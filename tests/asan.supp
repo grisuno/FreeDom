@@ -1,0 +1,5 @@
+# ASan/LSan suppressions for known one-time leaks in system libraries reached
+# through Cairo/fontconfig during GUI initialisation. These are outside Freedom's
+# code and do not grow with use.
+leak:libfontconfig
+leak:FcValueSave

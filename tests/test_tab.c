@@ -1,0 +1,316 @@
+/*
+ * TDD suite for tab (Hito 5 - long-lived per-tab worker + JS in the child).
+ *
+ * tab_open forks a Landlock+seccomp-confined child internally; these tests run
+ * in the parent and drive the child over the private pipe protocol. The parent
+ * surviving hostile/binary input and a killed child is itself the isolation
+ * guarantee.
+ *
+ * RED state until src/tab.c exists: this links and fails on purpose.
+ *
+ * Build: make test   ;   ASan: make asan
+ */
+
+#define _POSIX_C_SOURCE 200809L
+
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <cmocka.h>
+
+#include "tab.h"
+
+static const char HTML[] =
+    "<!DOCTYPE html><html><head><title>Isolated</title></head>"
+    "<body><div id=\"main\" class=\"box\"><p>Hola</p>"
+    "<script>steal_cookies()</script>"
+    "<p onclick=\"evil()\">mundo</p></div></body></html>";
+
+/* --- a confined worker fixture shared by the binding tests --- */
+
+typedef struct fixture { tab *t; } fixture;
+
+static int setup_loaded(void **state) {
+    fixture *f = (fixture *)calloc(1, sizeof *f);
+    if (f == NULL) return -1;
+    if (tab_open(&f->t) != TAB_OK) return -1;
+    tab_page p;
+    if (tab_load(f->t, HTML, sizeof HTML - 1, &p) != TAB_OK) return -1;
+    tab_page_free(&p);
+    *state = f;
+    return 0;
+}
+
+static int teardown(void **state) {
+    fixture *f = (fixture *)*state;
+    if (f != NULL) {
+        tab_close(f->t);
+        free(f);
+    }
+    return 0;
+}
+
+/* Evaluates js and asserts the (non-exception) string result. */
+static void expect_eval(tab *t, const char *js, const char *expected) {
+    tab_eval_result r;
+    assert_int_equal(tab_eval(t, js, strlen(js), &r), TAB_OK);
+    assert_int_equal(r.is_exception, 0);
+    assert_non_null(r.value);
+    assert_string_equal(r.value, expected);
+    tab_eval_result_free(&r);
+}
+
+/* --- lifecycle --- */
+
+static void test_open_close(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    assert_non_null(t);
+    assert_true(tab_alive(t));
+    assert_true(tab_child_pid(t) > 0);
+    tab_close(t);
+}
+
+static void test_open_null(void **state) {
+    (void)state;
+    assert_int_equal(tab_open(NULL), TAB_ERR_NULL_ARG);
+}
+
+/* --- load: inert title + text --- */
+
+static void test_load_basic(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, HTML, sizeof HTML - 1, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "Isolated");
+    assert_non_null(p.text);
+    assert_non_null(strstr(p.text, "Hola"));
+    assert_non_null(strstr(p.text, "mundo"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* The structured display list must survive the IPC round-trip: a heading and a
+ * link with its href arrive intact in p.view. */
+static void test_load_returns_view_with_link(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>V</title></head><body>"
+        "<h1>Head</h1><p>go <a href=\"https://e.example/x\">here</a></p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_heading = 0, saw_link = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->heading == 1 && strcmp(r->text, "Head") == 0) saw_heading = 1;
+        if (r->kind == PV_LINK && strcmp(r->text, "here") == 0
+            && r->href != NULL && strcmp(r->href, "https://e.example/x") == 0) saw_link = 1;
+    }
+    assert_true(saw_heading);
+    assert_true(saw_link);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+static void test_load_strips_script(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, HTML, sizeof HTML - 1, &p), TAB_OK);
+    assert_null(strstr(p.text, "steal_cookies")); /* script body never inert text */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+static void test_load_null_and_too_large(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(NULL, HTML, 4, &p), TAB_ERR_NULL_ARG);
+    assert_int_equal(tab_load(t, HTML, 4, NULL), TAB_ERR_NULL_ARG);
+    assert_int_equal(tab_load(t, NULL, 4, &p), TAB_ERR_NULL_ARG);
+    /* Length cap checked in the parent before any IPC; child stays alive. */
+    assert_int_equal(tab_load(t, "x", TAB_MAX_INPUT + 1, &p), TAB_ERR_TOO_LARGE);
+    assert_true(tab_alive(t));
+    tab_close(t);
+}
+
+/* --- eval: sees the DOM bound in the child --- */
+
+static void test_eval_sees_dom(void **state) {
+    fixture *f = (fixture *)*state;
+    expect_eval(f->t, "dom.nodeCount() > 0", "true");
+    expect_eval(f->t, "dom.getElementById('main') !== null", "true");
+    expect_eval(f->t, "dom.tagName(dom.getElementById('main'))", "div");
+    expect_eval(f->t, "dom.getAttribute(dom.getElementById('main'),'class')", "box");
+}
+
+/* --- eval: sees the normalized anti-fp environment --- */
+
+static void test_eval_sees_env(void **state) {
+    fixture *f = (fixture *)*state;
+    expect_eval(f->t, "navigator.language", "en-US");
+    expect_eval(f->t, "navigator.userAgent.indexOf('Firefox') >= 0", "true");
+    expect_eval(f->t, "screen.width === 1920 && screen.height === 1080", "true");
+    expect_eval(f->t, "Date.now() % 100", "0");
+    expect_eval(f->t, "typeof canvas.readback", "function");
+}
+
+/* --- eval: a JS exception is TAB_OK with is_exception set, not a worker error --- */
+
+static void test_eval_exception(void **state) {
+    fixture *f = (fixture *)*state;
+    tab_eval_result r;
+    assert_int_equal(tab_eval(f->t, "throw new Error('boom')", 23, &r), TAB_OK);
+    assert_int_not_equal(r.is_exception, 0);
+    assert_non_null(r.value);
+    assert_non_null(strstr(r.value, "boom"));
+    tab_eval_result_free(&r);
+}
+
+/* --- eval: state persists across calls within the same worker --- */
+
+static void test_eval_persistent_state(void **state) {
+    fixture *f = (fixture *)*state;
+    expect_eval(f->t, "globalThis.counter = 41", "41");
+    expect_eval(f->t, "++globalThis.counter", "42");
+    expect_eval(f->t, "globalThis.counter", "42");
+}
+
+/* --- a second load replaces the page; eval sees the new DOM --- */
+
+static void test_reload_replaces_page(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+
+    tab_page p;
+    assert_int_equal(tab_load(t, HTML, sizeof HTML - 1, &p), TAB_OK);
+    tab_page_free(&p);
+    expect_eval(t, "dom.getElementById('main') !== null", "true");
+
+    static const char HTML2[] =
+        "<!DOCTYPE html><html><head><title>Second</title></head>"
+        "<body><span id=\"other\">x</span></body></html>";
+    assert_int_equal(tab_load(t, HTML2, sizeof HTML2 - 1, &p), TAB_OK);
+    assert_string_equal(p.title, "Second");
+    tab_page_free(&p);
+    expect_eval(t, "dom.getElementById('other') !== null", "true");
+    expect_eval(t, "dom.getElementById('main') === null", "true"); /* old node gone */
+
+    tab_close(t);
+}
+
+/* --- eval before any load is a worker error, not a crash --- */
+
+static void test_eval_without_load(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_eval_result r;
+    assert_int_equal(tab_eval(t, "1+1", 3, &r), TAB_ERR_SCRIPT);
+    assert_true(tab_alive(t));
+    tab_close(t);
+}
+
+/* --- the parent must survive arbitrary/binary input: isolation in action --- */
+
+static void test_binary_does_not_crash_parent(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    uint8_t junk[1024];
+    for (size_t i = 0; i < sizeof junk; ++i) junk[i] = (uint8_t)(i * 37 + 11);
+    tab_page p;
+    tab_status s = tab_load(t, (const char *)junk, sizeof junk, &p);
+    assert_true(s == TAB_OK || s == TAB_ERR_RENDER || s == TAB_ERR_DEAD);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* --- killing the child: the parent survives, reports TAB_ERR_DEAD --- */
+
+static void test_child_death_survived(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, HTML, sizeof HTML - 1, &p), TAB_OK);
+    tab_page_free(&p);
+
+    pid_t pid = tab_child_pid(t);
+    assert_true(pid > 0);
+    assert_int_equal(kill(pid, SIGKILL), 0);
+
+    /* Give the kernel a moment to deliver the signal and reap-on-read. */
+    struct timespec ts = { 0, 50 * 1000 * 1000 };
+    nanosleep(&ts, NULL);
+
+    tab_eval_result r;
+    tab_status s = tab_eval(t, "1+1", 3, &r);
+    assert_int_equal(s, TAB_ERR_DEAD); /* parent did not die with the child */
+    tab_eval_result_free(&r);
+    assert_false(tab_alive(t));
+    tab_close(t);
+}
+
+/* --- releasers are NULL-safe and idempotent --- */
+
+static void test_free_null_and_double(void **state) {
+    (void)state;
+    tab_close(NULL);
+    tab_page_free(NULL);
+    tab_eval_result_free(NULL);
+
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, HTML, sizeof HTML - 1, &p), TAB_OK);
+    tab_page_free(&p);
+    tab_page_free(&p); /* idempotent */
+
+    tab_eval_result r;
+    assert_int_equal(tab_eval(t, "1+1", 3, &r), TAB_OK);
+    tab_eval_result_free(&r);
+    tab_eval_result_free(&r); /* idempotent */
+    tab_close(t);
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_open_close),
+        cmocka_unit_test(test_open_null),
+        cmocka_unit_test(test_load_basic),
+        cmocka_unit_test(test_load_returns_view_with_link),
+        cmocka_unit_test(test_load_strips_script),
+        cmocka_unit_test(test_load_null_and_too_large),
+        cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),
+        cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),
+        cmocka_unit_test_setup_teardown(test_eval_exception, setup_loaded, teardown),
+        cmocka_unit_test_setup_teardown(test_eval_persistent_state, setup_loaded, teardown),
+        cmocka_unit_test(test_reload_replaces_page),
+        cmocka_unit_test(test_eval_without_load),
+        cmocka_unit_test(test_binary_does_not_crash_parent),
+        cmocka_unit_test(test_child_death_survived),
+        cmocka_unit_test(test_free_null_and_double),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
+}

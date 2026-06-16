@@ -1,0 +1,91 @@
+#ifndef FREEDOM_DOM_H
+#define FREEDOM_DOM_H
+
+#include <stddef.h>
+#include <stdint.h>
+
+#include "html_parse.h"
+
+#ifdef __cplusplus
+#error "Freedom is pure C (C11). C++ is not supported."
+#endif
+
+/*
+ * dom — a queryable index over the inert tree produced by html_parse.
+ *
+ * Nodes become integer-addressable handles assigned in document order, with
+ * O(1) by-id / by-tag / by-class hash indices and document-order primitives
+ * that are binary-search friendly. This is the read-only substrate the JS
+ * sandbox exposes to scripts; it never executes script and never mutates the
+ * tree. The Lexbor backend stays encapsulated: no lxb_* type appears here.
+ *
+ * The index references the tree owned by hp_document, so the document MUST
+ * outlive the index. See spec/dom.md for the full contract.
+ */
+
+typedef enum dom_status {
+    DOM_OK = 0,
+    DOM_ERR_NULL_ARG,  /* doc/out was NULL, or the document had no root */
+    DOM_ERR_OOM,       /* allocation failed */
+    DOM_ERR_INTERNAL   /* backend returned an unexpected state */
+} dom_status;
+
+/* Integer node handle. Assigned in document order at build time. */
+typedef uint32_t dom_node_id;
+
+/* "No such node" sentinel returned by lookups and navigation. */
+#define DOM_NODE_NONE ((dom_node_id)0xFFFFFFFFu)
+
+/* Opaque queryable index. */
+typedef struct dom_index dom_index;
+
+/* Builds the index over an already-parsed document. doc must outlive *out.
+ * doc == NULL / out == NULL => DOM_ERR_NULL_ARG.
+ * On DOM_OK, *out must be released with dom_free. */
+dom_status dom_build(const hp_document *doc, dom_index **out);
+
+/* Idempotent; safe on NULL and safe to call twice. Does not free the tree. */
+void dom_free(dom_index *idx);
+
+/* Number of element nodes indexed. NULL idx => 0. */
+size_t dom_node_count(const dom_index *idx);
+
+/* --- key lookups --- */
+
+/* O(1). First match in document order, or DOM_NODE_NONE. Case-sensitive. */
+dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id);
+
+/* Writes up to cap matching ids (in document order) into out; returns the total
+ * match count (which may exceed cap, so the caller can size a buffer). */
+size_t dom_get_by_tag(const dom_index *idx, const char *tag,
+                      dom_node_id *out, size_t cap);
+size_t dom_get_by_class(const dom_index *idx, const char *cls,
+                        dom_node_id *out, size_t cap);
+
+/* --- document order (binary-search friendly) --- */
+
+/* 0-based document-order position of node, or 0 if node is invalid. */
+size_t dom_document_position(const dom_index *idx, dom_node_id node);
+
+/* Nonzero iff a precedes b in document order. */
+int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);
+
+/* Node at the given document-order position, or DOM_NODE_NONE if out of range. */
+dom_node_id dom_node_at(const dom_index *idx, size_t position);
+
+/* --- navigation (element-only; DOM_NODE_NONE at boundaries) --- */
+
+dom_node_id dom_parent(const dom_index *idx, dom_node_id node);
+dom_node_id dom_first_child(const dom_index *idx, dom_node_id node);
+dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node);
+
+/* --- reads (borrowed memory, valid while idx and doc are alive) --- */
+
+/* Lowercase qualified tag name, or NULL. *len (optional) excludes the NUL. */
+const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);
+
+/* Attribute value by name, or NULL if absent. *len (optional) excludes NUL. */
+const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
+                              const char *name, size_t *len);
+
+#endif /* FREEDOM_DOM_H */

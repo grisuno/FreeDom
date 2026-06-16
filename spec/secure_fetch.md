@@ -1,0 +1,208 @@
+# Especificación: `secure_fetch`
+
+> Hito 1 — Núcleo de Red y Criptografía. Estado: **VERDE + INTEGRACIÓN CERRADA**.
+> Metodología: SDD + TDD. Esta spec es el contrato; `tests/test_secure_fetch.c` (24 tests,
+> ASan/UBSan limpio) cubre los validadores puros y `tests/itest_secure_fetch.c` (`make itest`)
+> ejerce la ruta de red real contra un endpoint que negocia `X25519MLKEM768` (Cloudflare).
+
+## 1. Propósito
+
+`secure_fetch` realiza una petición HTTPS GET bajo garantías criptográficas estrictas y
+post-cuánticas. Es el único punto de salida a la red del navegador: ningún otro módulo abre
+sockets. Implementa el principio *Secure by Default* — la configuración insegura no es
+representable en la API.
+
+## 2. Decisión de stack (corrección 2026)
+
+OpenSSL **3.5+** expone PQC de forma **nativa** en el `default` provider. Verificado en este
+host (OpenSSL 3.6.2):
+
+- Grupos KE: `X25519MLKEM768`, `MLKEM768`, `SecP256r1MLKEM768`, … (`@ default`).
+- Firmas: `ML-DSA-44/65/87`, familia `SLH-DSA` completa (`@ default`).
+- `curl 8.19.0` enlaza contra este mismo OpenSSL.
+
+**Consecuencia:** se elimina la dependencia de `liboqs` + `oqsprovider` del plan original.
+Menos superficie de ataque, una dependencia menos que auditar. El transporte es
+`libcurl` (HTTPS estricto) sobre `OpenSSL 3.6.2`.
+
+## 3. Política de aplicación PQC (por niveles)
+
+| Política | Key Exchange | Firma de la cadena de certificados |
+| :-- | :-- | :-- |
+| `SF_POLICY_PQ_HYBRID_KE` *(por defecto)* | **Exige** grupo PQ-híbrido | Validación PKI clásica completa; firma PQ no requerida |
+| `SF_POLICY_STRICT_PQ` | **Exige** grupo PQ-híbrido | **Exige además** una firma PQ (`ML-DSA`/`SLH-DSA`) en la cadena verificada |
+| `SF_POLICY_PERMISSIVE` | **Exige** grupo PQ-híbrido | Permite primitivas débiles (RSA 2048, SHA-1) como **override explícito del usuario** |
+
+Justificación: el KE híbrido es desplegable hoy y es lo que neutraliza *Harvest-Now,
+Decrypt-Later*. Las firmas PQC aún no existen en la Web PKI pública en 2026; exigirlas por
+defecto rompería la conectividad. `STRICT_PQ` queda disponible para entornos controlados
+(infra propia, redes cerradas) donde el extremo sí presenta certificados PQ.
+
+En **ambas** políticas seguras (`PQ_HYBRID_KE` y `STRICT_PQ`) se rechazan primitivas débiles.
+El rechazo **RSA < 3072** se aplica al **certificado de sitio (end-entity / leaf)**: es la
+clave que el operador del sitio controla y la que autentica la sesión. Los intermedios de CA
+con RSA 2048 son universales en la Web PKI pública de 2026 (Google "WR2", Let's Encrypt
+R10/R11, …) y quedan fuera del control del sitio, por lo que **no** se les exige RSA ≥ 3072;
+exigirlo bloquearía la práctica totalidad de la web pública sin beneficio real de seguridad
+(la confidencialidad frente a *Harvest-Now-Decrypt-Later* la aporta el KE híbrido, no la firma
+de la CA). En cambio **SHA-1 es fatal en cualquier posición de la cadena**: una firma SHA-1 es
+un riesgo de falsificación real. `SF_POLICY_PERMISSIVE` mantiene los requisitos de TLS 1.3 y KE
+híbrido, pero relaja la política de firma para que un usuario informado pueda añadir una
+excepción por host (actualmente en sesión; persistencia mediante `local_store` planificada).
+
+## 4. Contrato de la API
+
+Definida en `include/secure_fetch.h`. Resumen:
+
+```c
+sf_config sf_config_default(void);
+
+/* Validadores puros (sin I/O) — superficie principal de pruebas unitarias. */
+sf_status sf_validate_url(const char *url);
+sf_status sf_check_tls_version(const char *negotiated_version);
+sf_status sf_check_group_is_pq(const char *negotiated_group);
+sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy);
+
+/* Redirecciones — lógica pura (sin I/O), también verificable directamente. */
+int       sf_is_redirect_code(long http_code);
+sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz);
+sf_status sf_resolve_redirect(const char *base_url, const char *location,
+                              char *out, size_t outsz);
+
+/* Orquestadores con I/O. */
+sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out);
+sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
+                        int max_redirects);
+void      sf_response_free(sf_response *resp);
+```
+
+Diseño orientado a prueba: la lógica de seguridad vive en **funciones puras** sin red,
+verificables directamente. `sf_get` solo orquesta: configura el transporte, ejecuta la
+petición e invoca a los validadores sobre el estado negociado.
+
+### Entradas
+
+- `url`: cadena NUL-terminada. **Debe** comenzar por `https://`. Se rechaza todo lo demás
+  (`http`, `file`, `data`, `javascript`, `ftp`, ausencia de esquema).
+- `cfg`: configuración. `NULL` ⇒ se usan los valores de `sf_config_default()`
+  (*secure by default*: el caso por defecto es el seguro).
+- `out`: estructura de salida propiedad del llamante; el contenido lo asigna la función.
+
+### Salidas
+
+`sf_response`:
+- `status`: resultado (ver tabla §5).
+- `http_code`: código HTTP si hubo respuesta.
+- `tls_version`: p. ej. `"TLSv1.3"` (propiedad de la struct).
+- `negotiated_group`: p. ej. `"X25519MLKEM768"` (propiedad de la struct).
+- `body` / `body_len`: cuerpo acotado por `max_body_bytes`; `body` lleva NUL final por
+  conveniencia (`body_len` no lo cuenta).
+- `location`: valor crudo de la cabecera `Location` si la respuesta la trae (propiedad de la
+  struct); `NULL` si no hubo. Es un **dato con procedencia**, nunca una instrucción: no se
+  sigue automáticamente dentro de `sf_get`.
+
+`sf_response_free` libera y pone a cero todos los punteros. Es **idempotente** y seguro
+sobre una struct inicializada a cero o liberada dos veces.
+
+## 5. Tabla de errores (garantías)
+
+| Código | Condición |
+| :-- | :-- |
+| `SF_OK` | Petición completada bajo todas las garantías de la política activa. |
+| `SF_ERR_NULL_ARG` | `url == NULL` o `out == NULL`. |
+| `SF_ERR_INVALID_URL` | URL ausente, malformada, o esquema distinto de `https`. |
+| `SF_ERR_TLS_VERSION` | Protocolo negociado por debajo de TLS 1.3. |
+| `SF_ERR_KEM_NOT_PQ` | Grupo KE negociado no es PQ-híbrido (clásico puro **o** PQ puro). |
+| `SF_ERR_WEAK_ALGO` | Certificado de sitio (leaf) con RSA < 3072, **o** algún certificado de la cadena firmado con SHA-1. |
+| `SF_ERR_CERT_INVALID` | La verificación de la cadena de certificados falló. |
+| `SF_ERR_CERT_NOT_PQ` | Política `STRICT_PQ`: ningún certificado de la cadena usa firma PQ. |
+| `SF_ERR_TOO_LARGE` | Cuerpo de respuesta superó `max_body_bytes`. |
+| `SF_ERR_NETWORK` | Fallo de transporte (conexión / lectura / timeout). |
+| `SF_ERR_OOM` | Fallo de asignación de memoria. |
+| `SF_ERR_TOO_MANY_REDIRECTS` | `sf_get_follow` superó `max_redirects` saltos. |
+| `SF_ERR_INTERNAL` | El transporte devolvió un estado inesperado. |
+
+## 6. Semántica de los validadores puros
+
+- `sf_validate_url`: `NULL` ⇒ `SF_ERR_INVALID_URL`. Solo se acepta el prefijo `https://`
+  (case-insensitive) seguido de al menos un carácter de host. Cualquier otro esquema ⇒
+  `SF_ERR_INVALID_URL`.
+- `sf_check_tls_version`: acepta exactamente `"TLSv1.3"`. `"TLSv1.2"`, versiones inferiores,
+  `NULL` o cadena no reconocida ⇒ `SF_ERR_TLS_VERSION`.
+- `sf_check_group_is_pq`: acepta solo grupos **híbridos** que combinan KEM clásico + ML-KEM
+  (`X25519MLKEM768`, `SecP256r1MLKEM768`, `X448MLKEM1024`, `SecP384r1MLKEM1024`). Rechaza
+  clásicos puros (`x25519`, `secp256r1`) **y** PQ puros (`MLKEM768`) ⇒ `SF_ERR_KEM_NOT_PQ`.
+  Rechazar el PQ puro es deliberado: si ML-KEM cayera, el componente clásico debe resistir.
+- `sf_check_chain_policy`: aplica los rechazos de primitiva débil en toda política — SHA-1
+  (en cualquier cert de la cadena) y RSA < 3072 (`chain->rsa_bits`, que `inspect_chain` rellena
+  solo con la clave del leaf); en `STRICT_PQ` exige además firma PQ en la cadena.
+- `sf_is_redirect_code`: devuelve 1 para 301, 302, 303, 307 y 308; 0 en cualquier otro caso.
+- `sf_parse_location_header`: extrae el valor de una línea de cabecera `Location` (nombre
+  case-insensitive, espacios iniciales y `CR`/`LF` finales recortados). `SF_OK` solo si la
+  línea es una cabecera `Location` con valor no vacío que cabe en `out`; en otro caso
+  `SF_ERR_INVALID_URL`.
+- `sf_resolve_redirect`: resuelve un destino de redirección contra la URL base y **siempre**
+  produce una URL `https://` absoluta o falla (fail-closed). Casos: destino absoluto
+  `https://…` (se usa tal cual); `http://…` y cualquier otro esquema (`javascript:`, `data:`,
+  `ftp:`) ⇒ `SF_ERR_INVALID_URL` (rechazo de *downgrade* a texto claro y de esquemas
+  peligrosos); relativo a esquema `//host/p` ⇒ `https://host/p`; ruta absoluta `/p` ⇒ origen
+  de la base + `/p`; ruta relativa ⇒ directorio de la base + destino. El resultado se valida
+  con `sf_validate_url` antes de devolverse.
+
+## 6bis. Política de redirecciones (`sf_get_follow`)
+
+Por **Zero Trust**, `sf_get` nunca sigue una redirección por sí mismo: `CURLOPT_FOLLOWLOCATION`
+está desactivado. Si curl siguiera los saltos internamente, solo se capturaría el estado TLS
+del primer salto y los intermedios escaparían a la política PQ/TLS. En su lugar, `sf_get`
+expone el `Location` como dato y `sf_get_follow` orquesta el seguimiento:
+
+1. Llama a `sf_get` sobre la URL actual — esto **re-aplica la política completa** (TLS 1.3,
+   KE híbrido, cadena) en *cada* salto.
+2. Si el código no es de redirección (`sf_is_redirect_code`) o no hay `Location`, devuelve la
+   respuesta tal cual.
+3. Si hay redirección, resuelve el destino con `sf_resolve_redirect` (que rechaza el
+   *downgrade* a `http://` y los esquemas no `https`), libera la respuesta intermedia y repite.
+4. Acota a `max_redirects` saltos (`SF_DEFAULT_MAX_REDIRECTS` = 10); excederlos ⇒
+   `SF_ERR_TOO_MANY_REDIRECTS`. Esto neutraliza bucles y cadenas de redirección abusivas.
+
+`sf_get_follow` no comparte estado entre saltos salvo la URL resuelta: cada salto es una
+conexión nueva auditada de cero.
+
+## 7. Garantías de memoria
+
+- Sin estado global mutable; reentrante.
+- Toda asignación tiene un dueño único; `sf_response_free` es el único liberador y es
+  idempotente.
+- Ruta de error no asigna memoria de cuerpo (sin fugas en el camino de fallo).
+- El cuerpo está acotado por `max_body_bytes` antes de asignarse — sin crecimiento ilimitado.
+- Objetivo de auditoría: `valgrind` y `-fsanitize=address,undefined` limpios.
+
+## 8. Matriz de pruebas (`tests/test_secure_fetch.c`)
+
+Las tres exigencias del Hito 1 mapean así:
+
+- **(a) Rechazo de TLS 1.2** → `sf_check_tls_version("TLSv1.2") == SF_ERR_TLS_VERSION`.
+- **(b) Rechazo de cert sin validación PQC** → en `STRICT_PQ`, una cadena clásica devuelve
+  `SF_ERR_CERT_NOT_PQ`; primitivas débiles (SHA-1, RSA<3072) rechazadas en toda política.
+- **(c) Manejo seguro de memoria** → `sf_response_free` sobre struct a cero y doble llamada
+  no fallan; argumentos `NULL` devuelven `SF_ERR_NULL_ARG` sin asignar.
+
+Más cobertura de los validadores puros (URL, grupo KE híbrido vs. clásico/PQ-puro).
+
+**Cierre de integración** (`tests/itest_secure_fetch.c`, `make itest`, dependiente de red):
+- `http://` se rechaza antes de cualquier I/O.
+- GET real bajo política por defecto ⇒ `SF_OK`, `TLSv1.3`, grupo con `MLKEM`.
+- Forzando `kex_groups="x25519"` (clásico puro) ⇒ `SF_ERR_KEM_NOT_PQ`: el navegador
+  rehúsa la conexión. El estado TLS negociado se captura **durante** la transferencia
+  (callbacks de cabecera/cuerpo), porque `CURLINFO_TLS_SSL_PTR` solo expone el `SSL*`
+  mientras la transferencia está viva; tras `curl_easy_perform` el puntero es nulo.
+
+## 9. Fuera de alcance (de momento)
+
+- Cookies y cabeceras de petición arbitrarias (*third-party* se bloquea a nivel de motor de
+  red, ver `request_policy`).
+- Reescritura de la barra de URL al destino final tras `sf_get_follow` (el orquestador GUI aún
+  muestra la URL tecleada; pendiente devolver la URL final resuelta).
+- Normalización completa de URL relativas con `.`/`..` y resolución de `query`/`fragment` en
+  destinos relativos (se cubren los casos comunes; pendiente RFC 3986 íntegro).
+- HTTP/2, HTTP/3 (el transporte los soporta; la política se fija después).
