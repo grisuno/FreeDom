@@ -32,13 +32,15 @@ git clone https://github.com/grisuno/FreeDom.git
 cd FreeDom
 
 # Install dependencies (Ubuntu/Debian example)
-sudo ./install.sh
+# sudo ./install.sh # Soon #
 
 # Build the browser
-make
+make clean && make all produce build/freedom 
 
 # Run in GUI mode
-./freedom
+weston --backend=x11-backend.so --renderer=pixman --width=1024 --height=768 &
+WAYLAND_DISPLAY=wayland-1 ./build/freedom
+
 
 # Run in headless mode
 ./freedom --headless https://example.com
