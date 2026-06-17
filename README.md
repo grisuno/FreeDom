@@ -1,5 +1,7 @@
 # FreeDom
 
+<img width="937" height="735" alt="image" src="https://github.com/user-attachments/assets/23e389ad-434f-4ebe-8021-75ea4402f16f" />
+
 A free and open-source minimal web browser written in C, focused on Zero Trust and Zero Knowledge principles.
 
 ## Philosophy
