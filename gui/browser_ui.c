@@ -12,6 +12,8 @@
 #define _GNU_SOURCE
 
 #include "browser.h"
+#include "render_doc.h"
+#include "render_policy.h"
 #include "ui.h"
 
 #include <stdio.h>
@@ -37,6 +39,97 @@
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
 #define UI_TEXT_MARGIN 8.0
+
+/* Number of heading levels (h1..h6). Index 0 of the scale table is body text. */
+#define UI_HEADING_LEVELS 6
+
+/* Link underline geometry, expressed relative to the run's font so it scales
+ * with heading-sized links. Offset below the baseline; thickness in px. */
+#define UI_UNDERLINE_OFFSET 0.12
+#define UI_UNDERLINE_THICK  1.0
+
+/* Largest text slice measured/drawn at once (one word, or one clipped label).
+ * Words longer than this are still placed, just measured up to the cap. */
+#define UI_SLICE_MAX 512
+
+/* Presentation theme: every font size, spacing and colour the renderer uses,
+ * gathered in one place so no value is hardcoded at a call site. An RGB colour is
+ * a 3-element array in [0,1]. The structured content painter and the window
+ * chrome both read from a single theme instance (see ui_theme_default). */
+typedef struct ui_rgb { double r, g, b; } ui_rgb;
+
+typedef struct ui_theme {
+    double body_font;                          /* body text size (px) */
+    double heading_scale[UI_HEADING_LEVELS + 1]; /* [level] multiplier; [0] = body */
+    double line_spacing;                       /* multiplier of font height per line */
+    double paragraph_gap;                      /* extra px above a new paragraph block */
+    double content_margin;                     /* left/right/top padding of the content area */
+    double image_box_pad;                      /* padding inside an image placeholder box */
+    double scroll_step_lines;                  /* wheel/arrow scroll step, in body lines */
+    double page_step_lines;                    /* Page Up/Down scroll step, in body lines */
+
+    ui_rgb window_bg;
+    ui_rgb content_bg;
+    ui_rgb text;
+    ui_rgb heading;
+    ui_rgb link;
+    ui_rgb notice_bg;
+    ui_rgb notice_text;
+    ui_rgb image_box;       /* placeholder border + label */
+    ui_rgb image_blocked;   /* label colour for a blocked image */
+    ui_rgb toolbar_bg;
+    ui_rgb titlebar_bg;
+    ui_rgb chrome_text;
+    ui_rgb chrome_text_dim; /* disabled button */
+    ui_rgb close_button;
+    ui_rgb url_bg_focused;
+    ui_rgb url_bg;
+    ui_rgb url_border;
+    ui_rgb caret;
+} ui_theme;
+
+/* The single source of truth for the look of the browser. */
+static ui_theme ui_theme_default(void) {
+    ui_theme t;
+    t.body_font = UI_FONT_SIZE;
+    t.heading_scale[0] = 1.0;
+    t.heading_scale[1] = 2.0;
+    t.heading_scale[2] = 1.6;
+    t.heading_scale[3] = 1.35;
+    t.heading_scale[4] = 1.2;
+    t.heading_scale[5] = 1.1;
+    t.heading_scale[6] = 1.05;
+    t.line_spacing = 1.3;
+    t.paragraph_gap = 8.0;
+    t.content_margin = UI_TEXT_MARGIN;
+    t.image_box_pad = 6.0;
+    t.scroll_step_lines = 3.0;
+    t.page_step_lines = 10.0;
+
+    t.window_bg      = (ui_rgb){ 0.96, 0.96, 0.96 };
+    t.content_bg     = (ui_rgb){ 1.00, 1.00, 1.00 };
+    t.text           = (ui_rgb){ 0.10, 0.10, 0.10 };
+    t.heading        = (ui_rgb){ 0.06, 0.08, 0.20 };
+    t.link           = (ui_rgb){ 0.10, 0.33, 0.80 };
+    t.notice_bg      = (ui_rgb){ 1.00, 0.95, 0.70 };
+    t.notice_text    = (ui_rgb){ 0.40, 0.28, 0.00 };
+    t.image_box      = (ui_rgb){ 0.45, 0.45, 0.50 };
+    t.image_blocked  = (ui_rgb){ 0.70, 0.30, 0.30 };
+    t.toolbar_bg     = (ui_rgb){ 0.22, 0.23, 0.25 };
+    t.titlebar_bg    = (ui_rgb){ 0.12, 0.12, 0.14 };
+    t.chrome_text    = (ui_rgb){ 0.85, 0.85, 0.85 };
+    t.chrome_text_dim= (ui_rgb){ 0.45, 0.45, 0.45 };
+    t.close_button   = (ui_rgb){ 1.00, 0.55, 0.55 };
+    t.url_bg_focused = (ui_rgb){ 1.00, 1.00, 1.00 };
+    t.url_bg         = (ui_rgb){ 0.92, 0.92, 0.92 };
+    t.url_border     = (ui_rgb){ 0.10, 0.10, 0.10 };
+    t.caret          = (ui_rgb){ 0.00, 0.00, 0.00 };
+    return t;
+}
+
+static void set_rgb(cairo_t *cr, ui_rgb c) {
+    cairo_set_source_rgb(cr, c.r, c.g, c.b);
+}
 
 typedef struct browser_window {
     struct wl_display    *display;
@@ -70,6 +163,11 @@ typedef struct browser_window {
 
     browser_state bs;
     int url_bar_focused;
+
+    ui_theme  theme;
+    rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
+    rdp_caps  caps;     /* per-page render capabilities (images off by default) */
+    double    scroll;   /* content scroll offset in pixels */
 
     /* xkbcommon state for keyboard input. */
     struct xkb_context *xkb_ctx;
@@ -164,8 +262,18 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "secure_fetch.h"
 #include "tab.h"
 
+/* Releases the structured render of the previous page (text mode resumes). */
+static void clear_doc(browser_window *w) {
+    if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
+}
+
 static void do_load(browser_window *w, const char *url) {
     if (url == NULL) return;
+
+    /* A fresh navigation: drop the old structured render and scroll to the top.
+     * Error/start pages then fall back to the plain-text painter (doc == NULL). */
+    clear_doc(w);
+    w->scroll = 0.0;
 
     if (strcmp(url, "about:blank") == 0) {
         browser_set_page(&w->bs, "Freedom", "", 0);
@@ -253,6 +361,17 @@ static void do_load(browser_window *w, const char *url) {
     }
 
     browser_set_page(&w->bs, page.title, page.text, 0);
+
+    /* Build the paint-ready document. The top-level URL is the https origin (for
+     * per-image policy) or NULL for a local file, which fails image loads closed.
+     * On failure we keep doc == NULL and the plain-text painter still shows the
+     * extracted text. */
+    const char *top = is_https_url(url) ? url : NULL;
+    rd_doc *doc = NULL;
+    if (rd_build(page.view, w->caps, top, &doc) == RD_OK) {
+        w->doc = doc;
+    }
+
     tab_page_free(&page);
     tab_close(t);
     free(html);
@@ -296,41 +415,324 @@ static void draw_text(cairo_t *cr, const char *s, double x, double y, int center
     cairo_show_text(cr, s);
 }
 
+/* ===================== structured content layout + paint ==================== */
+/*
+ * The content area paints an rd_doc (the same structured document the headless
+ * mode prints): headings, paragraphs and inline links flow word-by-word into
+ * lines, the image-tracking warning is a banner, and each image is a bordered
+ * placeholder showing its render_policy decision. Layout runs once per frame into
+ * transient arrays so vertical scrolling can be a smooth pixel offset over the
+ * real total height. This is visual-only (no headless test) but compiles under
+ * the same hardened flags.
+ */
+
+typedef struct rc_frag {
+    double      x, width, font_size;
+    int         bold, underline;
+    ui_rgb      color;
+    const char *text;     /* slice into a rd_block text (not owned) */
+    size_t      len;
+} rc_frag;
+
+typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE } rc_rowkind;
+
+typedef struct rc_row {
+    rc_rowkind      kind;
+    double          top, height, ascent;
+    size_t          first, count;  /* RC_TEXT: frag range */
+    int             banner;        /* RC_TEXT: draw the notice background */
+    const rd_block *blk;           /* RC_IMAGE: source image block */
+} rc_row;
+
+typedef struct rc_layout {
+    rc_frag *frags; size_t nfrag, capfrag;
+    rc_row  *rows;  size_t nrow,  caprow;
+    double   total_h;
+} rc_layout;
+
+typedef struct rc_state {
+    double cur_top, pending_gap, pen_x, line_asc, line_desc;
+    int    line_open, banner;
+    size_t line_first;
+} rc_state;
+
+static void rc_free(rc_layout *L) { free(L->frags); free(L->rows); }
+
+static rc_frag *rc_add_frag(rc_layout *L) {
+    if (L->nfrag == L->capfrag) {
+        size_t nc = L->capfrag ? L->capfrag * 2 : 64;
+        rc_frag *g = (rc_frag *)realloc(L->frags, nc * sizeof *g);
+        if (g == NULL) return NULL;
+        L->frags = g; L->capfrag = nc;
+    }
+    return &L->frags[L->nfrag++];
+}
+
+static rc_row *rc_add_row(rc_layout *L) {
+    if (L->nrow == L->caprow) {
+        size_t nc = L->caprow ? L->caprow * 2 : 32;
+        rc_row *g = (rc_row *)realloc(L->rows, nc * sizeof *g);
+        if (g == NULL) return NULL;
+        L->rows = g; L->caprow = nc;
+    }
+    return &L->rows[L->nrow++];
+}
+
+static void content_font(cairo_t *cr, double size, int bold) {
+    cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL,
+                           bold ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, size);
+}
+
+static double measure_slice(cairo_t *cr, const char *s, size_t n) {
+    char buf[UI_SLICE_MAX];
+    if (n >= sizeof buf) n = sizeof buf - 1;
+    memcpy(buf, s, n);
+    buf[n] = '\0';
+    cairo_text_extents_t te;
+    cairo_text_extents(cr, buf, &te);
+    return te.x_advance;
+}
+
+static void draw_slice(cairo_t *cr, const char *s, size_t n) {
+    char buf[UI_SLICE_MAX];
+    if (n >= sizeof buf) n = sizeof buf - 1;
+    memcpy(buf, s, n);
+    buf[n] = '\0';
+    cairo_show_text(cr, buf);
+}
+
+static void block_style(const ui_theme *th, const rd_block *b,
+                        double *size, int *bold, int *underline, ui_rgb *color) {
+    *bold = 0; *underline = 0; *size = th->body_font; *color = th->text;
+    if (b->kind == RD_HEADING) {
+        int lv = (b->heading_level >= 1 && b->heading_level <= UI_HEADING_LEVELS)
+                 ? b->heading_level : 1;
+        *size = th->body_font * th->heading_scale[lv];
+        *bold = 1; *color = th->heading;
+    } else if (b->kind == RD_LINK) {
+        *color = th->link; *underline = 1;
+    } else if (b->kind == RD_NOTICE) {
+        *color = th->notice_text;
+    }
+}
+
+static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
+    if (!s->line_open) return;
+    double h = (s->line_asc + s->line_desc) * th->line_spacing;
+    rc_row *r = rc_add_row(L);
+    if (r != NULL) {
+        r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
+        r->first = s->line_first; r->count = L->nfrag - s->line_first;
+        r->banner = s->banner; r->blk = NULL;
+    }
+    s->cur_top += h;
+    s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
+    s->line_first = L->nfrag;
+}
+
+static void open_line(rc_layout *L, rc_state *s) {
+    if (s->line_open) return;
+    if (L->nrow > 0) s->cur_top += s->pending_gap;  /* no leading gap at the very top */
+    s->pending_gap = 0;
+    s->line_open = 1;
+    s->pen_x = 0;
+    s->line_first = L->nfrag;
+}
+
+/* Places the words of text into the current inline line, wrapping at content_w. */
+static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
+                      const char *text, double size, int bold, int underline,
+                      ui_rgb color, double content_w) {
+    content_font(cr, size, bold);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    double space_w = measure_slice(cr, " ", 1);
+
+    size_t i = 0, n = strlen(text);
+    while (i < n) {
+        while (i < n && text[i] == ' ') ++i;
+        size_t ws = i;
+        while (i < n && text[i] != ' ') ++i;
+        size_t wl = i - ws;
+        if (wl == 0) break;
+
+        double ww = measure_slice(cr, text + ws, wl);
+        open_line(L, s);
+        double adv = (s->pen_x > 0.0) ? space_w : 0.0;
+        if (s->pen_x > 0.0 && s->pen_x + adv + ww > content_w) {
+            flush_line(L, s, th);
+            open_line(L, s);
+            adv = 0.0;
+        }
+        s->pen_x += adv;
+
+        rc_frag *f = rc_add_frag(L);
+        if (f != NULL) {
+            f->x = s->pen_x; f->width = ww; f->font_size = size;
+            f->bold = bold; f->underline = underline; f->color = color;
+            f->text = text + ws; f->len = wl;
+        }
+        s->pen_x += ww;
+        if (fe.ascent  > s->line_asc)  s->line_asc  = fe.ascent;
+        if (fe.descent > s->line_desc) s->line_desc = fe.descent;
+    }
+}
+
+static void layout_doc(cairo_t *cr, const rd_doc *doc, const ui_theme *th,
+                       double content_w, rc_layout *L) {
+    memset(L, 0, sizeof *L);
+    rc_state s;
+    memset(&s, 0, sizeof s);
+
+    for (size_t i = 0; i < rd_count(doc); ++i) {
+        const rd_block *b = rd_at(doc, i);
+        int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE || b->kind == RD_HEADING);
+        if (standalone || b->block_break) {
+            flush_line(L, &s, th);
+            s.pending_gap = th->paragraph_gap;
+        }
+
+        if (b->kind == RD_IMAGE) {
+            content_font(cr, th->body_font, 0);
+            cairo_font_extents_t fe;
+            cairo_font_extents(cr, &fe);
+            double h = fe.height + 2.0 * th->image_box_pad;
+            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
+            s.pending_gap = 0;
+            rc_row *r = rc_add_row(L);
+            if (r != NULL) {
+                r->kind = RC_IMAGE; r->top = top; r->height = h; r->ascent = fe.ascent;
+                r->first = 0; r->count = 0; r->banner = 0; r->blk = b;
+            }
+            s.cur_top = top + h;
+            continue;
+        }
+
+        double size; int bold, underline; ui_rgb color;
+        block_style(th, b, &size, &bold, &underline, &color);
+
+        if (b->kind == RD_NOTICE) {
+            s.banner = 1;
+            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w);
+            flush_line(L, &s, th);
+            s.banner = 0;
+        } else {
+            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w);
+        }
+    }
+    flush_line(L, &s, th);
+    L->total_h = s.cur_top;
+}
+
+/* Paints the structured document into the content rectangle, honouring scroll. */
+static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
+                             double content_h) {
+    const ui_theme *th = &w->theme;
+    double left = th->content_margin;
+    double content_w = (double)w->width - 2.0 * th->content_margin;
+    if (content_w < 1.0) content_w = 1.0;
+
+    rc_layout L;
+    layout_doc(cr, w->doc, th, content_w, &L);
+
+    double max_scroll = L.total_h - content_h;
+    if (max_scroll < 0.0) max_scroll = 0.0;
+    if (w->scroll < 0.0) w->scroll = 0.0;
+    if (w->scroll > max_scroll) w->scroll = max_scroll;
+    double origin = content_top + th->content_margin - w->scroll;
+
+    for (size_t i = 0; i < L.nrow; ++i) {
+        const rc_row *r = &L.rows[i];
+        double ry = origin + r->top;
+        if (ry + r->height < content_top || ry > content_top + content_h) continue;
+
+        if (r->kind == RC_IMAGE && r->blk != NULL) {
+            const rd_block *b = r->blk;
+            int blocked = (b->img_decision != RDP_IMG_ALLOW);
+            ui_rgb col = blocked ? th->image_blocked : th->image_box;
+            cairo_set_line_width(cr, 1.0);
+            set_rgb(cr, col);
+            cairo_rectangle(cr, left, ry, content_w, r->height);
+            cairo_stroke(cr);
+
+            content_font(cr, th->body_font, 0);
+            cairo_save(cr);
+            cairo_rectangle(cr, left + th->image_box_pad, ry,
+                            content_w - 2.0 * th->image_box_pad, r->height);
+            cairo_clip(cr);
+            cairo_move_to(cr, left + th->image_box_pad, ry + r->ascent + th->image_box_pad);
+            char label[1024];
+            const char *alt = (b->text != NULL) ? b->text : "";
+            snprintf(label, sizeof label, "%s%s%s",
+                     rd_image_label(b->img_decision), alt[0] ? " : " : "", alt);
+            cairo_show_text(cr, label);
+            cairo_restore(cr);
+            continue;
+        }
+
+        if (r->banner) {
+            set_rgb(cr, th->notice_bg);
+            cairo_rectangle(cr, 0.0, ry, (double)w->width, r->height);
+            cairo_fill(cr);
+        }
+        double baseline = ry + r->ascent;
+        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
+            const rc_frag *f = &L.frags[k];
+            content_font(cr, f->font_size, f->bold);
+            set_rgb(cr, f->color);
+            cairo_move_to(cr, left + f->x, baseline);
+            draw_slice(cr, f->text, f->len);
+            if (f->underline) {
+                double uy = baseline + f->font_size * UI_UNDERLINE_OFFSET;
+                cairo_set_line_width(cr, UI_UNDERLINE_THICK);
+                cairo_move_to(cr, left + f->x, uy);
+                cairo_line_to(cr, left + f->x + f->width, uy);
+                cairo_stroke(cr);
+            }
+        }
+    }
+    rc_free(&L);
+}
+
 static void paint(browser_window *w) {
     cairo_t *cr = cairo_create(w->cairo_surface);
+    const ui_theme *th = &w->theme;
     double ttop = toolbar_top(w);
 
     /* Background. */
-    cairo_set_source_rgb(cr, 0.96, 0.96, 0.96);
+    set_rgb(cr, th->window_bg);
     cairo_paint(cr);
 
+    /* The chrome (titlebar, toolbar, URL bar) uses a monospace face for stable
+     * caret math; page content is painted separately with a proportional face. */
     cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, UI_FONT_SIZE);
+    cairo_set_font_size(cr, th->body_font);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
 
     /* Client-side titlebar (when the compositor offers no SSD). */
     if (w->use_csd) {
         double bl = (UI_TITLEBAR_H + fe.ascent - fe.descent) / 2.0;
-        cairo_set_source_rgb(cr, 0.12, 0.12, 0.14);
+        set_rgb(cr, th->titlebar_bg);
         cairo_rectangle(cr, 0, 0, w->width, UI_TITLEBAR_H);
         cairo_fill(cr);
 
-        cairo_set_source_rgb(cr, 0.9, 0.9, 0.9);
+        set_rgb(cr, th->chrome_text);
         cairo_move_to(cr, UI_MARGIN, bl);
         cairo_show_text(cr, (w->bs.page_title != NULL) ? w->bs.page_title : "Freedom");
 
         double min_x, max_x, close_x;
         window_button_rects(w, &min_x, &max_x, &close_x);
-        cairo_set_source_rgb(cr, 0.85, 0.85, 0.85);
+        set_rgb(cr, th->chrome_text);
         draw_text(cr, "_", min_x + UI_WIN_BTN_W / 2.0, bl, 1);
         draw_text(cr, "[]", max_x + UI_WIN_BTN_W / 2.0, bl, 1);
-        cairo_set_source_rgb(cr, 1.0, 0.55, 0.55);
+        set_rgb(cr, th->close_button);
         draw_text(cr, "X", close_x + UI_WIN_BTN_W / 2.0, bl, 1);
     }
 
     /* Toolbar. */
-    cairo_set_source_rgb(cr, 0.22, 0.23, 0.25);
+    set_rgb(cr, th->toolbar_bg);
     cairo_rectangle(cr, 0, ttop, w->width, UI_TOOLBAR_H);
     cairo_fill(cr);
 
@@ -342,25 +744,21 @@ static void paint(browser_window *w) {
     int can_back = browser_can_back(&w->bs);
     int can_fwd  = browser_can_forward(&w->bs);
 
-    cairo_set_source_rgb(cr, can_back ? 0.85 : 0.45, can_back ? 0.85 : 0.45, can_back ? 0.85 : 0.45);
+    set_rgb(cr, can_back ? th->chrome_text : th->chrome_text_dim);
     draw_text(cr, "<", back_x + UI_BTN_W / 2.0, bl, 1);
 
-    cairo_set_source_rgb(cr, can_fwd ? 0.85 : 0.45, can_fwd ? 0.85 : 0.45, can_fwd ? 0.85 : 0.45);
+    set_rgb(cr, can_fwd ? th->chrome_text : th->chrome_text_dim);
     draw_text(cr, ">", fwd_x + UI_BTN_W / 2.0, bl, 1);
 
-    cairo_set_source_rgb(cr, 0.85, 0.85, 0.85);
+    set_rgb(cr, th->chrome_text);
     draw_text(cr, "Go", go_x + UI_BTN_W / 2.0, bl, 1);
 
     /* URL bar. */
-    if (w->url_bar_focused) {
-        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    } else {
-        cairo_set_source_rgb(cr, 0.92, 0.92, 0.92);
-    }
+    set_rgb(cr, w->url_bar_focused ? th->url_bg_focused : th->url_bg);
     cairo_rectangle(cr, url_x, ttop + UI_MARGIN, url_w, UI_TOOLBAR_H - 2 * UI_MARGIN);
     cairo_fill(cr);
 
-    cairo_set_source_rgb(cr, 0.1, 0.1, 0.1);
+    set_rgb(cr, th->url_border);
     cairo_rectangle(cr, url_x, ttop + UI_MARGIN, url_w, UI_TOOLBAR_H - 2 * UI_MARGIN);
     cairo_stroke(cr);
 
@@ -391,7 +789,7 @@ static void paint(browser_window *w) {
                 cairo_text_extents(cr, left, &te);
                 cx += te.x_advance;
             }
-            cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+            set_rgb(cr, th->caret);
             cairo_rectangle(cr, cx, ty - fe.ascent, 1.5, fe.height);
             cairo_fill(cr);
         }
@@ -400,55 +798,60 @@ static void paint(browser_window *w) {
 
     /* Content area. */
     double content_top = ttop + UI_TOOLBAR_H;
-    double content_h = (double)w->height - content_top - 2 * UI_TEXT_MARGIN;
+    double content_h = (double)w->height - content_top - 2 * th->content_margin;
     if (content_h < 1.0) content_h = 1.0;
 
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    set_rgb(cr, th->content_bg);
     cairo_rectangle(cr, 0, content_top, w->width, (double)w->height - content_top);
     cairo_fill(cr);
 
-    const char *text = w->bs.page_text;
-    if (text == NULL) text = "";
-    size_t text_len = w->bs.page_text ? strlen(w->bs.page_text) : 0;
+    if (w->doc != NULL) {
+        paint_structured(cr, w, content_top, content_h);
+    } else {
+        /* Plain-text fallback for the start page and error pages: monospace,
+         * word-wrapped, scrolled by the same pixel offset (converted to lines). */
+        const char *text = w->bs.page_text ? w->bs.page_text : "";
+        size_t text_len = strlen(text);
 
-    cairo_text_extents_t te;
-    cairo_text_extents(cr, "M", &te);
-    double cell_w = (te.x_advance > 0) ? te.x_advance : 8.0;
-    double cell_h = (fe.height > 0) ? fe.height : UI_FONT_SIZE;
+        cairo_text_extents_t te;
+        cairo_text_extents(cr, "M", &te);
+        double cell_w = (te.x_advance > 0) ? te.x_advance : 8.0;
+        double cell_h = (fe.height > 0) ? fe.height : th->body_font;
 
-    size_t max_cols = (size_t)((w->width - 2 * UI_TEXT_MARGIN) / cell_w);
-    if (max_cols == 0) max_cols = 1;
-    size_t viewport_lines = (size_t)(content_h / cell_h);
-    if (viewport_lines == 0) viewport_lines = 1;
+        size_t max_cols = (size_t)((w->width - 2 * th->content_margin) / cell_w);
+        if (max_cols == 0) max_cols = 1;
+        size_t viewport_lines = (size_t)(content_h / cell_h);
+        if (viewport_lines == 0) viewport_lines = 1;
 
-    static size_t scroll = 0;
+        ui_layout lay;
+        if (ui_wrap_text(text, text_len, max_cols, &lay) == UI_OK) {
+            size_t first = (size_t)(w->scroll / cell_h);
+            first = ui_clamp_scroll(first, lay.count, viewport_lines);
+            w->scroll = (double)first * cell_h;
 
-    ui_layout lay;
-    if (ui_wrap_text(text, text_len, max_cols, &lay) == UI_OK) {
-        scroll = ui_clamp_scroll(scroll, lay.count, viewport_lines);
-
-        /* A line is at most max_cols columns; in UTF-8 each column is up to 4
-         * bytes, so size for that and copy whole lines (ui_wrap_text already
-         * breaks on character boundaries, so no byte cap can split a glyph). */
-        size_t linecap = max_cols * 4 + 1;
-        char *linebuf = (char *)malloc(linecap);
-        if (linebuf != NULL) {
-            cairo_set_source_rgb(cr, 0.1, 0.1, 0.1);
-            double y = content_top + UI_TEXT_MARGIN + fe.ascent;
-            for (size_t row = 0; row < viewport_lines; ++row) {
-                size_t idx = scroll + row;
-                if (idx >= lay.count) break;
-                size_t n = lay.lines[idx].len;
-                if (n > linecap - 1) n = linecap - 1;
-                memcpy(linebuf, text + lay.lines[idx].offset, n);
-                linebuf[n] = '\0';
-                cairo_move_to(cr, UI_TEXT_MARGIN, y);
-                cairo_show_text(cr, linebuf);
-                y += cell_h;
+            /* A line is at most max_cols columns; in UTF-8 each column is up to 4
+             * bytes, so size for that and copy whole lines (ui_wrap_text already
+             * breaks on character boundaries, so no byte cap can split a glyph). */
+            size_t linecap = max_cols * 4 + 1;
+            char *linebuf = (char *)malloc(linecap);
+            if (linebuf != NULL) {
+                set_rgb(cr, th->text);
+                double y = content_top + th->content_margin + fe.ascent;
+                for (size_t row = 0; row < viewport_lines; ++row) {
+                    size_t idx = first + row;
+                    if (idx >= lay.count) break;
+                    size_t n = lay.lines[idx].len;
+                    if (n > linecap - 1) n = linecap - 1;
+                    memcpy(linebuf, text + lay.lines[idx].offset, n);
+                    linebuf[n] = '\0';
+                    cairo_move_to(cr, th->content_margin, y);
+                    cairo_show_text(cr, linebuf);
+                    y += cell_h;
+                }
+                free(linebuf);
             }
-            free(linebuf);
+            ui_layout_free(&lay);
         }
-        ui_layout_free(&lay);
     }
 
     cairo_surface_flush(w->cairo_surface);
@@ -591,9 +994,9 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     redraw(w);
 }
 
-static size_t *global_scroll_ptr(void) {
-    static size_t scroll = 0;
-    return &scroll;
+/* One body line of scroll, in pixels (the common step unit). */
+static double scroll_line_px(const browser_window *w) {
+    return w->theme.body_font * w->theme.line_spacing;
 }
 
 static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
@@ -603,14 +1006,10 @@ static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
     browser_window *w = (browser_window *)data;
     if (w->ptr_y < UI_TOOLBAR_H) return;
 
-    size_t *scroll = global_scroll_ptr();
     double v = wl_fixed_to_double(value);
-    long step = (v > 0) ? 3 : -3;
-    if (step < 0 && *scroll < (size_t)(-step)) {
-        *scroll = 0;
-    } else {
-        *scroll = (size_t)((long)*scroll + step);
-    }
+    double step = w->theme.scroll_step_lines * scroll_line_px(w);
+    w->scroll += (v > 0.0) ? step : -step;
+    if (w->scroll < 0.0) w->scroll = 0.0; /* the upper bound is clamped during paint */
     redraw(w);
 }
 
@@ -688,12 +1087,23 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
         return;
     }
 
+    /* Ctrl+I toggles loading remote images for this session (Privacy by Default:
+     * off). Reloading the current page rebuilds the render so the tracking
+     * warning and the per-image placeholders update to the new posture. */
+    if (ctrl && !shift && (sym == XKB_KEY_i || sym == XKB_KEY_I)) {
+        w->caps.images = !w->caps.images;
+        load_current(w);
+        redraw(w);
+        return;
+    }
+
     if (!w->url_bar_focused) {
-        size_t *scroll = global_scroll_ptr();
-        if (sym == XKB_KEY_Up) { if (*scroll > 0) (*scroll)--; }
-        else if (sym == XKB_KEY_Down) { (*scroll)++; }
-        else if (sym == XKB_KEY_Page_Up) { if (*scroll > 9) *scroll -= 10; else *scroll = 0; }
-        else if (sym == XKB_KEY_Page_Down) { *scroll += 10; }
+        double line = scroll_line_px(w);
+        if (sym == XKB_KEY_Up) { w->scroll -= line; }
+        else if (sym == XKB_KEY_Down) { w->scroll += line; }
+        else if (sym == XKB_KEY_Page_Up) { w->scroll -= w->theme.page_step_lines * line; }
+        else if (sym == XKB_KEY_Page_Down) { w->scroll += w->theme.page_step_lines * line; }
+        if (w->scroll < 0.0) w->scroll = 0.0;
         redraw(w);
         return;
     }
@@ -801,6 +1211,9 @@ ui_status ui_run_browser(const char *start_url) {
     w.height = 700;
     w.running = 1;
     w.use_csd = 1;
+    w.theme = ui_theme_default();
+    w.caps = rdp_caps_safe();   /* Privacy by Default: images/CSS/JS off */
+    w.scroll = 0.0;
 
     if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
 
@@ -855,6 +1268,11 @@ ui_status ui_run_browser(const char *start_url) {
             "  - https://<site>   (TLS 1.3, PQ-hybrid KE, leaf RSA >= 3072 / ECDSA)\n"
             "  - /path/file.html  (local file)\n"
             "\n"
+            "Pages render with structure (headings, links, paragraphs). Remote\n"
+            "images are off by default; a page that uses them shows a tracking\n"
+            "warning and a placeholder per image. Press Ctrl+I to toggle images\n"
+            "for the current page (Ctrl+L focuses the URL bar).\n"
+            "\n"
             "Sites whose end-entity certificate uses RSA 2048 are rejected with\n"
             "status 5 (weak algorithm). This is fail-closed by design.", 0);
     }
@@ -886,6 +1304,7 @@ ui_status ui_run_browser(const char *start_url) {
     if (w.xkb_state) xkb_state_unref(w.xkb_state);
     xkb_context_unref(w.xkb_ctx);
 
+    clear_doc(&w);
     browser_free(&w.bs);
 
     /* Release the process-wide font caches so a leak checker sees a clean exit.

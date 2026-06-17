@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Freedom — rich render demo</title></head>
+<body>
+<h1>Freedom rich render</h1>
+<p>This page exercises the structured renderer: headings, paragraphs, a link,
+and images (a normal one plus a 1x1 tracking pixel). With images off by default
+you should see the tracking warning and one placeholder per image.</p>
+
+<h2>A link</h2>
+<p>Visit the <a href="https://example.org/docs">documentation</a> for details.</p>
+
+<h2>Images</h2>
+<p>A normal illustration:</p>
+<img src="https://example.org/diagram.png" alt="Architecture diagram" width="640" height="360">
+
+<p>And an invisible tracking beacon that must be blocked even when images are on:</p>
+<img src="https://tracker.example/pixel.gif" alt="" width="1" height="1">
+
+<script>document.title = "HACKED"; alert("must not run");</script>
+<button onclick="alert('must not fire')">do not click</button>
+
+<h3>End</h3>
+<p>If you can read the structure above with the image warning, the renderer works.</p>
+</body>
+</html>

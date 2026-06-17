@@ -1,0 +1,90 @@
+#ifndef FREEDOM_RENDER_DOC_H
+#define FREEDOM_RENDER_DOC_H
+
+#include <stddef.h>
+
+#include "page_view.h"
+#include "render_policy.h"
+
+#ifdef __cplusplus
+#error "Freedom is pure C (C11). C++ is not supported."
+#endif
+
+/*
+ * render_doc — turns a page_view display list plus the page's render
+ * capabilities into a flat, paint-ready document of styled blocks.
+ *
+ * Pure, I/O-free policy/shape logic: the directly auditable layer between the
+ * inert display list (page_view) and the presentation orchestrator (the GUI and
+ * the --headless writer). It decides WHAT to show and HOW to label it (a semantic
+ * style plus, for images, the render_policy decision); it never produces pixels,
+ * fonts or colours, which belong to the presentation layer.
+ *
+ * Both orchestrators consume the same rd_doc, so the "this is a heading / this is
+ * a blocked tracking image / warn the user about images" rules live in exactly
+ * one tested place. See spec/render_doc.md for the full contract.
+ */
+
+typedef enum rd_kind {
+    RD_HEADING = 0,   /* heading text; heading_level is 1..6 */
+    RD_PARAGRAPH,     /* body text */
+    RD_LINK,          /* hyperlink text; href is the target */
+    RD_IMAGE,         /* image placeholder; href is the src, img_decision is set */
+    RD_NOTICE         /* a user-agent notice (e.g. the image tracking warning) */
+} rd_kind;
+
+/* One paint-ready block in document order. text is owned, NUL-terminated and
+ * valid UTF-8. href is owned and NUL-terminated for RD_LINK (link target) and
+ * RD_IMAGE (image src); NULL otherwise. img_decision is meaningful only for
+ * RD_IMAGE. */
+typedef struct rd_block {
+    rd_kind          kind;
+    int              heading_level;  /* 1..6 for RD_HEADING, else 0 */
+    int              block_break;    /* nonzero: a block boundary precedes this block */
+    char            *text;
+    char            *href;
+    rdp_img_decision img_decision;
+} rd_block;
+
+typedef struct rd_doc {
+    rd_block *blocks;
+    size_t    count;
+    size_t    cap;
+    int       has_images;  /* the page declared at least one image */
+} rd_doc;
+
+typedef enum rd_status {
+    RD_OK = 0,
+    RD_ERR_NULL_ARG,  /* a required out pointer was NULL */
+    RD_ERR_OOM        /* allocation failed */
+} rd_status;
+
+/* Builds the paint-ready document from an inert display list and the page's
+ * capabilities. view == NULL is treated as an empty view. When the page declares
+ * images and caps.images is false, a single RD_NOTICE block carrying
+ * rdp_images_warning() is prepended so the user is always told. Each image
+ * becomes an RD_IMAGE block whose img_decision is computed with
+ * rdp_image_decision(caps, top_level_url, src, img_w, img_h) — Zero Trust,
+ * revalidated per image. top_level_url may be NULL (e.g. a local file): image
+ * decisions then fail closed. out == NULL => RD_ERR_NULL_ARG. On RD_OK, *out must
+ * be released with rd_free. */
+rd_status rd_build(const pv_view *view, rdp_caps caps,
+                   const char *top_level_url, rd_doc **out);
+
+/* Idempotent; safe on NULL and safe to call twice. */
+void rd_free(rd_doc *d);
+
+/* Read accessors. NULL-safe. */
+size_t          rd_count(const rd_doc *d);
+const rd_block *rd_at(const rd_doc *d, size_t i);
+
+/* Stable, short English name of a block kind for structured/agent output. Never
+ * NULL; an unknown enum value yields "block". */
+const char *rd_kind_name(rd_kind k);
+
+/* Stable, short English label for an image placeholder, derived from its
+ * decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never
+ * NULL. */
+const char *rd_image_label(rdp_img_decision d);
+
+#endif /* FREEDOM_RENDER_DOC_H */

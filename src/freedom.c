@@ -8,6 +8,8 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include "render_doc.h"
+#include "render_policy.h"
 #include "secure_fetch.h"
 #include "tab.h"
 #include "ui.h"
@@ -51,9 +53,66 @@ static char *read_file(const char *path, size_t *out_len) {
     return buf;
 }
 
-/* Loads html into a fresh tab and prints title + text. Returns EXIT_OK or
- * EXIT_ERROR; on error no partial output is emitted. */
-static int render_page(const char *html, size_t len) {
+/* True if s holds only ASCII spaces/tabs (or is empty). */
+static int is_blank_text(const char *s) {
+    for (; *s != '\0'; ++s) {
+        if (*s != ' ' && *s != '\t') return 0;
+    }
+    return 1;
+}
+
+/* Writes the render document as deterministic, flowing plain text for a terminal
+ * and for an AI agent (content as data, never instruction). Inline runs
+ * (paragraphs and links) flow onto one line and break on a block boundary;
+ * headings get a leading "#"*level marker, images show their gate decision and
+ * source, and notices are prefixed with "! ". It is the same rd_doc the GUI
+ * paints. */
+static void print_doc(const rd_doc *doc) {
+    int line_open = 0; /* an inline line is being accumulated */
+    for (size_t i = 0; i < rd_count(doc); ++i) {
+        const rd_block *b = rd_at(doc, i);
+        switch (b->kind) {
+            case RD_HEADING: {
+                if (line_open) { putchar('\n'); line_open = 0; }
+                int level = (b->heading_level >= 1 && b->heading_level <= 6) ? b->heading_level : 1;
+                putchar('\n');
+                for (int k = 0; k < level; ++k) putchar('#');
+                printf(" %s\n", b->text);
+                break;
+            }
+            case RD_IMAGE:
+                if (line_open) { putchar('\n'); line_open = 0; }
+                printf("\n[%s]", rd_image_label(b->img_decision));
+                if (b->text[0] != '\0') printf(" %s", b->text);
+                if (b->href != NULL && b->href[0] != '\0') printf(" <%s>", b->href);
+                putchar('\n');
+                break;
+            case RD_NOTICE:
+                if (line_open) { putchar('\n'); line_open = 0; }
+                printf("\n! %s\n", b->text);
+                break;
+            case RD_LINK:
+            case RD_PARAGRAPH:
+            default:
+                /* Inter-block whitespace carries no information in plain text. */
+                if (is_blank_text(b->text) && (b->block_break || !line_open)) break;
+                if (line_open && b->block_break) { printf("\n\n"); line_open = 0; }
+                if (b->kind == RD_LINK && b->href != NULL && b->href[0] != '\0') {
+                    printf("%s <%s>", b->text, b->href);
+                } else {
+                    printf("%s", b->text);
+                }
+                line_open = 1;
+                break;
+        }
+    }
+    if (line_open) putchar('\n');
+}
+
+/* Loads html into a fresh tab and prints the structured render of the page.
+ * top_url is the page's https origin (for per-image policy decisions) or NULL for
+ * a local file. Returns EXIT_OK or EXIT_ERROR; on error no partial page output. */
+static int render_page(const char *html, size_t len, const char *top_url) {
     tab *t = NULL;
     tab_status ts = tab_open(&t);
     if (ts != TAB_OK) {
@@ -71,15 +130,23 @@ static int render_page(const char *html, size_t len) {
     }
 
     if (page.title != NULL && page.title_len > 0) {
-        printf("%s\n\n", page.title);
+        printf("%s\n", page.title);
     }
-    if (page.text != NULL && page.text_len > 0) {
-        printf("%s\n", page.text);
+
+    /* Images stay off by default (Privacy by Default); render_doc prepends the
+     * tracking warning when the page declares images. */
+    rd_doc *doc = NULL;
+    rd_status rs = rd_build(page.view, rdp_caps_safe(), top_url, &doc);
+    if (rs == RD_OK && rd_count(doc) > 0) {
+        print_doc(doc);
+    } else if (page.text != NULL && page.text_len > 0) {
+        printf("\n%s\n", page.text); /* fallback if the display list is empty */
     }
+    rd_free(doc);
 
     tab_page_free(&page);
     tab_close(t);
-    return EXIT_OK;
+    return (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;
 }
 
 static const char *sf_reason(sf_status ss) {
@@ -114,7 +181,7 @@ static int fetch_and_render(const char *url) {
         return EXIT_ERROR;
     }
 
-    int rc = render_page((const char *)resp.body, resp.body_len);
+    int rc = render_page((const char *)resp.body, resp.body_len, url);
     sf_response_free(&resp);
     return rc;
 }
@@ -131,7 +198,8 @@ static int run_headless(const char *target) {
         return EXIT_ERROR;
     }
 
-    int rc = render_page(html, len);
+    /* A local file has no https origin; image decisions then fail closed. */
+    int rc = render_page(html, len, NULL);
     free(html);
     return rc;
 }

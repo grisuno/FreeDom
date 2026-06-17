@@ -36,6 +36,15 @@ static const pv_run *find_text(const pv_view *v, const char *text) {
     return NULL;
 }
 
+/* Finds the first image run whose src equals `src`; NULL if none. */
+static const pv_run *find_image(const pv_view *v, const char *src) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_IMAGE && r->src != NULL && strcmp(r->src, src) == 0) return r;
+    }
+    return NULL;
+}
+
 /* --- pure model: pv_new / pv_append / pv_free --- */
 
 static void test_new_is_empty(void **state) {
@@ -65,6 +74,40 @@ static void test_append_copies_fields(void **state) {
     assert_int_equal(b->kind, PV_LINK);
     assert_string_equal(b->text, "site");
     assert_string_equal(b->href, "https://x.example/");
+
+    /* Non-image runs carry no image fields: src NULL, dimensions unknown (-1). */
+    assert_null(a->src);
+    assert_int_equal(a->img_w, -1);
+    assert_int_equal(a->img_h, -1);
+    assert_null(b->src);
+    pv_free(v);
+}
+
+static void test_append_image_copies_fields(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 1, "a logo", "https://x.example/l.png", 200, 80), PV_OK);
+    const pv_run *r = pv_at(v, 0);
+    assert_non_null(r);
+    assert_int_equal(r->kind, PV_IMAGE);
+    assert_int_equal(r->block_break, 1);
+    assert_string_equal(r->text, "a logo");
+    assert_string_equal(r->src, "https://x.example/l.png");
+    assert_null(r->href);
+    assert_int_equal(r->img_w, 200);
+    assert_int_equal(r->img_h, 80);
+    pv_free(v);
+}
+
+static void test_append_image_null_args(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(NULL, 0, 0, "alt", "https://x/i.png", 1, 1), PV_ERR_NULL_ARG);
+    /* A missing src is not representable: src is required for an image run. */
+    assert_int_equal(pv_append_image(v, 0, 0, "alt", NULL, 1, 1), PV_ERR_NULL_ARG);
+    /* A NULL alt is allowed and stored as the empty string. */
+    assert_int_equal(pv_append_image(v, 0, 0, NULL, "https://x/i.png", -1, -1), PV_OK);
+    assert_string_equal(pv_at(v, 0)->text, "");
     pv_free(v);
 }
 
@@ -194,6 +237,87 @@ static void test_build_inline_link_no_break_within_paragraph(void **state) {
     hp_document_free(doc);
 }
 
+static void test_build_image_with_dims(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>before</p>"
+                            "<img src=\"https://e.example/logo.png\" alt=\"Logo\" width=\"200\" height=\"80\">"
+                            "<p>after</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = find_image(v, "https://e.example/logo.png");
+    assert_non_null(img);
+    assert_int_equal(img->kind, PV_IMAGE);
+    assert_string_equal(img->text, "Logo");
+    assert_int_equal(img->img_w, 200);
+    assert_int_equal(img->img_h, 80);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_image_unknown_dims(void **state) {
+    (void)state;
+    /* No width/height attributes => unknown (-1); a non-empty alt is kept. */
+    hp_document *doc = parse("<body><img src=\"https://e.example/p.jpg\" alt=\"Photo\"></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = find_image(v, "https://e.example/p.jpg");
+    assert_non_null(img);
+    assert_int_equal(img->img_w, -1);
+    assert_int_equal(img->img_h, -1);
+    assert_string_equal(img->text, "Photo");
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_image_px_and_tracking_dims(void **state) {
+    (void)state;
+    /* Leading integer is parsed even with a unit suffix; a 1x1 beacon keeps its
+     * declared dimensions so render_policy can classify it as a tracker. */
+    hp_document *doc = parse("<body>"
+                            "<img src=\"https://e.example/wide.png\" width=\"640px\" height=\"480px\">"
+                            "<img src=\"https://t.example/beacon.gif\" width=\"1\" height=\"1\">"
+                            "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *wide = find_image(v, "https://e.example/wide.png");
+    assert_non_null(wide);
+    assert_int_equal(wide->img_w, 640);
+    assert_int_equal(wide->img_h, 480);
+    const pv_run *beacon = find_image(v, "https://t.example/beacon.gif");
+    assert_non_null(beacon);
+    assert_int_equal(beacon->img_w, 1);
+    assert_int_equal(beacon->img_h, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_image_in_skipped_subtree_ignored(void **state) {
+    (void)state;
+    /* An <img> inside <noscript> is in a non-rendered subtree: no run emitted. */
+    hp_document *doc = parse("<body><noscript><img src=\"https://e.example/x.png\"></noscript>"
+                            "<p>visible</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_null(find_image(v, "https://e.example/x.png"));
+    assert_non_null(find_text(v, "visible"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_image_without_src_ignored(void **state) {
+    (void)state;
+    /* An <img> with no src has nothing to load and nothing to show: skipped. */
+    hp_document *doc = parse("<body><img alt=\"orphan\"><p>kept</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        assert_int_not_equal(pv_at(v, i)->kind, PV_IMAGE);
+    }
+    assert_non_null(find_text(v, "kept"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_empty_document(void **state) {
     (void)state;
     hp_document *doc = parse("<html><head><title>t</title></head><body></body></html>");
@@ -210,6 +334,8 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
         cmocka_unit_test(test_append_copies_fields),
+        cmocka_unit_test(test_append_image_copies_fields),
+        cmocka_unit_test(test_append_image_null_args),
         cmocka_unit_test(test_append_sanitizes_utf8),
         cmocka_unit_test(test_append_null_args),
         cmocka_unit_test(test_free_null_and_double),
@@ -220,6 +346,11 @@ int main(void) {
         cmocka_unit_test(test_build_block_break_between_paragraphs),
         cmocka_unit_test(test_build_skips_script_and_style),
         cmocka_unit_test(test_build_inline_link_no_break_within_paragraph),
+        cmocka_unit_test(test_build_image_with_dims),
+        cmocka_unit_test(test_build_image_unknown_dims),
+        cmocka_unit_test(test_build_image_px_and_tracking_dims),
+        cmocka_unit_test(test_build_image_in_skipped_subtree_ignored),
+        cmocka_unit_test(test_build_image_without_src_ignored),
         cmocka_unit_test(test_build_empty_document),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

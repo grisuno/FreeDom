@@ -128,6 +128,37 @@ static void test_load_returns_view_with_link(void **state) {
     tab_close(t);
 }
 
+/* An <img> must survive the IPC round-trip as a PV_IMAGE run carrying its src,
+ * alt text, and declared dimensions (so render_policy can later gate it). */
+static void test_load_returns_image_run(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>I</title></head><body>"
+        "<img src=\"https://e.example/logo.png\" alt=\"Logo\" width=\"200\" height=\"80\">"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_image = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->kind == PV_IMAGE && r->src != NULL
+            && strcmp(r->src, "https://e.example/logo.png") == 0) {
+            assert_string_equal(r->text, "Logo");
+            assert_int_equal(r->img_w, 200);
+            assert_int_equal(r->img_h, 80);
+            saw_image = 1;
+        }
+    }
+    assert_true(saw_image);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 static void test_load_strips_script(void **state) {
     (void)state;
     tab *t = NULL;
@@ -300,6 +331,7 @@ int main(void) {
         cmocka_unit_test(test_open_null),
         cmocka_unit_test(test_load_basic),
         cmocka_unit_test(test_load_returns_view_with_link),
+        cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),

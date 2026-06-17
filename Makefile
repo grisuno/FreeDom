@@ -64,7 +64,8 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_js_env $(BUILD_DIR)/test_local_store \
              $(BUILD_DIR)/test_disk_store $(BUILD_DIR)/test_tab \
              $(BUILD_DIR)/test_browser $(BUILD_DIR)/test_freedom \
-             $(BUILD_DIR)/test_page_view
+             $(BUILD_DIR)/test_page_view $(BUILD_DIR)/test_render_policy \
+             $(BUILD_DIR)/test_render_doc
 
 .PHONY: all test itest asan fuzz fuzz-js view clean
 
@@ -138,6 +139,17 @@ $(BUILD_DIR)/test_request_policy: $(TEST_DIR)/test_request_policy.c $(BUILD_DIR)
 $(BUILD_DIR)/test_anti_fp: $(TEST_DIR)/test_anti_fp.c $(BUILD_DIR)/anti_fp.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# render_policy reuses rp_evaluate, so it links request_policy.o + the PSL table.
+$(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(PSL_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# render_doc builds the paint-ready model from a page_view + render_policy gate,
+# so it links page_view/html_parse (lexbor) plus the render/request policy chain.
+$(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_doc.o \
+                              $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
+                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/html_parse.o $(PSL_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
@@ -172,6 +184,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(QJS_OBJ) \
                       $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/request_policy.o \
+                      $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
                       $(BUILD_DIR)/xdg-decoration-client-protocol.h | $(BUILD_DIR)

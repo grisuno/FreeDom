@@ -20,6 +20,11 @@
 #include <lexbor/html/html.h>
 #include <lexbor/tag/const.h>
 
+/* Upper bound for a parsed <img> declared dimension. A declared size only feeds
+ * the tracking-pixel heuristic and the layout hint, so absurd values are clamped
+ * rather than trusted; this also keeps parse_dim free of integer overflow. */
+#define PV_MAX_DIM 1000000
+
 /* --- UTF-8 sanitisation (cairo rejects invalid UTF-8; legacy-encoded pages
  * carry bytes that are invalid UTF-8). Mirrors browser.c's sanitiser; kept local
  * so page_view stays self-contained. Output is never longer than the input. --- */
@@ -100,6 +105,38 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->block_break = block_break;
     r->text = t;
     r->href = h;
+    r->src = NULL;
+    r->img_w = -1;
+    r->img_h = -1;
+    return PV_OK;
+}
+
+pv_status pv_append_image(pv_view *v, int heading, int block_break,
+                          const char *alt, const char *src, int w, int h) {
+    if (v == NULL || src == NULL) return PV_ERR_NULL_ARG;
+
+    if (v->count == v->cap) {
+        size_t ncap = v->cap ? v->cap * 2 : 32;
+        pv_run *grown = (pv_run *)realloc(v->runs, ncap * sizeof *grown);
+        if (grown == NULL) return PV_ERR_OOM;
+        v->runs = grown;
+        v->cap = ncap;
+    }
+
+    char *t = utf8_sanitized_dup(alt != NULL ? alt : "");
+    if (t == NULL) return PV_ERR_OOM;
+    char *s = utf8_sanitized_dup(src);
+    if (s == NULL) { free(t); return PV_ERR_OOM; }
+
+    pv_run *r = &v->runs[v->count++];
+    r->kind = PV_IMAGE;
+    r->heading = heading;
+    r->block_break = block_break;
+    r->text = t;
+    r->href = NULL;
+    r->src = s;
+    r->img_w = w;
+    r->img_h = h;
     return PV_OK;
 }
 
@@ -108,6 +145,7 @@ void pv_free(pv_view *v) {
     for (size_t i = 0; i < v->count; ++i) {
         free(v->runs[i].text);
         free(v->runs[i].href);
+        free(v->runs[i].src);
     }
     free(v->runs);
     free(v);
@@ -229,6 +267,22 @@ static char *collapse_ws(const char *s, size_t n) {
     return out;
 }
 
+/* Parses the leading non-negative integer of an HTML length attribute value
+ * (e.g. "640", "640px", "50%"). Returns the value clamped to a sane bound, or -1
+ * if the value is absent, empty, or does not start with a digit. */
+static int parse_dim(const lxb_char_t *s, size_t len) {
+    if (s == NULL || len == 0) return -1;
+    size_t i = 0;
+    while (i < len && (s[i] == ' ' || s[i] == '\t')) ++i;
+    if (i >= len || s[i] < '0' || s[i] > '9') return -1;
+    long v = 0;
+    for (; i < len && s[i] >= '0' && s[i] <= '9'; ++i) {
+        v = v * 10 + (s[i] - '0');
+        if (v > PV_MAX_DIM) { v = PV_MAX_DIM; break; }
+    }
+    return (int)v;
+}
+
 static lxb_dom_node_t *find_body(lxb_dom_node_t *root) {
     for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(n) == LXB_TAG_BODY) return n;
@@ -257,7 +311,44 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_tag_id_t t = node_tag(n);
-            if (t == LXB_TAG_BR || t == LXB_TAG_HR) pending_break = 1;
+            if (t == LXB_TAG_BR || t == LXB_TAG_HR) { pending_break = 1; continue; }
+            if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base)) {
+                lxb_dom_element_t *el = lxb_dom_interface_element(n);
+                size_t sl = 0;
+                const lxb_char_t *src =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
+                if (src == NULL || sl == 0) continue; /* no source: nothing to show */
+
+                size_t al = 0;
+                const lxb_char_t *alt =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"alt", 3, &al);
+                size_t wl = 0, hl = 0;
+                const lxb_char_t *ws =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"width", 5, &wl);
+                const lxb_char_t *hs =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
+                int iw = parse_dim(ws, wl);
+                int ih = parse_dim(hs, hl);
+
+                const char *unused_href = NULL;
+                size_t unused_hl = 0;
+                const lxb_dom_node_t *block = NULL;
+                int heading = 0;
+                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading);
+                int brk = pending_break || (block != prev_block);
+                pending_break = 0;
+                prev_block = block;
+
+                char *src_dup = dup_n((const char *)src, sl);
+                if (src_dup == NULL) { pv_free(v); return PV_ERR_OOM; }
+                char *alt_dup = (alt != NULL) ? collapse_ws((const char *)alt, al) : dup_n("", 0);
+                if (alt_dup == NULL) { free(src_dup); pv_free(v); return PV_ERR_OOM; }
+
+                pv_status st = pv_append_image(v, heading, brk, alt_dup, src_dup, iw, ih);
+                free(src_dup);
+                free(alt_dup);
+                if (st != PV_OK) { pv_free(v); return st; }
+            }
             continue;
         }
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;

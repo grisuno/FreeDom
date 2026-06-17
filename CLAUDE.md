@@ -207,6 +207,43 @@ freedom/
   (mostrar acentos en vez de `?`), PSL completa (parcial), multiplexado de pestañas + eventos/timers
   asíncronos en el worker, paso de `session_key`/dimensiones desde el orquestador, mitigación de
   WebGL por ausencia, `pledge`/`unveil` en OpenBSD.)*
+- **Puente Hito 5→render enriquecido** — `render_policy`: gate de capacidades de render
+  (imágenes/CSS/JS) puro y sin I/O. Secure/Privacy by Default: `rdp_caps` con valor cero =
+  baseline seguro (todo opt-in, imágenes OFF por defecto); `rdp_image_decision` reusa
+  `rp_evaluate` (Zero Trust: revalida esquema/host por imagen) y, con imágenes activadas, aplica
+  la postura "cargar todas salvo trackers" —cross-site permitido, bloqueo de píxel de rastreo
+  (1x1 / diminuto / área cero vía `rdp_is_tracking_pixel`), no-https e inválidas fatales
+  (fail-closed)—; `rdp_images_warning` para el aviso de rastreo de la UI. *(verde: 15 tests +
+  ASan/UBSan limpio.)*
+- **Render enriquecido cableado a pantalla** — la display list estructurada ahora llega de verdad
+  al usuario, en GUI y `--headless` (antes el orquestador pintaba solo texto plano y descartaba la
+  estructura, `render_policy` no estaba conectado y las imágenes eran invisibles). Piezas:
+  `page_view` emite también runs `PV_IMAGE` (`PV_IMAGE` + `pv_append_image`, campos `src`/`img_w`/
+  `img_h`; el `<img>` aporta `src`, `alt` y dimensiones declaradas —entero inicial de `width`/
+  `height`, o −1—; el `src` se normaliza a UTF-8 seguro; nunca se descarga aquí). El IPC del worker
+  `tab` transporta esos campos por run (write/read_view) con los topes anti-amplificación intactos.
+  Nuevo módulo puro `render_doc` (prefijo `rd_`): convierte `pv_view` + `rdp_caps` + URL top-level
+  en una lista de bloques lista para pintar (`RD_HEADING`/`RD_PARAGRAPH`/`RD_LINK`/`RD_IMAGE`/
+  `RD_NOTICE`); aplica `render_policy` por imagen (Zero Trust, revalida por imagen; sin top-level
+  https → falla cerrado) y antepone el aviso de rastreo (`RD_NOTICE` con `rdp_images_warning()`)
+  siempre que la página declare imágenes con la capacidad apagada (defecto). Tanto `freedom
+  --headless` como la GUI Wayland (`browser_ui`) consumen el MISMO `rd_doc` (DRY): el headless lo
+  imprime como texto fluido determinista (encabezados `#`, enlaces `texto <href>`, placeholders de
+  imagen `[image blocked: ...]`, aviso `! ...`); la GUI lo pinta con tema centralizado
+  (`ui_theme`: tamaños, espaciados y colores, sin números mágicos) —encabezados escalados/negrita,
+  enlaces en color+subrayado, párrafos con flujo en línea y wrapping, banner de aviso e imágenes
+  como caja-placeholder con su decisión—, `Ctrl+I` alterna imágenes por sesión (Privacy by Default:
+  off) y recarga para refrescar aviso/placeholders. Corregido de paso un bug latente: el scroll por
+  rueda/teclado actualizaba un `static` distinto del que leía `paint()` (no hacía nada); ahora el
+  desplazamiento es un offset en píxeles en el estado de la ventana (sin estado global mutable).
+  *(verde: `page_view` 20 tests, `render_doc` 13 tests, `tab` 16, `freedom` 6; 19 suites / 250
+  tests + ASan/UBSan limpio. Pendiente, honesto: descarga+decodificado+pintado de los BYTES reales
+  de la imagen —requiere fetch https de subrecurso y un decodificador de formato (PNG/JPEG/WebP),
+  una superficie de ataque grande, contraria a la doctrina de superficie mínima, y no verificable
+  aquí; el gate, la decisión, el aviso y el placeholder ya están—; transcodificación de charset;
+  persistencia del opt-in por sitio; motor de cajas CSS de autor y JS-vivo (mutación DOM→repintado)
+  como hitos propios; verificación visual de la GUI en una sesión Wayland (aquí solo compila bajo
+  los flags endurecidos, sin display para pintar).)*
 
 ---
 

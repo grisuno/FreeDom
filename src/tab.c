@@ -111,8 +111,12 @@ static int child_load(child_state *cs, const char *html, size_t len) {
     return 0;
 }
 
-/* Serialises the display list: [count][ kind,heading,break, text, href ]*, with
- * each string length-prefixed (href length 0 means no link target). */
+/* Serialises the display list:
+ *   [count]( kind,heading,break, text, href, src, img_w,img_h )*
+ * with each string length-prefixed (an href/src length of 0 means absent). The
+ * image fields travel for every run so a hostile child cannot desync the stream
+ * by varying the per-run layout; non-image runs simply carry an empty src and
+ * -1 dimensions. */
 static int write_view(int wfd, const pv_view *v) {
     size_t n = pv_count(v);
     if (write_full(wfd, &n, sizeof n) != 0) return -1;
@@ -121,8 +125,11 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t kind = (int32_t)r->kind;
         int32_t heading = (int32_t)r->heading;
         int32_t brk = (int32_t)r->block_break;
+        int32_t img_w = (int32_t)r->img_w;
+        int32_t img_h = (int32_t)r->img_h;
         size_t tlen = (r->text != NULL) ? strlen(r->text) : 0;
         size_t hlen = (r->href != NULL) ? strlen(r->href) : 0;
+        size_t slen = (r->src != NULL) ? strlen(r->src) : 0;
         if (write_full(wfd, &kind, sizeof kind) != 0) return -1;
         if (write_full(wfd, &heading, sizeof heading) != 0) return -1;
         if (write_full(wfd, &brk, sizeof brk) != 0) return -1;
@@ -130,6 +137,10 @@ static int write_view(int wfd, const pv_view *v) {
         if (tlen != 0 && write_full(wfd, r->text, tlen) != 0) return -1;
         if (write_full(wfd, &hlen, sizeof hlen) != 0) return -1;
         if (hlen != 0 && write_full(wfd, r->href, hlen) != 0) return -1;
+        if (write_full(wfd, &slen, sizeof slen) != 0) return -1;
+        if (slen != 0 && write_full(wfd, r->src, slen) != 0) return -1;
+        if (write_full(wfd, &img_w, sizeof img_w) != 0) return -1;
+        if (write_full(wfd, &img_h, sizeof img_h) != 0) return -1;
     }
     return 0;
 }
@@ -300,22 +311,33 @@ static int read_view(int fd, pv_view **out) {
     if (v == NULL) return -1;
 
     for (size_t i = 0; i < n; ++i) {
-        int32_t kind = 0, heading = 0, brk = 0;
+        int32_t kind = 0, heading = 0, brk = 0, img_w = -1, img_h = -1;
         if (read_full(fd, &kind, sizeof kind) != 0
          || read_full(fd, &heading, sizeof heading) != 0
          || read_full(fd, &brk, sizeof brk) != 0) {
             pv_free(v);
             return -1;
         }
-        char *text = NULL, *href = NULL;
-        size_t tl = 0, hl = 0;
+        char *text = NULL, *href = NULL, *src = NULL;
+        size_t tl = 0, hl = 0, sl = 0;
         if (read_field(fd, &text, &tl) != 0) { pv_free(v); return -1; }
         if (read_field(fd, &href, &hl) != 0) { free(text); pv_free(v); return -1; }
+        if (read_field(fd, &src, &sl) != 0) { free(text); free(href); pv_free(v); return -1; }
+        if (read_full(fd, &img_w, sizeof img_w) != 0
+         || read_full(fd, &img_h, sizeof img_h) != 0) {
+            free(text); free(href); free(src); pv_free(v); return -1;
+        }
 
-        pv_kind k = (kind == PV_LINK && hl > 0) ? PV_LINK : PV_TEXT;
-        pv_status st = pv_append(v, k, heading, brk, text, (hl > 0) ? href : NULL);
+        pv_status st;
+        if (kind == PV_IMAGE && sl > 0) {
+            st = pv_append_image(v, heading, brk, text, src, img_w, img_h);
+        } else {
+            pv_kind k = (kind == PV_LINK && hl > 0) ? PV_LINK : PV_TEXT;
+            st = pv_append(v, k, heading, brk, text, (hl > 0) ? href : NULL);
+        }
         free(text);
         free(href);
+        free(src);
         if (st != PV_OK) { pv_free(v); return -1; }
     }
 

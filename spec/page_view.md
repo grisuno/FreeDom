@@ -8,7 +8,11 @@
 
 `page_view` convierte el DOM inerte y saneado (`html_parse`) en una **display list** plana: una
 lista ordenada de *runs* en línea con la estructura mínima para maquetar y pintar una página
-legible — texto, **enlaces**, nivel de **encabezado** y **saltos de bloque**.
+legible — texto, **enlaces**, **imágenes**, nivel de **encabezado** y **saltos de bloque**.
+
+Una imagen es **dato con procedencia, nunca petición**: el `src` se guarda pero **no se descarga
+aquí**. La decisión de cargarla (o no) la toma `render_policy`/el orquestador; `page_view` solo la
+hace visible y aporta sus dimensiones declaradas para la heurística de píxel de rastreo.
 
 Es el dato que el worker `tab` entrega a la GUI. El renderer **no** recorre el DOM hostil ni el
 texto plano sin estructura; consume esta lista. Cada run es **dato con procedencia, nunca
@@ -18,18 +22,24 @@ re-valida por `secure_fetch`.
 ## 2. Modelo de datos
 
 ```c
-typedef enum { PV_TEXT, PV_LINK } pv_kind;
+typedef enum { PV_TEXT, PV_LINK, PV_IMAGE } pv_kind;
 
 typedef struct pv_run {
-    pv_kind kind;        /* texto o enlace */
+    pv_kind kind;        /* texto, enlace o imagen */
     int     heading;     /* 0 = cuerpo; 1..6 = dentro de h1..h6 */
     int     block_break; /* !=0: un límite de bloque precede a este run */
-    char   *text;        /* propio, NUL-terminado, UTF-8 válido */
+    char   *text;        /* propio, NUL-terminado, UTF-8 válido (alt en PV_IMAGE) */
     char   *href;        /* propio (PV_LINK), NUL-terminado; si no, NULL */
+    char   *src;         /* propio (PV_IMAGE): URL de la imagen; si no, NULL */
+    int     img_w;       /* ancho declarado del <img> (px), o -1 si desconocido */
+    int     img_h;       /* alto declarado del <img> (px), o -1 si desconocido */
 } pv_run;
 
 typedef struct pv_view { pv_run *runs; size_t count; size_t cap; } pv_view;
 ```
+
+En un run que no es imagen, `src == NULL` y `img_w == img_h == -1`. En un `PV_IMAGE`, `text` es el
+texto alternativo (`alt`, puede ser cadena vacía) y `href == NULL` (la imagen no es un enlace).
 
 ## 3. API
 
@@ -37,7 +47,9 @@ typedef struct pv_view { pv_run *runs; size_t count; size_t cap; } pv_view;
 pv_status pv_build(const hp_document *doc, pv_view **out); /* recorre el árbol (Lexbor) */
 pv_view  *pv_new(void);                                    /* vista vacía (deserializador IPC) */
 pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
-                    const char *text, const char *href);   /* copia text/href */
+                    const char *text, const char *href);   /* texto/enlace; copia text/href */
+pv_status pv_append_image(pv_view *v, int heading, int block_break,
+                          const char *alt, const char *src, int w, int h); /* PV_IMAGE */
 void          pv_free(pv_view *v);
 size_t        pv_count(const pv_view *v);
 const pv_run *pv_at(const pv_view *v, size_t i);
@@ -67,6 +79,13 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
 
 `href` se guarda **sin** normalizar (no se muestra; la navegación lo valida con `sf_validate_url`).
 
+Además, para cada elemento **`<img>`** (no dentro de un subárbol invisible) se emite un run
+`PV_IMAGE`: `text` = atributo `alt` colapsado (o cadena vacía), `src` = atributo `src`, y
+`img_w`/`img_h` = el entero inicial de los atributos `width`/`height` (o `-1` si ausente o no
+numérico). El `src` se normaliza igual que el `text` para que sea seguro de pintar. El salto de
+bloque se calcula como para el texto (bloque contenedor distinto del anterior, o `<br>`/`<hr>`
+previo).
+
 ## 5. Tabla de errores
 
 | Código | Condición |
@@ -87,5 +106,7 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
 ## 7. Fuera de alcance (de momento)
 
 - Maquetación (posiciones, líneas): la hace el orquestador de UI a partir de esta lista.
-- Estilos CSS, imágenes, formularios funcionales, tablas con celdas, listas con viñetas/numeración.
+- Descarga/decodificado/pintado de la imagen: lo decide `render_policy` y lo ejecuta el
+  orquestador. `page_view` solo emite el run con `src` y dimensiones declaradas.
+- Estilos CSS, formularios funcionales, tablas con celdas, listas con viñetas/numeración.
 - Normalización de espacios entre runs adyacentes (colapso entre nodos), `white-space: pre`.
