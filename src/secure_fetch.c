@@ -12,6 +12,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "secure_fetch.h"
+#include "url.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -68,11 +69,8 @@ sf_config sf_config_default(void) {
 /* --- public: pure validators --- */
 
 sf_status sf_validate_url(const char *url) {
-    if (url == NULL) return SF_ERR_INVALID_URL;
-    if (!ci_starts_with(url, "https://")) return SF_ERR_INVALID_URL;
-    const char *host = url + 8; /* strlen("https://") */
-    if (host[0] == '\0' || host[0] == '/') return SF_ERR_INVALID_URL;
-    return SF_OK;
+    /* The canonical https-URL rule lives in the pure url module (DRY). */
+    return (url_validate_https(url) == URL_OK) ? SF_OK : SF_ERR_INVALID_URL;
 }
 
 sf_status sf_check_tls_version(const char *negotiated_version) {
@@ -109,63 +107,13 @@ sf_status sf_enforce_policy(const char *tls_version, const char *group,
     return sf_check_chain_policy(chain, policy);
 }
 
-/* --- bounded string helpers for URL assembly (overflow => -1, never truncate) --- */
+/* --- bounded string helper (overflow => -1, never truncate) --- */
 
 static int copy_checked(char *dst, size_t dstsz, const char *src) {
     size_t n = strlen(src);
     if (n + 1 > dstsz) return -1;
     memcpy(dst, src, n + 1);
     return 0;
-}
-
-static int ncopy_checked(char *dst, size_t dstsz, const char *src, size_t n) {
-    if (n + 1 > dstsz) return -1;
-    memcpy(dst, src, n);
-    dst[n] = '\0';
-    return 0;
-}
-
-static int cat_checked(char *dst, size_t dstsz, const char *src) {
-    size_t cur = strlen(dst);
-    size_t n = strlen(src);
-    if (cur + n + 1 > dstsz) return -1;
-    memcpy(dst + cur, src, n + 1);
-    return 0;
-}
-
-/* Does s begin with "<scheme>:" per RFC 3986 (ALPHA *( ALPHA/DIGIT/+/-/. ) ":")? */
-static int starts_with_scheme(const char *s) {
-    char c0 = s[0];
-    if (!((c0 >= 'A' && c0 <= 'Z') || (c0 >= 'a' && c0 <= 'z'))) return 0;
-    for (size_t i = 1; s[i] != '\0'; ++i) {
-        char c = s[i];
-        if (c == ':') return 1;
-        int ok = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
-              || (c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.';
-        if (!ok) return 0;
-    }
-    return 0;
-}
-
-/* Length of "https://host[:port]" in base (validated absolute https URL): index
- * of the first '/' after the scheme, or the whole length if there is no path. */
-static size_t sf_authority_len(const char *base) {
-    size_t i = 8; /* strlen("https://"); base is validated to start with it */
-    while (base[i] != '\0' && base[i] != '/') ++i;
-    return i;
-}
-
-/* Length of base up to and including the last path '/', ignoring query/fragment.
- * If the path carries no slash, returns the authority length (caller adds '/'). */
-static size_t sf_dir_len(const char *base) {
-    size_t auth = sf_authority_len(base);
-    size_t last = 0;
-    int found = 0;
-    for (size_t i = auth; base[i] != '\0'; ++i) {
-        if (base[i] == '?' || base[i] == '#') break;
-        if (base[i] == '/') { last = i; found = 1; }
-    }
-    return found ? last + 1 : auth;
 }
 
 /* --- public: pure redirect logic --- */
@@ -199,36 +147,11 @@ sf_status sf_resolve_redirect(const char *base_url, const char *location,
                               char *out, size_t outsz) {
     if (base_url == NULL || location == NULL || out == NULL || outsz == 0)
         return SF_ERR_NULL_ARG;
-    if (location[0] == '\0') return SF_ERR_INVALID_URL;
-
-    if (ci_starts_with(location, "https://")) {
-        if (copy_checked(out, outsz, location) != 0) return SF_ERR_INVALID_URL;
-    } else if (ci_starts_with(location, "http://")) {
-        return SF_ERR_INVALID_URL; /* refuse cleartext downgrade */
-    } else if (location[0] == '/' && location[1] == '/') {
-        /* scheme-relative: //host/path => https://host/path */
-        if (copy_checked(out, outsz, "https:") != 0) return SF_ERR_INVALID_URL;
-        if (cat_checked(out, outsz, location) != 0) return SF_ERR_INVALID_URL;
-    } else if (starts_with_scheme(location)) {
-        return SF_ERR_INVALID_URL; /* any other explicit scheme (javascript:, data:, ...) */
-    } else if (location[0] == '/') {
-        /* absolute path: origin of base + location */
-        size_t auth = sf_authority_len(base_url);
-        if (auth <= 8) return SF_ERR_INVALID_URL; /* empty host */
-        if (ncopy_checked(out, outsz, base_url, auth) != 0) return SF_ERR_INVALID_URL;
-        if (cat_checked(out, outsz, location) != 0) return SF_ERR_INVALID_URL;
-    } else {
-        /* relative path: base directory + location */
-        size_t auth = sf_authority_len(base_url);
-        size_t dir = sf_dir_len(base_url);
-        if (auth <= 8) return SF_ERR_INVALID_URL;
-        if (ncopy_checked(out, outsz, base_url, dir) != 0) return SF_ERR_INVALID_URL;
-        if (dir == auth && cat_checked(out, outsz, "/") != 0) return SF_ERR_INVALID_URL;
-        if (cat_checked(out, outsz, location) != 0) return SF_ERR_INVALID_URL;
-    }
-
-    /* Final gate: the result must be a valid absolute https URL. */
-    return sf_validate_url(out);
+    /* Reference resolution + the https-only / no-downgrade policy live in the
+     * pure url module (DRY); a redirect is just a reference resolved against the
+     * current URL, fail-closed to an absolute https URL. */
+    return (url_resolve_https(base_url, location, out, outsz) == URL_OK)
+               ? SF_OK : SF_ERR_INVALID_URL;
 }
 
 /* --- public: cleanup --- */

@@ -244,6 +244,34 @@ freedom/
   persistencia del opt-in por sitio; motor de cajas CSS de autor y JS-vivo (mutación DOM→repintado)
   como hitos propios; verificación visual de la GUI en una sesión Wayland (aquí solo compila bajo
   los flags endurecidos, sin display para pintar).)*
+- **Navegación de enlaces (clic → carga)** — los hiperenlaces renderizados ahora se pueden
+  *seguir*. Lógica pura y testeable, orquestador que solo cablea. Piezas: `url` (prefijo `url_`):
+  conocimiento canónico y único de "qué es una URL https absoluta válida" y "cómo resuelve una
+  referencia (relativa / ruta absoluta / relativa al esquema / absoluta) contra una base" según
+  RFC 3986 con colapso de segmentos `.`/`..`; rechaza el *downgrade* a `http://` y todo otro esquema;
+  falla cerrado (resultado no-https no es representable). `secure_fetch` se refactoriza para delegar
+  `sf_validate_url` y `sf_resolve_redirect` en este módulo (DRY: la regla que sigue una redirección
+  es la misma que sigue un enlace), eliminando su copia duplicada de la lógica. (14 tests)
+  `link_nav` (prefijo `ln_`): `ln_resolve(base, href, out)` decide qué hace un clic dado el `href`
+  crudo del documento (dato hostil con procedencia, nunca instrucción) y la ubicación de la página:
+  `LN_NAVIGATE` (https absoluta, o ruta de fichero local bajo base local), `LN_SAME_DOCUMENT`
+  (vacío o fragmento `#...`) o `LN_BLOCKED` (downgrade, `javascript:`/`data:`/`file:`/`mailto:`, sin
+  base resoluble, desbordamiento). Limpia el `href` (WHATWG: elimina TAB/LF/CR, recorta espacios),
+  reusa `url_resolve_https` para enlaces https (DRY) y un normalizador de rutas que **preserva la
+  relatividad** para ficheros locales (`examples/../README.md` → `README.md`, nunca `/README.md`,
+  para que un `..` no convierta por accidente una ruta relativa en absoluta). Pura, reentrante,
+  fail-closed. (17 tests) Cableado en `gui/browser_ui.c`: cada fragmento de enlace de la maqueta
+  arrastra su `href` (alias, no propiedad); un clic en el área de contenido se *hit-testea* contra
+  los fragmentos maquetados (`link_at_point`, que reusa exactamente la maqueta y el recorte de
+  scroll del pintor para que el impacto coincida con lo que se ve) y `follow_link` pasa el `href`
+  crudo por `ln_resolve` contra `browser_current_url`; solo con `LN_NAVIGATE` registra historial
+  (`browser_navigate`) y carga (`do_load`), que re-aplica TODA la política TLS/PQ/cadena en cada
+  salto (Zero Trust: la resolución no confía en el destino, se revalida al cargar). Un clic en un
+  enlace de *downgrade*, esquema ajeno o fragmento no navega a ningún sitio (Secure by Default: el
+  contenido hostil no puede provocar una carga insegura). Helper `content_geometry` compartido por
+  el pintor y el hit-test (única fuente de verdad de la geometría, sin números mágicos). *(verde:
+  21 suites / 281 tests + ASan/UBSan limpio; la GUI compila bajo los flags endurecidos, sin display
+  para verificar el clic visualmente aquí.)*
 
 ---
 

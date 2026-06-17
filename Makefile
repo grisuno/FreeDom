@@ -65,7 +65,8 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_disk_store $(BUILD_DIR)/test_tab \
              $(BUILD_DIR)/test_browser $(BUILD_DIR)/test_freedom \
              $(BUILD_DIR)/test_page_view $(BUILD_DIR)/test_render_policy \
-             $(BUILD_DIR)/test_render_doc
+             $(BUILD_DIR)/test_render_doc $(BUILD_DIR)/test_url \
+             $(BUILD_DIR)/test_link_nav
 
 .PHONY: all test itest asan fuzz fuzz-js view clean
 
@@ -108,7 +109,7 @@ $(BUILD_DIR)/qjs_%.o: $(QJS_DIR)/%.c | $(BUILD_DIR)
 test: $(TEST_BINS)
 	@set -e; for t in $(TEST_BINS); do echo "== run $$t =="; $$t; done
 
-$(BUILD_DIR)/test_secure_fetch: $(TEST_DIR)/test_secure_fetch.c $(BUILD_DIR)/secure_fetch.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_secure_fetch: $(TEST_DIR)/test_secure_fetch.c $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_html_parse: $(TEST_DIR)/test_html_parse.c $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
@@ -150,6 +151,14 @@ $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_
                               $(BUILD_DIR)/page_view.o $(BUILD_DIR)/html_parse.o $(PSL_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
+# Pure URL operations: validation + RFC 3986 reference resolution. No I/O deps.
+$(BUILD_DIR)/test_url: $(TEST_DIR)/test_url.c $(BUILD_DIR)/url.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Clicked-link navigation policy: reuses the pure url module, no I/O deps.
+$(BUILD_DIR)/test_link_nav: $(TEST_DIR)/test_link_nav.c $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
@@ -183,7 +192,8 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(QJS_OBJ) \
-                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/request_policy.o \
+                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/url.o \
+                      $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/request_policy.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -202,7 +212,7 @@ $(BUILD_DIR)/test_freedom: $(TEST_DIR)/test_freedom.c $(BUILD_DIR)/freedom | $(B
 itest: $(BUILD_DIR)/itest_secure_fetch
 	@echo "== run $< (network-dependent) =="; $<
 
-$(BUILD_DIR)/itest_secure_fetch: $(TEST_DIR)/itest_secure_fetch.c $(BUILD_DIR)/secure_fetch.o | $(BUILD_DIR)
+$(BUILD_DIR)/itest_secure_fetch: $(TEST_DIR)/itest_secure_fetch.c $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS)
 
 # Same suites under AddressSanitizer + UBSan (FORTIFY/PIE relaxed for the sanitizers).

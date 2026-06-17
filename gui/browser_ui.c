@@ -12,6 +12,7 @@
 #define _GNU_SOURCE
 
 #include "browser.h"
+#include "link_nav.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "ui.h"
@@ -388,6 +389,17 @@ static double toolbar_top(const browser_window *w) {
     return w->use_csd ? UI_TITLEBAR_H : 0.0;
 }
 
+/* The content area rectangle below the toolbar, in surface coordinates. The
+ * single source of truth for both painting and click hit-testing so they cannot
+ * drift apart. */
+static void content_geometry(const browser_window *w, double *top, double *height) {
+    double t = toolbar_top(w) + UI_TOOLBAR_H;
+    double h = (double)w->height - t - 2.0 * w->theme.content_margin;
+    if (h < 1.0) h = 1.0;
+    *top = t;
+    *height = h;
+}
+
 static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *close_x) {
     *close_x = w->width - UI_WIN_BTN_W;
     *max_x   = w->width - 2 * UI_WIN_BTN_W;
@@ -432,6 +444,7 @@ typedef struct rc_frag {
     ui_rgb      color;
     const char *text;     /* slice into a rd_block text (not owned) */
     size_t      len;
+    const char *href;     /* link target (aliases the rd_block href, not owned); NULL if not a link */
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE } rc_rowkind;
@@ -540,10 +553,12 @@ static void open_line(rc_layout *L, rc_state *s) {
     s->line_first = L->nfrag;
 }
 
-/* Places the words of text into the current inline line, wrapping at content_w. */
+/* Places the words of text into the current inline line, wrapping at content_w.
+ * href tags every fragment produced (NULL for non-link runs) so a later hit-test
+ * can recover the click target without re-walking the document. */
 static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                       const char *text, double size, int bold, int underline,
-                      ui_rgb color, double content_w) {
+                      ui_rgb color, double content_w, const char *href) {
     content_font(cr, size, bold);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
@@ -571,7 +586,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         if (f != NULL) {
             f->x = s->pen_x; f->width = ww; f->font_size = size;
             f->bold = bold; f->underline = underline; f->color = color;
-            f->text = text + ws; f->len = wl;
+            f->text = text + ws; f->len = wl; f->href = href;
         }
         s->pen_x += ww;
         if (fe.ascent  > s->line_asc)  s->line_asc  = fe.ascent;
@@ -611,14 +626,15 @@ static void layout_doc(cairo_t *cr, const rd_doc *doc, const ui_theme *th,
 
         double size; int bold, underline; ui_rgb color;
         block_style(th, b, &size, &bold, &underline, &color);
+        const char *href = (b->kind == RD_LINK) ? b->href : NULL;
 
         if (b->kind == RD_NOTICE) {
             s.banner = 1;
-            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w);
+            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w, href);
             flush_line(L, &s, th);
             s.banner = 0;
         } else {
-            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w);
+            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w, href);
         }
     }
     flush_line(L, &s, th);
@@ -693,6 +709,67 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         }
     }
     rc_free(&L);
+}
+
+/* Returns the link target under the surface point (px, py), or NULL when the
+ * point is outside the content area or not over a link fragment. The layout and
+ * scroll clamping mirror paint_structured exactly, so the hit matches what is on
+ * screen. The returned pointer aliases the current rd_doc (it is not owned) and
+ * stays valid until the document is replaced; the caller must resolve it before
+ * triggering a load that frees the document. */
+static const char *link_at_point(browser_window *w, double px, double py) {
+    if (w->doc == NULL || w->cairo_surface == NULL) return NULL;
+
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    if (py < content_top || py > content_top + content_h) return NULL;
+
+    const ui_theme *th = &w->theme;
+    double left = th->content_margin;
+    double content_w = (double)w->width - 2.0 * th->content_margin;
+    if (content_w < 1.0) content_w = 1.0;
+
+    cairo_t *cr = cairo_create(w->cairo_surface);
+    rc_layout L;
+    layout_doc(cr, w->doc, th, content_w, &L);
+
+    double max_scroll = L.total_h - content_h;
+    if (max_scroll < 0.0) max_scroll = 0.0;
+    double scroll = w->scroll;
+    if (scroll < 0.0) scroll = 0.0;
+    if (scroll > max_scroll) scroll = max_scroll;
+    double origin = content_top + th->content_margin - scroll;
+
+    const char *hit = NULL;
+    for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
+        const rc_row *r = &L.rows[i];
+        if (r->kind != RC_TEXT) continue;
+        double ry = origin + r->top;
+        if (py < ry || py > ry + r->height) continue;
+        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
+            const rc_frag *f = &L.frags[k];
+            if (f->href == NULL) continue;
+            double fx = left + f->x;
+            if (px >= fx && px <= fx + f->width) { hit = f->href; break; }
+        }
+    }
+
+    rc_free(&L);
+    cairo_destroy(cr);
+    return hit;
+}
+
+/* Resolves a clicked link's raw href against the current page location through
+ * the pure navigation policy and, only when it yields a navigable target, records
+ * the navigation and performs the load. A same-document fragment or a blocked
+ * reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
+ * hostile content cannot drive an unsafe load. */
+static void follow_link(browser_window *w, const char *href) {
+    ln_result res;
+    if (ln_resolve(browser_current_url(&w->bs), href, &res) != LN_OK) return;
+    if (res.action != LN_NAVIGATE) return;
+    if (browser_navigate(&w->bs, res.target) != BROWSER_OK) return;
+    do_load(w, res.target);
 }
 
 static void paint(browser_window *w) {
@@ -797,9 +874,8 @@ static void paint(browser_window *w) {
     }
 
     /* Content area. */
-    double content_top = ttop + UI_TOOLBAR_H;
-    double content_h = (double)w->height - content_top - 2 * th->content_margin;
-    if (content_h < 1.0) content_h = 1.0;
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
 
     set_rgb(cr, th->content_bg);
     cairo_rectangle(cr, 0, content_top, w->width, (double)w->height - content_top);
@@ -989,7 +1065,11 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             w->url_bar_focused = 0;
         }
     } else {
+        /* Content area: a click on a rendered hyperlink follows it. The decision
+         * (and every security rejection) lives in the pure ln_resolve. */
         w->url_bar_focused = 0;
+        const char *href = link_at_point(w, w->ptr_x, w->ptr_y);
+        if (href != NULL) follow_link(w, href);
     }
     redraw(w);
 }
