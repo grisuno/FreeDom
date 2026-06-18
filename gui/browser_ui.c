@@ -1022,15 +1022,49 @@ static void paint_image_placeholder(cairo_t *cr, browser_window *w, const rd_blo
  * Respeta exactamente la política RDP_IMG_ALLOW sin hardcodes.
  * Usa theme existente. */
 static void paint_rd_image(cairo_t *cr, browser_window *w, const rd_block *blk,
-                           double x, double y, double max_w) {
+                           double x, double y, double max_w, double max_h) {
     if (blk->img_decision != RDP_IMG_ALLOW || blk->href == NULL) {
         paint_image_placeholder(cr, w, blk, x, y, max_w);
         return;
     }
 
-    /* Raíz del bug: aquí iría la carga real de la imagen + cairo_surface.
-     * Por ahora fallback al placeholder (mejor que nada). */
-    paint_image_placeholder(cr, w, blk, x, y, max_w);
+    /* Intentar cargar y dibujar imagen real */
+    cairo_surface_t *img_surface = NULL;
+
+    /* Caso 1: data: URL (base64) */
+    if (strncmp(blk->href, "data:", 5) == 0) {
+        /* TODO: soporte base64 futuro */
+        img_surface = NULL;
+    } 
+    /* Caso 2: URL normal */
+    else {
+        /* Por ahora fallback (implementaremos descarga real después) */
+        img_surface = NULL;
+    }
+
+    if (img_surface != NULL) {
+        int iw = cairo_image_surface_get_width(img_surface);
+        int ih = cairo_image_surface_get_height(img_surface);
+
+        double scale = 1.0;
+        if (iw > 0) {
+            double sx = max_w / iw;
+            double sy = (max_h > 0 && ih > 0) ? max_h / ih : sx;
+            scale = (sx < sy) ? sx : sy;   // la más restrictiva
+        }
+
+        cairo_save(cr);
+        cairo_translate(cr, x, y);
+        cairo_scale(cr, scale, scale);
+        cairo_set_source_surface(cr, img_surface, 0, 0);
+        cairo_paint(cr);
+        cairo_restore(cr);
+
+        cairo_surface_destroy(img_surface);
+    } else {
+        /* Fallback al placeholder */
+        paint_image_placeholder(cr, w, blk, x, y, max_w);
+    }
 }
 
 /* Paints the structured document into the content rectangle, honouring scroll. */
@@ -1080,7 +1114,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
             cairo_show_text(cr, label);
             cairo_restore(cr);
             /* Raíz: usar paint_rd_image para manejar ALLOW vs BLOCKED */
-            paint_rd_image(cr, w, b, img_x, img_y, content_w);
+            paint_rd_image(cr, w, b, img_x, img_y, content_w, r->height);
             continue;
         }
 
