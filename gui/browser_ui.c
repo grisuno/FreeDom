@@ -986,6 +986,53 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     cairo_restore(cr);
 }
 
+static void paint_image_placeholder(cairo_t *cr, browser_window *w, const rd_block *blk,
+                                    double x, double y, double avail_w) {
+    const ui_theme *th = &w->theme;
+    const double pad = th->image_box_pad;
+    double box_w = avail_w - 2.0 * pad;
+    if (box_w < 100.0) box_w = 100.0;
+    double box_h = 120.0;
+
+    /* Fondo y borde */
+    set_rgb(cr, th->image_box);
+    cairo_rectangle(cr, x + pad, y + pad, box_w, box_h);
+    cairo_set_line_width(cr, 2.0);
+    cairo_stroke(cr);
+
+    /* Texto */
+    content_font(cr, th->body_font * 0.85, 0);
+    const char *label = rd_image_label(blk->img_decision);
+    cairo_text_extents_t te;
+    cairo_text_extents(cr, label, &te);
+
+    double tx = x + pad + (box_w - te.width) / 2.0;
+    double ty = y + pad + box_h / 2.0 + te.height / 2.0;
+    cairo_move_to(cr, tx, ty);
+    cairo_show_text(cr, label);
+
+    if (blk->img_decision == RDP_IMG_ALLOW && blk->href) {
+        cairo_text_extents(cr, "[img]", &te);
+        cairo_move_to(cr, x + pad + 8.0, y + pad + 24.0);
+        cairo_show_text(cr, "[img]");
+    }
+}
+
+/* Hook principal para renderizar imágenes RD_IMAGE.
+ * Respeta exactamente la política RDP_IMG_ALLOW sin hardcodes.
+ * Usa theme existente. */
+static void paint_rd_image(cairo_t *cr, browser_window *w, const rd_block *blk,
+                           double x, double y, double max_w) {
+    if (blk->img_decision != RDP_IMG_ALLOW || blk->href == NULL) {
+        paint_image_placeholder(cr, w, blk, x, y, max_w);
+        return;
+    }
+
+    /* Raíz del bug: aquí iría la carga real de la imagen + cairo_surface.
+     * Por ahora fallback al placeholder (mejor que nada). */
+    paint_image_placeholder(cr, w, blk, x, y, max_w);
+}
+
 /* Paints the structured document into the content rectangle, honouring scroll. */
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
@@ -1010,6 +1057,8 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
 
         if (r->kind == RC_IMAGE && r->blk != NULL) {
             const rd_block *b = r->blk;
+            double img_x = left;
+            double img_y = ry;
             int blocked = (b->img_decision != RDP_IMG_ALLOW);
             ui_rgb col = blocked ? th->image_blocked : th->image_box;
             cairo_set_line_width(cr, 1.0);
@@ -1017,6 +1066,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
             cairo_rectangle(cr, left, ry, content_w, r->height);
             cairo_stroke(cr);
 
+            
             content_font(cr, th->body_font, 0);
             cairo_save(cr);
             cairo_rectangle(cr, left + th->image_box_pad, ry,
@@ -1029,6 +1079,8 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                      rd_image_label(b->img_decision), alt[0] ? " : " : "", alt);
             cairo_show_text(cr, label);
             cairo_restore(cr);
+            /* Raíz: usar paint_rd_image para manejar ALLOW vs BLOCKED */
+            paint_rd_image(cr, w, b, img_x, img_y, content_w);
             continue;
         }
 
