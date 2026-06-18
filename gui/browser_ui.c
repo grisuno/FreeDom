@@ -216,6 +216,14 @@ static void set_rgb(cairo_t *cr, ui_rgb c) {
     cairo_set_source_rgb(cr, c.r, c.g, c.b);
 }
 
+/* Live editable state for one form text control, aliasing a block of the current
+ * rd_doc (not owned; valid until the doc is replaced). The field carries the value
+ * the user is editing; submission reads it back. */
+typedef struct ui_input_state {
+    const rd_block *blk;   /* the RD_INPUT block (aliases w->doc) */
+    tf_field        field; /* live editable value */
+} ui_input_state;
+
 typedef struct browser_window {
     struct wl_display    *display;
     struct wl_registry   *registry;
@@ -285,14 +293,6 @@ typedef struct browser_window {
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
 } browser_window;
-
-/* Live editable state for one form text control, aliasing a block of the current
- * rd_doc (not owned; valid until the doc is replaced). The field carries the value
- * the user is editing; submission reads it back. */
-typedef struct ui_input_state {
-    const rd_block *blk;   /* the RD_INPUT block (aliases w->doc) */
-    tf_field        field; /* live editable value */
-} ui_input_state;
 
 /* Pointer to the rdp_caps bool toggled by options-menu item i. */
 static bool *menu_item_flag(browser_window *w, size_t i) {
@@ -1201,7 +1201,7 @@ static void do_submit_post(browser_window *w, const fm_plan *plan) {
                            plan->content_type, &resp);
     if (ss != SF_OK) {
         char msg[512];
-        snprintf(msg, sizeof msg, "POST to '%s' failed (status %d).", plan->url, (int)ss);
+        snprintf(msg, sizeof msg, "POST to '%.400s' failed (status %d).", plan->url, (int)ss);
         set_cache(w, NULL, 0, NULL);
         browser_set_page(&w->bs, NULL, msg, 1);
         sf_response_free(&resp);
@@ -1947,6 +1947,39 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
             tf_end(&w->ua_field);
         } else if (n > 0) {
             for (int i = 0; i < n; ++i) tf_insert(&w->ua_field, utf8[i]);
+        }
+        redraw(w);
+        return;
+    }
+
+    /* A focused page text control (e.g. a search box) captures the keyboard before
+     * scroll: typing edits its live value, Enter submits the owning form (the load
+     * re-applies the full TLS/PQ policy, Zero Trust), Escape releases focus. Same
+     * edit mechanics as the URL bar and the User-Agent box, over the shared
+     * textfield primitive. submit_form may reload and rebuild w->inputs, so the
+     * block is captured and focus dropped before calling it. */
+    if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
+        tf_field *field = &w->inputs[w->focused_input].field;
+        if (sym == XKB_KEY_Escape) {
+            w->focused_input = -1;
+        } else if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
+            const rd_block *blk = w->inputs[w->focused_input].blk;
+            w->focused_input = -1;
+            submit_form(w, blk);
+        } else if (sym == XKB_KEY_BackSpace) {
+            tf_backspace(field);
+        } else if (sym == XKB_KEY_Delete || sym == XKB_KEY_KP_Delete) {
+            tf_delete(field);
+        } else if (sym == XKB_KEY_Left) {
+            tf_move(field, -1);
+        } else if (sym == XKB_KEY_Right) {
+            tf_move(field, 1);
+        } else if (sym == XKB_KEY_Home) {
+            tf_home(field);
+        } else if (sym == XKB_KEY_End) {
+            tf_end(field);
+        } else if (n > 0 && (unsigned char)utf8[0] >= 0x20) {
+            for (int i = 0; i < n; ++i) tf_insert(field, utf8[i]);
         }
         redraw(w);
         return;

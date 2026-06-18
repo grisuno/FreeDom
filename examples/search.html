@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><title>Freedom — form controls demo</title></head>
+<body>
+<h1>Search and forms</h1>
+<p>This page exercises the interactive controls: a search box, a button, and a
+login form. Click a text box to focus it, type, and press Enter (or the submit
+button) to send the form through secure_fetch (https only, full TLS/PQ policy).</p>
+
+<h2>Search (GET)</h2>
+<form action="https://example.org/search" method="get">
+<input type="search" name="q" placeholder="Type your query and press Enter">
+<input type="submit" value="Search">
+</form>
+
+<h2>Sign in (POST)</h2>
+<form action="https://example.org/login" method="post">
+<input type="text" name="user" placeholder="username">
+<input type="password" name="pass" placeholder="password">
+<input type="hidden" name="csrf" value="opaque-token">
+<input type="submit" value="Sign in">
+</form>
+
+<h2>Blocked: insecure form</h2>
+<p>A form whose action downgrades to http must fail closed on submit.</p>
+<form action="http://insecure.example/submit" method="get">
+<input type="text" name="x" placeholder="this submit is blocked">
+<input type="submit" value="Send">
+</form>
+</body>
+</html>

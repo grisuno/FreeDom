@@ -211,7 +211,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
                       $(BUILD_DIR)/request_policy.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
-                      $(BUILD_DIR)/textfield.o \
+                      $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
                       $(BUILD_DIR)/xdg-decoration-client-protocol.h | $(BUILD_DIR)
