@@ -110,6 +110,11 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->img_w = -1;
     r->img_h = -1;
     r->fg_rgb = -1;
+    r->input_type = 0;
+    r->name = NULL;
+    r->value = NULL;
+    r->form_id = -1;
+    r->form_method = PV_METHOD_GET;
     return PV_OK;
 }
 
@@ -140,6 +145,54 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->img_w = w;
     r->img_h = h;
     r->fg_rgb = -1;
+    r->input_type = 0;
+    r->name = NULL;
+    r->value = NULL;
+    r->form_id = -1;
+    r->form_method = PV_METHOD_GET;
+    return PV_OK;
+}
+
+pv_status pv_append_input(pv_view *v, int heading, int block_break,
+                          pv_input_type input_type, const char *text,
+                          const char *name, const char *value,
+                          const char *action, int form_id, int method) {
+    if (v == NULL) return PV_ERR_NULL_ARG;
+
+    if (v->count == v->cap) {
+        size_t ncap = v->cap ? v->cap * 2 : 32;
+        pv_run *grown = (pv_run *)realloc(v->runs, ncap * sizeof *grown);
+        if (grown == NULL) return PV_ERR_OOM;
+        v->runs = grown;
+        v->cap = ncap;
+    }
+
+    /* text is display (placeholder/label) -> UTF-8 sanitised; name/value/action are
+     * submitted/resolved bytes -> copied verbatim. */
+    char *t = utf8_sanitized_dup(text != NULL ? text : "");
+    if (t == NULL) return PV_ERR_OOM;
+    char *nm = (name != NULL) ? dup_n(name, strlen(name)) : NULL;
+    if (name != NULL && nm == NULL) { free(t); return PV_ERR_OOM; }
+    char *vl = (value != NULL) ? dup_n(value, strlen(value)) : NULL;
+    if (value != NULL && vl == NULL) { free(t); free(nm); return PV_ERR_OOM; }
+    char *ac = (action != NULL) ? dup_n(action, strlen(action)) : NULL;
+    if (action != NULL && ac == NULL) { free(t); free(nm); free(vl); return PV_ERR_OOM; }
+
+    pv_run *r = &v->runs[v->count++];
+    r->kind = PV_INPUT;
+    r->heading = heading;
+    r->block_break = block_break;
+    r->text = t;
+    r->href = ac;
+    r->src = NULL;
+    r->img_w = -1;
+    r->img_h = -1;
+    r->fg_rgb = -1;
+    r->input_type = (int)input_type;
+    r->name = nm;
+    r->value = vl;
+    r->form_id = form_id;
+    r->form_method = method;
     return PV_OK;
 }
 
@@ -154,6 +207,8 @@ void pv_free(pv_view *v) {
         free(v->runs[i].text);
         free(v->runs[i].href);
         free(v->runs[i].src);
+        free(v->runs[i].name);
+        free(v->runs[i].value);
     }
     free(v->runs);
     free(v);
@@ -212,8 +267,11 @@ static int heading_level(lxb_tag_id_t t) {
 }
 
 static int is_skipped_tag(lxb_tag_id_t t) {
+    /* TEXTAREA/SELECT/BUTTON content is a control's value/label, emitted as a
+     * PV_INPUT, not as page text; suppress their inner text from the normal walk. */
     return t == LXB_TAG_SCRIPT || t == LXB_TAG_STYLE || t == LXB_TAG_HEAD
-        || t == LXB_TAG_TITLE  || t == LXB_TAG_NOSCRIPT;
+        || t == LXB_TAG_TITLE  || t == LXB_TAG_NOSCRIPT
+        || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT || t == LXB_TAG_BUTTON;
 }
 
 static lxb_tag_id_t node_tag(const lxb_dom_node_t *n) {
@@ -371,6 +429,180 @@ static lxb_dom_node_t *find_body(lxb_dom_node_t *root) {
     return NULL;
 }
 
+/* --- form controls --- */
+
+/* One <form> seen in document order: its grouping id is its index. action is an
+ * owned NUL-terminated copy of the raw action attribute (or NULL); method is GET
+ * unless method="post". */
+typedef struct form_rec {
+    const lxb_dom_node_t *node;
+    char                 *action;
+    int                   method;
+} form_rec;
+
+typedef struct form_table {
+    form_rec *recs;
+    size_t    count, cap;
+} form_table;
+
+static void forms_free(form_table *ft) {
+    for (size_t i = 0; i < ft->count; ++i) free(ft->recs[i].action);
+    free(ft->recs);
+    ft->recs = NULL; ft->count = ft->cap = 0;
+}
+
+/* Case-insensitive ASCII equality of a NUL-terminated string against a literal. */
+static int ascii_ieq(const char *s, const char *lit) {
+    if (s == NULL) return 0;
+    for (;; ++s, ++lit) {
+        int a = (unsigned char)*s, b = (unsigned char)*lit;
+        if (a >= 'A' && a <= 'Z') a += 'a' - 'A';
+        if (a != b) return 0;
+        if (a == '\0') return 1;
+    }
+}
+
+/* Owned NUL-terminated copy of an attribute value, or NULL when the attribute is
+ * absent. A present-but-empty attribute yields a "" string (distinguishable). */
+static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen) {
+    size_t L = 0;
+    const lxb_char_t *v =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)name, namelen, &L);
+    if (v == NULL) return NULL;
+    return dup_n((const char *)v, L);
+}
+
+/* Records a <form> element. Returns 0, or -1 on OOM. */
+static int forms_add(form_table *ft, const lxb_dom_node_t *node) {
+    if (ft->count == ft->cap) {
+        size_t nc = ft->cap ? ft->cap * 2 : 8;
+        form_rec *g = (form_rec *)realloc(ft->recs, nc * sizeof *g);
+        if (g == NULL) return -1;
+        ft->recs = g; ft->cap = nc;
+    }
+    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node);
+    char *method = attr_dup(el, "method", 6);
+    int m = ascii_ieq(method, "post") ? PV_METHOD_POST : PV_METHOD_GET;
+    free(method);
+
+    form_rec *r = &ft->recs[ft->count++];
+    r->node = node;
+    r->action = attr_dup(el, "action", 6); /* may be NULL (submit to current doc) */
+    r->method = m;
+    return 0;
+}
+
+/* Index of the nearest enclosing recorded form, or -1 when the control has none. */
+static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+                    const lxb_dom_node_t *base) {
+    for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(p) == LXB_TAG_FORM) {
+            for (size_t i = 0; i < ft->count; ++i)
+                if (ft->recs[i].node == p) return (int)i;
+        }
+        if (p == base) break;
+    }
+    return -1;
+}
+
+/* Concatenates the descendant text of el into an owned NUL-terminated string (the
+ * value of a <textarea> / the label of a <button>). Never NULL on success. */
+static char *collect_text(const lxb_dom_node_t *el) {
+    size_t cap = 0, len = 0;
+    char *buf = NULL;
+    for (lxb_dom_node_t *n = el->first_child; n != NULL; n = node_next(n, el)) {
+        if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
+        lxb_dom_text_t *txt = lxb_dom_interface_text(n);
+        const char *raw = (const char *)txt->char_data.data.data;
+        size_t rl = txt->char_data.data.length;
+        if (raw == NULL || rl == 0) continue;
+        if (len + rl + 1 > cap) {
+            size_t nc = (len + rl + 1) * 2;
+            char *g = (char *)realloc(buf, nc);
+            if (g == NULL) { free(buf); return NULL; }
+            buf = g; cap = nc;
+        }
+        memcpy(buf + len, raw, rl);
+        len += rl;
+    }
+    if (buf == NULL) return dup_n("", 0);
+    buf[len] = '\0';
+    return buf;
+}
+
+static pv_input_type classify_input(const char *type) {
+    if (type == NULL) return PV_IN_TEXT; /* default input type is text */
+    if (ascii_ieq(type, "hidden"))   return PV_IN_HIDDEN;
+    if (ascii_ieq(type, "password")) return PV_IN_PASSWORD;
+    if (ascii_ieq(type, "submit"))   return PV_IN_SUBMIT;
+    if (ascii_ieq(type, "image"))    return PV_IN_SUBMIT; /* image button submits */
+    if (ascii_ieq(type, "button"))   return PV_IN_BUTTON;
+    if (ascii_ieq(type, "reset"))    return PV_IN_BUTTON;
+    /* text/search/email/url/tel/number and any other (date, color, checkbox, ...)
+     * collapse to a one-line editable box for v1 (see spec: checkbox/radio/select
+     * are out of scope). */
+    return PV_IN_TEXT;
+}
+
+/* Fills owned label/name/value for a control element and its classified type.
+ * Returns 0, or -1 on OOM (caller frees whatever is non-NULL). */
+static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
+                            const lxb_dom_node_t *node, pv_input_type *out_type,
+                            char **out_label, char **out_name, char **out_value) {
+    *out_label = NULL; *out_name = NULL; *out_value = NULL;
+    *out_type = PV_IN_TEXT;
+
+    if (tag == LXB_TAG_TEXTAREA) {
+        *out_type = PV_IN_TEXTAREA;
+        *out_name = attr_dup(el, "name", 4);
+        *out_value = collect_text(node);
+        char *ph = attr_dup(el, "placeholder", 11);
+        *out_label = (ph != NULL) ? ph : dup_n("", 0);
+        if (*out_value == NULL || *out_label == NULL) return -1;
+        return 0;
+    }
+
+    if (tag == LXB_TAG_BUTTON) {
+        char *type = attr_dup(el, "type", 4);
+        *out_type = (ascii_ieq(type, "button") || ascii_ieq(type, "reset"))
+                    ? PV_IN_BUTTON : PV_IN_SUBMIT; /* default button type is submit */
+        free(type);
+        *out_name = attr_dup(el, "name", 4);
+        *out_value = attr_dup(el, "value", 5);
+        char *txt = collect_text(node);
+        if (txt == NULL) return -1;
+        char *lab = collapse_ws(txt, strlen(txt));
+        free(txt);
+        if (lab == NULL) return -1;
+        if (lab[0] == '\0') { /* empty label: fall back to value or a generic word */
+            free(lab);
+            const char *fb = (*out_value != NULL && (*out_value)[0] != '\0') ? *out_value
+                             : (*out_type == PV_IN_SUBMIT ? "Submit" : "Button");
+            lab = dup_n(fb, strlen(fb));
+        }
+        *out_label = lab;
+        if (*out_label == NULL) return -1;
+        return 0;
+    }
+
+    /* <input> */
+    char *type = attr_dup(el, "type", 4);
+    *out_type = classify_input(type);
+    free(type);
+    *out_name = attr_dup(el, "name", 4);
+    *out_value = attr_dup(el, "value", 5);
+    if (*out_type == PV_IN_SUBMIT || *out_type == PV_IN_BUTTON) {
+        const char *def = (*out_type == PV_IN_SUBMIT) ? "Submit" : "Button";
+        const char *lab = (*out_value != NULL && (*out_value)[0] != '\0') ? *out_value : def;
+        *out_label = dup_n(lab, strlen(lab));
+    } else {
+        char *ph = attr_dup(el, "placeholder", 11);
+        *out_label = (ph != NULL) ? ph : dup_n("", 0);
+    }
+    if (*out_label == NULL) return -1;
+    return 0;
+}
+
 /* --- public: builder --- */
 
 pv_status pv_build(const hp_document *doc, pv_view **out) {
@@ -388,11 +620,49 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
 
     const lxb_dom_node_t *prev_block = NULL;
     int pending_break = 0;
+    form_table forms = { NULL, 0, 0 };
+    pv_status rc = PV_OK;
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_tag_id_t t = node_tag(n);
             if (t == LXB_TAG_BR || t == LXB_TAG_HR) { pending_break = 1; continue; }
+
+            if (t == LXB_TAG_FORM) {
+                if (forms_add(&forms, n) != 0) { rc = PV_ERR_OOM; goto cleanup; }
+                continue;
+            }
+
+            if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON)
+                && !in_skipped_subtree(n, base)) {
+                lxb_dom_element_t *el = lxb_dom_interface_element(n);
+
+                const char *unused_href = NULL;
+                size_t unused_hl = 0;
+                const lxb_dom_node_t *block = NULL;
+                int heading = 0, unused_fg = -1;
+                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading, &unused_fg);
+                int brk = pending_break || (block != prev_block);
+                pending_break = 0;
+                prev_block = block;
+
+                int fidx = form_for(&forms, n, base);
+                const char *action = (fidx >= 0) ? forms.recs[fidx].action : NULL;
+                int method = (fidx >= 0) ? forms.recs[fidx].method : PV_METHOD_GET;
+
+                pv_input_type itype;
+                char *label = NULL, *name = NULL, *value = NULL;
+                if (describe_control(el, t, n, &itype, &label, &name, &value) != 0) {
+                    free(label); free(name); free(value);
+                    rc = PV_ERR_OOM; goto cleanup;
+                }
+                pv_status st = pv_append_input(v, heading, brk, itype, label,
+                                               name, value, action, fidx, method);
+                free(label); free(name); free(value);
+                if (st != PV_OK) { rc = st; goto cleanup; }
+                continue;
+            }
+
             if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base)) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 size_t sl = 0;
@@ -421,14 +691,14 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 prev_block = block;
 
                 char *src_dup = dup_n((const char *)src, sl);
-                if (src_dup == NULL) { pv_free(v); return PV_ERR_OOM; }
+                if (src_dup == NULL) { rc = PV_ERR_OOM; goto cleanup; }
                 char *alt_dup = (alt != NULL) ? collapse_ws((const char *)alt, al) : dup_n("", 0);
-                if (alt_dup == NULL) { free(src_dup); pv_free(v); return PV_ERR_OOM; }
+                if (alt_dup == NULL) { free(src_dup); rc = PV_ERR_OOM; goto cleanup; }
 
                 pv_status st = pv_append_image(v, heading, brk, alt_dup, src_dup, iw, ih);
                 free(src_dup);
                 free(alt_dup);
-                if (st != PV_OK) { pv_free(v); return st; }
+                if (st != PV_OK) { rc = st; goto cleanup; }
             }
             continue;
         }
@@ -441,7 +711,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         if (raw == NULL || raw_len == 0) continue;
 
         char *collapsed = collapse_ws(raw, raw_len);
-        if (collapsed == NULL) { pv_free(v); return PV_ERR_OOM; }
+        if (collapsed == NULL) { rc = PV_ERR_OOM; goto cleanup; }
         if (collapsed[0] == '\0') { free(collapsed); continue; }
 
         const char *href = NULL;
@@ -457,17 +727,23 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         char *href_dup = NULL;
         if (href != NULL) {
             href_dup = dup_n(href, href_len);
-            if (href_dup == NULL) { free(collapsed); pv_free(v); return PV_ERR_OOM; }
+            if (href_dup == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
         }
 
         pv_status st = pv_append(v, href_dup != NULL ? PV_LINK : PV_TEXT,
                                  heading, brk, collapsed, href_dup);
         free(collapsed);
         free(href_dup);
-        if (st != PV_OK) { pv_free(v); return st; }
+        if (st != PV_OK) { rc = st; goto cleanup; }
         pv_set_color(v, fg);
     }
 
     *out = v;
+    forms_free(&forms);
     return PV_OK;
+
+cleanup:
+    forms_free(&forms);
+    pv_free(v);
+    return rc;
 }

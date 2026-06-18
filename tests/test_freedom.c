@@ -103,6 +103,32 @@ static void test_local_html(void **state) {
     unlink(path);
 }
 
+static void test_local_form_renders_inputs(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>Form Page</title></head><body>"
+        "<form action=\"https://duckduckgo.com/\" method=\"get\">"
+        "<input type=\"search\" name=\"q\" placeholder=\"Search the web\">"
+        "<input type=\"hidden\" name=\"ia\" value=\"HIDDENMARKER\">"
+        "<input type=\"submit\" value=\"Go\"></form></body></html>";
+    const char *path = "__freedom_test_form.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[1024];
+    int rc;
+    assert_int_equal(run_freedom(path, out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "Search the web")); /* the editable field placeholder */
+    assert_non_null(strstr(out, "[ Go ]"));          /* the submit button */
+    assert_null(strstr(out, "HIDDENMARKER"));         /* hidden value is not shown... */
+    assert_null(strstr(out, "[hidden"));              /* ...nor is the hidden control */
+
+    unlink(path);
+}
+
 static void test_missing_file(void **state) {
     (void)state;
     char out[512];
@@ -129,6 +155,7 @@ int main(void) {
         cmocka_unit_test(test_version),
         cmocka_unit_test(test_no_args),
         cmocka_unit_test(test_local_html),
+        cmocka_unit_test(test_local_form_renders_inputs),
         cmocka_unit_test(test_missing_file),
         cmocka_unit_test(test_rejects_http_url),
     };

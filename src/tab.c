@@ -112,11 +112,13 @@ static int child_load(child_state *cs, const char *html, size_t len) {
 }
 
 /* Serialises the display list:
- *   [count]( kind,heading,break, text, href, src, img_w,img_h, fg_rgb )*
- * with each string length-prefixed (an href/src length of 0 means absent). The
- * fixed-width fields travel for every run so a hostile child cannot desync the
- * stream by varying the per-run layout; non-image runs simply carry an empty src
- * and -1 dimensions, and a run without an author color carries fg_rgb == -1. */
+ *   [count]( kind,heading,break, text, href, src, img_w,img_h, fg_rgb,
+ *            input_type,form_id,form_method, name, value )*
+ * with each string length-prefixed (a length of 0 means absent). The fixed-width
+ * fields travel for every run so a hostile child cannot desync the stream by
+ * varying the per-run layout; non-image runs carry an empty src and -1 dimensions,
+ * a run without an author color carries fg_rgb == -1, and non-input runs carry an
+ * empty name/value, form_id == -1 and form_method == 0. */
 static int write_view(int wfd, const pv_view *v) {
     size_t n = pv_count(v);
     if (write_full(wfd, &n, sizeof n) != 0) return -1;
@@ -128,9 +130,14 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t img_w = (int32_t)r->img_w;
         int32_t img_h = (int32_t)r->img_h;
         int32_t fg = (int32_t)r->fg_rgb;
+        int32_t itype = (int32_t)r->input_type;
+        int32_t fid = (int32_t)r->form_id;
+        int32_t method = (int32_t)r->form_method;
         size_t tlen = (r->text != NULL) ? strlen(r->text) : 0;
         size_t hlen = (r->href != NULL) ? strlen(r->href) : 0;
         size_t slen = (r->src != NULL) ? strlen(r->src) : 0;
+        size_t nmlen = (r->name != NULL) ? strlen(r->name) : 0;
+        size_t vllen = (r->value != NULL) ? strlen(r->value) : 0;
         if (write_full(wfd, &kind, sizeof kind) != 0) return -1;
         if (write_full(wfd, &heading, sizeof heading) != 0) return -1;
         if (write_full(wfd, &brk, sizeof brk) != 0) return -1;
@@ -143,6 +150,13 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &img_w, sizeof img_w) != 0) return -1;
         if (write_full(wfd, &img_h, sizeof img_h) != 0) return -1;
         if (write_full(wfd, &fg, sizeof fg) != 0) return -1;
+        if (write_full(wfd, &itype, sizeof itype) != 0) return -1;
+        if (write_full(wfd, &fid, sizeof fid) != 0) return -1;
+        if (write_full(wfd, &method, sizeof method) != 0) return -1;
+        if (write_full(wfd, &nmlen, sizeof nmlen) != 0) return -1;
+        if (nmlen != 0 && write_full(wfd, r->name, nmlen) != 0) return -1;
+        if (write_full(wfd, &vllen, sizeof vllen) != 0) return -1;
+        if (vllen != 0 && write_full(wfd, r->value, vllen) != 0) return -1;
     }
     return 0;
 }
@@ -314,25 +328,37 @@ static int read_view(int fd, pv_view **out) {
 
     for (size_t i = 0; i < n; ++i) {
         int32_t kind = 0, heading = 0, brk = 0, img_w = -1, img_h = -1, fg = -1;
+        int32_t itype = 0, fid = -1, method = 0;
         if (read_full(fd, &kind, sizeof kind) != 0
          || read_full(fd, &heading, sizeof heading) != 0
          || read_full(fd, &brk, sizeof brk) != 0) {
             pv_free(v);
             return -1;
         }
-        char *text = NULL, *href = NULL, *src = NULL;
-        size_t tl = 0, hl = 0, sl = 0;
+        char *text = NULL, *href = NULL, *src = NULL, *name = NULL, *value = NULL;
+        size_t tl = 0, hl = 0, sl = 0, nl = 0, vl = 0;
         if (read_field(fd, &text, &tl) != 0) { pv_free(v); return -1; }
         if (read_field(fd, &href, &hl) != 0) { free(text); pv_free(v); return -1; }
         if (read_field(fd, &src, &sl) != 0) { free(text); free(href); pv_free(v); return -1; }
         if (read_full(fd, &img_w, sizeof img_w) != 0
          || read_full(fd, &img_h, sizeof img_h) != 0
-         || read_full(fd, &fg, sizeof fg) != 0) {
+         || read_full(fd, &fg, sizeof fg) != 0
+         || read_full(fd, &itype, sizeof itype) != 0
+         || read_full(fd, &fid, sizeof fid) != 0
+         || read_full(fd, &method, sizeof method) != 0) {
             free(text); free(href); free(src); pv_free(v); return -1;
+        }
+        if (read_field(fd, &name, &nl) != 0) { free(text); free(href); free(src); pv_free(v); return -1; }
+        if (read_field(fd, &value, &vl) != 0) {
+            free(text); free(href); free(src); free(name); pv_free(v); return -1;
         }
 
         pv_status st;
-        if (kind == PV_IMAGE && sl > 0) {
+        if (kind == PV_INPUT) {
+            st = pv_append_input(v, heading, brk, (pv_input_type)itype, text,
+                                 (nl > 0) ? name : NULL, (vl > 0) ? value : NULL,
+                                 (hl > 0) ? href : NULL, (int)fid, (int)method);
+        } else if (kind == PV_IMAGE && sl > 0) {
             st = pv_append_image(v, heading, brk, text, src, img_w, img_h);
         } else {
             pv_kind k = (kind == PV_LINK && hl > 0) ? PV_LINK : PV_TEXT;
@@ -341,8 +367,10 @@ static int read_view(int fd, pv_view **out) {
         free(text);
         free(href);
         free(src);
+        free(name);
+        free(value);
         if (st != PV_OK) { pv_free(v); return -1; }
-        pv_set_color(v, (int)fg);
+        if (kind != PV_INPUT) pv_set_color(v, (int)fg);
     }
 
     *out = v;

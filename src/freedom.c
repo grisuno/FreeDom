@@ -91,6 +91,21 @@ static void print_doc(const rd_doc *doc) {
                 if (line_open) { putchar('\n'); line_open = 0; }
                 printf("\n! %s\n", b->text);
                 break;
+            case RD_INPUT: {
+                /* A hidden control is not shown to the reader. */
+                if (b->input_type == PV_IN_HIDDEN) break;
+                if (line_open) { putchar('\n'); line_open = 0; }
+                if (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON) {
+                    printf("[ %s ]\n", (b->text[0] != '\0') ? b->text : rd_input_label(b->input_type));
+                } else {
+                    /* An editable field: show its current value, then the placeholder. */
+                    printf("[%s: %s]", rd_input_label(b->input_type),
+                           (b->value != NULL && b->value[0] != '\0') ? b->value
+                           : (b->text[0] != '\0' ? b->text : "____"));
+                    putchar('\n');
+                }
+                break;
+            }
             case RD_LINK:
             case RD_PARAGRAPH:
             default:

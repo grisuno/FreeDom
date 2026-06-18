@@ -63,7 +63,12 @@ sf_config sf_config_default(void) {
     c.timeout_ms = SF_DEFAULT_TIMEOUT_MS;
     c.max_body_bytes = SF_DEFAULT_MAX_BODY;
     c.kex_groups = SF_DEFAULT_KEX_GROUPS;
+    c.user_agent = NULL; /* resolved to SF_DEFAULT_USER_AGENT at request time */
     return c;
+}
+
+const char *sf_user_agent_or_default(const char *ua) {
+    return (ua != NULL && ua[0] != '\0') ? ua : SF_DEFAULT_USER_AGENT;
 }
 
 /* --- public: pure validators --- */
@@ -373,7 +378,13 @@ static sf_status map_curl_error(CURLcode rc, const body_sink *sink) {
 
 /* --- public: orchestrator --- */
 
-sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out) {
+/* The shared request engine for sf_get and sf_post. When post_body == NULL it is a
+ * GET; otherwise it is a POST carrying body (post_len bytes) with content_type. The
+ * full TLS/PQ/chain policy is enforced identically for both methods (Zero Trust:
+ * the method changes nothing about how the connection is judged). */
+static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
+                            const void *post_body, size_t post_len,
+                            const char *content_type) {
     if (url == NULL || out == NULL) return SF_ERR_NULL_ARG;
 
     memset(out, 0, sizeof *out);
@@ -394,6 +405,7 @@ sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out) {
     ctx.sink.limit = local.max_body_bytes;
     ctx.cap.curl = curl;
 
+    struct curl_slist *hdrs = NULL;
     sf_status result = SF_ERR_INTERNAL;
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -406,12 +418,28 @@ sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out) {
     curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "https");
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, local.timeout_ms);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Freedom/0.1");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, sf_user_agent_or_default(local.user_agent));
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &ctx);
+
+    if (post_body != NULL || post_len != 0) {
+        const char *ct = (content_type != NULL) ? content_type
+                                                 : "application/x-www-form-urlencoded";
+        char hbuf[256];
+        int hn = snprintf(hbuf, sizeof hbuf, "Content-Type: %s", ct);
+        if (hn < 0 || (size_t)hn >= sizeof hbuf) { result = SF_ERR_INVALID_URL; goto done; }
+        hdrs = curl_slist_append(NULL, hbuf);
+        /* Suppress libcurl's "Expect: 100-continue" so a small POST is one round trip. */
+        hdrs = curl_slist_append(hdrs, "Expect:");
+        if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)post_len);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (post_body != NULL) ? post_body : "");
+    }
 
     CURLcode rc = curl_easy_perform(curl);
     if (rc != CURLE_OK) {
@@ -452,14 +480,34 @@ sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out) {
     out->body = ctx.sink.data;
     out->body_len = ctx.sink.len;
     ctx.sink.data = NULL; /* ownership transferred */
+    curl_slist_free_all(hdrs);
     curl_easy_cleanup(curl);
     return SF_OK;
 
 done:
     free(ctx.sink.data);
     out->status = result;
+    curl_slist_free_all(hdrs);
     curl_easy_cleanup(curl);
     return result;
+}
+
+sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out) {
+    return sf_perform(url, cfg, out, NULL, 0, NULL);
+}
+
+sf_status sf_post(const char *url, const sf_config *cfg,
+                  const void *body, size_t body_len, const char *content_type,
+                  sf_response *out) {
+    if (url == NULL || out == NULL) return SF_ERR_NULL_ARG;
+    if (body == NULL && body_len != 0) {
+        memset(out, 0, sizeof *out);
+        out->status = SF_ERR_NULL_ARG;
+        return SF_ERR_NULL_ARG;
+    }
+    /* A non-empty body forces the POST path; an empty POST still sets POST via a
+     * zero-length body pointer. */
+    return sf_perform(url, cfg, out, (body != NULL) ? body : "", body_len, content_type);
 }
 
 sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,

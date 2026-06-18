@@ -260,6 +260,54 @@ static void test_author_color_gated_by_css(void **state) {
     pv_free(v);
 }
 
+/* --- form controls --- */
+
+static void test_input_passthrough(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_input(v, 0, 1, PV_IN_TEXT, "Search...",
+                                     "q", "seed", "/search", 0, PV_METHOD_GET), PV_OK);
+    assert_int_equal(pv_append_input(v, 0, 0, PV_IN_SUBMIT, "Go",
+                                     NULL, "Go", "/search", 0, PV_METHOD_GET), PV_OK);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+
+    const rd_block *in = first_kind(d, RD_INPUT);
+    assert_non_null(in);
+    assert_int_equal(in->input_type, PV_IN_TEXT);
+    assert_string_equal(in->text, "Search...");
+    assert_string_equal(in->name, "q");
+    assert_string_equal(in->value, "seed");
+    assert_string_equal(in->href, "/search"); /* form action */
+    assert_int_equal(in->form_id, 0);
+    assert_int_equal(in->form_method, PV_METHOD_GET);
+
+    /* The submit button is a second RD_INPUT in the same group. */
+    int submits = 0;
+    for (size_t i = 0; i < rd_count(d); ++i) {
+        const rd_block *b = rd_at(d, i);
+        if (b->kind == RD_INPUT && b->input_type == PV_IN_SUBMIT) {
+            assert_int_equal(b->form_id, 0);
+            submits++;
+        }
+    }
+    assert_int_equal(submits, 1);
+
+    rd_free(d);
+    pv_free(v);
+}
+
+static void test_input_label_total(void **state) {
+    (void)state;
+    /* Every type has a stable label; an unknown value falls back to "field". */
+    assert_string_equal(rd_input_label(PV_IN_TEXT), "text");
+    assert_string_equal(rd_input_label(PV_IN_PASSWORD), "password");
+    assert_string_equal(rd_input_label(PV_IN_SUBMIT), "submit");
+    assert_string_equal(rd_input_label(PV_IN_HIDDEN), "hidden");
+    assert_string_equal(rd_input_label(9999), "field");
+    assert_string_equal(rd_kind_name(RD_INPUT), "input");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_out),
@@ -275,6 +323,8 @@ int main(void) {
         cmocka_unit_test(test_kind_name_total),
         cmocka_unit_test(test_image_label_total),
         cmocka_unit_test(test_author_color_gated_by_css),
+        cmocka_unit_test(test_input_passthrough),
+        cmocka_unit_test(test_input_label_total),
         cmocka_unit_test(test_free_null_and_double),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

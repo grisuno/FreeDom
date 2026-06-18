@@ -16,6 +16,7 @@
 #include "link_nav.h"
 #include "render_doc.h"
 #include "render_policy.h"
+#include "textfield.h"
 #include "ui.h"
 
 #include <stddef.h>
@@ -48,11 +49,14 @@
 #define UI_TEXT_MARGIN 8.0
 
 /* Options menu (gear) panel geometry and the pointer cursor size, gathered with
- * the other chrome constants so no value is hardcoded at a call site. */
-#define UI_MENU_W       190.0
+ * the other chrome constants so no value is hardcoded at a call site. The panel is
+ * wide enough to edit a User-Agent string. */
+#define UI_MENU_W       340.0
 #define UI_MENU_ITEM_H  28.0
 #define UI_MENU_PAD     6.0
 #define UI_CHECK_SZ     16.0
+#define UI_MENU_LABEL_H 22.0   /* height of the "User-Agent" section label row */
+#define UI_MENU_INPUT_H 26.0   /* height of the editable User-Agent box */
 #define UI_HAMBURGER_W  18.0   /* width of the drawn menu-button icon */
 #define UI_HAMBURGER_GAP 5.0   /* vertical gap between the three icon bars */
 #define UI_CURSOR_SIZE  24     /* themed cursor size in px (XCURSOR_SIZE default) */
@@ -60,6 +64,13 @@
 
 /* Number of heading levels (h1..h6). Index 0 of the scale table is body text. */
 #define UI_HEADING_LEVELS 6
+
+/* Form control geometry: inner padding of a text box, the preferred text-box width
+ * (clamped to the content width), and the horizontal padding of a button. */
+#define UI_INPUT_PAD     6.0
+#define UI_INPUT_WIDTH   360.0
+#define UI_BUTTON_HPAD   14.0
+#define UI_FORM_FIELDS_MAX 64  /* matches FM_MAX_FIELDS; cap gathered controls */
 
 /* Link underline geometry, expressed relative to the run's font so it scales
  * with heading-sized links. Offset below the baseline; thickness in px. */
@@ -105,6 +116,13 @@ typedef struct ui_theme {
     ui_rgb url_border;
     ui_rgb caret;
     ui_rgb link_hover_bg;   /* highlight behind the link under the pointer */
+    ui_rgb input_bg;        /* form text input background */
+    ui_rgb input_bg_focused;
+    ui_rgb input_border;
+    ui_rgb input_text;
+    ui_rgb input_placeholder;
+    ui_rgb button_bg;       /* submit/button control */
+    ui_rgb button_text;
     ui_rgb menu_bg;
     ui_rgb menu_border;
     ui_rgb menu_text;
@@ -151,6 +169,13 @@ static ui_theme ui_theme_default(void) {
     t.url_border     = (ui_rgb){ 0.10, 0.10, 0.10 };
     t.caret          = (ui_rgb){ 0.00, 0.00, 0.00 };
     t.link_hover_bg  = (ui_rgb){ 0.88, 0.93, 1.00 };
+    t.input_bg          = (ui_rgb){ 1.00, 1.00, 1.00 };
+    t.input_bg_focused  = (ui_rgb){ 1.00, 1.00, 0.96 };
+    t.input_border      = (ui_rgb){ 0.55, 0.55, 0.60 };
+    t.input_text        = (ui_rgb){ 0.08, 0.08, 0.10 };
+    t.input_placeholder = (ui_rgb){ 0.55, 0.55, 0.58 };
+    t.button_bg         = (ui_rgb){ 0.22, 0.42, 0.78 };
+    t.button_text       = (ui_rgb){ 0.98, 0.98, 1.00 };
     t.menu_bg        = (ui_rgb){ 0.98, 0.98, 0.99 };
     t.menu_border    = (ui_rgb){ 0.55, 0.55, 0.60 };
     t.menu_text      = (ui_rgb){ 0.10, 0.10, 0.12 };
@@ -232,6 +257,17 @@ typedef struct browser_window {
     int         menu_open;     /* the options (gear) panel is showing */
     const char *hover_href;    /* link target under the pointer (aliases doc), or NULL */
 
+    /* Live form text controls of the current page (rebuilt with the doc). */
+    ui_input_state *inputs;
+    size_t          input_count;
+    int             focused_input; /* index into inputs, or -1 */
+
+    /* Configurable network User-Agent (session only; empty => SF_DEFAULT_USER_AGENT).
+     * navigator.userAgent in JS stays normalised by anti_fp regardless. Edited in
+     * the options menu with the shared textfield primitive. */
+    tf_field    ua_field;
+    int         ua_field_focused;
+
     /* Cached source of the current page, so a capability toggle re-renders without
      * a network round-trip. cur_top is the https origin (image policy) or NULL. */
     char  *cur_html;
@@ -249,6 +285,14 @@ typedef struct browser_window {
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
 } browser_window;
+
+/* Live editable state for one form text control, aliasing a block of the current
+ * rd_doc (not owned; valid until the doc is replaced). The field carries the value
+ * the user is editing; submission reads it back. */
+typedef struct ui_input_state {
+    const rd_block *blk;   /* the RD_INPUT block (aliases w->doc) */
+    tf_field        field; /* live editable value */
+} ui_input_state;
 
 /* Pointer to the rdp_caps bool toggled by options-menu item i. */
 static bool *menu_item_flag(browser_window *w, size_t i) {
@@ -339,12 +383,61 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
     return 1;
 }
 
+#include "form.h"
 #include "secure_fetch.h"
 #include "tab.h"
 
+/* An editable control gets a live text field; submit/button/hidden do not. */
+static int input_is_editable(int input_type) {
+    return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD
+        || input_type == PV_IN_TEXTAREA;
+}
+
+/* Releases the live form-control states (the array; fields are inline). */
+static void free_inputs(browser_window *w) {
+    free(w->inputs);
+    w->inputs = NULL;
+    w->input_count = 0;
+    w->focused_input = -1;
+}
+
+/* Builds the live editable state for the current doc: one entry per editable
+ * control, seeded with its declared value. Aliases the doc blocks (not owned). */
+static void rebuild_inputs(browser_window *w) {
+    free_inputs(w);
+    if (w->doc == NULL) return;
+    size_t n = rd_count(w->doc);
+    size_t editable = 0;
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind == RD_INPUT && input_is_editable(b->input_type)) editable++;
+    }
+    if (editable == 0) return;
+    w->inputs = (ui_input_state *)calloc(editable, sizeof *w->inputs);
+    if (w->inputs == NULL) return; /* fail closed: no editable fields, page still shows */
+    size_t k = 0;
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind != RD_INPUT || !input_is_editable(b->input_type)) continue;
+        ui_input_state *st = &w->inputs[k++];
+        st->blk = b;
+        tf_init(&st->field);
+        if (b->value != NULL) tf_set(&st->field, b->value);
+    }
+    w->input_count = k;
+}
+
+/* The live state for a given doc block, or NULL when it has none. */
+static ui_input_state *find_input_state(browser_window *w, const rd_block *blk) {
+    for (size_t i = 0; i < w->input_count; ++i)
+        if (w->inputs[i].blk == blk) return &w->inputs[i];
+    return NULL;
+}
+
 /* Releases the structured render of the previous page (text mode resumes). The
- * hovered link aliases the doc, so it is cleared too. */
+ * hovered link and the live form controls alias the doc, so they are cleared too. */
 static void clear_doc(browser_window *w) {
+    free_inputs(w);
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
     w->hover_href = NULL;
 }
@@ -388,6 +481,7 @@ static void render_current(browser_window *w) {
     if (rd_build(page.view, w->caps, w->cur_top, &doc) == RD_OK) {
         w->doc = doc;
     }
+    rebuild_inputs(w); /* seed live editable state for this page's controls */
 
     tab_page_free(&page);
     tab_close(t);
@@ -401,6 +495,8 @@ static void do_load(browser_window *w, const char *url) {
     clear_doc(w);
     w->scroll = 0.0;
     w->menu_open = 0;
+    w->ua_field_focused = 0;
+    w->focused_input = -1;
 
     if (strcmp(url, "about:blank") == 0) {
         set_cache(w, NULL, 0, NULL);
@@ -413,6 +509,7 @@ static void do_load(browser_window *w, const char *url) {
 
     if (is_https_url(url)) {
         sf_config cfg = sf_config_default();
+        cfg.user_agent = tf_text(&w->ua_field); /* "" => SF_DEFAULT_USER_AGENT */
         char host[256];
         if (host_from_url(url, host, sizeof host) && browser_is_exception(&w->bs, host)) {
             cfg.policy = SF_POLICY_PERMISSIVE;
@@ -530,7 +627,21 @@ static void menu_panel_rect(const browser_window *w, double *x, double *y,
     if (*x < 0.0) *x = 0.0;
     *y      = toolbar_top(w) + UI_TOOLBAR_H;
     *item_h = UI_MENU_ITEM_H;
-    *height = 2.0 * UI_MENU_PAD + (double)UI_MENU_COUNT * UI_MENU_ITEM_H;
+    /* Checkbox rows, then the User-Agent section (label + editable box). */
+    *height = 2.0 * UI_MENU_PAD + (double)UI_MENU_COUNT * UI_MENU_ITEM_H
+            + UI_MENU_LABEL_H + UI_MENU_INPUT_H + UI_MENU_PAD;
+}
+
+/* The editable User-Agent box rectangle inside the options panel. The single
+ * source of truth for drawing and hit-testing the field. */
+static void ua_box_rect(const browser_window *w, double *x, double *y,
+                        double *width, double *height) {
+    double mx, my, mw, mh, ih;
+    menu_panel_rect(w, &mx, &my, &mw, &mh, &ih);
+    *x      = mx + UI_MENU_PAD;
+    *width  = mw - 2.0 * UI_MENU_PAD;
+    *y      = my + UI_MENU_PAD + (double)UI_MENU_COUNT * UI_MENU_ITEM_H + UI_MENU_LABEL_H;
+    *height = UI_MENU_INPUT_H;
 }
 
 static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered) {
@@ -562,7 +673,7 @@ typedef struct rc_frag {
     const char *href;     /* link target (aliases the rd_block href, not owned); NULL if not a link */
 } rc_frag;
 
-typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE } rc_rowkind;
+typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT } rc_rowkind;
 
 typedef struct rc_row {
     rc_rowkind      kind;
@@ -717,10 +828,30 @@ static void layout_doc(cairo_t *cr, const rd_doc *doc, const ui_theme *th,
 
     for (size_t i = 0; i < rd_count(doc); ++i) {
         const rd_block *b = rd_at(doc, i);
-        int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE || b->kind == RD_HEADING);
+        /* Hidden controls are never painted (their value still submits). */
+        if (b->kind == RD_INPUT && b->input_type == PV_IN_HIDDEN) continue;
+
+        int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE
+                       || b->kind == RD_HEADING || b->kind == RD_INPUT);
         if (standalone || b->block_break) {
             flush_line(L, &s, th);
             s.pending_gap = th->paragraph_gap;
+        }
+
+        if (b->kind == RD_INPUT) {
+            content_font(cr, th->body_font, 0);
+            cairo_font_extents_t fe;
+            cairo_font_extents(cr, &fe);
+            double h = fe.height + 2.0 * UI_INPUT_PAD;
+            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
+            s.pending_gap = 0;
+            rc_row *r = rc_add_row(L);
+            if (r != NULL) {
+                r->kind = RC_INPUT; r->top = top; r->height = h; r->ascent = fe.ascent;
+                r->first = 0; r->count = 0; r->banner = 0; r->blk = b;
+            }
+            s.cur_top = top + h;
+            continue;
         }
 
         if (b->kind == RD_IMAGE) {
@@ -757,6 +888,102 @@ static void layout_doc(cairo_t *cr, const rd_doc *doc, const ui_theme *th,
     }
     flush_line(L, &s, th);
     L->total_h = s.cur_top;
+}
+
+/* Width of a painted text-input box: the preferred width clamped to the content. */
+static double input_box_width(double content_w) {
+    return (content_w < UI_INPUT_WIDTH) ? content_w : UI_INPUT_WIDTH;
+}
+
+/* Width of a painted button: its label plus horizontal padding, clamped. */
+static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
+                               double content_w) {
+    content_font(cr, th->body_font, 0);
+    const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
+                        : rd_input_label(b->input_type);
+    double bw = measure_slice(cr, label, strlen(label)) + 2.0 * UI_BUTTON_HPAD;
+    return (bw > content_w) ? content_w : bw;
+}
+
+/* Paints one form control row: a filled button, or a bordered editable text box
+ * with its value (masked for passwords), placeholder, and caret when focused. */
+static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
+                           double left, double content_w, double ry,
+                           double ascent, double height) {
+    const ui_theme *th = &w->theme;
+    int focused = (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count
+                   && w->inputs[w->focused_input].blk == b);
+
+    if (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON) {
+        const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
+                            : rd_input_label(b->input_type);
+        double bw = button_box_width(cr, th, b, content_w);
+        set_rgb(cr, th->button_bg);
+        cairo_rectangle(cr, left, ry, bw, height);
+        cairo_fill(cr);
+        cairo_save(cr);
+        cairo_rectangle(cr, left, ry, bw, height);
+        cairo_clip(cr);
+        set_rgb(cr, th->button_text);
+        content_font(cr, th->body_font, 0);
+        cairo_move_to(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD);
+        draw_slice(cr, label, strlen(label));
+        cairo_restore(cr);
+        return;
+    }
+
+    double bw = input_box_width(content_w);
+    set_rgb(cr, focused ? th->input_bg_focused : th->input_bg);
+    cairo_rectangle(cr, left, ry, bw, height);
+    cairo_fill(cr);
+    set_rgb(cr, focused ? th->link : th->input_border);
+    cairo_set_line_width(cr, 1.0);
+    cairo_rectangle(cr, left, ry, bw, height);
+    cairo_stroke(cr);
+
+    ui_input_state *st = find_input_state(w, b);
+    const char *val = (st != NULL) ? tf_text(&st->field) : (b->value != NULL ? b->value : "");
+
+    content_font(cr, th->body_font, 0);
+    cairo_save(cr);
+    cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 4.0, height - 2.0);
+    cairo_clip(cr);
+    double tx = left + UI_INPUT_PAD;
+    double ty = ry + ascent + UI_INPUT_PAD;
+
+    /* A password is shown as a run of '*' (one per value byte). */
+    char maskbuf[TF_CAP];
+    const char *shown = val;
+    if (b->input_type == PV_IN_PASSWORD) {
+        size_t vl = strlen(val);
+        if (vl >= sizeof maskbuf) vl = sizeof maskbuf - 1;
+        memset(maskbuf, '*', vl);
+        maskbuf[vl] = '\0';
+        shown = maskbuf;
+    }
+
+    if (shown[0] == '\0' && b->text != NULL && b->text[0] != '\0') {
+        set_rgb(cr, th->input_placeholder);
+        cairo_move_to(cr, tx, ty);
+        draw_slice(cr, b->text, strlen(b->text));
+    } else {
+        set_rgb(cr, th->input_text);
+        cairo_move_to(cr, tx, ty);
+        draw_slice(cr, shown, strlen(shown));
+    }
+
+    if (focused && st != NULL) {
+        size_t cur = tf_cursor(&st->field);
+        size_t slen = strlen(shown);
+        if (cur > slen) cur = slen;
+        double cx = tx + measure_slice(cr, shown, cur);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        set_rgb(cr, th->caret);
+        cairo_rectangle(cr, cx, ty - fe.ascent, 1.5, fe.height);
+        cairo_fill(cr);
+    }
+    cairo_restore(cr);
 }
 
 /* Paints the structured document into the content rectangle, honouring scroll. */
@@ -802,6 +1029,11 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                      rd_image_label(b->img_decision), alt[0] ? " : " : "", alt);
             cairo_show_text(cr, label);
             cairo_restore(cr);
+            continue;
+        }
+
+        if (r->kind == RC_INPUT && r->blk != NULL) {
+            draw_input_row(cr, w, r->blk, left, content_w, ry, r->ascent, r->height);
             continue;
         }
 
@@ -904,6 +1136,156 @@ static void follow_link(browser_window *w, const char *href) {
     do_load(w, res.target);
 }
 
+/* Returns the painted form control under (px, py), or NULL. Mirrors the layout and
+ * scroll clamping of paint_structured so the hit matches what is on screen. The
+ * returned block aliases the current rd_doc (not owned). */
+static const rd_block *input_at_point(browser_window *w, double px, double py) {
+    if (w->doc == NULL || w->cairo_surface == NULL) return NULL;
+
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    if (py < content_top || py > content_top + content_h) return NULL;
+
+    const ui_theme *th = &w->theme;
+    double left = th->content_margin;
+    double content_w = (double)w->width - 2.0 * th->content_margin;
+    if (content_w < 1.0) content_w = 1.0;
+
+    cairo_t *cr = cairo_create(w->cairo_surface);
+    rc_layout L;
+    layout_doc(cr, w->doc, th, content_w, &L);
+
+    double max_scroll = L.total_h - content_h;
+    if (max_scroll < 0.0) max_scroll = 0.0;
+    double scroll = w->scroll;
+    if (scroll < 0.0) scroll = 0.0;
+    if (scroll > max_scroll) scroll = max_scroll;
+    double origin = content_top + th->content_margin - scroll;
+
+    const rd_block *hit = NULL;
+    for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
+        const rc_row *r = &L.rows[i];
+        if (r->kind != RC_INPUT || r->blk == NULL) continue;
+        double ry = origin + r->top;
+        if (py < ry || py > ry + r->height) continue;
+        const rd_block *b = r->blk;
+        double bw = (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON)
+                    ? button_box_width(cr, th, b, content_w)
+                    : input_box_width(content_w);
+        if (px >= left && px <= left + bw) hit = b;
+    }
+
+    rc_free(&L);
+    cairo_destroy(cr);
+    return hit;
+}
+
+/* Sends a POST submission plan through secure_fetch (re-applying the full TLS/PQ
+ * policy) and renders the response in place. A redirect is followed as a GET. */
+static void do_submit_post(browser_window *w, const fm_plan *plan) {
+    clear_doc(w);
+    w->scroll = 0.0;
+    w->menu_open = 0;
+    w->ua_field_focused = 0;
+    w->focused_input = -1;
+
+    sf_config cfg = sf_config_default();
+    cfg.user_agent = tf_text(&w->ua_field);
+    char host[256];
+    if (host_from_url(plan->url, host, sizeof host) && browser_is_exception(&w->bs, host))
+        cfg.policy = SF_POLICY_PERMISSIVE;
+
+    sf_response resp;
+    memset(&resp, 0, sizeof resp);
+    sf_status ss = sf_post(plan->url, &cfg, plan->body, plan->body_len,
+                           plan->content_type, &resp);
+    if (ss != SF_OK) {
+        char msg[512];
+        snprintf(msg, sizeof msg, "POST to '%s' failed (status %d).", plan->url, (int)ss);
+        set_cache(w, NULL, 0, NULL);
+        browser_set_page(&w->bs, NULL, msg, 1);
+        sf_response_free(&resp);
+        return;
+    }
+
+    /* A POST that redirects (e.g. 303 See Other) is followed as a fresh GET, which
+     * re-applies the full policy on the new target (Zero Trust). */
+    if (sf_is_redirect_code(resp.http_code) && resp.location != NULL) {
+        char next[SF_MAX_URL];
+        if (sf_resolve_redirect(plan->url, resp.location, next, sizeof next) == SF_OK) {
+            sf_response_free(&resp);
+            if (browser_navigate(&w->bs, next) == BROWSER_OK) do_load(w, next);
+            return;
+        }
+    }
+
+    char *html = (char *)resp.body;
+    size_t len = resp.body_len;
+    resp.body = NULL;
+    sf_response_free(&resp);
+    if (html == NULL) { html = strdup(""); len = 0; }
+
+    /* Show the POST response in place and reflect the action URL in the bar. No
+     * history push: navigating back must not silently replay a POST as a GET. */
+    browser_set_url_bar(&w->bs, plan->url);
+    set_cache(w, html, len, plan->url);
+    render_current(w);
+}
+
+/* Submits the form that owns rep (any control of the form supplies the action and
+ * method). Gathers the named controls' current values, builds the plan with the
+ * pure form module (fail closed to https), and dispatches GET (navigate) or POST.
+ * The caller is responsible for the follow-up redraw. */
+static void submit_form(browser_window *w, const rd_block *rep) {
+    if (w->doc == NULL || rep == NULL) return;
+    if (rep->form_id < 0) {
+        browser_set_status(&w->bs, "This control is not part of a form.", now_ms());
+        return;
+    }
+
+    fm_field fields[UI_FORM_FIELDS_MAX];
+    size_t nf = 0;
+    for (size_t i = 0; i < rd_count(w->doc) && nf < UI_FORM_FIELDS_MAX; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind != RD_INPUT || b->form_id != rep->form_id) continue;
+        if (b->name == NULL || b->name[0] == '\0') continue;
+        const char *value;
+        if (input_is_editable(b->input_type)) {
+            ui_input_state *st = find_input_state(w, b);
+            value = (st != NULL) ? tf_text(&st->field) : (b->value != NULL ? b->value : "");
+        } else if (b->input_type == PV_IN_HIDDEN) {
+            value = (b->value != NULL) ? b->value : "";
+        } else {
+            continue; /* submit/button controls are not value fields (v1) */
+        }
+        fields[nf].name = b->name;
+        fields[nf].value = value;
+        nf++;
+    }
+
+    const char *base = browser_current_url(&w->bs);
+    if (base == NULL) base = ""; /* "" => fm_build blocks (no https base, fail closed) */
+    fm_plan plan;
+    if (fm_build(base, rep->href, (fm_method)rep->form_method, fields, nf, &plan) != FM_OK) {
+        browser_set_status(&w->bs, "Could not build the form submission.", now_ms());
+        return;
+    }
+    if (plan.kind == FM_BLOCKED) {
+        const char *why = "Form blocked: insecure target (https required).";
+        if (plan.reason == FM_BLOCK_OVERFLOW) why = "Form blocked: data too large.";
+        else if (plan.reason == FM_BLOCK_INVALID) why = "Form blocked: invalid fields.";
+        browser_set_status(&w->bs, why, now_ms());
+        return;
+    }
+    if (plan.kind == FM_NAVIGATE) {
+        if (browser_navigate(&w->bs, plan.url) == BROWSER_OK) do_load(w, plan.url);
+        return;
+    }
+    if (plan.kind == FM_POST_REQUEST) {
+        do_submit_post(w, &plan);
+    }
+}
+
 /* Draws the three-bar "hamburger" icon for the options-menu button, centred in a
  * UI_BTN_W-wide button starting at bx within the toolbar. */
 static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop) {
@@ -964,6 +1346,58 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
         cairo_move_to(cr, tx, ty);
         cairo_show_text(cr, UI_MENU_ITEMS[i].label);
     }
+
+    /* User-Agent section: a label and an editable box. The box uses a monospace
+     * face for stable caret math (same convention as the URL bar). */
+    double label_y = my + UI_MENU_PAD + (double)UI_MENU_COUNT * ih;
+    set_rgb(cr, th->menu_text);
+    cairo_move_to(cr, mx + UI_MENU_PAD, label_y + (UI_MENU_LABEL_H + fe.ascent - fe.descent) / 2.0);
+    cairo_show_text(cr, "User-Agent (network):");
+
+    double bx, by, bw, bh;
+    ua_box_rect(w, &bx, &by, &bw, &bh);
+    set_rgb(cr, w->ua_field_focused ? th->url_bg_focused : th->url_bg);
+    cairo_rectangle(cr, bx, by, bw, bh);
+    cairo_fill(cr);
+    set_rgb(cr, w->ua_field_focused ? th->link : th->url_border);
+    cairo_set_line_width(cr, 1.0);
+    cairo_rectangle(cr, bx, by, bw, bh);
+    cairo_stroke(cr);
+
+    cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, th->body_font);
+    cairo_font_extents_t mfe;
+    cairo_font_extents(cr, &mfe);
+
+    cairo_save(cr);
+    cairo_rectangle(cr, bx + 2.0, by + 1.0, bw - 4.0, bh - 2.0);
+    cairo_clip(cr);
+
+    const char *ua = tf_text(&w->ua_field);
+    double tx = bx + UI_MARGIN;
+    double ty = by + (bh + mfe.ascent - mfe.descent) / 2.0;
+    if (ua[0] == '\0' && !w->ua_field_focused) {
+        set_rgb(cr, th->chrome_text_dim);
+        cairo_move_to(cr, tx, ty);
+        cairo_show_text(cr, SF_DEFAULT_USER_AGENT " (default)");
+    } else {
+        set_rgb(cr, th->menu_text);
+        cairo_move_to(cr, tx, ty);
+        cairo_show_text(cr, ua);
+    }
+    if (w->ua_field_focused) {
+        double cx = tx;
+        for (size_t i = 0; i < tf_cursor(&w->ua_field); ++i) {
+            char tmp[2] = { ua[i], '\0' };
+            cairo_text_extents_t te;
+            cairo_text_extents(cr, tmp, &te);
+            cx += te.x_advance;
+        }
+        set_rgb(cr, th->caret);
+        cairo_rectangle(cr, cx, ty - mfe.ascent, 1.5, mfe.height);
+        cairo_fill(cr);
+    }
+    cairo_restore(cr);
 }
 
 /* Draws the transient status toast (a banner at the bottom of the window). */
@@ -1289,17 +1723,28 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     if (w->menu_open) {
         double mx, my, mw, mh, ih;
         menu_panel_rect(w, &mx, &my, &mw, &mh, &ih);
-        if (w->ptr_x >= mx && w->ptr_x < mx + mw && w->ptr_y >= my && w->ptr_y < my + mh) {
-            if (w->ptr_y >= my + UI_MENU_PAD) {
-                size_t row = (size_t)((w->ptr_y - (my + UI_MENU_PAD)) / ih);
-                if (row < UI_MENU_COUNT) {
-                    bool *flag = menu_item_flag(w, row);
-                    *flag = !*flag;
-                    render_current(w);
+        int inside = (w->ptr_x >= mx && w->ptr_x < mx + mw
+                   && w->ptr_y >= my && w->ptr_y < my + mh);
+        if (inside) {
+            double bx, by, bw, bh;
+            ua_box_rect(w, &bx, &by, &bw, &bh);
+            if (w->ptr_x >= bx && w->ptr_x < bx + bw && w->ptr_y >= by && w->ptr_y < by + bh) {
+                w->ua_field_focused = 1; /* edit the User-Agent */
+                w->url_bar_focused = 0;
+            } else {
+                w->ua_field_focused = 0;
+                if (w->ptr_y >= my + UI_MENU_PAD) {
+                    size_t row = (size_t)((w->ptr_y - (my + UI_MENU_PAD)) / ih);
+                    if (row < UI_MENU_COUNT) {
+                        bool *flag = menu_item_flag(w, row);
+                        *flag = !*flag;
+                        render_current(w);
+                    }
                 }
             }
         } else {
             w->menu_open = 0;
+            w->ua_field_focused = 0;
         }
         redraw(w);
         return;
@@ -1328,6 +1773,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             load_current(w);
         } else if (w->ptr_x >= url_x && w->ptr_x < url_x + url_w) {
             w->url_bar_focused = 1;
+            w->focused_input = -1; /* the URL bar takes the keyboard */
             /* Place cursor roughly by pixel offset. */
             double cx = w->ptr_x - url_x - UI_MARGIN;
             w->bs.url_bar_cursor = 0;
@@ -1352,11 +1798,25 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             w->url_bar_focused = 0;
         }
     } else {
-        /* Content area: a click on a rendered hyperlink follows it. The decision
-         * (and every security rejection) lives in the pure ln_resolve. */
+        /* Content area. A click first hit-tests the form controls: an editable box
+         * takes focus, a submit button submits its form. Otherwise a hyperlink is
+         * followed (the security decision lives in the pure ln_resolve). */
         w->url_bar_focused = 0;
-        const char *href = link_at_point(w, w->ptr_x, w->ptr_y);
-        if (href != NULL) follow_link(w, href);
+        w->focused_input = -1;
+        const rd_block *ctl = input_at_point(w, w->ptr_x, w->ptr_y);
+        if (ctl != NULL) {
+            if (ctl->input_type == PV_IN_SUBMIT) {
+                submit_form(w, ctl);
+            } else if (input_is_editable(ctl->input_type)) {
+                for (size_t i = 0; i < w->input_count; ++i) {
+                    if (w->inputs[i].blk == ctl) { w->focused_input = (int)i; break; }
+                }
+            }
+            /* PV_IN_BUTTON (reset/generic) is inert in v1. */
+        } else {
+            const char *href = link_at_point(w, w->ptr_x, w->ptr_y);
+            if (href != NULL) follow_link(w, href);
+        }
     }
     redraw(w);
 }
@@ -1461,6 +1921,33 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
     if (ctrl && !shift && (sym == XKB_KEY_i || sym == XKB_KEY_I)) {
         w->caps.images = !w->caps.images;
         render_current(w);
+        redraw(w);
+        return;
+    }
+
+    /* Editing the configurable User-Agent in the options menu takes priority over
+     * the URL bar and page scroll. Enter applies it (used on the next load). */
+    if (w->ua_field_focused) {
+        if (sym == XKB_KEY_Escape) {
+            w->ua_field_focused = 0;
+        } else if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
+            w->ua_field_focused = 0;
+            browser_set_status(&w->bs, "User-Agent set; reload to apply.", now_ms());
+        } else if (sym == XKB_KEY_BackSpace) {
+            tf_backspace(&w->ua_field);
+        } else if (sym == XKB_KEY_Delete || sym == XKB_KEY_KP_Delete) {
+            tf_delete(&w->ua_field);
+        } else if (sym == XKB_KEY_Left) {
+            tf_move(&w->ua_field, -1);
+        } else if (sym == XKB_KEY_Right) {
+            tf_move(&w->ua_field, 1);
+        } else if (sym == XKB_KEY_Home) {
+            tf_home(&w->ua_field);
+        } else if (sym == XKB_KEY_End) {
+            tf_end(&w->ua_field);
+        } else if (n > 0) {
+            for (int i = 0; i < n; ++i) tf_insert(&w->ua_field, utf8[i]);
+        }
         redraw(w);
         return;
     }
@@ -1582,6 +2069,8 @@ ui_status ui_run_browser(const char *start_url) {
     w.theme = ui_theme_default();
     w.caps = rdp_caps_safe();   /* Privacy by Default: images/CSS/JS off */
     w.scroll = 0.0;
+    w.focused_input = -1;       /* no form control focused */
+    tf_init(&w.ua_field);       /* empty => SF_DEFAULT_USER_AGENT */
 
     if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
 

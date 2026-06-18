@@ -317,4 +317,5 @@ freedom/
 - Sé honesto sobre lo no verificado: el código de red que no se pueda ejercitar aquí debe
   marcarse como pendiente de prueba de integración, no presentarse como verificado.
 - Verifica que cada símbolo/flag/algoritmo existe en este host antes de recomendarlo
-  (`openssl list ...`, `pkg-config ...`).
+  (`openssl list ...`, `pkg-config ...`). y haz fuzzing por ejemplo con American Fuzzy Lop afl++ (AFL)
+- Si ves fallos de seguridad o Deuda tecnica entras en modo boyscout y lo resuelves sin perder  funcionalidad nunca está fuera de scope el solucionar deuda tecnica y/o fallos de seguridad

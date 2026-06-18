@@ -66,7 +66,8 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_browser $(BUILD_DIR)/test_freedom \
              $(BUILD_DIR)/test_page_view $(BUILD_DIR)/test_render_policy \
              $(BUILD_DIR)/test_render_doc $(BUILD_DIR)/test_url \
-             $(BUILD_DIR)/test_link_nav $(BUILD_DIR)/test_css_color
+             $(BUILD_DIR)/test_link_nav $(BUILD_DIR)/test_css_color \
+             $(BUILD_DIR)/test_textfield $(BUILD_DIR)/test_form
 
 .PHONY: all test itest asan fuzz fuzz-js view clean
 
@@ -164,6 +165,14 @@ $(BUILD_DIR)/test_link_nav: $(TEST_DIR)/test_link_nav.c $(BUILD_DIR)/link_nav.o 
 $(BUILD_DIR)/test_css_color: $(TEST_DIR)/test_css_color.c $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure editable text-field primitive (UA field + form inputs). No I/O deps.
+$(BUILD_DIR)/test_textfield: $(TEST_DIR)/test_textfield.c $(BUILD_DIR)/textfield.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure form-submission builder. Reuses the url module (resolution/validation).
+$(BUILD_DIR)/test_form: $(TEST_DIR)/test_form.c $(BUILD_DIR)/form.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
@@ -202,6 +211,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
                       $(BUILD_DIR)/request_policy.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
+                      $(BUILD_DIR)/textfield.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
                       $(BUILD_DIR)/xdg-decoration-client-protocol.h | $(BUILD_DIR)

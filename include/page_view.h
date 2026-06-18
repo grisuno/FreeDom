@@ -39,8 +39,26 @@ typedef enum pv_status {
 typedef enum pv_kind {
     PV_TEXT = 0,   /* inline text */
     PV_LINK = 1,   /* inline text that is a hyperlink (href is set) */
-    PV_IMAGE = 2   /* an <img>: src is set, text holds the alt text */
+    PV_IMAGE = 2,  /* an <img>: src is set, text holds the alt text */
+    PV_INPUT = 3   /* a form control (<input>/<textarea>/<button>): see pv_input_type */
 } pv_kind;
+
+/* Class of a PV_INPUT control. Drives how the GUI paints and submits it. Unknown
+ * input types collapse to PV_IN_TEXT (a one-line editable box). */
+typedef enum pv_input_type {
+    PV_IN_TEXT = 0,   /* text/search/email/url/tel/number/...: one-line editable box */
+    PV_IN_PASSWORD,   /* password: editable, masked when painted */
+    PV_IN_TEXTAREA,   /* <textarea>: editable (one-line box for now); value = its content */
+    PV_IN_HIDDEN,     /* hidden: not painted; value still submitted */
+    PV_IN_SUBMIT,     /* submit button (triggers the owning form) */
+    PV_IN_BUTTON      /* non-submitting button (button/reset): painted, inert */
+} pv_input_type;
+
+/* Form method carried on a PV_INPUT run (denormalised from the owning <form>). */
+typedef enum pv_form_method {
+    PV_METHOD_GET = 0,
+    PV_METHOD_POST = 1
+} pv_form_method;
 
 /* One inline run in document order. text is owned, NUL-terminated, valid UTF-8
  * (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated
@@ -55,12 +73,20 @@ typedef struct pv_run {
     pv_kind kind;
     int     heading;      /* 0 = body text; 1..6 = inside h1..h6 */
     int     block_break;  /* nonzero: a block boundary precedes this run */
-    char   *text;
-    char   *href;
+    char   *text;         /* PV_INPUT: the placeholder (text) or button label */
+    char   *href;         /* PV_LINK target; PV_INPUT: the owning form's raw action */
     char   *src;          /* PV_IMAGE only: image URL; NULL otherwise */
     int     img_w;        /* PV_IMAGE declared width in px, or -1 if unknown */
     int     img_h;        /* PV_IMAGE declared height in px, or -1 if unknown */
     int     fg_rgb;       /* author color packed 0xRRGGBB, or -1 if none */
+    /* form controls (PV_INPUT only; defaults: type 0, name/value NULL, form_id -1,
+     * method GET). name/value carry the submitted bytes verbatim (not whitespace
+     * collapsed); form_id groups controls of the same <form> (-1 = no form). */
+    int     input_type;   /* pv_input_type */
+    char   *name;         /* control name, or NULL */
+    char   *value;        /* control current/default value, or NULL */
+    int     form_id;      /* owning-form group id in document order, or -1 */
+    int     form_method;  /* pv_form_method of the owning form */
 } pv_run;
 
 typedef struct pv_view {
@@ -92,6 +118,17 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
  * PV_ERR_NULL_ARG. */
 pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src, int w, int h);
+
+/* Appends one PV_INPUT run (a form control). text is the placeholder/label (may be
+ * NULL -> ""); name/value are the control identity and value (may be NULL); action
+ * is the owning form's raw action href (may be NULL); form_id groups controls of a
+ * form (-1 if none); method is the form's pv_form_method. text is normalised to
+ * valid UTF-8 (display); name/value/action are copied verbatim (submitted bytes /
+ * resolved later). Returns PV_OK or PV_ERR_OOM / PV_ERR_NULL_ARG. */
+pv_status pv_append_input(pv_view *v, int heading, int block_break,
+                          pv_input_type input_type, const char *text,
+                          const char *name, const char *value,
+                          const char *action, int form_id, int method);
 
 /* Sets the author foreground color (packed 0xRRGGBB, or -1 for none) on the most
  * recently appended run. No-op when the view is empty or NULL. Both append helpers

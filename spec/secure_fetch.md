@@ -55,7 +55,8 @@ excepción por host (actualmente en sesión; persistencia mediante `local_store`
 Definida en `include/secure_fetch.h`. Resumen:
 
 ```c
-sf_config sf_config_default(void);
+sf_config   sf_config_default(void);
+const char *sf_user_agent_or_default(const char *ua); /* ua/""=>SF_DEFAULT_USER_AGENT, puro */
 
 /* Validadores puros (sin I/O) — superficie principal de pruebas unitarias. */
 sf_status sf_validate_url(const char *url);
@@ -69,12 +70,29 @@ sf_status sf_parse_location_header(const char *header_line, char *out, size_t ou
 sf_status sf_resolve_redirect(const char *base_url, const char *location,
                               char *out, size_t outsz);
 
-/* Orquestadores con I/O. */
+/* Orquestadores con I/O. GET y POST comparten un único motor (sf_perform) que aplica
+ * IDÉNTICA la política TLS/PQ/cadena: el método no cambia cómo se juzga la conexión. */
 sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out);
 sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                         int max_redirects);
+sf_status sf_post(const char *url, const sf_config *cfg,
+                  const void *body, size_t body_len, const char *content_type,
+                  sf_response *out);
 void      sf_response_free(sf_response *resp);
 ```
+
+**User-Agent configurable.** `sf_config.user_agent` (NULL o `""` ⇒ `SF_DEFAULT_USER_AGENT`,
+`"Freedom/0.1"`) fija la cabecera `User-Agent` de red. Lo resuelve la función pura
+`sf_user_agent_or_default` (un único sitio probado). Es ajuste de **red** solo de sesión; el
+`navigator.userAgent` de JS sigue normalizado por `anti_fp` (anti-fingerprinting), de modo que un
+UA de red a medida no abre un canal de fingerprinting pasivo en el motor JS.
+
+**POST (`sf_post`).** Envía `body` (`body_len` bytes) con `content_type` (NULL ⇒
+`application/x-www-form-urlencoded`). Reusa el mismo `sf_perform` que `sf_get`, así que exige TLS 1.3
++ KE híbrido PQ + política de cadena igual que un GET (Zero Trust: un POST inseguro **no es
+representable**; el esquema se valida antes de abrir socket). No sigue redirecciones (el llamante
+inspecciona `http_code`/`location` y decide). `body == NULL` con `body_len != 0` ⇒ `SF_ERR_NULL_ARG`.
+El plan de envío lo construye el módulo puro `form` (`spec/form.md`).
 
 Diseño orientado a prueba: la lógica de seguridad vive en **funciones puras** sin red,
 verificables directamente. `sf_get` solo orquesta: configura el transporte, ejecuta la
@@ -206,3 +224,8 @@ Más cobertura de los validadores puros (URL, grupo KE híbrido vs. clásico/PQ-
 - Normalización completa de URL relativas con `.`/`..` y resolución de `query`/`fragment` en
   destinos relativos (se cubren los casos comunes; pendiente RFC 3986 íntegro).
 - HTTP/2, HTTP/3 (el transporte los soporta; la política se fija después).
+- Prueba de integración del POST en vivo: `sf_post` comparte el motor y la política con `sf_get`
+  (verificado en unit tests: rechazo de no-https y de args nulos sin red); el envío real contra un
+  endpoint PQ que acepte POST queda **pendiente de itest**, no presentado como verificado.
+- Seguimiento de redirecciones en `sf_post` (un `303 See Other` debería re-emitirse como GET): por
+  ahora el llamante inspecciona `http_code`/`location`.

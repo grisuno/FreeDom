@@ -387,6 +387,131 @@ static void test_build_author_color(void **state) {
     hp_document_free(doc);
 }
 
+/* Finds the first PV_INPUT run whose name equals `name`; NULL if none. */
+static const pv_run *find_input(const pv_view *v, const char *name) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_INPUT && r->name != NULL && strcmp(r->name, name) == 0) return r;
+    }
+    return NULL;
+}
+
+/* --- form / input extraction --- */
+
+static void test_build_search_form_get(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><form action=\"/search\" method=\"get\">"
+        "<input type=\"search\" name=\"q\" placeholder=\"Search...\">"
+        "<input type=\"submit\" value=\"Go\">"
+        "</form></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *q = find_input(v, "q");
+    assert_non_null(q);
+    assert_int_equal(q->input_type, PV_IN_TEXT);
+    assert_string_equal(q->text, "Search...");      /* placeholder is the display text */
+    assert_string_equal(q->href, "/search");          /* form action carried on href */
+    assert_int_equal(q->form_method, PV_METHOD_GET);
+    assert_true(q->form_id >= 0);
+
+    /* The submit button shares the same form group and carries its label. */
+    int found_submit = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_INPUT && r->input_type == PV_IN_SUBMIT) {
+            assert_string_equal(r->text, "Go");
+            assert_int_equal(r->form_id, q->form_id);
+            found_submit = 1;
+        }
+    }
+    assert_true(found_submit);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_form_post_and_hidden(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<form action=\"https://site.example/login\" method=\"POST\">"
+        "<input type=\"text\" name=\"user\" value=\"bob\">"
+        "<input type=\"hidden\" name=\"csrf\" value=\"tok123\">"
+        "<button>Log in</button>"
+        "</form>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *user = find_input(v, "user");
+    assert_non_null(user);
+    assert_int_equal(user->form_method, PV_METHOD_POST);
+    assert_string_equal(user->value, "bob");
+    assert_string_equal(user->href, "https://site.example/login");
+
+    const pv_run *csrf = find_input(v, "csrf");
+    assert_non_null(csrf);
+    assert_int_equal(csrf->input_type, PV_IN_HIDDEN);
+    assert_string_equal(csrf->value, "tok123");
+
+    /* A <button> with no type defaults to submit; its label is its text. */
+    int found = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_INPUT && r->input_type == PV_IN_SUBMIT
+            && r->text != NULL && strcmp(r->text, "Log in") == 0) found = 1;
+    }
+    assert_true(found);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_textarea_value(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<form><textarea name=\"msg\">hello world</textarea></form>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *msg = find_input(v, "msg");
+    assert_non_null(msg);
+    assert_int_equal(msg->input_type, PV_IN_TEXTAREA);
+    assert_string_equal(msg->value, "hello world");
+    /* The textarea content must NOT also appear as a plain text run. */
+    assert_null(find_text(v, "hello world"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_control_without_form(void **state) {
+    (void)state;
+    hp_document *doc = parse("<input type=\"text\" name=\"loose\">");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_input(v, "loose");
+    assert_non_null(r);
+    assert_int_equal(r->form_id, -1);   /* no owning form */
+    assert_null(r->href);               /* no action */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_two_forms_distinct_groups(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<form action=\"/a\"><input name=\"x\"></form>"
+        "<form action=\"/b\"><input name=\"y\"></form>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *x = find_input(v, "x");
+    const pv_run *y = find_input(v, "y");
+    assert_non_null(x);
+    assert_non_null(y);
+    assert_int_not_equal(x->form_id, y->form_id);
+    assert_string_equal(x->href, "/a");
+    assert_string_equal(y->href, "/b");
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
@@ -411,6 +536,11 @@ int main(void) {
         cmocka_unit_test(test_build_empty_document),
         cmocka_unit_test(test_set_color_model),
         cmocka_unit_test(test_build_author_color),
+        cmocka_unit_test(test_build_search_form_get),
+        cmocka_unit_test(test_build_form_post_and_hidden),
+        cmocka_unit_test(test_build_textarea_value),
+        cmocka_unit_test(test_build_control_without_form),
+        cmocka_unit_test(test_build_two_forms_distinct_groups),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

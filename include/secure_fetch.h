@@ -55,6 +55,7 @@ typedef struct sf_config {
     long        timeout_ms;     /* total request timeout; 0 => SF_DEFAULT_TIMEOUT_MS */
     size_t      max_body_bytes; /* hard cap on buffered response; 0 => SF_DEFAULT_MAX_BODY */
     const char *kex_groups;     /* OpenSSL group list; NULL => SF_DEFAULT_KEX_GROUPS */
+    const char *user_agent;     /* User-Agent header; NULL/"" => SF_DEFAULT_USER_AGENT */
 } sf_config;
 
 typedef struct sf_response {
@@ -68,6 +69,7 @@ typedef struct sf_response {
 } sf_response;
 
 #define SF_DEFAULT_KEX_GROUPS  "X25519MLKEM768"
+#define SF_DEFAULT_USER_AGENT  "Freedom/0.1"
 #define SF_DEFAULT_MAX_BODY    ((size_t)(16u * 1024u * 1024u))
 #define SF_DEFAULT_TIMEOUT_MS  30000L
 #define SF_DEFAULT_MAX_REDIRECTS 10
@@ -75,6 +77,11 @@ typedef struct sf_response {
 
 /* Returns a configuration with the secure defaults applied. */
 sf_config sf_config_default(void);
+
+/* Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT. Pure: the
+ * single place that resolves the effective User-Agent, so the orchestrator never
+ * sends an empty header and the default lives in one tested spot. */
+const char *sf_user_agent_or_default(const char *ua);
 
 /* --- Pure validators (no I/O): the primary unit-test surface. --- */
 
@@ -133,6 +140,18 @@ sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out);
  * sf_response_free. max_redirects < 0 is treated as 0 (do not follow). */
 sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                         int max_redirects);
+
+/* Performs an HTTPS POST under the given policy, sending body (body_len bytes)
+ * with the given Content-Type. Enforces the exact same TLS/PQ/chain policy as
+ * sf_get (Zero Trust): an insecure POST is not representable. Does not follow
+ * redirects (the caller inspects out->http_code / out->location and decides).
+ * cfg == NULL => sf_config_default(). url == NULL / out == NULL => SF_ERR_NULL_ARG.
+ * body may be NULL only when body_len == 0. content_type == NULL =>
+ * application/x-www-form-urlencoded. On SF_OK, *out must be released with
+ * sf_response_free. */
+sf_status sf_post(const char *url, const sf_config *cfg,
+                  const void *body, size_t body_len, const char *content_type,
+                  sf_response *out);
 
 /* Idempotent; safe on a zero-initialised struct and safe to call twice. */
 void sf_response_free(sf_response *resp);

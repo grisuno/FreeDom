@@ -186,6 +186,46 @@ static void test_load_carries_author_color(void **state) {
     tab_close(t);
 }
 
+/* A form control parsed in the confined child must survive the IPC round-trip as a
+ * PV_INPUT run carrying its type, name, value, the form action (on href) and the
+ * form method (so the parent can paint and submit it). */
+static void test_load_carries_form_control(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>F</title></head><body>"
+        "<form action=\"https://s.example/q\" method=\"post\">"
+        "<input type=\"text\" name=\"query\" value=\"seed\">"
+        "<input type=\"submit\" value=\"Find\"></form></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_text = 0, saw_submit = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->kind != PV_INPUT) continue;
+        if (r->name != NULL && strcmp(r->name, "query") == 0) {
+            assert_int_equal(r->input_type, PV_IN_TEXT);
+            assert_string_equal(r->value, "seed");
+            assert_string_equal(r->href, "https://s.example/q");
+            assert_int_equal(r->form_method, PV_METHOD_POST);
+            assert_true(r->form_id >= 0);
+            saw_text = 1;
+        }
+        if (r->input_type == PV_IN_SUBMIT && r->text != NULL
+            && strcmp(r->text, "Find") == 0) {
+            saw_submit = 1;
+        }
+    }
+    assert_true(saw_text);
+    assert_true(saw_submit);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 static void test_load_strips_script(void **state) {
     (void)state;
     tab *t = NULL;
@@ -360,6 +400,7 @@ int main(void) {
         cmocka_unit_test(test_load_returns_view_with_link),
         cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_carries_author_color),
+        cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),

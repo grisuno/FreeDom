@@ -83,6 +83,31 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->href = h;
     b->img_decision = dec;
     b->fg_rgb = fg_rgb;
+    b->input_type = 0;
+    b->name = NULL;
+    b->value = NULL;
+    b->form_id = -1;
+    b->form_method = 0;
+    return 0;
+}
+
+/* Appends an RD_INPUT block, copying text (placeholder/label), the form action
+ * (href), and the control name/value. Returns 0, or -1 on allocation failure. */
+static int rd_push_input(rd_doc *d, int block_break, const pv_run *r) {
+    if (rd_push(d, RD_INPUT, 0, block_break, r->text, r->href, RDP_IMG_ALLOW, -1) != 0)
+        return -1;
+    rd_block *b = &d->blocks[d->count - 1];
+    b->input_type = r->input_type;
+    b->form_id = r->form_id;
+    b->form_method = r->form_method;
+    if (r->name != NULL) {
+        b->name = utf8_sanitized_dup(r->name);
+        if (b->name == NULL) return -1;
+    }
+    if (r->value != NULL) {
+        b->value = utf8_sanitized_dup(r->value);
+        if (b->value == NULL) return -1;
+    }
     return 0;
 }
 
@@ -122,6 +147,9 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, r->src, dec, -1);
                 break;
             }
+            case PV_INPUT:
+                rc = rd_push_input(d, r->block_break, r);
+                break;
             case PV_LINK:
                 rc = rd_push(d, RD_LINK, r->heading, r->block_break, r->text, r->href,
                              RDP_IMG_ALLOW, fg);
@@ -144,6 +172,8 @@ void rd_free(rd_doc *d) {
     for (size_t i = 0; i < d->count; ++i) {
         free(d->blocks[i].text);
         free(d->blocks[i].href);
+        free(d->blocks[i].name);
+        free(d->blocks[i].value);
     }
     free(d->blocks);
     free(d);
@@ -165,8 +195,21 @@ const char *rd_kind_name(rd_kind k) {
         case RD_LINK:      return "link";
         case RD_IMAGE:     return "image";
         case RD_NOTICE:    return "notice";
+        case RD_INPUT:     return "input";
     }
     return "block";
+}
+
+const char *rd_input_label(int input_type) {
+    switch (input_type) {
+        case PV_IN_TEXT:     return "text";
+        case PV_IN_PASSWORD: return "password";
+        case PV_IN_TEXTAREA: return "textarea";
+        case PV_IN_HIDDEN:   return "hidden";
+        case PV_IN_SUBMIT:   return "submit";
+        case PV_IN_BUTTON:   return "button";
+    }
+    return "field";
 }
 
 const char *rd_image_label(rdp_img_decision d) {

@@ -30,13 +30,17 @@ typedef enum rd_kind {
     RD_PARAGRAPH,     /* body text */
     RD_LINK,          /* hyperlink text; href is the target */
     RD_IMAGE,         /* image placeholder; href is the src, img_decision is set */
-    RD_NOTICE         /* a user-agent notice (e.g. the image tracking warning) */
+    RD_NOTICE,        /* a user-agent notice (e.g. the image tracking warning) */
+    RD_INPUT          /* a form control; text is placeholder/label, href is the form action */
 } rd_kind;
 
 /* One paint-ready block in document order. text is owned, NUL-terminated and
- * valid UTF-8. href is owned and NUL-terminated for RD_LINK (link target) and
- * RD_IMAGE (image src); NULL otherwise. img_decision is meaningful only for
- * RD_IMAGE. */
+ * valid UTF-8. href is owned and NUL-terminated for RD_LINK (link target),
+ * RD_IMAGE (image src) and RD_INPUT (the owning form's action); NULL otherwise.
+ * img_decision is meaningful only for RD_IMAGE. The input_* fields are meaningful
+ * only for RD_INPUT: input_type is a pv_input_type; name/value are owned (NULL when
+ * absent) and carry the submitted bytes verbatim; form_id groups controls of one
+ * form (-1 = none); form_method is a pv_form_method. */
 typedef struct rd_block {
     rd_kind          kind;
     int              heading_level;  /* 1..6 for RD_HEADING, else 0 */
@@ -45,6 +49,11 @@ typedef struct rd_block {
     char            *href;
     rdp_img_decision img_decision;
     int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */
+    int              input_type;     /* RD_INPUT: pv_input_type, else 0 */
+    char            *name;           /* RD_INPUT: control name, or NULL */
+    char            *value;          /* RD_INPUT: control value, or NULL */
+    int              form_id;        /* RD_INPUT: owning-form group id, or -1 */
+    int              form_method;    /* RD_INPUT: pv_form_method */
 } rd_block;
 
 typedef struct rd_doc {
@@ -87,5 +96,9 @@ const char *rd_kind_name(rd_kind k);
  * decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never
  * NULL. */
 const char *rd_image_label(rdp_img_decision d);
+
+/* Stable, short English name of a form control type (a pv_input_type value), e.g.
+ * "text" / "password" / "submit". Never NULL; an unknown value yields "field". */
+const char *rd_input_label(int input_type);
 
 #endif /* FREEDOM_RENDER_DOC_H */

@@ -28,6 +28,21 @@ static void test_config_default_is_secure(void **state) {
     assert_int_equal((unsigned long)c.max_body_bytes, (unsigned long)SF_DEFAULT_MAX_BODY);
     assert_non_null(c.kex_groups);
     assert_string_equal(c.kex_groups, SF_DEFAULT_KEX_GROUPS);
+    assert_null(c.user_agent); /* NULL => resolved to the default at request time */
+}
+
+/* --- sf_user_agent_or_default --- */
+
+static void test_user_agent_default_when_unset(void **state) {
+    (void)state;
+    assert_string_equal(sf_user_agent_or_default(NULL), SF_DEFAULT_USER_AGENT);
+    assert_string_equal(sf_user_agent_or_default(""), SF_DEFAULT_USER_AGENT);
+}
+
+static void test_user_agent_uses_override(void **state) {
+    (void)state;
+    const char *ua = "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0";
+    assert_string_equal(sf_user_agent_or_default(ua), ua);
 }
 
 /* --- sf_validate_url --- */
@@ -382,9 +397,35 @@ static void test_get_null_args(void **state) {
     assert_int_equal(sf_get("https://example.com", &cfg, NULL), SF_ERR_NULL_ARG);
 }
 
+static void test_post_null_args(void **state) {
+    (void)state;
+    sf_config cfg = sf_config_default();
+    sf_response out;
+    memset(&out, 0, sizeof out);
+    assert_int_equal(sf_post(NULL, &cfg, "a=b", 3, NULL, &out), SF_ERR_NULL_ARG);
+    assert_int_equal(sf_post("https://example.com", &cfg, "a=b", 3, NULL, NULL), SF_ERR_NULL_ARG);
+    /* A NULL body with a non-zero length is rejected before any network use. */
+    assert_int_equal(sf_post("https://example.com", &cfg, NULL, 5, NULL, &out), SF_ERR_NULL_ARG);
+}
+
+/* The URL scheme is validated before any socket is opened, so a downgrade is
+ * rejected without network (Secure by Default: an insecure POST is unrepresentable). */
+static void test_post_rejects_non_https(void **state) {
+    (void)state;
+    sf_config cfg = sf_config_default();
+    sf_response out;
+    memset(&out, 0, sizeof out);
+    assert_int_equal(sf_post("http://example.com/login", &cfg, "a=b", 3, NULL, &out),
+                     SF_ERR_INVALID_URL);
+    assert_int_equal(sf_post("javascript:alert(1)", &cfg, "", 0, NULL, &out),
+                     SF_ERR_INVALID_URL);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
+        cmocka_unit_test(test_user_agent_default_when_unset),
+        cmocka_unit_test(test_user_agent_uses_override),
         cmocka_unit_test(test_url_rejects_null),
         cmocka_unit_test(test_url_rejects_plain_http),
         cmocka_unit_test(test_url_rejects_dangerous_schemes),
@@ -424,6 +465,8 @@ int main(void) {
         cmocka_unit_test(test_response_free_releases_location),
         cmocka_unit_test(test_get_null_args),
         cmocka_unit_test(test_get_follow_null_args),
+        cmocka_unit_test(test_post_null_args),
+        cmocka_unit_test(test_post_rejects_non_https),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
