@@ -75,6 +75,17 @@ typedef struct browser_state {
   puede envenenar el renderer ni dejar la ventana en blanco.
 - El historial no persiste en disco (Zero Knowledge por defecto).
 
+## 4b. Estado de aviso transitorio (toast)
+
+- `browser_set_status(bs, msg, now_ms)` guarda un aviso breve (p. ej. "blocked: insecure http link"
+  cuando se pulsa un enlace inseguro) copiando `msg` (truncado a `BROWSER_STATUS_MAX`) y fijando su
+  caducidad en `now_ms + BROWSER_STATUS_DURATION_MS`. `msg` vacío o `NULL` lo limpia.
+- `browser_status_text(bs, now_ms)` devuelve el aviso si sigue vigente a `now_ms`, o `NULL`.
+- El reloj `now_ms` (milisegundos monótonos) lo aporta el llamante: el módulo no hace llamadas de
+  tiempo, así que es puro y testeable. Una navegación real (navigate/back/forward) descarta un aviso
+  pendiente para que no sobreviva al cambio de página. El temporizado y la capacidad viven en
+  `BROWSER_STATUS_DURATION_MS` / `BROWSER_STATUS_MAX` (sin números mágicos en el código).
+
 ## 5. Qué queda fuera de alcance
 
 - Layout de cajas/CSS/imágenes: el renderizado es texto extraído (igual que

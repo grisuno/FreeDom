@@ -17,8 +17,8 @@ CMOCKA_LIBS   := $(shell pkg-config --libs cmocka 2>/dev/null || echo -lcmocka)
 
 # UI (Hito 4+): Wayland + Cairo + xkbcommon for the browser GUI. fontconfig is
 # linked explicitly so the GUI can call FcFini() at shutdown (clean leak exit).
-WL_CFLAGS   := $(shell pkg-config --cflags wayland-client cairo fontconfig xkbcommon 2>/dev/null)
-WL_LIBS     := $(shell pkg-config --libs wayland-client cairo fontconfig xkbcommon 2>/dev/null || echo -lwayland-client -lcairo -lfontconfig -lxkbcommon)
+WL_CFLAGS   := $(shell pkg-config --cflags wayland-client wayland-cursor cairo fontconfig xkbcommon 2>/dev/null)
+WL_LIBS     := $(shell pkg-config --libs wayland-client wayland-cursor cairo fontconfig xkbcommon 2>/dev/null || echo -lwayland-client -lwayland-cursor -lcairo -lfontconfig -lxkbcommon)
 WL_SCANNER  := wayland-scanner
 WL_PROTODIR := $(shell pkg-config --variable=pkgdatadir wayland-protocols 2>/dev/null)
 XDG_XML     := $(WL_PROTODIR)/stable/xdg-shell/xdg-shell.xml
@@ -66,7 +66,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_browser $(BUILD_DIR)/test_freedom \
              $(BUILD_DIR)/test_page_view $(BUILD_DIR)/test_render_policy \
              $(BUILD_DIR)/test_render_doc $(BUILD_DIR)/test_url \
-             $(BUILD_DIR)/test_link_nav
+             $(BUILD_DIR)/test_link_nav $(BUILD_DIR)/test_css_color
 
 .PHONY: all test itest asan fuzz fuzz-js view clean
 
@@ -121,7 +121,7 @@ $(BUILD_DIR)/test_js_sandbox: $(TEST_DIR)/test_js_sandbox.c $(BUILD_DIR)/js_sand
 $(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(QJS_OBJ) | $(BUILD_DIR)
@@ -148,7 +148,8 @@ $(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/r
 # so it links page_view/html_parse (lexbor) plus the render/request policy chain.
 $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_doc.o \
                               $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
-                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/html_parse.o $(PSL_OBJ) | $(BUILD_DIR)
+                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_color.o \
+                              $(BUILD_DIR)/html_parse.o $(PSL_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 # Pure URL operations: validation + RFC 3986 reference resolution. No I/O deps.
@@ -157,6 +158,10 @@ $(BUILD_DIR)/test_url: $(TEST_DIR)/test_url.c $(BUILD_DIR)/url.o | $(BUILD_DIR)
 
 # Clicked-link navigation policy: reuses the pure url module, no I/O deps.
 $(BUILD_DIR)/test_link_nav: $(TEST_DIR)/test_link_nav.c $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure CSS color token parser. No I/O deps.
+$(BUILD_DIR)/test_css_color: $(TEST_DIR)/test_css_color.c $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
@@ -177,7 +182,8 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
-                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(QJS_OBJ) | $(BUILD_DIR)
+                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o \
+                       $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 # Freedom browser (Hito 5+): GUI by default, --headless for terminal output.
@@ -193,7 +199,8 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(QJS_OBJ) \
                       $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/url.o \
-                      $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/request_policy.o \
+                      $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
+                      $(BUILD_DIR)/request_policy.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \

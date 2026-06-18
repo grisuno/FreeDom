@@ -30,6 +30,11 @@
 /* Fits an https URL (<= URL_MAX_LEN) or a local filesystem path (PATH_MAX). */
 #define LN_MAX_TARGET 4096u
 
+/* Fits a fragment identifier captured from a clicked href (the part after '#').
+ * A longer fragment is dropped (stored as ""); it only feeds a future anchor
+ * scroll, never navigation, so losing it is non-fatal. */
+#define LN_MAX_FRAGMENT 256u
+
 typedef enum ln_action {
     LN_NAVIGATE = 0,    /* load out->target */
     LN_SAME_DOCUMENT,   /* empty href or fragment (#...): same page, do not reload */
@@ -42,10 +47,22 @@ typedef enum ln_target_kind {
     LN_TARGET_FILE      /* target is a local filesystem path */
 } ln_target_kind;
 
+/* Why a reference was blocked, for a precise user-facing notice and for
+ * agent-friendly structured output. LN_BLOCK_NONE unless action == LN_BLOCKED. */
+typedef enum ln_block_reason {
+    LN_BLOCK_NONE = 0,       /* not blocked */
+    LN_BLOCK_DOWNGRADE,      /* http:// cleartext downgrade */
+    LN_BLOCK_FOREIGN_SCHEME, /* javascript:/data:/file:/mailto:/ftp:/... */
+    LN_BLOCK_NO_BASE,        /* relative reference with no base to resolve against */
+    LN_BLOCK_UNSUPPORTED     /* scheme-relative without origin, overflow, otherwise unresolvable */
+} ln_block_reason;
+
 typedef struct ln_result {
-    ln_action      action;
-    ln_target_kind kind;                /* meaningful only when action == LN_NAVIGATE */
-    char           target[LN_MAX_TARGET]; /* resolved destination; "" unless NAVIGATE */
+    ln_action       action;
+    ln_target_kind  kind;                  /* meaningful only when action == LN_NAVIGATE */
+    ln_block_reason reason;                /* LN_BLOCK_NONE unless action == LN_BLOCKED */
+    char            target[LN_MAX_TARGET];   /* resolved destination; "" unless NAVIGATE */
+    char            fragment[LN_MAX_FRAGMENT]; /* fragment id without '#'; "" if none */
 } ln_result;
 
 typedef enum ln_status {
@@ -60,5 +77,9 @@ typedef enum ln_status {
  *   out  — fully populated on LN_OK; out == NULL => LN_ERR_NULL_ARG.
  * Fails closed: anything not provably safe to navigate yields LN_BLOCKED. */
 ln_status ln_resolve(const char *base, const char *href, ln_result *out);
+
+/* Stable, short English notice for a block reason (e.g. for a UI toast or agent
+ * output). Never NULL; an unknown value yields "blocked". */
+const char *ln_block_reason_text(ln_block_reason reason);
 
 #endif /* FREEDOM_LINK_NAV_H */

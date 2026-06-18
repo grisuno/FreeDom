@@ -44,6 +44,7 @@ typedef struct rd_block {
     char            *text;
     char            *href;
     rdp_img_decision img_decision;
+    int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */
 } rd_block;
 
 typedef struct rd_doc {

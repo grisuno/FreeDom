@@ -47,7 +47,10 @@ typedef enum pv_kind {
  * for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for PV_IMAGE
  * runs (the image URL, data with provenance, never fetched here), NULL otherwise;
  * img_w/img_h carry the declared <img> dimensions in pixels, or -1 when unknown.
- * An image is never a link, so href and src are never both set. */
+ * An image is never a link, so href and src are never both set. fg_rgb carries the
+ * author foreground color (nearest inline style "color:" or <font color>) packed
+ * as 0xRRGGBB, or -1 when none/unparseable; it is presentation data the renderer
+ * applies only when author CSS is enabled. */
 typedef struct pv_run {
     pv_kind kind;
     int     heading;      /* 0 = body text; 1..6 = inside h1..h6 */
@@ -57,6 +60,7 @@ typedef struct pv_run {
     char   *src;          /* PV_IMAGE only: image URL; NULL otherwise */
     int     img_w;        /* PV_IMAGE declared width in px, or -1 if unknown */
     int     img_h;        /* PV_IMAGE declared height in px, or -1 if unknown */
+    int     fg_rgb;       /* author color packed 0xRRGGBB, or -1 if none */
 } pv_run;
 
 typedef struct pv_view {
@@ -88,6 +92,12 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
  * PV_ERR_NULL_ARG. */
 pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src, int w, int h);
+
+/* Sets the author foreground color (packed 0xRRGGBB, or -1 for none) on the most
+ * recently appended run. No-op when the view is empty or NULL. Both append helpers
+ * default a new run's color to -1, so this only needs calling when a color is
+ * present. */
+void pv_set_color(pv_view *v, int fg_rgb);
 
 /* Idempotent; safe on NULL and safe to call twice. */
 void pv_free(pv_view *v);

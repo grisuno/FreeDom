@@ -2,6 +2,7 @@
 #define FREEDOM_BROWSER_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -19,6 +20,10 @@
 
 #define BROWSER_URL_MAX 1024
 
+/* Transient status line (toast): capacity and how long it stays visible. */
+#define BROWSER_STATUS_MAX 256
+#define BROWSER_STATUS_DURATION_MS 4000u
+
 typedef struct browser_state {
     char **history;
     size_t history_len;
@@ -32,6 +37,9 @@ typedef struct browser_state {
     char  *page_title;
     char  *page_text;
     int    loading_error;
+
+    char     status_msg[BROWSER_STATUS_MAX]; /* transient toast text ("" if none) */
+    uint64_t status_expiry_ms;               /* monotonic ms when the toast hides; 0 = none */
 
     char **exceptions;     /* hostnames allowed with weak TLS */
     size_t exceptions_len;
@@ -88,5 +96,15 @@ browser_status browser_url_bar_clear(browser_state *bs);
  * error != 0 means failure; title/text may be NULL. */
 browser_status browser_set_page(browser_state *bs, const char *title,
                                 const char *text, int error);
+
+/* Transient status line (a toast, e.g. "blocked: insecure http link"). msg is
+ * copied (truncated to fit) and shown until now_ms reaches the expiry
+ * (now_ms + BROWSER_STATUS_DURATION_MS). A NULL or empty msg clears it. now_ms is a
+ * caller-supplied monotonic millisecond clock, so this stays pure (no time syscall
+ * here, fully testable). */
+browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms);
+
+/* The active status text, or NULL when there is none or it has expired at now_ms. */
+const char *browser_status_text(const browser_state *bs, uint64_t now_ms);
 
 #endif /* FREEDOM_BROWSER_H */

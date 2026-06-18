@@ -58,7 +58,7 @@ static char *utf8_sanitized_dup(const char *s) {
 /* Appends one block, taking owned copies of text (required) and href (optional).
  * Returns 0 on success, -1 on allocation failure (the doc is left consistent). */
 static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
-                   const char *text, const char *href, rdp_img_decision dec) {
+                   const char *text, const char *href, rdp_img_decision dec, int fg_rgb) {
     if (d->count == d->cap) {
         size_t ncap = d->cap ? d->cap * 2 : 16;
         rd_block *grown = (rd_block *)realloc(d->blocks, ncap * sizeof *grown);
@@ -82,6 +82,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->text = t;
     b->href = h;
     b->img_decision = dec;
+    b->fg_rgb = fg_rgb;
     return 0;
 }
 
@@ -101,7 +102,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     /* The user is always told when a page wants to load images while the
      * capability is off (the default). */
     if (d->has_images && !caps.images) {
-        if (rd_push(d, RD_NOTICE, 0, 1, rdp_images_warning(), NULL, RDP_IMG_ALLOW) != 0) {
+        if (rd_push(d, RD_NOTICE, 0, 1, rdp_images_warning(), NULL, RDP_IMG_ALLOW, -1) != 0) {
             rd_free(d);
             return RD_ERR_OOM;
         }
@@ -109,22 +110,26 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
 
     for (size_t i = 0; i < n; ++i) {
         const pv_run *r = pv_at(view, i);
+        /* Author colors are presentation: applied only when author CSS is enabled
+         * (Privacy/Secure by Default off). Inline text color reveals nothing to the
+         * network, so it is safe to honor once the user opts in. */
+        int fg = (caps.css && r->fg_rgb >= 0) ? r->fg_rgb : -1;
         int rc;
         switch (r->kind) {
             case PV_IMAGE: {
                 rdp_img_decision dec = rdp_image_decision(caps, top_level_url, r->src,
                                                           r->img_w, r->img_h);
-                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, r->src, dec);
+                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, r->src, dec, -1);
                 break;
             }
             case PV_LINK:
                 rc = rd_push(d, RD_LINK, r->heading, r->block_break, r->text, r->href,
-                             RDP_IMG_ALLOW);
+                             RDP_IMG_ALLOW, fg);
                 break;
             case PV_TEXT:
             default:
                 rc = rd_push(d, r->heading > 0 ? RD_HEADING : RD_PARAGRAPH,
-                             r->heading, r->block_break, r->text, NULL, RDP_IMG_ALLOW);
+                             r->heading, r->block_break, r->text, NULL, RDP_IMG_ALLOW, fg);
                 break;
         }
         if (rc != 0) { rd_free(d); return RD_ERR_OOM; }

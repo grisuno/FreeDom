@@ -21,7 +21,8 @@ segmentos `.`/`..` también en rutas locales.
 ## 1. Tipos
 
 ```c
-#define LN_MAX_TARGET 4096u  /* cabe una URL https (<=2048) o una ruta de fichero (PATH_MAX) */
+#define LN_MAX_TARGET 4096u    /* cabe una URL https (<=2048) o una ruta de fichero (PATH_MAX) */
+#define LN_MAX_FRAGMENT 256u   /* identificador de fragmento (parte tras '#'); si no cabe, "" */
 
 typedef enum ln_action {
     LN_NAVIGATE = 0,    /* cargar out->target */
@@ -35,10 +36,20 @@ typedef enum ln_target_kind {
     LN_TARGET_FILE      /* target es una ruta de fichero local */
 } ln_target_kind;
 
+typedef enum ln_block_reason {
+    LN_BLOCK_NONE = 0,       /* no bloqueado */
+    LN_BLOCK_DOWNGRADE,      /* downgrade http:// en claro */
+    LN_BLOCK_FOREIGN_SCHEME, /* javascript:/data:/file:/mailto:/ftp:/... */
+    LN_BLOCK_NO_BASE,        /* referencia relativa sin base contra la que resolver */
+    LN_BLOCK_UNSUPPORTED     /* relativa al esquema sin origen, desbordamiento, irresoluble */
+} ln_block_reason;
+
 typedef struct ln_result {
-    ln_action      action;
-    ln_target_kind kind;          /* significativo solo si action == LN_NAVIGATE */
-    char           target[LN_MAX_TARGET];  /* destino resuelto; "" si no es NAVIGATE */
+    ln_action       action;
+    ln_target_kind  kind;                    /* significativo solo si action == LN_NAVIGATE */
+    ln_block_reason reason;                  /* LN_BLOCK_NONE salvo si action == LN_BLOCKED */
+    char            target[LN_MAX_TARGET];     /* destino resuelto; "" si no es NAVIGATE */
+    char            fragment[LN_MAX_FRAGMENT]; /* id del fragmento sin '#'; "" si no hay */
 } ln_result;
 
 typedef enum ln_status { LN_OK = 0, LN_ERR_NULL_ARG } ln_status;
@@ -47,8 +58,21 @@ typedef enum ln_status { LN_OK = 0, LN_ERR_NULL_ARG } ln_status;
 ## 2. API (pura, reentrante)
 
 ```c
-ln_status ln_resolve(const char *base, const char *href, ln_result *out);
+ln_status   ln_resolve(const char *base, const char *href, ln_result *out);
+const char *ln_block_reason_text(ln_block_reason reason);
 ```
+
+### Fragmento y motivo de bloqueo
+- **Fragmento:** el `href` se separa por el **primer** `#` (delimitador de fragmento de URL): la
+  parte posterior se copia a `out->fragment` (sin `#`) y la navegación actúa solo sobre la
+  referencia previa. Así `page#sec` navega a `page` con `fragment = "sec"`, y `#sec` solo es
+  `LN_SAME_DOCUMENT` con `fragment = "sec"`. Un fragmento que no quepa en `LN_MAX_FRAGMENT` se
+  descarta (`""`): solo alimenta un futuro *scroll* al ancla, nunca la navegación, así que perderlo
+  no es fatal. El *scroll* al ancla queda fuera de alcance (requiere el mapa de posiciones del
+  documento); aquí se captura el dato.
+- **Motivo:** cuando `action == LN_BLOCKED`, `reason` precisa por qué (downgrade, esquema ajeno, sin
+  base, irresoluble) para un aviso exacto al usuario y para salida estructurada agent-friendly.
+  `ln_block_reason_text` da una cadena inglesa estable por motivo.
 
 ### `ln_resolve`
 - `out == NULL` → `LN_ERR_NULL_ARG` (único error). En cualquier otro caso devuelve `LN_OK` con

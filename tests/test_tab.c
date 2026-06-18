@@ -159,6 +159,33 @@ static void test_load_returns_image_run(void **state) {
     tab_close(t);
 }
 
+/* An author color extracted in the confined child must survive the IPC round-trip
+ * as the run's fg_rgb (so the parent can apply it once CSS is enabled). */
+static void test_load_carries_author_color(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>C</title></head><body>"
+        "<p style=\"color:#3366cc\">tinted</p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_color = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text != NULL && strcmp(r->text, "tinted") == 0) {
+            assert_int_equal(r->fg_rgb, 0x3366cc);
+            saw_color = 1;
+        }
+    }
+    assert_true(saw_color);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 static void test_load_strips_script(void **state) {
     (void)state;
     tab *t = NULL;
@@ -332,6 +359,7 @@ int main(void) {
         cmocka_unit_test(test_load_basic),
         cmocka_unit_test(test_load_returns_view_with_link),
         cmocka_unit_test(test_load_returns_image_run),
+        cmocka_unit_test(test_load_carries_author_color),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),

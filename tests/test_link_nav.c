@@ -188,6 +188,74 @@ static void test_overflow_blocked(void **state) {
     assert_int_equal(R.action, LN_BLOCKED);
 }
 
+/* --- block reasons (for the precise UI notice) --- */
+
+static void test_block_reasons(void **state) {
+    (void)state;
+    assert_int_equal(ln_resolve("https://h.example/", "http://h.example/", &R), LN_OK);
+    assert_int_equal(R.action, LN_BLOCKED);
+    assert_int_equal(R.reason, LN_BLOCK_DOWNGRADE);
+
+    assert_int_equal(ln_resolve("https://h.example/", "javascript:alert(1)", &R), LN_OK);
+    assert_int_equal(R.reason, LN_BLOCK_FOREIGN_SCHEME);
+
+    assert_int_equal(ln_resolve("/home/u/a.html", "http://h.example/", &R), LN_OK);
+    assert_int_equal(R.reason, LN_BLOCK_DOWNGRADE);
+
+    assert_int_equal(ln_resolve("/home/u/a.html", "mailto:a@b.example", &R), LN_OK);
+    assert_int_equal(R.reason, LN_BLOCK_FOREIGN_SCHEME);
+
+    assert_int_equal(ln_resolve("/home/u/a.html", "//h.example/x", &R), LN_OK);
+    assert_int_equal(R.reason, LN_BLOCK_UNSUPPORTED);
+
+    assert_int_equal(ln_resolve(NULL, "relative/path", &R), LN_OK);
+    assert_int_equal(R.reason, LN_BLOCK_NO_BASE);
+
+    /* A navigable reference reports no block reason. */
+    assert_int_equal(ln_resolve("https://h.example/", "/x", &R), LN_OK);
+    assert_int_equal(R.action, LN_NAVIGATE);
+    assert_int_equal(R.reason, LN_BLOCK_NONE);
+}
+
+static void test_block_reason_text(void **state) {
+    (void)state;
+    assert_string_equal(ln_block_reason_text(LN_BLOCK_DOWNGRADE), "blocked: insecure http link");
+    assert_non_null(ln_block_reason_text(LN_BLOCK_FOREIGN_SCHEME));
+    assert_non_null(ln_block_reason_text(LN_BLOCK_NO_BASE));
+    assert_non_null(ln_block_reason_text((ln_block_reason)999)); /* unknown is safe */
+}
+
+/* --- fragment capture (for a later anchor scroll) --- */
+
+static void test_fragment_capture(void **state) {
+    (void)state;
+    assert_int_equal(ln_resolve("https://h.example/a", "#section", &R), LN_OK);
+    assert_int_equal(R.action, LN_SAME_DOCUMENT);
+    assert_string_equal(R.fragment, "section");
+    assert_string_equal(R.target, "");
+
+    /* https relative with a fragment: target is clean, fragment captured. */
+    assert_int_equal(ln_resolve("https://h.example/a/b", "c#frag", &R), LN_OK);
+    assert_int_equal(R.action, LN_NAVIGATE);
+    assert_string_equal(R.target, "https://h.example/a/c");
+    assert_string_equal(R.fragment, "frag");
+
+    /* absolute https with a fragment. */
+    assert_int_equal(ln_resolve("https://a.example/", "https://b.example/p#sec", &R), LN_OK);
+    assert_string_equal(R.target, "https://b.example/p");
+    assert_string_equal(R.fragment, "sec");
+
+    /* local file with a fragment: fragment dropped from target, captured here. */
+    assert_int_equal(ln_resolve("/home/u/a.html", "b.html#sec", &R), LN_OK);
+    assert_int_equal(R.action, LN_NAVIGATE);
+    assert_string_equal(R.target, "/home/u/b.html");
+    assert_string_equal(R.fragment, "sec");
+
+    /* no fragment: empty. */
+    assert_int_equal(ln_resolve("https://h.example/", "/x", &R), LN_OK);
+    assert_string_equal(R.fragment, "");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_out),
@@ -207,6 +275,9 @@ int main(void) {
         cmocka_unit_test(test_file_base_blocks_schemes_and_scheme_relative),
         cmocka_unit_test(test_no_base),
         cmocka_unit_test(test_overflow_blocked),
+        cmocka_unit_test(test_block_reasons),
+        cmocka_unit_test(test_block_reason_text),
+        cmocka_unit_test(test_fragment_capture),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

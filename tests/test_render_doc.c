@@ -232,6 +232,34 @@ static void test_free_null_and_double(void **state) {
     rd_free(d);
 }
 
+/* Author colors are presentation gated by caps.css (Privacy by Default off): the
+ * run's fg_rgb is dropped to -1 unless author CSS is enabled. */
+static void test_author_color_gated_by_css(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "colored", NULL), PV_OK);
+    pv_set_color(v, 0x3366cc);
+
+    /* CSS off (default): color suppressed. */
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->fg_rgb, -1);
+    rd_free(d);
+
+    /* CSS on: color carried through. */
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->fg_rgb, 0x3366cc);
+    rd_free(d);
+
+    pv_free(v);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_out),
@@ -246,6 +274,7 @@ int main(void) {
         cmocka_unit_test(test_href_sanitised),
         cmocka_unit_test(test_kind_name_total),
         cmocka_unit_test(test_image_label_total),
+        cmocka_unit_test(test_author_color_gated_by_css),
         cmocka_unit_test(test_free_null_and_double),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -20,6 +20,12 @@ static void free_page(browser_state *bs) {
     bs->loading_error = 0;
 }
 
+/* Drops any active transient status. */
+static void clear_status(browser_state *bs) {
+    bs->status_msg[0] = '\0';
+    bs->status_expiry_ms = 0;
+}
+
 static void free_history(browser_state *bs) {
     if (bs == NULL || bs->history == NULL) return;
     for (size_t i = 0; i < bs->history_len; ++i) free(bs->history[i]);
@@ -185,6 +191,7 @@ browser_status browser_navigate(browser_state *bs, const char *url) {
     browser_set_url_bar(bs, url);
     free_page(bs);
     bs->loading_error = 0;
+    clear_status(bs);
     return BROWSER_OK;
 }
 
@@ -196,6 +203,7 @@ browser_status browser_back(browser_state *bs) {
     browser_set_url_bar(bs, url ? url : "");
     free_page(bs);
     bs->loading_error = 0;
+    clear_status(bs);
     return BROWSER_OK;
 }
 
@@ -207,6 +215,7 @@ browser_status browser_forward(browser_state *bs) {
     browser_set_url_bar(bs, url ? url : "");
     free_page(bs);
     bs->loading_error = 0;
+    clear_status(bs);
     return BROWSER_OK;
 }
 
@@ -295,6 +304,26 @@ browser_status browser_set_page(browser_state *bs, const char *title,
         return BROWSER_ERR_OOM;
     }
     return BROWSER_OK;
+}
+
+browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms) {
+    if (bs == NULL) return BROWSER_ERR_NULL;
+    if (msg == NULL || msg[0] == '\0') {
+        clear_status(bs);
+        return BROWSER_OK;
+    }
+    size_t n = strlen(msg);
+    if (n >= BROWSER_STATUS_MAX) n = BROWSER_STATUS_MAX - 1;
+    memcpy(bs->status_msg, msg, n);
+    bs->status_msg[n] = '\0';
+    bs->status_expiry_ms = now_ms + BROWSER_STATUS_DURATION_MS;
+    return BROWSER_OK;
+}
+
+const char *browser_status_text(const browser_state *bs, uint64_t now_ms) {
+    if (bs == NULL || bs->status_msg[0] == '\0') return NULL;
+    if (now_ms >= bs->status_expiry_ms) return NULL;
+    return bs->status_msg;
 }
 
 /* --- exceptions (user override for weak TLS) --- */

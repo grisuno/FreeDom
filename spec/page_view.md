@@ -33,6 +33,7 @@ typedef struct pv_run {
     char   *src;         /* propio (PV_IMAGE): URL de la imagen; si no, NULL */
     int     img_w;       /* ancho declarado del <img> (px), o -1 si desconocido */
     int     img_h;       /* alto declarado del <img> (px), o -1 si desconocido */
+    int     fg_rgb;      /* color del autor empaquetado 0xRRGGBB, o -1 si no hay */
 } pv_run;
 
 typedef struct pv_view { pv_run *runs; size_t count; size_t cap; } pv_view;
@@ -40,6 +41,13 @@ typedef struct pv_view { pv_run *runs; size_t count; size_t cap; } pv_view;
 
 En un run que no es imagen, `src == NULL` y `img_w == img_h == -1`. En un `PV_IMAGE`, `text` es el
 texto alternativo (`alt`, puede ser cadena vacía) y `href == NULL` (la imagen no es un enlace).
+
+**Color del autor (`fg_rgb`):** se extrae del ancestro más cercano que fije un `color` (atributo
+`style` en línea con declaración `color:`, o el `<font color>` heredado), parseado por el módulo
+puro `css_color`; `background-color` nunca se confunde con `color`; un valor no parseable → -1. Es
+dato de presentación: `render_doc` solo lo propaga si la capacidad de CSS del autor está activa, y
+nunca implica una petición de red (el color en línea no filtra nada). Ambos `pv_append*` inicializan
+`fg_rgb` a -1; `pv_set_color` lo fija en el último run.
 
 ## 3. API
 
@@ -50,6 +58,7 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     const char *text, const char *href);   /* texto/enlace; copia text/href */
 pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src, int w, int h); /* PV_IMAGE */
+void          pv_set_color(pv_view *v, int fg_rgb);        /* color del autor del ultimo run */
 void          pv_free(pv_view *v);
 size_t        pv_count(const pv_view *v);
 const pv_run *pv_at(const pv_view *v, size_t i);

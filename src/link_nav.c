@@ -34,6 +34,37 @@ static int clean_href(const char *href, char *out, size_t outsz) {
     return 0;
 }
 
+/* Case-insensitive: does s begin with prefix? */
+static int ci_prefix(const char *s, const char *prefix) {
+    for (size_t i = 0; prefix[i] != '\0'; ++i) {
+        int a = (unsigned char)s[i], b = (unsigned char)prefix[i];
+        if (a >= 'A' && a <= 'Z') a += 'a' - 'A';
+        if (b >= 'A' && b <= 'Z') b += 'a' - 'A';
+        if (a != b) return 0;
+    }
+    return 1;
+}
+
+/* Splits the fragment (everything after the first '#') out of ref: copies the
+ * fragment id (without '#') into frag, then truncates ref at the '#'. A fragment
+ * that does not fit is dropped (frag becomes ""), never truncated to a partial id. */
+static void split_fragment(char *ref, char *frag, size_t fragsz) {
+    frag[0] = '\0';
+    char *hash = strchr(ref, '#');
+    if (hash == NULL) return;
+    const char *f = hash + 1;
+    size_t fl = strlen(f);
+    if (fl + 1 <= fragsz) memcpy(frag, f, fl + 1);
+    *hash = '\0';
+}
+
+/* Classifies why a fragment-less reference could not become a navigable target. */
+static ln_block_reason classify_block(const char *ref) {
+    if (ci_prefix(ref, "http://")) return LN_BLOCK_DOWNGRADE;
+    if (url_has_scheme(ref)) return LN_BLOCK_FOREIGN_SCHEME;
+    return LN_BLOCK_UNSUPPORTED;
+}
+
 /* Length of base up to and including the last '/'; 0 when base has no '/'. */
 static size_t file_dir_len(const char *base) {
     size_t last = 0;
@@ -142,15 +173,22 @@ ln_status ln_resolve(const char *base, const char *href, ln_result *out) {
     if (out == NULL) return LN_ERR_NULL_ARG;
     out->action = LN_BLOCKED;
     out->kind = LN_TARGET_NONE;
+    out->reason = LN_BLOCK_UNSUPPORTED;
     out->target[0] = '\0';
+    out->fragment[0] = '\0';
 
     if (href == NULL) return LN_OK;
 
     char clean[LN_MAX_TARGET];
     if (clean_href(href, clean, sizeof clean) != 0) return LN_OK; /* overflow: blocked */
 
-    if (clean[0] == '\0' || clean[0] == '#') {
+    /* Separate the fragment once, up front: navigation acts on the reference, the
+     * fragment is captured for a later anchor scroll. */
+    split_fragment(clean, out->fragment, sizeof out->fragment);
+
+    if (clean[0] == '\0') { /* empty href or pure "#fragment": same document */
         out->action = LN_SAME_DOCUMENT;
+        out->reason = LN_BLOCK_NONE;
         return LN_OK;
     }
 
@@ -161,8 +199,10 @@ ln_status ln_resolve(const char *base, const char *href, ln_result *out) {
         if (url_resolve_https(base, clean, out->target, sizeof out->target) == URL_OK) {
             out->action = LN_NAVIGATE;
             out->kind = LN_TARGET_HTTPS;
+            out->reason = LN_BLOCK_NONE;
         } else {
             out->target[0] = '\0';
+            out->reason = classify_block(clean);
         }
         return LN_OK;
     }
@@ -174,19 +214,37 @@ ln_status ln_resolve(const char *base, const char *href, ln_result *out) {
             memcpy(out->target, clean, strlen(clean) + 1);
             out->action = LN_NAVIGATE;
             out->kind = LN_TARGET_HTTPS;
+            out->reason = LN_BLOCK_NONE;
+        } else {
+            out->reason = classify_block(clean);
         }
         return LN_OK;
     }
 
     if (clean[0] == '/' && clean[1] == '/') return LN_OK; /* scheme-relative: no origin */
 
-    if (base == NULL) return LN_OK; /* no base to resolve a path against */
+    if (base == NULL) { /* no base to resolve a path against */
+        out->reason = LN_BLOCK_NO_BASE;
+        return LN_OK;
+    }
 
     if (resolve_file(base, clean, out->target, sizeof out->target) == 0) {
         out->action = LN_NAVIGATE;
         out->kind = LN_TARGET_FILE;
+        out->reason = LN_BLOCK_NONE;
     } else {
         out->target[0] = '\0';
     }
     return LN_OK;
+}
+
+const char *ln_block_reason_text(ln_block_reason reason) {
+    switch (reason) {
+        case LN_BLOCK_NONE:           return "not blocked";
+        case LN_BLOCK_DOWNGRADE:      return "blocked: insecure http link";
+        case LN_BLOCK_FOREIGN_SCHEME: return "blocked: unsupported link type";
+        case LN_BLOCK_NO_BASE:        return "blocked: no page to resolve against";
+        case LN_BLOCK_UNSUPPORTED:    return "blocked: link cannot be resolved";
+    }
+    return "blocked";
 }

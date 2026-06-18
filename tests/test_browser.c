@@ -218,6 +218,58 @@ static void test_exceptions(void **state) {
     browser_free(&bs);
 }
 
+/* The transient status line (toast) is time-bounded and caller-clocked: visible
+ * until now_ms reaches the expiry, then gone. NULL/empty clears it, and any real
+ * navigation drops a stale toast. */
+static void test_status_toast(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+
+    assert_null(browser_status_text(&bs, 0)); /* none initially */
+
+    assert_int_equal(browser_set_status(&bs, "blocked: insecure http link", 1000), BROWSER_OK);
+    assert_string_equal(browser_status_text(&bs, 1000), "blocked: insecure http link");
+    assert_string_equal(browser_status_text(&bs, 1000 + BROWSER_STATUS_DURATION_MS - 1),
+                        "blocked: insecure http link");
+    assert_null(browser_status_text(&bs, 1000 + BROWSER_STATUS_DURATION_MS)); /* expired */
+
+    /* Empty/NULL clears immediately. */
+    assert_int_equal(browser_set_status(&bs, "x", 0), BROWSER_OK);
+    assert_non_null(browser_status_text(&bs, 0));
+    assert_int_equal(browser_set_status(&bs, NULL, 0), BROWSER_OK);
+    assert_null(browser_status_text(&bs, 0));
+    assert_int_equal(browser_set_status(&bs, "", 0), BROWSER_OK);
+    assert_null(browser_status_text(&bs, 0));
+
+    /* A navigation drops a stale toast. */
+    assert_int_equal(browser_set_status(&bs, "still here", 0), BROWSER_OK);
+    assert_int_equal(browser_navigate(&bs, "/p.html"), BROWSER_OK);
+    assert_null(browser_status_text(&bs, 0));
+
+    assert_int_equal(browser_set_status(NULL, "y", 0), BROWSER_ERR_NULL);
+
+    browser_free(&bs);
+}
+
+static void test_status_truncates(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+
+    char big[BROWSER_STATUS_MAX + 64];
+    memset(big, 'a', sizeof big - 1);
+    big[sizeof big - 1] = '\0';
+    assert_int_equal(browser_set_status(&bs, big, 0), BROWSER_OK);
+    const char *got = browser_status_text(&bs, 0);
+    assert_non_null(got);
+    assert_int_equal((int)strlen(got), BROWSER_STATUS_MAX - 1);
+
+    browser_free(&bs);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_init),
@@ -230,6 +282,8 @@ int main(void) {
         cmocka_unit_test(test_set_page),
         cmocka_unit_test(test_set_page_sanitizes_invalid_utf8),
         cmocka_unit_test(test_exceptions),
+        cmocka_unit_test(test_status_toast),
+        cmocka_unit_test(test_status_truncates),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -330,6 +330,63 @@ static void test_build_empty_document(void **state) {
     hp_document_free(doc);
 }
 
+/* The pure model defaults a run's author color to -1 (none); pv_set_color sets it
+ * on the most recent run and is a safe no-op on an empty view. */
+static void test_set_color_model(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    pv_set_color(v, 0x102030); /* no-op: empty view */
+    assert_int_equal((int)pv_count(v), 0);
+
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
+    assert_int_equal(pv_at(v, 0)->fg_rgb, -1); /* default */
+    pv_set_color(v, 0x123456);
+    assert_int_equal(pv_at(v, 0)->fg_rgb, 0x123456);
+
+    pv_set_color(NULL, 0); /* NULL-safe */
+    pv_free(v);
+}
+
+/* pv_build extracts the author foreground color: inline style "color:" and the
+ * legacy <font color>; the nearest ancestor that sets a color wins (inheritance);
+ * background-color is never mistaken for color; an unparseable value yields -1. */
+static void test_build_author_color(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<p style='color:#ff0000'>red text</p>"
+        "<p style='background-color:#00ff00'>plain text</p>"
+        "<font color='blue'>blue text</font>"
+        "<p style='color:bogusvalue'>fallback text</p>"
+        "<div style='color:#112233'><span>inherited text</span></div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *red = find_text(v, "red text");
+    assert_non_null(red);
+    assert_int_equal(red->fg_rgb, 0xff0000);
+
+    const pv_run *plain = find_text(v, "plain text");
+    assert_non_null(plain);
+    assert_int_equal(plain->fg_rgb, -1); /* background-color is not color */
+
+    const pv_run *blue = find_text(v, "blue text");
+    assert_non_null(blue);
+    assert_int_equal(blue->fg_rgb, 0x0000ff);
+
+    const pv_run *fallback = find_text(v, "fallback text");
+    assert_non_null(fallback);
+    assert_int_equal(fallback->fg_rgb, -1); /* unparseable value */
+
+    const pv_run *inherited = find_text(v, "inherited text");
+    assert_non_null(inherited);
+    assert_int_equal(inherited->fg_rgb, 0x112233); /* nearest ancestor with color */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
@@ -352,6 +409,8 @@ int main(void) {
         cmocka_unit_test(test_build_image_in_skipped_subtree_ignored),
         cmocka_unit_test(test_build_image_without_src_ignored),
         cmocka_unit_test(test_build_empty_document),
+        cmocka_unit_test(test_set_color_model),
+        cmocka_unit_test(test_build_author_color),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

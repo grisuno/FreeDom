@@ -40,6 +40,7 @@ typedef struct rd_block {
     char            *text;           /* propio, NUL-terminado, UTF-8 válido */
     char            *href;           /* propio: destino (RD_LINK) o src (RD_IMAGE); si no, NULL */
     rdp_img_decision img_decision;   /* solo significativo en RD_IMAGE */
+    int              fg_rgb;         /* color del autor 0xRRGGBB, o -1; solo con caps.css */
 } rd_block;
 
 typedef struct rd_doc {
@@ -75,6 +76,9 @@ const char    *rd_image_label(rdp_img_decision d); /* etiqueta del placeholder *
     imagen).
 - Si la vista declara imágenes y `!caps.images`, antepone un `RD_NOTICE` con
   `rdp_images_warning()`. `has_images` refleja si hubo alguna imagen.
+- **Color del autor (`fg_rgb`):** se propaga el `pv_run.fg_rgb` a `RD_HEADING`/`RD_PARAGRAPH`/
+  `RD_LINK` **solo si `caps.css`** (Secure/Privacy by Default: apagado); en otro caso queda en -1 y
+  la presentación usa el color del tema. Así el *gate* de CSS vive en una función pura y testeable.
 - `top_level_url` puede ser `NULL` (p. ej. un fichero local): las decisiones de imagen entonces
   **fallan cerrado** (`RDP_IMG_BLOCK_INVALID`) salvo que la capacidad esté apagada
   (`RDP_IMG_BLOCK_DISABLED`, que tiene precedencia).

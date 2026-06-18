@@ -10,6 +10,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "page_view.h"
+#include "css_color.h"
 #include "html_parse.h"
 
 #include <stdint.h>
@@ -108,6 +109,7 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->src = NULL;
     r->img_w = -1;
     r->img_h = -1;
+    r->fg_rgb = -1;
     return PV_OK;
 }
 
@@ -137,7 +139,13 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->src = s;
     r->img_w = w;
     r->img_h = h;
+    r->fg_rgb = -1;
     return PV_OK;
+}
+
+void pv_set_color(pv_view *v, int fg_rgb) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].fg_rgb = fg_rgb;
 }
 
 void pv_free(pv_view *v) {
@@ -221,13 +229,85 @@ static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *bas
     return 0;
 }
 
+/* Largest color token value extracted from markup. A longer value is not a valid
+ * color and is ignored (fail closed). */
+#define PV_COLOR_TOKEN_MAX 64u
+
+static int ascii_eq_color(const char *p) {
+    return (p[0] | 0x20) == 'c' && (p[1] | 0x20) == 'o' && (p[2] | 0x20) == 'l'
+        && (p[3] | 0x20) == 'o' && (p[4] | 0x20) == 'r';
+}
+
+/* Extracts the value of the CSS `color` declaration from an inline style string
+ * and parses it. Matches the property name exactly (length 5) so "background-color"
+ * is never mistaken for "color"; the last `color` declaration wins (the cascade).
+ * Returns the packed 0xRRGGBB color, or -1 when absent or unparseable. */
+static int color_from_style(const char *style, size_t len) {
+    int result = -1;
+    size_t i = 0;
+    while (i < len) {
+        size_t ds = i;
+        while (i < len && style[i] != ';') ++i;
+        size_t de = i;
+        if (i < len) ++i; /* skip ';' */
+
+        size_t colon = ds;
+        while (colon < de && style[colon] != ':') ++colon;
+        if (colon >= de) continue;
+
+        size_t ps = ds, pe = colon;
+        while (ps < pe && (style[ps] == ' ' || style[ps] == '\t')) ++ps;
+        while (pe > ps && (style[pe - 1] == ' ' || style[pe - 1] == '\t')) --pe;
+        if (pe - ps != 5 || !ascii_eq_color(style + ps)) continue;
+
+        size_t vs = colon + 1, ve = de;
+        while (vs < ve && (style[vs] == ' ' || style[vs] == '\t')) ++vs;
+        while (ve > vs && (style[ve - 1] == ' ' || style[ve - 1] == '\t')) --ve;
+        size_t vlen = ve - vs;
+        if (vlen == 0 || vlen >= PV_COLOR_TOKEN_MAX) continue;
+
+        char buf[PV_COLOR_TOKEN_MAX];
+        memcpy(buf, style + vs, vlen);
+        buf[vlen] = '\0';
+        cc_rgb rgb;
+        if (cc_parse(buf, &rgb) == CC_OK) result = cc_pack(rgb);
+    }
+    return result;
+}
+
+/* Author foreground color declared directly on el (inline style "color:", or the
+ * legacy <font color> attribute), or -1 if none/unparseable. */
+static int element_color(lxb_dom_element_t *el, lxb_tag_id_t tag) {
+    size_t sl = 0;
+    const lxb_char_t *style =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
+    if (style != NULL && sl > 0) {
+        int c = color_from_style((const char *)style, sl);
+        if (c >= 0) return c;
+    }
+    if (tag == LXB_TAG_FONT) {
+        size_t cl = 0;
+        const lxb_char_t *col =
+            lxb_dom_element_get_attribute(el, (const lxb_char_t *)"color", 5, &cl);
+        if (col != NULL && cl > 0 && cl < PV_COLOR_TOKEN_MAX) {
+            char buf[PV_COLOR_TOKEN_MAX];
+            memcpy(buf, col, cl);
+            buf[cl] = '\0';
+            cc_rgb rgb;
+            if (cc_parse(buf, &rgb) == CC_OK) return cc_pack(rgb);
+        }
+    }
+    return -1;
+}
+
 /* Resolves the inline context of a text node: nearest <a href>, nearest heading
- * level, and nearest block-level ancestor (defaults to base). */
+ * level, nearest block-level ancestor (defaults to base), and the inherited author
+ * color (nearest ancestor that sets one, packed 0xRRGGBB, or -1). */
 static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const char **href, size_t *href_len,
-                            const lxb_dom_node_t **block, int *heading) {
-    *href = NULL; *href_len = 0; *block = base; *heading = 0;
-    int got_link = 0, got_block = 0, got_heading = 0;
+                            const lxb_dom_node_t **block, int *heading, int *fg) {
+    *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1;
+    int got_link = 0, got_block = 0, got_heading = 0, got_color = 0;
 
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
@@ -241,6 +321,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             if (!got_heading) { int lv = heading_level(t); if (lv) { *heading = lv; got_heading = 1; } }
             if (!got_block && is_block_tag(t)) { *block = p; got_block = 1; }
+            if (!got_color) { int c = element_color(el, t); if (c >= 0) { *fg = c; got_color = 1; } }
         }
         if (p == base) break;
     }
@@ -333,8 +414,8 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 const char *unused_href = NULL;
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
-                int heading = 0;
-                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading);
+                int heading = 0, unused_fg = -1;
+                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading, &unused_fg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -366,8 +447,8 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         const char *href = NULL;
         size_t href_len = 0;
         const lxb_dom_node_t *block = NULL;
-        int heading = 0;
-        resolve_context(n, base, &href, &href_len, &block, &heading);
+        int heading = 0, fg = -1;
+        resolve_context(n, base, &href, &href_len, &block, &heading, &fg);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -384,6 +465,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         free(collapsed);
         free(href_dup);
         if (st != PV_OK) { pv_free(v); return st; }
+        pv_set_color(v, fg);
     }
 
     *out = v;

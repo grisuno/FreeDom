@@ -12,19 +12,25 @@
 #define _GNU_SOURCE
 
 #include "browser.h"
+#include "css_color.h"
 #include "link_nav.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "ui.h"
 
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
+#include <poll.h>
 #include <sys/mman.h>
 #include <errno.h>
 
 #include <wayland-client.h>
+#include <wayland-cursor.h>
 #include <cairo/cairo.h>
 #include <fontconfig/fontconfig.h>
 #include <xkbcommon/xkbcommon.h>
@@ -40,6 +46,17 @@
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
 #define UI_TEXT_MARGIN 8.0
+
+/* Options menu (gear) panel geometry and the pointer cursor size, gathered with
+ * the other chrome constants so no value is hardcoded at a call site. */
+#define UI_MENU_W       190.0
+#define UI_MENU_ITEM_H  28.0
+#define UI_MENU_PAD     6.0
+#define UI_CHECK_SZ     16.0
+#define UI_HAMBURGER_W  18.0   /* width of the drawn menu-button icon */
+#define UI_HAMBURGER_GAP 5.0   /* vertical gap between the three icon bars */
+#define UI_CURSOR_SIZE  24     /* themed cursor size in px (XCURSOR_SIZE default) */
+#define UI_TOAST_PAD    8.0    /* padding inside the toast banner */
 
 /* Number of heading levels (h1..h6). Index 0 of the scale table is body text. */
 #define UI_HEADING_LEVELS 6
@@ -87,6 +104,14 @@ typedef struct ui_theme {
     ui_rgb url_bg;
     ui_rgb url_border;
     ui_rgb caret;
+    ui_rgb link_hover_bg;   /* highlight behind the link under the pointer */
+    ui_rgb menu_bg;
+    ui_rgb menu_border;
+    ui_rgb menu_text;
+    ui_rgb check_border;
+    ui_rgb check_mark;
+    ui_rgb toast_bg;
+    ui_rgb toast_text;
 } ui_theme;
 
 /* The single source of truth for the look of the browser. */
@@ -125,8 +150,42 @@ static ui_theme ui_theme_default(void) {
     t.url_bg         = (ui_rgb){ 0.92, 0.92, 0.92 };
     t.url_border     = (ui_rgb){ 0.10, 0.10, 0.10 };
     t.caret          = (ui_rgb){ 0.00, 0.00, 0.00 };
+    t.link_hover_bg  = (ui_rgb){ 0.88, 0.93, 1.00 };
+    t.menu_bg        = (ui_rgb){ 0.98, 0.98, 0.99 };
+    t.menu_border    = (ui_rgb){ 0.55, 0.55, 0.60 };
+    t.menu_text      = (ui_rgb){ 0.10, 0.10, 0.12 };
+    t.check_border   = (ui_rgb){ 0.35, 0.35, 0.40 };
+    t.check_mark     = (ui_rgb){ 0.10, 0.45, 0.20 };
+    t.toast_bg       = (ui_rgb){ 0.15, 0.15, 0.18 };
+    t.toast_text     = (ui_rgb){ 0.95, 0.95, 0.97 };
     return t;
 }
+
+/* Converts a packed 0xRRGGBB author color into a theme RGB triple. */
+static ui_rgb rgb_from_packed(int packed) {
+    cc_rgb c = cc_unpack(packed);
+    return (ui_rgb){ c.r / 255.0, c.g / 255.0, c.b / 255.0 };
+}
+
+/* Monotonic millisecond clock for toast timing (caller of the pure browser API). */
+static uint64_t now_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000u + (uint64_t)ts.tv_nsec / 1000000u;
+}
+
+/* The options-menu items, mapped to a render capability by field offset so labels
+ * and the toggled flag live in exactly one place (no magic indices). */
+typedef struct ui_menu_item {
+    const char *label;
+    size_t      cap_offset; /* offset of a bool field within rdp_caps */
+} ui_menu_item;
+
+static const ui_menu_item UI_MENU_ITEMS[] = {
+    { "Load images",         offsetof(rdp_caps, images) },
+    { "Author colors (CSS)", offsetof(rdp_caps, css) },
+};
+#define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
 
 static void set_rgb(cairo_t *cr, ui_rgb c) {
     cairo_set_source_rgb(cr, c.r, c.g, c.b);
@@ -170,11 +229,31 @@ typedef struct browser_window {
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     double    scroll;   /* content scroll offset in pixels */
 
+    int         menu_open;     /* the options (gear) panel is showing */
+    const char *hover_href;    /* link target under the pointer (aliases doc), or NULL */
+
+    /* Cached source of the current page, so a capability toggle re-renders without
+     * a network round-trip. cur_top is the https origin (image policy) or NULL. */
+    char  *cur_html;
+    size_t cur_html_len;
+    char  *cur_top;
+
+    uint32_t            pointer_serial; /* last pointer-enter serial, for set_cursor */
+    struct wl_cursor_theme *cursor_theme;
+    struct wl_cursor       *cursor_default;
+    struct wl_cursor       *cursor_hand;
+    struct wl_surface      *cursor_surface;
+
     /* xkbcommon state for keyboard input. */
     struct xkb_context *xkb_ctx;
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
 } browser_window;
+
+/* Pointer to the rdp_caps bool toggled by options-menu item i. */
+static bool *menu_item_flag(browser_window *w, size_t i) {
+    return (bool *)((char *)&w->caps + UI_MENU_ITEMS[i].cap_offset);
+}
 
 static void redraw(browser_window *w);
 
@@ -263,9 +342,55 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "secure_fetch.h"
 #include "tab.h"
 
-/* Releases the structured render of the previous page (text mode resumes). */
+/* Releases the structured render of the previous page (text mode resumes). The
+ * hovered link aliases the doc, so it is cleared too. */
 static void clear_doc(browser_window *w) {
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
+    w->hover_href = NULL;
+}
+
+/* Replaces the cached page source. Takes ownership of html; copies top. */
+static void set_cache(browser_window *w, char *html, size_t len, const char *top) {
+    free(w->cur_html);
+    free(w->cur_top);
+    w->cur_html = html;
+    w->cur_html_len = len;
+    w->cur_top = (top != NULL) ? strdup(top) : NULL;
+}
+
+/* Renders the cached page source into the page/doc using the current capabilities.
+ * No network: a capability toggle (images/CSS) re-renders from cache. Does nothing
+ * when there is no cached source (start/error pages stay in plain-text mode). */
+static void render_current(browser_window *w) {
+    clear_doc(w);
+    if (w->cur_html == NULL) return;
+
+    tab *t = NULL;
+    if (tab_open(&t) != TAB_OK) {
+        browser_set_page(&w->bs, NULL, "Failed to spawn sandboxed tab.", 1);
+        return;
+    }
+
+    tab_page page;
+    memset(&page, 0, sizeof page);
+    if (tab_load(t, w->cur_html, w->cur_html_len, &page) != TAB_OK) {
+        browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
+        tab_close(t);
+        return;
+    }
+
+    browser_set_page(&w->bs, page.title, page.text, 0);
+
+    /* The top-level URL is the https origin (per-image policy) or NULL for a local
+     * file, which fails image loads closed. On failure doc stays NULL and the
+     * plain-text painter still shows the extracted text. */
+    rd_doc *doc = NULL;
+    if (rd_build(page.view, w->caps, w->cur_top, &doc) == RD_OK) {
+        w->doc = doc;
+    }
+
+    tab_page_free(&page);
+    tab_close(t);
 }
 
 static void do_load(browser_window *w, const char *url) {
@@ -275,8 +400,10 @@ static void do_load(browser_window *w, const char *url) {
      * Error/start pages then fall back to the plain-text painter (doc == NULL). */
     clear_doc(w);
     w->scroll = 0.0;
+    w->menu_open = 0;
 
     if (strcmp(url, "about:blank") == 0) {
+        set_cache(w, NULL, 0, NULL);
         browser_set_page(&w->bs, "Freedom", "", 0);
         return;
     }
@@ -325,6 +452,7 @@ static void do_load(browser_window *w, const char *url) {
                      "chain, and certificates that fail strict validation.\n"
                      "%s",
                      url, (int)ss, reason, bypass);
+            set_cache(w, NULL, 0, NULL);
             browser_set_page(&w->bs, NULL, msg, 1);
             sf_response_free(&resp);
             return;
@@ -338,44 +466,16 @@ static void do_load(browser_window *w, const char *url) {
         if (html == NULL) {
             char msg[256];
             snprintf(msg, sizeof msg, "Cannot read file '%s': %s.", url, strerror(errno));
+            set_cache(w, NULL, 0, NULL);
             browser_set_page(&w->bs, NULL, msg, 1);
             return;
         }
     }
 
-    tab *t = NULL;
-    tab_status ts = tab_open(&t);
-    if (ts != TAB_OK) {
-        browser_set_page(&w->bs, NULL, "Failed to spawn sandboxed tab.", 1);
-        free(html);
-        return;
-    }
-
-    tab_page page;
-    memset(&page, 0, sizeof page);
-    ts = tab_load(t, html, html_len, &page);
-    if (ts != TAB_OK) {
-        browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
-        tab_close(t);
-        free(html);
-        return;
-    }
-
-    browser_set_page(&w->bs, page.title, page.text, 0);
-
-    /* Build the paint-ready document. The top-level URL is the https origin (for
-     * per-image policy) or NULL for a local file, which fails image loads closed.
-     * On failure we keep doc == NULL and the plain-text painter still shows the
-     * extracted text. */
-    const char *top = is_https_url(url) ? url : NULL;
-    rd_doc *doc = NULL;
-    if (rd_build(page.view, w->caps, top, &doc) == RD_OK) {
-        w->doc = doc;
-    }
-
-    tab_page_free(&page);
-    tab_close(t);
-    free(html);
+    /* Cache the source (image policy uses the https origin) and render it. A later
+     * capability toggle re-renders from this cache without a network round-trip. */
+    set_cache(w, html, html_len, is_https_url(url) ? url : NULL);
+    render_current(w);
 }
 
 /* --- painting --- */
@@ -383,7 +483,7 @@ static void do_load(browser_window *w, const char *url) {
 static void toolbar_rects(const browser_window *w,
                           double *back_x, double *fwd_x,
                           double *url_x, double *url_w,
-                          double *go_x);
+                          double *go_x, double *menu_x);
 
 static double toolbar_top(const browser_window *w) {
     return w->use_csd ? UI_TITLEBAR_H : 0.0;
@@ -409,13 +509,28 @@ static void window_button_rects(const browser_window *w, double *min_x, double *
 static void toolbar_rects(const browser_window *w,
                           double *back_x, double *fwd_x,
                           double *url_x, double *url_w,
-                          double *go_x) {
+                          double *go_x, double *menu_x) {
     *back_x = 0.0;
     *fwd_x  = UI_BTN_W;
-    *go_x   = (double)w->width - UI_BTN_W;
+    *menu_x = (double)w->width - UI_BTN_W;
+    *go_x   = *menu_x - UI_BTN_W;
     *url_x  = UI_BTN_W * 2.0 + UI_MARGIN;
     *url_w  = *go_x - *url_x - UI_MARGIN;
     if (*url_w < 20.0) *url_w = 20.0;
+}
+
+/* The options-menu panel rectangle (below the gear button), and its per-item row
+ * height. The single source of truth for drawing and hit-testing the panel. */
+static void menu_panel_rect(const browser_window *w, double *x, double *y,
+                            double *width, double *height, double *item_h) {
+    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
+    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
+    *width  = UI_MENU_W;
+    *x      = menu_x + UI_BTN_W - UI_MENU_W; /* right-aligned under the gear */
+    if (*x < 0.0) *x = 0.0;
+    *y      = toolbar_top(w) + UI_TOOLBAR_H;
+    *item_h = UI_MENU_ITEM_H;
+    *height = 2.0 * UI_MENU_PAD + (double)UI_MENU_COUNT * UI_MENU_ITEM_H;
 }
 
 static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered) {
@@ -626,6 +741,9 @@ static void layout_doc(cairo_t *cr, const rd_doc *doc, const ui_theme *th,
 
         double size; int bold, underline; ui_rgb color;
         block_style(th, b, &size, &bold, &underline, &color);
+        /* Author CSS color (already gated by caps.css in render_doc) overrides the
+         * theme color while keeping the link underline / heading weight. */
+        if (b->fg_rgb >= 0) color = rgb_from_packed(b->fg_rgb);
         const char *href = (b->kind == RD_LINK) ? b->href : NULL;
 
         if (b->kind == RD_NOTICE) {
@@ -695,6 +813,13 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         double baseline = ry + r->ascent;
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
+            /* Highlight the link under the pointer (all fragments of that link share
+             * its href pointer into the doc). */
+            if (f->href != NULL && f->href == w->hover_href) {
+                set_rgb(cr, th->link_hover_bg);
+                cairo_rectangle(cr, left + f->x, ry, f->width, r->height);
+                cairo_fill(cr);
+            }
             content_font(cr, f->font_size, f->bold);
             set_rgb(cr, f->color);
             cairo_move_to(cr, left + f->x, baseline);
@@ -767,9 +892,104 @@ static const char *link_at_point(browser_window *w, double px, double py) {
 static void follow_link(browser_window *w, const char *href) {
     ln_result res;
     if (ln_resolve(browser_current_url(&w->bs), href, &res) != LN_OK) return;
+    if (res.action == LN_BLOCKED) {
+        /* Tell the user why an unsafe link did nothing (the toast auto-hides). */
+        browser_set_status(&w->bs, ln_block_reason_text(res.reason), now_ms());
+        return;
+    }
+    /* A same-document fragment stays on the page (res.fragment carries the anchor
+     * id for a future scroll); only a real target navigates. */
     if (res.action != LN_NAVIGATE) return;
     if (browser_navigate(&w->bs, res.target) != BROWSER_OK) return;
     do_load(w, res.target);
+}
+
+/* Draws the three-bar "hamburger" icon for the options-menu button, centred in a
+ * UI_BTN_W-wide button starting at bx within the toolbar. */
+static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop) {
+    set_rgb(cr, color);
+    cairo_set_line_width(cr, 2.0);
+    double cx = bx + (UI_BTN_W - UI_HAMBURGER_W) / 2.0;
+    double cy = ttop + (UI_TOOLBAR_H - 2.0 * UI_HAMBURGER_GAP) / 2.0;
+    for (int i = 0; i < 3; ++i) {
+        double y = cy + (double)i * UI_HAMBURGER_GAP;
+        cairo_move_to(cr, cx, y);
+        cairo_line_to(cr, cx + UI_HAMBURGER_W, y);
+        cairo_stroke(cr);
+    }
+}
+
+/* Draws the options-menu panel (checkbox per capability) when open. */
+static void draw_menu(cairo_t *cr, browser_window *w) {
+    if (!w->menu_open) return;
+    const ui_theme *th = &w->theme;
+    double mx, my, mw, mh, ih;
+    menu_panel_rect(w, &mx, &my, &mw, &mh, &ih);
+
+    set_rgb(cr, th->menu_bg);
+    cairo_rectangle(cr, mx, my, mw, mh);
+    cairo_fill(cr);
+    set_rgb(cr, th->menu_border);
+    cairo_set_line_width(cr, 1.0);
+    cairo_rectangle(cr, mx, my, mw, mh);
+    cairo_stroke(cr);
+
+    cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, th->body_font);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+
+    for (size_t i = 0; i < UI_MENU_COUNT; ++i) {
+        double row_y = my + UI_MENU_PAD + (double)i * ih;
+        double box_y = row_y + (ih - UI_CHECK_SZ) / 2.0;
+        double box_x = mx + UI_MENU_PAD;
+
+        set_rgb(cr, th->check_border);
+        cairo_set_line_width(cr, 1.5);
+        cairo_rectangle(cr, box_x, box_y, UI_CHECK_SZ, UI_CHECK_SZ);
+        cairo_stroke(cr);
+
+        if (*menu_item_flag(w, i)) {
+            set_rgb(cr, th->check_mark);
+            cairo_set_line_width(cr, 2.0);
+            cairo_move_to(cr, box_x + UI_CHECK_SZ * 0.2, box_y + UI_CHECK_SZ * 0.55);
+            cairo_line_to(cr, box_x + UI_CHECK_SZ * 0.42, box_y + UI_CHECK_SZ * 0.78);
+            cairo_line_to(cr, box_x + UI_CHECK_SZ * 0.8, box_y + UI_CHECK_SZ * 0.25);
+            cairo_stroke(cr);
+        }
+
+        set_rgb(cr, th->menu_text);
+        double tx = box_x + UI_CHECK_SZ + UI_MENU_PAD;
+        double ty = row_y + (ih + fe.ascent - fe.descent) / 2.0;
+        cairo_move_to(cr, tx, ty);
+        cairo_show_text(cr, UI_MENU_ITEMS[i].label);
+    }
+}
+
+/* Draws the transient status toast (a banner at the bottom of the window). */
+static void draw_toast(cairo_t *cr, browser_window *w) {
+    const char *msg = browser_status_text(&w->bs, now_ms());
+    if (msg == NULL) return;
+    const ui_theme *th = &w->theme;
+
+    cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, th->body_font);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    cairo_text_extents_t te;
+    cairo_text_extents(cr, msg, &te);
+
+    double bh = fe.height + 2.0 * UI_TOAST_PAD;
+    double bw = te.width + 2.0 * UI_TOAST_PAD;
+    double bx = UI_MARGIN;
+    double by = (double)w->height - bh - UI_MARGIN;
+
+    set_rgb(cr, th->toast_bg);
+    cairo_rectangle(cr, bx, by, bw, bh);
+    cairo_fill(cr);
+    set_rgb(cr, th->toast_text);
+    cairo_move_to(cr, bx + UI_TOAST_PAD, by + UI_TOAST_PAD + fe.ascent);
+    cairo_show_text(cr, msg);
 }
 
 static void paint(browser_window *w) {
@@ -813,8 +1033,8 @@ static void paint(browser_window *w) {
     cairo_rectangle(cr, 0, ttop, w->width, UI_TOOLBAR_H);
     cairo_fill(cr);
 
-    double back_x, fwd_x, url_x, url_w, go_x;
-    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x);
+    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
+    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
     double bl = ttop + (UI_TOOLBAR_H + fe.ascent - fe.descent) / 2.0;
 
     /* Buttons. */
@@ -829,6 +1049,9 @@ static void paint(browser_window *w) {
 
     set_rgb(cr, th->chrome_text);
     draw_text(cr, "Go", go_x + UI_BTN_W / 2.0, bl, 1);
+
+    /* Options-menu (gear) button: a three-bar icon. */
+    draw_hamburger(cr, th->chrome_text, menu_x, ttop);
 
     /* URL bar. */
     set_rgb(cr, w->url_bar_focused ? th->url_bg_focused : th->url_bg);
@@ -930,6 +1153,10 @@ static void paint(browser_window *w) {
         }
     }
 
+    /* Overlays painted on top of the content. */
+    draw_menu(cr, w);
+    draw_toast(cr, w);
+
     cairo_surface_flush(w->cairo_surface);
     cairo_destroy(cr);
 }
@@ -987,21 +1214,57 @@ static const struct zxdg_toplevel_decoration_v1_listener deco_listener = { deco_
 
 /* --- input --- */
 
+/* Applies the hand (over a link) or default arrow cursor for the current pointer
+ * enter serial. A no-op when no themed cursor is available (the compositor keeps
+ * its own default). */
+static void set_cursor(browser_window *w, int hand) {
+    if (w->pointer == NULL || w->cursor_surface == NULL) return;
+    struct wl_cursor *c = hand ? w->cursor_hand : w->cursor_default;
+    if (c == NULL || c->image_count == 0) return;
+    struct wl_cursor_image *img = c->images[0];
+    struct wl_buffer *buf = wl_cursor_image_get_buffer(img);
+    if (buf == NULL) return;
+    wl_pointer_set_cursor(w->pointer, w->pointer_serial, w->cursor_surface,
+                          (int32_t)img->hotspot_x, (int32_t)img->hotspot_y);
+    wl_surface_attach(w->cursor_surface, buf, 0, 0);
+    wl_surface_damage(w->cursor_surface, 0, 0, (int32_t)img->width, (int32_t)img->height);
+    wl_surface_commit(w->cursor_surface);
+}
+
+/* Recomputes which link (if any) is under the pointer; on a change, updates the
+ * cursor shape and repaints so the hover highlight follows. */
+static void update_hover(browser_window *w) {
+    const char *h = (w->doc != NULL && !w->menu_open)
+                    ? link_at_point(w, w->ptr_x, w->ptr_y) : NULL;
+    if (h == w->hover_href) return;
+    int was = (w->hover_href != NULL);
+    int now = (h != NULL);
+    w->hover_href = h;
+    if (was != now) set_cursor(w, now);
+    redraw(w);
+}
+
 static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_surface *sf, wl_fixed_t x, wl_fixed_t y) {
-    (void)p; (void)s; (void)sf;
+    (void)p; (void)sf;
     browser_window *w = (browser_window *)d;
+    w->pointer_serial = s;
     w->ptr_x = wl_fixed_to_double(x);
     w->ptr_y = wl_fixed_to_double(y);
+    set_cursor(w, 0);
+    update_hover(w);
 }
 static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf) {
-    (void)d; (void)p; (void)s; (void)sf;
+    (void)p; (void)s; (void)sf;
+    browser_window *w = (browser_window *)d;
+    if (w->hover_href != NULL) { w->hover_href = NULL; redraw(w); }
 }
 static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y) {
     (void)p; (void)t;
     browser_window *w = (browser_window *)d;
     w->ptr_x = wl_fixed_to_double(x);
     w->ptr_y = wl_fixed_to_double(y);
+    update_hover(w);
 }
 
 static void load_current(browser_window *w) {
@@ -1020,6 +1283,28 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
 
     double ttop = toolbar_top(w);
 
+    /* While the options menu is open it captures the click: a hit on a row toggles
+     * that capability and re-renders from cache (no network); any click elsewhere
+     * dismisses the menu. */
+    if (w->menu_open) {
+        double mx, my, mw, mh, ih;
+        menu_panel_rect(w, &mx, &my, &mw, &mh, &ih);
+        if (w->ptr_x >= mx && w->ptr_x < mx + mw && w->ptr_y >= my && w->ptr_y < my + mh) {
+            if (w->ptr_y >= my + UI_MENU_PAD) {
+                size_t row = (size_t)((w->ptr_y - (my + UI_MENU_PAD)) / ih);
+                if (row < UI_MENU_COUNT) {
+                    bool *flag = menu_item_flag(w, row);
+                    *flag = !*flag;
+                    render_current(w);
+                }
+            }
+        } else {
+            w->menu_open = 0;
+        }
+        redraw(w);
+        return;
+    }
+
     /* Client-side decoration controls. */
     if (w->use_csd && w->ptr_y < UI_TITLEBAR_H) {
         double min_x, max_x, close_x;
@@ -1032,11 +1317,13 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
         return;
     }
 
-    double back_x, fwd_x, url_x, url_w, go_x;
-    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x);
+    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
+    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
 
     if (w->ptr_y >= ttop && w->ptr_y < ttop + UI_TOOLBAR_H) {
-        if (w->ptr_x >= go_x) {
+        if (w->ptr_x >= menu_x) {
+            w->menu_open = 1;
+        } else if (w->ptr_x >= go_x && w->ptr_x < menu_x) {
             browser_commit_url_bar(&w->bs);
             load_current(w);
         } else if (w->ptr_x >= url_x && w->ptr_x < url_x + url_w) {
@@ -1168,11 +1455,12 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
     }
 
     /* Ctrl+I toggles loading remote images for this session (Privacy by Default:
-     * off). Reloading the current page rebuilds the render so the tracking
-     * warning and the per-image placeholders update to the new posture. */
+     * off), the same capability the options menu exposes. Re-renders from the
+     * cached source (no network) so the tracking warning and the per-image
+     * placeholders update to the new posture. */
     if (ctrl && !shift && (sym == XKB_KEY_i || sym == XKB_KEY_I)) {
         w->caps.images = !w->caps.images;
-        load_current(w);
+        render_current(w);
         redraw(w);
         return;
     }
@@ -1334,6 +1622,18 @@ ui_status ui_run_browser(const char *start_url) {
             ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
     }
 
+    /* Themed cursors: a hand over links, the default arrow elsewhere. Best-effort
+     * from the system theme (no absolute paths); if unavailable the compositor's
+     * own default cursor is used. */
+    w.cursor_theme = wl_cursor_theme_load(NULL, UI_CURSOR_SIZE, w.shm);
+    if (w.cursor_theme != NULL) {
+        w.cursor_default = wl_cursor_theme_get_cursor(w.cursor_theme, "left_ptr");
+        w.cursor_hand = wl_cursor_theme_get_cursor(w.cursor_theme, "pointer");
+        if (w.cursor_hand == NULL) w.cursor_hand = wl_cursor_theme_get_cursor(w.cursor_theme, "hand2");
+        if (w.cursor_hand == NULL) w.cursor_hand = wl_cursor_theme_get_cursor(w.cursor_theme, "hand1");
+    }
+    w.cursor_surface = wl_compositor_create_surface(w.compositor);
+
     wl_surface_commit(w.surface);
 
     /* Initial page. Provide instructions because the strict TLS policy means
@@ -1348,10 +1648,11 @@ ui_status ui_run_browser(const char *start_url) {
             "  - https://<site>   (TLS 1.3, PQ-hybrid KE, leaf RSA >= 3072 / ECDSA)\n"
             "  - /path/file.html  (local file)\n"
             "\n"
-            "Pages render with structure (headings, links, paragraphs). Remote\n"
-            "images are off by default; a page that uses them shows a tracking\n"
-            "warning and a placeholder per image. Press Ctrl+I to toggle images\n"
-            "for the current page (Ctrl+L focuses the URL bar).\n"
+            "Pages render with structure (headings, links, paragraphs) and you can\n"
+            "click links to navigate. Remote images and author colors are off by\n"
+            "default (Privacy by Default); the menu button at the top right toggles\n"
+            "them (or Ctrl+I for images). A page that uses images shows a tracking\n"
+            "warning and a placeholder per image. Ctrl+L focuses the URL bar.\n"
             "\n"
             "Sites whose end-entity certificate uses RSA 2048 are rejected with\n"
             "status 5 (weak algorithm). This is fail-closed by design.", 0);
@@ -1361,8 +1662,33 @@ ui_status ui_run_browser(const char *start_url) {
     w.url_bar_focused = 1;
     browser_url_bar_clear(&w.bs);
 
-    while (w.running && wl_display_dispatch(w.display) != -1) {
-        /* events drive redraw */
+    /* Event loop using the prepare_read/read_events pattern so a poll timeout can
+     * fire the toast's auto-hide without racing the Wayland queue. The timeout is
+     * the remaining lifetime of an active toast, or infinite when there is none. */
+    while (w.running) {
+        while (wl_display_prepare_read(w.display) != 0) {
+            wl_display_dispatch_pending(w.display);
+        }
+        wl_display_flush(w.display);
+
+        uint64_t t = now_ms();
+        int timeout = -1;
+        if (browser_status_text(&w.bs, t) != NULL) {
+            uint64_t exp = w.bs.status_expiry_ms;
+            timeout = (exp > t) ? (int)(exp - t) : 0;
+        }
+
+        struct pollfd pfd = { .fd = wl_display_get_fd(w.display), .events = POLLIN, .revents = 0 };
+        int pr = poll(&pfd, 1, timeout);
+        if (pr > 0 && (pfd.revents & POLLIN)) {
+            if (wl_display_read_events(w.display) == -1) break;
+            if (wl_display_dispatch_pending(w.display) == -1) break;
+        } else {
+            wl_display_cancel_read(w.display);
+            if (pr == 0) redraw(&w);            /* toast expired: repaint to clear it */
+            else if (pr > 0) break;             /* POLLHUP/POLLERR: the display is gone */
+            else if (errno != EINTR) break;     /* a real poll error */
+        }
     }
 
     destroy_buffer(&w);
@@ -1374,6 +1700,8 @@ ui_status ui_run_browser(const char *start_url) {
     if (w.keyboard) wl_keyboard_destroy(w.keyboard);
     if (w.pointer) wl_pointer_destroy(w.pointer);
     if (w.seat) wl_seat_destroy(w.seat);
+    if (w.cursor_surface) wl_surface_destroy(w.cursor_surface);
+    if (w.cursor_theme) wl_cursor_theme_destroy(w.cursor_theme);
     if (w.wm_base) xdg_wm_base_destroy(w.wm_base);
     if (w.shm) wl_shm_destroy(w.shm);
     if (w.compositor) wl_compositor_destroy(w.compositor);
@@ -1385,6 +1713,8 @@ ui_status ui_run_browser(const char *start_url) {
     xkb_context_unref(w.xkb_ctx);
 
     clear_doc(&w);
+    free(w.cur_html);
+    free(w.cur_top);
     browser_free(&w.bs);
 
     /* Release the process-wide font caches so a leak checker sees a clean exit.

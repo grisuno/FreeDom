@@ -272,6 +272,37 @@ freedom/
   el pintor y el hit-test (única fuente de verdad de la geometría, sin números mágicos). *(verde:
   21 suites / 281 tests + ASan/UBSan limpio; la GUI compila bajo los flags endurecidos, sin display
   para verificar el clic visualmente aquí.)*
+- **Navegación enriquecida + menú de opciones + colores del autor** — pulido interactivo y render
+  con color, lógica nueva en módulos puros y testeables; la GUI solo cablea. Piezas: `css_color`
+  (prefijo `cc_`): parser puro de tokens de color CSS —`#rgb`/`#rgba`/`#rrggbb`/`#rrggbbaa` (alfa
+  validado y descartado, opaco), `rgb()`/`rgba()` con enteros o porcentajes, y el conjunto extendido
+  de colores con nombre por búsqueda binaria sobre tabla ordenada (148 entradas, dato de referencia)—,
+  falla cerrado (`transparent`/desconocido/`hsl()` → `CC_ERR_SYNTAX`), sin asignación dinámica, 14
+  tests. `link_nav` enriquecido: `ln_result` añade `reason` (`ln_block_reason` + `ln_block_reason_text`
+  para el aviso exacto: downgrade / esquema ajeno / sin base / irresoluble) y `fragment` (el `#id` se
+  separa por el primer `#`; la navegación actúa sobre la referencia limpia y el ancla se captura para
+  un *scroll* futuro), 20 tests. `browser`: aviso transitorio (toast) acotado en el tiempo
+  —`browser_set_status`/`browser_status_text` con reloj `now_ms` aportado por el llamante (puro,
+  testeable), capacidad y duración en `BROWSER_STATUS_MAX`/`BROWSER_STATUS_DURATION_MS`, una navegación
+  descarta un toast obsoleto—, 12 tests. Colores del autor de extremo a extremo: `page_view` extrae el
+  `color` del ancestro más cercano (atributo `style` en línea —`background-color` nunca se confunde con
+  `color`— o `<font color>`) vía `css_color` a un nuevo `pv_run.fg_rgb` empaquetado (`pv_set_color`); el
+  IPC del worker `tab` lo transporta por run (capa fija anti-desync); `render_doc` lo propaga a
+  `rd_block.fg_rgb` **solo si `caps.css`** (Secure/Privacy by Default: apagado), de modo que el *gate* de
+  CSS vive en una función pura (page_view +2, render_doc +1, tab +1 tests). GUI (`gui/browser_ui.c`):
+  botón de menú (hamburguesa) que abre un panel de opciones con casillas "Load images" y "Author colors
+  (CSS)" mapeadas a `rdp_caps` por `offsetof` (etiquetas y flag en un único sitio, sin índices mágicos);
+  al alternar se **re-renderiza desde una caché del HTML** (`set_cache`/`render_current`) sin volver a la
+  red —corrige el patrón previo de Ctrl+I que re-descargaba—; toast que pinta `ln_block_reason_text` al
+  pulsar un enlace inseguro y se auto-oculta vía un bucle de eventos `poll`+`prepare_read` con timeout
+  igual a la vida restante del aviso; cursor de mano sobre enlaces (`wayland-cursor`, tema del sistema,
+  sin rutas absolutas) + resaltado del enlace bajo el puntero (hit-test en movimiento); colores del autor
+  pintados (override del color del tema conservando subrayado/negrita); todo el tema (colores del menú,
+  resaltado, toast) centralizado en `ui_theme`. *(verde: 22 suites / 304 tests + ASan/UBSan limpio.
+  Pendiente honesto: *scroll* al ancla del fragmento (requiere mapa de posiciones del documento);
+  transcodificación de charset; persistencia del opt-in por sitio; la GUI compila bajo los flags
+  endurecidos pero su verificación visual —menú, hover, toast, color— requiere una sesión Wayland real,
+  no disponible aquí.)*
 
 ---
 
