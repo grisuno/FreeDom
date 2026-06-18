@@ -2,6 +2,8 @@
 
 <img width="937" height="735" alt="image" src="https://github.com/user-attachments/assets/23e389ad-434f-4ebe-8021-75ea4402f16f" />
 
+<img width="924" height="721" alt="image" src="https://github.com/user-attachments/assets/e076cd89-62f2-40cf-b607-28caa88415e6" />
+
 A free and open-source minimal web browser written in C, focused on Zero Trust and Zero Knowledge principles.
 
 ## Philosophy
