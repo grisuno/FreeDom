@@ -1,0 +1,25 @@
+Format: 1.8
+Date: Fri, 19 Jun 2026 14:07:29 -0400
+Source: freedom
+Binary: freedom
+Architecture: amd64
+Version: 0.0.3-1
+Distribution: UNRELEASED
+Urgency: medium
+Maintainer: grisun0 <grisun0@kali>
+Changed-By: grisun0 <grisun0@kali>
+Description:
+ freedom    - FreeDom - Zero Trust / Zero Knowledge RedTeam Browser
+Changes:
+ freedom (0.0.3-1) UNRELEASED; urgency=medium
+ .
+   * Initial release. (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+Checksums-Sha1:
+ 6f0cda6fbc74030045759763afd15447ea74d6d2 14133 freedom_0.0.3-1_amd64.buildinfo
+ c4e0dea370280b1953fa49ae8890c8d77273b77f 2596 freedom_0.0.3-1_amd64.deb
+Checksums-Sha256:
+ 6209822704436bb52d0ec3c6ff2cb327626dbd4596dc5ab3f8fd8f16c2661496 14133 freedom_0.0.3-1_amd64.buildinfo
+ f6e4e19f92f4e17ee6169c9f3674c2f0cea6d06133baa2511f5bfbf6fa48b848 2596 freedom_0.0.3-1_amd64.deb
+Files:
+ 4e493b7d6fed53b23900f4de4d669706 14133 web optional freedom_0.0.3-1_amd64.buildinfo
+ 708f5bb534c9b99faa401eeac49eb6bd 2596 web optional freedom_0.0.3-1_amd64.deb

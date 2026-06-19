@@ -108,7 +108,7 @@ $(BUILD_DIR)/qjs_%.o: $(QJS_DIR)/%.c | $(BUILD_DIR)
 install: all
 	@echo "[*] Installing binary and assets..."
 	install -d /usr/local/bin
-	install -m 0755 build/tu_binario_principal /usr/local/bin/
+	install -m 0755 build/freedom /usr/local/bin/
 	@echo "[+] Installation successful."
 
 # Until the corresponding src/*.c exists, a test fails to link on purpose:

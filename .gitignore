@@ -164,3 +164,11 @@ cython_debug/
 # graphify
 
 graphify-out/
+
+# Fuzzing
+
+fuzz/
+
+# Packaging
+
+debian/
