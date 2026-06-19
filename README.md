@@ -50,7 +50,7 @@ The name reflects its core goals:
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
-## Building
+## Building On Premise
 
 ```bash
 # Clone the repository
