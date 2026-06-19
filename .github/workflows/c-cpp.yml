@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Clonar el repositorio y sus submódulos de forma recursiva
+    # 1. Clonar el repositorio
     - uses: actions/checkout@v4
       with:
         submodules: recursive
 
-    # 2. Instalar dependencias del sistema requeridas por FreeDom
+    # 2. Instalar dependencias del sistema
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -41,17 +41,14 @@ jobs:
         sudo make install
         sudo ldconfig
 
-    # 4. Compilar el proyecto inyectando _GNU_SOURCE para OpenSSL
-    - name: make all
-      env:
-        CPPFLAGS: "-D_GNU_SOURCE"
-        CFLAGS: "-D_GNU_SOURCE"
-      run: make all
-
-    # 5. Limpieza (Opcional, pero incluido en tu flujo original)
+    # 4. Limpiar el directorio de build primero
     - name: make clean
       run: make clean
 
-    # 6. Ejecutar la suite de tests de FreeDom
+    # 5. Compilar el proyecto heredando las rutas correctas
+    - name: make all
+      run: make all EXTRA_CFLAGS="-D_GNU_SOURCE -I/usr/local/include" CFLAGS="-std=c11 -Wall -Wextra -Werror -Wshadow -Wpointer-arith -Wvla -Wwrite-strings -fstack-protector-strong -fstack-clash-protection -fcf-protection=full -D_FORTIFY_SOURCE=3 -fPIE -O2 -Iinclude -I/usr/local/include -D_GNU_SOURCE"
+
+    # 6. Ejecutar las pruebas
     - name: make test
       run: make test
