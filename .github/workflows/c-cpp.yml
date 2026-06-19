@@ -11,10 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. Clonar el repositorio y sus submódulos de forma recursiva
     - uses: actions/checkout@v4
       with:
         submodules: recursive
 
+    # 2. Instalar dependencias del sistema requeridas por FreeDom
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -29,7 +31,7 @@ jobs:
           fontconfig \
           libfreetype6-dev
 
-    # clonamos, compilamos e instalamos lexbor globalmente en el contenedor de CI
+    # 3. Descargar, compilar e instalar Lexbor globalmente
     - name: Install Lexbor from source
       run: |
         git clone https://github.com/lexbor/lexbor.git
@@ -37,14 +39,19 @@ jobs:
         cmake -DLEXBOR_BUILD_SEPARATELY=OFF .
         make
         sudo make install
-        # Actualizamos la caché de librerías del sistema para que reconozca el nuevo .so
         sudo ldconfig
 
+    # 4. Compilar el proyecto inyectando _GNU_SOURCE para OpenSSL
     - name: make all
+      env:
+        CPPFLAGS: "-D_GNU_SOURCE"
+        CFLAGS: "-D_GNU_SOURCE"
       run: make all
 
+    # 5. Limpieza (Opcional, pero incluido en tu flujo original)
     - name: make clean
       run: make clean
 
+    # 6. Ejecutar la suite de tests de FreeDom
     - name: make test
       run: make test
