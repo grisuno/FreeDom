@@ -37,7 +37,7 @@ cd FreeDom
 # sudo ./install.sh # Soon #
 
 # Build the browser
-make clean && make all produce build/freedom 
+make clean && make all
 
 # Run in GUI mode
 weston --backend=x11-backend.so --renderer=pixman --width=1024 --height=768 &
