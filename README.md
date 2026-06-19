@@ -69,6 +69,29 @@ sudo docker run -it \
   freedom-browser
 ```
 
+## Agentic Automation (MCP Server)
+
+This repository includes an MCP (Model Context Protocol) server (`app.py`) that allows AI agents and LLM bridges (like the LazyOwn framework or OpenCode Adapter) to interact with and monitor the fuzzing environment natively.
+
+### Exposed Tools
+* `read_fuzz_stats`: Reads the real-time performance and metrics from the active AFL++ session.
+* `list_unique_crashes`: Lists all unique payloads that triggered a browser crash.
+* `run_freedom_headless`: Executes `./build/freedom --headless <payload_path>` to triage specific inputs or mutated seeds programmatically.
+
+### Usage
+
+1. Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+1. Configure your MCP client or agent routing table to invoke the server via stdio:
+
+```bash
+python3 app.py
+```
+
 ## Project Structure
 
 ```text
