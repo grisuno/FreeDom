@@ -51,6 +51,24 @@ WAYLAND_DISPLAY=wayland-1 ./build/freedom
 ./freedom --headless https://example.com
 ```
 
+## Docker
+
+FreeDom is fully compatible with Docker, enabling seamless deployment within an isolated sandbox environment.
+
+FreeDom has evolved from an experimental build into a fully automated environment. The repository now features standard Unix ./configure validation, a robust install.sh for dependency management, and strict Zero-Trust runtime isolation using a custom Docker architecture—all continuously validated through an automated GitHub Actions CI/CD workflow.
+
+```bash
+sudo docker build -t freedom-browser . 
+
+sudo docker run -it \
+  --name freedom-test \
+  -p 8080:8080 \
+  --cap-drop=ALL \
+  --security-opt no-new-privileges:true \
+  --memory="2g" \
+  freedom-browser
+```
+
 ## Project Structure
 
 ```text
@@ -64,6 +82,14 @@ FreeDom/
 ├── docs/          # Documentation
 └── Makefile       # Build system
 ```
+
+## CI/CD & Enterprise Deployment
+
+FreeDom is built for deterministic environments and integrates a layered deployment strategy:
+
+* **Automated CI/CD Pipeline:** Every commit triggers a headless GitHub Actions workflow that fuzzes code, runs unit tests via CMocka, and validates cross-compilation parity.
+* **Standard Toolchain (`./configure && make`):** Implements a traditional, low-dependency build workflow with built-in parches for OpenSSL compatibility.
+* **Deterministic Sandbox (Docker):** Bundles a secure Xvfb + noVNC + Weston stack inside a non-root container, stripping Linux capabilities (`--cap-drop=ALL`) to guarantee zero host contamination during execution.
 
 ## Security
 
