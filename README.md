@@ -159,7 +159,7 @@ FreeDom follows security-by-design principles:
 See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
 
-## Build & Development
+## Development
 
 This project is written in pure C11 and is security-hardened by default using stack protection, control-flow protection (-fcf-protection), and PIE. 
 
@@ -184,6 +184,19 @@ Run the following commands from the root directory of the repository:
 * make fuzz-js: Initiates a 30-second coverage-guided fuzzing session on the isolated JavaScript sandbox.
 * make view: Compiles the experimental standalone Wayland + Cairo GUI demo application (build/freedom-view).
 * make clean: Wipes out the build/ directory and resets the environment.
+
+
+```bash
+make 
+sudo make install
+make test
+make itest
+make asan
+make fuzz
+make fuzz-js
+make view
+make clean
+```
 
 ## License
 
