@@ -50,6 +50,11 @@ WAYLAND_DISPLAY=wayland-1 ./build/freedom
 # Run in headless mode
 ./freedom --headless https://example.com
 ```
+## Fuzzing
+
+```bash
+./fuzz.sh
+```
 
 ## Docker
 
