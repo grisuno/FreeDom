@@ -41,13 +41,22 @@ jobs:
         sudo make install
         sudo ldconfig
 
-    # 4. Limpiar el directorio de build primero
+    # 4. Limpiar antes de compilar
     - name: make clean
       run: make clean
 
-    # 5. Compilar el proyecto heredando las rutas correctas
+    # 5. Compilar usando CPATH para Lexbor y agregando _GNU_SOURCE solo si no existe
     - name: make all
-      run: make all EXTRA_CFLAGS="-D_GNU_SOURCE -I/usr/local/include" CFLAGS="-std=c11 -Wall -Wextra -Werror -Wshadow -Wpointer-arith -Wvla -Wwrite-strings -fstack-protector-strong -fstack-clash-protection -fcf-protection=full -D_FORTIFY_SOURCE=3 -fPIE -O2 -Iinclude -I/usr/local/include -D_GNU_SOURCE"
+      run: |
+        # Añadimos _GNU_SOURCE directamente en secure_fetch.c antes de compilar para no romper los demás archivos
+        sed -i '1s/^/#define _GNU_SOURCE\n/' src/secure_fetch.c
+        
+        # Ejecutamos el make limpio pasándole la ruta de /usr/local a través de CPATH
+        export CPATH="/usr/local/include:$CPATH"
+        export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
+        export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+        
+        make all
 
     # 6. Ejecutar las pruebas
     - name: make test
