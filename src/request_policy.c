@@ -13,7 +13,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+
 #define RP_MAX_HOST   255u  /* RFC 1035 maximum host length */
 #define RP_MAX_LABELS 128u  /* far above any real host's label count */
 
@@ -22,7 +22,7 @@
 static char lower(char c) {
     return (c >= 'A' && c <= 'Z') ? (char)(c + ('a' - 'A')) : c;
 }
-/*
+
 static int ci_starts_with(const char *s, const char *prefix) {
     while (*prefix) {
         if (*s == '\0' || lower(*s) != lower(*prefix)) return 0;
@@ -30,7 +30,7 @@ static int ci_starts_with(const char *s, const char *prefix) {
     }
     return 1;
 }
-*/
+
 /* --- Public Suffix List lookup (binary search over the generated tables) --- */
 
 static int psl_cmp(const void *key, const void *elem) {
@@ -76,32 +76,18 @@ static size_t public_suffix_labels(const char *host, const size_t *off, size_t n
 int rp_host_of(const char *url, char *out, size_t out_size) {
     if (url == NULL || out == NULL || out_size == 0) return -1;
 
-    const char *p = url;
-
-    /* Saltar esquema si existe */
-    const char *scheme = strstr(url, "://");
-    if (scheme != NULL) {
-        p = scheme + 3;
-    }
-
-    /* Si es URL relativa (empieza con /), devolver error controlado */
-    if (url[0] == '/') {
-        strncpy(out, "same-origin", out_size - 1);
-        out[out_size - 1] = '\0';
-        return 0;   /* Éxito, pero marcado como same-origin */
-    }
+    const char *p = strstr(url, "://");
+    if (p == NULL) return -1;
+    p += 3;
 
     size_t n = 0;
     while (p[n] != '\0' && p[n] != '/' && p[n] != ':' &&
            p[n] != '?' && p[n] != '#') {
         ++n;
     }
-
     if (n == 0 || n + 1 > out_size) return -1;
 
-    for (size_t i = 0; i < n; ++i) {
-        out[i] = lower(p[i]);
-    }
+    for (size_t i = 0; i < n; ++i) out[i] = lower(p[i]);
     out[n] = '\0';
     return 0;
 }
@@ -148,29 +134,18 @@ int rp_same_site(const char *top_level_url, const char *request_url) {
 }
 
 rp_decision rp_evaluate(const char *top_level_url, const char *request_url) {
-    (void)top_level_url;   /* silencia warning unused parameter */
+    char rh[256], th[256], rs[256], ts[256];
 
-    if (request_url == NULL) {
-        return RP_BLOCK_INVALID;
-    }
+    /* The request must name a host and use https. */
+    if (rp_host_of(request_url, rh, sizeof rh) != 0) return RP_BLOCK_INVALID;
+    if (!ci_starts_with(request_url, "https://")) return RP_BLOCK_SCHEME;
 
-    /* === FIX PARA IMÁGENES (Google, DuckDuckGo, etc.) === */
+    /* The top-level document must be locatable and https, or we fail closed. */
+    if (rp_host_of(top_level_url, th, sizeof th) != 0) return RP_BLOCK_INVALID;
+    if (!ci_starts_with(top_level_url, "https://")) return RP_BLOCK_INVALID;
 
-    /* Permitir URLs relativas (las más usadas en sitios modernos) */
-    if (request_url[0] == '/') {
-        return RP_ALLOW;
-    }
+    if (rp_site_of(rh, rs, sizeof rs) != 0) return RP_BLOCK_INVALID;
+    if (rp_site_of(th, ts, sizeof ts) != 0) return RP_BLOCK_INVALID;
 
-    /* Permitir imágenes en base64 (data:) */
-    if (strncmp(request_url, "data:", 5) == 0) {
-        return RP_ALLOW;
-    }
-
-    /* Permitir cualquier URL que tenga esquema http/https */
-    if (strstr(request_url, "http://") != NULL || strstr(request_url, "https://") != NULL) {
-        return RP_ALLOW;
-    }
-
-    /* Fallback */
-    return RP_BLOCK_INVALID;
+    return (strcmp(rs, ts) == 0) ? RP_ALLOW : RP_BLOCK_THIRD_PARTY;
 }

@@ -15,6 +15,11 @@ LEXBOR_LIBS   := $(shell pkg-config --libs lexbor 2>/dev/null || echo -llexbor)
 CMOCKA_CFLAGS := $(shell pkg-config --cflags cmocka 2>/dev/null)
 CMOCKA_LIBS   := $(shell pkg-config --libs cmocka 2>/dev/null || echo -lcmocka)
 
+# image_decode (PNG only): libpng is already pulled in transitively by Cairo, so
+# this adds no new transitive dependency. Decoding runs inside the confined worker.
+PNG_CFLAGS    := $(shell pkg-config --cflags libpng 2>/dev/null)
+PNG_LIBS      := $(shell pkg-config --libs libpng 2>/dev/null || echo -lpng16)
+
 # UI (Hito 4+): Wayland + Cairo + xkbcommon for the browser GUI. fontconfig is
 # linked explicitly so the GUI can call FcFini() at shutdown (clean leak exit).
 WL_CFLAGS   := $(shell pkg-config --cflags wayland-client wayland-cursor cairo fontconfig xkbcommon 2>/dev/null)
@@ -67,9 +72,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_page_view $(BUILD_DIR)/test_render_policy \
              $(BUILD_DIR)/test_render_doc $(BUILD_DIR)/test_url \
              $(BUILD_DIR)/test_link_nav $(BUILD_DIR)/test_css_color \
-             $(BUILD_DIR)/test_textfield $(BUILD_DIR)/test_form
+             $(BUILD_DIR)/test_textfield $(BUILD_DIR)/test_form \
+             $(BUILD_DIR)/test_image_decode
 
-.PHONY: all install test itest asan fuzz fuzz-js view clean
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img view clean
 
 all: $(BUILD_DIR)/freedom
 
@@ -88,6 +94,10 @@ $(PSL_OBJ): $(BUILD_DIR)/psl_data.c include/psl_data.h | $(BUILD_DIR)
 
 $(BUILD_DIR)/request_policy.o: $(SRC_DIR)/request_policy.c include/psl_data.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# image_decode pulls in <png.h>; libpng's include dir is added explicitly.
+$(BUILD_DIR)/image_decode.o: $(SRC_DIR)/image_decode.c include/image_decode.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(PNG_CFLAGS) -c $< -o $@
 
 # js_sandbox / js_dom include the vendored quickjs.h: keep our code under the
 # hardened flags, but pull the header via -isystem so its warnings do not trip
@@ -156,7 +166,7 @@ $(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/r
 $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_doc.o \
                               $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
                               $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_color.o \
-                              $(BUILD_DIR)/html_parse.o $(PSL_OBJ) | $(BUILD_DIR)
+                              $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 # Pure URL operations: validation + RFC 3986 reference resolution. No I/O deps.
@@ -170,6 +180,10 @@ $(BUILD_DIR)/test_link_nav: $(TEST_DIR)/test_link_nav.c $(BUILD_DIR)/link_nav.o 
 # Pure CSS color token parser. No I/O deps.
 $(BUILD_DIR)/test_css_color: $(TEST_DIR)/test_css_color.c $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# PNG decode (runs inside the confined worker). Links libpng only.
+$(BUILD_DIR)/test_image_decode: $(TEST_DIR)/test_image_decode.c $(BUILD_DIR)/image_decode.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(PNG_CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(PNG_LIBS) $(CMOCKA_LIBS)
 
 # Pure editable text-field primitive (UA field + form inputs). No I/O deps.
 $(BUILD_DIR)/test_textfield: $(TEST_DIR)/test_textfield.c $(BUILD_DIR)/textfield.o | $(BUILD_DIR)
@@ -198,8 +212,9 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
                        $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o \
-                       $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
+                       $(BUILD_DIR)/css_color.o $(BUILD_DIR)/image_decode.o \
+                       $(QJS_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(PNG_LIBS) $(CMOCKA_LIBS)
 
 # Freedom browser (Hito 5+): GUI by default, --headless for terminal output.
 # Links the full secure tab pipeline plus the Wayland/Cairo/xkbcommon UI.
@@ -218,10 +233,11 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/request_policy.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
+                      $(BUILD_DIR)/image_decode.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
                       $(BUILD_DIR)/xdg-decoration-client-protocol.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(WL_LIBS)
+	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(PNG_LIBS) $(WL_LIBS)
 
 $(BUILD_DIR)/test_browser: $(TEST_DIR)/test_browser.c $(BUILD_DIR)/browser.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -265,6 +281,15 @@ fuzz-js: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_js_sandbox.c $(SRC_DIR)/js_sandbox.c $(QJS_SRC) \
 	  -o $(BUILD_DIR)/fuzz_js_sandbox $(JS_LIBS)
 	./$(BUILD_DIR)/fuzz_js_sandbox -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the PNG decoder (clang + libFuzzer). Hostile image
+# bytes through sniff + dimensions + decode + free must never crash/leak/UB.
+fuzz-img: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude $(PNG_CFLAGS) \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_image_decode.c $(SRC_DIR)/image_decode.c \
+	  -o $(BUILD_DIR)/fuzz_image_decode $(PNG_LIBS)
+	./$(BUILD_DIR)/fuzz_image_decode -max_total_time=30 -rss_limit_mb=2048
 
 # --- UI demo (Hito 4): Wayland + Cairo. Visual test, not part of `make test`. ---
 # Generated xdg-shell glue (relaxed flags: generated code is not ours to harden).

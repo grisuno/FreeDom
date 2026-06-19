@@ -38,7 +38,11 @@ typedef enum sf_status {
 typedef enum sf_policy {
     SF_POLICY_PQ_HYBRID_KE = 0, /* default: require PQ-hybrid KE; allow classical certs */
     SF_POLICY_STRICT_PQ,        /* additionally require a PQ signature in the chain */
-    SF_POLICY_PERMISSIVE        /* keep TLS 1.3 + PQ-hybrid KE; allow weak certs on explicit user override */
+    SF_POLICY_PERMISSIVE,       /* keep TLS 1.3 + PQ-hybrid KE; allow weak certs on explicit user override */
+    SF_POLICY_ALLOW_CLASSICAL_KE /* navigability fallback: keep TLS 1.3 + full cert validation, but allow a
+                                  * classical (non-PQ) key exchange so a non-PQ host does not block
+                                  * navigation. The caller MUST surface the downgrade to the user (e.g. a
+                                  * toast). Only the PQ-ness of the KE is relaxed; nothing else. */
 } sf_policy;
 
 /* Minimal view of the verified certificate chain, used by sf_check_chain_policy.
@@ -68,7 +72,13 @@ typedef struct sf_response {
     char     *location;         /* owned; raw Location header value, or NULL if absent */
 } sf_response;
 
-#define SF_DEFAULT_KEX_GROUPS  "X25519MLKEM768"
+/* PQ-hybrid is preferred (listed first); classical groups are also offered so a
+ * non-PQ host completes the TLS 1.3 handshake and yields a clean SF_ERR_KEM_NOT_PQ
+ * under the strict policy (instead of an opaque handshake failure) — which lets the
+ * orchestrator offer the classical-KE navigability fallback. Offering a classical
+ * group never weakens the strict policy: a classical *negotiated* group is still
+ * rejected by sf_check_group_is_pq. */
+#define SF_DEFAULT_KEX_GROUPS  "X25519MLKEM768:X25519:secp256r1"
 #define SF_DEFAULT_USER_AGENT  "Freedom/0.1"
 #define SF_DEFAULT_MAX_BODY    ((size_t)(16u * 1024u * 1024u))
 #define SF_DEFAULT_TIMEOUT_MS  30000L
@@ -100,9 +110,12 @@ sf_status sf_check_group_is_pq(const char *negotiated_group);
 sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy);
 
 /* Enforces the full connection policy in order: TLS version, then KE group, then
- * certificate chain. Fails closed: a NULL chain (could not be inspected) yields
- * SF_ERR_INTERNAL rather than trusting the connection. This is the exact glue
- * sf_get applies to the negotiated state, exposed as a pure function for testing. */
+ * certificate chain. Under SF_POLICY_ALLOW_CLASSICAL_KE the KE-group PQ check is
+ * skipped (a classical key exchange is accepted); every other check, including the
+ * full certificate-chain validation, still applies. Fails closed: a NULL chain
+ * (could not be inspected) yields SF_ERR_INTERNAL rather than trusting the
+ * connection. This is the exact glue sf_get applies to the negotiated state,
+ * exposed as a pure function for testing. */
 sf_status sf_enforce_policy(const char *tls_version, const char *group,
                             const sf_chain_info *chain, sf_policy policy);
 

@@ -226,6 +226,27 @@ static void test_enforce_strict_requires_pq_chain(void **state) {
                                        SF_POLICY_STRICT_PQ), SF_OK);
 }
 
+/* A weak chain: SHA-1 signature (forbidden in every non-permissive policy). */
+static const sf_chain_info WEAK_SHA1 = {
+    .leaf_sig_alg = "sha1WithRSAEncryption", .rsa_bits = 4096, .uses_sha1 = 1, .has_pq_sig = 0
+};
+
+static void test_enforce_allow_classical_ke(void **state) {
+    (void)state;
+    /* The navigability fallback accepts a classical KE that strict mode rejects... */
+    assert_int_equal(sf_enforce_policy("TLSv1.3", "x25519", &OK_CLASSICAL,
+                                       SF_POLICY_PQ_HYBRID_KE), SF_ERR_KEM_NOT_PQ);
+    assert_int_equal(sf_enforce_policy("TLSv1.3", "x25519", &OK_CLASSICAL,
+                                       SF_POLICY_ALLOW_CLASSICAL_KE), SF_OK);
+    /* ...but it still enforces TLS 1.3, a non-NULL chain, and the cert checks. */
+    assert_int_equal(sf_enforce_policy("TLSv1.2", "x25519", &OK_CLASSICAL,
+                                       SF_POLICY_ALLOW_CLASSICAL_KE), SF_ERR_TLS_VERSION);
+    assert_int_equal(sf_enforce_policy("TLSv1.3", "x25519", NULL,
+                                       SF_POLICY_ALLOW_CLASSICAL_KE), SF_ERR_INTERNAL);
+    assert_int_equal(sf_enforce_policy("TLSv1.3", "x25519", &WEAK_SHA1,
+                                       SF_POLICY_ALLOW_CLASSICAL_KE), SF_ERR_WEAK_ALGO);
+}
+
 /* --- sf_is_redirect_code --- */
 
 static void test_redirect_code_recognizes_3xx(void **state) {
@@ -448,6 +469,7 @@ int main(void) {
         cmocka_unit_test(test_enforce_checks_group_after_version),
         cmocka_unit_test(test_enforce_fails_closed_on_null_chain),
         cmocka_unit_test(test_enforce_strict_requires_pq_chain),
+        cmocka_unit_test(test_enforce_allow_classical_ke),
         cmocka_unit_test(test_redirect_code_recognizes_3xx),
         cmocka_unit_test(test_redirect_code_rejects_others),
         cmocka_unit_test(test_location_parses_value),

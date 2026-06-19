@@ -13,11 +13,13 @@
 
 #include "browser.h"
 #include "css_color.h"
+#include "image_decode.h"
 #include "link_nav.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "textfield.h"
 #include "ui.h"
+#include "url.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -224,6 +226,20 @@ typedef struct ui_input_state {
     tf_field        field; /* live editable value */
 } ui_input_state;
 
+/* Hard cap on the response body of an image subresource (a PNG; the decoder bounds
+ * the decoded pixels further). Keeps a hostile server from streaming forever. */
+#define UI_IMAGE_MAX_BODY ((size_t)(8u * 1024u * 1024u))
+
+/* A decoded image for one RD_IMAGE block of the current doc. surface owns the
+ * pixels (ARGB32) and is NULL when the image was blocked, not fetched, or could
+ * not be decoded (the placeholder is drawn instead). nat_w/nat_h are the natural
+ * pixel dimensions. The block aliases w->doc (not owned). */
+typedef struct ui_image {
+    const rd_block  *blk;
+    cairo_surface_t *surface;
+    int              nat_w, nat_h;
+} ui_image;
+
 typedef struct browser_window {
     struct wl_display    *display;
     struct wl_registry   *registry;
@@ -269,6 +285,10 @@ typedef struct browser_window {
     ui_input_state *inputs;
     size_t          input_count;
     int             focused_input; /* index into inputs, or -1 */
+
+    /* Decoded images of the current page (rebuilt with the doc; one per RD_IMAGE). */
+    ui_image       *images;
+    size_t          image_count;
 
     /* Configurable network User-Agent (session only; empty => SF_DEFAULT_USER_AGENT).
      * navigator.userAgent in JS stays normalised by anti_fp regardless. Edited in
@@ -401,6 +421,39 @@ static void free_inputs(browser_window *w) {
     w->focused_input = -1;
 }
 
+/* Releases the decoded image surfaces of the current page and the array. */
+static void free_images(browser_window *w) {
+    for (size_t i = 0; i < w->image_count; ++i) {
+        if (w->images[i].surface != NULL) cairo_surface_destroy(w->images[i].surface);
+    }
+    free(w->images);
+    w->images = NULL;
+    w->image_count = 0;
+}
+
+/* The decoded image for a doc block, or NULL when it has none (blocked / failed). */
+static const ui_image *find_image(const browser_window *w, const rd_block *blk) {
+    for (size_t i = 0; i < w->image_count; ++i) {
+        if (w->images[i].blk == blk) return &w->images[i];
+    }
+    return NULL;
+}
+
+/* On-screen size of a decoded image: fit to the content width, never upscaled past
+ * the natural size. Returns 1 and sets dw/dh when a decoded surface exists for the
+ * block; 0 otherwise (the caller draws the placeholder). The single source of truth
+ * shared by layout (row height) and paint (blit), so they cannot drift apart. */
+static int image_display_size(const browser_window *w, const rd_block *blk,
+                              double box_w, double *dw, double *dh) {
+    const ui_image *im = find_image(w, blk);
+    if (im == NULL || im->surface == NULL || im->nat_w <= 0 || im->nat_h <= 0) return 0;
+    if (box_w < 1.0) box_w = 1.0;
+    double scale = ((double)im->nat_w > box_w) ? box_w / (double)im->nat_w : 1.0;
+    *dw = (double)im->nat_w * scale;
+    *dh = (double)im->nat_h * scale;
+    return 1;
+}
+
 /* Builds the live editable state for the current doc: one entry per editable
  * control, seeded with its declared value. Aliases the doc blocks (not owned). */
 static void rebuild_inputs(browser_window *w) {
@@ -438,6 +491,7 @@ static ui_input_state *find_input_state(browser_window *w, const rd_block *blk) 
  * hovered link and the live form controls alias the doc, so they are cleared too. */
 static void clear_doc(browser_window *w) {
     free_inputs(w);
+    free_images(w);
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
     w->hover_href = NULL;
 }
@@ -449,6 +503,112 @@ static void set_cache(browser_window *w, char *html, size_t len, const char *top
     w->cur_html = html;
     w->cur_html_len = len;
     w->cur_top = (top != NULL) ? strdup(top) : NULL;
+}
+
+/* Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row
+ * by row because Cairo may use a wider stride than the tightly packed worker buffer.
+ * Returns NULL on failure. */
+static cairo_surface_t *surface_from_pixels(const tab_image *img) {
+    if (img->data == NULL || img->width == 0 || img->height == 0) return NULL;
+    cairo_surface_t *s = cairo_image_surface_create(
+        CAIRO_FORMAT_ARGB32, (int)img->width, (int)img->height);
+    if (cairo_surface_status(s) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(s);
+        return NULL;
+    }
+    cairo_surface_flush(s);
+    unsigned char *dst = cairo_image_surface_get_data(s);
+    int dstride = cairo_image_surface_get_stride(s);
+    size_t rowbytes = (size_t)img->width * 4u;
+    for (uint32_t y = 0; y < img->height; ++y) {
+        memcpy(dst + (size_t)y * (size_t)dstride,
+               img->data + (size_t)y * (size_t)img->stride, rowbytes);
+    }
+    cairo_surface_mark_dirty(s);
+    return s;
+}
+
+/* Fetches url (following redirects) under cfg's policy; if the only obstacle is
+ * that the host cannot do a PQ-hybrid key exchange (SF_ERR_KEM_NOT_PQ), retries
+ * once with the classical-KE fallback — TLS 1.3 and full certificate validation
+ * are kept; only the PQ-ness of the key exchange is relaxed — so a non-PQ host does
+ * not block navigation. *downgraded is set to 1 iff that fallback produced the
+ * response (the caller warns the user). cfg->policy is restored before returning.
+ * Genuinely insecure failures (TLS < 1.3, invalid/weak certificate) are never
+ * retried; they stay fatal (fail closed). */
+static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
+                                        sf_response *out, int *downgraded) {
+    *downgraded = 0;
+    sf_status s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
+    if (s != SF_ERR_KEM_NOT_PQ) return s;
+    sf_response_free(out);
+    sf_policy saved = cfg->policy;
+    cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
+    s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
+    cfg->policy = saved;
+    if (s == SF_OK) *downgraded = 1;
+    return s;
+}
+
+/* Fetches and decodes every allowed image of the current doc into w->images (one
+ * entry per RD_IMAGE block). Each fetch re-applies the full TLS/PQ/chain policy
+ * through secure_fetch (Zero Trust); decoding happens inside the still-open confined
+ * worker t, so the parent never decodes hostile image bytes. A blocked, policy-
+ * rejected, failed or non-PNG image keeps surface == NULL and the placeholder is
+ * drawn. Synchronous: image loads block this render (acceptable for v1; async fetch
+ * is future work). */
+static void load_images(browser_window *w, tab *t) {
+    if (w->doc == NULL) return;
+    size_t n = rd_count(w->doc);
+    size_t nimg = 0;
+    for (size_t i = 0; i < n; ++i)
+        if (rd_at(w->doc, i)->kind == RD_IMAGE) nimg++;
+    if (nimg == 0) return;
+
+    w->images = (ui_image *)calloc(nimg, sizeof *w->images);
+    if (w->images == NULL) return; /* fail closed: no images, page still shows */
+
+    size_t k = 0;
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind != RD_IMAGE) continue;
+        ui_image *slot = &w->images[k++];
+        slot->blk = b;
+
+        /* render_doc already applied render_policy: only an ALLOW image with a src is
+         * fetched. cur_top is the https origin; resolution fails closed without it. */
+        if (b->img_decision != RDP_IMG_ALLOW || b->href == NULL || w->cur_top == NULL)
+            continue;
+
+        char abs[URL_MAX_LEN];
+        if (url_resolve_https(w->cur_top, b->href, abs, sizeof abs) != URL_OK)
+            continue;
+
+        sf_config cfg = sf_config_default();
+        cfg.user_agent = tf_text(&w->ua_field);
+        cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
+
+        sf_response resp;
+        memset(&resp, 0, sizeof resp);
+        int img_downgraded = 0; /* page-level toast already warns; per-image is moot */
+        if (fetch_follow_navigable(abs, &cfg, &resp, &img_downgraded) != SF_OK) {
+            sf_response_free(&resp);
+            continue;
+        }
+
+        tab_image img;
+        tab_status ds = tab_decode_image(t, resp.body, resp.body_len, &img);
+        sf_response_free(&resp);
+        if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); continue; }
+
+        slot->surface = surface_from_pixels(&img);
+        if (slot->surface != NULL) {
+            slot->nat_w = (int)img.width;
+            slot->nat_h = (int)img.height;
+        }
+        tab_image_free(&img);
+    }
+    w->image_count = k;
 }
 
 /* Renders the cached page source into the page/doc using the current capabilities.
@@ -482,6 +642,7 @@ static void render_current(browser_window *w) {
         w->doc = doc;
     }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
+    load_images(w, t); /* fetch + decode allowed images in the still-open worker */
 
     tab_page_free(&page);
     tab_close(t);
@@ -506,6 +667,7 @@ static void do_load(browser_window *w, const char *url) {
 
     char *html = NULL;
     size_t html_len = 0;
+    int downgraded = 0; /* set when a non-PQ host was loaded over classical TLS 1.3 */
 
     if (is_https_url(url)) {
         sf_config cfg = sf_config_default();
@@ -517,9 +679,11 @@ static void do_load(browser_window *w, const char *url) {
 
         sf_response resp;
         memset(&resp, 0, sizeof resp);
-        /* Follow redirects (e.g. google.com -> www.google.com); each hop is a
-         * fresh request that re-applies the full TLS/PQ/chain policy. */
-        sf_status ss = sf_get_follow(url, &cfg, &resp, SF_DEFAULT_MAX_REDIRECTS);
+        /* Follow redirects (e.g. google.com -> www.google.com); each hop is a fresh
+         * request that re-applies the full TLS/PQ/chain policy. A host that cannot
+         * do a PQ-hybrid key exchange falls back to classical TLS 1.3 (cert checks
+         * kept) so navigation is not blocked; the user is warned via a toast below. */
+        sf_status ss = fetch_follow_navigable(url, &cfg, &resp, &downgraded);
         if (ss != SF_OK) {
             char msg[1024];
             const char *reason = "";
@@ -544,10 +708,11 @@ static void do_load(browser_window *w, const char *url) {
             }
             snprintf(msg, sizeof msg,
                      "Failed to load '%s'.\nStatus %d: %s.\n\n"
-                     "Freedom rejects TLS < 1.3, a non-PQ-hybrid key exchange, a site\n"
-                     "(leaf) certificate with RSA < 3072, any SHA-1 signature in the\n"
-                     "chain, and certificates that fail strict validation.\n"
-                     "%s",
+                     "Freedom rejects TLS < 1.3, a site (leaf) certificate with RSA\n"
+                     "< 3072, any SHA-1 signature in the chain, and certificates that\n"
+                     "fail strict validation. A host that cannot do a post-quantum key\n"
+                     "exchange is loaded over classical TLS 1.3 with a warning, not\n"
+                     "blocked.\n%s",
                      url, (int)ss, reason, bypass);
             set_cache(w, NULL, 0, NULL);
             browser_set_page(&w->bs, NULL, msg, 1);
@@ -573,6 +738,13 @@ static void do_load(browser_window *w, const char *url) {
      * capability toggle re-renders from this cache without a network round-trip. */
     set_cache(w, html, html_len, is_https_url(url) ? url : NULL);
     render_current(w);
+
+    /* Tell the user when the connection had to drop to classical TLS 1.3 because the
+     * host is not post-quantum. Navigation proceeds; the warning is non-blocking. */
+    if (downgraded) {
+        browser_set_status(&w->bs,
+            "Warning: connection is not post-quantum (classical TLS 1.3).", now_ms());
+    }
 }
 
 /* --- painting --- */
@@ -820,8 +992,10 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
     }
 }
 
-static void layout_doc(cairo_t *cr, const rd_doc *doc, const ui_theme *th,
-                       double content_w, rc_layout *L) {
+static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
+                       rc_layout *L) {
+    const rd_doc *doc = w->doc;
+    const ui_theme *th = &w->theme;
     memset(L, 0, sizeof *L);
     rc_state s;
     memset(&s, 0, sizeof s);
@@ -858,7 +1032,13 @@ static void layout_doc(cairo_t *cr, const rd_doc *doc, const ui_theme *th,
             content_font(cr, th->body_font, 0);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
-            double h = fe.height + 2.0 * th->image_box_pad;
+            /* A decoded image sizes the row to its on-screen height; otherwise the
+             * row is a single-line placeholder box. Same box width used to paint. */
+            double dw, dh;
+            double box_w = content_w - 2.0 * th->image_box_pad;
+            double h = image_display_size(w, b, box_w, &dw, &dh)
+                       ? dh + 2.0 * th->image_box_pad
+                       : fe.height + 2.0 * th->image_box_pad;
             double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
             s.pending_gap = 0;
             rc_row *r = rc_add_row(L);
@@ -986,85 +1166,53 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     cairo_restore(cr);
 }
 
-static void paint_image_placeholder(cairo_t *cr, browser_window *w, const rd_block *blk,
-                                    double x, double y, double avail_w) {
+/* Paints one RD_IMAGE row inside the content rectangle: the decoded image blitted
+ * and scaled to fit the content width (the bytes were fetched and decoded in the
+ * confined worker), or, when no image is available (blocked / policy-rejected /
+ * decode failed), a bordered placeholder box labelled with the render_policy
+ * decision plus the alt text. The on-screen size comes from image_display_size, the
+ * same source of truth the layout used to size this row, so paint and layout agree. */
+static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+                            double left, double ry, double content_w, double row_h) {
     const ui_theme *th = &w->theme;
     const double pad = th->image_box_pad;
-    double box_w = avail_w - 2.0 * pad;
-    if (box_w < 100.0) box_w = 100.0;
-    double box_h = 120.0;
+    double box_w = content_w - 2.0 * pad;
 
-    /* Fondo y borde */
-    set_rgb(cr, th->image_box);
-    cairo_rectangle(cr, x + pad, y + pad, box_w, box_h);
-    cairo_set_line_width(cr, 2.0);
-    cairo_stroke(cr);
-
-    /* Texto */
-    content_font(cr, th->body_font * 0.85, 0);
-    const char *label = rd_image_label(blk->img_decision);
-    cairo_text_extents_t te;
-    cairo_text_extents(cr, label, &te);
-
-    double tx = x + pad + (box_w - te.width) / 2.0;
-    double ty = y + pad + box_h / 2.0 + te.height / 2.0;
-    cairo_move_to(cr, tx, ty);
-    cairo_show_text(cr, label);
-
-    if (blk->img_decision == RDP_IMG_ALLOW && blk->href) {
-        cairo_text_extents(cr, "[img]", &te);
-        cairo_move_to(cr, x + pad + 8.0, y + pad + 24.0);
-        cairo_show_text(cr, "[img]");
-    }
-}
-
-/* Hook principal para renderizar imágenes RD_IMAGE.
- * Respeta exactamente la política RDP_IMG_ALLOW sin hardcodes.
- * Usa theme existente. */
-static void paint_rd_image(cairo_t *cr, browser_window *w, const rd_block *blk,
-                           double x, double y, double max_w, double max_h) {
-    if (blk->img_decision != RDP_IMG_ALLOW || blk->href == NULL) {
-        paint_image_placeholder(cr, w, blk, x, y, max_w);
+    double dw, dh;
+    if (image_display_size(w, blk, box_w, &dw, &dh)) {
+        const ui_image *im = find_image(w, blk); /* non-NULL with surface, nat_w > 0 */
+        double scale = dw / (double)im->nat_w;
+        cairo_save(cr);
+        cairo_translate(cr, left + pad, ry + pad);
+        cairo_rectangle(cr, 0.0, 0.0, dw, dh);
+        cairo_clip(cr);
+        cairo_scale(cr, scale, scale); /* uniform => aspect preserved */
+        cairo_set_source_surface(cr, im->surface, 0.0, 0.0);
+        cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_GOOD);
+        cairo_paint(cr);
+        cairo_restore(cr);
         return;
     }
 
-    /* Intentar cargar y dibujar imagen real */
-    cairo_surface_t *img_surface = NULL;
+    int blocked = (blk->img_decision != RDP_IMG_ALLOW);
+    set_rgb(cr, blocked ? th->image_blocked : th->image_box);
+    cairo_set_line_width(cr, 1.0);
+    cairo_rectangle(cr, left, ry, content_w, row_h);
+    cairo_stroke(cr);
 
-    /* Caso 1: data: URL (base64) */
-    if (strncmp(blk->href, "data:", 5) == 0) {
-        /* TODO: soporte base64 futuro */
-        img_surface = NULL;
-    } 
-    /* Caso 2: URL normal */
-    else {
-        /* Por ahora fallback (implementaremos descarga real después) */
-        img_surface = NULL;
-    }
-
-    if (img_surface != NULL) {
-        int iw = cairo_image_surface_get_width(img_surface);
-        int ih = cairo_image_surface_get_height(img_surface);
-
-        double scale = 1.0;
-        if (iw > 0) {
-            double sx = max_w / iw;
-            double sy = (max_h > 0 && ih > 0) ? max_h / ih : sx;
-            scale = (sx < sy) ? sx : sy;   // la más restrictiva
-        }
-
-        cairo_save(cr);
-        cairo_translate(cr, x, y);
-        cairo_scale(cr, scale, scale);
-        cairo_set_source_surface(cr, img_surface, 0, 0);
-        cairo_paint(cr);
-        cairo_restore(cr);
-
-        cairo_surface_destroy(img_surface);
-    } else {
-        /* Fallback al placeholder */
-        paint_image_placeholder(cr, w, blk, x, y, max_w);
-    }
+    content_font(cr, th->body_font, 0);
+    cairo_save(cr);
+    cairo_rectangle(cr, left + pad, ry, content_w - 2.0 * pad, row_h);
+    cairo_clip(cr);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    cairo_move_to(cr, left + pad, ry + fe.ascent + pad);
+    char label[1024];
+    const char *alt = (blk->text != NULL) ? blk->text : "";
+    snprintf(label, sizeof label, "%s%s%s",
+             rd_image_label(blk->img_decision), alt[0] ? " : " : "", alt);
+    cairo_show_text(cr, label);
+    cairo_restore(cr);
 }
 
 /* Paints the structured document into the content rectangle, honouring scroll. */
@@ -1076,7 +1224,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (content_w < 1.0) content_w = 1.0;
 
     rc_layout L;
-    layout_doc(cr, w->doc, th, content_w, &L);
+    layout_doc(cr, w, content_w, &L);
 
     double max_scroll = L.total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
@@ -1090,31 +1238,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         if (ry + r->height < content_top || ry > content_top + content_h) continue;
 
         if (r->kind == RC_IMAGE && r->blk != NULL) {
-            const rd_block *b = r->blk;
-            double img_x = left;
-            double img_y = ry;
-            int blocked = (b->img_decision != RDP_IMG_ALLOW);
-            ui_rgb col = blocked ? th->image_blocked : th->image_box;
-            cairo_set_line_width(cr, 1.0);
-            set_rgb(cr, col);
-            cairo_rectangle(cr, left, ry, content_w, r->height);
-            cairo_stroke(cr);
-
-            
-            content_font(cr, th->body_font, 0);
-            cairo_save(cr);
-            cairo_rectangle(cr, left + th->image_box_pad, ry,
-                            content_w - 2.0 * th->image_box_pad, r->height);
-            cairo_clip(cr);
-            cairo_move_to(cr, left + th->image_box_pad, ry + r->ascent + th->image_box_pad);
-            char label[1024];
-            const char *alt = (b->text != NULL) ? b->text : "";
-            snprintf(label, sizeof label, "%s%s%s",
-                     rd_image_label(b->img_decision), alt[0] ? " : " : "", alt);
-            cairo_show_text(cr, label);
-            cairo_restore(cr);
-            /* Raíz: usar paint_rd_image para manejar ALLOW vs BLOCKED */
-            paint_rd_image(cr, w, b, img_x, img_y, content_w, r->height);
+            paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
             continue;
         }
 
@@ -1174,7 +1298,7 @@ static const char *link_at_point(browser_window *w, double px, double py) {
 
     cairo_t *cr = cairo_create(w->cairo_surface);
     rc_layout L;
-    layout_doc(cr, w->doc, th, content_w, &L);
+    layout_doc(cr, w, content_w, &L);
 
     double max_scroll = L.total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
@@ -1239,7 +1363,7 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
 
     cairo_t *cr = cairo_create(w->cairo_surface);
     rc_layout L;
-    layout_doc(cr, w->doc, th, content_w, &L);
+    layout_doc(cr, w, content_w, &L);
 
     double max_scroll = L.total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;

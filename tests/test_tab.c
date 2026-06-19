@@ -392,6 +392,69 @@ static void test_free_null_and_double(void **state) {
     tab_close(t);
 }
 
+/* --- image decode runs inside the confined worker --- */
+
+/* The same 2x2 RGBA PNG used by test_image_decode (see that file for the pixel
+ * map). Decoding it here proves libpng works under the worker's seccomp allowlist. */
+static const uint8_t PNG_2x2[] = {
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+    0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
+    0x08, 0x06, 0x00, 0x00, 0x00, 0x72, 0xb6, 0x0d, 0x24, 0x00, 0x00, 0x00,
+    0x13, 0x49, 0x44, 0x41, 0x54, 0x78, 0xda, 0x63, 0xf8, 0xcf, 0xc0, 0xf0,
+    0x1f, 0x0c, 0x81, 0x34, 0x08, 0x34, 0x00, 0x00, 0x49, 0x49, 0x09, 0x78,
+    0x9c, 0x51, 0x17, 0x92, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44,
+    0xae, 0x42, 0x60, 0x82
+};
+
+static void test_decode_image_in_sandbox(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+
+    tab_image img;
+    assert_int_equal(tab_decode_image(t, PNG_2x2, sizeof PNG_2x2, &img), TAB_OK);
+    assert_non_null(img.data);
+    assert_int_equal(img.width, 2);
+    assert_int_equal(img.height, 2);
+    assert_int_equal(img.stride, 2u * 4u);
+    assert_int_equal(img.data_len, 2u * 4u * 2u);
+    /* (0,0) is premultiplied ARGB32 red opaque: B,G,R,A = 0,0,255,255. */
+    assert_int_equal(img.data[0], 0x00);
+    assert_int_equal(img.data[1], 0x00);
+    assert_int_equal(img.data[2], 0xff);
+    assert_int_equal(img.data[3], 0xff);
+    tab_image_free(&img);
+    tab_image_free(&img); /* idempotent */
+    tab_close(t);
+}
+
+static void test_decode_image_rejects_junk(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+
+    const uint8_t junk[32] = {0};
+    tab_image img;
+    /* Transport succeeds; the worker simply could not decode -> data == NULL. */
+    assert_int_equal(tab_decode_image(t, junk, sizeof junk, &img), TAB_OK);
+    assert_null(img.data);
+    assert_int_equal(img.width, 0);
+    tab_image_free(&img);
+    tab_close(t);
+}
+
+static void test_decode_image_null_args(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_image img;
+    assert_int_equal(tab_decode_image(t, NULL, 4, &img), TAB_ERR_NULL_ARG);
+    assert_int_equal(tab_decode_image(NULL, PNG_2x2, sizeof PNG_2x2, &img), TAB_ERR_NULL_ARG);
+    assert_int_equal(tab_decode_image(t, PNG_2x2, sizeof PNG_2x2, NULL), TAB_ERR_NULL_ARG);
+    tab_image_free(NULL);
+    tab_close(t);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_open_close),
@@ -411,6 +474,9 @@ int main(void) {
         cmocka_unit_test(test_eval_without_load),
         cmocka_unit_test(test_binary_does_not_crash_parent),
         cmocka_unit_test(test_child_death_survived),
+        cmocka_unit_test(test_decode_image_in_sandbox),
+        cmocka_unit_test(test_decode_image_rejects_junk),
+        cmocka_unit_test(test_decode_image_null_args),
         cmocka_unit_test(test_free_null_and_double),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

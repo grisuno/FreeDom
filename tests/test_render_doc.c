@@ -141,6 +141,40 @@ static void test_image_on_allows_normal(void **state) {
     pv_free(v);
 }
 
+/* A relative src ("/logo.png") is not an invalid URL: it resolves against the
+ * top-level document. The decision must allow it and the stored href must be the
+ * resolved absolute https URL the fetch will use. (Regression: relative images such
+ * as the Google logo were wrongly blocked as "invalid URL".) */
+static void test_image_on_resolves_relative_src(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 0, "Logo", "/images/logo.png", 272, 92), PV_OK);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, caps_images_on(), TOP, &d), RD_OK);
+    const rd_block *img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->img_decision, RDP_IMG_ALLOW);
+    assert_string_equal(img->href, "https://example.com/images/logo.png");
+    rd_free(d);
+    pv_free(v);
+}
+
+/* A document-relative src ("logo.png", no leading slash) resolves against the
+ * page's directory, too. */
+static void test_image_on_resolves_doc_relative_src(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 0, "", "pic.png", 100, 100), PV_OK);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, caps_images_on(), TOP, &d), RD_OK);
+    const rd_block *img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->img_decision, RDP_IMG_ALLOW);
+    assert_string_equal(img->href, "https://example.com/pic.png");
+    rd_free(d);
+    pv_free(v);
+}
+
 static void test_image_on_blocks_tracker(void **state) {
     (void)state;
     pv_view *v = pv_new();
@@ -316,6 +350,8 @@ int main(void) {
         cmocka_unit_test(test_image_off_emits_notice_and_blocked),
         cmocka_unit_test(test_no_images_no_notice),
         cmocka_unit_test(test_image_on_allows_normal),
+        cmocka_unit_test(test_image_on_resolves_relative_src),
+        cmocka_unit_test(test_image_on_resolves_doc_relative_src),
         cmocka_unit_test(test_image_on_blocks_tracker),
         cmocka_unit_test(test_image_on_blocks_non_https),
         cmocka_unit_test(test_image_on_local_top_fails_closed),

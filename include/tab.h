@@ -2,6 +2,7 @@
 #define FREEDOM_TAB_H
 
 #include <stddef.h>
+#include <stdint.h>
 #include <sys/types.h>
 
 #include "page_view.h"
@@ -59,6 +60,18 @@ typedef struct tab_eval_result {
     int    is_exception; /* nonzero if value holds a JS error message, not a value */
 } tab_eval_result;
 
+/* Pixels of a decoded image, produced inside the confined worker. data is owned
+ * and holds premultiplied ARGB32 (Cairo's CAIRO_FORMAT_ARGB32 layout: bytes
+ * B,G,R,A; stride == width*4). data == NULL means the worker could not decode the
+ * bytes (not a PNG, corrupt, or out of bounds): the caller shows the placeholder. */
+typedef struct tab_image {
+    uint32_t width;
+    uint32_t height;
+    uint32_t stride;
+    uint8_t *data;
+    size_t   data_len;  /* stride * height when data != NULL, else 0 */
+} tab_image;
+
 #define TAB_MAX_INPUT ((size_t)(32u * 1024u * 1024u))
 
 /* Spawns and confines a tab worker. On TAB_OK, *out must be released with
@@ -76,6 +89,14 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);
  * failures. On TAB_OK, *out must be released with tab_eval_result_free. */
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out);
 
+/* Decodes image bytes (PNG) inside the confined worker and returns the pixels to
+ * the parent, which never decodes hostile image bytes itself. Independent of any
+ * loaded page. bytes may be NULL only when len == 0. On TAB_OK, *out is populated
+ * and must be released with tab_image_free; out->data == NULL means the worker
+ * could not decode (caller shows the placeholder), which is not a transport error.
+ * TAB_ERR_* is reserved for transport/worker failures. */
+tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out);
+
 /* Nonzero while the worker process is believed alive. */
 int tab_alive(const tab *t);
 
@@ -88,5 +109,6 @@ void tab_close(tab *t);
 /* Idempotent releasers for the result structs. Safe on NULL / zeroed structs. */
 void tab_page_free(tab_page *p);
 void tab_eval_result_free(tab_eval_result *r);
+void tab_image_free(tab_image *img);
 
 #endif /* FREEDOM_TAB_H */

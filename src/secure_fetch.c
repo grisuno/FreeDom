@@ -106,8 +106,12 @@ sf_status sf_enforce_policy(const char *tls_version, const char *group,
                             const sf_chain_info *chain, sf_policy policy) {
     sf_status s = sf_check_tls_version(tls_version);
     if (s != SF_OK) return s;
-    s = sf_check_group_is_pq(group);
-    if (s != SF_OK) return s;
+    /* The navigability fallback accepts a classical KE; every other policy requires
+     * a PQ-hybrid group. The certificate chain is always validated below. */
+    if (policy != SF_POLICY_ALLOW_CLASSICAL_KE) {
+        s = sf_check_group_is_pq(group);
+        if (s != SF_OK) return s;
+    }
     if (chain == NULL) return SF_ERR_INTERNAL; /* fail closed: chain not inspectable */
     return sf_check_chain_policy(chain, policy);
 }
@@ -228,7 +232,11 @@ static void tls_capture_try(tls_capture *cap) {
 
     SSL *ssl = (SSL *)ti->internals;
     copy_bounded(cap->version, sizeof cap->version, SSL_get_version(ssl));
-    copy_bounded(cap->group, sizeof cap->group, "X25519");
+    /* Read the REAL negotiated group from OpenSSL. A previous "fix" hardcoded this
+     * to "X25519", which made sf_check_group_is_pq reject every connection as
+     * non-PQ (status 4) — no site could load. NULL (no group / not TLS 1.3) copies
+     * to "" and is then rejected by the policy, which is the correct fail-closed. */
+    copy_bounded(cap->group, sizeof cap->group, SSL_get0_group_name(ssl));
     memset(&cap->chain, 0, sizeof cap->chain);
     cap->chain_ok = (inspect_chain(ssl, &cap->chain, cap->sigbuf, sizeof cap->sigbuf) == 0);
     cap->have = 1;

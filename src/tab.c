@@ -17,6 +17,7 @@
 
 #include "dom.h"
 #include "html_parse.h"
+#include "image_decode.h"
 #include "js_dom.h"
 #include "js_env.h"
 #include "js_sandbox.h"
@@ -42,7 +43,7 @@
 #define TAB_MAX_RUNS ((size_t)(2u * 1024u * 1024u))
 
 /* Request opcodes (parent -> child). */
-enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3 };
+enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4 };
 
 /* Handshake bytes (child -> parent) after the confinement attempt. */
 enum { TAB_READY = 0x55, TAB_NO_CONFINE = 0xAA };
@@ -215,6 +216,26 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
     js_result_free(&r);
 }
 
+/* Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
+ * Decoding hostile image bytes happens here, inside the confinement; ok==0 means
+ * the bytes were not a decodable PNG (no partial pixels are sent). */
+static void child_handle_decode_image(int wfd, const char *bytes, size_t len) {
+    img_pixels px;
+    memset(&px, 0, sizeof px);
+    int ok = (img_decode_png((const uint8_t *)bytes, len, &px) == IMG_OK);
+    int32_t k = ok ? 1 : 0;
+    if (write_full(wfd, &k, sizeof k) == 0 && ok) {
+        uint32_t w = px.width, h = px.height, stride = px.stride;
+        size_t dlen = (size_t)stride * (size_t)h;
+        (void)(write_full(wfd, &w, sizeof w) == 0
+            && write_full(wfd, &h, sizeof h) == 0
+            && write_full(wfd, &stride, sizeof stride) == 0
+            && write_full(wfd, &dlen, sizeof dlen) == 0
+            && (dlen == 0 || write_full(wfd, px.data, dlen) == 0));
+    }
+    img_pixels_free(&px);
+}
+
 static uint64_t gen_session_key(void) {
     uint64_t k = 0;
     uint8_t *p = (uint8_t *)&k;
@@ -252,7 +273,7 @@ static void child_main(int rfd, int wfd) {
         uint8_t op;
         if (read_full(rfd, &op, 1) != 0) break; /* EOF / error => quit */
         if (op == OP_QUIT) break;
-        if (op != OP_LOAD && op != OP_EVAL) break; /* protocol desync */
+        if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE) break; /* desync */
 
         size_t len = 0;
         if (read_full(rfd, &len, sizeof len) != 0) break;
@@ -263,8 +284,9 @@ static void child_main(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD) child_handle_load(wfd, &cs, buf, len);
-        else               child_handle_eval(wfd, &cs, buf, len);
+        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len);
+        else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
+        else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
         free(buf);
     }
 
@@ -506,6 +528,49 @@ tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out) {
     return TAB_OK;
 }
 
+tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out) {
+    if (t == NULL || out == NULL || (bytes == NULL && len != 0)) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    if (len > TAB_MAX_INPUT) return TAB_ERR_TOO_LARGE;
+
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+
+    tab_status sr = send_request(t, OP_DECODE_IMAGE, (const char *)bytes, len);
+    if (sr != TAB_OK) return sr;
+
+    int32_t ok = 0;
+    if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
+    if (!ok) return TAB_OK; /* not decodable: out stays zeroed, caller shows placeholder */
+
+    uint32_t w = 0, h = 0, stride = 0;
+    size_t dlen = 0;
+    if (read_full(t->resp_fd, &w, sizeof w) != 0
+     || read_full(t->resp_fd, &h, sizeof h) != 0
+     || read_full(t->resp_fd, &stride, sizeof stride) != 0
+     || read_full(t->resp_fd, &dlen, sizeof dlen) != 0) {
+        return io_failure(t);
+    }
+    /* Validate the worker's claims against the same anti-DoS bounds the decoder
+     * enforces, so a hostile child cannot desync the stream or over-claim memory
+     * (dimensions_ok bounds w,h <= IMG_MAX_DIM, so w*4 and stride*h cannot overflow). */
+    if (!img_dimensions_ok(w, h) || stride != w * 4u
+     || dlen != (size_t)stride * (size_t)h) {
+        return io_failure(t);
+    }
+
+    uint8_t *data = (uint8_t *)malloc(dlen);
+    if (data == NULL) return TAB_ERR_OOM;
+    if (read_full(t->resp_fd, data, dlen) != 0) { free(data); return io_failure(t); }
+
+    out->width = w;
+    out->height = h;
+    out->stride = stride;
+    out->data = data;
+    out->data_len = dlen;
+    return TAB_OK;
+}
+
 int tab_alive(const tab *t) {
     if (t == NULL) return 0;
     tab_refresh_alive((tab *)t);
@@ -546,4 +611,14 @@ void tab_eval_result_free(tab_eval_result *r) {
     r->value = NULL;
     r->value_len = 0;
     r->is_exception = 0;
+}
+
+void tab_image_free(tab_image *img) {
+    if (img == NULL) return;
+    free(img->data);
+    img->data = NULL;
+    img->width = 0;
+    img->height = 0;
+    img->stride = 0;
+    img->data_len = 0;
 }

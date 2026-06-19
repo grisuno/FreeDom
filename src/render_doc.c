@@ -11,6 +11,8 @@
 
 #include "render_doc.h"
 
+#include "url.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -142,9 +144,21 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         int rc;
         switch (r->kind) {
             case PV_IMAGE: {
-                rdp_img_decision dec = rdp_image_decision(caps, top_level_url, r->src,
+                /* Resolve a (possibly relative) image src against the page URL before
+                 * judging it: a relative "/logo.png" is NOT an invalid URL, it resolves
+                 * against the top-level document. The policy decision and the later
+                 * fetch must both act on the real absolute https URL, or every relative
+                 * image (the common case) would be blocked as "invalid URL". On failure
+                 * (data:/javascript:/no base) the raw src is kept and fails closed. */
+                char resolved[URL_MAX_LEN];
+                const char *img_url = r->src;
+                if (top_level_url != NULL && r->src != NULL
+                    && url_resolve_https(top_level_url, r->src, resolved, sizeof resolved) == URL_OK) {
+                    img_url = resolved;
+                }
+                rdp_img_decision dec = rdp_image_decision(caps, top_level_url, img_url,
                                                           r->img_w, r->img_h);
-                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, r->src, dec, -1);
+                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, -1);
                 break;
             }
             case PV_INPUT:

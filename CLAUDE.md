@@ -303,6 +303,68 @@ freedom/
   transcodificación de charset; persistencia del opt-in por sitio; la GUI compila bajo los flags
   endurecidos pero su verificación visual —menú, hover, toast, color— requiere una sesión Wayland real,
   no disponible aquí.)*
+- **Imágenes reales (decodificado en el sandbox)** — al activar "Load images" en el menú ya no se ve solo
+  un placeholder `[img]`: la imagen se descarga, se decodifica y se pinta. El decodificado de bytes hostiles
+  (la superficie CVE clásica de un navegador) **no corre en el padre**, sino dentro del worker `tab` ya
+  confinado (seccomp-bpf + Landlock). Piezas: módulo puro nuevo `image_decode` (prefijo `img_`): `img_sniff`
+  (magic PNG), `img_png_dimensions` (lee el IHDR sin descomprimir, para acotar bombas), `img_dimensions_ok`
+  (tope anti-DoS `IMG_MAX_DIM`/`IMG_MAX_PIXELS`, con chequeo de overflow), `img_fit` (encaje preservando
+  aspecto) e `img_decode_png` (libpng, salida BGRA premultiplicada = `CAIRO_FORMAT_ARGB32`, lista para blit
+  sin reconvertir); falla cerrado ante no-PNG/truncado/dimensiones fuera de tope/flujo corrupto, sin filtrar
+  memoria. **Solo PNG** (el decodificador que Cairo ya trae: cero dependencias nuevas; otros formatos →
+  placeholder, fiel a la doctrina de superficie mínima). El worker `tab` gana una op IPC `OP_DECODE_IMAGE`
+  (`tab_decode_image`/`tab_image`): el padre solo descarga los bytes con `secure_fetch` (TLS 1.3 + KE híbrido
+  PQ, https-only, tope de cuerpo) y los pasa al hijo, que decodifica bajo seccomp y devuelve píxeles ARGB
+  crudos con validación anti-amplificación (dimensiones acotadas, `stride == w*4`, `len == stride*h`); el
+  padre **nunca decodifica**. La GUI (`gui/browser_ui.c`) tras `rd_build` resuelve cada `src` de imagen
+  permitida con `url_resolve_https` contra el origen top-level, descarga+decodifica en el worker abierto,
+  envuelve los píxeles en una `cairo_surface_t` (copia fila a fila por si el stride de Cairo difiere) y la
+  pinta escalada al ancho de contenido sin ampliar; `image_display_size` es la única fuente de verdad del
+  tamaño, compartida por el layout (alto de fila), el pintor (blit) y el hit-test, para que no deriven.
+  Eliminado de paso el stub muerto `paint_rd_image` (TODOs, comentarios en español) que siempre caía al
+  placeholder. **Modo boyscout:** el commit previo `7903600` había destrozado `request_policy.c` —el motor
+  de bloqueo de terceros (Privacy by Default)— para "arreglar" imágenes: `rp_evaluate` ignoraba el
+  `top_level_url` y devolvía `RP_ALLOW` para cualquier http/https, anulando el bloqueo de rastreadores y
+  permitiendo el *downgrade* a `http://`. Era innecesario (`render_policy` ya permite cross-site para
+  imágenes y solo trata invalid/non-https como fatales) y una regresión de privacidad grave; restaurado el
+  original correcto desde el commit inicial. *(verde: 25 suites / ~360 tests + ASan/UBSan limpio —incl.
+  `image_decode` 17 tests y `tab` 21 con decodificado real bajo seccomp—; `test_request_policy` 11/11 otra
+  vez; fuzz `make fuzz-img` 6.7M ejecuciones sin crash. Pendiente honesto: descarga+pintado de **otros
+  formatos** (JPEG/WebP/GIF → placeholder, requerirían dependencia/superficie nueva, contra doctrina); fetch
+  de imágenes **síncrono** (bloquea el render; async es trabajo futuro); muchas imágenes de CDNs de terceros
+  fallarán el KE híbrido PQ y caerán al placeholder —comportamiento correcto por doctrina—; la verificación
+  **visual** del blit requiere sesión Wayland real, no disponible aquí: aquí solo compila bajo los flags
+  endurecidos y se prueba el decodificado/IPC.)*
+- **Navegabilidad: fix de regresión PQ + fallback clásico con aviso** — el navegador no cargaba **ningún**
+  sitio (status 4 "key is not PQ hybrid" en toda conexión). Causa raíz (modo boyscout): el commit `c982232`
+  había sustituido la lectura real del grupo TLS negociado `SSL_get0_group_name(ssl)` por el literal
+  `"X25519"` en `secure_fetch.c`, de modo que `sf_check_group_is_pq` rechazaba **todas** las conexiones como
+  no-PQ. Restaurada la captura real del grupo (verificado contra red real: Cloudflare/Google/example.com
+  negocian `X25519MLKEM768` y cargan con status 0). Además, por decisión explícita del dueño
+  ([[freedom-navigability-over-strict-pq]]), un host que **no** puede hacer KE híbrido PQ ya **no detiene la
+  navegación**: nueva política `SF_POLICY_ALLOW_CLASSICAL_KE` (acepta KE clásico pero mantiene TLS 1.3 +
+  validación completa de cert; solo relaja la exigencia PQ del intercambio), `SF_DEFAULT_KEX_GROUPS` pasa a
+  ofrecer también grupos clásicos (`X25519MLKEM768:X25519:secp256r1`, PQ preferido) para que un host no-PQ dé
+  un `SF_ERR_KEM_NOT_PQ` limpio en vez de un fallo de handshake opaco, y el orquestador (`gui/browser_ui.c`
+  `do_load`/`load_images` vía helper `fetch_follow_navigable`) reintenta en clásico y muestra un **toast** de
+  aviso "connection is not post-quantum (classical TLS 1.3)". Lo genuinamente inseguro sigue cerrado:
+  verificado contra red real que openbsd.org/debian.org/mirrors.kernel.org cargan vía fallback clásico
+  (status 0, x25519), mientras ftp.gnu.org/kernel.org siguen **bloqueados** por cert RSA débil (status 5) aun
+  en el fallback. *(verde: `test_secure_fetch` 45 tests —incl. `SF_POLICY_ALLOW_CLASSICAL_KE`: clásico pasa,
+  pero TLS<1.3/chain nula/SHA-1 siguen fatales—; 25 suites + ASan/UBSan limpio; verificación de red real del
+  grupo PQ y del fallback. Pendiente honesto: `do_submit_post` (POST) no tiene aún el fallback clásico; el
+  umbral RSA<3072 del leaf bloquea sitios RSA-2048 con KE válido —se sortea con la excepción por host
+  Ctrl+Shift+E (PERMISSIVE)—; el toast solo en GUI, no en `--headless`.)*
+- **Fix: imágenes con `src` relativo se bloqueaban como "invalid URL"** — `render_doc` (`rd_build`) pasaba el
+  `src` **crudo** del HTML a `rdp_image_decision`; un `src` relativo (lo normal: el logo de Google es
+  `/images/branding/googlelogo/...png`) no tiene esquema/host, así que `rp_evaluate`→`rp_host_of` lo rechazaba
+  como `RP_BLOCK_INVALID` aun con "Load images" activado (placeholder "image blocked: invalid URL"). Arreglado:
+  `rd_build` ahora **resuelve el `src` contra la URL top-level con `url_resolve_https` (módulo puro) ANTES de
+  decidir** y guarda la URL absoluta como `href`; si la resolución falla (`data:`/`javascript:`/sin base)
+  conserva el crudo y falla cerrado. `render_doc` enlaza `url.o`. *(verde: `test_render_doc` 18 tests —+2:
+  `/logo.png` y `pic.png` resuelven a `https://example.com/...` con `RDP_IMG_ALLOW`—; 25 suites + ASan/UBSan
+  limpio. Verificado end-to-end contra google.com real: el logo resuelve a absoluto → `allow` → descarga →
+  decodifica 272x92.)*
 
 ---
 

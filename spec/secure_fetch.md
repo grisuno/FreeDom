@@ -32,6 +32,19 @@ Menos superficie de ataque, una dependencia menos que auditar. El transporte es
 | `SF_POLICY_PQ_HYBRID_KE` *(por defecto)* | **Exige** grupo PQ-híbrido | Validación PKI clásica completa; firma PQ no requerida |
 | `SF_POLICY_STRICT_PQ` | **Exige** grupo PQ-híbrido | **Exige además** una firma PQ (`ML-DSA`/`SLH-DSA`) en la cadena verificada |
 | `SF_POLICY_PERMISSIVE` | **Exige** grupo PQ-híbrido | Permite primitivas débiles (RSA 2048, SHA-1) como **override explícito del usuario** |
+| `SF_POLICY_ALLOW_CLASSICAL_KE` | **Acepta** KE clásico (no-PQ) | Validación PKI clásica completa (igual que el defecto; **no** se relaja el cert) |
+
+`SF_POLICY_ALLOW_CLASSICAL_KE` es el **fallback de navegabilidad**: cuando un host no puede negociar
+un KE híbrido PQ, el defecto devuelve `SF_ERR_KEM_NOT_PQ` (status 4) y, en vez de detener la
+navegación, el orquestador reintenta con esta política, que mantiene TLS 1.3 y la validación completa
+del certificado y **solo** relaja la exigencia PQ del intercambio de claves. El orquestador **debe**
+avisar al usuario del *downgrade* (toast). Decisión del dueño que se desvía conscientemente del
+Principio 5 para que el navegador sea usable en la web no-PQ de 2026; nunca se aplica en silencio.
+
+> Para que un host no-PQ produzca un `SF_ERR_KEM_NOT_PQ` *limpio* (en vez de un fallo opaco de
+> handshake), el cliente ofrece grupos clásicos además del híbrido: `SF_DEFAULT_KEX_GROUPS =
+> "X25519MLKEM768:X25519:secp256r1"` (PQ preferido). Ofrecer un grupo clásico no debilita las
+> políticas estrictas: un grupo *negociado* clásico sigue siendo rechazado por `sf_check_group_is_pq`.
 
 Justificación: el KE híbrido es desplegable hoy y es lo que neutraliza *Harvest-Now,
 Decrypt-Later*. Las firmas PQC aún no existen en la Web PKI pública en 2026; exigirlas por
