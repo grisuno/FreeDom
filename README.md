@@ -86,7 +86,7 @@ This repository includes an MCP (Model Context Protocol) server (`app.py`) that 
 pip install -r requirements.txt
 ```
 
-1. Configure your MCP client or agent routing table to invoke the server via stdio:
+2. Configure your MCP client or agent routing table to invoke the server via stdio:
 
 ```bash
 python3 app.py
