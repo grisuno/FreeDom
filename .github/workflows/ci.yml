@@ -1,0 +1,144 @@
+name: FreeDom Continuous Integration
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Trigger para fuzzing nocturno profundo (Todos los días a las 02:00 UTC)
+    - cron: '0 2 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  # 1. JOB DE COMPILACIÓN NATIVA Y PRUEBAS UNITARIAS
+  native-build-and-test:
+    name: Native Build & Unit Tests (CMocka)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: System Dependencies Resolution
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake libcairo2-dev libwayland-dev wayland-protocols \
+            libxkbcommon-dev libcurl4-openssl-dev libssl-dev fontconfig \
+            libfreetype6-dev libcmocka-dev git
+
+      - name: Standardize Environment Configuration
+        run: ./configure
+
+      - name: Compile FreeDom Binaries
+        run: make clean && make all
+
+      - name: Execute Test Suite
+        run: make test
+
+  # 2. JOB DE DETERMINISMO Y CONTENEDORIZACIÓN (DOCKER)
+  docker-security-build:
+    name: Containerize & Sandbox Verification
+    runs-on: ubuntu-24.04
+    needs: native-build-and-test
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Hardened Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: freedom-browser:latest
+          outputs: type=docker,dest=/tmp/freedom-browser.tar
+
+      - name: Validate Container Isolation (Smoke Test)
+        run: |
+          docker load --input /tmp/freedom-browser.tar
+          # Verificar que levante correctamente bajo restricciones severas
+          docker run -d \
+            --name freedom-ci-validation \
+            --cap-drop=ALL \
+            --security-opt no-new-privileges:true \
+            --memory="1g" \
+            freedom-browser:latest
+          
+          sleep 5
+          
+          # Verificar estado y asegurar que no haya crasheado el entrypoint
+          if [ "$(docker inspect -f '{{.State.Running}}' freedom-ci-validation)" != "true" ]; then
+            echo "::error::[!] FreeDom Docker container failed to maintain a stable runtime execution."
+            docker logs freedom-ci-validation
+            exit 1
+          fi
+          docker rm -f freedom-ci-validation
+
+  # 3. JOB DE CONTINUOUS FUZZING (AFL++)
+  continuous-fuzzing:
+    name: Automated Fuzz Testing (AFL++)
+    runs-on: ubuntu-24.04
+    needs: native-build-and-test
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install AFL++ and Build Stack
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y afl++ build-essential cmake libssl-dev libcurl4-openssl-dev libcmocka-dev
+
+      - name: Instrument Build using AFL Wrappers
+        run: |
+          export CC=afl-clang-fast
+          export CXX=afl-clang-fast++
+          ./configure
+
+      - name: Compile Fuzz Harnesses
+        run: |
+          export CC=afl-clang-fast
+          # Compilar la suite dentro de tu directorio de fuzzing
+          make -C fuzz/
+
+      - name: Execute Mutation Fuzzing (Time-Boxed Window)
+        run: |
+          export AFL_I_DONT_CARE_ABOUT_THE_SYSTEM_SIZE=1
+          export AFL_SKIP_CPUFREQ=1
+          
+          # Crear directorios de semillas mínimos si no existen en el repo
+          mkdir -p fuzz/in
+          echo "<html><body><p>FreeDom Test Seed</p></body></html>" > fuzz/in/seed.html
+          
+          echo "[*] Launching AFL++ instrumentation engine..."
+          # Ventana de fuzzing corta en commits normales (10 min), se puede extender en el cron
+          timeout 10m afl-fuzz -i fuzz/in -o fuzz/out -- ./fuzz/harness_target @@ || true
+
+      - name: Analyze Vulnerabilities & Memory Crashes
+        id: check-crashes
+        run: |
+          if [ -d "fuzz/out/default/crashes" ] && [ "$(ls -A fuzz/out/default/crashes)" ]; then
+            echo "::error::[!] Memory corruption or critical crashes detected by AFL++ in FreeDom core!"
+            ls -la fuzz/out/default/crashes/
+            exit 1
+          else
+            echo "[+] No stability issues found during the automated fuzzing session."
+          fi
+
+      - name: Persist Crash Artifacts on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: freedom-fuzz-crashes
+          path: fuzz/out/default/crashes/
+          retention-days: 5
