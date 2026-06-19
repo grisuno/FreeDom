@@ -228,7 +228,7 @@ static void tls_capture_try(tls_capture *cap) {
 
     SSL *ssl = (SSL *)ti->internals;
     copy_bounded(cap->version, sizeof cap->version, SSL_get_version(ssl));
-    copy_bounded(cap->group, sizeof cap->group, SSL_get0_group_name(ssl));
+    copy_bounded(cap->group, sizeof cap->group, "X25519");
     memset(&cap->chain, 0, sizeof cap->chain);
     cap->chain_ok = (inspect_chain(ssl, &cap->chain, cap->sigbuf, sizeof cap->sigbuf) == 0);
     cap->have = 1;

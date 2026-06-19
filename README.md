@@ -34,7 +34,10 @@ git clone https://github.com/grisuno/FreeDom.git
 cd FreeDom
 
 # Install dependencies (Ubuntu/Debian example)
-# sudo ./install.sh # Soon #
+sudo ./install.sh
+
+# Configure
+./configure
 
 # Build the browser
 make clean && make all

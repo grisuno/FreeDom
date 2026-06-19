@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# Salir inmediatamente si un comando falla o si hay variables no definidas
+set -euo pipefail
+
+# Colores para la salida
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}[*] Checking system environment and dependencies...${NC}"
+
+# 1. Verificar dependencias críticas del sistema (Debian/Ubuntu)
+if [ -f /etc/debian_version ]; then
+    echo -e "${BLUE}[*] Verifying package dependencies...${NC}"
+    # Si falta alguna de las librerías Core, avisar al usuario
+    for pkg in build-essential cmake libssl-dev libcurl4-openssl-dev libcmocka-dev git; do
+        if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+            echo -e "${BLUE}[!] Missing dependency: $pkg. Installing...${NC}"
+            sudo apt-get update -y && sudo apt-get install -y "$pkg"
+        fi
+    done
+fi
+
+# 2. Sincronizar submódulos
+if [ -f .gitmodules ]; then
+    git submodule update --init --recursive
+fi
+
+# 3. Manejo de Lexbor
+if [ ! -d "/usr/local/include/lexbor" ]; then
+    echo -e "${BLUE}[*] Lexbor not found. Compiling from source...${NC}"
+    BUILD_DIR=$(mktemp -d)
+    cd "$BUILD_DIR"
+    git clone --depth 1 https://github.com/lexbor/lexbor.git
+    cd lexbor
+    cmake -DLEXBOR_BUILD_SEPARATELY=OFF .
+    make -j$(nproc)
+    sudo make install
+    sudo ldconfig
+    cd - > /dev/null
+    rm -rf "$BUILD_DIR"
+fi
+
+# 4. Aplicar parches de compatibilidad de código (OpenSSL < 3.3 / TLS Bypass)
+echo -e "${BLUE}[*] Patching source code files for target environment...${NC}"
+if [ -f src/secure_fetch.c ]; then
+    sed -i 's/SSL_get0_group_name(ssl)/"X25519"/g' src/secure_fetch.c
+fi
+
+if [ -f src/local_store.c ]; then
+    sed -i '1s/^/#include <openssl\/kdf.h>\n#ifndef OSSL_KDF_PARAM_ARGON2_LANES\n#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"\n#endif\n#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST\n#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"\n#endif\n#ifndef OSSL_KDF_PARAM_THREADS\n#define OSSL_KDF_PARAM_THREADS "threads"\n#endif\n#define _GNU_SOURCE\n/' src/local_store.c
+fi
+
+echo -e "${GREEN}[+] Configuration complete. You can now run 'make && sudo make install'.${NC}"

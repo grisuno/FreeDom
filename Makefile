@@ -69,7 +69,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_link_nav $(BUILD_DIR)/test_css_color \
              $(BUILD_DIR)/test_textfield $(BUILD_DIR)/test_form
 
-.PHONY: all test itest asan fuzz fuzz-js view clean
+.PHONY: all install test itest asan fuzz fuzz-js view clean
 
 all: $(BUILD_DIR)/freedom
 
@@ -104,6 +104,12 @@ $(BUILD_DIR)/js_env.o: $(SRC_DIR)/js_env.c | $(BUILD_DIR)
 # Vendored QuickJS core objects (relaxed flags; sanitizer added under `asan`).
 $(BUILD_DIR)/qjs_%.o: $(QJS_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(QJS_CFLAGS) -c $< -o $@
+
+install: all
+	@echo "[*] Installing binary and assets..."
+	install -d /usr/local/bin
+	install -m 0755 build/tu_binario_principal /usr/local/bin/
+	@echo "[+] Installation successful."
 
 # Until the corresponding src/*.c exists, a test fails to link on purpose:
 # that is the RED state of TDD.
