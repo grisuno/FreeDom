@@ -16,7 +16,7 @@ jobs:
       with:
         submodules: recursive
 
-    # 2. Instalar dependencias del sistema (incluyendo el framework de testing CMocka)
+    # 2. Instalar dependencias del sistema
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -52,8 +52,8 @@ jobs:
         # Parche 1: Reemplazar la llamada conflictiva de TLS por un string estático para el runner
         sed -i 's/SSL_get0_group_name(ssl)/"X25519"/g' src/secure_fetch.c
         
-        # Parche 2: Asegurar que se incluya la cabecera de KDF necesaria para Argon2id en local_store.c
-        sed -i '1s/^/#include <openssl\/kdf.h>\n#define _GNU_SOURCE\n/' src/local_store.c
+        # Parche 2: Asegurar cabeceras OpenSSL y definir macros de Argon2 si faltan en versiones < 3.3
+        sed -i '1s/^/#include <openssl\/kdf.h>\n#ifndef OSSL_KDF_PARAM_ARGON2_LANES\n#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"\n#endif\n#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST\n#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"\n#endif\n#ifndef OSSL_KDF_PARAM_THREADS\n#define OSSL_KDF_PARAM_THREADS "threads"\n#endif\n#define _GNU_SOURCE\n/' src/local_store.c
         
         # Exportamos rutas de librerías para Lexbor
         export CPATH="/usr/local/include:$CPATH"
