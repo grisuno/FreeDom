@@ -1,20 +1,17 @@
-## Descripción
+## Description
 
-<-- Agrega una descripción del user story !-->
+## Summary of Changes
 
-## Resumen de los cambios
+* * ## Testing & Verification
 
-<-- Agrega una breve descripción de los cambios !-->
+* **Environment:** * **Commands executed:** ## Checklist
 
-## Checklist
+- [ ] Code compiles and executes correctly without regressions
+- [ ] Internal documentation / README has been updated accordingly
+- [ ] Unit tests or regression test cases (seeds) have been added
+- [ ] All unit tests pass successfully
+- [ ] Ran under `--headless` mode / instrumented environments (if applicable)
 
-- [x] Ejecución correcta
-- [x] Documentación actualizada 
-- [x] Se agregaron unit test
-- [x] Unit test estan correctos
+## Notes
 
-## Notas
-
-<-- Agrega notas adicionales !-->
-
-## Screensshots
+## Screenshots / Logs
