@@ -8,14 +8,31 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        # Instalamos lexbor, cairo, wayland, curl y demás herramientas necesarias
+        sudo apt-get install -y \
+          liblexbor-dev \
+          libcairo2-dev \
+          libwayland-dev \
+          wayland-protocols \
+          libxkbcommon-dev \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          fontconfig \
+          libfreetype6-dev
+
     - name: make
       run: make all
+
     - name: make clean
       run: make clean
+
     - name: make test
       run: make test
