@@ -158,6 +158,33 @@ FreeDom follows security-by-design principles:
 
 See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
+
+## Build & Development
+
+This project is written in pure C11 and is security-hardened by default using stack protection, control-flow protection (-fcf-protection), and PIE. 
+
+### Prerequisites
+
+Ensure you have the required development libraries installed (e.g., via apt on Kali/Debian):
+
+```bash
+sudo apt install liblexbor-dev libcmocka-dev libcurl4-openssl-dev libwayland-dev wayland-protocols libcairo2-dev libfontconfig-dev libxkbcommon-dev pkg-config clang
+```
+
+### Available Targets
+
+Run the following commands from the root directory of the repository:
+
+* make (or make all): Compiles the main project and generates the binary executable at build/freedom.
+* sudo make install: Installs the compiled binary globally into /usr/local/bin/.
+* make test: Runs the TDD unit test suites utilizing the cmocka framework.
+* make itest: Executes network-dependent integration tests (performs a live PQ key exchange GET request).
+* make asan: Recompiles and runs all test suites under AddressSanitizer (ASan) and UndefinedBehaviorSanitizer (UBSan) to detect memory leaks and UB.
+* make fuzz: Initiates a 30-second coverage-guided fuzzing session on the HTML parser using libFuzzer.
+* make fuzz-js: Initiates a 30-second coverage-guided fuzzing session on the isolated JavaScript sandbox.
+* make view: Compiles the experimental standalone Wayland + Cairo GUI demo application (build/freedom-view).
+* make clean: Wipes out the build/ directory and resets the environment.
+
 ## License
 
 This project is licensed under the **AGPL-3.0** license - see the [LICENSE](LICENSE) file for details.
