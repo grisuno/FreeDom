@@ -70,6 +70,10 @@ typedef struct sf_response {
     uint8_t  *body;             /* owned; NUL-terminated for convenience; may be NULL */
     size_t    body_len;         /* bytes in body excluding the trailing NUL */
     char     *location;         /* owned; raw Location header value, or NULL if absent */
+    char     *final_url;        /* owned; the absolute https URL that produced this body
+                                 * (the last hop after sf_get_follow's redirects, or the
+                                 * requested URL for sf_get); NULL if unset. The correct
+                                 * base for resolving the document's relative references. */
 } sf_response;
 
 /* PQ-hybrid is preferred (listed first); classical groups are also offered so a
