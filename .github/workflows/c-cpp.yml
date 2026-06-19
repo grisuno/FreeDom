@@ -11,16 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Clonar el repositorio asegurando que baje todos los submódulos (si Lexbor lo es)
     - uses: actions/checkout@v4
       with:
         submodules: recursive
 
-    # 2. Instalar solo las dependencias reales del sistema (Wayland, Cairo, etc.)
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
+          cmake \
           libcairo2-dev \
           libwayland-dev \
           wayland-protocols \
@@ -30,19 +29,18 @@ jobs:
           fontconfig \
           libfreetype6-dev
 
-    # 3. Si Lexbor es una carpeta de código dentro de third_party que requiere compilarse 
-    # antes de tu 'make all', solemos necesitar compilarla primero. 
-    # Si tu Makefile principal ya se encarga de compilar third_party, este paso se puede omitir.
-    # Por si acaso, intentamos compilar Lexbor si tiene su propio Makefile/CMake:
-    - name: Build vendored dependencies (Lexbor)
+    # clonamos, compilamos e instalamos lexbor globalmente en el contenedor de CI
+    - name: Install Lexbor from source
       run: |
-        if [ -d "third_party/lexbor" ]; then
-          echo "Lexbor detectado en third_party. Verificando compilación..."
-          # Si tu proyecto requiere instalar lexbor en el sistema desde third_party:
-          # cd third_party/lexbor && cmake . && make && sudo make install
-        fi
+        git clone https://github.com/lexbor/lexbor.git
+        cd lexbor
+        cmake -DLEXBOR_BUILD_SEPARATELY=OFF .
+        make
+        sudo make install
+        # Actualizamos la caché de librerías del sistema para que reconozca el nuevo .so
+        sudo ldconfig
 
-    - name: make
+    - name: make all
       run: make all
 
     - name: make clean
