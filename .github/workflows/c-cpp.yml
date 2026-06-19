@@ -16,7 +16,7 @@ jobs:
       with:
         submodules: recursive
 
-    # 2. Instalar dependencias del sistema
+    # 2. Instalar dependencias del sistema (incluyendo el framework de testing CMocka)
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -29,7 +29,8 @@ jobs:
           libcurl4-openssl-dev \
           libssl-dev \
           fontconfig \
-          libfreetype6-dev
+          libfreetype6-dev \
+          libcmocka-dev
 
     # 3. Descargar, compilar e instalar Lexbor globalmente
     - name: Install Lexbor from source
@@ -49,7 +50,6 @@ jobs:
     - name: make all
       run: |
         # Reemplazamos la llamada conflictiva por un string estático solo para pasar la CI
-        # Esto evita tocar CFLAGS, manteniendo el Makefile original intacto con sus -Iinclude
         sed -i 's/SSL_get0_group_name(ssl)/"X25519"/g' src/secure_fetch.c
         
         # Exportamos rutas de librerías para Lexbor
@@ -59,6 +59,10 @@ jobs:
         
         make all
 
-    # 6. Ejecutar las pruebas
+    # 6. Ejecutar las pruebas unitarias e integración con CMocka ya instalado
     - name: make test
-      run: make test
+      run: |
+        export CPATH="/usr/local/include:$CPATH"
+        export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
+        export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+        make test
