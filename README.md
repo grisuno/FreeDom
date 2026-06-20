@@ -305,26 +305,6 @@ make clean
 
 <img width="921" height="718" alt="image" src="https://github.com/user-attachments/assets/e6b9ef46-f75a-47a6-a1f0-98074b7fd424" />
 
-
-
-## License
-
-This project is licensed under the **AGPL-3.0** license - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
-
-## Roadmap
-
-- Complete GUI implementation
-- Full CSS support
-- Improved networking and caching
-- Extension system (future)
-- More platform support (Linux first, others later)
-
----
-
 ## Current Status (Updated - June 2026)
 
 - ✅ Advanced HTML rendering with box model and flex/grid layout
@@ -345,6 +325,26 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 **Status**: progressing Alpha — focus on secure, testable rendering engine and usable GUI.
 
 
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
+## Roadmap
+
+- Complete GUI implementation
+- Full CSS support
+- Improved networking and caching
+- Extension system (future)
+- More platform support (Linux first, others later)
+
+---
+
+## License
+
+This project is licensed under the **AGPL-3.0** license - see the [LICENSE](LICENSE) file for details.
+
+---
 
 For more information, visit the [GitHub repository](https://github.com/grisuno/FreeDom).
 
