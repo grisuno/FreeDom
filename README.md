@@ -24,7 +24,7 @@ sudo docker run -it \
   freedom-browser
 ```
 
-Then open your browser and go to: http://localhost:8080
+Then open your browser and go to: http://localhost:8080/vnc.html
 
 <img width="1127" height="921" alt="image" src="https://github.com/user-attachments/assets/b00510ab-3870-4212-964d-56634ecc9c88" />
 
