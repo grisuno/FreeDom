@@ -60,7 +60,8 @@ static char *utf8_sanitized_dup(const char *s) {
 /* Appends one block, taking owned copies of text (required) and href (optional).
  * Returns 0 on success, -1 on allocation failure (the doc is left consistent). */
 static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
-                   const char *text, const char *href, rdp_img_decision dec, int fg_rgb) {
+                   const char *text, const char *href, rdp_img_decision dec,
+                   int fg_rgb, int bg_rgb) {
     if (d->count == d->cap) {
         size_t ncap = d->cap ? d->cap * 2 : 16;
         rd_block *grown = (rd_block *)realloc(d->blocks, ncap * sizeof *grown);
@@ -85,6 +86,12 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->href = h;
     b->img_decision = dec;
     b->fg_rgb = fg_rgb;
+    b->bg_rgb = bg_rgb;
+    b->cont_id = -1;
+    b->cont_display = 0;
+    b->cont_gap = 0;
+    b->cont_justify = 0;
+    b->cont_cols = 0;
     b->input_type = 0;
     b->name = NULL;
     b->value = NULL;
@@ -96,7 +103,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
 /* Appends an RD_INPUT block, copying text (placeholder/label), the form action
  * (href), and the control name/value. Returns 0, or -1 on allocation failure. */
 static int rd_push_input(rd_doc *d, int block_break, const pv_run *r) {
-    if (rd_push(d, RD_INPUT, 0, block_break, r->text, r->href, RDP_IMG_ALLOW, -1) != 0)
+    if (rd_push(d, RD_INPUT, 0, block_break, r->text, r->href, RDP_IMG_ALLOW, -1, -1) != 0)
         return -1;
     rd_block *b = &d->blocks[d->count - 1];
     b->input_type = r->input_type;
@@ -129,7 +136,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     /* The user is always told when a page wants to load images while the
      * capability is off (the default). */
     if (d->has_images && !caps.images) {
-        if (rd_push(d, RD_NOTICE, 0, 1, rdp_images_warning(), NULL, RDP_IMG_ALLOW, -1) != 0) {
+        if (rd_push(d, RD_NOTICE, 0, 1, rdp_images_warning(), NULL, RDP_IMG_ALLOW, -1, -1) != 0) {
             rd_free(d);
             return RD_ERR_OOM;
         }
@@ -141,6 +148,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
          * (Privacy/Secure by Default off). Inline text color reveals nothing to the
          * network, so it is safe to honor once the user opts in. */
         int fg = (caps.css && r->fg_rgb >= 0) ? r->fg_rgb : -1;
+        int bg = (caps.css && r->bg_rgb >= 0) ? r->bg_rgb : -1;
         int rc;
         switch (r->kind) {
             case PV_IMAGE: {
@@ -158,7 +166,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 }
                 rdp_img_decision dec = rdp_image_decision(caps, top_level_url, img_url,
                                                           r->img_w, r->img_h);
-                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, -1);
+                rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, -1, -1);
                 break;
             }
             case PV_INPUT:
@@ -166,15 +174,27 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 break;
             case PV_LINK:
                 rc = rd_push(d, RD_LINK, r->heading, r->block_break, r->text, r->href,
-                             RDP_IMG_ALLOW, fg);
+                             RDP_IMG_ALLOW, fg, bg);
                 break;
             case PV_TEXT:
             default:
                 rc = rd_push(d, r->heading > 0 ? RD_HEADING : RD_PARAGRAPH,
-                             r->heading, r->block_break, r->text, NULL, RDP_IMG_ALLOW, fg);
+                             r->heading, r->block_break, r->text, NULL, RDP_IMG_ALLOW, fg, bg);
                 break;
         }
         if (rc != 0) { rd_free(d); return RD_ERR_OOM; }
+
+        /* Author flex/grid container layout is presentation: carried only with
+         * caps.css, and only on text/link blocks (the flex content this engine
+         * groups). Without caps.css every block stays cont_id == -1 (plain flow). */
+        if (caps.css && (r->kind == PV_TEXT || r->kind == PV_LINK) && d->count > 0) {
+            rd_block *lb = &d->blocks[d->count - 1];
+            lb->cont_id = r->cont_id;
+            lb->cont_display = r->cont_display;
+            lb->cont_gap = r->cont_gap;
+            lb->cont_justify = r->cont_justify;
+            lb->cont_cols = r->cont_cols;
+        }
     }
 
     *out = d;
@@ -212,6 +232,31 @@ const char *rd_kind_name(rd_kind k) {
         case RD_INPUT:     return "input";
     }
     return "block";
+}
+
+const char *rd_block_tag(const rd_block *b) {
+    if (b == NULL) return NULL;
+    switch (b->kind) {
+        case RD_HEADING: {
+            int lvl = b->heading_level;
+            if (lvl < 1) lvl = 1;
+            if (lvl > 6) lvl = 6;
+            static const char *const H[6] = { "h1", "h2", "h3", "h4", "h5", "h6" };
+            return H[lvl - 1];
+        }
+        case RD_PARAGRAPH: return "p";
+        case RD_LINK:      return "a";
+        case RD_IMAGE:     return "img";
+        case RD_INPUT:
+            switch (b->input_type) {
+                case PV_IN_TEXTAREA: return "textarea";
+                case PV_IN_SUBMIT:
+                case PV_IN_BUTTON:   return "button";
+                default:             return "input";
+            }
+        case RD_NOTICE:    return NULL;
+    }
+    return NULL;
 }
 
 const char *rd_input_label(int input_type) {

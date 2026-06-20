@@ -10,7 +10,9 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "page_view.h"
+#include "box_style.h"
 #include "css_color.h"
+#include "flex_layout.h"
 #include "html_parse.h"
 
 #include <stdint.h>
@@ -110,6 +112,12 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->img_w = -1;
     r->img_h = -1;
     r->fg_rgb = -1;
+    r->bg_rgb = -1;
+    r->cont_id = -1;
+    r->cont_display = 0;
+    r->cont_gap = 0;
+    r->cont_justify = 0;
+    r->cont_cols = 0;
     r->input_type = 0;
     r->name = NULL;
     r->value = NULL;
@@ -145,6 +153,12 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->img_w = w;
     r->img_h = h;
     r->fg_rgb = -1;
+    r->bg_rgb = -1;
+    r->cont_id = -1;
+    r->cont_display = 0;
+    r->cont_gap = 0;
+    r->cont_justify = 0;
+    r->cont_cols = 0;
     r->input_type = 0;
     r->name = NULL;
     r->value = NULL;
@@ -188,6 +202,12 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     r->img_w = -1;
     r->img_h = -1;
     r->fg_rgb = -1;
+    r->bg_rgb = -1;
+    r->cont_id = -1;
+    r->cont_display = 0;
+    r->cont_gap = 0;
+    r->cont_justify = 0;
+    r->cont_cols = 0;
     r->input_type = (int)input_type;
     r->name = nm;
     r->value = vl;
@@ -199,6 +219,22 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
 void pv_set_color(pv_view *v, int fg_rgb) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].fg_rgb = fg_rgb;
+}
+
+void pv_set_bgcolor(pv_view *v, int bg_rgb) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].bg_rgb = bg_rgb;
+}
+
+void pv_set_container(pv_view *v, int cont_id, int cont_display,
+                      int cont_gap, int cont_justify, int cont_cols) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->cont_id = cont_id;
+    r->cont_display = cont_display;
+    r->cont_gap = cont_gap;
+    r->cont_justify = cont_justify;
+    r->cont_cols = cont_cols;
 }
 
 void pv_free(pv_view *v) {
@@ -291,17 +327,21 @@ static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *bas
  * color and is ignored (fail closed). */
 #define PV_COLOR_TOKEN_MAX 64u
 
-static int ascii_eq_color(const char *p) {
-    return (p[0] | 0x20) == 'c' && (p[1] | 0x20) == 'o' && (p[2] | 0x20) == 'l'
-        && (p[3] | 0x20) == 'o' && (p[4] | 0x20) == 'r';
+/* Case-insensitive ASCII compare of the first n bytes of p against prop. */
+static int ascii_eq_ci(const char *p, const char *prop, size_t n) {
+    for (size_t i = 0; i < n; ++i) {
+        if (((unsigned char)p[i] | 0x20) != (unsigned char)prop[i]) return 0;
+    }
+    return 1;
 }
 
-/* Extracts the value of the CSS `color` declaration from an inline style string
- * and parses it. Matches the property name exactly (length 5) so "background-color"
- * is never mistaken for "color"; the last `color` declaration wins (the cascade).
- * Returns the packed 0xRRGGBB color, or -1 when absent or unparseable. */
-static int color_from_style(const char *style, size_t len) {
-    int result = -1;
+/* Copies the trimmed value of declaration `prop` (length prop_len) from an inline
+ * style string into out (NUL-terminated, bounded). The property name is matched
+ * exactly so "color" never matches inside "background-color"; the last matching
+ * declaration wins (the cascade). Returns 1 if found and it fits, else 0. */
+static int style_value(const char *style, size_t len, const char *prop, size_t prop_len,
+                       char *out, size_t out_size) {
+    int found = 0;
     size_t i = 0;
     while (i < len) {
         size_t ds = i;
@@ -316,21 +356,39 @@ static int color_from_style(const char *style, size_t len) {
         size_t ps = ds, pe = colon;
         while (ps < pe && (style[ps] == ' ' || style[ps] == '\t')) ++ps;
         while (pe > ps && (style[pe - 1] == ' ' || style[pe - 1] == '\t')) --pe;
-        if (pe - ps != 5 || !ascii_eq_color(style + ps)) continue;
+        if (pe - ps != prop_len || !ascii_eq_ci(style + ps, prop, prop_len)) continue;
 
         size_t vs = colon + 1, ve = de;
         while (vs < ve && (style[vs] == ' ' || style[vs] == '\t')) ++vs;
         while (ve > vs && (style[ve - 1] == ' ' || style[ve - 1] == '\t')) --ve;
         size_t vlen = ve - vs;
-        if (vlen == 0 || vlen >= PV_COLOR_TOKEN_MAX) continue;
-
-        char buf[PV_COLOR_TOKEN_MAX];
-        memcpy(buf, style + vs, vlen);
-        buf[vlen] = '\0';
-        cc_rgb rgb;
-        if (cc_parse(buf, &rgb) == CC_OK) result = cc_pack(rgb);
+        if (vlen == 0 || vlen + 1 > out_size) continue;
+        memcpy(out, style + vs, vlen);
+        out[vlen] = '\0';
+        found = 1;
     }
-    return result;
+    return found;
+}
+
+/* Parses declaration `prop` of `style` as a CSS color; -1 if absent/unparseable. */
+static int color_decl_from_style(const char *style, size_t len,
+                                 const char *prop, size_t prop_len) {
+    char buf[PV_COLOR_TOKEN_MAX];
+    if (!style_value(style, len, prop, prop_len, buf, sizeof buf)) return -1;
+    cc_rgb rgb;
+    return (cc_parse(buf, &rgb) == CC_OK) ? cc_pack(rgb) : -1;
+}
+
+/* Author background-color declared directly on el (inline style "background-color:"),
+ * or -1 if none/unparseable. Only the longhand is honoured; the `background`
+ * shorthand and the legacy `bgcolor` attribute are out of scope. */
+static int element_bgcolor(lxb_dom_element_t *el) {
+    size_t sl = 0;
+    const lxb_char_t *style =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
+    if (style != NULL && sl > 0)
+        return color_decl_from_style((const char *)style, sl, "background-color", 16);
+    return -1;
 }
 
 /* Author foreground color declared directly on el (inline style "color:", or the
@@ -340,7 +398,7 @@ static int element_color(lxb_dom_element_t *el, lxb_tag_id_t tag) {
     const lxb_char_t *style =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
     if (style != NULL && sl > 0) {
-        int c = color_from_style((const char *)style, sl);
+        int c = color_decl_from_style((const char *)style, sl, "color", 5);
         if (c >= 0) return c;
     }
     if (tag == LXB_TAG_FONT) {
@@ -358,14 +416,112 @@ static int element_color(lxb_dom_element_t *el, lxb_tag_id_t tag) {
     return -1;
 }
 
+/* --- author flex/grid container layout (honoured by render_doc only with caps.css) --- */
+
+#define PV_LAYOUT_TOKEN_MAX 256u
+#define PV_MAX_CONTAINERS   256u
+#define PV_MAX_GRID_COLS    64
+
+/* Nearest-container info attached to a run. */
+typedef struct pv_cont_info {
+    int id, display, gap, justify, cols;
+} pv_cont_info;
+
+/* Document-order registry of flex/grid container nodes, so the runs of one
+ * container share a stable id. */
+typedef struct pv_container_reg {
+    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    size_t count;
+} pv_container_reg;
+
+/* Id of node in reg, registering it on first sight. -1 when reg is full. */
+static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
+    for (size_t i = 0; i < reg->count; ++i)
+        if (reg->node[i] == node) return (int)i;
+    if (reg->count >= PV_MAX_CONTAINERS) return -1;
+    reg->node[reg->count] = node;
+    return (int)reg->count++;
+}
+
+/* Leading non-negative integer of a token (e.g. "12px" -> 12); 0 if none. */
+static int parse_px(const char *s) {
+    int v = 0, any = 0;
+    while (*s == ' ' || *s == '\t') ++s;
+    while (*s >= '0' && *s <= '9') {
+        v = v * 10 + (*s - '0');
+        any = 1;
+        ++s;
+        if (v > 100000) break;  /* clamp absurd values */
+    }
+    return any ? v : 0;
+}
+
+/* Maps a justify-content token to an fx_justify (case-insensitive). */
+static int parse_justify(const char *s) {
+    if (ascii_eq_ci(s, "center", 6) && s[6] == '\0') return FX_JUSTIFY_CENTER;
+    if ((ascii_eq_ci(s, "flex-end", 8) && s[8] == '\0') ||
+        (ascii_eq_ci(s, "end", 3) && s[3] == '\0')) return FX_JUSTIFY_END;
+    if (ascii_eq_ci(s, "space-between", 13) && s[13] == '\0') return FX_JUSTIFY_SPACE_BETWEEN;
+    if (ascii_eq_ci(s, "space-around", 12) && s[12] == '\0') return FX_JUSTIFY_SPACE_AROUND;
+    if (ascii_eq_ci(s, "space-evenly", 12) && s[12] == '\0') return FX_JUSTIFY_SPACE_EVENLY;
+    return FX_JUSTIFY_START;  /* flex-start / start / unknown */
+}
+
+/* Counts whitespace-separated track tokens in a grid-template-columns value, e.g.
+ * "1fr 1fr 1fr" -> 3. repeat()/minmax() are out of scope (counted as literal
+ * tokens); the result is clamped to [1, PV_MAX_GRID_COLS]. */
+static int count_tracks(const char *s) {
+    int n = 0, in_tok = 0;
+    for (; *s != '\0'; ++s) {
+        int ws = (*s == ' ' || *s == '\t');
+        if (!ws && !in_tok) { ++n; in_tok = 1; }
+        else if (ws) in_tok = 0;
+    }
+    if (n < 1) n = 1;
+    if (n > PV_MAX_GRID_COLS) n = PV_MAX_GRID_COLS;
+    return n;
+}
+
+/* Fills *ci with el's author flex/grid layout (inline style "display:flex|grid"
+ * plus gap / justify-content / grid-template-columns), or returns 0 when el is not
+ * such a container. ci->id is left -1 (the caller assigns it via the registry). */
+static int element_container(lxb_dom_element_t *el, pv_cont_info *ci) {
+    size_t sl = 0;
+    const lxb_char_t *style =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
+    if (style == NULL || sl == 0) return 0;
+
+    char buf[PV_LAYOUT_TOKEN_MAX];
+    if (!style_value((const char *)style, sl, "display", 7, buf, sizeof buf)) return 0;
+    bx_display disp;
+    if (bx_parse_display(buf, &disp) != BX_OK) return 0;
+    if (disp != BX_DISPLAY_FLEX && disp != BX_DISPLAY_GRID) return 0;
+
+    ci->id = -1;
+    ci->display = (int)disp;
+    ci->gap = style_value((const char *)style, sl, "gap", 3, buf, sizeof buf)
+              ? parse_px(buf) : 0;
+    ci->justify = style_value((const char *)style, sl, "justify-content", 15, buf, sizeof buf)
+                  ? parse_justify(buf) : FX_JUSTIFY_START;
+    ci->cols = (disp == BX_DISPLAY_GRID)
+               ? (style_value((const char *)style, sl, "grid-template-columns", 21, buf, sizeof buf)
+                  ? count_tracks(buf) : 1)
+               : 0;
+    return 1;
+}
+
 /* Resolves the inline context of a text node: nearest <a href>, nearest heading
  * level, nearest block-level ancestor (defaults to base), and the inherited author
  * color (nearest ancestor that sets one, packed 0xRRGGBB, or -1). */
 static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const char **href, size_t *href_len,
-                            const lxb_dom_node_t **block, int *heading, int *fg) {
-    *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1;
-    int got_link = 0, got_block = 0, got_heading = 0, got_color = 0;
+                            const lxb_dom_node_t **block, int *heading,
+                            int *fg, int *bg,
+                            pv_container_reg *reg, pv_cont_info *cont) {
+    *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
+    cont->id = -1; cont->display = 0; cont->gap = 0;
+    cont->justify = FX_JUSTIFY_START; cont->cols = 0;
+    int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
 
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
@@ -380,6 +536,19 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             if (!got_heading) { int lv = heading_level(t); if (lv) { *heading = lv; got_heading = 1; } }
             if (!got_block && is_block_tag(t)) { *block = p; got_block = 1; }
             if (!got_color) { int c = element_color(el, t); if (c >= 0) { *fg = c; got_color = 1; } }
+            /* background-color does not inherit in CSS; in this flat model we take
+             * the nearest ancestor's so a block's background shows behind its text. */
+            if (!got_bg) { int c = element_bgcolor(el); if (c >= 0) { *bg = c; got_bg = 1; } }
+            /* Nearest flex/grid container: its runs share one id so the presentation
+             * layer can lay the container out (gated by caps.css in render_doc). */
+            if (!got_cont && reg != NULL) {
+                pv_cont_info ci;
+                if (element_container(el, &ci)) {
+                    ci.id = container_id(reg, p);
+                    *cont = ci;
+                    got_cont = 1;
+                }
+            }
         }
         if (p == base) break;
     }
@@ -622,6 +791,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
     int pending_break = 0;
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
+    pv_container_reg reg = { { NULL }, 0 };  /* flex/grid containers, document order */
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
@@ -640,8 +810,10 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 const char *unused_href = NULL;
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
-                int heading = 0, unused_fg = -1;
-                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading, &unused_fg);
+                int heading = 0, unused_fg = -1, unused_bg = -1;
+                pv_cont_info unused_cont;
+                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading,
+                                &unused_fg, &unused_bg, &reg, &unused_cont);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -684,8 +856,10 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 const char *unused_href = NULL;
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
-                int heading = 0, unused_fg = -1;
-                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading, &unused_fg);
+                int heading = 0, unused_fg = -1, unused_bg = -1;
+                pv_cont_info unused_cont;
+                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading,
+                                &unused_fg, &unused_bg, &reg, &unused_cont);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -717,8 +891,9 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         const char *href = NULL;
         size_t href_len = 0;
         const lxb_dom_node_t *block = NULL;
-        int heading = 0, fg = -1;
-        resolve_context(n, base, &href, &href_len, &block, &heading, &fg);
+        int heading = 0, fg = -1, bg = -1;
+        pv_cont_info cont;
+        resolve_context(n, base, &href, &href_len, &block, &heading, &fg, &bg, &reg, &cont);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -736,6 +911,8 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         free(href_dup);
         if (st != PV_OK) { rc = st; goto cleanup; }
         pv_set_color(v, fg);
+        pv_set_bgcolor(v, bg);
+        pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
     }
 
     *out = v;

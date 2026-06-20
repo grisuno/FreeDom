@@ -1,0 +1,229 @@
+/*
+ * test_box_tree — CMocka suite for the pure recursive block/flex/grid layout.
+ *
+ * Builds small trees by hand (leaf content heights, margins, flex factors) and
+ * asserts the resolved rectangles: block stacking with margin collapsing and
+ * padding, flex row with grow/justify/gap, grid rows/columns, nesting, display:none
+ * skipping, the leaf base case, and the fail-closed edges (NULL, depth/children
+ * caps, bad grid columns).
+ */
+
+#include <setjmp.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include <cmocka.h>
+
+#include "box_tree.h"
+
+static int dbl_eq(double a, double b) {
+    double d = a - b;
+    return d < 1e-6 && d > -1e-6;
+}
+
+static void assert_rect(const bt_node *n, double x, double y, double w, double h) {
+    assert_true(dbl_eq(n->x, x));
+    assert_true(dbl_eq(n->y, y));
+    assert_true(dbl_eq(n->w, w));
+    assert_true(dbl_eq(n->h, h));
+}
+
+static void test_null_root(void **state) {
+    (void)state;
+    assert_int_equal(bt_layout(NULL, 200), BT_ERR_NULL_ARG);
+}
+
+static void test_leaf(void **state) {
+    (void)state;
+    bt_node root = { .display = BX_DISPLAY_BLOCK, .content_h = 50 };
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    assert_rect(&root, 0, 0, 200, 50);
+}
+
+static void test_leaf_with_padding(void **state) {
+    (void)state;
+    bt_node leaf = { .display = BX_DISPLAY_BLOCK, .content_h = 30 };
+    bt_node root = {
+        .display = BX_DISPLAY_BLOCK,
+        .padding = { 10, 10, 10, 10 },
+        .children = &leaf, .child_count = 1,
+    };
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    /* content width = 200 - 20 = 180; child at the padding origin. */
+    assert_rect(&leaf, 10, 10, 180, 30);
+    assert_true(dbl_eq(root.h, 50)); /* 10 + 30 + 10 */
+    assert_true(dbl_eq(root.w, 200));
+}
+
+static void test_block_stacking_with_collapse(void **state) {
+    (void)state;
+    bt_node kids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30, .margin = { .top = 10 } },
+    };
+    bt_node root = { .display = BX_DISPLAY_BLOCK, .children = kids, .child_count = 2 };
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    assert_rect(&kids[0], 0, 0, 200, 20);
+    assert_rect(&kids[1], 0, 30, 200, 30); /* 20 + collapsed top margin 10 */
+    assert_true(dbl_eq(root.h, 60));
+}
+
+static void test_flex_row_grow(void **state) {
+    (void)state;
+    bt_node kids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40, .basis = 100, .grow = 1, .shrink = 1 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 60, .basis = 100, .grow = 1, .shrink = 1 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .justify = FX_JUSTIFY_START,
+        .children = kids, .child_count = 2,
+    };
+    assert_int_equal(bt_layout(&root, 300), BT_OK);
+    /* free 100 split evenly -> 150 each, laid side by side */
+    assert_rect(&kids[0], 0, 0, 150, 40);
+    assert_rect(&kids[1], 150, 0, 150, 60);
+    assert_true(dbl_eq(root.h, 60));   /* tallest child */
+    assert_true(dbl_eq(root.w, 300));
+}
+
+static void test_flex_gap_and_justify_center(void **state) {
+    (void)state;
+    bt_node kids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 100, .grow = 0, .shrink = 1 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 100, .grow = 0, .shrink = 1 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .justify = FX_JUSTIFY_CENTER, .gap = 20,
+        .children = kids, .child_count = 2,
+    };
+    assert_int_equal(bt_layout(&root, 300), BT_OK);
+    /* used = 200 + gap 20 = 220; leftover 80; center start 40 */
+    assert_rect(&kids[0], 40, 0, 100, 20);
+    assert_rect(&kids[1], 160, 0, 100, 20);
+}
+
+static void test_grid(void **state) {
+    (void)state;
+    bt_node kids[4] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 2, .gap = 10,
+        .children = kids, .child_count = 4,
+    };
+    assert_int_equal(bt_layout(&root, 210), BT_OK);
+    /* col_w = (210-10)/2 = 100; col_x = 0,110; rows: maxh 20 then 40 */
+    assert_rect(&kids[0], 0,   0,  100, 10);
+    assert_rect(&kids[1], 110, 0,  100, 20);
+    assert_rect(&kids[2], 0,   30, 100, 30); /* row1 y = 20 + gap 10 */
+    assert_rect(&kids[3], 110, 30, 100, 40);
+    assert_true(dbl_eq(root.h, 70)); /* 20 + 10 + 40 */
+}
+
+static void test_nested_flex_in_block(void **state) {
+    (void)state;
+    bt_node fkids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40, .basis = 100, .grow = 0, .shrink = 1 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40, .basis = 100, .grow = 0, .shrink = 1 },
+    };
+    bt_node bkids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+        { .display = BX_DISPLAY_FLEX, .justify = FX_JUSTIFY_START,
+          .children = fkids, .child_count = 2 },
+    };
+    bt_node root = { .display = BX_DISPLAY_BLOCK, .children = bkids, .child_count = 2 };
+    assert_int_equal(bt_layout(&root, 300), BT_OK);
+
+    assert_rect(&bkids[0], 0, 0, 300, 20);     /* first block leaf */
+    assert_true(dbl_eq(bkids[1].y, 20));       /* flex container below it */
+    assert_true(dbl_eq(bkids[1].h, 40));       /* tallest flex child */
+    assert_true(dbl_eq(bkids[1].w, 300));
+    /* inner children are relative to the flex container's content origin */
+    assert_rect(&fkids[0], 0,   0, 100, 40);
+    assert_rect(&fkids[1], 100, 0, 100, 40);
+    assert_true(dbl_eq(root.h, 60));
+}
+
+static void test_display_none_skipped(void **state) {
+    (void)state;
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+        { .display = BX_DISPLAY_NONE,  .content_h = 999 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30, .margin = { .top = 5 } },
+    };
+    bt_node root = { .display = BX_DISPLAY_BLOCK, .children = kids, .child_count = 3 };
+    assert_int_equal(bt_layout(&root, 200), BT_OK);
+    assert_rect(&kids[1], 0, 0, 0, 0);    /* none takes no space */
+    assert_rect(&kids[0], 0, 0, 200, 20);
+    assert_rect(&kids[2], 0, 25, 200, 30); /* placed right after, skipping none */
+    assert_true(dbl_eq(root.h, 55));
+}
+
+static void test_grid_bad_columns(void **state) {
+    (void)state;
+    bt_node leaf = { .display = BX_DISPLAY_BLOCK, .content_h = 10 };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 0,
+        .children = &leaf, .child_count = 1,
+    };
+    assert_int_equal(bt_layout(&root, 200), BT_ERR_RANGE);
+}
+
+static void test_flex_negative_gap(void **state) {
+    (void)state;
+    bt_node leaf = { .display = BX_DISPLAY_BLOCK, .content_h = 10, .basis = 50 };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .gap = -1,
+        .children = &leaf, .child_count = 1,
+    };
+    assert_int_equal(bt_layout(&root, 200), BT_ERR_RANGE);
+}
+
+static void test_children_cap(void **state) {
+    (void)state;
+    static bt_node many[BT_MAX_CHILDREN + 1];  /* zeroed => block leaves */
+    bt_node root = {
+        .display = BX_DISPLAY_BLOCK,
+        .children = many, .child_count = BT_MAX_CHILDREN + 1,
+    };
+    assert_int_equal(bt_layout(&root, 200), BT_ERR_RANGE);
+}
+
+static void test_depth_cap(void **state) {
+    (void)state;
+    static bt_node chain[BT_MAX_DEPTH + 5];
+    size_t n = sizeof chain / sizeof chain[0];
+    for (size_t i = 0; i < n; ++i) {
+        chain[i].display = BX_DISPLAY_BLOCK;
+        chain[i].content_h = 1;
+        if (i + 1 < n) {
+            chain[i].children = &chain[i + 1];
+            chain[i].child_count = 1;
+        }
+    }
+    assert_int_equal(bt_layout(&chain[0], 200), BT_ERR_RANGE);
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_null_root),
+        cmocka_unit_test(test_leaf),
+        cmocka_unit_test(test_leaf_with_padding),
+        cmocka_unit_test(test_block_stacking_with_collapse),
+        cmocka_unit_test(test_flex_row_grow),
+        cmocka_unit_test(test_flex_gap_and_justify_center),
+        cmocka_unit_test(test_grid),
+        cmocka_unit_test(test_nested_flex_in_block),
+        cmocka_unit_test(test_display_none_skipped),
+        cmocka_unit_test(test_grid_bad_columns),
+        cmocka_unit_test(test_flex_negative_gap),
+        cmocka_unit_test(test_children_cap),
+        cmocka_unit_test(test_depth_cap),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
+}

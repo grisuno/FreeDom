@@ -34,6 +34,12 @@ typedef struct pv_run {
     int     img_w;       /* ancho declarado del <img> (px), o -1 si desconocido */
     int     img_h;       /* alto declarado del <img> (px), o -1 si desconocido */
     int     fg_rgb;      /* color del autor empaquetado 0xRRGGBB, o -1 si no hay */
+    int     bg_rgb;      /* background-color del autor 0xRRGGBB, o -1 si no hay */
+    int     cont_id;     /* contenedor flex/grid de autor mas cercano, o -1 */
+    int     cont_display;/* bx_display del contenedor (flex/grid), o 0 */
+    int     cont_gap;    /* gap del contenedor en px */
+    int     cont_justify;/* fx_justify del contenedor */
+    int     cont_cols;   /* columnas del grid, o 0 */
 } pv_run;
 
 typedef struct pv_view { pv_run *runs; size_t count; size_t cap; } pv_view;
@@ -49,6 +55,22 @@ dato de presentación: `render_doc` solo lo propaga si la capacidad de CSS del a
 nunca implica una petición de red (el color en línea no filtra nada). Ambos `pv_append*` inicializan
 `fg_rgb` a -1; `pv_set_color` lo fija en el último run.
 
+**Background-color del autor (`bg_rgb`):** se extrae solo del longhand `background-color:` del atributo
+`style` (el shorthand `background` y el atributo legacy `bgcolor` quedan fuera de alcance), parseado
+por `css_color`. En CSS `background-color` **no hereda**; en este modelo plano se toma del ancestro más
+cercano que lo fije, de modo que el fondo de un bloque se ve tras su texto. Mismo gate de presentación
+que `fg_rgb` (`render_doc` lo propaga solo con `caps.css`); los `pv_append*` lo inicializan a -1 y
+`pv_set_bgcolor` lo fija en el último run.
+
+**Contenedor flex/grid del autor (`cont_*`):** por cada run se busca el ancestro más cercano cuyo
+`style` declare `display:flex` o `display:grid` (parseado por `[[box_style]]`). Los runs de un mismo
+contenedor comparten `cont_id` (registro en orden de documento, -1 = ninguno); se guardan además su
+`display`, el `gap` (px), `justify-content` (`[[flex_layout]]` `fx_justify`) y, en grid, el número de
+columnas de `grid-template-columns` (cuenta de tokens; `repeat()`/`minmax()` fuera de alcance). Es
+dato de presentación: `render_doc` lo propaga solo con `caps.css`, así que con CSS de autor apagado
+todo es flujo plano. Los `pv_append*` inicializan `cont_id` a -1; `pv_set_container` fija los cinco
+campos en el último run. El `background` shorthand y `bgcolor` legacy siguen fuera de alcance.
+
 ## 3. API
 
 ```c
@@ -59,6 +81,9 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
 pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src, int w, int h); /* PV_IMAGE */
 void          pv_set_color(pv_view *v, int fg_rgb);        /* color del autor del ultimo run */
+void          pv_set_bgcolor(pv_view *v, int bg_rgb);      /* background-color del ultimo run */
+void          pv_set_container(pv_view *v, int cont_id, int cont_display,
+                               int cont_gap, int cont_justify, int cont_cols); /* contenedor */
 void          pv_free(pv_view *v);
 size_t        pv_count(const pv_view *v);
 const pv_run *pv_at(const pv_view *v, size_t i);

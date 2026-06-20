@@ -12,6 +12,8 @@
 #define _GNU_SOURCE
 
 #include "browser.h"
+#include "box_style.h"
+#include "box_tree.h"
 #include "css_color.h"
 #include "image_decode.h"
 #include "link_nav.h"
@@ -252,9 +254,64 @@ static ui_theme ui_theme_dark(void) {
     return t;
 }
 
-/* The single place that maps the dark-mode toggle to a palette. */
-static ui_theme ui_theme_for(int dark) {
-    return dark ? ui_theme_dark() : ui_theme_default();
+/* Sepia reading palette: warm paper background and dark-brown ink, easier on the
+ * eyes for long-form text. Shares all the metrics with the default theme; only the
+ * colours change. */
+static ui_theme ui_theme_sepia(void) {
+    ui_theme t = ui_theme_default();
+    t.window_bg      = (ui_rgb){ 0.90, 0.85, 0.74 };
+    t.content_bg     = (ui_rgb){ 0.96, 0.92, 0.82 };
+    t.text           = (ui_rgb){ 0.24, 0.18, 0.10 };
+    t.heading        = (ui_rgb){ 0.30, 0.20, 0.10 };
+    t.link           = (ui_rgb){ 0.40, 0.26, 0.10 };
+    t.notice_bg      = (ui_rgb){ 0.93, 0.86, 0.62 };
+    t.notice_text    = (ui_rgb){ 0.40, 0.28, 0.05 };
+    t.image_box      = (ui_rgb){ 0.50, 0.42, 0.30 };
+    t.image_blocked  = (ui_rgb){ 0.65, 0.32, 0.22 };
+    t.toolbar_bg     = (ui_rgb){ 0.42, 0.34, 0.24 };
+    t.titlebar_bg    = (ui_rgb){ 0.32, 0.25, 0.16 };
+    t.chrome_text    = (ui_rgb){ 0.95, 0.90, 0.80 };
+    t.chrome_text_dim= (ui_rgb){ 0.62, 0.55, 0.45 };
+    t.url_bg_focused = (ui_rgb){ 0.99, 0.96, 0.88 };
+    t.url_bg         = (ui_rgb){ 0.86, 0.80, 0.68 };
+    t.url_border     = (ui_rgb){ 0.30, 0.24, 0.14 };
+    t.caret          = (ui_rgb){ 0.20, 0.14, 0.06 };
+    t.link_hover_bg  = (ui_rgb){ 0.88, 0.80, 0.62 };
+    t.btn_hover_bg   = (ui_rgb){ 0.52, 0.43, 0.30 };
+    t.input_bg          = (ui_rgb){ 0.98, 0.94, 0.84 };
+    t.input_bg_focused  = (ui_rgb){ 1.00, 0.98, 0.90 };
+    t.input_border      = (ui_rgb){ 0.55, 0.46, 0.32 };
+    t.input_text        = (ui_rgb){ 0.24, 0.18, 0.10 };
+    t.input_placeholder = (ui_rgb){ 0.55, 0.46, 0.34 };
+    t.button_bg         = (ui_rgb){ 0.50, 0.36, 0.18 };
+    t.button_text       = (ui_rgb){ 0.98, 0.94, 0.86 };
+    t.menu_bg        = (ui_rgb){ 0.95, 0.90, 0.80 };
+    t.menu_border    = (ui_rgb){ 0.55, 0.46, 0.32 };
+    t.menu_text      = (ui_rgb){ 0.26, 0.19, 0.10 };
+    t.check_border   = (ui_rgb){ 0.45, 0.36, 0.24 };
+    t.check_mark     = (ui_rgb){ 0.35, 0.45, 0.20 };
+    t.toast_bg       = (ui_rgb){ 0.30, 0.23, 0.14 };
+    t.toast_text     = (ui_rgb){ 0.96, 0.92, 0.84 };
+    t.scrollbar_track     = (ui_rgb){ 0.84, 0.78, 0.66 };
+    t.scrollbar_thumb     = (ui_rgb){ 0.58, 0.48, 0.34 };
+    t.scrollbar_thumb_hot = (ui_rgb){ 0.44, 0.35, 0.22 };
+    return t;
+}
+
+/* Selectable palettes for the options menu. */
+typedef enum ui_theme_mode {
+    UI_THEME_LIGHT = 0,
+    UI_THEME_DARK,
+    UI_THEME_SEPIA
+} ui_theme_mode;
+
+/* The single place that maps the theme mode to a palette. */
+static ui_theme ui_theme_for(int mode) {
+    switch (mode) {
+        case UI_THEME_DARK:  return ui_theme_dark();
+        case UI_THEME_SEPIA: return ui_theme_sepia();
+        default:             return ui_theme_default();
+    }
 }
 
 /* Converts a packed 0xRRGGBB author color into a theme RGB triple. */
@@ -271,23 +328,27 @@ static uint64_t now_ms(void) {
 }
 
 /* The options-menu items. A capability item toggles a bool in rdp_caps by field
- * offset (labels and the flag live in one place, no magic indices); the dark-mode
- * item toggles the window's theme instead. */
+ * offset (labels and the flag live in one place, no magic indices); a theme item
+ * selects a palette; the force item ignores author colours. */
 typedef enum ui_menu_action {
     UI_MENU_CAP = 0,  /* toggles w->caps.<offset>; needs a re-render from cache */
-    UI_MENU_DARK      /* toggles w->dark_mode; needs only a repaint */
+    UI_MENU_THEME,    /* selects w->theme_mode (theme_val); needs only a repaint */
+    UI_MENU_FORCE     /* toggles w->force_theme; needs only a repaint */
 } ui_menu_action;
 
 typedef struct ui_menu_item {
     const char    *label;
     ui_menu_action action;
     size_t         cap_offset; /* offset of a bool field within rdp_caps (UI_MENU_CAP) */
+    int            theme_val;  /* the ui_theme_mode this item selects (UI_MENU_THEME) */
 } ui_menu_item;
 
 static const ui_menu_item UI_MENU_ITEMS[] = {
-    { "Dark mode",           UI_MENU_DARK, 0 },
-    { "Load images",         UI_MENU_CAP,  offsetof(rdp_caps, images) },
-    { "Author colors (CSS)", UI_MENU_CAP,  offsetof(rdp_caps, css) },
+    { "Dark mode",            UI_MENU_THEME, 0,                          UI_THEME_DARK },
+    { "Reading mode (sepia)", UI_MENU_THEME, 0,                          UI_THEME_SEPIA },
+    { "Force theme colors",   UI_MENU_FORCE, 0,                          0 },
+    { "Load images",          UI_MENU_CAP,   offsetof(rdp_caps, images), 0 },
+    { "Author colors (CSS)",  UI_MENU_CAP,   offsetof(rdp_caps, css),    0 },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
 
@@ -357,7 +418,8 @@ typedef struct browser_window {
     int url_bar_focused;
 
     ui_theme  theme;
-    int       dark_mode; /* dark palette selected in the options menu */
+    int       theme_mode;  /* ui_theme_mode selected in the options menu */
+    int       force_theme; /* ignore author fg/bg colors, use the theme (reading) */
     int       loading;   /* a network request is in flight (busy clock shown) */
     ui_hot    hot;       /* toolbar button under the pointer, or UI_HOT_NONE */
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
@@ -1070,6 +1132,8 @@ typedef struct rc_row {
     double          top, height, ascent;
     size_t          first, count;  /* RC_TEXT: frag range */
     int             banner;        /* RC_TEXT: draw the notice background */
+    int             bg_rgb;        /* author background-color packed 0xRRGGBB, or -1 */
+    double          x_off;         /* extra horizontal offset (flex/grid column), 0 normally */
     const rd_block *blk;           /* RC_IMAGE: source image block */
 } rc_row;
 
@@ -1081,7 +1145,9 @@ typedef struct rc_layout {
 
 typedef struct rc_state {
     double cur_top, pending_gap, pen_x, line_asc, line_desc;
+    double prev_bottom;  /* bottom margin (px) of the last block, for CSS margin collapsing */
     int    line_open, banner;
+    int    bg_rgb;       /* current block's author background-color, or -1 */
     size_t line_first;
 } rc_state;
 
@@ -1146,6 +1212,21 @@ static void block_style(const ui_theme *th, const rd_block *b,
     }
 }
 
+/* Vertical margins (px) of a block from the user-agent box model (box_style),
+ * resolved against the block's own font size (em -> px). The user-agent notice has
+ * no HTML tag, so it keeps the theme's paragraph gap as a separator and does not
+ * regress. The single place that turns "what tag is this" into block spacing. */
+static void block_margins(const ui_theme *th, const rd_block *b,
+                          double *top_px, double *bottom_px) {
+    const char *tag = rd_block_tag(b);
+    if (tag == NULL) { *top_px = th->paragraph_gap; *bottom_px = th->paragraph_gap; return; }
+    bx_box box = bx_default_for_tag(tag);
+    double size; int bold, underline; ui_rgb color;
+    block_style(th, b, &size, &bold, &underline, &color);
+    *top_px = box.margin.top * size;
+    *bottom_px = box.margin.bottom * size;
+}
+
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (!s->line_open) return;
     double h = (s->line_asc + s->line_desc) * th->line_spacing;
@@ -1153,7 +1234,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (r != NULL) {
         r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
         r->first = s->line_first; r->count = L->nfrag - s->line_first;
-        r->banner = s->banner; r->blk = NULL;
+        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->x_off = 0.0; r->blk = NULL;
     }
     s->cur_top += h;
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
@@ -1210,6 +1291,102 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
     }
 }
 
+/* Flows one text/link/notice block into L at content_w using state s. The caller
+ * sets s->bg_rgb (the block's author background, or -1) beforehand; the foreground
+ * color and link/heading styling are derived here. */
+static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
+                            rc_state *s, const ui_theme *th, const rd_block *b,
+                            double content_w) {
+    double size; int bold, underline; ui_rgb color;
+    block_style(th, b, &size, &bold, &underline, &color);
+    if (!w->force_theme && b->fg_rgb >= 0) color = rgb_from_packed(b->fg_rgb);
+    const char *href = (b->kind == RD_LINK) ? b->href : NULL;
+    if (b->kind == RD_NOTICE) {
+        s->banner = 1;
+        flow_text(cr, L, s, th, b->text, size, bold, underline, color, content_w, href);
+        flush_line(L, s, th);
+        s->banner = 0;
+    } else {
+        flow_text(cr, L, s, th, b->text, size, bold, underline, color, content_w, href);
+    }
+}
+
+/* Lays a contiguous range [start,end) of blocks that share one author flex/grid
+ * container into equal columns, then appends the positioned rows to L and advances
+ * s->cur_top. Each block is one item (basic: items are not grouped). Column geometry
+ * and row packing come from box_tree/flex_layout (already tested); this only flows
+ * the text and translates the rows. Visual-only, gated upstream by caps.css. A run
+ * that falls outside the engine's range degrades to plain vertical flow. */
+static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+                             rc_state *s, const ui_theme *th, double content_w,
+                             const rd_doc *doc, size_t start, size_t end) {
+    size_t n = end - start;
+    const rd_block *head = rd_at(doc, start);
+    int is_grid = (head->cont_display == BX_DISPLAY_GRID);
+    size_t ncols = is_grid ? (size_t)head->cont_cols : n;
+    if (ncols < 1) ncols = 1;
+
+    if (n == 0 || n > BT_MAX_CHILDREN || ncols > BT_MAX_CHILDREN) {
+        for (size_t k = start; k < end; ++k) {
+            s->bg_rgb = (!w->force_theme) ? rd_at(doc, k)->bg_rgb : -1;
+            flow_text_block(cr, w, L, s, th, rd_at(doc, k), content_w);
+        }
+        return;
+    }
+
+    flush_line(L, s, th);
+    double base_top = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
+    s->pending_gap = 0;
+
+    bt_node kids[BT_MAX_CHILDREN];
+    bt_node root;
+    memset(&root, 0, sizeof root);
+    memset(kids, 0, sizeof kids[0] * n);
+    root.display = BX_DISPLAY_GRID;   /* flex row == grid with n columns, one row */
+    root.grid_cols = ncols;
+    root.gap = (double)head->cont_gap;
+    root.justify = (fx_justify)head->cont_justify;
+    root.children = kids;
+    root.child_count = n;
+    for (size_t k = 0; k < n; ++k) kids[k].display = BX_DISPLAY_BLOCK;
+
+    /* First pass: column widths (heights still 0). */
+    if (bt_layout(&root, content_w) != BT_OK) {
+        for (size_t k = start; k < end; ++k) {
+            s->bg_rgb = (!w->force_theme) ? rd_at(doc, k)->bg_rgb : -1;
+            flow_text_block(cr, w, L, s, th, rd_at(doc, k), content_w);
+        }
+        return;
+    }
+
+    /* Flow each item into L at its column width; record its row range and height. */
+    size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
+    for (size_t k = 0; k < n; ++k) {
+        rc_state si;
+        memset(&si, 0, sizeof si);
+        si.bg_rgb = -1;   /* container item backgrounds are out of scope (basic) */
+        double cw = (kids[k].w < 1.0) ? 1.0 : kids[k].w;
+        size_t sr = L->nrow;
+        flow_text_block(cr, w, L, &si, th, rd_at(doc, start + k), cw);
+        flush_line(L, &si, th);
+        row_start[k] = sr;
+        row_count[k] = L->nrow - sr;
+        kids[k].content_h = si.cur_top;
+    }
+
+    /* Second pass: final row packing + y now that the heights are known. */
+    if (bt_layout(&root, content_w) != BT_OK) return;
+
+    /* Translate each item's rows into its column rectangle. */
+    for (size_t k = 0; k < n; ++k) {
+        for (size_t r = row_start[k]; r < row_start[k] + row_count[k]; ++r) {
+            L->rows[r].top += base_top + kids[k].y;
+            L->rows[r].x_off = kids[k].x;
+        }
+    }
+    s->cur_top = base_top + root.h;
+}
+
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                        rc_layout *L) {
     const rd_doc *doc = w->doc;
@@ -1217,17 +1394,38 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     memset(L, 0, sizeof *L);
     rc_state s;
     memset(&s, 0, sizeof s);
+    s.bg_rgb = -1;  /* 0 is opaque black; no background until a block sets one */
 
     for (size_t i = 0; i < rd_count(doc); ++i) {
         const rd_block *b = rd_at(doc, i);
         /* Hidden controls are never painted (their value still submits). */
         if (b->kind == RD_INPUT && b->input_type == PV_IN_HIDDEN) continue;
 
+        /* A maximal run of blocks sharing one author flex/grid container (set only
+         * with caps.css) is laid out in columns and then skipped. */
+        if (b->cont_id >= 0 &&
+            (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID)) {
+            size_t j = i + 1;
+            while (j < rd_count(doc) && rd_at(doc, j)->cont_id == b->cont_id) ++j;
+            double mt, mb;
+            block_margins(th, b, &mt, &mb);
+            s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
+            layout_container(cr, w, L, &s, th, content_w, doc, i, j);
+            s.prev_bottom = mb;
+            i = j - 1;  /* the loop's ++i moves past the container */
+            continue;
+        }
+
         int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE
                        || b->kind == RD_HEADING || b->kind == RD_INPUT);
         if (standalone || b->block_break) {
             flush_line(L, &s, th);
-            s.pending_gap = th->paragraph_gap;
+            /* Space before this block = its top margin collapsed with the previous
+             * block's bottom margin (CSS adjacent-margin collapsing, basic). */
+            double mt, mb;
+            block_margins(th, b, &mt, &mb);
+            s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
+            s.prev_bottom = mb;
         }
 
         if (b->kind == RD_INPUT) {
@@ -1240,7 +1438,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             rc_row *r = rc_add_row(L);
             if (r != NULL) {
                 r->kind = RC_INPUT; r->top = top; r->height = h; r->ascent = fe.ascent;
-                r->first = 0; r->count = 0; r->banner = 0; r->blk = b;
+                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0; r->blk = b;
             }
             s.cur_top = top + h;
             continue;
@@ -1262,27 +1460,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             rc_row *r = rc_add_row(L);
             if (r != NULL) {
                 r->kind = RC_IMAGE; r->top = top; r->height = h; r->ascent = fe.ascent;
-                r->first = 0; r->count = 0; r->banner = 0; r->blk = b;
+                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0; r->blk = b;
             }
             s.cur_top = top + h;
             continue;
         }
 
-        double size; int bold, underline; ui_rgb color;
-        block_style(th, b, &size, &bold, &underline, &color);
-        /* Author CSS color (already gated by caps.css in render_doc) overrides the
-         * theme color while keeping the link underline / heading weight. */
-        if (b->fg_rgb >= 0) color = rgb_from_packed(b->fg_rgb);
-        const char *href = (b->kind == RD_LINK) ? b->href : NULL;
-
-        if (b->kind == RD_NOTICE) {
-            s.banner = 1;
-            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w, href);
-            flush_line(L, &s, th);
-            s.banner = 0;
-        } else {
-            flow_text(cr, L, &s, th, b->text, size, bold, underline, color, content_w, href);
-        }
+        /* Author background travels on the row (unless the theme is forced); the
+         * foreground tints the fragments inside flow_text_block. */
+        s.bg_rgb = (!w->force_theme) ? b->bg_rgb : -1;
+        flow_text_block(cr, w, L, &s, th, b, content_w);
     }
     flush_line(L, &s, th);
     L->total_h = s.cur_top;
@@ -1469,26 +1656,32 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
             set_rgb(cr, th->notice_bg);
             cairo_rectangle(cr, 0.0, ry, (double)w->width, r->height);
             cairo_fill(cr);
+        } else if (r->bg_rgb >= 0) {
+            /* Author background-color behind the block's text (content box). */
+            set_rgb(cr, rgb_from_packed(r->bg_rgb));
+            cairo_rectangle(cr, left, ry, content_w, r->height);
+            cairo_fill(cr);
         }
         double baseline = ry + r->ascent;
+        double rx = left + r->x_off;  /* row origin (column offset for flex/grid) */
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
             /* Highlight the link under the pointer (all fragments of that link share
              * its href pointer into the doc). */
             if (f->href != NULL && f->href == w->hover_href) {
                 set_rgb(cr, th->link_hover_bg);
-                cairo_rectangle(cr, left + f->x, ry, f->width, r->height);
+                cairo_rectangle(cr, rx + f->x, ry, f->width, r->height);
                 cairo_fill(cr);
             }
             content_font(cr, f->font_size, f->bold);
             set_rgb(cr, f->color);
-            cairo_move_to(cr, left + f->x, baseline);
+            cairo_move_to(cr, rx + f->x, baseline);
             draw_slice(cr, f->text, f->len);
             if (f->underline) {
                 double uy = baseline + f->font_size * UI_UNDERLINE_OFFSET;
                 cairo_set_line_width(cr, UI_UNDERLINE_THICK);
-                cairo_move_to(cr, left + f->x, uy);
-                cairo_line_to(cr, left + f->x + f->width, uy);
+                cairo_move_to(cr, rx + f->x, uy);
+                cairo_line_to(cr, rx + f->x + f->width, uy);
                 cairo_stroke(cr);
             }
         }
@@ -1533,7 +1726,7 @@ static const char *link_at_point(browser_window *w, double px, double py) {
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
             if (f->href == NULL) continue;
-            double fx = left + f->x;
+            double fx = left + r->x_off + f->x;
             if (px >= fx && px <= fx + f->width) { hit = f->href; break; }
         }
     }
@@ -1717,18 +1910,25 @@ static void submit_form(browser_window *w, const rd_block *rep) {
 /* True when options-menu item i is currently enabled (drives its checkmark). */
 static int menu_item_checked(const browser_window *w, size_t i) {
     const ui_menu_item *it = &UI_MENU_ITEMS[i];
-    if (it->action == UI_MENU_DARK) return w->dark_mode;
+    if (it->action == UI_MENU_THEME) return w->theme_mode == it->theme_val;
+    if (it->action == UI_MENU_FORCE) return w->force_theme;
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
 
-/* Toggles options-menu item i and applies its effect. Dark mode only swaps the
- * theme (a repaint suffices); a capability change re-renders from cache. */
+/* Toggles options-menu item i and applies its effect. Theme and force-colors only
+ * affect presentation (a repaint, which re-runs layout, suffices); a capability
+ * change re-renders from cache. */
 static void menu_item_toggle(browser_window *w, size_t i) {
     const ui_menu_item *it = &UI_MENU_ITEMS[i];
-    if (it->action == UI_MENU_DARK) {
-        w->dark_mode = !w->dark_mode;
-        w->theme = ui_theme_for(w->dark_mode);
+    if (it->action == UI_MENU_THEME) {
+        /* Clicking the active palette returns to light; otherwise select it. */
+        w->theme_mode = (w->theme_mode == it->theme_val) ? UI_THEME_LIGHT : it->theme_val;
+        w->theme = ui_theme_for(w->theme_mode);
         return;
+    }
+    if (it->action == UI_MENU_FORCE) {
+        w->force_theme = !w->force_theme;
+        return;  /* layout re-applies author colors (or not) on the next paint */
     }
     bool *flag = (bool *)((char *)&w->caps + it->cap_offset);
     *flag = !*flag;

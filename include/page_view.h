@@ -79,6 +79,17 @@ typedef struct pv_run {
     int     img_w;        /* PV_IMAGE declared width in px, or -1 if unknown */
     int     img_h;        /* PV_IMAGE declared height in px, or -1 if unknown */
     int     fg_rgb;       /* author color packed 0xRRGGBB, or -1 if none */
+    int     bg_rgb;       /* author background-color packed 0xRRGGBB, or -1 if none */
+    /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
+     * the presentation layer can lay the container's children out with box_tree.
+     * cont_id groups runs of one container (-1 = none); cont_display is the
+     * bx_display (flex/grid); the rest are the container's parsed params. Defaults:
+     * cont_id -1, the others 0. Honoured by render_doc only with caps.css. */
+    int     cont_id;      /* container group id in document order, or -1 */
+    int     cont_display; /* bx_display of the container (flex/grid), or 0 */
+    int     cont_gap;     /* container gap in px (>= 0) */
+    int     cont_justify; /* fx_justify of the container */
+    int     cont_cols;    /* grid column count (>= 1 for grid), or 0 */
     /* form controls (PV_INPUT only; defaults: type 0, name/value NULL, form_id -1,
      * method GET). name/value carry the submitted bytes verbatim (not whitespace
      * collapsed); form_id groups controls of the same <form> (-1 = no form). */
@@ -135,6 +146,19 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
  * default a new run's color to -1, so this only needs calling when a color is
  * present. */
 void pv_set_color(pv_view *v, int fg_rgb);
+
+/* Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most
+ * recently appended run. No-op when the view is empty or NULL. Both append helpers
+ * default a new run's bg_rgb to -1. background-color does not inherit in CSS; in
+ * this flat model pv_build resolves it from the nearest ancestor that sets one, so
+ * a block's background shows behind its text runs. */
+void pv_set_bgcolor(pv_view *v, int bg_rgb);
+
+/* Sets the nearest flex/grid container annotation on the most recently appended
+ * run (cont_id, the bx_display, and the parsed gap/justify/cols). No-op on an empty
+ * or NULL view. Both append helpers default cont_id to -1 (no container). */
+void pv_set_container(pv_view *v, int cont_id, int cont_display,
+                      int cont_gap, int cont_justify, int cont_cols);
 
 /* Idempotent; safe on NULL and safe to call twice. */
 void pv_free(pv_view *v);

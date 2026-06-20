@@ -16,6 +16,8 @@
 #include <string.h>
 #include <cmocka.h>
 
+#include "box_style.h"
+#include "flex_layout.h"
 #include "html_parse.h"
 #include "page_view.h"
 
@@ -340,10 +342,14 @@ static void test_set_color_model(void **state) {
 
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
     assert_int_equal(pv_at(v, 0)->fg_rgb, -1); /* default */
+    assert_int_equal(pv_at(v, 0)->bg_rgb, -1); /* default */
     pv_set_color(v, 0x123456);
     assert_int_equal(pv_at(v, 0)->fg_rgb, 0x123456);
+    pv_set_bgcolor(v, 0x654321);
+    assert_int_equal(pv_at(v, 0)->bg_rgb, 0x654321);
 
-    pv_set_color(NULL, 0); /* NULL-safe */
+    pv_set_color(NULL, 0);    /* NULL-safe */
+    pv_set_bgcolor(NULL, 0);  /* NULL-safe */
     pv_free(v);
 }
 
@@ -359,6 +365,7 @@ static void test_build_author_color(void **state) {
         "<font color='blue'>blue text</font>"
         "<p style='color:bogusvalue'>fallback text</p>"
         "<div style='color:#112233'><span>inherited text</span></div>"
+        "<div style='background-color:#abcdef'><span>bg inherited</span></div>"
         "</body>");
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
@@ -366,10 +373,17 @@ static void test_build_author_color(void **state) {
     const pv_run *red = find_text(v, "red text");
     assert_non_null(red);
     assert_int_equal(red->fg_rgb, 0xff0000);
+    assert_int_equal(red->bg_rgb, -1); /* no background-color set */
 
     const pv_run *plain = find_text(v, "plain text");
     assert_non_null(plain);
     assert_int_equal(plain->fg_rgb, -1); /* background-color is not color */
+    assert_int_equal(plain->bg_rgb, 0x00ff00); /* author background-color */
+
+    const pv_run *bg_inh = find_text(v, "bg inherited");
+    assert_non_null(bg_inh);
+    assert_int_equal(bg_inh->bg_rgb, 0xabcdef); /* nearest ancestor background-color */
+    assert_int_equal(bg_inh->fg_rgb, -1);
 
     const pv_run *blue = find_text(v, "blue text");
     assert_non_null(blue);
@@ -385,6 +399,78 @@ static void test_build_author_color(void **state) {
 
     pv_free(v);
     hp_document_free(doc);
+}
+
+/* pv_build records the nearest author flex/grid container per run: its id, display,
+ * and parsed gap/justify/columns. Runs of one container share the id; a second
+ * container gets a new id; content outside any container has cont_id == -1. */
+static void test_build_flex_container(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='display:flex;gap:10px;justify-content:center'>"
+        "<p>one</p><p>two</p></div>"
+        "<div style='display:flex'><p>second</p></div>"
+        "<p>outside</p>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *one = find_text(v, "one");
+    const pv_run *two = find_text(v, "two");
+    assert_non_null(one);
+    assert_non_null(two);
+    assert_int_equal(one->cont_display, BX_DISPLAY_FLEX);
+    assert_int_equal(one->cont_gap, 10);
+    assert_int_equal(one->cont_justify, FX_JUSTIFY_CENTER);
+    assert_int_equal(one->cont_id, two->cont_id);   /* same container */
+    assert_true(one->cont_id >= 0);
+
+    const pv_run *second = find_text(v, "second");
+    assert_non_null(second);
+    assert_int_equal(second->cont_display, BX_DISPLAY_FLEX);
+    assert_int_not_equal(second->cont_id, one->cont_id); /* a different container */
+    assert_int_equal(second->cont_justify, FX_JUSTIFY_START); /* default */
+
+    const pv_run *outside = find_text(v, "outside");
+    assert_non_null(outside);
+    assert_int_equal(outside->cont_id, -1);  /* no container */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_grid_container(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='display:grid;grid-template-columns:1fr 1fr 1fr'>"
+        "<span>a</span><span>b</span></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "a");
+    assert_non_null(a);
+    assert_int_equal(a->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(a->cont_cols, 3);
+    assert_true(a->cont_id >= 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A run with no flex/grid ancestor carries the no-container defaults. */
+static void test_container_defaults(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
+    assert_int_equal(pv_at(v, 0)->cont_id, -1);
+    assert_int_equal(pv_at(v, 0)->cont_display, 0);
+    pv_set_container(v, 2, BX_DISPLAY_GRID, 8, FX_JUSTIFY_END, 4);
+    assert_int_equal(pv_at(v, 0)->cont_id, 2);
+    assert_int_equal(pv_at(v, 0)->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(pv_at(v, 0)->cont_cols, 4);
+    pv_set_container(NULL, 0, 0, 0, 0, 0); /* NULL-safe */
+    pv_free(v);
 }
 
 /* Finds the first PV_INPUT run whose name equals `name`; NULL if none. */
@@ -536,6 +622,9 @@ int main(void) {
         cmocka_unit_test(test_build_empty_document),
         cmocka_unit_test(test_set_color_model),
         cmocka_unit_test(test_build_author_color),
+        cmocka_unit_test(test_build_flex_container),
+        cmocka_unit_test(test_build_grid_container),
+        cmocka_unit_test(test_container_defaults),
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),
         cmocka_unit_test(test_build_textarea_value),

@@ -89,6 +89,14 @@ const char    *rd_image_label(rdp_img_decision d); /* etiqueta del placeholder *
 Cadenas estables, cortas, en inglés, para salida determinista (agent-friendly). Nunca `NULL`; un
 valor de enum desconocido devuelve una cadena por defecto, nunca `NULL`.
 
+### `rd_block_tag`
+Etiqueta HTML canónica del bloque, para que la capa de presentación consulte su caja UA
+(`[[box_style]]`) sin re-derivar el mapeo kind->etiqueta en el sitio de llamada: `RD_HEADING` ->
+`h1`..`h6` (con `heading_level` acotado a 1..6), `RD_PARAGRAPH` -> `p`, `RD_LINK` -> `a`,
+`RD_IMAGE` -> `img`, `RD_INPUT` -> `textarea`/`button`/`input` según `input_type`. `RD_NOTICE`
+(banner del UA, no es un elemento HTML) y un bloque `NULL` devuelven `NULL`. Cadena estática (no
+se posee). Pura y determinista.
+
 ## 3. Garantías
 
 - **Pureza / Zero Trust:** sin I/O, sin estado global, reentrante; cada imagen se revalida contra

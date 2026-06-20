@@ -212,13 +212,41 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   dueño: máxima legibilidad con superficie mínima. Lógica pura y testeable; la GUI solo cablea.
   Base ya existente: escala de headings, `paragraph_gap`, `content_margin`, color de autor
   (`css_color`, gateado por `caps.css`).
-  - [ ] **Box model por etiqueta** (módulo puro, p. ej. `box_style` o extensión de `render_doc`):
-    márgenes/padding por defecto para `body`/`p`/`h1..h6`/`ul`/`ol`/`li`/`blockquote`/`hr`/`pre`,
-    consumidos por el layout. Spec + test rojo antes de tocar el pintor.
-  - [ ] **Reading mode (sepia)** como tercera paleta del menú, más una opción de forzar el tema
-    sobre los colores de autor (legibilidad > fidelidad).
-  - [ ] **`background-color` de autor** (hoy `css_color` extrae solo `color`), respetando el gate
-    `caps.css`.
+  - [x] **Box model por etiqueta** — módulo puro `box_style` (`bx_`): hoja de estilo del UA
+    (márgenes/padding en `em` + `display`) por etiqueta vía búsqueda binaria sobre tabla ordenada,
+    más `bx_parse_display` (gateado por el llamante con `caps.css`). Spec + test (16) verde +
+    ASan/UBSan limpio. `body` con margen 0 (el gutter lo da el chrome).
+  - [x] **Flexbox 1D + grid básico** — módulo puro `flex_layout` (`fx_`): solver del eje principal
+    (`flex-grow`/`shrink` con congelado iterativo al `min`, `gap`, `justify-content` completo) y
+    grid de columnas iguales (`repeat(n,1fr)`) + colocación fila-por-fila. Acotado (`FX_MAX_ITEMS`,
+    sin VLA/alloc). Spec + test (19) verde + ASan/UBSan limpio.
+  - [x] **Box model cableado al pintor**: puente puro `rd_block_tag` (`render_doc`: kind ->
+    etiqueta HTML canónica, +1 test, ASan limpio) y la GUI compone `rd_block_tag ->
+    bx_default_for_tag` en `block_margins` para espaciar cada bloque por su margen UA (em -> px del
+    propio tamaño de fuente) con **colapso de márgenes** básico, sustituyendo el `paragraph_gap`
+    único. Headings con jerarquía real, párrafos/listas con su margen. *(compila + enlaza
+    endurecido; **sin verificar visualmente**: requiere Wayland.)*
+  - [x] **Árbol de cajas (motor de layout)** — módulo puro `box_tree` (`bt_`): layout recursivo que
+    apila bloques (con colapso de márgenes + padding), delega flex/grid en `flex_layout` y baja con
+    el ancho resuelto; topes anti-DoS (`BT_MAX_DEPTH`/`BT_MAX_CHILDREN`), sin VLA/alloc. Spec +
+    test (13) verde + ASan/UBSan limpio. Compone `[[box_style]]` + `[[flex_layout]]`.
+  - [x] **Construcción del árbol desde el DOM + pintado** — pipeline puro (TDD): `page_view` extrae
+    el contenedor flex/grid de autor más cercano por run (`cont_id`/`display`/`gap`/`justify`/`cols`
+    vía `display`/`gap`/`justify-content`/`grid-template-columns`), `tab` lo serializa por IPC,
+    `render_doc` lo transporta **gateado por `caps.css`** (apagado → flujo plano, cero regresión).
+    La GUI agrupa los bloques de un contenedor, mide cada ítem y los dispone en columnas con
+    `bt_layout`/`flex_layout` (flex=fila de N columnas, grid=`cols` con wrap), traduciendo las filas
+    a su columna (`x_off`). Básico: cada bloque = un ítem; ítems multi-bloque y anidamiento profundo
+    quedan fuera. Tests: page_view 30, render_doc 20, tab 21 verde + ASan limpio. La GUI **sin
+    verificar visualmente** (requiere Wayland).
+  - [x] **Reading mode (sepia)** — tercera paleta `ui_theme_sepia` en el menú (papel cálido + tinta
+    marrón), con `theme_mode` (light/dark/sepia) y un toggle **"Force theme colors"** que ignora los
+    colores de autor (legibilidad > fidelidad). Solo `gui/browser_ui.c`; **sin verificar visualmente**.
+  - [x] **`background-color` de autor** — pipeline puro: `page_view` extrae la declaración
+    `background-color` (longhand) a `bg_rgb` (no hereda en CSS; se toma del ancestro más cercano para
+    que el fondo del bloque se vea tras su texto), `tab` lo serializa por IPC, `render_doc` lo
+    transporta gateado por `caps.css`. La GUI lo pinta tras el bloque (orquestador). Spec + tests
+    (page_view 27, render_doc 19, tab 21) verde + ASan limpio.
 - **Hito 8 — Transcodificación de charset.** Mostrar acentos en vez de `?` (Latin-1 y otros →
   UTF-8) en `page_view`/`browser_set_page`. Lógica pura + tests; sin dependencia nueva.
 - **Hito 9 — Fetch asíncrono.** Sacar `secure_fetch` del hilo del event loop (el worker/IPC de

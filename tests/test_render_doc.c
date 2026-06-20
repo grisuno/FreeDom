@@ -16,6 +16,8 @@
 #include <string.h>
 #include <cmocka.h>
 
+#include "box_style.h"
+#include "flex_layout.h"
 #include "page_view.h"
 #include "render_doc.h"
 #include "render_policy.h"
@@ -273,22 +275,25 @@ static void test_author_color_gated_by_css(void **state) {
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "colored", NULL), PV_OK);
     pv_set_color(v, 0x3366cc);
+    pv_set_bgcolor(v, 0xeeddcc);
 
-    /* CSS off (default): color suppressed. */
+    /* CSS off (default): both author colors suppressed. */
     rd_doc *d = NULL;
     assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
     const rd_block *p = first_kind(d, RD_PARAGRAPH);
     assert_non_null(p);
     assert_int_equal(p->fg_rgb, -1);
+    assert_int_equal(p->bg_rgb, -1);
     rd_free(d);
 
-    /* CSS on: color carried through. */
+    /* CSS on: both colors carried through. */
     rdp_caps caps = rdp_caps_safe();
     caps.css = true;
     assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
     p = first_kind(d, RD_PARAGRAPH);
     assert_non_null(p);
     assert_int_equal(p->fg_rgb, 0x3366cc);
+    assert_int_equal(p->bg_rgb, 0xeeddcc);
     rd_free(d);
 
     pv_free(v);
@@ -342,9 +347,73 @@ static void test_input_label_total(void **state) {
     assert_string_equal(rd_kind_name(RD_INPUT), "input");
 }
 
+/* The author flex/grid container annotation is presentation gated by caps.css:
+ * dropped to cont_id -1 unless author CSS is enabled, then carried with its params. */
+static void test_container_gated_by_css(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "item", NULL), PV_OK);
+    pv_set_container(v, 0, BX_DISPLAY_FLEX, 12, FX_JUSTIFY_CENTER, 0);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->cont_id, -1);  /* CSS off: no container layout */
+    rd_free(d);
+
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->cont_id, 0);
+    assert_int_equal(p->cont_display, BX_DISPLAY_FLEX);
+    assert_int_equal(p->cont_gap, 12);
+    assert_int_equal(p->cont_justify, FX_JUSTIFY_CENTER);
+    rd_free(d);
+    pv_free(v);
+}
+
+static void test_block_tag_total(void **state) {
+    (void)state;
+    rd_block b;
+
+    memset(&b, 0, sizeof b);
+    b.kind = RD_HEADING;
+    const char *want[6] = { "h1", "h2", "h3", "h4", "h5", "h6" };
+    for (int lvl = 1; lvl <= 6; ++lvl) {
+        b.heading_level = lvl;
+        assert_string_equal(rd_block_tag(&b), want[lvl - 1]);
+    }
+    /* out-of-range heading levels clamp into h1..h6 */
+    b.heading_level = 0;  assert_string_equal(rd_block_tag(&b), "h1");
+    b.heading_level = 99; assert_string_equal(rd_block_tag(&b), "h6");
+
+    memset(&b, 0, sizeof b);
+    b.kind = RD_PARAGRAPH; assert_string_equal(rd_block_tag(&b), "p");
+    b.kind = RD_LINK;      assert_string_equal(rd_block_tag(&b), "a");
+    b.kind = RD_IMAGE;     assert_string_equal(rd_block_tag(&b), "img");
+
+    memset(&b, 0, sizeof b);
+    b.kind = RD_INPUT;
+    b.input_type = PV_IN_TEXT;     assert_string_equal(rd_block_tag(&b), "input");
+    b.input_type = PV_IN_TEXTAREA; assert_string_equal(rd_block_tag(&b), "textarea");
+    b.input_type = PV_IN_SUBMIT;   assert_string_equal(rd_block_tag(&b), "button");
+    b.input_type = PV_IN_BUTTON;   assert_string_equal(rd_block_tag(&b), "button");
+
+    /* the user-agent notice has no HTML tag; a NULL block is NULL too */
+    memset(&b, 0, sizeof b);
+    b.kind = RD_NOTICE;
+    assert_null(rd_block_tag(&b));
+    assert_null(rd_block_tag(NULL));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_out),
+        cmocka_unit_test(test_container_gated_by_css),
+        cmocka_unit_test(test_block_tag_total),
         cmocka_unit_test(test_build_null_view_is_empty),
         cmocka_unit_test(test_heading_paragraph_link),
         cmocka_unit_test(test_image_off_emits_notice_and_blocked),

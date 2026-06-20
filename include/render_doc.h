@@ -49,6 +49,15 @@ typedef struct rd_block {
     char            *href;
     rdp_img_decision img_decision;
     int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */
+    int              bg_rgb;         /* author background-color packed 0xRRGGBB, or -1; set only with caps.css */
+    /* Nearest author flex/grid container of this block (page_view), carried only
+     * with caps.css so the presentation layer can lay it out with box_tree/flex_layout.
+     * cont_id groups blocks of one container (-1 = none); the rest are its params. */
+    int              cont_id;        /* container group id, or -1 */
+    int              cont_display;   /* bx_display (flex/grid), or 0 */
+    int              cont_gap;       /* container gap in px */
+    int              cont_justify;   /* fx_justify of the container */
+    int              cont_cols;      /* grid column count, or 0 */
     int              input_type;     /* RD_INPUT: pv_input_type, else 0 */
     char            *name;           /* RD_INPUT: control name, or NULL */
     char            *value;          /* RD_INPUT: control value, or NULL */
@@ -91,6 +100,14 @@ const rd_block *rd_at(const rd_doc *d, size_t i);
 /* Stable, short English name of a block kind for structured/agent output. Never
  * NULL; an unknown enum value yields "block". */
 const char *rd_kind_name(rd_kind k);
+
+/* Canonical HTML tag name for a block, so the presentation layer can look up its
+ * user-agent box (box_style) without re-deriving the kind->tag mapping at the call
+ * site. RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH ->
+ * "p", RD_LINK -> "a", RD_IMAGE -> "img", RD_INPUT -> "textarea"/"button"/"input"
+ * by input_type. RD_NOTICE (a user-agent banner, not an HTML element) and a NULL
+ * block yield NULL. The returned string is a static literal (not owned). */
+const char *rd_block_tag(const rd_block *b);
 
 /* Stable, short English label for an image placeholder, derived from its
  * decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never
