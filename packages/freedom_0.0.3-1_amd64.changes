@@ -15,11 +15,11 @@ Changes:
  .
    * Initial release. (Closes: #nnnn)  <nnnn is the bug number of your ITP>
 Checksums-Sha1:
- 6f0cda6fbc74030045759763afd15447ea74d6d2 14133 freedom_0.0.3-1_amd64.buildinfo
- c4e0dea370280b1953fa49ae8890c8d77273b77f 2596 freedom_0.0.3-1_amd64.deb
+ fd4ae2651984adcaa151689e92adfa850dd81757 14125 freedom_0.0.3-1_amd64.buildinfo
+ af826948293f26acd951671955d8f4172e0ad247 2352 freedom_0.0.3-1_amd64.deb
 Checksums-Sha256:
- 6209822704436bb52d0ec3c6ff2cb327626dbd4596dc5ab3f8fd8f16c2661496 14133 freedom_0.0.3-1_amd64.buildinfo
- f6e4e19f92f4e17ee6169c9f3674c2f0cea6d06133baa2511f5bfbf6fa48b848 2596 freedom_0.0.3-1_amd64.deb
+ 177e17670bc9fbcd15404a9602b2c2288e43a8d39080b11f713003022ccad7c0 14125 freedom_0.0.3-1_amd64.buildinfo
+ bba243f42ecf8ed6001baa5894a50c672938c630fe2727e0a403d0bbf7bcfaed 2352 freedom_0.0.3-1_amd64.deb
 Files:
- 4e493b7d6fed53b23900f4de4d669706 14133 web optional freedom_0.0.3-1_amd64.buildinfo
- 708f5bb534c9b99faa401eeac49eb6bd 2596 web optional freedom_0.0.3-1_amd64.deb
+ c02b4173e94fc885e289499d816ee49d 14125 web optional freedom_0.0.3-1_amd64.buildinfo
+ 04d1480181e86db43b1e1782c5b59c1b 2352 web optional freedom_0.0.3-1_amd64.deb

@@ -16,7 +16,7 @@ cd "$SCRIPT_DIR"
 
 # 2. Clean up dh_make boilerplate files that cause Lintian errors
 echo -e "${GREEN}[*] Cleaning up obsolete templates from debian/...${NC}"
-rm -f debian/*.ex debian/*.EX debian/freedom.doc-base*
+rm -fr debian/*.ex debian/*.EX debian/freedom.doc-base*
 
 # 3. Clean up previous build artifacts from the Makefile
 if [ -f Makefile ]; then
@@ -30,7 +30,7 @@ chmod +x debian/rules
 # 5. Build the .deb package (skipping tests)
 echo -e "${GREEN}[*] Building the binary package (.deb)...${NC}"
 # -us -uc skips signing, -b is for binary-only, -d skips build-dependency check if needed. No cheks it's only meanwhile i repair the 4 test are broken
-DEB_BUILD_OPTIONS=nocheck debuild -us -uc -b -d
+debuild -us -uc -b -d
 
 echo -e "${GREEN}[+] Package built successfully!${NC}"
 echo -e "To install it, run:"

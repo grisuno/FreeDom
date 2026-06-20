@@ -1,4 +1,4 @@
- dpkg-buildpackage -us -uc -ui -b
+ dpkg-buildpackage -us -uc -ui -b -d
 dpkg-buildpackage: aviso: email address 'grisun0 <grisun0@kali>' with single label domain
 dpkg-buildpackage: información: paquete fuente freedom
 dpkg-buildpackage: información: versión de las fuentes 0.0.3-1
@@ -63,6 +63,7 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/render_policy.c -o build/render_policy.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/textfield.c -o build/textfield.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/form.c -o build/form.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -I/usr/include/libpng16 -c src/image_decode.c -o build/image_decode.o
 cc -std=c11 -O2 -o build/gen_psl tools/gen_psl.c
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/browser.c -o build/browser.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/ui_layout.c -o build/ui_layout.o
@@ -72,9 +73,873 @@ wayland-scanner client-header //usr/share/wayland-protocols/stable/xdg-shell/xdg
 wayland-scanner client-header //usr/share/wayland-protocols/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml build/xdg-decoration-client-protocol.h
 build/gen_psl third_party/psl/public_suffix_list.dat > build/psl_data.c
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c build/psl_data.c -o build/psl_data.o
-cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -Ibuild -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 src/freedom.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o build/secure_fetch.o build/url.o build/link_nav.o build/css_color.o build/request_policy.o build/render_doc.o build/render_policy.o build/textfield.o build/form.o build/psl_data.o build/browser.o build/ui_layout.o gui/browser_ui.c build/xdg-shell-protocol.c build/xdg-decoration-protocol.c build/xdg-shell-client-protocol.h build/xdg-decoration-client-protocol.h -o build/freedom -Wl,-z,relro -lcurl -lssl -lcrypto -lm -lpthread -L/usr/local/lib -llexbor -lwayland-cursor -lwayland-client -lm -lcairo -lfontconfig -lfreetype -lxkbcommon
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -Ibuild -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 src/freedom.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o build/secure_fetch.o build/url.o build/link_nav.o build/css_color.o build/request_policy.o build/render_doc.o build/render_policy.o build/textfield.o build/form.o build/image_decode.o build/psl_data.o build/browser.o build/ui_layout.o gui/browser_ui.c build/xdg-shell-protocol.c build/xdg-decoration-protocol.c build/xdg-shell-client-protocol.h build/xdg-decoration-client-protocol.h -o build/freedom -Wl,-z,relro -lcurl -lssl -lcrypto -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lwayland-cursor -lwayland-client -lm -lcairo -lfontconfig -lfreetype -lxkbcommon
 make[1]: se sale del directorio '/home/grisun0/src_note/c/freedom-0.0.3'
-dh: command-omitted: The call to "dh_auto_test" was omitted due to "DEB_BUILD_OPTIONS=nocheck"
+   dh_auto_test
+	make -j16 test TESTSUITEFLAGS="-j16 --verbose" VERBOSE=1
+make[1]: se entra en el directorio '/home/grisun0/src_note/c/freedom-0.0.3'
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_secure_fetch.c build/secure_fetch.o build/url.o -o build/test_secure_fetch -Wl,-z,relro -lcurl -lssl -lcrypto -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_html_parse.c build/html_parse.o -o build/test_html_parse -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_js_sandbox.c build/js_sandbox.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o -o build/test_js_sandbox -Wl,-z,relro -lm -lpthread -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_dom.c build/dom.o build/html_parse.o -o build/test_dom -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  -isystem third_party/quickjs tests/test_js_dom.c build/js_dom.o build/js_sandbox.o build/dom.o build/html_parse.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o -o build/test_js_dom -Wl,-z,relro -lm -lpthread -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_os_sandbox.c build/os_sandbox.o -o build/test_os_sandbox -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_ui.c build/ui_layout.o -o build/test_ui -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_request_policy.c build/request_policy.o build/psl_data.o -o build/test_request_policy -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_anti_fp.c build/anti_fp.o -o build/test_anti_fp -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/renderer.c -o build/renderer.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  -isystem third_party/quickjs tests/test_js_env.c build/js_env.o build/js_dom.o build/js_sandbox.o build/anti_fp.o build/dom.o build/html_parse.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o -o build/test_js_env -Wl,-z,relro -lm -lpthread -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/local_store.c -o build/local_store.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/disk_store.c -o build/disk_store.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_tab.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/css_color.o build/image_decode.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o -o build/test_tab -Wl,-z,relro -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_browser.c build/browser.o -o build/test_browser -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_freedom.c -o build/test_freedom -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_page_view.c build/page_view.o build/css_color.o build/html_parse.o -o build/test_page_view -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_render_policy.c build/render_policy.o build/request_policy.o build/psl_data.o -o build/test_render_policy -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_render_doc.c build/render_doc.o build/render_policy.o build/request_policy.o build/page_view.o build/css_color.o build/html_parse.o build/url.o build/psl_data.o -o build/test_render_doc -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_url.c build/url.o -o build/test_url -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_link_nav.c build/link_nav.o build/url.o -o build/test_link_nav -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_css_color.c build/css_color.o -o build/test_css_color -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_textfield.c build/textfield.o -o build/test_textfield -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_form.c build/form.o build/url.o -o build/test_form -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -I/usr/include/libpng16  tests/test_image_decode.c build/image_decode.o -o build/test_image_decode -Wl,-z,relro -lpng16 -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_renderer.c build/renderer.o build/os_sandbox.o build/html_parse.o -o build/test_renderer -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_local_store.c build/local_store.o -o build/test_local_store -Wl,-z,relro -lcrypto -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_disk_store.c build/disk_store.o build/local_store.o -o build/test_disk_store -Wl,-z,relro -lcrypto -lcmocka
+== run build/test_secure_fetch ==
+[==========] tests: Running 45 test(s).
+[ RUN      ] test_config_default_is_secure
+[       OK ] test_config_default_is_secure
+[ RUN      ] test_user_agent_default_when_unset
+[       OK ] test_user_agent_default_when_unset
+[ RUN      ] test_user_agent_uses_override
+[       OK ] test_user_agent_uses_override
+[ RUN      ] test_url_rejects_null
+[       OK ] test_url_rejects_null
+[ RUN      ] test_url_rejects_plain_http
+[       OK ] test_url_rejects_plain_http
+[ RUN      ] test_url_rejects_dangerous_schemes
+[       OK ] test_url_rejects_dangerous_schemes
+[ RUN      ] test_url_accepts_https
+[       OK ] test_url_accepts_https
+[ RUN      ] test_tls_rejects_12
+[       OK ] test_tls_rejects_12
+[ RUN      ] test_tls_rejects_older_and_garbage
+[       OK ] test_tls_rejects_older_and_garbage
+[ RUN      ] test_tls_accepts_13
+[       OK ] test_tls_accepts_13
+[ RUN      ] test_group_rejects_classical
+[       OK ] test_group_rejects_classical
+[ RUN      ] test_group_rejects_pure_pq
+[       OK ] test_group_rejects_pure_pq
+[ RUN      ] test_group_accepts_hybrid
+[       OK ] test_group_accepts_hybrid
+[ RUN      ] test_chain_strict_rejects_classical
+[       OK ] test_chain_strict_rejects_classical
+[ RUN      ] test_chain_strict_accepts_pq
+[       OK ] test_chain_strict_accepts_pq
+[ RUN      ] test_chain_hybrid_allows_classical
+[       OK ] test_chain_hybrid_allows_classical
+[ RUN      ] test_chain_rejects_sha1_in_any_policy
+[       OK ] test_chain_rejects_sha1_in_any_policy
+[ RUN      ] test_chain_permissive_allows_weak_certs
+[       OK ] test_chain_permissive_allows_weak_certs
+[ RUN      ] test_chain_rejects_weak_rsa
+[       OK ] test_chain_rejects_weak_rsa
+[ RUN      ] test_chain_rejects_null
+[       OK ] test_chain_rejects_null
+[ RUN      ] test_enforce_all_good_hybrid
+[       OK ] test_enforce_all_good_hybrid
+[ RUN      ] test_enforce_checks_version_first
+[       OK ] test_enforce_checks_version_first
+[ RUN      ] test_enforce_checks_group_after_version
+[       OK ] test_enforce_checks_group_after_version
+[ RUN      ] test_enforce_fails_closed_on_null_chain
+[       OK ] test_enforce_fails_closed_on_null_chain
+[ RUN      ] test_enforce_strict_requires_pq_chain
+[       OK ] test_enforce_strict_requires_pq_chain
+[ RUN      ] test_enforce_allow_classical_ke
+[       OK ] test_enforce_allow_classical_ke
+[ RUN      ] test_redirect_code_recognizes_3xx
+[       OK ] test_redirect_code_recognizes_3xx
+[ RUN      ] test_redirect_code_rejects_others
+[       OK ] test_redirect_code_rejects_others
+[ RUN      ] test_location_parses_value
+[       OK ] test_location_parses_value
+[ RUN      ] test_location_is_case_insensitive_and_trims
+[       OK ] test_location_is_case_insensitive_and_trims
+[ RUN      ] test_location_rejects_non_location_and_empty
+[       OK ] test_location_rejects_non_location_and_empty
+[ RUN      ] test_location_rejects_overflow
+[       OK ] test_location_rejects_overflow
+[ RUN      ] test_resolve_absolute_https
+[       OK ] test_resolve_absolute_https
+[ RUN      ] test_resolve_refuses_http_downgrade
+[       OK ] test_resolve_refuses_http_downgrade
+[ RUN      ] test_resolve_refuses_dangerous_schemes
+[       OK ] test_resolve_refuses_dangerous_schemes
+[ RUN      ] test_resolve_scheme_relative
+[       OK ] test_resolve_scheme_relative
+[ RUN      ] test_resolve_absolute_path
+[       OK ] test_resolve_absolute_path
+[ RUN      ] test_resolve_relative_path
+[       OK ] test_resolve_relative_path
+[ RUN      ] test_resolve_null_args
+[       OK ] test_resolve_null_args
+[ RUN      ] test_response_free_on_zeroed
+[       OK ] test_response_free_on_zeroed
+[ RUN      ] test_response_free_releases_location
+[       OK ] test_response_free_releases_location
+[ RUN      ] test_get_null_args
+[       OK ] test_get_null_args
+[ RUN      ] test_get_follow_null_args
+[       OK ] test_get_follow_null_args
+[ RUN      ] test_post_null_args
+[       OK ] test_post_null_args
+[ RUN      ] test_post_rejects_non_https
+[       OK ] test_post_rejects_non_https
+[==========] tests: 45 test(s) run.
+[  PASSED  ] 45 test(s).
+== run build/test_html_parse ==
+[==========] tests: Running 14 test(s).
+[ RUN      ] test_config_default_is_secure
+[       OK ] test_config_default_is_secure
+[ RUN      ] test_validate_rejects_null
+[       OK ] test_validate_rejects_null
+[ RUN      ] test_validate_rejects_empty
+[       OK ] test_validate_rejects_empty
+[ RUN      ] test_validate_rejects_oversize
+[       OK ] test_validate_rejects_oversize
+[ RUN      ] test_validate_accepts_within_cap
+[       OK ] test_validate_accepts_within_cap
+[ RUN      ] test_parse_rejects_null_args
+[       OK ] test_parse_rejects_null_args
+[ RUN      ] test_parse_rejects_oversize
+[       OK ] test_parse_rejects_oversize
+[ RUN      ] test_parse_simple_document
+[       OK ] test_parse_simple_document
+[ RUN      ] test_scripts_stripped_by_default
+[       OK ] test_scripts_stripped_by_default
+[ RUN      ] test_scripts_kept_when_disabled
+[       OK ] test_scripts_kept_when_disabled
+[ RUN      ] test_event_handlers_stripped_by_default
+[       OK ] test_event_handlers_stripped_by_default
+[ RUN      ] test_event_handlers_kept_when_disabled
+[       OK ] test_event_handlers_kept_when_disabled
+[ RUN      ] test_parse_malformed_does_not_crash
+[       OK ] test_parse_malformed_does_not_crash
+[ RUN      ] test_free_null_and_double
+[       OK ] test_free_null_and_double
+[==========] tests: 14 test(s) run.
+[  PASSED  ] 14 test(s).
+== run build/test_js_sandbox ==
+[==========] tests: Running 18 test(s).
+[ RUN      ] test_limits_default_is_secure
+[       OK ] test_limits_default_is_secure
+[ RUN      ] test_validate_rejects_null
+[       OK ] test_validate_rejects_null
+[ RUN      ] test_validate_rejects_empty
+[       OK ] test_validate_rejects_empty
+[ RUN      ] test_validate_rejects_oversize
+[       OK ] test_validate_rejects_oversize
+[ RUN      ] test_validate_accepts_within_cap
+[       OK ] test_validate_accepts_within_cap
+[ RUN      ] test_context_new_and_free
+[       OK ] test_context_new_and_free
+[ RUN      ] test_context_new_null_out
+[       OK ] test_context_new_null_out
+[ RUN      ] test_eval_arithmetic
+[       OK ] test_eval_arithmetic
+[ RUN      ] test_eval_string_concat
+[       OK ] test_eval_string_concat
+[ RUN      ] test_eval_syntax_error
+[       OK ] test_eval_syntax_error
+[ RUN      ] test_eval_runtime_exception
+[       OK ] test_eval_runtime_exception
+[ RUN      ] test_no_io_globals
+[       OK ] test_no_io_globals
+[ RUN      ] test_filesystem_access_is_reference_error
+[       OK ] test_filesystem_access_is_reference_error
+[ RUN      ] test_infinite_loop_times_out
+[       OK ] test_infinite_loop_times_out
+[ RUN      ] test_memory_limit_is_enforced
+[       OK ] test_memory_limit_is_enforced
+[ RUN      ] test_result_free_on_zeroed
+[       OK ] test_result_free_on_zeroed
+[ RUN      ] test_context_free_null_and_double
+[       OK ] test_context_free_null_and_double
+[ RUN      ] test_eval_null_args
+[       OK ] test_eval_null_args
+[==========] tests: 18 test(s) run.
+[  PASSED  ] 18 test(s).
+== run build/test_dom ==
+[==========] tests: Running 11 test(s).
+[ RUN      ] test_build_null_args
+[       OK ] test_build_null_args
+[ RUN      ] test_free_null_and_double
+[       OK ] test_free_null_and_double
+[ RUN      ] test_node_count
+[       OK ] test_node_count
+[ RUN      ] test_get_by_id
+[       OK ] test_get_by_id
+[ RUN      ] test_get_by_id_absent
+[       OK ] test_get_by_id_absent
+[ RUN      ] test_by_class
+[       OK ] test_by_class
+[ RUN      ] test_by_tag
+[       OK ] test_by_tag
+[ RUN      ] test_by_tag_results_in_document_order
+[       OK ] test_by_tag_results_in_document_order
+[ RUN      ] test_document_order
+[       OK ] test_document_order
+[ RUN      ] test_navigation
+[       OK ] test_navigation
+[ RUN      ] test_attributes
+[       OK ] test_attributes
+[==========] tests: 11 test(s) run.
+[  PASSED  ] 11 test(s).
+== run build/test_js_dom ==
+[==========] tests: Running 10 test(s).
+[ RUN      ] test_install_null_args
+[       OK ] test_install_null_args
+[ RUN      ] test_get_element_by_id
+[       OK ] test_get_element_by_id
+[ RUN      ] test_node_count
+[       OK ] test_node_count
+[ RUN      ] test_by_class_and_tag
+[       OK ] test_by_class_and_tag
+[ RUN      ] test_navigation
+[       OK ] test_navigation
+[ RUN      ] test_attributes
+[       OK ] test_attributes
+[ RUN      ] test_document_order
+[       OK ] test_document_order
+[ RUN      ] test_invalid_handles
+[       OK ] test_invalid_handles
+[ RUN      ] test_methods_are_frozen
+[       OK ] test_methods_are_frozen
+[ RUN      ] test_no_io_with_dom
+[       OK ] test_no_io_with_dom
+[==========] tests: 10 test(s) run.
+[  PASSED  ] 10 test(s).
+== run build/test_os_sandbox ==
+[==========] tests: Running 9 test(s).
+[ RUN      ] test_policy_allows_safe
+[       OK ] test_policy_allows_safe
+[ RUN      ] test_policy_denies_dangerous
+[       OK ] test_policy_denies_dangerous
+[ RUN      ] test_policy_size
+[       OK ] test_policy_size
+[ RUN      ] test_harden_kills_denied_syscall
+[       OK ] test_harden_kills_denied_syscall
+[ RUN      ] test_harden_allows_permitted_syscall
+[       OK ] test_harden_allows_permitted_syscall
+[ RUN      ] test_harden_errno_denies_with_eperm
+[       OK ] test_harden_errno_denies_with_eperm
+[ RUN      ] test_landlock_abi_present
+[       OK ] test_landlock_abi_present
+[ RUN      ] test_landlock_deny_all
+[       OK ] test_landlock_deny_all
+[ RUN      ] test_landlock_allow_read
+[       OK ] test_landlock_allow_read
+[==========] tests: 9 test(s) run.
+[  PASSED  ] 9 test(s).
+== run build/test_ui ==
+[==========] tests: Running 10 test(s).
+[ RUN      ] test_wrap_null_args
+[       OK ] test_wrap_null_args
+[ RUN      ] test_wrap_empty
+[       OK ] test_wrap_empty
+[ RUN      ] test_wrap_short_single_line
+[       OK ] test_wrap_short_single_line
+[ RUN      ] test_wrap_breaks_at_space
+[       OK ] test_wrap_breaks_at_space
+[ RUN      ] test_wrap_hard_breaks_long_word
+[       OK ] test_wrap_hard_breaks_long_word
+[ RUN      ] test_wrap_does_not_split_utf8
+[       OK ] test_wrap_does_not_split_utf8
+[ RUN      ] test_wrap_respects_newline
+[       OK ] test_wrap_respects_newline
+[ RUN      ] test_wrap_zero_cols_is_sanitised
+[       OK ] test_wrap_zero_cols_is_sanitised
+[ RUN      ] test_clamp_scroll
+[       OK ] test_clamp_scroll
+[ RUN      ] test_layout_free_null_and_double
+[       OK ] test_layout_free_null_and_double
+[==========] tests: 10 test(s) run.
+[  PASSED  ] 10 test(s).
+== run build/test_request_policy ==
+[==========] tests: Running 11 test(s).
+[ RUN      ] test_host_of_basic
+[       OK ] test_host_of_basic
+[ RUN      ] test_host_of_invalid
+[       OK ] test_host_of_invalid
+[ RUN      ] test_host_of_overflow
+[       OK ] test_host_of_overflow
+[ RUN      ] test_site_of
+[       OK ] test_site_of
+[ RUN      ] test_site_of_multi_suffix
+[       OK ] test_site_of_multi_suffix
+[ RUN      ] test_site_of_psl
+[       OK ] test_site_of_psl
+[ RUN      ] test_same_site
+[       OK ] test_same_site
+[ RUN      ] test_evaluate_allow_same_site
+[       OK ] test_evaluate_allow_same_site
+[ RUN      ] test_evaluate_block_third_party
+[       OK ] test_evaluate_block_third_party
+[ RUN      ] test_evaluate_block_scheme
+[       OK ] test_evaluate_block_scheme
+[ RUN      ] test_evaluate_block_invalid
+[       OK ] test_evaluate_block_invalid
+[==========] tests: 11 test(s) run.
+[  PASSED  ] 11 test(s).
+== run build/test_anti_fp ==
+[==========] tests: Running 7 test(s).
+[ RUN      ] test_coarsen_time
+[       OK ] test_coarsen_time
+[ RUN      ] test_identity_is_fixed
+[       OK ] test_identity_is_fixed
+[ RUN      ] test_bucket_screen
+[       OK ] test_bucket_screen
+[ RUN      ] test_perturb_deterministic
+[       OK ] test_perturb_deterministic
+[ RUN      ] test_perturb_bounded_lsb
+[       OK ] test_perturb_bounded_lsb
+[ RUN      ] test_perturb_key_sensitive
+[       OK ] test_perturb_key_sensitive
+[ RUN      ] test_perturb_safe_edges
+[       OK ] test_perturb_safe_edges
+[==========] tests: 7 test(s) run.
+[  PASSED  ] 7 test(s).
+== run build/test_renderer ==
+[==========] tests: Running 7 test(s).
+[ RUN      ] test_render_basic
+[       OK ] test_render_basic
+[ RUN      ] test_render_strips_script
+[       OK ] test_render_strips_script
+[ RUN      ] test_render_null_args
+[       OK ] test_render_null_args
+[ RUN      ] test_render_too_large
+[       OK ] test_render_too_large
+[ RUN      ] test_render_binary_does_not_crash_parent
+[       OK ] test_render_binary_does_not_crash_parent
+[ RUN      ] test_render_multiple_independent
+[       OK ] test_render_multiple_independent
+[ RUN      ] test_result_free_null_and_double
+[       OK ] test_result_free_null_and_double
+[==========] tests: 7 test(s) run.
+[  PASSED  ] 7 test(s).
+== run build/test_js_env ==
+[==========] tests: Running 10 test(s).
+[ RUN      ] test_install_null_args
+[       OK ] test_install_null_args
+[ RUN      ] test_navigator_identity
+[       OK ] test_navigator_identity
+[ RUN      ] test_screen_bucketed
+[       OK ] test_screen_bucketed
+[ RUN      ] test_clocks_coarse
+[       OK ] test_clocks_coarse
+[ RUN      ] test_unforgeable
+[       OK ] test_unforgeable
+[ RUN      ] test_screen_edges
+[       OK ] test_screen_edges
+[ RUN      ] test_canvas_readback
+[       OK ] test_canvas_readback
+[ RUN      ] test_canvas_unlinkable
+[       OK ] test_canvas_unlinkable
+[ RUN      ] test_canvas_unforgeable
+[       OK ] test_canvas_unforgeable
+[ RUN      ] test_coexists_with_dom
+[       OK ] test_coexists_with_dom
+[==========] tests: 10 test(s) run.
+[  PASSED  ] 10 test(s).
+== run build/test_local_store ==
+[==========] tests: Running 14 test(s).
+[ RUN      ] test_roundtrip_aes
+[       OK ] test_roundtrip_aes
+[ RUN      ] test_roundtrip_chacha
+[       OK ] test_roundtrip_chacha
+[ RUN      ] test_empty_plaintext
+[       OK ] test_empty_plaintext
+[ RUN      ] test_wrong_key
+[       OK ] test_wrong_key
+[ RUN      ] test_tamper_ciphertext
+[       OK ] test_tamper_ciphertext
+[ RUN      ] test_tamper_tag
+[       OK ] test_tamper_tag
+[ RUN      ] test_tamper_nonce
+[       OK ] test_tamper_nonce
+[ RUN      ] test_tamper_salt
+[       OK ] test_tamper_salt
+[ RUN      ] test_tamper_aead_id
+[       OK ] test_tamper_aead_id
+[ RUN      ] test_nondeterministic
+[       OK ] test_nondeterministic
+[ RUN      ] test_passphrase_roundtrip
+[       OK ] test_passphrase_roundtrip
+[ RUN      ] test_derive_key
+[       OK ] test_derive_key
+[ RUN      ] test_format_errors
+[       OK ] test_format_errors
+[ RUN      ] test_null_and_limits
+[       OK ] test_null_and_limits
+[==========] tests: 14 test(s) run.
+[  PASSED  ] 14 test(s).
+== run build/test_disk_store ==
+[==========] tests: Running 9 test(s).
+[ RUN      ] test_roundtrip
+[       OK ] test_roundtrip
+[ RUN      ] test_roundtrip_chacha
+[       OK ] test_roundtrip_chacha
+[ RUN      ] test_empty
+[       OK ] test_empty
+[ RUN      ] test_permissions
+[       OK ] test_permissions
+[ RUN      ] test_no_temp_left
+[       OK ] test_no_temp_left
+[ RUN      ] test_overwrite
+[       OK ] test_overwrite
+[ RUN      ] test_wrong_key
+[       OK ] test_wrong_key
+[ RUN      ] test_tamper_on_disk
+[       OK ] test_tamper_on_disk
+[ RUN      ] test_missing_and_null
+[       OK ] test_missing_and_null
+[==========] tests: 9 test(s) run.
+[  PASSED  ] 9 test(s).
+== run build/test_tab ==
+[==========] tests: Running 21 test(s).
+[ RUN      ] test_open_close
+[       OK ] test_open_close
+[ RUN      ] test_open_null
+[       OK ] test_open_null
+[ RUN      ] test_load_basic
+[       OK ] test_load_basic
+[ RUN      ] test_load_returns_view_with_link
+[       OK ] test_load_returns_view_with_link
+[ RUN      ] test_load_returns_image_run
+[       OK ] test_load_returns_image_run
+[ RUN      ] test_load_carries_author_color
+[       OK ] test_load_carries_author_color
+[ RUN      ] test_load_carries_form_control
+[       OK ] test_load_carries_form_control
+[ RUN      ] test_load_strips_script
+[       OK ] test_load_strips_script
+[ RUN      ] test_load_null_and_too_large
+[       OK ] test_load_null_and_too_large
+[ RUN      ] test_eval_sees_dom
+[       OK ] test_eval_sees_dom
+[ RUN      ] test_eval_sees_env
+[       OK ] test_eval_sees_env
+[ RUN      ] test_eval_exception
+[       OK ] test_eval_exception
+[ RUN      ] test_eval_persistent_state
+[       OK ] test_eval_persistent_state
+[ RUN      ] test_reload_replaces_page
+[       OK ] test_reload_replaces_page
+[ RUN      ] test_eval_without_load
+[       OK ] test_eval_without_load
+[ RUN      ] test_binary_does_not_crash_parent
+[       OK ] test_binary_does_not_crash_parent
+[ RUN      ] test_child_death_survived
+[       OK ] test_child_death_survived
+[ RUN      ] test_decode_image_in_sandbox
+[       OK ] test_decode_image_in_sandbox
+[ RUN      ] test_decode_image_rejects_junk
+[       OK ] test_decode_image_rejects_junk
+[ RUN      ] test_decode_image_null_args
+[       OK ] test_decode_image_null_args
+[ RUN      ] test_free_null_and_double
+[       OK ] test_free_null_and_double
+[==========] tests: 21 test(s) run.
+[  PASSED  ] 21 test(s).
+== run build/test_browser ==
+[==========] tests: Running 12 test(s).
+[ RUN      ] test_init
+[       OK ] test_init
+[ RUN      ] test_navigate_history
+[       OK ] test_navigate_history
+[ RUN      ] test_navigate_from_middle_discards_future
+[       OK ] test_navigate_from_middle_discards_future
+[ RUN      ] test_back_forward_bounds
+[       OK ] test_back_forward_bounds
+[ RUN      ] test_rejects_invalid_url
+[       OK ] test_rejects_invalid_url
+[ RUN      ] test_accepts_https_and_file
+[       OK ] test_accepts_https_and_file
+[ RUN      ] test_url_bar_editing
+[       OK ] test_url_bar_editing
+[ RUN      ] test_set_page
+[       OK ] test_set_page
+[ RUN      ] test_set_page_sanitizes_invalid_utf8
+[       OK ] test_set_page_sanitizes_invalid_utf8
+[ RUN      ] test_exceptions
+[       OK ] test_exceptions
+[ RUN      ] test_status_toast
+[       OK ] test_status_toast
+[ RUN      ] test_status_truncates
+[       OK ] test_status_truncates
+[==========] tests: 12 test(s) run.
+[  PASSED  ] 12 test(s).
+== run build/test_freedom ==
+[==========] tests: Running 7 test(s).
+[ RUN      ] test_help
+[       OK ] test_help
+[ RUN      ] test_version
+[       OK ] test_version
+[ RUN      ] test_no_args
+[       OK ] test_no_args
+[ RUN      ] test_local_html
+[       OK ] test_local_html
+[ RUN      ] test_local_form_renders_inputs
+[       OK ] test_local_form_renders_inputs
+[ RUN      ] test_missing_file
+[       OK ] test_missing_file
+[ RUN      ] test_rejects_http_url
+[       OK ] test_rejects_http_url
+[==========] tests: 7 test(s) run.
+[  PASSED  ] 7 test(s).
+== run build/test_page_view ==
+[==========] tests: Running 27 test(s).
+[ RUN      ] test_new_is_empty
+[       OK ] test_new_is_empty
+[ RUN      ] test_append_copies_fields
+[       OK ] test_append_copies_fields
+[ RUN      ] test_append_image_copies_fields
+[       OK ] test_append_image_copies_fields
+[ RUN      ] test_append_image_null_args
+[       OK ] test_append_image_null_args
+[ RUN      ] test_append_sanitizes_utf8
+[       OK ] test_append_sanitizes_utf8
+[ RUN      ] test_append_null_args
+[       OK ] test_append_null_args
+[ RUN      ] test_free_null_and_double
+[       OK ] test_free_null_and_double
+[ RUN      ] test_build_null_args
+[       OK ] test_build_null_args
+[ RUN      ] test_build_plain_text
+[       OK ] test_build_plain_text
+[ RUN      ] test_build_heading_level
+[       OK ] test_build_heading_level
+[ RUN      ] test_build_link_with_href
+[       OK ] test_build_link_with_href
+[ RUN      ] test_build_block_break_between_paragraphs
+[       OK ] test_build_block_break_between_paragraphs
+[ RUN      ] test_build_skips_script_and_style
+[       OK ] test_build_skips_script_and_style
+[ RUN      ] test_build_inline_link_no_break_within_paragraph
+[       OK ] test_build_inline_link_no_break_within_paragraph
+[ RUN      ] test_build_image_with_dims
+[       OK ] test_build_image_with_dims
+[ RUN      ] test_build_image_unknown_dims
+[       OK ] test_build_image_unknown_dims
+[ RUN      ] test_build_image_px_and_tracking_dims
+[       OK ] test_build_image_px_and_tracking_dims
+[ RUN      ] test_build_image_in_skipped_subtree_ignored
+[       OK ] test_build_image_in_skipped_subtree_ignored
+[ RUN      ] test_build_image_without_src_ignored
+[       OK ] test_build_image_without_src_ignored
+[ RUN      ] test_build_empty_document
+[       OK ] test_build_empty_document
+[ RUN      ] test_set_color_model
+[       OK ] test_set_color_model
+[ RUN      ] test_build_author_color
+[       OK ] test_build_author_color
+[ RUN      ] test_build_search_form_get
+[       OK ] test_build_search_form_get
+[ RUN      ] test_build_form_post_and_hidden
+[       OK ] test_build_form_post_and_hidden
+[ RUN      ] test_build_textarea_value
+[       OK ] test_build_textarea_value
+[ RUN      ] test_build_control_without_form
+[       OK ] test_build_control_without_form
+[ RUN      ] test_build_two_forms_distinct_groups
+[       OK ] test_build_two_forms_distinct_groups
+[==========] tests: 27 test(s) run.
+[  PASSED  ] 27 test(s).
+== run build/test_render_policy ==
+[==========] tests: Running 15 test(s).
+[ RUN      ] test_caps_safe_is_all_off
+[       OK ] test_caps_safe_is_all_off
+[ RUN      ] test_caps_zero_value_is_safe
+[       OK ] test_caps_zero_value_is_safe
+[ RUN      ] test_tracking_pixel_tiny
+[       OK ] test_tracking_pixel_tiny
+[ RUN      ] test_tracking_pixel_zero_area
+[       OK ] test_tracking_pixel_zero_area
+[ RUN      ] test_tracking_pixel_normal
+[       OK ] test_tracking_pixel_normal
+[ RUN      ] test_tracking_pixel_unknown
+[       OK ] test_tracking_pixel_unknown
+[ RUN      ] test_image_disabled_by_default
+[       OK ] test_image_disabled_by_default
+[ RUN      ] test_image_allow_same_site
+[       OK ] test_image_allow_same_site
+[ RUN      ] test_image_allow_cross_site_when_enabled
+[       OK ] test_image_allow_cross_site_when_enabled
+[ RUN      ] test_image_block_tracker
+[       OK ] test_image_block_tracker
+[ RUN      ] test_image_block_scheme
+[       OK ] test_image_block_scheme
+[ RUN      ] test_image_block_invalid
+[       OK ] test_image_block_invalid
+[ RUN      ] test_image_disabled_precedence
+[       OK ] test_image_disabled_precedence
+[ RUN      ] test_img_reason_total_and_stable
+[       OK ] test_img_reason_total_and_stable
+[ RUN      ] test_images_warning_present
+[       OK ] test_images_warning_present
+[==========] tests: 15 test(s) run.
+[  PASSED  ] 15 test(s).
+== run build/test_render_doc ==
+[==========] tests: Running 18 test(s).
+[ RUN      ] test_build_null_out
+[       OK ] test_build_null_out
+[ RUN      ] test_build_null_view_is_empty
+[       OK ] test_build_null_view_is_empty
+[ RUN      ] test_heading_paragraph_link
+[       OK ] test_heading_paragraph_link
+[ RUN      ] test_image_off_emits_notice_and_blocked
+[       OK ] test_image_off_emits_notice_and_blocked
+[ RUN      ] test_no_images_no_notice
+[       OK ] test_no_images_no_notice
+[ RUN      ] test_image_on_allows_normal
+[       OK ] test_image_on_allows_normal
+[ RUN      ] test_image_on_resolves_relative_src
+[       OK ] test_image_on_resolves_relative_src
+[ RUN      ] test_image_on_resolves_doc_relative_src
+[       OK ] test_image_on_resolves_doc_relative_src
+[ RUN      ] test_image_on_blocks_tracker
+[       OK ] test_image_on_blocks_tracker
+[ RUN      ] test_image_on_blocks_non_https
+[       OK ] test_image_on_blocks_non_https
+[ RUN      ] test_image_on_local_top_fails_closed
+[       OK ] test_image_on_local_top_fails_closed
+[ RUN      ] test_href_sanitised
+[       OK ] test_href_sanitised
+[ RUN      ] test_kind_name_total
+[       OK ] test_kind_name_total
+[ RUN      ] test_image_label_total
+[       OK ] test_image_label_total
+[ RUN      ] test_author_color_gated_by_css
+[       OK ] test_author_color_gated_by_css
+[ RUN      ] test_input_passthrough
+[       OK ] test_input_passthrough
+[ RUN      ] test_input_label_total
+[       OK ] test_input_label_total
+[ RUN      ] test_free_null_and_double
+[       OK ] test_free_null_and_double
+[==========] tests: 18 test(s) run.
+[  PASSED  ] 18 test(s).
+== run build/test_url ==
+[==========] tests: Running 14 test(s).
+[ RUN      ] test_is_https
+[       OK ] test_is_https
+[ RUN      ] test_validate_https
+[       OK ] test_validate_https
+[ RUN      ] test_has_scheme
+[       OK ] test_has_scheme
+[ RUN      ] test_authority_len
+[       OK ] test_authority_len
+[ RUN      ] test_remove_dot_segments
+[       OK ] test_remove_dot_segments
+[ RUN      ] test_remove_dot_segments_nulls
+[       OK ] test_remove_dot_segments_nulls
+[ RUN      ] test_resolve_absolute
+[       OK ] test_resolve_absolute
+[ RUN      ] test_resolve_rejects_downgrade_and_schemes
+[       OK ] test_resolve_rejects_downgrade_and_schemes
+[ RUN      ] test_resolve_scheme_relative
+[       OK ] test_resolve_scheme_relative
+[ RUN      ] test_resolve_absolute_path
+[       OK ] test_resolve_absolute_path
+[ RUN      ] test_resolve_relative_path
+[       OK ] test_resolve_relative_path
+[ RUN      ] test_resolve_dot_segments
+[       OK ] test_resolve_dot_segments
+[ RUN      ] test_resolve_fail_closed_on_bad_base
+[       OK ] test_resolve_fail_closed_on_bad_base
+[ RUN      ] test_resolve_null_and_overflow
+[       OK ] test_resolve_null_and_overflow
+[==========] tests: 14 test(s) run.
+[  PASSED  ] 14 test(s).
+== run build/test_link_nav ==
+[==========] tests: Running 20 test(s).
+[ RUN      ] test_null_out
+[       OK ] test_null_out
+[ RUN      ] test_null_href_blocked
+[       OK ] test_null_href_blocked
+[ RUN      ] test_fragment_is_same_document
+[       OK ] test_fragment_is_same_document
+[ RUN      ] test_https_absolute
+[       OK ] test_https_absolute
+[ RUN      ] test_https_relative
+[       OK ] test_https_relative
+[ RUN      ] test_https_absolute_path_and_parent
+[       OK ] test_https_absolute_path_and_parent
+[ RUN      ] test_https_blocks_downgrade_and_schemes
+[       OK ] test_https_blocks_downgrade_and_schemes
+[ RUN      ] test_https_scheme_relative
+[       OK ] test_https_scheme_relative
+[ RUN      ] test_href_cleaning
+[       OK ] test_href_cleaning
+[ RUN      ] test_file_relative
+[       OK ] test_file_relative
+[ RUN      ] test_file_parent
+[       OK ] test_file_parent
+[ RUN      ] test_file_absolute_path
+[       OK ] test_file_absolute_path
+[ RUN      ] test_file_drops_fragment
+[       OK ] test_file_drops_fragment
+[ RUN      ] test_file_base_to_https
+[       OK ] test_file_base_to_https
+[ RUN      ] test_file_base_blocks_schemes_and_scheme_relative
+[       OK ] test_file_base_blocks_schemes_and_scheme_relative
+[ RUN      ] test_no_base
+[       OK ] test_no_base
+[ RUN      ] test_overflow_blocked
+[       OK ] test_overflow_blocked
+[ RUN      ] test_block_reasons
+[       OK ] test_block_reasons
+[ RUN      ] test_block_reason_text
+[       OK ] test_block_reason_text
+[ RUN      ] test_fragment_capture
+[       OK ] test_fragment_capture
+[==========] tests: 20 test(s) run.
+[  PASSED  ] 20 test(s).
+== run build/test_css_color ==
+[==========] tests: Running 14 test(s).
+[ RUN      ] test_null_args
+[       OK ] test_null_args
+[ RUN      ] test_hex_short
+[       OK ] test_hex_short
+[ RUN      ] test_hex_short_alpha
+[       OK ] test_hex_short_alpha
+[ RUN      ] test_hex_long
+[       OK ] test_hex_long
+[ RUN      ] test_hex_long_alpha
+[       OK ] test_hex_long_alpha
+[ RUN      ] test_hex_bad
+[       OK ] test_hex_bad
+[ RUN      ] test_rgb_integer
+[       OK ] test_rgb_integer
+[ RUN      ] test_rgba_integer
+[       OK ] test_rgba_integer
+[ RUN      ] test_rgb_percent
+[       OK ] test_rgb_percent
+[ RUN      ] test_rgb_out_of_range
+[       OK ] test_rgb_out_of_range
+[ RUN      ] test_named
+[       OK ] test_named
+[ RUN      ] test_named_bad
+[       OK ] test_named_bad
+[ RUN      ] test_unsupported_syntax
+[       OK ] test_unsupported_syntax
+[ RUN      ] test_pack_unpack
+[       OK ] test_pack_unpack
+[==========] tests: 14 test(s) run.
+[  PASSED  ] 14 test(s).
+== run build/test_textfield ==
+[==========] tests: Running 7 test(s).
+[ RUN      ] test_init_and_accessors
+[       OK ] test_init_and_accessors
+[ RUN      ] test_null_safe
+[       OK ] test_null_safe
+[ RUN      ] test_set
+[       OK ] test_set
+[ RUN      ] test_insert_sequence
+[       OK ] test_insert_sequence
+[ RUN      ] test_backspace_delete
+[       OK ] test_backspace_delete
+[ RUN      ] test_move_saturates
+[       OK ] test_move_saturates
+[ RUN      ] test_full_fails_closed
+[       OK ] test_full_fails_closed
+[==========] tests: 7 test(s) run.
+[  PASSED  ] 7 test(s).
+== run build/test_form ==
+[==========] tests: Running 19 test(s).
+[ RUN      ] test_encode_basic
+[       OK ] test_encode_basic
+[ RUN      ] test_encode_space_and_reserved
+[       OK ] test_encode_space_and_reserved
+[ RUN      ] test_encode_unreserved_kept
+[       OK ] test_encode_unreserved_kept
+[ RUN      ] test_encode_empty_and_nameless
+[       OK ] test_encode_empty_and_nameless
+[ RUN      ] test_encode_overflow_fails_closed
+[       OK ] test_encode_overflow_fails_closed
+[ RUN      ] test_encode_null_args
+[       OK ] test_encode_null_args
+[ RUN      ] test_get_relative_action_on_https_base
+[       OK ] test_get_relative_action_on_https_base
+[ RUN      ] test_get_absolute_https_action_ignores_base
+[       OK ] test_get_absolute_https_action_ignores_base
+[ RUN      ] test_get_empty_action_submits_to_base
+[       OK ] test_get_empty_action_submits_to_base
+[ RUN      ] test_get_replaces_existing_query
+[       OK ] test_get_replaces_existing_query
+[ RUN      ] test_get_action_cleaned_of_whitespace
+[       OK ] test_get_action_cleaned_of_whitespace
+[ RUN      ] test_post_builds_body
+[       OK ] test_post_builds_body
+[ RUN      ] test_block_http_downgrade
+[       OK ] test_block_http_downgrade
+[ RUN      ] test_block_foreign_scheme
+[       OK ] test_block_foreign_scheme
+[ RUN      ] test_block_relative_action_on_local_base
+[       OK ] test_block_relative_action_on_local_base
+[ RUN      ] test_block_too_many_fields
+[       OK ] test_block_too_many_fields
+[ RUN      ] test_block_null_field_name
+[       OK ] test_block_null_field_name
+[ RUN      ] test_build_null_args
+[       OK ] test_build_null_args
+[ RUN      ] test_get_no_fields_still_navigates
+[       OK ] test_get_no_fields_still_navigates
+[==========] tests: 19 test(s) run.
+[  PASSED  ] 19 test(s).
+== run build/test_image_decode ==
+[==========] tests: Running 17 test(s).
+[ RUN      ] test_sniff_png
+[       OK ] test_sniff_png
+[ RUN      ] test_sniff_non_png
+[       OK ] test_sniff_non_png
+[ RUN      ] test_dimensions_from_ihdr
+[       OK ] test_dimensions_from_ihdr
+[ RUN      ] test_dimensions_truncated
+[       OK ] test_dimensions_truncated
+[ RUN      ] test_dimensions_non_png
+[       OK ] test_dimensions_non_png
+[ RUN      ] test_dimensions_null
+[       OK ] test_dimensions_null
+[ RUN      ] test_dimensions_ok_bounds
+[       OK ] test_dimensions_ok_bounds
+[ RUN      ] test_fit_landscape_into_square
+[       OK ] test_fit_landscape_into_square
+[ RUN      ] test_fit_portrait_into_box
+[       OK ] test_fit_portrait_into_box
+[ RUN      ] test_fit_degenerate
+[       OK ] test_fit_degenerate
+[ RUN      ] test_decode_dimensions_and_stride
+[       OK ] test_decode_dimensions_and_stride
+[ RUN      ] test_decode_pixels_premultiplied
+[       OK ] test_decode_pixels_premultiplied
+[ RUN      ] test_decode_rejects_non_png
+[       OK ] test_decode_rejects_non_png
+[ RUN      ] test_decode_rejects_truncated
+[       OK ] test_decode_rejects_truncated
+[ RUN      ] test_decode_null_args
+[       OK ] test_decode_null_args
+[ RUN      ] test_pixels_free_idempotent
+[       OK ] test_pixels_free_idempotent
+[ RUN      ] test_format_name
+[       OK ] test_format_name
+[==========] tests: 17 test(s) run.
+[  PASSED  ] 17 test(s).
+make[1]: se sale del directorio '/home/grisun0/src_note/c/freedom-0.0.3'
+	rm -fr -- /tmp/dh-xdg-rundir-fZlNnoti
    create-stamp debian/debhelper-build-stamp
    dh_prep
 	rm -f -- debian/freedom.substvars
@@ -91,8 +956,6 @@ make[1]: se sale del directorio '/home/grisun0/src_note/c/freedom-0.0.3'
    dh_installdocs
 	install -m0755 -d debian/freedom/usr/share/doc/freedom
 	install -p -m0644 debian/copyright debian/freedom/usr/share/doc/freedom/copyright
-	install -m0755 -d debian/freedom/usr/share/doc-base/
-	install -p -m0644 debian/freedom.doc-base.ex debian/freedom/usr/share/doc-base/freedom.freedom
    dh_installchangelogs
 	install -m0755 -d debian/freedom/usr/share/doc/freedom
 	install -p -m0644 debian/.debhelper/generated/freedom/dh_installchangelogs.dch.trimmed debian/freedom/usr/share/doc/freedom/changelog.Debian
@@ -149,15 +1012,9 @@ E: freedom: bogus-mail-host-in-debian-changelog grisun0@kali (for version 0.0.3-
 E: freedom: changelog-is-dh_make-template [usr/share/doc/freedom/changelog.Debian.gz:1]
 E: freedom: copyright-contains-dh_make-todo-boilerplate
 E: freedom: description-starts-with-package-name
-E: freedom: doc-base-file-references-missing-file /usr/share/doc/freedom/freedom.ps.gz [usr/share/doc-base/freedom.freedom:13]
-E: freedom: doc-base-file-references-missing-file /usr/share/doc/freedom/freedom.sgml.gz [usr/share/doc-base/freedom.freedom:10]
-E: freedom: doc-base-file-references-missing-file /usr/share/doc/freedom/freedom.text.gz [usr/share/doc-base/freedom.freedom:16]
-E: freedom: doc-base-file-references-missing-file /usr/share/doc/freedom/html/*.html [usr/share/doc-base/freedom.freedom:20]
-E: freedom: doc-base-file-references-missing-file /usr/share/doc/freedom/html/index.html [usr/share/doc-base/freedom.freedom:19]
 E: freedom: helper-templates-in-copyright
 W: freedom: copyright-has-url-from-dh_make-boilerplate
-W: freedom: doc-base-abstract-field-is-template [usr/share/doc-base/freedom.freedom:6]
-W: freedom: doc-base-unknown-section unknown [usr/share/doc-base/freedom.freedom:7]
+W: freedom: empty-binary-package
 W: freedom: initial-upload-closes-no-bugs [usr/share/doc/freedom/changelog.Debian.gz:1]
 W: freedom: wrong-bug-number-in-closes #nnnn [usr/share/doc/freedom/changelog.Debian.gz:3]
 Finished running lintian.
