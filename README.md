@@ -39,18 +39,41 @@ The name reflects its core goals:
 - **Dom**: Reference to the DOM (Document Object Model) and domain-level control
 
 ## Features
-
 - Written in portable C11
 - Strong process-based sandboxing for each tab
 - JavaScript sandbox using QuickJS-ng
 - Hardened build with stack protection, PIE, RELRO, and FORTIFY_SOURCE
-- Wayland + Cairo GUI backend
+- Wayland + Cairo GUI backend with Client-Side Decorations (CSD)
 - Lexbor HTML parser and renderer
-- Strict request policy using Public Suffix List
+- Strict request policy using Public Suffix List + blacklist/whitelist for TLS 1.2 compatibility
 - Post-quantum hybrid cryptography support (X25519MLKEM768)
 - Headless mode for automation and testing
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
+
+### New Features & Improvements
+- **Advanced Layout Engine**:
+  - Full box model per HTML tag (margins, padding, display, border)
+  - Flexbox 1D layout support (`flex-grow`, `flex-shrink`, `gap`, `justify-content`)
+  - Basic CSS Grid support (`repeat(n, 1fr)`)
+  - Recursive box-tree layout with margin collapsing
+- **GUI & Usability**:
+  - Visible vertical scrollbar with drag and click support
+  - Vim-style keyboard navigation (`j`/`k`, `space`/`b`, `gg`/`G`, etc.)
+  - Window controls: maximize, minimize, edge resize, titlebar drag
+  - Sepia reading mode + Light/Dark themes with "Force theme colors" toggle
+  - Hover link preview (shows destination URL)
+  - Loading indicator (busy clock)
+  - Improved dark mode and typography
+- **Build & Distribution**:
+  - Debian `.deb` packaging (`build_deb.sh`)
+  - Improved `./configure`, `install.sh` and Makefile
+- **Networking & Security**:
+  - TLS 1.2 allowlist/blacklist support
+  - Enhanced secure fetch
+- **Automation**:
+  - Full GitHub Actions CI/CD pipeline
+  - MCP (Model Context Protocol) server for AI agent integration
 
 ## Building On Premise
 
@@ -218,18 +241,24 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ---
 
-## Current Status (Early Alpha)
+## Current Status (Updated - June 2026)
 
-- ✅ Basic HTML rendering + links
+- ✅ Advanced HTML rendering with box model and flex/grid layout
+- ✅ Clickable links and basic image support (PNG)
 - ✅ Headless mode
-- ✅ Process-based sandbox per tab
-- ✅ Docker + noVNC
-- ✅ User-Agent customization
-- ⚠️ Very limited CSS support
-- ⚠️ JavaScript support still basic
-- ⚠️ GUI is work in progress
+- ✅ Strong process-based sandboxing per tab
+- ✅ Docker + noVNC environment
+- ✅ User-Agent customization & anti-fingerprinting
+- ✅ Modern GUI with scrollbar, vim shortcuts, window management, themes and sepia mode
+- ✅ Debian packaging
+- ✅ Comprehensive CI/CD + fuzzing + MCP agentic automation
+- ⚠️ CSS support still limited (static + author-gated)
+- ⚠️ JavaScript support remains basic
+- ⚠️ Full networking/caching layer in active development
 
-**Status**: Early development stage (Alpha)
+**Status**: progressing Alpha — focus on secure, testable rendering engine and usable GUI.
+
+
 
 For more information, visit the [GitHub repository](https://github.com/grisuno/FreeDom).
 
