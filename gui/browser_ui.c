@@ -63,6 +63,7 @@
 #define UI_HAMBURGER_GAP 5.0   /* vertical gap between the three icon bars */
 #define UI_CURSOR_SIZE  24     /* themed cursor size in px (XCURSOR_SIZE default) */
 #define UI_TOAST_PAD    8.0    /* padding inside the toast banner */
+#define UI_TWO_PI       6.28318530717958647692 /* radians of a full circle (busy clock) */
 
 /* Number of heading levels (h1..h6). Index 0 of the scale table is body text. */
 #define UI_HEADING_LEVELS 6
@@ -118,6 +119,7 @@ typedef struct ui_theme {
     ui_rgb url_border;
     ui_rgb caret;
     ui_rgb link_hover_bg;   /* highlight behind the link under the pointer */
+    ui_rgb btn_hover_bg;    /* highlight behind the toolbar button under the pointer */
     ui_rgb input_bg;        /* form text input background */
     ui_rgb input_bg_focused;
     ui_rgb input_border;
@@ -171,6 +173,7 @@ static ui_theme ui_theme_default(void) {
     t.url_border     = (ui_rgb){ 0.10, 0.10, 0.10 };
     t.caret          = (ui_rgb){ 0.00, 0.00, 0.00 };
     t.link_hover_bg  = (ui_rgb){ 0.88, 0.93, 1.00 };
+    t.btn_hover_bg   = (ui_rgb){ 0.34, 0.35, 0.38 };
     t.input_bg          = (ui_rgb){ 1.00, 1.00, 1.00 };
     t.input_bg_focused  = (ui_rgb){ 1.00, 1.00, 0.96 };
     t.input_border      = (ui_rgb){ 0.55, 0.55, 0.60 };
@@ -188,6 +191,52 @@ static ui_theme ui_theme_default(void) {
     return t;
 }
 
+/* Dark reading palette. Shares all the metrics (font sizes, spacing) with the
+ * default theme; only the colours change, so the box model stays in one place. */
+static ui_theme ui_theme_dark(void) {
+    ui_theme t = ui_theme_default();
+    t.window_bg      = (ui_rgb){ 0.12, 0.12, 0.13 };
+    t.content_bg     = (ui_rgb){ 0.13, 0.13, 0.15 };
+    t.text           = (ui_rgb){ 0.85, 0.86, 0.88 };
+    t.heading        = (ui_rgb){ 0.78, 0.84, 1.00 };
+    t.link           = (ui_rgb){ 0.50, 0.70, 1.00 };
+    t.notice_bg      = (ui_rgb){ 0.28, 0.25, 0.10 };
+    t.notice_text    = (ui_rgb){ 0.95, 0.90, 0.70 };
+    t.image_box      = (ui_rgb){ 0.55, 0.55, 0.60 };
+    t.image_blocked  = (ui_rgb){ 0.85, 0.50, 0.50 };
+    t.toolbar_bg     = (ui_rgb){ 0.10, 0.10, 0.12 };
+    t.titlebar_bg    = (ui_rgb){ 0.06, 0.06, 0.08 };
+    t.chrome_text    = (ui_rgb){ 0.85, 0.85, 0.88 };
+    t.chrome_text_dim= (ui_rgb){ 0.40, 0.40, 0.45 };
+    t.close_button   = (ui_rgb){ 1.00, 0.55, 0.55 };
+    t.url_bg_focused = (ui_rgb){ 0.22, 0.22, 0.26 };
+    t.url_bg         = (ui_rgb){ 0.17, 0.17, 0.20 };
+    t.url_border     = (ui_rgb){ 0.40, 0.40, 0.45 };
+    t.caret          = (ui_rgb){ 0.90, 0.90, 0.95 };
+    t.link_hover_bg  = (ui_rgb){ 0.18, 0.24, 0.34 };
+    t.btn_hover_bg   = (ui_rgb){ 0.20, 0.21, 0.24 };
+    t.input_bg          = (ui_rgb){ 0.18, 0.18, 0.21 };
+    t.input_bg_focused  = (ui_rgb){ 0.22, 0.22, 0.18 };
+    t.input_border      = (ui_rgb){ 0.45, 0.45, 0.50 };
+    t.input_text        = (ui_rgb){ 0.88, 0.88, 0.90 };
+    t.input_placeholder = (ui_rgb){ 0.50, 0.50, 0.55 };
+    t.button_bg         = (ui_rgb){ 0.25, 0.45, 0.80 };
+    t.button_text       = (ui_rgb){ 0.98, 0.98, 1.00 };
+    t.menu_bg        = (ui_rgb){ 0.16, 0.16, 0.19 };
+    t.menu_border    = (ui_rgb){ 0.45, 0.45, 0.50 };
+    t.menu_text      = (ui_rgb){ 0.85, 0.85, 0.88 };
+    t.check_border   = (ui_rgb){ 0.55, 0.55, 0.60 };
+    t.check_mark     = (ui_rgb){ 0.40, 0.85, 0.50 };
+    t.toast_bg       = (ui_rgb){ 0.04, 0.04, 0.06 };
+    t.toast_text     = (ui_rgb){ 0.95, 0.95, 0.97 };
+    return t;
+}
+
+/* The single place that maps the dark-mode toggle to a palette. */
+static ui_theme ui_theme_for(int dark) {
+    return dark ? ui_theme_dark() : ui_theme_default();
+}
+
 /* Converts a packed 0xRRGGBB author color into a theme RGB triple. */
 static ui_rgb rgb_from_packed(int packed) {
     cc_rgb c = cc_unpack(packed);
@@ -201,18 +250,32 @@ static uint64_t now_ms(void) {
     return (uint64_t)ts.tv_sec * 1000u + (uint64_t)ts.tv_nsec / 1000000u;
 }
 
-/* The options-menu items, mapped to a render capability by field offset so labels
- * and the toggled flag live in exactly one place (no magic indices). */
+/* The options-menu items. A capability item toggles a bool in rdp_caps by field
+ * offset (labels and the flag live in one place, no magic indices); the dark-mode
+ * item toggles the window's theme instead. */
+typedef enum ui_menu_action {
+    UI_MENU_CAP = 0,  /* toggles w->caps.<offset>; needs a re-render from cache */
+    UI_MENU_DARK      /* toggles w->dark_mode; needs only a repaint */
+} ui_menu_action;
+
 typedef struct ui_menu_item {
-    const char *label;
-    size_t      cap_offset; /* offset of a bool field within rdp_caps */
+    const char    *label;
+    ui_menu_action action;
+    size_t         cap_offset; /* offset of a bool field within rdp_caps (UI_MENU_CAP) */
 } ui_menu_item;
 
 static const ui_menu_item UI_MENU_ITEMS[] = {
-    { "Load images",         offsetof(rdp_caps, images) },
-    { "Author colors (CSS)", offsetof(rdp_caps, css) },
+    { "Dark mode",           UI_MENU_DARK, 0 },
+    { "Load images",         UI_MENU_CAP,  offsetof(rdp_caps, images) },
+    { "Author colors (CSS)", UI_MENU_CAP,  offsetof(rdp_caps, css) },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
+
+/* Toolbar control under the pointer, for the hover highlight (the same affordance
+ * links already get). */
+typedef enum ui_hot {
+    UI_HOT_NONE = 0, UI_HOT_BACK, UI_HOT_FWD, UI_HOT_GO, UI_HOT_MENU
+} ui_hot;
 
 static void set_rgb(cairo_t *cr, ui_rgb c) {
     cairo_set_source_rgb(cr, c.r, c.g, c.b);
@@ -274,6 +337,9 @@ typedef struct browser_window {
     int url_bar_focused;
 
     ui_theme  theme;
+    int       dark_mode; /* dark palette selected in the options menu */
+    int       loading;   /* a network request is in flight (busy clock shown) */
+    ui_hot    hot;       /* toolbar button under the pointer, or UI_HOT_NONE */
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     double    scroll;   /* content scroll offset in pixels */
@@ -313,11 +379,6 @@ typedef struct browser_window {
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
 } browser_window;
-
-/* Pointer to the rdp_caps bool toggled by options-menu item i. */
-static bool *menu_item_flag(browser_window *w, size_t i) {
-    return (bool *)((char *)&w->caps + UI_MENU_ITEMS[i].cap_offset);
-}
 
 static void redraw(browser_window *w);
 
@@ -648,6 +709,14 @@ static void render_current(browser_window *w) {
     tab_close(t);
 }
 
+/* Paints and presents a frame with the busy clock showing, so the user sees that
+ * a request is in flight before the (synchronous) fetch blocks the event loop. */
+static void show_busy(browser_window *w) {
+    w->loading = 1;
+    redraw(w);
+    if (w->display != NULL) wl_display_flush(w->display);
+}
+
 static void do_load(browser_window *w, const char *url) {
     if (url == NULL) return;
 
@@ -683,7 +752,9 @@ static void do_load(browser_window *w, const char *url) {
          * request that re-applies the full TLS/PQ/chain policy. A host that cannot
          * do a PQ-hybrid key exchange falls back to classical TLS 1.3 (cert checks
          * kept) so navigation is not blocked; the user is warned via a toast below. */
+        show_busy(w);
         sf_status ss = fetch_follow_navigable(url, &cfg, &resp, &downgraded);
+        w->loading = 0;
         if (ss != SF_OK) {
             char msg[1024];
             const char *reason = "";
@@ -786,6 +857,32 @@ static void toolbar_rects(const browser_window *w,
     *url_x  = UI_BTN_W * 2.0 + UI_MARGIN;
     *url_w  = *go_x - *url_x - UI_MARGIN;
     if (*url_w < 20.0) *url_w = 20.0;
+}
+
+/* Which toolbar button (if any) is at (px, py). Shared by the hover highlight and
+ * the cursor shape so they cannot drift from the click hit-test. */
+static ui_hot toolbar_button_at(const browser_window *w, double px, double py) {
+    if (w->menu_open) return UI_HOT_NONE;
+    double ttop = toolbar_top(w);
+    if (py < ttop || py >= ttop + UI_TOOLBAR_H) return UI_HOT_NONE;
+    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
+    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
+    if (px >= menu_x) return UI_HOT_MENU;
+    if (px >= go_x && px < menu_x) return UI_HOT_GO;
+    if (px >= fwd_x && px < fwd_x + UI_BTN_W) return UI_HOT_FWD;
+    if (px >= back_x && px < back_x + UI_BTN_W) return UI_HOT_BACK;
+    return UI_HOT_NONE;
+}
+
+/* A hovered button is "actionable" (gets the hand cursor) when clicking it would
+ * do something: Go/menu always, Back/Forward only when there is history. */
+static int hot_actionable(const browser_window *w, ui_hot hot) {
+    switch (hot) {
+        case UI_HOT_GO: case UI_HOT_MENU: return 1;
+        case UI_HOT_BACK: return browser_can_back(&w->bs);
+        case UI_HOT_FWD:  return browser_can_forward(&w->bs);
+        default: return 0;
+    }
 }
 
 /* The options-menu panel rectangle (below the gear button), and its per-item row
@@ -1498,6 +1595,42 @@ static void submit_form(browser_window *w, const rd_block *rep) {
 
 /* Draws the three-bar "hamburger" icon for the options-menu button, centred in a
  * UI_BTN_W-wide button starting at bx within the toolbar. */
+/* True when options-menu item i is currently enabled (drives its checkmark). */
+static int menu_item_checked(const browser_window *w, size_t i) {
+    const ui_menu_item *it = &UI_MENU_ITEMS[i];
+    if (it->action == UI_MENU_DARK) return w->dark_mode;
+    return *(const bool *)((const char *)&w->caps + it->cap_offset);
+}
+
+/* Toggles options-menu item i and applies its effect. Dark mode only swaps the
+ * theme (a repaint suffices); a capability change re-renders from cache. */
+static void menu_item_toggle(browser_window *w, size_t i) {
+    const ui_menu_item *it = &UI_MENU_ITEMS[i];
+    if (it->action == UI_MENU_DARK) {
+        w->dark_mode = !w->dark_mode;
+        w->theme = ui_theme_for(w->dark_mode);
+        return;
+    }
+    bool *flag = (bool *)((char *)&w->caps + it->cap_offset);
+    *flag = !*flag;
+    render_current(w);
+}
+
+/* A small clock glyph meaning "busy". Static (the synchronous fetch blocks the
+ * loop, so an animated spinner cannot tick); it tells the user work is happening. */
+static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r) {
+    set_rgb(cr, color);
+    cairo_set_line_width(cr, 1.5);
+    cairo_new_sub_path(cr);
+    cairo_arc(cr, cx, cy, r, 0.0, UI_TWO_PI);
+    cairo_stroke(cr);
+    cairo_move_to(cr, cx, cy);
+    cairo_line_to(cr, cx, cy - r * 0.6);    /* minute hand, up */
+    cairo_move_to(cr, cx, cy);
+    cairo_line_to(cr, cx + r * 0.45, cy);   /* hour hand, right */
+    cairo_stroke(cr);
+}
+
 static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop) {
     set_rgb(cr, color);
     cairo_set_line_width(cr, 2.0);
@@ -1541,7 +1674,7 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
         cairo_rectangle(cr, box_x, box_y, UI_CHECK_SZ, UI_CHECK_SZ);
         cairo_stroke(cr);
 
-        if (*menu_item_flag(w, i)) {
+        if (menu_item_checked(w, i)) {
             set_rgb(cr, th->check_mark);
             cairo_set_line_width(cr, 2.0);
             cairo_move_to(cr, box_x + UI_CHECK_SZ * 0.2, box_y + UI_CHECK_SZ * 0.55);
@@ -1610,8 +1743,42 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
     cairo_restore(cr);
 }
 
-/* Draws the transient status toast (a banner at the bottom of the window). */
-static void draw_toast(cairo_t *cr, browser_window *w) {
+/* Persistent bottom strip showing the target of the link under the pointer, so
+ * the user always knows where a click will go. Returns the strip height (0 when
+ * nothing is hovered) so the toast can stack above it. */
+static double draw_hover_url(cairo_t *cr, browser_window *w) {
+    if (w->hover_href == NULL) return 0.0;
+    const ui_theme *th = &w->theme;
+
+    cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, th->body_font);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    cairo_text_extents_t te;
+    cairo_text_extents(cr, w->hover_href, &te);
+
+    double bh = fe.height + 2.0 * UI_TOAST_PAD;
+    double bw = te.width + 2.0 * UI_TOAST_PAD;
+    if (bw > (double)w->width) bw = (double)w->width; /* never wider than the window */
+    double by = (double)w->height - bh;
+
+    set_rgb(cr, th->toast_bg);
+    cairo_rectangle(cr, 0.0, by, bw, bh);
+    cairo_fill(cr);
+
+    cairo_save(cr);
+    cairo_rectangle(cr, 0.0, by, bw - UI_TOAST_PAD, bh); /* clip a long URL */
+    cairo_clip(cr);
+    set_rgb(cr, th->toast_text);
+    cairo_move_to(cr, UI_TOAST_PAD, by + UI_TOAST_PAD + fe.ascent);
+    cairo_show_text(cr, w->hover_href);
+    cairo_restore(cr);
+    return bh;
+}
+
+/* Draws the transient status toast (a banner near the bottom of the window),
+ * raised by bottom_offset so it stacks above the hover-URL strip when both show. */
+static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset) {
     const char *msg = browser_status_text(&w->bs, now_ms());
     if (msg == NULL) return;
     const ui_theme *th = &w->theme;
@@ -1626,7 +1793,7 @@ static void draw_toast(cairo_t *cr, browser_window *w) {
     double bh = fe.height + 2.0 * UI_TOAST_PAD;
     double bw = te.width + 2.0 * UI_TOAST_PAD;
     double bx = UI_MARGIN;
-    double by = (double)w->height - bh - UI_MARGIN;
+    double by = (double)w->height - bh - UI_MARGIN - bottom_offset;
 
     set_rgb(cr, th->toast_bg);
     cairo_rectangle(cr, bx, by, bw, bh);
@@ -1661,7 +1828,8 @@ static void paint(browser_window *w) {
 
         set_rgb(cr, th->chrome_text);
         cairo_move_to(cr, UI_MARGIN, bl);
-        cairo_show_text(cr, (w->bs.page_title != NULL) ? w->bs.page_title : "Freedom");
+        cairo_show_text(cr, w->loading ? "Loading..."
+                          : (w->bs.page_title != NULL) ? w->bs.page_title : "Freedom");
 
         double min_x, max_x, close_x;
         window_button_rects(w, &min_x, &max_x, &close_x);
@@ -1680,6 +1848,22 @@ static void paint(browser_window *w) {
     double back_x, fwd_x, url_x, url_w, go_x, menu_x;
     toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
     double bl = ttop + (UI_TOOLBAR_H + fe.ascent - fe.descent) / 2.0;
+
+    /* Hover highlight behind the toolbar button under the pointer (the same
+     * affordance links get). */
+    if (w->hot != UI_HOT_NONE) {
+        double hx = back_x;
+        switch (w->hot) {
+            case UI_HOT_BACK: hx = back_x; break;
+            case UI_HOT_FWD:  hx = fwd_x;  break;
+            case UI_HOT_GO:   hx = go_x;   break;
+            case UI_HOT_MENU: hx = menu_x; break;
+            default: break;
+        }
+        set_rgb(cr, th->btn_hover_bg);
+        cairo_rectangle(cr, hx, ttop, UI_BTN_W, UI_TOOLBAR_H);
+        cairo_fill(cr);
+    }
 
     /* Buttons. */
     int can_back = browser_can_back(&w->bs);
@@ -1738,6 +1922,14 @@ static void paint(browser_window *w) {
             cairo_fill(cr);
         }
         cairo_restore(cr);
+    }
+
+    /* Busy clock at the right of the URL bar while a request is in flight. */
+    if (w->loading) {
+        double r = (UI_TOOLBAR_H - 2.0 * UI_MARGIN) * 0.30;
+        double ccx = url_x + url_w - r - UI_MARGIN;
+        double ccy = ttop + UI_TOOLBAR_H / 2.0;
+        draw_clock(cr, th->link, ccx, ccy, r);
     }
 
     /* Content area. */
@@ -1799,7 +1991,8 @@ static void paint(browser_window *w) {
 
     /* Overlays painted on top of the content. */
     draw_menu(cr, w);
-    draw_toast(cr, w);
+    double hover_h = draw_hover_url(cr, w);
+    draw_toast(cr, w, hover_h);
 
     cairo_surface_flush(w->cairo_surface);
     cairo_destroy(cr);
@@ -1880,11 +2073,14 @@ static void set_cursor(browser_window *w, int hand) {
 static void update_hover(browser_window *w) {
     const char *h = (w->doc != NULL && !w->menu_open)
                     ? link_at_point(w, w->ptr_x, w->ptr_y) : NULL;
-    if (h == w->hover_href) return;
-    int was = (w->hover_href != NULL);
-    int now = (h != NULL);
+    ui_hot hot = toolbar_button_at(w, w->ptr_x, w->ptr_y);
+    if (h == w->hover_href && hot == w->hot) return;
+
+    int hand_was = (w->hover_href != NULL) || hot_actionable(w, w->hot);
+    int hand_now = (h != NULL) || hot_actionable(w, hot);
     w->hover_href = h;
-    if (was != now) set_cursor(w, now);
+    w->hot = hot;
+    if (hand_was != hand_now) set_cursor(w, hand_now);
     redraw(w);
 }
 
@@ -1901,7 +2097,11 @@ static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
 static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf) {
     (void)p; (void)s; (void)sf;
     browser_window *w = (browser_window *)d;
-    if (w->hover_href != NULL) { w->hover_href = NULL; redraw(w); }
+    if (w->hover_href != NULL || w->hot != UI_HOT_NONE) {
+        w->hover_href = NULL;
+        w->hot = UI_HOT_NONE;
+        redraw(w);
+    }
 }
 static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y) {
     (void)p; (void)t;
@@ -1945,11 +2145,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
                 w->ua_field_focused = 0;
                 if (w->ptr_y >= my + UI_MENU_PAD) {
                     size_t row = (size_t)((w->ptr_y - (my + UI_MENU_PAD)) / ih);
-                    if (row < UI_MENU_COUNT) {
-                        bool *flag = menu_item_flag(w, row);
-                        *flag = !*flag;
-                        render_current(w);
-                    }
+                    if (row < UI_MENU_COUNT) menu_item_toggle(w, row);
                 }
             }
         } else {
