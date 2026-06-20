@@ -4,6 +4,8 @@
 
 A free and open-source minimal web browser written in C, focused on Zero Trust and Zero Knowledge principles.
 
+<img width="800" height="450" alt="browser" src="https://github.com/user-attachments/assets/82918e97-852a-4bf0-81ce-ae39484008c4" />
+
 ## Quick Start (Recommended)
 
 **Easiest way to try FreeDom right now:**
