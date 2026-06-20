@@ -2569,21 +2569,7 @@ ui_status ui_run_browser(const char *start_url) {
     if (start_url != NULL) {
         do_load(&w, start_url);
     } else {
-        browser_set_page(&w.bs, "Freedom",
-            "Freedom browser\n\n"
-            "Click the URL bar, type an address, and press Enter or click Go.\n"
-            "Allowed URLs:\n"
-            "  - https://<site>   (TLS 1.3, PQ-hybrid KE, leaf RSA >= 3072 / ECDSA)\n"
-            "  - /path/file.html  (local file)\n"
-            "\n"
-            "Pages render with structure (headings, links, paragraphs) and you can\n"
-            "click links to navigate. Remote images and author colors are off by\n"
-            "default (Privacy by Default); the menu button at the top right toggles\n"
-            "them (or Ctrl+I for images). A page that uses images shows a tracking\n"
-            "warning and a placeholder per image. Ctrl+L focuses the URL bar.\n"
-            "\n"
-            "Sites whose end-entity certificate uses RSA 2048 are rejected with\n"
-            "status 5 (weak algorithm). This is fail-closed by design.", 0);
+        do_load(&w, "docs/index.html");
     }
 
     /* Make the URL bar ready for typing. */
