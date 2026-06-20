@@ -48,7 +48,18 @@
 #define UI_WIN_BTN_W   30.0
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
-#define UI_TEXT_MARGIN 8.0
+#define UI_TEXT_MARGIN 20.0   /* left/right/top breathing room around page content */
+
+/* Vertical scrollbar in the content area's right gutter. The gutter width is
+ * always reserved (subtracted from the content width) so the scroll affordance and
+ * the click hit-test share one geometry and never overlap the text. */
+#define UI_SCROLLBAR_W   12.0  /* reserved gutter width on the content's right edge */
+#define UI_SCROLLBAR_MIN 28.0  /* minimum thumb height so it stays grabbable */
+#define UI_SCROLLBAR_PAD 2.0   /* inset of the thumb inside the track */
+
+/* Border band (px) that starts an interactive window resize when dragged, used
+ * only with client-side decorations (the compositor handles edges under SSD). */
+#define UI_RESIZE_MARGIN 6.0
 
 /* Options menu (gear) panel geometry and the pointer cursor size, gathered with
  * the other chrome constants so no value is hardcoded at a call site. The panel is
@@ -134,6 +145,9 @@ typedef struct ui_theme {
     ui_rgb check_mark;
     ui_rgb toast_bg;
     ui_rgb toast_text;
+    ui_rgb scrollbar_track;
+    ui_rgb scrollbar_thumb;
+    ui_rgb scrollbar_thumb_hot; /* thumb under the pointer / being dragged */
 } ui_theme;
 
 /* The single source of truth for the look of the browser. */
@@ -188,6 +202,9 @@ static ui_theme ui_theme_default(void) {
     t.check_mark     = (ui_rgb){ 0.10, 0.45, 0.20 };
     t.toast_bg       = (ui_rgb){ 0.15, 0.15, 0.18 };
     t.toast_text     = (ui_rgb){ 0.95, 0.95, 0.97 };
+    t.scrollbar_track     = (ui_rgb){ 0.90, 0.90, 0.92 };
+    t.scrollbar_thumb     = (ui_rgb){ 0.62, 0.62, 0.66 };
+    t.scrollbar_thumb_hot = (ui_rgb){ 0.45, 0.45, 0.50 };
     return t;
 }
 
@@ -229,6 +246,9 @@ static ui_theme ui_theme_dark(void) {
     t.check_mark     = (ui_rgb){ 0.40, 0.85, 0.50 };
     t.toast_bg       = (ui_rgb){ 0.04, 0.04, 0.06 };
     t.toast_text     = (ui_rgb){ 0.95, 0.95, 0.97 };
+    t.scrollbar_track     = (ui_rgb){ 0.18, 0.18, 0.21 };
+    t.scrollbar_thumb     = (ui_rgb){ 0.38, 0.38, 0.43 };
+    t.scrollbar_thumb_hot = (ui_rgb){ 0.55, 0.55, 0.62 };
     return t;
 }
 
@@ -343,6 +363,11 @@ typedef struct browser_window {
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     double    scroll;   /* content scroll offset in pixels */
+    double    content_total_h;  /* full height of the laid-out content, cached each paint */
+    int       maximized;        /* toplevel currently maximized (from xdg states) */
+    int       dragging_scroll;  /* the scrollbar thumb is being dragged */
+    double    scroll_grab_dy;   /* pointer offset within the thumb at drag start */
+    int       pending_g;        /* a 'g' was pressed; a second one scrolls to the top (vim gg) */
 
     int         menu_open;     /* the options (gear) panel is showing */
     const char *hover_href;    /* link target under the pointer (aliases doc), or NULL */
@@ -840,6 +865,102 @@ static void content_geometry(const browser_window *w, double *top, double *heigh
     *height = h;
 }
 
+/* Width available to page content: the window width minus the left/right margins
+ * and the always-reserved scrollbar gutter. The single source of truth shared by
+ * the painter and the click/link hit-tests so the laid-out lines and the hit
+ * geometry cannot drift. */
+static double content_width(const browser_window *w) {
+    double cw = (double)w->width - 2.0 * w->theme.content_margin - UI_SCROLLBAR_W;
+    if (cw < 1.0) cw = 1.0;
+    return cw;
+}
+
+/* Geometry of the vertical scrollbar in surface coordinates, plus the current
+ * thumb position. Returns 0 (and leaves outputs untouched) when the content fits
+ * and no scrollbar is needed. content_total_h is the height cached by the last
+ * paint; the track spans the content area down to the bottom edge. */
+static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
+                             double *track_h, double *thumb_y, double *thumb_h) {
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    double total = w->content_total_h;
+    if (content_h <= 0.0 || total <= content_h) return 0;
+
+    double trh = (double)w->height - content_top;
+    if (trh < 1.0) trh = 1.0;
+    double thh = trh * (content_h / total);
+    if (thh < UI_SCROLLBAR_MIN) thh = UI_SCROLLBAR_MIN;
+    if (thh > trh) thh = trh;
+
+    double max_scroll = total - content_h;
+    double frac = (max_scroll > 0.0) ? (w->scroll / max_scroll) : 0.0;
+    if (frac < 0.0) frac = 0.0;
+    if (frac > 1.0) frac = 1.0;
+
+    *track_x = (double)w->width - UI_SCROLLBAR_W;
+    *track_y = content_top;
+    *track_h = trh;
+    *thumb_h = thh;
+    *thumb_y = content_top + frac * (trh - thh);
+    return 1;
+}
+
+/* Maps the current pointer Y (less the grab offset) to a scroll offset while the
+ * thumb is being dragged, then repaints. No-op when there is no scrollbar. */
+static void scrollbar_drag_to(browser_window *w) {
+    double tx, ty, trh, thy, thh;
+    if (!scrollbar_metrics(w, &tx, &ty, &trh, &thy, &thh)) return;
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    double max_scroll = w->content_total_h - content_h;
+    if (max_scroll < 0.0) max_scroll = 0.0;
+    double travel = trh - thh;
+    double frac = (travel > 0.0) ? ((w->ptr_y - w->scroll_grab_dy) - ty) / travel : 0.0;
+    if (frac < 0.0) frac = 0.0;
+    if (frac > 1.0) frac = 1.0;
+    w->scroll = frac * max_scroll;
+    redraw(w);
+}
+
+/* Paints the scrollbar track and thumb. The thumb highlights while hovered or
+ * dragged, the same affordance the toolbar buttons and links get. */
+static void draw_scrollbar(cairo_t *cr, const browser_window *w) {
+    double tx, ty, trh, thy, thh;
+    if (!scrollbar_metrics(w, &tx, &ty, &trh, &thy, &thh)) return;
+    const ui_theme *th = &w->theme;
+
+    set_rgb(cr, th->scrollbar_track);
+    cairo_rectangle(cr, tx, ty, UI_SCROLLBAR_W, trh);
+    cairo_fill(cr);
+
+    int hot = w->dragging_scroll
+           || (w->ptr_x >= tx && w->ptr_x <= tx + UI_SCROLLBAR_W
+               && w->ptr_y >= thy && w->ptr_y <= thy + thh);
+    set_rgb(cr, hot ? th->scrollbar_thumb_hot : th->scrollbar_thumb);
+    cairo_rectangle(cr, tx + UI_SCROLLBAR_PAD, thy + UI_SCROLLBAR_PAD,
+                    UI_SCROLLBAR_W - 2.0 * UI_SCROLLBAR_PAD, thh - 2.0 * UI_SCROLLBAR_PAD);
+    cairo_fill(cr);
+}
+
+/* Interactive-resize edge for a pointer near the window border (CSD only). Returns
+ * an xdg_toplevel resize edge, or 0 (NONE) away from the edges. The top edge is
+ * excluded: it belongs to the titlebar (move / window buttons). */
+static uint32_t resize_edge_at(const browser_window *w, double x, double y) {
+    double m = UI_RESIZE_MARGIN;
+    int left   = x < m;
+    int right  = x > (double)w->width - m;
+    int bottom = y > (double)w->height - m;
+    /* The side edges live in the page margins; keep them out of the titlebar and
+     * toolbar rows so the chrome buttons stay clickable. */
+    if (y < toolbar_top(w) + UI_TOOLBAR_H) { left = 0; right = 0; }
+    if (bottom && left)  return XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_LEFT;
+    if (bottom && right) return XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_RIGHT;
+    if (bottom) return XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
+    if (left)   return XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
+    if (right)  return XDG_TOPLEVEL_RESIZE_EDGE_RIGHT;
+    return XDG_TOPLEVEL_RESIZE_EDGE_NONE;
+}
+
 static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *close_x) {
     *close_x = w->width - UI_WIN_BTN_W;
     *max_x   = w->width - 2 * UI_WIN_BTN_W;
@@ -1317,11 +1438,11 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
     double left = th->content_margin;
-    double content_w = (double)w->width - 2.0 * th->content_margin;
-    if (content_w < 1.0) content_w = 1.0;
+    double content_w = content_width(w);
 
     rc_layout L;
     layout_doc(cr, w, content_w, &L);
+    w->content_total_h = L.total_h;  /* cached for the scrollbar */
 
     double max_scroll = L.total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
@@ -1390,8 +1511,7 @@ static const char *link_at_point(browser_window *w, double px, double py) {
 
     const ui_theme *th = &w->theme;
     double left = th->content_margin;
-    double content_w = (double)w->width - 2.0 * th->content_margin;
-    if (content_w < 1.0) content_w = 1.0;
+    double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
     rc_layout L;
@@ -1455,8 +1575,7 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
 
     const ui_theme *th = &w->theme;
     double left = th->content_margin;
-    double content_w = (double)w->width - 2.0 * th->content_margin;
-    if (content_w < 1.0) content_w = 1.0;
+    double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
     rc_layout L;
@@ -1940,6 +2059,7 @@ static void paint(browser_window *w) {
     cairo_rectangle(cr, 0, content_top, w->width, (double)w->height - content_top);
     cairo_fill(cr);
 
+    w->content_total_h = 0.0;  /* each branch sets the real height; 0 => no scrollbar */
     if (w->doc != NULL) {
         paint_structured(cr, w, content_top, content_h);
     } else {
@@ -1953,13 +2073,14 @@ static void paint(browser_window *w) {
         double cell_w = (te.x_advance > 0) ? te.x_advance : 8.0;
         double cell_h = (fe.height > 0) ? fe.height : th->body_font;
 
-        size_t max_cols = (size_t)((w->width - 2 * th->content_margin) / cell_w);
+        size_t max_cols = (size_t)(content_width(w) / cell_w);
         if (max_cols == 0) max_cols = 1;
         size_t viewport_lines = (size_t)(content_h / cell_h);
         if (viewport_lines == 0) viewport_lines = 1;
 
         ui_layout lay;
         if (ui_wrap_text(text, text_len, max_cols, &lay) == UI_OK) {
+            w->content_total_h = (double)lay.count * cell_h;  /* cached for the scrollbar */
             size_t first = (size_t)(w->scroll / cell_h);
             first = ui_clamp_scroll(first, lay.count, viewport_lines);
             w->scroll = (double)first * cell_h;
@@ -1989,7 +2110,8 @@ static void paint(browser_window *w) {
         }
     }
 
-    /* Overlays painted on top of the content. */
+    /* Scrollbar over the content's right gutter, then overlays on top. */
+    draw_scrollbar(cr, w);
     draw_menu(cr, w);
     double hover_h = draw_hover_url(cr, w);
     draw_toast(cr, w, hover_h);
@@ -2025,11 +2147,19 @@ static const struct xdg_surface_listener xdg_surface_listener = { xdg_surface_co
 
 static void toplevel_configure(void *data, struct xdg_toplevel *t,
                                int32_t width, int32_t height, struct wl_array *states) {
-    (void)t; (void)states;
+    (void)t;
     browser_window *w = (browser_window *)data;
     if (width > 0 && height > 0) {
         w->width = width;
         w->height = height;
+    }
+    /* Track the maximized state so the titlebar button toggles correctly. */
+    w->maximized = 0;
+    if (states != NULL) {
+        const uint32_t *st;
+        wl_array_for_each(st, states) {
+            if (*st == XDG_TOPLEVEL_STATE_MAXIMIZED) w->maximized = 1;
+        }
     }
 }
 static void toplevel_close(void *data, struct xdg_toplevel *t) {
@@ -2108,6 +2238,7 @@ static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, 
     browser_window *w = (browser_window *)d;
     w->ptr_x = wl_fixed_to_double(x);
     w->ptr_y = wl_fixed_to_double(y);
+    if (w->dragging_scroll) { scrollbar_drag_to(w); return; }
     update_hover(w);
 }
 
@@ -2121,9 +2252,14 @@ static void load_current(browser_window *w) {
 
 static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
                        uint32_t button, uint32_t state) {
-    (void)p; (void)serial; (void)t;
+    (void)p; (void)t;
     browser_window *w = (browser_window *)d;
-    if (button != UI_BTN_LEFT || state != WL_POINTER_BUTTON_STATE_PRESSED) return;
+    if (button != UI_BTN_LEFT) return;
+    if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
+        if (w->dragging_scroll) { w->dragging_scroll = 0; redraw(w); }
+        return;
+    }
+    /* state == WL_POINTER_BUTTON_STATE_PRESSED below. */
 
     double ttop = toolbar_top(w);
 
@@ -2156,15 +2292,49 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
         return;
     }
 
-    /* Client-side decoration controls. */
+    /* Dragging a window border starts an interactive resize (CSD only; the
+     * compositor owns the edges under server-side decorations). Checked before the
+     * scrollbar so the extreme edge always resizes; the rest of the gutter drags. */
+    if (w->use_csd && !w->maximized) {
+        uint32_t edge = resize_edge_at(w, w->ptr_x, w->ptr_y);
+        if (edge != XDG_TOPLEVEL_RESIZE_EDGE_NONE) {
+            if (w->seat != NULL)
+                xdg_toplevel_resize(w->xdg_toplevel, w->seat, serial, edge);
+            return;
+        }
+    }
+
+    /* The scrollbar captures the press: grabbing the thumb starts a drag; clicking
+     * the track jumps the thumb under the cursor and then drags. */
+    {
+        double tx, ty, trh, thy, thh;
+        if (scrollbar_metrics(w, &tx, &ty, &trh, &thy, &thh)
+            && w->ptr_x >= tx && w->ptr_x <= tx + UI_SCROLLBAR_W
+            && w->ptr_y >= ty && w->ptr_y <= ty + trh) {
+            w->scroll_grab_dy = (w->ptr_y >= thy && w->ptr_y <= thy + thh)
+                                ? (w->ptr_y - thy)   /* grabbed the thumb */
+                                : (thh / 2.0);       /* clicked the track: center on cursor */
+            w->dragging_scroll = 1;
+            scrollbar_drag_to(w);
+            return;
+        }
+    }
+
+    /* Client-side decoration controls: close / maximize-toggle / minimize, and a
+     * drag on the empty titlebar moves the window. */
     if (w->use_csd && w->ptr_y < UI_TITLEBAR_H) {
         double min_x, max_x, close_x;
         window_button_rects(w, &min_x, &max_x, &close_x);
         if (w->ptr_x >= close_x) {
             w->running = 0;
-            return;
+        } else if (w->ptr_x >= max_x) {
+            if (w->maximized) xdg_toplevel_unset_maximized(w->xdg_toplevel);
+            else              xdg_toplevel_set_maximized(w->xdg_toplevel);
+        } else if (w->ptr_x >= min_x) {
+            xdg_toplevel_set_minimized(w->xdg_toplevel);
+        } else if (w->seat != NULL) {
+            xdg_toplevel_move(w->xdg_toplevel, w->seat, serial);
         }
-        (void)min_x; (void)max_x;
         return;
     }
 
@@ -2392,11 +2562,19 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
     }
 
     if (!w->url_bar_focused) {
+        /* Page scroll plus vim-style keys: j/k by line, space/b by page, gg to the
+         * top, G to the bottom. pending_g remembers a lone 'g' for the gg sequence. */
         double line = scroll_line_px(w);
-        if (sym == XKB_KEY_Up) { w->scroll -= line; }
-        else if (sym == XKB_KEY_Down) { w->scroll += line; }
-        else if (sym == XKB_KEY_Page_Up) { w->scroll -= w->theme.page_step_lines * line; }
-        else if (sym == XKB_KEY_Page_Down) { w->scroll += w->theme.page_step_lines * line; }
+        double page = w->theme.page_step_lines * line;
+        int was_g = w->pending_g;
+        w->pending_g = 0;
+        if (sym == XKB_KEY_Up || sym == XKB_KEY_k) { w->scroll -= line; }
+        else if (sym == XKB_KEY_Down || sym == XKB_KEY_j) { w->scroll += line; }
+        else if (sym == XKB_KEY_Page_Up || sym == XKB_KEY_b) { w->scroll -= page; }
+        else if (sym == XKB_KEY_Page_Down || sym == XKB_KEY_space) { w->scroll += page; }
+        else if (sym == XKB_KEY_Home) { w->scroll = 0.0; }
+        else if (sym == XKB_KEY_End || sym == XKB_KEY_G) { w->scroll = w->content_total_h; }
+        else if (sym == XKB_KEY_g) { if (was_g) w->scroll = 0.0; else w->pending_g = 1; }
         if (w->scroll < 0.0) w->scroll = 0.0;
         redraw(w);
         return;

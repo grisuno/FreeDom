@@ -194,6 +194,20 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   - [x] **Indicador de carga** (reloj "busy") en el tab/barra de URL durante un request
     (`show_busy` pinta y presenta un frame antes del fetch síncrono; título "Loading..."). Honesto:
     estático, no animado, porque el fetch bloquea el event loop (animarlo es el Hito 9).
+  - [x] **Barra de scroll visible** (`scrollbar_metrics`/`draw_scrollbar`): track + thumb en un
+    gutter derecho **siempre reservado** (`content_width` resta el gutter, una sola fuente de
+    verdad para pintor y hit-test de enlaces/inputs). Arrastre del thumb y clic-en-track
+    (`scrollbar_drag_to`, estado `dragging_scroll`); aparece solo si el contenido excede el
+    viewport.
+  - [x] **Márgenes/padding más amplios** (`UI_TEXT_MARGIN` 8→20): el contenido respira y los
+    bordes de resize caen en el margen, no sobre el texto.
+  - [x] **Controles de ventana (CSD)**: mover (arrastrar el titlebar → `xdg_toplevel_move`),
+    maximizar/restaurar (botón `[]`, estado leído de `XDG_TOPLEVEL_STATE_MAXIMIZED`), minimizar
+    (`_`), cerrar (`X`), y **redimensionar** por bordes (`resize_edge_at` → `xdg_toplevel_resize`,
+    laterales solo en el área de contenido para no robar clics al chrome). Bajo SSD el compositor
+    sigue dueño de los bordes.
+  - [x] **Atajos vim** en el área de contenido (sin foco en la URL): `j`/`k` línea, `space`/`b`
+    página, `gg` arriba, `G` abajo, además de `Home`/`End` y las flechas/PgUp-Dn ya existentes.
 - **Hito 7 — CSS estático / box model enriquecido (Secure by Default, sin JS).** Estrategia del
   dueño: máxima legibilidad con superficie mínima. Lógica pura y testeable; la GUI solo cablea.
   Base ya existente: escala de headings, `paragraph_gap`, `content_margin`, color de autor
