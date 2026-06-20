@@ -62,12 +62,25 @@ typedef struct sf_chain_info {
     int         has_pq_sig;   /* nonzero if any cert in the chain uses an ML-DSA/SLH-DSA sig */
 } sf_chain_info;
 
+/* Socket-level anonymity proxy (Privacy by Default, Principle 3). The realm router
+ * (net_realm) decides which one to use per request; secure_fetch just applies it. */
+typedef enum sf_proxy_type {
+    SF_PROXY_NONE = 0,  /* connect directly */
+    SF_PROXY_SOCKS5H,   /* SOCKS5 with REMOTE DNS (Tor): no DNS leak, resolves .onion */
+    SF_PROXY_HTTP       /* HTTP proxy (I2P) */
+} sf_proxy_type;
+
 typedef struct sf_config {
     sf_policy   policy;
     long        timeout_ms;     /* total request timeout; 0 => SF_DEFAULT_TIMEOUT_MS */
     size_t      max_body_bytes; /* hard cap on buffered response; 0 => SF_DEFAULT_MAX_BODY */
     const char *kex_groups;     /* OpenSSL group list; NULL => SF_DEFAULT_KEX_GROUPS */
     const char *user_agent;     /* User-Agent header; NULL/"" => SF_DEFAULT_USER_AGENT */
+    sf_proxy_type proxy_type;   /* SF_PROXY_NONE => direct connection */
+    const char *proxy_address;  /* "host:port" for the proxy; used iff proxy_type != NONE */
+    int allow_overlay_http;     /* allow plain http:// (no TLS) -- ONLY for overlay realms
+                                 * (.onion/.i2p) routed through their proxy, where the overlay
+                                 * itself encrypts and authenticates. Never set for clearnet. */
 } sf_config;
 
 typedef struct sf_response {

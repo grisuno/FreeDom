@@ -165,6 +165,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | URL/enlaces | `url` (`url_`), `link_nav` (`ln_`) | RFC 3986; "qué es una https absoluta válida" y "qué hace un clic" en un solo sitio; downgrade a http / esquemas ajenos no representables. |
 | Política de red | `request_policy` (`rp_`), `render_policy` (`rdp_`) | Bloqueo de terceros por defecto, https-only, gate puro de imágenes/CSS/JS (todo opt-in). |
 | Filtro de hosts | `hostblock` (`hb_`) | Lista negra + lista blanca en formato `/etc/hosts` (archivos `.conf`); la blanca gana y cubre subdominios; consultado antes de abrir el socket. Puro, falla **abierto** (adblock, no frontera de seguridad). |
+| Enrutado de red | `net_realm` (`nr_`) | Clasifica clearnet / `.onion` / `.i2p` y decide ruta (directo / Tor SOCKS5h / I2P HTTP / **bloqueado**). Puro. Aislamiento de realm + **fail-closed** (nunca fuga `.onion` por clearnet). `secure_fetch` aplica el proxy (`sf_proxy_*`). |
 | Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice consultable de solo lectura. |
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla/readback normalizados. |
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock; worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
@@ -198,6 +199,18 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   de `$FREEDOM_HOSTS_DIR`, `~/.config/freedom` y `./config`; la GUI consulta `hb_check` antes del
   fetch (la blanca gana y cubre subdominios). Falla **abierto**: sin listas no bloquea nada. La
   blanca tiene **doble rol**: des-bloquea del adblock **y** habilita el override TLS por host.
+- **Tor/I2P a nivel de socket (opt-in):** integración por **proxy local** (Tor SOCKS5h
+  `127.0.0.1:9050` / I2P HTTP `127.0.0.1:4444`), **nunca** embebiendo el daemon (superficie). El
+  cerebro es `net_realm` (puro): `.onion`→solo Tor, `.i2p`→solo I2P, clearnet→directo o Tor si
+  "torify". Dos invariantes: **DNS remoto** (SOCKS5h, sin fuga) y **fail-closed** (realm sin su
+  proxy → bloqueado, jamás directo). `.onion` sigue **https-only**; **`.i2p` acepta `http://`**
+  (`nr_realm_allows_http`/`sf_config.allow_overlay_http`): los eepsites son http y el overlay ya
+  cifra/autentica por dirección, así que no es downgrade; `http://` clearnet **sigue rechazado**.
+  TLS 1.3 sigue vigente en `.onion` (el override por host de `allow.conf` aplica si hace falta). GUI: toggles
+  "Tor routing"/"I2P routing"; headless: `--tor[=addr]`/`--i2p[=addr]`/`--torify`; env:
+  `FREEDOM_TOR_PROXY`/`FREEDOM_I2P_PROXY`/`FREEDOM_TORIFY_CLEARNET`. **Sin verificar** contra un
+  circuito real aquí (no hay `tor`/`i2pd`): pendiente de itest; la lógica pura y el fail-closed sí
+  están probados.
 - **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
   contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
 

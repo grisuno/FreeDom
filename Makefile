@@ -75,7 +75,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_textfield $(BUILD_DIR)/test_form \
              $(BUILD_DIR)/test_image_decode $(BUILD_DIR)/test_box_style \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
-             $(BUILD_DIR)/test_hostblock
+             $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm
 
 .PHONY: all install test itest asan fuzz fuzz-js fuzz-img view clean
 
@@ -200,6 +200,10 @@ $(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o 
 $(BUILD_DIR)/test_hostblock: $(TEST_DIR)/test_hostblock.c $(BUILD_DIR)/hostblock.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure realm classifier + router (Tor/I2P/clearnet). No I/O deps.
+$(BUILD_DIR)/test_net_realm: $(TEST_DIR)/test_net_realm.c $(BUILD_DIR)/net_realm.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # PNG decode (runs inside the confined worker). Links libpng only.
 $(BUILD_DIR)/test_image_decode: $(TEST_DIR)/test_image_decode.c $(BUILD_DIR)/image_decode.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(PNG_CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(PNG_LIBS) $(CMOCKA_LIBS)
@@ -254,6 +258,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
                       $(BUILD_DIR)/box_style.o $(BUILD_DIR)/box_tree.o \
                       $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/hostblock.o \
+                      $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/image_decode.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \

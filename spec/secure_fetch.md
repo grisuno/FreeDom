@@ -109,6 +109,15 @@ void      sf_response_free(sf_response *resp);
 `navigator.userAgent` de JS sigue normalizado por `anti_fp` (anti-fingerprinting), de modo que un
 UA de red a medida no abre un canal de fingerprinting pasivo en el motor JS.
 
+**Proxy de anonimato (Tor/I2P, a nivel de socket).** `sf_config.proxy_type` +
+`sf_config.proxy_address` enrutan la petición por un proxy local (Principio 3). `SF_PROXY_NONE`
+(defecto) = conexión directa; `SF_PROXY_SOCKS5H` = SOCKS5 con **DNS remoto** (Tor: sin fuga de DNS,
+resuelve `.onion`); `SF_PROXY_HTTP` = proxy HTTP (I2P). `secure_fetch` solo **aplica** el proxy
+(`CURLOPT_PROXY`/`CURLOPT_PROXYTYPE`); **quién** lo elige es el módulo puro `[[net_realm]]` en el
+orquestador (clasifica el realm, decide la ruta, falla cerrado). Con un proxy fijado, libcurl nunca
+lo evita: no hay fallback directo que desanonimice. La política TLS/PQ/cadena es **idéntica** con o
+sin proxy (https-only y TLS 1.3 también para `.onion`).
+
 **POST (`sf_post`).** Envía `body` (`body_len` bytes) con `content_type` (NULL ⇒
 `application/x-www-form-urlencoded`). Reusa el mismo `sf_perform` que `sf_get`, así que exige TLS 1.3
 + KE híbrido PQ + política de cadena igual que un GET (Zero Trust: un POST inseguro **no es

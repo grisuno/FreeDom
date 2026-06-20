@@ -64,6 +64,9 @@ sf_config sf_config_default(void) {
     c.max_body_bytes = SF_DEFAULT_MAX_BODY;
     c.kex_groups = SF_DEFAULT_KEX_GROUPS;
     c.user_agent = NULL; /* resolved to SF_DEFAULT_USER_AGENT at request time */
+    c.proxy_type = SF_PROXY_NONE; /* direct by default; Tor/I2P is opt-in */
+    c.proxy_address = NULL;
+    c.allow_overlay_http = 0;     /* https-only unless an overlay realm opts in */
     return c;
 }
 
@@ -76,6 +79,21 @@ const char *sf_user_agent_or_default(const char *ua) {
 sf_status sf_validate_url(const char *url) {
     /* The canonical https-URL rule lives in the pure url module (DRY). */
     return (url_validate_https(url) == URL_OK) ? SF_OK : SF_ERR_INVALID_URL;
+}
+
+/* Nonzero iff url is "http://host..." (case-insensitive) with a non-empty host.
+ * Plain http is only ever permitted for overlay (.onion/.i2p) realms, gated by
+ * sf_config.allow_overlay_http; the overlay layer provides encryption + authenticity. */
+static int sf_url_is_http(const char *url) {
+    static const char pre[] = "http://";
+    if (url == NULL) return 0;
+    for (size_t i = 0; i < sizeof pre - 1; ++i) {
+        char a = url[i];
+        if (a >= 'A' && a <= 'Z') a += 'a' - 'A';
+        if (a != pre[i]) return 0;
+    }
+    const char *h = url + (sizeof pre - 1);
+    return (h[0] != '\0' && h[0] != '/' && h[0] != ':' && h[0] != '?' && h[0] != '#');
 }
 
 sf_status sf_check_tls_version(const char *negotiated_version) {
@@ -174,6 +192,45 @@ sf_status sf_resolve_redirect(const char *base_url, const char *location,
      * current URL, fail-closed to an absolute https URL. */
     return (url_resolve_https(base_url, location, out, outsz) == URL_OK)
                ? SF_OK : SF_ERR_INVALID_URL;
+}
+
+/* Case-insensitive prefix test. */
+static int sf_ci_prefix(const char *s, const char *p) {
+    for (; *p; ++s, ++p) {
+        char a = *s, b = *p;
+        if (a >= 'A' && a <= 'Z') a += 'a' - 'A';
+        if (b >= 'A' && b <= 'Z') b += 'a' - 'A';
+        if (a != b) return 0;
+    }
+    return 1;
+}
+
+/* Resolves a redirect for an overlay (plain-http) request, reusing the tested https
+ * reference resolver by swapping http<->https around it. A redirect that explicitly
+ * names https is refused (an eepsite must not bounce navigation onto the clearnet
+ * from behind the overlay proxy: fail closed). The base must be an http URL. */
+static sf_status sf_resolve_redirect_overlay(const char *base, const char *location,
+                                             char *out, size_t outsz) {
+    if (base == NULL || location == NULL || out == NULL || outsz == 0)
+        return SF_ERR_NULL_ARG;
+    if (sf_ci_prefix(location, "https://")) return SF_ERR_INVALID_URL;
+    if (!sf_ci_prefix(base, "http://")) return SF_ERR_INVALID_URL;
+
+    char hbase[SF_MAX_URL], hloc[SF_MAX_URL], tmp[SF_MAX_URL];
+    if (snprintf(hbase, sizeof hbase, "https://%s", base + 7) >= (int)sizeof hbase)
+        return SF_ERR_INVALID_URL;
+    /* Absolute http reference -> https for resolution; relative refs pass through. */
+    if (sf_ci_prefix(location, "http://")) {
+        if (snprintf(hloc, sizeof hloc, "https://%s", location + 7) >= (int)sizeof hloc)
+            return SF_ERR_INVALID_URL;
+    } else {
+        if (snprintf(hloc, sizeof hloc, "%s", location) >= (int)sizeof hloc)
+            return SF_ERR_INVALID_URL;
+    }
+    if (url_resolve_https(hbase, hloc, tmp, sizeof tmp) != URL_OK) return SF_ERR_INVALID_URL;
+    if (!sf_ci_prefix(tmp, "https://")) return SF_ERR_INVALID_URL;
+    if (snprintf(out, outsz, "http://%s", tmp + 8) >= (int)outsz) return SF_ERR_INVALID_URL;
+    return SF_OK;
 }
 
 /* --- public: cleanup --- */
@@ -415,8 +472,15 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     if (local.max_body_bytes == 0) local.max_body_bytes = SF_DEFAULT_MAX_BODY;
     if (local.kex_groups == NULL) local.kex_groups = SF_DEFAULT_KEX_GROUPS;
 
-    sf_status vs = sf_validate_url(url);
-    if (vs != SF_OK) { out->status = vs; return vs; }
+    /* https is required everywhere except an overlay (.onion/.i2p) request that opted
+     * into plain http: there the overlay layer authenticates and encrypts, so http is
+     * not a downgrade. A malformed http URL (no host) still falls through to the
+     * strict https validation and is rejected. */
+    int http_overlay = local.allow_overlay_http && sf_url_is_http(url);
+    if (!http_overlay) {
+        sf_status vs = sf_validate_url(url);
+        if (vs != SF_OK) { out->status = vs; return vs; }
+    }
 
     CURL *curl = curl_easy_init();
     if (curl == NULL) { out->status = SF_ERR_OOM; return SF_ERR_OOM; }
@@ -430,6 +494,17 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     sf_status result = SF_ERR_INTERNAL;
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
+    /* Socket-level anonymity proxy (Tor SOCKS5h / I2P HTTP). SOCKS5_HOSTNAME keeps DNS
+     * resolution at the proxy (no local lookup => no DNS leak; resolves .onion). When
+     * a proxy is set, libcurl never bypasses it, so there is no de-anonymizing direct
+     * fallback. The realm router (net_realm) chose this in the orchestrator. */
+    if (local.proxy_type != SF_PROXY_NONE && local.proxy_address != NULL) {
+        curl_easy_setopt(curl, CURLOPT_PROXY, local.proxy_address);
+        curl_easy_setopt(curl, CURLOPT_PROXYTYPE,
+                         (local.proxy_type == SF_PROXY_HTTP)
+                             ? (long)CURLPROXY_HTTP
+                             : (long)CURLPROXY_SOCKS5_HOSTNAME);
+    }
     /* TLS 1.3 is the floor everywhere except the explicit allowlist override, which
      * lowers the floor to TLS 1.2 (1.3 still the ceiling, so it is preferred). The
      * negotiated version is re-checked against the policy in sf_enforce_policy. */
@@ -440,8 +515,10 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, local.kex_groups);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
-    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "https");
-    curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "https");
+    /* https only, except an overlay request that also allows plain http. */
+    const char *protos = local.allow_overlay_http ? "http,https" : "https";
+    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, protos);
+    curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, protos);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, local.timeout_ms);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, sf_user_agent_or_default(local.user_agent));
@@ -473,16 +550,20 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
         goto done;
     }
 
-    /* The negotiated TLS state was snapshotted during the transfer. If the
-     * snapshot never happened (no callback could read the SSL*), fail closed. */
-    if (!ctx.cap.have) {
+    /* The negotiated TLS state was snapshotted during the transfer. */
+    if (ctx.cap.have) {
+        /* A TLS connection: enforce the full TLS/PQ/chain policy. */
+        sf_chain_info *chain_ptr = ctx.cap.chain_ok ? &ctx.cap.chain : NULL;
+        result = sf_enforce_policy(ctx.cap.version, ctx.cap.group, chain_ptr, local.policy);
+        if (result != SF_OK) goto done;
+    } else if (!local.allow_overlay_http) {
+        /* No TLS captured and this was not an accepted plain-http overlay request:
+         * fail closed (an https response we could not inspect is never trusted). */
         result = SF_ERR_INTERNAL;
         goto done;
     }
-
-    sf_chain_info *chain_ptr = ctx.cap.chain_ok ? &ctx.cap.chain : NULL;
-    result = sf_enforce_policy(ctx.cap.version, ctx.cap.group, chain_ptr, local.policy);
-    if (result != SF_OK) goto done;
+    /* else: plain http over the overlay (Tor/I2P). The overlay layer encrypts and
+     * authenticates by the destination address, so there is no TLS to enforce. */
 
     /* All guarantees met: publish the response. */
     long code = 0;
@@ -564,7 +645,12 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
         }
 
         char next[SF_MAX_URL];
-        sf_status rs = sf_resolve_redirect(current, out->location, next, sizeof next);
+        /* An overlay (plain-http) hop resolves redirects in the http scheme; every
+         * other request stays strictly https. */
+        int overlay = (cfg != NULL && cfg->allow_overlay_http && sf_url_is_http(current));
+        sf_status rs = overlay
+            ? sf_resolve_redirect_overlay(current, out->location, next, sizeof next)
+            : sf_resolve_redirect(current, out->location, next, sizeof next);
         if (rs != SF_OK) {
             sf_response_free(out);
             out->status = rs;

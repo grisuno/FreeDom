@@ -18,6 +18,7 @@
 #include "hostblock.h"
 #include "image_decode.h"
 #include "link_nav.h"
+#include "net_realm.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "textfield.h"
@@ -334,7 +335,9 @@ static uint64_t now_ms(void) {
 typedef enum ui_menu_action {
     UI_MENU_CAP = 0,  /* toggles w->caps.<offset>; needs a re-render from cache */
     UI_MENU_THEME,    /* selects w->theme_mode (theme_val); needs only a repaint */
-    UI_MENU_FORCE     /* toggles w->force_theme; needs only a repaint */
+    UI_MENU_FORCE,    /* toggles w->force_theme; needs only a repaint */
+    UI_MENU_TOR,      /* toggles Tor routing (tor_enabled + torify clearnet) */
+    UI_MENU_I2P       /* toggles I2P routing for .i2p */
 } ui_menu_action;
 
 typedef struct ui_menu_item {
@@ -350,6 +353,8 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Force theme colors",   UI_MENU_FORCE, 0,                          0 },
     { "Load images",          UI_MENU_CAP,   offsetof(rdp_caps, images), 0 },
     { "Author colors (CSS)",  UI_MENU_CAP,   offsetof(rdp_caps, css),    0 },
+    { "Tor routing (.onion)", UI_MENU_TOR,   0,                          0 },
+    { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
 
@@ -426,6 +431,9 @@ typedef struct browser_window {
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     hb_set   *hosts;    /* /etc/hosts-format blocklist + allowlist; consulted pre-fetch */
+    nr_config net_cfg;  /* Tor/I2P routing (Privacy by Default: opt-in, off by default) */
+    char      tor_addr[64];  /* Tor SOCKS5h proxy "host:port" (default 127.0.0.1:9050) */
+    char      i2p_addr[64];  /* I2P HTTP proxy "host:port" (default 127.0.0.1:4444) */
     double    scroll;   /* content scroll offset in pixels */
     double    content_total_h;  /* full height of the laid-out content, cached each paint */
     int       maximized;        /* toplevel currently maximized (from xdg states) */
@@ -575,8 +583,45 @@ static hb_set *build_host_filter(void) {
     return s;
 }
 
+/* Copies a proxy "host:port" into dst: if the env value is unset/empty the default is
+ * used; the literal "1" also means "use the default" (a convenient on-switch). Returns
+ * 1 if the env var was set non-empty (the proxy should be enabled), else 0. */
+static int proxy_addr_from_env(const char *envname, const char *deflt,
+                               char *dst, size_t dstsz) {
+    const char *v = getenv(envname);
+    int enabled = (v != NULL && v[0] != '\0');
+    const char *addr = (!enabled || strcmp(v, "1") == 0) ? deflt : v;
+    snprintf(dst, dstsz, "%s", addr);
+    return enabled;
+}
+
+/* Builds the Tor/I2P routing config from the environment (Privacy by Default: opt-in,
+ * everything off unless explicitly enabled). FREEDOM_TOR_PROXY / FREEDOM_I2P_PROXY set
+ * and enable each proxy ("1" => the default port); FREEDOM_TORIFY_CLEARNET=1 routes
+ * ordinary clearnet through Tor too. The addresses are always seeded with the defaults
+ * so the menu toggles work even when the env vars are absent. */
+static void init_net_config(browser_window *w) {
+    memset(&w->net_cfg, 0, sizeof w->net_cfg);
+    w->net_cfg.tor_enabled = proxy_addr_from_env("FREEDOM_TOR_PROXY", "127.0.0.1:9050",
+                                                 w->tor_addr, sizeof w->tor_addr);
+    w->net_cfg.i2p_enabled = proxy_addr_from_env("FREEDOM_I2P_PROXY", "127.0.0.1:4444",
+                                                 w->i2p_addr, sizeof w->i2p_addr);
+    const char *t = getenv("FREEDOM_TORIFY_CLEARNET");
+    w->net_cfg.torify_clearnet = (t != NULL && strcmp(t, "1") == 0 && w->net_cfg.tor_enabled);
+}
+
 static int is_https_url(const char *s) {
     return strncmp(s, "https://", 8) == 0;
+}
+
+static int is_http_url(const char *s) {
+    return strncmp(s, "http://", 7) == 0;
+}
+
+/* A plain-http URL whose realm self-authenticates (an i2p eepsite today): it is
+ * fetched over the network (through the overlay proxy), not read as a local file. */
+static int is_overlay_http_url(const char *s) {
+    return is_http_url(s) && nr_realm_allows_http(nr_classify_url(s));
 }
 
 /* Extract hostname from https://host[:port][/path]. Returns 0 on parse failure. */
@@ -722,6 +767,24 @@ static cairo_surface_t *surface_from_pixels(const tab_image *img) {
     return s;
 }
 
+/* Applies the realm route for url to cfg (proxy type + address). Returns the route;
+ * NR_ROUTE_BLOCKED means the caller must NOT fetch (fail closed). */
+static nr_route apply_route(const browser_window *w, const char *url, sf_config *cfg) {
+    nr_route r = nr_route_for(url, w->net_cfg);
+    if (r == NR_ROUTE_TOR) {
+        cfg->proxy_type = SF_PROXY_SOCKS5H;
+        cfg->proxy_address = w->tor_addr;
+    } else if (r == NR_ROUTE_I2P) {
+        cfg->proxy_type = SF_PROXY_HTTP;
+        cfg->proxy_address = w->i2p_addr;
+    }
+    /* An overlay realm routed through its proxy may use plain http (the overlay
+     * authenticates + encrypts by address). Only i2p opts in today; onion stays https. */
+    if (r == NR_ROUTE_TOR || r == NR_ROUTE_I2P)
+        cfg->allow_overlay_http = nr_realm_allows_http(nr_classify_url(url));
+    return r;
+}
+
 /* Downgrade reasons reported by fetch_follow_navigable via *downgraded. */
 enum { DOWNGRADE_NONE = 0, DOWNGRADE_CLASSICAL_KE = 1, DOWNGRADE_ALLOWLISTED = 2 };
 
@@ -801,6 +864,10 @@ static void load_images(browser_window *w, tab *t) {
         sf_config cfg = sf_config_default();
         cfg.user_agent = tf_text(&w->ua_field);
         cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
+
+        /* Route the image like the page: a .onion/.i2p image with its proxy off is
+         * skipped, never leaked over clearnet (fail closed). */
+        if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) continue;
 
         sf_response resp;
         memset(&resp, 0, sizeof resp);
@@ -894,7 +961,7 @@ static void do_load(browser_window *w, const char *url) {
     size_t html_len = 0;
     int downgraded = 0; /* set when a non-PQ host was loaded over classical TLS 1.3 */
 
-    if (is_https_url(url)) {
+    if (is_https_url(url) || is_overlay_http_url(url)) {
         sf_config cfg = sf_config_default();
         cfg.user_agent = tf_text(&w->ua_field); /* "" => SF_DEFAULT_USER_AGENT */
         char host[256];
@@ -926,6 +993,28 @@ static void do_load(browser_window *w, const char *url) {
          * navigated below Freedom's standard (TLS 1.2, classical KE, weak cert) if
          * the strict attempt fails. Secure by default, but not a dictatorship. */
         int allowlisted = have_host && hb_is_allowlisted(w->hosts, host);
+
+        /* Socket-level anonymity routing (Tor/I2P). A .onion/.i2p host with its proxy
+         * disabled is BLOCKED, never leaked over clearnet (fail closed). */
+        nr_route route = apply_route(w, url, &cfg);
+        if (route == NR_ROUTE_BLOCKED) {
+            char msg[640];
+            nr_realm realm = nr_classify_url(url);
+            snprintf(msg, sizeof msg,
+                "Blocked '%s': it is a %s address but %s routing is not enabled.\n\n"
+                "Freedom never leaks a %s lookup over the clearnet (fail closed). Enable\n"
+                "%s in the menu (or set %s) and make sure a local %s proxy is running,\n"
+                "then reload.",
+                url, nr_realm_name(realm),
+                (realm == NR_I2P) ? "I2P" : "Tor",
+                nr_realm_name(realm),
+                (realm == NR_I2P) ? "I2P routing" : "Tor routing",
+                (realm == NR_I2P) ? "FREEDOM_I2P_PROXY" : "FREEDOM_TOR_PROXY",
+                (realm == NR_I2P) ? "I2P (e.g. i2pd)" : "Tor");
+            set_cache(w, NULL, 0, NULL);
+            browser_set_page(&w->bs, NULL, msg, 1);
+            return;
+        }
 
         sf_response resp;
         memset(&resp, 0, sizeof resp);
@@ -1001,7 +1090,8 @@ static void do_load(browser_window *w, const char *url) {
 
     /* Cache the source (image policy uses the https origin) and render it. A later
      * capability toggle re-renders from this cache without a network round-trip. */
-    set_cache(w, html, html_len, is_https_url(url) ? url : NULL);
+    set_cache(w, html, html_len,
+              (is_https_url(url) || is_overlay_http_url(url)) ? url : NULL);
     render_current(w);
 
     /* Tell the user when a security downgrade was needed to load the page. Navigation
@@ -2026,6 +2116,8 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     const ui_menu_item *it = &UI_MENU_ITEMS[i];
     if (it->action == UI_MENU_THEME) return w->theme_mode == it->theme_val;
     if (it->action == UI_MENU_FORCE) return w->force_theme;
+    if (it->action == UI_MENU_TOR)   return w->net_cfg.tor_enabled;
+    if (it->action == UI_MENU_I2P)   return w->net_cfg.i2p_enabled;
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
 
@@ -2043,6 +2135,24 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     if (it->action == UI_MENU_FORCE) {
         w->force_theme = !w->force_theme;
         return;  /* layout re-applies author colors (or not) on the next paint */
+    }
+    if (it->action == UI_MENU_TOR) {
+        /* One switch: enable Tor and route clearnet through it too (so the whole
+         * session is anonymized and .onion becomes reachable). Takes effect on the
+         * next navigation; warn the user, who must have a Tor proxy running. */
+        w->net_cfg.tor_enabled = !w->net_cfg.tor_enabled;
+        w->net_cfg.torify_clearnet = w->net_cfg.tor_enabled;
+        browser_set_status(&w->bs, w->net_cfg.tor_enabled
+            ? "Tor routing ON (needs a Tor proxy on the configured port). Reload to apply."
+            : "Tor routing OFF.", now_ms());
+        return;
+    }
+    if (it->action == UI_MENU_I2P) {
+        w->net_cfg.i2p_enabled = !w->net_cfg.i2p_enabled;
+        browser_set_status(&w->bs, w->net_cfg.i2p_enabled
+            ? "I2P routing ON for .i2p (needs an I2P HTTP proxy). Reload to apply."
+            : "I2P routing OFF.", now_ms());
+        return;
     }
     bool *flag = (bool *)((char *)&w->caps + it->cap_offset);
     *flag = !*flag;
@@ -3059,6 +3169,7 @@ ui_status ui_run_browser(const char *start_url) {
     /* Host filter (blocklist + allowlist) ready before the first fetch. Placed after
      * the fallible Wayland setup so its error returns above never leak it. */
     w.hosts = build_host_filter();
+    init_net_config(&w);  /* Tor/I2P routing config from the environment (opt-in) */
 
     /* Initial page. Provide instructions because the strict TLS policy means
        many public sites will be rejected. */

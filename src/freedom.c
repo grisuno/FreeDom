@@ -8,6 +8,7 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include "net_realm.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "secure_fetch.h"
@@ -27,13 +28,30 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  default: open the Wayland browser GUI\n");
     fprintf(fp, "  --headless: render the page to stdout and exit\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
+    fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
+    fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
+    fprintf(fp, "  --torify: also route ordinary clearnet through Tor (implies --tor)\n");
 }
 
 static int is_https_url(const char *s) {
     return strncmp(s, "https://", 8) == 0;
 }
 
+static int is_http_url(const char *s) {
+    return strncmp(s, "http://", 7) == 0;
+}
+
+/* A plain-http overlay URL (an i2p eepsite today): fetched over the network, not a file. */
+static int is_overlay_http(const char *s) {
+    return is_http_url(s) && nr_realm_allows_http(nr_classify_url(s));
+}
+
 static int global_insecure = 0;
+
+/* Tor/I2P routing for headless mode (off by default; opt-in via CLI flags). */
+static nr_config global_net = { 0, 0, 0 };
+static char global_tor_addr[64] = "127.0.0.1:9050";
+static char global_i2p_addr[64] = "127.0.0.1:4444";
 
 /* Reads the whole file into a NUL-terminated buffer. Caller frees with free(). */
 static char *read_file(const char *path, size_t *out_len) {
@@ -186,6 +204,21 @@ static int fetch_and_render(const char *url) {
     sf_config cfg = sf_config_default();
     if (global_insecure) cfg.policy = SF_POLICY_PERMISSIVE;
 
+    /* Socket-level anonymity routing. A .onion/.i2p target whose proxy is not enabled
+     * is BLOCKED (fail closed), never leaked over the clearnet. */
+    nr_route route = nr_route_for(url, global_net);
+    if (route == NR_ROUTE_BLOCKED) {
+        fprintf(stderr, "freedom: '%s' is a %s address but its proxy is not enabled "
+                "(use --tor/--i2p). Refusing to leak it over clearnet.\n",
+                url, nr_realm_name(nr_classify_url(url)));
+        sf_response_free(&resp);
+        return EXIT_ERROR;
+    }
+    if (route == NR_ROUTE_TOR) { cfg.proxy_type = SF_PROXY_SOCKS5H; cfg.proxy_address = global_tor_addr; }
+    else if (route == NR_ROUTE_I2P) { cfg.proxy_type = SF_PROXY_HTTP; cfg.proxy_address = global_i2p_addr; }
+    if (route == NR_ROUTE_TOR || route == NR_ROUTE_I2P)
+        cfg.allow_overlay_http = nr_realm_allows_http(nr_classify_url(url));
+
     /* Follow redirects (e.g. google.com -> www.google.com), re-validating the
      * full policy on every hop. */
     sf_status ss = sf_get_follow(url, &cfg, &resp, SF_DEFAULT_MAX_REDIRECTS);
@@ -202,7 +235,7 @@ static int fetch_and_render(const char *url) {
 }
 
 static int run_headless(const char *target) {
-    if (is_https_url(target)) {
+    if (is_https_url(target) || is_overlay_http(target)) {
         return fetch_and_render(target);
     }
 
@@ -237,6 +270,19 @@ int main(int argc, char **argv) {
             headless = 1;
         } else if (strcmp(arg, "--insecure") == 0 || strcmp(arg, "-I") == 0) {
             global_insecure = 1;
+        } else if (strcmp(arg, "--tor") == 0) {
+            global_net.tor_enabled = 1;
+        } else if (strncmp(arg, "--tor=", 6) == 0) {
+            global_net.tor_enabled = 1;
+            snprintf(global_tor_addr, sizeof global_tor_addr, "%s", arg + 6);
+        } else if (strcmp(arg, "--i2p") == 0) {
+            global_net.i2p_enabled = 1;
+        } else if (strncmp(arg, "--i2p=", 6) == 0) {
+            global_net.i2p_enabled = 1;
+            snprintf(global_i2p_addr, sizeof global_i2p_addr, "%s", arg + 6);
+        } else if (strcmp(arg, "--torify") == 0) {
+            global_net.tor_enabled = 1;
+            global_net.torify_clearnet = 1;
         } else if (arg[0] == '-') {
             fprintf(stderr, "freedom: unknown option '%s'\n", arg);
             print_usage(stderr, argv[0]);
