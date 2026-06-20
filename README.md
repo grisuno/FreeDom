@@ -64,6 +64,7 @@ The name reflects its core goals:
   - Vim-style keyboard navigation (`j`/`k`, `space`/`b`, `gg`/`G`, etc.)
   - Window controls: maximize, minimize, edge resize, titlebar drag
   - Sepia reading mode + Light/Dark themes with "Force theme colors" toggle
+  - Dark mode + Dark theme with "Force theme colors" toggle
   - Hover link preview (shows destination URL)
   - Loading indicator (busy clock)
   - Improved dark mode and typography
@@ -297,6 +298,14 @@ make fuzz-js
 make view
 make clean
 ```
+
+## Secreenshots
+
+### Tor working on dark mode
+
+<img width="921" height="718" alt="image" src="https://github.com/user-attachments/assets/e6b9ef46-f75a-47a6-a1f0-98074b7fd424" />
+
+
 
 ## License
 
