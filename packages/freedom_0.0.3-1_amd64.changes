@@ -15,11 +15,11 @@ Changes:
  .
    * Initial release. (Closes: #nnnn)  <nnnn is the bug number of your ITP>
 Checksums-Sha1:
- fd4ae2651984adcaa151689e92adfa850dd81757 14125 freedom_0.0.3-1_amd64.buildinfo
+ 746718745b501cb6538d0ec344d64008908b280a 14125 freedom_0.0.3-1_amd64.buildinfo
  af826948293f26acd951671955d8f4172e0ad247 2352 freedom_0.0.3-1_amd64.deb
 Checksums-Sha256:
- 177e17670bc9fbcd15404a9602b2c2288e43a8d39080b11f713003022ccad7c0 14125 freedom_0.0.3-1_amd64.buildinfo
+ f9698e9b92ee948e58b7597bef02f4fc214eae3fd582c4f0d2f09438293184a7 14125 freedom_0.0.3-1_amd64.buildinfo
  bba243f42ecf8ed6001baa5894a50c672938c630fe2727e0a403d0bbf7bcfaed 2352 freedom_0.0.3-1_amd64.deb
 Files:
- c02b4173e94fc885e289499d816ee49d 14125 web optional freedom_0.0.3-1_amd64.buildinfo
+ a4173890ab45e259a2aa8efccfaf496d 14125 web optional freedom_0.0.3-1_amd64.buildinfo
  04d1480181e86db43b1e1782c5b59c1b 2352 web optional freedom_0.0.3-1_amd64.deb

@@ -61,6 +61,9 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/request_policy.c -o build/request_policy.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/render_doc.c -o build/render_doc.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/render_policy.c -o build/render_policy.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/box_style.c -o build/box_style.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/box_tree.c -o build/box_tree.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/flex_layout.c -o build/flex_layout.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/textfield.c -o build/textfield.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/form.c -o build/form.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -I/usr/include/libpng16 -c src/image_decode.c -o build/image_decode.o
@@ -73,7 +76,7 @@ wayland-scanner client-header //usr/share/wayland-protocols/stable/xdg-shell/xdg
 wayland-scanner client-header //usr/share/wayland-protocols/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml build/xdg-decoration-client-protocol.h
 build/gen_psl third_party/psl/public_suffix_list.dat > build/psl_data.c
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c build/psl_data.c -o build/psl_data.o
-cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -Ibuild -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 src/freedom.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o build/secure_fetch.o build/url.o build/link_nav.o build/css_color.o build/request_policy.o build/render_doc.o build/render_policy.o build/textfield.o build/form.o build/image_decode.o build/psl_data.o build/browser.o build/ui_layout.o gui/browser_ui.c build/xdg-shell-protocol.c build/xdg-decoration-protocol.c build/xdg-shell-client-protocol.h build/xdg-decoration-client-protocol.h -o build/freedom -Wl,-z,relro -lcurl -lssl -lcrypto -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lwayland-cursor -lwayland-client -lm -lcairo -lfontconfig -lfreetype -lxkbcommon
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -Ibuild -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 src/freedom.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o build/secure_fetch.o build/url.o build/link_nav.o build/css_color.o build/request_policy.o build/render_doc.o build/render_policy.o build/box_style.o build/box_tree.o build/flex_layout.o build/textfield.o build/form.o build/image_decode.o build/psl_data.o build/browser.o build/ui_layout.o gui/browser_ui.c build/xdg-shell-protocol.c build/xdg-decoration-protocol.c build/xdg-shell-client-protocol.h build/xdg-decoration-client-protocol.h -o build/freedom -Wl,-z,relro -lcurl -lssl -lcrypto -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lwayland-cursor -lwayland-client -lm -lcairo -lfontconfig -lfreetype -lxkbcommon
 make[1]: se sale del directorio '/home/grisun0/src_note/c/freedom-0.0.3'
    dh_auto_test
 	make -j16 test TESTSUITEFLAGS="-j16 --verbose" VERBOSE=1
@@ -91,18 +94,21 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  -isystem third_party/quickjs tests/test_js_env.c build/js_env.o build/js_dom.o build/js_sandbox.o build/anti_fp.o build/dom.o build/html_parse.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o -o build/test_js_env -Wl,-z,relro -lm -lpthread -L/usr/local/lib -llexbor -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/local_store.c -o build/local_store.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/disk_store.c -o build/disk_store.o
-cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_tab.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/css_color.o build/image_decode.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o -o build/test_tab -Wl,-z,relro -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_tab.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/css_color.o build/box_style.o build/image_decode.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o -o build/test_tab -Wl,-z,relro -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_browser.c build/browser.o -o build/test_browser -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_freedom.c -o build/test_freedom -Wl,-z,relro -lcmocka
-cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_page_view.c build/page_view.o build/css_color.o build/html_parse.o -o build/test_page_view -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_page_view.c build/page_view.o build/css_color.o build/box_style.o build/html_parse.o -o build/test_page_view -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_render_policy.c build/render_policy.o build/request_policy.o build/psl_data.o -o build/test_render_policy -Wl,-z,relro -lcmocka
-cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_render_doc.c build/render_doc.o build/render_policy.o build/request_policy.o build/page_view.o build/css_color.o build/html_parse.o build/url.o build/psl_data.o -o build/test_render_doc -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_render_doc.c build/render_doc.o build/render_policy.o build/request_policy.o build/page_view.o build/css_color.o build/box_style.o build/html_parse.o build/url.o build/psl_data.o -o build/test_render_doc -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_url.c build/url.o -o build/test_url -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_link_nav.c build/link_nav.o build/url.o -o build/test_link_nav -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_css_color.c build/css_color.o -o build/test_css_color -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_textfield.c build/textfield.o -o build/test_textfield -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_form.c build/form.o build/url.o -o build/test_form -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -I/usr/include/libpng16  tests/test_image_decode.c build/image_decode.o -o build/test_image_decode -Wl,-z,relro -lpng16 -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_box_style.c build/box_style.o -o build/test_box_style -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_flex_layout.c build/flex_layout.o -o build/test_flex_layout -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_box_tree.c build/box_tree.o build/flex_layout.o -o build/test_box_tree -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_renderer.c build/renderer.o build/os_sandbox.o build/html_parse.o -o build/test_renderer -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_local_store.c build/local_store.o -o build/test_local_store -Wl,-z,relro -lcrypto -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_disk_store.c build/disk_store.o build/local_store.o -o build/test_disk_store -Wl,-z,relro -lcrypto -lcmocka
@@ -601,7 +607,7 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [==========] tests: 7 test(s) run.
 [  PASSED  ] 7 test(s).
 == run build/test_page_view ==
-[==========] tests: Running 27 test(s).
+[==========] tests: Running 30 test(s).
 [ RUN      ] test_new_is_empty
 [       OK ] test_new_is_empty
 [ RUN      ] test_append_copies_fields
@@ -646,6 +652,12 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_set_color_model
 [ RUN      ] test_build_author_color
 [       OK ] test_build_author_color
+[ RUN      ] test_build_flex_container
+[       OK ] test_build_flex_container
+[ RUN      ] test_build_grid_container
+[       OK ] test_build_grid_container
+[ RUN      ] test_container_defaults
+[       OK ] test_container_defaults
 [ RUN      ] test_build_search_form_get
 [       OK ] test_build_search_form_get
 [ RUN      ] test_build_form_post_and_hidden
@@ -656,8 +668,8 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_build_control_without_form
 [ RUN      ] test_build_two_forms_distinct_groups
 [       OK ] test_build_two_forms_distinct_groups
-[==========] tests: 27 test(s) run.
-[  PASSED  ] 27 test(s).
+[==========] tests: 30 test(s) run.
+[  PASSED  ] 30 test(s).
 == run build/test_render_policy ==
 [==========] tests: Running 15 test(s).
 [ RUN      ] test_caps_safe_is_all_off
@@ -693,9 +705,13 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [==========] tests: 15 test(s) run.
 [  PASSED  ] 15 test(s).
 == run build/test_render_doc ==
-[==========] tests: Running 18 test(s).
+[==========] tests: Running 20 test(s).
 [ RUN      ] test_build_null_out
 [       OK ] test_build_null_out
+[ RUN      ] test_container_gated_by_css
+[       OK ] test_container_gated_by_css
+[ RUN      ] test_block_tag_total
+[       OK ] test_block_tag_total
 [ RUN      ] test_build_null_view_is_empty
 [       OK ] test_build_null_view_is_empty
 [ RUN      ] test_heading_paragraph_link
@@ -730,8 +746,8 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_input_label_total
 [ RUN      ] test_free_null_and_double
 [       OK ] test_free_null_and_double
-[==========] tests: 18 test(s) run.
-[  PASSED  ] 18 test(s).
+[==========] tests: 20 test(s) run.
+[  PASSED  ] 20 test(s).
 == run build/test_url ==
 [==========] tests: Running 14 test(s).
 [ RUN      ] test_is_https
@@ -938,8 +954,116 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_format_name
 [==========] tests: 17 test(s) run.
 [  PASSED  ] 17 test(s).
+== run build/test_box_style ==
+[==========] tests: Running 16 test(s).
+[ RUN      ] test_body_has_no_margin
+[       OK ] test_body_has_no_margin
+[ RUN      ] test_paragraph
+[       OK ] test_paragraph
+[ RUN      ] test_heading_ladder
+[       OK ] test_heading_ladder
+[ RUN      ] test_lists
+[       OK ] test_lists
+[ RUN      ] test_blockquote
+[       OK ] test_blockquote
+[ RUN      ] test_hr
+[       OK ] test_hr
+[ RUN      ] test_inline_and_inline_block
+[       OK ] test_inline_and_inline_block
+[ RUN      ] test_display_none_for_non_rendered
+[       OK ] test_display_none_for_non_rendered
+[ RUN      ] test_case_insensitive
+[       OK ] test_case_insensitive
+[ RUN      ] test_unknown_and_null_are_neutral_inline
+[       OK ] test_unknown_and_null_are_neutral_inline
+[ RUN      ] test_div_is_block
+[       OK ] test_div_is_block
+[ RUN      ] test_parse_display_keywords
+[       OK ] test_parse_display_keywords
+[ RUN      ] test_parse_display_inline_aliases
+[       OK ] test_parse_display_inline_aliases
+[ RUN      ] test_parse_display_case_and_trim
+[       OK ] test_parse_display_case_and_trim
+[ RUN      ] test_parse_display_errors
+[       OK ] test_parse_display_errors
+[ RUN      ] test_display_name
+[       OK ] test_display_name
+[==========] tests: 16 test(s) run.
+[  PASSED  ] 16 test(s).
+== run build/test_flex_layout ==
+[==========] tests: Running 19 test(s).
+[ RUN      ] test_grow_equal
+[       OK ] test_grow_equal
+[ RUN      ] test_grow_weighted
+[       OK ] test_grow_weighted
+[ RUN      ] test_shrink_equal
+[       OK ] test_shrink_equal
+[ RUN      ] test_shrink_with_min_clamp
+[       OK ] test_shrink_with_min_clamp
+[ RUN      ] test_gap_start
+[       OK ] test_gap_start
+[ RUN      ] test_justify_center
+[       OK ] test_justify_center
+[ RUN      ] test_justify_end
+[       OK ] test_justify_end
+[ RUN      ] test_justify_space_between
+[       OK ] test_justify_space_between
+[ RUN      ] test_justify_space_around
+[       OK ] test_justify_space_around
+[ RUN      ] test_justify_space_evenly
+[       OK ] test_justify_space_evenly
+[ RUN      ] test_space_between_single_item_is_start
+[       OK ] test_space_between_single_item_is_start
+[ RUN      ] test_negative_fields_clamped
+[       OK ] test_negative_fields_clamped
+[ RUN      ] test_flex_zero_items_is_noop
+[       OK ] test_flex_zero_items_is_noop
+[ RUN      ] test_flex_errors
+[       OK ] test_flex_errors
+[ RUN      ] test_grid_columns
+[       OK ] test_grid_columns
+[ RUN      ] test_grid_columns_too_narrow_clamps_to_zero
+[       OK ] test_grid_columns_too_narrow_clamps_to_zero
+[ RUN      ] test_grid_columns_edges
+[       OK ] test_grid_columns_edges
+[ RUN      ] test_grid_cell
+[       OK ] test_grid_cell
+[ RUN      ] test_justify_name
+[       OK ] test_justify_name
+[==========] tests: 19 test(s) run.
+[  PASSED  ] 19 test(s).
+== run build/test_box_tree ==
+[==========] tests: Running 13 test(s).
+[ RUN      ] test_null_root
+[       OK ] test_null_root
+[ RUN      ] test_leaf
+[       OK ] test_leaf
+[ RUN      ] test_leaf_with_padding
+[       OK ] test_leaf_with_padding
+[ RUN      ] test_block_stacking_with_collapse
+[       OK ] test_block_stacking_with_collapse
+[ RUN      ] test_flex_row_grow
+[       OK ] test_flex_row_grow
+[ RUN      ] test_flex_gap_and_justify_center
+[       OK ] test_flex_gap_and_justify_center
+[ RUN      ] test_grid
+[       OK ] test_grid
+[ RUN      ] test_nested_flex_in_block
+[       OK ] test_nested_flex_in_block
+[ RUN      ] test_display_none_skipped
+[       OK ] test_display_none_skipped
+[ RUN      ] test_grid_bad_columns
+[       OK ] test_grid_bad_columns
+[ RUN      ] test_flex_negative_gap
+[       OK ] test_flex_negative_gap
+[ RUN      ] test_children_cap
+[       OK ] test_children_cap
+[ RUN      ] test_depth_cap
+[       OK ] test_depth_cap
+[==========] tests: 13 test(s) run.
+[  PASSED  ] 13 test(s).
 make[1]: se sale del directorio '/home/grisun0/src_note/c/freedom-0.0.3'
-	rm -fr -- /tmp/dh-xdg-rundir-fZlNnoti
+	rm -fr -- /tmp/dh-xdg-rundir-BEPAUnRd
    create-stamp debian/debhelper-build-stamp
    dh_prep
 	rm -f -- debian/freedom.substvars
