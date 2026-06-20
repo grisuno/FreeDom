@@ -1,22 +1,27 @@
-<!DOCTYPE html>
-<html>
-    <head><title>FreeDom v0.0.3</title></head>
-    <body>
+<!DOCTYPE html>  
+<html>  
+    <head><title>FreeDom v0.0.3</title></head>  
+    <body style="color:#0a0a0a">  
+        <h1 style="color:#061414">FreeDom v0.0.3</h1>  
+        <hr>  
+          
+        <h2 style="color:#061414">Getting Started</h2>  
+        <p style="color:#0a0a0a">Click the URL bar, type an address, and press Enter or click Go.</p>  
+          
+        <h2 style="color:#061414">Allowed URLs</h2>  
+        <ul>  
+            <li style="color:#0a0a0a"><strong style="color:#061414">HTTPS:</strong> <code style="color:#0a3380">https://&lt;site&gt;</code> (TLS 1.3, PQ-hybrid KE, leaf RSA &gt;= 3072 / ECDSA)</li>  
+            <li style="color:#0a0a0a"><strong style="color:#061414">Local:</strong> <code style="color:#0a3380">/path/file.html</code> (local file)</li>  
+        </ul>  
+  
+        <h2 style="color:#061414">Features</h2>  
+        <p style="color:#0a0a0a">Pages render with <strong style="color:#061414">structure</strong> (headings, links, paragraphs) and you can click links to navigate.</p>  
+        <p style="color:#0a0a0a"><em style="color:#061414">Privacy by Default:</em> Remote images and author colors are off by default; the menu button at the top right toggles them (or <code style="color:#0a3380">Ctrl+I</code> for images). A page that uses images shows a tracking warning and a placeholder per image. <code style="color:#0a3380">Ctrl+L</code> focuses the URL bar.</p>  
+  
+        <h2 style="color:#061414">Security</h2>  
+        <p style="color:#700000"><strong style="color:#700000">Fail-Closed:</strong> Sites whose end-entity certificate uses RSA 2048 are rejected with status 5 (weak algorithm).</p>
         
-        <h1>FreeDom v0.0.3</h1>
-        <p>Click the URL bar, type an address, and press Enter or click Go.</p>
-        <p>Allowed URLs:</p>
-        <p>  - https://<site>   (TLS 1.3, PQ-hybrid KE, leaf RSA >= 3072 / ECDSA)</p>
-        <p>  - /path/file.html  (local file)</p>
-
-        <p>Pages render with structure (headings, links, paragraphs) and you can
-        click links to navigate. Remote images and author colors are off by
-        default (Privacy by Default); the menu button at the top right toggles
-        them (or <b>Ctrl+I</b> for images). A page that uses images shows a tracking
-        warning and a placeholder per image. <b>Ctrl+L</b> focuses the URL bar.</p>
-        <br />
-        <br />
-        </p>Sites whose end-entity certificate uses RSA 2048 are rejected with
-        status 5 (weak algorithm). This is fail-closed by design. </p>
-    </body>    
+        <hr>
+        <p style="color:#555555"><em>[ Isolated Session: Local Storage Ephemeral / Isolated PID ]</em></p>
+    </body>      
 </html>
