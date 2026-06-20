@@ -184,10 +184,12 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         }
         if (rc != 0) { rd_free(d); return RD_ERR_OOM; }
 
-        /* Author flex/grid container layout is presentation: carried only with
-         * caps.css, and only on text/link blocks (the flex content this engine
-         * groups). Without caps.css every block stays cont_id == -1 (plain flow). */
-        if (caps.css && (r->kind == PV_TEXT || r->kind == PV_LINK) && d->count > 0) {
+        /* Author flex/grid container layout is structure, not author styling: it
+         * reveals nothing to the network (no fetch, no fingerprint), so the box
+         * model and column layout apply by default, decoupled from caps.css (which
+         * still gates author *colors* above). Carried only on text/link blocks (the
+         * flex content this engine groups). */
+        if ((r->kind == PV_TEXT || r->kind == PV_LINK) && d->count > 0) {
             rd_block *lb = &d->blocks[d->count - 1];
             lb->cont_id = r->cont_id;
             lb->cont_display = r->cont_display;

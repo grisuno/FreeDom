@@ -84,7 +84,8 @@ typedef struct pv_run {
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
      * bx_display (flex/grid); the rest are the container's parsed params. Defaults:
-     * cont_id -1, the others 0. Honoured by render_doc only with caps.css. */
+     * cont_id -1, the others 0. Carried by render_doc regardless of caps.css
+     * (layout is structure; only author colors are gated). */
     int     cont_id;      /* container group id in document order, or -1 */
     int     cont_display; /* bx_display of the container (flex/grid), or 0 */
     int     cont_gap;     /* container gap in px (>= 0) */

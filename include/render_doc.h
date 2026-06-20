@@ -50,8 +50,9 @@ typedef struct rd_block {
     rdp_img_decision img_decision;
     int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */
     int              bg_rgb;         /* author background-color packed 0xRRGGBB, or -1; set only with caps.css */
-    /* Nearest author flex/grid container of this block (page_view), carried only
-     * with caps.css so the presentation layer can lay it out with box_tree/flex_layout.
+    /* Nearest author flex/grid container of this block (page_view), carried by
+     * default (layout is structure, not author styling, and leaks nothing to the
+     * network) so the presentation layer can lay it out with box_tree/flex_layout.
      * cont_id groups blocks of one container (-1 = none); the rest are its params. */
     int              cont_id;        /* container group id, or -1 */
     int              cont_display;   /* bx_display (flex/grid), or 0 */

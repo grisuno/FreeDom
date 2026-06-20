@@ -247,6 +247,29 @@ static void test_enforce_allow_classical_ke(void **state) {
                                        SF_POLICY_ALLOW_CLASSICAL_KE), SF_ERR_WEAK_ALGO);
 }
 
+/* The allowlist override: the user's sovereign per-host escape hatch for sites below
+ * Freedom's elevated standard. Tolerates TLS 1.2, a classical KE, and weak-but-valid
+ * leaf primitives; still authenticates the chain (non-NULL) and refuses below 1.2. */
+static void test_enforce_allowlisted_insecure(void **state) {
+    (void)state;
+    /* A TLS 1.2, classical-KE host with a fine cert (e.g. Hacker News) now passes... */
+    assert_int_equal(sf_enforce_policy("TLSv1.2", "x25519", &OK_CLASSICAL,
+                                       SF_POLICY_ALLOWLISTED_INSECURE), SF_OK);
+    /* ...as does plain TLS 1.3, and a weak/SHA-1 leaf (override = permissive chain). */
+    assert_int_equal(sf_enforce_policy("TLSv1.3", "x25519", &OK_CLASSICAL,
+                                       SF_POLICY_ALLOWLISTED_INSECURE), SF_OK);
+    assert_int_equal(sf_enforce_policy("TLSv1.2", "x25519", &WEAK_SHA1,
+                                       SF_POLICY_ALLOWLISTED_INSECURE), SF_OK);
+    /* But authenticity is never waived: a non-inspectable chain still fails closed,
+     * and anything below TLS 1.2 is still refused. */
+    assert_int_equal(sf_enforce_policy("TLSv1.2", "x25519", NULL,
+                                       SF_POLICY_ALLOWLISTED_INSECURE), SF_ERR_INTERNAL);
+    assert_int_equal(sf_enforce_policy("TLSv1.1", "x25519", &OK_CLASSICAL,
+                                       SF_POLICY_ALLOWLISTED_INSECURE), SF_ERR_TLS_VERSION);
+    assert_int_equal(sf_enforce_policy(NULL, "x25519", &OK_CLASSICAL,
+                                       SF_POLICY_ALLOWLISTED_INSECURE), SF_ERR_TLS_VERSION);
+}
+
 /* --- sf_is_redirect_code --- */
 
 static void test_redirect_code_recognizes_3xx(void **state) {
@@ -470,6 +493,7 @@ int main(void) {
         cmocka_unit_test(test_enforce_fails_closed_on_null_chain),
         cmocka_unit_test(test_enforce_strict_requires_pq_chain),
         cmocka_unit_test(test_enforce_allow_classical_ke),
+        cmocka_unit_test(test_enforce_allowlisted_insecure),
         cmocka_unit_test(test_redirect_code_recognizes_3xx),
         cmocka_unit_test(test_redirect_code_rejects_others),
         cmocka_unit_test(test_location_parses_value),

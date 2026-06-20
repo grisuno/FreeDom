@@ -33,6 +33,15 @@ Menos superficie de ataque, una dependencia menos que auditar. El transporte es
 | `SF_POLICY_STRICT_PQ` | **Exige** grupo PQ-híbrido | **Exige además** una firma PQ (`ML-DSA`/`SLH-DSA`) en la cadena verificada |
 | `SF_POLICY_PERMISSIVE` | **Exige** grupo PQ-híbrido | Permite primitivas débiles (RSA 2048, SHA-1) como **override explícito del usuario** |
 | `SF_POLICY_ALLOW_CLASSICAL_KE` | **Acepta** KE clásico (no-PQ) | Validación PKI clásica completa (igual que el defecto; **no** se relaja el cert) |
+| `SF_POLICY_ALLOWLISTED_INSECURE` | **Acepta** KE clásico; **mínimo TLS 1.2** | Permite primitivas débiles-pero-válidas (RSA 2048, SHA-1); la cadena se **sigue autenticando** (VERIFYPEER) |
+
+`SF_POLICY_ALLOWLISTED_INSECURE` es el **override de soberanía por host**: el usuario pone un host en
+`allow.conf` y el orquestador, si el intento estricto falla, reintenta con esta política. Baja el piso
+de TLS a **1.2** (1.3 sigue siendo el techo, así que se prefiere), acepta KE clásico y certs débiles
+pero **válidos**. Lo que **no** se relaja es la autenticidad: `CURLOPT_SSL_VERIFYPEER` sigue activo, así
+que se llega al sitio real sobre cripto vieja, nunca a un impostor. Por debajo de TLS 1.2 se rechaza
+(`SF_ERR_TLS_VERSION`). El orquestador **debe** avisar (toast). Es el caso de sitios solo-TLS-1.2 como
+Hacker News: secure by default, pero el usuario es soberano sobre sus propios hosts (no es dictadura).
 
 `SF_POLICY_ALLOW_CLASSICAL_KE` es el **fallback de navegabilidad**: cuando un host no puede negociar
 un KE híbrido PQ, el defecto devuelve `SF_ERR_KEM_NOT_PQ` (status 4) y, en vez de detener la

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head><title>Freedom — flex / grid layout demo</title></head>
+<body>
+<h1>Box model, flex and grid</h1>
+<p>This page exercises the structured layout engine: per-tag user-agent margins
+(box_style), a flex row, and a grid. Layout is structure, so it applies by default
+&mdash; you do NOT need to enable author colors (CSS) for the columns to show. Only
+author <em>colors</em> are gated behind the options menu.</p>
+
+<h2>A flex row (three columns)</h2>
+<div style="display:flex; gap:24px; justify-content:space-between">
+  <p>First column. Each direct block becomes one flex item, sized by the solver and
+  placed side by side instead of stacking vertically.</p>
+  <p>Second column. The gap between items and the justify-content distribution come
+  straight from the inline style on the container.</p>
+  <p>Third column. Wrapping happens inside each column at its resolved width.</p>
+</div>
+
+<h2>A grid (two equal columns)</h2>
+<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px">
+  <p>Grid cell one. Two equal tracks (1fr each), filled row by row.</p>
+  <p>Grid cell two. The second track on the first row.</p>
+  <p>Grid cell three. Wraps to the next row, first track.</p>
+  <p>Grid cell four. Second track, second row.</p>
+</div>
+
+<h2>Heading hierarchy and paragraph spacing</h2>
+<h3>An h3 sits closer than an h2</h3>
+<p>Paragraphs get their user-agent top/bottom margin (1em), and adjacent margins
+collapse, so the vertical rhythm matches a real browser's defaults.</p>
+<h4>An h4 is tighter still</h4>
+<p>If the columns above render side by side and the headings step down in size and
+spacing, box_style + flex_layout are wired into the painter.</p>
+</body>
+</html>

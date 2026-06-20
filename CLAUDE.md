@@ -91,13 +91,21 @@ funciones puras sobre el estado real.
 ### Política criptográfica concreta
 - **KEM por defecto:** `X25519MLKEM768` (híbrido).
 - **Firmas (cuando estén en la cadena):** `ML-DSA-65`; alternativa basada en hash `SLH-DSA`.
-- **Rechazos en toda política:** TLS < 1.3, KE no híbrido, **leaf (end-entity) con RSA < 3072**,
+- **Rechazos por defecto:** TLS < 1.3, KE no híbrido, **leaf (end-entity) con RSA < 3072**,
   y cualquier cert de la cadena firmado con SHA-1. El umbral RSA aplica solo al cert del sitio,
   no a los intermedios de CA (RSA 2048 universal en la Web PKI pública de 2026); SHA-1 es fatal
   en cualquier posición. Ver `spec/secure_fetch.md` §3.
+- **Soberanía del usuario (la allowlist no es dictadura):** un host **explícitamente** en
+  `allow.conf` se navega bajo `SF_POLICY_ALLOWLISTED_INSECURE` si el intento estricto falla:
+  acepta **TLS 1.2** (mínimo; 1.3 sigue preferido), KE clásico y cert débil-pero-válido. La
+  **autenticidad de la cadena se mantiene** (VERIFYPEER sigue activo): se relaja la fuerza
+  criptográfica, nunca la autenticidad — llegás al sitio real sobre cripto vieja, no a un
+  impostor. Por debajo de TLS 1.2 sigue rechazado. Es opt-in, por host, con aviso (toast).
 - **Política por niveles** (ver `spec/secure_fetch.md`): `SF_POLICY_PQ_HYBRID_KE` (por defecto;
   exige KE híbrido, acepta certs clásicos válidos porque la Web PKI pública aún no tiene certs
-  PQ en 2026) y `SF_POLICY_STRICT_PQ` (opt-in; exige además firma PQ en la cadena).
+  PQ en 2026), `SF_POLICY_STRICT_PQ` (opt-in; exige además firma PQ en la cadena),
+  `SF_POLICY_ALLOW_CLASSICAL_KE` (fallback de navegabilidad PQ) y `SF_POLICY_ALLOWLISTED_INSECURE`
+  (override por host de la allowlist; ver arriba).
 - **Estado local (Zero Knowledge):** caché/marcadores/credenciales cifrados con AES-256-GCM o
   ChaCha20-Poly1305; clave derivada con **Argon2id** y sal única por dispositivo.
 
@@ -156,6 +164,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Red/TLS | `secure_fetch` (`sf_`) | TLS 1.3 mínimo, KE híbrido PQ preferido, validación de cadena; cada redirección re-aplica TODA la política (Zero Trust). |
 | URL/enlaces | `url` (`url_`), `link_nav` (`ln_`) | RFC 3986; "qué es una https absoluta válida" y "qué hace un clic" en un solo sitio; downgrade a http / esquemas ajenos no representables. |
 | Política de red | `request_policy` (`rp_`), `render_policy` (`rdp_`) | Bloqueo de terceros por defecto, https-only, gate puro de imágenes/CSS/JS (todo opt-in). |
+| Filtro de hosts | `hostblock` (`hb_`) | Lista negra + lista blanca en formato `/etc/hosts` (archivos `.conf`); la blanca gana y cubre subdominios; consultado antes de abrir el socket. Puro, falla **abierto** (adblock, no frontera de seguridad). |
 | Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice consultable de solo lectura. |
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla/readback normalizados. |
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock; worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
@@ -168,13 +177,27 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 
 **Decisiones de doctrina vigentes** (no evidentes en el código; no re-litigar):
 - **Navegabilidad sobre PQ estricto:** un host que no puede KE híbrido PQ **avisa** (toast
-  "classical TLS 1.3"), no bloquea (`SF_POLICY_ALLOW_CLASSICAL_KE`). TLS<1.3, cadena inválida y
-  SHA-1 siguen fatales. Ver `[[freedom-navigability-over-strict-pq]]`.
+  "classical TLS 1.3"), no bloquea (`SF_POLICY_ALLOW_CLASSICAL_KE`). Por defecto, TLS<1.3 / cadena
+  inválida / SHA-1 siguen fatales — **salvo** que el host esté en la allowlist (override de
+  soberanía, abajo). Ver `[[freedom-navigability-over-strict-pq]]`.
+- **La allowlist es el override de soberanía (no dictadura):** un host en `allow.conf` se navega
+  bajo `SF_POLICY_ALLOWLISTED_INSECURE` (TLS 1.2, KE clásico, cert débil-pero-válido) si el
+  estricto falla, con aviso; la autenticidad de la cadena se mantiene (VERIFYPEER). Es el caso
+  de Hacker News (`news.ycombinator.com`, solo TLS 1.2). `hb_is_allowlisted` distingue "en la
+  blanca explícita" de "permitido por defecto". Ver `[[freedom-navigability-over-strict-pq]]`.
 - **Umbral RSA<3072 solo al leaf** (los intermedios RSA-2048 de la Web PKI son válidos). Un
   sitio con leaf RSA-2048 se sortea con la excepción por host **Ctrl+Shift+E** (PERMISSIVE, solo
   sesión).
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú.
   Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie mínima).
+- **Layout != estilo de autor:** la **maquetación** (box model UA, flex/grid, márgenes/columnas)
+  se aplica **siempre**, desacoplada de `caps.css`; es estructura, no abre sockets ni filtra a la
+  red. Solo los **colores** de autor (`fg_rgb`/`bg_rgb`) siguen gateados por `caps.css`. El gate
+  vive en `render_doc` (`rd_build`). Antes flex/grid estaba gateado y no se veía nunca.
+- **Filtro de hosts opcional + override:** `block.conf`/`allow.conf` (formato `/etc/hosts`) se leen
+  de `$FREEDOM_HOSTS_DIR`, `~/.config/freedom` y `./config`; la GUI consulta `hb_check` antes del
+  fetch (la blanca gana y cubre subdominios). Falla **abierto**: sin listas no bloquea nada. La
+  blanca tiene **doble rol**: des-bloquea del adblock **y** habilita el override TLS por host.
 - **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
   contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
 
@@ -233,12 +256,13 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   - [x] **Construcción del árbol desde el DOM + pintado** — pipeline puro (TDD): `page_view` extrae
     el contenedor flex/grid de autor más cercano por run (`cont_id`/`display`/`gap`/`justify`/`cols`
     vía `display`/`gap`/`justify-content`/`grid-template-columns`), `tab` lo serializa por IPC,
-    `render_doc` lo transporta **gateado por `caps.css`** (apagado → flujo plano, cero regresión).
-    La GUI agrupa los bloques de un contenedor, mide cada ítem y los dispone en columnas con
-    `bt_layout`/`flex_layout` (flex=fila de N columnas, grid=`cols` con wrap), traduciendo las filas
-    a su columna (`x_off`). Básico: cada bloque = un ítem; ítems multi-bloque y anidamiento profundo
-    quedan fuera. Tests: page_view 30, render_doc 20, tab 21 verde + ASan limpio. La GUI **sin
-    verificar visualmente** (requiere Wayland).
+    `render_doc` lo transporta **siempre** (la maquetación es estructura, **desacoplada de
+    `caps.css`**; solo los colores siguen gateados). La GUI agrupa los bloques de un contenedor,
+    mide cada ítem y los dispone en columnas con `bt_layout`/`flex_layout` (flex=fila de N columnas,
+    grid=`cols` con wrap), traduciendo las filas a su columna (`x_off`). Básico: cada bloque = un
+    ítem; ítems multi-bloque y anidamiento profundo quedan fuera. Tests: page_view 30, render_doc 20,
+    tab 21 verde + ASan limpio. Demo: `examples/flex.html`. La GUI **sin verificar visualmente**
+    (requiere Wayland).
   - [x] **Reading mode (sepia)** — tercera paleta `ui_theme_sepia` en el menú (papel cálido + tinta
     marrón), con `theme_mode` (light/dark/sepia) y un toggle **"Force theme colors"** que ignora los
     colores de autor (legibilidad > fidelidad). Solo `gui/browser_ui.c`; **sin verificar visualmente**.

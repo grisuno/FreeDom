@@ -76,9 +76,14 @@ const char    *rd_image_label(rdp_img_decision d); /* etiqueta del placeholder *
     imagen).
 - Si la vista declara imágenes y `!caps.images`, antepone un `RD_NOTICE` con
   `rdp_images_warning()`. `has_images` refleja si hubo alguna imagen.
-- **Color del autor (`fg_rgb`):** se propaga el `pv_run.fg_rgb` a `RD_HEADING`/`RD_PARAGRAPH`/
-  `RD_LINK` **solo si `caps.css`** (Secure/Privacy by Default: apagado); en otro caso queda en -1 y
-  la presentación usa el color del tema. Así el *gate* de CSS vive en una función pura y testeable.
+- **Color del autor (`fg_rgb`/`bg_rgb`):** se propaga el `pv_run.fg_rgb`/`bg_rgb` a
+  `RD_HEADING`/`RD_PARAGRAPH`/`RD_LINK` **solo si `caps.css`** (Secure/Privacy by Default: apagado);
+  en otro caso queda en -1 y la presentación usa el color del tema. Así el *gate* de CSS vive en una
+  función pura y testeable.
+- **Contenedor flex/grid del autor (`cont_id`/`cont_display`/`cont_gap`/`cont_justify`/`cont_cols`):**
+  se transporta **siempre**, con o sin `caps.css`. La maquetación (cajas, columnas, márgenes) es
+  estructura, no estilo del autor: no abre sockets ni filtra nada a la red, así que el camino seguro
+  por defecto la incluye. Solo los **colores** del autor siguen gateados por `caps.css`.
 - `top_level_url` puede ser `NULL` (p. ej. un fichero local): las decisiones de imagen entonces
   **fallan cerrado** (`RDP_IMG_BLOCK_INVALID`) salvo que la capacidad esté apagada
   (`RDP_IMG_BLOCK_DISABLED`, que tiene precedencia).

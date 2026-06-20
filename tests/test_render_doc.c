@@ -347,21 +347,26 @@ static void test_input_label_total(void **state) {
     assert_string_equal(rd_kind_name(RD_INPUT), "input");
 }
 
-/* The author flex/grid container annotation is presentation gated by caps.css:
- * dropped to cont_id -1 unless author CSS is enabled, then carried with its params. */
-static void test_container_gated_by_css(void **state) {
+/* The author flex/grid container annotation is structure, not styling: it is
+ * carried regardless of caps.css (layout applies by default), with its params. */
+static void test_container_carried_by_default(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "item", NULL), PV_OK);
     pv_set_container(v, 0, BX_DISPLAY_FLEX, 12, FX_JUSTIFY_CENTER, 0);
 
+    /* CSS off: the container layout is still carried (decoupled from author CSS). */
     rd_doc *d = NULL;
     assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
     const rd_block *p = first_kind(d, RD_PARAGRAPH);
     assert_non_null(p);
-    assert_int_equal(p->cont_id, -1);  /* CSS off: no container layout */
+    assert_int_equal(p->cont_id, 0);
+    assert_int_equal(p->cont_display, BX_DISPLAY_FLEX);
+    assert_int_equal(p->cont_gap, 12);
+    assert_int_equal(p->cont_justify, FX_JUSTIFY_CENTER);
     rd_free(d);
 
+    /* CSS on: identical container layout (only author colors differ, tested above). */
     rdp_caps caps = rdp_caps_safe();
     caps.css = true;
     assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
@@ -412,7 +417,7 @@ static void test_block_tag_total(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_out),
-        cmocka_unit_test(test_container_gated_by_css),
+        cmocka_unit_test(test_container_carried_by_default),
         cmocka_unit_test(test_block_tag_total),
         cmocka_unit_test(test_build_null_view_is_empty),
         cmocka_unit_test(test_heading_paragraph_link),

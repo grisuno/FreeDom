@@ -15,6 +15,7 @@
 #include "box_style.h"
 #include "box_tree.h"
 #include "css_color.h"
+#include "hostblock.h"
 #include "image_decode.h"
 #include "link_nav.h"
 #include "render_doc.h"
@@ -424,6 +425,7 @@ typedef struct browser_window {
     ui_hot    hot;       /* toolbar button under the pointer, or UI_HOT_NONE */
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
+    hb_set   *hosts;    /* /etc/hosts-format blocklist + allowlist; consulted pre-fetch */
     double    scroll;   /* content scroll offset in pixels */
     double    content_total_h;  /* full height of the laid-out content, cached each paint */
     int       maximized;        /* toplevel currently maximized (from xdg states) */
@@ -527,6 +529,50 @@ static char *read_file(const char *path, size_t *out_len) {
     buf[n] = '\0';
     if (out_len != NULL) *out_len = n;
     return buf;
+}
+
+/* Loads one /etc/hosts-format .conf file (if present and readable) into the given
+ * list. A missing file is not an error: the filter fails open, never over-blocking. */
+static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list) {
+    char path[1024];
+    int n = snprintf(path, sizeof path, "%s/%s", dir, name);
+    if (n <= 0 || (size_t)n >= sizeof path) return;
+    size_t len = 0;
+    char *txt = read_file(path, &len);
+    if (txt == NULL) return;
+    hb_load(s, txt, list);   /* HB_ERR_OOM only drops extra entries; not fatal here */
+    free(txt);
+}
+
+/* Builds the host filter from the user's .conf lists. Privacy by Default: block.conf
+ * (a /etc/hosts-format blocklist) blocks trackers/ads and their subdomains; allow.conf
+ * re-enables specific (sub)domains and wins over the blocklist. Directories are tried
+ * in order -- $FREEDOM_HOSTS_DIR, then ~/.config/freedom, then ./config (repo-local) --
+ * and each that exists is loaded cumulatively. Returns NULL only on OOM (hb_check
+ * then treats every host as allowed). */
+static hb_set *build_host_filter(void) {
+    hb_set *s = hb_new();
+    if (s == NULL) return NULL;
+
+    const char *env = getenv("FREEDOM_HOSTS_DIR");
+    if (env != NULL && env[0] != '\0') {
+        load_host_file(s, env, "block.conf", HB_LIST_BLOCK);
+        load_host_file(s, env, "allow.conf", HB_LIST_ALLOW);
+    }
+
+    const char *home = getenv("HOME");
+    if (home != NULL && home[0] != '\0') {
+        char dir[1024];
+        int n = snprintf(dir, sizeof dir, "%s/.config/freedom", home);
+        if (n > 0 && (size_t)n < sizeof dir) {
+            load_host_file(s, dir, "block.conf", HB_LIST_BLOCK);
+            load_host_file(s, dir, "allow.conf", HB_LIST_ALLOW);
+        }
+    }
+
+    load_host_file(s, "config", "block.conf", HB_LIST_BLOCK);
+    load_host_file(s, "config", "allow.conf", HB_LIST_ALLOW);
+    return s;
 }
 
 static int is_https_url(const char *s) {
@@ -676,25 +722,45 @@ static cairo_surface_t *surface_from_pixels(const tab_image *img) {
     return s;
 }
 
-/* Fetches url (following redirects) under cfg's policy; if the only obstacle is
- * that the host cannot do a PQ-hybrid key exchange (SF_ERR_KEM_NOT_PQ), retries
- * once with the classical-KE fallback — TLS 1.3 and full certificate validation
- * are kept; only the PQ-ness of the key exchange is relaxed — so a non-PQ host does
- * not block navigation. *downgraded is set to 1 iff that fallback produced the
- * response (the caller warns the user). cfg->policy is restored before returning.
- * Genuinely insecure failures (TLS < 1.3, invalid/weak certificate) are never
- * retried; they stay fatal (fail closed). */
+/* Downgrade reasons reported by fetch_follow_navigable via *downgraded. */
+enum { DOWNGRADE_NONE = 0, DOWNGRADE_CLASSICAL_KE = 1, DOWNGRADE_ALLOWLISTED = 2 };
+
+/* Fetches url (following redirects) under cfg's policy, applying two navigability
+ * fallbacks in order of decreasing security:
+ *   1) If the only obstacle is a non-PQ key exchange (SF_ERR_KEM_NOT_PQ), retry with
+ *      the classical-KE fallback (TLS 1.3 + full cert validation kept). Applies to
+ *      every host; *downgraded = DOWNGRADE_CLASSICAL_KE on success.
+ *   2) If the host is on the user's allowlist (allowlisted != 0) and still fails,
+ *      retry with the allowlist override: TLS 1.2, classical KE, weak-but-valid cert.
+ *      The chain is still authenticated, so this reaches the real site over older
+ *      crypto, not an impostor. *downgraded = DOWNGRADE_ALLOWLISTED on success. This
+ *      is the user's sovereign escape hatch -- secure by default, not a dictatorship.
+ * A non-allowlisted host that fails Freedom's standard stays fatal (fail closed).
+ * cfg->policy is restored before returning. */
 static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
-                                        sf_response *out, int *downgraded) {
-    *downgraded = 0;
+                                        sf_response *out, int *downgraded,
+                                        int allowlisted) {
+    *downgraded = DOWNGRADE_NONE;
     sf_status s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-    if (s != SF_ERR_KEM_NOT_PQ) return s;
-    sf_response_free(out);
-    sf_policy saved = cfg->policy;
-    cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
-    s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-    cfg->policy = saved;
-    if (s == SF_OK) *downgraded = 1;
+    if (s == SF_OK) return s;
+
+    if (s == SF_ERR_KEM_NOT_PQ) {
+        sf_response_free(out);
+        sf_policy saved = cfg->policy;
+        cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
+        s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
+        cfg->policy = saved;
+        if (s == SF_OK) { *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
+    }
+
+    if (allowlisted) {
+        sf_response_free(out);
+        sf_policy saved = cfg->policy;
+        cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
+        s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
+        cfg->policy = saved;
+        if (s == SF_OK) { *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
+    }
     return s;
 }
 
@@ -739,7 +805,10 @@ static void load_images(browser_window *w, tab *t) {
         sf_response resp;
         memset(&resp, 0, sizeof resp);
         int img_downgraded = 0; /* page-level toast already warns; per-image is moot */
-        if (fetch_follow_navigable(abs, &cfg, &resp, &img_downgraded) != SF_OK) {
+        char ihost[256];
+        int img_allow = host_from_url(abs, ihost, sizeof ihost)
+                        && hb_is_allowlisted(w->hosts, ihost);
+        if (fetch_follow_navigable(abs, &cfg, &resp, &img_downgraded, img_allow) != SF_OK) {
             sf_response_free(&resp);
             continue;
         }
@@ -829,9 +898,34 @@ static void do_load(browser_window *w, const char *url) {
         sf_config cfg = sf_config_default();
         cfg.user_agent = tf_text(&w->ua_field); /* "" => SF_DEFAULT_USER_AGENT */
         char host[256];
-        if (host_from_url(url, host, sizeof host) && browser_is_exception(&w->bs, host)) {
+        int have_host = host_from_url(url, host, sizeof host);
+
+        /* Privacy by Default: consult the host filter (blocklist/allowlist) before
+         * opening any socket. The allowlist wins, so a re-enabled subdomain of an
+         * otherwise blocked domain still loads. */
+        if (have_host && hb_check(w->hosts, host) == HB_BLOCK) {
+            char msg[640];
+            snprintf(msg, sizeof msg,
+                "Blocked '%s' by the host filter.\n\n"
+                "This domain (or a parent of it) is on your blocklist (block.conf).\n"
+                "To see a specific subdomain, add it to allow.conf -- the allowlist\n"
+                "wins over the blocklist and covers its subdomains -- then reload.\n\n"
+                "Lists are read from $FREEDOM_HOSTS_DIR, ~/.config/freedom, or ./config\n"
+                "in /etc/hosts format (one domain per line, or '0.0.0.0 domain').",
+                host);
+            set_cache(w, NULL, 0, NULL);
+            browser_set_page(&w->bs, NULL, msg, 1);
+            return;
+        }
+
+        if (have_host && browser_is_exception(&w->bs, host)) {
             cfg.policy = SF_POLICY_PERMISSIVE;
         }
+
+        /* The user's sovereign override: a host explicitly on allow.conf may be
+         * navigated below Freedom's standard (TLS 1.2, classical KE, weak cert) if
+         * the strict attempt fails. Secure by default, but not a dictatorship. */
+        int allowlisted = have_host && hb_is_allowlisted(w->hosts, host);
 
         sf_response resp;
         memset(&resp, 0, sizeof resp);
@@ -840,28 +934,41 @@ static void do_load(browser_window *w, const char *url) {
          * do a PQ-hybrid key exchange falls back to classical TLS 1.3 (cert checks
          * kept) so navigation is not blocked; the user is warned via a toast below. */
         show_busy(w);
-        sf_status ss = fetch_follow_navigable(url, &cfg, &resp, &downgraded);
+        sf_status ss = fetch_follow_navigable(url, &cfg, &resp, &downgraded, allowlisted);
         w->loading = 0;
         if (ss != SF_OK) {
-            char msg[1024];
+            char msg[1536];
             const char *reason = "";
             switch (ss) {
                 case SF_ERR_TLS_VERSION:  reason = "TLS version below 1.3"; break;
                 case SF_ERR_KEM_NOT_PQ:   reason = "key exchange is not PQ-hybrid"; break;
                 case SF_ERR_WEAK_ALGO:    reason = "weak certificate/key algorithm"; break;
-                case SF_ERR_CERT_INVALID: reason = "certificate validation failed"; break;
+                case SF_ERR_CERT_INVALID: reason = "TLS handshake/cert validation failed (site may not support TLS 1.3)"; break;
                 case SF_ERR_CERT_NOT_PQ:  reason = "strict PQ signature missing"; break;
                 case SF_ERR_NETWORK:      reason = "network error"; break;
                 case SF_ERR_TOO_MANY_REDIRECTS: reason = "too many redirects"; break;
                 default:                  reason = "fetch error"; break;
             }
-            char bypass[512];
+            char bypass[768];
             bypass[0] = '\0';
-            if (ss == SF_ERR_WEAK_ALGO || ss == SF_ERR_CERT_INVALID || ss == SF_ERR_CERT_NOT_PQ) {
+            if (allowlisted) {
+                /* Already retried with the allowlist override; a remaining failure is
+                 * genuine (untrusted/expired cert, network, or TLS below 1.2). */
+                snprintf(bypass, sizeof bypass,
+                    "\n\n'%s' is on your allowlist, so Freedom already retried it accepting\n"
+                    "TLS 1.2 and weak-but-valid crypto. This failure is real: the certificate\n"
+                    "is untrusted/expired, the network failed, or TLS is below 1.2.", host);
+            } else if (ss == SF_ERR_TLS_VERSION || ss == SF_ERR_WEAK_ALGO
+                       || ss == SF_ERR_CERT_INVALID || ss == SF_ERR_CERT_NOT_PQ
+                       || ss == SF_ERR_KEM_NOT_PQ) {
                 if (host_from_url(url, host, sizeof host)) {
                     snprintf(bypass, sizeof bypass,
-                        "\n\nPress Ctrl+Shift+E to add '%s' to the exception list and reload insecurely.\n"
-                        "This is stored for the current session only.", host);
+                        "\n\nThis site is below Freedom's security standard. To navigate it\n"
+                        "anyway, add '%s' to allow.conf -- your sovereign per-host override:\n"
+                        "TLS 1.2, a classical key exchange, and weak-but-valid certificates\n"
+                        "are then accepted for this host (with a warning). The chain is still\n"
+                        "authenticated, so you reach the real site, not an impostor.\n"
+                        "Ctrl+Shift+E relaxes only a weak certificate for this session.", host);
                 }
             }
             snprintf(msg, sizeof msg,
@@ -897,9 +1004,14 @@ static void do_load(browser_window *w, const char *url) {
     set_cache(w, html, html_len, is_https_url(url) ? url : NULL);
     render_current(w);
 
-    /* Tell the user when the connection had to drop to classical TLS 1.3 because the
-     * host is not post-quantum. Navigation proceeds; the warning is non-blocking. */
-    if (downgraded) {
+    /* Tell the user when a security downgrade was needed to load the page. Navigation
+     * proceeds; the warning is non-blocking. The allowlist override is the stronger
+     * downgrade (possibly TLS 1.2 / weak cert), so it gets the louder message. */
+    if (downgraded == DOWNGRADE_ALLOWLISTED) {
+        browser_set_status(&w->bs,
+            "Warning: allowlisted host loaded below Freedom's standard "
+            "(possibly TLS 1.2 / weak crypto).", now_ms());
+    } else if (downgraded == DOWNGRADE_CLASSICAL_KE) {
         browser_set_status(&w->bs,
             "Warning: connection is not post-quantum (classical TLS 1.3).", now_ms());
     }
@@ -1315,8 +1427,9 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
  * container into equal columns, then appends the positioned rows to L and advances
  * s->cur_top. Each block is one item (basic: items are not grouped). Column geometry
  * and row packing come from box_tree/flex_layout (already tested); this only flows
- * the text and translates the rows. Visual-only, gated upstream by caps.css. A run
- * that falls outside the engine's range degrades to plain vertical flow. */
+ * the text and translates the rows. Visual-only structure, applied by default
+ * (decoupled from caps.css, which gates only author colors). A run that falls
+ * outside the engine's range degrades to plain vertical flow. */
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th, double content_w,
                              const rd_doc *doc, size_t start, size_t end) {
@@ -1401,8 +1514,9 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         /* Hidden controls are never painted (their value still submits). */
         if (b->kind == RD_INPUT && b->input_type == PV_IN_HIDDEN) continue;
 
-        /* A maximal run of blocks sharing one author flex/grid container (set only
-         * with caps.css) is laid out in columns and then skipped. */
+        /* A maximal run of blocks sharing one author flex/grid container (carried
+         * by default; layout is structure, not gated by caps.css) is laid out in
+         * columns and then skipped. */
         if (b->cont_id >= 0 &&
             (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID)) {
             size_t j = i + 1;
@@ -2942,6 +3056,10 @@ ui_status ui_run_browser(const char *start_url) {
 
     wl_surface_commit(w.surface);
 
+    /* Host filter (blocklist + allowlist) ready before the first fetch. Placed after
+     * the fallible Wayland setup so its error returns above never leak it. */
+    w.hosts = build_host_filter();
+
     /* Initial page. Provide instructions because the strict TLS policy means
        many public sites will be rejected. */
     if (start_url != NULL) {
@@ -3005,6 +3123,7 @@ ui_status ui_run_browser(const char *start_url) {
     xkb_context_unref(w.xkb_ctx);
 
     clear_doc(&w);
+    hb_free(w.hosts);
     free(w.cur_html);
     free(w.cur_top);
     browser_free(&w.bs);

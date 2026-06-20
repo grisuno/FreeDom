@@ -51,8 +51,16 @@ hb_set     *hb_new(void);
 void        hb_free(hb_set *s);
 hb_status   hb_load(hb_set *s, const char *text, hb_list list);
 hb_decision hb_check(const hb_set *s, const char *host);
+int         hb_is_allowlisted(const hb_set *s, const char *host);
 size_t      hb_count(const hb_set *s, hb_list list);
 ```
+
+> **Doble rol de la lista blanca.** Además de des-bloquear del adblock, una entrada en la blanca es
+> el **override de soberanía** del usuario: el orquestador la usa (vía `hb_is_allowlisted`) para
+> habilitar la navegación de un host por debajo del estándar de Freedom (p. ej. TLS 1.2). Secure by
+> default, pero el usuario manda sobre sus propios hosts — no es una dictadura. La relajación TLS
+> vive en `[[secure_fetch]]` (`SF_POLICY_ALLOWLISTED_INSECURE`); aquí solo se decide "¿está en la
+> blanca explícita?".
 
 ### `hb_new` / `hb_free`
 - `hb_new` reserva un conjunto vacío (NULL si OOM). `hb_free` es idempotente y seguro sobre NULL.
@@ -72,6 +80,12 @@ size_t      hb_count(const hb_set *s, hb_list list);
   3. Si no → `HB_ALLOW`.
   Así `example.com` en la negra bloquea `example.com` y `ads.example.com`; `cdn.example.com` en la
   blanca permite `cdn.example.com` y `x.cdn.example.com` aunque `example.com` esté en la negra.
+
+### `hb_is_allowlisted`
+- `1` si algún sufijo de dominio del host está **explícitamente** en la lista blanca (cubre
+  subdominios), si no `0`. Distinto de `hb_check`: reporta una entrada explícita de la blanca, no el
+  "permitido porque nada lo bloquea". El orquestador lo usa como override por host (relajar TLS).
+- `s`/`host` NULL, vacío o de más de 253 chars → `0`. Misma normalización que `hb_check`.
 
 ### `hb_count`
 - Número de dominios únicos en la lista indicada (para tests/estadística).

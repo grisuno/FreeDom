@@ -39,10 +39,18 @@ typedef enum sf_policy {
     SF_POLICY_PQ_HYBRID_KE = 0, /* default: require PQ-hybrid KE; allow classical certs */
     SF_POLICY_STRICT_PQ,        /* additionally require a PQ signature in the chain */
     SF_POLICY_PERMISSIVE,       /* keep TLS 1.3 + PQ-hybrid KE; allow weak certs on explicit user override */
-    SF_POLICY_ALLOW_CLASSICAL_KE /* navigability fallback: keep TLS 1.3 + full cert validation, but allow a
+    SF_POLICY_ALLOW_CLASSICAL_KE, /* navigability fallback: keep TLS 1.3 + full cert validation, but allow a
                                   * classical (non-PQ) key exchange so a non-PQ host does not block
                                   * navigation. The caller MUST surface the downgrade to the user (e.g. a
                                   * toast). Only the PQ-ness of the KE is relaxed; nothing else. */
+    SF_POLICY_ALLOWLISTED_INSECURE /* explicit per-host user override (the allowlist): navigate a site below
+                                  * Freedom's elevated standard. Accepts TLS 1.2 (min; 1.3 still preferred),
+                                  * a classical KE, and weak-but-valid leaf primitives (RSA < 3072, SHA-1).
+                                  * The certificate chain is STILL authenticated (transport VERIFYPEER stays
+                                  * on): this relaxes crypto strength, never authenticity -- you reach the
+                                  * real site over older crypto, not an impostor. Below TLS 1.2 is refused.
+                                  * The caller MUST warn the user. This is the "not a dictatorship" escape
+                                  * hatch: secure by default, but the user is sovereign over their own hosts. */
 } sf_policy;
 
 /* Minimal view of the verified certificate chain, used by sf_check_chain_policy.

@@ -104,6 +104,19 @@ sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy) {
 
 sf_status sf_enforce_policy(const char *tls_version, const char *group,
                             const sf_chain_info *chain, sf_policy policy) {
+    if (policy == SF_POLICY_ALLOWLISTED_INSECURE) {
+        /* Explicit per-host user override (the allowlist). Tolerate TLS 1.2 (1.3 is
+         * still preferred by the handshake), a classical key exchange, and weak-but-
+         * valid leaf primitives. The chain is still authenticated by the transport's
+         * VERIFYPEER and re-checked here permissively: crypto strength is relaxed,
+         * authenticity is not. Anything below TLS 1.2 stays refused. */
+        if (tls_version == NULL ||
+            (!ci_equal(tls_version, "TLSv1.3") && !ci_equal(tls_version, "TLSv1.2")))
+            return SF_ERR_TLS_VERSION;
+        if (chain == NULL) return SF_ERR_INTERNAL; /* fail closed: chain not inspectable */
+        return sf_check_chain_policy(chain, SF_POLICY_PERMISSIVE);
+    }
+
     sf_status s = sf_check_tls_version(tls_version);
     if (s != SF_OK) return s;
     /* The navigability fallback accepts a classical KE; every other policy requires
@@ -417,8 +430,13 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     sf_status result = SF_ERR_INTERNAL;
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
+    /* TLS 1.3 is the floor everywhere except the explicit allowlist override, which
+     * lowers the floor to TLS 1.2 (1.3 still the ceiling, so it is preferred). The
+     * negotiated version is re-checked against the policy in sf_enforce_policy. */
+    long sslmin = (local.policy == SF_POLICY_ALLOWLISTED_INSECURE)
+                  ? CURL_SSLVERSION_TLSv1_2 : CURL_SSLVERSION_TLSv1_3;
     curl_easy_setopt(curl, CURLOPT_SSLVERSION,
-                     (long)(CURL_SSLVERSION_TLSv1_3 | CURL_SSLVERSION_MAX_TLSv1_3));
+                     (long)(sslmin | CURL_SSLVERSION_MAX_TLSv1_3));
     curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, local.kex_groups);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
