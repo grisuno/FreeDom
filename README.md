@@ -26,9 +26,11 @@ sudo docker run -it \
 
 Then open your browser and go to: http://localhost:8080
 
-<img width="800" height="450" alt="browser" src="https://github.com/user-attachments/assets/82918e97-852a-4bf0-81ce-ae39484008c4" />
+<img width="1127" height="921" alt="image" src="https://github.com/user-attachments/assets/b00510ab-3870-4212-964d-56634ecc9c88" />
 
 ## Philosophy
+
+<img width="800" height="450" alt="browser" src="https://github.com/user-attachments/assets/82918e97-852a-4bf0-81ce-ae39484008c4" />
 
 FreeDom (Free + DOM) is a lightweight, security-first web browser built from the ground up in modern C. It prioritizes user privacy, strong isolation, and minimal attack surface over feature bloat.
 
