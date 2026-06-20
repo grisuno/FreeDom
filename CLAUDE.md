@@ -206,96 +206,53 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   proxy → bloqueado, jamás directo). `.onion` sigue **https-only**; **`.i2p` acepta `http://`**
   (`nr_realm_allows_http`/`sf_config.allow_overlay_http`): los eepsites son http y el overlay ya
   cifra/autentica por dirección, así que no es downgrade; `http://` clearnet **sigue rechazado**.
-  TLS 1.3 sigue vigente en `.onion` (el override por host de `allow.conf` aplica si hace falta). GUI: toggles
-  "Tor routing"/"I2P routing"; headless: `--tor[=addr]`/`--i2p[=addr]`/`--torify`; env:
-  `FREEDOM_TOR_PROXY`/`FREEDOM_I2P_PROXY`/`FREEDOM_TORIFY_CLEARNET`. **Sin verificar** contra un
-  circuito real aquí (no hay `tor`/`i2pd`): pendiente de itest; la lógica pura y el fail-closed sí
-  están probados.
+  TLS 1.3 sigue vigente en `.onion` (el override por host de `allow.conf` aplica si hace falta).
+  Redirects overlay http se resuelven en http (sin salir del overlay). GUI: toggles "Tor/I2P
+  routing"; headless: `--tor[=addr]`/`--i2p[=addr]`/`--torify`; env: `FREEDOM_TOR_PROXY`/
+  `FREEDOM_I2P_PROXY`/`FREEDOM_TORIFY_CLEARNET`. **Verificado de extremo a extremo** (jun 2026):
+  `.onion` vía Tor y `.i2p` vía el router Java (`stats.i2p`, `i2p-projekt.i2p` con redirect).
 - **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
   contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
 
-### 7.2 Roadmap — por alcanzar
+### 7.2 Hitos cerrados (resumen)
 
-- **Hito 6 — Pulido interactivo de la GUI (en curso).** Todo en `gui/browser_ui.c`
-  (orquestador; sin lógica de seguridad nueva). *(compila + enlaza bajo los flags endurecidos;
-  **sin verificar visualmente**: requiere una sesión Wayland.)*
-  - [x] **Modo oscuro/claro** en el menú hamburguesa (`ui_theme_dark`/`ui_theme_for`, item
-    `UI_MENU_DARK`). Toggle = swap de paleta + repaint (sin red); comparte las métricas con el
-    tema claro, así el box model vive en un solo sitio.
-  - [x] **Hover en los botones del toolbar** (Atrás/Adelante/Go/menú): la misma afordancia que
-    ya tienen los enlaces —resaltado `btn_hover_bg` + cursor de mano sobre botones accionables
-    (`toolbar_button_at`/`hot_actionable`, fuente única con el hit-test del clic)—.
-  - [x] **Destino del enlace al pasar el cursor**: tira inferior persistente con el `href` bajo
-    el puntero (`draw_hover_url`); el toast se apila encima.
-  - [x] **Indicador de carga** (reloj "busy") en el tab/barra de URL durante un request
-    (`show_busy` pinta y presenta un frame antes del fetch síncrono; título "Loading..."). Honesto:
-    estático, no animado, porque el fetch bloquea el event loop (animarlo es el Hito 9).
-  - [x] **Barra de scroll visible** (`scrollbar_metrics`/`draw_scrollbar`): track + thumb en un
-    gutter derecho **siempre reservado** (`content_width` resta el gutter, una sola fuente de
-    verdad para pintor y hit-test de enlaces/inputs). Arrastre del thumb y clic-en-track
-    (`scrollbar_drag_to`, estado `dragging_scroll`); aparece solo si el contenido excede el
-    viewport.
-  - [x] **Márgenes/padding más amplios** (`UI_TEXT_MARGIN` 8→20): el contenido respira y los
-    bordes de resize caen en el margen, no sobre el texto.
-  - [x] **Controles de ventana (CSD)**: mover (arrastrar el titlebar → `xdg_toplevel_move`),
-    maximizar/restaurar (botón `[]`, estado leído de `XDG_TOPLEVEL_STATE_MAXIMIZED`), minimizar
-    (`_`), cerrar (`X`), y **redimensionar** por bordes (`resize_edge_at` → `xdg_toplevel_resize`,
-    laterales solo en el área de contenido para no robar clics al chrome). Bajo SSD el compositor
-    sigue dueño de los bordes.
-  - [x] **Atajos vim** en el área de contenido (sin foco en la URL): `j`/`k` línea, `space`/`b`
-    página, `gg` arriba, `G` abajo, además de `Home`/`End` y las flechas/PgUp-Dn ya existentes.
-- **Hito 7 — CSS estático / box model enriquecido (Secure by Default, sin JS).** Estrategia del
-  dueño: máxima legibilidad con superficie mínima. Lógica pura y testeable; la GUI solo cablea.
-  Base ya existente: escala de headings, `paragraph_gap`, `content_margin`, color de autor
-  (`css_color`, gateado por `caps.css`).
-  - [x] **Box model por etiqueta** — módulo puro `box_style` (`bx_`): hoja de estilo del UA
-    (márgenes/padding en `em` + `display`) por etiqueta vía búsqueda binaria sobre tabla ordenada,
-    más `bx_parse_display` (gateado por el llamante con `caps.css`). Spec + test (16) verde +
-    ASan/UBSan limpio. `body` con margen 0 (el gutter lo da el chrome).
-  - [x] **Flexbox 1D + grid básico** — módulo puro `flex_layout` (`fx_`): solver del eje principal
-    (`flex-grow`/`shrink` con congelado iterativo al `min`, `gap`, `justify-content` completo) y
-    grid de columnas iguales (`repeat(n,1fr)`) + colocación fila-por-fila. Acotado (`FX_MAX_ITEMS`,
-    sin VLA/alloc). Spec + test (19) verde + ASan/UBSan limpio.
-  - [x] **Box model cableado al pintor**: puente puro `rd_block_tag` (`render_doc`: kind ->
-    etiqueta HTML canónica, +1 test, ASan limpio) y la GUI compone `rd_block_tag ->
-    bx_default_for_tag` en `block_margins` para espaciar cada bloque por su margen UA (em -> px del
-    propio tamaño de fuente) con **colapso de márgenes** básico, sustituyendo el `paragraph_gap`
-    único. Headings con jerarquía real, párrafos/listas con su margen. *(compila + enlaza
-    endurecido; **sin verificar visualmente**: requiere Wayland.)*
-  - [x] **Árbol de cajas (motor de layout)** — módulo puro `box_tree` (`bt_`): layout recursivo que
-    apila bloques (con colapso de márgenes + padding), delega flex/grid en `flex_layout` y baja con
-    el ancho resuelto; topes anti-DoS (`BT_MAX_DEPTH`/`BT_MAX_CHILDREN`), sin VLA/alloc. Spec +
-    test (13) verde + ASan/UBSan limpio. Compone `[[box_style]]` + `[[flex_layout]]`.
-  - [x] **Construcción del árbol desde el DOM + pintado** — pipeline puro (TDD): `page_view` extrae
-    el contenedor flex/grid de autor más cercano por run (`cont_id`/`display`/`gap`/`justify`/`cols`
-    vía `display`/`gap`/`justify-content`/`grid-template-columns`), `tab` lo serializa por IPC,
-    `render_doc` lo transporta **siempre** (la maquetación es estructura, **desacoplada de
-    `caps.css`**; solo los colores siguen gateados). La GUI agrupa los bloques de un contenedor,
-    mide cada ítem y los dispone en columnas con `bt_layout`/`flex_layout` (flex=fila de N columnas,
-    grid=`cols` con wrap), traduciendo las filas a su columna (`x_off`). Básico: cada bloque = un
-    ítem; ítems multi-bloque y anidamiento profundo quedan fuera. Tests: page_view 30, render_doc 20,
-    tab 21 verde + ASan limpio. Demo: `examples/flex.html`. La GUI **sin verificar visualmente**
-    (requiere Wayland).
-  - [x] **Reading mode (sepia)** — tercera paleta `ui_theme_sepia` en el menú (papel cálido + tinta
-    marrón), con `theme_mode` (light/dark/sepia) y un toggle **"Force theme colors"** que ignora los
-    colores de autor (legibilidad > fidelidad). Solo `gui/browser_ui.c`; **sin verificar visualmente**.
-  - [x] **`background-color` de autor** — pipeline puro: `page_view` extrae la declaración
-    `background-color` (longhand) a `bg_rgb` (no hereda en CSS; se toma del ancestro más cercano para
-    que el fondo del bloque se vea tras su texto), `tab` lo serializa por IPC, `render_doc` lo
-    transporta gateado por `caps.css`. La GUI lo pinta tras el bloque (orquestador). Spec + tests
-    (page_view 27, render_doc 19, tab 21) verde + ASan limpio.
+- **Hito 6 — Pulido interactivo de la GUI.** Todo en `gui/browser_ui.c`: temas claro/oscuro/sepia +
+  "Force theme colors", hover de botones/enlaces con cursor de mano, tira de `href` al pasar el
+  cursor, indicador de carga ("busy"), barra de scroll arrastrable (gutter reservado), márgenes
+  amplios, controles CSD (mover/maximizar/minimizar/cerrar/resize por bordes), atajos vim
+  (`j`/`k`/`space`/`b`/`gg`/`G`). *(Compila endurecido; verificado visualmente en Wayland por el
+  dueño.)*
+- **Hito 7 — CSS estático / box model (Secure by Default, sin JS).** Módulos puros con TDD: `box_style`
+  (caja UA por etiqueta), `flex_layout` (flex 1D + grid `repeat(n,1fr)`), `box_tree` (layout recursivo
+  con colapso de márgenes). Pipeline DOM→cajas: `page_view` extrae contenedor/colores de autor, `tab`
+  serializa por IPC, `render_doc` transporta (**layout siempre**; colores gateados por `caps.css`), la
+  GUI dispone en columnas. `background-color` de autor. Demo `examples/flex.html`.
+- **Hito 11 — Filtro de hosts.** Módulo puro `hostblock` (lista negra + blanca formato `/etc/hosts`,
+  blanca gana y cubre subdominios, falla abierto). Cableado pre-fetch en la GUI; la blanca es además
+  el **override de soberanía** por host (TLS 1.2 / cert débil-pero-válido vía
+  `SF_POLICY_ALLOWLISTED_INSECURE`). Spec + tests + ASan.
+- **Hito 12 — Privacidad de red (Tor/I2P) a nivel de socket.** Módulo puro `net_realm` (clasifica
+  clearnet/`.onion`/`.i2p`, decide ruta, **fail-closed**) + proxy en `secure_fetch` (`sf_proxy_*`,
+  SOCKS5h con DNS remoto / HTTP). `.i2p` acepta http (overlay autentica); redirects overlay resueltos
+  en http. Toggles GUI + flags `--tor`/`--i2p`/`--torify` + env. Verificado E2E (jun 2026).
+
+### 7.3 Roadmap — por cruzar
+
 - **Hito 8 — Transcodificación de charset.** Mostrar acentos en vez de `?` (Latin-1 y otros →
   UTF-8) en `page_view`/`browser_set_page`. Lógica pura + tests; sin dependencia nueva.
-- **Hito 9 — Fetch asíncrono.** Sacar `secure_fetch` del hilo del event loop (el worker/IPC de
-  `tab` ya existe) para: spinner **animado** real, no congelar la UI, carga de imágenes no
-  bloqueante, y `do_submit_post` (POST) con el mismo fallback clásico que el GET.
-- **Hito 10 — Persistencia de preferencias por sitio.** Opt-in de imágenes/CSS/tema y excepciones
-  de host (hoy solo sesión) cifrados con `local_store`/`disk_store`.
-- **Pendiente de fondo (hitos propios, fuera del camino corto):** motor de cajas CSS de autor
-  completo; JS-vivo (mutación DOM → repintado, eventos, timers); `querySelector`/selectores CSS;
-  otros formatos de imagen (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación);
-  `pledge`/`unveil` en OpenBSD; PSL completa; scroll al ancla de fragmento (`#id`); multiplexado de
-  varias pestañas.
+- **Hito 9 — Fetch asíncrono.** Sacar `secure_fetch` del hilo del event loop (el worker/IPC de `tab`
+  ya existe) para: spinner **animado** real, no congelar la UI, imágenes no bloqueantes, y
+  `do_submit_post` (POST) con el mismo fallback navegable que el GET. *(También destraba I2P, que es
+  lento de integrar: hoy bloquea la UI mientras teje túneles.)*
+- **Hito 10 — Persistencia de preferencias.** Opt-in de imágenes/CSS/tema, excepciones de host, y
+  config Tor/I2P (hoy env/sesión) cifrados con `local_store`/`disk_store`.
+- **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`
+  (`nr_realm_allows_http`); autenticación de onion services v3 con clave; **stream isolation** por
+  pestaña/origen (circuitos Tor separados); unificar i2pd/router-Java; indicador de realm en el chrome.
+- **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo; JS-vivo (mutación DOM
+  → repintado, eventos, timers); `querySelector`/selectores CSS; otros formatos de imagen
+  (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación); `pledge`/`unveil` en
+  OpenBSD; scroll al ancla de fragmento (`#id`); multiplexado de varias pestañas.
 
 ---
 

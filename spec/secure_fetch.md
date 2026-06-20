@@ -116,7 +116,11 @@ resuelve `.onion`); `SF_PROXY_HTTP` = proxy HTTP (I2P). `secure_fetch` solo **ap
 (`CURLOPT_PROXY`/`CURLOPT_PROXYTYPE`); **quién** lo elige es el módulo puro `[[net_realm]]` en el
 orquestador (clasifica el realm, decide la ruta, falla cerrado). Con un proxy fijado, libcurl nunca
 lo evita: no hay fallback directo que desanonimice. La política TLS/PQ/cadena es **idéntica** con o
-sin proxy (https-only y TLS 1.3 también para `.onion`).
+sin proxy (https-only y TLS 1.3 también para `.onion`). Para un request overlay http
+(`allow_overlay_http`, p. ej. un eepsite `.i2p`) la política TLS se omite (no hay TLS; el overlay da
+la seguridad) y los redirects se resuelven en esquema http (reusando el resolver https mapeando
+http↔https); un salto explícito a `https` se rechaza (un eepsite no debe sacarte del overlay a
+clearnet: fail-closed).
 
 **POST (`sf_post`).** Envía `body` (`body_len` bytes) con `content_type` (NULL ⇒
 `application/x-www-form-urlencoded`). Reusa el mismo `sf_perform` que `sf_get`, así que exige TLS 1.3

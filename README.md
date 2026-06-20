@@ -68,11 +68,15 @@ The name reflects its core goals:
   - Loading indicator (busy clock)
   - Improved dark mode and typography
 - **Privacy & Networking**:
-  - **Tor support** (`.onion` routing via SOCKS5h proxy)
-  - **I2P support** (`.i2p` routing via HTTP proxy)
+  - **Tor support** (`.onion` routing via SOCKS5h proxy, remote DNS = no leak)
+  - **I2P support** (`.i2p` routing via HTTP proxy, plain-http eepsites allowed)
   - Clearnet Torification option (`--torify`)
-  - Realm-based routing with fail-closed policy (no leaks)
-  - TLS 1.2 allowlist/blacklist support
+  - Realm-based routing (`net_realm`) with **fail-closed** policy (no de-anonymizing fallback)
+  - **Host filtering** (`hostblock`): `/etc/hosts`-format `block.conf` + `allow.conf`, allowlist
+    wins and covers subdomains
+  - **Sovereignty allowlist**: per-host override to navigate sites below FreeDom's TLS standard
+    (e.g. TLS-1.2-only sites like Hacker News) while still authenticating the certificate chain
+  - Post-quantum hybrid KE by default with a non-blocking classical-TLS-1.3 fallback
   - Enhanced secure fetch
 - **Build & Distribution**:
   - Debian `.deb` packaging (`build_deb.sh`)
@@ -105,6 +109,68 @@ WAYLAND_DISPLAY=wayland-1 ./build/freedom
 # Run in headless mode
 ./freedom --headless https://example.com
 ```
+
+## Privacy Networking: Tor, I2P & Host Filtering
+
+FreeDom integrates Tor and I2P **at the socket level** (it routes through a local proxy you run; it
+never embeds the Tor/I2P daemon — minimal attack surface). The routing brain is the pure, tested
+`net_realm` module, which guarantees two anonymity invariants:
+
+- **Realm isolation**: a `.onion` address only ever exits through Tor, a `.i2p` only through I2P.
+- **Fail-closed**: if a realm's proxy is not enabled, the request is **blocked**, never leaked over
+  the clearnet. DNS for Tor is resolved remotely (SOCKS5h), so there is no DNS leak.
+
+### Tor (`.onion`)
+
+```bash
+sudo systemctl start tor      # Tor SOCKS5 proxy on 127.0.0.1:9050
+./build/freedom --tor https://<address>.onion/        # headless
+# GUI: hamburger menu → enable "Tor routing (.onion)", then reload
+```
+
+`.onion` stays **https-only** by owner policy (most large onions — DuckDuckGo, NYT — serve https).
+Use `--torify` (or `FREEDOM_TORIFY_CLEARNET=1`) to route ordinary clearnet sites through Tor too.
+
+### I2P (`.i2p`)
+
+```bash
+sudo systemctl start i2pd     # or: i2prouter start   (Java router)
+                              # HTTP proxy on 127.0.0.1:4444
+./build/freedom --i2p http://stats.i2p/               # headless
+# GUI: hamburger menu → enable "I2P routing (.i2p)", then reload
+```
+
+I2P eepsites are served over **http** — FreeDom allows plain http **only** for `.i2p`, where the I2P
+layer already encrypts and authenticates by destination (http on the clearnet is still rejected).
+Note: I2P takes several minutes to integrate (build tunnels) on first start; until then requests fail
+closed (no leak), not load.
+
+### Configuration (flags / env / menu)
+
+| Setting | CLI flag (headless) | Env var | GUI |
+| :-- | :-- | :-- | :-- |
+| Tor routing | `--tor[=host:port]` | `FREEDOM_TOR_PROXY` (`1` = default) | "Tor routing (.onion)" |
+| I2P routing | `--i2p[=host:port]` | `FREEDOM_I2P_PROXY` (`1` = default) | "I2P routing (.i2p)" |
+| Torify clearnet | `--torify` | `FREEDOM_TORIFY_CLEARNET=1` | (implied by Tor toggle) |
+
+### Host filtering & the sovereignty allowlist
+
+A pure `hostblock` module reads two `/etc/hosts`-format files — `block.conf` (blocklist) and
+`allow.conf` (allowlist) — from `$FREEDOM_HOSTS_DIR`, `~/.config/freedom`, or `./config` (sample
+files ship in `config/`). The format is one domain per line, or `0.0.0.0 domain` hosts-style lines.
+
+- A blocklisted domain blocks itself **and all subdomains**; the allowlist **wins** and likewise
+  covers subdomains — so you can re-enable one subdomain of an otherwise blocked domain.
+- The allowlist is also your **sovereignty override**: a host listed there may be navigated even when
+  it falls below FreeDom's elevated TLS standard. If the strict attempt fails, FreeDom retries
+  accepting TLS 1.2, a classical key exchange, and a weak-but-valid certificate (with a warning). The
+  certificate chain is still authenticated, so you reach the real site over older crypto, not an
+  impostor. This is how TLS-1.2-only sites such as **Hacker News** (`news.ycombinator.com`) load —
+  secure by default, but you are sovereign over your own hosts.
+
+This is purely opt-in: with no list files present, nothing is blocked (the filter fails open — it is
+an adblock-style layer, not the security boundary).
+
 ## Fuzzing
 
 Empirical security in C: Passing 10 full AFL++ mutation cycles and 700 unique code paths with 0 crashes, 0 hangs, and a rock-solid 75% stability map.
@@ -160,11 +226,14 @@ python3 app.py
 
 ```text
 FreeDom/
-├── src/           # Core source code
+├── src/           # Core source code (one .c per module: secure_fetch, net_realm, hostblock, ...)
 ├── gui/           # Wayland + Cairo GUI implementation
-├── include/       # Public headers
+├── include/       # Public headers (module contracts)
+├── spec/          # SDD specifications (one spec per module)
+├── config/        # Sample host filter lists (block.conf / allow.conf)
+├── examples/      # Sample pages (rich.html, flex.html, ...)
 ├── third_party/   # Vendored libraries (Lexbor, QuickJS-ng, etc.)
-├── tests/         # Unit and integration tests
+├── tests/         # Unit (CMocka) and integration tests
 ├── fuzz/          # Fuzzing harnesses
 ├── docs/          # Documentation
 └── Makefile       # Build system
@@ -256,7 +325,8 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 - ✅ Docker + noVNC environment
 - ✅ User-Agent customization & anti-fingerprinting
 - ✅ Modern GUI with scrollbar, vim shortcuts, window management, themes and sepia mode
-- ✅ Tor & I2P routing support (`.onion` / `.i2p` + torify)
+- ✅ Tor & I2P routing support (`.onion` / `.i2p` + torify), socket-level, fail-closed
+- ✅ Host filtering (block/allow lists) + per-host sovereignty TLS override
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP agentic automation
 - ⚠️ CSS support still limited (static + author-gated)
