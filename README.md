@@ -39,6 +39,7 @@ The name reflects its core goals:
 - **Dom**: Reference to the DOM (Document Object Model) and domain-level control
 
 ## Features
+
 - Written in portable C11
 - Strong process-based sandboxing for each tab
 - JavaScript sandbox using QuickJS-ng
@@ -52,6 +53,7 @@ The name reflects its core goals:
 - Comprehensive test suite, fuzzing, and integration tests
 
 ### New Features & Improvements
+
 - **Advanced Layout Engine**:
   - Full box model per HTML tag (margins, padding, display, border)
   - Flexbox 1D layout support (`flex-grow`, `flex-shrink`, `gap`, `justify-content`)
@@ -65,12 +67,16 @@ The name reflects its core goals:
   - Hover link preview (shows destination URL)
   - Loading indicator (busy clock)
   - Improved dark mode and typography
+- **Privacy & Networking**:
+  - **Tor support** (`.onion` routing via SOCKS5h proxy)
+  - **I2P support** (`.i2p` routing via HTTP proxy)
+  - Clearnet Torification option (`--torify`)
+  - Realm-based routing with fail-closed policy (no leaks)
+  - TLS 1.2 allowlist/blacklist support
+  - Enhanced secure fetch
 - **Build & Distribution**:
   - Debian `.deb` packaging (`build_deb.sh`)
   - Improved `./configure`, `install.sh` and Makefile
-- **Networking & Security**:
-  - TLS 1.2 allowlist/blacklist support
-  - Enhanced secure fetch
 - **Automation**:
   - Full GitHub Actions CI/CD pipeline
   - MCP (Model Context Protocol) server for AI agent integration
@@ -250,6 +256,7 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 - ✅ Docker + noVNC environment
 - ✅ User-Agent customization & anti-fingerprinting
 - ✅ Modern GUI with scrollbar, vim shortcuts, window management, themes and sepia mode
+- ✅ Tor & I2P routing support (`.onion` / `.i2p` + torify)
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP agentic automation
 - ⚠️ CSS support still limited (static + author-gated)
