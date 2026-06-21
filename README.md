@@ -2,7 +2,7 @@
 
 <img width="1922" height="825" alt="image" src="https://github.com/user-attachments/assets/6b049cfb-3253-469f-9547-3c88ba67c23a" />
 
-A free and open-source minimal web browser written in C, focused on Zero Trust and Zero Knowledge principles.
+From the creators of Lazy Town Red Team Framework comes a free and open-source minimal web browser written in C, focused on Zero Trust and Zero Knowledge principles.
 
 ## Quick Start (Recommended)
 
