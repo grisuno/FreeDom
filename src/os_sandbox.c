@@ -15,6 +15,8 @@
 #include "os_sandbox.h"
 
 #if defined(__linux__)
+#include <errno.h>
+#include <sched.h>
 #include <sys/syscall.h>
 
 /* Allowlist for an already-initialised worker: I/O over already-open fds and
@@ -44,12 +46,34 @@ size_t os_policy_size(void) {
     return OS_ALLOWED_N;
 }
 
-#else /* non-Linux: no seccomp-bpf */
+/* Namespace isolation: defense in depth under seccomp. A new user namespace is the
+ * unprivileged enabler for the rest; the worker never touches the network (the
+ * parent fetches), so it gets an empty network stack; IPC and UTS isolate it from
+ * shared System V/POSIX IPC and the host identity. Mount and PID namespaces are
+ * intentionally excluded (they need /proc remounting and a post-unshare fork). */
+int os_namespace_flags(void) {
+    return CLONE_NEWUSER | CLONE_NEWNET | CLONE_NEWIPC | CLONE_NEWUTS;
+}
+
+os_status os_isolate_namespaces(void) {
+    if (unshare(os_namespace_flags()) != 0) {
+        /* Unprivileged user namespaces disabled (EPERM) or unsupported kernel
+         * (EINVAL/ENOSYS): not fatal -- seccomp remains the mandatory boundary. */
+        return (errno == EPERM || errno == EINVAL || errno == ENOSYS)
+               ? OS_ERR_UNSUPPORTED : OS_ERR_NAMESPACE;
+    }
+    return OS_OK;
+}
+
+#else /* non-Linux: no seccomp-bpf, no Linux namespaces */
 
 int os_policy_allows(long syscall_nr) { (void)syscall_nr; return 0; }
 size_t os_policy_size(void) { return 0; }
 
 os_status os_harden(os_violation action) { (void)action; return OS_ERR_UNSUPPORTED; }
+
+int os_namespace_flags(void) { return 0; }
+os_status os_isolate_namespaces(void) { return OS_ERR_UNSUPPORTED; }
 
 #endif
 

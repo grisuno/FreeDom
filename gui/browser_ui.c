@@ -19,6 +19,7 @@
 #include "image_decode.h"
 #include "link_nav.h"
 #include "net_realm.h"
+#include "pdf_export.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "textfield.h"
@@ -43,6 +44,7 @@
 #include <wayland-client.h>
 #include <wayland-cursor.h>
 #include <cairo/cairo.h>
+#include <cairo/cairo-pdf.h>
 #include <fontconfig/fontconfig.h>
 #include <xkbcommon/xkbcommon.h>
 
@@ -347,7 +349,8 @@ typedef enum ui_menu_action {
     UI_MENU_THEME,    /* selects w->theme_mode (theme_val); needs only a repaint */
     UI_MENU_FORCE,    /* toggles w->force_theme; needs only a repaint */
     UI_MENU_TOR,      /* toggles Tor routing (tor_enabled + torify clearnet) */
-    UI_MENU_I2P       /* toggles I2P routing for .i2p */
+    UI_MENU_I2P,      /* toggles I2P routing for .i2p */
+    UI_MENU_PDF       /* action (not a toggle): export the page to a vector PDF */
 } ui_menu_action;
 
 typedef struct ui_menu_item {
@@ -365,6 +368,7 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Author colors (CSS)",  UI_MENU_CAP,   offsetof(rdp_caps, css),    0 },
     { "Tor routing (.onion)", UI_MENU_TOR,   0,                          0 },
     { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
+    { "Save as PDF (Ctrl+P)", UI_MENU_PDF,   0,                          0 },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
 
@@ -2245,6 +2249,60 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
 }
 
 /* Paints the structured document into the content rectangle, honouring scroll. */
+/* Paints one laid-out row at vertical position ry. Shared by the on-screen painter
+ * and the PDF exporter so both render identically (same fonts, colours, emphasis,
+ * links and backgrounds). band_w is the full-bleed width for notice banners (the
+ * window width on screen, the page width in the PDF). show_hover draws the link
+ * hover highlight (on screen only; suppressed when exporting). */
+static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
+                              const rc_row *r, double left, double ry,
+                              double content_w, double band_w, int show_hover) {
+    const ui_theme *th = &w->theme;
+
+    if (r->kind == RC_IMAGE && r->blk != NULL) {
+        paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
+        return;
+    }
+    if (r->kind == RC_INPUT && r->blk != NULL) {
+        draw_input_row(cr, w, r->blk, left, content_w, ry, r->ascent, r->height);
+        return;
+    }
+
+    if (r->banner) {
+        set_rgb(cr, th->notice_bg);
+        cairo_rectangle(cr, 0.0, ry, band_w, r->height);
+        cairo_fill(cr);
+    } else if (r->bg_rgb >= 0) {
+        /* Author background-color behind the block's text (content box). */
+        set_rgb(cr, rgb_from_packed(r->bg_rgb));
+        cairo_rectangle(cr, left, ry, content_w, r->height);
+        cairo_fill(cr);
+    }
+    double baseline = ry + r->ascent;
+    double rx = left + r->x_off;  /* row origin (column offset for flex/grid) */
+    for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
+        const rc_frag *f = &L->frags[k];
+        /* Highlight the link under the pointer (all fragments of that link share
+         * its href pointer into the doc). */
+        if (show_hover && f->href != NULL && f->href == w->hover_href) {
+            set_rgb(cr, th->link_hover_bg);
+            cairo_rectangle(cr, rx + f->x, ry, f->width, r->height);
+            cairo_fill(cr);
+        }
+        content_font(cr, f->font_size, f->bold, f->italic);
+        set_rgb(cr, f->color);
+        cairo_move_to(cr, rx + f->x, baseline);
+        draw_slice(cr, f->text, f->len);
+        if (f->underline) {
+            double uy = baseline + f->font_size * UI_UNDERLINE_OFFSET;
+            cairo_set_line_width(cr, UI_UNDERLINE_THICK);
+            cairo_move_to(cr, rx + f->x, uy);
+            cairo_line_to(cr, rx + f->x + f->width, uy);
+            cairo_stroke(cr);
+        }
+    }
+}
+
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
@@ -2265,52 +2323,105 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         const rc_row *r = &L.rows[i];
         double ry = origin + r->top;
         if (ry + r->height < content_top || ry > content_top + content_h) continue;
-
-        if (r->kind == RC_IMAGE && r->blk != NULL) {
-            paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
-            continue;
-        }
-
-        if (r->kind == RC_INPUT && r->blk != NULL) {
-            draw_input_row(cr, w, r->blk, left, content_w, ry, r->ascent, r->height);
-            continue;
-        }
-
-        if (r->banner) {
-            set_rgb(cr, th->notice_bg);
-            cairo_rectangle(cr, 0.0, ry, (double)w->width, r->height);
-            cairo_fill(cr);
-        } else if (r->bg_rgb >= 0) {
-            /* Author background-color behind the block's text (content box). */
-            set_rgb(cr, rgb_from_packed(r->bg_rgb));
-            cairo_rectangle(cr, left, ry, content_w, r->height);
-            cairo_fill(cr);
-        }
-        double baseline = ry + r->ascent;
-        double rx = left + r->x_off;  /* row origin (column offset for flex/grid) */
-        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
-            const rc_frag *f = &L.frags[k];
-            /* Highlight the link under the pointer (all fragments of that link share
-             * its href pointer into the doc). */
-            if (f->href != NULL && f->href == w->hover_href) {
-                set_rgb(cr, th->link_hover_bg);
-                cairo_rectangle(cr, rx + f->x, ry, f->width, r->height);
-                cairo_fill(cr);
-            }
-            content_font(cr, f->font_size, f->bold, f->italic);
-            set_rgb(cr, f->color);
-            cairo_move_to(cr, rx + f->x, baseline);
-            draw_slice(cr, f->text, f->len);
-            if (f->underline) {
-                double uy = baseline + f->font_size * UI_UNDERLINE_OFFSET;
-                cairo_set_line_width(cr, UI_UNDERLINE_THICK);
-                cairo_move_to(cr, rx + f->x, uy);
-                cairo_line_to(cr, rx + f->x + f->width, uy);
-                cairo_stroke(cr);
-            }
-        }
+        paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
     }
     rc_free(&L);
+}
+
+/* PDF page geometry: US Letter at 72 dpi (Cairo's PDF user-space unit is 1 point =
+ * 1/72 inch), with a uniform margin. */
+#define PDF_PAGE_W  612.0
+#define PDF_PAGE_H  792.0
+#define PDF_MARGIN  48.0
+
+/* Saves the current page as a vector PDF (selectable text, infinite zoom): Cairo
+ * re-draws the SAME render_doc display list onto a cairo_pdf_surface_t instead of
+ * the screen. Pure helpers (pdf_export) choose a safe output path from the hostile
+ * page title and paginate the rows; this orchestrator only does the Cairo I/O. The
+ * page is laid out in a clean light theme so the print is dark-on-white. */
+static void export_pdf(browser_window *w) {
+    if (w->doc == NULL || rd_count(w->doc) == 0) {
+        browser_set_status(&w->bs, "Nothing to export to PDF.", now_ms());
+        redraw(w);
+        return;
+    }
+
+    /* Output directory: $XDG_DOWNLOAD_DIR, else $HOME, else the current directory. */
+    const char *dir = getenv("XDG_DOWNLOAD_DIR");
+    if (dir == NULL || dir[0] == '\0') dir = getenv("HOME");
+    if (dir == NULL || dir[0] == '\0') dir = ".";
+
+    const char *title = (w->bs.page_title != NULL && w->bs.page_title[0] != '\0')
+                        ? w->bs.page_title : PE_FALLBACK_NAME;
+    char path[PE_NAME_MAX + 4096u];
+    if (pe_build_path(dir, title, path, sizeof path) != PE_OK) {
+        browser_set_status(&w->bs, "Could not build a safe PDF path.", now_ms());
+        redraw(w);
+        return;
+    }
+
+    cairo_surface_t *surf = cairo_pdf_surface_create(path, PDF_PAGE_W, PDF_PAGE_H);
+    if (cairo_surface_status(surf) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(surf);
+        browser_set_status(&w->bs, "Could not create the PDF file.", now_ms());
+        redraw(w);
+        return;
+    }
+    cairo_t *cr = cairo_create(surf);
+
+    /* Lay out (and colour fragments) in a light theme so the PDF is print-friendly;
+     * restore the live theme afterwards. layout_doc reads w->theme for colours. */
+    ui_theme saved = w->theme;
+    w->theme = ui_theme_for(UI_THEME_LIGHT);
+
+    double content_w = PDF_PAGE_W - 2.0 * PDF_MARGIN;
+    double page_content_h = PDF_PAGE_H - 2.0 * PDF_MARGIN;
+
+    rc_layout L;
+    layout_doc(cr, w, content_w, &L);
+
+    size_t pages = 0;
+    double *tops = NULL, *heights = NULL, *yof = NULL;
+    int *pageof = NULL;
+    if (L.nrow > 0) {
+        tops    = (double *)malloc(L.nrow * sizeof *tops);
+        heights = (double *)malloc(L.nrow * sizeof *heights);
+        yof     = (double *)malloc(L.nrow * sizeof *yof);
+        pageof  = (int *)malloc(L.nrow * sizeof *pageof);
+    }
+    if (L.nrow > 0 && tops != NULL && heights != NULL && yof != NULL && pageof != NULL) {
+        for (size_t i = 0; i < L.nrow; ++i) {
+            tops[i] = L.rows[i].top;
+            heights[i] = L.rows[i].height;
+        }
+        pages = pe_paginate(tops, heights, L.nrow, page_content_h, pageof, yof);
+        for (size_t p = 0; p < pages; ++p) {
+            cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); /* white page */
+            cairo_paint(cr);
+            for (size_t i = 0; i < L.nrow; ++i) {
+                if ((size_t)pageof[i] != p) continue;
+                paint_content_row(cr, w, &L, &L.rows[i], PDF_MARGIN,
+                                  PDF_MARGIN + yof[i], content_w, PDF_PAGE_W, 0);
+            }
+            cairo_show_page(cr);
+        }
+    }
+
+    free(tops); free(heights); free(yof); free(pageof);
+    rc_free(&L);
+    w->theme = saved;
+    cairo_destroy(cr);
+    cairo_surface_destroy(surf);
+
+    char msg[PE_NAME_MAX + 4096u + 64u];
+    if (pages > 0) {
+        snprintf(msg, sizeof msg, "Saved PDF (%zu page%s): %s",
+                 pages, pages == 1 ? "" : "s", path);
+    } else {
+        snprintf(msg, sizeof msg, "Nothing to export to PDF.");
+    }
+    browser_set_status(&w->bs, msg, now_ms());
+    redraw(w);
 }
 
 /* Returns the link target under the surface point (px, py), or NULL when the
@@ -2577,6 +2688,7 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_FORCE) return w->force_theme;
     if (it->action == UI_MENU_TOR)   return w->net_cfg.tor_enabled;
     if (it->action == UI_MENU_I2P)   return w->net_cfg.i2p_enabled;
+    if (it->action == UI_MENU_PDF)   return 0; /* an action, never "checked" */
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
 
@@ -2611,6 +2723,11 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         browser_set_status(&w->bs, w->net_cfg.i2p_enabled
             ? "I2P routing ON for .i2p (needs an I2P HTTP proxy). Reload to apply."
             : "I2P routing OFF.", now_ms());
+        return;
+    }
+    if (it->action == UI_MENU_PDF) {
+        w->menu_open = 0; /* dismiss the menu, then export */
+        export_pdf(w);
         return;
     }
     bool *flag = (bool *)((char *)&w->caps + it->cap_offset);
@@ -3683,6 +3800,14 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         w->caps.images = !w->caps.images;
         render_current(w);
         redraw(w);
+        return;
+    }
+
+    /* Ctrl+P saves the current page as a vector PDF (selectable text) to the
+     * downloads directory. The output filename is derived safely from the page
+     * title (pdf_export, fail-closed). */
+    if (ctrl && !shift && (sym == XKB_KEY_p || sym == XKB_KEY_P)) {
+        export_pdf(w);
         return;
     }
 

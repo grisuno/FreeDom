@@ -68,7 +68,7 @@ Para cada módulo, el ciclo es inviolable y **en este orden**:
    `fuzz-js`/`fuzz-img`; AFL++: `make fuzz-afl`). Cero crashes/leaks/UB antes de cerrar.
 7. **Documentación** — **recién después de validar y fuzzear** se documenta: se actualiza la spec,
    este `CLAUDE.md` (hito → cerrado, doctrina nueva) y la memoria. Documentar antes de validar es
-   documentar lo que todavía no es verdad.
+   documentar lo que todavía no es verdad. y casi mas importante actualizar docs/index.html ya que es el "home page" poner todos los atajos, etc.
 
 **No escribas la implementación antes que la spec y el test.** No avances de hito sin que el
 anterior esté verde, validado y fuzzeado.
@@ -191,12 +191,13 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Enrutado de red | `net_realm` (`nr_`) | Clasifica clearnet / `.onion` / `.i2p` y decide ruta (directo / Tor SOCKS5h / I2P HTTP / **bloqueado**). Puro. Aislamiento de realm + **fail-closed** (nunca fuga `.onion` por clearnet). `secure_fetch` aplica el proxy (`sf_proxy_*`). |
 | Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice consultable de solo lectura. |
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla/readback normalizados. |
-| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock; worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
+| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; color de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`). |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
-| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo) | Toolbar, historial, barra de URL editable, scroll, menú de opciones, navegación por clic, submit de formularios. **Multi-pestaña** (tira de tabs entre titlebar y toolbar, `+`/cerrar/click, atajos `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`). El contenido va **recortado** (`cairo_clip`) al viewport bajo el chrome, así no se solapa con la toolbar al scrollear. |
+| Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
+| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo) | Toolbar, historial, barra de URL editable, scroll, menú de opciones, navegación por clic, submit de formularios. **Multi-pestaña** (tira de tabs entre titlebar y toolbar, `+`/cerrar/click, atajos `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`). El contenido va **recortado** (`cairo_clip`) al viewport bajo el chrome, así no se solapa con la toolbar al scrollear. **Save as PDF** (`Ctrl+P` o menú). |
 | Auditoría | `spec/threat-model.md` | Activos/adversarios/fronteras → mitigaciones. |
 
 **Decisiones de doctrina vigentes** (no evidentes en el código; no re-litigar):
@@ -297,6 +298,33 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   input de página / UA; se filtran bytes de control), **Ctrl+C** copia el campo enfocado o la URL de la
   página; lectura acotada (1 MiB + timeout 500ms), `SIGPIPE` ignorado. *(Compila endurecido + ASan
   limpio; verificación visual Wayland pendiente al dueño.)*
+- **Hito 16 — Export a PDF vectorial (Cairo).** Módulo **puro** `pdf_export` (`pe_`) con TDD: el
+  **título de la página es contenido remoto hostil**, así que `pe_safe_basename`/`pe_build_path`
+  derivan el nombre de archivo **fail-closed** (solo `[A-Za-z0-9._-]`, resto→`_` colapsado, recorte de
+  bordes, sin traversal ni separadores ni oculto; fallback `page`), y `pe_paginate` reparte las filas
+  en páginas **sin partir ninguna**. El orquestador `export_pdf` (`gui/browser_ui.c`) solo cablea
+  Cairo: re-pinta el **mismo** `rd_doc` con el helper compartido `paint_content_row` (extraído de
+  `paint_structured`, así pantalla y PDF son idénticos) sobre un `cairo_pdf_surface_t` (US Letter,
+  tema claro forzado para print dark-on-white). Resultado: PDF con **texto seleccionable/buscable**
+  (verificado E2E: `mutool` → 2 páginas, texto extraíble), no una captura. Disparadores: **`Ctrl+P`**
+  y menú "Save as PDF". Sin dependencia nueva (`-lcairo` ya enlazado; `cairo-pdf.h`). Spec + 25 tests
+  CMocka + ASan/UBSan limpio + fuzz (`make fuzz-pe`, 7.3M execs sin crash). *(El módulo puro está
+  verificado; la ruta Cairo de la GUI compila endurecida y se probó la API E2E, pero la integración
+  visual en Wayland queda pendiente al dueño.)* Ver `[[freedom-pdf-export]]`.
+- **Hito 17 — Namespaces OS por pestaña (aislamiento del proceso worker).** Tercera capa de
+  confinamiento bajo seccomp+Landlock: el worker de cada pestaña hace `unshare(CLONE_NEWUSER |
+  CLONE_NEWNET | CLONE_NEWIPC | CLONE_NEWUTS)` recién forkeado, antes de Landlock/seccomp
+  (`child_main` en `tab.c`). Superficie pura `os_namespace_flags` (espejo testeable de lo aplicado,
+  como `os_policy_allows`) + enforcement `os_isolate_namespaces` en `os_sandbox`. **Best-effort
+  defensa en profundidad** (no fatal: seccomp sigue siendo la frontera obligatoria, así que un host
+  sin userns no privilegiado no rompe el navegador) — exactamente el criterio de Landlock. El worker
+  **nunca usa la red** (el padre hace el fetch y pasa bytes), por eso `CLONE_NEWNET` le da una pila
+  vacía: ni siquiera un bypass del filtro seccomp encontraría red. Sin uid maps (cero escrituras a
+  `/proc`); requiere contexto monohilo (lo cumple el hijo recién forkeado). Spec (`os_sandbox.md`
+  §9) + tests CMocka fork-based (la inode de `/proc/self/ns/net` cambia) + ASan/UBSan limpio;
+  `test_tab` sigue verde (el worker parsea/ejecuta/decodifica dentro de los namespaces nuevos).
+  *(Verificado: módulo puro + enforcement + integración del worker bajo test.)* Ver
+  `[[freedom-tab-namespaces]]`.
 
 ### 7.3 Roadmap — por cruzar
 

@@ -279,9 +279,13 @@ static void child_main(int rfd, int wfd) {
     memset(&cs, 0, sizeof cs);
     cs.session_key = gen_session_key();
 
-    /* Confine before any content. Landlock is best-effort defense in depth
-     * (seccomp already excludes open/socket/exec); seccomp is mandatory: if it
-     * cannot be installed, report not-confined and exit (fail closed). */
+    /* Confine before any content. Namespace isolation and Landlock are best-effort
+     * defense in depth (seccomp already excludes open/socket/exec); seccomp is
+     * mandatory: if it cannot be installed, report not-confined and exit (fail
+     * closed). Namespaces go first: unshare(CLONE_NEWUSER) needs a single-threaded
+     * context, which this freshly forked child is, and detaching the network/IPC/UTS
+     * stacks means even a seccomp bypass finds no network to reach. */
+    os_isolate_namespaces();
     os_landlock_restrict(NULL, 0);
     uint8_t hs = (os_harden(OS_VIOLATION_KILL) == OS_OK) ? TAB_READY : TAB_NO_CONFINE;
     if (write_full(wfd, &hs, 1) != 0 || hs != TAB_READY) {

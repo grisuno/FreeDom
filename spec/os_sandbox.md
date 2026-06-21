@@ -146,9 +146,42 @@ os_status os_landlock_restrict(const os_fs_rule *rules, size_t n);
   fichero dentro **funciona**, leer fuera (`/etc/hostname`) **falla**.
 - **Args NULL / n>0 con rules NULL** ⇒ `OS_ERR_*` apropiado sin confinar a medias.
 
-## 9. Fuera de alcance
+## 9. Aislamiento por namespaces (Linux) — defensa en profundidad por pestaña
+
+Tercera capa bajo seccomp y Landlock: el worker de cada pestaña se **desacopla** en namespaces
+propios con `unshare(2)` antes de tocar contenido. seccomp ya prohíbe `socket`/`connect`, pero un
+bypass por bug del kernel del filtro no encontraría **red** que alcanzar, ni IPC compartida, ni la
+identidad del host.
+
+```c
+/* Conjunto puro de flags CLONE_* que el worker aísla (espejo testeable de lo aplicado). */
+int       os_namespace_flags(void);
+/* Aplica unshare(os_namespace_flags()) sobre el proceso llamante. */
+os_status os_isolate_namespaces(void);
+```
+
+- **Flags:** `CLONE_NEWUSER` (habilitador no privilegiado del resto) `| CLONE_NEWNET` (el worker
+  **nunca** usa la red —el padre hace el fetch y pasa los bytes—, así que recibe una pila vacía) `|
+  CLONE_NEWIPC | CLONE_NEWUTS`. **Fuera de alcance:** mount y PID namespaces (exigen remontar
+  `/proc` y un `fork` posterior al `unshare`).
+- **Best-effort (como Landlock), no fatal:** seccomp sigue siendo la frontera **obligatoria**; si
+  `unshare` falla (userns no privilegiado deshabilitado), el worker continúa igual de protegido por
+  seccomp. `OS_ERR_UNSUPPORTED` (EPERM/EINVAL/ENOSYS) vs `OS_ERR_NAMESPACE` (otro fallo).
+- **Contexto monohilo:** debe llamarse recién forkeado, antes de cualquier hilo o contenido
+  (`unshare(CLONE_NEWUSER)` lo exige). **No** escribe mapas uid/gid (al worker no le importa su uid
+  dentro del namespace) ⇒ cero escrituras a `/proc`. Los fds de pipe heredados siguen funcionando.
+- **Orden en el hijo del worker:** `os_isolate_namespaces()` → `os_landlock_restrict(NULL,0)` →
+  `os_harden(KILL)`.
+
+### Matriz de pruebas (namespaces)
+- **Pura:** `os_namespace_flags()` incluye `CLONE_NEWNET`/`NEWUSER`/`NEWIPC`/`NEWUTS`.
+- **Enforcement (fork-based):** el hijo aísla y debe quedar en un **net namespace distinto** que el
+  padre (inode de `/proc/self/ns/net` cambia); en hosts con userns deshabilitado reporta *skip*
+  (ambos resultados aceptables: es defensa en profundidad).
+
+## 10. Fuera de alcance
 
 - UI Cairo + Wayland (spec aparte; requiere display).
 - `pledge`/`unveil` (OpenBSD) y equivalentes no-Linux.
-- Aislamiento por `namespaces`; reglas Landlock de red/IPC (ABI≥4/≥6; aquí solo FS).
+- Mount/PID namespaces; reglas Landlock de red/IPC (ABI≥4/≥6; aquí FS + namespaces).
 - Argumentos de syscall (la v1 de seccomp filtra por número de syscall, no por argumentos).

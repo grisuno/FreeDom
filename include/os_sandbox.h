@@ -20,9 +20,10 @@
 
 typedef enum os_status {
     OS_OK = 0,
-    OS_ERR_UNSUPPORTED, /* not Linux/x86_64, or seccomp-bpf / Landlock unavailable */
+    OS_ERR_UNSUPPORTED, /* not Linux/x86_64, or seccomp-bpf / Landlock / namespaces unavailable */
     OS_ERR_PRCTL,       /* prctl(NO_NEW_PRIVS) or seccomp install failed */
-    OS_ERR_LANDLOCK     /* Landlock ruleset creation / rule / restrict_self failed */
+    OS_ERR_LANDLOCK,    /* Landlock ruleset creation / rule / restrict_self failed */
+    OS_ERR_NAMESPACE    /* unshare() of the requested namespaces failed */
 } os_status;
 
 /* Action taken when a denied syscall is attempted. */
@@ -46,6 +47,33 @@ size_t os_policy_size(void);
  * before touching untrusted content.
  * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf x86_64. */
 os_status os_harden(os_violation action);
+
+/* --- Namespace isolation (Linux): defense in depth around the worker. --- */
+
+/* The set of CLONE_* namespace flags the worker isolates into: a new user
+ * namespace (the unprivileged enabler), network (the worker never needs the
+ * network -- the parent fetches and passes bytes -- so it gets an empty stack),
+ * IPC and UTS namespaces. Pure: returns the same constant the enforcer requests,
+ * the directly testable mirror of what os_isolate_namespaces applies. 0 on
+ * platforms without these namespaces. Mount and PID namespaces are out of scope
+ * (they need extra plumbing); see spec/os_sandbox.md. */
+int os_namespace_flags(void);
+
+/* Detaches the calling process into fresh namespaces (os_namespace_flags) via
+ * unshare(2). This is DEFENSE IN DEPTH layered under seccomp (which already
+ * forbids socket/connect): even a kernel-bug bypass of the syscall filter finds
+ * no network, no shared IPC and no host identity. Best-effort, exactly like
+ * os_landlock_restrict: callers treat a failure as non-fatal because seccomp is
+ * the mandatory boundary.
+ *
+ * MUST be called from a SINGLE-THREADED context (e.g. straight after fork, before
+ * any thread or untrusted content): unshare(CLONE_NEWUSER) requires it. Does NOT
+ * set up uid/gid maps (the worker only computes; its in-namespace uid is
+ * irrelevant) so it performs no /proc writes. Returns OS_OK on success,
+ * OS_ERR_UNSUPPORTED where unprivileged user namespaces are disabled, or
+ * OS_ERR_NAMESPACE on other unshare failure. Inherited pipe fds keep working
+ * across all of these namespaces. */
+os_status os_isolate_namespaces(void);
 
 /* --- Landlock filesystem confinement (Linux >= 5.13). --- */
 

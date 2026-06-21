@@ -75,9 +75,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_textfield $(BUILD_DIR)/test_form \
              $(BUILD_DIR)/test_image_decode $(BUILD_DIR)/test_box_style \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
-             $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm
+             $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm \
+             $(BUILD_DIR)/test_pdf_export
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -217,6 +218,10 @@ $(BUILD_DIR)/test_textfield: $(TEST_DIR)/test_textfield.c $(BUILD_DIR)/textfield
 $(BUILD_DIR)/test_form: $(TEST_DIR)/test_form.c $(BUILD_DIR)/form.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure PDF-export helpers (hostile-title -> safe filename + pagination). No I/O deps.
+$(BUILD_DIR)/test_pdf_export: $(TEST_DIR)/test_pdf_export.c $(BUILD_DIR)/pdf_export.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
@@ -261,10 +266,11 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/hostblock.o \
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
-                      $(BUILD_DIR)/image_decode.o \
+                      $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
+                      | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
-                      $(BUILD_DIR)/xdg-decoration-client-protocol.h | $(BUILD_DIR)
+                      $(BUILD_DIR)/xdg-decoration-client-protocol.h
 	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(PNG_LIBS) $(WL_LIBS)
 
 $(BUILD_DIR)/test_browser: $(TEST_DIR)/test_browser.c $(BUILD_DIR)/browser.o | $(BUILD_DIR)
@@ -330,6 +336,16 @@ fuzz-pv: | $(BUILD_DIR)
 	  -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_page_view -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
 
+# Coverage-guided fuzzing of the PDF-export filename sanitizer (clang + libFuzzer).
+# The page title is hostile remote content: arbitrary bytes -> pe_safe_basename /
+# pe_build_path must never crash/leak/UB nor escape the output directory.
+fuzz-pe: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_pdf_export.c $(SRC_DIR)/pdf_export.c \
+	  -o $(BUILD_DIR)/fuzz_pdf_export
+	./$(BUILD_DIR)/fuzz_pdf_export -max_total_time=30 -rss_limit_mb=2048
+
 # ====================================================================== #
 #  Developer / packaging targets centralised from the old *.sh scripts.  #
 #  Single source of truth: these reuse the canonical source/object lists #
@@ -367,7 +383,16 @@ run: $(BUILD_DIR)/freedom
 # whose hand-copied object list drifted out of date: this rebuilds the canonical
 # `freedom` target with the AFL compiler, so the source list can never diverge.
 # Requires afl++ (`sudo apt install afl++`).
+#
+# CLASSIC instrumentation (not the default LLVM-PCGUARD): PCGUARD emits sancov
+# trace-pc-guard module constructors in comdat sections that the GNU bfd linker
+# discards while .init_array still references them ("defined in discarded section"),
+# which only ld.lld/ld.gold resolve cleanly -- neither ships on a stock Debian/Kali
+# host here. CLASSIC uses afl's own edge trampolines, so the link succeeds with the
+# default linker. The target-specific vars below are inherited by the freedom
+# prerequisite's recipe (same mechanism as the CC override).
 fuzz-afl: CC := afl-clang-fast
+fuzz-afl: export AFL_LLVM_INSTRUMENT := CLASSIC
 fuzz-afl: clean $(BUILD_DIR)/freedom
 	mkdir -p $(FUZZ_DIR)/in $(FUZZ_DIR)/out
 	[ -e $(FUZZ_DIR)/in/seed.html ] || echo '<html><body><p>seed</p></body></html>' > $(FUZZ_DIR)/in/seed.html

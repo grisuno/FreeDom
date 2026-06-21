@@ -22,6 +22,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <sched.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -167,6 +168,51 @@ static void test_landlock_allow_read(void **state) {
     assert_int_equal(WEXITSTATUS(st), 62);
 }
 
+/* --- namespace isolation --- */
+
+/* The pure flag set: the worker requests an isolated network (no remote access),
+ * a user namespace (the unprivileged enabler), and IPC + UTS isolation. */
+static void test_namespace_flags(void **state) {
+    (void)state;
+    int f = os_namespace_flags();
+    assert_true((f & CLONE_NEWNET) != 0);   /* no network: the worker never fetches */
+    assert_true((f & CLONE_NEWUSER) != 0);  /* enables the rest unprivileged */
+    assert_true((f & CLONE_NEWIPC) != 0);
+    assert_true((f & CLONE_NEWUTS) != 0);
+}
+
+/* The net-namespace inode of a process. Returns 0 on failure. */
+static unsigned long net_ns_inode(void) {
+    struct stat sb;
+    if (stat("/proc/self/ns/net", &sb) != 0) return 0UL;
+    return (unsigned long)sb.st_ino;
+}
+
+/* Enforcement (fork-based, like os_harden): the child detaches and must land in a
+ * DIFFERENT network namespace than the parent. Where unprivileged user namespaces
+ * are disabled the child reports a skip; both outcomes are acceptable for the
+ * suite (it is best-effort defense in depth), and on a host that allows them the
+ * isolation must actually take effect. */
+static void test_namespace_isolate_changes_netns(void **state) {
+    (void)state;
+    unsigned long parent_ns = net_ns_inode();
+    pid_t pid = fork();
+    assert_int_not_equal(pid, -1);
+    if (pid == 0) {
+        os_status rc = os_isolate_namespaces();
+        if (rc == OS_ERR_UNSUPPORTED) _exit(80);       /* userns disabled: skip */
+        if (rc != OS_OK) _exit(44);                    /* unexpected failure */
+        unsigned long child_ns = net_ns_inode();
+        if (child_ns == 0UL || parent_ns == 0UL) _exit(45);
+        _exit(child_ns != parent_ns ? 42 : 43);        /* 42: isolated */
+    }
+    int st = 0;
+    assert_int_equal(waitpid(pid, &st, 0), pid);
+    assert_true(WIFEXITED(st));
+    int code = WEXITSTATUS(st);
+    assert_true(code == 42 || code == 80); /* isolated, or skipped on a locked host */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_policy_allows_safe),
@@ -178,6 +224,8 @@ int main(void) {
         cmocka_unit_test(test_landlock_abi_present),
         cmocka_unit_test(test_landlock_deny_all),
         cmocka_unit_test(test_landlock_allow_read),
+        cmocka_unit_test(test_namespace_flags),
+        cmocka_unit_test(test_namespace_isolate_changes_netns),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
