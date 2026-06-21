@@ -113,12 +113,55 @@ static void test_append_image_null_args(void **state) {
     pv_free(v);
 }
 
-static void test_append_sanitizes_utf8(void **state) {
+/* A lone high byte that is invalid UTF-8 is reinterpreted as Windows-1252 (a
+ * superset of Latin-1) and re-emitted as UTF-8, recovering accents from a legacy
+ * page rather than dropping them to '?'. 0xE1 -> U+00E1 (a-acute) -> 0xC3 0xA1. */
+static void test_append_transcodes_latin1(void **state) {
     (void)state;
     pv_view *v = pv_new();
-    const char latin1[] = { 'I', 'm', (char)0xE1, 'g', '\0' }; /* lone 0xE1 */
+    const char latin1[] = { 'I', 'm', (char)0xE1, 'g', '\0' }; /* lone 0xE1 = a-acute */
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, latin1, NULL), PV_OK);
-    assert_string_equal(pv_at(v, 0)->text, "Im?g");
+    assert_string_equal(pv_at(v, 0)->text, "Im\xC3\xA1g"); /* "Imág" */
+    pv_free(v);
+}
+
+/* 0xE9 -> U+00E9 (e-acute); a full word of Latin-1 accents round-trips to UTF-8. */
+static void test_append_transcodes_word(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    const char latin1[] = { 'c', 'a', 'f', (char)0xE9, '\0' }; /* "café" in Latin-1 */
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, latin1, NULL), PV_OK);
+    assert_string_equal(pv_at(v, 0)->text, "caf\xC3\xA9");
+    pv_free(v);
+}
+
+/* Windows-1252 0x80-0x9F carry printable glyphs (unlike Latin-1 C1 controls):
+ * 0x93/0x94 are curly double quotes -> U+201C/U+201D (3-byte UTF-8 each). */
+static void test_append_transcodes_cp1252_quotes(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    const char cp1252[] = { (char)0x93, 'h', 'i', (char)0x94, '\0' };
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, cp1252, NULL), PV_OK);
+    assert_string_equal(pv_at(v, 0)->text, "\xE2\x80\x9C" "hi" "\xE2\x80\x9D");
+    pv_free(v);
+}
+
+/* Undefined Windows-1252 positions (0x81 here) have no glyph and still fail to '?'. */
+static void test_append_undefined_cp1252_is_qmark(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    const char bad[] = { 'a', (char)0x81, 'b', '\0' };
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, bad, NULL), PV_OK);
+    assert_string_equal(pv_at(v, 0)->text, "a?b");
+    pv_free(v);
+}
+
+/* Valid multi-byte UTF-8 input passes through untouched (no double-encoding). */
+static void test_append_valid_utf8_passthrough(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "caf\xC3\xA9", NULL), PV_OK);
+    assert_string_equal(pv_at(v, 0)->text, "caf\xC3\xA9");
     pv_free(v);
 }
 
@@ -172,6 +215,141 @@ static void test_build_heading_level(void **state) {
     const pv_run *p = find_text(v, "body");
     assert_non_null(p);
     assert_int_equal(p->heading, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Inline emphasis: <b>/<strong> set bold, <i>/<em> set italic, on the wrapped run
+ * only; surrounding text stays plain. Nested b>i is both. */
+static void test_build_inline_emphasis(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>plain<b>bb</b><strong>ss</strong><i>ii</i>"
+                             "<em>ee</em><b><i>both</i></b></p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *plain = find_text(v, "plain");
+    assert_non_null(plain);
+    assert_int_equal(plain->bold, 0);
+    assert_int_equal(plain->italic, 0);
+
+    const pv_run *bb = find_text(v, "bb");
+    assert_non_null(bb);
+    assert_int_equal(bb->bold, 1);
+    assert_int_equal(bb->italic, 0);
+
+    const pv_run *ss = find_text(v, "ss");
+    assert_non_null(ss);
+    assert_int_equal(ss->bold, 1);
+
+    const pv_run *ii = find_text(v, "ii");
+    assert_non_null(ii);
+    assert_int_equal(ii->bold, 0);
+    assert_int_equal(ii->italic, 1);
+
+    const pv_run *ee = find_text(v, "ee");
+    assert_non_null(ee);
+    assert_int_equal(ee->italic, 1);
+
+    const pv_run *both = find_text(v, "both");
+    assert_non_null(both);
+    assert_int_equal(both->bold, 1);
+    assert_int_equal(both->italic, 1);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Unordered list: each <li>'s first run is prefixed with a bullet marker and
+ * carries list depth 1. */
+static void test_build_unordered_list(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><ul><li>apple</li><li>pear</li></ul></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "\xE2\x80\xA2 apple"); /* "* apple" */
+    assert_non_null(a);
+    assert_int_equal(a->indent, 1);
+    const pv_run *p = find_text(v, "\xE2\x80\xA2 pear");
+    assert_non_null(p);
+    assert_int_equal(p->indent, 1);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Ordered list: markers are 1-based ordinals; nested lists deepen the indent. */
+static void test_build_ordered_and_nested_list(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><ol><li>one</li><li>two<ul><li>sub</li></ul></li></ol></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *one = find_text(v, "1. one");
+    assert_non_null(one);
+    assert_int_equal(one->indent, 1);
+    const pv_run *two = find_text(v, "2. two");
+    assert_non_null(two);
+    assert_int_equal(two->indent, 1);
+    /* The nested <ul> item is a bullet at depth 2. */
+    const pv_run *sub = find_text(v, "\xE2\x80\xA2 sub");
+    assert_non_null(sub);
+    assert_int_equal(sub->indent, 2);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A table becomes a grid: each cell is one collected text run sharing the table's
+ * cont_id, with the column count = widest row. <th> cells are bold. */
+static void test_build_table_grid(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><table>"
+                             "<tr><th>Name</th><th>Age</th></tr>"
+                             "<tr><td>Ana</td><td>30</td></tr>"
+                             "</table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *name = find_text(v, "Name");
+    assert_non_null(name);
+    assert_int_equal(name->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(name->cont_cols, 2);
+    assert_int_equal(name->bold, 1); /* th */
+
+    const pv_run *ana = find_text(v, "Ana");
+    assert_non_null(ana);
+    assert_int_equal(ana->bold, 0); /* td */
+    /* All four cells share the one table container id. */
+    assert_int_equal(ana->cont_id, name->cont_id);
+    assert_true(name->cont_id >= 0);
+
+    const pv_run *age = find_text(v, "Age");
+    assert_non_null(age);
+    const pv_run *thirty = find_text(v, "30");
+    assert_non_null(thirty);
+    assert_int_equal(thirty->cont_id, name->cont_id);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Cell inner markup is flattened into the cell's text and not re-emitted as a
+ * separate run; the column count comes from the widest row. */
+static void test_build_table_flattens_cell(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><table><tr><td>a <b>bold</b> c</td>"
+                             "<td>x</td><td>y</td></tr></table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *cell = find_text(v, "a bold c");
+    assert_non_null(cell);
+    assert_int_equal(cell->cont_cols, 3);
+    /* "bold" is part of the cell text, not its own run. */
+    assert_null(find_text(v, "bold"));
+
     pv_free(v);
     hp_document_free(doc);
 }
@@ -604,12 +782,21 @@ int main(void) {
         cmocka_unit_test(test_append_copies_fields),
         cmocka_unit_test(test_append_image_copies_fields),
         cmocka_unit_test(test_append_image_null_args),
-        cmocka_unit_test(test_append_sanitizes_utf8),
+        cmocka_unit_test(test_append_transcodes_latin1),
+        cmocka_unit_test(test_append_transcodes_word),
+        cmocka_unit_test(test_append_transcodes_cp1252_quotes),
+        cmocka_unit_test(test_append_undefined_cp1252_is_qmark),
+        cmocka_unit_test(test_append_valid_utf8_passthrough),
         cmocka_unit_test(test_append_null_args),
         cmocka_unit_test(test_free_null_and_double),
         cmocka_unit_test(test_build_null_args),
         cmocka_unit_test(test_build_plain_text),
         cmocka_unit_test(test_build_heading_level),
+        cmocka_unit_test(test_build_inline_emphasis),
+        cmocka_unit_test(test_build_unordered_list),
+        cmocka_unit_test(test_build_ordered_and_nested_list),
+        cmocka_unit_test(test_build_table_grid),
+        cmocka_unit_test(test_build_table_flattens_cell),
         cmocka_unit_test(test_build_link_with_href),
         cmocka_unit_test(test_build_block_break_between_paragraphs),
         cmocka_unit_test(test_build_skips_script_and_style),

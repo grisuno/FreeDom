@@ -44,6 +44,9 @@ typedef enum rd_kind {
 typedef struct rd_block {
     rd_kind          kind;
     int              heading_level;  /* 1..6 for RD_HEADING, else 0 */
+    int              bold;           /* inline emphasis: inside <b>/<strong>/<th> */
+    int              italic;         /* inline emphasis: inside <i>/<em> */
+    int              indent;         /* list nesting depth (ul/ol ancestors); 0 if none */
     int              block_break;    /* nonzero: a block boundary precedes this block */
     char            *text;
     char            *href;

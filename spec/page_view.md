@@ -104,12 +104,32 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
 - **Enlace**: si el ancestro más cercano es un `<a>` con `href`, el run es `PV_LINK` y lleva ese
   `href`; si no, `PV_TEXT` con `href == NULL`.
 - **Encabezado**: `heading` = nivel (1..6) del ancestro `h1..h6` más cercano, o 0.
+- **Énfasis inline**: `bold` = 1 si algún ancestro es `<b>/<strong>/<th>`; `italic` = 1 si algún
+  ancestro es `<i>/<em>`. Es estructura (peso/inclinación del glifo), se transporta por defecto y
+  **no** está gateado por `caps.css`.
+- **Tablas**: cada celda `<td>/<th>` se emite como **un** run de texto recolectado (su markup
+  interno se aplana a texto plano, no se re-emite), anotado como item de un contenedor **grid**:
+  `cont_id` = id de la `<table>` ancestro, `cont_display` = `GRID`, `cont_cols` = la fila más ancha
+  (máx. celdas por `<tr>`, en `[1, PV_MAX_GRID_COLS]`). `<th>` es negrita. Así la capa de
+  presentación reusa el motor flex/grid (`box_tree`) y las celdas se alinean en columnas. `colspan`/
+  `rowspan` quedan fuera de alcance (tabla rectangular).
+- **Listas**: `indent` = profundidad de anidamiento (cantidad de ancestros `<ul>/<ol>`), 0 si no hay.
+  Al **primer** run de cada `<li>` se le antepone un marcador ASCII: `"* "` (viñeta U+2022) en lista
+  no ordenada, `"N. "` (ordinal 1-based entre los `<li>` hermanos) en ordenada. El marcador es texto
+  normal (hereda estilo, no requiere pintado especial); el indentado lo aplica la capa de
+  presentación (`indent * paso`). Atributos `start`/`value` de `<ol>` quedan fuera de alcance.
 - **Salto de bloque**: `block_break != 0` cuando el bloque contenedor más cercano del run difiere
   del bloque del run anterior, o cuando un `<br>`/`<hr>` precede al run. Bloques: `body, div, p,
   h1..h6, ul, ol, li, section, article, header, footer, nav, main, aside, blockquote, pre, table,
   tr, figure, form, fieldset, dl, dt, dd`.
-- **UTF-8**: `text` se normaliza a UTF-8 bien formado (bytes inválidos → `?`), porque el renderer
-  (cairo) rechaza UTF-8 inválido y muchas páginas llegan en codificaciones legadas (Latin-1).
+- **UTF-8**: `text` se normaliza a UTF-8 bien formado, porque el renderer (cairo) rechaza UTF-8
+  inválido y muchas páginas llegan en codificaciones legadas. Las secuencias UTF-8 válidas pasan
+  intactas. Un byte que **no** forma una secuencia UTF-8 válida se reinterpreta como **Windows-1252**
+  (superóptimo de Latin-1: cubre 0xA0–0xFF idéntico a ISO-8859-1, más comillas tipográficas y guiones
+  en 0x80–0x9F) y se reemite como su UTF-8 (p. ej. `0xE9` → `é`). Solo las posiciones **indefinidas**
+  de Windows-1252 (`0x81 0x8D 0x8F 0x90 0x9D`) caen a `?`. Esto recupera los acentos de páginas
+  Latin-1/Windows-1252 sin declaración de charset, sin dependencia nueva y de forma pura. La salida
+  puede ser más larga que la entrada (un byte ≥0x80 → hasta 3 bytes UTF-8).
 
 `href` se guarda **sin** normalizar (no se muestra; la navegación lo valida con `sf_validate_url`).
 

@@ -1,10 +1,3 @@
-#!/bin/bash
-echo "Building FreeDom Docker..."
-sudo docker build -t freedom-browser .
-sudo docker run -it --rm \
-  --name freedom-test \
-  -p 8080:8080 \
-  --cap-drop=ALL \
-  --security-opt no-new-privileges:true \
-  --memory="2g" \
-  freedom-browser
+#!/usr/bin/env bash
+# Thin wrapper. The docker build/run lives in the Makefile (single source of truth).
+exec make docker "$@"

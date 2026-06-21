@@ -72,6 +72,9 @@ typedef enum pv_form_method {
 typedef struct pv_run {
     pv_kind kind;
     int     heading;      /* 0 = body text; 1..6 = inside h1..h6 */
+    int     bold;         /* nonzero: inside <b>/<strong>/<th> (inline emphasis) */
+    int     italic;       /* nonzero: inside <i>/<em> (inline emphasis) */
+    int     indent;       /* list nesting depth (count of <ul>/<ol> ancestors); 0 if none */
     int     block_break;  /* nonzero: a block boundary precedes this run */
     char   *text;         /* PV_INPUT: the placeholder (text) or button label */
     char   *href;         /* PV_LINK target; PV_INPUT: the owning form's raw action */
@@ -146,6 +149,19 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
  * recently appended run. No-op when the view is empty or NULL. Both append helpers
  * default a new run's color to -1, so this only needs calling when a color is
  * present. */
+/* Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from
+ * <i>/<em>) on the most recently appended run. No-op on an empty or NULL view.
+ * Both append helpers default a new run to bold=0, italic=0. Emphasis is structure
+ * (which glyph weight/slant), not author styling, so it is carried by default and
+ * is not gated by caps.css. */
+void pv_set_emphasis(pv_view *v, int bold, int italic);
+
+/* Sets the list nesting depth (count of <ul>/<ol> ancestors) on the most recently
+ * appended run. No-op on an empty or NULL view; defaults to 0. The list marker
+ * ("* " or "N. ") is prepended to the run text by pv_build, not here. List
+ * structure is carried by default (not gated by caps.css). */
+void pv_set_indent(pv_view *v, int indent);
+
 void pv_set_color(pv_view *v, int fg_rgb);
 
 /* Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most

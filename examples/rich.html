@@ -20,6 +20,35 @@ you should see the tracking warning and one placeholder per image.</p>
 <script>document.title = "HACKED"; alert("must not run");</script>
 <button onclick="alert('must not fire')">do not click</button>
 
+<h2>Inline emphasis and accents</h2>
+<p>The engine paints <b>bold</b>, <strong>strong</strong>, <i>italic</i> and
+<em>emphasis</em> inline. Legacy-encoded accents must read correctly:
+caf&eacute;, ni&ntilde;o, &uuml;ber, &copy; 2026.</p>
+
+<h2>Unordered list</h2>
+<ul>
+  <li>First item</li>
+  <li>Second with a <a href="https://example.org/">link inside</a></li>
+  <li>Nested:
+    <ul><li>deeper one</li><li>deeper two</li></ul>
+  </li>
+</ul>
+
+<h2>Ordered list</h2>
+<ol>
+  <li>Step one</li>
+  <li>Step two</li>
+  <li>Step three</li>
+</ol>
+
+<h2>Table</h2>
+<table>
+  <tr><th>Name</th><th>Role</th><th>City</th></tr>
+  <tr><td>Ana</td><td>Engineer</td><td>Lima</td></tr>
+  <tr><td>Beto</td><td>Designer</td><td>Cusco</td></tr>
+  <tr><td>Cira</td><td>Analyst</td><td>Trujillo</td></tr>
+</table>
+
 <h3>End</h3>
 <p>If you can read the structure above with the image warning, the renderer works.</p>
 </body>

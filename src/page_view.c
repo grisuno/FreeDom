@@ -16,6 +16,7 @@
 #include "html_parse.h"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,7 +31,11 @@
 
 /* --- UTF-8 sanitisation (cairo rejects invalid UTF-8; legacy-encoded pages
  * carry bytes that are invalid UTF-8). Mirrors browser.c's sanitiser; kept local
- * so page_view stays self-contained. Output is never longer than the input. --- */
+ * so page_view stays self-contained. Valid UTF-8 passes through; a byte that is
+ * not part of a valid sequence is reinterpreted as Windows-1252 (a superset of
+ * Latin-1) and re-emitted as UTF-8, recovering accents instead of dropping to '?'.
+ * Output may be longer than the input (a single byte >=0x80 -> up to 3 UTF-8
+ * bytes), so the caller sizes for 3x. --- */
 
 static size_t utf8_seq_len(unsigned char c) {
     if (c < 0x80) return 1;
@@ -40,9 +45,40 @@ static size_t utf8_seq_len(unsigned char c) {
     return 0;
 }
 
+/* Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80). 0xA0..
+ * 0xFF map identically to Latin-1 (code point == byte). 0x80..0x9F carry the
+ * Windows-1252 printable glyphs; the five undefined positions return 0 (the caller
+ * emits '?'). */
+static unsigned int cp1252_to_ucs(unsigned char c) {
+    static const unsigned short hi[32] = {
+        0x20AC, 0x0000, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
+        0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x0000, 0x017D, 0x0000,
+        0x0000, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
+        0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
+    };
+    if (c < 0x80) return c;
+    if (c < 0xA0) return hi[c - 0x80];
+    return c; /* 0xA0..0xFF: Latin-1 == Unicode code point */
+}
+
+/* Encodes a BMP scalar (<= 0xFFFF, which covers all Windows-1252 targets) as
+ * UTF-8 into out (up to 3 bytes); returns the byte count written. */
+static size_t utf8_encode(unsigned int cp, char *out) {
+    if (cp < 0x80) { out[0] = (char)cp; return 1; }
+    if (cp < 0x800) {
+        out[0] = (char)(0xC0 | (cp >> 6));
+        out[1] = (char)(0x80 | (cp & 0x3F));
+        return 2;
+    }
+    out[0] = (char)(0xE0 | (cp >> 12));
+    out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+    out[2] = (char)(0x80 | (cp & 0x3F));
+    return 3;
+}
+
 static char *utf8_sanitized_dup(const char *s) {
     size_t n = strlen(s);
-    char *d = (char *)malloc(n + 1);
+    char *d = (char *)malloc(3 * n + 1); /* worst case: every byte -> 3-byte UTF-8 */
     if (d == NULL) return NULL;
     size_t i = 0, o = 0;
     while (i < n) {
@@ -60,7 +96,11 @@ static char *utf8_sanitized_dup(const char *s) {
             for (size_t k = 0; k < L; ++k) d[o++] = s[i + k];
             i += L;
         } else {
-            d[o++] = '?';
+            /* Not valid UTF-8: treat the lone byte as Windows-1252. Undefined
+             * positions (cp == 0) keep the legacy '?' fallback. */
+            unsigned int cp = cp1252_to_ucs(c);
+            if (cp == 0) d[o++] = '?';
+            else o += utf8_encode(cp, d + o);
             i += 1;
         }
     }
@@ -105,6 +145,9 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     pv_run *r = &v->runs[v->count++];
     r->kind = kind;
     r->heading = heading;
+    r->bold = 0;
+    r->italic = 0;
+    r->indent = 0;
     r->block_break = block_break;
     r->text = t;
     r->href = h;
@@ -146,6 +189,9 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     pv_run *r = &v->runs[v->count++];
     r->kind = PV_IMAGE;
     r->heading = heading;
+    r->bold = 0;
+    r->italic = 0;
+    r->indent = 0;
     r->block_break = block_break;
     r->text = t;
     r->href = NULL;
@@ -195,6 +241,9 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     pv_run *r = &v->runs[v->count++];
     r->kind = PV_INPUT;
     r->heading = heading;
+    r->bold = 0;
+    r->italic = 0;
+    r->indent = 0;
     r->block_break = block_break;
     r->text = t;
     r->href = ac;
@@ -214,6 +263,18 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     r->form_id = form_id;
     r->form_method = method;
     return PV_OK;
+}
+
+void pv_set_emphasis(pv_view *v, int bold, int italic) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->bold = bold ? 1 : 0;
+    r->italic = italic ? 1 : 0;
+}
+
+void pv_set_indent(pv_view *v, int indent) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].indent = (indent > 0) ? indent : 0;
 }
 
 void pv_set_color(pv_view *v, int fg_rgb) {
@@ -510,23 +571,47 @@ static int element_container(lxb_dom_element_t *el, pv_cont_info *ci) {
     return 1;
 }
 
+/* Inline emphasis carried by a tag: bold from <b>/<strong>/<th>, italic from
+ * <i>/<em>. <th> is a header cell, conventionally bold. */
+static int is_bold_tag(lxb_tag_id_t t) {
+    return t == LXB_TAG_B || t == LXB_TAG_STRONG || t == LXB_TAG_TH;
+}
+static int is_italic_tag(lxb_tag_id_t t) {
+    return t == LXB_TAG_I || t == LXB_TAG_EM;
+}
+
 /* Resolves the inline context of a text node: nearest <a href>, nearest heading
- * level, nearest block-level ancestor (defaults to base), and the inherited author
- * color (nearest ancestor that sets one, packed 0xRRGGBB, or -1). */
+ * level, nearest block-level ancestor (defaults to base), the inherited author
+ * color (nearest ancestor that sets one, packed 0xRRGGBB, or -1), the inline
+ * emphasis (bold/italic set if any ancestor up to base carries it), and the list
+ * context: the nearest <li> ancestor (*li, or NULL), the list nesting depth
+ * (*list_depth = count of <ul>/<ol> ancestors), and whether the innermost list is
+ * ordered (*ordered: the nearest <ol> appears before any <ul>). */
 static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const char **href, size_t *href_len,
                             const lxb_dom_node_t **block, int *heading,
-                            int *fg, int *bg,
+                            int *fg, int *bg, int *bold, int *italic,
+                            const lxb_dom_node_t **li, int *list_depth, int *ordered,
                             pv_container_reg *reg, pv_cont_info *cont) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
+    *bold = 0; *italic = 0;
+    *li = NULL; *list_depth = 0; *ordered = 0;
     cont->id = -1; cont->display = 0; cont->gap = 0;
     cont->justify = FX_JUSTIFY_START; cont->cols = 0;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
+    int got_li = 0, got_list_kind = 0;
 
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
             lxb_tag_id_t t = lxb_dom_element_tag_id(el);
+            if (is_bold_tag(t)) *bold = 1;
+            if (is_italic_tag(t)) *italic = 1;
+            if (!got_li && t == LXB_TAG_LI) { *li = p; got_li = 1; }
+            if (t == LXB_TAG_UL || t == LXB_TAG_OL) {
+                ++(*list_depth);
+                if (!got_list_kind) { *ordered = (t == LXB_TAG_OL); got_list_kind = 1; }
+            }
             if (!got_link && t == LXB_TAG_A) {
                 size_t hl = 0;
                 const lxb_char_t *h =
@@ -774,6 +859,72 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
 
 /* --- public: builder --- */
 
+/* 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the
+ * `start`/`value` attributes are out of scope). Counts preceding element siblings
+ * that are <li>. */
+static int li_ordinal(const lxb_dom_node_t *li) {
+    int n = 1;
+    for (const lxb_dom_node_t *p = li->prev; p != NULL; p = p->prev) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(p) == LXB_TAG_LI) ++n;
+    }
+    return n;
+}
+
+/* Builds the list marker for the first run of an <li>: "* " for an unordered list,
+ * "N. " for an ordered one. Written into out (size cap); out is left empty on bad
+ * args. ASCII only, so it is valid UTF-8 and safe to paint. */
+static void list_marker(int ordered, const lxb_dom_node_t *li, char *out, size_t cap) {
+    if (cap == 0) return;
+    if (ordered && li != NULL) {
+        int ord = li_ordinal(li);
+        snprintf(out, cap, "%d. ", ord);
+    } else {
+        snprintf(out, cap, "\xE2\x80\xA2 "); /* U+2022 BULLET + space */
+    }
+}
+
+/* Nearest <table> ancestor of n (up to base), or NULL. */
+static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+    for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(p) == LXB_TAG_TABLE) return p;
+        if (p == base) break;
+    }
+    return NULL;
+}
+
+/* Nonzero if n has a <td>/<th> ancestor up to base: its text was already emitted as
+ * one collected cell run, so the normal walk must not re-emit the inner text. */
+static int in_cell_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+    for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_tag_id_t t = node_tag(p);
+            if (t == LXB_TAG_TD || t == LXB_TAG_TH) return 1;
+        }
+        if (p == base) break;
+    }
+    return 0;
+}
+
+/* Grid column count of a table: the maximum number of <td>/<th> direct children of
+ * any descendant <tr>, clamped to [1, PV_MAX_GRID_COLS]. A table is laid out as a
+ * grid of equal columns (basic: colspan/rowspan are out of scope). */
+static int table_columns(const lxb_dom_node_t *table) {
+    int maxc = 1;
+    for (lxb_dom_node_t *n = table->first_child; n != NULL; n = node_next(n, table)) {
+        if (n->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(n) != LXB_TAG_TR) continue;
+        int c = 0;
+        for (const lxb_dom_node_t *k = n->first_child; k != NULL; k = k->next) {
+            if (k->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+                lxb_tag_id_t t = node_tag(k);
+                if (t == LXB_TAG_TD || t == LXB_TAG_TH) ++c;
+            }
+        }
+        if (c > maxc) maxc = c;
+    }
+    if (maxc > PV_MAX_GRID_COLS) maxc = PV_MAX_GRID_COLS;
+    return maxc;
+}
+
 pv_status pv_build(const hp_document *doc, pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
@@ -788,6 +939,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
     lxb_dom_node_t *base = (body != NULL) ? body : root;
 
     const lxb_dom_node_t *prev_block = NULL;
+    const lxb_dom_node_t *prev_li = NULL;  /* last <li> seen, to mark each item once */
     int pending_break = 0;
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
@@ -803,6 +955,41 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 continue;
             }
 
+            /* A table cell becomes one collected text run annotated as a grid item:
+             * the table is a grid container (cont_id), its column count is the widest
+             * row, and each cell is one column. This reuses the flex/grid layout
+             * engine (layout_container/box_tree) so cells align across rows. <th> is
+             * bold. The cell's inner text nodes are suppressed below (in_cell_subtree)
+             * so they are not re-emitted. Nested cells are handled by the outer cell. */
+            if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
+                && !in_skipped_subtree(n, base) && !in_cell_subtree(n, base)) {
+                const lxb_dom_node_t *table = nearest_table(n, base);
+                int cols = (table != NULL) ? table_columns(table) : 1;
+                int cid = (table != NULL) ? container_id(&reg, table) : -1;
+
+                char *raw = collect_text(n);
+                if (raw == NULL) { rc = PV_ERR_OOM; goto cleanup; }
+                char *cell = collapse_ws(raw, strlen(raw));
+                free(raw);
+                if (cell == NULL) { rc = PV_ERR_OOM; goto cleanup; }
+
+                /* The whole table is one block: the first cell breaks from the prior
+                 * block, the rest share it, so the grid is laid out as one unit. */
+                const lxb_dom_node_t *tblk = (table != NULL) ? table : n;
+                int brk = pending_break || (tblk != prev_block);
+                pending_break = 0;
+                prev_block = tblk;
+
+                /* An empty cell still occupies its column. */
+                pv_status st = pv_append(v, PV_TEXT, 0, brk,
+                                         (cell[0] != '\0') ? cell : " ", NULL);
+                free(cell);
+                if (st != PV_OK) { rc = st; goto cleanup; }
+                pv_set_emphasis(v, (t == LXB_TAG_TH) ? 1 : 0, 0);
+                pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols);
+                continue;
+            }
+
             if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON)
                 && !in_skipped_subtree(n, base)) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
@@ -811,9 +998,14 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
+                int unused_bold = 0, unused_italic = 0;
+                const lxb_dom_node_t *unused_li = NULL;
+                int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 resolve_context(n, base, &unused_href, &unused_hl, &block, &heading,
-                                &unused_fg, &unused_bg, &reg, &unused_cont);
+                                &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_li, &unused_depth, &unused_ordered,
+                                &reg, &unused_cont);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -857,9 +1049,14 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
+                int unused_bold = 0, unused_italic = 0;
+                const lxb_dom_node_t *unused_li = NULL;
+                int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 resolve_context(n, base, &unused_href, &unused_hl, &block, &heading,
-                                &unused_fg, &unused_bg, &reg, &unused_cont);
+                                &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_li, &unused_depth, &unused_ordered,
+                                &reg, &unused_cont);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -878,6 +1075,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         }
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
         if (in_skipped_subtree(n, base)) continue;
+        if (in_cell_subtree(n, base)) continue; /* already emitted as a collected cell run */
 
         lxb_dom_text_t *txt = lxb_dom_interface_text(n);
         const char *raw = (const char *)txt->char_data.data.data;
@@ -891,25 +1089,53 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
         const char *href = NULL;
         size_t href_len = 0;
         const lxb_dom_node_t *block = NULL;
-        int heading = 0, fg = -1, bg = -1;
+        int heading = 0, fg = -1, bg = -1, bold = 0, italic = 0;
+        const lxb_dom_node_t *li = NULL;
+        int list_depth = 0, ordered = 0;
         pv_cont_info cont;
-        resolve_context(n, base, &href, &href_len, &block, &heading, &fg, &bg, &reg, &cont);
+        resolve_context(n, base, &href, &href_len, &block, &heading, &fg, &bg,
+                        &bold, &italic, &li, &list_depth, &ordered, &reg, &cont);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
         prev_block = block;
 
+        /* Prepend the list marker ("* "/"N. ") to the first text run of each <li>,
+         * once per item. The marker is plain ASCII text, so it inherits the run's
+         * style and needs no special painting; the GUI indents the whole item by
+         * list_depth. A run that is only whitespace (e.g. between a nested </ul> and
+         * its </li>) carries no content, so it never claims the marker. */
+        int has_content = 0;
+        for (const char *c = collapsed; *c != '\0'; ++c) {
+            if (*c != ' ') { has_content = 1; break; }
+        }
+        char *marked = NULL;
+        if (li != NULL && li != prev_li && has_content) {
+            char mk[16];
+            list_marker(ordered, li, mk, sizeof mk);
+            size_t ml = strlen(mk), cl = strlen(collapsed);
+            marked = (char *)malloc(ml + cl + 1);
+            if (marked == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+            memcpy(marked, mk, ml);
+            memcpy(marked + ml, collapsed, cl + 1);
+        }
+        if (has_content) prev_li = li;
+        const char *text_for_run = (marked != NULL) ? marked : collapsed;
+
         char *href_dup = NULL;
         if (href != NULL) {
             href_dup = dup_n(href, href_len);
-            if (href_dup == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+            if (href_dup == NULL) { free(collapsed); free(marked); rc = PV_ERR_OOM; goto cleanup; }
         }
 
         pv_status st = pv_append(v, href_dup != NULL ? PV_LINK : PV_TEXT,
-                                 heading, brk, collapsed, href_dup);
+                                 heading, brk, text_for_run, href_dup);
         free(collapsed);
+        free(marked);
         free(href_dup);
         if (st != PV_OK) { rc = st; goto cleanup; }
+        pv_set_emphasis(v, bold, italic);
+        pv_set_indent(v, list_depth);
         pv_set_color(v, fg);
         pv_set_bgcolor(v, bg);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);

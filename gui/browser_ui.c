@@ -48,11 +48,17 @@
 #define UI_FONT_SIZE   14.0
 #define UI_TOOLBAR_H   36.0
 #define UI_TITLEBAR_H  30.0
+#define UI_TABBAR_H    30.0   /* height of the tab strip (between titlebar and toolbar) */
+#define UI_TAB_MIN_W   80.0   /* minimum drawn width of a tab before it shrinks further */
+#define UI_TAB_MAX_W   200.0  /* preferred width of a tab when there is room */
+#define UI_TAB_NEW_W   30.0   /* width of the trailing "new tab" (+) button */
+#define UI_TAB_CLOSE_W 18.0   /* width of a tab's close (x) hot zone at its right edge */
 #define UI_BTN_W       48.0
 #define UI_WIN_BTN_W   30.0
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
 #define UI_TEXT_MARGIN 20.0   /* left/right/top breathing room around page content */
+#define UI_LIST_INDENT 24.0   /* left indent (px) per list nesting level (ul/ol) */
 
 /* Vertical scrollbar in the content area's right gutter. The gutter width is
  * always reserved (subtracted from the content width) so the scroll affordance and
@@ -390,6 +396,29 @@ typedef struct ui_image {
     int              nat_w, nat_h;
 } ui_image;
 
+/* Maximum concurrent tabs. Bounded so the per-tab snapshot array is a fixed,
+ * auditable size (no unbounded growth from a hostile page opening tabs; this
+ * browser never opens a tab on a page's behalf anyway). */
+#define UI_MAX_TABS 16
+
+/* One tab's complete per-page state: everything that must persist when the tab is
+ * not the foreground one. The browser_window keeps the ACTIVE tab's copy in its own
+ * fields (so the 200+ render/event call sites stay unchanged); tab_save/tab_restore
+ * move this set in and out of the slot array on a switch. All owned pointers are
+ * transferred by value (no deep copy, no free): exactly one of {live window field,
+ * inactive slot} owns each allocation at any time. */
+typedef struct tab_ctx {
+    browser_state   bs;          /* history, URL bar, page text/title, exceptions */
+    rd_doc         *doc;         /* structured render, or NULL (text mode) */
+    rdp_caps        caps;        /* per-tab render capabilities (images/CSS/JS) */
+    double          scroll, content_total_h;
+    ui_input_state *inputs; size_t input_count; int focused_input;
+    ui_image       *images; size_t image_count;
+    char           *cur_html; size_t cur_html_len; char *cur_top;
+    int             loading;
+    const char     *hover_href; /* aliases doc; moves with it */
+} tab_ctx;
+
 typedef struct browser_window {
     struct wl_display    *display;
     struct wl_registry   *registry;
@@ -475,6 +504,12 @@ typedef struct browser_window {
     struct xkb_context *xkb_ctx;
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
+
+    /* Tabs. The active tab's state lives in the fields above; the other tabs are
+     * parked in tab_slots. tab_count >= 1 always; active_tab is in [0, tab_count). */
+    tab_ctx tab_slots[UI_MAX_TABS];
+    int     tab_count;
+    int     active_tab;
 } browser_window;
 
 static void redraw(browser_window *w);
@@ -1107,6 +1142,158 @@ static void do_load(browser_window *w, const char *url) {
     }
 }
 
+/* --- tabs --- */
+
+/* Parks the active tab's live state into its slot (a shallow move: the slot and the
+ * live fields briefly alias the same allocations; the live fields are overwritten
+ * by tab_restore before anything is freed). */
+static void tab_save(browser_window *w) {
+    tab_ctx *c = &w->tab_slots[w->active_tab];
+    c->bs = w->bs;
+    c->doc = w->doc;
+    c->caps = w->caps;
+    c->scroll = w->scroll;
+    c->content_total_h = w->content_total_h;
+    c->inputs = w->inputs; c->input_count = w->input_count; c->focused_input = w->focused_input;
+    c->images = w->images; c->image_count = w->image_count;
+    c->cur_html = w->cur_html; c->cur_html_len = w->cur_html_len; c->cur_top = w->cur_top;
+    c->loading = w->loading;
+    c->hover_href = w->hover_href;
+}
+
+/* Loads the active tab's slot into the live fields (the inverse move). */
+static void tab_restore(browser_window *w) {
+    tab_ctx *c = &w->tab_slots[w->active_tab];
+    w->bs = c->bs;
+    w->doc = c->doc;
+    w->caps = c->caps;
+    w->scroll = c->scroll;
+    w->content_total_h = c->content_total_h;
+    w->inputs = c->inputs; w->input_count = c->input_count; w->focused_input = c->focused_input;
+    w->images = c->images; w->image_count = c->image_count;
+    w->cur_html = c->cur_html; w->cur_html_len = c->cur_html_len; w->cur_top = c->cur_top;
+    w->loading = c->loading;
+    w->hover_href = c->hover_href;
+}
+
+/* Frees the LIVE page's owned state (used when closing the foreground tab). */
+static void free_live_page(browser_window *w) {
+    clear_doc(w);                 /* inputs, images, doc, hover_href */
+    free(w->cur_html); w->cur_html = NULL;
+    free(w->cur_top);  w->cur_top = NULL;
+    browser_free(&w->bs);
+    memset(&w->bs, 0, sizeof w->bs);
+}
+
+/* Frees a parked (inactive) tab's owned state. */
+static void tab_ctx_release(tab_ctx *c) {
+    if (c->images != NULL) {
+        for (size_t i = 0; i < c->image_count; ++i)
+            if (c->images[i].surface != NULL) cairo_surface_destroy(c->images[i].surface);
+        free(c->images);
+    }
+    free(c->inputs);
+    if (c->doc != NULL) rd_free(c->doc);
+    free(c->cur_html);
+    free(c->cur_top);
+    browser_free(&c->bs);
+    memset(c, 0, sizeof *c);
+}
+
+/* Brings tab idx to the foreground (no network: the cached doc is restored). */
+static void tab_switch(browser_window *w, int idx) {
+    if (idx < 0 || idx >= w->tab_count || idx == w->active_tab) return;
+    tab_save(w);
+    w->active_tab = idx;
+    tab_restore(w);
+    w->menu_open = 0;
+    w->url_bar_focused = 0;
+    const char *u = browser_current_url(&w->bs);
+    browser_set_url_bar(&w->bs, (u != NULL) ? u : "");
+    redraw(w);
+}
+
+/* Opens a new tab after the active one and loads url (the start page when NULL). */
+static void tab_new(browser_window *w, const char *url) {
+    if (w->tab_count >= UI_MAX_TABS) {
+        browser_set_status(&w->bs, "Tab limit reached.", now_ms());
+        redraw(w);
+        return;
+    }
+    tab_save(w);
+    int idx = w->active_tab + 1;
+    for (int i = w->tab_count; i > idx; --i) w->tab_slots[i] = w->tab_slots[i - 1];
+    memset(&w->tab_slots[idx], 0, sizeof w->tab_slots[idx]); /* drop the stale duplicate */
+    w->tab_count++;
+    w->active_tab = idx;
+
+    /* Blank live page, then load. */
+    w->doc = NULL; w->hover_href = NULL;
+    w->inputs = NULL; w->input_count = 0; w->focused_input = -1;
+    w->images = NULL; w->image_count = 0;
+    w->cur_html = NULL; w->cur_html_len = 0; w->cur_top = NULL;
+    w->scroll = 0.0; w->content_total_h = 0.0; w->loading = 0;
+    w->caps = rdp_caps_safe();
+    memset(&w->bs, 0, sizeof w->bs);
+    if (browser_init(&w->bs) != BROWSER_OK) { browser_set_page(&w->bs, "Freedom", "", 0); }
+    w->url_bar_focused = 1;
+    do_load(w, (url != NULL) ? url : "docs/index.html");
+    browser_url_bar_clear(&w->bs);
+    redraw(w);
+}
+
+/* Closes tab idx. Never closes the last tab (always keeps one). */
+static void uitab_close(browser_window *w, int idx) {
+    if (w->tab_count <= 1 || idx < 0 || idx >= w->tab_count) return;
+
+    if (idx == w->active_tab) {
+        free_live_page(w);
+    } else {
+        tab_ctx_release(&w->tab_slots[idx]);
+    }
+    for (int i = idx; i < w->tab_count - 1; ++i) w->tab_slots[i] = w->tab_slots[i + 1];
+    memset(&w->tab_slots[w->tab_count - 1], 0, sizeof w->tab_slots[0]);
+    w->tab_count--;
+
+    if (idx == w->active_tab) {
+        if (w->active_tab >= w->tab_count) w->active_tab = w->tab_count - 1;
+        tab_restore(w);
+        const char *u = browser_current_url(&w->bs);
+        browser_set_url_bar(&w->bs, (u != NULL) ? u : "");
+        w->menu_open = 0; w->url_bar_focused = 0;
+    } else if (idx < w->active_tab) {
+        w->active_tab--;
+    }
+    redraw(w);
+}
+
+/* Width of one tab: the strip (minus the trailing + button) split evenly, clamped to
+ * a readable maximum and a grabbable floor (many tabs shrink, they never vanish). */
+static double tab_width(const browser_window *w) {
+    double avail = (double)w->width - UI_TAB_NEW_W;
+    if (avail < 1.0) avail = 1.0;
+    double tw = avail / (double)w->tab_count;
+    if (tw > UI_TAB_MAX_W) tw = UI_TAB_MAX_W;
+    if (tw < 36.0) tw = 36.0;
+    return tw;
+}
+
+/* X of the "new tab" (+) button: right after the last tab, clamped to the reserved
+ * slot at the right edge. */
+static double newtab_x(const browser_window *w) {
+    double after = (double)w->tab_count * tab_width(w);
+    double maxx = (double)w->width - UI_TAB_NEW_W;
+    return (after < maxx) ? after : maxx;
+}
+
+/* Title shown on a tab: the page title, else the URL, else a placeholder. */
+static const char *tab_title(const browser_window *w, int i) {
+    const browser_state *bs = (i == w->active_tab) ? &w->bs : &w->tab_slots[i].bs;
+    if (bs->page_title != NULL && bs->page_title[0] != '\0') return bs->page_title;
+    if (bs->url_bar[0] != '\0') return bs->url_bar;
+    return "New tab";
+}
+
 /* --- painting --- */
 
 static void toolbar_rects(const browser_window *w,
@@ -1114,8 +1301,16 @@ static void toolbar_rects(const browser_window *w,
                           double *url_x, double *url_w,
                           double *go_x, double *menu_x);
 
-static double toolbar_top(const browser_window *w) {
+/* Top of the tab strip: directly under the client-side titlebar (or at the surface
+ * top under server-side decorations). */
+static double tabbar_top(const browser_window *w) {
     return w->use_csd ? UI_TITLEBAR_H : 0.0;
+}
+
+/* Top of the toolbar: under the tab strip, which is always reserved. The whole
+ * content area derives from this, so adding the strip reflows everything below it. */
+static double toolbar_top(const browser_window *w) {
+    return tabbar_top(w) + UI_TABBAR_H;
 }
 
 /* The content area rectangle below the toolbar, in surface coordinates. The
@@ -1320,7 +1515,7 @@ static void draw_text(cairo_t *cr, const char *s, double x, double y, int center
 
 typedef struct rc_frag {
     double      x, width, font_size;
-    int         bold, underline;
+    int         bold, italic, underline;
     ui_rgb      color;
     const char *text;     /* slice into a rd_block text (not owned) */
     size_t      len;
@@ -1348,6 +1543,7 @@ typedef struct rc_layout {
 typedef struct rc_state {
     double cur_top, pending_gap, pen_x, line_asc, line_desc;
     double prev_bottom;  /* bottom margin (px) of the last block, for CSS margin collapsing */
+    double indent_px;    /* left indent of the current line (list nesting), applied as row x_off */
     int    line_open, banner;
     int    bg_rgb;       /* current block's author background-color, or -1 */
     size_t line_first;
@@ -1375,8 +1571,9 @@ static rc_row *rc_add_row(rc_layout *L) {
     return &L->rows[L->nrow++];
 }
 
-static void content_font(cairo_t *cr, double size, int bold) {
-    cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL,
+static void content_font(cairo_t *cr, double size, int bold, int italic) {
+    cairo_select_font_face(cr, "sans-serif",
+                           italic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
                            bold ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, size);
 }
@@ -1400,8 +1597,8 @@ static void draw_slice(cairo_t *cr, const char *s, size_t n) {
 }
 
 static void block_style(const ui_theme *th, const rd_block *b,
-                        double *size, int *bold, int *underline, ui_rgb *color) {
-    *bold = 0; *underline = 0; *size = th->body_font; *color = th->text;
+                        double *size, int *bold, int *italic, int *underline, ui_rgb *color) {
+    *bold = 0; *italic = 0; *underline = 0; *size = th->body_font; *color = th->text;
     if (b->kind == RD_HEADING) {
         int lv = (b->heading_level >= 1 && b->heading_level <= UI_HEADING_LEVELS)
                  ? b->heading_level : 1;
@@ -1412,6 +1609,10 @@ static void block_style(const ui_theme *th, const rd_block *b,
     } else if (b->kind == RD_NOTICE) {
         *color = th->notice_text;
     }
+    /* Inline emphasis (b/strong/i/em) layers on top of the block's base style: a
+     * heading stays bold, a bold link stays a link. */
+    if (b->bold) *bold = 1;
+    if (b->italic) *italic = 1;
 }
 
 /* Vertical margins (px) of a block from the user-agent box model (box_style),
@@ -1423,8 +1624,8 @@ static void block_margins(const ui_theme *th, const rd_block *b,
     const char *tag = rd_block_tag(b);
     if (tag == NULL) { *top_px = th->paragraph_gap; *bottom_px = th->paragraph_gap; return; }
     bx_box box = bx_default_for_tag(tag);
-    double size; int bold, underline; ui_rgb color;
-    block_style(th, b, &size, &bold, &underline, &color);
+    double size; int bold, italic, underline; ui_rgb color;
+    block_style(th, b, &size, &bold, &italic, &underline, &color);
     *top_px = box.margin.top * size;
     *bottom_px = box.margin.bottom * size;
 }
@@ -1436,7 +1637,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (r != NULL) {
         r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
         r->first = s->line_first; r->count = L->nfrag - s->line_first;
-        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->x_off = 0.0; r->blk = NULL;
+        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->x_off = s->indent_px; r->blk = NULL;
     }
     s->cur_top += h;
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
@@ -1456,9 +1657,9 @@ static void open_line(rc_layout *L, rc_state *s) {
  * href tags every fragment produced (NULL for non-link runs) so a later hit-test
  * can recover the click target without re-walking the document. */
 static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
-                      const char *text, double size, int bold, int underline,
+                      const char *text, double size, int bold, int italic, int underline,
                       ui_rgb color, double content_w, const char *href) {
-    content_font(cr, size, bold);
+    content_font(cr, size, bold, italic);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
     double space_w = measure_slice(cr, " ", 1);
@@ -1484,7 +1685,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         rc_frag *f = rc_add_frag(L);
         if (f != NULL) {
             f->x = s->pen_x; f->width = ww; f->font_size = size;
-            f->bold = bold; f->underline = underline; f->color = color;
+            f->bold = bold; f->italic = italic; f->underline = underline; f->color = color;
             f->text = text + ws; f->len = wl; f->href = href;
         }
         s->pen_x += ww;
@@ -1499,17 +1700,17 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
 static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                             rc_state *s, const ui_theme *th, const rd_block *b,
                             double content_w) {
-    double size; int bold, underline; ui_rgb color;
-    block_style(th, b, &size, &bold, &underline, &color);
+    double size; int bold, italic, underline; ui_rgb color;
+    block_style(th, b, &size, &bold, &italic, &underline, &color);
     if (!w->force_theme && b->fg_rgb >= 0) color = rgb_from_packed(b->fg_rgb);
     const char *href = (b->kind == RD_LINK) ? b->href : NULL;
     if (b->kind == RD_NOTICE) {
         s->banner = 1;
-        flow_text(cr, L, s, th, b->text, size, bold, underline, color, content_w, href);
+        flow_text(cr, L, s, th, b->text, size, bold, italic, underline, color, content_w, href);
         flush_line(L, s, th);
         s->banner = 0;
     } else {
-        flow_text(cr, L, s, th, b->text, size, bold, underline, color, content_w, href);
+        flow_text(cr, L, s, th, b->text, size, bold, italic, underline, color, content_w, href);
     }
 }
 
@@ -1633,7 +1834,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         }
 
         if (b->kind == RD_INPUT) {
-            content_font(cr, th->body_font, 0);
+            content_font(cr, th->body_font, 0, 0);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
             double h = fe.height + 2.0 * UI_INPUT_PAD;
@@ -1649,7 +1850,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         }
 
         if (b->kind == RD_IMAGE) {
-            content_font(cr, th->body_font, 0);
+            content_font(cr, th->body_font, 0, 0);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
             /* A decoded image sizes the row to its on-screen height; otherwise the
@@ -1673,7 +1874,13 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         /* Author background travels on the row (unless the theme is forced); the
          * foreground tints the fragments inside flow_text_block. */
         s.bg_rgb = (!w->force_theme) ? b->bg_rgb : -1;
-        flow_text_block(cr, w, L, &s, th, b, content_w);
+        /* List items indent the whole block by their nesting depth; the marker text
+         * was prepended by page_view. Non-list blocks have indent 0. The available
+         * text width shrinks by the indent so wrapped lines stay inside the column. */
+        s.indent_px = (double)b->indent * UI_LIST_INDENT;
+        double avail_w = content_w - s.indent_px;
+        if (avail_w < 1.0) avail_w = 1.0;
+        flow_text_block(cr, w, L, &s, th, b, avail_w);
     }
     flush_line(L, &s, th);
     L->total_h = s.cur_top;
@@ -1687,7 +1894,7 @@ static double input_box_width(double content_w) {
 /* Width of a painted button: its label plus horizontal padding, clamped. */
 static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
                                double content_w) {
-    content_font(cr, th->body_font, 0);
+    content_font(cr, th->body_font, 0, 0);
     const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
                         : rd_input_label(b->input_type);
     double bw = measure_slice(cr, label, strlen(label)) + 2.0 * UI_BUTTON_HPAD;
@@ -1714,7 +1921,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         cairo_rectangle(cr, left, ry, bw, height);
         cairo_clip(cr);
         set_rgb(cr, th->button_text);
-        content_font(cr, th->body_font, 0);
+        content_font(cr, th->body_font, 0, 0);
         cairo_move_to(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD);
         draw_slice(cr, label, strlen(label));
         cairo_restore(cr);
@@ -1733,7 +1940,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     ui_input_state *st = find_input_state(w, b);
     const char *val = (st != NULL) ? tf_text(&st->field) : (b->value != NULL ? b->value : "");
 
-    content_font(cr, th->body_font, 0);
+    content_font(cr, th->body_font, 0, 0);
     cairo_save(cr);
     cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 4.0, height - 2.0);
     cairo_clip(cr);
@@ -1809,7 +2016,7 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     cairo_rectangle(cr, left, ry, content_w, row_h);
     cairo_stroke(cr);
 
-    content_font(cr, th->body_font, 0);
+    content_font(cr, th->body_font, 0, 0);
     cairo_save(cr);
     cairo_rectangle(cr, left + pad, ry, content_w - 2.0 * pad, row_h);
     cairo_clip(cr);
@@ -1877,7 +2084,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 cairo_rectangle(cr, rx + f->x, ry, f->width, r->height);
                 cairo_fill(cr);
             }
-            content_font(cr, f->font_size, f->bold);
+            content_font(cr, f->font_size, f->bold, f->italic);
             set_rgb(cr, f->color);
             cairo_move_to(cr, rx + f->x, baseline);
             draw_slice(cr, f->text, f->len);
@@ -2346,6 +2553,63 @@ static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset) {
     cairo_show_text(cr, msg);
 }
 
+/* Paints the tab strip: one cell per tab (the active one connected to the content
+ * background, the rest dimmed), each with its clipped title and a close 'x', then a
+ * trailing '+' to open a new tab. The geometry mirrors the pointer hit-test
+ * (tab_width/newtab_x) so a click lands on exactly what is drawn. Uses the chrome
+ * (monospace) font already selected by paint(). */
+static void draw_tabstrip(cairo_t *cr, browser_window *w) {
+    const ui_theme *th = &w->theme;
+    double top = tabbar_top(w);
+    double h = UI_TABBAR_H;
+
+    set_rgb(cr, th->titlebar_bg);
+    cairo_rectangle(cr, 0, top, w->width, h);
+    cairo_fill(cr);
+
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    double baseline = top + (h + fe.ascent - fe.descent) / 2.0;
+    double tw = tab_width(w);
+
+    for (int i = 0; i < w->tab_count; ++i) {
+        double x = (double)i * tw;
+        int active = (i == w->active_tab);
+        int hot = (w->ptr_y >= top && w->ptr_y < top + h
+                   && w->ptr_x >= x && w->ptr_x < x + tw);
+
+        set_rgb(cr, active ? th->content_bg : (hot ? th->btn_hover_bg : th->toolbar_bg));
+        cairo_rectangle(cr, x, top, tw - 1.0, h);
+        cairo_fill(cr);
+
+        cairo_save(cr);
+        cairo_rectangle(cr, x + 6.0, top, tw - 6.0 - UI_TAB_CLOSE_W, h);
+        cairo_clip(cr);
+        set_rgb(cr, active ? th->chrome_text : th->chrome_text_dim);
+        cairo_move_to(cr, x + 6.0, baseline);
+        cairo_show_text(cr, tab_title(w, i));
+        cairo_restore(cr);
+
+        if (w->tab_count > 1) {
+            double cxr = x + tw - UI_TAB_CLOSE_W;
+            int cl_hot = (w->ptr_y >= top && w->ptr_y < top + h
+                          && w->ptr_x >= cxr && w->ptr_x < x + tw);
+            set_rgb(cr, cl_hot ? th->close_button
+                                : (active ? th->chrome_text : th->chrome_text_dim));
+            draw_text(cr, "x", cxr + UI_TAB_CLOSE_W / 2.0, baseline, 1);
+        }
+    }
+
+    double nx = newtab_x(w);
+    int nhot = (w->ptr_y >= top && w->ptr_y < top + h
+                && w->ptr_x >= nx && w->ptr_x < nx + UI_TAB_NEW_W);
+    set_rgb(cr, nhot ? th->btn_hover_bg : th->titlebar_bg);
+    cairo_rectangle(cr, nx, top, UI_TAB_NEW_W, h);
+    cairo_fill(cr);
+    set_rgb(cr, th->chrome_text);
+    draw_text(cr, "+", nx + UI_TAB_NEW_W / 2.0, baseline, 1);
+}
+
 static void paint(browser_window *w) {
     cairo_t *cr = cairo_create(w->cairo_surface);
     const ui_theme *th = &w->theme;
@@ -2382,6 +2646,9 @@ static void paint(browser_window *w) {
         set_rgb(cr, th->close_button);
         draw_text(cr, "X", close_x + UI_WIN_BTN_W / 2.0, bl, 1);
     }
+
+    /* Tab strip, between the titlebar and the toolbar. */
+    draw_tabstrip(cr, w);
 
     /* Toolbar. */
     set_rgb(cr, th->toolbar_bg);
@@ -2483,6 +2750,15 @@ static void paint(browser_window *w) {
     cairo_rectangle(cr, 0, content_top, w->width, (double)w->height - content_top);
     cairo_fill(cr);
 
+    /* Clip every page paint to the content viewport. Rows that straddle the top
+     * edge (partly scrolled above content_top) would otherwise bleed up over the
+     * toolbar/tab strip; the clip is the single guard that keeps content under the
+     * chrome no matter the scroll offset. Released before the chrome overlays
+     * (scrollbar, menu, toast) so those still paint over the full surface. */
+    cairo_save(cr);
+    cairo_rectangle(cr, 0, content_top, w->width, (double)w->height - content_top);
+    cairo_clip(cr);
+
     w->content_total_h = 0.0;  /* each branch sets the real height; 0 => no scrollbar */
     if (w->doc != NULL) {
         paint_structured(cr, w, content_top, content_h);
@@ -2533,6 +2809,8 @@ static void paint(browser_window *w) {
             ui_layout_free(&lay);
         }
     }
+
+    cairo_restore(cr);  /* end content-viewport clip */
 
     /* Scrollbar over the content's right gutter, then overlays on top. */
     draw_scrollbar(cr, w);
@@ -2686,6 +2964,24 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     /* state == WL_POINTER_BUTTON_STATE_PRESSED below. */
 
     double ttop = toolbar_top(w);
+
+    /* Tab strip (between titlebar and toolbar): the "+" opens a tab, the close 'x' at
+     * a tab's right edge closes it, and a click on the body switches to it. */
+    double tbtop = tabbar_top(w);
+    if (w->ptr_y >= tbtop && w->ptr_y < tbtop + UI_TABBAR_H) {
+        double nx = newtab_x(w);
+        if (w->ptr_x >= nx && w->ptr_x < nx + UI_TAB_NEW_W) { tab_new(w, NULL); return; }
+        double tw = tab_width(w);
+        int i = (int)(w->ptr_x / tw);
+        if (i >= 0 && i < w->tab_count) {
+            double cxr = (double)i * tw + tw - UI_TAB_CLOSE_W;
+            if (w->tab_count > 1 && w->ptr_x >= cxr && w->ptr_x < (double)i * tw + tw)
+                uitab_close(w, i);
+            else
+                tab_switch(w, i);
+        }
+        return; /* clicks anywhere on the strip stay on the strip */
+    }
 
     /* While the options menu is open it captures the click: a hit on a row toggles
      * that capability and re-renders from cache (no network); any click elsewhere
@@ -2925,6 +3221,25 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
         return;
     }
 
+    /* Tab shortcuts. Ctrl+T opens a tab, Ctrl+W closes the current one (never the
+     * last), Ctrl+Tab / Ctrl+Shift+Tab cycle forward / backward. */
+    if (ctrl && !shift && (sym == XKB_KEY_t || sym == XKB_KEY_T)) {
+        tab_new(w, NULL);
+        return;
+    }
+    if (ctrl && !shift && (sym == XKB_KEY_w || sym == XKB_KEY_W)) {
+        uitab_close(w, w->active_tab);
+        return;
+    }
+    if (ctrl && (sym == XKB_KEY_Tab || sym == XKB_KEY_ISO_Left_Tab)) {
+        if (w->tab_count > 1) {
+            int next = shift ? (w->active_tab + w->tab_count - 1) % w->tab_count
+                             : (w->active_tab + 1) % w->tab_count;
+            tab_switch(w, next);
+        }
+        return;
+    }
+
     /* Editing the configurable User-Agent in the options menu takes priority over
      * the URL bar and page scroll. Enter applies it (used on the next load). */
     if (w->ua_field_focused) {
@@ -3111,6 +3426,8 @@ ui_status ui_run_browser(const char *start_url) {
     w.caps = rdp_caps_safe();   /* Privacy by Default: images/CSS/JS off */
     w.scroll = 0.0;
     w.focused_input = -1;       /* no form control focused */
+    w.tab_count = 1;            /* the foreground tab lives in the window's own fields */
+    w.active_tab = 0;
     tf_init(&w.ua_field);       /* empty => SF_DEFAULT_USER_AGENT */
 
     if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
@@ -3232,6 +3549,12 @@ ui_status ui_run_browser(const char *start_url) {
     if (w.xkb_keymap) xkb_keymap_unref(w.xkb_keymap);
     if (w.xkb_state) xkb_state_unref(w.xkb_state);
     xkb_context_unref(w.xkb_ctx);
+
+    /* Release background tabs (parked in slots); the foreground tab is freed via the
+     * live fields just below. */
+    for (int i = 0; i < w.tab_count; ++i) {
+        if (i != w.active_tab) tab_ctx_release(&w.tab_slots[i]);
+    }
 
     clear_doc(&w);
     hb_free(w.hosts);

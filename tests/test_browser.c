@@ -175,23 +175,30 @@ static void test_set_page_sanitizes_invalid_utf8(void **state) {
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
-    /* "Im" + 0xE1 (Latin-1 'a-acute', a lone byte in UTF-8) + "genes" */
+    /* "Im" + 0xE1 (Latin-1 'a-acute', invalid UTF-8) + "genes": the lone high byte
+     * is recovered as Windows-1252 and re-emitted as UTF-8 ("Imágenes"). */
     const char latin1_text[] = { 'I', 'm', (char)0xE1, 'g', 'e', 'n', 'e', 's', '\0' };
     const char latin1_title[] = { 'C', 'a', 'f', (char)0xE9, '\0' }; /* "Caf" + 0xE9 */
 
     assert_int_equal(browser_set_page(&bs, latin1_title, latin1_text, 0), BROWSER_OK);
-    assert_string_equal(bs.page_text, "Im?genes");
-    assert_string_equal(bs.page_title, "Caf?");
+    assert_string_equal(bs.page_text, "Im\xC3\xA1genes");
+    assert_string_equal(bs.page_title, "Caf\xC3\xA9");
 
     /* Well-formed UTF-8 (2-byte 'a-acute' = 0xC3 0xA1) must pass through intact. */
     const char utf8_text[] = { 'I', 'm', (char)0xC3, (char)0xA1, 'g', 'e', 'n', 'e', 's', '\0' };
     assert_int_equal(browser_set_page(&bs, "ok", utf8_text, 0), BROWSER_OK);
     assert_string_equal(bs.page_text, utf8_text);
 
-    /* A lone continuation byte and a truncated lead are both replaced. */
+    /* A lone 0x80 (Windows-1252 Euro) and a truncated lead 0xE0 (Latin-1 'a-grave')
+     * are both decoded, not dropped: "€aà". */
     const char broken[] = { (char)0x80, 'a', (char)0xE0, '\0' };
     assert_int_equal(browser_set_page(&bs, "x", broken, 0), BROWSER_OK);
-    assert_string_equal(bs.page_text, "?a?");
+    assert_string_equal(bs.page_text, "\xE2\x82\xAC" "a" "\xC3\xA0");
+
+    /* An undefined Windows-1252 position (0x81) has no glyph and still fails to '?'. */
+    const char undef[] = { 'a', (char)0x81, 'b', '\0' };
+    assert_int_equal(browser_set_page(&bs, "x", undef, 0), BROWSER_OK);
+    assert_string_equal(bs.page_text, "a?b");
 
     browser_free(&bs);
 }

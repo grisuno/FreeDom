@@ -77,7 +77,8 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
              $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img view clean
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-afl \
+        deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
 
@@ -317,6 +318,80 @@ fuzz-img: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_image_decode.c $(SRC_DIR)/image_decode.c \
 	  -o $(BUILD_DIR)/fuzz_image_decode $(PNG_LIBS)
 	./$(BUILD_DIR)/fuzz_image_decode -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the display-list builder (clang + libFuzzer). Arbitrary
+# bytes -> DOM -> pv_build must never crash/leak/UB: covers the UTF-8/Windows-1252
+# transcoder, inline emphasis, list markers and the table-to-grid cell collection.
+fuzz-pv: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_color.c \
+	  $(SRC_DIR)/box_style.c $(SRC_DIR)/html_parse.c \
+	  -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
+	./$(BUILD_DIR)/fuzz_page_view -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
+
+# ====================================================================== #
+#  Developer / packaging targets centralised from the old *.sh scripts.  #
+#  Single source of truth: these reuse the canonical source/object lists #
+#  defined above, so a new module added to the build is picked up here    #
+#  automatically. The standalone scripts (fuzz.sh, build_deb.sh, ...) now #
+#  delegate to these targets instead of carrying a hand-maintained copy   #
+#  of the build (which is how fuzz.sh silently went stale).               #
+# ====================================================================== #
+
+# System build dependencies + a source build of Lexbor (Debian/Ubuntu). Centralises
+# the dependency half of install.sh. NOTE: install.sh's source-mutating `sed`
+# patches (OpenSSL<3.3 / CI host workarounds) are deliberately NOT here -- a build
+# target must never rewrite tracked sources. Run them only on the hosts that need
+# them, from install.sh.
+deps:
+	sudo apt-get update -y
+	sudo apt-get install -y build-essential cmake libcairo2-dev libwayland-dev \
+	  wayland-protocols libxkbcommon-dev libcurl4-openssl-dev libssl-dev fontconfig \
+	  libfreetype6-dev libcmocka-dev libpng-dev libwayland-bin git
+	@if [ ! -d /usr/local/include/lexbor ]; then \
+	  echo "[*] building Lexbor from source..."; \
+	  d=$$(mktemp -d); git clone --depth 1 https://github.com/lexbor/lexbor.git $$d/lexbor; \
+	  cmake -S $$d/lexbor -B $$d/lexbor -DLEXBOR_BUILD_SEPARATELY=OFF; \
+	  $(MAKE) -C $$d/lexbor -j$$(nproc); sudo $(MAKE) -C $$d/lexbor install; sudo ldconfig; \
+	  rm -rf $$d; \
+	else echo "[+] Lexbor already installed"; fi
+
+# Run the GUI browser, optionally on a URL: `make run URL=https://example.com`.
+# Centralises run_freedom.sh (minus its nested-weston launch, which is only for a
+# headless CI box; in a real Wayland session the binary runs directly).
+run: $(BUILD_DIR)/freedom
+	./$(BUILD_DIR)/freedom $(URL)
+
+# AFL++ coverage-guided fuzzing of the full headless pipeline. Replaces fuzz.sh,
+# whose hand-copied object list drifted out of date: this rebuilds the canonical
+# `freedom` target with the AFL compiler, so the source list can never diverge.
+# Requires afl++ (`sudo apt install afl++`).
+fuzz-afl: CC := afl-clang-fast
+fuzz-afl: clean $(BUILD_DIR)/freedom
+	mkdir -p $(FUZZ_DIR)/in $(FUZZ_DIR)/out
+	[ -e $(FUZZ_DIR)/in/seed.html ] || echo '<html><body><p>seed</p></body></html>' > $(FUZZ_DIR)/in/seed.html
+	afl-fuzz -i $(FUZZ_DIR)/in -o $(FUZZ_DIR)/out -- ./$(BUILD_DIR)/freedom --headless @@
+
+# Build the Debian .deb, then restore build/ ownership: debuild runs under
+# fakeroot/sudo and leaves build/ root-owned, which then blocks an ordinary `make`.
+# Centralises build_deb.sh.
+deb:
+	rm -fr debian/*.ex debian/*.EX debian/freedom.doc-base*
+	$(MAKE) clean
+	chmod +x debian/rules
+	debuild -us -uc -b -d
+	@echo "[*] restoring build/ ownership after the fakeroot/sudo build"
+	-sudo chown -R $$(id -u):$$(id -g) $(BUILD_DIR)
+	@echo "[+] package built: ../freedom_0.0.3-1_amd64.deb"
+
+# Build and run the Zero-Trust Docker image (Xvfb+weston+noVNC on :8080). Centralises
+# docker_run.sh; the in-container entrypoint stays in docker-entrypoint.sh (it is the
+# image's ENTRYPOINT, run inside the container, not a host build command).
+docker:
+	sudo docker build -t freedom-browser .
+	sudo docker run -it --rm --name freedom-test -p 8080:8080 \
+	  --cap-drop=ALL --security-opt no-new-privileges:true --memory=2g freedom-browser
 
 # --- UI demo (Hito 4): Wayland + Cairo. Visual test, not part of `make test`. ---
 # Generated xdg-shell glue (relaxed flags: generated code is not ours to harden).

@@ -87,16 +87,48 @@ static size_t utf8_seq_len(unsigned char c) {
     return 0;
 }
 
-/* Duplicates s as guaranteed well-formed UTF-8: any byte not part of a valid
- * sequence (overlong, surrogate, out-of-range, lone byte) is replaced with '?'.
- * Remote pages are hostile data: many are served in legacy encodings (Latin-1)
- * whose high bytes are invalid UTF-8, and a single invalid byte poisons the text
- * renderer (cairo_show_text rejects invalid UTF-8 and silently stops drawing).
- * Output is never longer than the input, so malloc(n+1) is sufficient. */
+/* Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80). 0xA0..
+ * 0xFF map identically to Latin-1; 0x80..0x9F carry the Windows-1252 glyphs; the
+ * five undefined positions return 0 (the caller emits '?'). */
+static unsigned int cp1252_to_ucs(unsigned char c) {
+    static const unsigned short hi[32] = {
+        0x20AC, 0x0000, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
+        0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x0000, 0x017D, 0x0000,
+        0x0000, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
+        0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
+    };
+    if (c < 0x80) return c;
+    if (c < 0xA0) return hi[c - 0x80];
+    return c;
+}
+
+/* Encodes a BMP scalar (<= 0xFFFF) as UTF-8 into out (up to 3 bytes); returns the
+ * byte count written. */
+static size_t utf8_encode(unsigned int cp, char *out) {
+    if (cp < 0x80) { out[0] = (char)cp; return 1; }
+    if (cp < 0x800) {
+        out[0] = (char)(0xC0 | (cp >> 6));
+        out[1] = (char)(0x80 | (cp & 0x3F));
+        return 2;
+    }
+    out[0] = (char)(0xE0 | (cp >> 12));
+    out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+    out[2] = (char)(0x80 | (cp & 0x3F));
+    return 3;
+}
+
+/* Duplicates s as guaranteed well-formed UTF-8. Valid UTF-8 passes through; a
+ * byte not part of a valid sequence (overlong, surrogate, out-of-range, lone byte)
+ * is reinterpreted as Windows-1252 (a superset of Latin-1) and re-emitted as UTF-8,
+ * recovering accents from legacy-encoded pages instead of dropping them to '?'.
+ * Remote pages are hostile data: many are served in legacy encodings whose high
+ * bytes are invalid UTF-8, and a single invalid byte poisons the text renderer
+ * (cairo_show_text rejects invalid UTF-8 and silently stops drawing). Output may be
+ * longer than the input (a byte >=0x80 -> up to 3 UTF-8 bytes), so size for 3x. */
 static char *utf8_sanitized_dup(const char *s) {
     if (s == NULL) return NULL;
     size_t n = strlen(s);
-    char *d = (char *)malloc(n + 1);
+    char *d = (char *)malloc(3 * n + 1);
     if (d == NULL) return NULL;
 
     size_t i = 0, o = 0;
@@ -115,7 +147,9 @@ static char *utf8_sanitized_dup(const char *s) {
             for (size_t k = 0; k < L; ++k) d[o++] = s[i + k];
             i += L;
         } else {
-            d[o++] = '?';
+            unsigned int cp = cp1252_to_ucs(c);
+            if (cp == 0) d[o++] = '?';
+            else o += utf8_encode(cp, d + o);
             i += 1;
         }
     }

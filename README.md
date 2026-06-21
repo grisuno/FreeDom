@@ -62,6 +62,7 @@ The name reflects its core goals:
 - **GUI & Usability**:
   - Visible vertical scrollbar with drag and click support
   - Vim-style keyboard navigation (`j`/`k`, `space`/`b`, `gg`/`G`, etc.)
+  - Tabs Shortcuts `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`.
   - Window controls: maximize, minimize, edge resize, titlebar drag
   - Sepia reading mode + Light/Dark themes with "Force theme colors" toggle
   - Dark mode + Dark theme with "Force theme colors" toggle

@@ -55,7 +55,7 @@ justificarse por reducción de superficie de ataque, no por conveniencia.
 
 ## 3. Metodología: SDD + TDD estricto
 
-Para cada módulo, el ciclo es inviolable:
+Para cada módulo, el ciclo es inviolable y **en este orden**:
 
 1. **Spec** — `spec/<modulo>.md`: entradas, salidas, tabla de errores, garantías de seguridad,
    y qué queda fuera de alcance.
@@ -63,10 +63,15 @@ Para cada módulo, el ciclo es inviolable:
    implementación todavía.
 3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar.
 4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas.
-5. **Audit** — `make asan` (ASan+UBSan), `valgrind`, `cppcheck`.
+5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`.
+6. **Fuzzing** — el path que toca contenido remoto se fuzzea (libFuzzer: `make fuzz`/`fuzz-pv`/
+   `fuzz-js`/`fuzz-img`; AFL++: `make fuzz-afl`). Cero crashes/leaks/UB antes de cerrar.
+7. **Documentación** — **recién después de validar y fuzzear** se documenta: se actualiza la spec,
+   este `CLAUDE.md` (hito → cerrado, doctrina nueva) y la memoria. Documentar antes de validar es
+   documentar lo que todavía no es verdad.
 
 **No escribas la implementación antes que la spec y el test.** No avances de hito sin que el
-anterior esté verde y auditado.
+anterior esté verde, validado y fuzzeado.
 
 **Diseño orientado a prueba:** la lógica de seguridad va en **funciones puras sin I/O** (la
 superficie verificable directamente); los orquestadores con red/SO solo cablean y llaman a esas
@@ -127,7 +132,25 @@ Targets:
 - `make test` — compila y ejecuta la suite CMocka. Hasta que exista la implementación de un
   módulo, **enlaza con fallo a propósito** (estado rojo de TDD).
 - `make asan` — la misma suite bajo AddressSanitizer + UBSan.
+- `make fuzz` / `fuzz-pv` / `fuzz-js` / `fuzz-img` — libFuzzer (parser HTML / display list
+  `page_view` / sandbox JS / decoder PNG). `make fuzz-afl` — AFL++ sobre el binario headless.
 - `make clean`.
+
+**El Makefile es la única fuente de verdad de los comandos.** Los scripts `*.sh` que duplicaban
+la compilación (y por eso se desincronizaban: `fuzz.sh` quedó obsoleto y dejó de compilar) ahora son
+**wrappers delgados** que delegan a un target: `fuzz.sh`→`fuzz-afl`, `build_deb.sh`→`deb`,
+`docker_run.sh`→`docker`, `run_freedom.sh`→`run`. Targets de desarrollo/empaquetado centralizados:
+- `make deps` — dependencias del sistema + Lexbor desde fuente (subconjunto seguro de `install.sh`;
+  **sin** los `sed` que mutan fuentes: un target jamás reescribe código versionado).
+- `make run [URL=...]` — corre la GUI.
+- `make deb` — construye el `.deb` y **restaura el dueño de `build/`** (`debuild` corre bajo
+  fakeroot/sudo y lo deja root; el target hace `chown -R $(id -u):$(id -g) build`, si no `make`
+  posterior falla por permisos).
+- `make docker` — build + run de la imagen Zero-Trust (el entrypoint del contenedor sigue en
+  `docker-entrypoint.sh`, que corre dentro de la imagen, no es comando de host).
+
+Si agregás una fuente nueva a la compilación, queda parametrizada en el Makefile y todos los targets
+(incluido `fuzz-afl`, que reusa el target `freedom` con `CC=afl-clang-fast`) la toman solos.
 
 Todo PR debe pasar `make test` y `make asan` limpios antes de integrarse.
 
@@ -170,10 +193,10 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla/readback normalizados. |
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock; worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
-| Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; color de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. |
+| Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; color de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`). |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
-| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo) | Toolbar, historial, barra de URL editable, scroll, menú de opciones, navegación por clic, submit de formularios. |
+| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo) | Toolbar, historial, barra de URL editable, scroll, menú de opciones, navegación por clic, submit de formularios. **Multi-pestaña** (tira de tabs entre titlebar y toolbar, `+`/cerrar/click, atajos `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`). El contenido va **recortado** (`cairo_clip`) al viewport bajo el chrome, así no se solapa con la toolbar al scrollear. |
 | Auditoría | `spec/threat-model.md` | Activos/adversarios/fronteras → mitigaciones. |
 
 **Decisiones de doctrina vigentes** (no evidentes en el código; no re-litigar):
@@ -235,11 +258,26 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   clearnet/`.onion`/`.i2p`, decide ruta, **fail-closed**) + proxy en `secure_fetch` (`sf_proxy_*`,
   SOCKS5h con DNS remoto / HTTP). `.i2p` acepta http (overlay autentica); redirects overlay resueltos
   en http. Toggles GUI + flags `--tor`/`--i2p`/`--torify` + env. Verificado E2E (jun 2026).
+- **Hito 8 — Transcodificación de charset.** El sanitizer UTF-8 (gemelo en `page_view` y `browser`)
+  ya no manda el byte inválido a `?`: lo reinterpreta como **Windows-1252** (superset de Latin-1) y lo
+  reemite como UTF-8, recuperando acentos de páginas legadas sin charset declarado. Solo las 5
+  posiciones indefinidas de CP-1252 caen a `?`. Puro, con tests; sin dependencia nueva.
+- **Hito 14 — Render más cercano a un navegador moderno (puro, TDD).** En `page_view`→`render_doc`→IPC
+  (`tab`)→GUI: **énfasis inline** (`bold`/`italic` desde `b/strong/th` e `i/em`; `content_font` con
+  slant), **listas** (`indent` por anidamiento `ul/ol` + marcador `•`/`N.` antepuesto al primer run de
+  cada `li`; la GUI sangra con `x_off`), **tablas** (cada `td/th` = un run recolectado anotado como item
+  **grid** del `<table>`, reusando `box_tree`/`flex_layout`; `colspan/rowspan` fuera de alcance). Demo
+  `examples/rich.html`. Fuzzeado (`make fuzz-pv`).
+- **Hito 15 — Multi-pestaña.** En `gui/browser_ui.c`: arreglo **save/restore** — el estado por-página
+  vive en los campos vivos de `browser_window` (los ~190 sitios de render/eventos no cambian) y
+  `tab_save`/`tab_restore` mueven ese set a/desde `tab_slots[]` (transferencia de propiedad, sin copia
+  ni free). Tira de tabs entre titlebar y toolbar (todo deriva de `toolbar_top()`, el contenido se
+  reubica solo); `+`/cerrar/click; `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`. Las funciones UI usan prefijo `uitab_`
+  para no chocar con el módulo `tab` (worker). Fix de solapamiento: `cairo_clip` al viewport de
+  contenido. *(Compila endurecido + ASan limpio; verificación visual Wayland pendiente al dueño.)*
 
 ### 7.3 Roadmap — por cruzar
 
-- **Hito 8 — Transcodificación de charset.** Mostrar acentos en vez de `?` (Latin-1 y otros →
-  UTF-8) en `page_view`/`browser_set_page`. Lógica pura + tests; sin dependencia nueva.
 - **Hito 9 — Fetch asíncrono.** Sacar `secure_fetch` del hilo del event loop (el worker/IPC de `tab`
   ya existe) para: spinner **animado** real, no congelar la UI, imágenes no bloqueantes, y
   `do_submit_post` (POST) con el mismo fallback navegable que el GET. *(También destraba I2P, que es
@@ -252,20 +290,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo; JS-vivo (mutación DOM
   → repintado, eventos, timers); `querySelector`/selectores CSS; otros formatos de imagen
   (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación); `pledge`/`unveil` en
-  OpenBSD; scroll al ancla de fragmento (`#id`); multiplexado de varias pestañas.
+  OpenBSD; scroll al ancla de fragmento (`#id`); render: `colspan`/`rowspan` y énfasis inline
+  **dentro** de celdas (hoy la celda se aplana a texto), sangría francesa real en listas, fetch
+  de pestaña en background (carga concurrente entre tabs, depende del Hito 9).
 
 ---
 
 ## 8. Reglas para el asistente (IA)
 
-- Aplica el ciclo SDD+TDD: spec → test rojo → código verde → refactor → audit. No te saltes
-  pasos ni adelantes implementación sin spec+test.
-- **Falla cerrado.** Ante la duda de seguridad, rechaza; nunca degrades una garantía por
-  conveniencia.
-- No introduzcas dependencias nuevas sin justificarlas por reducción de superficie de ataque, y
-  nunca `liboqs`/`oqsprovider` (OpenSSL nativo cubre PQC).
-- Sé honesto sobre lo no verificado: el código de red que no se pueda ejercitar aquí debe
-  marcarse como pendiente de prueba de integración, no presentarse como verificado.
+- Aplica el ciclo completo de §3 **en orden**: spec → test rojo → código verde → refactor →
+  validación (ASan) → fuzzing → documentación. No te saltes pasos ni adelantes implementación sin
+  spec+test, y no documentes antes de validar y fuzzear.
+- **Falla cerrado.** Ante la duda de seguridad, rechaza; nunca degrades una garantía por conveniencia.
+- No introduzcas dependencias nuevas sin justificarlas por reducción de superficie de ataque, y nunca
+  `liboqs`/`oqsprovider` (OpenSSL nativo cubre PQC).
+- Sé honesto sobre lo no verificado: el código de red/GUI que no se pueda ejercitar aquí se marca como
+  pendiente de prueba de integración / verificación visual, no como verificado.
 - Verifica que cada símbolo/flag/algoritmo existe en este host antes de recomendarlo
-  (`openssl list ...`, `pkg-config ...`). y haz fuzzing por ejemplo con American Fuzzy Lop afl++ (AFL)
-- Si ves fallos de seguridad o Deuda tecnica entras en modo boyscout y lo resuelves sin perder  funcionalidad nunca está fuera de scope el solucionar deuda tecnica y/o fallos de seguridad
+  (`openssl list ...`, `pkg-config ...`).
+- Comandos nuevos van al **Makefile** (única fuente de verdad), no a scripts sueltos que se
+  desincronizan (ver §5).
+- Modo **boyscout**: resolver deuda técnica y fallos de seguridad nunca está fuera de scope, siempre
+  sin perder funcionalidad.

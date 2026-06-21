@@ -81,6 +81,9 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     rd_block *b = &d->blocks[d->count++];
     b->kind = kind;
     b->heading_level = heading_level;
+    b->bold = 0;
+    b->italic = 0;
+    b->indent = 0;
     b->block_break = block_break;
     b->text = t;
     b->href = h;
@@ -191,6 +194,9 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
          * flex content this engine groups). */
         if ((r->kind == PV_TEXT || r->kind == PV_LINK) && d->count > 0) {
             rd_block *lb = &d->blocks[d->count - 1];
+            lb->bold = r->bold;
+            lb->italic = r->italic;
+            lb->indent = r->indent;
             lb->cont_id = r->cont_id;
             lb->cont_display = r->cont_display;
             lb->cont_gap = r->cont_gap;

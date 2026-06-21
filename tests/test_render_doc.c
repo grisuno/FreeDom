@@ -88,6 +88,37 @@ static void test_heading_paragraph_link(void **state) {
     pv_free(v);
 }
 
+/* Inline emphasis flags (bold/italic) carry from the run to the block, on text and
+ * link blocks alike, and are independent of caps (structure, not author styling). */
+static void test_emphasis_propagates(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "plain", NULL), PV_OK);
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "strong", NULL), PV_OK);
+    pv_set_emphasis(v, 1, 0);
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "slanted", NULL), PV_OK);
+    pv_set_emphasis(v, 0, 1);
+    assert_int_equal(pv_append(v, PV_LINK, 0, 0, "boldlink", "https://e.example/x"), PV_OK);
+    pv_set_emphasis(v, 1, 1);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    assert_int_equal((int)rd_count(d), 4);
+
+    assert_int_equal(rd_at(d, 0)->bold, 0);
+    assert_int_equal(rd_at(d, 0)->italic, 0);
+    assert_int_equal(rd_at(d, 1)->bold, 1);
+    assert_int_equal(rd_at(d, 1)->italic, 0);
+    assert_int_equal(rd_at(d, 2)->bold, 0);
+    assert_int_equal(rd_at(d, 2)->italic, 1);
+    assert_int_equal(rd_at(d, 3)->kind, RD_LINK);
+    assert_int_equal(rd_at(d, 3)->bold, 1);
+    assert_int_equal(rd_at(d, 3)->italic, 1);
+
+    rd_free(d);
+    pv_free(v);
+}
+
 /* --- images off (default): a notice is prepended and the image is blocked --- */
 
 static void test_image_off_emits_notice_and_blocked(void **state) {
@@ -421,6 +452,7 @@ int main(void) {
         cmocka_unit_test(test_block_tag_total),
         cmocka_unit_test(test_build_null_view_is_empty),
         cmocka_unit_test(test_heading_paragraph_link),
+        cmocka_unit_test(test_emphasis_propagates),
         cmocka_unit_test(test_image_off_emits_notice_and_blocked),
         cmocka_unit_test(test_no_images_no_notice),
         cmocka_unit_test(test_image_on_allows_normal),
