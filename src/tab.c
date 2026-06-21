@@ -183,7 +183,8 @@ static int write_view(int wfd, const pv_view *v) {
 
 /* Response: [ok:int32][title_len][title][text_len][text][view]. On any failure
  * the page is reset and ok==0 is reported (no partial/leaked state). */
-static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len) {
+static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+                              int run_js) {
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
@@ -191,7 +192,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     if (ok) {
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
-        if (title == NULL || text == NULL || pv_build(cs->doc, &view) != PV_OK) {
+        if (title == NULL || text == NULL || pv_build_ex(cs->doc, run_js, &view) != PV_OK) {
             ok = 0;
             child_reset_page(cs);
         }
@@ -298,6 +299,10 @@ static void child_main(int rfd, int wfd) {
         if (op == OP_QUIT) break;
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE) break; /* desync */
 
+        /* OP_LOAD carries a leading run_js flag byte (JS policy for this page). */
+        uint8_t run_js = 0;
+        if (op == OP_LOAD && read_full(rfd, &run_js, 1) != 0) break;
+
         size_t len = 0;
         if (read_full(rfd, &len, sizeof len) != 0) break;
         if (len > TAB_MAX_INPUT) break; /* parent enforces; defensive */
@@ -307,7 +312,7 @@ static void child_main(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len);
+        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js);
         else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
         else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
         free(buf);
@@ -508,6 +513,10 @@ tab_status tab_open(tab **out) {
 }
 
 tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out) {
+    return tab_load_ex(t, html, len, 0, out); /* JS off by default */
+}
+
+tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out) {
     if (t == NULL || out == NULL || html == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (len > TAB_MAX_INPUT) return TAB_ERR_TOO_LARGE;
@@ -515,8 +524,16 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out) {
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    tab_status sr = send_request(t, OP_LOAD, html, len);
-    if (sr != TAB_OK) return sr;
+    /* OP_LOAD framing: [op][run_js:1][len][html] (the flag precedes the payload so
+     * the html stays zero-copy). */
+    uint8_t op = OP_LOAD, flag = run_js ? 1 : 0;
+    if (write_full(t->req_fd, &op, 1) != 0
+     || write_full(t->req_fd, &flag, 1) != 0
+     || write_full(t->req_fd, &len, sizeof len) != 0
+     || (len != 0 && write_full(t->req_fd, html, len) != 0)) {
+        tab_refresh_alive(t);
+        return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
 
     int32_t ok = 0;
     if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);

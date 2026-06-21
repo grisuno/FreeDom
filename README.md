@@ -75,6 +75,10 @@ The name reflects its core goals:
   - **Omnibox address bar**: type an address to navigate (the `https://` scheme is added; `http://`
     is upgraded), or type anything else to run a **DuckDuckGo HTML** (no-JS) search. A dangerous
     scheme such as `javascript:` is searched, never executed (fail-closed).
+  - **Per-domain JavaScript policy**: Secure by Default, page JS is off unless you opt a host in.
+    A global tri-state mode (off / allowlist / on) plus a `js.conf` allowlist (same `/etc/hosts`
+    format and search path as the host filter, subdomains covered). Today this controls `<noscript>`
+    handling (a no-JS browser shows the fallback); executing allowlisted scripts is the next step.
   - **Tor support** (`.onion` routing via SOCKS5h proxy, remote DNS, no leaks)
   - **I2P support** (`.i2p` routing via HTTP proxy)
   - Clearnet Torification option (`--torify`)
@@ -144,7 +148,24 @@ The address bar works like a real **omnibox**:
 - **`best linux distro`** (or anything that is not a URL) → runs a **DuckDuckGo HTML** search (the
   no-JS endpoint, which renders cleanly in Freedom).
 - **`javascript:...` / `file:...` / `data:...`** → searched as text, **never executed** (fail-closed).
-- An existing **local path** (e.g. `examples/rich.html`) still opens from disk.
+- An existing **local path** (e.g. `examples/rich.html`) still opens from disk. A local page gets a
+  `file://` origin and **acts like https** for resolution: its relative links and images load from
+  disk, confined to the document's own directory (no `../` escape, no phone-home). Enable images
+  (`Ctrl+I`) to see local images such as the logo on the start page.
+
+### JavaScript policy (per-domain allowlist)
+
+Page JavaScript is hostile content, so it is **off by default**. A global tri-state mode controls it:
+
+- `off` — never run page JS;
+- `allowlist` (default) — run JS only for hosts listed in `js.conf`;
+- `on` — run JS for every host (least safe; explicit opt-in).
+
+Set it in the hamburger menu (the "JavaScript: …" row cycles the mode), with `--js[=off|allowlist|on]`,
+or with the `FREEDOM_JS` env var. `js.conf` uses the same `/etc/hosts` format and search path as the
+host filter (subdomains covered). Today the policy controls `<noscript>` rendering (a no-JS browser
+shows the fallback content; an allowlisted page hides it); executing allowlisted page scripts is the
+next milestone (the DOM bridge is read-only by design for now).
 
 ### Anti-fingerprinting identity
 

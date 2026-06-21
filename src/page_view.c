@@ -365,9 +365,11 @@ static int heading_level(lxb_tag_id_t t) {
 
 static int is_skipped_tag(lxb_tag_id_t t) {
     /* TEXTAREA/SELECT/BUTTON content is a control's value/label, emitted as a
-     * PV_INPUT, not as page text; suppress their inner text from the normal walk. */
+     * PV_INPUT, not as page text; suppress their inner text from the normal walk.
+     * NOSCRIPT is handled separately (in_skipped_subtree): its fallback content is
+     * shown when JS is disabled and hidden when JS runs. */
     return t == LXB_TAG_SCRIPT || t == LXB_TAG_STYLE || t == LXB_TAG_HEAD
-        || t == LXB_TAG_TITLE  || t == LXB_TAG_NOSCRIPT
+        || t == LXB_TAG_TITLE
         || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT || t == LXB_TAG_BUTTON;
 }
 
@@ -375,10 +377,18 @@ static lxb_tag_id_t node_tag(const lxb_dom_node_t *n) {
     return lxb_dom_element_tag_id(lxb_dom_interface_element((lxb_dom_node_t *)n));
 }
 
-/* Nonzero if any ancestor up to base is a non-rendered container. */
-static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+/* Nonzero if any ancestor up to base is a non-rendered container. When js_enabled,
+ * a <noscript> ancestor also suppresses content (the script would run, so the
+ * fallback is hidden); when JS is off, <noscript> content IS rendered (a no-JS
+ * browser shows the fallback). */
+static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                              int js_enabled) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
-        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT && is_skipped_tag(node_tag(p))) return 1;
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_tag_id_t t = node_tag(p);
+            if (is_skipped_tag(t)) return 1;
+            if (t == LXB_TAG_NOSCRIPT && js_enabled) return 1;
+        }
         if (p == base) break;
     }
     return 0;
@@ -926,6 +936,10 @@ static int table_columns(const lxb_dom_node_t *table) {
 }
 
 pv_status pv_build(const hp_document *doc, pv_view **out) {
+    return pv_build_ex(doc, 0, out); /* JS off by default: <noscript> fallback shown */
+}
+
+pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
 
@@ -962,7 +976,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
              * bold. The cell's inner text nodes are suppressed below (in_cell_subtree)
              * so they are not re-emitted. Nested cells are handled by the outer cell. */
             if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
-                && !in_skipped_subtree(n, base) && !in_cell_subtree(n, base)) {
+                && !in_skipped_subtree(n, base, js_enabled) && !in_cell_subtree(n, base)) {
                 const lxb_dom_node_t *table = nearest_table(n, base);
                 int cols = (table != NULL) ? table_columns(table) : 1;
                 int cid = (table != NULL) ? container_id(&reg, table) : -1;
@@ -991,7 +1005,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
             }
 
             if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON)
-                && !in_skipped_subtree(n, base)) {
+                && !in_skipped_subtree(n, base, js_enabled)) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
 
                 const char *unused_href = NULL;
@@ -1027,7 +1041,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
                 continue;
             }
 
-            if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base)) {
+            if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 size_t sl = 0;
                 const lxb_char_t *src =
@@ -1074,7 +1088,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out) {
             continue;
         }
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
-        if (in_skipped_subtree(n, base)) continue;
+        if (in_skipped_subtree(n, base, js_enabled)) continue;
         if (in_cell_subtree(n, base)) continue; /* already emitted as a collected cell run */
 
         lxb_dom_text_t *txt = lxb_dom_interface_text(n);

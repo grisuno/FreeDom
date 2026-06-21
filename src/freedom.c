@@ -31,6 +31,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
     fprintf(fp, "  --torify: also route ordinary clearnet through Tor (implies --tor)\n");
+    fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy in the GUI (default allowlist via js.conf)\n");
 }
 
 static int is_https_url(const char *s) {
@@ -283,6 +284,10 @@ int main(int argc, char **argv) {
         } else if (strcmp(arg, "--torify") == 0) {
             global_net.tor_enabled = 1;
             global_net.torify_clearnet = 1;
+        } else if (strcmp(arg, "--js") == 0) {
+            setenv("FREEDOM_JS", "on", 1);            /* GUI reads FREEDOM_JS */
+        } else if (strncmp(arg, "--js=", 5) == 0) {
+            setenv("FREEDOM_JS", arg + 5, 1);          /* off|allowlist|on */
         } else if (arg[0] == '-') {
             fprintf(stderr, "freedom: unknown option '%s'\n", arg);
             print_usage(stderr, argv[0]);

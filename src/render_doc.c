@@ -158,17 +158,38 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 /* Resolve a (possibly relative) image src against the page URL before
                  * judging it: a relative "/logo.png" is NOT an invalid URL, it resolves
                  * against the top-level document. The policy decision and the later
-                 * fetch must both act on the real absolute https URL, or every relative
-                 * image (the common case) would be blocked as "invalid URL". On failure
-                 * (data:/javascript:/no base) the raw src is kept and fails closed. */
-                char resolved[URL_MAX_LEN];
+                 * fetch must both act on the real absolute URL, or every relative image
+                 * (the common case) would be blocked as "invalid URL". */
+                char resolved[URL_MAX_LEN + 1];
                 const char *img_url = r->src;
-                if (top_level_url != NULL && r->src != NULL
-                    && url_resolve_https(top_level_url, r->src, resolved, sizeof resolved) == URL_OK) {
-                    img_url = resolved;
+                rdp_img_decision dec;
+                if (top_level_url != NULL && url_is_file(top_level_url)) {
+                    /* Local (file://) page: only same-subtree LOCAL images load. A
+                     * remote, foreign-scheme or "../"-escaping src fails closed (no
+                     * phone-home, no reading files outside the document directory).
+                     * url_resolve_file enforces the confinement. */
+                    if (!caps.images) {
+                        dec = RDP_IMG_BLOCK_DISABLED;
+                    } else if (r->src != NULL &&
+                               url_resolve_file(top_level_url, r->src,
+                                                resolved, sizeof resolved) == URL_OK) {
+                        img_url = resolved;
+                        dec = rdp_is_tracking_pixel(r->img_w, r->img_h)
+                                  ? RDP_IMG_BLOCK_TRACKER : RDP_IMG_ALLOW;
+                    } else {
+                        dec = RDP_IMG_BLOCK_SCHEME;
+                    }
+                } else {
+                    /* Remote (https) pipeline. On failure (data:/javascript:/no base)
+                     * the raw src is kept and fails closed in rdp_image_decision. */
+                    if (top_level_url != NULL && r->src != NULL
+                        && url_resolve_https(top_level_url, r->src, resolved,
+                                             sizeof resolved) == URL_OK) {
+                        img_url = resolved;
+                    }
+                    dec = rdp_image_decision(caps, top_level_url, img_url,
+                                             r->img_w, r->img_h);
                 }
-                rdp_img_decision dec = rdp_image_decision(caps, top_level_url, img_url,
-                                                          r->img_w, r->img_h);
                 rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, -1, -1);
                 break;
             }

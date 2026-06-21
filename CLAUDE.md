@@ -223,12 +223,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `https://`, `http://` ⇒ promovido a https, esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda**
   (nunca ejecución, fail-closed), texto libre ⇒ DuckDuckGo HTML (sin JS). El orquestador (`go_omnibox`)
   resuelve primero un archivo local existente (la función pura no hace I/O). Ver `[[freedom-omnibox-search]]`.
-- **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú.
-  Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie mínima).
-  Las páginas **locales** (archivo) no tienen origen https, así que hoy **no** resuelven `src`
-  relativos: el `logo.png` de `docs/index.html` no se ve dentro de Freedom (sí en la web/GitHub
-  Pages con ruta relativa). Cargar imágenes locales es trabajo futuro (traversal-guard + lectura de
-  disco + decode en worker), parte del Hito de imágenes.
+- **JS Secure by Default + allowlist por host:** el JS de página está **apagado** salvo opt-in por
+  host. El modo global es tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`(defecto)/`JSP_ON`); la pertenencia por
+  host vive en `js.conf` (reusa `hostblock`, cubre subdominios). `js_policy` (puro) decide; la GUI
+  deriva `caps.js` por host y lo pasa al worker con `tab_load_ex(run_js)`. Hoy `caps.js` controla el
+  render de `<noscript>` (fallback visible con JS off; oculto con JS on). **Ejecutar** scripts es el
+  Hito 20b (el puente DOM es de solo lectura por diseño). No reintroducir ejecución de JS sin un DOM
+  escribible + repintado. Ver `[[freedom-js-allowlist]]`.
+- **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
+  (`Ctrl+I`). Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie
+  mínima). El toggle de imágenes cubre **remotas y locales** por igual (una regla, fail-closed): un
+  HTML local hostil tampoco autocarga nada hasta que el usuario habilita imágenes.
+- **Origen `file://` para páginas locales (actúan como https):** una página de archivo recibe origen
+  `file:///realpath` (`build_file_origin`/`realpath` en la GUI), así sus `src` relativos resuelven
+  con `url_resolve_file` (puro) **confinado al subárbol del directorio del documento** (sin escape
+  `../`, sin path absoluto fuera, sin esquema remoto/ajeno → no telefonea a casa, no lee
+  `/etc/passwd`). Con imágenes ON (`Ctrl+I`) el `logo.png` de `docs/index.html` se ve dentro de
+  Freedom; la lectura de disco es acotada (`read_file_bounded`) y el decode sigue en el worker. La
+  navegación local sigue usando paths planos (historial/barra/base de link), `file://` es solo el
+  origen de render; un `file://` tecleado se normaliza a su path. Ver `[[freedom-local-file-origin]]`.
 - **Layout != estilo de autor:** la **maquetación** (box model UA, flex/grid, márgenes/columnas)
   se aplica **siempre**, desacoplada de `caps.css`; es estructura, no abre sockets ni filtra a la
   red. Solo los **colores** de autor (`fg_rgb`/`bg_rgb`) siguen gateados por `caps.css`. El gate
@@ -356,6 +369,39 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `url_omnibox`. Docs: `docs/index.html` (logo relativo + tabla completa de atajos) y README.
   *(Módulos puros verificados; GUI compila endurecida, verificación visual Wayland pendiente al
   dueño.)* Ver `[[freedom-anti-fp-network-identity]]`, `[[freedom-omnibox-search]]`.
+- **Hito 19a — Origen `file://` local + imágenes locales (el logo).** Una página de archivo recibe
+  origen `file:///realpath` y "actúa como https": sus referencias relativas e imágenes resuelven
+  contra ese origen. Núcleo puro en `url` (TDD): `url_is_file`/`url_file_path` y
+  `url_resolve_file`, que resuelve `src` relativas/absolutas-locales **confinadas al subárbol del
+  directorio del documento** (fail-closed: `../`, path absoluto fuera, scheme-relative o esquema
+  remoto/ajeno → `URL_ERR_NOT_LOCAL`; colapsa dot-segments antes del prefijo, con barra final para
+  que `/a/docsEVIL/` no pase). `render_doc` enruta las imágenes de páginas `file://` por esa función
+  (decisión local separada del pipeline remoto: nunca telefonea a casa, mismo guard de tracking
+  pixel); la GUI (`do_load` arma el origen con `realpath`; `load_images` lee del disco acotado con
+  `read_file_bounded` y decodifica en el **worker**, como las remotas). `go_omnibox` acepta `file://`
+  tecleado (lo normaliza a path). Las locales respetan Privacy by Default (opt-in `Ctrl+I`). Spec
+  (`url.md`) + 4 tests nuevos de `url_resolve_file` (relativo/confinamiento/nulls) + `make test`/
+  `make asan` limpios + stress ASan/UBSan 3M iters con invariante de confinamiento + verificación E2E
+  (el `logo.png` de `docs/index.html` resuelve a un archivo legible; `../../etc/passwd` bloqueado).
+  *(Núcleo puro verificado E2E; ruta GUI compila endurecida, verificación visual Wayland pendiente al
+  dueño.)* Ver `[[freedom-local-file-origin]]`.
+- **Hito 20 — Allowlist de JS por dominio (granular).** Espina de **política** pura + plumbing de
+  `caps.js`. Módulo `js_policy` (`jsp_`): `jsp_enabled(mode, host_allowlisted)` combina un modo global
+  tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`/`JSP_ON`, defecto allowlist) con la pertenencia por host;
+  `jsp_mode_from_str/str` para CLI/env. La allowlist por host **reusa `hostblock`** (`js.conf` cargado
+  como `HB_LIST_ALLOW`, `hb_is_allowlisted` cubre subdominios). La GUI deriva `caps.js` por host de la
+  página en `render_current` y lo pasa al worker con **`tab_load_ex(run_js)`** (nuevo; framing OP_LOAD
+  = `[op][run_js:1][len][html]`, html zero-copy). El efecto **visible** hoy es el manejo de
+  `<noscript>`: `pv_build_ex(doc, js_enabled, out)` muestra el fallback cuando JS está OFF (lo correcto
+  en un navegador sin JS) y lo oculta cuando está ON; antes `<noscript>` se ocultaba siempre. Toggle en
+  el menú (fila "JavaScript: off/allowlist/on" que cicla), CLI `--js[=MODE]` y env `FREEDOM_JS`; sample
+  `config/js.conf`. Spec (`js_policy.md`) + tests (matriz off/allowlist/on, parser, roundtrip; 2 tests
+  noscript en `page_view`) + `make test`/`make asan` limpios + fuzz del parser (2M iters, siempre un
+  modo válido). **La EJECUCIÓN** de los scripts de páginas allowlisteadas queda para el hito de
+  DOM-vivo: el puente `[[js_dom]]` es de **solo lectura** por diseño, así que correr scripts no podría
+  mutar la página todavía; `caps.js` ya es el gancho. *(Núcleo puro + IPC verificados bajo test; ruta
+  GUI compila endurecida, verificación visual Wayland pendiente al dueño.)* Ver
+  `[[freedom-js-allowlist]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -363,15 +409,16 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   principal (hoy `load_images` hace fetch síncrono dentro del worker durante el render) y permitir
   **carga concurrente entre pestañas** (generación por pestaña en vez de global, entrega a la pestaña
   destino aunque esté en segundo plano). Destraba además I2P (lento de tejer túneles).
-- **Hito 19 — Imágenes: locales + formatos + lazy.** (a) **Imágenes locales relativas:** resolver
-  `src` contra el directorio del archivo local (función pura con **guard de traversal** fail-closed,
-  TDD), leer de disco acotado y decodificar en el worker — esto hace ver el `logo.png` de
-  `docs/index.html` dentro de Freedom. (b) **SVG** (nativo en Cairo vía `librsvg`? evaluar
-  superficie) y **JPEG** (decoder en worker; contra doctrina PNG-only salvo justificar superficie).
-  (c) **Lazy loading** (decodificar solo lo visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
-- **Hito 20 — Allowlist de JS por dominio (granular).** Hoy el JS está sandbox pero apagado/limitado;
-  con namespaces fuertes (Hito 17) exponer más JS por dominio: toggle global + por host
-  (p. ej. `duckduckgo.com`, `news.ycombinator.com`, `wikipedia.org`). Persistir con Hito 10.
+- **Hito 19b — Imágenes: formatos + lazy.** (Hito 19a, imágenes locales, ya cerrado arriba.)
+  (b) **SVG** (¿`librsvg`? evaluar superficie de ataque) y **JPEG** (decoder en worker; contra la
+  doctrina PNG-only salvo justificar la superficie). (c) **Lazy loading** (decodificar solo lo
+  visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
+- **Hito 20b — JS-vivo (ejecución + DOM escribible).** La política (`js_policy`/`caps.js`) ya está
+  cerrada (Hito 20). Falta el **enabler real**: hacer el puente `[[js_dom]]` escribible (innerHTML/
+  textContent/createElement/append, `document.title`), ejecutar los scripts de páginas allowlisteadas
+  en el worker (preservar `<script>` con `hp_config.strip_scripts=0`, extraer y `js_eval`) y
+  re-derivar la vista → repintar. `caps.js`/`tab_load_ex(run_js)` ya son el gancho. Persistir el modo
+  y la allowlist con Hito 10.
 - **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
   Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).
 - **Hito 22 — Zoom + recarga + descargas.** Zoom `Ctrl++`/`Ctrl+-` (escala de fuentes/layout);

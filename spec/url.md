@@ -28,7 +28,8 @@ typedef enum url_status {
     URL_OK = 0,
     URL_ERR_NULL_ARG,   /* un puntero requerido era NULL, o outsz == 0 */
     URL_ERR_NOT_HTTPS,  /* no es una URL https absoluta / esquema rechazado / host vacio */
-    URL_ERR_OVERFLOW    /* el resultado no cabe en el buffer del llamante */
+    URL_ERR_OVERFLOW,   /* el resultado no cabe en el buffer del llamante */
+    URL_ERR_NOT_LOCAL   /* no es una referencia file:// local valida, o escapa el dir base */
 } url_status;
 
 #define URL_SEARCH_ENDPOINT "https://html.duckduckgo.com/html/?q=" /* buscador sin JS */
@@ -49,6 +50,9 @@ url_status url_validate_https(const char *url);
 url_status url_remove_dot_segments(const char *path, char *out, size_t outsz);
 url_status url_resolve_https(const char *base, const char *ref, char *out, size_t outsz);
 url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz);
+int         url_is_file(const char *s);
+const char *url_file_path(const char *s);
+url_status  url_resolve_file(const char *base, const char *ref, char *out, size_t outsz);
 ```
 
 ### `url_is_https`
@@ -118,6 +122,24 @@ Default):
 (una función pura no puede `stat` el FS). `out` queda NUL-terminado en `URL_OK`; punteros NULL /
 `outsz==0` → `URL_ERR_NULL_ARG`; URL construida que no cabe → `URL_ERR_OVERFLOW`.
 
+### `url_is_file` / `url_file_path` / `url_resolve_file`
+
+Origen **local** `file://` para que una página de archivo "actúe como https" (resolución de
+referencias relativas e imágenes locales). `url_is_file(s)` = `s` empieza (case-insensitive) con
+`file://` seguido de path absoluto (`file:///...`). `url_file_path(s)` = el path (`/...`) dentro del
+`file://`, o NULL (alias de `s`, no se libera).
+
+`url_resolve_file(base, ref, out, outsz)` resuelve `ref` (relativa o absoluta-local o `file://`)
+contra una base `file:///dir/page` y produce un `file:///...` canónico. **Crítico de seguridad y
+fail-closed:** el resultado queda **confinado al subárbol del directorio de `base`** — un escape
+`../`, un path absoluto fuera, una scheme-relative (`//..`) o cualquier esquema no-file (una `src`
+remota https o de esquema ajeno en una página local) devuelven `URL_ERR_NOT_LOCAL`. Así un documento
+local hostil **no puede** autocargar `/etc/passwd` ni telefonear a casa por una imagen. Los segmentos
+punto se colapsan **antes** del chequeo de confinamiento (`../` no puede burlar el prefijo). `base`
+inválida ⇒ `URL_ERR_NOT_LOCAL`; punteros NULL / `outsz==0` ⇒ `URL_ERR_NULL_ARG`; overflow ⇒
+`URL_ERR_OVERFLOW`. **Solo** lo aplican páginas con origen `file://`; un origen https jamás entra a
+esta rama (un remoto nunca resuelve a `file://`).
+
 ## 3. Garantías
 
 - **Pureza / Zero Trust:** sin I/O, sin estado global, reentrante. Falla cerrado: ante cualquier
@@ -125,6 +147,9 @@ Default):
 - **Omnibox fail-closed:** un esquema peligroso tecleado/pegado (`javascript:`, `file:`, `data:`)
   se convierte en **búsqueda**, jamás en ejecución; `http://` se **promueve** a https, nunca se
   navega en claro.
+- **Confinamiento local fail-closed:** `url_resolve_file` nunca produce un path fuera del directorio
+  del documento; el prefijo se compara con la barra final (`/a/docs/`) para que `/a/docsEVIL/` no
+  pase. Verificado con stress ASan/UBSan de 3M iteraciones (invariante de confinamiento intacto).
 - **Secure by Default:** una URL no-https no es representable como salida de `url_resolve_https`;
   el *downgrade* a `http://` se rechaza explícitamente.
 - **Sin desbordamiento:** todo ensamblado usa copias acotadas; nunca se trunca silenciosamente
@@ -140,6 +165,7 @@ Default):
 | `URL_ERR_NULL_ARG` | Puntero requerido `NULL` o `outsz == 0`. |
 | `URL_ERR_NOT_HTTPS` | Entrada/resultado no es una URL https absoluta válida, o esquema rechazado. |
 | `URL_ERR_OVERFLOW` | El resultado no cabe en `out`. |
+| `URL_ERR_NOT_LOCAL` | No es una referencia `file://` local válida, o escapa el directorio base. |
 
 ## 5. Fuera de alcance
 

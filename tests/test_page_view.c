@@ -473,12 +473,38 @@ static void test_build_image_px_and_tracking_dims(void **state) {
 
 static void test_build_image_in_skipped_subtree_ignored(void **state) {
     (void)state;
-    /* An <img> inside <noscript> is in a non-rendered subtree: no run emitted. */
-    hp_document *doc = parse("<body><noscript><img src=\"https://e.example/x.png\"></noscript>"
+    /* An <img> inside an always-skipped container (a control) emits no run. */
+    hp_document *doc = parse("<body><button><img src=\"https://e.example/x.png\"></button>"
                             "<p>visible</p></body>");
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
     assert_null(find_image(v, "https://e.example/x.png"));
+    assert_non_null(find_text(v, "visible"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_noscript_shown_when_js_off(void **state) {
+    (void)state;
+    /* JS off (the default): a no-JS browser renders the <noscript> fallback. */
+    hp_document *doc = parse("<body><noscript><p>enable-js-fallback</p></noscript>"
+                            "<p>visible</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_text(v, "enable-js-fallback"));
+    assert_non_null(find_text(v, "visible"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_noscript_hidden_when_js_on(void **state) {
+    (void)state;
+    /* JS on: the <noscript> fallback is suppressed (the script would run instead). */
+    hp_document *doc = parse("<body><noscript><p>enable-js-fallback</p></noscript>"
+                            "<p>visible</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_ex(doc, 1, &v), PV_OK);
+    assert_null(find_text(v, "enable-js-fallback"));
     assert_non_null(find_text(v, "visible"));
     pv_free(v);
     hp_document_free(doc);
@@ -805,6 +831,8 @@ int main(void) {
         cmocka_unit_test(test_build_image_unknown_dims),
         cmocka_unit_test(test_build_image_px_and_tracking_dims),
         cmocka_unit_test(test_build_image_in_skipped_subtree_ignored),
+        cmocka_unit_test(test_build_noscript_shown_when_js_off),
+        cmocka_unit_test(test_build_noscript_hidden_when_js_on),
         cmocka_unit_test(test_build_image_without_src_ignored),
         cmocka_unit_test(test_build_empty_document),
         cmocka_unit_test(test_set_color_model),

@@ -298,6 +298,75 @@ static void test_omnibox_nulls_and_empty(void **state) {
     assert_string_equal(out, URL_SEARCH_ENDPOINT);
 }
 
+/* --- url_is_file / url_file_path / url_resolve_file --- */
+
+static void test_is_file_and_path(void **state) {
+    (void)state;
+    assert_int_equal(url_is_file("file:///home/u/a.html"), 1);
+    assert_int_equal(url_is_file("FILE:///x"), 1);
+    assert_int_equal(url_is_file("file://host/x"), 0); /* needs absolute path (///), not a host */
+    assert_int_equal(url_is_file("file:relative"), 0);
+    assert_int_equal(url_is_file("https://example.com"), 0);
+    assert_int_equal(url_is_file(NULL), 0);
+    assert_string_equal(url_file_path("file:///home/u/a.html"), "/home/u/a.html");
+    assert_null(url_file_path("https://example.com"));
+}
+
+static void test_resolve_file_relative(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    /* sibling and child resources resolve and stay confined */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "logo.png",
+                                      out, sizeof out), URL_OK);
+    assert_string_equal(out, "file:///a/docs/logo.png");
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "img/x.png",
+                                      out, sizeof out), URL_OK);
+    assert_string_equal(out, "file:///a/docs/img/x.png");
+    /* a "." / ".." that stays inside is collapsed and allowed */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "sub/../logo.png",
+                                      out, sizeof out), URL_OK);
+    assert_string_equal(out, "file:///a/docs/logo.png");
+    /* an absolute path inside the subtree is allowed */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "/a/docs/sub/p.png",
+                                      out, sizeof out), URL_OK);
+    assert_string_equal(out, "file:///a/docs/sub/p.png");
+}
+
+static void test_resolve_file_confinement_fail_closed(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    /* "../" escaping the document directory is rejected */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "../secret.png",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "../../etc/passwd",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+    /* an absolute path outside the subtree is rejected */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "/etc/passwd",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+    /* a sibling directory sharing a name prefix must not pass the prefix check */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "/a/docsEVIL/x.png",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+    /* a remote / foreign-scheme src on a local page never loads (no phone-home) */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "https://tracker/x.png",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "//evil/x.png",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+    /* an empty ref and a non-file base both fail closed */
+    assert_int_equal(url_resolve_file("file:///a/docs/index.html", "",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+    assert_int_equal(url_resolve_file("https://example.com/p", "logo.png",
+                                      out, sizeof out), URL_ERR_NOT_LOCAL);
+}
+
+static void test_resolve_file_nulls(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    assert_int_equal(url_resolve_file(NULL, "x", out, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_resolve_file("file:///a/b", NULL, out, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_resolve_file("file:///a/b", "x", NULL, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_resolve_file("file:///a/b", "x", out, 0), URL_ERR_NULL_ARG);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_is_https),
@@ -320,6 +389,10 @@ int main(void) {
         cmocka_unit_test(test_omnibox_search_for_queries),
         cmocka_unit_test(test_omnibox_foreign_scheme_is_searched_not_executed),
         cmocka_unit_test(test_omnibox_nulls_and_empty),
+        cmocka_unit_test(test_is_file_and_path),
+        cmocka_unit_test(test_resolve_file_relative),
+        cmocka_unit_test(test_resolve_file_confinement_fail_closed),
+        cmocka_unit_test(test_resolve_file_nulls),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

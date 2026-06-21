@@ -361,3 +361,62 @@ url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t
     *kind = URL_OMNI_SEARCH;
     return build_search(start, out, outsz);
 }
+
+/* --- local file:// origin --- */
+
+int url_is_file(const char *s) {
+    if (s == NULL) return 0;
+    if (!ci_prefix(s, "file://")) return 0;
+    return s[7] == '/'; /* file:/// => absolute path follows */
+}
+
+const char *url_file_path(const char *s) {
+    return url_is_file(s) ? s + 7 : NULL; /* the leading '/' of the absolute path */
+}
+
+url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz) {
+    if (base == NULL || ref == NULL || out == NULL || outsz == 0)
+        return URL_ERR_NULL_ARG;
+    if (!url_is_file(base)) return URL_ERR_NOT_LOCAL;
+
+    const char *base_path = base + 7; /* absolute, starts with '/' */
+    /* Base directory = up to and including the last '/'. base_path is absolute, so
+     * there is always at least the root '/'. */
+    size_t dir_end = 0;
+    for (size_t i = 0; base_path[i] != '\0'; ++i)
+        if (base_path[i] == '/') dir_end = i + 1;
+    if (dir_end == 0) return URL_ERR_NOT_LOCAL; /* defensive: not absolute */
+
+    /* Pick the candidate absolute path to canonicalize. */
+    char merged[URL_MAX_LEN + 1];
+    if (url_has_scheme(ref)) {
+        /* Only a file:// reference is local; a remote/foreign scheme on a local
+         * page is rejected (no phone-home, no foreign scheme). */
+        if (!url_is_file(ref)) return URL_ERR_NOT_LOCAL;
+        if (copy_checked(merged, sizeof merged, ref + 7) != 0) return URL_ERR_OVERFLOW;
+    } else if (ref[0] == '/' && ref[1] == '/') {
+        return URL_ERR_NOT_LOCAL; /* scheme-relative: no local meaning */
+    } else if (ref[0] == '/') {
+        if (copy_checked(merged, sizeof merged, ref) != 0) return URL_ERR_OVERFLOW;
+    } else if (ref[0] == '\0') {
+        return URL_ERR_NOT_LOCAL; /* empty reference */
+    } else {
+        merged[0] = '\0';
+        if (ncat_checked(merged, sizeof merged, base_path, dir_end) != 0) return URL_ERR_OVERFLOW;
+        if (cat_checked(merged, sizeof merged, ref) != 0) return URL_ERR_OVERFLOW;
+    }
+
+    char canon[URL_MAX_LEN + 1];
+    url_status ns = url_remove_dot_segments(merged, canon, sizeof canon);
+    if (ns != URL_OK) return ns;
+
+    /* Confinement: the canonical path must stay inside the base directory subtree.
+     * base directory text = base_path[0..dir_end) (ends with '/'), so a strict
+     * prefix match rejects "../" escapes and absolute paths elsewhere. */
+    if (strncmp(canon, base_path, dir_end) != 0) return URL_ERR_NOT_LOCAL;
+
+    out[0] = '\0';
+    if (cat_checked(out, outsz, "file://") != 0) return URL_ERR_OVERFLOW;
+    if (cat_checked(out, outsz, canon) != 0) return URL_ERR_OVERFLOW;
+    return URL_OK;
+}

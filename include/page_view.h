@@ -114,7 +114,12 @@ typedef struct pv_view {
  * doc == NULL / out == NULL => PV_ERR_NULL_ARG.
  * On PV_OK, *out must be released with pv_free. An empty document yields a valid
  * view with count == 0. */
-pv_status pv_build(const hp_document *doc, pv_view **out);
+pv_status pv_build(const hp_document *doc, pv_view **out); /* == pv_build_ex(doc, 0, out) */
+
+/* As pv_build, but js_enabled selects <noscript> handling: when 0 (JS off, the
+ * default) the <noscript> fallback content IS rendered (a no-JS browser shows it);
+ * when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */
+pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);
 
 /* Allocates an empty view (used by the IPC deserialiser to rebuild a view on the
  * receiving side). Returns NULL on allocation failure. */

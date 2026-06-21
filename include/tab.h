@@ -83,6 +83,12 @@ tab_status tab_open(tab **out);
  * page. On TAB_OK, *out is populated and must be released with tab_page_free. */
 tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);
 
+/* As tab_load, but run_js carries the page's JS policy (rdp_caps.js): it selects
+ * <noscript> handling in the built view (off => fallback shown, on => suppressed)
+ * and is where allowlisted page-script execution will hook in (live-DOM milestone).
+ * tab_load is tab_load_ex with run_js == 0. */
+tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out);
+
 /* Evaluates untrusted JS in the tab's current context (sees the loaded DOM,
  * navigator/screen/performance, canvas/audio). A JS-level error is reported via
  * out->is_exception with TAB_OK; TAB_ERR_* is reserved for transport/worker

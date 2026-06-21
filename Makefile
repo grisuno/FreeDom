@@ -76,7 +76,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_image_decode $(BUILD_DIR)/test_box_style \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
              $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm \
-             $(BUILD_DIR)/test_pdf_export
+             $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy
 
 .PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-afl \
         deps run deb docker view clean
@@ -178,6 +178,10 @@ $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_
 $(BUILD_DIR)/test_url: $(TEST_DIR)/test_url.c $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure per-host JavaScript policy decision. No I/O deps.
+$(BUILD_DIR)/test_js_policy: $(TEST_DIR)/test_js_policy.c $(BUILD_DIR)/js_policy.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # Clicked-link navigation policy: reuses the pure url module, no I/O deps.
 $(BUILD_DIR)/test_link_nav: $(TEST_DIR)/test_link_nav.c $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -266,6 +270,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/hostblock.o \
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
+                      $(BUILD_DIR)/js_policy.o \
                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       | $(BUILD_DIR) \

@@ -17,6 +17,7 @@
 #include "css_color.h"
 #include "hostblock.h"
 #include "image_decode.h"
+#include "js_policy.h"
 #include "link_nav.h"
 #include "net_realm.h"
 #include "pdf_export.h"
@@ -39,6 +40,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <pthread.h>
 
 #include <wayland-client.h>
@@ -350,6 +352,7 @@ typedef enum ui_menu_action {
     UI_MENU_FORCE,    /* toggles w->force_theme; needs only a repaint */
     UI_MENU_TOR,      /* toggles Tor routing (tor_enabled + torify clearnet) */
     UI_MENU_I2P,      /* toggles I2P routing for .i2p */
+    UI_MENU_JS,       /* cycles the JS policy (off -> allowlist -> on) */
     UI_MENU_PDF       /* action (not a toggle): export the page to a vector PDF */
 } ui_menu_action;
 
@@ -368,6 +371,7 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Author colors (CSS)",  UI_MENU_CAP,   offsetof(rdp_caps, css),    0 },
     { "Tor routing (.onion)", UI_MENU_TOR,   0,                          0 },
     { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
+    { "JavaScript",           UI_MENU_JS,    0,                          0 },
     { "Save as PDF (Ctrl+P)", UI_MENU_PDF,   0,                          0 },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
@@ -468,6 +472,8 @@ typedef struct browser_window {
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     hb_set   *hosts;    /* /etc/hosts-format blocklist + allowlist; consulted pre-fetch */
+    hb_set   *js_hosts; /* js.conf allowlist (HB_LIST_ALLOW): hosts permitted to run JS */
+    jsp_mode  js_mode;  /* global JS policy (Secure by Default: JSP_ALLOWLIST) */
     nr_config net_cfg;  /* Tor/I2P routing (Privacy by Default: opt-in, off by default) */
     char      tor_addr[64];  /* Tor SOCKS5h proxy "host:port" (default 127.0.0.1:9050) */
     char      i2p_addr[64];  /* I2P HTTP proxy "host:port" (default 127.0.0.1:4444) */
@@ -616,6 +622,37 @@ static char *read_file(const char *path, size_t *out_len) {
     return buf;
 }
 
+/* Reads up to cap bytes of a local file; fails closed (NULL) if the file is larger
+ * than cap or unreadable. Used for local images, so a giant local file cannot be
+ * read whole into memory (anti-DoS, like the network image cap). */
+static uint8_t *read_file_bounded(const char *path, size_t cap, size_t *out_len) {
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) return NULL;
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
+    long sz = ftell(f);
+    if (sz < 0 || (size_t)sz > cap) { fclose(f); return NULL; }
+    rewind(f);
+    uint8_t *buf = (uint8_t *)malloc((size_t)sz > 0 ? (size_t)sz : 1);
+    if (buf == NULL) { fclose(f); return NULL; }
+    size_t n = fread(buf, 1, (size_t)sz, f);
+    fclose(f);
+    if (out_len != NULL) *out_len = n;
+    return buf;
+}
+
+/* Builds a "file:///<canonical absolute path>" origin from a local path (or passes
+ * through a file:// URL's path). realpath canonicalizes; on failure (file gone, too
+ * long) returns 0 and the caller proceeds with no origin (local images then simply
+ * do not resolve). This origin makes a local page "act like https": relative
+ * references and images resolve against it, confined to its own directory. */
+static int build_file_origin(const char *path_or_url, char *out, size_t outsz) {
+    const char *path = url_is_file(path_or_url) ? url_file_path(path_or_url) : path_or_url;
+    char abs[PATH_MAX];
+    if (path == NULL || realpath(path, abs) == NULL) return 0;
+    int n = snprintf(out, outsz, "file://%s", abs);
+    return n > 0 && (size_t)n < outsz;
+}
+
 /* Loads one /etc/hosts-format .conf file (if present and readable) into the given
  * list. A missing file is not an error: the filter fails open, never over-blocking. */
 static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list) {
@@ -657,6 +694,28 @@ static hb_set *build_host_filter(void) {
 
     load_host_file(s, "config", "block.conf", HB_LIST_BLOCK);
     load_host_file(s, "config", "allow.conf", HB_LIST_ALLOW);
+    return s;
+}
+
+/* Builds the per-host JS allowlist from js.conf (same /etc/hosts format and search
+ * order as the host filter). Loaded as HB_LIST_ALLOW so hb_is_allowlisted reports
+ * membership (subdomains covered). Returns NULL on OOM (then no host is allowlisted,
+ * so under JSP_ALLOWLIST no page runs JS -- fail closed). */
+static hb_set *build_js_filter(void) {
+    hb_set *s = hb_new();
+    if (s == NULL) return NULL;
+
+    const char *env = getenv("FREEDOM_HOSTS_DIR");
+    if (env != NULL && env[0] != '\0') load_host_file(s, env, "js.conf", HB_LIST_ALLOW);
+
+    const char *home = getenv("HOME");
+    if (home != NULL && home[0] != '\0') {
+        char dir[1024];
+        int n = snprintf(dir, sizeof dir, "%s/.config/freedom", home);
+        if (n > 0 && (size_t)n < sizeof dir) load_host_file(s, dir, "js.conf", HB_LIST_ALLOW);
+    }
+
+    load_host_file(s, "config", "js.conf", HB_LIST_ALLOW);
     return s;
 }
 
@@ -1147,37 +1206,57 @@ static void load_images(browser_window *w, tab *t) {
         ui_image *slot = &w->images[k++];
         slot->blk = b;
 
-        /* render_doc already applied render_policy: only an ALLOW image with a src is
-         * fetched. cur_top is the https origin; resolution fails closed without it. */
+        /* render_doc already applied the policy: only an ALLOW image with a src is
+         * loaded. cur_top is the origin (https remote, or file:// local). */
         if (b->img_decision != RDP_IMG_ALLOW || b->href == NULL || w->cur_top == NULL)
             continue;
 
-        char abs[URL_MAX_LEN];
-        if (url_resolve_https(w->cur_top, b->href, abs, sizeof abs) != URL_OK)
-            continue;
-
-        sf_config cfg = sf_config_default();
-        cfg.user_agent = tf_text(&w->ua_field);
-        cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
-
-        /* Route the image like the page: a .onion/.i2p image with its proxy off is
-         * skipped, never leaked over clearnet (fail closed). */
-        if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) continue;
-
+        /* Gather the raw image bytes, either from disk (local file:// page) or from
+         * the network (https page). Either way the bytes are hostile and are decoded
+         * inside the sandboxed worker (tab_decode_image), never in this process. */
+        uint8_t *bytes = NULL;
+        size_t   bytes_len = 0;
         sf_response resp;
         memset(&resp, 0, sizeof resp);
-        int img_downgraded = 0; /* page-level toast already warns; per-image is moot */
-        char ihost[256];
-        int img_allow = host_from_url(abs, ihost, sizeof ihost)
-                        && hb_is_allowlisted(w->hosts, ihost);
-        if (fetch_follow_navigable(abs, &cfg, &resp, &img_downgraded, img_allow) != SF_OK) {
-            sf_response_free(&resp);
-            continue;
+        int from_network = 0;
+
+        if (url_is_file(w->cur_top)) {
+            /* Local page: b->href is a file:// URL already CONFINED to the document
+             * directory by render_doc (url_resolve_file). Read it bounded from disk;
+             * no network is touched, so a local page never phones home. */
+            const char *p = url_file_path(b->href);
+            if (p == NULL) continue;
+            bytes = read_file_bounded(p, UI_IMAGE_MAX_BODY, &bytes_len);
+            if (bytes == NULL) continue;
+        } else {
+            char abs[URL_MAX_LEN];
+            if (url_resolve_https(w->cur_top, b->href, abs, sizeof abs) != URL_OK)
+                continue;
+
+            sf_config cfg = sf_config_default();
+            cfg.user_agent = tf_text(&w->ua_field);
+            cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
+
+            /* Route the image like the page: a .onion/.i2p image with its proxy off is
+             * skipped, never leaked over clearnet (fail closed). */
+            if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) continue;
+
+            int img_downgraded = 0; /* page-level toast already warns; per-image is moot */
+            char ihost[256];
+            int img_allow = host_from_url(abs, ihost, sizeof ihost)
+                            && hb_is_allowlisted(w->hosts, ihost);
+            if (fetch_follow_navigable(abs, &cfg, &resp, &img_downgraded, img_allow) != SF_OK) {
+                sf_response_free(&resp);
+                continue;
+            }
+            bytes = resp.body;
+            bytes_len = resp.body_len;
+            from_network = 1;
         }
 
         tab_image img;
-        tab_status ds = tab_decode_image(t, resp.body, resp.body_len, &img);
-        sf_response_free(&resp);
+        tab_status ds = tab_decode_image(t, bytes, bytes_len, &img);
+        if (from_network) sf_response_free(&resp); else free(bytes);
         if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); continue; }
 
         slot->surface = surface_from_pixels(&img);
@@ -1197,6 +1276,15 @@ static void render_current(browser_window *w) {
     clear_doc(w);
     if (w->cur_html == NULL) return;
 
+    /* Resolve the JS policy for THIS page's host (Secure by Default: off unless the
+     * global mode is ON or the host is on the js.conf allowlist). caps.js drives the
+     * worker's <noscript> handling and is the seam for future script execution. */
+    int js_host_ok = 0;
+    char js_host[256];
+    if (w->cur_top != NULL && host_from_url(w->cur_top, js_host, sizeof js_host))
+        js_host_ok = hb_is_allowlisted(w->js_hosts, js_host);
+    w->caps.js = jsp_enabled(w->js_mode, js_host_ok);
+
     tab *t = NULL;
     if (tab_open(&t) != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to spawn sandboxed tab.", 1);
@@ -1205,7 +1293,7 @@ static void render_current(browser_window *w) {
 
     tab_page page;
     memset(&page, 0, sizeof page);
-    if (tab_load(t, w->cur_html, w->cur_html_len, &page) != TAB_OK) {
+    if (tab_load_ex(t, w->cur_html, w->cur_html_len, w->caps.js, &page) != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
         tab_close(t);
         return;
@@ -1332,20 +1420,25 @@ static void do_load(browser_window *w, const char *url) {
         return;
     }
 
-    /* Local file: synchronous (no network, instant). */
+    /* Local file: synchronous (no network, instant). The page is given a file://
+     * origin so its relative references and local images resolve (confined to the
+     * document's directory) -- a local page "acts like https" for resolution. */
     clear_doc(w);
     w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
     w->loading = 0;
+    const char *path = url_is_file(url) ? url_file_path(url) : url;
     size_t html_len = 0;
-    char *html = read_file(url, &html_len);
+    char *html = read_file(path, &html_len);
     if (html == NULL) {
         char msg[256];
-        snprintf(msg, sizeof msg, "Cannot read file '%s': %s.", url, strerror(errno));
+        snprintf(msg, sizeof msg, "Cannot read file '%s': %s.", path, strerror(errno));
         set_cache(w, NULL, 0, NULL);
         browser_set_page(&w->bs, NULL, msg, 1);
         return;
     }
-    set_cache(w, html, html_len, NULL);
+    char origin[PATH_MAX + 16];
+    const char *top = build_file_origin(url, origin, sizeof origin) ? origin : NULL;
+    set_cache(w, html, html_len, top);
     render_current(w);
 }
 
@@ -2689,6 +2782,7 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_FORCE) return w->force_theme;
     if (it->action == UI_MENU_TOR)   return w->net_cfg.tor_enabled;
     if (it->action == UI_MENU_I2P)   return w->net_cfg.i2p_enabled;
+    if (it->action == UI_MENU_JS)    return w->js_mode != JSP_OFF;
     if (it->action == UI_MENU_PDF)   return 0; /* an action, never "checked" */
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
@@ -2724,6 +2818,19 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         browser_set_status(&w->bs, w->net_cfg.i2p_enabled
             ? "I2P routing ON for .i2p (needs an I2P HTTP proxy). Reload to apply."
             : "I2P routing OFF.", now_ms());
+        return;
+    }
+    if (it->action == UI_MENU_JS) {
+        /* Cycle the global policy: off -> allowlist -> on -> off. ALLOWLIST runs JS
+         * only for hosts in js.conf; ON runs it everywhere (least safe). Re-render so
+         * <noscript> handling reflects the new policy for the current page. */
+        w->js_mode = (w->js_mode == JSP_OFF)       ? JSP_ALLOWLIST
+                   : (w->js_mode == JSP_ALLOWLIST) ? JSP_ON
+                                                   : JSP_OFF;
+        char msg[96];
+        snprintf(msg, sizeof msg, "JavaScript policy: %s.", jsp_mode_str(w->js_mode));
+        browser_set_status(&w->bs, msg, now_ms());
+        render_current(w);
         return;
     }
     if (it->action == UI_MENU_PDF) {
@@ -2807,7 +2914,14 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
         double tx = box_x + UI_CHECK_SZ + UI_MENU_PAD;
         double ty = row_y + (ih + fe.ascent - fe.descent) / 2.0;
         cairo_move_to(cr, tx, ty);
-        cairo_show_text(cr, UI_MENU_ITEMS[i].label);
+        /* The JS row shows its tri-state mode inline (off/allowlist/on). */
+        if (UI_MENU_ITEMS[i].action == UI_MENU_JS) {
+            char jl[64];
+            snprintf(jl, sizeof jl, "JavaScript: %s", jsp_mode_str(w->js_mode));
+            cairo_show_text(cr, jl);
+        } else {
+            cairo_show_text(cr, UI_MENU_ITEMS[i].label);
+        }
     }
 
     /* User-Agent section: a label and an editable box. The box uses a monospace
@@ -3335,6 +3449,16 @@ static void load_current(browser_window *w) {
 static void go_omnibox(browser_window *w) {
     const char *raw = w->bs.url_bar;
     if (raw == NULL || raw[0] == '\0') return;
+
+    /* A typed file:// URL navigates to its path (do_load rebuilds the file:// origin),
+     * so the URL bar / history / link base stay a plain path that link_nav resolves. */
+    if (url_is_file(raw)) {
+        const char *p = url_file_path(raw);
+        if (p != NULL && access(p, R_OK) == 0) {
+            if (browser_navigate(&w->bs, p) == BROWSER_OK) load_current(w);
+            return;
+        }
+    }
 
     /* A readable local path keeps the file-browsing capability (the start page is a
      * relative path), and must win over the host heuristic ("docs/index.html"). */
@@ -4232,6 +4356,8 @@ ui_status ui_run_browser(const char *start_url) {
     /* Host filter (blocklist + allowlist) ready before the first fetch. Placed after
      * the fallible Wayland setup so its error returns above never leak it. */
     w.hosts = build_host_filter();
+    w.js_hosts = build_js_filter();        /* per-host JS allowlist (js.conf) */
+    w.js_mode = jsp_mode_from_str(getenv("FREEDOM_JS")); /* default JSP_ALLOWLIST */
     init_net_config(&w);  /* Tor/I2P routing config from the environment (opt-in) */
 
     /* Initial page. Provide instructions because the strict TLS policy means
@@ -4344,6 +4470,7 @@ ui_status ui_run_browser(const char *start_url) {
 
     clear_doc(&w);
     hb_free(w.hosts);
+    hb_free(w.js_hosts);
     free(w.cur_html);
     free(w.cur_top);
     browser_free(&w.bs);
