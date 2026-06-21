@@ -39,7 +39,6 @@ The name reflects its core goals:
 - **Dom**: Reference to the DOM (Document Object Model) and domain-level control
 
 ## Features
-
 - Written in portable C11
 - Strong process-based sandboxing for each tab
 - JavaScript sandbox using QuickJS-ng
@@ -52,8 +51,7 @@ The name reflects its core goals:
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
-### New Features & Improvements
-
+### New Features & Improvements (Latest)
 - **Advanced Layout Engine**:
   - Full box model per HTML tag (margins, padding, display, border)
   - Flexbox 1D layout support (`flex-grow`, `flex-shrink`, `gap`, `justify-content`)
@@ -61,31 +59,45 @@ The name reflects its core goals:
   - Recursive box-tree layout with margin collapsing
 - **GUI & Usability**:
   - Visible vertical scrollbar with drag and click support
-  - Vim-style keyboard navigation (`j`/`k`, `space`/`b`, `gg`/`G`, etc.)
-  - Tabs Shortcuts `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`.
+  - Vim-style keyboard shortcuts (`j`/`k`, `space`/`b`, `gg`/`G`, Home/End, arrows, etc.)
   - Window controls: maximize, minimize, edge resize, titlebar drag
-  - Sepia reading mode + Light/Dark themes with "Force theme colors" toggle
-  - Dark mode + Dark theme with "Force theme colors" toggle
+  - Sepia reading mode + Light/Dark/Night themes with "Force theme colors" toggle
   - Hover link preview (shows destination URL)
   - Loading indicator (busy clock)
-  - Improved dark mode and typography
+  - Improved margins/padding and typography for better readability
+  - **Simplified/Distraction-free HTML rendering** (minimalist view focused on content)
+  - **Tab management** with Vim-style shortcuts
 - **Privacy & Networking**:
-  - **Tor support** (`.onion` routing via SOCKS5h proxy, remote DNS = no leak)
-  - **I2P support** (`.i2p` routing via HTTP proxy, plain-http eepsites allowed)
+  - **Tor support** (`.onion` routing via SOCKS5h proxy, remote DNS, no leaks)
+  - **I2P support** (`.i2p` routing via HTTP proxy)
   - Clearnet Torification option (`--torify`)
-  - Realm-based routing (`net_realm`) with **fail-closed** policy (no de-anonymizing fallback)
-  - **Host filtering** (`hostblock`): `/etc/hosts`-format `block.conf` + `allow.conf`, allowlist
-    wins and covers subdomains
-  - **Sovereignty allowlist**: per-host override to navigate sites below FreeDom's TLS standard
-    (e.g. TLS-1.2-only sites like Hacker News) while still authenticating the certificate chain
-  - Post-quantum hybrid KE by default with a non-blocking classical-TLS-1.3 fallback
-  - Enhanced secure fetch
+  - Realm-based routing with **fail-closed** policy
+  - Host filtering (allow/block lists)
+  - TLS 1.2 allowlist/blacklist support
 - **Build & Distribution**:
   - Debian `.deb` packaging (`build_deb.sh`)
   - Improved `./configure`, `install.sh` and Makefile
 - **Automation**:
   - Full GitHub Actions CI/CD pipeline
   - MCP (Model Context Protocol) server for AI agent integration
+
+## Current Status (Updated - June 20, 2026)
+- ✅ Advanced HTML rendering with box model, flex/grid and margin collapsing
+- ✅ Clickable links + basic image support (PNG)
+- ✅ Headless mode
+- ✅ Strong per-tab sandboxing
+- ✅ Docker + noVNC
+- ✅ Modern GUI: scrollbar, vim shortcuts, window management, themes (including sepia/night), hover previews
+- ✅ Tor & I2P routing (`.onion` / `.i2p` + torify)
+- ✅ Tab shortcuts estilo Vim
+- ✅ Simplified/distraction-free rendering mode
+- ✅ Debian packaging
+- ✅ Comprehensive CI/CD + fuzzing + MCP automation
+- ⚠️ CSS support still limited (static + author-gated)
+- ⚠️ JavaScript support remains basic
+- ⚠️ Full async networking/caching in progress
+
+**Status**: Rapidly progressing Alpha — strong focus on secure rendering, usable GUI, and powerful anonymity tools (Tor/I2P).
 
 ## Building On Premise
 
@@ -305,27 +317,6 @@ make clean
 ### Tor working on dark mode
 
 <img width="921" height="718" alt="image" src="https://github.com/user-attachments/assets/e6b9ef46-f75a-47a6-a1f0-98074b7fd424" />
-
-## Current Status (Updated - June 2026)
-
-- ✅ Advanced HTML rendering with box model and flex/grid layout
-- ✅ Clickable links and basic image support (PNG)
-- ✅ Headless mode
-- ✅ Strong process-based sandboxing per tab
-- ✅ Docker + noVNC environment
-- ✅ User-Agent customization & anti-fingerprinting
-- ✅ Modern GUI with scrollbar, vim shortcuts, window management, themes and sepia mode
-- ✅ Tor & I2P routing support (`.onion` / `.i2p` + torify), socket-level, fail-closed
-- ✅ Host filtering (block/allow lists) + per-host sovereignty TLS override
-- ✅ Debian packaging
-- ✅ Comprehensive CI/CD + fuzzing + MCP agentic automation
-- ⚠️ CSS support still limited (static + author-gated)
-- ⚠️ JavaScript support remains basic
-- ⚠️ Full networking/caching layer in active development
-
-**Status**: progressing Alpha — focus on secure, testable rendering engine and usable GUI.
-
-
 
 ## Contributing
 
