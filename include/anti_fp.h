@@ -21,6 +21,18 @@
 
 #define FP_TIMER_RESOLUTION_MS 100u
 
+/* The normalized identity strings live here as macros so they are a single source
+ * of truth shared by the JS bindings (navigator.*) AND the network layer (the
+ * User-Agent / Accept-Language HTTP headers in secure_fetch). A mismatch between
+ * the JS-visible identity and the on-the-wire identity is itself a high-entropy
+ * fingerprint (and a bot signal), so both MUST present the same blend-in identity.
+ * The value is a common, current Firefox-on-Linux string: it maximizes the
+ * anonymity set instead of advertising "Freedom". */
+#define FP_USER_AGENT \
+    "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+#define FP_ACCEPT_LANGUAGE        "en-US,en"       /* list form (navigator.languages) */
+#define FP_ACCEPT_LANGUAGE_HEADER "en-US,en;q=0.5" /* HTTP Accept-Language header value */
+
 /* --- clocks: coarse granularity against high-resolution timing --- */
 
 uint64_t fp_timer_resolution_ms(void);
@@ -29,7 +41,8 @@ uint64_t fp_coarsen_time_ms(uint64_t raw_ms); /* floor to the resolution grid */
 /* --- normalized identity (low entropy; identical for every user) --- */
 
 const char *fp_user_agent(void);
-const char *fp_accept_language(void); /* e.g. "en-US,en" */
+const char *fp_accept_language(void);        /* list form, e.g. "en-US,en" */
+const char *fp_accept_language_header(void); /* HTTP header value, e.g. "en-US,en;q=0.5" */
 const char *fp_timezone(void);        /* "UTC" */
 const char *fp_platform(void);        /* "Linux x86_64" (consistent with the UA) */
 const char *fp_vendor(void);          /* "" (no vendor; minimal entropy) */

@@ -21,11 +21,15 @@ uint64_t fp_coarsen_time_ms(uint64_t raw_ms) {
 /* --- normalized identity (shared by all Freedom users) --- */
 
 const char *fp_user_agent(void) {
-    return "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0";
+    return FP_USER_AGENT;
 }
 
 const char *fp_accept_language(void) {
-    return "en-US,en";
+    return FP_ACCEPT_LANGUAGE;
+}
+
+const char *fp_accept_language_header(void) {
+    return FP_ACCEPT_LANGUAGE_HEADER;
 }
 
 const char *fp_timezone(void) {

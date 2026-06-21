@@ -213,8 +213,22 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Umbral RSA<3072 solo al leaf** (los intermedios RSA-2048 de la Web PKI son válidos). Un
   sitio con leaf RSA-2048 se sortea con la excepción por host **Ctrl+Shift+E** (PERMISSIVE, solo
   sesión).
+- **Identidad de red = identidad anti-fingerprinting (no "Freedom/0.1"):** el `User-Agent` por
+  defecto de la red **es** `FP_USER_AGENT` (cadena común de Firefox/Linux, fuente única en
+  `anti_fp`) y **coincide** con `navigator.userAgent`; toda petición (GET y POST) envía además un
+  `Accept-Language` normalizado (`FP_ACCEPT_LANGUAGE_HEADER`). Mandar `"Freedom"` por el cable era
+  huella única + señal de bot (rompía Google/Cloudflare). El usuario puede sobrescribir la UA por
+  sesión (menú); vacío ⇒ default anti-fp. Ver `[[freedom-anti-fp-network-identity]]`.
+- **Omnibox en la barra de URL:** `url_omnibox` (puro) decide navegar vs buscar — host desnudo ⇒
+  `https://`, `http://` ⇒ promovido a https, esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda**
+  (nunca ejecución, fail-closed), texto libre ⇒ DuckDuckGo HTML (sin JS). El orquestador (`go_omnibox`)
+  resuelve primero un archivo local existente (la función pura no hace I/O). Ver `[[freedom-omnibox-search]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú.
   Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie mínima).
+  Las páginas **locales** (archivo) no tienen origen https, así que hoy **no** resuelven `src`
+  relativos: el `logo.png` de `docs/index.html` no se ve dentro de Freedom (sí en la web/GitHub
+  Pages con ruta relativa). Cargar imágenes locales es trabajo futuro (traversal-guard + lectura de
+  disco + decode en worker), parte del Hito de imágenes.
 - **Layout != estilo de autor:** la **maquetación** (box model UA, flex/grid, márgenes/columnas)
   se aplica **siempre**, desacoplada de `caps.css`; es estructura, no abre sockets ni filtra a la
   red. Solo los **colores** de autor (`fg_rgb`/`bg_rgb`) siguen gateados por `caps.css`. El gate
@@ -325,6 +339,23 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `test_tab` sigue verde (el worker parsea/ejecuta/decodifica dentro de los namespaces nuevos).
   *(Verificado: módulo puro + enforcement + integración del worker bajo test.)* Ver
   `[[freedom-tab-namespaces]]`.
+- **Hito 18 — Identidad de red anti-fingerprinting + omnibox de búsqueda.** Dos cambios puros con
+  TDD. (a) **Identidad de red:** `anti_fp` pasa a ser la **fuente única** de la identidad
+  normalizada (macros `FP_USER_AGENT`/`FP_ACCEPT_LANGUAGE`/`FP_ACCEPT_LANGUAGE_HEADER` + nueva
+  `fp_accept_language_header()`); `secure_fetch` repunta `SF_DEFAULT_USER_AGENT` a `FP_USER_AGENT`
+  (incluye `anti_fp.h`) y envía `Accept-Language` normalizado en **toda** petición (antes solo había
+  `Content-Type` en POST; ahora la slist se arma siempre). Así la UA de red **coincide** con
+  `navigator.userAgent` y no se manda `"Freedom"` (huella + señal de bot que rompía Google). El
+  placeholder del menú UA pasó a "anti-fingerprint default". (b) **Omnibox:** `url_omnibox` (puro)
+  clasifica el texto de la barra en navegar (host desnudo→https, http→https) vs buscar (DuckDuckGo
+  HTML sin JS); esquema ajeno→búsqueda (nunca ejecuta, fail-closed); query codificada en porcentaje.
+  El orquestador `go_omnibox` (GUI) resuelve primero un archivo local existente (`access`) y cablea
+  los 3 puntos de commit (botón Go + dos handlers Enter). Specs (`anti_fp.md`, `secure_fetch.md`,
+  `url.md`) + tests (anti_fp identity, 6 tests de `url_omnibox`: navegar/host/upgrade/búsqueda/
+  esquema-ajeno/nulls) + `make test`/`make asan` limpios + stress ASan/UBSan de 3M iters sobre
+  `url_omnibox`. Docs: `docs/index.html` (logo relativo + tabla completa de atajos) y README.
+  *(Módulos puros verificados; GUI compila endurecida, verificación visual Wayland pendiente al
+  dueño.)* Ver `[[freedom-anti-fp-network-identity]]`, `[[freedom-omnibox-search]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -332,6 +363,20 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   principal (hoy `load_images` hace fetch síncrono dentro del worker durante el render) y permitir
   **carga concurrente entre pestañas** (generación por pestaña en vez de global, entrega a la pestaña
   destino aunque esté en segundo plano). Destraba además I2P (lento de tejer túneles).
+- **Hito 19 — Imágenes: locales + formatos + lazy.** (a) **Imágenes locales relativas:** resolver
+  `src` contra el directorio del archivo local (función pura con **guard de traversal** fail-closed,
+  TDD), leer de disco acotado y decodificar en el worker — esto hace ver el `logo.png` de
+  `docs/index.html` dentro de Freedom. (b) **SVG** (nativo en Cairo vía `librsvg`? evaluar
+  superficie) y **JPEG** (decoder en worker; contra doctrina PNG-only salvo justificar superficie).
+  (c) **Lazy loading** (decodificar solo lo visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
+- **Hito 20 — Allowlist de JS por dominio (granular).** Hoy el JS está sandbox pero apagado/limitado;
+  con namespaces fuertes (Hito 17) exponer más JS por dominio: toggle global + por host
+  (p. ej. `duckduckgo.com`, `news.ycombinator.com`, `wikipedia.org`). Persistir con Hito 10.
+- **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
+  Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).
+- **Hito 22 — Zoom + recarga + descargas.** Zoom `Ctrl++`/`Ctrl+-` (escala de fuentes/layout);
+  recarga `Ctrl+R`/`F5` + icono; **descarga segura** de `.pdf/.txt/.epub/...` a `~/Downloads/freedom/`
+  con nombre saneado fail-closed (reusar `pe_safe_basename`) y tope de tamaño.
 - **Hito 10 — Persistencia de preferencias.** Opt-in de imágenes/CSS/tema, excepciones de host, y
   config Tor/I2P (hoy env/sesión) cifrados con `local_store`/`disk_store`.
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`

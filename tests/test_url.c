@@ -209,6 +209,95 @@ static void test_resolve_null_and_overflow(void **state) {
                                        tiny, sizeof tiny), URL_ERR_OVERFLOW);
 }
 
+/* --- url_omnibox --- */
+
+static void test_omnibox_navigate_https(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    url_omni_kind k = URL_OMNI_SEARCH;
+    assert_int_equal(url_omnibox("https://example.com/path?q=1", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_NAVIGATE);
+    assert_string_equal(out, "https://example.com/path?q=1");
+    /* surrounding whitespace is trimmed, not searched */
+    assert_int_equal(url_omnibox("  https://example.com  ", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_NAVIGATE);
+    assert_string_equal(out, "https://example.com");
+}
+
+static void test_omnibox_bare_host_gets_https(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    url_omni_kind k = URL_OMNI_SEARCH;
+    assert_int_equal(url_omnibox("example.com", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_NAVIGATE);
+    assert_string_equal(out, "https://example.com");
+
+    assert_int_equal(url_omnibox("news.ycombinator.com/news", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_NAVIGATE);
+    assert_string_equal(out, "https://news.ycombinator.com/news");
+
+    assert_int_equal(url_omnibox("localhost:8443/admin", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_NAVIGATE);
+    assert_string_equal(out, "https://localhost:8443/admin");
+}
+
+static void test_omnibox_http_upgraded_to_https(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    url_omni_kind k = URL_OMNI_SEARCH;
+    /* Secure by Default: an http:// URL is navigated as https, never downgraded. */
+    assert_int_equal(url_omnibox("http://example.com/x", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_NAVIGATE);
+    assert_string_equal(out, "https://example.com/x");
+}
+
+static void test_omnibox_search_for_queries(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    url_omni_kind k = URL_OMNI_NAVIGATE;
+    /* whitespace => query */
+    assert_int_equal(url_omnibox("best linux distro", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_SEARCH);
+    assert_string_equal(out, URL_SEARCH_ENDPOINT "best+linux+distro");
+
+    /* single word, no dot => query (not a host) */
+    assert_int_equal(url_omnibox("freedom", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_SEARCH);
+    assert_string_equal(out, URL_SEARCH_ENDPOINT "freedom");
+
+    /* reserved characters are percent-encoded */
+    assert_int_equal(url_omnibox("a&b=c+d", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_SEARCH);
+    assert_string_equal(out, URL_SEARCH_ENDPOINT "a%26b%3Dc%2Bd");
+}
+
+static void test_omnibox_foreign_scheme_is_searched_not_executed(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    url_omni_kind k = URL_OMNI_NAVIGATE;
+    /* fail-closed: a dangerous scheme is treated as text, never run */
+    assert_int_equal(url_omnibox("javascript:alert(1)", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_SEARCH);
+    assert_int_equal(url_omnibox("file:///etc/passwd", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_SEARCH);
+    assert_int_equal(url_omnibox("ftp://h.example/x", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_SEARCH);
+}
+
+static void test_omnibox_nulls_and_empty(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    url_omni_kind k;
+    assert_int_equal(url_omnibox(NULL, &k, out, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_omnibox("x", NULL, out, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_omnibox("x", &k, NULL, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_omnibox("x", &k, out, 0), URL_ERR_NULL_ARG);
+    /* empty / whitespace-only input is a (degenerate) empty search, never a crash */
+    assert_int_equal(url_omnibox("   ", &k, out, sizeof out), URL_OK);
+    assert_int_equal(k, URL_OMNI_SEARCH);
+    assert_string_equal(out, URL_SEARCH_ENDPOINT);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_is_https),
@@ -225,6 +314,12 @@ int main(void) {
         cmocka_unit_test(test_resolve_dot_segments),
         cmocka_unit_test(test_resolve_fail_closed_on_bad_base),
         cmocka_unit_test(test_resolve_null_and_overflow),
+        cmocka_unit_test(test_omnibox_navigate_https),
+        cmocka_unit_test(test_omnibox_bare_host_gets_https),
+        cmocka_unit_test(test_omnibox_http_upgraded_to_https),
+        cmocka_unit_test(test_omnibox_search_for_queries),
+        cmocka_unit_test(test_omnibox_foreign_scheme_is_searched_not_executed),
+        cmocka_unit_test(test_omnibox_nulls_and_empty),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

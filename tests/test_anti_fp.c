@@ -35,7 +35,17 @@ static void test_identity_is_fixed(void **state) {
     (void)state;
     assert_non_null(fp_user_agent());
     assert_true(strlen(fp_user_agent()) > 0);
+    /* The normalized identity must blend in, not advertise the browser name: a UA
+     * containing "Freedom" is a unique fingerprint and trips bot detection. */
+    assert_null(strstr(fp_user_agent(), "Freedom"));
+    assert_non_null(strstr(fp_user_agent(), "Firefox"));
+    assert_string_equal(fp_user_agent(), FP_USER_AGENT);
     assert_non_null(fp_accept_language());
+    /* Header form carries a q-value; list form does not (it feeds navigator.languages). */
+    assert_string_equal(fp_accept_language(), "en-US,en");
+    assert_string_equal(fp_accept_language_header(), "en-US,en;q=0.5");
+    assert_non_null(strstr(fp_accept_language_header(), "en-US"));
+    assert_null(strchr(fp_accept_language(), ';'));
     assert_string_equal(fp_timezone(), "UTC");
     assert_string_equal(fp_platform(), "Linux x86_64");
     assert_string_equal(fp_vendor(), "");

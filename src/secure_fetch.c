@@ -534,21 +534,27 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &ctx);
 
+    /* Send a normalized Accept-Language on every request (anti-fingerprinting): the
+     * value matches the JS-visible identity, so the on-the-wire and in-page locales
+     * agree. Omitting it is itself a signal; the real system locale must never leak. */
+    hdrs = curl_slist_append(hdrs, "Accept-Language: " FP_ACCEPT_LANGUAGE_HEADER);
+    if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+
     if (post_body != NULL || post_len != 0) {
         const char *ct = (content_type != NULL) ? content_type
                                                  : "application/x-www-form-urlencoded";
         char hbuf[256];
         int hn = snprintf(hbuf, sizeof hbuf, "Content-Type: %s", ct);
         if (hn < 0 || (size_t)hn >= sizeof hbuf) { result = SF_ERR_INVALID_URL; goto done; }
-        hdrs = curl_slist_append(NULL, hbuf);
+        hdrs = curl_slist_append(hdrs, hbuf);
         /* Suppress libcurl's "Expect: 100-continue" so a small POST is one round trip. */
         hdrs = curl_slist_append(hdrs, "Expect:");
         if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)post_len);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (post_body != NULL) ? post_body : "");
     }
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
 
     CURLcode rc = curl_easy_perform(curl);
     if (rc != CURLE_OK) {

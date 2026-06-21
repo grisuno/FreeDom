@@ -32,7 +32,8 @@ uint64_t fp_coarsen_time_ms(uint64_t raw_ms);     /* redondea hacia abajo a la r
 
 /* Identidad normalizada (baja entropia, igual para todos los usuarios). */
 const char *fp_user_agent(void);
-const char *fp_accept_language(void);              /* p.ej. "en-US,en" */
+const char *fp_accept_language(void);              /* lista, p.ej. "en-US,en" */
+const char *fp_accept_language_header(void);       /* valor de header HTTP, "en-US,en;q=0.5" */
 const char *fp_timezone(void);                     /* "UTC" */
 const char *fp_platform(void);                     /* "Linux x86_64" (coherente con la UA) */
 const char *fp_vendor(void);                       /* "" (sin vendor; minima entropia) */
@@ -53,10 +54,20 @@ void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);
 - `fp_timer_resolution_ms`: devuelve `FP_TIMER_RESOLUTION_MS` (100). 
 - `fp_coarsen_time_ms(t)`: `t - (t % resolucion)`. Un atacante no puede medir diferencias por
   debajo de la rejilla. Idempotente sobre valores ya alineados.
-- `fp_user_agent` / `fp_accept_language` / `fp_timezone` / `fp_platform` / `fp_vendor` /
-  `fp_hardware_concurrency` / `fp_device_memory_gb`: constantes fijas e idénticas para todos. No
-  reflejan el dispositivo real. `fp_platform` es coherente con la UA (`"Linux x86_64"`); `fp_vendor`
-  es `""`. Punteros de cadena estáticos (no liberar).
+- `fp_user_agent` / `fp_accept_language` / `fp_accept_language_header` / `fp_timezone` /
+  `fp_platform` / `fp_vendor` / `fp_hardware_concurrency` / `fp_device_memory_gb`: constantes fijas
+  e idénticas para todos. No reflejan el dispositivo real. `fp_platform` es coherente con la UA
+  (`"Linux x86_64"`); `fp_vendor` es `""`. Punteros de cadena estáticos (no liberar).
+- **Fuente única de identidad para JS y red:** las cadenas viven como macros (`FP_USER_AGENT`,
+  `FP_ACCEPT_LANGUAGE`, `FP_ACCEPT_LANGUAGE_HEADER`) compartidas por las bindings JS
+  (`navigator.*`) **y** por la capa de red (`secure_fetch`: headers `User-Agent` y
+  `Accept-Language`). Un desajuste entre la identidad visible por JS y la enviada por la red **es en
+  sí mismo huella de alta entropía** (y señal de bot que rompe sitios como Google), así que ambas
+  deben coincidir. La UA es una cadena común de **Firefox/Linux** (no contiene `"Freedom"`):
+  maximiza el conjunto de anonimato en vez de delatar el navegador.
+- `fp_accept_language` devuelve la **lista** (`"en-US,en"`, para `navigator.languages`);
+  `fp_accept_language_header` devuelve el **valor de header HTTP** con q-value (`"en-US,en;q=0.5"`).
+  Son formas distintas de la misma preferencia: la lista no lleva `;q=`.
 - `fp_bucket_screen`: elige el bucket estándar de **mayor área que quepa** en `(w,h)`; si ninguno
   cabe, el bucket más pequeño. Buckets: 1920x1080, 1600x900, 1536x864, 1440x900, 1366x768,
   1280x720, 1024x768, 800x600. `out_w`/`out_h` no nulos.
@@ -81,7 +92,9 @@ void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);
 `tests/test_anti_fp.c` (cmocka):
 - `fp_coarsen_time_ms`: alinea hacia abajo; idempotente; resolución > 0.
 - Identidad: no nula, no vacía; `fp_timezone()=="UTC"`; `fp_platform()=="Linux x86_64"`;
-  `fp_vendor()==""`; valores fijos coherentes.
+  `fp_vendor()==""`; valores fijos coherentes. La UA **no contiene** `"Freedom"` y **sí** contiene
+  `"Firefox"`; `fp_accept_language()=="en-US,en"` (sin `;`); `fp_accept_language_header()` lleva
+  q-value (`"en-US,en;q=0.5"`).
 - `fp_bucket_screen`: 1920x1080→igual; 1680x1050→1600x900; 1366x768→igual; 640x480→800x600.
 - `fp_perturb`: determinista (dos copias, misma clave ⇒ iguales); acotado (`out^in ∈ {0,1}`);
   sensible a la clave (claves distintas ⇒ difieren en buffer grande); `NULL`/`len 0` no crashea.

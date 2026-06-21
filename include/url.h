@@ -64,4 +64,31 @@ url_status url_remove_dot_segments(const char *path, char *out, size_t outsz);
  * URL_ERR_OVERFLOW. */
 url_status url_resolve_https(const char *base, const char *ref, char *out, size_t outsz);
 
+/* --- omnibox: classify free-form URL-bar input --- */
+
+/* The no-JS DuckDuckGo HTML endpoint (the percent-encoded query is appended). It
+ * works without scripting, which is why it is the default search target. */
+#define URL_SEARCH_ENDPOINT "https://html.duckduckgo.com/html/?q="
+
+typedef enum url_omni_kind {
+    URL_OMNI_NAVIGATE = 0, /* out holds an absolute https URL to load */
+    URL_OMNI_SEARCH        /* out holds the https DuckDuckGo HTML search URL */
+} url_omni_kind;
+
+/* Resolves free-form URL-bar text into an absolute https URL, deciding whether it
+ * names a site to navigate or a query to search. Pure, fail-closed and Secure by
+ * Default:
+ *   - input that already is an absolute https URL  -> NAVIGATE (copied verbatim);
+ *   - a bare host shape ("example.com", "host:8443/p", "localhost") -> NAVIGATE,
+ *     prefixed with "https://";
+ *   - an "http://" prefix -> NAVIGATE, UPGRADED to https (HTTPS-only; never a
+ *     downgrade, and the secure scheme is the only representable one);
+ *   - anything else -- whitespace, a non-http(s) scheme (so "javascript:..." is
+ *     searched for, never executed), or a non-host token -> SEARCH.
+ * Does NOT handle local files: the orchestrator must resolve an existing local
+ * path before calling this (a pure function cannot stat the filesystem).
+ * out is NUL-terminated on URL_OK. NULL args / outsz == 0 => URL_ERR_NULL_ARG;
+ * a built URL that does not fit => URL_ERR_OVERFLOW. */
+url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz);
+
 #endif /* FREEDOM_URL_H */

@@ -68,6 +68,13 @@ The name reflects its core goals:
   - **Simplified/Distraction-free HTML rendering** (minimalist view focused on content)
   - **Tab management** with Vim-style shortcuts
 - **Privacy & Networking**:
+  - **Anti-fingerprinting network identity**: a normalized, shared `User-Agent` and
+    `Accept-Language` (a common Firefox-on-Linux identity) sent on every request — Freedom never
+    advertises "Freedom" on the wire, so it blends into the crowd and stops tripping bot detection
+    (this is what lets sites like Google load). Overridable per session in the menu.
+  - **Omnibox address bar**: type an address to navigate (the `https://` scheme is added; `http://`
+    is upgraded), or type anything else to run a **DuckDuckGo HTML** (no-JS) search. A dangerous
+    scheme such as `javascript:` is searched, never executed (fail-closed).
   - **Tor support** (`.onion` routing via SOCKS5h proxy, remote DNS, no leaks)
   - **I2P support** (`.i2p` routing via HTTP proxy)
   - Clearnet Torification option (`--torify`)
@@ -81,9 +88,13 @@ The name reflects its core goals:
   - Full GitHub Actions CI/CD pipeline
   - MCP (Model Context Protocol) server for AI agent integration
 
-## Current Status (Updated - June 20, 2026)
+## Current Status (Updated - June 21, 2026)
 - ✅ Advanced HTML rendering with box model, flex/grid and margin collapsing
 - ✅ Clickable links + basic image support (PNG)
+- ✅ Anti-fingerprinting network identity (normalized User-Agent + Accept-Language)
+- ✅ Omnibox address bar (navigate or DuckDuckGo HTML search)
+- ✅ Native forms (GET/POST, no JS)
+- ✅ Save page as vector PDF (`Ctrl+P`)
 - ✅ Headless mode
 - ✅ Strong per-tab sandboxing
 - ✅ Docker + noVNC
@@ -123,6 +134,41 @@ WAYLAND_DISPLAY=wayland-1 ./build/freedom
 # Run in headless mode
 ./freedom --headless https://example.com
 ```
+
+## Address Bar, Search & Keyboard Shortcuts
+
+The address bar works like a real **omnibox**:
+
+- **`example.com`** → opens `https://example.com` (the scheme is added; a bare host is recognised).
+- **`http://site`** → **upgraded to https** (Secure by Default: a downgrade is never representable).
+- **`best linux distro`** (or anything that is not a URL) → runs a **DuckDuckGo HTML** search (the
+  no-JS endpoint, which renders cleanly in Freedom).
+- **`javascript:...` / `file:...` / `data:...`** → searched as text, **never executed** (fail-closed).
+- An existing **local path** (e.g. `examples/rich.html`) still opens from disk.
+
+### Anti-fingerprinting identity
+
+Every request carries a normalized, low-entropy `User-Agent` and `Accept-Language` shared by all
+Freedom users — a common Firefox-on-Linux identity that matches what the JS engine reports
+(`navigator.userAgent`). The on-the-wire identity and the in-page identity are the same, so there is
+no mismatch to fingerprint, and Freedom never sends a "Freedom" product string (which is a unique
+fingerprint and a bot signal). You can override the User-Agent per session in the hamburger menu;
+leave it empty to use the anti-fingerprint default.
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+| :-- | :-- |
+| `Enter` / `Go` | Open the address, or search the web if it is not a URL |
+| `Ctrl+L` | Focus the URL bar |
+| `Ctrl+I` | Toggle remote images (off by default) |
+| `Ctrl+P` | Save the current page as a vector PDF (selectable text) |
+| `Ctrl+C` / `Ctrl+V` | Copy the focused field or page URL / paste into the focused field |
+| `Ctrl+T` / `Ctrl+W` / `Ctrl+Tab` | New tab / close tab / next tab |
+| `Ctrl+Shift+E` | Per-host exception for a weak-but-valid certificate (this session) |
+| `j` / `k` | Scroll one line down / up (URL bar unfocused) |
+| `Space` / `b` | Scroll one page down / up |
+| `gg` / `G`, `Home` / `End` | Jump to top / bottom |
 
 ## Privacy Networking: Tor, I2P & Host Filtering
 
@@ -185,7 +231,13 @@ files ship in `config/`). The format is one domain per line, or `0.0.0.0 domain`
 This is purely opt-in: with no list files present, nothing is blocked (the filter fails open — it is
 an adblock-style layer, not the security boundary).
 
-By not using the Blink (Chromium) or Gecko (Firefox) engine, web servers become completely confused when receiving your requests, which destroys commercial Machine Learning algorithms that try to profile what type of user you are based on how your browser traffic behaves.
+Although Freedom uses neither the Blink (Chromium) nor the Gecko (Firefox) engine, it deliberately
+presents the **identity** of a common Firefox-on-Linux browser on the wire (a shared, normalized
+`User-Agent` and `Accept-Language`). The goal is anti-fingerprinting by **blending in**, not by
+standing out: every Freedom user looks identical and indistinguishable from a large crowd, which
+starves the commercial Machine Learning models that try to profile you from your browser's
+behaviour — while still letting fingerprinting-hostile sites (Google, Cloudflare) serve you instead
+of a bot-challenge wall.
 
 ## Fuzzing
 

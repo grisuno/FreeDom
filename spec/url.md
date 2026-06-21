@@ -30,6 +30,13 @@ typedef enum url_status {
     URL_ERR_NOT_HTTPS,  /* no es una URL https absoluta / esquema rechazado / host vacio */
     URL_ERR_OVERFLOW    /* el resultado no cabe en el buffer del llamante */
 } url_status;
+
+#define URL_SEARCH_ENDPOINT "https://html.duckduckgo.com/html/?q=" /* buscador sin JS */
+
+typedef enum url_omni_kind {
+    URL_OMNI_NAVIGATE = 0, /* out = https absoluta a cargar */
+    URL_OMNI_SEARCH        /* out = URL https de búsqueda DuckDuckGo HTML */
+} url_omni_kind;
 ```
 
 ## 2. API (pura, reentrante)
@@ -41,6 +48,7 @@ size_t     url_authority_len(const char *url);
 url_status url_validate_https(const char *url);
 url_status url_remove_dot_segments(const char *path, char *out, size_t outsz);
 url_status url_resolve_https(const char *base, const char *ref, char *out, size_t outsz);
+url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz);
 ```
 
 ### `url_is_https`
@@ -88,10 +96,35 @@ es una URL canónica). Antes de devolver, el resultado se valida con `url_valida
 una https absoluta válida → `URL_ERR_NOT_HTTPS`. Si el ensamblado excede `outsz` →
 `URL_ERR_OVERFLOW`.
 
+### `url_omnibox`
+
+Resuelve texto libre de la barra de URL en una https absoluta, decidiendo entre **navegar** a un
+sitio o **buscar** en la web (DuckDuckGo HTML, `URL_SEARCH_ENDPOINT`, que funciona sin JS). Tipo
+`url_omni_kind` = `{ URL_OMNI_NAVIGATE, URL_OMNI_SEARCH }`. Reglas (puro, fail-closed, Secure by
+Default):
+
+- ya es una https absoluta válida → `NAVIGATE` (copia verbatim);
+- forma de host desnudo (`example.com`, `host:8443/p`, `localhost`) → `NAVIGATE`, prefijado con
+  `https://`. "Host" = `localhost`, o etiquetas `[A-Za-z0-9-]` unidas por puntos con TLD final
+  **alfabético de ≥2**. La forma `host:port` se reconoce como host **antes** del chequeo de esquema
+  (sintácticamente `host:` parece `<scheme>:`);
+- prefijo `http://` → `NAVIGATE`, **promovido a https** (HTTPS-only: nunca downgrade, el esquema
+  seguro es el único representable);
+- cualquier otra cosa — espacios en blanco, un esquema que no sea http(s) (así `javascript:...` se
+  **busca**, nunca se ejecuta), o un token que no es host → `SEARCH`. La query se codifica en
+  porcentaje (espacio→`+`, no-unreserved→`%XX`).
+
+**No** maneja archivos locales: el orquestador resuelve un path local existente **antes** de llamar
+(una función pura no puede `stat` el FS). `out` queda NUL-terminado en `URL_OK`; punteros NULL /
+`outsz==0` → `URL_ERR_NULL_ARG`; URL construida que no cabe → `URL_ERR_OVERFLOW`.
+
 ## 3. Garantías
 
 - **Pureza / Zero Trust:** sin I/O, sin estado global, reentrante. Falla cerrado: ante cualquier
   duda (base inválida, esquema no https, desbordamiento) se rechaza, nunca se degrada.
+- **Omnibox fail-closed:** un esquema peligroso tecleado/pegado (`javascript:`, `file:`, `data:`)
+  se convierte en **búsqueda**, jamás en ejecución; `http://` se **promueve** a https, nunca se
+  navega en claro.
 - **Secure by Default:** una URL no-https no es representable como salida de `url_resolve_https`;
   el *downgrade* a `http://` se rechaza explícitamente.
 - **Sin desbordamiento:** todo ensamblado usa copias acotadas; nunca se trunca silenciosamente

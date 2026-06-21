@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "anti_fp.h" /* normalized network identity (User-Agent / Accept-Language) */
+
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
 #endif
@@ -104,7 +106,12 @@ typedef struct sf_response {
  * group never weakens the strict policy: a classical *negotiated* group is still
  * rejected by sf_check_group_is_pq. */
 #define SF_DEFAULT_KEX_GROUPS  "X25519MLKEM768:X25519:secp256r1"
-#define SF_DEFAULT_USER_AGENT  "Freedom/0.1"
+/* The default User-Agent IS the anti-fingerprinting identity (FP_USER_AGENT): it
+ * must match navigator.userAgent exactly and must not advertise "Freedom" (that is
+ * a unique fingerprint and a bot signal that breaks sites like Google). Demoting
+ * the old "Freedom/0.1" to merely a brand string was deliberate; never reintroduce
+ * a product name here. The user can still override per session in the menu. */
+#define SF_DEFAULT_USER_AGENT  FP_USER_AGENT
 #define SF_DEFAULT_MAX_BODY    ((size_t)(16u * 1024u * 1024u))
 #define SF_DEFAULT_TIMEOUT_MS  30000L
 #define SF_DEFAULT_MAX_REDIRECTS 10

@@ -103,11 +103,17 @@ sf_status sf_post(const char *url, const sf_config *cfg,
 void      sf_response_free(sf_response *resp);
 ```
 
-**User-Agent configurable.** `sf_config.user_agent` (NULL o `""` ⇒ `SF_DEFAULT_USER_AGENT`,
-`"Freedom/0.1"`) fija la cabecera `User-Agent` de red. Lo resuelve la función pura
-`sf_user_agent_or_default` (un único sitio probado). Es ajuste de **red** solo de sesión; el
-`navigator.userAgent` de JS sigue normalizado por `anti_fp` (anti-fingerprinting), de modo que un
-UA de red a medida no abre un canal de fingerprinting pasivo en el motor JS.
+**Identidad de red normalizada (anti-fingerprinting).** `SF_DEFAULT_USER_AGENT` **es** la identidad
+anti-fingerprinting (`FP_USER_AGENT` de `[[anti_fp]]`): una cadena común de **Firefox/Linux**, no
+`"Freedom/0.1"`. El antiguo `"Freedom/0.1"` quedó degradado a mera marca de producto y **nunca** se
+envía por la red — una UA con `"Freedom"` es una huella única y dispara la detección de bots (rompe
+Google, Cloudflare, etc.). `sf_config.user_agent` (NULL o `""` ⇒ el default) fija la cabecera; lo
+resuelve la función pura `sf_user_agent_or_default` (un único sitio probado). El usuario puede
+sobrescribirla por sesión en el menú. Como ahora el default de red **coincide** con
+`navigator.userAgent`, la identidad on-the-wire y la visible por JS son la misma (la discrepancia
+era en sí misma huella). Además, **toda** petición (GET y POST) envía un `Accept-Language`
+normalizado (`FP_ACCEPT_LANGUAGE_HEADER`, `"en-US,en;q=0.5"`): omitirlo es señal, y el locale real
+del sistema no debe filtrarse.
 
 **Proxy de anonimato (Tor/I2P, a nivel de socket).** `sf_config.proxy_type` +
 `sf_config.proxy_address` enrutan la petición por un proxy local (Principio 3). `SF_PROXY_NONE`

@@ -490,8 +490,9 @@ typedef struct browser_window {
     ui_image       *images;
     size_t          image_count;
 
-    /* Configurable network User-Agent (session only; empty => SF_DEFAULT_USER_AGENT).
-     * navigator.userAgent in JS stays normalised by anti_fp regardless. Edited in
+    /* Configurable network User-Agent (session only; empty => SF_DEFAULT_USER_AGENT,
+     * which IS the anti_fp normalized identity, matching navigator.userAgent). A custom
+     * value overrides only the wire header; the JS identity stays normalised. Edited in
      * the options menu with the shared textfield primitive. */
     tf_field    ua_field;
     int         ua_field_focused;
@@ -2839,9 +2840,12 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
     double tx = bx + UI_MARGIN;
     double ty = by + (bh + mfe.ascent - mfe.descent) / 2.0;
     if (ua[0] == '\0' && !w->ua_field_focused) {
+        /* Empty field => the normalized anti-fingerprint identity (a shared Firefox
+         * string) is sent. The placeholder names that intent rather than the long UA
+         * literal; "Freedom" is deliberately never sent on the wire. */
         set_rgb(cr, th->chrome_text_dim);
         cairo_move_to(cr, tx, ty);
-        cairo_show_text(cr, SF_DEFAULT_USER_AGENT " (default)");
+        cairo_show_text(cr, "anti-fingerprint default (shared Firefox identity)");
     } else {
         set_rgb(cr, th->menu_text);
         cairo_move_to(cr, tx, ty);
@@ -3323,6 +3327,34 @@ static void load_current(browser_window *w) {
     }
 }
 
+/* Commits the URL bar like a real omnibox: an existing local file is opened as
+ * before; otherwise url_omnibox (pure) decides between navigating to a site and
+ * running a DuckDuckGo HTML search, building the absolute https URL either way. So
+ * "example.com" becomes https://example.com and "best linux distro" becomes a
+ * search, instead of the old "cannot read file" dead end. */
+static void go_omnibox(browser_window *w) {
+    const char *raw = w->bs.url_bar;
+    if (raw == NULL || raw[0] == '\0') return;
+
+    /* A readable local path keeps the file-browsing capability (the start page is a
+     * relative path), and must win over the host heuristic ("docs/index.html"). */
+    if (!is_https_url(raw) && !is_overlay_http_url(raw) && access(raw, R_OK) == 0) {
+        if (browser_navigate(&w->bs, raw) == BROWSER_OK) load_current(w);
+        return;
+    }
+
+    char target[URL_MAX_LEN];
+    url_omni_kind kind;
+    if (url_omnibox(raw, &kind, target, sizeof target) == URL_OK &&
+        browser_navigate(&w->bs, target) == BROWSER_OK) {
+        do_load(w, target);
+        return;
+    }
+    /* Fail closed to the legacy path (e.g. about:blank or an OOM in the bounded build). */
+    browser_commit_url_bar(&w->bs);
+    load_current(w);
+}
+
 static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
                        uint32_t button, uint32_t state) {
     (void)p; (void)t;
@@ -3436,8 +3468,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
         if (w->ptr_x >= menu_x) {
             w->menu_open = 1;
         } else if (w->ptr_x >= go_x && w->ptr_x < menu_x) {
-            browser_commit_url_bar(&w->bs);
-            load_current(w);
+            go_omnibox(w);
         } else if (w->ptr_x >= url_x && w->ptr_x < url_x + url_w) {
             w->url_bar_focused = 1;
             w->focused_input = -1; /* the URL bar takes the keyboard */
@@ -3912,8 +3943,7 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     if (sym == XKB_KEY_Escape) {
         w->url_bar_focused = 0;
     } else if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
-        browser_commit_url_bar(&w->bs);
-        load_current(w);
+        go_omnibox(w);
         w->url_bar_focused = 0;
     } else if (sym == XKB_KEY_BackSpace) {
         browser_url_bar_backspace(&w->bs);

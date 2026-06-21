@@ -200,3 +200,164 @@ url_status url_resolve_https(const char *base, const char *ref,
 
     return url_validate_https(out);
 }
+
+/* --- omnibox --- */
+
+static int is_space(int c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
+}
+
+static int is_unreserved(int c) {
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+           (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' || c == '~';
+}
+
+/* Percent-encodes src into a query value appended to out (space -> '+', every
+ * non-unreserved byte -> %XX). Nonzero on overflow. */
+static int append_query_encoded(char *out, size_t outsz, const char *src) {
+    static const char hex[] = "0123456789ABCDEF";
+    size_t cur = strlen(out);
+    for (const char *p = src; *p != '\0'; ++p) {
+        unsigned char c = (unsigned char)*p;
+        if (c == ' ') {
+            if (cur + 1 + 1 > outsz) return -1;
+            out[cur++] = '+';
+        } else if (is_unreserved(c)) {
+            if (cur + 1 + 1 > outsz) return -1;
+            out[cur++] = (char)c;
+        } else {
+            if (cur + 3 + 1 > outsz) return -1;
+            out[cur++] = '%';
+            out[cur++] = hex[(c >> 4) & 0xF];
+            out[cur++] = hex[c & 0xF];
+        }
+    }
+    out[cur] = '\0';
+    return 0;
+}
+
+/* Does the authority of s (up to the first '/', '?' or '#', minus any ":port")
+ * look like a registrable host: "localhost", or labels of [A-Za-z0-9-] joined by
+ * dots with a final all-alphabetic label of length >= 2 (a TLD)? No whitespace is
+ * assumed (the caller already routed whitespace to search). */
+static int looks_like_host(const char *s) {
+    size_t authlen = 0;
+    while (s[authlen] != '\0' && s[authlen] != '/' &&
+           s[authlen] != '?' && s[authlen] != '#') {
+        ++authlen;
+    }
+    /* Drop a ":port" suffix from the authority. */
+    size_t hostlen = authlen;
+    for (size_t i = 0; i < authlen; ++i) {
+        if (s[i] == ':') { hostlen = i; break; }
+    }
+    if (hostlen == 0) return 0;
+
+    if (hostlen == 9 && ci_prefix(s, "localhost") && (s[9] == '\0' || s[9] == ':' ||
+        s[9] == '/' || s[9] == '?' || s[9] == '#')) {
+        return 1;
+    }
+
+    int dots = 0;
+    size_t label_start = 0;
+    size_t last_label_start = 0;
+    for (size_t i = 0; i <= hostlen; ++i) {
+        char c = (i < hostlen) ? s[i] : '.'; /* virtual trailing '.' closes the last label */
+        if (c == '.') {
+            size_t label_len = i - label_start;
+            if (label_len == 0) return 0;                 /* empty label ("a..b", ".a") */
+            if (s[label_start] == '-' || s[i - 1] == '-') return 0; /* hyphen at edge */
+            if (i < hostlen) ++dots;
+            last_label_start = label_start;
+            label_start = i + 1;
+        } else {
+            int ok = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+                     (c >= '0' && c <= '9') || c == '-';
+            if (!ok) return 0;
+        }
+    }
+    if (dots < 1) return 0;
+
+    /* The final label (the TLD) must be all-alphabetic and at least 2 chars. */
+    size_t tld_len = hostlen - last_label_start;
+    if (tld_len < 2) return 0;
+    for (size_t i = last_label_start; i < hostlen; ++i) {
+        char c = s[i];
+        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))) return 0;
+    }
+    return 1;
+}
+
+static url_status build_search(const char *query, char *out, size_t outsz) {
+    if (copy_checked(out, outsz, URL_SEARCH_ENDPOINT) != 0) return URL_ERR_OVERFLOW;
+    if (append_query_encoded(out, outsz, query) != 0) return URL_ERR_OVERFLOW;
+    return URL_OK;
+}
+
+url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz) {
+    if (input == NULL || kind == NULL || out == NULL || outsz == 0)
+        return URL_ERR_NULL_ARG;
+
+    /* Trim surrounding whitespace; the original (untrimmed) input still feeds a
+     * search query so a copy-pasted "  foo bar  " searches for "foo bar". */
+    const char *start = input;
+    while (*start != '\0' && is_space((unsigned char)*start)) ++start;
+    const char *end = start + strlen(start);
+    while (end > start && is_space((unsigned char)end[-1])) --end;
+    size_t trimlen = (size_t)(end - start);
+
+    if (trimlen == 0) { *kind = URL_OMNI_SEARCH; return build_search("", out, outsz); }
+
+    /* Internal whitespace can never be a URL: it is a query. */
+    for (size_t i = 0; i < trimlen; ++i) {
+        if (is_space((unsigned char)start[i])) {
+            *kind = URL_OMNI_SEARCH;
+            return build_search(start, out, outsz);
+        }
+    }
+
+    /* The trimmed token has no whitespace; copy it NUL-terminated for the scheme
+     * checks and host build (bounded by URL_MAX_LEN like every URL we act on). */
+    char tok[URL_MAX_LEN + 1];
+    if (trimlen + 1 > sizeof tok) { *kind = URL_OMNI_SEARCH; return build_search(start, out, outsz); }
+    memcpy(tok, start, trimlen);
+    tok[trimlen] = '\0';
+
+    if (ci_prefix(tok, "https://")) {
+        if (url_validate_https(tok) != URL_OK) { *kind = URL_OMNI_SEARCH; return build_search(start, out, outsz); }
+        *kind = URL_OMNI_NAVIGATE;
+        return copy_checked(out, outsz, tok) != 0 ? URL_ERR_OVERFLOW : URL_OK;
+    }
+
+    if (ci_prefix(tok, "http://")) {
+        /* HTTPS-only upgrade: rebuild as https and validate. */
+        char up[URL_MAX_LEN + 1];
+        up[0] = '\0';
+        if (cat_checked(up, sizeof up, "https://") != 0 ||
+            cat_checked(up, sizeof up, tok + 7) != 0 ||
+            url_validate_https(up) != URL_OK) {
+            *kind = URL_OMNI_SEARCH;
+            return build_search(start, out, outsz);
+        }
+        *kind = URL_OMNI_NAVIGATE;
+        return copy_checked(out, outsz, up) != 0 ? URL_ERR_OVERFLOW : URL_OK;
+    }
+
+    /* A host shape is checked BEFORE the generic scheme guard: "host:port" (e.g.
+     * "localhost:8443") syntactically parses as "<scheme>:" but is really a host. */
+    if (looks_like_host(tok)) {
+        char built[URL_MAX_LEN + 1];
+        built[0] = '\0';
+        if (cat_checked(built, sizeof built, "https://") == 0 &&
+            cat_checked(built, sizeof built, tok) == 0 &&
+            url_validate_https(built) == URL_OK) {
+            *kind = URL_OMNI_NAVIGATE;
+            return copy_checked(out, outsz, built) != 0 ? URL_ERR_OVERFLOW : URL_OK;
+        }
+    }
+
+    /* Any remaining explicit scheme is never executed nor downgraded: search for it
+     * (so "javascript:...", "file:...", "ftp://..." become harmless queries). */
+    *kind = URL_OMNI_SEARCH;
+    return build_search(start, out, outsz);
+}

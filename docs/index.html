@@ -1,31 +1,63 @@
-<!DOCTYPE html>  
-<html>  
-    <head><title>FreeDom v0.0.3</title></head>  
-    <body style="color:#0a0a0a">  
-        <h1 style="color:#061414">FreeDom v0.0.3</h1>  
-        <hr>  
-          
-        <h2 style="color:#061414">Getting Started</h2>  
-        <p style="color:#0a0a0a">Click the URL bar, type an address, and press Enter or click Go.</p>  
-          
-        <h2 style="color:#061414">Allowed URLs</h2>  
-        <ul>  
-            <li style="color:#0a0a0a"><strong style="color:#061414">HTTPS:</strong> <code style="color:#0a3380">https://&lt;site&gt;</code> (TLS 1.3, PQ-hybrid KE, leaf RSA &gt;= 3072 / ECDSA)</li>  
-            <li style="color:#0a0a0a"><strong style="color:#061414">Local:</strong> <code style="color:#0a3380">/path/file.html</code> (local file)</li>  
-        </ul>  
-  
-        <h2 style="color:#061414">Features</h2>  
-        <p style="color:#0a0a0a">Pages render with <strong style="color:#061414">structure</strong> (headings, links, paragraphs) and you can click links to navigate.</p>  
-        <p style="color:#0a0a0a"><em style="color:#061414">Privacy by Default:</em> Remote images and author colors are off by default; the menu button at the top right toggles them (or <code style="color:#0a3380">Ctrl+I</code> for images). A page that uses images shows a tracking warning and a placeholder per image. <code style="color:#0a3380">Ctrl+L</code> focuses the URL bar.</p>  
-        <p>Vim shortcuts in the content area (without focus on the URL): j/k line, space/b page, gg up, G down, plus Home/End</p>
-        <br />
-        <p>Tabs shortcuts 
-        Ctrl+T/Ctrl+W/Ctrl+Tab.</p>
-        <br />
-        <h2 style="color:#061414">Security</h2>  
-        <p style="color:#700000"><strong style="color:#700000">Fail-Closed:</strong> Sites whose end-entity certificate uses RSA 2048 are rejected with status 5 (weak algorithm).</p>
-        
-        <hr>
-        <p style="color:#555555"><em>[ Isolated Session: Local Storage Ephemeral / Isolated PID ]</em></p>
-    </body>      
+<!DOCTYPE html>
+<html>
+<head><title>Freedom v0.0.3</title></head>
+<body style="color:#0a0a0a">
+
+    <p style="text-align:center">
+        <img src="logo.png" alt="Freedom logo" width="180" height="180">
+    </p>
+    <h1 style="color:#061414; text-align:center">Freedom v0.0.3</h1>
+    <p style="color:#555555; text-align:center"><em>A secure-by-default web browser in pure C. Zero telemetry. Zero backdoors. Zero implicit trust.</em></p>
+    <hr>
+
+    <h2 style="color:#061414">Getting Started</h2>
+    <p style="color:#0a0a0a">Click the URL bar (or press <code style="color:#0a3380">Ctrl+L</code>), type, and press
+    <strong style="color:#061414">Enter</strong> or click <strong style="color:#061414">Go</strong>.</p>
+    <ul>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Type an address</strong> &mdash; <code style="color:#0a3380">example.com</code> opens <code style="color:#0a3380">https://example.com</code> (the scheme is added; <code style="color:#0a3380">http://</code> is upgraded to https).</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Type anything else</strong> &mdash; <code style="color:#0a3380">best linux distro</code> runs a <strong style="color:#061414">DuckDuckGo HTML</strong> search (the no-JS version). A dangerous scheme like <code style="color:#0a3380">javascript:</code> is searched, never executed.</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Local file</strong> &mdash; <code style="color:#0a3380">/path/file.html</code> or a relative path opens it from disk.</li>
+    </ul>
+
+    <h2 style="color:#061414">Keyboard Shortcuts</h2>
+    <table>
+        <tr><th style="color:#061414">Shortcut</th><th style="color:#061414">Action</th></tr>
+        <tr><td style="color:#0a3380"><code>Enter</code> / <code>Go</code></td><td style="color:#0a0a0a">Open the address, or search the web if it is not a URL</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+L</code></td><td style="color:#0a0a0a">Focus the URL bar</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+I</code></td><td style="color:#0a0a0a">Toggle remote images (off by default &mdash; Privacy by Default)</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+P</code></td><td style="color:#0a0a0a">Save the current page as a vector PDF (selectable text)</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+C</code></td><td style="color:#0a0a0a">Copy the focused field, or the page URL</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+V</code></td><td style="color:#0a0a0a">Paste into the focused field</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+T</code></td><td style="color:#0a0a0a">New tab</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+W</code></td><td style="color:#0a0a0a">Close tab</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+Tab</code></td><td style="color:#0a0a0a">Next tab</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+Shift+E</code></td><td style="color:#0a0a0a">Per-host exception for a weak-but-valid certificate (this session)</td></tr>
+    </table>
+
+    <h3 style="color:#061414">Scrolling (Vim-style, when the URL bar is not focused)</h3>
+    <table>
+        <tr><td style="color:#0a3380"><code>j</code> / <code>k</code></td><td style="color:#0a0a0a">Scroll down / up one line</td></tr>
+        <tr><td style="color:#0a3380"><code>Space</code> / <code>b</code></td><td style="color:#0a0a0a">Scroll down / up one page</td></tr>
+        <tr><td style="color:#0a3380"><code>gg</code> / <code>G</code></td><td style="color:#0a0a0a">Jump to top / bottom</td></tr>
+        <tr><td style="color:#0a3380"><code>Home</code> / <code>End</code></td><td style="color:#0a0a0a">Jump to top / bottom</td></tr>
+    </table>
+
+    <h2 style="color:#061414">Privacy &amp; Anti-Fingerprinting</h2>
+    <ul>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Blend-in identity:</strong> Freedom sends a normalized, shared <code style="color:#0a3380">User-Agent</code> and <code style="color:#0a3380">Accept-Language</code> (a common Firefox-on-Linux identity) so every user looks the same. It never advertises "Freedom" on the wire. Override the User-Agent per session in the menu (top-right).</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Off by default:</strong> remote images and author colors are disabled; the menu toggles them (or <code style="color:#0a3380">Ctrl+I</code> for images). A page that uses images shows a tracking warning and a placeholder per image.</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Normalized JS surface:</strong> clocks, screen size, and canvas/audio readback are coarsened or poisoned so the JS engine cannot fingerprint the device. No WebRTC, no WebGL, no third-party requests.</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Tor / I2P:</strong> optional socket-level routing via local proxies (toggles in the menu). <code style="color:#0a3380">.onion</code> uses Tor only; <code style="color:#0a3380">.i2p</code> uses I2P only &mdash; fail-closed, never leaked over clearnet.</li>
+    </ul>
+
+    <h2 style="color:#061414">Security</h2>
+    <ul>
+        <li style="color:#700000"><strong style="color:#700000">Post-Quantum by Default:</strong> TLS 1.3 minimum, hybrid key exchange (<code style="color:#0a3380">X25519MLKEM768</code>) preferred.</li>
+        <li style="color:#700000"><strong style="color:#700000">Fail-Closed:</strong> a site whose end-entity certificate uses RSA &lt; 3072 is rejected with status 5 (weak algorithm). Use <code style="color:#0a3380">Ctrl+Shift+E</code> for a session exception.</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Per-tab isolation:</strong> each tab parses, decodes, and runs hostile content in a worker confined by seccomp-bpf + Landlock + per-tab namespaces. The parent survives a compromised worker.</li>
+    </ul>
+
+    <hr>
+    <p style="color:#555555"><em>[ Isolated Session: Local Storage Ephemeral / Isolated PID ]</em></p>
+</body>
 </html>
