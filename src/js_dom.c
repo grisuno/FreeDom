@@ -200,6 +200,54 @@ static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
+/* --- DOM construction (live JS, Hito 20c) --- */
+
+static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,
+                               int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    const char *tag = JS_ToCString(ctx, argv[0]);
+    if (tag == NULL) return JS_EXCEPTION;
+    dom_node_id id = DOM_NODE_NONE;
+    dom_status st = dom_create_element(jd_idx(ctx), tag, &id);
+    JS_FreeCString(ctx, tag);
+    if (st == DOM_ERR_OOM) return JS_ThrowOutOfMemory(ctx);
+    return jd_handle_or_null(ctx, id);
+}
+
+static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,
+                             int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id p, c;
+    if (jd_handle(ctx, argv[0], &p) < 0 || jd_handle(ctx, argv[1], &c) < 0)
+        return JS_EXCEPTION;
+    return JS_NewBool(ctx, dom_append_child(jd_idx(ctx), p, c) == DOM_OK);
+}
+
+static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,
+                             int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id p, c;
+    if (jd_handle(ctx, argv[0], &p) < 0 || jd_handle(ctx, argv[1], &c) < 0)
+        return JS_EXCEPTION;
+    return JS_NewBool(ctx, dom_remove_child(jd_idx(ctx), p, c) == DOM_OK);
+}
+
+static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
+                              int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    const char *name = JS_ToCString(ctx, argv[1]);
+    if (name == NULL) return JS_EXCEPTION;
+    const char *val = JS_ToCString(ctx, argv[2]);
+    if (val == NULL) { JS_FreeCString(ctx, name); return JS_EXCEPTION; }
+    dom_status st = dom_set_attribute(jd_idx(ctx), h, name, val);
+    JS_FreeCString(ctx, name);
+    JS_FreeCString(ctx, val);
+    if (st == DOM_ERR_OOM) return JS_ThrowOutOfMemory(ctx);
+    return JS_UNDEFINED;
+}
+
 /* --- install --- */
 
 typedef struct jd_method {
@@ -223,6 +271,10 @@ static const jd_method JD_METHODS[] = {
     { "setText",        m_set_text,          2 },
     { "getTitle",       m_get_title,         0 },
     { "setTitle",       m_set_title,         1 },
+    { "createElement",  m_create_element,    1 },
+    { "appendChild",    m_append_child,      2 },
+    { "removeChild",    m_remove_child,      2 },
+    { "setAttribute",   m_set_attribute,     3 },
 };
 
 /* A small standard `document` facade over the native handle API, so real page
@@ -235,25 +287,60 @@ static const char JD_DOCUMENT_SHIM[] =
     "  function wrap(h){"
     "    if (h===null||h===undefined) return null;"
     "    return {"
+    "      _h:h, nodeType:1,"
     "      get textContent(){ return dom.textContent(h); },"
     "      set textContent(v){ dom.setText(h, String(v)); },"
     "      getAttribute: function(n){ return dom.getAttribute(h, String(n)); },"
-    "      get tagName(){ var t=dom.tagName(h); return t===null?null:String(t).toUpperCase(); }"
+    "      setAttribute: function(n,v){ dom.setAttribute(h, String(n), String(v)); },"
+    "      get tagName(){ var t=dom.tagName(h); return t===null?null:String(t).toUpperCase(); },"
+    "      get id(){ var v=dom.getAttribute(h,'id'); return v===null?'':v; },"
+    "      set id(v){ dom.setAttribute(h,'id',String(v)); },"
+    "      get className(){ var v=dom.getAttribute(h,'class'); return v===null?'':v; },"
+    "      set className(v){ dom.setAttribute(h,'class',String(v)); },"
+    "      appendChild: function(c){ if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
+    "      removeChild: function(c){ if(c&&c._h!==undefined) dom.removeChild(h,c._h); return c; },"
+    "      addEventListener: function(){}, removeEventListener: function(){}"
     "    };"
     "  }"
     "  function wrapList(hs){ var r=[]; for (var i=0;i<hs.length;i++) r.push(wrap(hs[i])); return r; }"
+    "  var loadCbs=[], timers=[];"
+    "  function addL(type,fn){ if(typeof fn==='function' &&"
+    "    (type==='load'||type==='DOMContentLoaded'||type==='readystatechange')) loadCbs.push(fn); }"
     "  var d={"
     "    getElementById: function(id){ return wrap(dom.getElementById(String(id))); },"
     "    getElementsByTagName: function(t){ return wrapList(dom.getByTag(String(t))); },"
-    "    getElementsByClassName: function(c){ return wrapList(dom.getByClass(String(c))); }"
+    "    getElementsByClassName: function(c){ return wrapList(dom.getByClass(String(c))); },"
+    "    createElement: function(t){ return wrap(dom.createElement(String(t))); },"
+    "    createTextNode: function(t){ return {nodeType:3, textContent:String(t)}; },"
+    "    addEventListener: function(type,fn){ addL(String(type),fn); },"
+    "    removeEventListener: function(){}, readyState:'loading'"
     "  };"
     "  Object.defineProperty(d,'title',{get:function(){return dom.getTitle();},"
     "    set:function(v){dom.setTitle(String(v));},enumerable:true});"
+    "  function tagOne(t){ var a=dom.getByTag(t); return a.length?wrap(a[0]):null; }"
+    "  Object.defineProperty(d,'body',{get:function(){return tagOne('body');},enumerable:true});"
+    "  Object.defineProperty(d,'head',{get:function(){return tagOne('head');},enumerable:true});"
+    "  Object.defineProperty(d,'documentElement',{get:function(){return tagOne('html');},enumerable:true});"
     "  globalThis.document=d;"
     "  if (typeof globalThis.window==='undefined') globalThis.window=globalThis;"
     "  if (typeof globalThis.console==='undefined')"
     "    globalThis.console={log:function(){},warn:function(){},error:function(){},"
     "      info:function(){},debug:function(){}};"
+    "  globalThis.addEventListener=function(type,fn){ addL(String(type),fn); };"
+    "  globalThis.removeEventListener=function(){};"
+    "  globalThis.setTimeout=function(fn){ if(typeof fn==='function') timers.push(fn); return timers.length; };"
+    "  globalThis.setInterval=function(fn){ if(typeof fn==='function') timers.push(fn); return timers.length; };"
+    "  globalThis.clearTimeout=function(){}; globalThis.clearInterval=function(){};"
+    /* Synthetic, bounded "page loaded" pump: fire load handlers, then flush queued
+     * timers ONCE (capped, since this is not a real async event loop). */
+    "  globalThis.__fireDeferred=function(){"
+    "    d.readyState='complete';"
+    "    for (var i=0;i<loadCbs.length;i++){ try{ loadCbs[i].call(globalThis); }catch(e){} }"
+    "    if (typeof globalThis.onload==='function'){ try{ globalThis.onload(); }catch(e){} }"
+    "    if (typeof d.onload==='function'){ try{ d.onload(); }catch(e){} }"
+    "    var n=0; while (timers.length>0 && n<64){ var t=timers.shift(); n++;"
+    "      try{ t.call(globalThis); }catch(e){} }"
+    "  };"
     "})();";
 
 jd_status jd_install(js_context *ctx, dom_index *idx) {

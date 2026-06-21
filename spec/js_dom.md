@@ -46,19 +46,27 @@ Objeto global `dom` (solo lectura). Handles = enteros; "ninguno" = `null`.
 | `dom.precedes(a, b)` | booleano | `dom_precedes` |
 | `dom.textContent(h)` | string | `dom_text_content` |
 | `dom.setText(h, str)` | `undefined` | `dom_set_text_content` (detach-safe) |
-| `dom.getTitle()` | string | `dom_document_title` |
-| `dom.setTitle(str)` | `undefined` | `dom_set_document_title` |
+| `dom.getTitle()` / `setTitle(str)` | string / `undefined` | `dom_document_title` / `_set` |
+| `dom.createElement(tag)` | handle | `dom_create_element` (índice crece) |
+| `dom.appendChild(p, c)` / `removeChild(p, c)` | bool | `dom_append_child` / `_remove` |
+| `dom.setAttribute(h, n, v)` | `undefined` | `dom_set_attribute` (re-indexa id/class) |
 
-**Fachada `document` (Hito 20b):** un shim JS inyectado por `jd_install` define `document` sobre la
-API de handles para que scripts reales corran: `document.title` (get/set), `document.getElementById(id)`
-→ wrapper con `textContent` (get/set), `getAttribute`, `tagName`; `document.getElementsByTagName/
-ClassName`; `window === globalThis`; `console` no-op. Los wrappers solo guardan el **handle entero
-validado** — **no** se exponen objetos-nodo vivos del motor.
+**Fachada `document` (Hito 20b/20c):** un shim JS inyectado por `jd_install` define `document` sobre la
+API de handles para que scripts reales corran. Lectura/escritura: `document.title`,
+`getElementById(id)` → wrapper con `textContent` (get/set), `getAttribute`/`setAttribute`, `tagName`,
+`id`/`className` (get/set), `appendChild`/`removeChild`; `createElement(tag)`; `getElementsByTagName/
+ClassName`; `body`/`head`/`documentElement`. Eventos/timers **sintéticos y acotados**:
+`addEventListener('load'|'DOMContentLoaded', fn)` / `window.onload` y `setTimeout`/`setInterval`
+**encolan**; el worker llama `__fireDeferred()` una vez tras los scripts (dispara los handlers de carga
+y vacía la cola de timers **hasta 64 veces** — no es un event loop real). `window === globalThis`,
+`console` no-op. Los wrappers solo guardan el **handle entero validado** — **no** se exponen
+objetos-nodo vivos del motor.
 
-Lo que **no** existe aún (por diseño): mutación estructural (`appendChild`/`createElement`/`remove`),
-`setAttribute`, `innerHTML`, eventos, timers, scripts externos (`src`). Mutar es **memory-safe**: el
-setter de texto detacha (no destruye) los hijos, así un handle previo nunca cuelga. Un handle inválido
-produce `null`/`""`/`undefined`, **nunca** un fallo del host.
+Lo que **no** existe aún (por diseño): `innerHTML`, `createTextNode` real (devuelve un objeto inerte),
+eventos **interactivos** (clic del usuario), timers **asíncronos** reales, scripts externos (`src`).
+Todas las mutaciones son **memory-safe**: remover detacha (no destruye) → un handle previo nunca
+cuelga; agregar nodos nunca libera. Un handle inválido produce `null`/`""`/`false`, **nunca** un fallo
+del host.
 
 ## 4. Contrato de la API (C)
 

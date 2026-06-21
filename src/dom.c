@@ -224,6 +224,7 @@ static void pm_free(ptrmap *m) {
 struct dom_index {
     lxb_dom_node_t      **nodes;    /* arena: id -> element node, in document order */
     size_t                count;
+    size_t                cap;      /* capacity of nodes[] (grows when JS creates nodes) */
     lxb_dom_document_t   *document; /* owning document (for title / text-node creation) */
     strmap                by_id;
     strmap                by_tag;
@@ -300,6 +301,7 @@ dom_status dom_build(const hp_document *doc, dom_index **out) {
     if (idx == NULL) return DOM_ERR_OOM;
 
     idx->count = n;
+    idx->cap = n;
     idx->nodes = (n > 0) ? (lxb_dom_node_t **)malloc(n * sizeof *idx->nodes) : NULL;
     if (n > 0 && idx->nodes == NULL) {
         free(idx);
@@ -487,4 +489,95 @@ dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) 
         lxb_html_document_title_set((lxb_html_document_t *)idx->document,
                                     (const lxb_char_t *)(text != NULL ? text : ""), len);
     return (s == LXB_STATUS_OK) ? DOM_OK : DOM_ERR_INTERNAL;
+}
+
+/* --- DOM construction (live JS) --- */
+
+/* Appends an element node to the index, assigning the next handle. */
+static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id) {
+    if (idx->count == idx->cap) {
+        size_t ncap = idx->cap ? idx->cap * 2 : 8;
+        lxb_dom_node_t **grown =
+            (lxb_dom_node_t **)realloc(idx->nodes, ncap * sizeof *grown);
+        if (grown == NULL) return DOM_ERR_OOM;
+        idx->nodes = grown;
+        idx->cap = ncap;
+    }
+    dom_node_id id = (dom_node_id)idx->count;
+    idx->nodes[id] = node;
+    if (pm_put(&idx->rev, node, id) != 0) return DOM_ERR_OOM;
+    idx->count++;
+    *out_id = id;
+    return DOM_OK;
+}
+
+dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id) {
+    if (idx == NULL || tag == NULL || out_id == NULL || idx->document == NULL)
+        return DOM_ERR_NULL_ARG;
+    size_t tlen = strlen(tag);
+    char lower[256];
+    if (tlen == 0 || to_lower_buf(tag, tlen, lower, sizeof lower) != 0)
+        return DOM_ERR_NULL_ARG;
+
+    lxb_dom_element_t *el =
+        lxb_dom_document_create_element(idx->document, (const lxb_char_t *)lower, tlen, NULL);
+    if (el == NULL) return DOM_ERR_OOM;
+
+    dom_node_id id;
+    dom_status s = idx_push(idx, lxb_dom_interface_node(el), &id);
+    if (s != DOM_OK) return s;
+    (void)sm_put(&idx->by_tag, lower, tlen, id); /* queryable via getByTag */
+    *out_id = id;
+    return DOM_OK;
+}
+
+dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child) {
+    if (!valid(idx, parent) || !valid(idx, child) || parent == child)
+        return DOM_ERR_NULL_ARG;
+    lxb_dom_node_t *p = idx->nodes[parent];
+    lxb_dom_node_t *c = idx->nodes[child];
+    /* Reject a cycle: child must not be an ancestor of parent (would loop the walk). */
+    for (lxb_dom_node_t *a = p; a != NULL; a = a->parent) {
+        if (a == c) return DOM_ERR_NULL_ARG;
+    }
+    lxb_dom_node_remove(c);          /* detach from any current position */
+    lxb_dom_node_insert_child(p, c); /* append as last child */
+    return DOM_OK;
+}
+
+dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child) {
+    if (!valid(idx, parent) || !valid(idx, child)) return DOM_ERR_NULL_ARG;
+    lxb_dom_node_t *c = idx->nodes[child];
+    if (c->parent != idx->nodes[parent]) return DOM_ERR_NULL_ARG;
+    lxb_dom_node_remove(c); /* detach; node stays valid in the index */
+    return DOM_OK;
+}
+
+dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
+                             const char *name, const char *value) {
+    if (!valid(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
+    const char *v = (value != NULL) ? value : "";
+    size_t nl = strlen(name), vl = strlen(v);
+
+    lxb_dom_attr_t *a =
+        lxb_dom_element_set_attribute(lxb_dom_interface_element(idx->nodes[node]),
+                                      (const lxb_char_t *)name, nl,
+                                      (const lxb_char_t *)v, vl);
+    if (a == NULL) return DOM_ERR_OOM;
+
+    /* Keep id/class lookups working for dynamically-set attributes. */
+    if (nl == 2 && (name[0] | 0x20) == 'i' && (name[1] | 0x20) == 'd' && vl > 0) {
+        (void)sm_put(&idx->by_id, v, vl, node);
+    } else if (nl == 5 && (name[0] | 0x20) == 'c' && (name[1] | 0x20) == 'l' &&
+               (name[2] | 0x20) == 'a' && (name[3] | 0x20) == 's' &&
+               (name[4] | 0x20) == 's') {
+        size_t i = 0;
+        while (i < vl) {
+            while (i < vl && is_ws((unsigned char)v[i])) ++i;
+            size_t start = i;
+            while (i < vl && !is_ws((unsigned char)v[i])) ++i;
+            if (i > start) (void)sm_put(&idx->by_class, v + start, i - start, node);
+        }
+    }
+    return DOM_OK;
 }

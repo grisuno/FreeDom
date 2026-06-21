@@ -165,11 +165,14 @@ Page JavaScript is hostile content, so it is **off by default**. A global tri-st
 Set it in the hamburger menu (the "JavaScript: …" row cycles the mode), with `--js[=off|allowlist|on]`,
 or with the `FREEDOM_JS` env var. `js.conf` uses the same `/etc/hosts` format and search path as the
 host filter (subdomains covered). When JS is enabled for a page, its **inline scripts execute** inside
-the per-tab sandbox (seccomp + Landlock + namespaces, no I/O) against a memory-safe writable DOM: a
-standard `document` facade exposes `document.title` and `getElementById().textContent`. Removed nodes
-are detached, never freed, so a script can never dangle a handle (no use-after-free). With JS off,
-`<noscript>` fallback content is shown. Out of scope for now: external scripts, events, timers,
-`createElement`/`appendChild`, and `innerHTML`.
+the per-tab sandbox (seccomp + Landlock + namespaces, no I/O) against a memory-safe writable DOM. A
+standard `document` facade exposes reads/writes (`document.title`, `getElementById().textContent`),
+**DOM construction** (`createElement`, `appendChild`, `removeChild`, `setAttribute`, `body`/`head`),
+and **bounded synthetic events/timers** (`addEventListener('load')`/`window.onload`, `setTimeout` —
+fired once after the page's scripts run). Removed nodes are detached, never freed, so a script can
+never dangle a handle (no use-after-free), and `appendChild` rejects cycles. With JS off, `<noscript>`
+fallback content is shown. Out of scope for now: `innerHTML`, interactive (click) events, real async
+timers, and external (`src`) scripts.
 
 ### Anti-fingerprinting identity
 

@@ -230,11 +230,15 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   el worker **ejecuta** los scripts inline de la página (Hito 20b) sobre un **DOM escribible pero
   seguro**: los mutadores (`dom_set_text_content`/`dom_set_document_title`) **DETACHAN** hijos
   (`lxb_dom_node_remove`, nunca `destroy`), así un handle del índice nunca queda colgando (cero UAF);
-  el bridge expone una fachada estándar `document` (`document.title`, `getElementById().textContent`)
-  sobre handles enteros validados, sin objetos-nodo vivos. `<noscript>` se muestra con JS off y se
-  oculta con JS on. **Fuera de alcance:** scripts externos (`src`), eventos, timers, `createElement`/
-  `appendChild` (agregar nodos), `innerHTML`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el
-  índice). Ver `[[freedom-live-js]]`, `[[freedom-js-allowlist]]`.
+  el bridge expone una fachada estándar `document` (`document.title`, `getElementById().textContent`,
+  **`createElement`/`appendChild`/`removeChild`/`setAttribute`**, `body`/`head`, `addEventListener`/
+  `onload`, `setTimeout`) sobre handles enteros validados, sin objetos-nodo vivos. El índice **crece**
+  para nodos nuevos; `append` rechaza ciclos; `setAttribute('id'/'class')` re-indexa lookups. Eventos
+  y timers son **sintéticos y acotados**: el worker llama `__fireDeferred()` una vez tras los scripts
+  (dispara handlers de carga + vacía la cola de timers ≤64). `<noscript>` se muestra con JS off, se
+  oculta con JS on. **Fuera de alcance:** `innerHTML`, eventos interactivos, timers async reales,
+  scripts externos (`src`). No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). Ver
+  `[[freedom-live-js]]`, `[[freedom-js-allowlist]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
   (`Ctrl+I`). Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie
   mínima). El toggle de imágenes cubre **remotas y locales** por igual (una regla, fail-closed): un
@@ -423,9 +427,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   (`dom.md`, `js_dom.md`, `html_parse.md`, `tab.md`) + tests (5 en `dom`, 5 live en `js_dom` incl.
   detach memory-safe, 2 E2E en `tab` ejecutando un script que muta título+texto) + `make test`/
   `make asan` limpios + fuzz: `fuzz-js`/`fuzz-pv` sin crash + stress ASan/UBSan dedicado (60k programas
-  JS aleatorios contra el bridge + re-render, sin UAF). **Fuera de alcance:** scripts externos,
-  eventos, timers, `createElement`/`appendChild`, `innerHTML`. *(Núcleo + IPC + ejecución verificados
+  JS aleatorios contra el bridge + re-render, sin UAF). *(Núcleo + IPC + ejecución verificados
   bajo test/ASan/fuzz; integración visual GUI pendiente al dueño.)* Ver `[[freedom-live-js]]`.
+- **Hito 20c — JS vivo: construcción de DOM + eventos/timers sintéticos.** Sobre 20b: los scripts
+  ahora **construyen y reestructuran** el DOM y corren código `onload`. (a) **`dom`** crece de forma
+  memory-safe: `dom_create_element` (índice reallocable; nuevo handle consultable + indexado por tag),
+  `dom_append_child` (detach-luego-append; **rechaza ciclos**, child ancestro de parent),
+  `dom_remove_child` (detach, sigue válido), `dom_set_attribute` (re-indexa `id`/`class`). **Jamás**
+  `lxb_dom_node_destroy` → cero UAF. (b) **`js_dom`**: métodos nativos `createElement/appendChild/
+  removeChild/setAttribute` + la fachada `document` ampliada (wrappers con `appendChild`/`removeChild`/
+  `setAttribute`/`id`/`className`, `createElement`, `body`/`head`/`documentElement`) y eventos/timers
+  **acotados** (`addEventListener('load'|'DOMContentLoaded')`/`onload`/`setTimeout`/`setInterval`
+  encolan; `__fireDeferred()` los vacía una vez, ≤64). (c) **tab**: tras los scripts, el worker evalúa
+  `__fireDeferred()` y **luego** deriva la vista. Specs (`dom.md`, `js_dom.md`) + tests (5 construcción
+  en `dom` incl. ciclo/reindex, 5 live en `js_dom` incl. onload/setTimeout, 1 E2E en `tab` que construye
+  con `createElement`+`onload`) + `make test`/`make asan` limpios + **stress ASan/UBSan dedicado: 40k
+  programas JS aleatorios de create/append/remove/setAttr/onload + re-render, sin UAF**. **Fuera de
+  alcance (20d):** `innerHTML`, eventos **interactivos** (clic), timers **async** reales, scripts
+  externos (`src`), repintado incremental en mutación. *(Núcleo + IPC + ejecución verificados bajo
+  test/ASan/fuzz; integración visual GUI pendiente al dueño.)* Ver `[[freedom-live-js]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -437,11 +457,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   (b) **SVG** (¿`librsvg`? evaluar superficie de ataque) y **JPEG** (decoder en worker; contra la
   doctrina PNG-only salvo justificar la superficie). (c) **Lazy loading** (decodificar solo lo
   visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
-- **Hito 20c — JS vivo avanzado.** El slice base (ejecución + título/textContent) está cerrado
-  (Hito 20b). Falta: agregar nodos (`createElement`/`appendChild`, memory-safe porque no liberan),
-  `innerHTML` (re-parseo acotado), `setAttribute` (cuidado: id/class desincronizan el índice → invalidar
-  o reconstruir), **eventos** y **timers** (bucle de eventos en el worker), scripts externos (`src`,
-  con política de red), y **repintado incremental** en mutación (hoy se ejecuta una vez al cargar).
+- **Hito 20d — JS vivo: lo dinámico real.** Cerrados 20b (ejecución + título/texto) y 20c
+  (construcción + eventos/timers sintéticos). Falta: **`innerHTML`** (re-parseo de fragmento acotado +
+  indexar el subárbol nuevo), **eventos interactivos** (clic del usuario → IPC GUI↔worker → handler JS
+  → re-render), **timers async reales** (event loop en el worker que empuja vistas nuevas), scripts
+  externos (`src`, con política de red), y **repintado incremental** en mutación (hoy se ejecuta y
+  re-deriva una vez al cargar; no hay re-render tras un evento posterior).
   Persistir el modo y la allowlist con Hito 10.
 - **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
   Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).

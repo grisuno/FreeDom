@@ -267,6 +267,34 @@ static void test_load_ex_runs_script_and_mutates(void **state) {
     tab_close(t);
 }
 
+/* Live JS construction (Hito 20c): a script builds a node and an onload handler
+ * mutates it; both must be reflected in the worker's returned view. */
+static void test_load_ex_builds_dom_and_fires_onload(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body><div id=\"root\"></div>"
+        "<script>"
+        "var s=document.createElement('p'); s.textContent='created';"
+        "document.getElementById('root').appendChild(s);"
+        "window.onload=function(){ var q=document.createElement('p');"
+        "q.textContent='onloaded'; document.getElementById('root').appendChild(q); };"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    int saw_created = 0, saw_onloaded = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const char *txt = pv_at(p.view, i)->text;
+        if (txt != NULL && strcmp(txt, "created") == 0) saw_created = 1;
+        if (txt != NULL && strcmp(txt, "onloaded") == 0) saw_onloaded = 1;
+    }
+    assert_true(saw_created);   /* createElement+appendChild rendered */
+    assert_true(saw_onloaded);  /* onload handler ran (synthetic pump) */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* With JS off (the default tab_load), the same script does NOT run: title and text
  * are unchanged (Secure by Default). */
 static void test_load_without_js_does_not_run_script(void **state) {
@@ -522,6 +550,7 @@ int main(void) {
         cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_ex_runs_script_and_mutates),
+        cmocka_unit_test(test_load_ex_builds_dom_and_fires_onload),
         cmocka_unit_test(test_load_without_js_does_not_run_script),
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),

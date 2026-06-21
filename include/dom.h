@@ -110,4 +110,29 @@ dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
  * idx/document NULL => DOM_ERR_NULL_ARG; backend failure => DOM_ERR_INTERNAL. */
 dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len);
 
+/* --- DOM construction (live JS, Hito 20c) ---
+ * Adding nodes is inherently memory-safe (it never frees indexed nodes). New nodes
+ * are appended to the index so they get a queryable handle; document-order helpers
+ * (precedes/position) are NOT recomputed for them. */
+
+/* Creates a detached element with the given tag (lowercased), registers it in the
+ * index (also under getByTag), and returns its handle in *out_id. Place it with
+ * dom_append_child. tag empty / no document => DOM_ERR_NULL_ARG; OOM => DOM_ERR_OOM. */
+dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id);
+
+/* Appends child as parent's last child, detaching it from any current parent first.
+ * Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle
+ * => DOM_ERR_NULL_ARG. */
+dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child);
+
+/* Detaches child (which must currently be a child of parent) from the tree; the node
+ * stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */
+dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);
+
+/* Sets attribute name=value on node. Setting "id"/"class" also adds the value to the
+ * lookup indices (so getElementById/getByClass find the node; old keys are not pruned).
+ * Invalid handle / NULL name => DOM_ERR_NULL_ARG; OOM => DOM_ERR_OOM. */
+dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
+                             const char *name, const char *value);
+
 #endif /* FREEDOM_DOM_H */

@@ -14,10 +14,12 @@ a los scripts (DOM bindings de solo lectura) y la base sobre la que motores de U
 resumability ni islas — esos patrones se escriben en JavaScript y corren sobre esta API. Lo que
 este módulo garantiza es que esa API sea **rápida**.
 
-> **Actualización Hito 20b:** el índice ahora soporta **mutación acotada y memory-safe** para JS vivo
-> (`dom_set_text_content`, `dom_set_document_title`). La invariante clave: los hijos removidos se
-> **detachan** (`lxb_dom_node_remove`), **nunca** se destruyen, así que ningún handle del índice queda
-> colgando (cero UAF). Agregar nodos / `setAttribute` / `innerHTML` siguen fuera de alcance.
+> **Actualización Hito 20b/20c:** el índice soporta **mutación y construcción acotadas y memory-safe**
+> para JS vivo: texto/título (20b) y `createElement`/`appendChild`/`removeChild`/`setAttribute` (20c).
+> Invariante clave: los hijos removidos se **detachan** (`lxb_dom_node_remove`), **nunca** se
+> destruyen → ningún handle del índice queda colgando (cero UAF, verificado con stress ASan). El índice
+> **crece** para los nodos nuevos (handle consultable; `setAttribute('id'/'class')` re-indexa lookups).
+> `append` rechaza ciclos. `innerHTML`, eventos interactivos y timers reales siguen fuera de alcance.
 
 La entrega original era **solo lectura**. La mutación (appendChild/removeChild/setAttribute con
 mantenimiento incremental de índices) queda para un hito posterior.
@@ -106,6 +108,15 @@ const char *dom_document_title(const dom_index *idx, size_t *len);
 dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
                                 const char *text, size_t len);
 dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len);
+
+/* Construcción (Hito 20c). Agregar nodos es memory-safe (nunca libera). El índice
+ * CRECE: un nodo nuevo recibe un handle consultable; precedes/position no se
+ * recomputan para él. append rechaza ciclos (child ancestro de parent). */
+dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id);
+dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child);
+dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);
+dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
+                             const char *name, const char *value);
 ```
 
 `dom_get_by_tag`/`dom_get_by_class` escriben hasta `cap` ids en `out` (en orden de documento) y

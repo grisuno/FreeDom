@@ -216,6 +216,62 @@ static void test_document_is_not_io(void **state) {
     EXPECT(f, "typeof XMLHttpRequest + typeof fetch", "undefinedundefined");
 }
 
+/* --- live DOM construction (Hito 20c) --- */
+
+static void test_create_append_renders_in_tree(void **state) {
+    fixture *f = (fixture *)*state;
+    /* createElement + appendChild + textContent builds new content the tree shows. */
+    js_result r;
+    assert_int_equal(run(f,
+        "var s=document.createElement('span'); s.textContent='built';"
+        "document.getElementById('main').appendChild(s);"
+        "document.getElementById('main').textContent.indexOf('built')>=0", &r), JS_OK);
+    assert_non_null(r.value);
+    assert_string_equal(r.value, "true");
+    js_result_free(&r);
+    /* C side: a <span> now exists and #main contains "built". */
+    dom_node_id span[4];
+    assert_true(dom_get_by_tag(f->idx, "span", span, 4) >= 1);
+}
+
+static void test_set_attribute_makes_queryable(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f,
+        "var d=document.createElement('div'); d.id='made'; d.className='x y';"
+        "document.getElementById('main').appendChild(d);"
+        "document.getElementById('made')!==null", "true");
+    assert_int_not_equal(dom_get_element_by_id(f->idx, "made"), DOM_NODE_NONE);
+}
+
+static void test_append_cycle_is_rejected(void **state) {
+    fixture *f = (fixture *)*state;
+    /* Appending an ancestor under its descendant must be a no-op (no crash/loop). */
+    EXPECT(f,
+        "document.getElementById('go').appendChild(document.getElementById('main'));"
+        "dom.parent(dom.getElementById('main'))!==dom.getElementById('go')", "true");
+}
+
+static void test_onload_runs_and_mutates(void **state) {
+    fixture *f = (fixture *)*state;
+    /* A handler registered for load runs only when __fireDeferred() pumps it. */
+    js_result r;
+    assert_int_equal(run(f,
+        "window.onload=function(){ document.title='loaded'; };"
+        "var before=document.title; __fireDeferred();"
+        "before+'/'+document.title", &r), JS_OK);
+    assert_non_null(r.value);
+    assert_string_equal(r.value, "T/loaded");
+    js_result_free(&r);
+}
+
+static void test_settimeout_flushed_by_pump(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f,
+        "setTimeout(function(){ document.getElementById('go').textContent='timed'; });"
+        "var b=document.getElementById('go').textContent; __fireDeferred();"
+        "b+'/'+document.getElementById('go').textContent", "Go/timed");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
@@ -233,6 +289,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_set_text_content_reflects_in_tree, setup, teardown),
         cmocka_unit_test_setup_teardown(test_set_text_content_detach_is_memory_safe, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_is_not_io, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_create_append_renders_in_tree, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_set_attribute_makes_queryable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_append_cycle_is_rejected, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_onload_runs_and_mutates, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_settimeout_flushed_by_pump, setup, teardown),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

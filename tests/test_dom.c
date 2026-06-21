@@ -238,6 +238,67 @@ static void test_set_and_get_document_title(void **state) {
     assert_string_equal(t1, "New Title");
 }
 
+static void test_create_and_append(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    dom_node_id created = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "SPAN", &created), DOM_OK);
+    assert_int_not_equal(created, DOM_NODE_NONE);
+    /* new node is queryable (handle valid) and tagged span (lowercased) */
+    size_t tl = 0;
+    assert_string_equal(dom_tag_name(idx, created, &tl), "span");
+    assert_int_equal(dom_set_text_content(idx, created, "fresh", 5), DOM_OK);
+    assert_int_equal(dom_append_child(idx, main_id, created), DOM_OK);
+    /* it is now a child of #main: parent navigation finds it */
+    assert_int_equal(dom_parent(idx, created), main_id);
+    /* and getByTag now includes it */
+    dom_node_id spans[4];
+    assert_true(dom_get_by_tag(idx, "span", spans, 4) >= 1);
+}
+
+static void test_append_rejects_cycle(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    /* main is an ancestor of go; appending main under go would cycle */
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    assert_int_equal(dom_append_child(idx, go, main_id), DOM_ERR_NULL_ARG);
+    /* self-append rejected */
+    assert_int_equal(dom_append_child(idx, main_id, main_id), DOM_ERR_NULL_ARG);
+}
+
+static void test_remove_child(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    assert_int_equal(dom_remove_child(idx, main_id, go), DOM_OK);
+    /* go is detached but still a valid handle (memory-safe) */
+    size_t tl = 0;
+    assert_string_equal(dom_tag_name(idx, go, &tl), "button");
+    /* removing a non-child fails closed */
+    assert_int_equal(dom_remove_child(idx, go, main_id), DOM_ERR_NULL_ARG);
+}
+
+static void test_set_attribute_reindexes_id(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id created = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "div", &created), DOM_OK);
+    assert_int_equal(dom_set_attribute(idx, created, "id", "dynamic"), DOM_OK);
+    /* getElementById now finds the dynamically-id'd node */
+    assert_int_equal(dom_get_element_by_id(idx, "dynamic"), created);
+    /* a plain attribute round-trips */
+    assert_int_equal(dom_set_attribute(idx, created, "data-x", "1"), DOM_OK);
+    size_t len = 0;
+    assert_string_equal(dom_get_attribute(idx, created, "data-x", &len), "1");
+}
+
+static void test_construction_invalid_args(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id out = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "", &out), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_append_child(idx, DOM_NODE_NONE, 0), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_set_attribute(idx, DOM_NODE_NONE, "id", "x"), DOM_ERR_NULL_ARG);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_args),
@@ -256,6 +317,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_set_text_content_empty_clears, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_set_text_content_invalid_node, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_set_and_get_document_title, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_create_and_append, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_append_rejects_cycle, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_remove_child, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_set_attribute_reindexes_id, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_construction_invalid_args, setup_doc, teardown_doc),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

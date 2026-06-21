@@ -208,6 +208,13 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             js_result_free(&r);
             hp_free(scripts);
         }
+        /* Fire synthetic DOMContentLoaded/load handlers + flush queued timers once
+         * (bounded; not a real event loop), so onload-wrapped code runs. */
+        static const char fire[] = "if(typeof __fireDeferred==='function')__fireDeferred();";
+        js_result fr;
+        memset(&fr, 0, sizeof fr);
+        (void)js_eval(cs->js, fire, sizeof fire - 1, &fr);
+        js_result_free(&fr);
     }
     if (ok) {
         title = hp_get_title(cs->doc, &tl);
