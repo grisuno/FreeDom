@@ -88,4 +88,26 @@ const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);
 const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                               const char *name, size_t *len);
 
+/* Concatenated text content of node's subtree (borrowed, valid while idx/doc are
+ * alive), or NULL. *len (optional) excludes the NUL. */
+const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);
+
+/* Current document <title> text (borrowed), or NULL. *len excludes the NUL. */
+const char *dom_document_title(const dom_index *idx, size_t *len);
+
+/* --- mutation (live JS) ---
+ * Memory-safe under an existing index: removed children are DETACHED
+ * (lxb_dom_node_remove unlinks but does NOT free), so a handle still pointing at a
+ * detached node stays valid (it just becomes unreachable from the root and is no
+ * longer rendered). These never call lxb_dom_node_destroy. */
+
+/* Replaces node's children with a single text node carrying text[0..len) (an empty
+ * text clears the children). node invalid => DOM_ERR_NULL_ARG; OOM => DOM_ERR_OOM. */
+dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
+                                const char *text, size_t len);
+
+/* Sets the document <title> (creates the element if missing, via the html document).
+ * idx/document NULL => DOM_ERR_NULL_ARG; backend failure => DOM_ERR_INTERNAL. */
+dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len);
+
 #endif /* FREEDOM_DOM_H */

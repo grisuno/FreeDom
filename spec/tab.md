@@ -102,6 +102,11 @@ typedef struct tab_eval_result { char *value; size_t value_len; int is_exception
 
 tab_status tab_open(tab **out);
 tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);
+/* Hito 20b: run_js es la política de JS de la página (rdp_caps.js). Controla el
+ * render de <noscript> y, cuando es 1, EJECUTA los <script> inline en el worker antes
+ * de derivar la vista (las mutaciones de document.title/textContent se reflejan).
+ * tab_load == tab_load_ex con run_js == 0. Framing OP_LOAD: [op][run_js:1][len][html]. */
+tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out);
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out);
 int        tab_alive(const tab *t);
 pid_t      tab_child_pid(const tab *t);

@@ -88,12 +88,17 @@ static void child_reset_page(child_state *cs) {
     if (cs->doc != NULL) { hp_document_free(cs->doc);  cs->doc = NULL; }
 }
 
-/* Parse + index + fresh JS context bound to the page and the anti-fp env. */
-static int child_load(child_state *cs, const char *html, size_t len) {
+/* Parse + index + fresh JS context bound to the page and the anti-fp env. When
+ * run_js, inline <script>s are kept (not stripped) so child_handle_load can execute
+ * them; event-handler attributes (on*) are stripped regardless. */
+static int child_load(child_state *cs, const char *html, size_t len, int run_js) {
     child_reset_page(cs);
 
+    hp_config cfg = hp_config_default();
+    cfg.strip_scripts = run_js ? 0 : 1; /* keep scripts only when JS will run */
+
     hp_document *doc = NULL;
-    if (hp_parse(html, len, NULL, &doc) != HP_OK) return -1;
+    if (hp_parse(html, len, &cfg, &doc) != HP_OK) return -1;
 
     dom_index *idx = NULL;
     if (dom_build(doc, &idx) != DOM_OK) { hp_document_free(doc); return -1; }
@@ -188,7 +193,22 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
-    int ok = (child_load(cs, html, len) == 0);
+    int ok = (child_load(cs, html, len, run_js) == 0);
+    if (ok && run_js) {
+        /* Execute the page's inline scripts in the sandboxed context, THEN derive
+         * the view, so DOM mutations (document.title / textContent) are reflected.
+         * A JS-level error is non-fatal: the page still renders. The DOM bridge is
+         * read-mostly (safe mutators), so a script cannot corrupt the tree. */
+        size_t sl = 0;
+        char *scripts = hp_extract_scripts(cs->doc, &sl);
+        if (scripts != NULL) {
+            js_result r;
+            memset(&r, 0, sizeof r);
+            (void)js_eval(cs->js, scripts, sl, &r);
+            js_result_free(&r);
+            hp_free(scripts);
+        }
+    }
     if (ok) {
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);

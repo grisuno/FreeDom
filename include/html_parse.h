@@ -62,7 +62,13 @@ size_t hp_event_handler_count(const hp_document *doc);
 char *hp_extract_text(const hp_document *doc, size_t *out_len);
 char *hp_get_title(const hp_document *doc, size_t *out_len);
 
-/* Release a buffer returned by hp_extract_text / hp_get_title. NULL-safe. */
+/* Concatenated text of executable inline <script> elements (external src and JSON
+ * data blocks excluded), for the worker to evaluate when JS is allowed for the page.
+ * Only meaningful when the document was parsed with strip_scripts == 0. NULL when
+ * there are no inline scripts. Owned; release with hp_free. */
+char *hp_extract_scripts(const hp_document *doc, size_t *out_len);
+
+/* Release a buffer returned by hp_extract_text / hp_get_title / hp_extract_scripts. */
 void hp_free(char *buf);
 
 /* Idempotent; safe on NULL and safe to call twice. */

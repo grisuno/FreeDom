@@ -59,6 +59,10 @@ size_t hp_event_handler_count(const hp_document *doc);
 /* Buffers en propiedad; liberar con hp_free. *out_len excluye el NUL final. */
 char *hp_extract_text(const hp_document *doc, size_t *out_len);
 char *hp_get_title(const hp_document *doc, size_t *out_len);
+/* Hito 20b: texto concatenado de los <script> inline EJECUTABLES (excluye src
+ * externos y bloques type=*json*). Solo útil si se parseó con strip_scripts=0.
+ * NULL si no hay scripts inline. El worker lo evalúa cuando JS está permitido. */
+char *hp_extract_scripts(const hp_document *doc, size_t *out_len);
 
 void hp_free(char *buf);
 void hp_document_free(hp_document *doc);

@@ -26,9 +26,12 @@ typedef enum jd_status {
     JD_ERR_INTERNAL   /* engine context unreachable or install failed */
 } jd_status;
 
-/* Installs the read-only `dom` global into the sandbox, backed by idx.
- * idx must outlive ctx. Intended to be called on a freshly created context,
- * before any untrusted script runs. */
-jd_status jd_install(js_context *ctx, const dom_index *idx);
+/* Installs the `dom` global (and a small standard `document` shim) into the sandbox,
+ * backed by idx. The bridge is read-mostly: it also exposes memory-safe mutators
+ * (textContent / document.title) used by allowlisted page scripts; these mutate the
+ * underlying tree, never the index structure, so idx is no longer const. idx must
+ * outlive ctx. Intended to be called on a freshly created context, before any
+ * untrusted script runs. */
+jd_status jd_install(js_context *ctx, dom_index *idx);
 
 #endif /* FREEDOM_JS_DOM_H */

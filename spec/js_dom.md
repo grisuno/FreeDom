@@ -44,10 +44,21 @@ Objeto global `dom` (solo lectura). Handles = enteros; "ninguno" = `null`.
 | `dom.firstChild(h)` | handle \| `null` | `dom_first_child` |
 | `dom.nextSibling(h)` | handle \| `null` | `dom_next_sibling` |
 | `dom.precedes(a, b)` | booleano | `dom_precedes` |
+| `dom.textContent(h)` | string | `dom_text_content` |
+| `dom.setText(h, str)` | `undefined` | `dom_set_text_content` (detach-safe) |
+| `dom.getTitle()` | string | `dom_document_title` |
+| `dom.setTitle(str)` | `undefined` | `dom_set_document_title` |
 
-Lo que **no** existe (por diseño): mutación (`setAttribute`, `appendChild`, `remove`),
-acceso a árbol crudo, eventos, `innerHTML`, ni objetos nodo. Un handle inválido o de tipo
-incorrecto produce `null`/`false`, **nunca** un fallo del host.
+**Fachada `document` (Hito 20b):** un shim JS inyectado por `jd_install` define `document` sobre la
+API de handles para que scripts reales corran: `document.title` (get/set), `document.getElementById(id)`
+→ wrapper con `textContent` (get/set), `getAttribute`, `tagName`; `document.getElementsByTagName/
+ClassName`; `window === globalThis`; `console` no-op. Los wrappers solo guardan el **handle entero
+validado** — **no** se exponen objetos-nodo vivos del motor.
+
+Lo que **no** existe aún (por diseño): mutación estructural (`appendChild`/`createElement`/`remove`),
+`setAttribute`, `innerHTML`, eventos, timers, scripts externos (`src`). Mutar es **memory-safe**: el
+setter de texto detacha (no destruye) los hijos, así un handle previo nunca cuelga. Un handle inválido
+produce `null`/`""`/`undefined`, **nunca** un fallo del host.
 
 ## 4. Contrato de la API (C)
 

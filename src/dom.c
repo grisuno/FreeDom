@@ -222,12 +222,13 @@ static void pm_free(ptrmap *m) {
 /* --- the index --- */
 
 struct dom_index {
-    lxb_dom_node_t **nodes; /* arena: id -> element node, in document order */
-    size_t           count;
-    strmap           by_id;
-    strmap           by_tag;
-    strmap           by_class;
-    ptrmap           rev;   /* node pointer -> id */
+    lxb_dom_node_t      **nodes;    /* arena: id -> element node, in document order */
+    size_t                count;
+    lxb_dom_document_t   *document; /* owning document (for title / text-node creation) */
+    strmap                by_id;
+    strmap                by_tag;
+    strmap                by_class;
+    ptrmap                rev;      /* node pointer -> id */
 };
 
 /* Iterative pre-order successor within the subtree rooted at root. */
@@ -308,6 +309,7 @@ dom_status dom_build(const hp_document *doc, dom_index **out) {
     dom_node_id id = 0;
     for (lxb_dom_node_t *node = root; node != NULL; node = node_next(node, root)) {
         if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        if (idx->document == NULL) idx->document = node->owner_document;
         idx->nodes[id] = node;
         if (pm_put(&idx->rev, node, id) != 0) goto oom;
         if (index_element(idx, lxb_dom_interface_element(node), id) != 0) goto oom;
@@ -429,4 +431,60 @@ const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
     if (val == NULL) return NULL;
     if (len != NULL) *len = vlen;
     return (const char *)val;
+}
+
+const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len) {
+    if (len != NULL) *len = 0;
+    if (!valid(idx, node)) return NULL;
+    size_t tl = 0;
+    const lxb_char_t *t = lxb_dom_node_text_content(idx->nodes[node], &tl);
+    if (t == NULL) return NULL;
+    if (len != NULL) *len = tl;
+    return (const char *)t;
+}
+
+const char *dom_document_title(const dom_index *idx, size_t *len) {
+    if (len != NULL) *len = 0;
+    if (idx == NULL || idx->document == NULL) return NULL;
+    size_t tl = 0;
+    const lxb_char_t *t =
+        lxb_html_document_title((lxb_html_document_t *)idx->document, &tl);
+    if (t == NULL) return NULL;
+    if (len != NULL) *len = tl;
+    return (const char *)t;
+}
+
+/* --- mutation (live JS) --- */
+
+dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
+                                const char *text, size_t len) {
+    if (!valid(idx, node)) return DOM_ERR_NULL_ARG;
+    lxb_dom_node_t *el = idx->nodes[node];
+
+    /* Detach (not destroy) every child so any index handle into the removed subtree
+     * stays a valid pointer (it just leaves the rendered tree). */
+    lxb_dom_node_t *c = el->first_child;
+    while (c != NULL) {
+        lxb_dom_node_t *next = c->next;
+        lxb_dom_node_remove(c);
+        c = next;
+    }
+
+    if (text != NULL && len > 0) {
+        if (el->owner_document == NULL) return DOM_ERR_INTERNAL;
+        lxb_dom_text_t *t =
+            lxb_dom_document_create_text_node(el->owner_document,
+                                              (const lxb_char_t *)text, len);
+        if (t == NULL) return DOM_ERR_OOM;
+        lxb_dom_node_insert_child(el, lxb_dom_interface_node(t));
+    }
+    return DOM_OK;
+}
+
+dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) {
+    if (idx == NULL || idx->document == NULL) return DOM_ERR_NULL_ARG;
+    lxb_status_t s =
+        lxb_html_document_title_set((lxb_html_document_t *)idx->document,
+                                    (const lxb_char_t *)(text != NULL ? text : ""), len);
+    return (s == LXB_STATUS_OK) ? DOM_OK : DOM_ERR_INTERNAL;
 }

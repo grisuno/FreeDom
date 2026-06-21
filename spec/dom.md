@@ -14,7 +14,12 @@ a los scripts (DOM bindings de solo lectura) y la base sobre la que motores de U
 resumability ni islas — esos patrones se escriben en JavaScript y corren sobre esta API. Lo que
 este módulo garantiza es que esa API sea **rápida**.
 
-Esta primera entrega es **solo lectura**. La mutación (appendChild/removeChild/setAttribute con
+> **Actualización Hito 20b:** el índice ahora soporta **mutación acotada y memory-safe** para JS vivo
+> (`dom_set_text_content`, `dom_set_document_title`). La invariante clave: los hijos removidos se
+> **detachan** (`lxb_dom_node_remove`), **nunca** se destruyen, así que ningún handle del índice queda
+> colgando (cero UAF). Agregar nodos / `setAttribute` / `innerHTML` siguen fuera de alcance.
+
+La entrega original era **solo lectura**. La mutación (appendChild/removeChild/setAttribute con
 mantenimiento incremental de índices) queda para un hito posterior.
 
 ## 2. Decisión de estructura
@@ -92,6 +97,15 @@ dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node);
 const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);
 const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                               const char *name, size_t *len);
+const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);
+const char *dom_document_title(const dom_index *idx, size_t *len);
+
+/* Mutación (Hito 20b — JS vivo). Memory-safe: los hijos removidos se DETACHAN
+ * (lxb_dom_node_remove, nunca destroy), así un handle del índice a un nodo removido
+ * sigue siendo un puntero válido (sale del árbol renderizado, no se libera). */
+dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
+                                const char *text, size_t len);
+dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len);
 ```
 
 `dom_get_by_tag`/`dom_get_by_class` escriben hasta `cap` ids en `out` (en orden de documento) y

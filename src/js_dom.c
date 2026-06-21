@@ -20,8 +20,8 @@
 
 #include "quickjs.h"
 
-static const dom_index *jd_idx(JSContext *ctx) {
-    return (const dom_index *)JS_GetContextOpaque(ctx);
+static dom_index *jd_idx(JSContext *ctx) {
+    return (dom_index *)JS_GetContextOpaque(ctx);
 }
 
 /* Coerces a JS argument to a node handle. Returns -1 with a pending exception
@@ -155,6 +155,51 @@ static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,
     return JS_NewBool(ctx, dom_precedes(jd_idx(ctx), a, b));
 }
 
+/* --- mutators (live JS): backed by the memory-safe dom_set_* (detach, never free) --- */
+
+static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,
+                              int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    size_t len = 0;
+    const char *t = dom_text_content(jd_idx(ctx), h, &len);
+    return (t == NULL) ? JS_NewString(ctx, "") : JS_NewStringLen(ctx, t, len);
+}
+
+static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,
+                          int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    size_t len = 0;
+    const char *s = JS_ToCStringLen(ctx, &len, argv[1]);
+    if (s == NULL) return JS_EXCEPTION;
+    dom_status st = dom_set_text_content(jd_idx(ctx), h, s, len);
+    JS_FreeCString(ctx, s);
+    if (st == DOM_ERR_OOM) return JS_ThrowOutOfMemory(ctx);
+    return JS_UNDEFINED;
+}
+
+static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,
+                           int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc; (void)argv;
+    size_t len = 0;
+    const char *t = dom_document_title(jd_idx(ctx), &len);
+    return (t == NULL) ? JS_NewString(ctx, "") : JS_NewStringLen(ctx, t, len);
+}
+
+static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,
+                           int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    size_t len = 0;
+    const char *s = JS_ToCStringLen(ctx, &len, argv[0]);
+    if (s == NULL) return JS_EXCEPTION;
+    (void)dom_set_document_title(jd_idx(ctx), s, len);
+    JS_FreeCString(ctx, s);
+    return JS_UNDEFINED;
+}
+
 /* --- install --- */
 
 typedef struct jd_method {
@@ -174,9 +219,44 @@ static const jd_method JD_METHODS[] = {
     { "firstChild",     m_first_child,       1 },
     { "nextSibling",    m_next_sibling,      1 },
     { "precedes",       m_precedes,          2 },
+    { "textContent",    m_text_content,      1 },
+    { "setText",        m_set_text,          2 },
+    { "getTitle",       m_get_title,         0 },
+    { "setTitle",       m_set_title,         1 },
 };
 
-jd_status jd_install(js_context *ctx, const dom_index *idx) {
+/* A small standard `document` facade over the native handle API, so real page
+ * scripts ("document.title = ...", "document.getElementById('x').textContent = ...")
+ * work without exposing live engine node objects. Element wrappers carry only the
+ * validated integer handle and proxy to the sealed `dom` methods. A no-op console
+ * and window=globalThis keep common scripts from dying on a ReferenceError. */
+static const char JD_DOCUMENT_SHIM[] =
+    "(function(){"
+    "  function wrap(h){"
+    "    if (h===null||h===undefined) return null;"
+    "    return {"
+    "      get textContent(){ return dom.textContent(h); },"
+    "      set textContent(v){ dom.setText(h, String(v)); },"
+    "      getAttribute: function(n){ return dom.getAttribute(h, String(n)); },"
+    "      get tagName(){ var t=dom.tagName(h); return t===null?null:String(t).toUpperCase(); }"
+    "    };"
+    "  }"
+    "  function wrapList(hs){ var r=[]; for (var i=0;i<hs.length;i++) r.push(wrap(hs[i])); return r; }"
+    "  var d={"
+    "    getElementById: function(id){ return wrap(dom.getElementById(String(id))); },"
+    "    getElementsByTagName: function(t){ return wrapList(dom.getByTag(String(t))); },"
+    "    getElementsByClassName: function(c){ return wrapList(dom.getByClass(String(c))); }"
+    "  };"
+    "  Object.defineProperty(d,'title',{get:function(){return dom.getTitle();},"
+    "    set:function(v){dom.setTitle(String(v));},enumerable:true});"
+    "  globalThis.document=d;"
+    "  if (typeof globalThis.window==='undefined') globalThis.window=globalThis;"
+    "  if (typeof globalThis.console==='undefined')"
+    "    globalThis.console={log:function(){},warn:function(){},error:function(){},"
+    "      info:function(){},debug:function(){}};"
+    "})();";
+
+jd_status jd_install(js_context *ctx, dom_index *idx) {
     if (ctx == NULL || idx == NULL) return JD_ERR_NULL_ARG;
 
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
@@ -205,5 +285,12 @@ jd_status jd_install(js_context *ctx, const dom_index *idx) {
     int rc = JS_DefinePropertyValueStr(jsctx, global, "dom", dom,
                                        JS_PROP_ENUMERABLE);
     JS_FreeValue(jsctx, global);
-    return (rc < 0) ? JD_ERR_INTERNAL : JD_OK;
+    if (rc < 0) return JD_ERR_INTERNAL;
+
+    /* Install the `document` facade (depends on the `dom` global just defined). */
+    JSValue r = JS_Eval(jsctx, JD_DOCUMENT_SHIM, sizeof JD_DOCUMENT_SHIM - 1,
+                        "<document-shim>", JS_EVAL_TYPE_GLOBAL);
+    int shim_ok = !JS_IsException(r);
+    JS_FreeValue(jsctx, r);
+    return shim_ok ? JD_OK : JD_ERR_INTERNAL;
 }

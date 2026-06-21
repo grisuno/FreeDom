@@ -180,6 +180,64 @@ static void test_attributes(void **state) {
     assert_null(dom_get_attribute(idx, main_id, "data-missing", NULL));
 }
 
+/* --- mutation (live JS) --- */
+
+static void test_text_content_read(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id ids[4];
+    size_t n = dom_get_by_tag(idx, "p", ids, 4);
+    assert_true(n >= 1);
+    size_t len = 0;
+    const char *t = dom_text_content(idx, ids[0], &len);
+    assert_non_null(t);
+    assert_string_equal(t, "Hello");
+}
+
+static void test_set_text_content_changes_tree(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    assert_int_not_equal(main_id, DOM_NODE_NONE);
+    /* Replace the whole subtree's content with plain text. */
+    assert_int_equal(dom_set_text_content(idx, main_id, "REPLACED", 8), DOM_OK);
+    size_t len = 0;
+    const char *t = dom_text_content(idx, main_id, &len);
+    assert_non_null(t);
+    assert_string_equal(t, "REPLACED");
+    /* Memory-safety: handles into the detached subtree are still valid pointers
+     * (reads must not crash); the old <p> tag name is still readable. */
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    size_t tl = 0;
+    const char *tag = dom_tag_name(idx, go, &tl); /* detached but alive */
+    assert_non_null(tag);
+}
+
+static void test_set_text_content_empty_clears(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    assert_int_equal(dom_set_text_content(idx, main_id, "", 0), DOM_OK);
+    size_t len = 1;
+    const char *t = dom_text_content(idx, main_id, &len);
+    /* empty content: either NULL or "" with len 0 */
+    if (t != NULL) assert_int_equal((int)len, 0);
+}
+
+static void test_set_text_content_invalid_node(void **state) {
+    dom_index *idx = IDX(state);
+    assert_int_equal(dom_set_text_content(idx, DOM_NODE_NONE, "x", 1), DOM_ERR_NULL_ARG);
+}
+
+static void test_set_and_get_document_title(void **state) {
+    dom_index *idx = IDX(state);
+    size_t len = 0;
+    const char *t0 = dom_document_title(idx, &len);
+    assert_non_null(t0);
+    assert_string_equal(t0, "T");
+    assert_int_equal(dom_set_document_title(idx, "New Title", 9), DOM_OK);
+    const char *t1 = dom_document_title(idx, &len);
+    assert_non_null(t1);
+    assert_string_equal(t1, "New Title");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_args),
@@ -193,6 +251,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_document_order, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_navigation, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_attributes, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_text_content_read, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_set_text_content_changes_tree, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_set_text_content_empty_clears, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_set_text_content_invalid_node, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_set_and_get_document_title, setup_doc, teardown_doc),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

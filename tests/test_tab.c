@@ -237,6 +237,62 @@ static void test_load_strips_script(void **state) {
     tab_close(t);
 }
 
+/* Live JS (Hito 20b): with run_js, the page's inline script executes in the worker
+ * and its DOM mutations (document.title, textContent) appear in the returned page. */
+static void test_load_ex_runs_script_and_mutates(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>Old</title></head><body>"
+        "<p id=\"out\">before</p>"
+        "<script>document.title='New';"
+        "document.getElementById('out').textContent='after';</script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    /* title mutated by the script */
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "New");
+    /* textContent mutation visible in the rendered view */
+    int saw_after = 0, saw_before = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const char *txt = pv_at(p.view, i)->text;
+        if (txt != NULL && strcmp(txt, "after") == 0) saw_after = 1;
+        if (txt != NULL && strcmp(txt, "before") == 0) saw_before = 1;
+    }
+    assert_true(saw_after);
+    assert_false(saw_before);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* With JS off (the default tab_load), the same script does NOT run: title and text
+ * are unchanged (Secure by Default). */
+static void test_load_without_js_does_not_run_script(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>Old</title></head><body>"
+        "<p id=\"out\">before</p>"
+        "<script>document.title='New';"
+        "document.getElementById('out').textContent='after';</script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "Old");
+    int saw_before = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const char *txt = pv_at(p.view, i)->text;
+        if (txt != NULL && strcmp(txt, "before") == 0) saw_before = 1;
+    }
+    assert_true(saw_before);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 static void test_load_null_and_too_large(void **state) {
     (void)state;
     tab *t = NULL;
@@ -465,6 +521,8 @@ int main(void) {
         cmocka_unit_test(test_load_carries_author_color),
         cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
+        cmocka_unit_test(test_load_ex_runs_script_and_mutates),
+        cmocka_unit_test(test_load_without_js_does_not_run_script),
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),

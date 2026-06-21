@@ -223,13 +223,18 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `https://`, `http://` ⇒ promovido a https, esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda**
   (nunca ejecución, fail-closed), texto libre ⇒ DuckDuckGo HTML (sin JS). El orquestador (`go_omnibox`)
   resuelve primero un archivo local existente (la función pura no hace I/O). Ver `[[freedom-omnibox-search]]`.
-- **JS Secure by Default + allowlist por host:** el JS de página está **apagado** salvo opt-in por
-  host. El modo global es tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`(defecto)/`JSP_ON`); la pertenencia por
-  host vive en `js.conf` (reusa `hostblock`, cubre subdominios). `js_policy` (puro) decide; la GUI
-  deriva `caps.js` por host y lo pasa al worker con `tab_load_ex(run_js)`. Hoy `caps.js` controla el
-  render de `<noscript>` (fallback visible con JS off; oculto con JS on). **Ejecutar** scripts es el
-  Hito 20b (el puente DOM es de solo lectura por diseño). No reintroducir ejecución de JS sin un DOM
-  escribible + repintado. Ver `[[freedom-js-allowlist]]`.
+- **JS Secure by Default + allowlist por host + ejecución viva:** el JS de página está **apagado**
+  salvo opt-in por host. Modo global tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`(defecto)/`JSP_ON`);
+  pertenencia por host en `js.conf` (reusa `hostblock`, cubre subdominios). `js_policy` (puro) decide;
+  la GUI deriva `caps.js` por host y lo pasa al worker con `tab_load_ex(run_js)`. Con JS habilitado,
+  el worker **ejecuta** los scripts inline de la página (Hito 20b) sobre un **DOM escribible pero
+  seguro**: los mutadores (`dom_set_text_content`/`dom_set_document_title`) **DETACHAN** hijos
+  (`lxb_dom_node_remove`, nunca `destroy`), así un handle del índice nunca queda colgando (cero UAF);
+  el bridge expone una fachada estándar `document` (`document.title`, `getElementById().textContent`)
+  sobre handles enteros validados, sin objetos-nodo vivos. `<noscript>` se muestra con JS off y se
+  oculta con JS on. **Fuera de alcance:** scripts externos (`src`), eventos, timers, `createElement`/
+  `appendChild` (agregar nodos), `innerHTML`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el
+  índice). Ver `[[freedom-live-js]]`, `[[freedom-js-allowlist]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
   (`Ctrl+I`). Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie
   mínima). El toggle de imágenes cubre **remotas y locales** por igual (una regla, fail-closed): un
@@ -402,6 +407,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   mutar la página todavía; `caps.js` ya es el gancho. *(Núcleo puro + IPC verificados bajo test; ruta
   GUI compila endurecida, verificación visual Wayland pendiente al dueño.)* Ver
   `[[freedom-js-allowlist]]`.
+- **Hito 20b — JS vivo: ejecución de scripts + DOM escribible seguro.** Con JS habilitado por host
+  (Hito 20), el worker **ejecuta** los scripts inline y sus mutaciones aparecen en la página. Núcleo:
+  (a) **DOM escribible memory-safe** en `dom` — `dom_set_text_content`/`dom_set_document_title` +
+  lecturas `dom_text_content`/`dom_document_title`; el setter de texto **DETACHA** los hijos
+  (`lxb_dom_node_remove`, jamás `destroy`), de modo que un handle del índice a un nodo removido sigue
+  siendo válido (sale del árbol, no se libera) → **cero UAF**. (b) **Bridge `js_dom` ahora mutable**
+  (`jd_install` toma `dom_index*` no-const) con métodos `setText/textContent/setTitle/getTitle` y una
+  **fachada estándar `document`** inyectada como shim JS (`document.title`,
+  `getElementById().textContent`, `getElementsByTagName/ClassName`, `window=globalThis`, `console`
+  no-op) sobre handles enteros validados (sin objetos-nodo vivos). (c) **html_parse**:
+  `hp_extract_scripts` (solo inline; excluye `src` externos y bloques `type=*json*`); `child_load`
+  parsea con `strip_scripts=0` cuando `run_js`. (d) **tab**: `child_handle_load` ejecuta los scripts y
+  **luego** deriva título/texto/vista (las mutaciones se reflejan); error JS no es fatal. Specs
+  (`dom.md`, `js_dom.md`, `html_parse.md`, `tab.md`) + tests (5 en `dom`, 5 live en `js_dom` incl.
+  detach memory-safe, 2 E2E en `tab` ejecutando un script que muta título+texto) + `make test`/
+  `make asan` limpios + fuzz: `fuzz-js`/`fuzz-pv` sin crash + stress ASan/UBSan dedicado (60k programas
+  JS aleatorios contra el bridge + re-render, sin UAF). **Fuera de alcance:** scripts externos,
+  eventos, timers, `createElement`/`appendChild`, `innerHTML`. *(Núcleo + IPC + ejecución verificados
+  bajo test/ASan/fuzz; integración visual GUI pendiente al dueño.)* Ver `[[freedom-live-js]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -413,12 +437,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   (b) **SVG** (¿`librsvg`? evaluar superficie de ataque) y **JPEG** (decoder en worker; contra la
   doctrina PNG-only salvo justificar la superficie). (c) **Lazy loading** (decodificar solo lo
   visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
-- **Hito 20b — JS-vivo (ejecución + DOM escribible).** La política (`js_policy`/`caps.js`) ya está
-  cerrada (Hito 20). Falta el **enabler real**: hacer el puente `[[js_dom]]` escribible (innerHTML/
-  textContent/createElement/append, `document.title`), ejecutar los scripts de páginas allowlisteadas
-  en el worker (preservar `<script>` con `hp_config.strip_scripts=0`, extraer y `js_eval`) y
-  re-derivar la vista → repintar. `caps.js`/`tab_load_ex(run_js)` ya son el gancho. Persistir el modo
-  y la allowlist con Hito 10.
+- **Hito 20c — JS vivo avanzado.** El slice base (ejecución + título/textContent) está cerrado
+  (Hito 20b). Falta: agregar nodos (`createElement`/`appendChild`, memory-safe porque no liberan),
+  `innerHTML` (re-parseo acotado), `setAttribute` (cuidado: id/class desincronizan el índice → invalidar
+  o reconstruir), **eventos** y **timers** (bucle de eventos en el worker), scripts externos (`src`,
+  con política de red), y **repintado incremental** en mutación (hoy se ejecuta una vez al cargar).
+  Persistir el modo y la allowlist con Hito 10.
 - **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
   Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).
 - **Hito 22 — Zoom + recarga + descargas.** Zoom `Ctrl++`/`Ctrl+-` (escala de fuentes/layout);

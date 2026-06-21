@@ -160,6 +160,62 @@ static void test_no_io_with_dom(void **state) {
            "undefinedundefinedundefined");
 }
 
+/* --- live DOM (Hito 20b): the `document` shim mutates the tree safely --- */
+
+static void test_document_shim_present(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof document + typeof document.getElementById", "objectfunction");
+    EXPECT(f, "document.title", "T");
+    EXPECT(f, "document.getElementById('go').textContent", "Go");
+}
+
+static void test_document_title_set_reflects_in_tree(void **state) {
+    fixture *f = (fixture *)*state;
+    js_result r;
+    assert_int_equal(run(f, "document.title='Live'; document.title", &r), JS_OK);
+    assert_non_null(r.value);
+    assert_string_equal(r.value, "Live");
+    js_result_free(&r);
+    /* The native tree reflects the JS mutation. */
+    size_t len = 0;
+    const char *t = dom_document_title(f->idx, &len);
+    assert_non_null(t);
+    assert_string_equal(t, "Live");
+}
+
+static void test_set_text_content_reflects_in_tree(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "document.getElementById('go').textContent='Done';"
+              "document.getElementById('go').textContent", "Done");
+    dom_node_id go = dom_get_element_by_id(f->idx, "go");
+    size_t len = 0;
+    const char *t = dom_text_content(f->idx, go, &len);
+    assert_non_null(t);
+    assert_string_equal(t, "Done");
+}
+
+static void test_set_text_content_detach_is_memory_safe(void **state) {
+    fixture *f = (fixture *)*state;
+    /* Replacing #main's content detaches its <p>/<button> children. Reading a
+     * detached child via its still-valid handle must not crash (no UAF). */
+    js_result r;
+    assert_int_equal(run(f,
+        "document.getElementById('main').textContent='X';"
+        "var g=document.getElementById('go'); g===null?'gone':g.tagName", &r), JS_OK);
+    assert_non_null(r.value);
+    /* 'go' is detached but alive: its tag still reads safely. */
+    assert_string_equal(r.value, "BUTTON");
+    js_result_free(&r);
+    EXPECT(f, "document.getElementById('main').textContent", "X");
+}
+
+static void test_document_is_not_io(void **state) {
+    fixture *f = (fixture *)*state;
+    /* The shim adds no I/O surface; console is a no-op, window is the global. */
+    EXPECT(f, "typeof window + (window===globalThis)", "objecttrue");
+    EXPECT(f, "typeof XMLHttpRequest + typeof fetch", "undefinedundefined");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
@@ -172,6 +228,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_invalid_handles, setup, teardown),
         cmocka_unit_test_setup_teardown(test_methods_are_frozen, setup, teardown),
         cmocka_unit_test_setup_teardown(test_no_io_with_dom, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_document_shim_present, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_document_title_set_reflects_in_tree, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_set_text_content_reflects_in_tree, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_set_text_content_detach_is_memory_safe, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_document_is_not_io, setup, teardown),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

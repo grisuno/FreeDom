@@ -79,6 +79,57 @@ static void strip_scripts(lxb_html_document_t *document) {
     free(list);
 }
 
+/* Nonzero if the script element should run: inline (no src -- we never fetch
+ * external scripts) and not a data block (type containing "json"). */
+static int script_is_executable(const lxb_dom_node_t *n) {
+    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
+    size_t len = 0;
+    if (lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &len) != NULL)
+        return 0; /* external script: not fetched, not executed */
+    const lxb_char_t *type =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"type", 4, &len);
+    if (type != NULL && len > 0) {
+        for (size_t i = 0; i + 3 < len + 1 && i + 4 <= len; ++i) {
+            if ((type[i] | 0x20) == 'j' && (type[i + 1] | 0x20) == 's' &&
+                (type[i + 2] | 0x20) == 'o' && (type[i + 3] | 0x20) == 'n')
+                return 0; /* JSON data block (e.g. application/ld+json) */
+        }
+    }
+    return 1;
+}
+
+/* Concatenates the text of every executable inline <script> (separated so one
+ * script cannot swallow the next), for the worker to evaluate when JS is allowed.
+ * Returns a NUL-terminated buffer (free with hp_free), or NULL if there are none. */
+char *hp_extract_scripts(const hp_document *doc, size_t *out_len) {
+    if (out_len != NULL) *out_len = 0;
+    if (doc == NULL || doc->doc == NULL) return NULL;
+    lxb_dom_node_t *root = lxb_dom_interface_node(doc->doc);
+
+    char  *buf = NULL;
+    size_t len = 0, cap = 0;
+    for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {
+        if (!node_is_script(n) || !script_is_executable(n)) continue;
+        size_t tl = 0;
+        const lxb_char_t *t = lxb_dom_node_text_content(n, &tl);
+        if (t == NULL || tl == 0) continue;
+        size_t need = len + tl + 3; /* text + "\n;\n" */
+        if (need + 1 > cap) {
+            size_t ncap = cap ? cap * 2 : 1024;
+            while (ncap < need + 1) ncap *= 2;
+            char *grown = (char *)realloc(buf, ncap);
+            if (grown == NULL) { free(buf); return NULL; }
+            buf = grown; cap = ncap;
+        }
+        memcpy(buf + len, t, tl); len += tl;
+        buf[len++] = '\n'; buf[len++] = ';'; buf[len++] = '\n';
+    }
+    if (buf == NULL) return NULL;
+    buf[len] = '\0';
+    if (out_len != NULL) *out_len = len;
+    return buf;
+}
+
 static void strip_event_handlers(lxb_html_document_t *document) {
     lxb_dom_node_t *root = lxb_dom_interface_node(document);
     for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {

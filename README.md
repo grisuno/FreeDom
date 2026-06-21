@@ -75,10 +75,11 @@ The name reflects its core goals:
   - **Omnibox address bar**: type an address to navigate (the `https://` scheme is added; `http://`
     is upgraded), or type anything else to run a **DuckDuckGo HTML** (no-JS) search. A dangerous
     scheme such as `javascript:` is searched, never executed (fail-closed).
-  - **Per-domain JavaScript policy**: Secure by Default, page JS is off unless you opt a host in.
-    A global tri-state mode (off / allowlist / on) plus a `js.conf` allowlist (same `/etc/hosts`
-    format and search path as the host filter, subdomains covered). Today this controls `<noscript>`
-    handling (a no-JS browser shows the fallback); executing allowlisted scripts is the next step.
+  - **Per-domain JavaScript policy + live JS**: Secure by Default, page JS is off unless you opt a
+    host in. A global tri-state mode (off / allowlist / on) plus a `js.conf` allowlist (same
+    `/etc/hosts` format and search path as the host filter, subdomains covered). When enabled, the
+    page's inline scripts **run in the sandboxed worker** against a memory-safe writable DOM
+    (`document.title`, `getElementById().textContent`); with JS off, `<noscript>` fallbacks show.
   - **Tor support** (`.onion` routing via SOCKS5h proxy, remote DNS, no leaks)
   - **I2P support** (`.i2p` routing via HTTP proxy)
   - Clearnet Torification option (`--torify`)
@@ -163,9 +164,12 @@ Page JavaScript is hostile content, so it is **off by default**. A global tri-st
 
 Set it in the hamburger menu (the "JavaScript: …" row cycles the mode), with `--js[=off|allowlist|on]`,
 or with the `FREEDOM_JS` env var. `js.conf` uses the same `/etc/hosts` format and search path as the
-host filter (subdomains covered). Today the policy controls `<noscript>` rendering (a no-JS browser
-shows the fallback content; an allowlisted page hides it); executing allowlisted page scripts is the
-next milestone (the DOM bridge is read-only by design for now).
+host filter (subdomains covered). When JS is enabled for a page, its **inline scripts execute** inside
+the per-tab sandbox (seccomp + Landlock + namespaces, no I/O) against a memory-safe writable DOM: a
+standard `document` facade exposes `document.title` and `getElementById().textContent`. Removed nodes
+are detached, never freed, so a script can never dangle a handle (no use-after-free). With JS off,
+`<noscript>` fallback content is shown. Out of scope for now: external scripts, events, timers,
+`createElement`/`appendChild`, and `innerHTML`.
 
 ### Anti-fingerprinting identity
 
