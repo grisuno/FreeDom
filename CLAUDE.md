@@ -236,9 +236,14 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   para nodos nuevos; `append` rechaza ciclos; `setAttribute('id'/'class')` re-indexa lookups. Eventos
   y timers son **sintéticos y acotados**: el worker llama `__fireDeferred()` una vez tras los scripts
   (dispara handlers de carga + vacía la cola de timers ≤64). `<noscript>` se muestra con JS off, se
-  oculta con JS on. **Fuera de alcance:** `innerHTML`, eventos interactivos, timers async reales,
-  scripts externos (`src`). No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). Ver
-  `[[freedom-live-js]]`, `[[freedom-js-allowlist]]`.
+  oculta con JS on. **`innerHTML`** (setter) re-parsea un fragmento, detacha los hijos viejos e indexa
+  el subárbol nuevo (memory-safe). **Superficie ambiente identity-safe** (Hito 20d): `localStorage`/
+  `sessionStorage` **efímeros en memoria** (Zero Knowledge — nunca persisten), `document.cookie` (get
+  `""`/set no-op), `document.referrer` `""`, `history`/`location` stubs no-op — para que el JS de
+  detección **corra sin lanzar** sin filtrar identidad. **Fuera de alcance:** eventos interactivos
+  (clic), timers async reales, scripts externos (`src`), navegación por `location`, getter de
+  `innerHTML`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir el
+  storage ni poblar cookie/referrer con datos reales (rompería Zero Knowledge). Ver `[[freedom-live-js]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
   (`Ctrl+I`). Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie
   mínima). El toggle de imágenes cubre **remotas y locales** por igual (una regla, fail-closed): un
@@ -442,10 +447,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `__fireDeferred()` y **luego** deriva la vista. Specs (`dom.md`, `js_dom.md`) + tests (5 construcción
   en `dom` incl. ciclo/reindex, 5 live en `js_dom` incl. onload/setTimeout, 1 E2E en `tab` que construye
   con `createElement`+`onload`) + `make test`/`make asan` limpios + **stress ASan/UBSan dedicado: 40k
-  programas JS aleatorios de create/append/remove/setAttr/onload + re-render, sin UAF**. **Fuera de
-  alcance (20d):** `innerHTML`, eventos **interactivos** (clic), timers **async** reales, scripts
-  externos (`src`), repintado incremental en mutación. *(Núcleo + IPC + ejecución verificados bajo
-  test/ASan/fuzz; integración visual GUI pendiente al dueño.)* Ver `[[freedom-live-js]]`.
+  programas JS aleatorios de create/append/remove/setAttr/onload + re-render, sin UAF**.
+  *(Núcleo + IPC + ejecución verificados bajo test/ASan/fuzz; integración visual GUI pendiente al
+  dueño.)* Ver `[[freedom-live-js]]`.
+- **Hito 20d — JS vivo: `innerHTML` + superficie ambiente identity-safe.** (a) **`innerHTML`** setter:
+  `dom_set_inner_html` re-parsea un fragmento con `lxb_html_document_parse_fragment` (node como
+  contexto), **detacha** los hijos viejos (no libera) e **indexa el subárbol nuevo** (queryable); los
+  `<script>` del fragmento quedan inertes. (b) **Superficie ambiente identity-safe** (el punto del
+  pedido: "JS moderno sin comprometer identidad/seguridad") — todo en el shim, sin filtrar nada:
+  `localStorage`/`sessionStorage` **efímeros en memoria** (Zero Knowledge: nunca persisten),
+  `document.cookie` (get `""`/set no-op), `document.referrer` `""`, `history` y `location` **stubs**
+  no-op, `querySelector`→null. Así el JS de detección **corre sin lanzar** ReferenceError y sin que
+  el dispositivo/usuario se filtre. Specs (`dom.md`, `js_dom.md`) + tests (1 `innerHTML` en `dom`,
+  4 en `js_dom` incl. storage efímero/cookie vacío/stubs, 1 E2E `innerHTML` en `tab`) + `make test`/
+  `make asan` limpios + stress ASan/UBSan (40k JS aleatorios con `innerHTML`/storage, sin UAF).
+  **Honestidad sobre Google:** `google.com/search` exige **su JS externo propietario**, que Freedom
+  **no ejecuta** (los scripts `src` externos no se descargan ni corren — frontera de seguridad **y**
+  de identidad), así que su muro "enable JavaScript" puede persistir; la barra ya enruta búsquedas a
+  DuckDuckGo HTML (Hito 18). *(Núcleo + ejecución verificados; integración visual GUI pendiente al
+  dueño.)* Ver `[[freedom-live-js]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -457,12 +477,13 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   (b) **SVG** (¿`librsvg`? evaluar superficie de ataque) y **JPEG** (decoder en worker; contra la
   doctrina PNG-only salvo justificar la superficie). (c) **Lazy loading** (decodificar solo lo
   visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
-- **Hito 20d — JS vivo: lo dinámico real.** Cerrados 20b (ejecución + título/texto) y 20c
-  (construcción + eventos/timers sintéticos). Falta: **`innerHTML`** (re-parseo de fragmento acotado +
-  indexar el subárbol nuevo), **eventos interactivos** (clic del usuario → IPC GUI↔worker → handler JS
-  → re-render), **timers async reales** (event loop en el worker que empuja vistas nuevas), scripts
-  externos (`src`, con política de red), y **repintado incremental** en mutación (hoy se ejecuta y
-  re-deriva una vez al cargar; no hay re-render tras un evento posterior).
+- **Hito 20e — JS vivo: lo dinámico real.** Cerrados 20b (ejecución + título/texto), 20c
+  (construcción + eventos/timers sintéticos) y 20d (`innerHTML` + superficie ambiente identity-safe).
+  Falta: **eventos interactivos** (clic del usuario → IPC GUI↔worker → handler JS → re-render),
+  **timers async reales** (event loop en el worker que empuja vistas nuevas), **navegación por JS**
+  (`location.href=`/`location.replace` → solicitud de navegación reportada a la GUI, vía secure_fetch),
+  getter de `innerHTML` (serialización), `location.*` reales (requiere pasar la URL de la página al
+  worker), scripts externos (`src`, con política de red), y **repintado incremental** en mutación.
   Persistir el modo y la allowlist con Hito 10.
 - **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
   Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).

@@ -248,6 +248,20 @@ static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
+static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
+                                int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    size_t len = 0;
+    const char *s = JS_ToCStringLen(ctx, &len, argv[1]);
+    if (s == NULL) return JS_EXCEPTION;
+    dom_status st = dom_set_inner_html(jd_idx(ctx), h, s, len);
+    JS_FreeCString(ctx, s);
+    if (st == DOM_ERR_OOM) return JS_ThrowOutOfMemory(ctx);
+    return JS_UNDEFINED;
+}
+
 /* --- install --- */
 
 typedef struct jd_method {
@@ -275,6 +289,7 @@ static const jd_method JD_METHODS[] = {
     { "appendChild",    m_append_child,      2 },
     { "removeChild",    m_remove_child,      2 },
     { "setAttribute",   m_set_attribute,     3 },
+    { "setInnerHtml",   m_set_inner_html,    2 },
 };
 
 /* A small standard `document` facade over the native handle API, so real page
@@ -297,9 +312,12 @@ static const char JD_DOCUMENT_SHIM[] =
     "      set id(v){ dom.setAttribute(h,'id',String(v)); },"
     "      get className(){ var v=dom.getAttribute(h,'class'); return v===null?'':v; },"
     "      set className(v){ dom.setAttribute(h,'class',String(v)); },"
+    "      set innerHTML(v){ dom.setInnerHtml(h, String(v)); },"
+    "      get innerHTML(){ return ''; },"
     "      appendChild: function(c){ if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
     "      removeChild: function(c){ if(c&&c._h!==undefined) dom.removeChild(h,c._h); return c; },"
-    "      addEventListener: function(){}, removeEventListener: function(){}"
+    "      addEventListener: function(){}, removeEventListener: function(){},"
+    "      style:{}"
     "    };"
     "  }"
     "  function wrapList(hs){ var r=[]; for (var i=0;i<hs.length;i++) r.push(wrap(hs[i])); return r; }"
@@ -321,8 +339,27 @@ static const char JD_DOCUMENT_SHIM[] =
     "  Object.defineProperty(d,'body',{get:function(){return tagOne('body');},enumerable:true});"
     "  Object.defineProperty(d,'head',{get:function(){return tagOne('head');},enumerable:true});"
     "  Object.defineProperty(d,'documentElement',{get:function(){return tagOne('html');},enumerable:true});"
+    /* Identity-safe ambient surface: no real cookie/referrer leaks, storage is
+     * EPHEMERAL in-memory (Zero Knowledge -- never persisted, gone each load). */
+    "  Object.defineProperty(d,'cookie',{get:function(){return '';},set:function(){},enumerable:true});"
+    "  Object.defineProperty(d,'referrer',{get:function(){return '';},enumerable:true});"
+    "  d.querySelector=function(){return null;}; d.querySelectorAll=function(){return [];};"
     "  globalThis.document=d;"
     "  if (typeof globalThis.window==='undefined') globalThis.window=globalThis;"
+    "  function memStore(){ var m={};"
+    "    return { getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null;},"
+    "      setItem:function(k,v){m[String(k)]=String(v);},"
+    "      removeItem:function(k){delete m[String(k)];},"
+    "      clear:function(){m={};}, key:function(i){var ks=Object.keys(m);return i<ks.length?ks[i]:null;},"
+    "      get length(){return Object.keys(m).length;} }; }"
+    "  if (typeof globalThis.localStorage==='undefined') globalThis.localStorage=memStore();"
+    "  if (typeof globalThis.sessionStorage==='undefined') globalThis.sessionStorage=memStore();"
+    "  if (typeof globalThis.history==='undefined') globalThis.history={length:1,"
+    "    state:null,pushState:function(){},replaceState:function(){},back:function(){},"
+    "    forward:function(){},go:function(){}};"
+    "  if (typeof globalThis.location==='undefined') globalThis.location={href:'',protocol:'https:',"
+    "    host:'',hostname:'',pathname:'/',search:'',hash:'',origin:'',"
+    "    assign:function(){},replace:function(){},reload:function(){}};"
     "  if (typeof globalThis.console==='undefined')"
     "    globalThis.console={log:function(){},warn:function(){},error:function(){},"
     "      info:function(){},debug:function(){}};"

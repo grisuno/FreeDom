@@ -135,4 +135,12 @@ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const char *name, const char *value);
 
+/* Replaces node's children with the parsed HTML fragment (node as context element).
+ * Old children are DETACHED (not freed), the parsed nodes are inserted, and the new
+ * element subtree is indexed (queryable). Any <script> in the fragment is inert (never
+ * executed; page_view hides it). Invalid handle => DOM_ERR_NULL_ARG; parse/OOM =>
+ * DOM_ERR_OOM. */
+dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
+                              const char *html, size_t len);
+
 #endif /* FREEDOM_DOM_H */

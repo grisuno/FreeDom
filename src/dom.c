@@ -581,3 +581,48 @@ dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
     }
     return DOM_OK;
 }
+
+/* Indexes the element subtree rooted at sub (sub included), in pre-order. */
+static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub) {
+    for (lxb_dom_node_t *w = sub; w != NULL; w = node_next(w, sub)) {
+        if (w->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        dom_node_id id;
+        if (idx_push(idx, w, &id) != DOM_OK) return DOM_ERR_OOM;
+        if (index_element(idx, lxb_dom_interface_element(w), id) != 0) return DOM_ERR_OOM;
+    }
+    return DOM_OK;
+}
+
+dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
+                              const char *html, size_t len) {
+    if (!valid(idx, node)) return DOM_ERR_NULL_ARG;
+    if (idx->document == NULL) return DOM_ERR_INTERNAL;
+    lxb_dom_node_t *el = idx->nodes[node];
+
+    lxb_dom_node_t *frag =
+        lxb_html_document_parse_fragment((lxb_html_document_t *)idx->document,
+                                         lxb_dom_interface_element(el),
+                                         (const lxb_char_t *)(html != NULL ? html : ""),
+                                         len);
+    if (frag == NULL) return DOM_ERR_OOM;
+
+    /* Detach (not destroy) the current children: any index handle into them stays valid. */
+    lxb_dom_node_t *c = el->first_child;
+    while (c != NULL) {
+        lxb_dom_node_t *next = c->next;
+        lxb_dom_node_remove(c);
+        c = next;
+    }
+
+    /* Move each parsed top-level node into el and index its (new) element subtree. */
+    lxb_dom_node_t *child = frag->first_child;
+    while (child != NULL) {
+        lxb_dom_node_t *next = child->next;
+        lxb_dom_node_remove(child);
+        lxb_dom_node_insert_child(el, child);
+        dom_status s = index_subtree(idx, child);
+        if (s != DOM_OK) return s;
+        child = next;
+    }
+    return DOM_OK;
+}

@@ -168,11 +168,24 @@ host filter (subdomains covered). When JS is enabled for a page, its **inline sc
 the per-tab sandbox (seccomp + Landlock + namespaces, no I/O) against a memory-safe writable DOM. A
 standard `document` facade exposes reads/writes (`document.title`, `getElementById().textContent`),
 **DOM construction** (`createElement`, `appendChild`, `removeChild`, `setAttribute`, `body`/`head`),
-and **bounded synthetic events/timers** (`addEventListener('load')`/`window.onload`, `setTimeout` —
-fired once after the page's scripts run). Removed nodes are detached, never freed, so a script can
-never dangle a handle (no use-after-free), and `appendChild` rejects cycles. With JS off, `<noscript>`
-fallback content is shown. Out of scope for now: `innerHTML`, interactive (click) events, real async
-timers, and external (`src`) scripts.
+**bounded synthetic events/timers** (`addEventListener('load')`/`window.onload`, `setTimeout` —
+fired once after the page's scripts run), and **`innerHTML`**. Removed nodes are detached, never
+freed, so a script can never dangle a handle (no use-after-free), and `appendChild` rejects cycles.
+
+To run more real-world JS **without leaking your identity**, Freedom also provides an *identity-safe*
+ambient surface: `localStorage`/`sessionStorage` are **in-memory and ephemeral** (Zero Knowledge —
+never written to disk, cleared every load), `document.cookie` is always empty (set is a no-op),
+`document.referrer` is empty, and `history`/`location` are benign stubs — so detection scripts run
+without throwing while nothing about the user or device is revealed. With JS off, `<noscript>`
+fallback content is shown.
+
+> **Note on Google Search:** `google.com/search` requires running Google's large, proprietary
+> *external* JavaScript. Freedom deliberately **does not fetch or run external (`src`) scripts** — a
+> security *and* identity boundary — so Google's "enable JavaScript" wall may persist. Use the
+> address bar, which routes searches to the no-JS DuckDuckGo HTML endpoint that renders cleanly.
+
+Out of scope for now: interactive (click) events, real async timers, JS-driven navigation, and
+external (`src`) scripts.
 
 ### Anti-fingerprinting identity
 

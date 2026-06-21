@@ -291,6 +291,22 @@ static void test_set_attribute_reindexes_id(void **state) {
     assert_string_equal(dom_get_attribute(idx, created, "data-x", &len), "1");
 }
 
+static void test_set_inner_html(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    assert_int_equal(dom_set_inner_html(idx, main_id,
+        "<p id=\"np\">parsed</p><span class=\"sc\">two</span>", 44), DOM_OK);
+    /* the parsed subtree is queryable and rendered text reflects it */
+    dom_node_id np = dom_get_element_by_id(idx, "np");
+    assert_int_not_equal(np, DOM_NODE_NONE);
+    size_t len = 0;
+    assert_string_equal(dom_text_content(idx, np, &len), "parsed");
+    assert_true(dom_get_by_class(idx, "sc", NULL, 0) >= 1);
+    /* the old children (#go etc.) were detached but their handles stay valid */
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    assert_string_equal(dom_tag_name(idx, go, &len), "button");
+}
+
 static void test_construction_invalid_args(void **state) {
     dom_index *idx = IDX(state);
     dom_node_id out = DOM_NODE_NONE;
@@ -321,6 +337,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_append_rejects_cycle, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_remove_child, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_set_attribute_reindexes_id, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_set_inner_html, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_construction_invalid_args, setup_doc, teardown_doc),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

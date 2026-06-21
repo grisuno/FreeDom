@@ -272,6 +272,38 @@ static void test_settimeout_flushed_by_pump(void **state) {
         "b+'/'+document.getElementById('go').textContent", "Go/timed");
 }
 
+static void test_inner_html_builds_and_queryable(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f,
+        "document.getElementById('main').innerHTML='<p id=\"ih\">hi</p>';"
+        "document.getElementById('ih').textContent", "hi");
+    dom_node_id ih = dom_get_element_by_id(f->idx, "ih");
+    assert_int_not_equal(ih, DOM_NODE_NONE);
+}
+
+/* Identity-safe ambient globals: present (no throws) but leak nothing. */
+static void test_storage_is_ephemeral(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "localStorage.setItem('k','v'); localStorage.getItem('k')", "v");
+    EXPECT(f, "localStorage.getItem('absent')", "null");
+    EXPECT(f, "sessionStorage.setItem('a','1'); sessionStorage.length", "1");
+}
+
+static void test_cookie_and_referrer_leak_nothing(void **state) {
+    fixture *f = (fixture *)*state;
+    /* cookie set is a no-op; get is always empty; referrer empty. */
+    EXPECT(f, "document.cookie='track=1'; document.cookie", "");
+    EXPECT(f, "document.referrer", "");
+}
+
+static void test_ambient_apis_do_not_throw(void **state) {
+    fixture *f = (fixture *)*state;
+    /* history/location stubs let detection scripts run without ReferenceErrors. */
+    EXPECT(f,
+        "history.pushState({},'',''); location.assign('x'); location.replace('y');"
+        "typeof history.pushState + typeof location.protocol", "functionstring");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
@@ -294,6 +326,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_append_cycle_is_rejected, setup, teardown),
         cmocka_unit_test_setup_teardown(test_onload_runs_and_mutates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_settimeout_flushed_by_pump, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_inner_html_builds_and_queryable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_storage_is_ephemeral, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_cookie_and_referrer_leak_nothing, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_ambient_apis_do_not_throw, setup, teardown),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
