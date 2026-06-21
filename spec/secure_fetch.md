@@ -159,6 +159,17 @@ petición e invoca a los validadores sobre el estado negociado.
 - `location`: valor crudo de la cabecera `Location` si la respuesta la trae (propiedad de la
   struct); `NULL` si no hubo. Es un **dato con procedencia**, nunca una instrucción: no se
   sigue automáticamente dentro de `sf_get`.
+- `content_type`: valor de la cabecera `Content-Type` (p. ej. `"text/html; charset=utf-8"`),
+  vía `CURLINFO_CONTENT_TYPE`; `NULL` si el servidor la omitió. Lo consume la decisión pura
+  **render-vs-download** (`download`); nunca se confía para ejecutar.
+- `content_disposition`: valor crudo de la cabecera `Content-Disposition` (capturado en el
+  `header_cb`), o `NULL`. Es **contenido hostil con procedencia**: su `filename` se sanea
+  fail-closed antes de cualquier uso en disco (ver `spec/download.md`).
+
+Ambos campos son additivos (solo lectura de cabeceras de respuesta): no cambian ninguna
+decisión de TLS/PQ/cadena. En `sf_get_follow`, cada hop intermedio se libera con
+`sf_response_free`; el del hop final sobrevive, así que `content_type`/`content_disposition`
+reflejan la respuesta que produjo el cuerpo.
 
 `sf_response_free` libera y pone a cero todos los punteros. Es **idempotente** y seguro
 sobre una struct inicializada a cero o liberada dos veces.

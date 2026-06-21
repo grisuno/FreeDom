@@ -97,6 +97,12 @@ typedef struct sf_response {
                                  * (the last hop after sf_get_follow's redirects, or the
                                  * requested URL for sf_get); NULL if unset. The correct
                                  * base for resolving the document's relative references. */
+    char     *content_type;     /* owned; the response Content-Type (e.g. "text/html;
+                                 * charset=utf-8"), or NULL if the server omitted it. Used
+                                 * to decide render-vs-download; never trusted to execute. */
+    char     *content_disposition; /* owned; the raw Content-Disposition header value, or
+                                 * NULL if absent. Hostile input (its filename is sanitized
+                                 * fail-closed before any disk use; see download.h). */
 } sf_response;
 
 /* PQ-hybrid is preferred (listed first); classical groups are also offered so a

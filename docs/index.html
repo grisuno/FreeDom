@@ -26,6 +26,10 @@
         <tr><td style="color:#0a3380"><code>Ctrl+L</code></td><td style="color:#0a0a0a">Focus the URL bar</td></tr>
         <tr><td style="color:#0a3380"><code>Ctrl+I</code></td><td style="color:#0a0a0a">Toggle remote images (off by default &mdash; Privacy by Default)</td></tr>
         <tr><td style="color:#0a3380"><code>Ctrl+P</code></td><td style="color:#0a0a0a">Save the current page as a vector PDF (selectable text)</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+S</code></td><td style="color:#0a0a0a">Save the current page to <code>~/Downloads/freedom/</code></td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+R</code> / <code>F5</code></td><td style="color:#0a0a0a">Reload the current page (re-applies the full TLS/PQ policy)</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl++</code> / <code>Ctrl+-</code></td><td style="color:#0a0a0a">Zoom in / out (snaps to a 50&ndash;300% ladder)</td></tr>
+        <tr><td style="color:#0a3380"><code>Ctrl+0</code></td><td style="color:#0a0a0a">Reset zoom to 100%</td></tr>
         <tr><td style="color:#0a3380"><code>Ctrl+C</code></td><td style="color:#0a0a0a">Copy the focused field, or the page URL</td></tr>
         <tr><td style="color:#0a3380"><code>Ctrl+V</code></td><td style="color:#0a0a0a">Paste into the focused field</td></tr>
         <tr><td style="color:#0a3380"><code>Ctrl+T</code></td><td style="color:#0a0a0a">New tab</td></tr>
@@ -49,6 +53,12 @@
         <li style="color:#0a0a0a"><strong style="color:#061414">JavaScript off by default (per-domain):</strong> page JS is hostile content, so it is disabled unless you opt a host in. A global mode (<code style="color:#0a3380">off</code> / <code style="color:#0a3380">allowlist</code> / <code style="color:#0a3380">on</code>, set in the menu, <code style="color:#0a3380">--js</code>, or <code style="color:#0a3380">FREEDOM_JS</code>) plus a per-host <code style="color:#0a3380">js.conf</code> allowlist. When enabled, inline scripts run in the per-tab sandbox against a memory-safe writable DOM (<code style="color:#0a3380">document.title</code>, <code style="color:#0a3380">textContent</code>, <code style="color:#0a3380">createElement</code>/<code style="color:#0a3380">appendChild</code>, <code style="color:#0a3380">innerHTML</code>, <code style="color:#0a3380">onload</code>). Storage is in-memory and ephemeral, cookies are empty &mdash; JS runs without leaking your identity. External (<code style="color:#0a3380">src</code>) scripts are never run, so Google Search (which needs them) may still ask to enable JS &mdash; use the address bar, which searches via the no-JS DuckDuckGo HTML. With JS off, <code style="color:#0a3380">&lt;noscript&gt;</code> fallback content is shown.</li>
         <li style="color:#0a0a0a"><strong style="color:#061414">Normalized JS surface:</strong> clocks, screen size, and canvas/audio readback are coarsened or poisoned so the JS engine cannot fingerprint the device. No WebRTC, no WebGL, no third-party requests.</li>
         <li style="color:#0a0a0a"><strong style="color:#061414">Tor / I2P:</strong> optional socket-level routing via local proxies (toggles in the menu). <code style="color:#0a3380">.onion</code> uses Tor only; <code style="color:#0a3380">.i2p</code> uses I2P only &mdash; fail-closed, never leaked over clearnet.</li>
+    </ul>
+
+    <h2 style="color:#061414">Downloads &amp; Zoom</h2>
+    <ul>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Safe downloads:</strong> a link to a non-renderable resource (PDF, archive, e-book) is saved to <code style="color:#0a3380">~/Downloads/freedom/</code> instead of being parsed as a page; <code style="color:#0a3380">Ctrl+S</code> saves the current page there too. The filename is derived <strong style="color:#061414">fail-closed</strong> from the hostile <code style="color:#0a3380">Content-Disposition</code> / URL (only <code style="color:#0a3380">[A-Za-z0-9._-]</code>, no path separators, no traversal, no hidden dot), the body is size-capped, and the file is written atomically with <code style="color:#0a3380">0600</code> perms.</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Zoom:</strong> <code style="color:#0a3380">Ctrl++</code> / <code style="color:#0a3380">Ctrl+-</code> step through a 50&ndash;300% ladder; <code style="color:#0a3380">Ctrl+0</code> resets. The page reflows at the new size with no network round-trip.</li>
     </ul>
 
     <h2 style="color:#061414">Security</h2>

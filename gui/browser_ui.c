@@ -15,6 +15,7 @@
 #include "box_style.h"
 #include "box_tree.h"
 #include "css_color.h"
+#include "download.h"
 #include "hostblock.h"
 #include "image_decode.h"
 #include "js_policy.h"
@@ -26,6 +27,7 @@
 #include "textfield.h"
 #include "ui.h"
 #include "url.h"
+#include "zoom.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -36,6 +38,7 @@
 #include <unistd.h>
 #include <poll.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <sys/timerfd.h>
 #include <errno.h>
 #include <signal.h>
@@ -466,6 +469,7 @@ typedef struct browser_window {
 
     ui_theme  theme;
     int       theme_mode;  /* ui_theme_mode selected in the options menu */
+    int       zoom_pct;    /* page zoom percentage (window-level; see zoom.h) */
     int       force_theme; /* ignore author fg/bg colors, use the theme (reading) */
     int       loading;   /* a network request is in flight (busy clock shown) */
     ui_hot    hot;       /* toolbar button under the pointer, or UI_HOT_NONE */
@@ -561,6 +565,30 @@ typedef struct browser_window {
 } browser_window;
 
 static void redraw(browser_window *w);
+
+/* Rebuilds the live theme for the current mode and scales the font-driven metrics
+ * by the page zoom. Layout and text flow read these straight from the theme, so a
+ * zoom change is just "rebuild + repaint" -- no new pure layout path. The page
+ * gutter (content_margin) is intentionally left unzoomed, like a browser's text
+ * zoom. The PDF export keeps its own forced light theme and never calls this. */
+static void apply_theme(browser_window *w) {
+    w->theme = ui_theme_for(w->theme_mode);
+    double s = zm_scale(w->zoom_pct);
+    w->theme.body_font     = zm_apply(w->theme.body_font, w->zoom_pct);
+    w->theme.paragraph_gap = w->theme.paragraph_gap * s;
+    w->theme.image_box_pad = w->theme.image_box_pad * s;
+}
+
+/* Applies a new zoom level: rebuild the theme and repaint. The page is laid out
+ * fresh from w->theme on every paint, so no re-fetch and no worker round-trip are
+ * needed -- the text simply reflows at the new size. */
+static void apply_zoom(browser_window *w) {
+    apply_theme(w);
+    char msg[48];
+    snprintf(msg, sizeof msg, "Zoom %d%%", w->zoom_pct);
+    browser_set_status(&w->bs, msg, now_ms());
+    redraw(w);
+}
 
 /* --- shm buffer (same pattern as ui_render.c) --- */
 
@@ -1087,6 +1115,8 @@ typedef struct fetch_job {
     size_t    html_len;
     long      http_code;
     char     *location;          /* POST redirect target (owned), or NULL */
+    char     *resp_ctype;        /* response Content-Type (owned), or NULL */
+    char     *resp_disp;         /* response Content-Disposition (owned, hostile), or NULL */
 } fetch_job;
 
 static void fetch_job_free(fetch_job *j) {
@@ -1098,6 +1128,8 @@ static void fetch_job_free(fetch_job *j) {
     free(j->content_type);
     free(j->html);
     free(j->location);
+    free(j->resp_ctype);
+    free(j->resp_disp);
     free(j);
 }
 
@@ -1127,6 +1159,9 @@ static void *fetch_thread(void *arg) {
         j->html_len = resp.body_len;
         j->http_code = resp.http_code;
         j->location = (resp.location != NULL) ? strdup(resp.location) : NULL;
+        /* Move the headers that drive the render-vs-download decision (no extra copy). */
+        j->resp_ctype = resp.content_type; resp.content_type = NULL;
+        j->resp_disp  = resp.content_disposition; resp.content_disposition = NULL;
     }
     sf_response_free(&resp);
 
@@ -2664,6 +2699,89 @@ static void do_submit_post(browser_window *w, const fm_plan *plan) {
  * so the active tab is no longer this job's target (fail safe -- never paint a stale
  * or wrong-tab page). On success the page is rendered in place; a POST redirect is
  * followed as a fresh async GET (re-applying the full policy, Zero Trust). */
+/* Builds ~/Downloads/freedom into out and creates both levels (best effort; an
+ * existing directory is fine). Returns 1 on success. Falls back to $HOME or "."
+ * for the base, matching export_pdf's directory choice. */
+static int ensure_download_dir(char *out, size_t outsz) {
+    const char *home = getenv("HOME");
+    if (home == NULL || home[0] == '\0') home = ".";
+    char base[PATH_MAX];
+    if ((size_t)snprintf(base, sizeof base, "%s/Downloads", home) >= sizeof base) return 0;
+    if ((size_t)snprintf(out, outsz, "%s/freedom", base) >= outsz) return 0;
+    mkdir(base, 0700);   /* ignore EEXIST */
+    mkdir(out, 0700);
+    struct stat st;
+    return (stat(out, &st) == 0 && S_ISDIR(st.st_mode));
+}
+
+/* Writes len bytes to path with 0600 perms via a temp file + atomic rename (the
+ * disk_store convention): a crash mid-write never leaves a half file at path, and
+ * a download is never world-readable. Returns 1 on success. */
+static int write_file_atomic(const char *path, const void *bytes, size_t len) {
+    char tmp[PATH_MAX];
+    if ((size_t)snprintf(tmp, sizeof tmp, "%s.part", path) >= sizeof tmp) return 0;
+    int fd = open(tmp, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+    if (fd < 0) return 0;
+    const uint8_t *p = (const uint8_t *)bytes;
+    size_t off = 0;
+    int ok = 1;
+    while (off < len) {
+        ssize_t wr = write(fd, p + off, len - off);
+        if (wr < 0) { if (errno == EINTR) continue; ok = 0; break; }
+        off += (size_t)wr;
+    }
+    if (close(fd) != 0) ok = 0;
+    if (ok && rename(tmp, path) == 0) return 1;
+    unlink(tmp);
+    return 0;
+}
+
+/* Saves a fetched resource to ~/Downloads/freedom instead of rendering it. The
+ * filename is derived fail-closed from the hostile Content-Disposition / URL
+ * (download module); the body is size-capped. The current page stays on screen. */
+static void save_download(browser_window *w, const char *url, const char *bytes,
+                          size_t len, const char *ctype, const char *disp) {
+    if (dl_check_size(len) != DL_OK) {
+        browser_set_status(&w->bs, "Download refused: exceeds the size cap.", now_ms());
+        redraw(w);
+        return;
+    }
+    char dir[PATH_MAX];
+    if (!ensure_download_dir(dir, sizeof dir)) {
+        browser_set_status(&w->bs, "Could not create the downloads directory.", now_ms());
+        redraw(w);
+        return;
+    }
+    char name[DL_NAME_MAX + 8];
+    char path[PATH_MAX];
+    if (dl_pick_name(url, disp, ctype, name, sizeof name) != DL_OK ||
+        dl_build_path(dir, name, path, sizeof path) != DL_OK) {
+        browser_set_status(&w->bs, "Could not build a safe download path.", now_ms());
+        redraw(w);
+        return;
+    }
+    char msg[PATH_MAX + 64];
+    if (write_file_atomic(path, bytes != NULL ? bytes : "", len)) {
+        snprintf(msg, sizeof msg, "Downloaded (%zu bytes): %s", len, path);
+    } else {
+        snprintf(msg, sizeof msg, "Could not write the download: %s", path);
+    }
+    browser_set_status(&w->bs, msg, now_ms());
+    redraw(w);
+}
+
+/* Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network
+ * round-trip -- the bytes already in the page cache are written. */
+static void save_current_page(browser_window *w) {
+    if (w->cur_html == NULL) {
+        browser_set_status(&w->bs, "Nothing to save.", now_ms());
+        redraw(w);
+        return;
+    }
+    const char *url = (w->cur_top != NULL) ? w->cur_top : browser_current_url(&w->bs);
+    save_download(w, url, w->cur_html, w->cur_html_len, "text/html", NULL);
+}
+
 static void deliver_fetch_result(browser_window *w, fetch_job *j) {
     if (j->gen != w->net_gen) return; /* superseded/abandoned navigation */
     w->loading = 0;
@@ -2682,6 +2800,13 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
             redraw(w);
             return;
         }
+    }
+
+    /* A non-renderable response (PDF, archive, ...) or an explicit attachment is
+     * saved to disk rather than parsed as HTML. The current page stays on screen. */
+    if (dl_should_download(j->resp_ctype, j->resp_disp)) {
+        save_download(w, j->url, j->html, j->html_len, j->resp_ctype, j->resp_disp);
+        return;
     }
 
     clear_doc(w);
@@ -2795,7 +2920,7 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     if (it->action == UI_MENU_THEME) {
         /* Clicking the active palette returns to light; otherwise select it. */
         w->theme_mode = (w->theme_mode == it->theme_val) ? UI_THEME_LIGHT : it->theme_val;
-        w->theme = ui_theme_for(w->theme_mode);
+        apply_theme(w);
         return;
     }
     if (it->action == UI_MENU_FORCE) {
@@ -3966,6 +4091,37 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         return;
     }
 
+    /* Ctrl+S saves the current page's cached source to ~/Downloads/freedom (no
+     * network); the filename is derived fail-closed from the URL (download module). */
+    if (ctrl && !shift && (sym == XKB_KEY_s || sym == XKB_KEY_S)) {
+        save_current_page(w);
+        return;
+    }
+
+    /* Ctrl+R / F5 reloads the current page (re-fetch, full TLS/PQ policy re-applied). */
+    if ((ctrl && !shift && (sym == XKB_KEY_r || sym == XKB_KEY_R)) || sym == XKB_KEY_F5) {
+        load_current(w);
+        return;
+    }
+
+    /* Zoom: Ctrl + / Ctrl = / Ctrl KP+ zoom in, Ctrl - / Ctrl _ / Ctrl KP- zoom out,
+     * Ctrl 0 resets to 100%. The level snaps to the zoom ladder (zoom module). */
+    if (ctrl && (sym == XKB_KEY_plus || sym == XKB_KEY_equal || sym == XKB_KEY_KP_Add)) {
+        w->zoom_pct = zm_zoom_in(w->zoom_pct);
+        apply_zoom(w);
+        return;
+    }
+    if (ctrl && (sym == XKB_KEY_minus || sym == XKB_KEY_underscore || sym == XKB_KEY_KP_Subtract)) {
+        w->zoom_pct = zm_zoom_out(w->zoom_pct);
+        apply_zoom(w);
+        return;
+    }
+    if (ctrl && (sym == XKB_KEY_0 || sym == XKB_KEY_KP_0)) {
+        w->zoom_pct = zm_reset();
+        apply_zoom(w);
+        return;
+    }
+
     /* Tab shortcuts. Ctrl+T opens a tab, Ctrl+W closes the current one (never the
      * last), Ctrl+Tab / Ctrl+Shift+Tab cycle forward / backward. */
     if (ctrl && !shift && (sym == XKB_KEY_t || sym == XKB_KEY_T)) {
@@ -4261,7 +4417,8 @@ ui_status ui_run_browser(const char *start_url) {
     w.height = 700;
     w.running = 1;
     w.use_csd = 1;
-    w.theme = ui_theme_default();
+    w.zoom_pct = zm_reset();    /* 100%; Ctrl +/-/0 steps the zoom ladder */
+    apply_theme(&w);            /* theme_mode is 0 (light) via memset */
     w.caps = rdp_caps_safe();   /* Privacy by Default: images/CSS/JS off */
     w.scroll = 0.0;
     w.focused_input = -1;       /* no form control focused */

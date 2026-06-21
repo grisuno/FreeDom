@@ -247,11 +247,17 @@ void sf_response_free(sf_response *resp) {
     free(resp->negotiated_group);
     free(resp->body);
     free(resp->location);
+    free(resp->final_url);
+    free(resp->content_type);
+    free(resp->content_disposition);
     resp->tls_version = NULL;
     resp->negotiated_group = NULL;
     resp->body = NULL;
     resp->body_len = 0;
     resp->location = NULL;
+    resp->final_url = NULL;
+    resp->content_type = NULL;
+    resp->content_disposition = NULL;
     resp->http_code = 0;
     resp->status = SF_OK;
 }
@@ -286,6 +292,8 @@ typedef struct fetch_ctx {
     tls_capture cap;
     char        location[SF_MAX_URL]; /* last Location header value seen, if any */
     int         have_location;
+    char        disposition[SF_MAX_URL]; /* last Content-Disposition value, if any */
+    int         have_disposition;
 } fetch_ctx;
 
 static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len);
@@ -338,6 +346,20 @@ static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata
     if (sf_parse_location_header(line, val, sizeof val) == SF_OK) {
         memcpy(ctx->location, val, strlen(val) + 1);
         ctx->have_location = 1;
+    }
+    /* Capture Content-Disposition: its filename drives the download name (hostile;
+     * sanitized fail-closed downstream). The header name is matched case-insensitively;
+     * the value is the trimmed remainder after the colon. */
+    if (ci_starts_with(line, "content-disposition:")) {
+        const char *p = line + 20; /* strlen("content-disposition:") */
+        while (*p == ' ' || *p == '\t') ++p;
+        size_t vlen = strlen(p);
+        while (vlen > 0 && (p[vlen - 1] == '\r' || p[vlen - 1] == '\n' ||
+                            p[vlen - 1] == ' '  || p[vlen - 1] == '\t')) --vlen;
+        if (vlen >= sizeof ctx->disposition) vlen = sizeof ctx->disposition - 1;
+        memcpy(ctx->disposition, p, vlen);
+        ctx->disposition[vlen] = '\0';
+        ctx->have_disposition = 1;
     }
     return size * nitems;
 }
@@ -584,10 +606,19 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     char *ver = strdup(ctx.cap.version);
     char *grp = strdup(ctx.cap.group);
     char *loc = ctx.have_location ? strdup(ctx.location) : NULL;
-    if (ver == NULL || grp == NULL || (ctx.have_location && loc == NULL)) {
+    /* Content-Type comes straight from curl (already de-folded); Content-Disposition
+     * we captured by hand. Both feed the pure render-vs-download decision. */
+    const char *ct_raw = NULL;
+    curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct_raw);
+    char *ctype = (ct_raw != NULL) ? strdup(ct_raw) : NULL;
+    char *disp  = ctx.have_disposition ? strdup(ctx.disposition) : NULL;
+    if (ver == NULL || grp == NULL || (ctx.have_location && loc == NULL) ||
+        (ct_raw != NULL && ctype == NULL) || (ctx.have_disposition && disp == NULL)) {
         free(ver);
         free(grp);
         free(loc);
+        free(ctype);
+        free(disp);
         result = SF_ERR_OOM;
         goto done;
     }
@@ -596,6 +627,8 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     out->tls_version = ver;
     out->negotiated_group = grp;
     out->location = loc;
+    out->content_type = ctype;
+    out->content_disposition = disp;
     out->body = ctx.sink.data;
     out->body_len = ctx.sink.len;
     ctx.sink.data = NULL; /* ownership transferred */

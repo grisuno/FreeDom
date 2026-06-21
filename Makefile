@@ -76,9 +76,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_image_decode $(BUILD_DIR)/test_box_style \
              $(BUILD_DIR)/test_flex_layout $(BUILD_DIR)/test_box_tree \
              $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm \
-             $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy
+             $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
+             $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -226,6 +227,15 @@ $(BUILD_DIR)/test_form: $(TEST_DIR)/test_form.c $(BUILD_DIR)/form.o $(BUILD_DIR)
 $(BUILD_DIR)/test_pdf_export: $(TEST_DIR)/test_pdf_export.c $(BUILD_DIR)/pdf_export.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure page-zoom arithmetic (clamp + ladder stepping + scale). No I/O deps.
+$(BUILD_DIR)/test_zoom: $(TEST_DIR)/test_zoom.c $(BUILD_DIR)/zoom.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure download helpers (render-vs-save + hostile-input -> safe filename). Reuses
+# pe_safe_basename (pdf_export) as the single sanitizer. No I/O deps.
+$(BUILD_DIR)/test_download: $(TEST_DIR)/test_download.c $(BUILD_DIR)/download.o $(BUILD_DIR)/pdf_export.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
@@ -272,6 +282,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/js_policy.o \
                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
+                      $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -350,6 +361,16 @@ fuzz-pe: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_pdf_export.c $(SRC_DIR)/pdf_export.c \
 	  -o $(BUILD_DIR)/fuzz_pdf_export
 	./$(BUILD_DIR)/fuzz_pdf_export -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the download filename derivation (clang + libFuzzer).
+# The URL and Content-Disposition are hostile; the derived name must never escape
+# the download directory. Reuses pe_safe_basename (pdf_export.c).
+fuzz-dl: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_download.c $(SRC_DIR)/download.c $(SRC_DIR)/pdf_export.c \
+	  -o $(BUILD_DIR)/fuzz_download
+	./$(BUILD_DIR)/fuzz_download -max_total_time=30 -rss_limit_mb=2048
 
 # ====================================================================== #
 #  Developer / packaging targets centralised from the old *.sh scripts.  #

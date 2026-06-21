@@ -197,7 +197,9 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
 | Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
-| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo) | Toolbar, historial, barra de URL editable, scroll, menú de opciones, navegación por clic, submit de formularios. **Multi-pestaña** (tira de tabs entre titlebar y toolbar, `+`/cerrar/click, atajos `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`). El contenido va **recortado** (`cairo_clip`) al viewport bajo el chrome, así no se solapa con la toolbar al scrollear. **Save as PDF** (`Ctrl+P` o menú). |
+| Descargas | `download` (`dl_`) | **Guardar recurso a `~/Downloads/freedom/`** (link no renderizable → se descarga, no se parsea; `Ctrl+S` guarda la página). Puro: decide render-vs-download (`Content-Disposition` attachment / media-type binario), deriva el nombre **fail-closed** del header/URL hostil (reusa `pe_safe_basename`), y aplica el cap de tamaño; el orquestador escribe atómico 0600. |
+| Zoom | `zoom` (`zm_`) | **Zoom de página** `Ctrl++`/`Ctrl+-`/`Ctrl+0` (ladder 50–300%). Puro: clamp + escalón discreto + factor de escala; la GUI escala `theme.body_font` y la página reflowa al repintar (sin red). |
+| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo) | Toolbar, historial, barra de URL editable, scroll, menú de opciones, navegación por clic, submit de formularios. **Multi-pestaña** (tira de tabs entre titlebar y toolbar, `+`/cerrar/click, atajos `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`). El contenido va **recortado** (`cairo_clip`) al viewport bajo el chrome, así no se solapa con la toolbar al scrollear. **Save as PDF** (`Ctrl+P`), **descarga** (`Ctrl+S`/auto), **recarga** (`Ctrl+R`/`F5`), **zoom** (`Ctrl++`/`Ctrl+-`/`Ctrl+0`). |
 | Auditoría | `spec/threat-model.md` | Activos/adversarios/fronteras → mitigaciones. |
 
 **Decisiones de doctrina vigentes** (no evidentes en el código; no re-litigar):
@@ -466,6 +468,31 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   de identidad), así que su muro "enable JavaScript" puede persistir; la barra ya enruta búsquedas a
   DuckDuckGo HTML (Hito 18). *(Núcleo + ejecución verificados; integración visual GUI pendiente al
   dueño.)* Ver `[[freedom-live-js]]`.
+- **Hito 22 — Zoom + recarga + descargas.** Tres features con dos módulos **puros** nuevos (TDD).
+  (a) **`zoom` (`zm_`):** zoom como porcentaje entero que **engancha a un ladder** (50→300%);
+  `zm_clamp`/`zm_zoom_in`/`zm_zoom_out`/`zm_reset`/`zm_scale`/`zm_apply` (esta última con piso de
+  1px). Toda función clampa primero, así un valor fuera de rango no es representable. La GUI guarda
+  `zoom_pct` por ventana, y `apply_theme` escala `theme.body_font`/`paragraph_gap`/`image_box_pad`;
+  como el layout se recalcula en cada paint desde `w->theme`, el zoom es **rebuild+repaint** (sin red,
+  sin worker). Atajos `Ctrl++`/`Ctrl+=`/`KP+` (in), `Ctrl+-`/`Ctrl+_`/`KP-` (out), `Ctrl+0` (reset).
+  (b) **`download` (`dl_`):** el nombre de archivo se deriva de **input hostil** (`Content-Disposition`
+  + path de la URL), así que es la superficie auditable: `dl_should_download` (attachment / media-type
+  no renderizable vs `text/*`/xhtml/vacío → render), `dl_ext_for_type`, `dl_pick_name` (candidato
+  disposition→URL→fallback `download`, saneado **reusando `pe_safe_basename`** — sin separadores, sin
+  traversal, sin punto inicial; sintetiza extensión por content-type si falta), `dl_build_path`
+  (rechaza `/` en el nombre, no escapa el dir), `dl_check_size` (cap 256 MiB). El orquestador
+  (`save_download`/`ensure_download_dir`/`write_file_atomic` en la GUI) crea `~/Downloads/freedom/` y
+  escribe **atómico 0600** (temp+rename). Auto-descarga cuando la respuesta no es renderizable (la
+  página actual queda en pantalla); `Ctrl+S` guarda los bytes cacheados de la página (sin red).
+  (c) **Recarga:** `Ctrl+R`/`F5` → `load_current` (re-fetch, re-aplica TODA la política TLS/PQ).
+  **`secure_fetch`** gana dos campos additivos en `sf_response` (`content_type` vía
+  `CURLINFO_CONTENT_TYPE`, `content_disposition` capturado en `header_cb`); solo lectura de cabeceras,
+  no cambia ninguna decisión TLS/PQ/cadena; en `sf_get_follow` sobreviven los del hop final.
+  Specs (`zoom.md`, `download.md`, `secure_fetch.md`) + tests (10 `zoom`, 20 `download`) + `make test`
+  (34 suites) / `make asan` (34 suites, exit 0) limpios + fuzz `make fuzz-dl` (5.4M execs sin
+  crash/leak/UB, invariante de contención del nombre sostenido). *(Módulos puros + IPC additivo
+  verificados bajo test/ASan/fuzz; ruta GUI compila endurecida, verificación visual Wayland pendiente
+  al dueño. `make itest` requiere endpoint PQ vivo, no disponible aquí.)* Ver `[[freedom-zoom-download]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -487,9 +514,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   Persistir el modo y la allowlist con Hito 10.
 - **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
   Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).
-- **Hito 22 — Zoom + recarga + descargas.** Zoom `Ctrl++`/`Ctrl+-` (escala de fuentes/layout);
-  recarga `Ctrl+R`/`F5` + icono; **descarga segura** de `.pdf/.txt/.epub/...` a `~/Downloads/freedom/`
-  con nombre saneado fail-closed (reusar `pe_safe_basename`) y tope de tamaño.
+- **Hito 22b — Descargas/zoom: pulido.** (Hito 22, base, ya cerrado arriba.) Falta: ícono de recarga
+  en la toolbar; barra/indicador de progreso de descarga y descarga **asíncrona** (hoy el cuerpo ya
+  vino con el fetch async, pero la escritura es síncrona); evitar clobber (sufijo `(1)`); **fetch de
+  imágenes** y descargas grandes fuera del hilo (depende del Hito 9b); zoom **por sitio** y persistido
+  (Hito 10). Wart conocido: tras una auto-descarga la barra de URL muestra el recurso descargado
+  aunque el contenido en pantalla sea la página previa.
 - **Hito 10 — Persistencia de preferencias.** Opt-in de imágenes/CSS/tema, excepciones de host, y
   config Tor/I2P (hoy env/sesión) cifrados con `local_store`/`disk_store`.
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`

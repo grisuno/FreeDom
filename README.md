@@ -100,6 +100,8 @@ The name reflects its core goals:
 - ✅ Omnibox address bar (navigate or DuckDuckGo HTML search)
 - ✅ Native forms (GET/POST, no JS)
 - ✅ Save page as vector PDF (`Ctrl+P`)
+- ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
+- ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
 - ✅ Headless mode
 - ✅ Strong per-tab sandboxing
 - ✅ Docker + noVNC
@@ -204,12 +206,29 @@ leave it empty to use the anti-fingerprint default.
 | `Ctrl+L` | Focus the URL bar |
 | `Ctrl+I` | Toggle remote images (off by default) |
 | `Ctrl+P` | Save the current page as a vector PDF (selectable text) |
+| `Ctrl+S` | Save the current page to `~/Downloads/freedom/` |
+| `Ctrl+R` / `F5` | Reload the current page (re-applies the full TLS/PQ policy) |
+| `Ctrl++` / `Ctrl+-` / `Ctrl+0` | Zoom in / out (50–300% ladder) / reset to 100% |
 | `Ctrl+C` / `Ctrl+V` | Copy the focused field or page URL / paste into the focused field |
 | `Ctrl+T` / `Ctrl+W` / `Ctrl+Tab` | New tab / close tab / next tab |
 | `Ctrl+Shift+E` | Per-host exception for a weak-but-valid certificate (this session) |
 | `j` / `k` | Scroll one line down / up (URL bar unfocused) |
 | `Space` / `b` | Scroll one page down / up |
 | `gg` / `G`, `Home` / `End` | Jump to top / bottom |
+
+### Downloads & zoom
+
+A link to a non-renderable resource (PDF, archive, e-book) is **saved** to
+`~/Downloads/freedom/` instead of being parsed as a page; `Ctrl+S` saves the current
+page there too. Because the filename comes from hostile input (the `Content-Disposition`
+header and the URL), it is derived **fail-closed** by the pure `download` module: only
+`[A-Za-z0-9._-]` survive, every separator maps to `_`, no `..` traversal and no hidden
+leading dot are representable, and the extension is synthesized from the media type when
+missing (reusing the same `pe_safe_basename` sanitizer as the PDF export). The body is
+size-capped (256 MiB) and the file is written atomically with `0600` permissions.
+
+Zoom (`Ctrl++` / `Ctrl+-`) snaps to a 50–300% ladder, `Ctrl+0` resets to 100%; the page
+reflows at the new size with no network round-trip.
 
 ## Privacy Networking: Tor, I2P & Host Filtering
 
