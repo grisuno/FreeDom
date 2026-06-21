@@ -34,7 +34,11 @@
 #include <unistd.h>
 #include <poll.h>
 #include <sys/mman.h>
+#include <sys/timerfd.h>
 #include <errno.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <pthread.h>
 
 #include <wayland-client.h>
 #include <wayland-cursor.h>
@@ -505,6 +509,39 @@ typedef struct browser_window {
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
 
+    /* Key auto-repeat. Wayland delivers one key event per physical press; a held key
+     * (e.g. Backspace to clear the URL bar) repeats only if the client re-fires it on
+     * a timer. repeat_key is the evdev code currently held (0 => none); rate/delay come
+     * from the compositor (keyboard_repeat_info) with sane fallbacks. */
+    int      repeat_timer_fd;  /* timerfd in the poll set; -1 if unavailable */
+    uint32_t repeat_key;       /* evdev keycode being repeated, or 0 */
+    int32_t  repeat_rate;      /* repeats per second (0 disables repeat) */
+    int32_t  repeat_delay;     /* ms held before the first repeat */
+
+    /* Clipboard (wl_data_device): paste into the focused text field, copy the address.
+     * A selection offer's mime types are scanned as it is introduced (incoming_*); on
+     * the selection event the chosen text mime is committed for a later paste. */
+    struct wl_data_device_manager *data_device_manager;
+    struct wl_data_device         *data_device;
+    struct wl_data_offer          *selection_offer;  /* current clipboard offer, or NULL */
+    struct wl_data_offer          *incoming_offer;   /* offer being introduced (mime scan) */
+    int      selection_offer_has_text;
+    int      incoming_offer_has_text;
+    char     sel_mime[64];      /* committed selection's preferred text mime */
+    char     incoming_mime[64]; /* preferred text mime while scanning the incoming offer */
+    struct wl_data_source *copy_source; /* our active copy offer, or NULL */
+    char    *copy_text;                 /* text exposed for copy (owned) */
+    uint32_t last_serial;               /* latest input-event serial, for set_selection */
+
+    /* Asynchronous network fetch. The blocking sf_get/sf_post runs on a detached
+     * worker thread so the event loop stays responsive; the thread posts a completed
+     * fetch_job pointer down fetch_pipe, which the loop polls and renders on the main
+     * thread (Cairo/Wayland are single-threaded). net_gen is bumped on every new
+     * navigation and every tab context change, so a result whose gen no longer matches
+     * is discarded -- the active tab is then guaranteed unchanged since the launch. */
+    int      fetch_pipe[2];  /* [0] read end (polled), [1] write end (threads) */
+    uint64_t net_gen;        /* current navigation generation */
+
     /* Tabs. The active tab's state lives in the fields above; the other tabs are
      * parked in tab_slots. tab_count >= 1 always; active_tab is in [0, tab_count). */
     tab_ctx tab_slots[UI_MAX_TABS];
@@ -862,6 +899,224 @@ static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
     return s;
 }
 
+/* Like fetch_follow_navigable, but for a POST (sf_post does not follow redirects:
+ * the caller inspects out->http_code/out->location). The SAME two navigability
+ * fallbacks apply in the SAME order, so a POST is never sent under weaker rules than
+ * a GET (Zero Trust). cfg->policy is restored before returning. */
+static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
+                                      const void *body, size_t body_len,
+                                      const char *content_type, sf_response *out,
+                                      int *downgraded, int allowlisted) {
+    *downgraded = DOWNGRADE_NONE;
+    sf_status s = sf_post(url, cfg, body, body_len, content_type, out);
+    if (s == SF_OK) return s;
+
+    if (s == SF_ERR_KEM_NOT_PQ) {
+        sf_response_free(out);
+        sf_policy saved = cfg->policy;
+        cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
+        s = sf_post(url, cfg, body, body_len, content_type, out);
+        cfg->policy = saved;
+        if (s == SF_OK) { *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
+    }
+
+    if (allowlisted) {
+        sf_response_free(out);
+        sf_policy saved = cfg->policy;
+        cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
+        s = sf_post(url, cfg, body, body_len, content_type, out);
+        cfg->policy = saved;
+        if (s == SF_OK) { *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
+    }
+    return s;
+}
+
+/* Outcome of the pre-fetch gates shared by GET (do_load) and POST (do_submit_post).
+ * Both MUST pass through the SAME host filter, per-host exception, allowlist override
+ * and Tor/I2P realm route before any socket opens -- otherwise a POST could reach the
+ * network under laxer rules than a GET, or leak a .onion lookup over clearnet. */
+typedef struct fetch_prep {
+    int  allowlisted;  /* host is explicitly on allow.conf (sovereign override eligible) */
+    char err[768];     /* when prepare_fetch returns 0: the ready-to-show block reason */
+} fetch_prep;
+
+/* Builds cfg for url and applies the pre-fetch gates. Returns nonzero when the fetch
+ * may proceed (cfg and pr->allowlisted are then set); returns 0 when the request is
+ * blocked, with pr->err holding the user-facing reason (host filter or realm fail-
+ * closed). Pure orchestration over already-tested validators (hostblock, net_realm). */
+static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
+                         fetch_prep *pr) {
+    memset(pr, 0, sizeof *pr);
+    *cfg = sf_config_default();
+    cfg->user_agent = tf_text(&w->ua_field); /* "" => SF_DEFAULT_USER_AGENT */
+
+    char host[256];
+    int have_host = host_from_url(url, host, sizeof host);
+
+    /* Privacy by Default: consult the host filter before opening any socket. The
+     * allowlist wins, so a re-enabled subdomain of a blocked domain still loads. */
+    if (have_host && hb_check(w->hosts, host) == HB_BLOCK) {
+        snprintf(pr->err, sizeof pr->err,
+            "Blocked '%s' by the host filter.\n\n"
+            "This domain (or a parent of it) is on your blocklist (block.conf).\n"
+            "To see a specific subdomain, add it to allow.conf -- the allowlist\n"
+            "wins over the blocklist and covers its subdomains -- then reload.\n\n"
+            "Lists are read from $FREEDOM_HOSTS_DIR, ~/.config/freedom, or ./config\n"
+            "in /etc/hosts format (one domain per line, or '0.0.0.0 domain').",
+            host);
+        return 0;
+    }
+
+    if (have_host && browser_is_exception(&w->bs, host))
+        cfg->policy = SF_POLICY_PERMISSIVE;
+
+    /* The user's sovereign override: a host explicitly on allow.conf may be navigated
+     * below Freedom's standard (TLS 1.2, classical KE, weak cert) if strict fails. */
+    pr->allowlisted = have_host && hb_is_allowlisted(w->hosts, host);
+
+    /* Socket-level anonymity routing (Tor/I2P). A .onion/.i2p host with its proxy
+     * disabled is BLOCKED, never leaked over clearnet (fail closed). */
+    nr_route route = apply_route(w, url, cfg);
+    if (route == NR_ROUTE_BLOCKED) {
+        nr_realm realm = nr_classify_url(url);
+        snprintf(pr->err, sizeof pr->err,
+            "Blocked '%s': it is a %s address but %s routing is not enabled.\n\n"
+            "Freedom never leaks a %s lookup over the clearnet (fail closed). Enable\n"
+            "%s in the menu (or set %s) and make sure a local %s proxy is running,\n"
+            "then reload.",
+            url, nr_realm_name(realm),
+            (realm == NR_I2P) ? "I2P" : "Tor",
+            nr_realm_name(realm),
+            (realm == NR_I2P) ? "I2P routing" : "Tor routing",
+            (realm == NR_I2P) ? "FREEDOM_I2P_PROXY" : "FREEDOM_TOR_PROXY",
+            (realm == NR_I2P) ? "I2P (e.g. i2pd)" : "Tor");
+        return 0;
+    }
+    return 1;
+}
+
+/* A network request handed to the fetch thread. It owns deep copies of every input
+ * string (the window's buffers may change while the fetch runs), and is filled with
+ * the result before being posted back to the main thread, which owns it from then on.
+ * The thread NEVER touches the browser_window -- only this self-contained job. */
+typedef struct fetch_job {
+    int       write_fd;     /* fetch_pipe[1]: where the thread posts itself when done */
+    uint64_t  gen;          /* navigation generation; stale results are discarded */
+    int       is_post;
+
+    /* Input (owned). cfg is rebuilt from these on the thread. */
+    char         *url;
+    char         *user_agent;    /* may be NULL => sf default */
+    char         *proxy_address; /* may be NULL */
+    sf_proxy_type proxy_type;
+    int           allow_overlay_http;
+    sf_policy     policy;
+    int           allowlisted;
+    void         *body;          /* POST body (owned), or NULL */
+    size_t        body_len;
+    char         *content_type;  /* POST content type (owned), or NULL */
+
+    /* Output (filled by the thread). */
+    sf_status status;
+    int       downgraded;        /* DOWNGRADE_* */
+    char     *html;              /* response body (owned), or NULL */
+    size_t    html_len;
+    long      http_code;
+    char     *location;          /* POST redirect target (owned), or NULL */
+} fetch_job;
+
+static void fetch_job_free(fetch_job *j) {
+    if (j == NULL) return;
+    free(j->url);
+    free(j->user_agent);
+    free(j->proxy_address);
+    free(j->body);
+    free(j->content_type);
+    free(j->html);
+    free(j->location);
+    free(j);
+}
+
+/* Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer
+ * back to the event loop. Pure with respect to the window: it reads/writes only the
+ * job and writes one pointer to the pipe. */
+static void *fetch_thread(void *arg) {
+    fetch_job *j = (fetch_job *)arg;
+
+    sf_config cfg = sf_config_default();
+    cfg.user_agent = j->user_agent; /* NULL => sf default */
+    cfg.proxy_type = j->proxy_type;
+    cfg.proxy_address = j->proxy_address;
+    cfg.allow_overlay_http = j->allow_overlay_http;
+    cfg.policy = j->policy;
+
+    sf_response resp;
+    memset(&resp, 0, sizeof resp);
+    sf_status s = j->is_post
+        ? fetch_post_navigable(j->url, &cfg, j->body, j->body_len, j->content_type,
+                               &resp, &j->downgraded, j->allowlisted)
+        : fetch_follow_navigable(j->url, &cfg, &resp, &j->downgraded, j->allowlisted);
+
+    j->status = s;
+    if (s == SF_OK) {
+        j->html = (char *)resp.body; resp.body = NULL; /* move ownership to the job */
+        j->html_len = resp.body_len;
+        j->http_code = resp.http_code;
+        j->location = (resp.location != NULL) ? strdup(resp.location) : NULL;
+    }
+    sf_response_free(&resp);
+
+    ssize_t wr = write(j->write_fd, &j, sizeof j);
+    if (wr != (ssize_t)sizeof j) fetch_job_free(j); /* pipe gone (shutdown): no reader */
+    return NULL;
+}
+
+/* Spawns a detached worker to fetch url under cfg (already gated by prepare_fetch).
+ * The caller has bumped w->net_gen for this navigation; the job snapshots it. Returns
+ * nonzero on success. On failure nothing is launched and the caller shows an error. */
+static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
+                        int allowlisted, int is_post, const void *body, size_t body_len,
+                        const char *content_type) {
+    if (w->fetch_pipe[1] < 0) return 0;
+    fetch_job *j = (fetch_job *)calloc(1, sizeof *j);
+    if (j == NULL) return 0;
+
+    j->write_fd = w->fetch_pipe[1];
+    j->gen = w->net_gen;
+    j->is_post = is_post;
+    j->proxy_type = cfg->proxy_type;
+    j->allow_overlay_http = cfg->allow_overlay_http;
+    j->policy = cfg->policy;
+    j->allowlisted = allowlisted;
+    j->url = strdup(url);
+    j->user_agent = (cfg->user_agent != NULL) ? strdup(cfg->user_agent) : NULL;
+    j->proxy_address = (cfg->proxy_address != NULL) ? strdup(cfg->proxy_address) : NULL;
+    if (is_post) {
+        j->content_type = (content_type != NULL) ? strdup(content_type) : NULL;
+        if (body_len > 0) {
+            j->body = malloc(body_len);
+            if (j->body != NULL) { memcpy(j->body, body, body_len); j->body_len = body_len; }
+        }
+    }
+    /* Bail if any required copy failed (an OOM mid-setup must not fetch a truncated body). */
+    if (j->url == NULL ||
+        (cfg->user_agent != NULL && j->user_agent == NULL) ||
+        (cfg->proxy_address != NULL && j->proxy_address == NULL) ||
+        (is_post && content_type != NULL && j->content_type == NULL) ||
+        (is_post && body_len > 0 && j->body == NULL)) {
+        fetch_job_free(j);
+        return 0;
+    }
+
+    pthread_t th;
+    if (pthread_create(&th, NULL, fetch_thread, j) != 0) {
+        fetch_job_free(j);
+        return 0;
+    }
+    pthread_detach(th);
+    return 1;
+}
+
 /* Fetches and decodes every allowed image of the current doc into w->images (one
  * entry per RD_IMAGE block). Each fetch re-applies the full TLS/PQ/chain policy
  * through secure_fetch (Zero Trust); decoding happens inside the still-open confined
@@ -967,179 +1222,126 @@ static void render_current(browser_window *w) {
     tab_close(t);
 }
 
-/* Paints and presents a frame with the busy clock showing, so the user sees that
- * a request is in flight before the (synchronous) fetch blocks the event loop. */
+/* Marks a request in flight and paints a frame so the spinner appears at once. The
+ * fetch now runs on a worker thread, so the event loop keeps animating the spinner
+ * and stays responsive until deliver_fetch_result lands the page. */
 static void show_busy(browser_window *w) {
     w->loading = 1;
     redraw(w);
     if (w->display != NULL) wl_display_flush(w->display);
 }
 
+/* Replaces the page with the standard "Failed to load" diagnostic for status ss on
+ * url. allowlisted tailors the hint (already retried vs. how to override). Shared by
+ * the GET and POST async-result handlers so the message stays in one place. */
+static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
+                             int allowlisted) {
+    char host[256];
+    const char *reason = "";
+    switch (ss) {
+        case SF_ERR_TLS_VERSION:  reason = "TLS version below 1.3"; break;
+        case SF_ERR_KEM_NOT_PQ:   reason = "key exchange is not PQ-hybrid"; break;
+        case SF_ERR_WEAK_ALGO:    reason = "weak certificate/key algorithm"; break;
+        case SF_ERR_CERT_INVALID: reason = "TLS handshake/cert validation failed (site may not support TLS 1.3)"; break;
+        case SF_ERR_CERT_NOT_PQ:  reason = "strict PQ signature missing"; break;
+        case SF_ERR_NETWORK:      reason = "network error"; break;
+        case SF_ERR_TOO_MANY_REDIRECTS: reason = "too many redirects"; break;
+        default:                  reason = "fetch error"; break;
+    }
+    char bypass[768];
+    bypass[0] = '\0';
+    if (allowlisted) {
+        if (host_from_url(url, host, sizeof host))
+            snprintf(bypass, sizeof bypass,
+                "\n\n'%s' is on your allowlist, so Freedom already retried it accepting\n"
+                "TLS 1.2 and weak-but-valid crypto. This failure is real: the certificate\n"
+                "is untrusted/expired, the network failed, or TLS is below 1.2.", host);
+    } else if (ss == SF_ERR_TLS_VERSION || ss == SF_ERR_WEAK_ALGO
+               || ss == SF_ERR_CERT_INVALID || ss == SF_ERR_CERT_NOT_PQ
+               || ss == SF_ERR_KEM_NOT_PQ) {
+        if (host_from_url(url, host, sizeof host))
+            snprintf(bypass, sizeof bypass,
+                "\n\nThis site is below Freedom's security standard. To navigate it\n"
+                "anyway, add '%s' to allow.conf -- your sovereign per-host override:\n"
+                "TLS 1.2, a classical key exchange, and weak-but-valid certificates\n"
+                "are then accepted for this host (with a warning). The chain is still\n"
+                "authenticated, so you reach the real site, not an impostor.\n"
+                "Ctrl+Shift+E relaxes only a weak certificate for this session.", host);
+    }
+    char msg[1536];
+    snprintf(msg, sizeof msg,
+             "Failed to load '%s'.\nStatus %d: %s.\n\n"
+             "Freedom rejects TLS < 1.3, a site (leaf) certificate with RSA\n"
+             "< 3072, any SHA-1 signature in the chain, and certificates that\n"
+             "fail strict validation. A host that cannot do a post-quantum key\n"
+             "exchange is loaded over classical TLS 1.3 with a warning, not\n"
+             "blocked.\n%s",
+             url, (int)ss, reason, bypass);
+    clear_doc(w);
+    set_cache(w, NULL, 0, NULL);
+    browser_set_page(&w->bs, NULL, msg, 1);
+}
+
+/* Starts a navigation. Network loads are ASYNCHRONOUS: prepare_fetch (pure, fast)
+ * runs here, then fetch_launch hands the blocking transfer to a worker thread and we
+ * return immediately -- the event loop stays responsive and the previous page stays
+ * on screen until the result arrives (deliver_fetch_result renders it). about:blank
+ * and local files are synchronous (no network). Every call bumps net_gen so an older
+ * in-flight fetch is discarded when it completes. */
 static void do_load(browser_window *w, const char *url) {
     if (url == NULL) return;
-
-    /* A fresh navigation: drop the old structured render and scroll to the top.
-     * Error/start pages then fall back to the plain-text painter (doc == NULL). */
-    clear_doc(w);
-    w->scroll = 0.0;
+    w->net_gen++;        /* new navigation: supersede any in-flight fetch */
     w->menu_open = 0;
-    w->ua_field_focused = 0;
-    w->focused_input = -1;
 
     if (strcmp(url, "about:blank") == 0) {
+        clear_doc(w);
+        w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
+        w->loading = 0;
         set_cache(w, NULL, 0, NULL);
         browser_set_page(&w->bs, "Freedom", "", 0);
         return;
     }
 
-    char *html = NULL;
-    size_t html_len = 0;
-    int downgraded = 0; /* set when a non-PQ host was loaded over classical TLS 1.3 */
-
     if (is_https_url(url) || is_overlay_http_url(url)) {
-        sf_config cfg = sf_config_default();
-        cfg.user_agent = tf_text(&w->ua_field); /* "" => SF_DEFAULT_USER_AGENT */
-        char host[256];
-        int have_host = host_from_url(url, host, sizeof host);
-
-        /* Privacy by Default: consult the host filter (blocklist/allowlist) before
-         * opening any socket. The allowlist wins, so a re-enabled subdomain of an
-         * otherwise blocked domain still loads. */
-        if (have_host && hb_check(w->hosts, host) == HB_BLOCK) {
-            char msg[640];
-            snprintf(msg, sizeof msg,
-                "Blocked '%s' by the host filter.\n\n"
-                "This domain (or a parent of it) is on your blocklist (block.conf).\n"
-                "To see a specific subdomain, add it to allow.conf -- the allowlist\n"
-                "wins over the blocklist and covers its subdomains -- then reload.\n\n"
-                "Lists are read from $FREEDOM_HOSTS_DIR, ~/.config/freedom, or ./config\n"
-                "in /etc/hosts format (one domain per line, or '0.0.0.0 domain').",
-                host);
+        /* Pre-fetch gates (host filter, exception, allowlist, Tor/I2P route) are
+         * shared with the POST path so the two can never diverge (Zero Trust). */
+        sf_config cfg;
+        fetch_prep pr;
+        if (!prepare_fetch(w, url, &cfg, &pr)) {
+            clear_doc(w);
+            w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
+            w->loading = 0;
             set_cache(w, NULL, 0, NULL);
-            browser_set_page(&w->bs, NULL, msg, 1);
+            browser_set_page(&w->bs, NULL, pr.err, 1);
             return;
         }
-
-        if (have_host && browser_is_exception(&w->bs, host)) {
-            cfg.policy = SF_POLICY_PERMISSIVE;
-        }
-
-        /* The user's sovereign override: a host explicitly on allow.conf may be
-         * navigated below Freedom's standard (TLS 1.2, classical KE, weak cert) if
-         * the strict attempt fails. Secure by default, but not a dictatorship. */
-        int allowlisted = have_host && hb_is_allowlisted(w->hosts, host);
-
-        /* Socket-level anonymity routing (Tor/I2P). A .onion/.i2p host with its proxy
-         * disabled is BLOCKED, never leaked over clearnet (fail closed). */
-        nr_route route = apply_route(w, url, &cfg);
-        if (route == NR_ROUTE_BLOCKED) {
-            char msg[640];
-            nr_realm realm = nr_classify_url(url);
-            snprintf(msg, sizeof msg,
-                "Blocked '%s': it is a %s address but %s routing is not enabled.\n\n"
-                "Freedom never leaks a %s lookup over the clearnet (fail closed). Enable\n"
-                "%s in the menu (or set %s) and make sure a local %s proxy is running,\n"
-                "then reload.",
-                url, nr_realm_name(realm),
-                (realm == NR_I2P) ? "I2P" : "Tor",
-                nr_realm_name(realm),
-                (realm == NR_I2P) ? "I2P routing" : "Tor routing",
-                (realm == NR_I2P) ? "FREEDOM_I2P_PROXY" : "FREEDOM_TOR_PROXY",
-                (realm == NR_I2P) ? "I2P (e.g. i2pd)" : "Tor");
+        if (!fetch_launch(w, url, &cfg, pr.allowlisted, 0, NULL, 0, NULL)) {
+            clear_doc(w);
+            w->scroll = 0.0; w->loading = 0;
             set_cache(w, NULL, 0, NULL);
-            browser_set_page(&w->bs, NULL, msg, 1);
+            browser_set_page(&w->bs, NULL,
+                "Could not start the request (out of resources).", 1);
             return;
         }
-
-        sf_response resp;
-        memset(&resp, 0, sizeof resp);
-        /* Follow redirects (e.g. google.com -> www.google.com); each hop is a fresh
-         * request that re-applies the full TLS/PQ/chain policy. A host that cannot
-         * do a PQ-hybrid key exchange falls back to classical TLS 1.3 (cert checks
-         * kept) so navigation is not blocked; the user is warned via a toast below. */
-        show_busy(w);
-        sf_status ss = fetch_follow_navigable(url, &cfg, &resp, &downgraded, allowlisted);
-        w->loading = 0;
-        if (ss != SF_OK) {
-            char msg[1536];
-            const char *reason = "";
-            switch (ss) {
-                case SF_ERR_TLS_VERSION:  reason = "TLS version below 1.3"; break;
-                case SF_ERR_KEM_NOT_PQ:   reason = "key exchange is not PQ-hybrid"; break;
-                case SF_ERR_WEAK_ALGO:    reason = "weak certificate/key algorithm"; break;
-                case SF_ERR_CERT_INVALID: reason = "TLS handshake/cert validation failed (site may not support TLS 1.3)"; break;
-                case SF_ERR_CERT_NOT_PQ:  reason = "strict PQ signature missing"; break;
-                case SF_ERR_NETWORK:      reason = "network error"; break;
-                case SF_ERR_TOO_MANY_REDIRECTS: reason = "too many redirects"; break;
-                default:                  reason = "fetch error"; break;
-            }
-            char bypass[768];
-            bypass[0] = '\0';
-            if (allowlisted) {
-                /* Already retried with the allowlist override; a remaining failure is
-                 * genuine (untrusted/expired cert, network, or TLS below 1.2). */
-                snprintf(bypass, sizeof bypass,
-                    "\n\n'%s' is on your allowlist, so Freedom already retried it accepting\n"
-                    "TLS 1.2 and weak-but-valid crypto. This failure is real: the certificate\n"
-                    "is untrusted/expired, the network failed, or TLS is below 1.2.", host);
-            } else if (ss == SF_ERR_TLS_VERSION || ss == SF_ERR_WEAK_ALGO
-                       || ss == SF_ERR_CERT_INVALID || ss == SF_ERR_CERT_NOT_PQ
-                       || ss == SF_ERR_KEM_NOT_PQ) {
-                if (host_from_url(url, host, sizeof host)) {
-                    snprintf(bypass, sizeof bypass,
-                        "\n\nThis site is below Freedom's security standard. To navigate it\n"
-                        "anyway, add '%s' to allow.conf -- your sovereign per-host override:\n"
-                        "TLS 1.2, a classical key exchange, and weak-but-valid certificates\n"
-                        "are then accepted for this host (with a warning). The chain is still\n"
-                        "authenticated, so you reach the real site, not an impostor.\n"
-                        "Ctrl+Shift+E relaxes only a weak certificate for this session.", host);
-                }
-            }
-            snprintf(msg, sizeof msg,
-                     "Failed to load '%s'.\nStatus %d: %s.\n\n"
-                     "Freedom rejects TLS < 1.3, a site (leaf) certificate with RSA\n"
-                     "< 3072, any SHA-1 signature in the chain, and certificates that\n"
-                     "fail strict validation. A host that cannot do a post-quantum key\n"
-                     "exchange is loaded over classical TLS 1.3 with a warning, not\n"
-                     "blocked.\n%s",
-                     url, (int)ss, reason, bypass);
-            set_cache(w, NULL, 0, NULL);
-            browser_set_page(&w->bs, NULL, msg, 1);
-            sf_response_free(&resp);
-            return;
-        }
-        html = (char *)resp.body;
-        html_len = resp.body_len;
-        resp.body = NULL;
-        sf_response_free(&resp);
-    } else {
-        html = read_file(url, &html_len);
-        if (html == NULL) {
-            char msg[256];
-            snprintf(msg, sizeof msg, "Cannot read file '%s': %s.", url, strerror(errno));
-            set_cache(w, NULL, 0, NULL);
-            browser_set_page(&w->bs, NULL, msg, 1);
-            return;
-        }
+        show_busy(w); /* spinner on; the old page stays visible until the result lands */
+        return;
     }
 
-    /* Cache the source (image policy uses the https origin) and render it. A later
-     * capability toggle re-renders from this cache without a network round-trip. */
-    set_cache(w, html, html_len,
-              (is_https_url(url) || is_overlay_http_url(url)) ? url : NULL);
+    /* Local file: synchronous (no network, instant). */
+    clear_doc(w);
+    w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
+    w->loading = 0;
+    size_t html_len = 0;
+    char *html = read_file(url, &html_len);
+    if (html == NULL) {
+        char msg[256];
+        snprintf(msg, sizeof msg, "Cannot read file '%s': %s.", url, strerror(errno));
+        set_cache(w, NULL, 0, NULL);
+        browser_set_page(&w->bs, NULL, msg, 1);
+        return;
+    }
+    set_cache(w, html, html_len, NULL);
     render_current(w);
-
-    /* Tell the user when a security downgrade was needed to load the page. Navigation
-     * proceeds; the warning is non-blocking. The allowlist override is the stronger
-     * downgrade (possibly TLS 1.2 / weak cert), so it gets the louder message. */
-    if (downgraded == DOWNGRADE_ALLOWLISTED) {
-        browser_set_status(&w->bs,
-            "Warning: allowlisted host loaded below Freedom's standard "
-            "(possibly TLS 1.2 / weak crypto).", now_ms());
-    } else if (downgraded == DOWNGRADE_CLASSICAL_KE) {
-        browser_set_status(&w->bs,
-            "Warning: connection is not post-quantum (classical TLS 1.3).", now_ms());
-    }
 }
 
 /* --- tabs --- */
@@ -1203,6 +1405,11 @@ static void tab_ctx_release(tab_ctx *c) {
 /* Brings tab idx to the foreground (no network: the cached doc is restored). */
 static void tab_switch(browser_window *w, int idx) {
     if (idx < 0 || idx >= w->tab_count || idx == w->active_tab) return;
+    /* Single-load model: leaving a tab abandons its in-flight fetch (the discarded
+     * result is dropped by the generation check). Concurrent per-tab loading is future
+     * work. Clear the spinner now so the parked tab does not show it on return. */
+    w->net_gen++;
+    w->loading = 0;
     tab_save(w);
     w->active_tab = idx;
     tab_restore(w);
@@ -1220,6 +1427,8 @@ static void tab_new(browser_window *w, const char *url) {
         redraw(w);
         return;
     }
+    w->loading = 0; /* clear the current tab's spinner before parking it (its fetch,
+                     * if any, is abandoned: do_load below bumps the generation) */
     tab_save(w);
     int idx = w->active_tab + 1;
     for (int i = w->tab_count; i > idx; --i) w->tab_slots[i] = w->tab_slots[i - 1];
@@ -1247,6 +1456,10 @@ static void uitab_close(browser_window *w, int idx) {
     if (w->tab_count <= 1 || idx < 0 || idx >= w->tab_count) return;
 
     if (idx == w->active_tab) {
+        /* The active tab may have a fetch in flight; abandon it so its result is not
+         * later painted onto whichever tab becomes active. Closing a BACKGROUND tab
+         * leaves the active tab's load untouched (its generation still matches). */
+        w->net_gen++;
         free_live_page(w);
     } else {
         tab_ctx_release(&w->tab_slots[idx]);
@@ -2210,56 +2423,95 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
     return hit;
 }
 
-/* Sends a POST submission plan through secure_fetch (re-applying the full TLS/PQ
- * policy) and renders the response in place. A redirect is followed as a GET. */
+/* Submits a POST plan ASYNCHRONOUSLY (same model as do_load): the pre-fetch gates run
+ * here, then the blocking POST goes to a worker thread and the result is rendered by
+ * deliver_fetch_result. Goes through the SAME gates as a GET (host filter, exception,
+ * allowlist, Tor/I2P realm route) and the SAME navigability fallbacks: a POST to a
+ * .onion is routed through Tor instead of failing SF_ERR_NETWORK, and never reaches
+ * the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_window *w, const fm_plan *plan) {
-    clear_doc(w);
-    w->scroll = 0.0;
+    w->net_gen++;        /* new navigation: supersede any in-flight fetch */
     w->menu_open = 0;
-    w->ua_field_focused = 0;
-    w->focused_input = -1;
 
-    sf_config cfg = sf_config_default();
-    cfg.user_agent = tf_text(&w->ua_field);
-    char host[256];
-    if (host_from_url(plan->url, host, sizeof host) && browser_is_exception(&w->bs, host))
-        cfg.policy = SF_POLICY_PERMISSIVE;
-
-    sf_response resp;
-    memset(&resp, 0, sizeof resp);
-    sf_status ss = sf_post(plan->url, &cfg, plan->body, plan->body_len,
-                           plan->content_type, &resp);
-    if (ss != SF_OK) {
-        char msg[512];
-        snprintf(msg, sizeof msg, "POST to '%.400s' failed (status %d).", plan->url, (int)ss);
+    sf_config cfg;
+    fetch_prep pr;
+    if (!prepare_fetch(w, plan->url, &cfg, &pr)) {
+        clear_doc(w);
+        w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1; w->loading = 0;
         set_cache(w, NULL, 0, NULL);
-        browser_set_page(&w->bs, NULL, msg, 1);
-        sf_response_free(&resp);
+        browser_set_page(&w->bs, NULL, pr.err, 1);
         return;
     }
 
-    /* A POST that redirects (e.g. 303 See Other) is followed as a fresh GET, which
-     * re-applies the full policy on the new target (Zero Trust). */
-    if (sf_is_redirect_code(resp.http_code) && resp.location != NULL) {
+    if (!fetch_launch(w, plan->url, &cfg, pr.allowlisted, 1,
+                      plan->body, plan->body_len, plan->content_type)) {
+        clear_doc(w);
+        w->scroll = 0.0; w->loading = 0;
+        set_cache(w, NULL, 0, NULL);
+        browser_set_page(&w->bs, NULL, "Could not start the POST (out of resources).", 1);
+        return;
+    }
+    show_busy(w); /* spinner on; the form page stays visible until the response lands */
+}
+
+/* Renders a completed fetch on the main thread. A result whose generation no longer
+ * matches w->net_gen is silently dropped: the user navigated again or switched tabs,
+ * so the active tab is no longer this job's target (fail safe -- never paint a stale
+ * or wrong-tab page). On success the page is rendered in place; a POST redirect is
+ * followed as a fresh async GET (re-applying the full policy, Zero Trust). */
+static void deliver_fetch_result(browser_window *w, fetch_job *j) {
+    if (j->gen != w->net_gen) return; /* superseded/abandoned navigation */
+    w->loading = 0;
+
+    if (j->status != SF_OK) {
+        show_fetch_error(w, j->url, j->status, j->allowlisted);
+        w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
+        redraw(w);
+        return;
+    }
+
+    if (j->is_post && sf_is_redirect_code(j->http_code) && j->location != NULL) {
         char next[SF_MAX_URL];
-        if (sf_resolve_redirect(plan->url, resp.location, next, sizeof next) == SF_OK) {
-            sf_response_free(&resp);
+        if (sf_resolve_redirect(j->url, j->location, next, sizeof next) == SF_OK) {
             if (browser_navigate(&w->bs, next) == BROWSER_OK) do_load(w, next);
+            redraw(w);
             return;
         }
     }
 
-    char *html = (char *)resp.body;
-    size_t len = resp.body_len;
-    resp.body = NULL;
-    sf_response_free(&resp);
+    clear_doc(w);
+    w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
+
+    char *html = j->html;
+    size_t len = j->html_len;
+    j->html = NULL; /* ownership moves into the page cache */
     if (html == NULL) { html = strdup(""); len = 0; }
 
-    /* Show the POST response in place and reflect the action URL in the bar. No
-     * history push: navigating back must not silently replay a POST as a GET. */
-    browser_set_url_bar(&w->bs, plan->url);
-    set_cache(w, html, len, plan->url);
+    /* Image policy resolves srcs against this origin (the requested URL, as before). */
+    set_cache(w, html, len, j->url);
+    if (j->is_post) browser_set_url_bar(&w->bs, j->url); /* reflect action URL; no history push */
     render_current(w);
+
+    if (j->downgraded == DOWNGRADE_ALLOWLISTED) {
+        browser_set_status(&w->bs,
+            "Warning: allowlisted host loaded below Freedom's standard "
+            "(possibly TLS 1.2 / weak crypto).", now_ms());
+    } else if (j->downgraded == DOWNGRADE_CLASSICAL_KE) {
+        browser_set_status(&w->bs,
+            "Warning: connection is not post-quantum (classical TLS 1.3).", now_ms());
+    }
+    redraw(w);
+}
+
+/* Drains every completed fetch the worker threads have posted (the read end is
+ * non-blocking; pointer-sized writes are atomic). Called when the loop sees the
+ * fetch pipe readable. */
+static void drain_fetch_results(browser_window *w) {
+    fetch_job *j;
+    while (read(w->fetch_pipe[0], &j, sizeof j) == (ssize_t)sizeof j) {
+        deliver_fetch_result(w, j);
+        fetch_job_free(j);
+    }
 }
 
 /* Submits the form that owns rep (any control of the form supplies the action and
@@ -2366,18 +2618,18 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     render_current(w);
 }
 
-/* A small clock glyph meaning "busy". Static (the synchronous fetch blocks the
- * loop, so an animated spinner cannot tick); it tells the user work is happening. */
-static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r) {
+/* A small spinner meaning "busy". Now that the fetch runs off the event-loop thread,
+ * the loop ticks ~12 fps while loading and rotates a leading arc so the user sees real
+ * progress. phase in [0,1) is the rotation, derived from the wall clock. */
+static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
+                       double phase) {
+    double a0 = phase * UI_TWO_PI;
     set_rgb(cr, color);
-    cairo_set_line_width(cr, 1.5);
+    cairo_set_line_width(cr, 2.0);
+    cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+    /* A 270-degree arc that sweeps around, leaving a moving gap (a classic spinner). */
     cairo_new_sub_path(cr);
-    cairo_arc(cr, cx, cy, r, 0.0, UI_TWO_PI);
-    cairo_stroke(cr);
-    cairo_move_to(cr, cx, cy);
-    cairo_line_to(cr, cx, cy - r * 0.6);    /* minute hand, up */
-    cairo_move_to(cr, cx, cy);
-    cairo_line_to(cr, cx + r * 0.45, cy);   /* hour hand, right */
+    cairo_arc(cr, cx, cy, r, a0, a0 + UI_TWO_PI * 0.75);
     cairo_stroke(cr);
 }
 
@@ -2734,12 +2986,14 @@ static void paint(browser_window *w) {
         cairo_restore(cr);
     }
 
-    /* Busy clock at the right of the URL bar while a request is in flight. */
+    /* Animated spinner at the right of the URL bar while a request is in flight. The
+     * rotation comes from the wall clock; the loop wakes ~12 fps while loading. */
     if (w->loading) {
         double r = (UI_TOOLBAR_H - 2.0 * UI_MARGIN) * 0.30;
         double ccx = url_x + url_w - r - UI_MARGIN;
         double ccy = ttop + UI_TOOLBAR_H / 2.0;
-        draw_clock(cr, th->link, ccx, ccy, r);
+        double phase = (double)(now_ms() % 1000u) / 1000.0;
+        draw_clock(cr, th->link, ccx, ccy, r, phase);
     }
 
     /* Content area. */
@@ -3144,6 +3398,216 @@ static const struct wl_pointer_listener pointer_listener = {
     .axis = ptr_axis,
 };
 
+/* --- clipboard (wl_data_device) --- */
+
+/* True for a mime type that carries plain UTF-8/Latin text we can paste. */
+static int mime_is_text(const char *mime) {
+    if (mime == NULL) return 0;
+    return strncmp(mime, "text/plain", 10) == 0 ||
+           strcmp(mime, "UTF8_STRING") == 0 ||
+           strcmp(mime, "TEXT") == 0 ||
+           strcmp(mime, "STRING") == 0;
+}
+
+/* A mime type advertised by the incoming offer. Remember the best text mime so paste
+ * requests exactly what the source provides (preferring an explicit UTF-8 variant). */
+static void data_offer_mime(void *data, struct wl_data_offer *offer, const char *mime) {
+    browser_window *w = (browser_window *)data;
+    if (offer != w->incoming_offer || !mime_is_text(mime)) return;
+    w->incoming_offer_has_text = 1;
+    int prefer = (strstr(mime, "utf-8") != NULL || strstr(mime, "UTF-8") != NULL);
+    if (w->incoming_mime[0] == '\0' || prefer)
+        snprintf(w->incoming_mime, sizeof w->incoming_mime, "%s", mime);
+}
+static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) {
+    (void)d; (void)o; (void)a;
+}
+static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a) {
+    (void)d; (void)o; (void)a;
+}
+static const struct wl_data_offer_listener data_offer_listener = {
+    .offer = data_offer_mime,
+    .source_actions = data_offer_source_actions,
+    .action = data_offer_action,
+};
+
+/* A new offer is being introduced: start scanning its mime types. */
+static void data_device_data_offer(void *data, struct wl_data_device *dev,
+                                   struct wl_data_offer *offer) {
+    (void)dev;
+    browser_window *w = (browser_window *)data;
+    w->incoming_offer = offer;
+    w->incoming_offer_has_text = 0;
+    w->incoming_mime[0] = '\0';
+    wl_data_offer_add_listener(offer, &data_offer_listener, w);
+}
+
+/* The clipboard selection changed. Commit the new offer (or NULL when the clipboard
+ * was cleared), destroying any previous one we held. */
+static void data_device_selection(void *data, struct wl_data_device *dev,
+                                  struct wl_data_offer *offer) {
+    (void)dev;
+    browser_window *w = (browser_window *)data;
+    if (w->selection_offer != NULL && w->selection_offer != offer)
+        wl_data_offer_destroy(w->selection_offer);
+    if (offer == NULL) {
+        w->selection_offer = NULL;
+        w->selection_offer_has_text = 0;
+        w->sel_mime[0] = '\0';
+        return;
+    }
+    w->selection_offer = offer;
+    w->selection_offer_has_text = (offer == w->incoming_offer) ? w->incoming_offer_has_text : 0;
+    snprintf(w->sel_mime, sizeof w->sel_mime, "%s",
+             (offer == w->incoming_offer && w->incoming_mime[0]) ? w->incoming_mime : "text/plain");
+}
+
+/* Drag-and-drop events: not supported (the data device is clipboard-only). */
+static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+                              struct wl_surface *s, wl_fixed_t x, wl_fixed_t y,
+                              struct wl_data_offer *o) {
+    (void)d; (void)dev; (void)serial; (void)s; (void)x; (void)y; (void)o;
+}
+static void data_device_leave(void *d, struct wl_data_device *dev) { (void)d; (void)dev; }
+static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+                               wl_fixed_t x, wl_fixed_t y) {
+    (void)d; (void)dev; (void)t; (void)x; (void)y;
+}
+static void data_device_drop(void *d, struct wl_data_device *dev) { (void)d; (void)dev; }
+static const struct wl_data_device_listener data_device_listener = {
+    .data_offer = data_device_data_offer,
+    .enter = data_device_enter,
+    .leave = data_device_leave,
+    .motion = data_device_motion,
+    .drop = data_device_drop,
+    .selection = data_device_selection,
+};
+
+/* Another client now owns our copied text: drop our source. */
+static void data_source_cancelled(void *data, struct wl_data_source *src) {
+    browser_window *w = (browser_window *)data;
+    if (src == w->copy_source) w->copy_source = NULL;
+    wl_data_source_destroy(src);
+}
+/* A paster asked for our copied text: write it to the pipe and close. */
+static void data_source_send(void *data, struct wl_data_source *src,
+                             const char *mime, int32_t fd) {
+    (void)src; (void)mime;
+    browser_window *w = (browser_window *)data;
+    const char *t = (w->copy_text != NULL) ? w->copy_text : "";
+    size_t len = strlen(t), off = 0;
+    while (off < len) {
+        ssize_t n = write(fd, t + off, len - off);
+        if (n <= 0) break;       /* SIGPIPE is ignored process-wide; a closed reader ends it */
+        off += (size_t)n;
+    }
+    close(fd);
+}
+static void data_source_target(void *d, struct wl_data_source *s, const char *m) {
+    (void)d; (void)s; (void)m;
+}
+static const struct wl_data_source_listener data_source_listener = {
+    .target = data_source_target,
+    .send = data_source_send,
+    .cancelled = data_source_cancelled,
+};
+
+/* Inserts pasted bytes into whichever text target currently has focus (page input,
+ * User-Agent box, or the URL bar). Control bytes -- including embedded CR/LF/TAB that
+ * a multi-line clipboard would carry -- are dropped so a paste cannot inject a newline
+ * into a single-line field; UTF-8 continuation bytes (>= 0x80) pass through. */
+static void insert_pasted_text(browser_window *w, const char *text, size_t len) {
+    for (size_t i = 0; i < len; ++i) {
+        unsigned char c = (unsigned char)text[i];
+        if (c < 0x20 || c == 0x7f) continue;
+        if (w->ua_field_focused) {
+            tf_insert(&w->ua_field, (char)c);
+        } else if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
+            tf_insert(&w->inputs[w->focused_input].field, (char)c);
+        } else if (w->url_bar_focused) {
+            browser_url_bar_insert(&w->bs, (char)c);
+        } else {
+            return; /* nothing focused: paste goes nowhere */
+        }
+    }
+}
+
+/* Ctrl+V: pull the clipboard's text and insert it at the focused field's cursor.
+ * Synchronous (like the v1 image fetch): a pipe is handed to the source, the display
+ * is flushed so the source -- possibly ourselves -- writes, then we drain to EOF. The
+ * read is capped so a hostile clipboard cannot exhaust memory. */
+static void clipboard_paste(browser_window *w) {
+    if (w->selection_offer == NULL || !w->selection_offer_has_text) return;
+    /* Only paste when a text field is focused, else the bytes have nowhere to go. */
+    if (!w->ua_field_focused && w->url_bar_focused == 0 &&
+        !(w->focused_input >= 0 && (size_t)w->focused_input < w->input_count))
+        return;
+
+    int fds[2];
+    if (pipe(fds) != 0) return;
+    const char *mime = (w->sel_mime[0] != '\0') ? w->sel_mime : "text/plain";
+    wl_data_offer_receive(w->selection_offer, mime, fds[1]);
+    /* Roundtrip so the source dispatches the receive request (our own data_source_send
+     * runs here for a self-paste), then close our write end to bound the read by EOF. */
+    wl_display_roundtrip(w->display);
+    close(fds[1]);
+
+    char *buf = NULL;
+    size_t cap = 0, total = 0;
+    const size_t LIMIT = 1u << 20; /* 1 MiB hard cap */
+    for (;;) {
+        /* Bound the wait: a misbehaving source must not freeze the UI. Local clipboard
+         * transfers complete in well under this; a stall just truncates the paste. */
+        struct pollfd rp = { .fd = fds[0], .events = POLLIN, .revents = 0 };
+        int pr = poll(&rp, 1, 500);
+        if (pr <= 0) break; /* timeout or error: stop reading */
+        if (total == cap) {
+            size_t ncap = (cap == 0) ? 4096 : cap * 2;
+            if (ncap > LIMIT) ncap = LIMIT;
+            if (ncap == cap) break; /* hit the cap */
+            char *nb = (char *)realloc(buf, ncap);
+            if (nb == NULL) break;
+            buf = nb; cap = ncap;
+        }
+        ssize_t n = read(fds[0], buf + total, cap - total);
+        if (n <= 0) break;
+        total += (size_t)n;
+    }
+    close(fds[0]);
+    if (buf != NULL) insert_pasted_text(w, buf, total);
+    free(buf);
+}
+
+/* Ctrl+C: copy the focused field's text (or, with nothing focused, the page address)
+ * to the clipboard by owning a wl_data_source that serves it on demand. */
+static void clipboard_copy(browser_window *w) {
+    if (w->data_device == NULL || w->data_device_manager == NULL) return;
+
+    const char *text = NULL;
+    if (w->ua_field_focused) {
+        text = tf_text(&w->ua_field);
+    } else if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
+        text = tf_text(&w->inputs[w->focused_input].field);
+    } else if (w->url_bar_focused) {
+        text = w->bs.url_bar;
+    } else {
+        text = browser_current_url(&w->bs); /* copy the current page's address */
+    }
+    if (text == NULL || text[0] == '\0') return;
+
+    char *dup = strdup(text);
+    if (dup == NULL) return;
+    free(w->copy_text);
+    w->copy_text = dup;
+    if (w->copy_source != NULL) wl_data_source_destroy(w->copy_source);
+    w->copy_source = wl_data_device_manager_create_data_source(w->data_device_manager);
+    if (w->copy_source == NULL) return;
+    wl_data_source_add_listener(w->copy_source, &data_source_listener, w);
+    wl_data_source_offer(w->copy_source, "text/plain;charset=utf-8");
+    wl_data_source_offer(w->copy_source, "text/plain");
+    wl_data_device_set_selection(w->data_device, w->copy_source, w->last_serial);
+}
+
 /* --- keyboard with xkbcommon --- */
 
 static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
@@ -3175,27 +3639,28 @@ static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct 
     (void)d; (void)kbd; (void)s; (void)sf;
 }
 
-static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
-                         uint32_t time, uint32_t key, uint32_t state) {
-    (void)kbd; (void)serial; (void)time;
-    browser_window *w = (browser_window *)data;
-    if (state != WL_KEYBOARD_KEY_STATE_PRESSED) return;
-    if (w->xkb_state == NULL) return;
-
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(w->xkb_state, key + 8);
-    char utf8[16];
-    int n = xkb_state_key_get_utf8(w->xkb_state, key + 8, utf8, sizeof utf8);
-
-    int ctrl = xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_CTRL,
-                                            XKB_STATE_MODS_EFFECTIVE);
-    int shift = xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_SHIFT,
-                                             XKB_STATE_MODS_EFFECTIVE);
-
+/* Performs the effect of a single key press. Factored out of keyboard_key so a held
+ * key can be re-fired from the repeat timer with the exact same semantics (the caller
+ * recomputes sym/utf8/modifiers from the live xkb_state each time). */
+static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+                             int n, int ctrl, int shift) {
     /* Ctrl+L focuses and clears the URL bar. */
     if (ctrl && !shift && (sym == XKB_KEY_l || sym == XKB_KEY_L)) {
         w->url_bar_focused = 1;
         browser_url_bar_clear(&w->bs);
         redraw(w);
+        return;
+    }
+
+    /* Ctrl+V pastes the clipboard into the focused field; Ctrl+C copies the focused
+     * field's text (or the page address when nothing is focused). */
+    if (ctrl && !shift && (sym == XKB_KEY_v || sym == XKB_KEY_V)) {
+        clipboard_paste(w);
+        redraw(w);
+        return;
+    }
+    if (ctrl && !shift && (sym == XKB_KEY_c || sym == XKB_KEY_C)) {
+        clipboard_copy(w);
         return;
     }
 
@@ -3345,6 +3810,95 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
     redraw(w);
 }
 
+/* Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion
+ * and scrolling. A Ctrl chord (tab spawn, reload, image toggle...) or Enter must NOT
+ * repeat -- holding them would loop a navigation or spawn tabs. A printable character
+ * (n > 0) repeats so a held letter types, mirroring every text widget. */
+static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl) {
+    if (ctrl) return 0;
+    switch (sym) {
+        case XKB_KEY_BackSpace:
+        case XKB_KEY_Delete: case XKB_KEY_KP_Delete:
+        case XKB_KEY_Left:   case XKB_KEY_Right:
+        case XKB_KEY_Up:     case XKB_KEY_Down:
+        case XKB_KEY_Page_Up: case XKB_KEY_Page_Down:
+            return 1;
+        default:
+            return n > 0;
+    }
+}
+
+/* Arms the repeat timer for key: first fire after repeat_delay ms, then every
+ * 1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). */
+static void key_repeat_arm(browser_window *w, uint32_t key) {
+    if (w->repeat_timer_fd < 0 || w->repeat_rate <= 0) return;
+    w->repeat_key = key;
+    long interval_ns = 1000000000L / w->repeat_rate;
+    struct itimerspec its;
+    its.it_value.tv_sec  = w->repeat_delay / 1000;
+    its.it_value.tv_nsec = (long)(w->repeat_delay % 1000) * 1000000L;
+    its.it_interval.tv_sec  = interval_ns / 1000000000L;
+    its.it_interval.tv_nsec = interval_ns % 1000000000L;
+    timerfd_settime(w->repeat_timer_fd, 0, &its, NULL);
+}
+
+/* Disarms repeat (key released, or a non-repeatable key was pressed). */
+static void key_repeat_stop(browser_window *w) {
+    w->repeat_key = 0;
+    if (w->repeat_timer_fd < 0) return;
+    struct itimerspec off;
+    memset(&off, 0, sizeof off);
+    timerfd_settime(w->repeat_timer_fd, 0, &off, NULL);
+}
+
+/* Re-fires the currently held key. Called from the event loop when the timer expires.
+ * Modifiers/keysym are recomputed from the live xkb_state, so a chord released
+ * mid-repeat degrades correctly. */
+static void key_repeat_fire(browser_window *w) {
+    if (w->repeat_key == 0 || w->xkb_state == NULL) return;
+    uint32_t kc = w->repeat_key + 8;
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(w->xkb_state, kc);
+    char utf8[16];
+    int n = xkb_state_key_get_utf8(w->xkb_state, kc, utf8, sizeof utf8);
+    int ctrl = xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_CTRL,
+                                            XKB_STATE_MODS_EFFECTIVE);
+    int shift = xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_SHIFT,
+                                             XKB_STATE_MODS_EFFECTIVE);
+    if (!key_is_repeatable(sym, n, ctrl)) { key_repeat_stop(w); return; }
+    handle_key_press(w, sym, utf8, n, ctrl, shift);
+}
+
+static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+                         uint32_t time, uint32_t key, uint32_t state) {
+    (void)kbd; (void)time;
+    browser_window *w = (browser_window *)data;
+    w->last_serial = serial; /* for wl_data_device_set_selection on Ctrl+C */
+    if (w->xkb_state == NULL) return;
+
+    /* Releasing the held key (or any other key while it repeats) stops the repeat. */
+    if (state != WL_KEYBOARD_KEY_STATE_PRESSED) {
+        if (key == w->repeat_key) key_repeat_stop(w);
+        return;
+    }
+
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(w->xkb_state, key + 8);
+    char utf8[16];
+    int n = xkb_state_key_get_utf8(w->xkb_state, key + 8, utf8, sizeof utf8);
+    int ctrl = xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_CTRL,
+                                            XKB_STATE_MODS_EFFECTIVE);
+    int shift = xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_SHIFT,
+                                             XKB_STATE_MODS_EFFECTIVE);
+
+    handle_key_press(w, sym, utf8, n, ctrl, shift);
+
+    /* Start (or restart, for a new key) auto-repeat for the keys that warrant it. */
+    if (key_is_repeatable(sym, n, ctrl) &&
+        w->xkb_keymap != NULL && xkb_keymap_key_repeats(w->xkb_keymap, key + 8))
+        key_repeat_arm(w, key);
+    else
+        key_repeat_stop(w);
+}
+
 static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                                uint32_t mods_depressed, uint32_t mods_latched,
                                uint32_t mods_locked, uint32_t group) {
@@ -3355,7 +3909,11 @@ static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
     }
 }
 static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay) {
-    (void)d; (void)kbd; (void)rate; (void)delay;
+    (void)kbd;
+    browser_window *w = (browser_window *)d;
+    /* rate is repeats/second (0 => repeat disabled); delay is ms before the first. */
+    w->repeat_rate = rate;
+    w->repeat_delay = delay;
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
@@ -3401,6 +3959,8 @@ static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
     } else if (strcmp(iface, wl_seat_interface.name) == 0) {
         w->seat = wl_registry_bind(reg, name, &wl_seat_interface, 1);
         wl_seat_add_listener(w->seat, &seat_listener, w);
+    } else if (strcmp(iface, wl_data_device_manager_interface.name) == 0) {
+        w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1);
     } else if (strcmp(iface, zxdg_decoration_manager_v1_interface.name) == 0) {
         w->deco_mgr = wl_registry_bind(reg, name, &zxdg_decoration_manager_v1_interface, 1);
     }
@@ -3430,6 +3990,30 @@ ui_status ui_run_browser(const char *start_url) {
     w.active_tab = 0;
     tf_init(&w.ua_field);       /* empty => SF_DEFAULT_USER_AGENT */
 
+    /* Key auto-repeat: a monotonic timerfd polled alongside the Wayland fd. Defaults
+     * apply until the compositor sends keyboard_repeat_info. A failed create (-1) just
+     * disables repeat -- one event per press, as before. */
+    w.repeat_timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    w.repeat_key = 0;
+    w.repeat_rate = 25;         /* repeats/second */
+    w.repeat_delay = 600;       /* ms before the first repeat */
+
+    /* A clipboard paster that closes the pipe early would otherwise SIGPIPE us out of
+     * data_source_send; ignore it process-wide (curl is also happier this way). A
+     * fetch worker writing to a closed result pipe at shutdown benefits too. */
+    signal(SIGPIPE, SIG_IGN);
+
+    /* Async fetch: thread-safe global transport init on the main thread (before any
+     * worker), and the non-blocking result pipe the loop polls. If the pipe cannot be
+     * created, fetch_launch fails closed and loads report an error rather than block. */
+    sf_global_init();
+    w.fetch_pipe[0] = w.fetch_pipe[1] = -1;
+    if (pipe(w.fetch_pipe) == 0) {
+        fcntl(w.fetch_pipe[0], F_SETFL, O_NONBLOCK); /* drain without blocking the loop */
+        fcntl(w.fetch_pipe[0], F_SETFD, FD_CLOEXEC);
+        fcntl(w.fetch_pipe[1], F_SETFD, FD_CLOEXEC);
+    }
+
     if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
 
     if (start_url != NULL) {
@@ -3451,6 +4035,13 @@ ui_status ui_run_browser(const char *start_url) {
         browser_free(&w.bs);
         xkb_context_unref(w.xkb_ctx);
         return UI_ERR_INTERNAL;
+    }
+
+    /* Clipboard wiring (optional: a compositor without wl_data_device_manager simply
+     * has no copy/paste). The seat and the manager are both bound by the roundtrip. */
+    if (w.data_device_manager != NULL && w.seat != NULL) {
+        w.data_device = wl_data_device_manager_get_data_device(w.data_device_manager, w.seat);
+        wl_data_device_add_listener(w.data_device, &data_device_listener, &w);
     }
 
     w.surface = wl_compositor_create_surface(w.compositor);
@@ -3515,21 +4106,55 @@ ui_status ui_run_browser(const char *start_url) {
             uint64_t exp = w.bs.status_expiry_ms;
             timeout = (exp > t) ? (int)(exp - t) : 0;
         }
+        /* While a fetch is in flight, wake ~12 fps to animate the spinner. */
+        if (w.loading && (timeout < 0 || timeout > 80)) timeout = 80;
 
-        struct pollfd pfd = { .fd = wl_display_get_fd(w.display), .events = POLLIN, .revents = 0 };
-        int pr = poll(&pfd, 1, timeout);
-        if (pr > 0 && (pfd.revents & POLLIN)) {
+        /* Poll the Wayland fd, the key-repeat timer, and the async-fetch result pipe
+         * together. The Wayland fd keeps the prepare_read/read_events contract; the
+         * timer fires a held key's repeat; the pipe carries completed fetches. */
+        struct pollfd pfds[3];
+        int nfds = 0;
+        pfds[nfds].fd = wl_display_get_fd(w.display); pfds[nfds].events = POLLIN; pfds[nfds].revents = 0; nfds++;
+        int timer_idx = -1, fetch_idx = -1;
+        if (w.repeat_timer_fd >= 0) {
+            pfds[nfds].fd = w.repeat_timer_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
+            timer_idx = nfds++;
+        }
+        if (w.fetch_pipe[0] >= 0) {
+            pfds[nfds].fd = w.fetch_pipe[0]; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
+            fetch_idx = nfds++;
+        }
+        int pr = poll(pfds, (nfds_t)nfds, timeout);
+
+        if (pr > 0 && (pfds[0].revents & POLLIN)) {
             if (wl_display_read_events(w.display) == -1) break;
             if (wl_display_dispatch_pending(w.display) == -1) break;
         } else {
             wl_display_cancel_read(w.display);
-            if (pr == 0) redraw(&w);            /* toast expired: repaint to clear it */
-            else if (pr > 0) break;             /* POLLHUP/POLLERR: the display is gone */
-            else if (errno != EINTR) break;     /* a real poll error */
+            if (pr < 0) { if (errno != EINTR) break; }       /* a real poll error */
+            else if (pr == 0) redraw(&w);                    /* toast/spinner tick: repaint */
+            else if (pfds[0].revents & (POLLHUP | POLLERR)) break; /* the display is gone */
         }
+
+        /* A held key fired: re-apply it (read drains the expiration count so the timer
+         * re-arms cleanly). Only acts while a repeat key is set. */
+        if (pr > 0 && timer_idx >= 0 && (pfds[timer_idx].revents & POLLIN)) {
+            uint64_t expirations;
+            if (read(w.repeat_timer_fd, &expirations, sizeof expirations) > 0)
+                key_repeat_fire(&w);
+        }
+
+        /* One or more fetches completed: render them on this (main) thread. */
+        if (pr > 0 && fetch_idx >= 0 && (pfds[fetch_idx].revents & POLLIN))
+            drain_fetch_results(&w);
     }
 
     destroy_buffer(&w);
+    if (w.copy_source) wl_data_source_destroy(w.copy_source);
+    free(w.copy_text);
+    if (w.selection_offer) wl_data_offer_destroy(w.selection_offer);
+    if (w.data_device) wl_data_device_destroy(w.data_device);
+    if (w.data_device_manager) wl_data_device_manager_destroy(w.data_device_manager);
     if (w.deco) zxdg_toplevel_decoration_v1_destroy(w.deco);
     if (w.deco_mgr) zxdg_decoration_manager_v1_destroy(w.deco_mgr);
     if (w.xdg_toplevel) xdg_toplevel_destroy(w.xdg_toplevel);
@@ -3546,6 +4171,12 @@ ui_status ui_run_browser(const char *start_url) {
     if (w.registry) wl_registry_destroy(w.registry);
     wl_display_disconnect(w.display);
 
+    if (w.repeat_timer_fd >= 0) close(w.repeat_timer_fd);
+    /* Close the result pipe. Any still-running detached fetch worker that posts after
+     * this gets a write error (SIGPIPE ignored) and frees its own job; the process is
+     * exiting, so the OS reclaims the rest. */
+    if (w.fetch_pipe[0] >= 0) close(w.fetch_pipe[0]);
+    if (w.fetch_pipe[1] >= 0) close(w.fetch_pipe[1]);
     if (w.xkb_keymap) xkb_keymap_unref(w.xkb_keymap);
     if (w.xkb_state) xkb_state_unref(w.xkb_state);
     xkb_context_unref(w.xkb_ctx);

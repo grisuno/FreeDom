@@ -64,6 +64,8 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/box_style.c -o build/box_style.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/box_tree.c -o build/box_tree.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/flex_layout.c -o build/flex_layout.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/hostblock.c -o build/hostblock.o
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/net_realm.c -o build/net_realm.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/textfield.c -o build/textfield.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c src/form.c -o build/form.o
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -I/usr/include/libpng16 -c src/image_decode.c -o build/image_decode.o
@@ -76,7 +78,7 @@ wayland-scanner client-header //usr/share/wayland-protocols/stable/xdg-shell/xdg
 wayland-scanner client-header //usr/share/wayland-protocols/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml build/xdg-decoration-client-protocol.h
 build/gen_psl third_party/psl/public_suffix_list.dat > build/psl_data.c
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -c build/psl_data.c -o build/psl_data.o
-cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -Ibuild -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 src/freedom.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o build/secure_fetch.o build/url.o build/link_nav.o build/css_color.o build/request_policy.o build/render_doc.o build/render_policy.o build/box_style.o build/box_tree.o build/flex_layout.o build/textfield.o build/form.o build/image_decode.o build/psl_data.o build/browser.o build/ui_layout.o gui/browser_ui.c build/xdg-shell-protocol.c build/xdg-decoration-protocol.c build/xdg-shell-client-protocol.h build/xdg-decoration-client-protocol.h -o build/freedom -Wl,-z,relro -lcurl -lssl -lcrypto -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lwayland-cursor -lwayland-client -lm -lcairo -lfontconfig -lfreetype -lxkbcommon
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude -Ibuild -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 src/freedom.c build/tab.o build/os_sandbox.o build/html_parse.o build/dom.o build/js_sandbox.o build/js_dom.o build/js_env.o build/anti_fp.o build/page_view.o build/qjs_quickjs.o build/qjs_libregexp.o build/qjs_libunicode.o build/qjs_dtoa.o build/secure_fetch.o build/url.o build/link_nav.o build/css_color.o build/request_policy.o build/render_doc.o build/render_policy.o build/box_style.o build/box_tree.o build/flex_layout.o build/hostblock.o build/net_realm.o build/textfield.o build/form.o build/image_decode.o build/psl_data.o build/browser.o build/ui_layout.o gui/browser_ui.c build/xdg-shell-protocol.c build/xdg-decoration-protocol.c build/xdg-shell-client-protocol.h build/xdg-decoration-client-protocol.h -o build/freedom -Wl,-z,relro -lcurl -lssl -lcrypto -lm -lpthread -L/usr/local/lib -llexbor -lpng16 -lwayland-cursor -lwayland-client -lm -lcairo -lfontconfig -lfreetype -lxkbcommon
 make[1]: se sale del directorio '/home/grisun0/src_note/c/freedom-0.0.3'
    dh_auto_test
 	make -j16 test TESTSUITEFLAGS="-j16 --verbose" VERBOSE=1
@@ -109,11 +111,13 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_box_style.c build/box_style.o -o build/test_box_style -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_flex_layout.c build/flex_layout.o -o build/test_flex_layout -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_box_tree.c build/box_tree.o build/flex_layout.o -o build/test_box_tree -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_hostblock.c build/hostblock.o -o build/test_hostblock -Wl,-z,relro -lcmocka
+cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_net_realm.c build/net_realm.o -o build/test_net_realm -Wl,-z,relro -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_renderer.c build/renderer.o build/os_sandbox.o build/html_parse.o -o build/test_renderer -Wl,-z,relro -L/usr/local/lib -llexbor -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_local_store.c build/local_store.o -o build/test_local_store -Wl,-z,relro -lcrypto -lcmocka
 cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/src_note/c/freedom-0.0.3=. -fstack-protector-strong -fstack-clash-protection -Wformat -Werror=format-security -fcf-protection -Iinclude  tests/test_disk_store.c build/disk_store.o build/local_store.o -o build/test_disk_store -Wl,-z,relro -lcrypto -lcmocka
 == run build/test_secure_fetch ==
-[==========] tests: Running 45 test(s).
+[==========] tests: Running 46 test(s).
 [ RUN      ] test_config_default_is_secure
 [       OK ] test_config_default_is_secure
 [ RUN      ] test_user_agent_default_when_unset
@@ -166,6 +170,8 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_enforce_strict_requires_pq_chain
 [ RUN      ] test_enforce_allow_classical_ke
 [       OK ] test_enforce_allow_classical_ke
+[ RUN      ] test_enforce_allowlisted_insecure
+[       OK ] test_enforce_allowlisted_insecure
 [ RUN      ] test_redirect_code_recognizes_3xx
 [       OK ] test_redirect_code_recognizes_3xx
 [ RUN      ] test_redirect_code_rejects_others
@@ -204,8 +210,8 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_post_null_args
 [ RUN      ] test_post_rejects_non_https
 [       OK ] test_post_rejects_non_https
-[==========] tests: 45 test(s) run.
-[  PASSED  ] 45 test(s).
+[==========] tests: 46 test(s) run.
+[  PASSED  ] 46 test(s).
 == run build/test_html_parse ==
 [==========] tests: Running 14 test(s).
 [ RUN      ] test_config_default_is_secure
@@ -607,7 +613,7 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [==========] tests: 7 test(s) run.
 [  PASSED  ] 7 test(s).
 == run build/test_page_view ==
-[==========] tests: Running 30 test(s).
+[==========] tests: Running 39 test(s).
 [ RUN      ] test_new_is_empty
 [       OK ] test_new_is_empty
 [ RUN      ] test_append_copies_fields
@@ -616,8 +622,16 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_append_image_copies_fields
 [ RUN      ] test_append_image_null_args
 [       OK ] test_append_image_null_args
-[ RUN      ] test_append_sanitizes_utf8
-[       OK ] test_append_sanitizes_utf8
+[ RUN      ] test_append_transcodes_latin1
+[       OK ] test_append_transcodes_latin1
+[ RUN      ] test_append_transcodes_word
+[       OK ] test_append_transcodes_word
+[ RUN      ] test_append_transcodes_cp1252_quotes
+[       OK ] test_append_transcodes_cp1252_quotes
+[ RUN      ] test_append_undefined_cp1252_is_qmark
+[       OK ] test_append_undefined_cp1252_is_qmark
+[ RUN      ] test_append_valid_utf8_passthrough
+[       OK ] test_append_valid_utf8_passthrough
 [ RUN      ] test_append_null_args
 [       OK ] test_append_null_args
 [ RUN      ] test_free_null_and_double
@@ -628,6 +642,16 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_build_plain_text
 [ RUN      ] test_build_heading_level
 [       OK ] test_build_heading_level
+[ RUN      ] test_build_inline_emphasis
+[       OK ] test_build_inline_emphasis
+[ RUN      ] test_build_unordered_list
+[       OK ] test_build_unordered_list
+[ RUN      ] test_build_ordered_and_nested_list
+[       OK ] test_build_ordered_and_nested_list
+[ RUN      ] test_build_table_grid
+[       OK ] test_build_table_grid
+[ RUN      ] test_build_table_flattens_cell
+[       OK ] test_build_table_flattens_cell
 [ RUN      ] test_build_link_with_href
 [       OK ] test_build_link_with_href
 [ RUN      ] test_build_block_break_between_paragraphs
@@ -668,8 +692,8 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_build_control_without_form
 [ RUN      ] test_build_two_forms_distinct_groups
 [       OK ] test_build_two_forms_distinct_groups
-[==========] tests: 30 test(s) run.
-[  PASSED  ] 30 test(s).
+[==========] tests: 39 test(s) run.
+[  PASSED  ] 39 test(s).
 == run build/test_render_policy ==
 [==========] tests: Running 15 test(s).
 [ RUN      ] test_caps_safe_is_all_off
@@ -705,17 +729,19 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [==========] tests: 15 test(s) run.
 [  PASSED  ] 15 test(s).
 == run build/test_render_doc ==
-[==========] tests: Running 20 test(s).
+[==========] tests: Running 21 test(s).
 [ RUN      ] test_build_null_out
 [       OK ] test_build_null_out
-[ RUN      ] test_container_gated_by_css
-[       OK ] test_container_gated_by_css
+[ RUN      ] test_container_carried_by_default
+[       OK ] test_container_carried_by_default
 [ RUN      ] test_block_tag_total
 [       OK ] test_block_tag_total
 [ RUN      ] test_build_null_view_is_empty
 [       OK ] test_build_null_view_is_empty
 [ RUN      ] test_heading_paragraph_link
 [       OK ] test_heading_paragraph_link
+[ RUN      ] test_emphasis_propagates
+[       OK ] test_emphasis_propagates
 [ RUN      ] test_image_off_emits_notice_and_blocked
 [       OK ] test_image_off_emits_notice_and_blocked
 [ RUN      ] test_no_images_no_notice
@@ -746,8 +772,8 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_input_label_total
 [ RUN      ] test_free_null_and_double
 [       OK ] test_free_null_and_double
-[==========] tests: 20 test(s) run.
-[  PASSED  ] 20 test(s).
+[==========] tests: 21 test(s) run.
+[  PASSED  ] 21 test(s).
 == run build/test_url ==
 [==========] tests: Running 14 test(s).
 [ RUN      ] test_is_https
@@ -1062,8 +1088,84 @@ cc -g -O2 -Werror=implicit-function-declaration -ffile-prefix-map=/home/grisun0/
 [       OK ] test_depth_cap
 [==========] tests: 13 test(s) run.
 [  PASSED  ] 13 test(s).
+== run build/test_hostblock ==
+[==========] tests: Running 22 test(s).
+[ RUN      ] test_new_free
+[       OK ] test_new_free
+[ RUN      ] test_free_null_idempotent
+[       OK ] test_free_null_idempotent
+[ RUN      ] test_count_null_set
+[       OK ] test_count_null_set
+[ RUN      ] test_load_null_args
+[       OK ] test_load_null_args
+[ RUN      ] test_hosts_line_drops_ip
+[       OK ] test_hosts_line_drops_ip
+[ RUN      ] test_various_ip_tokens_ignored
+[       OK ] test_various_ip_tokens_ignored
+[ RUN      ] test_bare_domain_per_line
+[       OK ] test_bare_domain_per_line
+[ RUN      ] test_comments_and_blanks
+[       OK ] test_comments_and_blanks
+[ RUN      ] test_multiple_tokens_per_line
+[       OK ] test_multiple_tokens_per_line
+[ RUN      ] test_no_trailing_newline
+[       OK ] test_no_trailing_newline
+[ RUN      ] test_lowercased
+[       OK ] test_lowercased
+[ RUN      ] test_trailing_dot_trimmed
+[       OK ] test_trailing_dot_trimmed
+[ RUN      ] test_invalid_tokens_skipped
+[       OK ] test_invalid_tokens_skipped
+[ RUN      ] test_oversize_token_skipped
+[       OK ] test_oversize_token_skipped
+[ RUN      ] test_underscore_and_hyphen_valid
+[       OK ] test_underscore_and_hyphen_valid
+[ RUN      ] test_dedup_and_accumulate
+[       OK ] test_dedup_and_accumulate
+[ RUN      ] test_lists_independent
+[       OK ] test_lists_independent
+[ RUN      ] test_block_covers_subdomains
+[       OK ] test_block_covers_subdomains
+[ RUN      ] test_allow_wins_and_covers_subdomains
+[       OK ] test_allow_wins_and_covers_subdomains
+[ RUN      ] test_no_lists_allows
+[       OK ] test_no_lists_allows
+[ RUN      ] test_is_allowlisted
+[       OK ] test_is_allowlisted
+[ RUN      ] test_check_fail_open_edges
+[       OK ] test_check_fail_open_edges
+[==========] tests: 22 test(s) run.
+[  PASSED  ] 22 test(s).
+== run build/test_net_realm ==
+[==========] tests: Running 12 test(s).
+[ RUN      ] test_classify_host_onion
+[       OK ] test_classify_host_onion
+[ RUN      ] test_classify_host_i2p
+[       OK ] test_classify_host_i2p
+[ RUN      ] test_classify_host_clearnet
+[       OK ] test_classify_host_clearnet
+[ RUN      ] test_classify_host_lookalikes
+[       OK ] test_classify_host_lookalikes
+[ RUN      ] test_classify_host_edges
+[       OK ] test_classify_host_edges
+[ RUN      ] test_classify_url
+[       OK ] test_classify_url
+[ RUN      ] test_route_onion
+[       OK ] test_route_onion
+[ RUN      ] test_route_i2p
+[       OK ] test_route_i2p
+[ RUN      ] test_route_clearnet
+[       OK ] test_route_clearnet
+[ RUN      ] test_route_null_blocked
+[       OK ] test_route_null_blocked
+[ RUN      ] test_realm_allows_http
+[       OK ] test_realm_allows_http
+[ RUN      ] test_names
+[       OK ] test_names
+[==========] tests: 12 test(s) run.
+[  PASSED  ] 12 test(s).
 make[1]: se sale del directorio '/home/grisun0/src_note/c/freedom-0.0.3'
-	rm -fr -- /tmp/dh-xdg-rundir-BEPAUnRd
+	rm -fr -- /tmp/dh-xdg-rundir-6w7Yd84s
    create-stamp debian/debhelper-build-stamp
    dh_prep
 	rm -f -- debian/freedom.substvars

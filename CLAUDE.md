@@ -275,13 +275,35 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   reubica solo); `+`/cerrar/click; `Ctrl+T`/`Ctrl+W`/`Ctrl+Tab`. Las funciones UI usan prefijo `uitab_`
   para no chocar con el módulo `tab` (worker). Fix de solapamiento: `cairo_clip` al viewport de
   contenido. *(Compila endurecido + ASan limpio; verificación visual Wayland pendiente al dueño.)*
+- **Hito 9 — Fetch asíncrono (página).** `do_load`/`do_submit_post` ya **no bloquean** el event loop:
+  `prepare_fetch` (puro, rápido) corre en el hilo principal y el fetch bloqueante (`sf_get_follow`/
+  `sf_post`) se lanza en un **hilo worker desacoplado** (`fetch_thread`) que NO toca `browser_window`
+  (trabaja sobre un `fetch_job` con copias propias de cada string). El worker postea el `fetch_job*`
+  por un **pipe no bloqueante** que el loop sondea junto al fd de Wayland y el timerfd; `deliver_fetch_
+  result` renderiza en el hilo principal (Cairo/Wayland son single-thread). **Generación global**
+  (`net_gen`): cada navegación y cada cambio de pestaña la incrementa, y un resultado con gen vieja se
+  **descarta** (nunca pinta una página obsoleta ni en la pestaña equivocada). La página anterior queda
+  **visible y navegable** mientras carga (como un navegador real); el spinner ahora **anima** (~12 fps).
+  `sf_global_init` (nuevo, en `secure_fetch`) hace el init global de libcurl en el hilo principal
+  (thread-safe). **POST también es async** y mantiene la paridad de ruta/fallbacks con el GET.
+  *Fuera de alcance de este hito (siguen síncronos):* fetch de **imágenes** (opt-in, por eso no es el
+  freeze común) y **carga concurrente entre pestañas** (modelo de una carga activa; cambiar de pestaña
+  abandona la carga en vuelo). *(Compila endurecido + suite CMocka/ASan verde; verificación visual
+  Wayland pendiente al dueño.)* Ver `[[freedom-async-fetch]]`.
+- **Hito (UI) — Entrada de teclado: repetición y portapapeles.** En `gui/browser_ui.c`: **auto-repeat**
+  de tecla (un `timerfd` en el poll; `key_is_repeatable` habilita edición/cursor/caracteres, **nunca**
+  chords de Ctrl ni Enter; respeta `repeat_info`, fallback 600ms/25Hz) — mantener Backspace borra de
+  corrido. **Portapapeles** (`wl_data_device`): **Ctrl+V** pega en el campo enfocado (barra de URL /
+  input de página / UA; se filtran bytes de control), **Ctrl+C** copia el campo enfocado o la URL de la
+  página; lectura acotada (1 MiB + timeout 500ms), `SIGPIPE` ignorado. *(Compila endurecido + ASan
+  limpio; verificación visual Wayland pendiente al dueño.)*
 
 ### 7.3 Roadmap — por cruzar
 
-- **Hito 9 — Fetch asíncrono.** Sacar `secure_fetch` del hilo del event loop (el worker/IPC de `tab`
-  ya existe) para: spinner **animado** real, no congelar la UI, imágenes no bloqueantes, y
-  `do_submit_post` (POST) con el mismo fallback navegable que el GET. *(También destraba I2P, que es
-  lento de integrar: hoy bloquea la UI mientras teje túneles.)*
+- **Hito 9b — Fetch asíncrono (imágenes + multipestaña).** Sacar también las imágenes del hilo
+  principal (hoy `load_images` hace fetch síncrono dentro del worker durante el render) y permitir
+  **carga concurrente entre pestañas** (generación por pestaña en vez de global, entrega a la pestaña
+  destino aunque esté en segundo plano). Destraba además I2P (lento de tejer túneles).
 - **Hito 10 — Persistencia de preferencias.** Opt-in de imágenes/CSS/tema, excepciones de host, y
   config Tor/I2P (hoy env/sesión) cifrados con `local_store`/`disk_store`.
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`

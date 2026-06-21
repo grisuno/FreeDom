@@ -110,6 +110,14 @@ typedef struct sf_response {
 #define SF_DEFAULT_MAX_REDIRECTS 10
 #define SF_MAX_URL             2048u  /* hard cap for any single URL we will act on */
 
+/* Initialises process-global transport state (libcurl/OpenSSL) once, from the main
+ * thread, before any concurrent sf_get/sf_post. libcurl's implicit init on first use
+ * is NOT thread-safe, so an orchestrator that fetches from worker threads MUST call
+ * this first. Idempotent; safe to call more than once. A single-threaded caller need
+ * not call it. There is intentionally no cleanup: it would race in-flight fetches at
+ * shutdown, and the OS reclaims everything on exit. */
+void sf_global_init(void);
+
 /* Returns a configuration with the secure defaults applied. */
 sf_config sf_config_default(void);
 

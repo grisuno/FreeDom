@@ -57,6 +57,12 @@ static long ci_index(const char *haystack, const char *needle) {
 
 /* --- public: defaults --- */
 
+void sf_global_init(void) {
+    /* Refcounted by libcurl; the first call from the main thread does the real (not
+     * thread-safe) global setup so later per-thread curl_easy_init calls are safe. */
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+}
+
 sf_config sf_config_default(void) {
     sf_config c;
     c.policy = SF_POLICY_PQ_HYBRID_KE;
