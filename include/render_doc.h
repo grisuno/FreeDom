@@ -53,6 +53,8 @@ typedef struct rd_block {
     rdp_img_decision img_decision;
     int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */
     int              bg_rgb;         /* author background-color packed 0xRRGGBB, or -1; set only with caps.css */
+    int              text_align;     /* author text-align (css_align); set only with caps.css, else 0 */
+    int              font_scale;     /* author font-size percent (100=normal); set only with caps.css, else 0 */
     /* Nearest author flex/grid container of this block (page_view), carried by
      * default (layout is structure, not author styling, and leaks nothing to the
      * network) so the presentation layer can lay it out with box_tree/flex_layout.

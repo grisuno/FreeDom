@@ -90,6 +90,8 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->img_decision = dec;
     b->fg_rgb = fg_rgb;
     b->bg_rgb = bg_rgb;
+    b->text_align = 0;
+    b->font_scale = 0;
     b->cont_id = -1;
     b->cont_display = 0;
     b->cont_gap = 0;
@@ -218,6 +220,11 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->bold = r->bold;
             lb->italic = r->italic;
             lb->indent = r->indent;
+            /* Author text-align/font-size are presentation, gated by caps.css like
+             * the colors above (they reveal nothing to the network, but Privacy by
+             * Default keeps author styling off until the user opts in). */
+            lb->text_align = caps.css ? r->text_align : 0;
+            lb->font_scale = (caps.css && r->font_scale > 0) ? r->font_scale : 0;
             lb->cont_id = r->cont_id;
             lb->cont_display = r->cont_display;
             lb->cont_gap = r->cont_gap;

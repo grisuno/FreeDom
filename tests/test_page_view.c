@@ -17,6 +17,7 @@
 #include <cmocka.h>
 
 #include "box_style.h"
+#include "css.h"
 #include "flex_layout.h"
 #include "html_parse.h"
 #include "page_view.h"
@@ -802,6 +803,135 @@ static void test_build_two_forms_distinct_groups(void **state) {
     hp_document_free(doc);
 }
 
+/* --- author CSS from <style> blocks + the new text_align/font_scale fields --- */
+
+/* A <style> sheet colors matching elements: a type rule and a class rule. The
+ * <style> text itself never leaks as a run (already covered elsewhere). */
+static void test_build_style_sheet_color(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>p{color:#0a0b0c} .hi{color:#112233}</style>"
+        "<p>styled</p><span class='hi'>classed</span></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *p = find_text(v, "styled");
+    assert_non_null(p);
+    assert_int_equal(p->fg_rgb, 0x0a0b0c);
+    const pv_run *c = find_text(v, "classed");
+    assert_non_null(c);
+    assert_int_equal(c->fg_rgb, 0x112233);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* text-align and font-size resolve into the new run fields, from both a <style>
+ * sheet and inline style=. */
+static void test_build_text_align_and_font_size(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>h1{text-align:center;font-size:200%}</style>"
+        "<h1>big</h1><p style='text-align:right'>right</p>"
+        "<p style='font-size:32px'>large</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *big = find_text(v, "big");
+    assert_non_null(big);
+    assert_int_equal(big->text_align, CSS_ALIGN_CENTER);
+    assert_int_equal(big->font_scale, 200);
+    const pv_run *right = find_text(v, "right");
+    assert_non_null(right);
+    assert_int_equal(right->text_align, CSS_ALIGN_RIGHT);
+    const pv_run *large = find_text(v, "large");
+    assert_non_null(large);
+    assert_int_equal(large->font_scale, 200); /* 32/16 */
+    /* Default (no author CSS): both fields unset. */
+    const pv_run *plain = find_text(v, "right");
+    assert_int_equal(plain->font_scale, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* font-weight via CSS sets bold; an inline declaration wins over an id rule. */
+static void test_build_css_bold_and_inline_wins(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>#x{color:#111111} .b{font-weight:bold}</style>"
+        "<p id='x' style='color:#abcabc'>t</p>"
+        "<p class='b'>strongish</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *t = find_text(v, "t");
+    assert_non_null(t);
+    assert_int_equal(t->fg_rgb, 0xabcabc); /* inline beats the #x sheet rule */
+    const pv_run *s = find_text(v, "strongish");
+    assert_non_null(s);
+    assert_int_equal(s->bold, 1); /* font-weight:bold from the .b rule */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* display:none (inline or from a sheet) hides the element and its whole subtree. */
+static void test_build_display_none_hidden(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>.gone{display:none}</style>"
+        "<p style='display:none'>secret</p>"
+        "<div style='display:none'><span>nested</span></div>"
+        "<p class='gone'>classed-hidden</p>"
+        "<p>shown</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_null(find_text(v, "secret"));
+    assert_null(find_text(v, "nested"));
+    assert_null(find_text(v, "classed-hidden"));
+    assert_non_null(find_text(v, "shown"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Reader (distraction-free) mode skips nav/header/footer/aside boilerplate but
+ * keeps the main article content; with reader off, the boilerplate is kept. */
+static void test_build_reader_skips_boilerplate(void **state) {
+    (void)state;
+    const char *html =
+        "<body><nav>navlink</nav><header>site header</header>"
+        "<article><p>main content</p></article>"
+        "<aside>related</aside><footer>copyright</footer></body>";
+    hp_document *doc = parse(html);
+
+    pv_view *r = NULL;
+    assert_int_equal(pv_build_full(doc, 0, 1, &r), PV_OK); /* reader on */
+    assert_non_null(find_text(r, "main content"));
+    assert_null(find_text(r, "navlink"));
+    assert_null(find_text(r, "site header"));
+    assert_null(find_text(r, "related"));
+    assert_null(find_text(r, "copyright"));
+    pv_free(r);
+
+    pv_view *n = NULL;
+    assert_int_equal(pv_build_full(doc, 0, 0, &n), PV_OK); /* reader off */
+    assert_non_null(find_text(n, "navlink"));
+    assert_non_null(find_text(n, "main content"));
+    pv_free(n);
+    hp_document_free(doc);
+}
+
+/* pv_set_text_style sets the fields on the most recent run; NULL/empty safe. */
+static void test_set_text_style_model(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    pv_set_text_style(v, CSS_ALIGN_CENTER, 150); /* no-op: empty view */
+    assert_int_equal((int)pv_count(v), 0);
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
+    assert_int_equal(pv_at(v, 0)->text_align, 0); /* default */
+    assert_int_equal(pv_at(v, 0)->font_scale, 0);
+    pv_set_text_style(v, CSS_ALIGN_RIGHT, 175);
+    assert_int_equal(pv_at(v, 0)->text_align, CSS_ALIGN_RIGHT);
+    assert_int_equal(pv_at(v, 0)->font_scale, 175);
+    pv_set_text_style(NULL, 0, 0); /* NULL-safe */
+    pv_free(v);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
@@ -845,6 +975,12 @@ int main(void) {
         cmocka_unit_test(test_build_textarea_value),
         cmocka_unit_test(test_build_control_without_form),
         cmocka_unit_test(test_build_two_forms_distinct_groups),
+        cmocka_unit_test(test_build_style_sheet_color),
+        cmocka_unit_test(test_build_text_align_and_font_size),
+        cmocka_unit_test(test_build_css_bold_and_inline_wins),
+        cmocka_unit_test(test_build_display_none_hidden),
+        cmocka_unit_test(test_build_reader_skips_boilerplate),
+        cmocka_unit_test(test_set_text_style_model),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

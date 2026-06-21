@@ -1,0 +1,87 @@
+#ifndef FREEDOM_CSS_H
+#define FREEDOM_CSS_H
+
+#include <stddef.h>
+
+#ifdef __cplusplus
+#error "Freedom is pure C (C11). C++ is not supported."
+#endif
+
+/*
+ * css — pure parser + simple cascade for AUTHOR CSS (<style> blocks and inline
+ * style= attributes). Renders the page closer to what the webmaster intended,
+ * with a deliberately simpler subset.
+ *
+ * CSS is hostile remote content, so this module is an auditable surface:
+ *   - It NEVER phones home: any value containing url( is dropped, and every
+ *     @-rule (@import/@font-face/@media/...) is skipped.
+ *   - It is bounded (anti-DoS): rules/selectors/declarations are capped.
+ *   - It fails closed: unparseable selectors/declarations are dropped, not guessed.
+ *   - It executes nothing (expression()/var()/calc()/JS URLs are unknown -> ignored).
+ *
+ * It produces no pixels and opens no sockets: it resolves a small css_style value
+ * for an element. page_view consults it; render_doc still gates the result behind
+ * caps.css (Privacy by Default). See spec/css.md for the full contract.
+ */
+
+typedef enum css_status {
+    CSS_OK = 0,
+    CSS_ERR_NULL_ARG, /* out was NULL */
+    CSS_ERR_OOM       /* allocation failed */
+} css_status;
+
+typedef enum css_align {
+    CSS_ALIGN_UNSET = 0,
+    CSS_ALIGN_LEFT,
+    CSS_ALIGN_CENTER,
+    CSS_ALIGN_RIGHT,
+    CSS_ALIGN_JUSTIFY
+} css_align;
+
+typedef enum css_display {
+    CSS_DISP_UNSET = 0,
+    CSS_DISP_NONE,
+    CSS_DISP_BLOCK,
+    CSS_DISP_INLINE,
+    CSS_DISP_INLINE_BLOCK,
+    CSS_DISP_FLEX,
+    CSS_DISP_GRID,
+    CSS_DISP_OTHER
+} css_display;
+
+/* A resolved presentation. Each field uses a sentinel for "unset" so the caller
+ * can layer inheritance (take the first ancestor that sets each inheriting one). */
+typedef struct css_style {
+    int         color;       /* 0xRRGGBB or -1 (unset) */
+    int         background;  /* 0xRRGGBB or -1 (unset) */
+    css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
+    int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
+    int         bold;        /* 1, 0, or -1 (unset) */
+    int         italic;      /* 1, 0, or -1 (unset) */
+    css_display display;     /* CSS_DISP_UNSET if absent */
+} css_style;
+
+typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */
+
+/* Parses a <style> text (one or many blocks concatenated) into *out. Malformed
+ * input never fails: unparseable rules are skipped. text == NULL is treated as
+ * empty. out == NULL => CSS_ERR_NULL_ARG; allocation failure => CSS_ERR_OOM. On
+ * CSS_OK, *out must be freed with css_free. */
+css_status css_parse(const char *text, size_t len, css_sheet **out);
+
+/* Idempotent; NULL-safe. */
+void css_free(css_sheet *s);
+
+/* Computes the presentation for one element: every matching sheet rule applied in
+ * cascade order (specificity, then document order), then the element's own
+ * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure,
+ * allocates nothing, reentrant. Inheritance is the caller's job (call per ancestor,
+ * merge unset fields). */
+css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+                      const char *const *classes, size_t nclasses,
+                      const char *inline_style, size_t inline_len);
+
+/* Convenience: resolve only an inline declaration list (no sheet, no selectors). */
+css_style css_parse_inline(const char *style, size_t len);
+
+#endif /* FREEDOM_CSS_H */

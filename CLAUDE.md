@@ -193,7 +193,8 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla/readback normalizados. |
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
-| Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; color de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`). |
+| Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`font-weight`/`font-style`/`display`; selectores simples/compuestos; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
+| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos, sin combinadores; whitelist de propiedades). Contenido hostil: descarta `url(` y `@`-reglas (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. La presentación sigue gateada por `caps.css`. |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
 | Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
@@ -493,6 +494,35 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   crash/leak/UB, invariante de contención del nombre sostenido). *(Módulos puros + IPC additivo
   verificados bajo test/ASan/fuzz; ruta GUI compila endurecida, verificación visual Wayland pendiente
   al dueño. `make itest` requiere endpoint PQ vivo, no disponible aquí.)* Ver `[[freedom-zoom-download]]`.
+- **Hito 23 — CSS de autor (`<style>` + `style=`) + modo sin distracciones.** "Ver la web como la
+  puso el webmaster", con un subconjunto deliberadamente más simple. (a) **Módulo puro `css` (`css_`)**
+  con TDD: parsea una hoja acotada y resuelve un `css_style` por elemento por cascada
+  (especificidad → orden de documento; inline gana). Selectores **simples/compuestos** (tipo, `.clase`,
+  `#id`, `*`, grupos por coma; **sin combinadores**). Propiedades whitelisteadas: `color`,
+  `background[-color]`, `text-align`, `font-size`, `font-weight`, `font-style`, `display`. **Seguridad
+  (no negociable):** descarta cualquier valor con `url(` y **toda `@`-regla** → el CSS de autor **nunca
+  telefonea a casa** ni abre balizas; acotado (anti-DoS), falla cerrado, no ejecuta nada. (b)
+  **Integración en `page_view`** (`pv_build_full`): concatena los `<style>` del documento (≤1 MiB),
+  parsea una vez, y en `resolve_context` fusiona el `css_style` del ancestro más cercano (la caminata de
+  ancestros da herencia gratis); alimenta `fg_rgb`/`bg_rgb`/`bold`/`italic` y dos campos nuevos
+  `text_align`/`font_scale`. `display:none` (de hoja o inline) **oculta** el subárbol
+  (`in_hidden_subtree`, estructural, siempre); `<font color>` legacy queda como respaldo. (c)
+  **IPC**: `text_align`/`font_scale` viajan por `tab.c` `write_view`/`read_view`; `render_doc` los
+  transporta a `rd_block` **gateados por `caps.css`** como los colores. (d) **GUI**: pinta la
+  alineación (`row_align_offset`, compartido por pintor y hit-test de enlaces) y el tamaño de fuente;
+  el menú "Author colors (CSS)" pasa a **"Author styles (CSS)"**. (e) **Modo sin distracciones**
+  (`reader`, **`Ctrl+D`** + ítem de menú): `pv_build_full(reader)` descarta `nav/header/footer/aside`,
+  la GUI apaga `caps.css`/imágenes (sin tocar los toggles del usuario) y centra el contenido en una
+  columna de lectura (`apply_theme` ensancha el gutter). Specs (`css.md`, `page_view.md`, `tab.md`,
+  `render_doc.md`) + tests (19 `css`, 6 nuevos en `page_view`: hoja/align+font/bold+inline-gana/
+  display:none/reader/setter) + `make test` (35 suites) / `make asan` (35 suites, exit 0) limpios +
+  fuzz `make fuzz-css` (1M execs) y `fuzz-pv` (cascada CSS sobre HTML hostil) sin crash/leak/UB.
+  **Fuera de alcance (v1):** combinadores/pseudo-clases/selectores de atributo; `url()`/`@`-reglas/
+  `calc()`/`var()`/`!important`; box model de autor (margin/padding/width — sigue el UA);
+  flex/grid desde `<style>` (los parámetros siguen viniendo del parser inline de `page_view`; solo
+  `display:none` de `<style>` surte efecto). *(Módulos puros + IPC verificados bajo test/ASan/fuzz;
+  ruta GUI compila endurecida, verificación visual Wayland pendiente al dueño.)* Ver
+  `[[freedom-author-css-direction]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -525,8 +555,13 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`
   (`nr_realm_allows_http`); autenticación de onion services v3 con clave; **stream isolation** por
   pestaña/origen (circuitos Tor separados); unificar i2pd/router-Java; indicador de realm en el chrome.
-- **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo; JS-vivo (mutación DOM
-  → repintado, eventos, timers); `querySelector`/selectores CSS; otros formatos de imagen
+- **Hito 23b — CSS de autor: más cobertura.** (Hito 23, base, ya cerrado arriba.) Falta: **combinadores**
+  (descendiente/hijo/hermano) y pseudo-clases/selectores de atributo; **box model de autor**
+  (margin/padding/width/border — hoy gobierna el UA); flex/grid **desde `<style>`** (hoy solo inline);
+  `line-height`/`text-decoration`/`letter-spacing`; `!important`; persistir el toggle de estilos de autor
+  y el modo reader con el Hito 10.
+- **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo (ver Hito 23b); JS-vivo
+  (mutación DOM → repintado, eventos, timers); otros formatos de imagen
   (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación); `pledge`/`unveil` en
   OpenBSD; scroll al ancla de fragmento (`#id`); render: `colspan`/`rowspan` y énfasis inline
   **dentro** de celdas (hoy la celda se aplana a texto), sangría francesa real en listas, fetch

@@ -119,6 +119,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js)
 
 /* Serialises the display list:
  *   [count]( kind,heading,bold,italic,indent,break, text, href, src, img_w,img_h, fg_rgb,bg_rgb,
+ *            text_align,font_scale,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
  *            input_type,form_id,form_method, name, value )*
  * with each string length-prefixed (a length of 0 means absent). The fixed-width
@@ -141,6 +142,8 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t img_h = (int32_t)r->img_h;
         int32_t fg = (int32_t)r->fg_rgb;
         int32_t bg = (int32_t)r->bg_rgb;
+        int32_t talign = (int32_t)r->text_align;
+        int32_t fscale = (int32_t)r->font_scale;
         int32_t cid = (int32_t)r->cont_id;
         int32_t cdisp = (int32_t)r->cont_display;
         int32_t cgap = (int32_t)r->cont_gap;
@@ -170,6 +173,8 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &img_h, sizeof img_h) != 0) return -1;
         if (write_full(wfd, &fg, sizeof fg) != 0) return -1;
         if (write_full(wfd, &bg, sizeof bg) != 0) return -1;
+        if (write_full(wfd, &talign, sizeof talign) != 0) return -1;
+        if (write_full(wfd, &fscale, sizeof fscale) != 0) return -1;
         if (write_full(wfd, &cid, sizeof cid) != 0) return -1;
         if (write_full(wfd, &cdisp, sizeof cdisp) != 0) return -1;
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
@@ -189,7 +194,7 @@ static int write_view(int wfd, const pv_view *v) {
 /* Response: [ok:int32][title_len][title][text_len][text][view]. On any failure
  * the page is reset and ok==0 is reported (no partial/leaked state). */
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
-                              int run_js) {
+                              int run_js, int reader) {
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
@@ -219,7 +224,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     if (ok) {
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
-        if (title == NULL || text == NULL || pv_build_ex(cs->doc, run_js, &view) != PV_OK) {
+        if (title == NULL || text == NULL
+            || pv_build_full(cs->doc, run_js, reader, &view) != PV_OK) {
             ok = 0;
             child_reset_page(cs);
         }
@@ -326,9 +332,11 @@ static void child_main(int rfd, int wfd) {
         if (op == OP_QUIT) break;
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE) break; /* desync */
 
-        /* OP_LOAD carries a leading run_js flag byte (JS policy for this page). */
-        uint8_t run_js = 0;
-        if (op == OP_LOAD && read_full(rfd, &run_js, 1) != 0) break;
+        /* OP_LOAD carries two leading flag bytes: run_js (JS policy) and reader
+         * (distraction-free), in that order, before the length+payload. */
+        uint8_t run_js = 0, reader = 0;
+        if (op == OP_LOAD && (read_full(rfd, &run_js, 1) != 0
+                              || read_full(rfd, &reader, 1) != 0)) break;
 
         size_t len = 0;
         if (read_full(rfd, &len, sizeof len) != 0) break;
@@ -339,7 +347,7 @@ static void child_main(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js);
+        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, reader);
         else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
         else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
         free(buf);
@@ -406,6 +414,7 @@ static int read_view(int fd, pv_view **out) {
     for (size_t i = 0; i < n; ++i) {
         int32_t kind = 0, heading = 0, bold = 0, italic = 0, indent = 0, brk = 0;
         int32_t img_w = -1, img_h = -1, fg = -1, bg = -1;
+        int32_t talign = 0, fscale = 0;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
         int32_t itype = 0, fid = -1, method = 0;
         if (read_full(fd, &kind, sizeof kind) != 0
@@ -426,6 +435,8 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &img_h, sizeof img_h) != 0
          || read_full(fd, &fg, sizeof fg) != 0
          || read_full(fd, &bg, sizeof bg) != 0
+         || read_full(fd, &talign, sizeof talign) != 0
+         || read_full(fd, &fscale, sizeof fscale) != 0
          || read_full(fd, &cid, sizeof cid) != 0
          || read_full(fd, &cdisp, sizeof cdisp) != 0
          || read_full(fd, &cgap, sizeof cgap) != 0
@@ -463,6 +474,7 @@ static int read_view(int fd, pv_view **out) {
             pv_set_indent(v, (int)indent);
             pv_set_color(v, (int)fg);
             pv_set_bgcolor(v, (int)bg);
+            pv_set_text_style(v, (int)talign, (int)fscale);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols);
         }
     }
@@ -544,6 +556,11 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out) {
 }
 
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out) {
+    return tab_load_full(t, html, len, run_js, 0, out);
+}
+
+tab_status tab_load_full(tab *t, const char *html, size_t len, int run_js, int reader,
+                         tab_page *out) {
     if (t == NULL || out == NULL || html == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (len > TAB_MAX_INPUT) return TAB_ERR_TOO_LARGE;
@@ -551,11 +568,12 @@ tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_pag
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    /* OP_LOAD framing: [op][run_js:1][len][html] (the flag precedes the payload so
-     * the html stays zero-copy). */
-    uint8_t op = OP_LOAD, flag = run_js ? 1 : 0;
+    /* OP_LOAD framing: [op][run_js:1][reader:1][len][html] (the flags precede the
+     * payload so the html stays zero-copy). */
+    uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0, rflag = reader ? 1 : 0;
     if (write_full(t->req_fd, &op, 1) != 0
-     || write_full(t->req_fd, &flag, 1) != 0
+     || write_full(t->req_fd, &jflag, 1) != 0
+     || write_full(t->req_fd, &rflag, 1) != 0
      || write_full(t->req_fd, &len, sizeof len) != 0
      || (len != 0 && write_full(t->req_fd, html, len) != 0)) {
         tab_refresh_alive(t);

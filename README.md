@@ -102,16 +102,17 @@ The name reflects its core goals:
 - ✅ Save page as vector PDF (`Ctrl+P`)
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
+- ✅ Author CSS (`<style>` + inline `style=`, simple subset; never phones home) — menu "Author styles (CSS)"
 - ✅ Headless mode
 - ✅ Strong per-tab sandboxing
 - ✅ Docker + noVNC
 - ✅ Modern GUI: scrollbar, vim shortcuts, window management, themes (including sepia/night), hover previews
 - ✅ Tor & I2P routing (`.onion` / `.i2p` + torify)
 - ✅ Tab shortcuts estilo Vim
-- ✅ Simplified/distraction-free rendering mode
+- ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (static + author-gated)
+- ⚠️ CSS support still limited (author `<style>`/inline subset, no combinators/box model; author-gated)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 
@@ -205,6 +206,7 @@ leave it empty to use the anti-fingerprint default.
 | `Enter` / `Go` | Open the address, or search the web if it is not a URL |
 | `Ctrl+L` | Focus the URL bar |
 | `Ctrl+I` | Toggle remote images (off by default) |
+| `Ctrl+D` | Distraction-free (reader) mode: drop nav/header/footer/aside + author styles, center the text |
 | `Ctrl+P` | Save the current page as a vector PDF (selectable text) |
 | `Ctrl+S` | Save the current page to `~/Downloads/freedom/` |
 | `Ctrl+R` / `F5` | Reload the current page (re-applies the full TLS/PQ policy) |
@@ -229,6 +231,25 @@ size-capped (256 MiB) and the file is written atomically with `0600` permissions
 
 Zoom (`Ctrl++` / `Ctrl+-`) snaps to a 50–300% ladder, `Ctrl+0` resets to 100%; the page
 reflows at the new size with no network round-trip.
+
+### Author CSS & distraction-free reading
+
+Enable **Author styles (CSS)** in the menu to see the page the way the webmaster intended.
+Freedom renders the author's own CSS — both `<style>` blocks and inline `style=` — using a
+deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `font-weight`,
+`font-style`, `display` (including `display:none`), with type / `.class` / `#id` / `*` / group
+selectors and a real specificity-then-document-order cascade (inline wins). It is rendered by
+the pure `css` module and stays gated behind the author-CSS capability (Privacy by Default).
+
+CSS is hostile content, so the parser **never phones home**: any value containing `url(` and
+every `@`-rule (`@import` / `@font-face` / `@media` / …) is dropped, so author CSS can never
+trigger a fetch or a tracking beacon. It is bounded (anti-DoS), fails closed, executes nothing
+(`expression()` / `var()` / `calc()` are ignored), and is fuzzed (`make fuzz-css`).
+
+**Distraction-free mode** (`Ctrl+D`, or the menu) is a clean reading view: `nav` / `header` /
+`footer` / `aside` boilerplate is dropped in the sandboxed worker, author styling and images are
+turned off for the view, and the text is centered in a comfortable reading column. Toggle again
+to restore — your persistent image/CSS toggles are left untouched.
 
 ## Privacy Networking: Tor, I2P & Host Filtering
 
@@ -410,6 +431,8 @@ Run the following commands from the root directory of the repository:
 * make asan: Recompiles and runs all test suites under AddressSanitizer (ASan) and UndefinedBehaviorSanitizer (UBSan) to detect memory leaks and UB.
 * make fuzz: Initiates a 30-second coverage-guided fuzzing session on the HTML parser using libFuzzer.
 * make fuzz-js: Initiates a 30-second coverage-guided fuzzing session on the isolated JavaScript sandbox.
+* make fuzz-css: Fuzzes the author-CSS parser + cascade (hostile `<style>` bytes; never phones home).
+* make fuzz-pv / fuzz-img / fuzz-pe / fuzz-dl: Fuzz the display-list builder / PNG decoder / PDF-name / download-name paths.
 * make view: Compiles the experimental standalone Wayland + Cairo GUI demo application (build/freedom-view).
 * make clean: Wipes out the build/ directory and resets the environment.
 

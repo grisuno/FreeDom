@@ -14,6 +14,7 @@
 #include "browser.h"
 #include "box_style.h"
 #include "box_tree.h"
+#include "css.h"
 #include "css_color.h"
 #include "download.h"
 #include "hostblock.h"
@@ -356,6 +357,7 @@ typedef enum ui_menu_action {
     UI_MENU_TOR,      /* toggles Tor routing (tor_enabled + torify clearnet) */
     UI_MENU_I2P,      /* toggles I2P routing for .i2p */
     UI_MENU_JS,       /* cycles the JS policy (off -> allowlist -> on) */
+    UI_MENU_READER,   /* toggles distraction-free (reader) mode; re-renders from cache */
     UI_MENU_PDF       /* action (not a toggle): export the page to a vector PDF */
 } ui_menu_action;
 
@@ -371,7 +373,8 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Reading mode (sepia)", UI_MENU_THEME, 0,                          UI_THEME_SEPIA },
     { "Force theme colors",   UI_MENU_FORCE, 0,                          0 },
     { "Load images",          UI_MENU_CAP,   offsetof(rdp_caps, images), 0 },
-    { "Author colors (CSS)",  UI_MENU_CAP,   offsetof(rdp_caps, css),    0 },
+    { "Author styles (CSS)",  UI_MENU_CAP,   offsetof(rdp_caps, css),    0 },
+    { "Distraction-free (Ctrl+D)", UI_MENU_READER, 0,                    0 },
     { "Tor routing (.onion)", UI_MENU_TOR,   0,                          0 },
     { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
     { "JavaScript",           UI_MENU_JS,    0,                          0 },
@@ -471,6 +474,7 @@ typedef struct browser_window {
     int       theme_mode;  /* ui_theme_mode selected in the options menu */
     int       zoom_pct;    /* page zoom percentage (window-level; see zoom.h) */
     int       force_theme; /* ignore author fg/bg colors, use the theme (reading) */
+    int       reader;      /* distraction-free mode: drop boilerplate + author CSS, wide margins */
     int       loading;   /* a network request is in flight (busy clock shown) */
     ui_hot    hot;       /* toolbar button under the pointer, or UI_HOT_NONE */
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
@@ -571,12 +575,24 @@ static void redraw(browser_window *w);
  * zoom change is just "rebuild + repaint" -- no new pure layout path. The page
  * gutter (content_margin) is intentionally left unzoomed, like a browser's text
  * zoom. The PDF export keeps its own forced light theme and never calls this. */
+/* Comfortable reading-column width (px) used by distraction-free mode: the text is
+ * centered in a column no wider than this, so long lines do not sprawl edge to edge. */
+#define UI_READER_COLUMN_W 720.0
+
 static void apply_theme(browser_window *w) {
     w->theme = ui_theme_for(w->theme_mode);
     double s = zm_scale(w->zoom_pct);
     w->theme.body_font     = zm_apply(w->theme.body_font, w->zoom_pct);
     w->theme.paragraph_gap = w->theme.paragraph_gap * s;
     w->theme.image_box_pad = w->theme.image_box_pad * s;
+    /* Distraction-free mode centers the content in a fixed reading column by widening
+     * the symmetric page gutter. content_width and the paint/hit-test left margin both
+     * read this single field, so they stay consistent. */
+    if (w->reader) {
+        double avail = (double)w->width - UI_SCROLLBAR_W;
+        double margin = (avail - UI_READER_COLUMN_W) / 2.0;
+        if (margin > w->theme.content_margin) w->theme.content_margin = margin;
+    }
 }
 
 /* Applies a new zoom level: rebuild the theme and repaint. The page is laid out
@@ -1328,7 +1344,10 @@ static void render_current(browser_window *w) {
 
     tab_page page;
     memset(&page, 0, sizeof page);
-    if (tab_load_ex(t, w->cur_html, w->cur_html_len, w->caps.js, &page) != TAB_OK) {
+    /* Distraction-free mode drops boilerplate in the worker (reader flag to
+     * pv_build_full). */
+    if (tab_load_full(t, w->cur_html, w->cur_html_len, w->caps.js, w->reader, &page)
+        != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
         tab_close(t);
         return;
@@ -1336,11 +1355,17 @@ static void render_current(browser_window *w) {
 
     browser_set_page(&w->bs, page.title, page.text, 0);
 
+    /* Distraction-free mode also ignores author styling and images (a clean reading
+     * view), without disturbing the user's persistent toggles: gate a local copy of
+     * the capabilities, not w->caps. */
+    rdp_caps eff = w->caps;
+    if (w->reader) { eff.css = false; eff.images = false; }
+
     /* The top-level URL is the https origin (per-image policy) or NULL for a local
      * file, which fails image loads closed. On failure doc stays NULL and the
      * plain-text painter still shows the extracted text. */
     rd_doc *doc = NULL;
-    if (rd_build(page.view, w->caps, w->cur_top, &doc) == RD_OK) {
+    if (rd_build(page.view, eff, w->cur_top, &doc) == RD_OK) {
         w->doc = doc;
     }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
@@ -1877,6 +1902,7 @@ typedef struct rc_row {
     int             banner;        /* RC_TEXT: draw the notice background */
     int             bg_rgb;        /* author background-color packed 0xRRGGBB, or -1 */
     double          x_off;         /* extra horizontal offset (flex/grid column), 0 normally */
+    int             align;         /* author text-align (css_align), 0 = left/unset */
     const rd_block *blk;           /* RC_IMAGE: source image block */
 } rc_row;
 
@@ -1892,6 +1918,7 @@ typedef struct rc_state {
     double indent_px;    /* left indent of the current line (list nesting), applied as row x_off */
     int    line_open, banner;
     int    bg_rgb;       /* current block's author background-color, or -1 */
+    int    align;        /* current block's author text-align (css_align), 0 = left/unset */
     size_t line_first;
 } rc_state;
 
@@ -1983,7 +2010,8 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (r != NULL) {
         r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
         r->first = s->line_first; r->count = L->nfrag - s->line_first;
-        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->x_off = s->indent_px; r->blk = NULL;
+        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->x_off = s->indent_px;
+        r->align = s->align; r->blk = NULL;
     }
     s->cur_top += h;
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
@@ -2049,6 +2077,12 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     double size; int bold, italic, underline; ui_rgb color;
     block_style(th, b, &size, &bold, &italic, &underline, &color);
     if (!w->force_theme && b->fg_rgb >= 0) color = rgb_from_packed(b->fg_rgb);
+    /* Author font-size scales the block's base size (composes with a heading's own
+     * scale); render_doc already gated this behind caps.css (0 when off). */
+    if (b->font_scale > 0) size = size * (double)b->font_scale / 100.0;
+    /* Author text-align travels on the rows this block flushes (paint centers/right-
+     * aligns each line); render_doc gated it behind caps.css (0 when off). */
+    s->align = b->text_align;
     const char *href = (b->kind == RD_LINK) ? b->href : NULL;
     if (b->kind == RD_NOTICE) {
         s->banner = 1;
@@ -2189,7 +2223,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             rc_row *r = rc_add_row(L);
             if (r != NULL) {
                 r->kind = RC_INPUT; r->top = top; r->height = h; r->ascent = fe.ascent;
-                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0; r->blk = b;
+                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
+                r->align = 0; r->blk = b;
             }
             s.cur_top = top + h;
             continue;
@@ -2211,7 +2246,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             rc_row *r = rc_add_row(L);
             if (r != NULL) {
                 r->kind = RC_IMAGE; r->top = top; r->height = h; r->ascent = fe.ascent;
-                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0; r->blk = b;
+                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
+                r->align = 0; r->blk = b;
             }
             s.cur_top = top + h;
             continue;
@@ -2377,6 +2413,20 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     cairo_restore(cr);
 }
 
+/* Horizontal shift a row's text gets from author text-align (center/right): the
+ * slack between the available width and the line's right edge. 0 for left/justify/
+ * unset, and for non-text rows. Shared by the painter and the link hit-test so the
+ * click target matches exactly what is drawn. */
+static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w) {
+    if ((r->align != CSS_ALIGN_CENTER && r->align != CSS_ALIGN_RIGHT)
+        || r->count == 0 || r->first + r->count > L->nfrag) return 0.0;
+    const rc_frag *last = &L->frags[r->first + r->count - 1];
+    double line_w = last->x + last->width;
+    double slack = (content_w - r->x_off) - line_w;
+    if (slack <= 0.0) return 0.0;
+    return (r->align == CSS_ALIGN_CENTER) ? slack / 2.0 : slack;
+}
+
 /* Paints the structured document into the content rectangle, honouring scroll. */
 /* Paints one laid-out row at vertical position ry. Shared by the on-screen painter
  * and the PDF exporter so both render identically (same fonts, colours, emphasis,
@@ -2408,7 +2458,8 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         cairo_fill(cr);
     }
     double baseline = ry + r->ascent;
-    double rx = left + r->x_off;  /* row origin (column offset for flex/grid) */
+    /* row origin (column offset for flex/grid) plus any author text-align shift. */
+    double rx = left + r->x_off + row_align_offset(L, r, content_w);
     for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
         const rc_frag *f = &L->frags[k];
         /* Highlight the link under the pointer (all fragments of that link share
@@ -2587,10 +2638,11 @@ static const char *link_at_point(browser_window *w, double px, double py) {
         if (r->kind != RC_TEXT) continue;
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
+        double ax = row_align_offset(&L, r, content_w);
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
             if (f->href == NULL) continue;
-            double fx = left + r->x_off + f->x;
+            double fx = left + r->x_off + ax + f->x;
             if (px >= fx && px <= fx + f->width) { hit = f->href; break; }
         }
     }
@@ -2900,6 +2952,18 @@ static void submit_form(browser_window *w, const rd_block *rep) {
 
 /* Draws the three-bar "hamburger" icon for the options-menu button, centred in a
  * UI_BTN_W-wide button starting at bx within the toolbar. */
+/* Toggles distraction-free (reader) mode and re-renders from cache (no network):
+ * the worker drops boilerplate, author styling/images are gated off, and the content
+ * is centered in a reading column. Shared by the menu item and the Ctrl+D shortcut. */
+static void toggle_reader(browser_window *w) {
+    w->reader = !w->reader;
+    apply_theme(w); /* recompute the reading-column margin for the new state */
+    browser_set_status(&w->bs, w->reader
+        ? "Distraction-free mode ON (boilerplate and author styles hidden)."
+        : "Distraction-free mode OFF.", now_ms());
+    render_current(w);
+}
+
 /* True when options-menu item i is currently enabled (drives its checkmark). */
 static int menu_item_checked(const browser_window *w, size_t i) {
     const ui_menu_item *it = &UI_MENU_ITEMS[i];
@@ -2908,6 +2972,7 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_TOR)   return w->net_cfg.tor_enabled;
     if (it->action == UI_MENU_I2P)   return w->net_cfg.i2p_enabled;
     if (it->action == UI_MENU_JS)    return w->js_mode != JSP_OFF;
+    if (it->action == UI_MENU_READER) return w->reader;
     if (it->action == UI_MENU_PDF)   return 0; /* an action, never "checked" */
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
@@ -2956,6 +3021,10 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         snprintf(msg, sizeof msg, "JavaScript policy: %s.", jsp_mode_str(w->js_mode));
         browser_set_status(&w->bs, msg, now_ms());
         render_current(w);
+        return;
+    }
+    if (it->action == UI_MENU_READER) {
+        toggle_reader(w);
         return;
     }
     if (it->action == UI_MENU_PDF) {
@@ -3468,6 +3537,9 @@ static void toplevel_configure(void *data, struct xdg_toplevel *t,
     if (width > 0 && height > 0) {
         w->width = width;
         w->height = height;
+        /* Reader mode centers the content in a width-derived margin, so recompute it
+         * when the window resizes (a no-op for the other modes). */
+        if (w->reader) apply_theme(w);
     }
     /* Track the maximized state so the titlebar button toggles correctly. */
     w->maximized = 0;
@@ -4079,6 +4151,14 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     if (ctrl && !shift && (sym == XKB_KEY_i || sym == XKB_KEY_I)) {
         w->caps.images = !w->caps.images;
         render_current(w);
+        redraw(w);
+        return;
+    }
+
+    /* Ctrl+D toggles distraction-free (reader) mode: drop nav/header/footer/aside
+     * boilerplate and author styling, center the content in a reading column. */
+    if (ctrl && !shift && (sym == XKB_KEY_d || sym == XKB_KEY_D)) {
+        toggle_reader(w);
         redraw(w);
         return;
     }

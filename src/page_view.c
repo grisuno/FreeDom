@@ -11,6 +11,7 @@
 
 #include "page_view.h"
 #include "box_style.h"
+#include "css.h"
 #include "css_color.h"
 #include "flex_layout.h"
 #include "html_parse.h"
@@ -156,6 +157,8 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->img_h = -1;
     r->fg_rgb = -1;
     r->bg_rgb = -1;
+    r->text_align = 0;
+    r->font_scale = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -200,6 +203,8 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->img_h = h;
     r->fg_rgb = -1;
     r->bg_rgb = -1;
+    r->text_align = 0;
+    r->font_scale = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -252,6 +257,8 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     r->img_h = -1;
     r->fg_rgb = -1;
     r->bg_rgb = -1;
+    r->text_align = 0;
+    r->font_scale = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -285,6 +292,13 @@ void pv_set_color(pv_view *v, int fg_rgb) {
 void pv_set_bgcolor(pv_view *v, int bg_rgb) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].bg_rgb = bg_rgb;
+}
+
+void pv_set_text_style(pv_view *v, int text_align, int font_scale) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->text_align = text_align;
+    r->font_scale = font_scale;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -441,50 +455,80 @@ static int style_value(const char *style, size_t len, const char *prop, size_t p
     return found;
 }
 
-/* Parses declaration `prop` of `style` as a CSS color; -1 if absent/unparseable. */
-static int color_decl_from_style(const char *style, size_t len,
-                                 const char *prop, size_t prop_len) {
-    char buf[PV_COLOR_TOKEN_MAX];
-    if (!style_value(style, len, prop, prop_len, buf, sizeof buf)) return -1;
-    cc_rgb rgb;
-    return (cc_parse(buf, &rgb) == CC_OK) ? cc_pack(rgb) : -1;
-}
+/* Bounds for the element selector inputs handed to css_resolve (anti-DoS; an
+ * over-long token simply does not match, which fails closed). */
+#define PV_CSS_TAG_MAX     64u
+#define PV_CSS_ID_MAX      128u
+#define PV_CSS_CLASS_BUF   256u
+#define PV_CSS_MAX_CLASSES 16
 
-/* Author background-color declared directly on el (inline style "background-color:"),
- * or -1 if none/unparseable. Only the longhand is honoured; the `background`
- * shorthand and the legacy `bgcolor` attribute are out of scope. */
-static int element_bgcolor(lxb_dom_element_t *el) {
-    size_t sl = 0;
-    const lxb_char_t *style =
-        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
-    if (style != NULL && sl > 0)
-        return color_decl_from_style((const char *)style, sl, "background-color", 16);
+/* Legacy <font color> attribute as a packed 0xRRGGBB, or -1. Not CSS, so it is a
+ * separate fallback the cascade consults only when no `color` declaration won. */
+static int font_color_attr(lxb_dom_element_t *el) {
+    size_t cl = 0;
+    const lxb_char_t *col =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"color", 5, &cl);
+    if (col != NULL && cl > 0 && cl < PV_COLOR_TOKEN_MAX) {
+        char buf[PV_COLOR_TOKEN_MAX];
+        memcpy(buf, col, cl);
+        buf[cl] = '\0';
+        cc_rgb rgb;
+        if (cc_parse(buf, &rgb) == CC_OK) return cc_pack(rgb);
+    }
     return -1;
 }
 
-/* Author foreground color declared directly on el (inline style "color:", or the
- * legacy <font color> attribute), or -1 if none/unparseable. */
-static int element_color(lxb_dom_element_t *el, lxb_tag_id_t tag) {
-    size_t sl = 0;
-    const lxb_char_t *style =
-        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
-    if (style != NULL && sl > 0) {
-        int c = color_decl_from_style((const char *)style, sl, "color", 5);
-        if (c >= 0) return c;
+/* Resolves the author presentation for one element from the document <style> sheet
+ * plus its own inline style= (inline wins; the css module does the cascade). The
+ * element's local name / id / class tokens become the selector match inputs. Pure
+ * (no fetch, no execution): the css module drops url() and @-rules. */
+static css_style element_css_style(lxb_dom_element_t *el, const css_sheet *sheet) {
+    size_t nl = 0;
+    const lxb_char_t *ln = lxb_dom_element_local_name(el, &nl);
+    char tag[PV_CSS_TAG_MAX];
+    size_t tn = (ln != NULL && nl > 0 && nl < sizeof tag) ? nl : 0;
+    if (tn > 0) memcpy(tag, ln, tn);
+    tag[tn] = '\0';
+
+    char idbuf[PV_CSS_ID_MAX];
+    const char *id = NULL;
+    size_t il = 0;
+    const lxb_char_t *idv =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"id", 2, &il);
+    if (idv != NULL && il > 0 && il < sizeof idbuf) {
+        memcpy(idbuf, idv, il);
+        idbuf[il] = '\0';
+        id = idbuf;
     }
-    if (tag == LXB_TAG_FONT) {
-        size_t cl = 0;
-        const lxb_char_t *col =
-            lxb_dom_element_get_attribute(el, (const lxb_char_t *)"color", 5, &cl);
-        if (col != NULL && cl > 0 && cl < PV_COLOR_TOKEN_MAX) {
-            char buf[PV_COLOR_TOKEN_MAX];
-            memcpy(buf, col, cl);
-            buf[cl] = '\0';
-            cc_rgb rgb;
-            if (cc_parse(buf, &rgb) == CC_OK) return cc_pack(rgb);
+
+    char clsbuf[PV_CSS_CLASS_BUF];
+    const char *clsptr[PV_CSS_MAX_CLASSES];
+    size_t nc = 0;
+    size_t cl = 0;
+    const lxb_char_t *clv =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"class", 5, &cl);
+    if (clv != NULL && cl > 0 && cl < sizeof clsbuf) {
+        memcpy(clsbuf, clv, cl);
+        clsbuf[cl] = '\0';
+        size_t i = 0;
+        while (i < cl && nc < PV_CSS_MAX_CLASSES) {
+            while (i < cl && (clsbuf[i] == ' ' || clsbuf[i] == '\t' ||
+                              clsbuf[i] == '\n' || clsbuf[i] == '\r' || clsbuf[i] == '\f'))
+                clsbuf[i++] = '\0';
+            if (i >= cl) break;
+            clsptr[nc++] = &clsbuf[i];
+            while (i < cl && !(clsbuf[i] == ' ' || clsbuf[i] == '\t' ||
+                               clsbuf[i] == '\n' || clsbuf[i] == '\r' || clsbuf[i] == '\f'))
+                ++i;
         }
     }
-    return -1;
+
+    size_t sl = 0;
+    const lxb_char_t *st =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
+
+    return css_resolve(sheet, (tn > 0) ? tag : NULL, id, clsptr, nc,
+                       (const char *)st, sl);
 }
 
 /* --- author flex/grid container layout (honoured by render_doc only with caps.css) --- */
@@ -592,31 +636,48 @@ static int is_italic_tag(lxb_tag_id_t t) {
 
 /* Resolves the inline context of a text node: nearest <a href>, nearest heading
  * level, nearest block-level ancestor (defaults to base), the inherited author
- * color (nearest ancestor that sets one, packed 0xRRGGBB, or -1), the inline
- * emphasis (bold/italic set if any ancestor up to base carries it), and the list
- * context: the nearest <li> ancestor (*li, or NULL), the list nesting depth
- * (*list_depth = count of <ul>/<ol> ancestors), and whether the innermost list is
- * ordered (*ordered: the nearest <ol> appears before any <ul>). */
+ * color (nearest ancestor that sets one, packed 0xRRGGBB, or -1), the author
+ * background (nearest ancestor that sets one), the inline emphasis (bold/italic),
+ * the author text-align (*align, a css_align) and font-size (*font_scale, percent),
+ * and the list context: the nearest <li> ancestor (*li, or NULL), the list nesting
+ * depth (*list_depth = count of <ul>/<ol> ancestors), and whether the innermost
+ * list is ordered (*ordered).
+ *
+ * Author presentation now comes from the css module: for each ancestor element its
+ * computed css_style (document <style> sheet + that element's inline style=, inline
+ * winning) is merged into the inheriting fields, nearest ancestor first. Inline
+ * emphasis from tags (<b>/<em>/...) still applies; an explicit CSS font-weight /
+ * font-style on the nearest ancestor that sets it takes precedence over the tag
+ * default. The <font color> attribute is a legacy fallback when no CSS color won. */
 static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                            const css_sheet *sheet,
                             const char **href, size_t *href_len,
                             const lxb_dom_node_t **block, int *heading,
                             int *fg, int *bg, int *bold, int *italic,
+                            int *align, int *font_scale,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
                             pv_container_reg *reg, pv_cont_info *cont) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
-    *bold = 0; *italic = 0;
+    *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0;
     *li = NULL; *list_depth = 0; *ordered = 0;
     cont->id = -1; cont->display = 0; cont->gap = 0;
     cont->justify = FX_JUSTIFY_START; cont->cols = 0;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
+    int got_align = 0, got_fs = 0;
     int got_li = 0, got_list_kind = 0;
+    int tag_bold = 0, tag_italic = 0;
+    int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
 
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
             lxb_tag_id_t t = lxb_dom_element_tag_id(el);
-            if (is_bold_tag(t)) *bold = 1;
-            if (is_italic_tag(t)) *italic = 1;
+            css_style cs = element_css_style(el, sheet);
+
+            if (is_bold_tag(t)) tag_bold = 1;
+            if (is_italic_tag(t)) tag_italic = 1;
+            if (!got_css_bold && cs.bold != -1) { css_bold = cs.bold; got_css_bold = 1; }
+            if (!got_css_italic && cs.italic != -1) { css_italic = cs.italic; got_css_italic = 1; }
             if (!got_li && t == LXB_TAG_LI) { *li = p; got_li = 1; }
             if (t == LXB_TAG_UL || t == LXB_TAG_OL) {
                 ++(*list_depth);
@@ -630,10 +691,18 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             if (!got_heading) { int lv = heading_level(t); if (lv) { *heading = lv; got_heading = 1; } }
             if (!got_block && is_block_tag(t)) { *block = p; got_block = 1; }
-            if (!got_color) { int c = element_color(el, t); if (c >= 0) { *fg = c; got_color = 1; } }
+            if (!got_color) {
+                int c = (cs.color >= 0) ? cs.color
+                        : ((t == LXB_TAG_FONT) ? font_color_attr(el) : -1);
+                if (c >= 0) { *fg = c; got_color = 1; }
+            }
             /* background-color does not inherit in CSS; in this flat model we take
              * the nearest ancestor's so a block's background shows behind its text. */
-            if (!got_bg) { int c = element_bgcolor(el); if (c >= 0) { *bg = c; got_bg = 1; } }
+            if (!got_bg && cs.background >= 0) { *bg = cs.background; got_bg = 1; }
+            if (!got_align && cs.text_align != CSS_ALIGN_UNSET) {
+                *align = (int)cs.text_align; got_align = 1;
+            }
+            if (!got_fs && cs.font_scale != 0) { *font_scale = cs.font_scale; got_fs = 1; }
             /* Nearest flex/grid container: its runs share one id so the presentation
              * layer can lay the container out (gated by caps.css in render_doc). */
             if (!got_cont && reg != NULL) {
@@ -647,6 +716,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
         }
         if (p == base) break;
     }
+
+    *bold = got_css_bold ? css_bold : tag_bold;
+    *italic = got_css_italic ? css_italic : tag_italic;
 }
 
 /* Collapses ASCII whitespace runs to a single space into a fresh buffer. */
@@ -935,11 +1007,86 @@ static int table_columns(const lxb_dom_node_t *table) {
     return maxc;
 }
 
+/* Upper bound on concatenated <style> text (anti-DoS): a pathological document
+ * cannot make the parser allocate without limit. The css module is itself bounded;
+ * this caps the text fed to it. */
+#define PV_MAX_STYLE_BYTES (1u << 20)
+
+/* Concatenates the text of every <style> element in the document (head included)
+ * into one owned, NUL-terminated buffer, capped at PV_MAX_STYLE_BYTES. Returns NULL
+ * when there is no <style> (or on OOM, treated by the caller as "no author CSS").
+ * *outlen receives the length. */
+static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen) {
+    *outlen = 0;
+    size_t cap = 0, len = 0;
+    char *buf = NULL;
+    for (lxb_dom_node_t *n = root; n != NULL && len < PV_MAX_STYLE_BYTES;
+         n = node_next(n, root)) {
+        if (n->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(n) != LXB_TAG_STYLE) continue;
+        for (lxb_dom_node_t *k = n->first_child; k != NULL; k = k->next) {
+            if (k->type != LXB_DOM_NODE_TYPE_TEXT) continue;
+            lxb_dom_text_t *txt = lxb_dom_interface_text(k);
+            const char *raw = (const char *)txt->char_data.data.data;
+            size_t rl = txt->char_data.data.length;
+            if (raw == NULL || rl == 0) continue;
+            if (rl > PV_MAX_STYLE_BYTES - len) rl = PV_MAX_STYLE_BYTES - len;
+            if (rl == 0) break;
+            if (len + rl + 1 > cap) {
+                size_t nc = cap ? cap * 2 : 1024;
+                while (nc < len + rl + 1) nc *= 2;
+                char *g = (char *)realloc(buf, nc);
+                if (g == NULL) { free(buf); return NULL; }
+                buf = g; cap = nc;
+            }
+            memcpy(buf + len, raw, rl);
+            len += rl;
+        }
+    }
+    if (buf != NULL) buf[len] = '\0';
+    *outlen = len;
+    return buf;
+}
+
+/* Nonzero if n or any ancestor up to base has display:none (from the <style> sheet
+ * or its inline style=). display:none is structural visibility, applied regardless
+ * of caps.css (hidden content stays hidden, like the JS-off display:none caveat). */
+static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                             const css_sheet *sheet) {
+    for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
+            if (element_css_style(el, sheet).display == CSS_DISP_NONE) return 1;
+        }
+        if (p == base) break;
+    }
+    return 0;
+}
+
+/* Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/
+ * <footer>/<aside>). Used only in distraction-free (reader) mode to drop chrome and
+ * keep the main content. Deterministic, not heuristic article extraction. */
+static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+    for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_tag_id_t t = node_tag(p);
+            if (t == LXB_TAG_NAV || t == LXB_TAG_HEADER ||
+                t == LXB_TAG_FOOTER || t == LXB_TAG_ASIDE) return 1;
+        }
+        if (p == base) break;
+    }
+    return 0;
+}
+
 pv_status pv_build(const hp_document *doc, pv_view **out) {
-    return pv_build_ex(doc, 0, out); /* JS off by default: <noscript> fallback shown */
+    return pv_build_full(doc, 0, 0, out); /* JS off by default: <noscript> fallback shown */
 }
 
 pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
+    return pv_build_full(doc, js_enabled, 0, out);
+}
+
+pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+                        pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
 
@@ -951,6 +1098,15 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
 
     lxb_dom_node_t *body = find_body(root);
     lxb_dom_node_t *base = (body != NULL) ? body : root;
+
+    /* Parse the document's <style> blocks once into a bounded sheet (pure: it never
+     * fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css
+     * module, so OOM here degrades to "no author CSS", not a failure. */
+    size_t style_len = 0;
+    char *style_text = collect_style_text(root, &style_len);
+    css_sheet *sheet = NULL;
+    (void)css_parse(style_text, style_len, &sheet);
+    free(style_text);
 
     const lxb_dom_node_t *prev_block = NULL;
     const lxb_dom_node_t *prev_li = NULL;  /* last <li> seen, to mark each item once */
@@ -976,7 +1132,9 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
              * bold. The cell's inner text nodes are suppressed below (in_cell_subtree)
              * so they are not re-emitted. Nested cells are handled by the outer cell. */
             if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
-                && !in_skipped_subtree(n, base, js_enabled) && !in_cell_subtree(n, base)) {
+                && !in_skipped_subtree(n, base, js_enabled) && !in_cell_subtree(n, base)
+                && !in_hidden_subtree(n, base, sheet)
+                && !(reader && in_boilerplate_subtree(n, base))) {
                 const lxb_dom_node_t *table = nearest_table(n, base);
                 int cols = (table != NULL) ? table_columns(table) : 1;
                 int cid = (table != NULL) ? container_id(&reg, table) : -1;
@@ -1005,19 +1163,22 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
             }
 
             if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON)
-                && !in_skipped_subtree(n, base, js_enabled)) {
+                && !in_skipped_subtree(n, base, js_enabled)
+                && !in_hidden_subtree(n, base, sheet)
+                && !(reader && in_boilerplate_subtree(n, base))) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
 
                 const char *unused_href = NULL;
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
-                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading,
+                resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_align, &unused_fs,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont);
                 int brk = pending_break || (block != prev_block);
@@ -1041,7 +1202,9 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
                 continue;
             }
 
-            if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)) {
+            if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)
+                && !in_hidden_subtree(n, base, sheet)
+                && !(reader && in_boilerplate_subtree(n, base))) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 size_t sl = 0;
                 const lxb_char_t *src =
@@ -1063,12 +1226,13 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
-                resolve_context(n, base, &unused_href, &unused_hl, &block, &heading,
+                resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_align, &unused_fs,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont);
                 int brk = pending_break || (block != prev_block);
@@ -1090,6 +1254,8 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
         if (in_skipped_subtree(n, base, js_enabled)) continue;
         if (in_cell_subtree(n, base)) continue; /* already emitted as a collected cell run */
+        if (in_hidden_subtree(n, base, sheet)) continue; /* display:none */
+        if (reader && in_boilerplate_subtree(n, base)) continue; /* distraction-free */
 
         lxb_dom_text_t *txt = lxb_dom_interface_text(n);
         const char *raw = (const char *)txt->char_data.data.data;
@@ -1103,12 +1269,13 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
         const char *href = NULL;
         size_t href_len = 0;
         const lxb_dom_node_t *block = NULL;
-        int heading = 0, fg = -1, bg = -1, bold = 0, italic = 0;
+        int heading = 0, fg = -1, bg = -1, bold = 0, italic = 0, align = 0, font_scale = 0;
         const lxb_dom_node_t *li = NULL;
         int list_depth = 0, ordered = 0;
         pv_cont_info cont;
-        resolve_context(n, base, &href, &href_len, &block, &heading, &fg, &bg,
-                        &bold, &italic, &li, &list_depth, &ordered, &reg, &cont);
+        resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
+                        &bold, &italic, &align, &font_scale,
+                        &li, &list_depth, &ordered, &reg, &cont);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -1152,15 +1319,18 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
         pv_set_indent(v, list_depth);
         pv_set_color(v, fg);
         pv_set_bgcolor(v, bg);
+        pv_set_text_style(v, align, font_scale);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
     }
 
     *out = v;
     forms_free(&forms);
+    css_free(sheet);
     return PV_OK;
 
 cleanup:
     forms_free(&forms);
+    css_free(sheet);
     pv_free(v);
     return rc;
 }

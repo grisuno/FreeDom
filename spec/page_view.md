@@ -35,6 +35,8 @@ typedef struct pv_run {
     int     img_h;       /* alto declarado del <img> (px), o -1 si desconocido */
     int     fg_rgb;      /* color del autor empaquetado 0xRRGGBB, o -1 si no hay */
     int     bg_rgb;      /* background-color del autor 0xRRGGBB, o -1 si no hay */
+    int     text_align;  /* text-align del autor (css_align), 0 = sin definir */
+    int     font_scale;  /* font-size del autor en porcentaje (100=normal), 0 = sin definir */
     int     cont_id;     /* contenedor flex/grid de autor mas cercano, o -1 */
     int     cont_display;/* bx_display del contenedor (flex/grid), o 0 */
     int     cont_gap;    /* gap del contenedor en px */
@@ -48,12 +50,39 @@ typedef struct pv_view { pv_run *runs; size_t count; size_t cap; } pv_view;
 En un run que no es imagen, `src == NULL` y `img_w == img_h == -1`. En un `PV_IMAGE`, `text` es el
 texto alternativo (`alt`, puede ser cadena vacía) y `href == NULL` (la imagen no es un enlace).
 
-**Color del autor (`fg_rgb`):** se extrae del ancestro más cercano que fije un `color` (atributo
-`style` en línea con declaración `color:`, o el `<font color>` heredado), parseado por el módulo
-puro `css_color`; `background-color` nunca se confunde con `color`; un valor no parseable → -1. Es
-dato de presentación: `render_doc` solo lo propaga si la capacidad de CSS del autor está activa, y
-nunca implica una petición de red (el color en línea no filtra nada). Ambos `pv_append*` inicializan
-`fg_rgb` a -1; `pv_set_color` lo fija en el último run.
+**CSS de autor (Hito 23) — `<style>` + `style=` en línea.** La presentación del autor ya no sale solo
+del `style` en línea: `pv_build_full` concatena los bloques `<style>` del documento (head incluido,
+acotado a 1 MiB) y los parsea **una vez** con el módulo puro `[[css]]` en una hoja acotada. Por cada
+ancestro de un run se calcula su `css_style` (reglas de la hoja + su propio `style=`, ganando el
+inline; `[[css]]` hace la cascada por especificidad y orden), y se fusionan los campos heredables
+desde el ancestro más cercano. El subconjunto soportado: selectores simples/compuestos (tipo, `.clase`,
+`#id`, `*`, grupos por coma; sin combinadores) y las propiedades `color`, `background[-color]`,
+`text-align`, `font-size`, `font-weight`, `font-style`, `display`. **Seguridad:** `[[css]]` descarta
+cualquier valor con `url(` y toda `@`-regla, así que el CSS de autor **nunca telefonea a casa** ni abre
+una baliza de rastreo; es contenido hostil, por eso se fuzzea (`make fuzz-css`/`fuzz-pv`).
+
+**Color del autor (`fg_rgb`):** sale del ancestro más cercano cuyo `css_style` fije `color` (regla de
+`<style>` o `color:` en línea), con el `<font color>` legacy como respaldo cuando ninguna declaración
+CSS ganó; `background-color` nunca se confunde con `color`; valor no parseable → -1. Es dato de
+presentación: `render_doc` solo lo propaga con `caps.css`, y nunca implica red. Los `pv_append*`
+inicializan `fg_rgb` a -1; `pv_set_color` lo fija en el último run.
+
+**Alineación y tamaño del autor (`text_align`/`font_scale`):** `text_align` es el `text-align` heredado
+(un `css_align`: 0 sin definir, 1 izquierda, 2 centro, 3 derecha, 4 justificado); `font_scale` es el
+`font-size` en porcentaje (100 = normal; `px` relativo a 16px, `em`/`rem`/`%` y palabras clave), 0 si
+no se define. Ambos del ancestro más cercano que los fije. Mismo gate de presentación que los colores
+(`render_doc` los propaga solo con `caps.css`); `pv_set_text_style` los fija en el último run.
+
+**`display:none` (estructura).** Un run cuyo elemento o algún ancestro tenga `display:none` (de la hoja
+o en línea) **no se emite** (`in_hidden_subtree`). Es visibilidad estructural: se aplica siempre,
+independiente de `caps.css` (el contenido oculto sigue oculto, como el caso `display:none` con JS off).
+`font-weight`/`font-style` del autor, cuando el ancestro más cercano los fija, ganan al énfasis por
+etiqueta (`<b>`/`<em>`); si no, sigue el énfasis por etiqueta.
+
+**Modo sin distracciones (reader).** `pv_build_full(doc, js, reader, out)` con `reader != 0` descarta
+los subárboles de chrome (`<nav>`/`<header>`/`<footer>`/`<aside>`, `in_boilerplate_subtree`) y emite
+solo el contenido principal. Determinista, no extracción heurística de artículo. La hoja de autor se
+sigue resolviendo; el orquestador decide aplicarla o no (en reader apaga `caps.css`/imágenes).
 
 **Background-color del autor (`bg_rgb`):** se extrae solo del longhand `background-color:` del atributo
 `style` (el shorthand `background` y el atributo legacy `bgcolor` quedan fuera de alcance), parseado
@@ -74,7 +103,10 @@ campos en el último run. El `background` shorthand y `bgcolor` legacy siguen fu
 ## 3. API
 
 ```c
-pv_status pv_build(const hp_document *doc, pv_view **out); /* recorre el árbol (Lexbor) */
+pv_status pv_build(const hp_document *doc, pv_view **out); /* == pv_build_full(doc,0,0,out) */
+pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out); /* reader=0 */
+pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,   /* reader: sin distracciones */
+                        pv_view **out);
 pv_view  *pv_new(void);                                    /* vista vacía (deserializador IPC) */
 pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     const char *text, const char *href);   /* texto/enlace; copia text/href */
@@ -82,6 +114,7 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src, int w, int h); /* PV_IMAGE */
 void          pv_set_color(pv_view *v, int fg_rgb);        /* color del autor del ultimo run */
 void          pv_set_bgcolor(pv_view *v, int bg_rgb);      /* background-color del ultimo run */
+void          pv_set_text_style(pv_view *v, int text_align, int font_scale); /* align/font del ultimo run */
 void          pv_set_container(pv_view *v, int cont_id, int cont_display,
                                int cont_gap, int cont_justify, int cont_cols); /* contenedor */
 void          pv_free(pv_view *v);

@@ -83,6 +83,13 @@ typedef struct pv_run {
     int     img_h;        /* PV_IMAGE declared height in px, or -1 if unknown */
     int     fg_rgb;       /* author color packed 0xRRGGBB, or -1 if none */
     int     bg_rgb;       /* author background-color packed 0xRRGGBB, or -1 if none */
+    /* Author text presentation resolved from <style> + inline style= (the css
+     * module). text_align is a css_align (0 unset, 1 left, 2 center, 3 right,
+     * 4 justify); font_scale is a font-size percent (100 = normal) or 0 (unset).
+     * Both are presentation: render_doc applies them only with caps.css, exactly
+     * like fg_rgb/bg_rgb. Defaults: text_align 0, font_scale 0. */
+    int     text_align;
+    int     font_scale;
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -120,6 +127,13 @@ pv_status pv_build(const hp_document *doc, pv_view **out); /* == pv_build_ex(doc
  * default) the <noscript> fallback content IS rendered (a no-JS browser shows it);
  * when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */
 pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);
+
+/* As pv_build_ex, plus a distraction-free (reader) flag. When reader is nonzero,
+ * boilerplate subtrees (<nav>/<header>/<footer>/<aside>) are skipped so only the
+ * main content is emitted; author CSS is still resolved (the presentation layer
+ * decides whether to apply it). When reader is 0 this is exactly pv_build_ex. */
+pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+                        pv_view **out);
 
 /* Allocates an empty view (used by the IPC deserialiser to rebuild a view on the
  * receiving side). Returns NULL on allocation failure. */
@@ -175,6 +189,12 @@ void pv_set_color(pv_view *v, int fg_rgb);
  * this flat model pv_build resolves it from the nearest ancestor that sets one, so
  * a block's background shows behind its text runs. */
 void pv_set_bgcolor(pv_view *v, int bg_rgb);
+
+/* Sets the author text presentation (text_align as a css_align, font_scale as a
+ * font-size percent or 0 for unset) on the most recently appended run. No-op on an
+ * empty or NULL view. Both append helpers default text_align and font_scale to 0.
+ * Like author colors, render_doc applies these only with caps.css. */
+void pv_set_text_style(pv_view *v, int text_align, int font_scale);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, and the parsed gap/justify/cols). No-op on an empty
