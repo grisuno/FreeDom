@@ -185,6 +185,8 @@ files ship in `config/`). The format is one domain per line, or `0.0.0.0 domain`
 This is purely opt-in: with no list files present, nothing is blocked (the filter fails open — it is
 an adblock-style layer, not the security boundary).
 
+By not using the Blink (Chromium) or Gecko (Firefox) engine, web servers become completely confused when receiving your requests, which destroys commercial Machine Learning algorithms that try to profile what type of user you are based on how your browser traffic behaves.
+
 ## Fuzzing
 
 Empirical security in C: Passing 10 full AFL++ mutation cycles and 700 unique code paths with 0 crashes, 0 hangs, and a rock-solid 75% stability map.
