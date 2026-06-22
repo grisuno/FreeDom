@@ -32,7 +32,11 @@ if [ -f /etc/debian_version ]; then
       libssl-dev \
       libpng-dev \
       wayland-protocols \
-      libwayland-bin
+      libwayland-bin \
+      weston \
+      cage \
+      liblexbor-dev \
+      libcmocka-dev
 else
     echo -e "${BLUE}[*] Non-Debian system detected. Please ensure build tools, OpenSSL, libcurl, CMake, and CMocka are installed manually.${NC}"
 fi
