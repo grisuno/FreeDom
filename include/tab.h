@@ -89,11 +89,13 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);
  * tab_load is tab_load_ex with run_js == 0. */
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out);
 
-/* As tab_load_ex, plus a distraction-free (reader) flag forwarded to pv_build_full:
- * when nonzero the worker drops boilerplate (<nav>/<header>/<footer>/<aside>) and
- * emits only the main content. tab_load_ex is tab_load_full with reader == 0. */
+/* As tab_load_ex, plus a distraction-free (reader) flag and the user's color-scheme
+ * preference (prefers_dark), both forwarded to pv_build_full: reader drops boilerplate
+ * (<nav>/<header>/<footer>/<aside>); prefers_dark gates the author's
+ * @media(prefers-color-scheme) rules (auto dark mode). tab_load_ex is tab_load_full
+ * with reader == 0 and prefers_dark == 0. */
 tab_status tab_load_full(tab *t, const char *html, size_t len, int run_js, int reader,
-                         tab_page *out);
+                         int prefers_dark, tab_page *out);
 
 /* Evaluates untrusted JS in the tab's current context (sees the loaded DOM,
  * navigator/screen/performance, canvas/audio). A JS-level error is reported via

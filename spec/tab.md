@@ -67,10 +67,11 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
 Padre y hijo son el mismo binario y arquitectura (`fork`), así que se intercambian estructuras
 crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), como el `renderer`.
 
-- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **dos bytes de bandera** antes de la carga:
-  `[op][run_js:1][reader:1][len: size_t][html]` (las banderas preceden a la carga para que el HTML
-  quede zero-copy). `run_js` es la política de JS; `reader` es el modo sin distracciones (Hito 23),
-  reenviado a `pv_build_full`. `OP_EVAL`/`OP_DECODE_IMAGE` llevan `[op][len][payload]`. EOF en la
+- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **tres bytes de bandera** antes de la carga:
+  `[op][run_js:1][reader:1][dark:1][len: size_t][html]` (las banderas preceden a la carga para que el
+  HTML quede zero-copy). `run_js` es la política de JS; `reader` es el modo sin distracciones (Hito 23);
+  `dark` es la preferencia de esquema de color (Hito 23b, gate de `@media(prefers-color-scheme)`). Las
+  tres se reenvían a `pv_build_full`. `OP_EVAL`/`OP_DECODE_IMAGE` llevan `[op][len][payload]`. EOF en la
   tubería de peticiones equivale a `OP_QUIT`.
 - **Respuesta de `OP_LOAD`:** `[ok: int32][title_len: size_t][title][text_len: size_t][text]`.
 - **Respuesta de `OP_EVAL`:** `[ok: int32][is_exception: int32][value_len: size_t][value]`.
@@ -108,12 +109,13 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);
 /* Hito 20b: run_js es la política de JS de la página (rdp_caps.js). Controla el
  * render de <noscript> y, cuando es 1, EJECUTA los <script> inline en el worker antes
  * de derivar la vista (las mutaciones de document.title/textContent se reflejan).
- * tab_load == tab_load_ex con run_js == 0. Framing OP_LOAD: [op][run_js:1][reader:1][len][html]. */
+ * tab_load == tab_load_ex con run_js == 0. Framing OP_LOAD: [op][run_js:1][reader:1][dark:1][len][html]. */
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out);
-/* Hito 23: reader = modo sin distracciones (reenviado a pv_build_full: descarta
- * nav/header/footer/aside). tab_load_ex == tab_load_full con reader == 0. */
+/* Hito 23: reader = modo sin distracciones. Hito 23b: prefers_dark = preferencia de
+ * esquema de color (gate de @media(prefers-color-scheme)). Ambos a pv_build_full.
+ * tab_load_ex == tab_load_full con reader == 0 y prefers_dark == 0. */
 tab_status tab_load_full(tab *t, const char *html, size_t len, int run_js, int reader,
-                         tab_page *out);
+                         int prefers_dark, tab_page *out);
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out);
 int        tab_alive(const tab *t);
 pid_t      tab_child_pid(const tab *t);

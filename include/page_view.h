@@ -128,12 +128,14 @@ pv_status pv_build(const hp_document *doc, pv_view **out); /* == pv_build_ex(doc
  * when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */
 pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);
 
-/* As pv_build_ex, plus a distraction-free (reader) flag. When reader is nonzero,
- * boilerplate subtrees (<nav>/<header>/<footer>/<aside>) are skipped so only the
- * main content is emitted; author CSS is still resolved (the presentation layer
- * decides whether to apply it). When reader is 0 this is exactly pv_build_ex. */
+/* As pv_build_ex, plus a distraction-free (reader) flag and the user's color-scheme
+ * preference (prefers_dark != 0 selects dark for the author's
+ * @media(prefers-color-scheme) rules). When reader is nonzero, boilerplate subtrees
+ * (<nav>/<header>/<footer>/<aside>) are skipped so only the main content is emitted;
+ * author CSS is still resolved (the presentation layer decides whether to apply it).
+ * pv_build_ex is pv_build_full with reader == 0 and prefers_dark == 0. */
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
-                        pv_view **out);
+                        int prefers_dark, pv_view **out);
 
 /* Allocates an empty view (used by the IPC deserialiser to rebuild a view on the
  * receiving side). Returns NULL on allocation failure. */

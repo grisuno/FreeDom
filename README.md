@@ -103,6 +103,7 @@ The name reflects its core goals:
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
 - ✅ Author CSS (`<style>` + inline `style=`, simple subset; never phones home) — menu "Author styles (CSS)"
+- ✅ Automatic dark mode (`@media (prefers-color-scheme: dark)`, safe `@media` subset; no viewport leak)
 - ✅ Headless mode
 - ✅ Strong per-tab sandboxing
 - ✅ Docker + noVNC
@@ -112,7 +113,7 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset, no combinators/box model; author-gated)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media`; no combinators/box model/`position`; author-gated)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 
@@ -241,10 +242,16 @@ deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `
 selectors and a real specificity-then-document-order cascade (inline wins). It is rendered by
 the pure `css` module and stays gated behind the author-CSS capability (Privacy by Default).
 
-CSS is hostile content, so the parser **never phones home**: any value containing `url(` and
-every `@`-rule (`@import` / `@font-face` / `@media` / …) is dropped, so author CSS can never
-trigger a fetch or a tracking beacon. It is bounded (anti-DoS), fails closed, executes nothing
-(`expression()` / `var()` / `calc()` are ignored), and is fuzzed (`make fuzz-css`).
+**Automatic dark mode:** `@media` is supported as a safe subset — with the dark theme on (and
+Author styles enabled), a page's `@media (prefers-color-scheme: dark)` rules apply automatically.
+`screen`/`print` and `min-width`/`max-width` queries evaluate against a fixed, normalized desktop
+width (no real viewport size leaks — anti-fingerprinting); `not` and unknown features fail closed.
+
+CSS is hostile content, so the parser **never phones home**: any value containing `url(` and the
+network/font `@`-rules (`@import` / `@font-face`) are dropped, and `@media` can only choose which
+*local* rules apply — author CSS can never trigger a fetch or a tracking beacon. It is bounded
+(anti-DoS), fails closed, executes nothing (`expression()` / `var()` / `calc()` are ignored), and
+is fuzzed (`make fuzz-css`).
 
 **Distraction-free mode** (`Ctrl+D`, or the menu) is a clean reading view: `nav` / `header` /
 `footer` / `aside` boilerplate is dropped in the sandboxed worker, author styling and images are

@@ -182,9 +182,93 @@ static void test_at_rules_skipped(void **state) {
         "@import url(evil.css);\n"
         "@media screen { p { color:#ffffff } }\n"
         "p { color:#123456 }", 0, &sh), CSS_OK);
-    /* the @media block's inner rule is skipped along with the at-rule; the plain
-     * rule still applies. */
+    /* @import is skipped entirely (no network). @media screen matches the default
+     * context, so its rule applies, then the later same-specificity plain rule wins
+     * by document order. */
     assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x123456);
+    css_free(sh);
+}
+
+/* --- @media (Hito 23b) --- */
+
+/* @media screen matches the default context; its rules apply. @media print does not. */
+static void test_media_screen_and_print(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@media screen { p { color:#abcdef } }\n"
+        "@media print { p { color:#010101 } }", 0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0xabcdef);
+    css_free(sh);
+
+    /* With a print context, the print block applies and the screen block does not. */
+    css_media print_ctx = { 0, 1, CSS_MEDIA_DEFAULT_WIDTH };
+    assert_int_equal(css_parse_media(
+        "@media screen { p { color:#abcdef } }\n"
+        "@media print { p { color:#010101 } }", 0, &print_ctx, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x010101);
+    css_free(sh);
+}
+
+/* prefers-color-scheme: dark applies only when the context prefers dark. */
+static void test_media_prefers_color_scheme(void **state) {
+    (void)state;
+    const char *css = "@media (prefers-color-scheme: dark) { body { color:#ffffff } }";
+    css_sheet *sh = NULL;
+
+    assert_int_equal(css_parse(css, 0, &sh), CSS_OK); /* default = light */
+    assert_int_equal(css_resolve(sh, "body", NULL, NULL, 0, NULL, 0).color, -1);
+    css_free(sh);
+
+    css_media dark = { 1, 0, CSS_MEDIA_DEFAULT_WIDTH };
+    assert_int_equal(css_parse_media(css, 0, &dark, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "body", NULL, NULL, 0, NULL, 0).color, 0xffffff);
+    css_free(sh);
+}
+
+/* min-width / max-width compare against the normalized 1920px width. */
+static void test_media_width_queries(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@media (min-width: 600px) { p { color:#111111 } }\n"
+        "@media (min-width: 3000px) { p { color:#222222 } }\n"
+        "@media (max-width: 1000px) { div { color:#333333 } }", 0, &sh), CSS_OK);
+    /* 1920 >= 600 applies; 1920 >= 3000 does not; so p stays #111111. */
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x111111);
+    /* 1920 <= 1000 is false, so the div rule never applies. */
+    assert_int_equal(css_resolve(sh, "div", NULL, NULL, 0, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+/* "and" requires every part; a comma is OR across the query list. */
+static void test_media_and_or(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@media screen and (min-width: 600px) { p { color:#0a0a0a } }\n"
+        "@media screen and (min-width: 5000px) { div { color:#0b0b0b } }\n"
+        "@media print, screen { span { color:#0c0c0c } }", 0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x0a0a0a);
+    assert_int_equal(css_resolve(sh, "div", NULL, NULL, 0, NULL, 0).color, -1); /* and fails */
+    assert_int_equal(css_resolve(sh, "span", NULL, NULL, 0, NULL, 0).color, 0x0c0c0c); /* or: screen */
+    css_free(sh);
+}
+
+/* Fail closed: unknown media type/feature and `not` never apply their rules. */
+static void test_media_unknown_fails_closed(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@media (hover: hover) { p { color:#cccccc } }\n"
+        "@media tv { a { color:#dddddd } }\n"
+        "@media not screen { b { color:#eeeeee } }\n"
+        "h1 { color:#0f0f0f }", 0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, -1);
+    assert_int_equal(css_resolve(sh, "a", NULL, NULL, 0, NULL, 0).color, -1);
+    assert_int_equal(css_resolve(sh, "b", NULL, NULL, 0, NULL, 0).color, -1);
+    /* a normal rule after the dropped @media blocks still parses. */
+    assert_int_equal(css_resolve(sh, "h1", NULL, NULL, 0, NULL, 0).color, 0x0f0f0f);
     css_free(sh);
 }
 
@@ -228,6 +312,11 @@ int main(void) {
         cmocka_unit_test(test_cascade_document_order),
         cmocka_unit_test(test_cascade_inline_wins),
         cmocka_unit_test(test_at_rules_skipped),
+        cmocka_unit_test(test_media_screen_and_print),
+        cmocka_unit_test(test_media_prefers_color_scheme),
+        cmocka_unit_test(test_media_width_queries),
+        cmocka_unit_test(test_media_and_or),
+        cmocka_unit_test(test_media_unknown_fails_closed),
         cmocka_unit_test(test_parse_null_args),
         cmocka_unit_test(test_resolve_null_safe),
     };

@@ -1078,15 +1078,15 @@ static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t 
 }
 
 pv_status pv_build(const hp_document *doc, pv_view **out) {
-    return pv_build_full(doc, 0, 0, out); /* JS off by default: <noscript> fallback shown */
+    return pv_build_full(doc, 0, 0, 0, out); /* JS off by default: <noscript> fallback shown */
 }
 
 pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
-    return pv_build_full(doc, js_enabled, 0, out);
+    return pv_build_full(doc, js_enabled, 0, 0, out);
 }
 
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
-                        pv_view **out) {
+                        int prefers_dark, pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
 
@@ -1105,7 +1105,10 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
     size_t style_len = 0;
     char *style_text = collect_style_text(root, &style_len);
     css_sheet *sheet = NULL;
-    (void)css_parse(style_text, style_len, &sheet);
+    /* @media gated against the user's color scheme (auto dark mode) and a fixed,
+     * normalized desktop width (no real viewport size leaks). Screen context. */
+    css_media media = { prefers_dark ? 1 : 0, 0, CSS_MEDIA_DEFAULT_WIDTH };
+    (void)css_parse_media(style_text, style_len, &media, &sheet);
     free(style_text);
 
     const lxb_dom_node_t *prev_block = NULL;

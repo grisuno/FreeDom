@@ -343,23 +343,177 @@ static size_t skip_at_rule(const char *s, size_t i, size_t n) {
     return i;
 }
 
-static void parse_sheet(css_sheet *sh, const char *s, size_t n) {
-    size_t i = 0;
-    while (i < n) {
-        while (i < n && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r')) ++i;
-        if (i >= n) break;
-        if (s[i] == '@') { i = skip_at_rule(s, i, n); continue; }
+/* Index just past the '}' that closes the block whose '{' is at s[open]. n if
+ * unbalanced. */
+static size_t block_end(const char *s, size_t open, size_t n) {
+    int depth = 0;
+    for (size_t i = open; i < n; ++i) {
+        if (s[i] == '{') ++depth;
+        else if (s[i] == '}') { --depth; if (depth == 0) return i + 1; }
+    }
+    return n;
+}
+
+/* --- @media query evaluation (Hito 23b). All inputs are bounded substrings; the
+ * query never fetches and unknown features fail closed (do not match). --- */
+
+#define CSS_MEDIA_TOK 128u
+
+/* Leading non-negative integer of a length value ("600px" -> 600), unit ignored. */
+static int css_px(const char *v) {
+    double d;
+    const char *e;
+    return parse_num(v, &d, &e) ? (int)(d + 0.5) : 0;
+}
+
+/* Trims ASCII spaces/tabs from both ends of a NUL-terminated string, in place. */
+static void trim_inplace(char *s) {
+    size_t a = 0;
+    while (s[a] == ' ' || s[a] == '\t') ++a;
+    size_t n = strlen(s + a);
+    memmove(s, s + a, n + 1);
+    while (n > 0 && (s[n-1] == ' ' || s[n-1] == '\t')) s[--n] = '\0';
+}
+
+/* Lowercased, trimmed copy of s[a,b) into dst; SIZE_MAX if it does not fit. */
+static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
+    size_t n = copy_trim(s, a, b, dst, cap);
+    if (n == (size_t)-1) return (size_t)-1;
+    for (size_t i = 0; i < n; ++i) dst[i] = lower(dst[i]);
+    return n;
+}
+
+/* One media part: a type word ("screen"/"print"/"all") or a "(feature: value)".
+ * p is already lowercased and trimmed. Unknown -> 0 (fail closed). */
+static int media_part_matches(const char *p, const css_media *m) {
+    if (p[0] == '(') {
+        size_t L = strlen(p);
+        if (L < 2 || p[L-1] != ')') return 0;
+        char inner[CSS_MEDIA_TOK];
+        size_t k = 0;
+        for (size_t i = 1; i + 1 < L && k + 1 < sizeof inner; ++i) inner[k++] = p[i];
+        inner[k] = '\0';
+        char *colon = strchr(inner, ':');
+        if (colon == NULL) return 0;  /* boolean feature (e.g. "(color)"): fail closed */
+        *colon = '\0';
+        char *name = inner, *value = colon + 1;
+        trim_inplace(name);
+        trim_inplace(value);
+        if (strcmp(name, "prefers-color-scheme") == 0)
+            return (strcmp(value, "dark") == 0)  ? (m->prefers_dark ? 1 : 0)
+                 : (strcmp(value, "light") == 0) ? (m->prefers_dark ? 0 : 1) : 0;
+        if (strcmp(name, "min-width") == 0) return m->width_px >= css_px(value);
+        if (strcmp(name, "max-width") == 0) return m->width_px <= css_px(value);
+        return 0;  /* unknown feature: fail closed */
+    }
+    if (strcmp(p, "all") == 0) return 1;
+    if (strcmp(p, "screen") == 0) return m->print ? 0 : 1;
+    if (strcmp(p, "print") == 0) return m->print ? 1 : 0;
+    return 0;  /* unknown media type: fail closed */
+}
+
+/* One media query segment (between commas): an AND of parts. `not`/`or`/unknown
+ * fail closed. An empty segment matches (all). */
+static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m) {
+    int result = 1, any = 0;
+    size_t i = a;
+    while (i < b) {
+        while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
+        if (i >= b) break;
+        size_t ts = i;
+        char buf[CSS_MEDIA_TOK];
+        if (s[i] == '(') {
+            int d = 0;
+            while (i < b) {
+                if (s[i] == '(') ++d;
+                else if (s[i] == ')') { ++i; if (--d == 0) break; continue; }
+                ++i;
+            }
+            if (copy_lower_trim(s, ts, i, buf, sizeof buf) == (size_t)-1) return 0;
+            if (!media_part_matches(buf, m)) result = 0;
+            any = 1;
+        } else {
+            size_t we = i;
+            while (we < b && s[we] != ' ' && s[we] != '\t' && s[we] != '(') ++we;
+            if (copy_lower_trim(s, ts, we, buf, sizeof buf) == (size_t)-1) return 0;
+            i = we;
+            if (strcmp(buf, "and") == 0 || strcmp(buf, "only") == 0) {
+                /* connector / legacy keyword: ignore */
+            } else if (strcmp(buf, "not") == 0 || strcmp(buf, "or") == 0) {
+                return 0;  /* negation / level-4 or: fail closed */
+            } else {
+                if (!media_part_matches(buf, m)) result = 0;
+                any = 1;
+            }
+        }
+    }
+    return any ? result : 1;
+}
+
+/* A media query list s[a,b): comma-separated segments OR'd together. */
+static int media_matches(const char *s, size_t a, size_t b, const css_media *m) {
+    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+    if (a >= b) return 1;  /* empty query == all */
+    size_t i = a;
+    while (i < b) {
+        size_t seg = i;
+        while (i < b && s[i] != ',') ++i;
+        if (media_segment_matches(s, seg, i, m)) return 1;
+        if (i < b) ++i;
+    }
+    return 0;
+}
+
+/* True when s[i] ('@') begins an "@media" at-rule. */
+static int at_is_media(const char *s, size_t i, size_t n) {
+    static const char kw[5] = { 'm', 'e', 'd', 'i', 'a' };
+    if (i + 6 > n) return 0;
+    for (int k = 0; k < 5; ++k) if (lower(s[i + 1 + k]) != kw[k]) return 0;
+    size_t j = i + 6;
+    return j >= n || s[j] == ' ' || s[j] == '\t' || s[j] == '\n' || s[j] == '\r'
+        || s[j] == '{' || s[j] == '(';
+}
+
+#define CSS_MEDIA_MAX_DEPTH 4
+
+/* Parses rules in s[start,end). A matched @media block is descended into (bounded
+ * depth); @import/@font-face/other @-rules and a non-matching @media are skipped. */
+static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+                        const css_media *media, int depth) {
+    size_t i = start;
+    while (i < end) {
+        while (i < end && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r')) ++i;
+        if (i >= end) break;
+        if (s[i] == '@') {
+            if (at_is_media(s, i, end)) {
+                size_t q = i + 6;
+                while (q < end && s[q] != '{' && s[q] != ';') ++q;
+                if (q < end && s[q] == '{') {
+                    size_t be = block_end(s, q, end);     /* past the closing '}' */
+                    size_t body_start = q + 1;
+                    size_t body_end = (be > body_start) ? be - 1 : body_start;
+                    if (depth < CSS_MEDIA_MAX_DEPTH && media_matches(s, i + 6, q, media))
+                        parse_block(sh, s, body_start, body_end, media, depth + 1);
+                    i = be;
+                    continue;
+                }
+                i = (q < end && s[q] == ';') ? q + 1 : end;  /* @media with no block */
+                continue;
+            }
+            i = skip_at_rule(s, i, end);
+            continue;
+        }
         if (s[i] == '}') { ++i; continue; }  /* stray */
 
         size_t ss = i;
-        while (i < n && s[i] != '{' && s[i] != '}') ++i;
-        if (i >= n || s[i] != '{') { if (i < n && s[i] == '}') ++i; continue; }
+        while (i < end && s[i] != '{' && s[i] != '}') ++i;
+        if (i >= end || s[i] != '{') { if (i < end && s[i] == '}') ++i; continue; }
         size_t se = i;     /* at '{' */
         ++i;
         size_t ds = i;
-        while (i < n && s[i] != '}') ++i;
+        while (i < end && s[i] != '}') ++i;
         size_t de = i;     /* at '}' or end */
-        if (i < n) ++i;
+        if (i < end) ++i;
         add_rule(sh, s, ss, se, ds, de);
     }
 }
@@ -386,15 +540,22 @@ static char *strip_comments(const char *text, size_t len, size_t *outlen) {
 }
 
 css_status css_parse(const char *text, size_t len, css_sheet **out) {
+    return css_parse_media(text, len, NULL, out);
+}
+
+css_status css_parse_media(const char *text, size_t len, const css_media *media,
+                           css_sheet **out) {
     if (out == NULL) return CSS_ERR_NULL_ARG;
     css_sheet *sh = (css_sheet *)calloc(1, sizeof *sh);
     if (sh == NULL) return CSS_ERR_OOM;
+    css_media def = { 0, 0, CSS_MEDIA_DEFAULT_WIDTH };  /* screen / light / desktop */
+    const css_media *m = (media != NULL) ? media : &def;
     if (text != NULL) {
         if (len == 0) len = strlen(text);
         size_t clen = 0;
         char *clean = strip_comments(text, len, &clen);
         if (clean == NULL) { free(sh); return CSS_ERR_OOM; }
-        parse_sheet(sh, clean, clen);
+        parse_block(sh, clean, 0, clen, m, 0);
         free(clean);
     }
     *out = sh;

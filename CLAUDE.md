@@ -194,7 +194,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`font-weight`/`font-style`/`display`; selectores simples/compuestos; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
-| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos, sin combinadores; whitelist de propiedades). Contenido hostil: descarta `url(` y `@`-reglas (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. La presentación sigue gateada por `caps.css`. |
+| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos, sin combinadores; whitelist de propiedades). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. La presentación sigue gateada por `caps.css`. |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
 | Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
@@ -523,6 +523,24 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `display:none` de `<style>` surte efecto). *(Módulos puros + IPC verificados bajo test/ASan/fuzz;
   ruta GUI compila endurecida, verificación visual Wayland pendiente al dueño.)* Ver
   `[[freedom-author-css-direction]]`.
+- **Hito 23b (parte 1) — `@media` + `prefers-color-scheme` (modo oscuro automático).** El parser `css`
+  deja de **descartar** `@media`: ahora lo **evalúa en tiempo de parseo** contra un contexto `css_media`
+  (`css_parse_media`) y conserva las reglas internas **solo si la consulta matchea**. Subconjunto:
+  tipos `screen`/`print`/`all` (+ `only` ignorado), `(prefers-color-scheme: dark|light)`,
+  `(min-width|max-width: Npx)` contra un **ancho normalizado fijo (1920px, anti-fingerprint —
+  el worker no conoce el ancho real)`; lista por comas = **OR**, partes con `and` = **AND**.
+  **Falla cerrado:** `not`, tipos/features desconocidos y profundidad de anidamiento > 4 no matchean —
+  nunca se aplica una regla que no se puede gatear bien. `@import`/`@font-face`/otras `@`-reglas siguen
+  descartadas (cero red). El flag `prefers_dark` se hila GUI→worker (OP_LOAD gana un 3er byte:
+  `[op][run_js][reader][dark][len][html]`; `pv_build_full`/`tab_load_full` ganan el parámetro), derivado
+  del tema oscuro; cambiar de tema con `caps.css` activo re-renderiza desde caché (sin red) para aplicar
+  el CSS dark del autor. `@media print` se excluye correctamente de la vista de pantalla (rendering a
+  PDF queda para después). Spec (`css.md`, `page_view.md`, `tab.md`) + tests (5 nuevos en `css`:
+  screen/print, prefers-color-scheme, width, and/or, fail-closed; 1 en `page_view`) + `make test`
+  (35 suites) / `make asan` (35, exit 0) limpios + `fuzz-css`/`fuzz-pv` (contexto `@media` variado) sin
+  crash/leak/UB. *(Módulo puro + IPC verificados; ruta GUI compila endurecida, verificación visual
+  Wayland pendiente al dueño.)* **Pendiente (Hito 23b parte 2):** `position` relative/absolute/sticky,
+  flex/grid desde `<style>`, render de `@media print` al PDF. Ver `[[freedom-author-css-direction]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -555,11 +573,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`
   (`nr_realm_allows_http`); autenticación de onion services v3 con clave; **stream isolation** por
   pestaña/origen (circuitos Tor separados); unificar i2pd/router-Java; indicador de realm en el chrome.
-- **Hito 23b — CSS de autor: más cobertura.** (Hito 23, base, ya cerrado arriba.) Falta: **combinadores**
-  (descendiente/hijo/hermano) y pseudo-clases/selectores de atributo; **box model de autor**
+- **Hito 23b parte 2 — CSS de autor: más cobertura.** (Parte 1, `@media` + `prefers-color-scheme`, ya
+  cerrada arriba.) Falta: **`position`** relative/absolute/sticky y **box model de autor**
   (margin/padding/width/border — hoy gobierna el UA); flex/grid **desde `<style>`** (hoy solo inline);
-  `line-height`/`text-decoration`/`letter-spacing`; `!important`; persistir el toggle de estilos de autor
-  y el modo reader con el Hito 10.
+  render de `@media print` al PDF; **combinadores** (descendiente/hijo/hermano) y pseudo-clases/selectores
+  de atributo; `line-height`/`text-decoration`/`letter-spacing`; `!important`; persistir el toggle de
+  estilos de autor y el modo reader con el Hito 10.
 - **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo (ver Hito 23b); JS-vivo
   (mutación DOM → repintado, eventos, timers); otros formatos de imagen
   (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación); `pledge`/`unveil` en

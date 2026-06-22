@@ -14,9 +14,10 @@ and is not gated (doctrine: "Layout != estilo de autor").
 
 ## Security posture (non-negotiable)
 
-- **Never phones home.** Any declaration whose value contains `url(` is dropped,
-  and all `@`-rules (`@import`, `@font-face`, `@media`, ...) are skipped. So author
-  CSS can never trigger a network fetch or a tracking beacon.
+- **Never phones home.** Any declaration whose value contains `url(` is dropped, and
+  the network/font `@`-rules (`@import`, `@font-face`, ...) are skipped. `@media` is
+  **parsed** (a safe subset, see below) but can only gate which *local* rules apply;
+  it never fetches. So author CSS can never trigger a network fetch or a tracking beacon.
 - **Bounded (anti-DoS).** Rules, selectors and declarations are capped; over-long
   tokens are ignored. A pathological stylesheet cannot exhaust memory or time.
 - **Fail closed.** An unparseable selector or declaration is dropped, never
@@ -44,6 +45,21 @@ Specificity = `100*has_id + 10*nclasses + has_type`.
 | `font-weight` | `bold`: `bold`/`bolder` or numeric ≥ 600 → 1; `normal`/`lighter`/< 600 → 0 |
 | `font-style` | `italic`: `italic`/`oblique` → 1; `normal` → 0 |
 | `display` | `display`: `none`/`block`/`inline`/`inline-block`/`flex`/`grid`/other |
+
+**`@media` (Hito 23b).** A `@media <query> { ... }` block is **parsed**, not dropped: its
+inner rules are kept **only if the query matches** the render-time `css_media` context
+(`css_parse_media`), evaluated at parse time. Supported query features:
+
+- media **types** `screen` / `print` / `all` (and a leading `only`, which is ignored);
+- `(prefers-color-scheme: dark|light)` — matches `media.prefers_dark` (auto dark mode);
+- `(min-width: Npx)` / `(max-width: Npx)` — compared against `media.width_px` (a fixed,
+  normalized desktop width, so it leaks no real viewport size — anti-fingerprinting).
+
+A query list is comma-separated (**OR**); within a query, parts are joined by `and`
+(**AND**). **Fail closed:** `not`, unknown media types, and unknown features make that
+query (segment) **not match** — Freedom never applies a rule it cannot correctly gate.
+Nested `@media` and any other `@`-rule inside a matched block are skipped. `@import` /
+`@font-face` / other top-level `@`-rules are still skipped entirely (no network/font surface).
 
 ## Types
 
@@ -73,6 +89,16 @@ typedef struct css_style {
 } css_style;
 
 typedef struct css_sheet css_sheet;   /* opaque, owns the parsed rules */
+
+/* Render-time media context for evaluating @media at parse time. width_px is a
+ * fixed, normalized desktop width (no real viewport size leaks). */
+typedef struct css_media {
+    int prefers_dark; /* 1: user prefers a dark color scheme */
+    int print;        /* 1: rendering for print (PDF); 0: screen */
+    int width_px;     /* assumed viewport width for min/max-width (default 1920) */
+} css_media;
+
+#define CSS_MEDIA_DEFAULT_WIDTH 1920
 ```
 
 ## API
@@ -83,7 +109,15 @@ Parses a `<style>` text (one or many blocks concatenated) into `*out`. Malformed
 input never fails: unparseable rules are skipped (`*out` holds what parsed).
 `text == NULL` is treated as empty. `out == NULL` => `CSS_ERR_NULL_ARG`; an
 allocation failure => `CSS_ERR_OOM`. On `CSS_OK`, `*out` must be freed with
-`css_free`. An empty/whitespace text yields a valid empty sheet.
+`css_free`. An empty/whitespace text yields a valid empty sheet. Equivalent to
+`css_parse_media` with a default **screen / light / 1920px** context (so plain
+`@media screen`/`(min-width:…)` blocks apply, `prefers-color-scheme: dark` does not).
+
+### `css_status css_parse_media(const char *text, size_t len, const css_media *media, css_sheet **out)`
+
+As `css_parse`, but `@media` blocks are gated against `media` (see *Supported subset*).
+`media == NULL` uses the default screen/light/1920px context. The matched rules are
+folded into the sheet as if unconditional, so `css_resolve` is unchanged.
 
 ### `void css_free(css_sheet *s)`
 
@@ -125,6 +159,10 @@ common case.)
   governs spacing. `display:flex|grid` *parameters* (gap/justify/columns) keep
   coming from page_view's existing inline parser; `<style>`-driven flex/grid
   parameters are not wired in v1 (only `display:none` from `<style>` takes effect).
-- `url()` anything, `@`-rules, `calc()`, `var()`, custom properties, `!important`
-  precedence (the token is stripped; it does not raise precedence).
+- `url()` anything, `@import`/`@font-face`/other `@`-rules, `calc()`, `var()`, custom
+  properties, `!important` precedence (the token is stripped; it does not raise it).
+  `@media` is supported (subset above); `not`/unknown features fail closed.
+- `position` (relative/absolute/sticky) and other layout/box properties — deferred to
+  the layout milestone (Hito 23b-2); `@media print` *rendering* into the PDF is deferred
+  (print-only rules are correctly excluded from the screen view today).
 - text-decoration, line-height, letter-spacing, and the rest of CSS.

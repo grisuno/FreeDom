@@ -824,6 +824,27 @@ static void test_build_style_sheet_color(void **state) {
     hp_document_free(doc);
 }
 
+/* @media(prefers-color-scheme: dark) in a <style> applies only when pv_build_full is
+ * told the user prefers dark (auto dark mode threaded through to the css module). */
+static void test_build_prefers_color_scheme(void **state) {
+    (void)state;
+    const char *html =
+        "<body><style>@media (prefers-color-scheme: dark){ p { color:#ffffff } }</style>"
+        "<p>auto</p></body>";
+    hp_document *doc = parse(html);
+
+    pv_view *light = NULL;
+    assert_int_equal(pv_build_full(doc, 0, 0, 0, &light), PV_OK); /* prefers_dark = 0 */
+    assert_int_equal(find_text(light, "auto")->fg_rgb, -1);
+    pv_free(light);
+
+    pv_view *dark = NULL;
+    assert_int_equal(pv_build_full(doc, 0, 0, 1, &dark), PV_OK); /* prefers_dark = 1 */
+    assert_int_equal(find_text(dark, "auto")->fg_rgb, 0xffffff);
+    pv_free(dark);
+    hp_document_free(doc);
+}
+
 /* text-align and font-size resolve into the new run fields, from both a <style>
  * sheet and inline style=. */
 static void test_build_text_align_and_font_size(void **state) {
@@ -900,7 +921,7 @@ static void test_build_reader_skips_boilerplate(void **state) {
     hp_document *doc = parse(html);
 
     pv_view *r = NULL;
-    assert_int_equal(pv_build_full(doc, 0, 1, &r), PV_OK); /* reader on */
+    assert_int_equal(pv_build_full(doc, 0, 1, 0, &r), PV_OK); /* reader on */
     assert_non_null(find_text(r, "main content"));
     assert_null(find_text(r, "navlink"));
     assert_null(find_text(r, "site header"));
@@ -909,7 +930,7 @@ static void test_build_reader_skips_boilerplate(void **state) {
     pv_free(r);
 
     pv_view *n = NULL;
-    assert_int_equal(pv_build_full(doc, 0, 0, &n), PV_OK); /* reader off */
+    assert_int_equal(pv_build_full(doc, 0, 0, 0, &n), PV_OK); /* reader off */
     assert_non_null(find_text(n, "navlink"));
     assert_non_null(find_text(n, "main content"));
     pv_free(n);
@@ -976,6 +997,7 @@ int main(void) {
         cmocka_unit_test(test_build_control_without_form),
         cmocka_unit_test(test_build_two_forms_distinct_groups),
         cmocka_unit_test(test_build_style_sheet_color),
+        cmocka_unit_test(test_build_prefers_color_scheme),
         cmocka_unit_test(test_build_text_align_and_font_size),
         cmocka_unit_test(test_build_css_bold_and_inline_wins),
         cmocka_unit_test(test_build_display_none_hidden),

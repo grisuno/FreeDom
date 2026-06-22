@@ -63,11 +63,30 @@ typedef struct css_style {
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */
 
+/* Render-time media context for evaluating @media at parse time. width_px is a
+ * fixed, normalized desktop width, so a (min/max-width) query leaks no real viewport
+ * size (anti-fingerprinting). */
+typedef struct css_media {
+    int prefers_dark; /* 1: the user prefers a dark color scheme */
+    int print;        /* 1: rendering for print (PDF); 0: screen */
+    int width_px;     /* assumed viewport width for min/max-width queries */
+} css_media;
+
+#define CSS_MEDIA_DEFAULT_WIDTH 1920
+
 /* Parses a <style> text (one or many blocks concatenated) into *out. Malformed
  * input never fails: unparseable rules are skipped. text == NULL is treated as
  * empty. out == NULL => CSS_ERR_NULL_ARG; allocation failure => CSS_ERR_OOM. On
- * CSS_OK, *out must be freed with css_free. */
+ * CSS_OK, *out must be freed with css_free. Equivalent to css_parse_media with a
+ * default screen / light / 1920px context. */
 css_status css_parse(const char *text, size_t len, css_sheet **out);
+
+/* As css_parse, but @media blocks are gated against *media (prefers-color-scheme,
+ * screen/print/all, min/max-width). media == NULL uses the default screen/light/
+ * 1920px context. Matched @media rules fold into the sheet as if unconditional, so
+ * css_resolve is unchanged. @import/@font-face/other @-rules are still skipped. */
+css_status css_parse_media(const char *text, size_t len, const css_media *media,
+                           css_sheet **out);
 
 /* Idempotent; NULL-safe. */
 void css_free(css_sheet *s);

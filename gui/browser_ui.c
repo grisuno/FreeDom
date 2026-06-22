@@ -1344,10 +1344,12 @@ static void render_current(browser_window *w) {
 
     tab_page page;
     memset(&page, 0, sizeof page);
-    /* Distraction-free mode drops boilerplate in the worker (reader flag to
-     * pv_build_full). */
-    if (tab_load_full(t, w->cur_html, w->cur_html_len, w->caps.js, w->reader, &page)
-        != TAB_OK) {
+    /* Distraction-free mode drops boilerplate in the worker (reader flag); the dark
+     * theme makes the author's @media(prefers-color-scheme:dark) rules apply (auto
+     * dark mode). Reader forces a clean view, so it never reports a dark preference. */
+    int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
+    if (tab_load_full(t, w->cur_html, w->cur_html_len, w->caps.js, w->reader,
+                      prefers_dark, &page) != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
         tab_close(t);
         return;
@@ -2986,6 +2988,10 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         /* Clicking the active palette returns to light; otherwise select it. */
         w->theme_mode = (w->theme_mode == it->theme_val) ? UI_THEME_LIGHT : it->theme_val;
         apply_theme(w);
+        /* With author styles on, the color scheme drives the page's own
+         * @media(prefers-color-scheme) CSS, so re-render from cache (no network) to
+         * pick up its dark/light rules. Otherwise a repaint suffices. */
+        if (w->caps.css && w->cur_html != NULL) render_current(w);
         return;
     }
     if (it->action == UI_MENU_FORCE) {

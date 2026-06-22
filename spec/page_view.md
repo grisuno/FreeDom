@@ -79,10 +79,17 @@ independiente de `caps.css` (el contenido oculto sigue oculto, como el caso `dis
 `font-weight`/`font-style` del autor, cuando el ancestro más cercano los fija, ganan al énfasis por
 etiqueta (`<b>`/`<em>`); si no, sigue el énfasis por etiqueta.
 
-**Modo sin distracciones (reader).** `pv_build_full(doc, js, reader, out)` con `reader != 0` descarta
-los subárboles de chrome (`<nav>`/`<header>`/`<footer>`/`<aside>`, `in_boilerplate_subtree`) y emite
-solo el contenido principal. Determinista, no extracción heurística de artículo. La hoja de autor se
-sigue resolviendo; el orquestador decide aplicarla o no (en reader apaga `caps.css`/imágenes).
+**Modo sin distracciones (reader).** `pv_build_full(doc, js, reader, prefers_dark, out)` con
+`reader != 0` descarta los subárboles de chrome (`<nav>`/`<header>`/`<footer>`/`<aside>`,
+`in_boilerplate_subtree`) y emite solo el contenido principal. Determinista, no extracción heurística
+de artículo. La hoja de autor se sigue resolviendo; el orquestador decide aplicarla o no (en reader
+apaga `caps.css`/imágenes).
+
+**Modo oscuro automático (Hito 23b).** `prefers_dark` se pasa a `css_parse_media` como contexto de
+medios: con `prefers_dark != 0`, las reglas del autor bajo `@media (prefers-color-scheme: dark)` se
+aplican (`screen`, `min/max-width` contra un ancho normalizado de 1920px, `print` excluido en pantalla).
+El worker no conoce el ancho real de la ventana (anti-fingerprint); la GUI deriva `prefers_dark` del
+tema oscuro y re-renderiza desde caché al cambiar de tema (con `caps.css` activo).
 
 **Background-color del autor (`bg_rgb`):** se extrae solo del longhand `background-color:` del atributo
 `style` (el shorthand `background` y el atributo legacy `bgcolor` quedan fuera de alcance), parseado
@@ -103,10 +110,10 @@ campos en el último run. El `background` shorthand y `bgcolor` legacy siguen fu
 ## 3. API
 
 ```c
-pv_status pv_build(const hp_document *doc, pv_view **out); /* == pv_build_full(doc,0,0,out) */
-pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out); /* reader=0 */
+pv_status pv_build(const hp_document *doc, pv_view **out); /* == pv_build_full(doc,0,0,0,out) */
+pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out); /* reader=0, prefers_dark=0 */
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,   /* reader: sin distracciones */
-                        pv_view **out);
+                        int prefers_dark, pv_view **out);                     /* prefers_dark: auto dark mode */
 pv_view  *pv_new(void);                                    /* vista vacía (deserializador IPC) */
 pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     const char *text, const char *href);   /* texto/enlace; copia text/href */
