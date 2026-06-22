@@ -51,6 +51,13 @@ typedef struct tab_page {
     char    *text;      /* NUL-terminated; may be NULL */
     size_t   text_len;
     pv_view *view;      /* owned display list; may be NULL */
+    /* JS-requested navigation (Hito 20e): a resolved, policy-gated https/file target
+     * the page's JS asked to navigate to (location.href= / assign / replace / reload),
+     * or NULL when none. nav_replace mirrors location.replace (history semantics). The
+     * parent already gated the worker's raw request with ln_resolve; the caller still
+     * drives it through the normal load path, re-applying ALL network policy. */
+    char    *nav_url;
+    int      nav_replace;
 } tab_page;
 
 /* Result of evaluating script: the value, or a JS error message. */
@@ -89,13 +96,16 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);
  * tab_load is tab_load_ex with run_js == 0. */
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out);
 
-/* As tab_load_ex, plus a distraction-free (reader) flag and the user's color-scheme
- * preference (prefers_dark), both forwarded to pv_build_full: reader drops boilerplate
+/* As tab_load_ex, plus the page's URL, a distraction-free (reader) flag and the user's
+ * color-scheme preference (prefers_dark). page_url (NULL allowed) backs the page JS's
+ * real `location.*` AND is the trusted base that gates any JS-requested navigation
+ * (ln_resolve): out->nav_url is set only to a resolved, policy-allowed target. reader
+ * and prefers_dark are forwarded to pv_build_full: reader drops boilerplate
  * (<nav>/<header>/<footer>/<aside>); prefers_dark gates the author's
  * @media(prefers-color-scheme) rules (auto dark mode). tab_load_ex is tab_load_full
- * with reader == 0 and prefers_dark == 0. */
-tab_status tab_load_full(tab *t, const char *html, size_t len, int run_js, int reader,
-                         int prefers_dark, tab_page *out);
+ * with page_url == NULL, reader == 0 and prefers_dark == 0. */
+tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+                         int run_js, int reader, int prefers_dark, tab_page *out);
 
 /* Evaluates untrusted JS in the tab's current context (sees the loaded DOM,
  * navigator/screen/performance, canvas/audio). A JS-level error is reported via

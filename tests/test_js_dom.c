@@ -19,6 +19,7 @@
 #include "html_parse.h"
 #include "js_dom.h"
 #include "js_sandbox.h"
+#include "url.h"
 
 static const char HTML[] =
     "<!DOCTYPE html><html><head><title>T</title></head>"
@@ -304,6 +305,106 @@ static void test_ambient_apis_do_not_throw(void **state) {
         "typeof history.pushState + typeof location.protocol", "functionstring");
 }
 
+/* --- real location + JS navigation capture (Hito 20e parte 1) --- */
+
+/* Installs a real https location on the fixture context from url. */
+static void set_https_location(fixture *f, const char *url) {
+    url_parts parts;
+    assert_int_equal(url_split(url, &parts), URL_OK);
+    assert_int_equal(jd_set_location(f->ctx, url, &parts), JD_OK);
+}
+
+static void test_location_reads_real_components(void **state) {
+    fixture *f = (fixture *)*state;
+    set_https_location(f, "https://example.com:8443/p/q?x=1#f");
+    EXPECT(f, "location.href", "https://example.com:8443/p/q?x=1#f");
+    EXPECT(f, "location.protocol", "https:");
+    EXPECT(f, "location.host", "example.com:8443");
+    EXPECT(f, "location.hostname", "example.com");
+    EXPECT(f, "location.port", "8443");
+    EXPECT(f, "location.pathname", "/p/q");
+    EXPECT(f, "location.search", "?x=1");
+    EXPECT(f, "location.hash", "#f");
+    EXPECT(f, "location.origin", "https://example.com:8443");
+    /* document.location / document.URL mirror it. */
+    EXPECT(f, "document.location.hostname", "example.com");
+    EXPECT(f, "document.URL", "https://example.com:8443/p/q?x=1#f");
+}
+
+static void test_location_pathname_defaults_slash(void **state) {
+    fixture *f = (fixture *)*state;
+    set_https_location(f, "https://bare.test");
+    EXPECT(f, "location.pathname", "/");   /* empty path presented as "/" */
+    EXPECT(f, "location.search", "");
+    EXPECT(f, "location.port", "");
+}
+
+static void test_location_href_set_captures_raw(void **state) {
+    fixture *f = (fixture *)*state;
+    set_https_location(f, "https://example.com/a/b");
+    js_result r;
+    assert_int_equal(run(f, "location.href='/next';", &r), JS_OK);
+    js_result_free(&r);
+    char buf[256]; int replace = 7;
+    assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 1);
+    assert_string_equal(buf, "/next");   /* RAW, unresolved: the parent gates it */
+    assert_int_equal(replace, 0);
+    /* taking it clears it: a second take reports none. */
+    assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 0);
+}
+
+static void test_location_replace_sets_replace_flag(void **state) {
+    fixture *f = (fixture *)*state;
+    set_https_location(f, "https://example.com/");
+    js_result r;
+    assert_int_equal(run(f, "location.replace('https://other.test/x');", &r), JS_OK);
+    js_result_free(&r);
+    char buf[256]; int replace = 0;
+    assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 1);
+    assert_string_equal(buf, "https://other.test/x");
+    assert_int_equal(replace, 1);
+}
+
+static void test_location_assign_and_window_last_wins(void **state) {
+    fixture *f = (fixture *)*state;
+    set_https_location(f, "https://example.com/");
+    js_result r;
+    assert_int_equal(run(f, "location.assign('first'); window.location='second';", &r), JS_OK);
+    js_result_free(&r);
+    char buf[256]; int replace = 1;
+    assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 1);
+    assert_string_equal(buf, "second");  /* last assignment wins */
+    assert_int_equal(replace, 0);
+}
+
+static void test_no_nav_request_when_idle(void **state) {
+    fixture *f = (fixture *)*state;
+    set_https_location(f, "https://example.com/");
+    char buf[256]; int replace = 9;
+    assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 0);
+}
+
+/* A local (file) page has no https parts but still captures navigation requests,
+ * so the parent can resolve them against the file base. */
+static void test_local_page_captures_nav(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_set_location(f->ctx, "file:///docs/index.html", NULL), JD_OK);
+    EXPECT(f, "location.href", "file:///docs/index.html");
+    js_result r;
+    assert_int_equal(run(f, "location.href='sub.html';", &r), JS_OK);
+    js_result_free(&r);
+    char buf[256]; int replace = 0;
+    assert_int_equal(jd_take_nav_request(f->ctx, buf, sizeof buf, &replace), 1);
+    assert_string_equal(buf, "sub.html");
+}
+
+static void test_set_location_null_ctx(void **state) {
+    (void)state;
+    char buf[8]; int replace = 0;
+    assert_int_equal(jd_set_location(NULL, "https://x", NULL), JD_ERR_NULL_ARG);
+    assert_int_equal(jd_take_nav_request(NULL, buf, sizeof buf, &replace), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
@@ -330,6 +431,14 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_storage_is_ephemeral, setup, teardown),
         cmocka_unit_test_setup_teardown(test_cookie_and_referrer_leak_nothing, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ambient_apis_do_not_throw, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_location_reads_real_components, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_location_pathname_defaults_slash, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_location_href_set_captures_raw, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_location_replace_sets_replace_flag, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_location_assign_and_window_last_wins, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_no_nav_request_when_idle, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_local_page_captures_nav, setup, teardown),
+        cmocka_unit_test(test_set_location_null_ctx),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

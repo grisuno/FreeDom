@@ -242,10 +242,16 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   oculta con JS on. **`innerHTML`** (setter) re-parsea un fragmento, detacha los hijos viejos e indexa
   el subárbol nuevo (memory-safe). **Superficie ambiente identity-safe** (Hito 20d): `localStorage`/
   `sessionStorage` **efímeros en memoria** (Zero Knowledge — nunca persisten), `document.cookie` (get
-  `""`/set no-op), `document.referrer` `""`, `history`/`location` stubs no-op — para que el JS de
-  detección **corra sin lanzar** sin filtrar identidad. **Fuera de alcance:** eventos interactivos
-  (clic), timers async reales, scripts externos (`src`), navegación por `location`, getter de
-  `innerHTML`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir el
+  `""`/set no-op), `document.referrer` `""`, `history` stub no-op — para que el JS de
+  detección **corra sin lanzar** sin filtrar identidad. **`location` real + navegación por JS**
+  (Hito 20e parte 1): el worker recibe la URL de la página, inyecta `__locParts` **en C** (`url_split`;
+  la URL hostil nunca se interpola en JS) y expone un `location` real de **solo lectura**; las
+  escrituras que navegan (`location.href=`/`assign`/`replace`/`reload`/`window.location=`) solo
+  **registran la string cruda** — **el padre confiable la gatea** con `ln_resolve(URL_real, cruda)` (un
+  worker comprometido no puede colar `file://`/downgrade) y la GUI navega por el camino normal
+  (re-aplica TODA la política), con cap anti-bucle. **Fuera de alcance (parte 2):** eventos
+  interactivos (clic), timers async reales, scripts externos (`src`), getter de `innerHTML`, scroll a
+  ancla `#id`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir el
   storage ni poblar cookie/referrer con datos reales (rompería Zero Knowledge). Ver `[[freedom-live-js]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
   (`Ctrl+I`). Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie
@@ -469,6 +475,30 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   de identidad), así que su muro "enable JavaScript" puede persistir; la barra ya enruta búsquedas a
   DuckDuckGo HTML (Hito 18). *(Núcleo + ejecución verificados; integración visual GUI pendiente al
   dueño.)* Ver `[[freedom-live-js]]`.
+- **Hito 20e parte 1 — JS vivo: `location.*` reales + navegación por JS.** El worker conoce la URL de
+  la página y la inyecta para que el JS lea su `location` real, y captura la **navegación por JS**
+  gateada con la misma política pura que un clic. (a) **`url_split` (puro, zero-copy):** descompone una
+  https absoluta en componentes WHATWG-location (`href`/`protocol`/`origin`/`host`/`hostname`/`port`/
+  `pathname`/`search`/`hash`), cada campo aliasando la entrada; reusa `url_authority_len`. https-only,
+  fail-closed. (b) **`js_dom`:** `jd_set_location` construye `__locParts` **en C** (la URL hostil
+  **nunca** se interpola en JS) e instala un `location`/`document.location`/`document.URL` real de solo
+  lectura; las escrituras que navegan (`location.href=`/`assign`/`replace`/`reload`/`window.location=`)
+  **no ejecutan nada**: registran la **string cruda** en `__navReq`; `jd_take_nav_request` la lee y
+  limpia. (c) **`tab`:** OP_LOAD lleva la URL (`[op][run_js][reader][dark][url_len][url][len][html]`);
+  el child captura la cruda tras correr scripts; **el padre (confiable) la gatea** con
+  `ln_resolve(URL_real, cruda)` (Zero Trust: un worker comprometido no puede colar `file://`/downgrade)
+  y solo expone `tab_page.nav_url`/`nav_replace` si la política lo permite. (d) **GUI:** pasa la URL al
+  worker; en carga **fresca** (no en re-render por toggle) navega a `nav_url` por el camino normal
+  (re-aplica TODA la política de red), con cap **anti-bucle** (`JS_NAV_MAX`, reset al asentarse).
+  `link_nav`/`url_resolve_https` se reusan (DRY): la misma regla que un clic. Specs (`url.md`,
+  `js_dom.md`, `tab.md`, `link_nav.md`) + tests (6 `url_split`, 8 `js_dom` location/nav, 5 E2E `tab`:
+  location real / nav absoluta / relativa resuelta / downgrade+foreign+fragmento bloqueados / sin-JS
+  sin-nav) + `make test` (35 suites) / `make asan` (35, exit 0) limpios + fuzz `make fuzz-url` (4.3M
+  execs sin crash/leak/UB, invariantes de in-bounds + gate sostenidos). **Fuera de alcance (parte 2):**
+  eventos interactivos (clic→handler→re-render), timers async reales, getter de `innerHTML`, scripts
+  externos (`src`), scroll a ancla `#id`. *(Núcleo puro + IPC + ejecución verificados bajo
+  test/ASan/fuzz; ruta GUI compila endurecida, verificación visual Wayland pendiente al dueño.)* Ver
+  `[[freedom-live-js]]`.
 - **Hito 22 — Zoom + recarga + descargas.** Tres features con dos módulos **puros** nuevos (TDD).
   (a) **`zoom` (`zm_`):** zoom como porcentaje entero que **engancha a un ladder** (50→300%);
   `zm_clamp`/`zm_zoom_in`/`zm_zoom_out`/`zm_reset`/`zm_scale`/`zm_apply` (esta última con piso de
@@ -553,13 +583,13 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   doctrina PNG-only salvo justificar la superficie). (c) **Lazy loading** (decodificar solo lo
   visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
 - **Hito 20e — JS vivo: lo dinámico real.** Cerrados 20b (ejecución + título/texto), 20c
-  (construcción + eventos/timers sintéticos) y 20d (`innerHTML` + superficie ambiente identity-safe).
-  Falta: **eventos interactivos** (clic del usuario → IPC GUI↔worker → handler JS → re-render),
-  **timers async reales** (event loop en el worker que empuja vistas nuevas), **navegación por JS**
-  (`location.href=`/`location.replace` → solicitud de navegación reportada a la GUI, vía secure_fetch),
-  getter de `innerHTML` (serialización), `location.*` reales (requiere pasar la URL de la página al
-  worker), scripts externos (`src`, con política de red), y **repintado incremental** en mutación.
-  Persistir el modo y la allowlist con Hito 10.
+  (construcción + eventos/timers sintéticos), 20d (`innerHTML` + superficie ambiente identity-safe) y
+  **parte 1** (`location.*` reales + navegación por JS gateada — ya cerrada arriba). Falta (parte 2):
+  **eventos interactivos** (clic del usuario → IPC GUI↔worker → handler JS → re-render; requiere
+  consistencia de node-id entre `dom` y `page_view` para el hit-test), **timers async reales** (event
+  loop en el worker que empuja vistas nuevas), getter de `innerHTML` (serialización), scripts externos
+  (`src`, con política de red), scroll a ancla de fragmento (`#id`), y **repintado incremental** en
+  mutación. Persistir el modo y la allowlist con Hito 10.
 - **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
   Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).
 - **Hito 22b — Descargas/zoom: pulido.** (Hito 22, base, ya cerrado arriba.) Falta: ícono de recarga

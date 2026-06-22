@@ -420,3 +420,66 @@ url_status url_resolve_file(const char *base, const char *ref, char *out, size_t
     if (cat_checked(out, outsz, canon) != 0) return URL_ERR_OVERFLOW;
     return URL_OK;
 }
+
+/* --- WHATWG-location decomposition (zero-copy; reads side of `location`) --- */
+
+url_status url_split(const char *url, url_parts *out) {
+    if (url == NULL || out == NULL) return URL_ERR_NULL_ARG;
+    if (!url_is_https(url)) return URL_ERR_NOT_HTTPS; /* https-only, fail closed */
+
+    memset(out, 0, sizeof *out);
+    size_t total = strlen(url);
+    out->href = url;     out->href_len = total;
+    out->protocol = url; out->protocol_len = 6; /* "https:" */
+
+    /* origin = "https://host[:port]"; host = origin without the "https://" prefix.
+     * url_is_https guarantees the host is non-empty. */
+    size_t auth = url_authority_len(url); /* first '/' after scheme, or total */
+    out->origin = url;     out->origin_len = auth;
+    const char *host = url + 8;            /* strlen("https://") */
+    size_t host_len = auth - 8;
+    out->host = host;      out->host_len = host_len;
+
+    /* hostname / port. An IPv6 literal "[..]" keeps its brackets in hostname; the
+     * port (if any) follows "]:". Otherwise the first ':' splits host:port. */
+    size_t hn = host_len;
+    const char *port = host + host_len;
+    size_t port_len = 0;
+    if (host_len > 0 && host[0] == '[') {
+        size_t k = 0;
+        while (k < host_len && host[k] != ']') ++k;
+        if (k < host_len) {       /* found the closing bracket */
+            hn = k + 1;           /* include ']' in hostname */
+            if (hn < host_len && host[hn] == ':') {
+                port = host + hn + 1;
+                port_len = host_len - (hn + 1);
+            }
+        }
+    } else {
+        for (size_t k = 0; k < host_len; ++k) {
+            if (host[k] == ':') {
+                hn = k;
+                port = host + k + 1;
+                port_len = host_len - (k + 1);
+                break;
+            }
+        }
+    }
+    out->hostname = host; out->hostname_len = hn;
+    out->port = port;     out->port_len = port_len;
+
+    /* pathname / search / hash from the remainder after the authority. Each is a
+     * span: search includes the leading '?', hash includes the leading '#', and
+     * pathname may be empty (no path) — the consumer presents that as "/". */
+    const char *rem = url + auth;
+    size_t rem_len = total - auth;
+    size_t hpos = rem_len;
+    for (size_t k = 0; k < rem_len; ++k) { if (rem[k] == '#') { hpos = k; break; } }
+    size_t qpos = hpos;
+    for (size_t k = 0; k < hpos; ++k) { if (rem[k] == '?') { qpos = k; break; } }
+
+    out->pathname = rem;        out->pathname_len = qpos;
+    out->search   = rem + qpos; out->search_len   = hpos - qpos;
+    out->hash     = rem + hpos; out->hash_len     = rem_len - hpos;
+    return URL_OK;
+}

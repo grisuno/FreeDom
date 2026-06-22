@@ -3,6 +3,7 @@
 
 #include "dom.h"
 #include "js_sandbox.h"
+#include "url.h"
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -33,5 +34,20 @@ typedef enum jd_status {
  * outlive ctx. Intended to be called on a freshly created context, before any
  * untrusted script runs. */
 jd_status jd_install(js_context *ctx, dom_index *idx);
+
+/* Installs a real, read-only `location` (and document.location / document.URL) over
+ * the page's URL, and arms JS-navigation capture: location.href= / assign / replace /
+ * reload / window.location= record the RAW requested string (never executed, never
+ * resolved here) for the trusted parent to gate. href is the full page URL (may be a
+ * file:// URL); parts, if non-NULL, is its url_split decomposition for the component
+ * reads (NULL => only href is known, the rest fall back to stub defaults). Call after
+ * jd_install, on the page's context. ctx == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts);
+
+/* Reads and CLEARS the navigation the page's JS requested (globalThis.__navReq). Returns
+ * 1 and copies the raw (unresolved) target into buf (bounded, NUL-terminated) with
+ * *replace set from location.replace; returns 0 when no (non-empty) request is pending.
+ * The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */
+int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 
 #endif /* FREEDOM_JS_DOM_H */

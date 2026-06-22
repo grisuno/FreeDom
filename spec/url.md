@@ -38,6 +38,22 @@ typedef enum url_omni_kind {
     URL_OMNI_NAVIGATE = 0, /* out = https absoluta a cargar */
     URL_OMNI_SEARCH        /* out = URL https de búsqueda DuckDuckGo HTML */
 } url_omni_kind;
+
+/* Descomposición estilo WHATWG-location de una URL https absoluta validada. Cada campo
+ * ALIASA la entrada (no se posee; válido mientras la URL viva); las longitudes excluyen
+ * cualquier NUL. Un componente ausente tiene longitud 0. pathname es el tramo literal
+ * del path y queda vacío cuando la URL no tiene path (el shim de location muestra "" como "/"). */
+typedef struct url_parts {
+    const char *href;     size_t href_len;     /* la URL completa */
+    const char *protocol; size_t protocol_len; /* "https:" */
+    const char *origin;   size_t origin_len;   /* "https://host[:port]" */
+    const char *host;     size_t host_len;     /* "host[:port]" */
+    const char *hostname; size_t hostname_len; /* "host" (corchetes conservados para IPv6) */
+    const char *port;     size_t port_len;     /* "" o dígitos decimales */
+    const char *pathname; size_t pathname_len; /* "/..." o "" */
+    const char *search;   size_t search_len;   /* "?..." o "" */
+    const char *hash;     size_t hash_len;     /* "#..." o "" */
+} url_parts;
 ```
 
 ## 2. API (pura, reentrante)
@@ -53,6 +69,7 @@ url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t
 int         url_is_file(const char *s);
 const char *url_file_path(const char *s);
 url_status  url_resolve_file(const char *base, const char *ref, char *out, size_t outsz);
+url_status  url_split(const char *url, url_parts *out);
 ```
 
 ### `url_is_https`
@@ -139,6 +156,28 @@ punto se colapsan **antes** del chequeo de confinamiento (`../` no puede burlar 
 inválida ⇒ `URL_ERR_NOT_LOCAL`; punteros NULL / `outsz==0` ⇒ `URL_ERR_NULL_ARG`; overflow ⇒
 `URL_ERR_OVERFLOW`. **Solo** lo aplican páginas con origen `file://`; un origen https jamás entra a
 esta rama (un remoto nunca resuelve a `file://`).
+
+### `url_split` — descomposición WHATWG-location (para `location.*` del JS)
+
+`url_split(url, out)` descompone una URL https absoluta validada en los componentes que un objeto
+`location` del JS de página necesita leer (`href`, `protocol`, `origin`, `host`, `hostname`, `port`,
+`pathname`, `search`, `hash`). Es **pura y zero-copy**: cada campo de `url_parts` apunta a un tramo
+de `url` (no se copia, no se posee) con su longitud. Reusa `url_authority_len`/`url_validate_https`,
+así "qué es la autoridad de una https" sigue viviendo en un solo lugar.
+
+Reglas de partición (todas tramos de la entrada):
+- `protocol` = `"https:"` (los 6 primeros bytes); `origin` = `"https://host[:port]"`
+  (`url[0..url_authority_len)`); `host` = `origin` sin el prefijo `https://`.
+- `hostname`/`port` parten `host` por el `:` (con soporte de literal IPv6 `[..]:port`; sin `:`,
+  `port` queda vacío).
+- El resto tras la autoridad se parte en `pathname` (hasta `?`/`#`), `search` (de `?` a `#`,
+  incluye el `?`) y `hash` (de `#` al final, incluye el `#`). `pathname` puede quedar **vacío**
+  (sin path); el consumidor lo presenta como `/`.
+
+**Solo https** (Secure by Default y fail-closed): `url` que no sea una https absoluta válida ⇒
+`URL_ERR_NOT_HTTPS`; punteros NULL ⇒ `URL_ERR_NULL_ARG`. No decodifica porcentual ni IDNA (igual
+que el resto del módulo). Es el lado de **lectura** de `location`; la **decisión** de navegar
+(`location.href=`/`assign`/`replace`) la toma `link_nav` (`ln_resolve`), no este módulo.
 
 ## 3. Garantías
 

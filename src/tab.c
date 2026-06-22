@@ -21,8 +21,10 @@
 #include "js_dom.h"
 #include "js_env.h"
 #include "js_sandbox.h"
+#include "link_nav.h"
 #include "os_sandbox.h"
 #include "page_view.h"
+#include "url.h"
 
 #include <errno.h>
 #include <signal.h>
@@ -41,6 +43,9 @@
 /* Anti-amplification cap on the number of display-list runs the parent will
  * accept from the (possibly exploited) child. Plenty for any real page. */
 #define TAB_MAX_RUNS ((size_t)(2u * 1024u * 1024u))
+
+/* Cap on the page URL carried by OP_LOAD (URLs are small; defensive vs a desync). */
+#define TAB_MAX_URL ((size_t)(64u * 1024u))
 
 /* Request opcodes (parent -> child). */
 enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4 };
@@ -90,8 +95,11 @@ static void child_reset_page(child_state *cs) {
 
 /* Parse + index + fresh JS context bound to the page and the anti-fp env. When
  * run_js, inline <script>s are kept (not stripped) so child_handle_load can execute
- * them; event-handler attributes (on*) are stripped regardless. */
-static int child_load(child_state *cs, const char *html, size_t len, int run_js) {
+ * them; event-handler attributes (on*) are stripped regardless. page_url (may be
+ * NULL/empty) backs the page JS's real `location.*`; navigation capture is armed
+ * regardless of run_js (a no-JS load simply never records a request). */
+static int child_load(child_state *cs, const char *html, size_t len, int run_js,
+                      const char *page_url) {
     child_reset_page(cs);
 
     hp_config cfg = hp_config_default();
@@ -111,6 +119,13 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js)
      || je_install(js, TAB_SCREEN_W, TAB_SCREEN_H) != JE_OK
      || je_install_canvas(js, cs->session_key) != JE_OK) {
         js_context_free(js); dom_free(idx); hp_document_free(doc); return -1;
+    }
+    /* Install a real `location` over the page URL. url_split is https-only; a local
+     * file:// (or empty) URL still gets href + navigation capture (parts == NULL). */
+    if (page_url != NULL && page_url[0] != '\0') {
+        url_parts parts;
+        int have = (url_split(page_url, &parts) == URL_OK);
+        (void)jd_set_location(js, page_url, have ? &parts : NULL);
     }
 
     cs->doc = doc; cs->idx = idx; cs->js = js;
@@ -191,14 +206,18 @@ static int write_view(int wfd, const pv_view *v) {
     return 0;
 }
 
-/* Response: [ok:int32][title_len][title][text_len][text][view]. On any failure
- * the page is reset and ok==0 is reported (no partial/leaked state). */
+/* Response: [ok:int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace:int32].
+ * navreq is the RAW (unresolved) navigation the page's JS requested; the parent gates it
+ * with ln_resolve. On any failure the page is reset and ok==0 is reported (no partial state). */
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
-                              int run_js, int reader, int prefers_dark) {
+                              int run_js, int reader, int prefers_dark, const char *page_url) {
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
-    int ok = (child_load(cs, html, len, run_js) == 0);
+    char navbuf[LN_MAX_TARGET];
+    navbuf[0] = '\0';
+    int32_t nav_replace = 0;
+    int ok = (child_load(cs, html, len, run_js, page_url) == 0);
     if (ok && run_js) {
         /* Execute the page's inline scripts in the sandboxed context, THEN derive
          * the view, so DOM mutations (document.title / textContent) are reflected.
@@ -220,6 +239,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         memset(&fr, 0, sizeof fr);
         (void)js_eval(cs->js, fire, sizeof fire - 1, &fr);
         js_result_free(&fr);
+        /* Capture any navigation the script requested (location.href=/assign/replace/
+         * reload). Raw and unresolved: the parent gates it (Zero Trust). */
+        int rep = 0;
+        (void)jd_take_nav_request(cs->js, navbuf, sizeof navbuf, &rep);
+        nav_replace = rep ? 1 : 0;
     }
     if (ok) {
         title = hp_get_title(cs->doc, &tl);
@@ -233,11 +257,15 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
 
     int32_t k = ok ? 1 : 0;
     if (write_full(wfd, &k, sizeof k) == 0 && ok) {
+        size_t nlen = strlen(navbuf);
         (void)(write_full(wfd, &tl, sizeof tl) == 0
             && (tl == 0 || write_full(wfd, title, tl) == 0)
             && write_full(wfd, &xl, sizeof xl) == 0
             && (xl == 0 || write_full(wfd, text, xl) == 0)
-            && write_view(wfd, view) == 0);
+            && write_view(wfd, view) == 0
+            && write_full(wfd, &nlen, sizeof nlen) == 0
+            && (nlen == 0 || write_full(wfd, navbuf, nlen) == 0)
+            && write_full(wfd, &nav_replace, sizeof nav_replace) == 0);
     }
     hp_free(title);
     hp_free(text);
@@ -333,25 +361,37 @@ static void child_main(int rfd, int wfd) {
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE) break; /* desync */
 
         /* OP_LOAD carries three leading flag bytes: run_js (JS policy), reader
-         * (distraction-free) and dark (prefers-color-scheme), before length+payload. */
+         * (distraction-free) and dark (prefers-color-scheme), then the page URL
+         * (for the real location), before length+payload. */
         uint8_t run_js = 0, reader = 0, dark = 0;
-        if (op == OP_LOAD && (read_full(rfd, &run_js, 1) != 0
-                              || read_full(rfd, &reader, 1) != 0
-                              || read_full(rfd, &dark, 1) != 0)) break;
+        char *url = NULL;
+        if (op == OP_LOAD) {
+            if (read_full(rfd, &run_js, 1) != 0
+             || read_full(rfd, &reader, 1) != 0
+             || read_full(rfd, &dark, 1) != 0) break;
+            size_t ulen = 0;
+            if (read_full(rfd, &ulen, sizeof ulen) != 0) break;
+            if (ulen > TAB_MAX_URL) break; /* defensive: URLs are small */
+            url = (char *)malloc(ulen + 1);
+            if (url == NULL) break;
+            if (ulen != 0 && read_full(rfd, url, ulen) != 0) { free(url); break; }
+            url[ulen] = '\0';
+        }
 
         size_t len = 0;
-        if (read_full(rfd, &len, sizeof len) != 0) break;
-        if (len > TAB_MAX_INPUT) break; /* parent enforces; defensive */
+        if (read_full(rfd, &len, sizeof len) != 0) { free(url); break; }
+        if (len > TAB_MAX_INPUT) { free(url); break; } /* parent enforces; defensive */
 
         char *buf = (char *)malloc(len + 1);
-        if (buf == NULL) break;
-        if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); break; }
+        if (buf == NULL) { free(url); break; }
+        if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); free(url); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, reader, dark);
+        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, reader, dark, url);
         else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
         else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
         free(buf);
+        free(url);
     }
 
     child_reset_page(&cs);
@@ -557,26 +597,30 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out) {
 }
 
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out) {
-    return tab_load_full(t, html, len, run_js, 0, 0, out);
+    return tab_load_full(t, html, len, NULL, run_js, 0, 0, out);
 }
 
-tab_status tab_load_full(tab *t, const char *html, size_t len, int run_js, int reader,
-                         int prefers_dark, tab_page *out) {
+tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+                         int run_js, int reader, int prefers_dark, tab_page *out) {
     if (t == NULL || out == NULL || html == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (len > TAB_MAX_INPUT) return TAB_ERR_TOO_LARGE;
+    size_t ulen = (page_url != NULL) ? strlen(page_url) : 0;
+    if (ulen > TAB_MAX_URL) return TAB_ERR_TOO_LARGE;
 
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    /* OP_LOAD framing: [op][run_js:1][reader:1][dark:1][len][html] (the flags precede
-     * the payload so the html stays zero-copy). */
+    /* OP_LOAD framing: [op][run_js:1][reader:1][dark:1][url_len][url][len][html] (the
+     * flags and URL precede the payload so the html stays zero-copy). */
     uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0, rflag = reader ? 1 : 0,
             dflag = prefers_dark ? 1 : 0;
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &jflag, 1) != 0
      || write_full(t->req_fd, &rflag, 1) != 0
      || write_full(t->req_fd, &dflag, 1) != 0
+     || write_full(t->req_fd, &ulen, sizeof ulen) != 0
+     || (ulen != 0 && write_full(t->req_fd, page_url, ulen) != 0)
      || write_full(t->req_fd, &len, sizeof len) != 0
      || (len != 0 && write_full(t->req_fd, html, len) != 0)) {
         tab_refresh_alive(t);
@@ -599,9 +643,37 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, int run_js, int r
         free(title); free(text);
         return io_failure(t);
     }
+    /* Raw (unresolved) navigation the page's JS requested + its replace flag. */
+    char *navreq = NULL;
+    size_t nlen = 0;
+    int32_t nav_replace = 0;
+    if (read_field(t->resp_fd, &navreq, &nlen) != 0
+     || read_full(t->resp_fd, &nav_replace, sizeof nav_replace) != 0) {
+        free(title); free(text); free(navreq); pv_free(view);
+        return io_failure(t);
+    }
+
+    /* Gate the raw request HERE (trusted parent, Zero Trust): a compromised worker
+     * cannot drive the browser off-policy. ln_resolve allows only https / a local
+     * file under a local base; a downgrade / foreign scheme / fragment yields no nav. */
+    char *nav_url = NULL;
+    if (nlen != 0 && page_url != NULL) {
+        ln_result ln;
+        if (ln_resolve(page_url, navreq, &ln) == LN_OK && ln.action == LN_NAVIGATE) {
+            nav_url = strdup(ln.target);
+            if (nav_url == NULL) {
+                free(title); free(text); free(navreq); pv_free(view);
+                return TAB_ERR_OOM;
+            }
+        }
+    }
+    free(navreq);
+
     out->title = title; out->title_len = tl;
     out->text  = text;  out->text_len  = xl;
     out->view  = view;
+    out->nav_url = nav_url;
+    out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
     return TAB_OK;
 }
 
@@ -703,9 +775,12 @@ void tab_page_free(tab_page *p) {
     free(p->title);
     free(p->text);
     pv_free(p->view);
+    free(p->nav_url);
     p->title = NULL;
     p->text = NULL;
     p->view = NULL;
+    p->nav_url = NULL;
+    p->nav_replace = 0;
     p->title_len = 0;
     p->text_len = 0;
 }

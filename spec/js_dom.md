@@ -62,11 +62,23 @@ y vacía la cola de timers **hasta 64 veces** — no es un event loop real). `wi
 `console` no-op. Los wrappers solo guardan el **handle entero validado** — **no** se exponen
 objetos-nodo vivos del motor.
 
-Lo que **no** existe aún (por diseño): `innerHTML`, `createTextNode` real (devuelve un objeto inerte),
-eventos **interactivos** (clic del usuario), timers **asíncronos** reales, scripts externos (`src`).
-Todas las mutaciones son **memory-safe**: remover detacha (no destruye) → un handle previo nunca
-cuelga; agregar nodos nunca libera. Un handle inválido produce `null`/`""`/`false`, **nunca** un fallo
-del host.
+**`location` real + navegación por JS (Hito 20e parte 1):** el worker conoce la URL de la página y la
+inyecta como `globalThis.__locParts` (objeto de datos construido en C con `url_split`, **sin
+interpolar** la URL hostil en JS). El shim define un `location` (y `document.location`/`document.URL`)
+de **solo lectura** sobre esos componentes: `href`, `protocol`, `host`, `hostname`, `port`,
+`pathname` (vacío ⇒ `/`), `search`, `hash`, `origin`. La **escritura** que navega
+(`location.href = x`, `location.assign(x)`, `location.replace(x)`, `location.reload()`,
+`window.location = x`) **no ejecuta nada**: solo **registra la string cruda** pedida en
+`globalThis.__navReq` (+ `__navReplace`). El worker la lee con `jd_take_nav_request` tras correr los
+scripts; **el padre (proceso confiable) la resuelve y gatea** con `ln_resolve(URL_real, cruda)`
+(Zero Trust: el worker no resuelve, así un worker comprometido no puede colar `file:///etc/passwd`).
+Sin URL (página local/about) `location` cae al stub no-op previo. Última asignación gana.
+
+Lo que **no** existe aún (por diseño): `innerHTML` (getter — serialización), eventos **interactivos**
+(clic del usuario), timers **asíncronos** reales (event loop que empuje vistas), scripts externos
+(`src`). Todas las mutaciones son **memory-safe**: remover detacha (no destruye) → un handle previo
+nunca cuelga; agregar nodos nunca libera. Un handle inválido produce `null`/`""`/`false`, **nunca** un
+fallo del host.
 
 ## 4. Contrato de la API (C)
 
@@ -80,9 +92,22 @@ typedef enum jd_status {
     JD_ERR_INTERNAL
 } jd_status;
 
-/* Instala el global `dom` (solo lectura) en el sandbox, respaldado por idx.
- * idx debe sobrevivir a ctx. Llamar sobre un contexto recien creado. */
-jd_status jd_install(js_context *ctx, const dom_index *idx);
+/* Instala el global `dom` (con mutadores memory-safe) y la fachada `document` en el
+ * sandbox, respaldado por idx (ya no const: expone mutadores). idx debe sobrevivir a
+ * ctx. Llamar sobre un contexto recien creado. */
+jd_status jd_install(js_context *ctx, dom_index *idx);
+
+/* Hito 20e: instala un `location` real de solo lectura sobre los componentes de la URL
+ * de la pagina, y arma la captura de navegacion (location.href=/assign/replace/reload/
+ * window.location=). parts puede ser NULL (sin URL https): location cae al stub no-op.
+ * href es la URL completa (puede ser file:///about); parts (si no es NULL) la
+ * descompone via url_split. No resuelve ni gatea: solo registra la string cruda. */
+jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts);
+
+/* Hito 20e: lee (y limpia) el pedido de navegacion que el JS dejo en globalThis.__navReq.
+ * Devuelve 1 si habia una string no vacia (copiada acotada en buf, *replace = location.replace),
+ * 0 si no hubo pedido. La string es CRUDA (sin resolver): el llamante la gatea con ln_resolve. */
+int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 ```
 
 ## 5. Tabla de errores
@@ -124,7 +149,8 @@ jd_status jd_install(js_context *ctx, const dom_index *idx);
 
 ## 8. Fuera de alcance
 
-- **Mutación** del DOM desde JS (depende del DOM mutable, hito posterior).
-- Objetos `Node`/`document` con prototipos y propiedades (capa ergonómica encima).
-- Eventos, `addEventListener`, delegación (necesario para resumability; spec aparte).
+- Eventos **interactivos** (clic del usuario → handler → re-render): Hito 20e parte 2.
+- Timers **asíncronos** reales (event loop en el worker que empuje vistas nuevas).
+- Getter de `innerHTML` (serialización del subárbol).
+- Scripts externos (`src`, con política de red) y navegación con anclas de fragmento (`#id`).
 - Selectores CSS completos vía `querySelector` (v1 cubre id/tag/class).

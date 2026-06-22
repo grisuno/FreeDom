@@ -347,6 +347,100 @@ static void test_load_without_js_does_not_run_script(void **state) {
     tab_close(t);
 }
 
+/* Real location (Hito 20e): the page URL passed to tab_load_full backs a real
+ * location object the page's JS can read (no scripts need run for the read). */
+static void test_load_full_location_is_real(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body><p>x</p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1,
+                                   "https://example.com:8443/a/b?q=1#h",
+                                   0, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    expect_eval(t, "location.hostname", "example.com");
+    expect_eval(t, "location.port", "8443");
+    expect_eval(t, "location.pathname", "/a/b");
+    expect_eval(t, "location.protocol", "https:");
+    tab_close(t);
+}
+
+/* JS navigation (Hito 20e): an allowlisted inline script setting location.href is
+ * reported as a gated nav_url (resolved against the page URL by the trusted parent). */
+static void test_js_navigation_absolute(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>location.href='https://example.org/landing';</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://example.com/",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.nav_url);
+    assert_string_equal(p.nav_url, "https://example.org/landing");
+    assert_int_equal(p.nav_replace, 0);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+static void test_js_navigation_relative_resolved(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>location.replace('/c');</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://example.com/a/b",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.nav_url);
+    assert_string_equal(p.nav_url, "https://example.com/c"); /* resolved by parent */
+    assert_int_equal(p.nav_replace, 1);                      /* location.replace */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Fail-closed gate: the parent rejects a downgrade / foreign-scheme / fragment nav,
+ * so a hostile or compromised worker cannot drive the browser off-policy. */
+static void test_js_navigation_unsafe_is_blocked(void **state) {
+    (void)state;
+    static const char DOWNGRADE[] =
+        "<html><body><script>location.href='http://evil.test/';</script></body></html>";
+    static const char FOREIGN[] =
+        "<html><body><script>location.href='javascript:alert(1)';</script></body></html>";
+    static const char FRAGMENT[] =
+        "<html><body><script>location.href='#section';</script></body></html>";
+    const char *cases[] = { DOWNGRADE, FOREIGN, FRAGMENT };
+    for (size_t i = 0; i < 3; ++i) {
+        tab *t = NULL;
+        assert_int_equal(tab_open(&t), TAB_OK);
+        tab_page p;
+        assert_int_equal(tab_load_full(t, cases[i], strlen(cases[i]),
+                                       "https://example.com/", 1, 0, 0, &p), TAB_OK);
+        assert_true(p.nav_url == NULL || p.nav_url[0] == '\0'); /* no navigation */
+        tab_page_free(&p);
+        tab_close(t);
+    }
+}
+
+/* With JS off the navigating script never runs: no nav request (Secure by Default). */
+static void test_no_js_no_navigation(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><script>location.href='https://example.org/';</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://example.com/",
+                                   0, 0, 0, &p), TAB_OK);
+    assert_true(p.nav_url == NULL || p.nav_url[0] == '\0');
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 static void test_load_null_and_too_large(void **state) {
     (void)state;
     tab *t = NULL;
@@ -579,6 +673,11 @@ int main(void) {
         cmocka_unit_test(test_load_ex_builds_dom_and_fires_onload),
         cmocka_unit_test(test_load_ex_inner_html_renders),
         cmocka_unit_test(test_load_without_js_does_not_run_script),
+        cmocka_unit_test(test_load_full_location_is_real),
+        cmocka_unit_test(test_js_navigation_absolute),
+        cmocka_unit_test(test_js_navigation_relative_resolved),
+        cmocka_unit_test(test_js_navigation_unsafe_is_blocked),
+        cmocka_unit_test(test_no_js_no_navigation),
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),

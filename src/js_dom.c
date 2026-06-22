@@ -380,6 +380,52 @@ static const char JD_DOCUMENT_SHIM[] =
     "  };"
     "})();";
 
+/* --- real location + JS-navigation capture (Hito 20e parte 1) --- */
+
+/* Defines a string property on the __locParts data object from a (ptr,len) span.
+ * The span is copied into an engine string; a NULL span becomes "". */
+static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
+                      const char *p, size_t len) {
+    JSValue s = (p != NULL) ? JS_NewStringLen(ctx, p, len) : JS_NewString(ctx, "");
+    JS_SetPropertyStr(ctx, obj, name, s); /* consumes s; name copied */
+}
+
+/* Reads the page URL components from globalThis.__locParts (set natively, so a hostile
+ * URL is never interpolated into JS) and installs a real, read-only `location`. The
+ * navigating writes only RECORD the raw request into __navReq/__navReplace; they never
+ * execute or resolve it. The trusted parent gates the raw string with ln_resolve. */
+static const char JD_LOCATION_SHIM[] =
+    "(function(){"
+    "  var lp = globalThis.__locParts || {};"
+    "  function nav(u, replace){ globalThis.__navReq = String(u);"
+    "    globalThis.__navReplace = !!replace; }"
+    "  var loc = {"
+    "    get href(){ return lp.href||''; }, set href(v){ nav(v,false); },"
+    "    get protocol(){ return lp.protocol||'https:'; },"
+    "    get host(){ return lp.host||''; },"
+    "    get hostname(){ return lp.hostname||''; },"
+    "    get port(){ return lp.port||''; },"
+    "    get pathname(){ return lp.pathname||'/'; },"
+    "    get search(){ return lp.search||''; },"
+    "    get hash(){ return lp.hash||''; },"
+    "    get origin(){ return lp.origin||''; },"
+    "    assign: function(u){ nav(u,false); },"
+    "    replace: function(u){ nav(u,true); },"
+    "    reload: function(){ nav(lp.href||'', true); },"
+    "    toString: function(){ return lp.href||''; }"
+    "  };"
+    "  try{ Object.defineProperty(globalThis,'location',{configurable:true,"
+    "    get:function(){return loc;}, set:function(v){ nav(v,false); }}); }catch(e){}"
+    "  try{ if(typeof document!=='undefined'){"
+    "    Object.defineProperty(document,'location',{configurable:true,enumerable:true,"
+    "      get:function(){return loc;}, set:function(v){ nav(v,false); }});"
+    "    Object.defineProperty(document,'URL',{configurable:true,enumerable:true,"
+    "      get:function(){return lp.href||'';}});"
+    "    Object.defineProperty(document,'documentURI',{configurable:true,enumerable:true,"
+    "      get:function(){return lp.href||'';}});"
+    "  } }catch(e){}"
+    "})();";
+
 jd_status jd_install(js_context *ctx, dom_index *idx) {
     if (ctx == NULL || idx == NULL) return JD_ERR_NULL_ARG;
 
@@ -417,4 +463,75 @@ jd_status jd_install(js_context *ctx, dom_index *idx) {
     int shim_ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return shim_ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
+jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+
+    JSValue global = JS_GetGlobalObject(jsctx);
+    if (JS_IsException(global)) return JD_ERR_OOM;
+
+    JSValue lp = JS_NewObject(jsctx);
+    if (JS_IsException(lp)) { JS_FreeValue(jsctx, global); return JD_ERR_OOM; }
+
+    jd_lp_set(jsctx, lp, "href", href, (href != NULL) ? strlen(href) : 0);
+    if (parts != NULL) {
+        jd_lp_set(jsctx, lp, "protocol", parts->protocol, parts->protocol_len);
+        jd_lp_set(jsctx, lp, "origin",   parts->origin,   parts->origin_len);
+        jd_lp_set(jsctx, lp, "host",     parts->host,     parts->host_len);
+        jd_lp_set(jsctx, lp, "hostname", parts->hostname, parts->hostname_len);
+        jd_lp_set(jsctx, lp, "port",     parts->port,     parts->port_len);
+        jd_lp_set(jsctx, lp, "pathname", parts->pathname, parts->pathname_len);
+        jd_lp_set(jsctx, lp, "search",   parts->search,   parts->search_len);
+        jd_lp_set(jsctx, lp, "hash",     parts->hash,     parts->hash_len);
+    }
+    JS_SetPropertyStr(jsctx, global, "__locParts", lp);  /* consumes lp */
+    JS_SetPropertyStr(jsctx, global, "__navReq", JS_NewString(jsctx, ""));
+    JS_SetPropertyStr(jsctx, global, "__navReplace", JS_NewBool(jsctx, 0));
+    JS_FreeValue(jsctx, global);
+
+    JSValue r = JS_Eval(jsctx, JD_LOCATION_SHIM, sizeof JD_LOCATION_SHIM - 1,
+                        "<location-shim>", JS_EVAL_TYPE_GLOBAL);
+    int ok = !JS_IsException(r);
+    JS_FreeValue(jsctx, r);
+    return ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
+int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace) {
+    if (replace != NULL) *replace = 0;
+    if (ctx == NULL || buf == NULL || bufsz == 0) return 0;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 0;
+
+    JSValue global = JS_GetGlobalObject(jsctx);
+    if (JS_IsException(global)) return 0;
+
+    buf[0] = '\0';
+    int present = 0;
+    JSValue req = JS_GetPropertyStr(jsctx, global, "__navReq");
+    if (!JS_IsUndefined(req) && !JS_IsNull(req)) {
+        const char *s = JS_ToCString(jsctx, req);
+        if (s != NULL && s[0] != '\0') {
+            size_t n = strlen(s);
+            if (n >= bufsz) n = bufsz - 1;
+            memcpy(buf, s, n);
+            buf[n] = '\0';
+            present = 1;
+        }
+        if (s != NULL) JS_FreeCString(jsctx, s);
+    }
+    JS_FreeValue(jsctx, req);
+
+    if (present && replace != NULL) {
+        JSValue rep = JS_GetPropertyStr(jsctx, global, "__navReplace");
+        *replace = JS_ToBool(jsctx, rep) ? 1 : 0;
+        JS_FreeValue(jsctx, rep);
+    }
+    if (present) /* clear so a later op does not re-trigger the same navigation */
+        JS_SetPropertyStr(jsctx, global, "__navReq", JS_NewString(jsctx, ""));
+
+    JS_FreeValue(jsctx, global);
+    return present;
 }

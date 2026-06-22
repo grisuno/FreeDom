@@ -67,13 +67,20 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
 Padre y hijo son el mismo binario y arquitectura (`fork`), así que se intercambian estructuras
 crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), como el `renderer`.
 
-- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **tres bytes de bandera** antes de la carga:
-  `[op][run_js:1][reader:1][dark:1][len: size_t][html]` (las banderas preceden a la carga para que el
-  HTML quede zero-copy). `run_js` es la política de JS; `reader` es el modo sin distracciones (Hito 23);
-  `dark` es la preferencia de esquema de color (Hito 23b, gate de `@media(prefers-color-scheme)`). Las
-  tres se reenvían a `pv_build_full`. `OP_EVAL`/`OP_DECODE_IMAGE` llevan `[op][len][payload]`. EOF en la
-  tubería de peticiones equivale a `OP_QUIT`.
-- **Respuesta de `OP_LOAD`:** `[ok: int32][title_len: size_t][title][text_len: size_t][text]`.
+- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **tres bytes de bandera** y la **URL de la página**
+  antes de la carga: `[op][run_js:1][reader:1][dark:1][url_len: size_t][url][len: size_t][html]` (las
+  banderas y la URL preceden a la carga para que el HTML quede zero-copy). `run_js` es la política de
+  JS; `reader` es el modo sin distracciones (Hito 23); `dark` es la preferencia de esquema de color
+  (Hito 23b, gate de `@media(prefers-color-scheme)`); `url` es la URL de la página (Hito 20e, para el
+  `location` real del JS — `url_len == 0` = sin URL). Las tres banderas se reenvían a `pv_build_full`.
+  `OP_EVAL`/`OP_DECODE_IMAGE` llevan `[op][len][payload]`. EOF en la tubería de peticiones equivale a
+  `OP_QUIT`.
+- **Respuesta de `OP_LOAD`:** `[ok: int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace: int32]`.
+  `navreq` (Hito 20e) es la string **cruda** que el JS de página pidió navegar
+  (`location.href=`/`assign`/`replace`/`reload`/`window.location=`), vacía si ninguna. El padre la
+  **gatea** con `ln_resolve(url_real, navreq)` y solo expone el destino resuelto en `tab_page.nav_url`
+  si la política lo permite (Zero Trust: el worker no resuelve; un worker comprometido no puede colar
+  `file://`/downgrade — el padre lo rechaza).
 - **Respuesta de `OP_EVAL`:** `[ok: int32][is_exception: int32][value_len: size_t][value]`.
 - `ok == 0` señala fallo de nivel-worker (parseo/DOM/contexto fallido, o `eval` sin página
   cargada): el padre devuelve `TAB_ERR_RENDER` / `TAB_ERR_SCRIPT` sin texto fugado.
@@ -99,7 +106,10 @@ typedef enum tab_status {
 } tab_status;
 
 typedef struct tab tab;                 /* opaco; handle del padre */
-typedef struct tab_page { char *title; size_t title_len; char *text; size_t text_len; } tab_page;
+/* nav_url (Hito 20e): destino https/file ya RESUELTO Y GATEADO (ln_resolve) que el JS
+ * de la pagina pidio navegar; NULL/"" = ninguno. nav_replace: location.replace (history). */
+typedef struct tab_page { char *title; size_t title_len; char *text; size_t text_len;
+                          pv_view *view; char *nav_url; int nav_replace; } tab_page;
 typedef struct tab_eval_result { char *value; size_t value_len; int is_exception; } tab_eval_result;
 
 #define TAB_MAX_INPUT ((size_t)(32u * 1024u * 1024u))
@@ -113,9 +123,11 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out);
 /* Hito 23: reader = modo sin distracciones. Hito 23b: prefers_dark = preferencia de
  * esquema de color (gate de @media(prefers-color-scheme)). Ambos a pv_build_full.
- * tab_load_ex == tab_load_full con reader == 0 y prefers_dark == 0. */
-tab_status tab_load_full(tab *t, const char *html, size_t len, int run_js, int reader,
-                         int prefers_dark, tab_page *out);
+ * Hito 20e: page_url = URL de la pagina (NULL permitido), para el location real del JS y
+ * como base que GATEA cualquier navegacion por JS (ln_resolve). tab_load_ex ==
+ * tab_load_full con page_url == NULL, reader == 0 y prefers_dark == 0. */
+tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+                         int run_js, int reader, int prefers_dark, tab_page *out);
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out);
 int        tab_alive(const tab *t);
 pid_t      tab_child_pid(const tab *t);

@@ -367,6 +367,85 @@ static void test_resolve_file_nulls(void **state) {
     assert_int_equal(url_resolve_file("file:///a/b", "x", out, 0), URL_ERR_NULL_ARG);
 }
 
+/* --- url_split (WHATWG-location decomposition) --- */
+
+/* Asserts a (ptr,len) span equals the expected C string exactly. */
+static void assert_span(const char *p, size_t len, const char *expect) {
+    assert_int_equal(len, strlen(expect));
+    assert_memory_equal(p, expect, len);
+}
+
+static void test_split_full_url(void **state) {
+    (void)state;
+    url_parts u;
+    static const char URL[] = "https://example.com:8443/a/b?x=1&y=2#frag";
+    assert_int_equal(url_split(URL, &u), URL_OK);
+    assert_span(u.href, u.href_len, URL);
+    assert_span(u.protocol, u.protocol_len, "https:");
+    assert_span(u.origin, u.origin_len, "https://example.com:8443");
+    assert_span(u.host, u.host_len, "example.com:8443");
+    assert_span(u.hostname, u.hostname_len, "example.com");
+    assert_span(u.port, u.port_len, "8443");
+    assert_span(u.pathname, u.pathname_len, "/a/b");
+    assert_span(u.search, u.search_len, "?x=1&y=2");
+    assert_span(u.hash, u.hash_len, "#frag");
+    /* every span must alias the input */
+    assert_true(u.href == URL);
+    assert_true(u.hostname >= URL && u.hostname < URL + sizeof URL);
+}
+
+static void test_split_no_port_no_path(void **state) {
+    (void)state;
+    url_parts u;
+    assert_int_equal(url_split("https://example.com", &u), URL_OK);
+    assert_span(u.host, u.host_len, "example.com");
+    assert_span(u.hostname, u.hostname_len, "example.com");
+    assert_int_equal(u.port_len, 0);    /* no explicit port */
+    assert_int_equal(u.pathname_len, 0); /* empty path; consumer presents "/" */
+    assert_int_equal(u.search_len, 0);
+    assert_int_equal(u.hash_len, 0);
+    assert_span(u.origin, u.origin_len, "https://example.com");
+}
+
+static void test_split_query_without_fragment(void **state) {
+    (void)state;
+    url_parts u;
+    assert_int_equal(url_split("https://h.test/p/q?a=b", &u), URL_OK);
+    assert_span(u.pathname, u.pathname_len, "/p/q");
+    assert_span(u.search, u.search_len, "?a=b");
+    assert_int_equal(u.hash_len, 0);
+}
+
+static void test_split_fragment_without_query(void **state) {
+    (void)state;
+    url_parts u;
+    assert_int_equal(url_split("https://h.test/p#sec", &u), URL_OK);
+    assert_span(u.pathname, u.pathname_len, "/p");
+    assert_int_equal(u.search_len, 0);
+    assert_span(u.hash, u.hash_len, "#sec");
+}
+
+static void test_split_ipv6_literal_with_port(void **state) {
+    (void)state;
+    url_parts u;
+    assert_int_equal(url_split("https://[2001:db8::1]:443/p", &u), URL_OK);
+    assert_span(u.host, u.host_len, "[2001:db8::1]:443");
+    assert_span(u.hostname, u.hostname_len, "[2001:db8::1]"); /* brackets kept */
+    assert_span(u.port, u.port_len, "443");
+    assert_span(u.pathname, u.pathname_len, "/p");
+}
+
+static void test_split_fail_closed_non_https(void **state) {
+    (void)state;
+    url_parts u;
+    assert_int_equal(url_split(NULL, &u), URL_ERR_NULL_ARG);
+    assert_int_equal(url_split("https://x", NULL), URL_ERR_NULL_ARG);
+    assert_int_equal(url_split("http://example.com", &u), URL_ERR_NOT_HTTPS);
+    assert_int_equal(url_split("file:///etc/passwd", &u), URL_ERR_NOT_HTTPS);
+    assert_int_equal(url_split("javascript:alert(1)", &u), URL_ERR_NOT_HTTPS);
+    assert_int_equal(url_split("https://", &u), URL_ERR_NOT_HTTPS); /* empty host */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_is_https),
@@ -393,6 +472,12 @@ int main(void) {
         cmocka_unit_test(test_resolve_file_relative),
         cmocka_unit_test(test_resolve_file_confinement_fail_closed),
         cmocka_unit_test(test_resolve_file_nulls),
+        cmocka_unit_test(test_split_full_url),
+        cmocka_unit_test(test_split_no_port_no_path),
+        cmocka_unit_test(test_split_query_without_fragment),
+        cmocka_unit_test(test_split_fragment_without_query),
+        cmocka_unit_test(test_split_ipv6_literal_with_port),
+        cmocka_unit_test(test_split_fail_closed_non_https),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

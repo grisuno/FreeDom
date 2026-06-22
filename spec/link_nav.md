@@ -18,6 +18,12 @@ segmentos `.`/`..` también en rutas locales.
 
 **Falla cerrado:** cualquier `href` que no sea demostrablemente seguro de navegar → `LN_BLOCKED`.
 
+**Reutilización (Hito 20e):** la **navegación por JS** (`location.href=`/`assign`/`replace`) es
+moralmente "un clic": el `tab` (proceso padre, confiable) gatea la string cruda que el JS de página
+pidió con este mismo `ln_resolve(URL_real, cruda)`. Así un `location.href='javascript:...'` o un
+downgrade `http://` se rechazan igual que un enlace hostil, y el worker no toma la decisión (Zero
+Trust). Un fragmento (`#id`) da `LN_SAME_DOCUMENT` (no navega, aún sin scroll a ancla).
+
 ## 1. Tipos
 
 ```c

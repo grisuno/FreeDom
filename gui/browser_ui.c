@@ -560,6 +560,7 @@ typedef struct browser_window {
      * is discarded -- the active tab is then guaranteed unchanged since the launch. */
     int      fetch_pipe[2];  /* [0] read end (polled), [1] write end (threads) */
     uint64_t net_gen;        /* current navigation generation */
+    int js_nav_depth;        /* consecutive JS-driven navigations (location.href=); capped */
 
     /* Tabs. The active tab's state lives in the fields above; the other tabs are
      * parked in tab_slots. tab_count >= 1 always; active_tab is in [0, tab_count). */
@@ -1320,10 +1321,22 @@ static void load_images(browser_window *w, tab *t) {
     w->image_count = k;
 }
 
+static void do_load(browser_window *w, const char *url); /* JS navigation re-enters it */
+
+/* Cap on consecutive JS-driven navigations (location.href=) without a settling page,
+ * so a hostile redirect loop cannot pin the browser. Reset when a page settles. */
+#define JS_NAV_MAX 10
+
 /* Renders the cached page source into the page/doc using the current capabilities.
  * No network: a capability toggle (images/CSS) re-renders from cache. Does nothing
- * when there is no cached source (start/error pages stay in plain-text mode). */
-static void render_current(browser_window *w) {
+ * when there is no cached source (start/error pages stay in plain-text mode).
+ *
+ * allow_js_nav: on a FRESH load (not a toggle re-render) the page's JS may request a
+ * navigation (location.href=/assign/replace); the worker reports it and the trusted
+ * parent (tab) already gated it (ln_resolve). We then drive it through the normal
+ * load path so it re-applies ALL network policy. A toggle re-render passes 0 so a
+ * settled page is not re-navigated every time the user flips a switch. */
+static void render_current_ex(browser_window *w, int allow_js_nav) {
     clear_doc(w);
     if (w->cur_html == NULL) return;
 
@@ -1348,11 +1361,30 @@ static void render_current(browser_window *w) {
      * theme makes the author's @media(prefers-color-scheme:dark) rules apply (auto
      * dark mode). Reader forces a clean view, so it never reports a dark preference. */
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
-    if (tab_load_full(t, w->cur_html, w->cur_html_len, w->caps.js, w->reader,
+    if (tab_load_full(t, w->cur_html, w->cur_html_len, w->cur_top, w->caps.js, w->reader,
                       prefers_dark, &page) != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
         tab_close(t);
         return;
+    }
+
+    /* JS-requested navigation (location.href=/assign/replace). page.nav_url is already
+     * resolved AND policy-gated by the trusted parent; we never render the transient
+     * page, we navigate (re-applying ALL network policy via do_load). Capped so a
+     * redirect loop cannot pin the browser; a settled page resets the chain. */
+    if (allow_js_nav && page.nav_url != NULL && page.nav_url[0] != '\0') {
+        if (w->js_nav_depth < JS_NAV_MAX) {
+            char target[LN_MAX_TARGET];
+            snprintf(target, sizeof target, "%s", page.nav_url);
+            w->js_nav_depth++;
+            tab_page_free(&page);
+            tab_close(t);
+            if (browser_navigate(&w->bs, target) == BROWSER_OK) do_load(w, target);
+            return;
+        }
+        browser_set_status(&w->bs, "Stopped a JavaScript redirect loop.", now_ms());
+    } else {
+        w->js_nav_depth = 0; /* a page that did not auto-navigate ends the chain */
     }
 
     browser_set_page(&w->bs, page.title, page.text, 0);
@@ -1375,6 +1407,11 @@ static void render_current(browser_window *w) {
 
     tab_page_free(&page);
     tab_close(t);
+}
+
+/* Re-render from cache without honoring JS navigation (capability/theme toggles). */
+static void render_current(browser_window *w) {
+    render_current_ex(w, 0);
 }
 
 /* Marks a request in flight and paints a frame so the spinner appears at once. The
@@ -1501,7 +1538,7 @@ static void do_load(browser_window *w, const char *url) {
     char origin[PATH_MAX + 16];
     const char *top = build_file_origin(url, origin, sizeof origin) ? origin : NULL;
     set_cache(w, html, html_len, top);
-    render_current(w);
+    render_current_ex(w, 1); /* a fresh load may honor a JS-requested navigation */
 }
 
 /* --- tabs --- */
@@ -2874,7 +2911,7 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
     /* Image policy resolves srcs against this origin (the requested URL, as before). */
     set_cache(w, html, len, j->url);
     if (j->is_post) browser_set_url_bar(&w->bs, j->url); /* reflect action URL; no history push */
-    render_current(w);
+    render_current_ex(w, 1); /* a fresh load may honor a JS-requested navigation */
 
     if (j->downgraded == DOWNGRADE_ALLOWLISTED) {
         browser_set_status(&w->bs,

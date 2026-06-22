@@ -103,6 +103,32 @@ int url_is_file(const char *s);
  * (not owned). */
 const char *url_file_path(const char *s);
 
+/* --- WHATWG-location decomposition (for a page's JS `location.*`) --- */
+
+/* Components of a validated absolute https URL, sliced for a JS location object.
+ * Every field ALIASES the input url (not owned, valid while url is alive); lengths
+ * exclude any NUL. Absent components have length 0. pathname is the literal path
+ * span and is empty when the URL has no path (the location shim presents "" as "/"). */
+typedef struct url_parts {
+    const char *href;     size_t href_len;     /* the whole URL */
+    const char *protocol; size_t protocol_len; /* "https:" */
+    const char *origin;   size_t origin_len;   /* "https://host[:port]" */
+    const char *host;     size_t host_len;     /* "host[:port]" */
+    const char *hostname; size_t hostname_len; /* "host" (brackets kept for IPv6) */
+    const char *port;     size_t port_len;     /* "" or decimal digits */
+    const char *pathname; size_t pathname_len; /* "/..." or "" */
+    const char *search;   size_t search_len;   /* "?..." or "" */
+    const char *hash;     size_t hash_len;     /* "#..." or "" */
+} url_parts;
+
+/* Decomposes a validated absolute https URL into WHATWG-location components, each
+ * field aliasing url (zero-copy). Reuses url_authority_len / url_validate_https.
+ * Fail-closed and https-only (the read side of `location`; the navigate decision
+ * belongs to link_nav): url == NULL / out == NULL => URL_ERR_NULL_ARG; a URL that
+ * is not a valid absolute https URL => URL_ERR_NOT_HTTPS. On URL_OK every field
+ * points into url. */
+url_status url_split(const char *url, url_parts *out);
+
 /* Resolves a (relative or absolute) reference ref against a "file:///dir/page"
  * base into out as a canonical "file:///..." URL. Security-critical and
  * fail-closed: the result is CONFINED to base's own directory subtree — a "../"
