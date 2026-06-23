@@ -18,7 +18,7 @@ repositorio. **Estas reglas anulan comportamientos por defecto.**
 2. **Zero Knowledge** — El navegador no sabe del usuario más de lo estrictamente necesario para
    renderizar. Sin historial en claro, sin fingerprinting pasivo, sin fugas de IP (WebRTC
    deshabilitado por defecto).
-3. **Privacy by Default** — Bloqueo total de terceros a nivel del motor de red. Sin telemetría,
+3. **Privacy by Default** — Bloqueo total de terceros a nivel del motor de red. Sin telemetría, tecnicas anti tracing o anti rastreo
    ni siquiera "anónima" u "opt-out". Integración opcional con Tor/I2P a nivel de socket.
 4. **Secure by Default** — La configuración insegura **no debe ser representable** en la API.
    El camino por defecto es siempre el seguro. Fallar cerrado: si una garantía no se puede
@@ -62,7 +62,7 @@ Para cada módulo, el ciclo es inviolable y **en este orden**:
 2. **Test (rojo)** — `tests/test_<modulo>.c` con CMocka. Debe **fallar** porque no hay
    implementación todavía.
 3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar.
-4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas.
+4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas. si vez codigo duplicado lo unificas, nunca esta fuera de scope, modo boy scout si ves deuda tecnica la extingues sin romper funcionalidades, lo mismo con las fallas de seguridad o vulnerabilidades la extincion de estas nunca esta fuera de scope
 5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`.
 6. **Fuzzing** — el path que toca contenido remoto se fuzzea (libFuzzer: `make fuzz`/`fuzz-pv`/
    `fuzz-js`/`fuzz-img`; AFL++: `make fuzz-afl`). Cero crashes/leaks/UB antes de cerrar.
