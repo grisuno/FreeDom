@@ -663,6 +663,68 @@ static void test_build_grid_container(void **state) {
     hp_document_free(doc);
 }
 
+/* Hito 23b-2: the flex/grid container params now come from the cascade, so a
+ * <style> rule (not only inline style=) feeds gap/justify/columns. */
+static void test_build_flex_container_from_sheet(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>.row{display:flex;gap:16px;justify-content:space-between}</style>"
+        "<div class='row'><p>one</p><p>two</p></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *one = find_text(v, "one");
+    const pv_run *two = find_text(v, "two");
+    assert_non_null(one);
+    assert_non_null(two);
+    assert_int_equal(one->cont_display, BX_DISPLAY_FLEX);
+    assert_int_equal(one->cont_gap, 16);
+    assert_int_equal(one->cont_justify, FX_JUSTIFY_SPACE_BETWEEN);
+    assert_int_equal(one->cont_id, two->cont_id);
+    assert_true(one->cont_id >= 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_grid_columns_from_sheet(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>#g{display:grid;grid-template-columns:1fr 1fr 1fr 1fr}</style>"
+        "<div id='g'><span>a</span><span>b</span></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "a");
+    assert_non_null(a);
+    assert_int_equal(a->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(a->cont_cols, 4);
+    assert_true(a->cont_id >= 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The sheet sets the container; an inline style= on the same element overrides one
+ * param (cascade: inline wins) while the sheet still supplies the rest. */
+static void test_build_container_sheet_inline_cascade(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>.row{display:flex;gap:5px;justify-content:center}</style>"
+        "<div class='row' style='gap:25px'><p>x</p></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *x = find_text(v, "x");
+    assert_non_null(x);
+    assert_int_equal(x->cont_display, BX_DISPLAY_FLEX);  /* sheet */
+    assert_int_equal(x->cont_gap, 25);                   /* inline wins */
+    assert_int_equal(x->cont_justify, FX_JUSTIFY_CENTER);/* sheet */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A run with no flex/grid ancestor carries the no-container defaults. */
 static void test_container_defaults(void **state) {
     (void)state;
@@ -990,6 +1052,9 @@ int main(void) {
         cmocka_unit_test(test_build_author_color),
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_grid_container),
+        cmocka_unit_test(test_build_flex_container_from_sheet),
+        cmocka_unit_test(test_build_grid_columns_from_sheet),
+        cmocka_unit_test(test_build_container_sheet_inline_cascade),
         cmocka_unit_test(test_container_defaults),
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),

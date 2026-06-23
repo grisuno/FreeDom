@@ -45,6 +45,18 @@ Specificity = `100*has_id + 10*nclasses + has_type`.
 | `font-weight` | `bold`: `bold`/`bolder` or numeric ≥ 600 → 1; `normal`/`lighter`/< 600 → 0 |
 | `font-style` | `italic`: `italic`/`oblique` → 1; `normal` → 0 |
 | `display` | `display`: `none`/`block`/`inline`/`inline-block`/`flex`/`grid`/other |
+| `gap`, `grid-gap`, `column-gap` | `gap`: leading px of the value (`12px 8px` → 12; `normal` → 0), clamped `[0, CSS_GAP_MAX]`, or -1 (unset) |
+| `justify-content` | `justify`: `flex-start`/`start`→START, `flex-end`/`end`→END, `center`, `space-between`, `space-around`, `space-evenly`; unknown dropped |
+| `grid-template-columns` | `grid_cols`: count of whitespace-separated track tokens, clamped `[1, CSS_GRID_COLS_MAX]`, or 0 (unset). `none` is dropped; `repeat()`/`minmax()` are counted as literal tokens (out of scope) |
+
+**Container layout params (Hito 23b-2).** `gap` / `justify-content` / `grid-template-columns`
+resolve through the **same cascade** as the other properties (so a `<style>` rule, a
+compound/id selector, and an inline `style=` all feed them, inline winning). They are
+**not inherited** (they describe the flex/grid container element itself, so the caller
+reads them from that element's resolved style, not up the ancestor chain). page_view
+consumes them to parameterize the flex/grid layout, which is **always applied and not
+gated by `caps.css`** (doctrine: "Layout != estilo de autor" — geometry is structure, it
+opens no socket and leaks nothing). Only author *colors* stay behind `caps.css`.
 
 **`@media` (Hito 23b).** A `@media <query> { ... }` block is **parsed**, not dropped: its
 inner rules are kept **only if the query matches** the render-time `css_media` context
@@ -76,8 +88,14 @@ typedef enum css_display {
     CSS_DISP_INLINE_BLOCK, CSS_DISP_FLEX, CSS_DISP_GRID, CSS_DISP_OTHER
 } css_display;
 
+typedef enum css_justify {      /* justify-content (flex/grid main axis) */
+    CSS_JUSTIFY_UNSET = 0, CSS_JUSTIFY_START, CSS_JUSTIFY_END, CSS_JUSTIFY_CENTER,
+    CSS_JUSTIFY_SPACE_BETWEEN, CSS_JUSTIFY_SPACE_AROUND, CSS_JUSTIFY_SPACE_EVENLY
+} css_justify;
+
 /* A resolved presentation. Each field uses a sentinel for "unset" so the caller
- * can layer inheritance (take the first ancestor that sets each inheriting one). */
+ * can layer inheritance (take the first ancestor that sets each inheriting one).
+ * The flex/grid container fields (gap/justify/grid_cols) are NOT inherited. */
 typedef struct css_style {
     int          color;       /* 0xRRGGBB or -1 (unset) */
     int          background;  /* 0xRRGGBB or -1 (unset) */
@@ -86,7 +104,13 @@ typedef struct css_style {
     int          bold;        /* 1, 0, or -1 (unset) */
     int          italic;      /* 1, 0, or -1 (unset) */
     css_display  display;     /* CSS_DISP_UNSET if absent */
+    int          gap;         /* px between flex/grid items, or -1 (unset) */
+    css_justify  justify;     /* justify-content; CSS_JUSTIFY_UNSET if absent */
+    int          grid_cols;   /* grid-template-columns track count, or 0 (unset) */
 } css_style;
+
+#define CSS_GAP_MAX       4096   /* px cap on gap (anti-DoS) */
+#define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns tracks (anti-DoS) */
 
 typedef struct css_sheet css_sheet;   /* opaque, owns the parsed rules */
 
@@ -156,9 +180,12 @@ common case.)
 - Inheritance/`initial`/`inherit`/`unset` keywords (caller does inheritance;
   these keywords are ignored).
 - The box model from author CSS (margin/padding/width/border): UA box model still
-  governs spacing. `display:flex|grid` *parameters* (gap/justify/columns) keep
-  coming from page_view's existing inline parser; `<style>`-driven flex/grid
-  parameters are not wired in v1 (only `display:none` from `<style>` takes effect).
+  governs spacing. `display:flex|grid` *parameters* (`gap`/`justify-content`/
+  `grid-template-columns`) **are now resolved through the cascade** (Hito 23b-2), so a
+  `<style>` rule feeds them, not only inline `style=`. Still out of scope: per-item
+  flex (`flex-grow`/`flex-shrink`/`flex-basis`/`order`), `align-items`/`align-content`,
+  `row-gap` as distinct from `column-gap`, `repeat()`/`minmax()` track expansion, and
+  named/`auto`/`fr`-weighted grid tracks (every track is treated as 1fr equal-width).
 - `url()` anything, `@import`/`@font-face`/other `@`-rules, `calc()`, `var()`, custom
   properties, `!important` precedence (the token is stripped; it does not raise it).
   `@media` is supported (subset above); `not`/unknown features fail closed.

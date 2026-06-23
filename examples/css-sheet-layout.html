@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Freedom — author stylesheet flex/grid demo</title>
+<style>
+  .row {
+    display: flex;
+    gap: 24px;
+    justify-content: space-between;
+  }
+  #cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .muted { color: #335577; }
+</style>
+</head>
+<body>
+<h1>Author stylesheet layout (Hito 23b-2)</h1>
+<p>The flex row and the grid below get their <code>display</code>, <code>gap</code>,
+<code>justify-content</code> and <code>grid-template-columns</code> from the
+<code>&lt;style&gt;</code> block in the head &mdash; not from inline
+<code>style=</code> attributes. Layout is structure, so the columns show by default;
+you do NOT need to enable author colors. (The muted text color below, an author
+color, DOES need the Author styles toggle.)</p>
+
+<h2>Flex row from a class rule (.row)</h2>
+<div class="row">
+  <p class="muted">First column, placed by the flex solver using the gap and
+  justify-content declared in the stylesheet.</p>
+  <p class="muted">Second column. None of these spacing values are inline.</p>
+  <p class="muted">Third column. Wrapping happens inside each column.</p>
+</div>
+
+<h2>Grid from an id rule (#cards)</h2>
+<div id="cards">
+  <p>Card one. Three equal tracks (1fr each), filled row by row.</p>
+  <p>Card two. The second track on the first row.</p>
+  <p>Card three. The third track on the first row.</p>
+  <p>Card four wraps to the next row, first track.</p>
+</div>
+
+<h2>Cascade: inline still wins</h2>
+<div class="row" style="gap:4px">
+  <p>This row is <code>.row</code> (flex, space-between from the sheet), but its gap
+  is overridden inline to 4px &mdash; the cascade resolves both, inline winning.</p>
+  <p>Second item, tight against the first.</p>
+</div>
+</body>
+</html>

@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <cmocka.h>
@@ -64,6 +65,97 @@ static void test_inline_display(void **state) {
     assert_int_equal(css_parse_inline("display:grid", 0).display, CSS_DISP_GRID);
     assert_int_equal(css_parse_inline("display:block", 0).display, CSS_DISP_BLOCK);
     assert_int_equal(css_parse_inline("color:red", 0).display, CSS_DISP_UNSET);
+}
+
+/* --- flex/grid container props (Hito 23b-2) --- */
+
+static void test_inline_container_props(void **state) {
+    (void)state;
+    css_style f = css_parse_inline("display:flex; gap:12px; justify-content:center", 0);
+    assert_int_equal(f.display, CSS_DISP_FLEX);
+    assert_int_equal(f.gap, 12);
+    assert_int_equal(f.justify, CSS_JUSTIFY_CENTER);
+    assert_int_equal(f.grid_cols, 0);  /* not a grid */
+
+    css_style g = css_parse_inline("display:grid; grid-template-columns:1fr 1fr 1fr", 0);
+    assert_int_equal(g.display, CSS_DISP_GRID);
+    assert_int_equal(g.grid_cols, 3);
+
+    /* every justify-content keyword maps to its css_justify. */
+    assert_int_equal(css_parse_inline("justify-content:flex-start", 0).justify, CSS_JUSTIFY_START);
+    assert_int_equal(css_parse_inline("justify-content:start", 0).justify, CSS_JUSTIFY_START);
+    assert_int_equal(css_parse_inline("justify-content:flex-end", 0).justify, CSS_JUSTIFY_END);
+    assert_int_equal(css_parse_inline("justify-content:space-between", 0).justify, CSS_JUSTIFY_SPACE_BETWEEN);
+    assert_int_equal(css_parse_inline("justify-content:space-around", 0).justify, CSS_JUSTIFY_SPACE_AROUND);
+    assert_int_equal(css_parse_inline("justify-content:space-evenly", 0).justify, CSS_JUSTIFY_SPACE_EVENLY);
+
+    /* gap aliases and a two-value gap (first token wins). */
+    assert_int_equal(css_parse_inline("grid-gap:8px", 0).gap, 8);
+    assert_int_equal(css_parse_inline("column-gap:6px", 0).gap, 6);
+    assert_int_equal(css_parse_inline("gap:10px 4px", 0).gap, 10);
+    assert_int_equal(css_parse_inline("gap:normal", 0).gap, 0);
+}
+
+static void test_sheet_container_props(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ".row { display:flex; gap:16px; justify-content:space-between }\n"
+        "#g { display:grid; grid-template-columns:1fr 1fr 1fr 1fr }", 0, &sh), CSS_OK);
+
+    const char *row[] = { "row" };
+    css_style f = css_resolve(sh, "div", NULL, row, 1, NULL, 0);
+    assert_int_equal(f.display, CSS_DISP_FLEX);
+    assert_int_equal(f.gap, 16);
+    assert_int_equal(f.justify, CSS_JUSTIFY_SPACE_BETWEEN);
+
+    css_style g = css_resolve(sh, "section", "g", NULL, 0, NULL, 0);
+    assert_int_equal(g.display, CSS_DISP_GRID);
+    assert_int_equal(g.grid_cols, 4);
+    css_free(sh);
+}
+
+/* The container props go through the full cascade: inline beats the sheet. */
+static void test_container_cascade_inline_wins(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".row{display:flex;gap:4px;justify-content:center}", 0, &sh), CSS_OK);
+    const char *row[] = { "row" };
+    css_style s = css_resolve(sh, "div", NULL, row, 1,
+                              "gap:20px; justify-content:flex-end", 0);
+    assert_int_equal(s.display, CSS_DISP_FLEX);   /* from the sheet */
+    assert_int_equal(s.gap, 20);                  /* inline wins */
+    assert_int_equal(s.justify, CSS_JUSTIFY_END); /* inline wins */
+    css_free(sh);
+}
+
+/* Fail closed: a bad justify keyword is dropped (unset); grid-template-columns:none
+ * is unset; gap and column count are clamped to their anti-DoS bounds. */
+static void test_container_fail_closed_and_bounds(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("justify-content:bogus", 0).justify, CSS_JUSTIFY_UNSET);
+    assert_int_equal(css_parse_inline("gap:abc", 0).gap, -1);          /* not a number */
+    assert_int_equal(css_parse_inline("grid-template-columns:none", 0).grid_cols, 0);
+    assert_int_equal(css_parse_inline("gap:999999px", 0).gap, CSS_GAP_MAX); /* clamped */
+
+    /* A declaration value longer than the per-declaration token cap is dropped
+     * entirely (fail closed, anti-DoS) — never silently truncated. The short
+     * display:grid declaration in the same block still parses. */
+    char buf[600];
+    size_t k = (size_t)snprintf(buf, sizeof buf, "display:grid;grid-template-columns:");
+    for (int i = 0; i < 100 && k + 4 < sizeof buf; ++i)
+        k += (size_t)snprintf(buf + k, sizeof buf - k, "1fr ");
+    css_style s = css_parse_inline(buf, 0);
+    assert_int_equal(s.display, CSS_DISP_GRID);
+    assert_int_equal(s.grid_cols, 0);
+}
+
+static void test_container_unset(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("color:red", 0);
+    assert_int_equal(s.gap, -1);
+    assert_int_equal(s.justify, CSS_JUSTIFY_UNSET);
+    assert_int_equal(s.grid_cols, 0);
 }
 
 /* --- security: never phone home, ignore junk --- */
@@ -291,6 +383,9 @@ static void test_resolve_null_safe(void **state) {
     assert_int_equal(s.color, -1);
     assert_int_equal(s.text_align, CSS_ALIGN_UNSET);
     assert_int_equal(s.display, CSS_DISP_UNSET);
+    assert_int_equal(s.gap, -1);
+    assert_int_equal(s.justify, CSS_JUSTIFY_UNSET);
+    assert_int_equal(s.grid_cols, 0);
 }
 
 int main(void) {
@@ -300,6 +395,11 @@ int main(void) {
         cmocka_unit_test(test_inline_font_size),
         cmocka_unit_test(test_inline_font_weight_style),
         cmocka_unit_test(test_inline_display),
+        cmocka_unit_test(test_inline_container_props),
+        cmocka_unit_test(test_sheet_container_props),
+        cmocka_unit_test(test_container_cascade_inline_wins),
+        cmocka_unit_test(test_container_fail_closed_and_bounds),
+        cmocka_unit_test(test_container_unset),
         cmocka_unit_test(test_url_value_dropped),
         cmocka_unit_test(test_unknown_props_ignored),
         cmocka_unit_test(test_malformed_inline_no_crash),

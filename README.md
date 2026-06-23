@@ -54,8 +54,8 @@ The name reflects its core goals:
 ### New Features & Improvements (Latest)
 - **Advanced Layout Engine**:
   - Full box model per HTML tag (margins, padding, display, border)
-  - Flexbox 1D layout support (`flex-grow`, `flex-shrink`, `gap`, `justify-content`)
-  - Basic CSS Grid support (`repeat(n, 1fr)`)
+  - Flexbox 1D layout support (`gap`, `justify-content`), fed from inline `style=` *and* `<style>` rules
+  - Basic equal-column CSS Grid (`grid-template-columns` track count; every track is 1fr — `repeat()`/`minmax()` not expanded yet)
   - Recursive box-tree layout with margin collapsing
 - **GUI & Usability**:
   - Visible vertical scrollbar with drag and click support
@@ -241,6 +241,12 @@ deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `
 `font-style`, `display` (including `display:none`), with type / `.class` / `#id` / `*` / group
 selectors and a real specificity-then-document-order cascade (inline wins). It is rendered by
 the pure `css` module and stays gated behind the author-CSS capability (Privacy by Default).
+
+**Flex & grid from the stylesheet:** a `display:flex` / `display:grid` container takes its
+layout params (`gap`, `justify-content`, `grid-template-columns`) from the same cascade, so a
+`<style>` rule lays out columns — not only an inline `style=`. Because layout is *structure*,
+not styling, the columns render even with author colors off (only author colors stay gated by
+the toggle). See `examples/css-sheet-layout.html`.
 
 **Automatic dark mode:** `@media` is supported as a safe subset — with the dark theme on (and
 Author styles enabled), a page's `@media (prefers-color-scheme: dark)` rules apply automatically.

@@ -412,49 +412,6 @@ static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *bas
  * color and is ignored (fail closed). */
 #define PV_COLOR_TOKEN_MAX 64u
 
-/* Case-insensitive ASCII compare of the first n bytes of p against prop. */
-static int ascii_eq_ci(const char *p, const char *prop, size_t n) {
-    for (size_t i = 0; i < n; ++i) {
-        if (((unsigned char)p[i] | 0x20) != (unsigned char)prop[i]) return 0;
-    }
-    return 1;
-}
-
-/* Copies the trimmed value of declaration `prop` (length prop_len) from an inline
- * style string into out (NUL-terminated, bounded). The property name is matched
- * exactly so "color" never matches inside "background-color"; the last matching
- * declaration wins (the cascade). Returns 1 if found and it fits, else 0. */
-static int style_value(const char *style, size_t len, const char *prop, size_t prop_len,
-                       char *out, size_t out_size) {
-    int found = 0;
-    size_t i = 0;
-    while (i < len) {
-        size_t ds = i;
-        while (i < len && style[i] != ';') ++i;
-        size_t de = i;
-        if (i < len) ++i; /* skip ';' */
-
-        size_t colon = ds;
-        while (colon < de && style[colon] != ':') ++colon;
-        if (colon >= de) continue;
-
-        size_t ps = ds, pe = colon;
-        while (ps < pe && (style[ps] == ' ' || style[ps] == '\t')) ++ps;
-        while (pe > ps && (style[pe - 1] == ' ' || style[pe - 1] == '\t')) --pe;
-        if (pe - ps != prop_len || !ascii_eq_ci(style + ps, prop, prop_len)) continue;
-
-        size_t vs = colon + 1, ve = de;
-        while (vs < ve && (style[vs] == ' ' || style[vs] == '\t')) ++vs;
-        while (ve > vs && (style[ve - 1] == ' ' || style[ve - 1] == '\t')) --ve;
-        size_t vlen = ve - vs;
-        if (vlen == 0 || vlen + 1 > out_size) continue;
-        memcpy(out, style + vs, vlen);
-        out[vlen] = '\0';
-        found = 1;
-    }
-    return found;
-}
-
 /* Bounds for the element selector inputs handed to css_resolve (anti-DoS; an
  * over-long token simply does not match, which fails closed). */
 #define PV_CSS_TAG_MAX     64u
@@ -531,9 +488,12 @@ static css_style element_css_style(lxb_dom_element_t *el, const css_sheet *sheet
                        (const char *)st, sl);
 }
 
-/* --- author flex/grid container layout (honoured by render_doc only with caps.css) --- */
+/* --- author flex/grid container layout: structure, not author styling. render_doc
+ * applies it ALWAYS, decoupled from caps.css (doctrine "Layout != estilo de autor");
+ * only author colors/text-align/font-size stay gated. The display and its params
+ * (gap/justify/columns) come from the css cascade (<style> + inline), resolved by
+ * element_css_style like the colors. --- */
 
-#define PV_LAYOUT_TOKEN_MAX 256u
 #define PV_MAX_CONTAINERS   256u
 #define PV_MAX_GRID_COLS    64
 
@@ -558,71 +518,19 @@ static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
     return (int)reg->count++;
 }
 
-/* Leading non-negative integer of a token (e.g. "12px" -> 12); 0 if none. */
-static int parse_px(const char *s) {
-    int v = 0, any = 0;
-    while (*s == ' ' || *s == '\t') ++s;
-    while (*s >= '0' && *s <= '9') {
-        v = v * 10 + (*s - '0');
-        any = 1;
-        ++s;
-        if (v > 100000) break;  /* clamp absurd values */
+/* Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify.
+ * Unset / start / unknown all fall to FX_JUSTIFY_START (the default). */
+static int css_to_fx_justify(css_justify j) {
+    switch (j) {
+        case CSS_JUSTIFY_END:           return FX_JUSTIFY_END;
+        case CSS_JUSTIFY_CENTER:        return FX_JUSTIFY_CENTER;
+        case CSS_JUSTIFY_SPACE_BETWEEN: return FX_JUSTIFY_SPACE_BETWEEN;
+        case CSS_JUSTIFY_SPACE_AROUND:  return FX_JUSTIFY_SPACE_AROUND;
+        case CSS_JUSTIFY_SPACE_EVENLY:  return FX_JUSTIFY_SPACE_EVENLY;
+        case CSS_JUSTIFY_START:
+        case CSS_JUSTIFY_UNSET:
+        default:                        return FX_JUSTIFY_START;
     }
-    return any ? v : 0;
-}
-
-/* Maps a justify-content token to an fx_justify (case-insensitive). */
-static int parse_justify(const char *s) {
-    if (ascii_eq_ci(s, "center", 6) && s[6] == '\0') return FX_JUSTIFY_CENTER;
-    if ((ascii_eq_ci(s, "flex-end", 8) && s[8] == '\0') ||
-        (ascii_eq_ci(s, "end", 3) && s[3] == '\0')) return FX_JUSTIFY_END;
-    if (ascii_eq_ci(s, "space-between", 13) && s[13] == '\0') return FX_JUSTIFY_SPACE_BETWEEN;
-    if (ascii_eq_ci(s, "space-around", 12) && s[12] == '\0') return FX_JUSTIFY_SPACE_AROUND;
-    if (ascii_eq_ci(s, "space-evenly", 12) && s[12] == '\0') return FX_JUSTIFY_SPACE_EVENLY;
-    return FX_JUSTIFY_START;  /* flex-start / start / unknown */
-}
-
-/* Counts whitespace-separated track tokens in a grid-template-columns value, e.g.
- * "1fr 1fr 1fr" -> 3. repeat()/minmax() are out of scope (counted as literal
- * tokens); the result is clamped to [1, PV_MAX_GRID_COLS]. */
-static int count_tracks(const char *s) {
-    int n = 0, in_tok = 0;
-    for (; *s != '\0'; ++s) {
-        int ws = (*s == ' ' || *s == '\t');
-        if (!ws && !in_tok) { ++n; in_tok = 1; }
-        else if (ws) in_tok = 0;
-    }
-    if (n < 1) n = 1;
-    if (n > PV_MAX_GRID_COLS) n = PV_MAX_GRID_COLS;
-    return n;
-}
-
-/* Fills *ci with el's author flex/grid layout (inline style "display:flex|grid"
- * plus gap / justify-content / grid-template-columns), or returns 0 when el is not
- * such a container. ci->id is left -1 (the caller assigns it via the registry). */
-static int element_container(lxb_dom_element_t *el, pv_cont_info *ci) {
-    size_t sl = 0;
-    const lxb_char_t *style =
-        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
-    if (style == NULL || sl == 0) return 0;
-
-    char buf[PV_LAYOUT_TOKEN_MAX];
-    if (!style_value((const char *)style, sl, "display", 7, buf, sizeof buf)) return 0;
-    bx_display disp;
-    if (bx_parse_display(buf, &disp) != BX_OK) return 0;
-    if (disp != BX_DISPLAY_FLEX && disp != BX_DISPLAY_GRID) return 0;
-
-    ci->id = -1;
-    ci->display = (int)disp;
-    ci->gap = style_value((const char *)style, sl, "gap", 3, buf, sizeof buf)
-              ? parse_px(buf) : 0;
-    ci->justify = style_value((const char *)style, sl, "justify-content", 15, buf, sizeof buf)
-                  ? parse_justify(buf) : FX_JUSTIFY_START;
-    ci->cols = (disp == BX_DISPLAY_GRID)
-               ? (style_value((const char *)style, sl, "grid-template-columns", 21, buf, sizeof buf)
-                  ? count_tracks(buf) : 1)
-               : 0;
-    return 1;
 }
 
 /* Inline emphasis carried by a tag: bold from <b>/<strong>/<th>, italic from
@@ -703,15 +611,21 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 *align = (int)cs.text_align; got_align = 1;
             }
             if (!got_fs && cs.font_scale != 0) { *font_scale = cs.font_scale; got_fs = 1; }
-            /* Nearest flex/grid container: its runs share one id so the presentation
-             * layer can lay the container out (gated by caps.css in render_doc). */
-            if (!got_cont && reg != NULL) {
-                pv_cont_info ci;
-                if (element_container(el, &ci)) {
-                    ci.id = container_id(reg, p);
-                    *cont = ci;
-                    got_cont = 1;
-                }
+            /* Nearest flex/grid container: derived from the SAME resolved css_style
+             * (cs) as the colors above, so a <style> rule feeds gap/justify/columns,
+             * not just an inline style=. Its runs share one id so the presentation
+             * layer can lay the container out. Structure, so render_doc applies it
+             * regardless of caps.css. */
+            if (!got_cont && reg != NULL &&
+                (cs.display == CSS_DISP_FLEX || cs.display == CSS_DISP_GRID)) {
+                cont->display = (cs.display == CSS_DISP_FLEX) ? BX_DISPLAY_FLEX
+                                                             : BX_DISPLAY_GRID;
+                cont->gap = (cs.gap >= 0) ? cs.gap : 0;
+                cont->justify = css_to_fx_justify(cs.justify);
+                cont->cols = (cs.display == CSS_DISP_GRID)
+                             ? (cs.grid_cols > 0 ? cs.grid_cols : 1) : 0;
+                cont->id = container_id(reg, p);
+                got_cont = 1;
             }
         }
         if (p == base) break;

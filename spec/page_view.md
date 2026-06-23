@@ -99,13 +99,18 @@ que `fg_rgb` (`render_doc` lo propaga solo con `caps.css`); los `pv_append*` lo 
 `pv_set_bgcolor` lo fija en el último run.
 
 **Contenedor flex/grid del autor (`cont_*`):** por cada run se busca el ancestro más cercano cuyo
-`style` declare `display:flex` o `display:grid` (parseado por `[[box_style]]`). Los runs de un mismo
-contenedor comparten `cont_id` (registro en orden de documento, -1 = ninguno); se guardan además su
-`display`, el `gap` (px), `justify-content` (`[[flex_layout]]` `fx_justify`) y, en grid, el número de
-columnas de `grid-template-columns` (cuenta de tokens; `repeat()`/`minmax()` fuera de alcance). Es
-dato de presentación: `render_doc` lo propaga solo con `caps.css`, así que con CSS de autor apagado
-todo es flujo plano. Los `pv_append*` inicializan `cont_id` a -1; `pv_set_container` fija los cinco
-campos en el último run. El `background` shorthand y `bgcolor` legacy siguen fuera de alcance.
+`display` computado sea `flex` o `grid`. Desde el **Hito 23b-2** ese `display` y sus parámetros
+(`gap`, `justify-content`, `grid-template-columns`) salen de la **cascada de `[[css]]`** — la misma
+`css_style` que ya se resuelve por ancestro (hoja `<style>` + `style=` inline, inline gana) — no de un
+parser inline propio (que se eliminó). El número de columnas mapea a `css_justify`→`fx_justify`
+(`[[flex_layout]]`). Los runs de un mismo contenedor comparten `cont_id` (registro en orden de
+documento, -1 = ninguno); se guardan además su `display`, el `gap` (px), `justify-content` y, en grid,
+las columnas de `grid-template-columns` (cuenta de tokens, `[1, PV_MAX_GRID_COLS]`; `repeat()`/
+`minmax()` fuera de alcance). Es **estructura, no estilo de autor**: `render_doc` lo propaga **siempre**
+(desacoplado de `caps.css`, doctrina "Layout != estilo de autor"); solo los *colores*/`text-align`/
+`font-size` de autor quedan gateados por `caps.css`. Los `pv_append*` inicializan `cont_id` a -1;
+`pv_set_container` fija los cinco campos en el último run. El `background` shorthand y `bgcolor` legacy
+siguen fuera de alcance.
 
 ## 3. API
 

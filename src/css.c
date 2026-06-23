@@ -23,7 +23,8 @@
 #define CSS_INLINE_SPEC         (1 << 20)
 
 /* Property slots. The enum value IS the css_style slot index used by apply(). */
-enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_WEIGHT, P_STYLE, P_DISPLAY, P_NSLOTS };
+enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_WEIGHT, P_STYLE, P_DISPLAY,
+       P_GAP, P_JUSTIFY, P_GRIDCOLS, P_NSLOTS };
 
 typedef struct css_decl {
     int prop;  /* P_* */
@@ -176,6 +177,47 @@ static int interp_display(const char *v) {
     return -1;  /* unknown display: leave unset */
 }
 
+/* gap / grid-gap / column-gap: leading length as px (a two-value gap keeps the
+ * first), "normal" -> 0; clamped to [0, CSS_GAP_MAX]. -1 when not a length. */
+static int interp_gap(const char *v) {
+    if (ci_eq(v, "normal")) return 0;
+    double num;
+    const char *end;
+    if (!parse_num(v, &num, &end)) return -1;
+    int px = (int)(num + 0.5);
+    if (px < 0) px = 0;
+    if (px > CSS_GAP_MAX) px = CSS_GAP_MAX;
+    return px;
+}
+
+static int interp_justify(const char *v) {
+    if (ci_eq(v, "flex-start") || ci_eq(v, "start") || ci_eq(v, "normal"))
+        return CSS_JUSTIFY_START;
+    if (ci_eq(v, "flex-end") || ci_eq(v, "end")) return CSS_JUSTIFY_END;
+    if (ci_eq(v, "center")) return CSS_JUSTIFY_CENTER;
+    if (ci_eq(v, "space-between")) return CSS_JUSTIFY_SPACE_BETWEEN;
+    if (ci_eq(v, "space-around")) return CSS_JUSTIFY_SPACE_AROUND;
+    if (ci_eq(v, "space-evenly")) return CSS_JUSTIFY_SPACE_EVENLY;
+    return -1;  /* unknown: fail closed */
+}
+
+/* grid-template-columns: count of whitespace-separated track tokens, clamped to
+ * [1, CSS_GRID_COLS_MAX]. "none"/empty -> -1 (unset). repeat()/minmax() are counted
+ * as literal tokens (out of scope). url() defensively dropped. */
+static int interp_gridcols(const char *v) {
+    if (ci_contains(v, "url(")) return -1;
+    if (ci_eq(v, "none")) return -1;
+    int n = 0, in_tok = 0;
+    for (const char *p = v; *p != '\0'; ++p) {
+        int ws = (*p == ' ' || *p == '\t');
+        if (!ws && !in_tok) { ++n; in_tok = 1; }
+        else if (ws) in_tok = 0;
+    }
+    if (n < 1) return -1;
+    if (n > CSS_GRID_COLS_MAX) n = CSS_GRID_COLS_MAX;
+    return n;
+}
+
 /* Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from
  * both ends. Returns the trimmed length, or SIZE_MAX if it does not fit dst. */
 static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
@@ -211,6 +253,11 @@ static int parse_one_decl(const char *s, size_t n, css_decl *out) {
     else if (strcmp(prop, "font-weight") == 0)       { prop_id = P_WEIGHT;   ival = interp_weight(val); }
     else if (strcmp(prop, "font-style") == 0)        { prop_id = P_STYLE;    ival = interp_style(val); }
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
+    else if (strcmp(prop, "gap") == 0 ||
+             strcmp(prop, "grid-gap") == 0 ||
+             strcmp(prop, "column-gap") == 0)         { prop_id = P_GAP;      ival = interp_gap(val); }
+    else if (strcmp(prop, "justify-content") == 0)    { prop_id = P_JUSTIFY;  ival = interp_justify(val); }
+    else if (strcmp(prop, "grid-template-columns") == 0) { prop_id = P_GRIDCOLS; ival = interp_gridcols(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -594,6 +641,9 @@ static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
             case P_WEIGHT:   o->bold = d->ival; break;
             case P_STYLE:    o->italic = d->ival; break;
             case P_DISPLAY:  o->display = (css_display)d->ival; break;
+            case P_GAP:      o->gap = d->ival; break;
+            case P_JUSTIFY:  o->justify = (css_justify)d->ival; break;
+            case P_GRIDCOLS: o->grid_cols = d->ival; break;
             default: break;
         }
     }
@@ -602,7 +652,8 @@ static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
 css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                       const char *const *classes, size_t nclasses,
                       const char *inline_style, size_t inline_len) {
-    css_style out = { -1, -1, CSS_ALIGN_UNSET, 0, -1, -1, CSS_DISP_UNSET };
+    css_style out = { -1, -1, CSS_ALIGN_UNSET, 0, -1, -1, CSS_DISP_UNSET,
+                      -1, CSS_JUSTIFY_UNSET, 0 };
     int ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { ws[k] = -1; wo[k] = -1; }
 

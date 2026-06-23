@@ -49,8 +49,25 @@ typedef enum css_display {
     CSS_DISP_OTHER
 } css_display;
 
+typedef enum css_justify {  /* justify-content (flex/grid main axis) */
+    CSS_JUSTIFY_UNSET = 0,
+    CSS_JUSTIFY_START,
+    CSS_JUSTIFY_END,
+    CSS_JUSTIFY_CENTER,
+    CSS_JUSTIFY_SPACE_BETWEEN,
+    CSS_JUSTIFY_SPACE_AROUND,
+    CSS_JUSTIFY_SPACE_EVENLY
+} css_justify;
+
+/* Anti-DoS bounds for the flex/grid container params. */
+#define CSS_GAP_MAX       4096   /* px cap on gap */
+#define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns track count */
+
 /* A resolved presentation. Each field uses a sentinel for "unset" so the caller
- * can layer inheritance (take the first ancestor that sets each inheriting one). */
+ * can layer inheritance (take the first ancestor that sets each inheriting one).
+ * The flex/grid container fields (gap/justify/grid_cols) are NOT inherited: they
+ * describe the container element itself, so the caller reads them from that
+ * element's resolved style, not up the ancestor chain. */
 typedef struct css_style {
     int         color;       /* 0xRRGGBB or -1 (unset) */
     int         background;  /* 0xRRGGBB or -1 (unset) */
@@ -59,6 +76,9 @@ typedef struct css_style {
     int         bold;        /* 1, 0, or -1 (unset) */
     int         italic;      /* 1, 0, or -1 (unset) */
     css_display display;     /* CSS_DISP_UNSET if absent */
+    int         gap;         /* px between flex/grid items, or -1 (unset) */
+    css_justify justify;     /* justify-content; CSS_JUSTIFY_UNSET if absent */
+    int         grid_cols;   /* grid-template-columns track count, or 0 (unset) */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */
