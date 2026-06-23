@@ -57,7 +57,8 @@
 #include "xdg-shell-client-protocol.h"
 #include "xdg-decoration-client-protocol.h"
 
-#define UI_FONT_SIZE   14.0
+#include "browser_ui_internal.h"
+
 #define UI_TOOLBAR_H   36.0
 #define UI_TITLEBAR_H  30.0
 #define UI_TABBAR_H    30.0   /* height of the tab strip (between titlebar and toolbar) */
@@ -69,7 +70,6 @@
 #define UI_WIN_BTN_W   30.0
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
-#define UI_TEXT_MARGIN 20.0   /* left/right/top breathing room around page content */
 #define UI_LIST_INDENT 24.0   /* left indent (px) per list nesting level (ul/ol) */
 
 /* Vertical scrollbar in the content area's right gutter. The gutter width is
@@ -98,9 +98,6 @@
 #define UI_TOAST_PAD    8.0    /* padding inside the toast banner */
 #define UI_TWO_PI       6.28318530717958647692 /* radians of a full circle (busy clock) */
 
-/* Number of heading levels (h1..h6). Index 0 of the scale table is body text. */
-#define UI_HEADING_LEVELS 6
-
 /* Form control geometry: inner padding of a text box, the preferred text-box width
  * (clamped to the content width), and the horizontal padding of a button. */
 #define UI_INPUT_PAD     6.0
@@ -116,229 +113,6 @@
 /* Largest text slice measured/drawn at once (one word, or one clipped label).
  * Words longer than this are still placed, just measured up to the cap. */
 #define UI_SLICE_MAX 512
-
-/* Presentation theme: every font size, spacing and colour the renderer uses,
- * gathered in one place so no value is hardcoded at a call site. An RGB colour is
- * a 3-element array in [0,1]. The structured content painter and the window
- * chrome both read from a single theme instance (see ui_theme_default). */
-typedef struct ui_rgb { double r, g, b; } ui_rgb;
-
-typedef struct ui_theme {
-    double body_font;                          /* body text size (px) */
-    double heading_scale[UI_HEADING_LEVELS + 1]; /* [level] multiplier; [0] = body */
-    double line_spacing;                       /* multiplier of font height per line */
-    double paragraph_gap;                      /* extra px above a new paragraph block */
-    double content_margin;                     /* left/right/top padding of the content area */
-    double image_box_pad;                      /* padding inside an image placeholder box */
-    double scroll_step_lines;                  /* wheel/arrow scroll step, in body lines */
-    double page_step_lines;                    /* Page Up/Down scroll step, in body lines */
-
-    ui_rgb window_bg;
-    ui_rgb content_bg;
-    ui_rgb text;
-    ui_rgb heading;
-    ui_rgb link;
-    ui_rgb notice_bg;
-    ui_rgb notice_text;
-    ui_rgb image_box;       /* placeholder border + label */
-    ui_rgb image_blocked;   /* label colour for a blocked image */
-    ui_rgb toolbar_bg;
-    ui_rgb titlebar_bg;
-    ui_rgb chrome_text;
-    ui_rgb chrome_text_dim; /* disabled button */
-    ui_rgb close_button;
-    ui_rgb url_bg_focused;
-    ui_rgb url_bg;
-    ui_rgb url_border;
-    ui_rgb caret;
-    ui_rgb link_hover_bg;   /* highlight behind the link under the pointer */
-    ui_rgb btn_hover_bg;    /* highlight behind the toolbar button under the pointer */
-    ui_rgb input_bg;        /* form text input background */
-    ui_rgb input_bg_focused;
-    ui_rgb input_border;
-    ui_rgb input_text;
-    ui_rgb input_placeholder;
-    ui_rgb button_bg;       /* submit/button control */
-    ui_rgb button_text;
-    ui_rgb menu_bg;
-    ui_rgb menu_border;
-    ui_rgb menu_text;
-    ui_rgb check_border;
-    ui_rgb check_mark;
-    ui_rgb toast_bg;
-    ui_rgb toast_text;
-    ui_rgb scrollbar_track;
-    ui_rgb scrollbar_thumb;
-    ui_rgb scrollbar_thumb_hot; /* thumb under the pointer / being dragged */
-} ui_theme;
-
-/* The single source of truth for the look of the browser. */
-static ui_theme ui_theme_default(void) {
-    ui_theme t;
-    t.body_font = UI_FONT_SIZE;
-    t.heading_scale[0] = 1.0;
-    t.heading_scale[1] = 2.0;
-    t.heading_scale[2] = 1.6;
-    t.heading_scale[3] = 1.35;
-    t.heading_scale[4] = 1.2;
-    t.heading_scale[5] = 1.1;
-    t.heading_scale[6] = 1.05;
-    t.line_spacing = 1.3;
-    t.paragraph_gap = 8.0;
-    t.content_margin = UI_TEXT_MARGIN;
-    t.image_box_pad = 6.0;
-    t.scroll_step_lines = 3.0;
-    t.page_step_lines = 10.0;
-
-    t.window_bg      = (ui_rgb){ 0.96, 0.96, 0.96 };
-    t.content_bg     = (ui_rgb){ 1.00, 1.00, 1.00 };
-    t.text           = (ui_rgb){ 0.10, 0.10, 0.10 };
-    t.heading        = (ui_rgb){ 0.06, 0.08, 0.20 };
-    t.link           = (ui_rgb){ 0.10, 0.33, 0.80 };
-    t.notice_bg      = (ui_rgb){ 1.00, 0.95, 0.70 };
-    t.notice_text    = (ui_rgb){ 0.40, 0.28, 0.00 };
-    t.image_box      = (ui_rgb){ 0.45, 0.45, 0.50 };
-    t.image_blocked  = (ui_rgb){ 0.70, 0.30, 0.30 };
-    t.toolbar_bg     = (ui_rgb){ 0.22, 0.23, 0.25 };
-    t.titlebar_bg    = (ui_rgb){ 0.12, 0.12, 0.14 };
-    t.chrome_text    = (ui_rgb){ 0.85, 0.85, 0.85 };
-    t.chrome_text_dim= (ui_rgb){ 0.45, 0.45, 0.45 };
-    t.close_button   = (ui_rgb){ 1.00, 0.55, 0.55 };
-    t.url_bg_focused = (ui_rgb){ 1.00, 1.00, 1.00 };
-    t.url_bg         = (ui_rgb){ 0.92, 0.92, 0.92 };
-    t.url_border     = (ui_rgb){ 0.10, 0.10, 0.10 };
-    t.caret          = (ui_rgb){ 0.00, 0.00, 0.00 };
-    t.link_hover_bg  = (ui_rgb){ 0.88, 0.93, 1.00 };
-    t.btn_hover_bg   = (ui_rgb){ 0.34, 0.35, 0.38 };
-    t.input_bg          = (ui_rgb){ 1.00, 1.00, 1.00 };
-    t.input_bg_focused  = (ui_rgb){ 1.00, 1.00, 0.96 };
-    t.input_border      = (ui_rgb){ 0.55, 0.55, 0.60 };
-    t.input_text        = (ui_rgb){ 0.08, 0.08, 0.10 };
-    t.input_placeholder = (ui_rgb){ 0.55, 0.55, 0.58 };
-    t.button_bg         = (ui_rgb){ 0.22, 0.42, 0.78 };
-    t.button_text       = (ui_rgb){ 0.98, 0.98, 1.00 };
-    t.menu_bg        = (ui_rgb){ 0.98, 0.98, 0.99 };
-    t.menu_border    = (ui_rgb){ 0.55, 0.55, 0.60 };
-    t.menu_text      = (ui_rgb){ 0.10, 0.10, 0.12 };
-    t.check_border   = (ui_rgb){ 0.35, 0.35, 0.40 };
-    t.check_mark     = (ui_rgb){ 0.10, 0.45, 0.20 };
-    t.toast_bg       = (ui_rgb){ 0.15, 0.15, 0.18 };
-    t.toast_text     = (ui_rgb){ 0.95, 0.95, 0.97 };
-    t.scrollbar_track     = (ui_rgb){ 0.90, 0.90, 0.92 };
-    t.scrollbar_thumb     = (ui_rgb){ 0.62, 0.62, 0.66 };
-    t.scrollbar_thumb_hot = (ui_rgb){ 0.45, 0.45, 0.50 };
-    return t;
-}
-
-/* Dark reading palette. Shares all the metrics (font sizes, spacing) with the
- * default theme; only the colours change, so the box model stays in one place. */
-static ui_theme ui_theme_dark(void) {
-    ui_theme t = ui_theme_default();
-    t.window_bg      = (ui_rgb){ 0.12, 0.12, 0.13 };
-    t.content_bg     = (ui_rgb){ 0.13, 0.13, 0.15 };
-    t.text           = (ui_rgb){ 0.85, 0.86, 0.88 };
-    t.heading        = (ui_rgb){ 0.78, 0.84, 1.00 };
-    t.link           = (ui_rgb){ 0.50, 0.70, 1.00 };
-    t.notice_bg      = (ui_rgb){ 0.28, 0.25, 0.10 };
-    t.notice_text    = (ui_rgb){ 0.95, 0.90, 0.70 };
-    t.image_box      = (ui_rgb){ 0.55, 0.55, 0.60 };
-    t.image_blocked  = (ui_rgb){ 0.85, 0.50, 0.50 };
-    t.toolbar_bg     = (ui_rgb){ 0.10, 0.10, 0.12 };
-    t.titlebar_bg    = (ui_rgb){ 0.06, 0.06, 0.08 };
-    t.chrome_text    = (ui_rgb){ 0.85, 0.85, 0.88 };
-    t.chrome_text_dim= (ui_rgb){ 0.40, 0.40, 0.45 };
-    t.close_button   = (ui_rgb){ 1.00, 0.55, 0.55 };
-    t.url_bg_focused = (ui_rgb){ 0.22, 0.22, 0.26 };
-    t.url_bg         = (ui_rgb){ 0.17, 0.17, 0.20 };
-    t.url_border     = (ui_rgb){ 0.40, 0.40, 0.45 };
-    t.caret          = (ui_rgb){ 0.90, 0.90, 0.95 };
-    t.link_hover_bg  = (ui_rgb){ 0.18, 0.24, 0.34 };
-    t.btn_hover_bg   = (ui_rgb){ 0.20, 0.21, 0.24 };
-    t.input_bg          = (ui_rgb){ 0.18, 0.18, 0.21 };
-    t.input_bg_focused  = (ui_rgb){ 0.22, 0.22, 0.18 };
-    t.input_border      = (ui_rgb){ 0.45, 0.45, 0.50 };
-    t.input_text        = (ui_rgb){ 0.88, 0.88, 0.90 };
-    t.input_placeholder = (ui_rgb){ 0.50, 0.50, 0.55 };
-    t.button_bg         = (ui_rgb){ 0.25, 0.45, 0.80 };
-    t.button_text       = (ui_rgb){ 0.98, 0.98, 1.00 };
-    t.menu_bg        = (ui_rgb){ 0.16, 0.16, 0.19 };
-    t.menu_border    = (ui_rgb){ 0.45, 0.45, 0.50 };
-    t.menu_text      = (ui_rgb){ 0.85, 0.85, 0.88 };
-    t.check_border   = (ui_rgb){ 0.55, 0.55, 0.60 };
-    t.check_mark     = (ui_rgb){ 0.40, 0.85, 0.50 };
-    t.toast_bg       = (ui_rgb){ 0.04, 0.04, 0.06 };
-    t.toast_text     = (ui_rgb){ 0.95, 0.95, 0.97 };
-    t.scrollbar_track     = (ui_rgb){ 0.18, 0.18, 0.21 };
-    t.scrollbar_thumb     = (ui_rgb){ 0.38, 0.38, 0.43 };
-    t.scrollbar_thumb_hot = (ui_rgb){ 0.55, 0.55, 0.62 };
-    return t;
-}
-
-/* Sepia reading palette: warm paper background and dark-brown ink, easier on the
- * eyes for long-form text. Shares all the metrics with the default theme; only the
- * colours change. */
-static ui_theme ui_theme_sepia(void) {
-    ui_theme t = ui_theme_default();
-    t.window_bg      = (ui_rgb){ 0.90, 0.85, 0.74 };
-    t.content_bg     = (ui_rgb){ 0.96, 0.92, 0.82 };
-    t.text           = (ui_rgb){ 0.24, 0.18, 0.10 };
-    t.heading        = (ui_rgb){ 0.30, 0.20, 0.10 };
-    t.link           = (ui_rgb){ 0.40, 0.26, 0.10 };
-    t.notice_bg      = (ui_rgb){ 0.93, 0.86, 0.62 };
-    t.notice_text    = (ui_rgb){ 0.40, 0.28, 0.05 };
-    t.image_box      = (ui_rgb){ 0.50, 0.42, 0.30 };
-    t.image_blocked  = (ui_rgb){ 0.65, 0.32, 0.22 };
-    t.toolbar_bg     = (ui_rgb){ 0.42, 0.34, 0.24 };
-    t.titlebar_bg    = (ui_rgb){ 0.32, 0.25, 0.16 };
-    t.chrome_text    = (ui_rgb){ 0.95, 0.90, 0.80 };
-    t.chrome_text_dim= (ui_rgb){ 0.62, 0.55, 0.45 };
-    t.url_bg_focused = (ui_rgb){ 0.99, 0.96, 0.88 };
-    t.url_bg         = (ui_rgb){ 0.86, 0.80, 0.68 };
-    t.url_border     = (ui_rgb){ 0.30, 0.24, 0.14 };
-    t.caret          = (ui_rgb){ 0.20, 0.14, 0.06 };
-    t.link_hover_bg  = (ui_rgb){ 0.88, 0.80, 0.62 };
-    t.btn_hover_bg   = (ui_rgb){ 0.52, 0.43, 0.30 };
-    t.input_bg          = (ui_rgb){ 0.98, 0.94, 0.84 };
-    t.input_bg_focused  = (ui_rgb){ 1.00, 0.98, 0.90 };
-    t.input_border      = (ui_rgb){ 0.55, 0.46, 0.32 };
-    t.input_text        = (ui_rgb){ 0.24, 0.18, 0.10 };
-    t.input_placeholder = (ui_rgb){ 0.55, 0.46, 0.34 };
-    t.button_bg         = (ui_rgb){ 0.50, 0.36, 0.18 };
-    t.button_text       = (ui_rgb){ 0.98, 0.94, 0.86 };
-    t.menu_bg        = (ui_rgb){ 0.95, 0.90, 0.80 };
-    t.menu_border    = (ui_rgb){ 0.55, 0.46, 0.32 };
-    t.menu_text      = (ui_rgb){ 0.26, 0.19, 0.10 };
-    t.check_border   = (ui_rgb){ 0.45, 0.36, 0.24 };
-    t.check_mark     = (ui_rgb){ 0.35, 0.45, 0.20 };
-    t.toast_bg       = (ui_rgb){ 0.30, 0.23, 0.14 };
-    t.toast_text     = (ui_rgb){ 0.96, 0.92, 0.84 };
-    t.scrollbar_track     = (ui_rgb){ 0.84, 0.78, 0.66 };
-    t.scrollbar_thumb     = (ui_rgb){ 0.58, 0.48, 0.34 };
-    t.scrollbar_thumb_hot = (ui_rgb){ 0.44, 0.35, 0.22 };
-    return t;
-}
-
-/* Selectable palettes for the options menu. */
-typedef enum ui_theme_mode {
-    UI_THEME_LIGHT = 0,
-    UI_THEME_DARK,
-    UI_THEME_SEPIA
-} ui_theme_mode;
-
-/* The single place that maps the theme mode to a palette. */
-static ui_theme ui_theme_for(int mode) {
-    switch (mode) {
-        case UI_THEME_DARK:  return ui_theme_dark();
-        case UI_THEME_SEPIA: return ui_theme_sepia();
-        default:             return ui_theme_default();
-    }
-}
-
-/* Converts a packed 0xRRGGBB author color into a theme RGB triple. */
-static ui_rgb rgb_from_packed(int packed) {
-    cc_rgb c = cc_unpack(packed);
-    return (ui_rgb){ c.r / 255.0, c.g / 255.0, c.b / 255.0 };
-}
 
 /* Monotonic millisecond clock for toast timing (caller of the pure browser API). */
 static uint64_t now_ms(void) {
@@ -387,10 +161,6 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
 typedef enum ui_hot {
     UI_HOT_NONE = 0, UI_HOT_BACK, UI_HOT_FWD, UI_HOT_GO, UI_HOT_MENU
 } ui_hot;
-
-static void set_rgb(cairo_t *cr, ui_rgb c) {
-    cairo_set_source_rgb(cr, c.r, c.g, c.b);
-}
 
 /* Live editable state for one form text control, aliasing a block of the current
  * rd_doc (not owned; valid until the doc is replaced). The field carries the value

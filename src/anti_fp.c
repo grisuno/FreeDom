@@ -93,3 +93,22 @@ void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key) {
         }
     }
 }
+
+uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain) {
+    /* FNV-1a over the domain bytes; a NULL/empty domain stays at the basis, so
+     * both collapse to one stable namespace distinct from any real site. */
+    uint64_t h = 0xcbf29ce484222325ULL; /* FNV-1a 64-bit offset basis */
+    if (registrable_domain != NULL) {
+        for (const unsigned char *p = (const unsigned char *)registrable_domain;
+             *p != '\0'; ++p) {
+            h ^= (uint64_t)*p;
+            h *= 0x00000100000001b3ULL; /* FNV-1a 64-bit prime */
+        }
+    }
+    /* splitmix64 is a bijection on the post-add state, so distinct (session_key,
+     * domain) pairs that differ in session_key ^ h yield distinct keys; the
+     * finalisation also diffuses FNV's weak avalanche so near-identical domains
+     * still produce well-separated keys. */
+    uint64_t state = session_key ^ h;
+    return splitmix64(&state);
+}

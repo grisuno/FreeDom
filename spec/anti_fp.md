@@ -47,6 +47,14 @@ void fp_bucket_screen(int w, int h, int *out_w, int *out_h);
  * el bit menos significativo de un subconjunto disperso elegido por la clave.
  * misma (buf,key) => misma salida; distinta key => distinta salida. */
 void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);
+
+/* Deriva la clave de readback por ORIGEN a partir del secreto de sesion y el
+ * dominio registrable (eTLD+1) del sitio. misma (session_key,dominio) => misma
+ * clave (el envenenado es estable dentro de un sitio); dominios distintos bajo
+ * la misma sesion => claves distintas con probabilidad abrumadora (la huella de
+ * canvas/audio NO es enlazable entre sitios). dominio NULL o "" se trata como un
+ * unico namespace (su propia clave estable): nunca filtra nada ni aborta. */
+uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain);
 ```
 
 ## 3. Semántica
@@ -76,13 +84,26 @@ void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);
   **acotado** (cada byte cambia a lo sumo en ±1 y solo en el LSB), **sensible a la clave** (claves
   distintas ⇒ salidas distintas con alta probabilidad sobre buffers grandes). `len == 0` o
   `buf == NULL`: no hace nada.
+- `fp_origin_key(session_key, dominio)`: hash FNV-1a del dominio mezclado con el secreto de
+  sesión y finalizado con `splitmix64` (el mismo primitivo de `fp_perturb`). Es la **derivación
+  pura**: el orquestador (worker de pestaña) calcula el eTLD+1 con `request_policy` y la pasa aquí.
+  Garantías: **determinista** (misma `(session_key,dominio)` ⇒ misma clave, el envenenado es
+  estable dentro de un sitio), **no enlazable entre orígenes** (dominios distintos bajo la misma
+  sesión ⇒ claves distintas con probabilidad abrumadora; un colisión solo ocurre ante una colisión
+  FNV, irrelevante para dominios reales), **sensible a la sesión** (mismo sitio, otra
+  `session_key` ⇒ otra clave). `dominio == NULL` o `""` colapsan a un **único namespace** (clave
+  estable propia, distinta de cualquier dominio real): nunca aborta ni filtra. Sin I/O ni
+  asignación.
 
 ## 4. Garantías
 
 1. **Anti-entropía por defecto:** los valores expuestos son uniformes; el dispositivo real no se
    filtra.
-2. **No enlazabilidad:** el envenenado depende de la clave de sesión; entre sesiones (clave
-   distinta) la huella de canvas/audio cambia.
+2. **No enlazabilidad (entre sesiones y entre orígenes):** el envenenado depende de la clave; entre
+   sesiones (clave distinta) la huella de canvas/audio cambia. Además, dentro de una misma sesión la
+   clave se deriva **por eTLD+1** con `fp_origin_key`, de modo que dos sitios distintos ven ruido
+   distinto: un tracker no puede correlacionar la lectura de canvas/audio de un origen con la de
+   otro (no cross-origin linking).
 3. **Imperceptibilidad:** el envenenado solo toca LSBs de un subconjunto disperso (cambio visual/
    acústico nulo a efectos prácticos).
 4. **Puro y reentrante:** sin I/O ni estado global; ASan/UBSan limpios; sin asignación dinámica.
@@ -98,6 +119,11 @@ void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);
 - `fp_bucket_screen`: 1920x1080→igual; 1680x1050→1600x900; 1366x768→igual; 640x480→800x600.
 - `fp_perturb`: determinista (dos copias, misma clave ⇒ iguales); acotado (`out^in ∈ {0,1}`);
   sensible a la clave (claves distintas ⇒ difieren en buffer grande); `NULL`/`len 0` no crashea.
+- `fp_origin_key`: determinista (misma `(sesión,dominio)` ⇒ misma clave); por-sitio (dominios
+  distintos ⇒ claves distintas); por-sesión (misma site, otra sesión ⇒ otra clave); `NULL` y `""`
+  colapsan al mismo namespace y difieren de un dominio real; **invariante de extremo a extremo:** el
+  mismo buffer envenenado bajo las claves de dos sitios diverge, y reproduce el mismo resultado para
+  el mismo sitio.
 
 ## 6. Fuera de alcance
 
@@ -105,4 +131,9 @@ void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);
   bindings JS).
 - Resistencia a huella de fuentes, `AudioContext` real, WebGL parameters (mismas primitivas
   aplicarán).
-- Generación/gestión de la clave de sesión por eTLD+1 (la define el orquestador de sesión).
+
+> **Cerrado (antes fuera de alcance):** la clave de readback **por eTLD+1**. `anti_fp` aporta la
+> derivación pura `fp_origin_key`; el orquestador (worker de pestaña en `tab`) calcula el dominio
+> registrable con `request_policy` (`rp_host_of`→`rp_site_of`, tabla PSL) sobre la URL de la página
+> y se la pasa a `je_install_canvas`. El secreto de sesión sigue siendo aleatorio por worker
+> (`getrandom`); `fp_origin_key` lo combina con el sitio para que el envenenado sea por-origen.

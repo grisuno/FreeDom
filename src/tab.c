@@ -15,6 +15,7 @@
 
 #include "tab.h"
 
+#include "anti_fp.h"
 #include "dom.h"
 #include "html_parse.h"
 #include "image_decode.h"
@@ -24,6 +25,7 @@
 #include "link_nav.h"
 #include "os_sandbox.h"
 #include "page_view.h"
+#include "request_policy.h"
 #include "url.h"
 
 #include <errno.h>
@@ -115,9 +117,21 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
     if (js_context_new(NULL, &js) != JS_OK) {
         dom_free(idx); hp_document_free(doc); return -1;
     }
+    /* Per-origin canvas/audio readback key: combine the per-worker session secret
+     * with the page's registrable domain (eTLD+1) so two sites rendered by the same
+     * worker get unlinkable poisoning. A URL with no host (file://, empty) yields no
+     * registrable domain -> NULL -> a stable per-session namespace key. */
+    char rb_host[256], rb_site[256];
+    const char *rb_origin = NULL;
+    if (page_url != NULL
+     && rp_host_of(page_url, rb_host, sizeof rb_host) == 0
+     && rp_site_of(rb_host, rb_site, sizeof rb_site) == 0) {
+        rb_origin = rb_site;
+    }
+    uint64_t readback_key = fp_origin_key(cs->session_key, rb_origin);
     if (jd_install(js, idx) != JD_OK
      || je_install(js, TAB_SCREEN_W, TAB_SCREEN_H) != JE_OK
-     || je_install_canvas(js, cs->session_key) != JE_OK) {
+     || je_install_canvas(js, readback_key) != JE_OK) {
         js_context_free(js); dom_free(idx); hp_document_free(doc); return -1;
     }
     /* Install a real `location` over the page URL. url_split is https-only; a local

@@ -119,6 +119,59 @@ static void test_perturb_safe_edges(void **state) {
     assert_int_equal(x, 5);
 }
 
+/* --- per-origin readback key (fp_origin_key) --- */
+
+static void test_origin_key_deterministic(void **state) {
+    (void)state;
+    uint64_t k1 = fp_origin_key(0x0000DEADBEEFCAFEULL, "example.com");
+    uint64_t k2 = fp_origin_key(0x0000DEADBEEFCAFEULL, "example.com");
+    assert_true(k1 == k2); /* same (session, site) => same key */
+}
+
+static void test_origin_key_per_site(void **state) {
+    (void)state;
+    uint64_t sess = 0x0123456789ABCDEFULL;
+    uint64_t a = fp_origin_key(sess, "example.com");
+    uint64_t b = fp_origin_key(sess, "other.org");
+    uint64_t c = fp_origin_key(sess, "evil.net");
+    /* Different sites in one session => unlinkable keys. */
+    assert_true(a != b);
+    assert_true(a != c);
+    assert_true(b != c);
+}
+
+static void test_origin_key_per_session(void **state) {
+    (void)state;
+    /* Same site, different session secret => different key. */
+    assert_true(fp_origin_key(1, "example.com") != fp_origin_key(2, "example.com"));
+}
+
+static void test_origin_key_empty_namespace(void **state) {
+    (void)state;
+    uint64_t sess = 99;
+    uint64_t null_k  = fp_origin_key(sess, NULL);
+    uint64_t empty_k = fp_origin_key(sess, "");
+    assert_true(null_k == empty_k);                            /* NULL and "" are one namespace */
+    assert_true(null_k != fp_origin_key(sess, "example.com")); /* distinct from a real site */
+}
+
+/* The property that actually matters: the same canvas buffer poisoned under two
+ * different sites' keys diverges, so a tracker cannot link the two readbacks;
+ * and the same site reproduces the same poisoning. */
+static void test_origin_key_unlinks_readback(void **state) {
+    (void)state;
+    uint64_t sess = 0x00000000FEEDFACEULL;
+    uint8_t a[4096], b[4096], c[4096];
+    memset(a, 0x80, sizeof a);
+    memcpy(b, a, sizeof b);
+    memcpy(c, a, sizeof c);
+    fp_perturb(a, sizeof a, fp_origin_key(sess, "site-a.com"));
+    fp_perturb(b, sizeof b, fp_origin_key(sess, "site-b.com"));
+    fp_perturb(c, sizeof c, fp_origin_key(sess, "site-a.com"));
+    assert_memory_not_equal(a, b, sizeof a); /* cross-origin: diverges */
+    assert_memory_equal(a, c, sizeof a);     /* same origin: reproducible */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_coarsen_time),
@@ -128,6 +181,11 @@ int main(void) {
         cmocka_unit_test(test_perturb_bounded_lsb),
         cmocka_unit_test(test_perturb_key_sensitive),
         cmocka_unit_test(test_perturb_safe_edges),
+        cmocka_unit_test(test_origin_key_deterministic),
+        cmocka_unit_test(test_origin_key_per_site),
+        cmocka_unit_test(test_origin_key_per_session),
+        cmocka_unit_test(test_origin_key_empty_namespace),
+        cmocka_unit_test(test_origin_key_unlinks_readback),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

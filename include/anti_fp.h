@@ -58,4 +58,14 @@ void fp_bucket_screen(int w, int h, int *out_w, int *out_h);
  * (buf,key) => same output; different key => different output. NULL/len 0 = no-op. */
 void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);
 
+/* Derives the per-origin readback key from the per-session secret and a site's
+ * registrable domain (eTLD+1). Same (session_key, domain) => same key (poisoning
+ * is stable within a site); different domains under the same session => different
+ * keys with overwhelming probability (canvas/audio noise is not linkable across
+ * sites, defeating cross-origin fingerprint linking). registrable_domain NULL or
+ * "" collapses to a single namespace (its own stable key, distinct from any real
+ * domain); never aborts, never leaks. Pure: no I/O, no allocation. The caller
+ * (tab worker) computes the eTLD+1 via request_policy and passes it here. */
+uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain);
+
 #endif /* FREEDOM_ANTI_FP_H */

@@ -251,7 +251,7 @@ je_status je_install(js_context *ctx, int screen_w, int screen_h) {
     return ok ? JE_OK : JE_ERR_OOM;
 }
 
-je_status je_install_canvas(js_context *ctx, uint64_t session_key) {
+je_status je_install_canvas(js_context *ctx, uint64_t readback_key) {
     if (ctx == NULL) return JE_ERR_NULL_ARG;
 
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
@@ -260,8 +260,8 @@ je_status je_install_canvas(js_context *ctx, uint64_t session_key) {
     JSValue global = JS_GetGlobalObject(jsctx);
     if (JS_IsException(global)) return JE_ERR_OOM;
 
-    int ok = build_readback_obj(jsctx, global, "canvas", session_key) == 0
-          && build_readback_obj(jsctx, global, "audio", session_key) == 0;
+    int ok = build_readback_obj(jsctx, global, "canvas", readback_key) == 0
+          && build_readback_obj(jsctx, global, "audio", readback_key) == 0;
 
     JS_FreeValue(jsctx, global);
     return ok ? JE_OK : JE_ERR_OOM;

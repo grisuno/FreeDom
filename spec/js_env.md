@@ -68,18 +68,20 @@ Relojes (coarsenados a `FP_TIMER_RESOLUTION_MS` = 100 ms):
 | `Date.now()` | `fp_coarsen_time_ms(epoch_ms)` — múltiplo de 100 |
 | `performance.now()` | `fp_coarsen_time_ms(monotonic_ms - origin_ms)` — múltiplo de 100, `>= 0` |
 
-Envenenado de lectura (canvas/audio), instalado por `je_install_canvas(ctx, session_key)`:
+Envenenado de lectura (canvas/audio), instalado por `je_install_canvas(ctx, readback_key)`:
 
 | Expresión JS | Devuelve |
 | :-- | :-- |
-| `canvas.readback(u8)` | nueva `Uint8Array` = `u8` con `fp_perturb(.., session_key)` aplicado |
+| `canvas.readback(u8)` | nueva `Uint8Array` = `u8` con `fp_perturb(.., readback_key)` aplicado |
 | `audio.readback(u8)`  | igual (misma costura sobre bytes de muestras de audio) |
 
 `canvas`/`audio` son objetos sellados de solo lectura. El array de entrada **no se muta**: se copia,
 se perturba la copia y se devuelve una `Uint8Array` nueva. El envenenado es determinista dentro de
-una sesión (misma clave ⇒ misma salida) y no enlazable entre sesiones (clave distinta ⇒ salida
-distinta), acotado al LSB (cambio visual/acústico nulo). La `session_key` la da el orquestador de
-sesión (por eTLD+1). Pasar algo que no sea `Uint8Array` lanza `TypeError`.
+un origen (misma clave ⇒ misma salida) y no enlazable entre sesiones ni entre orígenes (clave
+distinta ⇒ salida distinta), acotado al LSB (cambio visual/acústico nulo). La `readback_key` es la
+clave **por origen** que produce el orquestador (worker de pestaña) con
+`fp_origin_key(session_key, eTLD+1)`: el secreto de sesión es aleatorio por worker y el eTLD+1 sale
+de `request_policy` sobre la URL de la página. Pasar algo que no sea `Uint8Array` lanza `TypeError`.
 
 Lo que **no** existe (por diseño, fuera de alcance): `navigator.plugins`, `mimeTypes`,
 `connection`, `getBattery`, `mediaDevices`; el constructor `Date` completo (solo `Date.now`);
@@ -105,9 +107,10 @@ typedef enum je_status {
 je_status je_install(js_context *ctx, int screen_w, int screen_h);
 
 /* Instala los globales sellados `canvas` y `audio`, cada uno con `readback(u8)`
- * que devuelve una Uint8Array nueva con fp_perturb aplicado bajo session_key
- * (envenenado de lectura anti-fingerprinting). No muta la entrada. */
-je_status je_install_canvas(js_context *ctx, uint64_t session_key);
+ * que devuelve una Uint8Array nueva con fp_perturb aplicado bajo readback_key
+ * (clave por origen = fp_origin_key(session_key, eTLD+1); anti-fingerprinting).
+ * No muta la entrada. */
+je_status je_install_canvas(js_context *ctx, uint64_t readback_key);
 ```
 
 Extensión de `anti_fp` (identidad normalizada; punteros estáticos, no liberar):
@@ -166,6 +169,7 @@ const char *fp_vendor(void);     /* "" (sin vendor; minima entropia) */
 ## 8. Fuera de alcance
 
 - Constructor `Date` completo coarsenado (`new Date().getTime()`), `Intl`/zona horaria.
-- Canvas/audio readback con `fp_perturb` (necesita la API de canvas; clave de sesión por eTLD+1).
+- API real de `<canvas>`/`getContext('2d')` y `AudioContext` (hoy el readback se expone vía los
+  globales sellados `canvas`/`audio`, ya con clave **por origen**: `fp_origin_key(session_key, eTLD+1)`).
 - `navigator.plugins`/`mimeTypes`/`connection`/`mediaDevices`/`getBattery`.
 - Letterboxing de la ventana real al bucket (es trabajo de la UI/orquestador, no de la binding).

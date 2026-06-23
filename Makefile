@@ -265,6 +265,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/css.o $(BUILD_DIR)/css_color.o \
                        $(BUILD_DIR)/box_style.o \
                        $(BUILD_DIR)/image_decode.o \
+                       $(BUILD_DIR)/request_policy.o $(PSL_OBJ) \
                        $(BUILD_DIR)/url.o $(BUILD_DIR)/link_nav.o \
                        $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(PNG_LIBS) $(CMOCKA_LIBS)
@@ -273,6 +274,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
 # Links the full secure tab pipeline plus the Wayland/Cairo/xkbcommon UI.
 FREEDOM_UI_OBJ = $(BUILD_DIR)/browser.o $(BUILD_DIR)/ui_layout.o
 FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
+                  $(GUI_DIR)/bui_theme.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 

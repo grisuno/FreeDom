@@ -39,10 +39,11 @@ je_status je_install(js_context *ctx, int screen_w, int screen_h);
 
 /* Installs sealed, read-only `canvas` and `audio` globals, each with a
  * `readback(Uint8Array)` method that returns a new Uint8Array with fp_perturb
- * applied under session_key. This is the seam where canvas pixel / audio sample
- * readback is poisoned (deterministic within a session, unlinkable across
- * sessions) to defeat readback fingerprinting. session_key is provided by the
- * session orchestrator (per eTLD+1). The input array is never mutated. */
-je_status je_install_canvas(js_context *ctx, uint64_t session_key);
+ * applied under readback_key. This is the seam where canvas pixel / audio sample
+ * readback is poisoned (deterministic within an origin, unlinkable across
+ * sessions and across origins) to defeat readback fingerprinting. readback_key
+ * is the per-origin key the orchestrator derives with
+ * fp_origin_key(session_key, eTLD+1). The input array is never mutated. */
+je_status je_install_canvas(js_context *ctx, uint64_t readback_key);
 
 #endif /* FREEDOM_JS_ENV_H */

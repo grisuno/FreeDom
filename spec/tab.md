@@ -56,9 +56,13 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
   así que un kernel sin Landlock no debilita la garantía. **seccomp es obligatorio**: si
   `os_harden` falla (o la plataforma no lo soporta), el hijo reporta no-confinado y `tab_open`
   devuelve `TAB_ERR_CONFINE` (*fail closed*: nunca se ejecuta contenido sin sandbox).
-- **session_key** se genera una vez por worker con `getrandom` (en la allowlist de seccomp). Cada
-  pestaña es una sesión: el envenenamiento de `canvas`/`audio` es determinista dentro de la pestaña
-  y **no enlazable** entre pestañas.
+- **session_key** se genera una vez por worker con `getrandom` (en la allowlist de seccomp); es el
+  secreto de sesión por pestaña. En cada `OP_LOAD` el worker deriva la **clave de readback por
+  origen** con `fp_origin_key(session_key, eTLD+1)`: el dominio registrable sale de `request_policy`
+  (`rp_host_of`→`rp_site_of`, tabla PSL) sobre la URL de la página (una URL sin host —`file://`/
+  vacía— da `NULL`, namespace propio). Así el envenenamiento de `canvas`/`audio` es **determinista
+  por origen** y **no enlazable** ni entre pestañas (otro `session_key`) ni entre sitios de una misma
+  pestaña (otro eTLD+1) — se cierra el cross-origin linking de la huella de readback.
 - **Pantalla:** `tab.h` no recibe dimensiones; el worker usa un valor por defecto fijo
   (`TAB_SCREEN_W` × `TAB_SCREEN_H`) que `fp_bucket_screen` normaliza igual para todos.
 
@@ -175,8 +179,9 @@ void       tab_eval_result_free(tab_eval_result *r);
    error en vez de matar al padre.
 4. **Anti-amplificación:** toda longitud recibida del hijo se valida contra `TAB_MAX_INPUT` antes de
    asignar.
-5. **Anti-fingerprinting:** identidad normalizada y relojes engrosados (`js_env`); `session_key`
-   aleatoria por pestaña hace el *readback* de canvas/audio no enlazable entre pestañas.
+5. **Anti-fingerprinting:** identidad normalizada y relojes engrosados (`js_env`); la `session_key`
+   aleatoria por pestaña, derivada por origen con `fp_origin_key(session_key, eTLD+1)`, hace el
+   *readback* de canvas/audio no enlazable ni entre pestañas ni entre sitios de una misma pestaña.
 6. **Memoria:** dueño único; `tab_page_free`/`tab_eval_result_free`/`tab_close` idempotentes.
    ASan/UBSan limpios. El hijo libera su estado y sale con `_exit` (sin reentrar al padre).
 
