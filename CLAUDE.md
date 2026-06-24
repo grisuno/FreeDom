@@ -63,7 +63,25 @@ Para cada módulo, el ciclo es inviolable y **en este orden**:
    implementación todavía.
 3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar.
 4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas. si vez codigo duplicado lo unificas, nunca esta fuera de scope, modo boy scout si ves deuda tecnica la extingues sin romper funcionalidades, lo mismo con las fallas de seguridad o vulnerabilidades la extincion de estas nunca esta fuera de scope
-5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`.
+5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`. como parte de la
+   validacion quiero que utilices ya sea urls y archivos html para revisar el comportamiento de la
+   GUI al renderizar. La GUI necesita Wayland (no siempre disponible para un agente), así que el
+   render se inspecciona **headless** exportando la página a PDF (el método nativo de "Save as PDF",
+   ya implementado de forma programática: flag `--download-pdf=PATH`) y rasterizándolo a PNG. Es la
+   **skill `/visual-review`** (`.claude/skills/visual-review/SKILL.md`). ## Pasos
+  a. Exporta a PDF: `./build/freedom --download-pdf=$SP/frame.pdf <URL-o-archivo.html>` (`$SP` = el
+     scratchpad de la sesión; no `/tmp` ni el árbol del repo).
+  b. Rasteriza a PNG: `mutool draw -r 96 -o $SP/frame.png $SP/frame.pdf 1` (o `-o $SP/frame-%d.png`
+     sin número de página para todas).
+  c. Lee la imagen con la herramienta Read: `Read $SP/frame.png` (fallback: `Read` del PDF con `pages`).
+  d. Verifica:
+    - ¿Se renderiza texto legible?
+    - ¿Los elementos tienen posicionamiento correcto (no superpuestos)?
+    - ¿Los colores/temas (sepia/oscuro) se aplican? (el PDF fuerza tema claro para imprimir
+      oscuro-sobre-blanco; imágenes y colores de autor están OFF por defecto → placeholders.)
+    - ¿Hay artefactos de rendering?
+  e. Compara con screenshot de referencia si existe
+
 6. **Fuzzing** — el path que toca contenido remoto se fuzzea (libFuzzer: `make fuzz`/`fuzz-pv`/
    `fuzz-js`/`fuzz-img`; AFL++: `make fuzz-afl`). Cero crashes/leaks/UB antes de cerrar.
 7. **Documentación** — **recién después de validar y fuzzear** se documenta: se actualiza la spec,
@@ -371,6 +389,31 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   CMocka + ASan/UBSan limpio + fuzz (`make fuzz-pe`, 7.3M execs sin crash). *(El módulo puro está
   verificado; la ruta Cairo de la GUI compila endurecida y se probó la API E2E, pero la integración
   visual en Wayland queda pendiente al dueño.)* Ver `[[freedom-pdf-export]]`.
+- **Hito (tooling) — Revisión visual headless (`--download-pdf`) + skill `/visual-review`.** Para
+  poder **inspeccionar visualmente** el render sin Wayland (CI / agente / este entorno), la GUI gana
+  una salida headless que exporta la **misma** display list que pinta la pantalla a un PDF vectorial,
+  sin abrir ventana. Refactor boyscout: el núcleo Cairo de `export_pdf` se extrajo a
+  `write_doc_pdf(w, path)` (reusado por el "Save as PDF" del GUI **y** por el nuevo camino headless);
+  `ui_render_pdf(doc, out_path, *pages)` (público en `include/ui.h`) arma un `browser_window` en cero
+  (sin imágenes → placeholders, sin inputs, tema claro) y llama a `write_doc_pdf` — **no toca estado
+  Wayland**. En `src/freedom.c`, `--download-pdf=PATH` (implica `--headless`) construye el `rd_doc` por
+  el pipeline síncrono existente (`tab`→`rd_build`, mismas caps seguras: imágenes OFF) y escribe el
+  PDF; el PATH es un argumento local de confianza, se usa tal cual (la sanitización fail-closed del
+  título hostil, `pe_safe_basename`, sigue siendo solo del "Save as PDF" del GUI). La **skill**
+  `.claude/skills/visual-review/SKILL.md` documenta el flujo: exportar → `mutool draw` a PNG → `Read`
+  la imagen → checklist (texto legible, layout/listas/tablas/grid, énfasis inline, colores de tema,
+  placeholders de imagen, artefactos). Spec (`freedom.md`) + 2 tests E2E nuevos en `test_freedom`
+  (PDF local válido empieza por `%PDF`; `--download-pdf` sin `=PATH` → exit 2 fail-closed) + `make
+  test` (35 suites) / `make asan` (35, exit 0; leaks de `libfontconfig` ya suprimidos por
+  `tests/asan.supp`) limpios + **verificado E2E visual**: `examples/rich.html` (3pp) y
+  `docs/index.html` (6pp) rasterizados y leídos — headings/párrafos/listas (`•`+sangrado)/tablas como
+  grid/énfasis/enlaces/banner/botón se renderizan correctos, sin artefactos. Sin dependencia nueva
+  (Cairo PDF ya enlazado; `mutool` es herramienta de validación, no del navegador). No se añade
+  superficie de parseo de contenido remoto nueva (el HTML/CSS/título hostil sigue por
+  `page_view`/`render_doc`/`pe_paginate`, ya fuzzeados); smoke headless sobre HTML adversario
+  (vacío/título-sin-cerrar/grid y listas enormes) limpio bajo ASan. *(Núcleo + IPC + E2E visual
+  verificados; la ventana Wayland interactiva sigue pendiente de verificación al dueño.)* Ver
+  `[[freedom-visual-review-headless]]`.
 - **Hito 17 — Namespaces OS por pestaña (aislamiento del proceso worker).** Tercera capa de
   confinamiento bajo seccomp+Landlock: el worker de cada pestaña hace `unshare(CLONE_NEWUSER |
   CLONE_NEWNET | CLONE_NEWIPC | CLONE_NEWUTS)` recién forkeado, antes de Landlock/seccomp

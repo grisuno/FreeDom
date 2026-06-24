@@ -2328,38 +2328,21 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
  * the screen. Pure helpers (pdf_export) choose a safe output path from the hostile
  * page title and paginate the rows; this orchestrator only does the Cairo I/O. The
  * page is laid out in a clean light theme so the print is dark-on-white. */
-static void export_pdf(browser_window *w) {
-    if (w->doc == NULL || rd_count(w->doc) == 0) {
-        browser_set_status(&w->bs, "Nothing to export to PDF.", now_ms());
-        redraw(w);
-        return;
-    }
-
-    /* Output directory: $XDG_DOWNLOAD_DIR, else $HOME, else the current directory. */
-    const char *dir = getenv("XDG_DOWNLOAD_DIR");
-    if (dir == NULL || dir[0] == '\0') dir = getenv("HOME");
-    if (dir == NULL || dir[0] == '\0') dir = ".";
-
-    const char *title = (w->bs.page_title != NULL && w->bs.page_title[0] != '\0')
-                        ? w->bs.page_title : PE_FALLBACK_NAME;
-    char path[PE_NAME_MAX + 4096u];
-    if (pe_build_path(dir, title, path, sizeof path) != PE_OK) {
-        browser_set_status(&w->bs, "Could not build a safe PDF path.", now_ms());
-        redraw(w);
-        return;
-    }
-
+/* Writes the window's current laid-out document to a vector PDF at `path`,
+ * paginated to US Letter. Returns the page count (0 when the document lays out to
+ * nothing), or -1 on a Cairo error. The page is laid out and coloured in a forced
+ * light theme so the print is dark-on-white; the live theme is restored before
+ * return. No window/Wayland state is touched -- only w->doc and w->theme are read,
+ * through the same layout_doc / paint_content_row the screen uses -- so the GUI
+ * "Save as PDF" and the headless --download-pdf path render identically. */
+static long write_doc_pdf(browser_window *w, const char *path) {
     cairo_surface_t *surf = cairo_pdf_surface_create(path, PDF_PAGE_W, PDF_PAGE_H);
     if (cairo_surface_status(surf) != CAIRO_STATUS_SUCCESS) {
         cairo_surface_destroy(surf);
-        browser_set_status(&w->bs, "Could not create the PDF file.", now_ms());
-        redraw(w);
-        return;
+        return -1;
     }
     cairo_t *cr = cairo_create(surf);
 
-    /* Lay out (and colour fragments) in a light theme so the PDF is print-friendly;
-     * restore the live theme afterwards. layout_doc reads w->theme for colours. */
     ui_theme saved = w->theme;
     w->theme = ui_theme_for(UI_THEME_LIGHT);
 
@@ -2401,16 +2384,68 @@ static void export_pdf(browser_window *w) {
     w->theme = saved;
     cairo_destroy(cr);
     cairo_surface_destroy(surf);
+    return (long)pages;
+}
+
+static void export_pdf(browser_window *w) {
+    if (w->doc == NULL || rd_count(w->doc) == 0) {
+        browser_set_status(&w->bs, "Nothing to export to PDF.", now_ms());
+        redraw(w);
+        return;
+    }
+
+    /* Output directory: $XDG_DOWNLOAD_DIR, else $HOME, else the current directory. */
+    const char *dir = getenv("XDG_DOWNLOAD_DIR");
+    if (dir == NULL || dir[0] == '\0') dir = getenv("HOME");
+    if (dir == NULL || dir[0] == '\0') dir = ".";
+
+    /* The page title is hostile remote content; pe_build_path sanitises it into a
+     * safe basename (no traversal/separators/hidden) -- fail-closed by design. */
+    const char *title = (w->bs.page_title != NULL && w->bs.page_title[0] != '\0')
+                        ? w->bs.page_title : PE_FALLBACK_NAME;
+    char path[PE_NAME_MAX + 4096u];
+    if (pe_build_path(dir, title, path, sizeof path) != PE_OK) {
+        browser_set_status(&w->bs, "Could not build a safe PDF path.", now_ms());
+        redraw(w);
+        return;
+    }
+
+    long pages = write_doc_pdf(w, path);
 
     char msg[PE_NAME_MAX + 4096u + 64u];
-    if (pages > 0) {
-        snprintf(msg, sizeof msg, "Saved PDF (%zu page%s): %s",
+    if (pages < 0) {
+        snprintf(msg, sizeof msg, "Could not create the PDF file.");
+    } else if (pages > 0) {
+        snprintf(msg, sizeof msg, "Saved PDF (%ld page%s): %s",
                  pages, pages == 1 ? "" : "s", path);
     } else {
         snprintf(msg, sizeof msg, "Nothing to export to PDF.");
     }
     browser_set_status(&w->bs, msg, now_ms());
     redraw(w);
+}
+
+/* Headless PDF export (no Wayland; see include/ui.h). Renders an already-built
+ * render document to a vector PDF at out_path, reusing the exact on-screen
+ * layout/paint path so what the file shows is what the window would paint. The
+ * caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
+ * out_path verbatim (a trusted local path, not derived from the hostile title). */
+ui_status ui_render_pdf(const rd_doc *doc, const char *out_path, long *out_pages) {
+    if (out_pages != NULL) *out_pages = 0;
+    if (doc == NULL || out_path == NULL || rd_count(doc) == 0) return UI_ERR_NULL_ARG;
+
+    /* A zeroed window is enough for layout/paint: no images (placeholders drawn),
+     * no inputs, no hover, light theme. write_doc_pdf touches no Wayland state. */
+    browser_window w;
+    memset(&w, 0, sizeof w);
+    w.theme = ui_theme_for(UI_THEME_LIGHT);
+    w.doc = (rd_doc *)doc;   /* read-only here; write_doc_pdf never mutates the doc */
+    w.focused_input = -1;
+
+    long pages = write_doc_pdf(&w, out_path);
+    if (pages < 0) return UI_ERR_INTERNAL;
+    if (out_pages != NULL) *out_pages = pages;
+    return UI_OK;
 }
 
 /* Returns the link target under the surface point (px, py), or NULL when the

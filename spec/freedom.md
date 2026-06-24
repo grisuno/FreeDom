@@ -21,6 +21,8 @@ OPTIONS:
   -h, --help        muestra uso y termina con éxito
   -V, --version     muestra la versión y termina con éxito
   -H, --headless    modo terminal: renderiza una única página a stdout y sale
+  --download-pdf=PATH   modo headless: renderiza la página a un PDF vectorial en
+                        PATH (sin abrir ventana) y sale. Implica --headless.
 
 [url-or-file]:
   - "https://host/..."  → se obtiene con secure_fetch (TLS 1.3, KE híbrido PQ).
@@ -29,7 +31,27 @@ OPTIONS:
 
 SALIDA headless (stdout):
   <título>\n\n<texto extraído>\n
+
+SALIDA --download-pdf (fichero):
+  Un PDF vectorial US Letter en PATH (mismo pipeline de render que la pantalla y
+  que "Save as PDF" del GUI: reusa rd_doc + layout_doc + paint_content_row sobre
+  un cairo_pdf_surface_t, tema claro forzado). A stdout solo va una línea de
+  confirmación ("Saved PDF (<n> pages): <path>"). Sin red más allá del fetch de
+  la página; las imágenes siguen apagadas por defecto (Privacy by Default), así
+  que aparecen como placeholders salvo que se habiliten.
 ```
+
+### `--download-pdf`: razón de ser (revisión visual)
+
+El render del GUI necesita Wayland, que no siempre está disponible para una
+herramienta automatizada (CI, un agente de IA, este entorno). `--download-pdf`
+exporta la **misma** display list que pinta la pantalla a un PDF vectorial **sin
+abrir ventana**, de modo que el resultado pueda inspeccionarse visualmente
+(rasterizar con `mutool draw` → PNG y leer la imagen). Es la base de la skill de
+revisión visual (ver `CLAUDE.md` §3, paso de validación). PATH es local y de
+confianza (lo teclea el operador), así que se usa tal cual; la derivación
+fail-closed del nombre desde un título hostil (`pe_safe_basename`) solo aplica al
+"Save as PDF" del GUI, donde el nombre proviene de contenido remoto.
 
 ## 3. Códigos de salida
 

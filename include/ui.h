@@ -65,4 +65,17 @@ ui_status ui_run_text_view(const char *title, const char *text, size_t text_len)
  * Blocks until the window is closed. Visual-only (no headless test). */
 ui_status ui_run_browser(const char *start_url);
 
+struct rd_doc;
+
+/* Headless vector-PDF export: render an already-built render document to a PDF at
+ * out_path without opening a Wayland window, using the exact same layout/paint
+ * path as the on-screen renderer and the GUI "Save as PDF". This is the bridge
+ * that lets the GUI render be inspected where no display is available (CI, an AI
+ * agent): export, rasterise the PDF (e.g. `mutool draw`), and read the image. See
+ * `--download-pdf` in spec/freedom.md and the visual-review validation step in
+ * CLAUDE.md. *out_pages (optional) receives the page count.
+ * Returns UI_OK on success; UI_ERR_NULL_ARG if doc/out_path is null or the
+ * document is empty; UI_ERR_INTERNAL on a Cairo error. */
+ui_status ui_render_pdf(const struct rd_doc *doc, const char *out_path, long *out_pages);
+
 #endif /* FREEDOM_UI_H */

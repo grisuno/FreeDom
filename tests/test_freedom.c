@@ -45,6 +45,29 @@ static int run_freedom(const char *arg, char *out, size_t out_size, int *exit_st
     return 0;
 }
 
+/* Runs the binary with a raw argument string (no implicit --headless), capturing
+ * stdout into OUT_FILE. Used by the --download-pdf tests, which set their own mode. */
+static int run_freedom_raw(const char *args, int *exit_status) {
+    char cmd[2048];
+    int n = snprintf(cmd, sizeof cmd, "%s %s >" OUT_FILE " 2>" ERR_FILE,
+                     FREEDOM_BIN, (args != NULL) ? args : "");
+    if (n < 0 || (size_t)n >= sizeof cmd) return -1;
+    int rc = system(cmd);
+    if (rc == -1) return -1;
+    *exit_status = WEXITSTATUS(rc);
+    return 0;
+}
+
+/* True if path exists and its first bytes are the PDF magic "%PDF". */
+static int is_pdf_file(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) return 0;
+    char magic[5] = {0};
+    size_t got = fread(magic, 1, 4, f);
+    fclose(f);
+    return got == 4 && memcmp(magic, "%PDF", 4) == 0;
+}
+
 static void cleanup_files(void) {
     (void)unlink(OUT_FILE);
     (void)unlink(ERR_FILE);
@@ -137,6 +160,41 @@ static void test_missing_file(void **state) {
     assert_int_equal(rc, 1);
 }
 
+/* --- headless PDF export (--download-pdf, visual-review tooling) --- */
+
+static void test_download_pdf_local(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><head><title>PDF Page</title></head>"
+        "<body><h1>Heading</h1><p>Vector text for review.</p></body></html>";
+    const char *path = "__freedom_pdf_page.html";
+    const char *pdf = "__freedom_out.pdf";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(pdf);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--download-pdf=%s %s", pdf, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_pdf_file(pdf)); /* a real vector PDF, not a stub */
+
+    unlink(path);
+    unlink(pdf);
+}
+
+/* --download-pdf with no PATH is a usage error (fail closed: never guess a path). */
+static void test_download_pdf_requires_path(void **state) {
+    (void)state;
+    int rc = -1;
+    assert_int_equal(run_freedom_raw("--download-pdf examples/sample.html", &rc), 0);
+    assert_int_equal(rc, 2);
+}
+
 /* --- network policy --- */
 
 static void test_rejects_http_url(void **state) {
@@ -157,6 +215,8 @@ int main(void) {
         cmocka_unit_test(test_local_html),
         cmocka_unit_test(test_local_form_renders_inputs),
         cmocka_unit_test(test_missing_file),
+        cmocka_unit_test(test_download_pdf_local),
+        cmocka_unit_test(test_download_pdf_requires_path),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

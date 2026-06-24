@@ -27,6 +27,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "usage: %s [--help] [--version] [--headless] [--insecure] <url-or-file>\n", prog);
     fprintf(fp, "  default: open the Wayland browser GUI\n");
     fprintf(fp, "  --headless: render the page to stdout and exit\n");
+    fprintf(fp, "  --download-pdf=PATH: headless render to a vector PDF at PATH (implies --headless)\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
@@ -48,6 +49,11 @@ static int is_overlay_http(const char *s) {
 }
 
 static int global_insecure = 0;
+
+/* When non-NULL (set by --download-pdf=PATH), headless mode renders the page to a
+ * vector PDF at this path instead of printing to stdout. The path is a trusted
+ * local CLI argument, used verbatim. */
+static const char *g_pdf_out = NULL;
 
 /* Tor/I2P routing for headless mode (off by default; opt-in via CLI flags). */
 static nr_config global_net = { 0, 0, 0 };
@@ -163,7 +169,9 @@ static int render_page(const char *html, size_t len, const char *top_url) {
         return EXIT_ERROR;
     }
 
-    if (page.title != NULL && page.title_len > 0) {
+    /* In stdout mode the title leads the output; in PDF mode it is carried inside
+     * the document, so stdout stays a single confirmation line. */
+    if (g_pdf_out == NULL && page.title != NULL && page.title_len > 0) {
         printf("%s\n", page.title);
     }
 
@@ -171,7 +179,25 @@ static int render_page(const char *html, size_t len, const char *top_url) {
      * tracking warning when the page declares images. */
     rd_doc *doc = NULL;
     rd_status rs = rd_build(page.view, rdp_caps_safe(), top_url, &doc);
-    if (rs == RD_OK && rd_count(doc) > 0) {
+    int out_rc = (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;
+
+    if (g_pdf_out != NULL) {
+        /* Headless vector-PDF export for visual review: write the SAME display list
+         * the GUI would paint, to a PDF, without a Wayland window. */
+        if (rs == RD_OK && rd_count(doc) > 0) {
+            long pages = 0;
+            if (ui_render_pdf(doc, g_pdf_out, &pages) != UI_OK) {
+                fprintf(stderr, "freedom: could not write PDF to '%s'\n", g_pdf_out);
+                out_rc = EXIT_ERROR;
+            } else {
+                printf("Saved PDF (%ld page%s): %s\n",
+                       pages, pages == 1 ? "" : "s", g_pdf_out);
+            }
+        } else {
+            fprintf(stderr, "freedom: nothing to render to PDF for this page\n");
+            out_rc = EXIT_ERROR;
+        }
+    } else if (rs == RD_OK && rd_count(doc) > 0) {
         print_doc(doc);
     } else if (page.text != NULL && page.text_len > 0) {
         printf("\n%s\n", page.text); /* fallback if the display list is empty */
@@ -180,7 +206,7 @@ static int render_page(const char *html, size_t len, const char *top_url) {
 
     tab_page_free(&page);
     tab_close(t);
-    return (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;
+    return out_rc;
 }
 
 static const char *sf_reason(sf_status ss) {
@@ -269,6 +295,17 @@ int main(int argc, char **argv) {
         }
         if (strcmp(arg, "--headless") == 0 || strcmp(arg, "-H") == 0) {
             headless = 1;
+        } else if (strncmp(arg, "--download-pdf=", 15) == 0) {
+            /* Bare "--download-pdf" (no =PATH) falls through to the unknown-option
+             * branch below -> usage error: never guess an output path. */
+            const char *path = arg + 15;
+            if (path[0] == '\0') {
+                fprintf(stderr, "freedom: --download-pdf requires a non-empty PATH\n");
+                print_usage(stderr, argv[0]);
+                return EXIT_USAGE;
+            }
+            g_pdf_out = path;
+            headless = 1; /* PDF export is a headless operation (no window) */
         } else if (strcmp(arg, "--insecure") == 0 || strcmp(arg, "-I") == 0) {
             global_insecure = 1;
         } else if (strcmp(arg, "--tor") == 0) {
