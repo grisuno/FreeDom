@@ -27,12 +27,24 @@ and is not gated (doctrine: "Layout != estilo de autor").
 
 ## Supported subset
 
-**Selectors** (simple / compound, NO combinators): a single compound selector is
-an optional type, any number of `.class`, and an optional `#id`, e.g. `p`, `.note`,
-`#main`, `a.button`, `*`. Rules may list several comma-separated selectors. A
-descendant/child/sibling combinator (space, `>`, `+`, `~`) makes that selector
-unsupported (the whole selector is dropped, the rest of the group still parse).
-Specificity = `100*has_id + 10*nclasses + has_type`.
+**Selectors** (compound + descendant/child combinators). A **compound** is an
+optional type, any number of `.class`, and an optional `#id`, e.g. `p`, `.note`,
+`#main`, `a.button`, `*`. A **complex** selector chains compounds with the
+**descendant** combinator (whitespace, `A B`) or the **child** combinator (`A > B`),
+e.g. `div p`, `nav > a`, `#main .card p`. The rightmost compound is the *subject*
+(the element a rule styles); the compounds to its left constrain its ancestors
+(descendant = any ancestor; child = the immediate parent). Up to
+`CSS_MAX_COMPOUNDS` (4) compounds per selector; a deeper chain is **dropped**
+(fail closed). Rules may list several comma-separated selectors.
+
+Still **out of scope** (the whole selector is dropped, the rest of the group still
+parse): the sibling combinators `+`/`~`, attribute selectors `[...]`, and
+pseudo-classes/elements `:`/`::`.
+
+**Specificity** = sum over all compounds of `100*has_id + 10*nclasses + has_type`
+(so `#main .card p` = 100+10+1 = 111). Ties break on document order. Matching is
+right-to-left: the subject is tested against the element, then each combinator is
+checked against the ancestor chain (descendant backtracks over ancestors).
 
 **Properties** (whitelist; everything else ignored):
 
@@ -158,6 +170,33 @@ empty sheet / no tag); `inline_style` may be NULL. Pure, allocates nothing,
 re-entrant. Inheritance is the **caller's** job (call per ancestor, merge unset
 fields).
 
+This signature carries no ancestor context, so it matches **only single-compound**
+selectors (a complex selector with a combinator never matches through it). It is
+equivalent to `css_resolve_el` with a parentless element; kept for callers that do
+not need combinators.
+
+### `css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len)`
+
+As `css_resolve`, but `el` describes the element **and its ancestor chain** (`el`,
+`el->parent`, `el->parent->parent`, …, NULL at the root), so **combinator** rules
+(`div p`, `nav > a`) can be matched: the subject compound is tested against `el` and
+each combinator is checked up the chain. `el == NULL` resolves only the inline
+declarations. `css_element` is:
+
+```c
+typedef struct css_element {
+    const char *tag;                  /* lowercased local name, or NULL */
+    const char *id;                   /* id attribute value, or NULL */
+    const char *const *classes;       /* class tokens (not NUL-joined) */
+    size_t nclasses;
+    const struct css_element *parent; /* parent element, or NULL at the root */
+} css_element;
+```
+
+The caller supplies as much of the chain as it has (bounded is fine: a missing deep
+ancestor only means a descendant selector against it fails to match — fail closed).
+Pure, allocates nothing, re-entrant.
+
 ### `css_style css_parse_inline(const char *style, size_t len)`
 
 Convenience: `css_resolve(NULL, NULL, NULL, NULL, 0, style, len)` — resolve only
@@ -175,8 +214,9 @@ common case.)
 
 ## Out of scope (v1)
 
-- Combinators (descendant/child/sibling), pseudo-classes/elements, attribute
-  selectors. `:hover` etc. are dropped.
+- The **sibling** combinators `+`/`~`, pseudo-classes/elements (`:hover`/`::before`),
+  and attribute selectors `[...]` — dropped (fail closed). Descendant (` `) and
+  child (`>`) combinators **are** supported (up to `CSS_MAX_COMPOUNDS` compounds).
 - Inheritance/`initial`/`inherit`/`unset` keywords (caller does inheritance;
   these keywords are ignored).
 - The box model from author CSS (margin/padding/width/border): UA box model still

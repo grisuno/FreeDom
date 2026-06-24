@@ -63,6 +63,10 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_GAP_MAX       4096   /* px cap on gap */
 #define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns track count */
 
+/* Max compounds in one complex selector (subject + ancestor/parent constraints).
+ * A deeper chain is dropped (fail closed). */
+#define CSS_MAX_COMPOUNDS 4
+
 /* A resolved presentation. Each field uses a sentinel for "unset" so the caller
  * can layer inheritance (take the first ancestor that sets each inheriting one).
  * The flex/grid container fields (gap/justify/grid_cols) are NOT inherited: they
@@ -119,6 +123,24 @@ void css_free(css_sheet *s);
 css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                       const char *const *classes, size_t nclasses,
                       const char *inline_style, size_t inline_len);
+
+/* An element plus its ancestor chain, for combinator matching. Each field aliases
+ * caller storage (nothing is copied/owned). parent walks toward the root (NULL at
+ * the top). A bounded/partial chain is fine: a descendant compound that would have
+ * matched a missing deeper ancestor simply does not match (fail closed). */
+typedef struct css_element {
+    const char *tag;                  /* lowercased local name, or NULL */
+    const char *id;                   /* id attribute value, or NULL */
+    const char *const *classes;       /* class tokens (not NUL-joined) */
+    size_t nclasses;
+    const struct css_element *parent; /* parent element, or NULL at the root */
+} css_element;
+
+/* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators
+ * against el's ancestor chain. el == NULL resolves only inline_style. Pure,
+ * allocates nothing, reentrant. css_resolve is this with a parentless element. */
+css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+                         const char *inline_style, size_t inline_len);
 
 /* Convenience: resolve only an inline declaration list (no sheet, no selectors). */
 css_style css_parse_inline(const char *style, size_t len);

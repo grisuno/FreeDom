@@ -227,13 +227,91 @@ static void test_sheet_compound_selector(void **state) {
     css_free(sh);
 }
 
-static void test_descendant_selector_unsupported(void **state) {
+/* Builds one css_element node aliasing the given fields (test-local helper). */
+static css_element el_node(const char *tag, const char *id,
+                           const char *const *classes, size_t nc,
+                           const css_element *parent) {
+    css_element e;
+    e.tag = tag; e.id = id; e.classes = classes; e.nclasses = nc; e.parent = parent;
+    return e;
+}
+
+static void test_descendant_combinator(void **state) {
     (void)state;
     css_sheet *sh = NULL;
-    /* "div p" has a combinator -> that selector is dropped; the next group still works. */
-    assert_int_equal(css_parse("div p { color:#999999 } p { color:#080808 }", 0, &sh), CSS_OK);
-    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0x080808);
+    /* "div p" now MATCHES a p with a div ancestor (through any depth). */
+    assert_int_equal(css_parse("div p { color:#999999 }", 0, &sh), CSS_OK);
+    css_element div = el_node("div", NULL, NULL, 0, NULL);
+    css_element span = el_node("span", NULL, NULL, 0, &div);
+    css_element p = el_node("p", NULL, NULL, 0, &span);   /* p > span > div */
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, 0x999999);
+    css_element lone = el_node("p", NULL, NULL, 0, NULL); /* no div ancestor */
+    assert_int_equal(css_resolve_el(sh, &lone, NULL, 0).color, -1);
+    /* css_resolve (no ancestor context) never matches through a combinator. */
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, -1);
     css_free(sh);
+}
+
+static void test_child_combinator(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div > p { color:#111111 }", 0, &sh), CSS_OK);
+    css_element div = el_node("div", NULL, NULL, 0, NULL);
+    css_element pc = el_node("p", NULL, NULL, 0, &div);   /* direct child: matches */
+    assert_int_equal(css_resolve_el(sh, &pc, NULL, 0).color, 0x111111);
+    css_element span = el_node("span", NULL, NULL, 0, &div);
+    css_element pg = el_node("p", NULL, NULL, 0, &span);  /* grandchild: child combinator fails */
+    assert_int_equal(css_resolve_el(sh, &pg, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_combinator_specificity_sum(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* div p (spec 2) beats p (spec 1); #m p (spec 101) beats div p (spec 2). */
+    assert_int_equal(css_parse("p{color:#ff0000} div p{color:#00ff00} #m p{color:#0000ff}",
+                               0, &sh), CSS_OK);
+    css_element div_plain = el_node("div", NULL, NULL, 0, NULL);
+    css_element p1 = el_node("p", NULL, NULL, 0, &div_plain);
+    assert_int_equal(css_resolve_el(sh, &p1, NULL, 0).color, 0x00ff00); /* div p > p */
+    css_element div_m = el_node("div", "m", NULL, 0, NULL);
+    css_element p2 = el_node("p", NULL, NULL, 0, &div_m);
+    assert_int_equal(css_resolve_el(sh, &p2, NULL, 0).color, 0x0000ff); /* #m p wins */
+    css_free(sh);
+}
+
+static void test_combinator_class_chain(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".nav .item a { color:#0a0a0a }", 0, &sh), CSS_OK);
+    const char *nav[] = { "nav" };
+    const char *item[] = { "item" };
+    css_element navdiv = el_node("div", NULL, nav, 1, NULL);
+    css_element li     = el_node("li", NULL, item, 1, &navdiv);
+    css_element a      = el_node("a", NULL, NULL, 0, &li);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x0a0a0a);
+    /* Missing the .nav ancestor -> no match (fail closed). */
+    css_element li2 = el_node("li", NULL, item, 1, NULL);
+    css_element a2  = el_node("a", NULL, NULL, 0, &li2);
+    assert_int_equal(css_resolve_el(sh, &a2, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_sibling_combinator_unsupported(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* '+' and '~' stay unsupported: those selectors drop, the group survives. */
+    assert_int_equal(css_parse("a + b { color:#999999 } a ~ b { color:#777777 } "
+                               "b { color:#080808 }", 0, &sh), CSS_OK);
+    css_element b = el_node("b", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x080808);
+    css_free(sh);
+}
+
+static void test_resolve_el_inline_only(void **state) {
+    (void)state;
+    /* el == NULL resolves just the inline declarations (no crash, no match). */
+    assert_int_equal(css_resolve_el(NULL, NULL, "color:#abcdef", 0).color, 0xabcdef);
 }
 
 /* --- cascade --- */
@@ -407,7 +485,12 @@ int main(void) {
         cmocka_unit_test(test_sheet_class_and_id),
         cmocka_unit_test(test_sheet_universal_and_group),
         cmocka_unit_test(test_sheet_compound_selector),
-        cmocka_unit_test(test_descendant_selector_unsupported),
+        cmocka_unit_test(test_descendant_combinator),
+        cmocka_unit_test(test_child_combinator),
+        cmocka_unit_test(test_combinator_specificity_sum),
+        cmocka_unit_test(test_combinator_class_chain),
+        cmocka_unit_test(test_sibling_combinator_unsupported),
+        cmocka_unit_test(test_resolve_el_inline_only),
         cmocka_unit_test(test_cascade_specificity),
         cmocka_unit_test(test_cascade_document_order),
         cmocka_unit_test(test_cascade_inline_wins),

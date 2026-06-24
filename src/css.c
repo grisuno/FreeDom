@@ -31,13 +31,26 @@ typedef struct css_decl {
     int ival;  /* interpreted value (color packed / enum / scale / bool) */
 } css_decl;
 
-typedef struct css_sel {
+/* Combinator joining a compound to the one on its left. */
+enum { COMB_DESCENDANT = 0, COMB_CHILD = 1 };
+
+/* One compound selector: optional type, optional id, zero+ classes. */
+typedef struct css_compound {
     char tag[CSS_TOK_MAX];
     int  has_tag;
     char id[CSS_TOK_MAX];
     int  has_id;
     char cls[CSS_MAX_CLASSES_PER_SEL][CSS_TOK_MAX];
     int  ncls;
+} css_compound;
+
+/* A complex selector: a chain of compounds, parts[nparts-1] being the subject (the
+ * element a rule styles). comb[k] (k>=1) is the combinator to the LEFT of parts[k];
+ * comb[0] is unused. A single compound is nparts == 1. */
+typedef struct css_sel {
+    css_compound parts[CSS_MAX_COMPOUNDS];
+    int  comb[CSS_MAX_COMPOUNDS];
+    int  nparts;
     int  spec;
     int  order;     /* document order (tie-break) */
     int  rule;      /* index into rules[] */
@@ -278,33 +291,22 @@ static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap
     return count;
 }
 
-/* Parses one compound selector span s[a,b) into *sel. Returns 1 if supported
- * (simple/compound only: type, .class, #id, *, no combinators). */
-static int parse_selector(const char *s, size_t a, size_t b, css_sel *sel) {
-    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
-    while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+/* Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space)
+ * into *cp. Returns 1 if supported (type, .class, #id, *). */
+static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
     if (a >= b) return 0;
-
-    /* any combinator or unsupported syntax => drop this selector. */
-    for (size_t i = a; i < b; ++i) {
-        char c = s[i];
-        if (c == ' ' || c == '\t' || c == '\n' || c == '\r' ||
-            c == '>' || c == '+' || c == '~' || c == '[' || c == ']' ||
-            c == ':' || c == '(' || c == ')') return 0;
-    }
-
-    memset(sel, 0, sizeof *sel);
+    memset(cp, 0, sizeof *cp);
     size_t i = a;
     if (s[i] == '*') {
         ++i;  /* universal: no type */
     } else if ((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z')) {
         size_t k = 0;
         while (i < b && is_ident_ch(s[i])) {
-            if (k + 1 < sizeof sel->tag) sel->tag[k++] = lower(s[i]);
+            if (k + 1 < sizeof cp->tag) cp->tag[k++] = lower(s[i]);
             ++i;
         }
-        sel->tag[k] = '\0';
-        sel->has_tag = 1;
+        cp->tag[k] = '\0';
+        cp->has_tag = 1;
     } else if (s[i] != '.' && s[i] != '#') {
         return 0;
     }
@@ -313,30 +315,79 @@ static int parse_selector(const char *s, size_t a, size_t b, css_sel *sel) {
         if (s[i] == '.') {
             ++i;
             if (i >= b || !is_ident_ch(s[i])) return 0;
-            if (sel->ncls >= CSS_MAX_CLASSES_PER_SEL) return 0;
+            if (cp->ncls >= CSS_MAX_CLASSES_PER_SEL) return 0;
             size_t k = 0;
             while (i < b && is_ident_ch(s[i])) {
-                if (k + 1 < CSS_TOK_MAX) sel->cls[sel->ncls][k++] = s[i];
+                if (k + 1 < CSS_TOK_MAX) cp->cls[cp->ncls][k++] = s[i];
                 ++i;
             }
-            sel->cls[sel->ncls][k] = '\0';
-            ++sel->ncls;
+            cp->cls[cp->ncls][k] = '\0';
+            ++cp->ncls;
         } else if (s[i] == '#') {
             ++i;
-            if (i >= b || !is_ident_ch(s[i]) || sel->has_id) return 0;
+            if (i >= b || !is_ident_ch(s[i]) || cp->has_id) return 0;
             size_t k = 0;
             while (i < b && is_ident_ch(s[i])) {
-                if (k + 1 < sizeof sel->id) sel->id[k++] = s[i];
+                if (k + 1 < sizeof cp->id) cp->id[k++] = s[i];
                 ++i;
             }
-            sel->id[k] = '\0';
-            sel->has_id = 1;
+            cp->id[k] = '\0';
+            cp->has_id = 1;
         } else {
-            return 0;
+            return 0;  /* unexpected char inside a compound */
         }
     }
+    return 1;
+}
 
-    sel->spec = 100 * (sel->has_id ? 1 : 0) + 10 * sel->ncls + (sel->has_tag ? 1 : 0);
+/* Parses a complex selector span s[a,b) into *sel: a chain of compounds joined by
+ * the descendant (whitespace) or child (`>`) combinator. Returns 1 if supported.
+ * The sibling combinators (`+`/`~`), attribute selectors and pseudo-classes are
+ * unsupported: the whole selector is dropped (fail closed). A chain deeper than
+ * CSS_MAX_COMPOUNDS is dropped. Specificity is the sum over all compounds. */
+static int parse_complex_selector(const char *s, size_t a, size_t b, css_sel *sel) {
+    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+    while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+    if (a >= b) return 0;
+
+    /* Unsupported syntax anywhere => drop the whole selector. `>` and whitespace are
+     * now combinators, so they are allowed here. */
+    for (size_t i = a; i < b; ++i) {
+        char c = s[i];
+        if (c == '+' || c == '~' || c == '[' || c == ']' ||
+            c == ':' || c == '(' || c == ')') return 0;
+    }
+
+    memset(sel, 0, sizeof *sel);
+    int n = 0;
+    size_t i = a;
+    while (i < b) {
+        /* Skip the separator before this compound, noting a `>` (child combinator). */
+        int child = 0;
+        while (i < b && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' ||
+                         s[i] == '\r' || s[i] == '>')) {
+            if (s[i] == '>') { if (child) return 0; child = 1; }  /* `>>` invalid */
+            ++i;
+        }
+        if (i >= b) { if (child) return 0; break; }   /* trailing `>` with no compound */
+        if (n == 0 && child) return 0;                /* leading `>` */
+
+        size_t ts = i;
+        while (i < b && s[i] != ' ' && s[i] != '\t' && s[i] != '\n' &&
+               s[i] != '\r' && s[i] != '>') ++i;
+        if (n >= CSS_MAX_COMPOUNDS) return 0;          /* too deep: fail closed */
+        if (!parse_compound(s, ts, i, &sel->parts[n])) return 0;
+        sel->comb[n] = (n == 0) ? COMB_DESCENDANT : (child ? COMB_CHILD : COMB_DESCENDANT);
+        ++n;
+    }
+    if (n == 0) return 0;
+    sel->nparts = n;
+
+    int spec = 0;
+    for (int k = 0; k < n; ++k)
+        spec += 100 * (sel->parts[k].has_id ? 1 : 0) + 10 * sel->parts[k].ncls +
+                (sel->parts[k].has_tag ? 1 : 0);
+    sel->spec = spec;
     return 1;
 }
 
@@ -349,7 +400,7 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     while (i < se && got < CSS_SELS_PER_GROUP) {
         size_t j = i;
         while (j < se && s[j] != ',') ++j;
-        if (parse_selector(s, i, j, &tmp[got])) ++got;
+        if (parse_complex_selector(s, i, j, &tmp[got])) ++got;
         i = (j < se) ? j + 1 : j;
     }
     if (got == 0) return;  /* no supported selector: skip the whole rule */
@@ -613,18 +664,39 @@ void css_free(css_sheet *s) {
     free(s);
 }
 
-static int sel_matches(const css_sel *s, const char *tag, const char *id,
-                       const char *const *classes, size_t nc) {
-    if (s->has_tag) { if (tag == NULL || !ci_eq(s->tag, tag)) return 0; }
-    if (s->has_id)  { if (id == NULL || strcmp(s->id, id) != 0) return 0; }
-    for (int i = 0; i < s->ncls; ++i) {
+/* True if one compound matches one element (no ancestor context). */
+static int compound_matches(const css_compound *c, const css_element *el) {
+    if (el == NULL) return 0;
+    if (c->has_tag) { if (el->tag == NULL || !ci_eq(c->tag, el->tag)) return 0; }
+    if (c->has_id)  { if (el->id == NULL || strcmp(c->id, el->id) != 0) return 0; }
+    for (int i = 0; i < c->ncls; ++i) {
         int found = 0;
-        for (size_t j = 0; j < nc; ++j) {
-            if (classes[j] != NULL && strcmp(s->cls[i], classes[j]) == 0) { found = 1; break; }
+        for (size_t j = 0; j < el->nclasses; ++j) {
+            if (el->classes[j] != NULL && strcmp(c->cls[i], el->classes[j]) == 0) {
+                found = 1; break;
+            }
         }
         if (!found) return 0;
     }
     return 1;
+}
+
+/* True if parts[0..k] match the ancestor chain ending at el (el matches parts[k]).
+ * Right-to-left: child requires the immediate parent; descendant tries each ancestor
+ * (the recursion backtracks). Bounded by k (<= CSS_MAX_COMPOUNDS) and the chain. */
+static int complex_matches(const css_sel *sel, int k, const css_element *el) {
+    if (!compound_matches(&sel->parts[k], el)) return 0;
+    if (k == 0) return 1;
+    if (sel->comb[k] == COMB_CHILD) {
+        return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent);
+    }
+    for (const css_element *anc = el->parent; anc != NULL; anc = anc->parent)
+        if (complex_matches(sel, k - 1, anc)) return 1;
+    return 0;
+}
+
+static int sel_matches_el(const css_sel *s, const css_element *el) {
+    return complex_matches(s, s->nparts - 1, el);
 }
 
 static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
@@ -649,18 +721,17 @@ static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
     }
 }
 
-css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
-                      const char *const *classes, size_t nclasses,
-                      const char *inline_style, size_t inline_len) {
+css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+                         const char *inline_style, size_t inline_len) {
     css_style out = { -1, -1, CSS_ALIGN_UNSET, 0, -1, -1, CSS_DISP_UNSET,
                       -1, CSS_JUSTIFY_UNSET, 0 };
     int ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { ws[k] = -1; wo[k] = -1; }
 
-    if (sheet != NULL) {
+    if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
-            if (!sel_matches(sel, tag, id, classes, nclasses)) continue;
+            if (!sel_matches_el(sel, el)) continue;
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
@@ -677,6 +748,15 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
     }
 
     return out;
+}
+
+css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+                      const char *const *classes, size_t nclasses,
+                      const char *inline_style, size_t inline_len) {
+    /* No ancestor context: a parentless element. A complex (multi-compound) selector
+     * therefore cannot match through its combinator (complex_matches needs parents). */
+    css_element el = { tag, id, classes, nclasses, NULL };
+    return css_resolve_el(sheet, &el, inline_style, inline_len);
 }
 
 css_style css_parse_inline(const char *style, size_t len) {

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CSS combinator demo</title>
+<style>
+  /* CHILD combinator: only a .row that is a DIRECT child of .menu becomes flex. */
+  .menu > .row { display: flex; gap: 32px; }
+  /* DESCENDANT combinator: hide any .ad anywhere inside an <aside>. */
+  aside .ad { display: none; }
+</style>
+</head>
+<body>
+  <h1>CSS combinator demo</h1>
+
+  <h2>Child combinator: .menu &gt; .row</h2>
+  <div class="menu">
+    <div class="row"><div>Alpha</div><div>Beta</div><div>Gamma</div></div>
+  </div>
+  <p>Alpha / Beta / Gamma form a flex row (their .row is a direct child of .menu).</p>
+
+  <div class="menu"><section>
+    <div class="row"><div>Delta</div><div>Epsilon</div></div>
+  </section></div>
+  <p>Delta / Epsilon do NOT form a row: their .row is a grandchild of .menu, so
+     .menu &gt; .row does not match and they stack.</p>
+
+  <h2>Descendant combinator: aside .ad { display:none }</h2>
+  <aside>
+    <p class="ad">HIDDEN: this .ad sits inside an aside.</p>
+    <p>Visible: a normal note inside the aside.</p>
+  </aside>
+  <p class="ad">Visible: this .ad is NOT inside an aside, so it is shown.</p>
+</body>
+</html>

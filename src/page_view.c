@@ -435,57 +435,90 @@ static int font_color_attr(lxb_dom_element_t *el) {
     return -1;
 }
 
-/* Resolves the author presentation for one element from the document <style> sheet
- * plus its own inline style= (inline wins; the css module does the cascade). The
- * element's local name / id / class tokens become the selector match inputs. Pure
- * (no fetch, no execution): the css module drops url() and @-rules. */
-static css_style element_css_style(lxb_dom_element_t *el, const css_sheet *sheet) {
-    size_t nl = 0;
-    const lxb_char_t *ln = lxb_dom_element_local_name(el, &nl);
-    char tag[PV_CSS_TAG_MAX];
-    size_t tn = (ln != NULL && nl > 0 && nl < sizeof tag) ? nl : 0;
-    if (tn > 0) memcpy(tag, ln, tn);
-    tag[tn] = '\0';
+/* Max ancestors carried for combinator matching. A selector reaching past this is
+ * not matched (fail closed); 32 is far beyond any real `a b c d` chain. */
+#define PV_CSS_CHAIN_MAX 32
 
-    char idbuf[PV_CSS_ID_MAX];
-    const char *id = NULL;
+/* One element's selector inputs (tag/id/classes) plus its css_element view, with
+ * backing storage so the css_element pointers stay valid for the chain's lifetime. */
+typedef struct pv_css_node {
+    char        tag[PV_CSS_TAG_MAX];
+    char        idbuf[PV_CSS_ID_MAX];
+    char        clsbuf[PV_CSS_CLASS_BUF];
+    const char *clsptr[PV_CSS_MAX_CLASSES];
+    css_element el;
+} pv_css_node;
+
+/* Fills *node with element e's tag/id/class tokens (no style=, no parent link yet).
+ * Over-long tokens are simply absent, which fails closed (does not match). */
+static void fill_css_node(lxb_dom_element_t *e, pv_css_node *node) {
+    size_t nl = 0;
+    const lxb_char_t *ln = lxb_dom_element_local_name(e, &nl);
+    size_t tn = (ln != NULL && nl > 0 && nl < sizeof node->tag) ? nl : 0;
+    if (tn > 0) memcpy(node->tag, ln, tn);
+    node->tag[tn] = '\0';
+
+    node->el.id = NULL;
     size_t il = 0;
     const lxb_char_t *idv =
-        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"id", 2, &il);
-    if (idv != NULL && il > 0 && il < sizeof idbuf) {
-        memcpy(idbuf, idv, il);
-        idbuf[il] = '\0';
-        id = idbuf;
+        lxb_dom_element_get_attribute(e, (const lxb_char_t *)"id", 2, &il);
+    if (idv != NULL && il > 0 && il < sizeof node->idbuf) {
+        memcpy(node->idbuf, idv, il);
+        node->idbuf[il] = '\0';
+        node->el.id = node->idbuf;
     }
 
-    char clsbuf[PV_CSS_CLASS_BUF];
-    const char *clsptr[PV_CSS_MAX_CLASSES];
-    size_t nc = 0;
-    size_t cl = 0;
+    size_t nc = 0, cl = 0;
     const lxb_char_t *clv =
-        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"class", 5, &cl);
-    if (clv != NULL && cl > 0 && cl < sizeof clsbuf) {
-        memcpy(clsbuf, clv, cl);
-        clsbuf[cl] = '\0';
+        lxb_dom_element_get_attribute(e, (const lxb_char_t *)"class", 5, &cl);
+    if (clv != NULL && cl > 0 && cl < sizeof node->clsbuf) {
+        memcpy(node->clsbuf, clv, cl);
+        node->clsbuf[cl] = '\0';
         size_t i = 0;
         while (i < cl && nc < PV_CSS_MAX_CLASSES) {
-            while (i < cl && (clsbuf[i] == ' ' || clsbuf[i] == '\t' ||
-                              clsbuf[i] == '\n' || clsbuf[i] == '\r' || clsbuf[i] == '\f'))
-                clsbuf[i++] = '\0';
+            while (i < cl && (node->clsbuf[i] == ' ' || node->clsbuf[i] == '\t' ||
+                              node->clsbuf[i] == '\n' || node->clsbuf[i] == '\r' ||
+                              node->clsbuf[i] == '\f'))
+                node->clsbuf[i++] = '\0';
             if (i >= cl) break;
-            clsptr[nc++] = &clsbuf[i];
-            while (i < cl && !(clsbuf[i] == ' ' || clsbuf[i] == '\t' ||
-                               clsbuf[i] == '\n' || clsbuf[i] == '\r' || clsbuf[i] == '\f'))
+            node->clsptr[nc++] = &node->clsbuf[i];
+            while (i < cl && !(node->clsbuf[i] == ' ' || node->clsbuf[i] == '\t' ||
+                               node->clsbuf[i] == '\n' || node->clsbuf[i] == '\r' ||
+                               node->clsbuf[i] == '\f'))
                 ++i;
         }
     }
 
+    node->el.tag = (tn > 0) ? node->tag : NULL;
+    node->el.classes = node->clsptr;
+    node->el.nclasses = nc;
+    node->el.parent = NULL;  /* linked by the caller once the chain is built */
+}
+
+/* Resolves the author presentation for one element from the document <style> sheet
+ * plus its own inline style= (inline wins; the css module does the cascade). The
+ * element and its ancestor chain (bounded) become the selector match inputs, so
+ * descendant/child combinators (`div p`, `nav > a`) resolve. Pure (no fetch, no
+ * execution): the css module drops url() and @-rules. */
+static css_style element_css_style(lxb_dom_element_t *el, const css_sheet *sheet) {
+    pv_css_node chain[PV_CSS_CHAIN_MAX];
+    int n = 0;
+    for (lxb_dom_node_t *p = (lxb_dom_node_t *)el;
+         p != NULL && p->type == LXB_DOM_NODE_TYPE_ELEMENT && n < PV_CSS_CHAIN_MAX;
+         p = p->parent) {
+        fill_css_node(lxb_dom_interface_element(p), &chain[n]);
+        ++n;
+    }
+    for (int i = 0; i < n; ++i)
+        chain[i].el.parent = (i + 1 < n) ? &chain[i + 1].el : NULL;
+
+    /* Inline style= applies to the subject element only. */
     size_t sl = 0;
     const lxb_char_t *st =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
 
-    return css_resolve(sheet, (tn > 0) ? tag : NULL, id, clsptr, nc,
-                       (const char *)st, sl);
+    return css_resolve_el(sheet, (n > 0) ? &chain[0].el : NULL,
+                          (const char *)st, sl);
 }
 
 /* --- author flex/grid container layout: structure, not author styling. render_doc

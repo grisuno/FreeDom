@@ -606,6 +606,43 @@ static void test_build_author_color(void **state) {
     hp_document_free(doc);
 }
 
+/* Descendant (`div p`) and child (`nav > a`) combinators from a <style> sheet
+ * resolve through the real DOM ancestor chain. */
+static void test_build_combinator_selectors(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>"
+        "div p { color:#990000 }"     /* descendant: any p under a div */
+        "nav > a { color:#003399 }"   /* child: a whose parent is nav */
+        "</style></head><body>"
+        "<div><section><p>inside div</p></section></div>" /* p under div (via section) */
+        "<p>outside</p>"                                  /* no div ancestor */
+        "<nav><a>direct link</a></nav>"                   /* a is a child of nav */
+        "<nav><p><a>nested link</a></p></nav>"            /* a is a grandchild of nav */
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *inside = find_text(v, "inside div");
+    assert_non_null(inside);
+    assert_int_equal(inside->fg_rgb, 0x990000);  /* descendant matched */
+
+    const pv_run *outside = find_text(v, "outside");
+    assert_non_null(outside);
+    assert_int_equal(outside->fg_rgb, -1);        /* no div ancestor: no match */
+
+    const pv_run *direct = find_text(v, "direct link");
+    assert_non_null(direct);
+    assert_int_equal(direct->fg_rgb, 0x003399);  /* child combinator matched */
+
+    const pv_run *nested = find_text(v, "nested link");
+    assert_non_null(nested);
+    assert_int_equal(nested->fg_rgb, -1);         /* grandchild: child combinator fails */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* pv_build records the nearest author flex/grid container per run: its id, display,
  * and parsed gap/justify/columns. Runs of one container share the id; a second
  * container gets a new id; content outside any container has cont_id == -1. */
@@ -1050,6 +1087,7 @@ int main(void) {
         cmocka_unit_test(test_build_empty_document),
         cmocka_unit_test(test_set_color_model),
         cmocka_unit_test(test_build_author_color),
+        cmocka_unit_test(test_build_combinator_selectors),
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_grid_container),
         cmocka_unit_test(test_build_flex_container_from_sheet),

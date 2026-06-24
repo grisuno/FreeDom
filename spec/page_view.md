@@ -55,8 +55,12 @@ del `style` en línea: `pv_build_full` concatena los bloques `<style>` del docum
 acotado a 1 MiB) y los parsea **una vez** con el módulo puro `[[css]]` en una hoja acotada. Por cada
 ancestro de un run se calcula su `css_style` (reglas de la hoja + su propio `style=`, ganando el
 inline; `[[css]]` hace la cascada por especificidad y orden), y se fusionan los campos heredables
-desde el ancestro más cercano. El subconjunto soportado: selectores simples/compuestos (tipo, `.clase`,
-`#id`, `*`, grupos por coma; sin combinadores) y las propiedades `color`, `background[-color]`,
+desde el ancestro más cercano. El cálculo por elemento usa **`css_resolve_el`**: `element_css_style`
+arma la **cadena de ancestros** del elemento (`fill_css_node` extrae tag/id/clases por nivel, acotada
+a 32 → fail-closed) y se la pasa al módulo, de modo que los **combinadores descendiente (`A B`) e hijo
+(`A > B`)** resuelven sobre el DOM real. El subconjunto soportado: selectores simples/compuestos (tipo,
+`.clase`, `#id`, `*`, grupos por coma) **+ combinadores descendiente/hijo** (sibling `+`/`~`, atributo
+y pseudo siguen fuera, fallan cerrado) y las propiedades `color`, `background[-color]`,
 `text-align`, `font-size`, `font-weight`, `font-style`, `display`. **Seguridad:** `[[css]]` descarta
 cualquier valor con `url(` y toda `@`-regla, así que el CSS de autor **nunca telefonea a casa** ni abre
 una baliza de rastreo; es contenido hostil, por eso se fuzzea (`make fuzz-css`/`fuzz-pv`).
