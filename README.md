@@ -364,6 +364,8 @@ sudo docker run -it \
 
 This repository includes an MCP (Model Context Protocol) server (`app.py`) that allows AI agents and LLM bridges (like the LazyOwn framework or OpenCode Adapter) to interact with and monitor the fuzzing environment natively.
 
+The ability to act as a semantic reduction and normalization layer before information reaches the agentic/LLM
+
 ### Exposed Tools
 * `read_fuzz_stats`: Reads the real-time performance and metrics from the active AFL++ session.
 * `list_unique_crashes`: Lists all unique payloads that triggered a browser crash.
