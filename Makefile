@@ -15,10 +15,15 @@ LEXBOR_LIBS   := $(shell pkg-config --libs lexbor 2>/dev/null || echo -llexbor)
 CMOCKA_CFLAGS := $(shell pkg-config --cflags cmocka 2>/dev/null)
 CMOCKA_LIBS   := $(shell pkg-config --libs cmocka 2>/dev/null || echo -lcmocka)
 
-# image_decode (PNG only): libpng is already pulled in transitively by Cairo, so
-# this adds no new transitive dependency. Decoding runs inside the confined worker.
+# image_decode (PNG + JPEG): libpng comes in transitively via Cairo; libjpeg-turbo
+# is linked explicitly (-ljpeg) only where image_decode.o is. Decoding hostile bytes
+# runs inside the confined worker (seccomp + Landlock); see spec/image_decode.md.
 PNG_CFLAGS    := $(shell pkg-config --cflags libpng 2>/dev/null)
 PNG_LIBS      := $(shell pkg-config --libs libpng 2>/dev/null || echo -lpng16)
+JPEG_CFLAGS   := $(shell pkg-config --cflags libjpeg 2>/dev/null)
+JPEG_LIBS     := $(shell pkg-config --libs libjpeg 2>/dev/null || echo -ljpeg)
+IMG_CFLAGS    := $(PNG_CFLAGS) $(JPEG_CFLAGS)
+IMG_LIBS      := $(PNG_LIBS) $(JPEG_LIBS)
 
 # UI (Hito 4+): Wayland + Cairo + xkbcommon for the browser GUI. fontconfig is
 # linked explicitly so the GUI can call FcFini() at shutdown (clean leak exit).
@@ -101,9 +106,9 @@ $(PSL_OBJ): $(BUILD_DIR)/psl_data.c include/psl_data.h | $(BUILD_DIR)
 $(BUILD_DIR)/request_policy.o: $(SRC_DIR)/request_policy.c include/psl_data.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# image_decode pulls in <png.h>; libpng's include dir is added explicitly.
+# image_decode pulls in <png.h> and <jpeglib.h>; their include dirs are added explicitly.
 $(BUILD_DIR)/image_decode.o: $(SRC_DIR)/image_decode.c include/image_decode.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(PNG_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(IMG_CFLAGS) -c $< -o $@
 
 # js_sandbox / js_dom include the vendored quickjs.h: keep our code under the
 # hardened flags, but pull the header via -isystem so its warnings do not trip
@@ -218,9 +223,9 @@ $(BUILD_DIR)/test_hostblock: $(TEST_DIR)/test_hostblock.c $(BUILD_DIR)/hostblock
 $(BUILD_DIR)/test_net_realm: $(TEST_DIR)/test_net_realm.c $(BUILD_DIR)/net_realm.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
-# PNG decode (runs inside the confined worker). Links libpng only.
+# PNG + JPEG decode (runs inside the confined worker). Links libpng + libjpeg.
 $(BUILD_DIR)/test_image_decode: $(TEST_DIR)/test_image_decode.c $(BUILD_DIR)/image_decode.o | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(PNG_CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(PNG_LIBS) $(CMOCKA_LIBS)
+	$(CC) $(CFLAGS) $(IMG_CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(IMG_LIBS) $(CMOCKA_LIBS)
 
 # Pure editable text-field primitive (UA field + form inputs). No I/O deps.
 $(BUILD_DIR)/test_textfield: $(TEST_DIR)/test_textfield.c $(BUILD_DIR)/textfield.o | $(BUILD_DIR)
@@ -268,7 +273,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/request_policy.o $(PSL_OBJ) \
                        $(BUILD_DIR)/url.o $(BUILD_DIR)/link_nav.o \
                        $(QJS_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(PNG_LIBS) $(CMOCKA_LIBS)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CMOCKA_LIBS)
 
 # Freedom browser (Hito 5+): GUI by default, --headless for terminal output.
 # Links the full secure tab pipeline plus the Wayland/Cairo/xkbcommon UI.
@@ -299,7 +304,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
                       $(BUILD_DIR)/xdg-decoration-client-protocol.h
-	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(PNG_LIBS) $(WL_LIBS)
+	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(WL_LIBS)
 
 $(BUILD_DIR)/test_browser: $(TEST_DIR)/test_browser.c $(BUILD_DIR)/browser.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -347,10 +352,10 @@ fuzz-js: | $(BUILD_DIR)
 # Coverage-guided fuzzing of the PNG decoder (clang + libFuzzer). Hostile image
 # bytes through sniff + dimensions + decode + free must never crash/leak/UB.
 fuzz-img: | $(BUILD_DIR)
-	clang $(STD) -g -O1 -Iinclude $(PNG_CFLAGS) \
+	clang $(STD) -g -O1 -Iinclude $(IMG_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_image_decode.c $(SRC_DIR)/image_decode.c \
-	  -o $(BUILD_DIR)/fuzz_image_decode $(PNG_LIBS)
+	  -o $(BUILD_DIR)/fuzz_image_decode $(IMG_LIBS)
 	./$(BUILD_DIR)/fuzz_image_decode -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the display-list builder (clang + libFuzzer). Arbitrary

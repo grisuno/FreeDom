@@ -170,8 +170,8 @@ typedef struct ui_input_state {
     tf_field        field; /* live editable value */
 } ui_input_state;
 
-/* Hard cap on the response body of an image subresource (a PNG; the decoder bounds
- * the decoded pixels further). Keeps a hostile server from streaming forever. */
+/* Hard cap on the response body of an image subresource (a PNG/JPEG; the decoder
+ * bounds the decoded pixels further). Keeps a hostile server from streaming forever. */
 #define UI_IMAGE_MAX_BODY ((size_t)(8u * 1024u * 1024u))
 
 /* A decoded image for one RD_IMAGE block of the current doc. surface owns the
@@ -1007,9 +1007,9 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
  * entry per RD_IMAGE block). Each fetch re-applies the full TLS/PQ/chain policy
  * through secure_fetch (Zero Trust); decoding happens inside the still-open confined
  * worker t, so the parent never decodes hostile image bytes. A blocked, policy-
- * rejected, failed or non-PNG image keeps surface == NULL and the placeholder is
- * drawn. Synchronous: image loads block this render (acceptable for v1; async fetch
- * is future work). */
+ * rejected, failed or undecodable (non-PNG/JPEG) image keeps surface == NULL and the
+ * placeholder is drawn. Synchronous: image loads block this render (acceptable for v1;
+ * async fetch is future work). */
 static void load_images(browser_window *w, tab *t) {
     if (w->doc == NULL) return;
     size_t n = rd_count(w->doc);

@@ -95,7 +95,7 @@ The name reflects its core goals:
 
 ## Current Status (Updated - June 21, 2026)
 - ✅ Advanced HTML rendering with box model, flex/grid and margin collapsing
-- ✅ Clickable links + basic image support (PNG)
+- ✅ Clickable links + image support (PNG + JPEG, decoded inside the sandboxed worker)
 - ✅ Anti-fingerprinting network identity (normalized User-Agent + Accept-Language)
 - ✅ Omnibox address bar (navigate or DuckDuckGo HTML search)
 - ✅ Native forms (GET/POST, no JS)
@@ -447,7 +447,7 @@ Run the following commands from the root directory of the repository:
 * make fuzz: Initiates a 30-second coverage-guided fuzzing session on the HTML parser using libFuzzer.
 * make fuzz-js: Initiates a 30-second coverage-guided fuzzing session on the isolated JavaScript sandbox.
 * make fuzz-css: Fuzzes the author-CSS parser + cascade (hostile `<style>` bytes; never phones home).
-* make fuzz-pv / fuzz-img / fuzz-pe / fuzz-dl: Fuzz the display-list builder / PNG decoder / PDF-name / download-name paths.
+* make fuzz-pv / fuzz-img / fuzz-pe / fuzz-dl: Fuzz the display-list builder / PNG+JPEG decoder / PDF-name / download-name paths.
 * make view: Compiles the experimental standalone Wayland + Cairo GUI demo application (build/freedom-view).
 * make clean: Wipes out the build/ directory and resets the environment.
 

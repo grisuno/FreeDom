@@ -12,20 +12,23 @@
  * image_decode — turns raw image bytes into paint-ready pixels.
  *
  * Deterministic, no network and no filesystem: it only reads the input buffer and
- * allocates the output bitmap. Decoding hostile image bytes (libpng + zlib) is a
- * classic attack surface, so this code is meant to run inside the confined tab
+ * allocates the output bitmap. Decoding hostile image bytes (libpng + zlib, libjpeg)
+ * is a classic attack surface, so this code is meant to run inside the confined tab
  * worker (seccomp allowlist + Landlock), never in the parent. The parent fetches
  * the bytes through secure_fetch and paints the result; it never decodes.
  *
- * Scope of this milestone: PNG only. Any other format is rejected (IMG_ERR_FORMAT)
- * and the orchestrator shows the placeholder. Fails closed on every doubt.
- *
- * See spec/image_decode.md for the full contract.
+ * Scope: PNG and JPEG (baseline + progressive). Any other format is rejected
+ * (IMG_ERR_FORMAT) and the orchestrator shows the placeholder. JPEG is an owner-
+ * authorised exception to the PNG-only doctrine, contained by the same sandbox plus
+ * libjpeg-specific guards (in-memory source only, longjmp error manager so a bad
+ * stream never calls exit(), dimension caps before decode); see spec/image_decode.md
+ * §0.1. Fails closed on every doubt.
  */
 
 typedef enum img_format {
     IMG_FMT_UNKNOWN = 0,
-    IMG_FMT_PNG = 1
+    IMG_FMT_PNG = 1,
+    IMG_FMT_JPEG = 2
 } img_format;
 
 typedef enum img_status {
@@ -77,6 +80,18 @@ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h,
  * On IMG_OK, *out owns data and must be released with img_pixels_free. On any error
  * *out is zeroed and nothing leaks. Reentrant: no global state. */
 img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out);
+
+/* Decodes a JPEG (baseline/progressive) into out (ARGB32, opaque alpha 0xFF). Bounds
+ * the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and
+ * expands to BGRA. Rejects non-JPEG (IMG_ERR_FORMAT), out-of-bounds dimensions, CMYK/
+ * YCCK and corrupt streams (IMG_ERR_DECODE, via a longjmp error manager — never calls
+ * exit()). Ownership/zeroing/reentrancy as img_decode_png. */
+img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out);
+
+/* Generic entry point: sniffs the format and routes to img_decode_png/img_decode_jpeg;
+ * an unrecognised format yields IMG_ERR_FORMAT. This is what the confined worker calls.
+ * Fails closed. */
+img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out);
 
 /* Releases data and zeroes the struct. Idempotent; safe on NULL and on a zeroed
  * struct. */

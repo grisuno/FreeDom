@@ -213,7 +213,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
 | CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~`/atributo/pseudo siguen fuera, fallan cerrado; whitelist de propiedades). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). |
-| Imágenes | `image_decode` (`img_`) | Decodificado **PNG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. |
+| Imágenes | `image_decode` (`img_`) | Decodificado **PNG + JPEG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. JPEG es excepción de doctrina autorizada (libjpeg con fuente en memoria + `longjmp` que nunca llama `exit()`). |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
 | Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
 | Descargas | `download` (`dl_`) | **Guardar recurso a `~/Downloads/freedom/`** (link no renderizable → se descarga, no se parsea; `Ctrl+S` guarda la página). Puro: decide render-vs-download (`Content-Disposition` attachment / media-type binario), deriva el nombre **fail-closed** del header/URL hostil (reusa `pe_safe_basename`), y aplica el cap de tamaño; el orquestador escribe atómico 0600. |
@@ -282,9 +282,11 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   ancla `#id`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir el
   storage ni poblar cookie/referrer con datos reales (rompería Zero Knowledge). Ver `[[freedom-live-js]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
-  (`Ctrl+I`). Imágenes solo **PNG** y fetch **síncrono**; otros formatos → placeholder (superficie
-  mínima). El toggle de imágenes cubre **remotas y locales** por igual (una regla, fail-closed): un
-  HTML local hostil tampoco autocarga nada hasta que el usuario habilita imágenes.
+  (`Ctrl+I`). Imágenes **PNG y JPEG** (resto → placeholder) y fetch **síncrono**; el decode corre
+  en el worker confinado (JPEG es excepción de doctrina autorizada por el dueño, contenida por el
+  sandbox + guardas de libjpeg; ver `[[freedom-jpeg-decode]]`). El toggle de imágenes cubre
+  **remotas y locales** por igual (una regla, fail-closed): un HTML local hostil tampoco autocarga
+  nada hasta que el usuario habilita imágenes.
 - **Origen `file://` para páginas locales (actúan como https):** una página de archivo recibe origen
   `file:///realpath` (`build_file_origin`/`realpath` en la GUI), así sus `src` relativos resuelven
   con `url_resolve_file` (puro) **confinado al subárbol del directorio del documento** (sin escape
@@ -485,6 +487,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   (el `logo.png` de `docs/index.html` resuelve a un archivo legible; `../../etc/passwd` bloqueado).
   *(Núcleo puro verificado E2E; ruta GUI compila endurecida, verificación visual Wayland pendiente al
   dueño.)* Ver `[[freedom-local-file-origin]]`.
+- **Hito 19b (JPEG) — Decodificado JPEG en el worker (excepción de doctrina autorizada).** `image_decode`
+  deja de ser PNG-only: `img_sniff` reconoce `FF D8 FF`, `img_decode_jpeg` decodifica baseline/progressive
+  con **libjpeg-turbo** y un nuevo despachador `img_decode` (sniff → png/jpeg/`IMG_ERR_FORMAT`) es la única
+  entrada que usa el worker (`tab.c` `child_handle_decode_image`). JPEG **rompe la doctrina PNG-only** y se
+  admite solo con sign-off del dueño + contención: decode **solo en el worker** (seccomp+Landlock+netns),
+  **fuente solo en memoria** (`jpeg_mem_src`), **manejador de error `longjmp`** (el `error_exit` por defecto
+  de libjpeg llama `exit()`; se reemplaza → un JPEG hostil devuelve `IMG_ERR_DECODE`, falla cerrado, no mata
+  el worker), **tope anti-bomba antes del decode** (`jpeg_read_header`→`img_dimensions_ok`→`jpeg_start_
+  decompress`), salida forzada a `JCS_RGB` expandida a **BGRA opaco** (sin extensión turbo; CMYK/YCCK se
+  **rechazan**). Sin cambios de IPC/render (los píxeles ya viajaban igual). `-ljpeg` solo donde está
+  `image_decode.o`. Spec (`image_decode.md` §0.1/§4.1) + tests (7 nuevos en `test_image_decode`: sniff/
+  dispatch/dim+alfa/truncado/no-jpeg/nulls; `test_sniff_non_png`→`test_sniff_unsupported` por el cambio de
+  contrato) + `make test` (35 suites) / `make asan` (exit 0, sin leaks en la ruta `longjmp`) limpios + fuzz
+  `make fuzz-img` (4.2M execs; libFuzzer descubre `FF D8 FF` solo) + corpus JPEG sembrado (CMYK/progresivo/
+  gris/truncado, 176k execs) sin crash/leak/UB + **verificación visual del decode**: una JPEG con formas/
+  colores/texto decodificada por `img_decode`→PNG confirma orden de canal BGRA correcto (rojo=rojo) y
+  fidelidad sin artefactos. **Fuera de alcance:** SVG/WebP/GIF/AVIF, EXIF/ICC, CMYK. *(Decode + ASan + fuzz
+  + revisión visual del bitmap verificados; el render JPEG dentro de la GUI Wayland —con `Ctrl+I`— queda
+  pendiente al dueño: el camino headless `--download-pdf` lleva imágenes OFF.)* Ver `[[freedom-jpeg-decode]]`.
 - **Hito 20 — Allowlist de JS por dominio (granular).** Espina de **política** pura + plumbing de
   `caps.js`. Módulo `js_policy` (`jsp_`): `jsp_enabled(mode, host_allowlisted)` combina un modo global
   tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`/`JSP_ON`, defecto allowlist) con la pertenencia por host;
@@ -679,10 +700,10 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   principal (hoy `load_images` hace fetch síncrono dentro del worker durante el render) y permitir
   **carga concurrente entre pestañas** (generación por pestaña en vez de global, entrega a la pestaña
   destino aunque esté en segundo plano). Destraba además I2P (lento de tejer túneles).
-- **Hito 19b — Imágenes: formatos + lazy.** (Hito 19a, imágenes locales, ya cerrado arriba.)
-  (b) **SVG** (¿`librsvg`? evaluar superficie de ataque) y **JPEG** (decoder en worker; contra la
-  doctrina PNG-only salvo justificar la superficie). (c) **Lazy loading** (decodificar solo lo
-  visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
+- **Hito 19b — Imágenes: formatos + lazy.** (Hito 19a imágenes locales y el sub-hito **JPEG**, ya
+  cerrados arriba.) Falta: (a) **SVG** (¿`librsvg`? evaluar superficie de ataque); (b) **WebP/GIF/
+  AVIF** (cada uno superficie nueva, contra doctrina salvo justificar); (c) **Lazy loading**
+  (decodificar solo lo visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
 - **Hito 20e — JS vivo: lo dinámico real.** Cerrados 20b (ejecución + título/texto), 20c
   (construcción + eventos/timers sintéticos), 20d (`innerHTML` + superficie ambiente identity-safe) y
   **parte 1** (`location.*` reales + navegación por JS gateada — ya cerrada arriba). Falta (parte 2):

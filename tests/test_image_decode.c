@@ -32,6 +32,36 @@ static const uint8_t PNG_2x2[] = {
     0xae, 0x42, 0x60, 0x82
 };
 
+/* A 4x4 solid-red baseline JPEG (ImageMagick, q90, 4:4:4). JPEG is lossy, so a flat
+ * fill is used: every pixel decodes to ~(254,0,0) opaque. Checks use a tolerance.
+ * Magic FF D8 FF; SOF0 at the FF C0 marker declares 4x4. */
+static const uint8_t JPEG_RED_4x4[] = {
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
+    0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43,
+    0x00, 0x03, 0x02, 0x02, 0x03, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03, 0x04,
+    0x03, 0x03, 0x04, 0x05, 0x08, 0x05, 0x05, 0x04, 0x04, 0x05, 0x0a, 0x07,
+    0x07, 0x06, 0x08, 0x0c, 0x0a, 0x0c, 0x0c, 0x0b, 0x0a, 0x0b, 0x0b, 0x0d,
+    0x0e, 0x12, 0x10, 0x0d, 0x0e, 0x11, 0x0e, 0x0b, 0x0b, 0x10, 0x16, 0x10,
+    0x11, 0x13, 0x14, 0x15, 0x15, 0x15, 0x0c, 0x0f, 0x17, 0x18, 0x16, 0x14,
+    0x18, 0x12, 0x14, 0x15, 0x14, 0xff, 0xdb, 0x00, 0x43, 0x01, 0x03, 0x04,
+    0x04, 0x05, 0x04, 0x05, 0x09, 0x05, 0x05, 0x09, 0x14, 0x0d, 0x0b, 0x0d,
+    0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,
+    0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,
+    0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,
+    0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,
+    0x14, 0x14, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x04, 0x00, 0x04, 0x03,
+    0x01, 0x11, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01, 0xff, 0xc4, 0x00,
+    0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0xff, 0xc4, 0x00, 0x14, 0x10,
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xc4, 0x00, 0x15, 0x01, 0x01, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x07, 0x09, 0xff, 0xc4, 0x00, 0x14, 0x11, 0x01, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xff, 0xda, 0x00, 0x0c, 0x03, 0x01, 0x00, 0x02, 0x11, 0x03,
+    0x11, 0x00, 0x3f, 0x00, 0x3a, 0x03, 0x15, 0x4d, 0xff, 0xd9
+};
+
 static uint32_t px(const img_pixels *p, uint32_t x, uint32_t y) {
     const uint8_t *row = p->data + (size_t)y * p->stride;
     const uint8_t *q = row + (size_t)x * 4u;
@@ -47,10 +77,12 @@ static void test_sniff_png(void **state) {
     assert_int_equal(img_sniff(PNG_2x2, sizeof PNG_2x2), IMG_FMT_PNG);
 }
 
-static void test_sniff_non_png(void **state) {
+static void test_sniff_unsupported(void **state) {
     (void)state;
-    const uint8_t jpeg[] = { 0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0 };
-    assert_int_equal(img_sniff(jpeg, sizeof jpeg), IMG_FMT_UNKNOWN);
+    /* An unsupported format (GIF) and garbage both sniff as UNKNOWN; PNG and JPEG
+     * are the only recognised signatures (see test_sniff_png/test_sniff_jpeg). */
+    const uint8_t gif[] = { 'G', 'I', 'F', '8', '9', 'a', 0, 0 };
+    assert_int_equal(img_sniff(gif, sizeof gif), IMG_FMT_UNKNOWN);
     assert_int_equal(img_sniff(NULL, 0), IMG_FMT_UNKNOWN);
     assert_int_equal(img_sniff(PNG_2x2, 4), IMG_FMT_UNKNOWN); /* too short for the magic */
 }
@@ -198,13 +230,90 @@ static void test_pixels_free_idempotent(void **state) {
 static void test_format_name(void **state) {
     (void)state;
     assert_string_equal(img_format_name(IMG_FMT_PNG), "png");
+    assert_string_equal(img_format_name(IMG_FMT_JPEG), "jpeg");
     assert_string_equal(img_format_name(IMG_FMT_UNKNOWN), "unknown");
+}
+
+/* --- JPEG --- */
+
+static void test_sniff_jpeg(void **state) {
+    (void)state;
+    assert_int_equal(img_sniff(JPEG_RED_4x4, sizeof JPEG_RED_4x4), IMG_FMT_JPEG);
+    /* SOI without the third magic byte is not enough. */
+    const uint8_t soi_only[] = { 0xff, 0xd8 };
+    assert_int_equal(img_sniff(soi_only, sizeof soi_only), IMG_FMT_UNKNOWN);
+}
+
+static void test_decode_jpeg_dimensions_and_alpha(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_jpeg(JPEG_RED_4x4, sizeof JPEG_RED_4x4, &p), IMG_OK);
+    assert_int_equal(p.width, 4u);
+    assert_int_equal(p.height, 4u);
+    assert_int_equal(p.stride, 4u * 4u);
+    assert_non_null(p.data);
+    /* Flat red: every pixel ~ (R=254,G=0,B=0), opaque. Tolerance for lossy JPEG. */
+    for (uint32_t y = 0; y < p.height; ++y) {
+        for (uint32_t x = 0; x < p.width; ++x) {
+            uint32_t v = px(&p, x, y);
+            unsigned a = (v >> 24) & 0xff, r = (v >> 16) & 0xff;
+            unsigned g = (v >> 8) & 0xff, b = v & 0xff;
+            assert_int_equal(a, 0xffu);
+            assert_true(r >= 248u);
+            assert_true(g <= 8u);
+            assert_true(b <= 8u);
+        }
+    }
+    img_pixels_free(&p);
+}
+
+static void test_decode_dispatch_routes_jpeg_and_png(void **state) {
+    (void)state;
+    img_pixels j, n;
+    /* The generic entry point sniffs and routes both formats. */
+    assert_int_equal(img_decode(JPEG_RED_4x4, sizeof JPEG_RED_4x4, &j), IMG_OK);
+    assert_int_equal(j.width, 4u);
+    img_pixels_free(&j);
+    assert_int_equal(img_decode(PNG_2x2, sizeof PNG_2x2, &n), IMG_OK);
+    assert_int_equal(n.width, 2u);
+    img_pixels_free(&n);
+}
+
+static void test_decode_dispatch_rejects_unknown(void **state) {
+    (void)state;
+    const uint8_t junk[] = { 'n', 'o', 't', ' ', 'a', 'n', ' ', 'i', 'm', 'g' };
+    img_pixels p;
+    assert_int_equal(img_decode(junk, sizeof junk, &p), IMG_ERR_FORMAT);
+    assert_null(p.data);
+}
+
+static void test_decode_jpeg_rejects_truncated(void **state) {
+    (void)state;
+    img_pixels p;
+    /* Header present but the scan is cut off: libjpeg must fail closed, not exit(). */
+    assert_int_not_equal(img_decode_jpeg(JPEG_RED_4x4, 40u, &p), IMG_OK);
+    assert_null(p.data);
+}
+
+static void test_decode_jpeg_rejects_non_jpeg(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_jpeg(PNG_2x2, sizeof PNG_2x2, &p), IMG_ERR_FORMAT);
+    assert_null(p.data);
+}
+
+static void test_decode_jpeg_null_args(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_jpeg(NULL, 10u, &p), IMG_ERR_NULL_ARG);
+    assert_int_equal(img_decode_jpeg(JPEG_RED_4x4, sizeof JPEG_RED_4x4, NULL),
+                     IMG_ERR_NULL_ARG);
 }
 
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_sniff_png),
-        cmocka_unit_test(test_sniff_non_png),
+        cmocka_unit_test(test_sniff_unsupported),
         cmocka_unit_test(test_dimensions_from_ihdr),
         cmocka_unit_test(test_dimensions_truncated),
         cmocka_unit_test(test_dimensions_non_png),
@@ -220,6 +329,13 @@ int main(void) {
         cmocka_unit_test(test_decode_null_args),
         cmocka_unit_test(test_pixels_free_idempotent),
         cmocka_unit_test(test_format_name),
+        cmocka_unit_test(test_sniff_jpeg),
+        cmocka_unit_test(test_decode_jpeg_dimensions_and_alpha),
+        cmocka_unit_test(test_decode_dispatch_routes_jpeg_and_png),
+        cmocka_unit_test(test_decode_dispatch_rejects_unknown),
+        cmocka_unit_test(test_decode_jpeg_rejects_truncated),
+        cmocka_unit_test(test_decode_jpeg_rejects_non_jpeg),
+        cmocka_unit_test(test_decode_jpeg_null_args),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

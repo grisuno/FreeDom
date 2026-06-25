@@ -313,11 +313,11 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
 
 /* Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
  * Decoding hostile image bytes happens here, inside the confinement; ok==0 means
- * the bytes were not a decodable PNG (no partial pixels are sent). */
+ * the bytes were not a decodable PNG/JPEG (no partial pixels are sent). */
 static void child_handle_decode_image(int wfd, const char *bytes, size_t len) {
     img_pixels px;
     memset(&px, 0, sizeof px);
-    int ok = (img_decode_png((const uint8_t *)bytes, len, &px) == IMG_OK);
+    int ok = (img_decode((const uint8_t *)bytes, len, &px) == IMG_OK);
     int32_t k = ok ? 1 : 0;
     if (write_full(wfd, &k, sizeof k) == 0 && ok) {
         uint32_t w = px.width, h = px.height, stride = px.stride;
