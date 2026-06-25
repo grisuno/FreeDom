@@ -46,6 +46,19 @@ static void test_inline_font_size(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).font_scale, 0);          /* unset */
 }
 
+static void test_inline_line_height(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("line-height:1.5", 0).line_scale, 150);  /* unitless */
+    assert_int_equal(css_parse_inline("line-height:2", 0).line_scale, 200);
+    assert_int_equal(css_parse_inline("line-height:160%", 0).line_scale, 160); /* percent */
+    assert_int_equal(css_parse_inline("line-height:normal", 0).line_scale, 0); /* unset */
+    assert_int_equal(css_parse_inline("line-height:24px", 0).line_scale, 0);   /* absolute: dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).line_scale, 0);          /* unset */
+    /* Clamped to the anti-DoS range [CSS_LINE_MIN, CSS_LINE_MAX]. */
+    assert_int_equal(css_parse_inline("line-height:99", 0).line_scale, CSS_LINE_MAX);
+    assert_int_equal(css_parse_inline("line-height:0.1", 0).line_scale, CSS_LINE_MIN);
+}
+
 static void test_inline_font_weight_style(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("font-weight:bold", 0).bold, 1);
@@ -471,6 +484,7 @@ int main(void) {
         cmocka_unit_test(test_inline_color_and_bg),
         cmocka_unit_test(test_inline_text_align),
         cmocka_unit_test(test_inline_font_size),
+        cmocka_unit_test(test_inline_line_height),
         cmocka_unit_test(test_inline_font_weight_style),
         cmocka_unit_test(test_inline_display),
         cmocka_unit_test(test_inline_container_props),

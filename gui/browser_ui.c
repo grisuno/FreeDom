@@ -1728,6 +1728,7 @@ typedef struct rc_state {
     int    line_open, banner;
     int    bg_rgb;       /* current block's author background-color, or -1 */
     int    align;        /* current block's author text-align (css_align), 0 = left/unset */
+    int    line_scale;   /* current block's author line-height percent, 0 = use theme spacing */
     size_t line_first;
 } rc_state;
 
@@ -1814,7 +1815,10 @@ static void block_margins(const ui_theme *th, const rd_block *b,
 
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (!s->line_open) return;
-    double h = (s->line_asc + s->line_desc) * th->line_spacing;
+    /* Author line-height (percent of the natural line box) replaces the theme's
+     * default spacing when set; render_doc gated it behind caps.css (0 when off). */
+    double spacing = (s->line_scale > 0) ? (double)s->line_scale / 100.0 : th->line_spacing;
+    double h = (s->line_asc + s->line_desc) * spacing;
     rc_row *r = rc_add_row(L);
     if (r != NULL) {
         r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
@@ -1892,6 +1896,7 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     /* Author text-align travels on the rows this block flushes (paint centers/right-
      * aligns each line); render_doc gated it behind caps.css (0 when off). */
     s->align = b->text_align;
+    s->line_scale = b->line_scale;
     const char *href = (b->kind == RD_LINK) ? b->href : NULL;
     if (b->kind == RD_NOTICE) {
         s->banner = 1;

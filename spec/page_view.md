@@ -37,6 +37,7 @@ typedef struct pv_run {
     int     bg_rgb;      /* background-color del autor 0xRRGGBB, o -1 si no hay */
     int     text_align;  /* text-align del autor (css_align), 0 = sin definir */
     int     font_scale;  /* font-size del autor en porcentaje (100=normal), 0 = sin definir */
+    int     line_scale;  /* line-height del autor en % de la caja de línea, 0 = sin definir */
     int     cont_id;     /* contenedor flex/grid de autor mas cercano, o -1 */
     int     cont_display;/* bx_display del contenedor (flex/grid), o 0 */
     int     cont_gap;    /* gap del contenedor en px */
@@ -71,10 +72,11 @@ CSS ganó; `background-color` nunca se confunde con `color`; valor no parseable 
 presentación: `render_doc` solo lo propaga con `caps.css`, y nunca implica red. Los `pv_append*`
 inicializan `fg_rgb` a -1; `pv_set_color` lo fija en el último run.
 
-**Alineación y tamaño del autor (`text_align`/`font_scale`):** `text_align` es el `text-align` heredado
-(un `css_align`: 0 sin definir, 1 izquierda, 2 centro, 3 derecha, 4 justificado); `font_scale` es el
+**Alineación y tamaño del autor (`text_align`/`font_scale`/`line_scale`):** `text_align` es el `text-align`
+heredado (un `css_align`: 0 sin definir, 1 izquierda, 2 centro, 3 derecha, 4 justificado); `font_scale` es el
 `font-size` en porcentaje (100 = normal; `px` relativo a 16px, `em`/`rem`/`%` y palabras clave), 0 si
-no se define. Ambos del ancestro más cercano que los fije. Mismo gate de presentación que los colores
+no se define; `line_scale` es el `line-height` en % de la caja de línea natural (unitless×100 o `%`; `normal`
+o `px`/`em` absolutos → 0). Los tres del ancestro más cercano que los fije. Mismo gate de presentación que los colores
 (`render_doc` los propaga solo con `caps.css`); `pv_set_text_style` los fija en el último run.
 
 **`display:none` (estructura).** Un run cuyo elemento o algún ancestro tenga `display:none` (de la hoja
@@ -130,7 +132,7 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src, int w, int h); /* PV_IMAGE */
 void          pv_set_color(pv_view *v, int fg_rgb);        /* color del autor del ultimo run */
 void          pv_set_bgcolor(pv_view *v, int bg_rgb);      /* background-color del ultimo run */
-void          pv_set_text_style(pv_view *v, int text_align, int font_scale); /* align/font del ultimo run */
+void          pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale); /* align/font/line-height del ultimo run */
 void          pv_set_container(pv_view *v, int cont_id, int cont_display,
                                int cont_gap, int cont_justify, int cont_cols); /* contenedor */
 void          pv_free(pv_view *v);

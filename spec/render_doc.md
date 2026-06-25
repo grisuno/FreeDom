@@ -44,6 +44,7 @@ typedef struct rd_block {
     int              bg_rgb;         /* background-color del autor 0xRRGGBB, o -1; solo con caps.css */
     int              text_align;     /* text-align del autor (css_align); solo con caps.css, si no 0 */
     int              font_scale;     /* font-size del autor en %; solo con caps.css, si no 0 */
+    int              line_scale;     /* line-height del autor en % de la caja de línea; solo con caps.css, si no 0 */
     /* ... cont_* (contenedor flex/grid, transportado siempre) e input_* (RD_INPUT) ... */
 } rd_block;
 

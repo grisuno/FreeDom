@@ -23,6 +23,10 @@ OPTIONS:
   -H, --headless    modo terminal: renderiza una única página a stdout y sale
   --download-pdf=PATH   modo headless: renderiza la página a un PDF vectorial en
                         PATH (sin abrir ventana) y sale. Implica --headless.
+  --author-css          aplica el CSS de autor (caps.css) en el render headless,
+                        para que colores/text-align/font-size/line-height sean
+                        revisables visualmente. Solo render local: el cap de
+                        imágenes/red sigue OFF (nunca fetch, no telefonea). Default off.
 
 [url-or-file]:
   - "https://host/..."  → se obtiene con secure_fetch (TLS 1.3, KE híbrido PQ).

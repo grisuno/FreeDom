@@ -28,6 +28,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  default: open the Wayland browser GUI\n");
     fprintf(fp, "  --headless: render the page to stdout and exit\n");
     fprintf(fp, "  --download-pdf=PATH: headless render to a vector PDF at PATH (implies --headless)\n");
+    fprintf(fp, "  --author-css: apply author CSS (colors/sizing/line-height) in the headless render (local only)\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
@@ -54,6 +55,12 @@ static int global_insecure = 0;
  * vector PDF at this path instead of printing to stdout. The path is a trusted
  * local CLI argument, used verbatim. */
 static const char *g_pdf_out = NULL;
+
+/* Set by --author-css: apply author CSS (caps.css) in the headless render, so
+ * author styling (colors, text-align, font-size, line-height) is visually
+ * reviewable without a Wayland window. Local render only; the network image cap
+ * stays off, so this never fetches or phones home. Default off (Privacy by Default). */
+static int g_author_css = 0;
 
 /* Tor/I2P routing for headless mode (off by default; opt-in via CLI flags). */
 static nr_config global_net = { 0, 0, 0 };
@@ -176,9 +183,12 @@ static int render_page(const char *html, size_t len, const char *top_url) {
     }
 
     /* Images stay off by default (Privacy by Default); render_doc prepends the
-     * tracking warning when the page declares images. */
+     * tracking warning when the page declares images. --author-css opts into author
+     * styling for the local render only (no network: the image cap stays off). */
+    rdp_caps caps = rdp_caps_safe();
+    if (g_author_css) caps.css = true;
     rd_doc *doc = NULL;
-    rd_status rs = rd_build(page.view, rdp_caps_safe(), top_url, &doc);
+    rd_status rs = rd_build(page.view, caps, top_url, &doc);
     int out_rc = (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;
 
     if (g_pdf_out != NULL) {
@@ -306,6 +316,8 @@ int main(int argc, char **argv) {
             }
             g_pdf_out = path;
             headless = 1; /* PDF export is a headless operation (no window) */
+        } else if (strcmp(arg, "--author-css") == 0) {
+            g_author_css = 1; /* apply author CSS in the headless render (local only) */
         } else if (strcmp(arg, "--insecure") == 0 || strcmp(arg, "-I") == 0) {
             global_insecure = 1;
         } else if (strcmp(arg, "--tor") == 0) {

@@ -971,6 +971,26 @@ static void test_build_text_align_and_font_size(void **state) {
     hp_document_free(doc);
 }
 
+/* line-height resolves into line_scale from a <style> sheet and inline style=, and
+ * inherits to descendant text (like font-size). */
+static void test_build_line_height(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>p{line-height:1.8}</style>"
+        "<p>sheet <span>inherited</span></p>"
+        "<div style='line-height:160%'>inlined</div>"
+        "<h2 style='font-size:120%'>nolh</h2></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal(find_text(v, "sheet ")->line_scale, 180);
+    assert_int_equal(find_text(v, "inherited")->line_scale, 180); /* inherited from <p> */
+    assert_int_equal(find_text(v, "inlined")->line_scale, 160);
+    /* An <h2> is not matched by the p{} rule and sets no line-height: unset. */
+    assert_int_equal(find_text(v, "nolh")->line_scale, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* font-weight via CSS sets bold; an inline declaration wins over an id rule. */
 static void test_build_css_bold_and_inline_wins(void **state) {
     (void)state;
@@ -1040,15 +1060,17 @@ static void test_build_reader_skips_boilerplate(void **state) {
 static void test_set_text_style_model(void **state) {
     (void)state;
     pv_view *v = pv_new();
-    pv_set_text_style(v, CSS_ALIGN_CENTER, 150); /* no-op: empty view */
+    pv_set_text_style(v, CSS_ALIGN_CENTER, 150, 140); /* no-op: empty view */
     assert_int_equal((int)pv_count(v), 0);
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
     assert_int_equal(pv_at(v, 0)->text_align, 0); /* default */
     assert_int_equal(pv_at(v, 0)->font_scale, 0);
-    pv_set_text_style(v, CSS_ALIGN_RIGHT, 175);
+    assert_int_equal(pv_at(v, 0)->line_scale, 0);
+    pv_set_text_style(v, CSS_ALIGN_RIGHT, 175, 160);
     assert_int_equal(pv_at(v, 0)->text_align, CSS_ALIGN_RIGHT);
     assert_int_equal(pv_at(v, 0)->font_scale, 175);
-    pv_set_text_style(NULL, 0, 0); /* NULL-safe */
+    assert_int_equal(pv_at(v, 0)->line_scale, 160);
+    pv_set_text_style(NULL, 0, 0, 0); /* NULL-safe */
     pv_free(v);
 }
 
@@ -1102,6 +1124,7 @@ int main(void) {
         cmocka_unit_test(test_build_style_sheet_color),
         cmocka_unit_test(test_build_prefers_color_scheme),
         cmocka_unit_test(test_build_text_align_and_font_size),
+        cmocka_unit_test(test_build_line_height),
         cmocka_unit_test(test_build_css_bold_and_inline_wins),
         cmocka_unit_test(test_build_display_none_hidden),
         cmocka_unit_test(test_build_reader_skips_boilerplate),

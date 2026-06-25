@@ -54,6 +54,7 @@ checked against the ancestor chain (descendant backtracks over ancestors).
 | `background-color`, `background` | `background` (color only; a `background` with `url(` is dropped) |
 | `text-align` | `text_align`: left/center/right/justify |
 | `font-size` | `font_scale` (percent): `px` relative to 16px base, `em`/`rem` ×100, `%`, and keywords (`small`=85, `medium`=100, `large`=120, `x-large`=150, `xx-large`=200, `smaller`=85, `larger`=120) |
+| `line-height` | `line_scale` (percent of the natural line box): unitless multiplier (`1.5` → 150) or `%` (`160%` → 160), clamped `[CSS_LINE_MIN, CSS_LINE_MAX]`; `normal` → 0 (unset, uses the UA default). Absolute `px`/`em` line-heights are out of scope (dropped). Inherits, like `font-size`. |
 | `font-weight` | `bold`: `bold`/`bolder` or numeric ≥ 600 → 1; `normal`/`lighter`/< 600 → 0 |
 | `font-style` | `italic`: `italic`/`oblique` → 1; `normal` → 0 |
 | `display` | `display`: `none`/`block`/`inline`/`inline-block`/`flex`/`grid`/other |
@@ -113,6 +114,7 @@ typedef struct css_style {
     int          background;  /* 0xRRGGBB or -1 (unset) */
     css_align    text_align;  /* CSS_ALIGN_UNSET if absent */
     int          font_scale;  /* percent (e.g. 150), or 0 (unset) */
+    int          line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
     int          bold;        /* 1, 0, or -1 (unset) */
     int          italic;      /* 1, 0, or -1 (unset) */
     css_display  display;     /* CSS_DISP_UNSET if absent */
@@ -123,6 +125,8 @@ typedef struct css_style {
 
 #define CSS_GAP_MAX       4096   /* px cap on gap (anti-DoS) */
 #define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns tracks (anti-DoS) */
+#define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
+#define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
 
 typedef struct css_sheet css_sheet;   /* opaque, owns the parsed rules */
 

@@ -237,10 +237,12 @@ reflows at the new size with no network round-trip.
 
 Enable **Author styles (CSS)** in the menu to see the page the way the webmaster intended.
 Freedom renders the author's own CSS — both `<style>` blocks and inline `style=` — using a
-deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `font-weight`,
-`font-style`, `display` (including `display:none`), with type / `.class` / `#id` / `*` / group
-selectors and a real specificity-then-document-order cascade (inline wins). It is rendered by
-the pure `css` module and stays gated behind the author-CSS capability (Privacy by Default).
+deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `line-height`,
+`font-weight`, `font-style`, `display` (including `display:none`), with type / `.class` / `#id`
+/ `*` / group selectors and a real specificity-then-document-order cascade (inline wins). It is
+rendered by the pure `css` module and stays gated behind the author-CSS capability (Privacy by
+Default). For headless visual review, `freedom --author-css --download-pdf=PATH …` applies author
+styling in the PDF (local render only — the network image cap stays off).
 
 **Flex & grid from the stylesheet:** a `display:flex` / `display:grid` container takes its
 layout params (`gap`, `justify-content`, `grid-template-columns`) from the same cascade, so a

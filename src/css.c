@@ -23,8 +23,8 @@
 #define CSS_INLINE_SPEC         (1 << 20)
 
 /* Property slots. The enum value IS the css_style slot index used by apply(). */
-enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_WEIGHT, P_STYLE, P_DISPLAY,
-       P_GAP, P_JUSTIFY, P_GRIDCOLS, P_NSLOTS };
+enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
+       P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS, P_NSLOTS };
 
 typedef struct css_decl {
     int prop;  /* P_* */
@@ -165,6 +165,25 @@ static int interp_fontsize(const char *v) {
     return scale;
 }
 
+/* line-height as a percent of the natural line box. A unitless multiplier ("1.5" ->
+ * 150) or a percent ("160%" -> 160); "normal" is unset (the UA default). Absolute px/em
+ * line-heights need a font size we don't have here, so they are dropped (return -1).
+ * Clamped to [CSS_LINE_MIN, CSS_LINE_MAX] (anti-DoS). */
+static int interp_lineheight(const char *v) {
+    if (ci_eq(v, "normal")) return 0;
+    double num;
+    const char *end;
+    if (!parse_num(v, &num, &end)) return -1;
+    while (*end == ' ' || *end == '\t') ++end;
+    int pct;
+    if (end[0] == '\0')                       pct = (int)(num * 100.0 + 0.5); /* unitless */
+    else if (end[0] == '%' && end[1] == '\0') pct = (int)(num + 0.5);
+    else return -1;  /* px/em/other: out of scope, dropped */
+    if (pct < CSS_LINE_MIN) pct = CSS_LINE_MIN;
+    if (pct > CSS_LINE_MAX) pct = CSS_LINE_MAX;
+    return pct;
+}
+
 static int interp_weight(const char *v) {
     if (ci_eq(v, "bold") || ci_eq(v, "bolder")) return 1;
     if (ci_eq(v, "normal") || ci_eq(v, "lighter")) return 0;
@@ -263,6 +282,7 @@ static int parse_one_decl(const char *s, size_t n, css_decl *out) {
              strcmp(prop, "background") == 0)        { prop_id = P_BG;       ival = interp_bg(val); }
     else if (strcmp(prop, "text-align") == 0)        { prop_id = P_ALIGN;    ival = interp_align(val); }
     else if (strcmp(prop, "font-size") == 0)         { prop_id = P_FONTSIZE; ival = interp_fontsize(val); }
+    else if (strcmp(prop, "line-height") == 0)       { prop_id = P_LINEHEIGHT; ival = interp_lineheight(val); }
     else if (strcmp(prop, "font-weight") == 0)       { prop_id = P_WEIGHT;   ival = interp_weight(val); }
     else if (strcmp(prop, "font-style") == 0)        { prop_id = P_STYLE;    ival = interp_style(val); }
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
@@ -710,6 +730,7 @@ static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
             case P_BG:       o->background = d->ival; break;
             case P_ALIGN:    o->text_align = (css_align)d->ival; break;
             case P_FONTSIZE: o->font_scale = d->ival; break;
+            case P_LINEHEIGHT: o->line_scale = d->ival; break;
             case P_WEIGHT:   o->bold = d->ival; break;
             case P_STYLE:    o->italic = d->ival; break;
             case P_DISPLAY:  o->display = (css_display)d->ival; break;
@@ -723,8 +744,8 @@ static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
 
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          const char *inline_style, size_t inline_len) {
-    css_style out = { -1, -1, CSS_ALIGN_UNSET, 0, -1, -1, CSS_DISP_UNSET,
-                      -1, CSS_JUSTIFY_UNSET, 0 };
+    css_style out = { -1, -1, CSS_ALIGN_UNSET, 0, 0, -1, -1, CSS_DISP_UNSET,
+                      -1, CSS_JUSTIFY_UNSET, 0 };  /* ...font_scale, line_scale, bold... */
     int ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { ws[k] = -1; wo[k] = -1; }
 

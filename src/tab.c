@@ -148,7 +148,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
 
 /* Serialises the display list:
  *   [count]( kind,heading,bold,italic,indent,break, text, href, src, img_w,img_h, fg_rgb,bg_rgb,
- *            text_align,font_scale,
+ *            text_align,font_scale,line_scale,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
  *            input_type,form_id,form_method, name, value )*
  * with each string length-prefixed (a length of 0 means absent). The fixed-width
@@ -173,6 +173,7 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t bg = (int32_t)r->bg_rgb;
         int32_t talign = (int32_t)r->text_align;
         int32_t fscale = (int32_t)r->font_scale;
+        int32_t lscale = (int32_t)r->line_scale;
         int32_t cid = (int32_t)r->cont_id;
         int32_t cdisp = (int32_t)r->cont_display;
         int32_t cgap = (int32_t)r->cont_gap;
@@ -204,6 +205,7 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &bg, sizeof bg) != 0) return -1;
         if (write_full(wfd, &talign, sizeof talign) != 0) return -1;
         if (write_full(wfd, &fscale, sizeof fscale) != 0) return -1;
+        if (write_full(wfd, &lscale, sizeof lscale) != 0) return -1;
         if (write_full(wfd, &cid, sizeof cid) != 0) return -1;
         if (write_full(wfd, &cdisp, sizeof cdisp) != 0) return -1;
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
@@ -469,7 +471,7 @@ static int read_view(int fd, pv_view **out) {
     for (size_t i = 0; i < n; ++i) {
         int32_t kind = 0, heading = 0, bold = 0, italic = 0, indent = 0, brk = 0;
         int32_t img_w = -1, img_h = -1, fg = -1, bg = -1;
-        int32_t talign = 0, fscale = 0;
+        int32_t talign = 0, fscale = 0, lscale = 0;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
         int32_t itype = 0, fid = -1, method = 0;
         if (read_full(fd, &kind, sizeof kind) != 0
@@ -492,6 +494,7 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &bg, sizeof bg) != 0
          || read_full(fd, &talign, sizeof talign) != 0
          || read_full(fd, &fscale, sizeof fscale) != 0
+         || read_full(fd, &lscale, sizeof lscale) != 0
          || read_full(fd, &cid, sizeof cid) != 0
          || read_full(fd, &cdisp, sizeof cdisp) != 0
          || read_full(fd, &cgap, sizeof cgap) != 0
@@ -529,7 +532,7 @@ static int read_view(int fd, pv_view **out) {
             pv_set_indent(v, (int)indent);
             pv_set_color(v, (int)fg);
             pv_set_bgcolor(v, (int)bg);
-            pv_set_text_style(v, (int)talign, (int)fscale);
+            pv_set_text_style(v, (int)talign, (int)fscale, (int)lscale);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols);
         }
     }

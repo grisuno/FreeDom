@@ -85,11 +85,13 @@ typedef struct pv_run {
     int     bg_rgb;       /* author background-color packed 0xRRGGBB, or -1 if none */
     /* Author text presentation resolved from <style> + inline style= (the css
      * module). text_align is a css_align (0 unset, 1 left, 2 center, 3 right,
-     * 4 justify); font_scale is a font-size percent (100 = normal) or 0 (unset).
-     * Both are presentation: render_doc applies them only with caps.css, exactly
-     * like fg_rgb/bg_rgb. Defaults: text_align 0, font_scale 0. */
+     * 4 justify); font_scale is a font-size percent (100 = normal) or 0 (unset);
+     * line_scale is a line-height percent of the natural line box (0 = unset).
+     * All are presentation: render_doc applies them only with caps.css, exactly
+     * like fg_rgb/bg_rgb. Defaults: text_align 0, font_scale 0, line_scale 0. */
     int     text_align;
     int     font_scale;
+    int     line_scale;
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -193,10 +195,10 @@ void pv_set_color(pv_view *v, int fg_rgb);
 void pv_set_bgcolor(pv_view *v, int bg_rgb);
 
 /* Sets the author text presentation (text_align as a css_align, font_scale as a
- * font-size percent or 0 for unset) on the most recently appended run. No-op on an
- * empty or NULL view. Both append helpers default text_align and font_scale to 0.
- * Like author colors, render_doc applies these only with caps.css. */
-void pv_set_text_style(pv_view *v, int text_align, int font_scale);
+ * font-size percent or 0, line_scale as a line-height percent or 0) on the most
+ * recently appended run. No-op on an empty or NULL view. The append helpers default
+ * all three to 0. Like author colors, render_doc applies these only with caps.css. */
+void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, and the parsed gap/justify/cols). No-op on an empty

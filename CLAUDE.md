@@ -211,7 +211,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla normalizados; readback de canvas/audio envenenado **por origen** (`fp_origin_key(session_key, eTLD+1)`, no enlazable cross-origin). |
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
-| Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
+| Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`line-height`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
 | CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~`/atributo/pseudo siguen fuera, fallan cerrado; whitelist de propiedades). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG + JPEG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. JPEG es excepción de doctrina autorizada (libjpeg con fuente en memoria + `longjmp` que nunca llama `exit()`). |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
@@ -506,6 +506,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   fidelidad sin artefactos. **Fuera de alcance:** SVG/WebP/GIF/AVIF, EXIF/ICC, CMYK. *(Decode + ASan + fuzz
   + revisión visual del bitmap verificados; el render JPEG dentro de la GUI Wayland —con `Ctrl+I`— queda
   pendiente al dueño: el camino headless `--download-pdf` lleva imágenes OFF.)* Ver `[[freedom-jpeg-decode]]`.
+- **Hito 23b (line-height) — CSS de autor `line-height` + `--author-css` para revisión visual.** El
+  subconjunto `css` gana `line-height` (porcentaje de la caja de línea natural): unitless (`1.5`→150) o
+  `%` (`160%`→160), clamp `[CSS_LINE_MIN, CSS_LINE_MAX]`, `normal`→0 (UA), `px`/`em` absolutos fuera de
+  scope (se descartan). **Hereda** como `font-size` y viaja por el **mismo plumbing** que `font_scale`:
+  `css_style.line_scale` → `pv_run.line_scale` (emitido en `resolve_context`/`pv_set_text_style`) → IPC
+  `tab.c` `write_view`/`read_view` → `rd_block.line_scale` (gateado por `caps.css`) → GUI `flush_line`
+  (reemplaza el factor `theme.line_spacing` por el del autor). Presentación, no estructura: gateado por
+  `caps.css` como los colores/font-size. Además, **boyscout de tooling:** nuevo flag `--author-css` en el
+  render headless (`src/freedom.c`) que activa `caps.css` (solo render local; el cap de **imágenes/red
+  sigue OFF**, no telefonea), de modo que CUALQUIER feature de CSS de autor (line-height, colores,
+  text-align, font-size) por fin es **visualmente revisable** sin Wayland — antes era imposible (el PDF
+  headless iba con `caps.css` OFF). Specs (`css.md`, `page_view.md`, `render_doc.md`, `tab.md`,
+  `freedom.md`) + tests (8 en `css`: unitless/%/normal/px-drop/clamp; 1 en `page_view`: hoja+inline+
+  herencia; `pv_set_text_style` ahora 4-ario en `test_page_view`) + `make test` (35 suites) / `make asan`
+  (exit 0) limpios + fuzz `fuzz-css` (256k) y `fuzz-pv` (26k) sin crash/leak/UB + **E2E visual**
+  (`--author-css --download-pdf` sobre un demo `line-height:1.0` vs `2.4`: el PNG confirma interlineado
+  apretado vs amplio con el mismo ancho de wrap). **Fuera de alcance:** `px`/`em` absolutos de line-height,
+  `letter-spacing`/`text-decoration`. *(Módulos puros + IPC + E2E visual headless verificados; ventana
+  Wayland interactiva pendiente al dueño.)* Ver `[[freedom-line-height]]`, `[[freedom-author-css-direction]]`.
 - **Hito 20 — Allowlist de JS por dominio (granular).** Espina de **política** pura + plumbing de
   `caps.js`. Módulo `js_policy` (`jsp_`): `jsp_enabled(mode, host_allowlisted)` combina un modo global
   tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`/`JSP_ON`, defecto allowlist) con la pertenencia por host;
@@ -731,8 +750,8 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   flex **por-item** desde `<style>` (`flex-grow`/`-shrink`/`-basis`/`order`, `align-items`) y expansión
   de `repeat()`/`minmax()`/pesos `fr` en grid (hoy todo track = 1fr igual); render de `@media print` al
   PDF; combinadores **hermano** (`+`/`~`) y pseudo-clases/selectores de atributo (los combinadores
-  **descendiente/hijo** ya cerrados arriba); `line-height`/`text-decoration`/`letter-spacing`;
-  `!important`; persistir el toggle de estilos de autor y el modo reader con el Hito 10.
+  **descendiente/hijo** ya cerrados arriba); `text-decoration`/`letter-spacing` (`line-height` ya
+  cerrado arriba); `!important`; persistir el toggle de estilos de autor y el modo reader con el Hito 10.
 - **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo (ver Hito 23b); JS-vivo
   (mutación DOM → repintado, eventos, timers); otros formatos de imagen
   (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación); `pledge`/`unveil` en
