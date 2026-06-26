@@ -61,7 +61,7 @@ Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scou
    y qué queda fuera de alcance. Usando Dado-Cuando-Entonces o BDD
 2. **Test (rojo)** — `tests/test_<modulo>.c` con CMocka. Debe **fallar** porque no hay
    implementación todavía. usando ATDD (Acceptance Test-Driven Development - Desarrollo Orientado a Pruebas de Aceptación):
-3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar.
+3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar. todas las llamadas syscalls deben usar io_uring, el subsistema y API de Linux para E/S asíncrona. de tal modo no bloquee la ui del usuario ni el hilo.
 4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas. si vez codigo duplicado lo unificas esto es imperativo busca codigo dduplicado y extinguelo sin perder funcionalidad, nunca esta fuera de scope, modo boy scout si ves deuda tecnica la extingues sin romper funcionalidades, lo mismo con las fallas de seguridad o vulnerabilidades la extincion de estas nunca esta fuera de scope, si puedes hacer lo mismo que haces en 40 lineas de codigo lo puedes hacer en 10 o 1 bienvenido siempre y cuando respete el dry solid y no pierda funcionalidad ni agregue mas deuda tecnica
 5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`. como parte de la
    validacion quiero que utilices ya sea urls y archivos html para revisar el comportamiento de la
@@ -86,7 +86,7 @@ Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scou
    `fuzz-js`/`fuzz-img`; AFL++: `make fuzz-afl`). Cero crashes/leaks/UB antes de cerrar.
 7. **Documentación** — **recién después de validar y fuzzear** se documenta: se actualiza la spec,
    este `CLAUDE.md` (hito → cerrado, doctrina nueva) y la memoria. Documentar antes de validar es
-   documentar lo que todavía no es verdad. y casi mas importante actualizar docs/index.html ya que es el "home page" poner todos los atajos, etc.
+   documentar lo que todavía no es verdad. y casi mas importante actualizar docs/index.html ya que es el "home page" poner todos los atajos, etc. y el README.md
 
 **No escribas la implementación antes que la spec y el test.** No avances de hito sin que el
 anterior esté verde, validado y fuzzeado.
