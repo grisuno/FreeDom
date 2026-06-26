@@ -47,7 +47,9 @@ static int read_full(int fd, void *buf, size_t n) {
 
 static void child_render(int wfd, const char *html, size_t len) {
     /* Confine before touching untrusted content: a parse that tried to open a
-     * file, a socket or exec would be killed by the kernel. */
+     * file, a socket or exec would be killed by the kernel. Drop dumpability first
+     * so a crash cannot spill the parsed content to a core file. */
+    os_no_dump();
     if (os_harden(OS_VIOLATION_KILL) != OS_OK) _exit(90);
 
     hp_document *doc = NULL;

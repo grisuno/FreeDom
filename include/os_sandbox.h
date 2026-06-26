@@ -34,19 +34,40 @@ typedef enum os_violation {
 
 /* --- Pure policy surface (no side effects): the primary test surface. --- */
 
-/* Nonzero iff syscall_nr is on the strict allowlist (mirrors the BPF program). */
+/* Nonzero iff syscall_nr is on the strict allowlist (mirrors the BPF program).
+ * This is MEMBERSHIP only: mmap/mprotect are members, but their effective
+ * permission also depends on the protection flags (see os_prot_allowed / W^X). */
 int os_policy_allows(long syscall_nr);
 
 /* Number of syscalls on the allowlist. */
 size_t os_policy_size(void);
 
+/* Pure mirror of the BPF program's EFFECTIVE decision for memory syscalls (W^X).
+ * Nonzero iff a call to syscall_nr with the given memory-protection flags would
+ * be permitted. For non-memory syscalls this is just os_policy_allows(syscall_nr);
+ * for mmap/mprotect it is additionally false when prot requests PROT_EXEC, because
+ * the worker is an interpreter over already-mapped code and never needs to create
+ * or flip executable pages. Denying PROT_EXEC removes the last step of native code
+ * injection even after a control-flow hijack. No side effects. */
+int os_prot_allowed(long syscall_nr, unsigned long prot);
+
 /* --- Enforcement (irreversible). --- */
 
 /* Installs the fail-closed seccomp-bpf allowlist on the calling process.
  * Once installed it cannot be removed or relaxed. Call after initialisation,
- * before touching untrusted content.
+ * before touching untrusted content. The filter enforces W^X: mmap/mprotect that
+ * request PROT_EXEC are denied (see os_prot_allowed).
  * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf x86_64. */
 os_status os_harden(os_violation action);
+
+/* Anti-dump defense in depth: prctl(PR_SET_DUMPABLE, 0) plus setrlimit(RLIMIT_CORE,
+ * 0), so a crash leaves no core file and no foreign (non-parent) process can
+ * ptrace-attach or read /proc/<pid>/mem. This prevents post-compromise exfiltration
+ * of worker secrets (the canvas/audio readback session key, decrypted page bytes).
+ * Best-effort like Landlock/namespaces; call BEFORE os_harden (it uses prctl, which
+ * the seccomp filter does not allow). Returns OS_OK, or OS_ERR_PRCTL if
+ * PR_SET_DUMPABLE failed. OS_ERR_UNSUPPORTED on non-Linux. */
+os_status os_no_dump(void);
 
 /* --- Namespace isolation (Linux): defense in depth around the worker. --- */
 

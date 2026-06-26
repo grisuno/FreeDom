@@ -74,7 +74,7 @@
     <ul>
         <li style="color:#700000"><strong style="color:#700000">Post-Quantum by Default:</strong> TLS 1.3 minimum, hybrid key exchange (<code style="color:#0a3380">X25519MLKEM768</code>) preferred.</li>
         <li style="color:#700000"><strong style="color:#700000">Fail-Closed:</strong> a site whose end-entity certificate uses RSA &lt; 3072 is rejected with status 5 (weak algorithm). Use <code style="color:#0a3380">Ctrl+Shift+E</code> for a session exception.</li>
-        <li style="color:#0a0a0a"><strong style="color:#061414">Per-tab isolation:</strong> each tab parses, decodes, and runs hostile content in a worker confined by seccomp-bpf + Landlock + per-tab namespaces. The parent survives a compromised worker.</li>
+        <li style="color:#0a0a0a"><strong style="color:#061414">Per-tab isolation:</strong> each tab parses, decodes, and runs hostile content in a worker confined by seccomp-bpf + Landlock + per-tab namespaces. The syscall filter enforces <strong style="color:#061414">W^X</strong> (no executable memory: <code style="color:#0a3380">mmap</code>/<code style="color:#0a3380">mprotect</code> requesting <code style="color:#0a3380">PROT_EXEC</code> are killed, so a compromised worker cannot stage native shellcode), and the worker is made <strong style="color:#061414">undumpable</strong> (no core file, no foreign ptrace) so its secrets cannot be exfiltrated. The parent survives a compromised worker.</li>
     </ul>
 
     <hr>

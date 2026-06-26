@@ -40,7 +40,9 @@ The name reflects its core goals:
 
 ## Features
 - Written in portable C11
-- Strong process-based sandboxing for each tab
+- Strong process-based sandboxing for each tab (seccomp-bpf with **W^X** — no executable
+  memory, `PROT_EXEC` `mmap`/`mprotect` are killed — plus Landlock, per-tab namespaces, and an
+  undumpable worker so secrets cannot leak via core dump or ptrace)
 - JavaScript sandbox using QuickJS-ng
 - Hardened build with stack protection, PIE, RELRO, and FORTIFY_SOURCE
 - Wayland + Cairo GUI backend with Client-Side Decorations (CSD)

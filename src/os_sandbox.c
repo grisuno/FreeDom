@@ -17,6 +17,9 @@
 #if defined(__linux__)
 #include <errno.h>
 #include <sched.h>
+#include <sys/mman.h>
+#include <sys/prctl.h>
+#include <sys/resource.h>
 #include <sys/syscall.h>
 
 /* Allowlist for an already-initialised worker: I/O over already-open fds and
@@ -46,6 +49,28 @@ size_t os_policy_size(void) {
     return OS_ALLOWED_N;
 }
 
+/* W^X mirror: mmap/mprotect keep their membership but lose any request that asks
+ * for executable memory. The single source of truth the BPF prot-check replicates. */
+int os_prot_allowed(long syscall_nr, unsigned long prot) {
+    if (!os_policy_allows(syscall_nr)) return 0;
+    if (syscall_nr == __NR_mmap || syscall_nr == __NR_mprotect)
+        return (prot & PROT_EXEC) ? 0 : 1;
+    return 1;
+}
+
+/* Anti-dump defense in depth: undumpable + no core file, so neither a crash nor a
+ * foreign ptrace can exfiltrate worker secrets. Best-effort; call before os_harden
+ * (prctl is not on the seccomp allowlist). */
+os_status os_no_dump(void) {
+    if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) != 0) return OS_ERR_PRCTL;
+    /* PR_SET_DUMPABLE=0 already disables core dumps and blocks non-parent ptrace;
+     * pinning RLIMIT_CORE to 0 is belt-and-suspenders and may legitimately fail
+     * under a pre-existing lower hard cap, so its failure is non-fatal. */
+    struct rlimit rl = { .rlim_cur = 0, .rlim_max = 0 };
+    (void)setrlimit(RLIMIT_CORE, &rl);
+    return OS_OK;
+}
+
 /* Namespace isolation: defense in depth under seccomp. A new user namespace is the
  * unprivileged enabler for the rest; the worker never touches the network (the
  * parent fetches), so it gets an empty network stack; IPC and UTS isolate it from
@@ -69,6 +94,10 @@ os_status os_isolate_namespaces(void) {
 
 int os_policy_allows(long syscall_nr) { (void)syscall_nr; return 0; }
 size_t os_policy_size(void) { return 0; }
+int os_prot_allowed(long syscall_nr, unsigned long prot) {
+    (void)syscall_nr; (void)prot; return 0;
+}
+os_status os_no_dump(void) { return OS_ERR_UNSUPPORTED; }
 
 os_status os_harden(os_violation action) { (void)action; return OS_ERR_UNSUPPORTED; }
 
@@ -84,6 +113,7 @@ os_status os_isolate_namespaces(void) { return OS_ERR_UNSUPPORTED; }
 #include <linux/audit.h>
 #include <linux/filter.h>
 #include <linux/seccomp.h>
+#include <sys/mman.h>
 #include <sys/prctl.h>
 
 os_status os_harden(os_violation action) {
@@ -91,8 +121,10 @@ os_status os_harden(os_violation action) {
         ? (SECCOMP_RET_ERRNO | (EPERM & SECCOMP_RET_DATA))
         : SECCOMP_RET_KILL_PROCESS;
 
-    /* 4 header instructions + 2 per allowed syscall + 1 default action. */
-    struct sock_filter prog[4 + 2 * OS_ALLOWED_N + 1];
+    /* Header (4) + 2 W^X branch instructions + 2 per generic syscall + RET deny (1)
+     * + 5-instruction PROT_EXEC check block. Sized with OS_ALLOWED_N (generic loop
+     * emits fewer, since mmap/mprotect are branched out). */
+    struct sock_filter prog[4 + 2 + 2 * OS_ALLOWED_N + 1 + 5];
     size_t n = 0;
 
     /* Reject any ABI other than x86_64 before inspecting the syscall number. */
@@ -105,7 +137,19 @@ os_status os_harden(os_violation action) {
     prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
                                              offsetof(struct seccomp_data, nr));
 
+    /* W^X: mmap/mprotect are allowed only when they do NOT request PROT_EXEC. Branch
+     * them to the protection-check block (jt patched once its index is known); a
+     * non-match falls through (jf=0) to the generic allowlist below. */
+    size_t at_mmap = n;
+    prog[n++] = (struct sock_filter)BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                                             (unsigned int)__NR_mmap, 0, 0);
+    size_t at_mprotect = n;
+    prog[n++] = (struct sock_filter)BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                                             (unsigned int)__NR_mprotect, 0, 0);
+
+    /* Generic allowlist, excluding the two W^X syscalls handled above. */
     for (size_t i = 0; i < OS_ALLOWED_N; ++i) {
+        if (os_allowed[i] == __NR_mmap || os_allowed[i] == __NR_mprotect) continue;
         /* if nr == allowed[i] fall through to ALLOW, else skip it. */
         prog[n++] = (struct sock_filter)BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
                                                  (unsigned int)os_allowed[i], 0, 1);
@@ -113,6 +157,24 @@ os_status os_harden(os_violation action) {
     }
 
     prog[n++] = (struct sock_filter)BPF_STMT(BPF_RET | BPF_K, deny);
+
+    /* PROT_EXEC check block: load the low word of args[2] (prot) and mask PROT_EXEC.
+     * Zero => no exec page requested => ALLOW; nonzero => DENY. x86_64 is little-
+     * endian (arch-guarded above) and PROT_EXEC lives in the low 32 bits, so the
+     * 32-bit word load of args[2] is sufficient. */
+    size_t prot_check = n;
+    prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
+                                             offsetof(struct seccomp_data, args[2]));
+    prog[n++] = (struct sock_filter)BPF_STMT(BPF_ALU | BPF_AND | BPF_K, PROT_EXEC);
+    prog[n++] = (struct sock_filter)BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, 0, 1, 0);
+    prog[n++] = (struct sock_filter)BPF_STMT(BPF_RET | BPF_K, deny);
+    prog[n++] = (struct sock_filter)BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW);
+
+    /* Patch the two W^X forward jumps now that the block's index is known. The list
+     * is a small compile-time constant, so these offsets fit the u8 jump field with
+     * wide headroom (room for ~125 allowed syscalls). */
+    prog[at_mmap].jt     = (unsigned char)(prot_check - (at_mmap + 1));
+    prog[at_mprotect].jt = (unsigned char)(prot_check - (at_mprotect + 1));
 
     struct sock_fprog fprog = { .len = (unsigned short)n, .filter = prog };
 

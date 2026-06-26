@@ -26,6 +26,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/prctl.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
@@ -107,6 +110,80 @@ static void test_harden_errno_denies_with_eperm(void **state) {
     assert_int_equal(waitpid(pid, &st, 0), pid);
     assert_true(WIFEXITED(st));
     assert_int_equal(WEXITSTATUS(st), 7);
+}
+
+/* --- W^X: no executable memory (seccomp argument filtering) --- */
+
+/* Pure mirror: mmap/mprotect are members of the allowlist but lose the request
+ * when it asks for PROT_EXEC; other syscalls keep their membership decision. */
+static void test_prot_allowed_wx(void **state) {
+    (void)state;
+    assert_true(os_prot_allowed(__NR_mmap, PROT_READ | PROT_WRITE));
+    assert_false(os_prot_allowed(__NR_mmap, PROT_READ | PROT_EXEC));
+    assert_false(os_prot_allowed(__NR_mprotect, PROT_EXEC));
+    assert_true(os_prot_allowed(__NR_read, 0));             /* non-memory: allowed */
+    assert_true(os_prot_allowed(__NR_munmap, 0));           /* memory, not prot-filtered */
+    assert_false(os_prot_allowed(__NR_socket, PROT_READ));  /* denied stays denied */
+}
+
+/* KILL: a PROT_READ|PROT_WRITE mmap survives but a PROT_EXEC mmap is killed. */
+static void test_harden_blocks_exec_mmap(void **state) {
+    (void)state;
+    pid_t pid = fork();
+    assert_true(pid >= 0);
+    if (pid == 0) {
+        if (os_harden(OS_VIOLATION_KILL) != OS_OK) _exit(98);
+        long rw = syscall(__NR_mmap, (void *)0, (size_t)4096,
+                          PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, (off_t)0);
+        if (rw == -1) _exit(60); /* a benign RW mapping must still work */
+        (void)syscall(__NR_mmap, (void *)0, (size_t)4096,
+                      PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, (off_t)0);
+        _exit(0); /* reached only if the exec mapping was NOT blocked */
+    }
+    int st = 0;
+    assert_int_equal(waitpid(pid, &st, 0), pid);
+    assert_true(WIFSIGNALED(st));
+    assert_int_equal(WTERMSIG(st), SIGSYS);
+}
+
+/* KILL: flipping a writable page to executable via mprotect is killed. */
+static void test_harden_blocks_exec_mprotect(void **state) {
+    (void)state;
+    pid_t pid = fork();
+    assert_true(pid >= 0);
+    if (pid == 0) {
+        if (os_harden(OS_VIOLATION_KILL) != OS_OK) _exit(98);
+        long p = syscall(__NR_mmap, (void *)0, (size_t)4096,
+                         PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, (off_t)0);
+        if (p == -1) _exit(60);
+        (void)syscall(__NR_mprotect, (void *)p, (size_t)4096, PROT_READ | PROT_EXEC);
+        _exit(0); /* reached only if the exec flip was NOT blocked */
+    }
+    int st = 0;
+    assert_int_equal(waitpid(pid, &st, 0), pid);
+    assert_true(WIFSIGNALED(st));
+    assert_int_equal(WTERMSIG(st), SIGSYS);
+}
+
+/* --- anti-dump (no core / no foreign ptrace) --- */
+
+/* Probed BEFORE seccomp so prctl/getrlimit are still reachable: after os_no_dump
+ * the process is undumpable and the core-file limit is zero. */
+static void test_no_dump_undumpable(void **state) {
+    (void)state;
+    pid_t pid = fork();
+    assert_true(pid >= 0);
+    if (pid == 0) {
+        if (os_no_dump() != OS_OK) _exit(98);
+        if (prctl(PR_GET_DUMPABLE) != 0) _exit(70);
+        struct rlimit rl;
+        if (getrlimit(RLIMIT_CORE, &rl) != 0) _exit(71);
+        _exit(rl.rlim_cur == 0 ? 42 : 72);
+    }
+    int st = 0;
+    assert_int_equal(waitpid(pid, &st, 0), pid);
+    assert_true(WIFEXITED(st));
+    assert_int_equal(WEXITSTATUS(st), 42);
 }
 
 /* --- Landlock filesystem confinement --- */
@@ -221,6 +298,10 @@ int main(void) {
         cmocka_unit_test(test_harden_kills_denied_syscall),
         cmocka_unit_test(test_harden_allows_permitted_syscall),
         cmocka_unit_test(test_harden_errno_denies_with_eperm),
+        cmocka_unit_test(test_prot_allowed_wx),
+        cmocka_unit_test(test_harden_blocks_exec_mmap),
+        cmocka_unit_test(test_harden_blocks_exec_mprotect),
+        cmocka_unit_test(test_no_dump_undumpable),
         cmocka_unit_test(test_landlock_abi_present),
         cmocka_unit_test(test_landlock_deny_all),
         cmocka_unit_test(test_landlock_allow_read),

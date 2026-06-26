@@ -62,6 +62,17 @@ typedef enum os_violation {
 int    os_policy_allows(long syscall_nr);
 size_t os_policy_size(void);
 
+/* Espejo puro de la decision REAL del BPF para los syscalls de memoria: 1 si una
+ * llamada a syscall_nr con esos flags de proteccion se permitiria. Para syscalls
+ * que no son de memoria equivale a os_policy_allows; para mmap/mprotect es ademas
+ * falso cuando prot pide PROT_EXEC (W^X, ver seccion 11). */
+int os_prot_allowed(long syscall_nr, unsigned long prot);
+
+/* Anti-volcado (defensa en profundidad): prctl(PR_SET_DUMPABLE,0) + RLIMIT_CORE=0
+ * para que ni un core dump ni un ptrace de un proceso ajeno puedan exfiltrar los
+ * secretos del worker. Mejor-esfuerzo; se llama antes de os_harden (seccion 12). */
+os_status os_no_dump(void);
+
 /* Instala el filtro fail-closed en el proceso llamante. Irreversible. */
 os_status os_harden(os_violation action);
 ```
@@ -184,4 +195,58 @@ os_status os_isolate_namespaces(void);
 - UI Cairo + Wayland (spec aparte; requiere display).
 - `pledge`/`unveil` (OpenBSD) y equivalentes no-Linux.
 - Mount/PID namespaces; reglas Landlock de red/IPC (ABI≥4/≥6; aquí FS + namespaces).
-- Argumentos de syscall (la v1 de seccomp filtra por número de syscall, no por argumentos).
+- **`RLIMIT_AS`** (tope de memoria virtual): **diferido**. Choca con la enorme reserva de
+  espacio virtual del *shadow memory* de AddressSanitizer (rompería `make asan`), y el heap del
+  motor JS ya está acotado por su asignador propio (`js_sandbox`) y las imágenes por el tope de
+  dimensiones **antes** de decodificar. Reintroducir con `#if !defined(__SANITIZE_ADDRESS__)` y un
+  valor justificado cuando haya un caso de uso medido.
+- **`RLIMIT_CPU`** (tope de segundos de CPU): **diferido**. Mata todo el worker (no solo el script)
+  y el valor es una política de tiempo de render / presupuesto de interrupción del intérprete JS;
+  va atado a un mecanismo de *interrupt handler* de QuickJS, no a un número mágico aquí.
+- `ppoll`/`epoll`/`pselect6`: **deliberadamente NO** se agregan al allowlist. El worker hace I/O
+  **bloqueante** sobre fds de pipe ya abiertos (`read`/`write`); añadirlos violaría el privilegio
+  mínimo (ensanchar la superficie sin necesidad es lo contrario de endurecer).
+- ARM64 (`AUDIT_ARCH_AARCH64`): el guard de arquitectura sigue siendo x86_64 (este host); en otra
+  arquitectura `os_harden` falla cerrado con `OS_ERR_UNSUPPORTED`.
+
+## 11. W^X — sin memoria ejecutable (filtrado por argumento de syscall)
+
+seccomp v1 filtra por número de syscall, pero el programa BPF clásico **también puede inspeccionar
+los argumentos** (`seccomp_data.args[]`). El worker es un **intérprete** (QuickJS interpreta
+bytecode, **sin JIT**) sobre código ya mapeado, más parser (`lexbor`) y decoders (`libpng`/
+`libjpeg`); con `-z relro -z now` hasta el PLT/GOT se resuelve y queda de solo-lectura al arrancar,
+**antes** del `fork`. Por lo tanto, tras confinarse, **ninguna** operación legítima necesita crear
+ni convertir una página a ejecutable.
+
+Por eso `os_harden` saca `mmap` y `mprotect` del allowlist genérico y los maneja con un bloque que
+inspecciona su argumento de protección (`args[2]`, índice 2 en ambas): si pide `PROT_EXEC`, **se
+deniega** (KILL/ERRNO según la acción); si no, se permite. Así, aunque una corrupción de memoria
+secuestre el control del worker, **no puede montar shellcode nativo** (W^X / no-dyncode): se cierra
+el último paso de la inyección de código.
+
+- `mremap` se mantiene permitido sin filtrar: **no** toma argumento de protección (preserva la del
+  área), así que no puede elevar a ejecutable.
+- `pkey_mprotect` sigue **denegado por completo** (el worker no lo usa; privilegio mínimo).
+- **Espejo puro:** `os_prot_allowed(nr, prot)` replica la decisión del BPF y es la superficie de
+  prueba directa. `os_policy_allows` sigue siendo la **pertenencia** (mmap/mprotect siguen en la
+  lista); `os_prot_allowed` es la **decisión efectiva** (pertenencia ∧ ¬PROT_EXEC para mmap/mprotect).
+
+### Matriz de pruebas (W^X)
+- **Pura:** `os_prot_allowed(mmap, READ|WRITE)`=1; `os_prot_allowed(mmap, READ|EXEC)`=0;
+  `os_prot_allowed(mprotect, EXEC)`=0; `os_prot_allowed(read, *)`=1; `os_prot_allowed(socket, *)`=0.
+- **Enforcement (fork, KILL):** el hijo se endurece; `mmap(...,PROT_READ|PROT_WRITE,...)` sobrevive;
+  `mmap(...,PROT_READ|PROT_EXEC,...)` ⇒ `SIGSYS`; `mprotect(pagina, len, PROT_READ|PROT_EXEC)` ⇒
+  `SIGSYS`.
+
+## 12. Anti-volcado — no exfiltrar secretos del worker
+
+`os_no_dump()` aplica `prctl(PR_SET_DUMPABLE, 0)` y `setrlimit(RLIMIT_CORE, {0,0})`: un crash del
+worker **no** deja un core file y un proceso ajeno (no el padre) **no** puede `ptrace`-adjuntarse ni
+leer `/proc/<pid>/mem`. Así, tras un compromiso o un fallo, no se filtran los secretos del worker
+(la clave de sesión que envenena el readback de canvas/audio, los bytes de la página descifrada).
+Mejor-esfuerzo (defensa en profundidad, como Landlock/namespaces); el orden en el hijo del worker es
+`os_isolate_namespaces()` → `os_no_dump()` → `os_landlock_restrict(NULL,0)` → `os_harden(KILL)`.
+
+### Matriz de pruebas (anti-volcado, fork-based)
+- El hijo llama `os_no_dump()` (antes de seccomp, así `prctl`/`getrlimit` siguen disponibles):
+  `prctl(PR_GET_DUMPABLE)` ⇒ 0 y `getrlimit(RLIMIT_CORE).rlim_cur` ⇒ 0; sale con código marcador.

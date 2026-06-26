@@ -364,6 +364,7 @@ static void child_main(int rfd, int wfd) {
      * context, which this freshly forked child is, and detaching the network/IPC/UTS
      * stacks means even a seccomp bypass finds no network to reach. */
     os_isolate_namespaces();
+    os_no_dump();
     os_landlock_restrict(NULL, 0);
     uint8_t hs = (os_harden(OS_VIOLATION_KILL) == OS_OK) ? TAB_READY : TAB_NO_CONFINE;
     if (write_full(wfd, &hs, 1) != 0 || hs != TAB_READY) {

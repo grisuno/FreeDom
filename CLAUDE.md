@@ -209,7 +209,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Enrutado de red | `net_realm` (`nr_`) | Clasifica clearnet / `.onion` / `.i2p` y decide ruta (directo / Tor SOCKS5h / I2P HTTP / **bloqueado**). Puro. Aislamiento de realm + **fail-closed** (nunca fuga `.onion` por clearnet). `secure_fetch` aplica el proxy (`sf_proxy_*`). |
 | Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice consultable de solo lectura. |
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla normalizados; readback de canvas/audio envenenado **por origen** (`fp_origin_key(session_key, eTLD+1)`, no enlazable cross-origin). |
-| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
+| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed (con **W^X**: `mmap`/`mprotect` con `PROT_EXEC` denegados por inspección de argumento → sin shellcode nativo aun tras secuestro de control) + **anti-volcado** (`PR_SET_DUMPABLE`=0 + `RLIMIT_CORE`=0, sin core ni ptrace ajeno) + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`line-height`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
 | CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~`/atributo/pseudo siguen fuera, fallan cerrado; whitelist de propiedades). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). |
@@ -454,6 +454,33 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `test_tab` sigue verde (el worker parsea/ejecuta/decodifica dentro de los namespaces nuevos).
   *(Verificado: módulo puro + enforcement + integración del worker bajo test.)* Ver
   `[[freedom-tab-namespaces]]`.
+- **Hito 17b — Endurecimiento de seccomp: W^X + anti-volcado.** Dos mejoras al confinamiento del
+  worker (`os_sandbox`), ambas con TDD y verificadas en este host. (a) **W^X (sin memoria
+  ejecutable):** el BPF clásico ahora **inspecciona argumentos** (no solo el número de syscall):
+  `mmap` y `mprotect` salen del allowlist genérico y pasan por un bloque que enmascara `PROT_EXEC`
+  en `seccomp_data.args[2]` → si pide ejecutable se **deniega** (KILL/ERRNO). El worker es un
+  **intérprete** (QuickJS sin JIT) sobre código ya mapeado + parser/decoders, y con `-z relro -z
+  now` el PLT/GOT queda de solo-lectura **antes** del `fork`, así que ninguna operación legítima
+  necesita crear/voltear una página ejecutable; se cierra el último paso de la inyección de código
+  nativo aun tras un secuestro de control. `mremap` sigue permitido (no toma protección);
+  `pkey_mprotect` sigue denegado por completo (privilegio mínimo). Espejo puro `os_prot_allowed(nr,
+  prot)` (la decisión efectiva; `os_policy_allows` sigue siendo la pertenencia). (b) **Anti-volcado:**
+  `os_no_dump()` = `PR_SET_DUMPABLE`=0 + `RLIMIT_CORE`=0, así un crash no deja core ni un proceso
+  ajeno puede `ptrace`/`/proc/<pid>/mem` — no se exfiltran los secretos del worker (clave de sesión
+  del readback canvas/audio, bytes de la página descifrada). Best-effort (como Landlock/namespaces);
+  el orden del hijo pasa a `os_isolate_namespaces()` → `os_no_dump()` → `os_landlock_restrict(NULL,0)`
+  → `os_harden(KILL)` (cableado en `tab.c` y `renderer.c`). Spec (`os_sandbox.md` §11/§12, §10
+  actualizado) + 4 tests nuevos (`os_prot_allowed` puro; fork: `mmap`/`mprotect` PROT_EXEC → `SIGSYS`;
+  `os_no_dump` → undumpable + core=0) + `make test` (35 suites) / `make asan` (35, exit 0) limpios +
+  **validación de no-regresión del worker**: `test_tab` (30 tests: parse + JS + decode bajo el filtro
+  W^X) verde y un render headless real (`--download-pdf` de `examples/rich.html` → PDF de 3 páginas
+  válido), probando que el intérprete-sobre-código-mapeado nunca necesita páginas ejecutables.
+  **Diferido con justificación** (no por olvido): `RLIMIT_AS` (choca con la reserva de *shadow* de
+  ASan; el heap JS ya está acotado por su asignador) y `RLIMIT_CPU` (mata todo el worker; el valor es
+  política de render atada a un interrupt-handler de QuickJS). **No** se agregan `ppoll`/`epoll`
+  (el worker hace I/O bloqueante: ensanchar sería lo contrario de endurecer). Origen: auditoría de
+  gaps #5. *(seccomp es x86_64-only; en otra arquitectura `os_harden` falla cerrado — el port ARM64
+  es el gap #3, pendiente y no verificable en este host.)* Ver `[[freedom-seccomp-wx-hardening]]`.
 - **Hito 18 — Identidad de red anti-fingerprinting + omnibox de búsqueda.** Dos cambios puros con
   TDD. (a) **Identidad de red:** `anti_fp` pasa a ser la **fuente única** de la identidad
   normalizada (macros `FP_USER_AGENT`/`FP_ACCEPT_LANGUAGE`/`FP_ACCEPT_LANGUAGE_HEADER` + nueva
