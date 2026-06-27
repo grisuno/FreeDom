@@ -65,6 +65,13 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
 
+/* Box-model lengths (margin/padding/width/max-width), in px. Two out-of-band
+ * sentinels distinguish "not declared" and the 'auto' keyword from a real length;
+ * a real length is clamped to [-CSS_LEN_MAX, CSS_LEN_MAX] (anti-DoS). */
+#define CSS_LEN_MAX       100000
+#define CSS_LEN_UNSET     (-2147483647 - 1) /* INT_MIN: property not set */
+#define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
+
 /* Max compounds in one complex selector (subject + ancestor/parent constraints).
  * A deeper chain is dropped (fail closed). */
 #define CSS_MAX_COMPOUNDS 4
@@ -86,6 +93,12 @@ typedef struct css_style {
     int         gap;         /* px between flex/grid items, or -1 (unset) */
     css_justify justify;     /* justify-content; CSS_JUSTIFY_UNSET if absent */
     int         grid_cols;   /* grid-template-columns track count, or 0 (unset) */
+    /* Author box model (px; NOT inherited — read from the element's own style).
+     * margins: CSS_LEN_UNSET / CSS_LEN_AUTO / signed px. padding: CSS_LEN_UNSET /
+     * px >= 0. width/max_width: CSS_LEN_UNSET / px > 0 (auto/none -> unset). */
+    int         margin_top, margin_right, margin_bottom, margin_left;
+    int         pad_top, pad_right, pad_bottom, pad_left;
+    int         width, max_width;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

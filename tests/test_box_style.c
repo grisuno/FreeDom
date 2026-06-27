@@ -205,8 +205,71 @@ static void test_display_name(void **state) {
     assert_string_equal(bx_display_name((bx_display)999), "inline");
 }
 
+/* --- bx_place: author box horizontal geometry (Hito 23b-3) --- */
+
+static void test_place_no_box_is_identity(void **state) {
+    (void)state;
+    bx_hplace p = bx_place(0, 0, 0, 0, 800.0);
+    assert_true(dbl_eq(p.x_off, 0.0));
+    assert_true(dbl_eq(p.content_w, 800.0));
+}
+
+static void test_place_max_width_caps(void **state) {
+    (void)state;
+    /* cap below available: content shrinks, left-aligned (no centering). */
+    bx_hplace p = bx_place(0, 0, 600.0, 0, 800.0);
+    assert_true(dbl_eq(p.x_off, 0.0));
+    assert_true(dbl_eq(p.content_w, 600.0));
+    /* cap above available: never overflows (stays at available). */
+    bx_hplace q = bx_place(0, 0, 2000.0, 0, 800.0);
+    assert_true(dbl_eq(q.content_w, 800.0));
+}
+
+static void test_place_centering(void **state) {
+    (void)state;
+    /* margin: 0 auto; max-width:600 within 800 -> centered, 100px each side. */
+    bx_hplace p = bx_place(0, 0, 600.0, 1, 800.0);
+    assert_true(dbl_eq(p.content_w, 600.0));
+    assert_true(dbl_eq(p.x_off, 100.0));
+    /* centering with no width cap is a no-op (nothing to center). */
+    bx_hplace q = bx_place(0, 0, 0, 1, 800.0);
+    assert_true(dbl_eq(q.x_off, 0.0));
+    assert_true(dbl_eq(q.content_w, 800.0));
+}
+
+static void test_place_insets(void **state) {
+    (void)state;
+    /* padding/left+right margins inset the content and shrink the width. */
+    bx_hplace p = bx_place(40.0, 20.0, 0, 0, 800.0);
+    assert_true(dbl_eq(p.x_off, 40.0));
+    assert_true(dbl_eq(p.content_w, 740.0));  /* 800 - 40 - 20 */
+    /* insets compose with a width cap (cap applies to the inner box). */
+    bx_hplace q = bx_place(40.0, 20.0, 500.0, 0, 800.0);
+    assert_true(dbl_eq(q.x_off, 40.0));
+    assert_true(dbl_eq(q.content_w, 500.0));
+}
+
+static void test_place_failclosed_bounds(void **state) {
+    (void)state;
+    /* negative insets clamp to 0; tiny/negative avail floors content_w at 1. */
+    bx_hplace p = bx_place(-50.0, -50.0, 0, 0, 800.0);
+    assert_true(dbl_eq(p.x_off, 0.0));
+    assert_true(dbl_eq(p.content_w, 800.0));
+    bx_hplace q = bx_place(0, 0, 0, 0, -10.0);
+    assert_true(p.x_off >= 0.0);
+    assert_true(q.content_w >= 1.0);
+    /* insets exceeding avail still yield content_w >= 1 (never negative). */
+    bx_hplace r = bx_place(900.0, 900.0, 0, 0, 800.0);
+    assert_true(r.content_w >= 1.0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_place_no_box_is_identity),
+        cmocka_unit_test(test_place_max_width_caps),
+        cmocka_unit_test(test_place_centering),
+        cmocka_unit_test(test_place_insets),
+        cmocka_unit_test(test_place_failclosed_bounds),
         cmocka_unit_test(test_body_has_no_margin),
         cmocka_unit_test(test_paragraph),
         cmocka_unit_test(test_heading_ladder),

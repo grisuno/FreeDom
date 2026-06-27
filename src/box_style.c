@@ -155,6 +155,23 @@ bx_status bx_parse_display(const char *token, bx_display *out) {
     return BX_OK;
 }
 
+bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
+                   double avail_w) {
+    if (inset_l < 0.0) inset_l = 0.0;
+    if (inset_r < 0.0) inset_r = 0.0;
+    if (avail_w < 1.0) avail_w = 1.0;
+    double inner = avail_w - inset_l - inset_r;
+    if (inner < 1.0) inner = 1.0;
+    double w = (width_cap > 0.0 && width_cap < inner) ? width_cap : inner;
+    double x = inset_l;
+    if (center && width_cap > 0.0) {
+        double slack = inner - w;
+        if (slack > 0.0) x = inset_l + slack / 2.0;
+    }
+    bx_hplace p = { x, w };
+    return p;
+}
+
 const char *bx_display_name(bx_display d) {
     switch (d) {
         case BX_DISPLAY_BLOCK:        return "block";

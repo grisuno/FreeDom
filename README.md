@@ -110,6 +110,7 @@ The name reflects its core goals:
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
 - ✅ Author CSS (`<style>` + inline `style=`, simple subset; never phones home) — menu "Author styles (CSS)"
+- ✅ Author box model (`margin`/`padding`/`width`/`max-width`): centered reading columns (`max-width` + `margin: 0 auto`)
 - ✅ Automatic dark mode (`@media (prefers-color-scheme: dark)`, safe `@media` subset; no viewport leak)
 - ✅ Headless mode
 - ✅ Strong per-tab sandboxing
@@ -120,7 +121,7 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media`; no combinators/box model/`position`; author-gated)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model `margin`/`padding`/`width`/`max-width`; no `border`/`box-sizing`/`position`; author-gated)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 
@@ -256,6 +257,15 @@ layout params (`gap`, `justify-content`, `grid-template-columns`) from the same 
 `<style>` rule lays out columns — not only an inline `style=`. Because layout is *structure*,
 not styling, the columns render even with author colors off (only author colors stay gated by
 the toggle). See `examples/css-sheet-layout.html`.
+
+**Box model (`margin` / `padding` / `width` / `max-width`):** resolved through the same cascade
+(lengths in `px`, a bare `0`, or `em`/`rem`; `%`/viewport units fail closed). The headline win is
+the modern **centered reading column** — `max-width` + `margin: 0 auto` + horizontal padding — and
+an author `margin-top`/`margin-bottom` overrides the default block spacing. Because an author box
+can shrink content to unreadability, the box model is gated behind the author-CSS capability like
+the colors (Secure/Privacy by Default). Out of scope for now: `border`, `box-sizing`, vertical
+`padding-top/bottom`, and `position`. See `examples/box-model.html`
+(`freedom --author-css --download-pdf=… examples/box-model.html`).
 
 **Automatic dark mode:** `@media` is supported as a safe subset — with the dark theme on (and
 Author styles enabled), a page's `@media (prefers-color-scheme: dark)` rules apply automatically.

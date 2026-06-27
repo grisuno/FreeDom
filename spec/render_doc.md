@@ -45,6 +45,11 @@ typedef struct rd_block {
     int              text_align;     /* text-align del autor (css_align); solo con caps.css, si no 0 */
     int              font_scale;     /* font-size del autor en %; solo con caps.css, si no 0 */
     int              line_scale;     /* line-height del autor en % de la caja de línea; solo con caps.css, si no 0 */
+    /* Box model del autor (Hito 23b-3); solo con caps.css, si no 0 / PV_LEN_UNSET. */
+    int              box_l, box_r;   /* insets izq/der px */
+    int              box_w;          /* tope de ancho de contenido px, 0 = sin tope */
+    int              box_center;     /* 1: margin: 0 auto */
+    int              box_mt, box_mb; /* override de margen sup/inf px, o PV_LEN_UNSET (UA) */
     /* ... cont_* (contenedor flex/grid, transportado siempre) e input_* (RD_INPUT) ... */
 } rd_block;
 
@@ -81,11 +86,13 @@ const char    *rd_image_label(rdp_img_decision d); /* etiqueta del placeholder *
     imagen).
 - Si la vista declara imágenes y `!caps.images`, antepone un `RD_NOTICE` con
   `rdp_images_warning()`. `has_images` refleja si hubo alguna imagen.
-- **Presentación del autor (`fg_rgb`/`bg_rgb`/`text_align`/`font_scale`):** se propaga del `pv_run` a
-  `RD_HEADING`/`RD_PARAGRAPH`/`RD_LINK` **solo si `caps.css`** (Secure/Privacy by Default: apagado);
-  en otro caso queda en -1 (colores) o 0 (align/font_scale) y la presentación usa el tema. Estos
-  cuatro campos son el estilo de autor de Hito 23 (de `<style>` + `style=`, vía `[[css]]`/`[[page_view]]`);
-  el *gate* de CSS vive en una función pura y testeable.
+- **Presentación del autor (`fg_rgb`/`bg_rgb`/`text_align`/`font_scale`/`line_scale` + `box_*`):** se
+  propaga del `pv_run` a `RD_HEADING`/`RD_PARAGRAPH`/`RD_LINK` **solo si `caps.css`** (Secure/Privacy
+  by Default: apagado); en otro caso queda en -1 (colores), 0 (align/font/box_l/r/w/center) o
+  `PV_LEN_UNSET` (box_mt/box_mb → la GUI usa el margen UA) y la presentación usa el tema/UA. Son el
+  estilo de autor de Hito 23/23b (de `<style>` + `style=`, vía `[[css]]`/`[[page_view]]`); el **box
+  model** `box_*` (Hito 23b-3) se gatea aquí igual que los colores porque una caja del autor puede
+  encoger el contenido a lo ilegible. El *gate* de CSS vive en una función pura y testeable.
 - **Contenedor flex/grid del autor (`cont_id`/`cont_display`/`cont_gap`/`cont_justify`/`cont_cols`):**
   se transporta **siempre**, con o sin `caps.css`. La maquetación (cajas, columnas, márgenes) es
   estructura, no estilo del autor: no abre sockets ni filtra nada a la red, así que el camino seguro

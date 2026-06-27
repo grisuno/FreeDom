@@ -52,6 +52,12 @@ typedef enum bx_status {
     BX_ERR_SYNTAX     /* not a recognised display keyword (fails closed) */
 } bx_status;
 
+/* Horizontal placement of an author box inside an available width (px). */
+typedef struct bx_hplace {
+    double x_off;      /* left offset from the content area's left edge */
+    double content_w;  /* width available to the block's inline content */
+} bx_hplace;
+
 /* UA default box for an HTML tag name (case-insensitive). tag == NULL, empty, or
  * unknown yields a neutral inline box with zero margins and padding (the safe
  * default: an unknown element invents no spacing). Returned by value; no
@@ -68,5 +74,15 @@ bx_status bx_parse_display(const char *token, bx_display *out);
 /* Stable, short English name of a display type for structured/agent output. Never
  * NULL; an unknown enum value yields "inline". */
 const char *bx_display_name(bx_display d);
+
+/* Resolves the horizontal placement of an author box within avail_w (px). inset_l/
+ * inset_r are the left/right insets (padding + non-auto margin of that side);
+ * width_cap is the content-width cap (min of width/max-width already resolved, 0 =
+ * none); center is 1 for `margin: 0 auto` (both horizontal margins auto + a width
+ * cap). Pure, no allocation. Negative insets are clamped to 0; avail_w < 1 is
+ * raised to 1; the result always has content_w >= 1 and x_off >= 0. With no box
+ * (inset_l=inset_r=0, width_cap=0) it returns x_off 0 and content_w == avail_w. */
+bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
+                   double avail_w);
 
 #endif /* FREEDOM_BOX_STYLE_H */

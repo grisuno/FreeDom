@@ -219,7 +219,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | **fork + exec del worker** (re-ejecuta `/proc/self/exe` como `--tab-worker`: NO hereda COW del padre → un worker no ve el contenido de las otras pestañas; ASLR fresca; higiene de fds vía `close_range`) + seccomp-bpf fail-closed (con **W^X**: `mmap`/`mprotect` con `PROT_EXEC` denegados por inspección de argumento → sin shellcode nativo aun tras secuestro de control) + **anti-volcado** (`PR_SET_DUMPABLE`=0 + `RLIMIT_CORE`=0, sin core ni ptrace ajeno) + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`line-height`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
-| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~`/atributo/pseudo siguen fuera, fallan cerrado; whitelist de propiedades). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). |
+| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~`/atributo/pseudo siguen fuera, fallan cerrado; whitelist de propiedades). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). **Box model** (`margin`/`padding`/`width`/`max-width`, Hito 23b-3): resuelto por la misma cascada (px/`0`/`em`·`rem`; `%`/vw/`calc` fallan cerrado), gateado por `caps.css` (una caja del autor puede encoger el contenido a lo ilegible → familia de presentación, no la de layout siempre-on); habilita la **columna de lectura centrada** (`max-width` + `margin: 0 auto` + padding). La geometría horizontal vive en `bx_place` (puro, en `box_style`). |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG + JPEG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. JPEG es excepción de doctrina autorizada (libjpeg con fuente en memoria + `longjmp` que nunca llama `exit()`). |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
 | Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
@@ -806,6 +806,32 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `repeat()`/`minmax()`, y pesos `fr`/`auto`/tracks nombrados (todo track = 1fr de igual ancho).
   *(Módulos puros + IPC verificados bajo test/ASan/fuzz + E2E headless; verificación visual Wayland
   pendiente al dueño.)* Ver `[[freedom-author-css-direction]]`.
+- **Hito 23b-3 — Box model de autor (`margin`/`padding`/`width`/`max-width`).** "Ver la web moderna
+  como la maquetó el webmaster": el subconjunto `css` deja de ignorar el box model. (a) **`css`
+  (puro, fuzzeado):** 10 campos nuevos en `css_style` + `interp_len` (px, `0`, `em`/`rem`×16; `%`/vw/
+  `calc` **fallan cerrado** — necesitan un bloque contenedor que el parser no tiene) + `emit_len` +
+  `expand_box4` (shorthand 1–4 valores, orden CSS). Márgenes admiten signo y `auto`
+  (`CSS_LEN_AUTO`); padding/width no. Las cajas saltan el viejo gate `ival<0 ⇒ rechazo`; slots de
+  margin/padding **contiguos** en orden CSS. (b) **`page_view`:** `css_hbox_resolve`/`css_has_hbox`
+  pre-resuelven 6 campos de wire en `resolve_context` — **horizontal** (`box_l/r/w/center`) del
+  **ancestro de bloque más cercano con caja** (así el `max-width`/centrado de un wrapper alcanza a
+  sus descendientes), **margen vertical** (`box_mt/box_mb`) del **bloque hoja propio** (no se duplica
+  por bloque interno). `pv_set_box`. (c) **IPC `tab.c`:** 6 int32 nuevos en write_view/read_view.
+  (d) **`render_doc`:** copia los 6 **solo con `caps.css`** (una caja puede encoger el contenido a lo
+  ilegible → familia de presentación, como colores/`text-align`/`font-size`, **no** la de layout
+  siempre-on de flex/grid). (e) **`box_style`:** `bx_place` (puro, testeable) hace la geometría
+  horizontal (cap + centrado + insets); la GUI `layout_doc` la llama y `block_margins` aplica el
+  override de margen vertical. **Defecto (caps.css off) byte-idéntico** al previo: cajas en 0/`UNSET`,
+  `bx_place(0,0,0,0,avail)` ⇒ `x_off=0, content_w=avail`. Specs (`css.md`, `box_style.md`,
+  `page_view.md`, `render_doc.md`) + tests (6 en `css`, 5 `bx_place` en `box_style`, 3 E2E en
+  `page_view`) + `make test` (35 suites) / `make asan` (35, exit 0) limpios + fuzz `fuzz-css` (~494k)
+  y `fuzz-pv` (~265k) sin crash/leak/UB + **E2E visual** (`examples/box-model.html` por
+  `--author-css --download-pdf` → PNG: columna centrada con `max-width`, padding horizontal, caja
+  compartida por los descendientes del wrapper, y override de margen 64px/2px confirmados). **Fuera de
+  alcance:** `border`, `box-sizing` (todo `width` = content-box), `padding-top/bottom` (la lista plana
+  no tiene caja por-bloque que inflar — necesita box-grouping), `%`/viewport, composición de cajas
+  anidadas, `position`. *(Módulos puros + IPC + E2E visual headless verificados; ventana Wayland
+  interactiva pendiente al dueño.)* Ver `[[freedom-author-box-model]]`, `[[freedom-author-css-direction]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -838,9 +864,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`
   (`nr_realm_allows_http`); autenticación de onion services v3 con clave; **stream isolation** por
   pestaña/origen (circuitos Tor separados); unificar i2pd/router-Java; indicador de realm en el chrome.
-- **Hito 23b parte 2 — CSS de autor: más cobertura.** (Parte 1 `@media`+`prefers-color-scheme` y el
-  sub-hito **flex/grid desde `<style>`**, ya cerrados arriba.) Falta: **`position`**
-  relative/absolute/sticky y **box model de autor** (margin/padding/width/border — hoy gobierna el UA);
+- **Hito 23b parte 2 — CSS de autor: más cobertura.** (Parte 1 `@media`+`prefers-color-scheme`, el
+  sub-hito **flex/grid desde `<style>`**, y el **box model `margin`/`padding`/`width`/`max-width`**
+  —Hito 23b-3— ya cerrados arriba.) Falta del box model: **`border`** (width/style/color),
+  **`box-sizing`**, **`padding-top/bottom`** (la lista plana no tiene caja por-bloque que inflar —
+  necesita box-grouping), unidades `%`/viewport, y composición de cajas anidadas. Falta además:
+  **`position`** relative/absolute/sticky;
   flex **por-item** desde `<style>` (`flex-grow`/`-shrink`/`-basis`/`order`, `align-items`) y expansión
   de `repeat()`/`minmax()`/pesos `fr` en grid (hoy todo track = 1fr igual); render de `@media print` al
   PDF; combinadores **hermano** (`+`/`~`) y pseudo-clases/selectores de atributo (los combinadores

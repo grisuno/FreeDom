@@ -43,6 +43,13 @@ typedef struct pv_run {
     int     cont_gap;    /* gap del contenedor en px */
     int     cont_justify;/* fx_justify del contenedor */
     int     cont_cols;   /* columnas del grid, o 0 */
+    /* Box model del autor pre-resuelto a px (Hito 23b-3), gateado por caps.css. */
+    int     box_l;       /* inset izquierdo px (padding-left + margin-left no-auto), 0 */
+    int     box_r;       /* inset derecho px (padding-right + margin-right no-auto), 0 */
+    int     box_w;       /* tope de ancho de contenido px (min width/max-width), 0 = sin tope */
+    int     box_center;  /* 1: margin: 0 auto (centrar dentro del ancho disponible) */
+    int     box_mt;      /* override de margen superior px, o PV_LEN_UNSET (usa el UA) */
+    int     box_mb;      /* override de margen inferior px, o PV_LEN_UNSET (usa el UA) */
 } pv_run;
 
 typedef struct pv_view { pv_run *runs; size_t count; size_t cap; } pv_view;
@@ -118,6 +125,22 @@ las columnas de `grid-template-columns` (cuenta de tokens, `[1, PV_MAX_GRID_COLS
 `pv_set_container` fija los cinco campos en el último run. El `background` shorthand y `bgcolor` legacy
 siguen fuera de alcance.
 
+**Box model del autor (`box_*`, Hito 23b-3).** Por cada run se resuelve una caja horizontal del
+**ancestro de bloque más cercano que declare alguna propiedad de caja** (`margin`/`padding`/`width`/
+`max-width` en la `css_style` ya resuelta por ancestro). Se pre-calculan a px: `box_l`/`box_r` =
+`padding` + `margin` no-`auto` de cada lado; `box_w` = `min(width, max-width)` (0 = sin tope);
+`box_center` = 1 si `margin-left`/`margin-right` son ambos `auto` con `box_w` (`margin: 0 auto`). El
+**override de margen vertical** (`box_mt`/`box_mb`) se toma del **bloque hoja propio** del run (no de
+un wrapper externo), por eso un run cuyo bloque hoja no fija márgenes lleva `PV_LEN_UNSET` y la GUI usa
+el margen UA. Así el `max-width`/centrado de un wrapper alcanza a todos sus descendientes (comparten el
+ancestro), pero su margen vertical no se duplica en cada bloque interno. La geometría horizontal final
+(inset/cap/centrado dentro del ancho disponible) la calcula `bx_place` (`[[box_style]]`, puro). Es
+**presentación del autor**, gateada por `caps.css` igual que los colores/`text-align`/`font-size`
+(`render_doc` la propaga solo con `caps.css`; las cajas de autor pueden encoger el contenido a lo
+ilegible, así que Privacy/Secure by Default las mantiene apagadas hasta el opt-in). `pv_set_box` fija
+los seis campos en el último run; `pv_append*` los inicializan a 0/`PV_LEN_UNSET`. Fuera de alcance v1:
+`padding-top/bottom`, `border`, `box-sizing`, `%`/viewport y la composición de cajas anidadas.
+
 ## 3. API
 
 ```c
@@ -135,6 +158,8 @@ void          pv_set_bgcolor(pv_view *v, int bg_rgb);      /* background-color d
 void          pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale); /* align/font/line-height del ultimo run */
 void          pv_set_container(pv_view *v, int cont_id, int cont_display,
                                int cont_gap, int cont_justify, int cont_cols); /* contenedor */
+void          pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+                         int box_center, int box_mt, int box_mb); /* box model del ultimo run */
 void          pv_free(pv_view *v);
 size_t        pv_count(const pv_view *v);
 const pv_run *pv_at(const pv_view *v, size_t i);

@@ -156,6 +156,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
  *   [count]( kind,heading,bold,italic,indent,break, text, href, src, img_w,img_h, fg_rgb,bg_rgb,
  *            text_align,font_scale,line_scale,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
+ *            box_l,box_r,box_w,box_center,box_mt,box_mb,
  *            input_type,form_id,form_method, name, value )*
  * with each string length-prefixed (a length of 0 means absent). The fixed-width
  * fields travel for every run so a hostile child cannot desync the stream by
@@ -185,6 +186,12 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t cgap = (int32_t)r->cont_gap;
         int32_t cjust = (int32_t)r->cont_justify;
         int32_t ccols = (int32_t)r->cont_cols;
+        int32_t bl = (int32_t)r->box_l;
+        int32_t br = (int32_t)r->box_r;
+        int32_t bw = (int32_t)r->box_w;
+        int32_t bcenter = (int32_t)r->box_center;
+        int32_t bmt = (int32_t)r->box_mt;
+        int32_t bmb = (int32_t)r->box_mb;
         int32_t itype = (int32_t)r->input_type;
         int32_t fid = (int32_t)r->form_id;
         int32_t method = (int32_t)r->form_method;
@@ -217,6 +224,12 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
         if (write_full(wfd, &cjust, sizeof cjust) != 0) return -1;
         if (write_full(wfd, &ccols, sizeof ccols) != 0) return -1;
+        if (write_full(wfd, &bl, sizeof bl) != 0) return -1;
+        if (write_full(wfd, &br, sizeof br) != 0) return -1;
+        if (write_full(wfd, &bw, sizeof bw) != 0) return -1;
+        if (write_full(wfd, &bcenter, sizeof bcenter) != 0) return -1;
+        if (write_full(wfd, &bmt, sizeof bmt) != 0) return -1;
+        if (write_full(wfd, &bmb, sizeof bmb) != 0) return -1;
         if (write_full(wfd, &itype, sizeof itype) != 0) return -1;
         if (write_full(wfd, &fid, sizeof fid) != 0) return -1;
         if (write_full(wfd, &method, sizeof method) != 0) return -1;
@@ -518,6 +531,8 @@ static int read_view(int fd, pv_view **out) {
         int32_t img_w = -1, img_h = -1, fg = -1, bg = -1;
         int32_t talign = 0, fscale = 0, lscale = 0;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
+        int32_t bl = 0, br = 0, bw = 0, bcenter = 0;
+        int32_t bmt = PV_LEN_UNSET, bmb = PV_LEN_UNSET;
         int32_t itype = 0, fid = -1, method = 0;
         if (read_full(fd, &kind, sizeof kind) != 0
          || read_full(fd, &heading, sizeof heading) != 0
@@ -545,6 +560,12 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &cgap, sizeof cgap) != 0
          || read_full(fd, &cjust, sizeof cjust) != 0
          || read_full(fd, &ccols, sizeof ccols) != 0
+         || read_full(fd, &bl, sizeof bl) != 0
+         || read_full(fd, &br, sizeof br) != 0
+         || read_full(fd, &bw, sizeof bw) != 0
+         || read_full(fd, &bcenter, sizeof bcenter) != 0
+         || read_full(fd, &bmt, sizeof bmt) != 0
+         || read_full(fd, &bmb, sizeof bmb) != 0
          || read_full(fd, &itype, sizeof itype) != 0
          || read_full(fd, &fid, sizeof fid) != 0
          || read_full(fd, &method, sizeof method) != 0) {
@@ -579,6 +600,7 @@ static int read_view(int fd, pv_view **out) {
             pv_set_bgcolor(v, (int)bg);
             pv_set_text_style(v, (int)talign, (int)fscale, (int)lscale);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols);
+            pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
         }
     }
 

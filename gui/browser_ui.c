@@ -1809,8 +1809,10 @@ static void block_margins(const ui_theme *th, const rd_block *b,
     bx_box box = bx_default_for_tag(tag);
     double size; int bold, italic, underline; ui_rgb color;
     block_style(th, b, &size, &bold, &italic, &underline, &color);
-    *top_px = box.margin.top * size;
-    *bottom_px = box.margin.bottom * size;
+    /* An author margin-top/bottom (px, only with caps.css) overrides the UA margin;
+     * PV_LEN_UNSET keeps the UA value. */
+    *top_px = (b->box_mt != PV_LEN_UNSET) ? (double)b->box_mt : box.margin.top * size;
+    *bottom_px = (b->box_mb != PV_LEN_UNSET) ? (double)b->box_mb : box.margin.bottom * size;
 }
 
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
@@ -2071,12 +2073,17 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * foreground tints the fragments inside flow_text_block. */
         s.bg_rgb = (!w->force_theme) ? b->bg_rgb : -1;
         /* List items indent the whole block by their nesting depth; the marker text
-         * was prepended by page_view. Non-list blocks have indent 0. The available
-         * text width shrinks by the indent so wrapped lines stay inside the column. */
-        s.indent_px = (double)b->indent * UI_LIST_INDENT;
-        double avail_w = content_w - s.indent_px;
+         * was prepended by page_view. Non-list blocks have indent 0. The author box
+         * model (left/right insets, a width cap and margin:0 auto centering, only
+         * with caps.css; all zero otherwise -> identical to before) then places the
+         * content within the remaining width via the pure bx_place. */
+        double base_l = (double)b->indent * UI_LIST_INDENT;
+        double avail_w = content_w - base_l;
         if (avail_w < 1.0) avail_w = 1.0;
-        flow_text_block(cr, w, L, &s, th, b, avail_w);
+        bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r, (double)b->box_w,
+                                b->box_center, avail_w);
+        s.indent_px = base_l + hp.x_off;
+        flow_text_block(cr, w, L, &s, th, b, hp.content_w);
     }
     flush_line(L, &s, th);
     L->total_h = s.cur_top;

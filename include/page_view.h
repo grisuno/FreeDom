@@ -36,6 +36,10 @@ typedef enum pv_status {
     PV_ERR_INTERNAL   /* backend returned an unexpected state */
 } pv_status;
 
+/* Sentinel for an unset author box vertical-margin override (box_mt/box_mb): the
+ * presentation layer then uses the user-agent margin. Matches CSS_LEN_UNSET. */
+#define PV_LEN_UNSET (-2147483647 - 1)
+
 typedef enum pv_kind {
     PV_TEXT = 0,   /* inline text */
     PV_LINK = 1,   /* inline text that is a hyperlink (href is set) */
@@ -103,6 +107,17 @@ typedef struct pv_run {
     int     cont_gap;     /* container gap in px (>= 0) */
     int     cont_justify; /* fx_justify of the container */
     int     cont_cols;    /* grid column count (>= 1 for grid), or 0 */
+    /* Author box model pre-resolved to px (Hito 23b-3), gated by caps.css. box_l/
+     * box_r are the left/right insets (padding + non-auto margin of that side);
+     * box_w is the content-width cap (min width/max-width, 0 = none); box_center is
+     * 1 for `margin: 0 auto`; box_mt/box_mb override the block's top/bottom margin,
+     * or PV_LEN_UNSET to keep the user-agent margin. Defaults: 0/0/0/0/UNSET/UNSET. */
+    int     box_l;
+    int     box_r;
+    int     box_w;
+    int     box_center;
+    int     box_mt;
+    int     box_mb;
     /* form controls (PV_INPUT only; defaults: type 0, name/value NULL, form_id -1,
      * method GET). name/value carry the submitted bytes verbatim (not whitespace
      * collapsed); form_id groups controls of the same <form> (-1 = no form). */
@@ -205,6 +220,13 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
  * or NULL view. Both append helpers default cont_id to -1 (no container). */
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_gap, int cont_justify, int cont_cols);
+
+/* Sets the author box model on the most recently appended run (left/right insets,
+ * width cap, centered flag, and top/bottom margin overrides in px; box_mt/box_mb
+ * may be PV_LEN_UNSET). No-op on an empty or NULL view. The append helpers default
+ * box_l/r/w/center to 0 and box_mt/box_mb to PV_LEN_UNSET. */
+void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+                int box_center, int box_mt, int box_mb);
 
 /* Idempotent; safe on NULL and safe to call twice. */
 void pv_free(pv_view *v);

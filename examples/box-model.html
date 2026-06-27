@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Author box model demo</title>
+  <style>
+    /* A centered, padded reading column (the dominant modern article layout). */
+    .reading { max-width: 360px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+    /* Author vertical-margin override on a leaf block. */
+    .tight { margin-top: 64px; margin-bottom: 2px; }
+  </style>
+</head>
+<body>
+  <h1>Full-width heading (no author box)</h1>
+  <p>This paragraph has no author box, so it spans the whole content width and
+     wraps only near the right edge of the page. It is the baseline to compare
+     the centered column below against.</p>
+
+  <div class="reading">
+    <h2>Centered reading column</h2>
+    <p>This wrapper sets max-width 360px with margin 0 auto, so its content is
+       centered with visible left and right gutters. A horizontal padding of
+       24px insets the text a little further inside the column.</p>
+    <p>A second paragraph in the same wrapper shares the exact same centered,
+       padded box, even though the box is declared on the ancestor div and not
+       on each paragraph.</p>
+  </div>
+
+  <p class="tight">Back to full width. This paragraph overrides the user-agent
+     margins: a large 64px gap above and only 2px below.</p>
+  <p>This line follows the tight paragraph, separated by just 2px of margin.</p>
+</body>
+</html>

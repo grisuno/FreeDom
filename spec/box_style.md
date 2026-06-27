@@ -57,6 +57,12 @@ typedef enum bx_status {
     BX_ERR_NULL_ARG,  /* token u out era NULL */
     BX_ERR_SYNTAX     /* el token no es una palabra clave de display reconocida */
 } bx_status;
+
+/* Ubicación horizontal de una caja del autor dentro del ancho disponible. */
+typedef struct bx_hplace {
+    double x_off;      /* desplazamiento desde el borde izquierdo del área de contenido */
+    double content_w;  /* ancho disponible para el contenido en línea del bloque */
+} bx_hplace;
 ```
 
 ## 3. API (pura, reentrante)
@@ -65,6 +71,8 @@ typedef enum bx_status {
 bx_box     bx_default_for_tag(const char *tag);
 bx_status  bx_parse_display(const char *token, bx_display *out);
 const char *bx_display_name(bx_display d);
+bx_hplace  bx_place(double inset_l, double inset_r, double width_cap, int center,
+                    double avail_w);
 ```
 
 ### `bx_default_for_tag`
@@ -113,6 +121,27 @@ Subconjunto cubierto (defaults de la hoja UA de CSS 2.1):
 - Nombre en inglés, corto y estable, del tipo de display (`"block"`, `"flex"`, ...), para salida
   estructurada/agente. Nunca `NULL`; un valor de enum desconocido → `"inline"`.
 
+### `bx_place` (geometría del box model del autor, Hito 23b-3)
+Resuelve la **ubicación horizontal** de un bloque con caja de autor dentro de `avail_w`. Es la única
+pieza de geometría que vive en `box_style`, porque es **aritmética pura del box model** (no mide texto
+ni pinta); el layout completo sigue en `flex_layout`/el pintor. `page_view` ya pre-resuelve los `px`
+del autor; esta función solo decide dónde empieza el contenido y cuán ancho es.
+
+- `inset_l` / `inset_r`: insets izquierdo/derecho en px (`padding` + `margin` no-`auto` de ese lado).
+  Negativos se tratan como 0 (falla cerrado).
+- `width_cap`: tope de ancho de contenido en px (`min(width, max-width)` ya resuelto por `page_view`),
+  o `0` = sin tope.
+- `center`: 1 cuando `margin-left` y `margin-right` son ambos `auto` y hay `width_cap` (`margin: 0 auto`).
+- `avail_w`: ancho disponible (px); valores < 1 se elevan a 1.
+
+Reglas (deterministas, sin asignación):
+- `inner = max(1, avail_w − inset_l − inset_r)`.
+- `content_w = (width_cap > 0 && width_cap < inner) ? width_cap : inner` (un tope mayor que el
+  disponible no ensancha — `max-width` nunca desborda).
+- `x_off = center && width_cap > 0 ? inset_l + (inner − content_w)/2 : inset_l`.
+- Garantía: `content_w >= 1` y `x_off >= 0` siempre. Sin caja del autor (`inset_l=inset_r=0`,
+  `width_cap=0`) ⇒ `x_off=0`, `content_w=avail_w`: comportamiento idéntico al previo (cero regresión).
+
 ## 4. Garantías
 
 - **Pureza / Zero Trust:** sin I/O, sin estado global, reentrante; la etiqueta y el token son dato
@@ -133,9 +162,11 @@ Subconjunto cubierto (defaults de la hoja UA de CSS 2.1):
 
 ## 6. Fuera de alcance
 
-- Resolver geometría (anchos, posiciones, line-boxes): eso es `flex_layout` y el pintor.
-- `width`/`height`/`border`/`gap`/`flex`/`grid-template` del autor: los consume `flex_layout`; aquí
-  solo se clasifica el `display`.
+- Resolver geometría de layout (line-boxes, packing flex/grid, posiciones verticales): eso es
+  `flex_layout` y el pintor. La **excepción** es `bx_place`: la ubicación horizontal de UNA caja de
+  autor (inset/cap/centrado) es aritmética pura del box model y vive aquí; el resto del layout no.
+- `height`/`border`/`box-sizing`/`flex`/`grid-template` del autor: los consume `flex_layout`; aquí
+  solo se clasifica el `display` y se ubica horizontalmente una caja ya resuelta a px (`bx_place`).
 - Herencia y cascada CSS, selectores, especificidad: el motor aplica la hoja UA por etiqueta y, a lo
   sumo, un `display` en línea gateado por el llamante.
 - `table`/`table-*`, `ruby`, `contents`, `flow-root` y demás valores de `display` raros.

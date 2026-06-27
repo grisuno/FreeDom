@@ -61,6 +61,31 @@ checked against the ancestor chain (descendant backtracks over ancestors).
 | `gap`, `grid-gap`, `column-gap` | `gap`: leading px of the value (`12px 8px` → 12; `normal` → 0), clamped `[0, CSS_GAP_MAX]`, or -1 (unset) |
 | `justify-content` | `justify`: `flex-start`/`start`→START, `flex-end`/`end`→END, `center`, `space-between`, `space-around`, `space-evenly`; unknown dropped |
 | `grid-template-columns` | `grid_cols`: count of whitespace-separated track tokens, clamped `[1, CSS_GRID_COLS_MAX]`, or 0 (unset). `none` is dropped; `repeat()`/`minmax()` are counted as literal tokens (out of scope) |
+| `margin`, `margin-top/right/bottom/left` | `margin_top/right/bottom/left` (px). The shorthand expands 1–4 values (CSS order: all / `v h` / `t h b` / `t r b l`). `auto` → `CSS_LEN_AUTO` (meaningful for the horizontal sides: `margin: 0 auto` centers). Negative px allowed. Clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`. |
+| `padding`, `padding-top/right/bottom/left` | `pad_top/right/bottom/left` (px ≥ 0). Same 1–4 shorthand. `auto`/negative → that side dropped (fail closed). Clamped `[0, CSS_LEN_MAX]`. |
+| `width` | `width` (px content width, or `CSS_LEN_UNSET`). `auto` → unset. |
+| `max-width` | `max_width` (px, or `CSS_LEN_UNSET`). `none` → unset. |
+
+**Box model (Hito 23b-3).** `margin` / `padding` / `width` / `max-width` resolve through the
+**same cascade** as the other properties (a `<style>` rule, a selector, and inline `style=`
+all feed them, inline winning). **Lengths** accept `px`, a bare `0`, and `em`/`rem` (×16 px,
+the engine's base font); `%`/`vw`/`vh`/`calc()` and other units are **dropped** (fail closed —
+they need a containing-block width the parser does not have). They are **not inherited** (a box
+describes its own element, so page_view reads them from that element's resolved style, not up
+the ancestor chain). page_view turns them into a per-block placement (left/right inset, an
+optional width cap, a centered flag, and a top/bottom margin override) that the presentation
+layer applies; like the author *colors* and `text-align`/`font-size`, the **box is gated behind
+`caps.css`** (Privacy/Secure by Default — author box metrics can shrink content to
+unreadability, so they stay off until the user opts in). The geometry math (cap + centering +
+insets within an available width) lives in the pure, tested `box_style` helper `bx_place`.
+
+**Out of scope of the box model (v1, Hito 23b-3), fail closed / UA fallback:** vertical
+`padding-top/bottom` application (parsed and stored, but the flat display list has no per-block
+box to inflate yet — needs the box-grouping of a later milestone), `border` (width/style/color),
+`box-sizing` (every `width` is treated as a content-box width), `%`/viewport units, and
+**nested** author boxes do not compose (the nearest block ancestor that sets a box wins for the
+horizontal placement; an outer wrapper's `max-width`/centering still reaches its descendants
+because they all share that ancestor).
 
 **Container layout params (Hito 23b-2).** `gap` / `justify-content` / `grid-template-columns`
 resolve through the **same cascade** as the other properties (so a `<style>` rule, a
@@ -121,12 +146,21 @@ typedef struct css_style {
     int          gap;         /* px between flex/grid items, or -1 (unset) */
     css_justify  justify;     /* justify-content; CSS_JUSTIFY_UNSET if absent */
     int          grid_cols;   /* grid-template-columns track count, or 0 (unset) */
+    /* Author box model (not inherited; px). margins: CSS_LEN_UNSET / CSS_LEN_AUTO
+     * (auto) / signed px. padding: CSS_LEN_UNSET / px >= 0. width/max_width:
+     * CSS_LEN_UNSET / px > 0. */
+    int          margin_top, margin_right, margin_bottom, margin_left;
+    int          pad_top, pad_right, pad_bottom, pad_left;
+    int          width, max_width;
 } css_style;
 
 #define CSS_GAP_MAX       4096   /* px cap on gap (anti-DoS) */
 #define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns tracks (anti-DoS) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
+#define CSS_LEN_MAX       100000 /* px clamp for box-model lengths (anti-DoS) */
+#define CSS_LEN_UNSET     (-2147483647 - 1) /* INT_MIN: box length not set */
+#define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
 
 typedef struct css_sheet css_sheet;   /* opaque, owns the parsed rules */
 
@@ -223,13 +257,16 @@ common case.)
   child (`>`) combinators **are** supported (up to `CSS_MAX_COMPOUNDS` compounds).
 - Inheritance/`initial`/`inherit`/`unset` keywords (caller does inheritance;
   these keywords are ignored).
-- The box model from author CSS (margin/padding/width/border): UA box model still
-  governs spacing. `display:flex|grid` *parameters* (`gap`/`justify-content`/
-  `grid-template-columns`) **are now resolved through the cascade** (Hito 23b-2), so a
-  `<style>` rule feeds them, not only inline `style=`. Still out of scope: per-item
-  flex (`flex-grow`/`flex-shrink`/`flex-basis`/`order`), `align-items`/`align-content`,
-  `row-gap` as distinct from `column-gap`, `repeat()`/`minmax()` track expansion, and
-  named/`auto`/`fr`-weighted grid tracks (every track is treated as 1fr equal-width).
+- The author box model `margin`/`padding`/`width`/`max-width` **is now resolved through the
+  cascade** (Hito 23b-3) and applied (gated by `caps.css`): horizontal insets, an optional
+  width cap, `margin: 0 auto` centering, and a top/bottom margin override. Still out of scope:
+  `border`, `box-sizing`, vertical `padding-top/bottom` application, `%`/viewport units, and
+  nested box composition (see *Box model* above). `display:flex|grid` *parameters*
+  (`gap`/`justify-content`/`grid-template-columns`) are resolved through the cascade (Hito
+  23b-2). Still out of scope: per-item flex (`flex-grow`/`flex-shrink`/`flex-basis`/`order`),
+  `align-items`/`align-content`, `row-gap` as distinct from `column-gap`, `repeat()`/`minmax()`
+  track expansion, and named/`auto`/`fr`-weighted grid tracks (every track is treated as 1fr
+  equal-width).
 - `url()` anything, `@import`/`@font-face`/other `@`-rules, `calc()`, `var()`, custom
   properties, `!important` precedence (the token is stripped; it does not raise it).
   `@media` is supported (subset above); `not`/unknown features fail closed.

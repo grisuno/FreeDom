@@ -98,6 +98,12 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->cont_gap = 0;
     b->cont_justify = 0;
     b->cont_cols = 0;
+    b->box_l = 0;
+    b->box_r = 0;
+    b->box_w = 0;
+    b->box_center = 0;
+    b->box_mt = PV_LEN_UNSET;
+    b->box_mb = PV_LEN_UNSET;
     b->input_type = 0;
     b->name = NULL;
     b->value = NULL;
@@ -232,6 +238,16 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->cont_gap = r->cont_gap;
             lb->cont_justify = r->cont_justify;
             lb->cont_cols = r->cont_cols;
+            /* Author box model is presentation (it can shrink content to
+             * unreadability), so it is gated by caps.css like the colors above. */
+            if (caps.css) {
+                lb->box_l = r->box_l;
+                lb->box_r = r->box_r;
+                lb->box_w = r->box_w;
+                lb->box_center = r->box_center;
+                lb->box_mt = r->box_mt;
+                lb->box_mb = r->box_mb;
+            }
         }
     }
 

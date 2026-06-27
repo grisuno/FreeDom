@@ -165,6 +165,12 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->cont_gap = 0;
     r->cont_justify = 0;
     r->cont_cols = 0;
+    r->box_l = 0;
+    r->box_r = 0;
+    r->box_w = 0;
+    r->box_center = 0;
+    r->box_mt = PV_LEN_UNSET;
+    r->box_mb = PV_LEN_UNSET;
     r->input_type = 0;
     r->name = NULL;
     r->value = NULL;
@@ -212,6 +218,12 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->cont_gap = 0;
     r->cont_justify = 0;
     r->cont_cols = 0;
+    r->box_l = 0;
+    r->box_r = 0;
+    r->box_w = 0;
+    r->box_center = 0;
+    r->box_mt = PV_LEN_UNSET;
+    r->box_mb = PV_LEN_UNSET;
     r->input_type = 0;
     r->name = NULL;
     r->value = NULL;
@@ -267,6 +279,12 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     r->cont_gap = 0;
     r->cont_justify = 0;
     r->cont_cols = 0;
+    r->box_l = 0;
+    r->box_r = 0;
+    r->box_w = 0;
+    r->box_center = 0;
+    r->box_mt = PV_LEN_UNSET;
+    r->box_mb = PV_LEN_UNSET;
     r->input_type = (int)input_type;
     r->name = nm;
     r->value = vl;
@@ -314,6 +332,18 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
     r->cont_gap = cont_gap;
     r->cont_justify = cont_justify;
     r->cont_cols = cont_cols;
+}
+
+void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+                int box_center, int box_mt, int box_mb) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->box_l = box_l;
+    r->box_r = box_r;
+    r->box_w = box_w;
+    r->box_center = box_center;
+    r->box_mt = box_mt;
+    r->box_mb = box_mb;
 }
 
 void pv_free(pv_view *v) {
@@ -539,6 +569,39 @@ typedef struct pv_cont_info {
     int id, display, gap, justify, cols;
 } pv_cont_info;
 
+/* Author box model resolved for a run: horizontal placement (l/r insets, w cap,
+ * centered) from the nearest block ancestor that declares a box, plus the leaf
+ * block's own vertical-margin override (mt/mb, or PV_LEN_UNSET). */
+typedef struct pv_box_info {
+    int l, r, w, center, mt, mb;
+} pv_box_info;
+
+/* True if the resolved style declares any HORIZONTAL box property. */
+static int css_has_hbox(const css_style *cs) {
+    return cs->margin_left != CSS_LEN_UNSET || cs->margin_right != CSS_LEN_UNSET ||
+           cs->pad_left   != CSS_LEN_UNSET || cs->pad_right   != CSS_LEN_UNSET ||
+           cs->width != CSS_LEN_UNSET || cs->max_width != CSS_LEN_UNSET;
+}
+
+/* Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets =
+ * padding + non-auto margin of each side (clamped >= 0); w = the tightest of
+ * width/max-width (0 = none); center = margin: 0 auto with a width cap. */
+static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
+    int ml = cs->margin_left, mr = cs->margin_right;
+    int pl = (cs->pad_left  != CSS_LEN_UNSET) ? cs->pad_left  : 0;
+    int pr = (cs->pad_right != CSS_LEN_UNSET) ? cs->pad_right : 0;
+    int l = pl + ((ml != CSS_LEN_UNSET && ml != CSS_LEN_AUTO) ? ml : 0);
+    int r = pr + ((mr != CSS_LEN_UNSET && mr != CSS_LEN_AUTO) ? mr : 0);
+    int w = CSS_LEN_UNSET;
+    if (cs->width != CSS_LEN_UNSET) w = cs->width;
+    if (cs->max_width != CSS_LEN_UNSET && (w == CSS_LEN_UNSET || cs->max_width < w))
+        w = cs->max_width;
+    out->l = (l > 0) ? l : 0;
+    out->r = (r > 0) ? r : 0;
+    out->w = (w != CSS_LEN_UNSET && w > 0) ? w : 0;
+    out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO && out->w > 0) ? 1 : 0;
+}
+
 /* Document-order registry of flex/grid container nodes, so the runs of one
  * container share a stable id. */
 typedef struct pv_container_reg {
@@ -601,14 +664,16 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             int *fg, int *bg, int *bold, int *italic,
                             int *align, int *font_scale, int *line_scale,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
-                            pv_container_reg *reg, pv_cont_info *cont) {
+                            pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
     *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
     *li = NULL; *list_depth = 0; *ordered = 0;
     cont->id = -1; cont->display = 0; cont->gap = 0;
     cont->justify = FX_JUSTIFY_START; cont->cols = 0;
+    box->l = 0; box->r = 0; box->w = 0; box->center = 0;
+    box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
-    int got_align = 0, got_fs = 0, got_lh = 0;
+    int got_align = 0, got_fs = 0, got_lh = 0, got_hbox = 0;
     int got_li = 0, got_list_kind = 0;
     int tag_bold = 0, tag_italic = 0;
     int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
@@ -635,7 +700,19 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 if (h != NULL && hl > 0) { *href = (const char *)h; *href_len = hl; got_link = 1; }
             }
             if (!got_heading) { int lv = heading_level(t); if (lv) { *heading = lv; got_heading = 1; } }
-            if (!got_block && is_block_tag(t)) { *block = p; got_block = 1; }
+            if (!got_block && is_block_tag(t)) {
+                *block = p; got_block = 1;
+                /* The leaf block's OWN vertical margins override the UA (a wrapper's
+                 * do not, so they are not duplicated across its inner blocks). */
+                box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : PV_LEN_UNSET;
+                box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : PV_LEN_UNSET;
+            }
+            /* Horizontal box from the nearest block ancestor that declares one, so a
+             * wrapper's max-width/centering/padding reaches all its descendants. */
+            if (!got_hbox && is_block_tag(t) && css_has_hbox(&cs)) {
+                css_hbox_resolve(&cs, box);
+                got_hbox = 1;
+            }
             if (!got_color) {
                 int c = (cs.color >= 0) ? cs.color
                         : ((t == LXB_TAG_FONT) ? font_color_attr(el) : -1);
@@ -1131,11 +1208,12 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
+                pv_box_info unused_box;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont);
+                                &reg, &unused_cont, &unused_box);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1185,11 +1263,12 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
+                pv_box_info unused_box;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont);
+                                &reg, &unused_cont, &unused_box);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1229,9 +1308,10 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         const lxb_dom_node_t *li = NULL;
         int list_depth = 0, ordered = 0;
         pv_cont_info cont;
+        pv_box_info box;
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
                         &bold, &italic, &align, &font_scale, &line_scale,
-                        &li, &list_depth, &ordered, &reg, &cont);
+                        &li, &list_depth, &ordered, &reg, &cont, &box);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -1277,6 +1357,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         pv_set_bgcolor(v, bg);
         pv_set_text_style(v, align, font_scale, line_scale);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
+        pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
     }
 
     *out = v;

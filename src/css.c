@@ -22,9 +22,14 @@
 #define CSS_INLINE_DECLS        64u
 #define CSS_INLINE_SPEC         (1 << 20)
 
-/* Property slots. The enum value IS the css_style slot index used by apply(). */
+/* Property slots. The enum value IS the css_style slot index used by apply().
+ * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
+ * left); the four padding slots likewise — expand_box4 relies on that. */
 enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
-       P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS, P_NSLOTS };
+       P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
+       P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
+       P_PAD_TOP, P_PAD_RIGHT, P_PAD_BOTTOM, P_PAD_LEFT,
+       P_WIDTH, P_MAXWIDTH, P_NSLOTS };
 
 typedef struct css_decl {
     int prop;  /* P_* */
@@ -250,6 +255,91 @@ static int interp_gridcols(const char *v) {
     return n;
 }
 
+/* Parses one box-model length. Accepts "Npx", a bare "0", "Nem"/"Nrem" (x16 px,
+ * the engine's base font), and (when allow_auto) "auto". Rejects %/viewport units,
+ * calc()/var() and bare non-zero numbers (fail closed: they need a containing block
+ * the parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a signed px
+ * clamped to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
+static int interp_len(const char *v, int allow_auto, int *out) {
+    if (allow_auto && ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
+    const char *p = v;
+    int neg = 0;
+    if (*p == '+') ++p;
+    else if (*p == '-') { neg = 1; ++p; }
+    double num;
+    const char *end;
+    if (!parse_num(p, &num, &end)) return 0;
+    while (*end == ' ' || *end == '\t') ++end;
+    double px;
+    if (end[0] == '\0') {
+        if (num != 0.0) return 0;       /* unitless non-zero length: invalid */
+        px = 0.0;
+    } else if (ci_eq(end, "px")) {
+        px = num;
+    } else if (ci_eq(end, "em") || ci_eq(end, "rem")) {
+        px = num * 16.0;
+    } else {
+        return 0;                       /* %, vw/vh, pt, calc(...), ... */
+    }
+    int val = (int)(px + 0.5);
+    if (neg) val = -val;
+    if (val > CSS_LEN_MAX) val = CSS_LEN_MAX;
+    if (val < -CSS_LEN_MAX) val = -CSS_LEN_MAX;
+    *out = val;
+    return 1;
+}
+
+/* Emits one box length declaration for slot into dst (cap permitting). A negative
+ * value is rejected unless allow_neg (margins allow it; padding/width do not).
+ * Returns 1 on success, 0 if the value is unsupported or does not fit. */
+static int emit_len(css_decl *dst, int cap, int slot, const char *val,
+                    int allow_auto, int allow_neg) {
+    int o;
+    if (cap < 1 || !interp_len(val, allow_auto, &o)) return 0;
+    if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
+    dst[0].prop = slot;
+    dst[0].ival = o;
+    return 1;
+}
+
+/* Expands a margin/padding shorthand (1..4 whitespace-separated lengths, CSS order
+ * all / "v h" / "t h b" / "t r b l") into the four contiguous slots starting at
+ * slot_top (top,right,bottom,left). Any unsupported token drops the WHOLE shorthand
+ * (fail closed, never a partial box). Returns the number of decls written (<= cap). */
+static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
+                       css_decl *dst, int cap) {
+    int vals[4], nv = 0;
+    const char *p = val;
+    while (nv < 4) {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        int o;
+        if (!interp_len(tok, allow_auto, &o)) return 0;
+        if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
+        vals[nv++] = o;
+    }
+    if (nv == 0) return 0;
+    int top, right, bottom, left;
+    switch (nv) {
+        case 1: top = right = bottom = left = vals[0]; break;
+        case 2: top = bottom = vals[0]; right = left = vals[1]; break;
+        case 3: top = vals[0]; right = left = vals[1]; bottom = vals[2]; break;
+        default: top = vals[0]; right = vals[1]; bottom = vals[2]; left = vals[3]; break;
+    }
+    int sides[4] = { top, right, bottom, left };
+    int n = 0;
+    for (int s = 0; s < 4 && n < cap; ++s) {
+        dst[n].prop = slot_top + s;
+        dst[n].ival = sides[s];
+        ++n;
+    }
+    return n;
+}
+
 /* Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from
  * both ends. Returns the trimmed length, or SIZE_MAX if it does not fit dst. */
 static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
@@ -262,9 +352,11 @@ static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap
     return n;
 }
 
-/* Interprets one declaration span s[0,n) into *out. Returns 1 if it names a
- * supported property with a valid value. */
-static int parse_one_decl(const char *s, size_t n, css_decl *out) {
+/* Interprets one declaration span s[0,n) into dst (up to cap). Returns the number
+ * of css_decl written (0 if unsupported). Most properties emit one; the margin/
+ * padding shorthands expand to up to four (one per side). */
+static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap) {
+    if (cap < 1) return 0;
     size_t c = 0;
     while (c < n && s[c] != ':') ++c;
     if (c >= n) return 0;  /* no colon */
@@ -275,6 +367,21 @@ static int parse_one_decl(const char *s, size_t n, css_decl *out) {
     if (copy_trim(s, c + 1, n, val, sizeof val) == (size_t)-1) return 0;
     if (prop[0] == '\0' || val[0] == '\0') return 0;
     for (char *p = prop; *p != '\0'; ++p) *p = lower(*p);
+
+    /* Box model: margins allow 'auto' and negatives; padding/width neither. The
+     * shorthands expand; the longhands and width/max-width emit one. */
+    if (strcmp(prop, "margin") == 0)  return expand_box4(val, P_MARGIN_TOP, 1, 1, dst, cap);
+    if (strcmp(prop, "padding") == 0) return expand_box4(val, P_PAD_TOP, 0, 0, dst, cap);
+    if (strcmp(prop, "margin-top") == 0)     return emit_len(dst, cap, P_MARGIN_TOP, val, 1, 1);
+    if (strcmp(prop, "margin-right") == 0)   return emit_len(dst, cap, P_MARGIN_RIGHT, val, 1, 1);
+    if (strcmp(prop, "margin-bottom") == 0)  return emit_len(dst, cap, P_MARGIN_BOTTOM, val, 1, 1);
+    if (strcmp(prop, "margin-left") == 0)    return emit_len(dst, cap, P_MARGIN_LEFT, val, 1, 1);
+    if (strcmp(prop, "padding-top") == 0)    return emit_len(dst, cap, P_PAD_TOP, val, 0, 0);
+    if (strcmp(prop, "padding-right") == 0)  return emit_len(dst, cap, P_PAD_RIGHT, val, 0, 0);
+    if (strcmp(prop, "padding-bottom") == 0) return emit_len(dst, cap, P_PAD_BOTTOM, val, 0, 0);
+    if (strcmp(prop, "padding-left") == 0)   return emit_len(dst, cap, P_PAD_LEFT, val, 0, 0);
+    if (strcmp(prop, "width") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
+    if (strcmp(prop, "max-width") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
 
     int prop_id, ival;
     if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
@@ -294,8 +401,8 @@ static int parse_one_decl(const char *s, size_t n, css_decl *out) {
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
-    out->prop = prop_id;
-    out->ival = ival;
+    dst[0].prop = prop_id;
+    dst[0].ival = ival;
     return 1;
 }
 
@@ -305,7 +412,7 @@ static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap
     while (i < n && count < cap) {
         size_t j = i;
         while (j < n && s[j] != ';') ++j;
-        if (parse_one_decl(s + i, j - i, &dst[count])) ++count;
+        count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count));
         i = (j < n) ? j + 1 : j;
     }
     return count;
@@ -737,6 +844,16 @@ static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
             case P_GAP:      o->gap = d->ival; break;
             case P_JUSTIFY:  o->justify = (css_justify)d->ival; break;
             case P_GRIDCOLS: o->grid_cols = d->ival; break;
+            case P_MARGIN_TOP:    o->margin_top = d->ival; break;
+            case P_MARGIN_RIGHT:  o->margin_right = d->ival; break;
+            case P_MARGIN_BOTTOM: o->margin_bottom = d->ival; break;
+            case P_MARGIN_LEFT:   o->margin_left = d->ival; break;
+            case P_PAD_TOP:    o->pad_top = d->ival; break;
+            case P_PAD_RIGHT:  o->pad_right = d->ival; break;
+            case P_PAD_BOTTOM: o->pad_bottom = d->ival; break;
+            case P_PAD_LEFT:   o->pad_left = d->ival; break;
+            case P_WIDTH:      o->width = d->ival; break;
+            case P_MAXWIDTH:   o->max_width = d->ival; break;
             default: break;
         }
     }
@@ -745,7 +862,11 @@ static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          const char *inline_style, size_t inline_len) {
     css_style out = { -1, -1, CSS_ALIGN_UNSET, 0, 0, -1, -1, CSS_DISP_UNSET,
-                      -1, CSS_JUSTIFY_UNSET, 0 };  /* ...font_scale, line_scale, bold... */
+                      -1, CSS_JUSTIFY_UNSET, 0,
+                      /* margin t,r,b,l / padding t,r,b,l / width / max_width */
+                      CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET,
+                      CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET,
+                      CSS_LEN_UNSET, CSS_LEN_UNSET };
     int ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { ws[k] = -1; wo[k] = -1; }
 

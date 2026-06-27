@@ -479,8 +479,122 @@ static void test_resolve_null_safe(void **state) {
     assert_int_equal(s.grid_cols, 0);
 }
 
+/* --- author box model (Hito 23b-3) --- */
+
+static void test_inline_box_longhands(void **state) {
+    (void)state;
+    css_style s = css_parse_inline(
+        "margin-top:10px; margin-right:20px; margin-bottom:30px; margin-left:40px;"
+        "padding-top:1px; padding-right:2px; padding-bottom:3px; padding-left:4px;"
+        "width:600px; max-width:800px", 0);
+    assert_int_equal(s.margin_top, 10);
+    assert_int_equal(s.margin_right, 20);
+    assert_int_equal(s.margin_bottom, 30);
+    assert_int_equal(s.margin_left, 40);
+    assert_int_equal(s.pad_top, 1);
+    assert_int_equal(s.pad_right, 2);
+    assert_int_equal(s.pad_bottom, 3);
+    assert_int_equal(s.pad_left, 4);
+    assert_int_equal(s.width, 600);
+    assert_int_equal(s.max_width, 800);
+}
+
+static void test_box_shorthand_expansion(void **state) {
+    (void)state;
+    /* one value: all four sides. */
+    css_style a = css_parse_inline("margin:5px", 0);
+    assert_int_equal(a.margin_top, 5);
+    assert_int_equal(a.margin_right, 5);
+    assert_int_equal(a.margin_bottom, 5);
+    assert_int_equal(a.margin_left, 5);
+    /* two values: vertical | horizontal. */
+    css_style b = css_parse_inline("margin:5px 10px", 0);
+    assert_int_equal(b.margin_top, 5);
+    assert_int_equal(b.margin_bottom, 5);
+    assert_int_equal(b.margin_right, 10);
+    assert_int_equal(b.margin_left, 10);
+    /* three values: top | horizontal | bottom. */
+    css_style c = css_parse_inline("margin:1px 2px 3px", 0);
+    assert_int_equal(c.margin_top, 1);
+    assert_int_equal(c.margin_right, 2);
+    assert_int_equal(c.margin_left, 2);
+    assert_int_equal(c.margin_bottom, 3);
+    /* four values: top right bottom left (clockwise). */
+    css_style d = css_parse_inline("padding:1px 2px 3px 4px", 0);
+    assert_int_equal(d.pad_top, 1);
+    assert_int_equal(d.pad_right, 2);
+    assert_int_equal(d.pad_bottom, 3);
+    assert_int_equal(d.pad_left, 4);
+}
+
+static void test_box_auto_and_centering(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("margin:0 auto; max-width:700px", 0);
+    assert_int_equal(s.margin_top, 0);
+    assert_int_equal(s.margin_bottom, 0);
+    assert_int_equal(s.margin_left, CSS_LEN_AUTO);
+    assert_int_equal(s.margin_right, CSS_LEN_AUTO);
+    assert_int_equal(s.max_width, 700);
+    /* margin: 10px auto -> vertical 10, horizontal auto. */
+    css_style m = css_parse_inline("margin:10px auto", 0);
+    assert_int_equal(m.margin_top, 10);
+    assert_int_equal(m.margin_left, CSS_LEN_AUTO);
+    /* width:auto -> unset; max-width:none -> unset. */
+    assert_int_equal(css_parse_inline("width:auto", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("max-width:none", 0).max_width, CSS_LEN_UNSET);
+}
+
+static void test_box_units_and_failclosed(void **state) {
+    (void)state;
+    /* em/rem -> x16 px. */
+    assert_int_equal(css_parse_inline("margin-left:2em", 0).margin_left, 32);
+    assert_int_equal(css_parse_inline("padding:1rem", 0).pad_top, 16);
+    /* bare 0 (no unit) accepted. */
+    assert_int_equal(css_parse_inline("margin-top:0", 0).margin_top, 0);
+    /* negative margins allowed; negative/auto padding & width dropped (unset). */
+    assert_int_equal(css_parse_inline("margin-top:-8px", 0).margin_top, -8);
+    assert_int_equal(css_parse_inline("padding-top:-8px", 0).pad_top, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("padding:auto", 0).pad_top, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width:-8px", 0).width, CSS_LEN_UNSET);
+    /* percent / viewport units dropped (no containing block) -> unset. */
+    assert_int_equal(css_parse_inline("width:50%", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("margin-left:5vw", 0).margin_left, CSS_LEN_UNSET);
+    /* unset by default (a declaration that touches only color). */
+    css_style def = css_parse_inline("color:#000", 0);
+    assert_int_equal(def.margin_top, CSS_LEN_UNSET);
+    assert_int_equal(def.pad_left, CSS_LEN_UNSET);
+    assert_int_equal(def.width, CSS_LEN_UNSET);
+    assert_int_equal(def.max_width, CSS_LEN_UNSET);
+}
+
+static void test_box_clamp_anti_dos(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("width:99999999px", 0).width, CSS_LEN_MAX);
+    assert_int_equal(css_parse_inline("margin-top:99999999px", 0).margin_top, CSS_LEN_MAX);
+    assert_int_equal(css_parse_inline("margin-top:-99999999px", 0).margin_top, -CSS_LEN_MAX);
+}
+
+static void test_box_sheet_cascade_inline_wins(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".card{max-width:600px;margin:0 auto;padding:24px}", 0, &sh), CSS_OK);
+    const char *cls[] = { "card" };
+    css_style s = css_resolve(sh, "div", NULL, cls, 1, "padding:40px", 0);
+    assert_int_equal(s.max_width, 600);
+    assert_int_equal(s.margin_left, CSS_LEN_AUTO);
+    assert_int_equal(s.pad_top, 40);   /* inline overrides the sheet */
+    assert_int_equal(s.pad_left, 40);
+    css_free(sh);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_inline_box_longhands),
+        cmocka_unit_test(test_box_shorthand_expansion),
+        cmocka_unit_test(test_box_auto_and_centering),
+        cmocka_unit_test(test_box_units_and_failclosed),
+        cmocka_unit_test(test_box_clamp_anti_dos),
+        cmocka_unit_test(test_box_sheet_cascade_inline_wins),
         cmocka_unit_test(test_inline_color_and_bg),
         cmocka_unit_test(test_inline_text_align),
         cmocka_unit_test(test_inline_font_size),

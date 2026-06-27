@@ -777,6 +777,92 @@ static void test_container_defaults(void **state) {
     pv_free(v);
 }
 
+/* --- author box model (Hito 23b-3) --- */
+
+/* A wrapper with max-width + margin:0 auto + horizontal padding centers a readable
+ * column: its descendant runs all carry the same horizontal box, even from a
+ * <style> rule (not just inline style=). */
+static void test_build_box_wrapper_centering_from_sheet(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>.page{max-width:600px;margin:0 auto;"
+        "padding-left:20px;padding-right:20px}</style>"
+        "<div class='page'><p>alpha</p><p>beta</p></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *alpha = find_text(v, "alpha");
+    const pv_run *beta = find_text(v, "beta");
+    assert_non_null(alpha);
+    assert_non_null(beta);
+    assert_int_equal(alpha->box_w, 600);
+    assert_int_equal(alpha->box_center, 1);
+    assert_int_equal(alpha->box_l, 20);
+    assert_int_equal(alpha->box_r, 20);
+    /* the wrapper is not the leaf block of these paragraphs, so its vertical
+     * margins do not override the leaf's UA margin. */
+    assert_int_equal(alpha->box_mt, PV_LEN_UNSET);
+    assert_int_equal(beta->box_w, 600);
+    assert_int_equal(beta->box_center, 1);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A leaf block's own box: vertical margins override the UA, horizontal padding +
+ * a fixed width inset and cap the content. No centering without margin:auto. */
+static void test_build_box_leaf_inline(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><p style='margin-top:50px;margin-bottom:5px;"
+        "padding-left:30px;width:400px'>solo</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *solo = find_text(v, "solo");
+    assert_non_null(solo);
+    assert_int_equal(solo->box_mt, 50);
+    assert_int_equal(solo->box_mb, 5);
+    assert_int_equal(solo->box_l, 30);
+    assert_int_equal(solo->box_r, 0);
+    assert_int_equal(solo->box_w, 400);
+    assert_int_equal(solo->box_center, 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A run with no author box carries the neutral defaults; pv_set_box fixes the
+ * last run and is NULL-safe. */
+static void test_box_defaults_and_setter(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>plain</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *p = find_text(v, "plain");
+    assert_non_null(p);
+    assert_int_equal(p->box_l, 0);
+    assert_int_equal(p->box_r, 0);
+    assert_int_equal(p->box_w, 0);
+    assert_int_equal(p->box_center, 0);
+    assert_int_equal(p->box_mt, PV_LEN_UNSET);
+    assert_int_equal(p->box_mb, PV_LEN_UNSET);
+    pv_free(v);
+    hp_document_free(doc);
+
+    pv_view *w = pv_new();
+    assert_int_equal(pv_append(w, PV_TEXT, 0, 0, "x", NULL), PV_OK);
+    pv_set_box(w, 12, 8, 500, 1, 40, 4);
+    assert_int_equal(pv_at(w, 0)->box_l, 12);
+    assert_int_equal(pv_at(w, 0)->box_r, 8);
+    assert_int_equal(pv_at(w, 0)->box_w, 500);
+    assert_int_equal(pv_at(w, 0)->box_center, 1);
+    assert_int_equal(pv_at(w, 0)->box_mt, 40);
+    assert_int_equal(pv_at(w, 0)->box_mb, 4);
+    pv_set_box(NULL, 0, 0, 0, 0, 0, 0); /* NULL-safe */
+    pv_free(w);
+}
+
 /* Finds the first PV_INPUT run whose name equals `name`; NULL if none. */
 static const pv_run *find_input(const pv_view *v, const char *name) {
     for (size_t i = 0; i < pv_count(v); ++i) {
@@ -1116,6 +1202,9 @@ int main(void) {
         cmocka_unit_test(test_build_grid_columns_from_sheet),
         cmocka_unit_test(test_build_container_sheet_inline_cascade),
         cmocka_unit_test(test_container_defaults),
+        cmocka_unit_test(test_build_box_wrapper_centering_from_sheet),
+        cmocka_unit_test(test_build_box_leaf_inline),
+        cmocka_unit_test(test_box_defaults_and_setter),
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),
         cmocka_unit_test(test_build_textarea_value),

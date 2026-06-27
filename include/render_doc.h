@@ -65,6 +65,11 @@ typedef struct rd_block {
     int              cont_gap;       /* container gap in px */
     int              cont_justify;   /* fx_justify of the container */
     int              cont_cols;      /* grid column count, or 0 */
+    /* Author box model (Hito 23b-3); set only with caps.css, else 0 / PV_LEN_UNSET.
+     * box_l/box_r: left/right insets px; box_w: content-width cap px (0 = none);
+     * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or
+     * PV_LEN_UNSET (use the user-agent margin). */
+    int              box_l, box_r, box_w, box_center, box_mt, box_mb;
     int              input_type;     /* RD_INPUT: pv_input_type, else 0 */
     char            *name;           /* RD_INPUT: control name, or NULL */
     char            *value;          /* RD_INPUT: control value, or NULL */
