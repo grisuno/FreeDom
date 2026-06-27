@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include "freebug.h"
 #include "page_view.h"
 
 #ifdef __cplusplus
@@ -58,6 +59,10 @@ typedef struct tab_page {
      * drives it through the normal load path, re-applying ALL network policy. */
     char    *nav_url;
     int      nav_replace;
+    /* Console output (console.* calls + any uncaught script exception) captured
+     * while loading the page, for the Freebug devtools. Owned; drained from the
+     * worker. Empty when JS did not run. Release via tab_page_free. */
+    fb_buffer console;
 } tab_page;
 
 /* Result of evaluating script: the value, or a JS error message. */
@@ -65,6 +70,9 @@ typedef struct tab_eval_result {
     char  *value;        /* owned; NUL-terminated; may be NULL */
     size_t value_len;
     int    is_exception; /* nonzero if value holds a JS error message, not a value */
+    /* console.* output produced by THIS evaluation (Freebug REPL transcript).
+     * Owned; release via tab_eval_result_free. */
+    fb_buffer console;
 } tab_eval_result;
 
 /* Pixels of a decoded image, produced inside the confined worker. data is owned

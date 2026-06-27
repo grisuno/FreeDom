@@ -347,6 +347,83 @@ static void test_load_without_js_does_not_run_script(void **state) {
     tab_close(t);
 }
 
+/* Finds a console entry at the given level whose text contains needle. */
+static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle) {
+    for (size_t i = 0; i < fb_buffer_count(log); ++i) {
+        const fb_entry *e = fb_buffer_at(log, i);
+        if (e != NULL && e->level == level && strstr(e->text, needle) != NULL) return e;
+    }
+    return NULL;
+}
+
+/* Freebug (FB-1): with run_js, the page's console.* output and any uncaught script
+ * error are captured and delivered to the parent in tab_page.console. */
+static void test_load_captures_console_and_error(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>console.log('hi', 42); console.warn('careful'); nope_fn();</script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+
+    /* console.log args space-joined, captured as FB_LOG. */
+    assert_non_null(console_find(&p.console, FB_LOG, "hi 42"));
+    /* console.warn captured as FB_WARN. */
+    assert_non_null(console_find(&p.console, FB_WARN, "careful"));
+    /* The ReferenceError from nope_fn() surfaced as an FB_ERROR entry. */
+    assert_non_null(console_find(&p.console, FB_ERROR, "nope_fn"));
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Freebug (FB-1): a no-JS load runs no scripts, so the console is empty. */
+static void test_load_without_js_has_empty_console(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>console.log('should not run');</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_int_equal((int)fb_buffer_count(&p.console), 0);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Freebug (FB-1): the REPL (tab_eval) returns the value AND the console output the
+ * evaluation produced, each eval reporting only its own transcript. */
+static void test_eval_captures_console_output(void **state) {
+    (void)state;
+    static const char H[] = "<html><body><p>x</p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    tab_page_free(&p);
+
+    tab_eval_result r;
+    assert_int_equal(tab_eval(t, "console.log('repl', 2+2); 7", 27, &r), TAB_OK);
+    assert_int_equal(r.is_exception, 0);
+    assert_string_equal(r.value, "7");
+    assert_int_equal((int)fb_buffer_count(&r.console), 1);
+    assert_int_equal(fb_buffer_at(&r.console, 0)->level, FB_LOG);
+    assert_string_equal(fb_buffer_at(&r.console, 0)->text, "repl 4");
+    tab_eval_result_free(&r);
+
+    /* A second eval reports only ITS own console, not the first eval's. */
+    assert_int_equal(tab_eval(t, "1+1", 3, &r), TAB_OK);
+    assert_string_equal(r.value, "2");
+    assert_int_equal((int)fb_buffer_count(&r.console), 0);
+    tab_eval_result_free(&r);
+
+    tab_close(t);
+}
+
 /* Real location (Hito 20e): the page URL passed to tab_load_full backs a real
  * location object the page's JS can read (no scripts need run for the read). */
 static void test_load_full_location_is_real(void **state) {
@@ -759,6 +836,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test_setup_teardown(test_eval_exception, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_persistent_state, setup_loaded, teardown),
         cmocka_unit_test(test_reload_replaces_page),
+        cmocka_unit_test(test_load_captures_console_and_error),
+        cmocka_unit_test(test_load_without_js_has_empty_console),
+        cmocka_unit_test(test_eval_captures_console_output),
         cmocka_unit_test(test_eval_without_load),
         cmocka_unit_test(test_binary_does_not_crash_parent),
         cmocka_unit_test(test_child_death_survived),

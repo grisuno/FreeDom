@@ -12,6 +12,7 @@
 #include "js_dom.h"
 
 #include "dom.h"
+#include "freebug.h"
 #include "js_sandbox.h"
 
 #include <stdint.h>
@@ -463,6 +464,105 @@ jd_status jd_install(js_context *ctx, dom_index *idx) {
     int shim_ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return shim_ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
+/* --- capturing console (Freebug) --- */
+
+/* Appends src[0..srclen) to *buf (grown on demand), hard-capped at
+ * FB_MAX_ENTRY_BYTES total so a hostile console.log of a huge string costs bounded
+ * work/memory here too (fb_buffer_push would truncate anyway). Returns 1 when the
+ * cap is reached or an allocation fails (caller stops), else 0. */
+static int cb_append(char **buf, size_t *len, size_t *cap,
+                     const char *src, size_t srclen) {
+    if (*len >= FB_MAX_ENTRY_BYTES) return 1;
+    size_t room = FB_MAX_ENTRY_BYTES - *len;
+    if (srclen > room) srclen = room;
+    if (*len + srclen + 1 > *cap) {
+        size_t ncap = *cap ? *cap * 2 : 128;
+        while (ncap < *len + srclen + 1) ncap *= 2;
+        if (ncap > FB_MAX_ENTRY_BYTES + 1) ncap = FB_MAX_ENTRY_BYTES + 1;
+        char *g = (char *)realloc(*buf, ncap);
+        if (g == NULL) return 1;
+        *buf = g; *cap = ncap;
+    }
+    if (srclen != 0) memcpy(*buf + *len, src, srclen);
+    *len += srclen;
+    (*buf)[*len] = '\0';
+    return (*len >= FB_MAX_ENTRY_BYTES);
+}
+
+/* console.<level>(...args): join args with single spaces (each via toString),
+ * push the line into the runtime's fb_buffer. magic carries the fb_level. A
+ * toString that throws is swallowed (its exception cleared) so logging never
+ * disturbs the calling script. */
+static JSValue m_console(JSContext *ctx, JSValueConst this_val,
+                         int argc, JSValueConst *argv, int magic) {
+    (void)this_val;
+    fb_buffer *log = (fb_buffer *)JS_GetRuntimeOpaque(JS_GetRuntime(ctx));
+    if (log == NULL) return JS_UNDEFINED; /* capture disabled: silent no-op */
+
+    char *msg = NULL;
+    size_t len = 0, cap = 0;
+    int full = 0;
+    for (int i = 0; i < argc && !full; ++i) {
+        if (i > 0 && cb_append(&msg, &len, &cap, " ", 1)) break;
+        size_t sl = 0;
+        const char *s = JS_ToCStringLen(ctx, &sl, argv[i]);
+        if (s == NULL) {
+            JS_FreeValue(ctx, JS_GetException(ctx)); /* swallow toString error */
+            full = cb_append(&msg, &len, &cap, "<unprintable>", 13);
+            continue;
+        }
+        full = cb_append(&msg, &len, &cap, s, sl);
+        JS_FreeCString(ctx, s);
+    }
+    fb_buffer_push(log, magic, (msg != NULL) ? msg : "", len);
+    free(msg);
+    return JS_UNDEFINED;
+}
+
+/* Non-capturing console methods scripts commonly call: defined as no-ops so they
+ * never throw a ReferenceError (they produce no Freebug entry). */
+static const char JD_CONSOLE_EXTRA[] =
+    "(function(){var c=globalThis.console;"
+    "['assert','group','groupCollapsed','groupEnd','count','countReset',"
+    "'time','timeEnd','timeLog','table','clear','dirxml'].forEach("
+    "function(k){ if(typeof c[k]!=='function') c[k]=function(){}; });})();";
+
+jd_status jd_install_console(js_context *ctx, fb_buffer *log) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+
+    /* The buffer is reachable only from native code, never from script. */
+    JS_SetRuntimeOpaque(JS_GetRuntime(jsctx), (void *)log);
+
+    JSValue console = JS_NewObject(jsctx);
+    if (JS_IsException(console)) return JD_ERR_OOM;
+
+    static const struct { const char *name; int level; } LV[] = {
+        { "log",   FB_LOG },   { "info", FB_INFO }, { "warn",  FB_WARN },
+        { "error", FB_ERROR }, { "debug", FB_DEBUG }, { "trace", FB_DEBUG },
+        { "dir",   FB_LOG },
+    };
+    for (size_t i = 0; i < sizeof LV / sizeof LV[0]; ++i) {
+        JSValue fn = JS_NewCFunctionMagic(jsctx, m_console, LV[i].name, 1,
+                                          JS_CFUNC_generic_magic, LV[i].level);
+        if (JS_IsException(fn)) { JS_FreeValue(jsctx, console); return JD_ERR_OOM; }
+        JS_DefinePropertyValueStr(jsctx, console, LV[i].name, fn, JS_PROP_ENUMERABLE);
+    }
+
+    JSValue global = JS_GetGlobalObject(jsctx);
+    if (JS_IsException(global)) { JS_FreeValue(jsctx, console); return JD_ERR_OOM; }
+    int rc = JS_SetPropertyStr(jsctx, global, "console", console); /* consumes console */
+    JS_FreeValue(jsctx, global);
+    if (rc < 0) return JD_ERR_INTERNAL;
+
+    JSValue r = JS_Eval(jsctx, JD_CONSOLE_EXTRA, sizeof JD_CONSOLE_EXTRA - 1,
+                        "<console-extra>", JS_EVAL_TYPE_GLOBAL);
+    int ok = !JS_IsException(r);
+    JS_FreeValue(jsctx, r);
+    return ok ? JD_OK : JD_ERR_INTERNAL;
 }
 
 jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts) {

@@ -2,6 +2,7 @@
 #define FREEDOM_JS_DOM_H
 
 #include "dom.h"
+#include "freebug.h"
 #include "js_sandbox.h"
 #include "url.h"
 
@@ -34,6 +35,14 @@ typedef enum jd_status {
  * outlive ctx. Intended to be called on a freshly created context, before any
  * untrusted script runs. */
 jd_status jd_install(js_context *ctx, dom_index *idx);
+
+/* Installs a capturing `console` (log/info/warn/error/debug + no-op group/time/...)
+ * that appends each call's formatted message into log, so the developer console
+ * ("Freebug") can show page-script output and errors. The buffer pointer is held in
+ * the engine runtime opaque (unreachable from script); log must outlive ctx. Pass
+ * log == NULL to make console a silent no-op. Call after jd_install (it overrides
+ * the no-op console the document shim defines). ctx == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_install_console(js_context *ctx, fb_buffer *log);
 
 /* Installs a real, read-only `location` (and document.location / document.URL) over
  * the page's URL, and arms JS-navigation capture: location.href= / assign / replace /

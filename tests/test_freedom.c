@@ -195,6 +195,65 @@ static void test_download_pdf_requires_path(void **state) {
     assert_int_equal(rc, 2);
 }
 
+/* --- headless console (Freebug --dump-console) --- */
+
+/* --dump-console runs the page's JS and prints console.* output + uncaught errors. */
+static void test_dump_console_shows_output_and_error(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>JS</title></head><body><p>x</p>"
+        "<script>console.log('LOGMARK', 1+1); console.warn('WARNMARK');"
+        "boomUndefined();</script></body></html>";
+    const char *path = "__freedom_console.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--dump-console %s", path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    char out[4096];
+    FILE *o = fopen(OUT_FILE, "r");
+    assert_non_null(o);
+    size_t got = fread(out, 1, sizeof out - 1, o);
+    out[got] = '\0';
+    fclose(o);
+
+    assert_non_null(strstr(out, "Freebug console"));
+    assert_non_null(strstr(out, "[log] LOGMARK 2"));        /* console.log + computed arg */
+    assert_non_null(strstr(out, "[warn] WARNMARK"));         /* console.warn */
+    assert_non_null(strstr(out, "[error] "));               /* uncaught ReferenceError */
+    assert_non_null(strstr(out, "boomUndefined"));           /* error names the missing fn */
+
+    unlink(path);
+}
+
+/* Plain headless (no --dump-console) does not run JS and prints no console section. */
+static void test_no_dump_console_without_flag(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>JS</title></head><body><p>x</p>"
+        "<script>console.log('SHOULD_NOT_APPEAR');</script></body></html>";
+    const char *path = "__freedom_noconsole.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[2048];
+    int rc;
+    assert_int_equal(run_freedom(path, out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_null(strstr(out, "Freebug console"));
+    assert_null(strstr(out, "SHOULD_NOT_APPEAR"));
+
+    unlink(path);
+}
+
 /* --- network policy --- */
 
 static void test_rejects_http_url(void **state) {
@@ -217,6 +276,8 @@ int main(void) {
         cmocka_unit_test(test_missing_file),
         cmocka_unit_test(test_download_pdf_local),
         cmocka_unit_test(test_download_pdf_requires_path),
+        cmocka_unit_test(test_dump_console_shows_output_and_error),
+        cmocka_unit_test(test_no_dump_console_without_flag),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

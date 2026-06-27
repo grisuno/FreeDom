@@ -27,6 +27,14 @@ OPTIONS:
                         para que colores/text-align/font-size/line-height sean
                         revisables visualmente. Solo render local: el cap de
                         imágenes/red sigue OFF (nunca fetch, no telefonea). Default off.
+  --js[=off|allowlist|on]   política de JS de página. En el GUI la lee FREEDOM_JS
+                        (default allowlist vía js.conf). En headless, corre el JS
+                        de la página solo cuando esto resuelve a "on".
+  --dump-console        modo headless: corre el JS de la página e imprime la consola
+                        capturada (Freebug) — cada console.* y cualquier excepción no
+                        capturada del script. Implica JS encendido (una consola con JS
+                        apagado no tendría sentido), independientemente del orden de los
+                        flags. Es la forma de "ver" el comportamiento de JS sin Wayland.
 
 [url-or-file]:
   - "https://host/..."  → se obtiene con secure_fetch (TLS 1.3, KE híbrido PQ).
@@ -35,6 +43,11 @@ OPTIONS:
 
 SALIDA headless (stdout):
   <título>\n\n<texto extraído>\n
+
+SALIDA --dump-console (stdout, tras la salida normal de la página):
+  === Freebug console (<n>) ===
+  [<nivel>] <texto>            (una línea por entrada; nivel = log/info/warn/error/debug)
+  [notice] console output was truncated (buffer full)   (solo si se llenó el buffer)
 
 SALIDA --download-pdf (fichero):
   Un PDF vectorial US Letter en PATH (mismo pipeline de render que la pantalla y

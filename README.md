@@ -150,7 +150,45 @@ WAYLAND_DISPLAY=wayland-1 ./build/freedom
 
 # Run in headless mode
 ./freedom --headless https://example.com
+
+# See what a page's JavaScript does, without a Wayland window (developer console).
+# Runs the page's JS and prints every console.* call + any uncaught error.
+./freedom --dump-console https://example.com
 ```
+
+### Seeing JavaScript: the headless console
+
+`--dump-console` runs the page's JavaScript and prints the captured console — every
+`console.log`/`info`/`warn`/`error`/`debug` call, plus any uncaught script error — so you are
+no longer blind about what the page's JS does and why it fails:
+
+```
+$ ./freedom --dump-console page.html
+...page text...
+=== Freebug console (3) ===
+[log] hello from page 2
+[warn] be careful
+[error] ReferenceError: notDefinedFn is not defined
+```
+
+It implies JS on (a console dump with JS off is pointless) and is a headless diagnostic, so it
+works in CI / over SSH / for an AI agent — no display required.
+
+### Freebug: the in-window developer console (F12)
+
+In the GUI, press **F12** (or pick **"Freebug console (F12)"** in the hamburger menu) to open
+the **Freebug** developer console in a second window:
+
+- The **log pane** shows the current page's `console.*` output and any uncaught JavaScript error,
+  colour-coded by level.
+- The **editor** below is a JavaScript REPL: type or paste code and run it with **`Ctrl+Enter`**.
+  It evaluates against the **live page** (the per-tab sandboxed worker stays alive for the console),
+  so you see the returned value, any exception, *and* the console output the snippet produced.
+- `Ctrl+L` clears the editor, drag the divider to resize the panes, mouse-wheel / arrows scroll the
+  log, and `F12` / `Esc` closes the window.
+
+So you are no longer blind about what a page's JS does or why it fails — and you can test fixes
+interactively. The headless `--dump-console` above prints the same captured console for CI / agents.
 
 ## Address Bar, Search & Keyboard Shortcuts
 

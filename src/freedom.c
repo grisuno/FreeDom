@@ -8,6 +8,8 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include "freebug.h"
+#include "js_policy.h"
 #include "net_realm.h"
 #include "render_doc.h"
 #include "render_policy.h"
@@ -33,7 +35,8 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
     fprintf(fp, "  --torify: also route ordinary clearnet through Tor (implies --tor)\n");
-    fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy in the GUI (default allowlist via js.conf)\n");
+    fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy (GUI; headless runs JS when this resolves to 'on')\n");
+    fprintf(fp, "  --dump-console: headless, run the page's JS and print the captured console (Freebug); implies JS on\n");
 }
 
 static int is_https_url(const char *s) {
@@ -61,6 +64,14 @@ static const char *g_pdf_out = NULL;
  * reviewable without a Wayland window. Local render only; the network image cap
  * stays off, so this never fetches or phones home. Default off (Privacy by Default). */
 static int g_author_css = 0;
+
+/* Set by --dump-console: after the headless render, print the captured Freebug
+ * console (page console.* output + any uncaught script error). Implies running JS. */
+static int g_dump_console = 0;
+
+/* When nonzero, the headless render runs the page's inline JS (tab_load_full run_js).
+ * Set by --dump-console and by --js resolving to "on". Default off (Secure by Default). */
+static int g_headless_js = 0;
 
 /* Tor/I2P routing for headless mode (off by default; opt-in via CLI flags). */
 static nr_config global_net = { 0, 0, 0 };
@@ -156,9 +167,23 @@ static void print_doc(const rd_doc *doc) {
     if (line_open) putchar('\n');
 }
 
+/* Prints the captured Freebug console (the developer-visible JS transcript) to
+ * stdout, one entry per line, prefixed with its level. Deterministic order; an
+ * empty buffer prints just the header so "nothing logged" is unambiguous. */
+static void print_console(const fb_buffer *log) {
+    size_t n = fb_buffer_count(log);
+    printf("\n=== Freebug console (%zu) ===\n", n);
+    for (size_t i = 0; i < n; ++i) {
+        const fb_entry *e = fb_buffer_at(log, i);
+        printf("[%s] %s\n", fb_level_name(e->level), e->text);
+    }
+    if (log->overflow) printf("[notice] console output was truncated (buffer full)\n");
+}
+
 /* Loads html into a fresh tab and prints the structured render of the page.
  * top_url is the page's https origin (for per-image policy decisions) or NULL for
- * a local file. Returns EXIT_OK or EXIT_ERROR; on error no partial page output. */
+ * a local file. Runs the page's JS when g_headless_js (so --dump-console can show
+ * console output/errors). Returns EXIT_OK or EXIT_ERROR; on error no partial output. */
 static int render_page(const char *html, size_t len, const char *top_url) {
     tab *t = NULL;
     tab_status ts = tab_open(&t);
@@ -169,7 +194,7 @@ static int render_page(const char *html, size_t len, const char *top_url) {
 
     tab_page page;
     memset(&page, 0, sizeof page);
-    ts = tab_load(t, html, len, &page);
+    ts = tab_load_full(t, html, len, top_url, g_headless_js, 0, 0, &page);
     if (ts != TAB_OK) {
         fprintf(stderr, "freedom: failed to load page (status %d)\n", (int)ts);
         tab_close(t);
@@ -213,6 +238,9 @@ static int render_page(const char *html, size_t len, const char *top_url) {
         printf("\n%s\n", page.text); /* fallback if the display list is empty */
     }
     rd_free(doc);
+
+    /* Developer console (Freebug): show what the page's JS logged and any error. */
+    if (g_dump_console) print_console(&page.console);
 
     tab_page_free(&page);
     tab_close(t);
@@ -296,6 +324,7 @@ int main(int argc, char **argv) {
     tab_worker_dispatch(argc, argv);
 
     int headless = 0;
+    int js_on = 0; /* the --js flag resolved to "on" (headless then runs JS) */
     const char *target = NULL;
 
     for (int i = 1; i < argc; ++i) {
@@ -340,8 +369,13 @@ int main(int argc, char **argv) {
             global_net.torify_clearnet = 1;
         } else if (strcmp(arg, "--js") == 0) {
             setenv("FREEDOM_JS", "on", 1);            /* GUI reads FREEDOM_JS */
+            js_on = 1;                                 /* headless: run JS too */
         } else if (strncmp(arg, "--js=", 5) == 0) {
             setenv("FREEDOM_JS", arg + 5, 1);          /* off|allowlist|on */
+            js_on = (jsp_mode_from_str(arg + 5) == JSP_ON); /* headless runs JS only on 'on' */
+        } else if (strcmp(arg, "--dump-console") == 0) {
+            g_dump_console = 1;
+            headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (arg[0] == '-') {
             fprintf(stderr, "freedom: unknown option '%s'\n", arg);
             print_usage(stderr, argv[0]);
@@ -350,6 +384,11 @@ int main(int argc, char **argv) {
             target = arg;
         }
     }
+
+    /* --dump-console always runs JS (a console dump with JS off is pointless), so it
+     * forces JS on regardless of any --js flag's order; otherwise headless runs JS
+     * only when --js resolved to "on". */
+    g_headless_js = g_dump_console || js_on;
 
     if (headless) {
         if (target == NULL) {

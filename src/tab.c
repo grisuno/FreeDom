@@ -17,6 +17,7 @@
 
 #include "anti_fp.h"
 #include "dom.h"
+#include "freebug.h"
 #include "html_parse.h"
 #include "image_decode.h"
 #include "js_dom.h"
@@ -93,6 +94,7 @@ typedef struct child_state {
     dom_index   *idx;
     js_context  *js;
     uint64_t     session_key;
+    fb_buffer    log; /* console capture (Freebug); persists across loads/evals */
 } child_state;
 
 static void child_reset_page(child_state *cs) {
@@ -140,6 +142,11 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
      || je_install_canvas(js, readback_key) != JE_OK) {
         js_context_free(js); dom_free(idx); hp_document_free(doc); return -1;
     }
+    /* Capturing console for Freebug: a fresh page starts with an empty transcript;
+     * the buffer (stable child_state member) is wired into the new context's runtime
+     * opaque. Installed regardless of run_js so the REPL works on any page. */
+    fb_buffer_reset(&cs->log);
+    (void)jd_install_console(js, &cs->log);
     /* Install a real `location` over the page URL. url_split is https-only; a local
      * file:// (or empty) URL still gets href + navigation capture (parts == NULL). */
     if (page_url != NULL && page_url[0] != '\0') {
@@ -241,7 +248,25 @@ static int write_view(int wfd, const pv_view *v) {
     return 0;
 }
 
-/* Response: [ok:int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace:int32].
+/* Console section (Freebug): [n:int32] then per entry [level:int32][len:size_t][text].
+ * n is bounded by FB_MAX_ENTRIES and each len by FB_MAX_ENTRY_BYTES (the buffer
+ * enforces both), so a hostile worker cannot amplify the stream. */
+static int write_console(int wfd, const fb_buffer *log) {
+    int32_t n = (int32_t)fb_buffer_count(log);
+    if (write_full(wfd, &n, sizeof n) != 0) return -1;
+    for (int32_t i = 0; i < n; ++i) {
+        const fb_entry *e = fb_buffer_at(log, (size_t)i);
+        int32_t level = e->level;
+        size_t  elen  = e->len;
+        if (write_full(wfd, &level, sizeof level) != 0
+         || write_full(wfd, &elen, sizeof elen) != 0
+         || (elen != 0 && write_full(wfd, e->text, elen) != 0))
+            return -1;
+    }
+    return 0;
+}
+
+/* Response: [ok:int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace:int32][console].
  * navreq is the RAW (unresolved) navigation the page's JS requested; the parent gates it
  * with ln_resolve. On any failure the page is reset and ok==0 is reported (no partial state). */
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
@@ -263,7 +288,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         if (scripts != NULL) {
             js_result r;
             memset(&r, 0, sizeof r);
-            (void)js_eval(cs->js, scripts, sl, &r);
+            js_status es = js_eval(cs->js, scripts, sl, &r);
+            /* Surface an uncaught script error in the Freebug console (so the
+             * developer sees what broke), in addition to letting the page render. */
+            if (es != JS_OK && r.is_exception && r.value != NULL)
+                fb_buffer_push(&cs->log, FB_ERROR, r.value, r.value_len);
             js_result_free(&r);
             hp_free(scripts);
         }
@@ -300,7 +329,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && write_view(wfd, view) == 0
             && write_full(wfd, &nlen, sizeof nlen) == 0
             && (nlen == 0 || write_full(wfd, navbuf, nlen) == 0)
-            && write_full(wfd, &nav_replace, sizeof nav_replace) == 0);
+            && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
+            && write_console(wfd, &cs->log) == 0);
     }
     hp_free(title);
     hp_free(text);
@@ -317,6 +347,9 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
         return;
     }
 
+    /* Fresh transcript: this eval reports only its own console output. */
+    fb_buffer_reset(&cs->log);
+
     js_result r;
     js_status s = js_eval(cs->js, js, len, &r);
     int32_t  ok = 1;
@@ -327,7 +360,8 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
     if (write_full(wfd, &ok, sizeof ok) == 0) {
         (void)(write_full(wfd, &is_exc, sizeof is_exc) == 0
             && write_full(wfd, &vlen, sizeof vlen) == 0
-            && (vlen == 0 || write_full(wfd, val, vlen) == 0));
+            && (vlen == 0 || write_full(wfd, val, vlen) == 0)
+            && write_console(wfd, &cs->log) == 0);
     }
     js_result_free(&r);
 }
@@ -436,6 +470,7 @@ static void tab_worker_run(int rfd, int wfd) {
     }
 
     child_reset_page(&cs);
+    fb_buffer_free(&cs.log);
     _exit(0);
 }
 
@@ -608,6 +643,31 @@ static int read_view(int fd, pv_view **out) {
     return 0;
 }
 
+/* Reads the console section written by write_console into out (a zero-initialised
+ * fb_buffer). Bounds the entry count and each length against amplification from a
+ * hostile child, mirroring the buffer's own caps. */
+static int read_console(int fd, fb_buffer *out) {
+    int32_t n = 0;
+    if (read_full(fd, &n, sizeof n) != 0) return -1;
+    if (n < 0 || (size_t)n > FB_MAX_ENTRIES) return -1;
+    for (int32_t i = 0; i < n; ++i) {
+        int32_t level = 0;
+        size_t  elen  = 0;
+        if (read_full(fd, &level, sizeof level) != 0
+         || read_full(fd, &elen, sizeof elen) != 0) return -1;
+        if (elen > FB_MAX_ENTRY_BYTES) return -1;
+        char *txt = NULL;
+        if (elen != 0) {
+            txt = (char *)malloc(elen);
+            if (txt == NULL) return -1;
+            if (read_full(fd, txt, elen) != 0) { free(txt); return -1; }
+        }
+        (void)fb_buffer_push(out, level, (txt != NULL) ? txt : "", elen);
+        free(txt);
+    }
+    return 0;
+}
+
 /* Sends [op][len][payload]; classifies a transport failure as dead vs io. */
 static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len) {
     if (write_full(t->req_fd, &op, 1) != 0
@@ -756,6 +816,14 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
         free(title); free(text); free(navreq); pv_free(view);
         return io_failure(t);
     }
+    /* Captured console transcript for Freebug. */
+    fb_buffer console;
+    fb_buffer_init(&console);
+    if (read_console(t->resp_fd, &console) != 0) {
+        free(title); free(text); free(navreq); pv_free(view);
+        fb_buffer_free(&console);
+        return io_failure(t);
+    }
 
     /* Gate the raw request HERE (trusted parent, Zero Trust): a compromised worker
      * cannot drive the browser off-policy. ln_resolve allows only https / a local
@@ -767,6 +835,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
             nav_url = strdup(ln.target);
             if (nav_url == NULL) {
                 free(title); free(text); free(navreq); pv_free(view);
+                fb_buffer_free(&console);
                 return TAB_ERR_OOM;
             }
         }
@@ -778,6 +847,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     out->view  = view;
     out->nav_url = nav_url;
     out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
+    out->console = console; /* ownership moves to the caller (tab_page_free) */
     return TAB_OK;
 }
 
@@ -803,9 +873,18 @@ tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out) {
     size_t vlen = 0;
     if (read_field(t->resp_fd, &val, &vlen) != 0) return io_failure(t);
 
+    /* Console output produced by this eval (Freebug REPL transcript). */
+    fb_buffer console;
+    fb_buffer_init(&console);
+    if (read_console(t->resp_fd, &console) != 0) {
+        free(val); fb_buffer_free(&console);
+        return io_failure(t);
+    }
+
     out->value = val;
     out->value_len = vlen;
     out->is_exception = is_exc ? 1 : 0;
+    out->console = console; /* ownership moves to the caller (tab_eval_result_free) */
     return TAB_OK;
 }
 
@@ -880,6 +959,7 @@ void tab_page_free(tab_page *p) {
     free(p->text);
     pv_free(p->view);
     free(p->nav_url);
+    fb_buffer_free(&p->console);
     p->title = NULL;
     p->text = NULL;
     p->view = NULL;
@@ -892,6 +972,7 @@ void tab_page_free(tab_page *p) {
 void tab_eval_result_free(tab_eval_result *r) {
     if (r == NULL) return;
     free(r->value);
+    fb_buffer_free(&r->console);
     r->value = NULL;
     r->value_len = 0;
     r->is_exception = 0;

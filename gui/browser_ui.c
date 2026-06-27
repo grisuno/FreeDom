@@ -17,6 +17,7 @@
 #include "css.h"
 #include "css_color.h"
 #include "download.h"
+#include "freebug.h"
 #include "hostblock.h"
 #include "image_decode.h"
 #include "js_policy.h"
@@ -132,7 +133,8 @@ typedef enum ui_menu_action {
     UI_MENU_I2P,      /* toggles I2P routing for .i2p */
     UI_MENU_JS,       /* cycles the JS policy (off -> allowlist -> on) */
     UI_MENU_READER,   /* toggles distraction-free (reader) mode; re-renders from cache */
-    UI_MENU_PDF       /* action (not a toggle): export the page to a vector PDF */
+    UI_MENU_PDF,      /* action (not a toggle): export the page to a vector PDF */
+    UI_MENU_FREEBUG   /* toggles the Freebug developer console (second window) */
 } ui_menu_action;
 
 typedef struct ui_menu_item {
@@ -152,6 +154,7 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Tor routing (.onion)", UI_MENU_TOR,   0,                          0 },
     { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
     { "JavaScript",           UI_MENU_JS,    0,                          0 },
+    { "Freebug console (F12)", UI_MENU_FREEBUG, 0,                       0 },
     { "Save as PDF (Ctrl+P)", UI_MENU_PDF,   0,                          0 },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
@@ -337,7 +340,34 @@ typedef struct browser_window {
     tab_ctx tab_slots[UI_MAX_TABS];
     int     tab_count;
     int     active_tab;
+
+    /* Freebug developer console (F12 / hamburger). The active page's worker is kept
+     * ALIVE after rendering (tab_worker) so the console REPL can tab_eval against the
+     * live page context; console holds the captured console.* output + uncaught script
+     * errors of the active page; freebug is the second Wayland toplevel (NULL until
+     * first opened). kbd_focus/ptr_focus track which surface holds input focus, so the
+     * shared seat listeners route keys/pointer to the right window. */
+    struct tab        *tab_worker; /* forward-declared; tab.h is included further down */
+    fb_buffer          console;
+    struct freebug_window *freebug;
+    struct wl_surface *kbd_focus;
+    struct wl_surface *ptr_focus;
 } browser_window;
+
+/* Freebug second-window forward declarations (defined further down, but referenced
+ * by render_current_ex, the menu and the input listeners above their definition). */
+typedef struct freebug_window freebug_window;
+static void freebug_toggle(browser_window *w);
+static void freebug_redraw(browser_window *w);
+static void freebug_destroy(browser_window *w);
+static int  freebug_is_open(const browser_window *w);
+static int  freebug_owns_surface(const browser_window *w, const struct wl_surface *sf);
+static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+                               const char *utf8, int n, int ctrl, int shift);
+static void freebug_pointer_button(browser_window *w, uint32_t serial,
+                                   uint32_t button, uint32_t state);
+static void freebug_pointer_motion(browser_window *w);
+static void freebug_pointer_axis(browser_window *w, wl_fixed_t value);
 
 static void redraw(browser_window *w);
 
@@ -1106,18 +1136,36 @@ static void do_load(browser_window *w, const char *url); /* JS navigation re-ent
  * parent (tab) already gated it (ln_resolve). We then drive it through the normal
  * load path so it re-applies ALL network policy. A toggle re-render passes 0 so a
  * settled page is not re-navigated every time the user flips a switch. */
-static void render_current_ex(browser_window *w, int allow_js_nav) {
-    clear_doc(w);
-    if (w->cur_html == NULL) return;
-
-    /* Resolve the JS policy for THIS page's host (Secure by Default: off unless the
-     * global mode is ON or the host is on the js.conf allowlist). caps.js drives the
-     * worker's <noscript> handling and is the seam for future script execution. */
+/* Resolves the JS policy for the current page's host (Secure by Default: off unless
+ * the global mode is ON or the host is on the js.conf allowlist). Pure read of the
+ * window state; reused by render_current_ex and the Freebug REPL's lazy worker. */
+static int compute_page_js(const browser_window *w) {
     int js_host_ok = 0;
     char js_host[256];
     if (w->cur_top != NULL && host_from_url(w->cur_top, js_host, sizeof js_host))
         js_host_ok = hb_is_allowlisted(w->js_hosts, js_host);
-    w->caps.js = jsp_enabled(w->js_mode, js_host_ok);
+    return jsp_enabled(w->js_mode, js_host_ok);
+}
+
+/* Drops the kept-alive REPL worker and clears the (active-tab) console transcript.
+ * Used when the active page changes WITHOUT a re-render (tab switch / new / close):
+ * a later eval lazily rebinds the worker to the now-active page. */
+static void drop_repl_worker(browser_window *w) {
+    if (w->tab_worker != NULL) { tab_close(w->tab_worker); w->tab_worker = NULL; }
+    fb_buffer_reset(&w->console);
+    if (w->freebug != NULL) freebug_redraw(w);
+}
+
+static void render_current_ex(browser_window *w, int allow_js_nav) {
+    clear_doc(w);
+    if (w->cur_html == NULL) return;
+
+    /* A fresh render replaces the page: drop the previous tab's still-alive worker
+     * (kept for the Freebug REPL) so a new one binds to the new page. */
+    if (w->tab_worker != NULL) { tab_close(w->tab_worker); w->tab_worker = NULL; }
+
+    /* caps.js drives the worker's <noscript> handling and inline-script execution. */
+    w->caps.js = compute_page_js(w);
 
     tab *t = NULL;
     if (tab_open(&t) != TAB_OK) {
@@ -1175,8 +1223,16 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t); /* fetch + decode allowed images in the still-open worker */
 
+    /* Move the page's captured console transcript into the window for Freebug, then
+     * keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this
+     * live page. The next render (or a tab switch) closes it. */
+    fb_buffer_free(&w->console);
+    w->console = page.console;
+    fb_buffer_init(&page.console); /* ownership moved; tab_page_free frees an empty buffer */
+
     tab_page_free(&page);
-    tab_close(t);
+    w->tab_worker = t;
+    if (w->freebug != NULL) freebug_redraw(w); /* refresh the console pane if open */
 }
 
 /* Re-render from cache without honoring JS navigation (capability/theme toggles). */
@@ -1377,6 +1433,7 @@ static void tab_switch(browser_window *w, int idx) {
      * work. Clear the spinner now so the parked tab does not show it on return. */
     w->net_gen++;
     w->loading = 0;
+    drop_repl_worker(w); /* active page changes without a render; rebind on next eval */
     tab_save(w);
     w->active_tab = idx;
     tab_restore(w);
@@ -1404,6 +1461,7 @@ static void tab_new(browser_window *w, const char *url) {
     w->active_tab = idx;
 
     /* Blank live page, then load. */
+    drop_repl_worker(w); /* the previous tab's worker/console must not bleed into the new one */
     w->doc = NULL; w->hover_href = NULL;
     w->inputs = NULL; w->input_count = 0; w->focused_input = -1;
     w->images = NULL; w->image_count = 0;
@@ -1427,6 +1485,7 @@ static void uitab_close(browser_window *w, int idx) {
          * later painted onto whichever tab becomes active. Closing a BACKGROUND tab
          * leaves the active tab's load untouched (its generation still matches). */
         w->net_gen++;
+        drop_repl_worker(w); /* the active page is going away; rebind on next eval */
         free_live_page(w);
     } else {
         tab_ctx_release(&w->tab_slots[idx]);
@@ -2829,6 +2888,7 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_I2P)   return w->net_cfg.i2p_enabled;
     if (it->action == UI_MENU_JS)    return w->js_mode != JSP_OFF;
     if (it->action == UI_MENU_READER) return w->reader;
+    if (it->action == UI_MENU_FREEBUG) return freebug_is_open(w);
     if (it->action == UI_MENU_PDF)   return 0; /* an action, never "checked" */
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
@@ -2890,6 +2950,11 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     if (it->action == UI_MENU_PDF) {
         w->menu_open = 0; /* dismiss the menu, then export */
         export_pdf(w);
+        return;
+    }
+    if (it->action == UI_MENU_FREEBUG) {
+        w->menu_open = 0; /* dismiss the menu, then open/close the console window */
+        freebug_toggle(w);
         return;
     }
     bool *flag = (bool *)((char *)&w->caps + it->cap_offset);
@@ -3462,19 +3527,491 @@ static void update_hover(browser_window *w) {
     redraw(w);
 }
 
+/* ===================== Freebug (developer console, second window) ===================== */
+/* A second Wayland xdg_toplevel: a log pane (the active page's captured console.* +
+ * uncaught script errors, held in browser_window.console) over a JS REPL editor that
+ * tab_eval's against the live page worker (browser_window.tab_worker, kept alive after
+ * render). Opened with F12 or the hamburger menu. It shares display/compositor/shm/
+ * wm_base/seat with the main window; the shared seat listeners route input here while
+ * this surface holds focus (kbd_focus/ptr_focus). */
+
+#define FBW_W          760
+#define FBW_H          560
+#define FBW_HEADER     26.0
+#define FBW_PAD         8.0
+#define FBW_LINE       16.0
+#define FBW_GUTTER     16.0
+#define FBW_MIN_SPLIT   0.20
+#define FBW_MAX_SPLIT   0.88
+
+struct freebug_window {
+    browser_window      *owner;
+    struct wl_surface   *surface;
+    struct xdg_surface  *xdg_surface;
+    struct xdg_toplevel *xdg_toplevel;
+    struct zxdg_toplevel_decoration_v1 *deco;
+    int    width, height;
+    int    configured;
+    int    visible;
+    struct wl_buffer *buffer;
+    void  *shm_data;
+    size_t shm_size;
+    cairo_surface_t *cairo_surface;
+    double split;          /* log-pane fraction of the body height */
+    double scroll;         /* log scroll offset (px) */
+    int    dragging_split; /* the divider is being dragged */
+    tf_field editor;       /* the JS REPL input (newlines allowed) */
+};
+
+/* y of the divider between the log pane and the editor. */
+static double fbw_split_y(const freebug_window *fb) {
+    double body = (double)fb->height - FBW_HEADER;
+    if (body < 0) body = 0;
+    double s = fb->split;
+    if (s < FBW_MIN_SPLIT) s = FBW_MIN_SPLIT;
+    if (s > FBW_MAX_SPLIT) s = FBW_MAX_SPLIT;
+    return FBW_HEADER + body * s;
+}
+
+static int freebug_ensure_buffer(freebug_window *fb) {
+    int stride = fb->width * 4;
+    size_t size = (size_t)stride * (size_t)fb->height;
+    if (fb->buffer && fb->shm_size == size && fb->cairo_surface) return 0;
+    if (fb->cairo_surface) { cairo_surface_destroy(fb->cairo_surface); fb->cairo_surface = NULL; }
+    if (fb->buffer) { wl_buffer_destroy(fb->buffer); fb->buffer = NULL; }
+    if (fb->shm_data) { munmap(fb->shm_data, fb->shm_size); fb->shm_data = NULL; fb->shm_size = 0; }
+
+    int fd = memfd_create("freedom-freebug", MFD_CLOEXEC);
+    if (fd < 0) return -1;
+    if (ftruncate(fd, (off_t)size) < 0) { close(fd); return -1; }
+    void *data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (data == MAP_FAILED) { close(fd); return -1; }
+    struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size);
+    fb->buffer = wl_shm_pool_create_buffer(pool, 0, fb->width, fb->height, stride, WL_SHM_FORMAT_ARGB8888);
+    wl_shm_pool_destroy(pool);
+    close(fd);
+    if (fb->buffer == NULL) { munmap(data, size); return -1; }
+    wl_buffer_add_listener(fb->buffer, &buffer_listener, fb); /* release is a no-op */
+    fb->shm_data = data;
+    fb->shm_size = size;
+    fb->cairo_surface = cairo_image_surface_create_for_data(
+        (unsigned char *)data, CAIRO_FORMAT_ARGB32, fb->width, fb->height, stride);
+    return (cairo_surface_status(fb->cairo_surface) == CAIRO_STATUS_SUCCESS) ? 0 : -1;
+}
+
+/* Color for a console level (dark devtools palette). */
+static void fbw_level_rgb(int level, double *r, double *g, double *b) {
+    switch (level) {
+        case FB_ERROR: *r = 0.95; *g = 0.36; *b = 0.36; break;
+        case FB_WARN:  *r = 0.93; *g = 0.78; *b = 0.36; break;
+        case FB_INFO:  *r = 0.46; *g = 0.80; *b = 0.95; break;
+        case FB_DEBUG: *r = 0.60; *g = 0.60; *b = 0.66; break;
+        default:       *r = 0.86; *g = 0.88; *b = 0.91; break; /* log */
+    }
+}
+
+/* Counts the visual lines a console buffer occupies (entries split on '\n'). */
+static size_t fbw_console_lines(const fb_buffer *log) {
+    size_t lines = 0;
+    for (size_t i = 0; i < fb_buffer_count(log); ++i) {
+        const fb_entry *e = fb_buffer_at(log, i);
+        lines += 1;
+        for (size_t k = 0; k < e->len; ++k) if (e->text[k] == '\n') lines++;
+    }
+    return lines;
+}
+
+static void freebug_paint(freebug_window *fb) {
+    browser_window *w = fb->owner;
+    cairo_t *cr = cairo_create(fb->cairo_surface);
+    cairo_set_source_rgb(cr, 0.11, 0.12, 0.14);
+    cairo_paint(cr);
+    cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, 13.0);
+
+    /* header */
+    cairo_set_source_rgb(cr, 0.18, 0.19, 0.22);
+    cairo_rectangle(cr, 0, 0, fb->width, FBW_HEADER);
+    cairo_fill(cr);
+    cairo_set_source_rgb(cr, 0.80, 0.82, 0.86);
+    cairo_move_to(cr, FBW_PAD, FBW_HEADER - 8.0);
+    cairo_show_text(cr, "Freebug  -  F12 close  -  Ctrl+Enter run  -  Ctrl+L clear");
+
+    double split_y = fbw_split_y(fb);
+    double logh = split_y - FBW_HEADER;
+
+    /* clamp the scroll against the content height */
+    double total = (double)fbw_console_lines(&w->console) * FBW_LINE;
+    double view = logh - 2 * FBW_PAD;
+    double maxs = (total > view) ? (total - view) : 0.0;
+    if (fb->scroll > maxs) fb->scroll = maxs;
+    if (fb->scroll < 0) fb->scroll = 0;
+
+    /* log pane (clipped) */
+    cairo_save(cr);
+    cairo_rectangle(cr, 0, FBW_HEADER, fb->width, logh);
+    cairo_clip(cr);
+    double y = FBW_HEADER + FBW_PAD + FBW_LINE - fb->scroll;
+    for (size_t i = 0; i < fb_buffer_count(&w->console); ++i) {
+        const fb_entry *e = fb_buffer_at(&w->console, i);
+        double r, g, b; fbw_level_rgb(e->level, &r, &g, &b);
+        cairo_set_source_rgb(cr, r, g, b);
+        const char *p = e->text;
+        size_t rem = e->len;
+        int first = 1;
+        for (;;) {
+            const char *nl = (rem > 0) ? (const char *)memchr(p, '\n', rem) : NULL;
+            size_t linelen = nl ? (size_t)(nl - p) : rem;
+            if (y > FBW_HEADER && y < split_y + FBW_LINE) {
+                if (first) {
+                    const char *mk = (e->level == FB_ERROR) ? "x"
+                                   : (e->level == FB_WARN)  ? "!" : ">";
+                    cairo_move_to(cr, FBW_PAD, y);
+                    cairo_show_text(cr, mk);
+                }
+                char buf[1024];
+                size_t cpy = (linelen < sizeof buf - 1) ? linelen : sizeof buf - 1;
+                memcpy(buf, p, cpy);
+                buf[cpy] = '\0';
+                cairo_move_to(cr, FBW_PAD + FBW_GUTTER, y);
+                cairo_show_text(cr, buf);
+            }
+            y += FBW_LINE;
+            first = 0;
+            if (nl == NULL) break;
+            rem -= (linelen + 1);
+            p = nl + 1;
+        }
+    }
+    cairo_restore(cr);
+
+    /* divider */
+    cairo_set_source_rgb(cr, 0.30, 0.32, 0.36);
+    cairo_rectangle(cr, 0, split_y, fb->width, 3.0);
+    cairo_fill(cr);
+
+    /* editor pane */
+    double ey0 = split_y + 3.0;
+    cairo_set_source_rgb(cr, 0.07, 0.08, 0.09);
+    cairo_rectangle(cr, 0, ey0, fb->width, fb->height - ey0);
+    cairo_fill(cr);
+    cairo_save(cr);
+    cairo_rectangle(cr, 0, ey0, fb->width, fb->height - ey0);
+    cairo_clip(cr);
+
+    const char *etext = tf_text(&fb->editor);
+    size_t elen = tf_len(&fb->editor);
+    size_t ecur = tf_cursor(&fb->editor);
+    if (elen == 0) {
+        cairo_set_source_rgb(cr, 0.45, 0.47, 0.50);
+        cairo_move_to(cr, FBW_PAD + FBW_GUTTER, ey0 + FBW_PAD + FBW_LINE);
+        cairo_show_text(cr, "type JS here, Ctrl+Enter to run");
+        /* still draw the prompt + caret at the start */
+        cairo_set_source_rgb(cr, 0.55, 0.85, 0.55);
+        cairo_move_to(cr, FBW_PAD, ey0 + FBW_PAD + FBW_LINE);
+        cairo_show_text(cr, ">");
+        cairo_set_source_rgb(cr, 0.95, 0.95, 0.45);
+        cairo_rectangle(cr, FBW_PAD + FBW_GUTTER, ey0 + FBW_PAD + 4.0, 1.5, FBW_LINE);
+        cairo_fill(cr);
+    } else {
+        cairo_set_source_rgb(cr, 0.86, 0.88, 0.91);
+        double yy = ey0 + FBW_PAD + FBW_LINE;
+        double caret_x = -1, caret_y = -1;
+        size_t line_start = 0;
+        for (size_t k = 0; k <= elen; ++k) {
+            if (k == elen || etext[k] == '\n') {
+                size_t ll = k - line_start;
+                char buf[1024];
+                size_t cpy = (ll < sizeof buf - 1) ? ll : sizeof buf - 1;
+                memcpy(buf, etext + line_start, cpy);
+                buf[cpy] = '\0';
+                if (line_start == 0) {
+                    cairo_set_source_rgb(cr, 0.55, 0.85, 0.55);
+                    cairo_move_to(cr, FBW_PAD, yy);
+                    cairo_show_text(cr, ">");
+                    cairo_set_source_rgb(cr, 0.86, 0.88, 0.91);
+                }
+                cairo_move_to(cr, FBW_PAD + FBW_GUTTER, yy);
+                cairo_show_text(cr, buf);
+                if (caret_x < 0 && ecur >= line_start && ecur <= k) {
+                    char cbuf[1024];
+                    size_t cc = ecur - line_start;
+                    if (cc > sizeof cbuf - 1) cc = sizeof cbuf - 1;
+                    memcpy(cbuf, etext + line_start, cc);
+                    cbuf[cc] = '\0';
+                    cairo_text_extents_t te;
+                    cairo_text_extents(cr, cbuf, &te);
+                    caret_x = FBW_PAD + FBW_GUTTER + te.x_advance;
+                    caret_y = yy;
+                }
+                yy += FBW_LINE;
+                line_start = k + 1;
+                if (k == elen) break;
+            }
+        }
+        if (caret_x >= 0) {
+            cairo_set_source_rgb(cr, 0.95, 0.95, 0.45);
+            cairo_rectangle(cr, caret_x, caret_y - FBW_LINE + 4.0, 1.5, FBW_LINE);
+            cairo_fill(cr);
+        }
+    }
+    cairo_restore(cr);
+
+    cairo_surface_flush(fb->cairo_surface);
+    cairo_destroy(cr);
+}
+
+static void freebug_redraw_fb(freebug_window *fb) {
+    if (fb == NULL || !fb->visible || !fb->configured) return;
+    if (freebug_ensure_buffer(fb) != 0) return;
+    freebug_paint(fb);
+    wl_surface_attach(fb->surface, fb->buffer, 0, 0);
+    wl_surface_damage_buffer(fb->surface, 0, 0, fb->width, fb->height);
+    wl_surface_commit(fb->surface);
+}
+
+static void freebug_redraw(browser_window *w) {
+    if (w->freebug != NULL) freebug_redraw_fb(w->freebug);
+}
+
+static void freebug_hide(browser_window *w) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL || !fb->visible) return;
+    if (w->kbd_focus == fb->surface) w->kbd_focus = NULL;
+    if (w->ptr_focus == fb->surface) w->ptr_focus = NULL;
+    if (fb->cairo_surface) { cairo_surface_destroy(fb->cairo_surface); fb->cairo_surface = NULL; }
+    if (fb->buffer) { wl_buffer_destroy(fb->buffer); fb->buffer = NULL; }
+    if (fb->shm_data) { munmap(fb->shm_data, fb->shm_size); fb->shm_data = NULL; fb->shm_size = 0; }
+    if (fb->deco) { zxdg_toplevel_decoration_v1_destroy(fb->deco); fb->deco = NULL; }
+    if (fb->xdg_toplevel) { xdg_toplevel_destroy(fb->xdg_toplevel); fb->xdg_toplevel = NULL; }
+    if (fb->xdg_surface) { xdg_surface_destroy(fb->xdg_surface); fb->xdg_surface = NULL; }
+    if (fb->surface) { wl_surface_destroy(fb->surface); fb->surface = NULL; }
+    fb->visible = 0;
+    fb->configured = 0;
+}
+
+static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial) {
+    freebug_window *fb = (freebug_window *)data;
+    xdg_surface_ack_configure(s, serial);
+    fb->configured = 1;
+    freebug_redraw_fb(fb);
+}
+static const struct xdg_surface_listener fbw_xdg_surface_listener = { fbw_xdg_surface_configure };
+
+static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
+                                   int32_t width, int32_t height, struct wl_array *states) {
+    (void)t; (void)states;
+    freebug_window *fb = (freebug_window *)data;
+    if (width > 0) fb->width = width;
+    if (height > 0) fb->height = height;
+    if (fb->width < 240) fb->width = 240;
+    if (fb->height < 160) fb->height = 160;
+}
+static void fbw_toplevel_close(void *data, struct xdg_toplevel *t) {
+    (void)t;
+    freebug_window *fb = (freebug_window *)data;
+    freebug_hide(fb->owner); /* the window's close button hides it, never quits the app */
+}
+static const struct xdg_toplevel_listener fbw_toplevel_listener = {
+    .configure = fbw_toplevel_configure,
+    .close = fbw_toplevel_close,
+};
+
+static void freebug_show(browser_window *w) {
+    if (w->compositor == NULL || w->wm_base == NULL || w->shm == NULL) return;
+    if (w->freebug == NULL) {
+        w->freebug = (freebug_window *)calloc(1, sizeof *w->freebug);
+        if (w->freebug == NULL) return;
+        w->freebug->owner = w;
+        w->freebug->width = FBW_W;
+        w->freebug->height = FBW_H;
+        w->freebug->split = 0.68;
+        tf_init(&w->freebug->editor);
+    }
+    freebug_window *fb = w->freebug;
+    if (fb->visible) return;
+    fb->surface = wl_compositor_create_surface(w->compositor);
+    if (fb->surface == NULL) return;
+    fb->xdg_surface = xdg_wm_base_get_xdg_surface(w->wm_base, fb->surface);
+    xdg_surface_add_listener(fb->xdg_surface, &fbw_xdg_surface_listener, fb);
+    fb->xdg_toplevel = xdg_surface_get_toplevel(fb->xdg_surface);
+    xdg_toplevel_add_listener(fb->xdg_toplevel, &fbw_toplevel_listener, fb);
+    xdg_toplevel_set_title(fb->xdg_toplevel, "Freebug - Freedom DevTools");
+    xdg_toplevel_set_app_id(fb->xdg_toplevel, "org.freedom.freebug");
+    if (w->deco_mgr != NULL) {
+        fb->deco = zxdg_decoration_manager_v1_get_toplevel_decoration(w->deco_mgr, fb->xdg_toplevel);
+        zxdg_toplevel_decoration_v1_set_mode(fb->deco, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+    }
+    fb->configured = 0;
+    fb->visible = 1;
+    wl_surface_commit(fb->surface); /* trigger the initial configure -> first paint */
+}
+
+static void freebug_toggle(browser_window *w) {
+    if (w->freebug != NULL && w->freebug->visible) freebug_hide(w);
+    else freebug_show(w);
+}
+
+static void freebug_destroy(browser_window *w) {
+    if (w->freebug == NULL) return;
+    freebug_hide(w);
+    free(w->freebug);
+    w->freebug = NULL;
+}
+
+static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf) {
+    return w->freebug != NULL && w->freebug->visible && w->freebug->surface == sf;
+}
+
+static int freebug_is_open(const browser_window *w) {
+    return w->freebug != NULL && w->freebug->visible;
+}
+
+/* Returns the live page worker for the REPL, lazily (re)opening one bound to the
+ * active page's cache if none is kept alive (e.g. just after a tab switch). NULL if
+ * there is no page to bind to. */
+static tab *freebug_repl_worker(browser_window *w) {
+    if (w->tab_worker != NULL) return w->tab_worker;
+    if (w->cur_html == NULL) return NULL;
+    tab *t = NULL;
+    if (tab_open(&t) != TAB_OK) return NULL;
+    int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
+    tab_page page;
+    memset(&page, 0, sizeof page);
+    if (tab_load_full(t, w->cur_html, w->cur_html_len, w->cur_top,
+                      compute_page_js(w), w->reader, prefers_dark, &page) != TAB_OK) {
+        tab_close(t);
+        return NULL;
+    }
+    fb_buffer_free(&w->console);
+    w->console = page.console;
+    fb_buffer_init(&page.console);
+    tab_page_free(&page);
+    w->tab_worker = t;
+    return t;
+}
+
+static void freebug_eval(browser_window *w) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL) return;
+    const char *code = tf_text(&fb->editor);
+    size_t clen = tf_len(&fb->editor);
+    if (clen == 0) return;
+
+    char line[1100];
+    int n = snprintf(line, sizeof line, "> %.1000s", code);
+    if (n > 0) fb_buffer_push(&w->console, FB_LOG, line, strlen(line));
+
+    tab *t = freebug_repl_worker(w);
+    if (t == NULL) {
+        fb_buffer_push(&w->console, FB_ERROR,
+                       "Freebug: no live page to evaluate (reload the page first).", 56);
+    } else {
+        tab_eval_result r;
+        if (tab_eval(t, code, clen, &r) != TAB_OK) {
+            if (w->tab_worker == t) { tab_close(w->tab_worker); w->tab_worker = NULL; }
+            fb_buffer_push(&w->console, FB_ERROR,
+                           "Freebug: evaluation failed (the page worker is gone).", 52);
+        } else {
+            for (size_t i = 0; i < fb_buffer_count(&r.console); ++i) {
+                const fb_entry *e = fb_buffer_at(&r.console, i);
+                fb_buffer_push(&w->console, e->level, e->text, e->len);
+            }
+            char out[1100];
+            int m = snprintf(out, sizeof out, "%s %.1000s",
+                             r.is_exception ? "x" : "=", r.value ? r.value : "undefined");
+            if (m > 0) fb_buffer_push(&w->console, r.is_exception ? FB_ERROR : FB_INFO,
+                                      out, strlen(out));
+            tab_eval_result_free(&r);
+        }
+    }
+    tf_clear(&fb->editor);
+    fb->scroll = 1e9; /* jump to the bottom; paint clamps it */
+    freebug_redraw_fb(fb);
+}
+
+static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+                               const char *utf8, int n, int ctrl, int shift) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL) return;
+    (void)shift;
+    if (sym == XKB_KEY_F12 || sym == XKB_KEY_Escape) { freebug_hide(w); redraw(w); return; }
+    if (ctrl && (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter)) { freebug_eval(w); return; }
+    if (ctrl && (sym == XKB_KEY_l || sym == XKB_KEY_L)) {
+        tf_clear(&fb->editor); freebug_redraw_fb(fb); return;
+    }
+    if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
+        tf_insert(&fb->editor, '\n'); freebug_redraw_fb(fb); return;
+    }
+    if (sym == XKB_KEY_BackSpace) { tf_backspace(&fb->editor); freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Delete)    { tf_delete(&fb->editor);    freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Left)      { tf_move(&fb->editor, -1);  freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Right)     { tf_move(&fb->editor, 1);   freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Home)      { tf_home(&fb->editor);      freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_End)       { tf_end(&fb->editor);       freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Up)        { fb->scroll -= FBW_LINE * 3; if (fb->scroll < 0) fb->scroll = 0; freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Down)      { fb->scroll += FBW_LINE * 3; freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Page_Up)   { fb->scroll -= 200; if (fb->scroll < 0) fb->scroll = 0; freebug_redraw_fb(fb); return; }
+    if (sym == XKB_KEY_Page_Down) { fb->scroll += 200; freebug_redraw_fb(fb); return; }
+    if (!ctrl && n > 0) {
+        for (int i = 0; i < n; ++i) {
+            char c = utf8[i];
+            if (c == '\t' || (unsigned char)c >= 0x20) tf_insert(&fb->editor, c);
+        }
+        freebug_redraw_fb(fb);
+    }
+}
+
+static void freebug_pointer_button(browser_window *w, uint32_t serial,
+                                   uint32_t button, uint32_t state) {
+    (void)serial;
+    freebug_window *fb = w->freebug;
+    if (fb == NULL) return;
+    if (button != UI_BTN_LEFT) return;
+    if (state == WL_POINTER_BUTTON_STATE_RELEASED) { fb->dragging_split = 0; return; }
+    double sy = fbw_split_y(fb);
+    if (w->ptr_y >= sy - 4.0 && w->ptr_y <= sy + 7.0) fb->dragging_split = 1; /* grab the divider */
+}
+
+static void freebug_pointer_motion(browser_window *w) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL || !fb->dragging_split) return;
+    double body = (double)fb->height - FBW_HEADER;
+    if (body < 1.0) body = 1.0;
+    double s = (w->ptr_y - FBW_HEADER) / body;
+    if (s < FBW_MIN_SPLIT) s = FBW_MIN_SPLIT;
+    if (s > FBW_MAX_SPLIT) s = FBW_MAX_SPLIT;
+    fb->split = s;
+    freebug_redraw_fb(fb);
+}
+
+static void freebug_pointer_axis(browser_window *w, wl_fixed_t value) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL) return;
+    double v = wl_fixed_to_double(value);
+    fb->scroll += (v > 0.0) ? (FBW_LINE * 3) : -(FBW_LINE * 3);
+    if (fb->scroll < 0) fb->scroll = 0;
+    freebug_redraw_fb(fb);
+}
+
+/* ===================== end Freebug ===================== */
+
 static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_surface *sf, wl_fixed_t x, wl_fixed_t y) {
-    (void)p; (void)sf;
+    (void)p;
     browser_window *w = (browser_window *)d;
     w->pointer_serial = s;
     w->ptr_x = wl_fixed_to_double(x);
     w->ptr_y = wl_fixed_to_double(y);
+    w->ptr_focus = sf; /* route later pointer events to the focused window */
     set_cursor(w, 0);
+    if (freebug_owns_surface(w, sf)) return; /* the console has no link/hover affordance */
     update_hover(w);
 }
 static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf) {
-    (void)p; (void)s; (void)sf;
+    (void)p; (void)s;
     browser_window *w = (browser_window *)d;
+    if (w->ptr_focus == sf) w->ptr_focus = NULL;
     if (w->hover_href != NULL || w->hot != UI_HOT_NONE) {
         w->hover_href = NULL;
         w->hot = UI_HOT_NONE;
@@ -3486,6 +4023,7 @@ static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, 
     browser_window *w = (browser_window *)d;
     w->ptr_x = wl_fixed_to_double(x);
     w->ptr_y = wl_fixed_to_double(y);
+    if (freebug_owns_surface(w, w->ptr_focus)) { freebug_pointer_motion(w); return; }
     if (w->dragging_scroll) { scrollbar_drag_to(w); return; }
     update_hover(w);
 }
@@ -3540,6 +4078,10 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
                        uint32_t button, uint32_t state) {
     (void)p; (void)t;
     browser_window *w = (browser_window *)d;
+    if (freebug_owns_surface(w, w->ptr_focus)) {
+        freebug_pointer_button(w, serial, button, state);
+        return;
+    }
     if (button != UI_BTN_LEFT) return;
     if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
         if (w->dragging_scroll) { w->dragging_scroll = 0; redraw(w); }
@@ -3710,6 +4252,7 @@ static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
     (void)p; (void)time;
     if (axis != WL_POINTER_AXIS_VERTICAL_SCROLL) return;
     browser_window *w = (browser_window *)data;
+    if (freebug_owns_surface(w, w->ptr_focus)) { freebug_pointer_axis(w, value); return; }
     if (w->ptr_y < UI_TOOLBAR_H) return;
 
     double v = wl_fixed_to_double(value);
@@ -3962,10 +4505,14 @@ static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
 
 static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                            struct wl_surface *sf, struct wl_array *keys) {
-    (void)d; (void)kbd; (void)s; (void)sf; (void)keys;
+    (void)kbd; (void)s; (void)keys;
+    browser_window *w = (browser_window *)d;
+    w->kbd_focus = sf; /* so keyboard_key routes to the focused window (main vs Freebug) */
 }
 static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf) {
-    (void)d; (void)kbd; (void)s; (void)sf;
+    (void)kbd; (void)s;
+    browser_window *w = (browser_window *)d;
+    if (w->kbd_focus == sf) w->kbd_focus = NULL;
 }
 
 /* Performs the effect of a single key press. Factored out of keyboard_key so a held
@@ -3973,6 +4520,11 @@ static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct 
  * recomputes sym/utf8/modifiers from the live xkb_state each time). */
 static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
                              int n, int ctrl, int shift) {
+    /* F12 opens / closes the Freebug developer console (second window). Works from the
+     * main window regardless of which field is focused; closing it from inside is handled
+     * in freebug_handle_key. */
+    if (sym == XKB_KEY_F12) { freebug_toggle(w); return; }
+
     /* Ctrl+L focuses and clears the URL bar. */
     if (ctrl && !shift && (sym == XKB_KEY_l || sym == XKB_KEY_L)) {
         w->url_bar_focused = 1;
@@ -4264,6 +4816,14 @@ static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
     int shift = xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_SHIFT,
                                              XKB_STATE_MODS_EFFECTIVE);
 
+    /* Route to the Freebug console when it holds keyboard focus (it has its own,
+     * simpler editor key handling and does not use the main window's auto-repeat). */
+    if (freebug_owns_surface(w, w->kbd_focus)) {
+        key_repeat_stop(w);
+        freebug_handle_key(w, sym, utf8, n, ctrl, shift);
+        return;
+    }
+
     handle_key_press(w, sym, utf8, n, ctrl, shift);
 
     /* Start (or restart, for a new key) auto-repeat for the keys that warrant it. */
@@ -4469,6 +5029,11 @@ ui_status ui_run_browser(const char *start_url) {
     w.url_bar_focused = 1;
     browser_url_bar_clear(&w.bs);
 
+    /* Optionally open the Freebug console on launch (like a browser's
+     * auto-open-devtools): set FREEDOM_FREEBUG to any value. F12 / the hamburger
+     * toggle it at any time. */
+    if (getenv("FREEDOM_FREEBUG") != NULL) freebug_show(&w);
+
     /* Event loop using the prepare_read/read_events pattern so a poll timeout can
      * fire the toast's auto-hide without racing the Wayland queue. The timeout is
      * the remaining lifetime of an active toast, or infinite when there is none. */
@@ -4528,6 +5093,9 @@ ui_status ui_run_browser(const char *start_url) {
     }
 
     destroy_buffer(&w);
+    freebug_destroy(&w);                       /* tear down the console window if open */
+    if (w.tab_worker) tab_close(w.tab_worker); /* the kept-alive REPL worker */
+    fb_buffer_free(&w.console);                /* captured console transcript */
     if (w.copy_source) wl_data_source_destroy(w.copy_source);
     free(w.copy_text);
     if (w.selection_offer) wl_data_offer_destroy(w.selection_offer);

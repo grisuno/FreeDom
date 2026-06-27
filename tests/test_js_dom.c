@@ -405,6 +405,101 @@ static void test_set_location_null_ctx(void **state) {
     assert_int_equal(jd_take_nav_request(NULL, buf, sizeof buf, &replace), 0);
 }
 
+/* --- capturing console (Freebug) --- */
+
+/* Builds a fresh context with dom + capturing console wired to *log. */
+static void console_fixture(hp_document **doc, dom_index **idx, js_context **ctx,
+                            fb_buffer *log) {
+    assert_int_equal(hp_parse(HTML, sizeof HTML - 1, NULL, doc), HP_OK);
+    assert_int_equal(dom_build(*doc, idx), DOM_OK);
+    assert_int_equal(js_context_new(NULL, ctx), JS_OK);
+    assert_int_equal(jd_install(*ctx, *idx), JD_OK);
+    fb_buffer_init(log);
+    assert_int_equal(jd_install_console(*ctx, log), JD_OK);
+}
+
+static void console_teardown(hp_document *doc, dom_index *idx, js_context *ctx,
+                             fb_buffer *log) {
+    fb_buffer_free(log);
+    js_context_free(ctx);
+    dom_free(idx);
+    hp_document_free(doc);
+}
+
+static void test_console_captures_levels(void **state) {
+    (void)state;
+    hp_document *doc; dom_index *idx; js_context *ctx; fb_buffer log;
+    console_fixture(&doc, &idx, &ctx, &log);
+
+    const char *src =
+        "console.log('a', 1, true);"
+        "console.info('i');"
+        "console.warn('w');"
+        "console.error('e');"
+        "console.debug('d');";
+    js_result r; memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    js_result_free(&r);
+
+    assert_int_equal((int)fb_buffer_count(&log), 5);
+    assert_int_equal(fb_buffer_at(&log, 0)->level, FB_LOG);
+    assert_string_equal(fb_buffer_at(&log, 0)->text, "a 1 true"); /* space-joined args */
+    assert_int_equal(fb_buffer_at(&log, 1)->level, FB_INFO);
+    assert_string_equal(fb_buffer_at(&log, 1)->text, "i");
+    assert_int_equal(fb_buffer_at(&log, 2)->level, FB_WARN);
+    assert_int_equal(fb_buffer_at(&log, 3)->level, FB_ERROR);
+    assert_int_equal(fb_buffer_at(&log, 4)->level, FB_DEBUG);
+
+    console_teardown(doc, idx, ctx, &log);
+}
+
+static void test_console_object_and_throwing_tostring(void **state) {
+    (void)state;
+    hp_document *doc; dom_index *idx; js_context *ctx; fb_buffer log;
+    console_fixture(&doc, &idx, &ctx, &log);
+
+    const char *src =
+        "console.log({});"                                  /* -> [object Object] */
+        "console.log({toString:function(){throw 'x';}});";  /* swallowed */
+    js_result r; memset(&r, 0, sizeof r);
+    /* The throwing toString must NOT propagate as an eval error. */
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    js_result_free(&r);
+
+    assert_int_equal((int)fb_buffer_count(&log), 2);
+    assert_string_equal(fb_buffer_at(&log, 0)->text, "[object Object]");
+    assert_string_equal(fb_buffer_at(&log, 1)->text, "<unprintable>");
+
+    console_teardown(doc, idx, ctx, &log);
+}
+
+static void test_console_null_buffer_is_noop(void **state) {
+    (void)state;
+    hp_document *doc; dom_index *idx; js_context *ctx;
+    assert_int_equal(hp_parse(HTML, sizeof HTML - 1, NULL, &doc), HP_OK);
+    assert_int_equal(dom_build(doc, &idx), DOM_OK);
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    assert_int_equal(jd_install(ctx, idx), JD_OK);
+    assert_int_equal(jd_install_console(ctx, NULL), JD_OK); /* silent */
+
+    const char *src = "console.log('x'); console.error('y'); 42";
+    js_result r; memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    assert_string_equal(r.value, "42"); /* runs fine, just captures nothing */
+    js_result_free(&r);
+
+    js_context_free(ctx);
+    dom_free(idx);
+    hp_document_free(doc);
+}
+
+static void test_console_null_ctx(void **state) {
+    (void)state;
+    fb_buffer log; fb_buffer_init(&log);
+    assert_int_equal(jd_install_console(NULL, &log), JD_ERR_NULL_ARG);
+    fb_buffer_free(&log);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
@@ -439,6 +534,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_no_nav_request_when_idle, setup, teardown),
         cmocka_unit_test_setup_teardown(test_local_page_captures_nav, setup, teardown),
         cmocka_unit_test(test_set_location_null_ctx),
+        cmocka_unit_test(test_console_captures_levels),
+        cmocka_unit_test(test_console_object_and_throwing_tostring),
+        cmocka_unit_test(test_console_null_buffer_is_noop),
+        cmocka_unit_test(test_console_null_ctx),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -835,6 +835,55 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 
 ### 7.3 Roadmap — por cruzar
 
+- **Hito 24 — Freebug (consola de desarrollo JS) + scripts externos por soberanía.** Para no estar
+  "a ciegas" sobre qué JS corre y por qué falla. **FB-1 (CERRADO):** captura de consola en el backend.
+  Módulo **puro** `freebug` (`fb_`): `fb_buffer` acotado (caps `FB_MAX_ENTRIES`/`FB_MAX_ENTRY_BYTES`/
+  `FB_MAX_TOTAL_BYTES`, fail-closed: trunca la entrada gigante, descarta entera la que excede el total/
+  conteo, flag `overflow`). `js_dom` gana `jd_install_console(ctx, fb_buffer*)` que instala un `console.
+  {log,info,warn,error,debug,trace,dir}` **capturador** (`JS_NewCFunctionMagic`, nivel=magic; junta args
+  con espacio vía `JS_ToCStringLen`; un `toString` que lanza se traga → `<unprintable>`); el puntero al
+  buffer vive en el **runtime opaque** (libre; el context opaque sigue siendo el `dom_index`). `tab`:
+  `child_state.log` persiste entre cargas, se resetea por carga/eval, se instala en `child_load`, y una
+  **excepción no capturada** del script de página se empuja como `FB_ERROR`; se **drena por IPC**
+  (`write_console`/`read_console`) y viaja en `tab_page.console` (carga) y `tab_eval_result.console`
+  (REPL). `tab_eval` (ya existía) **es** el backend del REPL: evalúa en el contexto vivo y devuelve
+  valor/excepción. Spec (`freebug.md`) + tests (9 `freebug` + 4 `js_dom` console + 3 E2E `tab`) + `make
+  test`/`make asan` (36 suites, exit 0) + `make fuzz-fb` (931k execs, sin crash/leak/UB; los NUL
+  embebidos se preservan porque el wire es length-prefixed). **FB-1b (CERRADO): vista de consola
+  headless.** `freedom.c` gana `--dump-console` (corre el JS de la página vía `tab_load_full(run_js)` e
+  imprime la consola capturada en stdout: `=== Freebug console (n) === / [nivel] texto`) y honra `--js`
+  en headless (corre JS cuando resuelve a `on`); `--dump-console` **fuerza JS on** sin importar el orden
+  de flags. Es la forma de **ver** el comportamiento de JS **sin Wayland** (verificable aquí y por el
+  dueño), riesgo cero al GUI interactivo (solo toca el entry headless). 2 tests E2E en `test_freedom`
+  (11 total). **FB-2 (GUI) — IMPLEMENTADO y VERIFICADO VISUALMENTE** (weston headless con backend
+  X11 sobre Xvfb + captura ImageMagick `import`; ver `[[freedom-gui-visual-verification-weston]]`):
+  **ventana Wayland nueva** (segundo `xdg_toplevel` en `gui/browser_ui.c`, struct
+  `freebug_window` con su propia surface/buffer/cairo/configure), toggle **F12** (en `handle_key_press`)
+  **y** ítem de hamburguesa "Freebug console (F12)" (`UI_MENU_FREEBUG`); `Esc`/`F12` cierra desde dentro.
+  Panel de log que pinta `browser_window.console` (color por nivel) sobre un editor JS redimensionable
+  (divisor arrastrable; `tf_field` admite `\n`) que con **`Ctrl+Enter`** llama `tab_eval` contra la
+  **página viva** y muestra valor/excepción + la consola del propio eval; `Ctrl+L` limpia, rueda/flechas
+  scrollean. **Prerrequisito resuelto:** el GUI abría/cerraba un worker por render; ahora el worker de la
+  pestaña activa se **mantiene vivo** (`browser_window.tab_worker`, cerrado al re-render/cambiar/cerrar
+  pestaña; `drop_repl_worker`; `freebug_repl_worker` lo recrea lazy tras un cambio de pestaña) para que el
+  REPL evalúe contra el DOM vivo. Ruteo de input por foco de surface (`kbd_focus`/`ptr_focus` en
+  enter/leave; los listeners compartidos del seat enrutan a Freebug con `freebug_owns_surface`). Compila
+  **warning-clean** (`make`/`make test` 36 suites/`make asan` exit 0) y se **verificó en pantalla**: el
+  screenshot confirma la 2ª ventana, el panel de log con la consola capturada **coloreada por nivel**
+  (log gris, info cian, warn amarillo, error rojo: `console.log/info/warn` + el `ReferenceError` no
+  capturado) y el editor con prompt/caret/placeholder. Afordancia de arranque `FREEDOM_FREEBUG=1` abre
+  Freebug al inicio (como auto-open-devtools; habilitó la captura sin inyectar F12). **Lo no inyectable
+  aquí** (faltan `wtype`/`ydotool`): el *keypress* F12/`Ctrl+Enter` en vivo — pero `freebug_show` (lo que
+  F12 invoca) está probado por el screenshot y `tab_eval` (el REPL) por `test_tab` + `--dump-console`.
+  **Limitaciones v1 (notas):**
+  consola por-pestaña activa (se limpia al cambiar de pestaña; no es por-tab persistente), sin auto-repeat
+  de tecla en el editor, sin scroll-a-cursor multilínea. **Pendiente
+  EXT (scripts externos):** habilitar `<script src>` cuando el host está en **allow.conf Y js.conf**
+  (cross-origin permitido); el worker (que parsea) reporta las URLs `src` al padre, el padre las fetchea
+  re-aplicando **TODA** la política de red (hostblock/net_realm/TLS-PQ) y devuelve los cuerpos, el worker
+  ejecuta inline+externos en orden de documento. Esto **revierte** la doctrina "scripts `src` externos
+  NUNCA corren" de `[[freedom-live-js]]` y la nota SOP — actualizar ambas al cerrar. Ver
+  `[[freedom-freebug-console]]`.
 - **Hito 9b — Fetch asíncrono (imágenes + multipestaña).** Sacar también las imágenes del hilo
   principal (hoy `load_images` hace fetch síncrono dentro del worker durante el render) y permitir
   **carga concurrente entre pestañas** (generación por pestaña en vez de global, entrega a la pestaña
