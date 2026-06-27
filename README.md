@@ -40,9 +40,14 @@ The name reflects its core goals:
 
 ## Features
 - Written in portable C11
-- Strong process-based sandboxing for each tab (seccomp-bpf with **W^X** — no executable
-  memory, `PROT_EXEC` `mmap`/`mprotect` are killed — plus Landlock, per-tab namespaces, and an
-  undumpable worker so secrets cannot leak via core dump or ptrace)
+- Strong process-based sandboxing for each tab: the worker is **forked _and re-exec'd_** so it
+  inherits none of the browser's memory (a compromised tab cannot read other tabs' content; fresh
+  ASLR), then confined with seccomp-bpf with **W^X** (no executable memory — `PROT_EXEC`
+  `mmap`/`mprotect` are killed), Landlock, per-tab namespaces, and an undumpable worker so secrets
+  cannot leak via core dump or ptrace. The syscall allowlist is **deny-by-default**, so
+  **`io_uring` is blocked** in the worker — it is a seccomp-bypass primitive (its operations skip the
+  filtered syscall entry), so it never gets in, not even "for async I/O"; async I/O lives only on the
+  trusted side
 - JavaScript sandbox using QuickJS-ng
 - Hardened build with stack protection, PIE, RELRO, and FORTIFY_SOURCE
 - Wayland + Cairo GUI backend with Client-Side Decorations (CSD)

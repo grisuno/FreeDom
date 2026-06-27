@@ -290,6 +290,11 @@ static int run_headless(const char *target) {
 }
 
 int main(int argc, char **argv) {
+    /* A per-tab worker is spawned by re-exec'ing this binary (tab.c fork+exec) so it
+     * inherits none of the GUI's memory. When invoked as one, run the confined worker
+     * loop and never return; otherwise this is a no-op and normal startup proceeds. */
+    tab_worker_dispatch(argc, argv);
+
     int headless = 0;
     const char *target = NULL;
 

@@ -81,6 +81,21 @@ typedef struct tab_image {
 
 #define TAB_MAX_INPUT ((size_t)(32u * 1024u * 1024u))
 
+/* Worker process entry. tab_open forks AND re-execs this same binary so the worker
+ * inherits none of the parent's address space (no other tabs' content, fresh ASLR).
+ * Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the
+ * internal "--tab-worker <rfd> <wfd>" invocation it runs the confined worker loop on
+ * those pipe fds and never returns (_exit); otherwise it returns and main() proceeds
+ * normally. Because the worker re-execs /proc/self/exe, EVERY binary that links tab
+ * and reaches tab_open (the app and the test harness) must call this first. */
+void tab_worker_dispatch(int argc, char **argv);
+
+/* Pure validator of the worker handoff arguments (the security-relevant surface of
+ * the exec): returns nonzero and writes the two fds iff argv is exactly
+ * "<prog> --tab-worker <rfd> <wfd>" with both fds non-negative decimal integers
+ * within a sane bound. No side effects; fail-closed (any malformation => 0). */
+int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);
+
 /* Spawns and confines a tab worker. On TAB_OK, *out must be released with
  * tab_close. Returns TAB_ERR_CONFINE if the child could not sandbox itself. */
 tab_status tab_open(tab **out);

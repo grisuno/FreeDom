@@ -24,7 +24,18 @@
 
 /* Allowlist for an already-initialised worker: I/O over already-open fds and
  * computation, never opening new resources. Deliberately excludes open/openat,
- * socket/connect, execve, ptrace, clone/fork, etc. */
+ * socket/connect, execve, ptrace, clone/fork, etc.
+ *
+ * This is an allowlist (deny-by-default), which is what makes io_uring
+ * (io_uring_setup/enter/register) and the other seccomp-bypass primitives
+ * (process_vm_readv/writev, bpf, userfaultfd, ...) denied by construction -- a
+ * denylist could forget them. io_uring matters most: its IORING_OP_* operations are
+ * dispatched by a kernel worker WITHOUT re-entering the syscall entry point this BPF
+ * program filters, so a ring would let a compromised worker openat/connect past the
+ * filter. It must never be added here "for async I/O" -- the worker only does blocking
+ * pipe I/O, and the io_uring doctrine (CLAUDE.md §3) applies to the trusted side only.
+ * See spec/os_sandbox.md §13; locked by test_policy_denies_io_uring +
+ * test_harden_kills_io_uring_setup. */
 static const long os_allowed[] = {
     __NR_read, __NR_write, __NR_readv, __NR_writev, __NR_close, __NR_lseek,
     __NR_fstat,
@@ -106,7 +117,14 @@ os_status os_isolate_namespaces(void) { return OS_ERR_UNSUPPORTED; }
 
 #endif
 
-#if defined(__linux__) && defined(__x86_64__)
+/* seccomp-bpf is supported on x86_64 and little-endian aarch64. Both are
+ * little-endian, which the W^X args[2] low-word load relies on (PROT_EXEC lives in
+ * the low 32 bits); big-endian aarch64 (__AARCH64EB__) is therefore NOT enabled and
+ * falls through to the fail-closed OS_ERR_UNSUPPORTED stub below. The allowlist uses
+ * only generic-ABI syscalls, so the __NR_* macros resolve to the correct per-arch
+ * numbers automatically. */
+#if defined(__linux__) && (defined(__x86_64__) || \
+    (defined(__aarch64__) && !defined(__AARCH64EB__)))
 
 #include <errno.h>
 #include <stddef.h>
@@ -115,6 +133,14 @@ os_status os_isolate_namespaces(void) { return OS_ERR_UNSUPPORTED; }
 #include <linux/seccomp.h>
 #include <sys/mman.h>
 #include <sys/prctl.h>
+
+/* The native ABI token the BPF arch guard pins to (rejects x32/i386 on x86_64 and
+ * AArch32 on aarch64 -- syscall-ABI-confusion defence). */
+#if defined(__x86_64__)
+#  define OS_SECCOMP_ARCH AUDIT_ARCH_X86_64
+#else
+#  define OS_SECCOMP_ARCH AUDIT_ARCH_AARCH64
+#endif
 
 os_status os_harden(os_violation action) {
     const unsigned int deny = (action == OS_VIOLATION_ERRNO)
@@ -127,11 +153,12 @@ os_status os_harden(os_violation action) {
     struct sock_filter prog[4 + 2 + 2 * OS_ALLOWED_N + 1 + 5];
     size_t n = 0;
 
-    /* Reject any ABI other than x86_64 before inspecting the syscall number. */
+    /* Reject any ABI other than the one we built for before inspecting the syscall
+     * number (x32/i386 on x86_64, AArch32 on aarch64). */
     prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
                                              offsetof(struct seccomp_data, arch));
     prog[n++] = (struct sock_filter)BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
-                                             AUDIT_ARCH_X86_64, 1, 0);
+                                             OS_SECCOMP_ARCH, 1, 0);
     prog[n++] = (struct sock_filter)BPF_STMT(BPF_RET | BPF_K,
                                              SECCOMP_RET_KILL_PROCESS);
     prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
@@ -159,9 +186,10 @@ os_status os_harden(os_violation action) {
     prog[n++] = (struct sock_filter)BPF_STMT(BPF_RET | BPF_K, deny);
 
     /* PROT_EXEC check block: load the low word of args[2] (prot) and mask PROT_EXEC.
-     * Zero => no exec page requested => ALLOW; nonzero => DENY. x86_64 is little-
-     * endian (arch-guarded above) and PROT_EXEC lives in the low 32 bits, so the
-     * 32-bit word load of args[2] is sufficient. */
+     * Zero => no exec page requested => ALLOW; nonzero => DENY. Both supported arches
+     * (x86_64, aarch64 LE) are little-endian -- big-endian is excluded above -- and
+     * PROT_EXEC lives in the low 32 bits, so the 32-bit word load of args[2] is
+     * sufficient. */
     size_t prot_check = n;
     prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
                                              offsetof(struct seccomp_data, args[2]));
@@ -187,8 +215,9 @@ os_status os_harden(os_violation action) {
 
 #elif defined(__linux__)
 
-/* Linux on a non-x86_64 architecture: the BPF arch guard above is x86_64-only,
- * so refuse rather than install an incomplete policy (fail closed). */
+/* Linux on an unsupported architecture (not x86_64, not little-endian aarch64): the
+ * BPF arch guard and the W^X little-endian assumption do not hold, so refuse rather
+ * than install an incomplete or wrong policy (fail closed). */
 os_status os_harden(os_violation action) { (void)action; return OS_ERR_UNSUPPORTED; }
 
 #endif

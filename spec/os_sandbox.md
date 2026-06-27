@@ -28,9 +28,17 @@ Verificado en este host: modo KILL ⇒ `SIGSYS` en una syscall denegada; modo ER
   `os_policy_allows` y el constructor del BPF lo recorren ambos, así la política es
   **directamente testeable** sin instalar nada (doctrina: la lógica de seguridad en funciones
   puras).
-- **Comprobación de arquitectura:** el BPF rechaza cualquier `arch` distinto de `AUDIT_ARCH_X86_64`
-  (defensa frente a confusión de ABI x32/i386). En arquitecturas no soportadas `os_harden`
-  devuelve `OS_ERR_UNSUPPORTED` (no instala una política incompleta — falla cerrado).
+- **Comprobación de arquitectura:** el BPF fija la ABI nativa (`OS_SECCOMP_ARCH` =
+  `AUDIT_ARCH_X86_64` en x86_64, `AUDIT_ARCH_AARCH64` en aarch64 **little-endian**) y rechaza
+  cualquier otra (defensa frente a confusión de ABI x32/i386 en x86_64, AArch32 en aarch64). El
+  allowlist usa solo syscalls de la **ABI genérica**, así que los macros `__NR_*` resuelven al número
+  correcto por arquitectura sin hardcodear. **aarch64 big-endian** (`__AARCH64EB__`) **no** se habilita
+  (rompería la suposición little-endian del load de `args[2]` para W^X). En arquitecturas no soportadas
+  `os_harden` devuelve `OS_ERR_UNSUPPORTED` (no instala una política incompleta o errónea — falla
+  cerrado). *Estado: el camino x86_64 está verificado en este host; el camino aarch64 es
+  **source-complete** (compila por construcción simétrica, todos los `__NR_*` existen en la ABI
+  genérica) pero **no se pudo construir ni ejecutar aquí** (sin toolchain/sysroot aarch64) — pendiente
+  de itest en hardware/CI ARM64.*
 - **Acción ante violación:** `OS_VIOLATION_KILL` (por defecto) mata el proceso con `SIGSYS`
   (fail-closed duro). `OS_VIOLATION_ERRNO` deniega con `EPERM` (diagnóstico / compatibilidad con
   librerías que sondean syscalls). El camino por defecto es el seguro.
@@ -40,7 +48,14 @@ Verificado en este host: modo KILL ⇒ `SIGSYS` en una syscall denegada; modo ER
 
 La lista blanca es la de un trabajador ya inicializado (renderer / worker JS): I/O sobre
 descriptores ya abiertos y cómputo, **no** apertura de recursos nuevos. Excluye explícitamente
-`open`/`openat`, `socket`/`connect`, `execve`, `ptrace`, `clone`/`fork`, etc.
+`open`/`openat`, `socket`/`connect`, `execve`, `ptrace`, `clone`/`fork`, `io_uring_setup`/
+`io_uring_enter`/`io_uring_register`, etc.
+
+- **Deny-by-default, no denylist:** la lista es **blanca**; cualquier syscall ausente se mata. Esto
+  no es un detalle de implementación: es lo que neutraliza las **primitivas de bypass del propio
+  filtro** sin tener que enumerarlas. La más importante es **`io_uring`** (ver §13): un denylist se
+  podría olvidar de ella; un allowlist la deniega por construcción. Lo mismo con `process_vm_readv`/
+  `process_vm_writev`, `bpf`, `userfaultfd`, `seccomp`, `keyctl`, etc.
 
 ## 4. Contrato de la API
 
@@ -206,8 +221,15 @@ os_status os_isolate_namespaces(void);
 - `ppoll`/`epoll`/`pselect6`: **deliberadamente NO** se agregan al allowlist. El worker hace I/O
   **bloqueante** sobre fds de pipe ya abiertos (`read`/`write`); añadirlos violaría el privilegio
   mínimo (ensanchar la superficie sin necesidad es lo contrario de endurecer).
-- ARM64 (`AUDIT_ARCH_AARCH64`): el guard de arquitectura sigue siendo x86_64 (este host); en otra
-  arquitectura `os_harden` falla cerrado con `OS_ERR_UNSUPPORTED`.
+- **`io_uring` (`io_uring_setup`/`enter`/`register`): PROHIBIDO en el worker — ver §13.** Es una
+  **primitiva de bypass de seccomp**: las operaciones se envían por la cola de submission y **no
+  atraviesan el syscall entry** que el BPF intercepta. Por eso NUNCA entra al allowlist, ni siquiera
+  "para E/S asíncrona": la asincronía del worker es innecesaria (hace I/O bloqueante sobre dos pipes)
+  y el costo sería anular todo el confinamiento. La doctrina de "usar io_uring" (CLAUDE.md §3) aplica
+  **solo al lado confiable** (el orquestador), jamás al worker.
+- ARM64 (`AUDIT_ARCH_AARCH64`): **ya soportado en fuente** (ver §3) para aarch64 little-endian;
+  pendiente de itest en hardware/CI ARM64 (no construible en este host x86_64). Otras arquitecturas
+  (incluida aarch64 big-endian) ⇒ `os_harden` falla cerrado con `OS_ERR_UNSUPPORTED`.
 
 ## 11. W^X — sin memoria ejecutable (filtrado por argumento de syscall)
 
@@ -250,3 +272,38 @@ Mejor-esfuerzo (defensa en profundidad, como Landlock/namespaces); el orden en e
 ### Matriz de pruebas (anti-volcado, fork-based)
 - El hijo llama `os_no_dump()` (antes de seccomp, así `prctl`/`getrlimit` siguen disponibles):
   `prctl(PR_GET_DUMPABLE)` ⇒ 0 y `getrlimit(RLIMIT_CORE).rlim_cur` ⇒ 0; sale con código marcador.
+
+## 13. `io_uring` — primitiva de bypass de seccomp, prohibida en el worker
+
+`io_uring` es el subsistema de E/S asíncrona de Linux (la API que la doctrina §3 del proyecto pide
+usar "para todas las syscalls"). En un proceso **confiable** es legítimo. En el **worker confinado
+es una vulnerabilidad de diseño** y por eso queda fuera del allowlist de forma **permanente**:
+
+- **Rompe seccomp-bpf.** El filtro BPF inspecciona cada syscall en su *entry point*. `io_uring`
+  ejecuta operaciones (`IORING_OP_OPENAT`, `IORING_OP_CONNECT`, `IORING_OP_READ`/`WRITE`,
+  `IORING_OP_READV`, …) que el kernel despacha **desde un worker interno**, **sin** volver a pasar por
+  ese entry point. Un worker comprometido que tuviera un ring podría abrir archivos, abrir sockets y
+  exfiltrar — **exactamente lo que el allowlist niega** — burlando el filtro. Es la misma razón por la
+  que Docker (perfil seccomp por defecto), ChromeOS y Android **lo bloquean**.
+- **Anularía W^X y netns por la puerta de atrás.** El confinamiento (§11 W^X, §9 netns, Landlock)
+  asume que toda I/O cruza el filtro. `io_uring` mueve la I/O fuera de ese plano: la pila de red
+  vacía (`CLONE_NEWNET`) deja de bastar si el ring puede operar sobre fds heredados, y el filtrado de
+  `PROT_EXEC` no ve un `IORING_OP_*` que mapee/escriba.
+- **No se gana nada.** El worker solo hace I/O **bloqueante sobre dos pipes** ya abiertos
+  (`read`/`write`, §6 del contrato `tab`); no hay concurrencia de descriptores que justifique un ring.
+  La asincronía que la UI necesita vive en el **lado confiable** (event loop Wayland + fetch en hilo
+  desacoplado, Hito 9), nunca dentro de la frontera Zero-Trust.
+
+**Garantía estructural (deny-by-default).** Como el allowlist es **blanco** (todo lo ausente se mata),
+`io_uring_setup`/`io_uring_enter`/`io_uring_register` ya están denegados **por construcción** —no hay
+que enumerarlos en un denylist que se podría olvidar. Esta sección hace **explícita y bloqueada por
+prueba de regresión** esa propiedad para que nadie pueda agregar `io_uring` al allowlist "para hacer
+E/S asíncrona" sin que la suite falle. Análogo a SOP/CORS por construcción: una invariante de
+seguridad que se sostiene por diseño y se candadea con un test.
+
+### Matriz de pruebas (io_uring)
+- **Pura:** `os_policy_allows(__NR_io_uring_setup)`=0, `__NR_io_uring_enter`=0,
+  `__NR_io_uring_register`=0 (no son miembros del allowlist).
+- **Enforcement (fork, KILL):** el hijo se endurece y llama `io_uring_setup(...)` ⇒ `SIGSYS`
+  (`io_uring_setup` es el punto de entrada obligatorio: sin él no hay ring, así que matarlo basta para
+  cerrar todo el subsistema).

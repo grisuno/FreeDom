@@ -26,6 +26,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <linux/audit.h>
 #include <sys/mman.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -54,6 +55,17 @@ static void test_policy_denies_dangerous(void **state) {
     assert_false(os_policy_allows(__NR_execve));
     assert_false(os_policy_allows(__NR_ptrace));
     assert_false(os_policy_allows(__NR_connect));
+}
+
+/* io_uring is a seccomp-bypass primitive (its IORING_OP_* operations are dispatched
+ * without re-entering the syscall entry point the BPF filters), so none of its three
+ * entry syscalls may ever be on the allowlist. Locks the deny-by-default invariant so
+ * nobody can quietly add io_uring "for async I/O" (see spec/os_sandbox.md §13). */
+static void test_policy_denies_io_uring(void **state) {
+    (void)state;
+    assert_false(os_policy_allows(__NR_io_uring_setup));
+    assert_false(os_policy_allows(__NR_io_uring_enter));
+    assert_false(os_policy_allows(__NR_io_uring_register));
 }
 
 static void test_policy_size(void **state) {
@@ -112,6 +124,26 @@ static void test_harden_errno_denies_with_eperm(void **state) {
     assert_int_equal(WEXITSTATUS(st), 7);
 }
 
+/* KILL: io_uring_setup (the mandatory entry point of the whole subsystem -- no ring
+ * exists without it) must be killed with SIGSYS. Proves a compromised worker cannot
+ * stand up an io_uring instance to smuggle openat/connect past the BPF filter. */
+static void test_harden_kills_io_uring_setup(void **state) {
+    (void)state;
+    pid_t pid = fork();
+    assert_true(pid >= 0);
+    if (pid == 0) {
+        if (os_harden(OS_VIOLATION_KILL) != OS_OK) _exit(98);
+        /* args are irrelevant: the filter rejects on the syscall number, before the
+         * kernel inspects the params -> SIGSYS regardless of a valid setup struct. */
+        (void)syscall(__NR_io_uring_setup, 1u, (void *)0);
+        _exit(0); /* reached only if the filter failed to block it */
+    }
+    int st = 0;
+    assert_int_equal(waitpid(pid, &st, 0), pid);
+    assert_true(WIFSIGNALED(st));
+    assert_int_equal(WTERMSIG(st), SIGSYS);
+}
+
 /* --- W^X: no executable memory (seccomp argument filtering) --- */
 
 /* Pure mirror: mmap/mprotect are members of the allowlist but lose the request
@@ -163,6 +195,16 @@ static void test_harden_blocks_exec_mprotect(void **state) {
     assert_int_equal(waitpid(pid, &st, 0), pid);
     assert_true(WIFSIGNALED(st));
     assert_int_equal(WTERMSIG(st), SIGSYS);
+}
+
+/* The W^X args[2] low-word load assumes a little-endian ABI. Both arches the seccomp
+ * port enables (x86_64, aarch64) must carry the LE bit; a big-endian arch must never
+ * be enabled silently (PROT_EXEC would land in the high word and the check be bypassed).
+ * Runs on any host since the AUDIT_ARCH_* tokens are arch-independent constants. */
+static void test_seccomp_arches_are_le(void **state) {
+    (void)state;
+    assert_true((AUDIT_ARCH_X86_64  & __AUDIT_ARCH_LE) != 0);
+    assert_true((AUDIT_ARCH_AARCH64 & __AUDIT_ARCH_LE) != 0);
 }
 
 /* --- anti-dump (no core / no foreign ptrace) --- */
@@ -294,13 +336,16 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_policy_allows_safe),
         cmocka_unit_test(test_policy_denies_dangerous),
+        cmocka_unit_test(test_policy_denies_io_uring),
         cmocka_unit_test(test_policy_size),
         cmocka_unit_test(test_harden_kills_denied_syscall),
         cmocka_unit_test(test_harden_allows_permitted_syscall),
         cmocka_unit_test(test_harden_errno_denies_with_eperm),
+        cmocka_unit_test(test_harden_kills_io_uring_setup),
         cmocka_unit_test(test_prot_allowed_wx),
         cmocka_unit_test(test_harden_blocks_exec_mmap),
         cmocka_unit_test(test_harden_blocks_exec_mprotect),
+        cmocka_unit_test(test_seccomp_arches_are_le),
         cmocka_unit_test(test_no_dump_undumpable),
         cmocka_unit_test(test_landlock_abi_present),
         cmocka_unit_test(test_landlock_deny_all),

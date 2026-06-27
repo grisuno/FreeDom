@@ -476,6 +476,29 @@ static void test_eval_sees_env(void **state) {
     expect_eval(f->t, "typeof canvas.readback", "function");
 }
 
+/* SOP/CORS confidentiality (gap audit #2): the JS sandbox exposes NO way to make a
+ * network request or open a cross-origin browsing context, so it can never READ
+ * cross-origin data -- the canonical CORS threat (reading a cross-origin response)
+ * is structurally absent, on top of the worker having no network at all (CLONE_NEWNET
+ * + seccomp blocks socket/connect). document.cookie is present but empty (Zero
+ * Knowledge), so there is nothing to exfiltrate even via the page's own loads. If a
+ * future change adds a fetch-like API, this test fires and forces same-origin/CORS
+ * enforcement to be added alongside it. */
+static void test_eval_no_network_or_cross_origin_api(void **state) {
+    fixture *f = (fixture *)*state;
+    expect_eval(f->t, "typeof fetch", "undefined");
+    expect_eval(f->t, "typeof XMLHttpRequest", "undefined");
+    expect_eval(f->t, "typeof WebSocket", "undefined");
+    expect_eval(f->t, "typeof EventSource", "undefined");
+    expect_eval(f->t, "typeof navigator.sendBeacon", "undefined");
+    expect_eval(f->t, "typeof importScripts", "undefined");
+    expect_eval(f->t, "typeof Image", "undefined");
+    expect_eval(f->t, "typeof postMessage", "undefined");
+    expect_eval(f->t, "typeof open", "undefined");          /* no window.open / new window */
+    expect_eval(f->t, "typeof document.cookie", "string");  /* present but... */
+    expect_eval(f->t, "document.cookie", "");               /* ...empty: nothing to steal */
+}
+
 /* --- eval: a JS exception is TAB_OK with is_exception set, not a worker error --- */
 
 static void test_eval_exception(void **state) {
@@ -659,8 +682,59 @@ static void test_decode_image_null_args(void **state) {
     tab_close(t);
 }
 
-int main(void) {
+/* --- pure: worker-handoff argument validation (the exec security surface) --- */
+
+static void test_worker_args_valid(void **state) {
+    (void)state;
+    const char *argv[] = { "freedom", "--tab-worker", "3", "4", NULL };
+    int rfd = -1, wfd = -1;
+    assert_true(tab_parse_worker_args(4, argv, &rfd, &wfd));
+    assert_int_equal(rfd, 3);
+    assert_int_equal(wfd, 4);
+}
+
+static void test_worker_args_not_worker(void **state) {
+    (void)state;
+    const char *argv[] = { "freedom", "https://example.com", NULL };
+    int rfd = -1, wfd = -1;
+    assert_false(tab_parse_worker_args(2, argv, &rfd, &wfd));
+}
+
+static void test_worker_args_malformed(void **state) {
+    (void)state;
+    int rfd = 0, wfd = 0;
+    const char *missing[]  = { "freedom", "--tab-worker", "3", NULL };            /* too few */
+    const char *nonnum[]   = { "freedom", "--tab-worker", "3", "x4", NULL };      /* not a number */
+    const char *negative[] = { "freedom", "--tab-worker", "-3", "4", NULL };      /* leading '-' */
+    const char *huge[]     = { "freedom", "--tab-worker", "3", "99999999", NULL };/* absurd fd */
+    const char *empty[]    = { "freedom", "--tab-worker", "", "4", NULL };        /* empty token */
+    assert_false(tab_parse_worker_args(3, missing, &rfd, &wfd));
+    assert_false(tab_parse_worker_args(4, nonnum, &rfd, &wfd));
+    assert_false(tab_parse_worker_args(4, negative, &rfd, &wfd));
+    assert_false(tab_parse_worker_args(4, huge, &rfd, &wfd));
+    assert_false(tab_parse_worker_args(4, empty, &rfd, &wfd));
+}
+
+static void test_worker_args_null_safe(void **state) {
+    (void)state;
+    int rfd = 0, wfd = 0;
+    const char *argv[] = { "freedom", "--tab-worker", "3", "4", NULL };
+    assert_false(tab_parse_worker_args(4, NULL, &rfd, &wfd));
+    assert_false(tab_parse_worker_args(4, argv, NULL, &wfd));
+    assert_false(tab_parse_worker_args(4, argv, &rfd, NULL));
+    assert_false(tab_parse_worker_args(0, argv, &rfd, &wfd));
+}
+
+int main(int argc, char **argv) {
+    /* The worker re-execs /proc/self/exe (this very test binary), so the first thing
+     * any tab-linking main() must do is run the worker when invoked as one. */
+    tab_worker_dispatch(argc, argv);
+
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_worker_args_valid),
+        cmocka_unit_test(test_worker_args_not_worker),
+        cmocka_unit_test(test_worker_args_malformed),
+        cmocka_unit_test(test_worker_args_null_safe),
         cmocka_unit_test(test_open_close),
         cmocka_unit_test(test_open_null),
         cmocka_unit_test(test_load_basic),
@@ -681,6 +755,7 @@ int main(void) {
         cmocka_unit_test(test_load_null_and_too_large),
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),
+        cmocka_unit_test_setup_teardown(test_eval_no_network_or_cross_origin_api, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_exception, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_persistent_state, setup_loaded, teardown),
         cmocka_unit_test(test_reload_replaces_page),

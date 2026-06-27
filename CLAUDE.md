@@ -61,7 +61,14 @@ Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scou
    y qué queda fuera de alcance. Usando Dado-Cuando-Entonces o BDD
 2. **Test (rojo)** — `tests/test_<modulo>.c` con CMocka. Debe **fallar** porque no hay
    implementación todavía. usando ATDD (Acceptance Test-Driven Development - Desarrollo Orientado a Pruebas de Aceptación):
-3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar. todas las llamadas syscalls deben usar io_uring, el subsistema y API de Linux para E/S asíncrona. de tal modo no bloquee la ui del usuario ni el hilo.
+3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar. La I/O del **lado
+   confiable** (orquestador / event loop, el que NO toca contenido hostil) debe ser **asíncrona** —
+   `io_uring` cuando aplique — de modo que no bloquee la UI ni el hilo. **Excepción de seguridad
+   inquebrantable:** `io_uring` está **PROHIBIDO dentro del worker confinado** (`tab`/`renderer`),
+   porque es una **primitiva de bypass de seccomp** (sus `IORING_OP_*` no atraviesan el syscall entry
+   que filtra el BPF → un ring anularía el allowlist, W^X y netns). El worker hace I/O **bloqueante**
+   sobre los dos pipes ya abiertos y punto. La regla "usar io_uring" jamás se aplica donde corre
+   contenido remoto. Ver `spec/os_sandbox.md` §13 y `[[freedom-io-uring-forbidden-in-worker]]`.
 4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas. si vez codigo duplicado lo unificas esto es imperativo busca codigo dduplicado y extinguelo sin perder funcionalidad, nunca esta fuera de scope, modo boy scout si ves deuda tecnica la extingues sin romper funcionalidades, lo mismo con las fallas de seguridad o vulnerabilidades la extincion de estas nunca esta fuera de scope, si puedes hacer lo mismo que haces en 40 lineas de codigo lo puedes hacer en 10 o 1 bienvenido siempre y cuando respete el dry solid y no pierda funcionalidad ni agregue mas deuda tecnica
 5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`. como parte de la
    validacion quiero que utilices ya sea urls y archivos html para revisar el comportamiento de la
@@ -209,7 +216,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Enrutado de red | `net_realm` (`nr_`) | Clasifica clearnet / `.onion` / `.i2p` y decide ruta (directo / Tor SOCKS5h / I2P HTTP / **bloqueado**). Puro. Aislamiento de realm + **fail-closed** (nunca fuga `.onion` por clearnet). `secure_fetch` aplica el proxy (`sf_proxy_*`). |
 | Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice consultable de solo lectura. |
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla normalizados; readback de canvas/audio envenenado **por origen** (`fp_origin_key(session_key, eTLD+1)`, no enlazable cross-origin). |
-| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | seccomp-bpf fail-closed (con **W^X**: `mmap`/`mprotect` con `PROT_EXEC` denegados por inspección de argumento → sin shellcode nativo aun tras secuestro de control) + **anti-volcado** (`PR_SET_DUMPABLE`=0 + `RLIMIT_CORE`=0, sin core ni ptrace ajeno) + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
+| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | **fork + exec del worker** (re-ejecuta `/proc/self/exe` como `--tab-worker`: NO hereda COW del padre → un worker no ve el contenido de las otras pestañas; ASLR fresca; higiene de fds vía `close_range`) + seccomp-bpf fail-closed (con **W^X**: `mmap`/`mprotect` con `PROT_EXEC` denegados por inspección de argumento → sin shellcode nativo aun tras secuestro de control) + **anti-volcado** (`PR_SET_DUMPABLE`=0 + `RLIMIT_CORE`=0, sin core ni ptrace ajeno) + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`line-height`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
 | CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~`/atributo/pseudo siguen fuera, fallan cerrado; whitelist de propiedades). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). |
@@ -315,6 +322,30 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   routing"; headless: `--tor[=addr]`/`--i2p[=addr]`/`--torify`; env: `FREEDOM_TOR_PROXY`/
   `FREEDOM_I2P_PROXY`/`FREEDOM_TORIFY_CLEARNET`. **Verificado de extremo a extremo** (jun 2026):
   `.onion` vía Tor y `.i2p` vía el router Java (`stats.i2p`, `i2p-projekt.i2p` con redirect).
+- **Same-Origin/CORS por construcción (no implementar CORS):** la SOP clásica —que JS lea la
+  respuesta de **otro origen**— es **estructuralmente imposible** en Freedom, así que **no se
+  implementa un parser de CORS** (sería código ceremonial muerto: no hay petición cross-origin de JS
+  cuya respuesta haya que negociar). Razones: el sandbox JS **no expone** ninguna API de red
+  (`fetch`/`XMLHttpRequest`/`WebSocket`/`EventSource`/`sendBeacon`/`Image`), no hay `iframe` ni
+  contexto de navegación anidado, no hay `window.open`/`postMessage`/`opener`, el readback de
+  canvas/audio está **envenenado** (nunca píxeles reales) y el worker **no tiene red**
+  (`CLONE_NEWNET`+seccomp). `document.cookie` está **vacío** (Zero Knowledge), así que no hay nada
+  sensible que robar ni siquiera por los propios `src`/navegación de la página (que sí pueden ser
+  cross-origin, como en cualquier navegador). Bloqueado por regresión:
+  `test_eval_no_network_or_cross_origin_api` — si alguien añade una API de red, **falla** y obliga a
+  añadir CORS/SOP con ella. Origen: auditoría de gaps #2 (el reclamo "exfiltración cross-origin sin
+  restricciones" era falso). Ver `spec/threat-model.md` §3 ("JS ↔ otro origen"), `[[freedom-sop-by-construction]]`.
+- **`io_uring` PROHIBIDO en el worker confinado (la doctrina io_uring es solo del lado confiable):**
+  la §3 pide I/O asíncrona con `io_uring`, pero `io_uring` es una **primitiva de bypass de seccomp**
+  (sus `IORING_OP_*` no atraviesan el syscall entry que filtra el BPF), así que **nunca** entra al
+  allowlist del worker: un ring le permitiría a un worker comprometido `openat`/`connect`/`read`
+  burlando el filtro, W^X y `CLONE_NEWNET` — anularía toda la frontera Zero-Trust (como en Docker/
+  ChromeOS/Android, que lo bloquean). Ya está denegado **por construcción** (el allowlist es blanco,
+  deny-by-default), y se candadea con regresión: `test_policy_denies_io_uring` (puro) +
+  `test_harden_kills_io_uring_setup` (`io_uring_setup` ⇒ `SIGSYS`). La asincronía de la UI vive en el
+  lado confiable (event loop Wayland + fetch en hilo desacoplado, Hito 9), **jamás** donde corre
+  contenido hostil; el worker solo hace I/O bloqueante sobre dos pipes. Análogo a SOP por
+  construcción. Ver `spec/os_sandbox.md` §13, `[[freedom-io-uring-forbidden-in-worker]]`.
 - **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
   contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
 
@@ -479,8 +510,44 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   ASan; el heap JS ya está acotado por su asignador) y `RLIMIT_CPU` (mata todo el worker; el valor es
   política de render atada a un interrupt-handler de QuickJS). **No** se agregan `ppoll`/`epoll`
   (el worker hace I/O bloqueante: ensanchar sería lo contrario de endurecer). Origen: auditoría de
-  gaps #5. *(seccomp es x86_64-only; en otra arquitectura `os_harden` falla cerrado — el port ARM64
-  es el gap #3, pendiente y no verificable en este host.)* Ver `[[freedom-seccomp-wx-hardening]]`.
+  gaps #5. *(El port aarch64 llegó en el Hito 17d, abajo.)* Ver `[[freedom-seccomp-wx-hardening]]`.
+- **Hito 17d — Port de seccomp a aarch64 (gap #3).** El filtro dejó de ser x86_64-only: el guard de
+  arquitectura del BPF se parametriza (`OS_SECCOMP_ARCH` = `AUDIT_ARCH_X86_64` en x86_64,
+  `AUDIT_ARCH_AARCH64` en **aarch64 little-endian**) y la sección `os_harden` se habilita para ambos
+  (`#if defined(__x86_64__) || (defined(__aarch64__) && !defined(__AARCH64EB__))`). **El allowlist y el
+  W^X ya eran portables:** usan solo syscalls de la **ABI genérica**, así que los macros `__NR_*`
+  resuelven el número correcto por arquitectura sin hardcodear, y `args[2]` (prot) está en la misma
+  posición; ambas arquitecturas habilitadas son **little-endian**, condición que el load de bajo-orden
+  del W^X exige (por eso **aarch64 big-endian se excluye** y cae a `OS_ERR_UNSUPPORTED`, fail-closed).
+  Spec (`os_sandbox.md` §3/§10) + test nuevo `test_seccomp_arches_are_le` (invariante LE de
+  `AUDIT_ARCH_X86_64`/`AARCH64`, corre en este host) + verificación concreta de que **los 34 syscalls
+  del allowlist+landlock+close_range existen en `asm-generic/unistd.h`** (la ABI de aarch64) + `make
+  test`/`make asan` (35, exit 0) limpios con el camino x86_64 **sin cambios**. **Honestidad:** el
+  camino aarch64 es **source-complete** pero **no se pudo construir ni ejecutar aquí** (sin
+  toolchain/sysroot aarch64 en este host x86_64) — queda **pendiente de itest en hardware/CI ARM64**,
+  nunca marcado como verificado. Ver `[[freedom-seccomp-wx-hardening]]`.
+- **Hito 17c — Aislamiento real de proceso por pestaña: fork + exec del worker.** El worker dejó de
+  ser solo `fork()` (que hereda **copy-on-write** TODO el espacio del padre): ahora `tab_open`
+  **re-ejecuta** el binario (`execv("/proc/self/exe", {"freedom","--tab-worker",rfd,wfd})`) tras el
+  fork, así el worker arranca con una **imagen nueva sin herencia**. Cierra una fuga cross-pestaña
+  real (el audit de gaps #4): el padre (GUI) tiene en `tab_slots[]` el HTML/URL/estado de **todas** las
+  pestañas de fondo; con `fork`-solo, el worker que renderiza la pestaña activa hostil tenía copias COW
+  de las otras y podía lavarlas por la red del padre (un `src` de imagen o `location.href` a
+  `evil.com/?<secreto-de-otra-pestaña>`). seccomp/W^X/Landlock confinan lo que el worker *puede hacer*;
+  el exec confina lo que *puede ver* (+ ASLR fresca). **Higiene de fds:** antes del exec el hijo marca
+  `CLOEXEC` en todo fd≥3 (`close_range(3,~0,CLOSE_RANGE_CLOEXEC)`) y lo limpia solo en los 2 pipes, así
+  el worker tampoco hereda el socket de Wayland ni otros fds. `tab_worker_dispatch(argc,argv)` (1ª línea
+  de `main` del binario **y** de `test_tab`, porque el worker re-ejecuta `/proc/self/exe`) detecta
+  `--tab-worker`, valida los fds con `tab_parse_worker_args` (puro, fail-closed: decimal, no-negativo,
+  acotado) y corre `tab_worker_run`; exec fallido ⇒ sin handshake ⇒ `TAB_ERR_CONFINE`. Spec (`tab.md`
+  §2) + 4 tests puros nuevos (`tab_parse_worker_args`: válido/no-worker/malformado/nulls) + **el set E2E
+  de `test_tab` ahora corre a través del worker re-exec'd** (30 tests: parse+JS+decode) → `make test`
+  (35 suites) / `make asan` (35, exit 0) limpios + verificación runtime por `strace`
+  (`close_range`→`execve("/proc/self/exe", --tab-worker 3 6)`) + flag público `--tab-worker` fail-closed
+  (fds malos salen rápido; arg malformado cae a la CLI normal). **Sin dependencia nueva.** Origen:
+  auditoría de gaps #4 (el reclamo literal "unshare en proceso actual / no fork por tab" era falso —
+  ya había fork-por-render; la fuga real era la herencia COW). Ver `[[freedom-tab-fork-exec]]`,
+  `[[freedom-tab-namespaces]]`.
 - **Hito 18 — Identidad de red anti-fingerprinting + omnibox de búsqueda.** Dos cambios puros con
   TDD. (a) **Identidad de red:** `anti_fp` pasa a ser la **fuente única** de la identidad
   normalizada (macros `FP_USER_AGENT`/`FP_ACCEPT_LANGUAGE`/`FP_ACCEPT_LANGUAGE_HEADER` + nueva

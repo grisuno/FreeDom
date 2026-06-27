@@ -32,10 +32,15 @@ renderer: *IPC bidireccional persistente*, *ejecución de JS en el hijo* y *land
 
 ```
 proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confinado)
-  tab_open() -> pipe x2; fork() -------->  close extremos del padre
+  tab_open() -> pipe x2; fork() -------->  fd hygiene: CLOEXEC a TODO fd>=3, salvo los 2 pipes
+                                           execv(/proc/self/exe, --tab-worker rfd wfd)  <- IMAGEN NUEVA
+                                           ----- nuevo proceso, sin herencia COW -----
+                                           tab_worker_dispatch() -> tab_worker_run(rfd,wfd)
                                            session_key = getrandom()      <- antes del confinamiento
+                                           os_isolate_namespaces()         <- user/net/ipc/uts
+                                           os_no_dump()                    <- undumpable + RLIMIT_CORE=0
                                            os_landlock_restrict(NULL,0)    <- niega TODO el filesystem
-                                           os_harden(KILL)                 <- seccomp fail-closed activo
+                                           os_harden(KILL)                 <- seccomp fail-closed + W^X
   read(handshake) <----------pipe-------- write(TAB_READY | TAB_NO_CONFINE)
   ----- bucle de peticiones -----         ----- bucle confinado -----
   tab_load(html) -> [OP_LOAD][len][html]-> hp_parse + dom_build + js_context_new
@@ -46,10 +51,26 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
   tab_close() -> close(req); SIGKILL; waitpid()   EOF en req -> libera estado -> _exit(0)
 ```
 
-- El hijo **se confina una sola vez** al arrancar, antes de la primera petición y antes de mapear
-  cualquier contenido. Todo lo subsiguiente (parseo, DOM, creación de contexto JS, `eval`) ocurre
-  ya confinado. Si el parseo o el motor JS intentaran abrir un fichero/socket o `exec`, el kernel
-  mata al hijo (`SIGSYS`) y el padre lo reporta como `TAB_ERR_DEAD`.
+- **fork + exec (aislamiento de proceso real, no solo `fork`):** el hijo **re-ejecuta** el propio
+  binario (`execv("/proc/self/exe", {"freedom","--tab-worker",rfd,wfd})`) en vez de seguir corriendo
+  con la imagen heredada del padre. Así el worker **no hereda copy-on-write** del espacio de
+  direcciones del padre (el contenido HTML/URL/estado de las **otras pestañas** vive en `tab_slots[]`
+  del padre) y re-aleatoriza ASLR. seccomp/W^X/Landlock confinan lo que el worker *puede hacer*; el
+  exec confina lo que el worker *puede ver*: cierra el filtrado cross-pestaña por inheritance de
+  memoria (un worker comprometido renderizando la pestaña activa ya no puede leer las otras y
+  lavarlas por la red del padre vía `src` de imagen o `location.href`). **Higiene de fds:** antes del
+  exec, el hijo marca `CLOEXEC` en **todo** fd ≥ 3 (`close_range(3, ~0, CLOSE_RANGE_CLOEXEC)`) y lo
+  limpia solo en los dos extremos de pipe que cruzan el exec, de modo que el worker tampoco hereda el
+  socket de Wayland ni ningún otro fd del padre. `tab_worker_dispatch(argc,argv)` (llamado al inicio
+  de `main` del binario **y** del `test_tab`, ya que el worker re-ejecuta `/proc/self/exe`) detecta la
+  invocación `--tab-worker`, valida los fds con `tab_parse_worker_args` (puro, fail-closed) y corre el
+  worker; si el exec falla, el hijo `_exit(127)` sin handshake y el padre devuelve `TAB_ERR_CONFINE`
+  (*fail closed*).
+- El hijo **se confina una sola vez** al arrancar (ya en la imagen nueva), antes de la primera
+  petición y antes de mapear cualquier contenido. Todo lo subsiguiente (parseo, DOM, creación de
+  contexto JS, `eval`) ocurre ya confinado. Si el parseo o el motor JS intentaran abrir un
+  fichero/socket o `exec`, el kernel mata al hijo (`SIGSYS`) y el padre lo reporta como
+  `TAB_ERR_DEAD`.
 - **Orden de confinamiento:** `os_landlock_restrict(NULL, 0)` (Landlock niega todo el FS) va
   **antes** de `os_harden` (seccomp bloquea los propios syscalls de Landlock). Landlock es
   *best-effort* (defensa en profundidad): seccomp ya excluye `open`/`openat`/`socket`/`connect`,

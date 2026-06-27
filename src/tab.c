@@ -29,14 +29,20 @@
 #include "url.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <linux/close_range.h>
 #include <sys/random.h>
 #include <sys/wait.h>
+
+/* Defined parent-side below; the re-exec'd worker restores SIGPIPE handling with it. */
+static void ignore_sigpipe(void);
 
 /* Fixed, normalized output size; fp_bucket_screen snaps it the same for all. */
 #define TAB_SCREEN_W 1920
@@ -351,8 +357,13 @@ static uint64_t gen_session_key(void) {
     return k;
 }
 
-/* The confined request loop. Never returns to the caller (always _exit). */
-static void child_main(int rfd, int wfd) {
+/* The confined request loop. Runs in the re-exec'd worker image (see
+ * tab_worker_dispatch). Never returns to the caller (always _exit). */
+static void tab_worker_run(int rfd, int wfd) {
+    /* The exec reset SIGPIPE to default; restore SIG_IGN so a write to a dead parent
+     * surfaces as EPIPE (graceful loop exit), not a signal. */
+    ignore_sigpipe();
+
     child_state cs;
     memset(&cs, 0, sizeof cs);
     cs.session_key = gen_session_key();
@@ -361,7 +372,7 @@ static void child_main(int rfd, int wfd) {
      * defense in depth (seccomp already excludes open/socket/exec); seccomp is
      * mandatory: if it cannot be installed, report not-confined and exit (fail
      * closed). Namespaces go first: unshare(CLONE_NEWUSER) needs a single-threaded
-     * context, which this freshly forked child is, and detaching the network/IPC/UTS
+     * context, which this freshly exec'd image is, and detaching the network/IPC/UTS
      * stacks means even a seccomp bypass finds no network to reach. */
     os_isolate_namespaces();
     os_no_dump();
@@ -413,6 +424,39 @@ static void child_main(int rfd, int wfd) {
 
     child_reset_page(&cs);
     _exit(0);
+}
+
+/* --- worker entry dispatch (the re-exec'd image lands here from main) --- */
+
+/* Parses one strictly-decimal, non-negative, sanely-bounded fd. Fail-closed. */
+static int parse_worker_fd(const char *s, int *out) {
+    if (s == NULL || *s == '\0') return 0;
+    long v = 0;
+    for (const char *p = s; *p != '\0'; ++p) {
+        if (*p < '0' || *p > '9') return 0;
+        v = v * 10 + (*p - '0');
+        if (v > 1048576) return 0; /* far above any real fd; reject as garbage */
+    }
+    *out = (int)v;
+    return 1;
+}
+
+int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd) {
+    if (argc < 4 || argv == NULL || rfd == NULL || wfd == NULL) return 0;
+    if (argv[1] == NULL || strcmp(argv[1], "--tab-worker") != 0) return 0;
+    int a = -1, b = -1;
+    if (!parse_worker_fd(argv[2], &a) || !parse_worker_fd(argv[3], &b)) return 0;
+    *rfd = a;
+    *wfd = b;
+    return 1;
+}
+
+void tab_worker_dispatch(int argc, char **argv) {
+    int rfd = -1, wfd = -1;
+    if (!tab_parse_worker_args(argc, (const char *const *)argv, &rfd, &wfd))
+        return; /* not a worker invocation: the caller's main() proceeds normally */
+    tab_worker_run(rfd, wfd); /* confines, serves the request loop */
+    _exit(0);                 /* never returns to main(): no atexit/LSan under seccomp */
 }
 
 /* =========================== parent side ============================= */
@@ -558,6 +602,26 @@ static tab_status io_failure(tab *t) {
     return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
 }
 
+/* Child half of the fork: re-exec a fresh worker image so it inherits NONE of the
+ * parent's address space (no other tabs' content from tab_slots[], fresh ASLR) and
+ * none of its descriptors except the two pipe ends. Never returns on success. */
+static void exec_worker_child(int rfd, int wfd) {
+    /* Mark every descriptor >= 3 close-on-exec, then clear it on just the two pipe
+     * ends the worker keeps: the re-exec'd image sees no Wayland socket, no fetch
+     * pipe, no other parent fd. (stdio 0..2 stay open for diagnostics.) */
+    close_range(3, ~0U, CLOSE_RANGE_CLOEXEC);
+    int rf = fcntl(rfd, F_GETFD); if (rf >= 0) fcntl(rfd, F_SETFD, rf & ~FD_CLOEXEC);
+    int wf = fcntl(wfd, F_GETFD); if (wf >= 0) fcntl(wfd, F_SETFD, wf & ~FD_CLOEXEC);
+
+    char rbuf[16], wbuf[16];
+    snprintf(rbuf, sizeof rbuf, "%d", rfd);
+    snprintf(wbuf, sizeof wbuf, "%d", wfd);
+    char *const av[] = { (char *)"freedom", (char *)"--tab-worker", rbuf, wbuf, NULL };
+    execv("/proc/self/exe", av);
+    /* exec failed: the caller _exit()s without a handshake, so the parent's read
+     * sees EOF and returns TAB_ERR_CONFINE (fail closed). */
+}
+
 tab_status tab_open(tab **out) {
     if (out == NULL) return TAB_ERR_NULL_ARG;
     *out = NULL;
@@ -578,8 +642,8 @@ tab_status tab_open(tab **out) {
     }
     if (pid == 0) {
         close(req[1]); close(resp[0]);
-        child_main(req[0], resp[1]);
-        _exit(0); /* unreachable */
+        exec_worker_child(req[0], resp[1]);
+        _exit(127); /* exec failed -> fail closed (no handshake -> TAB_ERR_CONFINE) */
     }
 
     /* Parent: keep the request-write and response-read ends only. */
