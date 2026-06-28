@@ -135,6 +135,12 @@ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const char *name, const char *value);
 
+/* Removes attribute name from node (no-op if absent). Like dom_set_attribute, the
+ * id/class lookup indices are not pruned (a removed id may still resolve until the
+ * next render) -- consistent with set's best-effort dynamic indexing. Invalid handle
+ * / NULL name => DOM_ERR_NULL_ARG; backend failure => DOM_ERR_INTERNAL. */
+dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name);
+
 /* Replaces node's children with the parsed HTML fragment (node as context element).
  * Old children are DETACHED (not freed), the parsed nodes are inserted, and the new
  * element subtree is indexed (queryable). Any <script> in the fragment is inert (never

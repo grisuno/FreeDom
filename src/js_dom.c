@@ -249,6 +249,18 @@ static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
+static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,
+                                  int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    const char *name = JS_ToCString(ctx, argv[1]);
+    if (name == NULL) return JS_EXCEPTION;
+    (void)dom_remove_attribute(jd_idx(ctx), h, name);
+    JS_FreeCString(ctx, name);
+    return JS_UNDEFINED;
+}
+
 static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
                                 int argc, JSValueConst *argv) {
     (void)this_val; (void)argc;
@@ -290,6 +302,7 @@ static const jd_method JD_METHODS[] = {
     { "appendChild",    m_append_child,      2 },
     { "removeChild",    m_remove_child,      2 },
     { "setAttribute",   m_set_attribute,     3 },
+    { "removeAttribute", m_remove_attribute, 2 },
     { "setInnerHtml",   m_set_inner_html,    2 },
 };
 
@@ -308,6 +321,28 @@ static const char JD_DOCUMENT_SHIM[] =
     "      set textContent(v){ dom.setText(h, String(v)); },"
     "      getAttribute: function(n){ return dom.getAttribute(h, String(n)); },"
     "      setAttribute: function(n,v){ dom.setAttribute(h, String(n), String(v)); },"
+    "      removeAttribute: function(n){ dom.removeAttribute(h, String(n)); },"
+    "      hasAttribute: function(n){ return dom.getAttribute(h, String(n))!==null; },"
+    /* dataset: data-* attributes via a Proxy, so reads like el.dataset.fooBar map to
+     * the data-foo-bar attribute (missing => undefined, never a throw). Identity-safe:
+     * only this element's own attributes, no enumeration of anything else. */
+    "      get dataset(){ return new Proxy({}, {"
+    "        get:function(t,p){ if(typeof p!=='string') return undefined;"
+    "          var k='data-'+p.replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();});"
+    "          var v=dom.getAttribute(h,k); return v===null?undefined:v; },"
+    "        has:function(t,p){ if(typeof p!=='string') return false;"
+    "          var k='data-'+p.replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();});"
+    "          return dom.getAttribute(h,k)!==null; },"
+    "        set:function(t,p,v){ if(typeof p==='string'){"
+    "          var k='data-'+p.replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();});"
+    "          dom.setAttribute(h,k,String(v)); } return true; } }); },"
+    /* src/href reflect the attribute as a string ('' when absent) so common idioms
+     * (img.src.substring(...), a.href) never read a property of undefined. The raw
+     * attribute is returned (not a resolved absolute URL): no base-URL leak into JS. */
+    "      get src(){ var v=dom.getAttribute(h,'src'); return v===null?'':v; },"
+    "      set src(v){ dom.setAttribute(h,'src',String(v)); },"
+    "      get href(){ var v=dom.getAttribute(h,'href'); return v===null?'':v; },"
+    "      set href(v){ dom.setAttribute(h,'href',String(v)); },"
     "      get tagName(){ var t=dom.tagName(h); return t===null?null:String(t).toUpperCase(); },"
     "      get id(){ var v=dom.getAttribute(h,'id'); return v===null?'':v; },"
     "      set id(v){ dom.setAttribute(h,'id',String(v)); },"

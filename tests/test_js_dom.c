@@ -244,6 +244,47 @@ static void test_set_attribute_makes_queryable(void **state) {
     assert_int_not_equal(dom_get_element_by_id(f->idx, "made"), DOM_NODE_NONE);
 }
 
+/* Element-wrapper completeness: dataset / hasAttribute / removeAttribute / src /
+ * href -- the missing members that made google.com's startup JS throw. Each idiom
+ * below is exactly the shape that previously threw (see Hito 24 FB-error fixes). */
+static void test_element_dataset_via_proxy(void **state) {
+    fixture *f = (fixture *)*state;
+    /* el.dataset.fooBar maps to the data-foo-bar attribute; missing => undefined. */
+    EXPECT(f,
+        "var e=document.getElementById('go'); e.setAttribute('data-foo-bar','hi');"
+        "e.dataset.fooBar + '/' + (e.dataset.nope===undefined)", "hi/true");
+    /* The google idiom b.dataset.ved on an element without it must not throw. */
+    EXPECT(f, "(document.getElementById('main').dataset.ved)||'none'", "none");
+    /* writes round-trip back to the attribute */
+    EXPECT(f,
+        "var e=document.getElementById('main'); e.dataset.testKey='1';"
+        "e.getAttribute('data-test-key')", "1");
+}
+
+static void test_element_has_attribute(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "''+document.getElementById('main').hasAttribute('class')", "true");
+    EXPECT(f, "''+document.getElementById('main').hasAttribute('data-noaft')", "false");
+}
+
+static void test_element_remove_attribute(void **state) {
+    fixture *f = (fixture *)*state;
+    /* removeAttribute is real (native dom_remove_attribute): the attribute is gone. */
+    EXPECT(f,
+        "var e=document.getElementById('main'); e.removeAttribute('class');"
+        "e.getAttribute('class')===null", "true");
+    /* and it must not throw on an absent attribute */
+    EXPECT(f, "document.getElementById('go').removeAttribute('zzz'); 'ok'", "ok");
+}
+
+static void test_element_src_href_are_strings(void **state) {
+    fixture *f = (fixture *)*state;
+    /* .src/.href read '' when absent so d.src.substring(...) never hits undefined. */
+    EXPECT(f, "document.getElementById('go').src.substring(0,5)", "");
+    EXPECT(f, "var e=document.getElementById('go'); e.src='http://x/y'; e.src", "http://x/y");
+    EXPECT(f, "document.getElementById('go').href", "");
+}
+
 static void test_append_cycle_is_rejected(void **state) {
     fixture *f = (fixture *)*state;
     /* Appending an ancestor under its descendant must be a no-op (no crash/loop). */
@@ -519,6 +560,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_document_is_not_io, setup, teardown),
         cmocka_unit_test_setup_teardown(test_create_append_renders_in_tree, setup, teardown),
         cmocka_unit_test_setup_teardown(test_set_attribute_makes_queryable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_dataset_via_proxy, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_has_attribute, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_remove_attribute, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_src_href_are_strings, setup, teardown),
         cmocka_unit_test_setup_teardown(test_append_cycle_is_rejected, setup, teardown),
         cmocka_unit_test_setup_teardown(test_onload_runs_and_mutates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_settimeout_flushed_by_pump, setup, teardown),

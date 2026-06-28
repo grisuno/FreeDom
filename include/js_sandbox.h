@@ -51,7 +51,17 @@ typedef struct js_result {
     char     *value;     /* owned; textual result, or exception message; may be NULL */
     size_t    value_len; /* bytes in value excluding the trailing NUL */
     int       is_exception; /* nonzero if value holds an error message, not a value */
+    /* Throw site of an exception, parsed from the engine's .stack (developer aid).
+     * Only meaningful when is_exception != 0; file is NULL and line/col 0 when the
+     * location could not be determined (e.g. a thrown non-Error primitive). file is
+     * owned by this struct (freed by js_result_free). */
+    char     *file;      /* owned; source name (the filename passed to js_eval_named) */
+    int       line;      /* 1-based source line, or 0 if unknown */
+    int       col;       /* 1-based source column, or 0 if unknown */
 } js_result;
+
+/* Upper bound on a stack-parsed source name (file) length, NUL excluded. */
+#define JS_LOC_FILE_MAX ((size_t)512)
 
 #define JS_DEFAULT_MAX_SOURCE   ((size_t)(4u * 1024u * 1024u))
 #define JS_DEFAULT_MEM_LIMIT    ((size_t)(64u * 1024u * 1024u))
@@ -83,9 +93,27 @@ void js_context_free(js_context *ctx);
  * On return, *res is populated and must be released with js_result_free. */
 js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res);
 
+/* As js_eval, but tags the source with `filename` so an exception's location
+ * (res->file/line/col) and the engine's .stack carry a meaningful name instead
+ * of the generic "<sandbox>". filename == NULL => "<sandbox>". The name is used
+ * for diagnostics only; it grants the script no capability. */
+js_status js_eval_named(js_context *ctx, const char *src, size_t len,
+                        const char *filename, js_result *res);
+
 /* Convenience: new context, evaluate once, free the context. Same error codes
  * as js_eval. lim == NULL => defaults. */
 js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res);
+
+/* Pure parser: extracts the throw site (file, line, column) from the FIRST frame
+ * of a QuickJS .stack string. Recognised frame forms:
+ *     at <name> (<file>:<line>:<col>)
+ *     at <file>:<line>:<col>
+ * Writes up to file_cap-1 bytes of <file> (NUL-terminated) into file_out and the
+ * numbers into *line / *col (*col is 0 when the frame carries only a line). Returns
+ * 1 when a line number was parsed, else 0 (file_out emptied, *line=*col=0). Tolerant
+ * of NULL/garbage input. No I/O, no allocation, reentrant. */
+int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
+                      int *line, int *col);
 
 /* Adjusts the wall-clock budget armed on each subsequent js_eval. Used to enforce
  * a single page-wide budget across a sequence of evaluations (e.g. a page's inline

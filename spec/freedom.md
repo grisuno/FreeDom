@@ -46,7 +46,9 @@ SALIDA headless (stdout):
 
 SALIDA --dump-console (stdout, tras la salida normal de la página):
   === Freebug console (<n>) ===
-  [<nivel>] <texto>            (una línea por entrada; nivel = log/info/warn/error/debug)
+  [<nivel>] <texto>                      (entrada sin ubicación, p. ej. un console.log)
+  [<nivel>] <file>:<line>:<col>  <texto> (error con sitio de lanzamiento; p. ej.
+                                          inline #9:2:54 para el 9º <script> inline)
   [notice] console output was truncated (buffer full)   (solo si se llenó el buffer)
 
 SALIDA --download-pdf (fichero):

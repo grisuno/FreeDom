@@ -291,6 +291,23 @@ static void test_set_attribute_reindexes_id(void **state) {
     assert_string_equal(dom_get_attribute(idx, created, "data-x", &len), "1");
 }
 
+static void test_remove_attribute(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id created = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "div", &created), DOM_OK);
+    assert_int_equal(dom_set_attribute(idx, created, "data-x", "1"), DOM_OK);
+    size_t len = 0;
+    assert_string_equal(dom_get_attribute(idx, created, "data-x", &len), "1");
+    /* remove it: getAttribute now reports absent (NULL) */
+    assert_int_equal(dom_remove_attribute(idx, created, "data-x"), DOM_OK);
+    assert_null(dom_get_attribute(idx, created, "data-x", &len));
+    /* removing an absent attribute is a no-op success */
+    assert_int_equal(dom_remove_attribute(idx, created, "nope"), DOM_OK);
+    /* invalid args fail closed */
+    assert_int_equal(dom_remove_attribute(idx, DOM_NODE_NONE, "x"), DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_remove_attribute(idx, created, NULL), DOM_ERR_NULL_ARG);
+}
+
 static void test_set_inner_html(void **state) {
     dom_index *idx = IDX(state);
     dom_node_id main_id = dom_get_element_by_id(idx, "main");
@@ -337,6 +354,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_append_rejects_cycle, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_remove_child, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_set_attribute_reindexes_id, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_remove_attribute, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_set_inner_html, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_construction_invalid_args, setup_doc, teardown_doc),
     };

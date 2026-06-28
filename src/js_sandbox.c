@@ -113,12 +113,83 @@ static int js_interrupt_cb(JSRuntime *rt, void *opaque) {
     return 0;
 }
 
-/* Pulls the pending exception into an owned host string. The deadline must be
- * disarmed before calling: formatting an Error may run user toString(). Under a
- * memory cap the heap may be exhausted and formatting can fail (NULL): we then
- * fall back to a fixed message (host allocation is not subject to the cap). */
-static char *capture_exception(JSContext *ctx, size_t *out_len) {
-    if (out_len != NULL) *out_len = 0;
+static int is_ascii_digit(char c) { return c >= '0' && c <= '9'; }
+
+int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
+                      int *line, int *col) {
+    if (file_out != NULL && file_cap != 0) file_out[0] = '\0';
+    if (line != NULL) *line = 0;
+    if (col != NULL) *col = 0;
+    if (stack == NULL) return 0;
+
+    /* Work on the first stack line only. */
+    const char *nl = strchr(stack, '\n');
+    const char *end = (nl != NULL) ? nl : stack + strlen(stack);
+
+    const char *p = stack;
+    while (p < end && (*p == ' ' || *p == '\t')) p++;
+    if (end - p >= 3 && p[0] == 'a' && p[1] == 't' && p[2] == ' ') p += 3;
+
+    /* The "file:line:col" lives inside the last "(...)" when present. */
+    const char *loc = p, *loc_end = end;
+    if (loc_end > loc && loc_end[-1] == ')') {
+        const char *open = NULL;
+        for (const char *s = loc; s < loc_end; s++) if (*s == '(') open = s;
+        if (open != NULL) { loc = open + 1; loc_end = loc_end - 1; }
+    }
+    while (loc < loc_end && (loc_end[-1] == ' ' || loc_end[-1] == '\t')) loc_end--;
+    while (loc < loc_end && (*loc == ' ' || *loc == '\t')) loc++;
+
+    /* Parse up to two trailing ":<digits>" groups from the right (file may itself
+     * contain ':' as in https://..., so anchor on the rightmost colons). */
+    const char *d2 = loc_end;
+    while (d2 > loc && is_ascii_digit(d2[-1])) d2--;
+    if (d2 == loc_end) return 0;                 /* no trailing digits => no location */
+    if (d2 == loc || d2[-1] != ':') return 0;    /* digits not after a ':' */
+    const char *colon_a = d2 - 1;
+
+    const char *d1 = colon_a;
+    while (d1 > loc && is_ascii_digit(d1[-1])) d1--;
+    int have_two = (d1 < colon_a && d1 > loc && d1[-1] == ':');
+
+    int a = 0, b = 0;
+    for (const char *s = d2; s < loc_end; s++) { a = a * 10 + (*s - '0'); if (a > 1000000000) a = 1000000000; }
+
+    const char *file_end;
+    if (have_two) {
+        for (const char *s = d1; s < colon_a; s++) { b = b * 10 + (*s - '0'); if (b > 1000000000) b = 1000000000; }
+        file_end = d1 - 1;                        /* the ':' before the line number */
+        if (line != NULL) *line = b;
+        if (col  != NULL) *col  = a;
+    } else {
+        file_end = colon_a;                       /* only "file:line" present */
+        if (line != NULL) *line = a;
+    }
+
+    const char *fs = loc, *fe = file_end;
+    while (fs < fe && (*fs == ' ' || *fs == '\t')) fs++;
+    while (fs < fe && (fe[-1] == ' ' || fe[-1] == '\t')) fe--;
+    if (file_out != NULL && file_cap != 0) {
+        size_t n = (size_t)(fe - fs);
+        if (n > file_cap - 1) n = file_cap - 1;
+        if (n != 0) memcpy(file_out, fs, n);
+        file_out[n] = '\0';
+    }
+    return 1;
+}
+
+/* Pulls the pending exception into an owned host string and, when the exception is
+ * an Error, parses its throw site (file/line/col) out of the .stack. The deadline
+ * must be disarmed before calling: formatting an Error may run user toString().
+ * Under a memory cap the heap may be exhausted and formatting can fail (NULL): we
+ * then fall back to a fixed message (host allocation is not subject to the cap).
+ * out_file (owned, may be set to NULL) and out_line/out_col are diagnostics only. */
+static char *capture_exception(JSContext *ctx, size_t *out_len,
+                               char **out_file, int *out_line, int *out_col) {
+    if (out_len  != NULL) *out_len  = 0;
+    if (out_file != NULL) *out_file = NULL;
+    if (out_line != NULL) *out_line = 0;
+    if (out_col  != NULL) *out_col  = 0;
 
     JSValue exc = JS_GetException(ctx);
     size_t clen = 0;
@@ -133,6 +204,28 @@ static char *capture_exception(JSContext *ctx, size_t *out_len) {
         if (out_len != NULL && msg != NULL) *out_len = clen;
         JS_FreeCString(ctx, cmsg);
     }
+
+    /* Best-effort location: only Error objects carry .stack; a thrown primitive
+     * yields undefined (or a getter throws), in which case we leave it unknown. */
+    JSValue st = JS_GetPropertyStr(ctx, exc, "stack");
+    if (JS_IsException(st)) {
+        JS_FreeValue(ctx, JS_GetException(ctx)); /* clear, never propagate */
+    } else if (!JS_IsUndefined(st) && !JS_IsNull(st)) {
+        const char *ss = JS_ToCString(ctx, st);
+        if (ss != NULL) {
+            char fbuf[JS_LOC_FILE_MAX];
+            int ln = 0, cl = 0;
+            if (js_loc_from_stack(ss, fbuf, sizeof fbuf, &ln, &cl)) {
+                if (out_file != NULL) *out_file = host_dup(fbuf, strlen(fbuf));
+                if (out_line != NULL) *out_line = ln;
+                if (out_col  != NULL) *out_col  = cl;
+            }
+            JS_FreeCString(ctx, ss);
+        } else {
+            JS_FreeValue(ctx, JS_GetException(ctx)); /* ToCString may have thrown */
+        }
+    }
+    JS_FreeValue(ctx, st);
 
     JS_FreeValue(ctx, exc);
     return msg;
@@ -238,7 +331,13 @@ void js_set_time_budget(js_context *ctx, uint64_t budget_ms) {
 }
 
 js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res) {
+    return js_eval_named(ctx, src, len, "<sandbox>", res);
+}
+
+js_status js_eval_named(js_context *ctx, const char *src, size_t len,
+                        const char *filename, js_result *res) {
     if (ctx == NULL || src == NULL || res == NULL) return JS_ERR_NULL_ARG;
+    if (filename == NULL) filename = "<sandbox>";
 
     memset(res, 0, sizeof *res);
 
@@ -255,13 +354,13 @@ js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res) 
     arm_deadline(ctx, ctx->limits.time_budget_ms);
 
     /* Phase 1: compile only, so syntax errors are distinct from runtime ones. */
-    JSValue compiled = JS_Eval(ctx->ctx, code, len, "<sandbox>",
+    JSValue compiled = JS_Eval(ctx->ctx, code, len, filename,
                                JS_EVAL_FLAG_COMPILE_ONLY | JS_EVAL_TYPE_GLOBAL);
     if (JS_IsException(compiled)) {
         int was_interrupted = ctx->interrupted;
         ctx->has_deadline = 0; /* disarm before formatting the message */
         size_t mlen = 0;
-        char *msg = capture_exception(ctx->ctx, &mlen);
+        char *msg = capture_exception(ctx->ctx, &mlen, &res->file, &res->line, &res->col);
         res->value = msg;
         res->value_len = (msg != NULL) ? mlen : 0;
         res->is_exception = 1;
@@ -281,7 +380,7 @@ js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res) 
 
     if (JS_IsException(result)) {
         size_t mlen = 0;
-        char *msg = capture_exception(ctx->ctx, &mlen);
+        char *msg = capture_exception(ctx->ctx, &mlen, &res->file, &res->line, &res->col);
         res->value = msg;
         res->value_len = (msg != NULL) ? mlen : 0;
         res->is_exception = 1;
@@ -334,7 +433,11 @@ js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_res
 void js_result_free(js_result *res) {
     if (res == NULL) return;
     free(res->value);
+    free(res->file);
     res->value = NULL;
+    res->file = NULL;
+    res->line = 0;
+    res->col = 0;
     res->value_len = 0;
     res->is_exception = 0;
     res->status = JS_OK;

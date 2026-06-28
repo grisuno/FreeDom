@@ -582,6 +582,14 @@ dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
     return DOM_OK;
 }
 
+dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) {
+    if (!valid(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
+    lxb_status_t st =
+        lxb_dom_element_remove_attribute(lxb_dom_interface_element(idx->nodes[node]),
+                                         (const lxb_char_t *)name, strlen(name));
+    return (st == LXB_STATUS_OK) ? DOM_OK : DOM_ERR_INTERNAL;
+}
+
 /* Indexes the element subtree rooted at sub (sub included), in pre-order. */
 static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub) {
     for (lxb_dom_node_t *w = sub; w != NULL; w = node_next(w, sub)) {

@@ -89,6 +89,30 @@ Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scou
     - ¿Hay artefactos de rendering?
   e. Compara con screenshot de referencia si existe
 
+   **Verificación visual de Freebug (la consola de devtools) — parte del contrato.** El render de
+   página se revisa headless con `--download-pdf`, pero **Freebug es una ventana Wayland aparte**
+   (segundo `xdg_toplevel`): su panel de log, los colores por nivel y la **ubicación `file:line:col`**
+   de cada error **no** salen en el PDF. Por eso **todo cambio que toque Freebug** (captura de consola,
+   ubicación de errores, REPL, colores, layout del panel) se verifica **en pantalla** con el flujo
+   weston-sobre-Xvfb (el único modo agent-verificable aquí, sin GPU ni Wayland real):
+  i.   `Xvfb :99` + `weston --backend=x11 --renderer=pixman` (NO `--renderer=noop`, da pantalla en
+       blanco; NO `weston-screenshooter`, está gateado). `XDG_RUNTIME_DIR` **corto** (p. ej.
+       `/tmp/wlfb`): la ruta del socket AF_UNIX no puede pasar 108 bytes, y el scratchpad de sesión
+       la excede.
+  ii.  Arranca Freedom con la afordancia de env **`FREEDOM_FREEBUG=1`** (abre Freebug al inicio, como
+       auto-open-devtools) sobre `WAYLAND_DISPLAY` de weston, con `--js=on` y una página que produzca
+       entradas (p. ej. un HTML con `console.*` y un `<script>` que lance en su 2ª línea). No hay
+       `wtype`/`ydotool`, así que el *keypress* F12/`Ctrl+Enter` no se inyecta: la afordancia de env
+       ejercita la apertura, y el REPL queda cubierto por `tab_eval`/`--dump-console`.
+  iii. Captura: `DISPLAY=:99 import -window root $SP/freebug.png` (ImageMagick; raíz X = salida de
+       weston, ambos toplevels visibles).
+  iv.  `Read $SP/freebug.png` y verifica: el panel de log; **niveles coloreados** (log gris, info cian,
+       warn amarillo, error rojo); y que cada error muestre su **`file:line:col` en tono atenuado**
+       antes del mensaje (p. ej. `inline #2:3:1`), mientras un `console.log` no lleva ubicación.
+   Validación cruzada sin GUI: `./build/freedom --js=on --dump-console <URL|archivo>` imprime la misma
+   consola con `[nivel] file:line:col  texto` (ver `[[freedom-freebug-console]]`,
+   `[[freedom-gui-visual-verification-weston]]`).
+
 6. **Fuzzing** — el path que toca contenido remoto se fuzzea (libFuzzer: `make fuzz`/`fuzz-pv`/
    `fuzz-js`/`fuzz-img`; AFL++: `make fuzz-afl`). Cero crashes/leaks/UB antes de cerrar.
 7. **Documentación** — **recién después de validar y fuzzear** se documenta: se actualiza la spec,
@@ -965,6 +989,29 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   ejecuta inline+externos en orden de documento. Esto **revierte** la doctrina "scripts `src` externos
   NUNCA corren" de `[[freedom-live-js]]` y la nota SOP — actualizar ambas al cerrar. Ver
   `[[freedom-freebug-console]]`.
+  - **FB-3 (CERRADO) — Ubicación de errores `file:line:col` + completitud del wrapper de elemento.**
+    Para que Freebug sea útil a un desarrollador, cada error ahora dice **dónde**: `js_sandbox` gana
+    `js_eval_named` (etiqueta la fuente; el worker nombra cada `<script>` inline **`inline #N`**) y el
+    parser **puro** `js_loc_from_stack` (extrae `file:line:col` del primer frame del `.stack` de
+    QuickJS, forma `at <fn> (<file>:<line>:<col>)`; tolera URLs con `:`, solo-línea, basura/`NULL`;
+    fuzzeado). `js_result` y `fb_entry` ganan `file/line/col` (dueño, `NULL`/0 = sin ubicación);
+    `fb_buffer_push_loc` (push queda como wrapper sin ubicación); el wire de consola de `tab.c` los
+    serializa (acotados por `FB_MAX_FILE_BYTES`); la GUI los pinta en tono atenuado antes del mensaje
+    y `--dump-console` como `[nivel] file:line:col texto`. Con esta herramienta se diagnosticaron y
+    **arreglaron los 4 errores de google.com** (`cannot read property 'ved' of undefined`,
+    `not a function`×2, `cannot read property 'substring' of undefined`): todos eran **wrappers de
+    elemento incompletos**. Se completó el wrapper (identity-safe, como `document.fonts`): `dataset`
+    (Proxy sobre `data-*`), `hasAttribute`, `removeAttribute` (native nuevo `dom_remove_attribute`),
+    y `src`/`href` (string, `''` si ausente — sin resolver a URL absoluta). **El 5º error surfaceado,
+    `XMLHttpRequest is not defined`, se DEJA a propósito**: es la frontera Zero-Trust "sin API de red
+    en JS" (SOP por construcción, candado `test_eval_no_network_or_cross_origin_api`); decisión del
+    dueño de mantener la frontera, no stubbearla. Spec (`freebug.md`, `js_sandbox.md`, `dom.md`,
+    `js_dom.md`, `tab.md`, `freedom.md`) + tests (9 `js_sandbox` loc/named, 3 `freebug` push_loc,
+    1 `dom` remove_attribute, 4 `js_dom` wrapper, 2 E2E `tab` ubicación+idioms) + `make test`/`make
+    asan` (exit 0) limpios + fuzz `fuzz-js` (parser sobre bytes arbitrarios) y `fuzz-fb` (push_loc)
+    sin crash/leak/UB + **verificación visual de Freebug** (weston+Xvfb, `FREEDOM_FREEBUG=1`: el PNG
+    confirma `inline #N:line:col` atenuado + niveles coloreados). Ver `[[freedom-freebug-error-locations]]`,
+    `[[freedom-freebug-console]]`, `[[freedom-element-wrapper-completeness]]`.
 - **Hito 9b — Fetch asíncrono (imágenes + multipestaña).** Sacar también las imágenes del hilo
   principal (hoy `load_images` hace fetch síncrono dentro del worker durante el render) y permitir
   **carga concurrente entre pestañas** (generación por pestaña en vez de global, entrega a la pestaña

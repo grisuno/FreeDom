@@ -50,12 +50,19 @@ Objeto global `dom` (solo lectura). Handles = enteros; "ninguno" = `null`.
 | `dom.createElement(tag)` | handle | `dom_create_element` (índice crece) |
 | `dom.appendChild(p, c)` / `removeChild(p, c)` | bool | `dom_append_child` / `_remove` |
 | `dom.setAttribute(h, n, v)` | `undefined` | `dom_set_attribute` (re-indexa id/class) |
+| `dom.removeAttribute(h, n)` | `undefined` | `dom_remove_attribute` |
 
 **Fachada `document` (Hito 20b/20c):** un shim JS inyectado por `jd_install` define `document` sobre la
 API de handles para que scripts reales corran. Lectura/escritura: `document.title`,
-`getElementById(id)` → wrapper con `textContent` (get/set), `getAttribute`/`setAttribute`, `tagName`,
-`id`/`className` (get/set), `appendChild`/`removeChild`; `createElement(tag)`; `getElementsByTagName/
-ClassName`; `body`/`head`/`documentElement`. Eventos/timers **sintéticos y acotados**:
+`getElementById(id)` → wrapper con `textContent` (get/set), `getAttribute`/`setAttribute`/
+`removeAttribute`/`hasAttribute`, `tagName`, `id`/`className` (get/set), `src`/`href` (get/set,
+reflejan el atributo, `''` si ausente — sin resolver a URL absoluta, sin fuga de base-URL),
+`dataset` (Proxy sobre los `data-*`: `el.dataset.fooBar` ↔ `data-foo-bar`, ausente ⇒ `undefined`,
+**nunca** lanza), `appendChild`/`removeChild`; `createElement(tag)`; `getElementsByTagName/
+ClassName`; `body`/`head`/`documentElement`. Esta **completitud del wrapper** (Hito 24) es lo que
+hace correr el JS de arranque de google.com sin lanzar (`b.dataset.ved`, `a.hasAttribute(...)`,
+`linkEl.removeAttribute('id')`, `d.src.substring(...)` antes reventaban). Eventos/timers
+**sintéticos y acotados**:
 `addEventListener('load'|'DOMContentLoaded', fn)` / `window.onload` y `setTimeout`/`setInterval`
 **encolan**; el worker llama `__fireDeferred()` una vez tras los scripts (dispara los handlers de carga
 y vacía la cola de timers **hasta 64 veces** — no es un event loop real). `window === globalThis`,

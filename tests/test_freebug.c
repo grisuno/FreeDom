@@ -172,6 +172,59 @@ static void test_free_idempotent(void **state) {
     fb_buffer_free(&b);
 }
 
+static void test_push_loc_records_location(void **state) {
+    (void)state;
+    fb_buffer b;
+    fb_buffer_init(&b);
+    assert_int_equal(fb_buffer_push_loc(&b, FB_ERROR, "boom", 4, "inline #9", 2, 54), 1);
+    /* The plain push records no location. */
+    assert_int_equal(fb_buffer_push(&b, FB_LOG, "plain", 5), 1);
+
+    const fb_entry *e0 = fb_buffer_at(&b, 0);
+    assert_string_equal(e0->text, "boom");
+    assert_non_null(e0->file);
+    assert_string_equal(e0->file, "inline #9");
+    assert_int_equal(e0->line, 2);
+    assert_int_equal(e0->col, 54);
+
+    const fb_entry *e1 = fb_buffer_at(&b, 1);
+    assert_null(e1->file);
+    assert_int_equal(e1->line, 0);
+    assert_int_equal(e1->col, 0);
+    fb_buffer_free(&b);
+}
+
+static void test_push_loc_null_file_and_negative_nums(void **state) {
+    (void)state;
+    fb_buffer b;
+    fb_buffer_init(&b);
+    /* NULL file => no location; negative line/col clamp to 0 (unknown). */
+    assert_int_equal(fb_buffer_push_loc(&b, FB_WARN, "w", 1, NULL, -3, -1), 1);
+    const fb_entry *e = fb_buffer_at(&b, 0);
+    assert_null(e->file);
+    assert_int_equal(e->line, 0);
+    assert_int_equal(e->col, 0);
+    /* reset then free must not leak the file copy (run under ASan). */
+    assert_int_equal(fb_buffer_push_loc(&b, FB_LOG, "x", 1, "f", 1, 1), 1);
+    fb_buffer_reset(&b);
+    assert_int_equal((int)fb_buffer_count(&b), 0);
+    fb_buffer_free(&b);
+}
+
+static void test_push_loc_file_truncated(void **state) {
+    (void)state;
+    fb_buffer b;
+    fb_buffer_init(&b);
+    char big[FB_MAX_FILE_BYTES + 64];
+    memset(big, 'a', sizeof big - 1);
+    big[sizeof big - 1] = '\0';
+    assert_int_equal(fb_buffer_push_loc(&b, FB_ERROR, "x", 1, big, 1, 1), 1);
+    const fb_entry *e = fb_buffer_at(&b, 0);
+    assert_non_null(e->file);
+    assert_int_equal((int)strlen(e->file), (int)FB_MAX_FILE_BYTES);
+    fb_buffer_free(&b);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_push_and_read),
@@ -183,6 +236,9 @@ int main(void) {
         cmocka_unit_test(test_level_name),
         cmocka_unit_test(test_reset_reuses_and_no_leak),
         cmocka_unit_test(test_free_idempotent),
+        cmocka_unit_test(test_push_loc_records_location),
+        cmocka_unit_test(test_push_loc_null_file_and_negative_nums),
+        cmocka_unit_test(test_push_loc_file_truncated),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

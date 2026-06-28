@@ -220,6 +220,123 @@ static void test_eval_null_args(void **state) {
     js_context_free(ctx);
 }
 
+/* --- js_loc_from_stack (pure parser) --- */
+
+static void test_loc_parses_named_frame(void **state) {
+    (void)state;
+    char file[64]; int line = -1, col = -1;
+    /* The real QuickJS-ng top frame form. */
+    assert_int_equal(js_loc_from_stack("    at e (inline #9:2:54)\n    at x (a:1:1)",
+                                       file, sizeof file, &line, &col), 1);
+    assert_string_equal(file, "inline #9");
+    assert_int_equal(line, 2);
+    assert_int_equal(col, 54);
+}
+
+static void test_loc_parses_bare_frame(void **state) {
+    (void)state;
+    char file[64]; int line = 0, col = 0;
+    assert_int_equal(js_loc_from_stack("    at <repl>:7:3", file, sizeof file, &line, &col), 1);
+    assert_string_equal(file, "<repl>");
+    assert_int_equal(line, 7);
+    assert_int_equal(col, 3);
+}
+
+static void test_loc_file_may_contain_colons(void **state) {
+    (void)state;
+    /* A URL-like name (https://...) has its own colons; the two trailing ones win. */
+    char file[128]; int line = 0, col = 0;
+    assert_int_equal(js_loc_from_stack("    at f (https://h/p:10:200)",
+                                       file, sizeof file, &line, &col), 1);
+    assert_string_equal(file, "https://h/p");
+    assert_int_equal(line, 10);
+    assert_int_equal(col, 200);
+}
+
+static void test_loc_line_only_sets_col_zero(void **state) {
+    (void)state;
+    char file[64]; int line = -1, col = -1;
+    assert_int_equal(js_loc_from_stack("    at g (foo:42)", file, sizeof file, &line, &col), 1);
+    assert_string_equal(file, "foo");
+    assert_int_equal(line, 42);
+    assert_int_equal(col, 0);
+}
+
+static void test_loc_truncates_to_cap(void **state) {
+    (void)state;
+    char file[8]; int line = 0, col = 0;
+    assert_int_equal(js_loc_from_stack("    at z (abcdefghij:1:2)", file, sizeof file, &line, &col), 1);
+    assert_int_equal((int)strlen(file), 7); /* cap-1, NUL-terminated */
+    assert_int_equal(line, 1);
+}
+
+static void test_loc_rejects_garbage_and_null(void **state) {
+    (void)state;
+    char file[16]; int line = 9, col = 9;
+    assert_int_equal(js_loc_from_stack(NULL, file, sizeof file, &line, &col), 0);
+    assert_string_equal(file, ""); /* emptied */
+    assert_int_equal(line, 0);
+    assert_int_equal(col, 0);
+    assert_int_equal(js_loc_from_stack("native code, no numbers", file, sizeof file, &line, &col), 0);
+    assert_int_equal(js_loc_from_stack("", file, sizeof file, &line, &col), 0);
+    /* NULL outputs must be tolerated. */
+    assert_int_equal(js_loc_from_stack("    at q (f:1:2)", NULL, 0, NULL, NULL), 1);
+}
+
+/* --- js_eval_named: an uncaught error carries its throw site --- */
+
+static void test_eval_named_captures_location(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_result r;
+    memset(&r, 0, sizeof r);
+    /* Throw on the 2nd line so a non-trivial line number is asserted. */
+    const char *src = "var x = 1;\nnull.boom;";
+    assert_int_equal(js_eval_named(ctx, src, strlen(src), "myscript", &r), JS_ERR_RUNTIME);
+    assert_int_equal(r.is_exception, 1);
+    assert_non_null(r.file);
+    assert_string_equal(r.file, "myscript");
+    assert_int_equal(r.line, 2);
+    assert_true(r.col > 0);
+    js_result_free(&r);
+    /* After free the location is cleared. */
+    assert_null(r.file);
+    assert_int_equal(r.line, 0);
+    js_context_free(ctx);
+}
+
+static void test_eval_named_null_filename_defaults(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_result r;
+    memset(&r, 0, sizeof r);
+    /* NULL filename must behave like js_eval (no crash, sandbox name). */
+    assert_int_equal(js_eval_named(ctx, "null.x", 6, NULL, &r), JS_ERR_RUNTIME);
+    assert_int_equal(r.is_exception, 1);
+    assert_non_null(r.file);
+    assert_string_equal(r.file, "<sandbox>");
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
+static void test_eval_thrown_primitive_has_no_location(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    js_result r;
+    memset(&r, 0, sizeof r);
+    /* A thrown non-Error has no .stack: location stays unknown, never crashes. */
+    assert_int_equal(js_eval_named(ctx, "throw 'oops';", 13, "s", &r), JS_ERR_RUNTIME);
+    assert_int_equal(r.is_exception, 1);
+    assert_null(r.file);
+    assert_int_equal(r.line, 0);
+    assert_int_equal(r.col, 0);
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_limits_default_is_secure),
@@ -241,6 +358,15 @@ int main(void) {
         cmocka_unit_test(test_result_free_on_zeroed),
         cmocka_unit_test(test_context_free_null_and_double),
         cmocka_unit_test(test_eval_null_args),
+        cmocka_unit_test(test_loc_parses_named_frame),
+        cmocka_unit_test(test_loc_parses_bare_frame),
+        cmocka_unit_test(test_loc_file_may_contain_colons),
+        cmocka_unit_test(test_loc_line_only_sets_col_zero),
+        cmocka_unit_test(test_loc_truncates_to_cap),
+        cmocka_unit_test(test_loc_rejects_garbage_and_null),
+        cmocka_unit_test(test_eval_named_captures_location),
+        cmocka_unit_test(test_eval_named_null_filename_defaults),
+        cmocka_unit_test(test_eval_thrown_primitive_has_no_location),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -78,8 +78,25 @@ void      js_context_free(js_context *ctx);
  * Nunca realiza I/O del host. */
 js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res);
 
+/* Como js_eval, pero etiqueta la fuente con `filename` para que la ubicacion de una
+ * excepcion (res->file/line/col) y el .stack lleven un nombre util en vez del generico
+ * "<sandbox>". filename NULL => "<sandbox>". El nombre es solo diagnostico; no concede
+ * ninguna capacidad al script. */
+js_status js_eval_named(js_context *ctx, const char *src, size_t len,
+                        const char *filename, js_result *res);
+
 /* Conveniencia: crea contexto, evalua, libera. */
 js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res);
+
+/* Parser puro: extrae el sitio de lanzamiento (archivo, linea, columna) del PRIMER frame
+ * de un string .stack de QuickJS. Formas reconocidas:
+ *     at <nombre> (<archivo>:<linea>:<col>)
+ *     at <archivo>:<linea>:<col>
+ * Escribe hasta file_cap-1 bytes de <archivo> en file_out y los numeros en *line/*col
+ * (*col=0 si el frame solo trae linea). Devuelve 1 si parseo una linea, 0 si no (file_out
+ * vaciado, *line=*col=0). Tolera NULL/basura. Sin I/O ni asignacion, reentrante. */
+int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,
+                      int *line, int *col);
 
 /* Ajusta el presupuesto de reloj armado en cada js_eval POSTERIOR. Permite imponer un
  * unico presupuesto por pagina a traves de una secuencia de evaluaciones (p. ej. los
@@ -105,6 +122,11 @@ seguro; no es representable "sin límite").
 - `value` / `value_len`: forma textual del resultado (o el mensaje de la excepción si
   `is_exception`); buffer en propiedad del llamante, NUL-terminado, `value_len` excluye el NUL.
 - `is_exception`: distinto de cero si `value` contiene un mensaje de error en vez de un valor.
+- `file` / `line` / `col`: **sitio de lanzamiento** de la excepción (ayuda al desarrollador),
+  parseado del `.stack` del motor. Solo significativo con `is_exception`; `file` es `NULL` y
+  `line`/`col` 0 cuando no se pudo determinar (p. ej. al lanzar un primitivo sin `.stack`).
+  `file` lo libera `js_result_free`. El nombre proviene del `filename` pasado a `js_eval_named`
+  (`<sandbox>` por defecto). Cota del nombre: `JS_LOC_FILE_MAX`.
 
 ## 5. Tabla de errores
 
@@ -155,9 +177,15 @@ seguro; no es representable "sin límite").
   `JS_ERR_MEMORY`.
 - `js_eval_once` de un programa simple ⇒ `JS_OK`.
 - `js_result_free`/`js_context_free` con `NULL` y dobles llamadas.
+- **Ubicación de excepción:** `js_loc_from_stack` parsea frame con nombre, frame desnudo,
+  archivo con `:` (URL), solo-línea (col 0), truncado a cap, basura/`NULL` ⇒ 0. `js_eval_named`
+  con un error en la 2ª línea ⇒ `res->file` == el filename dado, `res->line==2`, `res->col>0`;
+  filename `NULL` ⇒ `"<sandbox>"`; lanzar un primitivo (`throw 'x'`) ⇒ sin ubicación (no crashea).
 
-`fuzz/fuzz_js_sandbox.c` (libFuzzer): bytes arbitrarios → `js_eval_once` con límites estrictos;
-el objetivo es que **nunca** se produzca crash/leak/UB.
+`fuzz/fuzz_js_sandbox.c` (libFuzzer): bytes arbitrarios → `js_eval_once` con límites estrictos
+**y** `js_loc_from_stack` sobre los mismos bytes (parser puro, sin motor); el objetivo es que
+**nunca** se produzca crash/leak/UB (el `.stack` lleva nombres de función/archivo controlados por
+el script hostil, así que el parser ve entrada no confiable).
 
 ## 8. Fuera de alcance
 

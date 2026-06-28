@@ -17,6 +17,11 @@ void fb_buffer_init(fb_buffer *b) {
 }
 
 int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len) {
+    return fb_buffer_push_loc(b, level, text, len, NULL, 0, 0);
+}
+
+int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
+                       const char *file, int line, int col) {
     if (b == NULL) return 0;
 
     if (b->count >= FB_MAX_ENTRIES) { b->overflow = 1; return 0; }
@@ -43,10 +48,26 @@ int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len) {
     if (store != 0) memcpy(copy, text, store);
     copy[store] = '\0';
 
+    /* Optional source name; failure to copy it degrades to "no location", never
+     * fails the push (the message itself must still be recorded). */
+    char *fcopy = NULL;
+    if (file != NULL) {
+        size_t flen = strlen(file);
+        if (flen > FB_MAX_FILE_BYTES) flen = FB_MAX_FILE_BYTES;
+        fcopy = (char *)malloc(flen + 1);
+        if (fcopy != NULL) {
+            if (flen != 0) memcpy(fcopy, file, flen);
+            fcopy[flen] = '\0';
+        }
+    }
+
     int lv = (level < FB_LOG || level > FB_DEBUG) ? FB_LOG : level;
     b->entries[b->count].level = lv;
     b->entries[b->count].text  = copy;
     b->entries[b->count].len   = store;
+    b->entries[b->count].file  = fcopy;
+    b->entries[b->count].line  = (line > 0) ? line : 0;
+    b->entries[b->count].col   = (col  > 0) ? col  : 0;
     b->count++;
     b->total_bytes += store;
     return 1;
@@ -56,7 +77,9 @@ void fb_buffer_reset(fb_buffer *b) {
     if (b == NULL) return;
     for (size_t i = 0; i < b->count; ++i) {
         free(b->entries[i].text);
+        free(b->entries[i].file);
         b->entries[i].text = NULL;
+        b->entries[i].file = NULL;
     }
     b->count = 0;
     b->total_bytes = 0;
@@ -65,7 +88,10 @@ void fb_buffer_reset(fb_buffer *b) {
 
 void fb_buffer_free(fb_buffer *b) {
     if (b == NULL) return;
-    for (size_t i = 0; i < b->count; ++i) free(b->entries[i].text);
+    for (size_t i = 0; i < b->count; ++i) {
+        free(b->entries[i].text);
+        free(b->entries[i].file);
+    }
     free(b->entries);
     memset(b, 0, sizeof *b);
 }

@@ -409,6 +409,63 @@ static void test_load_isolates_script_errors(void **state) {
     tab_close(t);
 }
 
+/* FB error locations (Hito 24): an uncaught error reports the inline script name
+ * ("inline #N") plus the line and column of its throw site, carried across the IPC
+ * pipe into tab_page.console. The 2nd inline script throws on its 2nd line so a
+ * non-trivial line number is asserted. */
+static void test_load_error_carries_location(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>var ok=1;</script>"                       /* inline #1: clean */
+        "<script>var a=2;\nnull.boom;</script>"             /* inline #2: throws on line 2 */
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+
+    const fb_entry *e = console_find(&p.console, FB_ERROR, "TypeError");
+    assert_non_null(e);
+    assert_non_null(e->file);
+    assert_string_equal(e->file, "inline #2");
+    assert_int_equal(e->line, 2);
+    assert_true(e->col > 0);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Element-wrapper completeness (Hito 24): the exact google.com startup idioms that
+ * previously threw -- dataset.X, hasAttribute, removeAttribute, src.substring -- now
+ * run clean end-to-end through the worker. Title is set only if all four succeed. */
+static void test_load_element_wrapper_idioms(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>old</title></head><body>"
+        "<img id=\"m\" src=\"x.png\" data-ved=\"v1\">"
+        "<script>"
+        "var b=document.getElementById('m');"
+        "var ved=b.dataset.ved;"                            /* was: 'ved' of undefined */
+        "var has=b.hasAttribute('data-ved');"               /* was: not a function */
+        "b.removeAttribute('id');"                          /* was: not a function */
+        "var pre=b.src.substring(0,1);"                     /* was: 'substring' of undefined */
+        "if(ved==='v1'&&has===true&&pre==='x') document.title='ALL_OK';"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+
+    /* No error captured, and every idiom worked (title only set when all pass). */
+    assert_null(console_find(&p.console, FB_ERROR, "TypeError"));
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "ALL_OK");
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* document.fonts stub: a feature-detecting script that calls document.fonts.load()/
  * .check() must not throw (this exact call -- document.fonts.load -- is what produced
  * google.com's "cannot read property 'load' of undefined"). The stub is benign. */
@@ -889,6 +946,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_reload_replaces_page),
         cmocka_unit_test(test_load_captures_console_and_error),
         cmocka_unit_test(test_load_isolates_script_errors),
+        cmocka_unit_test(test_load_error_carries_location),
+        cmocka_unit_test(test_load_element_wrapper_idioms),
         cmocka_unit_test(test_load_document_fonts_stub),
         cmocka_unit_test(test_load_without_js_has_empty_console),
         cmocka_unit_test(test_eval_captures_console_output),

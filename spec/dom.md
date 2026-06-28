@@ -117,6 +117,11 @@ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);
 dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const char *name, const char *value);
+/* Quita el atributo `name` (no-op si ausente). Como set, los índices id/class NO se
+ * podan (un id removido puede resolver hasta el siguiente render) — coherente con el
+ * indexado dinámico best-effort de set. Handle inválido / name NULL => DOM_ERR_NULL_ARG;
+ * fallo del backend => DOM_ERR_INTERNAL. */
+dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name);
 ```
 
 `dom_get_by_tag`/`dom_get_by_class` escriben hasta `cap` ids en `out` (en orden de documento) y

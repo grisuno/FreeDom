@@ -250,17 +250,27 @@ static int write_view(int wfd, const pv_view *v) {
     return 0;
 }
 
-/* Console section (Freebug): [n:int32] then per entry [level:int32][len:size_t][text].
- * n is bounded by FB_MAX_ENTRIES and each len by FB_MAX_ENTRY_BYTES (the buffer
- * enforces both), so a hostile worker cannot amplify the stream. */
+/* Console section (Freebug): [n:int32] then per entry
+ * [level:int32][line:int32][col:int32][flen:size_t][file][elen:size_t][text].
+ * n is bounded by FB_MAX_ENTRIES, elen by FB_MAX_ENTRY_BYTES and flen by
+ * FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+ * the stream. file is the source name of an error's throw site (developer aid). */
 static int write_console(int wfd, const fb_buffer *log) {
     int32_t n = (int32_t)fb_buffer_count(log);
     if (write_full(wfd, &n, sizeof n) != 0) return -1;
     for (int32_t i = 0; i < n; ++i) {
         const fb_entry *e = fb_buffer_at(log, (size_t)i);
         int32_t level = e->level;
+        int32_t line  = e->line;
+        int32_t col   = e->col;
+        size_t  flen  = (e->file != NULL) ? strlen(e->file) : 0;
         size_t  elen  = e->len;
+        if (flen > FB_MAX_FILE_BYTES) flen = FB_MAX_FILE_BYTES;
         if (write_full(wfd, &level, sizeof level) != 0
+         || write_full(wfd, &line, sizeof line) != 0
+         || write_full(wfd, &col, sizeof col) != 0
+         || write_full(wfd, &flen, sizeof flen) != 0
+         || (flen != 0 && write_full(wfd, e->file, flen) != 0)
          || write_full(wfd, &elen, sizeof elen) != 0
          || (elen != 0 && write_full(wfd, e->text, elen) != 0))
             return -1;
@@ -312,9 +322,15 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             js_set_time_budget(cs->js, rem);
             js_result r;
             memset(&r, 0, sizeof r);
-            js_status es = js_eval(cs->js, scripts[i].text, scripts[i].len, &r);
+            /* Name each inline <script> so an uncaught error in it reports a
+             * meaningful "file" (the page itself is shown in the URL bar). */
+            char sname[32];
+            snprintf(sname, sizeof sname, "inline #%zu", i + 1);
+            js_status es = js_eval_named(cs->js, scripts[i].text, scripts[i].len,
+                                         sname, &r);
             if (es != JS_OK && r.is_exception && r.value != NULL)
-                fb_buffer_push(&cs->log, FB_ERROR, r.value, r.value_len);
+                fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
+                                   r.file, r.line, r.col);
             js_result_free(&r);
         }
         hp_free_scripts(scripts, nscripts);
@@ -380,7 +396,7 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
     fb_buffer_reset(&cs->log);
 
     js_result r;
-    js_status s = js_eval(cs->js, js, len, &r);
+    js_status s = js_eval_named(cs->js, js, len, "<repl>", &r);
     int32_t  ok = 1;
     int32_t  is_exc = (s != JS_OK) ? 1 : 0;
     const char *val = (r.value != NULL) ? r.value : "";
@@ -681,19 +697,32 @@ static int read_console(int fd, fb_buffer *out) {
     if (read_full(fd, &n, sizeof n) != 0) return -1;
     if (n < 0 || (size_t)n > FB_MAX_ENTRIES) return -1;
     for (int32_t i = 0; i < n; ++i) {
-        int32_t level = 0;
-        size_t  elen  = 0;
+        int32_t level = 0, line = 0, col = 0;
+        size_t  flen = 0, elen = 0;
         if (read_full(fd, &level, sizeof level) != 0
-         || read_full(fd, &elen, sizeof elen) != 0) return -1;
-        if (elen > FB_MAX_ENTRY_BYTES) return -1;
+         || read_full(fd, &line, sizeof line) != 0
+         || read_full(fd, &col, sizeof col) != 0
+         || read_full(fd, &flen, sizeof flen) != 0) return -1;
+        if (flen > FB_MAX_FILE_BYTES) return -1;
+        char *file = NULL;
+        if (flen != 0) {
+            file = (char *)malloc(flen + 1);
+            if (file == NULL) return -1;
+            if (read_full(fd, file, flen) != 0) { free(file); return -1; }
+            file[flen] = '\0';
+        }
+        if (read_full(fd, &elen, sizeof elen) != 0) { free(file); return -1; }
+        if (elen > FB_MAX_ENTRY_BYTES) { free(file); return -1; }
         char *txt = NULL;
         if (elen != 0) {
             txt = (char *)malloc(elen);
-            if (txt == NULL) return -1;
-            if (read_full(fd, txt, elen) != 0) { free(txt); return -1; }
+            if (txt == NULL) { free(file); return -1; }
+            if (read_full(fd, txt, elen) != 0) { free(txt); free(file); return -1; }
         }
-        (void)fb_buffer_push(out, level, (txt != NULL) ? txt : "", elen);
+        (void)fb_buffer_push_loc(out, level, (txt != NULL) ? txt : "", elen,
+                                 file, line, col);
         free(txt);
+        free(file);
     }
     return 0;
 }

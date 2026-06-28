@@ -3688,17 +3688,36 @@ static void freebug_paint(freebug_window *fb) {
             const char *nl = (rem > 0) ? (const char *)memchr(p, '\n', rem) : NULL;
             size_t linelen = nl ? (size_t)(nl - p) : rem;
             if (y > FBW_HEADER && y < split_y + FBW_LINE) {
+                double textx = FBW_PAD + FBW_GUTTER;
                 if (first) {
                     const char *mk = (e->level == FB_ERROR) ? "x"
                                    : (e->level == FB_WARN)  ? "!" : ">";
                     cairo_move_to(cr, FBW_PAD, y);
                     cairo_show_text(cr, mk);
+                    /* Source location of an error (file:line:col) in a muted tone,
+                     * then the message in the level colour -- like a devtools link. */
+                    if (e->file != NULL && e->file[0] != '\0') {
+                        char locbuf[160];
+                        if (e->col > 0)
+                            snprintf(locbuf, sizeof locbuf, "%s:%d:%d  ", e->file, e->line, e->col);
+                        else if (e->line > 0)
+                            snprintf(locbuf, sizeof locbuf, "%s:%d  ", e->file, e->line);
+                        else
+                            snprintf(locbuf, sizeof locbuf, "%s  ", e->file);
+                        cairo_set_source_rgb(cr, 0.55, 0.58, 0.64);
+                        cairo_move_to(cr, textx, y);
+                        cairo_show_text(cr, locbuf);
+                        cairo_text_extents_t lext;
+                        cairo_text_extents(cr, locbuf, &lext);
+                        textx += lext.x_advance;
+                        cairo_set_source_rgb(cr, r, g, b);
+                    }
                 }
                 char buf[1024];
                 size_t cpy = (linelen < sizeof buf - 1) ? linelen : sizeof buf - 1;
                 memcpy(buf, p, cpy);
                 buf[cpy] = '\0';
-                cairo_move_to(cr, FBW_PAD + FBW_GUTTER, y);
+                cairo_move_to(cr, textx, y);
                 cairo_show_text(cr, buf);
             }
             y += FBW_LINE;

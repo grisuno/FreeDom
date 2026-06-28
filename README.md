@@ -168,11 +168,14 @@ $ ./freedom --dump-console page.html
 === Freebug console (3) ===
 [log] hello from page 2
 [warn] be careful
-[error] ReferenceError: notDefinedFn is not defined
+[error] inline #2:3:1  ReferenceError: notDefinedFn is not defined
 ```
 
-It implies JS on (a console dump with JS off is pointless) and is a headless diagnostic, so it
-works in CI / over SSH / for an AI agent — no display required.
+Each uncaught error carries its **source location** — `file:line:col` — so you know exactly where
+it threw: `inline #N` is the Nth inline `<script>` on the page (the page itself is in the URL bar),
+and the line/column are the throw site (for minified code the column pinpoints it). Plain
+`console.log` lines have no location. It implies JS on (a console dump with JS off is pointless) and
+is a headless diagnostic, so it works in CI / over SSH / for an AI agent — no display required.
 
 ### Freebug: the in-window developer console (F12)
 
@@ -180,7 +183,8 @@ In the GUI, press **F12** (or pick **"Freebug console (F12)"** in the hamburger 
 the **Freebug** developer console in a second window:
 
 - The **log pane** shows the current page's `console.*` output and any uncaught JavaScript error,
-  colour-coded by level.
+  colour-coded by level. Errors are prefixed with their **`file:line:col`** (e.g. `inline #2:3:1`)
+  in a muted tone, like a devtools source link, so you can jump straight to the failing line.
 - The **editor** below is a JavaScript REPL: type or paste code and run it with **`Ctrl+Enter`**.
   It evaluates against the **live page** (the per-tab sandboxed worker stays alive for the console),
   so you see the returned value, any exception, *and* the console output the snippet produced.

@@ -21,15 +21,23 @@ type, no Cairo, no Wayland, no global state, reentrant.
 ## Model
 
 A buffer is an ordered list of entries. Each entry is a `level` (one of the
-`fb_level` enum) plus an owned, NUL-terminated `text` copy. The buffer enforces
-three independent caps, each fail-closed (the offending push is **dropped**, the
-`overflow` flag is raised, and previously stored entries are kept intact):
+`fb_level` enum), an owned NUL-terminated `text` copy, and an optional **source
+location**: an owned `file` name (or `NULL`) plus 1-based `line`/`col` (0 when
+unknown). The buffer enforces three independent caps on text, each fail-closed (the
+offending push is **dropped**, the `overflow` flag is raised, and previously stored
+entries are kept intact):
 
 - `FB_MAX_ENTRIES` — maximum number of stored entries.
 - `FB_MAX_ENTRY_BYTES` — a single message longer than this is **truncated** to the
   cap (not dropped): a giant log line still shows, bounded.
 - `FB_MAX_TOTAL_BYTES` — maximum sum of stored text bytes; a push that would
   exceed it is dropped whole.
+
+A stored `file` name is **truncated** to `FB_MAX_FILE_BYTES` (it is not counted
+against `FB_MAX_TOTAL_BYTES`: entries are capped, so total file memory is bounded at
+`FB_MAX_ENTRIES * FB_MAX_FILE_BYTES` regardless). Failing to copy a `file` degrades
+the entry to "no location" — it never fails the push, because the message itself must
+still be recorded. `line`/`col` ≤ 0 are stored as 0 (unknown).
 
 An out-of-range `level` is clamped to `FB_LOG` (never indexes out of bounds). A
 `NULL`/empty text is stored as an empty string (a bare `console.log()` is a real
@@ -41,14 +49,17 @@ outlive the call.
 | Function | Behaviour |
 | :-- | :-- |
 | `void fb_buffer_init(fb_buffer *b)` | Zero-initialises `b` (no allocation). Safe precondition for every other call. |
-| `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)` | Appends `text[0..len)` at `level`. Returns `1` if stored, `0` if dropped (caps) or on allocation failure / `NULL` `b`. Truncates to `FB_MAX_ENTRY_BYTES`; clamps `level`. Raises `b->overflow` when it drops. |
+| `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)` | Appends `text[0..len)` at `level` with **no** location. Returns `1` if stored, `0` if dropped (caps) or on allocation failure / `NULL` `b`. Truncates to `FB_MAX_ENTRY_BYTES`; clamps `level`. Raises `b->overflow` when it drops. |
+| `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len, const char *file, int line, int col)` | As `fb_buffer_push`, but also records a source location. `file` (may be `NULL`) is copied truncated to `FB_MAX_FILE_BYTES`; `line`/`col` ≤ 0 store as 0. Same caps/return/fail-closed behaviour. `fb_buffer_push` is exactly this with `file=NULL, line=col=0`. |
 | `void fb_buffer_reset(fb_buffer *b)` | Frees every entry's text and sets `count`/`total_bytes`/`overflow` to 0, **keeping** the entry array allocation for reuse. |
 | `void fb_buffer_free(fb_buffer *b)` | Frees the entries and the array; re-zeroes `b`. Idempotent; safe on `NULL` / a zeroed struct. |
 | `size_t fb_buffer_count(const fb_buffer *b)` | Number of stored entries (`0` for `NULL`). |
 | `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)` | The `i`-th entry, or `NULL` if out of range / `NULL` `b`. |
 | `const char *fb_level_name(int level)` | A stable lowercase name (`"log"`/`"info"`/`"warn"`/`"error"`/`"debug"`); out-of-range clamps to `"log"`. Pure, no allocation. |
 
-`fb_entry` exposes `int level; char *text; size_t len;` (text owned by the buffer).
+`fb_entry` exposes `int level; char *text; size_t len; char *file; int line; int col;`
+(`text` and `file` owned by the buffer; `file` is `NULL` and `line`/`col` 0 when the
+entry has no known location).
 
 ## Behaviour (Given–When–Then)
 
@@ -65,6 +76,9 @@ outlive the call.
   stored entry's level is `FB_LOG` and `fb_level_name` of it is `"log"`.
 - **Given** any buffer, **when** `fb_buffer_reset` then a new push, **then** the
   array is reused (no leak) and `overflow` is back to 0.
+- **Given** a located push (`fb_buffer_push_loc` with `file="inline #2", line=3,
+  col=1`), **when** read back, **then** the entry's `file`/`line`/`col` match; a
+  `file` over `FB_MAX_FILE_BYTES` is truncated; a `NULL` `file` stores no location.
 
 ## Guarantees
 
@@ -83,6 +97,8 @@ outlive the call.
 - Formatting of JS values (objects → `"[object Object]"` via `toString`): the
   `js_dom` binding does the value→string conversion; this module only stores bytes.
   Structured/`JSON.stringify` rendering of objects is a later refinement.
-- Source location (file:line) and timestamps: the v1 entry is level + text only.
+- **Call-site** location for `console.*` lines (only the *error* throw site is
+  captured, from the engine's `.stack`; see `js_sandbox` `js_loc_from_stack`). A bare
+  `console.log` therefore has no `file`/`line`/`col`. Timestamps are also out of scope.
 - Persistence: the console is per-load / per-session, never written to disk
   (Zero Knowledge).

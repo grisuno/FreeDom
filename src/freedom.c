@@ -168,14 +168,19 @@ static void print_doc(const rd_doc *doc) {
 }
 
 /* Prints the captured Freebug console (the developer-visible JS transcript) to
- * stdout, one entry per line, prefixed with its level. Deterministic order; an
- * empty buffer prints just the header so "nothing logged" is unambiguous. */
+ * stdout, one entry per line, prefixed with its level and (for located errors)
+ * its source name:line:col. Deterministic order; an empty buffer prints just the
+ * header so "nothing logged" is unambiguous. */
 static void print_console(const fb_buffer *log) {
     size_t n = fb_buffer_count(log);
     printf("\n=== Freebug console (%zu) ===\n", n);
     for (size_t i = 0; i < n; ++i) {
         const fb_entry *e = fb_buffer_at(log, i);
-        printf("[%s] %s\n", fb_level_name(e->level), e->text);
+        if (e->file != NULL && e->file[0] != '\0')
+            printf("[%s] %s:%d:%d  %s\n", fb_level_name(e->level),
+                   e->file, e->line, e->col, e->text);
+        else
+            printf("[%s] %s\n", fb_level_name(e->level), e->text);
     }
     if (log->overflow) printf("[notice] console output was truncated (buffer full)\n");
 }
