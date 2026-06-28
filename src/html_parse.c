@@ -98,36 +98,46 @@ static int script_is_executable(const lxb_dom_node_t *n) {
     return 1;
 }
 
-/* Concatenates the text of every executable inline <script> (separated so one
- * script cannot swallow the next), for the worker to evaluate when JS is allowed.
- * Returns a NUL-terminated buffer (free with hp_free), or NULL if there are none. */
-char *hp_extract_scripts(const hp_document *doc, size_t *out_len) {
-    if (out_len != NULL) *out_len = 0;
+/* Collects each executable inline <script> as its own owned, NUL-terminated buffer,
+ * in document order. Browsers run each <script> as a separate program, so the worker
+ * evaluates them one by one: an uncaught exception in one script must not abort the
+ * others (concatenating into a single eval would let the first failure kill them all).
+ * Bounded by HP_MAX_SCRIPTS (fail-closed anti-DoS). NULL with *out_count == 0 when
+ * there are none or on allocation failure; release with hp_free_scripts. */
+hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
+    if (out_count != NULL) *out_count = 0;
     if (doc == NULL || doc->doc == NULL) return NULL;
     lxb_dom_node_t *root = lxb_dom_interface_node(doc->doc);
 
-    char  *buf = NULL;
-    size_t len = 0, cap = 0;
+    hp_script *list = NULL;
+    size_t count = 0, cap = 0;
     for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {
+        if (count >= HP_MAX_SCRIPTS) break; /* fail closed: drop the excess */
         if (!node_is_script(n) || !script_is_executable(n)) continue;
         size_t tl = 0;
         const lxb_char_t *t = lxb_dom_node_text_content(n, &tl);
         if (t == NULL || tl == 0) continue;
-        size_t need = len + tl + 3; /* text + "\n;\n" */
-        if (need + 1 > cap) {
-            size_t ncap = cap ? cap * 2 : 1024;
-            while (ncap < need + 1) ncap *= 2;
-            char *grown = (char *)realloc(buf, ncap);
-            if (grown == NULL) { free(buf); return NULL; }
-            buf = grown; cap = ncap;
+        char *text = dup_bytes(t, tl);
+        if (text == NULL) { hp_free_scripts(list, count); return NULL; }
+        if (count == cap) {
+            size_t ncap = cap ? cap * 2 : 8;
+            hp_script *grown = (hp_script *)realloc(list, ncap * sizeof *grown);
+            if (grown == NULL) { free(text); hp_free_scripts(list, count); return NULL; }
+            list = grown; cap = ncap;
         }
-        memcpy(buf + len, t, tl); len += tl;
-        buf[len++] = '\n'; buf[len++] = ';'; buf[len++] = '\n';
+        list[count].text = text;
+        list[count].len  = tl;
+        count++;
     }
-    if (buf == NULL) return NULL;
-    buf[len] = '\0';
-    if (out_len != NULL) *out_len = len;
-    return buf;
+    if (count == 0) { free(list); return NULL; }
+    if (out_count != NULL) *out_count = count;
+    return list;
+}
+
+void hp_free_scripts(hp_script *scripts, size_t count) {
+    if (scripts == NULL) return;
+    for (size_t i = 0; i < count; ++i) free(scripts[i].text);
+    free(scripts);
 }
 
 static void strip_event_handlers(lxb_html_document_t *document) {

@@ -62,6 +62,14 @@ y vacía la cola de timers **hasta 64 veces** — no es un event loop real). `wi
 `console` no-op. Los wrappers solo guardan el **handle entero validado** — **no** se exponen
 objetos-nodo vivos del motor.
 
+**`document.fonts` (stub identity-safe):** el shim define `document.fonts` como un `FontFaceSet`
+benigno de valores fijos — `load()`→`Promise.resolve([])`, `check()`→`true`, `ready`→`Promise.resolve()`,
+`status:'loaded'`, `size:0`, y `add/delete/clear/forEach/addEventListener/removeEventListener` no-op.
+Motivo: scripts de feature-detection llaman `document.fonts.load(...)` muy temprano; sin el stub,
+`document.fonts` era `undefined` y la lectura de `.load` lanzaba — la causa **literal** del error de
+google.com `cannot read property 'load' of undefined`. No enumera fuentes reales (anti-fingerprinting)
+ni toca la red.
+
 **`location` real + navegación por JS (Hito 20e parte 1):** el worker conoce la URL de la página y la
 inyecta como `globalThis.__locParts` (objeto de datos construido en C con `url_split`, **sin
 interpolar** la URL hostil en JS). El shim define un `location` (y `document.location`/`document.URL`)

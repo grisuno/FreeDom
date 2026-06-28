@@ -155,6 +155,26 @@ static void test_infinite_loop_times_out(void **state) {
     js_result_free(&r);
 }
 
+/* js_set_time_budget lowers the wall-clock cap armed on subsequent evals, so a
+ * caller can enforce a single page-wide budget across many evaluations. A tiny
+ * budget interrupts an infinite loop; a NULL context is a safe no-op. */
+static void test_set_time_budget_applies(void **state) {
+    (void)state;
+    js_set_time_budget(NULL, 1000); /* no-op, must not crash */
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK); /* default budget = 1000ms */
+    js_set_time_budget(ctx, 50); /* shrink it for a fast test */
+    js_result r;
+    memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, "while(true){}", 13, &r), JS_ERR_TIMEOUT);
+    js_result_free(&r);
+    /* A subsequent eval still honours the lowered budget (it persists on the ctx). */
+    memset(&r, 0, sizeof r);
+    assert_int_equal(js_eval(ctx, "for(;;){}", 9, &r), JS_ERR_TIMEOUT);
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
 static void test_memory_limit_is_enforced(void **state) {
     (void)state;
     js_limits l = js_limits_default();
@@ -216,6 +236,7 @@ int main(void) {
         cmocka_unit_test(test_no_io_globals),
         cmocka_unit_test(test_filesystem_access_is_reference_error),
         cmocka_unit_test(test_infinite_loop_times_out),
+        cmocka_unit_test(test_set_time_budget_applies),
         cmocka_unit_test(test_memory_limit_is_enforced),
         cmocka_unit_test(test_result_free_on_zeroed),
         cmocka_unit_test(test_context_free_null_and_double),

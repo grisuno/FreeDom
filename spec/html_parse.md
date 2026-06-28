@@ -59,10 +59,17 @@ size_t hp_event_handler_count(const hp_document *doc);
 /* Buffers en propiedad; liberar con hp_free. *out_len excluye el NUL final. */
 char *hp_extract_text(const hp_document *doc, size_t *out_len);
 char *hp_get_title(const hp_document *doc, size_t *out_len);
-/* Hito 20b: texto concatenado de los <script> inline EJECUTABLES (excluye src
- * externos y bloques type=*json*). Solo útil si se parseó con strip_scripts=0.
- * NULL si no hay scripts inline. El worker lo evalúa cuando JS está permitido. */
-char *hp_extract_scripts(const hp_document *doc, size_t *out_len);
+/* Lista de los <script> inline EJECUTABLES (excluye src externos y bloques
+ * type=*json*), en orden de documento, cada uno como su propio buffer. El worker
+ * evalúa CADA script por separado: en un navegador cada <script> es un programa
+ * independiente, y una excepción no capturada en uno aborta SOLO ese script, no los
+ * demás (concatenarlos en un único eval dejaba que el primer fallo matara a todos --
+ * la causa raíz de "no carga nada" en paginas con mucho JS). Acotada por
+ * HP_MAX_SCRIPTS (fail-closed, anti-DoS: el exceso se descarta, no se ejecuta).
+ * NULL (y *out_count == 0) si no hay scripts inline o en fallo de asignacion. */
+typedef struct hp_script { char *text; size_t len; } hp_script;
+hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count);
+void hp_free_scripts(hp_script *scripts, size_t count);
 
 void hp_free(char *buf);
 void hp_document_free(hp_document *doc);
@@ -96,6 +103,13 @@ void hp_document_free(hp_document *doc);
   `on*` en el árbol.
 - `hp_extract_text`: texto inerte del cuerpo (sin contenido de `<script>` si fue eliminado).
 - `hp_get_title`: contenido de `<title>` o cadena vacía.
+- `hp_extract_script_list`: devuelve un arreglo en propiedad con cada `<script>` inline
+  ejecutable como su propio `hp_script` (texto NUL-terminado + longitud), en orden de
+  documento; `*out_count` recibe el número. Solo significativo si se parseó con
+  `strip_scripts==0`. **Browser semantics:** el llamador evalúa cada script por separado,
+  así una excepción no capturada en uno **no** aborta los siguientes. Tope `HP_MAX_SCRIPTS`
+  (4096): los scripts extra se descartan (fail-closed). `NULL` con `*out_count==0` si no hay
+  o en OOM. Liberar con `hp_free_scripts` (libera cada `text` y el arreglo; idempotente en NULL).
 
 ## 7. Matriz de pruebas
 

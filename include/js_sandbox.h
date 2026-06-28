@@ -87,6 +87,13 @@ js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res);
  * as js_eval. lim == NULL => defaults. */
 js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res);
 
+/* Adjusts the wall-clock budget armed on each subsequent js_eval. Used to enforce
+ * a single page-wide budget across a sequence of evaluations (e.g. a page's inline
+ * scripts run one by one): the caller lowers the budget to the time remaining before
+ * each call, so isolating scripts into separate evals does not multiply the cap.
+ * No-op on a NULL context. Does not affect an evaluation already in progress. */
+void js_set_time_budget(js_context *ctx, uint64_t budget_ms);
+
 /* Idempotent; safe on a zero-initialised struct and safe to call twice. */
 void js_result_free(js_result *res);
 

@@ -232,6 +232,11 @@ static void arm_deadline(js_context *ctx, uint64_t budget_ms) {
     ctx->has_deadline = 1;
 }
 
+void js_set_time_budget(js_context *ctx, uint64_t budget_ms) {
+    if (ctx == NULL) return;
+    ctx->limits.time_budget_ms = budget_ms;
+}
+
 js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res) {
     if (ctx == NULL || src == NULL || res == NULL) return JS_ERR_NULL_ARG;
 

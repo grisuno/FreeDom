@@ -175,6 +175,15 @@ void       tab_eval_result_free(tab_eval_result *r);
   `TAB_OK`; `text` nunca contiene cuerpos de script. Fallo de parseo/DOM/contexto ⇒ `TAB_ERR_RENDER`
   (sin estado parcial). Fallo de IPC con el hijo aún vivo ⇒ `TAB_ERR_IO`; si el hijo murió ⇒
   `TAB_ERR_DEAD`.
+- **Ejecución de scripts (run_js)**: con `run_js == 1`, el worker obtiene los `<script>` inline
+  con `hp_extract_script_list` y **evalúa cada uno por separado** (`js_eval` por script), como un
+  navegador: una excepción no capturada en un script se reporta a la consola Freebug (`FB_ERROR`)
+  pero **no aborta** los siguientes (antes se concatenaban en un único `js_eval`, así que el primer
+  fallo mataba a todos — por eso google.com "no cargaba nada"). Un **único presupuesto de reloj por
+  página** (`JS_DEFAULT_TIME_BUDGET`, vía `js_set_time_budget`) se reparte entre todos los scripts y
+  el pump sintético `__fireDeferred`, de modo que aislar los scripts **no multiplica** el tope de
+  tiempo; al agotarse, los scripts restantes no se ejecutan (fail-closed). Luego se restaura el
+  presupuesto completo para el REPL (`tab_eval`).
 - **`tab_eval`**: requiere una página cargada con éxito. `t`/`out` no nulos; `js` no nulo si
   `len > 0`; `len > TAB_MAX_INPUT` ⇒ `TAB_ERR_TOO_LARGE`; hijo muerto ⇒ `TAB_ERR_DEAD`. El JS ve el
   DOM cargado y los globales `navigator`/`screen`/`performance`/`canvas`/`audio`. Un **error a nivel

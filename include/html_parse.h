@@ -40,6 +40,13 @@ typedef struct hp_document hp_document;
 
 #define HP_DEFAULT_MAX_BYTES ((size_t)(32u * 1024u * 1024u))
 
+/* Upper bound on the number of inline <script> elements returned by
+ * hp_extract_script_list. A real page has a handful; the cap is a fail-closed,
+ * anti-DoS limit so a hostile document (up to HP_DEFAULT_MAX_BYTES of tiny
+ * scripts) cannot force an unbounded eval loop. Scripts beyond the cap are
+ * dropped (not executed). */
+#define HP_MAX_SCRIPTS ((size_t)4096)
+
 /* Returns a configuration with the secure defaults applied. */
 hp_config hp_config_default(void);
 
@@ -62,13 +69,30 @@ size_t hp_event_handler_count(const hp_document *doc);
 char *hp_extract_text(const hp_document *doc, size_t *out_len);
 char *hp_get_title(const hp_document *doc, size_t *out_len);
 
-/* Concatenated text of executable inline <script> elements (external src and JSON
- * data blocks excluded), for the worker to evaluate when JS is allowed for the page.
- * Only meaningful when the document was parsed with strip_scripts == 0. NULL when
- * there are no inline scripts. Owned; release with hp_free. */
-char *hp_extract_scripts(const hp_document *doc, size_t *out_len);
+/* One executable inline <script>'s source: a NUL-terminated buffer of `len` bytes
+ * (the NUL is not counted in len). Owned by the hp_script array it belongs to. */
+typedef struct hp_script {
+    char  *text;
+    size_t len;
+} hp_script;
 
-/* Release a buffer returned by hp_extract_text / hp_get_title / hp_extract_scripts. */
+/* Returns the executable inline <script> elements (external src and JSON data
+ * blocks excluded), in document order, as an owned array; *out_count receives the
+ * number found. Each script is a SEPARATE program: the caller must evaluate each
+ * one independently, so an uncaught exception in one aborts only that script and
+ * not the rest -- exactly as a browser runs <script> elements. (Concatenating them
+ * into a single eval would let the first failing script kill all the others.)
+ * Only meaningful when the document was parsed with strip_scripts == 0. At most
+ * HP_MAX_SCRIPTS scripts are returned (extras are dropped, fail-closed). Returns
+ * NULL (with *out_count == 0) when there are no inline scripts or on allocation
+ * failure. Release with hp_free_scripts. */
+hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count);
+
+/* Releases an array returned by hp_extract_script_list (and each script's text).
+ * Idempotent on NULL. */
+void hp_free_scripts(hp_script *scripts, size_t count);
+
+/* Release a buffer returned by hp_extract_text / hp_get_title. */
 void hp_free(char *buf);
 
 /* Idempotent; safe on NULL and safe to call twice. */

@@ -10,6 +10,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <setjmp.h>
 #include <string.h>
 #include <cmocka.h>
@@ -155,6 +157,78 @@ static void test_event_handlers_kept_when_disabled(void **state) {
     hp_document_free(doc);
 }
 
+/* --- per-script extraction (browsers run each <script> as its own program) --- */
+
+/* Two inline scripts come back as two SEPARATE entries (not concatenated), in
+ * document order, each its own NUL-terminated buffer. An external src and a JSON
+ * data block are excluded. This separation is what lets the worker isolate an
+ * error in one script from the next. */
+static void test_extract_script_list_separates(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body>"
+        "<script>var a=1;</script>"
+        "<script src='https://x.example/app.js'></script>" /* external: excluded */
+        "<script type='application/ld+json'>{\"k\":1}</script>" /* data: excluded */
+        "<script>var b=2;</script>"
+        "</body></html>";
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+
+    size_t n = 0;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 2UL);            /* only the two inline ones */
+    assert_int_equal((unsigned long)s[0].len, strlen("var a=1;"));
+    assert_string_equal(s[0].text, "var a=1;");          /* document order preserved */
+    assert_string_equal(s[1].text, "var b=2;");
+    hp_free_scripts(s, n);
+    hp_document_free(doc);
+}
+
+/* No inline scripts => NULL list and zero count (never a bogus empty buffer). */
+static void test_extract_script_list_empty(void **state) {
+    (void)state;
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT("<html><body><p>hi</p></body></html>"), &c, &doc), HP_OK);
+    size_t n = 123;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_null(s);
+    assert_int_equal((unsigned long)n, 0UL);
+    hp_document_free(doc);
+    hp_free_scripts(NULL, 0); /* idempotent on NULL */
+}
+
+/* Fail-closed anti-DoS: a document with more inline scripts than HP_MAX_SCRIPTS
+ * returns at most the cap (the excess is dropped, never executed). */
+static void test_extract_script_list_caps(void **state) {
+    (void)state;
+    /* Build HP_MAX_SCRIPTS + 50 trivial scripts. */
+    const size_t extra = 50;
+    const size_t total = HP_MAX_SCRIPTS + extra;
+    size_t buflen = total * (sizeof("<script>;</script>") - 1) + 64;
+    char *html = (char *)malloc(buflen);
+    assert_non_null(html);
+    size_t off = 0;
+    for (size_t i = 0; i < total; i++)
+        off += (size_t)snprintf(html + off, buflen - off, "<script>;</script>");
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(html, off, &c, &doc), HP_OK);
+    size_t n = 0;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, (unsigned long)HP_MAX_SCRIPTS);
+    hp_free_scripts(s, n);
+    hp_document_free(doc);
+    free(html);
+}
+
 /* --- robustness --- */
 
 static void test_parse_malformed_does_not_crash(void **state) {
@@ -191,6 +265,9 @@ int main(void) {
         cmocka_unit_test(test_parse_simple_document),
         cmocka_unit_test(test_scripts_stripped_by_default),
         cmocka_unit_test(test_scripts_kept_when_disabled),
+        cmocka_unit_test(test_extract_script_list_separates),
+        cmocka_unit_test(test_extract_script_list_empty),
+        cmocka_unit_test(test_extract_script_list_caps),
         cmocka_unit_test(test_event_handlers_stripped_by_default),
         cmocka_unit_test(test_event_handlers_kept_when_disabled),
         cmocka_unit_test(test_parse_malformed_does_not_crash),

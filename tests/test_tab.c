@@ -380,6 +380,57 @@ static void test_load_captures_console_and_error(void **state) {
     tab_close(t);
 }
 
+/* Per-script isolation (browser semantics): an uncaught error in the FIRST inline
+ * <script> must NOT abort later scripts. Before this, all scripts were concatenated
+ * into one eval, so the first throw killed every following script -- the root cause
+ * of "loads nothing" on script-heavy pages (e.g. google.com). The first script's
+ * error is still surfaced to the console; the second script still mutates the title. */
+static void test_load_isolates_script_errors(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>Old</title></head><body>"
+        "<script>throws_undefined_fn();</script>"            /* script #1: throws */
+        "<script>document.title='SECOND_RAN';"               /* script #2: must run */
+        "console.log('second ok');</script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+
+    /* Script #1's error was isolated and reported... */
+    assert_non_null(console_find(&p.console, FB_ERROR, "throws_undefined_fn"));
+    /* ...and script #2 still executed (title mutated + log emitted). */
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "SECOND_RAN");
+    assert_non_null(console_find(&p.console, FB_LOG, "second ok"));
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* document.fonts stub: a feature-detecting script that calls document.fonts.load()/
+ * .check() must not throw (this exact call -- document.fonts.load -- is what produced
+ * google.com's "cannot read property 'load' of undefined"). The stub is benign. */
+static void test_load_document_fonts_stub(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>document.fonts.load('10pt X').catch(function(){});"
+        "document.title = document.fonts.check('10pt X') ? 'FONTS_OK' : 'FONTS_BAD';"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    /* No uncaught error, and the script ran to completion. */
+    assert_int_equal((int)fb_buffer_count(&p.console), 0);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "FONTS_OK");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Freebug (FB-1): a no-JS load runs no scripts, so the console is empty. */
 static void test_load_without_js_has_empty_console(void **state) {
     (void)state;
@@ -837,6 +888,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test_setup_teardown(test_eval_persistent_state, setup_loaded, teardown),
         cmocka_unit_test(test_reload_replaces_page),
         cmocka_unit_test(test_load_captures_console_and_error),
+        cmocka_unit_test(test_load_isolates_script_errors),
+        cmocka_unit_test(test_load_document_fonts_stub),
         cmocka_unit_test(test_load_without_js_has_empty_console),
         cmocka_unit_test(test_eval_captures_console_output),
         cmocka_unit_test(test_eval_without_load),

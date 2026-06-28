@@ -261,6 +261,14 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `https://`, `http://` ⇒ promovido a https, esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda**
   (nunca ejecución, fail-closed), texto libre ⇒ DuckDuckGo HTML (sin JS). El orquestador (`go_omnibox`)
   resuelve primero un archivo local existente (la función pura no hace I/O). Ver `[[freedom-omnibox-search]]`.
+  **El buscador depende de la allowlist:** `html.duckduckgo.com` (todos los endpoints de DuckDuckGo)
+  presenta un **leaf RSA-2048**, que la política por defecto **rechaza** (`RSA<3072` ⇒ status 5). Por
+  eso `config/allow.conf` **incluye `duckduckgo.com`** (cubre subdominios): el override de soberanía
+  (`SF_POLICY_ALLOWLISTED_INSECURE`) acepta el cert débil-pero-válido **manteniendo** la autenticidad
+  de cadena — y de hecho aún negocia **TLS 1.3 + X25519MLKEM768** (solo se relajó el cert). Si la
+  búsqueda muestra **página en blanco / sin JS**, es que el `allow.conf` con `duckduckgo.com` **no está
+  en el search path en runtime** (`$FREEDOM_HOSTS_DIR`, `~/.config/freedom`, `./config`): correr desde
+  la raíz del repo o copiar el config a `~/.config/freedom/` lo resuelve. Ver `[[freedom-search-needs-allowlist]]`.
 - **JS Secure by Default + allowlist por host + ejecución viva:** el JS de página está **apagado**
   salvo opt-in por host. Modo global tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`(defecto)/`JSP_ON`);
   pertenencia por host en `js.conf` (reusa `hostblock`, cubre subdominios). `js_policy` (puro) decide;
@@ -288,6 +296,19 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   interactivos (clic), timers async reales, scripts externos (`src`), getter de `innerHTML`, scroll a
   ancla `#id`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir el
   storage ni poblar cookie/referrer con datos reales (rompería Zero Knowledge). Ver `[[freedom-live-js]]`.
+- **Aislamiento de scripts por `<script>` (browser semantics) + `document.fonts` stub:** el worker
+  ejecuta **cada** `<script>` inline como su **propio programa** (`hp_extract_script_list` → un
+  `js_eval` por script), no concatenados en un único eval. Antes, una excepción no capturada en el
+  primer script **abortaba todos** los siguientes — por eso google.com "no cargaba nada": su primer
+  script llama `document.fonts.load(...)` y, sin ese global, lanzaba `cannot read property 'load' of
+  undefined`, matando el resto. Dos arreglos: (a) cada error de script se reporta a Freebug
+  (`FB_ERROR`) pero **no** corta los demás; (b) `document.fonts` es un stub `FontFaceSet` benigno
+  (identity-safe, sin red). Un **único presupuesto de reloj por página** (`js_set_time_budget`) se
+  reparte entre todos los scripts + `__fireDeferred`, así aislar **no** multiplica el tope de 1 s
+  (fail-closed: scripts tras agotarlo no corren); tope `HP_MAX_SCRIPTS` (4096) anti-DoS. **google.com
+  igual no funciona del todo** porque su buscador exige su **JS externo propietario**, que Freedom
+  **no ejecuta** (frontera de seguridad/identidad): usar la omnibox (→ DuckDuckGo). Ver `[[freedom-live-js]]`,
+  `[[freedom-per-script-isolation]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
   (`Ctrl+I`). Imágenes **PNG y JPEG** (resto → placeholder) y fetch **síncrono**; el decode corre
   en el worker confinado (JPEG es excepción de doctrina autorizada por el dueño, contenida por el

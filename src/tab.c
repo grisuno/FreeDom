@@ -271,6 +271,18 @@ static int write_console(int wfd, const fb_buffer *log) {
 /* Response: [ok:int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace:int32][console].
  * navreq is the RAW (unresolved) navigation the page's JS requested; the parent gates it
  * with ln_resolve. On any failure the page is reset and ok==0 is reported (no partial state). */
+/* Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent.
+ * Used to share one page-wide JS budget across the inline scripts run individually. */
+static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms) {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    int64_t elapsed = (int64_t)(now.tv_sec - start->tv_sec) * 1000
+                    + (now.tv_nsec - start->tv_nsec) / 1000000;
+    if (elapsed < 0) elapsed = 0;
+    if ((uint64_t)elapsed >= budget_ms) return 0;
+    return budget_ms - (uint64_t)elapsed;
+}
+
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int reader, int prefers_dark, const char *page_url) {
     char  *title = NULL, *text = NULL;
@@ -283,28 +295,43 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     if (ok && run_js) {
         /* Execute the page's inline scripts in the sandboxed context, THEN derive
          * the view, so DOM mutations (document.title / textContent) are reflected.
-         * A JS-level error is non-fatal: the page still renders. The DOM bridge is
+         * Each <script> is run as its own program, exactly as a browser does: an
+         * uncaught error in one is surfaced to the Freebug console but does NOT abort
+         * the others (concatenating them would let the first failure kill them all --
+         * the root cause of "loads nothing" on script-heavy pages). A single page-wide
+         * wall-clock budget is shared across every script and the synthetic load/timer
+         * pump, so isolating scripts never multiplies the cap. The DOM bridge is
          * read-mostly (safe mutators), so a script cannot corrupt the tree. */
-        size_t sl = 0;
-        char *scripts = hp_extract_scripts(cs->doc, &sl);
-        if (scripts != NULL) {
+        size_t nscripts = 0;
+        hp_script *scripts = hp_extract_script_list(cs->doc, &nscripts);
+        struct timespec t0;
+        clock_gettime(CLOCK_MONOTONIC, &t0);
+        for (size_t i = 0; i < nscripts; i++) {
+            uint64_t rem = budget_remaining_ms(&t0, JS_DEFAULT_TIME_BUDGET);
+            if (rem == 0) break; /* page JS budget spent; stop running scripts */
+            js_set_time_budget(cs->js, rem);
             js_result r;
             memset(&r, 0, sizeof r);
-            js_status es = js_eval(cs->js, scripts, sl, &r);
-            /* Surface an uncaught script error in the Freebug console (so the
-             * developer sees what broke), in addition to letting the page render. */
+            js_status es = js_eval(cs->js, scripts[i].text, scripts[i].len, &r);
             if (es != JS_OK && r.is_exception && r.value != NULL)
                 fb_buffer_push(&cs->log, FB_ERROR, r.value, r.value_len);
             js_result_free(&r);
-            hp_free(scripts);
         }
+        hp_free_scripts(scripts, nscripts);
         /* Fire synthetic DOMContentLoaded/load handlers + flush queued timers once
-         * (bounded; not a real event loop), so onload-wrapped code runs. */
-        static const char fire[] = "if(typeof __fireDeferred==='function')__fireDeferred();";
-        js_result fr;
-        memset(&fr, 0, sizeof fr);
-        (void)js_eval(cs->js, fire, sizeof fire - 1, &fr);
-        js_result_free(&fr);
+         * (bounded; not a real event loop), so onload-wrapped code runs -- under the
+         * same remaining page budget. */
+        uint64_t rem = budget_remaining_ms(&t0, JS_DEFAULT_TIME_BUDGET);
+        if (rem > 0) {
+            js_set_time_budget(cs->js, rem);
+            static const char fire[] = "if(typeof __fireDeferred==='function')__fireDeferred();";
+            js_result fr;
+            memset(&fr, 0, sizeof fr);
+            (void)js_eval(cs->js, fire, sizeof fire - 1, &fr);
+            js_result_free(&fr);
+        }
+        /* Restore the full per-eval budget for any REPL (tab_eval) on this context. */
+        js_set_time_budget(cs->js, JS_DEFAULT_TIME_BUDGET);
         /* Capture any navigation the script requested (location.href=/assign/replace/
          * reload). Raw and unresolved: the parent gates it (Zero Trust). */
         int rep = 0;

@@ -81,6 +81,13 @@ js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res);
 /* Conveniencia: crea contexto, evalua, libera. */
 js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res);
 
+/* Ajusta el presupuesto de reloj armado en cada js_eval POSTERIOR. Permite imponer un
+ * unico presupuesto por pagina a traves de una secuencia de evaluaciones (p. ej. los
+ * <script> inline de una pagina corridos uno por uno): el llamador baja el presupuesto al
+ * tiempo restante antes de cada llamada, de modo que aislar scripts no multiplica el tope.
+ * No-op con ctx NULL; no afecta una evaluacion en curso. */
+void      js_set_time_budget(js_context *ctx, uint64_t budget_ms);
+
 void      js_result_free(js_result *res);
 ```
 

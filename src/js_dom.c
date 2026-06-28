@@ -340,6 +340,14 @@ static const char JD_DOCUMENT_SHIM[] =
     "  Object.defineProperty(d,'body',{get:function(){return tagOne('body');},enumerable:true});"
     "  Object.defineProperty(d,'head',{get:function(){return tagOne('head');},enumerable:true});"
     "  Object.defineProperty(d,'documentElement',{get:function(){return tagOne('html');},enumerable:true});"
+    /* document.fonts: a benign FontFaceSet stub so feature-detecting scripts that call
+     * document.fonts.load(...)/ready do not throw -- the literal cause of google.com's
+     * "cannot read property 'load' of undefined". Identity-neutral: fixed values, no
+     * real font enumeration, never touches the network. */
+    "  d.fonts={status:'loaded',size:0,ready:Promise.resolve(),"
+    "    load:function(){return Promise.resolve([]);},check:function(){return true;},"
+    "    add:function(){},delete:function(){},clear:function(){},forEach:function(){},"
+    "    addEventListener:function(){},removeEventListener:function(){}};"
     /* Identity-safe ambient surface: no real cookie/referrer leaks, storage is
      * EPHEMERAL in-memory (Zero Knowledge -- never persisted, gone each load). */
     "  Object.defineProperty(d,'cookie',{get:function(){return '';},set:function(){},enumerable:true});"
