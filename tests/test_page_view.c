@@ -1112,6 +1112,30 @@ static void test_build_line_height(void **state) {
     hp_document_free(doc);
 }
 
+/* text-decoration resolves into text_decoration from a <style> sheet and inline
+ * style=, inherits to descendant text, and an inline `none` drops a link underline. */
+static void test_build_text_decoration(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>p{text-decoration:line-through} a{text-decoration:underline}</style>"
+        "<p>struck <span>inherited</span></p>"
+        "<a href='https://e.x/'>linky</a>"
+        "<a href='https://e.x/' style='text-decoration:none'>plain</a>"
+        "<div style='text-decoration:overline'>over</div>"
+        "<h3>plainh</h3></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal(find_text(v, "struck ")->text_decoration, CSS_DECO_LINE_THROUGH);
+    assert_int_equal(find_text(v, "inherited")->text_decoration, CSS_DECO_LINE_THROUGH);
+    assert_int_equal(find_text(v, "linky")->text_decoration, CSS_DECO_UNDERLINE);
+    assert_int_equal(find_text(v, "plain")->text_decoration, 0); /* none: explicit removal */
+    assert_int_equal(find_text(v, "over")->text_decoration, CSS_DECO_OVERLINE);
+    /* An <h3> matched by no rule sets none: unset (-1). */
+    assert_int_equal(find_text(v, "plainh")->text_decoration, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* font-weight via CSS sets bold; an inline declaration wins over an id rule. */
 static void test_build_css_bold_and_inline_wins(void **state) {
     (void)state;
@@ -1181,17 +1205,19 @@ static void test_build_reader_skips_boilerplate(void **state) {
 static void test_set_text_style_model(void **state) {
     (void)state;
     pv_view *v = pv_new();
-    pv_set_text_style(v, CSS_ALIGN_CENTER, 150, 140); /* no-op: empty view */
+    pv_set_text_style(v, CSS_ALIGN_CENTER, 150, 140, CSS_DECO_UNDERLINE); /* no-op: empty view */
     assert_int_equal((int)pv_count(v), 0);
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
     assert_int_equal(pv_at(v, 0)->text_align, 0); /* default */
     assert_int_equal(pv_at(v, 0)->font_scale, 0);
     assert_int_equal(pv_at(v, 0)->line_scale, 0);
-    pv_set_text_style(v, CSS_ALIGN_RIGHT, 175, 160);
+    assert_int_equal(pv_at(v, 0)->text_decoration, -1); /* default unset */
+    pv_set_text_style(v, CSS_ALIGN_RIGHT, 175, 160, CSS_DECO_LINE_THROUGH);
     assert_int_equal(pv_at(v, 0)->text_align, CSS_ALIGN_RIGHT);
     assert_int_equal(pv_at(v, 0)->font_scale, 175);
     assert_int_equal(pv_at(v, 0)->line_scale, 160);
-    pv_set_text_style(NULL, 0, 0, 0); /* NULL-safe */
+    assert_int_equal(pv_at(v, 0)->text_decoration, CSS_DECO_LINE_THROUGH);
+    pv_set_text_style(NULL, 0, 0, 0, 0); /* NULL-safe */
     pv_free(v);
 }
 
@@ -1250,6 +1276,7 @@ int main(void) {
         cmocka_unit_test(test_build_prefers_color_scheme),
         cmocka_unit_test(test_build_text_align_and_font_size),
         cmocka_unit_test(test_build_line_height),
+        cmocka_unit_test(test_build_text_decoration),
         cmocka_unit_test(test_build_css_bold_and_inline_wins),
         cmocka_unit_test(test_build_display_none_hidden),
         cmocka_unit_test(test_build_reader_skips_boilerplate),

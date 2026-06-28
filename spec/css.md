@@ -92,6 +92,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `line-height` | `line_scale` (percent of the natural line box): unitless multiplier (`1.5` → 150) or `%` (`160%` → 160), clamped `[CSS_LINE_MIN, CSS_LINE_MAX]`; `normal` → 0 (unset, uses the UA default). Absolute `px`/`em` line-heights are out of scope (dropped). Inherits, like `font-size`. |
 | `font-weight` | `bold`: `bold`/`bolder` or numeric ≥ 600 → 1; `normal`/`lighter`/< 600 → 0 |
 | `font-style` | `italic`: `italic`/`oblique` → 1; `normal` → 0 |
+| `text-decoration`, `text-decoration-line` | `text_decoration` (OR of `CSS_DECO_UNDERLINE`/`CSS_DECO_LINE_THROUGH`/`CSS_DECO_OVERLINE`): collects the line keywords `underline`/`overline`/`line-through` from the (space-separated) value; `none` → 0 (explicit removal — e.g. `a { text-decoration: none }` drops the link underline); a value with *no* line keyword (only a color/style/thickness token) is dropped → unset (-1). Style/color/thickness tokens (`wavy`, `red`, `2px`, `solid`, …) are ignored. |
 | `display` | `display`: `none`/`block`/`inline`/`inline-block`/`flex`/`grid`/other |
 | `gap`, `grid-gap`, `column-gap` | `gap`: leading px of the value (`12px 8px` → 12; `normal` → 0), clamped `[0, CSS_GAP_MAX]`, or -1 (unset) |
 | `justify-content` | `justify`: `flex-start`/`start`→START, `flex-end`/`end`→END, `center`, `space-between`, `space-around`, `space-evenly`; unknown dropped |
@@ -175,6 +176,7 @@ typedef struct css_style {
     css_align    text_align;  /* CSS_ALIGN_UNSET if absent */
     int          font_scale;  /* percent (e.g. 150), or 0 (unset) */
     int          line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
+    int          text_decoration; /* OR of CSS_DECO_*; 0 = none; -1 = unset */
     int          bold;        /* 1, 0, or -1 (unset) */
     int          italic;      /* 1, 0, or -1 (unset) */
     css_display  display;     /* CSS_DISP_UNSET if absent */
@@ -195,6 +197,9 @@ typedef struct css_style {
 #define CSS_MAX_ATTR_SEL  4      /* max [attr] selectors in one compound */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
+#define CSS_DECO_UNDERLINE    0x1 /* text-decoration line bits (OR-combined) */
+#define CSS_DECO_LINE_THROUGH 0x2
+#define CSS_DECO_OVERLINE     0x4
 #define CSS_LEN_MAX       100000 /* px clamp for box-model lengths (anti-DoS) */
 #define CSS_LEN_UNSET     (-2147483647 - 1) /* INT_MIN: box length not set */
 #define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
@@ -321,4 +326,8 @@ common case.)
 - `position` (relative/absolute/sticky) and other layout/box properties — deferred to
   the layout milestone (Hito 23b-2); `@media print` *rendering* into the PDF is deferred
   (print-only rules are correctly excluded from the screen view today).
-- text-decoration, line-height, letter-spacing, and the rest of CSS.
+- `text-decoration` (and `text-decoration-line`) **is** supported for the line keywords
+  `underline`/`overline`/`line-through`/`none` (Hito 23b-5; gated by `caps.css`). Still out of
+  scope: `text-decoration-style`/`-color`/`-thickness` (extra tokens are ignored, not applied),
+  `text-decoration` propagation semantics (our flat model resolves the nearest ancestor that set
+  it, like `color`), `letter-spacing`, `text-transform`, and the rest of CSS.

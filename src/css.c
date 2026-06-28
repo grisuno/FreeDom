@@ -26,7 +26,7 @@
  * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
  * left); the four padding slots likewise — expand_box4 relies on that. */
 enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
-       P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
+       P_TEXTDECO, P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
        P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
        P_PAD_TOP, P_PAD_RIGHT, P_PAD_BOTTOM, P_PAD_LEFT,
        P_WIDTH, P_MAXWIDTH, P_NSLOTS };
@@ -226,6 +226,30 @@ static int interp_style(const char *v) {
     return -1;
 }
 
+/* text-decoration / text-decoration-line: OR of the line keywords underline /
+ * overline / line-through found in the (space-separated) value. "none" -> 0
+ * (explicit removal). Style/color/thickness tokens (wavy, red, 2px, solid, ...) are
+ * ignored. A value carrying no line keyword at all is unsupported -> -1 (dropped). */
+static int interp_textdeco(const char *v) {
+    int bits = 0, saw_keyword = 0;
+    const char *p = v;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        while (*p != '\0' && *p != ' ' && *p != '\t') ++p;  /* drop an over-long token tail */
+        if (ci_eq(tok, "none")) return 0;
+        else if (ci_eq(tok, "underline"))    { bits |= CSS_DECO_UNDERLINE;    saw_keyword = 1; }
+        else if (ci_eq(tok, "overline"))     { bits |= CSS_DECO_OVERLINE;     saw_keyword = 1; }
+        else if (ci_eq(tok, "line-through")) { bits |= CSS_DECO_LINE_THROUGH; saw_keyword = 1; }
+        /* anything else (style/color/thickness): ignored */
+    }
+    return saw_keyword ? bits : -1;
+}
+
 static int interp_display(const char *v) {
     if (ci_eq(v, "none")) return CSS_DISP_NONE;
     if (ci_eq(v, "block")) return CSS_DISP_BLOCK;
@@ -421,6 +445,8 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "line-height") == 0)       { prop_id = P_LINEHEIGHT; ival = interp_lineheight(val); }
     else if (strcmp(prop, "font-weight") == 0)       { prop_id = P_WEIGHT;   ival = interp_weight(val); }
     else if (strcmp(prop, "font-style") == 0)        { prop_id = P_STYLE;    ival = interp_style(val); }
+    else if (strcmp(prop, "text-decoration") == 0 ||
+             strcmp(prop, "text-decoration-line") == 0) { prop_id = P_TEXTDECO; ival = interp_textdeco(val); }
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
     else if (strcmp(prop, "gap") == 0 ||
              strcmp(prop, "grid-gap") == 0 ||
@@ -1034,6 +1060,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_LINEHEIGHT: o->line_scale = d->ival; break;
             case P_WEIGHT:   o->bold = d->ival; break;
             case P_STYLE:    o->italic = d->ival; break;
+            case P_TEXTDECO: o->text_decoration = d->ival; break;
             case P_DISPLAY:  o->display = (css_display)d->ival; break;
             case P_GAP:      o->gap = d->ival; break;
             case P_JUSTIFY:  o->justify = (css_justify)d->ival; break;
@@ -1055,12 +1082,19 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
 
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          const char *inline_style, size_t inline_len) {
-    css_style out = { -1, -1, CSS_ALIGN_UNSET, 0, 0, -1, -1, CSS_DISP_UNSET,
-                      -1, CSS_JUSTIFY_UNSET, 0,
-                      /* margin t,r,b,l / padding t,r,b,l / width / max_width */
-                      CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET,
-                      CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET,
-                      CSS_LEN_UNSET, CSS_LEN_UNSET };
+    /* Designated initializers: robust against field insertion/reordering (every
+     * "unset" sentinel is named, so a new field cannot silently default to 0). */
+    css_style out = {
+        .color = -1, .background = -1, .text_align = CSS_ALIGN_UNSET,
+        .font_scale = 0, .line_scale = 0, .text_decoration = -1,
+        .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,
+        .gap = -1, .justify = CSS_JUSTIFY_UNSET, .grid_cols = 0,
+        .margin_top = CSS_LEN_UNSET, .margin_right = CSS_LEN_UNSET,
+        .margin_bottom = CSS_LEN_UNSET, .margin_left = CSS_LEN_UNSET,
+        .pad_top = CSS_LEN_UNSET, .pad_right = CSS_LEN_UNSET,
+        .pad_bottom = CSS_LEN_UNSET, .pad_left = CSS_LEN_UNSET,
+        .width = CSS_LEN_UNSET, .max_width = CSS_LEN_UNSET,
+    };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }
 

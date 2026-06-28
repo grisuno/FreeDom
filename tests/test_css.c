@@ -71,6 +71,31 @@ static void test_inline_font_weight_style(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).italic, -1);
 }
 
+static void test_inline_text_decoration(void **state) {
+    (void)state;
+    /* Single line keywords. */
+    assert_int_equal(css_parse_inline("text-decoration:underline", 0).text_decoration,
+                     CSS_DECO_UNDERLINE);
+    assert_int_equal(css_parse_inline("text-decoration: line-through", 0).text_decoration,
+                     CSS_DECO_LINE_THROUGH);
+    assert_int_equal(css_parse_inline("text-decoration:OVERLINE", 0).text_decoration,
+                     CSS_DECO_OVERLINE);
+    /* The -line longhand is an alias. */
+    assert_int_equal(css_parse_inline("text-decoration-line:underline", 0).text_decoration,
+                     CSS_DECO_UNDERLINE);
+    /* none is an explicit value (0), distinct from unset (-1). */
+    assert_int_equal(css_parse_inline("text-decoration:none", 0).text_decoration, 0);
+    /* Combined keywords OR together; CSS3 style/color/thickness tokens are ignored. */
+    assert_int_equal(css_parse_inline("text-decoration:underline overline", 0).text_decoration,
+                     CSS_DECO_UNDERLINE | CSS_DECO_OVERLINE);
+    assert_int_equal(css_parse_inline("text-decoration:underline wavy red 2px", 0).text_decoration,
+                     CSS_DECO_UNDERLINE);
+    /* A value with no line keyword at all (only a color) is dropped -> unset. */
+    assert_int_equal(css_parse_inline("text-decoration:red", 0).text_decoration, -1);
+    /* An unrelated property leaves it unset. */
+    assert_int_equal(css_parse_inline("color:red", 0).text_decoration, -1);
+}
+
 static void test_inline_display(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("display:none", 0).display, CSS_DISP_NONE);
@@ -258,6 +283,25 @@ static css_element el_attr_node(const char *tag, const char *id,
     css_element e = el_node(tag, id, classes, nc, parent);
     e.attrs = attrs; e.nattrs = na;
     return e;
+}
+
+static void test_text_decoration_cascade(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* A sheet rule sets it; the nearest ancestor that declares it wins (like color),
+     * and an inline `none` overrides the sheet underline (explicit removal). */
+    assert_int_equal(css_parse("a{text-decoration:underline} .q{text-decoration:line-through}",
+                               0, &sh), CSS_OK);
+    css_element a = el_node("a", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).text_decoration, CSS_DECO_UNDERLINE);
+    assert_int_equal(css_resolve_el(sh, &a, "text-decoration:none", 0).text_decoration, 0);
+    const char *q[] = { "q" };
+    css_element span = el_node("span", NULL, q, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &span, NULL, 0).text_decoration, CSS_DECO_LINE_THROUGH);
+    /* No declaration anywhere -> unset. */
+    css_element p = el_node("p", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).text_decoration, -1);
+    css_free(sh);
 }
 
 static void test_descendant_combinator(void **state) {
@@ -823,6 +867,8 @@ int main(void) {
         cmocka_unit_test(test_inline_font_size),
         cmocka_unit_test(test_inline_line_height),
         cmocka_unit_test(test_inline_font_weight_style),
+        cmocka_unit_test(test_inline_text_decoration),
+        cmocka_unit_test(test_text_decoration_cascade),
         cmocka_unit_test(test_inline_display),
         cmocka_unit_test(test_inline_container_props),
         cmocka_unit_test(test_sheet_container_props),

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-size: 18px; }
+  .under  { text-decoration: underline; }
+  .strike { text-decoration: line-through; }
+  .over   { text-decoration: overline; }
+  .both   { text-decoration: underline overline; }
+  /* extra CSS3 tokens (style/color/thickness) must be ignored, underline kept */
+  .fancy  { text-decoration: underline wavy red 2px; }
+  a.plain { text-decoration: none; }   /* drops the default link underline */
+</style>
+</head>
+<body>
+  <h1>text-decoration</h1>
+  <p class="under">This whole paragraph is underlined.</p>
+  <p class="strike">This paragraph is struck through (line-through).</p>
+  <p class="over">This paragraph has an overline above it.</p>
+  <p class="both">Underline and overline together.</p>
+  <p class="fancy">Fancy underline (wavy red 2px ignored, underline kept).</p>
+  <p>A normal paragraph with an
+     <span class="strike">inline struck span</span> and an
+     <span class="under">inline underlined span</span> inside it.</p>
+  <p>
+    <a href="https://example.org/">A normal link (underlined by default)</a>
+    then
+    <a class="plain" href="https://example.org/">a link with text-decoration:none</a>.
+  </p>
+</body>
+</html>

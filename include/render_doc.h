@@ -56,6 +56,7 @@ typedef struct rd_block {
     int              text_align;     /* author text-align (css_align); set only with caps.css, else 0 */
     int              font_scale;     /* author font-size percent (100=normal); set only with caps.css, else 0 */
     int              line_scale;     /* author line-height percent of the line box; set only with caps.css, else 0 */
+    int              text_decoration;/* author text-decoration (OR of CSS_DECO_*); set only with caps.css, else -1 (unset) */
     /* Nearest author flex/grid container of this block (page_view), carried by
      * default (layout is structure, not author styling, and leaks nothing to the
      * network) so the presentation layer can lay it out with box_tree/flex_layout.

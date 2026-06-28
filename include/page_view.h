@@ -96,6 +96,10 @@ typedef struct pv_run {
     int     text_align;
     int     font_scale;
     int     line_scale;
+    /* Author text-decoration (OR of CSS_DECO_UNDERLINE/LINE_THROUGH/OVERLINE; 0 =
+     * none, -1 = unset). Presentation: render_doc applies it only with caps.css,
+     * like fg_rgb/bg_rgb. Resolved from the nearest ancestor that sets it. */
+    int     text_decoration;
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -210,10 +214,13 @@ void pv_set_color(pv_view *v, int fg_rgb);
 void pv_set_bgcolor(pv_view *v, int bg_rgb);
 
 /* Sets the author text presentation (text_align as a css_align, font_scale as a
- * font-size percent or 0, line_scale as a line-height percent or 0) on the most
- * recently appended run. No-op on an empty or NULL view. The append helpers default
- * all three to 0. Like author colors, render_doc applies these only with caps.css. */
-void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale);
+ * font-size percent or 0, line_scale as a line-height percent or 0, text_decoration
+ * as an OR of CSS_DECO_* / 0 none / -1 unset) on the most recently appended run.
+ * No-op on an empty or NULL view. The append helpers default text_align/font_scale/
+ * line_scale to 0 and text_decoration to -1. Like author colors, render_doc applies
+ * these only with caps.css. */
+void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
+                       int text_decoration);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, and the parsed gap/justify/cols). No-op on an empty

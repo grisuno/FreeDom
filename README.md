@@ -284,7 +284,8 @@ reflows at the new size with no network round-trip.
 Enable **Author styles (CSS)** in the menu to see the page the way the webmaster intended.
 Freedom renders the author's own CSS — both `<style>` blocks and inline `style=` — using a
 deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `line-height`,
-`font-weight`, `font-style`, `display` (including `display:none`), with type / `.class` / `#id`
+`font-weight`, `font-style`, `text-decoration` (`underline`/`line-through`/`overline`/`none`),
+`display` (including `display:none`), with type / `.class` / `#id`
 / `*` / group selectors, the descendant (`div p`) and child (`nav > a`) combinators, **attribute
 selectors** (`[type=text]`, `[href^="https"]`, `[lang|="en"]`, `~=`/`$=`/`*=` with the `i` case
 flag), `!important`, and a real specificity-then-document-order cascade (inline wins). It is

@@ -93,6 +93,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->text_align = 0;
     b->font_scale = 0;
     b->line_scale = 0;
+    b->text_decoration = -1;
     b->cont_id = -1;
     b->cont_display = 0;
     b->cont_gap = 0;
@@ -233,6 +234,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->text_align = caps.css ? r->text_align : 0;
             lb->font_scale = (caps.css && r->font_scale > 0) ? r->font_scale : 0;
             lb->line_scale = (caps.css && r->line_scale > 0) ? r->line_scale : 0;
+            lb->text_decoration = caps.css ? r->text_decoration : -1;
             lb->cont_id = r->cont_id;
             lb->cont_display = r->cont_display;
             lb->cont_gap = r->cont_gap;

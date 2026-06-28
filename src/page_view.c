@@ -160,6 +160,7 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->text_align = 0;
     r->font_scale = 0;
     r->line_scale = 0;
+    r->text_decoration = -1;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -213,6 +214,7 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->text_align = 0;
     r->font_scale = 0;
     r->line_scale = 0;
+    r->text_decoration = -1;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -274,6 +276,7 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     r->text_align = 0;
     r->font_scale = 0;
     r->line_scale = 0;
+    r->text_decoration = -1;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -315,12 +318,14 @@ void pv_set_bgcolor(pv_view *v, int bg_rgb) {
     v->runs[v->count - 1].bg_rgb = bg_rgb;
 }
 
-void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale) {
+void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
+                       int text_decoration) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->text_align = text_align;
     r->font_scale = font_scale;
     r->line_scale = line_scale;
+    r->text_decoration = text_decoration;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -697,18 +702,19 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const char **href, size_t *href_len,
                             const lxb_dom_node_t **block, int *heading,
                             int *fg, int *bg, int *bold, int *italic,
-                            int *align, int *font_scale, int *line_scale,
+                            int *align, int *font_scale, int *line_scale, int *deco,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
                             pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
     *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
+    *deco = -1;
     *li = NULL; *list_depth = 0; *ordered = 0;
     cont->id = -1; cont->display = 0; cont->gap = 0;
     cont->justify = FX_JUSTIFY_START; cont->cols = 0;
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
-    int got_align = 0, got_fs = 0, got_lh = 0, got_hbox = 0;
+    int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0;
     int got_li = 0, got_list_kind = 0;
     int tag_bold = 0, tag_italic = 0;
     int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
@@ -761,6 +767,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             if (!got_fs && cs.font_scale != 0) { *font_scale = cs.font_scale; got_fs = 1; }
             if (!got_lh && cs.line_scale != 0) { *line_scale = cs.line_scale; got_lh = 1; }
+            /* text-decoration: nearest ancestor that sets it (incl. an explicit
+             * `none` = 0, which drops a link underline). -1 means still unset. */
+            if (!got_deco && cs.text_decoration != -1) { *deco = cs.text_decoration; got_deco = 1; }
             /* Nearest flex/grid container: derived from the SAME resolved css_style
              * (cs) as the colors above, so a <style> rule feeds gap/justify/columns,
              * not just an inline style=. Its runs share one id so the presentation
@@ -1239,14 +1248,14 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh,
+                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box);
                 int brk = pending_break || (block != prev_block);
@@ -1294,14 +1303,14 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh,
+                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box);
                 int brk = pending_break || (block != prev_block);
@@ -1339,13 +1348,13 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         size_t href_len = 0;
         const lxb_dom_node_t *block = NULL;
         int heading = 0, fg = -1, bg = -1, bold = 0, italic = 0, align = 0, font_scale = 0;
-        int line_scale = 0;
+        int line_scale = 0, text_decoration = -1;
         const lxb_dom_node_t *li = NULL;
         int list_depth = 0, ordered = 0;
         pv_cont_info cont;
         pv_box_info box;
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
-                        &bold, &italic, &align, &font_scale, &line_scale,
+                        &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
                         &li, &list_depth, &ordered, &reg, &cont, &box);
 
         int brk = pending_break || (block != prev_block);
@@ -1390,7 +1399,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         pv_set_indent(v, list_depth);
         pv_set_color(v, fg);
         pv_set_bgcolor(v, bg);
-        pv_set_text_style(v, align, font_scale, line_scale);
+        pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
     }

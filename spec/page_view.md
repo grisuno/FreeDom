@@ -38,6 +38,7 @@ typedef struct pv_run {
     int     text_align;  /* text-align del autor (css_align), 0 = sin definir */
     int     font_scale;  /* font-size del autor en porcentaje (100=normal), 0 = sin definir */
     int     line_scale;  /* line-height del autor en % de la caja de línea, 0 = sin definir */
+    int     text_decoration; /* text-decoration del autor (OR de CSS_DECO_*; 0=none, -1=sin definir) */
     int     cont_id;     /* contenedor flex/grid de autor mas cercano, o -1 */
     int     cont_display;/* bx_display del contenedor (flex/grid), o 0 */
     int     cont_gap;    /* gap del contenedor en px */
@@ -85,6 +86,11 @@ heredado (un `css_align`: 0 sin definir, 1 izquierda, 2 centro, 3 derecha, 4 jus
 no se define; `line_scale` es el `line-height` en % de la caja de línea natural (unitless×100 o `%`; `normal`
 o `px`/`em` absolutos → 0). Los tres del ancestro más cercano que los fije. Mismo gate de presentación que los colores
 (`render_doc` los propaga solo con `caps.css`); `pv_set_text_style` los fija en el último run.
+
+**Decoración del autor (`text_decoration`):** OR de `CSS_DECO_UNDERLINE`/`CSS_DECO_LINE_THROUGH`/
+`CSS_DECO_OVERLINE` resuelto del ancestro más cercano que fije `text-decoration` (incluido `none` → 0,
+que p.ej. quita el subrayado de un `<a>`); -1 = sin definir. Presentación gateada por `caps.css` como los
+colores; `pv_set_text_style` lo fija en el último run (4º argumento).
 
 **`display:none` (estructura).** Un run cuyo elemento o algún ancestro tenga `display:none` (de la hoja
 o en línea) **no se emite** (`in_hidden_subtree`). Es visibilidad estructural: se aplica siempre,
@@ -155,7 +161,7 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src, int w, int h); /* PV_IMAGE */
 void          pv_set_color(pv_view *v, int fg_rgb);        /* color del autor del ultimo run */
 void          pv_set_bgcolor(pv_view *v, int bg_rgb);      /* background-color del ultimo run */
-void          pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale); /* align/font/line-height del ultimo run */
+void          pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale, int text_decoration); /* align/font/line-height/decoration del ultimo run */
 void          pv_set_container(pv_view *v, int cont_id, int cont_display,
                                int cont_gap, int cont_justify, int cont_cols); /* contenedor */
 void          pv_set_box(pv_view *v, int box_l, int box_r, int box_w,

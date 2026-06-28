@@ -45,6 +45,7 @@ typedef struct rd_block {
     int              text_align;     /* text-align del autor (css_align); solo con caps.css, si no 0 */
     int              font_scale;     /* font-size del autor en %; solo con caps.css, si no 0 */
     int              line_scale;     /* line-height del autor en % de la caja de línea; solo con caps.css, si no 0 */
+    int              text_decoration;/* text-decoration del autor (OR de CSS_DECO_*); solo con caps.css, si no -1 */
     /* Box model del autor (Hito 23b-3); solo con caps.css, si no 0 / PV_LEN_UNSET. */
     int              box_l, box_r;   /* insets izq/der px */
     int              box_w;          /* tope de ancho de contenido px, 0 = sin tope */

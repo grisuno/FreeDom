@@ -65,6 +65,13 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
 
+/* text-decoration line bits, OR-combined into css_style.text_decoration. The field
+ * is -1 when unset and 0 for an explicit `none` (so `a { text-decoration: none }`
+ * can drop the default link underline). */
+#define CSS_DECO_UNDERLINE    0x1
+#define CSS_DECO_LINE_THROUGH 0x2
+#define CSS_DECO_OVERLINE     0x4
+
 /* Box-model lengths (margin/padding/width/max-width), in px. Two out-of-band
  * sentinels distinguish "not declared" and the 'auto' keyword from a real length;
  * a real length is clamped to [-CSS_LEN_MAX, CSS_LEN_MAX] (anti-DoS). */
@@ -91,6 +98,7 @@ typedef struct css_style {
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
     int         line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
+    int         text_decoration; /* OR of CSS_DECO_*; 0 = none; -1 = unset */
     int         bold;        /* 1, 0, or -1 (unset) */
     int         italic;      /* 1, 0, or -1 (unset) */
     css_display display;     /* CSS_DISP_UNSET if absent */

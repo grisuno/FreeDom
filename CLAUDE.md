@@ -219,7 +219,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | **fork + exec del worker** (re-ejecuta `/proc/self/exe` como `--tab-worker`: NO hereda COW del padre → un worker no ve el contenido de las otras pestañas; ASLR fresca; higiene de fds vía `close_range`) + seccomp-bpf fail-closed (con **W^X**: `mmap`/`mprotect` con `PROT_EXEC` denegados por inspección de argumento → sin shellcode nativo aun tras secuestro de control) + **anti-volcado** (`PR_SET_DUMPABLE`=0 + `RLIMIT_CORE`=0, sin core ni ptrace ajeno) + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`line-height`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
-| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** + **selectores de atributo** `[attr]`/`[attr=v]`/`~=`/`\|=`/`^=`/`$=`/`*=` con flag `i`/`s` (Hito 23b-4, hasta `CSS_MAX_ATTR_SEL` (4) por compuesto, especificidad +10 c/u) — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~` y pseudo `:`/`::` siguen fuera, fallan cerrado; whitelist de propiedades). **`!important`** honrado (Hito 23b-4): el sufijo se quita y la declaración sube a un **tier de cascada superior** que gana a toda no-importante sin importar especificidad (antes se **descartaba** por completo). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). **Box model** (`margin`/`padding`/`width`/`max-width`, Hito 23b-3): resuelto por la misma cascada (px/`0`/`em`·`rem`; `%`/vw/`calc` fallan cerrado), gateado por `caps.css` (una caja del autor puede encoger el contenido a lo ilegible → familia de presentación, no la de layout siempre-on); habilita la **columna de lectura centrada** (`max-width` + `margin: 0 auto` + padding). La geometría horizontal vive en `bx_place` (puro, en `box_style`). |
+| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** + **selectores de atributo** `[attr]`/`[attr=v]`/`~=`/`\|=`/`^=`/`$=`/`*=` con flag `i`/`s` (Hito 23b-4, hasta `CSS_MAX_ATTR_SEL` (4) por compuesto, especificidad +10 c/u) — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~` y pseudo `:`/`::` siguen fuera, fallan cerrado; whitelist de propiedades). **`!important`** honrado (Hito 23b-4): el sufijo se quita y la declaración sube a un **tier de cascada superior** que gana a toda no-importante sin importar especificidad (antes se **descartaba** por completo). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). **Box model** (`margin`/`padding`/`width`/`max-width`, Hito 23b-3): resuelto por la misma cascada (px/`0`/`em`·`rem`; `%`/vw/`calc` fallan cerrado), gateado por `caps.css` (una caja del autor puede encoger el contenido a lo ilegible → familia de presentación, no la de layout siempre-on); habilita la **columna de lectura centrada** (`max-width` + `margin: 0 auto` + padding). La geometría horizontal vive en `bx_place` (puro, en `box_style`). **`text-decoration`** (`underline`/`line-through`/`overline`/`none`, Hito 23b-5): OR de bits `CSS_DECO_*` resuelto por la misma cascada (palabras clave de línea; tokens de estilo/color/grosor ignorados; `none`=0 quita p.ej. el subrayado de un `<a>`), gateado por `caps.css` como los colores; el painter reutiliza la maquinaria de subrayado de los links y añade tachado/línea-superior. |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG + JPEG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. JPEG es excepción de doctrina autorizada (libjpeg con fuente en memoria + `longjmp` que nunca llama `exit()`). |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
 | Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
@@ -864,9 +864,34 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   crash/leak/UB + **E2E visual** (`examples/attr-selectors.html` por `--author-css --download-pdf`).
   **Fuera de alcance (siguiente):** combinadores **hermano** `+`/`~` (necesitan enlaces a hermano
   previo en `css_element` — extensión distinta), pseudo-clases `:first-child`/`:hover`,
-  `text-decoration`, `border`/`box-sizing`. *(Módulos puros + integración verificados bajo
+  `border`/`box-sizing`. *(Módulos puros + integración verificados bajo
   test/ASan/fuzz + E2E visual headless; ventana Wayland interactiva pendiente al dueño.)* Ver
   `[[freedom-css-attr-selectors-important]]`, `[[freedom-author-css-direction]]`.
+- **Hito 23b-5 — `text-decoration` de autor (`underline`/`line-through`/`overline`/`none`).** Una
+  propiedad de **texto** que viaja por el **mismo plumbing de runs** que `line-height` (plantilla del
+  Hito 23b line-height): `css_style.text_decoration` (OR de `CSS_DECO_UNDERLINE`/`_LINE_THROUGH`/
+  `_OVERLINE`; -1 sin definir, **0 = `none` explícito** para distinguirlo de "sin declarar") →
+  `pv_run.text_decoration` (emitido por `resolve_context`/`pv_set_text_style`, ahora 4-ario) → IPC
+  `tab.c` `write_view`/`read_view` (1 int32 nuevo) → `rd_block.text_decoration` (**gateado por
+  `caps.css`** como los colores; -1 cuando off) → GUI `flow_text_block` (override del subrayado base de
+  los links: `a{text-decoration:none}` **quita** el subrayado; añade `strike`/`overline` al `rc_frag`)
+  → `paint_content_row` (reutiliza la maquinaria de subrayado de los links + dos líneas nuevas). El
+  parser `css` recolecta las **palabras clave de línea** de un valor multi-token (`underline overline`)
+  e **ignora** los tokens de estilo/color/grosor de CSS3 (`wavy`/`red`/`2px`); un valor sin ninguna
+  palabra clave de línea se descarta (fail-closed → -1). **Boyscout:** el init posicional de `css_style`
+  en `css_resolve_el` se pasó a **inicializadores designados** (extingue el gotcha recurrente de
+  "campo nuevo default a 0 en vez de su sentinel"). Presentación, no estructura: como en CSS real no
+  hereda, pero el modelo plano resuelve el **ancestro más cercano** que la fije (igual que `color`).
+  Specs (`css.md`, `page_view.md`, `render_doc.md`) + tests (2 en `css`: inline-todas-las-variantes +
+  cascada/none-quita-subrayado; 1 E2E en `page_view`; setter `pv_set_text_style` 4-ario) + `make test`
+  (36 suites) / `make asan` (36, exit 0) limpios + fuzz `fuzz-css` (186k execs) y `fuzz-pv` (152k execs)
+  sin crash/leak/UB + **E2E visual** (`examples/text-decoration.html` por `--author-css --download-pdf`:
+  el PNG confirma subrayado/tachado/línea-superior, combinados, tokens extra ignorados, spans inline, y
+  que `text-decoration:none` quita el subrayado del link; **sin** `--author-css` byte-idéntico al previo
+  — ambos links subrayados, cero decoración de autor). **Fuera de alcance:** `text-decoration-style/
+  -color/-thickness`, semántica de propagación (usamos ancestro-más-cercano), `letter-spacing`,
+  `text-transform`. *(Módulos puros + IPC + E2E visual headless verificados; ventana Wayland
+  interactiva pendiente al dueño.)* Ver `[[freedom-author-css-direction]]`, `[[freedom-line-height]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -958,8 +983,8 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   de `repeat()`/`minmax()`/pesos `fr` en grid (hoy todo track = 1fr igual); render de `@media print` al
   PDF; combinadores **hermano** (`+`/`~`) y **pseudo-clases** `:`/`::` (los combinadores
   **descendiente/hijo** y los **selectores de atributo** + **`!important`** ya cerrados arriba, Hito
-  23b-4); `text-decoration`/`letter-spacing` (`line-height` ya cerrado arriba); persistir el toggle de
-  estilos de autor y el modo reader con el Hito 10.
+  23b-4); `letter-spacing`/`text-transform` (`line-height` y `text-decoration` ya cerrados arriba,
+  Hito 23b-5); persistir el toggle de estilos de autor y el modo reader con el Hito 10.
 - **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo (ver Hito 23b); JS-vivo
   (mutación DOM → repintado, eventos, timers); otros formatos de imagen
   (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación); `pledge`/`unveil` en

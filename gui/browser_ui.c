@@ -106,10 +106,13 @@
 #define UI_BUTTON_HPAD   14.0
 #define UI_FORM_FIELDS_MAX 64  /* matches FM_MAX_FIELDS; cap gathered controls */
 
-/* Link underline geometry, expressed relative to the run's font so it scales
- * with heading-sized links. Offset below the baseline; thickness in px. */
+/* Link/author text-decoration geometry, expressed relative to the run's font so it
+ * scales with heading-sized text. Underline offset is below the baseline; the
+ * line-through sits over the x-height and the overline above the ascent. */
 #define UI_UNDERLINE_OFFSET 0.12
 #define UI_UNDERLINE_THICK  1.0
+#define UI_STRIKE_OFFSET    0.32   /* above the baseline (≈ through the x-height) */
+#define UI_OVERLINE_OFFSET  0.78   /* above the baseline (≈ at the ascent) */
 
 /* Largest text slice measured/drawn at once (one word, or one clipped label).
  * Words longer than this are still placed, just measured up to the cap. */
@@ -1754,7 +1757,7 @@ static void draw_text(cairo_t *cr, const char *s, double x, double y, int center
 
 typedef struct rc_frag {
     double      x, width, font_size;
-    int         bold, italic, underline;
+    int         bold, italic, underline, strike, overline;
     ui_rgb      color;
     const char *text;     /* slice into a rd_block text (not owned) */
     size_t      len;
@@ -1906,6 +1909,7 @@ static void open_line(rc_layout *L, rc_state *s) {
  * can recover the click target without re-walking the document. */
 static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                       const char *text, double size, int bold, int italic, int underline,
+                      int strike, int overline,
                       ui_rgb color, double content_w, const char *href) {
     content_font(cr, size, bold, italic);
     cairo_font_extents_t fe;
@@ -1933,7 +1937,8 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         rc_frag *f = rc_add_frag(L);
         if (f != NULL) {
             f->x = s->pen_x; f->width = ww; f->font_size = size;
-            f->bold = bold; f->italic = italic; f->underline = underline; f->color = color;
+            f->bold = bold; f->italic = italic; f->underline = underline;
+            f->strike = strike; f->overline = overline; f->color = color;
             f->text = text + ws; f->len = wl; f->href = href;
         }
         s->pen_x += ww;
@@ -1958,14 +1963,25 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
      * aligns each line); render_doc gated it behind caps.css (0 when off). */
     s->align = b->text_align;
     s->line_scale = b->line_scale;
+    /* Author text-decoration overrides the base underline (e.g. `a {text-decoration:
+     * none}` drops the link underline) and adds line-through/overline. -1 means the
+     * author set none (render_doc gated it off, or no rule), so the base style stands. */
+    int strike = 0, overline = 0;
+    if (b->text_decoration != -1) {
+        underline = (b->text_decoration & CSS_DECO_UNDERLINE) ? 1 : 0;
+        strike    = (b->text_decoration & CSS_DECO_LINE_THROUGH) ? 1 : 0;
+        overline  = (b->text_decoration & CSS_DECO_OVERLINE) ? 1 : 0;
+    }
     const char *href = (b->kind == RD_LINK) ? b->href : NULL;
     if (b->kind == RD_NOTICE) {
         s->banner = 1;
-        flow_text(cr, L, s, th, b->text, size, bold, italic, underline, color, content_w, href);
+        flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
+                  color, content_w, href);
         flush_line(L, s, th);
         s->banner = 0;
     } else {
-        flow_text(cr, L, s, th, b->text, size, bold, italic, underline, color, content_w, href);
+        flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
+                  color, content_w, href);
     }
 }
 
@@ -2353,12 +2369,21 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         set_rgb(cr, f->color);
         cairo_move_to(cr, rx + f->x, baseline);
         draw_slice(cr, f->text, f->len);
-        if (f->underline) {
-            double uy = baseline + f->font_size * UI_UNDERLINE_OFFSET;
+        if (f->underline || f->strike || f->overline) {
             cairo_set_line_width(cr, UI_UNDERLINE_THICK);
-            cairo_move_to(cr, rx + f->x, uy);
-            cairo_line_to(cr, rx + f->x + f->width, uy);
-            cairo_stroke(cr);
+            double x0 = rx + f->x, x1 = x0 + f->width;
+            if (f->underline) {
+                double uy = baseline + f->font_size * UI_UNDERLINE_OFFSET;
+                cairo_move_to(cr, x0, uy); cairo_line_to(cr, x1, uy); cairo_stroke(cr);
+            }
+            if (f->strike) {
+                double sy = baseline - f->font_size * UI_STRIKE_OFFSET;
+                cairo_move_to(cr, x0, sy); cairo_line_to(cr, x1, sy); cairo_stroke(cr);
+            }
+            if (f->overline) {
+                double oy = baseline - f->font_size * UI_OVERLINE_OFFSET;
+                cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(cr);
+            }
         }
     }
 }
