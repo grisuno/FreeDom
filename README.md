@@ -109,7 +109,7 @@ The name reflects its core goals:
 - ✅ Save page as vector PDF (`Ctrl+P`)
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
-- ✅ Author CSS (`<style>` + inline `style=`, simple subset; never phones home) — menu "Author styles (CSS)"
+- ✅ Author CSS (`<style>` + inline `style=`, simple subset; combinators, attribute selectors `[attr=v]`/`^=`/`$=`/`*=`/`~=`/`|=`, `!important`; never phones home) — menu "Author styles (CSS)"
 - ✅ Author box model (`margin`/`padding`/`width`/`max-width`): centered reading columns (`max-width` + `margin: 0 auto`)
 - ✅ Automatic dark mode (`@media (prefers-color-scheme: dark)`, safe `@media` subset; no viewport leak)
 - ✅ Headless mode
@@ -285,10 +285,14 @@ Enable **Author styles (CSS)** in the menu to see the page the way the webmaster
 Freedom renders the author's own CSS — both `<style>` blocks and inline `style=` — using a
 deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `line-height`,
 `font-weight`, `font-style`, `display` (including `display:none`), with type / `.class` / `#id`
-/ `*` / group selectors and a real specificity-then-document-order cascade (inline wins). It is
+/ `*` / group selectors, the descendant (`div p`) and child (`nav > a`) combinators, **attribute
+selectors** (`[type=text]`, `[href^="https"]`, `[lang|="en"]`, `~=`/`$=`/`*=` with the `i` case
+flag), `!important`, and a real specificity-then-document-order cascade (inline wins). It is
 rendered by the pure `css` module and stays gated behind the author-CSS capability (Privacy by
 Default). For headless visual review, `freedom --author-css --download-pdf=PATH …` applies author
-styling in the PDF (local render only — the network image cap stays off).
+styling in the PDF (local render only — the network image cap stays off); see
+`examples/attr-selectors.html`. The sibling `+`/`~` and pseudo `:`/`::` selectors stay
+unsupported and fail closed.
 
 **Flex & grid from the stylesheet:** a `display:flex` / `display:grid` container takes its
 layout params (`gap`, `justify-content`, `grid-template-columns`) from the same cascade, so a

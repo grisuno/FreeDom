@@ -452,6 +452,8 @@ static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *bas
 #define PV_CSS_ID_MAX      128u
 #define PV_CSS_CLASS_BUF   256u
 #define PV_CSS_MAX_CLASSES 16
+#define PV_CSS_MAX_ATTRS   16     /* attributes captured per element for [attr] selectors */
+#define PV_CSS_ATTR_BUF    512u   /* bytes for all captured attr names+values of one element */
 
 /* Legacy <font color> attribute as a packed 0xRRGGBB, or -1. Not CSS, so it is a
  * separate fallback the cascade consults only when no `color` declaration won. */
@@ -480,6 +482,8 @@ typedef struct pv_css_node {
     char        idbuf[PV_CSS_ID_MAX];
     char        clsbuf[PV_CSS_CLASS_BUF];
     const char *clsptr[PV_CSS_MAX_CLASSES];
+    char        attrbuf[PV_CSS_ATTR_BUF];
+    css_attr    attrs[PV_CSS_MAX_ATTRS];
     css_element el;
 } pv_css_node;
 
@@ -523,9 +527,40 @@ static void fill_css_node(lxb_dom_element_t *e, pv_css_node *node) {
         }
     }
 
+    /* Capture all attributes (name lowercased) for [attr] selectors, packed into one
+     * bounded buffer. Over-long sets are truncated (anti-DoS): a missing attribute just
+     * fails to match (fail closed). id/class/style are attributes too, so [id=...] etc.
+     * work alongside the dedicated #id/.class paths. */
+    size_t nat = 0, off = 0;
+    for (lxb_dom_attr_t *at = lxb_dom_element_first_attribute(e);
+         at != NULL && nat < PV_CSS_MAX_ATTRS;
+         at = lxb_dom_element_next_attribute(at)) {
+        size_t anl = 0, avl = 0;
+        const lxb_char_t *an = lxb_dom_attr_local_name(at, &anl);
+        const lxb_char_t *av = lxb_dom_attr_value(at, &avl);
+        if (an == NULL || anl == 0) continue;
+        if (off + anl + 1 + avl + 1 > sizeof node->attrbuf) break;  /* buffer full */
+        char *np = node->attrbuf + off;
+        for (size_t k = 0; k < anl; ++k) {
+            char ch = (char)an[k];
+            np[k] = (ch >= 'A' && ch <= 'Z') ? (char)(ch + 32) : ch;
+        }
+        np[anl] = '\0';
+        off += anl + 1;
+        char *vp = node->attrbuf + off;
+        if (av != NULL && avl > 0) memcpy(vp, av, avl);
+        vp[avl] = '\0';
+        off += avl + 1;
+        node->attrs[nat].name = np;
+        node->attrs[nat].value = vp;
+        ++nat;
+    }
+
     node->el.tag = (tn > 0) ? node->tag : NULL;
     node->el.classes = node->clsptr;
     node->el.nclasses = nc;
+    node->el.attrs = (nat > 0) ? node->attrs : NULL;
+    node->el.nattrs = nat;
     node->el.parent = NULL;  /* linked by the caller once the chain is built */
 }
 

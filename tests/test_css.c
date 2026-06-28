@@ -245,7 +245,18 @@ static css_element el_node(const char *tag, const char *id,
                            const char *const *classes, size_t nc,
                            const css_element *parent) {
     css_element e;
-    e.tag = tag; e.id = id; e.classes = classes; e.nclasses = nc; e.parent = parent;
+    e.tag = tag; e.id = id; e.classes = classes; e.nclasses = nc;
+    e.attrs = NULL; e.nattrs = 0; e.parent = parent;
+    return e;
+}
+
+/* Like el_node but also carries an attribute list (for [attr] selectors). */
+static css_element el_attr_node(const char *tag, const char *id,
+                                const char *const *classes, size_t nc,
+                                const css_attr *attrs, size_t na,
+                                const css_element *parent) {
+    css_element e = el_node(tag, id, classes, nc, parent);
+    e.attrs = attrs; e.nattrs = na;
     return e;
 }
 
@@ -325,6 +336,218 @@ static void test_resolve_el_inline_only(void **state) {
     (void)state;
     /* el == NULL resolves just the inline declarations (no crash, no match). */
     assert_int_equal(css_resolve_el(NULL, NULL, "color:#abcdef", 0).color, 0xabcdef);
+}
+
+/* --- attribute selectors (Hito 23b-4) --- */
+
+static void test_attr_presence(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("input[disabled]{color:#101010}", 0, &sh), CSS_OK);
+    css_attr with[] = { { "disabled", "" } };
+    css_element a = el_attr_node("input", NULL, NULL, 0, with, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x101010);
+    /* No such attribute -> no match (fail closed). */
+    css_element b = el_attr_node("input", NULL, NULL, 0, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_attr_equals(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("input[type=text]{color:#202020}"
+                               "input[type=\"submit\"]{color:#303030}", 0, &sh), CSS_OK);
+    css_attr txt[] = { { "type", "text" } };
+    css_element a = el_attr_node("input", NULL, NULL, 0, txt, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x202020);
+    css_attr sub[] = { { "type", "submit" } };
+    css_element b = el_attr_node("input", NULL, NULL, 0, sub, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x303030);
+    /* Different value -> no match; default value match is case-sensitive. */
+    css_attr up[] = { { "type", "TEXT" } };
+    css_element c = el_attr_node("input", NULL, NULL, 0, up, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &c, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_attr_operators(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "[class~=btn]{color:#010101}"            /* word in a space list */
+        "[lang|=en]{background:#020202}"          /* exact or dash-prefix */
+        "a[href^=\"https://\"]{color:#030303}"    /* prefix */
+        "a[href$=\".pdf\"]{background:#040404}"    /* suffix */
+        "a[href*=\"track\"]{color:#050505}", 0, &sh), CSS_OK);
+
+    css_attr w[] = { { "class", "big btn round" } };
+    css_element word = el_attr_node("span", NULL, NULL, 0, w, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &word, NULL, 0).color, 0x010101);
+    css_attr w2[] = { { "class", "button" } };  /* "btn" is not a whole word here */
+    css_element noword = el_attr_node("span", NULL, NULL, 0, w2, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &noword, NULL, 0).color, -1);
+
+    css_attr l[] = { { "lang", "en-US" } };
+    css_element dash = el_attr_node("p", NULL, NULL, 0, l, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &dash, NULL, 0).background, 0x020202);
+    css_attr l2[] = { { "lang", "ending" } };   /* "en" prefix but no '-' boundary */
+    css_element nope = el_attr_node("p", NULL, NULL, 0, l2, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &nope, NULL, 0).background, -1);
+
+    css_attr h[] = { { "href", "https://x.test/track/a.pdf" } };
+    css_element link = el_attr_node("a", NULL, NULL, 0, h, 1, NULL);
+    css_style ls = css_resolve_el(sh, &link, NULL, 0);
+    assert_int_equal(ls.color, 0x050505);       /* *=track wins last among colors */
+    assert_int_equal(ls.background, 0x040404);  /* $=.pdf */
+    css_free(sh);
+}
+
+static void test_attr_case_insensitive_flag(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* The trailing " i" makes the value match case-insensitively. */
+    assert_int_equal(css_parse("input[type=\"text\" i]{color:#0b0b0b}"
+                               "input[type=email s]{color:#0c0c0c}", 0, &sh), CSS_OK);
+    css_attr up[] = { { "type", "TeXt" } };
+    css_element a = el_attr_node("input", NULL, NULL, 0, up, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x0b0b0b);
+    css_attr up2[] = { { "type", "EMAIL" } };   /* explicit s: stays case-sensitive */
+    css_element b = el_attr_node("input", NULL, NULL, 0, up2, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_attr_name_case_insensitive(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Attribute names are matched case-insensitively (HTML). */
+    assert_int_equal(css_parse("[DATA-X=on]{color:#0d0d0d}", 0, &sh), CSS_OK);
+    css_attr at[] = { { "data-x", "on" } };
+    css_element a = el_attr_node("div", NULL, NULL, 0, at, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x0d0d0d);
+    css_free(sh);
+}
+
+static void test_attr_quoted_value_with_space(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* A quoted value may contain whitespace without splitting the compound. */
+    assert_int_equal(css_parse("[title=\"a b\"]{color:#0e0e0e}", 0, &sh), CSS_OK);
+    css_attr ok[] = { { "title", "a b" } };
+    css_element a = el_attr_node("div", NULL, NULL, 0, ok, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x0e0e0e);
+    css_attr no[] = { { "title", "a" } };
+    css_element b = el_attr_node("div", NULL, NULL, 0, no, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_attr_specificity_and_compound(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* input[type=text] (1 type + 1 attr = 11) beats input (1). A second attribute
+     * and a tag must ALL hold (compound = AND). */
+    assert_int_equal(css_parse("input{color:#ff0000}"
+                               "input[type=text]{color:#00ff00}"
+                               "input[type=text][required]{color:#0000ff}", 0, &sh), CSS_OK);
+    css_attr one[] = { { "type", "text" } };
+    css_element a = el_attr_node("input", NULL, NULL, 0, one, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x00ff00);
+    css_attr two[] = { { "type", "text" }, { "required", "" } };
+    css_element b = el_attr_node("input", NULL, NULL, 0, two, 2, NULL);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x0000ff);
+    css_free(sh);
+}
+
+static void test_attr_in_combinator(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* An attribute constraint on an ANCESTOR compound resolves up the chain. */
+    assert_int_equal(css_parse("nav[role=banner] a{color:#abcdef}", 0, &sh), CSS_OK);
+    css_attr role[] = { { "role", "banner" } };
+    css_element nav = el_attr_node("nav", NULL, NULL, 0, role, 1, NULL);
+    css_element a   = el_node("a", NULL, NULL, 0, &nav);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0xabcdef);
+    /* Ancestor lacks the attribute -> no match (fail closed). */
+    css_element nav2 = el_node("nav", NULL, NULL, 0, NULL);
+    css_element a2   = el_node("a", NULL, NULL, 0, &nav2);
+    assert_int_equal(css_resolve_el(sh, &a2, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_attr_malformed_fail_closed(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Unbalanced/empty/unknown-operator brackets drop only that selector; the plain
+     * rule in the group survives. */
+    assert_int_equal(css_parse("input[ {color:#111111}"     /* unbalanced */
+                               "input[]{color:#222222}"      /* empty */
+                               "p{color:#333333}", 0, &sh), CSS_OK);
+    css_element p = el_node("p", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, 0x333333);
+    css_attr none[] = { { "type", "x" } };
+    css_element in = el_attr_node("input", NULL, NULL, 0, none, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &in, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+/* --- !important (Hito 23b-4) --- */
+
+static void test_important_inline_not_dropped(void **state) {
+    (void)state;
+    /* Previously a value with !important failed to interpret and was dropped. */
+    css_style s = css_parse_inline("color:#ff0000 !important", 0);
+    assert_int_equal(s.color, 0xff0000);
+    /* Whitespace variants and case are accepted; a bare !important is dropped. */
+    assert_int_equal(css_parse_inline("color:#00ff00!IMPORTANT", 0).color, 0x00ff00);
+    assert_int_equal(css_parse_inline("color: !important", 0).color, -1);
+}
+
+static void test_important_beats_specificity(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* An important type rule beats a non-important id rule (tier > specificity). */
+    assert_int_equal(css_parse("#x{color:#00ff00} p{color:#ff0000 !important}", 0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", "x", NULL, 0, NULL, 0).color, 0xff0000);
+    css_free(sh);
+}
+
+static void test_important_tier_then_normal_order(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Among important declarations, the normal cascade (specificity, then order) holds. */
+    assert_int_equal(css_parse("p{color:#111111 !important} #x{color:#222222 !important}",
+                               0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", "x", NULL, 0, NULL, 0).color, 0x222222);
+    css_free(sh);
+}
+
+static void test_important_inline_beats_sheet_important(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("p{color:#111111 !important}", 0, &sh), CSS_OK);
+    /* Inline important wins (inline carries the highest specificity). */
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, "color:#abcabc !important", 0).color,
+                     0xabcabc);
+    /* But a sheet important beats a NON-important inline. */
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, "color:#abcabc", 0).color, 0x111111);
+    css_free(sh);
+}
+
+static void test_important_in_shorthand(void **state) {
+    (void)state;
+    /* !important stamps every side a shorthand expands to. */
+    css_style s = css_parse_inline("margin:10px !important", 0);
+    assert_int_equal(s.margin_top, 10);
+    assert_int_equal(s.margin_left, 10);
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("p{margin:4px} p{margin:9px !important}", 0, &sh), CSS_OK);
+    /* The important shorthand wins over a later non-important one too. */
+    css_style r = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(r.margin_top, 9);
+    assert_int_equal(r.margin_right, 9);
+    css_free(sh);
 }
 
 /* --- cascade --- */
@@ -619,6 +842,20 @@ int main(void) {
         cmocka_unit_test(test_combinator_class_chain),
         cmocka_unit_test(test_sibling_combinator_unsupported),
         cmocka_unit_test(test_resolve_el_inline_only),
+        cmocka_unit_test(test_attr_presence),
+        cmocka_unit_test(test_attr_equals),
+        cmocka_unit_test(test_attr_operators),
+        cmocka_unit_test(test_attr_case_insensitive_flag),
+        cmocka_unit_test(test_attr_name_case_insensitive),
+        cmocka_unit_test(test_attr_quoted_value_with_space),
+        cmocka_unit_test(test_attr_specificity_and_compound),
+        cmocka_unit_test(test_attr_in_combinator),
+        cmocka_unit_test(test_attr_malformed_fail_closed),
+        cmocka_unit_test(test_important_inline_not_dropped),
+        cmocka_unit_test(test_important_beats_specificity),
+        cmocka_unit_test(test_important_tier_then_normal_order),
+        cmocka_unit_test(test_important_inline_beats_sheet_important),
+        cmocka_unit_test(test_important_in_shorthand),
         cmocka_unit_test(test_cascade_specificity),
         cmocka_unit_test(test_cascade_document_order),
         cmocka_unit_test(test_cascade_inline_wins),

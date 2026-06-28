@@ -28,23 +28,58 @@ and is not gated (doctrine: "Layout != estilo de autor").
 ## Supported subset
 
 **Selectors** (compound + descendant/child combinators). A **compound** is an
-optional type, any number of `.class`, and an optional `#id`, e.g. `p`, `.note`,
-`#main`, `a.button`, `*`. A **complex** selector chains compounds with the
-**descendant** combinator (whitespace, `A B`) or the **child** combinator (`A > B`),
-e.g. `div p`, `nav > a`, `#main .card p`. The rightmost compound is the *subject*
-(the element a rule styles); the compounds to its left constrain its ancestors
-(descendant = any ancestor; child = the immediate parent). Up to
-`CSS_MAX_COMPOUNDS` (4) compounds per selector; a deeper chain is **dropped**
-(fail closed). Rules may list several comma-separated selectors.
+optional type, any number of `.class`, an optional `#id`, and any number of
+**attribute selectors** `[...]` (below), e.g. `p`, `.note`, `#main`, `a.button`,
+`*`, `input[type=text]`, `a[href^="https"].ext`. A **complex** selector chains
+compounds with the **descendant** combinator (whitespace, `A B`) or the **child**
+combinator (`A > B`), e.g. `div p`, `nav > a`, `#main .card p`. The rightmost
+compound is the *subject* (the element a rule styles); the compounds to its left
+constrain its ancestors (descendant = any ancestor; child = the immediate parent).
+Up to `CSS_MAX_COMPOUNDS` (4) compounds per selector and `CSS_MAX_ATTR_SEL` (4)
+attribute selectors per compound; a deeper chain is **dropped** (fail closed).
+Rules may list several comma-separated selectors.
+
+**Attribute selectors** (Hito 23b-4). A compound may carry any number of `[...]`
+constraints (up to `CSS_MAX_ATTR_SEL`). The attribute **name** is matched case-
+insensitively (HTML); the **value** is case-sensitive unless a trailing `i` flag is
+given (`s` forces case-sensitive). Optional single/double quotes around the value
+are stripped; a quoted value may contain whitespace (`[title="a b"]`). Supported
+operators:
+
+| Syntax | Matches when the attribute… |
+| :-- | :-- |
+| `[attr]` | is present (any value) |
+| `[attr=v]` | equals `v` exactly |
+| `[attr~=v]` | is a whitespace-separated list containing the word `v` |
+| `[attr\|=v]` | equals `v` or begins with `v-` (e.g. `lang\|=en` ⇒ `en`, `en-US`) |
+| `[attr^=v]` | begins with `v` |
+| `[attr$=v]` | ends with `v` |
+| `[attr*=v]` | contains the substring `v` |
+
+For the word/substring/prefix/suffix operators (`~= ^= $= *=`) an **empty** `v`
+never matches (per spec). A malformed `[...]` (missing name, unknown operator,
+unbalanced bracket) drops the **whole selector** (fail closed). The host element's
+`id`/`class` are also attributes, so `[id=…]`/`[class~=…]` work alongside the
+dedicated `#id`/`.class` syntax.
 
 Still **out of scope** (the whole selector is dropped, the rest of the group still
-parse): the sibling combinators `+`/`~`, attribute selectors `[...]`, and
-pseudo-classes/elements `:`/`::`.
+parse): the sibling combinators `+`/`~` and pseudo-classes/elements `:`/`::`.
 
-**Specificity** = sum over all compounds of `100*has_id + 10*nclasses + has_type`
-(so `#main .card p` = 100+10+1 = 111). Ties break on document order. Matching is
+**Specificity** = sum over all compounds of `100*has_id + 10*(nclasses + nattrs) +
+has_type` (an attribute selector counts as a class, so `input[type=text]` = 11 and
+`#main .card p` = 100+10+1 = 111). Ties break on document order. Matching is
 right-to-left: the subject is tested against the element, then each combinator is
 checked against the ancestor chain (descendant backtracks over ancestors).
+
+**`!important` (Hito 23b-4).** A declaration ending in `!important` (optional
+whitespace before/inside, case-insensitive) is **honored**, not dropped: the `!important`
+suffix is stripped, the value interpreted normally, and the declaration placed in a
+**higher cascade tier** that beats every non-important declaration regardless of
+specificity. Within the important tier the normal order applies (specificity, then
+document order; an **inline** `style=` important beats a `<style>` important because
+inline carries the highest specificity). A declaration that is *only* `!important`
+(no value) is dropped. This applies to every property, including the box-model
+shorthands (`margin: 0 auto !important` stamps all four sides important).
 
 **Properties** (whitelist; everything else ignored):
 
@@ -156,6 +191,8 @@ typedef struct css_style {
 
 #define CSS_GAP_MAX       4096   /* px cap on gap (anti-DoS) */
 #define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns tracks (anti-DoS) */
+#define CSS_MAX_COMPOUNDS 4      /* max compounds in one complex selector */
+#define CSS_MAX_ATTR_SEL  4      /* max [attr] selectors in one compound */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
 #define CSS_LEN_MAX       100000 /* px clamp for box-model lengths (anti-DoS) */
@@ -222,18 +259,26 @@ each combinator is checked up the chain. `el == NULL` resolves only the inline
 declarations. `css_element` is:
 
 ```c
+typedef struct css_attr {             /* one element attribute for [attr] selectors */
+    const char *name;                 /* lowercased local name */
+    const char *value;                /* attribute value ("" if empty) */
+} css_attr;
+
 typedef struct css_element {
     const char *tag;                  /* lowercased local name, or NULL */
     const char *id;                   /* id attribute value, or NULL */
     const char *const *classes;       /* class tokens (not NUL-joined) */
     size_t nclasses;
+    const css_attr *attrs;            /* element attributes, or NULL (for [attr] selectors) */
+    size_t nattrs;
     const struct css_element *parent; /* parent element, or NULL at the root */
 } css_element;
 ```
 
 The caller supplies as much of the chain as it has (bounded is fine: a missing deep
 ancestor only means a descendant selector against it fails to match — fail closed).
-Pure, allocates nothing, re-entrant.
+`attrs`/`nattrs` may be empty (`NULL`/`0`): an attribute selector against an element
+with no attribute list simply does not match. Pure, allocates nothing, re-entrant.
 
 ### `css_style css_parse_inline(const char *style, size_t len)`
 
@@ -252,9 +297,11 @@ common case.)
 
 ## Out of scope (v1)
 
-- The **sibling** combinators `+`/`~`, pseudo-classes/elements (`:hover`/`::before`),
-  and attribute selectors `[...]` — dropped (fail closed). Descendant (` `) and
-  child (`>`) combinators **are** supported (up to `CSS_MAX_COMPOUNDS` compounds).
+- The **sibling** combinators `+`/`~` and pseudo-classes/elements (`:hover`/`::before`)
+  — dropped (fail closed). Descendant (` `) and child (`>`) combinators **are**
+  supported (up to `CSS_MAX_COMPOUNDS` compounds); **attribute** selectors `[attr]`,
+  `[attr=v]`, `~=`, `|=`, `^=`, `$=`, `*=` (with the `i`/`s` case flag) are supported
+  (Hito 23b-4, up to `CSS_MAX_ATTR_SEL` per compound).
 - Inheritance/`initial`/`inherit`/`unset` keywords (caller does inheritance;
   these keywords are ignored).
 - The author box model `margin`/`padding`/`width`/`max-width` **is now resolved through the
@@ -268,8 +315,9 @@ common case.)
   track expansion, and named/`auto`/`fr`-weighted grid tracks (every track is treated as 1fr
   equal-width).
 - `url()` anything, `@import`/`@font-face`/other `@`-rules, `calc()`, `var()`, custom
-  properties, `!important` precedence (the token is stripped; it does not raise it).
-  `@media` is supported (subset above); `not`/unknown features fail closed.
+  properties. `!important` **is** honored (Hito 23b-4): the suffix is stripped and the
+  declaration raised to a higher cascade tier (was previously dropped). `@media` is
+  supported (subset above); `not`/unknown features fail closed.
 - `position` (relative/absolute/sticky) and other layout/box properties — deferred to
   the layout milestone (Hito 23b-2); `@media print` *rendering* into the PDF is deferred
   (print-only rules are correctly excluded from the screen view today).

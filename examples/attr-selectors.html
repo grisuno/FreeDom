@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Attribute selectors and !important</title>
+<style>
+  body { font-size: 18px }
+
+  /* Attribute selectors (Hito 23b-4) */
+  a[href^="https://"] { color: #1a7f37; font-weight: bold }  /* secure links: green bold */
+  a[href^="http://"]  { color: #b00020 }                      /* insecure links: red */
+  a[href$=".pdf"]     { font-style: italic }                  /* downloads: italic */
+  input[type="text"]  { color: #0a3d91 }                      /* matched by [type=text] */
+  [data-ad]           { display: none }                       /* attribute presence hides ads */
+  [lang|="en"]        { color: #6a1b9a }                       /* en, en-US, en-GB */
+
+  /* !important beats a higher-specificity non-important rule */
+  #headline           { color: #888888 }                       /* id, specificity 100 */
+  h1                  { color: #c2410c !important }             /* type + important wins */
+</style>
+</head>
+<body>
+  <h1 id="headline">Important wins over the id rule</h1>
+
+  <p lang="en-US">This paragraph is tagged lang="en-US" and matches [lang|="en"].</p>
+
+  <p>
+    Links by attribute:
+    <a href="https://example.test/">secure (green bold)</a> /
+    <a href="http://example.test/">insecure (red)</a> /
+    <a href="https://files.test/report.pdf">report.pdf (italic)</a>
+  </p>
+
+  <p>An input matched by <code>input[type=text]</code>:
+    <input type="text" value="field text"></p>
+
+  <div data-ad="banner">THIS AD SHOULD BE HIDDEN by [data-ad].</div>
+  <p>End of page (the ad above must not appear).</p>
+</body>
+</html>

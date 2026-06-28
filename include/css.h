@@ -76,6 +76,10 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
  * A deeper chain is dropped (fail closed). */
 #define CSS_MAX_COMPOUNDS 4
 
+/* Max attribute selectors ([attr], [attr=v], ...) in one compound. More are dropped
+ * (the whole selector fails closed). */
+#define CSS_MAX_ATTR_SEL  4
+
 /* A resolved presentation. Each field uses a sentinel for "unset" so the caller
  * can layer inheritance (take the first ancestor that sets each inheriting one).
  * The flex/grid container fields (gap/justify/grid_cols) are NOT inherited: they
@@ -140,15 +144,26 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                       const char *const *classes, size_t nclasses,
                       const char *inline_style, size_t inline_len);
 
+/* One element attribute, for attribute selectors ([attr], [attr=v], [attr~=v], ...).
+ * name is the lowercased local name; value is the attribute text ("" if empty). Both
+ * alias caller storage (nothing is copied/owned). */
+typedef struct css_attr {
+    const char *name;
+    const char *value;
+} css_attr;
+
 /* An element plus its ancestor chain, for combinator matching. Each field aliases
  * caller storage (nothing is copied/owned). parent walks toward the root (NULL at
  * the top). A bounded/partial chain is fine: a descendant compound that would have
- * matched a missing deeper ancestor simply does not match (fail closed). */
+ * matched a missing deeper ancestor simply does not match (fail closed). attrs/nattrs
+ * may be empty (NULL/0): an attribute selector then simply does not match. */
 typedef struct css_element {
     const char *tag;                  /* lowercased local name, or NULL */
     const char *id;                   /* id attribute value, or NULL */
     const char *const *classes;       /* class tokens (not NUL-joined) */
     size_t nclasses;
+    const css_attr *attrs;            /* element attributes, or NULL */
+    size_t nattrs;
     const struct css_element *parent; /* parent element, or NULL at the root */
 } css_element;
 

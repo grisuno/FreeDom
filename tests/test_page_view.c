@@ -990,6 +990,41 @@ static void test_build_two_forms_distinct_groups(void **state) {
 
 /* --- author CSS from <style> blocks + the new text_align/font_scale fields --- */
 
+/* Attribute selectors and !important resolve through the real html_parse->page_view
+ * pipeline (Hito 23b-4). The chain carries each element's attributes, so an attribute
+ * selector matches, and an important sheet rule beats a more-specific non-important one. */
+static void test_build_attr_selectors_and_important(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>"
+        "a[href^=\"https://\"] { color:#003399 }"   /* prefix attribute selector */
+        "input[type=text] { color:#990000 }"         /* exact attribute selector */
+        "#x { color:#0a0a0a }"                        /* id (specificity 100) */
+        "p { color:#00ff00 !important }"              /* important beats the id rule */
+        "</style></head><body>"
+        "<a href=\"https://example.test/\">secure</a>"
+        "<a href=\"http://example.test/\">plain</a>"
+        "<input type=\"text\" value=\"field\">"
+        "<p id=\"x\">important wins</p>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *secure = find_text(v, "secure");
+    assert_non_null(secure);
+    assert_int_equal(secure->fg_rgb, 0x003399);  /* https prefix matched */
+    const pv_run *plain = find_text(v, "plain");
+    assert_non_null(plain);
+    assert_int_equal(plain->fg_rgb, -1);          /* http: no match (fail closed) */
+
+    const pv_run *imp = find_text(v, "important wins");
+    assert_non_null(imp);
+    assert_int_equal(imp->fg_rgb, 0x00ff00);      /* important type beats non-important id */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A <style> sheet colors matching elements: a type rule and a class rule. The
  * <style> text itself never leaks as a run (already covered elsewhere). */
 static void test_build_style_sheet_color(void **state) {
@@ -1211,6 +1246,7 @@ int main(void) {
         cmocka_unit_test(test_build_control_without_form),
         cmocka_unit_test(test_build_two_forms_distinct_groups),
         cmocka_unit_test(test_build_style_sheet_color),
+        cmocka_unit_test(test_build_attr_selectors_and_important),
         cmocka_unit_test(test_build_prefers_color_scheme),
         cmocka_unit_test(test_build_text_align_and_font_size),
         cmocka_unit_test(test_build_line_height),

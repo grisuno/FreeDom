@@ -32,14 +32,26 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_WIDTH, P_MAXWIDTH, P_NSLOTS };
 
 typedef struct css_decl {
-    int prop;  /* P_* */
-    int ival;  /* interpreted value (color packed / enum / scale / bool) */
+    int prop;       /* P_* */
+    int ival;       /* interpreted value (color packed / enum / scale / bool) */
+    int important;  /* 1 if the declaration carried !important (higher cascade tier) */
 } css_decl;
 
 /* Combinator joining a compound to the one on its left. */
 enum { COMB_DESCENDANT = 0, COMB_CHILD = 1 };
 
-/* One compound selector: optional type, optional id, zero+ classes. */
+/* Attribute selector operator. PRESENT is bare `[attr]`; the rest carry a value. */
+enum { ATTR_PRESENT = 0, ATTR_EQ, ATTR_TILDE, ATTR_PIPE, ATTR_CARET, ATTR_DOLLAR, ATTR_STAR };
+
+/* One attribute selector inside a compound: name OP value, with a case flag. */
+typedef struct css_attr_match {
+    char name[CSS_TOK_MAX];
+    char value[CSS_TOK_MAX];
+    int  op;   /* ATTR_* */
+    int  ci;   /* 1 = match the value case-insensitively (the trailing `i` flag) */
+} css_attr_match;
+
+/* One compound selector: optional type, optional id, zero+ classes, zero+ [attr]. */
 typedef struct css_compound {
     char tag[CSS_TOK_MAX];
     int  has_tag;
@@ -47,6 +59,8 @@ typedef struct css_compound {
     int  has_id;
     char cls[CSS_MAX_CLASSES_PER_SEL][CSS_TOK_MAX];
     int  ncls;
+    css_attr_match attrs[CSS_MAX_ATTR_SEL];
+    int  nattrs;
 } css_compound;
 
 /* A complex selector: a chain of compounds, parts[nparts-1] being the subject (the
@@ -82,15 +96,23 @@ static int ci_eq(const char *a, const char *b) {
     return *a == '\0' && *b == '\0';
 }
 
-/* Case-insensitive substring test (used to drop any value carrying url(). */
-static int ci_contains(const char *hay, const char *needle) {
-    size_t nl = strlen(needle);
-    if (nl == 0) return 1;
-    for (const char *p = hay; *p != '\0'; ++p) {
-        size_t i = 0;
-        while (i < nl && p[i] != '\0' && lower(p[i]) == lower(needle[i])) ++i;
-        if (i == nl) return 1;
+/* True if a[0,n) equals b[0,n) up to n chars (b NUL-terminated), case-folded when ci. */
+static int span_eq(const char *a, const char *b, size_t n, int ci) {
+    for (size_t i = 0; i < n; ++i) {
+        char x = a[i], y = b[i];
+        if (ci) { x = lower(x); y = lower(y); }
+        if (x != y) return 0;
     }
+    return 1;
+}
+
+/* Substring test (used both to drop any value carrying url() — always ci — and by the
+ * attribute `*=` operator). A non-empty needle only; an empty needle never matches. */
+static int substr_match(const char *hay, const char *needle, int ci) {
+    size_t nl = strlen(needle), hl = strlen(hay);
+    if (nl == 0 || nl > hl) return 0;
+    for (size_t off = 0; off + nl <= hl; ++off)
+        if (span_eq(hay + off, needle, nl, ci)) return 1;
     return 0;
 }
 
@@ -125,7 +147,7 @@ static int interp_color(const char *v) {
 }
 
 static int interp_bg(const char *v) {
-    if (ci_contains(v, "url(")) return -1;   /* never phone home */
+    if (substr_match(v, "url(", 1)) return -1;   /* never phone home */
     cc_rgb c;
     if (cc_parse(v, &c) == CC_OK) return cc_pack(c);
     /* shorthand: try the first whitespace-delimited token as a color. */
@@ -242,7 +264,7 @@ static int interp_justify(const char *v) {
  * [1, CSS_GRID_COLS_MAX]. "none"/empty -> -1 (unset). repeat()/minmax() are counted
  * as literal tokens (out of scope). url() defensively dropped. */
 static int interp_gridcols(const char *v) {
-    if (ci_contains(v, "url(")) return -1;
+    if (substr_match(v, "url(", 1)) return -1;
     if (ci_eq(v, "none")) return -1;
     int n = 0, in_tok = 0;
     for (const char *p = v; *p != '\0'; ++p) {
@@ -352,22 +374,29 @@ static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap
     return n;
 }
 
-/* Interprets one declaration span s[0,n) into dst (up to cap). Returns the number
- * of css_decl written (0 if unsupported). Most properties emit one; the margin/
- * padding shorthands expand to up to four (one per side). */
-static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap) {
-    if (cap < 1) return 0;
-    size_t c = 0;
-    while (c < n && s[c] != ':') ++c;
-    if (c >= n) return 0;  /* no colon */
+/* Strips a trailing "!important" (case-insensitive, with optional whitespace before
+ * '!' and between '!' and the keyword) from val, in place. Returns 1 if found. A '!'
+ * that does not begin "!important" is left intact (the value will fail to interpret). */
+static int strip_important(char *val) {
+    size_t len = strlen(val);
+    for (size_t i = len; i-- > 0; ) {
+        if (val[i] != '!') continue;
+        const char *r = val + i + 1;
+        while (*r == ' ' || *r == '\t') ++r;
+        if (!ci_eq(r, "important")) return 0;   /* a non-!important '!': leave as-is */
+        size_t e = i;
+        while (e > 0 && (val[e-1] == ' ' || val[e-1] == '\t')) --e;
+        val[e] = '\0';
+        return 1;
+    }
+    return 0;
+}
 
-    char prop[CSS_TOK_MAX];
-    char val[CSS_TOK_MAX];
-    if (copy_trim(s, 0, c, prop, sizeof prop) == (size_t)-1) return 0;
-    if (copy_trim(s, c + 1, n, val, sizeof val) == (size_t)-1) return 0;
-    if (prop[0] == '\0' || val[0] == '\0') return 0;
-    for (char *p = prop; *p != '\0'; ++p) *p = lower(*p);
-
+/* Maps property name `prop` (lowercased) + value `val` to css_decl(s) in dst (up to
+ * cap). Returns the number written (0 if unsupported). Most properties emit one; the
+ * margin/padding shorthands expand to up to four (one per side). The important flag is
+ * left to the caller (parse_one_decl stamps it). */
+static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap) {
     /* Box model: margins allow 'auto' and negatives; padding/width neither. The
      * shorthands expand; the longhands and width/max-width emit one. */
     if (strcmp(prop, "margin") == 0)  return expand_box4(val, P_MARGIN_TOP, 1, 1, dst, cap);
@@ -406,6 +435,30 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap) {
     return 1;
 }
 
+/* Interprets one declaration span s[0,n) into dst (up to cap). Returns the number of
+ * css_decl written (0 if unsupported). Splits `prop: value`, strips a trailing
+ * `!important` (stamping every emitted decl), then dispatches on the property. */
+static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap) {
+    if (cap < 1) return 0;
+    size_t c = 0;
+    while (c < n && s[c] != ':') ++c;
+    if (c >= n) return 0;  /* no colon */
+
+    char prop[CSS_TOK_MAX];
+    char val[CSS_TOK_MAX];
+    if (copy_trim(s, 0, c, prop, sizeof prop) == (size_t)-1) return 0;
+    if (copy_trim(s, c + 1, n, val, sizeof val) == (size_t)-1) return 0;
+    if (prop[0] == '\0' || val[0] == '\0') return 0;
+    for (char *p = prop; *p != '\0'; ++p) *p = lower(*p);
+
+    int important = strip_important(val);
+    if (val[0] == '\0') return 0;  /* bare "!important" with no value */
+
+    int nw = interpret_prop(prop, val, dst, cap);
+    for (int i = 0; i < nw; ++i) dst[i].important = important;
+    return nw;
+}
+
 /* Splits a ';'-separated declaration block into dst (up to cap). Returns count. */
 static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap) {
     size_t count = 0, i = 0;
@@ -418,8 +471,66 @@ static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap
     return count;
 }
 
+/* Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
+ * Advances *ip past the closing ']'. Returns 1 if supported, 0 (fail closed) on any
+ * malformation (no name, unknown operator, unterminated). Grammar:
+ *   '[' ws name ws ( ']' | op '=' ws value ws (i|s)? ws ']' )
+ * value may be quoted (single/double; quotes stripped, may contain whitespace). */
+static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am) {
+    size_t i = *ip + 1;  /* past '[' */
+    memset(am, 0, sizeof *am);
+    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
+
+    size_t k = 0;
+    while (i < b && is_ident_ch(s[i])) {
+        if (k + 1 < CSS_TOK_MAX) am->name[k++] = lower(s[i]);
+        ++i;
+    }
+    am->name[k] = '\0';
+    if (k == 0) return 0;  /* no attribute name */
+    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
+
+    if (i < b && s[i] == ']') { am->op = ATTR_PRESENT; *ip = i + 1; return 1; }
+
+    if (i < b && s[i] == '=') { am->op = ATTR_EQ; ++i; }
+    else if (i + 1 < b && s[i + 1] == '=') {
+        switch (s[i]) {
+            case '~': am->op = ATTR_TILDE;  break;
+            case '|': am->op = ATTR_PIPE;   break;
+            case '^': am->op = ATTR_CARET;  break;
+            case '$': am->op = ATTR_DOLLAR; break;
+            case '*': am->op = ATTR_STAR;   break;
+            default:  return 0;            /* unknown operator */
+        }
+        i += 2;
+    } else {
+        return 0;
+    }
+
+    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
+    char q = 0;
+    if (i < b && (s[i] == '"' || s[i] == '\'')) { q = s[i]; ++i; }
+    size_t vk = 0;
+    while (i < b) {
+        char ch = s[i];
+        if (q) { if (ch == q) { ++i; break; } }
+        else if (ch == ']' || ch == ' ' || ch == '\t') break;
+        if (vk + 1 < CSS_TOK_MAX) am->value[vk++] = ch;
+        ++i;
+    }
+    am->value[vk] = '\0';
+
+    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
+    if (i < b && (s[i] == 'i' || s[i] == 'I')) { am->ci = 1; ++i; }
+    else if (i < b && (s[i] == 's' || s[i] == 'S')) { am->ci = 0; ++i; }
+    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
+    if (i >= b || s[i] != ']') return 0;   /* unterminated attribute selector */
+    *ip = i + 1;
+    return 1;
+}
+
 /* Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space)
- * into *cp. Returns 1 if supported (type, .class, #id, *). */
+ * into *cp. Returns 1 if supported (type, .class, #id, *, [attr]). */
 static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
     if (a >= b) return 0;
     memset(cp, 0, sizeof *cp);
@@ -434,7 +545,7 @@ static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
         }
         cp->tag[k] = '\0';
         cp->has_tag = 1;
-    } else if (s[i] != '.' && s[i] != '#') {
+    } else if (s[i] != '.' && s[i] != '#' && s[i] != '[') {
         return 0;
     }
 
@@ -460,6 +571,10 @@ static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
             }
             cp->id[k] = '\0';
             cp->has_id = 1;
+        } else if (s[i] == '[') {
+            if (cp->nattrs >= CSS_MAX_ATTR_SEL) return 0;
+            if (!parse_attr_sel(s, &i, b, &cp->attrs[cp->nattrs])) return 0;
+            ++cp->nattrs;
         } else {
             return 0;  /* unexpected char inside a compound */
         }
@@ -469,21 +584,28 @@ static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
 
 /* Parses a complex selector span s[a,b) into *sel: a chain of compounds joined by
  * the descendant (whitespace) or child (`>`) combinator. Returns 1 if supported.
- * The sibling combinators (`+`/`~`), attribute selectors and pseudo-classes are
- * unsupported: the whole selector is dropped (fail closed). A chain deeper than
- * CSS_MAX_COMPOUNDS is dropped. Specificity is the sum over all compounds. */
+ * Attribute selectors `[...]` are now supported; the sibling combinators (`+`/`~`)
+ * and pseudo-classes (`:`) are unsupported: the whole selector is dropped (fail
+ * closed). A chain deeper than CSS_MAX_COMPOUNDS is dropped. Whitespace inside a
+ * bracket (a quoted attribute value) does NOT split a compound. Specificity is the
+ * sum over all compounds (id*100 + (class+attr)*10 + type). */
 static int parse_complex_selector(const char *s, size_t a, size_t b, css_sel *sel) {
     while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
     while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
     if (a >= b) return 0;
 
-    /* Unsupported syntax anywhere => drop the whole selector. `>` and whitespace are
-     * now combinators, so they are allowed here. */
+    /* Unsupported syntax OUTSIDE brackets => drop the whole selector. `>` and
+     * whitespace are combinators; `[`/`]` open an attribute selector (whose contents
+     * may legitimately contain `~`/`+`/`*`/etc, so they are skipped here). */
+    int in_br = 0;
     for (size_t i = a; i < b; ++i) {
         char c = s[i];
-        if (c == '+' || c == '~' || c == '[' || c == ']' ||
-            c == ':' || c == '(' || c == ')') return 0;
+        if (c == '[') { if (in_br) return 0; in_br = 1; continue; }
+        if (c == ']') { if (!in_br) return 0; in_br = 0; continue; }
+        if (in_br) continue;
+        if (c == '+' || c == '~' || c == ':' || c == '(' || c == ')') return 0;
     }
+    if (in_br) return 0;  /* unbalanced bracket */
 
     memset(sel, 0, sizeof *sel);
     int n = 0;
@@ -499,9 +621,18 @@ static int parse_complex_selector(const char *s, size_t a, size_t b, css_sel *se
         if (i >= b) { if (child) return 0; break; }   /* trailing `>` with no compound */
         if (n == 0 && child) return 0;                /* leading `>` */
 
+        /* The compound runs until whitespace/`>` at bracket depth 0; a `[..]` keeps a
+         * quoted value with spaces in the same compound. */
         size_t ts = i;
-        while (i < b && s[i] != ' ' && s[i] != '\t' && s[i] != '\n' &&
-               s[i] != '\r' && s[i] != '>') ++i;
+        int br = 0;
+        while (i < b) {
+            char c = s[i];
+            if (c == '[') br = 1;
+            else if (c == ']') br = 0;
+            else if (!br && (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '>'))
+                break;
+            ++i;
+        }
         if (n >= CSS_MAX_COMPOUNDS) return 0;          /* too deep: fail closed */
         if (!parse_compound(s, ts, i, &sel->parts[n])) return 0;
         sel->comb[n] = (n == 0) ? COMB_DESCENDANT : (child ? COMB_CHILD : COMB_DESCENDANT);
@@ -512,7 +643,8 @@ static int parse_complex_selector(const char *s, size_t a, size_t b, css_sel *se
 
     int spec = 0;
     for (int k = 0; k < n; ++k)
-        spec += 100 * (sel->parts[k].has_id ? 1 : 0) + 10 * sel->parts[k].ncls +
+        spec += 100 * (sel->parts[k].has_id ? 1 : 0) +
+                10 * (sel->parts[k].ncls + sel->parts[k].nattrs) +
                 (sel->parts[k].has_tag ? 1 : 0);
     sel->spec = spec;
     return 1;
@@ -791,6 +923,58 @@ void css_free(css_sheet *s) {
     free(s);
 }
 
+/* The value of element attribute `name` (case-insensitive name), or NULL if absent.
+ * A present attribute with no value reads as "". */
+static const char *el_attr_value(const css_element *el, const char *name) {
+    if (el->attrs == NULL) return NULL;
+    for (size_t i = 0; i < el->nattrs; ++i) {
+        if (el->attrs[i].name != NULL && ci_eq(el->attrs[i].name, name))
+            return el->attrs[i].value != NULL ? el->attrs[i].value : "";
+    }
+    return NULL;
+}
+
+/* True if `v` ends with `suf` (non-empty), case-folded when ci. */
+static int ends_with(const char *v, const char *suf, int ci) {
+    size_t vl = strlen(v), fl = strlen(suf);
+    if (fl == 0 || fl > vl) return 0;
+    return span_eq(v + vl - fl, suf, fl, ci);
+}
+
+/* True if `v` is a whitespace-separated list containing the word `w` (non-empty),
+ * case-folded when ci (the `~=` operator). */
+static int has_word(const char *v, const char *w, int ci) {
+    size_t wl = strlen(w);
+    if (wl == 0) return 0;
+    const char *p = v;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == '\f') ++p;
+        const char *st = p;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\n' &&
+               *p != '\r' && *p != '\f') ++p;
+        if ((size_t)(p - st) == wl && span_eq(st, w, wl, ci)) return 1;
+    }
+    return 0;
+}
+
+/* True if attribute selector `am` matches element `el`. */
+static int attr_matches(const css_attr_match *am, const css_element *el) {
+    const char *v = el_attr_value(el, am->name);
+    if (v == NULL) return 0;                 /* attribute absent */
+    if (am->op == ATTR_PRESENT) return 1;
+    size_t vl = strlen(v), nl = strlen(am->value);
+    switch (am->op) {
+        case ATTR_EQ:     return vl == nl && span_eq(v, am->value, nl, am->ci);
+        case ATTR_TILDE:  return has_word(v, am->value, am->ci);
+        case ATTR_PIPE:   return (vl == nl && span_eq(v, am->value, nl, am->ci)) ||
+                                 (vl > nl && span_eq(v, am->value, nl, am->ci) && v[nl] == '-');
+        case ATTR_CARET:  return nl > 0 && vl >= nl && span_eq(v, am->value, nl, am->ci);
+        case ATTR_DOLLAR: return ends_with(v, am->value, am->ci);
+        case ATTR_STAR:   return substr_match(v, am->value, am->ci);
+        default:          return 0;
+    }
+}
+
 /* True if one compound matches one element (no ancestor context). */
 static int compound_matches(const css_compound *c, const css_element *el) {
     if (el == NULL) return 0;
@@ -805,6 +989,8 @@ static int compound_matches(const css_compound *c, const css_element *el) {
         }
         if (!found) return 0;
     }
+    for (int i = 0; i < c->nattrs; ++i)
+        if (!attr_matches(&c->attrs[i], el)) return 0;
     return 1;
 }
 
@@ -826,10 +1012,18 @@ static int sel_matches_el(const css_sel *s, const css_element *el) {
     return complex_matches(s, s->nparts - 1, el);
 }
 
-static void apply_decl(css_style *o, int *ws, int *wo, const css_decl *d,
+/* Applies one declaration to the running style if it wins its property slot. The
+ * cascade is two-tiered: an !important declaration beats any non-important one
+ * (regardless of specificity); within a tier the higher specificity wins, ties
+ * broken by document order. wi/ws/wo track the winning tier/specificity/order so far. */
+static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
                        int spec, int ord) {
     int slot = d->prop;
-    if (spec > ws[slot] || (spec == ws[slot] && ord >= wo[slot])) {
+    int imp = d->important;
+    int win = imp > wi[slot] ||
+              (imp == wi[slot] && (spec > ws[slot] || (spec == ws[slot] && ord >= wo[slot])));
+    if (win) {
+        wi[slot] = imp;
         ws[slot] = spec;
         wo[slot] = ord;
         switch (d->prop) {
@@ -867,8 +1061,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                       CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET,
                       CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET,
                       CSS_LEN_UNSET, CSS_LEN_UNSET };
-    int ws[P_NSLOTS], wo[P_NSLOTS];
-    for (int k = 0; k < P_NSLOTS; ++k) { ws[k] = -1; wo[k] = -1; }
+    int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
+    for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }
 
     if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
@@ -877,7 +1071,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
-                apply_decl(&out, ws, wo, &sheet->decls[start + d], sel->spec, sel->order);
+                apply_decl(&out, wi, ws, wo, &sheet->decls[start + d], sel->spec, sel->order);
         }
     }
 
@@ -886,7 +1080,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         css_decl tmp[CSS_INLINE_DECLS];
         size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS);
         for (size_t d = 0; d < dn; ++d)
-            apply_decl(&out, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX);
+            apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX);
     }
 
     return out;
@@ -896,8 +1090,10 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                       const char *const *classes, size_t nclasses,
                       const char *inline_style, size_t inline_len) {
     /* No ancestor context: a parentless element. A complex (multi-compound) selector
-     * therefore cannot match through its combinator (complex_matches needs parents). */
-    css_element el = { tag, id, classes, nclasses, NULL };
+     * therefore cannot match through its combinator (complex_matches needs parents).
+     * No attributes are supplied, so [attr] selectors do not match via this entry
+     * point (callers that need them build a css_element with attrs). */
+    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL };
     return css_resolve_el(sheet, &el, inline_style, inline_len);
 }
 
