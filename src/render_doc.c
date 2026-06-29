@@ -94,6 +94,17 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->font_scale = 0;
     b->line_scale = 0;
     b->text_decoration = -1;
+    b->font_family = 0;
+    b->text_transform = 0;
+    b->letter_spacing = PV_LEN_UNSET;
+    b->word_spacing = PV_LEN_UNSET;
+    b->shadow_dx = 0;
+    b->shadow_dy = 0;
+    b->shadow_color = -1;
+    b->opacity = -1;
+    b->valign = 0;
+    b->text_indent = PV_LEN_UNSET;
+    b->white_space = 0;
     b->cont_id = -1;
     b->cont_display = 0;
     b->cont_gap = 0;
@@ -235,6 +246,21 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->font_scale = (caps.css && r->font_scale > 0) ? r->font_scale : 0;
             lb->line_scale = (caps.css && r->line_scale > 0) ? r->line_scale : 0;
             lb->text_decoration = caps.css ? r->text_decoration : -1;
+            /* Author text-presentation extensions: same caps.css gate as above. When
+             * off they keep their no-effect defaults (set by rd_push). */
+            if (caps.css) {
+                lb->font_family = r->font_family;
+                lb->text_transform = r->text_transform;
+                lb->letter_spacing = r->letter_spacing;
+                lb->word_spacing = r->word_spacing;
+                lb->shadow_dx = r->shadow_dx;
+                lb->shadow_dy = r->shadow_dy;
+                lb->shadow_color = r->shadow_color;
+                lb->opacity = r->opacity;
+                lb->valign = r->valign;
+                lb->text_indent = r->text_indent;
+                lb->white_space = r->white_space;
+            }
             lb->cont_id = r->cont_id;
             lb->cont_display = r->cont_display;
             lb->cont_gap = r->cont_gap;

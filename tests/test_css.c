@@ -96,6 +96,147 @@ static void test_inline_text_decoration(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).text_decoration, -1);
 }
 
+/* --- text-presentation extensions (Hito 23b-6) --- */
+
+static void test_font_family(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("font-family:serif", 0).font_family, CSS_FF_SERIF);
+    assert_int_equal(css_parse_inline("font-family:monospace", 0).font_family, CSS_FF_MONO);
+    /* A concrete name maps to its generic bucket; the first recognised entry wins. */
+    assert_int_equal(css_parse_inline("font-family:Arial, Helvetica, sans-serif", 0).font_family,
+                     CSS_FF_SANS);
+    assert_int_equal(css_parse_inline("font-family:'Courier New', monospace", 0).font_family,
+                     CSS_FF_MONO);
+    /* Multi-word names compare whole; quotes optional. */
+    assert_int_equal(css_parse_inline("font-family:\"Times New Roman\"", 0).font_family,
+                     CSS_FF_SERIF);
+    /* Unknown families fall through to the next entry, then to unset. */
+    assert_int_equal(css_parse_inline("font-family:Frobnozz, cursive", 0).font_family,
+                     CSS_FF_CURSIVE);
+    assert_int_equal(css_parse_inline("font-family:Frobnozz", 0).font_family, CSS_FF_UNSET);
+    /* Never phones home. */
+    assert_int_equal(css_parse_inline("font-family:url(evil.woff)", 0).font_family, CSS_FF_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).font_family, CSS_FF_UNSET);
+}
+
+static void test_text_transform(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("text-transform:uppercase", 0).text_transform,
+                     CSS_TT_UPPERCASE);
+    assert_int_equal(css_parse_inline("text-transform:LOWERCASE", 0).text_transform,
+                     CSS_TT_LOWERCASE);
+    assert_int_equal(css_parse_inline("text-transform:capitalize", 0).text_transform,
+                     CSS_TT_CAPITALIZE);
+    assert_int_equal(css_parse_inline("text-transform:none", 0).text_transform, CSS_TT_NONE);
+    assert_int_equal(css_parse_inline("text-transform:full-width", 0).text_transform,
+                     CSS_TT_UNSET);  /* out of scope: fail closed */
+    assert_int_equal(css_parse_inline("color:red", 0).text_transform, CSS_TT_UNSET);
+}
+
+static void test_letter_word_spacing(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("letter-spacing:2px", 0).letter_spacing, 2);
+    assert_int_equal(css_parse_inline("letter-spacing:-1px", 0).letter_spacing, -1);
+    assert_int_equal(css_parse_inline("letter-spacing:normal", 0).letter_spacing, 0);
+    assert_int_equal(css_parse_inline("word-spacing:4px", 0).word_spacing, 4);
+    assert_int_equal(css_parse_inline("word-spacing:1em", 0).word_spacing, 16);
+    /* %/calc/bare numbers are dropped (fail closed) -> unset sentinel. */
+    assert_int_equal(css_parse_inline("letter-spacing:5%", 0).letter_spacing, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).letter_spacing, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).word_spacing, CSS_LEN_UNSET);
+    /* Anti-DoS clamp. */
+    assert_int_equal(css_parse_inline("letter-spacing:9999px", 0).letter_spacing, CSS_SPACING_MAX);
+}
+
+static void test_text_shadow(void **state) {
+    (void)state;
+    css_style a = css_parse_inline("text-shadow:2px 3px #ff0000", 0);
+    assert_int_equal(a.shadow_dx, 2);
+    assert_int_equal(a.shadow_dy, 3);
+    assert_int_equal(a.shadow_color, 0xff0000);
+    /* Blur radius is accepted then ignored; color may come first. */
+    css_style b = css_parse_inline("text-shadow:#00ff00 1px 1px 4px", 0);
+    assert_int_equal(b.shadow_dx, 1);
+    assert_int_equal(b.shadow_dy, 1);
+    assert_int_equal(b.shadow_color, 0x00ff00);
+    /* No color -> black default; still a shadow. */
+    css_style c = css_parse_inline("text-shadow:2px 2px", 0);
+    assert_int_equal(c.shadow_color, 0x000000);
+    /* none is explicit (color -1). */
+    assert_int_equal(css_parse_inline("text-shadow:none", 0).shadow_color, -1);
+    /* Too few offsets / url() -> dropped (unset, color -1). */
+    assert_int_equal(css_parse_inline("text-shadow:2px", 0).shadow_color, -1);
+    assert_int_equal(css_parse_inline("text-shadow:2px 2px url(x)", 0).shadow_color, -1);
+    assert_int_equal(css_parse_inline("color:red", 0).shadow_color, -1);
+}
+
+static void test_opacity(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("opacity:0.5", 0).opacity, 50);
+    assert_int_equal(css_parse_inline("opacity:1", 0).opacity, 100);
+    assert_int_equal(css_parse_inline("opacity:0", 0).opacity, 0);
+    assert_int_equal(css_parse_inline("opacity:50%", 0).opacity, 50);
+    assert_int_equal(css_parse_inline("opacity:2", 0).opacity, 100);   /* clamp */
+    assert_int_equal(css_parse_inline("color:red", 0).opacity, -1);    /* unset */
+}
+
+static void test_vertical_align(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("vertical-align:super", 0).valign, CSS_VA_SUPER);
+    assert_int_equal(css_parse_inline("vertical-align:sub", 0).valign, CSS_VA_SUB);
+    assert_int_equal(css_parse_inline("vertical-align:baseline", 0).valign, CSS_VA_BASELINE);
+    assert_int_equal(css_parse_inline("vertical-align:middle", 0).valign, CSS_VA_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).valign, CSS_VA_UNSET);
+}
+
+static void test_text_indent(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("text-indent:32px", 0).text_indent, 32);
+    assert_int_equal(css_parse_inline("text-indent:2em", 0).text_indent, 32);
+    assert_int_equal(css_parse_inline("text-indent:-10px", 0).text_indent, -10);
+    assert_int_equal(css_parse_inline("text-indent:5%", 0).text_indent, CSS_LEN_UNSET); /* dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).text_indent, CSS_LEN_UNSET);
+}
+
+static void test_white_space(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("white-space:nowrap", 0).white_space, CSS_WS_NOWRAP);
+    assert_int_equal(css_parse_inline("white-space:pre", 0).white_space, CSS_WS_PRE);
+    assert_int_equal(css_parse_inline("white-space:normal", 0).white_space, CSS_WS_NORMAL);
+    assert_int_equal(css_parse_inline("white-space:pre-wrap", 0).white_space, CSS_WS_PRE_WRAP);
+    assert_int_equal(css_parse_inline("white-space:break-spaces", 0).white_space, CSS_WS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).white_space, CSS_WS_UNSET);
+}
+
+static void test_list_style_type(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("list-style-type:square", 0).list_style, CSS_LS_SQUARE);
+    assert_int_equal(css_parse_inline("list-style-type:decimal", 0).list_style, CSS_LS_DECIMAL);
+    assert_int_equal(css_parse_inline("list-style-type:lower-alpha", 0).list_style,
+                     CSS_LS_LOWER_ALPHA);
+    assert_int_equal(css_parse_inline("list-style-type:none", 0).list_style, CSS_LS_NONE);
+    /* The shorthand: the recognised type token wins, image url() is ignored. */
+    assert_int_equal(css_parse_inline("list-style:square inside", 0).list_style, CSS_LS_SQUARE);
+    assert_int_equal(css_parse_inline("list-style:circle url(dot.png)", 0).list_style,
+                     CSS_LS_UNSET);  /* url() drops the whole declaration */
+    assert_int_equal(css_parse_inline("color:red", 0).list_style, CSS_LS_UNSET);
+}
+
+static void test_text_ext_cascade_and_important(void **state) {
+    (void)state;
+    /* The new props ride the normal cascade: specificity then inline-wins, and
+     * !important raises the tier. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "p { text-transform: uppercase; font-family: serif; }"
+        "p.lead { text-transform: lowercase !important; }", 0, &sh), CSS_OK);
+    const char *cls[] = { "lead" };
+    css_style s = css_resolve(sh, "p", NULL, cls, 1, "font-family: monospace", 0);
+    assert_int_equal(s.text_transform, CSS_TT_LOWERCASE);  /* !important wins */
+    assert_int_equal(s.font_family, CSS_FF_MONO);          /* inline wins */
+    css_free(sh);
+}
+
 static void test_inline_display(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("display:none", 0).display, CSS_DISP_NONE);
@@ -869,6 +1010,16 @@ int main(void) {
         cmocka_unit_test(test_inline_font_weight_style),
         cmocka_unit_test(test_inline_text_decoration),
         cmocka_unit_test(test_text_decoration_cascade),
+        cmocka_unit_test(test_font_family),
+        cmocka_unit_test(test_text_transform),
+        cmocka_unit_test(test_letter_word_spacing),
+        cmocka_unit_test(test_text_shadow),
+        cmocka_unit_test(test_opacity),
+        cmocka_unit_test(test_vertical_align),
+        cmocka_unit_test(test_text_indent),
+        cmocka_unit_test(test_white_space),
+        cmocka_unit_test(test_list_style_type),
+        cmocka_unit_test(test_text_ext_cascade_and_important),
         cmocka_unit_test(test_inline_display),
         cmocka_unit_test(test_inline_container_props),
         cmocka_unit_test(test_sheet_container_props),

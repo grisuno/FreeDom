@@ -39,6 +39,17 @@ typedef struct pv_run {
     int     font_scale;  /* font-size del autor en porcentaje (100=normal), 0 = sin definir */
     int     line_scale;  /* line-height del autor en % de la caja de línea, 0 = sin definir */
     int     text_decoration; /* text-decoration del autor (OR de CSS_DECO_*; 0=none, -1=sin definir) */
+    /* Extensiones de presentación de texto del autor (Hito 23b-6), gateadas por caps.css. */
+    int     font_family;     /* css_font_family, 0 sin definir */
+    int     text_transform;  /* css_text_transform, 0 sin definir */
+    int     letter_spacing;  /* px con signo, PV_LEN_UNSET sin definir */
+    int     word_spacing;    /* px con signo, PV_LEN_UNSET sin definir */
+    int     shadow_dx, shadow_dy; /* offsets de text-shadow px */
+    int     shadow_color;    /* 0xRRGGBB, o -1 (sin sombra) */
+    int     opacity;         /* 0..100, o -1 (sin definir) */
+    int     valign;          /* css_valign, 0 sin definir */
+    int     text_indent;     /* px con signo (sangría 1ª línea), PV_LEN_UNSET sin definir */
+    int     white_space;     /* css_white_space, 0 sin definir */
     int     cont_id;     /* contenedor flex/grid de autor mas cercano, o -1 */
     int     cont_display;/* bx_display del contenedor (flex/grid), o 0 */
     int     cont_gap;    /* gap del contenedor en px */
@@ -91,6 +102,18 @@ o `px`/`em` absolutos → 0). Los tres del ancestro más cercano que los fije. M
 `CSS_DECO_OVERLINE` resuelto del ancestro más cercano que fije `text-decoration` (incluido `none` → 0,
 que p.ej. quita el subrayado de un `<a>`); -1 = sin definir. Presentación gateada por `caps.css` como los
 colores; `pv_set_text_style` lo fija en el último run (4º argumento).
+
+**Extensiones de presentación de texto del autor (Hito 23b-6).** Once campos de run más —
+`font_family`, `text_transform`, `letter_spacing`, `word_spacing`, `shadow_dx`/`shadow_dy`/
+`shadow_color`, `opacity`, `valign`, `text_indent`, `white_space` — resueltos del **ancestro más
+cercano** que fije cada uno (heredan en CSS) por `resolve_context` (vía la struct interna `pv_text_ext`
++ `pv_text_ext_merge`) y fijados con el setter dedicado **`pv_set_text_ext`** (no se amplió de nuevo
+`pv_set_text_style`). Presentación gateada por `caps.css` como los colores. Defaults sin autor:
+`font_family`/`text_transform`/`valign`/`white_space` = 0, `letter_spacing`/`word_spacing`/`text_indent`
+= `PV_LEN_UNSET`, `shadow_color`/`opacity` = -1, `shadow_dx`/`shadow_dy` = 0. El `list-style-type`
+también se resuelve en la fusión, pero **no es un campo de run**: `list_marker` lo consume para elegir el
+glyph/numeración del marcador del `<li>` (disc/circle/square/decimal/alpha/roman; `none` ⇒ sin marcador),
+que se hornea en el texto del run — estructura, no gateada.
 
 **`display:none` (estructura).** Un run cuyo elemento o algún ancestro tenga `display:none` (de la hoja
 o en línea) **no se emite** (`in_hidden_subtree`). Es visibilidad estructural: se aplica siempre,

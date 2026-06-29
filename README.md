@@ -111,6 +111,7 @@ The name reflects its core goals:
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
 - ✅ Author CSS (`<style>` + inline `style=`, simple subset; combinators, attribute selectors `[attr=v]`/`^=`/`$=`/`*=`/`~=`/`|=`, `!important`; never phones home) — menu "Author styles (CSS)"
 - ✅ Author box model (`margin`/`padding`/`width`/`max-width`): centered reading columns (`max-width` + `margin: 0 auto`)
+- ✅ Author text presentation: `font-family` (generic families), `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow`, `opacity`, `vertical-align` (sub/super), `text-indent`, `white-space` (nowrap), `list-style-type` (decimal/alpha/roman/disc/circle/square)
 - ✅ Automatic dark mode (`@media (prefers-color-scheme: dark)`, safe `@media` subset; no viewport leak)
 - ✅ Headless mode
 - ✅ Strong per-tab sandboxing
@@ -121,7 +122,7 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model `margin`/`padding`/`width`/`max-width`; no `border`/`box-sizing`/`position`; author-gated)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; no `border`/`box-sizing`/`position`/transforms; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 
@@ -298,6 +299,16 @@ Default). For headless visual review, `freedom --author-css --download-pdf=PATH 
 styling in the PDF (local render only — the network image cap stays off); see
 `examples/attr-selectors.html`. The sibling `+`/`~` and pseudo `:`/`::` selectors stay
 unsupported and fail closed.
+
+**Text presentation:** the author subset also covers `font-family` (mapped to a generic family —
+serif / sans-serif / monospace / cursive / fantasy; exact font files are never matched and
+`@font-face`/`url()` are dropped, so it never fetches), `text-transform`
+(`uppercase`/`lowercase`/`capitalize`), `letter-spacing`, `word-spacing`, `text-shadow` (single
+layer), `opacity`, `vertical-align` (`sub`/`super`), `text-indent`, `white-space` (`nowrap`/`pre`
+suppress wrapping) and `list-style-type` (`decimal`/`lower-alpha`/`upper-roman`/`disc`/`circle`/
+`square`/… changes the `<li>` marker). All but `list-style` are gated behind the Author-styles
+toggle. See `examples/text-presentation.html` and the full **supported-vs-missing** property
+inventory in `spec/css.md`.
 
 **Flex & grid from the stylesheet:** a `display:flex` / `display:grid` container takes its
 layout params (`gap`, `justify-content`, `grid-template-columns`) from the same cascade, so a

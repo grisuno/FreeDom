@@ -72,6 +72,41 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_DECO_LINE_THROUGH 0x2
 #define CSS_DECO_OVERLINE     0x4
 
+/* Generic font family bucket (font-family). A specific family name is mapped to its
+ * generic group; an unrecognised name leaves the field unset (UA sans-serif). */
+typedef enum css_font_family {
+    CSS_FF_UNSET = 0, CSS_FF_SERIF, CSS_FF_SANS, CSS_FF_MONO,
+    CSS_FF_CURSIVE, CSS_FF_FANTASY
+} css_font_family;
+
+/* text-transform. 0 is unset; CSS_TT_NONE is an explicit `none`. */
+typedef enum css_text_transform {
+    CSS_TT_UNSET = 0, CSS_TT_NONE, CSS_TT_UPPERCASE, CSS_TT_LOWERCASE, CSS_TT_CAPITALIZE
+} css_text_transform;
+
+/* vertical-align (subset: only the inline shifts). 0 unset. */
+typedef enum css_valign {
+    CSS_VA_UNSET = 0, CSS_VA_BASELINE, CSS_VA_SUB, CSS_VA_SUPER
+} css_valign;
+
+/* white-space (subset: only the wrap/keep distinction is consumed). 0 unset. */
+typedef enum css_white_space {
+    CSS_WS_UNSET = 0, CSS_WS_NORMAL, CSS_WS_NOWRAP, CSS_WS_PRE,
+    CSS_WS_PRE_WRAP, CSS_WS_PRE_LINE
+} css_white_space;
+
+/* list-style-type (and the type token of the list-style shorthand). 0 unset. */
+typedef enum css_list_style {
+    CSS_LS_UNSET = 0, CSS_LS_NONE, CSS_LS_DISC, CSS_LS_CIRCLE, CSS_LS_SQUARE,
+    CSS_LS_DECIMAL, CSS_LS_LOWER_ALPHA, CSS_LS_UPPER_ALPHA,
+    CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN
+} css_list_style;
+
+/* Anti-DoS clamps for the new metric properties (px, absolute value). text-indent
+ * reuses the box-model CSS_LEN_MAX clamp (below). */
+#define CSS_SPACING_MAX 200      /* letter-spacing / word-spacing */
+#define CSS_SHADOW_MAX  100      /* text-shadow offsets */
+
 /* Box-model lengths (margin/padding/width/max-width), in px. Two out-of-band
  * sentinels distinguish "not declared" and the 'auto' keyword from a real length;
  * a real length is clamped to [-CSS_LEN_MAX, CSS_LEN_MAX] (anti-DoS). */
@@ -111,6 +146,21 @@ typedef struct css_style {
     int         margin_top, margin_right, margin_bottom, margin_left;
     int         pad_top, pad_right, pad_bottom, pad_left;
     int         width, max_width;
+    /* Author text-presentation extensions (Hito 23b-6). All inherit in CSS; in this
+     * flat model the caller takes the nearest ancestor that sets each. Like the other
+     * author presentation, they are gated behind caps.css downstream. */
+    int         font_family;     /* css_font_family, 0 (unset) */
+    int         text_transform;  /* css_text_transform, 0 (unset) */
+    int         letter_spacing;  /* px (signed), 0 = normal, CSS_LEN_UNSET (unset) */
+    int         word_spacing;    /* px (signed), 0 = normal, CSS_LEN_UNSET (unset) */
+    int         shadow_dx;       /* text-shadow x offset px (signed), 0 if no shadow */
+    int         shadow_dy;       /* text-shadow y offset px (signed), 0 if no shadow */
+    int         shadow_color;    /* text-shadow color 0xRRGGBB, or -1 (none/unset) */
+    int         opacity;         /* percent 0..100, or -1 (unset) */
+    int         valign;          /* css_valign, 0 (unset) */
+    int         text_indent;     /* px (signed), CSS_LEN_UNSET (unset) */
+    int         white_space;     /* css_white_space, 0 (unset) */
+    int         list_style;      /* css_list_style, 0 (unset) */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

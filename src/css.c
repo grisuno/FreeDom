@@ -29,7 +29,13 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_TEXTDECO, P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
        P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
        P_PAD_TOP, P_PAD_RIGHT, P_PAD_BOTTOM, P_PAD_LEFT,
-       P_WIDTH, P_MAXWIDTH, P_NSLOTS };
+       P_WIDTH, P_MAXWIDTH,
+       /* Text-presentation extensions (Hito 23b-6). The three text-shadow slots are
+        * contiguous (dx,dy,color) so expand_shadow writes them as a group. */
+       P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING,
+       P_SHADOW_DX, P_SHADOW_DY, P_SHADOW_COLOR,
+       P_OPACITY, P_VALIGN, P_TEXTINDENT, P_WHITESPACE, P_LISTSTYLE,
+       P_NSLOTS };
 
 typedef struct css_decl {
     int prop;       /* P_* */
@@ -386,6 +392,192 @@ static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_
     return n;
 }
 
+/* --- text-presentation extensions (Hito 23b-6) --- */
+
+/* Maps one font-family name (a generic keyword or a common family) to a generic
+ * css_font_family bucket; -1 if unrecognised. Case-insensitive; multi-word names
+ * (e.g. "times new roman") are compared whole. */
+static int family_of(const char *name) {
+    static const struct { const char *n; int f; } tbl[] = {
+        { "serif", CSS_FF_SERIF }, { "ui-serif", CSS_FF_SERIF },
+        { "times", CSS_FF_SERIF }, { "times new roman", CSS_FF_SERIF },
+        { "georgia", CSS_FF_SERIF }, { "garamond", CSS_FF_SERIF },
+        { "cambria", CSS_FF_SERIF }, { "palatino", CSS_FF_SERIF },
+        { "sans-serif", CSS_FF_SANS }, { "ui-sans-serif", CSS_FF_SANS },
+        { "system-ui", CSS_FF_SANS }, { "arial", CSS_FF_SANS },
+        { "helvetica", CSS_FF_SANS }, { "verdana", CSS_FF_SANS },
+        { "tahoma", CSS_FF_SANS }, { "segoe ui", CSS_FF_SANS },
+        { "roboto", CSS_FF_SANS }, { "open sans", CSS_FF_SANS },
+        { "monospace", CSS_FF_MONO }, { "ui-monospace", CSS_FF_MONO },
+        { "courier", CSS_FF_MONO }, { "courier new", CSS_FF_MONO },
+        { "consolas", CSS_FF_MONO }, { "monaco", CSS_FF_MONO },
+        { "menlo", CSS_FF_MONO }, { "dejavu sans mono", CSS_FF_MONO },
+        { "cursive", CSS_FF_CURSIVE }, { "comic sans ms", CSS_FF_CURSIVE },
+        { "fantasy", CSS_FF_FANTASY }, { "impact", CSS_FF_FANTASY },
+    };
+    for (size_t i = 0; i < sizeof tbl / sizeof tbl[0]; ++i)
+        if (ci_eq(name, tbl[i].n)) return tbl[i].f;
+    return -1;
+}
+
+/* font-family: the first recognised name in the comma-separated stack wins (its
+ * generic bucket). Quotes are stripped. url() defensively dropped. -1 if none known. */
+static int interp_fontfamily(const char *v) {
+    if (substr_match(v, "url(", 1)) return -1;
+    const char *p = v;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t' || *p == ',') ++p;
+        if (*p == '\0') break;
+        const char *st = p;
+        while (*p != '\0' && *p != ',') ++p;       /* one comma entry */
+        size_t e = (size_t)(p - st);
+        while (e > 0 && (st[e-1] == ' ' || st[e-1] == '\t')) --e;
+        size_t a = 0;
+        if (e >= 2 && (st[0] == '"' || st[0] == '\'') && st[e-1] == st[0]) { a = 1; --e; }
+        char buf[CSS_TOK_MAX];
+        size_t k = 0;
+        for (size_t i = a; i < e && k + 1 < sizeof buf; ++i) buf[k++] = st[i];
+        buf[k] = '\0';
+        int f = family_of(buf);
+        if (f >= 0) return f;
+    }
+    return -1;
+}
+
+static int interp_texttransform(const char *v) {
+    if (ci_eq(v, "none"))       return CSS_TT_NONE;
+    if (ci_eq(v, "uppercase"))  return CSS_TT_UPPERCASE;
+    if (ci_eq(v, "lowercase"))  return CSS_TT_LOWERCASE;
+    if (ci_eq(v, "capitalize")) return CSS_TT_CAPITALIZE;
+    return -1;  /* full-width/full-size-kana/...: out of scope, fail closed */
+}
+
+/* opacity: a unitless 0..1 alpha (or a percentage), mapped to 0..100 and clamped.
+ * A negative or unparseable value is dropped (-1). */
+static int interp_opacity(const char *v) {
+    double num;
+    const char *end;
+    if (!parse_num(v, &num, &end)) return -1;
+    while (*end == ' ' || *end == '\t') ++end;
+    int pct;
+    if (end[0] == '%' && end[1] == '\0') pct = (int)(num + 0.5);
+    else if (end[0] == '\0')             pct = (int)(num * 100.0 + 0.5);
+    else return -1;
+    if (pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+    return pct;
+}
+
+static int interp_valign(const char *v) {
+    if (ci_eq(v, "baseline")) return CSS_VA_BASELINE;
+    if (ci_eq(v, "sub"))      return CSS_VA_SUB;
+    if (ci_eq(v, "super"))    return CSS_VA_SUPER;
+    return -1;  /* top/middle/bottom/<length>: out of scope, fail closed */
+}
+
+static int interp_whitespace(const char *v) {
+    if (ci_eq(v, "normal"))   return CSS_WS_NORMAL;
+    if (ci_eq(v, "nowrap"))   return CSS_WS_NOWRAP;
+    if (ci_eq(v, "pre"))      return CSS_WS_PRE;
+    if (ci_eq(v, "pre-wrap")) return CSS_WS_PRE_WRAP;
+    if (ci_eq(v, "pre-line")) return CSS_WS_PRE_LINE;
+    return -1;
+}
+
+static int liststyle_kw(const char *t) {
+    if (ci_eq(t, "none"))        return CSS_LS_NONE;
+    if (ci_eq(t, "disc"))        return CSS_LS_DISC;
+    if (ci_eq(t, "circle"))      return CSS_LS_CIRCLE;
+    if (ci_eq(t, "square"))      return CSS_LS_SQUARE;
+    if (ci_eq(t, "decimal"))     return CSS_LS_DECIMAL;
+    if (ci_eq(t, "lower-alpha") || ci_eq(t, "lower-latin")) return CSS_LS_LOWER_ALPHA;
+    if (ci_eq(t, "upper-alpha") || ci_eq(t, "upper-latin")) return CSS_LS_UPPER_ALPHA;
+    if (ci_eq(t, "lower-roman")) return CSS_LS_LOWER_ROMAN;
+    if (ci_eq(t, "upper-roman")) return CSS_LS_UPPER_ROMAN;
+    return -1;
+}
+
+/* list-style-type, or the type token of the list-style shorthand: the first
+ * recognised keyword wins. url() (a list-style-image) is dropped: never fetch. */
+static int interp_liststyle(const char *v) {
+    if (substr_match(v, "url(", 1)) return -1;
+    const char *p = v;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        while (*p != '\0' && *p != ' ' && *p != '\t') ++p;
+        int ls = liststyle_kw(tok);
+        if (ls >= 0) return ls;
+    }
+    return -1;
+}
+
+/* letter-spacing / word-spacing: "normal" -> 0, else a signed length (px/em/0),
+ * clamped to [-CSS_SPACING_MAX, CSS_SPACING_MAX]. Returns 1 with *out set, 0 if
+ * the value is unsupported (%/vw/calc/bare number -> dropped, fail closed). */
+static int interp_spacing(const char *v, int *out) {
+    if (ci_eq(v, "normal")) { *out = 0; return 1; }
+    int px;
+    if (!interp_len(v, 0, &px)) return 0;
+    if (px > CSS_SPACING_MAX) px = CSS_SPACING_MAX;
+    if (px < -CSS_SPACING_MAX) px = -CSS_SPACING_MAX;
+    *out = px;
+    return 1;
+}
+
+static int emit_spacing(css_decl *dst, int cap, int slot, const char *val) {
+    int o;
+    if (cap < 1 || !interp_spacing(val, &o)) return 0;
+    dst[0].prop = slot;
+    dst[0].ival = o;
+    return 1;
+}
+
+/* text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is
+ * ignored) and an optional color, in any order. "none" emits an explicit no-shadow.
+ * Needs at least dx and dy or the whole declaration is dropped (fail closed). When no
+ * color is given it defaults to black. url() dropped: never fetch. Writes the three
+ * contiguous P_SHADOW_* slots; offsets clamped to [-CSS_SHADOW_MAX, CSS_SHADOW_MAX]. */
+static int expand_shadow(const char *val, css_decl *dst, int cap) {
+    if (cap < 3) return 0;
+    if (substr_match(val, "url(", 1)) return 0;
+    if (ci_eq(val, "none")) {
+        dst[0].prop = P_SHADOW_DX;    dst[0].ival = 0;
+        dst[1].prop = P_SHADOW_DY;    dst[1].ival = 0;
+        dst[2].prop = P_SHADOW_COLOR; dst[2].ival = -1;
+        return 3;
+    }
+    int lens[3], nlen = 0, color = 0, have_color = 0;
+    const char *p = val;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        while (*p != '\0' && *p != ' ' && *p != '\t') ++p;
+        int px;
+        cc_rgb c;
+        if (interp_len(tok, 0, &px)) { if (nlen < 3) lens[nlen++] = px; }
+        else if (!have_color && cc_parse(tok, &c) == CC_OK) { color = cc_pack(c); have_color = 1; }
+    }
+    if (nlen < 2) return 0;  /* need both offsets */
+    int dx = lens[0], dy = lens[1];
+    if (dx > CSS_SHADOW_MAX) dx = CSS_SHADOW_MAX;
+    if (dx < -CSS_SHADOW_MAX) dx = -CSS_SHADOW_MAX;
+    if (dy > CSS_SHADOW_MAX) dy = CSS_SHADOW_MAX;
+    if (dy < -CSS_SHADOW_MAX) dy = -CSS_SHADOW_MAX;
+    dst[0].prop = P_SHADOW_DX;    dst[0].ival = dx;
+    dst[1].prop = P_SHADOW_DY;    dst[1].ival = dy;
+    dst[2].prop = P_SHADOW_COLOR; dst[2].ival = have_color ? color : 0x000000;
+    return 3;
+}
+
 /* Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from
  * both ends. Returns the trimmed length, or SIZE_MAX if it does not fit dst. */
 static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
@@ -436,6 +628,13 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "width") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
     if (strcmp(prop, "max-width") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
 
+    /* Text-presentation extensions whose value may legitimately be 0 or negative
+     * (so they bypass the generic ival<0 drop, like the box-model lengths). */
+    if (strcmp(prop, "text-shadow") == 0)    return expand_shadow(val, dst, cap);
+    if (strcmp(prop, "letter-spacing") == 0) return emit_spacing(dst, cap, P_LETTERSPACING, val);
+    if (strcmp(prop, "word-spacing") == 0)   return emit_spacing(dst, cap, P_WORDSPACING, val);
+    if (strcmp(prop, "text-indent") == 0)    return emit_len(dst, cap, P_TEXTINDENT, val, 0, 1);
+
     int prop_id, ival;
     if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
     else if (strcmp(prop, "background-color") == 0 ||
@@ -453,6 +652,13 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
              strcmp(prop, "column-gap") == 0)         { prop_id = P_GAP;      ival = interp_gap(val); }
     else if (strcmp(prop, "justify-content") == 0)    { prop_id = P_JUSTIFY;  ival = interp_justify(val); }
     else if (strcmp(prop, "grid-template-columns") == 0) { prop_id = P_GRIDCOLS; ival = interp_gridcols(val); }
+    else if (strcmp(prop, "font-family") == 0)        { prop_id = P_FONTFAMILY;    ival = interp_fontfamily(val); }
+    else if (strcmp(prop, "text-transform") == 0)     { prop_id = P_TEXTTRANSFORM; ival = interp_texttransform(val); }
+    else if (strcmp(prop, "opacity") == 0)            { prop_id = P_OPACITY;       ival = interp_opacity(val); }
+    else if (strcmp(prop, "vertical-align") == 0)     { prop_id = P_VALIGN;        ival = interp_valign(val); }
+    else if (strcmp(prop, "white-space") == 0)        { prop_id = P_WHITESPACE;    ival = interp_whitespace(val); }
+    else if (strcmp(prop, "list-style-type") == 0 ||
+             strcmp(prop, "list-style") == 0)          { prop_id = P_LISTSTYLE;     ival = interp_liststyle(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -1075,6 +1281,18 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_PAD_LEFT:   o->pad_left = d->ival; break;
             case P_WIDTH:      o->width = d->ival; break;
             case P_MAXWIDTH:   o->max_width = d->ival; break;
+            case P_FONTFAMILY:    o->font_family = d->ival; break;
+            case P_TEXTTRANSFORM: o->text_transform = d->ival; break;
+            case P_LETTERSPACING: o->letter_spacing = d->ival; break;
+            case P_WORDSPACING:   o->word_spacing = d->ival; break;
+            case P_SHADOW_DX:     o->shadow_dx = d->ival; break;
+            case P_SHADOW_DY:     o->shadow_dy = d->ival; break;
+            case P_SHADOW_COLOR:  o->shadow_color = d->ival; break;
+            case P_OPACITY:       o->opacity = d->ival; break;
+            case P_VALIGN:        o->valign = d->ival; break;
+            case P_TEXTINDENT:    o->text_indent = d->ival; break;
+            case P_WHITESPACE:    o->white_space = d->ival; break;
+            case P_LISTSTYLE:     o->list_style = d->ival; break;
             default: break;
         }
     }
@@ -1094,6 +1312,12 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .pad_top = CSS_LEN_UNSET, .pad_right = CSS_LEN_UNSET,
         .pad_bottom = CSS_LEN_UNSET, .pad_left = CSS_LEN_UNSET,
         .width = CSS_LEN_UNSET, .max_width = CSS_LEN_UNSET,
+        .font_family = CSS_FF_UNSET, .text_transform = CSS_TT_UNSET,
+        .letter_spacing = CSS_LEN_UNSET, .word_spacing = CSS_LEN_UNSET,
+        .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
+        .opacity = -1, .valign = CSS_VA_UNSET,
+        .text_indent = CSS_LEN_UNSET, .white_space = CSS_WS_UNSET,
+        .list_style = CSS_LS_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

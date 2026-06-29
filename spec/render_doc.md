@@ -46,6 +46,10 @@ typedef struct rd_block {
     int              font_scale;     /* font-size del autor en %; solo con caps.css, si no 0 */
     int              line_scale;     /* line-height del autor en % de la caja de línea; solo con caps.css, si no 0 */
     int              text_decoration;/* text-decoration del autor (OR de CSS_DECO_*); solo con caps.css, si no -1 */
+    /* Extensiones de presentación de texto (Hito 23b-6); solo con caps.css, si no sus
+     * defaults sin efecto. */
+    int              font_family, text_transform, letter_spacing, word_spacing;
+    int              shadow_dx, shadow_dy, shadow_color, opacity, valign, text_indent, white_space;
     /* Box model del autor (Hito 23b-3); solo con caps.css, si no 0 / PV_LEN_UNSET. */
     int              box_l, box_r;   /* insets izq/der px */
     int              box_w;          /* tope de ancho de contenido px, 0 = sin tope */
@@ -93,7 +97,11 @@ const char    *rd_image_label(rdp_img_decision d); /* etiqueta del placeholder *
   `PV_LEN_UNSET` (box_mt/box_mb → la GUI usa el margen UA) y la presentación usa el tema/UA. Son el
   estilo de autor de Hito 23/23b (de `<style>` + `style=`, vía `[[css]]`/`[[page_view]]`); el **box
   model** `box_*` (Hito 23b-3) se gatea aquí igual que los colores porque una caja del autor puede
-  encoger el contenido a lo ilegible. El *gate* de CSS vive en una función pura y testeable.
+  encoger el contenido a lo ilegible. El *gate* de CSS vive en una función pura y testeable. Las
+  **extensiones de presentación de texto** (Hito 23b-6: `font_family`/`text_transform`/
+  `letter_spacing`/`word_spacing`/`shadow_*`/`opacity`/`valign`/`text_indent`/`white_space`) se
+  gatean igual; con `caps.css` apagado quedan en sus defaults sin efecto (0 / `PV_LEN_UNSET` / -1). El
+  `list-style` NO viaja por aquí: ya está horneado en el texto del run por `page_view` (estructura).
 - **Contenedor flex/grid del autor (`cont_id`/`cont_display`/`cont_gap`/`cont_justify`/`cont_cols`):**
   se transporta **siempre**, con o sin `caps.css`. La maquetación (cajas, columnas, márgenes) es
   estructura, no estilo del autor: no abre sockets ni filtra nada a la red, así que el camino seguro

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Text presentation (Hito 23b-6)</title>
+<style>
+  h1 { text-transform: uppercase; letter-spacing: 4px; text-shadow: 2px 2px #888; }
+  .serif { font-family: "Times New Roman", Georgia, serif; }
+  .mono  { font-family: Consolas, monospace; }
+  .cursive { font-family: cursive; }
+  .caps  { text-transform: capitalize; }
+  .lower { text-transform: lowercase; }
+  .wide  { letter-spacing: 3px; }
+  .spaced { word-spacing: 12px; }
+  .faded { opacity: 0.45; }
+  .shadow { text-shadow: 3px 3px #cc0000; font-weight: bold; }
+  .indent { text-indent: 40px; }
+  .nowrap { white-space: nowrap; }
+  ul.roman { list-style-type: lower-roman; }
+  ul.alpha { list-style-type: upper-alpha; }
+  ul.square { list-style-type: square; }
+  sub, .sub { vertical-align: sub; font-size: 80%; }
+  sup, .sup { vertical-align: super; font-size: 80%; }
+</style>
+</head>
+<body>
+  <h1>Freedom text presentation</h1>
+
+  <p class="serif">This paragraph is set in a <b>serif</b> family (Times / Georgia).
+  The quick brown fox jumps over the lazy dog.</p>
+
+  <p class="mono">This one is <b>monospace</b> (Consolas): code_sample(x) = x * 2;</p>
+
+  <p class="cursive">And this paragraph requests a cursive family.</p>
+
+  <p class="caps">this heading-like text is capitalized per word.</p>
+  <p class="lower">THIS TEXT IS FORCED TO LOWERCASE.</p>
+
+  <p class="wide">Letter spacing widens the tracking of this line noticeably.</p>
+  <p class="spaced">Word spacing pushes these words far apart on the line.</p>
+
+  <p class="faded">This paragraph is rendered at 45% opacity (faded).</p>
+  <p class="shadow">This bold line carries a red drop shadow.</p>
+
+  <p class="indent">The first line of this paragraph is indented by forty pixels, while
+  the wrapped lines that follow return to the left margin as a real browser would do
+  for text-indent on a block of flowing prose.</p>
+
+  <p>Water is H<sub class="sub">2</sub>O and Einstein wrote E = mc<sup class="sup">2</sup>.</p>
+
+  <h2>List markers</h2>
+  <ul class="roman"><li>roman one</li><li>roman two</li><li>roman three</li></ul>
+  <ul class="alpha"><li>alpha one</li><li>alpha two</li></ul>
+  <ul class="square"><li>square bullet one</li><li>square bullet two</li></ul>
+</body>
+</html>

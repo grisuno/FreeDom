@@ -243,7 +243,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | **fork + exec del worker** (re-ejecuta `/proc/self/exe` como `--tab-worker`: NO hereda COW del padre → un worker no ve el contenido de las otras pestañas; ASLR fresca; higiene de fds vía `close_range`) + seccomp-bpf fail-closed (con **W^X**: `mmap`/`mprotect` con `PROT_EXEC` denegados por inspección de argumento → sin shellcode nativo aun tras secuestro de control) + **anti-volcado** (`PR_SET_DUMPABLE`=0 + `RLIMIT_CORE`=0, sin core ni ptrace ajeno) + Landlock + **namespaces por pestaña** (`unshare` user/net/ipc/uts, best-effort defensa en profundidad); worker por pestaña que parsea/decodifica/ejecuta contenido hostil; el padre sobrevive. |
 | Estado cifrado | `local_store`, `disk_store` | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `css` (`css_`), `css_color` (`cc_`) | Display list inerte → bloques pintables; presentación de autor solo con `caps.css`; `src` de imagen resuelto contra el origen. Acerca al render moderno (puro, con tests): **acentos** (byte inválido → Windows-1252 → UTF-8, no `?`), **énfasis inline** (`b/strong/th`→negrita, `i/em`→cursiva), **listas** (`ul/ol/li` con marcador `•`/`N.` + sangrado por anidamiento), **tablas** (`td/th` = celda recolectada, agrupadas como **grid** reusando `box_tree`), **CSS de autor** (`<style>` + `style=`: color/fondo/`text-align`/`font-size`/`line-height`/`font-weight`/`font-style`/`display`; selectores simples/compuestos **+ combinadores descendiente/hijo**; `display:none` oculta; **nunca telefonea a casa** — `url(`/`@`-reglas descartadas) y **modo sin distracciones**. |
-| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** + **selectores de atributo** `[attr]`/`[attr=v]`/`~=`/`\|=`/`^=`/`$=`/`*=` con flag `i`/`s` (Hito 23b-4, hasta `CSS_MAX_ATTR_SEL` (4) por compuesto, especificidad +10 c/u) — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~` y pseudo `:`/`::` siguen fuera, fallan cerrado; whitelist de propiedades). **`!important`** honrado (Hito 23b-4): el sufijo se quita y la declaración sube a un **tier de cascada superior** que gana a toda no-importante sin importar especificidad (antes se **descartaba** por completo). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). **Box model** (`margin`/`padding`/`width`/`max-width`, Hito 23b-3): resuelto por la misma cascada (px/`0`/`em`·`rem`; `%`/vw/`calc` fallan cerrado), gateado por `caps.css` (una caja del autor puede encoger el contenido a lo ilegible → familia de presentación, no la de layout siempre-on); habilita la **columna de lectura centrada** (`max-width` + `margin: 0 auto` + padding). La geometría horizontal vive en `bx_place` (puro, en `box_style`). **`text-decoration`** (`underline`/`line-through`/`overline`/`none`, Hito 23b-5): OR de bits `CSS_DECO_*` resuelto por la misma cascada (palabras clave de línea; tokens de estilo/color/grosor ignorados; `none`=0 quita p.ej. el subrayado de un `<a>`), gateado por `caps.css` como los colores; el painter reutiliza la maquinaria de subrayado de los links y añade tachado/línea-superior. |
+| CSS de autor | `css` (`css_`) | Parser + cascada pura del CSS del **webmaster** (`<style>` + `style=`). Subconjunto simple (selectores de tipo/`.clase`/`#id`/`*`/grupos **+ combinadores descendiente `A B` e hijo `A > B`** + **selectores de atributo** `[attr]`/`[attr=v]`/`~=`/`\|=`/`^=`/`$=`/`*=` con flag `i`/`s` (Hito 23b-4, hasta `CSS_MAX_ATTR_SEL` (4) por compuesto, especificidad +10 c/u) — hasta `CSS_MAX_COMPOUNDS` (4) compuestos, especificidad = suma; sibling `+`/`~` y pseudo `:`/`::` siguen fuera, fallan cerrado; whitelist de propiedades). **`!important`** honrado (Hito 23b-4): el sufijo se quita y la declaración sube a un **tier de cascada superior** que gana a toda no-importante sin importar especificidad (antes se **descartaba** por completo). Propiedades de **layout de contenedor** (`display:flex`/`grid` + `gap`/`justify-content`/`grid-template-columns`) resueltas por la **misma cascada** y consumidas por `page_view`: una hoja `<style>` maqueta columnas, no solo `style=` inline (Hito 23b-2). **`@media`** soportado (subconjunto: `prefers-color-scheme` → modo oscuro automático, `screen`/`print`/`all`, `min/max-width` contra ancho normalizado; `not`/desconocido falla cerrado). Contenido hostil: descarta `url(` y `@import`/`@font-face` (cero red), acotado (anti-DoS), falla cerrado, no ejecuta nada; fuzzeado. Los **colores** de autor siguen gateados por `caps.css`; la **maquetación** (flex/grid) se aplica siempre (estructura). **Box model** (`margin`/`padding`/`width`/`max-width`, Hito 23b-3): resuelto por la misma cascada (px/`0`/`em`·`rem`; `%`/vw/`calc` fallan cerrado), gateado por `caps.css` (una caja del autor puede encoger el contenido a lo ilegible → familia de presentación, no la de layout siempre-on); habilita la **columna de lectura centrada** (`max-width` + `margin: 0 auto` + padding). La geometría horizontal vive en `bx_place` (puro, en `box_style`). **`text-decoration`** (`underline`/`line-through`/`overline`/`none`, Hito 23b-5): OR de bits `CSS_DECO_*` resuelto por la misma cascada (palabras clave de línea; tokens de estilo/color/grosor ignorados; `none`=0 quita p.ej. el subrayado de un `<a>`), gateado por `caps.css` como los colores; el painter reutiliza la maquinaria de subrayado de los links y añade tachado/línea-superior. **Presentación de texto** (Hito 23b-6, gateada por `caps.css` salvo `list-style`): `font-family` (bucket genérico serif/sans/mono/cursive/fantasy), `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow` (una capa), `opacity`, `vertical-align` (sub/super), `text-indent`, `white-space` (ajuste/no-ajuste) y `list-style-type` (marcador del `<li>`: disc/circle/square/decimal/alpha/roman); `font-family` mapea a familia genérica (sin casado exacto) y descarta `@font-face`/`url(`. Inventario soportado-vs-faltante en `spec/css.md`. |
 | Imágenes | `image_decode` (`img_`) | Decodificado **PNG + JPEG dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. JPEG es excepción de doctrina autorizada (libjpeg con fuente en memoria + `longjmp` que nunca llama `exit()`). |
 | Formularios | `form` (`fm_`) | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). |
 | Export PDF | `pdf_export` (`pe_`) | **Guardar página como PDF vectorial** (texto seleccionable, zoom infinito). Puro: el nombre de archivo se deriva del **título hostil** saneado fail-closed (sin traversal/separadores/oculto) y la paginación es determinista; el orquestador (`export_pdf` en la GUI) solo hace la I/O de Cairo, reusando el mismo `layout_doc`/`paint_content_row` que la pantalla. |
@@ -937,6 +937,43 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   -color/-thickness`, semántica de propagación (usamos ancestro-más-cercano), `letter-spacing`,
   `text-transform`. *(Módulos puros + IPC + E2E visual headless verificados; ventana Wayland
   interactiva pendiente al dueño.)* Ver `[[freedom-author-css-direction]]`, `[[freedom-line-height]]`.
+- **Hito 23b-6 — 10 propiedades de presentación de texto (las de mayor impacto cosmético).** Tanda
+  de **10 propiedades nuevas** de CSS de autor, todas con TDD + fuzz + E2E visual: **`font-family`**
+  (mapea a un *bucket* genérico serif/sans/mono/cursive/fantasy — el motor no casa familias exactas;
+  nombres comunes mapeados; `@font-face`/`url(` descartados → cero red), **`text-transform`**
+  (uppercase/lowercase/capitalize/none), **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**
+  (una capa, blur ignorado, sin color → negro), **`opacity`** (0..100), **`vertical-align`** (solo
+  sub/super/baseline), **`text-indent`** (primera línea), **`white-space`** (solo se consume la
+  distinción ajuste/no-ajuste: `nowrap`/`pre` suprimen el wrap) y **`list-style-type`**/`list-style`
+  (disc/circle/square/decimal/lower·upper-alpha/lower·upper-roman/none → cambia el marcador del `<li>`).
+  `spec/css.md` ahora lleva un **inventario explícito de soportado vs faltante**. **Plumbing:** mismo
+  patrón de run que `line-height`/`text-decoration` pero con un **setter nuevo dedicado**
+  `pv_set_text_ext` (11 args; un `pv_text_ext` las transporta por la fusión nearest-ancestor de
+  `resolve_context`) → **11 int32 nuevos en `tab.c` write_view/read_view** (insertados entre `deco` y
+  `cid` en AMBOS, mismo orden — desincronizar = basura) → `rd_block` **gateado por `caps.css`** (salvo
+  `list-style`, que es estructura: el marcador se hornea en el texto del run, no se gatea). En el painter
+  (`browser_ui.c`): `content_font` gana arg `family` (`family_face` mapea bucket→cara Cairo);
+  `styled_advance` (medición) y `styled_draw` (pintado) aplican `text-transform` + `letter-spacing`
+  **igual por clúster UTF-8** → la geometría/hit-test quedan consistentes y el **camino por defecto
+  (sin `--author-css`) es byte-idéntico** (verificado: `rich.html` sin author-CSS sin cambios);
+  `word-spacing` = px extra al hueco inter-palabra; `vertical-align` sub/super encoge 0.83 + desplaza
+  baseline; `text-indent` vía `rc_state.pending_indent` consumido en `open_line` (solo cuando un bloque
+  abre línea fresca → pega a la 1ª línea una vez); `nowrap` suprime el test de wrap; `text-shadow` pinta
+  una copia desplazada; `opacity` → `set_rgb_alpha`. `list_marker` ahora toma el `list-style` (helpers
+  `alpha_marker`/`roman_marker`). **Gotcha (anotado en memoria):** el Makefile no rastrea deps de header
+  → tras crecer `css_style`/`pv_run`/`rd_block` hay que **`make clean`** o un `.o` viejo lee el layout
+  anterior (`css_resolve_el` devuelve `css_style` **por valor** → ABI rota → basura silenciosa; se
+  manifestó como fallos de los tests flex de `page_view`). Specs (`css.md`, `page_view.md`, `render_doc.md`,
+  `tab.md`) + tests (11 nuevos en `css`; el pipeline real cubierto por `page_view`/`render_doc`) +
+  `make test` (36 suites) / `make asan` (36, exit 0) limpios + fuzz `fuzz-css` (175k execs) y `fuzz-pv`
+  (21.8k execs) sin crash/leak/UB + **E2E visual** (`examples/text-presentation.html` por `--author-css
+  --download-pdf`: el PNG confirma las 10 — serif/mono/cursive, MAYÚSCULAS/Capitalizado/minúsculas,
+  tracking ancho, palabras separadas, sombra gris/roja, párrafo al 45% de opacidad, H₂O/mc² sub/super,
+  sangría de 1ª línea, y marcadores i./ii./A./B./square). **Fuera de alcance (ahora el tope de la lista
+  "faltante" en `spec/css.md`):** `border`/`border-radius`/`box-shadow`/`box-sizing` (necesitan
+  agrupación de cajas por bloque), `position`, transforms/gradientes, casado exacto de fuentes, blur/
+  multi-capa de `text-shadow`. *(Módulos puros + IPC + E2E visual headless verificados; ventana Wayland
+  interactiva pendiente al dueño.)* Ver `[[freedom-text-presentation-css]]`, `[[freedom-author-css-direction]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -1051,8 +1088,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   de `repeat()`/`minmax()`/pesos `fr` en grid (hoy todo track = 1fr igual); render de `@media print` al
   PDF; combinadores **hermano** (`+`/`~`) y **pseudo-clases** `:`/`::` (los combinadores
   **descendiente/hijo** y los **selectores de atributo** + **`!important`** ya cerrados arriba, Hito
-  23b-4); `letter-spacing`/`text-transform` (`line-height` y `text-decoration` ya cerrados arriba,
-  Hito 23b-5); persistir el toggle de estilos de autor y el modo reader con el Hito 10.
+  23b-4); persistir el toggle de estilos de autor y el modo reader con el Hito 10. (`line-height` y
+  `text-decoration` cerrados en Hito 23b-5; `font-family`/`text-transform`/`letter-spacing`/
+  `word-spacing`/`text-shadow`/`opacity`/`vertical-align`/`text-indent`/`white-space`/`list-style-type`
+  cerrados en Hito 23b-6. Falta fino dentro de esa tanda: casado exacto de fuentes, blur/multi-capa de
+  `text-shadow`, `letter-spacing`/`text-indent` en `%`, `vertical-align` con longitud/top/middle/bottom,
+  preservación de espacios de `white-space`.)
 - **Pendiente de fondo (hitos propios):** motor de cajas CSS de autor completo (ver Hito 23b); JS-vivo
   (mutación DOM → repintado, eventos, timers); otros formatos de imagen
   (JPEG/WebP/GIF — superficie nueva, contra doctrina salvo justificación); `pledge`/`unveil` en

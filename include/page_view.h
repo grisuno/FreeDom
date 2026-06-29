@@ -100,6 +100,22 @@ typedef struct pv_run {
      * none, -1 = unset). Presentation: render_doc applies it only with caps.css,
      * like fg_rgb/bg_rgb. Resolved from the nearest ancestor that sets it. */
     int     text_decoration;
+    /* Author text-presentation extensions (Hito 23b-6), each resolved from the
+     * nearest ancestor that sets it (they inherit). Presentation: render_doc applies
+     * them only with caps.css. Defaults (no author value): font_family 0 (unset ->
+     * sans), text_transform 0 (none), letter_spacing/word_spacing/text_indent
+     * PV_LEN_UNSET, shadow_dx/dy 0 + shadow_color -1 (no shadow), opacity -1 (opaque),
+     * valign 0 (baseline), white_space 0 (normal/wrap). */
+    int     font_family;     /* css_font_family */
+    int     text_transform;  /* css_text_transform */
+    int     letter_spacing;  /* signed px, PV_LEN_UNSET unset */
+    int     word_spacing;    /* signed px, PV_LEN_UNSET unset */
+    int     shadow_dx, shadow_dy; /* text-shadow offsets px */
+    int     shadow_color;    /* 0xRRGGBB, or -1 (no shadow) */
+    int     opacity;         /* percent 0..100, or -1 (unset/opaque) */
+    int     valign;          /* css_valign */
+    int     text_indent;     /* signed px first-line indent, PV_LEN_UNSET unset */
+    int     white_space;     /* css_white_space */
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -221,6 +237,17 @@ void pv_set_bgcolor(pv_view *v, int bg_rgb);
  * these only with caps.css. */
 void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
                        int text_decoration);
+
+/* Sets the author text-presentation extensions (Hito 23b-6) on the most recently
+ * appended run: the generic font_family, text_transform, signed letter_spacing/
+ * word_spacing (PV_LEN_UNSET = unset), text-shadow (shadow_dx/dy offsets + shadow_color
+ * packed 0xRRGGBB or -1 for none), opacity (0..100 or -1), valign, signed text_indent
+ * (PV_LEN_UNSET = unset) and white_space. No-op on an empty or NULL view. Like author
+ * colors, render_doc applies these only with caps.css. */
+void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
+                     int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
+                     int shadow_color, int opacity, int valign, int text_indent,
+                     int white_space);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, and the parsed gap/justify/cols). No-op on an empty

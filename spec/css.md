@@ -101,6 +101,72 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `padding`, `padding-top/right/bottom/left` | `pad_top/right/bottom/left` (px ≥ 0). Same 1–4 shorthand. `auto`/negative → that side dropped (fail closed). Clamped `[0, CSS_LEN_MAX]`. |
 | `width` | `width` (px content width, or `CSS_LEN_UNSET`). `auto` → unset. |
 | `max-width` | `max_width` (px, or `CSS_LEN_UNSET`). `none` → unset. |
+| `font-family` | `font_family` (`css_font_family`): the first recognised name in the comma stack maps to its **generic bucket** (`serif`/`sans-serif`/`monospace`/`cursive`/`fantasy`); common names (Arial→sans, Times→serif, Courier→mono, …) are mapped; quotes stripped; `url()` dropped; unknown → unset |
+| `text-transform` | `text_transform` (`css_text_transform`): `uppercase`/`lowercase`/`capitalize`/`none` (explicit); other values (`full-width`, …) dropped |
+| `letter-spacing` | `letter_spacing` (signed px; `normal` → 0; `em` ×16; `CSS_LEN_UNSET` unset), clamped `[−CSS_SPACING_MAX, CSS_SPACING_MAX]`; `%`/`calc`/bare number dropped |
+| `word-spacing` | `word_spacing` (same domain/clamp as `letter-spacing`) — extra px added to each inter-word gap |
+| `text-shadow` | `shadow_dx`/`shadow_dy` (signed px offsets, clamped `[−CSS_SHADOW_MAX, CSS_SHADOW_MAX]`) + `shadow_color` (0xRRGGBB, or -1 = none/unset). Single layer: collects ≤3 lengths (dx, dy, **blur ignored**) + one color in any order; needs both offsets or the declaration is dropped; missing color → black; `none` → explicit no-shadow; `url()` dropped |
+| `opacity` | `opacity` (percent 0..100, or -1 unset): unitless `0..1` ×100 or a `%`, clamped `[0,100]` |
+| `vertical-align` | `valign` (`css_valign`): `baseline`/`sub`/`super` only; `top`/`middle`/`bottom`/`<length>` dropped (out of scope) |
+| `text-indent` | `text_indent` (signed px first-line indent; `em` ×16; `CSS_LEN_UNSET` unset); `%`/viewport dropped |
+| `white-space` | `white_space` (`css_white_space`): `normal`/`nowrap`/`pre`/`pre-wrap`/`pre-line` — the presentation layer consumes only the **wrap/no-wrap** distinction (`nowrap`/`pre` suppress line wrapping) |
+| `list-style-type`, `list-style` | `list_style` (`css_list_style`): the first recognised type keyword wins (`disc`/`circle`/`square`/`decimal`/`lower-alpha`\|`lower-latin`/`upper-alpha`\|`upper-latin`/`lower-roman`/`upper-roman`/`none`); changes the `<li>` marker; `url()` (list-style-image) dropped (never fetch) |
+
+### Property inventory (supported vs missing)
+
+**Supported** (resolved into `css_style`, gated downstream as noted):
+
+- *Color / background*: `color`, `background-color`, `background` (color only).
+- *Text*: `text-align`, `font-size`, `font-weight`, `font-style`, `line-height`,
+  `text-decoration`(`-line`), **`font-family`**, **`text-transform`**,
+  **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**, **`opacity`**,
+  **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only).
+- *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
+  `grid-template-columns`, `margin`(+longhands), `padding`(+longhands), `width`,
+  `max-width`.
+- *Lists*: **`list-style-type`**, **`list-style`** (type token only).
+- *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
+  `all`, `min/max-width`), `!important`.
+
+(Properties in **bold** are the Hito 23b-6 batch.)
+
+**Not yet supported** (dropped / fail closed unless noted), highest cosmetic value
+first:
+
+- *Box decoration*: `border`(/`-width`/`-style`/`-color`), `border-radius`,
+  `box-shadow`, `box-sizing`, `outline` — need per-block box grouping (the flat
+  display list has no block box to stroke yet).
+- *Positioning*: `position` (relative/absolute/sticky/fixed), `top`/`left`/…,
+  `z-index`, `float`, `clear`, `overflow`.
+- *Backgrounds beyond a solid color*: `background-image`/gradients (and any
+  `url()` — by doctrine, never fetched), `background-position`/`-size`/`-repeat`.
+- *Transforms / filters / transitions*: `transform`, `filter`, `transition`,
+  `animation`, `@keyframes`.
+- *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
+  in `%`/viewport units, `text-decoration-style`/`-color`/`-thickness`,
+  `vertical-align` length/`top`/`middle`/`bottom`, `white-space` whitespace
+  *preservation* (only the wrap distinction is consumed), `word-break`,
+  `overflow-wrap`, `text-overflow`, `direction`/`writing-mode`.
+- *Flex/grid, finer grain*: per-item `flex-grow`/`-shrink`/`-basis`/`order`,
+  `align-items`/`align-content`, distinct `row-gap`, `repeat()`/`minmax()`/`fr`
+  weights/named tracks.
+- *Selectors*: sibling combinators `+`/`~`, pseudo-classes/elements `:`/`::`.
+- *Values*: `calc()`, `var()`/custom properties, `url()` anything,
+  `@import`/`@font-face`.
+
+**Text-presentation extensions (Hito 23b-6).** `font-family` / `text-transform` /
+`letter-spacing` / `word-spacing` / `text-shadow` / `opacity` / `vertical-align` /
+`text-indent` / `white-space` resolve through the **same cascade** as the other
+properties (a `<style>` rule, a selector, and inline `style=` all feed them, inline
+winning, `!important` honored). In CSS they all **inherit**; in this flat model the
+caller (page_view) takes the value from the **nearest ancestor** that sets each, exactly
+like `color`. They are **presentation**, so render_doc applies them only with `caps.css`
+(Privacy/Secure by Default), like the author colors. `font-family` maps a name to a
+**generic bucket** (the engine has no font files to match exact families); `text-shadow`
+keeps a single layer (blur ignored); `white-space` consumes only the wrap/no-wrap
+distinction; `list-style-type` changes the `<li>` marker (structural — page_view bakes it
+into the run text, so it is carried by default, not gated). None can ever phone home:
+`url()` (a `@font-face`/list-style-image) is dropped on every one of them.
 
 **Box model (Hito 23b-3).** `margin` / `padding` / `width` / `max-width` resolve through the
 **same cascade** as the other properties (a `<style>` rule, a selector, and inline `style=`
@@ -189,8 +255,38 @@ typedef struct css_style {
     int          margin_top, margin_right, margin_bottom, margin_left;
     int          pad_top, pad_right, pad_bottom, pad_left;
     int          width, max_width;
+    /* Text-presentation extensions (Hito 23b-6; inherit in CSS, gated by caps.css). */
+    int          font_family;     /* css_font_family, 0 unset */
+    int          text_transform;  /* css_text_transform, 0 unset */
+    int          letter_spacing;  /* signed px, 0 = normal, CSS_LEN_UNSET unset */
+    int          word_spacing;    /* signed px, 0 = normal, CSS_LEN_UNSET unset */
+    int          shadow_dx, shadow_dy; /* text-shadow offsets px (0 if no shadow) */
+    int          shadow_color;    /* 0xRRGGBB, or -1 (none/unset) */
+    int          opacity;         /* percent 0..100, or -1 unset */
+    int          valign;          /* css_valign, 0 unset */
+    int          text_indent;     /* signed px, CSS_LEN_UNSET unset */
+    int          white_space;     /* css_white_space, 0 unset */
+    int          list_style;      /* css_list_style, 0 unset */
 } css_style;
 
+typedef enum css_font_family {    /* font-family generic bucket */
+    CSS_FF_UNSET = 0, CSS_FF_SERIF, CSS_FF_SANS, CSS_FF_MONO,
+    CSS_FF_CURSIVE, CSS_FF_FANTASY
+} css_font_family;
+typedef enum css_text_transform {
+    CSS_TT_UNSET = 0, CSS_TT_NONE, CSS_TT_UPPERCASE, CSS_TT_LOWERCASE, CSS_TT_CAPITALIZE
+} css_text_transform;
+typedef enum css_valign { CSS_VA_UNSET = 0, CSS_VA_BASELINE, CSS_VA_SUB, CSS_VA_SUPER } css_valign;
+typedef enum css_white_space {
+    CSS_WS_UNSET = 0, CSS_WS_NORMAL, CSS_WS_NOWRAP, CSS_WS_PRE, CSS_WS_PRE_WRAP, CSS_WS_PRE_LINE
+} css_white_space;
+typedef enum css_list_style {
+    CSS_LS_UNSET = 0, CSS_LS_NONE, CSS_LS_DISC, CSS_LS_CIRCLE, CSS_LS_SQUARE,
+    CSS_LS_DECIMAL, CSS_LS_LOWER_ALPHA, CSS_LS_UPPER_ALPHA, CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN
+} css_list_style;
+
+#define CSS_SPACING_MAX 200      /* px clamp for letter/word-spacing (anti-DoS) */
+#define CSS_SHADOW_MAX  100      /* px clamp for text-shadow offsets (anti-DoS) */
 #define CSS_GAP_MAX       4096   /* px cap on gap (anti-DoS) */
 #define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns tracks (anti-DoS) */
 #define CSS_MAX_COMPOUNDS 4      /* max compounds in one complex selector */
@@ -330,4 +426,12 @@ common case.)
   `underline`/`overline`/`line-through`/`none` (Hito 23b-5; gated by `caps.css`). Still out of
   scope: `text-decoration-style`/`-color`/`-thickness` (extra tokens are ignored, not applied),
   `text-decoration` propagation semantics (our flat model resolves the nearest ancestor that set
-  it, like `color`), `letter-spacing`, `text-transform`, and the rest of CSS.
+  it, like `color`).
+- **`font-family`, `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow`,
+  `opacity`, `vertical-align`, `text-indent`, `white-space`, `list-style-type`/`list-style`**
+  **are** supported (Hito 23b-6; see *Property inventory* and the *Properties* table for the
+  exact subset and fail-closed rules). Still out of scope within them: exact font matching
+  (only generic buckets), `text-shadow` blur/multi-layer, `%`/viewport `letter-spacing`/
+  `text-indent`, `vertical-align` lengths/`top`/`middle`/`bottom`, and `white-space`
+  whitespace *preservation* (only the wrap distinction is consumed). The full "Not yet
+  supported" list (borders, `position`, transforms, gradients, …) is in *Property inventory*.

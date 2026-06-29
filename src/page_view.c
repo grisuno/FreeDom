@@ -161,6 +161,17 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->font_scale = 0;
     r->line_scale = 0;
     r->text_decoration = -1;
+    r->font_family = 0;
+    r->text_transform = 0;
+    r->letter_spacing = PV_LEN_UNSET;
+    r->word_spacing = PV_LEN_UNSET;
+    r->shadow_dx = 0;
+    r->shadow_dy = 0;
+    r->shadow_color = -1;
+    r->opacity = -1;
+    r->valign = 0;
+    r->text_indent = PV_LEN_UNSET;
+    r->white_space = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -215,6 +226,17 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->font_scale = 0;
     r->line_scale = 0;
     r->text_decoration = -1;
+    r->font_family = 0;
+    r->text_transform = 0;
+    r->letter_spacing = PV_LEN_UNSET;
+    r->word_spacing = PV_LEN_UNSET;
+    r->shadow_dx = 0;
+    r->shadow_dy = 0;
+    r->shadow_color = -1;
+    r->opacity = -1;
+    r->valign = 0;
+    r->text_indent = PV_LEN_UNSET;
+    r->white_space = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -277,6 +299,17 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     r->font_scale = 0;
     r->line_scale = 0;
     r->text_decoration = -1;
+    r->font_family = 0;
+    r->text_transform = 0;
+    r->letter_spacing = PV_LEN_UNSET;
+    r->word_spacing = PV_LEN_UNSET;
+    r->shadow_dx = 0;
+    r->shadow_dy = 0;
+    r->shadow_color = -1;
+    r->opacity = -1;
+    r->valign = 0;
+    r->text_indent = PV_LEN_UNSET;
+    r->white_space = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -326,6 +359,25 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
     r->font_scale = font_scale;
     r->line_scale = line_scale;
     r->text_decoration = text_decoration;
+}
+
+void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
+                     int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
+                     int shadow_color, int opacity, int valign, int text_indent,
+                     int white_space) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->font_family = font_family;
+    r->text_transform = text_transform;
+    r->letter_spacing = letter_spacing;
+    r->word_spacing = word_spacing;
+    r->shadow_dx = shadow_dx;
+    r->shadow_dy = shadow_dy;
+    r->shadow_color = shadow_color;
+    r->opacity = opacity;
+    r->valign = valign;
+    r->text_indent = text_indent;
+    r->white_space = white_space;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -616,6 +668,47 @@ typedef struct pv_box_info {
     int l, r, w, center, mt, mb;
 } pv_box_info;
 
+/* Author text-presentation extensions resolved for a run (Hito 23b-6): each from the
+ * nearest ancestor that sets it (they inherit in CSS). list_style drives the <li>
+ * marker (structural); the rest are gated by caps.css downstream. Defaults mirror the
+ * pv_run / css_style "unset" sentinels. */
+typedef struct pv_text_ext {
+    int font_family, text_transform, letter_spacing, word_spacing;
+    int shadow_dx, shadow_dy, shadow_color;
+    int opacity, valign, text_indent, white_space;
+    int list_style;
+} pv_text_ext;
+
+/* Initialises an ext to "unset" (no author text extension applied). */
+static void pv_text_ext_reset(pv_text_ext *e) {
+    e->font_family = 0; e->text_transform = 0;
+    e->letter_spacing = PV_LEN_UNSET; e->word_spacing = PV_LEN_UNSET;
+    e->shadow_dx = 0; e->shadow_dy = 0; e->shadow_color = -1;
+    e->opacity = -1; e->valign = 0; e->text_indent = PV_LEN_UNSET;
+    e->white_space = 0; e->list_style = 0;
+}
+
+/* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
+ * already set is not overwritten — keeps the nearest, matching inheritance). */
+static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
+    if (e->font_family == 0 && cs->font_family != CSS_FF_UNSET) e->font_family = cs->font_family;
+    if (e->text_transform == 0 && cs->text_transform != CSS_TT_UNSET) e->text_transform = cs->text_transform;
+    if (e->letter_spacing == PV_LEN_UNSET && cs->letter_spacing != CSS_LEN_UNSET)
+        e->letter_spacing = cs->letter_spacing;
+    if (e->word_spacing == PV_LEN_UNSET && cs->word_spacing != CSS_LEN_UNSET)
+        e->word_spacing = cs->word_spacing;
+    if (e->shadow_color == -1 && cs->shadow_color != -1) {
+        e->shadow_dx = cs->shadow_dx; e->shadow_dy = cs->shadow_dy;
+        e->shadow_color = cs->shadow_color;
+    }
+    if (e->opacity == -1 && cs->opacity != -1) e->opacity = cs->opacity;
+    if (e->valign == 0 && cs->valign != CSS_VA_UNSET) e->valign = cs->valign;
+    if (e->text_indent == PV_LEN_UNSET && cs->text_indent != CSS_LEN_UNSET)
+        e->text_indent = cs->text_indent;
+    if (e->white_space == 0 && cs->white_space != CSS_WS_UNSET) e->white_space = cs->white_space;
+    if (e->list_style == 0 && cs->list_style != CSS_LS_UNSET) e->list_style = cs->list_style;
+}
+
 /* True if the resolved style declares any HORIZONTAL box property. */
 static int css_has_hbox(const css_style *cs) {
     return cs->margin_left != CSS_LEN_UNSET || cs->margin_right != CSS_LEN_UNSET ||
@@ -704,7 +797,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             int *fg, int *bg, int *bold, int *italic,
                             int *align, int *font_scale, int *line_scale, int *deco,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
-                            pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box) {
+                            pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box,
+                            pv_text_ext *ext) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
     *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
     *deco = -1;
@@ -713,6 +807,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->justify = FX_JUSTIFY_START; cont->cols = 0;
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
+    pv_text_ext_reset(ext);
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
     int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0;
     int got_li = 0, got_list_kind = 0;
@@ -724,6 +819,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
             lxb_tag_id_t t = lxb_dom_element_tag_id(el);
             css_style cs = element_css_style(el, sheet);
+            pv_text_ext_merge(ext, &cs);
 
             if (is_bold_tag(t)) tag_bold = 1;
             if (is_italic_tag(t)) tag_italic = 1;
@@ -1025,17 +1121,66 @@ static int li_ordinal(const lxb_dom_node_t *li) {
     return n;
 }
 
-/* Builds the list marker for the first run of an <li>: "* " for an unordered list,
- * "N. " for an ordered one. Written into out (size cap); out is left empty on bad
- * args. ASCII only, so it is valid UTF-8 and safe to paint. */
-static void list_marker(int ordered, const lxb_dom_node_t *li, char *out, size_t cap) {
-    if (cap == 0) return;
-    if (ordered && li != NULL) {
-        int ord = li_ordinal(li);
-        snprintf(out, cap, "%d. ", ord);
-    } else {
-        snprintf(out, cap, "\xE2\x80\xA2 "); /* U+2022 BULLET + space */
+/* Spreadsheet-style alphabetic ordinal (1->a, 26->z, 27->aa), written as "a. " into
+ * out (size cap). upper selects A..Z. */
+static void alpha_marker(int n, int upper, char *out, size_t cap) {
+    char buf[8];
+    int k = 0;
+    if (n < 1) n = 1;
+    while (n > 0 && k < (int)sizeof buf) {
+        int r = (n - 1) % 26;
+        buf[k++] = (char)((upper ? 'A' : 'a') + r);
+        n = (n - 1) / 26;
     }
+    size_t o = 0;
+    while (k > 0 && o + 1 < cap) out[o++] = buf[--k];     /* reverse */
+    if (o + 2 < cap) { out[o++] = '.'; out[o++] = ' '; }
+    if (o < cap) out[o] = '\0';
+}
+
+/* Roman-numeral ordinal (1->i, 4->iv, clamped to [1,3999]) as "iv. " into out. */
+static void roman_marker(int n, int upper, char *out, size_t cap) {
+    static const int vals[] = { 1000,900,500,400,100,90,50,40,10,9,5,4,1 };
+    static const char *const up[] = { "M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I" };
+    static const char *const lo[] = { "m","cm","d","cd","c","xc","l","xl","x","ix","v","iv","i" };
+    if (cap == 0) return;
+    if (n < 1) n = 1;
+    if (n > 3999) n = 3999;
+    size_t o = 0;
+    for (int i = 0; i < 13; ++i) {
+        const char *s = upper ? up[i] : lo[i];
+        while (n >= vals[i]) {
+            for (const char *p = s; *p != '\0' && o + 1 < cap; ++p) out[o++] = *p;
+            n -= vals[i];
+        }
+    }
+    if (o + 2 < cap) { out[o++] = '.'; out[o++] = ' '; }
+    out[o < cap ? o : cap - 1] = '\0';
+}
+
+/* Builds the list marker for the first run of an <li>. With no author list-style
+ * (CSS_LS_UNSET) it is the UA default: "N. " for an ordered list, "* " (bullet)
+ * otherwise. An author list-style-type selects the glyph/numbering (disc/circle/
+ * square or decimal/alpha/roman). Written into out (size cap); ASCII or short UTF-8,
+ * so it is valid UTF-8 and safe to paint. CSS_LS_NONE is handled by the caller (no
+ * marker emitted at all). */
+static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+                        char *out, size_t cap) {
+    if (cap == 0) return;
+    int ord = (li != NULL) ? li_ordinal(li) : 1;
+    switch (list_style) {
+        case CSS_LS_DISC:        snprintf(out, cap, "\xE2\x80\xA2 "); return; /* U+2022 bullet */
+        case CSS_LS_CIRCLE:      snprintf(out, cap, "\xE2\x97\xA6 "); return; /* U+25E6 white bullet */
+        case CSS_LS_SQUARE:      snprintf(out, cap, "\xE2\x96\xAA "); return; /* U+25AA small square */
+        case CSS_LS_DECIMAL:     snprintf(out, cap, "%d. ", ord); return;
+        case CSS_LS_LOWER_ALPHA: alpha_marker(ord, 0, out, cap); return;
+        case CSS_LS_UPPER_ALPHA: alpha_marker(ord, 1, out, cap); return;
+        case CSS_LS_LOWER_ROMAN: roman_marker(ord, 0, out, cap); return;
+        case CSS_LS_UPPER_ROMAN: roman_marker(ord, 1, out, cap); return;
+        default: break;  /* unset: UA default below */
+    }
+    if (ordered && li != NULL) snprintf(out, cap, "%d. ", ord);
+    else                       snprintf(out, cap, "\xE2\x80\xA2 ");
 }
 
 /* Nearest <table> ancestor of n (up to base), or NULL. */
@@ -1253,11 +1398,12 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
+                pv_text_ext unused_ext;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont, &unused_box);
+                                &reg, &unused_cont, &unused_box, &unused_ext);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1308,11 +1454,12 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
+                pv_text_ext unused_ext;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont, &unused_box);
+                                &reg, &unused_cont, &unused_box, &unused_ext);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1353,9 +1500,10 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         int list_depth = 0, ordered = 0;
         pv_cont_info cont;
         pv_box_info box;
+        pv_text_ext ext;
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
                         &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
-                        &li, &list_depth, &ordered, &reg, &cont, &box);
+                        &li, &list_depth, &ordered, &reg, &cont, &box, &ext);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -1371,9 +1519,9 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
             if (*c != ' ') { has_content = 1; break; }
         }
         char *marked = NULL;
-        if (li != NULL && li != prev_li && has_content) {
-            char mk[16];
-            list_marker(ordered, li, mk, sizeof mk);
+        if (li != NULL && li != prev_li && has_content && ext.list_style != CSS_LS_NONE) {
+            char mk[32];
+            list_marker(ordered, li, ext.list_style, mk, sizeof mk);
             size_t ml = strlen(mk), cl = strlen(collapsed);
             marked = (char *)malloc(ml + cl + 1);
             if (marked == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
@@ -1402,6 +1550,9 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
+        pv_set_text_ext(v, ext.font_family, ext.text_transform, ext.letter_spacing,
+                        ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,
+                        ext.opacity, ext.valign, ext.text_indent, ext.white_space);
     }
 
     *out = v;

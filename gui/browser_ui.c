@@ -1762,6 +1762,16 @@ typedef struct rc_frag {
     const char *text;     /* slice into a rd_block text (not owned) */
     size_t      len;
     const char *href;     /* link target (aliases the rd_block href, not owned); NULL if not a link */
+    /* Author text-presentation extensions (Hito 23b-6), applied by the painter and
+     * consistently by the layout measure. Defaults (no author style): family 0
+     * (sans), transform 0 (none), letter_spacing 0, valign_dy 0, shadow_color -1
+     * (no shadow), opacity -1 (opaque). */
+    int         family;       /* css_font_family */
+    int         transform;    /* css_text_transform */
+    double      letter_spacing;/* px between clusters */
+    double      valign_dy;    /* baseline shift px (sub/super) */
+    int         shadow_dx, shadow_dy, shadow_color;
+    int         opacity;      /* 0..100, or -1 */
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT } rc_rowkind;
@@ -1791,6 +1801,8 @@ typedef struct rc_state {
     int    bg_rgb;       /* current block's author background-color, or -1 */
     int    align;        /* current block's author text-align (css_align), 0 = left/unset */
     int    line_scale;   /* current block's author line-height percent, 0 = use theme spacing */
+    double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
+    int    nowrap;       /* current block's white-space suppresses line wrapping */
     size_t line_first;
 } rc_state;
 
@@ -1816,11 +1828,56 @@ static rc_row *rc_add_row(rc_layout *L) {
     return &L->rows[L->nrow++];
 }
 
-static void content_font(cairo_t *cr, double size, int bold, int italic) {
-    cairo_select_font_face(cr, "sans-serif",
+/* Maps an author font-family bucket (css_font_family) to a Cairo toy-font family.
+ * The engine matches no exact families, only the generic groups. */
+static const char *family_face(int family) {
+    switch (family) {
+        case CSS_FF_SERIF:   return "serif";
+        case CSS_FF_MONO:    return "monospace";
+        case CSS_FF_CURSIVE: return "cursive";
+        case CSS_FF_FANTASY: return "fantasy";
+        default:             return "sans-serif";  /* CSS_FF_SANS / unset */
+    }
+}
+
+static void content_font(cairo_t *cr, double size, int bold, int italic, int family) {
+    cairo_select_font_face(cr, family_face(family),
                            italic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
                            bold ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, size);
+}
+
+/* Sets the source color, applying an author opacity (0..100) as an alpha when set
+ * (-1 = fully opaque). Used for author text and its shadow. */
+static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity) {
+    if (opacity >= 0 && opacity < 100)
+        cairo_set_source_rgba(cr, c.r, c.g, c.b, (double)opacity / 100.0);
+    else
+        cairo_set_source_rgb(cr, c.r, c.g, c.b);
+}
+
+/* Bytes in the UTF-8 cluster starting at s[0] (1 for a stray/continuation byte),
+ * clamped to n. */
+static size_t utf8_clen(const char *s, size_t n) {
+    unsigned char c = (unsigned char)s[0];
+    size_t l = (c < 0x80) ? 1 : ((c >> 5) == 0x6) ? 2 :
+               ((c >> 4) == 0xe) ? 3 : ((c >> 3) == 0x1e) ? 4 : 1;
+    return (l > n) ? n : l;
+}
+
+/* Copies one cluster s[0,cl) into out (>= 4 bytes), applying text-transform. ASCII
+ * case mapping only (a multi-byte cluster passes through). first marks the word's
+ * first cluster (for capitalize). Returns cl. */
+static size_t xform_cluster(const char *s, size_t cl, int transform, int first, char *out) {
+    memcpy(out, s, cl);
+    if (cl == 1) {
+        char c = out[0];
+        if (transform == CSS_TT_UPPERCASE && c >= 'a' && c <= 'z') out[0] = (char)(c - 32);
+        else if (transform == CSS_TT_LOWERCASE && c >= 'A' && c <= 'Z') out[0] = (char)(c + 32);
+        else if (transform == CSS_TT_CAPITALIZE && first && c >= 'a' && c <= 'z')
+            out[0] = (char)(c - 32);
+    }
+    return cl;
 }
 
 static double measure_slice(cairo_t *cr, const char *s, size_t n) {
@@ -1839,6 +1896,51 @@ static void draw_slice(cairo_t *cr, const char *s, size_t n) {
     memcpy(buf, s, n);
     buf[n] = '\0';
     cairo_show_text(cr, buf);
+}
+
+/* True if a fragment needs the per-cluster path (text-transform other than
+ * none/unset, or a non-zero letter-spacing). Otherwise the fast whole-slice path is
+ * byte-identical to the pre-Hito-23b-6 renderer. */
+static int frag_styled(const rc_frag *f) {
+    return f->transform > CSS_TT_NONE || f->letter_spacing != 0.0;
+}
+
+/* Advance (px) of a fragment's text under its text-transform + letter-spacing. The
+ * current Cairo font must already be selected. Mirrors styled_draw exactly so layout
+ * and paint stay consistent. */
+static double styled_advance(cairo_t *cr, const rc_frag *f) {
+    if (!frag_styled(f)) return measure_slice(cr, f->text, f->len);
+    double adv = 0.0;
+    int first = 1;
+    char cl[8];
+    for (size_t i = 0; i < f->len; first = 0) {
+        size_t clen = utf8_clen(f->text + i, f->len - i);
+        size_t ol = xform_cluster(f->text + i, clen, f->transform, first, cl);
+        adv += measure_slice(cr, cl, ol) + f->letter_spacing;
+        i += clen;
+    }
+    return adv;
+}
+
+/* Draws a fragment's text starting at (x, baseline) under its text-transform +
+ * letter-spacing. The current Cairo font/source must already be set. */
+static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f) {
+    if (!frag_styled(f)) {
+        cairo_move_to(cr, x, baseline);
+        draw_slice(cr, f->text, f->len);
+        return;
+    }
+    double px = x;
+    int first = 1;
+    char cl[8];
+    for (size_t i = 0; i < f->len; first = 0) {
+        size_t clen = utf8_clen(f->text + i, f->len - i);
+        size_t ol = xform_cluster(f->text + i, clen, f->transform, first, cl);
+        cairo_move_to(cr, px, baseline);
+        draw_slice(cr, cl, ol);
+        px += measure_slice(cr, cl, ol) + f->letter_spacing;
+        i += clen;
+    }
 }
 
 static void block_style(const ui_theme *th, const rd_block *b,
@@ -1900,9 +2002,24 @@ static void open_line(rc_layout *L, rc_state *s) {
     if (L->nrow > 0) s->cur_top += s->pending_gap;  /* no leading gap at the very top */
     s->pending_gap = 0;
     s->line_open = 1;
-    s->pen_x = 0;
+    /* Author text-indent (px) offsets the first line a block opens; cleared so wrapped
+     * lines start at 0. Default pending_indent 0 -> identical to before. */
+    s->pen_x = s->pending_indent;
+    s->pending_indent = 0;
     s->line_first = L->nfrag;
 }
+
+/* Author text-presentation extensions for a block, derived from its rd_block (already
+ * gated by caps.css upstream) and handed to flow_text. */
+typedef struct rc_ext {
+    int    family;        /* css_font_family */
+    int    transform;     /* css_text_transform */
+    double letter_spacing;/* px between clusters */
+    double word_spacing;  /* px added to each inter-word gap */
+    double valign_dy;     /* baseline shift px (sub/super) */
+    int    shadow_dx, shadow_dy, shadow_color;
+    int    opacity;       /* 0..100, or -1 */
+} rc_ext;
 
 /* Places the words of text into the current inline line, wrapping at content_w.
  * href tags every fragment produced (NULL for non-link runs) so a later hit-test
@@ -1910,11 +2027,12 @@ static void open_line(rc_layout *L, rc_state *s) {
 static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                       const char *text, double size, int bold, int italic, int underline,
                       int strike, int overline,
-                      ui_rgb color, double content_w, const char *href) {
-    content_font(cr, size, bold, italic);
+                      ui_rgb color, double content_w, const char *href, const rc_ext *x) {
+    content_font(cr, size, bold, italic, x->family);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
-    double space_w = measure_slice(cr, " ", 1);
+    double space_w = measure_slice(cr, " ", 1) + x->word_spacing;
+    if (space_w < 0.0) space_w = 0.0;
 
     size_t i = 0, n = strlen(text);
     while (i < n) {
@@ -1924,10 +2042,18 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         size_t wl = i - ws;
         if (wl == 0) break;
 
-        double ww = measure_slice(cr, text + ws, wl);
         open_line(L, s);
-        double adv = (s->pen_x > 0.0) ? space_w : 0.0;
-        if (s->pen_x > 0.0 && s->pen_x + adv + ww > content_w) {
+        /* A leading inter-word gap only between words already on this line (not at a
+         * line start), so an author text-indent does not gain a phantom space. */
+        int line_has_frag = (L->nfrag > s->line_first);
+        double adv = line_has_frag ? space_w : 0.0;
+
+        rc_frag probe = (rc_frag){ 0 };
+        probe.text = text + ws; probe.len = wl;
+        probe.transform = x->transform; probe.letter_spacing = x->letter_spacing;
+        double ww = styled_advance(cr, &probe);
+
+        if (line_has_frag && !s->nowrap && s->pen_x + adv + ww > content_w) {
             flush_line(L, s, th);
             open_line(L, s);
             adv = 0.0;
@@ -1940,6 +2066,10 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
             f->bold = bold; f->italic = italic; f->underline = underline;
             f->strike = strike; f->overline = overline; f->color = color;
             f->text = text + ws; f->len = wl; f->href = href;
+            f->family = x->family; f->transform = x->transform;
+            f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
+            f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
+            f->shadow_color = x->shadow_color; f->opacity = x->opacity;
         }
         s->pen_x += ww;
         if (fe.ascent  > s->line_asc)  s->line_asc  = fe.ascent;
@@ -1973,16 +2103,36 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
         overline  = (b->text_decoration & CSS_DECO_OVERLINE) ? 1 : 0;
     }
     const char *href = (b->kind == RD_LINK) ? b->href : NULL;
+
+    /* Author text-presentation extensions (gated by caps.css upstream; no-effect
+     * defaults otherwise). vertical-align sub/super shrinks the run and shifts its
+     * baseline; text-indent applies to the first line this block opens; white-space
+     * nowrap/pre suppresses wrapping. */
+    rc_ext x = (rc_ext){ 0 };
+    x.family = b->font_family;
+    x.transform = b->text_transform;
+    x.letter_spacing = (b->letter_spacing != PV_LEN_UNSET) ? (double)b->letter_spacing : 0.0;
+    x.word_spacing = (b->word_spacing != PV_LEN_UNSET) ? (double)b->word_spacing : 0.0;
+    x.shadow_dx = b->shadow_dx; x.shadow_dy = b->shadow_dy; x.shadow_color = b->shadow_color;
+    x.opacity = b->opacity;
+    if (b->valign == CSS_VA_SUB)        { x.valign_dy =  size * 0.18; size *= 0.83; }
+    else if (b->valign == CSS_VA_SUPER) { x.valign_dy = -size * 0.34; size *= 0.83; }
+
+    s->nowrap = (b->white_space == CSS_WS_NOWRAP || b->white_space == CSS_WS_PRE);
+    if (!s->line_open && b->text_indent != PV_LEN_UNSET)
+        s->pending_indent = (double)b->text_indent;
+
     if (b->kind == RD_NOTICE) {
         s->banner = 1;
         flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
-                  color, content_w, href);
+                  color, content_w, href, &x);
         flush_line(L, s, th);
         s->banner = 0;
     } else {
         flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
-                  color, content_w, href);
+                  color, content_w, href, &x);
     }
+    s->nowrap = 0;
 }
 
 /* Lays a contiguous range [start,end) of blocks that share one author flex/grid
@@ -2105,7 +2255,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         }
 
         if (b->kind == RD_INPUT) {
-            content_font(cr, th->body_font, 0, 0);
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
             double h = fe.height + 2.0 * UI_INPUT_PAD;
@@ -2122,7 +2272,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         }
 
         if (b->kind == RD_IMAGE) {
-            content_font(cr, th->body_font, 0, 0);
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
             cairo_font_extents_t fe;
             cairo_font_extents(cr, &fe);
             /* A decoded image sizes the row to its on-screen height; otherwise the
@@ -2172,7 +2322,7 @@ static double input_box_width(double content_w) {
 /* Width of a painted button: its label plus horizontal padding, clamped. */
 static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
                                double content_w) {
-    content_font(cr, th->body_font, 0, 0);
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
     const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
                         : rd_input_label(b->input_type);
     double bw = measure_slice(cr, label, strlen(label)) + 2.0 * UI_BUTTON_HPAD;
@@ -2199,7 +2349,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         cairo_rectangle(cr, left, ry, bw, height);
         cairo_clip(cr);
         set_rgb(cr, th->button_text);
-        content_font(cr, th->body_font, 0, 0);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
         cairo_move_to(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD);
         draw_slice(cr, label, strlen(label));
         cairo_restore(cr);
@@ -2218,7 +2368,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     ui_input_state *st = find_input_state(w, b);
     const char *val = (st != NULL) ? tf_text(&st->field) : (b->value != NULL ? b->value : "");
 
-    content_font(cr, th->body_font, 0, 0);
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
     cairo_save(cr);
     cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 4.0, height - 2.0);
     cairo_clip(cr);
@@ -2294,7 +2444,7 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     cairo_rectangle(cr, left, ry, content_w, row_h);
     cairo_stroke(cr);
 
-    content_font(cr, th->body_font, 0, 0);
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
     cairo_save(cr);
     cairo_rectangle(cr, left + pad, ry, content_w - 2.0 * pad, row_h);
     cairo_clip(cr);
@@ -2365,23 +2515,32 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
             cairo_rectangle(cr, rx + f->x, ry, f->width, r->height);
             cairo_fill(cr);
         }
-        content_font(cr, f->font_size, f->bold, f->italic);
-        set_rgb(cr, f->color);
-        cairo_move_to(cr, rx + f->x, baseline);
-        draw_slice(cr, f->text, f->len);
+        content_font(cr, f->font_size, f->bold, f->italic, f->family);
+        /* vertical-align sub/super shifts this fragment's baseline (and the
+         * decorations below); default valign_dy 0 keeps it on the line. */
+        double fbaseline = baseline + f->valign_dy;
+        double fx = rx + f->x;
+        /* Author text-shadow: one offset copy behind the glyphs, in the shadow color
+         * (honoring opacity). shadow_color -1 (the default) means no shadow. */
+        if (f->shadow_color >= 0) {
+            set_rgb_alpha(cr, rgb_from_packed(f->shadow_color), f->opacity);
+            styled_draw(cr, fx + f->shadow_dx, fbaseline + f->shadow_dy, f);
+        }
+        set_rgb_alpha(cr, f->color, f->opacity);
+        styled_draw(cr, fx, fbaseline, f);
         if (f->underline || f->strike || f->overline) {
             cairo_set_line_width(cr, UI_UNDERLINE_THICK);
-            double x0 = rx + f->x, x1 = x0 + f->width;
+            double x0 = fx, x1 = x0 + f->width;
             if (f->underline) {
-                double uy = baseline + f->font_size * UI_UNDERLINE_OFFSET;
+                double uy = fbaseline + f->font_size * UI_UNDERLINE_OFFSET;
                 cairo_move_to(cr, x0, uy); cairo_line_to(cr, x1, uy); cairo_stroke(cr);
             }
             if (f->strike) {
-                double sy = baseline - f->font_size * UI_STRIKE_OFFSET;
+                double sy = fbaseline - f->font_size * UI_STRIKE_OFFSET;
                 cairo_move_to(cr, x0, sy); cairo_line_to(cr, x1, sy); cairo_stroke(cr);
             }
             if (f->overline) {
-                double oy = baseline - f->font_size * UI_OVERLINE_OFFSET;
+                double oy = fbaseline - f->font_size * UI_OVERLINE_OFFSET;
                 cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(cr);
             }
         }
