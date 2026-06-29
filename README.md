@@ -51,6 +51,7 @@ The name reflects its core goals:
 - JavaScript sandbox using QuickJS-ng
 - Hardened build with stack protection, PIE, RELRO, and FORTIFY_SOURCE
 - Wayland + Cairo GUI backend with Client-Side Decorations (CSD)
+- HarfBuzz text shaping (ligatures, GPOS kerning, complex scripts) on the trusted side, with local fonts only — never in the sandboxed worker, never a web font fetch
 - Lexbor HTML parser and renderer
 - Strict request policy using Public Suffix List + blacklist/whitelist for TLS 1.2 compatibility
 - Post-quantum hybrid cryptography support (X25519MLKEM768)
@@ -509,7 +510,7 @@ This project is written in pure C11 and is security-hardened by default using st
 Ensure you have the required development libraries installed (e.g., via apt on Kali/Debian):
 
 ```bash
-sudo apt install liblexbor-dev libcmocka-dev libcurl4-openssl-dev libwayland-dev wayland-protocols libcairo2-dev libfontconfig-dev libxkbcommon-dev pkg-config clang
+sudo apt install liblexbor-dev libcmocka-dev libcurl4-openssl-dev libwayland-dev wayland-protocols libcairo2-dev libfontconfig-dev libfreetype6-dev libharfbuzz-dev libxkbcommon-dev pkg-config clang
 ```
 
 ### Available Targets

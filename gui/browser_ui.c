@@ -26,6 +26,7 @@
 #include "pdf_export.h"
 #include "render_doc.h"
 #include "render_policy.h"
+#include "text_shape.h"
 #include "textfield.h"
 #include "ui.h"
 #include "url.h"
@@ -1840,11 +1841,23 @@ static const char *family_face(int family) {
     }
 }
 
+/* The font last selected by content_font. measure_slice/draw_slice shape with this
+ * descriptor via HarfBuzz (text_shape); the painter always selects the font before
+ * measuring/drawing a slice, so this single-threaded shadow is always current. The
+ * toy face is still selected so the fallback path and direct cairo_show_text users
+ * (chrome labels) keep working. */
+static tsh_font g_cur_font;
+static double    g_cur_px;
+
 static void content_font(cairo_t *cr, double size, int bold, int italic, int family) {
     cairo_select_font_face(cr, family_face(family),
                            italic ? CAIRO_FONT_SLANT_ITALIC : CAIRO_FONT_SLANT_NORMAL,
                            bold ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, size);
+    g_cur_font.family = family;
+    g_cur_font.bold = bold;
+    g_cur_font.italic = italic;
+    g_cur_px = size;
 }
 
 /* Sets the source color, applying an author opacity (0..100) as an alpha when set
@@ -1880,7 +1893,12 @@ static size_t xform_cluster(const char *s, size_t cl, int transform, int first, 
     return cl;
 }
 
+/* Advance (px) of a text slice in the current content font. Shapes with HarfBuzz
+ * (text_shape) when the backend is available, otherwise falls back to the Cairo
+ * toy API (byte-identical to the pre-Hito-25 renderer). */
 static double measure_slice(cairo_t *cr, const char *s, size_t n) {
+    double adv = tsh_measure(&g_cur_font, g_cur_px, s, n);
+    if (adv >= 0.0) return adv;
     char buf[UI_SLICE_MAX];
     if (n >= sizeof buf) n = sizeof buf - 1;
     memcpy(buf, s, n);
@@ -1890,11 +1908,16 @@ static double measure_slice(cairo_t *cr, const char *s, size_t n) {
     return te.x_advance;
 }
 
-static void draw_slice(cairo_t *cr, const char *s, size_t n) {
+/* Draws a text slice at (x, baseline) in the current content font/source. Shapes
+ * with HarfBuzz when available; otherwise the Cairo toy API. Mirrors measure_slice
+ * so layout and paint stay consistent for the same slice. */
+static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n) {
+    if (tsh_draw(cr, &g_cur_font, g_cur_px, x, baseline, s, n) == TSH_OK) return;
     char buf[UI_SLICE_MAX];
     if (n >= sizeof buf) n = sizeof buf - 1;
     memcpy(buf, s, n);
     buf[n] = '\0';
+    cairo_move_to(cr, x, baseline);
     cairo_show_text(cr, buf);
 }
 
@@ -1926,8 +1949,7 @@ static double styled_advance(cairo_t *cr, const rc_frag *f) {
  * letter-spacing. The current Cairo font/source must already be set. */
 static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f) {
     if (!frag_styled(f)) {
-        cairo_move_to(cr, x, baseline);
-        draw_slice(cr, f->text, f->len);
+        draw_slice(cr, x, baseline, f->text, f->len);
         return;
     }
     double px = x;
@@ -1936,8 +1958,7 @@ static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f
     for (size_t i = 0; i < f->len; first = 0) {
         size_t clen = utf8_clen(f->text + i, f->len - i);
         size_t ol = xform_cluster(f->text + i, clen, f->transform, first, cl);
-        cairo_move_to(cr, px, baseline);
-        draw_slice(cr, cl, ol);
+        draw_slice(cr, px, baseline, cl, ol);
         px += measure_slice(cr, cl, ol) + f->letter_spacing;
         i += clen;
     }
@@ -2350,8 +2371,7 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         cairo_clip(cr);
         set_rgb(cr, th->button_text);
         content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
-        cairo_move_to(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD);
-        draw_slice(cr, label, strlen(label));
+        draw_slice(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD, label, strlen(label));
         cairo_restore(cr);
         return;
     }
@@ -2388,12 +2408,10 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
 
     if (shown[0] == '\0' && b->text != NULL && b->text[0] != '\0') {
         set_rgb(cr, th->input_placeholder);
-        cairo_move_to(cr, tx, ty);
-        draw_slice(cr, b->text, strlen(b->text));
+        draw_slice(cr, tx, ty, b->text, strlen(b->text));
     } else {
         set_rgb(cr, th->input_text);
-        cairo_move_to(cr, tx, ty);
-        draw_slice(cr, shown, strlen(shown));
+        draw_slice(cr, tx, ty, shown, strlen(shown));
     }
 
     if (focused && st != NULL) {
@@ -5344,9 +5362,11 @@ ui_status ui_run_browser(const char *start_url) {
     browser_free(&w.bs);
 
     /* Release the process-wide font caches so a leak checker sees a clean exit.
-     * Cairo holds FcPattern references in its static font cache; drop those
-     * first, then let fontconfig free its global config. All cairo objects have
-     * already been destroyed above, so this is safe. */
+     * tsh_shutdown drops the HarfBuzz shaper's cached FT/cairo faces first, then
+     * cairo's static font cache (which holds FcPattern references), then let
+     * fontconfig free its global config. All other cairo objects have already
+     * been destroyed above, so this ordering is safe. */
+    tsh_shutdown();
     cairo_debug_reset_static_data();
     FcFini();
     return UI_OK;

@@ -3,6 +3,12 @@
 > Módulo `hostblock` (prefijo `hb_`). Lógica **pura, sin I/O, sin estado global**: parsea listas de
 > dominios en formato `/etc/hosts` (archivos `.conf`) a tablas hash y decide si un host se bloquea.
 > No abre sockets ni lee archivos; el llamante le pasa el texto ya leído. Metodología: SDD + TDD.
+>
+> **Nota de namespace (Hito 25):** el prefijo `hb_` coincide con HarfBuzz, que desde 8.0 exporta un
+> `hb_free` público. La colisión **no** se resuelve renombrando este módulo de seguridad: el binario
+> `freedom` se compila con `-fvisibility=hidden` (Makefile, en `HARDEN` y en el `CFLAGS` de `asan`), así
+> sus símbolos no entran al `.dynsym` y no preemptan a los de HarfBuzz. No quitar esa flag. Ver
+> `[[freedom-harfbuzz-shaping]]`.
 
 ## 0. Por qué existe
 

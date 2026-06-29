@@ -5,8 +5,15 @@
 CC        ?= cc
 STD        = -std=c11
 WARN       = -Wall -Wextra -Werror -Wshadow -Wpointer-arith -Wvla -Wwrite-strings
+# -fvisibility=hidden: the freedom binary exports NO public API, so keep all our
+# symbols out of .dynsym. This is both hardening (minimal dynamic symbol surface)
+# and a correctness guard: without it an executable symbol PREEMPTS the same-named
+# symbol in a linked library process-wide. Concretely, hostblock uses the hb_ prefix
+# and HarfBuzz (linked since Hito 25) exports a public hb_free; the executable's
+# hb_free would interpose HarfBuzz's internal allocator and crash it. Hiding our
+# symbols resolves this and any future project/library name clash at the source.
 HARDEN     = -fstack-protector-strong -fstack-clash-protection -fcf-protection=full \
-             -D_FORTIFY_SOURCE=3 -fPIE
+             -D_FORTIFY_SOURCE=3 -fPIE -fvisibility=hidden
 OPT        = -O2
 LDHARDEN   = -pie -Wl,-z,relro,-z,now,-z,noexecstack
 
@@ -29,6 +36,13 @@ IMG_LIBS      := $(PNG_LIBS) $(JPEG_LIBS)
 # linked explicitly so the GUI can call FcFini() at shutdown (clean leak exit).
 WL_CFLAGS   := $(shell pkg-config --cflags wayland-client wayland-cursor cairo fontconfig xkbcommon 2>/dev/null)
 WL_LIBS     := $(shell pkg-config --libs wayland-client wayland-cursor cairo fontconfig xkbcommon 2>/dev/null || echo -lwayland-client -lwayland-cursor -lcairo -lfontconfig -lxkbcommon)
+# text_shape (Hito 25): HarfBuzz shaping for the trusted-side painter. Cairo (with
+# its FreeType backend, cairo-ft.h) + HarfBuzz + FreeType + fontconfig. Owner-
+# authorized dependency: it shapes hostile UTF-8 (fuzzed) with LOCAL fonts only,
+# runs on the trusted side, and never enters the confined worker. See spec/text_shape.md.
+TSH_CFLAGS  := $(shell pkg-config --cflags cairo harfbuzz freetype2 fontconfig 2>/dev/null)
+TSH_LIBS    := $(shell pkg-config --libs cairo harfbuzz freetype2 fontconfig 2>/dev/null || echo -lcairo -lharfbuzz -lfreetype -lfontconfig)
+
 WL_SCANNER  := wayland-scanner
 WL_PROTODIR := $(shell pkg-config --variable=pkgdatadir wayland-protocols 2>/dev/null)
 XDG_XML     := $(WL_PROTODIR)/stable/xdg-shell/xdg-shell.xml
@@ -83,9 +97,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
-             $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug
+             $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
+             $(BUILD_DIR)/test_text_shape
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -109,6 +124,11 @@ $(BUILD_DIR)/request_policy.o: $(SRC_DIR)/request_policy.c include/psl_data.h | 
 # image_decode pulls in <png.h> and <jpeglib.h>; their include dirs are added explicitly.
 $(BUILD_DIR)/image_decode.o: $(SRC_DIR)/image_decode.c include/image_decode.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(IMG_CFLAGS) -c $< -o $@
+
+# text_shape pulls in <cairo-ft.h>, <hb.h>, <hb-ft.h>, FreeType and fontconfig;
+# their include dirs are added explicitly. Trusted-side painter helper only.
+$(BUILD_DIR)/text_shape.o: $(SRC_DIR)/text_shape.c include/text_shape.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(TSH_CFLAGS) -c $< -o $@
 
 # js_sandbox / js_dom include the vendored quickjs.h: keep our code under the
 # hardened flags, but pull the header via -isystem so its warnings do not trip
@@ -247,6 +267,11 @@ $(BUILD_DIR)/test_zoom: $(TEST_DIR)/test_zoom.c $(BUILD_DIR)/zoom.o | $(BUILD_DI
 $(BUILD_DIR)/test_freebug: $(TEST_DIR)/test_freebug.c $(BUILD_DIR)/freebug.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# HarfBuzz text shaper (trusted-side painter helper). Shaped text is hostile;
+# fonts are local. Links cairo + harfbuzz + freetype + fontconfig.
+$(BUILD_DIR)/test_text_shape: $(TEST_DIR)/test_text_shape.c $(BUILD_DIR)/text_shape.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(TSH_CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(TSH_LIBS) $(CMOCKA_LIBS) -lm
+
 # Pure download helpers (render-vs-save + hostile-input -> safe filename). Reuses
 # pe_safe_basename (pdf_export) as the single sanitizer. No I/O deps.
 $(BUILD_DIR)/test_download: $(TEST_DIR)/test_download.c $(BUILD_DIR)/download.o $(BUILD_DIR)/pdf_export.o | $(BUILD_DIR)
@@ -305,12 +330,12 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/js_policy.o \
                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
-                      $(BUILD_DIR)/freebug.o \
+                      $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
                       $(BUILD_DIR)/xdg-decoration-client-protocol.h
-	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(WL_LIBS)
+	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $(TSH_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(WL_LIBS) $(TSH_LIBS)
 
 $(BUILD_DIR)/test_browser: $(TEST_DIR)/test_browser.c $(BUILD_DIR)/browser.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -329,7 +354,10 @@ $(BUILD_DIR)/itest_secure_fetch: $(TEST_DIR)/itest_secure_fetch.c $(BUILD_DIR)/s
 
 # Same suites under AddressSanitizer + UBSan (FORTIFY/PIE relaxed for the sanitizers).
 # The vendored QuickJS objects are rebuilt with the sanitizer too (QJS_OPT/QJS_SAN).
-asan: CFLAGS  := $(STD) $(WARN) -g -O1 -Iinclude $(LEXBOR_CFLAGS) -fsanitize=address,undefined -fno-omit-frame-pointer
+# -fvisibility=hidden kept here too (asan drops HARDEN): the asan build of `freedom`
+# (pulled in by test_freedom's --download-pdf E2E) links HarfBuzz, so it needs the
+# same symbol hiding to avoid the hb_free preemption crash. See HARDEN above.
+asan: CFLAGS  := $(STD) $(WARN) -g -O1 -Iinclude $(LEXBOR_CFLAGS) -fsanitize=address,undefined -fno-omit-frame-pointer -fvisibility=hidden
 asan: LDFLAGS := -fsanitize=address,undefined
 asan: QJS_OPT := -O1 -g
 asan: QJS_SAN := -fsanitize=address,undefined -fno-omit-frame-pointer
@@ -428,6 +456,18 @@ fuzz-fb: | $(BUILD_DIR)
 	  -o $(BUILD_DIR)/fuzz_freebug
 	./$(BUILD_DIR)/fuzz_freebug -max_total_time=30 -rss_limit_mb=2048
 
+# Coverage-guided fuzzing of the HarfBuzz shaper (clang + libFuzzer). The shaped
+# TEXT is hostile remote content: arbitrary bytes through tsh_shape must never
+# crash/leak/UB, must keep the glyph cap fail-closed and must never write OOB.
+# Fonts are local; fontconfig's one-time leaks are suppressed (tests/asan.supp).
+fuzz-tsh: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude $(TSH_CFLAGS) \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_text_shape.c $(SRC_DIR)/text_shape.c \
+	  -o $(BUILD_DIR)/fuzz_text_shape $(TSH_LIBS)
+	LSAN_OPTIONS=suppressions=tests/asan.supp \
+	  ./$(BUILD_DIR)/fuzz_text_shape -max_total_time=30 -rss_limit_mb=2048
+
 # ====================================================================== #
 #  Developer / packaging targets centralised from the old *.sh scripts.  #
 #  Single source of truth: these reuse the canonical source/object lists #
@@ -446,7 +486,7 @@ deps:
 	sudo apt-get update -y
 	sudo apt-get install -y build-essential cmake libcairo2-dev libwayland-dev \
 	  wayland-protocols libxkbcommon-dev libcurl4-openssl-dev libssl-dev fontconfig \
-	  libfreetype6-dev libcmocka-dev libpng-dev libwayland-bin git
+	  libfreetype6-dev libharfbuzz-dev libcmocka-dev libpng-dev libwayland-bin git
 	@if [ ! -d /usr/local/include/lexbor ]; then \
 	  echo "[*] building Lexbor from source..."; \
 	  d=$$(mktemp -d); git clone --depth 1 https://github.com/lexbor/lexbor.git $$d/lexbor; \

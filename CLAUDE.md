@@ -136,6 +136,7 @@ funciones puras sobre el estado real.
 | Parser HTML/CSS | `Lexbor` | C puro, superficie de ataque mínima. Sin ejecución de scripts inline por defecto. |
 | Motor JS | `QuickJS` / `MuJS` | C puro, sandboxed. Bridge C que expone **solo** APIs validadas. Sin `XHR` a terceros, sin WebRTC, sin WebGL, sin acceso a FS. |
 | UI/Gráficos | `Cairo` + **Wayland** (nunca X11) | X11 permite keylogging entre ventanas. |
+| Shaping de texto | **HarfBuzz** + FreeType + fontconfig (Hito 25) | C, lado confiable. Da ligaduras, kerning GPOS y formas contextuales (scripts complejos). Dependencia autorizada por el dueño: **solo** maqueta texto (hostil pero saneado, fuzzeado) con **fuentes locales**; **nunca** entra al worker confinado ni a la red. Ver `[[freedom-harfbuzz-shaping]]`. |
 | Pruebas | `CMocka` | TDD. Instalar con `sudo apt install libcmocka-dev`. |
 | Memoria | asignador endurecido / `mimalloc` | Mitigar UAF y overflows; canaries y hardening. |
 
@@ -393,6 +394,13 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   construcción. Ver `spec/os_sandbox.md` §13, `[[freedom-io-uring-forbidden-in-worker]]`.
 - **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
   contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
+- **`-fvisibility=hidden` es invariante de build (no quitar):** el binario `freedom` no exporta API,
+  así que todos sus símbolos van **ocultos** del `.dynsym`. No es solo endurecimiento: un símbolo del
+  ejecutable con visibilidad por defecto **preempta** al homónimo de una librería enlazada en TODO el
+  proceso. Concreto: `hostblock` usa prefijo `hb_` y HarfBuzz (Hito 25) exporta un `hb_free` público
+  → sin la flag, el `hb_free` del ejecutable secuestra el alocador de HarfBuzz y lo crashea dentro de
+  `hb_shape`. La flag vive en `HARDEN` **y** en el `CFLAGS` de `asan` (asan no hereda HARDEN, y su build
+  de `freedom` vía `test_freedom --download-pdf` también enlaza HarfBuzz). Ver `[[freedom-harfbuzz-shaping]]`.
 
 ### 7.2 Hitos cerrados (resumen)
 
@@ -1015,6 +1023,44 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   número de línea/named-line en grid, `position:sticky` con scroll. *(Módulo puro `css` resuelto +
   fuzzeado; consumo en render/IPC y verificación visual pendientes del hito de motor de cajas.)* Ver
   `[[freedom-author-css-layout]]`, `[[freedom-author-css-direction]]`.
+- **Hito 25 — Shaping de texto con HarfBuzz (rendering moderno, lado confiable).** El painter dejó
+  de usar la **toy font API** de Cairo (`cairo_select_font_face`+`cairo_show_text`, un glifo por byte,
+  sin conciencia de script) y pasa a **HarfBuzz** (shaping) + `cairo_show_glyphs` (FreeType vía
+  `cairo-ft`): ahora hay **ligaduras** (fi/ffi/fl), **kerning GPOS** (AV/To/Wa), **formas
+  contextuales** y **dirección intra-run** correcta para scripts complejos. Módulo nuevo `text_shape`
+  (`tsh_`): resuelve una **fuente local** por bucket genérico (`fontconfig` → serif/sans/mono/cursive/
+  fantasy × bold × italic, cacheada), la parsea con FreeType (para los glifos de Cairo) **y** con
+  HarfBuzz (para el shaping) desde **los mismos bytes en memoria** (mismos glyph ids, sin estado FT
+  mutable compartido), y maqueta `[text,len)` en `cairo_glyph_t`. **Lado confiable, doctrina:** la
+  dependencia es **autorizada por el dueño** (como JPEG); el **texto** es contenido remoto hostil ya
+  saneado a UTF-8 (**fuzzeado**, `make fuzz-tsh`), las **fuentes son locales** (las que Cairo ya abría);
+  el módulo **nunca** se enlaza ni se llama desde el worker confinado (que produce display lists inertes
+  y no toca fuentes), **nunca** abre socket ni persiste. **Fail-closed:** sin backend/fuente o ante
+  cualquier error, `tsh_*` devuelve un status que hace al painter **caer al toy path** (byte-idéntico al
+  render pre-Hito-25; sin regresión en hosts sin fuentes). **Integración mínima en `gui/browser_ui.c`:**
+  `content_font` registra el `(family,bold,italic,px)` actual; los dos primitivos atómicos
+  `measure_slice`/`draw_slice` (este último ahora toma `(x,baseline)`) shapean vía `tsh_` con fallback
+  toy — así `styled_advance`/`styled_draw` ganan shaping de palabra entera, y measure==draw queda
+  consistente (mismo shaper, misma slice). El path por-cluster (text-transform/letter-spacing) shapea
+  cada cluster (coincide con CSS: letter-spacing desactiva ligaduras). Specs (`text_shape.md`) + tests
+  (7 en `text_shape`: contrato fail-closed de input —sin fuente—, shaping ASCII, slice vacía,
+  determinismo, measure==advance, cap-overflow, draw) + `make test` (**37 suites**) / `make asan`
+  (37, exit 0; leaks de fontconfig suprimidos) limpios + fuzz `fuzz-tsh` (**1.11M execs**, sin
+  crash/leak/UB, invariante de cap + measure==advance + sin NaN) + **E2E visual** (`--download-pdf` de
+  una página con ligaduras/kerning/acentos/wrap, y la propia `docs/index.html` con `--author-css`: el
+  PNG confirma fi/ffi/fl ligadas, AV/To/Wa kerneadas, café/naïve/résumé/Ñame, y tablas/listas/grid
+  intactas). **Boyscout — colisión de símbolos extinguida:** HarfBuzz 8.0+ **exporta** un `hb_free`
+  público (alocadores), que colisiona con el `hb_free` del módulo `hostblock` (prefijo `hb_`); el
+  símbolo del ejecutable **preempta** el de la librería process-wide → SIGSEGV dentro de `hb_shape`.
+  Fix: `-fvisibility=hidden` en la compilación (HARDEN + asan) — el binario `freedom` **no exporta API**,
+  así que ocultar sus símbolos del `.dynsym` resuelve esta y **cualquier** futura colisión
+  proyecto/librería (además es endurecimiento: menor superficie de símbolos dinámicos). No se renombró
+  `hostblock` (no butcherear un módulo de seguridad). **Fuera de alcance (v1):** bidi de párrafo
+  (reordenamiento mixto LTR/RTL; v1 shapea por palabra/run con dirección por-run), cadena de fallback de
+  fuentes (un glifo ausente cae a `.notdef`), casado exacto de familia/webfonts (prohibido por Privacy
+  by Default; CSS ya descarta `@font-face`/`url(`), shaping en el renderer plano `ui_render.c`. *(Módulo
+  puro + integración + E2E visual headless verificados bajo test/ASan/fuzz; ventana Wayland interactiva
+  pendiente al dueño.)* Ver `[[freedom-harfbuzz-shaping]]`.
 
 ### 7.3 Roadmap — por cruzar
 
