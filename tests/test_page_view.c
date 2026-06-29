@@ -863,6 +863,112 @@ static void test_box_defaults_and_setter(void **state) {
     pv_free(w);
 }
 
+/* --- box engine (Hito 23b-8 Step A): identity + box decoration on a run --- */
+
+static void test_build_boxdeco_border_padding(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='border:2px solid #ff0000;padding:10px;"
+        "box-sizing:border-box'>solo</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *solo = find_text(v, "solo");
+    assert_non_null(solo);
+    assert_true(solo->block_id >= 0);
+    assert_int_equal(solo->bord_tw, 2);
+    assert_int_equal(solo->bord_rw, 2);
+    assert_int_equal(solo->bord_bw, 2);
+    assert_int_equal(solo->bord_lw, 2);
+    assert_int_equal(solo->bord_ts, CSS_BST_SOLID);
+    assert_int_equal(solo->bord_tc, 0xff0000);
+    assert_int_equal(solo->pad_t, 10);
+    assert_int_equal(solo->pad_r, 10);
+    assert_int_equal(solo->pad_b, 10);
+    assert_int_equal(solo->pad_l, 10);
+    assert_int_equal(solo->box_sizing, CSS_BOXS_BORDER);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_boxdeco_shadow_outline(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='box-shadow:2px 4px 6px #00ff00;"
+        "outline:1px dashed #0000ff'>fx</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *fx = find_text(v, "fx");
+    assert_non_null(fx);
+    assert_true(fx->block_id >= 0);
+    assert_int_equal(fx->bsh_dx, 2);
+    assert_int_equal(fx->bsh_dy, 4);
+    assert_int_equal(fx->bsh_blur, 6);
+    assert_int_equal(fx->bsh_color, 0x00ff00);
+    assert_int_equal(fx->outline_w, 1);
+    assert_int_equal(fx->outline_style, CSS_BST_DASHED);
+    assert_int_equal(fx->outline_color, 0x0000ff);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_boxdeco_defaults_no_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>plain</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *p = find_text(v, "plain");
+    assert_non_null(p);
+    assert_int_equal(p->block_id, -1);
+    assert_int_equal(p->box_sizing, 0);
+    assert_int_equal(p->pad_t, 0);
+    assert_int_equal(p->bord_tw, PV_LEN_UNSET);
+    assert_int_equal(p->bord_tc, -1);
+    assert_int_equal(p->border_radius, PV_LEN_UNSET);
+    assert_int_equal(p->bsh_color, -1);
+    assert_int_equal(p->bsh_inset, -1);
+    assert_int_equal(p->outline_w, PV_LEN_UNSET);
+    assert_int_equal(p->outline_color, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='border:1px solid #111'>aaa</div>"
+        "<div style='border:1px solid #222'>bbb</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "aaa");
+    const pv_run *b = find_text(v, "bbb");
+    assert_non_null(a);
+    assert_non_null(b);
+    assert_true(a->block_id >= 0);
+    assert_true(b->block_id >= 0);
+    assert_int_not_equal(a->block_id, b->block_id);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_boxdeco_shared_id_within_block(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='border:3px solid #abc;padding:5px'>"
+        "<span>one</span> <span>two</span></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *one = find_text(v, "one");
+    const pv_run *two = find_text(v, "two");
+    assert_non_null(one);
+    assert_non_null(two);
+    assert_true(one->block_id >= 0);
+    assert_int_equal(one->block_id, two->block_id);
+    assert_int_equal(one->bord_tw, 3);
+    assert_int_equal(two->bord_tw, 3);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* Finds the first PV_INPUT run whose name equals `name`; NULL if none. */
 static const pv_run *find_input(const pv_view *v, const char *name) {
     for (size_t i = 0; i < pv_count(v); ++i) {
@@ -1266,6 +1372,11 @@ int main(void) {
         cmocka_unit_test(test_build_box_wrapper_centering_from_sheet),
         cmocka_unit_test(test_build_box_leaf_inline),
         cmocka_unit_test(test_box_defaults_and_setter),
+        cmocka_unit_test(test_build_boxdeco_border_padding),
+        cmocka_unit_test(test_build_boxdeco_shadow_outline),
+        cmocka_unit_test(test_build_boxdeco_defaults_no_box),
+        cmocka_unit_test(test_build_boxdeco_sibling_blocks_distinct_ids),
+        cmocka_unit_test(test_build_boxdeco_shared_id_within_block),
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),
         cmocka_unit_test(test_build_textarea_value),

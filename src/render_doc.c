@@ -116,6 +116,19 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_center = 0;
     b->box_mt = PV_LEN_UNSET;
     b->box_mb = PV_LEN_UNSET;
+    b->block_id = -1;
+    b->box_sizing = 0;
+    b->pad_t = b->pad_r = b->pad_b = b->pad_l = 0;
+    b->bord_tw = b->bord_rw = b->bord_bw = b->bord_lw = PV_LEN_UNSET;
+    b->bord_ts = b->bord_rs = b->bord_bs = b->bord_ls = 0;
+    b->bord_tc = b->bord_rc = b->bord_bc = b->bord_lc = -1;
+    b->border_radius = PV_LEN_UNSET;
+    b->bsh_dx = b->bsh_dy = b->bsh_blur = b->bsh_spread = 0;
+    b->bsh_color = -1;
+    b->bsh_inset = -1;
+    b->outline_w = PV_LEN_UNSET;
+    b->outline_style = 0;
+    b->outline_color = -1;
     b->input_type = 0;
     b->name = NULL;
     b->value = NULL;
@@ -275,6 +288,30 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->box_center = r->box_center;
                 lb->box_mt = r->box_mt;
                 lb->box_mb = r->box_mb;
+            }
+            /* Box engine (Hito 23b-8): unlike cont_id (flex/grid is page structure,
+             * always applied), block_id exists only to GROUP runs for painting the
+             * author box decoration -- which is presentation. So it is gated by
+             * caps.css together with the decoration: with author styling off there is
+             * no box to draw, the runs are not grouped, and the layout is byte-identical
+             * to before. (The event dispatcher's node identity is a separate field.) */
+            if (caps.css) {
+                lb->block_id = r->block_id;
+                lb->box_sizing = r->box_sizing;
+                lb->pad_t = r->pad_t; lb->pad_r = r->pad_r;
+                lb->pad_b = r->pad_b; lb->pad_l = r->pad_l;
+                lb->bord_tw = r->bord_tw; lb->bord_rw = r->bord_rw;
+                lb->bord_bw = r->bord_bw; lb->bord_lw = r->bord_lw;
+                lb->bord_ts = r->bord_ts; lb->bord_rs = r->bord_rs;
+                lb->bord_bs = r->bord_bs; lb->bord_ls = r->bord_ls;
+                lb->bord_tc = r->bord_tc; lb->bord_rc = r->bord_rc;
+                lb->bord_bc = r->bord_bc; lb->bord_lc = r->bord_lc;
+                lb->border_radius = r->border_radius;
+                lb->bsh_dx = r->bsh_dx; lb->bsh_dy = r->bsh_dy;
+                lb->bsh_blur = r->bsh_blur; lb->bsh_spread = r->bsh_spread;
+                lb->bsh_color = r->bsh_color; lb->bsh_inset = r->bsh_inset;
+                lb->outline_w = r->outline_w; lb->outline_style = r->outline_style;
+                lb->outline_color = r->outline_color;
             }
         }
     }

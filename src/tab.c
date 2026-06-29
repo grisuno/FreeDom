@@ -166,6 +166,11 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
  *            shadow_dx,shadow_dy,shadow_color,opacity,valign,text_indent,white_space,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,
+ *            block_id,box_sizing,pad_t,pad_r,pad_b,pad_l,
+ *            bord_tw,bord_rw,bord_bw,bord_lw,bord_ts,bord_rs,bord_bs,bord_ls,
+ *            bord_tc,bord_rc,bord_bc,bord_lc,border_radius,
+ *            bsh_dx,bsh_dy,bsh_blur,bsh_spread,bsh_color,bsh_inset,
+ *            outline_w,outline_style,outline_color,
  *            input_type,form_id,form_method, name, value )*
  * with each string length-prefixed (a length of 0 means absent). The fixed-width
  * fields travel for every run so a hostile child cannot desync the stream by
@@ -213,6 +218,34 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t bcenter = (int32_t)r->box_center;
         int32_t bmt = (int32_t)r->box_mt;
         int32_t bmb = (int32_t)r->box_mb;
+        int32_t blkid = (int32_t)r->block_id;
+        int32_t bsz = (int32_t)r->box_sizing;
+        int32_t padt = (int32_t)r->pad_t;
+        int32_t padr = (int32_t)r->pad_r;
+        int32_t padb = (int32_t)r->pad_b;
+        int32_t padl = (int32_t)r->pad_l;
+        int32_t btw = (int32_t)r->bord_tw;
+        int32_t brw = (int32_t)r->bord_rw;
+        int32_t bbw = (int32_t)r->bord_bw;
+        int32_t blw = (int32_t)r->bord_lw;
+        int32_t bts = (int32_t)r->bord_ts;
+        int32_t brs = (int32_t)r->bord_rs;
+        int32_t bbs = (int32_t)r->bord_bs;
+        int32_t bls = (int32_t)r->bord_ls;
+        int32_t btc = (int32_t)r->bord_tc;
+        int32_t brc = (int32_t)r->bord_rc;
+        int32_t bbc = (int32_t)r->bord_bc;
+        int32_t blc = (int32_t)r->bord_lc;
+        int32_t brad = (int32_t)r->border_radius;
+        int32_t shx = (int32_t)r->bsh_dx;
+        int32_t shy = (int32_t)r->bsh_dy;
+        int32_t shbl = (int32_t)r->bsh_blur;
+        int32_t shsp = (int32_t)r->bsh_spread;
+        int32_t shc = (int32_t)r->bsh_color;
+        int32_t shin = (int32_t)r->bsh_inset;
+        int32_t olw = (int32_t)r->outline_w;
+        int32_t ols = (int32_t)r->outline_style;
+        int32_t olc = (int32_t)r->outline_color;
         int32_t itype = (int32_t)r->input_type;
         int32_t fid = (int32_t)r->form_id;
         int32_t method = (int32_t)r->form_method;
@@ -263,6 +296,34 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &bcenter, sizeof bcenter) != 0) return -1;
         if (write_full(wfd, &bmt, sizeof bmt) != 0) return -1;
         if (write_full(wfd, &bmb, sizeof bmb) != 0) return -1;
+        if (write_full(wfd, &blkid, sizeof blkid) != 0) return -1;
+        if (write_full(wfd, &bsz, sizeof bsz) != 0) return -1;
+        if (write_full(wfd, &padt, sizeof padt) != 0) return -1;
+        if (write_full(wfd, &padr, sizeof padr) != 0) return -1;
+        if (write_full(wfd, &padb, sizeof padb) != 0) return -1;
+        if (write_full(wfd, &padl, sizeof padl) != 0) return -1;
+        if (write_full(wfd, &btw, sizeof btw) != 0) return -1;
+        if (write_full(wfd, &brw, sizeof brw) != 0) return -1;
+        if (write_full(wfd, &bbw, sizeof bbw) != 0) return -1;
+        if (write_full(wfd, &blw, sizeof blw) != 0) return -1;
+        if (write_full(wfd, &bts, sizeof bts) != 0) return -1;
+        if (write_full(wfd, &brs, sizeof brs) != 0) return -1;
+        if (write_full(wfd, &bbs, sizeof bbs) != 0) return -1;
+        if (write_full(wfd, &bls, sizeof bls) != 0) return -1;
+        if (write_full(wfd, &btc, sizeof btc) != 0) return -1;
+        if (write_full(wfd, &brc, sizeof brc) != 0) return -1;
+        if (write_full(wfd, &bbc, sizeof bbc) != 0) return -1;
+        if (write_full(wfd, &blc, sizeof blc) != 0) return -1;
+        if (write_full(wfd, &brad, sizeof brad) != 0) return -1;
+        if (write_full(wfd, &shx, sizeof shx) != 0) return -1;
+        if (write_full(wfd, &shy, sizeof shy) != 0) return -1;
+        if (write_full(wfd, &shbl, sizeof shbl) != 0) return -1;
+        if (write_full(wfd, &shsp, sizeof shsp) != 0) return -1;
+        if (write_full(wfd, &shc, sizeof shc) != 0) return -1;
+        if (write_full(wfd, &shin, sizeof shin) != 0) return -1;
+        if (write_full(wfd, &olw, sizeof olw) != 0) return -1;
+        if (write_full(wfd, &ols, sizeof ols) != 0) return -1;
+        if (write_full(wfd, &olc, sizeof olc) != 0) return -1;
         if (write_full(wfd, &itype, sizeof itype) != 0) return -1;
         if (write_full(wfd, &fid, sizeof fid) != 0) return -1;
         if (write_full(wfd, &method, sizeof method) != 0) return -1;
@@ -640,6 +701,14 @@ static int read_view(int fd, pv_view **out) {
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
         int32_t bl = 0, br = 0, bw = 0, bcenter = 0;
         int32_t bmt = PV_LEN_UNSET, bmb = PV_LEN_UNSET;
+        int32_t blkid = -1, bsz = 0;
+        int32_t padt = 0, padr = 0, padb = 0, padl = 0;
+        int32_t btw = PV_LEN_UNSET, brw = PV_LEN_UNSET, bbw = PV_LEN_UNSET, blw = PV_LEN_UNSET;
+        int32_t bts = 0, brs = 0, bbs = 0, bls = 0;
+        int32_t btc = -1, brc = -1, bbc = -1, blc = -1;
+        int32_t brad = PV_LEN_UNSET;
+        int32_t shx = 0, shy = 0, shbl = 0, shsp = 0, shc = -1, shin = -1;
+        int32_t olw = PV_LEN_UNSET, ols = 0, olc = -1;
         int32_t itype = 0, fid = -1, method = 0;
         if (read_full(fd, &kind, sizeof kind) != 0
          || read_full(fd, &heading, sizeof heading) != 0
@@ -685,6 +754,34 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &bcenter, sizeof bcenter) != 0
          || read_full(fd, &bmt, sizeof bmt) != 0
          || read_full(fd, &bmb, sizeof bmb) != 0
+         || read_full(fd, &blkid, sizeof blkid) != 0
+         || read_full(fd, &bsz, sizeof bsz) != 0
+         || read_full(fd, &padt, sizeof padt) != 0
+         || read_full(fd, &padr, sizeof padr) != 0
+         || read_full(fd, &padb, sizeof padb) != 0
+         || read_full(fd, &padl, sizeof padl) != 0
+         || read_full(fd, &btw, sizeof btw) != 0
+         || read_full(fd, &brw, sizeof brw) != 0
+         || read_full(fd, &bbw, sizeof bbw) != 0
+         || read_full(fd, &blw, sizeof blw) != 0
+         || read_full(fd, &bts, sizeof bts) != 0
+         || read_full(fd, &brs, sizeof brs) != 0
+         || read_full(fd, &bbs, sizeof bbs) != 0
+         || read_full(fd, &bls, sizeof bls) != 0
+         || read_full(fd, &btc, sizeof btc) != 0
+         || read_full(fd, &brc, sizeof brc) != 0
+         || read_full(fd, &bbc, sizeof bbc) != 0
+         || read_full(fd, &blc, sizeof blc) != 0
+         || read_full(fd, &brad, sizeof brad) != 0
+         || read_full(fd, &shx, sizeof shx) != 0
+         || read_full(fd, &shy, sizeof shy) != 0
+         || read_full(fd, &shbl, sizeof shbl) != 0
+         || read_full(fd, &shsp, sizeof shsp) != 0
+         || read_full(fd, &shc, sizeof shc) != 0
+         || read_full(fd, &shin, sizeof shin) != 0
+         || read_full(fd, &olw, sizeof olw) != 0
+         || read_full(fd, &ols, sizeof ols) != 0
+         || read_full(fd, &olc, sizeof olc) != 0
          || read_full(fd, &itype, sizeof itype) != 0
          || read_full(fd, &fid, sizeof fid) != 0
          || read_full(fd, &method, sizeof method) != 0) {
@@ -723,6 +820,13 @@ static int read_view(int fd, pv_view **out) {
                             (int)wspace);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
+            pv_set_block_id(v, (int)blkid);
+            pv_set_box_border(v, (int)btw, (int)brw, (int)bbw, (int)blw,
+                              (int)bts, (int)brs, (int)bbs, (int)bls,
+                              (int)btc, (int)brc, (int)bbc, (int)blc, (int)brad);
+            pv_set_boxdeco(v, (int)bsz, (int)padt, (int)padr, (int)padb, (int)padl,
+                           (int)shx, (int)shy, (int)shbl, (int)shsp, (int)shc, (int)shin,
+                           (int)olw, (int)ols, (int)olc);
         }
     }
 

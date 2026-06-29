@@ -83,6 +83,20 @@ typedef struct rd_block {
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or
      * PV_LEN_UNSET (use the user-agent margin). */
     int              box_l, box_r, box_w, box_center, box_mt, box_mb;
+    /* Box engine (Hito 23b-8). block_id groups runs of one block-level box and is
+     * carried by default (structure, like cont_id); the decoration fields are set
+     * only with caps.css (author presentation, like the box model). Sentinels match
+     * pv_run: block_id -1, border widths/radius/outline width PV_LEN_UNSET, colors
+     * -1, the rest 0. See spec/box_engine.md. */
+    int              block_id;
+    int              box_sizing;
+    int              pad_t, pad_r, pad_b, pad_l;
+    int              bord_tw, bord_rw, bord_bw, bord_lw;
+    int              bord_ts, bord_rs, bord_bs, bord_ls;
+    int              bord_tc, bord_rc, bord_bc, bord_lc;
+    int              border_radius;
+    int              bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
+    int              outline_w, outline_style, outline_color;
     int              input_type;     /* RD_INPUT: pv_input_type, else 0 */
     char            *name;           /* RD_INPUT: control name, or NULL */
     char            *value;          /* RD_INPUT: control value, or NULL */

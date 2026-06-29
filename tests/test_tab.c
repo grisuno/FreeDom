@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <cmocka.h>
 
+#include "css.h"
 #include "tab.h"
 
 static const char HTML[] =
@@ -181,6 +182,39 @@ static void test_load_carries_author_color(void **state) {
         }
     }
     assert_true(saw_color);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Box-engine identity + decoration resolved in the confined child must survive the
+ * IPC round-trip (write_view/read_view symmetry for the new fields). */
+static void test_load_carries_box_decoration(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>B</title></head><body>"
+        "<div style=\"border:2px solid #ff0000;padding:7px;"
+        "box-sizing:border-box\">boxed</div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text != NULL && strcmp(r->text, "boxed") == 0) {
+            assert_true(r->block_id >= 0);
+            assert_int_equal(r->bord_tw, 2);
+            assert_int_equal(r->bord_tc, 0xff0000);
+            assert_int_equal(r->pad_t, 7);
+            assert_int_equal(r->pad_l, 7);
+            assert_int_equal(r->box_sizing, CSS_BOXS_BORDER);
+            saw = 1;
+        }
+    }
+    assert_true(saw);
 
     tab_page_free(&p);
     tab_close(t);
@@ -926,6 +960,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_returns_view_with_link),
         cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_carries_author_color),
+        cmocka_unit_test(test_load_carries_box_decoration),
         cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_ex_runs_script_and_mutates),

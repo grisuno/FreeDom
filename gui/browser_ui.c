@@ -1788,9 +1788,24 @@ typedef struct rc_row {
     const rd_block *blk;           /* RC_IMAGE: source image block */
 } rc_row;
 
+/* One painted block box (Hito 23b-8 Step C): a border-box rectangle in layout space
+ * with its author decoration, painted behind the rows it encloses. Built from a
+ * maximal run of rd_blocks sharing one block_id. */
+typedef struct rc_box {
+    double x, top, w, h;   /* border-box rect (layout space) */
+    int    bord_tw, bord_rw, bord_bw, bord_lw;
+    int    bord_ts, bord_rs, bord_bs, bord_ls;
+    int    bord_tc, bord_rc, bord_bc, bord_lc;
+    int    radius;
+    int    bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
+    int    outline_w, outline_style, outline_color;
+    int    bg_rgb;
+} rc_box;
+
 typedef struct rc_layout {
     rc_frag *frags; size_t nfrag, capfrag;
     rc_row  *rows;  size_t nrow,  caprow;
+    rc_box  *boxes; size_t nbox,  capbox;
     double   total_h;
 } rc_layout;
 
@@ -1805,9 +1820,26 @@ typedef struct rc_state {
     double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
     int    nowrap;       /* current block's white-space suppresses line wrapping */
     size_t line_first;
+    /* Box engine (Hito 23b-8): the open block box, if any. cur_box_id is its block_id
+     * (-1 = none); box_idx indexes L->boxes; box_bl/box_br are its left/right border
+     * px (added to inner content x / removed from width); box_pb/box_bb are its
+     * bottom padding/border px (added to cur_top when the box closes). */
+    int    cur_box_id;
+    size_t box_idx;
+    double box_bl, box_br, box_pb, box_bb;
 } rc_state;
 
-static void rc_free(rc_layout *L) { free(L->frags); free(L->rows); }
+static void rc_free(rc_layout *L) { free(L->frags); free(L->rows); free(L->boxes); }
+
+static rc_box *rc_add_box(rc_layout *L) {
+    if (L->nbox == L->capbox) {
+        size_t nc = L->capbox ? L->capbox * 2 : 8;
+        rc_box *g = (rc_box *)realloc(L->boxes, nc * sizeof *g);
+        if (g == NULL) return NULL;
+        L->boxes = g; L->capbox = nc;
+    }
+    return &L->boxes[L->nbox++];
+}
 
 static rc_frag *rc_add_frag(rc_layout *L) {
     if (L->nfrag == L->capfrag) {
@@ -2233,6 +2265,82 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     s->cur_top = base_top + root.h;
 }
 
+/* A border/outline width in px, or 0 when unset/non-positive. */
+static double box_edge_px(int wpx) {
+    return (wpx != PV_LEN_UNSET && wpx > 0) ? (double)wpx : 0.0;
+}
+
+/* True iff a border/outline style paints a line (solid..outset); none/hidden/unset
+ * paint nothing. The fancier 3D styles collapse to solid at paint time. */
+static int box_line_visible(int style) {
+    return style >= CSS_BST_SOLID && style <= CSS_BST_OUTSET;
+}
+
+/* Closes the open block box: flushes the current line, reserves the box's bottom
+ * padding+border, and finalizes the recorded border-box height. No-op if none open. */
+static void close_box(rc_layout *L, rc_state *s, const ui_theme *th) {
+    if (s->cur_box_id < 0) return;
+    flush_line(L, s, th);
+    s->cur_top += s->box_pb + s->box_bb;
+    if (s->box_idx < L->nbox)
+        L->boxes[s->box_idx].h = s->cur_top - L->boxes[s->box_idx].top;
+    s->cur_box_id = -1;
+    s->box_bl = s->box_br = s->box_pb = s->box_bb = 0.0;
+}
+
+/* Opens a block box for block b (which carries the box decoration): flushes the line,
+ * applies the gap before the box, records the border-box rect, and reserves the top
+ * padding+border so inner content starts inset. The existing hbox/bx_place already
+ * insets content horizontally by the box padding, so only the border is added to the
+ * inner content; the box rect mirrors that placement. */
+static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
+                     double content_w, const rd_block *b) {
+    flush_line(L, s, th);
+    if (L->nrow > 0) {
+        double gap = (s->prev_bottom > th->paragraph_gap) ? s->prev_bottom : th->paragraph_gap;
+        s->cur_top += gap;
+    }
+    s->prev_bottom = 0;
+
+    double bl = box_edge_px(b->bord_lw), br = box_edge_px(b->bord_rw);
+    double bt = box_edge_px(b->bord_tw), bb = box_edge_px(b->bord_bw);
+    double pl = (b->pad_l > 0) ? (double)b->pad_l : 0.0;
+    double pr = (b->pad_r > 0) ? (double)b->pad_r : 0.0;
+    double pt = (b->pad_t > 0) ? (double)b->pad_t : 0.0;
+    double pb = (b->pad_b > 0) ? (double)b->pad_b : 0.0;
+
+    double base_l = (double)b->indent * UI_LIST_INDENT;
+    double avail_w = content_w - base_l;
+    if (avail_w < 1.0) avail_w = 1.0;
+    bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r, (double)b->box_w,
+                            b->box_center, avail_w);
+    double box_left = base_l + hp.x_off - pl;
+    double box_width = hp.content_w + pl + pr;
+
+    rc_box *bx = rc_add_box(L);
+    size_t idx = (bx != NULL) ? (L->nbox - 1) : (size_t)-1;
+    if (bx != NULL) {
+        bx->x = box_left; bx->top = s->cur_top; bx->w = box_width; bx->h = 0.0;
+        bx->bord_tw = b->bord_tw; bx->bord_rw = b->bord_rw;
+        bx->bord_bw = b->bord_bw; bx->bord_lw = b->bord_lw;
+        bx->bord_ts = b->bord_ts; bx->bord_rs = b->bord_rs;
+        bx->bord_bs = b->bord_bs; bx->bord_ls = b->bord_ls;
+        bx->bord_tc = b->bord_tc; bx->bord_rc = b->bord_rc;
+        bx->bord_bc = b->bord_bc; bx->bord_lc = b->bord_lc;
+        bx->radius = b->border_radius;
+        bx->bsh_dx = b->bsh_dx; bx->bsh_dy = b->bsh_dy; bx->bsh_blur = b->bsh_blur;
+        bx->bsh_spread = b->bsh_spread; bx->bsh_color = b->bsh_color;
+        bx->bsh_inset = b->bsh_inset;
+        bx->outline_w = b->outline_w; bx->outline_style = b->outline_style;
+        bx->outline_color = b->outline_color;
+        bx->bg_rgb = b->bg_rgb;
+    }
+    s->cur_top += bt + pt;       /* inner content starts below the top border + padding */
+    s->cur_box_id = b->block_id;
+    s->box_idx = idx;
+    s->box_bl = bl; s->box_br = br; s->box_pb = pb; s->box_bb = bb;
+}
+
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                        rc_layout *L) {
     const rd_doc *doc = w->doc;
@@ -2241,6 +2349,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     rc_state s;
     memset(&s, 0, sizeof s);
     s.bg_rgb = -1;  /* 0 is opaque black; no background until a block sets one */
+    s.cur_box_id = -1;  /* 0 is a valid block_id; -1 means no open box */
 
     for (size_t i = 0; i < rd_count(doc); ++i) {
         const rd_block *b = rd_at(doc, i);
@@ -2252,6 +2361,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * columns and then skipped. */
         if (b->cont_id >= 0 &&
             (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID)) {
+            close_box(L, &s, th);  /* a container ends any open block box */
             size_t j = i + 1;
             while (j < rd_count(doc) && rd_at(doc, j)->cont_id == b->cont_id) ++j;
             double mt, mb;
@@ -2261,6 +2371,14 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             s.prev_bottom = mb;
             i = j - 1;  /* the loop's ++i moves past the container */
             continue;
+        }
+
+        /* Box engine (Hito 23b-8): open/close the block box when the block_id changes
+         * (a maximal run of blocks sharing a block_id is one box). The decoration is
+         * painted behind the rows; here we only reserve its border+padding geometry. */
+        if (b->block_id != s.cur_box_id) {
+            close_box(L, &s, th);
+            if (b->block_id >= 0) open_box(L, &s, th, content_w, b);
         }
 
         int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE
@@ -2328,9 +2446,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         if (avail_w < 1.0) avail_w = 1.0;
         bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r, (double)b->box_w,
                                 b->box_center, avail_w);
-        s.indent_px = base_l + hp.x_off;
-        flow_text_block(cr, w, L, &s, th, b, hp.content_w);
+        /* Inside an open box the existing hbox/bx_place already applied the padding;
+         * shift the inner content right by the left border and shrink it by both
+         * borders so the text clears the box border. Outside a box (box_bl/br == 0)
+         * this is identical to before. */
+        s.indent_px = base_l + hp.x_off + s.box_bl;
+        double inner_w = hp.content_w - s.box_bl - s.box_br;
+        if (inner_w < 1.0) inner_w = 1.0;
+        flow_text_block(cr, w, L, &s, th, b, inner_w);
     }
+    close_box(L, &s, th);
     flush_line(L, &s, th);
     L->total_h = s.cur_top;
 }
@@ -2491,6 +2616,74 @@ static double row_align_offset(const rc_layout *L, const rc_row *r, double conte
     return (r->align == CSS_ALIGN_CENTER) ? slack / 2.0 : slack;
 }
 
+/* Paints one block box's decoration (Hito 23b-8 Step C): box-shadow, background fill,
+ * the four borders and the outline, behind the rows it encloses. (ox, oy) is the
+ * absolute offset for the box's layout-space rect. Square corners + solid lines in
+ * v1: border-radius is threaded but not yet rounded, and dashed/dotted collapse to
+ * solid. The box decoration was gated behind caps.css upstream (render_doc). */
+static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy) {
+    double x = ox + bx->x, y = oy + bx->top, w = bx->w, h = bx->h;
+    if (w <= 0.0 || h <= 0.0) return;
+    double bt = box_edge_px(bx->bord_tw), br = box_edge_px(bx->bord_rw);
+    double bb = box_edge_px(bx->bord_bw), bl = box_edge_px(bx->bord_lw);
+
+    /* box-shadow (single outset layer): expanding translucent rects fake the blur,
+     * clipped to OUTSIDE the border box (CSS paints an outset shadow only beyond the
+     * box, never through a transparent interior). */
+    if (bx->bsh_color >= 0 && bx->bsh_inset != 1) {
+        double sp = (double)bx->bsh_spread, blur = (double)bx->bsh_blur;
+        double sx = x + (double)bx->bsh_dx - sp, sy = y + (double)bx->bsh_dy - sp;
+        double sw = w + 2.0 * sp, sh = h + 2.0 * sp;
+        if (sw > 0.0 && sh > 0.0) {
+            ui_rgb sc = rgb_from_packed(bx->bsh_color);
+            int steps = (blur > 0.0) ? 4 : 1;
+            cairo_save(cr);
+            cairo_rectangle(cr, sx - blur, sy - blur, sw + 2.0 * blur, sh + 2.0 * blur);
+            cairo_rectangle(cr, x, y, w, h);            /* punch out the border box */
+            cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+            cairo_clip(cr);
+            for (int k = steps; k >= 1; --k) {
+                double g = blur * (double)k / (double)steps;
+                cairo_set_source_rgba(cr, sc.r, sc.g, sc.b, 0.30 / (double)steps);
+                cairo_rectangle(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g);
+                cairo_fill(cr);
+            }
+            cairo_restore(cr);
+        }
+    }
+
+    /* Background fill inside the border box (covers the padding area). */
+    if (bx->bg_rgb >= 0) {
+        set_rgb(cr, rgb_from_packed(bx->bg_rgb));
+        cairo_rectangle(cr, x, y, w, h);
+        cairo_fill(cr);
+    }
+
+    /* The four borders, each a filled rect of its width along its edge. An unset
+     * color falls back to a dark grey (CSS would use currentColor). */
+    const double bw[4] = { bt, br, bb, bl };
+    const int    bs[4] = { bx->bord_ts, bx->bord_rs, bx->bord_bs, bx->bord_ls };
+    const int    bc[4] = { bx->bord_tc, bx->bord_rc, bx->bord_bc, bx->bord_lc };
+    for (int k = 0; k < 4; ++k) {
+        if (bw[k] <= 0.0 || !box_line_visible(bs[k])) continue;
+        set_rgb(cr, rgb_from_packed(bc[k] >= 0 ? bc[k] : 0x333333));
+        if      (k == 0) cairo_rectangle(cr, x, y, w, bt);            /* top */
+        else if (k == 1) cairo_rectangle(cr, x + w - br, y, br, h);   /* right */
+        else if (k == 2) cairo_rectangle(cr, x, y + h - bb, w, bb);   /* bottom */
+        else             cairo_rectangle(cr, x, y, bl, h);            /* left */
+        cairo_fill(cr);
+    }
+
+    /* Outline: stroked just outside the border box. */
+    double ow = box_edge_px(bx->outline_w);
+    if (ow > 0.0 && box_line_visible(bx->outline_style)) {
+        set_rgb(cr, rgb_from_packed(bx->outline_color >= 0 ? bx->outline_color : 0x333333));
+        cairo_set_line_width(cr, ow);
+        cairo_rectangle(cr, x - ow / 2.0, y - ow / 2.0, w + ow, h + ow);
+        cairo_stroke(cr);
+    }
+}
+
 /* Paints the structured document into the content rectangle, honouring scroll. */
 /* Paints one laid-out row at vertical position ry. Shared by the on-screen painter
  * and the PDF exporter so both render identically (same fonts, colours, emphasis,
@@ -2581,6 +2774,13 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (w->scroll > max_scroll) w->scroll = max_scroll;
     double origin = content_top + th->content_margin - w->scroll;
 
+    /* Box decoration first, so borders/backgrounds/shadows sit behind the rows. */
+    for (size_t i = 0; i < L.nbox; ++i) {
+        const rc_box *bx = &L.boxes[i];
+        double by = origin + bx->top;
+        if (by + bx->h < content_top || by > content_top + content_h) continue;
+        paint_box_decoration(cr, bx, left, origin);
+    }
     for (size_t i = 0; i < L.nrow; ++i) {
         const rc_row *r = &L.rows[i];
         double ry = origin + r->top;
@@ -2643,6 +2843,20 @@ static long write_doc_pdf(browser_window *w, const char *path) {
         for (size_t p = 0; p < pages; ++p) {
             cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); /* white page */
             cairo_paint(cr);
+            /* Box decoration first (behind the rows): a box is placed on the page of
+             * its first enclosed row, offset to keep its rect aligned with that row. */
+            for (size_t bi = 0; bi < L.nbox; ++bi) {
+                const rc_box *bx = &L.boxes[bi];
+                size_t k = L.nrow;
+                for (size_t i = 0; i < L.nrow; ++i) {
+                    if (L.rows[i].top >= bx->top && L.rows[i].top < bx->top + bx->h) { k = i; break; }
+                }
+                if (k == L.nrow || (size_t)pageof[k] != p) continue;
+                /* paint_box_decoration adds bx->top to oy, so oy maps the box's layout
+                 * top to the same page line as its first enclosed row. */
+                double box_oy = PDF_MARGIN + yof[k] - L.rows[k].top;
+                paint_box_decoration(cr, bx, PDF_MARGIN, box_oy);
+            }
             for (size_t i = 0; i < L.nrow; ++i) {
                 if ((size_t)pageof[i] != p) continue;
                 paint_content_row(cr, w, &L, &L.rows[i], PDF_MARGIN,
