@@ -19,6 +19,7 @@
 #include "download.h"
 #include "freebug.h"
 #include "hostblock.h"
+#include "hostedit.h"
 #include "image_decode.h"
 #include "js_policy.h"
 #include "link_nav.h"
@@ -26,6 +27,7 @@
 #include "pdf_export.h"
 #include "render_doc.h"
 #include "render_policy.h"
+#include "request_policy.h"
 #include "text_shape.h"
 #include "textfield.h"
 #include "ui.h"
@@ -98,6 +100,8 @@
 #define UI_HAMBURGER_GAP 5.0   /* vertical gap between the three icon bars */
 #define UI_CURSOR_SIZE  24     /* themed cursor size in px (XCURSOR_SIZE default) */
 #define UI_TOAST_PAD    8.0    /* padding inside the toast banner */
+#define OMNI_MAX_SUGG   6      /* max omnibox autocomplete rows shown */
+#define UI_OMNI_ROW_H   24.0   /* height of one omnibox suggestion row */
 #define UI_TWO_PI       6.28318530717958647692 /* radians of a full circle (busy clock) */
 
 /* Form control geometry: inner padding of a text box, the preferred text-box width
@@ -126,6 +130,9 @@ static uint64_t now_ms(void) {
     return (uint64_t)ts.tv_sec * 1000u + (uint64_t)ts.tv_nsec / 1000000u;
 }
 
+/* Which host list a UI_MENU_HOSTADD item edits (carried in the item's theme_val). */
+enum { HOSTLIST_BLOCK = 0, HOSTLIST_ALLOW = 1, HOSTLIST_JS = 2 };
+
 /* The options-menu items. A capability item toggles a bool in rdp_caps by field
  * offset (labels and the flag live in one place, no magic indices); a theme item
  * selects a palette; the force item ignores author colours. */
@@ -138,7 +145,8 @@ typedef enum ui_menu_action {
     UI_MENU_JS,       /* cycles the JS policy (off -> allowlist -> on) */
     UI_MENU_READER,   /* toggles distraction-free (reader) mode; re-renders from cache */
     UI_MENU_PDF,      /* action (not a toggle): export the page to a vector PDF */
-    UI_MENU_FREEBUG   /* toggles the Freebug developer console (second window) */
+    UI_MENU_FREEBUG,  /* toggles the Freebug developer console (second window) */
+    UI_MENU_HOSTADD   /* action: add the current host to a .conf list (theme_val selects which) */
 } ui_menu_action;
 
 typedef struct ui_menu_item {
@@ -159,6 +167,9 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
     { "JavaScript",           UI_MENU_JS,    0,                          0 },
     { "Freebug console (F12)", UI_MENU_FREEBUG, 0,                       0 },
+    { "Block this site (Ctrl+Shift+B)", UI_MENU_HOSTADD, 0,             HOSTLIST_BLOCK },
+    { "Allow this site (Ctrl+Shift+A)", UI_MENU_HOSTADD, 0,             HOSTLIST_ALLOW },
+    { "Allow JS here (Ctrl+Shift+J)",   UI_MENU_HOSTADD, 0,             HOSTLIST_JS },
     { "Save as PDF (Ctrl+P)", UI_MENU_PDF,   0,                          0 },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
@@ -166,7 +177,7 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
 /* Toolbar control under the pointer, for the hover highlight (the same affordance
  * links already get). */
 typedef enum ui_hot {
-    UI_HOT_NONE = 0, UI_HOT_BACK, UI_HOT_FWD, UI_HOT_GO, UI_HOT_MENU
+    UI_HOT_NONE = 0, UI_HOT_BACK, UI_HOT_FWD, UI_HOT_RELOAD, UI_HOT_GO, UI_HOT_MENU
 } ui_hot;
 
 /* Live editable state for one form text control, aliasing a block of the current
@@ -246,6 +257,14 @@ typedef struct browser_window {
 
     browser_state bs;
     int url_bar_focused;
+    /* Omnibox autocomplete: allow.conf treated as a favorites list. `favorites` holds
+     * the concatenated allow.conf bodies (loaded at startup, refreshed on edit);
+     * omni_sugg/omni_sugg_n are the live matches for what is typed; omni_sel is the
+     * highlighted row (-1 = none). The matching is the pure he_suggest. */
+    char  *favorites;
+    char   omni_sugg[OMNI_MAX_SUGG][HE_MAX_HOST + 1];
+    int    omni_sugg_n;
+    int    omni_sel;
 
     ui_theme  theme;
     int       theme_mode;  /* ui_theme_mode selected in the options menu */
@@ -566,6 +585,156 @@ static hb_set *build_js_filter(void) {
 
     load_host_file(s, "config", "js.conf", HB_LIST_ALLOW);
     return s;
+}
+
+/* The writable Freedom config dir: $FREEDOM_HOSTS_DIR if set, else ~/.config/freedom
+ * (created if absent). Returns 0 on success. Mirrors the read search path so an edit
+ * lands where build_host_filter/build_js_filter will read it back. */
+static int freedom_write_dir(char *out, size_t cap) {
+    const char *env = getenv("FREEDOM_HOSTS_DIR");
+    if (env != NULL && env[0] != '\0') {
+        int n = snprintf(out, cap, "%s", env);
+        return (n > 0 && (size_t)n < cap) ? 0 : -1;
+    }
+    const char *home = getenv("HOME");
+    if (home == NULL || home[0] == '\0') return -1;
+    char cfg[PATH_MAX];
+    int n = snprintf(cfg, sizeof cfg, "%s/.config", home);
+    if (n <= 0 || (size_t)n >= sizeof cfg) return -1;
+    mkdir(cfg, 0700);                            /* ignore EEXIST */
+    n = snprintf(out, cap, "%s/.config/freedom", home);
+    if (n <= 0 || (size_t)n >= cap) return -1;
+    mkdir(out, 0700);
+    return 0;
+}
+
+static void render_current(browser_window *w);  /* defined below; used by list editing */
+static void load_favorites(browser_window *w);  /* defined below; refreshed after allow edit */
+
+/* Appends the current page's host to one of the user's .conf lists (block/allow/js),
+ * then reloads the in-memory filter so it applies. The host is hostile data with
+ * provenance: the pure hostedit validates it fail-closed and builds the line; a
+ * duplicate is skipped. Feedback goes through the status toast. */
+static void add_current_host_to_list(browser_window *w, int sel) {
+    const char *filename = (sel == HOSTLIST_BLOCK) ? "block.conf"
+                         : (sel == HOSTLIST_ALLOW) ? "allow.conf" : "js.conf";
+    w->menu_open = 0;
+    char host[HE_MAX_HOST + 1];
+    if (rp_host_of(browser_current_url(&w->bs), host, sizeof host) != 0) {
+        browser_set_status(&w->bs, "Cannot edit lists: this page has no host.", now_ms());
+        return;
+    }
+    char line[HE_MAX_HOST + 2];
+    if (he_make_line(host, line, sizeof line) != HE_OK) {
+        browser_set_status(&w->bs, "Cannot edit lists: invalid host.", now_ms());
+        return;
+    }
+    char dir[PATH_MAX], path[PATH_MAX];
+    if (freedom_write_dir(dir, sizeof dir) != 0) {
+        browser_set_status(&w->bs, "Cannot edit lists: no writable config dir.", now_ms());
+        return;
+    }
+    int pn = snprintf(path, sizeof path, "%s/%s", dir, filename);
+    if (pn <= 0 || (size_t)pn >= sizeof path) {
+        browser_set_status(&w->bs, "Cannot edit lists: path too long.", now_ms());
+        return;
+    }
+    char msg[HE_MAX_HOST + 80];
+    /* Skip a duplicate: read the file (bounded) and check for the host already listed. */
+    size_t cur_len = 0;
+    uint8_t *cur = read_file_bounded(path, 1u << 20, &cur_len);
+    if (cur != NULL) {
+        char *txt = (char *)malloc(cur_len + 1);
+        int dup = 0;
+        if (txt != NULL) {
+            memcpy(txt, cur, cur_len);
+            txt[cur_len] = '\0';
+            dup = he_text_has_host(txt, host);
+            free(txt);
+        }
+        free(cur);
+        if (dup) {
+            snprintf(msg, sizeof msg, "%s is already in %s.", host, filename);
+            browser_set_status(&w->bs, msg, now_ms());
+            return;
+        }
+    }
+    int fd = open(path, O_WRONLY | O_CREAT | O_APPEND, 0600);
+    if (fd < 0 || write(fd, line, strlen(line)) != (ssize_t)strlen(line)) {
+        if (fd >= 0) close(fd);
+        browser_set_status(&w->bs, "Cannot edit lists: write failed.", now_ms());
+        return;
+    }
+    close(fd);
+    /* Reload the affected in-memory filter so it applies immediately on the next fetch. */
+    if (sel == HOSTLIST_JS) {
+        hb_free(w->js_hosts);
+        w->js_hosts = build_js_filter();
+    } else {
+        hb_free(w->hosts);
+        w->hosts = build_host_filter();
+        if (sel == HOSTLIST_ALLOW) load_favorites(w);  /* refresh omnibox favorites */
+    }
+    snprintf(msg, sizeof msg, "Added %s to %s. Reload to apply.", host, filename);
+    browser_set_status(&w->bs, msg, now_ms());
+    render_current(w);
+}
+
+/* Concatenates the allow.conf bodies along the same search path build_host_filter
+ * uses into one string: the omnibox "favorites". Frees any previous value. Best-effort
+ * (a missing/oversized file is skipped); on OOM favorites stays NULL (no suggestions). */
+static void load_favorites(browser_window *w) {
+    free(w->favorites);
+    w->favorites = NULL;
+    char *acc = (char *)malloc(1);
+    if (acc == NULL) return;
+    acc[0] = '\0';
+    size_t len = 0;
+
+    const char *dirs[3];
+    int nd = 0;
+    char home_dir[PATH_MAX];
+    const char *env = getenv("FREEDOM_HOSTS_DIR");
+    if (env != NULL && env[0] != '\0') dirs[nd++] = env;
+    const char *home = getenv("HOME");
+    if (home != NULL && home[0] != '\0') {
+        int n = snprintf(home_dir, sizeof home_dir, "%s/.config/freedom", home);
+        if (n > 0 && (size_t)n < sizeof home_dir) dirs[nd++] = home_dir;
+    }
+    dirs[nd++] = "config";
+
+    for (int i = 0; i < nd; ++i) {
+        char path[PATH_MAX];
+        int n = snprintf(path, sizeof path, "%s/allow.conf", dirs[i]);
+        if (n <= 0 || (size_t)n >= sizeof path) continue;
+        size_t flen = 0;
+        char *txt = read_file(path, &flen);
+        if (txt == NULL) continue;
+        char *na = (char *)realloc(acc, len + flen + 2);
+        if (na != NULL) {
+            acc = na;
+            memcpy(acc + len, txt, flen);
+            len += flen;
+            acc[len++] = '\n';
+            acc[len] = '\0';
+        }
+        free(txt);
+    }
+    w->favorites = acc;
+}
+
+/* Recomputes the omnibox autocomplete suggestions for the current URL-bar text. Shown
+ * only while the URL bar is focused and something is typed; otherwise cleared. Pure
+ * matching (he_suggest) over the favorites text; no I/O. */
+static void omni_refresh(browser_window *w) {
+    if (!w->url_bar_focused || w->favorites == NULL || w->bs.url_bar_len == 0) {
+        w->omni_sugg_n = 0;
+        w->omni_sel = -1;
+        return;
+    }
+    w->omni_sugg_n = he_suggest(w->favorites, w->bs.url_bar, w->omni_sugg, OMNI_MAX_SUGG);
+    if (w->omni_sugg_n == 0) w->omni_sel = -1;
+    else if (w->omni_sel >= w->omni_sugg_n) w->omni_sel = w->omni_sugg_n - 1;
 }
 
 /* Copies a proxy "host:port" into dst: if the env value is unset/empty the default is
@@ -1669,6 +1838,10 @@ static void window_button_rects(const browser_window *w, double *min_x, double *
     *min_x   = w->width - 3 * UI_WIN_BTN_W;
 }
 
+/* The reload button sits as the third left chrome button (after back/forward), at a
+ * fixed x; callers that need it derive it here so the layout stays single-sourced. */
+#define UI_RELOAD_X (UI_BTN_W * 2.0)
+
 static void toolbar_rects(const browser_window *w,
                           double *back_x, double *fwd_x,
                           double *url_x, double *url_w,
@@ -1677,7 +1850,7 @@ static void toolbar_rects(const browser_window *w,
     *fwd_x  = UI_BTN_W;
     *menu_x = (double)w->width - UI_BTN_W;
     *go_x   = *menu_x - UI_BTN_W;
-    *url_x  = UI_BTN_W * 2.0 + UI_MARGIN;
+    *url_x  = UI_BTN_W * 3.0 + UI_MARGIN;   /* after back, forward, reload */
     *url_w  = *go_x - *url_x - UI_MARGIN;
     if (*url_w < 20.0) *url_w = 20.0;
 }
@@ -1692,6 +1865,7 @@ static ui_hot toolbar_button_at(const browser_window *w, double px, double py) {
     toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
     if (px >= menu_x) return UI_HOT_MENU;
     if (px >= go_x && px < menu_x) return UI_HOT_GO;
+    if (px >= UI_RELOAD_X && px < UI_RELOAD_X + UI_BTN_W) return UI_HOT_RELOAD;
     if (px >= fwd_x && px < fwd_x + UI_BTN_W) return UI_HOT_FWD;
     if (px >= back_x && px < back_x + UI_BTN_W) return UI_HOT_BACK;
     return UI_HOT_NONE;
@@ -1701,7 +1875,7 @@ static ui_hot toolbar_button_at(const browser_window *w, double px, double py) {
  * do something: Go/menu always, Back/Forward only when there is history. */
 static int hot_actionable(const browser_window *w, ui_hot hot) {
     switch (hot) {
-        case UI_HOT_GO: case UI_HOT_MENU: return 1;
+        case UI_HOT_GO: case UI_HOT_MENU: case UI_HOT_RELOAD: return 1;
         case UI_HOT_BACK: return browser_can_back(&w->bs);
         case UI_HOT_FWD:  return browser_can_forward(&w->bs);
         default: return 0;
@@ -1809,6 +1983,21 @@ typedef struct rc_layout {
     double   total_h;
 } rc_layout;
 
+/* Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content
+ * rect (inner_left/inner_w) is the coordinate context its children (text or nested
+ * boxes) are placed in; bl/br/pb/bb are its borders/bottom-padding reserved geometry;
+ * box_idx points at the rc_box rect being measured. */
+typedef struct rc_open_box {
+    int    block_id;
+    size_t box_idx;
+    double bl, br, pb, bb;
+    double inner_left, inner_w;
+} rc_open_box;
+
+/* Max box-nesting depth the painter composes (anti-DoS; deeper boxes are clamped to
+ * the innermost open box, so a pathological tree never overflows the stack). */
+#define RC_BOX_STACK_MAX 16
+
 typedef struct rc_state {
     double cur_top, pending_gap, pen_x, line_asc, line_desc;
     double prev_bottom;  /* bottom margin (px) of the last block, for CSS margin collapsing */
@@ -1820,13 +2009,12 @@ typedef struct rc_state {
     double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
     int    nowrap;       /* current block's white-space suppresses line wrapping */
     size_t line_first;
-    /* Box engine (Hito 23b-8): the open block box, if any. cur_box_id is its block_id
-     * (-1 = none); box_idx indexes L->boxes; box_bl/box_br are its left/right border
-     * px (added to inner content x / removed from width); box_pb/box_bb are its
-     * bottom padding/border px (added to cur_top when the box closes). */
-    int    cur_box_id;
-    size_t box_idx;
-    double box_bl, box_br, box_pb, box_bb;
+    /* Box engine (Hito 23b-8 Step D): the STACK of currently-open block boxes, from
+     * outermost (index 0) to innermost. A run is laid out inside the innermost box's
+     * content rect; a child box nests inside its parent's, so a box is no longer split
+     * when a child interrupts it. box_depth 0 = no open box (default flat flow). */
+    rc_open_box box_stack[RC_BOX_STACK_MAX];
+    int         box_depth;
 } rc_state;
 
 static void rc_free(rc_layout *L) { free(L->frags); free(L->rows); free(L->boxes); }
@@ -2278,23 +2466,45 @@ static int box_line_visible(int style) {
 
 /* Closes the open block box: flushes the current line, reserves the box's bottom
  * padding+border, and finalizes the recorded border-box height. No-op if none open. */
-static void close_box(rc_layout *L, rc_state *s, const ui_theme *th) {
-    if (s->cur_box_id < 0) return;
+static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
+    if (s->box_depth <= 0) return;
     flush_line(L, s, th);
-    s->cur_top += s->box_pb + s->box_bb;
-    if (s->box_idx < L->nbox)
-        L->boxes[s->box_idx].h = s->cur_top - L->boxes[s->box_idx].top;
-    s->cur_box_id = -1;
-    s->box_bl = s->box_br = s->box_pb = s->box_bb = 0.0;
+    rc_open_box *ob = &s->box_stack[s->box_depth - 1];
+    s->cur_top += ob->pb + ob->bb;   /* bottom padding + border close the border box */
+    if (ob->box_idx < L->nbox)
+        L->boxes[ob->box_idx].h = s->cur_top - L->boxes[ob->box_idx].top;
+    s->box_depth--;
 }
 
-/* Opens a block box for block b (which carries the box decoration): flushes the line,
- * applies the gap before the box, records the border-box rect, and reserves the top
- * padding+border so inner content starts inset. The existing hbox/bx_place already
- * insets content horizontally by the box padding, so only the border is added to the
- * inner content; the box rect mirrors that placement. */
+/* Closes every open box (innermost first). Used at document end and when a flex/grid
+ * container interrupts the box flow (a box broken by a container is not composed). */
+static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th) {
+    while (s->box_depth > 0) close_top_box(L, s, th);
+}
+
+/* Content rect (left, width) the current run/box is laid out in: the innermost open
+ * box's, or the page content box when no box is open (default flat flow). */
+static void rc_box_context(const rc_state *s, double content_w,
+                           double *ctx_left, double *ctx_w) {
+    if (s->box_depth > 0) {
+        const rc_open_box *ob = &s->box_stack[s->box_depth - 1];
+        *ctx_left = ob->inner_left;
+        *ctx_w = ob->inner_w;
+    } else {
+        *ctx_left = 0.0;
+        *ctx_w = content_w;
+    }
+}
+
+/* Opens a block box (block_id, decoration from def) INSIDE the content rect
+ * [ctx_left, ctx_left+ctx_w): flushes the line, applies the gap before the box,
+ * records the border-box rect, reserves the top border+padding, and pushes the box's
+ * own content rect onto the stack so its children (text or nested boxes) place inside
+ * it. At top level (ctx_left 0, ctx_w content_w) this reproduces the Step B/C single-
+ * box geometry exactly, so single boxes and the default path stay byte-identical. */
 static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
-                     double content_w, const rd_block *b) {
+                     int block_id, const pv_box_def *def,
+                     double ctx_left, double ctx_w) {
     flush_line(L, s, th);
     if (L->nrow > 0) {
         double gap = (s->prev_bottom > th->paragraph_gap) ? s->prev_bottom : th->paragraph_gap;
@@ -2302,43 +2512,80 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
     }
     s->prev_bottom = 0;
 
-    double bl = box_edge_px(b->bord_lw), br = box_edge_px(b->bord_rw);
-    double bt = box_edge_px(b->bord_tw), bb = box_edge_px(b->bord_bw);
-    double pl = (b->pad_l > 0) ? (double)b->pad_l : 0.0;
-    double pr = (b->pad_r > 0) ? (double)b->pad_r : 0.0;
-    double pt = (b->pad_t > 0) ? (double)b->pad_t : 0.0;
-    double pb = (b->pad_b > 0) ? (double)b->pad_b : 0.0;
+    double bl = box_edge_px(def->bord_lw), br = box_edge_px(def->bord_rw);
+    double bt = box_edge_px(def->bord_tw), bb = box_edge_px(def->bord_bw);
+    double pl = (def->pad_l > 0) ? (double)def->pad_l : 0.0;
+    double pr = (def->pad_r > 0) ? (double)def->pad_r : 0.0;
+    double pt = (def->pad_t > 0) ? (double)def->pad_t : 0.0;
+    double pb = (def->pad_b > 0) ? (double)def->pad_b : 0.0;
 
-    double base_l = (double)b->indent * UI_LIST_INDENT;
-    double avail_w = content_w - base_l;
+    double avail_w = ctx_w;
     if (avail_w < 1.0) avail_w = 1.0;
-    bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r, (double)b->box_w,
-                            b->box_center, avail_w);
-    double box_left = base_l + hp.x_off - pl;
+    bx_hplace hp = bx_place((double)def->box_l, (double)def->box_r, (double)def->box_w,
+                            def->box_center, avail_w);
+    double box_left = ctx_left + hp.x_off - pl;
     double box_width = hp.content_w + pl + pr;
 
     rc_box *bx = rc_add_box(L);
     size_t idx = (bx != NULL) ? (L->nbox - 1) : (size_t)-1;
     if (bx != NULL) {
         bx->x = box_left; bx->top = s->cur_top; bx->w = box_width; bx->h = 0.0;
-        bx->bord_tw = b->bord_tw; bx->bord_rw = b->bord_rw;
-        bx->bord_bw = b->bord_bw; bx->bord_lw = b->bord_lw;
-        bx->bord_ts = b->bord_ts; bx->bord_rs = b->bord_rs;
-        bx->bord_bs = b->bord_bs; bx->bord_ls = b->bord_ls;
-        bx->bord_tc = b->bord_tc; bx->bord_rc = b->bord_rc;
-        bx->bord_bc = b->bord_bc; bx->bord_lc = b->bord_lc;
-        bx->radius = b->border_radius;
-        bx->bsh_dx = b->bsh_dx; bx->bsh_dy = b->bsh_dy; bx->bsh_blur = b->bsh_blur;
-        bx->bsh_spread = b->bsh_spread; bx->bsh_color = b->bsh_color;
-        bx->bsh_inset = b->bsh_inset;
-        bx->outline_w = b->outline_w; bx->outline_style = b->outline_style;
-        bx->outline_color = b->outline_color;
-        bx->bg_rgb = b->bg_rgb;
+        bx->bord_tw = def->bord_tw; bx->bord_rw = def->bord_rw;
+        bx->bord_bw = def->bord_bw; bx->bord_lw = def->bord_lw;
+        bx->bord_ts = def->bord_ts; bx->bord_rs = def->bord_rs;
+        bx->bord_bs = def->bord_bs; bx->bord_ls = def->bord_ls;
+        bx->bord_tc = def->bord_tc; bx->bord_rc = def->bord_rc;
+        bx->bord_bc = def->bord_bc; bx->bord_lc = def->bord_lc;
+        bx->radius = def->border_radius;
+        bx->bsh_dx = def->bsh_dx; bx->bsh_dy = def->bsh_dy; bx->bsh_blur = def->bsh_blur;
+        bx->bsh_spread = def->bsh_spread; bx->bsh_color = def->bsh_color;
+        bx->bsh_inset = def->bsh_inset;
+        bx->outline_w = def->outline_w; bx->outline_style = def->outline_style;
+        bx->outline_color = def->outline_color;
+        bx->bg_rgb = def->bg_rgb;
     }
     s->cur_top += bt + pt;       /* inner content starts below the top border + padding */
-    s->cur_box_id = b->block_id;
-    s->box_idx = idx;
-    s->box_bl = bl; s->box_br = br; s->box_pb = pb; s->box_bb = bb;
+    if (s->box_depth < RC_BOX_STACK_MAX) {
+        rc_open_box *ob = &s->box_stack[s->box_depth++];
+        ob->block_id = block_id;
+        ob->box_idx = idx;
+        ob->bl = bl; ob->br = br; ob->pb = pb; ob->bb = bb;
+        ob->inner_left = ctx_left + hp.x_off + bl;
+        ob->inner_w = hp.content_w - bl - br;
+        if (ob->inner_w < 1.0) ob->inner_w = 1.0;
+    }
+}
+
+/* Reconciles the open-box stack so it equals block b's box path (root..b->block_id),
+ * derived from the box-def parent_id chain. Closes any open box not on the path
+ * (innermost first), then opens any path box not yet open (outermost first), nesting
+ * each inside its parent's content rect. Bounded by RC_BOX_STACK_MAX. */
+static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
+                            const rd_doc *doc, double content_w, int block_id) {
+    int path[RC_BOX_STACK_MAX];
+    int n = 0;
+    for (int id = block_id; id >= 0 && n < RC_BOX_STACK_MAX; ) {
+        path[n++] = id;
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        id = (d != NULL) ? d->parent_id : -1;
+    }
+    /* path is innermost..outermost; reverse to root..innermost. */
+    for (int a = 0, b = n - 1; a < b; ++a, --b) { int t = path[a]; path[a] = path[b]; path[b] = t; }
+
+    /* Keep the common prefix; close the divergent tail of the open stack. */
+    int common = 0;
+    while (common < s->box_depth && common < n &&
+           s->box_stack[common].block_id == path[common]) ++common;
+    while (s->box_depth > common) close_top_box(L, s, th);
+
+    /* Open the remaining path boxes, each inside the current innermost box's rect. */
+    for (int k = common; k < n; ++k) {
+        const pv_box_def *d = rd_box_at(doc, (size_t)path[k]);
+        if (d == NULL) break;
+        double ctx_left, ctx_w;
+        rc_box_context(s, content_w, &ctx_left, &ctx_w);
+        open_box(L, s, th, path[k], d, ctx_left, ctx_w);
+    }
 }
 
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
@@ -2349,7 +2596,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     rc_state s;
     memset(&s, 0, sizeof s);
     s.bg_rgb = -1;  /* 0 is opaque black; no background until a block sets one */
-    s.cur_box_id = -1;  /* 0 is a valid block_id; -1 means no open box */
+    /* s.box_depth starts 0 (memset): no open box -> default flat flow. */
 
     for (size_t i = 0; i < rd_count(doc); ++i) {
         const rd_block *b = rd_at(doc, i);
@@ -2361,7 +2608,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * columns and then skipped. */
         if (b->cont_id >= 0 &&
             (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID)) {
-            close_box(L, &s, th);  /* a container ends any open block box */
+            close_all_boxes(L, &s, th);  /* a container ends any open block box (v1) */
             size_t j = i + 1;
             while (j < rd_count(doc) && rd_at(doc, j)->cont_id == b->cont_id) ++j;
             double mt, mb;
@@ -2373,13 +2620,11 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             continue;
         }
 
-        /* Box engine (Hito 23b-8): open/close the block box when the block_id changes
-         * (a maximal run of blocks sharing a block_id is one box). The decoration is
-         * painted behind the rows; here we only reserve its border+padding geometry. */
-        if (b->block_id != s.cur_box_id) {
-            close_box(L, &s, th);
-            if (b->block_id >= 0) open_box(L, &s, th, content_w, b);
-        }
+        /* Box engine (Hito 23b-8 Step D): reconcile the open-box stack with this
+         * block's box path (root..block_id) from the box-def parent chain, so a child
+         * box nests inside its parent instead of splitting it. block_id < 0 (images,
+         * inputs, blocks outside any box) closes all open boxes. */
+        reconcile_boxes(L, &s, th, doc, content_w, b->block_id);
 
         int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE
                        || b->kind == RD_HEADING || b->kind == RD_INPUT);
@@ -2442,20 +2687,30 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * with caps.css; all zero otherwise -> identical to before) then places the
          * content within the remaining width via the pure bx_place. */
         double base_l = (double)b->indent * UI_LIST_INDENT;
-        double avail_w = content_w - base_l;
-        if (avail_w < 1.0) avail_w = 1.0;
-        bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r, (double)b->box_w,
-                                b->box_center, avail_w);
-        /* Inside an open box the existing hbox/bx_place already applied the padding;
-         * shift the inner content right by the left border and shrink it by both
-         * borders so the text clears the box border. Outside a box (box_bl/br == 0)
-         * this is identical to before. */
-        s.indent_px = base_l + hp.x_off + s.box_bl;
-        double inner_w = hp.content_w - s.box_bl - s.box_br;
+        double inner_w;
+        if (s.box_depth > 0) {
+            /* Inside a box: the box already placed its content rect (consuming its own
+             * hbox/padding/border), so the run just flows there plus its list indent.
+             * Re-applying the run's bx_place would double-count the box's insets. */
+            double ctx_left, ctx_w;
+            rc_box_context(&s, content_w, &ctx_left, &ctx_w);
+            s.indent_px = ctx_left + base_l;
+            inner_w = ctx_w - base_l;
+        } else {
+            /* Top level: apply the block's own author box model (insets, width cap,
+             * margin:0 auto centering) via the pure bx_place. Byte-identical to before
+             * when there is no author box (all zero). */
+            double avail_w = content_w - base_l;
+            if (avail_w < 1.0) avail_w = 1.0;
+            bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r, (double)b->box_w,
+                                    b->box_center, avail_w);
+            s.indent_px = base_l + hp.x_off;
+            inner_w = hp.content_w;
+        }
         if (inner_w < 1.0) inner_w = 1.0;
         flow_text_block(cr, w, L, &s, th, b, inner_w);
     }
-    close_box(L, &s, th);
+    close_all_boxes(L, &s, th);
     flush_line(L, &s, th);
     L->total_h = s.cur_top;
 }
@@ -3306,6 +3561,7 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_READER) return w->reader;
     if (it->action == UI_MENU_FREEBUG) return freebug_is_open(w);
     if (it->action == UI_MENU_PDF)   return 0; /* an action, never "checked" */
+    if (it->action == UI_MENU_HOSTADD) return 0; /* an action, never "checked" */
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
 
@@ -3373,6 +3629,10 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         freebug_toggle(w);
         return;
     }
+    if (it->action == UI_MENU_HOSTADD) {
+        add_current_host_to_list(w, it->theme_val);  /* theme_val = HOSTLIST_* */
+        return;
+    }
     bool *flag = (bool *)((char *)&w->caps + it->cap_offset);
     *flag = !*flag;
     render_current(w);
@@ -3404,6 +3664,30 @@ static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop) {
         cairo_line_to(cr, cx + UI_HAMBURGER_W, y);
         cairo_stroke(cr);
     }
+}
+
+/* The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button
+ * starting at bx. Drawn with Cairo (not a font glyph) so it never depends on the
+ * chrome face having a reload codepoint. */
+static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop) {
+    set_rgb(cr, color);
+    cairo_set_line_width(cr, 2.0);
+    cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+    double cx = bx + UI_BTN_W / 2.0;
+    double cy = ttop + UI_TOOLBAR_H / 2.0;
+    double r = 6.0;
+    double a0 = -UI_TWO_PI * 0.08;          /* start just right of top */
+    double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead */
+    cairo_new_sub_path(cr);
+    cairo_arc(cr, cx, cy, r, a0, a1);
+    cairo_stroke(cr);
+    /* Arrowhead at the arc's start (top), pointing clockwise. */
+    double hx = cx + r * cos(a0), hy = cy + r * sin(a0);
+    cairo_move_to(cr, hx, hy);
+    cairo_line_to(cr, hx - 4.0, hy - 1.0);
+    cairo_move_to(cr, hx, hy);
+    cairo_line_to(cr, hx + 1.0, hy - 4.5);
+    cairo_stroke(cr);
 }
 
 /* Draws the options-menu panel (checkbox per capability) when open. */
@@ -3632,6 +3916,43 @@ static void draw_tabstrip(cairo_t *cr, browser_window *w) {
     draw_text(cr, "+", nx + UI_TAB_NEW_W / 2.0, baseline, 1);
 }
 
+/* Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL
+ * bar, drawn as an overlay (on top of content) while the URL bar is focused and a
+ * query matches. The highlighted row (omni_sel) is shaded. */
+static void draw_omnibox(cairo_t *cr, browser_window *w) {
+    omni_refresh(w);
+    if (w->omni_sugg_n <= 0) return;
+    const ui_theme *th = &w->theme;
+    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
+    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
+    double top = toolbar_top(w) + UI_TOOLBAR_H;
+    double h = UI_OMNI_ROW_H * (double)w->omni_sugg_n;
+
+    set_rgb(cr, th->url_bg);
+    cairo_rectangle(cr, url_x, top, url_w, h);
+    cairo_fill(cr);
+    set_rgb(cr, th->url_border);
+    cairo_rectangle(cr, url_x, top, url_w, h);
+    cairo_stroke(cr);
+
+    cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, UI_FONT_SIZE);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    for (int i = 0; i < w->omni_sugg_n; ++i) {
+        double ry = top + UI_OMNI_ROW_H * (double)i;
+        if (i == w->omni_sel) {
+            set_rgb(cr, th->btn_hover_bg);
+            cairo_rectangle(cr, url_x, ry, url_w, UI_OMNI_ROW_H);
+            cairo_fill(cr);
+        }
+        set_rgb(cr, th->chrome_text);
+        cairo_move_to(cr, url_x + UI_MARGIN,
+                      ry + (UI_OMNI_ROW_H + fe.ascent - fe.descent) / 2.0);
+        cairo_show_text(cr, w->omni_sugg[i]);
+    }
+}
+
 static void paint(browser_window *w) {
     cairo_t *cr = cairo_create(w->cairo_surface);
     const ui_theme *th = &w->theme;
@@ -3686,10 +4007,11 @@ static void paint(browser_window *w) {
     if (w->hot != UI_HOT_NONE) {
         double hx = back_x;
         switch (w->hot) {
-            case UI_HOT_BACK: hx = back_x; break;
-            case UI_HOT_FWD:  hx = fwd_x;  break;
-            case UI_HOT_GO:   hx = go_x;   break;
-            case UI_HOT_MENU: hx = menu_x; break;
+            case UI_HOT_BACK:   hx = back_x;      break;
+            case UI_HOT_FWD:    hx = fwd_x;       break;
+            case UI_HOT_RELOAD: hx = UI_RELOAD_X; break;
+            case UI_HOT_GO:     hx = go_x;        break;
+            case UI_HOT_MENU:   hx = menu_x;      break;
             default: break;
         }
         set_rgb(cr, th->btn_hover_bg);
@@ -3706,6 +4028,9 @@ static void paint(browser_window *w) {
 
     set_rgb(cr, can_fwd ? th->chrome_text : th->chrome_text_dim);
     draw_text(cr, ">", fwd_x + UI_BTN_W / 2.0, bl, 1);
+
+    /* Reload button (also F5 / Ctrl+R). */
+    draw_reload(cr, th->chrome_text, UI_RELOAD_X, ttop);
 
     set_rgb(cr, th->chrome_text);
     draw_text(cr, "Go", go_x + UI_BTN_W / 2.0, bl, 1);
@@ -3736,6 +4061,28 @@ static void paint(browser_window *w) {
         cairo_save(cr);
         cairo_rectangle(cr, url_x + 2, ttop + UI_MARGIN + 2, url_w - 4, UI_TOOLBAR_H - 2 * UI_MARGIN - 4);
         cairo_clip(cr);
+
+        /* Selection highlight behind the text (omnibar). Wrapped in save/restore so the
+         * source colour for the text below is unchanged when there is no selection. */
+        if (w->url_bar_focused) {
+            size_t ss = 0, sl = 0;
+            if (browser_url_bar_selection(&w->bs, &ss, &sl)) {
+                char m[2] = {0};
+                double sx = tx;
+                for (size_t i = 0; i < ss && i < w->bs.url_bar_len; ++i) {
+                    m[0] = url[i]; cairo_text_extents(cr, m, &te); sx += te.x_advance;
+                }
+                double ex = sx;
+                for (size_t i = ss; i < ss + sl && i < w->bs.url_bar_len; ++i) {
+                    m[0] = url[i]; cairo_text_extents(cr, m, &te); ex += te.x_advance;
+                }
+                cairo_save(cr);
+                set_rgb(cr, th->btn_hover_bg);
+                cairo_rectangle(cr, sx, ty - fe.ascent, ex - sx, fe.height);
+                cairo_fill(cr);
+                cairo_restore(cr);
+            }
+        }
 
         cairo_move_to(cr, tx, ty);
         cairo_show_text(cr, buf);
@@ -3839,6 +4186,7 @@ static void paint(browser_window *w) {
     /* Scrollbar over the content's right gutter, then overlays on top. */
     draw_scrollbar(cr, w);
     draw_menu(cr, w);
+    draw_omnibox(cr, w);
     double hover_h = draw_hover_url(cr, w);
     draw_toast(cr, w, hover_h);
 
@@ -4627,6 +4975,8 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             w->menu_open = 1;
         } else if (w->ptr_x >= go_x && w->ptr_x < menu_x) {
             go_omnibox(w);
+        } else if (w->ptr_x >= UI_RELOAD_X && w->ptr_x < UI_RELOAD_X + UI_BTN_W) {
+            load_current(w);  /* reload: re-fetch, full TLS/PQ policy re-applied (also F5/Ctrl+R) */
         } else if (w->ptr_x >= url_x && w->ptr_x < url_x + url_w) {
             w->url_bar_focused = 1;
             w->focused_input = -1; /* the URL bar takes the keyboard */
@@ -4645,6 +4995,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
                 if (acc >= cx) { w->bs.url_bar_cursor = i; break; }
                 w->bs.url_bar_cursor = i + 1;
             }
+            w->bs.url_bar_anchor = w->bs.url_bar_cursor;  /* a click collapses any selection */
             cairo_destroy(cr);
         } else if (w->ptr_x >= fwd_x && w->ptr_x < fwd_x + UI_BTN_W) {
             if (browser_forward(&w->bs) == BROWSER_OK) load_current(w);
@@ -4654,6 +5005,24 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             w->url_bar_focused = 0;
         }
     } else {
+        /* Omnibox autocomplete dropdown: a click on a favorite row commits it (the
+         * dropdown overlays the content top, so this is checked before content). */
+        if (w->url_bar_focused && w->omni_sugg_n > 0) {
+            double dtop = ttop + UI_TOOLBAR_H;
+            if (w->ptr_x >= url_x && w->ptr_x < url_x + url_w &&
+                w->ptr_y >= dtop && w->ptr_y < dtop + UI_OMNI_ROW_H * (double)w->omni_sugg_n) {
+                int row = (int)((w->ptr_y - dtop) / UI_OMNI_ROW_H);
+                if (row >= 0 && row < w->omni_sugg_n) {
+                    browser_set_url_bar(&w->bs, w->omni_sugg[row]);
+                    w->omni_sugg_n = 0;
+                    w->omni_sel = -1;
+                    go_omnibox(w);
+                    w->url_bar_focused = 0;
+                    redraw(w);
+                    return;
+                }
+            }
+        }
         /* Content area. A click first hit-tests the form controls: an editable box
          * takes focus, a submit button submits its form. Otherwise a hyperlink is
          * followed (the security decision lives in the pure ln_resolve). */
@@ -4891,12 +5260,21 @@ static void clipboard_copy(browser_window *w) {
     if (w->data_device == NULL || w->data_device_manager == NULL) return;
 
     const char *text = NULL;
+    char selbuf[BROWSER_URL_MAX];
     if (w->ua_field_focused) {
         text = tf_text(&w->ua_field);
     } else if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
         text = tf_text(&w->inputs[w->focused_input].field);
     } else if (w->url_bar_focused) {
-        text = w->bs.url_bar;
+        /* Copy just the selection if there is one, else the whole URL bar. */
+        size_t s = 0, l = 0;
+        if (browser_url_bar_selection(&w->bs, &s, &l) && l < sizeof selbuf) {
+            memcpy(selbuf, w->bs.url_bar + s, l);
+            selbuf[l] = '\0';
+            text = selbuf;
+        } else {
+            text = w->bs.url_bar;
+        }
     } else {
         text = browser_current_url(&w->bs); /* copy the current page's address */
     }
@@ -4913,6 +5291,15 @@ static void clipboard_copy(browser_window *w) {
     wl_data_source_offer(w->copy_source, "text/plain;charset=utf-8");
     wl_data_source_offer(w->copy_source, "text/plain");
     wl_data_device_set_selection(w->data_device, w->copy_source, w->last_serial);
+}
+
+/* Cut the omnibar selection: copy it to the clipboard, then remove it. v1 cut is the
+ * URL bar only (page inputs / the UA box have no selection model yet). */
+static void clipboard_cut(browser_window *w) {
+    if (!w->url_bar_focused) return;
+    if (!browser_url_bar_selection(&w->bs, NULL, NULL)) return;
+    clipboard_copy(w);                       /* copies just the selection */
+    browser_url_bar_delete_selection(&w->bs);
 }
 
 /* --- keyboard with xkbcommon --- */
@@ -4979,6 +5366,18 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         clipboard_copy(w);
         return;
     }
+    /* Ctrl+X cuts the omnibar selection (copy + delete). */
+    if (ctrl && !shift && (sym == XKB_KEY_x || sym == XKB_KEY_X)) {
+        clipboard_cut(w);
+        redraw(w);
+        return;
+    }
+    /* Ctrl+A selects all of the URL bar when it is focused. */
+    if (ctrl && !shift && (sym == XKB_KEY_a || sym == XKB_KEY_A) && w->url_bar_focused) {
+        browser_url_bar_select_all(&w->bs);
+        redraw(w);
+        return;
+    }
 
     /* Ctrl+Shift+E: add current host to exception list and reload insecurely. */
     if (ctrl && shift && sym == XKB_KEY_E) {
@@ -5028,6 +5427,21 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     /* Ctrl+R / F5 reloads the current page (re-fetch, full TLS/PQ policy re-applied). */
     if ((ctrl && !shift && (sym == XKB_KEY_r || sym == XKB_KEY_R)) || sym == XKB_KEY_F5) {
         load_current(w);
+        return;
+    }
+
+    /* Ctrl+Shift+B / A / J add the current host to block.conf / allow.conf / js.conf
+     * (hostedit validates fail-closed) and reload the matching filter immediately. */
+    if (ctrl && shift && (sym == XKB_KEY_b || sym == XKB_KEY_B)) {
+        add_current_host_to_list(w, HOSTLIST_BLOCK);
+        return;
+    }
+    if (ctrl && shift && (sym == XKB_KEY_a || sym == XKB_KEY_A)) {
+        add_current_host_to_list(w, HOSTLIST_ALLOW);
+        return;
+    }
+    if (ctrl && shift && (sym == XKB_KEY_j || sym == XKB_KEY_J)) {
+        add_current_host_to_list(w, HOSTLIST_JS);
         return;
     }
 
@@ -5149,25 +5563,49 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
 
     if (sym == XKB_KEY_Escape) {
         w->url_bar_focused = 0;
+        w->omni_sugg_n = 0; w->omni_sel = -1;
     } else if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
+        /* Commit a highlighted favorite suggestion, else what is typed. */
+        if (w->omni_sel >= 0 && w->omni_sel < w->omni_sugg_n)
+            browser_set_url_bar(&w->bs, w->omni_sugg[w->omni_sel]);
         go_omnibox(w);
         w->url_bar_focused = 0;
+        w->omni_sugg_n = 0; w->omni_sel = -1;
+    } else if (sym == XKB_KEY_Tab || sym == XKB_KEY_ISO_Left_Tab) {
+        /* Tab completes the URL bar to the top (or highlighted) favorite. */
+        omni_refresh(w);
+        if (w->omni_sugg_n > 0) {
+            int idx = (w->omni_sel >= 0) ? w->omni_sel : 0;
+            browser_set_url_bar(&w->bs, w->omni_sugg[idx]);
+            w->omni_sel = -1;
+        }
+    } else if (sym == XKB_KEY_Down) {
+        omni_refresh(w);
+        if (w->omni_sugg_n > 0)
+            w->omni_sel = (w->omni_sel + 1 < w->omni_sugg_n) ? w->omni_sel + 1 : 0;
+    } else if (sym == XKB_KEY_Up) {
+        w->omni_sel = (w->omni_sel > 0) ? w->omni_sel - 1 : -1;
     } else if (sym == XKB_KEY_BackSpace) {
         browser_url_bar_backspace(&w->bs);
+        w->omni_sel = -1;
     } else if (sym == XKB_KEY_Delete || sym == XKB_KEY_KP_Delete) {
         browser_url_bar_delete(&w->bs);
+        w->omni_sel = -1;
     } else if (sym == XKB_KEY_Left) {
-        browser_url_bar_move_cursor(&w->bs, -1);
+        if (shift) browser_url_bar_extend_cursor(&w->bs, -1);
+        else       browser_url_bar_move_cursor(&w->bs, -1);
     } else if (sym == XKB_KEY_Right) {
-        browser_url_bar_move_cursor(&w->bs, 1);
+        if (shift) browser_url_bar_extend_cursor(&w->bs, 1);
+        else       browser_url_bar_move_cursor(&w->bs, 1);
     } else if (sym == XKB_KEY_Home) {
-        w->bs.url_bar_cursor = 0;
+        browser_url_bar_set_cursor(&w->bs, 0, shift);            /* shift extends */
     } else if (sym == XKB_KEY_End) {
-        w->bs.url_bar_cursor = w->bs.url_bar_len;
+        browser_url_bar_set_cursor(&w->bs, w->bs.url_bar_len, shift);
     } else if (n > 0) {
         for (int i = 0; i < n; ++i) {
             browser_url_bar_insert(&w->bs, utf8[i]);
         }
+        w->omni_sel = -1;
     }
     redraw(w);
 }
@@ -5449,6 +5887,8 @@ ui_status ui_run_browser(const char *start_url) {
      * the fallible Wayland setup so its error returns above never leak it. */
     w.hosts = build_host_filter();
     w.js_hosts = build_js_filter();        /* per-host JS allowlist (js.conf) */
+    w.omni_sel = -1;
+    load_favorites(&w);                    /* omnibox autocomplete from allow.conf */
     w.js_mode = jsp_mode_from_str(getenv("FREEDOM_JS")); /* default JSP_ALLOWLIST */
     init_net_config(&w);  /* Tor/I2P routing config from the environment (opt-in) */
 
@@ -5571,6 +6011,7 @@ ui_status ui_run_browser(const char *start_url) {
     clear_doc(&w);
     hb_free(w.hosts);
     hb_free(w.js_hosts);
+    free(w.favorites);
     free(w.cur_html);
     free(w.cur_top);
     browser_free(&w.bs);

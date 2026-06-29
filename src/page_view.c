@@ -119,24 +119,11 @@ static char *dup_n(const char *s, size_t n) {
 
 /* --- public: model --- */
 
-/* Box engine (Hito 23b-8 Step A): the no-op defaults for the box identity/decoration
- * fields, shared by all three append helpers so a run with no author box renders
- * identically. Sentinels mirror the css module (PV_LEN_UNSET width/radius, -1 color,
- * 0 the rest). */
+/* Box engine (Hito 23b-8): a run defaults to "no box" (block_id -1). The box's
+ * decoration lives on the box-def list, not the run, so there is nothing else to
+ * default here; shared by all three append helpers. */
 static void run_init_box_defaults(pv_run *r) {
     r->block_id = -1;
-    r->box_sizing = 0;
-    r->pad_t = r->pad_r = r->pad_b = r->pad_l = 0;
-    r->bord_tw = r->bord_rw = r->bord_bw = r->bord_lw = PV_LEN_UNSET;
-    r->bord_ts = r->bord_rs = r->bord_bs = r->bord_ls = 0;
-    r->bord_tc = r->bord_rc = r->bord_bc = r->bord_lc = -1;
-    r->border_radius = PV_LEN_UNSET;
-    r->bsh_dx = r->bsh_dy = r->bsh_blur = r->bsh_spread = 0;
-    r->bsh_color = -1;
-    r->bsh_inset = -1;
-    r->outline_w = PV_LEN_UNSET;
-    r->outline_style = 0;
-    r->outline_color = -1;
 }
 
 pv_view *pv_new(void) {
@@ -431,29 +418,17 @@ void pv_set_block_id(pv_view *v, int block_id) {
     v->runs[v->count - 1].block_id = block_id;
 }
 
-void pv_set_box_border(pv_view *v, int tw, int rw, int bw, int lw,
-                       int ts, int rs, int bs, int ls,
-                       int tc, int rc, int bc, int lc, int radius) {
-    if (v == NULL || v->count == 0) return;
-    pv_run *r = &v->runs[v->count - 1];
-    r->bord_tw = tw; r->bord_rw = rw; r->bord_bw = bw; r->bord_lw = lw;
-    r->bord_ts = ts; r->bord_rs = rs; r->bord_bs = bs; r->bord_ls = ls;
-    r->bord_tc = tc; r->bord_rc = rc; r->bord_bc = bc; r->bord_lc = lc;
-    r->border_radius = radius;
-}
-
-void pv_set_boxdeco(pv_view *v, int box_sizing, int pad_t, int pad_r, int pad_b,
-                    int pad_l, int bsh_dx, int bsh_dy, int bsh_blur, int bsh_spread,
-                    int bsh_color, int bsh_inset, int outline_w, int outline_style,
-                    int outline_color) {
-    if (v == NULL || v->count == 0) return;
-    pv_run *r = &v->runs[v->count - 1];
-    r->box_sizing = box_sizing;
-    r->pad_t = pad_t; r->pad_r = pad_r; r->pad_b = pad_b; r->pad_l = pad_l;
-    r->bsh_dx = bsh_dx; r->bsh_dy = bsh_dy; r->bsh_blur = bsh_blur;
-    r->bsh_spread = bsh_spread; r->bsh_color = bsh_color; r->bsh_inset = bsh_inset;
-    r->outline_w = outline_w; r->outline_style = outline_style;
-    r->outline_color = outline_color;
+pv_status pv_add_box_def(pv_view *v, const pv_box_def *d) {
+    if (v == NULL || d == NULL) return PV_ERR_NULL_ARG;
+    if (v->nbox == v->boxcap) {
+        size_t nc = v->boxcap ? v->boxcap * 2 : 8;
+        pv_box_def *g = (pv_box_def *)realloc(v->boxes, nc * sizeof *g);
+        if (g == NULL) return PV_ERR_OOM;
+        v->boxes = g;
+        v->boxcap = nc;
+    }
+    v->boxes[v->nbox++] = *d;
+    return PV_OK;
 }
 
 void pv_free(pv_view *v) {
@@ -466,6 +441,7 @@ void pv_free(pv_view *v) {
         free(v->runs[i].value);
     }
     free(v->runs);
+    free(v->boxes);
     free(v);
 }
 
@@ -476,6 +452,15 @@ size_t pv_count(const pv_view *v) {
 const pv_run *pv_at(const pv_view *v, size_t i) {
     if (v == NULL || i >= v->count) return NULL;
     return &v->runs[i];
+}
+
+size_t pv_box_count(const pv_view *v) {
+    return (v != NULL) ? v->nbox : 0;
+}
+
+const pv_box_def *pv_box_at(const pv_view *v, size_t i) {
+    if (v == NULL || i >= v->nbox) return NULL;
+    return &v->boxes[i];
 }
 
 /* --- builder helpers --- */
@@ -788,33 +773,6 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
     out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO && out->w > 0) ? 1 : 0;
 }
 
-/* Box engine (Hito 23b-8 Step A): identity + decoration resolved for a run from the
- * nearest block-level ancestor that declares a box. Sentinels mirror pv_run. */
-typedef struct pv_box_deco {
-    int block_id;
-    int box_sizing;
-    int pad_t, pad_r, pad_b, pad_l;
-    int bord_tw, bord_rw, bord_bw, bord_lw;
-    int bord_ts, bord_rs, bord_bs, bord_ls;
-    int bord_tc, bord_rc, bord_bc, bord_lc;
-    int border_radius;
-    int bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
-    int outline_w, outline_style, outline_color;
-} pv_box_deco;
-
-static void pv_box_deco_reset(pv_box_deco *d) {
-    d->block_id = -1;
-    d->box_sizing = 0;
-    d->pad_t = d->pad_r = d->pad_b = d->pad_l = 0;
-    d->bord_tw = d->bord_rw = d->bord_bw = d->bord_lw = PV_LEN_UNSET;
-    d->bord_ts = d->bord_rs = d->bord_bs = d->bord_ls = 0;
-    d->bord_tc = d->bord_rc = d->bord_bc = d->bord_lc = -1;
-    d->border_radius = PV_LEN_UNSET;
-    d->bsh_dx = d->bsh_dy = d->bsh_blur = d->bsh_spread = 0;
-    d->bsh_color = -1; d->bsh_inset = -1;
-    d->outline_w = PV_LEN_UNSET; d->outline_style = 0; d->outline_color = -1;
-}
-
 /* True if the resolved style declares any paintable box (border/padding/radius/
  * shadow/outline). box-sizing alone is not a box (it only matters with a width). */
 static int css_has_boxdeco(const css_style *cs) {
@@ -826,11 +784,40 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->outline_width != CSS_LEN_UNSET;
 }
 
-/* Copies the box-decoration values from a resolved style into d, stamping block_id.
- * Padding unset -> 0 (geometry default); the rest keep css's sentinels (the painter
- * reads them). */
-static void css_boxdeco_resolve(const css_style *cs, int block_id, pv_box_deco *d) {
-    d->block_id = block_id;
+/* Document-order registry of flex/grid container nodes, so the runs of one
+ * container share a stable id. */
+typedef struct pv_container_reg {
+    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    size_t count;
+} pv_container_reg;
+
+/* Id of node in reg, registering it on first sight. -1 when reg is full. */
+static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
+    for (size_t i = 0; i < reg->count; ++i)
+        if (reg->node[i] == node) return (int)i;
+    if (reg->count >= PV_MAX_CONTAINERS) return -1;
+    reg->node[reg->count] = node;
+    return (int)reg->count++;
+}
+
+/* Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block
+ * nodes plus each box's resolved definition (decoration + parent link). A box's
+ * block_id is its index here, so the painter can reconstruct the box tree. */
+typedef struct pv_box_reg {
+    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    pv_box_def            def[PV_MAX_CONTAINERS];
+    size_t                count;
+} pv_box_reg;
+
+/* Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style.
+ * Padding unset -> 0 (geometry default); the rest keep the css module's sentinels
+ * (PV_LEN_UNSET width/radius/outline width, -1 colors, 0 the rest). */
+static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
+    d->parent_id = -1;
+    pv_box_info hb = { 0, 0, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET };
+    css_hbox_resolve(cs, &hb);
+    d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
+    d->bg_rgb = (cs->background >= 0) ? cs->background : -1;
     d->box_sizing = cs->box_sizing;
     d->pad_t = (cs->pad_top    != CSS_LEN_UNSET) ? cs->pad_top    : 0;
     d->pad_r = (cs->pad_right  != CSS_LEN_UNSET) ? cs->pad_right  : 0;
@@ -850,20 +837,16 @@ static void css_boxdeco_resolve(const css_style *cs, int block_id, pv_box_deco *
     d->outline_color = cs->outline_color;
 }
 
-/* Document-order registry of flex/grid container nodes, so the runs of one
- * container share a stable id. */
-typedef struct pv_container_reg {
-    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
-    size_t count;
-} pv_container_reg;
-
-/* Id of node in reg, registering it on first sight. -1 when reg is full. */
-static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
-    for (size_t i = 0; i < reg->count; ++i)
-        if (reg->node[i] == node) return (int)i;
-    if (reg->count >= PV_MAX_CONTAINERS) return -1;
-    reg->node[reg->count] = node;
-    return (int)reg->count++;
+/* Id of node in the box registry, recording its decoration on first sight. -1 when
+ * full. The parent link is stamped separately as the ancestor walk continues. */
+static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs) {
+    for (size_t i = 0; i < r->count; ++i)
+        if (r->node[i] == node) return (int)i;
+    if (r->count >= PV_MAX_CONTAINERS) return -1;
+    size_t id = r->count++;
+    r->node[id] = node;
+    boxdef_from_style(&r->def[id], cs);
+    return (int)id;
 }
 
 /* Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify.
@@ -913,8 +896,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             int *align, int *font_scale, int *line_scale, int *deco,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
                             pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box,
-                            pv_text_ext *ext, pv_container_reg *block_reg,
-                            pv_box_deco *deco_out) {
+                            pv_text_ext *ext, pv_box_reg *box_reg,
+                            int *block_id_out) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
     *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
     *deco = -1;
@@ -924,10 +907,11 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     pv_text_ext_reset(ext);
-    pv_box_deco_reset(deco_out);
+    *block_id_out = -1;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
     int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0, got_boxdeco = 0;
     int got_li = 0, got_list_kind = 0;
+    int prev_box_id = -1;  /* the box-carrying block seen one step more inner, for parent linking */
     int tag_bold = 0, tag_italic = 0;
     int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
 
@@ -967,15 +951,24 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 css_hbox_resolve(&cs, box);
                 got_hbox = 1;
             }
-            /* Box engine (Hito 23b-8): the nearest block ancestor that declares a
-             * paintable box (border/padding/shadow/outline). Its runs share one
-             * block_id (document order, separate registry from containers) and carry
-             * its decoration. Structure (block_id) + author presentation (decoration);
-             * render_doc gates the latter behind caps.css. */
-            if (!got_boxdeco && block_reg != NULL && is_block_tag(t) && css_has_boxdeco(&cs)) {
-                int bid = container_id(block_reg, p);
-                css_boxdeco_resolve(&cs, bid, deco_out);
-                got_boxdeco = 1;
+            /* Box engine (Hito 23b-8 Step D): EVERY box-carrying block ancestor is
+             * registered so the box tree has an entry for it (text-less wrappers
+             * included). The nearest one is the run's block_id (*block_id_out). As the
+             * walk moves outward, each inner box's parent_id is stamped with the next
+             * (outer) box found, so the registry holds the parent links. block_id is
+             * structure; the decoration (on the box def) is author presentation that
+             * render_doc gates behind caps.css. */
+            if (box_reg != NULL && is_block_tag(t) && css_has_boxdeco(&cs)) {
+                int bid = box_reg_id(box_reg, p, &cs);
+                if (bid >= 0) {
+                    if (!got_boxdeco) {
+                        *block_id_out = bid;
+                        got_boxdeco = 1;
+                    }
+                    if (prev_box_id >= 0)
+                        box_reg->def[prev_box_id].parent_id = bid;
+                    prev_box_id = bid;
+                }
             }
             if (!got_color) {
                 int c = (cs.color >= 0) ? cs.color
@@ -1462,7 +1455,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
     pv_container_reg reg = { { NULL }, 0 };  /* flex/grid containers, document order */
-    pv_container_reg block_reg = { { NULL }, 0 };  /* box-carrying blocks, document order */
+    pv_box_reg box_reg = { { NULL }, { { 0 } }, 0 };  /* box-carrying blocks + their defs */
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
@@ -1527,13 +1520,13 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
                 pv_text_ext unused_ext;
-                pv_box_deco unused_bdeco;
+                int unused_bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &unused_ext,
-                                &block_reg, &unused_bdeco);
+                                &box_reg, &unused_bdeco);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1585,13 +1578,13 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
                 pv_text_ext unused_ext;
-                pv_box_deco unused_bdeco;
+                int unused_bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &unused_ext,
-                                &block_reg, &unused_bdeco);
+                                &box_reg, &unused_bdeco);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1633,11 +1626,11 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         pv_cont_info cont;
         pv_box_info box;
         pv_text_ext ext;
-        pv_box_deco bdeco;
+        int bdeco;
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
                         &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
                         &li, &list_depth, &ordered, &reg, &cont, &box, &ext,
-                        &block_reg, &bdeco);
+                        &box_reg, &bdeco);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -1687,15 +1680,15 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         pv_set_text_ext(v, ext.font_family, ext.text_transform, ext.letter_spacing,
                         ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,
                         ext.opacity, ext.valign, ext.text_indent, ext.white_space);
-        pv_set_block_id(v, bdeco.block_id);
-        pv_set_box_border(v, bdeco.bord_tw, bdeco.bord_rw, bdeco.bord_bw, bdeco.bord_lw,
-                          bdeco.bord_ts, bdeco.bord_rs, bdeco.bord_bs, bdeco.bord_ls,
-                          bdeco.bord_tc, bdeco.bord_rc, bdeco.bord_bc, bdeco.bord_lc,
-                          bdeco.border_radius);
-        pv_set_boxdeco(v, bdeco.box_sizing, bdeco.pad_t, bdeco.pad_r, bdeco.pad_b,
-                       bdeco.pad_l, bdeco.bsh_dx, bdeco.bsh_dy, bdeco.bsh_blur,
-                       bdeco.bsh_spread, bdeco.bsh_color, bdeco.bsh_inset,
-                       bdeco.outline_w, bdeco.outline_style, bdeco.outline_color);
+        pv_set_block_id(v, bdeco);
+    }
+
+    /* Box engine (Step D): publish the box tree. box_reg holds one def per
+     * box-carrying block in document order (id == index) with parent links resolved
+     * during the ancestor walks; copy them into the view in id order. */
+    for (size_t bi = 0; bi < box_reg.count; ++bi) {
+        pv_status st = pv_add_box_def(v, &box_reg.def[bi]);
+        if (st != PV_OK) { rc = st; goto cleanup; }
     }
 
     *out = v;

@@ -262,10 +262,12 @@ leave it empty to use the anti-fingerprint default.
 | `Ctrl+D` | Distraction-free (reader) mode: drop nav/header/footer/aside + author styles, center the text |
 | `Ctrl+P` | Save the current page as a vector PDF (selectable text) |
 | `Ctrl+S` | Save the current page to `~/Downloads/freedom/` |
-| `Ctrl+R` / `F5` | Reload the current page (re-applies the full TLS/PQ policy) |
+| `Ctrl+R` / `F5` | Reload the current page (re-applies the full TLS/PQ policy); also a toolbar button |
 | `Ctrl++` / `Ctrl+-` / `Ctrl+0` | Zoom in / out (50–300% ladder) / reset to 100% |
-| `Ctrl+C` / `Ctrl+V` | Copy the focused field or page URL / paste into the focused field |
+| `Ctrl+C` / `Ctrl+X` / `Ctrl+V` | Copy (selection or field) / cut the omnibar selection / paste into the focused field |
+| `Ctrl+A` | Select all in the URL bar (Shift+arrows / Shift+Home/End extend a selection) |
 | `Ctrl+T` / `Ctrl+W` / `Ctrl+Tab` | New tab / close tab / next tab |
+| `Ctrl+Shift+B` / `Ctrl+Shift+A` / `Ctrl+Shift+J` | Add the current host to `block.conf` / `allow.conf` / `js.conf` (applies immediately) |
 | `Ctrl+Shift+E` | Per-host exception for a weak-but-valid certificate (this session) |
 | `j` / `k` | Scroll one line down / up (URL bar unfocused) |
 | `Space` / `b` | Scroll one page down / up |

@@ -176,6 +176,7 @@ void browser_free(browser_state *bs) {
     bs->url_bar[0] = '\0';
     bs->url_bar_len = 0;
     bs->url_bar_cursor = 0;
+    bs->url_bar_anchor = 0;
 }
 
 browser_status browser_set_url_bar(browser_state *bs, const char *url) {
@@ -186,6 +187,7 @@ browser_status browser_set_url_bar(browser_state *bs, const char *url) {
     bs->url_bar[n] = '\0';
     bs->url_bar_len = n;
     bs->url_bar_cursor = n;
+    bs->url_bar_anchor = n;   /* a freshly set URL has no selection */
     return BROWSER_OK;
 }
 
@@ -266,8 +268,30 @@ const char *browser_current_url(const browser_state *bs) {
     return bs->history[bs->history_pos];
 }
 
+int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len) {
+    if (bs == NULL || bs->url_bar_anchor == bs->url_bar_cursor) return 0;
+    size_t a = bs->url_bar_anchor, c = bs->url_bar_cursor;
+    size_t s = (a < c) ? a : c, e = (a < c) ? c : a;
+    if (e > bs->url_bar_len) e = bs->url_bar_len;   /* defensive clamp */
+    if (s >= e) return 0;
+    if (start != NULL) *start = s;
+    if (len != NULL) *len = e - s;
+    return 1;
+}
+
+int browser_url_bar_delete_selection(browser_state *bs) {
+    size_t s = 0, l = 0;
+    if (!browser_url_bar_selection(bs, &s, &l)) return 0;
+    memmove(bs->url_bar + s, bs->url_bar + s + l, bs->url_bar_len - (s + l) + 1);
+    bs->url_bar_len -= l;
+    bs->url_bar_cursor = s;
+    bs->url_bar_anchor = s;
+    return 1;
+}
+
 browser_status browser_url_bar_insert(browser_state *bs, char c) {
     if (bs == NULL) return BROWSER_ERR_NULL;
+    browser_url_bar_delete_selection(bs);   /* typing replaces a selection */
     if (bs->url_bar_len + 1 >= BROWSER_URL_MAX) return BROWSER_ERR_OOM;
     if (bs->url_bar_cursor > bs->url_bar_len) bs->url_bar_cursor = bs->url_bar_len;
     memmove(bs->url_bar + bs->url_bar_cursor + 1,
@@ -276,11 +300,13 @@ browser_status browser_url_bar_insert(browser_state *bs, char c) {
     bs->url_bar[bs->url_bar_cursor] = c;
     bs->url_bar_len++;
     bs->url_bar_cursor++;
+    bs->url_bar_anchor = bs->url_bar_cursor;
     return BROWSER_OK;
 }
 
 browser_status browser_url_bar_backspace(browser_state *bs) {
     if (bs == NULL) return BROWSER_ERR_NULL;
+    if (browser_url_bar_delete_selection(bs)) return BROWSER_OK;
     if (bs->url_bar_cursor == 0) return BROWSER_OK;
     size_t pos = bs->url_bar_cursor - 1;
     memmove(bs->url_bar + pos,
@@ -288,11 +314,13 @@ browser_status browser_url_bar_backspace(browser_state *bs) {
             bs->url_bar_len - pos);
     bs->url_bar_len--;
     bs->url_bar_cursor = pos;
+    bs->url_bar_anchor = pos;
     return BROWSER_OK;
 }
 
 browser_status browser_url_bar_delete(browser_state *bs) {
     if (bs == NULL) return BROWSER_ERR_NULL;
+    if (browser_url_bar_delete_selection(bs)) return BROWSER_OK;
     if (bs->url_bar_cursor >= bs->url_bar_len) return BROWSER_OK;
     memmove(bs->url_bar + bs->url_bar_cursor,
             bs->url_bar + bs->url_bar_cursor + 1,
@@ -307,6 +335,31 @@ browser_status browser_url_bar_move_cursor(browser_state *bs, long delta) {
     if (pos < 0) pos = 0;
     if ((size_t)pos > bs->url_bar_len) pos = (long)bs->url_bar_len;
     bs->url_bar_cursor = (size_t)pos;
+    bs->url_bar_anchor = bs->url_bar_cursor;   /* plain motion collapses the selection */
+    return BROWSER_OK;
+}
+
+browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta) {
+    if (bs == NULL) return BROWSER_ERR_NULL;
+    long pos = (long)bs->url_bar_cursor + delta;
+    if (pos < 0) pos = 0;
+    if ((size_t)pos > bs->url_bar_len) pos = (long)bs->url_bar_len;
+    bs->url_bar_cursor = (size_t)pos;          /* anchor kept: extends the selection */
+    return BROWSER_OK;
+}
+
+browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend) {
+    if (bs == NULL) return BROWSER_ERR_NULL;
+    if (pos > bs->url_bar_len) pos = bs->url_bar_len;
+    bs->url_bar_cursor = pos;
+    if (!extend) bs->url_bar_anchor = pos;
+    return BROWSER_OK;
+}
+
+browser_status browser_url_bar_select_all(browser_state *bs) {
+    if (bs == NULL) return BROWSER_ERR_NULL;
+    bs->url_bar_anchor = 0;
+    bs->url_bar_cursor = bs->url_bar_len;
     return BROWSER_OK;
 }
 
@@ -315,6 +368,7 @@ browser_status browser_url_bar_clear(browser_state *bs) {
     bs->url_bar[0] = '\0';
     bs->url_bar_len = 0;
     bs->url_bar_cursor = 0;
+    bs->url_bar_anchor = 0;
     return BROWSER_OK;
 }
 

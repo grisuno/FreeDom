@@ -875,17 +875,19 @@ static void test_build_boxdeco_border_padding(void **state) {
     const pv_run *solo = find_text(v, "solo");
     assert_non_null(solo);
     assert_true(solo->block_id >= 0);
-    assert_int_equal(solo->bord_tw, 2);
-    assert_int_equal(solo->bord_rw, 2);
-    assert_int_equal(solo->bord_bw, 2);
-    assert_int_equal(solo->bord_lw, 2);
-    assert_int_equal(solo->bord_ts, CSS_BST_SOLID);
-    assert_int_equal(solo->bord_tc, 0xff0000);
-    assert_int_equal(solo->pad_t, 10);
-    assert_int_equal(solo->pad_r, 10);
-    assert_int_equal(solo->pad_b, 10);
-    assert_int_equal(solo->pad_l, 10);
-    assert_int_equal(solo->box_sizing, CSS_BOXS_BORDER);
+    const pv_box_def *bx = pv_box_at(v, (size_t)solo->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->bord_tw, 2);
+    assert_int_equal(bx->bord_rw, 2);
+    assert_int_equal(bx->bord_bw, 2);
+    assert_int_equal(bx->bord_lw, 2);
+    assert_int_equal(bx->bord_ts, CSS_BST_SOLID);
+    assert_int_equal(bx->bord_tc, 0xff0000);
+    assert_int_equal(bx->pad_t, 10);
+    assert_int_equal(bx->pad_r, 10);
+    assert_int_equal(bx->pad_b, 10);
+    assert_int_equal(bx->pad_l, 10);
+    assert_int_equal(bx->box_sizing, CSS_BOXS_BORDER);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -900,13 +902,15 @@ static void test_build_boxdeco_shadow_outline(void **state) {
     const pv_run *fx = find_text(v, "fx");
     assert_non_null(fx);
     assert_true(fx->block_id >= 0);
-    assert_int_equal(fx->bsh_dx, 2);
-    assert_int_equal(fx->bsh_dy, 4);
-    assert_int_equal(fx->bsh_blur, 6);
-    assert_int_equal(fx->bsh_color, 0x00ff00);
-    assert_int_equal(fx->outline_w, 1);
-    assert_int_equal(fx->outline_style, CSS_BST_DASHED);
-    assert_int_equal(fx->outline_color, 0x0000ff);
+    const pv_box_def *bx = pv_box_at(v, (size_t)fx->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->bsh_dx, 2);
+    assert_int_equal(bx->bsh_dy, 4);
+    assert_int_equal(bx->bsh_blur, 6);
+    assert_int_equal(bx->bsh_color, 0x00ff00);
+    assert_int_equal(bx->outline_w, 1);
+    assert_int_equal(bx->outline_style, CSS_BST_DASHED);
+    assert_int_equal(bx->outline_color, 0x0000ff);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -919,15 +923,8 @@ static void test_build_boxdeco_defaults_no_box(void **state) {
     const pv_run *p = find_text(v, "plain");
     assert_non_null(p);
     assert_int_equal(p->block_id, -1);
-    assert_int_equal(p->box_sizing, 0);
-    assert_int_equal(p->pad_t, 0);
-    assert_int_equal(p->bord_tw, PV_LEN_UNSET);
-    assert_int_equal(p->bord_tc, -1);
-    assert_int_equal(p->border_radius, PV_LEN_UNSET);
-    assert_int_equal(p->bsh_color, -1);
-    assert_int_equal(p->bsh_inset, -1);
-    assert_int_equal(p->outline_w, PV_LEN_UNSET);
-    assert_int_equal(p->outline_color, -1);
+    /* No box-carrying block -> the box tree is empty (default render byte-identical). */
+    assert_int_equal((int)pv_box_count(v), 0);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -963,8 +960,87 @@ static void test_build_boxdeco_shared_id_within_block(void **state) {
     assert_non_null(two);
     assert_true(one->block_id >= 0);
     assert_int_equal(one->block_id, two->block_id);
-    assert_int_equal(one->bord_tw, 3);
-    assert_int_equal(two->bord_tw, 3);
+    const pv_box_def *bx = pv_box_at(v, (size_t)one->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->bord_tw, 3);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* --- box engine (Hito 23b-8 Step D): the box tree (parent_id + box-def list) --- */
+
+/* A child box nests inside its parent box (a run interrupting the parent must not
+ * split it): both share the box tree, the child's parent_id points at the outer box,
+ * and the outer box is a root (parent_id -1). Decoration lives on the box defs. */
+static void test_build_box_tree_nested(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='border:2px solid #1133ff;padding:8px'>"
+        "<p>before</p>"
+        "<div style='border:1px solid #ff1111'><p>inner</p></div>"
+        "<p>after</p>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *before = find_text(v, "before");
+    const pv_run *inner = find_text(v, "inner");
+    const pv_run *after = find_text(v, "after");
+    assert_non_null(before);
+    assert_non_null(inner);
+    assert_non_null(after);
+    /* before/after belong to the SAME (outer) box; inner is a different box. */
+    assert_true(before->block_id >= 0);
+    assert_int_equal(before->block_id, after->block_id);
+    assert_int_not_equal(before->block_id, inner->block_id);
+    /* the box tree carries both, with the parent link. */
+    assert_true(pv_box_count(v) >= 2);
+    const pv_box_def *outer = pv_box_at(v, (size_t)before->block_id);
+    const pv_box_def *inb = pv_box_at(v, (size_t)inner->block_id);
+    assert_non_null(outer);
+    assert_non_null(inb);
+    assert_int_equal(outer->parent_id, -1);
+    assert_int_equal(inb->parent_id, before->block_id);
+    assert_int_equal(outer->bord_tw, 2);
+    assert_int_equal(inb->bord_tw, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A text-less wrapper (a card whose only child is a body div with the text) owns no
+ * run, yet its box def must still exist and be the body box's parent — Step A's
+ * per-run decoration could not represent this. */
+static void test_build_box_tree_textless_wrapper(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='border:3px solid #00aa00'>"        /* card: no direct text */
+        "<div style='padding:9px'><p>body</p></div>"          /* body: has the text */
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *body = find_text(v, "body");
+    assert_non_null(body);
+    assert_true(body->block_id >= 0);
+    const pv_box_def *bd = pv_box_at(v, (size_t)body->block_id);
+    assert_non_null(bd);
+    assert_int_equal(bd->pad_t, 9);
+    int card_id = bd->parent_id;
+    assert_true(card_id >= 0);
+    const pv_box_def *card = pv_box_at(v, (size_t)card_id);
+    assert_non_null(card);
+    assert_int_equal(card->bord_tw, 3);
+    assert_int_equal(card->parent_id, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A page with no author box has an empty box tree (default render byte-identical). */
+static void test_build_box_tree_empty_no_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>plain</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal((int)pv_box_count(v), 0);
+    assert_null(pv_box_at(v, 0));
     pv_free(v);
     hp_document_free(doc);
 }
@@ -1377,6 +1453,9 @@ int main(void) {
         cmocka_unit_test(test_build_boxdeco_defaults_no_box),
         cmocka_unit_test(test_build_boxdeco_sibling_blocks_distinct_ids),
         cmocka_unit_test(test_build_boxdeco_shared_id_within_block),
+        cmocka_unit_test(test_build_box_tree_nested),
+        cmocka_unit_test(test_build_box_tree_textless_wrapper),
+        cmocka_unit_test(test_build_box_tree_empty_no_box),
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),
         cmocka_unit_test(test_build_textarea_value),

@@ -33,6 +33,7 @@ typedef struct browser_state {
     char   url_bar[BROWSER_URL_MAX];
     size_t url_bar_len;
     size_t url_bar_cursor;
+    size_t url_bar_anchor;   /* selection anchor; selection = [min(anchor,cursor), max) */
 
     char  *page_title;
     char  *page_text;
@@ -91,6 +92,30 @@ browser_status browser_url_bar_backspace(browser_state *bs);
 browser_status browser_url_bar_delete(browser_state *bs);
 browser_status browser_url_bar_move_cursor(browser_state *bs, long delta);
 browser_status browser_url_bar_clear(browser_state *bs);
+
+/* Selection (for the omnibar). The selection is the half-open range
+ * [min(anchor,cursor), max(anchor,cursor)); it is EMPTY when anchor == cursor. A
+ * plain cursor move / insert / typed edit COLLAPSES it (anchor follows cursor);
+ * extend keeps the anchor so shift+motion grows the selection. insert / backspace /
+ * delete first remove any selection. */
+
+/* Moves the cursor by delta, KEEPING the anchor (shift+Left/Right). Clamped. */
+browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta);
+
+/* Sets the cursor to pos (clamped). extend != 0 keeps the anchor (shift+Home/End or
+ * shift+click); extend == 0 collapses the selection (plain Home/End/click). */
+browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend);
+
+/* Selects the whole field (anchor = 0, cursor = len). For Ctrl+A. */
+browser_status browser_url_bar_select_all(browser_state *bs);
+
+/* If a selection exists, writes its start offset and length and returns 1; else 0.
+ * Lets the GUI copy/cut the selected text and paint the highlight. NULL-safe. */
+int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);
+
+/* Removes the selected range (if any), placing the cursor at its start; returns 1 if
+ * something was removed, else 0. Used by cut and by an edit over a selection. */
+int browser_url_bar_delete_selection(browser_state *bs);
 
 /* After a load (success or failure), the GUI reports the result here.
  * error != 0 means failure; title/text may be NULL. */

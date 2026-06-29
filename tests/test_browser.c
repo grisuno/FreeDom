@@ -147,6 +147,52 @@ static void test_url_bar_editing(void **state) {
     browser_free(&bs);
 }
 
+/* Omnibar selection model: extend builds a selection, ops replace/delete it, and a
+ * plain move collapses it. */
+static void test_url_bar_selection(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+
+    browser_set_url_bar(&bs, "example.com");
+    size_t s = 99, l = 99;
+    assert_int_equal(browser_url_bar_selection(&bs, &s, &l), 0); /* no selection yet */
+
+    /* Select all, then report the range. */
+    browser_url_bar_select_all(&bs);
+    assert_int_equal(browser_url_bar_selection(&bs, &s, &l), 1);
+    assert_int_equal((int)s, 0);
+    assert_int_equal((int)l, 11);
+
+    /* Typing over the selection replaces it. */
+    browser_url_bar_insert(&bs, 'x');
+    assert_string_equal(bs.url_bar, "x");
+    assert_int_equal(browser_url_bar_selection(&bs, &s, &l), 0); /* collapsed */
+
+    /* Build a selection with extend, then backspace deletes exactly it. */
+    browser_set_url_bar(&bs, "abcdef");
+    browser_url_bar_set_cursor(&bs, 2, 0);          /* cursor at 'c', no selection */
+    browser_url_bar_extend_cursor(&bs, 3);          /* select "cde" */
+    assert_int_equal(browser_url_bar_selection(&bs, &s, &l), 1);
+    assert_int_equal((int)s, 2);
+    assert_int_equal((int)l, 3);
+    browser_url_bar_backspace(&bs);
+    assert_string_equal(bs.url_bar, "abf");
+    assert_int_equal((int)bs.url_bar_cursor, 2);
+
+    /* A plain move collapses any selection. */
+    browser_url_bar_select_all(&bs);
+    browser_url_bar_move_cursor(&bs, -1);
+    assert_int_equal(browser_url_bar_selection(&bs, &s, &l), 0);
+
+    /* delete_selection returns 0 with nothing selected, and is NULL-safe. */
+    assert_int_equal(browser_url_bar_delete_selection(&bs), 0);
+    assert_int_equal(browser_url_bar_selection(NULL, &s, &l), 0);
+
+    browser_free(&bs);
+}
+
 static void test_set_page(void **state) {
     (void)state;
     browser_state bs;
@@ -286,6 +332,7 @@ int main(void) {
         cmocka_unit_test(test_rejects_invalid_url),
         cmocka_unit_test(test_accepts_https_and_file),
         cmocka_unit_test(test_url_bar_editing),
+        cmocka_unit_test(test_url_bar_selection),
         cmocka_unit_test(test_set_page),
         cmocka_unit_test(test_set_page_sanitizes_invalid_utf8),
         cmocka_unit_test(test_exceptions),

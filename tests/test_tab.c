@@ -206,15 +206,60 @@ static void test_load_carries_box_decoration(void **state) {
         const pv_run *r = pv_at(p.view, i);
         if (r->text != NULL && strcmp(r->text, "boxed") == 0) {
             assert_true(r->block_id >= 0);
-            assert_int_equal(r->bord_tw, 2);
-            assert_int_equal(r->bord_tc, 0xff0000);
-            assert_int_equal(r->pad_t, 7);
-            assert_int_equal(r->pad_l, 7);
-            assert_int_equal(r->box_sizing, CSS_BOXS_BORDER);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->bord_tw, 2);
+            assert_int_equal(bx->bord_tc, 0xff0000);
+            assert_int_equal(bx->pad_t, 7);
+            assert_int_equal(bx->pad_l, 7);
+            assert_int_equal(bx->box_sizing, CSS_BOXS_BORDER);
             saw = 1;
         }
     }
     assert_true(saw);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* The box TREE (Step D) — the box-definition list with its parent links — must
+ * survive the IPC round-trip: a nested box parsed in the confined child arrives with
+ * its decoration on the box def and its parent_id pointing at the outer box. */
+static void test_load_carries_box_tree(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>T</title></head><body>"
+        "<div style=\"border:2px solid #ff0000;padding:8px\">"
+        "<p>before</p>"
+        "<div style=\"border:1px solid #0000ff\"><p>inner</p></div>"
+        "<p>after</p>"
+        "</div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    const pv_run *before = NULL, *inner = NULL;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "before") == 0) before = r;
+        else if (strcmp(r->text, "inner") == 0) inner = r;
+    }
+    assert_non_null(before);
+    assert_non_null(inner);
+    assert_true(before->block_id >= 0);
+    assert_int_not_equal(before->block_id, inner->block_id);
+    assert_true(pv_box_count(p.view) >= 2);
+    const pv_box_def *outer = pv_box_at(p.view, (size_t)before->block_id);
+    const pv_box_def *inb = pv_box_at(p.view, (size_t)inner->block_id);
+    assert_non_null(outer);
+    assert_non_null(inb);
+    assert_int_equal(outer->parent_id, -1);
+    assert_int_equal(inb->parent_id, before->block_id);
+    assert_int_equal(outer->bord_tw, 2);
+    assert_int_equal(inb->bord_tw, 1);
 
     tab_page_free(&p);
     tab_close(t);
@@ -961,6 +1006,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_carries_author_color),
         cmocka_unit_test(test_load_carries_box_decoration),
+        cmocka_unit_test(test_load_carries_box_tree),
         cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_ex_runs_script_and_mutates),

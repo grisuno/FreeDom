@@ -98,7 +98,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
-             $(BUILD_DIR)/test_text_shape
+             $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit
 
 .PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-afl \
         deps run deb docker view clean
@@ -243,6 +243,10 @@ $(BUILD_DIR)/test_hostblock: $(TEST_DIR)/test_hostblock.c $(BUILD_DIR)/hostblock
 $(BUILD_DIR)/test_net_realm: $(TEST_DIR)/test_net_realm.c $(BUILD_DIR)/net_realm.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Pure host-list line builder (block/allow/js.conf editing from the UI). No I/O deps.
+$(BUILD_DIR)/test_hostedit: $(TEST_DIR)/test_hostedit.c $(BUILD_DIR)/hostedit.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # PNG + JPEG decode (runs inside the confined worker). Links libpng + libjpeg.
 $(BUILD_DIR)/test_image_decode: $(TEST_DIR)/test_image_decode.c $(BUILD_DIR)/image_decode.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(IMG_CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(IMG_LIBS) $(CMOCKA_LIBS)
@@ -325,6 +329,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
                       $(BUILD_DIR)/box_style.o $(BUILD_DIR)/box_tree.o \
                       $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/hostblock.o \
+                      $(BUILD_DIR)/hostedit.o \
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/js_policy.o \

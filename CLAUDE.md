@@ -69,7 +69,15 @@ Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scou
    que filtra el BPF → un ring anularía el allowlist, W^X y netns). El worker hace I/O **bloqueante**
    sobre los dos pipes ya abiertos y punto. La regla "usar io_uring" jamás se aplica donde corre
    contenido remoto. Ver `spec/os_sandbox.md` §13 y `[[freedom-io-uring-forbidden-in-worker]]`.
-4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas. si vez codigo duplicado lo unificas esto es imperativo busca codigo dduplicado y extinguelo sin perder funcionalidad, nunca esta fuera de scope, modo boy scout si ves deuda tecnica la extingues sin romper funcionalidades, lo mismo con las fallas de seguridad o vulnerabilidades la extincion de estas nunca esta fuera de scope, si puedes hacer lo mismo que haces en 40 lineas de codigo lo puedes hacer en 10 o 1 bienvenido siempre y cuando respete el dry solid y no pierda funcionalidad ni agregue mas deuda tecnica
+4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas. si vez codigo duplicado lo unificas esto es imperativo busca codigo dduplicado y extinguelo sin perder funcionalidad, nunca esta fuera de scope, modo boy scout si ves deuda tecnica la extingues sin romper funcionalidades, lo mismo con las fallas de seguridad o vulnerabilidades la extincion de estas nunca esta fuera de scope, si puedes hacer lo mismo que haces en 40 lineas de codigo lo puedes hacer en 10 o 1 bienvenido siempre y cuando respete el dry solid y no pierda funcionalidad ni agregue mas deuda tecnica.
+   **Cláusula anti-monolito (parte del modo boy-scout, nunca fuera de scope):** ningún
+   archivo debe convertirse en un monolito. Si un archivo **roza las ~2000 líneas**, se
+   **parte según contratos** (un módulo = un contrato `spec/<modulo>.md` + `include/<modulo>.h`
+   + `src/<modulo>.c`), extrayendo unidades coherentes a módulos nuevos con su prefijo, sin
+   perder funcionalidad ni añadir deuda. Aplica especialmente al añadir código: si tu cambio
+   empujaría un archivo más allá del umbral, primero extrae. **Deuda conocida:**
+   `gui/browser_ui.c` ya excede el umbral (>5000 líneas) — al tocarlo, la lógica nueva
+   (especialmente lógica pura) va a un módulo nuevo, no a engordarlo más.
 5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`. como parte de la
    validacion quiero que utilices ya sea urls y archivos html para revisar el comportamiento de la
    GUI al renderizar. La GUI necesita Wayland (no siempre disponible para un agente), así que el
@@ -1165,8 +1173,47 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`
   (`nr_realm_allows_http`); autenticación de onion services v3 con clave; **stream isolation** por
   pestaña/origen (circuitos Tor separados); unificar i2pd/router-Java; indicador de realm en el chrome.
-- **Hito 23b-8 — Motor de cajas: HONRAR el layout/decoración del Hito 23b-7 en el painter.** El Hito
-  23b-7 ya **resolvió los valores** de `position`/`border`/`box-sizing`/`box-shadow`/`outline`/flex-por-
+- **Hito 23b-8 Steps A–D (CERRADO) — Motor de cajas: pintar borde/box-sizing/padding/sombra/outline
+  + composición ANIDADA.** Steps A/B/C hilaron y pintaron la decoración de caja de un solo nivel
+  (`block_id`, `paint_box_decoration`). **Step D (2026-06-29)** convirtió las cajas en un **ÁRBOL**:
+  nuevo `pv_box_def` {parent_id, hbox, bg, 27 campos de decoración} indexado por `block_id`
+  (`pv_view.boxes`/`rd_doc.boxes`), con la decoración **movida fuera de los runs** (extinguida la
+  duplicación per-run del Step A; los runs solo llevan `block_id`). `page_view` registra **cada**
+  bloque-con-caja ancestro y estampa `parent_id`; el painter mantiene una **pila de cajas abiertas**
+  (`reconcile_boxes`) y compone cada hija dentro del rect de contenido de su padre (en vez de partir
+  al padre), pintando exterior→interior (orden z implícito correcto). Resuelve el bug visual: una
+  `.outer` que envuelve `<p>…</p><div class=inner>…</div><p>…</p>` ahora pinta UNA caja exterior con
+  la interior anidada (antes: dos cajas + hermana). Cubre **wrappers sin texto** (una card cuyo único
+  hijo es un body div). Validado: `make test`/`make asan` (exit 0), `fuzz_page_view` 138k sin
+  crash/leak/UB, revisión visual (`--author-css --download-pdf` de `nested.html`) + byte-idéntico en
+  `box-model.html`/`rich.html`. v1: imagen/input/contenedor flex cierra las cajas; indent de lista no
+  se aplica a la caja; box-sizing width math aún no se resta. **Gaps deferidos con razón**
+  (`spec/box_engine.md`): dirty-flag de invalidación (no hay path incremental → sería código muerto) y
+  z-index explícito (solo aplica con `position` fuera de flujo → Stage 2). Ver `[[freedom-box-engine-and-dispatcher]]`.
+- **Hito (UI) — Botón de recarga + edición de listas de host + autocompletado de omnibox.** Tres
+  features de UI (todo en `gui/browser_ui.c` salvo la lógica pura). (a) **Botón de recarga** en la
+  toolbar (tercer botón izquierdo, `UI_RELOAD_X`, icono `draw_reload` de Cairo) + `F5`/`Ctrl+R`
+  (ya existían). (b) **Editar block/allow/js.conf desde la UI:** módulo **puro nuevo `hostedit`
+  (`he_`)** que valida el host actual fail-closed (`he_make_line`: solo hostname registrable, sin
+  `/`/`:`/esquema) y construye la línea; `he_text_has_host` deduplica. Ítems de hamburguesa +
+  atajos **`Ctrl+Shift+B`/`A`/`J`** añaden el host de la página a `block.conf`/`allow.conf`/`js.conf`
+  (en `$FREEDOM_HOSTS_DIR` o `~/.config/freedom`, append atómico 0600) y **recargan el filtro en
+  memoria** al instante. (c) **Omnibox autocompletado** desde `allow.conf` tratado como favoritos:
+  `he_suggest` (puro: prefijo primero, luego substring, dedup) alimenta un dropdown bajo la barra de
+  URL (Tab completa, ↑/↓ navegan, Enter/clic confirman). **Cláusula anti-monolito** añadida a §3.4
+  (modo boy-scout): un archivo cerca de ~2000 LoC se parte por contratos — por eso la lógica nueva
+  fue al módulo `hostedit`, no a engordar `browser_ui.c` (>5000 LoC, deuda señalada). Spec
+  (`hostedit.md`) + 10 tests + `make asan` exit 0. (d) **Selección de texto en la omnibar:** se
+  añadió `url_bar_anchor` al modelo puro `browser_state` (selección = `[min(anchor,cursor),max)`),
+  con `browser_url_bar_extend_cursor`/`_set_cursor`/`_select_all`/`_selection`/`_delete_selection`
+  (insert/backspace/delete borran la selección primero; mover/clic/teclear la colapsan). GUI:
+  **shift+←/→/Home/End** extienden, **Ctrl+A** selecciona todo, **Ctrl+X** corta, **Ctrl+C** copia la
+  selección (o el campo completo) y **Ctrl+V** la reemplaza; resaltado pintado tras el texto. Test
+  `test_url_bar_selection`. `make test` **780 OK** + `make asan` exit 0. **Verificación visual del chrome pendiente al
+  dueño** (el flujo weston-sobre-Xvfb no cooperó esta sesión; sin inyección de teclado no se dispara
+  el dropdown/menú). Ver `[[freedom-ui-host-editing-omnibox]]`.
+- **Hito 23b-8 (resto, por cruzar) — `position`/z-index + flex/grid per-item en el painter.** El Hito
+  23b-7 ya **resolvió los valores** de `position`/`box-shadow`/flex-por-
   item/grid-por-item en `css_style`; **falta consumirlos**: hilar los campos por IPC (`tab.c`
   write_view/read_view), agrupar el render plano en **cajas por-bloque** (extender `box_tree`/`bt_node`,
   que ya da rects de border-box) y que el painter dibuje borde/radio/sombra/outline, aplique

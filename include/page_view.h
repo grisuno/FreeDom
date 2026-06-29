@@ -138,26 +138,13 @@ typedef struct pv_run {
     int     box_center;
     int     box_mt;
     int     box_mb;
-    /* Box engine (Hito 23b-8 Step A): identity + author box decoration resolved from
-     * the nearest block-level ancestor that declares a box. block_id groups the runs
-     * of one block-level box in document order (-1 = no box-carrying block); it is
-     * STRUCTURE, carried by render_doc regardless of caps.css (like cont_id). The
-     * decoration fields are author PRESENTATION, gated by caps.css (like the box
-     * model above). box_sizing is a css_box_sizing (0 unset -> content-box). pad_*
-     * are padding px (>= 0, 0 unset). bord_*w are per-side border width px
-     * (PV_LEN_UNSET unset); bord_*s a css_border_style (0 none); bord_*c a packed
-     * 0xRRGGBB (-1 unset). border_radius px (PV_LEN_UNSET unset). bsh_* is one
-     * box-shadow layer (dx/dy/blur/spread px, color 0xRRGGBB or -1 none, inset 1/0
-     * or -1 unset). outline_* mirror a single border (width PV_LEN_UNSET unset). */
+    /* Box engine (Hito 23b-8): block_id groups the runs of one block-level box in
+     * document order (-1 = no box-carrying block). It is STRUCTURE, carried by
+     * render_doc regardless of caps.css (like cont_id). The box's decoration and
+     * parent_id live on the box-definition list (pv_box_def, indexed by block_id) —
+     * NOT duplicated per run — so a text-less wrapper box is representable and the
+     * decoration is described once. See pv_box_def. */
     int     block_id;
-    int     box_sizing;
-    int     pad_t, pad_r, pad_b, pad_l;
-    int     bord_tw, bord_rw, bord_bw, bord_lw;
-    int     bord_ts, bord_rs, bord_bs, bord_ls;
-    int     bord_tc, bord_rc, bord_bc, bord_lc;
-    int     border_radius;
-    int     bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
-    int     outline_w, outline_style, outline_color;
     /* form controls (PV_INPUT only; defaults: type 0, name/value NULL, form_id -1,
      * method GET). name/value carry the submitted bytes verbatim (not whitespace
      * collapsed); form_id groups controls of the same <form> (-1 = no form). */
@@ -168,10 +155,42 @@ typedef struct pv_run {
     int     form_method;  /* pv_form_method of the owning form */
 } pv_run;
 
+/* Box engine (Hito 23b-8 Step D): one entry of the box-definition TREE. The box
+ * decoration and the parent link live here, not on each run, so a box is described
+ * once (extinguishing the Step A per-run duplication) and a TEXT-LESS wrapper box
+ * (one that owns no direct run, e.g. a card div whose only child is a body div) is
+ * still representable. A box's block_id IS its index in pv_view.boxes; a run carries
+ * only its block_id (which box it belongs to) and finds its parent via
+ * boxes[block_id].parent_id. parent_id is the block_id of the nearest box-carrying
+ * block ancestor, or -1 for a root box. The decoration fields mirror the Step A
+ * sentinels exactly (border widths/radius/outline width PV_LEN_UNSET, colors -1,
+ * the rest 0). The whole list is author presentation: render_doc copies it only with
+ * caps.css (empty otherwise -> default render byte-identical). */
+typedef struct pv_box_def {
+    int parent_id;
+    /* Horizontal box placement of this box (resolved like a run's box_l/r/w/center,
+     * Hito 23b-3): l/r insets = padding + non-auto margin px; w = width/max-width cap
+     * (0 = none); center = margin:0 auto. Carried on the def so the painter can place
+     * a box (incl. a text-less wrapper) without a run to read it from. */
+    int box_l, box_r, box_w, box_center;
+    int bg_rgb;   /* author background-color of the box (0xRRGGBB), or -1 */
+    int box_sizing;
+    int pad_t, pad_r, pad_b, pad_l;
+    int bord_tw, bord_rw, bord_bw, bord_lw;
+    int bord_ts, bord_rs, bord_bs, bord_ls;
+    int bord_tc, bord_rc, bord_bc, bord_lc;
+    int border_radius;
+    int bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
+    int outline_w, outline_style, outline_color;
+} pv_box_def;
+
 typedef struct pv_view {
-    pv_run *runs;
-    size_t  count;
-    size_t  cap;
+    pv_run    *runs;
+    size_t     count;
+    size_t     cap;
+    pv_box_def *boxes;   /* the box tree (Step D); boxes[block_id] describes a box */
+    size_t      nbox;
+    size_t      boxcap;
 } pv_view;
 
 /* Builds the display list from an already-parsed, sanitised document.
@@ -282,18 +301,17 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int box_mt, int box_mb);
 
-/* Box engine (Hito 23b-8 Step A) setters for the most recently appended run.
- * No-op on an empty or NULL view. The append helpers default block_id to -1, the
- * border widths/radius/outline width to PV_LEN_UNSET, the colors to -1, and the
- * rest to 0 (their no-op state), so a run with no author box renders identically. */
+/* Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of
+ * the box-carrying block it belongs to (-1 = none). No-op on an empty or NULL view;
+ * the append helpers default block_id to -1. The box's decoration is on pv_box_def. */
 void pv_set_block_id(pv_view *v, int block_id);
-void pv_set_box_border(pv_view *v, int tw, int rw, int bw, int lw,
-                       int ts, int rs, int bs, int ls,
-                       int tc, int rc, int bc, int lc, int radius);
-void pv_set_boxdeco(pv_view *v, int box_sizing, int pad_t, int pad_r, int pad_b,
-                    int pad_l, int bsh_dx, int bsh_dy, int bsh_blur, int bsh_spread,
-                    int bsh_color, int bsh_inset, int outline_w, int outline_style,
-                    int outline_color);
+
+/* Box engine (Hito 23b-8 Step D): appends one box definition to the box tree,
+ * taking an owned copy of *d. The append order IS the block_id order (callers append
+ * box 0, then 1, ...), so the new box's index equals its block_id. No-op returning
+ * PV_ERR_NULL_ARG on NULL args. Used by pv_build (after the run walk) and by the IPC
+ * deserialiser. */
+pv_status pv_add_box_def(pv_view *v, const pv_box_def *d);
 
 /* Idempotent; safe on NULL and safe to call twice. */
 void pv_free(pv_view *v);
@@ -301,5 +319,10 @@ void pv_free(pv_view *v);
 /* Read accessors. NULL-safe. */
 size_t        pv_count(const pv_view *v);
 const pv_run *pv_at(const pv_view *v, size_t i);
+
+/* Box tree accessors (Step D). pv_box_count is the number of box definitions;
+ * pv_box_at returns boxes[i] (i == a block_id) or NULL when out of range / NULL. */
+size_t            pv_box_count(const pv_view *v);
+const pv_box_def *pv_box_at(const pv_view *v, size_t i);
 
 #endif /* FREEDOM_PAGE_VIEW_H */

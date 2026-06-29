@@ -83,20 +83,12 @@ typedef struct rd_block {
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or
      * PV_LEN_UNSET (use the user-agent margin). */
     int              box_l, box_r, box_w, box_center, box_mt, box_mb;
-    /* Box engine (Hito 23b-8). block_id groups runs of one block-level box and is
-     * carried by default (structure, like cont_id); the decoration fields are set
-     * only with caps.css (author presentation, like the box model). Sentinels match
-     * pv_run: block_id -1, border widths/radius/outline width PV_LEN_UNSET, colors
-     * -1, the rest 0. See spec/box_engine.md. */
+    /* Box engine (Hito 23b-8 Step D). block_id says which block-level box this block
+     * belongs to (-1 = none); the box's decoration and parent_id live on the box-def
+     * tree (rd_doc.boxes[block_id]), not here. block_id is gated by caps.css (like the
+     * box tree): with author styling off there is no box, so blocks are not grouped
+     * and the layout is byte-identical. See spec/box_engine.md. */
     int              block_id;
-    int              box_sizing;
-    int              pad_t, pad_r, pad_b, pad_l;
-    int              bord_tw, bord_rw, bord_bw, bord_lw;
-    int              bord_ts, bord_rs, bord_bs, bord_ls;
-    int              bord_tc, bord_rc, bord_bc, bord_lc;
-    int              border_radius;
-    int              bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
-    int              outline_w, outline_style, outline_color;
     int              input_type;     /* RD_INPUT: pv_input_type, else 0 */
     char            *name;           /* RD_INPUT: control name, or NULL */
     char            *value;          /* RD_INPUT: control value, or NULL */
@@ -109,6 +101,14 @@ typedef struct rd_doc {
     size_t    count;
     size_t    cap;
     int       has_images;  /* the page declared at least one image */
+    /* Box engine (Hito 23b-8 Step D): the box-definition TREE. boxes[block_id]
+     * describes one block-level box (decoration + parent_id); a block finds its box
+     * via its block_id and its parent via boxes[block_id].parent_id. The whole list
+     * is author presentation, so rd_build copies it ONLY with caps.css (empty
+     * otherwise -> default render byte-identical). Reuses pv_box_def (same shape). */
+    pv_box_def *boxes;
+    size_t      nbox;
+    size_t      boxcap;
 } rd_doc;
 
 typedef enum rd_status {
@@ -135,6 +135,11 @@ void rd_free(rd_doc *d);
 /* Read accessors. NULL-safe. */
 size_t          rd_count(const rd_doc *d);
 const rd_block *rd_at(const rd_doc *d, size_t i);
+
+/* Box tree accessors (Step D). rd_box_count is the number of box definitions (0 when
+ * caps.css is off); rd_box_at returns boxes[i] (i == a block_id) or NULL. */
+size_t            rd_box_count(const rd_doc *d);
+const pv_box_def *rd_box_at(const rd_doc *d, size_t i);
 
 /* Stable, short English name of a block kind for structured/agent output. Never
  * NULL; an unknown enum value yields "block". */
