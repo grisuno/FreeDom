@@ -102,6 +102,62 @@ typedef enum css_list_style {
     CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN
 } css_list_style;
 
+/* --- Layout / box decoration (Hito 23b-7) ---------------------------------- */
+
+/* position. 0 unset; STATIC is the explicit in-flow default. RELATIVE offsets the
+ * box from its in-flow spot; ABSOLUTE/FIXED take it out of flow; STICKY is the
+ * scroll-pinned hybrid. The engine resolves the keyword here; how far each is
+ * honoured at paint time is the presentation layer's call (a later milestone). */
+typedef enum css_position {
+    CSS_POS_UNSET = 0, CSS_POS_STATIC, CSS_POS_RELATIVE,
+    CSS_POS_ABSOLUTE, CSS_POS_FIXED, CSS_POS_STICKY
+} css_position;
+
+/* box-sizing. 0 unset; CONTENT is content-box (width excludes padding/border),
+ * BORDER is border-box (width includes them). */
+typedef enum css_box_sizing {
+    CSS_BOXS_UNSET = 0, CSS_BOXS_CONTENT, CSS_BOXS_BORDER
+} css_box_sizing;
+
+/* border-style / outline-style (subset). 0 unset; NONE/HIDDEN paint nothing. The
+ * decorative variants are recognised so the cascade keeps them; the painter may
+ * collapse the fancier ones (groove/ridge/inset/outset) to solid. */
+typedef enum css_border_style {
+    CSS_BST_UNSET = 0, CSS_BST_NONE, CSS_BST_HIDDEN, CSS_BST_SOLID,
+    CSS_BST_DASHED, CSS_BST_DOTTED, CSS_BST_DOUBLE,
+    CSS_BST_GROOVE, CSS_BST_RIDGE, CSS_BST_INSET, CSS_BST_OUTSET
+} css_border_style;
+
+/* flex-direction. 0 unset. */
+typedef enum css_flex_direction {
+    CSS_FD_UNSET = 0, CSS_FD_ROW, CSS_FD_ROW_REVERSE,
+    CSS_FD_COLUMN, CSS_FD_COLUMN_REVERSE
+} css_flex_direction;
+
+/* flex-wrap. 0 unset. */
+typedef enum css_flex_wrap {
+    CSS_FW_UNSET = 0, CSS_FW_NOWRAP, CSS_FW_WRAP, CSS_FW_WRAP_REVERSE
+} css_flex_wrap;
+
+/* align-items / align-self / align-content / justify-items (cross-axis alignment).
+ * 0 unset. AUTO only applies to align-self (it inherits the parent's align-items). */
+typedef enum css_align_kw {
+    CSS_AK_UNSET = 0, CSS_AK_AUTO, CSS_AK_STRETCH, CSS_AK_START, CSS_AK_END,
+    CSS_AK_CENTER, CSS_AK_BASELINE,
+    CSS_AK_SPACE_BETWEEN, CSS_AK_SPACE_AROUND, CSS_AK_SPACE_EVENLY
+} css_align_kw;
+
+/* grid-auto-flow (subset: the row/column axis only; `dense` is ignored). 0 unset. */
+typedef enum css_grid_flow {
+    CSS_GF_UNSET = 0, CSS_GF_ROW, CSS_GF_COLUMN
+} css_grid_flow;
+
+/* Anti-DoS clamps for the layout properties. Insets/z-index/order reuse CSS_LEN_*.
+ * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX. */
+#define CSS_BORDER_W_MAX  CSS_LEN_MAX
+#define CSS_FLEX_FACTOR_MAX 100000  /* flex-grow/-shrink stored x100; ~1000.0 cap */
+#define CSS_GRID_SPAN_MAX 1000      /* grid-column/-row `span N` cap */
+
 /* Anti-DoS clamps for the new metric properties (px, absolute value). text-indent
  * reuses the box-model CSS_LEN_MAX clamp (below). */
 #define CSS_SPACING_MAX 200      /* letter-spacing / word-spacing */
@@ -161,6 +217,39 @@ typedef struct css_style {
     int         text_indent;     /* px (signed), CSS_LEN_UNSET (unset) */
     int         white_space;     /* css_white_space, 0 (unset) */
     int         list_style;      /* css_list_style, 0 (unset) */
+    /* --- Layout / box decoration (Hito 23b-7). NOT inherited (read from the
+     * element's own resolved style), like the box model. All gated behind caps.css
+     * downstream except `display`/flex/grid container params, which are structure. */
+    int         position;        /* css_position, 0 (unset) */
+    int         inset_top, inset_right, inset_bottom, inset_left; /* CSS_LEN_UNSET/AUTO/px */
+    int         z_index;         /* signed, or CSS_LEN_UNSET (unset; `auto` -> unset) */
+    int         box_sizing;      /* css_box_sizing, 0 (unset) */
+    /* Per-side border. widths: px >= 0 or CSS_LEN_UNSET. styles: css_border_style.
+     * colors: 0xRRGGBB or -1 (unset). */
+    int         border_top_width, border_right_width, border_bottom_width, border_left_width;
+    int         border_top_style, border_right_style, border_bottom_style, border_left_style;
+    int         border_top_color, border_right_color, border_bottom_color, border_left_color;
+    int         border_radius;   /* px >= 0, or CSS_LEN_UNSET */
+    /* box-shadow (single layer). offsets/blur/spread px; color 0xRRGGBB or -1 (none/
+     * unset); inset 1/0, or -1 (unset). */
+    int         shadow2_dx, shadow2_dy, shadow2_blur, shadow2_spread;
+    int         box_shadow_color;
+    int         box_shadow_inset;
+    int         outline_width;   /* px >= 0, or CSS_LEN_UNSET */
+    int         outline_style;   /* css_border_style */
+    int         outline_color;   /* 0xRRGGBB or -1 */
+    /* Flex item + container extras. grow/shrink stored x100 (1.0 -> 100), -1 unset.
+     * basis: px >= 0 / CSS_LEN_AUTO / CSS_LEN_UNSET. order/z reuse CSS_LEN_UNSET. */
+    int         flex_grow, flex_shrink, flex_basis;
+    int         order;           /* signed, or CSS_LEN_UNSET */
+    int         align_items, align_self, align_content, justify_items; /* css_align_kw */
+    int         flex_direction;  /* css_flex_direction */
+    int         flex_wrap;       /* css_flex_wrap */
+    /* Grid extras. grid_rows: track count, 0 unset. row_gap: px or -1 unset. */
+    int         grid_rows;
+    int         row_gap;
+    int         grid_auto_flow;  /* css_grid_flow */
+    int         grid_col_span, grid_row_span; /* `span N`, 0 unset */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

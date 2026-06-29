@@ -35,6 +35,23 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING,
        P_SHADOW_DX, P_SHADOW_DY, P_SHADOW_COLOR,
        P_OPACITY, P_VALIGN, P_TEXTINDENT, P_WHITESPACE, P_LISTSTYLE,
+       /* Layout / box decoration (Hito 23b-7). Contiguous groups feed the box4-style
+        * expanders: insets (T R B L); border widths/styles/colors (each T R B L);
+        * box-shadow (dx dy blur spread color inset); flex (grow shrink basis). */
+       P_POSITION,
+       P_INSET_TOP, P_INSET_RIGHT, P_INSET_BOTTOM, P_INSET_LEFT,
+       P_ZINDEX, P_BOXSIZING,
+       P_BW_TOP, P_BW_RIGHT, P_BW_BOTTOM, P_BW_LEFT,
+       P_BS_TOP, P_BS_RIGHT, P_BS_BOTTOM, P_BS_LEFT,
+       P_BC_TOP, P_BC_RIGHT, P_BC_BOTTOM, P_BC_LEFT,
+       P_BORDER_RADIUS,
+       P_BSHADOW_DX, P_BSHADOW_DY, P_BSHADOW_BLUR, P_BSHADOW_SPREAD,
+       P_BSHADOW_COLOR, P_BSHADOW_INSET,
+       P_OUTLINE_W, P_OUTLINE_S, P_OUTLINE_C,
+       P_FLEX_GROW, P_FLEX_SHRINK, P_FLEX_BASIS,
+       P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS,
+       P_FLEX_DIR, P_FLEX_WRAP,
+       P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW, P_GRID_COL_SPAN, P_GRID_ROW_SPAN,
        P_NSLOTS };
 
 typedef struct css_decl {
@@ -145,6 +162,16 @@ static int parse_num(const char *s, double *out, const char **endp) {
     return 1;
 }
 
+/* Rounds v to the nearest int, clamped to [lo, hi]. Clamping the double BEFORE the
+ * cast avoids undefined behaviour: casting an out-of-range double (e.g. a hostile
+ * "99999999999px") to int is UB. Every value interpreter that casts a parsed double
+ * routes through here. */
+static int round_clamp(double v, int lo, int hi) {
+    if (v >= (double)hi) return hi;
+    if (v <= (double)lo) return lo;
+    return (int)(v + (v < 0.0 ? -0.5 : 0.5));
+}
+
 /* --- value interpreters (return -1 / sentinel when the value is unsupported) --- */
 
 static int interp_color(const char *v) {
@@ -187,15 +214,13 @@ static int interp_fontsize(const char *v) {
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
     while (*end == ' ' || *end == '\t') ++end;
-    int scale;
-    if (ci_eq(end, "px")) scale = (int)(num / 16.0 * 100.0 + 0.5);
-    else if (ci_eq(end, "em") || ci_eq(end, "rem")) scale = (int)(num * 100.0 + 0.5);
-    else if (end[0] == '%' && end[1] == '\0') scale = (int)(num + 0.5);
-    else if (ci_eq(end, "pt")) scale = (int)(num * 1.333 / 16.0 * 100.0 + 0.5);
+    double scale;
+    if (ci_eq(end, "px")) scale = num / 16.0 * 100.0;
+    else if (ci_eq(end, "em") || ci_eq(end, "rem")) scale = num * 100.0;
+    else if (end[0] == '%' && end[1] == '\0') scale = num;
+    else if (ci_eq(end, "pt")) scale = num * 1.333 / 16.0 * 100.0;
     else return -1;
-    if (scale < 10) scale = 10;
-    if (scale > 1000) scale = 1000;
-    return scale;
+    return round_clamp(scale, 10, 1000);
 }
 
 /* line-height as a percent of the natural line box. A unitless multiplier ("1.5" ->
@@ -208,13 +233,11 @@ static int interp_lineheight(const char *v) {
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
     while (*end == ' ' || *end == '\t') ++end;
-    int pct;
-    if (end[0] == '\0')                       pct = (int)(num * 100.0 + 0.5); /* unitless */
-    else if (end[0] == '%' && end[1] == '\0') pct = (int)(num + 0.5);
+    double pct;
+    if (end[0] == '\0')                       pct = num * 100.0; /* unitless */
+    else if (end[0] == '%' && end[1] == '\0') pct = num;
     else return -1;  /* px/em/other: out of scope, dropped */
-    if (pct < CSS_LINE_MIN) pct = CSS_LINE_MIN;
-    if (pct > CSS_LINE_MAX) pct = CSS_LINE_MAX;
-    return pct;
+    return round_clamp(pct, CSS_LINE_MIN, CSS_LINE_MAX);
 }
 
 static int interp_weight(const char *v) {
@@ -273,10 +296,7 @@ static int interp_gap(const char *v) {
     double num;
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
-    int px = (int)(num + 0.5);
-    if (px < 0) px = 0;
-    if (px > CSS_GAP_MAX) px = CSS_GAP_MAX;
-    return px;
+    return round_clamp(num, 0, CSS_GAP_MAX);
 }
 
 static int interp_justify(const char *v) {
@@ -333,10 +353,8 @@ static int interp_len(const char *v, int allow_auto, int *out) {
     } else {
         return 0;                       /* %, vw/vh, pt, calc(...), ... */
     }
-    int val = (int)(px + 0.5);
+    int val = round_clamp(px, 0, CSS_LEN_MAX);   /* px >= 0 here; sign applied next */
     if (neg) val = -val;
-    if (val > CSS_LEN_MAX) val = CSS_LEN_MAX;
-    if (val < -CSS_LEN_MAX) val = -CSS_LEN_MAX;
     *out = val;
     return 1;
 }
@@ -459,13 +477,11 @@ static int interp_opacity(const char *v) {
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
     while (*end == ' ' || *end == '\t') ++end;
-    int pct;
-    if (end[0] == '%' && end[1] == '\0') pct = (int)(num + 0.5);
-    else if (end[0] == '\0')             pct = (int)(num * 100.0 + 0.5);
+    double pct;
+    if (end[0] == '%' && end[1] == '\0') pct = num;
+    else if (end[0] == '\0')             pct = num * 100.0;
     else return -1;
-    if (pct < 0) pct = 0;
-    if (pct > 100) pct = 100;
-    return pct;
+    return round_clamp(pct, 0, 100);
 }
 
 static int interp_valign(const char *v) {
@@ -578,6 +594,351 @@ static int expand_shadow(const char *val, css_decl *dst, int cap) {
     return 3;
 }
 
+/* --- Layout / box decoration (Hito 23b-7) --------------------------------- */
+
+static int interp_position(const char *v) {
+    if (ci_eq(v, "static"))   return CSS_POS_STATIC;
+    if (ci_eq(v, "relative")) return CSS_POS_RELATIVE;
+    if (ci_eq(v, "absolute")) return CSS_POS_ABSOLUTE;
+    if (ci_eq(v, "fixed"))    return CSS_POS_FIXED;
+    if (ci_eq(v, "sticky"))   return CSS_POS_STICKY;
+    return -1;
+}
+
+static int interp_boxsizing(const char *v) {
+    if (ci_eq(v, "content-box")) return CSS_BOXS_CONTENT;
+    if (ci_eq(v, "border-box"))  return CSS_BOXS_BORDER;
+    return -1;
+}
+
+/* Signed integer (z-index/order). Returns 1 with *out (clamped to +-CSS_LEN_MAX),
+ * 0 if not a pure integer (auto / floats / units -> dropped, leaving unset). */
+static int interp_int(const char *v, int *out) {
+    const char *p = v;
+    int neg = 0;
+    if (*p == '+') ++p; else if (*p == '-') { neg = 1; ++p; }
+    if (*p < '0' || *p > '9') return 0;
+    long val = 0;
+    while (*p >= '0' && *p <= '9') {
+        val = val * 10 + (*p - '0');
+        if (val > CSS_LEN_MAX) val = CSS_LEN_MAX;
+        ++p;
+    }
+    if (*p != '\0') return 0;   /* trailing fraction/unit: not an integer */
+    *out = neg ? -(int)val : (int)val;
+    return 1;
+}
+
+static int interp_border_style(const char *v) {
+    if (ci_eq(v, "none"))   return CSS_BST_NONE;
+    if (ci_eq(v, "hidden")) return CSS_BST_HIDDEN;
+    if (ci_eq(v, "solid"))  return CSS_BST_SOLID;
+    if (ci_eq(v, "dashed")) return CSS_BST_DASHED;
+    if (ci_eq(v, "dotted")) return CSS_BST_DOTTED;
+    if (ci_eq(v, "double")) return CSS_BST_DOUBLE;
+    if (ci_eq(v, "groove")) return CSS_BST_GROOVE;
+    if (ci_eq(v, "ridge"))  return CSS_BST_RIDGE;
+    if (ci_eq(v, "inset"))  return CSS_BST_INSET;
+    if (ci_eq(v, "outset")) return CSS_BST_OUTSET;
+    return -1;
+}
+
+/* Border/outline width token: thin/medium/thick keywords or a non-negative length.
+ * Returns 1 with *out (px >= 0), 0 if unsupported. */
+static int interp_border_width(const char *v, int *out) {
+    if (ci_eq(v, "thin"))   { *out = 1; return 1; }
+    if (ci_eq(v, "medium")) { *out = 3; return 1; }
+    if (ci_eq(v, "thick"))  { *out = 5; return 1; }
+    int px;
+    if (!interp_len(v, 0, &px) || px < 0) return 0;
+    *out = px;
+    return 1;
+}
+
+static int interp_bwidth1(const char *v) {
+    int o;
+    return interp_border_width(v, &o) ? o : -1;
+}
+
+/* border-radius: the first value only (corner-by-corner / elliptical out of scope).
+ * px >= 0, or -1 (unsupported: %/units dropped -> stays unset). */
+static int interp_border_radius(const char *v) {
+    char tok[CSS_TOK_MAX];
+    size_t k = 0;
+    const char *p = v;
+    while (*p == ' ' || *p == '\t') ++p;
+    while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '/' && k + 1 < sizeof tok)
+        tok[k++] = *p++;
+    tok[k] = '\0';
+    int px;
+    if (!interp_len(tok, 0, &px) || px < 0) return -1;
+    return px;
+}
+
+/* token classifiers for the per-category border-{width,style,color} quad expanders. */
+static int interp_bw_tok(const char *t, int *o) { return interp_border_width(t, o); }
+static int interp_bs_tok(const char *t, int *o) { int r = interp_border_style(t); if (r < 0) return 0; *o = r; return 1; }
+static int interp_bc_tok(const char *t, int *o) { int r = interp_color(t); if (r < 0) return 0; *o = r; return 1; }
+
+typedef int (*tok_interp)(const char *tok, int *out);
+
+/* Expands a 1-4 value box property (CSS order all / `v h` / `t h b` / `t r b l`) over
+ * a token classifier f into the four contiguous slots from slot_top. Any unsupported
+ * token drops the WHOLE shorthand (fail closed). Returns the number written (<= cap). */
+static int expand_quad(const char *val, int slot_top, tok_interp f, css_decl *dst, int cap) {
+    int vals[4], nv = 0;
+    const char *p = val;
+    while (nv < 4) {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        int o;
+        if (!f(tok, &o)) return 0;
+        vals[nv++] = o;
+    }
+    if (nv == 0) return 0;
+    int top, right, bottom, left;
+    switch (nv) {
+        case 1: top = right = bottom = left = vals[0]; break;
+        case 2: top = bottom = vals[0]; right = left = vals[1]; break;
+        case 3: top = vals[0]; right = left = vals[1]; bottom = vals[2]; break;
+        default: top = vals[0]; right = vals[1]; bottom = vals[2]; left = vals[3]; break;
+    }
+    int sides[4] = { top, right, bottom, left };
+    int n = 0;
+    for (int s = 0; s < 4 && n < cap; ++s) { dst[n].prop = slot_top + s; dst[n].ival = sides[s]; ++n; }
+    return n;
+}
+
+/* Classifies a `border`/`outline` shorthand value into an optional width, style and
+ * color (each at most once, any order). An unrecognised token drops the whole edge
+ * (fail closed). url() is dropped (never fetch). Returns 1 if any part was set. */
+static int classify_box_edge(const char *val, int *w, int *hw, int *s, int *hs,
+                             int *c, int *hc) {
+    *hw = *hs = *hc = 0;
+    if (substr_match(val, "url(", 1)) return 0;
+    const char *p = val;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        int tmp;
+        if (!*hw && interp_border_width(tok, &tmp)) { *w = tmp; *hw = 1; }
+        else if (!*hs && (tmp = interp_border_style(tok)) >= 0) { *s = tmp; *hs = 1; }
+        else if (!*hc && (tmp = interp_color(tok)) >= 0) { *c = tmp; *hc = 1; }
+        else return 0;   /* unrecognised token: drop the whole shorthand */
+    }
+    return (*hw || *hs || *hc);
+}
+
+/* border / border-<side> shorthand: sets the present width/style/color for each side
+ * named in mask (bit s: 0 top, 1 right, 2 bottom, 3 left). Only the parts given are
+ * emitted (omitted longhands stay unset — no initial-value reset). */
+static int expand_border_shorthand(const char *val, int mask, css_decl *dst, int cap) {
+    int w = 0, s = 0, c = 0, hw, hs, hc;
+    if (!classify_box_edge(val, &w, &hw, &s, &hs, &c, &hc)) return 0;
+    int n = 0;
+    for (int side = 0; side < 4; ++side) {
+        if (!(mask & (1 << side))) continue;
+        if (hw && n < cap) { dst[n].prop = P_BW_TOP + side; dst[n].ival = w; ++n; }
+        if (hs && n < cap) { dst[n].prop = P_BS_TOP + side; dst[n].ival = s; ++n; }
+        if (hc && n < cap) { dst[n].prop = P_BC_TOP + side; dst[n].ival = c; ++n; }
+    }
+    return n;
+}
+
+static int expand_outline(const char *val, css_decl *dst, int cap) {
+    int w = 0, s = 0, c = 0, hw, hs, hc;
+    if (!classify_box_edge(val, &w, &hw, &s, &hs, &c, &hc)) return 0;
+    int n = 0;
+    if (hw && n < cap) { dst[n].prop = P_OUTLINE_W; dst[n].ival = w; ++n; }
+    if (hs && n < cap) { dst[n].prop = P_OUTLINE_S; dst[n].ival = s; ++n; }
+    if (hc && n < cap) { dst[n].prop = P_OUTLINE_C; dst[n].ival = c; ++n; }
+    return n;
+}
+
+/* box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an
+ * optional color, and an optional `inset` keyword, in any order. Needs >= 2 lengths
+ * (dx, dy) or the whole declaration is dropped (fail closed). `none` is an explicit
+ * no-shadow. url() dropped: never fetch. Writes the six contiguous P_BSHADOW_* slots. */
+static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
+    if (cap < 6) return 0;
+    if (substr_match(val, "url(", 1)) return 0;
+    int lens[4], nlen = 0, color = 0, have_color = 0, inset = 0;
+    if (!ci_eq(val, "none")) {
+        const char *p = val;
+        while (*p != '\0') {
+            while (*p == ' ' || *p == '\t') ++p;
+            if (*p == '\0') break;
+            char tok[CSS_TOK_MAX];
+            size_t k = 0;
+            while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+            tok[k] = '\0';
+            if (ci_eq(tok, "inset")) { inset = 1; continue; }
+            int px;
+            cc_rgb c;
+            if (interp_len(tok, 0, &px)) { if (nlen < 4) lens[nlen++] = px; }
+            else if (!have_color && cc_parse(tok, &c) == CC_OK) { color = cc_pack(c); have_color = 1; }
+            /* else: unknown token ignored */
+        }
+        if (nlen < 2) return 0;   /* need both offsets */
+    }
+    dst[0].prop = P_BSHADOW_DX;     dst[0].ival = nlen > 0 ? lens[0] : 0;
+    dst[1].prop = P_BSHADOW_DY;     dst[1].ival = nlen > 1 ? lens[1] : 0;
+    dst[2].prop = P_BSHADOW_BLUR;   dst[2].ival = nlen > 2 ? lens[2] : 0;
+    dst[3].prop = P_BSHADOW_SPREAD; dst[3].ival = nlen > 3 ? lens[3] : 0;
+    dst[4].prop = P_BSHADOW_COLOR;  dst[4].ival = ci_eq(val, "none") ? -1
+                                                : (have_color ? color : 0x000000);
+    dst[5].prop = P_BSHADOW_INSET;  dst[5].ival = inset;
+    return 6;
+}
+
+/* flex-grow / flex-shrink: a non-negative number stored x100 (0.5 -> 50), clamped to
+ * [0, CSS_FLEX_FACTOR_MAX]. Negative / unparseable -> -1 (dropped, stays unset). */
+static int interp_flex_factor(const char *v) {
+    double num;
+    const char *end;
+    if (!parse_num(v, &num, &end) || *end != '\0' || num < 0.0) return -1;
+    return round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
+}
+
+/* flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; %/units
+ * dropped (returns 0, leaving unset). Returns 1 with *out, 0 if unsupported. */
+static int interp_flex_basis(const char *v, int *out) {
+    if (ci_eq(v, "auto") || ci_eq(v, "content")) { *out = CSS_LEN_AUTO; return 1; }
+    int px;
+    if (!interp_len(v, 0, &px) || px < 0) return 0;
+    *out = px;
+    return 1;
+}
+
+/* flex shorthand -> the three contiguous P_FLEX_GROW/SHRINK/BASIS slots. Keywords
+ * none/auto/initial; otherwise up to three values (a unitless number is grow then
+ * shrink; a length/auto is basis). Defaults: shrink 1, basis 0 when a grow is given,
+ * else basis auto. */
+static int expand_flex(const char *val, css_decl *dst, int cap) {
+    if (cap < 3) return 0;
+    int grow, shrink, basis;
+    if (ci_eq(val, "none"))         { grow = 0;   shrink = 0;   basis = CSS_LEN_AUTO; }
+    else if (ci_eq(val, "auto"))    { grow = 100; shrink = 100; basis = CSS_LEN_AUTO; }
+    else if (ci_eq(val, "initial")) { grow = 0;   shrink = 100; basis = CSS_LEN_AUTO; }
+    else {
+        int g = 0, sh = 0, ba = 0, have_g = 0, have_sh = 0, have_ba = 0;
+        const char *p = val;
+        int ntok = 0;
+        while (*p != '\0' && ntok < 4) {
+            while (*p == ' ' || *p == '\t') ++p;
+            if (*p == '\0') break;
+            char tok[CSS_TOK_MAX];
+            size_t k = 0;
+            while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+            tok[k] = '\0';
+            ++ntok;
+            double num;
+            const char *end;
+            if (parse_num(tok, &num, &end) && *end == '\0') {  /* unitless number */
+                if (num < 0.0) return 0;
+                int x100 = round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
+                if (!have_g)       { g = x100;  have_g = 1; }
+                else if (!have_sh) { sh = x100; have_sh = 1; }
+                else return 0;
+            } else {                                            /* a length / auto */
+                int b;
+                if (have_ba || !interp_flex_basis(tok, &b)) return 0;
+                ba = b; have_ba = 1;
+            }
+        }
+        if (!have_g && !have_ba) return 0;   /* nothing usable */
+        grow   = have_g  ? g  : 100;
+        shrink = have_sh ? sh : 100;
+        basis  = have_ba ? ba : (have_g ? 0 : CSS_LEN_AUTO);
+    }
+    dst[0].prop = P_FLEX_GROW;   dst[0].ival = grow;
+    dst[1].prop = P_FLEX_SHRINK; dst[1].ival = shrink;
+    dst[2].prop = P_FLEX_BASIS;  dst[2].ival = basis;
+    return 3;
+}
+
+/* align-items / align-self / align-content / justify-items keyword. allow_auto is for
+ * align-self; allow_dist (space-*) is for align-content. Unknown -> -1 (drop). */
+static int interp_align_kw(const char *v, int allow_auto, int allow_dist) {
+    if (allow_auto && ci_eq(v, "auto")) return CSS_AK_AUTO;
+    if (ci_eq(v, "stretch")) return CSS_AK_STRETCH;
+    if (ci_eq(v, "flex-start") || ci_eq(v, "start")) return CSS_AK_START;
+    if (ci_eq(v, "flex-end") || ci_eq(v, "end")) return CSS_AK_END;
+    if (ci_eq(v, "center")) return CSS_AK_CENTER;
+    if (ci_eq(v, "baseline")) return CSS_AK_BASELINE;
+    if (allow_dist && ci_eq(v, "space-between")) return CSS_AK_SPACE_BETWEEN;
+    if (allow_dist && ci_eq(v, "space-around")) return CSS_AK_SPACE_AROUND;
+    if (allow_dist && ci_eq(v, "space-evenly")) return CSS_AK_SPACE_EVENLY;
+    return -1;
+}
+
+static int interp_flex_direction(const char *v) {
+    if (ci_eq(v, "row")) return CSS_FD_ROW;
+    if (ci_eq(v, "row-reverse")) return CSS_FD_ROW_REVERSE;
+    if (ci_eq(v, "column")) return CSS_FD_COLUMN;
+    if (ci_eq(v, "column-reverse")) return CSS_FD_COLUMN_REVERSE;
+    return -1;
+}
+
+static int interp_flex_wrap(const char *v) {
+    if (ci_eq(v, "nowrap")) return CSS_FW_NOWRAP;
+    if (ci_eq(v, "wrap")) return CSS_FW_WRAP;
+    if (ci_eq(v, "wrap-reverse")) return CSS_FW_WRAP_REVERSE;
+    return -1;
+}
+
+/* grid-auto-flow: the first row/column axis keyword wins; `dense` ignored. */
+static int interp_grid_flow(const char *v) {
+    const char *p = v;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        if (ci_eq(tok, "row")) return CSS_GF_ROW;
+        if (ci_eq(tok, "column")) return CSS_GF_COLUMN;
+        /* dense / other: skip */
+    }
+    return -1;
+}
+
+/* True if s begins with the NUL-terminated prefix pre (case-insensitive), stopping at
+ * the first NUL (no out-of-bounds read past a short s). */
+static int starts_with_ci(const char *s, const char *pre) {
+    for (; *pre != '\0'; ++s, ++pre)
+        if (lower(*s) != lower(*pre)) return 0;
+    return 1;
+}
+
+/* grid-column / grid-row: only the `span N` form is supported -> N (clamped to
+ * [1, CSS_GRID_SPAN_MAX]). Line-number / named-line placement is out of scope (-1). */
+static int interp_grid_span(const char *v) {
+    const char *p = v;
+    while (*p == ' ' || *p == '\t') ++p;
+    if (!starts_with_ci(p, "span")) return -1;
+    p += 4;
+    if (*p != ' ' && *p != '\t') return -1;   /* "span" must be followed by a count */
+    while (*p == ' ' || *p == '\t') ++p;
+    double num;
+    const char *end;
+    if (!parse_num(p, &num, &end)) return -1;
+    while (*end == ' ' || *end == '\t') ++end;
+    if (*end != '\0') return -1;
+    int n = round_clamp(num, 0, CSS_GRID_SPAN_MAX);
+    if (n < 1) return -1;
+    return n;
+}
+
 /* Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from
  * both ends. Returns the trimmed length, or SIZE_MAX if it does not fit dst. */
 static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
@@ -635,6 +996,41 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "word-spacing") == 0)   return emit_spacing(dst, cap, P_WORDSPACING, val);
     if (strcmp(prop, "text-indent") == 0)    return emit_len(dst, cap, P_TEXTINDENT, val, 0, 1);
 
+    /* Layout box properties whose value may be negative or a sentinel (insets allow
+     * auto + negatives; z-index/order are signed; flex-basis can be auto), or which
+     * expand to several slots (border / box-shadow / outline / flex). */
+    if (strcmp(prop, "top") == 0)     return emit_len(dst, cap, P_INSET_TOP, val, 1, 1);
+    if (strcmp(prop, "right") == 0)   return emit_len(dst, cap, P_INSET_RIGHT, val, 1, 1);
+    if (strcmp(prop, "bottom") == 0)  return emit_len(dst, cap, P_INSET_BOTTOM, val, 1, 1);
+    if (strcmp(prop, "left") == 0)    return emit_len(dst, cap, P_INSET_LEFT, val, 1, 1);
+    if (strcmp(prop, "inset") == 0)   return expand_box4(val, P_INSET_TOP, 1, 1, dst, cap);
+    if (strcmp(prop, "z-index") == 0) {
+        int o;
+        if (cap < 1 || !interp_int(val, &o)) return 0;
+        dst[0].prop = P_ZINDEX; dst[0].ival = o; return 1;
+    }
+    if (strcmp(prop, "order") == 0) {
+        int o;
+        if (cap < 1 || !interp_int(val, &o)) return 0;
+        dst[0].prop = P_ORDER; dst[0].ival = o; return 1;
+    }
+    if (strcmp(prop, "flex-basis") == 0) {
+        int o;
+        if (cap < 1 || !interp_flex_basis(val, &o)) return 0;
+        dst[0].prop = P_FLEX_BASIS; dst[0].ival = o; return 1;
+    }
+    if (strcmp(prop, "flex") == 0)         return expand_flex(val, dst, cap);
+    if (strcmp(prop, "border") == 0)        return expand_border_shorthand(val, 0xF, dst, cap);
+    if (strcmp(prop, "border-top") == 0)    return expand_border_shorthand(val, 0x1, dst, cap);
+    if (strcmp(prop, "border-right") == 0)  return expand_border_shorthand(val, 0x2, dst, cap);
+    if (strcmp(prop, "border-bottom") == 0) return expand_border_shorthand(val, 0x4, dst, cap);
+    if (strcmp(prop, "border-left") == 0)   return expand_border_shorthand(val, 0x8, dst, cap);
+    if (strcmp(prop, "border-width") == 0)  return expand_quad(val, P_BW_TOP, interp_bw_tok, dst, cap);
+    if (strcmp(prop, "border-style") == 0)  return expand_quad(val, P_BS_TOP, interp_bs_tok, dst, cap);
+    if (strcmp(prop, "border-color") == 0)  return expand_quad(val, P_BC_TOP, interp_bc_tok, dst, cap);
+    if (strcmp(prop, "box-shadow") == 0)    return expand_box_shadow(val, dst, cap);
+    if (strcmp(prop, "outline") == 0)       return expand_outline(val, dst, cap);
+
     int prop_id, ival;
     if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
     else if (strcmp(prop, "background-color") == 0 ||
@@ -659,6 +1055,34 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "white-space") == 0)        { prop_id = P_WHITESPACE;    ival = interp_whitespace(val); }
     else if (strcmp(prop, "list-style-type") == 0 ||
              strcmp(prop, "list-style") == 0)          { prop_id = P_LISTSTYLE;     ival = interp_liststyle(val); }
+    else if (strcmp(prop, "position") == 0)            { prop_id = P_POSITION;      ival = interp_position(val); }
+    else if (strcmp(prop, "box-sizing") == 0)          { prop_id = P_BOXSIZING;     ival = interp_boxsizing(val); }
+    else if (strcmp(prop, "border-radius") == 0)       { prop_id = P_BORDER_RADIUS; ival = interp_border_radius(val); }
+    else if (strcmp(prop, "border-top-width") == 0)    { prop_id = P_BW_TOP;        ival = interp_bwidth1(val); }
+    else if (strcmp(prop, "border-right-width") == 0)  { prop_id = P_BW_RIGHT;      ival = interp_bwidth1(val); }
+    else if (strcmp(prop, "border-bottom-width") == 0) { prop_id = P_BW_BOTTOM;     ival = interp_bwidth1(val); }
+    else if (strcmp(prop, "border-left-width") == 0)   { prop_id = P_BW_LEFT;       ival = interp_bwidth1(val); }
+    else if (strcmp(prop, "border-top-style") == 0)    { prop_id = P_BS_TOP;        ival = interp_border_style(val); }
+    else if (strcmp(prop, "border-right-style") == 0)  { prop_id = P_BS_RIGHT;      ival = interp_border_style(val); }
+    else if (strcmp(prop, "border-bottom-style") == 0) { prop_id = P_BS_BOTTOM;     ival = interp_border_style(val); }
+    else if (strcmp(prop, "border-left-style") == 0)   { prop_id = P_BS_LEFT;       ival = interp_border_style(val); }
+    else if (strcmp(prop, "border-top-color") == 0)    { prop_id = P_BC_TOP;        ival = interp_color(val); }
+    else if (strcmp(prop, "border-right-color") == 0)  { prop_id = P_BC_RIGHT;      ival = interp_color(val); }
+    else if (strcmp(prop, "border-bottom-color") == 0) { prop_id = P_BC_BOTTOM;     ival = interp_color(val); }
+    else if (strcmp(prop, "border-left-color") == 0)   { prop_id = P_BC_LEFT;       ival = interp_color(val); }
+    else if (strcmp(prop, "flex-grow") == 0)           { prop_id = P_FLEX_GROW;     ival = interp_flex_factor(val); }
+    else if (strcmp(prop, "flex-shrink") == 0)         { prop_id = P_FLEX_SHRINK;   ival = interp_flex_factor(val); }
+    else if (strcmp(prop, "align-items") == 0)         { prop_id = P_ALIGN_ITEMS;   ival = interp_align_kw(val, 0, 0); }
+    else if (strcmp(prop, "align-self") == 0)          { prop_id = P_ALIGN_SELF;    ival = interp_align_kw(val, 1, 0); }
+    else if (strcmp(prop, "align-content") == 0)       { prop_id = P_ALIGN_CONTENT; ival = interp_align_kw(val, 0, 1); }
+    else if (strcmp(prop, "justify-items") == 0)       { prop_id = P_JUSTIFY_ITEMS; ival = interp_align_kw(val, 0, 0); }
+    else if (strcmp(prop, "flex-direction") == 0)      { prop_id = P_FLEX_DIR;      ival = interp_flex_direction(val); }
+    else if (strcmp(prop, "flex-wrap") == 0)           { prop_id = P_FLEX_WRAP;     ival = interp_flex_wrap(val); }
+    else if (strcmp(prop, "grid-template-rows") == 0)  { prop_id = P_GRID_ROWS;     ival = interp_gridcols(val); }
+    else if (strcmp(prop, "row-gap") == 0)             { prop_id = P_ROW_GAP;       ival = interp_gap(val); }
+    else if (strcmp(prop, "grid-auto-flow") == 0)      { prop_id = P_GRID_FLOW;     ival = interp_grid_flow(val); }
+    else if (strcmp(prop, "grid-column") == 0)         { prop_id = P_GRID_COL_SPAN; ival = interp_grid_span(val); }
+    else if (strcmp(prop, "grid-row") == 0)            { prop_id = P_GRID_ROW_SPAN; ival = interp_grid_span(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -952,7 +1376,7 @@ static size_t block_end(const char *s, size_t open, size_t n) {
 static int css_px(const char *v) {
     double d;
     const char *e;
-    return parse_num(v, &d, &e) ? (int)(d + 0.5) : 0;
+    return parse_num(v, &d, &e) ? round_clamp(d, 0, CSS_LEN_MAX) : 0;
 }
 
 /* Trims ASCII spaces/tabs from both ends of a NUL-terminated string, in place. */
@@ -1293,6 +1717,50 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_TEXTINDENT:    o->text_indent = d->ival; break;
             case P_WHITESPACE:    o->white_space = d->ival; break;
             case P_LISTSTYLE:     o->list_style = d->ival; break;
+            case P_POSITION:      o->position = d->ival; break;
+            case P_INSET_TOP:     o->inset_top = d->ival; break;
+            case P_INSET_RIGHT:   o->inset_right = d->ival; break;
+            case P_INSET_BOTTOM:  o->inset_bottom = d->ival; break;
+            case P_INSET_LEFT:    o->inset_left = d->ival; break;
+            case P_ZINDEX:        o->z_index = d->ival; break;
+            case P_BOXSIZING:     o->box_sizing = d->ival; break;
+            case P_BW_TOP:        o->border_top_width = d->ival; break;
+            case P_BW_RIGHT:      o->border_right_width = d->ival; break;
+            case P_BW_BOTTOM:     o->border_bottom_width = d->ival; break;
+            case P_BW_LEFT:       o->border_left_width = d->ival; break;
+            case P_BS_TOP:        o->border_top_style = d->ival; break;
+            case P_BS_RIGHT:      o->border_right_style = d->ival; break;
+            case P_BS_BOTTOM:     o->border_bottom_style = d->ival; break;
+            case P_BS_LEFT:       o->border_left_style = d->ival; break;
+            case P_BC_TOP:        o->border_top_color = d->ival; break;
+            case P_BC_RIGHT:      o->border_right_color = d->ival; break;
+            case P_BC_BOTTOM:     o->border_bottom_color = d->ival; break;
+            case P_BC_LEFT:       o->border_left_color = d->ival; break;
+            case P_BORDER_RADIUS: o->border_radius = d->ival; break;
+            case P_BSHADOW_DX:     o->shadow2_dx = d->ival; break;
+            case P_BSHADOW_DY:     o->shadow2_dy = d->ival; break;
+            case P_BSHADOW_BLUR:   o->shadow2_blur = d->ival; break;
+            case P_BSHADOW_SPREAD: o->shadow2_spread = d->ival; break;
+            case P_BSHADOW_COLOR:  o->box_shadow_color = d->ival; break;
+            case P_BSHADOW_INSET:  o->box_shadow_inset = d->ival; break;
+            case P_OUTLINE_W:     o->outline_width = d->ival; break;
+            case P_OUTLINE_S:     o->outline_style = d->ival; break;
+            case P_OUTLINE_C:     o->outline_color = d->ival; break;
+            case P_FLEX_GROW:     o->flex_grow = d->ival; break;
+            case P_FLEX_SHRINK:   o->flex_shrink = d->ival; break;
+            case P_FLEX_BASIS:    o->flex_basis = d->ival; break;
+            case P_ORDER:         o->order = d->ival; break;
+            case P_ALIGN_ITEMS:   o->align_items = d->ival; break;
+            case P_ALIGN_SELF:    o->align_self = d->ival; break;
+            case P_ALIGN_CONTENT: o->align_content = d->ival; break;
+            case P_JUSTIFY_ITEMS: o->justify_items = d->ival; break;
+            case P_FLEX_DIR:      o->flex_direction = d->ival; break;
+            case P_FLEX_WRAP:     o->flex_wrap = d->ival; break;
+            case P_GRID_ROWS:     o->grid_rows = d->ival; break;
+            case P_ROW_GAP:       o->row_gap = d->ival; break;
+            case P_GRID_FLOW:     o->grid_auto_flow = d->ival; break;
+            case P_GRID_COL_SPAN: o->grid_col_span = d->ival; break;
+            case P_GRID_ROW_SPAN: o->grid_row_span = d->ival; break;
             default: break;
         }
     }
@@ -1318,6 +1786,27 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .opacity = -1, .valign = CSS_VA_UNSET,
         .text_indent = CSS_LEN_UNSET, .white_space = CSS_WS_UNSET,
         .list_style = CSS_LS_UNSET,
+        .position = CSS_POS_UNSET,
+        .inset_top = CSS_LEN_UNSET, .inset_right = CSS_LEN_UNSET,
+        .inset_bottom = CSS_LEN_UNSET, .inset_left = CSS_LEN_UNSET,
+        .z_index = CSS_LEN_UNSET, .box_sizing = CSS_BOXS_UNSET,
+        .border_top_width = CSS_LEN_UNSET, .border_right_width = CSS_LEN_UNSET,
+        .border_bottom_width = CSS_LEN_UNSET, .border_left_width = CSS_LEN_UNSET,
+        .border_top_style = CSS_BST_UNSET, .border_right_style = CSS_BST_UNSET,
+        .border_bottom_style = CSS_BST_UNSET, .border_left_style = CSS_BST_UNSET,
+        .border_top_color = -1, .border_right_color = -1,
+        .border_bottom_color = -1, .border_left_color = -1,
+        .border_radius = CSS_LEN_UNSET,
+        .shadow2_dx = 0, .shadow2_dy = 0, .shadow2_blur = 0, .shadow2_spread = 0,
+        .box_shadow_color = -1, .box_shadow_inset = -1,
+        .outline_width = CSS_LEN_UNSET, .outline_style = CSS_BST_UNSET, .outline_color = -1,
+        .flex_grow = -1, .flex_shrink = -1, .flex_basis = CSS_LEN_UNSET,
+        .order = CSS_LEN_UNSET,
+        .align_items = CSS_AK_UNSET, .align_self = CSS_AK_UNSET,
+        .align_content = CSS_AK_UNSET, .justify_items = CSS_AK_UNSET,
+        .flex_direction = CSS_FD_UNSET, .flex_wrap = CSS_FW_UNSET,
+        .grid_rows = 0, .row_gap = -1, .grid_auto_flow = CSS_GF_UNSET,
+        .grid_col_span = 0, .grid_row_span = 0,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

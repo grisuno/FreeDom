@@ -122,7 +122,7 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; no `border`/`box-sizing`/`position`/transforms; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; the parser now **resolves** `position`/`border`/`box-sizing`/`box-shadow`/`outline`/per-item flex+grid values but does **not paint** them yet (staged for the box-engine milestone); no transforms; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 

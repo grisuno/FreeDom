@@ -974,6 +974,47 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   agrupación de cajas por bloque), `position`, transforms/gradientes, casado exacto de fuentes, blur/
   multi-capa de `text-shadow`. *(Módulos puros + IPC + E2E visual headless verificados; ventana Wayland
   interactiva pendiente al dueño.)* Ver `[[freedom-text-presentation-css]]`, `[[freedom-author-css-direction]]`.
+- **Hito 23b-7 — CSS de layout/decoración de caja: `position` + `border`/`box-sizing` +
+  `box-shadow`/`outline` + flexbox por-item + grid por-item (resolución de valores).** Los cuatro
+  GAPs CRÍTICOS de maquetación moderna (`position`, flexbox completo, `border`/`-radius`/`box-shadow`/
+  `box-sizing`, grid completo) viven **todos en el mismo componente `css`**, así que se cierran en un
+  golpe **en la capa que el módulo puro puede cerrar hoy: resolver los valores** por la misma cascada.
+  El paint-time (honrar la caja, el posicionamiento fuera de flujo, el sizing flex/grid real) depende
+  de la **agrupación de caja por-bloque** que el `rd_doc` plano aún no tiene (mismo bloqueo
+  arquitectónico que `border`/`box-shadow`/padding-vertical del Hito 23b-3) y queda **explícitamente
+  diferido** a un hito de motor de cajas (el embrión nativo es `box_tree`/`bt_node`, que ya da rects
+  de border-box). **~40 campos nuevos en `css_style`** (no heredados) + 6 enums (`css_position`,
+  `css_box_sizing`, `css_border_style`, `css_flex_direction`, `css_flex_wrap`, `css_align_kw`,
+  `css_grid_flow`) + topes (`CSS_BORDER_W_MAX`, `CSS_FLEX_FACTOR_MAX`, `CSS_GRID_SPAN_MAX`):
+  **`position`** (+`top`/`right`/`bottom`/`left`/`inset` shorthand 1–4 / `z-index` / `box-sizing`),
+  **`border`** uniforme + per-side + longhands (`-width`/`-style`/`-color`; clasificador de token
+  width/style/color en cualquier orden, fail-closed; `thin`/`medium`/`thick` → 1/3/5px) +
+  **`border-radius`** (primer valor px; corner-by-corner fuera) + **`box-shadow`** (una capa: dx dy
+  blur spread + color + `inset`; `none` → no-shadow explícito) + **`outline`** (mismo clasificador),
+  **flexbox por-item** (`flex`/`-grow`/`-shrink` guardados ×100 / `-basis` auto·content→`CSS_LEN_AUTO`,
+  `order`, `align-items`/`-self`/`-content`/`justify-items`, `flex-direction`, `flex-wrap`),
+  **grid por-item** (`grid-template-rows`, `row-gap`, `grid-auto-flow`, `grid-column`/`grid-row` solo
+  forma `span N`). **Honestidad (doctrina §8):** estos campos son **resolución de valor pura** —
+  **NO** se hilan por IPC (`tab.c`) ni los consume `page_view` todavía, así que **no cambian un solo
+  pixel del render aún**; lo que ya maqueta (display:flex/grid + gap/justify/grid-template-columns del
+  Hito 23b-2) sigue igual. Boyscout: **bug latente de UB extinguido** — varios interpretadores casteaban
+  `(int)(double + 0.5)` y clampaban **después** del cast (overflow `int` con valores enormes, p. ej.
+  `flex: 3.3e12`); el fuzzer lo encontró (`src/css.c:850`) y se unificó un solo helper `round_clamp`
+  que clampa el double **antes** del cast, aplicado en todos los sitios float→int (`interp_fontsize`/
+  `_lineheight`/`_gap`/`_len`/`_opacity`/`_flex_factor`/`expand_flex`/`interp_grid_span`/`css_px`).
+  Specs (`css.md`: tabla de propiedades + inventario soportado-vs-faltante + tipos/macros) + tests
+  (9 nuevos en `css`: position+insets / box-sizing / border shorthand / border longhands /
+  box-shadow+outline / flex item / flex align / grid extras / cascada+unset → **85 tests**) +
+  `make test` (36 suites) / `make asan` (36, exit 0) limpios + fuzz `fuzz-css` (366k execs, **oráculo
+  `check_style` reforzado** con invariantes de todos los campos nuevos: rangos de enum, clamps de
+  border/flex/grid/insets) y `fuzz-pv` (195k execs) sin crash/leak/UB (tras el fix de `round_clamp`).
+  **No hay E2E visual** porque no se pinta nada nuevo (sería deshonesto): la revisión visual llega con
+  el hito de motor de cajas que consuma estos valores. **Fuera de alcance (siguiente, motor de cajas):**
+  honrar `position`/`border`/`box-shadow`/`box-sizing` en el painter (necesita caja por-bloque),
+  flex/grid sizing real por-item, `float`/`clear`/`overflow`, stacking de `z-index`, placeholders por
+  número de línea/named-line en grid, `position:sticky` con scroll. *(Módulo puro `css` resuelto +
+  fuzzeado; consumo en render/IPC y verificación visual pendientes del hito de motor de cajas.)* Ver
+  `[[freedom-author-css-layout]]`, `[[freedom-author-css-direction]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -1078,15 +1119,23 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito 13 — Privacidad de red avanzada.** `http://` opt-in también para `.onion`
   (`nr_realm_allows_http`); autenticación de onion services v3 con clave; **stream isolation** por
   pestaña/origen (circuitos Tor separados); unificar i2pd/router-Java; indicador de realm en el chrome.
+- **Hito 23b-8 — Motor de cajas: HONRAR el layout/decoración del Hito 23b-7 en el painter.** El Hito
+  23b-7 ya **resolvió los valores** de `position`/`border`/`box-sizing`/`box-shadow`/`outline`/flex-por-
+  item/grid-por-item en `css_style`; **falta consumirlos**: hilar los campos por IPC (`tab.c`
+  write_view/read_view), agrupar el render plano en **cajas por-bloque** (extender `box_tree`/`bt_node`,
+  que ya da rects de border-box) y que el painter dibuje borde/radio/sombra/outline, aplique
+  `box-sizing` y resuelva `position` (relative offset, absolute/fixed fuera de flujo, sticky con scroll),
+  `padding-top/bottom`, flex sizing real por-item (`flex-grow`/`-shrink`/`-basis`/`order`/`align-*`) y
+  grid por-item (`grid-template-rows`/`row-gap`/`grid-auto-flow`/`span N`). Es el hito que por fin
+  **pinta** los cuatro GAPs CRÍTICOS y habilita su **revisión visual**. Falta además del box model:
+  unidades `%`/viewport, composición de cajas anidadas, `border-image`, `outline-offset`,
+  corner-by-corner `border-radius`, multi-capa `box-shadow`.
 - **Hito 23b parte 2 — CSS de autor: más cobertura.** (Parte 1 `@media`+`prefers-color-scheme`, el
-  sub-hito **flex/grid desde `<style>`**, y el **box model `margin`/`padding`/`width`/`max-width`**
-  —Hito 23b-3— ya cerrados arriba.) Falta del box model: **`border`** (width/style/color),
-  **`box-sizing`**, **`padding-top/bottom`** (la lista plana no tiene caja por-bloque que inflar —
-  necesita box-grouping), unidades `%`/viewport, y composición de cajas anidadas. Falta además:
-  **`position`** relative/absolute/sticky;
-  flex **por-item** desde `<style>` (`flex-grow`/`-shrink`/`-basis`/`order`, `align-items`) y expansión
-  de `repeat()`/`minmax()`/pesos `fr` en grid (hoy todo track = 1fr igual); render de `@media print` al
-  PDF; combinadores **hermano** (`+`/`~`) y **pseudo-clases** `:`/`::` (los combinadores
+  sub-hito **flex/grid desde `<style>`**, el **box model `margin`/`padding`/`width`/`max-width`**
+  —Hito 23b-3—, y la **resolución de valores** de `position`/`border`/`box-sizing`/`box-shadow`/flex-y-
+  grid-por-item —Hito 23b-7— ya cerrados arriba; **honrarlos en el painter** es el Hito 23b-8.) Falta
+  además: render de `@media print` al PDF; expansión de `repeat()`/`minmax()`/pesos `fr` en grid (hoy
+  todo track = 1fr igual); combinadores **hermano** (`+`/`~`) y **pseudo-clases** `:`/`::` (los combinadores
   **descendiente/hijo** y los **selectores de atributo** + **`!important`** ya cerrados arriba, Hito
   23b-4); persistir el toggle de estilos de autor y el modo reader con el Hito 10. (`line-height` y
   `text-decoration` cerrados en Hito 23b-5; `font-family`/`text-transform`/`letter-spacing`/

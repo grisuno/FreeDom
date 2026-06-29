@@ -995,8 +995,240 @@ static void test_box_sheet_cascade_inline_wins(void **state) {
     css_free(sh);
 }
 
+/* --- Layout / box decoration (Hito 23b-7) --- */
+
+static void test_position_and_insets(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("position:relative", 0).position, CSS_POS_RELATIVE);
+    assert_int_equal(css_parse_inline("position:ABSOLUTE", 0).position, CSS_POS_ABSOLUTE);
+    assert_int_equal(css_parse_inline("position:fixed", 0).position, CSS_POS_FIXED);
+    assert_int_equal(css_parse_inline("position:sticky", 0).position, CSS_POS_STICKY);
+    assert_int_equal(css_parse_inline("position:static", 0).position, CSS_POS_STATIC);
+    assert_int_equal(css_parse_inline("position:running", 0).position, CSS_POS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).position, CSS_POS_UNSET);
+
+    css_style s = css_parse_inline("top:10px; left:-4px; right:auto; bottom:2em", 0);
+    assert_int_equal(s.inset_top, 10);
+    assert_int_equal(s.inset_left, -4);
+    assert_int_equal(s.inset_right, CSS_LEN_AUTO);
+    assert_int_equal(s.inset_bottom, 32);             /* 2em x16 */
+    assert_int_equal(css_parse_inline("top:50%", 0).inset_top, CSS_LEN_UNSET); /* % dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).inset_top, CSS_LEN_UNSET);
+
+    /* inset shorthand (CSS order top right bottom left). */
+    css_style i = css_parse_inline("inset:1px 2px 3px 4px", 0);
+    assert_int_equal(i.inset_top, 1);  assert_int_equal(i.inset_right, 2);
+    assert_int_equal(i.inset_bottom, 3); assert_int_equal(i.inset_left, 4);
+    assert_int_equal(css_parse_inline("inset:5px", 0).inset_left, 5);
+
+    assert_int_equal(css_parse_inline("z-index:7", 0).z_index, 7);
+    assert_int_equal(css_parse_inline("z-index:-3", 0).z_index, -3);
+    assert_int_equal(css_parse_inline("z-index:auto", 0).z_index, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("z-index:1.5", 0).z_index, CSS_LEN_UNSET); /* non-integer */
+    assert_int_equal(css_parse_inline("color:red", 0).z_index, CSS_LEN_UNSET);
+}
+
+static void test_box_sizing(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("box-sizing:border-box", 0).box_sizing, CSS_BOXS_BORDER);
+    assert_int_equal(css_parse_inline("box-sizing:content-box", 0).box_sizing, CSS_BOXS_CONTENT);
+    assert_int_equal(css_parse_inline("box-sizing:padding-box", 0).box_sizing, CSS_BOXS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).box_sizing, CSS_BOXS_UNSET);
+}
+
+static void test_border_shorthand(void **state) {
+    (void)state;
+    /* border: <width> <style> <color> in any order -> all four sides. */
+    css_style s = css_parse_inline("border:2px solid #ff0000", 0);
+    assert_int_equal(s.border_top_width, 2);
+    assert_int_equal(s.border_right_width, 2);
+    assert_int_equal(s.border_bottom_width, 2);
+    assert_int_equal(s.border_left_width, 2);
+    assert_int_equal(s.border_top_style, CSS_BST_SOLID);
+    assert_int_equal(s.border_left_style, CSS_BST_SOLID);
+    assert_int_equal(s.border_top_color, 0xff0000);
+    assert_int_equal(s.border_bottom_color, 0xff0000);
+    /* width keywords + reordered tokens. */
+    css_style k = css_parse_inline("border:dashed thick blue", 0);
+    assert_int_equal(k.border_top_width, 5);          /* thick */
+    assert_int_equal(k.border_top_style, CSS_BST_DASHED);
+    assert_int_equal(k.border_top_color, 0x0000ff);
+    /* per-side shorthand sets only that side. */
+    css_style b = css_parse_inline("border-bottom:1px dotted green", 0);
+    assert_int_equal(b.border_bottom_width, 1);
+    assert_int_equal(b.border_bottom_style, CSS_BST_DOTTED);
+    assert_int_equal(b.border_top_width, CSS_LEN_UNSET);   /* untouched */
+    assert_int_equal(b.border_top_style, CSS_BST_UNSET);
+    /* omitted longhand stays unset (no initial reset). */
+    css_style p = css_parse_inline("border:3px solid", 0);
+    assert_int_equal(p.border_top_width, 3);
+    assert_int_equal(p.border_top_style, CSS_BST_SOLID);
+    assert_int_equal(p.border_top_color, -1);             /* color absent */
+}
+
+static void test_border_longhands(void **state) {
+    (void)state;
+    /* border-width / -style / -color expand 1-4 values (CSS side order). */
+    css_style w = css_parse_inline("border-width:1px 2px 3px 4px", 0);
+    assert_int_equal(w.border_top_width, 1);  assert_int_equal(w.border_right_width, 2);
+    assert_int_equal(w.border_bottom_width, 3); assert_int_equal(w.border_left_width, 4);
+    css_style st = css_parse_inline("border-style:solid dashed", 0);
+    assert_int_equal(st.border_top_style, CSS_BST_SOLID);
+    assert_int_equal(st.border_bottom_style, CSS_BST_SOLID);
+    assert_int_equal(st.border_right_style, CSS_BST_DASHED);
+    assert_int_equal(st.border_left_style, CSS_BST_DASHED);
+    css_style c = css_parse_inline("border-color:red", 0);
+    assert_int_equal(c.border_top_color, 0xff0000);
+    assert_int_equal(c.border_left_color, 0xff0000);
+    /* single per-side longhand. */
+    assert_int_equal(css_parse_inline("border-left-width:6px", 0).border_left_width, 6);
+    assert_int_equal(css_parse_inline("border-top-style:double", 0).border_top_style, CSS_BST_DOUBLE);
+    assert_int_equal(css_parse_inline("border-right-color:#00ff00", 0).border_right_color, 0x00ff00);
+    /* radius + fail-closed. */
+    assert_int_equal(css_parse_inline("border-radius:8px", 0).border_radius, 8);
+    assert_int_equal(css_parse_inline("border-radius:50%", 0).border_radius, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).border_radius, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).border_top_width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).border_top_color, -1);
+}
+
+static void test_box_shadow_and_outline(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("box-shadow:2px 4px 6px 1px #000000", 0);
+    assert_int_equal(s.shadow2_dx, 2);
+    assert_int_equal(s.shadow2_dy, 4);
+    assert_int_equal(s.shadow2_blur, 6);
+    assert_int_equal(s.shadow2_spread, 1);
+    assert_int_equal(s.box_shadow_color, 0x000000);
+    assert_int_equal(s.box_shadow_inset, 0);
+    css_style in = css_parse_inline("box-shadow:inset 1px 2px red", 0);
+    assert_int_equal(in.box_shadow_inset, 1);
+    assert_int_equal(in.shadow2_dx, 1);
+    assert_int_equal(in.box_shadow_color, 0xff0000);
+    assert_int_equal(css_parse_inline("box-shadow:none", 0).box_shadow_color, -1);
+    assert_int_equal(css_parse_inline("box-shadow:red", 0).box_shadow_inset, -1); /* <2 lengths dropped */
+    assert_int_equal(css_parse_inline("box-shadow:url(x)", 0).box_shadow_inset, -1);
+    assert_int_equal(css_parse_inline("color:red", 0).box_shadow_inset, -1);
+    /* outline (uniform like border). */
+    css_style o = css_parse_inline("outline:2px solid blue", 0);
+    assert_int_equal(o.outline_width, 2);
+    assert_int_equal(o.outline_style, CSS_BST_SOLID);
+    assert_int_equal(o.outline_color, 0x0000ff);
+    assert_int_equal(css_parse_inline("color:red", 0).outline_width, CSS_LEN_UNSET);
+}
+
+static void test_flex_item(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("flex-grow:2", 0).flex_grow, 200);     /* x100 */
+    assert_int_equal(css_parse_inline("flex-grow:0.5", 0).flex_grow, 50);
+    assert_int_equal(css_parse_inline("flex-shrink:0", 0).flex_shrink, 0);
+    assert_int_equal(css_parse_inline("flex-grow:-1", 0).flex_grow, -1);     /* negative dropped -> unset */
+    assert_int_equal(css_parse_inline("flex-basis:120px", 0).flex_basis, 120);
+    assert_int_equal(css_parse_inline("flex-basis:auto", 0).flex_basis, CSS_LEN_AUTO);
+    assert_int_equal(css_parse_inline("flex-basis:content", 0).flex_basis, CSS_LEN_AUTO);
+    assert_int_equal(css_parse_inline("flex-basis:10%", 0).flex_basis, CSS_LEN_UNSET);
+    /* shorthand. */
+    css_style f1 = css_parse_inline("flex:1", 0);
+    assert_int_equal(f1.flex_grow, 100); assert_int_equal(f1.flex_shrink, 100);
+    assert_int_equal(f1.flex_basis, 0);
+    css_style fn = css_parse_inline("flex:none", 0);
+    assert_int_equal(fn.flex_grow, 0); assert_int_equal(fn.flex_shrink, 0);
+    assert_int_equal(fn.flex_basis, CSS_LEN_AUTO);
+    css_style fa = css_parse_inline("flex:auto", 0);
+    assert_int_equal(fa.flex_grow, 100); assert_int_equal(fa.flex_basis, CSS_LEN_AUTO);
+    css_style fe = css_parse_inline("flex:2 3 10px", 0);
+    assert_int_equal(fe.flex_grow, 200); assert_int_equal(fe.flex_shrink, 300);
+    assert_int_equal(fe.flex_basis, 10);
+    assert_int_equal(css_parse_inline("order:-2", 0).order, -2);
+    assert_int_equal(css_parse_inline("order:5", 0).order, 5);
+    assert_int_equal(css_parse_inline("color:red", 0).order, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).flex_grow, -1);
+    assert_int_equal(css_parse_inline("color:red", 0).flex_basis, CSS_LEN_UNSET);
+}
+
+static void test_flex_align(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("align-items:center", 0).align_items, CSS_AK_CENTER);
+    assert_int_equal(css_parse_inline("align-items:flex-start", 0).align_items, CSS_AK_START);
+    assert_int_equal(css_parse_inline("align-items:stretch", 0).align_items, CSS_AK_STRETCH);
+    assert_int_equal(css_parse_inline("align-self:auto", 0).align_self, CSS_AK_AUTO);
+    assert_int_equal(css_parse_inline("align-content:space-between", 0).align_content,
+                     CSS_AK_SPACE_BETWEEN);
+    assert_int_equal(css_parse_inline("justify-items:end", 0).justify_items, CSS_AK_END);
+    assert_int_equal(css_parse_inline("flex-direction:column", 0).flex_direction, CSS_FD_COLUMN);
+    assert_int_equal(css_parse_inline("flex-direction:row-reverse", 0).flex_direction,
+                     CSS_FD_ROW_REVERSE);
+    assert_int_equal(css_parse_inline("flex-wrap:wrap", 0).flex_wrap, CSS_FW_WRAP);
+    assert_int_equal(css_parse_inline("flex-wrap:nowrap", 0).flex_wrap, CSS_FW_NOWRAP);
+    assert_int_equal(css_parse_inline("align-items:bogus", 0).align_items, CSS_AK_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).align_items, CSS_AK_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).flex_direction, CSS_FD_UNSET);
+}
+
+static void test_grid_extras(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("grid-template-rows:1fr 1fr 1fr", 0).grid_rows, 3);
+    assert_int_equal(css_parse_inline("grid-template-rows:none", 0).grid_rows, 0);
+    assert_int_equal(css_parse_inline("row-gap:14px", 0).row_gap, 14);
+    assert_int_equal(css_parse_inline("color:red", 0).row_gap, -1);
+    assert_int_equal(css_parse_inline("grid-auto-flow:column", 0).grid_auto_flow, CSS_GF_COLUMN);
+    assert_int_equal(css_parse_inline("grid-auto-flow:row dense", 0).grid_auto_flow, CSS_GF_ROW);
+    assert_int_equal(css_parse_inline("grid-column:span 2", 0).grid_col_span, 2);
+    assert_int_equal(css_parse_inline("grid-row:span 3", 0).grid_row_span, 3);
+    assert_int_equal(css_parse_inline("grid-column:1 / 3", 0).grid_col_span, 0); /* line nums dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).grid_col_span, 0);
+    /* column-gap still feeds `gap` (unchanged); row-gap is separate. */
+    css_style g = css_parse_inline("gap:10px; row-gap:20px", 0);
+    assert_int_equal(g.gap, 10);
+    assert_int_equal(g.row_gap, 20);
+}
+
+static void test_layout_sheet_cascade_and_unset(void **state) {
+    (void)state;
+    /* A bare element resolves every new layout field to its unset sentinel. */
+    css_style u = css_parse_inline("color:red", 0);
+    assert_int_equal(u.position, CSS_POS_UNSET);
+    assert_int_equal(u.inset_top, CSS_LEN_UNSET);
+    assert_int_equal(u.z_index, CSS_LEN_UNSET);
+    assert_int_equal(u.box_sizing, CSS_BOXS_UNSET);
+    assert_int_equal(u.border_bottom_width, CSS_LEN_UNSET);
+    assert_int_equal(u.border_radius, CSS_LEN_UNSET);
+    assert_int_equal(u.box_shadow_color, -1);
+    assert_int_equal(u.outline_color, -1);
+    assert_int_equal(u.flex_grow, -1);
+    assert_int_equal(u.flex_basis, CSS_LEN_UNSET);
+    assert_int_equal(u.order, CSS_LEN_UNSET);
+    assert_int_equal(u.align_items, CSS_AK_UNSET);
+    assert_int_equal(u.grid_rows, 0);
+    assert_int_equal(u.grid_auto_flow, CSS_GF_UNSET);
+    /* Sheet cascade + inline override on a layout property. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".card{position:absolute; border:1px solid red; z-index:2}",
+                               0, &sh), CSS_OK);
+    const char *cls[] = { "card" };
+    css_style s = css_resolve(sh, "div", NULL, cls, 1, "z-index:9", 0);
+    assert_int_equal(s.position, CSS_POS_ABSOLUTE);     /* from sheet */
+    assert_int_equal(s.border_top_width, 1);
+    assert_int_equal(s.border_top_style, CSS_BST_SOLID);
+    assert_int_equal(s.z_index, 9);                     /* inline wins */
+    css_free(sh);
+    /* Anti-DoS clamp on a flex factor and span. */
+    assert_int_equal(css_parse_inline("flex-grow:99999", 0).flex_grow, CSS_FLEX_FACTOR_MAX);
+    assert_int_equal(css_parse_inline("grid-column:span 99999", 0).grid_col_span,
+                     CSS_GRID_SPAN_MAX);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_position_and_insets),
+        cmocka_unit_test(test_box_sizing),
+        cmocka_unit_test(test_border_shorthand),
+        cmocka_unit_test(test_border_longhands),
+        cmocka_unit_test(test_box_shadow_and_outline),
+        cmocka_unit_test(test_flex_item),
+        cmocka_unit_test(test_flex_align),
+        cmocka_unit_test(test_grid_extras),
+        cmocka_unit_test(test_layout_sheet_cascade_and_unset),
         cmocka_unit_test(test_inline_box_longhands),
         cmocka_unit_test(test_box_shorthand_expansion),
         cmocka_unit_test(test_box_auto_and_centering),

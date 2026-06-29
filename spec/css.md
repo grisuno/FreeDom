@@ -112,6 +112,37 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `white-space` | `white_space` (`css_white_space`): `normal`/`nowrap`/`pre`/`pre-wrap`/`pre-line` — the presentation layer consumes only the **wrap/no-wrap** distinction (`nowrap`/`pre` suppress line wrapping) |
 | `list-style-type`, `list-style` | `list_style` (`css_list_style`): the first recognised type keyword wins (`disc`/`circle`/`square`/`decimal`/`lower-alpha`\|`lower-latin`/`upper-alpha`\|`upper-latin`/`lower-roman`/`upper-roman`/`none`); changes the `<li>` marker; `url()` (list-style-image) dropped (never fetch) |
 
+#### Layout / box decoration (Hito 23b-7)
+
+These resolve into `css_style` like the box model: **not inherited** (read from the
+element's own resolved style). The `css` module only resolves the *values*; how far
+each is honoured at paint time is the presentation layer's job and is staged across
+later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
+
+| Property | css_style field(s) → value/clamp |
+| :-- | :-- |
+| `position` | `position` (`css_position`): `static`/`relative`/`absolute`/`fixed`/`sticky`; unknown dropped (unset) |
+| `top`, `right`, `bottom`, `left`; `inset` shorthand | `inset_top/right/bottom/left` (`CSS_LEN_UNSET`/`CSS_LEN_AUTO`/signed px; `em`×16; `%`/`calc` dropped). `inset` expands 1–4 values (CSS order). |
+| `z-index` | `z_index` (signed, clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`; `auto` → unset) |
+| `box-sizing` | `box_sizing` (`css_box_sizing`): `content-box`/`border-box`; unknown dropped |
+| `border`, `border-top/right/bottom/left` | uniform/per-side shorthand: classifies each token as a width (px/`thin`=1/`medium`=3/`thick`=5), a `style` keyword, or a color, and sets the matching `border_*_{width,style,color}` for the affected side(s). Only the parts present are set (omitted longhands stay unset — no initial-value reset). |
+| `border-width`, `border-style`, `border-color` | `border_*_width`/`_style`/`_color` expanded 1–4 values (CSS order all / `v h` / `t h b` / `t r b l`). Widths px ≥ 0 (or keyword); styles `css_border_style`; colors `0xRRGGBB`. |
+| `border-top/right/bottom/left-width`/`-style`/`-color` | the single per-side longhand |
+| `border-radius` | `border_radius` (first value, px ≥ 0; `%` dropped). Corner-by-corner / elliptical radii out of scope. |
+| `box-shadow` | `shadow2_dx`/`_dy`/`_blur`/`_spread` (signed px) + `box_shadow_color` (`0xRRGGBB`/-1) + `box_shadow_inset` (1/0/-1). Single layer: ≤4 lengths in order dx, dy, blur, spread + optional color + optional `inset`; needs ≥2 lengths or dropped; `none` → explicit no-shadow; `url()` dropped |
+| `outline` (+`-width`/`-style`/`-color`) | `outline_width`/`outline_style`/`outline_color` (uniform, same token classifier as `border`) |
+| `flex-grow`, `flex-shrink` | `flex_grow`/`flex_shrink` stored ×100 (so `0.5` → 50), clamped `[0, CSS_FLEX_FACTOR_MAX]`, or -1 (unset) |
+| `flex-basis` | `flex_basis` (px ≥ 0 / `CSS_LEN_AUTO` for `auto`\|`content` / `CSS_LEN_UNSET`; `%` dropped) |
+| `flex` shorthand | sets `flex_grow`/`flex_shrink`/`flex_basis`: `flex: N` → N 1 0; `none` → 0 0 auto; `auto` → 1 1 auto; `initial` → 0 1 auto; up to three explicit values in order grow shrink basis |
+| `order` | `order` (signed, clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`, or `CSS_LEN_UNSET`) |
+| `align-items`, `align-self`, `align-content`, `justify-items` | `css_align_kw`: `stretch`/`flex-start`\|`start`/`flex-end`\|`end`/`center`/`baseline` (+`space-*` for `align-content`; +`auto` for `align-self`); unknown dropped |
+| `flex-direction` | `flex_direction` (`css_flex_direction`): `row`/`row-reverse`/`column`/`column-reverse` |
+| `flex-wrap` | `flex_wrap` (`css_flex_wrap`): `nowrap`/`wrap`/`wrap-reverse` |
+| `grid-template-rows` | `grid_rows` (track count, like `grid-template-columns`) |
+| `row-gap` | `row_gap` (px, clamped `[0, CSS_GAP_MAX]`, or -1 unset). `column-gap`/`gap` keep feeding `gap` (first token); two-value `gap` row component is set only via `row-gap`. |
+| `grid-auto-flow` | `grid_auto_flow` (`css_grid_flow`): `row`/`column`; `dense` ignored |
+| `grid-column`, `grid-row` | `grid_col_span`/`grid_row_span` from a `span N` value, clamped `[1, CSS_GRID_SPAN_MAX]`; line-number / named-line forms out of scope (dropped) |
+
 ### Property inventory (supported vs missing)
 
 **Supported** (resolved into `css_style`, gated downstream as noted):
@@ -124,20 +155,30 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 - *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
   `grid-template-columns`, `margin`(+longhands), `padding`(+longhands), `width`,
   `max-width`.
-- *Lists*: **`list-style-type`**, **`list-style`** (type token only).
+- *Layout / box decoration* (**Hito 23b-7**): **`position`** (+`top`/`right`/
+  `bottom`/`left`/`inset`/`z-index`), **`box-sizing`**, **`border`**(/`-width`/
+  `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**,
+  **`outline`**, **`flex`**(/`-grow`/`-shrink`/`-basis`), **`order`**,
+  **`align-items`/`align-self`/`align-content`/`justify-items`**, **`flex-direction`**,
+  **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
+  **`grid-column`/`grid-row`** (`span N`).
+- *Lists*: `list-style-type`, `list-style` (type token only).
 - *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
   `all`, `min/max-width`), `!important`.
 
-(Properties in **bold** are the Hito 23b-6 batch.)
+(Properties in **bold** are the Hito 23b-7 batch. The `css` module resolves their
+values; honouring them at paint time — the per-block box, out-of-flow positioning,
+full flex/grid sizing — is staged across later milestones.)
 
 **Not yet supported** (dropped / fail closed unless noted), highest cosmetic value
 first:
 
-- *Box decoration*: `border`(/`-width`/`-style`/`-color`), `border-radius`,
-  `box-shadow`, `box-sizing`, `outline` — need per-block box grouping (the flat
-  display list has no block box to stroke yet).
-- *Positioning*: `position` (relative/absolute/sticky/fixed), `top`/`left`/…,
-  `z-index`, `float`, `clear`, `overflow`.
+- *Box decoration, finer grain*: corner-by-corner / elliptical `border-radius`,
+  multi-layer `box-shadow`, `box-shadow` blur/spread *rendering* (resolved but not
+  yet painted), `border-image`, `outline-offset`.
+- *Positioning, finer grain*: `float`, `clear`, `overflow`(`-x`/`-y`), `z-index`
+  *stacking* (resolved but compositing is a later milestone), line-number / named
+  grid placement (only `span N` is resolved), `position: sticky` scroll pinning.
 - *Backgrounds beyond a solid color*: `background-image`/gradients (and any
   `url()` — by doctrine, never fetched), `background-position`/`-size`/`-repeat`.
 - *Transforms / filters / transitions*: `transform`, `filter`, `transition`,
@@ -267,7 +308,52 @@ typedef struct css_style {
     int          text_indent;     /* signed px, CSS_LEN_UNSET unset */
     int          white_space;     /* css_white_space, 0 unset */
     int          list_style;      /* css_list_style, 0 unset */
+    /* Layout / box decoration (Hito 23b-7; not inherited, value-resolution only —
+     * not yet threaded through IPC nor painted; honouring staged for later milestones). */
+    css_position    position;     /* CSS_POS_UNSET if absent */
+    int          inset_top, inset_right, inset_bottom, inset_left; /* CSS_LEN_UNSET/AUTO/signed px */
+    int          z_index;         /* signed, [-CSS_LEN_MAX, CSS_LEN_MAX], or CSS_LEN_UNSET */
+    css_box_sizing  box_sizing;   /* CSS_BOXS_UNSET if absent */
+    int          border_top_width, border_right_width, border_bottom_width, border_left_width; /* px>=0 / CSS_LEN_UNSET */
+    css_border_style border_top_style, border_right_style, border_bottom_style, border_left_style;
+    int          border_top_color, border_right_color, border_bottom_color, border_left_color; /* 0xRRGGBB / -1 */
+    int          border_radius;   /* px>=0, or CSS_LEN_UNSET */
+    int          shadow2_dx, shadow2_dy, shadow2_blur, shadow2_spread; /* box-shadow px (signed) */
+    int          box_shadow_color;/* 0xRRGGBB, or -1 (none/unset) */
+    int          box_shadow_inset;/* 1 inset, 0 outset, -1 unset */
+    int          outline_width;   /* px>=0, or CSS_LEN_UNSET */
+    css_border_style outline_style;
+    int          outline_color;   /* 0xRRGGBB, or -1 */
+    int          flex_grow, flex_shrink; /* stored x100 (0.5 -> 50), [0,CSS_FLEX_FACTOR_MAX], or -1 */
+    int          flex_basis;      /* px>=0 / CSS_LEN_AUTO / CSS_LEN_UNSET */
+    int          order;           /* signed, [-CSS_LEN_MAX, CSS_LEN_MAX], or CSS_LEN_UNSET */
+    css_align_kw    align_items, align_self, align_content, justify_items;
+    css_flex_direction flex_direction; /* CSS_FD_UNSET if absent */
+    css_flex_wrap   flex_wrap;    /* CSS_FW_UNSET if absent */
+    int          grid_rows;       /* grid-template-rows track count, or 0 (unset) */
+    int          row_gap;         /* px, [0, CSS_GAP_MAX], or -1 (unset) */
+    css_grid_flow   grid_auto_flow; /* CSS_GF_UNSET if absent */
+    int          grid_col_span, grid_row_span; /* span N, [1, CSS_GRID_SPAN_MAX], or 0 (unset) */
 } css_style;
+
+typedef enum css_position {
+    CSS_POS_UNSET = 0, CSS_POS_STATIC, CSS_POS_RELATIVE,
+    CSS_POS_ABSOLUTE, CSS_POS_FIXED, CSS_POS_STICKY
+} css_position;
+typedef enum css_box_sizing { CSS_BOXS_UNSET = 0, CSS_BOXS_CONTENT, CSS_BOXS_BORDER } css_box_sizing;
+typedef enum css_border_style {
+    CSS_BST_UNSET = 0, CSS_BST_NONE, CSS_BST_HIDDEN, CSS_BST_SOLID, CSS_BST_DASHED,
+    CSS_BST_DOTTED, CSS_BST_DOUBLE, CSS_BST_GROOVE, CSS_BST_RIDGE, CSS_BST_INSET, CSS_BST_OUTSET
+} css_border_style;
+typedef enum css_flex_direction {
+    CSS_FD_UNSET = 0, CSS_FD_ROW, CSS_FD_ROW_REVERSE, CSS_FD_COLUMN, CSS_FD_COLUMN_REVERSE
+} css_flex_direction;
+typedef enum css_flex_wrap { CSS_FW_UNSET = 0, CSS_FW_NOWRAP, CSS_FW_WRAP, CSS_FW_WRAP_REVERSE } css_flex_wrap;
+typedef enum css_align_kw {
+    CSS_AK_UNSET = 0, CSS_AK_AUTO, CSS_AK_STRETCH, CSS_AK_START, CSS_AK_END,
+    CSS_AK_CENTER, CSS_AK_BASELINE, CSS_AK_SPACE_BETWEEN, CSS_AK_SPACE_AROUND, CSS_AK_SPACE_EVENLY
+} css_align_kw;
+typedef enum css_grid_flow { CSS_GF_UNSET = 0, CSS_GF_ROW, CSS_GF_COLUMN } css_grid_flow;
 
 typedef enum css_font_family {    /* font-family generic bucket */
     CSS_FF_UNSET = 0, CSS_FF_SERIF, CSS_FF_SANS, CSS_FF_MONO,
@@ -299,6 +385,9 @@ typedef enum css_list_style {
 #define CSS_LEN_MAX       100000 /* px clamp for box-model lengths (anti-DoS) */
 #define CSS_LEN_UNSET     (-2147483647 - 1) /* INT_MIN: box length not set */
 #define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
+#define CSS_BORDER_W_MAX  CSS_LEN_MAX       /* px clamp for border/outline widths */
+#define CSS_FLEX_FACTOR_MAX 100000          /* clamp for flex-grow/shrink (stored x100) */
+#define CSS_GRID_SPAN_MAX 1000              /* clamp for grid-column/-row span N */
 
 typedef struct css_sheet css_sheet;   /* opaque, owns the parsed rules */
 
