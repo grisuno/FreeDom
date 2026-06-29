@@ -6,11 +6,7 @@
 |--------|-------|
 | ⭐ Stars | 7 |
 | 📥 Clones (last 14 days) | 1453 |
-<<<<<<< HEAD
-| 🟢 Open Issues | 0 |
-=======
-| 🟢 Open Issues | 1 |
->>>>>>> origin/security-export-2026-06-28-20260628_171901
+| 🟢 Open Issues | 3 |
 | 📋 Total Issues | 0 |
 | 🛡 Dependabot Open Alerts | 0 |
 | 🔍 CodeScan Open Alerts | 6 |
