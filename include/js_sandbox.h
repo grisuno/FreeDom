@@ -125,6 +125,14 @@ void js_set_time_budget(js_context *ctx, uint64_t budget_ms);
 /* Idempotent; safe on a zero-initialised struct and safe to call twice. */
 void js_result_free(js_result *res);
 
+/* Runs up to max_jobs pending microtasks/jobs (promise reactions queued by the last
+ * eval), under the context's current time budget. Job exceptions (rejected promises
+ * with no handler, etc.) are swallowed -- a job never aborts the caller. Returns the
+ * number of jobs run. Needed because js_eval does not drain the queue itself, so
+ * promise/.then/await continuations (e.g. from fetch) would otherwise never run.
+ * No-op (returns 0) on a NULL context. */
+int js_pump_jobs(js_context *ctx, int max_jobs);
+
 /* Internal seam for binding layers (e.g. js_dom): the underlying engine context
  * as an opaque handle (so this header stays free of backend types), or NULL.
  * Valid only while ctx is alive. Binding modules are the intended consumers. */

@@ -380,19 +380,29 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   routing"; headless: `--tor[=addr]`/`--i2p[=addr]`/`--torify`; env: `FREEDOM_TOR_PROXY`/
   `FREEDOM_I2P_PROXY`/`FREEDOM_TORIFY_CLEARNET`. **Verificado de extremo a extremo** (jun 2026):
   `.onion` vía Tor y `.i2p` vía el router Java (`stats.i2p`, `i2p-projekt.i2p` con redirect).
-- **Same-Origin/CORS por construcción (no implementar CORS):** la SOP clásica —que JS lea la
-  respuesta de **otro origen**— es **estructuralmente imposible** en Freedom, así que **no se
-  implementa un parser de CORS** (sería código ceremonial muerto: no hay petición cross-origin de JS
-  cuya respuesta haya que negociar). Razones: el sandbox JS **no expone** ninguna API de red
-  (`fetch`/`XMLHttpRequest`/`WebSocket`/`EventSource`/`sendBeacon`/`Image`), no hay `iframe` ni
-  contexto de navegación anidado, no hay `window.open`/`postMessage`/`opener`, el readback de
-  canvas/audio está **envenenado** (nunca píxeles reales) y el worker **no tiene red**
-  (`CLONE_NEWNET`+seccomp). `document.cookie` está **vacío** (Zero Knowledge), así que no hay nada
-  sensible que robar ni siquiera por los propios `src`/navegación de la página (que sí pueden ser
-  cross-origin, como en cualquier navegador). Bloqueado por regresión:
-  `test_eval_no_network_or_cross_origin_api` — si alguien añade una API de red, **falla** y obliga a
-  añadir CORS/SOP con ella. Origen: auditoría de gaps #2 (el reclamo "exfiltración cross-origin sin
-  restricciones" era falso). Ver `spec/threat-model.md` §3 ("JS ↔ otro origen"), `[[freedom-sop-by-construction]]`.
+- **SOP por construcción por defecto + red-en-JS SOLO para hosts en allow.conf ∩ js.conf
+  (override de soberanía, Hito 26):** por defecto el sandbox JS **no expone** ninguna API de red
+  (`fetch`/`XMLHttpRequest`/`WebSocket`/`EventSource`/`sendBeacon`/`Image`), no hay `iframe`,
+  `window.open`/`postMessage`/`opener`, el readback de canvas/audio está envenenado y el worker **no
+  tiene red** (`CLONE_NEWNET`+seccomp): para un sitio normal la SOP clásica es **estructuralmente
+  imposible** y no se implementa CORS (sería código muerto). **Excepción gateada:** un host presente
+  en **allow.conf Y js.conf** (el usuario lo declaró de confianza dos veces) recibe `XMLHttpRequest`
+  y `fetch` **reales** — pero el JS **nunca toca el socket**: el worker confinado proxya la petición
+  al **padre confiable** (`tab_set_fetcher`/`tab_set_net_allowed`; protocolo `TAG_SUBREQ`/`TAG_RESULT`
+  en `tab.c`), que **re-aplica TODA la política** (hostblock/filtro de rastreadores, `net_realm`
+  fail-closed, TLS-PQ con los fallbacks de navegabilidad) antes de buscar. Así "la web moderna
+  funciona" para sitios de confianza **bloqueando rastreadores en la capa de red** ("si el JS no toca
+  el socket, no hay espionaje"). Para esos sitios SÍ hay lecturas cross-origin (no implementamos CORS;
+  la protección es: solo hosts explícitamente confiables, rastreadores hostbloqueados, `document.cookie`
+  vacío → nada sensible que robar). El candado de regresión **se mantiene**:
+  `test_eval_no_network_or_cross_origin_api` corre con la red **apagada** (sitio no-confiable) y exige
+  que XHR/fetch sigan `undefined` por defecto; tests nuevos (`test_xhr_works_when_net_allowed`,
+  `test_xhr_undefined_when_net_not_allowed`, `test_xhr_blocked_host_refused_by_parent`) candan la ruta
+  gateada y que el padre rechaza un host bloqueado. **Límites v1:** síncrono bajo el capó (el worker —y
+  en el GUI el hilo de render— se bloquea durante el round-trip; aceptable por host de confianza),
+  activo solo durante la ventana de scripts de la carga (no en el REPL ni en eventos post-carga), y la
+  respuesta pasa por string UTF-8 (sin `arrayBuffer` binario real). Ver `spec/threat-model.md` §3,
+  `[[freedom-sop-by-construction]]`, `[[freedom-parent-gated-xhr]]`, `[[freedom-js-network-and-media-authorized]]`.
 - **`io_uring` PROHIBIDO en el worker confinado (la doctrina io_uring es solo del lado confiable):**
   la §3 pide I/O asíncrona con `io_uring`, pero `io_uring` es una **primitiva de bypass de seccomp**
   (sus `IORING_OP_*` no atraviesan el syscall entry que filtra el BPF), así que **nunca** entra al
@@ -529,6 +539,41 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `--author-css` exportados y leídos directo del PNG). Sin dependencia nueva (`cairo_surface_write_to_png`
   ya viene con Cairo; `cairo-png` presente). *(Núcleo + E2E visual verificados; ventana Wayland
   interactiva pendiente al dueño.)* Ver `[[freedom-visual-review-headless]]`.
+- **Hito (UI) — Fix de modo sin distracciones (render fuera de la ventana).** El centrado del reader
+  inflaba `w->theme.content_margin`, que es **también** el margen VERTICAL → en ventanas anchas la
+  altura de contenido se volvía negativa y la página se pintaba fuera de la ventana (nada visible).
+  Se desacoplaron los ejes: nuevo `content_margin_x(w)` (HORIZONTAL, lo usan `content_width` y el
+  `left` de pintado/hit-test) aplica el centrado; `content_margin` queda como margen vertical base.
+  Afordancia de verificación `FREEDOM_READER=1`. **Verificado en pantalla** (weston+Xvfb): boilerplate
+  eliminado, columna centrada, contenido completo visible. Ver `[[freedom-reader-mode-margin-axes]]`.
+- **Hito 26 — `XMLHttpRequest`/`fetch` reales con gateo del padre (la web moderna funciona para sitios
+  de confianza).** Revierte —**solo para hosts en allow.conf ∩ js.conf**— la doctrina "sin red en JS":
+  el JS de un sitio doblemente confiable obtiene `XMLHttpRequest` y `fetch` reales, pero **nunca toca
+  el socket**. El worker confinado (sin red: `CLONE_NEWNET`+seccomp) proxya la petición al **padre
+  confiable** por los pipes existentes (protocolo nuevo: tras `OP_LOAD`, el worker emite 0+ tramas
+  `TAG_SUBREQ` antes de `TAG_RESULT`; el padre las sirve y responde), y el padre **re-aplica TODA la
+  política** (hostblock/rastreadores, `net_realm` fail-closed, TLS-PQ con fallbacks) antes de buscar —
+  un worker comprometido no alcanza un host bloqueado. **Plumbing:** `jd_fetch_fn`+`jd_install_xhr`
+  (js_dom: native `__hostFetch` con la fn/ctx como closure data —sin global, sin leak— + shim JS de
+  XHR/fetch; `__hostFetch` se borra del global tras capturarse); `js_pump_jobs` (js_sandbox: drena
+  microtasks acotado, para que `fetch().then`/`await` resuelvan); `child_fetch` (worker: round-trip por
+  pipe, caps `TAB_MAX_SUBREQ`=64 / `TAB_MAX_SUBRESOURCE`=8 MiB, activo **solo** en la ventana de
+  scripts de la carga); `tab_set_fetcher`/`tab_set_net_allowed` + flag `net` en `OP_LOAD`; GUI
+  `gui_subresource_fetch` (reusa `ln_resolve`/`hb_check`/`apply_route`/`fetch_*_navigable`) gateado por
+  `caps.js && page_host_allowlisted`; headless `headless_fetch` gateado por `--js=on` (señal de
+  confianza del operador). **El candado de SOP se mantiene:** `test_eval_no_network_or_cross_origin_api`
+  corre con la red apagada y exige XHR/fetch `undefined` por defecto; 3 tests nuevos en `test_tab` candan
+  la ruta gateada (funciona / undefined-sin-gate / **host bloqueado rechazado por el padre**). `make
+  test` (38 suites, 0 fallos) / `make asan` (exit 0, sin leaks/UB en el round-trip del worker) limpios
+  + **E2E real verificado** (`--js=on --dump-console`: XHR a `https://example.com/` → status 200, body
+  559B con `<title>`; `fetch().then` → status 200 ok, body 559B; con JS off XHR/fetch `undefined`).
+  **Límites v1:** síncrono bajo el capó (bloquea el worker / hilo de render del GUI durante el
+  round-trip), activo solo en la carga (no REPL ni eventos post-carga; async real necesita event loop
+  en el worker), respuesta como string UTF-8 (sin `arrayBuffer` binario), `Promise`/`await` vía
+  `js_pump_jobs`. **Google:** XHR/fetch ya no lanzan "is not defined", pero su buscador también exige
+  su **JS externo propietario** (`<script src>`), que Freedom aún no ejecuta (próximo: Hito 24 EXT).
+  Ver `[[freedom-parent-gated-xhr]]`, `[[freedom-js-network-and-media-authorized]]`,
+  `[[freedom-sop-by-construction]]`, `[[freedom-live-js]]`.
 - **Hito 23b (combinadores) — CSS descendiente (`A B`) e hijo (`A > B`).** El módulo puro `css`
   deja de tratar todo combinador como "no soportado": un `css_sel` pasa de un único compuesto a una
   **cadena de compuestos** (`parts[CSS_MAX_COMPOUNDS]`, 4) unidos por descendiente (espacio) o hijo

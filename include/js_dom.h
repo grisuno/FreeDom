@@ -59,4 +59,27 @@ jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *pa
  * The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */
 int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 
+/* Host fetch callback for XMLHttpRequest/fetch. The JS sandbox NEVER touches a socket:
+ * this proxies a subresource request to the TRUSTED parent, which re-applies the FULL
+ * network policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching.
+ * `method` and `url` are the request line (url is the RAW string from the page; the
+ * parent resolves/validates it); `body`/`body_len` is the request body (empty for GET).
+ * On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body /
+ * *out_body_len (response bytes, malloc'd -- the bridge frees with free()), and
+ * *out_ctype (Content-Type, malloc'd, may be NULL). Returns non-zero on refusal/error
+ * (blocked host, policy failure, over budget): the XHR completes with status 0 and an
+ * empty body (fail-closed, never throws to the page in a way that leaks why). */
+typedef int (*jd_fetch_fn)(void *ctx, const char *method, const char *url,
+                           const char *body, size_t body_len,
+                           int *out_status, char **out_body, size_t *out_body_len,
+                           char **out_ctype);
+
+/* Installs XMLHttpRequest + fetch backed by `fn` (called with `fetch_ctx`). This is the
+ * ONLY path that gives page JS network access, and it is gated by the caller: install it
+ * ONLY for a host present in BOTH allow.conf AND js.conf (the sovereignty boundary). When
+ * not installed, XMLHttpRequest/fetch stay undefined (Same-Origin-by-construction holds
+ * for every other site). fn/fetch_ctx must outlive ctx. Call after jd_install, on the
+ * page's context. ctx == NULL / fn == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx);
+
 #endif /* FREEDOM_JS_DOM_H */

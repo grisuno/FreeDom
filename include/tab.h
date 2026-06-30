@@ -108,6 +108,30 @@ int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)
  * tab_close. Returns TAB_ERR_CONFINE if the child could not sandbox itself. */
 tab_status tab_open(tab **out);
 
+/* Subresource (XMLHttpRequest/fetch) network bridge. The confined worker has no network;
+ * when the page's script issues an XHR/fetch the worker proxies the request to the parent,
+ * which calls this callback to perform the policy-checked fetch (host blocklist/tracker
+ * filter, realm routing, TLS-PQ) -- the worker never touches a socket.
+ *   method/url: the request line; url is the RAW string from the page (the callback must
+ *     resolve/validate it and refuse cross-policy targets). body/body_len: request body.
+ *   On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len
+ *     (malloc'd response bytes, tab frees with free()), *out_ctype (malloc'd Content-Type,
+ *     may be NULL). Return non-zero to refuse (the page's XHR gets status 0, empty body).
+ * The callback runs on the thread calling tab_load_full, synchronously, once per request. */
+typedef int (*tab_fetch_fn)(void *ctx, const char *method, const char *url,
+                            const char *body, size_t body_len,
+                            int *out_status, char **out_body, size_t *out_body_len,
+                            char **out_ctype);
+
+/* Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then
+ * refused). fn/ctx must outlive any tab_load_full call that may trigger a subresource. */
+void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);
+
+/* Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load. Set it
+ * true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sovereignty
+ * boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction). */
+void tab_set_net_allowed(tab *t, int allowed);
+
 /* Loads untrusted HTML into the tab: the child parses it, builds the inert DOM,
  * and arms a fresh JS context bound to that DOM. Replaces any previously loaded
  * page. On TAB_OK, *out is populated and must be released with tab_page_free. */

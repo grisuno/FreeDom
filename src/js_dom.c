@@ -678,3 +678,130 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace) 
     JS_FreeValue(jsctx, global);
     return present;
 }
+
+/* --- XMLHttpRequest / fetch (parent-gated network; sovereignty boundary) --- */
+
+/* Carry the host fetch fn + its ctx as a function's closure data, each split into
+ * 32-bit halves (no assumption about JS number width). The data lives with the
+ * function object and is freed with the context: no global state, no leak. */
+static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p) {
+    uint64_t u = (uint64_t)(uintptr_t)p;
+    out2[0] = JS_NewInt32(ctx, (int32_t)(uint32_t)(u & 0xFFFFFFFFu));
+    out2[1] = JS_NewInt32(ctx, (int32_t)(uint32_t)(u >> 32));
+}
+static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi) {
+    int32_t l = 0, h = 0;
+    JS_ToInt32(ctx, &l, lo);
+    JS_ToInt32(ctx, &h, hi);
+    uint64_t u = ((uint64_t)(uint32_t)h << 32) | (uint32_t)l;
+    return (void *)(uintptr_t)u;
+}
+
+/* __hostFetch(method, url, body) -> { status, body, contentType }. The ONLY network
+ * primitive exposed to script; it does NOT touch a socket -- it calls the host fetch
+ * callback, which proxies to the trusted parent (full network policy re-applied there).
+ * Fail-closed: a refused/failed request yields { status:0, body:'', contentType:'' },
+ * never an exception that tells the page why. */
+static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
+                            int argc, JSValueConst *argv, int magic, JSValue *fd) {
+    (void)this_val; (void)magic;
+    jd_fetch_fn fn = (jd_fetch_fn)jd_unpack_ptr(ctx, fd[0], fd[1]);
+    void *fctx     = jd_unpack_ptr(ctx, fd[2], fd[3]);
+
+    const char *method = (argc > 0) ? JS_ToCString(ctx, argv[0]) : NULL;
+    const char *url    = (argc > 1) ? JS_ToCString(ctx, argv[1]) : NULL;
+    size_t blen = 0;
+    const char *body   = (argc > 2 && !JS_IsUndefined(argv[2]) && !JS_IsNull(argv[2]))
+                         ? JS_ToCStringLen(ctx, &blen, argv[2]) : NULL;
+
+    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
+    int rc = -1;
+    if (fn != NULL && url != NULL)
+        rc = fn(fctx, method ? method : "GET", url, body ? body : "", blen,
+                &status, &rbody, &rlen, &rctype);
+
+    JSValue o = JS_NewObject(ctx);
+    if (rc == 0) {
+        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, status));
+        JS_SetPropertyStr(ctx, o, "body", JS_NewStringLen(ctx, rbody ? rbody : "", rlen));
+        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, rctype ? rctype : ""));
+    } else { /* fail-closed */
+        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, 0));
+        JS_SetPropertyStr(ctx, o, "body", JS_NewString(ctx, ""));
+        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, ""));
+    }
+    free(rbody); free(rctype);
+    if (method != NULL) JS_FreeCString(ctx, method);
+    if (url != NULL)    JS_FreeCString(ctx, url);
+    if (body != NULL)   JS_FreeCString(ctx, body);
+    return o;
+}
+
+/* XMLHttpRequest + fetch over the single synchronous __hostFetch primitive. The
+ * round-trip is synchronous under the hood (the worker blocks on the parent), so XHR
+ * callbacks fire right after send(); fetch returns a resolved promise (its .then/await
+ * run when the worker pumps the job queue). __hostFetch is captured into a closure and
+ * then deleted from the global, so page script cannot call it directly. */
+static const char JD_XHR_SHIM[] =
+    "(function(){"
+    "var HF=globalThis.__hostFetch; if(typeof HF!=='function')return;"
+    "function fire(o,n){var f=o['on'+n]; if(typeof f==='function'){try{f.call(o);}catch(e){}}}"
+    "function XHR(){this.readyState=0;this.status=0;this.statusText='';this.responseText='';"
+    "this.response='';this.responseType='';this.responseURL='';this.withCredentials=false;"
+    "this.onreadystatechange=null;this.onload=null;this.onerror=null;this.onloadend=null;"
+    "this._m='GET';this._u='';this._h='';}"
+    "XHR.UNSENT=0;XHR.OPENED=1;XHR.HEADERS_RECEIVED=2;XHR.LOADING=3;XHR.DONE=4;"
+    "XHR.prototype.open=function(m,u){this._m=String(m||'GET');this._u=String(u||'');"
+    "this.responseURL=this._u;this.readyState=1;fire(this,'readystatechange');};"
+    "XHR.prototype.setRequestHeader=function(){};"
+    "XHR.prototype.getAllResponseHeaders=function(){return this._h;};"
+    "XHR.prototype.getResponseHeader=function(k){k=String(k).toLowerCase();"
+    "var ls=this._h.split('\\r\\n');for(var i=0;i<ls.length;i++){var p=ls[i].indexOf(':');"
+    "if(p>0&&ls[i].slice(0,p).toLowerCase().trim()===k)return ls[i].slice(p+1).trim();}return null;};"
+    "XHR.prototype.abort=function(){};XHR.prototype.overrideMimeType=function(){};"
+    "XHR.prototype.send=function(b){var r;try{r=HF(this._m,this._u,(b==null?'':String(b)));}catch(e){r=null;}"
+    "if(!r||(r.status|0)===0){this.status=0;this.readyState=4;fire(this,'readystatechange');"
+    "fire(this,'error');fire(this,'loadend');return;}"
+    "this.status=r.status|0;this.responseText=r.body||'';"
+    "this._h=r.contentType?('content-type: '+r.contentType+'\\r\\n'):'';"
+    "if(this.responseType==='json'){try{this.response=JSON.parse(this.responseText);}catch(e){this.response=null;}}"
+    "else{this.response=this.responseText;}"
+    "this.readyState=4;fire(this,'readystatechange');fire(this,'load');fire(this,'loadend');};"
+    "Object.defineProperty(globalThis,'XMLHttpRequest',{configurable:true,writable:true,value:XHR});"
+    "globalThis.fetch=function(u,opt){opt=opt||{};var r;"
+    "try{r=HF(String(opt.method||'GET'),String(u),(opt.body==null?'':String(opt.body)));}catch(e){r=null;}"
+    "var st=r?(r.status|0):0;var bt=r?(r.body||''):'';var ct=r?(r.contentType||''):'';"
+    "var ok=st>=200&&st<300;"
+    "var resp={ok:ok,status:st,statusText:'',url:String(u),redirected:false,type:'basic',bodyUsed:false,"
+    "headers:{get:function(k){return(String(k).toLowerCase()==='content-type'&&ct)?ct:null;},"
+    "has:function(k){return String(k).toLowerCase()==='content-type'&&!!ct;},forEach:function(){}},"
+    "text:function(){return Promise.resolve(bt);},"
+    "json:function(){try{return Promise.resolve(JSON.parse(bt));}catch(e){return Promise.reject(e);}},"
+    "arrayBuffer:function(){return Promise.resolve(bt);},clone:function(){return resp;}};"
+    "return st===0?Promise.reject(new TypeError('Failed to fetch')):Promise.resolve(resp);};"
+    "try{delete globalThis.__hostFetch;}catch(e){}"
+    "})();";
+
+jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx) {
+    if (ctx == NULL || fn == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+
+    JSValue data[4];
+    jd_pack_ptr(jsctx, &data[0], (const void *)fn);
+    jd_pack_ptr(jsctx, &data[2], (const void *)fetch_ctx);
+    JSValue hf = JS_NewCFunctionData(jsctx, m_host_fetch, 3, 0, 4, data);
+    for (int i = 0; i < 4; ++i) JS_FreeValue(jsctx, data[i]);
+    if (JS_IsException(hf)) return JD_ERR_OOM;
+
+    JSValue global = JS_GetGlobalObject(jsctx);
+    if (JS_IsException(global)) { JS_FreeValue(jsctx, hf); return JD_ERR_OOM; }
+    JS_SetPropertyStr(jsctx, global, "__hostFetch", hf); /* consumes hf */
+    JS_FreeValue(jsctx, global);
+
+    JSValue r = JS_Eval(jsctx, JD_XHR_SHIM, sizeof JD_XHR_SHIM - 1,
+                        "<xhr-shim>", JS_EVAL_TYPE_GLOBAL);
+    int ok = !JS_IsException(r);
+    JS_FreeValue(jsctx, r);
+    return ok ? JD_OK : JD_ERR_INTERNAL;
+}

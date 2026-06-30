@@ -195,6 +195,42 @@ static void print_console(const fb_buffer *log) {
  * top_url is the page's https origin (for per-image policy decisions) or NULL for
  * a local file. Runs the page's JS when g_headless_js (so --dump-console can show
  * console output/errors). Returns EXIT_OK or EXIT_ERROR; on error no partial output. */
+/* tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page
+ * XHR/fetch. https-only, realm-routed (fail-closed); no per-host allowlist here (headless
+ * is operator-driven -- enabling --js is the trust signal). The confined worker never
+ * touches a socket; this runs in the trusted parent. */
+static int headless_fetch(void *ctx, const char *method, const char *url,
+                          const char *body, size_t body_len,
+                          int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx;
+    *st = 0; *ob = NULL; *ol = 0; *oct = NULL;
+    if (url == NULL || strncmp(url, "https://", 8) != 0) return -1; /* subresource: https only */
+
+    sf_config cfg = sf_config_default();
+    if (global_insecure) cfg.policy = SF_POLICY_PERMISSIVE;
+    nr_route route = nr_route_for(url, global_net);
+    if (route == NR_ROUTE_BLOCKED) return -1;
+    if (route == NR_ROUTE_TOR)      { cfg.proxy_type = SF_PROXY_SOCKS5H; cfg.proxy_address = global_tor_addr; }
+    else if (route == NR_ROUTE_I2P) { cfg.proxy_type = SF_PROXY_HTTP;    cfg.proxy_address = global_i2p_addr; }
+
+    sf_response resp;
+    memset(&resp, 0, sizeof resp);
+    int is_post = (method != NULL && (strcmp(method, "POST") == 0 || strcmp(method, "post") == 0));
+    sf_status s = is_post
+        ? sf_post(url, &cfg, body, body_len, "application/x-www-form-urlencoded", &resp)
+        : sf_get_follow(url, &cfg, &resp, SF_DEFAULT_MAX_REDIRECTS);
+    if (s != SF_OK) { sf_response_free(&resp); return -1; }
+
+    char *rb = (char *)malloc(resp.body_len + 1);
+    if (rb == NULL) { sf_response_free(&resp); return -1; }
+    if (resp.body_len != 0) memcpy(rb, resp.body, resp.body_len);
+    rb[resp.body_len] = '\0';
+    *st = (int)resp.http_code; *ob = rb; *ol = resp.body_len;
+    *oct = (resp.content_type != NULL) ? strdup(resp.content_type) : NULL;
+    sf_response_free(&resp);
+    return 0;
+}
+
 static int render_page(const char *html, size_t len, const char *top_url) {
     tab *t = NULL;
     tab_status ts = tab_open(&t);
@@ -202,6 +238,11 @@ static int render_page(const char *html, size_t len, const char *top_url) {
         fprintf(stderr, "freedom: failed to open tab worker (status %d)\n", (int)ts);
         return EXIT_ERROR;
     }
+
+    /* Page-JS network (XHR/fetch): in headless the operator's --js=on is the trust signal
+     * (the GUI gates this per host on allow.conf AND js.conf). */
+    tab_set_fetcher(t, headless_fetch, NULL);
+    tab_set_net_allowed(t, g_headless_js);
 
     tab_page page;
     memset(&page, 0, sizeof page);

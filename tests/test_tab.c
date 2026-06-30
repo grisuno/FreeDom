@@ -763,6 +763,83 @@ static void test_eval_no_network_or_cross_origin_api(void **state) {
     expect_eval(f->t, "document.cookie", "");               /* ...empty: nothing to steal */
 }
 
+/* --- XMLHttpRequest / fetch: parent-gated network (allow.conf AND js.conf) --- */
+
+/* Stub parent fetcher: returns a fixed 200/"PONG" body, but REFUSES any "blocked.example"
+ * host -- standing in for the real parent's hostblock/realm/TLS policy. */
+static int stub_fetch(void *ctx, const char *method, const char *url,
+                      const char *body, size_t body_len,
+                      int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)method; (void)body; (void)body_len;
+    if (url == NULL || strstr(url, "blocked.example") != NULL) return -1; /* policy refusal */
+    *ob = strdup("PONG"); *ol = 4;
+    *oct = strdup("text/plain");
+    if (*ob == NULL || *oct == NULL) { free(*ob); free(*oct); return -1; }
+    *st = 200;
+    return 0;
+}
+
+#define XHR_PAGE(URL) \
+    "<!DOCTYPE html><html><head><title>x</title></head><body><script>" \
+    "var x=new XMLHttpRequest();x.open('GET','" URL "');x.send();" \
+    "document.title=x.status+':'+x.responseText;</script></body></html>"
+
+/* With net allowed (host in allow.conf AND js.conf) the page's XHR reaches the parent
+ * fetcher and the response is visible to script. */
+static void test_xhr_works_when_net_allowed(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] = XHR_PAGE("https://api.test/d");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "200:PONG");  /* the XHR body reached the script */
+    tab_page_free(&p);
+    expect_eval(t, "typeof XMLHttpRequest", "function");
+    expect_eval(t, "typeof fetch", "function");
+    tab_close(t);
+}
+
+/* Default (net not allowed): XHR/fetch stay undefined -- Same-Origin-by-construction holds
+ * for every site not in BOTH lists. The script's `new XMLHttpRequest` throws, so the title
+ * is never reassigned. */
+static void test_xhr_undefined_when_net_not_allowed(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_fetch, NULL);
+    /* net_allowed left at its default (0) */
+    static const char H[] = XHR_PAGE("https://api.test/d");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "x");          /* script threw: title unchanged */
+    tab_page_free(&p);
+    expect_eval(t, "typeof XMLHttpRequest", "undefined");
+    expect_eval(t, "typeof fetch", "undefined");
+    tab_close(t);
+}
+
+/* Even with net allowed, the trusted parent refuses a blocked host: the XHR completes with
+ * status 0 and an empty body (fail-closed). Proves the gate is the PARENT's, not the page's. */
+static void test_xhr_blocked_host_refused_by_parent(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] = XHR_PAGE("https://blocked.example/track");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "0:");         /* refused: status 0, empty body */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* --- eval: a JS exception is TAB_OK with is_exception set, not a worker error --- */
 
 static void test_eval_exception(void **state) {
@@ -1022,6 +1099,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test_setup_teardown(test_eval_sees_dom, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_no_network_or_cross_origin_api, setup_loaded, teardown),
+        cmocka_unit_test(test_xhr_works_when_net_allowed),
+        cmocka_unit_test(test_xhr_undefined_when_net_not_allowed),
+        cmocka_unit_test(test_xhr_blocked_host_refused_by_parent),
         cmocka_unit_test_setup_teardown(test_eval_exception, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_persistent_state, setup_loaded, teardown),
         cmocka_unit_test(test_reload_replaces_page),

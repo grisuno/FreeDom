@@ -1011,6 +1011,59 @@ static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
     return s;
 }
 
+/* Host of the current page is on allow.conf (sovereign list). Used to gate page-JS
+ * network access (XHR/fetch): allowed only for allow.conf AND js.conf hosts. */
+static int page_host_allowlisted(const browser_window *w) {
+    if (w == NULL || w->cur_top == NULL) return 0;
+    char host[256];
+    if (rp_host_of(w->cur_top, host, sizeof host) != 0) return 0;
+    return hb_is_allowlisted(w->hosts, host);
+}
+
+/* tab_fetch_fn: the trusted parent's policy-checked subresource fetch for page XHR/fetch.
+ * The worker has no network; it proxied the request here. We re-apply the SAME gates a
+ * click/load gets -- https-only resolution (cross-host allowed), the host blocklist
+ * (tracker filter), realm routing (fail-closed), TLS-PQ with the navigability fallbacks --
+ * so a trusted page can talk to the network without ever bypassing policy. */
+static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
+                                 const char *body, size_t body_len,
+                                 int *out_status, char **out_body, size_t *out_body_len,
+                                 char **out_ctype) {
+    browser_window *w = (browser_window *)vctx;
+    *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
+    if (w == NULL || url == NULL || w->cur_top == NULL) return -1;
+
+    ln_result ln;
+    if (ln_resolve(w->cur_top, url, &ln) != LN_OK
+        || ln.action != LN_NAVIGATE || ln.kind != LN_TARGET_HTTPS) return -1;
+    const char *abs = ln.target;
+
+    char host[256];
+    if (rp_host_of(abs, host, sizeof host) != 0) return -1;
+    if (hb_check(w->hosts, host) == HB_BLOCK) return -1;   /* tracker/host blocklist */
+
+    sf_config cfg = sf_config_default();
+    if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;  /* realm fail-closed */
+    int allowlisted = hb_is_allowlisted(w->hosts, host), dg = 0;
+    sf_response resp; memset(&resp, 0, sizeof resp);
+    int is_post = (method != NULL && (strcmp(method, "POST") == 0 || strcmp(method, "post") == 0));
+    sf_status s = is_post
+        ? fetch_post_navigable(abs, &cfg, body, body_len,
+                               "application/x-www-form-urlencoded", &resp, &dg, allowlisted)
+        : fetch_follow_navigable(abs, &cfg, &resp, &dg, allowlisted);
+    if (s != SF_OK) { sf_response_free(&resp); return -1; }
+
+    char *rb = (char *)malloc(resp.body_len + 1);
+    if (rb == NULL) { sf_response_free(&resp); return -1; }
+    if (resp.body_len != 0) memcpy(rb, resp.body, resp.body_len);
+    rb[resp.body_len] = '\0';
+    *out_status = (int)resp.http_code;
+    *out_body = rb; *out_body_len = resp.body_len;
+    *out_ctype = (resp.content_type != NULL) ? strdup(resp.content_type) : NULL;
+    sf_response_free(&resp);
+    return 0;
+}
+
 /* Outcome of the pre-fetch gates shared by GET (do_load) and POST (do_submit_post).
  * Both MUST pass through the SAME host filter, per-host exception, allowlist override
  * and Tor/I2P realm route before any socket opens -- otherwise a POST could reach the
@@ -1343,6 +1396,11 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         browser_set_page(&w->bs, NULL, "Failed to spawn sandboxed tab.", 1);
         return;
     }
+
+    /* Page-JS network (XHR/fetch) is granted only for a host in allow.conf AND js.conf
+     * (the sovereignty boundary): the fetcher re-applies the full network policy. */
+    tab_set_fetcher(t, gui_subresource_fetch, w);
+    tab_set_net_allowed(t, w->caps.js && page_host_allowlisted(w));
 
     tab_page page;
     memset(&page, 0, sizeof page);
@@ -4787,6 +4845,8 @@ static tab *freebug_repl_worker(browser_window *w) {
     if (w->cur_html == NULL) return NULL;
     tab *t = NULL;
     if (tab_open(&t) != TAB_OK) return NULL;
+    tab_set_fetcher(t, gui_subresource_fetch, w);
+    tab_set_net_allowed(t, compute_page_js(w) && page_host_allowlisted(w));
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);

@@ -92,20 +92,28 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
 Padre y hijo son el mismo binario y arquitectura (`fork`), así que se intercambian estructuras
 crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), como el `renderer`.
 
-- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **tres bytes de bandera** y la **URL de la página**
-  antes de la carga: `[op][run_js:1][reader:1][dark:1][url_len: size_t][url][len: size_t][html]` (las
-  banderas y la URL preceden a la carga para que el HTML quede zero-copy). `run_js` es la política de
-  JS; `reader` es el modo sin distracciones (Hito 23); `dark` es la preferencia de esquema de color
-  (Hito 23b, gate de `@media(prefers-color-scheme)`); `url` es la URL de la página (Hito 20e, para el
-  `location` real del JS — `url_len == 0` = sin URL). Las tres banderas se reenvían a `pv_build_full`.
-  `OP_EVAL`/`OP_DECODE_IMAGE` llevan `[op][len][payload]`. EOF en la tubería de peticiones equivale a
-  `OP_QUIT`.
-- **Respuesta de `OP_LOAD`:** `[ok: int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace: int32]`.
-  `navreq` (Hito 20e) es la string **cruda** que el JS de página pidió navegar
-  (`location.href=`/`assign`/`replace`/`reload`/`window.location=`), vacía si ninguna. El padre la
-  **gatea** con `ln_resolve(url_real, navreq)` y solo expone el destino resuelto en `tab_page.nav_url`
-  si la política lo permite (Zero Trust: el worker no resuelve; un worker comprometido no puede colar
-  `file://`/downgrade — el padre lo rechaza).
+- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **cuatro bytes de bandera** y la **URL de la página**
+  antes de la carga: `[op][run_js:1][net:1][reader:1][dark:1][url_len: size_t][url][len: size_t][html]`
+  (las banderas y la URL preceden a la carga para que el HTML quede zero-copy). `run_js` es la política
+  de JS; `net` (Hito 26) concede red a `XMLHttpRequest`/`fetch` — solo `1` si el host está en
+  **allow.conf Y js.conf** (el padre lo decide vía `tab_set_net_allowed`); `reader` es el modo sin
+  distracciones; `dark` es la preferencia de esquema de color. `url` es la URL de la página (para el
+  `location` real del JS — `url_len == 0` = sin URL). `OP_EVAL`/`OP_DECODE_IMAGE` llevan
+  `[op][len][payload]`. EOF en la tubería de peticiones equivale a `OP_QUIT`.
+- **Respuesta de `OP_LOAD` (Hito 26: con tramas de subrecurso):** mientras corre los scripts de la
+  página el hijo puede emitir **0+ tramas `TAG_SUBREQ`** (un XHR/fetch), cada una
+  `[TAG_SUBREQ:uint8][method_len][method][url_len][url][body_len][body]`; el padre la **sirve bajo
+  política** (`tab_set_fetcher` → resuelve la URL cruda, hostblock/rastreadores, `net_realm`
+  fail-closed, TLS-PQ) y responde por la tubería de peticiones `[status:int32][body_len][body][ctype_len][ctype]`
+  (refuso = `status 0`, cuerpo vacío). El worker confinado **no tiene socket**: el padre es el único
+  que toca la red, re-aplicando TODA la política (un worker comprometido no alcanza un host bloqueado).
+  Caps anti-DoS: `TAB_MAX_SUBREQ` (64) y `TAB_MAX_SUBRESOURCE` (8 MiB). Tras los subrecursos llega
+  `[TAG_RESULT:uint8]` y luego el resultado de página:
+  `[ok: int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace: int32]`.
+  `navreq` (Hito 20e) es la string **cruda** que el JS pidió navegar; el padre la **gatea** con
+  `ln_resolve(url_real, navreq)` y solo expone el destino resuelto en `tab_page.nav_url` si la política
+  lo permite (Zero Trust). Las tramas de subrecurso solo aparecen en `OP_LOAD` (XHR vive solo en la
+  ventana de scripts de la carga); `OP_EVAL`/`OP_DECODE_IMAGE` no llevan tags.
 - **Respuesta de `OP_EVAL`:** `[ok: int32][is_exception: int32][value_len: size_t][value]`.
 - `ok == 0` señala fallo de nivel-worker (parseo/DOM/contexto fallido, o `eval` sin página
   cargada): el padre devuelve `TAB_ERR_RENDER` / `TAB_ERR_SCRIPT` sin texto fugado.

@@ -417,6 +417,24 @@ js_status js_eval_named(js_context *ctx, const char *src, size_t len,
     return JS_OK;
 }
 
+int js_pump_jobs(js_context *ctx, int max_jobs) {
+    if (ctx == NULL) return 0;
+    int ran = 0;
+    ctx->interrupted = 0;
+    arm_deadline(ctx, ctx->limits.time_budget_ms);
+    while (ran < max_jobs && JS_IsJobPending(ctx->rt)) {
+        JSContext *jc = NULL;
+        int r = JS_ExecutePendingJob(ctx->rt, &jc);
+        if (r == 0) break;                    /* queue drained */
+        if (r < 0 && jc != NULL)              /* a job threw: swallow, keep draining */
+            JS_FreeValue(jc, JS_GetException(jc));
+        ran++;
+        if (ctx->interrupted) break;          /* time budget hit */
+    }
+    ctx->has_deadline = 0;
+    return ran;
+}
+
 js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res) {
     if (res == NULL) return JS_ERR_NULL_ARG;
     memset(res, 0, sizeof *res);

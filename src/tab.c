@@ -59,6 +59,18 @@ static void ignore_sigpipe(void);
 /* Request opcodes (parent -> child). */
 enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4 };
 
+/* OP_LOAD response tags (child -> parent). While running the page's scripts the child
+ * may issue zero or more TAG_SUBREQ subresource requests (XMLHttpRequest/fetch), which
+ * the trusted parent fetches under full network policy; the final TAG_RESULT precedes
+ * the page result. Only OP_LOAD carries tags (XHR is active only during page load). */
+enum { TAG_SUBREQ = 1, TAG_RESULT = 2 };
+
+/* Per-page subresource caps (anti-DoS): a hostile script cannot drive unbounded fetches
+ * or amplification through the parent. */
+#define TAB_MAX_SUBREQ        64
+#define TAB_MAX_SUBRESOURCE   ((size_t)(8u * 1024u * 1024u))
+#define TAB_MAX_JS_JOBS       4096   /* pending-job pump bound (promise microtasks) */
+
 /* Handshake bytes (child -> parent) after the confinement attempt. */
 enum { TAB_READY = 0x55, TAB_NO_CONFINE = 0xAA };
 
@@ -95,6 +107,10 @@ typedef struct child_state {
     js_context  *js;
     uint64_t     session_key;
     fb_buffer    log; /* console capture (Freebug); persists across loads/evals */
+    int          rfd;        /* worker read fd  (parent -> child): for subresource replies */
+    int          wfd;        /* worker write fd (child -> parent): for subresource requests */
+    int          net_active; /* 1 only during a page-load script window (XHR allowed) */
+    int          subreq_used;/* subresource requests issued this load (capped) */
 } child_state;
 
 static void child_reset_page(child_state *cs) {
@@ -103,14 +119,66 @@ static void child_reset_page(child_state *cs) {
     if (cs->doc != NULL) { hp_document_free(cs->doc);  cs->doc = NULL; }
 }
 
+/* jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). An XHR/fetch
+ * from page script is proxied to the TRUSTED parent over the existing pipes: write a
+ * TAG_SUBREQ frame, block for the parent's reply. The parent re-applies the FULL network
+ * policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
+ * compromised worker still cannot reach a blocked host. Refused/over-budget/IO-error =>
+ * non-zero (XHR completes with status 0). Only callable inside a page-load script window
+ * (net_active) so it never desyncs the OP_EVAL/OP_DECODE_IMAGE response paths. */
+static int child_fetch(void *vctx, const char *method, const char *url,
+                       const char *body, size_t body_len,
+                       int *out_status, char **out_body, size_t *out_body_len,
+                       char **out_ctype) {
+    child_state *cs = (child_state *)vctx;
+    *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
+    if (cs == NULL || !cs->net_active) return -1;
+    if (cs->subreq_used >= TAB_MAX_SUBREQ) return -1;
+    size_t mlen = (method != NULL) ? strlen(method) : 0;
+    size_t ulen = (url != NULL) ? strlen(url) : 0;
+    if (ulen == 0 || ulen > TAB_MAX_URL || mlen > 16 || body_len > TAB_MAX_SUBRESOURCE)
+        return -1;
+    cs->subreq_used++;
+
+    uint8_t tag = TAG_SUBREQ;
+    if (write_full(cs->wfd, &tag, 1) != 0
+     || write_full(cs->wfd, &mlen, sizeof mlen) != 0
+     || (mlen != 0 && write_full(cs->wfd, method, mlen) != 0)
+     || write_full(cs->wfd, &ulen, sizeof ulen) != 0
+     || write_full(cs->wfd, url, ulen) != 0
+     || write_full(cs->wfd, &body_len, sizeof body_len) != 0
+     || (body_len != 0 && write_full(cs->wfd, body, body_len) != 0))
+        return -1;
+
+    int32_t status = 0;
+    size_t rlen = 0, clen = 0;
+    if (read_full(cs->rfd, &status, sizeof status) != 0
+     || read_full(cs->rfd, &rlen, sizeof rlen) != 0
+     || rlen > TAB_MAX_SUBRESOURCE)
+        return -1;
+    char *rbody = (char *)malloc(rlen + 1);
+    if (rbody == NULL) return -1;
+    if (rlen != 0 && read_full(cs->rfd, rbody, rlen) != 0) { free(rbody); return -1; }
+    rbody[rlen] = '\0';
+    if (read_full(cs->rfd, &clen, sizeof clen) != 0 || clen > 256) { free(rbody); return -1; }
+    char *ctype = (char *)malloc(clen + 1);
+    if (ctype == NULL) { free(rbody); return -1; }
+    if (clen != 0 && read_full(cs->rfd, ctype, clen) != 0) { free(rbody); free(ctype); return -1; }
+    ctype[clen] = '\0';
+
+    *out_status = (int)status; *out_body = rbody; *out_body_len = rlen; *out_ctype = ctype;
+    return 0;
+}
+
 /* Parse + index + fresh JS context bound to the page and the anti-fp env. When
  * run_js, inline <script>s are kept (not stripped) so child_handle_load can execute
  * them; event-handler attributes (on*) are stripped regardless. page_url (may be
  * NULL/empty) backs the page JS's real `location.*`; navigation capture is armed
  * regardless of run_js (a no-JS load simply never records a request). */
 static int child_load(child_state *cs, const char *html, size_t len, int run_js,
-                      const char *page_url) {
+                      int net_allowed, const char *page_url) {
     child_reset_page(cs);
+    cs->subreq_used = 0;
 
     hp_config cfg = hp_config_default();
     cfg.strip_scripts = run_js ? 0 : 1; /* keep scripts only when JS will run */
@@ -154,6 +222,12 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
         int have = (url_split(page_url, &parts) == URL_OK);
         (void)jd_set_location(js, page_url, have ? &parts : NULL);
     }
+    /* Network APIs (XMLHttpRequest/fetch) are installed ONLY when the trusted parent
+     * granted net access for this host (allow.conf AND js.conf). Otherwise they stay
+     * undefined (Same-Origin-by-construction holds). child_fetch still refuses unless
+     * net_active is set during the script window, so install is safe regardless. */
+    if (run_js && net_allowed)
+        (void)jd_install_xhr(js, child_fetch, cs);
 
     cs->doc = doc; cs->idx = idx; cs->js = js;
     return 0;
@@ -347,15 +421,19 @@ static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budge
 }
 
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
-                              int run_js, int reader, int prefers_dark, const char *page_url) {
+                              int run_js, int net, int reader, int prefers_dark,
+                              const char *page_url) {
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
     char navbuf[LN_MAX_TARGET];
     navbuf[0] = '\0';
     int32_t nav_replace = 0;
-    int ok = (child_load(cs, html, len, run_js, page_url) == 0);
+    int ok = (child_load(cs, html, len, run_js, net, page_url) == 0);
     if (ok && run_js) {
+        /* Open the network window: XHR/fetch (if installed) may now reach the parent.
+         * Closed again before deriving the view so a later REPL eval cannot use it. */
+        cs->net_active = 1;
         /* Execute the page's inline scripts in the sandboxed context, THEN derive
          * the view, so DOM mutations (document.title / textContent) are reflected.
          * Each <script> is run as its own program, exactly as a browser does: an
@@ -385,6 +463,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                 fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
                                    r.file, r.line, r.col);
             js_result_free(&r);
+            /* Drain promise microtasks queued by this script (e.g. fetch().then),
+             * so continuations run before the next script / view derivation. */
+            (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
         }
         hp_free_scripts(scripts, nscripts);
         /* Fire synthetic DOMContentLoaded/load handlers + flush queued timers once
@@ -398,7 +479,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             memset(&fr, 0, sizeof fr);
             (void)js_eval(cs->js, fire, sizeof fire - 1, &fr);
             js_result_free(&fr);
+            (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS); /* drain deferred promise jobs */
         }
+        /* Close the network window: no XHR/fetch outside the load script phase. */
+        cs->net_active = 0;
         /* Restore the full per-eval budget for any REPL (tab_eval) on this context. */
         js_set_time_budget(cs->js, JS_DEFAULT_TIME_BUDGET);
         /* Capture any navigation the script requested (location.href=/assign/replace/
@@ -417,8 +501,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         }
     }
 
+    /* TAG_RESULT marks the end of any subresource frames: the page result follows. */
+    uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
-    if (write_full(wfd, &k, sizeof k) == 0 && ok) {
+    if (write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &k, sizeof k) == 0 && ok) {
         size_t nlen = strlen(navbuf);
         (void)(write_full(wfd, &tl, sizeof tl) == 0
             && (tl == 0 || write_full(wfd, title, tl) == 0)
@@ -512,6 +598,7 @@ static void tab_worker_run(int rfd, int wfd) {
     child_state cs;
     memset(&cs, 0, sizeof cs);
     cs.session_key = gen_session_key();
+    cs.rfd = rfd; cs.wfd = wfd;  /* child_fetch proxies subresource requests over these */
 
     /* Confine before any content. Namespace isolation and Landlock are best-effort
      * defense in depth (seccomp already excludes open/socket/exec); seccomp is
@@ -533,13 +620,15 @@ static void tab_worker_run(int rfd, int wfd) {
         if (op == OP_QUIT) break;
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE) break; /* desync */
 
-        /* OP_LOAD carries three leading flag bytes: run_js (JS policy), reader
-         * (distraction-free) and dark (prefers-color-scheme), then the page URL
-         * (for the real location), before length+payload. */
-        uint8_t run_js = 0, reader = 0, dark = 0;
+        /* OP_LOAD carries four leading flag bytes: run_js (JS policy), net (XHR/fetch
+         * allowed: host in allow.conf AND js.conf), reader (distraction-free) and dark
+         * (prefers-color-scheme), then the page URL (for the real location), before
+         * length+payload. */
+        uint8_t run_js = 0, net = 0, reader = 0, dark = 0;
         char *url = NULL;
         if (op == OP_LOAD) {
             if (read_full(rfd, &run_js, 1) != 0
+             || read_full(rfd, &net, 1) != 0
              || read_full(rfd, &reader, 1) != 0
              || read_full(rfd, &dark, 1) != 0) break;
             size_t ulen = 0;
@@ -560,7 +649,7 @@ static void tab_worker_run(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); free(url); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, reader, dark, url);
+        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, url);
         else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
         else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
         free(buf);
@@ -613,6 +702,12 @@ struct tab {
     int   resp_fd;  /* parent reads responses here */
     int   alive;
     int   reaped;   /* the child has been waited on; do not kill/wait again */
+    /* Subresource (XHR/fetch) support: net_allowed gates whether the worker may issue
+     * subresource requests this load (set per page: host in allow.conf AND js.conf);
+     * fetcher does the policy-checked fetch in the trusted parent. */
+    int            net_allowed;
+    tab_fetch_fn   fetcher;
+    void          *fetcher_ctx;
 };
 
 /* A write to a dead child must not kill the parent with SIGPIPE. Idempotent;
@@ -912,6 +1007,53 @@ tab_status tab_open(tab **out) {
     return TAB_OK;
 }
 
+void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx) {
+    if (t == NULL) return;
+    t->fetcher = fn;
+    t->fetcher_ctx = ctx;
+}
+
+void tab_set_net_allowed(tab *t, int allowed) {
+    if (t == NULL) return;
+    t->net_allowed = allowed ? 1 : 0;
+}
+
+/* Handles one TAG_SUBREQ frame on the response pipe: reads the worker's subresource
+ * request, runs the parent's policy-checked fetcher (or refuses if none), and writes the
+ * reply [status:int32][body_len][body][ctype_len][ctype]. Returns 0 on success, -1 on a
+ * pipe/protocol error (caller aborts the load). Bytes are capped (anti-amplification). */
+static int tab_serve_subreq(tab *t) {
+    size_t mlen = 0, ulen = 0, blen = 0;
+    char *method = NULL, *url = NULL, *body = NULL;
+    if (read_field(t->resp_fd, &method, &mlen) != 0) return -1;
+    if (read_field(t->resp_fd, &url, &ulen) != 0) { free(method); return -1; }
+    if (read_field(t->resp_fd, &body, &blen) != 0) { free(method); free(url); return -1; }
+
+    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
+    int ok = 0;
+    if (t->fetcher != NULL && ulen != 0
+        && t->fetcher(t->fetcher_ctx, method, url, body, blen,
+                      &status, &rbody, &rlen, &rctype) == 0) {
+        ok = 1;
+    }
+    if (!ok) { status = 0; rlen = 0; }                 /* refused/failed: fail-closed */
+    if (rlen > TAB_MAX_SUBRESOURCE) { rlen = 0; status = 0; } /* defensive cap */
+    size_t clen = (ok && rctype != NULL) ? strlen(rctype) : 0;
+    if (clen > 256) clen = 256;
+
+    /* The reply goes back on req_fd (the worker reads it from its rfd, the same fd it
+     * blocks on inside child_fetch). */
+    int32_t st32 = (int32_t)status;
+    int wok = (write_full(t->req_fd, &st32, sizeof st32) == 0
+            && write_full(t->req_fd, &rlen, sizeof rlen) == 0
+            && (rlen == 0 || write_full(t->req_fd, rbody, rlen) == 0)
+            && write_full(t->req_fd, &clen, sizeof clen) == 0
+            && (clen == 0 || write_full(t->req_fd, rctype, clen) == 0));
+
+    free(method); free(url); free(body); free(rbody); free(rctype);
+    return wok ? 0 : -1;
+}
+
 tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out) {
     return tab_load_ex(t, html, len, 0, out); /* JS off by default */
 }
@@ -931,12 +1073,15 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    /* OP_LOAD framing: [op][run_js:1][reader:1][dark:1][url_len][url][len][html] (the
-     * flags and URL precede the payload so the html stays zero-copy). */
-    uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0, rflag = reader ? 1 : 0,
-            dflag = prefers_dark ? 1 : 0;
+    /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][url_len][url][len][html]
+     * (the flags and URL precede the payload so the html stays zero-copy). net grants
+     * XHR/fetch and is only meaningful with JS on. */
+    uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0,
+            nflag = (run_js && t->net_allowed) ? 1 : 0,
+            rflag = reader ? 1 : 0, dflag = prefers_dark ? 1 : 0;
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &jflag, 1) != 0
+     || write_full(t->req_fd, &nflag, 1) != 0
      || write_full(t->req_fd, &rflag, 1) != 0
      || write_full(t->req_fd, &dflag, 1) != 0
      || write_full(t->req_fd, &ulen, sizeof ulen) != 0
@@ -945,6 +1090,17 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
      || (len != 0 && write_full(t->req_fd, html, len) != 0)) {
         tab_refresh_alive(t);
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
+
+    /* While the worker runs the page's scripts it may issue subresource (XHR/fetch)
+     * requests, each a TAG_SUBREQ frame the trusted parent services in policy. Loop
+     * until TAG_RESULT, which precedes the page result. */
+    for (;;) {
+        uint8_t tag = 0;
+        if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
+        if (tag == TAG_RESULT) break;
+        if (tag != TAG_SUBREQ) return io_failure(t);   /* desync */
+        if (tab_serve_subreq(t) != 0) return io_failure(t);
     }
 
     int32_t ok = 0;
