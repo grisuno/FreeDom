@@ -17,6 +17,7 @@
 #include <cmocka.h>
 
 #include "box_tree.h"
+#include "page_view.h"   /* pv_box_def for Stage 2 positioning tests */
 
 static int dbl_eq(double a, double b) {
     double d = a - b;
@@ -209,6 +210,221 @@ static void test_depth_cap(void **state) {
     assert_int_equal(bt_layout(&chain[0], 200), BT_ERR_RANGE);
 }
 
+/* --- Stage 2: position + z-index (red until bt_resolve_positioning exists) --- */
+
+static void test_positioning_null_args(void **state) {
+    (void)state;
+    bt_positioned out[4];
+    size_t cnt = 0;
+    /* out_count == NULL */
+    assert_int_equal(bt_resolve_positioning(NULL, 0, NULL, NULL, NULL, NULL,
+                                            800, 600, out, 4, NULL),
+                     BT_ERR_NULL_ARG);
+    /* boxes == NULL with nbox > 0 */
+    assert_int_equal(bt_resolve_positioning(NULL, 1, NULL, NULL, NULL, NULL,
+                                            800, 600, out, 4, &cnt),
+                     BT_ERR_NULL_ARG);
+}
+
+static void test_positioning_static_unchanged(void **state) {
+    (void)state;
+    /* A static (or unset) box is NOT in the output. */
+    pv_box_def boxes[1] = {{ .parent_id = -1, .position = BT_POS_STATIC }};
+    double gx[1] = {10}, gy[1] = {20}, gw[1] = {100}, gh[1] = {30};
+    bt_positioned out[4];
+    size_t cnt = 99;
+    assert_int_equal(bt_resolve_positioning(boxes, 1, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 0);
+}
+
+static void test_positioning_relative_offset(void **state) {
+    (void)state;
+    /* position:relative, top:10, left:20 → offset by (20, 10). */
+    pv_box_def boxes[1] = {{
+        .parent_id = -1, .position = BT_POS_RELATIVE,
+        .inset_top = 10, .inset_left = 20,
+    }};
+    double gx[1] = {0}, gy[1] = {0}, gw[1] = {100}, gh[1] = {50};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 1, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    assert_int_equal(out[0].box_index, 0);
+    assert_int_equal(out[0].z_index, 0);
+    assert_true(dbl_eq(out[0].x, 20));
+    assert_true(dbl_eq(out[0].y, 10));
+    assert_true(dbl_eq(out[0].w, 100));
+    assert_true(dbl_eq(out[0].h, 50));
+}
+
+static void test_positioning_absolute_against_ancestor(void **state) {
+    (void)state;
+    /* Parent (box 0): position:relative at (50, 50, 200, 100).
+     * Child (box 1): position:absolute, top:5, left:10 → at (60, 55). */
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE },
+        { .parent_id =  0, .position = BT_POS_ABSOLUTE,
+          .inset_top = 5, .inset_left = 10 },
+    };
+    double gx[2] = {50, 60}, gy[2] = {50, 60}, gw[2] = {200, 80}, gh[2] = {100, 40};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 2, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 2);
+    /* Box 0 (relative, no insets) stays at (50, 50). */
+    assert_true(dbl_eq(out[0].x, 50));
+    assert_true(dbl_eq(out[0].y, 50));
+    /* Box 1 (absolute) is at parent (50,50) + (10,5) = (60, 55). */
+    assert_true(dbl_eq(out[1].x, 60));
+    assert_true(dbl_eq(out[1].y, 55));
+}
+
+static void test_positioning_absolute_against_viewport(void **state) {
+    (void)state;
+    /* Absolute with no positioned ancestor → viewport. */
+    pv_box_def boxes[1] = {{
+        .parent_id = -1, .position = BT_POS_ABSOLUTE,
+        .inset_top = 10, .inset_left = 20,
+    }};
+    double gx[1] = {0}, gy[1] = {0}, gw[1] = {100}, gh[1] = {50};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 1, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    assert_true(dbl_eq(out[0].x, 20));
+    assert_true(dbl_eq(out[0].y, 10));
+}
+
+static void test_positioning_fixed_against_viewport(void **state) {
+    (void)state;
+    /* position:fixed → viewport regardless of ancestors. */
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE },
+        { .parent_id =  0, .position = BT_POS_FIXED,
+          .inset_top = 5, .inset_left = 10 },
+    };
+    double gx[2] = {50, 60}, gy[2] = {50, 60}, gw[2] = {200, 80}, gh[2] = {100, 40};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 2, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 2);
+    /* Box 1 (fixed) at viewport (0,0) + (10,5) = (10, 5), NOT at parent's (50,50). */
+    assert_true(dbl_eq(out[1].x, 10));
+    assert_true(dbl_eq(out[1].y, 5));
+}
+
+static void test_positioning_sticky_treated_as_relative(void **state) {
+    (void)state;
+    /* position:sticky → relative (fail-closed). */
+    pv_box_def boxes[1] = {{
+        .parent_id = -1, .position = BT_POS_STICKY,
+        .inset_top = 10, .inset_left = 20,
+    }};
+    double gx[1] = {0}, gy[1] = {0}, gw[1] = {100}, gh[1] = {50};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 1, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    /* Sticky → relative: offset by insets from in-flow position. */
+    assert_true(dbl_eq(out[0].x, 20));
+    assert_true(dbl_eq(out[0].y, 10));
+}
+
+static void test_positioning_stacking_order(void **state) {
+    (void)state;
+    /* Three relative boxes with z=1, z=10, z=-1 in document order.
+     * Stacking: z=-1 (box 2), z=1 (box 0), z=10 (box 1). */
+    pv_box_def boxes[3] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE, .z_index =  1 },
+        { .parent_id = -1, .position = BT_POS_RELATIVE, .z_index = 10 },
+        { .parent_id = -1, .position = BT_POS_RELATIVE, .z_index = -1 },
+    };
+    double gx[3] = {0,0,0}, gy[3] = {0,0,0}, gw[3] = {100,100,100}, gh[3] = {50,50,50};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 3, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 3);
+    assert_int_equal(out[0].box_index, 2); assert_int_equal(out[0].z_index, -1);
+    assert_int_equal(out[1].box_index, 0); assert_int_equal(out[1].z_index,  1);
+    assert_int_equal(out[2].box_index, 1); assert_int_equal(out[2].z_index, 10);
+}
+
+static void test_positioning_doc_order_tiebreak(void **state) {
+    (void)state;
+    /* Two boxes with the same z-index → document order is the tiebreaker. */
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE, .z_index = 5 },
+        { .parent_id = -1, .position = BT_POS_RELATIVE, .z_index = 5 },
+    };
+    double gx[2] = {0,0}, gy[2] = {0,0}, gw[2] = {100,100}, gh[2] = {50,50};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 2, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 2);
+    assert_int_equal(out[0].box_index, 0);
+    assert_int_equal(out[1].box_index, 1);
+    assert_true(out[0].doc_order < out[1].doc_order);
+}
+
+static void test_positioning_no_insets(void **state) {
+    (void)state;
+    /* Absolute with no insets → at the containing block's origin. */
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE },
+        { .parent_id =  0, .position = BT_POS_ABSOLUTE },
+    };
+    double gx[2] = {50,50}, gy[2] = {50,50}, gw[2] = {200,80}, gh[2] = {100,40};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 2, gx, gy, gw, gh,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 2);
+    assert_true(dbl_eq(out[1].x, 50));
+    assert_true(dbl_eq(out[1].y, 50));
+}
+
+static void test_positioning_null_geometry(void **state) {
+    (void)state;
+    /* NULL geometry arrays → zero-size at the containing block's origin. */
+    pv_box_def boxes[1] = {{
+        .parent_id = -1, .position = BT_POS_RELATIVE,
+    }};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning(boxes, 1, NULL, NULL, NULL, NULL,
+                                            800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    assert_true(dbl_eq(out[0].x, 0));
+    assert_true(dbl_eq(out[0].y, 0));
+    assert_true(dbl_eq(out[0].w, 0));
+    assert_true(dbl_eq(out[0].h, 0));
+}
+
+static void test_positioning_nbox_cap(void **state) {
+    (void)state;
+    /* nbox > BT_MAX_POSITIONED fails closed (BT_ERR_RANGE). */
+    size_t big_n = BT_MAX_POSITIONED + 1;
+    pv_box_def boxes[BT_MAX_POSITIONED + 1];
+    double gx[BT_MAX_POSITIONED + 1] = {0};
+    bt_positioned out[BT_MAX_POSITIONED + 1];
+    size_t cnt = 0;
+    for (size_t i = 0; i < big_n; ++i) {
+        boxes[i].parent_id = -1;
+        boxes[i].position = BT_POS_RELATIVE;
+    }
+    assert_int_equal(bt_resolve_positioning(boxes, big_n, gx, gx, gx, gx,
+                                            800, 600, out, big_n, &cnt),
+                     BT_ERR_RANGE);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_root),
@@ -224,6 +440,18 @@ int main(void) {
         cmocka_unit_test(test_flex_negative_gap),
         cmocka_unit_test(test_children_cap),
         cmocka_unit_test(test_depth_cap),
+        cmocka_unit_test(test_positioning_null_args),
+        cmocka_unit_test(test_positioning_static_unchanged),
+        cmocka_unit_test(test_positioning_relative_offset),
+        cmocka_unit_test(test_positioning_absolute_against_ancestor),
+        cmocka_unit_test(test_positioning_absolute_against_viewport),
+        cmocka_unit_test(test_positioning_fixed_against_viewport),
+        cmocka_unit_test(test_positioning_sticky_treated_as_relative),
+        cmocka_unit_test(test_positioning_stacking_order),
+        cmocka_unit_test(test_positioning_doc_order_tiebreak),
+        cmocka_unit_test(test_positioning_no_insets),
+        cmocka_unit_test(test_positioning_null_geometry),
+        cmocka_unit_test(test_positioning_nbox_cap),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

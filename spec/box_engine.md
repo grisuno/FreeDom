@@ -27,10 +27,17 @@
 >   + a box-definition list), so a child box composes inside its parent instead of
 >   splitting it, and text-less wrapper boxes paint. See below.
 >
-> Out of scope for this hito (own follow-ups): `position`/`z-index` (explicit
-> stacking; implicit tree z-order IS respected by Step D), flex/grid per-item sizing,
-> `%`/viewport units, corner-by-corner radius, multi-layer shadow, layout invalidation
-> ("dirty flag"). Those `css_style` fields stay resolved-but-unconsumed.
+> - **Stage 2 (DELIVERED):** `position` (relative / absolute / fixed) + `z-index`
+>   stacking pass. The values were already resolved into `pv_box_def.position` /
+>   `inset_*` / `z_index` (`include/page_view.h:193-195`); Stage 2 threads them
+>   through the layout and paints out-of-flow boxes in the correct stacking order.
+>   `position:sticky` falls closed to `relative` (no scroll hooks in the render).
+>   See below.
+>
+> Out of scope for this hito (own follow-ups): flex/grid per-item sizing, `%`/viewport
+> units, corner-by-corner radius, multi-layer shadow, layout invalidation ("dirty
+> flag"), `position:sticky` (no scroll hooks). Those `css_style` fields stay
+> resolved-but-unconsumed.
 
 ## Security posture (non-negotiable)
 
@@ -223,12 +230,274 @@ Carried from Step B/C plus: a box's own list-indent is not applied to the box re
 boxes (a box broken by a flex container is not composed); nesting depth capped at
 `RC_BOX_STACK_MAX`; `box-sizing` border-box width math still not subtracted.
 
-## Gaps deferred with reason (Layout Invalidation, explicit Z-Index)
+## Stage 2 — `position` (relative / absolute / fixed) + `z-index` stacking
 
-The owner flagged two further gaps alongside nesting. Neither is implemented, because
-implementing them **now** would be ceremonial dead code (the project's anti-dead-code
-doctrine, cf. SOP/CORS-by-construction). Their status is recorded here so the gap is
-*closed as a decision*, not left ambiguous:
+> **Why now.** Modern sites use `position:absolute` for **navigation structure**
+> (sticky-look headers, dropdowns, cookie banners, modals, fixed navbars). The CSS
+> cascade already resolves every value (`css_style.position` / `inset_*` / `z_index`,
+> `include/css.h:223-225`) and `pv_box_def` already carries it
+> (`include/page_view.h:193-195`); the dom_debug dump already shows it
+> (`src/dom_debug.c:118-185`). The gap is purely a render-pipeline one: the values
+> never leave `pv_box_def`, so a `<div style="position:fixed;top:0;z-index:100">`
+> paints at the same static rect as `<div>`. Stage 2 closes the gap: a box out of
+> flow is removed from the in-flow layout, placed against its containing block, and
+> painted in the correct stacking order.
+
+### Position values (mirror of `css_position`; 0 = static/unset)
+
+| Constant | Value | Meaning |
+| :-- | :-- | :-- |
+| `BT_POS_STATIC` | 0 | In-flow; no offset. The default (also for unset). |
+| `BT_POS_RELATIVE` | 2 | In-flow; offset by insets. Siblings unaffected. |
+| `BT_POS_ABSOLUTE` | 3 | Out-of-flow; placed against nearest positioned ancestor. |
+| `BT_POS_FIXED` | 4 | Out-of-flow; placed against the viewport. |
+| `BT_POS_STICKY` | 5 | Fail-closed → treated as RELATIVE (no scroll hooks in v1). |
+
+The `1` gap is intentional: `css_position` reserves `CSS_POS_STATIC = 1` for the
+explicit in-flow keyword; both 0 and 1 are "static" for layout purposes (the
+pv_box_def comment already says "0 unset/static"). This keeps the wire format a
+direct copy of `css_position` and avoids an extra translation layer.
+
+### Inset sentinels
+
+`pv_box_def.inset_{top,right,bottom,left}` use the CSS sentinels:
+
+| Sentinel | Meaning | Stage 2 handling |
+| :-- | :-- | :-- |
+| `CSS_LEN_UNSET` (0) | Not declared | Default: at the containing block's edge (left=cb.x, top=cb.y) |
+| `CSS_LEN_AUTO` (-2147483647) | `auto` | Treated as unset in v1 (no shrink-to-fit solver) |
+| signed px | Pixels | Used as-is |
+
+Only `top` and `left` insets are honored in v1. `right`/`bottom` are read but
+ignored (a v1 limitation; documented below) — a positioned box without `top` is
+anchored at the containing block's top edge, which is the common case.
+
+### Data model — one new pure struct + one new function
+
+No changes to `bt_node` (the layout tree stays in-flow only). A new struct carries
+the out-of-flow result:
+
+```c
+/* One positioned box in the final paint order. The GUI paints
+ * rc_layout.rows (in-flow) first, then these in the returned order. */
+typedef struct bt_positioned {
+    size_t  box_index;   /* index into pv_box_def (== block_id) */
+    int     z_index;     /* signed, or 0 if unset; CSS_LEN_UNSET -> 0 */
+    size_t  doc_order;   /* depth-first pre-order index, for stable tiebreak */
+    double  x, y, w, h;  /* final content-box rect, viewport-relative */
+} bt_positioned;
+```
+
+A new pure function resolves all positioning in one pass:
+
+```c
+bt_status bt_resolve_positioning(
+    const pv_box_def   *boxes,        /* box tree (parent_id chain) */
+    size_t              nbox,
+    const double       *box_x,        /* in-flow geometry, indexed by box_index, or NULL */
+    const double       *box_y,
+    const double       *box_w,
+    const double       *box_h,
+    double              viewport_w,   /* initial containing block (= content area) */
+    double              viewport_h,
+    bt_positioned      *out,          /* caller-owned; sorted by (z_index, doc_order) */
+    size_t              out_cap,
+    size_t             *out_count     /* number of positioned boxes found */
+);
+```
+
+Semantics:
+
+1. **Walk the box tree** (via `parent_id` chain) depth-first, assigning `doc_order`
+   in pre-order. Idempotent — each box gets one `doc_order` regardless of how many
+   runs reference it.
+2. **For each box with `position != BT_POS_STATIC` (i.e. relative/absolute/fixed/
+   sticky):**
+   - **`RELATIVE` / `STICKY` (treated as relative):** keep the in-flow geometry
+     (`box_x[i]`, `box_y[i]`, `box_w[i]`, `box_h[i]`) and offset by
+     `(inset_left, inset_top)`. If an inset is `CSS_LEN_UNSET`/`CSS_LEN_AUTO`, the
+     offset on that axis is 0.
+   - **`ABSOLUTE`:** walk the `parent_id` chain to find the nearest ancestor with
+     `position != BT_POS_STATIC`. If found, the containing block is the ancestor's
+     `(box_x[a], box_y[a], box_w[a], box_h[a])`. If not, fall back to the viewport
+     `(0, 0, viewport_w, viewport_h)`. The box's `(x, y)` = containing-block origin
+     + `(inset_left, inset_top)`; `(w, h)` come from the in-flow geometry (the box
+     does not collapse — its measured content height stands).
+   - **`FIXED`:** containing block = the viewport. Same offset rules.
+3. **Sort `out[]` by `(z_index ASC, doc_order ASC)`.** Negative z-index boxes sort
+   first (they paint behind in-flow content); the caller's painter uses this order
+   to split paint into two passes (see GUI below).
+4. `out_count` is the number of positioned boxes found (may exceed `out_cap`; the
+   caller can detect truncation by comparing `out_count` to a prior measure pass,
+   or by re-calling with a larger cap).
+
+### Status codes
+
+| Code | When |
+| :-- | :-- |
+| `BT_OK` | Success. `out_count` set; `out[]` filled up to `out_cap` (truncation reported). |
+| `BT_ERR_NULL_ARG` | `boxes` is NULL and `nbox > 0`, or `out_count` is NULL. `box_x/y/w/h` may be NULL for boxes without an in-flow rect — `bt_resolve_positioning` then treats those boxes as zero-size at `(0, 0)`. |
+| `BT_ERR_RANGE` | `nbox` > `BT_MAX_POSITIONED` (caller-side cap; the function fails closed rather than overflowing). |
+
+### Security posture (carries from Step D)
+
+- **No network, no execution.** Pure geometry on already-resolved, already-fuzzed
+  `pv_box_def` values. The values arrive already clamped by `css`
+  (`CSS_LEN_MAX`, `CSS_ZINDEX_MAX = 1<<20`, enum ranges), so the solver never
+  trusts an author value.
+- **Author presentation, gated.** `position`/`z-index` reshape content (a fixed
+  navbar covers the viewport; a modal covers the page). Stage 2's wire values are
+  author presentation → `render_doc` copies them ONLY with `caps.css`, like the
+  box decoration subset. The default render path (caps off) stays byte-identical
+  to Step D — no `position` field ever appears on a run or box, and the
+  positioning pass is a no-op.
+- **Containment.** A positioned box cannot escape the layout: `position:fixed`
+  is bounded by the viewport; `position:absolute` is bounded by the nearest
+  positioned ancestor (the box tree has bounded depth `BT_MAX_DEPTH`); the
+  containing block is always derived from the caller's geometry, never from
+  user-controlled input. `z_index` is clamped to `CSS_ZINDEX_MAX` upstream.
+- **Fail closed.** Out-of-cap / out-of-range / NULL inputs return an error
+  status; the caller skips the positioning pass for that frame rather than
+  painting garbage.
+
+### GUI integration (`gui/browser_ui.c`)
+
+The `rc_layout` struct gains a positioned section (sized by `BT_MAX_POSITIONED`):
+
+```c
+bt_positioned positioned[BT_MAX_POSITIONED];
+size_t        npositioned;
+```
+
+**`layout_doc` (in-flow pass, as today, plus one addition):**
+
+1. Walk `rd_doc` blocks in document order.
+2. For a block with `block_id >= 0` and `pv_box_def[block_id].position ==
+   BT_POS_RELATIVE` (or STICKY), offset the open box's `(x, y)` by `(inset_left,
+   inset_top)` in `open_box`/`reconcile_boxes`. Sibling rows are unaffected
+   (the box's own content moves).
+3. For a block with `position == BT_POS_ABSOLUTE` or `BT_POS_FIXED`:
+   **skip the in-flow placement entirely** (no row, no box, no margin; the
+   `prev_bottom`/`pending_gap` are not touched). Record the block for the
+   out-of-flow pass.
+4. For everything else, today's flat flow (Step D) is unchanged.
+
+**`position_doc` (new, runs after `layout_doc`):**
+
+1. Build a parallel `pv_box_def`-indexed geometry array from the in-flow pass
+   (each block's final `(x, y, w, h)` if it was placed; zero otherwise).
+2. Call `bt_resolve_positioning(boxes, nbox, gx, gy, gw, gh, content_w, content_h,
+   L->positioned, BT_MAX_POSITIONED, &L->npositioned)`.
+3. On `BT_OK`, `L->positioned` is sorted by stacking order.
+
+**`paint_content_row` / `paint_doc` (the painter):**
+
+1. Paint in-flow boxes (`paint_box_decoration` + `paint_content_row` per `rc_row`,
+   in document order) — byte-identical to today.
+2. Walk `L->positioned` from index 0 to `npositioned`. For each:
+   - If `z_index < 0`: paint now (behind in-flow; but since in-flow already
+     painted, this is a v1 limitation — see below). **v1:** skip negative z-index
+     boxes (they would have to paint before in-flow, requiring a two-pass
+     painter that doesn't exist yet).
+   - If `z_index >= 0` or unset: paint the box decoration + its block's runs at
+     the resolved `(x, y, w, h)`. A positioned box is a mini `rc_layout`: one
+     text run painted at the box's content origin, decoration drawn around it.
+3. For the **headless** export paths (`ui_render_pdf`, `ui_render_png`): the
+   same `layout_doc` + `position_doc` + paint sequence runs; the only
+   difference is the surface.
+
+### IPC + page_view plumbing
+
+The values are **already** in `pv_box_def` (`include/page_view.h:193-195`); they
+were resolved by `css` (Hito 23b-7) and carried by `page_view` into the box
+tree. The IPC `tab.c` `write_view`/`read_view` serialises `pv_box_def` in full
+**today** (the Step D wire format includes the whole struct). So:
+
+- **No new `pv_box_def` fields.** The `position`/`inset_*`/`z_index` fields are
+  already there; the writer/reader already round-trip them.
+- **No new `rd_block` / `rd_box_def` fields.** `render_doc` already copies the
+  box-def list to `rd_doc.boxes` (`src/render_doc.c`); the new fields ride
+  along. The whole list is gated by `caps.css` — unchanged.
+- **`dom_debug` already prints them** (`src/dom_debug.c:118-185`: `pos=...`,
+  `inset(t/r/b/l)`, `z=N`). After Stage 2 the values finally **affect pixels**.
+
+This is the cheap property of the closed Hito 23b-7 + Step D: the wire was
+already complete, so Stage 2 only adds the **consumer** (the pure solver + the
+GUI's stacking pass). No desync risk on `tab.c` (nothing new on the wire).
+
+### Given-When-Then
+
+- **Given** a `position:relative` box with `top:10px;left:20px`, **when** laid
+  out, **then** the box's content rect is offset by `(20, 10)` from its
+  in-flow position; siblings are unaffected; `dom_debug` reports
+  `pos=relative inset(t=10 l=20)`.
+- **Given** a `position:absolute` box with `top:0;left:0` inside a
+  `position:relative` wrapper, **when** laid out, **then** the absolute box
+  sits at the wrapper's `(0, 0)`; outside any positioned ancestor, it sits at
+  the viewport's `(0, 0)`.
+- **Given** a `position:fixed` box with `top:0;right:0`, **when** laid out,
+  **then** the box is anchored to the viewport's top-right (v1: only `top` is
+  honored, so the box sits at the viewport's top; `right` is read but ignored).
+- **Given** three positioned boxes with `z-index:1`, `z-index:10`, `z-index:-1`
+  in document order, **when** the stacking pass runs, **then** the sorted order
+  is `[z=-1, z=1, z=10]`; the painter paints the `z=-1` skip in v1, then
+  `z=1` and `z=10` in that order on top of the in-flow content.
+- **Given** `position:sticky`, **when** laid out, **then** it is treated as
+  `position:relative` (fail-closed) and the same offset rules apply; `dom_debug`
+  still reports `pos=sticky` for honesty.
+- **Given** author CSS **disabled** (`caps.css` off), **when** rendered, **then**
+  the `rd_doc.boxes` list is empty, the in-flow layout runs unchanged, and
+  `npositioned == 0` → byte-identical to the no-position render.
+- **Given** a `position:absolute` box whose ancestor chain has no positioned
+  node, **when** laid out, **then** the containing block falls back to the
+  viewport; the box is bounded by `content_w` × `content_h`.
+- **Given** a `nbox > BT_MAX_POSITIONED` page, **when** resolved, **then** the
+  function returns `BT_ERR_RANGE`; the GUI skips the positioning pass for that
+  frame and the in-flow layout is still painted (fail-closed: no garbage).
+
+### v1 limitations (Stage 2)
+
+Carried from the previous steps plus the new positioning scope:
+
+- **`right`/`bottom` insets read but ignored.** Only `top` and `left` are
+  honored. A box without `top` anchors at the containing block's top; without
+  `left`, at its left. Adding `right`/`bottom` is a future extension (no
+  algorithm blocker; just the containing-block math).
+- **`CSS_LEN_AUTO` for insets treated as `CSS_LEN_UNSET`.** No shrink-to-fit
+  solver (the box uses its measured content size).
+- **`position:sticky` → `relative`.** No scroll hooks in the render; the user
+  can still see the value in `dom_debug`. Real sticky needs an event from the
+  scroll path that the render currently doesn't have.
+- **Negative `z-index` skipped.** They would need to paint **before** in-flow,
+  requiring a two-pass painter. The `z_index` value is read and sorted; the
+  GUI skips `z_index < 0` entries for now and logs nothing (silent fail-closed;
+  a hostile doc can't use this to hide content because the default is to NOT
+  skip — only negative-z is the missing case).
+- **Containing block = border-box, not padding-box.** CSS says absolute's
+  containing block is the padding box of the nearest positioned ancestor; v1
+  uses the border-box (the difference is the border width, usually small).
+  Not a security issue; a precision issue documented here.
+- **No percentage or viewport units** for insets (`top: 50%` is ignored and
+  treated as `top: 0`). The cascade already drops `%`/vw for box-model lengths
+  (Hito 23b-3); the same fail-closed carries.
+- **Positioned image / input blocks** (rare but possible) paint their text
+  placeholder at the resolved rect; the image decode path is unchanged.
+
+### Out of scope (Stage 2)
+
+- `position:sticky` with scroll (own follow-up: needs the scroll path).
+- `right`/`bottom` insets and shrink-to-fit (`CSS_LEN_AUTO` math).
+- Negative `z-index` paint (two-pass painter).
+- Padding-box vs border-box containing block (precision).
+- Flex/grid per-item sizing (Stage 3 of the plan).
+- Event dispatcher / click → JS (Stage 4 of the plan).
+- Layout invalidation / incremental repaint (gated by JS-mutation path;
+  CLAUDE.md §7.3 Hito 20e p2 follow-up).
+
+## Gaps deferred with reason (Layout Invalidation only)
+
+The remaining gap after Stage 2 is layout invalidation. Its status is recorded
+here so the gap is *closed as a decision*, not left ambiguous:
 
 - **Layout invalidation ("dirty flag").** A per-block dirty flag so a JS style
   mutation re-lays-out only the changed box, instead of rebuilding the whole tree per
@@ -239,17 +508,6 @@ doctrine, cf. SOP/CORS-by-construction). Their status is recorded here so the ga
   roadmap item "**repintado incremental en mutación**" (CLAUDE.md §7.3, Hito 20e p2
   follow-up): the dirty tracking, the incremental relayout, and the JS-mutation hook
   land together, or the flag is dead. Not added until then.
-
-- **Explicit `z-index` / stacking of positioned boxes.** **Implicit** z-order (paint
-  in tree/document order) is now **correctly respected** for nested boxes by Step D
-  (parent paints before child; siblings in document order). **Explicit** `z-index`
-  only changes paint order when boxes **overlap**, and boxes overlap only once
-  `position:absolute`/`fixed`/`relative` take them out of normal flow — which is
-  Stage 2 (`position`), not yet built. `z-index` is already *resolved* in `css_style`
-  (Hito 23b-7) but threading/sorting it before `position` exists would reorder boxes
-  that never overlap → no visible effect = dead code. Deferred to the `position` hito
-  (PLAN-layout-engine.md Stage 2), which adds out-of-flow placement and the stacking
-  pass together.
 
 ## Errors
 
