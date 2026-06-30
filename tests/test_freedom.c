@@ -68,6 +68,17 @@ static int is_pdf_file(const char *path) {
     return got == 4 && memcmp(magic, "%PDF", 4) == 0;
 }
 
+/* True if path exists and its first bytes are the 8-byte PNG signature. */
+static int is_png_file(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) return 0;
+    unsigned char magic[8] = {0};
+    size_t got = fread(magic, 1, 8, f);
+    fclose(f);
+    static const unsigned char png_sig[8] = {0x89,'P','N','G',0x0D,0x0A,0x1A,0x0A};
+    return got == 8 && memcmp(magic, png_sig, 8) == 0;
+}
+
 static void cleanup_files(void) {
     (void)unlink(OUT_FILE);
     (void)unlink(ERR_FILE);
@@ -195,6 +206,41 @@ static void test_download_pdf_requires_path(void **state) {
     assert_int_equal(rc, 2);
 }
 
+/* --- headless PNG export (--download-png, visual-review tooling) --- */
+
+static void test_download_png_local(void **state) {
+    (void)state;
+    const char *html =
+        "<!DOCTYPE html><html><head><title>PNG Page</title></head>"
+        "<body><h1>Heading</h1><p>Raster text for review.</p></body></html>";
+    const char *path = "__freedom_png_page.html";
+    const char *png = "__freedom_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "--download-png=%s %s", png, path)
+                < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png)); /* a real PNG bitmap, not a stub */
+
+    unlink(path);
+    unlink(png);
+}
+
+/* --download-png with no PATH is a usage error (fail closed: never guess a path). */
+static void test_download_png_requires_path(void **state) {
+    (void)state;
+    int rc = -1;
+    assert_int_equal(run_freedom_raw("--download-png examples/sample.html", &rc), 0);
+    assert_int_equal(rc, 2);
+}
+
 /* --- headless console (Freebug --dump-console) --- */
 
 /* --dump-console runs the page's JS and prints console.* output + uncaught errors. */
@@ -276,6 +322,8 @@ int main(void) {
         cmocka_unit_test(test_missing_file),
         cmocka_unit_test(test_download_pdf_local),
         cmocka_unit_test(test_download_pdf_requires_path),
+        cmocka_unit_test(test_download_png_local),
+        cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),
         cmocka_unit_test(test_rejects_http_url),

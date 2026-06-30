@@ -145,6 +145,7 @@ typedef enum ui_menu_action {
     UI_MENU_JS,       /* cycles the JS policy (off -> allowlist -> on) */
     UI_MENU_READER,   /* toggles distraction-free (reader) mode; re-renders from cache */
     UI_MENU_PDF,      /* action (not a toggle): export the page to a vector PDF */
+    UI_MENU_PNG,      /* action (not a toggle): export the page to a raster PNG */
     UI_MENU_FREEBUG,  /* toggles the Freebug developer console (second window) */
     UI_MENU_HOSTADD   /* action: add the current host to a .conf list (theme_val selects which) */
 } ui_menu_action;
@@ -171,6 +172,7 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Allow this site (Ctrl+Shift+A)", UI_MENU_HOSTADD, 0,             HOSTLIST_ALLOW },
     { "Allow JS here (Ctrl+Shift+J)",   UI_MENU_HOSTADD, 0,             HOSTLIST_JS },
     { "Save as PDF (Ctrl+P)", UI_MENU_PDF,   0,                          0 },
+    { "Save as PNG (Ctrl+Shift+P)", UI_MENU_PNG, 0,                      0 },
 };
 #define UI_MENU_COUNT (sizeof UI_MENU_ITEMS / sizeof UI_MENU_ITEMS[0])
 
@@ -3167,6 +3169,97 @@ static void export_pdf(browser_window *w) {
     redraw(w);
 }
 
+/* PNG raster geometry: a single continuous bitmap (not paginated) of the whole
+ * page, sized to the laid-out content. The width fixes the wrap column; the height
+ * follows the content but is capped so a hostile page cannot force an unbounded
+ * allocation (a taller page is clipped at PNG_MAX_H). */
+#define PNG_PAGE_W   1000.0
+#define PNG_MARGIN   24.0
+#define PNG_MAX_H    30000   /* px; 1000 * 30000 * 4B ~= 120 MiB worst case */
+
+/* Writes the window's current laid-out document to a single full-height PNG at
+ * `path` (the same layout/paint path as the screen and the PDF export, in a forced
+ * light theme so it is dark-on-white). Returns the image height in px (0 when the
+ * document lays out to nothing), or -1 on a Cairo error. No Wayland state is
+ * touched -- only w->doc and w->theme are read. */
+static long write_doc_png(browser_window *w, const char *path) {
+    ui_theme saved = w->theme;
+    w->theme = ui_theme_for(UI_THEME_LIGHT);
+    double content_w = PNG_PAGE_W - 2.0 * PNG_MARGIN;
+
+    /* layout_doc needs a live Cairo context to measure text (font extents), but the
+     * image height is unknown until after layout. Measure on a scratch 1x1 surface
+     * (image-surface font metrics are size-independent), then paint on a surface
+     * sized to the result. */
+    cairo_surface_t *meas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+    cairo_t *mcr = cairo_create(meas);
+    rc_layout L;
+    layout_doc(mcr, w, content_w, &L);
+    double content_h = L.total_h;
+    cairo_destroy(mcr);
+    cairo_surface_destroy(meas);
+
+    if (L.nrow == 0 || content_h <= 0.0) { rc_free(&L); w->theme = saved; return 0; }
+
+    long img_h = (long)(content_h + 2.0 * PNG_MARGIN + 0.5);
+    if (img_h > PNG_MAX_H) img_h = PNG_MAX_H;
+
+    cairo_surface_t *surf =
+        cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (int)PNG_PAGE_W, (int)img_h);
+    if (cairo_surface_status(surf) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(surf); rc_free(&L); w->theme = saved; return -1;
+    }
+    cairo_t *cr = cairo_create(surf);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);   /* white page */
+    cairo_paint(cr);
+
+    /* Box decoration first (behind the rows), then the rows, at a constant origin
+     * (no pagination): both use PNG_MARGIN + their layout-space top. */
+    for (size_t bi = 0; bi < L.nbox; ++bi)
+        paint_box_decoration(cr, &L.boxes[bi], PNG_MARGIN, PNG_MARGIN);
+    for (size_t i = 0; i < L.nrow; ++i)
+        paint_content_row(cr, w, &L, &L.rows[i], PNG_MARGIN,
+                          PNG_MARGIN + L.rows[i].top, content_w, PNG_PAGE_W, 0);
+
+    cairo_destroy(cr);
+    cairo_status_t st = cairo_surface_write_to_png(surf, path);
+    cairo_surface_destroy(surf);
+    rc_free(&L);
+    w->theme = saved;
+    return (st == CAIRO_STATUS_SUCCESS) ? img_h : -1;
+}
+
+static void export_png(browser_window *w) {
+    if (w->doc == NULL || rd_count(w->doc) == 0) {
+        browser_set_status(&w->bs, "Nothing to export to PNG.", now_ms());
+        redraw(w);
+        return;
+    }
+
+    const char *dir = getenv("XDG_DOWNLOAD_DIR");
+    if (dir == NULL || dir[0] == '\0') dir = getenv("HOME");
+    if (dir == NULL || dir[0] == '\0') dir = ".";
+
+    /* The page title is hostile remote content; pe_build_path_ext sanitises it into
+     * a safe basename (no traversal/separators/hidden) -- fail-closed by design. */
+    const char *title = (w->bs.page_title != NULL && w->bs.page_title[0] != '\0')
+                        ? w->bs.page_title : PE_FALLBACK_NAME;
+    char path[PE_NAME_MAX + 4096u];
+    if (pe_build_path_ext(dir, title, PE_EXT_PNG, path, sizeof path) != PE_OK) {
+        browser_set_status(&w->bs, "Could not build a safe PNG path.", now_ms());
+        redraw(w);
+        return;
+    }
+
+    long h = write_doc_png(w, path);
+    char msg[PE_NAME_MAX + 4096u + 64u];
+    if (h < 0)        snprintf(msg, sizeof msg, "Could not create the PNG file.");
+    else if (h > 0)   snprintf(msg, sizeof msg, "Saved PNG (%ld px): %s", h, path);
+    else              snprintf(msg, sizeof msg, "Nothing to export to PNG.");
+    browser_set_status(&w->bs, msg, now_ms());
+    redraw(w);
+}
+
 /* Headless PDF export (no Wayland; see include/ui.h). Renders an already-built
  * render document to a vector PDF at out_path, reusing the exact on-screen
  * layout/paint path so what the file shows is what the window would paint. The
@@ -3187,6 +3280,25 @@ ui_status ui_render_pdf(const rd_doc *doc, const char *out_path, long *out_pages
     long pages = write_doc_pdf(&w, out_path);
     if (pages < 0) return UI_ERR_INTERNAL;
     if (out_pages != NULL) *out_pages = pages;
+    return UI_OK;
+}
+
+/* Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the
+ * whole page, the cheapest artifact for visual review (no PDF rasterise step). Same
+ * zeroed-window setup as ui_render_pdf. */
+ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h) {
+    if (out_h != NULL) *out_h = 0;
+    if (doc == NULL || out_path == NULL || rd_count(doc) == 0) return UI_ERR_NULL_ARG;
+
+    browser_window w;
+    memset(&w, 0, sizeof w);
+    w.theme = ui_theme_for(UI_THEME_LIGHT);
+    w.doc = (rd_doc *)doc;   /* read-only here; write_doc_png never mutates the doc */
+    w.focused_input = -1;
+
+    long h = write_doc_png(&w, out_path);
+    if (h < 0) return UI_ERR_INTERNAL;
+    if (out_h != NULL) *out_h = h;
     return UI_OK;
 }
 
@@ -3561,6 +3673,7 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_READER) return w->reader;
     if (it->action == UI_MENU_FREEBUG) return freebug_is_open(w);
     if (it->action == UI_MENU_PDF)   return 0; /* an action, never "checked" */
+    if (it->action == UI_MENU_PNG)   return 0; /* an action, never "checked" */
     if (it->action == UI_MENU_HOSTADD) return 0; /* an action, never "checked" */
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
@@ -3622,6 +3735,11 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     if (it->action == UI_MENU_PDF) {
         w->menu_open = 0; /* dismiss the menu, then export */
         export_pdf(w);
+        return;
+    }
+    if (it->action == UI_MENU_PNG) {
+        w->menu_open = 0; /* dismiss the menu, then export */
+        export_png(w);
         return;
     }
     if (it->action == UI_MENU_FREEBUG) {
@@ -5414,6 +5532,13 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
      * title (pdf_export, fail-closed). */
     if (ctrl && !shift && (sym == XKB_KEY_p || sym == XKB_KEY_P)) {
         export_pdf(w);
+        return;
+    }
+
+    /* Ctrl+Shift+P saves the current page as a single full-height PNG bitmap (the
+     * cheapest artifact for visual review; same safe-title path as Save as PDF). */
+    if (ctrl && shift && (sym == XKB_KEY_p || sym == XKB_KEY_P)) {
+        export_png(w);
         return;
     }
 

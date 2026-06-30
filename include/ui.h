@@ -78,4 +78,17 @@ struct rd_doc;
  * document is empty; UI_ERR_INTERNAL on a Cairo error. */
 ui_status ui_render_pdf(const struct rd_doc *doc, const char *out_path, long *out_pages);
 
+/* Headless raster-PNG export: render an already-built render document to a single
+ * full-height PNG image at out_path without opening a Wayland window, using the
+ * exact same layout/paint path as the on-screen renderer. Unlike the vector PDF
+ * (paginated to US Letter), this is one continuous bitmap of the whole page -- the
+ * cheapest artifact to inspect a render where no display is available (CI, an AI
+ * agent): export, then read the PNG directly (no PDF rasterise step). The image
+ * height is bounded (a hostile page cannot force an unbounded allocation); a taller
+ * page is clipped at the cap. See `--download-png` in spec/freedom.md and the
+ * visual-review validation step in CLAUDE.md. *out_h (optional) receives the image
+ * height in pixels. Returns UI_OK on success; UI_ERR_NULL_ARG if doc/out_path is
+ * null or the document is empty; UI_ERR_INTERNAL on a Cairo error. */
+ui_status ui_render_png(const struct rd_doc *doc, const char *out_path, long *out_h);
+
 #endif /* FREEDOM_UI_H */

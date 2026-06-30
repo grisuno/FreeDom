@@ -23,6 +23,10 @@ OPTIONS:
   -H, --headless    modo terminal: renderiza una única página a stdout y sale
   --download-pdf=PATH   modo headless: renderiza la página a un PDF vectorial en
                         PATH (sin abrir ventana) y sale. Implica --headless.
+  --download-png=PATH   modo headless: renderiza la página a una imagen PNG única
+                        (mapa de bits de altura completa) en PATH y sale. Implica
+                        --headless. Es el artefacto MÁS BARATO de revisar (se lee
+                        la imagen directa, sin paso de rasterizado de PDF).
   --author-css          aplica el CSS de autor (caps.css) en el render headless,
                         para que colores/text-align/font-size/line-height sean
                         revisables visualmente. Solo render local: el cap de
@@ -58,19 +62,37 @@ SALIDA --download-pdf (fichero):
   confirmación ("Saved PDF (<n> pages): <path>"). Sin red más allá del fetch de
   la página; las imágenes siguen apagadas por defecto (Privacy by Default), así
   que aparecen como placeholders salvo que se habiliten.
+
+SALIDA --download-png (fichero):
+  Un PNG ARGB único (1000px de ancho, altura = contenido maquetado, acotada a
+  30000px anti-DoS — una página más alta se recorta) en PATH. Mismo pipeline de
+  render que la pantalla y el PDF (rd_doc + layout_doc + paint_content_row sobre
+  un cairo_image_surface_t, tema claro forzado), pero SIN paginar: un solo mapa
+  de bits continuo de toda la página. A stdout solo va "Saved PNG (<h> px):
+  <path>". Mismas reglas de Privacy by Default que el PDF (imágenes off →
+  placeholders). Es la salida preferida para revisión visual automatizada: se
+  lee la imagen directamente, sin el paso de rasterizado de PDF (mutool).
 ```
 
-### `--download-pdf`: razón de ser (revisión visual)
+### `--download-pdf` / `--download-png`: razón de ser (revisión visual)
 
 El render del GUI necesita Wayland, que no siempre está disponible para una
-herramienta automatizada (CI, un agente de IA, este entorno). `--download-pdf`
-exporta la **misma** display list que pinta la pantalla a un PDF vectorial **sin
-abrir ventana**, de modo que el resultado pueda inspeccionarse visualmente
-(rasterizar con `mutool draw` → PNG y leer la imagen). Es la base de la skill de
-revisión visual (ver `CLAUDE.md` §3, paso de validación). PATH es local y de
-confianza (lo teclea el operador), así que se usa tal cual; la derivación
-fail-closed del nombre desde un título hostil (`pe_safe_basename`) solo aplica al
-"Save as PDF" del GUI, donde el nombre proviene de contenido remoto.
+herramienta automatizada (CI, un agente de IA, este entorno). Ambos flags
+exportan la **misma** display list que pinta la pantalla **sin abrir ventana**.
+
+- `--download-png` (preferido) escribe **directamente** un PNG: el agente lo lee
+  con un solo paso, sin rasterizar. Por eso es la salida por defecto de la skill
+  de revisión visual — un PNG cuesta muchos menos tokens que un PDF (que primero
+  hay que pasar por `mutool` a PNG, o leerlo página a página).
+- `--download-pdf` escribe un PDF vectorial (texto seleccionable, paginado a US
+  Letter); útil cuando se quiere el documento real para guardar/imprimir, no solo
+  una captura. Para inspeccionarlo se rasteriza con `mutool draw` → PNG.
+
+Es la base de la skill de revisión visual (ver `CLAUDE.md` §3, paso de
+validación). PATH es local y de confianza (lo teclea el operador), así que se usa
+tal cual; la derivación fail-closed del nombre desde un título hostil
+(`pe_safe_basename`/`pe_build_path_ext`) solo aplica al "Save as PDF/PNG" del GUI,
+donde el nombre proviene de contenido remoto.
 
 ## 3. Códigos de salida
 

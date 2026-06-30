@@ -27,6 +27,7 @@
 
 #define PE_NAME_MAX       128u    /* max bytes of the sanitized basename (excl. extension) */
 #define PE_EXT            ".pdf"
+#define PE_EXT_PNG        ".png"  /* raster export (visual review): see ui_render_png */
 #define PE_FALLBACK_NAME  "page"  /* used when the title yields nothing usable */
 
 typedef enum pe_status {
@@ -46,12 +47,17 @@ typedef enum pe_status {
  * Does NOT append the extension (that is pe_build_path's job). */
 pe_status pe_safe_basename(const char *title, char *out, size_t outsz);
 
-/* Builds the full output path dir + "/" + pe_safe_basename(title) + PE_EXT into
- * out. dir is trusted (chosen by the app from XDG/$HOME); title is hostile. A
- * trailing '/' on dir is respected (not duplicated). Because the basename can
- * hold no '/', the result cannot escape dir (no traversal) by construction.
- * Fails closed on overflow (out left empty). dir/out NULL or outsz == 0 =>
- * PE_ERR_NULL_ARG. */
+/* Builds the full output path dir + "/" + pe_safe_basename(title) + ext into out.
+ * dir is trusted (chosen by the app from XDG/$HOME); title is hostile. ext is a
+ * trusted literal (e.g. PE_EXT / PE_EXT_PNG); ext == NULL is treated as "" (no
+ * extension). A trailing '/' on dir is respected (not duplicated). Because the
+ * basename can hold no '/', the result cannot escape dir (no traversal) by
+ * construction. Fails closed on overflow (out left empty). dir/out NULL or
+ * outsz == 0 => PE_ERR_NULL_ARG. */
+pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,
+                            char *out, size_t outsz);
+
+/* pe_build_path_ext with the default PDF extension (PE_EXT). */
 pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz);
 
 /* Deterministic pagination: lays the rows (document-space tops + heights, in

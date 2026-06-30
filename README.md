@@ -107,7 +107,7 @@ The name reflects its core goals:
 - ✅ Anti-fingerprinting network identity (normalized User-Agent + Accept-Language)
 - ✅ Omnibox address bar (navigate or DuckDuckGo HTML search)
 - ✅ Native forms (GET/POST, no JS)
-- ✅ Save page as vector PDF (`Ctrl+P`)
+- ✅ Save page as vector PDF (`Ctrl+P`) or as a single PNG image (`Ctrl+Shift+P`)
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
 - ✅ Author CSS (`<style>` + inline `style=`, simple subset; combinators, attribute selectors `[attr=v]`/`^=`/`$=`/`*=`/`~=`/`|=`, `!important`; never phones home) — menu "Author styles (CSS)"
@@ -261,6 +261,7 @@ leave it empty to use the anti-fingerprint default.
 | `Ctrl+I` | Toggle remote images (off by default) |
 | `Ctrl+D` | Distraction-free (reader) mode: drop nav/header/footer/aside + author styles, center the text |
 | `Ctrl+P` | Save the current page as a vector PDF (selectable text) |
+| `Ctrl+Shift+P` | Save the current page as a single PNG image (full-height bitmap) |
 | `Ctrl+S` | Save the current page to `~/Downloads/freedom/` |
 | `Ctrl+R` / `F5` | Reload the current page (re-applies the full TLS/PQ policy); also a toolbar button |
 | `Ctrl++` / `Ctrl+-` / `Ctrl+0` | Zoom in / out (50–300% ladder) / reset to 100% |
@@ -298,8 +299,8 @@ deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `
 selectors** (`[type=text]`, `[href^="https"]`, `[lang|="en"]`, `~=`/`$=`/`*=` with the `i` case
 flag), `!important`, and a real specificity-then-document-order cascade (inline wins). It is
 rendered by the pure `css` module and stays gated behind the author-CSS capability (Privacy by
-Default). For headless visual review, `freedom --author-css --download-pdf=PATH …` applies author
-styling in the PDF (local render only — the network image cap stays off); see
+Default). For headless visual review, `freedom --author-css --download-png=PATH …` applies author
+styling in the exported image (local render only — the network image cap stays off); see
 `examples/attr-selectors.html`. The sibling `+`/`~` and pseudo `:`/`::` selectors stay
 unsupported and fail closed.
 
@@ -326,7 +327,7 @@ an author `margin-top`/`margin-bottom` overrides the default block spacing. Beca
 can shrink content to unreadability, the box model is gated behind the author-CSS capability like
 the colors (Secure/Privacy by Default). Out of scope for now: `border`, `box-sizing`, vertical
 `padding-top/bottom`, and `position`. See `examples/box-model.html`
-(`freedom --author-css --download-pdf=… examples/box-model.html`).
+(`freedom --author-css --download-png=… examples/box-model.html`).
 
 **Automatic dark mode:** `@media` is supported as a safe subset — with the dark theme on (and
 Author styles enabled), a page's `@media (prefers-color-scheme: dark)` rules apply automatically.

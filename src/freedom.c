@@ -30,6 +30,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  default: open the Wayland browser GUI\n");
     fprintf(fp, "  --headless: render the page to stdout and exit\n");
     fprintf(fp, "  --download-pdf=PATH: headless render to a vector PDF at PATH (implies --headless)\n");
+    fprintf(fp, "  --download-png=PATH: headless render to a single PNG image at PATH (implies --headless)\n");
     fprintf(fp, "  --author-css: apply author CSS (colors/sizing/line-height) in the headless render (local only)\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
@@ -58,6 +59,11 @@ static int global_insecure = 0;
  * vector PDF at this path instead of printing to stdout. The path is a trusted
  * local CLI argument, used verbatim. */
 static const char *g_pdf_out = NULL;
+
+/* When non-NULL (set by --download-png=PATH), headless mode renders the page to a
+ * single full-height PNG bitmap at this path instead of printing to stdout. The
+ * path is a trusted local CLI argument, used verbatim. */
+static const char *g_png_out = NULL;
 
 /* Set by --author-css: apply author CSS (caps.css) in the headless render, so
  * author styling (colors, text-align, font-size, line-height) is visually
@@ -208,7 +214,7 @@ static int render_page(const char *html, size_t len, const char *top_url) {
 
     /* In stdout mode the title leads the output; in PDF mode it is carried inside
      * the document, so stdout stays a single confirmation line. */
-    if (g_pdf_out == NULL && page.title != NULL && page.title_len > 0) {
+    if (g_pdf_out == NULL && g_png_out == NULL && page.title != NULL && page.title_len > 0) {
         printf("%s\n", page.title);
     }
 
@@ -235,6 +241,21 @@ static int render_page(const char *html, size_t len, const char *top_url) {
             }
         } else {
             fprintf(stderr, "freedom: nothing to render to PDF for this page\n");
+            out_rc = EXIT_ERROR;
+        }
+    } else if (g_png_out != NULL) {
+        /* Headless raster-PNG export for visual review: a single full-height bitmap
+         * of the SAME display list the GUI would paint, no Wayland window. */
+        if (rs == RD_OK && rd_count(doc) > 0) {
+            long img_h = 0;
+            if (ui_render_png(doc, g_png_out, &img_h) != UI_OK) {
+                fprintf(stderr, "freedom: could not write PNG to '%s'\n", g_png_out);
+                out_rc = EXIT_ERROR;
+            } else {
+                printf("Saved PNG (%ld px): %s\n", img_h, g_png_out);
+            }
+        } else {
+            fprintf(stderr, "freedom: nothing to render to PNG for this page\n");
             out_rc = EXIT_ERROR;
         }
     } else if (rs == RD_OK && rd_count(doc) > 0) {
@@ -355,6 +376,17 @@ int main(int argc, char **argv) {
             }
             g_pdf_out = path;
             headless = 1; /* PDF export is a headless operation (no window) */
+        } else if (strncmp(arg, "--download-png=", 15) == 0) {
+            /* Bare "--download-png" (no =PATH) falls through to the unknown-option
+             * branch below -> usage error: never guess an output path. */
+            const char *path = arg + 15;
+            if (path[0] == '\0') {
+                fprintf(stderr, "freedom: --download-png requires a non-empty PATH\n");
+                print_usage(stderr, argv[0]);
+                return EXIT_USAGE;
+            }
+            g_png_out = path;
+            headless = 1; /* PNG export is a headless operation (no window) */
         } else if (strcmp(arg, "--author-css") == 0) {
             g_author_css = 1; /* apply author CSS in the headless render (local only) */
         } else if (strcmp(arg, "--insecure") == 0 || strcmp(arg, "-I") == 0) {

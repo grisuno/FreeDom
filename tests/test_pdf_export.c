@@ -181,6 +181,43 @@ static void test_build_path_null_args(void **state) {
     assert_int_equal(pe_build_path("/tmp", "x", out, 0), PE_ERR_NULL_ARG);
 }
 
+/* --- pe_build_path_ext (PNG and other extensions) --- */
+
+static void test_build_path_ext_png(void **state) {
+    (void)state;
+    char out[256];
+    assert_int_equal(pe_build_path_ext("/home/u/Downloads", "My Page", PE_EXT_PNG,
+                                       out, sizeof out), PE_OK);
+    assert_string_equal(out, "/home/u/Downloads/My_Page.png");
+}
+
+static void test_build_path_ext_null_ext(void **state) {
+    (void)state;
+    char out[256];
+    /* ext == NULL is treated as "" (no extension appended). */
+    assert_int_equal(pe_build_path_ext("/tmp", "doc", NULL, out, sizeof out), PE_OK);
+    assert_string_equal(out, "/tmp/doc");
+}
+
+static void test_build_path_ext_hostile_title_contained(void **state) {
+    (void)state;
+    char out[256];
+    /* The hostile title is sanitised the same way regardless of extension: no
+     * traversal escapes the dir. */
+    assert_int_equal(pe_build_path_ext("/safe/dir", "../../../etc/passwd",
+                                       PE_EXT_PNG, out, sizeof out), PE_OK);
+    assert_string_equal(out, "/safe/dir/etc_passwd.png");
+    assert_null(strstr(out + strlen("/safe/dir"), ".."));
+}
+
+static void test_build_path_ext_overflow_fails_closed(void **state) {
+    (void)state;
+    char out[16];
+    assert_int_equal(pe_build_path_ext("/a/very/long/dir", "name", PE_EXT_PNG,
+                                       out, sizeof out), PE_ERR_OVERFLOW);
+    assert_string_equal(out, "");
+}
+
 /* --- pe_paginate --- */
 
 static void test_paginate_single_page(void **state) {
@@ -269,6 +306,10 @@ int main(void) {
         cmocka_unit_test(test_build_path_basic),
         cmocka_unit_test(test_build_path_trailing_slash),
         cmocka_unit_test(test_build_path_hostile_title_contained),
+        cmocka_unit_test(test_build_path_ext_png),
+        cmocka_unit_test(test_build_path_ext_null_ext),
+        cmocka_unit_test(test_build_path_ext_hostile_title_contained),
+        cmocka_unit_test(test_build_path_ext_overflow_fails_closed),
         cmocka_unit_test(test_build_path_empty_title_fallback),
         cmocka_unit_test(test_build_path_overflow_fails_closed),
         cmocka_unit_test(test_build_path_null_args),

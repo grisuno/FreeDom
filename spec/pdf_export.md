@@ -31,6 +31,7 @@ layout y pinta página por página según `pe_paginate`.
 ```c
 #define PE_NAME_MAX       128u    /* máx. bytes del basename saneado (sin la extensión) */
 #define PE_EXT            ".pdf"
+#define PE_EXT_PNG        ".png"  /* export raster (revisión visual): ui_render_png */
 #define PE_FALLBACK_NAME  "page"  /* nombre por defecto cuando el título no da nada usable */
 
 typedef enum pe_status {
@@ -44,6 +45,8 @@ typedef enum pe_status {
 
 ```c
 pe_status pe_safe_basename(const char *title, char *out, size_t outsz);
+pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,
+                            char *out, size_t outsz);
 pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz);
 size_t    pe_paginate(const double *tops, const double *heights, size_t n,
                       double page_h, int *out_page, double *out_page_y);
@@ -69,8 +72,12 @@ size_t    pe_paginate(const double *tops, const double *heights, size_t n,
 - `title == NULL` se trata como título vacío (→ fallback).
 - **No** añade la extensión: eso es trabajo de `pe_build_path`.
 
-### `pe_build_path`
-- Construye la ruta completa `dir + "/" + pe_safe_basename(title) + PE_EXT` en `out`.
+### `pe_build_path_ext` / `pe_build_path`
+- `pe_build_path_ext` construye la ruta completa `dir + "/" + pe_safe_basename(title) + ext` en `out`.
+  `pe_build_path` es el wrapper que pasa `PE_EXT` (`.pdf`); el export PNG pasa `PE_EXT_PNG` (`.png`).
+  Una sola superficie de saneo/contención de ruta para ambos formatos (DRY).
+- `ext` es un literal de **confianza** (lo pasa la app, no la red); `ext == NULL` se trata como `""`
+  (sin extensión).
 - `dir` es de **confianza** (lo elige la app desde XDG/`$HOME`, no viene de la red); `title` es
   **hostil** y pasa por `pe_safe_basename`. Un `/` final en `dir` se respeta (no se duplica).
 - **Falla cerrado:** si la ruta no cabe en `outsz` → `PE_ERR_OVERFLOW` y `out` queda vacío (nunca una

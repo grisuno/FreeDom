@@ -63,8 +63,10 @@ pe_status pe_safe_basename(const char *title, char *out, size_t outsz) {
     return PE_OK;
 }
 
-pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz) {
+pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,
+                            char *out, size_t outsz) {
     if (dir == NULL || out == NULL || outsz == 0) return PE_ERR_NULL_ARG;
+    if (ext == NULL) ext = "";
 
     char base[PE_NAME_MAX + 1];
     pe_status st = pe_safe_basename(title, base, sizeof base);
@@ -73,7 +75,7 @@ pe_status pe_build_path(const char *dir, const char *title, char *out, size_t ou
     size_t dlen = strlen(dir);
     int need_slash = (dlen > 0 && dir[dlen - 1] != '/');
     size_t blen = strlen(base);
-    size_t extlen = strlen(PE_EXT);
+    size_t extlen = strlen(ext);
     size_t total = dlen + (size_t)(need_slash ? 1 : 0) + blen + extlen; /* excl. NUL */
     if (total + 1 > outsz) { out[0] = '\0'; return PE_ERR_OVERFLOW; }
 
@@ -81,9 +83,13 @@ pe_status pe_build_path(const char *dir, const char *title, char *out, size_t ou
     memcpy(out + pos, dir, dlen); pos += dlen;
     if (need_slash) out[pos++] = '/';
     memcpy(out + pos, base, blen); pos += blen;
-    memcpy(out + pos, PE_EXT, extlen); pos += extlen;
+    memcpy(out + pos, ext, extlen); pos += extlen;
     out[pos] = '\0';
     return PE_OK;
+}
+
+pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz) {
+    return pe_build_path_ext(dir, title, PE_EXT, out, outsz);
 }
 
 size_t pe_paginate(const double *tops, const double *heights, size_t n,

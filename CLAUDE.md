@@ -81,21 +81,25 @@ Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scou
 5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`. como parte de la
    validacion quiero que utilices ya sea urls y archivos html para revisar el comportamiento de la
    GUI al renderizar. La GUI necesita Wayland (no siempre disponible para un agente), así que el
-   render se inspecciona **headless** exportando la página a PDF (el método nativo de "Save as PDF",
-   ya implementado de forma programática: flag `--download-pdf=PATH`) y rasterizándolo a PNG. Es la
-   **skill `/visual-review`** (`.claude/skills/visual-review/SKILL.md`). ## Pasos
-  a. Exporta a PDF: `./build/freedom --download-pdf=$SP/frame.pdf <URL-o-archivo.html>` (`$SP` = el
-     scratchpad de la sesión; no `/tmp` ni el árbol del repo).
-  b. Rasteriza a PNG: `mutool draw -r 96 -o $SP/frame.png $SP/frame.pdf 1` (o `-o $SP/frame-%d.png`
-     sin número de página para todas).
-  c. Lee la imagen con la herramienta Read: `Read $SP/frame.png` (fallback: `Read` del PDF con `pages`).
-  d. Verifica:
+   render se inspecciona **headless** exportando la página a **PNG** (método nativo "Save as PNG",
+   flag `--download-png=PATH`) y leyendo la imagen directamente. **Preferí PNG sobre PDF:** un PNG es
+   una sola imagen que se lee en **un paso** y cuesta muchos menos tokens; el PDF (`--download-pdf`)
+   queda para cuando se necesita el documento vectorial real (texto seleccionable, paginación), y aún
+   requiere rasterizar con `mutool`. Es la **skill `/visual-review`**
+   (`.claude/skills/visual-review/SKILL.md`). ## Pasos
+  a. Exporta a PNG: `./build/freedom --download-png=$SP/frame.png <URL-o-archivo.html>` (`$SP` = el
+     scratchpad de la sesión; no `/tmp` ni el árbol del repo). Un solo bitmap de toda la página
+     (1000px de ancho; alto = contenido, acotado a 30000px). Añadí `--author-css` para revisar CSS de
+     autor (colores/cajas), `--js=on` para JS, `--tor`/`--i2p`/`--insecure` según haga falta.
+  b. Lee la imagen con la herramienta Read: `Read $SP/frame.png`. (Fallback PDF: `--download-pdf` +
+     `mutool draw -r 96 -o $SP/frame-%d.png $SP/frame.pdf`, o `Read` del PDF con `pages`.)
+  c. Verifica:
     - ¿Se renderiza texto legible?
     - ¿Los elementos tienen posicionamiento correcto (no superpuestos)?
-    - ¿Los colores/temas (sepia/oscuro) se aplican? (el PDF fuerza tema claro para imprimir
+    - ¿Los colores/temas (sepia/oscuro) se aplican? (la exportación fuerza tema claro para imprimir
       oscuro-sobre-blanco; imágenes y colores de autor están OFF por defecto → placeholders.)
     - ¿Hay artefactos de rendering?
-  e. Compara con screenshot de referencia si existe
+  d. Compara con screenshot de referencia si existe
 
    **Verificación visual de Freebug (la consola de devtools) — parte del contrato.** El render de
    página se revisa headless con `--download-pdf`, pero **Freebug es una ventana Wayland aparte**
@@ -508,6 +512,23 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   (vacío/título-sin-cerrar/grid y listas enormes) limpio bajo ASan. *(Núcleo + IPC + E2E visual
   verificados; la ventana Wayland interactiva sigue pendiente de verificación al dueño.)* Ver
   `[[freedom-visual-review-headless]]`.
+- **Hito (tooling) — Export PNG headless + GUI "Save as PNG" (revisión visual más barata).** La
+  revisión visual deja de depender del PDF: `--download-png=PATH` (y "Save as PNG (Ctrl+Shift+P)" en
+  el GUI) exporta la **misma** display list a un **único PNG** (un `cairo_image_surface_t` ARGB de
+  1000px de ancho, alto = contenido maquetado, acotado a 30000px anti-DoS, **sin paginar**), que el
+  agente **lee en un paso** — mucho menos tokens que el PDF (que primero hay que rasterizar con
+  `mutool`). Boyscout/DRY: `pe_build_path` se generalizó a `pe_build_path_ext(dir,title,ext,...)` (una
+  sola superficie de saneo de nombre hostil fail-closed para `.pdf` y `.png`); `write_doc_png`/
+  `ui_render_png` reusan `layout_doc`/`paint_content_row`/`paint_box_decoration` (idéntico a pantalla y
+  PDF, tema claro forzado). Mismas reglas de Privacy by Default (imágenes off → placeholders). La skill
+  `/visual-review` y la doctrina §3.5 ahora **prefieren PNG**; el PDF queda como fallback para el
+  documento vectorial real. Spec (`freedom.md`, `pdf_export.md`) + tests (4 en `test_pdf_export` para
+  `pe_build_path_ext`; 2 E2E en `test_freedom`: PNG local empieza por la firma PNG, `--download-png`
+  sin `=PATH` → exit 2 fail-closed) + `make test`/`make asan` (exit 0) limpios + fuzz `make fuzz-pe`
+  (7.4M execs, sin crash/leak/UB) + **E2E visual** (`examples/rich.html` y `box-model.html` con
+  `--author-css` exportados y leídos directo del PNG). Sin dependencia nueva (`cairo_surface_write_to_png`
+  ya viene con Cairo; `cairo-png` presente). *(Núcleo + E2E visual verificados; ventana Wayland
+  interactiva pendiente al dueño.)* Ver `[[freedom-visual-review-headless]]`.
 - **Hito 23b (combinadores) — CSS descendiente (`A B`) e hijo (`A > B`).** El módulo puro `css`
   deja de tratar todo combinador como "no soportado": un `css_sel` pasa de un único compuesto a una
   **cadena de compuestos** (`parts[CSS_MAX_COMPOUNDS]`, 4) unidos por descendiente (espacio) o hijo
