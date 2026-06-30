@@ -836,7 +836,16 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   el menú "Author colors (CSS)" pasa a **"Author styles (CSS)"**. (e) **Modo sin distracciones**
   (`reader`, **`Ctrl+D`** + ítem de menú): `pv_build_full(reader)` descarta `nav/header/footer/aside`,
   la GUI apaga `caps.css`/imágenes (sin tocar los toggles del usuario) y centra el contenido en una
-  columna de lectura (`apply_theme` ensancha el gutter). Specs (`css.md`, `page_view.md`, `tab.md`,
+  columna de lectura. **Fix (2026-06-29):** el centrado del reader vive en `content_margin_x`
+  (HORIZONTAL únicamente); antes `apply_theme` inflaba `w->theme.content_margin`, que es **también** el
+  margen VERTICAL (`content_geometry` resta `2*content_margin` a la altura del viewport y desplaza el
+  origen) → en ventanas anchas la altura de contenido se volvía negativa y la página se pintaba
+  **fuera de la ventana / nada visible**. Ahora los ejes están desacoplados: `content_margin_x(w)`
+  (horizontal, lo usan `content_width` y el `left` de pintado/hit-test) aplica el centrado;
+  `content_margin` sigue siendo el margen vertical base. Afordancia de verificación
+  **`FREEDOM_READER=1`** (abre en modo reader al inicio, como `FREEDOM_FREEBUG=1`) — verificado en
+  pantalla (weston+Xvfb): boilerplate eliminado, columna centrada, contenido completo visible.
+  Specs (`css.md`, `page_view.md`, `tab.md`,
   `render_doc.md`) + tests (19 `css`, 6 nuevos en `page_view`: hoja/align+font/bold+inline-gana/
   display:none/reader/setter) + `make test` (35 suites) / `make asan` (35 suites, exit 0) limpios +
   fuzz `make fuzz-css` (1M execs) y `fuzz-pv` (cascada CSS sobre HTML hostil) sin crash/leak/UB.

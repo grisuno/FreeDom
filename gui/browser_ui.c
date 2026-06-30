@@ -411,14 +411,10 @@ static void apply_theme(browser_window *w) {
     w->theme.body_font     = zm_apply(w->theme.body_font, w->zoom_pct);
     w->theme.paragraph_gap = w->theme.paragraph_gap * s;
     w->theme.image_box_pad = w->theme.image_box_pad * s;
-    /* Distraction-free mode centers the content in a fixed reading column by widening
-     * the symmetric page gutter. content_width and the paint/hit-test left margin both
-     * read this single field, so they stay consistent. */
-    if (w->reader) {
-        double avail = (double)w->width - UI_SCROLLBAR_W;
-        double margin = (avail - UI_READER_COLUMN_W) / 2.0;
-        if (margin > w->theme.content_margin) w->theme.content_margin = margin;
-    }
+    /* Distraction-free centering lives in content_margin_x (HORIZONTAL only); it must
+     * NOT widen w->theme.content_margin, which is also the VERTICAL page margin
+     * (content_geometry height + paint origin) -- inflating it there pushed the
+     * content off-screen on wide windows. */
 }
 
 /* Applies a new zoom level: rebuild the theme and repaint. The page is laid out
@@ -1742,8 +1738,23 @@ static void content_geometry(const browser_window *w, double *top, double *heigh
  * and the always-reserved scrollbar gutter. The single source of truth shared by
  * the painter and the click/link hit-tests so the laid-out lines and the hit
  * geometry cannot drift. */
+/* Horizontal page margin (left edge to content, and symmetric right gutter). Equals
+ * the base content_margin, except in distraction-free mode it widens to center the
+ * content in a fixed reading column (UI_READER_COLUMN_W). This is HORIZONTAL only --
+ * the vertical margin stays w->theme.content_margin (see content_geometry), so reader
+ * centering never shrinks the vertical viewport. */
+static double content_margin_x(const browser_window *w) {
+    double m = w->theme.content_margin;
+    if (w->reader) {
+        double avail = (double)w->width - UI_SCROLLBAR_W;
+        double margin = (avail - UI_READER_COLUMN_W) / 2.0;
+        if (margin > m) m = margin;
+    }
+    return m;
+}
+
 static double content_width(const browser_window *w) {
-    double cw = (double)w->width - 2.0 * w->theme.content_margin - UI_SCROLLBAR_W;
+    double cw = (double)w->width - 2.0 * content_margin_x(w) - UI_SCROLLBAR_W;
     if (cw < 1.0) cw = 1.0;
     return cw;
 }
@@ -3018,7 +3029,7 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
-    double left = th->content_margin;
+    double left = content_margin_x(w);
     double content_w = content_width(w);
 
     rc_layout L;
@@ -3316,7 +3327,7 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     if (py < content_top || py > content_top + content_h) return NULL;
 
     const ui_theme *th = &w->theme;
-    double left = th->content_margin;
+    double left = content_margin_x(w);
     double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
@@ -3381,7 +3392,7 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
     if (py < content_top || py > content_top + content_h) return NULL;
 
     const ui_theme *th = &w->theme;
-    double left = th->content_margin;
+    double left = content_margin_x(w);
     double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
@@ -4289,7 +4300,7 @@ static void paint(browser_window *w) {
                     if (n > linecap - 1) n = linecap - 1;
                     memcpy(linebuf, text + lay.lines[idx].offset, n);
                     linebuf[n] = '\0';
-                    cairo_move_to(cr, th->content_margin, y);
+                    cairo_move_to(cr, content_margin_x(w), y);
                     cairo_show_text(cr, linebuf);
                     y += cell_h;
                 }
@@ -6016,6 +6027,11 @@ ui_status ui_run_browser(const char *start_url) {
     load_favorites(&w);                    /* omnibox autocomplete from allow.conf */
     w.js_mode = jsp_mode_from_str(getenv("FREEDOM_JS")); /* default JSP_ALLOWLIST */
     init_net_config(&w);  /* Tor/I2P routing config from the environment (opt-in) */
+
+    /* Optionally start in distraction-free (reader) mode: set FREEDOM_READER to any
+     * value (like a startup affordance for the Ctrl+D toggle). Set before the first
+     * load so the worker drops boilerplate and the paint centers the reading column. */
+    if (getenv("FREEDOM_READER") != NULL) w.reader = 1;
 
     /* Initial page. Provide instructions because the strict TLS policy means
        many public sites will be rejected. */
