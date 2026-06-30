@@ -8,6 +8,7 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include "dom_debug.h"
 #include "freebug.h"
 #include "js_policy.h"
 #include "net_realm.h"
@@ -38,6 +39,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --torify: also route ordinary clearnet through Tor (implies --tor)\n");
     fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy (GUI; headless runs JS when this resolves to 'on')\n");
     fprintf(fp, "  --dump-console: headless, run the page's JS and print the captured console (Freebug); implies JS on\n");
+    fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n");
 }
 
 static int is_https_url(const char *s) {
@@ -74,6 +76,11 @@ static int g_author_css = 0;
 /* Set by --dump-console: after the headless render, print the captured Freebug
  * console (page console.* output + any uncaught script error). Implies running JS. */
 static int g_dump_console = 0;
+
+/* Set by --dump-dom: print the paint-ready render tree (dom_debug) to stdout instead
+ * of the page render, the agent-readable instrument for diagnosing layout/paint gaps.
+ * Honours --author-css (so the box tree is populated); does NOT imply running JS. */
+static int g_dump_dom = 0;
 
 /* When nonzero, the headless render runs the page's inline JS (tab_load_full run_js).
  * Set by --dump-console and by --js resolving to "on". Default off (Secure by Default). */
@@ -191,6 +198,21 @@ static void print_console(const fb_buffer *log) {
     if (log->overflow) printf("[notice] console output was truncated (buffer full)\n");
 }
 
+/* Prints the paint-ready render tree (dom_debug) to stdout. Two-pass: measure, then
+ * allocate exactly and format. The dump is bounded by the document; dd_format never
+ * overruns and allocates nothing itself. */
+static void print_dom(const rd_doc *doc) {
+    size_t need = dd_format(doc, NULL, 0);
+    char *buf = (char *)malloc(need + 1);
+    if (buf == NULL) {
+        fprintf(stderr, "freedom: out of memory while dumping the render tree\n");
+        return;
+    }
+    dd_format(doc, buf, need + 1);
+    fputs(buf, stdout);
+    free(buf);
+}
+
 /* Loads html into a fresh tab and prints the structured render of the page.
  * top_url is the page's https origin (for per-image policy decisions) or NULL for
  * a local file. Runs the page's JS when g_headless_js (so --dump-console can show
@@ -299,11 +321,16 @@ static int render_page(const char *html, size_t len, const char *top_url) {
             fprintf(stderr, "freedom: nothing to render to PNG for this page\n");
             out_rc = EXIT_ERROR;
         }
-    } else if (rs == RD_OK && rd_count(doc) > 0) {
+    } else if (rs == RD_OK && rd_count(doc) > 0 && !g_dump_dom) {
         print_doc(doc);
-    } else if (page.text != NULL && page.text_len > 0) {
+    } else if (!g_dump_dom && page.text != NULL && page.text_len > 0) {
         printf("\n%s\n", page.text); /* fallback if the display list is empty */
     }
+
+    /* --dump-dom: the agent-readable render tree, printed after any render output
+     * (so --dump-dom alone prints just the tree; combined with --download-png it
+     * writes the PNG and prints the tree, both MCP-visible). */
+    if (g_dump_dom && rs == RD_OK) print_dom(doc);
     rd_free(doc);
 
     /* Developer console (Freebug): show what the page's JS logged and any error. */
@@ -453,6 +480,9 @@ int main(int argc, char **argv) {
             js_on = (jsp_mode_from_str(arg + 5) == JSP_ON); /* headless runs JS only on 'on' */
         } else if (strcmp(arg, "--dump-console") == 0) {
             g_dump_console = 1;
+            headless = 1;      /* it is a headless diagnostic (no window) */
+        } else if (strcmp(arg, "--dump-dom") == 0) {
+            g_dump_dom = 1;
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (arg[0] == '-') {
             fprintf(stderr, "freedom: unknown option '%s'\n", arg);

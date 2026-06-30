@@ -2464,9 +2464,15 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     if (ncols < 1) ncols = 1;
 
     if (n == 0 || n > BT_MAX_CHILDREN || ncols > BT_MAX_CHILDREN) {
+        /* Too many cells for the grid engine: degrade to plain flow, but honor each
+         * cell's block_break so a table that overflows the engine still lays out one
+         * ROW per line (page_view marks the first cell of every <tr>) instead of one
+         * continuous blob. This is the Hacker News case (>128 cells). */
         for (size_t k = start; k < end; ++k) {
-            s->bg_rgb = (!w->force_theme) ? rd_at(doc, k)->bg_rgb : -1;
-            flow_text_block(cr, w, L, s, th, rd_at(doc, k), content_w);
+            const rd_block *bk = rd_at(doc, k);
+            if (bk->block_break) flush_line(L, s, th);
+            s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
+            flow_text_block(cr, w, L, s, th, bk, content_w);
         }
         return;
     }
@@ -2490,8 +2496,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     /* First pass: column widths (heights still 0). */
     if (bt_layout(&root, content_w) != BT_OK) {
         for (size_t k = start; k < end; ++k) {
-            s->bg_rgb = (!w->force_theme) ? rd_at(doc, k)->bg_rgb : -1;
-            flow_text_block(cr, w, L, s, th, rd_at(doc, k), content_w);
+            const rd_block *bk = rd_at(doc, k);
+            if (bk->block_break) flush_line(L, s, th);
+            s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
+            flow_text_block(cr, w, L, s, th, bk, content_w);
         }
         return;
     }

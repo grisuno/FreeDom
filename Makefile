@@ -98,9 +98,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
-             $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit
+             $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
+             $(BUILD_DIR)/test_dom_debug
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -200,6 +201,17 @@ $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_
                               $(BUILD_DIR)/css_color.o \
                               $(BUILD_DIR)/box_style.o \
                               $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
+
+# dom_debug formats an rd_doc into an agent-readable dump, so it links the same
+# render_doc chain plus dom_debug.o; the test builds rd_doc through rd_build.
+$(BUILD_DIR)/test_dom_debug: $(TEST_DIR)/test_dom_debug.c $(BUILD_DIR)/dom_debug.o \
+                             $(BUILD_DIR)/render_doc.o \
+                             $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
+                             $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css.o \
+                             $(BUILD_DIR)/css_color.o \
+                             $(BUILD_DIR)/box_style.o \
+                             $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 # Pure URL operations: validation + RFC 3986 reference resolution. No I/O deps.
@@ -336,6 +348,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
+                      $(BUILD_DIR)/dom_debug.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -439,6 +452,19 @@ fuzz-css: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/css_color.c \
 	  -o $(BUILD_DIR)/fuzz_css
 	./$(BUILD_DIR)/fuzz_css -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of dom_debug (render-tree dump). Arbitrary bytes -> DOM ->
+# pv_build -> rd_build (caps.css on) -> dd_format must never crash/leak/UB nor write
+# past the caller's cap; the measure pass and the bounded pass must agree.
+fuzz-dd: $(PSL_OBJ) | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_dom_debug.c $(SRC_DIR)/dom_debug.c $(SRC_DIR)/render_doc.c \
+	  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/page_view.c \
+	  $(SRC_DIR)/css.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
+	  $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(PSL_OBJ) \
+	  -o $(BUILD_DIR)/fuzz_dom_debug $(HP_LIBS)
+	./$(BUILD_DIR)/fuzz_dom_debug -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
 
 # Coverage-guided fuzzing of url_split (JS `location.*` read side) + the JS-navigation
 # gate (ln_resolve). The page URL and the JS-requested target are hostile input:

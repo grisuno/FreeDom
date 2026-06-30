@@ -300,6 +300,37 @@ static void test_no_dump_console_without_flag(void **state) {
     unlink(path);
 }
 
+/* --- headless render-tree dump (--dump-dom, layout-debugging tooling) --- */
+
+/* --dump-dom prints the agent-readable render tree (header + per-block lines) instead
+ * of the normal text render, and does not run JS. */
+static void test_dump_dom_prints_render_tree(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>Tree</title></head><body>"
+        "<h1>Head</h1><p>para</p>"
+        "<a href=\"https://e.example/z\">lnk</a></body></html>";
+    const char *path = "__freedom_dumpdom.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[4096];
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args, "--dump-dom %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "=== Freedom render tree ==="));
+    assert_non_null(strstr(out, "blocks:"));
+    assert_non_null(strstr(out, "<h1>"));         /* heading tag */
+    assert_non_null(strstr(out, "<a>"));          /* link tag */
+    assert_non_null(strstr(out, "https://e.example/z")); /* link href surfaced */
+
+    unlink(path);
+}
+
 /* --- network policy --- */
 
 static void test_rejects_http_url(void **state) {
@@ -326,6 +357,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),
+        cmocka_unit_test(test_dump_dom_prints_render_tree),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

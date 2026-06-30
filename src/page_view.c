@@ -775,13 +775,20 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
 
 /* True if the resolved style declares any paintable box (border/padding/radius/
  * shadow/outline). box-sizing alone is not a box (it only matters with a width). */
+/* A real (non-static) position makes a block box-carrying too, so its position/insets/
+ * z-index ride the box-def tree (painted for relative; carried for the box engine). */
+static int css_has_position(const css_style *cs) {
+    return cs->position == CSS_POS_RELATIVE || cs->position == CSS_POS_ABSOLUTE ||
+           cs->position == CSS_POS_FIXED   || cs->position == CSS_POS_STICKY;
+}
+
 static int css_has_boxdeco(const css_style *cs) {
     return cs->pad_top != CSS_LEN_UNSET || cs->pad_right != CSS_LEN_UNSET ||
            cs->pad_bottom != CSS_LEN_UNSET || cs->pad_left != CSS_LEN_UNSET ||
            cs->border_top_width != CSS_LEN_UNSET || cs->border_right_width != CSS_LEN_UNSET ||
            cs->border_bottom_width != CSS_LEN_UNSET || cs->border_left_width != CSS_LEN_UNSET ||
            cs->border_radius != CSS_LEN_UNSET || cs->box_shadow_color != -1 ||
-           cs->outline_width != CSS_LEN_UNSET;
+           cs->outline_width != CSS_LEN_UNSET || css_has_position(cs);
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -835,6 +842,10 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bsh_color = cs->box_shadow_color; d->bsh_inset = cs->box_shadow_inset;
     d->outline_w = cs->outline_width; d->outline_style = cs->outline_style;
     d->outline_color = cs->outline_color;
+    d->position = cs->position;
+    d->inset_top = cs->inset_top; d->inset_right = cs->inset_right;
+    d->inset_bottom = cs->inset_bottom; d->inset_left = cs->inset_left;
+    d->z_index = cs->z_index;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
@@ -1312,13 +1323,40 @@ static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_do
     return NULL;
 }
 
-/* Nonzero if n has a <td>/<th> ancestor up to base: its text was already emitted as
- * one collected cell run, so the normal walk must not re-emit the inner text. */
-static int in_cell_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+/* Nearest <tr> ancestor of n up to base, or NULL. Used so each table ROW is its own
+ * block: the first cell of a row breaks to a new line, the rest share it, so a table
+ * that overflows the grid engine still degrades to one row per line (not one blob). */
+static const lxb_dom_node_t *nearest_row(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+    for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(p) == LXB_TAG_TR) return p;
+        if (p == base) break;
+    }
+    return NULL;
+}
+
+/* Nonzero if cell has a descendant <table>: it is then a structural CONTAINER, not a
+ * leaf cell. Only leaf cells (no nested table) are collected as one text run; a
+ * container cell is walked so the inner table's cells are collected separately. This
+ * is what stops a legacy table-in-table layout (e.g. Hacker News: the story list is a
+ * <table> nested inside a <td> of the outer table) from flattening its whole subtree
+ * into one giant run. Early-exit on the first nested table (bounded by the subtree). */
+static int cell_has_nested_table(const lxb_dom_node_t *cell) {
+    for (lxb_dom_node_t *k = cell->first_child; k != NULL; k = node_next(k, cell)) {
+        if (k->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(k) == LXB_TAG_TABLE) return 1;
+    }
+    return 0;
+}
+
+/* Nonzero if n's NEAREST <td>/<th> ancestor (up to base) is a LEAF cell (no nested
+ * table): its text was already emitted as one collected cell run, so the normal walk
+ * must not re-emit it. A container cell (one wrapping a nested table) does NOT suppress
+ * its content -- the inner table's leaf cells collect their own text, and any text
+ * directly in the container cell is emitted normally. */
+static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_tag_id_t t = node_tag(p);
-            if (t == LXB_TAG_TD || t == LXB_TAG_TH) return 1;
+            if (t == LXB_TAG_TD || t == LXB_TAG_TH) return !cell_has_nested_table(p);
         }
         if (p == base) break;
     }
@@ -1474,7 +1512,8 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
              * bold. The cell's inner text nodes are suppressed below (in_cell_subtree)
              * so they are not re-emitted. Nested cells are handled by the outer cell. */
             if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
-                && !in_skipped_subtree(n, base, js_enabled) && !in_cell_subtree(n, base)
+                && !in_skipped_subtree(n, base, js_enabled) && !in_collected_cell(n, base)
+                && !cell_has_nested_table(n) /* a container cell is walked, not collected */
                 && !in_hidden_subtree(n, base, sheet)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 const lxb_dom_node_t *table = nearest_table(n, base);
@@ -1487,9 +1526,12 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 free(raw);
                 if (cell == NULL) { rc = PV_ERR_OOM; goto cleanup; }
 
-                /* The whole table is one block: the first cell breaks from the prior
-                 * block, the rest share it, so the grid is laid out as one unit. */
-                const lxb_dom_node_t *tblk = (table != NULL) ? table : n;
+                /* Each table ROW is one block: the first cell of a row breaks from the
+                 * prior row, the rest of the row share it. The grid (cont_id on the
+                 * table) still aligns columns when it fits the engine; when a table
+                 * overflows the engine it degrades to one row per line, not one blob. */
+                const lxb_dom_node_t *row = nearest_row(n, base);
+                const lxb_dom_node_t *tblk = (row != NULL) ? row : (table != NULL ? table : n);
                 int brk = pending_break || (tblk != prev_block);
                 pending_break = 0;
                 prev_block = tblk;
@@ -1603,7 +1645,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         }
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
         if (in_skipped_subtree(n, base, js_enabled)) continue;
-        if (in_cell_subtree(n, base)) continue; /* already emitted as a collected cell run */
+        if (in_collected_cell(n, base)) continue; /* already emitted as a collected cell run */
         if (in_hidden_subtree(n, base, sheet)) continue; /* display:none */
         if (reader && in_boilerplate_subtree(n, base)) continue; /* distraction-free */
 

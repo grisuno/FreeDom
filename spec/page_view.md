@@ -212,12 +212,32 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
 - **Énfasis inline**: `bold` = 1 si algún ancestro es `<b>/<strong>/<th>`; `italic` = 1 si algún
   ancestro es `<i>/<em>`. Es estructura (peso/inclinación del glifo), se transporta por defecto y
   **no** está gateado por `caps.css`.
-- **Tablas**: cada celda `<td>/<th>` se emite como **un** run de texto recolectado (su markup
-  interno se aplana a texto plano, no se re-emite), anotado como item de un contenedor **grid**:
-  `cont_id` = id de la `<table>` ancestro, `cont_display` = `GRID`, `cont_cols` = la fila más ancha
-  (máx. celdas por `<tr>`, en `[1, PV_MAX_GRID_COLS]`). `<th>` es negrita. Así la capa de
-  presentación reusa el motor flex/grid (`box_tree`) y las celdas se alinean en columnas. `colspan`/
-  `rowspan` quedan fuera de alcance (tabla rectangular).
+- **Tablas**: cada celda `<td>/<th>` **hoja** se emite como **un** run de texto recolectado (su
+  markup interno se aplana a texto plano, no se re-emite), anotado como item de un contenedor
+  **grid**: `cont_id` = id de la `<table>` ancestro **más cercano** de la celda, `cont_display` =
+  `GRID`, `cont_cols` = la fila más ancha de **esa** tabla (máx. celdas por `<tr>`, en
+  `[1, PV_MAX_GRID_COLS]`). `<th>` es negrita. Así la capa de presentación reusa el motor flex/grid
+  (`box_tree`) y las celdas se alinean en columnas. `colspan`/`rowspan` quedan fuera de alcance
+  (tabla rectangular).
+  - **Tablas anidadas (celda = contenedor, no hoja).** Una celda que contiene una `<table>`
+    descendiente es una **hoja = no**: NO se recolecta como un run (eso aplanaría todo su subárbol).
+    Es un **contenedor estructural** que se recorre normalmente, de modo que las celdas de la tabla
+    interna se recolectan **cada una por separado** contra **su** tabla (la interna): cada tabla
+    aporta su propio `cont_id`/`cont_cols`. La supresión de re-emisión (`in_collected_cell`) solo
+    aplica al texto cuya celda `<td>/<th>` ancestro **más cercana es hoja** (la que lo recolectó); el
+    texto directo de una celda-contenedor se emite normal. Esto es lo que evita que un sitio legado
+    que maqueta con tablas anidadas (p. ej. Hacker News: la lista de historias vive en una `<table>`
+    dentro de un `<td>` de la tabla externa) colapse sus 30 filas en **un solo** run gigante: ahora
+    cada celda de cada fila es un item de grid propio. Recursivo a cualquier profundidad
+    (acotado por el árbol).
+  - **Fila = bloque (separación por `<tr>`).** El **bloque** de una celda es su `<tr>` más
+    cercano (no la tabla entera): la **primera** celda de cada fila lleva `block_break`, las
+    demás de la fila lo comparten. Así, cuando una tabla **excede** el motor de grid
+    (`BT_MAX_CHILDREN`=128 celdas — el caso de Hacker News, ~150 celdas), la presentación
+    degrada a **una fila por línea** (las celdas de la fila fluyen en línea, salto entre filas)
+    en vez de un único bloque de texto continuo. Cuando la tabla **sí** entra en el motor
+    (tablas de datos chicas), el grid alinea columnas igual (el `block_break` por fila no afecta
+    la geometría del grid, que la calcula `box_tree`).
 - **Listas**: `indent` = profundidad de anidamiento (cantidad de ancestros `<ul>/<ol>`), 0 si no hay.
   Al **primer** run de cada `<li>` se le antepone un marcador ASCII: `"* "` (viñeta U+2022) en lista
   no ordenada, `"N. "` (ordinal 1-based entre los `<li>` hermanos) en ordenada. El marcador es texto

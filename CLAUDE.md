@@ -539,6 +539,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `--author-css` exportados y leídos directo del PNG). Sin dependencia nueva (`cairo_surface_write_to_png`
   ya viene con Cairo; `cairo-png` presente). *(Núcleo + E2E visual verificados; ventana Wayland
   interactiva pendiente al dueño.)* Ver `[[freedom-visual-review-headless]]`.
+- **Hito (tooling) — `debug_dom`: dump del árbol de render (instrumento del "CSS paint gap").** Para
+  dejar de adivinar **por qué** un nodo maqueta mal, módulo **puro nuevo `dom_debug` (`dd_`)** con TDD:
+  `dd_format(rd_doc, buf, cap)` formatea el árbol paint-ready (`[[render_doc]]`) a texto determinista y
+  **agente-legible** (Principio 6) — cada `rd_block` (kind, tag, flags, grupo de contenedor flex/grid,
+  `box=#id`, estilo de autor) + el árbol de cajas (`rd_doc.boxes`: parent, placement, decoración). Puro,
+  sin I/O: lee un `rd_doc` inerte y escribe un buffer del llamador con **cursor acotado** (jamás escribe
+  más allá de `cap-1`, NUL-termina, devuelve la longitud sin truncar tipo snprintf); los bytes hostiles
+  (text/href) salen por un escritor de campo que trunca a `DD_FIELD_MAX` y escapa bytes de control →
+  un bloque = una línea, sin smear. Headless `--dump-dom` (implica `--headless`, honra `--author-css`
+  para poblar las cajas; **no** corre JS — Secure by Default); imprime tras cualquier render, así
+  `--dump-dom --download-png` da PNG **y** árbol por stdout (ambos MCP-visibles). Spec (`dom_debug.md`,
+  `freedom.md`) + tests (7 en `test_dom_debug`: header/mapping/grid/box-tree/no-css/truncación-sin-
+  overflow/bytes-de-control; 1 E2E en `test_freedom`) + `make test` (39 suites) / `make asan` (39, exit
+  0) limpios + fuzz `make fuzz-dd` (19k execs, sin crash/leak/UB; invariantes de no-overflow + acuerdo
+  medir-vs-escribir como traps). **Diagnóstico inmediato de `news.ycombinator.com`** (el sitio "se ve
+  horrible"): el dump probó que **no es `position`/`z-index`** — las 30 historias colapsan en UN `<p>`
+  (filas/celdas de tabla aplanadas) y el conjunto cae en `cont=#0(grid cols=3)`, que encoge todo a ~1/3
+  del ancho (la columna de 270px). Es **layout de tabla**, no posicionamiento. *(Módulo puro + IPC-N/A +
+  E2E headless verificados; panel de devtools GUI pendiente.)* Ver `[[freedom-debug-dom]]`.
 - **Hito (UI) — Fix de modo sin distracciones (render fuera de la ventana).** El centrado del reader
   inflaba `w->theme.content_margin`, que es **también** el margen VERTICAL → en ventanas anchas la
   altura de contenido se volvía negativa y la página se pintaba fuera de la ventana (nada visible).
@@ -1106,6 +1125,27 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   número de línea/named-line en grid, `position:sticky` con scroll. *(Módulo puro `css` resuelto +
   fuzzeado; consumo en render/IPC y verificación visual pendientes del hito de motor de cajas.)* Ver
   `[[freedom-author-css-layout]]`, `[[freedom-author-css-direction]]`.
+- **Hito (render) — Tablas anidadas: celda-hoja + fila-bloque (Hacker News deja de verse horrible).**
+  `debug_dom` (arriba) probó que HN se rompía por **layout de tabla**, no `position`: `page_view`
+  recolectaba la celda **externa** entera (la que envuelve la `<table>.itemlist` anidada) como **un**
+  run gigante (las 30 historias colapsadas en un `<p>`), y todo caía en `grid cols=3` → columna de
+  ~270px. Dos arreglos en `page_view` (puros, TDD): (a) **solo las celdas HOJA** (sin `<table>`
+  descendiente) se recolectan como run; una celda que envuelve una tabla anidada es **contenedor
+  estructural** que se recorre, así las celdas de la tabla interna se recolectan **cada una** contra
+  **su** tabla (`cell_has_nested_table` + `in_collected_cell` con chequeo de hoja, reemplaza
+  `in_cell_subtree`); (b) **cada `<tr>` es un bloque** (`nearest_row`): la 1ª celda de la fila lleva
+  `block_break`, las demás la comparten. Y en `gui/browser_ui.c`, el **degrade path** de
+  `layout_container` (cuando una tabla excede `BT_MAX_CHILDREN`=128 celdas — HN tiene ~150) ahora
+  **honra `block_break`** → una fila por línea en vez de un bloque continuo. Tablas de datos chicas
+  siguen alineando columnas por el grid (el `block_break` por fila no afecta la geometría de
+  `box_tree`). Resultado E2E (`--author-css --download-png` de HN): de columna de 270px ilegible a
+  **lista limpia, una historia por línea con su subtexto debajo, a ancho completo** — idéntico al HN
+  real. Spec (`page_view.md`) + tests (`test_build_nested_table_not_flattened` con celdas separadas +
+  break por fila; los `test_build_table_grid`/`flattens_cell` previos siguen verdes) + `make test`
+  (39 suites) / `make asan` (39, exit 0, 798 casos) limpios + fuzz `make fuzz-pv` (19k execs, sin
+  crash/leak/UB). **Fuera de alcance:** `colspan`/`rowspan` (la fila de subtexto de HN usa colspan, así
+  que su grid no alinea perfecto — pero el degrade por-fila lo hace legible), columnas con ancho por
+  contenido (todo track = 1fr), tablas >128 celdas que sí querrían grid alineado. Ver `[[freedom-debug-dom]]`.
 - **Hito 25 — Shaping de texto con HarfBuzz (rendering moderno, lado confiable).** El painter dejó
   de usar la **toy font API** de Cairo (`cairo_select_font_face`+`cairo_show_text`, un glifo por byte,
   sin conciencia de script) y pasa a **HarfBuzz** (shaping) + `cairo_show_glyphs` (FreeType vía

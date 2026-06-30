@@ -182,6 +182,17 @@ typedef struct pv_box_def {
     int border_radius;
     int bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
     int outline_w, outline_style, outline_color;
+    /* Positioning (Hito 23b-8 follow-up). position is a css_position (0 unset/static,
+     * RELATIVE/ABSOLUTE/FIXED/STICKY). inset_* are top/right/bottom/left in px, or
+     * CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1
+     * paints only position:relative (an in-flow offset, reader-safe); out-of-flow
+     * absolute/fixed/sticky + z-index stacking are deferred to the box engine (they
+     * need out-of-flow placement, which for a reader browser is also a policy call --
+     * see spec/box_engine.md). The values are still carried so the box engine and the
+     * debug_dom dump can see them. */
+    int position;
+    int inset_top, inset_right, inset_bottom, inset_left;
+    int z_index;
 } pv_box_def;
 
 typedef struct pv_view {

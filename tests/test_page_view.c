@@ -355,6 +355,60 @@ static void test_build_table_flattens_cell(void **state) {
     hp_document_free(doc);
 }
 
+/* A cell that wraps a nested <table> is a structural CONTAINER, not a collected leaf
+ * cell: the inner table's cells are each emitted as their own grid run (against the
+ * INNER table), instead of the outer cell flattening the whole subtree into one giant
+ * run. This is the Hacker News case (the story list is a <table> nested inside a <td>
+ * of the outer page table). */
+static void test_build_nested_table_not_flattened(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><table><tr><td>"
+        "<table>"
+        "<tr><td>1.</td><td>up</td><td>First Story</td></tr>"
+        "<tr><td>2.</td><td>up</td><td>Second Story</td></tr>"
+        "</table>"
+        "</td></tr></table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    /* Each inner cell is its own run... */
+    const pv_run *first = find_text(v, "First Story");
+    const pv_run *second = find_text(v, "Second Story");
+    assert_non_null(first);
+    assert_non_null(second);
+    const pv_run *rank1 = find_text(v, "1.");
+    assert_non_null(rank1);
+    /* ...annotated as a 3-column grid item (the INNER table's column count)... */
+    assert_int_equal(first->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(first->cont_cols, 3);
+    /* ...all sharing the one inner-table container id. */
+    assert_int_equal(first->cont_id, second->cont_id);
+    assert_int_equal(rank1->cont_id, first->cont_id);
+    assert_true(first->cont_id >= 0);
+
+    /* The two stories were NOT flattened into one run. */
+    assert_null(find_text(v, "1. up First Story 2. up Second Story"));
+
+    /* Each table ROW is its own block: the first cell of a row breaks to a new line,
+     * the rest of the row share it (so an overflowing table degrades to one row per
+     * line, not one blob). */
+    assert_int_equal(rank1->block_break, 1);          /* first cell of row 1 breaks */
+    const pv_run *up1 = NULL;                          /* 2nd cell of row 1: no break */
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strcmp(r->text, "up") == 0) { up1 = r; break; }
+    }
+    assert_non_null(up1);
+    assert_int_equal(up1->block_break, 0);
+    const pv_run *rank2 = find_text(v, "2.");          /* first cell of row 2 breaks */
+    assert_non_null(rank2);
+    assert_int_equal(rank2->block_break, 1);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_link_with_href(void **state) {
     (void)state;
     hp_document *doc = parse("<body><p>see <a href=\"https://e.example/x\">here</a> now</p></body>");
@@ -1424,6 +1478,7 @@ int main(void) {
         cmocka_unit_test(test_build_ordered_and_nested_list),
         cmocka_unit_test(test_build_table_grid),
         cmocka_unit_test(test_build_table_flattens_cell),
+        cmocka_unit_test(test_build_nested_table_not_flattened),
         cmocka_unit_test(test_build_link_with_href),
         cmocka_unit_test(test_build_block_break_between_paragraphs),
         cmocka_unit_test(test_build_skips_script_and_style),

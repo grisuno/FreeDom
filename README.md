@@ -196,6 +196,30 @@ the **Freebug** developer console in a second window:
 So you are no longer blind about what a page's JS does or why it fails — and you can test fixes
 interactively. The headless `--dump-console` above prints the same captured console for CI / agents.
 
+### Seeing layout: the render-tree dump (`--dump-dom`)
+
+When a page lays out wrong, `--dump-dom` prints the **paint-ready render tree** — the structure
+the painter actually consumes — in a deterministic, agent-readable form, so you can see *why* a
+node is mis-placed instead of guessing:
+
+```
+$ ./freedom --dump-dom --author-css news.ycombinator.com
+=== Freedom render tree ===
+blocks: 7  boxes: 1  containers: 1  has_images: 1
+[boxes]
+  #0 parent=-1 place(l=2 r=2 w=0 center=0) bg=- pad(2/2/2/2) bord(0/0/0/0 none) radius=0 shadow=0 outline=0
+[blocks]
+  #1 paragraph <p> bb cont=#0(grid cols=3 gap=0 start) "Hacker Newsnew | past | comments | ..."
+  #3 paragraph <p> bb cont=#0(grid cols=3 gap=0 start) "1.Claude Sonnet 5 (anthropic.com)473 points by ..."
+```
+
+Each block shows its kind, tag, flags, the flex/grid **container** it joined (`cont=#id`), the
+block-level **box** it belongs to (`box=#id`), and any author style (align/font-size/colors/width
+caps); the `[boxes]` section lists the box-definition tree (placement + decoration). Add
+`--author-css` so the box tree is populated. It is a headless diagnostic — no display required —
+and it is the instrument used to localise the "CSS paint gap". (For the *visual* counterpart, the
+PNG export — `--download-png=PATH`, preferred over PDF — is the one-step, cheapest review artifact.)
+
 ## Address Bar, Search & Keyboard Shortcuts
 
 The address bar works like a real **omnibox**:
