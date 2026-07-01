@@ -3570,9 +3570,16 @@ static long write_doc_png(browser_window *w, const char *path) {
      * (no pagination): both use PNG_MARGIN + their layout-space top. */
     for (size_t bi = 0; bi < L.nbox; ++bi)
         paint_box_decoration(cr, &L.boxes[bi], PNG_MARGIN, PNG_MARGIN);
-    for (size_t i = 0; i < L.nrow; ++i)
-        paint_content_row(cr, w, &L, &L.rows[i], PNG_MARGIN,
-                          PNG_MARGIN + L.rows[i].top, content_w, PNG_PAGE_W, 0);
+    for (size_t i = 0; i < L.nrow; ++i) {
+        const rc_row *r = &L.rows[i];
+        paint_content_row(cr, w, &L, r, PNG_MARGIN,
+                          PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
+    }
+    for (size_t i = 0; i < L.nrow; ++i) {
+        const rc_row *r = &L.rows[i];
+        paint_content_row(cr, w, &L, r, PNG_MARGIN,
+                          PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
+    }
     /* Stage 2: out-of-flow positioned boxes (same pattern as the on-screen and
      * PDF paths). z_index < 0 skipped in v1. */
     for (size_t pi = 0; pi < L.npositioned; ++pi) {

@@ -1337,7 +1337,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
     (v1: `right`/`bottom` leídos pero ignorados, `CSS_LEN_AUTO`→unset), ordena por
     `(z_index ASC, doc_order ASC)`. 13 tests nuevos en `test_box_tree.c` (25/25 verde).
   - **Spec:** nueva sección en `spec/box_engine.md` (~190 líneas: data model, API,
-    Given-When-Then, errores, v1 limitations, doctrinade seguridad).
+    Given-When-Then, errores, v1 limitations, doctrina de seguridad).
   - **GUI integration (parcial, verificada con `/visual-review`):**
     `layout_doc` skip absolute/fixed; `open_box` aplica offset por insets para
     relative/sticky (sticky fail-closed→relative); `position_doc` arma geometry arrays
@@ -1346,13 +1346,15 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
     (z<0 skipped en v1, documentado). **Verificado visualmente**:
     `examples/position-relative.html` ✅ (badges e iconos con offset correcto);
     `examples/position-overlay.html` ⚠️ (fixed navbar ✅, absolute badge ✅, pero el
-    contenido in-flow dentro del wrapper relative NO se ve — issue pendiente del
-    render del wrapper); `examples/position-zindex.html` ⚠️ (las tres absolute boxes
+    contenido in-flow dentro del wrapper relative NO se ve — issue pre-existente
+    del render de wrappers relative/absolute en el GUI, NO del solver de
+    positioning); `examples/position-zindex.html` ⚠️ (las tres absolute boxes
     no se pintan, mismo issue). El issue visual NO es de `bt_resolve_positioning`
     (los tests prueban la lógica) sino del render de in-flow dentro de un wrapper
     relative — un bug pre-existente de `reconcile_boxes`/`open_box` que el
-    skip de absolute/fixed expone. **Documentado y marcado para follow-up**
-    (el fix es en el render, no en el solver de positioning).
+    skip de absolute/fixed expone. **`position:relative` SÍ funciona end-to-end**
+    (verificado con `relative.png`); `position:absolute/fixed` resuelven coordenadas
+    correctamente pero el contenido de los wrappers no se ve.
   - **Lo que queda para cerrar Stage 2 completamente:** arreglar el render de
     in-flow dentro de wrappers relative (probablemente `rc_box_context` no se llama
     en el momento correcto, o el `reconcile_boxes` no abre el wrapper antes de
