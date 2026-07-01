@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stage 2 demo: position overlay</title>
+<style>
+  /* A relative wrapper so its children's `position:absolute` anchors to IT,
+   * not the viewport (Stage 2 fallback). */
+  .stage { position: relative; max-width: 640px; margin: 24px auto; padding: 16px;
+           border: 2px solid #555; background: #f8f8f0; font: 16px sans-serif; }
+  h1 { margin: 0 0 12px 0; font-size: 22px; }
+  p  { margin: 8px 0; }
+  /* An absolute overlay in the top-right of the wrapper. */
+  .badge { position: absolute; top: 8px; right: 8px;
+           background: #c33; color: #fff; padding: 4px 10px; font-size: 13px;
+           font-weight: bold; }
+  /* A fixed-position header pinned to the viewport top. */
+  .navbar { position: fixed; top: 0; left: 0; right: 0; height: 32px;
+            background: #335; color: #fff; padding: 6px 12px; z-index: 100;
+            font-size: 14px; }
+  /* A fixed banner at the bottom. */
+  .banner { position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+            background: #fd9; color: #222; padding: 4px 12px; z-index: 50;
+            font-size: 13px; }
+  /* body needs top/bottom padding so the fixed chrome doesn't cover the text. */
+  body { margin: 0; padding: 48px 0 40px 0; }
+</style>
+</head>
+<body>
+  <div class="navbar">Fixed navbar (z-index: 100)</div>
+  <div class="stage">
+    <div class="badge">NEW</div>
+    <h1>Overlay demo</h1>
+    <p>This is a relative-positioned wrapper. The red "NEW" badge in the corner
+       uses <code>position: absolute; top: 8px; right: 8px</code> and anchors
+       against this wrapper (its nearest positioned ancestor).</p>
+    <p>Below the badge, the in-flow content continues normally. The badge does
+       not affect the layout of the paragraphs (out-of-flow).</p>
+    <p>Scroll down to see the rest of the page, including a bottom fixed
+       banner and a z-index reorder test.</p>
+    <p>Four paragraphs of body text to give the page some height to scroll
+       through and verify the fixed chrome stays put.</p>
+    <p>Five paragraphs would scroll even more, ensuring the absolute badge
+       and the fixed navbar both render at the right positions regardless of
+       scroll position.</p>
+  </div>
+  <div class="banner">Fixed bottom banner (z-index: 50) — sits BELOW the navbar</div>
+</body>
+</html>

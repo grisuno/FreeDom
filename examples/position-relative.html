@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stage 2 demo: position relative</title>
+<style>
+  /* `position: relative` offsets a box by its insets without affecting siblings.
+   * Use cases: subtle visual nudges, badges with `top: -8px`, icons anchored
+   * next to a label. The box still occupies its in-flow space. */
+  body { margin: 0; padding: 24px; font: 16px sans-serif; background: #fafafa; }
+  h1 { margin: 0 0 16px 0; }
+  .row { background: #eef; padding: 12px; margin: 8px 0; border: 1px solid #99c; }
+  .label { display: inline-block; width: 140px; }
+  /* A badge nudged up and right with relative + insets. */
+  .badge {
+    display: inline-block;
+    background: #c33; color: #fff; padding: 2px 8px;
+    font-size: 12px; font-weight: bold;
+    position: relative; top: -8px; left: 8px;
+  }
+  /* An icon anchored to a label with a small offset. */
+  .icon {
+    display: inline-block; width: 14px; height: 14px;
+    background: #383; vertical-align: middle;
+    position: relative; top: -2px; left: 4px;
+  }
+  p { margin: 8px 0; }
+</style>
+</head>
+<body>
+  <h1>position: relative</h1>
+  <div class="row">
+    <span class="label">Status</span>
+    <span>Online</span>
+    <span class="badge">v2.0</span>
+  </div>
+  <div class="row">
+    <span class="label">Username</span>
+    <span>alice</span>
+    <span class="icon"></span>
+  </div>
+  <div class="row">
+    <span class="label">No badge</span>
+    <span>plain row, same in-flow space</span>
+  </div>
+  <p>The red "v2.0" badge and the green square are both <code>position: relative</code>
+     with small <code>top</code>/<code>left</code> offsets. Sibling elements are
+     unaffected (the badges occupy their original space; the offset is purely
+     visual). Without Stage 2, the offsets are silently dropped and the badges
+     sit at their static positions.</p>
+</body>
+</html>

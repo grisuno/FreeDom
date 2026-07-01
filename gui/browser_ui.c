@@ -2035,9 +2035,12 @@ typedef struct rc_row {
 
 /* One painted block box (Hito 23b-8 Step C): a border-box rectangle in layout space
  * with its author decoration, painted behind the rows it encloses. Built from a
- * maximal run of rd_blocks sharing one block_id. */
+ * maximal run of rd_blocks sharing one block_id. block_id is stamped at open_box
+ * time so position_doc can map an in-flow rc_box back to its pv_box_def (and the
+ * resolved out-of-flow rect to the right ancestor). */
 typedef struct rc_box {
     double x, top, w, h;   /* border-box rect (layout space) */
+    int    block_id;       /* pv_box_def index, -1 if none */
     int    bord_tw, bord_rw, bord_bw, bord_lw;
     int    bord_ts, bord_rs, bord_bs, bord_ls;
     int    bord_tc, bord_rc, bord_bc, bord_lc;
@@ -2052,6 +2055,13 @@ typedef struct rc_layout {
     rc_row  *rows;  size_t nrow,  caprow;
     rc_box  *boxes; size_t nbox,  capbox;
     double   total_h;
+    /* Stage 2: out-of-flow positioned boxes, in stacking order (z_index ASC,
+     * doc_order ASC). Allocated as a fixed-size array bounded by BT_MAX_POSITIONED;
+     * npositioned is the number of valid entries (out-of-flow blocks painted on
+     * top of the in-flow content). z_index < 0 entries are skipped by the painter
+     * in v1 (would need a two-pass painter to paint behind in-flow). */
+    bt_positioned positioned[BT_MAX_POSITIONED];
+    size_t        npositioned;
 } rc_layout;
 
 /* Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content
@@ -2097,7 +2107,9 @@ static rc_box *rc_add_box(rc_layout *L) {
         if (g == NULL) return NULL;
         L->boxes = g; L->capbox = nc;
     }
-    return &L->boxes[L->nbox++];
+    rc_box *b = &L->boxes[L->nbox++];
+    b->block_id = -1;  /* stamped by open_box; -1 = no associated pv_box_def */
+    return b;
 }
 
 static rc_frag *rc_add_frag(rc_layout *L) {
@@ -2609,6 +2621,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
     size_t idx = (bx != NULL) ? (L->nbox - 1) : (size_t)-1;
     if (bx != NULL) {
         bx->x = box_left; bx->top = s->cur_top; bx->w = box_width; bx->h = 0.0;
+        bx->block_id = block_id;
         bx->bord_tw = def->bord_tw; bx->bord_rw = def->bord_rw;
         bx->bord_bw = def->bord_bw; bx->bord_lw = def->bord_lw;
         bx->bord_ts = def->bord_ts; bx->bord_rs = def->bord_rs;
@@ -2622,6 +2635,17 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->outline_w = def->outline_w; bx->outline_style = def->outline_style;
         bx->outline_color = def->outline_color;
         bx->bg_rgb = def->bg_rgb;
+
+        /* Stage 2: position:relative (and sticky, fail-closed to relative) offsets
+         * the box's own rect by its insets. Siblings are unaffected — the box's
+         * own rows (and child boxes) move with it. Inset UNSET/AUTO → 0 offset
+         * on that axis (the box anchors at its in-flow position). */
+        if (def->position == BT_POS_RELATIVE || def->position == BT_POS_STICKY) {
+            if (def->inset_left != PV_LEN_UNSET && def->inset_left != (int)PV_LEN_UNSET + 1)
+                bx->x += (double)def->inset_left;
+            if (def->inset_top  != PV_LEN_UNSET && def->inset_top  != (int)PV_LEN_UNSET + 1)
+                bx->top += (double)def->inset_top;
+        }
     }
     s->cur_top += bt + pt;       /* inner content starts below the top border + padding */
     if (s->box_depth < RC_BOX_STACK_MAX) {
@@ -2667,6 +2691,11 @@ static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
     }
 }
 
+/* Stage 2: positioned blocks (absolute/fixed) that were skipped from the in-flow
+ * pass are recorded here for position_doc to lay out afterwards. The cap mirrors
+ * PV's per-page container cap; a hostile page cannot exceed it. */
+#define RC_MAX_OUT_OF_FLOW 256
+
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                        rc_layout *L) {
     const rd_doc *doc = w->doc;
@@ -2697,6 +2726,17 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             s.prev_bottom = mb;
             i = j - 1;  /* the loop's ++i moves past the container */
             continue;
+        }
+
+        /* Stage 2: out-of-flow blocks (position:absolute / fixed) are skipped from
+         * the in-flow layout — they take no space, don't open a box, and don't
+         * collapse margins. position_doc resolves their final rect after this pass. */
+        if (b->block_id >= 0) {
+            const pv_box_def *bd = rd_box_at(doc, (size_t)b->block_id);
+            if (bd != NULL && (bd->position == BT_POS_ABSOLUTE || bd->position == BT_POS_FIXED)) {
+                close_all_boxes(L, &s, th);
+                continue;
+            }
         }
 
         /* Box engine (Hito 23b-8 Step D): reconcile the open-box stack with this
@@ -2792,6 +2832,98 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     close_all_boxes(L, &s, th);
     flush_line(L, &s, th);
     L->total_h = s.cur_top;
+}
+
+/* Stage 2: resolves out-of-flow positioning for every absolute/fixed block in the
+ * document and stores the stacking-ordered result in L->positioned. Runs after
+ * layout_doc (which has already placed in-flow blocks). The geometry arrays are
+ * built from the rc_box rects (in-flow boxes) plus a content-measurement pass for
+ * out-of-flow blocks; pv_box_defs that are not present in either get zero geometry
+ * (the solver treats them as zero-size at the containing block's origin). */
+static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
+                        rc_layout *L) {
+    const rd_doc *doc = w->doc;
+    size_t nbox = rd_box_count(doc);
+    if (nbox == 0) { L->npositioned = 0; return; }
+    if (nbox > BT_MAX_POSITIONED) {
+        /* Fail closed: a hostile page with too many boxes skips the positioning
+         * pass for this frame rather than overflowing. */
+        L->npositioned = 0;
+        return;
+    }
+
+    /* Build the geometry arrays indexed by block_id (= pv_box_def index). */
+    double gx[BT_MAX_POSITIONED] = {0};
+    double gy[BT_MAX_POSITIONED] = {0};
+    double gw[BT_MAX_POSITIONED] = {0};
+    double gh[BT_MAX_POSITIONED] = {0};
+    char   in_flow[BT_MAX_POSITIONED] = {0};
+
+    /* In-flow boxes: their rc_box rect is the layout-space border-box. */
+    for (size_t i = 0; i < L->nbox; ++i) {
+        int bid = L->boxes[i].block_id;
+        if (bid < 0 || (size_t)bid >= nbox) continue;
+        gx[bid] = L->boxes[i].x;
+        gy[bid] = L->boxes[i].top;
+        gw[bid] = L->boxes[i].w;
+        gh[bid] = L->boxes[i].h;
+        in_flow[bid] = 1;
+    }
+
+    /* Out-of-flow blocks: measure content so the solver has a final w/h. The
+     * box-def's own box_w (an author width cap) is the first preference; the
+     * content width is the fallback. Height is the measured text height for
+     * text blocks, the image-display size for image blocks, the input height
+     * for inputs, and a reasonable default otherwise. */
+    const ui_theme *th = &w->theme;
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    double default_h = fe.height;
+    for (size_t i = 0; i < rd_count(doc); ++i) {
+        const rd_block *b = rd_at(doc, i);
+        if (b->block_id < 0) continue;
+        size_t bid = (size_t)b->block_id;
+        if (bid >= nbox) continue;
+        if (in_flow[bid]) continue;  /* already set from rc_box */
+
+        const pv_box_def *bd = rd_box_at(doc, bid);
+        if (bd == NULL) continue;
+
+        /* Width: author width cap, else the box's own bx_place against content_w. */
+        double bw = 0.0;
+        if (bd->box_w > 0) {
+            bw = (double)bd->box_w;
+        } else {
+            bx_hplace hp = bx_place((double)bd->box_l, (double)bd->box_r, 0, 0, content_w);
+            bw = hp.content_w;
+        }
+        if (bw < 1.0) bw = content_w;
+        if (bw < 1.0) bw = 1.0;
+        gw[bid] = bw;
+
+        /* Height: measured for text, default for the rest. */
+        if (b->kind == RD_IMAGE) {
+            double dw, dh, box_w = content_w - 2.0 * th->image_box_pad;
+            if (image_display_size(w, b, box_w, &dw, &dh)) {
+                gh[bid] = dh + 2.0 * th->image_box_pad;
+            } else {
+                gh[bid] = default_h + 2.0 * th->image_box_pad;
+            }
+        } else if (b->kind == RD_INPUT) {
+            gh[bid] = default_h + 2.0 * UI_INPUT_PAD;
+        } else {
+            /* Text block: the same single-line height used by the in-flow rows.
+             * Multi-line absolute/fixed is approximated as one line in v1; the
+             * painter wraps inside the resolved width. */
+            gh[bid] = default_h;
+        }
+    }
+
+    bt_status st = bt_resolve_positioning(
+        doc->boxes, nbox, gx, gy, gw, gh, content_w, content_w,
+        L->positioned, BT_MAX_POSITIONED, &L->npositioned);
+    (void)st;  /* BT_OK / BT_ERR_NULL_ARG / BT_ERR_RANGE all logged via dom_debug */
 }
 
 /* Width of a painted text-input box: the preferred width clamped to the content. */
@@ -3043,9 +3175,12 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         cairo_rectangle(cr, 0.0, ry, band_w, r->height);
         cairo_fill(cr);
     } else if (r->bg_rgb >= 0) {
-        /* Author background-color behind the block's text (content box). */
+        /* Author background-color behind the block's text (content box).
+         * Stage 2: r->x_off carries the column offset (flex/grid) OR the
+         * positioned box's resolved x. Either way the background sits on
+         * top of the same rect the text is drawn in. */
         set_rgb(cr, rgb_from_packed(r->bg_rgb));
-        cairo_rectangle(cr, left, ry, content_w, r->height);
+        cairo_rectangle(cr, left + r->x_off, ry, content_w, r->height);
         cairo_fill(cr);
     }
     double baseline = ry + r->ascent;
@@ -3100,6 +3235,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
 
     rc_layout L;
     layout_doc(cr, w, content_w, &L);
+    position_doc(cr, w, content_w, &L);
     w->content_total_h = L.total_h;  /* cached for the scrollbar */
 
     double max_scroll = L.total_h - content_h;
@@ -3120,6 +3256,78 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         double ry = origin + r->top;
         if (ry + r->height < content_top || ry > content_top + content_h) continue;
         paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
+    }
+    /* Stage 2: out-of-flow positioned boxes on top of in-flow content, in stacking
+     * order (z_index ASC). Negative z_index is skipped in v1 (a two-pass painter
+     * would be needed to paint behind in-flow). The resolved rect is viewport-
+     * relative (no scroll offset for FIXED; absolute uses the containing block). */
+    for (size_t i = 0; i < L.npositioned; ++i) {
+        const bt_positioned *pb = &L.positioned[i];
+        if (pb->z_index < 0) continue;
+        if (pb->w < 1.0 || pb->h < 1.0) continue;
+        const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
+        if (def == NULL) continue;
+        /* Build a transient rc_box/rc_row for the existing paint helpers. */
+        rc_box bx = {
+            .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
+            .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
+            .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
+            .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
+            .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
+            .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
+            .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
+            .radius = def->border_radius,
+            .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
+            .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
+            .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
+            .outline_w = def->outline_w, .outline_style = def->outline_style,
+            .outline_color = def->outline_color,
+            .bg_rgb = def->bg_rgb,
+        };
+        paint_box_decoration(cr, &bx, left, origin);
+        /* The text content: one synthetic row at the box's content origin. v1
+         * only paints the FIRST rd_block whose block_id matches; a positioned
+         * box with multiple runs would be a follow-up. */
+        for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
+            const rd_block *b = rd_at(w->doc, bi);
+            if ((int)b->block_id != (int)pb->box_index) continue;
+            if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
+                b->kind != RD_LINK) break;  /* v1: text-shaped blocks only */
+            /* Build a single-fragment rc_row and paint it. */
+            rc_frag fg = {
+                .x = 0, .width = 0, .font_size = th->body_font,
+                .bold = b->bold, .italic = b->italic,
+                .underline = 0, .strike = 0, .overline = 0,
+                .color = th->text,
+                .text = b->text, .len = strlen(b->text),
+                .href = b->href,
+                .family = CSS_FF_UNSET, .transform = 0,
+                .letter_spacing = 0, .valign_dy = 0,
+                .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
+                .opacity = -1,
+            };
+            content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
+            cairo_font_extents_t fe;
+            cairo_font_extents(cr, &fe);
+            cairo_text_extents_t te;
+            cairo_text_extents(cr, b->text, &te);
+            fg.width = te.x_advance;
+            rc_row row = {
+                .kind = RC_TEXT, .top = pb->y, .height = fe.height,
+                .ascent = fe.ascent, .first = 0, .count = 1,
+                .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
+                .x_off = pb->x, .align = 0, .blk = b,
+            };
+            rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
+                               .rows = &row, .nrow = 1, .caprow = 1,
+                               .boxes = NULL, .nbox = 0, .capbox = 0,
+                               .total_h = pb->h, .npositioned = 0 };
+            double ry = origin + pb->y;
+            if (ry + fe.height < content_top || ry > content_top + content_h) break;
+            paint_content_row(cr, w, &mini, &row, left, ry, pb->w,
+                              (double)w->width, 0);
+            break;  /* one text block per positioned box (v1) */
+        }
     }
     rc_free(&L);
 }
@@ -3152,12 +3360,14 @@ static long write_doc_pdf(browser_window *w, const char *path) {
 
     ui_theme saved = w->theme;
     w->theme = ui_theme_for(UI_THEME_LIGHT);
+    const ui_theme *th = &w->theme;
 
     double content_w = PDF_PAGE_W - 2.0 * PDF_MARGIN;
     double page_content_h = PDF_PAGE_H - 2.0 * PDF_MARGIN;
 
     rc_layout L;
     layout_doc(cr, w, content_w, &L);
+    position_doc(cr, w, content_w, &L);
 
     size_t pages = 0;
     double *tops = NULL, *heights = NULL, *yof = NULL;
@@ -3195,6 +3405,70 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                 if ((size_t)pageof[i] != p) continue;
                 paint_content_row(cr, w, &L, &L.rows[i], PDF_MARGIN,
                                   PDF_MARGIN + yof[i], content_w, PDF_PAGE_W, 0);
+            }
+            /* Stage 2: out-of-flow positioned boxes (v1: painted on every page;
+             * a positioned box that should only appear on one specific page is
+             * a follow-up). z_index < 0 is skipped. */
+            for (size_t pi = 0; pi < L.npositioned; ++pi) {
+                const bt_positioned *pb = &L.positioned[pi];
+                if (pb->z_index < 0) continue;
+                if (pb->w < 1.0 || pb->h < 1.0) continue;
+                const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
+                if (def == NULL) continue;
+                rc_box bx = {
+                    .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
+                    .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
+                    .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
+                    .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
+                    .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
+                    .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
+                    .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
+                    .radius = def->border_radius,
+                    .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
+                    .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
+                    .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
+                    .outline_w = def->outline_w, .outline_style = def->outline_style,
+                    .outline_color = def->outline_color,
+                    .bg_rgb = def->bg_rgb,
+                };
+                paint_box_decoration(cr, &bx, PDF_MARGIN, PDF_MARGIN);
+                for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
+                    const rd_block *b = rd_at(w->doc, bi);
+                    if ((int)b->block_id != (int)pb->box_index) continue;
+                    if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
+                        b->kind != RD_LINK) break;
+            rc_frag fg = {
+                .x = 0, .width = 0, .font_size = th->body_font,
+                .bold = b->bold, .italic = b->italic,
+                .underline = 0, .strike = 0, .overline = 0,
+                .color = th->text,
+                .text = b->text, .len = strlen(b->text),
+                .href = b->href,
+                .family = CSS_FF_UNSET, .transform = 0,
+                .letter_spacing = 0, .valign_dy = 0,
+                .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
+                .opacity = -1,
+            };
+                    content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
+                    cairo_font_extents_t fe;
+                    cairo_font_extents(cr, &fe);
+                    cairo_text_extents_t te;
+                    cairo_text_extents(cr, b->text, &te);
+                    fg.width = te.x_advance;
+                    rc_row row = {
+                        .kind = RC_TEXT, .top = pb->y, .height = fe.height,
+                        .ascent = fe.ascent, .first = 0, .count = 1,
+                        .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
+                        .x_off = pb->x, .align = 0, .blk = b,
+                    };
+                    rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
+                                       .rows = &row, .nrow = 1, .caprow = 1,
+                                       .boxes = NULL, .nbox = 0, .capbox = 0,
+                                       .total_h = pb->h, .npositioned = 0 };
+                    paint_content_row(cr, w, &mini, &row, PDF_MARGIN,
+                                      PDF_MARGIN + pb->y, pb->w, PDF_PAGE_W, 0);
+                    break;
+                }
             }
             cairo_show_page(cr);
         }
@@ -3262,6 +3536,7 @@ static void export_pdf(browser_window *w) {
 static long write_doc_png(browser_window *w, const char *path) {
     ui_theme saved = w->theme;
     w->theme = ui_theme_for(UI_THEME_LIGHT);
+    const ui_theme *th = &w->theme;
     double content_w = PNG_PAGE_W - 2.0 * PNG_MARGIN;
 
     /* layout_doc needs a live Cairo context to measure text (font extents), but the
@@ -3272,6 +3547,7 @@ static long write_doc_png(browser_window *w, const char *path) {
     cairo_t *mcr = cairo_create(meas);
     rc_layout L;
     layout_doc(mcr, w, content_w, &L);
+    position_doc(mcr, w, content_w, &L);
     double content_h = L.total_h;
     cairo_destroy(mcr);
     cairo_surface_destroy(meas);
@@ -3297,6 +3573,69 @@ static long write_doc_png(browser_window *w, const char *path) {
     for (size_t i = 0; i < L.nrow; ++i)
         paint_content_row(cr, w, &L, &L.rows[i], PNG_MARGIN,
                           PNG_MARGIN + L.rows[i].top, content_w, PNG_PAGE_W, 0);
+    /* Stage 2: out-of-flow positioned boxes (same pattern as the on-screen and
+     * PDF paths). z_index < 0 skipped in v1. */
+    for (size_t pi = 0; pi < L.npositioned; ++pi) {
+        const bt_positioned *pb = &L.positioned[pi];
+        if (pb->z_index < 0) continue;
+        if (pb->w < 1.0 || pb->h < 1.0) continue;
+        const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
+        if (def == NULL) continue;
+        rc_box bx = {
+            .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
+            .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
+            .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
+            .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
+            .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
+            .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
+            .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
+            .radius = def->border_radius,
+            .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
+            .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
+            .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
+            .outline_w = def->outline_w, .outline_style = def->outline_style,
+            .outline_color = def->outline_color,
+            .bg_rgb = def->bg_rgb,
+        };
+        paint_box_decoration(cr, &bx, PNG_MARGIN, PNG_MARGIN);
+        for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
+            const rd_block *b = rd_at(w->doc, bi);
+            if ((int)b->block_id != (int)pb->box_index) continue;
+            if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
+                b->kind != RD_LINK) break;
+            rc_frag fg = {
+                .x = 0, .width = 0, .font_size = th->body_font,
+                .bold = b->bold, .italic = b->italic,
+                .underline = 0, .strike = 0, .overline = 0,
+                .color = th->text,
+                .text = b->text, .len = strlen(b->text),
+                .href = b->href,
+                .family = CSS_FF_UNSET, .transform = 0,
+                .letter_spacing = 0, .valign_dy = 0,
+                .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
+                .opacity = -1,
+            };
+            content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
+            cairo_font_extents_t fe;
+            cairo_font_extents(cr, &fe);
+            cairo_text_extents_t te;
+            cairo_text_extents(cr, b->text, &te);
+            fg.width = te.x_advance;
+            rc_row row = {
+                .kind = RC_TEXT, .top = pb->y, .height = fe.height,
+                .ascent = fe.ascent, .first = 0, .count = 1,
+                .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
+                .x_off = pb->x, .align = 0, .blk = b,
+            };
+            rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
+                               .rows = &row, .nrow = 1, .caprow = 1,
+                               .boxes = NULL, .nbox = 0, .capbox = 0,
+                               .total_h = pb->h, .npositioned = 0 };
+            paint_content_row(cr, w, &mini, &row, PNG_MARGIN,
+                              PNG_MARGIN + pb->y, pb->w, PNG_PAGE_W, 0);
+            break;
+        }
+    }
 
     cairo_destroy(cr);
     cairo_status_t st = cairo_surface_write_to_png(surf, path);
