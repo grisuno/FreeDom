@@ -170,7 +170,7 @@ $(BUILD_DIR)/test_js_sandbox: $(TEST_DIR)/test_js_sandbox.c $(BUILD_DIR)/js_sand
 $(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(QJS_OBJ) | $(BUILD_DIR)

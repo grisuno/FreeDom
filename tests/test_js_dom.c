@@ -35,6 +35,7 @@ typedef struct fixture {
     hp_document *doc;
     dom_index   *idx;
     js_context  *ctx;
+    jd_opaque    jd_op;
 } fixture;
 
 static int setup(void **state) {
@@ -43,7 +44,7 @@ static int setup(void **state) {
     if (hp_parse(HTML, sizeof HTML - 1, NULL, &f->doc) != HP_OK) return -1;
     if (dom_build(f->doc, &f->idx) != DOM_OK) return -1;
     if (js_context_new(NULL, &f->ctx) != JS_OK) return -1;
-    if (jd_install(f->ctx, f->idx) != JD_OK) return -1;
+    if (jd_install(f->ctx, f->idx, &f->jd_op) != JD_OK) return -1;
     *state = f;
     return 0;
 }
@@ -80,8 +81,8 @@ static void test_install_null_args(void **state) {
     (void)state;
     js_context *ctx = NULL;
     assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
-    assert_int_equal(jd_install(ctx, NULL), JD_ERR_NULL_ARG);
-    assert_int_equal(jd_install(NULL, NULL), JD_ERR_NULL_ARG);
+    assert_int_equal(jd_install(ctx, NULL, NULL), JD_ERR_NULL_ARG);
+    assert_int_equal(jd_install(NULL, NULL, NULL), JD_ERR_NULL_ARG);
     js_context_free(ctx);
 }
 
@@ -454,7 +455,8 @@ static void console_fixture(hp_document **doc, dom_index **idx, js_context **ctx
     assert_int_equal(hp_parse(HTML, sizeof HTML - 1, NULL, doc), HP_OK);
     assert_int_equal(dom_build(*doc, idx), DOM_OK);
     assert_int_equal(js_context_new(NULL, ctx), JS_OK);
-    assert_int_equal(jd_install(*ctx, *idx), JD_OK);
+    jd_opaque op;
+    assert_int_equal(jd_install(*ctx, *idx, &op), JD_OK);
     fb_buffer_init(log);
     assert_int_equal(jd_install_console(*ctx, log), JD_OK);
 }
@@ -520,7 +522,8 @@ static void test_console_null_buffer_is_noop(void **state) {
     assert_int_equal(hp_parse(HTML, sizeof HTML - 1, NULL, &doc), HP_OK);
     assert_int_equal(dom_build(doc, &idx), DOM_OK);
     assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
-    assert_int_equal(jd_install(ctx, idx), JD_OK);
+    jd_opaque op;
+    assert_int_equal(jd_install(ctx, idx, &op), JD_OK);
     assert_int_equal(jd_install_console(ctx, NULL), JD_OK); /* silent */
 
     const char *src = "console.log('x'); console.error('y'); 42";
@@ -539,6 +542,96 @@ static void test_console_null_ctx(void **state) {
     fb_buffer log; fb_buffer_init(&log);
     assert_int_equal(jd_install_console(NULL, &log), JD_ERR_NULL_ARG);
     fb_buffer_free(&log);
+}
+
+/* --- click events (Stage 4 dispatcher) --- */
+
+static void test_click_install_null_args(void **state) {
+    (void)state;
+    assert_int_equal(jd_install_events(NULL, NULL), JD_ERR_NULL_ARG);
+}
+
+/* Registers a click listener on a paragraph and fires it from native code. */
+static void test_click_add_event_listener_fires(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+    jd_click_state *cs = jd_click_state_new();
+    assert_non_null(cs);
+    assert_int_equal(jd_install_events(f->ctx, cs), JD_OK);
+
+    const char *src =
+        "var p = document.getElementsByTagName('p')[0];"
+        "p.addEventListener('click', function(e){ p.textContent = 'clicked'; });"
+        "p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_click(f->ctx, h), 1); /* default action allowed */
+    EXPECT(f, "document.getElementsByTagName('p')[0].textContent", "clicked");
+
+    jd_click_state_free(cs);
+}
+
+/* onclick property also registers a handler. */
+static void test_click_onclick_fires(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+    jd_click_state *cs = jd_click_state_new();
+    assert_non_null(cs);
+    assert_int_equal(jd_install_events(f->ctx, cs), JD_OK);
+
+    const char *src =
+        "var b = document.getElementById('go');"
+        "b.onclick = function(e){ b.textContent = 'fired'; };"
+        "b._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_click(f->ctx, h), 1);
+    EXPECT(f, "document.getElementById('go').textContent", "fired");
+
+    jd_click_state_free(cs);
+}
+
+/* preventDefault() stops the default action. */
+static void test_click_prevent_default(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+    jd_click_state *cs = jd_click_state_new();
+    assert_non_null(cs);
+    assert_int_equal(jd_install_events(f->ctx, cs), JD_OK);
+
+    const char *src =
+        "var b = document.getElementById('go');"
+        "b.onclick = function(e){ e.preventDefault(); b.textContent = 'prevented'; };"
+        "b._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+
+    assert_int_equal(jd_fire_click(f->ctx, h), 0); /* default action cancelled */
+    EXPECT(f, "document.getElementById('go').textContent", "prevented");
+
+    jd_click_state_free(cs);
+}
+
+/* No handler registered => default action allowed, no mutation. */
+static void test_click_no_handler_allows_default(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+    jd_click_state *cs = jd_click_state_new();
+    assert_non_null(cs);
+    assert_int_equal(jd_install_events(f->ctx, cs), JD_OK);
+
+    assert_int_equal(jd_fire_click(f->ctx, 9999), 1);
+    jd_click_state_free(cs);
 }
 
 int main(void) {
@@ -583,6 +676,11 @@ int main(void) {
         cmocka_unit_test(test_console_object_and_throwing_tostring),
         cmocka_unit_test(test_console_null_buffer_is_noop),
         cmocka_unit_test(test_console_null_ctx),
+        cmocka_unit_test(test_click_install_null_args),
+        cmocka_unit_test_setup_teardown(test_click_add_event_listener_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_click_onclick_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_click_prevent_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_click_no_handler_allows_default, setup, teardown),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -154,6 +154,12 @@ tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_pag
 tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
                          int run_js, int reader, int prefers_dark, tab_page *out);
 
+/* Dispatches a click event on the loaded page's node_id. The worker fires any JS
+ * click handlers registered for that node and returns the re-derived view, so the
+ * caller can repaint DOM mutations caused by the handler. On TAB_OK, *out is
+ * populated and must be released with tab_page_free. */
+tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out);
+
 /* Evaluates untrusted JS in the tab's current context (sees the loaded DOM,
  * navigator/screen/performance, canvas/audio). A JS-level error is reported via
  * out->is_exception with TAB_OK; TAB_ERR_* is reserved for transport/worker

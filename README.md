@@ -264,8 +264,9 @@ fallback content is shown.
 > security *and* identity boundary — so Google's "enable JavaScript" wall may persist. Use the
 > address bar, which routes searches to the no-JS DuckDuckGo HTML endpoint that renders cleanly.
 
-Out of scope for now: interactive (click) events, real async timers, JS-driven navigation, and
-external (`src`) scripts.
+Partially implemented: interactive click events (`addEventListener('click')` and `element.onclick`
+fire over IPC and the GUI repaints the mutated DOM; no bubbling or coords yet). Out of scope for
+now: real async timers, JS-driven navigation, external (`src`) scripts, and events other than click.
 
 ### Anti-fingerprinting identity
 

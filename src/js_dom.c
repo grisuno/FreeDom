@@ -21,9 +21,15 @@
 
 #include "quickjs.h"
 
-static dom_index *jd_idx(JSContext *ctx) {
-    return (dom_index *)JS_GetContextOpaque(ctx);
+static jd_opaque *jd_opaque_get(JSContext *ctx) {
+    return (jd_opaque *)JS_GetContextOpaque(ctx);
 }
+
+static dom_index *jd_idx(JSContext *ctx) {
+    jd_opaque *o = jd_opaque_get(ctx);
+    return (o != NULL) ? o->idx : NULL;
+}
+
 
 /* Coerces a JS argument to a node handle. Returns -1 with a pending exception
  * if coercion threw; otherwise stores the handle (out-of-range values stay
@@ -283,6 +289,28 @@ typedef struct jd_method {
     int          nargs;
 } jd_method;
 
+static JSValue m_register_click(JSContext *ctx, JSValueConst this_val,
+                                int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    if (!JS_IsFunction(ctx, argv[1])) return JS_UNDEFINED;
+
+    JSValue global = JS_GetGlobalObject(ctx);
+    if (JS_IsException(global)) return JS_EXCEPTION;
+    JSValue reg = JS_GetPropertyStr(ctx, global, "__clickRegistry");
+    if (JS_IsUndefined(reg) || JS_IsNull(reg)) {
+        JS_FreeValue(ctx, reg);
+        reg = JS_NewObject(ctx);
+        if (JS_IsException(reg)) { JS_FreeValue(ctx, global); return JS_EXCEPTION; }
+        JS_SetPropertyStr(ctx, global, "__clickRegistry", JS_DupValue(ctx, reg));
+    }
+    JS_SetPropertyUint32(ctx, reg, (uint32_t)h, JS_DupValue(ctx, argv[1]));
+    JS_FreeValue(ctx, reg);
+    JS_FreeValue(ctx, global);
+    return JS_UNDEFINED;
+}
+
 static const jd_method JD_METHODS[] = {
     { "nodeCount",      m_node_count,        0 },
     { "getElementById", m_get_element_by_id, 1 },
@@ -304,6 +332,7 @@ static const jd_method JD_METHODS[] = {
     { "setAttribute",   m_set_attribute,     3 },
     { "removeAttribute", m_remove_attribute, 2 },
     { "setInnerHtml",   m_set_inner_html,    2 },
+    { "registerClick",  m_register_click,    2 },
 };
 
 /* A small standard `document` facade over the native handle API, so real page
@@ -313,10 +342,10 @@ static const jd_method JD_METHODS[] = {
  * and window=globalThis keep common scripts from dying on a ReferenceError. */
 static const char JD_DOCUMENT_SHIM[] =
     "(function(){"
+    "  globalThis.__clickRegistry={};"
     "  function wrap(h){"
     "    if (h===null||h===undefined) return null;"
-    "    return {"
-    "      _h:h, nodeType:1,"
+    "    var el={_h:h, nodeType:1,"
     "      get textContent(){ return dom.textContent(h); },"
     "      set textContent(v){ dom.setText(h, String(v)); },"
     "      getAttribute: function(n){ return dom.getAttribute(h, String(n)); },"
@@ -352,10 +381,14 @@ static const char JD_DOCUMENT_SHIM[] =
     "      get innerHTML(){ return ''; },"
     "      appendChild: function(c){ if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
     "      removeChild: function(c){ if(c&&c._h!==undefined) dom.removeChild(h,c._h); return c; },"
-    "      addEventListener: function(){}, removeEventListener: function(){},"
+    "      addEventListener: function(t,fn){ if(t==='click'&&typeof fn==='function') dom.registerClick(h, fn); },"
+    "      removeEventListener: function(){},"
     "      style:{}"
     "    };"
+    "    Object.defineProperty(el,'onclick',{set:function(fn){ if(typeof fn==='function') dom.registerClick(h, fn); },get:function(){return null;}});"
+    "    return el;"
     "  }"
+    "  globalThis.__wrap=wrap;"
     "  function wrapList(hs){ var r=[]; for (var i=0;i<hs.length;i++) r.push(wrap(hs[i])); return r; }"
     "  var loadCbs=[], timers=[];"
     "  function addL(type,fn){ if(typeof fn==='function' &&"
@@ -470,14 +503,16 @@ static const char JD_LOCATION_SHIM[] =
     "  } }catch(e){}"
     "})();";
 
-jd_status jd_install(js_context *ctx, dom_index *idx) {
-    if (ctx == NULL || idx == NULL) return JD_ERR_NULL_ARG;
+jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
+    if (ctx == NULL || idx == NULL || opaque == NULL) return JD_ERR_NULL_ARG;
 
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
 
-    /* The index is reachable only from native code, never from script. */
-    JS_SetContextOpaque(jsctx, (void *)idx);
+    /* The index and event state are reachable only from native code. */
+    memset(opaque, 0, sizeof *opaque);
+    opaque->idx = idx;
+    JS_SetContextOpaque(jsctx, (void *)opaque);
 
     JSValue dom = JS_NewObject(jsctx);
     if (JS_IsException(dom)) return JD_ERR_OOM;
@@ -804,4 +839,56 @@ jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx) {
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
+/* --- click events (Stage 4 dispatcher keystone) --- */
+
+struct jd_click_state {
+    int installed; /* nonzero after jd_install_events succeeds */
+};
+
+jd_click_state *jd_click_state_new(void) {
+    jd_click_state *s = (jd_click_state *)calloc(1, sizeof *s);
+    return s;
+}
+
+void jd_click_state_free(jd_click_state *s) {
+    free(s);
+}
+
+jd_status jd_install_events(js_context *ctx, jd_click_state *state) {
+    if (ctx == NULL || state == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    jd_opaque *o = jd_opaque_get(jsctx);
+    if (o == NULL) return JD_ERR_INTERNAL;
+    o->click = state;
+    state->installed = 1;
+    return JD_OK;
+}
+
+int jd_fire_click(js_context *ctx, dom_node_id node_id) {
+    if (ctx == NULL || node_id == DOM_NODE_NONE) return 1;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 1;
+
+    /* Build and run: var e={target:__wrap(n),preventDefault:function(){this.defaultPrevented=true},defaultPrevented:false}; var f=__clickRegistry[n]; if(typeof f==='function'){ f.call(e.target,e); } e.defaultPrevented?0:1; */
+    char src[512];
+    int n = snprintf(src, sizeof src,
+        "(function(){var n=%u;var f=globalThis.__clickRegistry[n];"
+        "if(typeof f!=='function')return 1;"
+        "var e={target:globalThis.__wrap(n),preventDefault:function(){this.defaultPrevented=true},defaultPrevented:false};"
+        "f.call(e.target,e);return e.defaultPrevented?0:1;})();",
+        (unsigned)node_id);
+    if (n < 0 || (size_t)n >= sizeof src) return 1;
+
+    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<click-fire>", JS_EVAL_TYPE_GLOBAL);
+    int default_action = 1;
+    if (!JS_IsException(r)) {
+        int32_t v = 1;
+        JS_ToInt32(jsctx, &v, r);
+        default_action = v != 0 ? 1 : 0;
+    }
+    JS_FreeValue(jsctx, r);
+    return default_action;
 }

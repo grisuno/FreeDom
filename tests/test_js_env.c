@@ -241,7 +241,8 @@ static void test_coexists_with_dom(void **state) {
     assert_int_equal(hp_parse(HTML, sizeof HTML - 1, NULL, &doc), HP_OK);
     assert_int_equal(dom_build(doc, &idx), DOM_OK);
     assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
-    assert_int_equal(jd_install(ctx, idx), JD_OK);
+    jd_opaque op;
+    assert_int_equal(jd_install(ctx, idx, &op), JD_OK);
     assert_int_equal(je_install(ctx, 1920, 1080), JE_OK);
 
     js_result r;

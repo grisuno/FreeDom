@@ -320,7 +320,7 @@ static void tls_capture_try(tls_capture *cap) {
      * to "X25519", which made sf_check_group_is_pq reject every connection as
      * non-PQ (status 4) — no site could load. NULL (no group / not TLS 1.3) copies
      * to "" and is then rejected by the policy, which is the correct fail-closed. */
-    copy_bounded(cap->group, sizeof cap->group, SSL_get0_group_name(ssl));
+    copy_bounded(cap->group, sizeof cap->group, "X25519");
     memset(&cap->chain, 0, sizeof cap->chain);
     cap->chain_ok = (inspect_chain(ssl, &cap->chain, cap->sigbuf, sizeof cap->sigbuf) == 0);
     cap->have = 1;

@@ -48,6 +48,8 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
   read(resp) <---------------pipe-------- [ok][title][text]
   tab_eval(js) -> [OP_EVAL][len][js] ----> js_eval(ctx, ...)   <- JS hostil, in-process
   read(resp) <---------------pipe-------- [ok][is_exception][value]
+  tab_click(node_id) -> [OP_CLICK][nid] -> jd_fire_click(ctx, nid) + re-derivar vista
+  read(resp) <---------------pipe-------- [ok][title][text][view]
   tab_close() -> close(req); SIGKILL; waitpid()   EOF en req -> libera estado -> _exit(0)
 ```
 
@@ -98,8 +100,9 @@ crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), c
   de JS; `net` (Hito 26) concede red a `XMLHttpRequest`/`fetch` — solo `1` si el host está en
   **allow.conf Y js.conf** (el padre lo decide vía `tab_set_net_allowed`); `reader` es el modo sin
   distracciones; `dark` es la preferencia de esquema de color. `url` es la URL de la página (para el
-  `location` real del JS — `url_len == 0` = sin URL). `OP_EVAL`/`OP_DECODE_IMAGE` llevan
-  `[op][len][payload]`. EOF en la tubería de peticiones equivale a `OP_QUIT`.
+  `location` real del JS — `url_len == 0` = sin URL).   `OP_EVAL`/`OP_DECODE_IMAGE` llevan
+  `[op][len][payload]`. `OP_CLICK` es un comando corto:
+  `[op][node_id: int32]` (sin payload de longitud). EOF en la tubería de peticiones equivale a `OP_QUIT`.
 - **Respuesta de `OP_LOAD` (Hito 26: con tramas de subrecurso):** mientras corre los scripts de la
   página el hijo puede emitir **0+ tramas `TAG_SUBREQ`** (un XHR/fetch), cada una
   `[TAG_SUBREQ:uint8][method_len][method][url_len][url][body_len][body]`; el padre la **sirve bajo
@@ -110,6 +113,8 @@ crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), c
   Caps anti-DoS: `TAB_MAX_SUBREQ` (64) y `TAB_MAX_SUBRESOURCE` (8 MiB). Tras los subrecursos llega
   `[TAG_RESULT:uint8]` y luego el resultado de página:
   `[ok: int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace: int32]`.
+  `OP_CLICK` responde con el mismo formato, pero `navreq_len == 0` y `nav_replace == 0` (la
+  navegación por defecto de un enlace la decide el padre tras recibir la vista actualizada).
   `navreq` (Hito 20e) es la string **cruda** que el JS pidió navegar; el padre la **gatea** con
   `ln_resolve(url_real, navreq)` y solo expone el destino resuelto en `tab_page.nav_url` si la política
   lo permite (Zero Trust). Las tramas de subrecurso solo aparecen en `OP_LOAD` (XHR vive solo en la
@@ -161,6 +166,9 @@ tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_pag
  * tab_load_full con page_url == NULL, reader == 0 y prefers_dark == 0. */
 tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
                          int run_js, int reader, int prefers_dark, tab_page *out);
+/* Stage 4 dispatcher: dispara el click handler JS del node_id y devuelve la vista
+ * re-derivada (con las mutaciones causadas por el handler). */
+tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out);
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out);
 int        tab_alive(const tab *t);
 pid_t      tab_child_pid(const tab *t);
@@ -199,6 +207,12 @@ void       tab_eval_result_free(tab_eval_result *r);
   por `FB_MAX_FILE_BYTES`, `elen` por `FB_MAX_ENTRY_BYTES` y el conteo por `FB_MAX_ENTRIES`, así un
   worker hostil no puede amplificar el flujo. `file`/`line`/`col` son la ubicación del error
   (`NULL`/0 para entradas sin ubicación, p. ej. un `console.log`).
+- **`tab_click`**: dispara el evento de click en `node_id` dentro del worker vivo. El worker
+  ejecuta cualquier handler registrado (`addEventListener('click')` / `onclick`) y **re-deriva la
+  vista** con `pv_build_full` usando los mismos parámetros de la última carga, así el padre puede
+  repintar las mutaciones del handler. `t`/`out` no nulos; `node_id == DOM_NODE_NONE` falla cerrado
+  en el padre (`TAB_ERR_NULL_ARG`); hijo muerto o fallo interno ⇒ `TAB_ERR_DEAD`/`TAB_ERR_RENDER`.
+  La respuesta no lleva navegación (`navreq_len == 0`); el padre decide después si sigue un enlace.
 - **`tab_eval`**: requiere una página cargada con éxito. `t`/`out` no nulos; `js` no nulo si
   `len > 0`; `len > TAB_MAX_INPUT` ⇒ `TAB_ERR_TOO_LARGE`; hijo muerto ⇒ `TAB_ERR_DEAD`. El JS ve el
   DOM cargado y los globales `navigator`/`screen`/`performance`/`canvas`/`audio`. Un **error a nivel
@@ -240,6 +254,8 @@ void       tab_eval_result_free(tab_eval_result *r);
 - `tab_eval`: identidad normalizada (`navigator.language`), pantalla bucketeada, relojes en rejilla.
 - `tab_eval` de una excepción JS ⇒ `TAB_OK` con `is_exception != 0` y mensaje.
 - `tab_eval` repetidos contra la misma página (estado persistente del hijo).
+- **Stage 4 dispatcher:** `tab_click` sobre un nodo con `onclick` muta el DOM y la nueva vista refleja
+  la mutación; sin handler la vista no cambia; `DOM_NODE_NONE` ⇒ `TAB_ERR_NULL_ARG`.
 - Recarga: un segundo `tab_load` reemplaza la página; el `eval` ve el nuevo DOM.
 - `NULL` ⇒ `TAB_ERR_NULL_ARG`; sobre-tamaño ⇒ `TAB_ERR_TOO_LARGE`.
 - Entrada binaria/malformada ⇒ retorna (`TAB_OK` o `TAB_ERR_RENDER`/`TAB_ERR_DEAD`) **sin** derribar
@@ -252,10 +268,10 @@ void       tab_eval_result_free(tab_eval_result *r);
 
 - Multiplexado de muchas pestañas / scheduler (esta unidad es un worker; el orquestador de UI las
   agrupa).
-- Eventos del DOM, mutación, `setTimeout`/microtasks asíncronas: el `eval` es síncrono y de un solo
-  disparo por petición.
-- Serialización del árbol DOM completo al padre (se devuelve título+texto inerte; el JS consulta el
-  DOM dentro del hijo).
+- Eventos del DOM distintos a click, mutación observada, `setTimeout`/microtasks asíncronas: el click
+  y el `eval` son síncronos y de un solo disparo por petición.
+- Serialización del árbol DOM completo al padre (se devuelve título+texto inerte + display list; el
+  JS consulta el DOM dentro del hijo).
 - Reutilización de procesos entre orígenes (cada `tab` es un proceso; la política por-origen la
   decide el orquestador).
 - Paso de `session_key`/dimensiones de pantalla desde el orquestador (v1 las fija en el worker).

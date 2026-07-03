@@ -18,6 +18,7 @@
 
 #include "box_style.h"
 #include "css.h"
+#include "dom.h"
 #include "flex_layout.h"
 #include "html_parse.h"
 #include "page_view.h"
@@ -1438,6 +1439,63 @@ static void test_build_reader_skips_boilerplate(void **state) {
 }
 
 /* pv_set_text_style sets the fields on the most recent run; NULL/empty safe. */
+/* The setter is a no-op when the view is empty or NULL, and it writes to the
+ * most recently appended run otherwise. */
+static void test_set_node_id_model(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "hello", NULL), PV_OK);
+    pv_set_node_id(v, 42);
+    assert_int_equal(pv_at(v, 0)->node_id, 42);
+    pv_set_node_id(v, DOM_NODE_NONE);
+    assert_int_equal(pv_at(v, 0)->node_id, DOM_NODE_NONE);
+    pv_set_node_id(NULL, 7); /* NULL-safe */
+    pv_free(v);
+}
+
+/* Stage 0 keystone: every emitted run carries the document-order element id of
+ * its source element, matching the id that dom_build assigns to the same
+ * element. This is what lets the GUI dispatch a click on a painted block back
+ * to the worker's live DOM. */
+static void test_build_node_id_matches_dom_index(void **state) {
+    (void)state;
+    hp_document *doc = parse("<html><head></head><body>"
+                             "<p id='a'>alpha</p>"
+                             "<img src='https://x.example/i.png' alt='pic'>"
+                             "<p id='b'><a href='/x'>beta</a></p>"
+                             "</body></html>");
+    dom_index *idx = NULL;
+    assert_int_equal(dom_build(doc, &idx), DOM_OK);
+    dom_node_id id_a = dom_get_element_by_id(idx, "a");
+    dom_node_id id_b = dom_get_element_by_id(idx, "b");
+    assert_int_not_equal(id_a, DOM_NODE_NONE);
+    assert_int_not_equal(id_b, DOM_NODE_NONE);
+
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *alpha = find_text(v, "alpha");
+    const pv_run *pic = find_image(v, "https://x.example/i.png");
+    const pv_run *beta = find_text(v, "beta");
+    dom_node_id id_img = DOM_NODE_NONE;
+    size_t nimg = dom_get_by_tag(idx, "img", &id_img, 1);
+    assert_int_equal(nimg, 1);
+    dom_node_id id_a_anchor = DOM_NODE_NONE;
+    size_t na = dom_get_by_tag(idx, "a", &id_a_anchor, 1);
+    assert_int_equal(na, 1);
+
+    assert_non_null(alpha);
+    assert_non_null(pic);
+    assert_non_null(beta);
+    assert_int_equal(alpha->node_id, id_a);
+    assert_int_equal(pic->node_id, id_img);
+    assert_int_equal(beta->node_id, id_a_anchor);
+
+    pv_free(v);
+    dom_free(idx);
+    hp_document_free(doc);
+}
+
 static void test_set_text_style_model(void **state) {
     (void)state;
     pv_view *v = pv_new();
@@ -1525,6 +1583,8 @@ int main(void) {
         cmocka_unit_test(test_build_css_bold_and_inline_wins),
         cmocka_unit_test(test_build_display_none_hidden),
         cmocka_unit_test(test_build_reader_skips_boilerplate),
+        cmocka_unit_test(test_set_node_id_model),
+        cmocka_unit_test(test_build_node_id_matches_dom_index),
         cmocka_unit_test(test_set_text_style_model),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

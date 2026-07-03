@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "dom.h"
 #include "html_parse.h"
 
 #ifdef __cplusplus
@@ -138,6 +139,13 @@ typedef struct pv_run {
     int     box_center;
     int     box_mt;
     int     box_mb;
+    /* Keystone (Stage 0): stable document-order element identity. node_id is the
+     * dom_node_id of the source element for this run, assigned by the same pre-order
+     * walk that dom_build uses, so it agrees with the JS sandbox's index. It is
+     * STRUCTURE (like block_id/cont_id), carried regardless of caps.css. DOM_NODE_NONE
+     * when the run has no single source element (e.g. an anonymous text run outside a
+     * block, or a synthesized notice). */
+    dom_node_id node_id;
     /* Box engine (Hito 23b-8): block_id groups the runs of one block-level box in
      * document order (-1 = no box-carrying block). It is STRUCTURE, carried by
      * render_doc regardless of caps.css (like cont_id). The box's decoration and
@@ -311,6 +319,11 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
  * box_l/r/w/center to 0 and box_mt/box_mb to PV_LEN_UNSET. */
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int box_mt, int box_mb);
+
+/* Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of
+ * the source element. No-op on an empty or NULL view; the append helpers default
+ * node_id to DOM_NODE_NONE. */
+void pv_set_node_id(pv_view *v, dom_node_id node_id);
 
 /* Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of
  * the box-carrying block it belongs to (-1 = none). No-op on an empty or NULL view;

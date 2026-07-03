@@ -119,11 +119,124 @@ static char *dup_n(const char *s, size_t n) {
 
 /* --- public: model --- */
 
-/* Box engine (Hito 23b-8): a run defaults to "no box" (block_id -1). The box's
- * decoration lives on the box-def list, not the run, so there is nothing else to
- * default here; shared by all three append helpers. */
-static void run_init_box_defaults(pv_run *r) {
+/* Common field initialization shared by all append helpers. Keeps the three
+ * constructors DRY and guarantees every run starts from the same sentinel state
+ * (including the Stage 0 node_id and the Step D block_id). */
+static void run_init_common(pv_run *r) {
+    r->kind = PV_TEXT;
+    r->heading = 0;
+    r->block_break = 0;
+    r->text = NULL;
+    r->href = NULL;
+    r->src = NULL;
+    r->img_w = -1;
+    r->img_h = -1;
+    r->bold = 0;
+    r->italic = 0;
+    r->indent = 0;
+    r->fg_rgb = -1;
+    r->bg_rgb = -1;
+    r->text_align = 0;
+    r->font_scale = 0;
+    r->line_scale = 0;
+    r->text_decoration = -1;
+    r->font_family = 0;
+    r->text_transform = 0;
+    r->letter_spacing = PV_LEN_UNSET;
+    r->word_spacing = PV_LEN_UNSET;
+    r->shadow_dx = 0;
+    r->shadow_dy = 0;
+    r->shadow_color = -1;
+    r->opacity = -1;
+    r->valign = 0;
+    r->text_indent = PV_LEN_UNSET;
+    r->white_space = 0;
+    r->cont_id = -1;
+    r->cont_display = 0;
+    r->cont_gap = 0;
+    r->cont_justify = 0;
+    r->cont_cols = 0;
+    r->box_l = 0;
+    r->box_r = 0;
+    r->box_w = 0;
+    r->box_center = 0;
+    r->box_mt = PV_LEN_UNSET;
+    r->box_mb = PV_LEN_UNSET;
+    r->node_id = DOM_NODE_NONE;
     r->block_id = -1;
+    r->input_type = 0;
+    r->name = NULL;
+    r->value = NULL;
+    r->form_id = -1;
+    r->form_method = PV_METHOD_GET;
+}
+
+/* Forward declaration: the iterative pre-order successor is defined below. */
+static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root);
+
+/* Keystone (Stage 0): document-order element identity. page_view builds the same
+ * pre-order element walk that dom_build uses, mapping each element pointer to its
+ * 0-based id. Runs then stamp the id of their source element so the GUI can map a
+ * painted block back to the live DOM node for event dispatch. */
+#define PV_NODE_MAP_INIT_CAP 64
+
+typedef struct pv_node_map {
+    const lxb_dom_node_t **nodes;
+    size_t count;
+    size_t cap;
+} pv_node_map;
+
+static int pv_node_map_init(pv_node_map *m) {
+    m->nodes = (const lxb_dom_node_t **)calloc(PV_NODE_MAP_INIT_CAP, sizeof *m->nodes);
+    if (m->nodes == NULL) return -1;
+    m->count = 0;
+    m->cap = PV_NODE_MAP_INIT_CAP;
+    return 0;
+}
+
+static void pv_node_map_free(pv_node_map *m) {
+    if (m == NULL) return;
+    free(m->nodes);
+    m->nodes = NULL;
+    m->count = m->cap = 0;
+}
+
+/* Records an element node in document order. Returns its id, or DOM_NODE_NONE on
+ * overflow (anti-DoS: a hostile document with too many elements still renders, but
+ * without stable ids for the overflow nodes). */
+static dom_node_id pv_node_map_add(pv_node_map *m, const lxb_dom_node_t *node) {
+    if (m->count >= m->cap) {
+        size_t ncap = m->cap * 2;
+        const lxb_dom_node_t **grown =
+            (const lxb_dom_node_t **)realloc(m->nodes, ncap * sizeof *grown);
+        if (grown == NULL) return DOM_NODE_NONE;
+        m->nodes = grown;
+        m->cap = ncap;
+    }
+    dom_node_id id = (dom_node_id)m->count;
+    m->nodes[m->count++] = node;
+    return id;
+}
+
+/* Looks up the document-order id of an element node. Returns DOM_NODE_NONE if the
+ * node was not recorded (e.g. overflow or a node from outside the indexed tree). */
+static dom_node_id pv_node_map_id(const pv_node_map *m, const lxb_dom_node_t *node) {
+    if (m == NULL || node == NULL) return DOM_NODE_NONE;
+    for (size_t i = 0; i < m->count; ++i) {
+        if (m->nodes[i] == node) return (dom_node_id)i;
+    }
+    return DOM_NODE_NONE;
+}
+
+/* Builds a document-order map of all element nodes under root. Returns 0, or -1 on
+ * allocation failure. */
+static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root) {
+    if (pv_node_map_init(m) != 0) return -1;
+    for (const lxb_dom_node_t *n = root; n != NULL; n = node_next((lxb_dom_node_t *)n, root)) {
+        if (n->type == LXB_DOM_NODE_TYPE_ELEMENT)
+            (void)pv_node_map_add(m, n);
+    }
+    return 0;
 }
 
 pv_view *pv_new(void) {
@@ -151,51 +264,15 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     }
 
     pv_run *r = &v->runs[v->count++];
+    run_init_common(r);
     r->kind = kind;
     r->heading = heading;
-    r->bold = 0;
-    r->italic = 0;
-    r->indent = 0;
     r->block_break = block_break;
     r->text = t;
     r->href = h;
     r->src = NULL;
     r->img_w = -1;
     r->img_h = -1;
-    r->fg_rgb = -1;
-    r->bg_rgb = -1;
-    r->text_align = 0;
-    r->font_scale = 0;
-    r->line_scale = 0;
-    r->text_decoration = -1;
-    r->font_family = 0;
-    r->text_transform = 0;
-    r->letter_spacing = PV_LEN_UNSET;
-    r->word_spacing = PV_LEN_UNSET;
-    r->shadow_dx = 0;
-    r->shadow_dy = 0;
-    r->shadow_color = -1;
-    r->opacity = -1;
-    r->valign = 0;
-    r->text_indent = PV_LEN_UNSET;
-    r->white_space = 0;
-    r->cont_id = -1;
-    r->cont_display = 0;
-    r->cont_gap = 0;
-    r->cont_justify = 0;
-    r->cont_cols = 0;
-    r->box_l = 0;
-    r->box_r = 0;
-    r->box_w = 0;
-    r->box_center = 0;
-    r->box_mt = PV_LEN_UNSET;
-    r->box_mb = PV_LEN_UNSET;
-    run_init_box_defaults(r);
-    r->input_type = 0;
-    r->name = NULL;
-    r->value = NULL;
-    r->form_id = -1;
-    r->form_method = PV_METHOD_GET;
     return PV_OK;
 }
 
@@ -217,51 +294,14 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     if (s == NULL) { free(t); return PV_ERR_OOM; }
 
     pv_run *r = &v->runs[v->count++];
+    run_init_common(r);
     r->kind = PV_IMAGE;
     r->heading = heading;
-    r->bold = 0;
-    r->italic = 0;
-    r->indent = 0;
     r->block_break = block_break;
     r->text = t;
-    r->href = NULL;
     r->src = s;
     r->img_w = w;
     r->img_h = h;
-    r->fg_rgb = -1;
-    r->bg_rgb = -1;
-    r->text_align = 0;
-    r->font_scale = 0;
-    r->line_scale = 0;
-    r->text_decoration = -1;
-    r->font_family = 0;
-    r->text_transform = 0;
-    r->letter_spacing = PV_LEN_UNSET;
-    r->word_spacing = PV_LEN_UNSET;
-    r->shadow_dx = 0;
-    r->shadow_dy = 0;
-    r->shadow_color = -1;
-    r->opacity = -1;
-    r->valign = 0;
-    r->text_indent = PV_LEN_UNSET;
-    r->white_space = 0;
-    r->cont_id = -1;
-    r->cont_display = 0;
-    r->cont_gap = 0;
-    r->cont_justify = 0;
-    r->cont_cols = 0;
-    r->box_l = 0;
-    r->box_r = 0;
-    r->box_w = 0;
-    r->box_center = 0;
-    r->box_mt = PV_LEN_UNSET;
-    r->box_mb = PV_LEN_UNSET;
-    run_init_box_defaults(r);
-    r->input_type = 0;
-    r->name = NULL;
-    r->value = NULL;
-    r->form_id = -1;
-    r->form_method = PV_METHOD_GET;
     return PV_OK;
 }
 
@@ -291,46 +331,12 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     if (action != NULL && ac == NULL) { free(t); free(nm); free(vl); return PV_ERR_OOM; }
 
     pv_run *r = &v->runs[v->count++];
+    run_init_common(r);
     r->kind = PV_INPUT;
     r->heading = heading;
-    r->bold = 0;
-    r->italic = 0;
-    r->indent = 0;
     r->block_break = block_break;
     r->text = t;
     r->href = ac;
-    r->src = NULL;
-    r->img_w = -1;
-    r->img_h = -1;
-    r->fg_rgb = -1;
-    r->bg_rgb = -1;
-    r->text_align = 0;
-    r->font_scale = 0;
-    r->line_scale = 0;
-    r->text_decoration = -1;
-    r->font_family = 0;
-    r->text_transform = 0;
-    r->letter_spacing = PV_LEN_UNSET;
-    r->word_spacing = PV_LEN_UNSET;
-    r->shadow_dx = 0;
-    r->shadow_dy = 0;
-    r->shadow_color = -1;
-    r->opacity = -1;
-    r->valign = 0;
-    r->text_indent = PV_LEN_UNSET;
-    r->white_space = 0;
-    r->cont_id = -1;
-    r->cont_display = 0;
-    r->cont_gap = 0;
-    r->cont_justify = 0;
-    r->cont_cols = 0;
-    r->box_l = 0;
-    r->box_r = 0;
-    r->box_w = 0;
-    r->box_center = 0;
-    r->box_mt = PV_LEN_UNSET;
-    r->box_mb = PV_LEN_UNSET;
-    run_init_box_defaults(r);
     r->input_type = (int)input_type;
     r->name = nm;
     r->value = vl;
@@ -411,6 +417,11 @@ void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
     r->box_center = box_center;
     r->box_mt = box_mt;
     r->box_mb = box_mb;
+}
+
+void pv_set_node_id(pv_view *v, dom_node_id node_id) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].node_id = node_id;
 }
 
 void pv_set_block_id(pv_view *v, int block_id) {
@@ -1475,6 +1486,13 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
     lxb_dom_node_t *body = find_body(root);
     lxb_dom_node_t *base = (body != NULL) ? body : root;
 
+    /* Keystone (Stage 0): build a document-order element map from the root so that
+     * every emitted run can carry the same element id that dom_build assigns. This
+     * makes pv_run.node_id agree with dom_node_id even though page_view walks from
+     * `base` (usually body) while the DOM index counts from root. */
+    pv_node_map node_map;
+    if (pv_node_map_build(&node_map, root) != 0) { pv_free(v); return PV_ERR_OOM; }
+
     /* Parse the document's <style> blocks once into a bounded sheet (pure: it never
      * fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css
      * module, so OOM here degrades to "no author CSS", not a failure. */
@@ -1543,6 +1561,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 if (st != PV_OK) { rc = st; goto cleanup; }
                 pv_set_emphasis(v, (t == LXB_TAG_TH) ? 1 : 0, 0);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
 
@@ -1587,6 +1606,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                                                name, value, action, fidx, method);
                 free(label); free(name); free(value);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
 
@@ -1640,6 +1660,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 free(src_dup);
                 free(alt_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
             }
             continue;
         }
@@ -1723,6 +1744,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                         ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,
                         ext.opacity, ext.valign, ext.text_indent, ext.white_space);
         pv_set_block_id(v, bdeco);
+        pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
     }
 
     /* Box engine (Step D): publish the box tree. box_reg holds one def per
@@ -1736,11 +1758,13 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
     *out = v;
     forms_free(&forms);
     css_free(sheet);
+    pv_node_map_free(&node_map);
     return PV_OK;
 
 cleanup:
     forms_free(&forms);
     css_free(sheet);
+    pv_node_map_free(&node_map);
     pv_free(v);
     return rc;
 }

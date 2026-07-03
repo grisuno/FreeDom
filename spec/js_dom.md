@@ -1,8 +1,7 @@
 # Especificación: `js_dom`
 
-> Puente DOM ↔ JS (cierre del cableado del Hito 3). Estado: **SPEC + TEST (rojo)**.
-> Metodología: SDD + TDD. Esta spec es el contrato; `tests/test_js_dom.c` debe fallar hasta que
-> exista `src/js_dom.c` (estado rojo).
+> Puente DOM ↔ JS. Estado: **SPEC + TEST verde + ASan/UBSan limpio + fuzz-js verde**.
+> Metodología: SDD + TDD.
 
 ## 1. Propósito
 
@@ -18,15 +17,16 @@ más adelante, en JS o en C, sin ampliar el núcleo de confianza.
 
 ## 2. Decisión de diseño
 
-- El índice `dom` se guarda en el *context opaque* del motor (`JS_SetContextOpaque`), **no**
-  alcanzable desde JS. Las funciones nativas lo recuperan con `JS_GetContextOpaque`.
+- El *context opaque* del motor (`JS_SetContextOpaque`) apunta a una estructura `jd_opaque`
+  controlada por el llamador, que contiene el `dom_index*` y el estado de eventos de click.
+  **No** es alcanzable desde JS; las funciones nativas lo recuperan con `JS_GetContextOpaque`.
 - Se instala un objeto global `dom` con métodos **no escribibles, no configurables**
   (`JS_PROP_ENUMERABLE` puro) y el propio objeto se sella con `JS_PreventExtensions`. Un script
   no puede sustituir `dom`, ni reemplazar `dom.getElementById`, ni inyectar métodos nuevos.
 - El bridge usa una costura mínima de `js_sandbox` (`js_context_raw`) que devuelve el contexto
   del motor como `void*` opaco — sin filtrar tipos `JS*` fuera del módulo, igual que
   `hp_document_root` para `dom`.
-- **El índice `dom` debe sobrevivir al `js_context`** (se referencia, no se copia).
+- **El `jd_opaque` debe sobrevivir al `js_context`** (vive en el stack/struct del llamador).
 
 ## 3. Superficie expuesta a JS
 
@@ -51,6 +51,15 @@ Objeto global `dom` (solo lectura). Handles = enteros; "ninguno" = `null`.
 | `dom.appendChild(p, c)` / `removeChild(p, c)` | bool | `dom_append_child` / `_remove` |
 | `dom.setAttribute(h, n, v)` | `undefined` | `dom_set_attribute` (re-indexa id/class) |
 | `dom.removeAttribute(h, n)` | `undefined` | `dom_remove_attribute` |
+| `dom.registerClick(h, fn)` | `undefined` | Registra `fn` como handler de click para el nodo `h` (nativo). |
+
+**Eventos de click (Stage 4 dispatcher):** `addEventListener('click', fn)` y `element.onclick = fn`
+registran un handler invocable desde C con `jd_fire_click(ctx, node_id)`. El handler recibe un
+objeto evento mínimo con `target` (wrapper del nodo) y `preventDefault()`. Si el handler llama
+`preventDefault()`, `jd_fire_click` devuelve `0` (el llamante no debe ejecutar la acción por
+defecto, p. ej. seguir un enlace); de lo contrario devuelve `1`. El registro vive en un objeto
+JS interno (`__clickRegistry`) indexado por handle; no hay JSValue retenido en C, así que no
+hay ciclo de vida que administrar.
 
 **Fachada `document` (Hito 20b/20c):** un shim JS inyectado por `jd_install` define `document` sobre la
 API de handles para que scripts reales corran. Lectura/escritura: `document.title`,
@@ -89,11 +98,11 @@ scripts; **el padre (proceso confiable) la resuelve y gatea** con `ln_resolve(UR
 (Zero Trust: el worker no resuelve, así un worker comprometido no puede colar `file:///etc/passwd`).
 Sin URL (página local/about) `location` cae al stub no-op previo. Última asignación gana.
 
-Lo que **no** existe aún (por diseño): `innerHTML` (getter — serialización), eventos **interactivos**
-(clic del usuario), timers **asíncronos** reales (event loop que empuje vistas), scripts externos
-(`src`). Todas las mutaciones son **memory-safe**: remover detacha (no destruye) → un handle previo
-nunca cuelga; agregar nodos nunca libera. Un handle inválido produce `null`/`""`/`false`, **nunca** un
-fallo del host.
+Lo que **no** existe aún (por diseño): `innerHTML` (getter — serialización), timers **asíncronos**
+reales (event loop que empuje vistas), scripts externos (`src`), eventos distintos a click
+(keydown, mousemove, submit, etc.). Todas las mutaciones son **memory-safe**: remover detacha
+(no destruye) → un handle previo nunca cuelga; agregar nodos nunca libera. Un handle inválido
+produce `null`/`""`/`false`, **nunca** un fallo del host.
 
 ## 4. Contrato de la API (C)
 
@@ -107,10 +116,15 @@ typedef enum jd_status {
     JD_ERR_INTERNAL
 } jd_status;
 
-/* Instala el global `dom` (con mutadores memory-safe) y la fachada `document` en el
- * sandbox, respaldado por idx (ya no const: expone mutadores). idx debe sobrevivir a
- * ctx. Llamar sobre un contexto recien creado. */
-jd_status jd_install(js_context *ctx, dom_index *idx);
+/* Instala el global `dom` y la fachada `document`. opaque debe sobrevivir a ctx y
+ * estar inicializado por el llamador (se escribe en la llamada). */
+jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque);
+
+/* Click events (Stage 4 dispatcher). state se guarda en opaque->click. */
+jd_click_state *jd_click_state_new(void);
+void jd_click_state_free(jd_click_state *s);
+jd_status jd_install_events(js_context *ctx, jd_click_state *state);
+int jd_fire_click(js_context *ctx, dom_node_id node_id);
 
 /* Hito 20e: instala un `location` real de solo lectura sobre los componentes de la URL
  * de la pagina, y arma la captura de navegacion (location.href=/assign/replace/reload/
@@ -129,8 +143,8 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 
 | Código | Condición |
 | :-- | :-- |
-| `JD_OK` | Global `dom` instalado. |
-| `JD_ERR_NULL_ARG` | `ctx == NULL` o `idx == NULL`. |
+| `JD_OK` | Global `dom` instalado / eventos instalados. |
+| `JD_ERR_NULL_ARG` | `ctx == NULL`, `idx == NULL`, `opaque == NULL` o `state == NULL`. |
 | `JD_ERR_OOM` | Fallo de asignación al construir el objeto/funciones. |
 | `JD_ERR_INTERNAL` | El contexto del motor no es accesible o la instalación falló. |
 
@@ -161,6 +175,9 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 - **Infalsificable:** tras `dom.getElementById = 1`, `typeof dom.getElementById==='function'`;
   reasignar `dom` no cambia su identidad; `dom.nuevo = 1` no añade (objeto sellado).
 - Hereda límites: un bucle infinito que usa `dom` sigue dando `JS_ERR_TIMEOUT`.
+- **Click events (Stage 4):** `addEventListener('click', fn)` y `onclick` ejecutan el handler al
+  llamar `jd_fire_click(ctx, h)`; `preventDefault()` hace que `jd_fire_click` devuelva `0`;
+  sin handler devuelve `1`; `jd_install_events(NULL, NULL)` falla cerrado.
 
 ## 8. Fuera de alcance
 

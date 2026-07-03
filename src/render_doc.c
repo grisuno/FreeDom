@@ -116,6 +116,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_center = 0;
     b->box_mt = PV_LEN_UNSET;
     b->box_mb = PV_LEN_UNSET;
+    b->node_id = DOM_NODE_NONE;
     b->block_id = -1;
     b->input_type = 0;
     b->name = NULL;
@@ -277,6 +278,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->box_mt = r->box_mt;
                 lb->box_mb = r->box_mb;
             }
+            /* Keystone (Stage 0): node_id is structure (the source DOM element), not
+             * author presentation, so it is carried regardless of caps.css. This is the
+             * stable handle the GUI uses to dispatch clicks to the worker's live DOM. */
+            lb->node_id = r->node_id;
             /* Box engine (Hito 23b-8 Step D): unlike cont_id (flex/grid is page
              * structure, always applied), block_id exists only to GROUP runs into the
              * author box they belong to -- which is presentation. So it is gated by

@@ -1185,6 +1185,24 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   puro + integración + E2E visual headless verificados bajo test/ASan/fuzz; ventana Wayland interactiva
   pendiente al dueño.)* Ver `[[freedom-harfbuzz-shaping]]`.
 
+- **Hito (keystone) — Identidad estable de nodo (`node_id`) + click dispatcher (Stage 4).**
+  Dos gaps críticos del motor cerrados de golpe. **Stage 0 (keystone):** `dom_node_id` se propaga
+  `dom_index` → `pv_run` → IPC (`tab.c`) → `rd_block` con una caminata pre-order idéntica a la de
+  `dom_build`, así el painter puede mapear un pixel pintado de vuelta al nodo vivo del worker. Se
+  añadieron tests en `test_page_view`, `test_render_doc` y `test_tab`; `make test`/`make asan`/`make
+  fuzz-pv` limpios. **Stage 4 (dispatcher):** el JS de página puede registrar click handlers vía
+  `addEventListener('click', fn)` y `element.onclick = fn`; la GUI, al hacer click sobre el contenido,
+  resuelve el `node_id` bajo el cursor (`node_at_point`), envía `OP_CLICK` al worker vivo
+  (`w->tab_worker`), el worker ejecuta `jd_fire_click` y re-deriva la vista, y la GUI repinta con la
+  mutación aplicada (`apply_click_result`). Si el punto era un enlace, se sigue tras la mutación (la
+  navegación por JS sigue gateada por `ln_resolve` + `JS_NAV_MAX`). Limitaciones v1: no hay bubbling,
+  coords en el evento, ni eventos distintos a click; el click es síncrono y bloquea el hilo de render
+  durante el round-trip. Specs actualizadas (`js_dom.md`, `tab.md`, `PLAN-layout-engine.md`) + tests
+  (4 nuevos en `test_js_dom`, 1 E2E en `test_tab`) + `make test` (39 suites) / `make asan` (39, exit 0)
+  limpios + `make fuzz-js`/`make fuzz-pv` verdes. *(Núcleo + IPC + integración GUI compilan y pasan
+  tests; la verificación visual interactiva en Wayland queda pendiente al dueño.)* Ver
+  `[[freedom-node-id-keystone]]`, `[[freedom-click-dispatcher]]`.
+
 ### 7.3 Roadmap — por cruzar
 
 - **Hito 24 — Freebug (consola de desarrollo JS) + scripts externos por soberanía.** Para no estar

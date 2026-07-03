@@ -57,7 +57,7 @@ static void ignore_sigpipe(void);
 #define TAB_MAX_URL ((size_t)(64u * 1024u))
 
 /* Request opcodes (parent -> child). */
-enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4 };
+enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5 };
 
 /* OP_LOAD response tags (child -> parent). While running the page's scripts the child
  * may issue zero or more TAG_SUBREQ subresource requests (XMLHttpRequest/fetch), which
@@ -102,21 +102,27 @@ static int read_full(int fd, void *buf, size_t n) {
 /* =========================== child side ============================== */
 
 typedef struct child_state {
-    hp_document *doc;
-    dom_index   *idx;
-    js_context  *js;
-    uint64_t     session_key;
-    fb_buffer    log; /* console capture (Freebug); persists across loads/evals */
-    int          rfd;        /* worker read fd  (parent -> child): for subresource replies */
-    int          wfd;        /* worker write fd (child -> parent): for subresource requests */
-    int          net_active; /* 1 only during a page-load script window (XHR allowed) */
-    int          subreq_used;/* subresource requests issued this load (capped) */
+    hp_document    *doc;
+    dom_index      *idx;
+    js_context     *js;
+    jd_opaque       jd_op;  /* per-context binding state; lives with child_state */
+    jd_click_state *click;  /* owned by child_state, freed on reset */
+    uint64_t        session_key;
+    fb_buffer       log; /* console capture (Freebug); persists across loads/evals */
+    int             rfd;        /* worker read fd  (parent -> child): for subresource replies */
+    int             wfd;        /* worker write fd (child -> parent): for subresource requests */
+    int             net_active; /* 1 only during a page-load script window (XHR allowed) */
+    int             subreq_used;/* subresource requests issued this load (capped) */
+    int             last_run_js;       /* render params from the last OP_LOAD */
+    int             last_reader;
+    int             last_prefers_dark;
 } child_state;
 
 static void child_reset_page(child_state *cs) {
-    if (cs->js  != NULL) { js_context_free(cs->js);  cs->js  = NULL; }
-    if (cs->idx != NULL) { dom_free(cs->idx);          cs->idx = NULL; }
-    if (cs->doc != NULL) { hp_document_free(cs->doc);  cs->doc = NULL; }
+    if (cs->js != NULL) { js_context_free(cs->js); cs->js = NULL; }
+    if (cs->click != NULL) { jd_click_state_free(cs->click); cs->click = NULL; }
+    if (cs->idx != NULL) { dom_free(cs->idx); cs->idx = NULL; }
+    if (cs->doc != NULL) { hp_document_free(cs->doc); cs->doc = NULL; }
 }
 
 /* jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). An XHR/fetch
@@ -204,11 +210,17 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
      && rp_site_of(rb_host, rb_site, sizeof rb_site) == 0) {
         rb_origin = rb_site;
     }
+    cs->click = jd_click_state_new();
+    if (cs->click == NULL) {
+        js_context_free(js); dom_free(idx); hp_document_free(doc); return -1;
+    }
     uint64_t readback_key = fp_origin_key(cs->session_key, rb_origin);
-    if (jd_install(js, idx) != JD_OK
+    if (jd_install(js, idx, &cs->jd_op) != JD_OK
+     || jd_install_events(js, cs->click) != JD_OK
      || je_install(js, TAB_SCREEN_W, TAB_SCREEN_H) != JE_OK
      || je_install_canvas(js, readback_key) != JE_OK) {
-        js_context_free(js); dom_free(idx); hp_document_free(doc); return -1;
+        js_context_free(js); jd_click_state_free(cs->click); cs->click = NULL;
+        dom_free(idx); hp_document_free(doc); return -1;
     }
     /* Capturing console for Freebug: a fresh page starts with an empty transcript;
      * the buffer (stable child_state member) is wired into the new context's runtime
@@ -291,6 +303,7 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t bmt = (int32_t)r->box_mt;
         int32_t bmb = (int32_t)r->box_mb;
         int32_t blkid = (int32_t)r->block_id;
+        int32_t nodeid = (int32_t)r->node_id;
         int32_t itype = (int32_t)r->input_type;
         int32_t fid = (int32_t)r->form_id;
         int32_t method = (int32_t)r->form_method;
@@ -342,6 +355,7 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &bmt, sizeof bmt) != 0) return -1;
         if (write_full(wfd, &bmb, sizeof bmb) != 0) return -1;
         if (write_full(wfd, &blkid, sizeof blkid) != 0) return -1;
+        if (write_full(wfd, &nodeid, sizeof nodeid) != 0) return -1;
         if (write_full(wfd, &itype, sizeof itype) != 0) return -1;
         if (write_full(wfd, &fid, sizeof fid) != 0) return -1;
         if (write_full(wfd, &method, sizeof method) != 0) return -1;
@@ -429,6 +443,10 @@ static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budge
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
                               const char *page_url) {
+    cs->last_run_js = run_js;
+    cs->last_reader = reader;
+    cs->last_prefers_dark = prefers_dark;
+
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
@@ -520,6 +538,44 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && write_full(wfd, &nlen, sizeof nlen) == 0
             && (nlen == 0 || write_full(wfd, navbuf, nlen) == 0)
             && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
+            && write_console(wfd, &cs->log) == 0);
+    }
+    hp_free(title);
+    hp_free(text);
+    pv_free(view);
+}
+
+/* Fire click handlers for node_id in the live DOM, then re-derive the view so the
+ * parent can repaint mutations caused by the handler. Response format matches the
+ * tail of OP_LOAD: [ok:int32][title_len][title][text_len][text][view][nav_len=''][console].
+ * No navigation is produced by a click (the parent decides default actions). */
+static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
+    char  *title = NULL, *text = NULL;
+    size_t tl = 0, xl = 0;
+    pv_view *view = NULL;
+    int ok = 0;
+    if (cs->js != NULL && cs->doc != NULL && cs->idx != NULL) {
+        (void)jd_fire_click(cs->js, node_id);
+        title = hp_get_title(cs->doc, &tl);
+        text  = hp_extract_text(cs->doc, &xl);
+        if (title != NULL && text != NULL
+            && pv_build_full(cs->doc, cs->last_run_js, cs->last_reader,
+                             cs->last_prefers_dark, &view) == PV_OK) {
+            ok = 1;
+        }
+    }
+
+    uint8_t rtag = TAG_RESULT;
+    int32_t k = ok ? 1 : 0;
+    size_t zero = 0;
+    if (write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &k, sizeof k) == 0 && ok) {
+        (void)(write_full(wfd, &tl, sizeof tl) == 0
+            && (tl == 0 || write_full(wfd, title, tl) == 0)
+            && write_full(wfd, &xl, sizeof xl) == 0
+            && (xl == 0 || write_full(wfd, text, xl) == 0)
+            && write_view(wfd, view) == 0
+            && write_full(wfd, &zero, sizeof zero) == 0
+            && write_full(wfd, &k, sizeof k) == 0 /* nav_replace = 0 */
             && write_console(wfd, &cs->log) == 0);
     }
     hp_free(title);
@@ -624,7 +680,16 @@ static void tab_worker_run(int rfd, int wfd) {
         uint8_t op;
         if (read_full(rfd, &op, 1) != 0) break; /* EOF / error => quit */
         if (op == OP_QUIT) break;
-        if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE) break; /* desync */
+        if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE && op != OP_CLICK)
+            break; /* desync */
+
+        /* OP_CLICK is a short command: just the target node id. */
+        if (op == OP_CLICK) {
+            int32_t nid = (int32_t)DOM_NODE_NONE;
+            if (read_full(rfd, &nid, sizeof nid) != 0) break;
+            child_handle_click(wfd, &cs, (dom_node_id)nid);
+            continue;
+        }
 
         /* OP_LOAD carries four leading flag bytes: run_js (JS policy), net (XHR/fetch
          * allowed: host in allow.conf AND js.conf), reader (distraction-free) and dark
@@ -771,6 +836,7 @@ static int read_view(int fd, pv_view **out) {
         int32_t bl = 0, br = 0, bw = 0, bcenter = 0;
         int32_t bmt = PV_LEN_UNSET, bmb = PV_LEN_UNSET;
         int32_t blkid = -1;
+        int32_t nodeid = (int32_t)DOM_NODE_NONE;
         int32_t itype = 0, fid = -1, method = 0;
         if (read_full(fd, &kind, sizeof kind) != 0
          || read_full(fd, &heading, sizeof heading) != 0
@@ -817,6 +883,7 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &bmt, sizeof bmt) != 0
          || read_full(fd, &bmb, sizeof bmb) != 0
          || read_full(fd, &blkid, sizeof blkid) != 0
+         || read_full(fd, &nodeid, sizeof nodeid) != 0
          || read_full(fd, &itype, sizeof itype) != 0
          || read_full(fd, &fid, sizeof fid) != 0
          || read_full(fd, &method, sizeof method) != 0) {
@@ -856,6 +923,7 @@ static int read_view(int fd, pv_view **out) {
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
             pv_set_block_id(v, (int)blkid);
+            pv_set_node_id(v, (dom_node_id)nodeid);
         }
     }
 
@@ -1170,6 +1238,69 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     out->nav_url = nav_url;
     out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
     out->console = console; /* ownership moves to the caller (tab_page_free) */
+    return TAB_OK;
+}
+
+tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
+    if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+
+    uint8_t op = OP_CLICK;
+    int32_t nid = (int32_t)node_id;
+    if (write_full(t->req_fd, &op, 1) != 0
+     || write_full(t->req_fd, &nid, sizeof nid) != 0) {
+        tab_refresh_alive(t);
+        return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
+
+    uint8_t tag = 0;
+    if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
+    if (tag != TAG_RESULT) return io_failure(t);
+
+    int32_t ok = 0;
+    if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
+    if (!ok) return TAB_ERR_RENDER;
+
+    char *title = NULL, *text = NULL;
+    size_t tl = 0, xl = 0;
+    if (read_field(t->resp_fd, &title, &tl) != 0
+     || read_field(t->resp_fd, &text, &xl) != 0) {
+        free(title); free(text);
+        return io_failure(t);
+    }
+    pv_view *view = NULL;
+    if (read_view(t->resp_fd, &view) != 0) {
+        free(title); free(text);
+        return io_failure(t);
+    }
+    /* Click responses carry an empty navigation field. */
+    char *navreq = NULL;
+    size_t nlen = 0;
+    int32_t nav_replace = 0;
+    if (read_field(t->resp_fd, &navreq, &nlen) != 0
+     || read_full(t->resp_fd, &nav_replace, sizeof nav_replace) != 0) {
+        free(title); free(text); free(navreq); pv_free(view);
+        return io_failure(t);
+    }
+    free(navreq);
+
+    fb_buffer console;
+    fb_buffer_init(&console);
+    if (read_console(t->resp_fd, &console) != 0) {
+        free(title); free(text); pv_free(view);
+        fb_buffer_free(&console);
+        return io_failure(t);
+    }
+
+    out->title = title; out->title_len = tl;
+    out->text  = text;  out->text_len  = xl;
+    out->view  = view;
+    out->nav_url = NULL;
+    out->nav_replace = 0;
+    out->console = console;
     return TAB_OK;
 }
 

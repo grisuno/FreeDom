@@ -2008,6 +2008,7 @@ typedef struct rc_frag {
     const char *text;     /* slice into a rd_block text (not owned) */
     size_t      len;
     const char *href;     /* link target (aliases the rd_block href, not owned); NULL if not a link */
+    dom_node_id node_id;  /* element that produced this fragment (DOM_NODE_NONE if none) */
     /* Author text-presentation extensions (Hito 23b-6), applied by the painter and
      * consistently by the layout measure. Defaults (no author style): family 0
      * (sans), transform 0 (none), letter_spacing 0, valign_dy 0, shadow_color -1
@@ -2347,11 +2348,13 @@ typedef struct rc_ext {
 
 /* Places the words of text into the current inline line, wrapping at content_w.
  * href tags every fragment produced (NULL for non-link runs) so a later hit-test
- * can recover the click target without re-walking the document. */
+ * can recover the click target without re-walking the document. node_id tags the
+ * originating element for JS click dispatch (Stage 4 dispatcher). */
 static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                       const char *text, double size, int bold, int italic, int underline,
                       int strike, int overline,
-                      ui_rgb color, double content_w, const char *href, const rc_ext *x) {
+                      ui_rgb color, double content_w, const char *href,
+                      dom_node_id node_id, const rc_ext *x) {
     content_font(cr, size, bold, italic, x->family);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
@@ -2389,7 +2392,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
             f->x = s->pen_x; f->width = ww; f->font_size = size;
             f->bold = bold; f->italic = italic; f->underline = underline;
             f->strike = strike; f->overline = overline; f->color = color;
-            f->text = text + ws; f->len = wl; f->href = href;
+            f->text = text + ws; f->len = wl; f->href = href; f->node_id = node_id;
             f->family = x->family; f->transform = x->transform;
             f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
             f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
@@ -2449,12 +2452,12 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     if (b->kind == RD_NOTICE) {
         s->banner = 1;
         flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
-                  color, content_w, href, &x);
+                  color, content_w, href, b->node_id, &x);
         flush_line(L, s, th);
         s->banner = 0;
     } else {
         flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
-                  color, content_w, href, &x);
+                  color, content_w, href, b->node_id, &x);
     }
     s->nowrap = 0;
 }
@@ -3300,7 +3303,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 .underline = 0, .strike = 0, .overline = 0,
                 .color = th->text,
                 .text = b->text, .len = strlen(b->text),
-                .href = b->href,
+                .href = b->href, .node_id = b->node_id,
                 .family = CSS_FF_UNSET, .transform = 0,
                 .letter_spacing = 0, .valign_dy = 0,
                 .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
@@ -3443,7 +3446,7 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                 .underline = 0, .strike = 0, .overline = 0,
                 .color = th->text,
                 .text = b->text, .len = strlen(b->text),
-                .href = b->href,
+                .href = b->href, .node_id = b->node_id,
                 .family = CSS_FF_UNSET, .transform = 0,
                 .letter_spacing = 0, .valign_dy = 0,
                 .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
@@ -3616,7 +3619,7 @@ static long write_doc_png(browser_window *w, const char *path) {
                 .underline = 0, .strike = 0, .overline = 0,
                 .color = th->text,
                 .text = b->text, .len = strlen(b->text),
-                .href = b->href,
+                .href = b->href, .node_id = b->node_id,
                 .family = CSS_FF_UNSET, .transform = 0,
                 .letter_spacing = 0, .valign_dy = 0,
                 .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
@@ -3773,6 +3776,50 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     return hit;
 }
 
+/* Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the
+ * point is over blank space / outside content. Mirrors layout and scroll clamping
+ * exactly so the hit matches the painted frame. */
+static dom_node_id node_at_point(browser_window *w, double px, double py) {
+    if (w->doc == NULL || w->cairo_surface == NULL) return DOM_NODE_NONE;
+
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    if (py < content_top || py > content_top + content_h) return DOM_NODE_NONE;
+
+    double left = content_margin_x(w);
+    double content_w = content_width(w);
+
+    cairo_t *cr = cairo_create(w->cairo_surface);
+    rc_layout L;
+    layout_doc(cr, w, content_w, &L);
+
+    double max_scroll = L.total_h - content_h;
+    if (max_scroll < 0.0) max_scroll = 0.0;
+    double scroll = w->scroll;
+    if (scroll < 0.0) scroll = 0.0;
+    if (scroll > max_scroll) scroll = max_scroll;
+    double origin = content_top + w->theme.content_margin - scroll;
+
+    dom_node_id hit = DOM_NODE_NONE;
+    for (size_t i = 0; i < L.nrow && hit == DOM_NODE_NONE; ++i) {
+        const rc_row *r = &L.rows[i];
+        if (r->kind != RC_TEXT) continue;
+        double ry = origin + r->top;
+        if (py < ry || py > ry + r->height) continue;
+        double ax = row_align_offset(&L, r, content_w);
+        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
+            const rc_frag *f = &L.frags[k];
+            if (f->node_id == DOM_NODE_NONE) continue;
+            double fx = left + r->x_off + ax + f->x;
+            if (px >= fx && px <= fx + f->width) { hit = f->node_id; break; }
+        }
+    }
+
+    rc_free(&L);
+    cairo_destroy(cr);
+    return hit;
+}
+
 /* Resolves a clicked link's raw href against the current page location through
  * the pure navigation policy and, only when it yields a navigable target, records
  * the navigation and performs the load. A same-document fragment or a blocked
@@ -3791,6 +3838,48 @@ static void follow_link(browser_window *w, const char *href) {
     if (res.action != LN_NAVIGATE) return;
     if (browser_navigate(&w->bs, res.target) != BROWSER_OK) return;
     do_load(w, res.target);
+}
+
+/* Applies a click result returned by the worker: rebuild the rendered document and
+ * refresh inputs/console, but keep the current page in history (a click is not a
+ * navigation). Images are not re-fetched: a click handler may add text, but v1 does
+ * not introduce new remote images. */
+static void apply_click_result(browser_window *w, tab_page *page) {
+    if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
+    rdp_caps eff = w->caps;
+    if (w->reader) { eff.css = false; eff.images = false; }
+    rd_doc *doc = NULL;
+    if (rd_build(page->view, eff, w->cur_top, &doc) == RD_OK) {
+        w->doc = doc;
+    }
+    rebuild_inputs(w);
+    fb_buffer_free(&w->console);
+    w->console = page->console;
+    fb_buffer_init(&page->console);
+    browser_set_page(&w->bs, page->title, page->text, 0);
+}
+
+/* Dispatches a click to the live worker for the node under the cursor. If the node
+ * is a link and the handler does not prevent the default, the link is followed.
+ * The link target is captured before the view is rebuilt, since apply_click_result
+ * replaces w->doc. */
+static void dispatch_click(browser_window *w, double px, double py) {
+    if (w->tab_worker == NULL) return;
+    dom_node_id nid = node_at_point(w, px, py);
+    if (nid == DOM_NODE_NONE) return;
+
+    const char *href = link_at_point(w, px, py);
+
+    tab_page page;
+    memset(&page, 0, sizeof page);
+    if (tab_click(w->tab_worker, nid, &page) != TAB_OK) {
+        browser_set_status(&w->bs, "Click handler failed.", now_ms());
+        return;
+    }
+
+    apply_click_result(w, &page);
+    tab_page_free(&page);
+    if (href != NULL) follow_link(w, href);
 }
 
 /* Returns the painted form control under (px, py), or NULL. Mirrors the layout and
@@ -5582,8 +5671,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
             }
             /* PV_IN_BUTTON (reset/generic) is inert in v1. */
         } else {
-            const char *href = link_at_point(w, w->ptr_x, w->ptr_y);
-            if (href != NULL) follow_link(w, href);
+            dispatch_click(w, w->ptr_x, w->ptr_y);
         }
     }
     redraw(w);

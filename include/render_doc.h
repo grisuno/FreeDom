@@ -83,6 +83,12 @@ typedef struct rd_block {
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or
      * PV_LEN_UNSET (use the user-agent margin). */
     int              box_l, box_r, box_w, box_center, box_mt, box_mb;
+    /* Keystone (Stage 0): stable document-order element identity. node_id is the
+     * dom_node_id of the source element for this block, copied from pv_run. It is
+     * STRUCTURE, carried regardless of caps.css (like block_id). DOM_NODE_NONE when
+     * the block has no single source element. This is the link that lets the GUI
+     * dispatch a click on a painted block to the worker's live DOM handler. */
+    dom_node_id      node_id;
     /* Box engine (Hito 23b-8 Step D). block_id says which block-level box this block
      * belongs to (-1 = none); the box's decoration and parent_id live on the box-def
      * tree (rd_doc.boxes[block_id]), not here. block_id is gated by caps.css (like the

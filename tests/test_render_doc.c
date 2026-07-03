@@ -445,6 +445,21 @@ static void test_block_tag_total(void **state) {
     assert_null(rd_block_tag(NULL));
 }
 
+/* Stage 0 keystone: node_id is structure, so it is copied regardless of the
+ * caps.css gate (unlike block_id, which exists only when author styling is on). */
+static void test_node_id_carried_by_default(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "hello", NULL), PV_OK);
+    pv_set_node_id(v, 42);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    assert_int_equal(rd_count(d), 1);
+    assert_int_equal(rd_at(d, 0)->node_id, 42);
+    rd_free(d);
+    pv_free(v);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_out),
@@ -467,6 +482,8 @@ int main(void) {
         cmocka_unit_test(test_author_color_gated_by_css),
         cmocka_unit_test(test_input_passthrough),
         cmocka_unit_test(test_input_label_total),
+        cmocka_unit_test(test_author_color_gated_by_css),
+        cmocka_unit_test(test_node_id_carried_by_default),
         cmocka_unit_test(test_free_null_and_double),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

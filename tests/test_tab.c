@@ -187,6 +187,82 @@ static void test_load_carries_author_color(void **state) {
     tab_close(t);
 }
 
+/* Stage 0 keystone: the document-order element id assigned by the child must
+ * survive the IPC round-trip, so the parent can map a painted block back to the
+ * worker's live DOM node. */
+static void test_load_carries_node_id(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>N</title></head><body>"
+        "<p id=\"first\">alpha</p>"
+        "<p id=\"second\">beta</p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    dom_node_id id_alpha = DOM_NODE_NONE, id_beta = DOM_NODE_NONE;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text != NULL && strcmp(r->text, "alpha") == 0) {
+            assert_int_not_equal(r->node_id, DOM_NODE_NONE);
+            id_alpha = r->node_id;
+        }
+        if (r->text != NULL && strcmp(r->text, "beta") == 0) {
+            assert_int_not_equal(r->node_id, DOM_NODE_NONE);
+            id_beta = r->node_id;
+        }
+    }
+    assert_int_not_equal(id_alpha, DOM_NODE_NONE);
+    assert_int_not_equal(id_beta, DOM_NODE_NONE);
+    assert_int_not_equal(id_alpha, id_beta);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Stage 4 dispatcher: a click on a node with a JS handler mutates the DOM, and the
+ * new view is returned over IPC with the mutation reflected. */
+static void test_click_runs_handler_and_returns_view(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>C</title></head><body>"
+        "<p id=\"target\">before</p>"
+        "<script>document.getElementById('target').onclick = function(e){"
+        "  document.getElementById('target').textContent = 'after';"
+        "};</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    dom_node_id target_id = DOM_NODE_NONE;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text != NULL && strcmp(r->text, "before") == 0) {
+            target_id = r->node_id;
+        }
+    }
+    assert_int_not_equal(target_id, DOM_NODE_NONE);
+    tab_page_free(&p);
+
+    tab_page p2;
+    assert_int_equal(tab_click(t, target_id, &p2), TAB_OK);
+    assert_non_null(p2.view);
+
+    int saw_after = 0;
+    for (size_t i = 0; i < pv_count(p2.view); ++i) {
+        const pv_run *r = pv_at(p2.view, i);
+        if (r->text != NULL && strcmp(r->text, "after") == 0) saw_after = 1;
+    }
+    assert_true(saw_after);
+
+    tab_page_free(&p2);
+    tab_close(t);
+}
+
 /* Box-engine identity + decoration resolved in the confined child must survive the
  * IPC round-trip (write_view/read_view symmetry for the new fields). */
 static void test_load_carries_box_decoration(void **state) {
@@ -1082,6 +1158,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_returns_view_with_link),
         cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_carries_author_color),
+        cmocka_unit_test(test_load_carries_node_id),
+        cmocka_unit_test(test_click_runs_handler_and_returns_view),
         cmocka_unit_test(test_load_carries_box_decoration),
         cmocka_unit_test(test_load_carries_box_tree),
         cmocka_unit_test(test_load_carries_form_control),

@@ -1,9 +1,9 @@
 # Plan — Layout Engine (box engine) + Event Dispatcher (click → JS)
 
-> **Status:** planning document (not a spec). Encodes the owner's priority for the
-> next bucket: turn Lexbor + CSS resolved values into a real box tree `(x,y,w,h)`
-> that Cairo paints, and a *simple* dispatcher where a click on a painted node
-> fires a JS handler in the QuickJS worker.
+> **Status:** Stage 0 keystone (node identity) **CERRADO**; Stage 4 dispatcher
+> **PARCIALMENTE CERRADO** (click handler fires over IPC and GUI wires it). Stage 1-3
+> (box engine) pendientes. Encodes the owner's priority for the next bucket: turn
+> Lexbor + CSS resolved values into a real box tree `(x,y,w,h)` that Cairo paints.
 >
 > Maps to the existing roadmap (CLAUDE.md §7.3): **Hito 23b-8 (motor de cajas)**
 > and **Hito 20e parte 2 (eventos interactivos)**. **No new dependencies.** Every
@@ -51,29 +51,24 @@ The existing assets to reuse (do **not** rewrite):
 
 ---
 
-## Stage 0 — Keystone: stable node identity `dom → pv_run → rd_block`
+## Stage 0 — Keystone: stable node identity `dom → pv_run → rd_block` ✅ CERRADO
 
 **Goal:** every `pv_run` carries the `dom_node_id` (document-order element id,
-`include/dom.h:34`) of its source element, and the nearest block-level ancestor's
-id (`block_id`) for box grouping. Both survive IPC into `rd_block`. **No behavior
-change** (additive fields, sentinel `DOM_NODE_NONE`); default render byte-identical.
+`include/dom.h:34`) of its source element. It survives IPC into `rd_block`. **No behavior
+change** (additive field, sentinel `DOM_NODE_NONE`); default render byte-identical.
 
-- `pv_run` gains `int node_id;` and `int block_id;` (after `cont_*`, mirroring it).
-- `page_view` assigns them while walking. The worker builds the `dom_index`
-  already when `run_js`; the identity must AGREE with that index so the dispatcher
-  can `dom_node_at`/fire handlers. Decision to validate in the red test: page_view
-  derives the id from the same document-order element walk dom uses (reuse
-  `dom_document_position`/`dom_node_at`), so `node_id` IS a `dom_node_id`.
-- IPC: add both ints to `write_view`/`read_view` (`src/tab.c:175`/`:624`) **in the
-  same order on both sides** (the known desync gotcha) + a `pv_set_ids` setter.
-- `rd_block` gains `node_id`/`block_id`; `rd_build` copies them **always**
-  (identity is structure, not author styling — like `cont_id`).
-- `make clean` after the struct grows (header-dep gotcha;
-  `[[freedom-text-presentation-css]]`).
+- `pv_run` gains `dom_node_id node_id;`.
+- `page_view` assigns it via a pre-order walk (`pv_node_map`) that matches the walk
+  used by `dom_build`, validated with a red test against `dom_index`.
+- IPC: add `node_id` to `write_view`/`read_view` (`src/tab.c`) **in the same order on
+  both sides** (the known desync gotcha) via `pv_set_node_id`.
+- `rd_block` gains `dom_node_id node_id`; `rd_build` copies it **always**
+  (identity is structure, not author styling).
+- `make clean` after the struct grows (header-dep gotcha).
 
-**Tests:** `test_page_view` (+3: each run's node_id maps to the right element;
-block_id groups a block's runs; empty doc), `test_tab` (+1: ids round-trip IPC).
-**Fuzz:** covered by `fuzz-pv` (ids stay in `[0, count)` or `NONE`).
+**Tests:** `test_page_view` (+2: setter model; node_id matches `dom_index`),
+`test_render_doc` (+1: carried by default), `test_tab` (+1: round-trip IPC).
+**Validation:** `make test`, `make asan`, `make fuzz-pv` verde.
 
 ---
 
@@ -139,41 +134,37 @@ Honor the per-item fields resolved in 23b-7 inside `bt_layout`'s flex/grid path:
 
 ---
 
-## Stage 4 — Event dispatcher: click → JS handler (Hito 20e p2, *simple*)
+## Stage 4 — Event dispatcher: click → JS handler (Hito 20e p2, *simple*) ✅ PARCIAL
 
 Reuses Stage 0's `node_id`. Mirrors the JS-navigation trust model (worker records
 intent, **parent gates**, GUI applies).
 
-- **Hit-test → node.** `link_at_point`/`input_at_point` already walk `rc_layout`;
-  extend them (or a sibling `node_at_point`) to also return the clicked run's
-  `node_id`. On a content click with no link/input, resolve the `node_id` and
-  dispatch a click event before falling back.
-- **Worker stores per-node handlers.** Extend `js_dom`: `addEventListener('click',
-  fn)` on an element wrapper registers `fn` in a per-node handler table keyed by
-  `dom_node_id` (today only `load`/`DOMContentLoaded` are queued). `onclick=`
-  attribute / property too. Bounded (cap like the 64 deferred cap).
-- **IPC `OP_CLICK`.** New op `[OP_CLICK][node_id:u32][x:i32][y:i32]` to the
-  kept-alive worker. The worker maps `node_id → dom_node_id`, builds a minimal
-  synthetic `event` object (identity-safe: `type`/`target`/`preventDefault`,
-  no real screen coords beyond the click point), fires the node's click handlers
-  (and bubbles to ancestors — bounded), then **re-derives** the `tab_page` (title/
-  text/view) so DOM mutations from the handler appear.
-- **Parent gates + GUI re-renders.** Any navigation the handler triggered
-  (`location.href=`) flows through the existing `jd_take_nav_request` → `ln_resolve`
-  gate (`src/tab.c:932`); the GUI applies it via the normal `do_load` path
-  (re-applies ALL network policy) with the existing `JS_NAV_MAX` anti-loop cap.
-  Non-navigating mutations → re-render in place (full re-render for v1; incremental
-  is a follow-up).
-- **Secure by Default:** the dispatcher only runs when `caps.js` is on for the host
-  (JS allowlist, Hito 20). With JS off, clicks behave exactly as today.
+- **Hit-test → node.** `node_at_point` (nuevo en `gui/browser_ui.c`) camina
+  `rc_layout` y devuelve el `node_id` del fragmento bajo el cursor. `rc_frag` gana
+  el campo `node_id`, propagado desde `rd_block` en todos los sitios que construyen
+  frags (layout normal, cajas posicionadas, PDF, PNG).
+- **Worker stores per-node handlers.** `js_dom` ahora soporta
+  `addEventListener('click', fn)` y `element.onclick = fn`; los handlers se guardan
+  en un registro JS interno (`__clickRegistry`) indexado por handle, así no hay
+  JSValue retenido en C.
+- **IPC `OP_CLICK`.** Nuevo op `[OP_CLICK][node_id: int32]` al worker vivo. El
+  worker llama `jd_fire_click`, que construye un evento mínimo con
+  `target`/`preventDefault`, ejecuta el handler y **re-deriva** la vista. La
+  respuesta comparte el formato de `OP_LOAD` con `navreq_len == 0`.
+- **GUI re-renders.** `dispatch_click` en `gui/browser_ui.c` envía el click al
+  worker, reemplaza `w->doc` con la vista actualizada (`apply_click_result`) y, si
+  el punto era un enlace, sigue el enlace tras la mutación (la navegación por JS
+  sigue fluyendo por `jd_take_nav_request` → `ln_resolve` con `JS_NAV_MAX`).
+- **Secure by Default:** el dispatcher solo corre cuando `caps.js` está activo para
+  el host (Hito 20). Con JS off, los clicks se comportan como antes.
 
-**Out of scope (v1):** `input`/`change`/`keydown`, real async timers/event loop,
-incremental repaint, capture-phase, `stopPropagation` ordering subtleties beyond a
-bounded bubble.
+**Limitaciones v1 (pendientes):** no hay bubbling a ancestros, no hay coords en el
+evento, no hay `input`/`change`/`keydown`, timers async reales, repintado
+incremental, capture-phase ni `stopPropagation`.
 
-**Tests:** `test_js_dom` (+ click handler registration + fire), `test_tab`
-(+ E2E: OP_CLICK fires a handler that mutates the title; nav intent gated).
-**Fuzz:** `fuzz-js` already exercises the handler path with arbitrary programs.
+**Tests:** `test_js_dom` (+4: addEventListener, onclick, preventDefault, sin
+handler), `test_tab` (+1: OP_CLICK E2E muta DOM y devuelve vista actualizada).
+**Fuzz:** `fuzz-js` verde.
 
 ---
 

@@ -28,13 +28,22 @@ typedef enum jd_status {
     JD_ERR_INTERNAL   /* engine context unreachable or install failed */
 } jd_status;
 
+/* Per-context state shared between the binding layer and the trusted caller.
+ * Lives in the caller's stack (or struct) and must outlive ctx. The caller
+ * zero-initialises it; jd_install wires it into the engine's context opaque. */
+typedef struct jd_click_state jd_click_state;
+typedef struct jd_opaque {
+    dom_index       *idx;
+    jd_click_state  *click;
+} jd_opaque;
+
 /* Installs the `dom` global (and a small standard `document` shim) into the sandbox,
  * backed by idx. The bridge is read-mostly: it also exposes memory-safe mutators
  * (textContent / document.title) used by allowlisted page scripts; these mutate the
  * underlying tree, never the index structure, so idx is no longer const. idx must
  * outlive ctx. Intended to be called on a freshly created context, before any
- * untrusted script runs. */
-jd_status jd_install(js_context *ctx, dom_index *idx);
+ * untrusted script runs. opaque must outlive ctx. */
+jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque);
 
 /* Installs a capturing `console` (log/info/warn/error/debug + no-op group/time/...)
  * that appends each call's formatted message into log, so the developer console
@@ -43,6 +52,21 @@ jd_status jd_install(js_context *ctx, dom_index *idx);
  * log == NULL to make console a silent no-op. Call after jd_install (it overrides
  * the no-op console the document shim defines). ctx == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_install_console(js_context *ctx, fb_buffer *log);
+
+/* Click-event state. Allocate with jd_click_state_new(), free with
+ * jd_click_state_free(). Bound to one context via jd_install_events(). */
+jd_click_state *jd_click_state_new(void);
+void jd_click_state_free(jd_click_state *s);
+
+/* Installs addEventListener('click', ...) and element.onclick capture on the
+ * document element wrapper. state must outlive ctx. Call after jd_install. */
+jd_status jd_install_events(js_context *ctx, jd_click_state *state);
+
+/* Fires the click event for node_id. Returns 1 if the default action should still
+ * run (no handler registered, or handlers ran without calling preventDefault()),
+ * and 0 if a handler called preventDefault(). ctx == NULL => 1 (fail-open for the
+ * default action, since no script can prevent it). */
+int jd_fire_click(js_context *ctx, dom_node_id node_id);
 
 /* Installs a real, read-only `location` (and document.location / document.URL) over
  * the page's URL, and arms JS-navigation capture: location.href= / assign / replace /
