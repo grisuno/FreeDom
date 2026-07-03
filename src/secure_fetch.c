@@ -145,7 +145,9 @@ sf_status sf_enforce_policy(const char *tls_version, const char *group,
     if (s != SF_OK) return s;
     /* The navigability fallback accepts a classical KE; every other policy requires
      * a PQ-hybrid group. The certificate chain is always validated below. */
-    if (policy != SF_POLICY_ALLOW_CLASSICAL_KE) {
+    /* Allow classical KE when --insecure is used */
+    if (policy != SF_POLICY_ALLOW_CLASSICAL_KE && 
+        policy != SF_POLICY_ALLOWLISTED_INSECURE) {
         s = sf_check_group_is_pq(group);
         if (s != SF_OK) return s;
     }
