@@ -1345,7 +1345,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `test_url_bar_selection`. `make test` **780 OK** + `make asan` exit 0. **Verificación visual del chrome pendiente al
   dueño** (el flujo weston-sobre-Xvfb no cooperó esta sesión; sin inyección de teclado no se dispara
   el dropdown/menú). Ver `[[freedom-ui-host-editing-omnibox]]`.
-- **Hito 23b-8 (resto, Stage 2 — `position`/z-index, PARCIAL).** El Hito 23b-7 ya
+- **Hito 23b-8 (resto, Stage 2 — `position`/z-index, CERRADO).** El Hito 23b-7 ya
   **resolvió los valores** de `position`/`box-shadow`/flex-por-item/grid-por-item en
   `css_style` (Hito 23b-7). El **Stage 2 del box engine** los consume para `position`
   y `z-index`:
@@ -1353,34 +1353,35 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
     (`include/box_tree.h` + `src/box_tree.c`) — resuelve el containing block (ancestro
     posicionado más cercano para absolute, viewport para fixed), aplica `top`/`left`
     (v1: `right`/`bottom` leídos pero ignorados, `CSS_LEN_AUTO`→unset), ordena por
-    `(z_index ASC, doc_order ASC)`. 13 tests nuevos en `test_box_tree.c` (25/25 verde).
-  - **Spec:** nueva sección en `spec/box_engine.md` (~190 líneas: data model, API,
-    Given-When-Then, errores, v1 limitations, doctrina de seguridad).
-  - **GUI integration (parcial, verificada con `/visual-review`):**
-    `layout_doc` skip absolute/fixed; `open_box` aplica offset por insets para
-    relative/sticky (sticky fail-closed→relative); `position_doc` arma geometry arrays
-    y llama `bt_resolve_positioning`; `paint_structured` + `write_doc_pdf` +
+    `(z_index ASC, doc_order ASC)`. 13 tests en `test_box_tree.c`.
+  - **GUI integration (CERRADA):** `layout_doc` skip absolute/fixed **sin cerrar el
+    wrapper padre** (el bug `close_all_boxes` fragmentaba el wrapper en N pedazos
+    h=0; el ÚLTIMO, al fondo de la página, se volvía containing block → los absolute
+    anclaban al fondo en vez de cerca del wrapper); `open_box` aplica offset por insets
+    para relative/sticky (sticky fail-closed→relative); `position_doc` arma geometry
+    arrays y llama `bt_resolve_positioning`; `paint_structured` + `write_doc_pdf` +
     `write_doc_png` pintan las positioned boxes en stacking order sobre el in-flow
-    (z<0 skipped en v1, documentado). **Verificado visualmente**:
-    `examples/position-relative.html` ✅ (badges e iconos con offset correcto);
-    `examples/position-overlay.html` ⚠️ (fixed navbar ✅, absolute badge ✅, pero el
-    contenido in-flow dentro del wrapper relative NO se ve — issue pre-existente
-    del render de wrappers relative/absolute en el GUI, NO del solver de
-    positioning); `examples/position-zindex.html` ⚠️ (las tres absolute boxes
-    no se pintan, mismo issue). El issue visual NO es de `bt_resolve_positioning`
-    (los tests prueban la lógica) sino del render de in-flow dentro de un wrapper
-    relative — un bug pre-existente de `reconcile_boxes`/`open_box` que el
-    skip de absolute/fixed expone. **`position:relative` SÍ funciona end-to-end**
-    (verificado con `relative.png`); `position:absolute/fixed` resuelven coordenadas
-    correctamente pero el contenido de los wrappers no se ve.
-  - **Lo que queda para cerrar Stage 2 completamente:** arreglar el render de
-    in-flow dentro de wrappers relative (probablemente `rc_box_context` no se llama
-    en el momento correcto, o el `reconcile_boxes` no abre el wrapper antes de
-    `flow_text_block`); negative `z-index` (dos-pass painter); `right`/`bottom`
-    insets; `position:sticky` con scroll hooks.
+    (z<0 skipped en v1, documentado). **Verificado con `--dump-layout`** (tooling
+    nuevo, abajo): `position-zindex.html` — `nbox=2` (era 10), z=1 box en `y=244.7`
+    (era 548.7, al fondo); `position-overlay.html` — wrapper `h=486.2` (era
+    fragmentado), badge en `y=56` (48+8). `position:relative` sigue funcionando
+    end-to-end.
+  - **Tooling (`--dump-layout`, CERRADO):** nuevo flag headless que imprime la
+    **geometría resuelta** (cajas in-flow + positioned boxes en orden de stacking) a
+    stdout — el complemento de `--dump-dom` (que muestra la entrada al layout,
+    `--dump-layout` muestra la salida). Es la forma de verificar
+    position/z-index/box-engine **sin Wayland ni imagen**: los bugs de
+    anclaje/fragmentación se ven como números (`ui_dump_layout` en `gui/browser_ui.c`,
+    declarada en `include/ui.h`). Test E2E en `test_freedom`
+    (`test_dump_layout_no_wrapper_fragmentation`: el wrapper no se fragmenta y el
+    z=1 absolute ancla cerca del wrapper, no al fondo).
+  - **Deferred (no bloquean el core):** negative `z-index` (dos-pass painter);
+    `right`/`bottom` insets; `position:sticky` con scroll hooks; containing block =
+    padding-box (hoy border-box). `position:sticky` cae a `relative` (fail-closed).
   - **Stages 3 y 4 del plan (`flex/grid per-item` + event dispatcher) siguen
     pendientes** — son own follow-ups; el plan completo está en
-    `spec/PLAN-layout-engine.md` y `spec/box_engine.md`.
+    `spec/PLAN-layout-engine.md` y `spec/box_engine.md`. Ver
+    `[[freedom-box-engine-and-dispatcher]]`.
 - **Hito 23b parte 2 — CSS de autor: más cobertura.** (Parte 1 `@media`+`prefers-color-scheme`, el
   sub-hito **flex/grid desde `<style>`**, el **box model `margin`/`padding`/`width`/`max-width`**
   —Hito 23b-3—, y la **resolución de valores** de `position`/`border`/`box-sizing`/`box-shadow`/flex-y-

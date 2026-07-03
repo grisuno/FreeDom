@@ -220,6 +220,30 @@ caps); the `[boxes]` section lists the box-definition tree (placement + decorati
 and it is the instrument used to localise the "CSS paint gap". (For the *visual* counterpart, the
 PNG export — `--download-png=PATH`, preferred over PDF — is the one-step, cheapest review artifact.)
 
+### Seeing the resolved geometry: the layout dump (`--dump-layout`)
+
+Where `--dump-dom` shows the render tree (the **input** to the layout engine), `--dump-layout` shows
+the rectangles the box engine actually **produced** (the output): every in-flow box `(x, top, w, h)`
+and every out-of-flow positioned box (with `z-index` and stacking order). Positioning, z-index
+stacking, and wrapper-fragmentation bugs are visible as plain numbers — no display or rasterised
+image needed:
+
+```
+$ ./freedom --dump-layout --author-css examples/position-zindex.html
+=== Freedom layout ===
+content_w=952 total_h=204.7 nbox=2 nrow=4 npositioned=5
+  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=204.7
+  box[1] bid=1 x=176.0 top=204.7 w=600.0 h=0.0
+  pos[0] box=1 z=0 x=176.0 y=204.7 w=600.0 h=0.0
+  pos[1] box=2 z=1 x=216.0 y=244.7 w=160.0 h=19.0
+  pos[2] box=4 z=5 x=296.0 y=324.7 w=160.0 h=19.0
+  pos[3] box=3 z=10 x=256.0 y=284.7 w=160.0 h=19.0
+```
+
+Here `nbox=2` (the body + one relative wrapper, each opened once — no fragmentation) and the
+absolute boxes anchor near the wrapper (`y ≈ 244`, not at the page bottom). Add `--author-css` so
+the box tree is populated. Headless diagnostic; pure I/O on already-resolved data.
+
 ## Address Bar, Search & Keyboard Shortcuts
 
 The address bar works like a real **omnibox**:

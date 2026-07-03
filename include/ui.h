@@ -91,4 +91,14 @@ ui_status ui_render_pdf(const struct rd_doc *doc, const char *out_path, long *ou
  * null or the document is empty; UI_ERR_INTERNAL on a Cairo error. */
 ui_status ui_render_png(const struct rd_doc *doc, const char *out_path, long *out_h);
 
+/* Headless layout dump: runs the same layout_doc + position_doc pass as the
+ * on-screen/PNG renderer and prints the resolved in-flow box rects and the
+ * out-of-flow positioned boxes (stacking-ordered) to stdout as agent-readable
+ * text. The layout-side counterpart to --dump-dom (which prints the pre-layout
+ * render tree): it makes the EFFECT of the layout engine (box geometry,
+ * positioning, z-stacking) verifiable without a display or a rasterised image.
+ * See `--dump-layout` in spec/freedom.md. Returns UI_OK on success;
+ * UI_ERR_NULL_ARG if doc is null or empty. */
+ui_status ui_dump_layout(const struct rd_doc *doc);
+
 #endif /* FREEDOM_UI_H */

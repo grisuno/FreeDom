@@ -39,6 +39,16 @@ OPTIONS:
                         capturada del script. Implica JS encendido (una consola con JS
                         apagado no tendría sentido), independientemente del orden de los
                         flags. Es la forma de "ver" el comportamiento de JS sin Wayland.
+  --dump-dom            modo headless: imprime el árbol de render listo para pintar
+                        (dom_debug: bloques, cajas, contenedores) a stdout. Es la entrada
+                        al layout (la estructura). Honora --author-css. No corre JS.
+  --dump-layout         modo headless: imprime la GEOMETRÍA resuelta (cajas in-flow +
+                        positioned boxes, en orden de stacking) a stdout. Es la SALIDA
+                        del layout — el complemento de --dump-dom: --dump-dom muestra la
+                        estructura (entrada), --dump-layout muestra los rectángulos que
+                        el motor de cajas produjo (salida). Honora --author-css. Es la
+                        forma de verificar position/z-index/box-engine sin Wayland ni
+                        imagen: los bugs de anclaje/fragmentación se ven como números.
 
 [url-or-file]:
   - "https://host/..."  → se obtiene con secure_fetch (TLS 1.3, KE híbrido PQ).
@@ -72,6 +82,16 @@ SALIDA --download-png (fichero):
   <path>". Mismas reglas de Privacy by Default que el PDF (imágenes off →
   placeholders). Es la salida preferida para revisión visual automatizada: se
   lee la imagen directamente, sin el paso de rasterizado de PDF (mutool).
+
+SALIDA --dump-layout (stdout):
+  === Freedom layout ===
+  content_w=<W> total_h=<H> nbox=<N> nrow=<R> npositioned=<P>
+    box[<i>] bid=<block_id> x=<X> top=<Y> w=<W> h=<H>     (una por caja in-flow)
+    pos[<i>] box=<box_index> z=<z_index> x=<X> y=<Y> w=<W> h=<H>  (una por positioned)
+  El motor de cajas (layout_doc + position_doc) sobre el mismo rd_doc que pinta
+  la pantalla, sin abrir ventana. Puro: no abre socket, no lee fichero, no
+  muta el doc. Los valores ya están acotados por css/box_tree (CSS_LEN_MAX,
+  BT_MAX_POSITIONED). Fail-closed: doc vacío → UI_ERR_NULL_ARG (no imprime nada).
 ```
 
 ### `--download-pdf` / `--download-png`: razón de ser (revisión visual)

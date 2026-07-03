@@ -1,9 +1,12 @@
 # Plan — Layout Engine (box engine) + Event Dispatcher (click → JS)
 
-> **Status:** Stage 0 keystone (node identity) **CERRADO**; Stage 4 dispatcher
-> **PARCIALMENTE CERRADO** (click handler fires over IPC and GUI wires it). Stage 1-3
-> (box engine) pendientes. Encodes the owner's priority for the next bucket: turn
-> Lexbor + CSS resolved values into a real box tree `(x,y,w,h)` that Cairo paints.
+> **Status:** Stage 0 keystone (node identity) **CERRADO**; Stage 1 (box decoration
+> threading + paint) **CERRADO** (Steps A–D); Stage 2 (position/z-index) **CERRADO**
+> (the `close_all_boxes` regression that fragmented relative wrappers is fixed;
+> `--dump-layout` verifies the resolved geometry headless); Stage 4 dispatcher
+> **PARCIALMENTE CERRADO** (click handler fires over IPC and GUI wires it). Stage 3
+> (flex/grid per-item) pendiente. Encodes the owner's priority for the next bucket:
+> turn Lexbor + CSS resolved values into a real box tree `(x,y,w,h)` that Cairo paints.
 >
 > Maps to the existing roadmap (CLAUDE.md §7.3): **Hito 23b-8 (motor de cajas)**
 > and **Hito 20e parte 2 (eventos interactivos)**. **No new dependencies.** Every

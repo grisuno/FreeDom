@@ -40,6 +40,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy (GUI; headless runs JS when this resolves to 'on')\n");
     fprintf(fp, "  --dump-console: headless, run the page's JS and print the captured console (Freebug); implies JS on\n");
     fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n");
+    fprintf(fp, "  --dump-layout: headless, print the resolved layout (box rects + positioned boxes) to stdout\n");
 }
 
 static int is_https_url(const char *s) {
@@ -81,6 +82,12 @@ static int g_dump_console = 0;
  * of the page render, the agent-readable instrument for diagnosing layout/paint gaps.
  * Honours --author-css (so the box tree is populated); does NOT imply running JS. */
 static int g_dump_dom = 0;
+
+/* Set by --dump-layout: print the resolved layout (in-flow boxes + positioned
+ * boxes) to stdout. The layout-side counterpart to --dump-dom: --dump-dom shows
+ * the render tree (input to layout), --dump-layout shows the geometry the layout
+ * engine produced (output). Honours --author-css. */
+static int g_dump_layout = 0;
 
 /* When nonzero, the headless render runs the page's inline JS (tab_load_full run_js).
  * Set by --dump-console and by --js resolving to "on". Default off (Secure by Default). */
@@ -321,9 +328,9 @@ static int render_page(const char *html, size_t len, const char *top_url) {
             fprintf(stderr, "freedom: nothing to render to PNG for this page\n");
             out_rc = EXIT_ERROR;
         }
-    } else if (rs == RD_OK && rd_count(doc) > 0 && !g_dump_dom) {
+    } else if (rs == RD_OK && rd_count(doc) > 0 && !g_dump_dom && !g_dump_layout) {
         print_doc(doc);
-    } else if (!g_dump_dom && page.text != NULL && page.text_len > 0) {
+    } else if (!g_dump_dom && !g_dump_layout && page.text != NULL && page.text_len > 0) {
         printf("\n%s\n", page.text); /* fallback if the display list is empty */
     }
 
@@ -331,6 +338,10 @@ static int render_page(const char *html, size_t len, const char *top_url) {
      * (so --dump-dom alone prints just the tree; combined with --download-png it
      * writes the PNG and prints the tree, both MCP-visible). */
     if (g_dump_dom && rs == RD_OK) print_dom(doc);
+    /* --dump-layout: the resolved geometry (in-flow boxes + positioned boxes),
+     * the layout-side counterpart to --dump-dom. Combined with --download-png it
+     * gives both the bitmap and the numbers behind it. */
+    if (g_dump_layout && rs == RD_OK) ui_dump_layout(doc);
     rd_free(doc);
 
     /* Developer console (Freebug): show what the page's JS logged and any error. */
@@ -483,6 +494,9 @@ int main(int argc, char **argv) {
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (strcmp(arg, "--dump-dom") == 0) {
             g_dump_dom = 1;
+            headless = 1;      /* it is a headless diagnostic (no window) */
+        } else if (strcmp(arg, "--dump-layout") == 0) {
+            g_dump_layout = 1;
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (arg[0] == '-') {
             fprintf(stderr, "freedom: unknown option '%s'\n", arg);

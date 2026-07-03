@@ -2733,11 +2733,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
 
         /* Stage 2: out-of-flow blocks (position:absolute / fixed) are skipped from
          * the in-flow layout — they take no space, don't open a box, and don't
-         * collapse margins. position_doc resolves their final rect after this pass. */
+         * collapse margins. position_doc resolves their final rect after this pass.
+         * The parent wrapper is NOT closed: an absolute/fixed child must not
+         * fragment its in-flow ancestor (the spec says "skip the in-flow placement
+         * entirely; prev_bottom/pending_gap not touched" — closing boxes here was a
+         * regression that split the wrapper into N zero-height pieces, making the
+         * LAST piece the containing block and pushing the absolutes to the page
+         * bottom). The next in-flow block reconciles the box stack normally. */
         if (b->block_id >= 0) {
             const pv_box_def *bd = rd_box_at(doc, (size_t)b->block_id);
             if (bd != NULL && (bd->position == BT_POS_ABSOLUTE || bd->position == BT_POS_FIXED)) {
-                close_all_boxes(L, &s, th);
                 continue;
             }
         }
@@ -3725,6 +3730,50 @@ ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h) {
     long h = write_doc_png(&w, out_path);
     if (h < 0) return UI_ERR_INTERNAL;
     if (out_h != NULL) *out_h = h;
+    return UI_OK;
+}
+
+/* Headless layout dump: runs the same layout_doc + position_doc pass as the
+ * on-screen/PNG renderer and prints the resolved box geometry (in-flow boxes and
+ * out-of-flow positioned boxes) to stdout as agent-readable text. This is the
+ * layout-side counterpart to --dump-dom (which prints the pre-layout render
+ * tree): it makes the EFFECT of the layout engine verifiable without a display or
+ * a rasterised image (CI, an AI agent) — the Stacking/positioning bugs that a PNG
+ * would reveal are inspectable as plain numbers. See `--dump-layout` in
+ * spec/freedom.md. Pure I/O on already-resolved, already-fuzzed data; no socket,
+ * no file, no mutation of the doc. */
+ui_status ui_dump_layout(const rd_doc *doc) {
+    if (doc == NULL || rd_count(doc) == 0) return UI_ERR_NULL_ARG;
+
+    browser_window w;
+    memset(&w, 0, sizeof w);
+    w.theme = ui_theme_for(UI_THEME_LIGHT);
+    w.doc = (rd_doc *)doc;   /* read-only; layout_doc/position_doc never mutate it */
+    w.focused_input = -1;
+
+    double content_w = PNG_PAGE_W - 2.0 * PNG_MARGIN;
+    cairo_surface_t *meas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+    cairo_t *cr = cairo_create(meas);
+    rc_layout L;
+    layout_doc(cr, &w, content_w, &L);
+    position_doc(cr, &w, content_w, &L);
+    cairo_destroy(cr);
+    cairo_surface_destroy(meas);
+
+    printf("=== Freedom layout ===\n");
+    printf("content_w=%.0f total_h=%.1f nbox=%zu nrow=%zu npositioned=%zu\n",
+           content_w, L.total_h, L.nbox, L.nrow, L.npositioned);
+    for (size_t i = 0; i < L.nbox; ++i) {
+        const rc_box *b = &L.boxes[i];
+        printf("  box[%zu] bid=%d x=%.1f top=%.1f w=%.1f h=%.1f\n",
+               i, b->block_id, b->x, b->top, b->w, b->h);
+    }
+    for (size_t i = 0; i < L.npositioned; ++i) {
+        const bt_positioned *p = &L.positioned[i];
+        printf("  pos[%zu] box=%zu z=%d x=%.1f y=%.1f w=%.1f h=%.1f\n",
+               i, p->box_index, p->z_index, p->x, p->y, p->w, p->h);
+    }
+    rc_free(&L);
     return UI_OK;
 }
 

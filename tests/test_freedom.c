@@ -331,6 +331,75 @@ static void test_dump_dom_prints_render_tree(void **state) {
     unlink(path);
 }
 
+/* --- headless layout dump (--dump-layout, Stage 2 positioning) --- */
+
+/* --dump-layout prints the resolved box geometry (in-flow boxes + out-of-flow
+ * positioned boxes). This guards the Stage 2 GUI-integration regression where
+ * skipping an absolute/fixed block called close_all_boxes, fragmenting the parent
+ * relative wrapper into N zero-height pieces (one per absolute child): nbox
+ * ballooned (body + wrapper re-opened per child) and the LAST wrapper piece
+ * became the containing block, pushing the absolute children to the page bottom.
+ * After the fix the wrapper stays open across its absolute children, so nbox is
+ * small (body + wrapper = 2) and the z=1 box anchors near the wrapper top. */
+static void test_dump_layout_no_wrapper_fragmentation(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body { margin: 0; padding: 16px; }"
+        ".wrap { position: relative; max-width: 600px; margin: 0 auto; padding: 8px; }"
+        ".b { position: absolute; width: 160px; }"
+        "</style></head><body>"
+        "<div class=\"wrap\">"
+        "<p>In-flow content that gives the wrapper height.</p>"
+        "<div class=\"b\" style=\"top:40px;left:40px;z-index:1\">blue</div>"
+        "<p>More in-flow content to separate the absolutes.</p>"
+        "<div class=\"b\" style=\"top:80px;left:80px;z-index:10\">green</div>"
+        "<p>Even more in-flow content here.</p>"
+        "<div class=\"b\" style=\"top:120px;left:120px;z-index:5\">orange</div>"
+        "</div></body></html>";
+    const char *path = "__freedom_dumplayout.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-layout %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "=== Freedom layout ==="));
+
+    /* nbox from the header line. Bug: 8 (body+wrapper fragmented per absolute
+     * child). Fix: 2 (body + wrapper, each opened once). */
+    char *nb = strstr(out, "nbox=");
+    assert_non_null(nb);
+    size_t nbox = 999;
+    assert_int_equal(sscanf(nb, "nbox=%zu", &nbox), 1);
+    assert_true(nbox <= 3);
+
+    /* The z=1 absolute box anchors near the wrapper top (wrapper at ~16px +
+     * inset 40 = ~56), not at the last fragmented piece (was ~152). */
+    double y_z1 = -1.0;
+    char *p = out;
+    while ((p = strstr(p, "pos[")) != NULL) {
+        size_t idx = 0, box = 0;
+        int z = 0;
+        double x = 0, y = 0;
+        if (sscanf(p, "pos[%zu] box=%zu z=%d x=%lf y=%lf",
+                   &idx, &box, &z, &x, &y) >= 5) {
+            if (z == 1) { y_z1 = y; break; }
+        }
+        p += 4;
+    }
+    assert_true(y_z1 >= 0.0);
+    assert_true(y_z1 < 100.0);
+
+    unlink(path);
+}
+
 /* --- network policy --- */
 
 static void test_rejects_http_url(void **state) {
@@ -358,6 +427,7 @@ int main(void) {
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),
         cmocka_unit_test(test_dump_dom_prints_render_tree),
+        cmocka_unit_test(test_dump_layout_no_wrapper_fragmentation),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);
