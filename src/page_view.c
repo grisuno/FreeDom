@@ -156,6 +156,11 @@ static void run_init_common(pv_run *r) {
     r->cont_gap = 0;
     r->cont_justify = 0;
     r->cont_cols = 0;
+    r->flex_grow = -1;
+    r->flex_shrink = -1;
+    r->flex_basis = CSS_LEN_UNSET;
+    r->flex_order = CSS_LEN_UNSET;
+    r->flex_direction = 0;
     r->box_l = 0;
     r->box_r = 0;
     r->box_w = 0;
@@ -405,6 +410,17 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
     r->cont_gap = cont_gap;
     r->cont_justify = cont_justify;
     r->cont_cols = cont_cols;
+}
+
+void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
+                 int flex_order, int flex_direction) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->flex_grow = flex_grow;
+    r->flex_shrink = flex_shrink;
+    r->flex_basis = flex_basis;
+    r->flex_order = flex_order;
+    r->flex_direction = flex_direction;
 }
 
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,

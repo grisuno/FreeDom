@@ -128,6 +128,18 @@ typedef struct pv_run {
     int     cont_gap;     /* container gap in px (>= 0) */
     int     cont_justify; /* fx_justify of the container */
     int     cont_cols;    /* grid column count (>= 1 for grid), or 0 */
+    /* Stage 3a: flex per-item values from the BLOCK element's own css_style (the
+     * flex item = the nearest block ancestor of this run). Like cont_*, these are
+     * layout STRUCTURE (not author styling), carried regardless of caps.css. The
+     * GUI's layout_container feeds them to bt_node.grow/shrink/basis. Defaults:
+     * flex_grow -1 (unset -> CSS 0), flex_shrink -1 (unset -> CSS 1.0),
+     * flex_basis CSS_LEN_UNSET (unset -> auto -> content size), flex_order
+     * CSS_LEN_UNSET (unset -> 0), flex_direction 0 (unset -> row). */
+    int     flex_grow;    /* x100 (1.0 -> 100), or -1 (unset) */
+    int     flex_shrink;  /* x100 (1.0 -> 100), or -1 (unset) */
+    int     flex_basis;   /* px >= 0, CSS_LEN_AUTO, or CSS_LEN_UNSET */
+    int     flex_order;   /* signed, or CSS_LEN_UNSET (unset -> 0) */
+    int     flex_direction; /* css_flex_direction, 0 (unset -> row) */
     /* Author box model pre-resolved to px (Hito 23b-3), gated by caps.css. box_l/
      * box_r are the left/right insets (padding + non-auto margin of that side);
      * box_w is the content-width cap (min width/max-width, 0 = none); box_center is

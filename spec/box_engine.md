@@ -34,10 +34,116 @@
 >   `position:sticky` falls closed to `relative` (no scroll hooks in the render).
 >   See below.
 >
-> Out of scope for this hito (own follow-ups): flex/grid per-item sizing, `%`/viewport
-> units, corner-by-corner radius, multi-layer shadow, layout invalidation ("dirty
-> flag"), `position:sticky` (no scroll hooks). Those `css_style` fields stay
-> resolved-but-unconsumed.
+> Out of scope for this hito (own follow-ups): `%`/viewport units, corner-by-corner
+> radius, multi-layer shadow, layout invalidation ("dirty flag"),
+> `position:sticky` (no scroll hooks). The flex per-item sizing (grow/shrink/basis/
+> order/direction) is closed by Stage 3a below; grid per-item (span N,
+> `grid-template-rows`, `grid-auto-flow`) and flex-wrap/align-items remain
+> resolved-but-unconsumed (Stage 3b).
+>
+> ## Stage 3a — flex per-item (grow/shrink/basis/order/direction) wired end-to-end
+>
+> The CSS cascade (Hito 23b-7) already resolves `flex-grow`/`-shrink`/`-basis`/
+> `order`/`flex-direction` into `css_style` (`include/css.h:243-247`), and the pure
+> solver `flex_layout` (`fx_flex_line`) already implements the full grow/shrink/
+> freeze algorithm. `bt_node` already carries `grow`/`shrink`/`basis`/`min_main`
+> slots (`include/box_tree.h:59`). **The gap was purely the wire:** the per-item
+> values never left `css_style`, so the GUI's `layout_container` built every flex
+> child with `grow=shrink=basis=0` — i.e. every flex page rendered as equal columns
+> (it used `BX_DISPLAY_GRID` for flex containers, not `BX_DISPLAY_FLEX`). Stage 3a
+> threads the per-item values through the pipeline and switches flex containers to
+> the real `layout_flex` path.
+>
+> ### Fields threaded onto `pv_run` and `rd_block` (structure, always carried)
+>
+> Like `cont_id`/`cont_display`/`cont_gap`/`cont_justify`/`cont_cols` (the container
+> params), the per-item flex values are **layout structure, not author styling**:
+> they describe how the container distributes space, which is structure (it leaks
+> nothing to the network and opens no socket). So they are carried **regardless of
+> `caps.css`**, exactly like the existing `cont_*` fields. With author CSS off, the
+> values are all at their no-op defaults (grow=0, shrink unset→CSS default 1, basis
+> unset→auto, order=0, direction=0→row) and the layout is byte-identical to before.
+>
+> | Field | Type | Wire default | CSS default (when unset) | Meaning |
+> | :-- | :-- | :-- | :-- | :-- |
+> | `flex_grow` | int (x100) | `-1` (unset) | `0` (no grow) | grow factor × 100 (1.0 → 100) |
+> | `flex_shrink` | int (x100) | `-1` (unset) | `1.0` (shrink) | shrink factor × 100 |
+> | `flex_basis` | int (px) | `CSS_LEN_UNSET` | `auto` (use content size) | preferred main size |
+> | `flex_order` | int (signed) | `CSS_LEN_UNSET` | `0` | paint/sort order (lower first) |
+> | `flex_direction` | int (enum) | `0` (unset) | `row` (0 unset→row) | `css_flex_direction` |
+>
+> The values are read from the **block element's own resolved `css_style`** (the flex
+> item = the nearest block ancestor of the text run), not from an ancestor chain —
+> flex item properties are not inherited. `resolve_context` already computes
+> `element_css_style(el, sheet)` for the block ancestor when `got_block` is set;
+> Stage 3a reads the four flex fields + direction from that same `cs`.
+>
+> ### IPC (`tab.c`)
+>
+> `write_view`/`read_view` serialize the 5 new int32s **in the same order on both
+> sides** (the desync gotcha), as one contiguous block right after `cont_cols`, via a
+> new `pv_set_flex` setter on the receiving view.
+>
+> ### render_doc
+>
+> `rd_build` copies the 5 fields **always** (structure, like `cont_*`), so the GUI's
+> `layout_container` can read them whether or not author CSS is enabled.
+>
+> ### GUI `layout_container` — the real flex path
+>
+> For a `BX_DISPLAY_FLEX` container:
+> - `root.display = BX_DISPLAY_FLEX` (was `BX_DISPLAY_GRID` with `ncols = n`).
+> - For each item `k`, set `kids[k].grow`/`shrink`/`basis` from the block's
+>   `flex_grow`/`flex_shrink`/`flex_basis`, applying CSS defaults: grow `-1`→`0`,
+>   shrink `-1`→`1.0`, basis `CSS_LEN_UNSET`→`0` (= auto → content size), basis
+>   `CSS_LEN_AUTO`→`0`. `min_main` stays `0` (no `min-width`/`min-height` threaded
+>   yet — a v1 limitation).
+> - `flex-direction: column` (or `column-reverse`) falls back to `BX_DISPLAY_BLOCK`
+>   (a vertical stack, each item full-width) — column flex is a block stack in v1;
+>   grow/shrink on the **vertical** axis is not honored (the items take their
+>   measured content height). `row-reverse` is honored by reversing the item order
+>   before `fx_flex_line`.
+> - The two-pass measure→pack approach is unchanged: pass 1 gets item widths from
+>   the flex solver, pass 2 re-layouts with measured heights for the cross axis.
+>
+> ### Given-When-Then
+>
+> - **Given** `<div style="display:flex"><div style="flex-grow:1">A</div>
+>   <div style="flex-grow:2">B</div></div>` with `--author-css`, **when** rendered,
+>   **then** item B is twice as wide as item A (not equal columns).
+> - **Given** the same page with author CSS **disabled**, **when** rendered, **then**
+>   both items are equal width (defaults: grow 0 → no growth, basis auto → content)
+>   and the layout is byte-identical to the pre-Stage-3a render.
+> - **Given** `flex-direction:column` on a container, **when** rendered, **then**
+>   the items stack vertically (block fallback), each at full content width.
+> - **Given** `flex-shrink:0` on an item in an overflowing container, **when** laid
+>   out, **then** that item does not shrink (keeps its basis).
+> - **Given** a page with no flex CSS, **when** rendered, **then** all flex fields
+>   are at their unset defaults → byte-identical to before.
+>
+> ### v1 limitations (Stage 3a)
+>
+> - **`min_main` = 0.** No `min-width`/`min-height` is threaded; items can shrink to
+>   0 (the solver clamps at its `min` field, which defaults to 0).
+> - **`flex-direction: column` = block stack.** No vertical grow/shrink (needs a
+>   column-aware flex solver; the main axis would be height, which is measured, not
+>   distributed, in the flat model).
+> - **`align-items`/`align-self`/`align-content` not honored.** Cross-axis alignment
+>   is start (top) for all items (the existing `layout_flex` behavior).
+> - **`flex-wrap` not honored.** Single-line only (the existing `fx_flex_line`).
+> - **Multi-run flex items.** A flex item with multiple text runs (`<div>a <b>b</b>
+>   </div>`) is treated as multiple items by the flat `layout_container` (each
+>   `rd_block` is one item). Only single-run items get correct per-item sizing.
+> - **`order` resolved but not consumed.** The field is threaded for future use; the
+>   GUI does not re-sort items by `order` yet (items stay in document order).
+>
+> ### Out of scope (Stage 3b)
+>
+> - `flex-wrap` / multi-line flex; `align-items`/`-self`/`-content` (cross axis).
+> - Grid per-item: `grid-column`/`grid-row: span N`, `grid-template-rows`,
+>   `row-gap` distinct from `column-gap`, `grid-auto-flow: column`.
+> - `min-width`/`min-height`/`max-width` per-item clamps.
+> - `order` re-sorting.
 
 ## Security posture (non-negotiable)
 

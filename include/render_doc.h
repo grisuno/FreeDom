@@ -78,6 +78,15 @@ typedef struct rd_block {
     int              cont_gap;       /* container gap in px */
     int              cont_justify;   /* fx_justify of the container */
     int              cont_cols;      /* grid column count, or 0 */
+    /* Stage 3a: flex per-item values (structure, carried regardless of caps.css,
+     * like cont_*). Copied from pv_run; the GUI's layout_container feeds them to
+     * bt_node.grow/shrink/basis. Defaults: grow -1, shrink -1, basis CSS_LEN_UNSET,
+     * order CSS_LEN_UNSET, direction 0. */
+    int              flex_grow;      /* x100 (1.0 -> 100), or -1 (unset) */
+    int              flex_shrink;    /* x100 (1.0 -> 100), or -1 (unset) */
+    int              flex_basis;     /* px, CSS_LEN_AUTO, or CSS_LEN_UNSET */
+    int              flex_order;     /* signed, or CSS_LEN_UNSET (unset) */
+    int              flex_direction; /* css_flex_direction, 0 (unset -> row) */
     /* Author box model (Hito 23b-3); set only with caps.css, else 0 / PV_LEN_UNSET.
      * box_l/box_r: left/right insets px; box_w: content-width cap px (0 = none);
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or
