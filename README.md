@@ -1,6 +1,9 @@
 # FreeDom
 
-<img width="1922" height="825" alt="image" src="https://github.com/user-attachments/assets/6b049cfb-3253-469f-9547-3c88ba67c23a" />
+<img width="3716" height="1038" alt="image" src="https://github.com/user-attachments/assets/f05ca2e0-0202-4708-a384-c49025967c18" />
+<img width="3840" height="1080" alt="image" src="https://github.com/user-attachments/assets/b989152a-9d14-441c-af9b-e36fa82e67b9" />
+
+
 
 From the creators of LazyOwn Redteam Framework comes a free and open-source minimal web browser written in C, focused on Zero Trust and Zero Knowledge principles.
 
