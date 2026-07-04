@@ -330,9 +330,10 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   **registran la string cruda** — **el padre confiable la gatea** con `ln_resolve(URL_real, cruda)` (un
   worker comprometido no puede colar `file://`/downgrade) y la GUI navega por el camino normal
   (re-aplica TODA la política), con cap anti-bucle. **Fuera de alcance (parte 2):** eventos
-  interactivos (clic), timers async reales, scripts externos (`src`), getter de `innerHTML`, scroll a
-  ancla `#id`. No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir el
-  storage ni poblar cookie/referrer con datos reales (rompería Zero Knowledge). Ver `[[freedom-live-js]]`.
+  interactivos (clic), timers async reales, getter de `innerHTML`, scroll a ancla `#id`. (Los
+  **scripts externos `src`** dejaron de estar fuera de alcance: corren para hosts allow∩js desde el
+  **Hito 24 EXT**.) No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir
+  el storage ni poblar cookie/referrer con datos reales (rompería Zero Knowledge). Ver `[[freedom-live-js]]`.
 - **Aislamiento de scripts por `<script>` (browser semantics) + `document.fonts` stub:** el worker
   ejecuta **cada** `<script>` inline como su **propio programa** (`hp_extract_script_list` → un
   `js_eval` por script), no concatenados en un único eval. Antes, una excepción no capturada en el
@@ -342,10 +343,11 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   (`FB_ERROR`) pero **no** corta los demás; (b) `document.fonts` es un stub `FontFaceSet` benigno
   (identity-safe, sin red). Un **único presupuesto de reloj por página** (`js_set_time_budget`) se
   reparte entre todos los scripts + `__fireDeferred`, así aislar **no** multiplica el tope de 1 s
-  (fail-closed: scripts tras agotarlo no corren); tope `HP_MAX_SCRIPTS` (4096) anti-DoS. **google.com
-  igual no funciona del todo** porque su buscador exige su **JS externo propietario**, que Freedom
-  **no ejecuta** (frontera de seguridad/identidad): usar la omnibox (→ DuckDuckGo). Ver `[[freedom-live-js]]`,
-  `[[freedom-per-script-isolation]]`.
+  (fail-closed: scripts tras agotarlo no corren); tope `HP_MAX_SCRIPTS` (4096) anti-DoS. Desde el
+  **Hito 24 EXT** el JS externo (`<script src>`) de un host allow∩js **sí corre** (fetcheado por el
+  padre bajo política); si Google aun así sirve su muro anti-bot, es decisión server-side (IP/cookies)
+  — la omnibox (→ DuckDuckGo) sigue siendo el buscador por defecto. Ver `[[freedom-live-js]]`,
+  `[[freedom-per-script-isolation]]`, `[[freedom-external-scripts]]`.
 - **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
   (`Ctrl+I`). Imágenes **PNG y JPEG** (resto → placeholder) y fetch **síncrono**; el decode corre
   en el worker confinado (JPEG es excepción de doctrina autorizada por el dueño, contenida por el
@@ -589,10 +591,52 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   **Límites v1:** síncrono bajo el capó (bloquea el worker / hilo de render del GUI durante el
   round-trip), activo solo en la carga (no REPL ni eventos post-carga; async real necesita event loop
   en el worker), respuesta como string UTF-8 (sin `arrayBuffer` binario), `Promise`/`await` vía
-  `js_pump_jobs`. **Google:** XHR/fetch ya no lanzan "is not defined", pero su buscador también exige
-  su **JS externo propietario** (`<script src>`), que Freedom aún no ejecuta (próximo: Hito 24 EXT).
+  `js_pump_jobs`. **Google:** XHR/fetch ya no lanzan "is not defined"; su JS externo propietario
+  (`<script src>`) corre desde el **Hito 24 EXT** (abajo).
   Ver `[[freedom-parent-gated-xhr]]`, `[[freedom-js-network-and-media-authorized]]`,
   `[[freedom-sop-by-construction]]`, `[[freedom-live-js]]`.
+- **Hito 24 EXT — Scripts externos `<script src>` por soberanía + la tanda de fixes que hizo
+  navegar la web real (2026-07-04).** El worker ejecuta también los scripts **externos** de la
+  página — **solo** para hosts doblemente confiables (**allow.conf Y js.conf** en GUI; `--js=on` del
+  operador en headless) — **en orden de documento** intercalados con los inline. El worker **no toca
+  la red**: pide los bytes por la misma trama `TAG_SUBREQ` del Hito 26 y el **padre confiable**
+  re-aplica TODA la política (`ln_resolve` contra la URL real de la página — sin `file://`/downgrade —,
+  hostblock/rastreadores, `net_realm` fail-closed, TLS-PQ). Gates del worker antes de evaluar (todo
+  fail-closed, el script no corre y la carga sigue, con nota `FB_WARN` en Freebug): red concedida,
+  status 2xx, **Content-Type de JS** (vacío o `javascript`/`ecmascript`; un 404 HTML no se evalúa —
+  anti confusión de tipo), presupuesto de página compartido y caps `TAB_MAX_SUBREQ`/`TAB_MAX_SUBRESOURCE`.
+  El script se nombra por su `src` → Freebug reporta `url:line:col` en sus errores (verificado E2E:
+  error real dentro de `https://www.gstatic.com/og/...js:168:28`). `hp_script` gana `src` (crudo,
+  hostil; el parser jamás fetchea); `type=module` se excluye (fail-closed); un `<script src>` con
+  cuerpo inline lista solo el src (regla de navegador). **Revierte "los `src` externos NUNCA corren"
+  SOLO para hosts doblemente confiables; para el resto sigue vigente** (candado:
+  `test_external_script_skipped_without_net`). **Cuatro fixes que la validación E2E real destapó:**
+  (a) **Captura del grupo TLS rota en OpenSSL 3.6** — `SSL_get_negotiated_group`+`OBJ_nid2sn` no puede
+  nombrar los híbridos PQ del provider (sin NID) → TODO host PQ-correcto (google, example.com) se
+  rechazaba con status 4; ahora `SSL_get0_group_name` (≥3.2) con fallback a NID (`secure_fetch`).
+  (b) **TZ del worker normalizada a UTC (`TZ=UTC0`+`tzset()` pre-seccomp)** — doble win: el
+  `Date.getTimezoneOffset()` del JS real de Google disparaba el `openat("/etc/localtime")` perezoso de
+  glibc → SIGSYS (worker muerto), y de paso la TZ del host era una fuga de fingerprinting; ahora todo
+  JS ve UTC (candado: `test_js_date_timezone_is_utc_and_survives`; diagnóstico vía audit type=1326 +
+  afordancia nueva `FREEDOM_DEBUG_WORKER=1`). (c) **El headless sigue la navegación por JS** (
+  `location.href=`/`assign`/`replace`) como el GUI: cada salto re-entra el camino normal de fetch
+  (re-aplica TODA la política), cap `HL_JS_NAV_MAX` (10) — sin esto el challenge anti-bot de Google
+  (que Freedom **ejecuta**: computa el token `sg_ss` y navega con él) rendía una cáscara vacía; y
+  `headless_fetch` resuelve URLs relativas de subrecursos contra la URL de página (`ln_resolve`).
+  (d) **`collect_text` salta `<style>`/`<script>` anidados** — con JS vivo los scripts quedan en el
+  árbol y el markup real de Google (styles dentro de botones, scripts en celdas) pintaba CSS/JS crudo
+  como contenido (candado: `test_build_collected_text_skips_style_and_script`). Specs
+  (`html_parse.md`, `tab.md`, `freedom.md`, `secure_fetch.md`, `page_view.md`) + tests (2 nuevos
+  `html_parse`, 6 nuevos `test_tab`, 1 nuevo `page_view` → 39 suites) + `make test`/`make asan`
+  (exit 0) limpios + fuzz `make fuzz` (1.68M execs, invariante inline-XOR-externo) y `fuzz-pv` sin
+  crash/leak/UB + **E2E real verificado**: google.com homepage carga con su JS externo ejecutándose y
+  renderiza limpia (PNG revisado); la búsqueda ejecuta el challenge JS de Google y sigue su navegación
+  — Google puede aún servir su muro "unusual traffic" (decisión server-side: IP + sin cookies
+  persistentes, que Zero Knowledge no negocia); DuckDuckGo (buscador por defecto de la omnibox) rinde
+  resultados completos (PNG revisado). **Límites v1:** fetch de script síncrono en la ventana de carga;
+  sin `defer`/`async` (orden de documento estricto); sin módulos ES (`type=module` excluido); sin
+  cookies (por diseño). Ver `[[freedom-external-scripts]]`, `[[freedom-parent-gated-xhr]]`,
+  `[[freedom-live-js]]`.
 - **Hito 23b (combinadores) — CSS descendiente (`A B`) e hijo (`A > B`).** El módulo puro `css`
   deja de tratar todo combinador como "no soportado": un `css_sel` pasa de un único compuesto a una
   **cadena de compuestos** (`parts[CSS_MAX_COMPOUNDS]`, 4) unidos por descendiente (espacio) o hijo
@@ -827,11 +871,11 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   el dispositivo/usuario se filtre. Specs (`dom.md`, `js_dom.md`) + tests (1 `innerHTML` en `dom`,
   4 en `js_dom` incl. storage efímero/cookie vacío/stubs, 1 E2E `innerHTML` en `tab`) + `make test`/
   `make asan` limpios + stress ASan/UBSan (40k JS aleatorios con `innerHTML`/storage, sin UAF).
-  **Honestidad sobre Google:** `google.com/search` exige **su JS externo propietario**, que Freedom
-  **no ejecuta** (los scripts `src` externos no se descargan ni corren — frontera de seguridad **y**
-  de identidad), así que su muro "enable JavaScript" puede persistir; la barra ya enruta búsquedas a
-  DuckDuckGo HTML (Hito 18). *(Núcleo + ejecución verificados; integración visual GUI pendiente al
-  dueño.)* Ver `[[freedom-live-js]]`.
+  **Honestidad sobre Google (histórico; superado por el Hito 24 EXT):** en este hito los scripts
+  `src` externos aún no corrían; desde el Hito 24 EXT sí (hosts allow∩js, fetch del padre bajo
+  política) y el muro que queda es el anti-bot server-side de Google; la barra sigue enrutando
+  búsquedas a DuckDuckGo HTML (Hito 18). *(Núcleo + ejecución verificados; integración visual GUI
+  pendiente al dueño.)* Ver `[[freedom-live-js]]`, `[[freedom-external-scripts]]`.
 - **Hito 20e parte 1 — JS vivo: `location.*` reales + navegación por JS.** El worker conoce la URL de
   la página y la inyecta para que el JS lea su `location` real, y captura la **navegación por JS**
   gateada con la misma política pura que un clic. (a) **`url_split` (puro, zero-copy):** descompone una
@@ -1146,6 +1190,29 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   crash/leak/UB). **Fuera de alcance:** `colspan`/`rowspan` (la fila de subtexto de HN usa colspan, así
   que su grid no alinea perfecto — pero el degrade por-fila lo hace legible), columnas con ancho por
   contenido (todo track = 1fr), tablas >128 celdas que sí querrían grid alineado. Ver `[[freedom-debug-dom]]`.
+- **Hito (render) — Tablas de navegación fluyen (los links de Hacker News por fin se ven) + `bgcolor`
+  legacy.** El hito anterior dejó a HN *legible* pero **sin un solo link**: recolectar una celda a texto
+  plano (`collect_text`) **destruye sus `<a href>`**, y HN mete cada título/subtexto/nav dentro de un
+  `<td>`. Diagnóstico con `--dump-dom` + PNG (Principio 6): las celdas salían como runs `PV_TEXT`, cero
+  hrefs; la barra naranja no aparecía (HN la pinta con `bgcolor="#ff6600"`, no CSS). Tres arreglos puros
+  en `page_view` (TDD): (a) **clasificación tabla-de-navegación vs tabla-de-datos** — una tabla con
+  **alguna celda hoja de ≥2 anclas** (`table_prefers_flow`, cacheado en `pv_flow_reg`, acotado a
+  `PV_MAX_CONTAINERS`, fail-closed) es de layout: sus celdas **se recorren** (los links salen como
+  `PV_LINK` con href/color/énfasis vía `resolve_context`, cada `<tr>` un bloque) en vez de recolectarse;
+  un **run separador `" "`** dedupe (`last_was_gap`) entre celdas recorridas evita que "1." y el título se
+  fusionen. (b) **celda de UNA sola ancla en tabla de datos** → run **`PV_LINK`** (clickeable sin romper
+  la grilla: sigue siendo un run = un ítem). (c) **`bgcolor` legacy** como fallback de `background` (gemelo
+  de `<font color>`: `bgcolor_attr`→`color_attr` unificado): la barra `#ff6600` y el beige `#f6f6ef` de HN
+  aparecen (gateado por `caps.css` en `render_doc` como todo color). Resultado E2E (`--author-css
+  --download-png` de HN, verificado): **barra naranja + fondo beige + 30 historias, cada título y cada
+  ítem de subtexto un link azul clickeable con su href real** — antes cero links. Spec (`page_view.md`) +
+  3 tests nuevos (`test_build_multilink_table_flows_links`, `_single_link_cell_collected_as_link`,
+  `_bgcolor_attr_fallback`; los de tabla-de-datos/anidada siguen verdes) + `make test` (39 suites) /
+  `make asan` (39, exit 0) limpios + fuzz `fuzz-pv` (18k execs, sin crash/leak/UB) + no-regresión de la
+  tabla de datos de `rich.html` (sigue `grid cols=3` alineado). **Fuera de alcance (documentado):** los
+  **colores de clase** de HN (títulos negros, subtexto gris, links visitados) viven en su **CSS externo**
+  `news.css` (`<link rel=stylesheet>`), que Freedom **no fetchea** aún → los links salen en el azul por
+  defecto; `colspan`/`rowspan`. Ver `[[freedom-debug-dom]]`, `[[freedom-nav-tables-and-bgcolor]]`.
 - **Hito 25 — Shaping de texto con HarfBuzz (rendering moderno, lado confiable).** El painter dejó
   de usar la **toy font API** de Cairo (`cairo_select_font_face`+`cairo_show_text`, un glifo por byte,
   sin conciencia de script) y pasa a **HarfBuzz** (shaping) + `cairo_show_glyphs` (FreeType vía
@@ -1247,13 +1314,10 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   F12 invoca) está probado por el screenshot y `tab_eval` (el REPL) por `test_tab` + `--dump-console`.
   **Limitaciones v1 (notas):**
   consola por-pestaña activa (se limpia al cambiar de pestaña; no es por-tab persistente), sin auto-repeat
-  de tecla en el editor, sin scroll-a-cursor multilínea. **Pendiente
-  EXT (scripts externos):** habilitar `<script src>` cuando el host está en **allow.conf Y js.conf**
-  (cross-origin permitido); el worker (que parsea) reporta las URLs `src` al padre, el padre las fetchea
-  re-aplicando **TODA** la política de red (hostblock/net_realm/TLS-PQ) y devuelve los cuerpos, el worker
-  ejecuta inline+externos en orden de documento. Esto **revierte** la doctrina "scripts `src` externos
-  NUNCA corren" de `[[freedom-live-js]]` y la nota SOP — actualizar ambas al cerrar. Ver
-  `[[freedom-freebug-console]]`.
+  de tecla en el editor, sin scroll-a-cursor multilínea. **EXT (scripts externos): CERRADO** — ver el
+  Hito 24 EXT en §7.2 (los `<script src>` corren para hosts en **allow.conf Y js.conf**, fetcheados por
+  el padre bajo TODA la política; la doctrina "externos nunca corren" quedó revertida SOLO para hosts
+  doblemente confiables). Ver `[[freedom-external-scripts]]`, `[[freedom-freebug-console]]`.
   - **FB-3 (CERRADO) — Ubicación de errores `file:line:col` + completitud del wrapper de elemento.**
     Para que Freebug sea útil a un desarrollador, cada error ahora dice **dónde**: `js_sandbox` gana
     `js_eval_named` (etiqueta la fuente; el worker nombra cada `<script>` inline **`inline #N`**) y el
@@ -1286,13 +1350,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   AVIF** (cada uno superficie nueva, contra doctrina salvo justificar); (c) **Lazy loading**
   (decodificar solo lo visible). Mantener Privacy by Default (opt-in `Ctrl+I`).
 - **Hito 20e — JS vivo: lo dinámico real.** Cerrados 20b (ejecución + título/texto), 20c
-  (construcción + eventos/timers sintéticos), 20d (`innerHTML` + superficie ambiente identity-safe) y
-  **parte 1** (`location.*` reales + navegación por JS gateada — ya cerrada arriba). Falta (parte 2):
-  **eventos interactivos** (clic del usuario → IPC GUI↔worker → handler JS → re-render; requiere
-  consistencia de node-id entre `dom` y `page_view` para el hit-test), **timers async reales** (event
-  loop en el worker que empuja vistas nuevas), getter de `innerHTML` (serialización), scripts externos
-  (`src`, con política de red), scroll a ancla de fragmento (`#id`), y **repintado incremental** en
-  mutación. Persistir el modo y la allowlist con Hito 10.
+  (construcción + eventos/timers sintéticos), 20d (`innerHTML` + superficie ambiente identity-safe),
+  **parte 1** (`location.*` reales + navegación por JS gateada — ya cerrada arriba), **clic**
+  (Stage 4 del keystone, arriba) y **scripts externos** (Hito 24 EXT, arriba). Falta (parte 2):
+  **timers async reales** (event loop en el worker que empuja vistas nuevas), getter de `innerHTML`
+  (serialización), `defer`/`async` y módulos ES para scripts externos, scroll a ancla de fragmento
+  (`#id`), y **repintado incremental** en mutación. Persistir el modo y la allowlist con Hito 10.
 - **Hito 21 — Buscar en página (`/` estilo Vim).** Resaltar todas las coincidencias con overlay
   Cairo suave; `n`/`N` para saltar. La lógica de matching es pura (sobre el display list/runs).
 - **Hito 22b — Descargas/zoom: pulido.** (Hito 22, base, ya cerrado arriba.) Falta: ícono de recarga

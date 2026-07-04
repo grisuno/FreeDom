@@ -153,7 +153,13 @@ petición e invoca a los validadores sobre el estado negociado.
 - `status`: resultado (ver tabla §5).
 - `http_code`: código HTTP si hubo respuesta.
 - `tls_version`: p. ej. `"TLSv1.3"` (propiedad de la struct).
-- `negotiated_group`: p. ej. `"X25519MLKEM768"` (propiedad de la struct).
+- `negotiated_group`: p. ej. `"X25519MLKEM768"` (propiedad de la struct). **Captura
+  (2026-07):** el nombre sale de `SSL_get0_group_name` (OpenSSL ≥3.2) con fallback a
+  `SSL_get_negotiated_group`+`OBJ_nid2sn`. El camino por NID **no puede nombrar** los
+  híbridos PQ del provider (en OpenSSL 3.6 `X25519MLKEM768` no tiene NID en la base
+  OBJ): con solo-NID, cada handshake híbrido quedaba sin nombre y la política lo
+  rechazaba con `SF_ERR_KEM_NOT_PQ` — exactamente los sitios que hacen TLS bien
+  (google.com, example.com). Fail-closed se mantiene: sin nombre ⇒ rechazo.
 - `body` / `body_len`: cuerpo acotado por `max_body_bytes`; `body` lleva NUL final por
   conveniencia (`body_len` no lo cuenta).
 - `location`: valor crudo de la cabecera `Location` si la respuesta la trae (propiedad de la

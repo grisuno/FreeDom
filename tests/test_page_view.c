@@ -392,6 +392,105 @@ static void test_build_collected_text_skips_style_and_script(void **state) {
     hp_document_free(doc);
 }
 
+/* A table with a multi-link leaf cell is navigation/layout, not data: its cells
+ * are WALKED (links survive as PV_LINK runs, one block per <tr>), not flattened
+ * into grid runs. This is the Hacker News case: every story title and subtext
+ * link lives inside a <td>, and collection was destroying all of them. */
+static void test_build_multilink_table_flows_links(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><table>"
+        "<tr><td>1.</td>"
+        "<td><a href='https://s.example/story'>Story title</a>"
+        " (<a href='https://s.example/from'>site</a>)</td></tr>"
+        "<tr><td>2.</td><td><a href='https://s.example/two'>Second</a></td></tr>"
+        "</table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    /* The links survive, as links, with their hrefs. */
+    const pv_run *story = find_text(v, "Story title");
+    const pv_run *site  = find_text(v, "site");
+    assert_non_null(story);
+    assert_non_null(site);
+    assert_int_equal(story->kind, PV_LINK);
+    assert_string_equal(story->href, "https://s.example/story");
+    assert_int_equal(site->kind, PV_LINK);
+    assert_string_equal(site->href, "https://s.example/from");
+
+    /* Not a grid: the cells were walked, not collected as grid items. */
+    assert_int_equal(story->cont_id, -1);
+
+    /* Rank and title share the row's line: rank breaks the block, title does not. */
+    const pv_run *rank = find_text(v, "1.");
+    assert_non_null(rank);
+    assert_int_not_equal(rank->block_break, 0);
+    assert_int_equal(story->block_break, 0);
+    /* The second row starts its own block. */
+    const pv_run *rank2 = find_text(v, "2.");
+    assert_non_null(rank2);
+    assert_int_not_equal(rank2->block_break, 0);
+
+    /* The cell boundary got a separator run, so "1." and the title do not fuse. */
+    size_t rank_i = 0, story_i = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        if (pv_at(v, i) == rank) rank_i = i;
+        if (pv_at(v, i) == story) story_i = i;
+    }
+    assert_true(rank_i + 1 < story_i); /* something (the gap run) sits between them */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A DATA table (no multi-link cell) keeps the grid, and a cell whose subtree has
+ * exactly one <a href> is collected as a LINK run: clickable without breaking
+ * column alignment (one run per cell is what the grid engine counts). */
+static void test_build_single_link_cell_collected_as_link(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><table>"
+        "<tr><td><a href='https://a.example/'>Alpha</a></td><td>plain</td></tr>"
+        "<tr><td><a href='https://b.example/'>Beta</a></td><td>text</td></tr>"
+        "</table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *alpha = find_text(v, "Alpha");
+    const pv_run *plain = find_text(v, "plain");
+    assert_non_null(alpha);
+    assert_non_null(plain);
+    assert_int_equal(alpha->kind, PV_LINK);
+    assert_string_equal(alpha->href, "https://a.example/");
+    assert_int_equal(plain->kind, PV_TEXT);
+    /* Still grid items of the same table (alignment preserved). */
+    assert_true(alpha->cont_id >= 0);
+    assert_int_equal(alpha->cont_id, plain->cont_id);
+    assert_int_equal(alpha->cont_display, BX_DISPLAY_GRID);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Legacy bgcolor attribute is the background fallback when no CSS background won
+ * (like <font color> for the foreground). Hacker News' orange bar and beige page
+ * are bgcolor attributes, not CSS. */
+static void test_build_bgcolor_attr_fallback(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><table bgcolor='#ff6600'>"
+        "<tr><td><a href='https://x.example/a'>one</a>"
+        "<a href='https://x.example/b'>two</a></td></tr>"
+        "</table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *one = find_text(v, "one");
+    assert_non_null(one);
+    assert_int_equal(one->bg_rgb, 0xff6600);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_nested_table_not_flattened(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -1568,6 +1667,9 @@ int main(void) {
         cmocka_unit_test(test_build_table_grid),
         cmocka_unit_test(test_build_table_flattens_cell),
         cmocka_unit_test(test_build_collected_text_skips_style_and_script),
+        cmocka_unit_test(test_build_multilink_table_flows_links),
+        cmocka_unit_test(test_build_single_link_cell_collected_as_link),
+        cmocka_unit_test(test_build_bgcolor_attr_fallback),
         cmocka_unit_test(test_build_nested_table_not_flattened),
         cmocka_unit_test(test_build_link_with_href),
         cmocka_unit_test(test_build_block_break_between_paragraphs),

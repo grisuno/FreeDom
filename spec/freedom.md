@@ -33,7 +33,19 @@ OPTIONS:
                         imágenes/red sigue OFF (nunca fetch, no telefonea). Default off.
   --js[=off|allowlist|on]   política de JS de página. En el GUI la lee FREEDOM_JS
                         (default allowlist vía js.conf). En headless, corre el JS
-                        de la página solo cuando esto resuelve a "on".
+                        de la página solo cuando esto resuelve a "on". Con JS on el
+                        headless también: (a) concede la red de página (XHR/fetch y
+                        scripts externos <script src>, Hito 24 EXT) — el --js=on del
+                        operador es la señal de confianza que en el GUI dan
+                        allow.conf ∩ js.conf; el fetcher del padre resuelve la URL
+                        cruda contra la URL de la página (ln_resolve: https-only,
+                        sin downgrade) antes de tocar la red; y (b) SIGUE la
+                        navegación pedida por el JS (location.href=/assign/replace),
+                        cada salto por el camino normal de fetch (re-aplica TODA la
+                        política), con cap anti-bucle HL_JS_NAV_MAX (10) — espejo del
+                        JS_NAV_MAX del GUI. Sin esto, un interstitial que reenvía por
+                        JS (p. ej. el challenge de un buscador) rendería como cáscara
+                        vacía en vez de su destino.
   --dump-console        modo headless: corre el JS de la página e imprime la consola
                         capturada (Freebug) — cada console.* y cualquier excepción no
                         capturada del script. Implica JS encendido (una consola con JS

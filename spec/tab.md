@@ -88,6 +88,20 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
   pestaña (otro eTLD+1) — se cierra el cross-origin linking de la huella de readback.
 - **Pantalla:** `tab.h` no recibe dimensiones; el worker usa un valor por defecto fijo
   (`TAB_SCREEN_W` × `TAB_SCREEN_H`) que `fp_bucket_screen` normaliza igual para todos.
+- **Zona horaria normalizada a UTC (anti-fp + corrección de sandbox):** antes de confinarse,
+  el worker fija `TZ=UTC0` y llama `tzset()`. Dos razones independientes: (a) **Zero
+  Knowledge** — la zona horaria del host es un vector de fingerprinting y el `Date` de
+  QuickJS la lee vía `localtime_r`; todo JS de página ve el mismo reloj UTC
+  (`getTimezoneOffset() == 0`); (b) **corrección** — con `TZ` sin fijar, el primer
+  `localtime_r` de glibc hace `openat("/etc/localtime")` perezoso, y `openat` (con razón) no
+  está en el allowlist de seccomp: el JS real de google.com llamando
+  `Date.getTimezoneOffset()` mataba el worker por SIGSYS. `"UTC0"` es una spec POSIX pura
+  que glibc parsea sin tocar el filesystem; el `tzset()` temprano la cachea con los
+  syscalls aún sin restringir. Candado: `test_js_date_timezone_is_utc_and_survives`.
+- **Diagnóstico de muerte del worker:** con `FREEDOM_DEBUG_WORKER=1` el padre reporta a
+  stderr cómo terminó el worker (`killed by signal N` / `exited N`) al detectar la muerte —
+  afordancia agente-amigable (Principio 6) para distinguir SIGSYS de un exit limpio sin
+  core (el worker es anti-dump). No cambia ningún comportamiento sin la variable.
 
 ### Protocolo padre↔hijo (framed)
 

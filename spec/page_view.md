@@ -212,6 +212,13 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
 - **Énfasis inline**: `bold` = 1 si algún ancestro es `<b>/<strong>/<th>`; `italic` = 1 si algún
   ancestro es `<i>/<em>`. Es estructura (peso/inclinación del glifo), se transporta por defecto y
   **no** está gateado por `caps.css`.
+- **Texto recolectado nunca incluye fuente no renderizada.** Los tres caminos que aplanan un
+  subárbol a texto (`collect_text`: valor de `<textarea>`, etiqueta de `<button>`, celda de
+  tabla recolectada) **saltan** el texto bajo un `<style>`/`<script>`/`<head>`/`<title>`
+  descendiente. Con JS vivo el parser conserva los nodos `<script>` (`strip_scripts=0`), así
+  que sin este guard el markup real de google.com (elementos `<style>` dentro de botones,
+  `<script>` dentro de celdas) pintaba CSS/JS crudo como contenido. Candado:
+  `test_build_collected_text_skips_style_and_script`.
 - **Tablas**: cada celda `<td>/<th>` **hoja** se emite como **un** run de texto recolectado (su
   markup interno se aplana a texto plano, no se re-emite), anotado como item de un contenedor
   **grid**: `cont_id` = id de la `<table>` ancestro **más cercano** de la celda, `cont_display` =
@@ -219,6 +226,29 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
   `[1, PV_MAX_GRID_COLS]`). `<th>` es negrita. Así la capa de presentación reusa el motor flex/grid
   (`box_tree`) y las celdas se alinean en columnas. `colspan`/`rowspan` quedan fuera de alcance
   (tabla rectangular).
+  - **Tablas con celdas multi-link = FLUJO, no grid (los links sobreviven).** El aplanado a
+    texto de una celda recolectada **destruye sus `<a href>`** (Hacker News quedaba sin un solo
+    link). Regla: una tabla con **alguna celda hoja que contenga ≥2 anclas con `href`** es una
+    **tabla de navegación/layout**, no de datos: sus celdas hoja **no se recolectan** — se
+    **recorren** como contenido normal (dado que `<tr>` es block-tag, cada fila sigue siendo un
+    bloque; los links salen como `PV_LINK` con su href/colores/énfasis por `resolve_context`).
+    Al visitar una celda recorrida que continúa la fila ya abierta se emite un **run separador
+    `" "`** (dedupe: nunca dos seguidos), así "1." y el título no se fusionan. La decisión es
+    por tabla, **cacheada** (`pv_flow_reg`, tope `PV_MAX_CONTAINERS`; registro lleno ⇒ grid,
+    comportamiento previo — fail-closed y acotado, anti-DoS). Las tablas anidadas deciden cada
+    una por sí misma (el scan salta sub-tablas).
+  - **Celda hoja con exactamente UNA ancla (tabla grid) = run-link.** En una tabla de datos
+    (sin celdas multi-link) una celda cuyo subárbol contiene exactamente un `<a href>` se
+    recolecta igual (un run, la grilla no pierde ítems) pero el run es **`PV_LINK`** con ese
+    href: el caso común "celda = un link" queda clickeable sin romper la alineación de columnas.
+    Con 0 anclas queda `PV_TEXT` como siempre; con ≥2 la tabla entera ya fluyó (regla anterior).
+  - **`bgcolor` legacy como fallback de fondo.** Como `<font color>` para el fg: si ningún
+    `background` de CSS ganó, el ancestro más cercano con atributo `bgcolor` válido
+    (`cc_parse`) aporta `bg_rgb` (p. ej. la barra naranja `#ff6600` y el beige `#f6f6ef` de
+    Hacker News, que no usa CSS para eso). Presentación de autor: gateado por `caps.css` en
+    `render_doc` como todo color. Las hojas de estilo **externas** (`<link rel=stylesheet>`)
+    siguen sin fetchearse (fuera de alcance; los colores de clase de HN — títulos negros,
+    subtexto gris — necesitan eso).
   - **Tablas anidadas (celda = contenedor, no hoja).** Una celda que contiene una `<table>`
     descendiente es una **hoja = no**: NO se recolecta como un run (eso aplanaría todo su subárbol).
     Es un **contenedor estructural** que se recorre normalmente, de modo que las celdas de la tabla

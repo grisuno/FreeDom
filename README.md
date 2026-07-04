@@ -283,14 +283,28 @@ never written to disk, cleared every load), `document.cookie` is always empty (s
 without throwing while nothing about the user or device is revealed. With JS off, `<noscript>`
 fallback content is shown.
 
-> **Note on Google Search:** `google.com/search` requires running Google's large, proprietary
-> *external* JavaScript. Freedom deliberately **does not fetch or run external (`src`) scripts** — a
-> security *and* identity boundary — so Google's "enable JavaScript" wall may persist. Use the
-> address bar, which routes searches to the no-JS DuckDuckGo HTML endpoint that renders cleanly.
+**External `<script src>` scripts (sovereignty-gated).** For a host you trust **twice** — present in
+both `allow.conf` **and** `js.conf` (headless: `--js=on`) — Freedom also fetches and runs the page's
+*external* scripts, in document order, interleaved with the inline ones. The sandboxed worker never
+touches a socket: script bytes are requested from the **trusted parent** over the same gated channel
+as `XMLHttpRequest`/`fetch`, and the parent re-applies the *full* network policy (URL resolution
+against the real page URL, host/tracker blocklist, Tor/I2P realm routing, TLS-PQ) before anything is
+fetched. Responses only execute on HTTP 2xx with a JavaScript `Content-Type` (a 404 HTML page is
+never evaluated), under the shared per-page time budget and request caps. Each script is named by its
+URL, so Freebug reports errors as `url:line:col`. For every other host, external scripts still
+**never** run.
+
+> **Note on Google Search:** with external scripts enabled for `google.com`, Freedom executes
+> Google's real JS — including its anti-bot *challenge*, whose token navigation Freedom follows under
+> full policy. Google may still serve its server-side "unusual traffic" wall (an IP/cookie decision on
+> their end; Freedom never persists cookies, by design). The address bar routes searches to the no-JS
+> DuckDuckGo HTML endpoint, which renders cleanly.
 
 Partially implemented: interactive click events (`addEventListener('click')` and `element.onclick`
 fire over IPC and the GUI repaints the mutated DOM; no bubbling or coords yet). Out of scope for
-now: real async timers, JS-driven navigation, external (`src`) scripts, and events other than click.
+now: real async timers, `defer`/`async`/ES-module scripts, and events other than click. JS-driven
+navigation (`location.href=`/`assign`/`replace`) is followed — gated by the trusted parent and
+capped against loops — both in the GUI and headless.
 
 ### Anti-fingerprinting identity
 

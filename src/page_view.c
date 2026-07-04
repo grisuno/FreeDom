@@ -577,12 +577,13 @@ static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *bas
 #define PV_CSS_MAX_ATTRS   16     /* attributes captured per element for [attr] selectors */
 #define PV_CSS_ATTR_BUF    512u   /* bytes for all captured attr names+values of one element */
 
-/* Legacy <font color> attribute as a packed 0xRRGGBB, or -1. Not CSS, so it is a
- * separate fallback the cascade consults only when no `color` declaration won. */
-static int font_color_attr(lxb_dom_element_t *el) {
+/* A color-valued legacy attribute (e.g. <font color>, bgcolor) as a packed
+ * 0xRRGGBB, or -1. Not CSS: a separate fallback consulted only when no CSS
+ * declaration for that channel won. */
+static int color_attr(lxb_dom_element_t *el, const char *name, size_t name_len) {
     size_t cl = 0;
     const lxb_char_t *col =
-        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"color", 5, &cl);
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)name, name_len, &cl);
     if (col != NULL && cl > 0 && cl < PV_COLOR_TOKEN_MAX) {
         char buf[PV_COLOR_TOKEN_MAX];
         memcpy(buf, col, cl);
@@ -591,6 +592,16 @@ static int font_color_attr(lxb_dom_element_t *el) {
         if (cc_parse(buf, &rgb) == CC_OK) return cc_pack(rgb);
     }
     return -1;
+}
+
+static int font_color_attr(lxb_dom_element_t *el) {
+    return color_attr(el, "color", 5);
+}
+
+/* Legacy bgcolor attribute (body/table/tr/td), the background twin of <font
+ * color>: pre-CSS sites (Hacker News' orange bar and beige page) still use it. */
+static int bgcolor_attr(lxb_dom_element_t *el) {
+    return color_attr(el, "bgcolor", 7);
 }
 
 /* Max ancestors carried for combinator matching. A selector reaching past this is
@@ -1014,8 +1025,12 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 if (c >= 0) { *fg = c; got_color = 1; }
             }
             /* background-color does not inherit in CSS; in this flat model we take
-             * the nearest ancestor's so a block's background shows behind its text. */
-            if (!got_bg && cs.background >= 0) { *bg = cs.background; got_bg = 1; }
+             * the nearest ancestor's so a block's background shows behind its text.
+             * The legacy bgcolor attribute is the fallback when no CSS won. */
+            if (!got_bg) {
+                int b = (cs.background >= 0) ? cs.background : bgcolor_attr(el);
+                if (b >= 0) { *bg = b; got_bg = 1; }
+            }
             if (!got_align && cs.text_align != CSS_ALIGN_UNSET) {
                 *align = (int)cs.text_align; got_align = 1;
             }
@@ -1390,16 +1405,96 @@ static int cell_has_nested_table(const lxb_dom_node_t *cell) {
     return 0;
 }
 
-/* Nonzero if n's NEAREST <td>/<th> ancestor (up to base) is a LEAF cell (no nested
- * table): its text was already emitted as one collected cell run, so the normal walk
- * must not re-emit it. A container cell (one wrapping a nested table) does NOT suppress
- * its content -- the inner table's leaf cells collect their own text, and any text
- * directly in the container cell is emitted normally. */
-static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+/* Pre-order successor that does NOT descend into n's children (used to skip an
+ * already-decided subtree during the table scan). */
+static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root) {
+    while (n != root && n->next == NULL) {
+        if (n->parent == NULL) return NULL;
+        n = n->parent;
+    }
+    if (n == root) return NULL;
+    return n->next;
+}
+
+/* First <a href> element in the cell's subtree, with *count receiving how many
+ * such anchors exist, capped at 2 (only none / exactly-one / several matters). */
+static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count) {
+    const lxb_dom_node_t *first = NULL;
+    *count = 0;
+    for (lxb_dom_node_t *k = cell->first_child; k != NULL; k = node_next(k, cell)) {
+        if (k->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(k) != LXB_TAG_A) continue;
+        size_t hl = 0;
+        const lxb_char_t *h = lxb_dom_element_get_attribute(
+            lxb_dom_interface_element(k), (const lxb_char_t *)"href", 4, &hl);
+        if (h == NULL || hl == 0) continue;
+        if (first == NULL) first = k;
+        if (++*count >= 2) break;
+    }
+    return first;
+}
+
+/* Nonzero when the table is navigation/layout rather than data: some leaf cell of
+ * ITS OWN (nested tables decide for themselves; their subtrees are skipped) holds
+ * two or more anchors. Flattening such a cell into one collected run would destroy
+ * its links (the Hacker News case: every story link lives inside a <td>), so the
+ * caller flows the table's cells through the normal walk instead of gridding them. */
+static int table_prefers_flow(const lxb_dom_node_t *table) {
+    lxb_dom_node_t *n = table->first_child;
+    while (n != NULL) {
+        int skip_children = 0;
+        if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_tag_id_t t = node_tag(n);
+            if (t == LXB_TAG_TABLE) {
+                skip_children = 1;
+            } else if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
+                       && !cell_has_nested_table(n)) {
+                int nanch = 0;
+                (void)cell_anchors(n, &nanch);
+                if (nanch >= 2) return 1;
+                skip_children = 1; /* the whole leaf cell was just scanned */
+            }
+        }
+        n = skip_children ? next_skip(n, (const lxb_dom_node_t *)table)
+                          : node_next(n, table);
+    }
+    return 0;
+}
+
+/* Cache of the per-table flow decision (a table subtree is scanned at most once,
+ * anti-DoS). Registry full => grid (the previous behaviour), bounded fail-closed. */
+typedef struct pv_flow_reg {
+    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    unsigned char         flow[PV_MAX_CONTAINERS];
+    size_t                count;
+} pv_flow_reg;
+
+static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table) {
+    if (table == NULL) return 0;
+    for (size_t i = 0; i < fr->count; ++i)
+        if (fr->node[i] == table) return fr->flow[i];
+    if (fr->count >= PV_MAX_CONTAINERS) return 0;
+    int f = table_prefers_flow(table) ? 1 : 0;
+    fr->node[fr->count] = table;
+    fr->flow[fr->count] = (unsigned char)f;
+    fr->count++;
+    return f;
+}
+
+/* Nonzero if n's NEAREST <td>/<th> ancestor (up to base) is a COLLECTED leaf cell:
+ * its text was already emitted as one collected cell run, so the normal walk must
+ * not re-emit it. A container cell (one wrapping a nested table) and a cell of a
+ * FLOW table (multi-link: walked so its links survive) do NOT suppress their
+ * content -- their text/links are emitted normally. */
+static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                             pv_flow_reg *fr) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_tag_id_t t = node_tag(p);
-            if (t == LXB_TAG_TD || t == LXB_TAG_TH) return !cell_has_nested_table(p);
+            if (t == LXB_TAG_TD || t == LXB_TAG_TH) {
+                if (cell_has_nested_table(p)) return 0;
+                if (flow_table(fr, nearest_table(p, base))) return 0;
+                return 1;
+            }
         }
         if (p == base) break;
     }
@@ -1544,6 +1639,8 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
     pv_status rc = PV_OK;
     pv_container_reg reg = { { NULL }, 0 };  /* flex/grid containers, document order */
     pv_box_reg box_reg = { { NULL }, { { 0 } }, 0 };  /* box-carrying blocks + their defs */
+    pv_flow_reg flowreg = { { NULL }, { 0 }, 0 };  /* per-table flow-vs-grid decisions */
+    int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
@@ -1555,18 +1652,35 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 continue;
             }
 
-            /* A table cell becomes one collected text run annotated as a grid item:
-             * the table is a grid container (cont_id), its column count is the widest
-             * row, and each cell is one column. This reuses the flex/grid layout
-             * engine (layout_container/box_tree) so cells align across rows. <th> is
-             * bold. The cell's inner text nodes are suppressed below (in_cell_subtree)
-             * so they are not re-emitted. Nested cells are handled by the outer cell. */
+            /* A table cell of a DATA table becomes one collected text run annotated
+             * as a grid item: the table is a grid container (cont_id), its column
+             * count is the widest row, and each cell is one column. This reuses the
+             * flex/grid layout engine (layout_container/box_tree) so cells align
+             * across rows. <th> is bold. The cell's inner text nodes are suppressed
+             * below (in_collected_cell) so they are not re-emitted. A container cell
+             * (nested table) and every cell of a FLOW table (one with a multi-link
+             * cell: flattening would destroy the links -- the Hacker News case) are
+             * WALKED instead: their text/links flow through the normal path, each
+             * <tr> a block, with a separator run between adjacent walked cells. */
             if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
-                && !in_skipped_subtree(n, base, js_enabled) && !in_collected_cell(n, base)
-                && !cell_has_nested_table(n) /* a container cell is walked, not collected */
+                && !in_skipped_subtree(n, base, js_enabled)
+                && !in_collected_cell(n, base, &flowreg)
                 && !in_hidden_subtree(n, base, sheet)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 const lxb_dom_node_t *table = nearest_table(n, base);
+                if (cell_has_nested_table(n) || flow_table(&flowreg, table)) {
+                    /* Walked cell. If it continues the row block already open, emit
+                     * one inter-cell gap so cell texts do not fuse ("1."+"Title"). */
+                    const lxb_dom_node_t *row = nearest_row(n, base);
+                    const lxb_dom_node_t *tblk = (row != NULL) ? row : table;
+                    if (!pending_break && tblk != NULL && tblk == prev_block
+                        && !last_was_gap) {
+                        pv_status st = pv_append(v, PV_TEXT, 0, 0, " ", NULL);
+                        if (st != PV_OK) { rc = st; goto cleanup; }
+                        last_was_gap = 1;
+                    }
+                    continue;
+                }
                 int cols = (table != NULL) ? table_columns(table) : 1;
                 int cid = (table != NULL) ? container_id(&reg, table) : -1;
 
@@ -1586,11 +1700,29 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                 pending_break = 0;
                 prev_block = tblk;
 
+                /* A cell whose subtree holds exactly ONE anchor is collected as a
+                 * LINK run: clickable without breaking column alignment (still one
+                 * run = one grid item). Several anchors cannot happen here (the
+                 * table would be flowed). */
+                int nanch = 0;
+                const lxb_dom_node_t *a1 = cell_anchors(n, &nanch);
+                char *cell_href = NULL;
+                if (nanch == 1 && a1 != NULL) {
+                    size_t hl = 0;
+                    const lxb_char_t *h = lxb_dom_element_get_attribute(
+                        lxb_dom_interface_element((lxb_dom_node_t *)a1),
+                        (const lxb_char_t *)"href", 4, &hl);
+                    if (h != NULL && hl > 0) cell_href = dup_n((const char *)h, hl);
+                }
+
                 /* An empty cell still occupies its column. */
-                pv_status st = pv_append(v, PV_TEXT, 0, brk,
-                                         (cell[0] != '\0') ? cell : " ", NULL);
+                pv_status st = pv_append(v, (cell_href != NULL) ? PV_LINK : PV_TEXT,
+                                         0, brk,
+                                         (cell[0] != '\0') ? cell : " ", cell_href);
                 free(cell);
+                free(cell_href);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                last_was_gap = 0;
                 pv_set_emphasis(v, (t == LXB_TAG_TH) ? 1 : 0, 0);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
@@ -1698,7 +1830,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         }
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
         if (in_skipped_subtree(n, base, js_enabled)) continue;
-        if (in_collected_cell(n, base)) continue; /* already emitted as a collected cell run */
+        if (in_collected_cell(n, base, &flowreg)) continue; /* emitted as a collected cell run */
         if (in_hidden_subtree(n, base, sheet)) continue; /* display:none */
         if (reader && in_boilerplate_subtree(n, base)) continue; /* distraction-free */
 
@@ -1765,6 +1897,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
         free(marked);
         free(href_dup);
         if (st != PV_OK) { rc = st; goto cleanup; }
+        last_was_gap = 0;
         pv_set_emphasis(v, bold, italic);
         pv_set_indent(v, list_depth);
         pv_set_color(v, fg);
