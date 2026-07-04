@@ -7,14 +7,15 @@
 
 #include "css.h"
 #include "css_color.h"
+#include "css_select.h"
 
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* Bounds (anti-DoS). A stylesheet beyond these is truncated, never unbounded. */
-#define CSS_TOK_MAX             64u
-#define CSS_MAX_CLASSES_PER_SEL 6
+/* Bounds (anti-DoS). A stylesheet beyond these is truncated, never unbounded.
+ * CSS_TOK_MAX / CSS_MAX_CLASSES_PER_SEL live in css_select.h (shared with the
+ * selector engine). */
 #define CSS_MAX_SELS            512u
 #define CSS_MAX_DECLS           2048u
 #define CSS_MAX_RULES           384u
@@ -60,43 +61,8 @@ typedef struct css_decl {
     int important;  /* 1 if the declaration carried !important (higher cascade tier) */
 } css_decl;
 
-/* Combinator joining a compound to the one on its left. */
-enum { COMB_DESCENDANT = 0, COMB_CHILD = 1 };
-
-/* Attribute selector operator. PRESENT is bare `[attr]`; the rest carry a value. */
-enum { ATTR_PRESENT = 0, ATTR_EQ, ATTR_TILDE, ATTR_PIPE, ATTR_CARET, ATTR_DOLLAR, ATTR_STAR };
-
-/* One attribute selector inside a compound: name OP value, with a case flag. */
-typedef struct css_attr_match {
-    char name[CSS_TOK_MAX];
-    char value[CSS_TOK_MAX];
-    int  op;   /* ATTR_* */
-    int  ci;   /* 1 = match the value case-insensitively (the trailing `i` flag) */
-} css_attr_match;
-
-/* One compound selector: optional type, optional id, zero+ classes, zero+ [attr]. */
-typedef struct css_compound {
-    char tag[CSS_TOK_MAX];
-    int  has_tag;
-    char id[CSS_TOK_MAX];
-    int  has_id;
-    char cls[CSS_MAX_CLASSES_PER_SEL][CSS_TOK_MAX];
-    int  ncls;
-    css_attr_match attrs[CSS_MAX_ATTR_SEL];
-    int  nattrs;
-} css_compound;
-
-/* A complex selector: a chain of compounds, parts[nparts-1] being the subject (the
- * element a rule styles). comb[k] (k>=1) is the combinator to the LEFT of parts[k];
- * comb[0] is unused. A single compound is nparts == 1. */
-typedef struct css_sel {
-    css_compound parts[CSS_MAX_COMPOUNDS];
-    int  comb[CSS_MAX_COMPOUNDS];
-    int  nparts;
-    int  spec;
-    int  order;     /* document order (tie-break) */
-    int  rule;      /* index into rules[] */
-} css_sel;
+/* The selector types (css_attr_match/css_compound/css_sel) and their parser/matcher
+ * live in css_select.{h,c}. */
 
 struct css_sheet {
     css_decl decls[CSS_MAX_DECLS];
@@ -107,42 +73,8 @@ struct css_sheet {
     size_t   nsels;
 };
 
-/* --- small ASCII helpers --- */
-
-static char lower(char c) { return (c >= 'A' && c <= 'Z') ? (char)(c + 32) : c; }
-
-static int ci_eq(const char *a, const char *b) {
-    while (*a != '\0' && *b != '\0') {
-        if (lower(*a) != lower(*b)) return 0;
-        ++a; ++b;
-    }
-    return *a == '\0' && *b == '\0';
-}
-
-/* True if a[0,n) equals b[0,n) up to n chars (b NUL-terminated), case-folded when ci. */
-static int span_eq(const char *a, const char *b, size_t n, int ci) {
-    for (size_t i = 0; i < n; ++i) {
-        char x = a[i], y = b[i];
-        if (ci) { x = lower(x); y = lower(y); }
-        if (x != y) return 0;
-    }
-    return 1;
-}
-
-/* Substring test (used both to drop any value carrying url() — always ci — and by the
- * attribute `*=` operator). A non-empty needle only; an empty needle never matches. */
-static int substr_match(const char *hay, const char *needle, int ci) {
-    size_t nl = strlen(needle), hl = strlen(hay);
-    if (nl == 0 || nl > hl) return 0;
-    for (size_t off = 0; off + nl <= hl; ++off)
-        if (span_eq(hay + off, needle, nl, ci)) return 1;
-    return 0;
-}
-
-static int is_ident_ch(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-           (c >= '0' && c <= '9') || c == '_' || c == '-';
-}
+/* The small ASCII helpers (csel_lower_ch / csel_ci_eq / csel_substr /
+ * csel_ident_ch) are shared with the selector engine via css_select.h. */
 
 /* Parses a leading non-negative number (digits + optional fraction). Returns 1 on
  * success, setting *out and *endp to the first unconsumed char. */
@@ -180,7 +112,7 @@ static int interp_color(const char *v) {
 }
 
 static int interp_bg(const char *v) {
-    if (substr_match(v, "url(", 1)) return -1;   /* never phone home */
+    if (csel_substr(v, "url(", 1)) return -1;   /* never phone home */
     cc_rgb c;
     if (cc_parse(v, &c) == CC_OK) return cc_pack(c);
     /* shorthand: try the first whitespace-delimited token as a color. */
@@ -194,31 +126,31 @@ static int interp_bg(const char *v) {
 }
 
 static int interp_align(const char *v) {
-    if (ci_eq(v, "left") || ci_eq(v, "start")) return CSS_ALIGN_LEFT;
-    if (ci_eq(v, "center")) return CSS_ALIGN_CENTER;
-    if (ci_eq(v, "right") || ci_eq(v, "end")) return CSS_ALIGN_RIGHT;
-    if (ci_eq(v, "justify")) return CSS_ALIGN_JUSTIFY;
+    if (csel_ci_eq(v, "left") || csel_ci_eq(v, "start")) return CSS_ALIGN_LEFT;
+    if (csel_ci_eq(v, "center")) return CSS_ALIGN_CENTER;
+    if (csel_ci_eq(v, "right") || csel_ci_eq(v, "end")) return CSS_ALIGN_RIGHT;
+    if (csel_ci_eq(v, "justify")) return CSS_ALIGN_JUSTIFY;
     return -1;
 }
 
 static int interp_fontsize(const char *v) {
-    if (ci_eq(v, "medium")) return 100;
-    if (ci_eq(v, "small") || ci_eq(v, "smaller")) return 85;
-    if (ci_eq(v, "large") || ci_eq(v, "larger")) return 120;
-    if (ci_eq(v, "x-large")) return 150;
-    if (ci_eq(v, "xx-large")) return 200;
-    if (ci_eq(v, "x-small")) return 75;
-    if (ci_eq(v, "xx-small")) return 60;
+    if (csel_ci_eq(v, "medium")) return 100;
+    if (csel_ci_eq(v, "small") || csel_ci_eq(v, "smaller")) return 85;
+    if (csel_ci_eq(v, "large") || csel_ci_eq(v, "larger")) return 120;
+    if (csel_ci_eq(v, "x-large")) return 150;
+    if (csel_ci_eq(v, "xx-large")) return 200;
+    if (csel_ci_eq(v, "x-small")) return 75;
+    if (csel_ci_eq(v, "xx-small")) return 60;
 
     double num;
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
     while (*end == ' ' || *end == '\t') ++end;
     double scale;
-    if (ci_eq(end, "px")) scale = num / 16.0 * 100.0;
-    else if (ci_eq(end, "em") || ci_eq(end, "rem")) scale = num * 100.0;
+    if (csel_ci_eq(end, "px")) scale = num / 16.0 * 100.0;
+    else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) scale = num * 100.0;
     else if (end[0] == '%' && end[1] == '\0') scale = num;
-    else if (ci_eq(end, "pt")) scale = num * 1.333 / 16.0 * 100.0;
+    else if (csel_ci_eq(end, "pt")) scale = num * 1.333 / 16.0 * 100.0;
     else return -1;
     return round_clamp(scale, 10, 1000);
 }
@@ -228,7 +160,7 @@ static int interp_fontsize(const char *v) {
  * line-heights need a font size we don't have here, so they are dropped (return -1).
  * Clamped to [CSS_LINE_MIN, CSS_LINE_MAX] (anti-DoS). */
 static int interp_lineheight(const char *v) {
-    if (ci_eq(v, "normal")) return 0;
+    if (csel_ci_eq(v, "normal")) return 0;
     double num;
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
@@ -241,8 +173,8 @@ static int interp_lineheight(const char *v) {
 }
 
 static int interp_weight(const char *v) {
-    if (ci_eq(v, "bold") || ci_eq(v, "bolder")) return 1;
-    if (ci_eq(v, "normal") || ci_eq(v, "lighter")) return 0;
+    if (csel_ci_eq(v, "bold") || csel_ci_eq(v, "bolder")) return 1;
+    if (csel_ci_eq(v, "normal") || csel_ci_eq(v, "lighter")) return 0;
     double num;
     const char *end;
     if (parse_num(v, &num, &end) && *end == '\0') return num >= 600.0 ? 1 : 0;
@@ -250,8 +182,8 @@ static int interp_weight(const char *v) {
 }
 
 static int interp_style(const char *v) {
-    if (ci_eq(v, "italic") || ci_eq(v, "oblique")) return 1;
-    if (ci_eq(v, "normal")) return 0;
+    if (csel_ci_eq(v, "italic") || csel_ci_eq(v, "oblique")) return 1;
+    if (csel_ci_eq(v, "normal")) return 0;
     return -1;
 }
 
@@ -270,29 +202,29 @@ static int interp_textdeco(const char *v) {
         while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
         tok[k] = '\0';
         while (*p != '\0' && *p != ' ' && *p != '\t') ++p;  /* drop an over-long token tail */
-        if (ci_eq(tok, "none")) return 0;
-        else if (ci_eq(tok, "underline"))    { bits |= CSS_DECO_UNDERLINE;    saw_keyword = 1; }
-        else if (ci_eq(tok, "overline"))     { bits |= CSS_DECO_OVERLINE;     saw_keyword = 1; }
-        else if (ci_eq(tok, "line-through")) { bits |= CSS_DECO_LINE_THROUGH; saw_keyword = 1; }
+        if (csel_ci_eq(tok, "none")) return 0;
+        else if (csel_ci_eq(tok, "underline"))    { bits |= CSS_DECO_UNDERLINE;    saw_keyword = 1; }
+        else if (csel_ci_eq(tok, "overline"))     { bits |= CSS_DECO_OVERLINE;     saw_keyword = 1; }
+        else if (csel_ci_eq(tok, "line-through")) { bits |= CSS_DECO_LINE_THROUGH; saw_keyword = 1; }
         /* anything else (style/color/thickness): ignored */
     }
     return saw_keyword ? bits : -1;
 }
 
 static int interp_display(const char *v) {
-    if (ci_eq(v, "none")) return CSS_DISP_NONE;
-    if (ci_eq(v, "block")) return CSS_DISP_BLOCK;
-    if (ci_eq(v, "inline")) return CSS_DISP_INLINE;
-    if (ci_eq(v, "inline-block")) return CSS_DISP_INLINE_BLOCK;
-    if (ci_eq(v, "flex") || ci_eq(v, "inline-flex")) return CSS_DISP_FLEX;
-    if (ci_eq(v, "grid") || ci_eq(v, "inline-grid")) return CSS_DISP_GRID;
+    if (csel_ci_eq(v, "none")) return CSS_DISP_NONE;
+    if (csel_ci_eq(v, "block")) return CSS_DISP_BLOCK;
+    if (csel_ci_eq(v, "inline")) return CSS_DISP_INLINE;
+    if (csel_ci_eq(v, "inline-block")) return CSS_DISP_INLINE_BLOCK;
+    if (csel_ci_eq(v, "flex") || csel_ci_eq(v, "inline-flex")) return CSS_DISP_FLEX;
+    if (csel_ci_eq(v, "grid") || csel_ci_eq(v, "inline-grid")) return CSS_DISP_GRID;
     return -1;  /* unknown display: leave unset */
 }
 
 /* gap / grid-gap / column-gap: leading length as px (a two-value gap keeps the
  * first), "normal" -> 0; clamped to [0, CSS_GAP_MAX]. -1 when not a length. */
 static int interp_gap(const char *v) {
-    if (ci_eq(v, "normal")) return 0;
+    if (csel_ci_eq(v, "normal")) return 0;
     double num;
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
@@ -300,13 +232,13 @@ static int interp_gap(const char *v) {
 }
 
 static int interp_justify(const char *v) {
-    if (ci_eq(v, "flex-start") || ci_eq(v, "start") || ci_eq(v, "normal"))
+    if (csel_ci_eq(v, "flex-start") || csel_ci_eq(v, "start") || csel_ci_eq(v, "normal"))
         return CSS_JUSTIFY_START;
-    if (ci_eq(v, "flex-end") || ci_eq(v, "end")) return CSS_JUSTIFY_END;
-    if (ci_eq(v, "center")) return CSS_JUSTIFY_CENTER;
-    if (ci_eq(v, "space-between")) return CSS_JUSTIFY_SPACE_BETWEEN;
-    if (ci_eq(v, "space-around")) return CSS_JUSTIFY_SPACE_AROUND;
-    if (ci_eq(v, "space-evenly")) return CSS_JUSTIFY_SPACE_EVENLY;
+    if (csel_ci_eq(v, "flex-end") || csel_ci_eq(v, "end")) return CSS_JUSTIFY_END;
+    if (csel_ci_eq(v, "center")) return CSS_JUSTIFY_CENTER;
+    if (csel_ci_eq(v, "space-between")) return CSS_JUSTIFY_SPACE_BETWEEN;
+    if (csel_ci_eq(v, "space-around")) return CSS_JUSTIFY_SPACE_AROUND;
+    if (csel_ci_eq(v, "space-evenly")) return CSS_JUSTIFY_SPACE_EVENLY;
     return -1;  /* unknown: fail closed */
 }
 
@@ -314,8 +246,8 @@ static int interp_justify(const char *v) {
  * [1, CSS_GRID_COLS_MAX]. "none"/empty -> -1 (unset). repeat()/minmax() are counted
  * as literal tokens (out of scope). url() defensively dropped. */
 static int interp_gridcols(const char *v) {
-    if (substr_match(v, "url(", 1)) return -1;
-    if (ci_eq(v, "none")) return -1;
+    if (csel_substr(v, "url(", 1)) return -1;
+    if (csel_ci_eq(v, "none")) return -1;
     int n = 0, in_tok = 0;
     for (const char *p = v; *p != '\0'; ++p) {
         int ws = (*p == ' ' || *p == '\t');
@@ -333,7 +265,7 @@ static int interp_gridcols(const char *v) {
  * the parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a signed px
  * clamped to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
 static int interp_len(const char *v, int allow_auto, int *out) {
-    if (allow_auto && ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
+    if (allow_auto && csel_ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
     const char *p = v;
     int neg = 0;
     if (*p == '+') ++p;
@@ -346,9 +278,9 @@ static int interp_len(const char *v, int allow_auto, int *out) {
     if (end[0] == '\0') {
         if (num != 0.0) return 0;       /* unitless non-zero length: invalid */
         px = 0.0;
-    } else if (ci_eq(end, "px")) {
+    } else if (csel_ci_eq(end, "px")) {
         px = num;
-    } else if (ci_eq(end, "em") || ci_eq(end, "rem")) {
+    } else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) {
         px = num * 16.0;
     } else {
         return 0;                       /* %, vw/vh, pt, calc(...), ... */
@@ -434,14 +366,14 @@ static int family_of(const char *name) {
         { "fantasy", CSS_FF_FANTASY }, { "impact", CSS_FF_FANTASY },
     };
     for (size_t i = 0; i < sizeof tbl / sizeof tbl[0]; ++i)
-        if (ci_eq(name, tbl[i].n)) return tbl[i].f;
+        if (csel_ci_eq(name, tbl[i].n)) return tbl[i].f;
     return -1;
 }
 
 /* font-family: the first recognised name in the comma-separated stack wins (its
  * generic bucket). Quotes are stripped. url() defensively dropped. -1 if none known. */
 static int interp_fontfamily(const char *v) {
-    if (substr_match(v, "url(", 1)) return -1;
+    if (csel_substr(v, "url(", 1)) return -1;
     const char *p = v;
     while (*p != '\0') {
         while (*p == ' ' || *p == '\t' || *p == ',') ++p;
@@ -463,10 +395,10 @@ static int interp_fontfamily(const char *v) {
 }
 
 static int interp_texttransform(const char *v) {
-    if (ci_eq(v, "none"))       return CSS_TT_NONE;
-    if (ci_eq(v, "uppercase"))  return CSS_TT_UPPERCASE;
-    if (ci_eq(v, "lowercase"))  return CSS_TT_LOWERCASE;
-    if (ci_eq(v, "capitalize")) return CSS_TT_CAPITALIZE;
+    if (csel_ci_eq(v, "none"))       return CSS_TT_NONE;
+    if (csel_ci_eq(v, "uppercase"))  return CSS_TT_UPPERCASE;
+    if (csel_ci_eq(v, "lowercase"))  return CSS_TT_LOWERCASE;
+    if (csel_ci_eq(v, "capitalize")) return CSS_TT_CAPITALIZE;
     return -1;  /* full-width/full-size-kana/...: out of scope, fail closed */
 }
 
@@ -485,38 +417,38 @@ static int interp_opacity(const char *v) {
 }
 
 static int interp_valign(const char *v) {
-    if (ci_eq(v, "baseline")) return CSS_VA_BASELINE;
-    if (ci_eq(v, "sub"))      return CSS_VA_SUB;
-    if (ci_eq(v, "super"))    return CSS_VA_SUPER;
+    if (csel_ci_eq(v, "baseline")) return CSS_VA_BASELINE;
+    if (csel_ci_eq(v, "sub"))      return CSS_VA_SUB;
+    if (csel_ci_eq(v, "super"))    return CSS_VA_SUPER;
     return -1;  /* top/middle/bottom/<length>: out of scope, fail closed */
 }
 
 static int interp_whitespace(const char *v) {
-    if (ci_eq(v, "normal"))   return CSS_WS_NORMAL;
-    if (ci_eq(v, "nowrap"))   return CSS_WS_NOWRAP;
-    if (ci_eq(v, "pre"))      return CSS_WS_PRE;
-    if (ci_eq(v, "pre-wrap")) return CSS_WS_PRE_WRAP;
-    if (ci_eq(v, "pre-line")) return CSS_WS_PRE_LINE;
+    if (csel_ci_eq(v, "normal"))   return CSS_WS_NORMAL;
+    if (csel_ci_eq(v, "nowrap"))   return CSS_WS_NOWRAP;
+    if (csel_ci_eq(v, "pre"))      return CSS_WS_PRE;
+    if (csel_ci_eq(v, "pre-wrap")) return CSS_WS_PRE_WRAP;
+    if (csel_ci_eq(v, "pre-line")) return CSS_WS_PRE_LINE;
     return -1;
 }
 
 static int liststyle_kw(const char *t) {
-    if (ci_eq(t, "none"))        return CSS_LS_NONE;
-    if (ci_eq(t, "disc"))        return CSS_LS_DISC;
-    if (ci_eq(t, "circle"))      return CSS_LS_CIRCLE;
-    if (ci_eq(t, "square"))      return CSS_LS_SQUARE;
-    if (ci_eq(t, "decimal"))     return CSS_LS_DECIMAL;
-    if (ci_eq(t, "lower-alpha") || ci_eq(t, "lower-latin")) return CSS_LS_LOWER_ALPHA;
-    if (ci_eq(t, "upper-alpha") || ci_eq(t, "upper-latin")) return CSS_LS_UPPER_ALPHA;
-    if (ci_eq(t, "lower-roman")) return CSS_LS_LOWER_ROMAN;
-    if (ci_eq(t, "upper-roman")) return CSS_LS_UPPER_ROMAN;
+    if (csel_ci_eq(t, "none"))        return CSS_LS_NONE;
+    if (csel_ci_eq(t, "disc"))        return CSS_LS_DISC;
+    if (csel_ci_eq(t, "circle"))      return CSS_LS_CIRCLE;
+    if (csel_ci_eq(t, "square"))      return CSS_LS_SQUARE;
+    if (csel_ci_eq(t, "decimal"))     return CSS_LS_DECIMAL;
+    if (csel_ci_eq(t, "lower-alpha") || csel_ci_eq(t, "lower-latin")) return CSS_LS_LOWER_ALPHA;
+    if (csel_ci_eq(t, "upper-alpha") || csel_ci_eq(t, "upper-latin")) return CSS_LS_UPPER_ALPHA;
+    if (csel_ci_eq(t, "lower-roman")) return CSS_LS_LOWER_ROMAN;
+    if (csel_ci_eq(t, "upper-roman")) return CSS_LS_UPPER_ROMAN;
     return -1;
 }
 
 /* list-style-type, or the type token of the list-style shorthand: the first
  * recognised keyword wins. url() (a list-style-image) is dropped: never fetch. */
 static int interp_liststyle(const char *v) {
-    if (substr_match(v, "url(", 1)) return -1;
+    if (csel_substr(v, "url(", 1)) return -1;
     const char *p = v;
     while (*p != '\0') {
         while (*p == ' ' || *p == '\t') ++p;
@@ -536,7 +468,7 @@ static int interp_liststyle(const char *v) {
  * clamped to [-CSS_SPACING_MAX, CSS_SPACING_MAX]. Returns 1 with *out set, 0 if
  * the value is unsupported (%/vw/calc/bare number -> dropped, fail closed). */
 static int interp_spacing(const char *v, int *out) {
-    if (ci_eq(v, "normal")) { *out = 0; return 1; }
+    if (csel_ci_eq(v, "normal")) { *out = 0; return 1; }
     int px;
     if (!interp_len(v, 0, &px)) return 0;
     if (px > CSS_SPACING_MAX) px = CSS_SPACING_MAX;
@@ -560,8 +492,8 @@ static int emit_spacing(css_decl *dst, int cap, int slot, const char *val) {
  * contiguous P_SHADOW_* slots; offsets clamped to [-CSS_SHADOW_MAX, CSS_SHADOW_MAX]. */
 static int expand_shadow(const char *val, css_decl *dst, int cap) {
     if (cap < 3) return 0;
-    if (substr_match(val, "url(", 1)) return 0;
-    if (ci_eq(val, "none")) {
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none")) {
         dst[0].prop = P_SHADOW_DX;    dst[0].ival = 0;
         dst[1].prop = P_SHADOW_DY;    dst[1].ival = 0;
         dst[2].prop = P_SHADOW_COLOR; dst[2].ival = -1;
@@ -597,17 +529,17 @@ static int expand_shadow(const char *val, css_decl *dst, int cap) {
 /* --- Layout / box decoration (Hito 23b-7) --------------------------------- */
 
 static int interp_position(const char *v) {
-    if (ci_eq(v, "static"))   return CSS_POS_STATIC;
-    if (ci_eq(v, "relative")) return CSS_POS_RELATIVE;
-    if (ci_eq(v, "absolute")) return CSS_POS_ABSOLUTE;
-    if (ci_eq(v, "fixed"))    return CSS_POS_FIXED;
-    if (ci_eq(v, "sticky"))   return CSS_POS_STICKY;
+    if (csel_ci_eq(v, "static"))   return CSS_POS_STATIC;
+    if (csel_ci_eq(v, "relative")) return CSS_POS_RELATIVE;
+    if (csel_ci_eq(v, "absolute")) return CSS_POS_ABSOLUTE;
+    if (csel_ci_eq(v, "fixed"))    return CSS_POS_FIXED;
+    if (csel_ci_eq(v, "sticky"))   return CSS_POS_STICKY;
     return -1;
 }
 
 static int interp_boxsizing(const char *v) {
-    if (ci_eq(v, "content-box")) return CSS_BOXS_CONTENT;
-    if (ci_eq(v, "border-box"))  return CSS_BOXS_BORDER;
+    if (csel_ci_eq(v, "content-box")) return CSS_BOXS_CONTENT;
+    if (csel_ci_eq(v, "border-box"))  return CSS_BOXS_BORDER;
     return -1;
 }
 
@@ -630,25 +562,25 @@ static int interp_int(const char *v, int *out) {
 }
 
 static int interp_border_style(const char *v) {
-    if (ci_eq(v, "none"))   return CSS_BST_NONE;
-    if (ci_eq(v, "hidden")) return CSS_BST_HIDDEN;
-    if (ci_eq(v, "solid"))  return CSS_BST_SOLID;
-    if (ci_eq(v, "dashed")) return CSS_BST_DASHED;
-    if (ci_eq(v, "dotted")) return CSS_BST_DOTTED;
-    if (ci_eq(v, "double")) return CSS_BST_DOUBLE;
-    if (ci_eq(v, "groove")) return CSS_BST_GROOVE;
-    if (ci_eq(v, "ridge"))  return CSS_BST_RIDGE;
-    if (ci_eq(v, "inset"))  return CSS_BST_INSET;
-    if (ci_eq(v, "outset")) return CSS_BST_OUTSET;
+    if (csel_ci_eq(v, "none"))   return CSS_BST_NONE;
+    if (csel_ci_eq(v, "hidden")) return CSS_BST_HIDDEN;
+    if (csel_ci_eq(v, "solid"))  return CSS_BST_SOLID;
+    if (csel_ci_eq(v, "dashed")) return CSS_BST_DASHED;
+    if (csel_ci_eq(v, "dotted")) return CSS_BST_DOTTED;
+    if (csel_ci_eq(v, "double")) return CSS_BST_DOUBLE;
+    if (csel_ci_eq(v, "groove")) return CSS_BST_GROOVE;
+    if (csel_ci_eq(v, "ridge"))  return CSS_BST_RIDGE;
+    if (csel_ci_eq(v, "inset"))  return CSS_BST_INSET;
+    if (csel_ci_eq(v, "outset")) return CSS_BST_OUTSET;
     return -1;
 }
 
 /* Border/outline width token: thin/medium/thick keywords or a non-negative length.
  * Returns 1 with *out (px >= 0), 0 if unsupported. */
 static int interp_border_width(const char *v, int *out) {
-    if (ci_eq(v, "thin"))   { *out = 1; return 1; }
-    if (ci_eq(v, "medium")) { *out = 3; return 1; }
-    if (ci_eq(v, "thick"))  { *out = 5; return 1; }
+    if (csel_ci_eq(v, "thin"))   { *out = 1; return 1; }
+    if (csel_ci_eq(v, "medium")) { *out = 3; return 1; }
+    if (csel_ci_eq(v, "thick"))  { *out = 5; return 1; }
     int px;
     if (!interp_len(v, 0, &px) || px < 0) return 0;
     *out = px;
@@ -719,7 +651,7 @@ static int expand_quad(const char *val, int slot_top, tok_interp f, css_decl *ds
 static int classify_box_edge(const char *val, int *w, int *hw, int *s, int *hs,
                              int *c, int *hc) {
     *hw = *hs = *hc = 0;
-    if (substr_match(val, "url(", 1)) return 0;
+    if (csel_substr(val, "url(", 1)) return 0;
     const char *p = val;
     while (*p != '\0') {
         while (*p == ' ' || *p == '\t') ++p;
@@ -769,9 +701,9 @@ static int expand_outline(const char *val, css_decl *dst, int cap) {
  * no-shadow. url() dropped: never fetch. Writes the six contiguous P_BSHADOW_* slots. */
 static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
     if (cap < 6) return 0;
-    if (substr_match(val, "url(", 1)) return 0;
+    if (csel_substr(val, "url(", 1)) return 0;
     int lens[4], nlen = 0, color = 0, have_color = 0, inset = 0;
-    if (!ci_eq(val, "none")) {
+    if (!csel_ci_eq(val, "none")) {
         const char *p = val;
         while (*p != '\0') {
             while (*p == ' ' || *p == '\t') ++p;
@@ -780,7 +712,7 @@ static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
             size_t k = 0;
             while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
             tok[k] = '\0';
-            if (ci_eq(tok, "inset")) { inset = 1; continue; }
+            if (csel_ci_eq(tok, "inset")) { inset = 1; continue; }
             int px;
             cc_rgb c;
             if (interp_len(tok, 0, &px)) { if (nlen < 4) lens[nlen++] = px; }
@@ -793,7 +725,7 @@ static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
     dst[1].prop = P_BSHADOW_DY;     dst[1].ival = nlen > 1 ? lens[1] : 0;
     dst[2].prop = P_BSHADOW_BLUR;   dst[2].ival = nlen > 2 ? lens[2] : 0;
     dst[3].prop = P_BSHADOW_SPREAD; dst[3].ival = nlen > 3 ? lens[3] : 0;
-    dst[4].prop = P_BSHADOW_COLOR;  dst[4].ival = ci_eq(val, "none") ? -1
+    dst[4].prop = P_BSHADOW_COLOR;  dst[4].ival = csel_ci_eq(val, "none") ? -1
                                                 : (have_color ? color : 0x000000);
     dst[5].prop = P_BSHADOW_INSET;  dst[5].ival = inset;
     return 6;
@@ -811,7 +743,7 @@ static int interp_flex_factor(const char *v) {
 /* flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; %/units
  * dropped (returns 0, leaving unset). Returns 1 with *out, 0 if unsupported. */
 static int interp_flex_basis(const char *v, int *out) {
-    if (ci_eq(v, "auto") || ci_eq(v, "content")) { *out = CSS_LEN_AUTO; return 1; }
+    if (csel_ci_eq(v, "auto") || csel_ci_eq(v, "content")) { *out = CSS_LEN_AUTO; return 1; }
     int px;
     if (!interp_len(v, 0, &px) || px < 0) return 0;
     *out = px;
@@ -825,9 +757,9 @@ static int interp_flex_basis(const char *v, int *out) {
 static int expand_flex(const char *val, css_decl *dst, int cap) {
     if (cap < 3) return 0;
     int grow, shrink, basis;
-    if (ci_eq(val, "none"))         { grow = 0;   shrink = 0;   basis = CSS_LEN_AUTO; }
-    else if (ci_eq(val, "auto"))    { grow = 100; shrink = 100; basis = CSS_LEN_AUTO; }
-    else if (ci_eq(val, "initial")) { grow = 0;   shrink = 100; basis = CSS_LEN_AUTO; }
+    if (csel_ci_eq(val, "none"))         { grow = 0;   shrink = 0;   basis = CSS_LEN_AUTO; }
+    else if (csel_ci_eq(val, "auto"))    { grow = 100; shrink = 100; basis = CSS_LEN_AUTO; }
+    else if (csel_ci_eq(val, "initial")) { grow = 0;   shrink = 100; basis = CSS_LEN_AUTO; }
     else {
         int g = 0, sh = 0, ba = 0, have_g = 0, have_sh = 0, have_ba = 0;
         const char *p = val;
@@ -868,30 +800,30 @@ static int expand_flex(const char *val, css_decl *dst, int cap) {
 /* align-items / align-self / align-content / justify-items keyword. allow_auto is for
  * align-self; allow_dist (space-*) is for align-content. Unknown -> -1 (drop). */
 static int interp_align_kw(const char *v, int allow_auto, int allow_dist) {
-    if (allow_auto && ci_eq(v, "auto")) return CSS_AK_AUTO;
-    if (ci_eq(v, "stretch")) return CSS_AK_STRETCH;
-    if (ci_eq(v, "flex-start") || ci_eq(v, "start")) return CSS_AK_START;
-    if (ci_eq(v, "flex-end") || ci_eq(v, "end")) return CSS_AK_END;
-    if (ci_eq(v, "center")) return CSS_AK_CENTER;
-    if (ci_eq(v, "baseline")) return CSS_AK_BASELINE;
-    if (allow_dist && ci_eq(v, "space-between")) return CSS_AK_SPACE_BETWEEN;
-    if (allow_dist && ci_eq(v, "space-around")) return CSS_AK_SPACE_AROUND;
-    if (allow_dist && ci_eq(v, "space-evenly")) return CSS_AK_SPACE_EVENLY;
+    if (allow_auto && csel_ci_eq(v, "auto")) return CSS_AK_AUTO;
+    if (csel_ci_eq(v, "stretch")) return CSS_AK_STRETCH;
+    if (csel_ci_eq(v, "flex-start") || csel_ci_eq(v, "start")) return CSS_AK_START;
+    if (csel_ci_eq(v, "flex-end") || csel_ci_eq(v, "end")) return CSS_AK_END;
+    if (csel_ci_eq(v, "center")) return CSS_AK_CENTER;
+    if (csel_ci_eq(v, "baseline")) return CSS_AK_BASELINE;
+    if (allow_dist && csel_ci_eq(v, "space-between")) return CSS_AK_SPACE_BETWEEN;
+    if (allow_dist && csel_ci_eq(v, "space-around")) return CSS_AK_SPACE_AROUND;
+    if (allow_dist && csel_ci_eq(v, "space-evenly")) return CSS_AK_SPACE_EVENLY;
     return -1;
 }
 
 static int interp_flex_direction(const char *v) {
-    if (ci_eq(v, "row")) return CSS_FD_ROW;
-    if (ci_eq(v, "row-reverse")) return CSS_FD_ROW_REVERSE;
-    if (ci_eq(v, "column")) return CSS_FD_COLUMN;
-    if (ci_eq(v, "column-reverse")) return CSS_FD_COLUMN_REVERSE;
+    if (csel_ci_eq(v, "row")) return CSS_FD_ROW;
+    if (csel_ci_eq(v, "row-reverse")) return CSS_FD_ROW_REVERSE;
+    if (csel_ci_eq(v, "column")) return CSS_FD_COLUMN;
+    if (csel_ci_eq(v, "column-reverse")) return CSS_FD_COLUMN_REVERSE;
     return -1;
 }
 
 static int interp_flex_wrap(const char *v) {
-    if (ci_eq(v, "nowrap")) return CSS_FW_NOWRAP;
-    if (ci_eq(v, "wrap")) return CSS_FW_WRAP;
-    if (ci_eq(v, "wrap-reverse")) return CSS_FW_WRAP_REVERSE;
+    if (csel_ci_eq(v, "nowrap")) return CSS_FW_NOWRAP;
+    if (csel_ci_eq(v, "wrap")) return CSS_FW_WRAP;
+    if (csel_ci_eq(v, "wrap-reverse")) return CSS_FW_WRAP_REVERSE;
     return -1;
 }
 
@@ -905,8 +837,8 @@ static int interp_grid_flow(const char *v) {
         size_t k = 0;
         while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
         tok[k] = '\0';
-        if (ci_eq(tok, "row")) return CSS_GF_ROW;
-        if (ci_eq(tok, "column")) return CSS_GF_COLUMN;
+        if (csel_ci_eq(tok, "row")) return CSS_GF_ROW;
+        if (csel_ci_eq(tok, "column")) return CSS_GF_COLUMN;
         /* dense / other: skip */
     }
     return -1;
@@ -916,7 +848,7 @@ static int interp_grid_flow(const char *v) {
  * the first NUL (no out-of-bounds read past a short s). */
 static int starts_with_ci(const char *s, const char *pre) {
     for (; *pre != '\0'; ++s, ++pre)
-        if (lower(*s) != lower(*pre)) return 0;
+        if (csel_lower_ch(*s) != csel_lower_ch(*pre)) return 0;
     return 1;
 }
 
@@ -960,7 +892,7 @@ static int strip_important(char *val) {
         if (val[i] != '!') continue;
         const char *r = val + i + 1;
         while (*r == ' ' || *r == '\t') ++r;
-        if (!ci_eq(r, "important")) return 0;   /* a non-!important '!': leave as-is */
+        if (!csel_ci_eq(r, "important")) return 0;   /* a non-!important '!': leave as-is */
         size_t e = i;
         while (e > 0 && (val[e-1] == ' ' || val[e-1] == '\t')) --e;
         val[e] = '\0';
@@ -1105,7 +1037,7 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap) {
     if (copy_trim(s, 0, c, prop, sizeof prop) == (size_t)-1) return 0;
     if (copy_trim(s, c + 1, n, val, sizeof val) == (size_t)-1) return 0;
     if (prop[0] == '\0' || val[0] == '\0') return 0;
-    for (char *p = prop; *p != '\0'; ++p) *p = lower(*p);
+    for (char *p = prop; *p != '\0'; ++p) *p = csel_lower_ch(*p);
 
     int important = strip_important(val);
     if (val[0] == '\0') return 0;  /* bare "!important" with no value */
@@ -1127,185 +1059,6 @@ static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap
     return count;
 }
 
-/* Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
- * Advances *ip past the closing ']'. Returns 1 if supported, 0 (fail closed) on any
- * malformation (no name, unknown operator, unterminated). Grammar:
- *   '[' ws name ws ( ']' | op '=' ws value ws (i|s)? ws ']' )
- * value may be quoted (single/double; quotes stripped, may contain whitespace). */
-static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am) {
-    size_t i = *ip + 1;  /* past '[' */
-    memset(am, 0, sizeof *am);
-    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
-
-    size_t k = 0;
-    while (i < b && is_ident_ch(s[i])) {
-        if (k + 1 < CSS_TOK_MAX) am->name[k++] = lower(s[i]);
-        ++i;
-    }
-    am->name[k] = '\0';
-    if (k == 0) return 0;  /* no attribute name */
-    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
-
-    if (i < b && s[i] == ']') { am->op = ATTR_PRESENT; *ip = i + 1; return 1; }
-
-    if (i < b && s[i] == '=') { am->op = ATTR_EQ; ++i; }
-    else if (i + 1 < b && s[i + 1] == '=') {
-        switch (s[i]) {
-            case '~': am->op = ATTR_TILDE;  break;
-            case '|': am->op = ATTR_PIPE;   break;
-            case '^': am->op = ATTR_CARET;  break;
-            case '$': am->op = ATTR_DOLLAR; break;
-            case '*': am->op = ATTR_STAR;   break;
-            default:  return 0;            /* unknown operator */
-        }
-        i += 2;
-    } else {
-        return 0;
-    }
-
-    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
-    char q = 0;
-    if (i < b && (s[i] == '"' || s[i] == '\'')) { q = s[i]; ++i; }
-    size_t vk = 0;
-    while (i < b) {
-        char ch = s[i];
-        if (q) { if (ch == q) { ++i; break; } }
-        else if (ch == ']' || ch == ' ' || ch == '\t') break;
-        if (vk + 1 < CSS_TOK_MAX) am->value[vk++] = ch;
-        ++i;
-    }
-    am->value[vk] = '\0';
-
-    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
-    if (i < b && (s[i] == 'i' || s[i] == 'I')) { am->ci = 1; ++i; }
-    else if (i < b && (s[i] == 's' || s[i] == 'S')) { am->ci = 0; ++i; }
-    while (i < b && (s[i] == ' ' || s[i] == '\t')) ++i;
-    if (i >= b || s[i] != ']') return 0;   /* unterminated attribute selector */
-    *ip = i + 1;
-    return 1;
-}
-
-/* Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space)
- * into *cp. Returns 1 if supported (type, .class, #id, *, [attr]). */
-static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
-    if (a >= b) return 0;
-    memset(cp, 0, sizeof *cp);
-    size_t i = a;
-    if (s[i] == '*') {
-        ++i;  /* universal: no type */
-    } else if ((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z')) {
-        size_t k = 0;
-        while (i < b && is_ident_ch(s[i])) {
-            if (k + 1 < sizeof cp->tag) cp->tag[k++] = lower(s[i]);
-            ++i;
-        }
-        cp->tag[k] = '\0';
-        cp->has_tag = 1;
-    } else if (s[i] != '.' && s[i] != '#' && s[i] != '[') {
-        return 0;
-    }
-
-    while (i < b) {
-        if (s[i] == '.') {
-            ++i;
-            if (i >= b || !is_ident_ch(s[i])) return 0;
-            if (cp->ncls >= CSS_MAX_CLASSES_PER_SEL) return 0;
-            size_t k = 0;
-            while (i < b && is_ident_ch(s[i])) {
-                if (k + 1 < CSS_TOK_MAX) cp->cls[cp->ncls][k++] = s[i];
-                ++i;
-            }
-            cp->cls[cp->ncls][k] = '\0';
-            ++cp->ncls;
-        } else if (s[i] == '#') {
-            ++i;
-            if (i >= b || !is_ident_ch(s[i]) || cp->has_id) return 0;
-            size_t k = 0;
-            while (i < b && is_ident_ch(s[i])) {
-                if (k + 1 < sizeof cp->id) cp->id[k++] = s[i];
-                ++i;
-            }
-            cp->id[k] = '\0';
-            cp->has_id = 1;
-        } else if (s[i] == '[') {
-            if (cp->nattrs >= CSS_MAX_ATTR_SEL) return 0;
-            if (!parse_attr_sel(s, &i, b, &cp->attrs[cp->nattrs])) return 0;
-            ++cp->nattrs;
-        } else {
-            return 0;  /* unexpected char inside a compound */
-        }
-    }
-    return 1;
-}
-
-/* Parses a complex selector span s[a,b) into *sel: a chain of compounds joined by
- * the descendant (whitespace) or child (`>`) combinator. Returns 1 if supported.
- * Attribute selectors `[...]` are now supported; the sibling combinators (`+`/`~`)
- * and pseudo-classes (`:`) are unsupported: the whole selector is dropped (fail
- * closed). A chain deeper than CSS_MAX_COMPOUNDS is dropped. Whitespace inside a
- * bracket (a quoted attribute value) does NOT split a compound. Specificity is the
- * sum over all compounds (id*100 + (class+attr)*10 + type). */
-static int parse_complex_selector(const char *s, size_t a, size_t b, css_sel *sel) {
-    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
-    while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
-    if (a >= b) return 0;
-
-    /* Unsupported syntax OUTSIDE brackets => drop the whole selector. `>` and
-     * whitespace are combinators; `[`/`]` open an attribute selector (whose contents
-     * may legitimately contain `~`/`+`/`*`/etc, so they are skipped here). */
-    int in_br = 0;
-    for (size_t i = a; i < b; ++i) {
-        char c = s[i];
-        if (c == '[') { if (in_br) return 0; in_br = 1; continue; }
-        if (c == ']') { if (!in_br) return 0; in_br = 0; continue; }
-        if (in_br) continue;
-        if (c == '+' || c == '~' || c == ':' || c == '(' || c == ')') return 0;
-    }
-    if (in_br) return 0;  /* unbalanced bracket */
-
-    memset(sel, 0, sizeof *sel);
-    int n = 0;
-    size_t i = a;
-    while (i < b) {
-        /* Skip the separator before this compound, noting a `>` (child combinator). */
-        int child = 0;
-        while (i < b && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' ||
-                         s[i] == '\r' || s[i] == '>')) {
-            if (s[i] == '>') { if (child) return 0; child = 1; }  /* `>>` invalid */
-            ++i;
-        }
-        if (i >= b) { if (child) return 0; break; }   /* trailing `>` with no compound */
-        if (n == 0 && child) return 0;                /* leading `>` */
-
-        /* The compound runs until whitespace/`>` at bracket depth 0; a `[..]` keeps a
-         * quoted value with spaces in the same compound. */
-        size_t ts = i;
-        int br = 0;
-        while (i < b) {
-            char c = s[i];
-            if (c == '[') br = 1;
-            else if (c == ']') br = 0;
-            else if (!br && (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '>'))
-                break;
-            ++i;
-        }
-        if (n >= CSS_MAX_COMPOUNDS) return 0;          /* too deep: fail closed */
-        if (!parse_compound(s, ts, i, &sel->parts[n])) return 0;
-        sel->comb[n] = (n == 0) ? COMB_DESCENDANT : (child ? COMB_CHILD : COMB_DESCENDANT);
-        ++n;
-    }
-    if (n == 0) return 0;
-    sel->nparts = n;
-
-    int spec = 0;
-    for (int k = 0; k < n; ++k)
-        spec += 100 * (sel->parts[k].has_id ? 1 : 0) +
-                10 * (sel->parts[k].ncls + sel->parts[k].nattrs) +
-                (sel->parts[k].has_tag ? 1 : 0);
-    sel->spec = spec;
-    return 1;
-}
-
 /* Adds a rule: selector list s[ss,se), declaration block s[ds,de). */
 static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      size_t ds, size_t de) {
@@ -1315,7 +1068,7 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     while (i < se && got < CSS_SELS_PER_GROUP) {
         size_t j = i;
         while (j < se && s[j] != ',') ++j;
-        if (parse_complex_selector(s, i, j, &tmp[got])) ++got;
+        if (csel_parse(s, i, j, &tmp[got])) ++got;
         i = (j < se) ? j + 1 : j;
     }
     if (got == 0) return;  /* no supported selector: skip the whole rule */
@@ -1392,7 +1145,7 @@ static void trim_inplace(char *s) {
 static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap) {
     size_t n = copy_trim(s, a, b, dst, cap);
     if (n == (size_t)-1) return (size_t)-1;
-    for (size_t i = 0; i < n; ++i) dst[i] = lower(dst[i]);
+    for (size_t i = 0; i < n; ++i) dst[i] = csel_lower_ch(dst[i]);
     return n;
 }
 
@@ -1481,7 +1234,7 @@ static int media_matches(const char *s, size_t a, size_t b, const css_media *m) 
 static int at_is_media(const char *s, size_t i, size_t n) {
     static const char kw[5] = { 'm', 'e', 'd', 'i', 'a' };
     if (i + 6 > n) return 0;
-    for (int k = 0; k < 5; ++k) if (lower(s[i + 1 + k]) != kw[k]) return 0;
+    for (int k = 0; k < 5; ++k) if (csel_lower_ch(s[i + 1 + k]) != kw[k]) return 0;
     size_t j = i + 6;
     return j >= n || s[j] == ' ' || s[j] == '\t' || s[j] == '\n' || s[j] == '\r'
         || s[j] == '{' || s[j] == '(';
@@ -1579,94 +1332,6 @@ void css_free(css_sheet *s) {
     free(s);
 }
 
-/* The value of element attribute `name` (case-insensitive name), or NULL if absent.
- * A present attribute with no value reads as "". */
-static const char *el_attr_value(const css_element *el, const char *name) {
-    if (el->attrs == NULL) return NULL;
-    for (size_t i = 0; i < el->nattrs; ++i) {
-        if (el->attrs[i].name != NULL && ci_eq(el->attrs[i].name, name))
-            return el->attrs[i].value != NULL ? el->attrs[i].value : "";
-    }
-    return NULL;
-}
-
-/* True if `v` ends with `suf` (non-empty), case-folded when ci. */
-static int ends_with(const char *v, const char *suf, int ci) {
-    size_t vl = strlen(v), fl = strlen(suf);
-    if (fl == 0 || fl > vl) return 0;
-    return span_eq(v + vl - fl, suf, fl, ci);
-}
-
-/* True if `v` is a whitespace-separated list containing the word `w` (non-empty),
- * case-folded when ci (the `~=` operator). */
-static int has_word(const char *v, const char *w, int ci) {
-    size_t wl = strlen(w);
-    if (wl == 0) return 0;
-    const char *p = v;
-    while (*p != '\0') {
-        while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == '\f') ++p;
-        const char *st = p;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\n' &&
-               *p != '\r' && *p != '\f') ++p;
-        if ((size_t)(p - st) == wl && span_eq(st, w, wl, ci)) return 1;
-    }
-    return 0;
-}
-
-/* True if attribute selector `am` matches element `el`. */
-static int attr_matches(const css_attr_match *am, const css_element *el) {
-    const char *v = el_attr_value(el, am->name);
-    if (v == NULL) return 0;                 /* attribute absent */
-    if (am->op == ATTR_PRESENT) return 1;
-    size_t vl = strlen(v), nl = strlen(am->value);
-    switch (am->op) {
-        case ATTR_EQ:     return vl == nl && span_eq(v, am->value, nl, am->ci);
-        case ATTR_TILDE:  return has_word(v, am->value, am->ci);
-        case ATTR_PIPE:   return (vl == nl && span_eq(v, am->value, nl, am->ci)) ||
-                                 (vl > nl && span_eq(v, am->value, nl, am->ci) && v[nl] == '-');
-        case ATTR_CARET:  return nl > 0 && vl >= nl && span_eq(v, am->value, nl, am->ci);
-        case ATTR_DOLLAR: return ends_with(v, am->value, am->ci);
-        case ATTR_STAR:   return substr_match(v, am->value, am->ci);
-        default:          return 0;
-    }
-}
-
-/* True if one compound matches one element (no ancestor context). */
-static int compound_matches(const css_compound *c, const css_element *el) {
-    if (el == NULL) return 0;
-    if (c->has_tag) { if (el->tag == NULL || !ci_eq(c->tag, el->tag)) return 0; }
-    if (c->has_id)  { if (el->id == NULL || strcmp(c->id, el->id) != 0) return 0; }
-    for (int i = 0; i < c->ncls; ++i) {
-        int found = 0;
-        for (size_t j = 0; j < el->nclasses; ++j) {
-            if (el->classes[j] != NULL && strcmp(c->cls[i], el->classes[j]) == 0) {
-                found = 1; break;
-            }
-        }
-        if (!found) return 0;
-    }
-    for (int i = 0; i < c->nattrs; ++i)
-        if (!attr_matches(&c->attrs[i], el)) return 0;
-    return 1;
-}
-
-/* True if parts[0..k] match the ancestor chain ending at el (el matches parts[k]).
- * Right-to-left: child requires the immediate parent; descendant tries each ancestor
- * (the recursion backtracks). Bounded by k (<= CSS_MAX_COMPOUNDS) and the chain. */
-static int complex_matches(const css_sel *sel, int k, const css_element *el) {
-    if (!compound_matches(&sel->parts[k], el)) return 0;
-    if (k == 0) return 1;
-    if (sel->comb[k] == COMB_CHILD) {
-        return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent);
-    }
-    for (const css_element *anc = el->parent; anc != NULL; anc = anc->parent)
-        if (complex_matches(sel, k - 1, anc)) return 1;
-    return 0;
-}
-
-static int sel_matches_el(const css_sel *s, const css_element *el) {
-    return complex_matches(s, s->nparts - 1, el);
-}
 
 /* Applies one declaration to the running style if it wins its property slot. The
  * cascade is two-tiered: an !important declaration beats any non-important one
@@ -1814,7 +1479,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
     if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
-            if (!sel_matches_el(sel, el)) continue;
+            if (!csel_matches(sel, el)) continue;
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
