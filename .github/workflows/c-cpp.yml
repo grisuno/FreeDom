@@ -30,7 +30,8 @@ jobs:
           libssl-dev \
           fontconfig \
           libfreetype6-dev \
-          libcmocka-dev
+          libcmocka-dev \
+          libjpeg-dev
 
     # 3. Descargar, compilar e instalar Lexbor globalmente
     - name: Install Lexbor from source
