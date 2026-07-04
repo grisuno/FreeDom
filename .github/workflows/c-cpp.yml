@@ -50,19 +50,20 @@ jobs:
     - name: make clean
       run: make clean
 
-    # 5. Parchear dependencias y compilar
     - name: make all
       run: |
         # Parche: Asegurar cabeceras OpenSSL y definir macros de Argon2 si faltan en versiones < 3.3
         sed -i '1s/^/#include <openssl\/kdf.h>\n#ifndef OSSL_KDF_PARAM_ARGON2_LANES\n#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"\n#endif\n#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST\n#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"\n#endif\n#ifndef OSSL_KDF_PARAM_THREADS\n#define OSSL_KDF_PARAM_THREADS "threads"\n#endif\n#define _GNU_SOURCE\n/' src/local_store.c
-        
+
         # Exportamos rutas de librerías para Lexbor
         export CPATH="/usr/local/include:$CPATH"
         export LIBRARY_PATH="/usr/local/lib:$LIBRARY_PATH"
         export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
-        
-        make all
 
+        export CFLAGS="$CFLAGS $(pkg-config --cflags cairo freetype2)"
+        export CXXFLAGS="$CXXFLAGS $(pkg-config --cflags cairo freetype2)"
+
+        make all
     # 6. Ejecutar las pruebas unitarias e integración
     - name: make test
       run: |
