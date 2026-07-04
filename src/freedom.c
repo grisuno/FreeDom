@@ -11,6 +11,7 @@
 #include "dom_debug.h"
 #include "freebug.h"
 #include "js_policy.h"
+#include "link_nav.h"
 #include "net_realm.h"
 #include "render_doc.h"
 #include "render_policy.h"
@@ -225,15 +226,26 @@ static void print_dom(const rd_doc *doc) {
  * a local file. Runs the page's JS when g_headless_js (so --dump-console can show
  * console output/errors). Returns EXIT_OK or EXIT_ERROR; on error no partial output. */
 /* tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page
- * XHR/fetch. https-only, realm-routed (fail-closed); no per-host allowlist here (headless
+ * XHR/fetch and external <script src>. ctx is the page's top URL (or NULL for a local
+ * file): the RAW url from the worker is resolved against it with ln_resolve, the same
+ * gate a click gets (https-only, no downgrade, no foreign scheme), so relative
+ * subresources work. Realm-routed (fail-closed); no per-host allowlist here (headless
  * is operator-driven -- enabling --js is the trust signal). The confined worker never
  * touches a socket; this runs in the trusted parent. */
 static int headless_fetch(void *ctx, const char *method, const char *url,
                           const char *body, size_t body_len,
                           int *st, char **ob, size_t *ol, char **oct) {
-    (void)ctx;
+    const char *base = (const char *)ctx;
+    ln_result ln;
     *st = 0; *ob = NULL; *ol = 0; *oct = NULL;
-    if (url == NULL || strncmp(url, "https://", 8) != 0) return -1; /* subresource: https only */
+    if (url == NULL) return -1;
+    if (base != NULL) {
+        if (ln_resolve(base, url, &ln) != LN_OK
+            || ln.action != LN_NAVIGATE || ln.kind != LN_TARGET_HTTPS) return -1;
+        url = ln.target;
+    } else if (strncmp(url, "https://", 8) != 0) {
+        return -1; /* no base to resolve against: absolute https only */
+    }
 
     sf_config cfg = sf_config_default();
     if (global_insecure) cfg.policy = SF_POLICY_PERMISSIVE;
@@ -260,7 +272,12 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     return 0;
 }
 
-static int render_page(const char *html, size_t len, const char *top_url) {
+/* out_nav (may be NULL): receives an owned copy of the JS-requested navigation
+ * target, if any. The tab layer already resolved and policy-gated it against the
+ * page's real URL (ln_resolve); the caller still drives it through the normal
+ * fetch path, re-applying the full network policy. */
+static int render_page(const char *html, size_t len, const char *top_url,
+                       char **out_nav) {
     tab *t = NULL;
     tab_status ts = tab_open(&t);
     if (ts != TAB_OK) {
@@ -268,9 +285,10 @@ static int render_page(const char *html, size_t len, const char *top_url) {
         return EXIT_ERROR;
     }
 
-    /* Page-JS network (XHR/fetch): in headless the operator's --js=on is the trust signal
-     * (the GUI gates this per host on allow.conf AND js.conf). */
-    tab_set_fetcher(t, headless_fetch, NULL);
+    /* Page-JS network (XHR/fetch + external <script src>): in headless the operator's
+     * --js=on is the trust signal (the GUI gates this per host on allow.conf AND
+     * js.conf). The page URL is the resolution base for relative subresources. */
+    tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
     tab_set_net_allowed(t, g_headless_js);
 
     tab_page page;
@@ -347,6 +365,11 @@ static int render_page(const char *html, size_t len, const char *top_url) {
     /* Developer console (Freebug): show what the page's JS logged and any error. */
     if (g_dump_console) print_console(&page.console);
 
+    if (out_nav != NULL) {
+        *out_nav = (page.nav_url != NULL && page.nav_url[0] != '\0')
+                 ? strdup(page.nav_url) : NULL;
+    }
+
     tab_page_free(&page);
     tab_close(t);
     return out_rc;
@@ -365,11 +388,16 @@ static const char *sf_reason(sf_status ss) {
     }
 }
 
-/* Fetches url with secure_fetch and renders the result. The response body is
- * consumed directly; no extra copy is made. */
-static int fetch_and_render(const char *url) {
+/* Anti-loop cap on JS-requested navigations followed headless (mirrors the GUI's
+ * JS_NAV_MAX): a hostile page cannot chain the renderer through endless hops. */
+#define HL_JS_NAV_MAX 10
+
+/* Fetches one url with secure_fetch and renders the result. The response body is
+ * consumed directly; no extra copy is made. out_nav as in render_page. */
+static int fetch_and_render_one(const char *url, char **out_nav) {
     sf_response resp;
     memset(&resp, 0, sizeof resp);
+    if (out_nav != NULL) *out_nav = NULL;
 
     sf_config cfg = sf_config_default();
     if (global_insecure) cfg.policy = SF_POLICY_PERMISSIVE;
@@ -399,8 +427,30 @@ static int fetch_and_render(const char *url) {
         return EXIT_ERROR;
     }
 
-    int rc = render_page((const char *)resp.body, resp.body_len, url);
+    int rc = render_page((const char *)resp.body, resp.body_len, url, out_nav);
     sf_response_free(&resp);
+    return rc;
+}
+
+/* Fetches and renders url, then follows any JS-requested navigation (location.href=
+ * / assign / replace) the same way the GUI does: each hop re-enters the normal fetch
+ * path, so the FULL policy re-applies, with a hard anti-loop cap. Without this, a
+ * page whose script immediately forwards elsewhere (e.g. a search engine's
+ * JS-capability interstitial) renders as an empty husk instead of its destination. */
+static int fetch_and_render(const char *url) {
+    char *cur = NULL;
+    int rc = EXIT_ERROR;
+    for (int hop = 0; hop <= HL_JS_NAV_MAX; ++hop) {
+        char *nav = NULL;
+        rc = fetch_and_render_one((cur != NULL) ? cur : url, g_headless_js ? &nav : NULL);
+        free(cur);
+        cur = NULL;
+        if (nav == NULL) break;
+        if (hop == HL_JS_NAV_MAX) { free(nav); break; } /* cap reached: keep last render */
+        fprintf(stderr, "freedom: following JS navigation to '%s'\n", nav);
+        cur = nav;
+    }
+    free(cur);
     return rc;
 }
 
@@ -416,8 +466,9 @@ static int run_headless(const char *target) {
         return EXIT_ERROR;
     }
 
-    /* A local file has no https origin; image decisions then fail closed. */
-    int rc = render_page(html, len, NULL);
+    /* A local file has no https origin; image decisions then fail closed, and a
+     * JS navigation request has no trusted base, so none is followed. */
+    int rc = render_page(html, len, NULL, NULL);
     free(html);
     return rc;
 }

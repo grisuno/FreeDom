@@ -1168,13 +1168,29 @@ static int form_for(const form_table *ft, const lxb_dom_node_t *n,
     return -1;
 }
 
+/* Nonzero if a descendant text node sits under a non-rendered element (a <style>
+ * or <script> nested in the collected subtree -- with run_js the parser keeps
+ * <script> nodes in the tree, so a flattened cell or a <button> label would
+ * otherwise paint raw CSS/JS source as content, as google.com's markup showed). */
+static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el) {
+    for (const lxb_dom_node_t *p = n->parent; p != NULL && p != el; p = p->parent) {
+        if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        lxb_tag_id_t t = node_tag(p);
+        if (t == LXB_TAG_SCRIPT || t == LXB_TAG_STYLE
+            || t == LXB_TAG_HEAD || t == LXB_TAG_TITLE) return 1;
+    }
+    return 0;
+}
+
 /* Concatenates the descendant text of el into an owned NUL-terminated string (the
- * value of a <textarea> / the label of a <button>). Never NULL on success. */
+ * value of a <textarea> / the label of a <button> / a flattened table cell),
+ * skipping text under non-rendered descendants. Never NULL on success. */
 static char *collect_text(const lxb_dom_node_t *el) {
     size_t cap = 0, len = 0;
     char *buf = NULL;
     for (lxb_dom_node_t *n = el->first_child; n != NULL; n = node_next(n, el)) {
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
+        if (under_unrendered(n, el)) continue;
         lxb_dom_text_t *txt = lxb_dom_interface_text(n);
         const char *raw = (const char *)txt->char_data.data.data;
         size_t rl = txt->char_data.data.length;

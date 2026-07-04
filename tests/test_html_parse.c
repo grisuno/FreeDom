@@ -160,15 +160,16 @@ static void test_event_handlers_kept_when_disabled(void **state) {
 /* --- per-script extraction (browsers run each <script> as its own program) --- */
 
 /* Two inline scripts come back as two SEPARATE entries (not concatenated), in
- * document order, each its own NUL-terminated buffer. An external src and a JSON
- * data block are excluded. This separation is what lets the worker isolate an
- * error in one script from the next. */
+ * document order, each its own NUL-terminated buffer; an external src script is a
+ * THIRD entry carrying its raw src (never fetched here). A JSON data block is
+ * excluded. This separation is what lets the worker isolate an error in one script
+ * from the next and interleave external execution in document order. */
 static void test_extract_script_list_separates(void **state) {
     (void)state;
     static const char H[] =
         "<html><body>"
         "<script>var a=1;</script>"
-        "<script src='https://x.example/app.js'></script>" /* external: excluded */
+        "<script src='https://x.example/app.js'></script>" /* external: listed w/ src */
         "<script type='application/ld+json'>{\"k\":1}</script>" /* data: excluded */
         "<script>var b=2;</script>"
         "</body></html>";
@@ -180,10 +181,41 @@ static void test_extract_script_list_separates(void **state) {
     size_t n = 0;
     hp_script *s = hp_extract_script_list(doc, &n);
     assert_non_null(s);
-    assert_int_equal((unsigned long)n, 2UL);            /* only the two inline ones */
+    assert_int_equal((unsigned long)n, 3UL);   /* two inline + the external, in order */
     assert_int_equal((unsigned long)s[0].len, strlen("var a=1;"));
     assert_string_equal(s[0].text, "var a=1;");          /* document order preserved */
-    assert_string_equal(s[1].text, "var b=2;");
+    assert_null(s[0].src);
+    assert_null(s[1].text);                              /* external: src only */
+    assert_string_equal(s[1].src, "https://x.example/app.js");
+    assert_string_equal(s[2].text, "var b=2;");
+    assert_null(s[2].src);
+    hp_free_scripts(s, n);
+    hp_document_free(doc);
+}
+
+/* External-script semantics (Hito 24 EXT): a <script src> with an inline body lists
+ * ONLY the src (browser rule: when src is present the content is ignored); module
+ * scripts (type containing "module") are excluded entirely, inline or external
+ * (import/export cannot run as a classic script -- fail closed). */
+static void test_extract_script_list_external_semantics(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body>"
+        "<script src='https://cdn.example/a.js'>var ignored=1;</script>"
+        "<script type='module' src='https://cdn.example/m.js'></script>"
+        "<script type='module'>import x from 'y';</script>"
+        "</body></html>";
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+
+    size_t n = 0;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 1UL);   /* only the classic external survives */
+    assert_null(s[0].text);                    /* inline body ignored when src set */
+    assert_string_equal(s[0].src, "https://cdn.example/a.js");
     hp_free_scripts(s, n);
     hp_document_free(doc);
 }
@@ -266,6 +298,7 @@ int main(void) {
         cmocka_unit_test(test_scripts_stripped_by_default),
         cmocka_unit_test(test_scripts_kept_when_disabled),
         cmocka_unit_test(test_extract_script_list_separates),
+        cmocka_unit_test(test_extract_script_list_external_semantics),
         cmocka_unit_test(test_extract_script_list_empty),
         cmocka_unit_test(test_extract_script_list_caps),
         cmocka_unit_test(test_event_handlers_stripped_by_default),

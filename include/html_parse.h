@@ -40,7 +40,7 @@ typedef struct hp_document hp_document;
 
 #define HP_DEFAULT_MAX_BYTES ((size_t)(32u * 1024u * 1024u))
 
-/* Upper bound on the number of inline <script> elements returned by
+/* Upper bound on the number of executable <script> elements returned by
  * hp_extract_script_list. A real page has a handful; the cap is a fail-closed,
  * anti-DoS limit so a hostile document (up to HP_DEFAULT_MAX_BYTES of tiny
  * scripts) cannot force an unbounded eval loop. Scripts beyond the cap are
@@ -69,27 +69,36 @@ size_t hp_event_handler_count(const hp_document *doc);
 char *hp_extract_text(const hp_document *doc, size_t *out_len);
 char *hp_get_title(const hp_document *doc, size_t *out_len);
 
-/* One executable inline <script>'s source: a NUL-terminated buffer of `len` bytes
- * (the NUL is not counted in len). Owned by the hp_script array it belongs to. */
+/* One executable <script>. Inline: text is a NUL-terminated buffer of `len` bytes
+ * (the NUL is not counted in len) and src == NULL. External: src is the RAW,
+ * unresolved value of the src attribute (hostile input; the parser never fetches)
+ * and text == NULL. Both buffers are owned by the hp_script array. */
 typedef struct hp_script {
     char  *text;
     size_t len;
+    char  *src;
 } hp_script;
 
-/* Returns the executable inline <script> elements (external src and JSON data
- * blocks excluded), in document order, as an owned array; *out_count receives the
- * number found. Each script is a SEPARATE program: the caller must evaluate each
- * one independently, so an uncaught exception in one aborts only that script and
- * not the rest -- exactly as a browser runs <script> elements. (Concatenating them
- * into a single eval would let the first failing script kill all the others.)
+/* Returns the executable <script> elements in document order, as an owned array;
+ * *out_count receives the number found. Inline scripts carry text; external ones
+ * carry their raw src (a <script src> with an inline body lists ONLY the src --
+ * browser rule: when src is present the content is ignored). JSON data blocks
+ * (type containing "json") and modules (type containing "module") are excluded,
+ * fail-closed: import/export cannot run as a classic script. Each entry is a
+ * SEPARATE program: the caller must evaluate each one independently, so an
+ * uncaught exception in one aborts only that script and not the rest -- exactly
+ * as a browser runs <script> elements. (Concatenating them into a single eval
+ * would let the first failing script kill all the others.) Whether an external
+ * script's bytes may be fetched at all is the tab worker's decision, gated by the
+ * trusted parent's policy (spec/tab.md, Hito 24 EXT) -- never this parser's.
  * Only meaningful when the document was parsed with strip_scripts == 0. At most
  * HP_MAX_SCRIPTS scripts are returned (extras are dropped, fail-closed). Returns
- * NULL (with *out_count == 0) when there are no inline scripts or on allocation
- * failure. Release with hp_free_scripts. */
+ * NULL (with *out_count == 0) when there are no executable scripts or on
+ * allocation failure. Release with hp_free_scripts. */
 hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count);
 
-/* Releases an array returned by hp_extract_script_list (and each script's text).
- * Idempotent on NULL. */
+/* Releases an array returned by hp_extract_script_list (each text/src and the
+ * array). Idempotent on NULL. */
 void hp_free_scripts(hp_script *scripts, size_t count);
 
 /* Release a buffer returned by hp_extract_text / hp_get_title. */

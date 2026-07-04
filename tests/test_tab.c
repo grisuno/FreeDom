@@ -916,6 +916,161 @@ static void test_xhr_blocked_host_refused_by_parent(void **state) {
     tab_close(t);
 }
 
+/* --- external <script src> (Hito 24 EXT): parent-gated fetch + document order --- */
+
+/* Stub parent fetcher for external scripts: serves JS bodies by URL with a proper
+ * JavaScript Content-Type; refuses "blocked.example" (standing in for the parent's
+ * policy) and serves one URL with a NON-JS Content-Type (type-confusion guard). */
+static int stub_script_fetch(void *ctx, const char *method, const char *url,
+                             const char *body, size_t body_len,
+                             int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)body; (void)body_len;
+    if (url == NULL || strstr(url, "blocked.example") != NULL) return -1;
+    if (method == NULL || strcmp(method, "GET") != 0) return -1;
+    const char *js = NULL, *ct = "text/javascript; charset=UTF-8";
+    if (strstr(url, "set-title.js") != NULL) {
+        js = "document.title='EXT-RAN';";
+    } else if (strstr(url, "mid.js") != NULL) {
+        js = "mark+='B';";
+    } else if (strstr(url, "html-not-js") != NULL) {
+        js = "document.title='EVIL';";
+        ct = "text/html";                       /* wrong type: must NOT execute */
+    } else {
+        return -1;
+    }
+    *ob = strdup(js); *ol = strlen(js);
+    *oct = strdup(ct);
+    if (*ob == NULL || *oct == NULL) { free(*ob); free(*oct); return -1; }
+    *st = 200;
+    return 0;
+}
+
+#define EXT_PAGE(SRC) \
+    "<!DOCTYPE html><html><head><title>x</title></head><body>" \
+    "<script src='" SRC "'></script></body></html>"
+
+/* With net granted (allow.conf AND js.conf) an external script's bytes come from the
+ * trusted parent and execute: its DOM mutation is visible in the page result. */
+static void test_external_script_executes_when_net_allowed(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_script_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] = EXT_PAGE("https://cdn.test/set-title.js");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "EXT-RAN");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* External scripts execute IN DOCUMENT ORDER interleaved with inline ones: a later
+ * inline script sees the external script's effects (exactly as a browser). */
+static void test_external_script_document_order(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_script_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>x</title></head><body>"
+        "<script>var mark='A';</script>"
+        "<script src='https://cdn.test/mid.js'></script>"
+        "<script>document.title=mark+'C';</script>"
+        "</body></html>";
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "ABC");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Without the network grant an external script is SKIPPED (never fetched, never run):
+ * the page still loads and a Freebug warn entry records the skip. The "external src
+ * never runs" doctrine still holds for every host not in BOTH lists. */
+static void test_external_script_skipped_without_net(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_script_fetch, NULL);
+    /* net_allowed left at its default (0) */
+    static const char H[] = EXT_PAGE("https://cdn.test/set-title.js");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "x");          /* external script never ran */
+    int warned = 0;
+    for (size_t i = 0; i < fb_buffer_count(&p.console); i++) {
+        const fb_entry *e = fb_buffer_at(&p.console, i);
+        if (e != NULL && e->level == FB_WARN && strstr(e->text, "external script") != NULL)
+            warned = 1;
+    }
+    assert_int_not_equal(warned, 0);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* A response that is not JavaScript (e.g. an HTML error page) is NOT executed
+ * (type-confusion guard, fail closed); the page still loads. */
+static void test_external_script_bad_ctype_not_executed(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_script_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] = EXT_PAGE("https://cdn.test/html-not-js");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "x");          /* body refused: never evaluated */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Even with net granted, the trusted parent's refusal (blocked host) means the script
+ * never runs -- the gate is the PARENT's policy, not the page's. */
+static void test_external_script_blocked_host_refused(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_script_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] = EXT_PAGE("https://blocked.example/x.js");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "x");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* --- Date/timezone: normalized to UTC inside the worker (anti-fp + no openat) --- */
+
+/* Page JS calling Date.getTimezoneOffset() must (a) not kill the worker -- with TZ
+ * unset, glibc's lazy localtime_r openat()s /etc/localtime, which seccomp rightly
+ * kills -- and (b) always see UTC (offset 0): the host timezone is a fingerprinting
+ * vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */
+static void test_js_date_timezone_is_utc_and_survives(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>x</title></head><body>"
+        "<script>document.title = 'tz:' + new Date(0).getTimezoneOffset()"
+        " + ':' + new Date(1e12).getTimezoneOffset();</script>"
+        "</body></html>";
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "tz:0:0");    /* UTC, and the worker lived to say so */
+    tab_page_free(&p);
+    assert_int_not_equal(tab_alive(t), 0);
+    tab_close(t);
+}
+
 /* --- eval: a JS exception is TAB_OK with is_exception set, not a worker error --- */
 
 static void test_eval_exception(void **state) {
@@ -1180,6 +1335,12 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_xhr_works_when_net_allowed),
         cmocka_unit_test(test_xhr_undefined_when_net_not_allowed),
         cmocka_unit_test(test_xhr_blocked_host_refused_by_parent),
+        cmocka_unit_test(test_external_script_executes_when_net_allowed),
+        cmocka_unit_test(test_external_script_document_order),
+        cmocka_unit_test(test_external_script_skipped_without_net),
+        cmocka_unit_test(test_external_script_bad_ctype_not_executed),
+        cmocka_unit_test(test_external_script_blocked_host_refused),
+        cmocka_unit_test(test_js_date_timezone_is_utc_and_survives),
         cmocka_unit_test_setup_teardown(test_eval_exception, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_persistent_state, setup_loaded, teardown),
         cmocka_unit_test(test_reload_replaces_page),

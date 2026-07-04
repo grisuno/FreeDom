@@ -440,6 +440,26 @@ static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budge
     return budget_ms - (uint64_t)elapsed;
 }
 
+/* Content-Type gate for an external script's response (anti type-confusion, fail
+ * closed for real content types): accept a missing/empty type -- classic-script
+ * behaviour -- or one containing "javascript"/"ecmascript"; refuse anything else,
+ * so an HTML error page or a JSON body is never evaluated as script. */
+static int ctype_is_javascript(const char *ctype) {
+    if (ctype == NULL || ctype[0] == '\0') return 1;
+    return strcasestr(ctype, "javascript") != NULL
+        || strcasestr(ctype, "ecmascript") != NULL;
+}
+
+/* Freebug note about an external script that did not run (skipped or refused).
+ * The raw hostile src is bounded by the message buffer; freebug caps the entry. */
+static void log_external_skip(fb_buffer *log, const char *why, const char *src) {
+    char msg[512];
+    int m = snprintf(msg, sizeof msg, "external script %s: %s", why, src);
+    if (m < 0) return;
+    size_t ml = ((size_t)m < sizeof msg) ? (size_t)m : sizeof msg - 1;
+    (void)fb_buffer_push(log, FB_WARN, msg, ml);
+}
+
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
                               const char *page_url) {
@@ -475,18 +495,56 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             uint64_t rem = budget_remaining_ms(&t0, JS_DEFAULT_TIME_BUDGET);
             if (rem == 0) break; /* page JS budget spent; stop running scripts */
             js_set_time_budget(cs->js, rem);
+            const char *code = scripts[i].text;
+            size_t code_len  = scripts[i].len;
+            char  *ext_body  = NULL;
+            /* Name each script so an uncaught error in it reports a meaningful
+             * "file": inline ones by document position, external ones by src. */
+            char sname[192];
+            if (scripts[i].src != NULL) {
+                /* External <script src> (Hito 24 EXT): runs ONLY for a doubly-trusted
+                 * host (allow.conf AND js.conf => net). The confined worker has no
+                 * socket; the bytes come from the TRUSTED parent via the same
+                 * TAG_SUBREQ channel as XHR, under the full network policy. Every
+                 * failure below is fail-closed: the script simply does not run and
+                 * the load continues. */
+                if (!net) {
+                    log_external_skip(&cs->log,
+                        "skipped (host not granted network)", scripts[i].src);
+                    continue;
+                }
+                int st = 0;
+                size_t blen = 0;
+                char *ctype = NULL;
+                int fr = child_fetch(cs, "GET", scripts[i].src, NULL, 0,
+                                     &st, &ext_body, &blen, &ctype);
+                if (fr != 0 || st < 200 || st >= 300 || !ctype_is_javascript(ctype)) {
+                    char why[96];
+                    if (fr != 0)
+                        snprintf(why, sizeof why, "blocked or failed");
+                    else
+                        snprintf(why, sizeof why, "refused (status %d, type %s)",
+                                 st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
+                    log_external_skip(&cs->log, why, scripts[i].src);
+                    free(ext_body);
+                    free(ctype);
+                    continue;
+                }
+                free(ctype);
+                code = ext_body;
+                code_len = blen;
+                snprintf(sname, sizeof sname, "%s", scripts[i].src);
+            } else {
+                snprintf(sname, sizeof sname, "inline #%zu", i + 1);
+            }
             js_result r;
             memset(&r, 0, sizeof r);
-            /* Name each inline <script> so an uncaught error in it reports a
-             * meaningful "file" (the page itself is shown in the URL bar). */
-            char sname[32];
-            snprintf(sname, sizeof sname, "inline #%zu", i + 1);
-            js_status es = js_eval_named(cs->js, scripts[i].text, scripts[i].len,
-                                         sname, &r);
+            js_status es = js_eval_named(cs->js, code, code_len, sname, &r);
             if (es != JS_OK && r.is_exception && r.value != NULL)
                 fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
                                    r.file, r.line, r.col);
             js_result_free(&r);
+            free(ext_body);
             /* Drain promise microtasks queued by this script (e.g. fetch().then),
              * so continuations run before the next script / view derivation. */
             (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
@@ -662,6 +720,18 @@ static void tab_worker_run(int rfd, int wfd) {
     cs.session_key = gen_session_key();
     cs.rfd = rfd; cs.wfd = wfd;  /* child_fetch proxies subresource requests over these */
 
+    /* Normalize the timezone to UTC before confinement, for two independent
+     * reasons. Anti-fingerprinting (Zero Knowledge): the host timezone is a
+     * fingerprinting vector, and QuickJS's Date reads it via localtime_r -- every
+     * page's JS must see the same UTC clock. Sandbox correctness: with TZ unset,
+     * glibc's first localtime_r lazily openat()s /etc/localtime, and openat is
+     * (rightly) not on the seccomp allowlist -- page JS calling
+     * Date.getTimezoneOffset() got the worker SIGSYS-killed. "UTC0" is a pure
+     * POSIX TZ spec glibc parses without touching the filesystem; the eager
+     * tzset() caches it while syscalls are still unrestricted. */
+    setenv("TZ", "UTC0", 1);
+    tzset();
+
     /* Confine before any content. Namespace isolation and Landlock are best-effort
      * defense in depth (seccomp already excludes open/socket/exec); seccomp is
      * mandatory: if it cannot be installed, report not-confined and exit (fail
@@ -794,7 +864,15 @@ static void tab_refresh_alive(tab *t) {
     if (t == NULL || t->reaped || t->pid <= 0) return;
     int st;
     pid_t r = waitpid(t->pid, &st, WNOHANG);
-    if (r == t->pid)                   { t->alive = 0; t->reaped = 1; }
+    if (r == t->pid) {
+        if (getenv("FREEDOM_DEBUG_WORKER") != NULL) {
+            if (WIFSIGNALED(st))
+                fprintf(stderr, "[worker] killed by signal %d\n", WTERMSIG(st));
+            else if (WIFEXITED(st))
+                fprintf(stderr, "[worker] exited %d\n", WEXITSTATUS(st));
+        }
+        t->alive = 0; t->reaped = 1;
+    }
     else if (r < 0 && errno == ECHILD) { t->alive = 0; t->reaped = 1; }
     /* r == 0: still running, liveness unchanged. */
 }

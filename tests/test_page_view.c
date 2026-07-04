@@ -361,6 +361,37 @@ static void test_build_table_flattens_cell(void **state) {
  * INNER table), instead of the outer cell flattening the whole subtree into one giant
  * run. This is the Hacker News case (the story list is a <table> nested inside a <td>
  * of the outer page table). */
+/* A collected subtree (button label / flattened table cell) must NOT paint the
+ * source of a nested <style> or <script> as content. With run_js the parser keeps
+ * <script> nodes in the tree (strip_scripts=0), so google.com's markup -- style
+ * elements inside buttons, scripts inside table cells -- leaked raw CSS/JS text
+ * into labels and cells before this guard. */
+static void test_build_collected_text_skips_style_and_script(void **state) {
+    (void)state;
+    static const char H[] =
+        "<body>"
+        "<button><style>.x{color:red}</style>Press<span> me</span></button>"
+        "<table><tr><td><script>var leak=1;</script>Cell text</td></tr></table>"
+        "</body>";
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0; /* live-JS parse mode: scripts stay in the tree */
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(H, sizeof H - 1, &c, &doc), HP_OK);
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_ex(doc, 1, &v), PV_OK);
+
+    const pv_run *btn = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i)
+        if (pv_at(v, i)->kind == PV_INPUT) btn = pv_at(v, i);
+    assert_non_null(btn);
+    assert_string_equal(btn->text, "Press me");     /* no .x{color:red} in the label */
+    assert_non_null(find_text(v, "Cell text"));     /* no var leak=1; in the cell */
+    assert_null(find_text(v, "var leak=1; Cell text"));
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_nested_table_not_flattened(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -1536,6 +1567,7 @@ int main(void) {
         cmocka_unit_test(test_build_ordered_and_nested_list),
         cmocka_unit_test(test_build_table_grid),
         cmocka_unit_test(test_build_table_flattens_cell),
+        cmocka_unit_test(test_build_collected_text_skips_style_and_script),
         cmocka_unit_test(test_build_nested_table_not_flattened),
         cmocka_unit_test(test_build_link_with_href),
         cmocka_unit_test(test_build_block_break_between_paragraphs),

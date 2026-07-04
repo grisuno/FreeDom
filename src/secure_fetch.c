@@ -312,22 +312,31 @@ static void copy_bounded(char *dst, size_t dstsz, const char *src) {
 
 /* Helper: Extracts the name of the TLS group actually negotiated from OpenSSL */
 static const char *get_negotiated_group_name(SSL *ssl) {
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x30200000L
+    /* OpenSSL 3.2+: canonical name of the negotiated group. This is the ONLY
+     * API that can name the provider-based PQ hybrids: X25519MLKEM768 has no
+     * NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the
+     * NID path below reports every PQ-hybrid handshake as unnamed and the
+     * policy check rejects it -- exactly the sites doing TLS right. */
+    const char *name = SSL_get0_group_name(ssl);
+    if (name != NULL && name[0] != '\0') return name;
+#endif
     int nid = 0;
-    
+
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
     /* OpenSSL 3.0+ has a dedicated API for obtaining the negotiated group*/
     nid = SSL_get_negotiated_group(ssl);
 #else
     /* OpenSSL 1.1.1: SSL_get_shared_group(ssl, 0) returns the NID of the
-     * first shared group, which corresponds to the negotiated key exchange 
+     * first shared group, which corresponds to the negotiated key exchange
      * group (for both TLS 1.2 ECDHE and TLS 1.3). */
     nid = SSL_get_shared_group(ssl, 0);
 #endif
-    
+
     if (nid == 0) {
         return NULL; /* There is no negotiated group (e.g., TLS 1.2 without PFS or failure) */
     }
-    
+
     /* OBJ_nid2sn returns the short name (e.g., "X25519", "prime256v1", "x25519") */
     return OBJ_nid2sn(nid);
 }

@@ -26,9 +26,16 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         hp_free(title);
 
         /* Per-script extraction over hostile markup: each script its own buffer,
-         * bounded by HP_MAX_SCRIPTS, freed as a unit. Must never crash/leak/UB. */
+         * bounded by HP_MAX_SCRIPTS, freed as a unit. Must never crash/leak/UB.
+         * Invariant (Hito 24 EXT): every entry is EITHER inline (text set, src
+         * NULL) or external (src set, text NULL) -- never both, never neither. */
         size_t nscripts = 0;
         hp_script *scripts = hp_extract_script_list(doc, &nscripts);
+        if (nscripts > HP_MAX_SCRIPTS) __builtin_trap();
+        for (size_t i = 0; i < nscripts; i++) {
+            if ((scripts[i].text != NULL) == (scripts[i].src != NULL)) __builtin_trap();
+            if (scripts[i].text == NULL && scripts[i].len != 0) __builtin_trap();
+        }
         hp_free_scripts(scripts, nscripts);
 
         (void)hp_element_count(doc);

@@ -79,29 +79,53 @@ static void strip_scripts(lxb_html_document_t *document) {
     free(list);
 }
 
-/* Nonzero if the script element should run: inline (no src -- we never fetch
- * external scripts) and not a data block (type containing "json"). */
-static int script_is_executable(const lxb_dom_node_t *n) {
-    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
-    size_t len = 0;
-    if (lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &len) != NULL)
-        return 0; /* external script: not fetched, not executed */
-    const lxb_char_t *type =
-        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"type", 4, &len);
-    if (type != NULL && len > 0) {
-        for (size_t i = 0; i + 3 < len + 1 && i + 4 <= len; ++i) {
-            if ((type[i] | 0x20) == 'j' && (type[i + 1] | 0x20) == 's' &&
-                (type[i + 2] | 0x20) == 'o' && (type[i + 3] | 0x20) == 'n')
-                return 0; /* JSON data block (e.g. application/ld+json) */
-        }
+/* Case-insensitive (ASCII) substring test over a length-delimited attribute value.
+ * needle must be lowercase letters. */
+static int mem_contains_ci(const lxb_char_t *hay, size_t hlen, const char *needle) {
+    size_t nlen = strlen(needle);
+    if (hay == NULL || nlen == 0 || hlen < nlen) return 0;
+    for (size_t i = 0; i + nlen <= hlen; ++i) {
+        size_t j = 0;
+        while (j < nlen && (char)(hay[i + j] | 0x20) == needle[j]) j++;
+        if (j == nlen) return 1;
     }
-    return 1;
+    return 0;
 }
 
-/* Collects each executable inline <script> as its own owned, NUL-terminated buffer,
- * in document order. Browsers run each <script> as a separate program, so the worker
- * evaluates them one by one: an uncaught exception in one script must not abort the
- * others (concatenating into a single eval would let the first failure kill them all).
+/* How one <script> element executes. */
+enum { SCRIPT_SKIP = 0, SCRIPT_INLINE = 1, SCRIPT_EXTERNAL = 2 };
+
+/* Classifies a <script>: data blocks (type containing "json") and modules (type
+ * containing "module") never run as a classic program (fail closed); a src
+ * attribute makes it external (its inline body, if any, is ignored -- browser
+ * rule); otherwise it runs from its inline source. The parser never fetches:
+ * external scripts are only REPORTED with their raw src. */
+static int script_classify(const lxb_dom_node_t *n,
+                           const lxb_char_t **src, size_t *src_len) {
+    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
+    size_t len = 0;
+    const lxb_char_t *type =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"type", 4, &len);
+    if (type != NULL && len > 0
+        && (mem_contains_ci(type, len, "json") || mem_contains_ci(type, len, "module")))
+        return SCRIPT_SKIP;
+    size_t slen = 0;
+    const lxb_char_t *s =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &slen);
+    if (s != NULL) {
+        if (slen == 0) return SCRIPT_SKIP; /* src="" names no resource */
+        *src = s;
+        *src_len = slen;
+        return SCRIPT_EXTERNAL;
+    }
+    return SCRIPT_INLINE;
+}
+
+/* Collects each executable <script> as its own entry, in document order: inline
+ * source for classic inline scripts, the raw src attribute for external ones.
+ * Browsers run each <script> as a separate program, so the worker evaluates them
+ * one by one: an uncaught exception in one script must not abort the others
+ * (concatenating into a single eval would let the first failure kill them all).
  * Bounded by HP_MAX_SCRIPTS (fail-closed anti-DoS). NULL with *out_count == 0 when
  * there are none or on allocation failure; release with hp_free_scripts. */
 hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
@@ -113,20 +137,35 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
     size_t count = 0, cap = 0;
     for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {
         if (count >= HP_MAX_SCRIPTS) break; /* fail closed: drop the excess */
-        if (!node_is_script(n) || !script_is_executable(n)) continue;
+        if (!node_is_script(n)) continue;
+        const lxb_char_t *sattr = NULL;
+        size_t slen = 0;
+        int cls = script_classify(n, &sattr, &slen);
+        if (cls == SCRIPT_SKIP) continue;
+        char  *text = NULL, *src = NULL;
         size_t tl = 0;
-        const lxb_char_t *t = lxb_dom_node_text_content(n, &tl);
-        if (t == NULL || tl == 0) continue;
-        char *text = dup_bytes(t, tl);
-        if (text == NULL) { hp_free_scripts(list, count); return NULL; }
+        if (cls == SCRIPT_INLINE) {
+            const lxb_char_t *t = lxb_dom_node_text_content(n, &tl);
+            if (t == NULL || tl == 0) continue;
+            text = dup_bytes(t, tl);
+            if (text == NULL) { hp_free_scripts(list, count); return NULL; }
+        } else {
+            src = dup_bytes(sattr, slen);
+            if (src == NULL) { hp_free_scripts(list, count); return NULL; }
+        }
         if (count == cap) {
             size_t ncap = cap ? cap * 2 : 8;
             hp_script *grown = (hp_script *)realloc(list, ncap * sizeof *grown);
-            if (grown == NULL) { free(text); hp_free_scripts(list, count); return NULL; }
+            if (grown == NULL) {
+                free(text); free(src);
+                hp_free_scripts(list, count);
+                return NULL;
+            }
             list = grown; cap = ncap;
         }
         list[count].text = text;
         list[count].len  = tl;
+        list[count].src  = src;
         count++;
     }
     if (count == 0) { free(list); return NULL; }
@@ -136,7 +175,10 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
 
 void hp_free_scripts(hp_script *scripts, size_t count) {
     if (scripts == NULL) return;
-    for (size_t i = 0; i < count; ++i) free(scripts[i].text);
+    for (size_t i = 0; i < count; ++i) {
+        free(scripts[i].text);
+        free(scripts[i].src);
+    }
     free(scripts);
 }
 

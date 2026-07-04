@@ -119,6 +119,25 @@ crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), c
   `ln_resolve(url_real, navreq)` y solo expone el destino resuelto en `tab_page.nav_url` si la política
   lo permite (Zero Trust). Las tramas de subrecurso solo aparecen en `OP_LOAD` (XHR vive solo en la
   ventana de scripts de la carga); `OP_EVAL`/`OP_DECODE_IMAGE` no llevan tags.
+- **Scripts externos `<script src>` (Hito 24 EXT):** con `run_js && net` el worker ejecuta también
+  los scripts **externos** de la página, **en orden de documento** intercalados con los inline
+  (`hp_extract_script_list` ahora los lista con su `src` crudo). El worker **no tiene red**: pide los
+  bytes por la **misma trama `TAG_SUBREQ`** (`GET`, url = el `src` crudo y hostil) y el padre
+  confiable la sirve **re-aplicando TODA la política** (resolución `ln_resolve` contra la URL real de
+  la página — un worker comprometido no cuela `file://`/downgrade —, hostblock/rastreadores,
+  `net_realm` fail-closed, TLS-PQ con fallbacks de navegabilidad). Gates del worker antes de evaluar
+  (todos fail-closed, el script simplemente **no corre** y la carga continúa):
+  (a) `net == 1` (host en **allow.conf Y js.conf** vía `tab_set_net_allowed`; sin red el script
+  externo se **salta** con una nota `FB_WARN` en la consola Freebug);
+  (b) status HTTP 2xx;
+  (c) Content-Type de JS (vacío/ausente, o que contenga `javascript`/`ecmascript` — un
+  `text/html`/`application/json` **no** se evalúa: anti-confusión de tipo);
+  (d) presupuesto de página compartido (`js_set_time_budget`) y caps `TAB_MAX_SUBREQ` (64) /
+  `TAB_MAX_SUBRESOURCE` (8 MiB), los mismos del XHR.
+  El script evaluado se **nombra por su `src`** (acotado) para que Freebug reporte
+  `url:line:col` en sus errores. Un fetch rechazado/fallido deja nota `FB_WARN` y sigue con el
+  próximo script. Esto **revierte, solo para hosts doblemente confiables**, la doctrina
+  "los `<script src>` externos nunca corren"; para cualquier otro host la doctrina sigue vigente.
 - **Respuesta de `OP_EVAL`:** `[ok: int32][is_exception: int32][value_len: size_t][value]`.
 - `ok == 0` señala fallo de nivel-worker (parseo/DOM/contexto fallido, o `eval` sin página
   cargada): el padre devuelve `TAB_ERR_RENDER` / `TAB_ERR_SCRIPT` sin texto fugado.

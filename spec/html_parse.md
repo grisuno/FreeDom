@@ -59,15 +59,23 @@ size_t hp_event_handler_count(const hp_document *doc);
 /* Buffers en propiedad; liberar con hp_free. *out_len excluye el NUL final. */
 char *hp_extract_text(const hp_document *doc, size_t *out_len);
 char *hp_get_title(const hp_document *doc, size_t *out_len);
-/* Lista de los <script> inline EJECUTABLES (excluye src externos y bloques
- * type=*json*), en orden de documento, cada uno como su propio buffer. El worker
- * evalúa CADA script por separado: en un navegador cada <script> es un programa
- * independiente, y una excepción no capturada en uno aborta SOLO ese script, no los
- * demás (concatenarlos en un único eval dejaba que el primer fallo matara a todos --
- * la causa raíz de "no carga nada" en paginas con mucho JS). Acotada por
- * HP_MAX_SCRIPTS (fail-closed, anti-DoS: el exceso se descarta, no se ejecuta).
- * NULL (y *out_count == 0) si no hay scripts inline o en fallo de asignacion. */
-typedef struct hp_script { char *text; size_t len; } hp_script;
+/* Lista de los <script> EJECUTABLES en orden de documento, cada uno como su propia
+ * entrada. Dos clases (Hito 24 EXT):
+ *   - inline:  text != NULL (fuente NUL-terminada), src == NULL.
+ *   - externo: src != NULL (el valor CRUDO del atributo src, hostil, sin resolver),
+ *              text == NULL. El parser NUNCA fetchea: quien ejecuta (el worker de tab)
+ *              decide si puede pedir los bytes al padre confiable bajo política.
+ * Se EXCLUYEN (fail-closed, no se ejecutan): bloques de datos (type con "json") y
+ * módulos (type con "module": import/export no son evaluables como script clásico).
+ * Un <script src> con cuerpo inline lista SOLO el src (semántica de navegador: si hay
+ * src, el contenido se ignora). El worker evalúa CADA entrada por separado: en un
+ * navegador cada <script> es un programa independiente, y una excepción no capturada
+ * en uno aborta SOLO ese script, no los demás (concatenarlos en un único eval dejaba
+ * que el primer fallo matara a todos -- la causa raíz de "no carga nada" en paginas
+ * con mucho JS). Acotada por HP_MAX_SCRIPTS (fail-closed, anti-DoS: el exceso se
+ * descarta, no se ejecuta). NULL (y *out_count == 0) si no hay scripts ejecutables o
+ * en fallo de asignacion. */
+typedef struct hp_script { char *text; size_t len; char *src; } hp_script;
 hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count);
 void hp_free_scripts(hp_script *scripts, size_t count);
 
@@ -103,13 +111,21 @@ void hp_document_free(hp_document *doc);
   `on*` en el árbol.
 - `hp_extract_text`: texto inerte del cuerpo (sin contenido de `<script>` si fue eliminado).
 - `hp_get_title`: contenido de `<title>` o cadena vacía.
-- `hp_extract_script_list`: devuelve un arreglo en propiedad con cada `<script>` inline
-  ejecutable como su propio `hp_script` (texto NUL-terminado + longitud), en orden de
-  documento; `*out_count` recibe el número. Solo significativo si se parseó con
-  `strip_scripts==0`. **Browser semantics:** el llamador evalúa cada script por separado,
-  así una excepción no capturada en uno **no** aborta los siguientes. Tope `HP_MAX_SCRIPTS`
-  (4096): los scripts extra se descartan (fail-closed). `NULL` con `*out_count==0` si no hay
-  o en OOM. Liberar con `hp_free_scripts` (libera cada `text` y el arreglo; idempotente en NULL).
+- `hp_extract_script_list`: devuelve un arreglo en propiedad con cada `<script>`
+  ejecutable como su propio `hp_script`, en orden de documento; `*out_count` recibe el
+  número. Un script **inline** lleva `text` (NUL-terminado) + `len` y `src == NULL`; un
+  script **externo** lleva `src` (el valor crudo del atributo, hostil, sin resolver ni
+  fetchear) y `text == NULL`. Un `<script src>` con cuerpo inline lista **solo** el `src`
+  (si hay `src`, el contenido se ignora — semántica de navegador). Se excluyen los bloques
+  de datos (`type` que contiene `json`) y los **módulos** (`type` que contiene `module`),
+  y los inline vacíos. Solo significativo si se parseó con `strip_scripts==0`.
+  **Browser semantics:** el llamador evalúa cada script por separado, así una excepción no
+  capturada en uno **no** aborta los siguientes. Tope `HP_MAX_SCRIPTS` (4096): los scripts
+  extra se descartan (fail-closed). `NULL` con `*out_count==0` si no hay o en OOM. Liberar
+  con `hp_free_scripts` (libera cada `text`/`src` y el arreglo; idempotente en NULL).
+  **El parser jamás abre la red:** exponer `src` es solo transporte de un atributo; la
+  decisión de buscar esos bytes vive en el worker de `tab` + el padre confiable
+  (`spec/tab.md` §2, Hito 24 EXT).
 
 ## 7. Matriz de pruebas
 
