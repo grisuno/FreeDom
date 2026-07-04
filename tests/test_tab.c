@@ -1047,6 +1047,166 @@ static void test_external_script_blocked_host_refused(void **state) {
     tab_close(t);
 }
 
+/* --- external stylesheets (Hito 27): parent-gated, worker never touches a socket --- */
+
+/* Observed subresource calls, reset per test: proves "no grant => zero fetches". */
+static int g_css_fetch_calls;
+
+/* Stub parent fetcher for stylesheets: serves CSS bodies by URL with a text/css
+ * Content-Type; refuses "blocked.example" (standing in for the parent's policy) and
+ * serves one URL with a NON-CSS Content-Type (type-confusion guard). */
+static int stub_css_fetch(void *ctx, const char *method, const char *url,
+                          const char *body, size_t body_len,
+                          int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)body; (void)body_len;
+    g_css_fetch_calls++;
+    if (url == NULL || strstr(url, "blocked.example") != NULL) return -1;
+    if (method == NULL || strcmp(method, "GET") != 0) return -1;
+    const char *css = "p{text-align:center}", *ct = "text/css";
+    if (strstr(url, "html-not-css") != NULL) ct = "text/html"; /* must NOT parse */
+    else if (strstr(url, "center.css") == NULL) return -1;
+    *ob = strdup(css); *ol = strlen(css);
+    *oct = strdup(ct);
+    if (*ob == NULL || *oct == NULL) { free(*ob); free(*oct); return -1; }
+    *st = 200;
+    return 0;
+}
+
+#define CSS_PAGE(HREF) \
+    "<!DOCTYPE html><html><head><title>x</title>" \
+    "<link rel='stylesheet' href='" HREF "'></head>" \
+    "<body><p>styled</p></body></html>"
+
+static const pv_run *view_find_text(const pv_view *v, const char *needle) {
+    if (v == NULL) return NULL;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strstr(r->text, needle) != NULL) return r;
+    }
+    return NULL;
+}
+
+/* With the css grant, the <link rel=stylesheet> bytes come from the trusted parent
+ * and feed the author-CSS cascade -- no JS required (run_js == 0). */
+static void test_external_css_applied_when_allowed(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_css_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    g_css_fetch_calls = 0;
+    static const char H[] = CSS_PAGE("https://cdn.test/center.css");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "styled");
+    assert_non_null(r);
+    assert_int_equal(r->text_align, CSS_ALIGN_CENTER);
+    assert_int_equal(g_css_fetch_calls, 1);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Default (no grant): zero subresource requests and no external styling --
+ * Privacy by Default holds, byte-identical to the pre-Hito-27 view. */
+static void test_external_css_skipped_without_grant(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_css_fetch, NULL);
+    g_css_fetch_calls = 0;
+    static const char H[] = CSS_PAGE("https://cdn.test/center.css");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "styled");
+    assert_non_null(r);
+    assert_int_equal(r->text_align, CSS_ALIGN_UNSET);
+    assert_int_equal(g_css_fetch_calls, 0);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* A non-CSS Content-Type (an HTML 404 page, a script) is never parsed as a sheet
+ * (anti type-confusion, fail closed); the load continues unstyled. */
+static void test_external_css_bad_ctype_not_parsed(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_css_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    static const char H[] = CSS_PAGE("https://cdn.test/html-not-css");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "styled");
+    assert_non_null(r);
+    assert_int_equal(r->text_align, CSS_ALIGN_UNSET);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* The parent's policy refusal (blocked host) degrades to "no sheet", never a
+ * failed load: presentation is fail-open like hostblock, the page stays usable. */
+static void test_external_css_blocked_host_refused(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_css_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    static const char H[] = CSS_PAGE("https://blocked.example/e.css");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "styled");
+    assert_non_null(r);
+    assert_int_equal(r->text_align, CSS_ALIGN_UNSET);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* The fetched sheet PERSISTS in the worker: a click re-derives the view (OP_CLICK)
+ * and the styling survives without a re-fetch. */
+static void test_external_css_survives_click_rederive(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_css_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    g_css_fetch_calls = 0;
+    static const char H[] = CSS_PAGE("https://cdn.test/center.css");
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "styled");
+    assert_non_null(r);
+    dom_node_id nid = r->node_id;
+    tab_page_free(&p);
+
+    tab_page c;
+    assert_int_equal(tab_click(t, nid, &c), TAB_OK);
+    const pv_run *rc = view_find_text(c.view, "styled");
+    assert_non_null(rc);
+    assert_int_equal(rc->text_align, CSS_ALIGN_CENTER); /* no re-fetch needed */
+    assert_int_equal(g_css_fetch_calls, 1);             /* still just the load's fetch */
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* Pure parent-side subresource gate (Zero Trust: the parent decides from ITS flags,
+ * never the worker's): net grants any well-formed method, css-only grants exactly
+ * "GET", nothing granted (or a malformed method) is refused. */
+static void test_subreq_permitted_pure(void **state) {
+    (void)state;
+    assert_true(tab_subreq_permitted(1, 0, "GET"));
+    assert_true(tab_subreq_permitted(1, 0, "POST"));
+    assert_true(tab_subreq_permitted(1, 1, "POST"));
+    assert_true(tab_subreq_permitted(0, 1, "GET"));
+    assert_false(tab_subreq_permitted(0, 1, "POST"));
+    assert_false(tab_subreq_permitted(0, 1, "get"));  /* exact token only: fail closed */
+    assert_false(tab_subreq_permitted(0, 1, "GET "));
+    assert_false(tab_subreq_permitted(0, 0, "GET"));
+    assert_false(tab_subreq_permitted(0, 0, "POST"));
+    assert_false(tab_subreq_permitted(1, 1, NULL));   /* malformed: always refused */
+    assert_false(tab_subreq_permitted(1, 1, ""));
+    assert_false(tab_subreq_permitted(0, 1, NULL));
+}
+
 /* --- Date/timezone: normalized to UTC inside the worker (anti-fp + no openat) --- */
 
 /* Page JS calling Date.getTimezoneOffset() must (a) not kill the worker -- with TZ
@@ -1340,6 +1500,12 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_external_script_skipped_without_net),
         cmocka_unit_test(test_external_script_bad_ctype_not_executed),
         cmocka_unit_test(test_external_script_blocked_host_refused),
+        cmocka_unit_test(test_external_css_applied_when_allowed),
+        cmocka_unit_test(test_external_css_skipped_without_grant),
+        cmocka_unit_test(test_external_css_bad_ctype_not_parsed),
+        cmocka_unit_test(test_external_css_blocked_host_refused),
+        cmocka_unit_test(test_external_css_survives_click_rederive),
+        cmocka_unit_test(test_subreq_permitted_pure),
         cmocka_unit_test(test_js_date_timezone_is_utc_and_survives),
         cmocka_unit_test_setup_teardown(test_eval_exception, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_persistent_state, setup_loaded, teardown),

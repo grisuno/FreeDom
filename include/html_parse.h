@@ -101,6 +101,25 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count);
  * array). Idempotent on NULL. */
 void hp_free_scripts(hp_script *scripts, size_t count);
 
+/* Upper bound on external stylesheets reported per document (a real page uses a
+ * handful; extras are dropped, fail-closed anti-DoS). */
+#define HP_MAX_STYLESHEETS ((size_t)64)
+
+/* Returns the RAW href of every applicable <link rel=stylesheet>, in document
+ * order, as an owned array of NUL-terminated strings; *out_count receives the
+ * number found. The parser never fetches: whether those bytes may be requested at
+ * all is the tab worker's decision, gated by the trusted parent (spec/tab.md §8).
+ * Applicable means: rel contains the whitespace-separated token "stylesheet"
+ * (ASCII case-insensitive) and NOT the token "alternate"; href is present and
+ * non-empty; and media is absent/empty or mentions "screen"/"all" (anything else,
+ * e.g. print, is skipped -- fail closed). Returns NULL (with *out_count == 0)
+ * when there are none or on allocation failure. Release with
+ * hp_free_stylesheet_hrefs. */
+char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count);
+
+/* Releases an array returned by hp_extract_stylesheet_hrefs. Idempotent on NULL. */
+void hp_free_stylesheet_hrefs(char **hrefs, size_t count);
+
 /* Release a buffer returned by hp_extract_text / hp_get_title. */
 void hp_free(char *buf);
 

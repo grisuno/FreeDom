@@ -38,6 +38,17 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         }
         hp_free_scripts(scripts, nscripts);
 
+        /* Stylesheet-href extraction over hostile markup (Hito 27): bounded by
+         * HP_MAX_STYLESHEETS, every entry a non-empty owned string. */
+        size_t nsheets = 0;
+        char **hrefs = hp_extract_stylesheet_hrefs(doc, &nsheets);
+        if (nsheets > HP_MAX_STYLESHEETS) __builtin_trap();
+        if ((hrefs == NULL) != (nsheets == 0)) __builtin_trap();
+        for (size_t i = 0; i < nsheets; i++) {
+            if (hrefs[i] == NULL || hrefs[i][0] == '\0') __builtin_trap();
+        }
+        hp_free_stylesheet_hrefs(hrefs, nsheets);
+
         (void)hp_element_count(doc);
         (void)hp_script_count(doc);
         (void)hp_event_handler_count(doc);

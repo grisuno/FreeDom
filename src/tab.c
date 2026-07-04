@@ -116,6 +116,8 @@ typedef struct child_state {
     int             last_run_js;       /* render params from the last OP_LOAD */
     int             last_reader;
     int             last_prefers_dark;
+    char           *extern_css;        /* fetched <link rel=stylesheet> bodies (Hito 27); */
+    size_t          extern_css_len;    /* kept so click/re-derive restyles without refetch */
 } child_state;
 
 static void child_reset_page(child_state *cs) {
@@ -123,6 +125,9 @@ static void child_reset_page(child_state *cs) {
     if (cs->click != NULL) { jd_click_state_free(cs->click); cs->click = NULL; }
     if (cs->idx != NULL) { dom_free(cs->idx); cs->idx = NULL; }
     if (cs->doc != NULL) { hp_document_free(cs->doc); cs->doc = NULL; }
+    free(cs->extern_css);
+    cs->extern_css = NULL;
+    cs->extern_css_len = 0;
 }
 
 /* jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). An XHR/fetch
@@ -450,19 +455,81 @@ static int ctype_is_javascript(const char *ctype) {
         || strcasestr(ctype, "ecmascript") != NULL;
 }
 
-/* Freebug note about an external script that did not run (skipped or refused).
- * The raw hostile src is bounded by the message buffer; freebug caps the entry. */
-static void log_external_skip(fb_buffer *log, const char *why, const char *src) {
+/* Content-Type gate for an external stylesheet (Hito 27), same shape as the script
+ * gate: a missing/empty type is accepted, anything else must mention "css" -- an
+ * HTML 404 page or a script body is never parsed as a sheet. */
+static int ctype_is_css(const char *ctype) {
+    if (ctype == NULL || ctype[0] == '\0') return 1;
+    return strcasestr(ctype, "css") != NULL;
+}
+
+/* Freebug note about an external subresource (script/stylesheet) that was not
+ * used (skipped or refused). The raw hostile src is bounded by the message
+ * buffer; freebug caps the entry. */
+static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+                              const char *src) {
     char msg[512];
-    int m = snprintf(msg, sizeof msg, "external script %s: %s", why, src);
+    int m = snprintf(msg, sizeof msg, "external %s %s: %s", kind, why, src);
     if (m < 0) return;
     size_t ml = ((size_t)m < sizeof msg) ? (size_t)m : sizeof msg - 1;
     (void)fb_buffer_push(log, FB_WARN, msg, ml);
 }
 
+/* Cap on the accumulated external stylesheet text (same order as page_view's
+ * PV_MAX_STYLE_BYTES): a sheet that would overflow it is dropped WHOLE (fail
+ * closed, never truncated mid-rule). */
+#define TAB_MAX_EXTERN_CSS ((size_t)(1u << 20))
+
+/* Fetches the page's <link rel=stylesheet> sheets through the trusted parent
+ * (TAG_SUBREQ; the confined worker never touches a socket) and accumulates the
+ * accepted bodies into cs->extern_css, newline-separated, in document order.
+ * Every failure is fail-open for the PAGE (the sheet is skipped with a Freebug
+ * warn and the load continues) and fail-closed for the SHEET (status non-2xx,
+ * non-CSS Content-Type or over-budget bodies are never parsed). Caller opens the
+ * net window (cs->net_active). */
+static void child_fetch_stylesheets(child_state *cs) {
+    size_t nhrefs = 0;
+    char **hrefs = hp_extract_stylesheet_hrefs(cs->doc, &nhrefs);
+    for (size_t i = 0; i < nhrefs; i++) {
+        int st = 0;
+        char *body = NULL, *ctype = NULL;
+        size_t blen = 0;
+        int fr = child_fetch(cs, "GET", hrefs[i], NULL, 0, &st, &body, &blen, &ctype);
+        if (fr != 0 || st < 200 || st >= 300 || !ctype_is_css(ctype)) {
+            char why[96];
+            if (fr != 0)
+                snprintf(why, sizeof why, "blocked or failed");
+            else
+                snprintf(why, sizeof why, "refused (status %d, type %s)",
+                         st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
+            log_external_skip(&cs->log, "stylesheet", why, hrefs[i]);
+            free(body);
+            free(ctype);
+            continue;
+        }
+        free(ctype);
+        if (blen == 0 || blen > TAB_MAX_EXTERN_CSS
+            || cs->extern_css_len > TAB_MAX_EXTERN_CSS - blen - 1) {
+            if (blen != 0)
+                log_external_skip(&cs->log, "stylesheet", "dropped (over budget)", hrefs[i]);
+            free(body);
+            continue;
+        }
+        char *grown = (char *)realloc(cs->extern_css, cs->extern_css_len + blen + 2);
+        if (grown == NULL) { free(body); continue; }
+        cs->extern_css = grown;
+        memcpy(cs->extern_css + cs->extern_css_len, body, blen);
+        cs->extern_css_len += blen;
+        cs->extern_css[cs->extern_css_len++] = '\n';
+        cs->extern_css[cs->extern_css_len] = '\0';
+        free(body);
+    }
+    hp_free_stylesheet_hrefs(hrefs, nhrefs);
+}
+
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
-                              const char *page_url) {
+                              int css, const char *page_url) {
     cs->last_run_js = run_js;
     cs->last_reader = reader;
     cs->last_prefers_dark = prefers_dark;
@@ -474,6 +541,15 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     navbuf[0] = '\0';
     int32_t nav_replace = 0;
     int ok = (child_load(cs, html, len, run_js, net, page_url) == 0);
+    if (ok && css) {
+        /* External stylesheets (Hito 27) come before the scripts, as a browser
+         * fetches them. Independent of run_js: author CSS needs no JS. The parent
+         * gates each frame on ITS OWN css grant (GET only), so this window adds
+         * nothing a compromised worker could not already request. */
+        cs->net_active = 1;
+        child_fetch_stylesheets(cs);
+        cs->net_active = 0;
+    }
     if (ok && run_js) {
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
          * Closed again before deriving the view so a later REPL eval cannot use it. */
@@ -509,7 +585,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                  * failure below is fail-closed: the script simply does not run and
                  * the load continues. */
                 if (!net) {
-                    log_external_skip(&cs->log,
+                    log_external_skip(&cs->log, "script",
                         "skipped (host not granted network)", scripts[i].src);
                     continue;
                 }
@@ -525,7 +601,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                     else
                         snprintf(why, sizeof why, "refused (status %d, type %s)",
                                  st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
-                    log_external_skip(&cs->log, why, scripts[i].src);
+                    log_external_skip(&cs->log, "script", why, scripts[i].src);
                     free(ext_body);
                     free(ctype);
                     continue;
@@ -577,7 +653,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
         if (title == NULL || text == NULL
-            || pv_build_full(cs->doc, run_js, reader, prefers_dark, &view) != PV_OK) {
+            || pv_build_styled(cs->doc, run_js, reader, prefers_dark,
+                               cs->extern_css, cs->extern_css_len, &view) != PV_OK) {
             ok = 0;
             child_reset_page(cs);
         }
@@ -617,8 +694,9 @@ static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
         if (title != NULL && text != NULL
-            && pv_build_full(cs->doc, cs->last_run_js, cs->last_reader,
-                             cs->last_prefers_dark, &view) == PV_OK) {
+            && pv_build_styled(cs->doc, cs->last_run_js, cs->last_reader,
+                               cs->last_prefers_dark, cs->extern_css,
+                               cs->extern_css_len, &view) == PV_OK) {
             ok = 1;
         }
     }
@@ -761,17 +839,18 @@ static void tab_worker_run(int rfd, int wfd) {
             continue;
         }
 
-        /* OP_LOAD carries four leading flag bytes: run_js (JS policy), net (XHR/fetch
-         * allowed: host in allow.conf AND js.conf), reader (distraction-free) and dark
-         * (prefers-color-scheme), then the page URL (for the real location), before
-         * length+payload. */
-        uint8_t run_js = 0, net = 0, reader = 0, dark = 0;
+        /* OP_LOAD carries five leading flag bytes: run_js (JS policy), net (XHR/fetch
+         * allowed: host in allow.conf AND js.conf), reader (distraction-free), dark
+         * (prefers-color-scheme) and css (external stylesheet fetch, Hito 27), then
+         * the page URL (for the real location), before length+payload. */
+        uint8_t run_js = 0, net = 0, reader = 0, dark = 0, css = 0;
         char *url = NULL;
         if (op == OP_LOAD) {
             if (read_full(rfd, &run_js, 1) != 0
              || read_full(rfd, &net, 1) != 0
              || read_full(rfd, &reader, 1) != 0
-             || read_full(rfd, &dark, 1) != 0) break;
+             || read_full(rfd, &dark, 1) != 0
+             || read_full(rfd, &css, 1) != 0) break;
             size_t ulen = 0;
             if (read_full(rfd, &ulen, sizeof ulen) != 0) break;
             if (ulen > TAB_MAX_URL) break; /* defensive: URLs are small */
@@ -790,7 +869,7 @@ static void tab_worker_run(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); free(url); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, url);
+        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, url);
         else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
         else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
         free(buf);
@@ -845,8 +924,10 @@ struct tab {
     int   reaped;   /* the child has been waited on; do not kill/wait again */
     /* Subresource (XHR/fetch) support: net_allowed gates whether the worker may issue
      * subresource requests this load (set per page: host in allow.conf AND js.conf);
-     * fetcher does the policy-checked fetch in the trusted parent. */
+     * css_allowed grants GET-only stylesheet fetches (Hito 27, the author-styles
+     * opt-in); fetcher does the policy-checked fetch in the trusted parent. */
     int            net_allowed;
+    int            css_allowed;
     tab_fetch_fn   fetcher;
     void          *fetcher_ctx;
 };
@@ -1174,11 +1255,27 @@ void tab_set_net_allowed(tab *t, int allowed) {
     t->net_allowed = allowed ? 1 : 0;
 }
 
+void tab_set_css_allowed(tab *t, int allowed) {
+    if (t == NULL) return;
+    t->css_allowed = allowed ? 1 : 0;
+}
+
+int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method) {
+    if (method == NULL || method[0] == '\0') return 0; /* malformed: fail closed */
+    if (net_allowed) return 1;
+    if (css_allowed && strcmp(method, "GET") == 0) return 1;
+    return 0;
+}
+
 /* Handles one TAG_SUBREQ frame on the response pipe: reads the worker's subresource
- * request, runs the parent's policy-checked fetcher (or refuses if none), and writes the
- * reply [status:int32][body_len][body][ctype_len][ctype]. Returns 0 on success, -1 on a
- * pipe/protocol error (caller aborts the load). Bytes are capped (anti-amplification). */
-static int tab_serve_subreq(tab *t) {
+ * request, gates it on the grants the PARENT decided for this load (Zero Trust: a
+ * compromised worker forging frames gets a refusal, never a fetch -- net grants any
+ * method, css-only grants exactly GET), then runs the policy-checked fetcher (or
+ * refuses), and writes the reply [status:int32][body_len][body][ctype_len][ctype].
+ * A refused frame is still consumed and answered (status 0), so the protocol never
+ * desyncs. Returns 0 on success, -1 on a pipe/protocol error (caller aborts the
+ * load). Bytes are capped (anti-amplification). */
+static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
     size_t mlen = 0, ulen = 0, blen = 0;
     char *method = NULL, *url = NULL, *body = NULL;
     if (read_field(t->resp_fd, &method, &mlen) != 0) return -1;
@@ -1187,7 +1284,8 @@ static int tab_serve_subreq(tab *t) {
 
     int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
     int ok = 0;
-    if (t->fetcher != NULL && ulen != 0
+    if (tab_subreq_permitted(net_granted, css_granted, method)
+        && t->fetcher != NULL && ulen != 0
         && t->fetcher(t->fetcher_ctx, method, url, body, blen,
                       &status, &rbody, &rlen, &rctype) == 0) {
         ok = 1;
@@ -1229,17 +1327,20 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][url_len][url][len][html]
-     * (the flags and URL precede the payload so the html stays zero-copy). net grants
-     * XHR/fetch and is only meaningful with JS on. */
+    /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][url_len][url]
+     * [len][html] (the flags and URL precede the payload so the html stays
+     * zero-copy). net grants XHR/fetch and is only meaningful with JS on; css
+     * grants GET-only external stylesheet fetches (Hito 27). */
     uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0,
             nflag = (run_js && t->net_allowed) ? 1 : 0,
-            rflag = reader ? 1 : 0, dflag = prefers_dark ? 1 : 0;
+            rflag = reader ? 1 : 0, dflag = prefers_dark ? 1 : 0,
+            cflag = t->css_allowed ? 1 : 0;
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &jflag, 1) != 0
      || write_full(t->req_fd, &nflag, 1) != 0
      || write_full(t->req_fd, &rflag, 1) != 0
      || write_full(t->req_fd, &dflag, 1) != 0
+     || write_full(t->req_fd, &cflag, 1) != 0
      || write_full(t->req_fd, &ulen, sizeof ulen) != 0
      || (ulen != 0 && write_full(t->req_fd, page_url, ulen) != 0)
      || write_full(t->req_fd, &len, sizeof len) != 0
@@ -1256,7 +1357,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
         if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
         if (tag == TAG_RESULT) break;
         if (tag != TAG_SUBREQ) return io_failure(t);   /* desync */
-        if (tab_serve_subreq(t) != 0) return io_failure(t);
+        if (tab_serve_subreq(t, nflag, cflag) != 0) return io_failure(t);
     }
 
     int32_t ok = 0;

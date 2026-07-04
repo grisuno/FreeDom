@@ -1210,9 +1210,48 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `_bgcolor_attr_fallback`; los de tabla-de-datos/anidada siguen verdes) + `make test` (39 suites) /
   `make asan` (39, exit 0) limpios + fuzz `fuzz-pv` (18k execs, sin crash/leak/UB) + no-regresión de la
   tabla de datos de `rich.html` (sigue `grid cols=3` alineado). **Fuera de alcance (documentado):** los
-  **colores de clase** de HN (títulos negros, subtexto gris, links visitados) viven en su **CSS externo**
-  `news.css` (`<link rel=stylesheet>`), que Freedom **no fetchea** aún → los links salen en el azul por
-  defecto; `colspan`/`rowspan`. Ver `[[freedom-debug-dom]]`, `[[freedom-nav-tables-and-bgcolor]]`.
+  **colores de clase** de HN (títulos negros, subtexto gris) vivían en su **CSS externo** `news.css`
+  (`<link rel=stylesheet>`) — **cerrado por el Hito 27** (abajo): con Author styles ON la hoja se
+  fetchea bajo política y esos colores resuelven; `colspan`/`rowspan` sigue fuera. Ver
+  `[[freedom-debug-dom]]`, `[[freedom-nav-tables-and-bgcolor]]`.
+- **Hito 27 — Hojas de estilo externas (`<link rel=stylesheet>`) + gate de subrecursos del padre
+  (2026-07-04).** El gap #1 de "web moderna" (casi todo sitio real sirve su CSS por `<link>`; hasta
+  aquí solo se veían `<style>`/`style=`). Con **Author styles (CSS) ON** (GUI: `caps.css`, sin modo
+  reader; headless: `--author-css`), el worker confinado pide cada hoja aplicable por la **misma trama
+  `TAG_SUBREQ`** del Hito 26 — **jamás toca un socket** — y el **padre confiable re-aplica TODA la
+  política** (ln_resolve contra la URL de página, hostblock/rastreadores, `net_realm` fail-closed,
+  TLS-PQ) antes de servirla. Piezas: (a) **`html_parse`**: `hp_extract_stylesheet_hrefs` (+
+  `HP_MAX_STYLESHEETS` 64) reporta los `href` crudos en orden de documento — `rel` por **token**
+  case-insensitive (`alternate` excluido), `media` solo ausente/`screen`/`all` (fail-closed) — el
+  parser jamás fetchea. (b) **`tab`**: 5º byte de bandera `css` en OP_LOAD (`tab_set_css_allowed`,
+  independiente de `run_js`: el CSS no necesita JS); el worker fetchea ANTES de los scripts, gatea
+  status 2xx + **Content-Type de CSS** (vacío o conteniendo `css` — un 404 HTML jamás se parsea como
+  hoja; espejo de `ctype_is_javascript`), acumula acotado (`TAB_MAX_EXTERN_CSS` 1 MiB; hoja que no
+  cabe se descarta ENTERA, nunca truncada a media regla) y **persiste `extern_css` en `child_state`**
+  (un click/re-derivación restylea sin re-fetch); toda falla es fail-open para la página (nota
+  `FB_WARN` en Freebug, la carga sigue) y fail-closed para la hoja. (c) **`page_view`**:
+  `pv_build_styled` (extern_css antepuesto al texto de los `<style>` del documento → a igual
+  especificidad la página gana; total acotado por `PV_MAX_STYLE_BYTES`; `pv_build_full` = wrapper
+  NULL ⇒ byte-idéntico). (d) **Boyscout Zero-Trust (gap real encontrado):** el padre servía
+  **cualquier** trama TAG_SUBREQ si había fetcher instalado (la GUI lo instala incondicionalmente),
+  confiando en el flag del *worker* — un worker comprometido podía forjar tramas y hacer fetch sin
+  grant. Ahora `tab_serve_subreq` gatea **del lado padre** con el puro `tab_subreq_permitted(net,
+  css, method)`: net ⇒ cualquier método bien formado; solo-css ⇒ **exactamente `GET`** (sin POST de
+  exfiltración); nada ⇒ rechazo (la trama se consume y responde status 0, sin desync). El gate de
+  presentación **no cambia**: los colores externos siguen gateados por `caps.css` en `render_doc`;
+  con el toggle OFF hay **cero fetches** (Privacy by Default, candado
+  `test_external_css_skipped_without_grant`). Specs (`tab.md` §8, `html_parse.md` §9, `page_view.md`
+  §8, `freedom.md` §6) + tests (5 `html_parse`, 1 `page_view`, 6 `tab`: aplicada/sin-grant/ctype/
+  bloqueada/persistencia-click/tabla-del-gate-puro → 39 suites) + `make test`/`make asan` (exit 0)
+  limpios + fuzz `make fuzz` (284k execs, harness ahora extrae hrefs con invariantes) y `fuzz-pv`
+  (18k execs, harness alimenta la mitad del input como hoja externa hostil) sin crash/leak/UB +
+  **E2E real verificado** (`--author-css --download-png` de news.ycombinator.com: `news.css` se
+  fetchea y los **títulos salen negros y el subtexto gris** — los colores de clase antes imposibles).
+  **Límites v1:** fetch síncrono en la ventana de carga; `media` del `<link>` por substring
+  screen/all (no media-query real); `@import` sigue descartado (cero fetch recursivo); páginas
+  `file://` sin hojas locales (resolver https-only); sin caché entre cargas; los subrayados de HN
+  persisten porque `a:link{text-decoration:none}` usa **pseudo-clase** (`:link`), aún fuera de
+  alcance del módulo `css`. Ver `[[freedom-external-stylesheets]]`.
 - **Hito 25 — Shaping de texto con HarfBuzz (rendering moderno, lado confiable).** El painter dejó
   de usar la **toy font API** de Cairo (`cairo_select_font_face`+`cairo_show_text`, un glifo por byte,
   sin conciencia de script) y pasa a **HarfBuzz** (shaping) + `cairo_show_glyphs` (FreeType vía

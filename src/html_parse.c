@@ -182,6 +182,92 @@ void hp_free_scripts(hp_script *scripts, size_t count) {
     free(scripts);
 }
 
+/* Whitespace-separated token test over a length-delimited attribute value, ASCII
+ * case-insensitive: rel="preload stylesheet" has the token "stylesheet";
+ * rel="notstylesheet" does not. needle must be lowercase. */
+static int attr_has_token_ci(const lxb_char_t *val, size_t vlen, const char *needle) {
+    size_t nlen = strlen(needle);
+    size_t i = 0;
+    while (i < vlen) {
+        while (i < vlen && (val[i] == ' ' || val[i] == '\t' || val[i] == '\n'
+                            || val[i] == '\r' || val[i] == '\f')) i++;
+        size_t start = i;
+        while (i < vlen && val[i] != ' ' && val[i] != '\t' && val[i] != '\n'
+                        && val[i] != '\r' && val[i] != '\f') i++;
+        if (i - start == nlen) {
+            size_t j = 0;
+            while (j < nlen && (char)(val[start + j] | 0x20) == needle[j]) j++;
+            if (j == nlen) return 1;
+        }
+    }
+    return 0;
+}
+
+/* An applicable stylesheet <link>: rel token "stylesheet" and not "alternate";
+ * a non-empty href; media absent/empty or mentioning screen/all (fail closed).
+ * On a match, href and hlen point into the element's attribute storage. */
+static int link_is_active_stylesheet(lxb_dom_element_t *el,
+                                     const lxb_char_t **href, size_t *hlen) {
+    size_t rlen = 0;
+    const lxb_char_t *rel =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"rel", 3, &rlen);
+    if (rel == NULL || !attr_has_token_ci(rel, rlen, "stylesheet")
+        || attr_has_token_ci(rel, rlen, "alternate")) return 0;
+    size_t len = 0;
+    const lxb_char_t *h =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"href", 4, &len);
+    if (h == NULL || len == 0) return 0;
+    size_t mlen = 0;
+    const lxb_char_t *media =
+        lxb_dom_element_get_attribute(el, (const lxb_char_t *)"media", 5, &mlen);
+    if (media != NULL && mlen != 0
+        && !mem_contains_ci(media, mlen, "screen")
+        && !mem_contains_ci(media, mlen, "all")) return 0;
+    *href = h;
+    *hlen = len;
+    return 1;
+}
+
+char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count) {
+    if (out_count != NULL) *out_count = 0;
+    if (doc == NULL || doc->doc == NULL) return NULL;
+    lxb_dom_node_t *root = lxb_dom_interface_node(doc->doc);
+
+    char **list = NULL;
+    size_t count = 0, cap = 0;
+    for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {
+        if (count >= HP_MAX_STYLESHEETS) break; /* fail closed: drop the excess */
+        if (n->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        lxb_dom_element_t *el = lxb_dom_interface_element(n);
+        if (lxb_dom_element_tag_id(el) != LXB_TAG_LINK) continue;
+        const lxb_char_t *href = NULL;
+        size_t hlen = 0;
+        if (!link_is_active_stylesheet(el, &href, &hlen)) continue;
+        char *dup = dup_bytes(href, hlen);
+        if (dup == NULL) { hp_free_stylesheet_hrefs(list, count); return NULL; }
+        if (count == cap) {
+            size_t ncap = cap ? cap * 2 : 8;
+            char **grown = (char **)realloc(list, ncap * sizeof *grown);
+            if (grown == NULL) {
+                free(dup);
+                hp_free_stylesheet_hrefs(list, count);
+                return NULL;
+            }
+            list = grown; cap = ncap;
+        }
+        list[count++] = dup;
+    }
+    if (count == 0) { free(list); return NULL; }
+    if (out_count != NULL) *out_count = count;
+    return list;
+}
+
+void hp_free_stylesheet_hrefs(char **hrefs, size_t count) {
+    if (hrefs == NULL) return;
+    for (size_t i = 0; i < count; ++i) free(hrefs[i]);
+    free(hrefs);
+}
+
 static void strip_event_handlers(lxb_html_document_t *document) {
     lxb_dom_node_t *root = lxb_dom_interface_node(document);
     for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {

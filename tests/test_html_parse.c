@@ -261,6 +261,126 @@ static void test_extract_script_list_caps(void **state) {
     free(html);
 }
 
+/* --- external stylesheet extraction (Hito 27: parser reports, never fetches) --- */
+
+/* Two applicable <link rel=stylesheet> come back as their RAW hrefs in document
+ * order; noise (rel=icon, link without href, a <style> element) is skipped. */
+static void test_extract_stylesheets_basic(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head>"
+        "<link rel='stylesheet' href='news.css'>"
+        "<link rel='icon' href='favicon.ico'>"
+        "<link rel='stylesheet'>"                      /* no href: skipped */
+        "<style>p{color:red}</style>"
+        "<link rel='stylesheet' href='https://x.example/a.css'>"
+        "</head><body><p>hi</p></body></html>";
+    hp_config c = hp_config_default();
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+    size_t n = 0;
+    char **s = hp_extract_stylesheet_hrefs(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 2UL);
+    assert_string_equal(s[0], "news.css");             /* raw, unresolved */
+    assert_string_equal(s[1], "https://x.example/a.css");
+    hp_free_stylesheet_hrefs(s, n);
+    hp_document_free(doc);
+}
+
+/* rel matches by whitespace-separated token, case-insensitively: "STYLESHEET"
+ * applies; "alternate stylesheet" is an inactive alternate sheet (skipped,
+ * fail-closed); a rel merely CONTAINING the word inside a longer token does not
+ * match. */
+static void test_extract_stylesheets_rel_tokens(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head>"
+        "<link rel='STYLESHEET' href='upper.css'>"
+        "<link rel='alternate stylesheet' href='alt.css' title='alt'>"
+        "<link rel='notstylesheet' href='fake.css'>"
+        "<link rel='preload stylesheet' href='multi.css'>"
+        "</head></html>";
+    hp_config c = hp_config_default();
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+    size_t n = 0;
+    char **s = hp_extract_stylesheet_hrefs(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 2UL);
+    assert_string_equal(s[0], "upper.css");
+    assert_string_equal(s[1], "multi.css");
+    hp_free_stylesheet_hrefs(s, n);
+    hp_document_free(doc);
+}
+
+/* media gate, fail-closed: absent/empty or containing "screen"/"all" applies;
+ * anything else (print, unknown queries) is skipped. */
+static void test_extract_stylesheets_media_gate(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head>"
+        "<link rel='stylesheet' href='base.css'>"
+        "<link rel='stylesheet' href='print.css' media='print'>"
+        "<link rel='stylesheet' href='scr.css' media='only screen and (max-width:600px)'>"
+        "<link rel='stylesheet' href='all.css' media='ALL'>"
+        "<link rel='stylesheet' href='odd.css' media='(min-width: 800px)'>"
+        "</head></html>";
+    hp_config c = hp_config_default();
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+    size_t n = 0;
+    char **s = hp_extract_stylesheet_hrefs(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 3UL);
+    assert_string_equal(s[0], "base.css");
+    assert_string_equal(s[1], "scr.css");
+    assert_string_equal(s[2], "all.css");
+    hp_free_stylesheet_hrefs(s, n);
+    hp_document_free(doc);
+}
+
+/* No applicable links => NULL with count 0; NULL doc likewise; the releaser is
+ * idempotent on NULL. */
+static void test_extract_stylesheets_none_and_null(void **state) {
+    (void)state;
+    hp_config c = hp_config_default();
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT("<html><body><p>hi</p></body></html>"), &c, &doc), HP_OK);
+    size_t n = 123;
+    char **s = hp_extract_stylesheet_hrefs(doc, &n);
+    assert_null(s);
+    assert_int_equal((unsigned long)n, 0UL);
+    hp_document_free(doc);
+    n = 123;
+    assert_null(hp_extract_stylesheet_hrefs(NULL, &n));
+    assert_int_equal((unsigned long)n, 0UL);
+    hp_free_stylesheet_hrefs(NULL, 0);
+}
+
+/* Fail-closed anti-DoS: more links than HP_MAX_STYLESHEETS returns the cap. */
+static void test_extract_stylesheets_caps(void **state) {
+    (void)state;
+    const size_t total = HP_MAX_STYLESHEETS + 10;
+    const char one[] = "<link rel=stylesheet href=a.css>";
+    size_t buflen = total * (sizeof one - 1) + 64;
+    char *html = (char *)malloc(buflen);
+    assert_non_null(html);
+    size_t off = 0;
+    for (size_t i = 0; i < total; i++)
+        off += (size_t)snprintf(html + off, buflen - off, "%s", one);
+    hp_config c = hp_config_default();
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(html, off, &c, &doc), HP_OK);
+    size_t n = 0;
+    char **s = hp_extract_stylesheet_hrefs(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, (unsigned long)HP_MAX_STYLESHEETS);
+    hp_free_stylesheet_hrefs(s, n);
+    hp_document_free(doc);
+    free(html);
+}
+
 /* --- robustness --- */
 
 static void test_parse_malformed_does_not_crash(void **state) {
@@ -301,6 +421,11 @@ int main(void) {
         cmocka_unit_test(test_extract_script_list_external_semantics),
         cmocka_unit_test(test_extract_script_list_empty),
         cmocka_unit_test(test_extract_script_list_caps),
+        cmocka_unit_test(test_extract_stylesheets_basic),
+        cmocka_unit_test(test_extract_stylesheets_rel_tokens),
+        cmocka_unit_test(test_extract_stylesheets_media_gate),
+        cmocka_unit_test(test_extract_stylesheets_none_and_null),
+        cmocka_unit_test(test_extract_stylesheets_caps),
         cmocka_unit_test(test_event_handlers_stripped_by_default),
         cmocka_unit_test(test_event_handlers_kept_when_disabled),
         cmocka_unit_test(test_parse_malformed_does_not_crash),

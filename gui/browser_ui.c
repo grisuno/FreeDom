@@ -1398,9 +1398,12 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     }
 
     /* Page-JS network (XHR/fetch) is granted only for a host in allow.conf AND js.conf
-     * (the sovereignty boundary): the fetcher re-applies the full network policy. */
+     * (the sovereignty boundary): the fetcher re-applies the full network policy.
+     * External stylesheets (Hito 27) follow the author-styles opt-in instead (GET-only
+     * at the parent gate); reader mode ignores author styling, so it fetches none. */
     tab_set_fetcher(t, gui_subresource_fetch, w);
     tab_set_net_allowed(t, w->caps.js && page_host_allowlisted(w));
+    tab_set_css_allowed(t, w->caps.css && !w->reader);
 
     tab_page page;
     memset(&page, 0, sizeof page);
@@ -5339,6 +5342,7 @@ static tab *freebug_repl_worker(browser_window *w) {
     if (tab_open(&t) != TAB_OK) return NULL;
     tab_set_fetcher(t, gui_subresource_fetch, w);
     tab_set_net_allowed(t, compute_page_js(w) && page_host_allowlisted(w));
+    tab_set_css_allowed(t, w->caps.css && !w->reader);
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);

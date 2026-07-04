@@ -1541,6 +1541,35 @@ static void test_build_display_none_hidden(void **state) {
     hp_document_free(doc);
 }
 
+/* External pre-fetched CSS (Hito 27) feeds the same cascade as the document's
+ * <style>: an extern rule applies (presentation and display:none alike); at equal
+ * specificity the document's own sheet, concatenated after, wins; and a NULL
+ * extern is byte-identical to pv_build_full (no-regression lock). page_view stays
+ * pure -- the bytes were fetched by the trusted parent, never here. */
+static void test_build_styled_external_css(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>p.own{text-align:right}</style>"
+        "<p>centered</p>"
+        "<p class='own'>docwins</p>"
+        "<p class='gone'>hidden</p></body>");
+    static const char EXT[] =
+        "p{text-align:center} p.own{text-align:center} .gone{display:none}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, EXT, sizeof EXT - 1, &v), PV_OK);
+    assert_int_equal(find_text(v, "centered")->text_align, CSS_ALIGN_CENTER);
+    assert_int_equal(find_text(v, "docwins")->text_align, CSS_ALIGN_RIGHT);
+    assert_null(find_text(v, "hidden"));
+    pv_free(v);
+
+    pv_view *w = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, NULL, 0, &w), PV_OK);
+    assert_int_equal(find_text(w, "centered")->text_align, CSS_ALIGN_UNSET);
+    assert_non_null(find_text(w, "hidden"));
+    pv_free(w);
+    hp_document_free(doc);
+}
+
 /* Reader (distraction-free) mode skips nav/header/footer/aside boilerplate but
  * keeps the main article content; with reader off, the boilerplate is kept. */
 static void test_build_reader_skips_boilerplate(void **state) {
@@ -1716,6 +1745,7 @@ int main(void) {
         cmocka_unit_test(test_build_text_decoration),
         cmocka_unit_test(test_build_css_bold_and_inline_wins),
         cmocka_unit_test(test_build_display_none_hidden),
+        cmocka_unit_test(test_build_styled_external_css),
         cmocka_unit_test(test_build_reader_skips_boilerplate),
         cmocka_unit_test(test_set_node_id_model),
         cmocka_unit_test(test_build_node_id_matches_dom_index),

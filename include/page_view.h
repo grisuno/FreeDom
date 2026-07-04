@@ -244,6 +244,19 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                         int prefers_dark, pv_view **out);
 
+/* As pv_build_full, plus a pre-fetched external stylesheet text (Hito 27).
+ * extern_css/extern_len (NULL/0 => none: byte-identical to pv_build_full) is the
+ * concatenated body of the page's <link rel=stylesheet> sheets, fetched by the
+ * TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays
+ * pure and never fetches. The external text precedes the document's own <style>
+ * blocks in the parsed sheet (document-order approximation: at equal specificity
+ * the page's <style> wins), and the combined text is capped (anti-DoS). Hostile
+ * input: it flows through the same bounded, fail-closed css parser (url()/@import
+ * dropped -- it can never phone home). */
+pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+                          int prefers_dark, const char *extern_css, size_t extern_len,
+                          pv_view **out);
+
 /* Allocates an empty view (used by the IPC deserialiser to rebuild a view on the
  * receiving side). Returns NULL on allocation failure. */
 pv_view *pv_new(void);

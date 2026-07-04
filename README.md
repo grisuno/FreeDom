@@ -111,6 +111,7 @@ The name reflects its core goals:
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
 - ✅ Author CSS (`<style>` + inline `style=`, simple subset; combinators, attribute selectors `[attr=v]`/`^=`/`$=`/`*=`/`~=`/`|=`, `!important`; never phones home) — menu "Author styles (CSS)"
+- ✅ External stylesheets (`<link rel=stylesheet>`): fetched by the **trusted parent** under the full network policy (tracker blocklist, realm routing, TLS-PQ) when Author styles is on — the sandboxed worker never touches a socket, and the parent serves style-only loads as `GET` exclusively
 - ✅ Author box model (`margin`/`padding`/`width`/`max-width`): centered reading columns (`max-width` + `margin: 0 auto`)
 - ✅ Author text presentation: `font-family` (generic families), `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow`, `opacity`, `vertical-align` (sub/super), `text-indent`, `white-space` (nowrap), `list-style-type` (decimal/alpha/roman/disc/circle/square)
 - ✅ Automatic dark mode (`@media (prefers-color-scheme: dark)`, safe `@media` subset; no viewport leak)
@@ -354,7 +355,13 @@ reflows at the new size with no network round-trip.
 ### Author CSS & distraction-free reading
 
 Enable **Author styles (CSS)** in the menu to see the page the way the webmaster intended.
-Freedom renders the author's own CSS — both `<style>` blocks and inline `style=` — using a
+With the toggle on, Freedom also fetches the page's **external stylesheets**
+(`<link rel=stylesheet>`): the confined worker asks the trusted parent for each sheet, and
+the parent re-applies the full network policy (host blocklist, realm routing, TLS-PQ) before
+any byte moves — style-only pages are limited to `GET` at the parent's gate, a wrong
+Content-Type is never parsed as CSS, and with the toggle off nothing is fetched at all
+(Privacy by Default). Freedom renders the author's own CSS — external sheets, `<style>`
+blocks and inline `style=` — using a
 deliberately simpler subset: `color`, `background`, `text-align`, `font-size`, `line-height`,
 `font-weight`, `font-style`, `text-decoration` (`underline`/`line-through`/`overline`/`none`),
 `display` (including `display:none`), with type / `.class` / `#id`

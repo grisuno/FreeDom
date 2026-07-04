@@ -247,8 +247,9 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
     (`cc_parse`) aporta `bg_rgb` (p. ej. la barra naranja `#ff6600` y el beige `#f6f6ef` de
     Hacker News, que no usa CSS para eso). Presentación de autor: gateado por `caps.css` en
     `render_doc` como todo color. Las hojas de estilo **externas** (`<link rel=stylesheet>`)
-    siguen sin fetchearse (fuera de alcance; los colores de clase de HN — títulos negros,
-    subtexto gris — necesitan eso).
+    llegan desde el Hito 27 vía `pv_build_styled` (el worker las fetchea por el padre bajo
+    política; ver `spec/tab.md` §8): los colores de clase de HN — títulos negros, subtexto
+    gris — ya resuelven cuando `caps.css` está activo.
   - **Tablas anidadas (celda = contenedor, no hoja).** Una celda que contiene una `<table>`
     descendiente es una **hoja = no**: NO se recolecta como un run (eso aplanaría todo su subárbol).
     Es un **contenedor estructural** que se recorre normalmente, de modo que las celdas de la tabla
@@ -319,3 +320,32 @@ previo).
   orquestador. `page_view` solo emite el run con `src` y dimensiones declaradas.
 - Estilos CSS, formularios funcionales, tablas con celdas, listas con viñetas/numeración.
 - Normalización de espacios entre runs adyacentes (colapso entre nodos), `white-space: pre`.
+
+## 8. CSS externo pre-fetcheado: `pv_build_styled` (Hito 27)
+
+`page_view` es puro y **jamás fetchea**; las hojas externas (`<link rel=stylesheet>`) las obtiene
+el worker por el padre confiable (`spec/tab.md` §8) y entran aquí como **texto ya en memoria**:
+
+```c
+/* Como pv_build_full, más una hoja de CSS externa pre-fetcheada (extern_css/extern_len;
+ * NULL/0 = ninguna: byte-idéntico a pv_build_full). El texto externo se antepone al de los
+ * <style> del documento (aproximación v1 del orden de documento: a igual especificidad el
+ * <style> de la página gana) y el TOTAL alimentado al parser css queda acotado por
+ * PV_MAX_STYLE_BYTES (anti-DoS; el módulo css además se auto-acota). El contenido es HOSTIL:
+ * pasa por css_parse_media, que descarta url()/@import (cero red) y falla cerrado. */
+pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+                          int prefers_dark, const char *extern_css, size_t extern_len,
+                          pv_view **out);
+```
+
+- **Dado** `extern_css == NULL`, **cuando** se construye la vista, **entonces** el resultado es
+  byte-idéntico a `pv_build_full` (candado de no-regresión).
+- **Dado** un `extern_css` con `p{text-align:center}` y un documento sin `<style>`, **cuando** se
+  construye, **entonces** los runs de `<p>` llevan `text_align == CSS_ALIGN_CENTER` (la hoja
+  externa alimenta la misma cascada que las internas).
+- **Dado** un `extern_css` y un `<style>` del documento que declaran la misma propiedad con la
+  misma especificidad, **cuando** se resuelve, **entonces** gana el `<style>` del documento
+  (viene después en el texto concatenado — orden de cascada).
+- El gate de presentación **no cambia**: los colores/estilos de autor (externos o internos)
+  siguen gateados por `caps.css` en `render_doc`; `display:none`/flex/grid siguen siendo
+  estructurales.

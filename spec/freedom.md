@@ -150,3 +150,13 @@ donde el nombre proviene de contenido remoto.
 vendoreado, `secure_fetch`, `request_policy`, `psl_data`, más Wayland/Cairo
 (`gui/browser_ui.c`) y xkbcommon, junto con `-lcurl -lssl -lcrypto -llexbor
 -lm -lpthread -lwayland-client -lcairo -lxkbcommon`.
+
+## 6. Hojas de estilo externas en headless (Hito 27)
+
+`--author-css` deja de ser "solo render local": para una página **remota** también autoriza el
+fetch de sus `<link rel=stylesheet>` (`tab_set_css_allowed(t, 1)`), servidos por `headless_fetch`
+bajo la política de siempre (resolución `ln_resolve` contra la URL de página, realm fail-closed,
+TLS-PQ). El gate del padre limita ese permiso a **GET** (puro `tab_subreq_permitted`): sin
+`--js=on` el worker no puede emitir POST ni ejecutar scripts. El cap de **imágenes/red de página
+sigue OFF** (no telefonea por imágenes). Sin `--author-css`, cero fetches de hojas: byte-idéntico
+al comportamiento previo.

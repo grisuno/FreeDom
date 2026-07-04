@@ -1601,6 +1601,12 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
 
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                         int prefers_dark, pv_view **out) {
+    return pv_build_styled(doc, js_enabled, reader, prefers_dark, NULL, 0, out);
+}
+
+pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+                          int prefers_dark, const char *extern_css, size_t extern_len,
+                          pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
 
@@ -1625,6 +1631,25 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
      * module, so OOM here degrades to "no author CSS", not a failure. */
     size_t style_len = 0;
     char *style_text = collect_style_text(root, &style_len);
+    /* Pre-fetched external sheets (Hito 27) precede the document's own <style>
+     * text: document-order approximation, so at equal specificity the page's
+     * inline sheet (later in the text) wins the cascade. The combined text stays
+     * capped at PV_MAX_STYLE_BYTES; OOM degrades to document styles only. */
+    if (extern_css != NULL && extern_len != 0) {
+        if (extern_len > PV_MAX_STYLE_BYTES) extern_len = PV_MAX_STYLE_BYTES;
+        size_t dlen = style_len;
+        if (dlen > PV_MAX_STYLE_BYTES - extern_len) dlen = PV_MAX_STYLE_BYTES - extern_len;
+        char *comb = (char *)malloc(extern_len + 1 + dlen + 1);
+        if (comb != NULL) {
+            memcpy(comb, extern_css, extern_len);
+            comb[extern_len] = '\n';
+            if (dlen != 0) memcpy(comb + extern_len + 1, style_text, dlen);
+            comb[extern_len + 1 + dlen] = '\0';
+            free(style_text);
+            style_text = comb;
+            style_len = extern_len + 1 + dlen;
+        }
+    }
     css_sheet *sheet = NULL;
     /* @media gated against the user's color scheme (auto dark mode) and a fixed,
      * normalized desktop width (no real viewport size leaks). Screen context. */

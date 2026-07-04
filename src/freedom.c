@@ -290,6 +290,9 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * js.conf). The page URL is the resolution base for relative subresources. */
     tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
     tab_set_net_allowed(t, g_headless_js);
+    /* --author-css also authorizes external <link rel=stylesheet> fetches for a
+     * remote page (GET-only at the parent gate; spec/freedom.md §6). */
+    tab_set_css_allowed(t, g_author_css);
 
     tab_page page;
     memset(&page, 0, sizeof page);
@@ -518,7 +521,7 @@ int main(int argc, char **argv) {
             g_png_out = path;
             headless = 1; /* PNG export is a headless operation (no window) */
         } else if (strcmp(arg, "--author-css") == 0) {
-            g_author_css = 1; /* apply author CSS in the headless render (local only) */
+            g_author_css = 1; /* author CSS in the headless render + external sheet fetch */
         } else if (strcmp(arg, "--insecure") == 0 || strcmp(arg, "-I") == 0) {
             global_insecure = 1;
         } else if (strcmp(arg, "--tor") == 0) {

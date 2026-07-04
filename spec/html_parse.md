@@ -149,3 +149,36 @@ objetivo es que **nunca** se produzca crash/leak/UB. `make fuzz`.
 - Ejecución/aislamiento de JS (Hito 3).
 - Política de subrecursos (imágenes, hojas de estilo externas): se define en spec aparte; el
   bloqueo de terceros vive en el motor de red.
+
+## 9. Extracción de hojas de estilo externas (`<link rel=stylesheet>`, Hito 27)
+
+El parser **jamás fetchea**: igual que con los `<script src>` (§6), las hojas externas solo se
+**reportan** con su `href` crudo (hostil); decidir si esos bytes pueden buscarse es del worker
+`tab`, gateado por el padre (`spec/tab.md` §8).
+
+```c
+/* Tope anti-DoS de hojas reportadas (una página real usa <10; el resto se descarta). */
+#define HP_MAX_STYLESHEETS ((size_t)64)
+
+/* Devuelve los href crudos de los <link rel=stylesheet> aplicables, en orden de
+ * documento, como arreglo propio de strings NUL-terminadas; *out_count recibe la
+ * cantidad. NULL (con *out_count == 0) si no hay ninguno o sin memoria. Liberar con
+ * hp_free_stylesheet_hrefs. */
+char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count);
+void hp_free_stylesheet_hrefs(char **hrefs, size_t count);
+```
+
+Semántica (Dado-Cuando-Entonces), todo **fail-closed** (ante la duda el `<link>` se salta):
+
+- **Dado** `<link rel=stylesheet href=S>`, **cuando** se extrae, **entonces** S aparece (crudo,
+  sin resolver). `rel` se compara por **token** (lista separada por espacios) y **case-insensitive**:
+  `rel="STYLESHEET"` aplica; `rel="alternate stylesheet"` **no** (hoja alternativa, no activa).
+- **Dado** un `<link>` sin `href` o con `href=""`, **entonces** se salta (no nombra recurso).
+- **Dado** un atributo `media`, **entonces** el `<link>` aplica solo si `media` está ausente/vacío
+  o contiene `screen` o `all` (substring case-insensitive). `media="print"` se salta. La
+  evaluación real de media queries del atributo queda fuera (v1).
+- **Dado** más de `HP_MAX_STYLESHEETS` links aplicables, **entonces** los excedentes se descartan.
+- **Dado** `doc == NULL`, **entonces** NULL con `*out_count == 0`.
+
+Matriz de pruebas: básico (2 hojas + ruido `rel=icon`/sin-href), `rel` case-insensitive por token,
+`alternate` excluido, gate de `media`, tope, documento sin links, args NULL.

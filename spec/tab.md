@@ -108,13 +108,15 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
 Padre y hijo son el mismo binario y arquitectura (`fork`), así que se intercambian estructuras
 crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), como el `renderer`.
 
-- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **cuatro bytes de bandera** y la **URL de la página**
-  antes de la carga: `[op][run_js:1][net:1][reader:1][dark:1][url_len: size_t][url][len: size_t][html]`
+- **Petición:** `[op: uint8]`. `OP_LOAD` lleva **cinco bytes de bandera** y la **URL de la página**
+  antes de la carga: `[op][run_js:1][net:1][reader:1][dark:1][css:1][url_len: size_t][url][len: size_t][html]`
   (las banderas y la URL preceden a la carga para que el HTML quede zero-copy). `run_js` es la política
   de JS; `net` (Hito 26) concede red a `XMLHttpRequest`/`fetch` — solo `1` si el host está en
   **allow.conf Y js.conf** (el padre lo decide vía `tab_set_net_allowed`); `reader` es el modo sin
-  distracciones; `dark` es la preferencia de esquema de color. `url` es la URL de la página (para el
-  `location` real del JS — `url_len == 0` = sin URL).   `OP_EVAL`/`OP_DECODE_IMAGE` llevan
+  distracciones; `dark` es la preferencia de esquema de color; `css` (Hito 27) autoriza el fetch de
+  **hojas de estilo externas** (`<link rel=stylesheet>`) por la misma trama de subrecurso — el padre
+  lo decide vía `tab_set_css_allowed` (en la GUI: el toggle "Author styles (CSS)"). `url` es la URL
+  de la página (para el `location` real del JS — `url_len == 0` = sin URL).   `OP_EVAL`/`OP_DECODE_IMAGE` llevan
   `[op][len][payload]`. `OP_CLICK` es un comando corto:
   `[op][node_id: int32]` (sin payload de longitud). EOF en la tubería de peticiones equivale a `OP_QUIT`.
 - **Respuesta de `OP_LOAD` (Hito 26: con tramas de subrecurso):** mientras corre los scripts de la
@@ -308,3 +310,78 @@ void       tab_eval_result_free(tab_eval_result *r);
 - Reutilización de procesos entre orígenes (cada `tab` es un proceso; la política por-origen la
   decide el orquestador).
 - Paso de `session_key`/dimensiones de pantalla desde el orquestador (v1 las fija en el worker).
+
+## 8. Hojas de estilo externas + gate de subrecursos del padre (Hito 27)
+
+La web moderna sirve casi todo su CSS por `<link rel=stylesheet href=...>`; hasta este hito
+Freedom solo veía `<style>`/`style=` y todo sitio real quedaba con colores/tipografía por defecto.
+Este hito reusa la trama `TAG_SUBREQ` existente (Hito 26) para que el worker obtenga esas hojas
+**sin tocar jamás un socket**, y de paso cierra un gap Zero-Trust: el padre ahora **gatea cada
+subrecurso** en su propio lado (antes servía cualquier trama si había fetcher instalado, confiando
+en el flag del worker — un worker comprometido podía forjar tramas).
+
+### 8.1 Contrato
+
+```c
+/* Autoriza (1) o revoca (0) el fetch de hojas de estilo externas para la PRÓXIMA carga.
+ * Independiente de run_js/net: el CSS de autor no requiere JS. En la GUI se deriva del
+ * toggle "Author styles (CSS)" (caps.css); en headless, de --author-css. */
+void tab_set_css_allowed(tab *t, int allowed);
+
+/* Puro (testeable): ¿puede el padre servir una trama de subrecurso del worker?
+ *   net_allowed  => cualquier método (XHR/fetch/scripts externos, Hito 26/24 EXT).
+ *   css_allowed  => SOLO "GET" exacto (hojas de estilo; un worker comprometido con
+ *                   solo-css no puede exfiltrar por POST).
+ *   ninguno      => 0 (la trama se consume y se responde rechazo, status 0).
+ * Fail-closed: método NULL/vacío/distinto de "GET" con solo-css => 0. */
+int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
+```
+
+### 8.2 Semántica (Dado-Cuando-Entonces)
+
+- **Dado** un `tab` con `tab_set_css_allowed(t, 1)` y un fetcher instalado, **cuando** se carga un
+  HTML con `<link rel=stylesheet href=S>`, **entonces** el worker emite una trama
+  `TAG_SUBREQ` `GET S` (href crudo e hostil; el padre lo resuelve/gatea bajo TODA la política),
+  y si la respuesta es status 2xx con Content-Type de CSS (vacío/ausente o conteniendo `css` —
+  anti-confusión de tipo: un 404 HTML nunca se parsea como hoja), el cuerpo se **acumula** como
+  CSS externo y alimenta `pv_build_styled` — los selectores/colores de la hoja se aplican a la
+  vista (gateados por `caps.css` en `render_doc`, como todo estilo de autor).
+- **Dado** `css == 0` (default), **cuando** se carga ese mismo HTML, **entonces** no se emite
+  ninguna trama por los `<link>` y la vista es byte-idéntica a la previa al hito (Privacy by
+  Default: cero fetches nuevos sin opt-in).
+- **Dado** un fetcher que rechaza (host bloqueado / política), **cuando** la hoja no llega,
+  **entonces** la carga **continúa sin esa hoja** (fail-open del adblock de presentación, como
+  `hostblock`) con nota `FB_WARN` en Freebug; nunca se cae la página por una hoja.
+- **Dado** el flujo de fetch, **cuando** se ordenan las hojas, **entonces** las externas se
+  concatenan **en orden de documento** y preceden a los `<style>` del documento (aproximación v1
+  del orden de cascada; a igual especificidad el `<style>` de la página gana).
+- **Cuando** el usuario hace click (`OP_CLICK` re-deriva la vista) o el título/vista se
+  re-derivan tras los scripts, **entonces** el CSS externo **persiste** en el `child_state`
+  (`extern_css`, dueño único, liberado en el reset de página): la re-derivación no re-fetchea.
+- **Anti-DoS:** hasta `HP_MAX_STYLESHEETS` (64) hojas por página; cada respuesta ≤
+  `TAB_MAX_SUBRESOURCE` (8 MiB, cap de wire); el acumulado de CSS externo ≤ `TAB_MAX_EXTERN_CSS`
+  (1 MiB — el mismo orden que `PV_MAX_STYLE_BYTES`); una hoja que no cabe entera se **descarta
+  entera** (fail-closed, nunca truncada a media regla). El contador `TAB_MAX_SUBREQ` (64) es
+  compartido con XHR/scripts.
+- **Gate del padre (Zero Trust, corrección de este hito):** `tab_serve_subreq` consulta
+  `tab_subreq_permitted(net_efectivo, css_efectivo, method)` con los flags que el padre
+  **decidió para esta carga** (no los que reporte el hijo). Una trama no permitida se consume y
+  se responde `status 0` (el protocolo no se desincroniza). `OP_CLICK`/`OP_EVAL` no llevan
+  ventana de red: cualquier trama ahí sigue siendo desync ⇒ `TAB_ERR_IO`.
+
+### 8.3 Matriz de pruebas
+
+- Hoja externa aplicada con `css=1` (estilo visible en la vista, fetcher llamado con el href crudo).
+- Sin flag ⇒ cero fetches y vista sin estilo externo.
+- Fetcher rechaza ⇒ carga OK sin estilo, warn en consola.
+- Content-Type no-CSS (`text/html`) ⇒ hoja no parseada.
+- `tab_subreq_permitted`: tabla completa (net/css/ninguno × GET/POST/NULL/vacío/"get").
+- Click tras carga con CSS externo ⇒ vista re-derivada conserva el estilo.
+
+### 8.4 Fuera de alcance (v1)
+
+- `<link>` con `media` que no contenga `screen`/`all` (se salta, fail-closed; la evaluación
+  real de media queries del atributo queda con el motor `@media`).
+- `@import` dentro de hojas externas (el módulo `css` lo sigue descartando: cero fetches
+  recursivos). Hojas para páginas `file://` locales (el resolver de subrecursos es https-only).
+- Caché de hojas entre cargas/pestañas.

@@ -132,6 +132,18 @@ void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);
  * boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction). */
 void tab_set_net_allowed(tab *t, int allowed);
 
+/* Grants/revokes external stylesheet fetches (<link rel=stylesheet>, Hito 27) for the
+ * NEXT load. Independent of JS: derive it from the author-styles opt-in (caps.css in the
+ * GUI, --author-css headless). With the grant, the worker requests each sheet through the
+ * parent's fetcher under full network policy; the parent serves css-only loads as GET
+ * exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */
+void tab_set_css_allowed(tab *t, int allowed);
+
+/* Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for
+ * this load, never the worker's claims): net_allowed permits any well-formed method;
+ * css_allowed alone permits exactly "GET"; a NULL/empty method or no grant is refused. */
+int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
+
 /* Loads untrusted HTML into the tab: the child parses it, builds the inert DOM,
  * and arms a fresh JS context bound to that DOM. Replaces any previously loaded
  * page. On TAB_OK, *out is populated and must be released with tab_page_free. */
