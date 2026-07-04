@@ -147,10 +147,13 @@ $(BUILD_DIR)/js_env.o: $(SRC_DIR)/js_env.c | $(BUILD_DIR)
 $(BUILD_DIR)/qjs_%.o: $(QJS_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(QJS_CFLAGS) -c $< -o $@
 
+prefix  ?= /usr/local
+bindir  ?= $(prefix)/bin
+
 install: all
 	@echo "[*] Installing binary and assets..."
-	install -d /usr/local/bin
-	install -m 0755 build/freedom /usr/local/bin/
+	install -d $(DESTDIR)$(bindir)
+	install -m 0755 build/freedom $(DESTDIR)$(bindir)/
 	@echo "[+] Installation successful."
 
 # Until the corresponding src/*.c exists, a test fails to link on purpose:
@@ -558,10 +561,14 @@ deb:
 	rm -fr debian/*.ex debian/*.EX debian/freedom.doc-base*
 	$(MAKE) clean
 	chmod +x debian/rules
-	debuild -us -uc -b -d
-	@echo "[*] restoring build/ ownership after the fakeroot/sudo build"
+	# Output .changes, .buildinfo and .deb to build/ instead of ../
+	# (avoids root-owned artifacts left by a previous fakeroot build).
+	debuild -us -uc -b -d \
+	  --changes-file=build/freedom_0.0.3-1_amd64.changes \
+	  --buildinfo-file=build/freedom_0.0.3-1_amd64.buildinfo
+	@echo "[*] restoring build/ ownership after the fakeroot build"
 	-sudo chown -R $$(id -u):$$(id -g) $(BUILD_DIR)
-	@echo "[+] package built: ../freedom_0.0.3-1_amd64.deb"
+	@echo "[+] package built: build/freedom_0.0.3-1_amd64.deb"
 
 # Build and run the Zero-Trust Docker image (Xvfb+weston+noVNC on :8080). Centralises
 # docker_run.sh; the in-container entrypoint stays in docker-entrypoint.sh (it is the

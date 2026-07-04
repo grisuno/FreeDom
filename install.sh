@@ -72,11 +72,6 @@ fi
 # 4. Apply compatibility source patches for compilation
 echo -e "${BLUE}[*] Preparing source files and applying environment patches...${NC}"
 
-if [ -f src/secure_fetch.c ]; then
-    # Patch 1: Bypass specific TLS runtime issues for the runner environment
-    sed -i 's/SSL_get0_group_name(ssl)/"X25519"/g' src/secure_fetch.c
-fi
-
 if [ -f src/local_store.c ]; then
     # Patch 2: Inject missing Argon2 macros if the host runs an OpenSSL version < 3.3
     sed -i '1s/^/#include <openssl\/kdf.h>\n#ifndef OSSL_KDF_PARAM_ARGON2_LANES\n#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"\n#endif\n#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST\n#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"\n#endif\n#ifndef OSSL_KDF_PARAM_THREADS\n#define OSSL_KDF_PARAM_THREADS "threads"\n#endif\n#define _GNU_SOURCE\n/' src/local_store.c

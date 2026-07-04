@@ -309,28 +309,57 @@ static void copy_bounded(char *dst, size_t dstsz, const char *src) {
     dst[i] = '\0';
 }
 
+
+/* Helper: Extracts the name of the TLS group actually negotiated from OpenSSL */
+static const char *get_negotiated_group_name(SSL *ssl) {
+    int nid = 0;
+    
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    /* OpenSSL 3.0+ has a dedicated API for obtaining the negotiated group*/
+    nid = SSL_get_negotiated_group(ssl);
+#else
+    /* OpenSSL 1.1.1: SSL_get_shared_group(ssl, 0) returns the NID of the
+     * first shared group, which corresponds to the negotiated key exchange 
+     * group (for both TLS 1.2 ECDHE and TLS 1.3). */
+    nid = SSL_get_shared_group(ssl, 0);
+#endif
+    
+    if (nid == 0) {
+        return NULL; /* There is no negotiated group (e.g., TLS 1.2 without PFS or failure) */
+    }
+    
+    /* OBJ_nid2sn returns the short name (e.g., "X25519", "prime256v1", "x25519") */
+    return OBJ_nid2sn(nid);
+}
+
 /* Idempotent: takes the TLS snapshot the first time the SSL* is reachable. */
 static void tls_capture_try(tls_capture *cap) {
     if (cap->have) return;
+    
     struct curl_tlssessioninfo *ti = NULL;
     if (curl_easy_getinfo(cap->curl, CURLINFO_TLS_SSL_PTR, &ti) != CURLE_OK) return;
     if (ti == NULL || ti->backend != CURLSSLBACKEND_OPENSSL || ti->internals == NULL) return;
 
     SSL *ssl = (SSL *)ti->internals;
+    
+    /* 1. Capture TLS version */
     copy_bounded(cap->version, sizeof cap->version, SSL_get_version(ssl));
-    /* Read the REAL negotiated group from OpenSSL. A previous "fix" hardcoded this
-     * to "X25519", which made sf_check_group_is_pq reject every connection as
-     * non-PQ (status 4) — no site could load. NULL (no group / not TLS 1.3) copies
-     * to "" and is then rejected by the policy, which is the correct fail-closed. */
-    /* Read the REAL negotiated group from OpenSSL */
-    const char *real_group = SSL_get0_group_name(ssl);
-    if (real_group != NULL) {
-        copy_bounded(cap->group, sizeof cap->group, real_group);
-    } else {
-        copy_bounded(cap->group, sizeof cap->group, "unknown");
+    
+    /* 2. Read the REAL group negotiated from OpenSSL.
+     * We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks.
+     * PQ for groups that are not X25519 and causes false rejections.
+     * If it is NULL (no group / not TLS 1.3 / no PFS), we copy "" which
+     * will be correctly rejected by the policy (fail-closed). */
+    const char *real_group = get_negotiated_group_name(ssl);
+    if (real_group == NULL) {
+        real_group = ""; /* Fail-closed: la cadena vacía será rechazada por la política */
     }
+    copy_bounded(cap->group, sizeof cap->group, real_group);
+    
+    /* 3. Inspect the chain of certificates and signatures */
     memset(&cap->chain, 0, sizeof cap->chain);
     cap->chain_ok = (inspect_chain(ssl, &cap->chain, cap->sigbuf, sizeof cap->sigbuf) == 0);
+    
     cap->have = 1;
 }
 
