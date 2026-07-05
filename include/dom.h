@@ -62,6 +62,39 @@ size_t dom_get_by_tag(const dom_index *idx, const char *tag,
 size_t dom_get_by_class(const dom_index *idx, const char *cls,
                         dom_node_id *out, size_t cap);
 
+/* --- CSS-selector queries (querySelector / matches / closest) --- */
+
+/* These reuse the author-CSS selector engine (css_select via css_chain), so
+ * `dom.querySelector('nav > a.link')` matches exactly like a stylesheet rule.
+ * The selector is a hostile string: parsing is bounded and fails closed (an
+ * unsupported or malformed complex selector in the list is dropped, the rest
+ * survive; an empty result never matches). The supported subset is css_select's
+ * (type, .class, #id, universal, [attr] operators, the structural/link
+ * pseudo-classes, descendant/child/sibling combinators); :not()/:is() and
+ * pseudo-elements are not.
+ *
+ * `root` scopes the walk: DOM_NODE_NONE searches the whole document (every
+ * element); a valid element searches its STRICT descendants only (never itself),
+ * matching the DOM Element.querySelector contract. Combinators still resolve
+ * against each candidate's real ancestor chain regardless of scope. */
+
+/* First element in document order matching the selector list, or DOM_NODE_NONE. */
+dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
+                               const char *selector);
+
+/* Writes up to cap matching ids (document order) into out; returns the total
+ * match count (may exceed cap, so the caller can size a buffer). */
+size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
+                              const char *selector, dom_node_id *out, size_t cap);
+
+/* Nonzero iff node itself matches the selector list (Element.matches). */
+int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);
+
+/* Nearest element at or above node matching the selector list, or DOM_NODE_NONE
+ * (Element.closest). */
+dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
+                        const char *selector);
+
 /* --- document order (binary-search friendly) --- */
 
 /* 0-based document-order position of node, or 0 if node is invalid. */

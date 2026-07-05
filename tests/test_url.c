@@ -43,6 +43,26 @@ static void test_validate_https(void **state) {
     assert_int_equal(url_validate_https("https://"), URL_ERR_NOT_HTTPS);
 }
 
+/* Modern bundle URLs exceed 2048 bytes (google.com's xjs script URL measures 3456):
+ * anything within URL_MAX_LEN must validate and resolve; far past it fails closed. */
+static void test_validate_long_bundle_url(void **state) {
+    (void)state;
+    char url[URL_MAX_LEN + 128];
+    size_t base = strlen("https://e.example/");
+    memcpy(url, "https://e.example/", base);
+    memset(url + base, 'a', 4000 - base);
+    url[4000] = '\0';
+    assert_int_equal(url_validate_https(url), URL_OK);
+
+    char out[URL_MAX_LEN + 1];
+    assert_int_equal(url_resolve_https("https://e.example/page", url + base - 1,
+                                       out, sizeof out), URL_OK);
+
+    memset(url + base, 'a', (URL_MAX_LEN + 100) - base);
+    url[URL_MAX_LEN + 100] = '\0';
+    assert_true(url_validate_https(url) != URL_OK);   /* past the cap: fail closed */
+}
+
 /* --- url_has_scheme --- */
 
 static void test_has_scheme(void **state) {
@@ -450,6 +470,7 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_is_https),
         cmocka_unit_test(test_validate_https),
+        cmocka_unit_test(test_validate_long_bundle_url),
         cmocka_unit_test(test_has_scheme),
         cmocka_unit_test(test_authority_len),
         cmocka_unit_test(test_remove_dot_segments),

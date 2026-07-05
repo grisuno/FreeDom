@@ -129,15 +129,18 @@ static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib) {
     *nsib = before + 1 + after;
 }
 
-/* Resolves the author presentation for one element from the document <style> sheet
- * plus its own inline style= (inline wins; the css module does the cascade). The
- * element and its ancestor chain (bounded) become the selector match inputs, so
- * descendant/child combinators (`div p`, `nav > a`) resolve. Pure (no fetch, no
- * execution): the css module drops url() and @-rules. */
-css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
-    cch_node chain[CCH_CHAIN_MAX];
-    cch_node sibs[CCH_SIB_MAX];
-    lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
+/* Builds the bounded css_element chain for `el` into the caller's storage:
+ * the ancestor chain (for descendant/child combinators), nth/nsib on every node
+ * (so a zebra `tr:nth-child(even) td` can constrain an ancestor) and the
+ * preceding-sibling chain for the SUBJECT only (for its `+`/`~`, bounded to
+ * CCH_SIB_MAX; a `+`/`~` on a non-subject compound or past the bound fails
+ * closed). Returns the subject css_element (&chain[0].el) or NULL when el has no
+ * element context. Shared by style resolution and selector matching so both see
+ * identical inputs (single source of truth). */
+static const css_element *build_chain(lxb_dom_element_t *el,
+                                      cch_node chain[CCH_CHAIN_MAX],
+                                      cch_node sibs[CCH_SIB_MAX],
+                                      lxb_dom_node_t *nodes[CCH_CHAIN_MAX]) {
     int n = 0;
     for (lxb_dom_node_t *p = (lxb_dom_node_t *)el;
          p != NULL && p->type == LXB_DOM_NODE_TYPE_ELEMENT && n < CCH_CHAIN_MAX;
@@ -149,11 +152,6 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
     for (int i = 0; i < n; ++i)
         chain[i].el.parent = (i + 1 < n) ? &chain[i + 1].el : NULL;
 
-    /* Sibling context (Hito 23b-9): nth/nsib for every chain node (so a zebra
-     * `tr:nth-child(even) td` can constrain an ancestor), and the prev-sibling
-     * chain for the SUBJECT only, bounded to CCH_SIB_MAX (a `+`/`~` on a
-     * non-subject compound or past the bound fails closed). Each sibling shares
-     * the subject's parent and derives its position from the subject's. */
     for (int i = 0; i < n; ++i)
         sibling_position(nodes[i], &chain[i].el.nth, &chain[i].el.nsib);
     int ns = 0;
@@ -173,12 +171,33 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
         for (int i = 0; i + 1 < ns; ++i)
             sibs[i].el.prev = &sibs[i + 1].el;
     }
+    return (n > 0) ? &chain[0].el : NULL;
+}
+
+/* Resolves the author presentation for one element from the document <style> sheet
+ * plus its own inline style= (inline wins; the css module does the cascade). The
+ * element and its ancestor chain (bounded) become the selector match inputs, so
+ * descendant/child combinators (`div p`, `nav > a`) resolve. Pure (no fetch, no
+ * execution): the css module drops url() and @-rules. */
+css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
+    cch_node chain[CCH_CHAIN_MAX];
+    cch_node sibs[CCH_SIB_MAX];
+    lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
+    const css_element *subject = build_chain(el, chain, sibs, nodes);
 
     /* Inline style= applies to the subject element only. */
     size_t sl = 0;
     const lxb_char_t *st =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
 
-    return css_resolve_el(sheet, (n > 0) ? &chain[0].el : NULL,
-                          (const char *)st, sl);
+    return css_resolve_el(sheet, subject, (const char *)st, sl);
+}
+
+int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel) {
+    if (el == NULL || sel == NULL) return 0;
+    cch_node chain[CCH_CHAIN_MAX];
+    cch_node sibs[CCH_SIB_MAX];
+    lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
+    const css_element *subject = build_chain(el, chain, sibs, nodes);
+    return (subject != NULL) ? csel_matches(sel, subject) : 0;
 }

@@ -290,6 +290,21 @@ never written to disk, cleared every load), `document.cookie` is always empty (s
 without throwing while nothing about the user or device is revealed. With JS off, `<noscript>`
 fallback content is shown.
 
+**Real `querySelector` + a modern DOM surface.** `document.querySelector`/`querySelectorAll` and
+`element.matches`/`closest` run through the **same author-CSS selector engine** the stylesheets use,
+so a selector matches identically from JS and from CSS (type/`.class`/`#id`/`*`/`[attr]` + descendant/
+child/sibling combinators + structural/`:link` pseudo-classes; unsupported constructs fail closed).
+Elements expose `parentNode`/`children`/`firstElementChild`/`classList`/`style`, `DocumentFragment`
+(its children re-parent on append), `createElementNS`, and node identity is cached so `===` works.
+The globals a modern site touches at startup are present but **inert and identity-safe**:
+`matchMedia` never matches, `MutationObserver`/`IntersectionObserver`/`ResizeObserver` never fire,
+`getComputedStyle` returns `""` (no layout/font leak), `performance.timing` is a fixed epoch (no real
+timing leaks), `requestAnimationFrame`/`queueMicrotask` feed a bounded synthetic pump, and the
+viewport reads a fixed normalized `1920` width. `window.open`/`postMessage` stay **undefined** by
+design (no popups, no cross-frame messaging). With this, real homepages like `google.com` render;
+web-component apps (YouTube's Polymer shell) still do not, since custom-element upgrade is not
+implemented.
+
 **External `<script src>` scripts (sovereignty-gated).** For a host you trust **twice** — present in
 both `allow.conf` **and** `js.conf` (headless: `--js=on`) — Freedom also fetches and runs the page's
 *external* scripts, in document order, interleaved with the inline ones. The sandboxed worker never

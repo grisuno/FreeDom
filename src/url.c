@@ -75,6 +75,12 @@ int url_is_https(const char *s) {
 
 url_status url_validate_https(const char *url) {
     if (url == NULL) return URL_ERR_NULL_ARG;
+    /* Fail closed past the hard cap: a URL longer than URL_MAX_LEN is not a URL
+     * the browser will act on (it would not fit the fixed buffers downstream).
+     * Bounded scan (pure C11; no strnlen feature-test macro dependency). */
+    size_t i = 0;
+    while (i <= URL_MAX_LEN && url[i] != '\0') ++i;
+    if (i > URL_MAX_LEN) return URL_ERR_NOT_HTTPS;
     return url_is_https(url) ? URL_OK : URL_ERR_NOT_HTTPS;
 }
 

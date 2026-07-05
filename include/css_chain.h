@@ -4,6 +4,7 @@
 #include <lexbor/html/html.h>
 
 #include "css.h"
+#include "css_select.h"
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -33,5 +34,12 @@
  * combinators, [attr] selectors and the structural pseudo-classes resolve
  * against the real DOM. sheet may be NULL (inline only). */
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet);
+
+/* Nonzero iff the parsed selector *sel matches element `el`, built against the
+ * same bounded ancestor/sibling/attribute context as cch_element_style. This is
+ * the single source of truth for selector matching: the DOM's querySelector and
+ * the author-CSS cascade agree by construction. `sel` is a pre-parsed css_sel
+ * (see csel_parse); NULL args return 0 (fail closed). */
+int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);
 
 #endif /* FREEDOM_CSS_CHAIN_H */

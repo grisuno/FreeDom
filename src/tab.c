@@ -68,8 +68,8 @@ enum { TAG_SUBREQ = 1, TAG_RESULT = 2 };
 
 /* Per-page subresource caps (anti-DoS): a hostile script cannot drive unbounded fetches
  * or amplification through the parent. */
-#define TAB_MAX_SUBREQ        64
-#define TAB_MAX_SUBRESOURCE   ((size_t)(8u * 1024u * 1024u))
+#define TAB_MAX_SUBREQ        128
+#define TAB_MAX_SUBRESOURCE   ((size_t)(16u * 1024u * 1024u))  /* matches SF_DEFAULT_MAX_BODY; modern app bundles (e.g. youtube main) exceed 8 MiB */
 #define TAB_MAX_JS_JOBS       4096   /* pending-job pump bound (promise microtasks) */
 
 /* Handshake bytes (child -> parent) after the confinement attempt. */

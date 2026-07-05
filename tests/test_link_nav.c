@@ -95,6 +95,20 @@ static void test_https_scheme_relative(void **state) {
     assert_string_equal(R.target, "https://b.example/y");
 }
 
+/* Modern bundle URLs exceed the old 4096 target cap (google's xjs URL is 3456 bytes
+ * BEFORE resolution; longer ones exist): a link/script href resolving to > 4096
+ * bytes must still navigate. */
+static void test_resolve_long_bundle_target(void **state) {
+    (void)state;
+    static char href[4601];
+    href[0] = '/';
+    memset(href + 1, 'x', 4499);
+    href[4500] = '\0';
+    assert_int_equal(ln_resolve("https://e.example/page", href, &R), LN_OK);
+    assert_int_equal(R.action, LN_NAVIGATE);
+    assert_true(strlen(R.target) > 4096);   /* used to overflow LN_MAX_TARGET */
+}
+
 /* --- href cleaning --- */
 
 static void test_href_cleaning(void **state) {
@@ -266,6 +280,7 @@ int main(void) {
         cmocka_unit_test(test_https_absolute_path_and_parent),
         cmocka_unit_test(test_https_blocks_downgrade_and_schemes),
         cmocka_unit_test(test_https_scheme_relative),
+        cmocka_unit_test(test_resolve_long_bundle_target),
         cmocka_unit_test(test_href_cleaning),
         cmocka_unit_test(test_file_relative),
         cmocka_unit_test(test_file_parent),

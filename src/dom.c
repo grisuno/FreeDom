@@ -12,6 +12,8 @@
 
 #include "dom.h"
 #include "html_parse.h"
+#include "css_chain.h"
+#include "css_select.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -368,6 +370,142 @@ size_t dom_get_by_class(const dom_index *idx, const char *cls,
                         dom_node_id *out, size_t cap) {
     if (idx == NULL || cls == NULL) return 0;
     return copy_ids(sm_find(&idx->by_class, cls, strlen(cls)), out, cap);
+}
+
+/* --- CSS-selector queries (querySelector / matches / closest) --- */
+
+/* Max complex selectors in one comma-separated list. A longer list is truncated
+ * (anti-DoS): the extra selectors are dropped, which only narrows matches. */
+#define DOM_QS_MAX_SELECTORS 16
+
+/* Reverse lookup: node pointer -> handle, or DOM_NODE_NONE if unindexed. */
+static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node) {
+    dom_node_id id;
+    return pm_get(&idx->rev, node, &id) ? id : DOM_NODE_NONE;
+}
+
+/* Parses a selector list "a, b, c" into up to cap css_sel. Splits only on
+ * TOP-LEVEL commas (respecting [], () and quotes so `[a="x,y"]` and `:not(a,b)`
+ * do not split); each complex selector goes through csel_parse and an
+ * unsupported/malformed one is dropped (fail closed) while the rest survive.
+ * Returns the number parsed. */
+static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap) {
+    if (sel == NULL) return 0;
+    size_t len = strlen(sel), start = 0, n = 0;
+    int br = 0, par = 0;
+    char quote = 0;
+    for (size_t i = 0; i <= len; ++i) {
+        char c = (i < len) ? sel[i] : ',';  /* virtual trailing comma flushes the last */
+        if (quote) { if (c == quote) quote = 0; continue; }
+        switch (c) {
+            case '"': case '\'': quote = c; break;
+            case '[': ++br; break;
+            case ']': if (br) --br; break;
+            case '(': ++par; break;
+            case ')': if (par) --par; break;
+            case ',':
+                if (br == 0 && par == 0) {
+                    if (n < cap) {
+                        css_sel s;
+                        if (csel_parse(sel, start, i, &s)) {
+                            s.order = (int)n; s.rule = 0;
+                            out[n++] = s;
+                        }
+                    }
+                    start = i + 1;
+                }
+                break;
+            default: break;
+        }
+    }
+    return n;
+}
+
+/* Nonzero iff element node `cn` matches any selector in the parsed list. */
+static int node_matches_any(const lxb_dom_node_t *cn,
+                            const css_sel *sels, size_t nsel) {
+    lxb_dom_element_t *e = lxb_dom_interface_element((lxb_dom_node_t *)cn);
+    for (size_t k = 0; k < nsel; ++k)
+        if (cch_element_matches(e, &sels[k])) return 1;
+    return 0;
+}
+
+/* Walks candidate elements under `root` (DOM_NODE_NONE = whole document) in
+ * document order, matching against the parsed list. When find_first, returns the
+ * first matching handle; otherwise fills out[] up to cap, sets *total to the full
+ * count (may exceed cap), and returns DOM_NODE_NONE. */
+static dom_node_id qs_walk(const dom_index *idx, dom_node_id root,
+                           const css_sel *sels, size_t nsel,
+                           dom_node_id *out, size_t cap, size_t *total,
+                           int find_first) {
+    if (total != NULL) *total = 0;
+    lxb_dom_node_t *walk_root, *start;
+    if (root == DOM_NODE_NONE) {
+        if (idx->count == 0) return DOM_NODE_NONE;
+        walk_root = idx->nodes[0];                 /* topmost element */
+        start = walk_root;                         /* document scope: include it */
+    } else {
+        if (!valid(idx, root)) return DOM_NODE_NONE;
+        walk_root = idx->nodes[root];
+        start = node_next(walk_root, walk_root);   /* element scope: descendants only */
+    }
+    size_t cnt = 0;
+    for (lxb_dom_node_t *cn = start; cn != NULL; cn = node_next(cn, walk_root)) {
+        if (cn->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        if (!node_matches_any(cn, sels, nsel)) continue;
+        dom_node_id id = id_of(idx, cn);
+        if (id == DOM_NODE_NONE) continue;         /* unindexed: no handle to expose */
+        if (find_first) return id;
+        if (cnt < cap) out[cnt] = id;
+        ++cnt;
+    }
+    if (total != NULL) *total = cnt;
+    return DOM_NODE_NONE;
+}
+
+dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
+                               const char *selector) {
+    if (idx == NULL || selector == NULL) return DOM_NODE_NONE;
+    css_sel sels[DOM_QS_MAX_SELECTORS];
+    size_t nsel = parse_selector_list(selector, sels, DOM_QS_MAX_SELECTORS);
+    if (nsel == 0) return DOM_NODE_NONE;
+    return qs_walk(idx, root, sels, nsel, NULL, 0, NULL, 1);
+}
+
+size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
+                              const char *selector, dom_node_id *out, size_t cap) {
+    if (idx == NULL || selector == NULL) return 0;
+    css_sel sels[DOM_QS_MAX_SELECTORS];
+    size_t nsel = parse_selector_list(selector, sels, DOM_QS_MAX_SELECTORS);
+    if (nsel == 0) return 0;
+    size_t total = 0;
+    (void)qs_walk(idx, root, sels, nsel, out, cap, &total, 0);
+    return total;
+}
+
+int dom_matches(const dom_index *idx, dom_node_id node, const char *selector) {
+    if (!valid(idx, node) || selector == NULL) return 0;
+    lxb_dom_node_t *n = idx->nodes[node];
+    if (n->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+    css_sel sels[DOM_QS_MAX_SELECTORS];
+    size_t nsel = parse_selector_list(selector, sels, DOM_QS_MAX_SELECTORS);
+    return node_matches_any(n, sels, nsel);
+}
+
+dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
+                        const char *selector) {
+    if (!valid(idx, node) || selector == NULL) return DOM_NODE_NONE;
+    css_sel sels[DOM_QS_MAX_SELECTORS];
+    size_t nsel = parse_selector_list(selector, sels, DOM_QS_MAX_SELECTORS);
+    if (nsel == 0) return DOM_NODE_NONE;
+    for (lxb_dom_node_t *p = idx->nodes[node];
+         p != NULL && p->type == LXB_DOM_NODE_TYPE_ELEMENT; p = p->parent) {
+        if (node_matches_any(p, sels, nsel)) {
+            dom_node_id id = id_of(idx, p);
+            if (id != DOM_NODE_NONE) return id;
+        }
+    }
+    return DOM_NODE_NONE;
 }
 
 size_t dom_document_position(const dom_index *idx, dom_node_id node) {

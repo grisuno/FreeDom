@@ -27,8 +27,10 @@
  * See spec/link_nav.md for the full contract.
  */
 
-/* Fits an https URL (<= URL_MAX_LEN) or a local filesystem path (PATH_MAX). */
-#define LN_MAX_TARGET 4096u
+/* Fits an https URL (<= URL_MAX_LEN, now 8 KiB) or a local filesystem path
+ * (PATH_MAX). Kept a slab above URL_MAX_LEN so a resolved absolute URL never
+ * clips at the ceiling. */
+#define LN_MAX_TARGET 8448u
 
 /* Fits a fragment identifier captured from a clicked href (the part after '#').
  * A longer fragment is dropped (stored as ""); it only feeds a future anchor

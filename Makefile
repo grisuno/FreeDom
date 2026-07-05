@@ -101,7 +101,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
              $(BUILD_DIR)/test_dom_debug
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -170,13 +170,13 @@ $(BUILD_DIR)/test_html_parse: $(TEST_DIR)/test_html_parse.c $(BUILD_DIR)/html_pa
 $(BUILD_DIR)/test_js_sandbox: $(TEST_DIR)/test_js_sandbox.c $(BUILD_DIR)/js_sandbox.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(QJS_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) -isystem $(QJS_DIR) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_os_sandbox: $(TEST_DIR)/test_os_sandbox.c $(BUILD_DIR)/os_sandbox.o | $(BUILD_DIR)
@@ -299,7 +299,7 @@ $(BUILD_DIR)/test_download: $(TEST_DIR)/test_download.c $(BUILD_DIR)/download.o 
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_js_env: $(TEST_DIR)/test_js_env.c $(BUILD_DIR)/js_env.o $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/freebug.o $(QJS_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_js_env: $(TEST_DIR)/test_js_env.c $(BUILD_DIR)/js_env.o $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) -isystem $(QJS_DIR) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_local_store: $(TEST_DIR)/test_local_store.c $(BUILD_DIR)/local_store.o | $(BUILD_DIR)
@@ -424,6 +424,14 @@ fuzz-pv: | $(BUILD_DIR)
 	  $(SRC_DIR)/box_style.c $(SRC_DIR)/html_parse.c \
 	  -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_page_view -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
+
+fuzz-dom: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_dom.c $(SRC_DIR)/dom.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c \
+	  $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/html_parse.c \
+	  -o $(BUILD_DIR)/fuzz_dom $(HP_LIBS)
+	./$(BUILD_DIR)/fuzz_dom -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the PDF-export filename sanitizer (clang + libFuzzer).
 # The page title is hostile remote content: arbitrary bytes -> pe_safe_basename /

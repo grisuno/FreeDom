@@ -110,6 +110,23 @@ static void test_clocks_coarse(void **state) {
     EXPECT(f, "performance.now() >= 0", "true");
 }
 
+/* performance.timing / navigation / getEntries*: present (real analytics read them)
+ * and identity-safe -- every timing field is the same fixed epoch (deltas are 0),
+ * entry lists are empty, so no real navigation timing leaks. */
+static void test_performance_timing_identity_safe(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof performance.timing", "object");
+    EXPECT(f, "performance.timing.responseStart - performance.timing.navigationStart", "0");
+    EXPECT(f, "performance.timing.loadEventEnd - performance.timing.navigationStart", "0");
+    EXPECT(f, "typeof performance.timeOrigin", "number");
+    EXPECT(f, "performance.navigation.type", "0");
+    EXPECT(f, "performance.getEntriesByType('navigation').length", "0");
+    EXPECT(f, "typeof performance.mark", "function");
+    /* Sealed: a script cannot add or replace fields. */
+    EXPECT(f, "try{performance.timing.responseStart=5}catch(e){};"
+              "performance.timing.responseStart === performance.timing.navigationStart", "true");
+}
+
 /* --- the API cannot be hijacked --- */
 
 static void test_unforgeable(void **state) {
@@ -267,6 +284,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_navigator_identity, setup, teardown),
         cmocka_unit_test_setup_teardown(test_screen_bucketed, setup, teardown),
         cmocka_unit_test_setup_teardown(test_clocks_coarse, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_performance_timing_identity_safe, setup, teardown),
         cmocka_unit_test_setup_teardown(test_unforgeable, setup, teardown),
         cmocka_unit_test(test_screen_edges),
         cmocka_unit_test(test_canvas_readback),

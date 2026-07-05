@@ -332,6 +332,103 @@ static void test_construction_invalid_args(void **state) {
     assert_int_equal(dom_set_attribute(idx, DOM_NODE_NONE, "id", "x"), DOM_ERR_NULL_ARG);
 }
 
+/* --- CSS-selector queries (querySelector / matches / closest) --- */
+
+/* Fixture tree (inside body): div#main.container.box > [ p.text "Hello",
+ * p.text.muted "World", button#go.btn "Go" ]. */
+
+static void test_query_selector_type_class_id(void **state) {
+    dom_index *idx = IDX(state);
+    /* First p.text in document order == the "Hello" p == first result of getByTag. */
+    dom_node_id buf[8];
+    dom_get_by_tag(idx, "p", buf, 8);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p.text"), buf[0]);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "#go"),
+                     dom_get_element_by_id(idx, "go"));
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "button#go.btn"),
+                     dom_get_element_by_id(idx, "go"));
+    /* No match -> DOM_NODE_NONE. */
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "marquee"), DOM_NODE_NONE);
+}
+
+static void test_query_selector_all_counts(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id buf[8];
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "p.text", buf, 8), 2);
+    /* Selector list: p, button -> 3 elements. */
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "p, button", buf, 8), 3);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, ".muted", buf, 8), 1);
+    /* total may exceed cap; results are still document-ordered. */
+    assert_true(dom_precedes(idx, buf[0], buf[0]) == 0);
+}
+
+static void test_query_selector_combinators(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    /* Child combinator: only a direct child button of #main. */
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "div#main > button.btn"), go);
+    /* Descendant combinator. */
+    dom_node_id buf[8];
+    dom_get_by_tag(idx, "p", buf, 8);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, ".container p"), buf[0]);
+    /* Adjacent sibling: p.muted immediately after the first p. */
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p + p.muted"), buf[1]);
+}
+
+static void test_query_selector_nth_and_structural(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id buf[8];
+    dom_get_by_tag(idx, "p", buf, 8);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p:first-child"), buf[0]);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p:nth-child(2)"), buf[1]);
+    /* :last-child scoped inside #main is the button (its last child); at document
+     * scope the first :last-child is <html> itself, so scope the query. */
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    assert_int_equal(dom_query_selector(idx, main_id, ":last-child"),
+                     dom_get_element_by_id(idx, "go"));
+}
+
+static void test_query_selector_scope_is_descendants_only(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    /* Element scope excludes the element itself: querying #main for "div" finds none. */
+    assert_int_equal(dom_query_selector(idx, main_id, "div"), DOM_NODE_NONE);
+    /* But document scope finds the div. */
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "div#main"), main_id);
+    /* Descendants of #main: the two p's + the button. */
+    dom_node_id buf[8];
+    assert_int_equal(dom_query_selector_all(idx, main_id, "p", buf, 8), 2);
+}
+
+static void test_matches_and_closest(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    assert_true(dom_matches(idx, go, "button#go.btn"));
+    assert_true(dom_matches(idx, go, "div > button"));
+    assert_false(dom_matches(idx, go, "p"));
+    /* closest walks up including self. */
+    assert_int_equal(dom_closest(idx, go, "button"), go);
+    assert_int_equal(dom_closest(idx, go, "div.container"), main_id);
+    assert_int_equal(dom_closest(idx, go, "table"), DOM_NODE_NONE);
+}
+
+static void test_query_selector_fail_closed(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id buf[8];
+    /* Unsupported constructs drop the whole selector -> no match (never a throw). */
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p::before"), DOM_NODE_NONE);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, ":not(div)"), DOM_NODE_NONE);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, ""), DOM_NODE_NONE);
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "@#$%", buf, 8), 0);
+    /* But a valid selector in a list survives an invalid sibling. */
+    assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "p::before, p.text", buf, 8), 2);
+    /* NULL args fail closed. */
+    assert_int_equal(dom_query_selector(NULL, DOM_NODE_NONE, "p"), DOM_NODE_NONE);
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, NULL), DOM_NODE_NONE);
+    assert_int_equal(dom_matches(idx, DOM_NODE_NONE, "p"), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_args),
@@ -357,6 +454,13 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_remove_attribute, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_set_inner_html, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_construction_invalid_args, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_query_selector_type_class_id, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_query_selector_all_counts, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_query_selector_combinators, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_query_selector_nth_and_structural, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_query_selector_scope_is_descendants_only, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_matches_and_closest, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_query_selector_fail_closed, setup_doc, teardown_doc),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

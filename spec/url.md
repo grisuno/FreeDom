@@ -22,7 +22,12 @@ envoltorios finos para no romper su API ni sus pruebas.
 ## 1. Tipos
 
 ```c
-#define URL_MAX_LEN 2048u  /* tope duro para cualquier URL sobre la que actuamos */
+#define URL_MAX_LEN 8192u  /* tope duro para cualquier URL sobre la que actuamos.
+                            * Subido de 2048 (2026-07-05): las URLs de bundle de la
+                            * web moderna exceden 2048 (el xjs de google.com mide
+                            * 3456 bytes) y el tope las hacía irresolubles; 8192 es
+                            * el límite práctico de navegadores/CDNs. Sigue siendo
+                            * anti-DoS: solo acota buffers de stack. */
 
 typedef enum url_status {
     URL_OK = 0,

@@ -22,8 +22,12 @@
  * See spec/url.md for the full contract.
  */
 
-/* Hard cap for any single URL the browser will act on. */
-#define URL_MAX_LEN 2048u
+/* Hard cap for any single URL the browser will act on. Sized for the modern
+ * web: bundler URLs on real sites carry long query strings (e.g. google's
+ * /xjs/_/js/... approaches 3.5 KiB), so the classic 2 KiB ceiling silently
+ * rejected legitimate subresource fetches. 8 KiB matches the de-facto server
+ * limit (nginx large_client_header_buffers, Apache LimitRequestLine). */
+#define URL_MAX_LEN 8192u
 
 typedef enum url_status {
     URL_OK = 0,

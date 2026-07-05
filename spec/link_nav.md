@@ -27,7 +27,7 @@ Trust). Un fragmento (`#id`) da `LN_SAME_DOCUMENT` (no navega, aún sin scroll a
 ## 1. Tipos
 
 ```c
-#define LN_MAX_TARGET 4096u    /* cabe una URL https (<=2048) o una ruta de fichero (PATH_MAX) */
+#define LN_MAX_TARGET 8448u    /* cabe una URL https (<= URL_MAX_LEN 8192) o una ruta de fichero (PATH_MAX) */
 #define LN_MAX_FRAGMENT 256u   /* identificador de fragmento (parte tras '#'); si no cabe, "" */
 
 typedef enum ln_action {

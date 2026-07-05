@@ -63,6 +63,21 @@ static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
     return JS_NewFloat64(ctx, (double)fp_coarsen_time_ms((uint64_t)elapsed));
 }
 
+/* Inert helpers for the performance surface: a no-op and an empty-array getter.
+ * getEntriesByType/mark/measure exist on real pages; returning nothing leaks no
+ * timing (Zero Knowledge) while keeping analytics scripts from throwing. */
+static JSValue m_noop(JSContext *ctx, JSValueConst this_val,
+                      int argc, JSValueConst *argv) {
+    (void)ctx; (void)this_val; (void)argc; (void)argv;
+    return JS_UNDEFINED;
+}
+
+static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
+                             int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc; (void)argv;
+    return JS_NewArray(ctx);
+}
+
 /* --- read-only property helpers --- */
 
 /* Always takes ownership of v: JS_DefinePropertyValueStr consumes it (freeing it
@@ -150,6 +165,50 @@ static int build_screen(JSContext *ctx, JSValueConst global, int w, int h) {
                                       JS_PROP_ENUMERABLE) < 0) ? -1 : 0;
 }
 
+/* PerformanceTiming (deprecated but still read by real analytics, e.g. google's
+ * timing.responseStart). Identity-safe: every field is the SAME fixed epoch, so
+ * all deltas are 0 ("loaded instantly") and no real navigation timing leaks. */
+static const char *const PERF_TIMING_FIELDS[] = {
+    "navigationStart", "unloadEventStart", "unloadEventEnd", "redirectStart",
+    "redirectEnd", "fetchStart", "domainLookupStart", "domainLookupEnd",
+    "connectStart", "connectEnd", "secureConnectionStart", "requestStart",
+    "responseStart", "responseEnd", "domLoading", "domInteractive",
+    "domContentLoadedEventStart", "domContentLoadedEventEnd", "domComplete",
+    "loadEventStart", "loadEventEnd"
+};
+#define PERF_ORIGIN_EPOCH 1700000000000.0
+
+static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
+                  JSCFunction *fn) {
+    return def_val(ctx, obj, name, JS_NewCFunction(ctx, fn, name, 0));
+}
+
+static int build_perf_timing(JSContext *ctx, JSValueConst perf) {
+    JSValue timing = JS_NewObject(ctx);
+    if (JS_IsException(timing)) return -1;
+    for (size_t i = 0; i < sizeof PERF_TIMING_FIELDS / sizeof PERF_TIMING_FIELDS[0]; ++i) {
+        if (def_val(ctx, timing, PERF_TIMING_FIELDS[i],
+                    JS_NewFloat64(ctx, PERF_ORIGIN_EPOCH)) != 0) {
+            JS_FreeValue(ctx, timing);
+            return -1;
+        }
+    }
+    JS_PreventExtensions(ctx, timing);
+    return def_val(ctx, perf, "timing", timing);
+}
+
+static int build_perf_navigation(JSContext *ctx, JSValueConst perf) {
+    JSValue nav = JS_NewObject(ctx);
+    if (JS_IsException(nav)) return -1;
+    if (def_int(ctx, nav, "type", 0) != 0 ||
+        def_int(ctx, nav, "redirectCount", 0) != 0) {
+        JS_FreeValue(ctx, nav);
+        return -1;
+    }
+    JS_PreventExtensions(ctx, nav);
+    return def_val(ctx, perf, "navigation", nav);
+}
+
 static int build_performance(JSContext *ctx, JSValueConst global) {
     JSValue perf = JS_NewObject(ctx);
     if (JS_IsException(perf)) return -1;
@@ -160,7 +219,21 @@ static int build_performance(JSContext *ctx, JSValueConst global) {
     JS_FreeValue(ctx, origin); /* JS_NewCFunctionData retains its own copy */
 
     /* def_val takes ownership of now (consumed even on failure). */
-    if (def_val(ctx, perf, "now", now) != 0) { JS_FreeValue(ctx, perf); return -1; }
+    int ok = def_val(ctx, perf, "now", now) == 0
+          && def_val(ctx, perf, "timeOrigin",
+                     JS_NewFloat64(ctx, PERF_ORIGIN_EPOCH)) == 0
+          && build_perf_timing(ctx, perf) == 0
+          && build_perf_navigation(ctx, perf) == 0
+          && def_fn(ctx, perf, "getEntries", m_empty_array) == 0
+          && def_fn(ctx, perf, "getEntriesByType", m_empty_array) == 0
+          && def_fn(ctx, perf, "getEntriesByName", m_empty_array) == 0
+          && def_fn(ctx, perf, "mark", m_noop) == 0
+          && def_fn(ctx, perf, "measure", m_noop) == 0
+          && def_fn(ctx, perf, "clearMarks", m_noop) == 0
+          && def_fn(ctx, perf, "clearMeasures", m_noop) == 0
+          && def_fn(ctx, perf, "clearResourceTimings", m_noop) == 0
+          && def_fn(ctx, perf, "setResourceTimingBufferSize", m_noop) == 0;
+    if (!ok) { JS_FreeValue(ctx, perf); return -1; }
     JS_PreventExtensions(ctx, perf);
     return (JS_DefinePropertyValueStr(ctx, global, "performance", perf,
                                       JS_PROP_ENUMERABLE) < 0) ? -1 : 0;

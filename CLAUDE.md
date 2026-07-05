@@ -194,8 +194,9 @@ Targets:
 - `make test` — compila y ejecuta la suite CMocka. Hasta que exista la implementación de un
   módulo, **enlaza con fallo a propósito** (estado rojo de TDD).
 - `make asan` — la misma suite bajo AddressSanitizer + UBSan.
-- `make fuzz` / `fuzz-pv` / `fuzz-js` / `fuzz-img` — libFuzzer (parser HTML / display list
-  `page_view` / sandbox JS / decoder PNG). `make fuzz-afl` — AFL++ sobre el binario headless.
+- `make fuzz` / `fuzz-pv` / `fuzz-js` / `fuzz-img` / `fuzz-dom` — libFuzzer (parser HTML / display
+  list `page_view` / sandbox JS / decoder PNG / selectores `querySelector` sobre DOM real).
+  `make fuzz-afl` — AFL++ sobre el binario headless.
 - `make clean`.
 
 **El Makefile es la única fuente de verdad de los comandos.** Los scripts `*.sh` que duplicaban
@@ -1425,6 +1426,57 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   wrapper ancestro sin caja propia no saca el subárbol del flujo); `visibility` no se soporta aún.
   *(Módulos puros + IPC + E2E visual headless verificados; ventana Wayland interactiva pendiente al
   dueño.)* Ver `[[freedom-interblock-whitespace-cont-item]]`, `[[freedom-flex-per-item]]`.
+- **Hito (JS web moderna) — `querySelector` real + superficie ambiente identity-safe + caps de red
+  para bundles (2026-07-05).** Para que el JS de sitios doblemente confiables (allow.conf ∩ js.conf)
+  **corra de verdad** en la web moderna, sin ceder Zero-Trust/Zero-Knowledge — el pedido del dueño:
+  "que Google/YouTube funcionen bloqueando rastreadores". Tres piezas, todas por el ciclo completo
+  (39 suites, ASan 0, cppcheck 0, fuzz limpio). (a) **Caps de red** (diagnóstico con
+  `--js=on --dump-console`: la URL del bundle `xjs` de Google mide 3456 B > el viejo tope de 2048 →
+  el subrecurso se rechazaba en silencio): `URL_MAX_LEN` 2048→**8192**, `SF_MAX_URL` 8192,
+  `LN_MAX_TARGET` 4096→**8448**, `TAB_MAX_SUBREQ` 64→**128**, `TAB_MAX_SUBRESOURCE` 8→**16 MiB**
+  (= `SF_DEFAULT_MAX_BODY`; el main de YouTube ~10.6 MB). Boyscout: `url_validate_https` **no
+  aplicaba el tope** (delegaba en `url_is_https`, sin chequeo de longitud) → se endureció con un
+  escaneo acotado (C11 puro) que **falla cerrado** más allá de `URL_MAX_LEN`. (b) **`querySelector`/
+  `querySelectorAll`/`matches`/`closest` reales** por el **mismo motor de selectores de autor**
+  (`css_select` vía `css_chain`: única fuente de verdad — un selector matchea igual desde JS que
+  desde una hoja). `cch_element_matches` (puro, extrae `build_chain` compartido con
+  `cch_element_style`); `dom_query_selector*`/`dom_matches`/`dom_closest` en `dom` (parseo de lista
+  con split de comas top-level bracket/paren/quote-aware → `csel_parse` por selector, uno malo se
+  descarta y el resto sobrevive = fail closed; walk del subárbol: `root=DOM_NODE_NONE`=documento,
+  elemento=descendientes **estrictos** como `Element.querySelector`; mapa inverso nodo→handle).
+  `dom.c` ahora depende de `css_chain`/`css`/`css_select`/`css_color` (agregados al link de
+  `test_dom`/`test_js_dom`/`test_js_env`). El selector es hostil → nuevo harness **`make fuzz-dom`**.
+  (c) **Superficie ambiente moderna identity-safe** (el desbloqueo grande): shim de `js_dom`
+  ampliado — **caché de identidad de nodo** (`__wc[h]`, para que `===` funcione: los frameworks lo
+  exigen), navegación (`parentNode`/`children`/`firstElementChild`/`nextElementSibling`/`contains`),
+  `classList` sobre el atributo class, `style` como objeto seteable, **`DocumentFragment`** (`__frag`
+  junta hijos; el `appendChild`/`insertBefore` de un nodo real los **re-parenta**), `cloneNode`/
+  `append`/`prepend`/`remove`, `createElementNS` (ns ignorado → elemento plano), `createDocumentFragment`/
+  `createComment`/`createEvent`, `document` visibility/scripts/forms/links/activeElement; **stubs de
+  constructores** `Element`/`Node`/`HTMLElement`/`Event`/... (vacíos, `instanceof`→false, inocuos);
+  `matchMedia` **nunca matchea**; `MutationObserver`/`IntersectionObserver`/`ResizeObserver`/
+  `PerformanceObserver` **nunca disparan** (sin observación → sin fuga de info); `getComputedStyle`→`''`
+  (ZK: sin fuga de layout/fuente); `requestAnimationFrame`/`requestIdleCallback`/`queueMicrotask`
+  alimentan la cola de timers y **`__fireDeferred` drena en RONDAS acotadas** (≤8 rondas, ≤256 total)
+  para que un timer que agenda otro corra; **viewport normalizado fijo** `innerWidth=1920`
+  (anti-fp, coincide con el ancho de `@media`, no el real). **`performance.timing`/`timeOrigin`/
+  `navigation`/`getEntries*`/`mark`/`measure`** se agregaron en **`js_env`** (el dueño del reloj,
+  antes sellado con solo `now`): los campos de `timing` son todos el mismo epoch fijo (deltas 0, sin
+  fuga de timing real). **INQUEBRANTABLE — `window.open`/`postMessage`/`opener` siguen AUSENTES**
+  (SOP por construcción: sin popups, sin mensajería cross-frame): agregarlos como stub rompió
+  `test_eval_no_network_or_cross_origin_api` (el candado net-off) → revertido; una llamada lanza
+  `ReferenceError` (fail closed). Specs (`dom.md`, `js_dom.md`) + tests (7 en `test_dom`, 8 en
+  `test_js_dom`, 1 en `test_js_env`) + `make test`/`make asan` (exit 0) + cppcheck 0 + fuzz
+  `fuzz-dom` (183k), `fuzz-url` (3M), `fuzz-pv`/`fuzz-css` sin crash/leak/UB + **E2E verificado**:
+  `google.com` **renderiza** (caja de búsqueda, botones, links de footer — PNG revisado); su bundle
+  de 3456 B ahora **carga y ejecuta** hondo en el framework WIZ (de ~5 errores inmediatos a 2
+  internos propietarios como `__wizmanager`, fuera de alcance). **Honestidad sobre lo que NO corre:**
+  **YouTube** es web-components/Polymer y `customElements.define` es no-op (sin upgrade ni Shadow DOM)
+  → su app-shell no renderiza; módulos ES, event loop async real, identidad de nodo a través de
+  re-parseo de `innerHTML`, `insertAdjacentHTML` (no-op, clobbearía), valores reales de
+  `getComputedStyle` — todo diferido. *(Módulos puros + IPC + E2E verificados; ventana Wayland
+  interactiva pendiente al dueño.)* Ver `[[freedom-js-modern-web-surface]]`, `[[freedom-live-js]]`,
+  `[[freedom-parent-gated-xhr]]`, `[[freedom-sop-by-construction]]`.
 
 ### 7.3 Roadmap — por cruzar
 

@@ -122,7 +122,36 @@ dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
  * indexado dinámico best-effort de set. Handle inválido / name NULL => DOM_ERR_NULL_ARG;
  * fallo del backend => DOM_ERR_INTERNAL. */
 dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name);
+
+/* Consultas por selector CSS (querySelector / matches / closest). Reusan el motor
+ * de selectores de autor (css_select vía css_chain): un mismo selector matchea
+ * igual desde JS que desde una hoja de estilo (única fuente de verdad). El selector
+ * es contenido hostil: el parseo está acotado (DOM_QS_MAX_SELECTORS por lista) y
+ * FALLA CERRADO — un selector complejo no soportado/malformado de la lista se
+ * descarta y el resto sobrevive; nunca lanza. `root` acota el recorrido:
+ * DOM_NODE_NONE = documento entero; un elemento válido = SOLO sus descendientes
+ * estrictos (nunca él mismo), como Element.querySelector. Los combinadores igual
+ * resuelven contra la cadena de ancestros REAL de cada candidato. */
+dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
+                               const char *selector);
+size_t      dom_query_selector_all(const dom_index *idx, dom_node_id root,
+                                   const char *selector, dom_node_id *out, size_t cap);
+int         dom_matches(const dom_index *idx, dom_node_id node, const char *selector);
+dom_node_id dom_closest(const dom_index *idx, dom_node_id node, const char *selector);
 ```
+
+### Dado-Cuando-Entonces (querySelector)
+
+- **Dado** un árbol `div#main.container > (p.text, p.text.muted, button#go.btn)`,
+  **cuando** JS pide `document.querySelector('div#main > button')`, **entonces** devuelve
+  el `button` (combinador hijo resuelto contra el ancestro real).
+- **Dado** el mismo árbol, **cuando** se consulta `querySelectorAll('p, button')`, **entonces**
+  devuelve 3 nodos en orden de documento (lista de selectores).
+- **Dado** un selector con pseudo-elemento o `:not()` (`p::before`, `:not(div)`), **cuando** se
+  consulta, **entonces** el selector se descarta y no matchea (fail closed, sin excepción); pero
+  `p::before, p.text` aún matchea los `p.text` (el hermano válido sobrevive).
+- **Dado** `element.querySelector(sel)` sobre `#main`, **cuando** `sel='div'`, **entonces**
+  DOM_NODE_NONE (alcance = descendientes estrictos, el propio `#main` no cuenta).
 
 `dom_get_by_tag`/`dom_get_by_class` escriben hasta `cap` ids en `out` (en orden de documento) y
 devuelven el **total** de coincidencias (que puede exceder `cap`; permite dimensionar el buffer).

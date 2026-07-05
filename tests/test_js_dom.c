@@ -171,6 +171,91 @@ static void test_document_shim_present(void **state) {
     EXPECT(f, "document.getElementById('go').textContent", "Go");
 }
 
+static void test_query_selector_from_js(void **state) {
+    fixture *f = (fixture *)*state;
+    /* Real querySelector over the live DOM via the css_select engine. */
+    EXPECT(f, "document.querySelector('p.text').textContent", "Hello");
+    EXPECT(f, "document.querySelectorAll('p').length", "2");
+    EXPECT(f, "document.querySelector('div#main > button').tagName", "BUTTON");
+    EXPECT(f, "document.querySelectorAll('p, button').length", "3");
+    /* A no-match returns null / empty list, never a throw. */
+    EXPECT(f, "document.querySelector('table') === null", "true");
+    /* Unsupported constructs fail closed (drop the selector, no throw). */
+    EXPECT(f, "document.querySelector('p::before') === null", "true");
+    EXPECT(f, "document.querySelectorAll('@#$').length", "0");
+}
+
+static void test_element_matches_closest_query_from_js(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "document.getElementById('go').matches('button.btn')", "true");
+    EXPECT(f, "document.getElementById('go').matches('p')", "false");
+    EXPECT(f, "document.getElementById('go').closest('div.container').id", "main");
+    /* Element-scoped querySelector is descendants-only. */
+    EXPECT(f, "document.getElementById('main').querySelectorAll('p').length", "2");
+    EXPECT(f, "document.getElementById('main').querySelector('div') === null", "true");
+}
+
+static void test_node_identity_is_cached(void **state) {
+    fixture *f = (fixture *)*state;
+    /* Same handle -> same wrapper object, so === works (frameworks rely on it). */
+    EXPECT(f, "document.getElementById('go') === document.getElementById('go')", "true");
+    EXPECT(f, "document.querySelector('#go') === document.getElementById('go')", "true");
+}
+
+static void test_element_traversal(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "document.getElementById('go').parentNode.id", "main");
+    EXPECT(f, "document.getElementById('main').children.length", "3");
+    EXPECT(f, "document.getElementById('main').firstElementChild.tagName", "P");
+    EXPECT(f, "document.getElementById('main').childElementCount", "3");
+    EXPECT(f, "document.getElementById('main').contains(document.getElementById('go'))", "true");
+}
+
+static void test_classlist_backs_class_attr(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "document.getElementById('go').classList.contains('btn')", "true");
+    EXPECT(f, "var e=document.getElementById('go'); e.classList.add('big');"
+              "e.classList.contains('big') && e.getAttribute('class')", "btn big");
+    EXPECT(f, "var e=document.getElementById('go'); e.classList.remove('btn');"
+              "e.classList.contains('btn')", "false");
+    EXPECT(f, "var e=document.getElementById('go'); e.classList.toggle('on'); e.classList.contains('on')", "true");
+}
+
+static void test_document_fragment_reparents(void **state) {
+    fixture *f = (fixture *)*state;
+    /* Fragment collects children; appending it re-parents them into #main. */
+    EXPECT(f, "var frag=document.createDocumentFragment();"
+              "frag.appendChild(document.createElement('span'));"
+              "frag.appendChild(document.createElement('span'));"
+              "var m=document.getElementById('main');"
+              "m.appendChild(frag);"
+              "m.getElementsByTagName('span').length", "2");
+}
+
+static void test_modern_globals_do_not_throw(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof Element + typeof Node + typeof HTMLElement", "functionfunctionfunction");
+    EXPECT(f, "Node.ELEMENT_NODE", "1");
+    EXPECT(f, "matchMedia('(prefers-color-scheme: dark)').matches", "false");
+    EXPECT(f, "typeof (new MutationObserver(function(){})).observe", "function");
+    EXPECT(f, "var seen=false; requestAnimationFrame(function(){seen=true;});"
+              "__fireDeferred(); seen", "true");
+    EXPECT(f, "getComputedStyle(document.body).getPropertyValue('color')", "");
+    EXPECT(f, "new Event('x').type", "x");
+    EXPECT(f, "document.createElementNS('http://www.w3.org/2000/svg','svg').tagName", "SVG");
+    /* SOP by construction: window.open / postMessage stay undefined (no popups). */
+    EXPECT(f, "typeof window.open + typeof postMessage", "undefinedundefined");
+    /* Normalized viewport (anti-fp): fixed, not the real window size. */
+    EXPECT(f, "window.innerWidth", "1920");
+}
+
+static void test_settimeout_chains_across_rounds(void **state) {
+    fixture *f = (fixture *)*state;
+    /* A timer that schedules another timer runs in a later pump round. */
+    EXPECT(f, "var n=0; setTimeout(function(){ n++; setTimeout(function(){ n++; }); });"
+              "__fireDeferred(); n", "2");
+}
+
 static void test_document_title_set_reflects_in_tree(void **state) {
     fixture *f = (fixture *)*state;
     js_result r;
@@ -647,6 +732,14 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_methods_are_frozen, setup, teardown),
         cmocka_unit_test_setup_teardown(test_no_io_with_dom, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_shim_present, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_query_selector_from_js, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_matches_closest_query_from_js, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_node_identity_is_cached, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_traversal, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_classlist_backs_class_attr, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_document_fragment_reparents, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_modern_globals_do_not_throw, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_settimeout_chains_across_rounds, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_title_set_reflects_in_tree, setup, teardown),
         cmocka_unit_test_setup_teardown(test_set_text_content_reflects_in_tree, setup, teardown),
         cmocka_unit_test_setup_teardown(test_set_text_content_detach_is_memory_safe, setup, teardown),

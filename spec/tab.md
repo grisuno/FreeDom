@@ -126,7 +126,7 @@ crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), c
   fail-closed, TLS-PQ) y responde por la tubería de peticiones `[status:int32][body_len][body][ctype_len][ctype]`
   (refuso = `status 0`, cuerpo vacío). El worker confinado **no tiene socket**: el padre es el único
   que toca la red, re-aplicando TODA la política (un worker comprometido no alcanza un host bloqueado).
-  Caps anti-DoS: `TAB_MAX_SUBREQ` (64) y `TAB_MAX_SUBRESOURCE` (8 MiB). Tras los subrecursos llega
+  Caps anti-DoS: `TAB_MAX_SUBREQ` (128) y `TAB_MAX_SUBRESOURCE` (16 MiB — igual al tope de cuerpo de `secure_fetch`, `SF_DEFAULT_MAX_BODY`; los bundles JS de la web moderna superan los 8 MiB: el principal de youtube.com mide 10,6 MB). Tras los subrecursos llega
   `[TAG_RESULT:uint8]` y luego el resultado de página:
   `[ok: int32][title_len][title][text_len][text][view][navreq_len][navreq][nav_replace: int32]`.
   `OP_CLICK` responde con el mismo formato, pero `navreq_len == 0` y `nav_replace == 0` (la
@@ -148,8 +148,8 @@ crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), c
   (b) status HTTP 2xx;
   (c) Content-Type de JS (vacío/ausente, o que contenga `javascript`/`ecmascript` — un
   `text/html`/`application/json` **no** se evalúa: anti-confusión de tipo);
-  (d) presupuesto de página compartido (`js_set_time_budget`) y caps `TAB_MAX_SUBREQ` (64) /
-  `TAB_MAX_SUBRESOURCE` (8 MiB), los mismos del XHR.
+  (d) presupuesto de página compartido (`js_set_time_budget`) y caps `TAB_MAX_SUBREQ` (128) /
+  `TAB_MAX_SUBRESOURCE` (16 MiB), los mismos del XHR.
   El script evaluado se **nombra por su `src`** (acotado) para que Freebug reporte
   `url:line:col` en sus errores. Un fetch rechazado/fallido deja nota `FB_WARN` y sigue con el
   próximo script. Esto **revierte, solo para hosts doblemente confiables**, la doctrina
@@ -366,9 +366,9 @@ int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
   re-derivan tras los scripts, **entonces** el CSS externo **persiste** en el `child_state`
   (`extern_css`, dueño único, liberado en el reset de página): la re-derivación no re-fetchea.
 - **Anti-DoS:** hasta `HP_MAX_STYLESHEETS` (64) hojas por página; cada respuesta ≤
-  `TAB_MAX_SUBRESOURCE` (8 MiB, cap de wire); el acumulado de CSS externo ≤ `TAB_MAX_EXTERN_CSS`
+  `TAB_MAX_SUBRESOURCE` (16 MiB, cap de wire); el acumulado de CSS externo ≤ `TAB_MAX_EXTERN_CSS`
   (1 MiB — el mismo orden que `PV_MAX_STYLE_BYTES`); una hoja que no cabe entera se **descarta
-  entera** (fail-closed, nunca truncada a media regla). El contador `TAB_MAX_SUBREQ` (64) es
+  entera** (fail-closed, nunca truncada a media regla). El contador `TAB_MAX_SUBREQ` (128) es
   compartido con XHR/scripts.
 - **Gate del padre (Zero Trust, corrección de este hito):** `tab_serve_subreq` consulta
   `tab_subreq_permitted(net_efectivo, css_efectivo, method)` con los flags que el padre

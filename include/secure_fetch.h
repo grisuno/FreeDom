@@ -121,7 +121,7 @@ typedef struct sf_response {
 #define SF_DEFAULT_MAX_BODY    ((size_t)(16u * 1024u * 1024u))
 #define SF_DEFAULT_TIMEOUT_MS  30000L
 #define SF_DEFAULT_MAX_REDIRECTS 10
-#define SF_MAX_URL             2048u  /* hard cap for any single URL we will act on */
+#define SF_MAX_URL             8192u  /* hard cap for any single URL we will act on (matches URL_MAX_LEN; modern bundler URLs exceed 2 KiB) */
 
 /* Initialises process-global transport state (libcurl/OpenSSL) once, from the main
  * thread, before any concurrent sf_get/sf_post. libcurl's implicit init on first use

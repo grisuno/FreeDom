@@ -52,6 +52,20 @@ Objeto global `dom` (solo lectura). Handles = enteros; "ninguno" = `null`.
 | `dom.setAttribute(h, n, v)` | `undefined` | `dom_set_attribute` (re-indexa id/class) |
 | `dom.removeAttribute(h, n)` | `undefined` | `dom_remove_attribute` |
 | `dom.registerClick(h, fn)` | `undefined` | Registra `fn` como handler de click para el nodo `h` (nativo). |
+| `dom.querySelector(root, sel)` | handle \| `null` | `dom_query_selector` (`root=-1` = documento) |
+| `dom.querySelectorAll(root, sel)` | array de handles | `dom_query_selector_all` |
+| `dom.matches(h, sel)` | booleano | `dom_matches` |
+| `dom.closest(h, sel)` | handle \| `null` | `dom_closest` |
+
+**Selectores CSS (`querySelector`/`querySelectorAll`/`matches`/`closest`):** el shim expone
+`document.querySelector(sel)`/`querySelectorAll(sel)` (alcance documento, `root=-1`) y, en el
+wrapper de elemento, `el.querySelector`/`querySelectorAll` (descendientes estrictos),
+`el.matches(sel)` y `el.closest(sel)`. Todos delegan en el **motor de selectores de autor**
+(`css_select` vía `css_chain`): el mismo selector matchea igual desde JS que desde una hoja de
+estilo (única fuente de verdad). El selector es hostil: parseo acotado, **falla cerrado** (un
+selector no soportado —`:not()`, pseudo-elementos— se descarta sin lanzar; un hermano válido de la
+lista sobrevive). Subconjunto soportado = el de `css_select` (tipo/`.clase`/`#id`/`*`/`[attr]` +
+combinadores descendiente/hijo/hermano + pseudo-clases estructurales/`:link`).
 
 **Eventos de click (Stage 4 dispatcher):** `addEventListener('click', fn)` y `element.onclick = fn`
 registran un handler invocable desde C con `jd_fire_click(ctx, node_id)`. El handler recibe un
@@ -184,5 +198,7 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 - Eventos **interactivos** (clic del usuario → handler → re-render): Hito 20e parte 2.
 - Timers **asíncronos** reales (event loop en el worker que empuje vistas nuevas).
 - Getter de `innerHTML` (serialización del subárbol).
-- Scripts externos (`src`, con política de red) y navegación con anclas de fragmento (`#id`).
-- Selectores CSS completos vía `querySelector` (v1 cubre id/tag/class).
+- Navegación con anclas de fragmento (`#id`).
+- Selectores CSS **completos**: `querySelector` cubre el subconjunto de `css_select`
+  (tipo/`.clase`/`#id`/`*`/`[attr]` + combinadores + pseudo-clases estructurales/`:link`); quedan
+  fuera `:not()`/`:is()`/`:where()`/`:has()`, of-type y pseudo-elementos `::` (fail closed).

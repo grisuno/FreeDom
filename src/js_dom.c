@@ -311,6 +311,75 @@ static JSValue m_register_click(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
+/* --- CSS-selector queries (querySelector / matches / closest) --- */
+
+/* dom.querySelector(root, sel): root is a handle or -1 for document scope. */
+static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,
+                                int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id root;
+    if (jd_handle(ctx, argv[0], &root) < 0) return JS_EXCEPTION;
+    const char *sel = JS_ToCString(ctx, argv[1]);
+    if (sel == NULL) return JS_EXCEPTION;
+    dom_node_id h = dom_query_selector(jd_idx(ctx), root, sel);
+    JS_FreeCString(ctx, sel);
+    return jd_handle_or_null(ctx, h);
+}
+
+/* dom.querySelectorAll(root, sel) -> array of handles. */
+static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
+                                    int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id root;
+    if (jd_handle(ctx, argv[0], &root) < 0) return JS_EXCEPTION;
+    const char *sel = JS_ToCString(ctx, argv[1]);
+    if (sel == NULL) return JS_EXCEPTION;
+    const dom_index *idx = jd_idx(ctx);
+    size_t total = dom_query_selector_all(idx, root, sel, NULL, 0);
+
+    JSValue arr = JS_NewArray(ctx);
+    if (JS_IsException(arr)) { JS_FreeCString(ctx, sel); return arr; }
+    if (total > 0) {
+        dom_node_id *buf = (dom_node_id *)malloc(total * sizeof *buf);
+        if (buf == NULL) {
+            JS_FreeCString(ctx, sel);
+            JS_FreeValue(ctx, arr);
+            return JS_ThrowOutOfMemory(ctx);
+        }
+        size_t n = dom_query_selector_all(idx, root, sel, buf, total);
+        if (n > total) n = total;
+        for (size_t i = 0; i < n; ++i)
+            JS_SetPropertyUint32(ctx, arr, (uint32_t)i, JS_NewInt64(ctx, (int64_t)buf[i]));
+        free(buf);
+    }
+    JS_FreeCString(ctx, sel);
+    return arr;
+}
+
+static JSValue m_matches(JSContext *ctx, JSValueConst this_val,
+                         int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    const char *sel = JS_ToCString(ctx, argv[1]);
+    if (sel == NULL) return JS_EXCEPTION;
+    int m = dom_matches(jd_idx(ctx), h, sel);
+    JS_FreeCString(ctx, sel);
+    return JS_NewBool(ctx, m);
+}
+
+static JSValue m_closest(JSContext *ctx, JSValueConst this_val,
+                         int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    const char *sel = JS_ToCString(ctx, argv[1]);
+    if (sel == NULL) return JS_EXCEPTION;
+    dom_node_id r = dom_closest(jd_idx(ctx), h, sel);
+    JS_FreeCString(ctx, sel);
+    return jd_handle_or_null(ctx, r);
+}
+
 static const jd_method JD_METHODS[] = {
     { "nodeCount",      m_node_count,        0 },
     { "getElementById", m_get_element_by_id, 1 },
@@ -333,6 +402,10 @@ static const jd_method JD_METHODS[] = {
     { "removeAttribute", m_remove_attribute, 2 },
     { "setInnerHtml",   m_set_inner_html,    2 },
     { "registerClick",  m_register_click,    2 },
+    { "querySelector",    m_query_selector,     2 },
+    { "querySelectorAll", m_query_selector_all, 2 },
+    { "matches",          m_matches,            2 },
+    { "closest",          m_closest,            2 },
 };
 
 /* A small standard `document` facade over the native handle API, so real page
@@ -343,9 +416,11 @@ static const jd_method JD_METHODS[] = {
 static const char JD_DOCUMENT_SHIM[] =
     "(function(){"
     "  globalThis.__clickRegistry={};"
+    "  var __wc={};"                          /* handle -> wrapper: stable node identity (===) */
     "  function wrap(h){"
     "    if (h===null||h===undefined) return null;"
-    "    var el={_h:h, nodeType:1,"
+    "    if (h in __wc) return __wc[h];"
+    "    var el={_h:h, nodeType:1, ELEMENT_NODE:1, nodeName:'',"
     "      get textContent(){ return dom.textContent(h); },"
     "      set textContent(v){ dom.setText(h, String(v)); },"
     "      getAttribute: function(n){ return dom.getAttribute(h, String(n)); },"
@@ -379,18 +454,63 @@ static const char JD_DOCUMENT_SHIM[] =
     "      set className(v){ dom.setAttribute(h,'class',String(v)); },"
     "      set innerHTML(v){ dom.setInnerHtml(h, String(v)); },"
     "      get innerHTML(){ return ''; },"
-    "      appendChild: function(c){ if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
+    /* A DocumentFragment carries its collected children in __frag; appending the
+     * fragment re-parents each child (its contents), never the fragment node. */
+    "      appendChild: function(c){ if(c&&c.__frag){ for(var i=0;i<c.__frag.length;i++) dom.appendChild(h,c.__frag[i]._h); c.__frag.length=0; return c; } if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
     "      removeChild: function(c){ if(c&&c._h!==undefined) dom.removeChild(h,c._h); return c; },"
+    "      insertBefore: function(n,ref){ if(n&&n.__frag){ for(var i=0;i<n.__frag.length;i++) dom.appendChild(h,n.__frag[i]._h); n.__frag.length=0; return n; } if(n&&n._h!==undefined) dom.appendChild(h,n._h); return n; },"
+    "      replaceChild: function(nw,old){ if(old&&old._h!==undefined) dom.removeChild(h,old._h); if(nw&&nw._h!==undefined) dom.appendChild(h,nw._h); return old; },"
+    "      append: function(){ for(var i=0;i<arguments.length;i++){ var a=arguments[i]; if(a&&a.__frag){ for(var j=0;j<a.__frag.length;j++) dom.appendChild(h,a.__frag[j]._h); a.__frag.length=0; } else if(a&&a._h!==undefined) dom.appendChild(h,a._h); } },"
+    "      prepend: function(){ for(var i=0;i<arguments.length;i++){ var a=arguments[i]; if(a&&a._h!==undefined) dom.appendChild(h,a._h); } },"
+    "      remove: function(){ var p=dom.parent(h); if(p!==null) dom.removeChild(p,h); },"
+    "      cloneNode: function(){ var t=dom.tagName(h); if(t===null) return null; return wrap(dom.createElement(String(t))); },"
+    "      insertAdjacentHTML: function(){}, insertAdjacentElement: function(){}, insertAdjacentText: function(){},"
+    "      get parentNode(){ var p=dom.parent(h); return p===null?null:wrap(p); },"
+    "      get parentElement(){ var p=dom.parent(h); return p===null?null:wrap(p); },"
+    "      get firstChild(){ var c=dom.firstChild(h); return c===null?null:wrap(c); },"
+    "      get firstElementChild(){ var c=dom.firstChild(h); return c===null?null:wrap(c); },"
+    "      get nextSibling(){ var s=dom.nextSibling(h); return s===null?null:wrap(s); },"
+    "      get nextElementSibling(){ var s=dom.nextSibling(h); return s===null?null:wrap(s); },"
+    "      get children(){ var r=[]; var c=dom.firstChild(h); while(c!==null){ r.push(wrap(c)); c=dom.nextSibling(c); } return r; },"
+    "      get childNodes(){ var r=[]; var c=dom.firstChild(h); while(c!==null){ r.push(wrap(c)); c=dom.nextSibling(c); } return r; },"
+    "      get childElementCount(){ var n=0; var c=dom.firstChild(h); while(c!==null){ n++; c=dom.nextSibling(c); } return n; },"
+    "      hasChildNodes: function(){ return dom.firstChild(h)!==null; },"
+    "      contains: function(o){ if(!o||o._h===undefined) return false; for(var p=o._h;p!==null&&p!==undefined;){ if(p===h) return true; p=dom.parent(p); } return false; },"
+    "      getElementsByTagName: function(t){ return wrapList(dom.querySelectorAll(h, String(t))); },"
+    "      getElementsByClassName: function(c){ return wrapList(dom.querySelectorAll(h, '.'+String(c))); },"
     "      addEventListener: function(t,fn){ if(t==='click'&&typeof fn==='function') dom.registerClick(h, fn); },"
-    "      removeEventListener: function(){},"
-    "      style:{}"
+    "      removeEventListener: function(){}, dispatchEvent: function(){ return true; },"
+    "      querySelector: function(s){ return wrap(dom.querySelector(h, String(s))); },"
+    "      querySelectorAll: function(s){ return wrapList(dom.querySelectorAll(h, String(s))); },"
+    "      matches: function(s){ return dom.matches(h, String(s)); },"
+    "      webkitMatchesSelector: function(s){ return dom.matches(h, String(s)); },"
+    "      closest: function(s){ return wrap(dom.closest(h, String(s))); },"
+    "      focus: function(){}, blur: function(){}, click: function(){},"
+    "      scrollIntoView: function(){}, getBoundingClientRect: function(){ return {x:0,y:0,top:0,left:0,right:0,bottom:0,width:0,height:0}; },"
+    /* classList backed by the class attribute (identity-safe: only this element). */
+    "      get classList(){"
+    "        function toks(){ var c=dom.getAttribute(h,'class'); return c?c.split(/\\s+/).filter(Boolean):[]; }"
+    "        function put(a){ dom.setAttribute(h,'class',a.join(' ')); }"
+    "        return { contains:function(x){ return toks().indexOf(String(x))>=0; },"
+    "          add:function(){ var t=toks(); for(var i=0;i<arguments.length;i++){var x=String(arguments[i]); if(t.indexOf(x)<0)t.push(x);} put(t); },"
+    "          remove:function(){ var t=toks(); for(var i=0;i<arguments.length;i++){var j=t.indexOf(String(arguments[i])); if(j>=0)t.splice(j,1);} put(t); },"
+    "          toggle:function(x,f){ x=String(x); var t=toks(); var has=t.indexOf(x)>=0; var add=(f===undefined)?!has:!!f; if(add&&!has)t.push(x); else if(!add&&has)t.splice(t.indexOf(x),1); put(t); return add; },"
+    "          replace:function(a,b){ var t=toks(); var j=t.indexOf(String(a)); if(j>=0){t[j]=String(b);put(t);return true;} return false; },"
+    "          get length(){ return toks().length; }, item:function(i){ return toks()[i]||null; },"
+    "          toString:function(){ return dom.getAttribute(h,'class')||''; } }; },"
+    /* style: a plain settable object (el.style.color='x' works); values are kept
+     * but never rendered from JS (author style is gated separately). */
+    "      style:{ setProperty:function(k,v){ this[String(k)]=String(v); }, getPropertyValue:function(k){ var v=this[String(k)]; return v===undefined?'':v; }, removeProperty:function(k){ var v=this[String(k)]; delete this[String(k)]; return v===undefined?'':v; }, cssText:'' }"
     "    };"
     "    Object.defineProperty(el,'onclick',{set:function(fn){ if(typeof fn==='function') dom.registerClick(h, fn); },get:function(){return null;}});"
+    "    __wc[h]=el;"
     "    return el;"
     "  }"
     "  globalThis.__wrap=wrap;"
     "  function wrapList(hs){ var r=[]; for (var i=0;i<hs.length;i++) r.push(wrap(hs[i])); return r; }"
+    "  globalThis.__wrapList=wrapList;"
     "  var loadCbs=[], timers=[];"
+    "  globalThis.__queueTimer=function(fn){ if(typeof fn==='function') timers.push(fn); };"
     "  function addL(type,fn){ if(typeof fn==='function' &&"
     "    (type==='load'||type==='DOMContentLoaded'||type==='readystatechange')) loadCbs.push(fn); }"
     "  var d={"
@@ -420,7 +540,41 @@ static const char JD_DOCUMENT_SHIM[] =
      * EPHEMERAL in-memory (Zero Knowledge -- never persisted, gone each load). */
     "  Object.defineProperty(d,'cookie',{get:function(){return '';},set:function(){},enumerable:true});"
     "  Object.defineProperty(d,'referrer',{get:function(){return '';},enumerable:true});"
-    "  d.querySelector=function(){return null;}; d.querySelectorAll=function(){return [];};"
+    "  d.querySelector=function(s){ return wrap(dom.querySelector(-1, String(s))); };"
+    "  d.querySelectorAll=function(s){ return wrapList(dom.querySelectorAll(-1, String(s))); };"
+    "  d.getElementsByName=function(n){ return wrapList(dom.querySelectorAll(-1, '[name=\"'+String(n).replace(/\"/g,'')+'\"]')); };"
+    /* createElementNS: the namespace is ignored (SVG/MathML become plain elements),
+     * enough to keep scripts that build namespaced nodes from throwing. */
+    "  d.createElementNS=function(ns,t){ return wrap(dom.createElement(String(t))); };"
+    "  d.createComment=function(t){ return {nodeType:8, textContent:String(t), data:String(t)}; };"
+    /* DocumentFragment: collects appended element children in __frag; a real node's
+     * appendChild/insertBefore re-parents those children (see wrap()). */
+    "  d.createDocumentFragment=function(){ var kids=[]; return {nodeType:11, __frag:kids,"
+    "    appendChild:function(c){ if(c&&c._h!==undefined) kids.push(c); return c; },"
+    "    append:function(){ for(var i=0;i<arguments.length;i++){var a=arguments[i]; if(a&&a._h!==undefined) kids.push(a);} },"
+    "    get childNodes(){ return kids.slice(); }, get children(){ return kids.slice(); },"
+    "    get firstChild(){ return kids.length?kids[0]:null; },"
+    "    querySelector:function(){return null;}, querySelectorAll:function(){return [];} }; };"
+    /* Event/CustomEvent shims so new Event('x')/document.createEvent do not throw. */
+    "  function mkEvent(type,opts){ opts=opts||{}; return {type:String(type),bubbles:!!opts.bubbles,"
+    "    cancelable:!!opts.cancelable,detail:(opts.detail!==undefined?opts.detail:null),defaultPrevented:false,"
+    "    target:null,currentTarget:null,timeStamp:0,"
+    "    preventDefault:function(){this.defaultPrevented=true;},stopPropagation:function(){},"
+    "    stopImmediatePropagation:function(){},initEvent:function(t){this.type=String(t);},"
+    "    initCustomEvent:function(t,b,c,dt){this.type=String(t);this.detail=dt;}}; }"
+    "  d.createEvent=function(t){ return mkEvent('',{}); };"
+    "  globalThis.__mkEvent=mkEvent;"
+    "  Object.defineProperty(d,'hidden',{get:function(){return false;},enumerable:true});"
+    "  Object.defineProperty(d,'visibilityState',{get:function(){return 'visible';},enumerable:true});"
+    "  d.hasFocus=function(){return true;}; d.currentScript=null;"
+    "  d.characterSet='UTF-8'; d.charset='UTF-8'; d.compatMode='CSS1Compat'; d.dir='';"
+    "  Object.defineProperty(d,'activeElement',{get:function(){return tagOne('body');},enumerable:true});"
+    "  Object.defineProperty(d,'scripts',{get:function(){return wrapList(dom.getByTag('script'));},enumerable:true});"
+    "  Object.defineProperty(d,'images',{get:function(){return wrapList(dom.getByTag('img'));},enumerable:true});"
+    "  Object.defineProperty(d,'forms',{get:function(){return wrapList(dom.getByTag('form'));},enumerable:true});"
+    "  Object.defineProperty(d,'links',{get:function(){return wrapList(dom.querySelectorAll(-1,'a[href]'));},enumerable:true});"
+    "  d.dispatchEvent=function(){ return true; };"
+    "  d.implementation={ hasFeature:function(){return true;}, createHTMLDocument:function(){return d;} };"
     "  globalThis.document=d;"
     "  if (typeof globalThis.window==='undefined') globalThis.window=globalThis;"
     "  function memStore(){ var m={};"
@@ -445,16 +599,90 @@ static const char JD_DOCUMENT_SHIM[] =
     "  globalThis.setTimeout=function(fn){ if(typeof fn==='function') timers.push(fn); return timers.length; };"
     "  globalThis.setInterval=function(fn){ if(typeof fn==='function') timers.push(fn); return timers.length; };"
     "  globalThis.clearTimeout=function(){}; globalThis.clearInterval=function(){};"
-    /* Synthetic, bounded "page loaded" pump: fire load handlers, then flush queued
-     * timers ONCE (capped, since this is not a real async event loop). */
+    /* rAF/rIC feed the same synthetic timer queue; the callback gets a fixed
+     * timestamp (identity-safe: no real high-res clock leaks through animation). */
+    "  globalThis.requestAnimationFrame=function(fn){ if(typeof fn==='function') timers.push(function(){ fn(0); }); return timers.length; };"
+    "  globalThis.cancelAnimationFrame=function(){};"
+    "  globalThis.requestIdleCallback=function(fn){ if(typeof fn==='function') timers.push(function(){ fn({didTimeout:false,timeRemaining:function(){return 0;}}); }); return timers.length; };"
+    "  globalThis.cancelIdleCallback=function(){};"
+    "  globalThis.queueMicrotask=function(fn){ if(typeof fn==='function') Promise.resolve().then(fn); };"
+    /* Synthetic, bounded "page loaded" pump: fire load handlers, then drain the
+     * timer queue in bounded ROUNDS (a timer may schedule more timers -- rAF loops,
+     * chained setTimeout). Capped total invocations, since this is not a real async
+     * event loop; microtasks (Promise/queueMicrotask) are drained by js_pump_jobs. */
     "  globalThis.__fireDeferred=function(){"
     "    d.readyState='complete';"
     "    for (var i=0;i<loadCbs.length;i++){ try{ loadCbs[i].call(globalThis); }catch(e){} }"
     "    if (typeof globalThis.onload==='function'){ try{ globalThis.onload(); }catch(e){} }"
     "    if (typeof d.onload==='function'){ try{ d.onload(); }catch(e){} }"
-    "    var n=0; while (timers.length>0 && n<64){ var t=timers.shift(); n++;"
-    "      try{ t.call(globalThis); }catch(e){} }"
+    "    var total=0, rounds=0;"
+    "    while (timers.length>0 && rounds<8 && total<256){"
+    "      var batch=timers; timers=[]; rounds++;"
+    "      for (var j=0;j<batch.length && total<256;j++){ total++; try{ batch[j].call(globalThis); }catch(e){} }"
+    "    }"
     "  };"
+    "})();";
+
+/* Modern ambient surface (Hito JS-web-moderna): benign, identity-safe globals a
+ * real site's scripts touch during startup, so they run without a ReferenceError
+ * or "cannot read property of undefined" instead of aborting. Every value is
+ * inert: DOM interface constructors are empty (instanceof yields false, harmless);
+ * observers never fire (no observation -> no info leak); matchMedia never matches
+ * and getComputedStyle returns "" (Zero Knowledge -- no viewport/layout/font
+ * leak); the viewport reads a fixed normalized size (matches the 1920 width
+ * anti_fp uses for @media, not the real window); window.open returns null and
+ * postMessage is a no-op (no popups, single realm). performance/navigator/screen
+ * are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+ * document shim (uses __wrap/__wrapList/__mkEvent), each define guarded so it
+ * never clobbers an existing global. */
+static const char JD_MODERN_SHIM[] =
+    "(function(){"
+    "  var g=globalThis;"
+    "  function stubCtor(){ function F(){} return F; }"
+    "  ['Node','Element','HTMLElement','HTMLDivElement','HTMLSpanElement','HTMLAnchorElement',"
+    "   'HTMLImageElement','HTMLInputElement','HTMLButtonElement','HTMLScriptElement','HTMLStyleElement',"
+    "   'HTMLDocument','Document','DocumentFragment','ShadowRoot','CharacterData','Text','Comment','Attr',"
+    "   'DOMTokenList','NodeList','HTMLCollection','CSSStyleDeclaration','EventTarget','XMLDocument'].forEach("
+    "    function(n){ if(typeof g[n]==='undefined') g[n]=stubCtor(); });"
+    "  if(g.Node){ g.Node.ELEMENT_NODE=1; g.Node.TEXT_NODE=3; g.Node.COMMENT_NODE=8;"
+    "    g.Node.DOCUMENT_NODE=9; g.Node.DOCUMENT_FRAGMENT_NODE=11; }"
+    "  function evCtor(){ return function(type,opts){ return g.__mkEvent?g.__mkEvent(type,opts):{type:String(type)}; }; }"
+    "  ['Event','CustomEvent','MouseEvent','KeyboardEvent','PointerEvent','UIEvent','FocusEvent',"
+    "   'InputEvent','TouchEvent','WheelEvent','MessageEvent','PopStateEvent','HashChangeEvent',"
+    "   'ErrorEvent','ProgressEvent'].forEach(function(n){ if(typeof g[n]==='undefined') g[n]=evCtor(); });"
+    "  if(typeof g.matchMedia==='undefined') g.matchMedia=function(q){ return {matches:false,"
+    "    media:String(q||''),onchange:null,addListener:function(){},removeListener:function(){},"
+    "    addEventListener:function(){},removeEventListener:function(){},dispatchEvent:function(){return false;}}; };"
+    "  function observer(){ function O(cb){ this._cb=cb; } O.prototype.observe=function(){};"
+    "    O.prototype.unobserve=function(){}; O.prototype.disconnect=function(){};"
+    "    O.prototype.takeRecords=function(){return [];}; return O; }"
+    "  ['MutationObserver','IntersectionObserver','ResizeObserver','PerformanceObserver'].forEach("
+    "    function(n){ if(typeof g[n]==='undefined') g[n]=observer(); });"
+    "  if(typeof g.getComputedStyle==='undefined') g.getComputedStyle=function(){"
+    "    var o={ getPropertyValue:function(){return '';}, getPropertyPriority:function(){return '';},"
+    "      length:0, item:function(){return '';} };"
+    "    return new Proxy(o,{ get:function(t,p){ if(p in t) return t[p]; return ''; } }); };"
+    "  function ro(name,val){ if(typeof g[name]==='undefined'){ try{ Object.defineProperty(g,name,"
+    "    {get:function(){return val;},configurable:true}); }catch(e){ try{ g[name]=val; }catch(e2){} } } }"
+    "  ro('innerWidth',1920); ro('innerHeight',1080); ro('outerWidth',1920); ro('outerHeight',1080);"
+    "  ro('devicePixelRatio',1); ro('scrollX',0); ro('scrollY',0); ro('pageXOffset',0); ro('pageYOffset',0);"
+    "  if(typeof g.scrollTo==='undefined') g.scrollTo=function(){};"
+    "  if(typeof g.scrollBy==='undefined') g.scrollBy=function(){};"
+    "  if(typeof g.scroll==='undefined') g.scroll=function(){};"
+    "  if(typeof g.getSelection==='undefined') g.getSelection=function(){ return {toString:function(){return '';},"
+    "    rangeCount:0,removeAllRanges:function(){},addRange:function(){}}; };"
+    /* NOTE: window.open / postMessage / opener are DELIBERATELY absent (SOP by
+     * construction: no popups, no cross-frame messaging). A call fails closed with
+     * a ReferenceError; test_eval_no_network_or_cross_origin_api locks this. */
+    "  if(typeof g.alert==='undefined') g.alert=function(){};"
+    "  if(typeof g.confirm==='undefined') g.confirm=function(){ return false; };"
+    "  if(typeof g.prompt==='undefined') g.prompt=function(){ return null; };"
+    "  g.self=g; if(typeof g.top==='undefined') g.top=g; if(typeof g.parent==='undefined') g.parent=g;"
+    "  if(typeof g.frames==='undefined') g.frames=g; if(typeof g.frameElement==='undefined') g.frameElement=null;"
+    "  if(typeof g.closed==='undefined') g.closed=false;"
+    "  if(typeof g.CSS==='undefined') g.CSS={ supports:function(){return false;}, escape:function(s){return String(s);} };"
+    "  if(typeof g.customElements==='undefined') g.customElements={ define:function(){},"
+    "    get:function(){return undefined;}, whenDefined:function(){return Promise.resolve();}, upgrade:function(){} };"
     "})();";
 
 /* --- real location + JS-navigation capture (Hito 20e parte 1) --- */
@@ -541,7 +769,14 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
                         "<document-shim>", JS_EVAL_TYPE_GLOBAL);
     int shim_ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
-    return shim_ok ? JD_OK : JD_ERR_INTERNAL;
+    if (!shim_ok) return JD_ERR_INTERNAL;
+
+    /* Install the modern ambient surface (depends on the document shim's helpers). */
+    JSValue r2 = JS_Eval(jsctx, JD_MODERN_SHIM, sizeof JD_MODERN_SHIM - 1,
+                         "<modern-shim>", JS_EVAL_TYPE_GLOBAL);
+    int mod_ok = !JS_IsException(r2);
+    JS_FreeValue(jsctx, r2);
+    return mod_ok ? JD_OK : JD_ERR_INTERNAL;
 }
 
 /* --- capturing console (Freebug) --- */
