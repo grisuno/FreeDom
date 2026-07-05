@@ -87,6 +87,10 @@ typedef struct rd_block {
     int              flex_basis;     /* px, CSS_LEN_AUTO, or CSS_LEN_UNSET */
     int              flex_order;     /* signed, or CSS_LEN_UNSET (unset) */
     int              flex_direction; /* css_flex_direction, 0 (unset -> row) */
+    /* Container-item ordinal: consecutive blocks sharing (cont_id, cont_item) are
+     * fragments of ONE flex/grid item and flow together in one cell. Structure like
+     * cont_* (never gated). -1 = no container. */
+    int              cont_item;
     /* Author box model (Hito 23b-3); set only with caps.css, else 0 / PV_LEN_UNSET.
      * box_l/box_r: left/right insets px; box_w: content-width cap px (0 = none);
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or

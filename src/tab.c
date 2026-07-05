@@ -16,6 +16,7 @@
 #include "tab.h"
 
 #include "anti_fp.h"
+#include "css.h"
 #include "dom.h"
 #include "freebug.h"
 #include "html_parse.h"
@@ -256,6 +257,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
  *            font_family,text_transform,letter_spacing,word_spacing,
  *            shadow_dx,shadow_dy,shadow_color,opacity,valign,text_indent,white_space,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
+ *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,
  *            block_id,
  *            input_type,form_id,form_method, name, value )*
@@ -301,6 +303,12 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t cgap = (int32_t)r->cont_gap;
         int32_t cjust = (int32_t)r->cont_justify;
         int32_t ccols = (int32_t)r->cont_cols;
+        int32_t fgrow = (int32_t)r->flex_grow;
+        int32_t fshrink = (int32_t)r->flex_shrink;
+        int32_t fbasis = (int32_t)r->flex_basis;
+        int32_t forder = (int32_t)r->flex_order;
+        int32_t fdir = (int32_t)r->flex_direction;
+        int32_t citem = (int32_t)r->cont_item;
         int32_t bl = (int32_t)r->box_l;
         int32_t br = (int32_t)r->box_r;
         int32_t bw = (int32_t)r->box_w;
@@ -353,6 +361,12 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
         if (write_full(wfd, &cjust, sizeof cjust) != 0) return -1;
         if (write_full(wfd, &ccols, sizeof ccols) != 0) return -1;
+        if (write_full(wfd, &fgrow, sizeof fgrow) != 0) return -1;
+        if (write_full(wfd, &fshrink, sizeof fshrink) != 0) return -1;
+        if (write_full(wfd, &fbasis, sizeof fbasis) != 0) return -1;
+        if (write_full(wfd, &forder, sizeof forder) != 0) return -1;
+        if (write_full(wfd, &fdir, sizeof fdir) != 0) return -1;
+        if (write_full(wfd, &citem, sizeof citem) != 0) return -1;
         if (write_full(wfd, &bl, sizeof bl) != 0) return -1;
         if (write_full(wfd, &br, sizeof br) != 0) return -1;
         if (write_full(wfd, &bw, sizeof bw) != 0) return -1;
@@ -992,6 +1006,9 @@ static int read_view(int fd, pv_view **out) {
         int32_t shdx = 0, shdy = 0, shcol = -1, opac = -1, valgn = 0;
         int32_t tindent = PV_LEN_UNSET, wspace = 0;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
+        int32_t fgrow = -1, fshrink = -1;
+        int32_t fbasis = CSS_LEN_UNSET, forder = CSS_LEN_UNSET, fdir = 0;
+        int32_t citem = -1;
         int32_t bl = 0, br = 0, bw = 0, bcenter = 0;
         int32_t bmt = PV_LEN_UNSET, bmb = PV_LEN_UNSET;
         int32_t blkid = -1;
@@ -1035,6 +1052,12 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &cgap, sizeof cgap) != 0
          || read_full(fd, &cjust, sizeof cjust) != 0
          || read_full(fd, &ccols, sizeof ccols) != 0
+         || read_full(fd, &fgrow, sizeof fgrow) != 0
+         || read_full(fd, &fshrink, sizeof fshrink) != 0
+         || read_full(fd, &fbasis, sizeof fbasis) != 0
+         || read_full(fd, &forder, sizeof forder) != 0
+         || read_full(fd, &fdir, sizeof fdir) != 0
+         || read_full(fd, &citem, sizeof citem) != 0
          || read_full(fd, &bl, sizeof bl) != 0
          || read_full(fd, &br, sizeof br) != 0
          || read_full(fd, &bw, sizeof bw) != 0
@@ -1080,6 +1103,8 @@ static int read_view(int fd, pv_view **out) {
                             (int)shdy, (int)shcol, (int)opac, (int)valgn, (int)tindent,
                             (int)wspace);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols);
+            pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir);
+            pv_set_cont_item(v, (int)citem);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
             pv_set_block_id(v, (int)blkid);
             pv_set_node_id(v, (dom_node_id)nodeid);

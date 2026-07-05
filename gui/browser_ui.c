@@ -2475,18 +2475,53 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
  * the text and translates the rows. Visual-only structure, applied by default
  * (decoupled from caps.css, which gates only author colors). A run that falls
  * outside the engine's range degrades to plain vertical flow. */
+/* Stage 3: true iff any block in [start, end) declares a flex per-item property.
+ * Without one, the equal-columns path stays in effect (byte-identical default). */
+static int container_has_flex_items(const rd_doc *doc, size_t start, size_t end) {
+    for (size_t k = start; k < end; ++k) {
+        const rd_block *bk = rd_at(doc, k);
+        if (bk->flex_grow >= 0 || bk->flex_shrink >= 0 ||
+            bk->flex_basis != CSS_LEN_UNSET || bk->flex_order != CSS_LEN_UNSET)
+            return 1;
+    }
+    return 0;
+}
+
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th, double content_w,
                              const rd_doc *doc, size_t start, size_t end) {
-    size_t n = end - start;
+    size_t nruns = end - start;
     const rd_block *head = rd_at(doc, start);
     int is_grid = (head->cont_display == BX_DISPLAY_GRID);
-    size_t ncols = is_grid ? (size_t)head->cont_cols : n;
+
+    /* Group consecutive runs into ITEMS by cont_item: inline fragments of one
+     * direct child of the container share an ordinal and flow together in one
+     * cell ("the <a>free</a> web" is ONE item, not three columns). A run without
+     * an ordinal (-1: synthesized runs, old wire) is its own item — collected
+     * table cells carry one ordinal per cell, so cells never merge. */
+    size_t gstart[BT_MAX_CHILDREN + 1];
+    size_t g = 0;
+    int grp_overflow = 0;
+    {
+        int prev_item = -1;
+        int have_prev = 0;
+        for (size_t k = start; k < end; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (!have_prev || bk->cont_item < 0 || bk->cont_item != prev_item) {
+                if (g >= BT_MAX_CHILDREN) { grp_overflow = 1; break; }
+                gstart[g++] = k;
+            }
+            prev_item = bk->cont_item;
+            have_prev = 1;
+        }
+        gstart[g] = end;
+    }
+    size_t ncols = is_grid ? (size_t)head->cont_cols : g;
     if (ncols < 1) ncols = 1;
 
-    if (n == 0 || n > BT_MAX_CHILDREN || ncols > BT_MAX_CHILDREN) {
-        /* Too many cells for the grid engine: degrade to plain flow, but honor each
-         * cell's block_break so a table that overflows the engine still lays out one
+    if (nruns == 0 || grp_overflow || ncols > BT_MAX_CHILDREN) {
+        /* Too many items for the grid engine: degrade to plain flow, but honor each
+         * run's block_break so a table that overflows the engine still lays out one
          * ROW per line (page_view marks the first cell of every <tr>) instead of one
          * continuous blob. This is the Hacker News case (>128 cells). */
         for (size_t k = start; k < end; ++k) {
@@ -2498,21 +2533,87 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         return;
     }
 
+    /* Stage 3: flex-direction column stacks the items vertically at full width
+     * (the row engine below would squeeze them into n side-by-side columns —
+     * exactly wrong for vertical navs). The container gap becomes vertical space
+     * between ITEMS (not between the lines inside one item); column-reverse falls
+     * back to document order (v1). */
+    if (!is_grid && (head->flex_direction == CSS_FD_COLUMN ||
+                     head->flex_direction == CSS_FD_COLUMN_REVERSE)) {
+        for (size_t j = 0; j < g; ++j) {
+            flush_line(L, s, th);
+            if (j > 0 && head->cont_gap > 0)
+                s->cur_top += (double)head->cont_gap;
+            for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
+                const rd_block *bk = rd_at(doc, k);
+                if (k > gstart[j] && bk->block_break) flush_line(L, s, th);
+                s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
+                flow_text_block(cr, w, L, s, th, bk, content_w);
+            }
+        }
+        return;
+    }
+
     flush_line(L, s, th);
     double base_top = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
     s->pending_gap = 0;
 
+    /* Stage 3: per-item flex. pos_of[j] is the layout slot of document item j —
+     * the identity map unless `order` reorders the main axis (stable insertion
+     * sort: equal order keeps document order, matching CSS). An item's flex
+     * values are read from its first run (fragments share them). */
+    int use_flex = !is_grid && container_has_flex_items(doc, start, end);
+    size_t pos_of[BT_MAX_CHILDREN];
+    for (size_t j = 0; j < g; ++j) pos_of[j] = j;
+    if (use_flex) {
+        size_t slot[BT_MAX_CHILDREN];   /* slot[j] = document item at layout slot j */
+        for (size_t j = 0; j < g; ++j) slot[j] = j;
+        for (size_t j = 1; j < g; ++j) {
+            size_t it = slot[j];
+            const rd_block *bi = rd_at(doc, gstart[it]);
+            int oi = (bi->flex_order != CSS_LEN_UNSET) ? bi->flex_order : 0;
+            size_t m = j;
+            while (m > 0) {
+                const rd_block *bj = rd_at(doc, gstart[slot[m - 1]]);
+                int oj = (bj->flex_order != CSS_LEN_UNSET) ? bj->flex_order : 0;
+                if (oj <= oi) break;
+                slot[m] = slot[m - 1];
+                --m;
+            }
+            slot[m] = it;
+        }
+        for (size_t j = 0; j < g; ++j) pos_of[slot[j]] = j;
+    }
+
     bt_node kids[BT_MAX_CHILDREN];
     bt_node root;
     memset(&root, 0, sizeof root);
-    memset(kids, 0, sizeof kids[0] * n);
-    root.display = BX_DISPLAY_GRID;   /* flex row == grid with n columns, one row */
-    root.grid_cols = ncols;
+    memset(kids, 0, sizeof kids[0] * g);
     root.gap = (double)head->cont_gap;
     root.justify = (fx_justify)head->cont_justify;
     root.children = kids;
-    root.child_count = n;
-    for (size_t k = 0; k < n; ++k) kids[k].display = BX_DISPLAY_BLOCK;
+    root.child_count = g;
+    if (use_flex) {
+        /* An item without an explicit basis takes an equal share of the line
+         * (basis auto == content size needs text measured before layout; the
+         * equal share is the flat model's stand-in and matches the default path). */
+        root.display = BX_DISPLAY_FLEX;
+        double share = (content_w - (double)head->cont_gap * (double)(g - 1)) / (double)g;
+        if (share < 1.0) share = 1.0;
+        for (size_t j = 0; j < g; ++j) {
+            const rd_block *bk = rd_at(doc, gstart[j]);
+            bt_node *kid = &kids[pos_of[j]];
+            kid->display = BX_DISPLAY_BLOCK;
+            kid->grow = (bk->flex_grow >= 0) ? (double)bk->flex_grow / 100.0 : 0.0;
+            kid->shrink = (bk->flex_shrink >= 0) ? (double)bk->flex_shrink / 100.0 : 1.0;
+            kid->basis = (bk->flex_basis >= 0) ? (double)bk->flex_basis : share;
+            kid->min_main = 1.0;
+        }
+    } else {
+        root.display = BX_DISPLAY_GRID;   /* flex row == grid with g columns, one row */
+        root.grid_cols = ncols;
+        for (size_t j = 0; j < g; ++j) kids[j].display = BX_DISPLAY_BLOCK;
+    }
 
     /* First pass: column widths (heights still 0). */
     if (bt_layout(&root, content_w) != BT_OK) {
@@ -2525,32 +2626,40 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         return;
     }
 
-    /* Flow each item into L at its column width; record its row range and height. */
+    /* Flow each item into L at its column width; record its row range and height.
+     * A multi-run item flows its fragments inline, breaking a line only where a
+     * run inside the item starts a new block. */
     size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
-    for (size_t k = 0; k < n; ++k) {
+    for (size_t j = 0; j < g; ++j) {
         rc_state si;
         memset(&si, 0, sizeof si);
-        double cw = (kids[k].w < 1.0) ? 1.0 : kids[k].w;
+        bt_node *kid = &kids[pos_of[j]];
+        double cw = (kid->w < 1.0) ? 1.0 : kid->w;
         /* The item's author background paints its own column rect (zebra rows in
          * data tables via tr:nth-child(even), header bands...). */
-        si.bg_rgb = (!w->force_theme) ? rd_at(doc, start + k)->bg_rgb : -1;
         si.bg_w = cw;
         size_t sr = L->nrow;
-        flow_text_block(cr, w, L, &si, th, rd_at(doc, start + k), cw);
+        for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
+            si.bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
+            flow_text_block(cr, w, L, &si, th, bk, cw);
+        }
         flush_line(L, &si, th);
-        row_start[k] = sr;
-        row_count[k] = L->nrow - sr;
-        kids[k].content_h = si.cur_top;
+        row_start[j] = sr;
+        row_count[j] = L->nrow - sr;
+        kid->content_h = si.cur_top;
     }
 
     /* Second pass: final row packing + y now that the heights are known. */
     if (bt_layout(&root, content_w) != BT_OK) return;
 
     /* Translate each item's rows into its column rectangle. */
-    for (size_t k = 0; k < n; ++k) {
-        for (size_t r = row_start[k]; r < row_start[k] + row_count[k]; ++r) {
-            L->rows[r].top += base_top + kids[k].y;
-            L->rows[r].x_off = kids[k].x;
+    for (size_t j = 0; j < g; ++j) {
+        const bt_node *kid = &kids[pos_of[j]];
+        for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r) {
+            L->rows[r].top += base_top + kid->y;
+            L->rows[r].x_off = kid->x;
         }
     }
     s->cur_top = base_top + root.h;
@@ -3774,6 +3883,16 @@ ui_status ui_dump_layout(const rd_doc *doc) {
     printf("=== Freedom layout ===\n");
     printf("content_w=%.0f total_h=%.1f nbox=%zu nrow=%zu npositioned=%zu\n",
            content_w, L.total_h, L.nbox, L.nrow, L.npositioned);
+    /* Rows are the resolved line geometry — x_off/bg_w expose the flex/grid column
+     * a line landed in (Stage 3), which no other dump shows. Text stays out (it is
+     * --dump-dom's job); geometry only, one line per row, agent-parseable. */
+    for (size_t i = 0; i < L.nrow; ++i) {
+        const rc_row *r = &L.rows[i];
+        printf("  row[%zu] top=%.1f h=%.1f x_off=%.1f", i, r->top, r->height, r->x_off);
+        if (r->bg_w > 0.0) printf(" w=%.1f", r->bg_w);
+        if (r->kind == RC_IMAGE) printf(" image");
+        printf("\n");
+    }
     for (size_t i = 0; i < L.nbox; ++i) {
         const rc_box *b = &L.boxes[i];
         printf("  box[%zu] bid=%d x=%.1f top=%.1f w=%.1f h=%.1f\n",

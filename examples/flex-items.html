@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Flex per-item demo (Stage 3)</title>
+<style>
+  .row { display: flex; gap: 12px; }
+  .sidebar { flex: 0 0 200px; background: #e8eef7; }
+  .main { flex: 1; background: #f7f3e8; }
+  .ordered { display: flex; gap: 8px; }
+  .first { order: 1; background: #fbe0e0; }
+  .second { order: 0; background: #e0fbe0; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .stack div { background: #eeeeee; }
+  .grow2 { flex: 2; background: #dcd0f0; }
+  .grow1 { flex: 1; background: #d0ecf0; }
+</style>
+</head>
+<body>
+  <h1>Flex per-item (Stage 3)</h1>
+
+  <h2>1. Sidebar 200px + main flex:1</h2>
+  <div class="row">
+    <div class="sidebar">SIDEBAR fixed 200px basis, grow 0</div>
+    <div class="main">MAIN takes the remaining line: flex 1 1 0. This paragraph is
+    long enough to wrap so the width difference is obvious at a glance.</div>
+  </div>
+
+  <h2>2. order: visual reorder</h2>
+  <div class="ordered">
+    <div class="first">DOC-FIRST (order:1, paints right)</div>
+    <div class="second">DOC-SECOND (order:0, paints left)</div>
+  </div>
+
+  <h2>3. flex-direction: column</h2>
+  <div class="stack">
+    <div>Item one stacked full width</div>
+    <div>Item two stacked full width</div>
+    <div>Item three stacked full width</div>
+  </div>
+
+  <h2>4. grow 2 vs grow 1</h2>
+  <div class="row">
+    <div class="grow2">TWO THIRDS (flex:2)</div>
+    <div class="grow1">ONE THIRD (flex:1)</div>
+  </div>
+
+  <h2>5. no flex properties (regression: equal columns)</h2>
+  <div class="row">
+    <div>equal A</div>
+    <div>equal B</div>
+    <div>equal C</div>
+  </div>
+</body>
+</html>

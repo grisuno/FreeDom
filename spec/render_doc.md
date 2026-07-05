@@ -102,10 +102,13 @@ const char    *rd_image_label(rdp_img_decision d); /* etiqueta del placeholder *
   `letter_spacing`/`word_spacing`/`shadow_*`/`opacity`/`valign`/`text_indent`/`white_space`) se
   gatean igual; con `caps.css` apagado quedan en sus defaults sin efecto (0 / `PV_LEN_UNSET` / -1). El
   `list-style` NO viaja por aquí: ya está horneado en el texto del run por `page_view` (estructura).
-- **Contenedor flex/grid del autor (`cont_id`/`cont_display`/`cont_gap`/`cont_justify`/`cont_cols`):**
-  se transporta **siempre**, con o sin `caps.css`. La maquetación (cajas, columnas, márgenes) es
-  estructura, no estilo del autor: no abre sockets ni filtra nada a la red, así que el camino seguro
-  por defecto la incluye. Solo los **colores** del autor siguen gateados por `caps.css`.
+- **Contenedor flex/grid del autor (`cont_id`/`cont_display`/`cont_gap`/`cont_justify`/`cont_cols`),
+  flex por-item (`flex_grow`/`flex_shrink`/`flex_basis`/`flex_order`/`flex_direction`, Stage 3) e
+  identidad de ítem (`cont_item`):** se transportan **siempre**, con o sin `caps.css`. La maquetación
+  (cajas, columnas, márgenes, distribución flex, a qué ítem pertenece cada run) es estructura, no
+  estilo del autor: no abre sockets ni filtra nada a la red, así que el camino seguro por defecto la
+  incluye. Solo los **colores** del autor siguen gateados por `caps.css`. Defaults sin definir:
+  `-1`/`-1`/`CSS_LEN_UNSET`/`CSS_LEN_UNSET`/`0`/`-1`.
 - `top_level_url` puede ser `NULL` (p. ej. un fichero local): las decisiones de imagen entonces
   **fallan cerrado** (`RDP_IMG_BLOCK_INVALID`) salvo que la capacidad esté apagada
   (`RDP_IMG_BLOCK_DISABLED`, que tiene precedencia).

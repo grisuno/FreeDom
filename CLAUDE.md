@@ -1354,6 +1354,77 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   limpios + `make fuzz-js`/`make fuzz-pv` verdes. *(Núcleo + IPC + integración GUI compilan y pasan
   tests; la verificación visual interactiva en Wayland queda pendiente al dueño.)* Ver
   `[[freedom-node-id-keystone]]`, `[[freedom-click-dispatcher]]`.
+- **Hito Stage 3 — Flex por-item (`flex-grow`/`shrink`/`basis`/`order` + `flex-direction`), 2026-07-05.**
+  El último stage pendiente del motor de layout (`spec/PLAN-layout-engine.md`): los valores por-item
+  que el Hito 23b-7 ya **resolvía** en `css_style` por fin **cambian pixeles**. (a) **Plumbing:** los 5
+  campos que `pv_run`/`rd_block` ya declaraban (Stage 3a a medias: existía `pv_set_flex` pero nadie
+  emitía, el IPC no los serializaba → se desvanecían al cruzar el worker) ahora fluyen completos —
+  `resolve_context` captura el **item** (el elemento inmediatamente interior al contenedor en la
+  caminata de ancestros: el flex item CSS real) + la `flex-direction` del **contenedor**; 5 int32
+  nuevos tras `cont_cols` en `write_view`/`read_view` (mismo orden en ambos); `rd_build` los copia
+  **sin gate** de `caps.css` (estructura, como `cont_*`). (b) **Consumo en `layout_container`:** si
+  algún item declara una propiedad flex, el root pasa de grid-de-columnas-iguales a **`BX_DISPLAY_FLEX`
+  real** alimentando `bt_node.grow/shrink/basis` (la distribución la hace `fx_flex_line`, que ya
+  existía sin usuarios); `order` se honra con un sort de inserción **estable** (empate = orden de
+  documento, como CSS); `flex-direction: column` **apila** los items a ancho completo con el gap como
+  espacio vertical (antes un nav vertical se aplastaba en N columnas — el bug visible de Wikipedia);
+  basis sin definir/auto → cuota igual de la línea (el modelo plano no mide contenido pre-layout). Sin
+  ninguna propiedad flex el camino previo queda **byte-idéntico** (candado de regresión: HN renderiza
+  idéntico px a px). (c) **Fix CSS-correcto encontrado por el ciclo:** el whitespace **hijo directo**
+  del contenedor creaba items anónimos fantasma (columnas vacías que diluían TODO flex/grid ya antes
+  del hito); ahora no se emite (CSS: el whitespace entre items no crea items anónimos); el separador
+  inter-celda de tablas fluidas lleva `cont_id == -1` y no se toca. (d) **Tools (fuente única):**
+  `--dump-dom` imprime `dir/grow/shrink/basis/order` tras `cont=` (solo si el autor los fijó);
+  `--dump-layout` ahora imprime también las **filas** (`row[i] top/h/x_off/w`) — la geometría de línea
+  resuelta que expone la columna flex donde aterrizó cada línea, la única vista del eje principal sin
+  imagen; pantalla, PDF, PNG y ambos dumps consumen el MISMO `layout_doc`/`rd_doc`. Specs
+  (`page_view.md`, `tab.md`, `render_doc.md`, `dom_debug.md`, `freedom.md`, `PLAN-layout-engine.md`) +
+  tests (2 nuevos `page_view` incl. whitespace-no-item, 1 `render_doc` estructura-sin-gate + defaults,
+  1 E2E `tab` round-trip IPC → 39 suites verdes) + `make asan` (exit 0) + fuzz `fuzz-pv` (78k execs
+  extendido, sin crash/leak/UB) + **E2E visual** (`examples/flex-items.html` por `--author-css
+  --download-png` + `--dump-layout`: sidebar 200px + main flex:1 (w=740), `order` invertido (x_off 480
+  vs 0), columna apilada, grow 2:1 = 626.7/313.3 px, caso sin props = columnas iguales; Wikipedia
+  mejora — la fila Donate/Create account/Log in maqueta como fila y los navs verticales apilan; HN
+  **byte-idéntico**). **Fuera de alcance (siguiente tanda del motor):** `align-items/self/content`,
+  `justify-items`, `flex-wrap`, `row-gap`, `grid-template-rows`, `grid-auto-flow`,
+  `grid-column/row: span N`, pesos `fr`, reversión visual de `*-reverse`. *(Módulos puros + IPC + E2E
+  visual headless verificados; ventana Wayland interactiva pendiente al dueño.)* Ver
+  `[[freedom-flex-per-item]]`, `[[freedom-box-engine-and-dispatcher]]`.
+- **Hito (render) — Whitespace inter-bloque no pinta + identidad de ítem de contenedor (`cont_item`)
+  (Wikipedia se lee como en un navegador real), 2026-07-05.** Diagnóstico con las propias tools
+  (`--dump-dom`/`--dump-layout`/PNG, Principio 6): en Wikipedia el **30% de los bloques (473/1592)
+  eran runs de solo-whitespace**, 412 con `block_break` → cada newline del HTML fuente entre `<div>`s
+  pintaba una **línea vacía de ~26px** (~11.000px de página en blanco); y el lead ("the free
+  encyclopedia that anyone can edit") salía **una palabra por línea** porque el path de contenedor
+  trataba **cada run como un ítem** del grid/flex (correcto para celdas recolectadas de tabla,
+  incorrecto para fragmentos inline del mismo hijo). Dos arreglos por el ciclo completo: (a)
+  **regla CSS de cajas anónimas** en `page_view`: un run de solo espacios que **iniciaría un bloque**
+  no se emite y su break queda **pendiente** (`pending_break`) para el primer contenido real del
+  bloque; el espacio separador **en medio** de un bloque (`<b>a</b> <i>b</i>`) se sigue emitiendo
+  (es contenido, candado `test_build_inline_whitespace_kept`); subsume-y-conserva el caso Stage 3
+  (hijo directo del contenedor). (b) **`cont_item`**: `resolve_context` ya identificaba el elemento
+  ítem (hijo directo del contenedor, Stage 3) — ahora `pv_cont_info.item` lo expone y `pv_build` lo
+  mapea a un **ordinal por contenedor** (`pv_item_track`/`item_ordinal`; celda recolectada = un
+  ordinal por celda; texto directo en el contenedor = ítem anónimo por run) → `pv_set_cont_item` →
+  **1 int32 nuevo en `tab.c`** tras los 5 de flex (mismo orden ambos lados) → `rd_block.cont_item`
+  **sin gate** (estructura como `cont_*`) → `layout_container` agrupa **runs consecutivos del mismo
+  (cont_id, cont_item) en UN ítem** que fluye junto en su celda (breaks internos = líneas dentro de
+  la celda; `order`/flex leen del primer run del grupo; el path columna mete el `gap` **entre ítems**,
+  no entre líneas). `--dump-dom` imprime `item=N` tras `cont=`. Boyscout: hallazgo cppcheck en
+  `render_doc.c` endurecido (init `resolved[]=""`, falla cerrado si un resolve devolviera OK sin
+  escribir). Specs (`page_view.md`, `tab.md`, `render_doc.md`, `dom_debug.md`) + tests (4 nuevos
+  `page_view`: inter-bloque/inline-se-conserva/identidad/celdas-distintas; 1 `render_doc`; 1 E2E
+  `tab` por el worker re-exec'd → 39 suites, 0 fallos) + `make asan` (exit 0) + cppcheck limpio +
+  fuzz `fuzz-pv` (95k execs extendido, sin crash/leak/UB) + **E2E visual**: Wikipedia pasa de
+  **25.337px a 18.809px** (whitespace 473→28, los 28 restantes separadores inline legítimos), el
+  lead y el artículo destacado **fluyen inline con sus links** como en un navegador real; HN
+  **misma altura px** (2347), `rich.html` tabla de datos 3 columnas intacta, `box-model`/
+  `css-sheet-layout`/`flex-items` correctos (±px por líneas vacías colapsadas). **Fuera de alcance
+  (siguiente):** los menús dropdown de Wikipedia siguen reservando ~400px invisibles — usan
+  `opacity:0`/`visibility:hidden`/`position:absolute` de overlay cerrado (el `position` de un
+  wrapper ancestro sin caja propia no saca el subárbol del flujo); `visibility` no se soporta aún.
+  *(Módulos puros + IPC + E2E visual headless verificados; ventana Wayland interactiva pendiente al
+  dueño.)* Ver `[[freedom-interblock-whitespace-cont-item]]`, `[[freedom-flex-per-item]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -1526,10 +1597,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   - **Deferred (no bloquean el core):** negative `z-index` (dos-pass painter);
     `right`/`bottom` insets; `position:sticky` con scroll hooks; containing block =
     padding-box (hoy border-box). `position:sticky` cae a `relative` (fail-closed).
-  - **Stages 3 y 4 del plan (`flex/grid per-item` + event dispatcher) siguen
-    pendientes** — son own follow-ups; el plan completo está en
-    `spec/PLAN-layout-engine.md` y `spec/box_engine.md`. Ver
-    `[[freedom-box-engine-and-dispatcher]]`.
+  - **Stage 3 (flex por-item) CERRADO v1 el 2026-07-05** (hito propio en §7.2: grow/
+    shrink/basis/order/direction de extremo a extremo + whitespace-no-item + filas en
+    `--dump-layout`); **Stage 4 (event dispatcher) parcialmente cerrado** (click). Restan del
+    plan: align-items/self, flex-wrap, row-gap/grid-template-rows/span N/pesos `fr`, y más
+    eventos. El plan completo está en `spec/PLAN-layout-engine.md` y `spec/box_engine.md`. Ver
+    `[[freedom-flex-per-item]]`, `[[freedom-box-engine-and-dispatcher]]`.
 - **Hito 23b parte 2 — CSS de autor: más cobertura.** (Parte 1 `@media`+`prefers-color-scheme`, el
   sub-hito **flex/grid desde `<style>`**, el **box model `margin`/`padding`/`width`/`max-width`**
   —Hito 23b-3—, y la **resolución de valores** de `position`/`border`/`box-sizing`/`box-shadow`/flex-y-

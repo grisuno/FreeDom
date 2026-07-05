@@ -187,6 +187,89 @@ static void test_load_carries_author_color(void **state) {
     tab_close(t);
 }
 
+/* Stage 3: the per-item flex values resolved by the worker must survive the IPC
+ * round-trip (write_view/read_view), so the GUI's flex layout can honor them. */
+static void test_load_carries_flex_item(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>F</title></head><body>"
+        "<div style=\"display:flex;flex-direction:column\">"
+        "<div style=\"flex:2;order:3\">grow</div>"
+        "<div>plain</div></div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_grow = 0, saw_plain = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "grow") == 0) {
+            assert_int_equal(r->flex_grow, 200);
+            assert_int_equal(r->flex_shrink, 100);
+            assert_int_equal(r->flex_basis, 0);
+            assert_int_equal(r->flex_order, 3);
+            assert_int_equal(r->flex_direction, CSS_FD_COLUMN);
+            saw_grow = 1;
+        }
+        if (strcmp(r->text, "plain") == 0) {
+            assert_int_equal(r->flex_grow, -1);
+            assert_int_equal(r->flex_shrink, -1);
+            assert_int_equal(r->flex_basis, CSS_LEN_UNSET);
+            assert_int_equal(r->flex_order, CSS_LEN_UNSET);
+            assert_int_equal(r->flex_direction, CSS_FD_COLUMN);
+            saw_plain = 1;
+        }
+    }
+    assert_true(saw_grow);
+    assert_true(saw_plain);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Container-item identity over IPC: inline fragments of the same direct child
+ * share one cont_item ordinal, the next child differs, and the inter-block source
+ * whitespace emits no run at all (no blank lines cross the wire). */
+static void test_load_carries_cont_item(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>I</title></head><body>"
+        "<div style=\"display:grid;grid-template-columns:1fr\">\n"
+        "<p>lead <a href=\"https://e.example/f\">free</a> tail</p>\n"
+        "<p>second</p>\n"
+        "</div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int item_lead = -2, item_free = -3, item_tail = -4, item_second = -5;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "lead ") == 0) item_lead = r->cont_item;
+        if (strcmp(r->text, "free") == 0) item_free = r->cont_item;
+        if (strcmp(r->text, " tail") == 0) item_tail = r->cont_item;
+        if (strcmp(r->text, "second") == 0) item_second = r->cont_item;
+        int blank = 1;
+        for (const char *c = r->text; *c != '\0'; ++c)
+            if (*c != ' ') { blank = 0; break; }
+        assert_false(blank);   /* inter-block whitespace never crosses the wire */
+    }
+    assert_true(item_lead >= 0);
+    assert_int_equal(item_lead, item_free);
+    assert_int_equal(item_lead, item_tail);
+    assert_true(item_second >= 0);
+    assert_int_not_equal(item_second, item_lead);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Stage 0 keystone: the document-order element id assigned by the child must
  * survive the IPC round-trip, so the parent can map a painted block back to the
  * worker's live DOM node. */
@@ -1473,6 +1556,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_returns_view_with_link),
         cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_carries_author_color),
+        cmocka_unit_test(test_load_carries_flex_item),
+        cmocka_unit_test(test_load_carries_cont_item),
         cmocka_unit_test(test_load_carries_node_id),
         cmocka_unit_test(test_click_runs_handler_and_returns_view),
         cmocka_unit_test(test_load_carries_box_decoration),

@@ -5,7 +5,14 @@
 > (the `close_all_boxes` regression that fragmented relative wrappers is fixed;
 > `--dump-layout` verifies the resolved geometry headless); Stage 4 dispatcher
 > **PARCIALMENTE CERRADO** (click handler fires over IPC and GUI wires it). Stage 3
-> (flex/grid per-item) pendiente. Encodes the owner's priority for the next bucket:
+> (flex per-item) **CERRADO v1** (2026-07-05): grow/shrink/basis/order/direction
+> threaded `page_view` → IPC (`tab.c`) → `render_doc` → `layout_container`, which
+> feeds `bt_node.grow/shrink/basis` (real `fx_flex_line` distribution), honors
+> `order` (stable sort) and stacks `flex-direction: column`; whitespace directly
+> inside a container no longer fabricates anonymous items. Deferred from Stage 3:
+> `align-items/self/content`, `flex-wrap`, `row-gap`, `grid-template-rows`,
+> `grid-auto-flow`, `grid-column/row: span N`, and `fr` track weights.
+> Encodes the owner's priority for the next bucket:
 > turn Lexbor + CSS resolved values into a real box tree `(x,y,w,h)` that Cairo paints.
 >
 > Maps to the existing roadmap (CLAUDE.md §7.3): **Hito 23b-8 (motor de cajas)**
@@ -126,14 +133,26 @@ clipping/scroll containers.
 
 ---
 
-## Stage 3 — Box engine: flex/grid per-item
+## Stage 3 — Box engine: flex/grid per-item ✅ CERRADO v1 (2026-07-05)
 
-Honor the per-item fields resolved in 23b-7 inside `bt_layout`'s flex/grid path:
-`flex-grow/shrink/basis/order`, `align-items/self/content`, `justify-items`,
-`flex-direction`/`flex-wrap`, `grid-template-rows`, `row-gap`, `grid-auto-flow`,
-`grid-column/row: span N`. `box_tree` already has `grow/shrink/basis` slots on
-`bt_node` (`include/box_tree.h:46`) — wire the resolved values in and extend
-`flex_layout` for wrap/align where missing. Visual review.
+Honor the per-item fields resolved in 23b-7 inside `bt_layout`'s flex/grid path.
+**Delivered:** `flex-grow/shrink/basis/order` + container `flex-direction` ride
+`pv_run` → IPC → `rd_block` (structure, never gated by caps.css; `pv_set_flex`,
+five int32 after `cont_cols` on the wire); `layout_container` switches to a real
+`BX_DISPLAY_FLEX` root feeding `bt_node.grow/shrink/basis` (so `fx_flex_line`
+distributes the main axis) whenever any item declares a flex property — otherwise
+the equal-columns path is untouched (regression-safe); `order` is honored with a
+stable insertion sort (equal order keeps document order, as CSS mandates);
+`flex-direction: column|column-reverse` stacks items vertically at full width
+with the container gap as vertical spacing (column-reverse keeps document order,
+v1). Item basis unset/auto falls back to an equal share of the line (the flat
+model cannot measure content before layout). Whitespace-only runs whose text node
+is a DIRECT child of the container are no longer emitted (CSS: no anonymous item
+from inter-item whitespace; they used to become ghost columns). `--dump-dom`
+prints `dir/grow/shrink/basis/order` after `cont=`, only when set.
+**Deferred (own follow-up):** `align-items/self/content`, `justify-items`,
+`flex-wrap`, `grid-template-rows`, `row-gap`, `grid-auto-flow`,
+`grid-column/row: span N`, `fr` track weights, `*-reverse` visual reversal.
 
 ---
 

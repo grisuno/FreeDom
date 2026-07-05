@@ -237,6 +237,13 @@ void       tab_eval_result_free(tab_eval_result *r);
   entre todos los scripts y el pump sintético `__fireDeferred`, de modo que aislar los scripts **no
   multiplica** el tope de tiempo; al agotarse, los scripts restantes no se ejecutan (fail-closed).
   Luego se restaura el presupuesto completo para el REPL (`tab_eval`).
+- **Wire de la vista (flex por-item, Stage 3)**: cada run serializa, tras los cinco campos de
+  contenedor (`cont_id..cont_cols`), **seis** `int32` —
+  `flex_grow, flex_shrink, flex_basis, flex_order, flex_direction, cont_item` — en el MISMO orden en
+  `write_view` y `read_view` (desincronizar = basura). Son estructura de maquetación (como `cont_*`):
+  viajan siempre, `render_doc` no los gatea por `caps.css`. `cont_item` es el ordinal del ítem
+  (hijo directo del contenedor) al que pertenece el run (-1 = sin contenedor); runs consecutivos con
+  el mismo `(cont_id, cont_item)` son fragmentos del mismo ítem y la GUI los fluye juntos en una celda.
 - **Wire de consola (Freebug)**: la sección de consola serializa por entrada
   `[level:int32][line:int32][col:int32][flen:size_t][file][elen:size_t][text]`; `flen` está acotado
   por `FB_MAX_FILE_BYTES`, `elen` por `FB_MAX_ENTRY_BYTES` y el conteo por `FB_MAX_ENTRIES`, así un

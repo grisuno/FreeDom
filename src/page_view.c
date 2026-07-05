@@ -162,6 +162,7 @@ static void run_init_common(pv_run *r) {
     r->flex_basis = CSS_LEN_UNSET;
     r->flex_order = CSS_LEN_UNSET;
     r->flex_direction = 0;
+    r->cont_item = -1;
     r->box_l = 0;
     r->box_r = 0;
     r->box_w = 0;
@@ -424,6 +425,11 @@ void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
     r->flex_direction = flex_direction;
 }
 
+void pv_set_cont_item(pv_view *v, int cont_item) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].cont_item = cont_item;
+}
+
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int box_mt, int box_mb) {
     if (v == NULL || v->count == 0) return;
@@ -605,10 +611,38 @@ static int bgcolor_attr(lxb_dom_element_t *el) {
 #define PV_MAX_CONTAINERS   256u
 #define PV_MAX_GRID_COLS    64
 
-/* Nearest-container info attached to a run. */
+/* Nearest-container info attached to a run, plus the flex per-item values (Stage 3):
+ * grow/shrink/basis/order come from the ITEM element (the container's direct child on
+ * the run's ancestor chain); direction from the container itself. Unset sentinels:
+ * grow/shrink -1, basis/order CSS_LEN_UNSET, direction 0. `item` is that same direct
+ * child (NULL = anonymous item: text directly inside the container); pv_build maps it
+ * to the run's cont_item ordinal so inline fragments of one child share one item. */
 typedef struct pv_cont_info {
     int id, display, gap, justify, cols;
+    int grow, shrink, basis, order, direction;
+    const lxb_dom_node_t *item;
 } pv_cont_info;
+
+/* Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for
+ * container cid, node[cid] the direct-child element it belongs to. A run whose item
+ * differs from the tracked one (or is NULL = anonymous) opens the next ordinal, so
+ * consecutive runs of one child share it and nested-container interruptions do not
+ * break the outer container's item continuity. */
+typedef struct pv_item_track {
+    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    int ord[PV_MAX_CONTAINERS];
+} pv_item_track;
+
+/* Ordinal for a run of container `cid` whose direct-child item is `item` (NULL =
+ * anonymous: every such run is its own item). -1 when the run has no container. */
+static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item) {
+    if (cid < 0 || (size_t)cid >= PV_MAX_CONTAINERS) return -1;
+    if (item == NULL || item != tr->node[cid]) {
+        tr->ord[cid]++;
+        tr->node[cid] = item;
+    }
+    return tr->ord[cid];
+}
 
 /* Author box model resolved for a run: horizontal placement (l/r insets, w cap,
  * centered) from the nearest block ancestor that declares a box, plus the leaf
@@ -826,6 +860,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     *li = NULL; *list_depth = 0; *ordered = 0;
     cont->id = -1; cont->display = 0; cont->gap = 0;
     cont->justify = FX_JUSTIFY_START; cont->cols = 0;
+    cont->grow = -1; cont->shrink = -1; cont->basis = CSS_LEN_UNSET;
+    cont->order = CSS_LEN_UNSET; cont->direction = 0;
+    cont->item = NULL;
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     pv_text_ext_reset(ext);
@@ -836,6 +873,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int prev_box_id = -1;  /* the box-carrying block seen one step more inner, for parent linking */
     int tag_bold = 0, tag_italic = 0;
     int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
+    /* Stage 3: the flex ITEM is the element visited just before the container on
+     * this walk (its direct child on the run's path). Track the previous element's
+     * flex values so the container hit can adopt them; text directly inside the
+     * container (anonymous item) has no previous element and keeps the sentinels. */
+    int prev_grow = -1, prev_shrink = -1;
+    int prev_basis = CSS_LEN_UNSET, prev_order = CSS_LEN_UNSET;
+    int have_prev_el = 0;
+    const lxb_dom_node_t *prev_el = NULL;
 
     /* A text node's context starts at its parent element; an ELEMENT passed
      * directly (a collected table cell, an input, an image) starts at itself,
@@ -931,8 +976,20 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 cont->cols = (cs.display == CSS_DISP_GRID)
                              ? (cs.grid_cols > 0 ? cs.grid_cols : 1) : 0;
                 cont->id = container_id(reg, p);
+                /* Stage 3: direction is the CONTAINER's; grow/shrink/basis/order are
+                 * the ITEM's (the element one step more inner on this walk). */
+                cont->direction = (cs.flex_direction != CSS_FD_UNSET) ? cs.flex_direction : 0;
+                if (have_prev_el) {
+                    cont->grow = prev_grow; cont->shrink = prev_shrink;
+                    cont->basis = prev_basis; cont->order = prev_order;
+                    cont->item = prev_el;
+                }
                 got_cont = 1;
             }
+            prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink;
+            prev_basis = cs.flex_basis; prev_order = cs.order;
+            have_prev_el = 1;
+            prev_el = p;
         }
         if (p == base) break;
     }
@@ -1543,6 +1600,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     pv_container_reg reg = { { NULL }, 0 };  /* flex/grid containers, document order */
     pv_box_reg box_reg = { { NULL }, { { 0 } }, 0 };  /* box-carrying blocks + their defs */
     pv_flow_reg flowreg = { { NULL }, { 0 }, 0 };  /* per-table flow-vs-grid decisions */
+    pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
     int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
@@ -1659,6 +1717,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 cext.opacity, cext.valign, cext.text_indent,
                                 cext.white_space);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols);
+                /* Every collected cell is its own grid item (the cell node is the
+                 * item identity), so item-grouping downstream never merges cells. */
+                pv_set_cont_item(v, item_ordinal(&items, cid, n));
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
@@ -1806,6 +1867,23 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         for (const char *c = collapsed; *c != '\0'; ++c) {
             if (*c != ' ') { has_content = 1; break; }
         }
+        /* CSS anonymous-box rules for whitespace-only text: (a) one that would START
+         * a block generates no box at all — each source newline between <div>s used
+         * to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);
+         * the break stays pending so the block's first real content still opens it.
+         * (b) One directly inside a flex/grid container creates no anonymous item
+         * even mid-block (source newlines between items must not become columns).
+         * A mid-block separator space between two inlines is content and IS emitted;
+         * the flowed-table inter-cell separator is appended elsewhere (no break). */
+        if (!has_content) {
+            int direct_in_cont = cont.id >= 0 && (size_t)cont.id < reg.count &&
+                                 n->parent == reg.node[cont.id];
+            if (brk || direct_in_cont) {
+                if (brk) pending_break = 1;
+                free(collapsed);
+                continue;
+            }
+        }
         char *marked = NULL;
         if (li != NULL && li != prev_li && has_content && ext.list_style != CSS_LS_NONE) {
             char mk[32];
@@ -1838,6 +1916,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_bgcolor(v, bg);
         pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
+        pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction);
+        pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
         pv_set_text_ext(v, ext.font_family, ext.text_transform, ext.letter_spacing,
                         ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,

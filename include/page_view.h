@@ -140,6 +140,12 @@ typedef struct pv_run {
     int     flex_basis;   /* px >= 0, CSS_LEN_AUTO, or CSS_LEN_UNSET */
     int     flex_order;   /* signed, or CSS_LEN_UNSET (unset -> 0) */
     int     flex_direction; /* css_flex_direction, 0 (unset -> row) */
+    /* Container-item identity: ordinal of the container's direct child this run
+     * belongs to (the CSS flex/grid item). Consecutive runs sharing (cont_id,
+     * cont_item) are fragments of ONE item and flow together in one cell; each
+     * collected table cell keeps its own ordinal. Structure like cont_*. -1 = no
+     * container. */
+    int     cont_item;
     /* Author box model pre-resolved to px (Hito 23b-3), gated by caps.css. box_l/
      * box_r are the left/right insets (padding + non-auto margin of that side);
      * box_w is the content-width cap (min width/max-width, 0 = none); box_center is
@@ -337,6 +343,18 @@ void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
  * or NULL view. Both append helpers default cont_id to -1 (no container). */
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_gap, int cont_justify, int cont_cols);
+
+/* Stage 3: sets the flex per-item values on the most recently appended run — the
+ * ITEM's resolved grow/shrink (x100, -1 unset), basis (px / CSS_LEN_AUTO /
+ * CSS_LEN_UNSET) and order (CSS_LEN_UNSET unset), plus the CONTAINER's
+ * flex-direction (css_flex_direction, 0 unset -> row). No-op on an empty or NULL
+ * view. The append helpers default them to the unset sentinels. */
+void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
+                 int flex_order, int flex_direction);
+
+/* Sets the container-item ordinal on the most recently appended run (-1 = none).
+ * No-op on an empty or NULL view; the append helpers default cont_item to -1. */
+void pv_set_cont_item(pv_view *v, int cont_item);
 
 /* Sets the author box model on the most recently appended run (left/right insets,
  * width cap, centered flag, and top/bottom margin overrides in px; box_mt/box_mb

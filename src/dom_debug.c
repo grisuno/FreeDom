@@ -197,10 +197,21 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
     if (b->italic) dd_puts(c, " i");
     if (b->indent) dd_printf(c, " indent=%d", b->indent);
 
-    if (b->cont_id >= 0)
+    if (b->cont_id >= 0) {
         dd_printf(c, " cont=#%d(%s cols=%d gap=%d %s)",
                   b->cont_id, dd_display_name(b->cont_display), b->cont_cols,
                   b->cont_gap, dd_justify_name(b->cont_justify));
+        /* Item identity: runs sharing cont/item are fragments of one flex/grid
+         * item and flow together in one cell. */
+        if (b->cont_item >= 0) dd_printf(c, " item=%d", b->cont_item);
+        /* Stage 3 flex per-item: printed only when the author set one, so the
+         * default dump stays byte-identical. dir is the container's. */
+        if (b->flex_direction != 0) dd_printf(c, " dir=%d", b->flex_direction);
+        if (b->flex_grow >= 0)      dd_printf(c, " grow=%d", b->flex_grow);
+        if (b->flex_shrink >= 0)    dd_printf(c, " shrink=%d", b->flex_shrink);
+        if (b->flex_basis >= 0)     dd_printf(c, " basis=%d", b->flex_basis);
+        if (b->flex_order != CSS_LEN_UNSET) dd_printf(c, " order=%d", b->flex_order);
+    }
     if (b->block_id >= 0) dd_printf(c, " box=#%d", b->block_id);
 
     if (b->text_align)    dd_printf(c, " align=%s", dd_align_name(b->text_align));

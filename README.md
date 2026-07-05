@@ -127,7 +127,7 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; the parser now **resolves** `position`/`border`/`box-sizing`/`box-shadow`/`outline`/per-item flex+grid values but does **not paint** them yet (staged for the box-engine milestone); no transforms; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` — now **lays out for real**; the parser resolves `border`/`box-sizing` per-side paint and grid extras (`span N`, `fr` weights, `align-items`) but does not consume them yet; no transforms; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 
@@ -218,8 +218,10 @@ blocks: 7  boxes: 1  containers: 1  has_images: 1
 ```
 
 Each block shows its kind, tag, flags, the flex/grid **container** it joined (`cont=#id`), the
-block-level **box** it belongs to (`box=#id`), and any author style (align/font-size/colors/width
-caps); the `[boxes]` section lists the box-definition tree (placement + decoration). Add
+container **item** it belongs to (`item=N` — runs sharing `cont`/`item` are inline fragments of
+one flex/grid item and flow together in one cell), the block-level **box** it belongs to
+(`box=#id`), and any author style (align/font-size/colors/width caps); the `[boxes]` section
+lists the box-definition tree (placement + decoration). Add
 `--author-css` so the box tree is populated. It is a headless diagnostic — no display required —
 and it is the instrument used to localise the "CSS paint gap". (For the *visual* counterpart, the
 PNG export — `--download-png=PATH`, preferred over PDF — is the one-step, cheapest review artifact.)
@@ -227,10 +229,11 @@ PNG export — `--download-png=PATH`, preferred over PDF — is the one-step, ch
 ### Seeing the resolved geometry: the layout dump (`--dump-layout`)
 
 Where `--dump-dom` shows the render tree (the **input** to the layout engine), `--dump-layout` shows
-the rectangles the box engine actually **produced** (the output): every in-flow box `(x, top, w, h)`
-and every out-of-flow positioned box (with `z-index` and stacking order). Positioning, z-index
-stacking, and wrapper-fragmentation bugs are visible as plain numbers — no display or rasterised
-image needed:
+the rectangles the box engine actually **produced** (the output): every line row `(top, h, x_off, w)`
+— exposing the flex/grid column each line landed in (per-item `flex-grow`/`shrink`/`basis`/`order`
+distribution included) — plus every in-flow box `(x, top, w, h)` and every out-of-flow positioned box
+(with `z-index` and stacking order). Positioning, z-index stacking, flex distribution, and
+wrapper-fragmentation bugs are visible as plain numbers — no display or rasterised image needed:
 
 ```
 $ ./freedom --dump-layout --author-css examples/position-zindex.html
@@ -397,6 +400,23 @@ layout params (`gap`, `justify-content`, `grid-template-columns`) from the same 
 `<style>` rule lays out columns — not only an inline `style=`. Because layout is *structure*,
 not styling, the columns render even with author colors off (only author colors stay gated by
 the toggle). See `examples/css-sheet-layout.html`.
+
+**Flex per-item (Stage 3):** each item's `flex-grow` / `flex-shrink` / `flex-basis` (and the
+`flex` shorthand) drive a real main-axis distribution — `flex: 0 0 200px` sidebar next to a
+`flex: 1` main column works like in a modern browser; `order` reorders items visually (stable,
+document order on ties); `flex-direction: column` stacks items vertically with the container
+gap. Whitespace between items never fabricates ghost columns. Containers whose items declare no
+flex properties keep the equal-column layout. See `examples/flex-items.html`, and
+`--dump-layout` to inspect the resolved columns as numbers.
+
+**Real items, no blank lines (container-item identity + anonymous-box whitespace):** inline
+fragments of one container child (`text <a>link</a> text`) form **one** flex/grid item that flows
+together in its cell — not one column per fragment — because every run carries the ordinal of the
+container child it belongs to (`cont_item`, printed by `--dump-dom` as `item=N`); collected table
+cells keep one ordinal per cell, so data tables still align column by column. And whitespace-only
+text between block elements generates **no box at all** (the CSS anonymous-box rule): the source
+newlines between `<div>`s no longer paint empty lines. On Wikipedia's Main Page this removed
+~6,500 px of blank page and made the lead paragraph read like a real browser render.
 
 **Box model (`margin` / `padding` / `width` / `max-width`):** resolved through the same cascade
 (lengths in `px`, a bare `0`, or `em`/`rem`; `%`/viewport units fail closed). The headline win is

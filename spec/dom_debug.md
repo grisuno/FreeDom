@@ -58,8 +58,14 @@ blocks: <N>  boxes: <M>  containers: <C>  has_images: <0|1>
   #<id> parent=<pid> place(l=<l> r=<r> w=<w> center=<0|1>) bg=<#rrggbb|-> pad(<t>/<r>/<b>/<l>) bord(<tw>/<rw>/<bw>/<lw> <style>) radius=<n> shadow=<0|1> outline=<n>
   ...
 [blocks]
-  #<i> <kind> <tag> [bb] [h<lvl>] [b] [i] [indent=<n>] [cont=#<id>(<flex|grid> cols=<n> gap=<n> <justify>)] [box=#<id>] [align=<kw>] [fscale=<n>] [lscale=<n>] [fg=<#rrggbb>] [bg=<#rrggbb>] [w=<n>] [ins(l=<n> r=<n>)] [center] href=<...> "<text>"
+  #<i> <kind> <tag> [bb] [h<lvl>] [b] [i] [indent=<n>] [cont=#<id>(<flex|grid> cols=<n> gap=<n> <justify>)] [item=<n>] [dir=<n>] [grow=<n>] [shrink=<n>] [basis=<n>] [order=<n>] [box=#<id>] [align=<kw>] [fscale=<n>] [lscale=<n>] [fg=<#rrggbb>] [bg=<#rrggbb>] [w=<n>] [ins(l=<n> r=<n>)] [center] href=<...> "<text>"
 ```
+
+The `dir=`/`grow=`/`shrink=`/`basis=`/`order=` fields (Stage 3 flex per-item) print only when
+the author set them, immediately after the `cont=` annotation they belong to, so the default
+dump stays byte-identical. `item=<n>` is the run's container-item ordinal (`cont_item`): runs
+sharing `cont=#id item=n` are fragments of the same item and flow together in one cell; it prints
+right after `cont=` whenever the run belongs to a container (`cont_item >= 0`).
 
 Concretely, three blocks render as:
 

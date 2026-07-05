@@ -11,6 +11,7 @@
 
 #include "render_doc.h"
 
+#include "css.h"
 #include "url.h"
 
 #include <stdlib.h>
@@ -110,6 +111,12 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->cont_gap = 0;
     b->cont_justify = 0;
     b->cont_cols = 0;
+    b->flex_grow = -1;
+    b->flex_shrink = -1;
+    b->flex_basis = CSS_LEN_UNSET;
+    b->flex_order = CSS_LEN_UNSET;
+    b->flex_direction = 0;
+    b->cont_item = -1;
     b->box_l = 0;
     b->box_r = 0;
     b->box_w = 0;
@@ -183,7 +190,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                  * against the top-level document. The policy decision and the later
                  * fetch must both act on the real absolute URL, or every relative image
                  * (the common case) would be blocked as "invalid URL". */
-                char resolved[URL_MAX_LEN + 1];
+                char resolved[URL_MAX_LEN + 1] = "";
                 const char *img_url = r->src;
                 rdp_img_decision dec;
                 if (top_level_url != NULL && url_is_file(top_level_url)) {
@@ -268,6 +275,14 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->cont_gap = r->cont_gap;
             lb->cont_justify = r->cont_justify;
             lb->cont_cols = r->cont_cols;
+            /* Stage 3: flex per-item values are layout structure like cont_*, so they
+             * are carried regardless of caps.css. */
+            lb->flex_grow = r->flex_grow;
+            lb->flex_shrink = r->flex_shrink;
+            lb->flex_basis = r->flex_basis;
+            lb->flex_order = r->flex_order;
+            lb->flex_direction = r->flex_direction;
+            lb->cont_item = r->cont_item;
             /* Author box model is presentation (it can shrink content to
              * unreadability), so it is gated by caps.css like the colors above. */
             if (caps.css) {

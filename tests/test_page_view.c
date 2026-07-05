@@ -867,6 +867,218 @@ static void test_build_flex_container(void **state) {
     hp_document_free(doc);
 }
 
+/* Stage 3: each run carries the flex ITEM's own resolved values (the direct child
+ * of the container on the run's ancestor chain: grow/shrink/basis x100/px, order)
+ * plus the CONTAINER's flex-direction. flex:1 -> 1 1 0. An item without flex
+ * properties, an anonymous item (text directly in the container) and content
+ * outside any container keep the unset sentinels. */
+static void test_build_flex_item_values(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='display:flex'>"
+        "<div style='flex:1'>main</div>"
+        "<div style='flex:0 0 200px;order:-1'>side</div>"
+        "<div>plain</div>"
+        "</div>"
+        "<div style='display:flex;flex-direction:column'><p>stacked</p></div>"
+        "<div style='display:flex'>anon</div>"
+        "<p>outside</p>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *m = find_text(v, "main");
+    assert_non_null(m);
+    assert_int_equal(m->cont_display, BX_DISPLAY_FLEX);
+    assert_int_equal(m->flex_grow, 100);
+    assert_int_equal(m->flex_shrink, 100);
+    assert_int_equal(m->flex_basis, 0);
+    assert_int_equal(m->flex_order, CSS_LEN_UNSET);
+    assert_int_equal(m->flex_direction, CSS_FD_UNSET);
+
+    const pv_run *s = find_text(v, "side");
+    assert_non_null(s);
+    assert_int_equal(s->flex_grow, 0);
+    assert_int_equal(s->flex_shrink, 0);
+    assert_int_equal(s->flex_basis, 200);
+    assert_int_equal(s->flex_order, -1);
+
+    const pv_run *pl = find_text(v, "plain");
+    assert_non_null(pl);
+    assert_int_equal(pl->flex_grow, -1);
+    assert_int_equal(pl->flex_shrink, -1);
+    assert_int_equal(pl->flex_basis, CSS_LEN_UNSET);
+    assert_int_equal(pl->flex_order, CSS_LEN_UNSET);
+
+    const pv_run *st = find_text(v, "stacked");
+    assert_non_null(st);
+    assert_int_equal(st->flex_direction, CSS_FD_COLUMN);
+    assert_int_equal(st->flex_grow, -1);
+
+    const pv_run *an = find_text(v, "anon");
+    assert_non_null(an);
+    assert_true(an->cont_id >= 0);
+    assert_int_equal(an->flex_grow, -1);
+    assert_int_equal(an->flex_basis, CSS_LEN_UNSET);
+
+    const pv_run *o = find_text(v, "outside");
+    assert_non_null(o);
+    assert_int_equal(o->cont_id, -1);
+    assert_int_equal(o->flex_grow, -1);
+    assert_int_equal(o->flex_direction, CSS_FD_UNSET);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* CSS: whitespace directly inside a flex/grid container creates NO anonymous item
+ * (the source newlines between <p> items must not become layout columns). The
+ * flowed-table inter-cell separator is unaffected (it carries cont_id == -1). */
+static void test_build_flex_whitespace_not_item(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='display:flex'>\n  <p>wa</p>\n  <p>wb</p>\n</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    assert_non_null(find_text(v, "wa"));
+    assert_non_null(find_text(v, "wb"));
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->cont_id < 0 || r->text == NULL) continue;
+        int blank = 1;
+        for (const char *c = r->text; *c != '\0'; ++c)
+            if (*c != ' ') { blank = 0; break; }
+        assert_false(blank);   /* no whitespace-only run inside the container */
+    }
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* CSS anonymous-box rule: whitespace-only text between BLOCK siblings generates no
+ * box at all. Each source newline between <div>s/<p>s used to paint an empty ~26px
+ * line (the Wikipedia blank-page bug: 412 such runs = ~11000px of nothing). The
+ * pending break moves to the block's first real content instead. */
+static void test_build_interblock_whitespace_not_emitted(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div>\n  <p>alpha</p>\n  <p>beta</p>\n</div>\n<p>gamma</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "alpha");
+    const pv_run *b = find_text(v, "beta");
+    const pv_run *g = find_text(v, "gamma");
+    assert_non_null(a);
+    assert_non_null(b);
+    assert_non_null(g);
+    /* The dropped whitespace left its break pending: each block still opens fresh. */
+    assert_true(b->block_break);
+    assert_true(g->block_break);
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text == NULL) continue;
+        int blank = 1;
+        for (const char *c = r->text; *c != '\0'; ++c)
+            if (*c != ' ') { blank = 0; break; }
+        assert_false(blank);   /* no whitespace-only run survives in this document */
+    }
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The separator space BETWEEN two inline elements is content, not an anonymous box:
+ * it flows mid-block (no break) and must keep being emitted. */
+static void test_build_inline_whitespace_kept(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p><b>one</b> <i>two</i></p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    int saw_sep = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strcmp(r->text, " ") == 0) {
+            assert_false(r->block_break);
+            saw_sep = 1;
+        }
+    }
+    assert_true(saw_sep);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Container-item identity: inline fragments of the SAME direct child share one
+ * cont_item ordinal (they are one flex/grid item and must flow together in one
+ * cell); the next child gets a different ordinal; runs outside carry -1. */
+static void test_build_cont_item_identity(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='display:grid;grid-template-columns:1fr'>"
+        "<p>lead <a href='https://e.example/f'>free</a> tail</p>"
+        "<p>second</p>"
+        "</div><p>plain</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *l = find_text(v, "lead ");
+    const pv_run *f = find_text(v, "free");
+    const pv_run *t = find_text(v, " tail");
+    const pv_run *s = find_text(v, "second");
+    const pv_run *p = find_text(v, "plain");
+    assert_non_null(l);
+    assert_non_null(f);
+    assert_non_null(t);
+    assert_non_null(s);
+    assert_non_null(p);
+
+    assert_true(l->cont_id >= 0);
+    assert_int_equal(l->cont_id, f->cont_id);
+    assert_int_equal(l->cont_id, t->cont_id);
+    assert_int_equal(l->cont_id, s->cont_id);
+    assert_true(l->cont_item >= 0);
+    assert_int_equal(l->cont_item, f->cont_item);   /* same <p> = same item */
+    assert_int_equal(l->cont_item, t->cont_item);
+    assert_true(s->cont_item >= 0);
+    assert_int_not_equal(s->cont_item, l->cont_item); /* next child = next item */
+    assert_int_equal(p->cont_item, -1);              /* outside any container */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Data-table regression lock: each collected cell keeps its OWN item ordinal, so
+ * the grid still lays one cell per column (grouping by item must not merge cells). */
+static void test_build_table_cells_distinct_items(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><table><tr><td>ca</td><td>cb</td></tr>"
+        "<tr><td>cc</td><td>cd</td></tr></table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *ca = find_text(v, "ca");
+    const pv_run *cb = find_text(v, "cb");
+    const pv_run *cc = find_text(v, "cc");
+    const pv_run *cd = find_text(v, "cd");
+    assert_non_null(ca);
+    assert_non_null(cb);
+    assert_non_null(cc);
+    assert_non_null(cd);
+    assert_true(ca->cont_id >= 0);
+    assert_int_equal(ca->cont_id, cb->cont_id);
+    assert_int_equal(ca->cont_id, cd->cont_id);
+    assert_true(ca->cont_item >= 0);
+    assert_int_not_equal(ca->cont_item, cb->cont_item);
+    assert_int_not_equal(cb->cont_item, cc->cont_item);
+    assert_int_not_equal(cc->cont_item, cd->cont_item);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_grid_container(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -1811,6 +2023,12 @@ int main(void) {
         cmocka_unit_test(test_build_author_color),
         cmocka_unit_test(test_build_combinator_selectors),
         cmocka_unit_test(test_build_flex_container),
+        cmocka_unit_test(test_build_flex_item_values),
+        cmocka_unit_test(test_build_flex_whitespace_not_item),
+        cmocka_unit_test(test_build_interblock_whitespace_not_emitted),
+        cmocka_unit_test(test_build_inline_whitespace_kept),
+        cmocka_unit_test(test_build_cont_item_identity),
+        cmocka_unit_test(test_build_table_cells_distinct_items),
         cmocka_unit_test(test_build_grid_container),
         cmocka_unit_test(test_build_flex_container_from_sheet),
         cmocka_unit_test(test_build_grid_columns_from_sheet),

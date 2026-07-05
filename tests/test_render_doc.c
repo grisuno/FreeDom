@@ -17,6 +17,7 @@
 #include <cmocka.h>
 
 #include "box_style.h"
+#include "css.h"
 #include "flex_layout.h"
 #include "page_view.h"
 #include "render_doc.h"
@@ -411,6 +412,84 @@ static void test_container_carried_by_default(void **state) {
     pv_free(v);
 }
 
+/* cont_item is structure like cont_*: carried with caps.css off, default -1. */
+static void test_cont_item_carried_by_default(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "frag", NULL), PV_OK);
+    pv_set_container(v, 3, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, 1);
+    pv_set_cont_item(v, 7);
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "bare", NULL), PV_OK);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    int saw_frag = 0, saw_bare = 0;
+    for (size_t i = 0; i < rd_count(d); ++i) {
+        const rd_block *b = rd_at(d, i);
+        if (b->text == NULL) continue;
+        if (strcmp(b->text, "frag") == 0) {
+            assert_int_equal(b->cont_item, 7);
+            saw_frag = 1;
+        }
+        if (strcmp(b->text, "bare") == 0) {
+            assert_int_equal(b->cont_item, -1);
+            saw_bare = 1;
+        }
+    }
+    assert_true(saw_frag);
+    assert_true(saw_bare);
+    rd_free(d);
+    pv_free(v);
+}
+
+/* Stage 3: the per-item flex values are structure like cont_* — carried with and
+ * without caps.css — and a run without them keeps the unset sentinels. */
+static void test_flex_item_carried_by_default(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "item", NULL), PV_OK);
+    pv_set_container(v, 0, BX_DISPLAY_FLEX, 0, FX_JUSTIFY_START, 0);
+    pv_set_flex(v, 300, 0, 120, -2, CSS_FD_COLUMN);
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "bare", NULL), PV_OK);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->flex_grow, 300);
+    assert_int_equal(p->flex_shrink, 0);
+    assert_int_equal(p->flex_basis, 120);
+    assert_int_equal(p->flex_order, -2);
+    assert_int_equal(p->flex_direction, CSS_FD_COLUMN);
+    /* The second block never got pv_set_flex: unset sentinels survive rd_build. */
+    int saw_bare = 0;
+    for (size_t i = 0; i < rd_count(d); ++i) {
+        const rd_block *b = rd_at(d, i);
+        if (b->text != NULL && strcmp(b->text, "bare") == 0) {
+            assert_int_equal(b->flex_grow, -1);
+            assert_int_equal(b->flex_shrink, -1);
+            assert_int_equal(b->flex_basis, CSS_LEN_UNSET);
+            assert_int_equal(b->flex_order, CSS_LEN_UNSET);
+            assert_int_equal(b->flex_direction, CSS_FD_UNSET);
+            saw_bare = 1;
+        }
+    }
+    assert_true(saw_bare);
+    rd_free(d);
+
+    /* caps.css on: identical (structure is not gated). */
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->flex_grow, 300);
+    assert_int_equal(p->flex_basis, 120);
+    assert_int_equal(p->flex_direction, CSS_FD_COLUMN);
+    rd_free(d);
+    pv_free(v);
+}
+
 static void test_block_tag_total(void **state) {
     (void)state;
     rd_block b;
@@ -464,6 +543,8 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_build_null_out),
         cmocka_unit_test(test_container_carried_by_default),
+        cmocka_unit_test(test_cont_item_carried_by_default),
+        cmocka_unit_test(test_flex_item_carried_by_default),
         cmocka_unit_test(test_block_tag_total),
         cmocka_unit_test(test_build_null_view_is_empty),
         cmocka_unit_test(test_heading_paragraph_link),

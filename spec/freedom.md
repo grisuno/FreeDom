@@ -98,8 +98,13 @@ SALIDA --download-png (fichero):
 SALIDA --dump-layout (stdout):
   === Freedom layout ===
   content_w=<W> total_h=<H> nbox=<N> nrow=<R> npositioned=<P>
+    row[<i>] top=<Y> h=<H> x_off=<X> [w=<W>] [image]      (una por fila de línea)
     box[<i>] bid=<block_id> x=<X> top=<Y> w=<W> h=<H>     (una por caja in-flow)
     pos[<i>] box=<box_index> z=<z_index> x=<X> y=<Y> w=<W> h=<H>  (una por positioned)
+  Las filas son la geometría de línea resuelta: x_off/w exponen la columna
+  flex/grid en la que aterrizó cada línea (Stage 3) — la única vista de la
+  distribución del eje principal (grow/shrink/basis/order) sin imagen. El texto
+  no se imprime (es trabajo de --dump-dom); solo geometría, una línea por fila.
   El motor de cajas (layout_doc + position_doc) sobre el mismo rd_doc que pinta
   la pantalla, sin abrir ventana. Puro: no abre socket, no lee fichero, no
   muta el doc. Los valores ya están acotados por css/box_tree (CSS_LEN_MAX,
