@@ -4025,6 +4025,7 @@ static void follow_link(browser_window *w, const char *href) {
  * not introduce new remote images. */
 static void apply_click_result(browser_window *w, tab_page *page) {
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
+    w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
     rdp_caps eff = w->caps;
     if (w->reader) { eff.css = false; eff.images = false; }
     rd_doc *doc = NULL;
@@ -4040,25 +4041,29 @@ static void apply_click_result(browser_window *w, tab_page *page) {
 
 /* Dispatches a click to the live worker for the node under the cursor. If the node
  * is a link and the handler does not prevent the default, the link is followed.
- * The link target is captured before the view is rebuilt, since apply_click_result
- * replaces w->doc. */
+ * The link target aliases w->doc, which apply_click_result frees when it rebuilds
+ * the view; own a copy up front so following the link afterward never reads freed
+ * memory (the href pointer, not its contents, was all the old code preserved). */
 static void dispatch_click(browser_window *w, double px, double py) {
     if (w->tab_worker == NULL) return;
     dom_node_id nid = node_at_point(w, px, py);
     if (nid == DOM_NODE_NONE) return;
 
-    const char *href = link_at_point(w, px, py);
+    const char *href_alias = link_at_point(w, px, py);
+    char *href = (href_alias != NULL) ? strdup(href_alias) : NULL;
 
     tab_page page;
     memset(&page, 0, sizeof page);
     if (tab_click(w->tab_worker, nid, &page) != TAB_OK) {
         browser_set_status(&w->bs, "Click handler failed.", now_ms());
+        free(href);
         return;
     }
 
     apply_click_result(w, &page);
     tab_page_free(&page);
     if (href != NULL) follow_link(w, href);
+    free(href);
 }
 
 /* Returns the painted form control under (px, py), or NULL. Mirrors the layout and
