@@ -1505,7 +1505,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
      * therefore cannot match through its combinator (complex_matches needs parents).
      * No attributes are supplied, so [attr] selectors do not match via this entry
      * point (callers that need them build a css_element with attrs). */
-    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL };
+    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL };
     return css_resolve_el(sheet, &el, inline_style, inline_len);
 }
 

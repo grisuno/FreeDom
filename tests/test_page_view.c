@@ -1392,6 +1392,101 @@ static void test_build_attr_selectors_and_important(void **state) {
     hp_document_free(doc);
 }
 
+/* Pseudo-classes + sibling combinators (Hito 23b-9) resolve through the real
+ * pipeline: page_view must feed the css engine each element's sibling context
+ * (nth/nsib/prev). Covers the Hacker News idiom a:link{text-decoration:none},
+ * zebra rows via :nth-child, and the adjacent-sibling combinator. */
+static void test_build_pseudo_classes_and_siblings(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>"
+        "a:link { text-decoration:none; color:#123123 }"
+        "li:nth-child(even) { color:#0e0e0e }"
+        "li:first-child { color:#f10000 }"
+        "h2 + p { color:#00ad00 }"
+        "a:visited, a:hover { color:#bad000 }"
+        "</style></head><body>"
+        "<a href=\"https://example.test/\">homelink</a>"
+        "<ul><li>uno</li><li>dos</li><li>tres</li><li>cuatro</li></ul>"
+        "<h2>head</h2><p>right after</p><p>further down</p>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    /* a:link matches the anchor (ZK: every link unvisited); :visited/:hover never
+     * match, so their #bad000 never applies. */
+    const pv_run *link = find_text(v, "homelink");
+    assert_non_null(link);
+    assert_int_equal(link->fg_rgb, 0x123123);
+    assert_int_equal(link->text_decoration, 0);   /* explicit none drops underline */
+
+    /* Zebra: li #1 first-child, #2 and #4 even, #3 unstyled. */
+    const pv_run *uno = find_text(v, "\xE2\x80\xA2 uno");
+    assert_non_null(uno);
+    assert_int_equal(uno->fg_rgb, 0xf10000);
+    const pv_run *dos = find_text(v, "\xE2\x80\xA2 dos");
+    assert_non_null(dos);
+    assert_int_equal(dos->fg_rgb, 0x0e0e0e);
+    const pv_run *tres = find_text(v, "\xE2\x80\xA2 tres");
+    assert_non_null(tres);
+    assert_int_equal(tres->fg_rgb, -1);
+    const pv_run *cuatro = find_text(v, "\xE2\x80\xA2 cuatro");
+    assert_non_null(cuatro);
+    assert_int_equal(cuatro->fg_rgb, 0x0e0e0e);
+
+    /* h2 + p styles only the immediately following paragraph. */
+    const pv_run *after = find_text(v, "right after");
+    assert_non_null(after);
+    assert_int_equal(after->fg_rgb, 0x00ad00);
+    const pv_run *further = find_text(v, "further down");
+    assert_non_null(further);
+    assert_int_equal(further->fg_rgb, -1);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Collected DATA-table cells resolve author styles too (found via --dump-dom:
+ * the cell path never called resolve_context, so td{color} / zebra
+ * tr:nth-child(even){background} / tr:first-child{font-weight} were silently
+ * lost while every non-table run got them). The cell's own style and its
+ * row/table ancestors' inherited style must land on the collected run. */
+static void test_build_table_cell_author_styles(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>"
+        "td { color:#cc0011 }"
+        "tr:nth-child(even) { background:#e8e8e8 }"
+        "tr:first-child { font-weight:bold }"
+        "</style></head><body>"
+        "<table>"
+        "<tr><td>alpha</td></tr>"
+        "<tr><td>beta</td></tr>"
+        "<tr><td>gamma</td></tr>"
+        "</table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "alpha");
+    assert_non_null(a);
+    assert_int_equal(a->fg_rgb, 0xcc0011);   /* td's own rule */
+    assert_int_equal(a->bold, 1);            /* inherited from tr:first-child */
+    assert_int_equal(a->bg_rgb, -1);         /* row 1 is odd: no zebra */
+
+    const pv_run *b = find_text(v, "beta");
+    assert_non_null(b);
+    assert_int_equal(b->fg_rgb, 0xcc0011);
+    assert_int_equal(b->bg_rgb, 0xe8e8e8);   /* zebra via tr:nth-child(even) */
+    assert_int_equal(b->bold, 0);
+
+    const pv_run *g = find_text(v, "gamma");
+    assert_non_null(g);
+    assert_int_equal(g->bg_rgb, -1);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A <style> sheet colors matching elements: a type rule and a class rule. The
  * <style> text itself never leaks as a run (already covered elsewhere). */
 static void test_build_style_sheet_color(void **state) {
@@ -1739,6 +1834,8 @@ int main(void) {
         cmocka_unit_test(test_build_two_forms_distinct_groups),
         cmocka_unit_test(test_build_style_sheet_color),
         cmocka_unit_test(test_build_attr_selectors_and_important),
+        cmocka_unit_test(test_build_pseudo_classes_and_siblings),
+        cmocka_unit_test(test_build_table_cell_author_styles),
         cmocka_unit_test(test_build_prefers_color_scheme),
         cmocka_unit_test(test_build_text_align_and_font_size),
         cmocka_unit_test(test_build_line_height),

@@ -2032,6 +2032,7 @@ typedef struct rc_row {
     size_t          first, count;  /* RC_TEXT: frag range */
     int             banner;        /* RC_TEXT: draw the notice background */
     int             bg_rgb;        /* author background-color packed 0xRRGGBB, or -1 */
+    double          bg_w;          /* background width; 0 = full content width */
     double          x_off;         /* extra horizontal offset (flex/grid column), 0 normally */
     int             align;         /* author text-align (css_align), 0 = left/unset */
     const rd_block *blk;           /* RC_IMAGE: source image block */
@@ -2089,6 +2090,7 @@ typedef struct rc_state {
     double indent_px;    /* left indent of the current line (list nesting), applied as row x_off */
     int    line_open, banner;
     int    bg_rgb;       /* current block's author background-color, or -1 */
+    double bg_w;         /* background width for the current rows; 0 = full content width */
     int    align;        /* current block's author text-align (css_align), 0 = left/unset */
     int    line_scale;   /* current block's author line-height percent, 0 = use theme spacing */
     double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
@@ -2317,7 +2319,8 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (r != NULL) {
         r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
         r->first = s->line_first; r->count = L->nfrag - s->line_first;
-        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->x_off = s->indent_px;
+        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->bg_w = s->bg_w;
+        r->x_off = s->indent_px;
         r->align = s->align; r->blk = NULL;
     }
     s->cur_top += h;
@@ -2527,8 +2530,11 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     for (size_t k = 0; k < n; ++k) {
         rc_state si;
         memset(&si, 0, sizeof si);
-        si.bg_rgb = -1;   /* container item backgrounds are out of scope (basic) */
         double cw = (kids[k].w < 1.0) ? 1.0 : kids[k].w;
+        /* The item's author background paints its own column rect (zebra rows in
+         * data tables via tr:nth-child(even), header bands...). */
+        si.bg_rgb = (!w->force_theme) ? rd_at(doc, start + k)->bg_rgb : -1;
+        si.bg_w = cw;
         size_t sr = L->nrow;
         flow_text_block(cr, w, L, &si, th, rd_at(doc, start + k), cw);
         flush_line(L, &si, th);
@@ -3189,9 +3195,11 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         /* Author background-color behind the block's text (content box).
          * Stage 2: r->x_off carries the column offset (flex/grid) OR the
          * positioned box's resolved x. Either way the background sits on
-         * top of the same rect the text is drawn in. */
+         * top of the same rect the text is drawn in. A container item's
+         * background is clipped to its own column (bg_w). */
+        double bw = (r->bg_w > 0.0) ? r->bg_w : content_w;
         set_rgb(cr, rgb_from_packed(r->bg_rgb));
-        cairo_rectangle(cr, left + r->x_off, ry, content_w, r->height);
+        cairo_rectangle(cr, left + r->x_off, ry, bw, r->height);
         cairo_fill(cr);
     }
     double baseline = ry + r->ascent;

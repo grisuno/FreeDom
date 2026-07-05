@@ -413,6 +413,15 @@ static css_element el_node(const char *tag, const char *id,
     css_element e;
     e.tag = tag; e.id = id; e.classes = classes; e.nclasses = nc;
     e.attrs = NULL; e.nattrs = 0; e.parent = parent;
+    e.nth = 0; e.nsib = 0; e.prev = NULL;   /* sibling context unknown by default */
+    return e;
+}
+
+/* Like el_node but with the sibling context (nth/nsib/prev) populated. */
+static css_element el_sib_node(const char *tag, int nth, int nsib,
+                               const css_element *prev, const css_element *parent) {
+    css_element e = el_node(tag, NULL, NULL, 0, parent);
+    e.nth = nth; e.nsib = nsib; e.prev = prev;
     return e;
 }
 
@@ -506,14 +515,238 @@ static void test_combinator_class_chain(void **state) {
     css_free(sh);
 }
 
-static void test_sibling_combinator_unsupported(void **state) {
+/* --- sibling combinators + pseudo-classes (Hito 23b-9) --- */
+
+static void test_adjacent_sibling_combinator(void **state) {
     (void)state;
     css_sheet *sh = NULL;
-    /* '+' and '~' stay unsupported: those selectors drop, the group survives. */
-    assert_int_equal(css_parse("a + b { color:#999999 } a ~ b { color:#777777 } "
-                               "b { color:#080808 }", 0, &sh), CSS_OK);
+    assert_int_equal(css_parse("h1 + p { color:#111111 }", 0, &sh), CSS_OK);
+    css_element h1 = el_sib_node("h1", 1, 3, NULL, NULL);
+    css_element p1 = el_sib_node("p", 2, 3, &h1, NULL);   /* right after the h1 */
+    assert_int_equal(css_resolve_el(sh, &p1, NULL, 0).color, 0x111111);
+    css_element p2 = el_sib_node("p", 3, 3, &p1, NULL);   /* one further: no match */
+    assert_int_equal(css_resolve_el(sh, &p2, NULL, 0).color, -1);
+    /* No prev link (unknown sibling context) -> fail closed. */
+    css_element lone = el_sib_node("p", 0, 0, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &lone, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_general_sibling_combinator(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("h1 ~ p { color:#222222 }", 0, &sh), CSS_OK);
+    css_element h1 = el_sib_node("h1", 1, 4, NULL, NULL);
+    css_element d  = el_sib_node("div", 2, 4, &h1, NULL);
+    css_element p1 = el_sib_node("p", 3, 4, &d, NULL);    /* h1 earlier, not adjacent */
+    assert_int_equal(css_resolve_el(sh, &p1, NULL, 0).color, 0x222222);
+    /* No h1 anywhere before -> no match. */
+    css_element d0 = el_sib_node("div", 1, 2, NULL, NULL);
+    css_element p0 = el_sib_node("p", 2, 2, &d0, NULL);
+    assert_int_equal(css_resolve_el(sh, &p0, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_sibling_mixed_with_child(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Mixed chain: subject p, adjacent p before it, div parent required. */
+    assert_int_equal(css_parse("div > p + p { color:#333333 }", 0, &sh), CSS_OK);
+    css_element div = el_node("div", NULL, NULL, 0, NULL);
+    css_element pa = el_sib_node("p", 1, 2, NULL, &div);
+    css_element pb = el_sib_node("p", 2, 2, &pa, &div);
+    assert_int_equal(css_resolve_el(sh, &pb, NULL, 0).color, 0x333333);
+    /* Same siblings under a section parent: the child combinator fails. */
+    css_element sec = el_node("section", NULL, NULL, 0, NULL);
+    css_element qa = el_sib_node("p", 1, 2, NULL, &sec);
+    css_element qb = el_sib_node("p", 2, 2, &qa, &sec);
+    assert_int_equal(css_resolve_el(sh, &qb, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_link(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("a:link{text-decoration:none} :any-link{color:#010203}",
+                               0, &sh), CSS_OK);
+    /* Zero Knowledge: no history, every link is unvisited -> :link matches a[href]. */
+    css_attr href[] = { { "href", "https://example.com/" } };
+    css_element a = el_attr_node("a", NULL, NULL, 0, href, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).text_decoration, 0);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x010203);
+    /* An <a> without href is not a link; a <span> with href is not either. */
+    css_element bare = el_node("a", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &bare, NULL, 0).text_decoration, -1);
+    css_element span = el_attr_node("span", NULL, NULL, 0, href, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &span, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_never_match_keeps_group(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* :visited never matches (no history by design); :hover/:focus/:active never
+     * match (static cascade). The selectors still PARSE, so the comma group and
+     * the rest of the sheet survive. */
+    assert_int_equal(css_parse("a:visited, b{color:#040404} a:hover{color:#050505} "
+                               "a:focus{color:#060606} a:active{color:#070707}",
+                               0, &sh), CSS_OK);
+    css_attr href[] = { { "href", "/x" } };
+    css_element a = el_attr_node("a", NULL, NULL, 0, href, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, -1);
     css_element b = el_node("b", NULL, NULL, 0, NULL);
-    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x080808);
+    assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x040404);
+    css_free(sh);
+}
+
+static void test_pseudo_structural(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("li:first-child{color:#0a0000} li:last-child{color:#000a00} "
+                               "li:only-child{background:#00000a}", 0, &sh), CSS_OK);
+    css_element first = el_sib_node("li", 1, 3, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &first, NULL, 0).color, 0x0a0000);
+    css_element last = el_sib_node("li", 3, 3, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &last, NULL, 0).color, 0x000a00);
+    css_element only = el_sib_node("li", 1, 1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &only, NULL, 0).background, 0x00000a);
+    /* An only child is first AND last; equal specificity, so the later rule
+     * (last-child) wins by document order. */
+    assert_int_equal(css_resolve_el(sh, &only, NULL, 0).color, 0x000a00);
+    /* Unknown sibling context (nth/nsib = 0) -> fail closed, no match. */
+    css_element unk = el_sib_node("li", 0, 0, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &unk, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_nth_child(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("tr:nth-child(even){background:#0e0e0e} "
+                               "tr:nth-child(odd){background:#0d0d0d} "
+                               "li:nth-child(3){color:#030303} "
+                               "li:nth-child(3n+1){background:#310031} "
+                               "li:nth-child(-n+2){color:#0000f2}", 0, &sh), CSS_OK);
+    css_element tr2 = el_sib_node("tr", 2, 9, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &tr2, NULL, 0).background, 0x0e0e0e);
+    css_element tr7 = el_sib_node("tr", 7, 9, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &tr7, NULL, 0).background, 0x0d0d0d);
+    css_element li3 = el_sib_node("li", 3, 9, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &li3, NULL, 0).color, 0x030303);
+    css_element li4 = el_sib_node("li", 4, 9, NULL, NULL);   /* 3n+1: 1,4,7 */
+    assert_int_equal(css_resolve_el(sh, &li4, NULL, 0).background, 0x310031);
+    css_element li1 = el_sib_node("li", 1, 9, NULL, NULL);   /* -n+2: 1,2 */
+    assert_int_equal(css_resolve_el(sh, &li1, NULL, 0).color, 0x0000f2);
+    css_element li5 = el_sib_node("li", 5, 9, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &li5, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_nth_last_child(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("li:nth-last-child(2){color:#0c0c0c}", 0, &sh), CSS_OK);
+    css_element li = el_sib_node("li", 4, 5, NULL, NULL);   /* 2nd from the end */
+    assert_int_equal(css_resolve_el(sh, &li, NULL, 0).color, 0x0c0c0c);
+    css_element last = el_sib_node("li", 5, 5, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &last, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_root_and_form_state(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(":root{background:#0b0b0b} input:checked{color:#0f0f0f} "
+                               "input:disabled{color:#1f1f1f} input:enabled{background:#2f2f2f}",
+                               0, &sh), CSS_OK);
+    css_element html = el_node("html", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &html, NULL, 0).background, 0x0b0b0b);
+    css_element div = el_node("div", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &div, NULL, 0).background, -1);
+    css_attr chk[] = { { "checked", "" } };
+    css_element in_chk = el_attr_node("input", NULL, NULL, 0, chk, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &in_chk, NULL, 0).color, 0x0f0f0f);
+    assert_int_equal(css_resolve_el(sh, &in_chk, NULL, 0).background, 0x2f2f2f); /* enabled */
+    css_attr dis[] = { { "disabled", "" } };
+    css_element in_dis = el_attr_node("input", NULL, NULL, 0, dis, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &in_dis, NULL, 0).color, 0x1f1f1f);
+    assert_int_equal(css_resolve_el(sh, &in_dis, NULL, 0).background, -1); /* not enabled */
+    /* :enabled only applies to form controls. */
+    css_element span = el_node("span", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &span, NULL, 0).background, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_unknown_drops_selector(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Unknown pseudo-classes, functional pseudos and pseudo-elements (including
+     * the legacy single-colon spellings) drop that selector; the group and the
+     * rest of the sheet survive. */
+    assert_int_equal(css_parse("a:foo, i{color:#080808} p::before{color:#090909} "
+                               "p:before{color:#0a0a0a} q:not(.x){color:#0b0b0b} "
+                               "s:first-of-type{color:#0c0c0c} p{background:#101010}",
+                               0, &sh), CSS_OK);
+    css_element i = el_node("i", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &i, NULL, 0).color, 0x080808);
+    css_element p = el_sib_node("p", 1, 1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, -1);
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).background, 0x101010);
+    css_element q = el_node("q", NULL, NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &q, NULL, 0).color, -1);
+    css_element s = el_sib_node("s", 1, 1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_specificity(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* a:link (1+10) beats a (1) regardless of document order; li:first-child
+     * (1+10) ties with li.big (1+10) so document order decides. */
+    assert_int_equal(css_parse("a:link{color:#111111} a{color:#222222} "
+                               "li:first-child{color:#333333} li.big{color:#444444}",
+                               0, &sh), CSS_OK);
+    css_attr href[] = { { "href", "/x" } };
+    css_element a = el_attr_node("a", NULL, NULL, 0, href, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x111111);
+    const char *big[] = { "big" };
+    css_element li = el_node("li", NULL, big, 1, NULL);
+    li.nth = 1; li.nsib = 2;
+    assert_int_equal(css_resolve_el(sh, &li, NULL, 0).color, 0x444444);
+    css_free(sh);
+}
+
+static void test_pseudo_with_sibling_combinator(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* The checked+label idiom: input:checked + label. */
+    assert_int_equal(css_parse("input:checked + label{color:#123456}", 0, &sh), CSS_OK);
+    css_attr chk[] = { { "checked", "" } };
+    css_element in_chk = el_attr_node("input", NULL, NULL, 0, chk, 1, NULL);
+    in_chk.nth = 1; in_chk.nsib = 2;
+    css_element lab = el_sib_node("label", 2, 2, &in_chk, NULL);
+    assert_int_equal(css_resolve_el(sh, &lab, NULL, 0).color, 0x123456);
+    css_element in_un = el_attr_node("input", NULL, NULL, 0, NULL, 0, NULL);
+    in_un.nth = 1; in_un.nsib = 2;
+    css_element lab2 = el_sib_node("label", 2, 2, &in_un, NULL);
+    assert_int_equal(css_resolve_el(sh, &lab2, NULL, 0).color, -1);
+    css_free(sh);
+}
+
+static void test_pseudo_nth_malformed_drops(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Malformed or oversized An+B drops the selector (fail closed); partner rules
+     * survive. */
+    assert_int_equal(css_parse("li:nth-child(){color:#111111} "
+                               "li:nth-child(2x+1){color:#222222} "
+                               "li:nth-child(999999999n+1){color:#333333} "
+                               "li:nth-child({color:#444444} "
+                               "li{background:#101010}", 0, &sh), CSS_OK);
+    css_element li = el_sib_node("li", 1, 1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &li, NULL, 0).color, -1);
+    assert_int_equal(css_resolve_el(sh, &li, NULL, 0).background, 0x101010);
     css_free(sh);
 }
 
@@ -1269,7 +1502,19 @@ int main(void) {
         cmocka_unit_test(test_child_combinator),
         cmocka_unit_test(test_combinator_specificity_sum),
         cmocka_unit_test(test_combinator_class_chain),
-        cmocka_unit_test(test_sibling_combinator_unsupported),
+        cmocka_unit_test(test_adjacent_sibling_combinator),
+        cmocka_unit_test(test_general_sibling_combinator),
+        cmocka_unit_test(test_sibling_mixed_with_child),
+        cmocka_unit_test(test_pseudo_link),
+        cmocka_unit_test(test_pseudo_never_match_keeps_group),
+        cmocka_unit_test(test_pseudo_structural),
+        cmocka_unit_test(test_pseudo_nth_child),
+        cmocka_unit_test(test_pseudo_nth_last_child),
+        cmocka_unit_test(test_pseudo_root_and_form_state),
+        cmocka_unit_test(test_pseudo_unknown_drops_selector),
+        cmocka_unit_test(test_pseudo_specificity),
+        cmocka_unit_test(test_pseudo_with_sibling_combinator),
+        cmocka_unit_test(test_pseudo_nth_malformed_drops),
         cmocka_unit_test(test_resolve_el_inline_only),
         cmocka_unit_test(test_attr_presence),
         cmocka_unit_test(test_attr_equals),

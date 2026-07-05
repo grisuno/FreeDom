@@ -173,7 +173,7 @@ $(BUILD_DIR)/test_js_sandbox: $(TEST_DIR)/test_js_sandbox.c $(BUILD_DIR)/js_sand
 $(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(QJS_OBJ) | $(BUILD_DIR)
@@ -200,7 +200,7 @@ $(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/r
 # so it links page_view/html_parse (lexbor) plus the render/request policy chain.
 $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_doc.o \
                               $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
-                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o \
+                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o \
                               $(BUILD_DIR)/css_color.o \
                               $(BUILD_DIR)/box_style.o \
                               $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
@@ -211,7 +211,7 @@ $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_
 $(BUILD_DIR)/test_dom_debug: $(TEST_DIR)/test_dom_debug.c $(BUILD_DIR)/dom_debug.o \
                              $(BUILD_DIR)/render_doc.o \
                              $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
-                             $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o \
+                             $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o \
                              $(BUILD_DIR)/css_color.o \
                              $(BUILD_DIR)/box_style.o \
                              $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
@@ -314,7 +314,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
-                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o \
+                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o \
                        $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o \
                        $(BUILD_DIR)/box_style.o \
                        $(BUILD_DIR)/image_decode.o \
@@ -336,7 +336,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
-                      $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(QJS_OBJ) \
+                      $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(QJS_OBJ) \
                       $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/url.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o \
@@ -419,7 +419,7 @@ fuzz-img: | $(BUILD_DIR)
 fuzz-pv: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css.c $(SRC_DIR)/css_select.c \
+	  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_select.c \
 	  $(SRC_DIR)/css_color.c \
 	  $(SRC_DIR)/box_style.c $(SRC_DIR)/html_parse.c \
 	  -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
@@ -463,7 +463,7 @@ fuzz-dd: $(PSL_OBJ) | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_dom_debug.c $(SRC_DIR)/dom_debug.c $(SRC_DIR)/render_doc.c \
-	  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/page_view.c \
+	  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c \
 	  $(SRC_DIR)/css.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
 	  $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(PSL_OBJ) \
 	  -o $(BUILD_DIR)/fuzz_dom_debug $(HP_LIBS)

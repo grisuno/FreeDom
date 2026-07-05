@@ -75,12 +75,22 @@ del `style` en línea: `pv_build_full` concatena los bloques `<style>` del docum
 acotado a 1 MiB) y los parsea **una vez** con el módulo puro `[[css]]` en una hoja acotada. Por cada
 ancestro de un run se calcula su `css_style` (reglas de la hoja + su propio `style=`, ganando el
 inline; `[[css]]` hace la cascada por especificidad y orden), y se fusionan los campos heredables
-desde el ancestro más cercano. El cálculo por elemento usa **`css_resolve_el`**: `element_css_style`
-arma la **cadena de ancestros** del elemento (`fill_css_node` extrae tag/id/clases por nivel, acotada
-a 32 → fail-closed) y se la pasa al módulo, de modo que los **combinadores descendiente (`A B`) e hijo
-(`A > B`)** resuelven sobre el DOM real. El subconjunto soportado: selectores simples/compuestos (tipo,
-`.clase`, `#id`, `*`, grupos por coma) **+ combinadores descendiente/hijo** (sibling `+`/`~`, atributo
-y pseudo siguen fuera, fallan cerrado) y las propiedades `color`, `background[-color]`,
+desde el ancestro más cercano. El cálculo por elemento usa **`css_resolve_el`**: `cch_element_style` (módulo `css_chain`, extraído de page_view por anti-monolito)
+arma la **cadena de ancestros** del elemento (`fill_css_node` extrae tag/id/clases/atributos por
+nivel, acotada a 32 → fail-closed) y se la pasa al módulo, de modo que los **combinadores
+descendiente (`A B`) e hijo (`A > B`)** resuelven sobre el DOM real. Desde el **Hito 23b-9** la
+cadena lleva además el **contexto de hermanos**: `sibling_position` calcula `nth`/`nsib` (índice
+1-based entre hermanos-elemento / total, caminata acotada por `CCH_NTH_MAX` (1024) → más allá
+lee 0 = desconocido, fail-closed) **para cada nodo de la cadena** (así `tr:nth-child(even) td`
+restringe a un ancestro), y el **sujeto** recibe su cadena de hermanos previos (`prev`), acotada a
+`CCH_SIB_MAX` (16), cada hermano compartiendo el padre del sujeto y derivando su posición —
+con eso los **combinadores hermanos `+`/`~`** y las **pseudo-clases estructurales** resuelven
+sobre el DOM real (un `+`/`~` en un compuesto no-sujeto falla cerrado: los ancestros no llevan
+`prev`). El subconjunto soportado: selectores simples/compuestos (tipo, `.clase`, `#id`, `*`,
+grupos por coma) + combinadores descendiente/hijo/**adyacente `+`/general `~`** + selectores de
+atributo + el subconjunto de **pseudo-clases** del Hito 23b-9 (`:link`/`:visited`/`:hover`-familia/
+`:root`/`:first-child`/`:last-child`/`:only-child`/`:nth-child()`/`:nth-last-child()`/`:checked`/
+`:disabled`/`:enabled`; ver `spec/css.md`) y las propiedades `color`, `background[-color]`,
 `text-align`, `font-size`, `font-weight`, `font-style`, `display`. **Seguridad:** `[[css]]` descarta
 cualquier valor con `url(` y toda `@`-regla, así que el CSS de autor **nunca telefonea a casa** ni abre
 una baliza de rastreo; es contenido hostil, por eso se fuzzea (`make fuzz-css`/`fuzz-pv`).
@@ -226,6 +236,19 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
   `[1, PV_MAX_GRID_COLS]`). `<th>` es negrita. Así la capa de presentación reusa el motor flex/grid
   (`box_tree`) y las celdas se alinean en columnas. `colspan`/`rowspan` quedan fuera de alcance
   (tabla rectangular).
+  - **La celda recolectada resuelve su presentación de autor (Hito 23b-9).** El run recolectado
+    llama `resolve_context` **en el elemento celda** (no solo en nodos de texto): las reglas
+    propias del `td`/`th` (`td{color}`) y la herencia de fila/tabla (zebra
+    `tr:nth-child(even){background}`, `tr:first-child{font-weight:bold}`) aterrizan en el run
+    (fg/bg/negrita/itálica/align/font/line/deco/text-ext), gateadas por `caps.css` como toda
+    presentación. `resolve_context` ahora **arranca en el propio elemento** cuando `n` es un
+    elemento (celda/input/imagen); para nodos de texto sigue arrancando en el padre. La
+    geometría no cambia: la anotación de contenedor sigue siendo la grilla de la tabla y la
+    caja/decoración de autor no se aplica a items de grid (v1). Encontrado con `--dump-dom`
+    (Principio 6): antes la ruta de celda nunca resolvía estilos y `td{color}` se perdía en
+    silencio. Candado: `test_build_table_cell_author_styles`. En el painter, el **fondo de un
+    item de contenedor pinta su propia columna** (`rc_row.bg_w`; antes se descartaba con
+    "out of scope (basic)").
   - **Tablas con celdas multi-link = FLUJO, no grid (los links sobreviven).** El aplanado a
     texto de una celda recolectada **destruye sus `<a href>`** (Hacker News quedaba sin un solo
     link). Regla: una tabla con **alguna celda hoja que contenga ≥2 anclas con `href`** es una

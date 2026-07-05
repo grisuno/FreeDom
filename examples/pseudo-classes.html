@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pseudo-classes and sibling combinators demo</title>
+<style>
+  a:link { text-decoration: none; color: #0044cc; }
+  a.plain { text-decoration: underline; }
+  tr:nth-child(even) { background: #e8e8e8; }
+  tr:first-child { background: #ffd27f; font-weight: bold; }
+  li:first-child { color: #b00000; }
+  li:last-child { color: #007000; font-style: italic; }
+  li:nth-child(3n+1) { font-weight: bold; }
+  h2 + p { color: #8000a0; }
+  h2 ~ blockquote { color: #555555; font-style: italic; }
+  a:visited, a:hover { color: #ff0000; }
+  input:disabled + span { color: #999999; }
+</style>
+</head>
+<body>
+  <h1>Hito 23b-9: pseudo-classes + sibling combinators</h1>
+
+  <p>The link below loses its underline via <b>a:link + text-decoration:none</b>
+  (the Hacker News idiom) and turns blue; :visited/:hover rules must NOT paint it
+  red (Zero Knowledge: no history, no interactive state).</p>
+  <p><a href="https://example.com/">an unvisited link with no underline</a></p>
+
+  <h2>Zebra table (tr:nth-child(even) + tr:first-child header)</h2>
+  <table>
+    <tr><td>Header row</td><td>bold on orange</td></tr>
+    <tr><td>row two</td><td>zebra grey</td></tr>
+    <tr><td>row three</td><td>white</td></tr>
+    <tr><td>row four</td><td>zebra grey</td></tr>
+    <tr><td>row five</td><td>white</td></tr>
+  </table>
+
+  <h2>List edges (first red, last green italic, 3n+1 bold)</h2>
+  <ul>
+    <li>first: red and bold (1 = 3*0+1)</li>
+    <li>second: plain</li>
+    <li>third: plain</li>
+    <li>fourth: bold (4 = 3*1+1)</li>
+    <li>last: green italic</li>
+  </ul>
+
+  <h2>Adjacent sibling</h2>
+  <p>This paragraph follows the h2, so h2 + p paints it purple.</p>
+  <p>This one does not (no color).</p>
+  <blockquote>And h2 ~ blockquote reaches me even here (grey italic).</blockquote>
+</body>
+</html>

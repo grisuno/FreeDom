@@ -62,14 +62,60 @@ unbalanced bracket) drops the **whole selector** (fail closed). The host element
 `id`/`class` are also attributes, so `[id=…]`/`[class~=…]` work alongside the
 dedicated `#id`/`.class` syntax.
 
-Still **out of scope** (the whole selector is dropped, the rest of the group still
-parse): the sibling combinators `+`/`~` and pseudo-classes/elements `:`/`::`.
+**Sibling combinators (Hito 23b-9).** A complex selector may also join compounds
+with the **adjacent-sibling** (`A + B`) and **general-sibling** (`A ~ B`)
+combinators: `+` requires B's immediately preceding element sibling to match A;
+`~` requires *some* preceding element sibling to match. Matching walks the
+`css_element.prev` chain the caller supplies; **an element without `prev` links
+simply never matches through a sibling combinator (fail closed)**. page_view
+builds the prev chain for the **subject element only**, bounded to
+`PV_CSS_SIB_MAX` (16) preceding siblings — a sibling combinator on a non-subject
+compound (e.g. the `+` in `h1 + div p`) or a sibling further left than the bound
+does not match. Common real-world forms (`li + li`, `h2 + p`,
+`input:checked + label`, `h2 ~ p`) are all subject-level.
 
-**Specificity** = sum over all compounds of `100*has_id + 10*(nclasses + nattrs) +
-has_type` (an attribute selector counts as a class, so `input[type=text]` = 11 and
-`#main .card p` = 100+10+1 = 111). Ties break on document order. Matching is
-right-to-left: the subject is tested against the element, then each combinator is
-checked against the ancestor chain (descendant backtracks over ancestors).
+**Pseudo-classes (Hito 23b-9).** A compound may carry up to `CSS_MAX_PSEUDO_SEL`
+(4) pseudo-classes. Each counts **10** toward specificity (like a class).
+Supported, with their Zero-Knowledge/static-render semantics:
+
+| Pseudo-class | Matches when… |
+| :-- | :-- |
+| `:link`, `:any-link` | the element is `a`/`area` **with an `href` attribute`**. Zero Knowledge: Freedom keeps no history, so every link is unvisited and `:link` covers them all. |
+| `:visited` | **never** (no history by design — CSS history sniffing is impossible). |
+| `:hover`, `:active`, `:focus`, `:focus-within`, `:focus-visible` | **never** (the cascade is resolved once per load; there is no interactive state plumbing yet). Parsed so the selector and its group survive. |
+| `:root` | the element's tag is `html`. |
+| `:first-child` | `el->nth == 1`. |
+| `:last-child` | `el->nth == el->nsib` (both known). |
+| `:only-child` | `nth == 1 && nsib == 1`. |
+| `:nth-child(An+B)` | the 1-based sibling index `nth` satisfies `nth = A*m + B` for some integer `m >= 0`. Accepts `odd`, `even`, `N`, `An`, `An+B`, `An-B`, `-n+B`, `n` (case-insensitive, spaces around the sign allowed). `\|A\|`/`\|B\|` bounded by `CSS_NTH_MAX` (100000); malformed or out-of-bounds drops the selector. |
+| `:nth-last-child(An+B)` | same formula over the index counted **from the end** (`nsib - nth + 1`). |
+| `:checked` | the element has a `checked` attribute (static form state). |
+| `:disabled` | the element has a `disabled` attribute. |
+| `:enabled` | the element is a form control (`input`/`button`/`select`/`textarea`/`option`/`optgroup`/`fieldset`) **without** a `disabled` attribute. |
+
+The structural pseudo-classes read `css_element.nth`/`.nsib` (1-based index among
+element siblings / total element siblings). **`0` means unknown, and unknown never
+matches** (fail closed): callers that cannot afford the sibling walk simply lose
+structural matching, never mis-match. page_view computes both with a bounded walk
+(`PV_CSS_NTH_MAX`, 1024): an element beyond 1024 element-siblings reads as unknown.
+
+**Unknown pseudo-classes and all pseudo-elements** (`::before`, `::after`,
+`::selection`, …, including the legacy single-colon spellings `:before`/`:after`/
+`:first-line`/`:first-letter`, and functional ones we do not support such as
+`:not()`/`:is()`/`:where()`/`:has()`/`:first-of-type`) drop the **whole selector**
+(fail closed); the rest of the comma group still parses.
+
+**Specificity** = sum over all compounds of `100*has_id + 10*(nclasses + nattrs +
+npseudo) + has_type` (an attribute selector and a pseudo-class each count as a
+class, so `input[type=text]` = 11, `a:link` = 11 and `#main .card p` = 100+10+1 =
+111). Ties break on document order. Matching is right-to-left: the subject is
+tested against the element, then each combinator is checked against the ancestor
+(`parent`) or preceding-sibling (`prev`) chain (descendant/`~` backtrack).
+
+The selector engine (types, parser, matcher) lives in the split-out module
+**`css_select`** (`include/css_select.h` + `src/css_select.c`, entry points
+`csel_parse`/`csel_matches`); see `spec/css_select.md`. The cascade and value
+interpretation stay here in `css`.
 
 **`!important` (Hito 23b-4).** A declaration ending in `!important` (optional
 whitespace before/inside, case-insensitive) is **honored**, not dropped: the `!important`
@@ -191,7 +237,12 @@ first:
 - *Flex/grid, finer grain*: per-item `flex-grow`/`-shrink`/`-basis`/`order`,
   `align-items`/`align-content`, distinct `row-gap`, `repeat()`/`minmax()`/`fr`
   weights/named tracks.
-- *Selectors*: sibling combinators `+`/`~`, pseudo-classes/elements `:`/`::`.
+- *Selectors*: `:not()`/`:is()`/`:where()`/`:has()`, `:first-of-type`/of-type
+  family, `:empty`, `:target`, `:lang()`, all pseudo-elements `::` (dropped, fail
+  closed). Sibling combinators `+`/`~` and the pseudo-class subset above **are**
+  supported since Hito 23b-9; dynamic pseudos (`:hover`/`:focus`/`:active`) parse
+  but never match (no interactive re-cascade yet), `:visited` never matches by
+  Zero-Knowledge design.
 - *Values*: `calc()`, `var()`/custom properties, `url()` anything,
   `@import`/`@font-face`.
 
@@ -462,13 +513,28 @@ typedef struct css_element {
     const css_attr *attrs;            /* element attributes, or NULL (for [attr] selectors) */
     size_t nattrs;
     const struct css_element *parent; /* parent element, or NULL at the root */
+    /* Hito 23b-9 (all optional; zero/NULL = unknown = structural/sibling
+     * selectors fail closed): */
+    int nth;                          /* 1-based index among element siblings, 0 unknown */
+    int nsib;                         /* total element siblings incl. self, 0 unknown */
+    const struct css_element *prev;   /* previous element sibling, or NULL */
 } css_element;
 ```
 
 The caller supplies as much of the chain as it has (bounded is fine: a missing deep
 ancestor only means a descendant selector against it fails to match — fail closed).
 `attrs`/`nattrs` may be empty (`NULL`/`0`): an attribute selector against an element
-with no attribute list simply does not match. Pure, allocates nothing, re-entrant.
+with no attribute list simply does not match. The Hito 23b-9 fields are equally
+optional: `nth`/`nsib` = 0 makes `:first-child`/`:nth-child(...)`-style selectors
+not match, `prev` = NULL makes `+`/`~` not match — never a mis-match. Pure,
+allocates nothing, re-entrant.
+
+**Dado** un `css_element` con `nth=2, nsib=4` y `prev` apuntando a su hermano
+anterior — **cuando** se resuelve una hoja con `li:nth-child(even){...}` o
+`li + li{...}` — **entonces** ambas reglas aplican al elemento. **Dado** el mismo
+elemento con `nth=0`/`prev=NULL` (el llamador no pudo poblarlos) — **cuando** se
+resuelve — **entonces** ninguna de las dos aplica (fail closed, jamás un falso
+positivo).
 
 ### `css_style css_parse_inline(const char *style, size_t len)`
 
@@ -487,11 +553,16 @@ common case.)
 
 ## Out of scope (v1)
 
-- The **sibling** combinators `+`/`~` and pseudo-classes/elements (`:hover`/`::before`)
-  — dropped (fail closed). Descendant (` `) and child (`>`) combinators **are**
-  supported (up to `CSS_MAX_COMPOUNDS` compounds); **attribute** selectors `[attr]`,
-  `[attr=v]`, `~=`, `|=`, `^=`, `$=`, `*=` (with the `i`/`s` case flag) are supported
-  (Hito 23b-4, up to `CSS_MAX_ATTR_SEL` per compound).
+- Selectors, still dropped (fail closed): `:not()`/`:is()`/`:where()`/`:has()`,
+  the of-type family, `:empty`/`:target`/`:lang()`, and every pseudo-element
+  (`::before`/`::after`/legacy `:before`). Supported: descendant (` `), child
+  (`>`), adjacent (`+`) and general (`~`) sibling combinators (Hito 23b-9, up to
+  `CSS_MAX_COMPOUNDS` compounds); **attribute** selectors `[attr]`, `[attr=v]`,
+  `~=`, `|=`, `^=`, `$=`, `*=` (with the `i`/`s` case flag, Hito 23b-4, up to
+  `CSS_MAX_ATTR_SEL` per compound); the **pseudo-class subset** of Hito 23b-9
+  (`:link`/`:any-link`/`:visited`/`:hover`-family/`:root`/`:first-child`/
+  `:last-child`/`:only-child`/`:nth-child()`/`:nth-last-child()`/`:checked`/
+  `:disabled`/`:enabled`, up to `CSS_MAX_PSEUDO_SEL` per compound).
 - Inheritance/`initial`/`inherit`/`unset` keywords (caller does inheritance;
   these keywords are ignored).
 - The author box model `margin`/`padding`/`width`/`max-width` **is now resolved through the

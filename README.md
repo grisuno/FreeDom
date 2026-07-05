@@ -113,7 +113,7 @@ The name reflects its core goals:
 - ✅ Save page as vector PDF (`Ctrl+P`) or as a single PNG image (`Ctrl+Shift+P`)
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
-- ✅ Author CSS (`<style>` + inline `style=`, simple subset; combinators, attribute selectors `[attr=v]`/`^=`/`$=`/`*=`/`~=`/`|=`, `!important`; never phones home) — menu "Author styles (CSS)"
+- ✅ Author CSS (`<style>` + inline `style=`, simple subset; descendant/child/sibling combinators, attribute selectors `[attr=v]`/`^=`/`$=`/`*=`/`~=`/`|=`, pseudo-classes `:link`/`:nth-child()`/…, `!important`; never phones home) — menu "Author styles (CSS)"
 - ✅ External stylesheets (`<link rel=stylesheet>`): fetched by the **trusted parent** under the full network policy (tracker blocklist, realm routing, TLS-PQ) when Author styles is on — the sandboxed worker never touches a socket, and the parent serves style-only loads as `GET` exclusively
 - ✅ Author box model (`margin`/`padding`/`width`/`max-width`): centered reading columns (`max-width` + `margin: 0 auto`)
 - ✅ Author text presentation: `font-family` (generic families), `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow`, `opacity`, `vertical-align` (sub/super), `text-indent`, `white-space` (nowrap), `list-style-type` (decimal/alpha/roman/disc/circle/square)
@@ -374,8 +374,13 @@ flag), `!important`, and a real specificity-then-document-order cascade (inline 
 rendered by the pure `css` module and stays gated behind the author-CSS capability (Privacy by
 Default). For headless visual review, `freedom --author-css --download-png=PATH …` applies author
 styling in the exported image (local render only — the network image cap stays off); see
-`examples/attr-selectors.html`. The sibling `+`/`~` and pseudo `:`/`::` selectors stay
-unsupported and fail closed.
+`examples/attr-selectors.html`. **Sibling combinators** (`h2 + p` adjacent, `h2 ~ p` general) and a **pseudo-class subset**
+are supported too: `:link`/`:any-link` (Zero Knowledge — no history, so every link is
+unvisited and CSS history sniffing is impossible), `:root`, `:first-child`/`:last-child`/
+`:only-child`/`:nth-child(An+B)`/`:nth-last-child()`, `:checked`/`:disabled`/`:enabled`;
+`:visited` and the dynamic `:hover`/`:focus`/`:active` parse (keeping the rule group alive)
+but never match; unknown pseudo-classes and all pseudo-elements (`::before`) fail closed.
+Demo: `examples/pseudo-classes.html`.
 
 **Text presentation:** the author subset also covers `font-family` (mapped to a generic family —
 serif / sans-serif / monospace / cursive / fantasy; exact font files are never matched and

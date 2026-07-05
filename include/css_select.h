@@ -28,11 +28,27 @@
 #define CSS_MAX_CLASSES_PER_SEL 6
 
 /* Combinator joining a compound to the one on its left. */
-enum { COMB_DESCENDANT = 0, COMB_CHILD = 1 };
+enum { COMB_DESCENDANT = 0, COMB_CHILD = 1, COMB_ADJACENT = 2, COMB_GENERAL = 3 };
 
 /* Attribute selector operator. PRESENT is bare `[attr]`; the rest carry a value. */
 enum { ATTR_PRESENT = 0, ATTR_EQ, ATTR_TILDE, ATTR_PIPE, ATTR_CARET, ATTR_DOLLAR,
        ATTR_STAR };
+
+/* Pseudo-class kind (Hito 23b-9). NEVER covers :visited (Zero Knowledge: no
+ * history to match, and no CSS history sniffing) and the dynamic pseudos
+ * (:hover/:active/:focus/:focus-within/:focus-visible — the cascade is resolved
+ * once per load): they parse, count specificity, and never match. */
+enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ROOT,
+       PSEUDO_FIRST_CHILD, PSEUDO_LAST_CHILD, PSEUDO_ONLY_CHILD,
+       PSEUDO_NTH_CHILD, PSEUDO_NTH_LAST_CHILD,
+       PSEUDO_CHECKED, PSEUDO_DISABLED, PSEUDO_ENABLED };
+
+/* One pseudo-class inside a compound. a/b are the An+B coefficients of the
+ * nth-child family (unused otherwise). */
+typedef struct css_pseudo_match {
+    int kind;  /* PSEUDO_* */
+    int a, b;
+} css_pseudo_match;
 
 /* One attribute selector inside a compound: name OP value, with a case flag. */
 typedef struct css_attr_match {
@@ -42,7 +58,8 @@ typedef struct css_attr_match {
     int  ci;   /* 1 = match the value case-insensitively (the trailing `i` flag) */
 } css_attr_match;
 
-/* One compound selector: optional type, optional id, zero+ classes, zero+ [attr]. */
+/* One compound selector: optional type, optional id, zero+ classes, zero+ [attr],
+ * zero+ pseudo-classes. */
 typedef struct css_compound {
     char tag[CSS_TOK_MAX];
     int  has_tag;
@@ -52,6 +69,8 @@ typedef struct css_compound {
     int  ncls;
     css_attr_match attrs[CSS_MAX_ATTR_SEL];
     int  nattrs;
+    css_pseudo_match pseudos[CSS_MAX_PSEUDO_SEL];
+    int  npseudo;
 } css_compound;
 
 /* A complex selector: a chain of compounds, parts[nparts-1] being the subject (the

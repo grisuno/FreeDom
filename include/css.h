@@ -178,6 +178,14 @@ typedef enum css_grid_flow {
  * (the whole selector fails closed). */
 #define CSS_MAX_ATTR_SEL  4
 
+/* Max pseudo-classes (:link, :nth-child(...), ...) in one compound. More are
+ * dropped (the whole selector fails closed). */
+#define CSS_MAX_PSEUDO_SEL 4
+
+/* Bound on the A/B coefficients of :nth-child(An+B) (anti-DoS; larger drops the
+ * selector, fail closed). */
+#define CSS_NTH_MAX 100000
+
 /* A resolved presentation. Each field uses a sentinel for "unset" so the caller
  * can layer inheritance (take the first ancestor that sets each inheriting one).
  * The flex/grid container fields (gap/justify/grid_cols) are NOT inherited: they
@@ -312,6 +320,13 @@ typedef struct css_element {
     const css_attr *attrs;            /* element attributes, or NULL */
     size_t nattrs;
     const struct css_element *parent; /* parent element, or NULL at the root */
+    /* Sibling context (Hito 23b-9). All optional; zero/NULL = unknown, and the
+     * structural pseudo-classes / sibling combinators then fail closed (never
+     * mis-match). nth is the 1-based index among element siblings; nsib the
+     * total element siblings including self; prev the previous element sibling. */
+    int nth;
+    int nsib;
+    const struct css_element *prev;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators
