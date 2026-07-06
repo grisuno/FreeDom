@@ -100,6 +100,29 @@ Motivo: scripts de feature-detection llaman `document.fonts.load(...)` muy tempr
 google.com `cannot read property 'load' of undefined`. No enumera fuentes reales (anti-fingerprinting)
 ni toca la red.
 
+**`URL` y `URLSearchParams` (identity-safe, WHATWG):** el shim moderno define los constructores
+globales `URL` y `URLSearchParams` como **implementación pura en JS** (parseo de strings), sin
+tocar la red, el disco ni ninguna API del host — por eso son seguros dentro del sandbox y no
+filtran identidad. Motivo: son de los globals más usados de la web moderna; su ausencia era el
+**primer** error de JS de Slashdot (`ReferenceError: URL is not defined`, luego
+`URLSearchParams is not defined`).
+
+- `new URL(input, base?)` descompone `input` (resolviéndolo contra `base` si es relativo) en
+  `href`/`protocol`/`host`/`hostname`/`port`/`pathname`/`search`/`hash`/`origin`/`username`/
+  `password` (getters de solo lectura sobre los componentes; un `input` no absoluto sin `base`
+  válida **lanza `TypeError`**, como el estándar). `searchParams` devuelve un `URLSearchParams`
+  vivo sobre la query. `toString()`/`toJSON()` re-serializan. `Given` una URL absoluta,
+  `When` se construye un `URL`, `Then` sus componentes coinciden con `url_split` (misma
+  descomposición WHATWG que usa `location`).
+- `new URLSearchParams(init)` acepta una query string (con o sin `?` inicial), un objeto, o un
+  arreglo de pares `[k,v]`. Métodos: `get`/`getAll`/`has`/`set`/`append`/`delete`/`sort`/`keys`/
+  `values`/`entries`/`forEach`/`toString`, con decodificación/codificación **percent** y `+`↔espacio.
+  Iterable (`for..of`).
+
+Ambos son **define-guarded** (no pisan un global preexistente) y **acotados** por el presupuesto de
+tiempo del intérprete (sin bucles no acotados sobre input hostil). No hay estado global mutable ni
+I/O: dos páginas distintas ven implementaciones idénticas y aisladas.
+
 **`location` real + navegación por JS (Hito 20e parte 1):** el worker conoce la URL de la página y la
 inyecta como `globalThis.__locParts` (objeto de datos construido en C con `url_split`, **sin
 interpolar** la URL hostil en JS). El shim define un `location` (y `document.location`/`document.URL`)

@@ -82,9 +82,12 @@ typedef struct hp_script {
 /* Returns the executable <script> elements in document order, as an owned array;
  * *out_count receives the number found. Inline scripts carry text; external ones
  * carry their raw src (a <script src> with an inline body lists ONLY the src --
- * browser rule: when src is present the content is ignored). JSON data blocks
- * (type containing "json") and modules (type containing "module") are excluded,
- * fail-closed: import/export cannot run as a classic script. Each entry is a
+ * browser rule: when src is present the content is ignored). A script executes
+ * only when its type is absent/empty or a JavaScript MIME type ("javascript"/
+ * "ecmascript"); every other type is excluded fail-closed -- JSON/LD data blocks,
+ * ES modules (import/export cannot run as a classic script), and template blocks
+ * (text/x-jquery-tmpl, text/html, text/template), whose markup would throw a
+ * SyntaxError if evaluated as JS. Each entry is a
  * SEPARATE program: the caller must evaluate each one independently, so an
  * uncaught exception in one aborts only that script and not the rest -- exactly
  * as a browser runs <script> elements. (Concatenating them into a single eval

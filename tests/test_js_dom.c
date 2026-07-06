@@ -232,6 +232,28 @@ static void test_document_fragment_reparents(void **state) {
               "m.getElementsByTagName('span').length", "2");
 }
 
+/* jQuery 1.x support-detection clones a fragment twice and reads .lastChild
+ * (b.checkClone). A minimal fragment without cloneNode/lastChild threw "not a
+ * function", which aborted the whole jQuery bundle -> "$ is not defined" on every
+ * page that ships jQuery (Slashdot). The fragment must be complete enough that the
+ * detection completes without throwing (the detected value need not be accurate). */
+static void test_fragment_clone_chain_does_not_throw(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof document.createDocumentFragment().cloneNode", "function");
+    EXPECT(f, "typeof document.createDocumentFragment().lastChild", "object"); /* null */
+    /* The exact jQuery pattern must not throw. */
+    EXPECT(f, "var n=document.createElement('div'); n.appendChild(document.createElement('input'));"
+              "var i=document.createDocumentFragment(); i.appendChild(n.lastChild);"
+              "var ok='ok'; try{ i.cloneNode(true).cloneNode(true).lastChild; }"
+              "catch(e){ ok='threw'; } ok", "ok");
+    /* Deep clone reproduces children (each is itself cloneable). */
+    EXPECT(f, "var i=document.createDocumentFragment();"
+              "i.appendChild(document.createElement('span'));"
+              "i.cloneNode(true).lastChild.tagName", "SPAN");
+    EXPECT(f, "var n=document.createElement('ul');"
+              "n.appendChild(document.createElement('li')); n.lastChild.tagName", "LI");
+}
+
 static void test_modern_globals_do_not_throw(void **state) {
     fixture *f = (fixture *)*state;
     EXPECT(f, "typeof Element + typeof Node + typeof HTMLElement", "functionfunctionfunction");
@@ -247,6 +269,56 @@ static void test_modern_globals_do_not_throw(void **state) {
     EXPECT(f, "typeof window.open + typeof postMessage", "undefinedundefined");
     /* Normalized viewport (anti-fp): fixed, not the real window size. */
     EXPECT(f, "window.innerWidth", "1920");
+}
+
+/* WHATWG URL: identity-safe, pure string parsing (no network/IO). This was
+ * Slashdot's first JS error (ReferenceError: URL is not defined). */
+static void test_url_constructor_parses_components(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof URL", "function");
+    EXPECT(f, "new URL('https://a.b.com:8443/p/q?x=1&y=2#frag').protocol", "https:");
+    EXPECT(f, "new URL('https://a.b.com:8443/p/q?x=1&y=2#frag').hostname", "a.b.com");
+    EXPECT(f, "new URL('https://a.b.com:8443/p/q?x=1&y=2#frag').host", "a.b.com:8443");
+    EXPECT(f, "new URL('https://a.b.com:8443/p/q?x=1&y=2#frag').port", "8443");
+    EXPECT(f, "new URL('https://a.b.com/p/q?x=1&y=2#frag').pathname", "/p/q");
+    EXPECT(f, "new URL('https://a.b.com/p?x=1&y=2#frag').search", "?x=1&y=2");
+    EXPECT(f, "new URL('https://a.b.com/p?x=1#frag').hash", "#frag");
+    EXPECT(f, "new URL('https://a.b.com/p').origin", "https://a.b.com");
+    /* A bare path (no host) with no default host defaults to root pathname. */
+    EXPECT(f, "new URL('/foo/bar', 'https://h.com/x/y').href",
+              "https://h.com/foo/bar");
+    EXPECT(f, "new URL('sub/page?z=9', 'https://h.com/a/b').pathname", "/a/sub/page");
+    /* searchParams is a live view; toString re-serializes. */
+    EXPECT(f, "new URL('https://h.com/?a=1&b=2').searchParams.get('b')", "2");
+    /* Relative with no base throws TypeError (WHATWG). */
+    EXPECT(f, "var t='ok'; try{ new URL('not a url'); t='no-throw'; }"
+              "catch(e){ t=e.constructor.name; } t", "TypeError");
+}
+
+/* WHATWG URLSearchParams: identity-safe query parsing/encoding. */
+static void test_url_search_params(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof URLSearchParams", "function");
+    EXPECT(f, "new URLSearchParams('a=1&b=2&a=3').get('a')", "1");
+    EXPECT(f, "new URLSearchParams('a=1&b=2&a=3').getAll('a').join(',')", "1,3");
+    EXPECT(f, "new URLSearchParams('?a=1&b=2').has('b')", "true");
+    EXPECT(f, "new URLSearchParams('a=1').has('z')", "false");
+    /* '+' decodes to space; percent-encoding round-trips. */
+    EXPECT(f, "new URLSearchParams('q=hello+world').get('q')", "hello world");
+    EXPECT(f, "new URLSearchParams('q=a%20b%26c').get('q')", "a b&c");
+    /* Mutation + serialization. */
+    EXPECT(f, "var p=new URLSearchParams('a=1'); p.append('a','2'); p.toString()",
+              "a=1&a=2");
+    EXPECT(f, "var p=new URLSearchParams('a=1&b=2'); p.set('a','9'); p.toString()",
+              "a=9&b=2");
+    EXPECT(f, "var p=new URLSearchParams('a=1&b=2&c=3'); p.delete('b'); p.toString()",
+              "a=1&c=3");
+    EXPECT(f, "new URLSearchParams('x y=1&z=q r').toString()", "x+y=1&z=q+r");
+    /* Object and array-of-pairs init. */
+    EXPECT(f, "new URLSearchParams({a:'1',b:'2'}).toString()", "a=1&b=2");
+    EXPECT(f, "new URLSearchParams([['a','1'],['b','2']]).toString()", "a=1&b=2");
+    /* Iterable. */
+    EXPECT(f, "var o=''; for(var k of new URLSearchParams('a=1&b=2').keys()) o+=k; o", "ab");
 }
 
 static void test_settimeout_chains_across_rounds(void **state) {
@@ -738,7 +810,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_element_traversal, setup, teardown),
         cmocka_unit_test_setup_teardown(test_classlist_backs_class_attr, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_fragment_reparents, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_fragment_clone_chain_does_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_modern_globals_do_not_throw, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_url_constructor_parses_components, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_url_search_params, setup, teardown),
         cmocka_unit_test_setup_teardown(test_settimeout_chains_across_rounds, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_title_set_reflects_in_tree, setup, teardown),
         cmocka_unit_test_setup_teardown(test_set_text_content_reflects_in_tree, setup, teardown),

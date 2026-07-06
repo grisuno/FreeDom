@@ -65,8 +65,13 @@ char *hp_get_title(const hp_document *doc, size_t *out_len);
  *   - externo: src != NULL (el valor CRUDO del atributo src, hostil, sin resolver),
  *              text == NULL. El parser NUNCA fetchea: quien ejecuta (el worker de tab)
  *              decide si puede pedir los bytes al padre confiable bajo política.
- * Se EXCLUYEN (fail-closed, no se ejecutan): bloques de datos (type con "json") y
- * módulos (type con "module": import/export no son evaluables como script clásico).
+ * Un <script> se EJECUTA solo si su `type` está ausente/vacío o es un MIME de
+ * JavaScript (contiene "javascript"/"ecmascript"). Todo otro `type` se EXCLUYE
+ * (fail-closed, no se ejecuta): bloques de datos JSON/LD, módulos ES (import/export
+ * no son evaluables como script clásico), y plantillas (text/x-jquery-tmpl,
+ * text/html, text/template), cuyo markup lanzaría un SyntaxError si se evaluara como
+ * JS (era el error "#each" de Slashdot). Espeja `ctype_is_javascript` de tab.c (la
+ * misma regla para el Content-Type fetcheado del script externo).
  * Un <script src> con cuerpo inline lista SOLO el src (semántica de navegador: si hay
  * src, el contenido se ignora). El worker evalúa CADA entrada por separado: en un
  * navegador cada <script> es un programa independiente, y una excepción no capturada
@@ -116,9 +121,10 @@ void hp_document_free(hp_document *doc);
   número. Un script **inline** lleva `text` (NUL-terminado) + `len` y `src == NULL`; un
   script **externo** lleva `src` (el valor crudo del atributo, hostil, sin resolver ni
   fetchear) y `text == NULL`. Un `<script src>` con cuerpo inline lista **solo** el `src`
-  (si hay `src`, el contenido se ignora — semántica de navegador). Se excluyen los bloques
-  de datos (`type` que contiene `json`) y los **módulos** (`type` que contiene `module`),
-  y los inline vacíos. Solo significativo si se parseó con `strip_scripts==0`.
+  (si hay `src`, el contenido se ignora — semántica de navegador). Ejecuta solo si el
+  `type` está ausente/vacío o es un MIME de JavaScript; todo otro `type` se excluye
+  fail-closed (JSON/LD, módulos ES, y plantillas `text/x-jquery-tmpl`/`text/html`/
+  `text/template`), igual que los inline vacíos. Solo significativo si se parseó con `strip_scripts==0`.
   **Browser semantics:** el llamador evalúa cada script por separado, así una excepción no
   capturada en uno **no** aborta los siguientes. Tope `HP_MAX_SCRIPTS` (4096): los scripts
   extra se descartan (fail-closed). `NULL` con `*out_count==0` si no hay o en OOM. Liberar

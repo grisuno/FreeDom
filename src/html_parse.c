@@ -95,11 +95,16 @@ static int mem_contains_ci(const lxb_char_t *hay, size_t hlen, const char *needl
 /* How one <script> element executes. */
 enum { SCRIPT_SKIP = 0, SCRIPT_INLINE = 1, SCRIPT_EXTERNAL = 2 };
 
-/* Classifies a <script>: data blocks (type containing "json") and modules (type
- * containing "module") never run as a classic program (fail closed); a src
- * attribute makes it external (its inline body, if any, is ignored -- browser
- * rule); otherwise it runs from its inline source. The parser never fetches:
- * external scripts are only REPORTED with their raw src. */
+/* Classifies a <script>: a classic program runs only when its type is absent/empty
+ * or a JavaScript MIME type (contains "javascript"/"ecmascript"). Every other type
+ * is a data block the browser never executes -- JSON/LD data, ES modules
+ * (import/export cannot run as a classic script), and template blocks like
+ * text/x-jquery-tmpl / text/html / text/template (executing their markup throws a
+ * SyntaxError; this was Slashdot's "#each" errors). Fail closed: unrecognized type
+ * -> skip. A src attribute makes it external (its inline body, if any, is ignored --
+ * browser rule); otherwise it runs from its inline source. The parser never
+ * fetches: external scripts are only REPORTED with their raw src. Mirrors
+ * ctype_is_javascript in tab.c (same rule for the fetched Content-Type). */
 static int script_classify(const lxb_dom_node_t *n,
                            const lxb_char_t **src, size_t *src_len) {
     lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
@@ -107,7 +112,8 @@ static int script_classify(const lxb_dom_node_t *n,
     const lxb_char_t *type =
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"type", 4, &len);
     if (type != NULL && len > 0
-        && (mem_contains_ci(type, len, "json") || mem_contains_ci(type, len, "module")))
+        && !mem_contains_ci(type, len, "javascript")
+        && !mem_contains_ci(type, len, "ecmascript"))
         return SCRIPT_SKIP;
     size_t slen = 0;
     const lxb_char_t *s =

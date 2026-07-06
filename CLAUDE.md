@@ -1477,6 +1477,46 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `getComputedStyle` — todo diferido. *(Módulos puros + IPC + E2E verificados; ventana Wayland
   interactiva pendiente al dueño.)* Ver `[[freedom-js-modern-web-surface]]`, `[[freedom-live-js]]`,
   `[[freedom-parent-gated-xhr]]`, `[[freedom-sop-by-construction]]`.
+- **Hito (JS web moderna) — `URL`/`URLSearchParams` + gate de tipo de `<script>` + `DocumentFragment`
+  completo (Slashdot: JS de 14 a 0 errores de consola, 2026-07-06).** Objetivo del dueño: navegador
+  ZT/ZK compatible con la web moderna; página de prueba **Slashdot** ("se ve fea"). Diagnóstico con
+  `--js=on --dump-console`: 14 errores. Tres arreglos de JS por el ciclo completo (spec → test rojo →
+  código → 39 suites + ASan limpio; **el fuzzing lo hace el dueño manualmente**). (a) **`URL` y
+  `URLSearchParams`** como **shim JS puro** (`JD_URL_SHIM` en `js_dom`, instalado tras el modern-shim):
+  parseadores de strings, **sin red/IO/API de host** → seguros en el sandbox, no filtran identidad. `URL`
+  resuelve por **RFC 3986 §5** (parser básico WHATWG para el subconjunto http/https): componentes
+  `protocol/host/hostname/port/pathname/search/hash/origin/username/password`, `searchParams` vivo,
+  relativa-sin-base-absoluta lanza `TypeError`. `URLSearchParams`: `get/getAll/has/set/append/delete/
+  sort/keys/values/entries/forEach/toString`, iterable, percent + `+`↔espacio. Define-guarded, acotado
+  por el presupuesto de tiempo. Era el **primer** error de Slashdot (`URL is not defined`). (b) **Un
+  `<script>` inline solo EJECUTA si su `type` es JS** (ausente/vacío o contiene "javascript"/
+  "ecmascript"): `script_classify` (`html_parse`) pasó de **exclusión** (saltar "json"/"module") a
+  **inclusión** — las plantillas `text/x-jquery-tmpl`/`text/html`/`text/template`/`text/babel` se
+  ejecutaban y lanzaban `SyntaxError: '#each'`; ahora son bloques de datos que no corren (Secure by
+  Default, fail-closed; espeja `ctype_is_javascript` de `tab.c`). (c) **`DocumentFragment` completo →
+  jQuery carga (el dominó):** la detección de features de jQuery hace
+  `createDocumentFragment().cloneNode(true).cloneNode(true).lastChild.checked`; el fragment mínimo sin
+  `cloneNode`/`lastChild` lanzaba `not a function` y **abortaba todo el bundle** → `$ is not defined` en
+  cada script inline (6 errores). Fix: helper `mkFrag()` (fragment recursivamente clonable con
+  `cloneNode(deep)`/`lastChild`/`insertBefore`/`removeChild`/`prepend`) + getters `lastChild`/
+  `lastElementChild` en el `wrap` de elemento (el valor detectado no importa; solo que **no lance** para
+  que la librería defina `$`). Specs (`js_dom.md`, `html_parse.md`) + tests (2 en `test_js_dom` para
+  URL/URLSearchParams, 1 para el clone-chain de fragment, 1 en `test_html_parse` para el gate de tipo) +
+  `make test` (39 suites, 0 fallos) / `make asan` (exit 0, sin leaks/UB) limpios + **E2E verificado**:
+  `--js=on --dump-console` de Slashdot pasó de **14 a 0 errores** (jQuery carga, `$` definido), y un HTML
+  local ejercitó `URL` (userinfo/puerto/resolución relativa `../c/d.html`→`/a/c/d.html`) y
+  `URLSearchParams` correctos; candado SOP intacto (`test_eval_no_network_or_cross_origin_api` verde).
+  Config: `slashdot.org`+`fsdn.com` en `allow.conf`, `slashdot.org` en `js.conf` (allow∩js = confiable).
+  **Pendiente (hito aparte, honesto): el LAYOUT CSS de Slashdot sigue feo** — es un diseño de dos
+  columnas con `float` (Freedom no tiene `float`: el nav se apila a ancho completo y las slashboxes caen
+  al fondo) y su panel blanco de contenido (caja DOM #83, `position:relative`, `l=120 r=336`, `bg=#fff`)
+  es una **caja huérfana** (ningún `rd_block` la reclama como ancestro de caja → nunca se abre en flujo y
+  `position_doc` la resuelve al fondo, y=26505), así que el gris `#cccccc` de la página (caja #0, el bg
+  real de Slashdot) se ve detrás de las historias = las "franjas grises". Requiere soporte de `float`
+  y/o manejo en-flujo de un panel de fondo `relative` sin contenido directo. *(Módulos puros + IPC + E2E
+  de JS verificados; ventana Wayland interactiva y el layout float pendientes.)* Ver
+  `[[freedom-url-api-and-script-type-gate]]`, `[[freedom-js-modern-web-surface]]`,
+  `[[freedom-per-script-isolation]]`, `[[freedom-external-scripts]]`, `[[freedom-sop-by-construction]]`.
 
 ### 7.3 Roadmap — por cruzar
 

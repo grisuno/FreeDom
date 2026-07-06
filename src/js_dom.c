@@ -471,6 +471,8 @@ static const char JD_DOCUMENT_SHIM[] =
     "      get firstElementChild(){ var c=dom.firstChild(h); return c===null?null:wrap(c); },"
     "      get nextSibling(){ var s=dom.nextSibling(h); return s===null?null:wrap(s); },"
     "      get nextElementSibling(){ var s=dom.nextSibling(h); return s===null?null:wrap(s); },"
+    "      get lastChild(){ var c=dom.firstChild(h),l=null; while(c!==null){ l=c; c=dom.nextSibling(c); } return l===null?null:wrap(l); },"
+    "      get lastElementChild(){ var c=dom.firstChild(h),l=null; while(c!==null){ l=c; c=dom.nextSibling(c); } return l===null?null:wrap(l); },"
     "      get children(){ var r=[]; var c=dom.firstChild(h); while(c!==null){ r.push(wrap(c)); c=dom.nextSibling(c); } return r; },"
     "      get childNodes(){ var r=[]; var c=dom.firstChild(h); while(c!==null){ r.push(wrap(c)); c=dom.nextSibling(c); } return r; },"
     "      get childElementCount(){ var n=0; var c=dom.firstChild(h); while(c!==null){ n++; c=dom.nextSibling(c); } return n; },"
@@ -548,13 +550,26 @@ static const char JD_DOCUMENT_SHIM[] =
     "  d.createElementNS=function(ns,t){ return wrap(dom.createElement(String(t))); };"
     "  d.createComment=function(t){ return {nodeType:8, textContent:String(t), data:String(t)}; };"
     /* DocumentFragment: collects appended element children in __frag; a real node's
-     * appendChild/insertBefore re-parents those children (see wrap()). */
-    "  d.createDocumentFragment=function(){ var kids=[]; return {nodeType:11, __frag:kids,"
-    "    appendChild:function(c){ if(c&&c._h!==undefined) kids.push(c); return c; },"
+     * appendChild/insertBefore re-parents those children (see wrap()). Complete
+     * enough (cloneNode/lastChild/removeChild/insertBefore) that library feature
+     * detection does not throw: jQuery clones a fragment twice and reads .lastChild
+     * (b.checkClone); a missing cloneNode aborted the whole bundle -> "$ is not
+     * defined". cloneNode(deep) returns a fresh fragment via mkFrag (recursively
+     * cloneable), deep-cloning each child. */
+    "  function mkFrag(){ var kids=[]; var f={nodeType:11, __frag:kids,"
+    "    appendChild:function(c){ if(c&&c.__frag){ for(var i=0;i<c.__frag.length;i++) kids.push(c.__frag[i]); c.__frag.length=0; return c; } if(c&&c._h!==undefined) kids.push(c); return c; },"
+    "    insertBefore:function(n,ref){ if(n&&n._h!==undefined){ var i=ref?kids.indexOf(ref):-1; if(i<0) kids.push(n); else kids.splice(i,0,n); } return n; },"
+    "    removeChild:function(c){ var i=kids.indexOf(c); if(i>=0) kids.splice(i,1); return c; },"
     "    append:function(){ for(var i=0;i<arguments.length;i++){var a=arguments[i]; if(a&&a._h!==undefined) kids.push(a);} },"
+    "    prepend:function(){ for(var i=arguments.length-1;i>=0;i--){var a=arguments[i]; if(a&&a._h!==undefined) kids.unshift(a);} },"
+    "    cloneNode:function(deep){ var g2=mkFrag(); if(deep){ for(var i=0;i<kids.length;i++){ var k=kids[i]; g2.__frag.push(k&&k.cloneNode?k.cloneNode(true):k); } } return g2; },"
     "    get childNodes(){ return kids.slice(); }, get children(){ return kids.slice(); },"
     "    get firstChild(){ return kids.length?kids[0]:null; },"
-    "    querySelector:function(){return null;}, querySelectorAll:function(){return [];} }; };"
+    "    get lastChild(){ return kids.length?kids[kids.length-1]:null; },"
+    "    get childElementCount(){ return kids.length; }, hasChildNodes:function(){ return kids.length>0; },"
+    "    getElementById:function(){return null;},"
+    "    querySelector:function(){return null;}, querySelectorAll:function(){return [];} }; return f; }"
+    "  d.createDocumentFragment=function(){ return mkFrag(); };"
     /* Event/CustomEvent shims so new Event('x')/document.createEvent do not throw. */
     "  function mkEvent(type,opts){ opts=opts||{}; return {type:String(type),bubbles:!!opts.bubbles,"
     "    cancelable:!!opts.cancelable,detail:(opts.detail!==undefined?opts.detail:null),defaultPrevented:false,"
@@ -685,6 +700,121 @@ static const char JD_MODERN_SHIM[] =
     "    get:function(){return undefined;}, whenDefined:function(){return Promise.resolve();}, upgrade:function(){} };"
     "})();";
 
+/* WHATWG URL + URLSearchParams as a pure-JS ambient surface. No network, no disk,
+ * no host API: both are string parsers, so they are safe inside the sandbox and
+ * leak no identity. They are two of the most-used modern-web globals; their absence
+ * was Slashdot's first JS error (ReferenceError: URL is not defined). Define-guarded
+ * (never clobbers a preexisting global) and bounded by the interpreter time budget.
+ * URL resolution follows RFC 3986 sec. 5 (the WHATWG basic parser for the http/https
+ * subset the browser actually navigates); a relative URL with no absolute base
+ * throws TypeError, as the standard requires. */
+static const char JD_URL_SHIM[] =
+    "(function(){"
+    "  var g=globalThis;"
+    "  function encf(s){ return encodeURIComponent(String(s)).replace(/%20/g,'+'); }"
+    "  function decf(s){ try{ return decodeURIComponent(String(s).replace(/\\+/g,' ')); }"
+    "    catch(e){ return String(s); } }"
+    "  if(typeof g.URLSearchParams==='undefined'){"
+    "    function USP(init){ this._e=[];"
+    "      if(init==null||init===''){}"
+    "      else if(typeof init==='string'){"
+    "        var q=init.charAt(0)==='?'?init.slice(1):init;"
+    "        if(q!==''){ var ps=q.split('&');"
+    "          for(var i=0;i<ps.length;i++){ if(ps[i]==='') continue;"
+    "            var d=ps[i].indexOf('='),k,v;"
+    "            if(d<0){ k=ps[i]; v=''; } else { k=ps[i].slice(0,d); v=ps[i].slice(d+1); }"
+    "            this._e.push([decf(k),decf(v)]); } } }"
+    "      else if(Array.isArray(init)){"
+    "        for(var j=0;j<init.length;j++) this._e.push([String(init[j][0]),String(init[j][1])]); }"
+    "      else if(typeof init==='object'){"
+    "        for(var key in init){ if(Object.prototype.hasOwnProperty.call(init,key))"
+    "          this._e.push([String(key),String(init[key])]); } } }"
+    "    USP.prototype.append=function(k,v){ this._e.push([String(k),String(v)]); };"
+    "    USP.prototype.delete=function(k){ k=String(k);"
+    "      this._e=this._e.filter(function(p){return p[0]!==k;}); };"
+    "    USP.prototype.get=function(k){ k=String(k);"
+    "      for(var i=0;i<this._e.length;i++) if(this._e[i][0]===k) return this._e[i][1]; return null; };"
+    "    USP.prototype.getAll=function(k){ k=String(k); var o=[];"
+    "      for(var i=0;i<this._e.length;i++) if(this._e[i][0]===k) o.push(this._e[i][1]); return o; };"
+    "    USP.prototype.has=function(k){ return this.get(String(k))!==null; };"
+    "    USP.prototype.set=function(k,v){ k=String(k); v=String(v); var done=false,o=[];"
+    "      for(var i=0;i<this._e.length;i++){ if(this._e[i][0]===k){ if(!done){o.push([k,v]);done=true;} }"
+    "        else o.push(this._e[i]); } if(!done) o.push([k,v]); this._e=o; };"
+    "    USP.prototype.sort=function(){ this._e.sort(function(a,b){"
+    "      return a[0]<b[0]?-1:(a[0]>b[0]?1:0); }); };"
+    "    USP.prototype.forEach=function(cb,t){"
+    "      for(var i=0;i<this._e.length;i++) cb.call(t,this._e[i][1],this._e[i][0],this); };"
+    "    USP.prototype.keys=function(){ return this._e.map(function(p){return p[0];})[Symbol.iterator](); };"
+    "    USP.prototype.values=function(){ return this._e.map(function(p){return p[1];})[Symbol.iterator](); };"
+    "    USP.prototype.entries=function(){ return this._e.map(function(p){return [p[0],p[1]];})[Symbol.iterator](); };"
+    "    USP.prototype[Symbol.iterator]=function(){ return this.entries(); };"
+    "    USP.prototype.toString=function(){ return this._e.map(function(p){"
+    "      return encf(p[0])+'='+encf(p[1]); }).join('&'); };"
+    "    Object.defineProperty(USP.prototype,'size',{get:function(){return this._e.length;},configurable:true});"
+    "    g.URLSearchParams=USP; }"
+    "  if(typeof g.URL==='undefined'){"
+    "    var SPLIT=/^(?:([^:\\/?#]+):)?(?:\\/\\/([^\\/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?$/;"
+    "    function split(u){ var m=SPLIT.exec(String(u));"
+    "      return {scheme:m[1],auth:m[2],path:m[3]||'',query:m[4],frag:m[5]}; }"
+    "    function removeDots(p){ var inp=p,out='';"
+    "      while(inp.length){"
+    "        if(inp.slice(0,3)==='../') inp=inp.slice(3);"
+    "        else if(inp.slice(0,2)==='./') inp=inp.slice(2);"
+    "        else if(inp.slice(0,3)==='/./') inp='/'+inp.slice(3);"
+    "        else if(inp==='/.') inp='/';"
+    "        else if(inp.slice(0,4)==='/../'){ inp='/'+inp.slice(4); out=out.replace(/\\/?[^\\/]*$/,''); }"
+    "        else if(inp==='/..'){ inp='/'; out=out.replace(/\\/?[^\\/]*$/,''); }"
+    "        else if(inp==='.'||inp==='..'){ inp=''; }"
+    "        else { var m=/^\\/?[^\\/]*/.exec(inp); out+=m[0]; inp=inp.slice(m[0].length); } }"
+    "      return out; }"
+    "    function merge(B,rp){ if(B.auth!==undefined && B.path===''){ return '/'+rp; }"
+    "      var i=B.path.lastIndexOf('/'); return i<0?rp:B.path.slice(0,i+1)+rp; }"
+    "    function resolve(baseStr,refStr){ var R=split(refStr),B=baseStr!=null?split(baseStr):null,T={};"
+    "      if(R.scheme!==undefined){ T.scheme=R.scheme; T.auth=R.auth; T.path=removeDots(R.path); T.query=R.query; }"
+    "      else { if(!B||B.scheme===undefined) return null;"
+    "        if(R.auth!==undefined){ T.auth=R.auth; T.path=removeDots(R.path); T.query=R.query; }"
+    "        else { if(R.path===''){ T.path=B.path; T.query=R.query!==undefined?R.query:B.query; }"
+    "          else { if(R.path.charAt(0)==='/') T.path=removeDots(R.path);"
+    "            else T.path=removeDots(merge(B,R.path)); T.query=R.query; } T.auth=B.auth; }"
+    "        T.scheme=B.scheme; } T.frag=R.frag; return T; }"
+    "    function parseAuth(a){ a=a||''; var user='',pass='',host='',port='';"
+    "      var at=a.lastIndexOf('@'); if(at>=0){ var ui=a.slice(0,at); a=a.slice(at+1);"
+    "        var c=ui.indexOf(':'); if(c>=0){user=ui.slice(0,c);pass=ui.slice(c+1);}else user=ui; }"
+    "      var pm=/:(\\d*)$/.exec(a); if(pm){ port=pm[1]; host=a.slice(0,pm.index); } else host=a;"
+    "      return {user:user,pass:pass,host:host,port:port}; }"
+    "    function URLc(url,base){"
+    "      var T=resolve(base!==undefined&&base!==null?String(base):null,String(url));"
+    "      if(T===null) throw new TypeError('Invalid URL: '+String(url));"
+    "      var A=parseAuth(T.auth); var path=T.path;"
+    "      if(T.auth!==undefined && path==='') path='/';"
+    "      this._scheme=T.scheme||''; this._auth=T.auth; this._user=A.user; this._pass=A.pass;"
+    "      this._host=A.host; this._port=A.port; this._path=path;"
+    "      this._query=T.query; this._frag=T.frag; this._sp=null; }"
+    "    function q(u){ if(u._sp){ var s=u._sp.toString(); return s?'?'+s:''; }"
+    "      return (u._query!==undefined&&u._query!=='')?'?'+u._query:''; }"
+    "    Object.defineProperties(URLc.prototype,{"
+    "      protocol:{get:function(){return this._scheme+':';},configurable:true},"
+    "      username:{get:function(){return this._user;},configurable:true},"
+    "      password:{get:function(){return this._pass;},configurable:true},"
+    "      hostname:{get:function(){return this._host;},configurable:true},"
+    "      port:{get:function(){return this._port;},configurable:true},"
+    "      host:{get:function(){return this._host+(this._port?':'+this._port:'');},configurable:true},"
+    "      pathname:{get:function(){return this._path;},configurable:true},"
+    "      search:{get:function(){return q(this);},configurable:true},"
+    "      hash:{get:function(){return (this._frag!==undefined&&this._frag!=='')?'#'+this._frag:'';},configurable:true},"
+    "      origin:{get:function(){ if(this._auth===undefined) return 'null';"
+    "        return this._scheme+'://'+this._host+(this._port?':'+this._port:''); },configurable:true},"
+    "      searchParams:{get:function(){ if(!this._sp) this._sp=new g.URLSearchParams(this._query||''); return this._sp; },configurable:true},"
+    "      href:{get:function(){ var s=this._scheme?this._scheme+':':'';"
+    "        if(this._auth!==undefined){ s+='//'; if(this._user){ s+=this._user; if(this._pass) s+=':'+this._pass; s+='@'; }"
+    "          s+=this._host+(this._port?':'+this._port:''); }"
+    "        s+=this._path+q(this)+((this._frag!==undefined&&this._frag!=='')?'#'+this._frag:''); return s; },configurable:true}"
+    "    });"
+    "    URLc.prototype.toString=function(){ return this.href; };"
+    "    URLc.prototype.toJSON=function(){ return this.href; };"
+    "    g.URL=URLc; }"
+    "})();";
+
 /* --- real location + JS-navigation capture (Hito 20e parte 1) --- */
 
 /* Defines a string property on the __locParts data object from a (ptr,len) span.
@@ -776,7 +906,14 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
                          "<modern-shim>", JS_EVAL_TYPE_GLOBAL);
     int mod_ok = !JS_IsException(r2);
     JS_FreeValue(jsctx, r2);
-    return mod_ok ? JD_OK : JD_ERR_INTERNAL;
+    if (!mod_ok) return JD_ERR_INTERNAL;
+
+    /* Install WHATWG URL / URLSearchParams (pure string parsers; no I/O, no net). */
+    JSValue r3 = JS_Eval(jsctx, JD_URL_SHIM, sizeof JD_URL_SHIM - 1,
+                         "<url-shim>", JS_EVAL_TYPE_GLOBAL);
+    int url_ok = !JS_IsException(r3);
+    JS_FreeValue(jsctx, r3);
+    return url_ok ? JD_OK : JD_ERR_INTERNAL;
 }
 
 /* --- capturing console (Freebug) --- */

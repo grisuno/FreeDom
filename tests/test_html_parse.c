@@ -220,6 +220,38 @@ static void test_extract_script_list_external_semantics(void **state) {
     hp_document_free(doc);
 }
 
+/* A classic script runs only when its type is absent/empty or a JavaScript MIME
+ * type. Template/data blocks (text/x-jquery-tmpl, text/html, text/template) are
+ * NOT executed -- running them throws a SyntaxError on their markup (Slashdot's
+ * "#each" errors). Fail closed: only a recognized JS type survives. */
+static void test_extract_script_list_skips_non_js_type(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body>"
+        "<script>var a=1;</script>"                              /* no type: runs */
+        "<script type='text/javascript'>var b=2;</script>"       /* JS type: runs */
+        "<script type='application/javascript'>var c=3;</script>"/* JS type: runs */
+        "<script type='text/x-jquery-tmpl'>{{each items}}x{{/each}}</script>" /* template: skip */
+        "<script type='text/html'><li>tpl</li></script>"         /* template: skip */
+        "<script type='text/template'>{{name}}</script>"         /* template: skip */
+        "<script type='text/babel'>var d=4;</script>"            /* needs transpile: skip */
+        "</body></html>";
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+
+    size_t n = 0;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 3UL);   /* only the three JS scripts, in order */
+    assert_string_equal(s[0].text, "var a=1;");
+    assert_string_equal(s[1].text, "var b=2;");
+    assert_string_equal(s[2].text, "var c=3;");
+    hp_free_scripts(s, n);
+    hp_document_free(doc);
+}
+
 /* No inline scripts => NULL list and zero count (never a bogus empty buffer). */
 static void test_extract_script_list_empty(void **state) {
     (void)state;
@@ -419,6 +451,7 @@ int main(void) {
         cmocka_unit_test(test_scripts_kept_when_disabled),
         cmocka_unit_test(test_extract_script_list_separates),
         cmocka_unit_test(test_extract_script_list_external_semantics),
+        cmocka_unit_test(test_extract_script_list_skips_non_js_type),
         cmocka_unit_test(test_extract_script_list_empty),
         cmocka_unit_test(test_extract_script_list_caps),
         cmocka_unit_test(test_extract_stylesheets_basic),
