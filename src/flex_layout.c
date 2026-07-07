@@ -140,6 +140,29 @@ fx_status fx_grid_columns(double avail, size_t ncols, double gap,
     return FX_OK;
 }
 
+fx_status fx_float_pack(const double *width, const int *side, size_t n,
+                        double avail, double gap, double *out_x) {
+    if (n == 0) return FX_OK;
+    if (width == NULL || side == NULL || out_x == NULL) return FX_ERR_NULL_ARG;
+    if (avail < 0.0 || gap < 0.0 || n > FX_MAX_ITEMS) return FX_ERR_RANGE;
+
+    double cur_l = 0.0;      /* left cursor advances rightward */
+    double cur_r = avail;    /* right cursor advances leftward */
+    for (size_t i = 0; i < n; ++i) {
+        double w = nn(width[i]);
+        if (side[i] == 1) {          /* right float: pack from the right edge */
+            double x = cur_r - w;
+            if (x < 0.0) x = 0.0;
+            out_x[i] = x;
+            cur_r = x - gap;
+        } else {                     /* left float (default): pack from the left edge */
+            out_x[i] = (cur_l < 0.0) ? 0.0 : cur_l;
+            cur_l += w + gap;
+        }
+    }
+    return FX_OK;
+}
+
 void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) {
     if (row == NULL || col == NULL) return;
     if (ncols == 0) {

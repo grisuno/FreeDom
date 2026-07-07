@@ -192,6 +192,53 @@ static void test_grid_cell(void **state) {
     fx_grid_cell(3, 0, &r, &c); assert_int_equal(r, 0); assert_int_equal(c, 0); /* no div by zero */
 }
 
+static void test_float_pack_left(void **state) {
+    (void)state;
+    /* Two left floats pack from the left edge, separated by gap. */
+    double w[2] = { 180.0, 400.0 };
+    int side[2] = { 0, 0 };
+    double x[2];
+    assert_int_equal(fx_float_pack(w, side, 2, 712, 10, x), FX_OK);
+    assert_true(dbl_eq(x[0], 0.0));
+    assert_true(dbl_eq(x[1], 190.0));   /* 180 + 10 gap */
+}
+
+static void test_float_pack_left_and_right(void **state) {
+    (void)state;
+    /* A left main + a right sidebar: main hugs the left, sidebar hugs the right,
+     * regardless of document order. */
+    double w[2] = { 400.0, 180.0 };
+    int side[2] = { 0, 1 };   /* item0 left, item1 right */
+    double x[2];
+    assert_int_equal(fx_float_pack(w, side, 2, 712, 0, x), FX_OK);
+    assert_true(dbl_eq(x[0], 0.0));
+    assert_true(dbl_eq(x[1], 532.0));   /* 712 - 180 */
+}
+
+static void test_float_pack_two_right(void **state) {
+    (void)state;
+    /* Two right floats: the first in document order sits furthest right. */
+    double w[2] = { 100.0, 100.0 };
+    int side[2] = { 1, 1 };
+    double x[2];
+    assert_int_equal(fx_float_pack(w, side, 2, 500, 10, x), FX_OK);
+    assert_true(dbl_eq(x[0], 400.0));   /* 500 - 100 */
+    assert_true(dbl_eq(x[1], 290.0));   /* 400 - 10 gap - 100 */
+}
+
+static void test_float_pack_edges(void **state) {
+    (void)state;
+    double w[2] = { 10, 10 }; int side[2] = { 0, 0 }; double x[2];
+    assert_int_equal(fx_float_pack(NULL, NULL, 0, 100, 0, NULL), FX_OK);  /* no-op */
+    assert_int_equal(fx_float_pack(NULL, side, 2, 100, 0, x), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_pack(w, side, 2, -1, 0, x), FX_ERR_RANGE);
+    assert_int_equal(fx_float_pack(w, side, (size_t)FX_MAX_ITEMS + 1, 100, 0, x), FX_ERR_RANGE);
+    /* Overflowing right float clamps to >= 0, never negative. */
+    double wo[1] = { 999 }; int so[1] = { 1 }; double xo[1];
+    assert_int_equal(fx_float_pack(wo, so, 1, 100, 0, xo), FX_OK);
+    assert_true(xo[0] >= 0.0);
+}
+
 static void test_justify_name(void **state) {
     (void)state;
     assert_string_equal(fx_justify_name(FX_JUSTIFY_START), "start");
@@ -223,6 +270,10 @@ int main(void) {
         cmocka_unit_test(test_grid_columns_too_narrow_clamps_to_zero),
         cmocka_unit_test(test_grid_columns_edges),
         cmocka_unit_test(test_grid_cell),
+        cmocka_unit_test(test_float_pack_left),
+        cmocka_unit_test(test_float_pack_left_and_right),
+        cmocka_unit_test(test_float_pack_two_right),
+        cmocka_unit_test(test_float_pack_edges),
         cmocka_unit_test(test_justify_name),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

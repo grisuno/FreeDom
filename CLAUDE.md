@@ -1512,11 +1512,55 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   al fondo) y su panel blanco de contenido (caja DOM #83, `position:relative`, `l=120 r=336`, `bg=#fff`)
   es una **caja huérfana** (ningún `rd_block` la reclama como ancestro de caja → nunca se abre en flujo y
   `position_doc` la resuelve al fondo, y=26505), así que el gris `#cccccc` de la página (caja #0, el bg
-  real de Slashdot) se ve detrás de las historias = las "franjas grises". Requiere soporte de `float`
-  y/o manejo en-flujo de un panel de fondo `relative` sin contenido directo. *(Módulos puros + IPC + E2E
-  de JS verificados; ventana Wayland interactiva y el layout float pendientes.)* Ver
+  real de Slashdot) se ve detrás de las historias = las "franjas grises". **Resuelto por el hito de
+  `float` (abajo):** las bandas side-by-side anidan en el box stack, así el panel `relative` queda en
+  flujo y pinta su fondo detrás de las columnas — franjas grises extinguidas. *(Módulos puros + IPC +
+  E2E de JS verificados; ventana Wayland interactiva pendiente.)* Ver
   `[[freedom-url-api-and-script-type-gate]]`, `[[freedom-js-modern-web-surface]]`,
   `[[freedom-per-script-isolation]]`, `[[freedom-external-scripts]]`, `[[freedom-sop-by-construction]]`.
+- **Hito (render) — `float:left`/`float:right` + `clear`: bandas side-by-side que ANIDAN en el
+  box stack (el layout de 2 columnas de Slashdot y "muchos sitios de esa época" se ve bien,
+  2026-07-06).** El gap de layout que quedaba de Slashdot: la web de dos columnas de esa era se
+  construye con `float`, que Freedom ignoraba → sidebar y main se **apilaban** vertical y un panel de
+  fondo `position:relative` sin contenido directo se iba al fondo (las "franjas grises"). Ciclo
+  completo (spec `float.md` → tests rojos → código → 39 suites + ASan 0 + E2E visual). (a) **`css`:**
+  dos propiedades nuevas whitelisteadas **no heredadas** — `float` (`css_float`: none/left/right) y
+  `clear` (`css_clear`: none/left/right/both), fail-closed ante keyword desconocido; oráculo de
+  `fuzz-css` reforzado con sus rangos. (b) **`flex_layout` (puro):** `fx_float_pack` empaqueta una
+  banda — items `left` desde el borde izquierdo hacia la derecha, items `right` desde el derecho hacia
+  la izquierda (orden de documento), clamp `x>=0`, sin wrap v1; sin I/O ni asignación, testeado.
+  (c) **`page_view`:** `resolve_context` resuelve el **float ancestro más cercano** (side + un
+  `float_id` de un registro en orden de documento que agrupa los runs de UN elemento flotado) y el
+  `clear` del bloque hoja propio; 3 campos nuevos en `pv_run` (`float_side`/`float_id`/`float_clear`),
+  **estructura** como `cont_*` (nunca gateada). (d) **IPC (`tab.c`) + `render_doc`:** 3 int32 nuevos
+  tras `cont_item` en `write_view`/`read_view` (mismo orden ambos lados) + copia **ungated** en
+  `rd_build`; `dom_debug` imprime `float=left|right(#id)`/`clear=N`. (e) **Painter (`browser_ui.c`):**
+  `layout_float_band` detecta una banda maximal de bloques con `float_id>=0` (un bloque no-flotado o
+  con `clear` la termina), la **reconcilia a su caja COMÚN** (`band_common_box` = prefijo común de los
+  box-paths) — a diferencia de un contenedor flex/grid que hace `close_all_boxes`, la banda **NO cierra
+  las cajas**, así un panel `position:relative`/bg que la envuelve queda **abierto en flujo y pinta su
+  fondo detrás de las columnas** (extingue las franjas grises); agrupa por `float_id` en items, ancho
+  del `box_w` de autor (los sin ancho reparten el sobrante), empaqueta con `fx_float_pack`, y fluye
+  cada item en su columna (sub-estado, como el pase flex por-item). **Bug preexistente extinguido
+  (boyscout):** una caja `position:relative` que envuelve varios bloques estaba **tanto** en
+  `L.boxes` (pintada en flujo, correcta) **como** en `L.positioned` (porque `bt_resolve_positioning`
+  incluye relative), así que el pase de posicionados la **re-pintaba encima** (su bg tapaba todo salvo
+  el primer bloque); `position_doc` ahora **filtra de la lista de posicionados las cajas ya pintadas
+  en flujo** (`in_flow`), dejando solo out-of-flow real (absolute/fixed). Specs (`float.md` nuevo,
+  `css.md`) + tests (float+clear en `css`; `fx_float_pack` en `flex_layout`; threading en `page_view`;
+  copia ungated en `render_doc`; roundtrip IPC en `tab`; E2E `test_dump_layout_float_two_columns` en
+  `test_freedom` — 2 columnas a distinto `x_off` + panel en flujo) + `make test` (39 suites, 0
+  fallos) / `make asan` (exit 0, 0 leaks/UB) limpios + **E2E visual** (`--author-css --download-png`
+  de un repro Slashdot-like: sidebar gris a la izquierda, columna principal a la derecha, footer con
+  `clear` abajo spanning, panel de fondo detrás; sin `--author-css` las 2 columnas también — layout es
+  estructura; `rich.html` sin regresión). **Límites v1:** sin **text-wrap** alrededor de un float
+  solo (la banda es una fila autocontenida; el contenido no-flotado siguiente limpia debajo); la
+  decoración de caja **propia** de un item de float (bordes de una `.story` dentro de `.main`) no se
+  compone (mismo límite que flex/grid — el bg del panel envolvente **sí** pinta); `clear` colapsa
+  left/right/both a "terminar la banda"; floats sin ancho reparten el sobrante; sin `%`; profundidad
+  por `RC_BOX_STACK_MAX`, items por `BT_MAX_CHILDREN`. *(Módulos puros + IPC + E2E visual headless
+  verificados; ventana Wayland interactiva pendiente al dueño.)* Ver `[[freedom-float-layout]]`,
+  `[[freedom-box-engine-and-dispatcher]]`.
 
 ### 7.3 Roadmap — por cruzar
 

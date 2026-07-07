@@ -2817,6 +2817,127 @@ static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
  * PV's per-page container cap; a hostile page cannot exceed it. */
 #define RC_MAX_OUT_OF_FLOW 256
 
+/* Box path root..block_id via the box-def parent_id chain (root first), written into
+ * out (bounded by RC_BOX_STACK_MAX). Returns the path length; block_id < 0 gives 0. */
+static int box_path_of(const rd_doc *doc, int block_id, int *out) {
+    int tmp[RC_BOX_STACK_MAX];
+    int n = 0;
+    for (int id = block_id; id >= 0 && n < RC_BOX_STACK_MAX; ) {
+        tmp[n++] = id;
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        id = (d != NULL) ? d->parent_id : -1;
+    }
+    for (int a = 0; a < n; ++a) out[a] = tmp[n - 1 - a];  /* reverse to root..id */
+    return n;
+}
+
+/* The innermost box that is an ancestor (or self) of EVERY block in [start, end), via
+ * the longest common prefix of their box paths — the box a float band nests inside, so
+ * a wrapping position:relative/background panel is opened in flow and paints its
+ * background behind the columns. -1 when the blocks share no box (top-level band). */
+static int band_common_box(const rd_doc *doc, size_t start, size_t end) {
+    int common[RC_BOX_STACK_MAX];
+    int ncommon = box_path_of(doc, rd_at(doc, start)->block_id, common);
+    for (size_t k = start + 1; k < end && ncommon > 0; ++k) {
+        int path[RC_BOX_STACK_MAX];
+        int n = box_path_of(doc, rd_at(doc, k)->block_id, path);
+        int m = 0;
+        while (m < ncommon && m < n && common[m] == path[m]) ++m;
+        ncommon = m;
+    }
+    return (ncommon > 0) ? common[ncommon - 1] : -1;
+}
+
+/* Lays a float band [start, end) — a maximal run of blocks each with float_id >= 0 —
+ * side by side inside the current box context (spec/float.md). Blocks are grouped by
+ * float_id into items (document order); each item's width is its author box_w, and
+ * width-less items split the leftover evenly; left/right sides pack via fx_float_pack.
+ * Each item's blocks flow into its column (a fresh sub-state, like the flex per-item
+ * pass); the band height is the tallest column. Structure, applied by default. */
+static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
+                              rc_state *s, const ui_theme *th, double content_w,
+                              const rd_doc *doc, size_t start, size_t end) {
+    flush_line(L, s, th);
+    double ctx_left, ctx_w;
+    rc_box_context(s, content_w, &ctx_left, &ctx_w);
+    if (ctx_w < 1.0) ctx_w = 1.0;
+
+    /* Group consecutive blocks by float_id into items (one floated element = one item). */
+    size_t gstart[BT_MAX_CHILDREN + 1];
+    size_t g = 0;
+    int grp_overflow = 0;
+    {
+        int prev_fid = -1, have = 0;
+        for (size_t k = start; k < end; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (!have || bk->float_id != prev_fid) {
+                if (g >= BT_MAX_CHILDREN) { grp_overflow = 1; break; }
+                gstart[g++] = k;
+            }
+            prev_fid = bk->float_id; have = 1;
+        }
+        gstart[g] = end;
+    }
+    if (g == 0 || grp_overflow) {  /* too many items: degrade to plain vertical flow */
+        for (size_t k = start; k < end; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (bk->block_break) flush_line(L, s, th);
+            s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
+            flow_text_block(cr, w, L, s, th, bk, ctx_w);
+        }
+        return;
+    }
+
+    double base_top = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
+    s->pending_gap = 0;
+
+    /* Item widths + sides: explicit author width wins; width-less items split leftover. */
+    double width[BT_MAX_CHILDREN];
+    int    side[BT_MAX_CHILDREN];
+    double outx[BT_MAX_CHILDREN];
+    double explicit_sum = 0.0;
+    size_t nfree = 0;
+    for (size_t j = 0; j < g; ++j) {
+        const rd_block *bk = rd_at(doc, gstart[j]);
+        side[j] = (bk->float_side == CSS_FLOAT_RIGHT) ? 1 : 0;
+        width[j] = (bk->box_w > 0) ? (double)bk->box_w : -1.0;
+        if (width[j] > 0.0) explicit_sum += width[j]; else ++nfree;
+    }
+    double leftover = ctx_w - explicit_sum;
+    double share = (nfree > 0) ? (leftover / (double)nfree) : 0.0;
+    if (share < 1.0) share = 1.0;
+    for (size_t j = 0; j < g; ++j) if (width[j] < 0.0) width[j] = share;
+
+    if (fx_float_pack(width, side, g, ctx_w, 0.0, outx) != FX_OK) {
+        for (size_t k = start; k < end; ++k)
+            flow_text_block(cr, w, L, s, th, rd_at(doc, k), ctx_w);
+        return;
+    }
+
+    /* Flow each item into its column, then translate its rows to the column rect. */
+    double band_h = 0.0;
+    for (size_t j = 0; j < g; ++j) {
+        rc_state si;
+        memset(&si, 0, sizeof si);
+        double cw = (width[j] < 1.0) ? 1.0 : width[j];
+        si.bg_w = cw;
+        size_t sr = L->nrow;
+        for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
+            si.bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
+            flow_text_block(cr, w, L, &si, th, bk, cw);
+        }
+        flush_line(L, &si, th);
+        if (si.cur_top > band_h) band_h = si.cur_top;
+        for (size_t r = sr; r < L->nrow; ++r) {
+            L->rows[r].top += base_top;
+            L->rows[r].x_off = ctx_left + outx[j];
+        }
+    }
+    s->cur_top = base_top + band_h;
+}
+
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                        rc_layout *L) {
     const rd_doc *doc = w->doc;
@@ -2863,6 +2984,29 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             if (bd != NULL && (bd->position == BT_POS_ABSOLUTE || bd->position == BT_POS_FIXED)) {
                 continue;
             }
+        }
+
+        /* Float band (spec/float.md): a maximal run of blocks each with float_id >= 0
+         * lays side by side. Unlike a flex/grid container it does NOT close the open
+         * boxes — it reconciles to the band's COMMON box so a wrapping
+         * position:relative/background panel stays open and paints behind the columns.
+         * A block whose own `clear` is set ends the band (the cleared block flows below).
+         * Structure, applied by default (never gated by caps.css). */
+        if (b->float_id >= 0) {
+            size_t j = i + 1;
+            while (j < rd_count(doc)) {
+                const rd_block *bj = rd_at(doc, j);
+                if (bj->float_id < 0 || bj->float_clear != 0) break;
+                ++j;
+            }
+            reconcile_boxes(L, &s, th, doc, content_w, band_common_box(doc, i, j));
+            double mt, mb;
+            block_margins(th, b, &mt, &mb);
+            s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
+            layout_float_band(cr, w, L, &s, th, content_w, doc, i, j);
+            s.prev_bottom = mb;
+            i = j - 1;  /* the loop's ++i moves past the band */
+            continue;
         }
 
         /* Box engine (Hito 23b-8 Step D): reconcile the open-box stack with this
@@ -3050,6 +3194,21 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
         doc->boxes, nbox, gx, gy, gw, gh, content_w, content_w,
         L->positioned, BT_MAX_POSITIONED, &L->npositioned);
     (void)st;  /* BT_OK / BT_ERR_NULL_ARG / BT_ERR_RANGE all logged via dom_debug */
+
+    /* A position:relative box is already painted IN FLOW (open_box applied its inset
+     * offset and its rc_box paints its decoration behind its rows). bt_resolve_
+     * positioning also emits it (relative keeps in-flow geometry + inset), which would
+     * make the painter repaint the box on TOP of its rows — covering everything past
+     * the first block with the box background. So drop the in-flow (relative) boxes
+     * here; the positioned repaint pass is left with only the true out-of-flow boxes
+     * (absolute/fixed, which layout_doc skipped so they have no rc_box). */
+    size_t keep = 0;
+    for (size_t i = 0; i < L->npositioned; ++i) {
+        size_t bid = L->positioned[i].box_index;
+        if (bid < BT_MAX_POSITIONED && in_flow[bid]) continue;
+        L->positioned[keep++] = L->positioned[i];
+    }
+    L->npositioned = keep;
 }
 
 /* Width of a painted text-input box: the preferred width clamped to the content. */

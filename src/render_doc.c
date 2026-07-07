@@ -117,6 +117,9 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->flex_order = CSS_LEN_UNSET;
     b->flex_direction = 0;
     b->cont_item = -1;
+    b->float_side = 0;
+    b->float_id = -1;
+    b->float_clear = 0;
     b->box_l = 0;
     b->box_r = 0;
     b->box_w = 0;
@@ -283,6 +286,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->flex_order = r->flex_order;
             lb->flex_direction = r->flex_direction;
             lb->cont_item = r->cont_item;
+            /* Float layout is structure like cont_*, carried regardless of caps.css. */
+            lb->float_side = r->float_side;
+            lb->float_id = r->float_id;
+            lb->float_clear = r->float_clear;
             /* Author box model is presentation (it can shrink content to
              * unreadability), so it is gated by caps.css like the colors above. */
             if (caps.css) {

@@ -146,6 +146,14 @@ typedef struct pv_run {
      * collected table cell keeps its own ordinal. Structure like cont_*. -1 = no
      * container. */
     int     cont_item;
+    /* Float layout (spec/float.md). float_side is the css_float of the nearest floated
+     * self-or-ancestor block (0 none, 2 left, 3 right — the css_float values); float_id
+     * groups the runs of ONE floated element in document order (-1 = not in a float);
+     * float_clear is this run's own block's css_clear (0 unset .. 4 both). Structure
+     * like cont_*, carried regardless of caps.css. Defaults: 0 / -1 / 0. */
+    int     float_side;
+    int     float_id;
+    int     float_clear;
     /* Author box model pre-resolved to px (Hito 23b-3), gated by caps.css. box_l/
      * box_r are the left/right insets (padding + non-auto margin of that side);
      * box_w is the content-width cap (min width/max-width, 0 = none); box_center is
@@ -355,6 +363,11 @@ void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
 /* Sets the container-item ordinal on the most recently appended run (-1 = none).
  * No-op on an empty or NULL view; the append helpers default cont_item to -1. */
 void pv_set_cont_item(pv_view *v, int cont_item);
+
+/* Float layout setter for the most recently appended run (spec/float.md): float_side
+ * (css_float), float_id (floated-element group id, -1 = none), float_clear (css_clear).
+ * No-op on an empty or NULL view; the append helpers default to 0 / -1 / 0. */
+void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear);
 
 /* Sets the author box model on the most recently appended run (left/right insets,
  * width cap, centered flag, and top/bottom margin overrides in px; box_mt/box_mb

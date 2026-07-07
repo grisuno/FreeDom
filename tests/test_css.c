@@ -1261,6 +1261,30 @@ static void test_position_and_insets(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).z_index, CSS_LEN_UNSET);
 }
 
+static void test_float_and_clear(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("float:left", 0).float_side, CSS_FLOAT_LEFT);
+    assert_int_equal(css_parse_inline("float:RIGHT", 0).float_side, CSS_FLOAT_RIGHT);
+    assert_int_equal(css_parse_inline("float:none", 0).float_side, CSS_FLOAT_NONE);
+    assert_int_equal(css_parse_inline("float:inline-start", 0).float_side, CSS_FLOAT_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).float_side, CSS_FLOAT_UNSET);
+
+    assert_int_equal(css_parse_inline("clear:both", 0).clear, CSS_CLEAR_BOTH);
+    assert_int_equal(css_parse_inline("clear:left", 0).clear, CSS_CLEAR_LEFT);
+    assert_int_equal(css_parse_inline("clear:right", 0).clear, CSS_CLEAR_RIGHT);
+    assert_int_equal(css_parse_inline("clear:none", 0).clear, CSS_CLEAR_NONE);
+    assert_int_equal(css_parse_inline("clear:all", 0).clear, CSS_CLEAR_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).clear, CSS_CLEAR_UNSET);
+
+    /* Cascade + inline-wins, like every other box property. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".a{float:left}", 14, &sh), CSS_OK);
+    const char *cls[] = { "a" };
+    assert_int_equal(css_resolve(sh, "div", NULL, cls, 1, NULL, 0).float_side, CSS_FLOAT_LEFT);
+    assert_int_equal(css_resolve(sh, "div", NULL, cls, 1, "float:right", 0).float_side, CSS_FLOAT_RIGHT);
+    css_free(sh);
+}
+
 static void test_box_sizing(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("box-sizing:border-box", 0).box_sizing, CSS_BOXS_BORDER);
@@ -1454,6 +1478,7 @@ static void test_layout_sheet_cascade_and_unset(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
+        cmocka_unit_test(test_float_and_clear),
         cmocka_unit_test(test_box_sizing),
         cmocka_unit_test(test_border_shorthand),
         cmocka_unit_test(test_border_longhands),

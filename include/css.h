@@ -152,6 +152,18 @@ typedef enum css_grid_flow {
     CSS_GF_UNSET = 0, CSS_GF_ROW, CSS_GF_COLUMN
 } css_grid_flow;
 
+/* float. 0 unset; NONE is the explicit in-flow default. LEFT/RIGHT take the box out of
+ * normal flow into a side-by-side float band (see spec/float.md). */
+typedef enum css_float {
+    CSS_FLOAT_UNSET = 0, CSS_FLOAT_NONE, CSS_FLOAT_LEFT, CSS_FLOAT_RIGHT
+} css_float;
+
+/* clear. 0 unset; NONE is the default. LEFT/RIGHT/BOTH drop the box below preceding
+ * floats (v1 collapses the three to "end the float band"). */
+typedef enum css_clear {
+    CSS_CLEAR_UNSET = 0, CSS_CLEAR_NONE, CSS_CLEAR_LEFT, CSS_CLEAR_RIGHT, CSS_CLEAR_BOTH
+} css_clear;
+
 /* Anti-DoS clamps for the layout properties. Insets/z-index/order reuse CSS_LEN_*.
  * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX. */
 #define CSS_BORDER_W_MAX  CSS_LEN_MAX
@@ -258,6 +270,10 @@ typedef struct css_style {
     int         row_gap;
     int         grid_auto_flow;  /* css_grid_flow */
     int         grid_col_span, grid_row_span; /* `span N`, 0 unset */
+    /* Float layout (spec/float.md). NOT inherited (read from the element's own resolved
+     * style, like the box model). Layout structure, applied regardless of caps.css. */
+    int         float_side;      /* css_float, 0 (unset) */
+    int         clear;           /* css_clear, 0 (unset) */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

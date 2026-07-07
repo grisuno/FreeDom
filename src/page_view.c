@@ -163,6 +163,9 @@ static void run_init_common(pv_run *r) {
     r->flex_order = CSS_LEN_UNSET;
     r->flex_direction = 0;
     r->cont_item = -1;
+    r->float_side = 0;
+    r->float_id = -1;
+    r->float_clear = 0;
     r->box_l = 0;
     r->box_r = 0;
     r->box_w = 0;
@@ -430,6 +433,14 @@ void pv_set_cont_item(pv_view *v, int cont_item) {
     v->runs[v->count - 1].cont_item = cont_item;
 }
 
+void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->float_side = float_side;
+    r->float_id = float_id;
+    r->float_clear = float_clear;
+}
+
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int box_mt, int box_mb) {
     if (v == NULL || v->count == 0) return;
@@ -621,6 +632,9 @@ typedef struct pv_cont_info {
     int id, display, gap, justify, cols;
     int grow, shrink, basis, order, direction;
     const lxb_dom_node_t *item;
+    /* Float context (spec/float.md): float_side/float_id from the nearest floated
+     * self-or-ancestor block, float_clear from the run's own leaf block. */
+    int float_side, float_id, float_clear;
 } pv_cont_info;
 
 /* Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for
@@ -853,7 +867,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
                             pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box,
                             pv_text_ext *ext, pv_box_reg *box_reg,
-                            int *block_id_out) {
+                            pv_container_reg *float_reg, int *block_id_out) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
     *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
     *deco = -1;
@@ -863,13 +877,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->grow = -1; cont->shrink = -1; cont->basis = CSS_LEN_UNSET;
     cont->order = CSS_LEN_UNSET; cont->direction = 0;
     cont->item = NULL;
+    cont->float_side = 0; cont->float_id = -1; cont->float_clear = 0;
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     pv_text_ext_reset(ext);
     *block_id_out = -1;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
     int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0, got_boxdeco = 0;
-    int got_li = 0, got_list_kind = 0;
+    int got_li = 0, got_list_kind = 0, got_float = 0;
     int prev_box_id = -1;  /* the box-carrying block seen one step more inner, for parent linking */
     int tag_bold = 0, tag_italic = 0;
     int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
@@ -916,6 +931,16 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                  * do not, so they are not duplicated across its inner blocks). */
                 box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : PV_LEN_UNSET;
                 box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : PV_LEN_UNSET;
+                /* The leaf block's own `clear` ends any preceding float band (float.md). */
+                cont->float_clear = (cs.clear != CSS_CLEAR_UNSET) ? cs.clear : 0;
+            }
+            /* Nearest floated self-or-ancestor block: its side + a document-order id so
+             * the painter groups the runs of one floated element into one column. */
+            if (!got_float && float_reg != NULL && is_block_tag(t) &&
+                (cs.float_side == CSS_FLOAT_LEFT || cs.float_side == CSS_FLOAT_RIGHT)) {
+                cont->float_side = cs.float_side;
+                cont->float_id = container_id(float_reg, p);
+                got_float = 1;
             }
             /* Horizontal box from the nearest block ancestor that declares one, so a
              * wrapper's max-width/centering/padding reaches all its descendants. */
@@ -1598,6 +1623,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
     pv_container_reg reg = { { NULL }, 0 };  /* flex/grid containers, document order */
+    pv_container_reg float_reg = { { NULL }, 0 };  /* floated elements, document order */
     pv_box_reg box_reg = { { NULL }, { { 0 } }, 0 };  /* box-carrying blocks + their defs */
     pv_flow_reg flowreg = { { NULL }, { 0 }, 0 };  /* per-table flow-vs-grid decisions */
     pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
@@ -1697,7 +1723,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &calign, &cfs, &clh, &cdeco,
                                 &cu_li, &cu_depth, &cu_ordered,
                                 &reg, &cu_cont, &cu_box, &cext,
-                                &box_reg, &cu_bdeco);
+                                &box_reg, &float_reg, &cu_bdeco);
 
                 /* An empty cell still occupies its column. */
                 pv_status st = pv_append(v, (cell_href != NULL) ? PV_LINK : PV_TEXT,
@@ -1720,6 +1746,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 /* Every collected cell is its own grid item (the cell node is the
                  * item identity), so item-grouping downstream never merges cells. */
                 pv_set_cont_item(v, item_ordinal(&items, cid, n));
+                pv_set_float(v, cu_cont.float_side, cu_cont.float_id, cu_cont.float_clear);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
@@ -1746,7 +1773,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &unused_ext,
-                                &box_reg, &unused_bdeco);
+                                &box_reg, &float_reg, &unused_bdeco);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1805,7 +1832,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &unused_ext,
-                                &box_reg, &unused_bdeco);
+                                &box_reg, &float_reg, &unused_bdeco);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1852,7 +1879,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
                         &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
                         &li, &list_depth, &ordered, &reg, &cont, &box, &ext,
-                        &box_reg, &bdeco);
+                        &box_reg, &float_reg, &bdeco);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -1918,6 +1945,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
         pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction);
         pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
+        pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
         pv_set_text_ext(v, ext.font_family, ext.text_transform, ext.letter_spacing,
                         ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,

@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Freedom float demo</title>
+<style>
+  body    { background: #cccccc; font-family: sans-serif; }
+  #panel  { position: relative; background: #ffffff; margin: 0 40px; }
+  .sidebar{ float: left;  width: 200px; background: #eeeeee; }
+  .main   { float: left;  width: 520px; }
+  .ad     { float: right; width: 160px; background: #fff4d6; }
+  .foot   { clear: both;  background: #dddddd; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <div class="sidebar">
+    <ul><li>Sections</li><li>Search</li><li>Login</li><li>Help</li></ul>
+  </div>
+  <div class="ad"><p>Sponsored slot on the right.</p></div>
+  <div class="main">
+    <h2>First story</h2>
+    <p>The classic two-column era layout: a floated sidebar, a floated main column,
+       and a cleared footer beneath both. The white panel is a position:relative
+       wrapper with no direct text; its background paints behind the columns.</p>
+    <h2>Second story</h2>
+    <p>Body of the second story goes here.</p>
+  </div>
+  <div class="foot">Footer spanning the full width, cleared below the floats.</div>
+</div>
+</body>
+</html>

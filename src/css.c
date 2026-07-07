@@ -53,6 +53,7 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS,
        P_FLEX_DIR, P_FLEX_WRAP,
        P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW, P_GRID_COL_SPAN, P_GRID_ROW_SPAN,
+       P_FLOAT, P_CLEAR,
        P_NSLOTS };
 
 typedef struct css_decl {
@@ -543,6 +544,21 @@ static int interp_boxsizing(const char *v) {
     return -1;
 }
 
+static int interp_float(const char *v) {
+    if (csel_ci_eq(v, "none"))  return CSS_FLOAT_NONE;
+    if (csel_ci_eq(v, "left"))  return CSS_FLOAT_LEFT;
+    if (csel_ci_eq(v, "right")) return CSS_FLOAT_RIGHT;
+    return -1;
+}
+
+static int interp_clear(const char *v) {
+    if (csel_ci_eq(v, "none"))  return CSS_CLEAR_NONE;
+    if (csel_ci_eq(v, "left"))  return CSS_CLEAR_LEFT;
+    if (csel_ci_eq(v, "right")) return CSS_CLEAR_RIGHT;
+    if (csel_ci_eq(v, "both"))  return CSS_CLEAR_BOTH;
+    return -1;
+}
+
 /* Signed integer (z-index/order). Returns 1 with *out (clamped to +-CSS_LEN_MAX),
  * 0 if not a pure integer (auto / floats / units -> dropped, leaving unset). */
 static int interp_int(const char *v, int *out) {
@@ -1015,6 +1031,8 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "grid-auto-flow") == 0)      { prop_id = P_GRID_FLOW;     ival = interp_grid_flow(val); }
     else if (strcmp(prop, "grid-column") == 0)         { prop_id = P_GRID_COL_SPAN; ival = interp_grid_span(val); }
     else if (strcmp(prop, "grid-row") == 0)            { prop_id = P_GRID_ROW_SPAN; ival = interp_grid_span(val); }
+    else if (strcmp(prop, "float") == 0)               { prop_id = P_FLOAT;         ival = interp_float(val); }
+    else if (strcmp(prop, "clear") == 0)               { prop_id = P_CLEAR;         ival = interp_clear(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -1426,6 +1444,8 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_GRID_FLOW:     o->grid_auto_flow = d->ival; break;
             case P_GRID_COL_SPAN: o->grid_col_span = d->ival; break;
             case P_GRID_ROW_SPAN: o->grid_row_span = d->ival; break;
+            case P_FLOAT:         o->float_side = d->ival; break;
+            case P_CLEAR:         o->clear = d->ival; break;
             default: break;
         }
     }
@@ -1472,6 +1492,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .flex_direction = CSS_FD_UNSET, .flex_wrap = CSS_FW_UNSET,
         .grid_rows = 0, .row_gap = -1, .grid_auto_flow = CSS_GF_UNSET,
         .grid_col_span = 0, .grid_row_span = 0,
+        .float_side = CSS_FLOAT_UNSET, .clear = CSS_CLEAR_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

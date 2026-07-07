@@ -73,6 +73,17 @@ fx_status fx_grid_columns(double avail, size_t ncols, double gap,
  * ncols == 0 yields row = col = 0 (defensive; no divide-by-zero). */
 void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);
 
+/* Float packing (one band; spec/float.md). Packs n float items along one axis:
+ * side[i] == 0 (left) items advance a cursor from the content start (0) rightward in
+ * document order; side[i] == 1 (right) items advance a cursor from `avail` leftward in
+ * document order; adjacent same-side items are separated by gap. Writes each item's x
+ * offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap
+ * (v1): an item that would overflow still gets a clamped position. Pure, no allocation.
+ * n == 0 is a no-op (pointers may be NULL). Returns FX_ERR_NULL_ARG (a required pointer
+ * NULL with n > 0), FX_ERR_RANGE (avail/gap negative, or n > FX_MAX_ITEMS). */
+fx_status fx_float_pack(const double *width, const int *side, size_t n,
+                        double avail, double gap, double *out_x);
+
 /* Stable, short English name of a justify mode for structured/agent output. Never
  * NULL; an unknown enum value yields "start". */
 const char *fx_justify_name(fx_justify j);

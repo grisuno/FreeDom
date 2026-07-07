@@ -91,6 +91,10 @@ typedef struct rd_block {
      * fragments of ONE flex/grid item and flow together in one cell. Structure like
      * cont_* (never gated). -1 = no container. */
     int              cont_item;
+    /* Float layout (spec/float.md). float_side (css_float), float_id (floated-element
+     * group id, -1 = none), float_clear (css_clear). Structure like cont_* (never
+     * gated). Defaults: 0 / -1 / 0. */
+    int              float_side, float_id, float_clear;
     /* Author box model (Hito 23b-3); set only with caps.css, else 0 / PV_LEN_UNSET.
      * box_l/box_r: left/right insets px; box_w: content-width cap px (0 = none);
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or

@@ -444,6 +444,41 @@ static void test_cont_item_carried_by_default(void **state) {
 
 /* Stage 3: the per-item flex values are structure like cont_* — carried with and
  * without caps.css — and a run without them keeps the unset sentinels. */
+/* float.md: float_side/float_id/float_clear are layout structure, carried regardless of
+ * caps.css; a run that never got pv_set_float keeps the unset defaults. */
+static void test_float_carried_by_default(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "col", NULL), PV_OK);
+    pv_set_float(v, CSS_FLOAT_LEFT, 3, CSS_CLEAR_BOTH);
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "bare", NULL), PV_OK);
+
+    for (int pass = 0; pass < 2; ++pass) {
+        rdp_caps caps = rdp_caps_safe();
+        caps.css = (pass == 1);   /* structure identical whether author CSS is on or off */
+        rd_doc *d = NULL;
+        assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+        const rd_block *p = first_kind(d, RD_PARAGRAPH);
+        assert_non_null(p);
+        assert_int_equal(p->float_side, CSS_FLOAT_LEFT);
+        assert_int_equal(p->float_id, 3);
+        assert_int_equal(p->float_clear, CSS_CLEAR_BOTH);
+        int saw_bare = 0;
+        for (size_t i = 0; i < rd_count(d); ++i) {
+            const rd_block *b = rd_at(d, i);
+            if (b->text != NULL && strcmp(b->text, "bare") == 0) {
+                assert_int_equal(b->float_side, 0);
+                assert_int_equal(b->float_id, -1);
+                assert_int_equal(b->float_clear, 0);
+                saw_bare = 1;
+            }
+        }
+        assert_true(saw_bare);
+        rd_free(d);
+    }
+    pv_free(v);
+}
+
 static void test_flex_item_carried_by_default(void **state) {
     (void)state;
     pv_view *v = pv_new();
@@ -545,6 +580,7 @@ int main(void) {
         cmocka_unit_test(test_container_carried_by_default),
         cmocka_unit_test(test_cont_item_carried_by_default),
         cmocka_unit_test(test_flex_item_carried_by_default),
+        cmocka_unit_test(test_float_carried_by_default),
         cmocka_unit_test(test_block_tag_total),
         cmocka_unit_test(test_build_null_view_is_empty),
         cmocka_unit_test(test_heading_paragraph_link),

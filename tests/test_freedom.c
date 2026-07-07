@@ -400,6 +400,58 @@ static void test_dump_layout_no_wrapper_fragmentation(void **state) {
     unlink(path);
 }
 
+/* float.md end-to-end: two floated siblings lay out SIDE BY SIDE (the second column's
+ * rows start at a larger x_off than the first), and a wrapping position:relative
+ * background panel stays IN FLOW (a box, not pushed to the page bottom by the
+ * positioned pass) so it does not leave grey stripes. Guards the full css -> page_view
+ * -> IPC -> render_doc -> painter float pipeline. */
+static void test_dump_layout_float_two_columns(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "#panel { position:relative; background:#fff; }"
+        ".a { float:left; width:200px; }"
+        ".b { float:left; width:400px; }"
+        "</style></head><body>"
+        "<div id=\"panel\">"
+        "<div class=\"a\"><p>left column</p></div>"
+        "<div class=\"b\"><p>right column</p></div>"
+        "<div style=\"clear:both\">footer</div>"
+        "</div></body></html>";
+    const char *path = "__freedom_float.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_float.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    /* Collect the x_off of every row; there must be a left column (small x_off) AND a
+     * right column (a distinctly larger x_off) — side by side, not stacked. */
+    double min_x = 1e9, max_x = -1.0;
+    char *p = out;
+    while ((p = strstr(p, "x_off=")) != NULL) {
+        double x = -1.0;
+        if (sscanf(p, "x_off=%lf", &x) == 1) {
+            if (x < min_x) min_x = x;
+            if (x > max_x) max_x = x;
+        }
+        p += 6;
+    }
+    assert_true(max_x - min_x > 100.0);  /* two columns at clearly different x */
+
+    /* The relative panel is in flow: at least one box, and no positioned box left it
+     * at the page bottom (the grey-stripe bug had npositioned pushing it away). */
+    assert_non_null(strstr(out, "nbox=1"));
+    assert_non_null(strstr(out, "npositioned=0"));
+
+    unlink(path);
+}
+
 /* --- network policy --- */
 
 static void test_rejects_http_url(void **state) {
@@ -428,6 +480,7 @@ int main(void) {
         cmocka_unit_test(test_no_dump_console_without_flag),
         cmocka_unit_test(test_dump_dom_prints_render_tree),
         cmocka_unit_test(test_dump_layout_no_wrapper_fragmentation),
+        cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

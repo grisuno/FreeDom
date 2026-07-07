@@ -209,6 +209,9 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
   **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
   **`grid-column`/`grid-row`** (`span N`).
 - *Lists*: `list-style-type`, `list-style` (type token only).
+- *Float* (**spec/float.md**): **`float`** (`left`/`right`/`none`), **`clear`**
+  (`left`/`right`/`both`/`none`). Consumed by the painter as side-by-side float bands
+  that nest in the open box stack; see spec/float.md for the v1 scope.
 - *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
   `all`, `min/max-width`), `!important`.
 
@@ -222,9 +225,11 @@ first:
 - *Box decoration, finer grain*: corner-by-corner / elliptical `border-radius`,
   multi-layer `box-shadow`, `box-shadow` blur/spread *rendering* (resolved but not
   yet painted), `border-image`, `outline-offset`.
-- *Positioning, finer grain*: `float`, `clear`, `overflow`(`-x`/`-y`), `z-index`
-  *stacking* (resolved but compositing is a later milestone), line-number / named
-  grid placement (only `span N` is resolved), `position: sticky` scroll pinning.
+- *Positioning, finer grain*: text **wrapping around** a single float (a float
+  followed by non-floated content — v1 float bands are self-contained rows; see
+  spec/float.md), `overflow`(`-x`/`-y`), `z-index` *stacking* (resolved but compositing
+  is a later milestone), line-number / named grid placement (only `span N` is
+  resolved), `position: sticky` scroll pinning.
 - *Backgrounds beyond a solid color*: `background-image`/gradients (and any
   `url()` — by doctrine, never fetched), `background-position`/`-size`/`-repeat`.
 - *Transforms / filters / transitions*: `transform`, `filter`, `transition`,

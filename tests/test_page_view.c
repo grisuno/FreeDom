@@ -932,6 +932,50 @@ static void test_build_flex_item_values(void **state) {
     hp_document_free(doc);
 }
 
+/* float.md: a run inside a floated block carries that block's side + a stable float_id
+ * grouping all its runs; two floated siblings get distinct ids; a run outside a float
+ * has float_id == -1; a clear:both block carries its clear. */
+static void test_build_float_threading(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='float:left'><p>navA</p><p>navB</p></div>"
+        "<div style='float:right'>side</div>"
+        "<div style='clear:both'>footer</div>"
+        "<p>plain</p>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "navA");
+    const pv_run *b = find_text(v, "navB");
+    assert_non_null(a); assert_non_null(b);
+    assert_int_equal(a->float_side, CSS_FLOAT_LEFT);
+    assert_int_equal(b->float_side, CSS_FLOAT_LEFT);
+    assert_true(a->float_id >= 0);
+    assert_int_equal(a->float_id, b->float_id);   /* one column, one id */
+
+    const pv_run *s = find_text(v, "side");
+    assert_non_null(s);
+    assert_int_equal(s->float_side, CSS_FLOAT_RIGHT);
+    assert_true(s->float_id >= 0);
+    assert_int_not_equal(s->float_id, a->float_id); /* distinct floated element */
+
+    const pv_run *f = find_text(v, "footer");
+    assert_non_null(f);
+    assert_int_equal(f->float_id, -1);              /* not floated */
+    assert_int_equal(f->float_clear, CSS_CLEAR_BOTH);
+
+    const pv_run *p = find_text(v, "plain");
+    assert_non_null(p);
+    assert_int_equal(p->float_side, 0);
+    assert_int_equal(p->float_id, -1);
+    assert_int_equal(p->float_clear, 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* CSS: whitespace directly inside a flex/grid container creates NO anonymous item
  * (the source newlines between <p> items must not become layout columns). The
  * flowed-table inter-cell separator is unaffected (it carries cont_id == -1). */
@@ -2024,6 +2068,7 @@ int main(void) {
         cmocka_unit_test(test_build_combinator_selectors),
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_flex_item_values),
+        cmocka_unit_test(test_build_float_threading),
         cmocka_unit_test(test_build_flex_whitespace_not_item),
         cmocka_unit_test(test_build_interblock_whitespace_not_emitted),
         cmocka_unit_test(test_build_inline_whitespace_kept),
