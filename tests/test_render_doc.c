@@ -385,7 +385,7 @@ static void test_container_carried_by_default(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "item", NULL), PV_OK);
-    pv_set_container(v, 0, BX_DISPLAY_FLEX, 12, FX_JUSTIFY_CENTER, 0);
+    pv_set_container(v, 0, BX_DISPLAY_FLEX, 12, FX_JUSTIFY_CENTER, 0, 0, -1, 0);
 
     /* CSS off: the container layout is still carried (decoupled from author CSS). */
     rd_doc *d = NULL;
@@ -417,7 +417,7 @@ static void test_cont_item_carried_by_default(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "frag", NULL), PV_OK);
-    pv_set_container(v, 3, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, 1);
+    pv_set_container(v, 3, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, 1, 0, -1, 0);
     pv_set_cont_item(v, 7);
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "bare", NULL), PV_OK);
 
@@ -483,8 +483,8 @@ static void test_flex_item_carried_by_default(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "item", NULL), PV_OK);
-    pv_set_container(v, 0, BX_DISPLAY_FLEX, 0, FX_JUSTIFY_START, 0);
-    pv_set_flex(v, 300, 0, 120, -2, CSS_FD_COLUMN);
+    pv_set_container(v, 0, BX_DISPLAY_FLEX, 0, FX_JUSTIFY_START, 0, 0, -1, 0);
+    pv_set_flex(v, 300, 0, 120, -2, CSS_FD_COLUMN, 0);
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "bare", NULL), PV_OK);
 
     rd_doc *d = NULL;
@@ -521,6 +521,40 @@ static void test_flex_item_carried_by_default(void **state) {
     assert_int_equal(p->flex_grow, 300);
     assert_int_equal(p->flex_basis, 120);
     assert_int_equal(p->flex_direction, CSS_FD_COLUMN);
+    rd_free(d);
+    pv_free(v);
+}
+
+/* flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) are structure
+ * like the rest of the cont_ and flex_ fields: carried regardless of caps.css. */
+static void test_flex_wrap_align_row_gap_carried_by_default(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "item", NULL), PV_OK);
+    pv_set_container(v, 0, BX_DISPLAY_FLEX, 10, FX_JUSTIFY_START, 0,
+                     CSS_FW_WRAP, 25, CSS_AK_CENTER);
+    pv_set_flex(v, -1, -1, CSS_LEN_UNSET, CSS_LEN_UNSET, 0, CSS_AK_END);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->cont_wrap, CSS_FW_WRAP);
+    assert_int_equal(p->cont_row_gap, 25);
+    assert_int_equal(p->cont_align_items, CSS_AK_CENTER);
+    assert_int_equal(p->flex_align_self, CSS_AK_END);
+    rd_free(d);
+
+    /* caps.css on: identical (structure is not gated). */
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->cont_wrap, CSS_FW_WRAP);
+    assert_int_equal(p->cont_row_gap, 25);
+    assert_int_equal(p->cont_align_items, CSS_AK_CENTER);
+    assert_int_equal(p->flex_align_self, CSS_AK_END);
     rd_free(d);
     pv_free(v);
 }
@@ -580,6 +614,7 @@ int main(void) {
         cmocka_unit_test(test_container_carried_by_default),
         cmocka_unit_test(test_cont_item_carried_by_default),
         cmocka_unit_test(test_flex_item_carried_by_default),
+        cmocka_unit_test(test_flex_wrap_align_row_gap_carried_by_default),
         cmocka_unit_test(test_float_carried_by_default),
         cmocka_unit_test(test_block_tag_total),
         cmocka_unit_test(test_build_null_view_is_empty),

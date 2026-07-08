@@ -230,6 +230,47 @@ static void test_load_carries_flex_item(void **state) {
     tab_close(t);
 }
 
+/* flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) survive the
+ * worker round-trip (write_view/read_view serialize the 4 new fields in the same
+ * order on both sides). */
+static void test_load_carries_flex_wrap_align_row_gap(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>F</title></head><body>"
+        "<div style=\"display:flex;flex-wrap:wrap;row-gap:15px;align-items:center\">"
+        "<div style=\"align-self:flex-end\">a</div>"
+        "<div>b</div></div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_a = 0, saw_b = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "a") == 0) {
+            assert_int_equal(r->cont_wrap, CSS_FW_WRAP);
+            assert_int_equal(r->cont_row_gap, 15);
+            assert_int_equal(r->cont_align_items, CSS_AK_CENTER);
+            assert_int_equal(r->flex_align_self, CSS_AK_END);
+            saw_a = 1;
+        }
+        if (strcmp(r->text, "b") == 0) {
+            assert_int_equal(r->cont_wrap, CSS_FW_WRAP);
+            assert_int_equal(r->cont_row_gap, 15);
+            assert_int_equal(r->flex_align_self, CSS_AK_UNSET);
+            saw_b = 1;
+        }
+    }
+    assert_true(saw_a);
+    assert_true(saw_b);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* float.md over IPC: float_side/float_id/float_clear survive the worker round-trip
  * (write_view/read_view serialize them in the same order on both sides). */
 static void test_load_carries_float(void **state) {
@@ -1599,6 +1640,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_returns_image_run),
         cmocka_unit_test(test_load_carries_author_color),
         cmocka_unit_test(test_load_carries_flex_item),
+        cmocka_unit_test(test_load_carries_flex_wrap_align_row_gap),
         cmocka_unit_test(test_load_carries_float),
         cmocka_unit_test(test_load_carries_cont_item),
         cmocka_unit_test(test_load_carries_node_id),

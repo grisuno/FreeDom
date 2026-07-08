@@ -329,6 +329,53 @@ static void test_container_fail_closed_and_bounds(void **state) {
     assert_int_equal(s.grid_cols, 0);
 }
 
+/* repeat()/minmax() track-count correctness (Hito: CSS layout expansion). Track
+ * SIZES still are not resolved (every track lays out equal-width downstream), but
+ * the COUNT is now correct instead of naive whitespace tokenization. */
+static void test_grid_repeat_expands_count(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("grid-template-columns: repeat(3, 1fr)", 0).grid_cols, 3);
+    assert_int_equal(
+        css_parse_inline("grid-template-columns: repeat(2, 100px 1fr)", 0).grid_cols, 4);
+    assert_int_equal(
+        css_parse_inline("grid-template-columns: 200px repeat(3, 1fr) 100px", 0).grid_cols, 5);
+    assert_int_equal(
+        css_parse_inline("grid-template-rows: repeat(4, auto)", 0).grid_rows, 4);
+}
+
+static void test_grid_minmax_counts_as_one_track(void **state) {
+    (void)state;
+    assert_int_equal(
+        css_parse_inline("grid-template-columns: minmax(100px, 1fr) 1fr", 0).grid_cols, 2);
+    assert_int_equal(
+        css_parse_inline("grid-template-columns: repeat(2, minmax(50px, 1fr))", 0).grid_cols, 2);
+}
+
+static void test_grid_repeat_autofill_fails_closed(void **state) {
+    (void)state;
+    /* auto-fill/auto-fit need an available width this pure parser does not have:
+     * fail closed (unset), never a wrong guess. */
+    assert_int_equal(
+        css_parse_inline("grid-template-columns: repeat(auto-fill, 100px)", 0).grid_cols, 0);
+    assert_int_equal(
+        css_parse_inline("grid-template-columns: repeat(auto-fit, minmax(100px,1fr))", 0)
+            .grid_cols, 0);
+}
+
+static void test_grid_repeat_malformed_fails_closed(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("grid-template-columns: repeat(3 1fr)", 0).grid_cols, 0);
+    assert_int_equal(css_parse_inline("grid-template-columns: repeat(0, 1fr)", 0).grid_cols, 0);
+    assert_int_equal(css_parse_inline("grid-template-columns: repeat(abc, 1fr)", 0).grid_cols, 0);
+}
+
+static void test_grid_repeat_clamped_anti_dos(void **state) {
+    (void)state;
+    assert_int_equal(
+        css_parse_inline("grid-template-columns: repeat(999, 1fr)", 0).grid_cols,
+        (int)CSS_GRID_COLS_MAX);
+}
+
 static void test_container_unset(void **state) {
     (void)state;
     css_style s = css_parse_inline("color:red", 0);
@@ -359,6 +406,90 @@ static void test_malformed_inline_no_crash(void **state) {
     (void)state;
     css_style s = css_parse_inline(";;: ; color ; :red; color::; color:#777;;", 0);
     assert_int_equal(s.color, 0x777777);
+}
+
+/* --- custom properties (--name) + var() --- */
+
+static void test_custom_prop_var_basic(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(":root{--brand:#ff6600;} .btn{color:var(--brand);}", 0, &sh),
+                     CSS_OK);
+    const char *cl[] = { "btn" };
+    css_style s = css_resolve(sh, "div", NULL, cl, 1, NULL, 0);
+    assert_int_equal(s.color, 0xff6600);
+    css_free(sh);
+}
+
+static void test_custom_prop_var_fallback_used_when_missing(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("color: var(--missing, #123456)", 0);
+    assert_int_equal(s.color, 0x123456);
+}
+
+static void test_custom_prop_var_no_fallback_drops_decl(void **state) {
+    (void)state;
+    /* No matching custom property and no fallback: the whole declaration is
+     * invalid (fail closed), not silently coerced into some default. */
+    css_style s = css_parse_inline("color: var(--missing); background: #00ff00", 0);
+    assert_int_equal(s.color, -1);
+    assert_int_equal(s.background, 0x00ff00);
+}
+
+static void test_custom_prop_var_chain(void **state) {
+    (void)state;
+    /* --b references --a: chained lookups resolve within CSS_VAR_MAX_DEPTH. */
+    css_style s = css_parse_inline(
+        "--a: #abcdef; --b: var(--a); color: var(--b)", 0);
+    assert_int_equal(s.color, 0xabcdef);
+}
+
+static void test_custom_prop_var_self_reference_fails_closed(void **state) {
+    (void)state;
+    /* A cyclic reference never infinite-loops or crashes: it just fails to
+     * resolve past CSS_VAR_MAX_DEPTH, dropping the declaration. */
+    css_style s = css_parse_inline("--a: var(--a); color: var(--a); background: #010101", 0);
+    assert_int_equal(s.color, -1);
+    assert_int_equal(s.background, 0x010101);
+}
+
+static void test_custom_prop_var_in_shorthand(void **state) {
+    (void)state;
+    /* var() can resolve just a fragment of a multi-value shorthand. */
+    css_style s = css_parse_inline("--gap: 12px; margin: var(--gap) auto", 0);
+    assert_int_equal(s.margin_top, 12);
+    assert_int_equal(s.margin_bottom, 12);
+    assert_int_equal(s.margin_left, CSS_LEN_AUTO);
+    assert_int_equal(s.margin_right, CSS_LEN_AUTO);
+}
+
+static void test_custom_prop_var_later_declaration_wins(void **state) {
+    (void)state;
+    /* Global-pool simplification: the LAST --name declaration in the whole
+     * stylesheet wins, regardless of which rule declared it. */
+    css_sheet *sh = NULL;
+    assert_int_equal(
+        css_parse(":root{--c:#111111;} .later{--c:#222222;} p{color:var(--c);}", 0, &sh),
+        CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0x222222);
+    css_free(sh);
+}
+
+static void test_custom_prop_var_unbalanced_paren_drops(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("color: var(--a; background:#00ff00", 0);
+    assert_int_equal(s.color, -1);
+    assert_int_equal(s.background, 0x00ff00);
+}
+
+static void test_custom_prop_var_never_phones_home(void **state) {
+    (void)state;
+    /* A custom property whose value contains url() flows through the same
+     * url()-drop check as a literal background value (interp_bg rejects it). */
+    css_style s = css_parse_inline(
+        "--evil: url(http://evil/x.png) #112233; background: var(--evil)", 0);
+    assert_int_equal(s.background, -1);
 }
 
 /* --- <style> block parsing + selectors --- */
@@ -1208,6 +1339,100 @@ static void test_box_units_and_failclosed(void **state) {
     assert_int_equal(def.max_width, CSS_LEN_UNSET);
 }
 
+static void test_calc_basic_arithmetic(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("width: calc(100px + 50px)", 0).width, 150);
+    assert_int_equal(css_parse_inline("width: calc(100px - 30px)", 0).width, 70);
+    assert_int_equal(css_parse_inline("width: calc(10px * 3)", 0).width, 30);
+    assert_int_equal(css_parse_inline("width: calc(3 * 10px)", 0).width, 30);
+    assert_int_equal(css_parse_inline("width: calc(100px / 4)", 0).width, 25);
+}
+
+static void test_calc_precedence_and_parens(void **state) {
+    (void)state;
+    /* * binds tighter than +: 10 + 2*20 = 50, not (10+2)*20 = 240. */
+    assert_int_equal(css_parse_inline("width: calc(10px + 2 * 20px)", 0).width, 50);
+    assert_int_equal(css_parse_inline("width: calc((10px + 2px) * 3)", 0).width, 36);
+}
+
+static void test_calc_units_and_signs(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("margin-left: calc(1em + 8px)", 0).margin_left, 24);
+    assert_int_equal(css_parse_inline("margin-left: calc(-1em - 8px)", 0).margin_left, -24);
+    /* auto is orthogonal to calc(): margin allows negative results. */
+    assert_int_equal(css_parse_inline("padding-left: calc(20px - 30px)", 0).pad_left, CSS_LEN_UNSET);
+}
+
+static void test_calc_dimension_errors_fail_closed(void **state) {
+    (void)state;
+    /* length * length and a dimensionless result are both invalid. */
+    assert_int_equal(css_parse_inline("width: calc(10px * 5px)", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width: calc(2 * 3)", 0).width, CSS_LEN_UNSET);
+    /* length +/- dimensionless number is invalid. */
+    assert_int_equal(css_parse_inline("width: calc(10px + 5)", 0).width, CSS_LEN_UNSET);
+    /* division by zero, by a length, unbalanced parens, percent inside calc(). */
+    assert_int_equal(css_parse_inline("width: calc(10px / 0)", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width: calc(10px / 2px)", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width: calc(10px + (5px)", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width: calc(100% - 20px)", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width: calc()", 0).width, CSS_LEN_UNSET);
+}
+
+static void test_calc_clamped_anti_dos(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("width: calc(99999999999px + 1px)", 0).width, CSS_LEN_MAX);
+}
+
+/* calc() must survive being ONE token inside a multi-value shorthand: a naive
+ * whitespace splitter would break "calc(10px + 5px)" apart at the internal spaces
+ * (into "calc(10px", "+", "5px)") before it ever reached interp_len. Exercises
+ * every shorthand tokenizer that can hand a token to something calc-aware
+ * (margin/padding, flex, border/outline width, text-shadow, box-shadow). */
+static void test_calc_inside_shorthands(void **state) {
+    (void)state;
+    css_style m = css_parse_inline("margin: calc(10px + 5px) auto", 0);
+    assert_int_equal(m.margin_top, 15);
+    assert_int_equal(m.margin_bottom, 15);
+    assert_int_equal(m.margin_left, CSS_LEN_AUTO);
+
+    css_style p4 = css_parse_inline("padding: calc(2px * 3) calc(20px / 4)", 0);
+    assert_int_equal(p4.pad_top, 6);
+    assert_int_equal(p4.pad_bottom, 6);
+    assert_int_equal(p4.pad_right, 5);
+    assert_int_equal(p4.pad_left, 5);
+
+    css_style f = css_parse_inline("flex: 0 0 calc(100px + 120px)", 0);
+    assert_int_equal(f.flex_grow, 0);
+    assert_int_equal(f.flex_shrink, 0);
+    assert_int_equal(f.flex_basis, 220);
+
+    css_style b = css_parse_inline("border-width: calc(1px + 1px) 3px", 0);
+    assert_int_equal(b.border_top_width, 2);
+    assert_int_equal(b.border_bottom_width, 2);
+    assert_int_equal(b.border_right_width, 3);
+
+    css_style bo = css_parse_inline("border: calc(1px + 2px) solid #ff0000", 0);
+    assert_int_equal(bo.border_top_width, 3);
+    assert_int_equal(bo.border_top_style, CSS_BST_SOLID);
+    assert_int_equal(bo.border_top_color, 0xff0000);
+
+    css_style ts = css_parse_inline("text-shadow: calc(1px + 1px) calc(2px + 2px) red", 0);
+    assert_int_equal(ts.shadow_dx, 2);
+    assert_int_equal(ts.shadow_dy, 4);
+
+    css_style bs = css_parse_inline("box-shadow: calc(1px + 1px) calc(2px + 2px) 3px", 0);
+    assert_int_equal(bs.shadow2_dx, 2);
+    assert_int_equal(bs.shadow2_dy, 4);
+    assert_int_equal(bs.shadow2_blur, 3);
+}
+
+static void test_calc_with_custom_property(void **state) {
+    (void)state;
+    /* calc() and var() compose: var() substitutes text before calc() is parsed. */
+    css_style s = css_parse_inline("--base: 20px; width: calc(var(--base) * 2)", 0);
+    assert_int_equal(s.width, 40);
+}
+
 static void test_box_clamp_anti_dos(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("width:99999999px", 0).width, CSS_LEN_MAX);
@@ -1491,6 +1716,13 @@ int main(void) {
         cmocka_unit_test(test_box_shorthand_expansion),
         cmocka_unit_test(test_box_auto_and_centering),
         cmocka_unit_test(test_box_units_and_failclosed),
+        cmocka_unit_test(test_calc_basic_arithmetic),
+        cmocka_unit_test(test_calc_precedence_and_parens),
+        cmocka_unit_test(test_calc_units_and_signs),
+        cmocka_unit_test(test_calc_dimension_errors_fail_closed),
+        cmocka_unit_test(test_calc_clamped_anti_dos),
+        cmocka_unit_test(test_calc_inside_shorthands),
+        cmocka_unit_test(test_calc_with_custom_property),
         cmocka_unit_test(test_box_clamp_anti_dos),
         cmocka_unit_test(test_box_sheet_cascade_inline_wins),
         cmocka_unit_test(test_inline_color_and_bg),
@@ -1515,10 +1747,24 @@ int main(void) {
         cmocka_unit_test(test_sheet_container_props),
         cmocka_unit_test(test_container_cascade_inline_wins),
         cmocka_unit_test(test_container_fail_closed_and_bounds),
+        cmocka_unit_test(test_grid_repeat_expands_count),
+        cmocka_unit_test(test_grid_minmax_counts_as_one_track),
+        cmocka_unit_test(test_grid_repeat_autofill_fails_closed),
+        cmocka_unit_test(test_grid_repeat_malformed_fails_closed),
+        cmocka_unit_test(test_grid_repeat_clamped_anti_dos),
         cmocka_unit_test(test_container_unset),
         cmocka_unit_test(test_url_value_dropped),
         cmocka_unit_test(test_unknown_props_ignored),
         cmocka_unit_test(test_malformed_inline_no_crash),
+        cmocka_unit_test(test_custom_prop_var_basic),
+        cmocka_unit_test(test_custom_prop_var_fallback_used_when_missing),
+        cmocka_unit_test(test_custom_prop_var_no_fallback_drops_decl),
+        cmocka_unit_test(test_custom_prop_var_chain),
+        cmocka_unit_test(test_custom_prop_var_self_reference_fails_closed),
+        cmocka_unit_test(test_custom_prop_var_in_shorthand),
+        cmocka_unit_test(test_custom_prop_var_later_declaration_wins),
+        cmocka_unit_test(test_custom_prop_var_unbalanced_paren_drops),
+        cmocka_unit_test(test_custom_prop_var_never_phones_home),
         cmocka_unit_test(test_sheet_type_selector),
         cmocka_unit_test(test_sheet_class_and_id),
         cmocka_unit_test(test_sheet_universal_and_group),

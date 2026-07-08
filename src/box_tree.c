@@ -49,40 +49,103 @@ static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
     return BT_OK;
 }
 
-/* Flex row: distribute the main axis with flex_layout, place children at the
- * padding origin (align-start), height = padding + tallest child. */
+/* Negative inputs clamp to zero (a basis never subtracts from the packing math). */
+static double bt_nn(double v) {
+    return (v > 0.0) ? v : 0.0;
+}
+
+#define BT_WRAP_EPS 1e-6
+
+/* Flex: distributes the main axis with flex_layout, one line at a time.
+ *
+ * Without wrap (node->wrap == 0, the default), every child is one line -- this is
+ * exactly the pre-wrap behaviour (a single fx_flex_line call, height = padding +
+ * tallest child), byte-identical output for every caller that predates flex-wrap.
+ *
+ * With wrap, children are greedily packed into lines by their flex basis (CSS's
+ * "flex base size": the layout only sees basis, not the grown/shrunk result, so
+ * wrap points are stable regardless of how a line's slack later gets distributed) --
+ * a child that would overflow the line starts a new one. Lines stack vertically
+ * with the cross-axis gap (row_gap if set, else gap, matching a plain CSS
+ * `gap: R C` shorthand). Within a line, a child is positioned per its resolved
+ * align (start/center/end; stretch is v1-approximated as start -- see
+ * spec/box_engine.md), never affecting the line height itself. */
 static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                              double pl, double pt, double pb, double cw, unsigned depth) {
-    if (node->gap < 0.0) return BT_ERR_RANGE;
+    if (node->gap < 0.0 || (node->has_row_gap && node->row_gap < 0.0)) return BT_ERR_RANGE;
+    if (nk == 0) { node->h = pt + pb; return BT_OK; }
+    double rgap = node->has_row_gap ? node->row_gap : node->gap;
 
-    fx_item items[BT_MAX_CHILDREN];
-    fx_result res[BT_MAX_CHILDREN];
-    for (size_t i = 0; i < nk; ++i) {
-        items[i].basis = kids[i]->basis;
-        items[i].grow = kids[i]->grow;
-        items[i].shrink = kids[i]->shrink;
-        items[i].min = kids[i]->min_main;
+    size_t line_start[BT_MAX_CHILDREN + 1];
+    size_t nlines;
+    if (node->wrap) {
+        nlines = 0;
+        size_t i = 0;
+        line_start[0] = 0;
+        while (i < nk) {
+            double used = bt_nn(kids[i]->basis);
+            size_t j = i + 1;
+            while (j < nk) {
+                double w = bt_nn(kids[j]->basis);
+                if (used + node->gap + w > cw + BT_WRAP_EPS) break;
+                used += node->gap + w;
+                ++j;
+            }
+            line_start[++nlines] = j;
+            i = j;
+        }
+    } else {
+        nlines = 1;
+        line_start[1] = nk;
     }
-    if (fx_flex_line(items, nk, cw, node->gap, node->justify, res) != FX_OK)
-        return BT_ERR_RANGE;
 
-    double maxh = 0.0;
-    for (size_t i = 0; i < nk; ++i) {
-        bt_status r = layout_node(kids[i], res[i].size, depth + 1);
-        if (r != BT_OK) return r;
-        kids[i]->x = pl + res[i].pos;
-        kids[i]->y = pt;
-        if (kids[i]->h > maxh) maxh = kids[i]->h;
+    double ytop = pt;
+    for (size_t L = 0; L < nlines; ++L) {
+        size_t a = line_start[L], b = line_start[L + 1], ln = b - a;
+        fx_item items[BT_MAX_CHILDREN];
+        fx_result res[BT_MAX_CHILDREN];
+        for (size_t k = 0; k < ln; ++k) {
+            items[k].basis = kids[a + k]->basis;
+            items[k].grow = kids[a + k]->grow;
+            items[k].shrink = kids[a + k]->shrink;
+            items[k].min = kids[a + k]->min_main;
+        }
+        if (fx_flex_line(items, ln, cw, node->gap, node->justify, res) != FX_OK)
+            return BT_ERR_RANGE;
+
+        double lineh = 0.0;
+        for (size_t k = 0; k < ln; ++k) {
+            bt_status r = layout_node(kids[a + k], res[k].size, depth + 1);
+            if (r != BT_OK) return r;
+            kids[a + k]->x = pl + res[k].pos;
+            if (kids[a + k]->h > lineh) lineh = kids[a + k]->h;
+        }
+        for (size_t k = 0; k < ln; ++k) {
+            bt_node *c = kids[a + k];
+            double extra = lineh - c->h;
+            double dy = 0.0;
+            if (c->align == BT_ALIGN_CENTER) dy = extra / 2.0;
+            else if (c->align == BT_ALIGN_END) dy = extra;
+            c->y = ytop + dy;
+        }
+        ytop += lineh + rgap;
     }
-    node->h = pt + maxh + pb;
+    node->h = ytop - rgap + pb;
     return BT_OK;
 }
 
-/* Grid: equal columns via flex_layout, row-major placement, per-row max height. */
+/* Grid: equal columns via flex_layout, row-major placement, per-row max height.
+ * The column gap is always `gap`; the ROW gap is `row_gap` when has_row_gap is set
+ * (author `row-gap`, distinct from `column-gap`), else it falls back to `gap` too
+ * (a plain `gap: N` applies to both axes) -- has_row_gap defaults to 0 under
+ * zero-init, so every caller that predates row-gap keeps its exact geometry. */
 static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                              double pl, double pt, double pb, double cw, unsigned depth) {
     size_t cols = node->grid_cols;
-    if (cols == 0 || cols > BT_MAX_CHILDREN || node->gap < 0.0) return BT_ERR_RANGE;
+    if (cols == 0 || cols > BT_MAX_CHILDREN || node->gap < 0.0 ||
+        (node->has_row_gap && node->row_gap < 0.0))
+        return BT_ERR_RANGE;
+    double rgap = node->has_row_gap ? node->row_gap : node->gap;
 
     double col_x[BT_MAX_CHILDREN];
     double col_w[BT_MAX_CHILDREN];
@@ -104,7 +167,7 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
     double yy = pt;
     for (size_t r = 0; r < nrows; ++r) {
         rowy[r] = yy;
-        yy += rowh[r] + node->gap;
+        yy += rowh[r] + rgap;
     }
     for (size_t i = 0; i < nk; ++i) {
         size_t rr, cc;
@@ -112,8 +175,8 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
         kids[i]->x = pl + col_x[cc];
         kids[i]->y = rowy[rr];
     }
-    /* yy = pt + sum(rowh) + gap*nrows; drop the trailing gap, add bottom padding. */
-    node->h = (nrows > 0) ? (yy - node->gap + pb) : (pt + pb);
+    /* yy = pt + sum(rowh) + rgap*nrows; drop the trailing gap, add bottom padding. */
+    node->h = (nrows > 0) ? (yy - rgap + pb) : (pt + pb);
     return BT_OK;
 }
 

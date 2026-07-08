@@ -2475,16 +2475,32 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
  * the text and translates the rows. Visual-only structure, applied by default
  * (decoupled from caps.css, which gates only author colors). A run that falls
  * outside the engine's range degrades to plain vertical flow. */
-/* Stage 3: true iff any block in [start, end) declares a flex per-item property.
- * Without one, the equal-columns path stays in effect (byte-identical default). */
+/* Stage 3: true iff any block in [start, end) declares a flex per-item property
+ * (grow/shrink/basis/order/align-self). Without one -- and without a container-level
+ * flex-wrap/align-items (checked by the caller) -- the equal-columns path stays in
+ * effect (byte-identical default). */
 static int container_has_flex_items(const rd_doc *doc, size_t start, size_t end) {
     for (size_t k = start; k < end; ++k) {
         const rd_block *bk = rd_at(doc, k);
         if (bk->flex_grow >= 0 || bk->flex_shrink >= 0 ||
-            bk->flex_basis != CSS_LEN_UNSET || bk->flex_order != CSS_LEN_UNSET)
+            bk->flex_basis != CSS_LEN_UNSET || bk->flex_order != CSS_LEN_UNSET ||
+            (bk->flex_align_self != CSS_AK_UNSET && bk->flex_align_self != CSS_AK_AUTO))
             return 1;
     }
     return 0;
+}
+
+/* Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis
+ * alignment it drives. BASELINE/AUTO/UNSET/space-* (align-content only, never
+ * seen here) all fall back to START; STRETCH is v1-approximated as START too
+ * (see spec/box_engine.md) -- box_tree.c's BT_ALIGN_STRETCH already does that. */
+static int css_align_to_bt(int align_kw) {
+    switch (align_kw) {
+        case CSS_AK_CENTER:  return BT_ALIGN_CENTER;
+        case CSS_AK_END:     return BT_ALIGN_END;
+        case CSS_AK_STRETCH: return BT_ALIGN_STRETCH;
+        default:              return BT_ALIGN_START;
+    }
 }
 
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
@@ -2562,7 +2578,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * the identity map unless `order` reorders the main axis (stable insertion
      * sort: equal order keeps document order, matching CSS). An item's flex
      * values are read from its first run (fragments share them). */
-    int use_flex = !is_grid && container_has_flex_items(doc, start, end);
+    int use_flex = !is_grid &&
+        (container_has_flex_items(doc, start, end) ||
+         head->cont_wrap == CSS_FW_WRAP || head->cont_wrap == CSS_FW_WRAP_REVERSE ||
+         head->cont_align_items != CSS_AK_UNSET);
     size_t pos_of[BT_MAX_CHILDREN];
     for (size_t j = 0; j < g; ++j) pos_of[j] = j;
     if (use_flex) {
@@ -2593,11 +2612,24 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     root.justify = (fx_justify)head->cont_justify;
     root.children = kids;
     root.child_count = g;
+    /* row-gap (author `row-gap`, distinct from `gap`/column-gap): applies to both
+     * the flex-wrap cross axis and grid row spacing below. Unset (-1) leaves
+     * has_row_gap at its zero-init 0, so `gap` keeps serving both axes exactly as
+     * before this property existed. */
+    if (head->cont_row_gap >= 0) {
+        root.has_row_gap = 1;
+        root.row_gap = (double)head->cont_row_gap;
+    }
     if (use_flex) {
         /* An item without an explicit basis takes an equal share of the line
          * (basis auto == content size needs text measured before layout; the
-         * equal share is the flat model's stand-in and matches the default path). */
+         * equal share is the flat model's stand-in and matches the default path).
+         * With wrap, this share is still content_w/g (not per-line): an accurate
+         * per-line auto-basis needs measuring content before layout, so wrapping
+         * items that want real auto-sizing should set an explicit basis/width --
+         * the common case in practice (cards, nav items with a fixed min width). */
         root.display = BX_DISPLAY_FLEX;
+        root.wrap = (head->cont_wrap == CSS_FW_WRAP || head->cont_wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
         double share = (content_w - (double)head->cont_gap * (double)(g - 1)) / (double)g;
         if (share < 1.0) share = 1.0;
         for (size_t j = 0; j < g; ++j) {
@@ -2607,6 +2639,9 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             kid->grow = (bk->flex_grow >= 0) ? (double)bk->flex_grow / 100.0 : 0.0;
             kid->shrink = (bk->flex_shrink >= 0) ? (double)bk->flex_shrink / 100.0 : 1.0;
             kid->basis = (bk->flex_basis >= 0) ? (double)bk->flex_basis : share;
+            int akw = (bk->flex_align_self != CSS_AK_UNSET && bk->flex_align_self != CSS_AK_AUTO)
+                      ? bk->flex_align_self : head->cont_align_items;
+            kid->align = css_align_to_bt(akw);
             kid->min_main = 1.0;
         }
     } else {

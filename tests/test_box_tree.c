@@ -105,6 +105,125 @@ static void test_flex_gap_and_justify_center(void **state) {
     assert_rect(&kids[1], 160, 0, 100, 20);
 }
 
+static void test_flex_wrap_two_lines(void **state) {
+    (void)state;
+    /* 3 items of basis 100 in a 250px line: the 3rd (100+10+100+10+100=320 > 250)
+     * overflows and starts a new line. */
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 100 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30, .basis = 100 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 15, .basis = 100 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .wrap = 1, .gap = 10,
+        .children = kids, .child_count = 3,
+    };
+    assert_int_equal(bt_layout(&root, 250), BT_OK);
+    /* line 1: items 0,1 side by side, height = tallest (30). */
+    assert_rect(&kids[0], 0,   0, 100, 20);
+    assert_rect(&kids[1], 110, 0, 100, 30);
+    /* line 2: item 2 alone, below line 1 + cross gap (falls back to `gap` = 10). */
+    assert_rect(&kids[2], 0, 40, 100, 15);
+    assert_true(dbl_eq(root.h, 55)); /* 30 + 10 + 15 */
+}
+
+static void test_flex_nowrap_default_single_line_unchanged(void **state) {
+    (void)state;
+    /* wrap == 0 (the zero-init default): identical to the pre-wrap behaviour even
+     * when items overflow the line (flex_layout shrinks them instead). */
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 100, .shrink = 1 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30, .basis = 100, .shrink = 1 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 15, .basis = 100, .shrink = 1 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .gap = 10,
+        .children = kids, .child_count = 3,
+    };
+    assert_int_equal(bt_layout(&root, 250), BT_OK);
+    assert_true(dbl_eq(kids[0].y, 0));
+    assert_true(dbl_eq(kids[1].y, 0));
+    assert_true(dbl_eq(kids[2].y, 0));           /* all on ONE line */
+    assert_true(dbl_eq(root.h, 30));             /* tallest of the three */
+}
+
+static void test_flex_wrap_row_gap_distinct_from_gap(void **state) {
+    (void)state;
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 200 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 200 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 200 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .wrap = 1, .gap = 10,
+        .has_row_gap = 1, .row_gap = 50,
+        .children = kids, .child_count = 3,
+    };
+    /* 250px line: each item (basis 200) alone on its own line (200+10+200 > 250). */
+    assert_int_equal(bt_layout(&root, 250), BT_OK);
+    assert_true(dbl_eq(kids[0].y, 0));
+    assert_true(dbl_eq(kids[1].y, 70));   /* 20 + row_gap 50, NOT gap 10 */
+    assert_true(dbl_eq(kids[2].y, 140));
+    assert_true(dbl_eq(root.h, 160));     /* 3*20 + 2*50 */
+}
+
+static void test_flex_cross_axis_align(void **state) {
+    (void)state;
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40, .basis = 50, .align = BT_ALIGN_START },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10, .basis = 50, .align = BT_ALIGN_CENTER },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10, .basis = 50, .align = BT_ALIGN_END },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .gap = 0,
+        .children = kids, .child_count = 3,
+    };
+    assert_int_equal(bt_layout(&root, 150), BT_OK);
+    /* line height = tallest = 40 (from the START item). */
+    assert_true(dbl_eq(kids[0].y, 0));    /* start: no offset */
+    assert_true(dbl_eq(kids[1].y, 15));   /* center: (40-10)/2 */
+    assert_true(dbl_eq(kids[2].y, 30));   /* end: 40-10 */
+}
+
+static void test_grid_row_gap_distinct_from_gap(void **state) {
+    (void)state;
+    bt_node kids[4] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 40 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 2, .gap = 10,
+        .has_row_gap = 1, .row_gap = 100,
+        .children = kids, .child_count = 4,
+    };
+    assert_int_equal(bt_layout(&root, 210), BT_OK);
+    /* column gap unaffected (still `gap` = 10: col_w = (210-10)/2 = 100). */
+    assert_rect(&kids[0], 0,   0,   100, 10);
+    assert_rect(&kids[1], 110, 0,   100, 20);
+    /* row spacing uses row_gap (100), not gap (10). */
+    assert_rect(&kids[2], 0,   120, 100, 30); /* row1 y = 20 + row_gap 100 */
+    assert_rect(&kids[3], 110, 120, 100, 40);
+    assert_true(dbl_eq(root.h, 160)); /* 20 + 100 + 40 */
+}
+
+static void test_grid_without_row_gap_falls_back_to_gap(void **state) {
+    (void)state;
+    /* has_row_gap == 0 (zero-init default): identical to the pre-row-gap behaviour. */
+    bt_node kids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 1, .gap = 5,
+        .children = kids, .child_count = 2,
+    };
+    assert_int_equal(bt_layout(&root, 100), BT_OK);
+    assert_true(dbl_eq(kids[1].y, 15)); /* 10 + gap 5 */
+    assert_true(dbl_eq(root.h, 35));
+}
+
 static void test_grid(void **state) {
     (void)state;
     bt_node kids[4] = {
@@ -433,6 +552,12 @@ int main(void) {
         cmocka_unit_test(test_block_stacking_with_collapse),
         cmocka_unit_test(test_flex_row_grow),
         cmocka_unit_test(test_flex_gap_and_justify_center),
+        cmocka_unit_test(test_flex_wrap_two_lines),
+        cmocka_unit_test(test_flex_nowrap_default_single_line_unchanged),
+        cmocka_unit_test(test_flex_wrap_row_gap_distinct_from_gap),
+        cmocka_unit_test(test_flex_cross_axis_align),
+        cmocka_unit_test(test_grid_row_gap_distinct_from_gap),
+        cmocka_unit_test(test_grid_without_row_gap_falls_back_to_gap),
         cmocka_unit_test(test_grid),
         cmocka_unit_test(test_nested_flex_in_block),
         cmocka_unit_test(test_display_none_skipped),

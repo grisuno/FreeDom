@@ -163,6 +163,10 @@ static void run_init_common(pv_run *r) {
     r->flex_order = CSS_LEN_UNSET;
     r->flex_direction = 0;
     r->cont_item = -1;
+    r->cont_wrap = 0;
+    r->cont_row_gap = -1;
+    r->cont_align_items = 0;
+    r->flex_align_self = 0;
     r->float_side = 0;
     r->float_id = -1;
     r->float_clear = 0;
@@ -407,7 +411,8 @@ void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
-                      int cont_gap, int cont_justify, int cont_cols) {
+                      int cont_gap, int cont_justify, int cont_cols,
+                      int cont_wrap, int cont_row_gap, int cont_align_items) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->cont_id = cont_id;
@@ -415,10 +420,13 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
     r->cont_gap = cont_gap;
     r->cont_justify = cont_justify;
     r->cont_cols = cont_cols;
+    r->cont_wrap = cont_wrap;
+    r->cont_row_gap = cont_row_gap;
+    r->cont_align_items = cont_align_items;
 }
 
 void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
-                 int flex_order, int flex_direction) {
+                 int flex_order, int flex_direction, int flex_align_self) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->flex_grow = flex_grow;
@@ -426,6 +434,7 @@ void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
     r->flex_basis = flex_basis;
     r->flex_order = flex_order;
     r->flex_direction = flex_direction;
+    r->flex_align_self = flex_align_self;
 }
 
 void pv_set_cont_item(pv_view *v, int cont_item) {
@@ -635,6 +644,9 @@ typedef struct pv_cont_info {
     /* Float context (spec/float.md): float_side/float_id from the nearest floated
      * self-or-ancestor block, float_clear from the run's own leaf block. */
     int float_side, float_id, float_clear;
+    /* flex-wrap / row-gap / align-items (CONTAINER); align-self (ITEM, tracked
+     * like grow/shrink/basis/order via the previous element on the walk). */
+    int wrap, row_gap, align_items, align_self;
 } pv_cont_info;
 
 /* Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for
@@ -878,6 +890,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->order = CSS_LEN_UNSET; cont->direction = 0;
     cont->item = NULL;
     cont->float_side = 0; cont->float_id = -1; cont->float_clear = 0;
+    cont->wrap = 0; cont->row_gap = -1; cont->align_items = 0; cont->align_self = 0;
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     pv_text_ext_reset(ext);
@@ -894,6 +907,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
      * container (anonymous item) has no previous element and keeps the sentinels. */
     int prev_grow = -1, prev_shrink = -1;
     int prev_basis = CSS_LEN_UNSET, prev_order = CSS_LEN_UNSET;
+    int prev_align_self = CSS_AK_UNSET;
     int have_prev_el = 0;
     const lxb_dom_node_t *prev_el = NULL;
 
@@ -1004,15 +1018,22 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 /* Stage 3: direction is the CONTAINER's; grow/shrink/basis/order are
                  * the ITEM's (the element one step more inner on this walk). */
                 cont->direction = (cs.flex_direction != CSS_FD_UNSET) ? cs.flex_direction : 0;
+                /* flex-wrap / row-gap / align-items are the CONTAINER's own; row-gap
+                 * falls back to -1 (unset -> the presentation layer uses cont_gap). */
+                cont->wrap = (cs.flex_wrap != CSS_FW_UNSET) ? cs.flex_wrap : 0;
+                cont->row_gap = (cs.row_gap >= 0) ? cs.row_gap : -1;
+                cont->align_items = (cs.align_items != CSS_AK_UNSET) ? cs.align_items : 0;
                 if (have_prev_el) {
                     cont->grow = prev_grow; cont->shrink = prev_shrink;
                     cont->basis = prev_basis; cont->order = prev_order;
+                    cont->align_self = prev_align_self;
                     cont->item = prev_el;
                 }
                 got_cont = 1;
             }
             prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink;
             prev_basis = cs.flex_basis; prev_order = cs.order;
+            prev_align_self = cs.align_self;
             have_prev_el = 1;
             prev_el = p;
         }
@@ -1742,7 +1763,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 cext.shadow_dx, cext.shadow_dy, cext.shadow_color,
                                 cext.opacity, cext.valign, cext.text_indent,
                                 cext.white_space);
-                pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols);
+                pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
+                                 0, -1, CSS_AK_UNSET);
                 /* Every collected cell is its own grid item (the cell node is the
                  * item identity), so item-grouping downstream never merges cells. */
                 pv_set_cont_item(v, item_ordinal(&items, cid, n));
@@ -1942,8 +1964,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_color(v, fg);
         pv_set_bgcolor(v, bg);
         pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
-        pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols);
-        pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction);
+        pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
+                         cont.wrap, cont.row_gap, cont.align_items);
+        pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
+                   cont.align_self);
         pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
         pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);

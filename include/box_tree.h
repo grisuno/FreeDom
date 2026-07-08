@@ -45,18 +45,39 @@
 #define BT_POS_FIXED     4
 #define BT_POS_STICKY    5
 
+/* Cross-axis alignment of a node as a flex item of its FLEX parent (bt_node.align).
+ * 0 (the zero-init default) is START, matching the layout's behaviour before this
+ * field existed: every existing caller that never sets it keeps its exact geometry.
+ * STRETCH is v1-approximated as START (the engine has no mechanism to force a leaf's
+ * content to grow to fill the line -- see spec/box_engine.md). */
+#define BT_ALIGN_START   0
+#define BT_ALIGN_CENTER  1
+#define BT_ALIGN_END     2
+#define BT_ALIGN_STRETCH 3
+
 typedef struct bt_node {
     bx_display      display;     /* BLOCK / FLEX / GRID / NONE; others => block leaf */
     bx_edges        margin;      /* px; used by the parent when placing this node */
     bx_edges        padding;     /* px; inside this node */
 
     /* container parameters (FLEX / GRID): */
-    double          gap;         /* px between children */
+    double          gap;         /* px between children (FLEX: main axis; GRID: columns) */
     fx_justify      justify;     /* FLEX main-axis distribution */
     size_t          grid_cols;   /* GRID: number of equal columns (>= 1) */
+    int             wrap;        /* FLEX: nonzero packs items onto multiple lines instead
+                                  * of forcing them all onto one (flex-wrap); 0 (default)
+                                  * is the original single-line behaviour, unchanged. */
+    double          row_gap;     /* cross-axis gap: between GRID rows, or between wrapped
+                                  * FLEX lines. Only consulted when has_row_gap is set. */
+    int             has_row_gap; /* 0 (zero-init default): `gap` serves both axes, exactly
+                                  * as before this field existed. 1: use row_gap instead of
+                                  * `gap` for the row/cross axis (author `row-gap`). */
 
     /* this node as a flex item of its FLEX parent: */
     double          grow, shrink, basis, min_main;
+    int             align;       /* BT_ALIGN_*: this item's cross-axis alignment within
+                                  * its line (already resolved from align-self / the
+                                  * container's align-items by the caller). */
 
     /* leaf content height in px (ignored for containers; computed): */
     double          content_h;

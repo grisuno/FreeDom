@@ -22,8 +22,11 @@ and is not gated (doctrine: "Layout != estilo de autor").
   tokens are ignored. A pathological stylesheet cannot exhaust memory or time.
 - **Fail closed.** An unparseable selector or declaration is dropped, never
   guessed. Unknown properties and values are ignored.
-- **No execution.** `expression()`, JS URLs, `var()`, `calc()` are not evaluated
-  (treated as unknown → ignored).
+- **No execution.** `expression()` and JS URLs are not evaluated (treated as
+  unknown → ignored). `var()` and `calc()` **are** evaluated (see below), but purely
+  as bounded, allocation-light **text substitution and arithmetic** over values this
+  module already understands — never code, never a fetch, never unbounded (custom
+  properties are a fixed-size table, `calc()`/`var()` recursion is depth-capped).
 
 ## Supported subset
 
@@ -142,7 +145,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `display` | `display`: `none`/`block`/`inline`/`inline-block`/`flex`/`grid`/other |
 | `gap`, `grid-gap`, `column-gap` | `gap`: leading px of the value (`12px 8px` → 12; `normal` → 0), clamped `[0, CSS_GAP_MAX]`, or -1 (unset) |
 | `justify-content` | `justify`: `flex-start`/`start`→START, `flex-end`/`end`→END, `center`, `space-between`, `space-around`, `space-evenly`; unknown dropped |
-| `grid-template-columns` | `grid_cols`: count of whitespace-separated track tokens, clamped `[1, CSS_GRID_COLS_MAX]`, or 0 (unset). `none` is dropped; `repeat()`/`minmax()` are counted as literal tokens (out of scope) |
+| `grid-template-columns` | `grid_cols`: track **count**, clamped `[1, CSS_GRID_COLS_MAX]`, or 0 (unset). `none` is dropped. `repeat(N, track-list)` expands to `N * tracks-in-pattern` (`repeat(auto-fill\|auto-fit, ...)` needs an available width this pure parser does not have, so it fails the WHOLE value); `minmax(a,b)` counts as ONE track. Track **sizes** (incl. `fr` weights) are still not resolved — every counted track lays out as an equal-width column downstream (see *Container layout params* below) |
 | `margin`, `margin-top/right/bottom/left` | `margin_top/right/bottom/left` (px). The shorthand expands 1–4 values (CSS order: all / `v h` / `t h b` / `t r b l`). `auto` → `CSS_LEN_AUTO` (meaningful for the horizontal sides: `margin: 0 auto` centers). Negative px allowed. Clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`. |
 | `padding`, `padding-top/right/bottom/left` | `pad_top/right/bottom/left` (px ≥ 0). Same 1–4 shorthand. `auto`/negative → that side dropped (fail closed). Clamped `[0, CSS_LEN_MAX]`. |
 | `width` | `width` (px content width, or `CSS_LEN_UNSET`). `auto` → unset. |
@@ -168,7 +171,7 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | Property | css_style field(s) → value/clamp |
 | :-- | :-- |
 | `position` | `position` (`css_position`): `static`/`relative`/`absolute`/`fixed`/`sticky`; unknown dropped (unset) |
-| `top`, `right`, `bottom`, `left`; `inset` shorthand | `inset_top/right/bottom/left` (`CSS_LEN_UNSET`/`CSS_LEN_AUTO`/signed px; `em`×16; `%`/`calc` dropped). `inset` expands 1–4 values (CSS order). |
+| `top`, `right`, `bottom`, `left`; `inset` shorthand | `inset_top/right/bottom/left` (`CSS_LEN_UNSET`/`CSS_LEN_AUTO`/signed px; `em`×16; `calc()` of same; `%` dropped). `inset` expands 1–4 values (CSS order; a `calc()` value survives the shorthand split — see *`calc()`* below). |
 | `z-index` | `z_index` (signed, clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`; `auto` → unset) |
 | `box-sizing` | `box_sizing` (`css_box_sizing`): `content-box`/`border-box`; unknown dropped |
 | `border`, `border-top/right/bottom/left` | uniform/per-side shorthand: classifies each token as a width (px/`thin`=1/`medium`=3/`thick`=5), a `style` keyword, or a color, and sets the matching `border_*_{width,style,color}` for the affected side(s). Only the parts present are set (omitted longhands stay unset — no initial-value reset). |
@@ -199,25 +202,34 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
   **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**, **`opacity`**,
   **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only).
 - *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
-  `grid-template-columns`, `margin`(+longhands), `padding`(+longhands), `width`,
-  `max-width`.
+  `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
+  (+longhands), `padding`(+longhands), `width`, `max-width` — all length-valued
+  properties among these accept `calc()`.
 - *Layout / box decoration* (**Hito 23b-7**): **`position`** (+`top`/`right`/
   `bottom`/`left`/`inset`/`z-index`), **`box-sizing`**, **`border`**(/`-width`/
   `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**,
   **`outline`**, **`flex`**(/`-grow`/`-shrink`/`-basis`), **`order`**,
   **`align-items`/`align-self`/`align-content`/`justify-items`**, **`flex-direction`**,
   **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
-  **`grid-column`/`grid-row`** (`span N`).
+  **`grid-column`/`grid-row`** (`span N`). **Painted** since the CSS layout expansion
+  batch: `flex-wrap` (multi-line wrapping), `row-gap` (distinct grid/flex-wrap cross
+  gap), `align-items`/`align-self` (flex row cross-axis only). Still value-resolved
+  only (not yet painted): `position`(-8b's Stage 2 handles `position`/`z-index`
+  separately — see spec/box_engine.md), `border`/`box-shadow` rendering, `align-content`,
+  grid item placement (`grid-column`/`grid-row: span N`), grid cross-axis alignment.
 - *Lists*: `list-style-type`, `list-style` (type token only).
 - *Float* (**spec/float.md**): **`float`** (`left`/`right`/`none`), **`clear`**
   (`left`/`right`/`both`/`none`). Consumed by the painter as side-by-side float bands
   that nest in the open box stack; see spec/float.md for the v1 scope.
 - *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
   `all`, `min/max-width`), `!important`.
+- *Values*: **`calc()`** (`+`/`-`/`*`/`/`, parens, dimensionally checked) and
+  **`var()`**/custom properties (a page-global `--name` table, `CSS_VAR_MAX_DEPTH`
+  bounded), composing with each other and every shorthand tokenizer.
 
 (Properties in **bold** are the Hito 23b-7 batch. The `css` module resolves their
-values; honouring them at paint time — the per-block box, out-of-flow positioning,
-full flex/grid sizing — is staged across later milestones.)
+values; honouring the rest at paint time — full flex/grid sizing, out-of-flow
+positioning beyond Stage 2 — is staged across later milestones.)
 
 **Not yet supported** (dropped / fail closed unless noted), highest cosmetic value
 first:
@@ -239,17 +251,22 @@ first:
   `vertical-align` length/`top`/`middle`/`bottom`, `white-space` whitespace
   *preservation* (only the wrap distinction is consumed), `word-break`,
   `overflow-wrap`, `text-overflow`, `direction`/`writing-mode`.
-- *Flex/grid, finer grain*: per-item `flex-grow`/`-shrink`/`-basis`/`order`,
-  `align-items`/`align-content`, distinct `row-gap`, `repeat()`/`minmax()`/`fr`
-  weights/named tracks.
+- *Flex/grid, finer grain*: `align-content` (parsed/resolved, not yet painted —
+  only `align-items`/`align-self` reach the painter), grid per-item placement
+  (`grid-column`/`grid-row: span N` are resolved but not yet honoured — every grid
+  item still occupies exactly one cell), `fr` weights/named tracks (every counted
+  track — `repeat()`/`minmax()`-aware since this batch — still lays out as an
+  equal-width column), `justify-items`, `*-reverse` visual reversal,
+  `flex-wrap: wrap-reverse` cross-axis reversal (treated as plain `wrap`).
 - *Selectors*: `:not()`/`:is()`/`:where()`/`:has()`, `:first-of-type`/of-type
   family, `:empty`, `:target`, `:lang()`, all pseudo-elements `::` (dropped, fail
   closed). Sibling combinators `+`/`~` and the pseudo-class subset above **are**
   supported since Hito 23b-9; dynamic pseudos (`:hover`/`:focus`/`:active`) parse
   but never match (no interactive re-cascade yet), `:visited` never matches by
   Zero-Knowledge design.
-- *Values*: `calc()`, `var()`/custom properties, `url()` anything,
-  `@import`/`@font-face`.
+- *Values*: `%`/viewport units anywhere (`calc()`/plain lengths alike), `url()`
+  anything, `@import`/`@font-face`. `calc()` and `var()`/custom properties **are**
+  supported (see below) — a simplified, bounded, non-executing subset.
 
 **Text-presentation extensions (Hito 23b-6).** `font-family` / `text-transform` /
 `letter-spacing` / `word-spacing` / `text-shadow` / `opacity` / `vertical-align` /
@@ -267,9 +284,10 @@ into the run text, so it is carried by default, not gated). None can ever phone 
 
 **Box model (Hito 23b-3).** `margin` / `padding` / `width` / `max-width` resolve through the
 **same cascade** as the other properties (a `<style>` rule, a selector, and inline `style=`
-all feed them, inline winning). **Lengths** accept `px`, a bare `0`, and `em`/`rem` (×16 px,
-the engine's base font); `%`/`vw`/`vh`/`calc()` and other units are **dropped** (fail closed —
-they need a containing-block width the parser does not have). They are **not inherited** (a box
+all feed them, inline winning). **Lengths** accept `px`, a bare `0`, `em`/`rem` (×16 px,
+the engine's base font), and `calc()` of the same (see *`calc()`* above); `%`/`vw`/`vh`
+and other units are **dropped** (fail closed — they need a containing-block width the
+parser does not have). They are **not inherited** (a box
 describes its own element, so page_view reads them from that element's resolved style, not up
 the ancestor chain). page_view turns them into a per-block placement (left/right inset, an
 optional width cap, a centered flag, and a top/bottom margin override) that the presentation
@@ -286,14 +304,74 @@ box to inflate yet — needs the box-grouping of a later milestone), `border` (w
 horizontal placement; an outer wrapper's `max-width`/centering still reaches its descendants
 because they all share that ancestor).
 
-**Container layout params (Hito 23b-2).** `gap` / `justify-content` / `grid-template-columns`
-resolve through the **same cascade** as the other properties (so a `<style>` rule, a
-compound/id selector, and an inline `style=` all feed them, inline winning). They are
-**not inherited** (they describe the flex/grid container element itself, so the caller
-reads them from that element's resolved style, not up the ancestor chain). page_view
-consumes them to parameterize the flex/grid layout, which is **always applied and not
-gated by `caps.css`** (doctrine: "Layout != estilo de autor" — geometry is structure, it
-opens no socket and leaks nothing). Only author *colors* stay behind `caps.css`.
+**Container layout params (Hito 23b-2, extended by the CSS layout expansion batch).**
+`gap` / `justify-content` / `grid-template-columns` / **`flex-wrap`** / **`row-gap`** /
+**`align-items`** resolve through the **same cascade** as the other properties (so a
+`<style>` rule, a compound/id selector, and an inline `style=` all feed them, inline
+winning). They are **not inherited** (they describe the flex/grid container element
+itself, so the caller reads them from that element's resolved style, not up the
+ancestor chain); **`align-self`** is the mirror-image ITEM property (like the Stage 3
+flex-grow/-shrink/-basis/order), read from the element one step more inner on the walk.
+page_view consumes them to parameterize the flex/grid layout, which is **always
+applied and not gated by `caps.css`** (doctrine: "Layout != estilo de autor" —
+geometry is structure, it opens no socket and leaks nothing). Only author *colors*
+stay behind `caps.css`. See `spec/box_tree.md` for how `layout_flex`/`layout_grid`
+consume `flex-wrap` (multi-line packing by flex basis), `row-gap` (falls back to
+`gap` when unset — `has_row_gap` defaults to 0 under zero-init, so every caller that
+predates the property keeps its exact prior geometry), and `align-items`/`align-self`
+(cross-axis offset within a flex line; grid cross-axis alignment is still deferred).
+
+**Custom properties + `var()` (CSS layout expansion).** A `--name: value` declaration
+anywhere in the stylesheet — any rule, any `@media` block — feeds one flat,
+**page-global** table (`collect_custom_props`, up to `CSS_MAX_CUSTOM_PROPS` (64)
+entries, each name/value bounded like every other token here to `CSS_TOK_MAX`; a
+later declaration of the same name overwrites an earlier one). This is a
+deliberate simplification of real CSS's cascade-scoped custom properties, chosen
+because it covers the overwhelmingly common `:root { --x: ... }` pattern without
+needing per-element scoping. `var(--name)` / `var(--name, fallback)` is resolved
+(`resolve_var`) when a declaration's value is interpreted: a hit substitutes the
+custom property's (recursively resolved) value; a miss uses the fallback if given,
+else the **whole declaration fails** (matches real CSS: an unresolvable `var()`
+with no fallback makes the property invalid, not some improvised value). Lookups
+recurse at most `CSS_VAR_MAX_DEPTH` (4) deep, so a chain or a self-reference
+(`--a: var(--a)`) fails the declaration instead of recursing/expanding unboundedly
+(anti-DoS — the bound is per-lookup, not per-document, so a hostile stylesheet
+cannot use it to burn CPU). An inline `style=` sees BOTH its own custom properties
+and the stylesheet's (its own win on a name collision, being closer to the use
+site). `var()` never phones home: whatever text it substitutes still flows through
+the same property interpreter, so e.g. `background: var(--evil)` where
+`--evil: url(...)` is dropped exactly like a literal `url()` value would be.
+
+**`calc()` (CSS layout expansion).** A length value (anything that flows through
+`interp_len`: `margin`/`padding`/`width`/`max-width`/`top`/`right`/`bottom`/`left`/
+`inset`/`text-indent`, and transitively `flex-basis`/border-width/outline-width/
+text-shadow and box-shadow offsets) accepts `calc(...)`: a small recursive-descent
+evaluator (`calc_eval`) over `+`, `-`, `*`, `/` and parens, with the same units
+`interp_len` already understands (`px`, `em`/`rem` ×16, bare `0`) — no `%`/viewport
+units (this engine has no containing-block/viewport width to resolve them
+against, so `calc()` cannot reach further than a plain length already could).
+Dimensionally checked like real `calc()`: `+`/`-` require both sides to be the
+same "shape" (both lengths, or both bare numbers — `calc(10px + 5)` is invalid);
+`*` requires at least one bare-number side (`calc(10px * 5px)` is invalid); `/`
+requires a bare-number, non-zero divisor. A bare-number *result* (`calc(2 * 3)`,
+no length anywhere) is not a valid length and fails, like any other unsupported
+value. Bounded: the whole expression already lives inside one `CSS_TOK_MAX`
+(64-byte) token, and `CSS_CALC_MAX_DEPTH` (8) caps parenthesis nesting.
+**`calc()` composes with `var()`:** `var()` substitution happens first (on the raw
+declaration text), so `calc(var(--gap) * 2)` resolves the custom property's text
+into the expression before it is evaluated.
+
+A `calc(...)` value commonly contains **internal spaces** (`calc(10px + 5px)`).
+Every multi-value shorthand that could otherwise hand a naively-space-split
+fragment to a calc-aware interpreter (`margin`/`padding`/`inset`, `flex`,
+`border-width`/`border-style`/`border-color`, `border`/`border-<side>`/`outline`,
+`text-shadow`, `box-shadow`) tokenizes via **one shared paren-aware splitter**
+(`next_ws_token`, which tracks paren depth so it never splits inside a `(...)`
+call) instead of each having its own ad-hoc whitespace loop — this was a real bug
+caught by `/visual-review` (a `flex: 0 0 calc(100px + 120px)` silently dropped to
+the shorthand's fallback share because the old per-shorthand tokenizers split the
+value at the space after `100px`) and is now covered by
+`test_calc_inside_shorthands`.
 
 **`@media` (Hito 23b).** A `@media <query> { ... }` block is **parsed**, not dropped: its
 inner rules are kept **only if the query matches** the render-time `css_media` context
@@ -572,18 +650,24 @@ common case.)
   these keywords are ignored).
 - The author box model `margin`/`padding`/`width`/`max-width` **is now resolved through the
   cascade** (Hito 23b-3) and applied (gated by `caps.css`): horizontal insets, an optional
-  width cap, `margin: 0 auto` centering, and a top/bottom margin override. Still out of scope:
-  `border`, `box-sizing`, vertical `padding-top/bottom` application, `%`/viewport units, and
+  width cap, `margin: 0 auto` centering, and a top/bottom margin override; all four (plus
+  `calc()` of them) are supported. Still out of scope: `border` (values resolved, not yet
+  painted), `box-sizing`, vertical `padding-top/bottom` application, `%`/viewport units, and
   nested box composition (see *Box model* above). `display:flex|grid` *parameters*
-  (`gap`/`justify-content`/`grid-template-columns`) are resolved through the cascade (Hito
-  23b-2). Still out of scope: per-item flex (`flex-grow`/`flex-shrink`/`flex-basis`/`order`),
-  `align-items`/`align-content`, `row-gap` as distinct from `column-gap`, `repeat()`/`minmax()`
-  track expansion, and named/`auto`/`fr`-weighted grid tracks (every track is treated as 1fr
-  equal-width).
-- `url()` anything, `@import`/`@font-face`/other `@`-rules, `calc()`, `var()`, custom
-  properties. `!important` **is** honored (Hito 23b-4): the suffix is stripped and the
-  declaration raised to a higher cascade tier (was previously dropped). `@media` is
-  supported (subset above); `not`/unknown features fail closed.
+  (`gap`/`justify-content`/`grid-template-columns`/`flex-wrap`/`row-gap`/`align-items`/
+  `align-self`) are resolved through the cascade (Hito 23b-2) **and painted** (the CSS layout
+  expansion batch: multi-line flex wrapping, distinct grid/flex-wrap row-gap, flex row
+  cross-axis alignment). Still out of scope: grid cross-axis alignment, `align-content`, grid
+  per-item placement (`grid-column`/`grid-row: span N` resolved, not yet honoured), and named/
+  `auto`/`fr`-weighted grid tracks (every counted track — `repeat()`/`minmax()`-aware — still
+  lays out as an equal-width column).
+- `url()` anything, `@import`/`@font-face`/other `@`-rules. `!important` **is** honored (Hito
+  23b-4): the suffix is stripped and the declaration raised to a higher cascade tier (was
+  previously dropped). `@media` is supported (subset above); `not`/unknown features fail
+  closed. **`calc()`** (`+`/`-`/`*`/`/`, parens, dimensionally checked, composes with `var()`)
+  and **`var()`**/custom properties (a page-global `--name` table) **are** supported — see
+  the *`calc()`*/*Custom properties* sections above for the exact bounded, non-executing
+  subset.
 - `position` (relative/absolute/sticky) and other layout/box properties — deferred to
   the layout milestone (Hito 23b-2); `@media print` *rendering* into the PDF is deferred
   (print-only rules are correctly excluded from the screen view today).

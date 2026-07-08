@@ -244,6 +244,12 @@ void       tab_eval_result_free(tab_eval_result *r);
   viajan siempre, `render_doc` no los gatea por `caps.css`. `cont_item` es el ordinal del ítem
   (hijo directo del contenedor) al que pertenece el run (-1 = sin contenedor); runs consecutivos con
   el mismo `(cont_id, cont_item)` son fragmentos del mismo ítem y la GUI los fluye juntos en una celda.
+- **Wire de la vista (CSS layout expansion: flex-wrap/row-gap/align-items/align-self)**: inmediatamente
+  después de `cont_item` (antes de `float_side`), **cuatro** `int32` más —
+  `cont_wrap, cont_row_gap, cont_align_items, flex_align_self` — mismo orden en ambos lados. Los tres
+  primeros son del CONTENEDOR (`css_flex_wrap`, px o -1 sin fijar, `css_align_kw`); el cuarto es del
+  ÍTEM (`css_align_kw` de `align-self`, 0/`CSS_AK_UNSET` si no se fijó, en cuyo caso la GUI usa
+  `cont_align_items`). Estructura como el resto de `cont_*`/`flex_*`: viajan siempre, nunca gateados.
 - **Wire de consola (Freebug)**: la sección de consola serializa por entrada
   `[level:int32][line:int32][col:int32][flen:size_t][file][elen:size_t][text]`; `flen` está acotado
   por `FB_MAX_FILE_BYTES`, `elen` por `FB_MAX_ENTRY_BYTES` y el conteo por `FB_MAX_ENTRIES`, así un

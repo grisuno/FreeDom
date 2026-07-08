@@ -117,6 +117,10 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->flex_order = CSS_LEN_UNSET;
     b->flex_direction = 0;
     b->cont_item = -1;
+    b->cont_wrap = 0;
+    b->cont_row_gap = -1;
+    b->cont_align_items = 0;
+    b->flex_align_self = 0;
     b->float_side = 0;
     b->float_id = -1;
     b->float_clear = 0;
@@ -286,6 +290,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->flex_order = r->flex_order;
             lb->flex_direction = r->flex_direction;
             lb->cont_item = r->cont_item;
+            lb->cont_wrap = r->cont_wrap;
+            lb->cont_row_gap = r->cont_row_gap;
+            lb->cont_align_items = r->cont_align_items;
+            lb->flex_align_self = r->flex_align_self;
             /* Float layout is structure like cont_*, carried regardless of caps.css. */
             lb->float_side = r->float_side;
             lb->float_id = r->float_id;

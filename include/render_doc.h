@@ -91,6 +91,13 @@ typedef struct rd_block {
      * fragments of ONE flex/grid item and flow together in one cell. Structure like
      * cont_* (never gated). -1 = no container. */
     int              cont_item;
+    /* flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM). Structure,
+     * never gated. Defaults: cont_wrap 0, cont_row_gap -1 (falls back to cont_gap),
+     * cont_align_items/flex_align_self 0 (CSS_AK_UNSET). */
+    int              cont_wrap;
+    int              cont_row_gap;
+    int              cont_align_items;
+    int              flex_align_self;
     /* Float layout (spec/float.md). float_side (css_float), float_id (floated-element
      * group id, -1 = none), float_clear (css_clear). Structure like cont_* (never
      * gated). Defaults: 0 / -1 / 0. */

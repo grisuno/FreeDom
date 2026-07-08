@@ -65,8 +65,8 @@ The name reflects its core goals:
 ### New Features & Improvements (Latest)
 - **Advanced Layout Engine**:
   - Full box model per HTML tag (margins, padding, display, border)
-  - Flexbox 1D layout support (`gap`, `justify-content`), fed from inline `style=` *and* `<style>` rules
-  - Basic equal-column CSS Grid (`grid-template-columns` track count; every track is 1fr — `repeat()`/`minmax()` not expanded yet)
+  - Flexbox layout support (`gap`, `justify-content`, `flex-wrap` multi-line, `align-items`/`align-self` cross-axis), fed from inline `style=` *and* `<style>` rules
+  - Basic equal-column CSS Grid (`grid-template-columns`/`-rows` track count, `repeat()`/`minmax()`-aware; `row-gap` distinct from column gap; every track still 1fr — `fr` weights not resolved yet)
   - Recursive box-tree layout with margin collapsing
 - **GUI & Usability**:
   - Visible vertical scrollbar with drag and click support
@@ -127,7 +127,7 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` — now **lays out for real**; the parser resolves `border`/`box-sizing` per-side paint and grid extras (`span N`, `fr` weights, `align-items`) but does not consume them yet; no transforms; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; `calc()` and `var()`/custom properties supported — bounded, non-executing; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` + `flex-wrap` multi-line + `align-items`/`align-self` — now **lays out for real**; `grid-template-columns`/`-rows` count `repeat()`/`minmax()` correctly and `row-gap` is distinct from column gap, but every track is still 1fr (`fr` weights unresolved) and grid items don't yet honor `span N`; the parser resolves `position`/`border`/`box-sizing` per-side paint but does not consume them yet; no transforms/animations; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 
@@ -450,8 +450,11 @@ width (no real viewport size leaks — anti-fingerprinting); `not` and unknown f
 CSS is hostile content, so the parser **never phones home**: any value containing `url(` and the
 network/font `@`-rules (`@import` / `@font-face`) are dropped, and `@media` can only choose which
 *local* rules apply — author CSS can never trigger a fetch or a tracking beacon. It is bounded
-(anti-DoS), fails closed, executes nothing (`expression()` / `var()` / `calc()` are ignored), and
-is fuzzed (`make fuzz-css`).
+(anti-DoS) and fails closed. `expression()` and JS URLs are never evaluated; `var()`/custom
+properties (a page-global `--name` table) and `calc()` (`+`/`-`/`*`/`/`, dimensionally checked) **are**
+evaluated, but only as bounded text substitution and arithmetic over values the parser already
+understands — never code, never a fetch, never unbounded (depth-capped lookups). It is fuzzed
+(`make fuzz-css`).
 
 **Distraction-free mode** (`Ctrl+D`, or the menu) is a clean reading view: `nav` / `header` /
 `footer` / `aside` boilerplate is dropped in the sandboxed worker, author styling and images are

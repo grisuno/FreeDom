@@ -23,6 +23,18 @@
 #define CSS_INLINE_DECLS        64u
 #define CSS_INLINE_SPEC         (1 << 20)
 
+/* Custom properties (--name: value) + var(--name[, fallback]) (see the "Custom
+ * properties" section of spec/css.md). Deliberately simplified vs. real CSS custom
+ * property scoping: every `--name` declaration found ANYWHERE in the stylesheet
+ * (any rule, any @media) feeds one flat, page-global table (last declaration for a
+ * name wins), which covers the overwhelmingly common `:root { --x: ... }` pattern.
+ * A value is capped at CSS_TOK_MAX like every other token here (an overlong one
+ * could never fit a re-substituted declaration value anyway), and lookups recurse
+ * at most CSS_VAR_MAX_DEPTH deep (a chain or cycle beyond that fails the var(),
+ * bounding the work to O(depth * CSS_TOK_MAX) -- anti-DoS, never a crash or hang). */
+#define CSS_MAX_CUSTOM_PROPS 64u
+#define CSS_VAR_MAX_DEPTH    4
+
 /* Property slots. The enum value IS the css_style slot index used by apply().
  * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
  * left); the four padding slots likewise — expand_box4 relies on that. */
@@ -62,6 +74,13 @@ typedef struct css_decl {
     int important;  /* 1 if the declaration carried !important (higher cascade tier) */
 } css_decl;
 
+/* One custom property (--name: value), for var() lookups. Both fields are bounded
+ * like every other token buffer here. */
+typedef struct css_custom_prop {
+    char name[CSS_TOK_MAX];
+    char value[CSS_TOK_MAX];
+} css_custom_prop;
+
 /* The selector types (css_attr_match/css_compound/css_sel) and their parser/matcher
  * live in css_select.{h,c}. */
 
@@ -72,6 +91,8 @@ struct css_sheet {
     size_t   nrules;
     css_sel  sels[CSS_MAX_SELS];
     size_t   nsels;
+    css_custom_prop custom[CSS_MAX_CUSTOM_PROPS];  /* --name table, page-global */
+    size_t          ncustom;
 };
 
 /* The small ASCII helpers (csel_lower_ch / csel_ci_eq / csel_substr /
@@ -243,30 +264,233 @@ static int interp_justify(const char *v) {
     return -1;  /* unknown: fail closed */
 }
 
-/* grid-template-columns: count of whitespace-separated track tokens, clamped to
- * [1, CSS_GRID_COLS_MAX]. "none"/empty -> -1 (unset). repeat()/minmax() are counted
- * as literal tokens (out of scope). url() defensively dropped. */
+/* grid-template-columns / grid-template-rows: counts the tracks in a track-list,
+ * paren-aware (a token may contain balanced parens, e.g. "minmax(100px, 1fr)", and
+ * is then ONE track, not split by its internal comma/space) and expanding
+ * repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern).
+ * repeat(auto-fill|...) / repeat(auto-fit|...) need an available width this pure
+ * parser does not have, so they fail the WHOLE value (return -1), like %/vw
+ * elsewhere in this module -- never a wrong guess. A malformed repeat() (no comma,
+ * non-integer count) likewise fails the whole value. The named/fr-weighted TRACK
+ * SIZES themselves are still not resolved (every track lays out as an equal-width
+ * column downstream; see spec/css.md) -- this only fixes the track COUNT. */
+static int count_tracks(const char *s, size_t n);
+
+static int count_one_repeat(const char *s, size_t tokstart, size_t toklen) {
+    size_t inner_a = tokstart + 7;                  /* past "repeat(" */
+    size_t inner_b = tokstart + toklen - 1;          /* before the matching ')' */
+    size_t comma = inner_b;
+    int depth = 0;
+    for (size_t k = inner_a; k < inner_b; ++k) {
+        if (s[k] == '(') ++depth;
+        else if (s[k] == ')') --depth;
+        else if (s[k] == ',' && depth == 0) { comma = k; break; }
+    }
+    if (comma >= inner_b) return -1;                 /* no comma: malformed */
+    size_t ca = inner_a, cb = comma;
+    while (ca < cb && (s[ca] == ' ' || s[ca] == '\t')) ++ca;
+    while (cb > ca && (s[cb - 1] == ' ' || s[cb - 1] == '\t')) --cb;
+    char cbuf[CSS_TOK_MAX];
+    size_t clen = cb - ca;
+    if (clen == 0 || clen >= sizeof cbuf) return -1;
+    memcpy(cbuf, s + ca, clen);
+    cbuf[clen] = '\0';
+    if (csel_ci_eq(cbuf, "auto-fill") || csel_ci_eq(cbuf, "auto-fit")) return -1;
+    double num;
+    const char *end;
+    if (!parse_num(cbuf, &num, &end) || *end != '\0' || num < 1.0) return -1;
+    int reps = round_clamp(num, 1, (int)CSS_GRID_COLS_MAX);
+    int inner_tracks = count_tracks(s + comma + 1, inner_b - (comma + 1));
+    if (inner_tracks < 1) return -1;
+    long total = (long)reps * (long)inner_tracks;
+    return (total > (long)CSS_GRID_COLS_MAX) ? (int)CSS_GRID_COLS_MAX : (int)total;
+}
+
+static int count_tracks(const char *s, size_t n) {
+    int total = 0;
+    size_t i = 0;
+    while (i < n) {
+        while (i < n && (s[i] == ' ' || s[i] == '\t')) ++i;
+        if (i >= n) break;
+        size_t start = i;
+        int depth = 0;
+        while (i < n) {
+            if (s[i] == '(') ++depth;
+            else if (s[i] == ')') { if (depth > 0) --depth; }
+            else if (depth == 0 && (s[i] == ' ' || s[i] == '\t')) break;
+            ++i;
+        }
+        size_t toklen = i - start;
+        int is_repeat = toklen > 7 && s[start + toklen - 1] == ')' &&
+            csel_lower_ch(s[start]) == 'r' && csel_lower_ch(s[start + 1]) == 'e' &&
+            csel_lower_ch(s[start + 2]) == 'p' && csel_lower_ch(s[start + 3]) == 'e' &&
+            csel_lower_ch(s[start + 4]) == 'a' && csel_lower_ch(s[start + 5]) == 't' &&
+            s[start + 6] == '(';
+        if (is_repeat) {
+            int rc = count_one_repeat(s, start, toklen);
+            if (rc < 0) return -1;
+            total += rc;
+        } else {
+            total += 1;
+        }
+        if (total > (int)CSS_GRID_COLS_MAX) total = (int)CSS_GRID_COLS_MAX;
+    }
+    return total;
+}
+
+/* grid-template-columns / -rows: track count via count_tracks (repeat()/minmax()
+ * aware), clamped to [1, CSS_GRID_COLS_MAX]. "none"/empty -> -1 (unset). url()
+ * defensively dropped (never reachable in practice: a track size cannot be a URL,
+ * but this mirrors the same guard the other properties carry). */
 static int interp_gridcols(const char *v) {
     if (csel_substr(v, "url(", 1)) return -1;
     if (csel_ci_eq(v, "none")) return -1;
-    int n = 0, in_tok = 0;
-    for (const char *p = v; *p != '\0'; ++p) {
-        int ws = (*p == ' ' || *p == '\t');
-        if (!ws && !in_tok) { ++n; in_tok = 1; }
-        else if (ws) in_tok = 0;
-    }
+    int n = count_tracks(v, strlen(v));
     if (n < 1) return -1;
     if (n > CSS_GRID_COLS_MAX) n = CSS_GRID_COLS_MAX;
     return n;
 }
 
+/* --- calc() for length values -------------------------------------------------
+ *
+ * A small recursive-descent evaluator over +, -, *, / and parens. Operands are
+ * plain numbers or px/em/rem lengths -- the same units interp_len itself accepts
+ * (no %/vw/vh: this engine has no containing-block/viewport width to resolve them
+ * against, so calc() cannot reach further than interp_len already can). Bounded:
+ * the whole expression already lives inside one CSS_TOK_MAX (64-byte) token,
+ * and CSS_CALC_MAX_DEPTH additionally caps parenthesis nesting -- never unbounded
+ * recursion. Dimensionally checked like real calc(): +/- require both sides to be
+ * the same "shape" (both lengths, or both bare numbers); * requires at least one
+ * bare-number side; / requires a bare-number, non-zero divisor. A bare-number
+ * *result* (e.g. calc(2 * 3), no length anywhere) is not a valid length -> fails. */
+#define CSS_CALC_MAX_DEPTH 8
+
+typedef struct calc_val { double px; int is_length; } calc_val;
+typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
+
+static void calc_skip_ws(calc_parser *p) {
+    while (p->i < p->n && (p->s[p->i] == ' ' || p->s[p->i] == '\t')) ++p->i;
+}
+
+static int calc_expr(calc_parser *p, calc_val *out, int depth);
+
+/* One number or length token, or a parenthesized sub-expression. */
+static int calc_factor(calc_parser *p, calc_val *out, int depth) {
+    calc_skip_ws(p);
+    if (p->i < p->n && p->s[p->i] == '(') {
+        if (depth >= CSS_CALC_MAX_DEPTH) return 0;
+        ++p->i;
+        if (!calc_expr(p, out, depth + 1)) return 0;
+        calc_skip_ws(p);
+        if (p->i >= p->n || p->s[p->i] != ')') return 0;
+        ++p->i;
+        return 1;
+    }
+    int neg = 0;
+    if (p->i < p->n && (p->s[p->i] == '+' || p->s[p->i] == '-')) {
+        neg = (p->s[p->i] == '-');
+        ++p->i;
+        calc_skip_ws(p);
+    }
+    double num;
+    const char *end;
+    if (!parse_num(p->s + p->i, &num, &end)) return 0;
+    p->i += (size_t)(end - (p->s + p->i));
+    if (neg) num = -num;
+    if (p->i + 2 <= p->n && csel_lower_ch(p->s[p->i]) == 'p' && csel_lower_ch(p->s[p->i + 1]) == 'x') {
+        out->px = num; out->is_length = 1; p->i += 2; return 1;
+    }
+    if (p->i + 3 <= p->n && csel_lower_ch(p->s[p->i]) == 'r' &&
+        csel_lower_ch(p->s[p->i + 1]) == 'e' && csel_lower_ch(p->s[p->i + 2]) == 'm') {
+        out->px = num * 16.0; out->is_length = 1; p->i += 3; return 1;
+    }
+    if (p->i + 2 <= p->n && csel_lower_ch(p->s[p->i]) == 'e' && csel_lower_ch(p->s[p->i + 1]) == 'm') {
+        out->px = num * 16.0; out->is_length = 1; p->i += 2; return 1;
+    }
+    out->px = num;                      /* a bare number: length only if exactly 0 */
+    out->is_length = (num == 0.0);
+    return 1;
+}
+
+/* '*' and '/' bind tighter than '+'/'-'. */
+static int calc_term(calc_parser *p, calc_val *out, int depth) {
+    if (!calc_factor(p, out, depth)) return 0;
+    for (;;) {
+        calc_skip_ws(p);
+        if (p->i >= p->n || (p->s[p->i] != '*' && p->s[p->i] != '/')) break;
+        char op = p->s[p->i++];
+        calc_val rhs;
+        if (!calc_factor(p, &rhs, depth)) return 0;
+        if (op == '*') {
+            if (out->is_length && rhs.is_length) return 0;   /* length*length: invalid */
+            out->px = out->px * rhs.px;
+            out->is_length = out->is_length || rhs.is_length;
+        } else {
+            if (rhs.is_length || rhs.px == 0.0) return 0;    /* divisor must be a nonzero number */
+            out->px = out->px / rhs.px;
+        }
+    }
+    return 1;
+}
+
+static int calc_expr(calc_parser *p, calc_val *out, int depth) {
+    if (!calc_term(p, out, depth)) return 0;
+    for (;;) {
+        calc_skip_ws(p);
+        if (p->i >= p->n || (p->s[p->i] != '+' && p->s[p->i] != '-')) break;
+        char op = p->s[p->i++];
+        calc_val rhs;
+        if (!calc_term(p, &rhs, depth)) return 0;
+        if (out->is_length != rhs.is_length) return 0;       /* length +/- number: invalid */
+        out->px = (op == '+') ? out->px + rhs.px : out->px - rhs.px;
+    }
+    return 1;
+}
+
+/* Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching
+ * ")" already stripped by the caller). Fails closed on any leftover/unparsed input,
+ * mismatched parens, a dimensionless result, or a dimensional error. */
+static int calc_eval(const char *v, size_t vlen, double *out_px) {
+    calc_parser p = { v, vlen, 0 };
+    calc_val r;
+    if (!calc_expr(&p, &r, 0)) return 0;
+    calc_skip_ws(&p);
+    if (p.i != vlen || !r.is_length) return 0;
+    *out_px = r.px;
+    return 1;
+}
+
+/* True if s (already trimmed) is a "calc(...)" call spanning the whole string
+ * (case-insensitive keyword, balanced trailing paren); on success the argument
+ * span is written to *inner_start / *inner_len. */
+static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len) {
+    size_t n = strlen(s);
+    if (n < 6) return 0;   /* "calc()" minimum */
+    if (csel_lower_ch(s[0]) != 'c' || csel_lower_ch(s[1]) != 'a' || csel_lower_ch(s[2]) != 'l' ||
+        csel_lower_ch(s[3]) != 'c' || s[4] != '(' || s[n - 1] != ')')
+        return 0;
+    *inner_start = 5;
+    *inner_len = n - 6;
+    return 1;
+}
+
 /* Parses one box-model length. Accepts "Npx", a bare "0", "Nem"/"Nrem" (x16 px,
- * the engine's base font), and (when allow_auto) "auto". Rejects %/viewport units,
- * calc()/var() and bare non-zero numbers (fail closed: they need a containing block
- * the parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a signed px
- * clamped to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
+ * the engine's base font), "calc(...)" over the same units (+, -, *, /, parens;
+ * see calc_eval), and (when allow_auto) "auto". Rejects %/viewport units and bare
+ * non-zero numbers outside calc() (fail closed: they need a containing block the
+ * parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a signed px clamped
+ * to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
 static int interp_len(const char *v, int allow_auto, int *out) {
     if (allow_auto && csel_ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
+
+    size_t cs, cl;
+    if (calc_unwrap(v, &cs, &cl)) {
+        double px;
+        if (!calc_eval(v + cs, cl, &px)) return 0;
+        *out = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
+        return 1;
+    }
+
     const char *p = v;
     int neg = 0;
     if (*p == '+') ++p;
@@ -284,7 +508,7 @@ static int interp_len(const char *v, int allow_auto, int *out) {
     } else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) {
         px = num * 16.0;
     } else {
-        return 0;                       /* %, vw/vh, pt, calc(...), ... */
+        return 0;                       /* %, vw/vh, pt, ... */
     }
     int val = round_clamp(px, 0, CSS_LEN_MAX);   /* px >= 0 here; sign applied next */
     if (neg) val = -val;
@@ -305,6 +529,32 @@ static int emit_len(css_decl *dst, int cap, int slot, const char *val,
     return 1;
 }
 
+/* Extracts the next whitespace-separated token starting at *p into tok (bounded to
+ * cap, NUL-terminated), advancing *p past it and any leading whitespace. A token
+ * may itself contain balanced parens -- so "calc(1px + 2px)" (which has spaces
+ * INSIDE it) is ONE token, not split apart at the space after "1px" -- tracked via
+ * a paren-depth counter, so every multi-value shorthand below can carry a calc()
+ * value exactly like a single-value property can. Every shorthand tokenizer in
+ * this file that might hand a token to interp_len (transitively: margin/padding/
+ * inset, flex-basis, border/outline width, text-shadow/box-shadow offsets) uses
+ * this helper, so calc() works uniformly instead of only in single-value
+ * properties. Returns 0 (tok untouched) when there is nothing left to read. */
+static int next_ws_token(const char **p, char *tok, size_t cap) {
+    while (**p == ' ' || **p == '\t') ++*p;
+    if (**p == '\0') return 0;
+    size_t k = 0;
+    int depth = 0;
+    while (**p != '\0') {
+        if (**p == '(') ++depth;
+        else if (**p == ')') { if (depth > 0) --depth; }
+        else if (depth == 0 && (**p == ' ' || **p == '\t')) break;
+        if (k + 1 < cap) tok[k++] = **p;
+        ++*p;
+    }
+    tok[k] = '\0';
+    return 1;
+}
+
 /* Expands a margin/padding shorthand (1..4 whitespace-separated lengths, CSS order
  * all / "v h" / "t h b" / "t r b l") into the four contiguous slots starting at
  * slot_top (top,right,bottom,left). Any unsupported token drops the WHOLE shorthand
@@ -313,13 +563,8 @@ static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_
                        css_decl *dst, int cap) {
     int vals[4], nv = 0;
     const char *p = val;
-    while (nv < 4) {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        char tok[CSS_TOK_MAX];
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-        tok[k] = '\0';
+    char tok[CSS_TOK_MAX];
+    while (nv < 4 && next_ws_token(&p, tok, sizeof tok)) {
         int o;
         if (!interp_len(tok, allow_auto, &o)) return 0;
         if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
@@ -502,14 +747,8 @@ static int expand_shadow(const char *val, css_decl *dst, int cap) {
     }
     int lens[3], nlen = 0, color = 0, have_color = 0;
     const char *p = val;
-    while (*p != '\0') {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        char tok[CSS_TOK_MAX];
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-        tok[k] = '\0';
-        while (*p != '\0' && *p != ' ' && *p != '\t') ++p;
+    char tok[CSS_TOK_MAX];
+    while (next_ws_token(&p, tok, sizeof tok)) {
         int px;
         cc_rgb c;
         if (interp_len(tok, 0, &px)) { if (nlen < 3) lens[nlen++] = px; }
@@ -636,13 +875,8 @@ typedef int (*tok_interp)(const char *tok, int *out);
 static int expand_quad(const char *val, int slot_top, tok_interp f, css_decl *dst, int cap) {
     int vals[4], nv = 0;
     const char *p = val;
-    while (nv < 4) {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        char tok[CSS_TOK_MAX];
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-        tok[k] = '\0';
+    char tok[CSS_TOK_MAX];
+    while (nv < 4 && next_ws_token(&p, tok, sizeof tok)) {
         int o;
         if (!f(tok, &o)) return 0;
         vals[nv++] = o;
@@ -669,13 +903,8 @@ static int classify_box_edge(const char *val, int *w, int *hw, int *s, int *hs,
     *hw = *hs = *hc = 0;
     if (csel_substr(val, "url(", 1)) return 0;
     const char *p = val;
-    while (*p != '\0') {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        char tok[CSS_TOK_MAX];
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-        tok[k] = '\0';
+    char tok[CSS_TOK_MAX];
+    while (next_ws_token(&p, tok, sizeof tok)) {
         int tmp;
         if (!*hw && interp_border_width(tok, &tmp)) { *w = tmp; *hw = 1; }
         else if (!*hs && (tmp = interp_border_style(tok)) >= 0) { *s = tmp; *hs = 1; }
@@ -721,13 +950,8 @@ static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
     int lens[4], nlen = 0, color = 0, have_color = 0, inset = 0;
     if (!csel_ci_eq(val, "none")) {
         const char *p = val;
-        while (*p != '\0') {
-            while (*p == ' ' || *p == '\t') ++p;
-            if (*p == '\0') break;
-            char tok[CSS_TOK_MAX];
-            size_t k = 0;
-            while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-            tok[k] = '\0';
+        char tok[CSS_TOK_MAX];
+        while (next_ws_token(&p, tok, sizeof tok)) {
             if (csel_ci_eq(tok, "inset")) { inset = 1; continue; }
             int px;
             cc_rgb c;
@@ -780,13 +1004,8 @@ static int expand_flex(const char *val, css_decl *dst, int cap) {
         int g = 0, sh = 0, ba = 0, have_g = 0, have_sh = 0, have_ba = 0;
         const char *p = val;
         int ntok = 0;
-        while (*p != '\0' && ntok < 4) {
-            while (*p == ' ' || *p == '\t') ++p;
-            if (*p == '\0') break;
-            char tok[CSS_TOK_MAX];
-            size_t k = 0;
-            while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-            tok[k] = '\0';
+        char tok[CSS_TOK_MAX];
+        while (ntok < 4 && next_ws_token(&p, tok, sizeof tok)) {
             ++ntok;
             double num;
             const char *end;
@@ -917,6 +1136,169 @@ static int strip_important(char *val) {
     return 0;
 }
 
+/* --- Custom properties (--name: value) + var(--name[, fallback]) ---------------
+ *
+ * Deliberately simplified: collect_custom_props scans the WHOLE stylesheet text
+ * once for `--ident: value` pairs regardless of which rule/selector/@media they
+ * appear in (a later occurrence of the same name overwrites an earlier one), into
+ * one flat page-global table. This covers the overwhelmingly common
+ * `:root { --x: ... }` pattern without needing real cascade-scoped custom
+ * properties. resolve_var then substitutes var() references against that table
+ * when a declaration's value is interpreted (parse_one_decl), bounded to
+ * CSS_VAR_MAX_DEPTH nested lookups so a reference cycle (`--a: var(--a)`) or a
+ * long chain fails the declaration instead of recursing/expanding unboundedly. */
+
+/* Scans s[0,n) for `--ident : value ;|}` declarations anywhere in the text. A name
+ * is recognised only where it cannot be part of a longer identifier (its preceding
+ * character, if any, is not itself an identifier character), so it never matches
+ * inside e.g. a longer token. Later occurrences of the same name overwrite earlier
+ * ones (last-in-source wins, approximating cascade for the common single-:root
+ * case). An overlong name or value (would not fit CSS_TOK_MAX) is dropped, not
+ * truncated -- a truncated custom property would silently feed a wrong value to
+ * every var() that references it. Bounded to cap entries (extra distinct names are
+ * ignored, fail closed, never an overflow). */
+static void collect_custom_props(const char *s, size_t n, css_custom_prop *tab,
+                                 size_t cap, size_t *ntab) {
+    *ntab = 0;
+    size_t i = 0;
+    while (i < n) {
+        if (s[i] == '-' && i + 1 < n && s[i + 1] == '-' &&
+            (i == 0 || !csel_ident_ch(s[i - 1]))) {
+            size_t j = i + 2;
+            while (j < n && csel_ident_ch(s[j])) ++j;
+            size_t name_len = j - i;
+            size_t k = j;
+            while (k < n && (s[k] == ' ' || s[k] == '\t' || s[k] == '\n' || s[k] == '\r')) ++k;
+            if (k < n && s[k] == ':' && name_len < CSS_TOK_MAX) {
+                size_t v0 = k + 1;
+                size_t v = v0;
+                while (v < n && s[v] != ';' && s[v] != '}') ++v;
+                char namebuf[CSS_TOK_MAX];
+                memcpy(namebuf, s + i, name_len);
+                namebuf[name_len] = '\0';
+                char valbuf[CSS_TOK_MAX];
+                size_t vlen = copy_trim(s, v0, v, valbuf, sizeof valbuf);
+                if (vlen != (size_t)-1 && vlen > 0) {
+                    strip_important(valbuf);
+                    size_t slot = *ntab;
+                    for (size_t e = 0; e < *ntab; ++e) {
+                        if (strcmp(tab[e].name, namebuf) == 0) { slot = e; break; }
+                    }
+                    if (slot < cap) {
+                        memcpy(tab[slot].name, namebuf, name_len + 1);
+                        strcpy(tab[slot].value, valbuf);
+                        if (slot == *ntab) ++*ntab;
+                    }
+                }
+                i = v;
+                continue;
+            }
+        }
+        ++i;
+    }
+}
+
+static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap,
+                           size_t *o, const css_custom_prop *tab, size_t ntab, int depth);
+
+/* Appends s[0,n) to out at *o; fails (0) if it would not fit outcap. */
+static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n) {
+    if (*o + n >= outcap) return 0;
+    memcpy(out + *o, s, n);
+    *o += n;
+    return 1;
+}
+
+/* Looks up name ("--ident", NUL-terminated) in tab; on a hit, recursively resolves
+ * ITS stored value (which may itself reference var()) into out. Returns 1 on a
+ * successful (found and resolved) expansion, 0 if not found or the nested
+ * resolution failed/overflowed/exceeded depth. */
+static int expand_lookup(const char *name, char *out, size_t outcap, size_t *o,
+                         const css_custom_prop *tab, size_t ntab, int depth) {
+    if (depth >= CSS_VAR_MAX_DEPTH) return 0;
+    for (size_t i = 0; i < ntab; ++i) {
+        if (strcmp(tab[i].name, name) == 0)
+            return resolve_var_rec(tab[i].value, strlen(tab[i].value), out, outcap, o,
+                                   tab, ntab, depth + 1);
+    }
+    return 0;
+}
+
+/* Copies val[0,vlen) to out (via *o), expanding every var(...) call found at the
+ * top level (recursively, bounded by depth via expand_lookup). Returns 1 if the
+ * whole value was resolved and fit within outcap; 0 on an unresolved var() (no
+ * matching custom property and no fallback), a malformed/unbalanced var(...), or
+ * an overflow -- the caller (resolve_var) then drops the whole declaration, like
+ * any other unsupported value (fail closed, never a partially-substituted value). */
+static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap,
+                           size_t *o, const css_custom_prop *tab, size_t ntab, int depth) {
+    size_t i = 0;
+    while (i < vlen) {
+        if (i + 4 <= vlen && csel_lower_ch(val[i]) == 'v' && csel_lower_ch(val[i + 1]) == 'a' &&
+            csel_lower_ch(val[i + 2]) == 'r' && val[i + 3] == '(') {
+            size_t j = i + 4;
+            int pdepth = 1;
+            size_t argstart = j;
+            while (j < vlen && pdepth > 0) {
+                if (val[j] == '(') ++pdepth;
+                else if (val[j] == ')') { if (--pdepth == 0) break; }
+                ++j;
+            }
+            if (pdepth != 0) return 0;             /* unbalanced var(...): invalid */
+            size_t argend = j;
+            size_t after = j + 1;                  /* past the matching ')' */
+
+            /* Split the argument on the first TOP-LEVEL comma (a fallback like
+             * rgb(1,2,3) must not split there). */
+            size_t comma = argend;
+            int cd = 0;
+            for (size_t k = argstart; k < argend; ++k) {
+                if (val[k] == '(') ++cd;
+                else if (val[k] == ')') --cd;
+                else if (val[k] == ',' && cd == 0) { comma = k; break; }
+            }
+            size_t na = argstart, nb = comma;
+            while (na < nb && (val[na] == ' ' || val[na] == '\t')) ++na;
+            while (nb > na && (val[nb - 1] == ' ' || val[nb - 1] == '\t')) --nb;
+            size_t nlen = nb - na;
+            char namebuf[CSS_TOK_MAX];
+            if (nlen == 0 || nlen >= sizeof namebuf ||
+                val[na] != '-' || na + 1 >= nb || val[na + 1] != '-')
+                return 0;                           /* not a custom-property reference */
+            memcpy(namebuf, val + na, nlen);
+            namebuf[nlen] = '\0';
+
+            if (!expand_lookup(namebuf, out, outcap, o, tab, ntab, depth)) {
+                if (comma >= argend) return 0;      /* unresolved, no fallback: invalid */
+                size_t fa = comma + 1, fb = argend;
+                while (fa < fb && (val[fa] == ' ' || val[fa] == '\t')) ++fa;
+                while (fb > fa && (val[fb - 1] == ' ' || val[fb - 1] == '\t')) --fb;
+                if (depth >= CSS_VAR_MAX_DEPTH) return 0;
+                if (!resolve_var_rec(val + fa, fb - fa, out, outcap, o, tab, ntab, depth + 1))
+                    return 0;
+            }
+            i = after;
+            continue;
+        }
+        if (!var_append(out, outcap, o, val + i, 1)) return 0;
+        ++i;
+    }
+    return 1;
+}
+
+/* Entry point: if val contains no "var(" this is a no-op (caller keeps using val
+ * directly); otherwise resolves every var() against tab/ntab into out (bounded to
+ * outcap, NUL-terminated). Returns 1 on success, 0 if resolution failed or
+ * overflowed (caller drops the declaration). */
+static int resolve_var(const char *val, char *out, size_t outcap,
+                       const css_custom_prop *tab, size_t ntab) {
+    if (outcap == 0) return 0;
+    size_t o = 0;
+    if (!resolve_var_rec(val, strlen(val), out, outcap - 1, &o, tab, ntab, 0)) return 0;
+    out[o] = '\0';
+    return 1;
+}
+
 /* Maps property name `prop` (lowercased) + value `val` to css_decl(s) in dst (up to
  * cap). Returns the number written (0 if unsupported). Most properties emit one; the
  * margin/padding shorthands expand to up to four (one per side). The important flag is
@@ -1043,8 +1425,12 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
 
 /* Interprets one declaration span s[0,n) into dst (up to cap). Returns the number of
  * css_decl written (0 if unsupported). Splits `prop: value`, strips a trailing
- * `!important` (stamping every emitted decl), then dispatches on the property. */
-static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap) {
+ * `!important` (stamping every emitted decl), resolves any var() reference against
+ * tab/ntab (a custom-property declaration itself, `--name: ...`, is not a real
+ * property and falls through interpret_prop's unknown-property path unchanged),
+ * then dispatches on the property. */
+static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
+                          const css_custom_prop *tab, size_t ntab) {
     if (cap < 1) return 0;
     size_t c = 0;
     while (c < n && s[c] != ':') ++c;
@@ -1060,18 +1446,28 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap) {
     int important = strip_important(val);
     if (val[0] == '\0') return 0;  /* bare "!important" with no value */
 
-    int nw = interpret_prop(prop, val, dst, cap);
+    const char *use_val = val;
+    char resolved[CSS_TOK_MAX];
+    if (csel_substr(val, "var(", 1)) {
+        if (!resolve_var(val, resolved, sizeof resolved, tab, ntab)) return 0;
+        use_val = resolved;
+    }
+
+    int nw = interpret_prop(prop, use_val, dst, cap);
     for (int i = 0; i < nw; ++i) dst[i].important = important;
     return nw;
 }
 
-/* Splits a ';'-separated declaration block into dst (up to cap). Returns count. */
-static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap) {
+/* Splits a ';'-separated declaration block into dst (up to cap). Returns count.
+ * tab/ntab is the custom-property table var() resolves against (NULL/0 when none,
+ * e.g. an inline style resolved against a NULL sheet). */
+static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+                              const css_custom_prop *tab, size_t ntab) {
     size_t count = 0, i = 0;
     while (i < n && count < cap) {
         size_t j = i;
         while (j < n && s[j] != ';') ++j;
-        count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count));
+        count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count), tab, ntab);
         i = (j < n) ? j + 1 : j;
     }
     return count;
@@ -1092,7 +1488,8 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     if (got == 0) return;  /* no supported selector: skip the whole rule */
 
     size_t dstart = sh->ndecls;
-    size_t dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], CSS_MAX_DECLS - dstart);
+    size_t dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], CSS_MAX_DECLS - dstart,
+                                sh->custom, sh->ncustom);
     if (dn == 0) return;
     if (sh->nrules >= CSS_MAX_RULES) return;  /* leave decls; harmless, unreferenced */
 
@@ -1339,6 +1736,7 @@ css_status css_parse_media(const char *text, size_t len, const css_media *media,
         size_t clen = 0;
         char *clean = strip_comments(text, len, &clen);
         if (clean == NULL) { free(sh); return CSS_ERR_OOM; }
+        collect_custom_props(clean, clen, sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom);
         parse_block(sh, clean, 0, clen, m, 0);
         free(clean);
     }
@@ -1510,8 +1908,25 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
 
     if (inline_style != NULL) {
         if (inline_len == 0) inline_len = strlen(inline_style);
+        /* var() in an inline style= can reference a custom property declared
+         * either in this SAME inline block (`style="--x:1;color:var(--x)"`) or in
+         * the stylesheet (e.g. a `:root` rule). Inline-declared names win on a
+         * collision (closer to the use site), so they go first in the combined
+         * table -- expand_lookup takes the first match. */
+        css_custom_prop combined[2 * CSS_MAX_CUSTOM_PROPS];
+        size_t ncombined = 0;
+        collect_custom_props(inline_style, inline_len, combined, CSS_MAX_CUSTOM_PROPS, &ncombined);
+        if (sheet != NULL) {
+            for (size_t i = 0; i < sheet->ncustom && ncombined < 2 * CSS_MAX_CUSTOM_PROPS; ++i) {
+                int dup = 0;
+                for (size_t k = 0; k < ncombined; ++k)
+                    if (strcmp(combined[k].name, sheet->custom[i].name) == 0) { dup = 1; break; }
+                if (!dup) combined[ncombined++] = sheet->custom[i];
+            }
+        }
         css_decl tmp[CSS_INLINE_DECLS];
-        size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS);
+        size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS,
+                                    combined, ncombined);
         for (size_t d = 0; d < dn; ++d)
             apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX);
     }

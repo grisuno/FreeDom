@@ -258,6 +258,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
  *            shadow_dx,shadow_dy,shadow_color,opacity,valign,text_indent,white_space,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
  *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
+ *            cont_wrap,cont_row_gap,cont_align_items,flex_align_self,
  *            float_side,float_id,float_clear,
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,
  *            block_id,
@@ -310,6 +311,10 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t forder = (int32_t)r->flex_order;
         int32_t fdir = (int32_t)r->flex_direction;
         int32_t citem = (int32_t)r->cont_item;
+        int32_t cwrap = (int32_t)r->cont_wrap;
+        int32_t crgap = (int32_t)r->cont_row_gap;
+        int32_t calign = (int32_t)r->cont_align_items;
+        int32_t fself = (int32_t)r->flex_align_self;
         int32_t flside = (int32_t)r->float_side;
         int32_t flid = (int32_t)r->float_id;
         int32_t flclear = (int32_t)r->float_clear;
@@ -371,6 +376,10 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &forder, sizeof forder) != 0) return -1;
         if (write_full(wfd, &fdir, sizeof fdir) != 0) return -1;
         if (write_full(wfd, &citem, sizeof citem) != 0) return -1;
+        if (write_full(wfd, &cwrap, sizeof cwrap) != 0) return -1;
+        if (write_full(wfd, &crgap, sizeof crgap) != 0) return -1;
+        if (write_full(wfd, &calign, sizeof calign) != 0) return -1;
+        if (write_full(wfd, &fself, sizeof fself) != 0) return -1;
         if (write_full(wfd, &flside, sizeof flside) != 0) return -1;
         if (write_full(wfd, &flid, sizeof flid) != 0) return -1;
         if (write_full(wfd, &flclear, sizeof flclear) != 0) return -1;
@@ -1016,6 +1025,7 @@ static int read_view(int fd, pv_view **out) {
         int32_t fgrow = -1, fshrink = -1;
         int32_t fbasis = CSS_LEN_UNSET, forder = CSS_LEN_UNSET, fdir = 0;
         int32_t citem = -1;
+        int32_t cwrap = 0, crgap = -1, calign = 0, fself = 0;
         int32_t flside = 0, flid = -1, flclear = 0;
         int32_t bl = 0, br = 0, bw = 0, bcenter = 0;
         int32_t bmt = PV_LEN_UNSET, bmb = PV_LEN_UNSET;
@@ -1066,6 +1076,10 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &forder, sizeof forder) != 0
          || read_full(fd, &fdir, sizeof fdir) != 0
          || read_full(fd, &citem, sizeof citem) != 0
+         || read_full(fd, &cwrap, sizeof cwrap) != 0
+         || read_full(fd, &crgap, sizeof crgap) != 0
+         || read_full(fd, &calign, sizeof calign) != 0
+         || read_full(fd, &fself, sizeof fself) != 0
          || read_full(fd, &flside, sizeof flside) != 0
          || read_full(fd, &flid, sizeof flid) != 0
          || read_full(fd, &flclear, sizeof flclear) != 0
@@ -1113,8 +1127,10 @@ static int read_view(int fd, pv_view **out) {
             pv_set_text_ext(v, (int)ffam, (int)ttrans, (int)lspc, (int)wspc, (int)shdx,
                             (int)shdy, (int)shcol, (int)opac, (int)valgn, (int)tindent,
                             (int)wspace);
-            pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols);
-            pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir);
+            pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
+                             (int)cwrap, (int)crgap, (int)calign);
+            pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
+                       (int)fself);
             pv_set_cont_item(v, (int)citem);
             pv_set_float(v, (int)flside, (int)flid, (int)flclear);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);

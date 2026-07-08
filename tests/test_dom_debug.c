@@ -95,7 +95,7 @@ static void test_grid_container_annotation(void **state) {
     for (int i = 0; i < 3; ++i) {
         assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "cell", NULL), PV_OK);
         /* cont_id=7, display=grid, gap=0, justify=start, cols=3 */
-        pv_set_container(v, 7, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, 3);
+        pv_set_container(v, 7, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, 3, 0, -1, 0);
     }
     rd_doc *d = build(v, rdp_caps_safe());        /* containers carried regardless of caps.css */
     char buf[1024];

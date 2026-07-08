@@ -67,6 +67,13 @@ typedef struct pv_run {
     int     flex_basis;     /* px >= 0, CSS_LEN_AUTO, o CSS_LEN_UNSET (-> auto) */
     int     flex_order;     /* con signo, o CSS_LEN_UNSET (-> 0) */
     int     flex_direction; /* css_flex_direction del CONTENEDOR, 0 (-> row) */
+    /* flex-wrap / row-gap / align-items (CONTENEDOR) + align-self (ITEM). Estructura
+     * como el resto de cont_*/flex_* (render_doc los propaga siempre). */
+    int     cont_wrap;        /* css_flex_wrap del contenedor, 0 (-> nowrap) */
+    int     cont_row_gap;     /* px >= 0, o -1 (sin definir -> cae a cont_gap) */
+    int     cont_align_items; /* css_align_kw del contenedor (align-items) */
+    int     flex_align_self;  /* css_align_kw del ITEM (align-self); UNSET/AUTO
+                               * -> usa cont_align_items */
     /* Box model del autor pre-resuelto a px (Hito 23b-3), gateado por caps.css. */
     int     box_l;       /* inset izquierdo px (padding-left + margin-left no-auto), 0 */
     int     box_r;       /* inset derecho px (padding-right + margin-right no-auto), 0 */
@@ -169,11 +176,15 @@ que `fg_rgb` (`render_doc` lo propaga solo con `caps.css`); los `pv_append*` lo 
 parser inline propio (que se eliminó). El número de columnas mapea a `css_justify`→`fx_justify`
 (`[[flex_layout]]`). Los runs de un mismo contenedor comparten `cont_id` (registro en orden de
 documento, -1 = ninguno); se guardan además su `display`, el `gap` (px), `justify-content` y, en grid,
-las columnas de `grid-template-columns` (cuenta de tokens, `[1, PV_MAX_GRID_COLS]`; `repeat()`/
-`minmax()` fuera de alcance). Es **estructura, no estilo de autor**: `render_doc` lo propaga **siempre**
-(desacoplado de `caps.css`, doctrina "Layout != estilo de autor"); solo los *colores*/`text-align`/
-`font-size` de autor quedan gateados por `caps.css`. Los `pv_append*` inicializan `cont_id` a -1;
-`pv_set_container` fija los cinco campos en el último run. El `background` shorthand y `bgcolor` legacy
+las columnas de `grid-template-columns` (cuenta de tracks, `[1, PV_MAX_GRID_COLS]`; `[[css]]` expande
+`repeat(N, ...)` y cuenta `minmax(...)` como un track desde la expansión de layout CSS — los *pesos*
+`fr`/tamaños de track siguen sin resolver, cada track maqueta como columna de igual ancho). Junto al
+contenedor viajan también, desde esa misma expansión, `flex-wrap`/`row-gap`/`align-items`
+(`cont_wrap`/`cont_row_gap`/`cont_align_items`). Es **estructura, no estilo de autor**: `render_doc` lo
+propaga **siempre** (desacoplado de `caps.css`, doctrina "Layout != estilo de autor"); solo los
+*colores*/`text-align`/`font-size` de autor quedan gateados por `caps.css`. Los `pv_append*`
+inicializan `cont_id` a -1 y `cont_wrap`/`cont_align_items` a 0, `cont_row_gap` a -1;
+`pv_set_container` fija los ocho campos en el último run. El `background` shorthand y `bgcolor` legacy
 siguen fuera de alcance.
 
 **Whitespace entre bloques (no pinta).** Un run de **solo espacios** que **iniciaría un bloque**
@@ -206,12 +217,15 @@ el elemento de la cadena de ancestros del run visitado inmediatamente **antes** 
 hijo directo en ese camino — el flex item CSS real). De su `css_style` ya resuelta salen
 `flex_grow`/`flex_shrink` (x100, -1 sin definir), `flex_basis` (px / `CSS_LEN_AUTO` / `CSS_LEN_UNSET`)
 y `flex_order` (`CSS_LEN_UNSET` sin definir); `flex_direction` sale del `css_style` del **contenedor**
-(0 = sin definir = `row`). Dado que el texto directamente dentro del contenedor (item anónimo) no tiene
-elemento intermedio, lleva los defaults. Es **estructura** como `cont_*`: `render_doc` lo propaga
-siempre, sin gate de `caps.css`. `pv_set_flex` fija los cinco campos en el último run. Runs del camino
-de celdas de tabla (grid sintetizado) llevan los defaults. Fuera de alcance v1: `align-items`/
-`align-self`, `flex-wrap`, `row-gap`, `grid-template-rows`, `grid-column/row: span N` (resueltos en
-`css_style` por el Hito 23b-7; los consumirá una iteración futura del motor de cajas).
+(0 = sin definir = `row`). El mismo elemento ITEM aporta también `align-self`
+(`flex_align_self`, `css_align_kw`, 0/`CSS_AK_UNSET` si no se fijó — la GUI entonces usa el
+`align-items` del contenedor). Dado que el texto directamente dentro del contenedor (item anónimo) no
+tiene elemento intermedio, lleva los defaults. Es **estructura** como `cont_*`: `render_doc` lo propaga
+siempre, sin gate de `caps.css`. `pv_set_flex` fija los seis campos en el último run. Runs del camino
+de celdas de tabla (grid sintetizado) llevan los defaults. Fuera de alcance: `grid-template-rows`/
+`grid-column`/`grid-row: span N` (resueltos en `css_style` por el Hito 23b-7, aún no consumidos aquí —
+cada item de grid sigue ocupando exactamente una celda), alineación en el eje cruzado de GRID
+(`align-items`/`align-self` solo llegan al pintor para contenedores FLEX).
 
 **Box model del autor (`box_*`, Hito 23b-3).** Por cada run se resuelve una caja horizontal del
 **ancestro de bloque más cercano que declare alguna propiedad de caja** (`margin`/`padding`/`width`/
@@ -245,9 +259,10 @@ void          pv_set_color(pv_view *v, int fg_rgb);        /* color del autor de
 void          pv_set_bgcolor(pv_view *v, int bg_rgb);      /* background-color del ultimo run */
 void          pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale, int text_decoration); /* align/font/line-height/decoration del ultimo run */
 void          pv_set_container(pv_view *v, int cont_id, int cont_display,
-                               int cont_gap, int cont_justify, int cont_cols); /* contenedor */
+                               int cont_gap, int cont_justify, int cont_cols,
+                               int cont_wrap, int cont_row_gap, int cont_align_items); /* contenedor */
 void          pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
-                          int flex_order, int flex_direction); /* flex por-item del ultimo run */
+                          int flex_order, int flex_direction, int flex_align_self); /* flex por-item */
 void          pv_set_cont_item(pv_view *v, int cont_item);  /* ordinal de item del ultimo run */
 void          pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                          int box_center, int box_mt, int box_mb); /* box model del ultimo run */

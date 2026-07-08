@@ -146,6 +146,16 @@ typedef struct pv_run {
      * collected table cell keeps its own ordinal. Structure like cont_*. -1 = no
      * container. */
     int     cont_item;
+    /* flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM). Structure
+     * like the rest of the cont_ and flex_ fields, carried regardless of caps.css.
+     * Defaults:
+     * cont_wrap 0 (unset -> nowrap), cont_row_gap -1 (unset -> falls back to
+     * cont_gap), cont_align_items/flex_align_self 0 (CSS_AK_UNSET -> start). */
+    int     cont_wrap;        /* css_flex_wrap of the container */
+    int     cont_row_gap;     /* px >= 0, or -1 (unset) */
+    int     cont_align_items; /* css_align_kw of the container (align-items) */
+    int     flex_align_self;  /* css_align_kw of the ITEM (align-self); AUTO/UNSET
+                               * defer to cont_align_items */
     /* Float layout (spec/float.md). float_side is the css_float of the nearest floated
      * self-or-ancestor block (0 none, 2 left, 3 right — the css_float values); float_id
      * groups the runs of ONE floated element in document order (-1 = not in a float);
@@ -347,18 +357,22 @@ void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
                      int white_space);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
- * run (cont_id, the bx_display, and the parsed gap/justify/cols). No-op on an empty
- * or NULL view. Both append helpers default cont_id to -1 (no container). */
+ * run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/
+ * row-gap/align-items). No-op on an empty or NULL view. Both append helpers
+ * default cont_id to -1 (no container), cont_wrap/cont_align_items to 0,
+ * cont_row_gap to -1. */
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
-                      int cont_gap, int cont_justify, int cont_cols);
+                      int cont_gap, int cont_justify, int cont_cols,
+                      int cont_wrap, int cont_row_gap, int cont_align_items);
 
 /* Stage 3: sets the flex per-item values on the most recently appended run — the
  * ITEM's resolved grow/shrink (x100, -1 unset), basis (px / CSS_LEN_AUTO /
- * CSS_LEN_UNSET) and order (CSS_LEN_UNSET unset), plus the CONTAINER's
- * flex-direction (css_flex_direction, 0 unset -> row). No-op on an empty or NULL
- * view. The append helpers default them to the unset sentinels. */
+ * CSS_LEN_UNSET), order (CSS_LEN_UNSET unset) and align-self (css_align_kw, 0
+ * unset), plus the CONTAINER's flex-direction (css_flex_direction, 0 unset ->
+ * row). No-op on an empty or NULL view. The append helpers default them to the
+ * unset sentinels. */
 void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
-                 int flex_order, int flex_direction);
+                 int flex_order, int flex_direction, int flex_align_self);
 
 /* Sets the container-item ordinal on the most recently appended run (-1 = none).
  * No-op on an empty or NULL view; the append helpers default cont_item to -1. */

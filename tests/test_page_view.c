@@ -867,6 +867,44 @@ static void test_build_flex_container(void **state) {
     hp_document_free(doc);
 }
 
+/* flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) resolve through
+ * the same cascade and thread through the same run fields as the rest of Stage 3. */
+static void test_build_flex_wrap_align_row_gap(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='display:flex;flex-wrap:wrap;row-gap:20px;align-items:center'>"
+        "<div style='align-self:flex-end'>a</div>"
+        "<div>b</div>"
+        "</div>"
+        "<div style='display:flex'>nowrap</div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "a");
+    assert_non_null(a);
+    assert_int_equal(a->cont_wrap, CSS_FW_WRAP);
+    assert_int_equal(a->cont_row_gap, 20);
+    assert_int_equal(a->cont_align_items, CSS_AK_CENTER);
+    assert_int_equal(a->flex_align_self, CSS_AK_END);
+
+    const pv_run *b = find_text(v, "b");
+    assert_non_null(b);
+    assert_int_equal(b->cont_wrap, CSS_FW_WRAP);       /* same container */
+    assert_int_equal(b->cont_align_items, CSS_AK_CENTER);
+    assert_int_equal(b->flex_align_self, CSS_AK_UNSET); /* no align-self of its own */
+
+    const pv_run *n = find_text(v, "nowrap");
+    assert_non_null(n);
+    assert_int_equal(n->cont_wrap, CSS_FW_UNSET);
+    assert_int_equal(n->cont_row_gap, -1);
+    assert_int_equal(n->cont_align_items, CSS_AK_UNSET);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* Stage 3: each run carries the flex ITEM's own resolved values (the direct child
  * of the container on the run's ancestor chain: grow/shrink/basis x100/px, order)
  * plus the CONTAINER's flex-direction. flex:1 -> 1 1 0. An item without flex
@@ -1210,11 +1248,11 @@ static void test_container_defaults(void **state) {
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
     assert_int_equal(pv_at(v, 0)->cont_id, -1);
     assert_int_equal(pv_at(v, 0)->cont_display, 0);
-    pv_set_container(v, 2, BX_DISPLAY_GRID, 8, FX_JUSTIFY_END, 4);
+    pv_set_container(v, 2, BX_DISPLAY_GRID, 8, FX_JUSTIFY_END, 4, 0, -1, 0);
     assert_int_equal(pv_at(v, 0)->cont_id, 2);
     assert_int_equal(pv_at(v, 0)->cont_display, BX_DISPLAY_GRID);
     assert_int_equal(pv_at(v, 0)->cont_cols, 4);
-    pv_set_container(NULL, 0, 0, 0, 0, 0); /* NULL-safe */
+    pv_set_container(NULL, 0, 0, 0, 0, 0, 0, -1, 0); /* NULL-safe */
     pv_free(v);
 }
 
@@ -2068,6 +2106,7 @@ int main(void) {
         cmocka_unit_test(test_build_combinator_selectors),
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_flex_item_values),
+        cmocka_unit_test(test_build_flex_wrap_align_row_gap),
         cmocka_unit_test(test_build_float_threading),
         cmocka_unit_test(test_build_flex_whitespace_not_item),
         cmocka_unit_test(test_build_interblock_whitespace_not_emitted),

@@ -1561,6 +1561,82 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   por `RC_BOX_STACK_MAX`, items por `BT_MAX_CHILDREN`. *(Módulos puros + IPC + E2E visual headless
   verificados; ventana Wayland interactiva pendiente al dueño.)* Ver `[[freedom-float-layout]]`,
   `[[freedom-box-engine-and-dispatcher]]`.
+- **Hito (CSS) — "CSS layout expansion": `var()`/custom properties, `calc()`, `repeat()`/`minmax()`
+  track count, `flex-wrap`, `row-gap` distinto, `align-items`/`align-self` (2026-07-07).** El gap
+  más grande pendiente ("CSS y Layout más completo"), atacado en el mayor tramo que el ciclo
+  completo (spec→test→código→ASan→fuzz→`/visual-review`) permite sin romper nada. **(a) Custom
+  properties + `var()` (puro, solo `css`):** `collect_custom_props` junta todo `--name: value` del
+  documento en una tabla plana **page-global** (`CSS_MAX_CUSTOM_PROPS` 64, simplificación deliberada
+  del scoping real de CSS — cubre el patrón `:root{...}` que es la inmensa mayoría de los casos
+  reales); `resolve_var` sustituye `var(--name[, fallback])` cuando se interpreta una declaración,
+  recursando hasta `CSS_VAR_MAX_DEPTH` (4) — una cadena o un self-reference (`--a: var(--a)`) falla
+  la declaración en vez de recursar/expandir sin límite (anti-DoS). Un `style=` inline ve sus propios
+  `--name` Y los de la hoja (los propios ganan). **Nunca telefonea a casa**: el texto sustituido sigue
+  pasando por el mismo intérprete de propiedad (`background: var(--evil)` con `--evil: url(...)`
+  se descarta igual que un `url()` literal). **(b) `calc()` (puro, solo `css`):** evaluador
+  recursivo-descendente (`calc_eval`) sobre `+`/`-`/`*`/`/`/paréntesis para todo lo que pasa por
+  `interp_len` (margin/padding/width/max-width/inset/text-indent y, transitivamente, flex-basis/
+  border-width/outline-width/text-shadow/box-shadow); chequeo dimensional como el `calc()` real
+  (`10px + 5` o `10px * 5px` son inválidos); acotado por `CSS_CALC_MAX_DEPTH` (8) de anidamiento de
+  paréntesis. Compone con `var()` (`calc(var(--x) * 2)`). **Bug real encontrado por
+  `/visual-review`, no por los tests unitarios:** un `calc(10px + 5px)` dentro de un shorthand
+  multivalor (`flex: 0 0 calc(100px + 120px)`) se partía en la palabra `+` porque CADA shorthand
+  (`expand_box4`/`expand_flex`/`expand_quad`/`classify_box_edge`/`expand_shadow`/
+  `expand_box_shadow`) tenía su propio tokenizador de espacios sin conciencia de paréntesis —
+  extinguido con **un** tokenizador compartido (`next_ws_token`, cuenta profundidad de paréntesis)
+  usado por los seis, candado `test_calc_inside_shorthands`. **(c) `repeat()`/`minmax()` en
+  `grid-template-columns`/`-rows` (puro, solo `css`, fix de conteo):** antes se tokenizaba por
+  espacios crudos (un `repeat(3, 1fr)` contaba mal); ahora `count_tracks`/`count_one_repeat`
+  expanden `repeat(N, patrón)` a `N × tracks-en-el-patrón` y cuentan `minmax(a,b)` como UNA pista;
+  `repeat(auto-fill|auto-fit, ...)` necesita un ancho disponible que este parser puro no tiene →
+  falla cerrado (todo el valor, no una pista). Los **pesos** `fr`/tracks con distinto ancho siguen
+  sin resolverse (cada pista sigue maquetando como columna de igual ancho — ver `spec/box_tree.md`
+  §6). **(d) `flex-wrap` + `row-gap` + `align-items`/`align-self` (hilado completo hasta el
+  pintor):** `box_tree` gana `bt_node.wrap`/`row_gap`/`has_row_gap`/`align`, diseñados para
+  **compatibilidad retroactiva exacta**: `wrap`/`align` en `0` bajo zero-init = comportamiento
+  previo (una línea, `align-start`); `has_row_gap` es un booleano explícito (no un centinela
+  negativo en `row_gap`, que colisionaría con el `0.0` de `memset`) — con `has_row_gap==0` el motor
+  sigue usando `gap` para ambos ejes exactamente como antes de que `row-gap` existiera.
+  `layout_flex` reescrito: sin `wrap`, una sola línea (idéntico al código previo, verificado por los
+  25 tests preexistentes de `test_box_tree` sin tocar); con `wrap`, empaquetado voraz por `basis` en
+  líneas, apiladas con el gap de eje cruzado, con alineación `start`/`center`/`end` por ítem dentro
+  de su línea (`stretch` se aproxima a `start`, honesto: el motor no puede forzar que una hoja crezca
+  para llenar la línea). `layout_grid`: gap de columna siempre `gap`, gap de fila `row_gap` si
+  `has_row_gap`. Hilado extremo a extremo: `css_style` (ya existía desde el Hito 23b-7) →
+  `pv_cont_info`/`resolve_context` en `page_view` (nuevos campos `wrap`/`row_gap`/`align_items`/
+  `align_self`, este último rastreado como el resto de flex por-item vía el elemento previo del
+  walk) → `pv_run` (4 campos nuevos: `cont_wrap`/`cont_row_gap`/`cont_align_items`/
+  `flex_align_self`; `pv_set_container`/`pv_set_flex` ganan parámetros) → IPC `tab.c`
+  `write_view`/`read_view` (4 `int32` nuevos tras `cont_item`, mismo orden en ambos lados) →
+  `rd_block` (**sin gate** de `caps.css`, estructura como el resto de `cont_*`) →
+  `gui/browser_ui.c` `layout_container` (`css_align_to_bt` mapea `css_align_kw`→`BT_ALIGN_*`;
+  `container_has_flex_items` ahora también dispara el camino FLEX real cuando el contenedor declara
+  `flex-wrap`/`align-items` sin ningún `flex-grow`/`-shrink`/`-basis`/`order` explícito). Specs
+  (`css.md`, `box_tree.md`, `page_view.md`, `render_doc.md`, `tab.md`) + tests (9 nuevos `css`
+  custom-properties/`var()`, 7 `calc()`, 5 `repeat()`/`minmax()`, 6 nuevos `test_box_tree`
+  wrap/align/row-gap incl. no-regresión explícita del camino sin estas propiedades, 1 `page_view`
+  E2E por el pipeline real, 1 `render_doc` estructura-sin-gate, 1 `tab` roundtrip IPC) + `make test`
+  (39 suites, 0 fallos) / `make asan` (39, exit 0, sin leaks/UB) limpios + fuzz `fuzz-css`
+  (múltiples corridas de 30s, ~135–145k execs cada una, incl. una con corpus dirigido a
+  `var()`/`calc()`/`repeat()`) y `fuzz-pv` (dos corridas de 30s, ~18k y ~19k execs) sin
+  crash/leak/UB + **E2E visual** (`examples`/demo ad-hoc con `--author-css --download-png`: `var()`
+  tiñe títulos y cajas con el color de marca; 5 ítems `flex-wrap` con `flex-basis: calc(...)` — 4 en
+  la línea 1, el 5º envuelve a la línea 2 con el `row-gap` de 24px claramente mayor que el `gap` de
+  columna de 10px; `align-items:center` centra un ítem corto junto a uno de 3 líneas, `align-self:
+  flex-end` lo ancla abajo; grid `repeat(3,1fr)` con `row-gap:40px` muestra columnas iguales y un
+  salto de fila mucho mayor que el `gap` de columna de 8px — las 6 propiedades confirmadas en un
+  solo PNG). **Fuera de alcance, con justificación (no por olvido):** `transform`/`filter`/
+  `transition`/`animation`/`@keyframes` — arquitectónicamente incompatibles con el modelo actual de
+  display-list plana pintada fila-por-fila (no hay pipeline de matriz de transformación ni capas
+  compuestas por elemento; añadirlos a medias sería deshonesto); `position:sticky` con scroll real
+  (sigue cayendo a `relative`, fail-closed — necesita hooks de scroll en el motor de cajas);
+  `align-content`, `justify-items`, alineación de eje cruzado en GRID, colocación de ítem de grid
+  (`grid-column`/`grid-row: span N` resuelto en `css_style`, no consumido todavía), pesos `fr`/
+  tracks nombrados, `wrap-reverse` (tratado como `wrap` plano), reversión visual de `*-reverse`,
+  `%`/viewport dentro de `calc()`. *(Módulos puros + IPC + E2E visual headless verificados; ventana
+  Wayland interactiva pendiente al dueño.)* Ver `[[freedom-css-layout-expansion]]`,
+  `[[freedom-flex-per-item]]`, `[[freedom-box-engine-and-dispatcher]]`,
+  `[[freedom-author-css-direction]]`.
 
 ### 7.3 Roadmap — por cruzar
 
@@ -1735,16 +1811,20 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
     padding-box (hoy border-box). `position:sticky` cae a `relative` (fail-closed).
   - **Stage 3 (flex por-item) CERRADO v1 el 2026-07-05** (hito propio en §7.2: grow/
     shrink/basis/order/direction de extremo a extremo + whitespace-no-item + filas en
-    `--dump-layout`); **Stage 4 (event dispatcher) parcialmente cerrado** (click). Restan del
-    plan: align-items/self, flex-wrap, row-gap/grid-template-rows/span N/pesos `fr`, y más
-    eventos. El plan completo está en `spec/PLAN-layout-engine.md` y `spec/box_engine.md`. Ver
-    `[[freedom-flex-per-item]]`, `[[freedom-box-engine-and-dispatcher]]`.
+    `--dump-layout`); **`flex-wrap`/`align-items`/`align-self`/`row-gap` CERRADOS el
+    2026-07-07** (hito "CSS layout expansion" en §7.2); **Stage 4 (event dispatcher)
+    parcialmente cerrado** (click). Restan del plan: `grid-template-rows`/`span N`/pesos
+    `fr`, alineación de eje cruzado en GRID, `align-content`, y más eventos. El plan completo
+    está en `spec/PLAN-layout-engine.md` y `spec/box_engine.md`. Ver
+    `[[freedom-flex-per-item]]`, `[[freedom-box-engine-and-dispatcher]]`,
+    `[[freedom-css-layout-expansion]]`.
 - **Hito 23b parte 2 — CSS de autor: más cobertura.** (Parte 1 `@media`+`prefers-color-scheme`, el
   sub-hito **flex/grid desde `<style>`**, el **box model `margin`/`padding`/`width`/`max-width`**
   —Hito 23b-3—, y la **resolución de valores** de `position`/`border`/`box-sizing`/`box-shadow`/flex-y-
   grid-por-item —Hito 23b-7— ya cerrados arriba; **honrarlos en el painter** es el Hito 23b-8.) Falta
-  además: render de `@media print` al PDF; expansión de `repeat()`/`minmax()`/pesos `fr` en grid (hoy
-  todo track = 1fr igual); ~~combinadores **hermano** (`+`/`~`) y **pseudo-clases**~~ (cerrados en el Hito 23b-9: hermanos + subconjunto de pseudo-clases; quedan `:not()`/`:is()`/of-type/pseudo-elementos `::`) (los combinadores
+  además: render de `@media print` al PDF; pesos `fr`/tracks nombrados en grid (hoy todo track
+  cuenta correcto —`repeat()`/`minmax()` cerrado en el hito "CSS layout expansion", 2026-07-07—
+  pero sigue maquetando como columna de igual ancho); ~~combinadores **hermano** (`+`/`~`) y **pseudo-clases**~~ (cerrados en el Hito 23b-9: hermanos + subconjunto de pseudo-clases; quedan `:not()`/`:is()`/of-type/pseudo-elementos `::`) (los combinadores
   **descendiente/hijo** y los **selectores de atributo** + **`!important`** ya cerrados arriba, Hito
   23b-4); persistir el toggle de estilos de autor y el modo reader con el Hito 10. (`line-height` y
   `text-decoration` cerrados en Hito 23b-5; `font-family`/`text-transform`/`letter-spacing`/
