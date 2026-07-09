@@ -6,8 +6,11 @@
  * produced; every assembly is bounded and reports overflow rather than truncate.
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include "url.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 /* --- small ASCII helpers (no locale dependence) --- */
@@ -366,6 +369,100 @@ url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t
      * (so "javascript:...", "file:...", "ftp://..." become harmless queries). */
     *kind = URL_OMNI_SEARCH;
     return build_search(start, out, outsz);
+}
+
+/* --- HTTP Basic Auth: extract userinfo from URL --- */
+
+url_status url_extract_userinfo(const char *url, char *out, size_t outsz,
+                                char **username_out, char **password_out) {
+    if (url == NULL || out == NULL || outsz == 0) return URL_ERR_NULL_ARG;
+    if (!url_is_https(url)) {
+        if (copy_checked(out, outsz, url) != 0) return URL_ERR_OVERFLOW;
+        if (username_out != NULL) *username_out = NULL;
+        if (password_out != NULL) *password_out = NULL;
+        return URL_OK; /* not an error: no auth expected for non-https */
+    }
+
+    /* Scan the authority part for '@'. Authority = bytes after "https://" up to
+     * the first '/', '?' or '#'. */
+    const char *auth = url + 8; /* strlen("https://") */
+    const char *at = NULL;
+    for (const char *p = auth; *p != '\0' && *p != '/' && *p != '?' && *p != '#'; ++p) {
+        if (*p == '@') { at = p; break; }
+    }
+
+    if (at == NULL) {
+        /* No userinfo: pass through the original URL. */
+        if (copy_checked(out, outsz, url) != 0) return URL_ERR_OVERFLOW;
+        if (username_out != NULL) *username_out = NULL;
+        if (password_out != NULL) *password_out = NULL;
+        return URL_OK;
+    }
+
+    /* There IS userinfo. The "user:password" part is between the scheme and '@'. */
+    size_t userinfo_len = (size_t)(at - auth);
+    if (userinfo_len == 0) {
+        if (copy_checked(out, outsz, url) != 0) return URL_ERR_OVERFLOW;
+        if (username_out != NULL) *username_out = NULL;
+        if (password_out != NULL) *password_out = NULL;
+        return URL_OK; /* "@" at the start of authority: not valid userinfo */
+    }
+
+    /* Split userinfo on the first ':' (if any) -> username and password. */
+    const char *colon = NULL;
+    for (size_t i = 0; i < userinfo_len; ++i) {
+        if (auth[i] == ':') { colon = auth + i; break; }
+    }
+
+    size_t user_len = (colon != NULL) ? (size_t)(colon - auth) : userinfo_len;
+    size_t pass_len = (colon != NULL) ? userinfo_len - user_len - 1 : 0;
+
+    char username[256];
+    if (user_len > sizeof username - 1) {
+        if (copy_checked(out, outsz, url) != 0) return URL_ERR_OVERFLOW;
+        if (username_out != NULL) *username_out = NULL;
+        if (password_out != NULL) *password_out = NULL;
+        return URL_OK; /* userinfo too long: skip auth, use URL as-is */
+    }
+    memcpy(username, auth, user_len);
+    username[user_len] = '\0';
+
+    char password[256];
+    if (pass_len >= sizeof password) {
+        if (copy_checked(out, outsz, url) != 0) return URL_ERR_OVERFLOW;
+        if (username_out != NULL) *username_out = NULL;
+        if (password_out != NULL) *password_out = NULL;
+        return URL_OK;
+    }
+    if (pass_len > 0) {
+        memcpy(password, colon + 1, pass_len);
+        password[pass_len] = '\0';
+    } else {
+        password[0] = '\0';
+    }
+
+    /* Build the cleaned URL: "https://" + host_part (everything after the '@'). */
+    const char *remain = at + 1; /* points to the host (after '@') */
+    char cleaned[URL_MAX_LEN + 1];
+    cleaned[0] = '\0';
+    if (cat_checked(cleaned, sizeof cleaned, "https://") != 0 ||
+        cat_checked(cleaned, sizeof cleaned, remain) != 0) {
+        return URL_ERR_OVERFLOW;
+    }
+    if (copy_checked(out, outsz, cleaned) != 0) return URL_ERR_OVERFLOW;
+
+    if (username_out != NULL) {
+        *username_out = strdup(username);
+        if (*username_out == NULL) return URL_ERR_NULL_ARG;
+    }
+    if (password_out != NULL) {
+        *password_out = (pass_len > 0) ? strdup(password) : strdup("");
+        if (*password_out == NULL) {
+            if (username_out != NULL) { free(*username_out); *username_out = NULL; }
+            return URL_ERR_NULL_ARG;
+        }
+    }
+    return URL_OK;
 }
 
 /* --- local file:// origin --- */

@@ -34,6 +34,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --download-pdf=PATH: headless render to a vector PDF at PATH (implies --headless)\n");
     fprintf(fp, "  --download-png=PATH: headless render to a single PNG image at PATH (implies --headless)\n");
     fprintf(fp, "  --author-css: apply author CSS (colors/sizing/line-height) in the headless render (local only)\n");
+    fprintf(fp, "  --user=user:password: HTTP Basic Authentication credentials (headless only)\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
@@ -93,6 +94,10 @@ static int g_dump_layout = 0;
 /* When nonzero, the headless render runs the page's inline JS (tab_load_full run_js).
  * Set by --dump-console and by --js resolving to "on". Default off (Secure by Default). */
 static int g_headless_js = 0;
+
+/* HTTP Basic Authentication for headless mode. Set by --user=username:password. */
+static char g_auth_user[256] = "";
+static char g_auth_pass[256] = "";
 
 /* Tor/I2P routing for headless mode (off by default; opt-in via CLI flags). */
 static nr_config global_net = { 0, 0, 0 };
@@ -248,7 +253,8 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     }
 
     sf_config cfg = sf_config_default();
-    if (global_insecure) cfg.policy = SF_POLICY_PERMISSIVE;
+    if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
+    if (g_auth_user[0] != '\0') { cfg.username = g_auth_user; cfg.password = g_auth_pass; }
     nr_route route = nr_route_for(url, global_net);
     if (route == NR_ROUTE_BLOCKED) return -1;
     if (route == NR_ROUTE_TOR)      { cfg.proxy_type = SF_PROXY_SOCKS5H; cfg.proxy_address = global_tor_addr; }
@@ -403,7 +409,8 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
     if (out_nav != NULL) *out_nav = NULL;
 
     sf_config cfg = sf_config_default();
-    if (global_insecure) cfg.policy = SF_POLICY_PERMISSIVE;
+    if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
+    if (g_auth_user[0] != '\0') { cfg.username = g_auth_user; cfg.password = g_auth_pass; }
 
     /* Socket-level anonymity routing. A .onion/.i2p target whose proxy is not enabled
      * is BLOCKED (fail closed), never leaked over the clearnet. */
@@ -522,6 +529,18 @@ int main(int argc, char **argv) {
             headless = 1; /* PNG export is a headless operation (no window) */
         } else if (strcmp(arg, "--author-css") == 0) {
             g_author_css = 1; /* author CSS in the headless render + external sheet fetch */
+        } else if (strncmp(arg, "--user=", 7) == 0) {
+            const char *val = arg + 7;
+            const char *colon = strchr(val, ':');
+            if (colon == NULL || colon == val || *(colon + 1) == '\0') {
+                fprintf(stderr, "freedom: --user requires 'username:password'\n");
+                return EXIT_USAGE;
+            }
+            size_t ulen = (size_t)(colon - val);
+            if (ulen >= sizeof g_auth_user) ulen = sizeof g_auth_user - 1;
+            memcpy(g_auth_user, val, ulen);
+            g_auth_user[ulen] = '\0';
+            snprintf(g_auth_pass, sizeof g_auth_pass, "%s", colon + 1);
         } else if (strcmp(arg, "--insecure") == 0 || strcmp(arg, "-I") == 0) {
             global_insecure = 1;
         } else if (strcmp(arg, "--tor") == 0) {

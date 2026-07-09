@@ -370,6 +370,14 @@ typedef struct browser_window {
     int     tab_count;
     int     active_tab;
 
+    /* HTTP Basic Authentication, scoped to the origin (scheme + host + port) from
+     * which the credentials were extracted (https://user:pass@host/). Only injected
+     * into requests whose origin matches auth_host, so credentials never leak cross-
+     * origin across tabs or redirects. auth_user/auth_pass are owned; NULL = no auth. */
+    char *auth_host;
+    char *auth_user;
+    char *auth_pass;
+
     /* Freebug developer console (F12 / hamburger). The active page's worker is kept
      * ALIVE after rendering (tab_worker) so the console REPL can tab_eval against the
      * live page context; console holds the captured console.* output + uncaught script
@@ -942,6 +950,19 @@ static nr_route apply_route(const browser_window *w, const char *url, sf_config 
     return r;
 }
 
+/* Injects HTTP Basic Auth credentials from the window into cfg, but ONLY when the
+ * request's host matches the host from which the credentials were originally
+ * extracted (auth_host). This prevents credential leakage across origins when a
+ * page fetches a cross-origin subresource or a redirect crosses hosts. */
+static void apply_auth(const browser_window *w, const char *url, sf_config *cfg) {
+    if (w->auth_host == NULL || w->auth_user == NULL || url == NULL) return;
+    char host[256];
+    if (rp_host_of(url, host, sizeof host) != 0) return;
+    if (strcmp(host, w->auth_host) != 0) return;
+    cfg->username = w->auth_user;
+    cfg->password = w->auth_pass;
+}
+
 /* Downgrade reasons reported by fetch_follow_navigable via *downgraded. */
 enum { DOWNGRADE_NONE = 0, DOWNGRADE_CLASSICAL_KE = 1, DOWNGRADE_ALLOWLISTED = 2 };
 
@@ -976,9 +997,12 @@ static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
     if (allowlisted) {
         sf_response_free(out);
         sf_policy saved = cfg->policy;
+        int saved_insecure = cfg->insecure;
         cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
+        cfg->insecure = 1;
         s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
         cfg->policy = saved;
+        cfg->insecure = saved_insecure;
         if (s == SF_OK) { *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
     }
     return s;
@@ -1008,9 +1032,12 @@ static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
     if (allowlisted) {
         sf_response_free(out);
         sf_policy saved = cfg->policy;
+        int saved_insecure = cfg->insecure;
         cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
+        cfg->insecure = 1;
         s = sf_post(url, cfg, body, body_len, content_type, out);
         cfg->policy = saved;
+        cfg->insecure = saved_insecure;
         if (s == SF_OK) { *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
     }
     return s;
@@ -1048,6 +1075,7 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     if (hb_check(w->hosts, host) == HB_BLOCK) return -1;   /* tracker/host blocklist */
 
     sf_config cfg = sf_config_default();
+    apply_auth(w, abs, &cfg);
     if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;  /* realm fail-closed */
     int allowlisted = hb_is_allowlisted(w->hosts, host), dg = 0;
     sf_response resp; memset(&resp, 0, sizeof resp);
@@ -1105,8 +1133,10 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
         return 0;
     }
 
-    if (have_host && browser_is_exception(&w->bs, host))
+    if (have_host && browser_is_exception(&w->bs, host)) {
         cfg->policy = SF_POLICY_PERMISSIVE;
+        cfg->insecure = 1;
+    }
 
     /* The user's sovereign override: a host explicitly on allow.conf may be navigated
      * below Freedom's standard (TLS 1.2, classical KE, weak cert) if strict fails. */
@@ -1114,6 +1144,9 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
 
     /* Socket-level anonymity routing (Tor/I2P). A .onion/.i2p host with its proxy
      * disabled is BLOCKED, never leaked over clearnet (fail closed). */
+    /* HTTP Basic Auth: inject credentials scoped to the request's origin host. */
+    apply_auth(w, url, cfg);
+
     nr_route route = apply_route(w, url, cfg);
     if (route == NR_ROUTE_BLOCKED) {
         nr_realm realm = nr_classify_url(url);
@@ -1150,6 +1183,8 @@ typedef struct fetch_job {
     int           allow_overlay_http;
     sf_policy     policy;
     int           allowlisted;
+    char         *username;      /* HTTP Basic Auth username (may be NULL) */
+    char         *password;      /* HTTP Basic Auth password (may be NULL) */
     void         *body;          /* POST body (owned), or NULL */
     size_t        body_len;
     char         *content_type;  /* POST content type (owned), or NULL */
@@ -1170,6 +1205,8 @@ static void fetch_job_free(fetch_job *j) {
     free(j->url);
     free(j->user_agent);
     free(j->proxy_address);
+    free(j->username);
+    free(j->password);
     free(j->body);
     free(j->content_type);
     free(j->html);
@@ -1191,6 +1228,8 @@ static void *fetch_thread(void *arg) {
     cfg.proxy_address = j->proxy_address;
     cfg.allow_overlay_http = j->allow_overlay_http;
     cfg.policy = j->policy;
+    cfg.username = j->username;
+    cfg.password = j->password;
 
     sf_response resp;
     memset(&resp, 0, sizeof resp);
@@ -1236,6 +1275,8 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
     j->url = strdup(url);
     j->user_agent = (cfg->user_agent != NULL) ? strdup(cfg->user_agent) : NULL;
     j->proxy_address = (cfg->proxy_address != NULL) ? strdup(cfg->proxy_address) : NULL;
+    j->username = (cfg->username != NULL) ? strdup(cfg->username) : NULL;
+    j->password = (cfg->password != NULL) ? strdup(cfg->password) : NULL;
     if (is_post) {
         j->content_type = (content_type != NULL) ? strdup(content_type) : NULL;
         if (body_len > 0) {
@@ -1317,6 +1358,7 @@ static void load_images(browser_window *w, tab *t) {
             sf_config cfg = sf_config_default();
             cfg.user_agent = tf_text(&w->ua_field);
             cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
+            apply_auth(w, abs, &cfg);
 
             /* Route the image like the page: a .onion/.i2p image with its proxy off is
              * skipped, never leaked over clearnet (fail closed). */
@@ -1558,11 +1600,39 @@ static void do_load(browser_window *w, const char *url) {
     }
 
     if (is_https_url(url) || is_overlay_http_url(url)) {
+        /* Extract HTTP Basic Auth credentials from the URL (https://user:pass@host/)
+         * before the pre-fetch gates: strip them from the URL and store in the window
+         * so they are available for subresource fetches (images, XHR) too. The cleaned
+         * URL (without userinfo) is what flows through the rest of the pipeline.
+         * The auth is scoped to the origin host so it never leaks cross-tab. */
+        char clean_url[SF_MAX_URL];
+        char *url_user = NULL, *url_pass = NULL;
+        url_status us = url_extract_userinfo(url, clean_url, sizeof clean_url,
+                                             &url_user, &url_pass);
+        const char *fetch_url = (us == URL_OK) ? clean_url : url;
+        char auth_host_buf[256];
+        int have_fetch_host = rp_host_of(fetch_url, auth_host_buf, sizeof auth_host_buf) == 0;
+        if (url_user != NULL) {
+            free(w->auth_user); w->auth_user = url_user;
+            free(w->auth_pass); w->auth_pass = url_pass;
+            if (have_fetch_host) {
+                free(w->auth_host);
+                w->auth_host = strdup(auth_host_buf);
+            }
+        } else if (have_fetch_host && w->auth_host != NULL
+                   && strcmp(auth_host_buf, w->auth_host) != 0) {
+            /* Navigation to a DIFFERENT host without userinfo: clear the previous
+             * auth so credentials do not persist cross-host. */
+            free(w->auth_host); w->auth_host = NULL;
+            free(w->auth_user); w->auth_user = NULL;
+            free(w->auth_pass); w->auth_pass = NULL;
+        }
+
         /* Pre-fetch gates (host filter, exception, allowlist, Tor/I2P route) are
          * shared with the POST path so the two can never diverge (Zero Trust). */
         sf_config cfg;
         fetch_prep pr;
-        if (!prepare_fetch(w, url, &cfg, &pr)) {
+        if (!prepare_fetch(w, fetch_url, &cfg, &pr)) {
             clear_doc(w);
             w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
             w->loading = 0;
@@ -1570,7 +1640,7 @@ static void do_load(browser_window *w, const char *url) {
             browser_set_page(&w->bs, NULL, pr.err, 1);
             return;
         }
-        if (!fetch_launch(w, url, &cfg, pr.allowlisted, 0, NULL, 0, NULL)) {
+        if (!fetch_launch(w, fetch_url, &cfg, pr.allowlisted, 0, NULL, 0, NULL)) {
             clear_doc(w);
             w->scroll = 0.0; w->loading = 0;
             set_cache(w, NULL, 0, NULL);
@@ -7229,6 +7299,8 @@ ui_status ui_run_browser(const char *start_url) {
     free(w.favorites);
     free(w.cur_html);
     free(w.cur_top);
+    free(w.auth_user);
+    free(w.auth_pass);
     browser_free(&w.bs);
 
     /* Release the process-wide font caches so a leak checker sees a clean exit.

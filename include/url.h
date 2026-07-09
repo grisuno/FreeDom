@@ -133,7 +133,21 @@ typedef struct url_parts {
  * points into url. */
 url_status url_split(const char *url, url_parts *out);
 
-/* Resolves a (relative or absolute) reference ref against a "file:///dir/page"
+/* Extracts HTTP Basic Auth credentials from a URL of the form
+ * "https://user:password@host/path..." or "https://user@host/path...".
+ * On success, writes the cleaned URL (without userinfo) into out, writes the
+ * username and password (owned, must be freed) into *username_out and
+ * *password_out, and returns URL_OK. When there is no userinfo ("@") in the
+ * URL, writes the original URL into out and sets *username_out = NULL,
+ * *password_out = NULL, and returns URL_OK (not an error: the absence of
+ * auth is the common case). When the URL is not absolute-https, the '@'
+ * appears before the scheme (impossible), or the buffer overflows, returns
+ * URL_ERR_NOT_HTTPS or URL_ERR_OVERFLOW. Pure: no I/O.
+ * username_out/password_out may be NULL (don't extract, just clean). */
+url_status url_extract_userinfo(const char *url, char *out, size_t outsz,
+                                char **username_out, char **password_out);
+
+/* Resolves a (relative or absolute) absolute reference ref against a "file:///dir/page"
  * base into out as a canonical "file:///..." URL. Security-critical and
  * fail-closed: the result is CONFINED to base's own directory subtree — a "../"
  * escape, an absolute path outside it, a scheme-relative ("//..") or any non-file

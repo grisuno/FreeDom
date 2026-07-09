@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <cmocka.h>
@@ -455,6 +456,120 @@ static void test_split_ipv6_literal_with_port(void **state) {
     assert_span(u.pathname, u.pathname_len, "/p");
 }
 
+/* --- url_extract_userinfo --- */
+
+static void test_extract_userinfo_basic(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = NULL, *pass = NULL;
+    url_status us = url_extract_userinfo("https://test:1234@httpbin.org/basic-auth/test/1234",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "https://httpbin.org/basic-auth/test/1234");
+    assert_string_equal(user, "test");
+    assert_string_equal(pass, "1234");
+    free(user); free(pass);
+}
+
+static void test_extract_userinfo_user_only(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = NULL, *pass = NULL;
+    url_status us = url_extract_userinfo("https://alice@example.com/",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "https://example.com/");
+    assert_string_equal(user, "alice");
+    assert_string_equal(pass, "");
+    free(user); free(pass);
+}
+
+static void test_extract_userinfo_no_userinfo(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = (char*)0xdead, *pass = (char*)0xdead; /* must be set to NULL */
+    url_status us = url_extract_userinfo("https://example.com/path",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "https://example.com/path");
+    assert_ptr_equal(user, NULL);
+    assert_ptr_equal(pass, NULL);
+}
+
+static void test_extract_userinfo_non_https_passthrough(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = (char*)0xdead, *pass = (char*)0xdead;
+    url_status us = url_extract_userinfo("http://user:pass@example.com/",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "http://user:pass@example.com/");
+    assert_ptr_equal(user, NULL);
+    assert_ptr_equal(pass, NULL);
+}
+
+static void test_extract_userinfo_https_subresource_no_auth(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = (char*)0xdead, *pass = (char*)0xdead;
+    /* For a sub-resource fetch the URL has no userinfo */
+    url_status us = url_extract_userinfo("https://httpbin.org/image/png",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "https://httpbin.org/image/png");
+    assert_ptr_equal(user, NULL);
+    assert_ptr_equal(pass, NULL);
+}
+
+static void test_extract_userinfo_nulls(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = NULL;
+    assert_int_equal(url_extract_userinfo(NULL, out, sizeof out, &user, NULL), URL_ERR_NULL_ARG);
+    assert_int_equal(url_extract_userinfo("https://x/", NULL, sizeof out, &user, NULL), URL_ERR_NULL_ARG);
+    assert_int_equal(url_extract_userinfo("https://x/", out, 0, &user, NULL), URL_ERR_NULL_ARG);
+    assert_int_equal(url_extract_userinfo("https://x/", out, sizeof out, NULL, NULL), URL_OK);
+}
+
+static void test_extract_userinfo_at_authority_start(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = (char*)0xdead, *pass = (char*)0xdead;
+    /* "@" at start of authority is not valid userinfo — pass through unchanged. */
+    url_status us = url_extract_userinfo("https://@example.com/",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "https://@example.com/");
+    assert_ptr_equal(user, NULL);
+    assert_ptr_equal(pass, NULL);
+}
+
+static void test_extract_userinfo_no_at_sign(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = (char*)0xdead, *pass = (char*)0xdead;
+    /* No '@' at all: pass through. */
+    url_status us = url_extract_userinfo("https://example.com:8443/admin",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "https://example.com:8443/admin");
+    assert_ptr_equal(user, NULL);
+    assert_ptr_equal(pass, NULL);
+}
+
+static void test_extract_userinfo_empty_password(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    char *user = NULL, *pass = NULL;
+    url_status us = url_extract_userinfo("https://user:@host/",
+                                         out, sizeof out, &user, &pass);
+    assert_int_equal(us, URL_OK);
+    assert_string_equal(out, "https://host/");
+    assert_string_equal(user, "user");
+    assert_string_equal(pass, "");
+    free(user); free(pass);
+}
+
 static void test_split_fail_closed_non_https(void **state) {
     (void)state;
     url_parts u;
@@ -500,5 +615,18 @@ int main(void) {
         cmocka_unit_test(test_split_ipv6_literal_with_port),
         cmocka_unit_test(test_split_fail_closed_non_https),
     };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+    const struct CMUnitTest extract_tests[] = {
+        cmocka_unit_test(test_extract_userinfo_basic),
+        cmocka_unit_test(test_extract_userinfo_user_only),
+        cmocka_unit_test(test_extract_userinfo_no_userinfo),
+        cmocka_unit_test(test_extract_userinfo_non_https_passthrough),
+        cmocka_unit_test(test_extract_userinfo_https_subresource_no_auth),
+        cmocka_unit_test(test_extract_userinfo_nulls),
+        cmocka_unit_test(test_extract_userinfo_at_authority_start),
+        cmocka_unit_test(test_extract_userinfo_no_at_sign),
+        cmocka_unit_test(test_extract_userinfo_empty_password),
+    };
+    int r1 = cmocka_run_group_tests(tests, NULL, NULL);
+    int r2 = cmocka_run_group_tests(extract_tests, NULL, NULL);
+    return r1 || r2;
 }

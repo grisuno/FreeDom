@@ -83,6 +83,9 @@ typedef struct sf_config {
     int allow_overlay_http;     /* allow plain http:// (no TLS) -- ONLY for overlay realms
                                  * (.onion/.i2p) routed through their proxy, where the overlay
                                  * itself encrypts and authenticates. Never set for clearnet. */
+    const char *username;       /* HTTP Basic Auth username (NULL/"" => no auth) */
+    const char *password;       /* HTTP Basic Auth password (ignored when username is NULL/empty) */
+    int         insecure;       /* skip TLS cert verification (self-signed/dev); default 0 */
 } sf_config;
 
 typedef struct sf_response {

@@ -73,6 +73,9 @@ sf_config sf_config_default(void) {
     c.proxy_type = SF_PROXY_NONE; /* direct by default; Tor/I2P is opt-in */
     c.proxy_address = NULL;
     c.allow_overlay_http = 0;     /* https-only unless an overlay realm opts in */
+    c.username = NULL;
+    c.password = NULL;
+    c.insecure = 0;
     return c;
 }
 
@@ -587,8 +590,13 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     curl_easy_setopt(curl, CURLOPT_SSLVERSION,
                      (long)(sslmin | CURL_SSLVERSION_MAX_TLSv1_3));
     curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, local.kex_groups);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+    if (local.insecure) {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+    }
     /* https only, except an overlay request that also allows plain http. */
     const char *protos = local.allow_overlay_http ? "http,https" : "https";
     curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, protos);
@@ -596,6 +604,20 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, local.timeout_ms);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, sf_user_agent_or_default(local.user_agent));
+    /* HTTP Basic Authentication. When username is set, build a "user:pass" string
+     * and hand it to curl, which sends an Authorization: Basic header preemptively
+     * and on any 401 challenge. Curl automatically strips the header on cross-host
+     * redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
+     * different origin. */
+    if (local.username != NULL && local.username[0] != '\0') {
+        char userpwd[512];
+        const char *pw = (local.password != NULL) ? local.password : "";
+        int upn = snprintf(userpwd, sizeof userpwd, "%s:%s", local.username, pw);
+        if (upn > 0 && (size_t)upn < sizeof userpwd) {
+            curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd);
+            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_BASIC);
+        }
+    }
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
@@ -632,10 +654,15 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
 
     /* The negotiated TLS state was snapshotted during the transfer. */
     if (ctx.cap.have) {
-        /* A TLS connection: enforce the full TLS/PQ/chain policy. */
-        sf_chain_info *chain_ptr = ctx.cap.chain_ok ? &ctx.cap.chain : NULL;
-        result = sf_enforce_policy(ctx.cap.version, ctx.cap.group, chain_ptr, local.policy);
-        if (result != SF_OK) goto done;
+        /* A TLS connection: enforce the full TLS/PQ/chain policy. When the user
+         * explicitly opted into insecure mode (--insecure / allowlist / per-session
+         * exception), skip the policy check -- VERIFYPEER is off so there is no
+         * meaningful chain to inspect, and the user is taking the risk. */
+        if (!local.insecure) {
+            sf_chain_info *chain_ptr = ctx.cap.chain_ok ? &ctx.cap.chain : NULL;
+            result = sf_enforce_policy(ctx.cap.version, ctx.cap.group, chain_ptr, local.policy);
+            if (result != SF_OK) goto done;
+        }
     } else if (!local.allow_overlay_http) {
         /* No TLS captured and this was not an accepted plain-http overlay request:
          * fail closed (an https response we could not inspect is never trusted). */
