@@ -3736,6 +3736,97 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
     }
 }
 
+/* Max overflow:hidden nesting depth (anti-DoS). */
+#define OV_MAX_DEPTH 16
+
+/* Returns nonzero if a box clips content on either axis. */
+static int ov_box_clips(const pv_box_def *d) {
+    if (d == NULL) return 0;
+    return (d->overflow_x != CSS_OF_VISIBLE && d->overflow_x != CSS_OF_UNSET)
+        || (d->overflow_y != CSS_OF_VISIBLE && d->overflow_y != CSS_OF_UNSET);
+}
+
+/* Walks the ancestor chain of block_id and collects overflow:hidden box IDs
+ * into out[] (outermost first). Returns count, limited to OV_MAX_DEPTH. */
+static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap) {
+    int tmp[OV_MAX_DEPTH], n = 0;
+    for (int id = block_id; id >= 0 && n < cap; ) {
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        if (d == NULL) break;
+        if (ov_box_clips(d)) tmp[n++] = id;
+        id = d->parent_id;
+    }
+    /* tmp is innermost..outermost; reverse to outermost..innermost */
+    for (int i = 0; i < n; ++i) out[i] = tmp[n - 1 - i];
+    return n;
+}
+
+/* Looks up an rc_box by block_id. */
+static const rc_box *ov_find_box(const rc_layout *L, int bid) {
+    for (size_t i = 0; i < L->nbox; ++i)
+        if (L->boxes[i].block_id == bid) return &L->boxes[i];
+    return NULL;
+}
+
+/* Computes the padding-box content rect (in page coords: y, x, w, h) for a box.
+ * Used as the clip region for overflow:hidden children. */
+static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
+                            double origin, double left, double *oy, double *ox,
+                            double *ow, double *oh) {
+    double bl = box_edge_px(d->bord_lw), br = box_edge_px(d->bord_rw);
+    double bt = box_edge_px(d->bord_tw), bb = box_edge_px(d->bord_bw);
+    double pl = (d->pad_l > 0) ? d->pad_l : 0.0;
+    double pr = (d->pad_r > 0) ? d->pad_r : 0.0;
+    double pt = (d->pad_t > 0) ? d->pad_t : 0.0;
+    double pb = (d->pad_b > 0) ? d->pad_b : 0.0;
+    *oy = origin + bx->top + bt + pt;
+    *ox = left   + bx->x   + bl + pl;
+    double cw = bx->w - bl - br - pl - pr;
+    double ch = bx->h - bt - bb - pt - pb;
+    *ow = (cw >= 1.0) ? cw : 1.0;
+    *oh = (ch >= 1.0) ? ch : 1.0;
+}
+
+/* Reconciles the cairo overflow clip stack: pops clips that are no longer
+ * ancestors of block_id (common-prefix rule), pushes clips for new overflow:
+ * hidden ancestors that aren't on the stack yet, outermost first. clip_stack
+ * stores block_id of each active overflow:hidden box. */
+static void ov_reconcile(cairo_t *cr, int *clip_stack, int *clip_depth,
+                         const rd_doc *doc, int block_id,
+                         const rc_layout *L, double origin, double left) {
+    int new_chain[OV_MAX_DEPTH];
+    int new_depth = ov_collect_chain(doc, block_id, new_chain, OV_MAX_DEPTH);
+
+    /* Find common prefix (the outer boxes that are still ancestors of the new
+     * block_id and match the current stack). */
+    int common = 0;
+    while (common < *clip_depth && common < new_depth &&
+           clip_stack[common] == new_chain[common])
+        ++common;
+
+    /* Pop clips that are no longer on the common prefix (innermost first). */
+    while (*clip_depth > common) {
+        cairo_restore(cr);
+        (*clip_depth)--;
+    }
+
+    /* Push new clips (outermost first). Each entry in new_chain beyond the
+     * common prefix needs a cairo_save + rectangle clip. */
+    for (int k = common; k < new_depth; ++k) {
+        const rc_box *bx = ov_find_box(L, new_chain[k]);
+        if (bx == NULL) continue;  /* no rc_box (positioned?); clip not possible */
+        const pv_box_def *d = rd_box_at(doc, (size_t)new_chain[k]);
+        if (d == NULL) continue;
+        double cy, cx, cw, ch;
+        ov_content_rect(bx, d, origin, left, &cy, &cx, &cw, &ch);
+        cairo_save(cr);
+        cairo_rectangle(cr, cx, cy, cw, ch);
+        cairo_clip(cr);
+        clip_stack[*clip_depth] = new_chain[k];
+        (*clip_depth)++;
+    }
+}
+
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
@@ -3753,7 +3844,13 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (w->scroll > max_scroll) w->scroll = max_scroll;
     double origin = content_top + th->content_margin - w->scroll;
 
-    /* Box decoration first, so borders/backgrounds/shadows sit behind the rows. */
+    /* Overflow clip state: stores block_id of each active overflow:hidden box
+     * whose content rect is applied as a cairo clip. clip_depth = number of
+     * active saves. Box decorations (borders/bg/shadow) are NOT clipped —
+     * CSS paints those outside the padding box; children are clipped inside. */
+    int ov_stack[OV_MAX_DEPTH] = {0};
+    int ov_depth = 0;
+
     for (size_t i = 0; i < L.nbox; ++i) {
         const rc_box *bx = &L.boxes[i];
         double by = origin + bx->top;
@@ -3762,10 +3859,17 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     }
     for (size_t i = 0; i < L.nrow; ++i) {
         const rc_row *r = &L.rows[i];
+        /* Each row is clipped to the innermost overflow:hidden ancestor's
+         * padding-box (the content rect where children paint). */
+        int row_bid = (r->blk != NULL) ? (int)r->blk->block_id : -1;
+        ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L, origin, left);
         double ry = origin + r->top;
         if (ry + r->height < content_top || ry > content_top + content_h) continue;
         paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
     }
+    /* Pop all overflow clips before painting positioned boxes (which may call
+     * ov_reconcile with their own block_id context). */
+    while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     /* Stage 2: out-of-flow positioned boxes on top of in-flow content, in stacking
      * order (z_index ASC). Negative z_index is skipped in v1 (a two-pass painter
      * would be needed to paint behind in-flow). The resolved rect is viewport-
@@ -3910,6 +4014,11 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                 double box_oy = PDF_MARGIN + yof[k] - L.rows[k].top;
                 paint_box_decoration(cr, bx, PDF_MARGIN, box_oy);
             }
+            /* Note: overflow:hidden clipping is NOT applied to the PDF export in v1
+             * because PDF pagination uses per-page Y offsets (yof[i]) and per-box
+             * first-row anchors (box_oy above), which would need per-box clip-rect
+             * recalculation at each page boundary. The on-screen (paint_structured)
+             * and PNG (write_doc_png) paths DO honour overflow:hidden. */
             for (size_t i = 0; i < L.nrow; ++i) {
                 if ((size_t)pageof[i] != p) continue;
                 paint_content_row(cr, w, &L, &L.rows[i], PDF_MARGIN,
@@ -4079,15 +4188,18 @@ static long write_doc_png(browser_window *w, const char *path) {
      * (no pagination): both use PNG_MARGIN + their layout-space top. */
     for (size_t bi = 0; bi < L.nbox; ++bi)
         paint_box_decoration(cr, &L.boxes[bi], PNG_MARGIN, PNG_MARGIN);
-    for (size_t i = 0; i < L.nrow; ++i) {
-        const rc_row *r = &L.rows[i];
-        paint_content_row(cr, w, &L, r, PNG_MARGIN,
-                          PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
-    }
-    for (size_t i = 0; i < L.nrow; ++i) {
-        const rc_row *r = &L.rows[i];
-        paint_content_row(cr, w, &L, r, PNG_MARGIN,
-                          PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
+    {
+        int ov_stack[OV_MAX_DEPTH] = {0};
+        int ov_depth = 0;
+        for (size_t i = 0; i < L.nrow; ++i) {
+            const rc_row *r = &L.rows[i];
+            int row_bid = (r->blk != NULL) ? (int)r->blk->block_id : -1;
+            ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L,
+                         PNG_MARGIN, PNG_MARGIN);
+            paint_content_row(cr, w, &L, r, PNG_MARGIN,
+                              PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
+        }
+        while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     }
     /* Stage 2: out-of-flow positioned boxes (same pattern as the on-screen and
      * PDF paths). z_index < 0 skipped in v1. */

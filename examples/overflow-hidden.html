@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Overflow hidden test</title>
+<style>
+  .clip-box {
+    overflow: hidden;
+    width: 300px;
+    height: 120px;
+    background: #e0f0ff;
+    border: 2px solid #0066cc;
+    padding: 8px;
+    margin: 16px;
+  }
+  .wide {
+    width: 500px;
+    background: #ffcccc;
+    border: 1px solid red;
+    padding: 4px;
+    margin: 4px 0;
+  }
+  .tall {
+    height: 200px;
+    background: #ccffcc;
+    border: 1px solid green;
+    padding: 4px;
+    margin: 4px 0;
+  }
+  .no-clip {
+    width: 300px;
+    height: 120px;
+    background: #ffe0e0;
+    border: 2px solid #cc0000;
+    padding: 8px;
+    margin: 16px;
+  }
+  .inner-box {
+    border: 2px dashed #666;
+    padding: 4px;
+    margin: 8px;
+  }
+</style></head>
+<body>
+<h2>Overflow:hidden test</h2>
+
+<div class="clip-box">
+  <p>This box has overflow:hidden + width:300px + height:120px.</p>
+  <div class="wide">This div is 500px wide (wider than parent) — should be CLIPPED on the right.</div>
+  <div class="tall">This div is 200px tall (taller than parent) — should be CLIPPED at the bottom.</div>
+  <p>This paragraph is inside the clipped area — the green box above should NOT extend past the blue border bottom.</p>
+</div>
+
+<div class="no-clip">
+  <p>This box has NO overflow:hidden — same 300x120 size.</p>
+  <div class="wide">This 500px div OVERFLOWS visibly to the right.</div>
+  <div class="tall">This 200px div OVERFLOWS visibly at the bottom.</div>
+</div>
+
+<h3>Nested test with overflow:hidden on outer only</h3>
+<div class="clip-box" style="height:160px">
+  <p>Outer: overflow:hidden, 300x160</p>
+  <div class="inner-box" style="margin-left:280px; width:200px; background:#fff0e0">
+    This inner box starts at x=280, is 200px wide = goes past 300px border → CLIPPED
+  </div>
+  <div style="margin-top:140px; background:#e0ffe0; padding:4px;">
+    This box is at y=140+ in a 160px tall parent → bottom part CLIPPED
+  </div>
+</div>
+
+</body></html>
