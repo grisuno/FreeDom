@@ -80,6 +80,13 @@ int rp_host_of(const char *url, char *out, size_t out_size) {
     if (p == NULL) return -1;
     p += 3;
 
+    /* Skip past userinfo (user:password@) if present, so the first colon
+     * that terminates the host scan is not the one in the credentials. */
+    const char *at;
+    for (at = p; *at != '\0' && *at != '/' && *at != '?' && *at != '#'; ++at) {
+        if (*at == '@') { p = at + 1; break; }
+    }
+
     size_t n = 0;
     while (p[n] != '\0' && p[n] != '/' && p[n] != ':' &&
            p[n] != '?' && p[n] != '#') {

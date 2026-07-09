@@ -7106,7 +7106,14 @@ ui_status ui_run_browser(const char *start_url) {
     if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
 
     if (start_url != NULL) {
-        browser_navigate(&w.bs, start_url);
+        /* Strip userinfo (user:password@) before storing in history so
+         * credentials never leak into the URL bar or the history list. */
+        char clean_url[SF_MAX_URL];
+        if (url_extract_userinfo(start_url, clean_url, sizeof clean_url,
+                                 NULL, NULL) == URL_OK)
+            browser_navigate(&w.bs, clean_url);
+        else
+            browser_navigate(&w.bs, start_url);
     }
 
     w.xkb_ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
