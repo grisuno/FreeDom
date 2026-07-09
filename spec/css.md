@@ -20,6 +20,17 @@ and is not gated (doctrine: "Layout != estilo de autor").
   it never fetches. So author CSS can never trigger a network fetch or a tracking beacon.
 - **Bounded (anti-DoS).** Rules, selectors and declarations are capped; over-long
   tokens are ignored. A pathological stylesheet cannot exhaust memory or time.
+  `CSS_MAX_RULES`/`CSS_MAX_SELS`/`CSS_MAX_DECLS` (css.c) were raised 16x
+  (384/512/2048 → 6144/8192/32768) on 2026-07-09 after a real vendored, minified
+  Bootstrap 4.5.2 stylesheet (~2100 rules) showed the old `CSS_MAX_RULES` silently
+  dropping essentially every utility class past rule #384 — the symptom was "the
+  whole page ignores `.bg-dark`/`.text-success`/etc." with no error anywhere,
+  since truncation here is deliberate and silent. Still a hard, finite cap (a
+  hostile sheet is still bounded), just sized for one real component-library
+  stylesheet instead of a toy one. Paired with `pv_style_cache` in page_view.c
+  (memoizes `cch_element_style()` per element pointer, since a shared ancestor is
+  otherwise re-resolved once per descendant) so the larger cap does not multiply
+  page_view's runtime by every text node on the page.
 - **Fail closed.** An unparseable selector or declaration is dropped, never
   guessed. Unknown properties and values are ignored.
 - **No execution.** `expression()` and JS URLs are not evaluated (treated as

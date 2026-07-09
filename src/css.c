@@ -15,10 +15,25 @@
 
 /* Bounds (anti-DoS). A stylesheet beyond these is truncated, never unbounded.
  * CSS_TOK_MAX / CSS_MAX_CLASSES_PER_SEL live in css_select.h (shared with the
- * selector engine). */
-#define CSS_MAX_SELS            512u
-#define CSS_MAX_DECLS           2048u
-#define CSS_MAX_RULES           384u
+ * selector engine).
+ *
+ * These were 512/2048/384 until a real-world audit (a single vendored, minified
+ * Bootstrap 4.5.2 stylesheet -- ~2100 rules, ~3600 individual selectors once
+ * comma groups are split, ~2100 declarations) showed CSS_MAX_RULES silently
+ * dropping essentially every utility class (.bg-dark, .text-success, ...): they
+ * sit near the end of a real compiled stylesheet, past rule #384, so the visible
+ * symptom was "the whole page ignores your background/text-color classes" with
+ * no error anywhere (truncation here is deliberately silent -- see parse_block's
+ * "leave decls; harmless, unreferenced" comment). Raised 16x to comfortably fit
+ * one real component-library stylesheet plus a handful of smaller ones (this is
+ * still a hard, finite cap -- a hostile/pathological sheet is still bounded, just
+ * at a size that matches real pages instead of a toy one). Paired with the
+ * per-element style cache in page_view.c's pv_style_cache: with the cascade now
+ * O(nsels) per unique element instead of per (element, ancestor-visit) pair,
+ * a bigger nsels does not multiply page_view's runtime by every text node. */
+#define CSS_MAX_SELS            8192u
+#define CSS_MAX_DECLS           32768u
+#define CSS_MAX_RULES           6144u
 #define CSS_SELS_PER_GROUP      32
 #define CSS_INLINE_DECLS        64u
 #define CSS_INLINE_SPEC         (1 << 20)

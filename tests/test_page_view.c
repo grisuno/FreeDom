@@ -1865,6 +1865,30 @@ static void test_build_style_sheet_color(void **state) {
     hp_document_free(doc);
 }
 
+/* Regression for pv_style_cache (page_view.c): resolve_context()/in_hidden_subtree()
+ * now memoize cch_element_style() per element pointer so a shared ancestor (here
+ * .wrap, walked once per sibling) is resolved once instead of once per descendant.
+ * A cache keyed or indexed wrong would leak one sibling's resolved style onto
+ * another; each must keep resolving its OWN class's color. */
+static void test_build_style_cache_distinct_siblings(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>"
+        ".wrap{color:#000000}"
+        ".a{color:#111111} .b{color:#222222} .c{color:#333333}"
+        "</style>"
+        "<div class='wrap'>"
+        "<p class='a'>alpha</p><p class='b'>bravo</p><p class='c'>charlie</p>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_int_equal(find_text(v, "alpha")->fg_rgb, 0x111111);
+    assert_int_equal(find_text(v, "bravo")->fg_rgb, 0x222222);
+    assert_int_equal(find_text(v, "charlie")->fg_rgb, 0x333333);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* @media(prefers-color-scheme: dark) in a <style> applies only when pv_build_full is
  * told the user prefers dark (auto dark mode threaded through to the css module). */
 static void test_build_prefers_color_scheme(void **state) {
@@ -2203,6 +2227,7 @@ int main(void) {
         cmocka_unit_test(test_build_control_without_form),
         cmocka_unit_test(test_build_two_forms_distinct_groups),
         cmocka_unit_test(test_build_style_sheet_color),
+        cmocka_unit_test(test_build_style_cache_distinct_siblings),
         cmocka_unit_test(test_build_attr_selectors_and_important),
         cmocka_unit_test(test_build_pseudo_classes_and_siblings),
         cmocka_unit_test(test_build_table_cell_author_styles),

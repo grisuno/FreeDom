@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <cmocka.h>
@@ -1112,6 +1113,36 @@ static void test_cascade_specificity(void **state) {
     css_free(sh);
 }
 
+/* Regression: CSS_MAX_RULES/CSS_MAX_SELS/CSS_MAX_DECLS used to be 384/512/2048.
+ * A real, vendored, minified Bootstrap 4.5.2 stylesheet has ~2100 rules; every
+ * rule past #384 (in practice: essentially all of its utility classes, which are
+ * generated last) was silently dropped, so ".bg-dark"/".text-success" and friends
+ * never matched anything -- with no error anywhere, since the drop is deliberately
+ * silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
+ * the OLD cap and well under the current one. */
+static void test_large_stylesheet_rules_beyond_old_cap(void **state) {
+    (void)state;
+    size_t bufsz = 64 * 1024;
+    char *buf = (char *)malloc(bufsz);
+    assert_non_null(buf);
+    size_t off = 0;
+    for (int i = 0; i < 500; ++i) {
+        int n = snprintf(buf + off, bufsz - off, ".f%d{color:#%06x}", i, (unsigned)i);
+        assert_true(n > 0);
+        off += (size_t)n;
+    }
+    int n = snprintf(buf + off, bufsz - off, ".target{color:#123456}");
+    assert_true(n > 0);
+    off += (size_t)n;
+
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(buf, off, &sh), CSS_OK);
+    const char *cl[] = { "target" };
+    assert_int_equal(css_resolve(sh, "div", NULL, cl, 1, NULL, 0).color, 0x123456);
+    css_free(sh);
+    free(buf);
+}
+
 static void test_cascade_document_order(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -1887,6 +1918,7 @@ int main(void) {
         cmocka_unit_test(test_important_inline_beats_sheet_important),
         cmocka_unit_test(test_important_in_shorthand),
         cmocka_unit_test(test_cascade_specificity),
+        cmocka_unit_test(test_large_stylesheet_rules_beyond_old_cap),
         cmocka_unit_test(test_cascade_document_order),
         cmocka_unit_test(test_cascade_inline_wins),
         cmocka_unit_test(test_at_rules_skipped),

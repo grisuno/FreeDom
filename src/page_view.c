@@ -845,6 +845,71 @@ static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style
     return (int)id;
 }
 
+/* Per-document memo of cch_element_style() results, keyed by element pointer.
+ * resolve_context()/in_hidden_subtree() call cch_element_style once per ANCESTOR
+ * on every walk from a node up to `base`; a common ancestor (e.g. <body>, a
+ * wrapper <div>) is revisited once per descendant text/element node, and each
+ * revisit re-runs the full O(nsels) cascade from scratch. On a page with a real
+ * stylesheet (hundreds to thousands of selectors -- see css.c's CSS_MAX_* caps)
+ * that redundant work dominates page_view's runtime. The cache trades it for one
+ * cascade per unique element plus a linear scan (bounded by the document's own
+ * element count, normally far smaller than the selector count). Grows like
+ * pv_node_map: a dynamic array, doubling, degrading to "no cache" (not a crash)
+ * on OOM. */
+typedef struct pv_style_cache {
+    const lxb_dom_node_t **node;
+    css_style             *style;
+    size_t                 count, cap;
+} pv_style_cache;
+
+static int pv_style_cache_init(pv_style_cache *c) {
+    c->cap = 64;
+    c->node = (const lxb_dom_node_t **)malloc(c->cap * sizeof *c->node);
+    c->style = (css_style *)malloc(c->cap * sizeof *c->style);
+    if (c->node == NULL || c->style == NULL) {
+        free(c->node); free(c->style);
+        c->node = NULL; c->style = NULL; c->cap = 0;
+        return -1;
+    }
+    c->count = 0;
+    return 0;
+}
+
+static void pv_style_cache_free(pv_style_cache *c) {
+    free(c->node); free(c->style);
+    c->node = NULL; c->style = NULL; c->count = c->cap = 0;
+}
+
+/* cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init,
+ * or a caller that opts out) simply calls through uncached -- never a hard
+ * failure, matching every other degrade-on-OOM path in this module. */
+static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
+                                      pv_style_cache *cache) {
+    const lxb_dom_node_t *node = (const lxb_dom_node_t *)el;
+    if (cache != NULL) {
+        for (size_t i = 0; i < cache->count; ++i)
+            if (cache->node[i] == node) return cache->style[i];
+    }
+    css_style cs = cch_element_style(el, sheet);
+    if (cache != NULL) {
+        if (cache->count == cache->cap) {
+            size_t ncap = cache->cap * 2;
+            const lxb_dom_node_t **nn =
+                (const lxb_dom_node_t **)realloc(cache->node, ncap * sizeof *nn);
+            if (nn != NULL) cache->node = nn;
+            css_style *ns = (css_style *)realloc(cache->style, ncap * sizeof *ns);
+            if (ns != NULL) cache->style = ns;
+            if (nn != NULL && ns != NULL) cache->cap = ncap;
+        }
+        if (cache->count < cache->cap) {
+            cache->node[cache->count] = node;
+            cache->style[cache->count] = cs;
+            ++cache->count;
+        }
+    }
+    return cs;
+}
+
 /* Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify.
  * Unset / start / unknown all fall to FX_JUSTIFY_START (the default). */
 static int css_to_fx_justify(css_justify j) {
@@ -893,7 +958,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
                             pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box,
                             pv_text_ext *ext, pv_box_reg *box_reg,
-                            pv_container_reg *float_reg, int *block_id_out) {
+                            pv_container_reg *float_reg, int *block_id_out,
+                            pv_style_cache *style_cache) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
     *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
     *deco = -1;
@@ -934,7 +1000,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
             lxb_tag_id_t t = lxb_dom_element_tag_id(el);
-            css_style cs = cch_element_style(el, sheet);
+            css_style cs = cached_element_style(el, sheet, style_cache);
             pv_text_ext_merge(ext, &cs);
 
             if (is_bold_tag(t)) tag_bold = 1;
@@ -1560,11 +1626,11 @@ static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen) {
  * or its inline style=). display:none is structural visibility, applied regardless
  * of caps.css (hidden content stays hidden, like the JS-off display:none caveat). */
 static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-                             const css_sheet *sheet) {
+                             const css_sheet *sheet, pv_style_cache *style_cache) {
     for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
-            if (cch_element_style(el, sheet).display == CSS_DISP_NONE) return 1;
+            if (cached_element_style(el, sheet, style_cache).display == CSS_DISP_NONE) return 1;
         }
         if (p == base) break;
     }
@@ -1663,6 +1729,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     pv_flow_reg flowreg = { { NULL }, { 0 }, 0 };  /* per-table flow-vs-grid decisions */
     pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
     int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
+    pv_style_cache cache;  /* memoized cch_element_style() per element (see above) */
+    (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
@@ -1687,7 +1755,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
                 && !in_skipped_subtree(n, base, js_enabled)
                 && !in_collected_cell(n, base, &flowreg)
-                && !in_hidden_subtree(n, base, sheet)
+                && !in_hidden_subtree(n, base, sheet, &cache)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 const lxb_dom_node_t *table = nearest_table(n, base);
                 if (cell_has_nested_table(n) || flow_table(&flowreg, table)) {
@@ -1758,7 +1826,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &calign, &cfs, &clh, &cdeco,
                                 &cu_li, &cu_depth, &cu_ordered,
                                 &reg, &cu_cont, &cu_box, &cext,
-                                &box_reg, &float_reg, &cu_bdeco);
+                                &box_reg, &float_reg, &cu_bdeco, &cache);
 
                 /* An empty cell still occupies its column. */
                 pv_status st = pv_append(v, (cell_href != NULL) ? PV_LINK : PV_TEXT,
@@ -1789,7 +1857,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
 
             if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON)
                 && !in_skipped_subtree(n, base, js_enabled)
-                && !in_hidden_subtree(n, base, sheet)
+                && !in_hidden_subtree(n, base, sheet, &cache)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
 
@@ -1809,7 +1877,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &unused_ext,
-                                &box_reg, &float_reg, &unused_bdeco);
+                                &box_reg, &float_reg, &unused_bdeco, &cache);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1833,7 +1901,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             }
 
             if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)
-                && !in_hidden_subtree(n, base, sheet)
+                && !in_hidden_subtree(n, base, sheet, &cache)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 size_t sl = 0;
@@ -1868,7 +1936,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &unused_ext,
-                                &box_reg, &float_reg, &unused_bdeco);
+                                &box_reg, &float_reg, &unused_bdeco, &cache);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -1889,7 +1957,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
         if (in_skipped_subtree(n, base, js_enabled)) continue;
         if (in_collected_cell(n, base, &flowreg)) continue; /* emitted as a collected cell run */
-        if (in_hidden_subtree(n, base, sheet)) continue; /* display:none */
+        if (in_hidden_subtree(n, base, sheet, &cache)) continue; /* display:none */
         if (reader && in_boilerplate_subtree(n, base)) continue; /* distraction-free */
 
         lxb_dom_text_t *txt = lxb_dom_interface_text(n);
@@ -1915,7 +1983,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
                         &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
                         &li, &list_depth, &ordered, &reg, &cont, &box, &ext,
-                        &box_reg, &float_reg, &bdeco);
+                        &box_reg, &float_reg, &bdeco, &cache);
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -2005,12 +2073,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     forms_free(&forms);
     css_free(sheet);
     pv_node_map_free(&node_map);
+    pv_style_cache_free(&cache);
     return PV_OK;
 
 cleanup:
     forms_free(&forms);
     css_free(sheet);
     pv_node_map_free(&node_map);
+    pv_style_cache_free(&cache);
     pv_free(v);
     return rc;
 }
