@@ -7,7 +7,9 @@
 
 From the creators of LazyOwn Redteam Framework comes a free and open-source minimal web browser written in C, focused on Zero Trust and Zero Knowledge principles.
 
-## Quick Start (Recommended)
+## Quick Start
+
+### Join the rebellion
 
 **Easiest way to try FreeDom right now:**
 
