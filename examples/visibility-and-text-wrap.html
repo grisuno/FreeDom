@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-size: 18px; }
+  .marker { background: #ffdd88; padding: 4px; }
+  .hidden { visibility: hidden; background: #ff0000; }
+  .box { border: 1px solid #333333; padding: 8px; width: 220px; }
+  .breakall { word-break: break-all; }
+  .normal { word-break: normal; }
+  .ellipsis { white-space: nowrap; text-overflow: ellipsis; overflow-x: hidden; }
+  .clickable { cursor: pointer; background: #dddddd; padding: 4px; }
+</style>
+</head>
+<body>
+  <h1>visibility / word-break / text-overflow / cursor</h1>
+
+  <h2>visibility: hidden reserves space, display:none does not</h2>
+  <p class="marker">before</p>
+  <p class="hidden">This paragraph is visibility:hidden (should NOT be visible, but its line still takes vertical space).</p>
+  <p class="marker">after (a gap should separate this from "before")</p>
+
+  <h2>word-break: break-all splits an unbreakable long word</h2>
+  <div class="box breakall">
+    ThisIsOneVeryLongUnbreakableWordThatWouldOtherwiseOverflowTheBoxEdgeWithoutWrapping
+  </div>
+  <div class="box normal">
+    ThisIsOneVeryLongUnbreakableWordThatWouldOtherwiseOverflowTheBoxEdgeWithoutWrapping
+  </div>
+
+  <h2>text-overflow: ellipsis truncates a nowrap line</h2>
+  <div class="box ellipsis">This line of text is much too long to fit in the box so it should truncate with an ellipsis</div>
+
+  <h2>cursor: pointer (not visible in a static PNG; verified via --dump-dom)</h2>
+  <div class="clickable">A non-link element styled with cursor:pointer</div>
+</body>
+</html>

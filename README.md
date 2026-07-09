@@ -117,6 +117,7 @@ The name reflects its core goals:
 - ✅ External stylesheets (`<link rel=stylesheet>`): fetched by the **trusted parent** under the full network policy (tracker blocklist, realm routing, TLS-PQ) when Author styles is on — the sandboxed worker never touches a socket, and the parent serves style-only loads as `GET` exclusively
 - ✅ Author box model (`margin`/`padding`/`width`/`max-width`): centered reading columns (`max-width` + `margin: 0 auto`)
 - ✅ Author text presentation: `font-family` (generic families), `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow`, `opacity`, `vertical-align` (sub/super), `text-indent`, `white-space` (nowrap), `list-style-type` (decimal/alpha/roman/disc/circle/square)
+- ✅ `visibility` (hidden reserves layout space), `cursor: pointer` (hand cursor on any element), `text-overflow: ellipsis` (nowrap truncation), `word-break`/`overflow-wrap` (splits an unbreakable long word) — `overflow`/`-x`/`-y` parse but clipping isn't painted yet
 - ✅ Automatic dark mode (`@media (prefers-color-scheme: dark)`, safe `@media` subset; no viewport leak)
 - ✅ Headless mode
 - ✅ Strong per-tab sandboxing
@@ -127,7 +128,7 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; `calc()` and `var()`/custom properties supported — bounded, non-executing; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` + `flex-wrap` multi-line + `align-items`/`align-self` — now **lays out for real**; `grid-template-columns`/`-rows` count `repeat()`/`minmax()` correctly and `row-gap` is distinct from column gap, but every track is still 1fr (`fr` weights unresolved) and grid items don't yet honor `span N`; the parser resolves `position`/`border`/`box-sizing` per-side paint but does not consume them yet; no transforms/animations; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; `calc()` and `var()`/custom properties supported — bounded, non-executing; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` + `flex-wrap` multi-line + `align-items`/`align-self` — now **lays out for real**; `grid-template-columns`/`-rows` count `repeat()`/`minmax()` correctly and `row-gap` is distinct from column gap, but every track is still 1fr (`fr` weights unresolved) and grid items don't yet honor `span N`; the parser resolves `position`/`border`/`box-sizing` per-side paint but does not consume them yet; `overflow`/`-x`/`-y` resolve but clipping isn't painted; no transforms/animations; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
 - ⚠️ JavaScript support remains basic
 - ⚠️ Full async networking/caching in progress
 
@@ -409,6 +410,17 @@ suppress wrapping) and `list-style-type` (`decimal`/`lower-alpha`/`upper-roman`/
 `square`/… changes the `<li>` marker). All but `list-style` are gated behind the Author-styles
 toggle. See `examples/text-presentation.html` and the full **supported-vs-missing** property
 inventory in `spec/css.md`.
+
+**Visibility, cursor & text wrapping:** `visibility:hidden` hides an element while still
+reserving its layout space (unlike `display:none`, which removes it entirely — a nested
+flex/grid container inside a hidden box is a known v1 gap); `cursor:pointer` shows the hand
+cursor on any element, not just links (the rest of the CSS cursor keyword set resolves for
+completeness but still paints as the default arrow); `text-overflow:ellipsis` truncates a
+`white-space:nowrap` line that doesn't fit, with "…" appended at the UTF-8 boundary that
+still fits; `word-break`/`overflow-wrap`/`word-wrap` (unified into one behaviour) split an
+unbreakable long word — a URL, say — at UTF-8 cluster boundaries instead of letting it
+overflow the box edge. `overflow`/`-x`/`-y` parse and resolve (so the cascade never
+misinterprets them) but clipping isn't painted yet. See `examples/visibility-and-text-wrap.html`.
 
 **Flex & grid from the stylesheet:** a `display:flex` / `display:grid` container takes its
 layout params (`gap`, `justify-content`, `grid-template-columns`) from the same cascade, so a

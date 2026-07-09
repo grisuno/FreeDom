@@ -164,6 +164,51 @@ typedef enum css_clear {
     CSS_CLEAR_UNSET = 0, CSS_CLEAR_NONE, CSS_CLEAR_LEFT, CSS_CLEAR_RIGHT, CSS_CLEAR_BOTH
 } css_clear;
 
+/* visibility. 0 unset; VISIBLE is the explicit default. HIDDEN paints nothing for the
+ * box and its content but keeps its layout space (unlike display:none, which removes
+ * it). COLLAPSE (meant for table rows/columns) has no real table-row model here, so it
+ * collapses to the same HIDDEN behaviour -- a documented simplification. */
+typedef enum css_visibility {
+    CSS_VIS_UNSET = 0, CSS_VIS_VISIBLE, CSS_VIS_HIDDEN, CSS_VIS_COLLAPSE
+} css_visibility;
+
+/* overflow / overflow-x / overflow-y. 0 unset; VISIBLE is the explicit default. This
+ * static, non-interactive renderer has no scrollbar machinery, so SCROLL/AUTO/HIDDEN
+ * are resolved distinctly (for debug_dom / a future scrolling milestone) but the v1
+ * presentation layer only distinguishes "clips" (HIDDEN/SCROLL/AUTO) from VISIBLE --
+ * see spec/css.md for the exact staged scope. */
+typedef enum css_overflow {
+    CSS_OF_UNSET = 0, CSS_OF_VISIBLE, CSS_OF_HIDDEN, CSS_OF_SCROLL, CSS_OF_AUTO
+} css_overflow;
+
+/* cursor (subset of the CSS keyword list). 0 unset. v1 paint only distinguishes
+ * POINTER (shows the hand cursor already used for links) from every other value
+ * (shows the default arrow); the rest are resolved for completeness/debug_dom and a
+ * future milestone that loads more cursor theme shapes -- see spec/css.md. */
+typedef enum css_cursor {
+    CSS_CUR_UNSET = 0, CSS_CUR_AUTO, CSS_CUR_DEFAULT, CSS_CUR_POINTER, CSS_CUR_TEXT,
+    CSS_CUR_MOVE, CSS_CUR_NOT_ALLOWED, CSS_CUR_HELP, CSS_CUR_WAIT, CSS_CUR_CROSSHAIR,
+    CSS_CUR_GRAB, CSS_CUR_ZOOM_IN, CSS_CUR_NONE
+} css_cursor;
+
+/* text-overflow. 0 unset; CLIP is the explicit default. ELLIPSIS only has a visible
+ * effect where a line cannot wrap (white-space:nowrap) and would otherwise overflow
+ * its box -- see spec/css.md. */
+typedef enum css_text_overflow {
+    CSS_TO_UNSET = 0, CSS_TO_CLIP, CSS_TO_ELLIPSIS
+} css_text_overflow;
+
+/* word-break / overflow-wrap / word-wrap, UNIFIED (a deliberate simplification, see
+ * spec/css.md): 0 unset; NORMAL is the explicit UA default (no mid-word break);
+ * BREAK allows a mid-word split when a single word does not fit its line. Real CSS
+ * gives `word-break: break-all` (breaks greedily) and `overflow-wrap: break-word`/
+ * `anywhere` (breaks only as a last resort) different semantics; this engine only
+ * models "may a long word split", so all three keywords that request breaking map to
+ * the same BREAK value. */
+typedef enum css_word_break {
+    CSS_WB_UNSET = 0, CSS_WB_NORMAL, CSS_WB_BREAK
+} css_word_break;
+
 /* Anti-DoS clamps for the layout properties. Insets/z-index/order reuse CSS_LEN_*.
  * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX. */
 #define CSS_BORDER_W_MAX  CSS_LEN_MAX
@@ -274,6 +319,18 @@ typedef struct css_style {
      * style, like the box model). Layout structure, applied regardless of caps.css. */
     int         float_side;      /* css_float, 0 (unset) */
     int         clear;           /* css_clear, 0 (unset) */
+    /* visibility / overflow / cursor. NOT inherited (read from the element's own
+     * resolved style, like position/border). All gated behind caps.css downstream
+     * (presentation, like the box decoration). */
+    int         visibility;      /* css_visibility, 0 (unset) */
+    int         overflow_x;      /* css_overflow, 0 (unset) */
+    int         overflow_y;      /* css_overflow, 0 (unset) */
+    int         cursor;          /* css_cursor, 0 (unset) */
+    /* text-overflow / word-break (unified, see css_word_break). These INHERIT like
+     * white-space, so the caller (page_view) takes the nearest ancestor that sets
+     * each. Gated behind caps.css downstream. */
+    int         text_overflow;   /* css_text_overflow, 0 (unset) */
+    int         word_break;      /* css_word_break, 0 (unset) */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

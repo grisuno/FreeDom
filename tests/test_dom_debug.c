@@ -149,6 +149,45 @@ static void test_box_tree_width_cap(void **state) {
     pv_free(v);
 }
 
+/* --- visibility/overflow/cursor on a box, and text-overflow/word-break on a run --- */
+
+static void test_visibility_overflow_cursor_and_text_wrap(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "inside the box", NULL), PV_OK);
+    pv_set_block_id(v, 0);
+    pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
+                    PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK);
+
+    pv_box_def b;
+    memset(&b, 0, sizeof b);
+    b.parent_id = -1;
+    b.bg_rgb = -1;
+    b.bord_tw = b.bord_rw = b.bord_bw = b.bord_lw = PV_LEN_UNSET;
+    b.bord_tc = b.bord_rc = b.bord_bc = b.bord_lc = -1;
+    b.border_radius = PV_LEN_UNSET;
+    b.bsh_color = -1;
+    b.outline_w = PV_LEN_UNSET; b.outline_color = -1;
+    b.visibility = CSS_VIS_HIDDEN;
+    b.overflow_x = CSS_OF_HIDDEN; b.overflow_y = CSS_OF_SCROLL;
+    b.cursor = CSS_CUR_POINTER;
+    assert_int_equal(pv_add_box_def(v, &b), PV_OK);
+
+    rd_doc *d = build(v, caps_css_on());
+    char buf[1024];
+    size_t n = dd_format(d, buf, sizeof buf);
+    assert_true(n < sizeof buf);
+
+    assert_non_null(strstr(buf, "visibility=hidden"));
+    assert_non_null(strstr(buf, "overflow=hidden/scroll"));
+    assert_non_null(strstr(buf, "cursor=pointer"));
+    assert_non_null(strstr(buf, "text-overflow=ellipsis"));
+    assert_non_null(strstr(buf, "word-break=break"));
+
+    rd_free(d);
+    pv_free(v);
+}
+
 /* --- with caps.css off there is no box tree (byte-identical render principle) --- */
 
 static void test_no_box_tree_without_css(void **state) {
@@ -229,6 +268,7 @@ int main(void) {
         cmocka_unit_test(test_heading_paragraph_link),
         cmocka_unit_test(test_grid_container_annotation),
         cmocka_unit_test(test_box_tree_width_cap),
+        cmocka_unit_test(test_visibility_overflow_cursor_and_text_wrap),
         cmocka_unit_test(test_no_box_tree_without_css),
         cmocka_unit_test(test_truncation_no_overflow),
         cmocka_unit_test(test_control_bytes_kept_on_one_line),

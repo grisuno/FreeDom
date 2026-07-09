@@ -192,6 +192,33 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | `grid-auto-flow` | `grid_auto_flow` (`css_grid_flow`): `row`/`column`; `dense` ignored |
 | `grid-column`, `grid-row` | `grid_col_span`/`grid_row_span` from a `span N` value, clamped `[1, CSS_GRID_SPAN_MAX]`; line-number / named-line forms out of scope (dropped) |
 
+#### Visibility, overflow, cursor, text-overflow, word-break
+
+| Property | Resolved into `css_style` | Painted? |
+| :-- | :-- | :-- |
+| `visibility` | `visibility` (`css_visibility`): `visible`/`hidden`/`collapse`; `collapse` (meant for table rows) has no real table-row model here, so it collapses to `hidden` | **Yes.** `hidden` skips painting the box/its content but keeps its layout space (unlike `display:none`, which removes it entirely). A nested container (flex/grid) inside a hidden box is a known v1 gap — see below. |
+| `overflow`, `overflow-x`, `overflow-y` | `overflow_x`/`overflow_y` (`css_overflow`): `visible`/`hidden`/`scroll`/`auto`; `clip` maps to `hidden` (no scroll). The `overflow` shorthand sets both axes to the same value (the two-token per-axis form is out of scope — use the longhands). | **No** (resolved only). This static, non-interactive renderer has no scrollbar machinery and the painter does not yet clip a box's content to its rect; deferred to a later box-engine milestone, like `position`/`border` painting were before Hito 23b-8. |
+| `cursor` | `cursor` (`css_cursor`): `auto`/`default`/`pointer`/`text`/`move`/`not-allowed`/`help`/`wait`/`crosshair`/`grab`/`zoom-in`/`none`; unknown dropped | **Partially.** v1 only distinguishes `pointer` (shows the existing hand cursor, on ANY element — not just links) from every other value (shows the default arrow); the rest resolve for completeness/`debug_dom` and a future milestone that loads more cursor theme shapes. Overriding a **link's** default hand cursor away (e.g. `a{cursor:default}`) is not yet honoured. |
+| `text-overflow` | `text_overflow` (`css_text_overflow`): `clip`/`ellipsis` | **Yes**, but only where `white-space:nowrap` is also set (the only signal this engine has that a line is meant to stay on one row, since `overflow:hidden` clipping is not painted yet): the line truncates at the character that fits and an ellipsis is appended. Truncating mid-word is at a UTF-8 cluster boundary, not a word boundary (matches real `text-overflow`). Text from a later inline run on the *same* visual line (after the one that triggered truncation) is a known v1 gap. |
+| `word-break`, `overflow-wrap`, `word-wrap` | `word_break` (`css_word_break`, **unified** — see note below): `normal`/`break-all`/`keep-all` (word-break) or `normal`/`break-word`/`anywhere` (overflow-wrap/word-wrap); a "may break" keyword from either property sets `CSS_WB_BREAK` | **Yes**, but only for the pathological case: a single word wider than the *entire* line (not just the remaining space on it — a normal wrap already handles that) is split at UTF-8 cluster boundaries into pieces that each fit, instead of overflowing the box edge unbroken. |
+
+**word-break/overflow-wrap unification (a deliberate simplification).** Real CSS gives
+`word-break: break-all` (breaks greedily, even where unnecessary) and `overflow-wrap:
+break-word`/`anywhere` (breaks only as a last resort) different semantics. This engine
+only models "may a long word split at all", so every keyword from either property that
+requests breaking maps to the same `CSS_WB_BREAK` value; `word-break: keep-all` (CJK
+line-breaking) is not modeled and falls back to `normal`.
+
+`visibility`/`overflow_x`/`overflow_y`/`cursor` are **not inherited** (read from the
+element's own resolved style, like `position`/`border`) and live on `pv_box_def`/the
+box-definition tree, gated behind `caps.css` as a whole (like the rest of the box
+decoration); a block that sets *only* one of these four (no other box property) still
+registers a box-def entry, but box registration itself remains scoped to block-level
+tags (the same scope the rest of the box model has — `cursor:pointer` on a bare inline
+`<a>` does not register a box; wrap it in a block-level element, or rely on the link's
+already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
+`white-space` (nearest ancestor wins) and live on the run (`pv_run`/`rd_block`).
+
 ### Property inventory (supported vs missing)
 
 **Supported** (resolved into `css_style`, gated downstream as noted):
@@ -200,7 +227,10 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 - *Text*: `text-align`, `font-size`, `font-weight`, `font-style`, `line-height`,
   `text-decoration`(`-line`), **`font-family`**, **`text-transform`**,
   **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**, **`opacity`**,
-  **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only).
+  **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only),
+  **`text-overflow`** (painted with `white-space:nowrap`), **`word-break`**/
+  **`overflow-wrap`**/**`word-wrap`** (unified, painted for the single-word-wider-
+  than-the-line case).
 - *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
   `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
   (+longhands), `padding`(+longhands), `width`, `max-width` — all length-valued
@@ -221,6 +251,10 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 - *Float* (**spec/float.md**): **`float`** (`left`/`right`/`none`), **`clear`**
   (`left`/`right`/`both`/`none`). Consumed by the painter as side-by-side float bands
   that nest in the open box stack; see spec/float.md for the v1 scope.
+- *Visibility / overflow / cursor*: **`visibility`** (painted: skip-draw, space
+  reserved), **`overflow`**/**`overflow-x`**/**`overflow-y`** (resolved only, not
+  yet painted — no clipping), **`cursor`** (painted: `pointer` shows the hand
+  cursor on any element, the rest resolve but paint as the default arrow).
 - *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
   `all`, `min/max-width`), `!important`.
 - *Values*: **`calc()`** (`+`/`-`/`*`/`/`, parens, dimensionally checked) and
@@ -239,7 +273,8 @@ first:
   yet painted), `border-image`, `outline-offset`.
 - *Positioning, finer grain*: text **wrapping around** a single float (a float
   followed by non-floated content — v1 float bands are self-contained rows; see
-  spec/float.md), `overflow`(`-x`/`-y`), `z-index` *stacking* (resolved but compositing
+  spec/float.md), `overflow`(`-x`/`-y`) *clipping* (resolved, not yet painted —
+  see the table above), `z-index` *stacking* (resolved but compositing
   is a later milestone), line-number / named grid placement (only `span N` is
   resolved), `position: sticky` scroll pinning.
 - *Backgrounds beyond a solid color*: `background-image`/gradients (and any
@@ -249,8 +284,10 @@ first:
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
   in `%`/viewport units, `text-decoration-style`/`-color`/`-thickness`,
   `vertical-align` length/`top`/`middle`/`bottom`, `white-space` whitespace
-  *preservation* (only the wrap distinction is consumed), `word-break`,
-  `overflow-wrap`, `text-overflow`, `direction`/`writing-mode`.
+  *preservation* (only the wrap distinction is consumed), the greedy-vs-last-resort
+  distinction between `word-break: break-all` and `overflow-wrap: break-word`
+  (unified to one behaviour), `text-overflow: ellipsis` on a line with more inline
+  content after the truncation point (v1 gap), `direction`/`writing-mode`.
 - *Flex/grid, finer grain*: `align-content` (parsed/resolved, not yet painted —
   only `align-items`/`align-self` reach the painter), grid per-item placement
   (`grid-column`/`grid-row: span N` are resolved but not yet honoured — every grid
@@ -468,6 +505,13 @@ typedef struct css_style {
     int          row_gap;         /* px, [0, CSS_GAP_MAX], or -1 (unset) */
     css_grid_flow   grid_auto_flow; /* CSS_GF_UNSET if absent */
     int          grid_col_span, grid_row_span; /* span N, [1, CSS_GRID_SPAN_MAX], or 0 (unset) */
+    css_float    float_side;      /* CSS_FLOAT_UNSET if absent */
+    css_clear    clear;           /* CSS_CLEAR_UNSET if absent */
+    css_visibility  visibility;   /* CSS_VIS_UNSET if absent */
+    css_overflow    overflow_x, overflow_y; /* CSS_OF_UNSET if absent */
+    css_cursor      cursor;       /* CSS_CUR_UNSET if absent */
+    css_text_overflow text_overflow; /* CSS_TO_UNSET if absent */
+    css_word_break  word_break;   /* CSS_WB_UNSET if absent; unifies word-break/overflow-wrap */
 } css_style;
 
 typedef enum css_position {
@@ -500,6 +544,25 @@ typedef enum css_valign { CSS_VA_UNSET = 0, CSS_VA_BASELINE, CSS_VA_SUB, CSS_VA_
 typedef enum css_white_space {
     CSS_WS_UNSET = 0, CSS_WS_NORMAL, CSS_WS_NOWRAP, CSS_WS_PRE, CSS_WS_PRE_WRAP, CSS_WS_PRE_LINE
 } css_white_space;
+typedef enum css_float {
+    CSS_FLOAT_UNSET = 0, CSS_FLOAT_NONE, CSS_FLOAT_LEFT, CSS_FLOAT_RIGHT
+} css_float;
+typedef enum css_clear {
+    CSS_CLEAR_UNSET = 0, CSS_CLEAR_NONE, CSS_CLEAR_LEFT, CSS_CLEAR_RIGHT, CSS_CLEAR_BOTH
+} css_clear;
+typedef enum css_visibility {
+    CSS_VIS_UNSET = 0, CSS_VIS_VISIBLE, CSS_VIS_HIDDEN, CSS_VIS_COLLAPSE
+} css_visibility;
+typedef enum css_overflow {
+    CSS_OF_UNSET = 0, CSS_OF_VISIBLE, CSS_OF_HIDDEN, CSS_OF_SCROLL, CSS_OF_AUTO
+} css_overflow;
+typedef enum css_cursor {
+    CSS_CUR_UNSET = 0, CSS_CUR_AUTO, CSS_CUR_DEFAULT, CSS_CUR_POINTER, CSS_CUR_TEXT,
+    CSS_CUR_MOVE, CSS_CUR_NOT_ALLOWED, CSS_CUR_HELP, CSS_CUR_WAIT, CSS_CUR_CROSSHAIR,
+    CSS_CUR_GRAB, CSS_CUR_ZOOM_IN, CSS_CUR_NONE
+} css_cursor;
+typedef enum css_text_overflow { CSS_TO_UNSET = 0, CSS_TO_CLIP, CSS_TO_ELLIPSIS } css_text_overflow;
+typedef enum css_word_break { CSS_WB_UNSET = 0, CSS_WB_NORMAL, CSS_WB_BREAK } css_word_break;
 typedef enum css_list_style {
     CSS_LS_UNSET = 0, CSS_LS_NONE, CSS_LS_DISC, CSS_LS_CIRCLE, CSS_LS_SQUARE,
     CSS_LS_DECIMAL, CSS_LS_LOWER_ALPHA, CSS_LS_UPPER_ALPHA, CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN

@@ -1510,6 +1510,87 @@ static void test_float_and_clear(void **state) {
     css_free(sh);
 }
 
+static void test_visibility(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("visibility:visible", 0).visibility, CSS_VIS_VISIBLE);
+    assert_int_equal(css_parse_inline("visibility:hidden", 0).visibility, CSS_VIS_HIDDEN);
+    assert_int_equal(css_parse_inline("visibility:collapse", 0).visibility, CSS_VIS_COLLAPSE);
+    assert_int_equal(css_parse_inline("visibility:bogus", 0).visibility, CSS_VIS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).visibility, CSS_VIS_UNSET);
+
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".a{visibility:hidden}", 21, &sh), CSS_OK);
+    const char *cls[] = { "a" };
+    assert_int_equal(css_resolve(sh, "div", NULL, cls, 1, NULL, 0).visibility, CSS_VIS_HIDDEN);
+    assert_int_equal(css_resolve(sh, "div", NULL, cls, 1, "visibility:visible", 0).visibility,
+                      CSS_VIS_VISIBLE);
+    css_free(sh);
+}
+
+static void test_overflow(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("overflow-x:hidden", 0).overflow_x, CSS_OF_HIDDEN);
+    assert_int_equal(css_parse_inline("overflow-y:scroll", 0).overflow_y, CSS_OF_SCROLL);
+    assert_int_equal(css_parse_inline("overflow-x:auto", 0).overflow_x, CSS_OF_AUTO);
+    assert_int_equal(css_parse_inline("overflow-x:visible", 0).overflow_x, CSS_OF_VISIBLE);
+    assert_int_equal(css_parse_inline("overflow-x:clip", 0).overflow_x, CSS_OF_HIDDEN);
+    assert_int_equal(css_parse_inline("overflow-x:bogus", 0).overflow_x, CSS_OF_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).overflow_x, CSS_OF_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).overflow_y, CSS_OF_UNSET);
+
+    /* Shorthand sets both axes. */
+    css_style s = css_parse_inline("overflow:hidden", 0);
+    assert_int_equal(s.overflow_x, CSS_OF_HIDDEN);
+    assert_int_equal(s.overflow_y, CSS_OF_HIDDEN);
+    assert_int_equal(css_parse_inline("overflow:bogus", 0).overflow_x, CSS_OF_UNSET);
+
+    /* Longhand after shorthand in the same declaration block wins that axis. */
+    s = css_parse_inline("overflow:hidden;overflow-y:visible", 0);
+    assert_int_equal(s.overflow_x, CSS_OF_HIDDEN);
+    assert_int_equal(s.overflow_y, CSS_OF_VISIBLE);
+}
+
+static void test_cursor(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("cursor:pointer", 0).cursor, CSS_CUR_POINTER);
+    assert_int_equal(css_parse_inline("cursor:default", 0).cursor, CSS_CUR_DEFAULT);
+    assert_int_equal(css_parse_inline("cursor:not-allowed", 0).cursor, CSS_CUR_NOT_ALLOWED);
+    assert_int_equal(css_parse_inline("cursor:zoom-in", 0).cursor, CSS_CUR_ZOOM_IN);
+    assert_int_equal(css_parse_inline("cursor:bogus", 0).cursor, CSS_CUR_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).cursor, CSS_CUR_UNSET);
+
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("a.btn{cursor:pointer}", 21, &sh), CSS_OK);
+    const char *cls[] = { "btn" };
+    assert_int_equal(css_resolve(sh, "a", NULL, cls, 1, NULL, 0).cursor, CSS_CUR_POINTER);
+    css_free(sh);
+}
+
+static void test_text_overflow_and_word_break(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("text-overflow:ellipsis", 0).text_overflow, CSS_TO_ELLIPSIS);
+    assert_int_equal(css_parse_inline("text-overflow:clip", 0).text_overflow, CSS_TO_CLIP);
+    assert_int_equal(css_parse_inline("text-overflow:bogus", 0).text_overflow, CSS_TO_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).text_overflow, CSS_TO_UNSET);
+
+    assert_int_equal(css_parse_inline("word-break:break-all", 0).word_break, CSS_WB_BREAK);
+    assert_int_equal(css_parse_inline("word-break:normal", 0).word_break, CSS_WB_NORMAL);
+    assert_int_equal(css_parse_inline("word-break:keep-all", 0).word_break, CSS_WB_NORMAL);
+    assert_int_equal(css_parse_inline("word-break:bogus", 0).word_break, CSS_WB_UNSET);
+
+    assert_int_equal(css_parse_inline("overflow-wrap:break-word", 0).word_break, CSS_WB_BREAK);
+    assert_int_equal(css_parse_inline("overflow-wrap:anywhere", 0).word_break, CSS_WB_BREAK);
+    assert_int_equal(css_parse_inline("overflow-wrap:normal", 0).word_break, CSS_WB_NORMAL);
+    assert_int_equal(css_parse_inline("word-wrap:break-word", 0).word_break, CSS_WB_BREAK);
+    assert_int_equal(css_parse_inline("color:red", 0).word_break, CSS_WB_UNSET);
+
+    /* Inherits like white-space: nearest ancestor wins. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("p{word-break:break-all}", 24, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).word_break, CSS_WB_BREAK);
+    css_free(sh);
+}
+
 static void test_box_sizing(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("box-sizing:border-box", 0).box_sizing, CSS_BOXS_BORDER);
@@ -1704,6 +1785,10 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
         cmocka_unit_test(test_float_and_clear),
+        cmocka_unit_test(test_visibility),
+        cmocka_unit_test(test_overflow),
+        cmocka_unit_test(test_cursor),
+        cmocka_unit_test(test_text_overflow_and_word_break),
         cmocka_unit_test(test_box_sizing),
         cmocka_unit_test(test_border_shorthand),
         cmocka_unit_test(test_border_longhands),

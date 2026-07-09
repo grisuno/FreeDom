@@ -1394,6 +1394,71 @@ static void test_build_boxdeco_shadow_outline(void **state) {
     hp_document_free(doc);
 }
 
+static void test_build_boxdeco_visibility_overflow_cursor(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='visibility:hidden;overflow-x:hidden;overflow-y:scroll;"
+        "cursor:pointer'>solo</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *solo = find_text(v, "solo");
+    assert_non_null(solo);
+    assert_true(solo->block_id >= 0);
+    const pv_box_def *bx = pv_box_at(v, (size_t)solo->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->visibility, CSS_VIS_HIDDEN);
+    assert_int_equal(bx->overflow_x, CSS_OF_HIDDEN);
+    assert_int_equal(bx->overflow_y, CSS_OF_SCROLL);
+    assert_int_equal(bx->cursor, CSS_CUR_POINTER);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A block that sets ONLY cursor (no other box property) still registers a box: the
+ * trigger for a box-def entry must include visibility/overflow/cursor, not just the
+ * older border/padding/position set. Box registration is scoped to block-level tags
+ * (like the rest of the box model), so this uses a <div>, not an inline <a>. */
+static void test_build_cursor_alone_triggers_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div style='cursor:help'>lnk</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *lnk = find_text(v, "lnk");
+    assert_non_null(lnk);
+    assert_true(lnk->block_id >= 0);
+    const pv_box_def *bx = pv_box_at(v, (size_t)lnk->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->cursor, CSS_CUR_HELP);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* text-overflow/word-break inherit like white-space (nearest ancestor wins). */
+static void test_build_text_overflow_and_word_break(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>p{word-break:break-all}</style>"
+        "<p style='text-overflow:ellipsis;white-space:nowrap'>clip me "
+        "<span>inherited</span></p>"
+        "<h3>plain</h3></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "clip me ");
+    assert_non_null(r);
+    assert_int_equal(r->text_overflow, CSS_TO_ELLIPSIS);
+    assert_int_equal(r->word_break, CSS_WB_BREAK);
+    const pv_run *ih = find_text(v, "inherited");
+    assert_non_null(ih);
+    assert_int_equal(ih->text_overflow, CSS_TO_ELLIPSIS);
+    assert_int_equal(ih->word_break, CSS_WB_BREAK);
+    const pv_run *plain = find_text(v, "plain");
+    assert_non_null(plain);
+    assert_int_equal(plain->text_overflow, 0);
+    assert_int_equal(plain->word_break, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_boxdeco_defaults_no_box(void **state) {
     (void)state;
     hp_document *doc = parse("<body><p>plain</p></body>");
@@ -2123,6 +2188,9 @@ int main(void) {
         cmocka_unit_test(test_box_defaults_and_setter),
         cmocka_unit_test(test_build_boxdeco_border_padding),
         cmocka_unit_test(test_build_boxdeco_shadow_outline),
+        cmocka_unit_test(test_build_boxdeco_visibility_overflow_cursor),
+        cmocka_unit_test(test_build_cursor_alone_triggers_box),
+        cmocka_unit_test(test_build_text_overflow_and_word_break),
         cmocka_unit_test(test_build_boxdeco_defaults_no_box),
         cmocka_unit_test(test_build_boxdeco_sibling_blocks_distinct_ids),
         cmocka_unit_test(test_build_boxdeco_shared_id_within_block),

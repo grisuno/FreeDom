@@ -66,6 +66,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_FLEX_DIR, P_FLEX_WRAP,
        P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW, P_GRID_COL_SPAN, P_GRID_ROW_SPAN,
        P_FLOAT, P_CLEAR,
+       P_VISIBILITY, P_OVERFLOW_X, P_OVERFLOW_Y, P_CURSOR,
+       P_TEXT_OVERFLOW, P_WORD_BREAK,
        P_NSLOTS };
 
 typedef struct css_decl {
@@ -798,6 +800,70 @@ static int interp_clear(const char *v) {
     return -1;
 }
 
+/* --- visibility / overflow / cursor / text-overflow / word-break ---------- */
+
+static int interp_visibility(const char *v) {
+    if (csel_ci_eq(v, "visible"))  return CSS_VIS_VISIBLE;
+    if (csel_ci_eq(v, "hidden"))   return CSS_VIS_HIDDEN;
+    if (csel_ci_eq(v, "collapse")) return CSS_VIS_COLLAPSE;
+    return -1;
+}
+
+static int interp_overflow(const char *v) {
+    if (csel_ci_eq(v, "visible")) return CSS_OF_VISIBLE;
+    if (csel_ci_eq(v, "hidden"))  return CSS_OF_HIDDEN;
+    if (csel_ci_eq(v, "clip"))    return CSS_OF_HIDDEN; /* clip: like hidden, never scrolls */
+    if (csel_ci_eq(v, "scroll"))  return CSS_OF_SCROLL;
+    if (csel_ci_eq(v, "auto"))    return CSS_OF_AUTO;
+    return -1;
+}
+
+/* `overflow: X` sets both overflow-x and overflow-y to the same value. The two-token
+ * per-axis form (`overflow: hidden visible`) is out of scope -- use the longhands. */
+static int expand_overflow(const char *val, css_decl *dst, int cap) {
+    int o = interp_overflow(val);
+    if (o < 0 || cap < 2) return 0;
+    dst[0].prop = P_OVERFLOW_X; dst[0].ival = o;
+    dst[1].prop = P_OVERFLOW_Y; dst[1].ival = o;
+    return 2;
+}
+
+static int interp_cursor(const char *v) {
+    if (csel_ci_eq(v, "auto"))        return CSS_CUR_AUTO;
+    if (csel_ci_eq(v, "default"))     return CSS_CUR_DEFAULT;
+    if (csel_ci_eq(v, "pointer"))     return CSS_CUR_POINTER;
+    if (csel_ci_eq(v, "text"))        return CSS_CUR_TEXT;
+    if (csel_ci_eq(v, "move"))        return CSS_CUR_MOVE;
+    if (csel_ci_eq(v, "not-allowed")) return CSS_CUR_NOT_ALLOWED;
+    if (csel_ci_eq(v, "help"))        return CSS_CUR_HELP;
+    if (csel_ci_eq(v, "wait"))        return CSS_CUR_WAIT;
+    if (csel_ci_eq(v, "crosshair"))   return CSS_CUR_CROSSHAIR;
+    if (csel_ci_eq(v, "grab"))        return CSS_CUR_GRAB;
+    if (csel_ci_eq(v, "zoom-in"))     return CSS_CUR_ZOOM_IN;
+    if (csel_ci_eq(v, "none"))        return CSS_CUR_NONE;
+    return -1;
+}
+
+static int interp_text_overflow(const char *v) {
+    if (csel_ci_eq(v, "clip"))     return CSS_TO_CLIP;
+    if (csel_ci_eq(v, "ellipsis")) return CSS_TO_ELLIPSIS;
+    return -1;
+}
+
+static int interp_word_break(const char *v) {
+    if (csel_ci_eq(v, "normal"))    return CSS_WB_NORMAL;
+    if (csel_ci_eq(v, "break-all")) return CSS_WB_BREAK;
+    if (csel_ci_eq(v, "keep-all"))  return CSS_WB_NORMAL; /* CJK line-breaking not modeled */
+    return -1;
+}
+
+static int interp_overflow_wrap(const char *v) {
+    if (csel_ci_eq(v, "normal"))     return CSS_WB_NORMAL;
+    if (csel_ci_eq(v, "break-word")) return CSS_WB_BREAK;
+    if (csel_ci_eq(v, "anywhere"))   return CSS_WB_BREAK;
+    return -1;
+}
+
 /* Signed integer (z-index/order). Returns 1 with *out (clamped to +-CSS_LEN_MAX),
  * 0 if not a pure integer (auto / floats / units -> dropped, leaving unset). */
 static int interp_int(const char *v, int *out) {
@@ -1360,6 +1426,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "border-color") == 0)  return expand_quad(val, P_BC_TOP, interp_bc_tok, dst, cap);
     if (strcmp(prop, "box-shadow") == 0)    return expand_box_shadow(val, dst, cap);
     if (strcmp(prop, "outline") == 0)       return expand_outline(val, dst, cap);
+    if (strcmp(prop, "overflow") == 0)      return expand_overflow(val, dst, cap);
 
     int prop_id, ival;
     if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
@@ -1415,6 +1482,14 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "grid-row") == 0)            { prop_id = P_GRID_ROW_SPAN; ival = interp_grid_span(val); }
     else if (strcmp(prop, "float") == 0)               { prop_id = P_FLOAT;         ival = interp_float(val); }
     else if (strcmp(prop, "clear") == 0)               { prop_id = P_CLEAR;         ival = interp_clear(val); }
+    else if (strcmp(prop, "visibility") == 0)          { prop_id = P_VISIBILITY;    ival = interp_visibility(val); }
+    else if (strcmp(prop, "overflow-x") == 0)          { prop_id = P_OVERFLOW_X;    ival = interp_overflow(val); }
+    else if (strcmp(prop, "overflow-y") == 0)          { prop_id = P_OVERFLOW_Y;    ival = interp_overflow(val); }
+    else if (strcmp(prop, "cursor") == 0)              { prop_id = P_CURSOR;        ival = interp_cursor(val); }
+    else if (strcmp(prop, "text-overflow") == 0)       { prop_id = P_TEXT_OVERFLOW; ival = interp_text_overflow(val); }
+    else if (strcmp(prop, "word-break") == 0)          { prop_id = P_WORD_BREAK;    ival = interp_word_break(val); }
+    else if (strcmp(prop, "overflow-wrap") == 0 ||
+             strcmp(prop, "word-wrap") == 0)            { prop_id = P_WORD_BREAK;    ival = interp_overflow_wrap(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -1844,6 +1919,12 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_GRID_ROW_SPAN: o->grid_row_span = d->ival; break;
             case P_FLOAT:         o->float_side = d->ival; break;
             case P_CLEAR:         o->clear = d->ival; break;
+            case P_VISIBILITY:    o->visibility = d->ival; break;
+            case P_OVERFLOW_X:    o->overflow_x = d->ival; break;
+            case P_OVERFLOW_Y:    o->overflow_y = d->ival; break;
+            case P_CURSOR:        o->cursor = d->ival; break;
+            case P_TEXT_OVERFLOW: o->text_overflow = d->ival; break;
+            case P_WORD_BREAK:    o->word_break = d->ival; break;
             default: break;
         }
     }
@@ -1891,6 +1972,10 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .grid_rows = 0, .row_gap = -1, .grid_auto_flow = CSS_GF_UNSET,
         .grid_col_span = 0, .grid_row_span = 0,
         .float_side = CSS_FLOAT_UNSET, .clear = CSS_CLEAR_UNSET,
+        .visibility = CSS_VIS_UNSET,
+        .overflow_x = CSS_OF_UNSET, .overflow_y = CSS_OF_UNSET,
+        .cursor = CSS_CUR_UNSET,
+        .text_overflow = CSS_TO_UNSET, .word_break = CSS_WB_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

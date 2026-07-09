@@ -331,6 +331,34 @@ static void test_author_color_gated_by_css(void **state) {
     pv_free(v);
 }
 
+/* text_overflow/word_break are presentation, gated by caps.css like white_space. */
+static void test_text_overflow_word_break_gated_by_css(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "clipped", NULL), PV_OK);
+    pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
+                    PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->text_overflow, 0);
+    assert_int_equal(p->word_break, 0);
+    rd_free(d);
+
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->text_overflow, CSS_TO_ELLIPSIS);
+    assert_int_equal(p->word_break, CSS_WB_BREAK);
+    rd_free(d);
+
+    pv_free(v);
+}
+
 /* --- form controls --- */
 
 static void test_input_passthrough(void **state) {
@@ -632,9 +660,9 @@ int main(void) {
         cmocka_unit_test(test_kind_name_total),
         cmocka_unit_test(test_image_label_total),
         cmocka_unit_test(test_author_color_gated_by_css),
+        cmocka_unit_test(test_text_overflow_word_break_gated_by_css),
         cmocka_unit_test(test_input_passthrough),
         cmocka_unit_test(test_input_label_total),
-        cmocka_unit_test(test_author_color_gated_by_css),
         cmocka_unit_test(test_node_id_carried_by_default),
         cmocka_unit_test(test_free_null_and_double),
     };

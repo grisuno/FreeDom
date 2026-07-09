@@ -69,6 +69,8 @@ typedef struct rd_block {
     int              valign;
     int              text_indent;
     int              white_space;
+    int              text_overflow;  /* author text-overflow (css_text_overflow); set only with caps.css, else 0 */
+    int              word_break;     /* author word-break (css_word_break); set only with caps.css, else 0 */
     /* Nearest author flex/grid container of this block (page_view), carried by
      * default (layout is structure, not author styling, and leaks nothing to the
      * network) so the presentation layer can lay it out with box_tree/flex_layout.

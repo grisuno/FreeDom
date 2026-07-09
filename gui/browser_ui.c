@@ -225,6 +225,7 @@ typedef struct tab_ctx {
     char           *cur_html; size_t cur_html_len; char *cur_top;
     int             loading;
     const char     *hover_href; /* aliases doc; moves with it */
+    int             hover_cursor; /* css_cursor resolved at the pointer, moves with hover_href */
 } tab_ctx;
 
 typedef struct browser_window {
@@ -292,6 +293,9 @@ typedef struct browser_window {
 
     int         menu_open;     /* the options (gear) panel is showing */
     const char *hover_href;    /* link target under the pointer (aliases doc), or NULL */
+    int         hover_cursor;  /* author cursor (css_cursor) resolved at the pointer, or
+                                 * CSS_CUR_UNSET; drives the hand-vs-arrow decision alongside
+                                 * hover_href/hot */
 
     /* Live form text controls of the current page (rebuilt with the doc). */
     ui_input_state *inputs;
@@ -885,6 +889,7 @@ static void clear_doc(browser_window *w) {
     free_images(w);
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
     w->hover_href = NULL;
+    w->hover_cursor = CSS_CUR_UNSET;
 }
 
 /* Replaces the cached page source. Takes ownership of html; copies top. */
@@ -1616,6 +1621,7 @@ static void tab_save(browser_window *w) {
     c->cur_html = w->cur_html; c->cur_html_len = w->cur_html_len; c->cur_top = w->cur_top;
     c->loading = w->loading;
     c->hover_href = w->hover_href;
+    c->hover_cursor = w->hover_cursor;
 }
 
 /* Loads the active tab's slot into the live fields (the inverse move). */
@@ -1631,6 +1637,7 @@ static void tab_restore(browser_window *w) {
     w->cur_html = c->cur_html; w->cur_html_len = c->cur_html_len; w->cur_top = c->cur_top;
     w->loading = c->loading;
     w->hover_href = c->hover_href;
+    w->hover_cursor = c->hover_cursor;
 }
 
 /* Frees the LIVE page's owned state (used when closing the foreground tab). */
@@ -1694,7 +1701,7 @@ static void tab_new(browser_window *w, const char *url) {
 
     /* Blank live page, then load. */
     drop_repl_worker(w); /* the previous tab's worker/console must not bleed into the new one */
-    w->doc = NULL; w->hover_href = NULL;
+    w->doc = NULL; w->hover_href = NULL; w->hover_cursor = CSS_CUR_UNSET;
     w->inputs = NULL; w->input_count = 0; w->focused_input = -1;
     w->images = NULL; w->image_count = 0;
     w->cur_html = NULL; w->cur_html_len = 0; w->cur_top = NULL;
@@ -2012,6 +2019,7 @@ typedef struct rc_frag {
     size_t      len;
     const char *href;     /* link target (aliases the rd_block href, not owned); NULL if not a link */
     dom_node_id node_id;  /* element that produced this fragment (DOM_NODE_NONE if none) */
+    int         block_id; /* owning box-def index (-1 if none), for hover-cursor lookup */
     /* Author text-presentation extensions (Hito 23b-6), applied by the painter and
      * consistently by the layout measure. Defaults (no author style): family 0
      * (sans), transform 0 (none), letter_spacing 0, valign_dy 0, shadow_color -1
@@ -2036,6 +2044,8 @@ typedef struct rc_row {
     double          x_off;         /* extra horizontal offset (flex/grid column), 0 normally */
     int             align;         /* author text-align (css_align), 0 = left/unset */
     const rd_block *blk;           /* RC_IMAGE: source image block */
+    int             hidden;        /* visibility:hidden on this row's box (or an ancestor):
+                                     * space is still reserved, painting is skipped */
 } rc_row;
 
 /* One painted block box (Hito 23b-8 Step C): a border-box rectangle in layout space
@@ -2053,6 +2063,8 @@ typedef struct rc_box {
     int    bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
     int    outline_w, outline_style, outline_color;
     int    bg_rgb;
+    int    hidden;   /* visibility:hidden on this box (or an ancestor): geometry (h/w)
+                       * is still resolved, decoration painting is skipped */
 } rc_box;
 
 typedef struct rc_layout {
@@ -2095,7 +2107,14 @@ typedef struct rc_state {
     int    line_scale;   /* current block's author line-height percent, 0 = use theme spacing */
     double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
     int    nowrap;       /* current block's white-space suppresses line wrapping */
+    int    break_words;  /* current block's word-break/overflow-wrap allows a mid-word split */
+    int    text_overflow;/* current block's text-overflow (css_text_overflow) */
     size_t line_first;
+    /* Box engine (Hito 23b-8 Step D) visibility: hidden_from is 0 (not hidden) or the
+     * box_stack depth (1-based) at which a visibility:hidden box was opened -- every
+     * row/box created while hidden_from != 0 is marked hidden (space reserved, paint
+     * skipped). Cleared when that box closes (box_depth drops back below it). */
+    int    hidden_from;
     /* Box engine (Hito 23b-8 Step D): the STACK of currently-open block boxes, from
      * outermost (index 0) to innermost. A run is laid out inside the innermost box's
      * content rect; a child box nests inside its parent's, so a box is no longer split
@@ -2322,6 +2341,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
         r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->bg_w = s->bg_w;
         r->x_off = s->indent_px;
         r->align = s->align; r->blk = NULL;
+        r->hidden = (s->hidden_from != 0);
     }
     s->cur_top += h;
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
@@ -2352,15 +2372,57 @@ typedef struct rc_ext {
     int    opacity;       /* 0..100, or -1 */
 } rc_ext;
 
+/* Emits one fragment at the current pen position, advancing it. Shared by the
+ * whole-word path and the word-break split path in flow_text. */
+static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
+                           const char *text, size_t len, double width, double size,
+                           int bold, int italic, int underline, int strike, int overline,
+                           ui_rgb color, const char *href, dom_node_id node_id,
+                           int block_id, const rc_ext *x) {
+    rc_frag *f = rc_add_frag(L);
+    if (f != NULL) {
+        f->x = s->pen_x; f->width = width; f->font_size = size;
+        f->bold = bold; f->italic = italic; f->underline = underline;
+        f->strike = strike; f->overline = overline; f->color = color;
+        f->text = text; f->len = len; f->href = href; f->node_id = node_id;
+        f->block_id = block_id;
+        f->family = x->family; f->transform = x->transform;
+        f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
+        f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
+        f->shadow_color = x->shadow_color; f->opacity = x->opacity;
+    }
+    s->pen_x += width;
+    if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
+    if (fe->descent > s->line_desc) s->line_desc = fe->descent;
+}
+
+/* U+2026 HORIZONTAL ELLIPSIS, UTF-8. Static storage: safe for a zero-copy rc_frag.text
+ * (like every other frag, which aliases the source rd_block text). */
+static const char FLOW_ELLIPSIS[] = "\xE2\x80\xA6";
+
 /* Places the words of text into the current inline line, wrapping at content_w.
  * href tags every fragment produced (NULL for non-link runs) so a later hit-test
  * can recover the click target without re-walking the document. node_id tags the
- * originating element for JS click dispatch (Stage 4 dispatcher). */
+ * originating element for JS click dispatch (Stage 4 dispatcher); block_id tags the
+ * owning box (for the hover-cursor lookup), -1 if none.
+ *
+ * word-break/overflow-wrap (s->break_words): a single word wider than the WHOLE
+ * line (not just the remaining space -- a normal wrap already handles that) is
+ * split at UTF-8 cluster boundaries into pieces that each fit, instead of
+ * overflowing the box edge unbroken.
+ *
+ * text-overflow: ellipsis (s->text_overflow, only meaningful with s->nowrap: this
+ * engine does not paint overflow:hidden clipping yet, so nowrap is the only signal
+ * that the line is meant to stay on one row): once a word would push the line past
+ * content_w, the line is truncated at the cluster boundary that fits, an ellipsis
+ * is appended, and the rest of this call's text is dropped (single-line
+ * truncation; text from a LATER sibling run on the same visual line, if any, is a
+ * known v1 gap -- see spec/css.md). */
 static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                       const char *text, double size, int bold, int italic, int underline,
                       int strike, int overline,
                       ui_rgb color, double content_w, const char *href,
-                      dom_node_id node_id, const rc_ext *x) {
+                      dom_node_id node_id, int block_id, const rc_ext *x) {
     content_font(cr, size, bold, italic, x->family);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
@@ -2390,23 +2452,62 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
             flush_line(L, s, th);
             open_line(L, s);
             adv = 0.0;
+            line_has_frag = 0;
         }
-        s->pen_x += adv;
 
-        rc_frag *f = rc_add_frag(L);
-        if (f != NULL) {
-            f->x = s->pen_x; f->width = ww; f->font_size = size;
-            f->bold = bold; f->italic = italic; f->underline = underline;
-            f->strike = strike; f->overline = overline; f->color = color;
-            f->text = text + ws; f->len = wl; f->href = href; f->node_id = node_id;
-            f->family = x->family; f->transform = x->transform;
-            f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
-            f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
-            f->shadow_color = x->shadow_color; f->opacity = x->opacity;
+        if (s->nowrap && s->text_overflow == CSS_TO_ELLIPSIS &&
+            s->pen_x + adv + ww > content_w) {
+            double ell_w = measure_slice(cr, FLOW_ELLIPSIS, sizeof FLOW_ELLIPSIS - 1);
+            double budget = content_w - s->pen_x - adv - ell_w;
+            s->pen_x += adv;
+            size_t take = 0;
+            double acc = 0.0;
+            size_t p = ws;
+            while (budget > 0.0 && p < ws + wl) {
+                size_t clen = utf8_clen(text + p, (ws + wl) - p);
+                rc_frag cprobe = (rc_frag){ 0 };
+                cprobe.text = text + p; cprobe.len = clen;
+                cprobe.transform = x->transform; cprobe.letter_spacing = x->letter_spacing;
+                double cw = styled_advance(cr, &cprobe);
+                if (acc + cw > budget) break;
+                acc += cw; p += clen; take += clen;
+            }
+            if (take > 0)
+                flow_emit_frag(L, s, &fe, text + ws, take, acc, size, bold, italic,
+                               underline, strike, overline, color, href, node_id,
+                               block_id, x);
+            flow_emit_frag(L, s, &fe, FLOW_ELLIPSIS, sizeof FLOW_ELLIPSIS - 1, ell_w,
+                           size, bold, italic, underline, strike, overline, color,
+                           href, node_id, block_id, x);
+            return;
         }
-        s->pen_x += ww;
-        if (fe.ascent  > s->line_asc)  s->line_asc  = fe.ascent;
-        if (fe.descent > s->line_desc) s->line_desc = fe.descent;
+
+        if (s->break_words && !line_has_frag && ww > content_w && content_w > 0.0) {
+            s->pen_x += adv;
+            size_t p = ws;
+            while (p < ws + wl) {
+                size_t chunk_start = p;
+                double chunk_w = 0.0;
+                while (p < ws + wl) {
+                    size_t clen = utf8_clen(text + p, (ws + wl) - p);
+                    rc_frag cprobe = (rc_frag){ 0 };
+                    cprobe.text = text + p; cprobe.len = clen;
+                    cprobe.transform = x->transform; cprobe.letter_spacing = x->letter_spacing;
+                    double cw = styled_advance(cr, &cprobe);
+                    if (chunk_w + cw > content_w && p > chunk_start) break;
+                    chunk_w += cw; p += clen;
+                }
+                flow_emit_frag(L, s, &fe, text + chunk_start, p - chunk_start, chunk_w,
+                               size, bold, italic, underline, strike, overline, color,
+                               href, node_id, block_id, x);
+                if (p < ws + wl) { flush_line(L, s, th); open_line(L, s); }
+            }
+            continue;
+        }
+
+        s->pen_x += adv;
+        flow_emit_frag(L, s, &fe, text + ws, wl, ww, size, bold, italic, underline,
+                       strike, overline, color, href, node_id, block_id, x);
     }
 }
 
@@ -2452,20 +2553,24 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     else if (b->valign == CSS_VA_SUPER) { x.valign_dy = -size * 0.34; size *= 0.83; }
 
     s->nowrap = (b->white_space == CSS_WS_NOWRAP || b->white_space == CSS_WS_PRE);
+    s->break_words = (b->word_break == CSS_WB_BREAK);
+    s->text_overflow = b->text_overflow;
     if (!s->line_open && b->text_indent != PV_LEN_UNSET)
         s->pending_indent = (double)b->text_indent;
 
     if (b->kind == RD_NOTICE) {
         s->banner = 1;
         flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
-                  color, content_w, href, b->node_id, &x);
+                  color, content_w, href, b->node_id, b->block_id, &x);
         flush_line(L, s, th);
         s->banner = 0;
     } else {
         flow_text(cr, L, s, th, b->text, size, bold, italic, underline, strike, overline,
-                  color, content_w, href, b->node_id, &x);
+                  color, content_w, href, b->node_id, b->block_id, &x);
     }
     s->nowrap = 0;
+    s->break_words = 0;
+    s->text_overflow = 0;
 }
 
 /* Lays a contiguous range [start,end) of blocks that share one author flex/grid
@@ -2721,6 +2826,7 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (ob->box_idx < L->nbox)
         L->boxes[ob->box_idx].h = s->cur_top - L->boxes[ob->box_idx].top;
     s->box_depth--;
+    if (s->hidden_from > s->box_depth) s->hidden_from = 0;
 }
 
 /* Closes every open box (innermost first). Used at document end and when a flex/grid
@@ -2773,6 +2879,12 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
     double box_left = ctx_left + hp.x_off - pl;
     double box_width = hp.content_w + pl + pr;
 
+    /* visibility:hidden on this box or an inherited hidden ancestor: geometry
+     * (x/top/w, and h once close_top_box finalizes it) is still resolved so layout
+     * space is reserved; only decoration/content painting is skipped. */
+    int inherited_hidden = (s->hidden_from != 0);
+    int this_hidden = (def->visibility == CSS_VIS_HIDDEN || def->visibility == CSS_VIS_COLLAPSE);
+
     rc_box *bx = rc_add_box(L);
     size_t idx = (bx != NULL) ? (L->nbox - 1) : (size_t)-1;
     if (bx != NULL) {
@@ -2791,6 +2903,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->outline_w = def->outline_w; bx->outline_style = def->outline_style;
         bx->outline_color = def->outline_color;
         bx->bg_rgb = def->bg_rgb;
+        bx->hidden = inherited_hidden || this_hidden;
 
         /* Stage 2: position:relative (and sticky, fail-closed to relative) offsets
          * the box's own rect by its insets. Siblings are unaffected — the box's
@@ -2812,6 +2925,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         ob->inner_left = ctx_left + hp.x_off + bl;
         ob->inner_w = hp.content_w - bl - br;
         if (ob->inner_w < 1.0) ob->inner_w = 1.0;
+        if (!inherited_hidden && this_hidden) s->hidden_from = s->box_depth;
     }
 }
 
@@ -3073,7 +3187,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             if (r != NULL) {
                 r->kind = RC_INPUT; r->top = top; r->height = h; r->ascent = fe.ascent;
                 r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-                r->align = 0; r->blk = b;
+                r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
             }
             s.cur_top = top + h;
             continue;
@@ -3096,7 +3210,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             if (r != NULL) {
                 r->kind = RC_IMAGE; r->top = top; r->height = h; r->ascent = fe.ascent;
                 r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-                r->align = 0; r->blk = b;
+                r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
             }
             s.cur_top = top + h;
             continue;
@@ -3408,6 +3522,7 @@ static double row_align_offset(const rc_layout *L, const rc_row *r, double conte
  * v1: border-radius is threaded but not yet rounded, and dashed/dotted collapse to
  * solid. The box decoration was gated behind caps.css upstream (render_doc). */
 static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy) {
+    if (bx->hidden) return;  /* visibility:hidden: geometry stood, decoration does not paint */
     double x = ox + bx->x, y = oy + bx->top, w = bx->w, h = bx->h;
     if (w <= 0.0 || h <= 0.0) return;
     double bt = box_edge_px(bx->bord_tw), br = box_edge_px(bx->bord_rw);
@@ -3480,6 +3595,8 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
                               const rc_row *r, double left, double ry,
                               double content_w, double band_w, int show_hover) {
     const ui_theme *th = &w->theme;
+
+    if (r->hidden) return;  /* visibility:hidden: space stood, nothing paints */
 
     if (r->kind == RC_IMAGE && r->blk != NULL) {
         paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
@@ -4149,6 +4266,70 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     return hit;
 }
 
+/* First non-unset author `cursor` on block_id's box or an ancestor (nearest wins,
+ * like the rest of the box-decoration fields), or CSS_CUR_UNSET if none set the
+ * property or block_id < 0. Bounded by the box-def parent chain (RC_BOX_STACK_MAX,
+ * same cap as every other box-path walk here). */
+static int resolve_box_cursor(const rd_doc *doc, int block_id) {
+    for (int id = block_id, n = 0; id >= 0 && n < RC_BOX_STACK_MAX; ++n) {
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        if (d == NULL) break;
+        if (d->cursor != CSS_CUR_UNSET) return d->cursor;
+        id = d->parent_id;
+    }
+    return CSS_CUR_UNSET;
+}
+
+/* Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET
+ * when outside content / no box sets one. Unlike link_at_point this tests EVERY
+ * fragment (not just linked ones): cursor:pointer commonly styles a non-link
+ * clickable element (a JS-driven button/div). A separate layout+hit-test walk from
+ * link_at_point/node_at_point (matching this file's existing per-purpose hit-test
+ * style); update_hover calls all it needs once per pointer-motion event. */
+static int cursor_at_point(browser_window *w, double px, double py) {
+    if (w->doc == NULL || w->cairo_surface == NULL) return CSS_CUR_UNSET;
+
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    if (py < content_top || py > content_top + content_h) return CSS_CUR_UNSET;
+
+    const ui_theme *th = &w->theme;
+    double left = content_margin_x(w);
+    double content_w = content_width(w);
+
+    cairo_t *cr = cairo_create(w->cairo_surface);
+    rc_layout L;
+    layout_doc(cr, w, content_w, &L);
+
+    double max_scroll = L.total_h - content_h;
+    if (max_scroll < 0.0) max_scroll = 0.0;
+    double scroll = w->scroll;
+    if (scroll < 0.0) scroll = 0.0;
+    if (scroll > max_scroll) scroll = max_scroll;
+    double origin = content_top + th->content_margin - scroll;
+
+    int cur = CSS_CUR_UNSET;
+    for (size_t i = 0; i < L.nrow && cur == CSS_CUR_UNSET; ++i) {
+        const rc_row *r = &L.rows[i];
+        if (r->kind != RC_TEXT) continue;
+        double ry = origin + r->top;
+        if (py < ry || py > ry + r->height) continue;
+        double ax = row_align_offset(&L, r, content_w);
+        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
+            const rc_frag *f = &L.frags[k];
+            double fx = left + r->x_off + ax + f->x;
+            if (px >= fx && px <= fx + f->width) {
+                cur = resolve_box_cursor(w->doc, f->block_id);
+                break;
+            }
+        }
+    }
+
+    rc_free(&L);
+    cairo_destroy(cr);
+    return cur;
+}
+
 /* Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the
  * point is over blank space / outside content. Mirrors layout and scroll clamping
  * exactly so the hit matches the painted frame. */
@@ -4220,6 +4401,7 @@ static void follow_link(browser_window *w, const char *href) {
 static void apply_click_result(browser_window *w, tab_page *page) {
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
     w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
+    w->hover_cursor = CSS_CUR_UNSET;
     rdp_caps eff = w->caps;
     if (w->reader) { eff.css = false; eff.images = false; }
     rd_doc *doc = NULL;
@@ -5284,16 +5466,26 @@ static void set_cursor(browser_window *w, int hand) {
 }
 
 /* Recomputes which link (if any) is under the pointer; on a change, updates the
- * cursor shape and repaints so the hover highlight follows. */
+ * cursor shape and repaints so the hover highlight follows. The author `cursor`
+ * (css_cursor) at the point is folded into the hand-vs-arrow decision: a
+ * cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
+ * even without an href. v1 only distinguishes pointer from everything else (the
+ * rest of the keyword set resolves for completeness/debug_dom but still paints as
+ * the default arrow -- see spec/css.md); overriding a LINK's hand cursor away
+ * (e.g. `a{cursor:default}`) is a known v1 gap. */
 static void update_hover(browser_window *w) {
     const char *h = (w->doc != NULL && !w->menu_open)
                     ? link_at_point(w, w->ptr_x, w->ptr_y) : NULL;
+    int cur = (w->doc != NULL && !w->menu_open)
+              ? cursor_at_point(w, w->ptr_x, w->ptr_y) : CSS_CUR_UNSET;
     ui_hot hot = toolbar_button_at(w, w->ptr_x, w->ptr_y);
-    if (h == w->hover_href && hot == w->hot) return;
+    if (h == w->hover_href && cur == w->hover_cursor && hot == w->hot) return;
 
-    int hand_was = (w->hover_href != NULL) || hot_actionable(w, w->hot);
-    int hand_now = (h != NULL) || hot_actionable(w, hot);
+    int hand_was = (w->hover_href != NULL) || hot_actionable(w, w->hot) ||
+                   w->hover_cursor == CSS_CUR_POINTER;
+    int hand_now = (h != NULL) || hot_actionable(w, hot) || cur == CSS_CUR_POINTER;
     w->hover_href = h;
+    w->hover_cursor = cur;
     w->hot = hot;
     if (hand_was != hand_now) set_cursor(w, hand_now);
     redraw(w);
@@ -5808,6 +6000,7 @@ static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surfa
     if (w->ptr_focus == sf) w->ptr_focus = NULL;
     if (w->hover_href != NULL || w->hot != UI_HOT_NONE) {
         w->hover_href = NULL;
+        w->hover_cursor = CSS_CUR_UNSET;
         w->hot = UI_HOT_NONE;
         redraw(w);
     }

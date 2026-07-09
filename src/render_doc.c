@@ -106,6 +106,8 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->valign = 0;
     b->text_indent = PV_LEN_UNSET;
     b->white_space = 0;
+    b->text_overflow = 0;
+    b->word_break = 0;
     b->cont_id = -1;
     b->cont_display = 0;
     b->cont_gap = 0;
@@ -276,6 +278,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->valign = r->valign;
                 lb->text_indent = r->text_indent;
                 lb->white_space = r->white_space;
+                lb->text_overflow = r->text_overflow;
+                lb->word_break = r->word_break;
             }
             lb->cont_id = r->cont_id;
             lb->cont_display = r->cont_display;

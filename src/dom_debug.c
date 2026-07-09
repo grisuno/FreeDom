@@ -126,6 +126,44 @@ static const char *dd_position_name(int p) {
     }
 }
 
+static const char *dd_visibility_name(int v) {
+    switch (v) {
+        case CSS_VIS_HIDDEN:   return "hidden";
+        case CSS_VIS_COLLAPSE: return "collapse";
+        default:                return "visible";
+    }
+}
+
+static const char *dd_overflow_name(int o) {
+    switch (o) {
+        case CSS_OF_HIDDEN: return "hidden";
+        case CSS_OF_SCROLL: return "scroll";
+        case CSS_OF_AUTO:   return "auto";
+        default:             return "visible";
+    }
+}
+
+static const char *dd_cursor_name(int c) {
+    switch (c) {
+        case CSS_CUR_POINTER:     return "pointer";
+        case CSS_CUR_DEFAULT:     return "default";
+        case CSS_CUR_TEXT:        return "text";
+        case CSS_CUR_MOVE:        return "move";
+        case CSS_CUR_NOT_ALLOWED: return "not-allowed";
+        case CSS_CUR_HELP:        return "help";
+        case CSS_CUR_WAIT:        return "wait";
+        case CSS_CUR_CROSSHAIR:   return "crosshair";
+        case CSS_CUR_GRAB:        return "grab";
+        case CSS_CUR_ZOOM_IN:     return "zoom-in";
+        case CSS_CUR_NONE:        return "none";
+        default:                   return "auto";
+    }
+}
+
+static const char *dd_text_overflow_name(int t) {
+    return (t == CSS_TO_ELLIPSIS) ? "ellipsis" : "clip";
+}
+
 /* A px inset value for the dump: 0 for unset/auto (so the line stays compact). */
 static int dd_inset(int v) {
     return (v == PV_LEN_UNSET || v == CSS_LEN_AUTO) ? 0 : v;
@@ -183,6 +221,15 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
                   dd_inset(b->inset_bottom), dd_inset(b->inset_left));
         if (b->z_index != PV_LEN_UNSET) dd_printf(c, " z=%d", b->z_index);
     }
+    /* visibility/overflow/cursor: printed only when set, so the common case stays
+     * compact. visibility is painted (skip-draw, space reserved); overflow is
+     * resolved-not-yet-painted (see spec/css.md); cursor drives hover. */
+    if (b->visibility != CSS_VIS_UNSET)
+        dd_printf(c, " visibility=%s", dd_visibility_name(b->visibility));
+    if (b->overflow_x != CSS_OF_UNSET || b->overflow_y != CSS_OF_UNSET)
+        dd_printf(c, " overflow=%s/%s", dd_overflow_name(b->overflow_x),
+                  dd_overflow_name(b->overflow_y));
+    if (b->cursor != CSS_CUR_UNSET) dd_printf(c, " cursor=%s", dd_cursor_name(b->cursor));
     dd_putc(c, '\n');
 }
 
@@ -229,6 +276,11 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
     if (b->box_w)         dd_printf(c, " w=%d", b->box_w);
     if (b->box_l || b->box_r) dd_printf(c, " ins(l=%d r=%d)", b->box_l, b->box_r);
     if (b->box_center)    dd_puts(c, " center");
+
+    /* text-overflow/word-break: printed only when set (inherited run properties,
+     * like white-space), so the common case stays byte-identical/compact. */
+    if (b->text_overflow) dd_printf(c, " text-overflow=%s", dd_text_overflow_name(b->text_overflow));
+    if (b->word_break == CSS_WB_BREAK) dd_puts(c, " word-break=break");
 
     if (b->href != NULL && b->href[0] != '\0') { dd_puts(c, " href="); dd_field(c, b->href); }
 

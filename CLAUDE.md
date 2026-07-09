@@ -1637,6 +1637,77 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   Wayland interactiva pendiente al dueño.)* Ver `[[freedom-css-layout-expansion]]`,
   `[[freedom-flex-per-item]]`, `[[freedom-box-engine-and-dispatcher]]`,
   `[[freedom-author-css-direction]]`.
+- **Hito (CSS) — `visibility`, `overflow`/`-x`/`-y`, `cursor`, `text-overflow`,
+  `word-break`/`overflow-wrap`/`word-wrap` (2026-07-08).** Cinco propiedades nuevas del
+  módulo puro `css`, elegidas por ser tractables sin tocar el pipeline de transform/
+  compositing que la doctrina ya excluye (ver el batch anterior). **`visibility`**
+  (`visible`/`hidden`/`collapse`, `collapse` colapsa a `hidden` — sin modelo de fila de
+  tabla real) es **pintada**: un box/fila con `visibility:hidden` (propia o de un
+  ancestro) no dibuja nada pero **reserva su espacio de layout** (a diferencia de
+  `display:none`, que lo elimina). **`overflow`/`overflow-x`/`overflow-y`** (`visible`/
+  `hidden`/`scroll`/`auto`; `clip`→`hidden`) se **resuelven pero no se pintan aún**
+  (sin clipping — este renderer estático no tiene aún el recorte de contenido a la caja;
+  mismo patrón "resolver ahora, pintar después" que `position`/`border` en el Hito
+  23b-7). **`cursor`** (subconjunto de keywords CSS) se resuelve completo pero v1 solo
+  distingue `pointer` (muestra la mano) de todo el resto (flecha por defecto) — reusa
+  la infraestructura de 2 cursores ya cargada. **`text-overflow: ellipsis`** trunca una
+  línea `white-space:nowrap` que no entra en su caja, en el punto de clúster UTF-8 que
+  cabe, con "…" (U+2026) añadido; solo tiene efecto con `nowrap` (única señal de "esta
+  línea no debe wrappear" disponible sin `overflow:hidden` pintado). **`word-break`/
+  `overflow-wrap`/`word-wrap`** se **unifican** deliberadamente en un solo campo
+  `word_break` (CSS real les da semántica distinta — rotura codiciosa vs. de último
+  recurso — que este motor no modela): una palabra más ancha que TODA la línea (no solo
+  el espacio restante) se parte en clústeres UTF-8 que cada uno cabe, en vez de
+  desbordar el borde de la caja sin partirse. **Plumbing (patrón establecido, sin
+  sorpresas):** `css.h`/`css.c` (5 enums + 6 campos en `css_style`, dispatch +
+  `apply_decl` + default designado); `page_view` (`pv_box_def` gana los 4 campos de
+  box — `css_has_boxdeco` extendido para que un elemento que solo fija uno de estos
+  cuatro igual registre su caja —; `pv_run`/`pv_text_ext` ganan `text_overflow`/
+  `word_break`, heredados como `white_space`; `pv_set_text_ext` pasa a 13-ario); `tab.c`
+  IPC (2 int32 nuevos en la cola por-run tras `white_space`; el array `f[]` de cajas
+  pasa de 39 a 43 campos — **el gotcha de desincronización de siempre**, ambos lados
+  editados juntos); `render_doc` (gate `caps.css`, cajas ya copian todo el struct).
+  **Pintura (`gui/browser_ui.c`):** visibilidad vía `rc_state.hidden_from` (profundidad
+  del box_stack en la que se abrió una caja `hidden`; se limpia al cerrarla) —
+  `rc_box.hidden`/`rc_row.hidden` se leen en `paint_box_decoration`/`paint_content_row`
+  (compartidas por pantalla/PDF/PNG, así un solo punto de skip cubre las tres rutas);
+  cursor vía `rc_frag.block_id` nuevo (para el lookup de ancestro) + `cursor_at_point`
+  (helper nuevo, hermano de `link_at_point`/`node_at_point` — walk de layout separado,
+  consistente con el estilo ya repetido del archivo) + `update_hover` extendido
+  (`w->hover_cursor` nuevo, con guardado/restaurado en `tab_save`/`tab_restore` como
+  `hover_href`); `flow_text` gana la partición por word-break y el truncado por
+  ellipsis (helper compartido `flow_emit_frag` para no duplicar la emisión de
+  fragmento). **Gotcha real encontrado por el propio ciclo:** un primer `make test`
+  tras crecer `css_style` otra vez dio un falso positivo (`test_dump_layout_no_wrapper_
+  fragmentation` con `npositioned=0`) — no era regresión: era el gotcha ya documentado
+  de `.o` viejos (el Makefile no seguimiento de deps de headers); un `git stash`/rebuild
+  limpio confirmó la lógica intacta, y un `make clean && make` sobre el código nuevo lo
+  arregló. Specs (`css.md`: tabla de propiedades + inventario + tipos) + tests (4 en
+  `css`, 3 en `page_view` incl. "cursor solo sí dispara caja" y herencia de
+  text-overflow/word-break, 1 en `render_doc` gate-por-caps.css, 1 E2E en `tab`
+  roundtrip IPC por el worker real, 1 en `dom_debug`) + `make test` (40 suites, 0
+  fallos) / `make asan` (40, exit 0, sin leaks/UB) / `cppcheck` limpios + fuzz
+  `fuzz-css` (147k execs, el diccionario del propio fuzzer descubrió `"visibility"`/
+  `"cursor"`/`"overflow-wrap"` solo), `fuzz-pv` (20.5k execs) y `fuzz-dd` (14k execs)
+  sin crash/leak/UB + **E2E visual** (`examples/visibility-and-text-wrap.html` por
+  `--author-css --download-png`: el "before"/"after" con hueco confirma que
+  `visibility:hidden` reserva espacio sin pintar; la caja `break-all` parte la palabra
+  larga en 4 líneas mientras la caja `normal` la deja desbordar sin partir — contraste
+  directo en el mismo PNG; la caja `ellipsis` trunca a "This line of text is much too
+  …"; `cursor=pointer` confirmado vía `--dump-dom`, no visual — un cursor no pinta
+  píxeles). **Fuera de alcance (v1, documentado en `spec/css.md`):** `overflow`
+  *pintado* (clipping real — próximo hito del motor de cajas), `cursor` más allá de
+  pointer-vs-default (necesita cargar más formas del tema de cursor), override del
+  cursor de mano por defecto de un link (`a{cursor:default}`), `text-overflow` cuando
+  el desborde ocurre en un run inline posterior al que truncó (mismo límite que otros
+  casos multi-run), un contenedor flex/grid anidado DENTRO de una caja
+  `visibility:hidden` (los `rc_state` hijos de `layout_container`/`layout_float_band`
+  no heredan `hidden_from` — gap de anidamiento conocido, mismo patrón que otras
+  composiciones no soportadas del motor de cajas), `visibility`/`overflow` en cajas
+  fuera de flujo (`position:absolute`/`fixed`, pintadas por un pase separado). *(Módulos
+  puros + IPC + E2E visual headless verificados; ventana Wayland interactiva
+  (el hover de cursor real) pendiente al dueño.)* Ver
+  `[[freedom-visibility-overflow-cursor-textwrap]]`.
 
 ### 7.3 Roadmap — por cruzar
 

@@ -313,6 +313,50 @@ static void test_load_carries_float(void **state) {
     tab_close(t);
 }
 
+/* visibility/overflow/cursor (box-level) and text-overflow/word-break (run-level)
+ * survive the worker round-trip -- write_view/read_view serialize the box-def f[]
+ * array and the per-run tail in the same order on both sides. */
+static void test_load_carries_visibility_overflow_cursor_and_text_wrap(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>V</title></head><body>"
+        "<div style=\"visibility:hidden;overflow-x:hidden;overflow-y:scroll;"
+        "cursor:pointer\">solo</div>"
+        "<p style=\"text-overflow:ellipsis;white-space:nowrap;word-break:break-all\">wrapme</p>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_solo = 0, saw_wrap = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "solo") == 0) {
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->visibility, CSS_VIS_HIDDEN);
+            assert_int_equal(bx->overflow_x, CSS_OF_HIDDEN);
+            assert_int_equal(bx->overflow_y, CSS_OF_SCROLL);
+            assert_int_equal(bx->cursor, CSS_CUR_POINTER);
+            saw_solo = 1;
+        }
+        if (strcmp(r->text, "wrapme") == 0) {
+            assert_int_equal(r->text_overflow, CSS_TO_ELLIPSIS);
+            assert_int_equal(r->word_break, CSS_WB_BREAK);
+            saw_wrap = 1;
+        }
+    }
+    assert_true(saw_solo);
+    assert_true(saw_wrap);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Container-item identity over IPC: inline fragments of the same direct child
  * share one cont_item ordinal, the next child differs, and the inter-block source
  * whitespace emits no run at all (no blank lines cross the wire). */
@@ -1642,6 +1686,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_flex_item),
         cmocka_unit_test(test_load_carries_flex_wrap_align_row_gap),
         cmocka_unit_test(test_load_carries_float),
+        cmocka_unit_test(test_load_carries_visibility_overflow_cursor_and_text_wrap),
         cmocka_unit_test(test_load_carries_cont_item),
         cmocka_unit_test(test_load_carries_node_id),
         cmocka_unit_test(test_click_runs_handler_and_returns_view),

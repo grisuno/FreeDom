@@ -117,6 +117,12 @@ typedef struct pv_run {
     int     valign;          /* css_valign */
     int     text_indent;     /* signed px first-line indent, PV_LEN_UNSET unset */
     int     white_space;     /* css_white_space */
+    /* text-overflow / word-break (see css_word_break for the word-break/overflow-wrap/
+     * word-wrap unification), each resolved from the nearest ancestor that sets it
+     * (they inherit, like white_space). Presentation: render_doc applies them only
+     * with caps.css. Defaults: 0 (unset). */
+    int     text_overflow;   /* css_text_overflow */
+    int     word_break;      /* css_word_break */
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -237,6 +243,15 @@ typedef struct pv_box_def {
     int position;
     int inset_top, inset_right, inset_bottom, inset_left;
     int z_index;
+    /* visibility / overflow / cursor (not inherited, like border/position -- read
+     * from the box's own resolved style). visibility gates painting of this box and
+     * everything it encloses while still reserving its layout space (see
+     * css_visibility). overflow_x/_y are resolved for completeness/debug_dom in this
+     * milestone; the presentation layer does not yet clip on them (deferred, see
+     * spec/css.md). cursor drives the hover cursor shape (see css_cursor). */
+    int visibility;
+    int overflow_x, overflow_y;
+    int cursor;
 } pv_box_def;
 
 typedef struct pv_view {
@@ -345,16 +360,18 @@ void pv_set_bgcolor(pv_view *v, int bg_rgb);
 void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
                        int text_decoration);
 
-/* Sets the author text-presentation extensions (Hito 23b-6) on the most recently
- * appended run: the generic font_family, text_transform, signed letter_spacing/
- * word_spacing (PV_LEN_UNSET = unset), text-shadow (shadow_dx/dy offsets + shadow_color
- * packed 0xRRGGBB or -1 for none), opacity (0..100 or -1), valign, signed text_indent
- * (PV_LEN_UNSET = unset) and white_space. No-op on an empty or NULL view. Like author
- * colors, render_doc applies these only with caps.css. */
+/* Sets the author text-presentation extensions (Hito 23b-6, plus text_overflow/
+ * word_break) on the most recently appended run: the generic font_family,
+ * text_transform, signed letter_spacing/word_spacing (PV_LEN_UNSET = unset),
+ * text-shadow (shadow_dx/dy offsets + shadow_color packed 0xRRGGBB or -1 for none),
+ * opacity (0..100 or -1), valign, signed text_indent (PV_LEN_UNSET = unset),
+ * white_space, text_overflow (css_text_overflow) and word_break (css_word_break).
+ * No-op on an empty or NULL view. Like author colors, render_doc applies these only
+ * with caps.css. */
 void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
                      int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
                      int shadow_color, int opacity, int valign, int text_indent,
-                     int white_space);
+                     int white_space, int text_overflow, int word_break);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/

@@ -152,6 +152,8 @@ static void run_init_common(pv_run *r) {
     r->valign = 0;
     r->text_indent = PV_LEN_UNSET;
     r->white_space = 0;
+    r->text_overflow = 0;
+    r->word_break = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -394,7 +396,7 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
 void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
                      int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
                      int shadow_color, int opacity, int valign, int text_indent,
-                     int white_space) {
+                     int white_space, int text_overflow, int word_break) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->font_family = font_family;
@@ -408,6 +410,8 @@ void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
     r->valign = valign;
     r->text_indent = text_indent;
     r->white_space = white_space;
+    r->text_overflow = text_overflow;
+    r->word_break = word_break;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -686,6 +690,7 @@ typedef struct pv_text_ext {
     int shadow_dx, shadow_dy, shadow_color;
     int opacity, valign, text_indent, white_space;
     int list_style;
+    int text_overflow, word_break;
 } pv_text_ext;
 
 /* Initialises an ext to "unset" (no author text extension applied). */
@@ -695,6 +700,7 @@ static void pv_text_ext_reset(pv_text_ext *e) {
     e->shadow_dx = 0; e->shadow_dy = 0; e->shadow_color = -1;
     e->opacity = -1; e->valign = 0; e->text_indent = PV_LEN_UNSET;
     e->white_space = 0; e->list_style = 0;
+    e->text_overflow = 0; e->word_break = 0;
 }
 
 /* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
@@ -716,6 +722,9 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
         e->text_indent = cs->text_indent;
     if (e->white_space == 0 && cs->white_space != CSS_WS_UNSET) e->white_space = cs->white_space;
     if (e->list_style == 0 && cs->list_style != CSS_LS_UNSET) e->list_style = cs->list_style;
+    if (e->text_overflow == 0 && cs->text_overflow != CSS_TO_UNSET)
+        e->text_overflow = cs->text_overflow;
+    if (e->word_break == 0 && cs->word_break != CSS_WB_UNSET) e->word_break = cs->word_break;
 }
 
 /* True if the resolved style declares any HORIZONTAL box property. */
@@ -759,7 +768,9 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->border_top_width != CSS_LEN_UNSET || cs->border_right_width != CSS_LEN_UNSET ||
            cs->border_bottom_width != CSS_LEN_UNSET || cs->border_left_width != CSS_LEN_UNSET ||
            cs->border_radius != CSS_LEN_UNSET || cs->box_shadow_color != -1 ||
-           cs->outline_width != CSS_LEN_UNSET || css_has_position(cs);
+           cs->outline_width != CSS_LEN_UNSET || css_has_position(cs) ||
+           cs->visibility != CSS_VIS_UNSET || cs->overflow_x != CSS_OF_UNSET ||
+           cs->overflow_y != CSS_OF_UNSET || cs->cursor != CSS_CUR_UNSET;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -817,6 +828,9 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->inset_top = cs->inset_top; d->inset_right = cs->inset_right;
     d->inset_bottom = cs->inset_bottom; d->inset_left = cs->inset_left;
     d->z_index = cs->z_index;
+    d->visibility = cs->visibility;
+    d->overflow_x = cs->overflow_x; d->overflow_y = cs->overflow_y;
+    d->cursor = cs->cursor;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
@@ -1762,7 +1776,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 cext.letter_spacing, cext.word_spacing,
                                 cext.shadow_dx, cext.shadow_dy, cext.shadow_color,
                                 cext.opacity, cext.valign, cext.text_indent,
-                                cext.white_space);
+                                cext.white_space, cext.text_overflow, cext.word_break);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
                 /* Every collected cell is its own grid item (the cell node is the
@@ -1973,7 +1987,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
         pv_set_text_ext(v, ext.font_family, ext.text_transform, ext.letter_spacing,
                         ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,
-                        ext.opacity, ext.valign, ext.text_indent, ext.white_space);
+                        ext.opacity, ext.valign, ext.text_indent, ext.white_space,
+                        ext.text_overflow, ext.word_break);
         pv_set_block_id(v, bdeco);
         pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
     }
