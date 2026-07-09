@@ -52,7 +52,7 @@ CFLAGS    ?= $(STD) $(WARN) $(HARDEN) $(OPT) -Iinclude $(LEXBOR_CFLAGS)
 LDFLAGS   ?= $(LDHARDEN)
 
 # Per-module link dependencies.
-SF_LIBS    = -lcurl -lssl -lcrypto
+SF_LIBS    = -lcurl -lssl -lcrypto -lpthread
 HP_LIBS    = $(LEXBOR_LIBS)
 JS_LIBS    = -lm -lpthread
 LS_LIBS    = -lcrypto

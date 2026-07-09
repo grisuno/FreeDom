@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <curl/curl.h>
 #include <openssl/ssl.h>
@@ -55,12 +56,37 @@ static long ci_index(const char *haystack, const char *needle) {
     return -1;
 }
 
+/* --- ephemeral cookie jar (in-memory, zero persistence, Zero Knowledge) --- */
+
+static CURLSH *sf_share = NULL;
+static pthread_mutex_t sf_cookie_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static void sf_share_lock(CURL *handle, curl_lock_data data,
+                          curl_lock_access access, void *userptr) {
+    (void)handle; (void)data; (void)access; (void)userptr;
+    pthread_mutex_lock(&sf_cookie_lock);
+}
+
+static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr) {
+    (void)handle; (void)data; (void)userptr;
+    pthread_mutex_unlock(&sf_cookie_lock);
+}
+
 /* --- public: defaults --- */
 
 void sf_global_init(void) {
     /* Refcounted by libcurl; the first call from the main thread does the real (not
      * thread-safe) global setup so later per-thread curl_easy_init calls are safe. */
     curl_global_init(CURL_GLOBAL_DEFAULT);
+
+    /* In-memory cookie jar shared across ALL requests so Set-Cookie from a POST
+     * login survives the redirect GET. Zero Knowledge: never persisted to disk. */
+    sf_share = curl_share_init();
+    if (sf_share != NULL) {
+        curl_share_setopt(sf_share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+        curl_share_setopt(sf_share, CURLSHOPT_LOCKFUNC, sf_share_lock);
+        curl_share_setopt(sf_share, CURLSHOPT_UNLOCKFUNC, sf_share_unlock);
+    }
 }
 
 sf_config sf_config_default(void) {
@@ -561,6 +587,16 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
 
     CURL *curl = curl_easy_init();
     if (curl == NULL) { out->status = SF_ERR_OOM; return SF_ERR_OOM; }
+
+    /* Share the ephemeral cookie jar so cookies survive across requests (login ->
+     * redirect -> profile). The share is created once in sf_global_init; if it is
+     * NULL (init not called / OOM) we still proceed without cookies. */
+    if (sf_share != NULL) {
+        curl_easy_setopt(curl, CURLOPT_SHARE, sf_share);
+    }
+    /* Enable libcurl's in-memory cookie engine on every handle. Even without the
+     * share, this handles Set-Cookie within a single redirect chain (sf_get_follow). */
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
     fetch_ctx ctx;
     memset(&ctx, 0, sizeof ctx);
