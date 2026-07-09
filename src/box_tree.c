@@ -69,7 +69,11 @@ static double bt_nn(double v) {
  * with the cross-axis gap (row_gap if set, else gap, matching a plain CSS
  * `gap: R C` shorthand). Within a line, a child is positioned per its resolved
  * align (start/center/end; stretch is v1-approximated as start -- see
- * spec/box_engine.md), never affecting the line height itself. */
+ * spec/box_engine.md), never affecting the line height itself.
+ *
+ * wrap_reverse (node->wrap_reverse): when node->wrap is active and node->wrap_reverse
+ * is nonzero, the cross-axis line order is reversed: the first line packs at the
+ * bottom, the last line at the top. Total height is the same as normal wrap. */
 static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                              double pl, double pt, double pb, double cw, unsigned depth) {
     if (node->gap < 0.0 || (node->has_row_gap && node->row_gap < 0.0)) return BT_ERR_RANGE;
@@ -99,38 +103,84 @@ static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
         line_start[1] = nk;
     }
 
-    double ytop = pt;
-    for (size_t L = 0; L < nlines; ++L) {
-        size_t a = line_start[L], b = line_start[L + 1], ln = b - a;
-        fx_item items[BT_MAX_CHILDREN];
-        fx_result res[BT_MAX_CHILDREN];
-        for (size_t k = 0; k < ln; ++k) {
-            items[k].basis = kids[a + k]->basis;
-            items[k].grow = kids[a + k]->grow;
-            items[k].shrink = kids[a + k]->shrink;
-            items[k].min = kids[a + k]->min_main;
+    double line_h[BT_MAX_CHILDREN];
+    if (node->wrap && node->wrap_reverse) {
+        /* wrap-reverse: first compute all line heights, then lay out from bottom
+         * to top so the first line ends up visually at the bottom. */
+        for (size_t L = 0; L < nlines; ++L) {
+            size_t a = line_start[L], b = line_start[L + 1], ln = b - a;
+            fx_item items[BT_MAX_CHILDREN];
+            fx_result res[BT_MAX_CHILDREN];
+            for (size_t k = 0; k < ln; ++k) {
+                items[k].basis = kids[a + k]->basis;
+                items[k].grow = kids[a + k]->grow;
+                items[k].shrink = kids[a + k]->shrink;
+                items[k].min = kids[a + k]->min_main;
+            }
+            if (fx_flex_line(items, ln, cw, node->gap, node->justify, res) != FX_OK)
+                return BT_ERR_RANGE;
+            double lh = 0.0;
+            for (size_t k = 0; k < ln; ++k) {
+                bt_status r = layout_node(kids[a + k], res[k].size, depth + 1);
+                if (r != BT_OK) return r;
+                kids[a + k]->x = pl + res[k].pos;
+                if (kids[a + k]->h > lh) lh = kids[a + k]->h;
+            }
+            line_h[L] = lh;
         }
-        if (fx_flex_line(items, ln, cw, node->gap, node->justify, res) != FX_OK)
-            return BT_ERR_RANGE;
+        double total_h = 0.0;
+        for (size_t L = 0; L < nlines; ++L)
+            total_h += line_h[L];
+        total_h += (nlines > 0 ? (nlines - 1) * rgap : 0.0);
+        double yrev = pt + total_h;
+        for (size_t L = 0; L < nlines; ++L) {
+            size_t a = line_start[L], ln = line_start[L + 1] - a;
+            yrev -= line_h[L];
+            for (size_t k = 0; k < ln; ++k) {
+                bt_node *c = kids[a + k];
+                double extra = line_h[L] - c->h;
+                double dy = 0.0;
+                if (c->align == BT_ALIGN_CENTER) dy = extra / 2.0;
+                else if (c->align == BT_ALIGN_END) dy = extra;
+                c->y = yrev + dy;
+            }
+            yrev -= rgap;
+        }
+        node->h = pt + total_h + pb;
+    } else {
+        double ytop = pt;
+        for (size_t L = 0; L < nlines; ++L) {
+            size_t a = line_start[L], b = line_start[L + 1], ln = b - a;
+            fx_item items[BT_MAX_CHILDREN];
+            fx_result res[BT_MAX_CHILDREN];
+            for (size_t k = 0; k < ln; ++k) {
+                items[k].basis = kids[a + k]->basis;
+                items[k].grow = kids[a + k]->grow;
+                items[k].shrink = kids[a + k]->shrink;
+                items[k].min = kids[a + k]->min_main;
+            }
+            if (fx_flex_line(items, ln, cw, node->gap, node->justify, res) != FX_OK)
+                return BT_ERR_RANGE;
 
-        double lineh = 0.0;
-        for (size_t k = 0; k < ln; ++k) {
-            bt_status r = layout_node(kids[a + k], res[k].size, depth + 1);
-            if (r != BT_OK) return r;
-            kids[a + k]->x = pl + res[k].pos;
-            if (kids[a + k]->h > lineh) lineh = kids[a + k]->h;
+            double lineh = 0.0;
+            for (size_t k = 0; k < ln; ++k) {
+                bt_status r = layout_node(kids[a + k], res[k].size, depth + 1);
+                if (r != BT_OK) return r;
+                kids[a + k]->x = pl + res[k].pos;
+                if (kids[a + k]->h > lineh) lineh = kids[a + k]->h;
+            }
+            for (size_t k = 0; k < ln; ++k) {
+                bt_node *c = kids[a + k];
+                double extra = lineh - c->h;
+                double dy = 0.0;
+                if (c->align == BT_ALIGN_CENTER) dy = extra / 2.0;
+                else if (c->align == BT_ALIGN_END) dy = extra;
+                c->y = ytop + dy;
+            }
+            ytop += lineh + rgap;
         }
-        for (size_t k = 0; k < ln; ++k) {
-            bt_node *c = kids[a + k];
-            double extra = lineh - c->h;
-            double dy = 0.0;
-            if (c->align == BT_ALIGN_CENTER) dy = extra / 2.0;
-            else if (c->align == BT_ALIGN_END) dy = extra;
-            c->y = ytop + dy;
-        }
-        ytop += lineh + rgap;
+        node->h = ytop - rgap + pb;
     }
-    node->h = ytop - rgap + pb;
     return BT_OK;
 }
 

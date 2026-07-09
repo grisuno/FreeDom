@@ -147,6 +147,28 @@ static void test_flex_nowrap_default_single_line_unchanged(void **state) {
     assert_true(dbl_eq(root.h, 30));             /* tallest of the three */
 }
 
+static void test_flex_wrap_reverse_two_lines(void **state) {
+    (void)state;
+    /* Same 3 items as test_flex_wrap_two_lines, but wrap_reverse = 1: the first
+     * line (items 0,1) goes to the BOTTOM, the second line (item 2) at the TOP. */
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20, .basis = 100 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30, .basis = 100 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 15, .basis = 100 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_FLEX, .wrap = 1, .wrap_reverse = 1, .gap = 10,
+        .children = kids, .child_count = 3,
+    };
+    assert_int_equal(bt_layout(&root, 250), BT_OK);
+    /* Total = 30 + 10 + 15 = 55. Reverse: line 1 (h=15) at top y=0, line 0 (h=30)
+     * at bottom y=25 (15+10). item y relative to line base accounts for align. */
+    assert_rect(&kids[2], 0,   0, 100, 15);  /* line 1 at top */
+    assert_rect(&kids[0], 0,  25, 100, 20);  /* line 0 at bottom */
+    assert_rect(&kids[1], 110, 25, 100, 30);
+    assert_true(dbl_eq(root.h, 55));
+}
+
 static void test_flex_wrap_row_gap_distinct_from_gap(void **state) {
     (void)state;
     bt_node kids[3] = {
@@ -553,6 +575,7 @@ int main(void) {
         cmocka_unit_test(test_flex_row_grow),
         cmocka_unit_test(test_flex_gap_and_justify_center),
         cmocka_unit_test(test_flex_wrap_two_lines),
+        cmocka_unit_test(test_flex_wrap_reverse_two_lines),
         cmocka_unit_test(test_flex_nowrap_default_single_line_unchanged),
         cmocka_unit_test(test_flex_wrap_row_gap_distinct_from_gap),
         cmocka_unit_test(test_flex_cross_axis_align),

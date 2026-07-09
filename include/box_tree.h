@@ -67,6 +67,9 @@ typedef struct bt_node {
     int             wrap;        /* FLEX: nonzero packs items onto multiple lines instead
                                   * of forcing them all onto one (flex-wrap); 0 (default)
                                   * is the original single-line behaviour, unchanged. */
+    int             wrap_reverse;/* FLEX: when wrap is active, 1 reverses the cross-axis
+                                  * order (lines stack from bottom to top instead of
+                                  * top to bottom). 0 (default) is normal wrap. */
     double          row_gap;     /* cross-axis gap: between GRID rows, or between wrapped
                                   * FLEX lines. Only consulted when has_row_gap is set. */
     int             has_row_gap; /* 0 (zero-init default): `gap` serves both axes, exactly

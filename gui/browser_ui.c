@@ -2727,20 +2727,45 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     /* Stage 3: flex-direction column stacks the items vertically at full width
      * (the row engine below would squeeze them into n side-by-side columns —
      * exactly wrong for vertical navs). The container gap becomes vertical space
-     * between ITEMS (not between the lines inside one item); column-reverse falls
-     * back to document order (v1). */
+     * between ITEMS (not between the lines inside one item). column-reverse
+     * reverses the visual order: last item at top, first at bottom. */
     if (!is_grid && (head->flex_direction == CSS_FD_COLUMN ||
                      head->flex_direction == CSS_FD_COLUMN_REVERSE)) {
+        size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
+        double item_h[BT_MAX_CHILDREN], cum_off[BT_MAX_CHILDREN];
+        double base = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
+        s->pending_gap = 0;
+        double cur = base;
         for (size_t j = 0; j < g; ++j) {
             flush_line(L, s, th);
             if (j > 0 && head->cont_gap > 0)
-                s->cur_top += (double)head->cont_gap;
+                cur += (double)head->cont_gap;
+            s->cur_top = cur;
+            cum_off[j] = cur;
+            size_t sr = L->nrow;
             for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
                 const rd_block *bk = rd_at(doc, k);
                 if (k > gstart[j] && bk->block_break) flush_line(L, s, th);
                 s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
                 flow_text_block(cr, w, L, s, th, bk, content_w);
             }
+            flush_line(L, s, th);
+            row_start[j] = sr;
+            row_count[j] = L->nrow - sr;
+            item_h[j] = s->cur_top - cur;
+            cur = s->cur_top;
+        }
+        if (head->flex_direction == CSS_FD_COLUMN_REVERSE) {
+            double total_h = s->cur_top - base;
+            double rev = base + total_h;
+            for (size_t j = 0; j < g; ++j) {
+                rev -= item_h[j];
+                double delta = rev - cum_off[j];
+                for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r)
+                    L->rows[r].top += delta;
+                rev -= (double)((head->cont_gap > 0) ? head->cont_gap : 0);
+            }
+            s->cur_top = base + total_h;
         }
         return;
     }
@@ -2777,6 +2802,14 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             slot[m] = it;
         }
         for (size_t j = 0; j < g; ++j) pos_of[slot[j]] = j;
+        /* flex-direction: row-reverse reverses the visual order of flex items.
+         * After the order sort, the slot array has the visual order (slot[0] =
+         * leftmost item). Reversing pos_of maps each document item to its reversed
+         * layout slot (item 0 → rightmost, last item → leftmost). */
+        if (head->flex_direction == CSS_FD_ROW_REVERSE) {
+            for (size_t j = 0; j < g; ++j)
+                pos_of[j] = g - 1 - pos_of[j];
+        }
     }
 
     bt_node kids[BT_MAX_CHILDREN];
@@ -2805,6 +2838,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * the common case in practice (cards, nav items with a fixed min width). */
         root.display = BX_DISPLAY_FLEX;
         root.wrap = (head->cont_wrap == CSS_FW_WRAP || head->cont_wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
+        root.wrap_reverse = (head->cont_wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
         double share = (content_w - (double)head->cont_gap * (double)(g - 1)) / (double)g;
         if (share < 1.0) share = 1.0;
         for (size_t j = 0; j < g; ++j) {

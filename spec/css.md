@@ -304,8 +304,12 @@ first:
   (`grid-column`/`grid-row: span N` are resolved but not yet honoured — every grid
   item still occupies exactly one cell), `fr` weights/named tracks (every counted
   track — `repeat()`/`minmax()`-aware since this batch — still lays out as an
-  equal-width column), `justify-items`, `*-reverse` visual reversal,
-  `flex-wrap: wrap-reverse` cross-axis reversal (treated as plain `wrap`).
+  equal-width column), `justify-items` (parsed/resolved, not yet painted).
+  **Flex-direction `*-reverse`** and **`flex-wrap: wrap-reverse`** were the last
+  `*-reverse` reversal gap: `row-reverse` reverses the visual order of items on
+  the main axis; `column-reverse` reverses the visual stack of items (first item
+  at bottom, last at top); `wrap-reverse` reverses the cross-axis line order
+  (first line at bottom, last at top). All three are now painted (Hito 2026-07-09).
 - *Selectors*: `:not()`/`:is()`/`:where()`/`:has()`, `:first-of-type`/of-type
   family, `:empty`, `:target`, `:lang()`, all pseudo-elements `::` (dropped, fail
   closed). Sibling combinators `+`/`~` and the pseudo-class subset above **are**

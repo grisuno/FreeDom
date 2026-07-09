@@ -1750,9 +1750,12 @@ static void test_flex_align(void **state) {
                      CSS_AK_SPACE_BETWEEN);
     assert_int_equal(css_parse_inline("justify-items:end", 0).justify_items, CSS_AK_END);
     assert_int_equal(css_parse_inline("flex-direction:column", 0).flex_direction, CSS_FD_COLUMN);
+    assert_int_equal(css_parse_inline("flex-direction:column-reverse", 0).flex_direction,
+                     CSS_FD_COLUMN_REVERSE);
     assert_int_equal(css_parse_inline("flex-direction:row-reverse", 0).flex_direction,
                      CSS_FD_ROW_REVERSE);
     assert_int_equal(css_parse_inline("flex-wrap:wrap", 0).flex_wrap, CSS_FW_WRAP);
+    assert_int_equal(css_parse_inline("flex-wrap:wrap-reverse", 0).flex_wrap, CSS_FW_WRAP_REVERSE);
     assert_int_equal(css_parse_inline("flex-wrap:nowrap", 0).flex_wrap, CSS_FW_NOWRAP);
     assert_int_equal(css_parse_inline("align-items:bogus", 0).align_items, CSS_AK_UNSET);
     assert_int_equal(css_parse_inline("color:red", 0).align_items, CSS_AK_UNSET);
