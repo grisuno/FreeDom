@@ -82,9 +82,13 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_FLEX_DIR, P_FLEX_WRAP,
        P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW, P_GRID_COL_SPAN, P_GRID_ROW_SPAN,
        P_FLOAT, P_CLEAR,
-       P_VISIBILITY, P_OVERFLOW_X, P_OVERFLOW_Y, P_CURSOR,
-       P_TEXT_OVERFLOW, P_WORD_BREAK,
-       P_NSLOTS };
+        P_VISIBILITY, P_OVERFLOW_X, P_OVERFLOW_Y, P_CURSOR,
+        P_TEXT_OVERFLOW, P_WORD_BREAK,
+        P_BORDER_COLLAPSE, P_BORDER_SPACING, P_EMPTY_CELLS,
+        P_CAPTION_SIDE, P_TABLE_LAYOUT,
+        P_FONT_VARIANT, P_HYPHENS, P_USER_SELECT, P_CARET_COLOR,
+        P_APPEARANCE, P_POINTER_EVENTS,
+        P_NSLOTS };
 
 typedef struct css_decl {
     int prop;       /* P_* */
@@ -908,6 +912,107 @@ static int interp_overflow_wrap(const char *v) {
     return -1;
 }
 
+/* border-collapse: collapse/separate. -1 if unknown. */
+static int interp_border_collapse(const char *v) {
+    if (csel_ci_eq(v, "collapse")) return CSS_BCOL_COLLAPSE;
+    if (csel_ci_eq(v, "separate")) return CSS_BCOL_SEPARATE;
+    return -1;
+}
+
+/* border-spacing: the first length only (a single value: uniform; the two-value
+ * h/v form gives horizontal and only the first is honoured in v1). px/em/rem/0,
+ * clamped to [0, CSS_BORDER_SPACING_MAX]. -1 unsupported. Also accepts a bare
+ * number (no unit) as px (common in shorthand context like "10 5"). */
+static int interp_border_spacing(const char *v) {
+    char tok[CSS_TOK_MAX];
+    size_t k = 0;
+    const char *p = v;
+    while (*p == ' ' || *p == '\t') ++p;
+    while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+    tok[k] = '\0';
+    /* Try interp_len first (handles px/em/rem/0/calc). A bare non-zero number
+     * fails there, so fall back to a simple numeric parse as px. */
+    int px;
+    if (interp_len(tok, 0, &px) && px >= 0) {
+        if (px > CSS_BORDER_SPACING_MAX) px = CSS_BORDER_SPACING_MAX;
+        return px;
+    }
+    double num;
+    const char *end;
+    if (parse_num(tok, &num, &end) && *end == '\0' && num >= 0.0) {
+        px = round_clamp(num, 0, CSS_BORDER_SPACING_MAX);
+        return px;
+    }
+    return -1;
+}
+
+/* empty-cells: show/hide. -1 unknown. */
+static int interp_empty_cells(const char *v) {
+    if (csel_ci_eq(v, "show")) return CSS_EC_SHOW;
+    if (csel_ci_eq(v, "hide")) return CSS_EC_HIDE;
+    return -1;
+}
+
+/* caption-side: top/bottom. -1 unknown. */
+static int interp_caption_side(const char *v) {
+    if (csel_ci_eq(v, "top"))    return CSS_CS_TOP;
+    if (csel_ci_eq(v, "bottom")) return CSS_CS_BOTTOM;
+    return -1;
+}
+
+/* table-layout: auto/fixed. -1 unknown. */
+static int interp_table_layout(const char *v) {
+    if (csel_ci_eq(v, "auto"))  return CSS_TL_AUTO;
+    if (csel_ci_eq(v, "fixed")) return CSS_TL_FIXED;
+    return -1;
+}
+
+/* font-variant (subset: only small-caps). normal/small-caps. -1 unknown. */
+static int interp_font_variant(const char *v) {
+    if (csel_ci_eq(v, "normal"))     return CSS_FV_NORMAL;
+    if (csel_ci_eq(v, "small-caps")) return CSS_FV_SMALL_CAPS;
+    /* all-small-caps, petite-caps, etc: out of scope, fail closed */
+    return -1;
+}
+
+/* hyphens: none/manual/auto. -1 unknown. */
+static int interp_hyphens(const char *v) {
+    if (csel_ci_eq(v, "none"))   return CSS_HY_NONE;
+    if (csel_ci_eq(v, "manual")) return CSS_HY_MANUAL;
+    if (csel_ci_eq(v, "auto"))   return CSS_HY_AUTO;
+    return -1;
+}
+
+/* user-select: none/text/all/auto. -1 unknown. */
+static int interp_user_select(const char *v) {
+    if (csel_ci_eq(v, "none")) return CSS_US_NONE;
+    if (csel_ci_eq(v, "text")) return CSS_US_TEXT;
+    if (csel_ci_eq(v, "all"))  return CSS_US_ALL;
+    if (csel_ci_eq(v, "auto")) return CSS_US_AUTO;
+    return -1;
+}
+
+/* caret-color: auto -> CSS_LEN_AUTO sentinel; color -> 0xRRGGBB; -1 unset. */
+static int interp_caret_color(const char *v) {
+    if (csel_ci_eq(v, "auto")) return CSS_LEN_AUTO;
+    cc_rgb c;
+    return (cc_parse(v, &c) == CC_OK) ? cc_pack(c) : -1;
+}
+
+/* appearance: auto/none. -1 unknown. */
+static int interp_appearance(const char *v) {
+    if (csel_ci_eq(v, "auto")) return CSS_AP_AUTO;
+    if (csel_ci_eq(v, "none")) return CSS_AP_NONE;
+    return -1;
+}
+
+/* pointer-events: auto/none. -1 unknown. */
+static int interp_pointer_events(const char *v) {
+    if (csel_ci_eq(v, "auto")) return CSS_PE_AUTO;
+    if (csel_ci_eq(v, "none")) return CSS_PE_NONE;
+    return -1;
+}
+
 /* Signed integer (z-index/order). Returns 1 with *out (clamped to +-CSS_LEN_MAX),
  * 0 if not a pure integer (auto / floats / units -> dropped, leaving unset). */
 static int interp_int(const char *v, int *out) {
@@ -1475,6 +1580,21 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "box-shadow") == 0)    return expand_box_shadow(val, dst, cap);
     if (strcmp(prop, "outline") == 0)       return expand_outline(val, dst, cap);
     if (strcmp(prop, "outline-offset") == 0) return emit_len(dst, cap, P_OUTLINE_OFFSET, val, 0, 1);
+    if (strcmp(prop, "outline-width") == 0) {
+        int o = interp_bwidth1(val);
+        if (o < 0) return 0;
+        dst[0].prop = P_OUTLINE_W; dst[0].ival = o; return 1;
+    }
+    if (strcmp(prop, "outline-style") == 0) {
+        int o = interp_border_style(val);
+        if (o < 0) return 0;
+        dst[0].prop = P_OUTLINE_S; dst[0].ival = o; return 1;
+    }
+    if (strcmp(prop, "outline-color") == 0) {
+        int o = interp_color(val);
+        if (o < 0) return 0;
+        dst[0].prop = P_OUTLINE_C; dst[0].ival = o; return 1;
+    }
     if (strcmp(prop, "overflow") == 0)      return expand_overflow(val, dst, cap);
 
     int prop_id, ival;
@@ -1543,6 +1663,21 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "word-break") == 0)          { prop_id = P_WORD_BREAK;    ival = interp_word_break(val); }
     else if (strcmp(prop, "overflow-wrap") == 0 ||
              strcmp(prop, "word-wrap") == 0)            { prop_id = P_WORD_BREAK;    ival = interp_overflow_wrap(val); }
+    else if (strcmp(prop, "border-collapse") == 0)      { prop_id = P_BORDER_COLLAPSE; ival = interp_border_collapse(val); }
+    else if (strcmp(prop, "border-spacing") == 0)       { prop_id = P_BORDER_SPACING;  ival = interp_border_spacing(val); }
+    else if (strcmp(prop, "empty-cells") == 0)           { prop_id = P_EMPTY_CELLS;     ival = interp_empty_cells(val); }
+    else if (strcmp(prop, "caption-side") == 0)          { prop_id = P_CAPTION_SIDE;    ival = interp_caption_side(val); }
+    else if (strcmp(prop, "table-layout") == 0)          { prop_id = P_TABLE_LAYOUT;    ival = interp_table_layout(val); }
+    else if (strcmp(prop, "font-variant") == 0)          { prop_id = P_FONT_VARIANT;    ival = interp_font_variant(val); }
+    else if (strcmp(prop, "hyphens") == 0)               { prop_id = P_HYPHENS;         ival = interp_hyphens(val); }
+    else if (strcmp(prop, "user-select") == 0)           { prop_id = P_USER_SELECT;     ival = interp_user_select(val); }
+    else if (strcmp(prop, "caret-color") == 0) {
+        int o = interp_caret_color(val);
+        if (o != CSS_LEN_AUTO && o < 0) return 0;
+        dst[0].prop = P_CARET_COLOR; dst[0].ival = o; return 1;
+    }
+    else if (strcmp(prop, "appearance") == 0)            { prop_id = P_APPEARANCE;      ival = interp_appearance(val); }
+    else if (strcmp(prop, "pointer-events") == 0)        { prop_id = P_POINTER_EVENTS;  ival = interp_pointer_events(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -1985,8 +2120,19 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_OVERFLOW_X:    o->overflow_x = d->ival; break;
             case P_OVERFLOW_Y:    o->overflow_y = d->ival; break;
             case P_CURSOR:        o->cursor = d->ival; break;
-            case P_TEXT_OVERFLOW: o->text_overflow = d->ival; break;
-            case P_WORD_BREAK:    o->word_break = d->ival; break;
+            case P_TEXT_OVERFLOW:   o->text_overflow = d->ival; break;
+            case P_WORD_BREAK:      o->word_break = d->ival; break;
+            case P_BORDER_COLLAPSE: o->border_collapse = d->ival; break;
+            case P_BORDER_SPACING:  o->border_spacing = d->ival; break;
+            case P_EMPTY_CELLS:     o->empty_cells = d->ival; break;
+            case P_CAPTION_SIDE:    o->caption_side = d->ival; break;
+            case P_TABLE_LAYOUT:    o->table_layout = d->ival; break;
+            case P_FONT_VARIANT:    o->font_variant = d->ival; break;
+            case P_HYPHENS:         o->hyphens = d->ival; break;
+            case P_USER_SELECT:     o->user_select = d->ival; break;
+            case P_CARET_COLOR:     o->caret_color = d->ival; break;
+            case P_APPEARANCE:      o->appearance = d->ival; break;
+            case P_POINTER_EVENTS:  o->pointer_events = d->ival; break;
             default: break;
         }
     }
@@ -2044,6 +2190,13 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .overflow_x = CSS_OF_UNSET, .overflow_y = CSS_OF_UNSET,
         .cursor = CSS_CUR_UNSET,
         .text_overflow = CSS_TO_UNSET, .word_break = CSS_WB_UNSET,
+        .border_collapse = CSS_BCOL_UNSET, .border_spacing = CSS_LEN_UNSET,
+        .empty_cells = CSS_EC_UNSET, .caption_side = CSS_CS_UNSET,
+        .table_layout = CSS_TL_UNSET,
+        .font_variant = CSS_FV_UNSET,
+        .hyphens = CSS_HY_UNSET, .user_select = CSS_US_UNSET,
+        .caret_color = -1,
+        .appearance = CSS_AP_UNSET, .pointer_events = CSS_PE_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

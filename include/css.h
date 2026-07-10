@@ -223,9 +223,66 @@ typedef enum css_direction {
     CSS_DIR_UNSET = 0, CSS_DIR_LTR, CSS_DIR_RTL
 } css_direction;
 
+/* border-collapse. 0 unset; SEPARATE is the explicit default (separate cell
+ * borders); COLLAPSE merges adjacent borders into one. */
+typedef enum css_border_collapse {
+    CSS_BCOL_UNSET = 0, CSS_BCOL_COLLAPSE, CSS_BCOL_SEPARATE
+} css_border_collapse;
+
+/* empty-cells. 0 unset; SHOW draws cell background/border for empty <td>/<th>;
+ * HIDE suppresses them (only when border-collapse is separate). */
+typedef enum css_empty_cells {
+    CSS_EC_UNSET = 0, CSS_EC_SHOW, CSS_EC_HIDE
+} css_empty_cells;
+
+/* caption-side. 0 unset; TOP is the explicit default; BOTTOM places the
+ * <caption> below the table. */
+typedef enum css_caption_side {
+    CSS_CS_UNSET = 0, CSS_CS_TOP, CSS_CS_BOTTOM
+} css_caption_side;
+
+/* table-layout. 0 unset; AUTO is the explicit default (automatic table layout);
+ * FIXED uses the declared column widths first. */
+typedef enum css_table_layout {
+    CSS_TL_UNSET = 0, CSS_TL_AUTO, CSS_TL_FIXED
+} css_table_layout;
+
+/* font-variant (subset: only small-caps). 0 unset; NONE is the explicit default;
+ * SMALL_CAPS renders lowercase as small capitals. */
+typedef enum css_font_variant {
+    CSS_FV_UNSET = 0, CSS_FV_NORMAL, CSS_FV_SMALL_CAPS
+} css_font_variant;
+
+/* hyphens. 0 unset; MANUAL is the explicit default (hyphen only at &shy;);
+ * AUTO allows the UA to hyphenate; NONE disables hyphenation. */
+typedef enum css_hyphens {
+    CSS_HY_UNSET = 0, CSS_HY_NONE, CSS_HY_MANUAL, CSS_HY_AUTO
+} css_hyphens;
+
+/* user-select. 0 unset; AUTO is the explicit default; NONE prevents selection;
+ * TEXT allows; ALL selects all on one click. */
+typedef enum css_user_select {
+    CSS_US_UNSET = 0, CSS_US_NONE, CSS_US_TEXT, CSS_US_ALL, CSS_US_AUTO
+} css_user_select;
+
+/* appearance. 0 unset; AUTO is the explicit default (native-looking);
+ * NONE removes native styling (common CSS reset). */
+typedef enum css_appearance {
+    CSS_AP_UNSET = 0, CSS_AP_AUTO, CSS_AP_NONE
+} css_appearance;
+
+/* pointer-events. 0 unset; AUTO is the explicit default; NONE makes the
+ * element not a hit-test target. */
+typedef enum css_pointer_events {
+    CSS_PE_UNSET = 0, CSS_PE_AUTO, CSS_PE_NONE
+} css_pointer_events;
+
 /* Anti-DoS clamps for the layout properties. Insets/z-index/order reuse CSS_LEN_*.
- * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX. */
+ * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX.
+ * border-spacing is clamped to [0, CSS_SPACING_MAX] like letter-spacing (a table
+ * with 200+ px cell spacing is layout-poison, not a legitimate value). */
 #define CSS_BORDER_W_MAX  CSS_LEN_MAX
+#define CSS_BORDER_SPACING_MAX 200
 #define CSS_FLEX_FACTOR_MAX 100000  /* flex-grow/-shrink stored x100; ~1000.0 cap */
 #define CSS_GRID_SPAN_MAX 1000      /* grid-column/-row `span N` cap */
 
@@ -351,6 +408,21 @@ typedef struct css_style {
      * each. Gated behind caps.css downstream. */
     int         text_overflow;   /* css_text_overflow, 0 (unset) */
     int         word_break;      /* css_word_break, 0 (unset) */
+    /* Table properties. NOT inherited (read from the element's own resolved style). */
+    int         border_collapse; /* css_border_collapse, 0 (unset) */
+    int         border_spacing;  /* px (signed), CSS_LEN_UNSET (unset) */
+    int         empty_cells;     /* css_empty_cells, 0 (unset) */
+    int         caption_side;    /* css_caption_side, 0 (unset) */
+    int         table_layout;    /* css_table_layout, 0 (unset) */
+    /* Text-presentation extension (font-variant). INHERITS like other text props. */
+    int         font_variant;    /* css_font_variant, 0 (unset) */
+    /* Text/interaction properties. INHERIT by default (user-select, hyphens,
+     * caret-color, pointer-events inherit per spec; appearance does not). */
+    int         hyphens;         /* css_hyphens, 0 (unset) */
+    int         user_select;     /* css_user_select, 0 (unset) */
+    int         caret_color;     /* 0xRRGGBB or -1 (unset) */
+    int         appearance;      /* css_appearance, 0 (unset) */
+    int         pointer_events;  /* css_pointer_events, 0 (unset) */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

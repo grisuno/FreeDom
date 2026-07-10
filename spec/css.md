@@ -179,6 +179,12 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `list-style-type`, `list-style` | `list_style` (`css_list_style`): the first recognised type keyword wins (`disc`/`circle`/`square`/`decimal`/`lower-alpha`\|`lower-latin`/`upper-alpha`\|`upper-latin`/`lower-roman`/`upper-roman`/`none`); changes the `<li>` marker; `url()` (list-style-image) dropped (never fetch) |
 | `direction` | `direction` (`css_direction`): `ltr`/`rtl`; unknown → unset. Text-direction hint for the layout engine. |
 | `tab-size` | `tab_size` (number of spaces, 0 unset): a bare integer ≥ 1 and ≤ 64; units (`px`, `%`) dropped. |
+| `font-variant` | `font_variant` (`css_font_variant`): `normal`/`small-caps`; extended variants (`all-small-caps`, `petite-caps`, …) dropped |
+| `hyphens` | `hyphens` (`css_hyphens`): `none`/`manual`/`auto`; unknown dropped |
+| `user-select` | `user_select` (`css_user_select`): `none`/`text`/`all`/`auto`; unknown dropped |
+| `caret-color` | `caret_color` (0xRRGGBB or `CSS_LEN_AUTO` for `auto`, or -1 unset): color of the text-input caret |
+| `appearance` | `appearance` (`css_appearance`): `auto`/`none`; unknown dropped |
+| `pointer-events` | `pointer_events` (`css_pointer_events`): `auto`/`none`; unknown dropped |
 
 #### Layout / box decoration (Hito 23b-7)
 
@@ -199,6 +205,9 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | `border-radius` | `border_radius` (first value, px ≥ 0; `%` dropped). Corner-by-corner / elliptical radii out of scope. |
 | `box-shadow` | `shadow2_dx`/`_dy`/`_blur`/`_spread` (signed px) + `box_shadow_color` (`0xRRGGBB`/-1) + `box_shadow_inset` (1/0/-1). Single layer: ≤4 lengths in order dx, dy, blur, spread + optional color + optional `inset`; needs ≥2 lengths or dropped; `none` → explicit no-shadow; `url()` dropped |
 | `outline` (+`-width`/`-style`/`-color`) | `outline_width`/`outline_style`/`outline_color` (uniform, same token classifier as `border`) |
+| `outline-width` | `outline_width` (px ≥ 0, keywords `thin`=1/`medium`=3/`thick`=5, or `CSS_LEN_UNSET`). Longhand alias of the width component in the `outline` shorthand. |
+| `outline-style` | `outline_style` (`css_border_style`). Longhand alias of the style component in the `outline` shorthand. |
+| `outline-color` | `outline_color` (0xRRGGBB or -1). Longhand alias of the color component in the `outline` shorthand. |
 | `outline-offset` | `outline_offset` (signed px, `CSS_LEN_UNSET` unset). Same length parser as box-model (`em`/`rem` ×16, `calc()`). |
 | `flex-grow`, `flex-shrink` | `flex_grow`/`flex_shrink` stored ×100 (so `0.5` → 50), clamped `[0, CSS_FLEX_FACTOR_MAX]`, or -1 (unset) |
 | `flex-basis` | `flex_basis` (px ≥ 0 / `CSS_LEN_AUTO` for `auto`\|`content` / `CSS_LEN_UNSET`; `%` dropped) |
@@ -211,6 +220,11 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | `row-gap` | `row_gap` (px, clamped `[0, CSS_GAP_MAX]`, or -1 unset). `column-gap`/`gap` keep feeding `gap` (first token); two-value `gap` row component is set only via `row-gap`. |
 | `grid-auto-flow` | `grid_auto_flow` (`css_grid_flow`): `row`/`column`; `dense` ignored |
 | `grid-column`, `grid-row` | `grid_col_span`/`grid_row_span` from a `span N` value, clamped `[1, CSS_GRID_SPAN_MAX]`; line-number / named-line forms out of scope (dropped) |
+| `border-collapse` | `border_collapse` (`css_border_collapse`): `collapse`/`separate`; unknown dropped |
+| `border-spacing` | `border_spacing` (signed px, `CSS_LEN_UNSET` unset): the first length only (two-value h/v → only h honoured in v1); px/em/rem/0, accepts a bare non-zero number as px; clamped `[0, CSS_BORDER_SPACING_MAX]` |
+| `empty-cells` | `empty_cells` (`css_empty_cells`): `show`/`hide`; unknown dropped |
+| `caption-side` | `caption_side` (`css_caption_side`): `top`/`bottom`; unknown dropped |
+| `table-layout` | `table_layout` (`css_table_layout`): `auto`/`fixed`; unknown dropped |
 
 #### Visibility, overflow, cursor, text-overflow, word-break
 
@@ -246,25 +260,30 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
 - *Color / background*: `color`, `background-color`, `background` (color only).
 - *Text*: `text-align`, `font-size`, `font-weight`, `font-style`, `line-height`,
    `text-decoration`(`-line`), **`text-decoration-color`**, **`text-decoration-style`**,
-   **`font-family`**, **`text-transform`**,
+   **`font-family`**, **`text-transform`**, **`font-variant`** (`small-caps`),
    **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**, **`opacity`**,
    **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only),
    **`tab-size`**, **`direction`**,
    **`text-overflow`** (painted with `white-space:nowrap`), **`word-break`**/
    **`overflow-wrap`**/**`word-wrap`** (unified, painted for the single-word-wider-
-   than-the-line case).
+   than-the-line case),
+   **`hyphens`**, **`user-select`**, **`caret-color`**.
 - *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
    `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
    (+longhands), `padding`(+longhands), `width`, `min-width`, `max-width`,
    `height`, `min-height`, `max-height` — all length-valued
    properties among these accept `calc()`.
 - *Layout / box decoration* (**Hito 23b-7**): **`position`** (+`top`/`right`/
-  `bottom`/`left`/`inset`/`z-index`), **`box-sizing`**, **`border`**(/`-width`/
-  `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**,
-  **`outline`**, **`flex`**(/`-grow`/`-shrink`/`-basis`), **`order`**,
-  **`align-items`/`align-self`/`align-content`/`justify-items`**, **`flex-direction`**,
-  **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
-   **`grid-column`/`grid-row`** (`span N`), **`outline-offset**. **Painted** since the CSS layout expansion
+   `bottom`/`left`/`inset`/`z-index`), **`box-sizing`**, **`border`**(/`-width`/
+   `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**,
+   **`outline`**(+`-width`/`-style`/`-color` longhands), **`outline-offset`**,
+   **`flex`**(/`-grow`/`-shrink`/`-basis`), **`order`**,
+   **`align-items`/`align-self`/`align-content`/`justify-items`**, **`flex-direction`**,
+   **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
+    **`grid-column`/`grid-row`** (`span N`),
+   **`border-collapse`**, **`border-spacing`**, **`empty-cells`**,
+   **`caption-side`**, **`table-layout**.
+   **Painted** since the CSS layout expansion
    batch: `flex-wrap` (multi-line wrapping), `row-gap` (distinct grid/flex-wrap cross
    gap), `align-items`/`align-self` (flex row cross-axis only). Still value-resolved
    only (not yet painted): `border`/`box-shadow` rendering, `align-content`,
@@ -276,11 +295,12 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
 - *Float* (**spec/float.md**): **`float`** (`left`/`right`/`none`), **`clear`**
   (`left`/`right`/`both`/`none`). Consumed by the painter as side-by-side float bands
   that nest in the open box stack; see spec/float.md for the v1 scope.
-- *Visibility / overflow / cursor*: **`visibility`** (painted: skip-draw, space
+- *Visibility / overflow / cursor / interaction*: **`visibility`** (painted: skip-draw, space
    reserved), **`overflow`**/**`overflow-x`**/**`overflow-y`** (painted: clips
    in-flow rows and positioned boxes to ancestor `overflow:hidden` rects;
    2026-07-09), **`cursor`** (painted: `pointer` shows the hand cursor on any
-   element, the rest resolve but paint as the default arrow).
+   element, the rest resolve but paint as the default arrow),
+   **`appearance`**, **`pointer-events`**.
 - *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
   `all`, `min/max-width`), `!important`.
 - *Values*: **`calc()`** (`+`/`-`/`*`/`/`, parens, dimensionally checked) and
@@ -547,6 +567,17 @@ typedef struct css_style {
     css_cursor      cursor;       /* CSS_CUR_UNSET if absent */
     css_text_overflow text_overflow; /* CSS_TO_UNSET if absent */
     css_word_break  word_break;   /* CSS_WB_UNSET if absent; unifies word-break/overflow-wrap */
+    css_border_collapse border_collapse; /* CSS_BCOL_UNSET if absent */
+    int             border_spacing;  /* px, CSS_LEN_UNSET if absent */
+    css_empty_cells empty_cells;     /* CSS_EC_UNSET if absent */
+    css_caption_side caption_side;   /* CSS_CS_UNSET if absent */
+    css_table_layout table_layout;   /* CSS_TL_UNSET if absent */
+    css_font_variant font_variant;   /* CSS_FV_UNSET if absent */
+    css_hyphens      hyphens;        /* CSS_HY_UNSET if absent */
+    css_user_select  user_select;    /* CSS_US_UNSET if absent */
+    int              caret_color;    /* 0xRRGGBB or -1 if absent */
+    css_appearance   appearance;     /* CSS_AP_UNSET if absent */
+    css_pointer_events pointer_events; /* CSS_PE_UNSET if absent */
 } css_style;
 
 typedef enum css_position {
@@ -603,6 +634,15 @@ typedef enum css_text_decoration_style {
     CSS_TDS_DASHED, CSS_TDS_WAVY
 } css_text_decoration_style;
 typedef enum css_direction { CSS_DIR_UNSET = 0, CSS_DIR_LTR, CSS_DIR_RTL } css_direction;
+typedef enum css_border_collapse { CSS_BCOL_UNSET = 0, CSS_BCOL_COLLAPSE, CSS_BCOL_SEPARATE } css_border_collapse;
+typedef enum css_empty_cells { CSS_EC_UNSET = 0, CSS_EC_SHOW, CSS_EC_HIDE } css_empty_cells;
+typedef enum css_caption_side { CSS_CS_UNSET = 0, CSS_CS_TOP, CSS_CS_BOTTOM } css_caption_side;
+typedef enum css_table_layout { CSS_TL_UNSET = 0, CSS_TL_AUTO, CSS_TL_FIXED } css_table_layout;
+typedef enum css_font_variant { CSS_FV_UNSET = 0, CSS_FV_NORMAL, CSS_FV_SMALL_CAPS } css_font_variant;
+typedef enum css_hyphens { CSS_HY_UNSET = 0, CSS_HY_NONE, CSS_HY_MANUAL, CSS_HY_AUTO } css_hyphens;
+typedef enum css_user_select { CSS_US_UNSET = 0, CSS_US_NONE, CSS_US_TEXT, CSS_US_ALL, CSS_US_AUTO } css_user_select;
+typedef enum css_appearance { CSS_AP_UNSET = 0, CSS_AP_AUTO, CSS_AP_NONE } css_appearance;
+typedef enum css_pointer_events { CSS_PE_UNSET = 0, CSS_PE_AUTO, CSS_PE_NONE } css_pointer_events;
 typedef enum css_list_style {
     CSS_LS_UNSET = 0, CSS_LS_NONE, CSS_LS_DISC, CSS_LS_CIRCLE, CSS_LS_SQUARE,
     CSS_LS_DECIMAL, CSS_LS_LOWER_ALPHA, CSS_LS_UPPER_ALPHA, CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN

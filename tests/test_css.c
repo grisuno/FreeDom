@@ -1938,6 +1938,157 @@ static void test_layout_sheet_cascade_and_unset(void **state) {
                      CSS_GRID_SPAN_MAX);
 }
 
+/* --- Outline longhands (outline-width/outline-style/outline-color) --- */
+static void test_inline_outline_longhands(void **state) {
+    (void)state;
+    /* outline-width */
+    assert_int_equal(css_parse_inline("outline-width:2px", 0).outline_width, 2);
+    assert_int_equal(css_parse_inline("outline-width:thin", 0).outline_width, 1);
+    assert_int_equal(css_parse_inline("outline-width:medium", 0).outline_width, 3);
+    assert_int_equal(css_parse_inline("outline-width:thick", 0).outline_width, 5);
+    assert_int_equal(css_parse_inline("outline-width:0", 0).outline_width, 0);
+    assert_int_equal(css_parse_inline("outline-width:2em", 0).outline_width, 32);
+    assert_int_equal(css_parse_inline("outline-width:auto", 0).outline_width, CSS_LEN_UNSET); /* dropped */
+    assert_int_equal(css_parse_inline("outline-width:-1px", 0).outline_width, CSS_LEN_UNSET); /* negative dropped */
+    /* outline-style */
+    assert_int_equal(css_parse_inline("outline-style:solid", 0).outline_style, CSS_BST_SOLID);
+    assert_int_equal(css_parse_inline("outline-style:dashed", 0).outline_style, CSS_BST_DASHED);
+    assert_int_equal(css_parse_inline("outline-style:dotted", 0).outline_style, CSS_BST_DOTTED);
+    assert_int_equal(css_parse_inline("outline-style:double", 0).outline_style, CSS_BST_DOUBLE);
+    assert_int_equal(css_parse_inline("outline-style:groove", 0).outline_style, CSS_BST_GROOVE);
+    assert_int_equal(css_parse_inline("outline-style:none", 0).outline_style, CSS_BST_NONE);
+    assert_int_equal(css_parse_inline("outline-style:ridge", 0).outline_style, CSS_BST_RIDGE);
+    assert_int_equal(css_parse_inline("outline-style:inset", 0).outline_style, CSS_BST_INSET);
+    assert_int_equal(css_parse_inline("outline-style:outset", 0).outline_style, CSS_BST_OUTSET);
+    assert_int_equal(css_parse_inline("outline-style:auto", 0).outline_style, CSS_BST_UNSET); /* unknown */
+    /* outline-color */
+    assert_int_equal(css_parse_inline("outline-color:red", 0).outline_color, 0xFF0000);
+    assert_int_equal(css_parse_inline("outline-color:#00FF00", 0).outline_color, 0x00FF00);
+    assert_int_equal(css_parse_inline("outline-color:rgba(0,0,255,0.5)", 0).outline_color, 0x0000FF);
+    assert_int_equal(css_parse_inline("outline-color:auto", 0).outline_color, -1); /* dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).outline_color, -1); /* unset */
+}
+
+/* --- border-collapse --- */
+static void test_inline_border_collapse(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("border-collapse:collapse", 0).border_collapse, CSS_BCOL_COLLAPSE);
+    assert_int_equal(css_parse_inline("border-collapse:separate", 0).border_collapse, CSS_BCOL_SEPARATE);
+    assert_int_equal(css_parse_inline("border-collapse:auto", 0).border_collapse, CSS_BCOL_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).border_collapse, CSS_BCOL_UNSET);
+}
+
+/* --- border-spacing --- */
+static void test_inline_border_spacing(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("border-spacing:2px", 0).border_spacing, 2);
+    assert_int_equal(css_parse_inline("border-spacing:0", 0).border_spacing, 0);
+    assert_int_equal(css_parse_inline("border-spacing:1em", 0).border_spacing, 16);
+    assert_int_equal(css_parse_inline("border-spacing:10 20", 0).border_spacing, 10); /* first value */
+    assert_int_equal(css_parse_inline("border-spacing:auto", 0).border_spacing, CSS_LEN_UNSET); /* dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).border_spacing, CSS_LEN_UNSET);
+}
+
+/* --- empty-cells --- */
+static void test_inline_empty_cells(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("empty-cells:show", 0).empty_cells, CSS_EC_SHOW);
+    assert_int_equal(css_parse_inline("empty-cells:hide", 0).empty_cells, CSS_EC_HIDE);
+    assert_int_equal(css_parse_inline("empty-cells:auto", 0).empty_cells, CSS_EC_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).empty_cells, CSS_EC_UNSET);
+}
+
+/* --- caption-side --- */
+static void test_inline_caption_side(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("caption-side:top", 0).caption_side, CSS_CS_TOP);
+    assert_int_equal(css_parse_inline("caption-side:bottom", 0).caption_side, CSS_CS_BOTTOM);
+    assert_int_equal(css_parse_inline("caption-side:left", 0).caption_side, CSS_CS_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).caption_side, CSS_CS_UNSET);
+}
+
+/* --- table-layout --- */
+static void test_inline_table_layout(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("table-layout:auto", 0).table_layout, CSS_TL_AUTO);
+    assert_int_equal(css_parse_inline("table-layout:fixed", 0).table_layout, CSS_TL_FIXED);
+    assert_int_equal(css_parse_inline("table-layout:collapse", 0).table_layout, CSS_TL_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).table_layout, CSS_TL_UNSET);
+}
+
+/* --- font-variant --- */
+static void test_inline_font_variant(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("font-variant:small-caps", 0).font_variant, CSS_FV_SMALL_CAPS);
+    assert_int_equal(css_parse_inline("font-variant:normal", 0).font_variant, CSS_FV_NORMAL);
+    assert_int_equal(css_parse_inline("font-variant:all-small-caps", 0).font_variant, CSS_FV_UNSET); /* out of scope */
+    assert_int_equal(css_parse_inline("color:red", 0).font_variant, CSS_FV_UNSET);
+}
+
+/* --- hyphens --- */
+static void test_inline_hyphens(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("hyphens:none", 0).hyphens, CSS_HY_NONE);
+    assert_int_equal(css_parse_inline("hyphens:manual", 0).hyphens, CSS_HY_MANUAL);
+    assert_int_equal(css_parse_inline("hyphens:auto", 0).hyphens, CSS_HY_AUTO);
+    assert_int_equal(css_parse_inline("hyphens:all", 0).hyphens, CSS_HY_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).hyphens, CSS_HY_UNSET);
+}
+
+/* --- user-select --- */
+static void test_inline_user_select(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("user-select:none", 0).user_select, CSS_US_NONE);
+    assert_int_equal(css_parse_inline("user-select:text", 0).user_select, CSS_US_TEXT);
+    assert_int_equal(css_parse_inline("user-select:all", 0).user_select, CSS_US_ALL);
+    assert_int_equal(css_parse_inline("user-select:auto", 0).user_select, CSS_US_AUTO);
+    assert_int_equal(css_parse_inline("user-select:element", 0).user_select, CSS_US_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).user_select, CSS_US_UNSET);
+}
+
+/* --- caret-color --- */
+static void test_inline_caret_color(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("caret-color:red", 0).caret_color, 0xFF0000);
+    assert_int_equal(css_parse_inline("caret-color:#00FF00", 0).caret_color, 0x00FF00);
+    assert_int_equal(css_parse_inline("caret-color:auto", 0).caret_color, CSS_LEN_AUTO);
+    assert_int_equal(css_parse_inline("caret-color:blargh", 0).caret_color, -1); /* unknown -> unset */
+    assert_int_equal(css_parse_inline("color:red", 0).caret_color, -1);
+}
+
+/* --- appearance --- */
+static void test_inline_appearance(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("appearance:auto", 0).appearance, CSS_AP_AUTO);
+    assert_int_equal(css_parse_inline("appearance:none", 0).appearance, CSS_AP_NONE);
+    assert_int_equal(css_parse_inline("appearance:button", 0).appearance, CSS_AP_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("color:red", 0).appearance, CSS_AP_UNSET);
+}
+
+/* --- pointer-events --- */
+static void test_inline_pointer_events(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("pointer-events:auto", 0).pointer_events, CSS_PE_AUTO);
+    assert_int_equal(css_parse_inline("pointer-events:none", 0).pointer_events, CSS_PE_NONE);
+    assert_int_equal(css_parse_inline("pointer-events:all", 0).pointer_events, CSS_PE_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).pointer_events, CSS_PE_UNSET);
+}
+
+/* --- Table properties cascade from sheet + inline --- */
+static void test_table_sheet_cascade(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL };
+    css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
+    assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
+    assert_int_equal(s.empty_cells, CSS_EC_HIDE);
+    assert_int_equal(s.caption_side, CSS_CS_BOTTOM);
+    assert_int_equal(s.table_layout, CSS_TL_FIXED);
+    assert_int_equal(s.border_spacing, 4);
+    css_free(sh);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -2062,6 +2213,19 @@ int main(void) {
         cmocka_unit_test(test_media_unknown_fails_closed),
         cmocka_unit_test(test_parse_null_args),
         cmocka_unit_test(test_resolve_null_safe),
+        cmocka_unit_test(test_inline_outline_longhands),
+        cmocka_unit_test(test_inline_border_collapse),
+        cmocka_unit_test(test_inline_border_spacing),
+        cmocka_unit_test(test_inline_empty_cells),
+        cmocka_unit_test(test_inline_caption_side),
+        cmocka_unit_test(test_inline_table_layout),
+        cmocka_unit_test(test_inline_font_variant),
+        cmocka_unit_test(test_inline_hyphens),
+        cmocka_unit_test(test_inline_user_select),
+        cmocka_unit_test(test_inline_caret_color),
+        cmocka_unit_test(test_inline_appearance),
+        cmocka_unit_test(test_inline_pointer_events),
+        cmocka_unit_test(test_table_sheet_cascade),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
