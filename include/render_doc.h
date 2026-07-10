@@ -74,6 +74,13 @@ typedef struct rd_block {
     int              valign;
     int              text_indent;
     int              white_space;
+    /* 2026-07-10 text-extension batch (set only with caps.css, else their
+     * no-effect defaults set by rd_push): tab_size (0 -> 8 in <pre>), direction
+     * (css_direction), font_variant (css_font_variant), list_style_pos (css_list_pos). */
+    int              tab_size;
+    int              direction;
+    int              font_variant;
+    int              list_style_pos;
     int              text_overflow;  /* author text-overflow (css_text_overflow); set only with caps.css, else 0 */
     int              word_break;     /* author word-break (css_word_break); set only with caps.css, else 0 */
     /* Nearest author flex/grid container of this block (page_view), carried by

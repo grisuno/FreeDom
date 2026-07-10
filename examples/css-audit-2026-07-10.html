@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CSS properties end-to-end test</title>
+<style>
+  /* Aspect-ratio: 16/9 video box */
+  .ar16x9 { aspect-ratio: 16/9; background: #336; color: white; padding: 8px; }
+  /* Height / min-height / max-height */
+  .h-fixed { height: 80px; background: #cfc; }
+  .h-min   { min-height: 100px; background: #ccf; }
+  .h-max   { max-height: 30px; background: #fcc; overflow: hidden; }
+  /* Box shadow (outset vs inset) */
+  .sh-out  { box-shadow: 4px 4px 8px #888; padding: 12px; background: #fff; }
+  .sh-in   { box-shadow: inset 0 0 8px #c00; padding: 12px; background: #fff; }
+  /* Small caps + tab-size in <pre> */
+  .small-caps { font-variant: small-caps; }
+  pre { background: #eee; padding: 8px; }
+  pre.c4 { tab-size: 4; }
+  pre.c8 { tab-size: 8; }
+  /* direction + list-style-position */
+  .rtl { direction: rtl; background: #ffc; padding: 4px; }
+  ul.inside { list-style-position: inside; }
+  ul.outside { list-style-position: outside; }
+  /* text-decoration */
+  ul.alpha { list-style-type: upper-alpha; }
+</style>
+</head>
+<body>
+<h1>CSS end-to-end test</h1>
+
+<h2>Aspect-ratio 16/9</h2>
+<div class="ar16x9">Aspect-ratio: 16/9 (this is a wide video-shaped box)</div>
+
+<h2>Height / min / max</h2>
+<div class="h-fixed">height: 80px</div>
+<div class="h-min">min-height: 100px (this text is shorter; the box stays at least 100px)</div>
+<div class="h-max">max-height: 30px (text is much taller; the box caps at 30px and overflows)</div>
+
+<h2>Box-shadow: outset vs inset</h2>
+<div class="sh-out">Outset shadow (outside the box, top-right)</div>
+<div class="sh-in">Inset shadow (inside the box, edge glow)</div>
+
+<h2>font-variant: small-caps</h2>
+<p class="small-caps">This sentence should render in small capitals (uppercase letters stay the same; lowercase letters become small caps).</p>
+
+<h2>tab-size in &lt;pre&gt;</h2>
+<pre class="c4">a	b	c	d
+aa	bb	cc	dd</pre>
+<pre class="c8">a	b	c	d
+aa	bb	cc	dd</pre>
+
+<h2>direction: rtl</h2>
+<p class="rtl">This paragraph is right-to-left (Hebrew/Arabic style flow).</p>
+
+<h2>list-style-position</h2>
+<ul class="inside"><li>Item 1 (inside)</li><li>Item 2 (inside)</li></ul>
+<ul class="outside"><li>Item 1 (outside)</li><li>Item 2 (outside)</li></ul>
+<ul class="alpha"><li>Item 1 (alpha)</li><li>Item 2 (alpha)</li></ul>
+
+</body>
+</html>

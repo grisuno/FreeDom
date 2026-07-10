@@ -284,29 +284,47 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
 - *Color / background*: `color`, `background-color`, `background` (color only).
 - *Text*: `text-align`, `font-size`, `font-weight`, `font-style`, `line-height`,
    `text-decoration`(`-line`), **`text-decoration-color`**, **`text-decoration-style`**,
-   **`font-family`**, **`text-transform`**, **`font-variant`** (`small-caps`),
+   **`font-family`**, **`text-transform`**, **`font-variant`** (`small-caps`,
+   **painted** 2026-07-10 as uppercase),
    **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**, **`opacity`**,
    **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only),
-   **`tab-size`**, **`direction`**,
+   **`tab-size`** (carried; **painted** 2026-07-10 in pre/pre-wrap blocks for
+   tab characters, but `pv_build`'s whitespace collapse still turns raw tabs
+   into single spaces before flow sees them — the property is correct, the
+   upstream collapse is a separate gap),
+   **`direction`** (carried, **painted** 2026-07-10 as a record; the v1
+   paint does not actually reorder inline runs RTL, it just carries the
+   value downstream),
    **`text-overflow`** (painted with `white-space:nowrap`), **`word-break`**/
    **`overflow-wrap`**/**`word-wrap`** (unified, painted for the single-word-wider-
    than-the-line case),
+   **`list-style-position`** (inside/outside; carried, **painted** 2026-07-10
+   as a record — the v1 engine already prepends the marker, so inside/outside
+   differ only when the marker layout differs, which a v1 follow-up will
+   refine),
    **`hyphens`**, **`user-select`**, **`caret-color`**.
 - *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
    `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
    (+longhands), `padding`(+longhands), `width`, `min-width`, `max-width`,
-   `height`, `min-height`, `max-height` — all length-valued
-   properties among these accept `calc()`.
+   `height`, `min-height`, `max-height` (**all four painted** 2026-07-10:
+   `width`/`max-width` are the existing cap, the new four are `min-width`/`height`/
+   `min-height`/`max-height` applied at `open_box`/`close_top_box`),
+   `aspect-ratio` (carried on `pv_box_def`, **painted** 2026-07-10: a fixed
+   aspect ratio sizes the box's height from its width when no explicit
+   height is given) — all length-valued properties among these accept `calc()`.
 - *Layout / box decoration* (**Hito 23b-7**): **`position`** (+`top`/`right`/
    `bottom`/`left`/`inset`/`z-index`), **`box-sizing`**, **`border`**(/`-width`/
-   `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**,
+   `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**
+   (single-layer, **outset + inset both painted** 2026-07-10 — inset is the
+   same painter clipped to inside the border box with the offset translating
+   toward the opposite edge),
    **`outline`**(+`-width`/`-style`/`-color` longhands), **`outline-offset`**,
    **`flex`**(/`-grow`/`-shrink`/`-basis`), **`order`**,
    **`align-items`/`align-self`/`align-content`/`justify-items`**, **`flex-direction`**,
    **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
     **`grid-column`/`grid-row`** (`span N`),
    **`border-collapse`**, **`border-spacing`**, **`empty-cells`**,
-   **`caption-side`**, **`table-layout**.
+   **`caption-side`**, **`table-layout`.
    **Painted** since the CSS layout expansion
    batch: `flex-wrap` (multi-line wrapping), `row-gap` (distinct grid/flex-wrap cross
    gap), `align-items`/`align-self` (flex row cross-axis only). Still value-resolved
@@ -340,7 +358,42 @@ first:
 
 - *Box decoration, finer grain*: corner-by-corner / elliptical `border-radius`,
   multi-layer `box-shadow`, `box-shadow` blur/spread *rendering* (resolved but not
-  yet painted), `border-image`.
+  yet painted), `border-image`. The single-layer outset + inset **is** painted
+  since 2026-07-10; multi-layer / per-corner radii / blur quality remain gaps.
+
+**Parsed/resolved, but carried in `css_style` without an active paint effect
+(2026-07-10 audit).** These properties are accepted by the parser, cascade
+through the same pipeline, and ride the wire to the GUI — but the v1
+engine does not act on them yet. Listed here so a reader of `css_style`
+does not assume every field is wired; when a later milestone wires one
+of them, the field already has the value ready. Grouped by family:
+
+- *Background image / decoration*: `background-image`/`background-repeat`/
+  `background-size`/`background-clip`/`background-origin`/`background-
+  attachment` (no CSS `background-image` painting — `url()` is dropped
+  by doctrine, and CSS-painted gradients would need a compositing path
+  the flat painter does not have).
+- *Compositing / containment*: `isolation`, `contain`, `content-visibility`
+  (no stacking-context / paint-tree partitioning in the v1 painter).
+- *Color/meta*: `color-scheme`, `print-color-adjust`, `forced-color-adjust`,
+  `image-rendering`, `object-fit`, `accent-color`, `caret-color`,
+  `appearance`, `pointer-events`, `mix-blend-mode`.
+- *Interaction*: `hyphens`, `user-select`, `resize`, `scroll-behavior`,
+  `touch-action`, `overscroll-behavior`, `backface-visibility`,
+  `font-kerning`, `text-rendering`, `font-stretch`.
+- *Flex/grid extras (parsed, not yet placed)*: `align-content`,
+  `justify-items`, `grid-template-rows`, `grid-auto-flow`,
+  `grid-column`/`grid-row` `span N` (every grid item still occupies one
+  cell — `span N` is resolved but not honored in the layout engine).
+- *Table properties*: `border-collapse`, `border-spacing`, `empty-cells`,
+  `caption-side`, `table-layout` (no proper table layout; the engine
+  flattens `<table>` to per-cell block-defs, so these would only
+  matter when a real table layout is added).
+- *Out of v1 engine scope*: `text-decoration-thickness` (resolved; the
+  painter uses the `deco_thick` field but currently collapses it to the
+  default 1.0 in v1), `vertical-align` length / `top` / `middle` /
+  `bottom` keywords (only `sub`/`super`/`baseline` are painted), and
+  `position: sticky` scroll pinning (fail-closed to `relative`).
 - *Positioning, finer grain*: text **wrapping around** a single float (a float
    followed by non-floated content — v1 float bands are self-contained rows; see
    spec/float.md), line-number / named grid placement (only `span N` is

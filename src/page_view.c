@@ -152,6 +152,10 @@ static void run_init_common(pv_run *r) {
     r->valign = 0;
     r->text_indent = PV_LEN_UNSET;
     r->white_space = 0;
+    r->tab_size = 0;
+    r->direction = 0;
+    r->font_variant = 0;
+    r->list_style_pos = 0;
     r->text_overflow = 0;
     r->word_break = 0;
     r->cont_id = -1;
@@ -398,7 +402,8 @@ void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
                      int shadow_color, int opacity, int valign, int text_indent,
                      int white_space, int text_overflow, int word_break,
                      int text_decoration_color, int text_decoration_style,
-                     int text_decoration_thickness) {
+                     int text_decoration_thickness,
+                     int tab_size, int direction, int font_variant, int list_style_pos) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->font_family = font_family;
@@ -417,6 +422,10 @@ void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
     r->text_decoration_color = text_decoration_color;
     r->text_decoration_style = text_decoration_style;
     r->text_decoration_thickness = text_decoration_thickness;
+    r->tab_size = tab_size;
+    r->direction = direction;
+    r->font_variant = font_variant;
+    r->list_style_pos = list_style_pos;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -703,6 +712,13 @@ typedef struct pv_text_ext {
     int text_decoration_color;     /* 0xRRGGBB, or -1 (unset) */
     int text_decoration_style;     /* css_text_decoration_style, 0 unset */
     int text_decoration_thickness; /* px, -1 unset, 0 from-font */
+    /* 2026-07-10 batch: tab_size (0 unset -> 8), direction (CSS text direction,
+     * not flex-direction), font_variant (small-caps), list_style_pos (inside/outside).
+     * Inherit like the rest. */
+    int tab_size;        /* 0 unset -> 8 at paint time */
+    int direction;       /* css_direction */
+    int font_variant;    /* css_font_variant */
+    int list_style_pos;  /* css_list_pos */
 } pv_text_ext;
 
 /* Initialises an ext to "unset" (no author text extension applied). */
@@ -716,6 +732,7 @@ static void pv_text_ext_reset(pv_text_ext *e) {
     e->text_decoration_color = -1;
     e->text_decoration_style = 0;
     e->text_decoration_thickness = -1;
+    e->tab_size = 0; e->direction = 0; e->font_variant = 0; e->list_style_pos = 0;
 }
 
 /* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
@@ -746,13 +763,18 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
         e->text_decoration_style = cs->text_decoration_style;
     if (e->text_decoration_thickness == -1 && cs->text_decoration_thickness != -1)
         e->text_decoration_thickness = cs->text_decoration_thickness;
+    if (e->tab_size == 0 && cs->tab_size > 0) e->tab_size = cs->tab_size;
+    if (e->direction == 0 && cs->direction != CSS_DIR_UNSET) e->direction = cs->direction;
+    if (e->font_variant == 0 && cs->font_variant != CSS_FV_UNSET) e->font_variant = cs->font_variant;
+    if (e->list_style_pos == 0 && cs->list_style_pos != CSS_LP_UNSET) e->list_style_pos = cs->list_style_pos;
 }
 
 /* True if the resolved style declares any HORIZONTAL box property. */
 static int css_has_hbox(const css_style *cs) {
     return cs->margin_left != CSS_LEN_UNSET || cs->margin_right != CSS_LEN_UNSET ||
            cs->pad_left   != CSS_LEN_UNSET || cs->pad_right   != CSS_LEN_UNSET ||
-           cs->width != CSS_LEN_UNSET || cs->max_width != CSS_LEN_UNSET;
+           cs->width != CSS_LEN_UNSET || cs->max_width != CSS_LEN_UNSET ||
+           cs->min_width > 0;
 }
 
 /* Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets =
@@ -791,7 +813,14 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->border_radius != CSS_LEN_UNSET || cs->box_shadow_color != -1 ||
            cs->outline_width != CSS_LEN_UNSET || css_has_position(cs) ||
            cs->visibility != CSS_VIS_UNSET || cs->overflow_x != CSS_OF_UNSET ||
-           cs->overflow_y != CSS_OF_UNSET || cs->cursor != CSS_CUR_UNSET;
+           cs->overflow_y != CSS_OF_UNSET || cs->cursor != CSS_CUR_UNSET ||
+           /* Author vertical dimensions or aspect-ratio alone make the box worth
+            * tracking (the painter needs them at open_box). */
+           cs->height > 0 || cs->min_height > 0 || cs->max_height > 0 ||
+           (cs->aspect_num > 0 && cs->aspect_den > 0) ||
+           /* min-width alone too: a div with only `min-width:Npx` is a paintable
+            * floor; the painter needs the box entry to honour it. */
+           cs->min_width > 0;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -854,6 +883,14 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->overflow_x = cs->overflow_x; d->overflow_y = cs->overflow_y;
     d->cursor = cs->cursor;
     d->aspect_num = cs->aspect_num; d->aspect_den = cs->aspect_den;
+    /* Author vertical dimensions (this batch, 2026-07-10): height/min-height/
+     * max-height in px, 0 unset; min-width too. A negative css_style value is the
+     * CSS_LEN_AUTO sentinel for height/width -- the user-agent's auto-sizing is
+     * always 0 here (the engine sizes boxes by their content). */
+    d->box_h = (cs->height > 0) ? cs->height : 0;
+    d->box_min_h = (cs->min_height > 0) ? cs->min_height : 0;
+    d->box_max_h = (cs->max_height > 0) ? cs->max_height : 0;
+    d->box_min_w = (cs->min_width > 0) ? cs->min_width : 0;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
@@ -1869,7 +1906,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 cext.opacity, cext.valign, cext.text_indent,
                                 cext.white_space, cext.text_overflow, cext.word_break,
                                 cext.text_decoration_color, cext.text_decoration_style,
-                                cext.text_decoration_thickness);
+                                cext.text_decoration_thickness,
+                                cext.tab_size, cext.direction, cext.font_variant,
+                                cext.list_style_pos);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
                 /* Every collected cell is its own grid item (the cell node is the
@@ -1990,10 +2029,6 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         size_t raw_len = txt->char_data.data.length;
         if (raw == NULL || raw_len == 0) continue;
 
-        char *collapsed = collapse_ws(raw, raw_len);
-        if (collapsed == NULL) { rc = PV_ERR_OOM; goto cleanup; }
-        if (collapsed[0] == '\0') { free(collapsed); continue; }
-
         const char *href = NULL;
         size_t href_len = 0;
         const lxb_dom_node_t *block = NULL;
@@ -2009,6 +2044,28 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                         &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
                         &li, &list_depth, &ordered, &reg, &cont, &box, &ext,
                         &box_reg, &float_reg, &bdeco, &cache);
+
+        /* Pre-like blocks (white-space: pre / pre-wrap / pre-line) preserve
+         * whitespace: the HTML parser keeps the source tabs and newlines, and
+         * page_view must NOT collapse them. CSS tab-size then expands the tabs
+         * at paint time (flow_text). Other blocks collapse runs of any
+         * whitespace to a single space (the spec). A <pre> tag's UA default
+         * of white-space:pre is honored too (a pre with no CSS still preserves
+         * whitespace; otherwise the parser keeps tabs that we then collapse). */
+        int is_pre_like = (ext.white_space == CSS_WS_PRE ||
+                           ext.white_space == CSS_WS_PRE_WRAP ||
+                           ext.white_space == CSS_WS_PRE_LINE ||
+                           (block != NULL && node_tag(block) == LXB_TAG_PRE));
+        char *collapsed = is_pre_like ? dup_n(raw, raw_len) : collapse_ws(raw, raw_len);
+        if (collapsed == NULL) { rc = PV_ERR_OOM; goto cleanup; }
+        if (collapsed[0] == '\0') { free(collapsed); continue; }
+
+        /* Honor the <pre> tag's UA default of `white-space: pre` even when
+         * the cascade hasn't set the property. The GUI's flow_text keys
+         * on ext.white_space to decide whether to expand tabs; without
+         * this UA fill-in, a vanilla <pre> would render raw \t glyphs. */
+        if (ext.white_space == 0 && block != NULL && node_tag(block) == LXB_TAG_PRE)
+            ext.white_space = CSS_WS_PRE;
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -2083,7 +2140,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                         ext.opacity, ext.valign, ext.text_indent, ext.white_space,
                         ext.text_overflow, ext.word_break,
                         ext.text_decoration_color, ext.text_decoration_style,
-                        ext.text_decoration_thickness);
+                        ext.text_decoration_thickness,
+                        ext.tab_size, ext.direction, ext.font_variant, ext.list_style_pos);
         pv_set_block_id(v, bdeco);
         pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
     }

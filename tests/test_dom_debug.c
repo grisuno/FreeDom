@@ -158,7 +158,9 @@ static void test_visibility_overflow_cursor_and_text_wrap(void **state) {
     pv_set_block_id(v, 0);
     pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
                     PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK,
-                    -1, 0, -1);
+                    -1, 0, -1,
+                    /* 2026-07-10 batch: tab_size, direction, font_variant, list_style_pos */
+                    0, 0, 0, 0);
 
     pv_box_def b;
     memset(&b, 0, sizeof b);

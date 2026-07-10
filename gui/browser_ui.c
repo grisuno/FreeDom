@@ -2107,6 +2107,10 @@ typedef struct rc_frag {
     int         deco_color;   /* 0xRRGGBB, or -1 (use fragment color) */
     int         deco_style;   /* css_text_decoration_style */
     int         deco_thick;   /* px, or -1 (use default 1.0) */
+    /* 2026-07-10 text-extension batch. font_variant applies small-caps to the
+     * fragment (uppercase + scaled font when set; baked at flow time so the
+     * layout/paint stay consistent). */
+    int         font_variant; /* css_font_variant (small-caps etc.) */
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT } rc_rowkind;
@@ -2143,6 +2147,12 @@ typedef struct rc_box {
     int    bg_rgb;
     int    hidden;   /* visibility:hidden on this box (or an ancestor): geometry (h/w)
                        * is still resolved, decoration painting is skipped */
+    /* 2026-07-10 author vertical dimensions: a fixed height/width sets the box's
+     * size when the content is smaller (height) or wider (min-width); a max-height
+     * caps the painted height. 0 = unset. Applied at open_box time; aspect_ratio
+     * (num/den x1000) sizes a box that has one dimension only. */
+    int    box_h, box_min_h, box_max_h, box_min_w;
+    int    aspect_num, aspect_den;
 } rc_box;
 
 typedef struct rc_layout {
@@ -2157,6 +2167,14 @@ typedef struct rc_layout {
      * in v1 (would need a two-pass painter to paint behind in-flow). */
     bt_positioned positioned[BT_MAX_POSITIONED];
     size_t        npositioned;
+    /* 2026-07-10 tab expansion in <pre> needs a buffer that lives as long as
+     * the layout: the rc_frag.text slice is just an offset into one of these
+     * owned buffers (heap-allocated, freed by rc_free). Without this, a
+     * tab-expanded slice from a local stack buffer would dangle by the time
+     * the painter runs. Bounded by a total cap to keep the layout bounded. */
+    char  **text_bufs;       /* array of owned heap buffers */
+    size_t  n_text_bufs;     /* count of valid entries */
+    size_t  cap_text_bufs;   /* allocated slots */
 } rc_layout;
 
 /* Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content
@@ -2187,6 +2205,11 @@ typedef struct rc_state {
     int    nowrap;       /* current block's white-space suppresses line wrapping */
     int    break_words;  /* current block's word-break/overflow-wrap allows a mid-word split */
     int    text_overflow;/* current block's text-overflow (css_text_overflow) */
+    /* 2026-07-10 text-extensions. white_space is the full css_white_space (flow_text
+     * uses it to know when to expand tabs in <pre>); tab_size is the author override
+     * (0 -> 8). The rest are read from rc_ext in flow_text and not cached here. */
+    int    white_space;  /* css_white_space of the current block */
+    int    tab_size;     /* author tab-size of the current block (0 -> 8) */
     size_t line_first;
     /* Box engine (Hito 23b-8 Step D) visibility: hidden_from is 0 (not hidden) or the
      * box_stack depth (1-based) at which a visibility:hidden box was opened -- every
@@ -2201,7 +2224,14 @@ typedef struct rc_state {
     int         box_depth;
 } rc_state;
 
-static void rc_free(rc_layout *L) { free(L->frags); free(L->rows); free(L->boxes); }
+static void rc_free(rc_layout *L) {
+    free(L->frags);
+    free(L->rows);
+    free(L->boxes);
+    /* Free every owned text buffer (2026-07-10: tab-expanded <pre> slices). */
+    for (size_t i = 0; i < L->n_text_bufs; ++i) free(L->text_bufs[i]);
+    free(L->text_bufs);
+}
 
 static rc_box *rc_add_box(rc_layout *L) {
     if (L->nbox == L->capbox) {
@@ -2451,6 +2481,14 @@ typedef struct rc_ext {
     /* Author text-decoration sub-properties (per-fragment). Same semantics as on
      * rc_frag. */
     int    deco_color, deco_style, deco_thick;
+    /* 2026-07-10 text-extension batch. tab_size 0 -> 8 (CSS default) at the
+     * pre block; font_variant is applied via uppercase transform (v1 small-caps
+     * approximation: see flow_text); list_style_pos CSS_LP_INSIDE means the
+     * list marker is part of the line (no extra first-line indent). */
+    int    tab_size;       /* 0 unset */
+    int    direction;      /* css_direction (carried; layout is still LTR) */
+    int    font_variant;   /* css_font_variant */
+    int    list_style_pos; /* css_list_pos */
 } rc_ext;
 
 /* Emits one fragment at the current pen position, advancing it. Shared by the
@@ -2473,6 +2511,7 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->shadow_color = x->shadow_color; f->opacity = x->opacity;
         f->deco_color = x->deco_color; f->deco_style = x->deco_style;
         f->deco_thick = x->deco_thick;
+        f->font_variant = x->font_variant;
     }
     s->pen_x += width;
     if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
@@ -2506,13 +2545,65 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
                       int strike, int overline,
                       ui_rgb color, double content_w, const char *href,
                       dom_node_id node_id, int block_id, const rc_ext *x) {
+    /* 2026-07-10: author font-variant: small-caps is approximated by rendering the
+     * text in uppercase (v1: a real implementation would draw lowercase at 0.7x in
+     * the small-caps font variant, but no Cairo toy backend exposes a small-caps
+     * face). The fragment's text_transform becomes uppercase, and the stored
+     * transform on the rc_frag is updated so layout measure + paint agree. */
+    int xform = x->transform;
+    if (x->font_variant == CSS_FV_SMALL_CAPS && xform == CSS_TT_UNSET)
+        xform = CSS_TT_UPPERCASE;
+
+    /* 2026-07-10: author tab-size inside a <pre>-like block. Tabs become that many
+     * spaces (the CSS default of 8 is used when the property is unset, so a
+     * `<pre>` with no tab-size still aligns the way browsers do). The expansion
+     * happens into a heap-allocated buffer owned by the layout (rc_layout.text_bufs),
+     * so the rc_frag.text slice into it stays valid past this function. */
+    const char *src = text;
+    size_t src_len = strlen(text);
+    if (s->white_space == CSS_WS_PRE || s->white_space == CSS_WS_PRE_WRAP ||
+        s->white_space == CSS_WS_PRE_LINE) {
+        int tab_n = (x->tab_size > 0) ? x->tab_size : 8;
+        if (tab_n > 32) tab_n = 32;            /* anti-DoS: cap a hostile tab-size */
+
+        /* Heap-allocate the expanded text: the slice (f->text) must stay
+         * valid past this function, and the rc_frag.text pointer is "not
+         * owned" (it points into one of the layout's owned buffers).
+         * Bounded to src_len * (tab_n <= 32) + 1 -- an over-long pre line
+         * falls back to the raw text (tabs become font glyphs). */
+        size_t need = src_len * tab_n + 1;
+        if (need < src_len + 1) need = src_len + 1;  /* overflow guard */
+        char *expanded = (char *)malloc(need);
+        if (expanded == NULL) return;
+        size_t o = 0;
+        for (size_t j = 0; j < src_len; ++j) {
+            if (text[j] == '\t') {
+                for (int k = 0; k < tab_n && o + 1 < need; ++k)
+                    expanded[o++] = ' ';
+            } else {
+                expanded[o++] = text[j];
+            }
+        }
+        expanded[o] = '\0';
+        if (L->n_text_bufs == L->cap_text_bufs) {
+            size_t nc = L->cap_text_bufs ? L->cap_text_bufs * 2 : 8;
+            char **g = (char **)realloc(L->text_bufs, nc * sizeof *g);
+            if (g == NULL) { free(expanded); return; }
+            L->text_bufs = g;
+            L->cap_text_bufs = nc;
+        }
+        L->text_bufs[L->n_text_bufs++] = expanded;
+        src = expanded;
+        src_len = o;
+    }
+
     content_font(cr, size, bold, italic, x->family);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
     double space_w = measure_slice(cr, " ", 1) + x->word_spacing;
     if (space_w < 0.0) space_w = 0.0;
 
-    size_t i = 0, n = strlen(text);
+    size_t i = 0, n = src_len;
     while (i < n) {
         while (i < n && text[i] == ' ') ++i;
         size_t ws = i;
@@ -2527,8 +2618,8 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         double adv = line_has_frag ? space_w : 0.0;
 
         rc_frag probe = (rc_frag){ 0 };
-        probe.text = text + ws; probe.len = wl;
-        probe.transform = x->transform; probe.letter_spacing = x->letter_spacing;
+        probe.text = src + ws; probe.len = wl;
+        probe.transform = xform; probe.letter_spacing = x->letter_spacing;
         double ww = styled_advance(cr, &probe);
 
         if (line_has_frag && !s->nowrap && s->pen_x + adv + ww > content_w) {
@@ -2547,16 +2638,16 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
             double acc = 0.0;
             size_t p = ws;
             while (budget > 0.0 && p < ws + wl) {
-                size_t clen = utf8_clen(text + p, (ws + wl) - p);
+                size_t clen = utf8_clen(src + p, (ws + wl) - p);
                 rc_frag cprobe = (rc_frag){ 0 };
-                cprobe.text = text + p; cprobe.len = clen;
-                cprobe.transform = x->transform; cprobe.letter_spacing = x->letter_spacing;
+                cprobe.text = src + p; cprobe.len = clen;
+                cprobe.transform = xform; cprobe.letter_spacing = x->letter_spacing;
                 double cw = styled_advance(cr, &cprobe);
                 if (acc + cw > budget) break;
                 acc += cw; p += clen; take += clen;
             }
             if (take > 0)
-                flow_emit_frag(L, s, &fe, text + ws, take, acc, size, bold, italic,
+                flow_emit_frag(L, s, &fe, src + ws, take, acc, size, bold, italic,
                                underline, strike, overline, color, href, node_id,
                                block_id, x);
             flow_emit_frag(L, s, &fe, FLOW_ELLIPSIS, sizeof FLOW_ELLIPSIS - 1, ell_w,
@@ -2572,15 +2663,15 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
                 size_t chunk_start = p;
                 double chunk_w = 0.0;
                 while (p < ws + wl) {
-                    size_t clen = utf8_clen(text + p, (ws + wl) - p);
+                    size_t clen = utf8_clen(src + p, (ws + wl) - p);
                     rc_frag cprobe = (rc_frag){ 0 };
-                    cprobe.text = text + p; cprobe.len = clen;
-                    cprobe.transform = x->transform; cprobe.letter_spacing = x->letter_spacing;
+                    cprobe.text = src + p; cprobe.len = clen;
+                    cprobe.transform = xform; cprobe.letter_spacing = x->letter_spacing;
                     double cw = styled_advance(cr, &cprobe);
                     if (chunk_w + cw > content_w && p > chunk_start) break;
                     chunk_w += cw; p += clen;
                 }
-                flow_emit_frag(L, s, &fe, text + chunk_start, p - chunk_start, chunk_w,
+                flow_emit_frag(L, s, &fe, src + chunk_start, p - chunk_start, chunk_w,
                                size, bold, italic, underline, strike, overline, color,
                                href, node_id, block_id, x);
                 if (p < ws + wl) { flush_line(L, s, th); open_line(L, s); }
@@ -2589,7 +2680,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         }
 
         s->pen_x += adv;
-        flow_emit_frag(L, s, &fe, text + ws, wl, ww, size, bold, italic, underline,
+        flow_emit_frag(L, s, &fe, src + ws, wl, ww, size, bold, italic, underline,
                        strike, overline, color, href, node_id, block_id, x);
     }
 }
@@ -2637,12 +2728,19 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     x.deco_color = b->text_decoration_color;
     x.deco_style = b->text_decoration_style;
     x.deco_thick = b->text_decoration_thickness;
+    /* 2026-07-10 text-extension batch. */
+    x.tab_size = b->tab_size;
+    x.direction = b->direction;
+    x.font_variant = b->font_variant;
+    x.list_style_pos = b->list_style_pos;
     if (b->valign == CSS_VA_SUB)        { x.valign_dy =  size * 0.18; size *= 0.83; }
     else if (b->valign == CSS_VA_SUPER) { x.valign_dy = -size * 0.34; size *= 0.83; }
 
     s->nowrap = (b->white_space == CSS_WS_NOWRAP || b->white_space == CSS_WS_PRE);
     s->break_words = (b->word_break == CSS_WB_BREAK);
     s->text_overflow = b->text_overflow;
+    s->white_space = b->white_space;  /* 2026-07-10: page_view fills the pre UA default (CSS_WS_PRE) upstream */
+    s->tab_size = b->tab_size;        /* 0 -> 8 at expand time */
     if (!s->line_open && b->text_indent != PV_LEN_UNSET)
         s->pending_indent = (double)b->text_indent;
 
@@ -2945,8 +3043,20 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
     flush_line(L, s, th);
     rc_open_box *ob = &s->box_stack[s->box_depth - 1];
     s->cur_top += ob->pb + ob->bb;   /* bottom padding + border close the border box */
-    if (ob->box_idx < L->nbox)
-        L->boxes[ob->box_idx].h = s->cur_top - L->boxes[ob->box_idx].top;
+    if (ob->box_idx < L->nbox) {
+        rc_box *bx = &L->boxes[ob->box_idx];
+        double h = s->cur_top - bx->top;
+        /* 2026-07-10: author box_h / box_min_h / box_max_h clamp the painted
+         * height. box_h wins when set (the box is the declared size); min_h is
+         * a floor, max_h a cap. The v1 model is intentionally simple: the box
+         * is the larger of content vs min_h, smaller of result vs max_h, and
+         * the fixed box_h when set overrides both. */
+        if (bx->box_h > 0) h = (double)bx->box_h;
+        if (bx->box_min_h > 0 && h < (double)bx->box_min_h) h = (double)bx->box_min_h;
+        if (bx->box_max_h > 0 && h > (double)bx->box_max_h) h = (double)bx->box_max_h;
+        bx->h = h;
+        if (h > 0.0 && s->cur_top - bx->top < h) s->cur_top = bx->top + h;
+    }
     s->box_depth--;
     if (s->hidden_from > s->box_depth) s->hidden_from = 0;
 }
@@ -3027,6 +3137,25 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->outline_offset = (def->outline_offset != PV_LEN_UNSET) ? def->outline_offset : 0;
         bx->bg_rgb = def->bg_rgb;
         bx->hidden = inherited_hidden || this_hidden;
+        /* 2026-07-10 author vertical dimensions + aspect-ratio. box_min_w enlarges
+         * box_width when the layout was smaller; box_h sets a fixed height (the
+         * content still flows; the painted box keeps the larger of content vs
+         * box_h). aspect-ratio is honoured below alongside the box. */
+        bx->box_h = def->box_h; bx->box_min_h = def->box_min_h;
+        bx->box_max_h = def->box_max_h; bx->box_min_w = def->box_min_w;
+        bx->aspect_num = def->aspect_num; bx->aspect_den = def->aspect_den;
+        if (def->box_min_w > 0 && box_width < (double)def->box_min_w) {
+            box_width = (double)def->box_min_w;
+            bx->w = box_width;
+        }
+        if (bx->aspect_num > 0 && bx->aspect_den > 0) {
+            /* aspect-ratio (num/den x1000) sizes the height from width or vice
+             * versa. With a fixed width, the height is width * den / num. */
+            if (box_width > 0.0) {
+                double h = box_width * (double)bx->aspect_den / (double)bx->aspect_num;
+                if (bx->box_h == 0 && h > bx->h) bx->h = h;
+            }
+        }
 
         /* Stage 2: position:relative (and sticky, fail-closed to relative) offsets
          * the box's own rect by its insets. Siblings are unaffected — the box's
@@ -3651,28 +3780,51 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
     double bt = box_edge_px(bx->bord_tw), br = box_edge_px(bx->bord_rw);
     double bb = box_edge_px(bx->bord_bw), bl = box_edge_px(bx->bord_lw);
 
-    /* box-shadow (single outset layer): expanding translucent rects fake the blur,
-     * clipped to OUTSIDE the border box (CSS paints an outset shadow only beyond the
-     * box, never through a transparent interior). */
-    if (bx->bsh_color >= 0 && bx->bsh_inset != 1) {
+    /* box-shadow (single layer, outset OR inset): expanding translucent rects fake
+     * the blur. OUTSET: clipped to OUTSIDE the border box (CSS paints an outset
+     * shadow only beyond the box, never through a transparent interior). INSET:
+     * clipped to INSIDE the border box; the offset translates the shadow toward
+     * the opposite edge of the box. */
+    if (bx->bsh_color >= 0) {
         double sp = (double)bx->bsh_spread, blur = (double)bx->bsh_blur;
-        double sx = x + (double)bx->bsh_dx - sp, sy = y + (double)bx->bsh_dy - sp;
-        double sw = w + 2.0 * sp, sh = h + 2.0 * sp;
-        if (sw > 0.0 && sh > 0.0) {
-            ui_rgb sc = rgb_from_packed(bx->bsh_color);
-            int steps = (blur > 0.0) ? 4 : 1;
-            cairo_save(cr);
-            cairo_rectangle(cr, sx - blur, sy - blur, sw + 2.0 * blur, sh + 2.0 * blur);
-            cairo_rectangle(cr, x, y, w, h);            /* punch out the border box */
-            cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
-            cairo_clip(cr);
-            for (int k = steps; k >= 1; --k) {
-                double g = blur * (double)k / (double)steps;
-                cairo_set_source_rgba(cr, sc.r, sc.g, sc.b, 0.30 / (double)steps);
-                cairo_rectangle(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g);
-                cairo_fill(cr);
+        if (bx->bsh_inset == 1) {
+            /* Inset: offset translates; the shadow stays within the border box. */
+            double sx = x + (double)bx->bsh_dx, sy = y + (double)bx->bsh_dy;
+            double sw = w, sh = h;
+            if (sw > 0.0 && sh > 0.0) {
+                ui_rgb sc = rgb_from_packed(bx->bsh_color);
+                int steps = (blur > 0.0) ? 4 : 1;
+                cairo_save(cr);
+                cairo_rectangle(cr, x, y, w, h);        /* clip to inside the box */
+                cairo_clip(cr);
+                for (int k = steps; k >= 1; --k) {
+                    double g = blur * (double)k / (double)steps;
+                    cairo_set_source_rgba(cr, sc.r, sc.g, sc.b, 0.30 / (double)steps);
+                    cairo_rectangle(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g);
+                    cairo_fill(cr);
+                }
+                cairo_restore(cr);
             }
-            cairo_restore(cr);
+        } else {
+            /* Outset (the default): the shadow expands outside the border box. */
+            double sx = x + (double)bx->bsh_dx - sp, sy = y + (double)bx->bsh_dy - sp;
+            double sw = w + 2.0 * sp, sh = h + 2.0 * sp;
+            if (sw > 0.0 && sh > 0.0) {
+                ui_rgb sc = rgb_from_packed(bx->bsh_color);
+                int steps = (blur > 0.0) ? 4 : 1;
+                cairo_save(cr);
+                cairo_rectangle(cr, sx - blur, sy - blur, sw + 2.0 * blur, sh + 2.0 * blur);
+                cairo_rectangle(cr, x, y, w, h);            /* punch out the border box */
+                cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+                cairo_clip(cr);
+                for (int k = steps; k >= 1; --k) {
+                    double g = blur * (double)k / (double)steps;
+                    cairo_set_source_rgba(cr, sc.r, sc.g, sc.b, 0.30 / (double)steps);
+                    cairo_rectangle(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g);
+                    cairo_fill(cr);
+                }
+                cairo_restore(cr);
+            }
         }
     }
 

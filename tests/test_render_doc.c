@@ -338,7 +338,9 @@ static void test_text_overflow_word_break_gated_by_css(void **state) {
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "clipped", NULL), PV_OK);
     pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
                     PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK,
-                    -1, 0, -1);
+                    -1, 0, -1,
+                    /* 2026-07-10 batch: tab_size, direction, font_variant, list_style_pos */
+                    0, 0, 0, 0);
 
     rd_doc *d = NULL;
     assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
@@ -355,6 +357,45 @@ static void test_text_overflow_word_break_gated_by_css(void **state) {
     assert_non_null(p);
     assert_int_equal(p->text_overflow, CSS_TO_ELLIPSIS);
     assert_int_equal(p->word_break, CSS_WB_BREAK);
+    rd_free(d);
+
+    pv_free(v);
+}
+
+/* 2026-07-10 batch: tab_size / direction / font_variant / list_style_pos travel
+ * the same caps.css gate as the other text extensions (off by default; carried
+ * to rd_block only when the user opts in via caps.css). Defaults: tab_size 0,
+ * direction 0, font_variant 0, list_style_pos 0. */
+static void test_text_ext_2026_07_10_batch_gated_by_css(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "smallcaps", NULL), PV_OK);
+    /* tab_size=4, direction=RTL, font_variant=SMALL_CAPS, list_style_pos=INSIDE */
+    pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
+                    PV_LEN_UNSET, 0, 0, 0, -1, 0, -1,
+                    4, CSS_DIR_RTL, CSS_FV_SMALL_CAPS, CSS_LP_INSIDE);
+
+    /* CSS off: every field is reset to the no-effect default. */
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->tab_size, 0);
+    assert_int_equal(p->direction, 0);
+    assert_int_equal(p->font_variant, 0);
+    assert_int_equal(p->list_style_pos, 0);
+    rd_free(d);
+
+    /* CSS on: every field is carried. */
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    p = first_kind(d, RD_PARAGRAPH);
+    assert_non_null(p);
+    assert_int_equal(p->tab_size, 4);
+    assert_int_equal(p->direction, CSS_DIR_RTL);
+    assert_int_equal(p->font_variant, CSS_FV_SMALL_CAPS);
+    assert_int_equal(p->list_style_pos, CSS_LP_INSIDE);
     rd_free(d);
 
     pv_free(v);
@@ -662,6 +703,7 @@ int main(void) {
         cmocka_unit_test(test_image_label_total),
         cmocka_unit_test(test_author_color_gated_by_css),
         cmocka_unit_test(test_text_overflow_word_break_gated_by_css),
+        cmocka_unit_test(test_text_ext_2026_07_10_batch_gated_by_css),
         cmocka_unit_test(test_input_passthrough),
         cmocka_unit_test(test_input_label_total),
         cmocka_unit_test(test_node_id_carried_by_default),

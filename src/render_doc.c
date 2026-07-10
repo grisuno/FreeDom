@@ -109,6 +109,12 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->valign = 0;
     b->text_indent = PV_LEN_UNSET;
     b->white_space = 0;
+    /* 2026-07-10 batch (text-ext): tab_size, direction, font_variant, list_style_pos.
+     * All gated by caps.css downstream like the rest of the text extensions. */
+    b->tab_size = 0;
+    b->direction = 0;
+    b->font_variant = 0;
+    b->list_style_pos = 0;
     b->text_overflow = 0;
     b->word_break = 0;
     b->cont_id = -1;
@@ -287,6 +293,11 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->valign = r->valign;
                 lb->text_indent = r->text_indent;
                 lb->white_space = r->white_space;
+                /* 2026-07-10 text-extension batch. */
+                lb->tab_size = r->tab_size;
+                lb->direction = r->direction;
+                lb->font_variant = r->font_variant;
+                lb->list_style_pos = r->list_style_pos;
                 lb->text_overflow = r->text_overflow;
                 lb->word_break = r->word_break;
             }

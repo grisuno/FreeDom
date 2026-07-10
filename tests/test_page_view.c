@@ -1433,6 +1433,90 @@ static void test_build_cursor_alone_triggers_box(void **state) {
     hp_document_free(doc);
 }
 
+/* 2026-07-10: tab_size / direction / font-variant / list-style-position travel
+ * the same inheritance path as the other text extensions (nearest ancestor
+ * wins, all set 0 when unset, all gated by caps.css downstream). */
+static void test_build_text_ext_2026_07_10_batch(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>"
+        "p { tab-size: 4; direction: rtl; font-variant: small-caps;"
+        "    list-style-position: inside }"
+        "</style>"
+        "<p>hi <span>inherits</span></p>"
+        "<h3>plain</h3></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *hi = find_text(v, "hi ");
+    assert_non_null(hi);
+    assert_int_equal(hi->tab_size, 4);
+    assert_int_equal(hi->direction, CSS_DIR_RTL);
+    assert_int_equal(hi->font_variant, CSS_FV_SMALL_CAPS);
+    assert_int_equal(hi->list_style_pos, CSS_LP_INSIDE);
+    const pv_run *in = find_text(v, "inherits");
+    assert_non_null(in);
+    assert_int_equal(in->tab_size, 4);
+    assert_int_equal(in->direction, CSS_DIR_RTL);
+    assert_int_equal(in->font_variant, CSS_FV_SMALL_CAPS);
+    assert_int_equal(in->list_style_pos, CSS_LP_INSIDE);
+    const pv_run *pl = find_text(v, "plain");
+    assert_non_null(pl);
+    assert_int_equal(pl->tab_size, 0);
+    assert_int_equal(pl->direction, 0);
+    assert_int_equal(pl->font_variant, 0);
+    assert_int_equal(pl->list_style_pos, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* 2026-07-10: a block that sets ONLY min-width / min-height / max-height / height /
+ * aspect-ratio (no other box property) still registers a box: those new box fields
+ * extend the box trigger. Box registration is scoped to block-level tags, so the
+ * div is the box-carrying element. */
+static void test_build_boxdeco_dims_alone_trigger_box(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='min-width:120px'>A</div>"
+        "<div style='min-height:60px'>B</div>"
+        "<div style='max-height:200px'>C</div>"
+        "<div style='height:80px'>D</div>"
+        "<div style='aspect-ratio:16/9'>E</div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "A"); assert_non_null(a);
+    const pv_box_def *ba = pv_box_at(v, (size_t)a->block_id);
+    assert_non_null(ba);
+    assert_int_equal(ba->box_min_w, 120);
+
+    const pv_run *b = find_text(v, "B"); assert_non_null(b);
+    const pv_box_def *bb = pv_box_at(v, (size_t)b->block_id);
+    assert_non_null(bb);
+    assert_int_equal(bb->box_min_h, 60);
+
+    const pv_run *c = find_text(v, "C"); assert_non_null(c);
+    const pv_box_def *bc = pv_box_at(v, (size_t)c->block_id);
+    assert_non_null(bc);
+    assert_int_equal(bc->box_max_h, 200);
+
+    const pv_run *d = find_text(v, "D"); assert_non_null(d);
+    const pv_box_def *bd = pv_box_at(v, (size_t)d->block_id);
+    assert_non_null(bd);
+    assert_int_equal(bd->box_h, 80);
+
+    const pv_run *e = find_text(v, "E"); assert_non_null(e);
+    const pv_box_def *be = pv_box_at(v, (size_t)e->block_id);
+    assert_non_null(be);
+    /* aspect-ratio: 16/9 -> num=16000, den=9000 (x1000). */
+    assert_int_equal(be->aspect_num, 16000);
+    assert_int_equal(be->aspect_den, 9000);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* text-overflow/word-break inherit like white-space (nearest ancestor wins). */
 static void test_build_text_overflow_and_word_break(void **state) {
     (void)state;
@@ -2214,6 +2298,8 @@ int main(void) {
         cmocka_unit_test(test_build_boxdeco_shadow_outline),
         cmocka_unit_test(test_build_boxdeco_visibility_overflow_cursor),
         cmocka_unit_test(test_build_cursor_alone_triggers_box),
+        cmocka_unit_test(test_build_text_ext_2026_07_10_batch),
+        cmocka_unit_test(test_build_boxdeco_dims_alone_trigger_box),
         cmocka_unit_test(test_build_text_overflow_and_word_break),
         cmocka_unit_test(test_build_boxdeco_defaults_no_box),
         cmocka_unit_test(test_build_boxdeco_sibling_blocks_distinct_ids),

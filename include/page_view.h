@@ -124,6 +124,15 @@ typedef struct pv_run {
     int     valign;          /* css_valign */
     int     text_indent;     /* signed px first-line indent, PV_LEN_UNSET unset */
     int     white_space;     /* css_white_space */
+    /* More text-presentation extensions (this batch, 2026-07-10): each resolved from
+     * the nearest ancestor that sets it (they inherit). Presentation: render_doc
+     * applies them only with caps.css. Defaults: tab_size 0 (unset -> 8 in <pre>),
+     * direction 0 (unset -> LTR), font_variant 0 (unset -> normal), list_style_pos
+     * 0 (unset -> outside). */
+    int     tab_size;        /* number of spaces for a tab character; 0 unset */
+    int     direction;       /* css_direction */
+    int     font_variant;    /* css_font_variant (small-caps etc.) */
+    int     list_style_pos;  /* css_list_pos (inside/outside) */
     /* text-overflow / word-break (see css_word_break for the word-break/overflow-wrap/
      * word-wrap unification), each resolved from the nearest ancestor that sets it
      * (they inherit, like white_space). Presentation: render_doc applies them only
@@ -230,6 +239,14 @@ typedef struct pv_box_def {
      * (0 = none); center = margin:0 auto. Carried on the def so the painter can place
      * a box (incl. a text-less wrapper) without a run to read it from. */
     int box_l, box_r, box_w, box_center;
+    /* Author vertical dimensions (this batch, 2026-07-10): height/min-height/max-height
+     * in px, 0 unset (the engine paints min-height as a floor, max-height as a cap
+     * on the painted box, and a fixed height only when no content-driven size wins).
+     * Like the rest of the box model, gated by caps.css upstream. */
+    int box_h;          /* height (px > 0), or 0 unset */
+    int box_min_h;      /* min-height (px >= 0), or 0 unset */
+    int box_max_h;      /* max-height (px > 0), or 0 unset */
+    int box_min_w;      /* min-width  (px >= 0), or 0 unset */
     int bg_rgb;   /* author background-color of the box (0xRRGGBB), or -1 */
     int box_sizing;
     int pad_t, pad_r, pad_b, pad_l;
@@ -374,22 +391,23 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
                        int text_decoration);
 
 /* Sets the author text-presentation extensions (Hito 23b-6, plus text_overflow/
- * word_break) on the most recently appended run: the generic font_family,
- * text_transform, signed letter_spacing/word_spacing (PV_LEN_UNSET = unset),
- * text-shadow (shadow_dx/dy offsets + shadow_color packed 0xRRGGBB or -1 for none),
- * opacity (0..100 or -1), valign, signed text_indent (PV_LEN_UNSET = unset),
- * white_space, text_overflow (css_text_overflow) and word_break (css_word_break),
- * plus the text-decoration sub-properties text_decoration_color (0xRRGGBB / -1
- * unset), text_decoration_style (css_text_decoration_style) and
- * text_decoration_thickness (px, -1 unset, 0 from-font).
- * No-op on an empty or NULL view. Like author colors, render_doc applies these only
- * with caps.css. */
+ * word_break, plus the 2026-07-10 batch: tab_size/direction/font_variant/list_style_pos)
+ * on the most recently appended run: the generic font_family, text_transform, signed
+ * letter_spacing/word_spacing (PV_LEN_UNSET = unset), text-shadow (shadow_dx/dy
+ * offsets + shadow_color packed 0xRRGGBB or -1 for none), opacity (0..100 or -1),
+ * valign, signed text_indent (PV_LEN_UNSET = unset), white_space, text_overflow
+ * (css_text_overflow), word_break (css_word_break), the text-decoration sub-
+ * properties (color/style/thickness), and the new batch: tab_size (0 unset ->
+ * 8 in <pre>), direction (css_direction), font_variant (css_font_variant) and
+ * list_style_pos (css_list_pos). No-op on an empty or NULL view. Like author
+ * colors, render_doc applies these only with caps.css. */
 void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
                      int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
                      int shadow_color, int opacity, int valign, int text_indent,
                      int white_space, int text_overflow, int word_break,
                      int text_decoration_color, int text_decoration_style,
-                     int text_decoration_thickness);
+                     int text_decoration_thickness,
+                     int tab_size, int direction, int font_variant, int list_style_pos);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/
