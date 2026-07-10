@@ -2100,6 +2100,13 @@ typedef struct rc_frag {
     double      valign_dy;    /* baseline shift px (sub/super) */
     int         shadow_dx, shadow_dy, shadow_color;
     int         opacity;      /* 0..100, or -1 */
+    /* Author text-decoration sub-properties (Hito 23b-...): color overrides the
+     * current fg for the line stroke (-1 = use fragment color), style is the
+     * css_text_decoration_style (0 unset -> solid), thickness is px (-1 unset -> 1.0).
+     * Applied by the painter, no effect on the layout measure. */
+    int         deco_color;   /* 0xRRGGBB, or -1 (use fragment color) */
+    int         deco_style;   /* css_text_decoration_style */
+    int         deco_thick;   /* px, or -1 (use default 1.0) */
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT } rc_rowkind;
@@ -2132,6 +2139,7 @@ typedef struct rc_box {
     int    radius;
     int    bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
     int    outline_w, outline_style, outline_color;
+    int    outline_offset;  /* px outset from the border edge; CSS_LEN_UNSET = 0 */
     int    bg_rgb;
     int    hidden;   /* visibility:hidden on this box (or an ancestor): geometry (h/w)
                        * is still resolved, decoration painting is skipped */
@@ -2440,6 +2448,9 @@ typedef struct rc_ext {
     double valign_dy;     /* baseline shift px (sub/super) */
     int    shadow_dx, shadow_dy, shadow_color;
     int    opacity;       /* 0..100, or -1 */
+    /* Author text-decoration sub-properties (per-fragment). Same semantics as on
+     * rc_frag. */
+    int    deco_color, deco_style, deco_thick;
 } rc_ext;
 
 /* Emits one fragment at the current pen position, advancing it. Shared by the
@@ -2460,6 +2471,8 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
         f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
         f->shadow_color = x->shadow_color; f->opacity = x->opacity;
+        f->deco_color = x->deco_color; f->deco_style = x->deco_style;
+        f->deco_thick = x->deco_thick;
     }
     s->pen_x += width;
     if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
@@ -2619,6 +2632,11 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     x.word_spacing = (b->word_spacing != PV_LEN_UNSET) ? (double)b->word_spacing : 0.0;
     x.shadow_dx = b->shadow_dx; x.shadow_dy = b->shadow_dy; x.shadow_color = b->shadow_color;
     x.opacity = b->opacity;
+    /* Author text-decoration sub-properties: -1/0/UNSET already set by the
+     * (rc_ext){ 0 } init, just lift from the block. */
+    x.deco_color = b->text_decoration_color;
+    x.deco_style = b->text_decoration_style;
+    x.deco_thick = b->text_decoration_thickness;
     if (b->valign == CSS_VA_SUB)        { x.valign_dy =  size * 0.18; size *= 0.83; }
     else if (b->valign == CSS_VA_SUPER) { x.valign_dy = -size * 0.34; size *= 0.83; }
 
@@ -3006,6 +3024,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->bsh_inset = def->bsh_inset;
         bx->outline_w = def->outline_w; bx->outline_style = def->outline_style;
         bx->outline_color = def->outline_color;
+        bx->outline_offset = (def->outline_offset != PV_LEN_UNSET) ? def->outline_offset : 0;
         bx->bg_rgb = def->bg_rgb;
         bx->hidden = inherited_hidden || this_hidden;
 
@@ -3679,12 +3698,15 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         cairo_fill(cr);
     }
 
-    /* Outline: stroked just outside the border box. */
+    /* Outline: stroked just outside the border box, offset by outline_offset
+     * (positive pushes the outline further out, negative pulls it inside). */
     double ow = box_edge_px(bx->outline_w);
     if (ow > 0.0 && box_line_visible(bx->outline_style)) {
         set_rgb(cr, rgb_from_packed(bx->outline_color >= 0 ? bx->outline_color : 0x333333));
         cairo_set_line_width(cr, ow);
-        cairo_rectangle(cr, x - ow / 2.0, y - ow / 2.0, w + ow, h + ow);
+        double oo = (double)bx->outline_offset;
+        cairo_rectangle(cr, x - ow / 2.0 - oo, y - ow / 2.0 - oo,
+                        w + ow + 2.0 * oo, h + ow + 2.0 * oo);
         cairo_stroke(cr);
     }
 }
@@ -3752,7 +3774,24 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         set_rgb_alpha(cr, f->color, f->opacity);
         styled_draw(cr, fx, fbaseline, f);
         if (f->underline || f->strike || f->overline) {
-            cairo_set_line_width(cr, UI_UNDERLINE_THICK);
+            /* Author text-decoration sub-properties override the line stroke:
+             * - color -1 means use the fragment's text color
+             * - thickness -1 means use the default 1.0px
+             * - style 0 (unset) means solid; CSS_TDS_DASHED/DOTTED use cairo dashes
+             *   (CSS_TDS_WAVY/CSS_TDS_DOUBLE fall back to solid in v1). */
+            ui_rgb deco_rgb = (f->deco_color >= 0) ? rgb_from_packed(f->deco_color) : f->color;
+            double deco_thick = (f->deco_thick >= 0) ? (double)f->deco_thick : UI_UNDERLINE_THICK;
+            set_rgb(cr, deco_rgb);
+            cairo_set_line_width(cr, deco_thick);
+            cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+            if (f->deco_style == CSS_TDS_DASHED) {
+                double on = 4.0 * deco_thick, off = 2.0 * deco_thick;
+                cairo_set_dash(cr, (double[]){ on, off }, 2, 0.0);
+            } else if (f->deco_style == CSS_TDS_DOTTED) {
+                cairo_set_dash(cr, (double[]){ 0.0, deco_thick * 2.0 }, 2, 0.0);
+            } else {
+                cairo_set_dash(cr, NULL, 0, 0.0);
+            }
             double x0 = fx, x1 = x0 + f->width;
             if (f->underline) {
                 double uy = fbaseline + f->font_size * UI_UNDERLINE_OFFSET;
@@ -3766,6 +3805,7 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
                 double oy = fbaseline - f->font_size * UI_OVERLINE_OFFSET;
                 cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(cr);
             }
+            cairo_set_dash(cr, NULL, 0, 0.0);  /* restore solid for next line */
         }
     }
 }

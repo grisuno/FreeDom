@@ -95,6 +95,9 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->font_scale = 0;
     b->line_scale = 0;
     b->text_decoration = -1;
+    b->text_decoration_color = -1;
+    b->text_decoration_style = 0;
+    b->text_decoration_thickness = -1;
     b->font_family = 0;
     b->text_transform = 0;
     b->letter_spacing = PV_LEN_UNSET;
@@ -264,6 +267,12 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->font_scale = (caps.css && r->font_scale > 0) ? r->font_scale : 0;
             lb->line_scale = (caps.css && r->line_scale > 0) ? r->line_scale : 0;
             lb->text_decoration = caps.css ? r->text_decoration : -1;
+            /* Author text-decoration sub-properties: same caps.css gate as above. */
+            if (caps.css) {
+                lb->text_decoration_color = r->text_decoration_color;
+                lb->text_decoration_style = r->text_decoration_style;
+                lb->text_decoration_thickness = r->text_decoration_thickness;
+            }
             /* Author text-presentation extensions: same caps.css gate as above. When
              * off they keep their no-effect defaults (set by rd_push). */
             if (caps.css) {
@@ -334,7 +343,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         if (nb > 0) {
             d->boxes = (pv_box_def *)malloc(nb * sizeof *d->boxes);
             if (d->boxes == NULL) { rd_free(d); return RD_ERR_OOM; }
-            for (size_t i = 0; i < nb; ++i) d->boxes[i] = *pv_box_at(view, i);
+            for (size_t i = 0; i < nb; ++i) {
+                const pv_box_def *src = pv_box_at(view, i);
+                d->boxes[i] = *src;
+            }
             d->nbox = nb;
             d->boxcap = nb;
         }

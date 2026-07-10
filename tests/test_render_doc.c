@@ -337,7 +337,8 @@ static void test_text_overflow_word_break_gated_by_css(void **state) {
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "clipped", NULL), PV_OK);
     pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
-                    PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK);
+                    PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK,
+                    -1, 0, -1);
 
     rd_doc *d = NULL;
     assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);

@@ -303,6 +303,9 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t wspace = (int32_t)r->white_space;
         int32_t toverflow = (int32_t)r->text_overflow;
         int32_t wbreak = (int32_t)r->word_break;
+        int32_t tdeco_color = (int32_t)r->text_decoration_color;
+        int32_t tdeco_style = (int32_t)r->text_decoration_style;
+        int32_t tdeco_thick = (int32_t)r->text_decoration_thickness;
         int32_t cid = (int32_t)r->cont_id;
         int32_t cdisp = (int32_t)r->cont_display;
         int32_t cgap = (int32_t)r->cont_gap;
@@ -370,6 +373,9 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &wspace, sizeof wspace) != 0) return -1;
         if (write_full(wfd, &toverflow, sizeof toverflow) != 0) return -1;
         if (write_full(wfd, &wbreak, sizeof wbreak) != 0) return -1;
+        if (write_full(wfd, &tdeco_color, sizeof tdeco_color) != 0) return -1;
+        if (write_full(wfd, &tdeco_style, sizeof tdeco_style) != 0) return -1;
+        if (write_full(wfd, &tdeco_thick, sizeof tdeco_thick) != 0) return -1;
         if (write_full(wfd, &cid, sizeof cid) != 0) return -1;
         if (write_full(wfd, &cdisp, sizeof cdisp) != 0) return -1;
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
@@ -414,7 +420,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[43] = {
+        int32_t f[46] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -435,6 +441,9 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->visibility,
             (int32_t)bd->overflow_x, (int32_t)bd->overflow_y,
             (int32_t)bd->cursor,
+            /* outline-offset + aspect-ratio (appended; read_view mirrors this) */
+            (int32_t)bd->outline_offset,
+            (int32_t)bd->aspect_num, (int32_t)bd->aspect_den,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
     }
@@ -1031,6 +1040,7 @@ static int read_view(int fd, pv_view **out) {
         int32_t shdx = 0, shdy = 0, shcol = -1, opac = -1, valgn = 0;
         int32_t tindent = PV_LEN_UNSET, wspace = 0;
         int32_t toverflow = 0, wbreak = 0;
+        int32_t tdeco_color = -1, tdeco_style = 0, tdeco_thick = -1;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
         int32_t fgrow = -1, fshrink = -1;
         int32_t fbasis = CSS_LEN_UNSET, forder = CSS_LEN_UNSET, fdir = 0;
@@ -1077,6 +1087,9 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &wspace, sizeof wspace) != 0
          || read_full(fd, &toverflow, sizeof toverflow) != 0
          || read_full(fd, &wbreak, sizeof wbreak) != 0
+         || read_full(fd, &tdeco_color, sizeof tdeco_color) != 0
+         || read_full(fd, &tdeco_style, sizeof tdeco_style) != 0
+         || read_full(fd, &tdeco_thick, sizeof tdeco_thick) != 0
          || read_full(fd, &cid, sizeof cid) != 0
          || read_full(fd, &cdisp, sizeof cdisp) != 0
          || read_full(fd, &cgap, sizeof cgap) != 0
@@ -1138,7 +1151,8 @@ static int read_view(int fd, pv_view **out) {
             pv_set_text_style(v, (int)talign, (int)fscale, (int)lscale, (int)deco);
             pv_set_text_ext(v, (int)ffam, (int)ttrans, (int)lspc, (int)wspc, (int)shdx,
                             (int)shdy, (int)shcol, (int)opac, (int)valgn, (int)tindent,
-                            (int)wspace, (int)toverflow, (int)wbreak);
+                            (int)wspace, (int)toverflow, (int)wbreak,
+                            (int)tdeco_color, (int)tdeco_style, (int)tdeco_thick);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
                              (int)cwrap, (int)crgap, (int)calign);
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
@@ -1157,7 +1171,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[43];
+        int32_t f[46];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1178,6 +1192,8 @@ static int read_view(int fd, pv_view **out) {
             .visibility = f[39],
             .overflow_x = f[40], .overflow_y = f[41],
             .cursor = f[42],
+            .outline_offset = f[43],
+            .aspect_num = f[44], .aspect_den = f[45],
         };
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
     }

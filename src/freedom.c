@@ -42,6 +42,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy (GUI; headless runs JS when this resolves to 'on')\n");
     fprintf(fp, "  --dump-console: headless, run the page's JS and print the captured console (Freebug); implies JS on\n");
     fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n");
+    fprintf(fp, "  --dump-css: headless, print the resolved CSS property dump (boxes + block properties) to stdout\n");
     fprintf(fp, "  --dump-layout: headless, print the resolved layout (box rects + positioned boxes) to stdout\n");
 }
 
@@ -84,6 +85,11 @@ static int g_dump_console = 0;
  * of the page render, the agent-readable instrument for diagnosing layout/paint gaps.
  * Honours --author-css (so the box tree is populated); does NOT imply running JS. */
 static int g_dump_dom = 0;
+
+/* Set by --dump-css: print the full CSS property dump (dd_format_css) to stdout after
+ * the render, showing per-element resolved CSS. Like --dump-dom, it makes the agent
+ * diagnose styling gaps without a Wayland window. Honours --author-css. */
+static int g_dump_css = 0;
 
 /* Set by --dump-layout: print the resolved layout (in-flow boxes + positioned
  * boxes) to stdout. The layout-side counterpart to --dump-dom: --dump-dom shows
@@ -226,6 +232,20 @@ static void print_dom(const rd_doc *doc) {
     free(buf);
 }
 
+/* Prints the CSS property inspector (dd_format_css) to stdout. Same contract as
+ * print_dom: two-pass measure-then-allocate. */
+static void print_dom_css(const rd_doc *doc) {
+    size_t need = dd_format_css(doc, NULL, 0);
+    char *buf = (char *)malloc(need + 1);
+    if (buf == NULL) {
+        fprintf(stderr, "freedom: out of memory while dumping CSS inspector\n");
+        return;
+    }
+    dd_format_css(doc, buf, need + 1);
+    fputs(buf, stdout);
+    free(buf);
+}
+
 /* Loads html into a fresh tab and prints the structured render of the page.
  * top_url is the page's https origin (for per-image policy decisions) or NULL for
  * a local file. Runs the page's JS when g_headless_js (so --dump-console can show
@@ -355,9 +375,9 @@ static int render_page(const char *html, size_t len, const char *top_url,
             fprintf(stderr, "freedom: nothing to render to PNG for this page\n");
             out_rc = EXIT_ERROR;
         }
-    } else if (rs == RD_OK && rd_count(doc) > 0 && !g_dump_dom && !g_dump_layout) {
+    } else if (rs == RD_OK && rd_count(doc) > 0 && !g_dump_dom && !g_dump_layout && !g_dump_css) {
         print_doc(doc);
-    } else if (!g_dump_dom && !g_dump_layout && page.text != NULL && page.text_len > 0) {
+    } else if (!g_dump_dom && !g_dump_layout && !g_dump_css && page.text != NULL && page.text_len > 0) {
         printf("\n%s\n", page.text); /* fallback if the display list is empty */
     }
 
@@ -369,6 +389,9 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * the layout-side counterpart to --dump-dom. Combined with --download-png it
      * gives both the bitmap and the numbers behind it. */
     if (g_dump_layout && rs == RD_OK) ui_dump_layout(doc);
+    /* --dump-css: the resolved CSS property inspector, showing per-element CSS
+     * properties as seen by the box engine and painter. */
+    if (g_dump_css && rs == RD_OK) print_dom_css(doc);
     rd_free(doc);
 
     /* Developer console (Freebug): show what the page's JS logged and any error. */
@@ -567,6 +590,9 @@ int main(int argc, char **argv) {
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (strcmp(arg, "--dump-dom") == 0) {
             g_dump_dom = 1;
+            headless = 1;      /* it is a headless diagnostic (no window) */
+        } else if (strcmp(arg, "--dump-css") == 0) {
+            g_dump_css = 1;
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (strcmp(arg, "--dump-layout") == 0) {
             g_dump_layout = 1;

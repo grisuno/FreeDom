@@ -35,4 +35,9 @@
  * nothing and cannot fail. */
 size_t dd_format(const rd_doc *doc, char *out, size_t cap);
 
+/* CSS inspector: dumps every block with its FULL resolved css_style fields as a
+ * compact property list. Designed for Freebug / --dump-css. Same contract as
+ * dd_format. */
+size_t dd_format_css(const rd_doc *doc, char *out, size_t cap);
+
 #endif /* FREEDOM_DOM_DEBUG_H */

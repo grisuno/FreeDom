@@ -57,6 +57,11 @@ typedef struct rd_block {
     int              font_scale;     /* author font-size percent (100=normal); set only with caps.css, else 0 */
     int              line_scale;     /* author line-height percent of the line box; set only with caps.css, else 0 */
     int              text_decoration;/* author text-decoration (OR of CSS_DECO_*); set only with caps.css, else -1 (unset) */
+    /* Author text-decoration sub-properties (color/style/thickness). Same caps.css
+     * gate as text_decoration above. Defaults: color -1, style 0, thickness -1. */
+    int              text_decoration_color;
+    int              text_decoration_style;
+    int              text_decoration_thickness;
     /* Author text-presentation extensions (Hito 23b-6); set only with caps.css, else
      * their no-effect defaults (font_family 0, text_transform 0, letter/word/indent
      * PV_LEN_UNSET, shadow_color -1, opacity -1, valign 0, white_space 0). */

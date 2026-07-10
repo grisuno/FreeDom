@@ -396,7 +396,9 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
 void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
                      int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
                      int shadow_color, int opacity, int valign, int text_indent,
-                     int white_space, int text_overflow, int word_break) {
+                     int white_space, int text_overflow, int word_break,
+                     int text_decoration_color, int text_decoration_style,
+                     int text_decoration_thickness) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->font_family = font_family;
@@ -412,6 +414,9 @@ void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
     r->white_space = white_space;
     r->text_overflow = text_overflow;
     r->word_break = word_break;
+    r->text_decoration_color = text_decoration_color;
+    r->text_decoration_style = text_decoration_style;
+    r->text_decoration_thickness = text_decoration_thickness;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -691,6 +696,13 @@ typedef struct pv_text_ext {
     int opacity, valign, text_indent, white_space;
     int list_style;
     int text_overflow, word_break;
+    /* Author text-decoration sub-properties (color, style, thickness). Inherit
+     * (nearest ancestor wins). -1/UNSET = unset. The line TYPE itself (underline/
+     * line-through/overline) is on pv_run.text_decoration; these three are its
+     * knobs. */
+    int text_decoration_color;     /* 0xRRGGBB, or -1 (unset) */
+    int text_decoration_style;     /* css_text_decoration_style, 0 unset */
+    int text_decoration_thickness; /* px, -1 unset, 0 from-font */
 } pv_text_ext;
 
 /* Initialises an ext to "unset" (no author text extension applied). */
@@ -701,6 +713,9 @@ static void pv_text_ext_reset(pv_text_ext *e) {
     e->opacity = -1; e->valign = 0; e->text_indent = PV_LEN_UNSET;
     e->white_space = 0; e->list_style = 0;
     e->text_overflow = 0; e->word_break = 0;
+    e->text_decoration_color = -1;
+    e->text_decoration_style = 0;
+    e->text_decoration_thickness = -1;
 }
 
 /* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
@@ -725,6 +740,12 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     if (e->text_overflow == 0 && cs->text_overflow != CSS_TO_UNSET)
         e->text_overflow = cs->text_overflow;
     if (e->word_break == 0 && cs->word_break != CSS_WB_UNSET) e->word_break = cs->word_break;
+    if (e->text_decoration_color == -1 && cs->text_decoration_color != -1)
+        e->text_decoration_color = cs->text_decoration_color;
+    if (e->text_decoration_style == 0 && cs->text_decoration_style != CSS_TDS_UNSET)
+        e->text_decoration_style = cs->text_decoration_style;
+    if (e->text_decoration_thickness == -1 && cs->text_decoration_thickness != -1)
+        e->text_decoration_thickness = cs->text_decoration_thickness;
 }
 
 /* True if the resolved style declares any HORIZONTAL box property. */
@@ -824,6 +845,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bsh_color = cs->box_shadow_color; d->bsh_inset = cs->box_shadow_inset;
     d->outline_w = cs->outline_width; d->outline_style = cs->outline_style;
     d->outline_color = cs->outline_color;
+    d->outline_offset = cs->outline_offset;
     d->position = cs->position;
     d->inset_top = cs->inset_top; d->inset_right = cs->inset_right;
     d->inset_bottom = cs->inset_bottom; d->inset_left = cs->inset_left;
@@ -831,6 +853,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->visibility = cs->visibility;
     d->overflow_x = cs->overflow_x; d->overflow_y = cs->overflow_y;
     d->cursor = cs->cursor;
+    d->aspect_num = cs->aspect_num; d->aspect_den = cs->aspect_den;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
@@ -1844,7 +1867,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 cext.letter_spacing, cext.word_spacing,
                                 cext.shadow_dx, cext.shadow_dy, cext.shadow_color,
                                 cext.opacity, cext.valign, cext.text_indent,
-                                cext.white_space, cext.text_overflow, cext.word_break);
+                                cext.white_space, cext.text_overflow, cext.word_break,
+                                cext.text_decoration_color, cext.text_decoration_style,
+                                cext.text_decoration_thickness);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
                 /* Every collected cell is its own grid item (the cell node is the
@@ -2056,7 +2081,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_text_ext(v, ext.font_family, ext.text_transform, ext.letter_spacing,
                         ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,
                         ext.opacity, ext.valign, ext.text_indent, ext.white_space,
-                        ext.text_overflow, ext.word_break);
+                        ext.text_overflow, ext.word_break,
+                        ext.text_decoration_color, ext.text_decoration_style,
+                        ext.text_decoration_thickness);
         pv_set_block_id(v, bdeco);
         pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
     }

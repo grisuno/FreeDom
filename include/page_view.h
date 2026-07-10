@@ -101,6 +101,13 @@ typedef struct pv_run {
      * none, -1 = unset). Presentation: render_doc applies it only with caps.css,
      * like fg_rgb/bg_rgb. Resolved from the nearest ancestor that sets it. */
     int     text_decoration;
+    /* Author text-decoration sub-properties: color (0xRRGGBB / -1 unset, falls back
+     * to fg_rgb at paint time), style (css_text_decoration_style, 0 unset -> solid)
+     * and thickness (px, -1 unset, 0 from-font). Same caps.css gate as
+     * text_decoration. Resolved from the nearest ancestor that sets them. */
+    int     text_decoration_color;
+    int     text_decoration_style;
+    int     text_decoration_thickness;
     /* Author text-presentation extensions (Hito 23b-6), each resolved from the
      * nearest ancestor that sets it (they inherit). Presentation: render_doc applies
      * them only with caps.css. Defaults (no author value): font_family 0 (unset ->
@@ -232,6 +239,10 @@ typedef struct pv_box_def {
     int border_radius;
     int bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
     int outline_w, outline_style, outline_color;
+    /* outline-offset: distance in px between the border edge and the outline (CSS:
+     * 0 by default, or any length). -1 = unset. Painted as an outset of the outline
+     * rect (positive pushes the outline further out, negative pulls it inside). */
+    int outline_offset;
     /* Positioning (Hito 23b-8 follow-up). position is a css_position (0 unset/static,
      * RELATIVE/ABSOLUTE/FIXED/STICKY). inset_* are top/right/bottom/left in px, or
      * CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1
@@ -252,6 +263,8 @@ typedef struct pv_box_def {
     int visibility;
     int overflow_x, overflow_y;
     int cursor;
+    /* aspect-ratio (numerator/denominator x1000, both 0 = unset/auto) */
+    int aspect_num, aspect_den;
 } pv_box_def;
 
 typedef struct pv_view {
@@ -365,13 +378,18 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
  * text_transform, signed letter_spacing/word_spacing (PV_LEN_UNSET = unset),
  * text-shadow (shadow_dx/dy offsets + shadow_color packed 0xRRGGBB or -1 for none),
  * opacity (0..100 or -1), valign, signed text_indent (PV_LEN_UNSET = unset),
- * white_space, text_overflow (css_text_overflow) and word_break (css_word_break).
+ * white_space, text_overflow (css_text_overflow) and word_break (css_word_break),
+ * plus the text-decoration sub-properties text_decoration_color (0xRRGGBB / -1
+ * unset), text_decoration_style (css_text_decoration_style) and
+ * text_decoration_thickness (px, -1 unset, 0 from-font).
  * No-op on an empty or NULL view. Like author colors, render_doc applies these only
  * with caps.css. */
 void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
                      int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
                      int shadow_color, int opacity, int valign, int text_indent,
-                     int white_space, int text_overflow, int word_break);
+                     int white_space, int text_overflow, int word_break,
+                     int text_decoration_color, int text_decoration_style,
+                     int text_decoration_thickness);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/

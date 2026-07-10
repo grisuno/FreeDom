@@ -431,6 +431,8 @@ typedef struct css_style {
     int         text_decoration; /* OR of CSS_DECO_*; 0 = none; -1 = unset */
     int         text_decoration_color; /* 0xRRGGBB or -1 (unset) */
     int         text_decoration_style; /* css_text_decoration_style, 0 (unset) */
+    int         text_decoration_thickness; /* px for underline/strike/overline line width,
+                                              or -1 unset, or 0 for from-font */
     int         bold;        /* 1, 0, or -1 (unset) */
     int         italic;      /* 1, 0, or -1 (unset) */
     css_display display;     /* CSS_DISP_UNSET if absent */
@@ -550,6 +552,9 @@ typedef struct css_style {
     int         touch_action;     /* css_touch_action, 0 (unset) */
     int         overscroll_behavior; /* css_overscroll, 0 (unset) */
     int         backface_visibility; /* css_backface, 0 (unset) */
+    /* aspect-ratio (Hito 2026-07-10). Stored as numerator/denominator x1000
+     * (so 16/9 -> num=16000, den=9000). auto/unset -> both 0. */
+    int         aspect_num, aspect_den;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

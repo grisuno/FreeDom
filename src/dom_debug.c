@@ -319,3 +319,121 @@ size_t dd_format(const rd_doc *doc, char *out, size_t cap) {
     if (out != NULL && cap != 0) out[(c.pos < cap) ? c.pos : cap - 1] = '\0';
     return c.need;
 }
+
+/* CSS inspector: dumps every element with its full CSS property set. */
+size_t dd_format_css(const rd_doc *doc, char *out, size_t cap) {
+    dd_cursor c = { out, cap, 0, 0 };
+    size_t nboxes = (doc != NULL) ? rd_box_count(doc) : 0;
+
+    dd_puts(&c, "=== Freedom CSS Inspector ===\n");
+    dd_printf(&c, "boxes: %zu\n\n", nboxes);
+
+    if (nboxes == 0) {
+        dd_puts(&c, "(no boxes — author CSS is off or page has no block elements)\n");
+        if (out != NULL && cap != 0) out[(c.pos < cap) ? c.pos : cap - 1] = '\0';
+        return c.need;
+    }
+
+    /* Per-box CSS summary */
+    for (size_t i = 0; i < nboxes; ++i) {
+        const pv_box_def *b = rd_box_at(doc, i);
+        if (b == NULL) continue;
+
+        dd_printf(&c, "--- box #%zu (parent=%d) ---\n", i, b->parent_id);
+        dd_printf(&c, "  layout: l=%d r=%d w=%d center=%d\n",
+                  b->box_l, b->box_r, b->box_w, b->box_center);
+        if (b->bg_rgb >= 0) {
+            dd_puts(&c, "  background: ");
+            dd_color(&c, b->bg_rgb);
+            dd_putc(&c, '\n');
+        }
+        dd_printf(&c, "  padding: t=%d r=%d b=%d l=%d\n",
+                  dd_w(b->pad_t), dd_w(b->pad_r), dd_w(b->pad_b), dd_w(b->pad_l));
+        dd_printf(&c, "  border: w=(%d,%d,%d,%d) style=%s color=(#%06x,#%06x,#%06x,#%06x) radius=%d\n",
+                  dd_w(b->bord_tw), dd_w(b->bord_rw), dd_w(b->bord_bw), dd_w(b->bord_lw),
+                  dd_border_style_name(b->bord_ts),
+                  (unsigned)(b->bord_tc >= 0 ? b->bord_tc : 0),
+                  (unsigned)(b->bord_rc >= 0 ? b->bord_rc : 0),
+                  (unsigned)(b->bord_bc >= 0 ? b->bord_bc : 0),
+                  (unsigned)(b->bord_lc >= 0 ? b->bord_lc : 0),
+                  dd_w(b->border_radius));
+        if (b->bsh_color >= 0)
+            dd_printf(&c, "  box-shadow: dx=%d dy=%d blur=%d spread=%d color=#%06x%s\n",
+                      b->bsh_dx, b->bsh_dy, b->bsh_blur, b->bsh_spread,
+                      (unsigned)b->bsh_color, b->bsh_inset ? " inset" : "");
+        if (b->outline_w > 0)
+            dd_printf(&c, "  outline: w=%d style=%s color=#%06x\n",
+                      dd_w(b->outline_w), dd_border_style_name(b->outline_style),
+                      (unsigned)(b->outline_color >= 0 ? b->outline_color : 0));
+        if (b->outline_offset != 0 && b->outline_offset != PV_LEN_UNSET)
+            dd_printf(&c, "  outline-offset: %d\n", b->outline_offset);
+        if (b->position > 0)
+            dd_printf(&c, "  position: %s inset(t=%d r=%d b=%d l=%d) z=%d\n",
+                      dd_position_name(b->position),
+                      dd_inset(b->inset_top), dd_inset(b->inset_right),
+                      dd_inset(b->inset_bottom), dd_inset(b->inset_left),
+                      (b->z_index != PV_LEN_UNSET) ? b->z_index : 0);
+        if (b->visibility != CSS_VIS_UNSET)
+            dd_printf(&c, "  visibility: %s\n", dd_visibility_name(b->visibility));
+        if (b->overflow_x != CSS_OF_UNSET || b->overflow_y != CSS_OF_UNSET)
+            dd_printf(&c, "  overflow: %s / %s\n",
+                      dd_overflow_name(b->overflow_x), dd_overflow_name(b->overflow_y));
+        if (b->cursor != CSS_CUR_UNSET)
+            dd_printf(&c, "  cursor: %s\n", dd_cursor_name(b->cursor));
+        if (b->aspect_num > 0 && b->aspect_den > 0) {
+            double ratio = (double)b->aspect_num / (double)b->aspect_den;
+            dd_printf(&c, "  aspect-ratio: %.2f (%d/%d)\n", ratio, b->aspect_num, b->aspect_den);
+        }
+        dd_putc(&c, '\n');
+    }
+
+    /* Also dump each block's text-level CSS */
+    size_t nblocks = (doc != NULL) ? rd_count(doc) : 0;
+    if (nblocks > 0) {
+        dd_puts(&c, "--- Block CSS ---\n");
+        for (size_t i = 0; i < nblocks; ++i) {
+            const rd_block *blk = rd_at(doc, i);
+            if (blk == NULL) continue;
+            dd_printf(&c, "  block #%zu <%s>", i, rd_block_tag(blk) ? rd_block_tag(blk) : "?");
+            if (blk->fg_rgb >= 0) { dd_puts(&c, " color="); dd_color(&c, blk->fg_rgb); }
+            if (blk->bg_rgb >= 0) { dd_puts(&c, " bg="); dd_color(&c, blk->bg_rgb); }
+            if (blk->font_scale)   dd_printf(&c, " font-size=%d%%", blk->font_scale);
+            if (blk->line_scale)   dd_printf(&c, " line-height=%d%%", blk->line_scale);
+            if (blk->bold)         dd_puts(&c, " bold");
+            if (blk->italic)       dd_puts(&c, " italic");
+            if (blk->text_align)   dd_printf(&c, " text-align=%s", dd_align_name(blk->text_align));
+            if (blk->text_decoration != -1) {
+                dd_puts(&c, " text-decoration:");
+                if (blk->text_decoration & CSS_DECO_UNDERLINE)    dd_puts(&c, " underline");
+                if (blk->text_decoration & CSS_DECO_LINE_THROUGH) dd_puts(&c, " line-through");
+                if (blk->text_decoration & CSS_DECO_OVERLINE)     dd_puts(&c, " overline");
+                if (blk->text_decoration == 0)                    dd_puts(&c, " none");
+            }
+            if (blk->font_family)  dd_printf(&c, " font-family=%d", blk->font_family);
+            if (blk->text_transform) dd_printf(&c, " text-transform=%d", blk->text_transform);
+            if (blk->letter_spacing != PV_LEN_UNSET) dd_printf(&c, " letter-spacing=%d", blk->letter_spacing);
+            if (blk->word_spacing != PV_LEN_UNSET)  dd_printf(&c, " word-spacing=%d", blk->word_spacing);
+            if (blk->shadow_color >= 0) dd_printf(&c, " text-shadow=(%d,%d) #%06x",
+                                                   blk->shadow_dx, blk->shadow_dy,
+                                                   (unsigned)blk->shadow_color);
+            if (blk->opacity >= 0)   dd_printf(&c, " opacity=%d%%", blk->opacity);
+            if (blk->valign)         dd_printf(&c, " valign=%d", blk->valign);
+            if (blk->text_indent != PV_LEN_UNSET) dd_printf(&c, " text-indent=%d", blk->text_indent);
+            if (blk->white_space)    dd_printf(&c, " white-space=%d", blk->white_space);
+            if (blk->text_overflow)  dd_printf(&c, " text-overflow=%s", dd_text_overflow_name(blk->text_overflow));
+            if (blk->word_break)     dd_puts(&c, " word-break=break");
+            if (blk->text_decoration_color >= 0)
+                dd_printf(&c, " text-decoration-color=#%06x", (unsigned)blk->text_decoration_color);
+            if (blk->text_decoration_style)
+                dd_printf(&c, " text-decoration-style=%d", blk->text_decoration_style);
+            if (blk->text_decoration_thickness >= 0)
+                dd_printf(&c, " text-decoration-thickness=%dpx", blk->text_decoration_thickness);
+            if (blk->box_w)          dd_printf(&c, " width=%d", blk->box_w);
+            if (blk->box_center)     dd_puts(&c, " margin=auto");
+            dd_putc(&c, '\n');
+        }
+    }
+
+    if (out != NULL && cap != 0) out[(c.pos < cap) ? c.pos : cap - 1] = '\0';
+    return c.need;
+}

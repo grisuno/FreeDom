@@ -1565,6 +1565,53 @@ static void test_inline_text_decoration_color_style(void **state) {
     assert_int_equal(def.text_decoration_style, CSS_TDS_UNSET);
 }
 
+/* --- text-decoration-thickness --- */
+
+static void test_inline_text_decoration_thickness(void **state) {
+    (void)state;
+    /* from-font -> 0 (the painter treats 0 as "default thickness" via cairo). */
+    assert_int_equal(css_parse_inline("text-decoration-thickness:from-font", 0).text_decoration_thickness, 0);
+    /* px values. */
+    assert_int_equal(css_parse_inline("text-decoration-thickness:1px", 0).text_decoration_thickness, 1);
+    assert_int_equal(css_parse_inline("text-decoration-thickness:3px", 0).text_decoration_thickness, 3);
+    assert_int_equal(css_parse_inline("text-decoration-thickness:0.5em", 0).text_decoration_thickness, 8);
+    /* Negative and percentage dropped (CSS does not allow them). */
+    assert_int_equal(css_parse_inline("text-decoration-thickness:-1px", 0).text_decoration_thickness, -1);
+    assert_int_equal(css_parse_inline("text-decoration-thickness:50%", 0).text_decoration_thickness, -1);
+    /* Default. */
+    assert_int_equal(css_parse_inline("color:#000", 0).text_decoration_thickness, -1);
+}
+
+/* --- aspect-ratio --- */
+
+static void test_inline_aspect_ratio(void **state) {
+    (void)state;
+    /* 16/9 -> 16000/9000. */
+    css_style a = css_parse_inline("aspect-ratio:16/9", 0);
+    assert_int_equal(a.aspect_num, 16000);
+    assert_int_equal(a.aspect_den, 9000);
+    /* 1.5 -> 1500/1000. */
+    css_style b = css_parse_inline("aspect-ratio:1.5", 0);
+    assert_int_equal(b.aspect_num, 1500);
+    assert_int_equal(b.aspect_den, 1000);
+    /* 1 (bare) -> 1000/1000. */
+    css_style c = css_parse_inline("aspect-ratio:1", 0);
+    assert_int_equal(c.aspect_num, 1000);
+    assert_int_equal(c.aspect_den, 1000);
+    /* auto -> 0/0 (unset/natural). */
+    css_style d = css_parse_inline("aspect-ratio:auto", 0);
+    assert_int_equal(d.aspect_num, 0);
+    assert_int_equal(d.aspect_den, 0);
+    /* Bad value -> 0/0 (dropped). */
+    css_style e = css_parse_inline("aspect-ratio:abc", 0);
+    assert_int_equal(e.aspect_num, 0);
+    assert_int_equal(e.aspect_den, 0);
+    /* default. */
+    css_style def = css_parse_inline("color:#000", 0);
+    assert_int_equal(def.aspect_num, 0);
+    assert_int_equal(def.aspect_den, 0);
+}
+
 /* --- direction --- */
 
 static void test_inline_direction(void **state) {
@@ -2358,6 +2405,8 @@ int main(void) {
         cmocka_unit_test(test_inline_min_max_height),
         cmocka_unit_test(test_box_extension_sheet_cascade),
         cmocka_unit_test(test_inline_text_decoration_color_style),
+        cmocka_unit_test(test_inline_text_decoration_thickness),
+        cmocka_unit_test(test_inline_aspect_ratio),
         cmocka_unit_test(test_inline_direction),
         cmocka_unit_test(test_inline_outline_offset),
         cmocka_unit_test(test_inline_tab_size),

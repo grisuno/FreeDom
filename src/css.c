@@ -95,6 +95,7 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_FONT_KERNING, P_TEXT_RENDERING, P_FONT_STRETCH,
         P_RESIZE, P_SCROLL_BEHAVIOR, P_TOUCH_ACTION, P_OVERSCROLL_BEHAVIOR,
         P_BACKFACE_VISIBILITY,
+        P_TEXTDECO_THICKNESS, P_ASPECT_NUM, P_ASPECT_DEN,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -739,6 +740,52 @@ static int interp_textdeco_style(const char *v) {
     if (csel_ci_eq(v, "dashed")) return CSS_TDS_DASHED;
     if (csel_ci_eq(v, "wavy"))   return CSS_TDS_WAVY;
     return -1;
+}
+
+/* text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length
+ * (px -> px, em/rem x16). -1 if unsupported (negative, %, etc -> dropped). */
+static int interp_textdeco_thickness(const char *v) {
+    if (csel_ci_eq(v, "from-font")) return 0;
+    int px;
+    if (!interp_len(v, 0, &px) || px < 0) return -1;
+    return px;
+}
+
+/* aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>`
+ * (auto fallback). Stores both numerator and denominator x1000 (for sub-integer
+ * ratios like 1.5 -> 1500/1000). Returns 1 with *num and *den set, 0 if unsupported.
+ * A bare number 1.5 is stored as 1500/1000; 16/9 as 16000/9000;
+ * auto / unparseable -> 0 (unset). */
+static int interp_aspect_ratio(const char *v, int *num, int *den) {
+    *num = *den = 0;
+    const char *p = v;
+    while (*p == ' ' || *p == '\t') ++p;
+    if (csel_ci_eq(p, "auto")) return 1;  /* auto alone -> unset (natural sizing) */
+    char buf[CSS_TOK_MAX];
+    size_t k = 0;
+    while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof buf) buf[k++] = *p++;
+    buf[k] = '\0';
+    if (k == 0) return 1;
+    /* Look for a '/' separator */
+    char *slash = strchr(buf, '/');
+    if (slash != NULL) {
+        *slash = '\0';
+        char *nend = slash + 1;
+        double nv, dv;
+        const char *ne, *de;
+        if (!parse_num(buf, &nv, &ne) || *ne != '\0') return 1;   /* fail -> unset */
+        if (!parse_num(nend, &dv, &de) || *de != '\0' || dv <= 0.0) return 1;
+        *num = round_clamp(nv * 1000.0, 1, CSS_LEN_MAX);
+        *den = round_clamp(dv * 1000.0, 1, CSS_LEN_MAX);
+        return 1;
+    }
+    /* Bare number: treat as w/h = N/1 */
+    double nv;
+    const char *ne;
+    if (!parse_num(buf, &nv, &ne) || *ne != '\0' || nv <= 0.0) return 1;
+    *num = round_clamp(nv * 1000.0, 1, CSS_LEN_MAX);
+    *den = 1000;
+    return 1;
 }
 
 /* direction: ltr/rtl. -1 if unknown. */
@@ -1842,6 +1889,18 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
              strcmp(prop, "text-decoration-line") == 0) { prop_id = P_TEXTDECO; ival = interp_textdeco(val); }
     else if (strcmp(prop, "text-decoration-color") == 0) { prop_id = P_TEXTDECO_COLOR; ival = interp_color(val); }
     else if (strcmp(prop, "text-decoration-style") == 0) { prop_id = P_TEXTDECO_STYLE; ival = interp_textdeco_style(val); }
+    else if (strcmp(prop, "text-decoration-thickness") == 0) { prop_id = P_TEXTDECO_THICKNESS; ival = interp_textdeco_thickness(val); }
+    /* aspect-ratio emits TWO property-value pairs (num + den) so the cascade can
+     * keep them in lock-step; the only caller that drops > 1 decl (var() in
+     * shorthand expansion) sees the same order in parse_one_decl's fall-through. */
+    else if (strcmp(prop, "aspect-ratio") == 0) {
+        int num, den;
+        interp_aspect_ratio(val, &num, &den);
+        if (cap < 2) return 0;
+        dst[0].prop = P_ASPECT_NUM; dst[0].ival = num;
+        dst[1].prop = P_ASPECT_DEN; dst[1].ival = den;
+        return 2;
+    }
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
     else if (strcmp(prop, "gap") == 0 ||
              strcmp(prop, "grid-gap") == 0 ||
@@ -2417,6 +2476,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_TOUCH_ACTION:        o->touch_action = d->ival; break;
             case P_OVERSCROLL_BEHAVIOR: o->overscroll_behavior = d->ival; break;
             case P_BACKFACE_VISIBILITY: o->backface_visibility = d->ival; break;
+            case P_TEXTDECO_THICKNESS: o->text_decoration_thickness = d->ival; break;
+            case P_ASPECT_NUM: o->aspect_num = d->ival; break;
+            case P_ASPECT_DEN: o->aspect_den = d->ival; break;
             default: break;
         }
     }
@@ -2497,6 +2559,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .resize = CSS_RS_UNSET, .scroll_behavior = CSS_SB_UNSET,
         .touch_action = CSS_TA_UNSET, .overscroll_behavior = CSS_OS_UNSET,
         .backface_visibility = CSS_BF_UNSET,
+        .text_decoration_thickness = -1,
+        .aspect_num = 0, .aspect_den = 0,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }
