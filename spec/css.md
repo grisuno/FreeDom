@@ -185,6 +185,19 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `caret-color` | `caret_color` (0xRRGGBB or `CSS_LEN_AUTO` for `auto`, or -1 unset): color of the text-input caret |
 | `appearance` | `appearance` (`css_appearance`): `auto`/`none`; unknown dropped |
 | `pointer-events` | `pointer_events` (`css_pointer_events`): `auto`/`none`; unknown dropped |
+| `background-repeat` | `bg_repeat` (`css_bg_repeat`): `repeat`/`no-repeat`/`repeat-x`/`repeat-y`/`space`/`round`; unknown dropped |
+| `background-size` | `bg_size` (`css_bg_size`): `auto`/`cover`/`contain`; `<length>`/`<percentage>` dropped |
+| `background-clip` | `bg_clip` (`css_bg_clip`): `border-box`/`padding-box`/`content-box`/`text`; unknown dropped |
+| `background-origin` | `bg_origin` (`css_bg_origin`): `padding-box`/`border-box`/`content-box`; unknown dropped |
+| `background-attachment` | `bg_attachment` (`css_bg_attachment`): `scroll`/`fixed`/`local`; unknown dropped |
+| `isolation` | `isolation` (`css_isolation`): `auto`/`isolate`; unknown dropped |
+| `contain` | `contain` (bitmask `CSS_CONTAIN_*`): `none`/`strict`/`content`/space‑separated `size` `layout` `style` `paint`; unknown tokens ignored |
+| `content-visibility` | `content_visibility` (`css_content_visibility`): `visible`/`auto`/`hidden`; unknown dropped |
+| `image-rendering` | `image_rendering` (`css_image_rendering`): `auto`/`pixelated`/`crisp-edges`; unknown dropped |
+| `color-scheme` | `color_scheme` (`css_color_scheme`): `normal`/`light`/`dark`; first keyword in `"light dark"` wins; unknown dropped |
+| `accent-color` | `accent_color` (0xRRGGBB or `CSS_LEN_AUTO` for `auto`, or -1 unset): colour of form‑control accents |
+| `print-color-adjust` | `print_color_adjust` (`css_print_color_adjust`): `economy`/`exact`; unknown dropped |
+| `forced-color-adjust` | `forced_color_adjust` (`css_forced_color_adjust`): `auto`/`none`; unknown dropped |
 
 #### Layout / box decoration (Hito 23b-7)
 
@@ -323,7 +336,7 @@ first:
    resolved), `position: sticky` scroll pinning. `overflow` clipping and
    `z-index` negative stacking **are** painted since 2026-07-09.
 - *Backgrounds beyond a solid color*: `background-image`/gradients (and any
-  `url()` — by doctrine, never fetched), `background-position`/`-size`/`-repeat`.
+  `url()` — by doctrine, never fetched), `background-position`.
 - *Transforms / filters / transitions*: `transform`, `filter`, `transition`,
   `animation`, `@keyframes`.
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
@@ -426,7 +439,7 @@ cannot use it to burn CPU). An inline `style=` sees BOTH its own custom properti
 and the stylesheet's (its own win on a name collision, being closer to the use
 site). `var()` never phones home: whatever text it substitutes still flows through
 the same property interpreter, so e.g. `background: var(--evil)` where
-`--evil: url(...)` is dropped exactly like a literal `url()` value would be.
+`--evil: url(...) #112233` still extracts the colour (`0x112233`) while the URL is dropped — same as a literal `background: url(...) #112233`.
 
 **`calc()` (CSS layout expansion).** A length value (anything that flows through
 `interp_len`: `margin`/`padding`/`width`/`max-width`/`top`/`right`/`bottom`/`left`/
@@ -577,7 +590,20 @@ typedef struct css_style {
     css_user_select  user_select;    /* CSS_US_UNSET if absent */
     int              caret_color;    /* 0xRRGGBB or -1 if absent */
     css_appearance   appearance;     /* CSS_AP_UNSET if absent */
-    css_pointer_events pointer_events; /* CSS_PE_UNSET if absent */
+    css_pointer_events    pointer_events;     /* CSS_PE_UNSET if absent */
+    css_bg_repeat         bg_repeat;          /* CSS_BGR_UNSET if absent */
+    css_bg_size           bg_size;            /* CSS_BGS_UNSET if absent */
+    css_bg_clip           bg_clip;            /* CSS_BGC_UNSET if absent */
+    css_bg_origin         bg_origin;          /* CSS_BGO_UNSET if absent */
+    css_bg_attachment     bg_attachment;      /* CSS_BGA_UNSET if absent */
+    css_isolation         isolation;          /* CSS_ISO_UNSET if absent */
+    int                   contain;            /* bitmask CSS_CONTAIN_*; 0 = unset/none */
+    css_content_visibility content_visibility; /* CSS_CV_UNSET if absent */
+    css_image_rendering   image_rendering;    /* CSS_IR_UNSET if absent */
+    css_color_scheme      color_scheme;       /* CSS_CSH_UNSET if absent */
+    int                   accent_color;       /* 0xRRGGBB, CSS_LEN_AUTO, or -1 unset */
+    css_print_color_adjust print_color_adjust; /* CSS_PCA_UNSET if absent */
+    css_forced_color_adjust forced_color_adjust; /* CSS_FCA_UNSET if absent */
 } css_style;
 
 typedef enum css_position {
@@ -643,6 +669,22 @@ typedef enum css_hyphens { CSS_HY_UNSET = 0, CSS_HY_NONE, CSS_HY_MANUAL, CSS_HY_
 typedef enum css_user_select { CSS_US_UNSET = 0, CSS_US_NONE, CSS_US_TEXT, CSS_US_ALL, CSS_US_AUTO } css_user_select;
 typedef enum css_appearance { CSS_AP_UNSET = 0, CSS_AP_AUTO, CSS_AP_NONE } css_appearance;
 typedef enum css_pointer_events { CSS_PE_UNSET = 0, CSS_PE_AUTO, CSS_PE_NONE } css_pointer_events;
+typedef enum css_bg_repeat { CSS_BGR_UNSET = 0, CSS_BGR_REPEAT, CSS_BGR_NO_REPEAT, CSS_BGR_REPEAT_X, CSS_BGR_REPEAT_Y, CSS_BGR_SPACE, CSS_BGR_ROUND } css_bg_repeat;
+typedef enum css_bg_size { CSS_BGS_UNSET = 0, CSS_BGS_AUTO, CSS_BGS_COVER, CSS_BGS_CONTAIN } css_bg_size;
+typedef enum css_bg_clip { CSS_BGC_UNSET = 0, CSS_BGC_BORDER_BOX, CSS_BGC_PADDING_BOX, CSS_BGC_CONTENT_BOX, CSS_BGC_TEXT } css_bg_clip;
+typedef enum css_bg_origin { CSS_BGO_UNSET = 0, CSS_BGO_PADDING_BOX, CSS_BGO_BORDER_BOX, CSS_BGO_CONTENT_BOX } css_bg_origin;
+typedef enum css_bg_attachment { CSS_BGA_UNSET = 0, CSS_BGA_SCROLL, CSS_BGA_FIXED, CSS_BGA_LOCAL } css_bg_attachment;
+typedef enum css_isolation { CSS_ISO_UNSET = 0, CSS_ISO_AUTO, CSS_ISO_ISOLATE } css_isolation;
+#define CSS_CONTAIN_NONE   0
+#define CSS_CONTAIN_SIZE   1
+#define CSS_CONTAIN_LAYOUT 2
+#define CSS_CONTAIN_STYLE  4
+#define CSS_CONTAIN_PAINT  8
+typedef enum css_content_visibility { CSS_CV_UNSET = 0, CSS_CV_VISIBLE, CSS_CV_AUTO, CSS_CV_HIDDEN } css_content_visibility;
+typedef enum css_image_rendering { CSS_IR_UNSET = 0, CSS_IR_AUTO, CSS_IR_PIXELATED, CSS_IR_CRISP_EDGES } css_image_rendering;
+typedef enum css_color_scheme { CSS_CSH_UNSET = 0, CSS_CSH_NORMAL, CSS_CSH_LIGHT, CSS_CSH_DARK } css_color_scheme;
+typedef enum css_print_color_adjust { CSS_PCA_UNSET = 0, CSS_PCA_ECONOMY, CSS_PCA_EXACT } css_print_color_adjust;
+typedef enum css_forced_color_adjust { CSS_FCA_UNSET = 0, CSS_FCA_AUTO, CSS_FCA_NONE } css_forced_color_adjust;
 typedef enum css_list_style {
     CSS_LS_UNSET = 0, CSS_LS_NONE, CSS_LS_DISC, CSS_LS_CIRCLE, CSS_LS_SQUARE,
     CSS_LS_DECIMAL, CSS_LS_LOWER_ALPHA, CSS_LS_UPPER_ALPHA, CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN

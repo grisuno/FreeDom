@@ -389,10 +389,11 @@ static void test_container_unset(void **state) {
 
 static void test_url_value_dropped(void **state) {
     (void)state;
-    /* a background with url() must NOT be honored (no fetch surface). */
-    css_style s = css_parse_inline("background: url(http://evil/x.png) #112233", 0);
-    assert_int_equal(s.background, -1);
-    /* but a plain color background is fine. */
+    /* A background with url() must NOT fetch, but the colour part IS honoured. */
+    assert_int_equal(css_parse_inline("background: url(http://evil/x.png) #112233", 0).background, 0x112233);
+    /* A bare url() with no colour still yields -1. */
+    assert_int_equal(css_parse_inline("background: url(http://evil/x.png)", 0).background, -1);
+    /* A plain color background is fine. */
     assert_int_equal(css_parse_inline("background:#112233", 0).background, 0x112233);
 }
 
@@ -486,10 +487,13 @@ static void test_custom_prop_var_unbalanced_paren_drops(void **state) {
 
 static void test_custom_prop_var_never_phones_home(void **state) {
     (void)state;
-    /* A custom property whose value contains url() flows through the same
-     * url()-drop check as a literal background value (interp_bg rejects it). */
+    /* A custom property whose value contains url() — colour IS honoured,
+     * the URL is never fetched. */
     css_style s = css_parse_inline(
         "--evil: url(http://evil/x.png) #112233; background: var(--evil)", 0);
+    assert_int_equal(s.background, 0x112233);
+    /* A var() resolved to bare url() with no colour still yields -1. */
+    s = css_parse_inline("--bg: url(http://evil/x.png); background: var(--bg)", 0);
     assert_int_equal(s.background, -1);
 }
 
@@ -2089,6 +2093,120 @@ static void test_table_sheet_cascade(void **state) {
     css_free(sh);
 }
 
+/* --- background longhands + background shorthand fix --- */
+static void test_inline_bg_repeat(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("background-repeat:repeat", 0).bg_repeat, CSS_BGR_REPEAT);
+    assert_int_equal(css_parse_inline("background-repeat:no-repeat", 0).bg_repeat, CSS_BGR_NO_REPEAT);
+    assert_int_equal(css_parse_inline("background-repeat:repeat-x", 0).bg_repeat, CSS_BGR_REPEAT_X);
+    assert_int_equal(css_parse_inline("background-repeat:repeat-y", 0).bg_repeat, CSS_BGR_REPEAT_Y);
+    assert_int_equal(css_parse_inline("background-repeat:space", 0).bg_repeat, CSS_BGR_SPACE);
+    assert_int_equal(css_parse_inline("background-repeat:round", 0).bg_repeat, CSS_BGR_ROUND);
+    assert_int_equal(css_parse_inline("background-repeat:stretch", 0).bg_repeat, CSS_BGR_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).bg_repeat, CSS_BGR_UNSET);
+}
+
+static void test_inline_bg_size(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("background-size:auto", 0).bg_size, CSS_BGS_AUTO);
+    assert_int_equal(css_parse_inline("background-size:cover", 0).bg_size, CSS_BGS_COVER);
+    assert_int_equal(css_parse_inline("background-size:contain", 0).bg_size, CSS_BGS_CONTAIN);
+    assert_int_equal(css_parse_inline("background-size:100px", 0).bg_size, CSS_BGS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).bg_size, CSS_BGS_UNSET);
+}
+
+static void test_inline_bg_clip_origin_attachment(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("background-clip:border-box", 0).bg_clip, CSS_BGC_BORDER_BOX);
+    assert_int_equal(css_parse_inline("background-clip:padding-box", 0).bg_clip, CSS_BGC_PADDING_BOX);
+    assert_int_equal(css_parse_inline("background-clip:content-box", 0).bg_clip, CSS_BGC_CONTENT_BOX);
+    assert_int_equal(css_parse_inline("background-clip:text", 0).bg_clip, CSS_BGC_TEXT);
+    assert_int_equal(css_parse_inline("background-clip:margin-box", 0).bg_clip, CSS_BGC_UNSET);
+    assert_int_equal(css_parse_inline("background-origin:padding-box", 0).bg_origin, CSS_BGO_PADDING_BOX);
+    assert_int_equal(css_parse_inline("background-origin:border-box", 0).bg_origin, CSS_BGO_BORDER_BOX);
+    assert_int_equal(css_parse_inline("background-origin:content-box", 0).bg_origin, CSS_BGO_CONTENT_BOX);
+    assert_int_equal(css_parse_inline("background-origin:margin-box", 0).bg_origin, CSS_BGO_UNSET);
+    assert_int_equal(css_parse_inline("background-attachment:scroll", 0).bg_attachment, CSS_BGA_SCROLL);
+    assert_int_equal(css_parse_inline("background-attachment:fixed", 0).bg_attachment, CSS_BGA_FIXED);
+    assert_int_equal(css_parse_inline("background-attachment:local", 0).bg_attachment, CSS_BGA_LOCAL);
+    assert_int_equal(css_parse_inline("background-attachment:auto", 0).bg_attachment, CSS_BGA_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).bg_clip, CSS_BGC_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).bg_origin, CSS_BGO_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).bg_attachment, CSS_BGA_UNSET);
+}
+
+static void test_inline_isolation(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("isolation:auto", 0).isolation, CSS_ISO_AUTO);
+    assert_int_equal(css_parse_inline("isolation:isolate", 0).isolation, CSS_ISO_ISOLATE);
+    assert_int_equal(css_parse_inline("isolation:unset", 0).isolation, CSS_ISO_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).isolation, CSS_ISO_UNSET);
+}
+
+static void test_inline_contain(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("contain:none", 0).contain, 0);
+    assert_int_equal(css_parse_inline("contain:strict", 0).contain,
+        CSS_CONTAIN_SIZE|CSS_CONTAIN_LAYOUT|CSS_CONTAIN_STYLE|CSS_CONTAIN_PAINT);
+    assert_int_equal(css_parse_inline("contain:content", 0).contain,
+        CSS_CONTAIN_LAYOUT|CSS_CONTAIN_STYLE|CSS_CONTAIN_PAINT);
+    assert_int_equal(css_parse_inline("contain:size", 0).contain, CSS_CONTAIN_SIZE);
+    assert_int_equal(css_parse_inline("contain:layout style paint", 0).contain,
+        CSS_CONTAIN_LAYOUT|CSS_CONTAIN_STYLE|CSS_CONTAIN_PAINT);
+    assert_int_equal(css_parse_inline("contain:paint size", 0).contain, CSS_CONTAIN_PAINT|CSS_CONTAIN_SIZE);
+    assert_int_equal(css_parse_inline("contain:unknown", 0).contain, 0);
+    assert_int_equal(css_parse_inline("color:red", 0).contain, 0);
+}
+
+static void test_inline_content_visibility(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("content-visibility:visible", 0).content_visibility, CSS_CV_VISIBLE);
+    assert_int_equal(css_parse_inline("content-visibility:auto", 0).content_visibility, CSS_CV_AUTO);
+    assert_int_equal(css_parse_inline("content-visibility:hidden", 0).content_visibility, CSS_CV_HIDDEN);
+    assert_int_equal(css_parse_inline("content-visibility:show", 0).content_visibility, CSS_CV_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).content_visibility, CSS_CV_UNSET);
+}
+
+static void test_inline_image_rendering(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("image-rendering:auto", 0).image_rendering, CSS_IR_AUTO);
+    assert_int_equal(css_parse_inline("image-rendering:pixelated", 0).image_rendering, CSS_IR_PIXELATED);
+    assert_int_equal(css_parse_inline("image-rendering:crisp-edges", 0).image_rendering, CSS_IR_CRISP_EDGES);
+    assert_int_equal(css_parse_inline("image-rendering:optimizeSpeed", 0).image_rendering, CSS_IR_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).image_rendering, CSS_IR_UNSET);
+}
+
+static void test_inline_color_scheme(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("color-scheme:normal", 0).color_scheme, CSS_CSH_NORMAL);
+    assert_int_equal(css_parse_inline("color-scheme:light", 0).color_scheme, CSS_CSH_LIGHT);
+    assert_int_equal(css_parse_inline("color-scheme:dark", 0).color_scheme, CSS_CSH_DARK);
+    assert_int_equal(css_parse_inline("color-scheme:light dark", 0).color_scheme, CSS_CSH_LIGHT);
+    assert_int_equal(css_parse_inline("color-scheme:auto", 0).color_scheme, CSS_CSH_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).color_scheme, CSS_CSH_UNSET);
+}
+
+static void test_inline_accent_color(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("accent-color:red", 0).accent_color, 0xFF0000);
+    assert_int_equal(css_parse_inline("accent-color:#00FF00", 0).accent_color, 0x00FF00);
+    assert_int_equal(css_parse_inline("accent-color:auto", 0).accent_color, CSS_LEN_AUTO);
+    assert_int_equal(css_parse_inline("accent-color:blargh", 0).accent_color, -1);
+    assert_int_equal(css_parse_inline("color:red", 0).accent_color, -1);
+}
+
+static void test_inline_print_forced_adjust(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("print-color-adjust:economy", 0).print_color_adjust, CSS_PCA_ECONOMY);
+    assert_int_equal(css_parse_inline("print-color-adjust:exact", 0).print_color_adjust, CSS_PCA_EXACT);
+    assert_int_equal(css_parse_inline("print-color-adjust:auto", 0).print_color_adjust, CSS_PCA_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).print_color_adjust, CSS_PCA_UNSET);
+    assert_int_equal(css_parse_inline("forced-color-adjust:auto", 0).forced_color_adjust, CSS_FCA_AUTO);
+    assert_int_equal(css_parse_inline("forced-color-adjust:none", 0).forced_color_adjust, CSS_FCA_NONE);
+    assert_int_equal(css_parse_inline("forced-color-adjust:preserve", 0).forced_color_adjust, CSS_FCA_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).forced_color_adjust, CSS_FCA_UNSET);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -2226,6 +2344,16 @@ int main(void) {
         cmocka_unit_test(test_inline_appearance),
         cmocka_unit_test(test_inline_pointer_events),
         cmocka_unit_test(test_table_sheet_cascade),
+        cmocka_unit_test(test_inline_bg_repeat),
+        cmocka_unit_test(test_inline_bg_size),
+        cmocka_unit_test(test_inline_bg_clip_origin_attachment),
+        cmocka_unit_test(test_inline_isolation),
+        cmocka_unit_test(test_inline_contain),
+        cmocka_unit_test(test_inline_content_visibility),
+        cmocka_unit_test(test_inline_image_rendering),
+        cmocka_unit_test(test_inline_color_scheme),
+        cmocka_unit_test(test_inline_accent_color),
+        cmocka_unit_test(test_inline_print_forced_adjust),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

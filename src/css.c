@@ -88,6 +88,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_CAPTION_SIDE, P_TABLE_LAYOUT,
         P_FONT_VARIANT, P_HYPHENS, P_USER_SELECT, P_CARET_COLOR,
         P_APPEARANCE, P_POINTER_EVENTS,
+        P_BG_REPEAT, P_BG_SIZE, P_BG_CLIP, P_BG_ORIGIN, P_BG_ATTACHMENT,
+        P_ISOLATION, P_CONTAIN, P_CONTENT_VISIBILITY, P_IMAGE_RENDERING,
+        P_COLOR_SCHEME, P_ACCENT_COLOR, P_PRINT_COLOR_ADJUST, P_FORCED_COLOR_ADJUST,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -156,17 +159,30 @@ static int interp_color(const char *v) {
 }
 
 static int interp_bg(const char *v) {
-    if (csel_substr(v, "url(", 1)) return -1;   /* never phone home */
     cc_rgb c;
     if (cc_parse(v, &c) == CC_OK) return cc_pack(c);
-    /* shorthand: try the first whitespace-delimited token as a color. */
+    /* token-iterate: skip url() tokens (never phone home), parse each other
+     * token as a color */
     char tok[CSS_TOK_MAX];
-    size_t k = 0;
     const char *p = v;
-    while (*p == ' ' || *p == '\t') ++p;
-    while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-    tok[k] = '\0';
-    return (cc_parse(tok, &c) == CC_OK) ? cc_pack(c) : -1;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        if (*p == 'u' || *p == 'U') {
+            /* skip url(...) token */
+            if ((p[0] == 'u' || p[0] == 'U') && (p[1] == 'r' || p[1] == 'R') &&
+                (p[2] == 'l' || p[2] == 'L') && p[3] == '(') {
+                while (*p != '\0' && *p != ')') ++p;
+                if (*p == ')') ++p;
+                continue;
+            }
+        }
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        if (cc_parse(tok, &c) == CC_OK) return cc_pack(c);
+    }
+    return -1;
 }
 
 static int interp_align(const char *v) {
@@ -1013,6 +1029,123 @@ static int interp_pointer_events(const char *v) {
     return -1;
 }
 
+/* background-repeat: repeat/no-repeat/repeat-x/repeat-y/space/round. -1 unknown. */
+static int interp_bg_repeat(const char *v) {
+    if (csel_ci_eq(v, "repeat"))    return CSS_BGR_REPEAT;
+    if (csel_ci_eq(v, "no-repeat")) return CSS_BGR_NO_REPEAT;
+    if (csel_ci_eq(v, "repeat-x"))  return CSS_BGR_REPEAT_X;
+    if (csel_ci_eq(v, "repeat-y"))  return CSS_BGR_REPEAT_Y;
+    if (csel_ci_eq(v, "space"))     return CSS_BGR_SPACE;
+    if (csel_ci_eq(v, "round"))     return CSS_BGR_ROUND;
+    return -1;
+}
+/* background-size: auto/cover/contain. -1 unknown (lengths dropped). */
+static int interp_bg_size(const char *v) {
+    if (csel_ci_eq(v, "auto"))    return CSS_BGS_AUTO;
+    if (csel_ci_eq(v, "cover"))   return CSS_BGS_COVER;
+    if (csel_ci_eq(v, "contain")) return CSS_BGS_CONTAIN;
+    return -1;
+}
+/* background-clip: border-box/padding-box/content-box/text. -1 unknown. */
+static int interp_bg_clip(const char *v) {
+    if (csel_ci_eq(v, "border-box"))   return CSS_BGC_BORDER_BOX;
+    if (csel_ci_eq(v, "padding-box"))  return CSS_BGC_PADDING_BOX;
+    if (csel_ci_eq(v, "content-box"))  return CSS_BGC_CONTENT_BOX;
+    if (csel_ci_eq(v, "text"))         return CSS_BGC_TEXT;
+    return -1;
+}
+/* background-origin: padding-box/border-box/content-box. -1 unknown. */
+static int interp_bg_origin(const char *v) {
+    if (csel_ci_eq(v, "padding-box"))  return CSS_BGO_PADDING_BOX;
+    if (csel_ci_eq(v, "border-box"))   return CSS_BGO_BORDER_BOX;
+    if (csel_ci_eq(v, "content-box"))  return CSS_BGO_CONTENT_BOX;
+    return -1;
+}
+/* background-attachment: scroll/fixed/local. -1 unknown. */
+static int interp_bg_attachment(const char *v) {
+    if (csel_ci_eq(v, "scroll")) return CSS_BGA_SCROLL;
+    if (csel_ci_eq(v, "fixed"))  return CSS_BGA_FIXED;
+    if (csel_ci_eq(v, "local"))  return CSS_BGA_LOCAL;
+    return -1;
+}
+/* isolation: auto/isolate. -1 unknown. */
+static int interp_isolation(const char *v) {
+    if (csel_ci_eq(v, "auto"))    return CSS_ISO_AUTO;
+    if (csel_ci_eq(v, "isolate")) return CSS_ISO_ISOLATE;
+    return -1;
+}
+/* contain: none/strict/content / space-separated size layout style paint. */
+static int interp_contain(const char *v) {
+    if (csel_ci_eq(v, "none"))    return 0;
+    if (csel_ci_eq(v, "strict"))  return CSS_CONTAIN_SIZE|CSS_CONTAIN_LAYOUT|CSS_CONTAIN_STYLE|CSS_CONTAIN_PAINT;
+    if (csel_ci_eq(v, "content")) return CSS_CONTAIN_LAYOUT|CSS_CONTAIN_STYLE|CSS_CONTAIN_PAINT;
+    int mask = 0;
+    const char *p = v;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        if (csel_ci_eq(tok, "size"))   mask |= CSS_CONTAIN_SIZE;
+        else if (csel_ci_eq(tok, "layout")) mask |= CSS_CONTAIN_LAYOUT;
+        else if (csel_ci_eq(tok, "style"))  mask |= CSS_CONTAIN_STYLE;
+        else if (csel_ci_eq(tok, "paint"))  mask |= CSS_CONTAIN_PAINT;
+    }
+    return mask;
+}
+/* content-visibility: visible/auto/hidden. -1 unknown. */
+static int interp_content_visibility(const char *v) {
+    if (csel_ci_eq(v, "visible")) return CSS_CV_VISIBLE;
+    if (csel_ci_eq(v, "auto"))    return CSS_CV_AUTO;
+    if (csel_ci_eq(v, "hidden"))  return CSS_CV_HIDDEN;
+    return -1;
+}
+/* image-rendering: auto/pixelated/crisp-edges. -1 unknown. */
+static int interp_image_rendering(const char *v) {
+    if (csel_ci_eq(v, "auto"))        return CSS_IR_AUTO;
+    if (csel_ci_eq(v, "pixelated"))   return CSS_IR_PIXELATED;
+    if (csel_ci_eq(v, "crisp-edges")) return CSS_IR_CRISP_EDGES;
+    return -1;
+}
+/* color-scheme: normal/light/dark; multi-keyword "light dark" -> first wins. -1 unknown. */
+static int interp_color_scheme(const char *v) {
+    if (csel_ci_eq(v, "normal")) return CSS_CSH_NORMAL;
+    if (csel_ci_eq(v, "light"))  return CSS_CSH_LIGHT;
+    if (csel_ci_eq(v, "dark"))   return CSS_CSH_DARK;
+    const char *p = v;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char tok[CSS_TOK_MAX];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
+        tok[k] = '\0';
+        if (csel_ci_eq(tok, "light")) return CSS_CSH_LIGHT;
+        if (csel_ci_eq(tok, "dark"))  return CSS_CSH_DARK;
+    }
+    return -1;
+}
+/* accent-color: auto -> CSS_LEN_AUTO; color -> 0xRRGGBB; -1 unknown. */
+static int interp_accent_color(const char *v) {
+    if (csel_ci_eq(v, "auto")) return CSS_LEN_AUTO;
+    cc_rgb c;
+    return (cc_parse(v, &c) == CC_OK) ? cc_pack(c) : -1;
+}
+/* print-color-adjust: economy/exact. -1 unknown. */
+static int interp_print_color_adjust(const char *v) {
+    if (csel_ci_eq(v, "economy")) return CSS_PCA_ECONOMY;
+    if (csel_ci_eq(v, "exact"))   return CSS_PCA_EXACT;
+    return -1;
+}
+/* forced-color-adjust: auto/none. -1 unknown. */
+static int interp_forced_color_adjust(const char *v) {
+    if (csel_ci_eq(v, "auto")) return CSS_FCA_AUTO;
+    if (csel_ci_eq(v, "none")) return CSS_FCA_NONE;
+    return -1;
+}
+
 /* Signed integer (z-index/order). Returns 1 with *out (clamped to +-CSS_LEN_MAX),
  * 0 if not a pure integer (auto / floats / units -> dropped, leaving unset). */
 static int interp_int(const char *v, int *out) {
@@ -1678,6 +1811,23 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     }
     else if (strcmp(prop, "appearance") == 0)            { prop_id = P_APPEARANCE;      ival = interp_appearance(val); }
     else if (strcmp(prop, "pointer-events") == 0)        { prop_id = P_POINTER_EVENTS;  ival = interp_pointer_events(val); }
+    else if (strcmp(prop, "background-repeat") == 0)    { prop_id = P_BG_REPEAT;     ival = interp_bg_repeat(val); }
+    else if (strcmp(prop, "background-size") == 0)      { prop_id = P_BG_SIZE;       ival = interp_bg_size(val); }
+    else if (strcmp(prop, "background-clip") == 0)      { prop_id = P_BG_CLIP;       ival = interp_bg_clip(val); }
+    else if (strcmp(prop, "background-origin") == 0)    { prop_id = P_BG_ORIGIN;     ival = interp_bg_origin(val); }
+    else if (strcmp(prop, "background-attachment") == 0){ prop_id = P_BG_ATTACHMENT; ival = interp_bg_attachment(val); }
+    else if (strcmp(prop, "isolation") == 0)            { prop_id = P_ISOLATION;     ival = interp_isolation(val); }
+    else if (strcmp(prop, "contain") == 0)              { prop_id = P_CONTAIN;       ival = interp_contain(val); }
+    else if (strcmp(prop, "content-visibility") == 0)   { prop_id = P_CONTENT_VISIBILITY; ival = interp_content_visibility(val); }
+    else if (strcmp(prop, "image-rendering") == 0)      { prop_id = P_IMAGE_RENDERING;    ival = interp_image_rendering(val); }
+    else if (strcmp(prop, "color-scheme") == 0)         { prop_id = P_COLOR_SCHEME;       ival = interp_color_scheme(val); }
+    else if (strcmp(prop, "accent-color") == 0) {
+        int o = interp_accent_color(val);
+        if (o != CSS_LEN_AUTO && o < 0) return 0;
+        dst[0].prop = P_ACCENT_COLOR; dst[0].ival = o; return 1;
+    }
+    else if (strcmp(prop, "print-color-adjust") == 0)   { prop_id = P_PRINT_COLOR_ADJUST;   ival = interp_print_color_adjust(val); }
+    else if (strcmp(prop, "forced-color-adjust") == 0)  { prop_id = P_FORCED_COLOR_ADJUST;  ival = interp_forced_color_adjust(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -2132,7 +2282,20 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_USER_SELECT:     o->user_select = d->ival; break;
             case P_CARET_COLOR:     o->caret_color = d->ival; break;
             case P_APPEARANCE:      o->appearance = d->ival; break;
-            case P_POINTER_EVENTS:  o->pointer_events = d->ival; break;
+            case P_POINTER_EVENTS:      o->pointer_events = d->ival; break;
+            case P_BG_REPEAT:           o->bg_repeat = d->ival; break;
+            case P_BG_SIZE:             o->bg_size = d->ival; break;
+            case P_BG_CLIP:             o->bg_clip = d->ival; break;
+            case P_BG_ORIGIN:           o->bg_origin = d->ival; break;
+            case P_BG_ATTACHMENT:       o->bg_attachment = d->ival; break;
+            case P_ISOLATION:           o->isolation = d->ival; break;
+            case P_CONTAIN:             o->contain = d->ival; break;
+            case P_CONTENT_VISIBILITY:  o->content_visibility = d->ival; break;
+            case P_IMAGE_RENDERING:     o->image_rendering = d->ival; break;
+            case P_COLOR_SCHEME:        o->color_scheme = d->ival; break;
+            case P_ACCENT_COLOR:        o->accent_color = d->ival; break;
+            case P_PRINT_COLOR_ADJUST:  o->print_color_adjust = d->ival; break;
+            case P_FORCED_COLOR_ADJUST: o->forced_color_adjust = d->ival; break;
             default: break;
         }
     }
@@ -2197,6 +2360,15 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .hyphens = CSS_HY_UNSET, .user_select = CSS_US_UNSET,
         .caret_color = -1,
         .appearance = CSS_AP_UNSET, .pointer_events = CSS_PE_UNSET,
+        .bg_repeat = CSS_BGR_UNSET, .bg_size = CSS_BGS_UNSET,
+        .bg_clip = CSS_BGC_UNSET, .bg_origin = CSS_BGO_UNSET,
+        .bg_attachment = CSS_BGA_UNSET,
+        .isolation = CSS_ISO_UNSET, .contain = 0,
+        .content_visibility = CSS_CV_UNSET,
+        .image_rendering = CSS_IR_UNSET,
+        .color_scheme = CSS_CSH_UNSET, .accent_color = -1,
+        .print_color_adjust = CSS_PCA_UNSET,
+        .forced_color_adjust = CSS_FCA_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

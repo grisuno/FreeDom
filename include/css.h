@@ -277,6 +277,58 @@ typedef enum css_pointer_events {
     CSS_PE_UNSET = 0, CSS_PE_AUTO, CSS_PE_NONE
 } css_pointer_events;
 
+/* background-repeat. 0 unset. */
+typedef enum css_bg_repeat {
+    CSS_BGR_UNSET = 0, CSS_BGR_REPEAT, CSS_BGR_NO_REPEAT,
+    CSS_BGR_REPEAT_X, CSS_BGR_REPEAT_Y, CSS_BGR_SPACE, CSS_BGR_ROUND
+} css_bg_repeat;
+/* background-size. 0 unset. */
+typedef enum css_bg_size {
+    CSS_BGS_UNSET = 0, CSS_BGS_AUTO, CSS_BGS_COVER, CSS_BGS_CONTAIN
+} css_bg_size;
+/* background-clip. 0 unset. */
+typedef enum css_bg_clip {
+    CSS_BGC_UNSET = 0, CSS_BGC_BORDER_BOX, CSS_BGC_PADDING_BOX,
+    CSS_BGC_CONTENT_BOX, CSS_BGC_TEXT
+} css_bg_clip;
+/* background-origin. 0 unset. */
+typedef enum css_bg_origin {
+    CSS_BGO_UNSET = 0, CSS_BGO_PADDING_BOX, CSS_BGO_BORDER_BOX, CSS_BGO_CONTENT_BOX
+} css_bg_origin;
+/* background-attachment. 0 unset. */
+typedef enum css_bg_attachment {
+    CSS_BGA_UNSET = 0, CSS_BGA_SCROLL, CSS_BGA_FIXED, CSS_BGA_LOCAL
+} css_bg_attachment;
+/* isolation. 0 unset. */
+typedef enum css_isolation {
+    CSS_ISO_UNSET = 0, CSS_ISO_AUTO, CSS_ISO_ISOLATE
+} css_isolation;
+/* contain bitmask values. 0 = none/unset. */
+#define CSS_CONTAIN_SIZE   1
+#define CSS_CONTAIN_LAYOUT 2
+#define CSS_CONTAIN_STYLE  4
+#define CSS_CONTAIN_PAINT  8
+/* content-visibility. 0 unset. */
+typedef enum css_content_visibility {
+    CSS_CV_UNSET = 0, CSS_CV_VISIBLE, CSS_CV_AUTO, CSS_CV_HIDDEN
+} css_content_visibility;
+/* image-rendering. 0 unset. */
+typedef enum css_image_rendering {
+    CSS_IR_UNSET = 0, CSS_IR_AUTO, CSS_IR_PIXELATED, CSS_IR_CRISP_EDGES
+} css_image_rendering;
+/* color-scheme. 0 unset. */
+typedef enum css_color_scheme {
+    CSS_CSH_UNSET = 0, CSS_CSH_NORMAL, CSS_CSH_LIGHT, CSS_CSH_DARK
+} css_color_scheme;
+/* print-color-adjust. 0 unset. */
+typedef enum css_print_color_adjust {
+    CSS_PCA_UNSET = 0, CSS_PCA_ECONOMY, CSS_PCA_EXACT
+} css_print_color_adjust;
+/* forced-color-adjust. 0 unset. */
+typedef enum css_forced_color_adjust {
+    CSS_FCA_UNSET = 0, CSS_FCA_AUTO, CSS_FCA_NONE
+} css_forced_color_adjust;
+
 /* Anti-DoS clamps for the layout properties. Insets/z-index/order reuse CSS_LEN_*.
  * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX.
  * border-spacing is clamped to [0, CSS_SPACING_MAX] like letter-spacing (a table
@@ -422,7 +474,20 @@ typedef struct css_style {
     int         user_select;     /* css_user_select, 0 (unset) */
     int         caret_color;     /* 0xRRGGBB or -1 (unset) */
     int         appearance;      /* css_appearance, 0 (unset) */
-    int         pointer_events;  /* css_pointer_events, 0 (unset) */
+    int         pointer_events;   /* css_pointer_events, 0 (unset) */
+    int         bg_repeat;        /* css_bg_repeat, 0 (unset) */
+    int         bg_size;          /* css_bg_size, 0 (unset) */
+    int         bg_clip;          /* css_bg_clip, 0 (unset) */
+    int         bg_origin;        /* css_bg_origin, 0 (unset) */
+    int         bg_attachment;    /* css_bg_attachment, 0 (unset) */
+    int         isolation;        /* css_isolation, 0 (unset) */
+    int         contain;          /* bitmask CSS_CONTAIN_*, 0 = none/unset */
+    int         content_visibility; /* css_content_visibility, 0 (unset) */
+    int         image_rendering;  /* css_image_rendering, 0 (unset) */
+    int         color_scheme;     /* css_color_scheme, 0 (unset) */
+    int         accent_color;     /* 0xRRGGBB or -1 (unset) */
+    int         print_color_adjust;   /* css_print_color_adjust, 0 (unset) */
+    int         forced_color_adjust;  /* css_forced_color_adjust, 0 (unset) */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */
