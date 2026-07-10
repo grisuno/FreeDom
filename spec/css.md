@@ -152,7 +152,9 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `line-height` | `line_scale` (percent of the natural line box): unitless multiplier (`1.5` → 150) or `%` (`160%` → 160), clamped `[CSS_LINE_MIN, CSS_LINE_MAX]`; `normal` → 0 (unset, uses the UA default). Absolute `px`/`em` line-heights are out of scope (dropped). Inherits, like `font-size`. |
 | `font-weight` | `bold`: `bold`/`bolder` or numeric ≥ 600 → 1; `normal`/`lighter`/< 600 → 0 |
 | `font-style` | `italic`: `italic`/`oblique` → 1; `normal` → 0 |
-| `text-decoration`, `text-decoration-line` | `text_decoration` (OR of `CSS_DECO_UNDERLINE`/`CSS_DECO_LINE_THROUGH`/`CSS_DECO_OVERLINE`): collects the line keywords `underline`/`overline`/`line-through` from the (space-separated) value; `none` → 0 (explicit removal — e.g. `a { text-decoration: none }` drops the link underline); a value with *no* line keyword (only a color/style/thickness token) is dropped → unset (-1). Style/color/thickness tokens (`wavy`, `red`, `2px`, `solid`, …) are ignored. |
+| `text-decoration`, `text-decoration-line` | `text_decoration` (OR of `CSS_DECO_UNDERLINE`/`CSS_DECO_LINE_THROUGH`/`CSS_DECO_OVERLINE`): collects the line keywords `underline`/`overline`/`line-through` from the (space-separated) value; `none` → 0 (explicit removal — e.g. `a { text-decoration: none }` drops the link underline); a value with *no* line keyword (only a color/style/thickness token) is dropped → unset (-1). Style/color/thickness tokens (`wavy`, `red`, `2px`, `solid`, …) are **no longer** ignored if they reach the dedicated properties below: the combined shorthand still extracts only line keywords. |
+| `text-decoration-color` | `text_decoration_color` (0xRRGGBB or -1 unset): colour of the decoration line. Parsed by `interp_color`. |
+| `text-decoration-style` | `text_decoration_style` (`css_text_decoration_style`): `solid`/`double`/`dotted`/`dashed`/`wavy`; unknown → unset. |
 | `display` | `display`: `none`/`block`/`inline`/`inline-block`/`flex`/`grid`/other |
 | `gap`, `grid-gap`, `column-gap` | `gap`: leading px of the value (`12px 8px` → 12; `normal` → 0), clamped `[0, CSS_GAP_MAX]`, or -1 (unset) |
 | `justify-content` | `justify`: `flex-start`/`start`→START, `flex-end`/`end`→END, `center`, `space-between`, `space-around`, `space-evenly`; unknown dropped |
@@ -160,7 +162,11 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `margin`, `margin-top/right/bottom/left` | `margin_top/right/bottom/left` (px). The shorthand expands 1–4 values (CSS order: all / `v h` / `t h b` / `t r b l`). `auto` → `CSS_LEN_AUTO` (meaningful for the horizontal sides: `margin: 0 auto` centers). Negative px allowed. Clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`. |
 | `padding`, `padding-top/right/bottom/left` | `pad_top/right/bottom/left` (px ≥ 0). Same 1–4 shorthand. `auto`/negative → that side dropped (fail closed). Clamped `[0, CSS_LEN_MAX]`. |
 | `width` | `width` (px content width, or `CSS_LEN_UNSET`). `auto` → unset. |
+| `min-width` | `min_width` (px, or `CSS_LEN_UNSET`). `auto` → unset. Same units as `width`; negative dropped. |
 | `max-width` | `max_width` (px, or `CSS_LEN_UNSET`). `none` → unset. |
+| `height` | `height` (px, or `CSS_LEN_UNSET`). `auto` → unset. Same units as `width`; negative dropped. |
+| `min-height` | `min_height` (px, or `CSS_LEN_UNSET`). `auto`/`none` → unset. Same units; negative dropped. |
+| `max-height` | `max_height` (px, or `CSS_LEN_UNSET`). `none` → unset. Same units; negative dropped. |
 | `font-family` | `font_family` (`css_font_family`): the first recognised name in the comma stack maps to its **generic bucket** (`serif`/`sans-serif`/`monospace`/`cursive`/`fantasy`); common names (Arial→sans, Times→serif, Courier→mono, …) are mapped; quotes stripped; `url()` dropped; unknown → unset |
 | `text-transform` | `text_transform` (`css_text_transform`): `uppercase`/`lowercase`/`capitalize`/`none` (explicit); other values (`full-width`, …) dropped |
 | `letter-spacing` | `letter_spacing` (signed px; `normal` → 0; `em` ×16; `CSS_LEN_UNSET` unset), clamped `[−CSS_SPACING_MAX, CSS_SPACING_MAX]`; `%`/`calc`/bare number dropped |
@@ -171,6 +177,8 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `text-indent` | `text_indent` (signed px first-line indent; `em` ×16; `CSS_LEN_UNSET` unset); `%`/viewport dropped |
 | `white-space` | `white_space` (`css_white_space`): `normal`/`nowrap`/`pre`/`pre-wrap`/`pre-line` — the presentation layer consumes only the **wrap/no-wrap** distinction (`nowrap`/`pre` suppress line wrapping) |
 | `list-style-type`, `list-style` | `list_style` (`css_list_style`): the first recognised type keyword wins (`disc`/`circle`/`square`/`decimal`/`lower-alpha`\|`lower-latin`/`upper-alpha`\|`upper-latin`/`lower-roman`/`upper-roman`/`none`); changes the `<li>` marker; `url()` (list-style-image) dropped (never fetch) |
+| `direction` | `direction` (`css_direction`): `ltr`/`rtl`; unknown → unset. Text-direction hint for the layout engine. |
+| `tab-size` | `tab_size` (number of spaces, 0 unset): a bare integer ≥ 1 and ≤ 64; units (`px`, `%`) dropped. |
 
 #### Layout / box decoration (Hito 23b-7)
 
@@ -191,6 +199,7 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | `border-radius` | `border_radius` (first value, px ≥ 0; `%` dropped). Corner-by-corner / elliptical radii out of scope. |
 | `box-shadow` | `shadow2_dx`/`_dy`/`_blur`/`_spread` (signed px) + `box_shadow_color` (`0xRRGGBB`/-1) + `box_shadow_inset` (1/0/-1). Single layer: ≤4 lengths in order dx, dy, blur, spread + optional color + optional `inset`; needs ≥2 lengths or dropped; `none` → explicit no-shadow; `url()` dropped |
 | `outline` (+`-width`/`-style`/`-color`) | `outline_width`/`outline_style`/`outline_color` (uniform, same token classifier as `border`) |
+| `outline-offset` | `outline_offset` (signed px, `CSS_LEN_UNSET` unset). Same length parser as box-model (`em`/`rem` ×16, `calc()`). |
 | `flex-grow`, `flex-shrink` | `flex_grow`/`flex_shrink` stored ×100 (so `0.5` → 50), clamped `[0, CSS_FLEX_FACTOR_MAX]`, or -1 (unset) |
 | `flex-basis` | `flex_basis` (px ≥ 0 / `CSS_LEN_AUTO` for `auto`\|`content` / `CSS_LEN_UNSET`; `%` dropped) |
 | `flex` shorthand | sets `flex_grow`/`flex_shrink`/`flex_basis`: `flex: N` → N 1 0; `none` → 0 0 auto; `auto` → 1 1 auto; `initial` → 0 1 auto; up to three explicit values in order grow shrink basis |
@@ -236,23 +245,26 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
 
 - *Color / background*: `color`, `background-color`, `background` (color only).
 - *Text*: `text-align`, `font-size`, `font-weight`, `font-style`, `line-height`,
-  `text-decoration`(`-line`), **`font-family`**, **`text-transform`**,
-  **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**, **`opacity`**,
-  **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only),
-  **`text-overflow`** (painted with `white-space:nowrap`), **`word-break`**/
-  **`overflow-wrap`**/**`word-wrap`** (unified, painted for the single-word-wider-
-  than-the-line case).
+   `text-decoration`(`-line`), **`text-decoration-color`**, **`text-decoration-style`**,
+   **`font-family`**, **`text-transform`**,
+   **`letter-spacing`**, **`word-spacing`**, **`text-shadow`**, **`opacity`**,
+   **`vertical-align`**, **`text-indent`**, **`white-space`** (wrap/no-wrap only),
+   **`tab-size`**, **`direction`**,
+   **`text-overflow`** (painted with `white-space:nowrap`), **`word-break`**/
+   **`overflow-wrap`**/**`word-wrap`** (unified, painted for the single-word-wider-
+   than-the-line case).
 - *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
-  `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
-  (+longhands), `padding`(+longhands), `width`, `max-width` — all length-valued
-  properties among these accept `calc()`.
+   `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
+   (+longhands), `padding`(+longhands), `width`, `min-width`, `max-width`,
+   `height`, `min-height`, `max-height` — all length-valued
+   properties among these accept `calc()`.
 - *Layout / box decoration* (**Hito 23b-7**): **`position`** (+`top`/`right`/
   `bottom`/`left`/`inset`/`z-index`), **`box-sizing`**, **`border`**(/`-width`/
   `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**,
   **`outline`**, **`flex`**(/`-grow`/`-shrink`/`-basis`), **`order`**,
   **`align-items`/`align-self`/`align-content`/`justify-items`**, **`flex-direction`**,
   **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
-  **`grid-column`/`grid-row`** (`span N`). **Painted** since the CSS layout expansion
+   **`grid-column`/`grid-row`** (`span N`), **`outline-offset**. **Painted** since the CSS layout expansion
    batch: `flex-wrap` (multi-line wrapping), `row-gap` (distinct grid/flex-wrap cross
    gap), `align-items`/`align-self` (flex row cross-axis only). Still value-resolved
    only (not yet painted): `border`/`box-shadow` rendering, `align-content`,
@@ -284,7 +296,7 @@ first:
 
 - *Box decoration, finer grain*: corner-by-corner / elliptical `border-radius`,
   multi-layer `box-shadow`, `box-shadow` blur/spread *rendering* (resolved but not
-  yet painted), `border-image`, `outline-offset`.
+  yet painted), `border-image`.
 - *Positioning, finer grain*: text **wrapping around** a single float (a float
    followed by non-floated content — v1 float bands are self-contained rows; see
    spec/float.md), line-number / named grid placement (only `span N` is
@@ -295,12 +307,12 @@ first:
 - *Transforms / filters / transitions*: `transform`, `filter`, `transition`,
   `animation`, `@keyframes`.
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
-  in `%`/viewport units, `text-decoration-style`/`-color`/`-thickness`,
+  in `%`/viewport units, `text-decoration-thickness`,
   `vertical-align` length/`top`/`middle`/`bottom`, `white-space` whitespace
   *preservation* (only the wrap distinction is consumed), the greedy-vs-last-resort
   distinction between `word-break: break-all` and `overflow-wrap: break-word`
   (unified to one behaviour), `text-overflow: ellipsis` on a line with more inline
-  content after the truncation point (v1 gap), `direction`/`writing-mode`.
+  content after the truncation point (v1 gap), `writing-mode`.
 - *Flex/grid, finer grain*: `align-content` (parsed/resolved, not yet painted —
   only `align-items`/`align-self` reach the painter), grid per-item placement
   (`grid-column`/`grid-row: span N` are resolved but not yet honoured — every grid
@@ -472,6 +484,8 @@ typedef struct css_style {
     int          font_scale;  /* percent (e.g. 150), or 0 (unset) */
     int          line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
     int          text_decoration; /* OR of CSS_DECO_*; 0 = none; -1 = unset */
+    int          text_decoration_color;  /* 0xRRGGBB or -1 (unset) */
+    int          text_decoration_style;  /* css_text_decoration_style, 0 unset */
     int          bold;        /* 1, 0, or -1 (unset) */
     int          italic;      /* 1, 0, or -1 (unset) */
     css_display  display;     /* CSS_DISP_UNSET if absent */
@@ -483,7 +497,8 @@ typedef struct css_style {
      * CSS_LEN_UNSET / px > 0. */
     int          margin_top, margin_right, margin_bottom, margin_left;
     int          pad_top, pad_right, pad_bottom, pad_left;
-    int          width, max_width;
+    int          width, max_width, min_width;
+    int          height, min_height, max_height;
     /* Text-presentation extensions (Hito 23b-6; inherit in CSS, gated by caps.css). */
     int          font_family;     /* css_font_family, 0 unset */
     int          text_transform;  /* css_text_transform, 0 unset */
@@ -495,7 +510,9 @@ typedef struct css_style {
     int          valign;          /* css_valign, 0 unset */
     int          text_indent;     /* signed px, CSS_LEN_UNSET unset */
     int          white_space;     /* css_white_space, 0 unset */
+    int          tab_size;        /* number of spaces, 0 unset */
     int          list_style;      /* css_list_style, 0 unset */
+    int          direction;       /* css_direction, 0 unset */
     /* Layout / box decoration (Hito 23b-7; not inherited, value-resolution only —
      * not yet threaded through IPC nor painted; honouring staged for later milestones). */
     css_position    position;     /* CSS_POS_UNSET if absent */
@@ -512,6 +529,7 @@ typedef struct css_style {
     int          outline_width;   /* px>=0, or CSS_LEN_UNSET */
     css_border_style outline_style;
     int          outline_color;   /* 0xRRGGBB, or -1 */
+    int          outline_offset;  /* signed px, CSS_LEN_UNSET (unset) */
     int          flex_grow, flex_shrink; /* stored x100 (0.5 -> 50), [0,CSS_FLEX_FACTOR_MAX], or -1 */
     int          flex_basis;      /* px>=0 / CSS_LEN_AUTO / CSS_LEN_UNSET */
     int          order;           /* signed, [-CSS_LEN_MAX, CSS_LEN_MAX], or CSS_LEN_UNSET */
@@ -580,6 +598,11 @@ typedef enum css_cursor {
 } css_cursor;
 typedef enum css_text_overflow { CSS_TO_UNSET = 0, CSS_TO_CLIP, CSS_TO_ELLIPSIS } css_text_overflow;
 typedef enum css_word_break { CSS_WB_UNSET = 0, CSS_WB_NORMAL, CSS_WB_BREAK } css_word_break;
+typedef enum css_text_decoration_style {
+    CSS_TDS_UNSET = 0, CSS_TDS_SOLID, CSS_TDS_DOUBLE, CSS_TDS_DOTTED,
+    CSS_TDS_DASHED, CSS_TDS_WAVY
+} css_text_decoration_style;
+typedef enum css_direction { CSS_DIR_UNSET = 0, CSS_DIR_LTR, CSS_DIR_RTL } css_direction;
 typedef enum css_list_style {
     CSS_LS_UNSET = 0, CSS_LS_NONE, CSS_LS_DISC, CSS_LS_CIRCLE, CSS_LS_SQUARE,
     CSS_LS_DECIMAL, CSS_LS_LOWER_ALPHA, CSS_LS_UPPER_ALPHA, CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN
@@ -752,10 +775,11 @@ common case.)
   the layout milestone (Hito 23b-2); `@media print` *rendering* into the PDF is deferred
   (print-only rules are correctly excluded from the screen view today).
 - `text-decoration` (and `text-decoration-line`) **is** supported for the line keywords
-  `underline`/`overline`/`line-through`/`none` (Hito 23b-5; gated by `caps.css`). Still out of
-  scope: `text-decoration-style`/`-color`/`-thickness` (extra tokens are ignored, not applied),
-  `text-decoration` propagation semantics (our flat model resolves the nearest ancestor that set
-  it, like `color`).
+  `underline`/`overline`/`line-through`/`none` (Hito 23b-5; gated by `caps.css`).
+  **`text-decoration-color`** and **`text-decoration-style`** are also supported
+  (resolved as separate `css_style` fields). Still out of scope: `text-decoration-thickness`
+  (dropped), and text-decoration propagation semantics (our flat model resolves the nearest
+  ancestor that set it, like `color`).
 - **`font-family`, `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow`,
   `opacity`, `vertical-align`, `text-indent`, `white-space`, `list-style-type`/`list-style`**
   **are** supported (Hito 23b-6; see *Property inventory* and the *Properties* table for the

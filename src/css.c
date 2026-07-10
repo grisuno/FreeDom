@@ -54,15 +54,16 @@
  * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
  * left); the four padding slots likewise — expand_box4 relies on that. */
 enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
-       P_TEXTDECO, P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
+       P_TEXTDECO, P_TEXTDECO_COLOR, P_TEXTDECO_STYLE,
+       P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
        P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
        P_PAD_TOP, P_PAD_RIGHT, P_PAD_BOTTOM, P_PAD_LEFT,
-       P_WIDTH, P_MAXWIDTH,
+       P_WIDTH, P_MAXWIDTH, P_MINWIDTH, P_HEIGHT, P_MINHEIGHT, P_MAXHEIGHT,
        /* Text-presentation extensions (Hito 23b-6). The three text-shadow slots are
         * contiguous (dx,dy,color) so expand_shadow writes them as a group. */
        P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING,
        P_SHADOW_DX, P_SHADOW_DY, P_SHADOW_COLOR,
-       P_OPACITY, P_VALIGN, P_TEXTINDENT, P_WHITESPACE, P_LISTSTYLE,
+       P_OPACITY, P_VALIGN, P_TEXTINDENT, P_WHITESPACE, P_TABSIZE, P_LISTSTYLE, P_DIRECTION,
        /* Layout / box decoration (Hito 23b-7). Contiguous groups feed the box4-style
         * expanders: insets (T R B L); border widths/styles/colors (each T R B L);
         * box-shadow (dx dy blur spread color inset); flex (grow shrink basis). */
@@ -75,7 +76,7 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_BORDER_RADIUS,
        P_BSHADOW_DX, P_BSHADOW_DY, P_BSHADOW_BLUR, P_BSHADOW_SPREAD,
        P_BSHADOW_COLOR, P_BSHADOW_INSET,
-       P_OUTLINE_W, P_OUTLINE_S, P_OUTLINE_C,
+       P_OUTLINE_W, P_OUTLINE_S, P_OUTLINE_C, P_OUTLINE_OFFSET,
        P_FLEX_GROW, P_FLEX_SHRINK, P_FLEX_BASIS,
        P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS,
        P_FLEX_DIR, P_FLEX_WRAP,
@@ -692,6 +693,34 @@ static int interp_whitespace(const char *v) {
     if (csel_ci_eq(v, "pre"))      return CSS_WS_PRE;
     if (csel_ci_eq(v, "pre-wrap")) return CSS_WS_PRE_WRAP;
     if (csel_ci_eq(v, "pre-line")) return CSS_WS_PRE_LINE;
+    return -1;
+}
+
+/* tab-size: a non-negative integer (number of spaces). -1 if unsupported. */
+static int interp_tabsize(const char *v) {
+    double num;
+    const char *end;
+    if (!parse_num(v, &num, &end)) return -1;
+    while (*end == ' ' || *end == '\t') ++end;
+    if (*end != '\0') return -1;  /* units/lengths dropped; only bare number */
+    int n = round_clamp(num, 0, 64);
+    return (n > 0) ? n : -1;  /* 0 or unparseable -> unset */
+}
+
+/* text-decoration-style: solid/wavy/dotted/dashed/double. -1 if unknown. */
+static int interp_textdeco_style(const char *v) {
+    if (csel_ci_eq(v, "solid"))  return CSS_TDS_SOLID;
+    if (csel_ci_eq(v, "double")) return CSS_TDS_DOUBLE;
+    if (csel_ci_eq(v, "dotted")) return CSS_TDS_DOTTED;
+    if (csel_ci_eq(v, "dashed")) return CSS_TDS_DASHED;
+    if (csel_ci_eq(v, "wavy"))   return CSS_TDS_WAVY;
+    return -1;
+}
+
+/* direction: ltr/rtl. -1 if unknown. */
+static int interp_direction(const char *v) {
+    if (csel_ci_eq(v, "ltr")) return CSS_DIR_LTR;
+    if (csel_ci_eq(v, "rtl")) return CSS_DIR_RTL;
     return -1;
 }
 
@@ -1399,6 +1428,10 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "padding-left") == 0)   return emit_len(dst, cap, P_PAD_LEFT, val, 0, 0);
     if (strcmp(prop, "width") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
     if (strcmp(prop, "max-width") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
+    if (strcmp(prop, "min-width") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
+    if (strcmp(prop, "height") == 0)    return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
+    if (strcmp(prop, "min-height") == 0)return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
+    if (strcmp(prop, "max-height") == 0)return emit_len(dst, cap, P_MAXHEIGHT, val, 0, 0);
 
     /* Text-presentation extensions whose value may legitimately be 0 or negative
      * (so they bypass the generic ival<0 drop, like the box-model lengths). */
@@ -1441,6 +1474,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "border-color") == 0)  return expand_quad(val, P_BC_TOP, interp_bc_tok, dst, cap);
     if (strcmp(prop, "box-shadow") == 0)    return expand_box_shadow(val, dst, cap);
     if (strcmp(prop, "outline") == 0)       return expand_outline(val, dst, cap);
+    if (strcmp(prop, "outline-offset") == 0) return emit_len(dst, cap, P_OUTLINE_OFFSET, val, 0, 1);
     if (strcmp(prop, "overflow") == 0)      return expand_overflow(val, dst, cap);
 
     int prop_id, ival;
@@ -1454,6 +1488,8 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "font-style") == 0)        { prop_id = P_STYLE;    ival = interp_style(val); }
     else if (strcmp(prop, "text-decoration") == 0 ||
              strcmp(prop, "text-decoration-line") == 0) { prop_id = P_TEXTDECO; ival = interp_textdeco(val); }
+    else if (strcmp(prop, "text-decoration-color") == 0) { prop_id = P_TEXTDECO_COLOR; ival = interp_color(val); }
+    else if (strcmp(prop, "text-decoration-style") == 0) { prop_id = P_TEXTDECO_STYLE; ival = interp_textdeco_style(val); }
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
     else if (strcmp(prop, "gap") == 0 ||
              strcmp(prop, "grid-gap") == 0 ||
@@ -1465,6 +1501,8 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "opacity") == 0)            { prop_id = P_OPACITY;       ival = interp_opacity(val); }
     else if (strcmp(prop, "vertical-align") == 0)     { prop_id = P_VALIGN;        ival = interp_valign(val); }
     else if (strcmp(prop, "white-space") == 0)        { prop_id = P_WHITESPACE;    ival = interp_whitespace(val); }
+    else if (strcmp(prop, "tab-size") == 0)            { prop_id = P_TABSIZE;       ival = interp_tabsize(val); }
+    else if (strcmp(prop, "direction") == 0)           { prop_id = P_DIRECTION;     ival = interp_direction(val); }
     else if (strcmp(prop, "list-style-type") == 0 ||
              strcmp(prop, "list-style") == 0)          { prop_id = P_LISTSTYLE;     ival = interp_liststyle(val); }
     else if (strcmp(prop, "position") == 0)            { prop_id = P_POSITION;      ival = interp_position(val); }
@@ -1861,7 +1899,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_LINEHEIGHT: o->line_scale = d->ival; break;
             case P_WEIGHT:   o->bold = d->ival; break;
             case P_STYLE:    o->italic = d->ival; break;
-            case P_TEXTDECO: o->text_decoration = d->ival; break;
+            case P_TEXTDECO:       o->text_decoration = d->ival; break;
+            case P_TEXTDECO_COLOR: o->text_decoration_color = d->ival; break;
+            case P_TEXTDECO_STYLE: o->text_decoration_style = d->ival; break;
             case P_DISPLAY:  o->display = (css_display)d->ival; break;
             case P_GAP:      o->gap = d->ival; break;
             case P_JUSTIFY:  o->justify = (css_justify)d->ival; break;
@@ -1876,6 +1916,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_PAD_LEFT:   o->pad_left = d->ival; break;
             case P_WIDTH:      o->width = d->ival; break;
             case P_MAXWIDTH:   o->max_width = d->ival; break;
+            case P_MINWIDTH:   o->min_width = d->ival; break;
+            case P_HEIGHT:     o->height = d->ival; break;
+            case P_MINHEIGHT:  o->min_height = d->ival; break;
+            case P_MAXHEIGHT:  o->max_height = d->ival; break;
             case P_FONTFAMILY:    o->font_family = d->ival; break;
             case P_TEXTTRANSFORM: o->text_transform = d->ival; break;
             case P_LETTERSPACING: o->letter_spacing = d->ival; break;
@@ -1887,7 +1931,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_VALIGN:        o->valign = d->ival; break;
             case P_TEXTINDENT:    o->text_indent = d->ival; break;
             case P_WHITESPACE:    o->white_space = d->ival; break;
+            case P_TABSIZE:       o->tab_size = d->ival; break;
             case P_LISTSTYLE:     o->list_style = d->ival; break;
+            case P_DIRECTION:     o->direction = d->ival; break;
             case P_POSITION:      o->position = d->ival; break;
             case P_INSET_TOP:     o->inset_top = d->ival; break;
             case P_INSET_RIGHT:   o->inset_right = d->ival; break;
@@ -1917,6 +1963,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_OUTLINE_W:     o->outline_width = d->ival; break;
             case P_OUTLINE_S:     o->outline_style = d->ival; break;
             case P_OUTLINE_C:     o->outline_color = d->ival; break;
+            case P_OUTLINE_OFFSET: o->outline_offset = d->ival; break;
             case P_FLEX_GROW:     o->flex_grow = d->ival; break;
             case P_FLEX_SHRINK:   o->flex_shrink = d->ival; break;
             case P_FLEX_BASIS:    o->flex_basis = d->ival; break;
@@ -1951,7 +1998,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
      * "unset" sentinel is named, so a new field cannot silently default to 0). */
     css_style out = {
         .color = -1, .background = -1, .text_align = CSS_ALIGN_UNSET,
-        .font_scale = 0, .line_scale = 0, .text_decoration = -1,
+        .font_scale = 0, .line_scale = 0,         .text_decoration = -1, .text_decoration_color = -1,
+        .text_decoration_style = CSS_TDS_UNSET,
         .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,
         .gap = -1, .justify = CSS_JUSTIFY_UNSET, .grid_cols = 0,
         .margin_top = CSS_LEN_UNSET, .margin_right = CSS_LEN_UNSET,
@@ -1959,12 +2007,16 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .pad_top = CSS_LEN_UNSET, .pad_right = CSS_LEN_UNSET,
         .pad_bottom = CSS_LEN_UNSET, .pad_left = CSS_LEN_UNSET,
         .width = CSS_LEN_UNSET, .max_width = CSS_LEN_UNSET,
+        .min_width = CSS_LEN_UNSET, .height = CSS_LEN_UNSET,
+        .min_height = CSS_LEN_UNSET, .max_height = CSS_LEN_UNSET,
         .font_family = CSS_FF_UNSET, .text_transform = CSS_TT_UNSET,
         .letter_spacing = CSS_LEN_UNSET, .word_spacing = CSS_LEN_UNSET,
         .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
         .opacity = -1, .valign = CSS_VA_UNSET,
         .text_indent = CSS_LEN_UNSET, .white_space = CSS_WS_UNSET,
+        .tab_size = 0,
         .list_style = CSS_LS_UNSET,
+        .direction = CSS_DIR_UNSET,
         .position = CSS_POS_UNSET,
         .inset_top = CSS_LEN_UNSET, .inset_right = CSS_LEN_UNSET,
         .inset_bottom = CSS_LEN_UNSET, .inset_left = CSS_LEN_UNSET,
@@ -1978,7 +2030,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .border_radius = CSS_LEN_UNSET,
         .shadow2_dx = 0, .shadow2_dy = 0, .shadow2_blur = 0, .shadow2_spread = 0,
         .box_shadow_color = -1, .box_shadow_inset = -1,
-        .outline_width = CSS_LEN_UNSET, .outline_style = CSS_BST_UNSET, .outline_color = -1,
+        .outline_width = CSS_LEN_UNSET, .outline_style = CSS_BST_UNSET,
+        .outline_color = -1, .outline_offset = CSS_LEN_UNSET,
         .flex_grow = -1, .flex_shrink = -1, .flex_basis = CSS_LEN_UNSET,
         .order = CSS_LEN_UNSET,
         .align_items = CSS_AK_UNSET, .align_self = CSS_AK_UNSET,

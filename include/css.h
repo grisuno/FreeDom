@@ -209,6 +209,20 @@ typedef enum css_word_break {
     CSS_WB_UNSET = 0, CSS_WB_NORMAL, CSS_WB_BREAK
 } css_word_break;
 
+/* text-decoration-style (Hito 23b-6 extension). 0 unset; the line drawing style
+ * for underline/overline/line-through. The painter may collapse the fancier ones to
+ * solid (v1 fallback). */
+typedef enum css_text_decoration_style {
+    CSS_TDS_UNSET = 0, CSS_TDS_SOLID, CSS_TDS_DOUBLE, CSS_TDS_DOTTED,
+    CSS_TDS_DASHED, CSS_TDS_WAVY
+} css_text_decoration_style;
+
+/* direction (Hito 23b-6 extension). 0 unset; LTR is the explicit default. RTL
+ * flips the inline flow direction. */
+typedef enum css_direction {
+    CSS_DIR_UNSET = 0, CSS_DIR_LTR, CSS_DIR_RTL
+} css_direction;
+
 /* Anti-DoS clamps for the layout properties. Insets/z-index/order reuse CSS_LEN_*.
  * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX. */
 #define CSS_BORDER_W_MAX  CSS_LEN_MAX
@@ -255,6 +269,8 @@ typedef struct css_style {
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
     int         line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
     int         text_decoration; /* OR of CSS_DECO_*; 0 = none; -1 = unset */
+    int         text_decoration_color; /* 0xRRGGBB or -1 (unset) */
+    int         text_decoration_style; /* css_text_decoration_style, 0 (unset) */
     int         bold;        /* 1, 0, or -1 (unset) */
     int         italic;      /* 1, 0, or -1 (unset) */
     css_display display;     /* CSS_DISP_UNSET if absent */
@@ -266,7 +282,8 @@ typedef struct css_style {
      * px >= 0. width/max_width: CSS_LEN_UNSET / px > 0 (auto/none -> unset). */
     int         margin_top, margin_right, margin_bottom, margin_left;
     int         pad_top, pad_right, pad_bottom, pad_left;
-    int         width, max_width;
+    int         width, max_width, min_width;
+    int         height, min_height, max_height;
     /* Author text-presentation extensions (Hito 23b-6). All inherit in CSS; in this
      * flat model the caller takes the nearest ancestor that sets each. Like the other
      * author presentation, they are gated behind caps.css downstream. */
@@ -281,7 +298,9 @@ typedef struct css_style {
     int         valign;          /* css_valign, 0 (unset) */
     int         text_indent;     /* px (signed), CSS_LEN_UNSET (unset) */
     int         white_space;     /* css_white_space, 0 (unset) */
+    int         tab_size;        /* number of spaces for tab, 0 (unset) */
     int         list_style;      /* css_list_style, 0 (unset) */
+    int         direction;       /* css_direction, 0 (unset) */
     /* --- Layout / box decoration (Hito 23b-7). NOT inherited (read from the
      * element's own resolved style), like the box model. All gated behind caps.css
      * downstream except `display`/flex/grid container params, which are structure. */
@@ -303,6 +322,7 @@ typedef struct css_style {
     int         outline_width;   /* px >= 0, or CSS_LEN_UNSET */
     int         outline_style;   /* css_border_style */
     int         outline_color;   /* 0xRRGGBB or -1 */
+    int         outline_offset;  /* px (signed), CSS_LEN_UNSET (unset) */
     /* Flex item + container extras. grow/shrink stored x100 (1.0 -> 100), -1 unset.
      * basis: px >= 0 / CSS_LEN_AUTO / CSS_LEN_UNSET. order/z reuse CSS_LEN_UNSET. */
     int         flex_grow, flex_shrink, flex_basis;

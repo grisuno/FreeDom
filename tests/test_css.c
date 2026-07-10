@@ -1471,6 +1471,129 @@ static void test_box_clamp_anti_dos(void **state) {
     assert_int_equal(css_parse_inline("margin-top:-99999999px", 0).margin_top, -CSS_LEN_MAX);
 }
 
+/* --- box model extensions (min-width, height, min-height, max-height) --- */
+
+static void test_inline_min_width_height(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("min-width:100px; height:200px", 0);
+    assert_int_equal(s.min_width, 100);
+    assert_int_equal(s.height, 200);
+    /* em/rem -> x16 px. */
+    assert_int_equal(css_parse_inline("min-width:5em", 0).min_width, 80);
+    assert_int_equal(css_parse_inline("height:2rem", 0).height, 32);
+    /* auto/none -> unset. */
+    assert_int_equal(css_parse_inline("min-width:auto", 0).min_width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("height:auto", 0).height, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("min-height:none", 0).min_height, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("max-height:none", 0).max_height, CSS_LEN_UNSET);
+    /* Percent dropped -> unset. */
+    assert_int_equal(css_parse_inline("min-width:50%", 0).min_width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("height:50%", 0).height, CSS_LEN_UNSET);
+    /* Negative -> unset (non-negative only). */
+    assert_int_equal(css_parse_inline("min-width:-8px", 0).min_width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("height:-8px", 0).height, CSS_LEN_UNSET);
+    /* Unset by default. */
+    css_style def = css_parse_inline("color:#000", 0);
+    assert_int_equal(def.min_width, CSS_LEN_UNSET);
+    assert_int_equal(def.height, CSS_LEN_UNSET);
+    assert_int_equal(def.min_height, CSS_LEN_UNSET);
+    assert_int_equal(def.max_height, CSS_LEN_UNSET);
+}
+
+static void test_inline_min_max_height(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("min-height:50px; max-height:400px", 0);
+    assert_int_equal(s.min_height, 50);
+    assert_int_equal(s.max_height, 400);
+    /* calc() works. */
+    assert_int_equal(css_parse_inline("min-height: calc(100px + 50px)", 0).min_height, 150);
+    assert_int_equal(css_parse_inline("max-height: calc(200px - 50px)", 0).max_height, 150);
+    /* em/rem. */
+    assert_int_equal(css_parse_inline("min-height:3em", 0).min_height, 48);
+    /* Clamp anti-DoS. */
+    assert_int_equal(css_parse_inline("min-height:99999999px", 0).min_height, CSS_LEN_MAX);
+}
+
+static void test_box_extension_sheet_cascade(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ".card { min-width:300px; height:200px; min-height:100px; max-height:500px }"
+        "#s { height:400px }", 0, &sh), CSS_OK);
+    const char *cls[] = { "card" };
+    css_style s = css_resolve(sh, "div", NULL, cls, 1, NULL, 0);
+    assert_int_equal(s.min_width, 300);
+    assert_int_equal(s.height, 200);
+    assert_int_equal(s.min_height, 100);
+    assert_int_equal(s.max_height, 500);
+    /* Inline wins. */
+    css_style t = css_resolve(sh, "div", NULL, cls, 1, "height:250px", 0);
+    assert_int_equal(t.height, 250);
+    css_free(sh);
+}
+
+/* --- text-decoration-color / text-decoration-style --- */
+
+static void test_inline_text_decoration_color_style(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("text-decoration-color:#ff0000", 0);
+    assert_int_equal(s.text_decoration_color, 0xff0000);
+    assert_int_equal(s.text_decoration_style, CSS_TDS_UNSET);
+
+    css_style t = css_parse_inline("text-decoration-style:wavy", 0);
+    assert_int_equal(t.text_decoration_style, CSS_TDS_WAVY);
+    assert_int_equal(t.text_decoration_color, -1);
+
+    css_style u = css_parse_inline("text-decoration-color:#00ff00; text-decoration-style:double", 0);
+    assert_int_equal(u.text_decoration_color, 0x00ff00);
+    assert_int_equal(u.text_decoration_style, CSS_TDS_DOUBLE);
+
+    /* All style keywords. */
+    assert_int_equal(css_parse_inline("text-decoration-style:solid", 0).text_decoration_style, CSS_TDS_SOLID);
+    assert_int_equal(css_parse_inline("text-decoration-style:dotted", 0).text_decoration_style, CSS_TDS_DOTTED);
+    assert_int_equal(css_parse_inline("text-decoration-style:dashed", 0).text_decoration_style, CSS_TDS_DASHED);
+
+    /* Unknown style -> unset. */
+    assert_int_equal(css_parse_inline("text-decoration-style:inherit", 0).text_decoration_style, CSS_TDS_UNSET);
+    /* Default: color -1, style unset. */
+    css_style def = css_parse_inline("color:#000", 0);
+    assert_int_equal(def.text_decoration_color, -1);
+    assert_int_equal(def.text_decoration_style, CSS_TDS_UNSET);
+}
+
+/* --- direction --- */
+
+static void test_inline_direction(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("direction:ltr", 0).direction, CSS_DIR_LTR);
+    assert_int_equal(css_parse_inline("direction:rtl", 0).direction, CSS_DIR_RTL);
+    assert_int_equal(css_parse_inline("color:red", 0).direction, CSS_DIR_UNSET);
+}
+
+/* --- outline-offset --- */
+
+static void test_inline_outline_offset(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("outline-offset:2px", 0).outline_offset, 2);
+    assert_int_equal(css_parse_inline("outline-offset:-1px", 0).outline_offset, -1);
+    assert_int_equal(css_parse_inline("outline-offset:0", 0).outline_offset, 0);
+    assert_int_equal(css_parse_inline("outline-offset:2em", 0).outline_offset, 32);
+    assert_int_equal(css_parse_inline("outline-offset:2%", 0).outline_offset, CSS_LEN_UNSET); /* dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).outline_offset, CSS_LEN_UNSET);
+}
+
+/* --- tab-size --- */
+
+static void test_inline_tab_size(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("tab-size:4", 0).tab_size, 4);
+    assert_int_equal(css_parse_inline("tab-size:8", 0).tab_size, 8);
+    assert_int_equal(css_parse_inline("tab-size:0", 0).tab_size, 0);  /* 0 -> unset */
+    assert_int_equal(css_parse_inline("tab-size:100", 0).tab_size, 64); /* clamp */
+    assert_int_equal(css_parse_inline("tab-size:2px", 0).tab_size, 0);  /* units dropped */
+    assert_int_equal(css_parse_inline("color:red", 0).tab_size, 0);
+}
+
 static void test_box_sheet_cascade_inline_wins(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -1843,6 +1966,13 @@ int main(void) {
         cmocka_unit_test(test_calc_inside_shorthands),
         cmocka_unit_test(test_calc_with_custom_property),
         cmocka_unit_test(test_box_clamp_anti_dos),
+        cmocka_unit_test(test_inline_min_width_height),
+        cmocka_unit_test(test_inline_min_max_height),
+        cmocka_unit_test(test_box_extension_sheet_cascade),
+        cmocka_unit_test(test_inline_text_decoration_color_style),
+        cmocka_unit_test(test_inline_direction),
+        cmocka_unit_test(test_inline_outline_offset),
+        cmocka_unit_test(test_inline_tab_size),
         cmocka_unit_test(test_box_sheet_cascade_inline_wins),
         cmocka_unit_test(test_inline_color_and_bg),
         cmocka_unit_test(test_inline_text_align),
