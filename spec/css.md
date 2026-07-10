@@ -208,7 +208,7 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | Property | Resolved into `css_style` | Painted? |
 | :-- | :-- | :-- |
 | `visibility` | `visibility` (`css_visibility`): `visible`/`hidden`/`collapse`; `collapse` (meant for table rows) has no real table-row model here, so it collapses to `hidden` | **Yes.** `hidden` skips painting the box/its content but keeps its layout space (unlike `display:none`, which removes it entirely). A nested container (flex/grid) inside a hidden box is a known v1 gap — see below. |
-| `overflow`, `overflow-x`, `overflow-y` | `overflow_x`/`overflow_y` (`css_overflow`): `visible`/`hidden`/`scroll`/`auto`; `clip` maps to `hidden` (no scroll). The `overflow` shorthand sets both axes to the same value (the two-token per-axis form is out of scope — use the longhands). | **No** (resolved only). This static, non-interactive renderer has no scrollbar machinery and the painter does not yet clip a box's content to its rect; deferred to a later box-engine milestone, like `position`/`border` painting were before Hito 23b-8. |
+| `overflow`, `overflow-x`, `overflow-y` | `overflow_x`/`overflow_y` (`css_overflow`): `visible`/`hidden`/`scroll`/`auto`; `clip` maps to `hidden` (no scroll). The `overflow` shorthand sets both axes to the same value (the two-token per-axis form is out of scope — use the longhands). | **Yes** (2026-07-09). Clipping is painted for in-flow box rows (the main `paint_structured` loop, `ov_reconcile` per row) and for positioned boxes (the two-pass painter applies the same ancestor clip). The clip rect is the box's content area after padding. `text-overflow:ellipsis` with `overflow:hidden+white-space:nowrap` continues to work (pre-existing). |
 | `cursor` | `cursor` (`css_cursor`): `auto`/`default`/`pointer`/`text`/`move`/`not-allowed`/`help`/`wait`/`crosshair`/`grab`/`zoom-in`/`none`; unknown dropped | **Partially.** v1 only distinguishes `pointer` (shows the existing hand cursor, on ANY element — not just links) from every other value (shows the default arrow); the rest resolve for completeness/`debug_dom` and a future milestone that loads more cursor theme shapes. Overriding a **link's** default hand cursor away (e.g. `a{cursor:default}`) is not yet honoured. |
 | `text-overflow` | `text_overflow` (`css_text_overflow`): `clip`/`ellipsis` | **Yes**, but only where `white-space:nowrap` is also set (the only signal this engine has that a line is meant to stay on one row, since `overflow:hidden` clipping is not painted yet): the line truncates at the character that fits and an ellipsis is appended. Truncating mid-word is at a UTF-8 cluster boundary, not a word boundary (matches real `text-overflow`). Text from a later inline run on the *same* visual line (after the one that triggered truncation) is a known v1 gap. |
 | `word-break`, `overflow-wrap`, `word-wrap` | `word_break` (`css_word_break`, **unified** — see note below): `normal`/`break-all`/`keep-all` (word-break) or `normal`/`break-word`/`anywhere` (overflow-wrap/word-wrap); a "may break" keyword from either property sets `CSS_WB_BREAK` | **Yes**, but only for the pathological case: a single word wider than the *entire* line (not just the remaining space on it — a normal wrap already handles that) is split at UTF-8 cluster boundaries into pieces that each fit, instead of overflowing the box edge unbroken. |
@@ -253,19 +253,22 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
   **`align-items`/`align-self`/`align-content`/`justify-items`**, **`flex-direction`**,
   **`flex-wrap`**, **`grid-template-rows`**, **`row-gap`**, **`grid-auto-flow`**,
   **`grid-column`/`grid-row`** (`span N`). **Painted** since the CSS layout expansion
-  batch: `flex-wrap` (multi-line wrapping), `row-gap` (distinct grid/flex-wrap cross
-  gap), `align-items`/`align-self` (flex row cross-axis only). Still value-resolved
-  only (not yet painted): `position`(-8b's Stage 2 handles `position`/`z-index`
-  separately — see spec/box_engine.md), `border`/`box-shadow` rendering, `align-content`,
-  grid item placement (`grid-column`/`grid-row: span N`), grid cross-axis alignment.
+   batch: `flex-wrap` (multi-line wrapping), `row-gap` (distinct grid/flex-wrap cross
+   gap), `align-items`/`align-self` (flex row cross-axis only). Still value-resolved
+   only (not yet painted): `border`/`box-shadow` rendering, `align-content`,
+   grid item placement (`grid-column`/`grid-row: span N`), grid cross-axis alignment.
+   `position`/`z-index` are **painted** (2026-07-09): positioned boxes are painted in
+   a two-pass pass (negative z-index behind in-flow, z-index≥0 above in-flow), each
+   with overflow clipping applied from ancestors.
 - *Lists*: `list-style-type`, `list-style` (type token only).
 - *Float* (**spec/float.md**): **`float`** (`left`/`right`/`none`), **`clear`**
   (`left`/`right`/`both`/`none`). Consumed by the painter as side-by-side float bands
   that nest in the open box stack; see spec/float.md for the v1 scope.
 - *Visibility / overflow / cursor*: **`visibility`** (painted: skip-draw, space
-  reserved), **`overflow`**/**`overflow-x`**/**`overflow-y`** (resolved only, not
-  yet painted — no clipping), **`cursor`** (painted: `pointer` shows the hand
-  cursor on any element, the rest resolve but paint as the default arrow).
+   reserved), **`overflow`**/**`overflow-x`**/**`overflow-y`** (painted: clips
+   in-flow rows and positioned boxes to ancestor `overflow:hidden` rects;
+   2026-07-09), **`cursor`** (painted: `pointer` shows the hand cursor on any
+   element, the rest resolve but paint as the default arrow).
 - *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
   `all`, `min/max-width`), `!important`.
 - *Values*: **`calc()`** (`+`/`-`/`*`/`/`, parens, dimensionally checked) and
@@ -283,11 +286,10 @@ first:
   multi-layer `box-shadow`, `box-shadow` blur/spread *rendering* (resolved but not
   yet painted), `border-image`, `outline-offset`.
 - *Positioning, finer grain*: text **wrapping around** a single float (a float
-  followed by non-floated content — v1 float bands are self-contained rows; see
-  spec/float.md), `overflow`(`-x`/`-y`) *clipping* (resolved, not yet painted —
-  see the table above), `z-index` *stacking* (resolved but compositing
-  is a later milestone), line-number / named grid placement (only `span N` is
-  resolved), `position: sticky` scroll pinning.
+   followed by non-floated content — v1 float bands are self-contained rows; see
+   spec/float.md), line-number / named grid placement (only `span N` is
+   resolved), `position: sticky` scroll pinning. `overflow` clipping and
+   `z-index` negative stacking **are** painted since 2026-07-09.
 - *Backgrounds beyond a solid color*: `background-image`/gradients (and any
   `url()` — by doctrine, never fetched), `background-position`/`-size`/`-repeat`.
 - *Transforms / filters / transitions*: `transform`, `filter`, `transition`,

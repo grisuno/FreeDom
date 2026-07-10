@@ -246,9 +246,9 @@ typedef struct pv_box_def {
     /* visibility / overflow / cursor (not inherited, like border/position -- read
      * from the box's own resolved style). visibility gates painting of this box and
      * everything it encloses while still reserving its layout space (see
-     * css_visibility). overflow_x/_y are resolved for completeness/debug_dom in this
-     * milestone; the presentation layer does not yet clip on them (deferred, see
-     * spec/css.md). cursor drives the hover cursor shape (see css_cursor). */
+     * css_visibility). overflow_x/_y clip in-flow rows and positioned boxes to
+     * ancestor overflow:hidden rects (2026-07-09). cursor drives the hover cursor
+     * shape (see css_cursor). */
     int visibility;
     int overflow_x, overflow_y;
     int cursor;

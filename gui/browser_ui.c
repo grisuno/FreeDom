@@ -3901,80 +3901,91 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         if (ry + r->height < content_top || ry > content_top + content_h) continue;
         paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
     }
-    /* Pop all overflow clips before painting positioned boxes (which may call
-     * ov_reconcile with their own block_id context). */
+    /* Pop all overflow clips before painting positioned boxes. */
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
-    /* Stage 2: out-of-flow positioned boxes on top of in-flow content, in stacking
-     * order (z_index ASC). Negative z_index is skipped in v1 (a two-pass painter
-     * would be needed to paint behind in-flow). The resolved rect is viewport-
-     * relative (no scroll offset for FIXED; absolute uses the containing block). */
-    for (size_t i = 0; i < L.npositioned; ++i) {
-        const bt_positioned *pb = &L.positioned[i];
-        if (pb->z_index < 0) continue;
-        if (pb->w < 1.0 || pb->h < 1.0) continue;
-        const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
-        if (def == NULL) continue;
-        /* Build a transient rc_box/rc_row for the existing paint helpers. */
-        rc_box bx = {
-            .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
-            .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
-            .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
-            .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
-            .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
-            .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
-            .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
-            .radius = def->border_radius,
-            .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
-            .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
-            .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
-            .outline_w = def->outline_w, .outline_style = def->outline_style,
-            .outline_color = def->outline_color,
-            .bg_rgb = def->bg_rgb,
-        };
-        paint_box_decoration(cr, &bx, left, origin);
-        /* The text content: one synthetic row at the box's content origin. v1
-         * only paints the FIRST rd_block whose block_id matches; a positioned
-         * box with multiple runs would be a follow-up. */
-        for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
-            const rd_block *b = rd_at(w->doc, bi);
-            if ((int)b->block_id != (int)pb->box_index) continue;
-            if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
-                b->kind != RD_LINK) break;  /* v1: text-shaped blocks only */
-            /* Build a single-fragment rc_row and paint it. */
-            rc_frag fg = {
-                .x = 0, .width = 0, .font_size = th->body_font,
-                .bold = b->bold, .italic = b->italic,
-                .underline = 0, .strike = 0, .overline = 0,
-                .color = th->text,
-                .text = b->text, .len = strlen(b->text),
-                .href = b->href, .node_id = b->node_id,
-                .family = CSS_FF_UNSET, .transform = 0,
-                .letter_spacing = 0, .valign_dy = 0,
-                .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
-                .opacity = -1,
+
+    /* Stage 2: out-of-flow positioned boxes. Two passes: negative z_index paints
+     * BEHIND in-flow content, non-negative paints ABOVE. Both honour overflow:
+     * hidden ancestor clipping (ov_reconcile) — a positioned box inside e.g. a
+     * <div style="overflow:hidden"> is clipped to that ancestor's padding-box.
+     * The clip stack (pos_ov_stack/pos_ov_depth) is shared across each pass;
+     * ov_reconcile's common-prefix reconciliation handles adjacent boxes sharing
+     * clipping ancestors. */
+    int pos_ov_stack[OV_MAX_DEPTH] = {0};
+    int pos_ov_depth = 0;
+    for (int pass = 0; pass < 2; ++pass) {
+        for (size_t i = 0; i < L.npositioned; ++i) {
+            const bt_positioned *pb = &L.positioned[i];
+            if (pass == 0 ? (pb->z_index >= 0) : (pb->z_index < 0)) continue;
+            if (pb->w < 1.0 || pb->h < 1.0) continue;
+            const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
+            if (def == NULL) continue;
+            /* Constrain the positioned box to its overflow:hidden ancestors. */
+            ov_reconcile(cr, pos_ov_stack, &pos_ov_depth, w->doc,
+                         (int)pb->box_index, &L, origin, left);
+            /* Build a transient rc_box/rc_row for the existing paint helpers. */
+            rc_box bx = {
+                .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
+                .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
+                .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
+                .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
+                .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
+                .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
+                .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
+                .radius = def->border_radius,
+                .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
+                .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
+                .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
+                .outline_w = def->outline_w, .outline_style = def->outline_style,
+                .outline_color = def->outline_color,
+                .bg_rgb = def->bg_rgb,
             };
-            content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
-            cairo_font_extents_t fe;
-            cairo_font_extents(cr, &fe);
-            cairo_text_extents_t te;
-            cairo_text_extents(cr, b->text, &te);
-            fg.width = te.x_advance;
-            rc_row row = {
-                .kind = RC_TEXT, .top = pb->y, .height = fe.height,
-                .ascent = fe.ascent, .first = 0, .count = 1,
-                .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
-                .x_off = pb->x, .align = 0, .blk = b,
-            };
-            rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
-                               .rows = &row, .nrow = 1, .caprow = 1,
-                               .boxes = NULL, .nbox = 0, .capbox = 0,
-                               .total_h = pb->h, .npositioned = 0 };
-            double ry = origin + pb->y;
-            if (ry + fe.height < content_top || ry > content_top + content_h) break;
-            paint_content_row(cr, w, &mini, &row, left, ry, pb->w,
-                              (double)w->width, 0);
-            break;  /* one text block per positioned box (v1) */
+            paint_box_decoration(cr, &bx, left, origin);
+            /* The text content: one synthetic row at the box's content origin. v1
+             * only paints the FIRST rd_block whose block_id matches; a positioned
+             * box with multiple runs would be a follow-up. */
+            for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
+                const rd_block *b = rd_at(w->doc, bi);
+                if ((int)b->block_id != (int)pb->box_index) continue;
+                if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
+                    b->kind != RD_LINK) break;
+                rc_frag fg = {
+                    .x = 0, .width = 0, .font_size = th->body_font,
+                    .bold = b->bold, .italic = b->italic,
+                    .underline = 0, .strike = 0, .overline = 0,
+                    .color = th->text,
+                    .text = b->text, .len = strlen(b->text),
+                    .href = b->href, .node_id = b->node_id,
+                    .family = CSS_FF_UNSET, .transform = 0,
+                    .letter_spacing = 0, .valign_dy = 0,
+                    .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
+                    .opacity = -1,
+                };
+                content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
+                cairo_font_extents_t fe;
+                cairo_font_extents(cr, &fe);
+                cairo_text_extents_t te;
+                cairo_text_extents(cr, b->text, &te);
+                fg.width = te.x_advance;
+                rc_row row = {
+                    .kind = RC_TEXT, .top = pb->y, .height = fe.height,
+                    .ascent = fe.ascent, .first = 0, .count = 1,
+                    .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
+                    .x_off = pb->x, .align = 0, .blk = b,
+                };
+                rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
+                                   .rows = &row, .nrow = 1, .caprow = 1,
+                                   .boxes = NULL, .nbox = 0, .capbox = 0,
+                                   .total_h = pb->h, .npositioned = 0 };
+                double ry = origin + pb->y;
+                if (ry + fe.height < content_top || ry > content_top + content_h) break;
+                paint_content_row(cr, w, &mini, &row, left, ry, pb->w,
+                                  (double)w->width, 0);
+                break;
+            }
         }
+        /* Pop all clips between passes (the second pass reconciles from scratch). */
+        while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
     }
     rc_free(&L);
 }
@@ -4235,68 +4246,76 @@ static long write_doc_png(browser_window *w, const char *path) {
         }
         while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     }
-    /* Stage 2: out-of-flow positioned boxes (same pattern as the on-screen and
-     * PDF paths). z_index < 0 skipped in v1. */
-    for (size_t pi = 0; pi < L.npositioned; ++pi) {
-        const bt_positioned *pb = &L.positioned[pi];
-        if (pb->z_index < 0) continue;
-        if (pb->w < 1.0 || pb->h < 1.0) continue;
-        const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
-        if (def == NULL) continue;
-        rc_box bx = {
-            .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
-            .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
-            .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
-            .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
-            .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
-            .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
-            .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
-            .radius = def->border_radius,
-            .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
-            .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
-            .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
-            .outline_w = def->outline_w, .outline_style = def->outline_style,
-            .outline_color = def->outline_color,
-            .bg_rgb = def->bg_rgb,
-        };
-        paint_box_decoration(cr, &bx, PNG_MARGIN, PNG_MARGIN);
-        for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
-            const rd_block *b = rd_at(w->doc, bi);
-            if ((int)b->block_id != (int)pb->box_index) continue;
-            if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
-                b->kind != RD_LINK) break;
-            rc_frag fg = {
-                .x = 0, .width = 0, .font_size = th->body_font,
-                .bold = b->bold, .italic = b->italic,
-                .underline = 0, .strike = 0, .overline = 0,
-                .color = th->text,
-                .text = b->text, .len = strlen(b->text),
-                .href = b->href, .node_id = b->node_id,
-                .family = CSS_FF_UNSET, .transform = 0,
-                .letter_spacing = 0, .valign_dy = 0,
-                .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
-                .opacity = -1,
+    /* Stage 2: out-of-flow positioned boxes (same two-pass + overflow clipping
+     * as the on-screen path). Negative z_index behind in-flow, non-negative
+     * above. Both honour overflow:hidden ancestors via ov_reconcile. */
+    int pos_ov_stack[OV_MAX_DEPTH] = {0};
+    int pos_ov_depth = 0;
+    for (int pass = 0; pass < 2; ++pass) {
+        for (size_t pi = 0; pi < L.npositioned; ++pi) {
+            const bt_positioned *pb = &L.positioned[pi];
+            if (pass == 0 ? (pb->z_index >= 0) : (pb->z_index < 0)) continue;
+            if (pb->w < 1.0 || pb->h < 1.0) continue;
+            const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
+            if (def == NULL) continue;
+            ov_reconcile(cr, pos_ov_stack, &pos_ov_depth, w->doc,
+                         (int)pb->box_index, &L, PNG_MARGIN, PNG_MARGIN);
+            rc_box bx = {
+                .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
+                .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
+                .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
+                .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
+                .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
+                .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
+                .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
+                .radius = def->border_radius,
+                .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
+                .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
+                .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
+                .outline_w = def->outline_w, .outline_style = def->outline_style,
+                .outline_color = def->outline_color,
+                .bg_rgb = def->bg_rgb,
             };
-            content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
-            cairo_font_extents_t fe;
-            cairo_font_extents(cr, &fe);
-            cairo_text_extents_t te;
-            cairo_text_extents(cr, b->text, &te);
-            fg.width = te.x_advance;
-            rc_row row = {
-                .kind = RC_TEXT, .top = pb->y, .height = fe.height,
-                .ascent = fe.ascent, .first = 0, .count = 1,
-                .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
-                .x_off = pb->x, .align = 0, .blk = b,
-            };
-            rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
-                               .rows = &row, .nrow = 1, .caprow = 1,
-                               .boxes = NULL, .nbox = 0, .capbox = 0,
-                               .total_h = pb->h, .npositioned = 0 };
-            paint_content_row(cr, w, &mini, &row, PNG_MARGIN,
-                              PNG_MARGIN + pb->y, pb->w, PNG_PAGE_W, 0);
-            break;
+            paint_box_decoration(cr, &bx, PNG_MARGIN, PNG_MARGIN);
+            for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
+                const rd_block *b = rd_at(w->doc, bi);
+                if ((int)b->block_id != (int)pb->box_index) continue;
+                if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
+                    b->kind != RD_LINK) break;
+                rc_frag fg = {
+                    .x = 0, .width = 0, .font_size = th->body_font,
+                    .bold = b->bold, .italic = b->italic,
+                    .underline = 0, .strike = 0, .overline = 0,
+                    .color = th->text,
+                    .text = b->text, .len = strlen(b->text),
+                    .href = b->href, .node_id = b->node_id,
+                    .family = CSS_FF_UNSET, .transform = 0,
+                    .letter_spacing = 0, .valign_dy = 0,
+                    .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
+                    .opacity = -1,
+                };
+                content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
+                cairo_font_extents_t fe;
+                cairo_font_extents(cr, &fe);
+                cairo_text_extents_t te;
+                cairo_text_extents(cr, b->text, &te);
+                fg.width = te.x_advance;
+                rc_row row = {
+                    .kind = RC_TEXT, .top = pb->y, .height = fe.height,
+                    .ascent = fe.ascent, .first = 0, .count = 1,
+                    .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
+                    .x_off = pb->x, .align = 0, .blk = b,
+                };
+                rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
+                                   .rows = &row, .nrow = 1, .caprow = 1,
+                                   .boxes = NULL, .nbox = 0, .capbox = 0,
+                                   .total_h = pb->h, .npositioned = 0 };
+                paint_content_row(cr, w, &mini, &row, PNG_MARGIN,
+                                  PNG_MARGIN + pb->y, pb->w, PNG_PAGE_W, 0);
+                break;
+            }
         }
+        while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
     }
 
     cairo_destroy(cr);

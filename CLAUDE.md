@@ -482,7 +482,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito (JS moderno) — `URL`/`URLSearchParams` + gate de tipo de `<script>` + `DocumentFragment`.** Slashdot JS 14→0 errores. Ver `[[freedom-url-api-and-script-type-gate]]`.
 - **Hito (render) — `float`/`clear`.** Bandas side-by-side que ANIDAN en el box stack (no cierran cajas); arregló las franjas grises de Slashdot. Ver `[[freedom-float-layout]]`.
 - **Hito (CSS) — `var()`/`calc()`/`repeat()`/`minmax()`/`flex-wrap`/`align-items`/`row-gap`.** Custom properties page-global; bug real de tokenizer de shorthand encontrado y unificado. Ver `[[freedom-css-layout-expansion]]`.
-- **Hito (CSS) — `visibility`/`overflow`(resuelto, sin pintar)/`cursor`/`text-overflow`/`word-break`.** `visibility:hidden` reserva espacio sin pintar; gap conocido: anidamiento flex/grid dentro de `hidden`. Ver `[[freedom-visibility-overflow-cursor-textwrap]]`.
+- **Hito (CSS) — `visibility`/`overflow`(pintado)/`cursor`/`text-overflow`/`word-break`.** `visibility:hidden` reserva espacio sin pintar; `overflow:hidden` clipea in-flow rows + positioned boxes (2026-07-09); gap conocido: anidamiento flex/grid dentro de `hidden`. Ver `[[freedom-visibility-overflow-cursor-textwrap]]`.
 - **Hito (CSS) — Caps de `css.c` 16x + `pv_style_cache` (2026-07-09).** Auditoría real
   contra un sitio propio (LazyOwn C2, Bootstrap 4.5.2 vendorizado) mostró que
   `CSS_MAX_RULES` (384) descartaba en silencio casi todas las utility classes
@@ -529,9 +529,9 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito 23b-8 (box engine, CERRADO v1).** Steps A-D (decoración de caja anidada) + Stage 2
   (`position`/z-index pintados) + Stage 3 (flex por-item) + Stage 4 parcial (clic). Ver
   `[[freedom-box-engine-and-dispatcher]]`, `[[freedom-flex-per-item]]`. **Abierto:** `grid-template-rows`/
-  `span N`/pesos `fr`, alineación de eje cruzado en GRID, `align-content`, más eventos del
-  dispatcher, negative z-index (two-pass painter), `right`/`bottom` insets, `position:sticky` con
-  scroll real.
+   `span N`/pesos `fr`, alineación de eje cruzado en GRID, `align-content`, más eventos del
+   dispatcher, `right`/`bottom` insets, `position:sticky` con
+   scroll real. **Negative z-index (two-pass painter) + overflow clipping para positioned boxes** CERRADOS (2026-07-09).
 - **Hito (UI) — Host editing + omnibox autocomplete (CERRADO, verificación visual pendiente).**
   Ver `[[freedom-ui-host-editing-omnibox]]`.
 - **Pendiente de fondo (hitos propios, sin iniciar):** `colspan`/`rowspan`, énfasis inline dentro de
@@ -544,12 +544,13 @@ El dueño pidió cerrar la brecha con sitios reales: CSS (transforms, animations
 (fetch completo, Web Components, async/await completo, Service Workers, WebGL, Canvas avanzado,
 IndexedDB) — probado contra un sitio propio real (panel LazyOwn C2 en `localhost:4444`, Basic Auth
 + login de sesión Flask, Bootstrap 4.5.2/particles.js/Chart.js/xterm vendorizados: exactamente el
-perfil "no tan moderno" que ejercita ambos frentes). **Encontrado y CERRADO esta sesión:** el
+perfil "no tan moderno" que ejercita ambos frentes). **Encontrados y CERRADOS esta sesión:** el
 Hito "Caps de css.c 16x + pv_style_cache" de arriba — el `CSS_MAX_RULES` (384) descartaba en
 silencio casi toda utility class de Bootstrap; era la causa real de "el sitio ignora mis colores/
-fondos", no un gap de feature. Verificado E2E en el sitio real (`--dump-dom`/`--download-png`):
-`.bg-dark`/`.text-success`/`.bg-secondary`/bordes/`position:fixed`/`overflow` (resuelto) ya
-resuelven; sin regresión de tiempo (~0.4-0.9s headless). Estado del resto del pedido:
+fondos", no un gap de feature. **Overflow clipping + negative z-index** — añadido al painter en
+`gui/browser_ui.c` (dos-pass painter con `ov_reconcile` por positioned box). Verificado E2E en
+Wikipedia + test HTML. Ver `[[freedom-visibility-overflow-cursor-textwrap]]`. Estado del resto del
+pedido:
 
 - `transform`/`filter`/`animation`/`@keyframes`/`transition`: **arquitectónicamente fuera de
   alcance con el motor actual** (display-list plana pintada fila-por-fila, sin pipeline de matrices
@@ -557,8 +558,7 @@ resuelven; sin regresión de tiempo (~0.4-0.9s headless). Estado del resto del p
   `[[freedom-css-layout-expansion]]`. Añadirlos a medias sería deshonesto; requieren un rediseño del
   motor de pintado, no un parche.
 - Grid `fr`/tracks con peso, `span N`: pendiente (hoy todo track cuenta igual, ver `[[freedom-css-layout-expansion]]`).
-- `overflow` pintado (clipping real): resuelto en `css_style` pero **no clipea** (ver
-  `[[freedom-visibility-overflow-cursor-textwrap]]`); candidato tratable.
+- `overflow` clipping (real): **pintado** (2026-07-09) — clipea in-flow rows + positioned boxes a rectos `overflow:hidden` ancestro; ver `[[freedom-visibility-overflow-cursor-textwrap]]`.
 - `position:fixed/sticky` completos: `position`/z-index ya pintan (Stage 2); falta `sticky` con
   scroll real y `right`/`bottom`. **Nuevo hallazgo E2E** en el sitio real: con varias cajas
   `position:relative/absolute/fixed` anidadas el layout desborda el borde derecho del viewport y
