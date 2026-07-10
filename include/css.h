@@ -329,6 +329,57 @@ typedef enum css_forced_color_adjust {
     CSS_FCA_UNSET = 0, CSS_FCA_AUTO, CSS_FCA_NONE
 } css_forced_color_adjust;
 
+/* mix-blend-mode. 0 unset. */
+typedef enum css_mix_blend {
+    CSS_MB_UNSET = 0, CSS_MB_NORMAL, CSS_MB_MULTIPLY, CSS_MB_SCREEN,
+    CSS_MB_OVERLAY, CSS_MB_DARKEN, CSS_MB_LIGHTEN, CSS_MB_COLOR_DODGE,
+    CSS_MB_COLOR_BURN, CSS_MB_DIFFERENCE, CSS_MB_EXCLUSION, CSS_MB_HUE,
+    CSS_MB_SATURATION, CSS_MB_COLOR, CSS_MB_LUMINOSITY
+} css_mix_blend;
+/* object-fit. 0 unset. */
+typedef enum css_object_fit {
+    CSS_OFI_UNSET = 0, CSS_OFI_FILL, CSS_OFI_CONTAIN, CSS_OFI_COVER,
+    CSS_OFI_NONE, CSS_OFI_SCALE_DOWN
+} css_object_fit;
+/* list-style-position. 0 unset. */
+typedef enum css_list_pos {
+    CSS_LP_UNSET = 0, CSS_LP_OUTSIDE, CSS_LP_INSIDE
+} css_list_pos;
+/* font-kerning. 0 unset. */
+typedef enum css_font_kerning {
+    CSS_FK_UNSET = 0, CSS_FK_AUTO, CSS_FK_NORMAL, CSS_FK_NONE
+} css_font_kerning;
+/* text-rendering. 0 unset. */
+typedef enum css_text_rendering {
+    CSS_TR_UNSET = 0, CSS_TR_AUTO, CSS_TR_OPTIMIZE_SPEED,
+    CSS_TR_OPTIMIZE_LEGIBILITY, CSS_TR_GEOMETRIC_PRECISION
+} css_text_rendering;
+/* font-stretch. 0 unset. Maps keyword to a percentage value. */
+typedef enum css_font_stretch {
+    CSS_FS_UNSET = 0, CSS_FS_NORMAL, CSS_FS_CONDENSED, CSS_FS_EXPANDED,
+    CSS_FS_ULTRA_CONDENSED, CSS_FS_EXTRA_CONDENSED, CSS_FS_SEMI_CONDENSED,
+    CSS_FS_SEMI_EXPANDED, CSS_FS_EXTRA_EXPANDED, CSS_FS_ULTRA_EXPANDED
+} css_font_stretch;
+/* resize. 0 unset. */
+typedef enum css_resize {
+    CSS_RS_UNSET = 0, CSS_RS_NONE, CSS_RS_BOTH, CSS_RS_HORIZONTAL, CSS_RS_VERTICAL
+} css_resize;
+/* scroll-behavior. 0 unset. */
+typedef enum css_scroll_behavior {
+    CSS_SB_UNSET = 0, CSS_SB_AUTO, CSS_SB_SMOOTH
+} css_scroll_behavior;
+/* touch-action. 0 unset. */
+typedef enum css_touch_action {
+    CSS_TA_UNSET = 0, CSS_TA_AUTO, CSS_TA_NONE, CSS_TA_MANIPULATION
+} css_touch_action;
+/* overscroll-behavior. 0 unset. */
+typedef enum css_overscroll {
+    CSS_OS_UNSET = 0, CSS_OS_AUTO, CSS_OS_CONTAIN, CSS_OS_NONE
+} css_overscroll;
+/* backface-visibility. 0 unset. */
+typedef enum css_backface {
+    CSS_BF_UNSET = 0, CSS_BF_VISIBLE, CSS_BF_HIDDEN
+} css_backface;
 /* Anti-DoS clamps for the layout properties. Insets/z-index/order reuse CSS_LEN_*.
  * Border/outline widths and radius are non-negative px clamped to CSS_LEN_MAX.
  * border-spacing is clamped to [0, CSS_SPACING_MAX] like letter-spacing (a table
@@ -488,6 +539,17 @@ typedef struct css_style {
     int         accent_color;     /* 0xRRGGBB or -1 (unset) */
     int         print_color_adjust;   /* css_print_color_adjust, 0 (unset) */
     int         forced_color_adjust;  /* css_forced_color_adjust, 0 (unset) */
+    int         mix_blend_mode;   /* css_mix_blend, 0 (unset) */
+    int         object_fit;       /* css_object_fit, 0 (unset) */
+    int         list_style_pos;   /* css_list_pos, 0 (unset) */
+    int         font_kerning;     /* css_font_kerning, 0 (unset) */
+    int         text_rendering;   /* css_text_rendering, 0 (unset) */
+    int         font_stretch;     /* css_font_stretch, 0 (unset) */
+    int         resize;           /* css_resize, 0 (unset) */
+    int         scroll_behavior;  /* css_scroll_behavior, 0 (unset) */
+    int         touch_action;     /* css_touch_action, 0 (unset) */
+    int         overscroll_behavior; /* css_overscroll, 0 (unset) */
+    int         backface_visibility; /* css_backface, 0 (unset) */
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

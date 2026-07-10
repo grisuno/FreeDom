@@ -2207,6 +2207,125 @@ static void test_inline_print_forced_adjust(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).forced_color_adjust, CSS_FCA_UNSET);
 }
 
+/* --- Batch C: mix-blend-mode, object-fit, list-style-position, font-*, etc --- */
+
+static void test_inline_mix_blend_mode(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("mix-blend-mode:normal", 0).mix_blend_mode, CSS_MB_NORMAL);
+    assert_int_equal(css_parse_inline("mix-blend-mode:multiply", 0).mix_blend_mode, CSS_MB_MULTIPLY);
+    assert_int_equal(css_parse_inline("mix-blend-mode:screen", 0).mix_blend_mode, CSS_MB_SCREEN);
+    assert_int_equal(css_parse_inline("mix-blend-mode:overlay", 0).mix_blend_mode, CSS_MB_OVERLAY);
+    assert_int_equal(css_parse_inline("mix-blend-mode:darken", 0).mix_blend_mode, CSS_MB_DARKEN);
+    assert_int_equal(css_parse_inline("mix-blend-mode:lighten", 0).mix_blend_mode, CSS_MB_LIGHTEN);
+    assert_int_equal(css_parse_inline("mix-blend-mode:color-dodge", 0).mix_blend_mode, CSS_MB_COLOR_DODGE);
+    assert_int_equal(css_parse_inline("mix-blend-mode:color-burn", 0).mix_blend_mode, CSS_MB_COLOR_BURN);
+    assert_int_equal(css_parse_inline("mix-blend-mode:difference", 0).mix_blend_mode, CSS_MB_DIFFERENCE);
+    assert_int_equal(css_parse_inline("mix-blend-mode:exclusion", 0).mix_blend_mode, CSS_MB_EXCLUSION);
+    assert_int_equal(css_parse_inline("mix-blend-mode:hue", 0).mix_blend_mode, CSS_MB_HUE);
+    assert_int_equal(css_parse_inline("mix-blend-mode:saturation", 0).mix_blend_mode, CSS_MB_SATURATION);
+    assert_int_equal(css_parse_inline("mix-blend-mode:color", 0).mix_blend_mode, CSS_MB_COLOR);
+    assert_int_equal(css_parse_inline("mix-blend-mode:luminosity", 0).mix_blend_mode, CSS_MB_LUMINOSITY);
+    assert_int_equal(css_parse_inline("mix-blend-mode:hard-light", 0).mix_blend_mode, CSS_MB_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).mix_blend_mode, CSS_MB_UNSET);
+}
+
+static void test_inline_object_fit(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("object-fit:fill", 0).object_fit, CSS_OFI_FILL);
+    assert_int_equal(css_parse_inline("object-fit:contain", 0).object_fit, CSS_OFI_CONTAIN);
+    assert_int_equal(css_parse_inline("object-fit:cover", 0).object_fit, CSS_OFI_COVER);
+    assert_int_equal(css_parse_inline("object-fit:none", 0).object_fit, CSS_OFI_NONE);
+    assert_int_equal(css_parse_inline("object-fit:scale-down", 0).object_fit, CSS_OFI_SCALE_DOWN);
+    assert_int_equal(css_parse_inline("object-fit:auto", 0).object_fit, CSS_OFI_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).object_fit, CSS_OFI_UNSET);
+}
+
+static void test_inline_list_style_pos(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("list-style-position:inside", 0).list_style_pos, CSS_LP_INSIDE);
+    assert_int_equal(css_parse_inline("list-style-position:outside", 0).list_style_pos, CSS_LP_OUTSIDE);
+    assert_int_equal(css_parse_inline("list-style-position:auto", 0).list_style_pos, CSS_LP_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).list_style_pos, CSS_LP_UNSET);
+}
+
+static void test_inline_font_kerning(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("font-kerning:auto", 0).font_kerning, CSS_FK_AUTO);
+    assert_int_equal(css_parse_inline("font-kerning:normal", 0).font_kerning, CSS_FK_NORMAL);
+    assert_int_equal(css_parse_inline("font-kerning:none", 0).font_kerning, CSS_FK_NONE);
+    assert_int_equal(css_parse_inline("font-kerning:initial", 0).font_kerning, CSS_FK_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).font_kerning, CSS_FK_UNSET);
+}
+
+static void test_inline_text_rendering(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("text-rendering:auto", 0).text_rendering, CSS_TR_AUTO);
+    assert_int_equal(css_parse_inline("text-rendering:optimizeSpeed", 0).text_rendering, CSS_TR_OPTIMIZE_SPEED);
+    assert_int_equal(css_parse_inline("text-rendering:optimizeLegibility", 0).text_rendering, CSS_TR_OPTIMIZE_LEGIBILITY);
+    assert_int_equal(css_parse_inline("text-rendering:geometricPrecision", 0).text_rendering, CSS_TR_GEOMETRIC_PRECISION);
+    assert_int_equal(css_parse_inline("text-rendering:optimizeQuality", 0).text_rendering, CSS_TR_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).text_rendering, CSS_TR_UNSET);
+}
+
+static void test_inline_font_stretch(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("font-stretch:normal", 0).font_stretch, CSS_FS_NORMAL);
+    assert_int_equal(css_parse_inline("font-stretch:condensed", 0).font_stretch, CSS_FS_CONDENSED);
+    assert_int_equal(css_parse_inline("font-stretch:expanded", 0).font_stretch, CSS_FS_EXPANDED);
+    assert_int_equal(css_parse_inline("font-stretch:ultra-condensed", 0).font_stretch, CSS_FS_ULTRA_CONDENSED);
+    assert_int_equal(css_parse_inline("font-stretch:extra-condensed", 0).font_stretch, CSS_FS_EXTRA_CONDENSED);
+    assert_int_equal(css_parse_inline("font-stretch:semi-condensed", 0).font_stretch, CSS_FS_SEMI_CONDENSED);
+    assert_int_equal(css_parse_inline("font-stretch:semi-expanded", 0).font_stretch, CSS_FS_SEMI_EXPANDED);
+    assert_int_equal(css_parse_inline("font-stretch:extra-expanded", 0).font_stretch, CSS_FS_EXTRA_EXPANDED);
+    assert_int_equal(css_parse_inline("font-stretch:ultra-expanded", 0).font_stretch, CSS_FS_ULTRA_EXPANDED);
+    assert_int_equal(css_parse_inline("font-stretch:oblique", 0).font_stretch, CSS_FS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).font_stretch, CSS_FS_UNSET);
+}
+
+static void test_inline_resize(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("resize:none", 0).resize, CSS_RS_NONE);
+    assert_int_equal(css_parse_inline("resize:both", 0).resize, CSS_RS_BOTH);
+    assert_int_equal(css_parse_inline("resize:horizontal", 0).resize, CSS_RS_HORIZONTAL);
+    assert_int_equal(css_parse_inline("resize:vertical", 0).resize, CSS_RS_VERTICAL);
+    assert_int_equal(css_parse_inline("resize:auto", 0).resize, CSS_RS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).resize, CSS_RS_UNSET);
+}
+
+static void test_inline_scroll_behavior(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("scroll-behavior:auto", 0).scroll_behavior, CSS_SB_AUTO);
+    assert_int_equal(css_parse_inline("scroll-behavior:smooth", 0).scroll_behavior, CSS_SB_SMOOTH);
+    assert_int_equal(css_parse_inline("scroll-behavior:instant", 0).scroll_behavior, CSS_SB_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).scroll_behavior, CSS_SB_UNSET);
+}
+
+static void test_inline_touch_action(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("touch-action:auto", 0).touch_action, CSS_TA_AUTO);
+    assert_int_equal(css_parse_inline("touch-action:none", 0).touch_action, CSS_TA_NONE);
+    assert_int_equal(css_parse_inline("touch-action:manipulation", 0).touch_action, CSS_TA_MANIPULATION);
+    assert_int_equal(css_parse_inline("touch-action:pan-x", 0).touch_action, CSS_TA_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).touch_action, CSS_TA_UNSET);
+}
+
+static void test_inline_overscroll_behavior(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("overscroll-behavior:auto", 0).overscroll_behavior, CSS_OS_AUTO);
+    assert_int_equal(css_parse_inline("overscroll-behavior:contain", 0).overscroll_behavior, CSS_OS_CONTAIN);
+    assert_int_equal(css_parse_inline("overscroll-behavior:none", 0).overscroll_behavior, CSS_OS_NONE);
+    assert_int_equal(css_parse_inline("overscroll-behavior:scroll", 0).overscroll_behavior, CSS_OS_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).overscroll_behavior, CSS_OS_UNSET);
+}
+
+static void test_inline_backface_visibility(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("backface-visibility:visible", 0).backface_visibility, CSS_BF_VISIBLE);
+    assert_int_equal(css_parse_inline("backface-visibility:hidden", 0).backface_visibility, CSS_BF_HIDDEN);
+    assert_int_equal(css_parse_inline("backface-visibility:auto", 0).backface_visibility, CSS_BF_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).backface_visibility, CSS_BF_UNSET);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -2354,6 +2473,17 @@ int main(void) {
         cmocka_unit_test(test_inline_color_scheme),
         cmocka_unit_test(test_inline_accent_color),
         cmocka_unit_test(test_inline_print_forced_adjust),
+        cmocka_unit_test(test_inline_mix_blend_mode),
+        cmocka_unit_test(test_inline_object_fit),
+        cmocka_unit_test(test_inline_list_style_pos),
+        cmocka_unit_test(test_inline_font_kerning),
+        cmocka_unit_test(test_inline_text_rendering),
+        cmocka_unit_test(test_inline_font_stretch),
+        cmocka_unit_test(test_inline_resize),
+        cmocka_unit_test(test_inline_scroll_behavior),
+        cmocka_unit_test(test_inline_touch_action),
+        cmocka_unit_test(test_inline_overscroll_behavior),
+        cmocka_unit_test(test_inline_backface_visibility),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -91,6 +91,10 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_BG_REPEAT, P_BG_SIZE, P_BG_CLIP, P_BG_ORIGIN, P_BG_ATTACHMENT,
         P_ISOLATION, P_CONTAIN, P_CONTENT_VISIBILITY, P_IMAGE_RENDERING,
         P_COLOR_SCHEME, P_ACCENT_COLOR, P_PRINT_COLOR_ADJUST, P_FORCED_COLOR_ADJUST,
+        P_MIX_BLEND_MODE, P_OBJECT_FIT, P_LIST_STYLE_POS,
+        P_FONT_KERNING, P_TEXT_RENDERING, P_FONT_STRETCH,
+        P_RESIZE, P_SCROLL_BEHAVIOR, P_TOUCH_ACTION, P_OVERSCROLL_BEHAVIOR,
+        P_BACKFACE_VISIBILITY,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -1146,6 +1150,101 @@ static int interp_forced_color_adjust(const char *v) {
     return -1;
 }
 
+/* mix-blend-mode: normal/multiply/screen/… -1 unknown. */
+static int interp_mix_blend_mode(const char *v) {
+    if (csel_ci_eq(v, "normal"))       return CSS_MB_NORMAL;
+    if (csel_ci_eq(v, "multiply"))     return CSS_MB_MULTIPLY;
+    if (csel_ci_eq(v, "screen"))       return CSS_MB_SCREEN;
+    if (csel_ci_eq(v, "overlay"))      return CSS_MB_OVERLAY;
+    if (csel_ci_eq(v, "darken"))       return CSS_MB_DARKEN;
+    if (csel_ci_eq(v, "lighten"))      return CSS_MB_LIGHTEN;
+    if (csel_ci_eq(v, "color-dodge"))  return CSS_MB_COLOR_DODGE;
+    if (csel_ci_eq(v, "color-burn"))   return CSS_MB_COLOR_BURN;
+    if (csel_ci_eq(v, "difference"))   return CSS_MB_DIFFERENCE;
+    if (csel_ci_eq(v, "exclusion"))    return CSS_MB_EXCLUSION;
+    if (csel_ci_eq(v, "hue"))          return CSS_MB_HUE;
+    if (csel_ci_eq(v, "saturation"))   return CSS_MB_SATURATION;
+    if (csel_ci_eq(v, "color"))        return CSS_MB_COLOR;
+    if (csel_ci_eq(v, "luminosity"))   return CSS_MB_LUMINOSITY;
+    return -1;
+}
+/* object-fit: fill/contain/cover/none/scale-down. -1 unknown. */
+static int interp_object_fit(const char *v) {
+    if (csel_ci_eq(v, "fill"))        return CSS_OFI_FILL;
+    if (csel_ci_eq(v, "contain"))     return CSS_OFI_CONTAIN;
+    if (csel_ci_eq(v, "cover"))       return CSS_OFI_COVER;
+    if (csel_ci_eq(v, "none"))        return CSS_OFI_NONE;
+    if (csel_ci_eq(v, "scale-down"))  return CSS_OFI_SCALE_DOWN;
+    return -1;
+}
+/* list-style-position: inside/outside. -1 unknown. */
+static int interp_list_style_pos(const char *v) {
+    if (csel_ci_eq(v, "inside"))  return CSS_LP_INSIDE;
+    if (csel_ci_eq(v, "outside")) return CSS_LP_OUTSIDE;
+    return -1;
+}
+/* font-kerning: auto/normal/none. -1 unknown. */
+static int interp_font_kerning(const char *v) {
+    if (csel_ci_eq(v, "auto"))   return CSS_FK_AUTO;
+    if (csel_ci_eq(v, "normal")) return CSS_FK_NORMAL;
+    if (csel_ci_eq(v, "none"))   return CSS_FK_NONE;
+    return -1;
+}
+/* text-rendering: auto/optimizeSpeed/optimizeLegibility/geometricPrecision. -1 unknown. */
+static int interp_text_rendering(const char *v) {
+    if (csel_ci_eq(v, "auto"))                return CSS_TR_AUTO;
+    if (csel_ci_eq(v, "optimizeSpeed"))       return CSS_TR_OPTIMIZE_SPEED;
+    if (csel_ci_eq(v, "optimizeLegibility"))  return CSS_TR_OPTIMIZE_LEGIBILITY;
+    if (csel_ci_eq(v, "geometricPrecision"))  return CSS_TR_GEOMETRIC_PRECISION;
+    return -1;
+}
+/* font-stretch: normal/condensed/expanded/etc. -1 unknown. */
+static int interp_font_stretch(const char *v) {
+    if (csel_ci_eq(v, "normal"))             return CSS_FS_NORMAL;
+    if (csel_ci_eq(v, "condensed"))          return CSS_FS_CONDENSED;
+    if (csel_ci_eq(v, "expanded"))           return CSS_FS_EXPANDED;
+    if (csel_ci_eq(v, "ultra-condensed"))    return CSS_FS_ULTRA_CONDENSED;
+    if (csel_ci_eq(v, "extra-condensed"))    return CSS_FS_EXTRA_CONDENSED;
+    if (csel_ci_eq(v, "semi-condensed"))     return CSS_FS_SEMI_CONDENSED;
+    if (csel_ci_eq(v, "semi-expanded"))      return CSS_FS_SEMI_EXPANDED;
+    if (csel_ci_eq(v, "extra-expanded"))     return CSS_FS_EXTRA_EXPANDED;
+    if (csel_ci_eq(v, "ultra-expanded"))     return CSS_FS_ULTRA_EXPANDED;
+    return -1;
+}
+/* resize: none/both/horizontal/vertical. -1 unknown. */
+static int interp_resize(const char *v) {
+    if (csel_ci_eq(v, "none"))        return CSS_RS_NONE;
+    if (csel_ci_eq(v, "both"))        return CSS_RS_BOTH;
+    if (csel_ci_eq(v, "horizontal"))  return CSS_RS_HORIZONTAL;
+    if (csel_ci_eq(v, "vertical"))    return CSS_RS_VERTICAL;
+    return -1;
+}
+/* scroll-behavior: auto/smooth. -1 unknown. */
+static int interp_scroll_behavior(const char *v) {
+    if (csel_ci_eq(v, "auto"))   return CSS_SB_AUTO;
+    if (csel_ci_eq(v, "smooth")) return CSS_SB_SMOOTH;
+    return -1;
+}
+/* touch-action: auto/none/manipulation. -1 unknown. */
+static int interp_touch_action(const char *v) {
+    if (csel_ci_eq(v, "auto"))         return CSS_TA_AUTO;
+    if (csel_ci_eq(v, "none"))         return CSS_TA_NONE;
+    if (csel_ci_eq(v, "manipulation")) return CSS_TA_MANIPULATION;
+    return -1;
+}
+/* overscroll-behavior: auto/contain/none. -1 unknown. */
+static int interp_overscroll_behavior(const char *v) {
+    if (csel_ci_eq(v, "auto"))    return CSS_OS_AUTO;
+    if (csel_ci_eq(v, "contain")) return CSS_OS_CONTAIN;
+    if (csel_ci_eq(v, "none"))    return CSS_OS_NONE;
+    return -1;
+}
+/* backface-visibility: visible/hidden. -1 unknown. */
+static int interp_backface_visibility(const char *v) {
+    if (csel_ci_eq(v, "visible")) return CSS_BF_VISIBLE;
+    if (csel_ci_eq(v, "hidden"))  return CSS_BF_HIDDEN;
+    return -1;
+}
 /* Signed integer (z-index/order). Returns 1 with *out (clamped to +-CSS_LEN_MAX),
  * 0 if not a pure integer (auto / floats / units -> dropped, leaving unset). */
 static int interp_int(const char *v, int *out) {
@@ -1828,6 +1927,17 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     }
     else if (strcmp(prop, "print-color-adjust") == 0)   { prop_id = P_PRINT_COLOR_ADJUST;   ival = interp_print_color_adjust(val); }
     else if (strcmp(prop, "forced-color-adjust") == 0)  { prop_id = P_FORCED_COLOR_ADJUST;  ival = interp_forced_color_adjust(val); }
+    else if (strcmp(prop, "mix-blend-mode") == 0)       { prop_id = P_MIX_BLEND_MODE;   ival = interp_mix_blend_mode(val); }
+    else if (strcmp(prop, "object-fit") == 0)           { prop_id = P_OBJECT_FIT;       ival = interp_object_fit(val); }
+    else if (strcmp(prop, "list-style-position") == 0)  { prop_id = P_LIST_STYLE_POS;   ival = interp_list_style_pos(val); }
+    else if (strcmp(prop, "font-kerning") == 0)         { prop_id = P_FONT_KERNING;     ival = interp_font_kerning(val); }
+    else if (strcmp(prop, "text-rendering") == 0)       { prop_id = P_TEXT_RENDERING;   ival = interp_text_rendering(val); }
+    else if (strcmp(prop, "font-stretch") == 0)         { prop_id = P_FONT_STRETCH;     ival = interp_font_stretch(val); }
+    else if (strcmp(prop, "resize") == 0)               { prop_id = P_RESIZE;           ival = interp_resize(val); }
+    else if (strcmp(prop, "scroll-behavior") == 0)      { prop_id = P_SCROLL_BEHAVIOR;  ival = interp_scroll_behavior(val); }
+    else if (strcmp(prop, "touch-action") == 0)         { prop_id = P_TOUCH_ACTION;     ival = interp_touch_action(val); }
+    else if (strcmp(prop, "overscroll-behavior") == 0)  { prop_id = P_OVERSCROLL_BEHAVIOR; ival = interp_overscroll_behavior(val); }
+    else if (strcmp(prop, "backface-visibility") == 0)  { prop_id = P_BACKFACE_VISIBILITY; ival = interp_backface_visibility(val); }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -2296,6 +2406,17 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_ACCENT_COLOR:        o->accent_color = d->ival; break;
             case P_PRINT_COLOR_ADJUST:  o->print_color_adjust = d->ival; break;
             case P_FORCED_COLOR_ADJUST: o->forced_color_adjust = d->ival; break;
+            case P_MIX_BLEND_MODE:      o->mix_blend_mode = d->ival; break;
+            case P_OBJECT_FIT:          o->object_fit = d->ival; break;
+            case P_LIST_STYLE_POS:      o->list_style_pos = d->ival; break;
+            case P_FONT_KERNING:        o->font_kerning = d->ival; break;
+            case P_TEXT_RENDERING:      o->text_rendering = d->ival; break;
+            case P_FONT_STRETCH:        o->font_stretch = d->ival; break;
+            case P_RESIZE:              o->resize = d->ival; break;
+            case P_SCROLL_BEHAVIOR:     o->scroll_behavior = d->ival; break;
+            case P_TOUCH_ACTION:        o->touch_action = d->ival; break;
+            case P_OVERSCROLL_BEHAVIOR: o->overscroll_behavior = d->ival; break;
+            case P_BACKFACE_VISIBILITY: o->backface_visibility = d->ival; break;
             default: break;
         }
     }
@@ -2369,6 +2490,13 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .color_scheme = CSS_CSH_UNSET, .accent_color = -1,
         .print_color_adjust = CSS_PCA_UNSET,
         .forced_color_adjust = CSS_FCA_UNSET,
+        .mix_blend_mode = CSS_MB_UNSET, .object_fit = CSS_OFI_UNSET,
+        .list_style_pos = CSS_LP_UNSET,
+        .font_kerning = CSS_FK_UNSET, .text_rendering = CSS_TR_UNSET,
+        .font_stretch = CSS_FS_UNSET,
+        .resize = CSS_RS_UNSET, .scroll_behavior = CSS_SB_UNSET,
+        .touch_action = CSS_TA_UNSET, .overscroll_behavior = CSS_OS_UNSET,
+        .backface_visibility = CSS_BF_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

@@ -198,6 +198,17 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `accent-color` | `accent_color` (0xRRGGBB or `CSS_LEN_AUTO` for `auto`, or -1 unset): colour of form‑control accents |
 | `print-color-adjust` | `print_color_adjust` (`css_print_color_adjust`): `economy`/`exact`; unknown dropped |
 | `forced-color-adjust` | `forced_color_adjust` (`css_forced_color_adjust`): `auto`/`none`; unknown dropped |
+| `mix-blend-mode` | `mix_blend_mode` (`css_mix_blend`): `normal`/`multiply`/`screen`/`overlay`/`darken`/`lighten`/`color-dodge`/`color-burn`/`difference`/`exclusion`/`hue`/`saturation`/`color`/`luminosity`; unknown dropped |
+| `object-fit` | `object_fit` (`css_object_fit`): `fill`/`contain`/`cover`/`none`/`scale-down`; unknown dropped |
+| `list-style-position` | `list_style_pos` (`css_list_pos`): `inside`/`outside`; unknown dropped |
+| `font-kerning` | `font_kerning` (`css_font_kerning`): `auto`/`normal`/`none`; unknown dropped |
+| `text-rendering` | `text_rendering` (`css_text_rendering`): `auto`/`optimizeSpeed`/`optimizeLegibility`/`geometricPrecision`; unknown dropped |
+| `font-stretch` | `font_stretch` (`css_font_stretch`): `normal`/`condensed`/`expanded`/`ultra‑condensed`/`extra‑condensed`/`semi‑condensed`/`semi‑expanded`/`extra‑expanded`/`ultra‑expanded`; unknown dropped |
+| `resize` | `resize` (`css_resize`): `none`/`both`/`horizontal`/`vertical`; unknown dropped |
+| `scroll-behavior` | `scroll_behavior` (`css_scroll_behavior`): `auto`/`smooth`; unknown dropped |
+| `touch-action` | `touch_action` (`css_touch_action`): `auto`/`none`/`manipulation`; unknown dropped |
+| `overscroll-behavior` | `overscroll_behavior` (`css_overscroll`): `auto`/`contain`/`none`; unknown dropped |
+| `backface-visibility` | `backface_visibility` (`css_backface`): `visible`/`hidden`; unknown dropped |
 
 #### Layout / box decoration (Hito 23b-7)
 
@@ -604,6 +615,17 @@ typedef struct css_style {
     int                   accent_color;       /* 0xRRGGBB, CSS_LEN_AUTO, or -1 unset */
     css_print_color_adjust print_color_adjust; /* CSS_PCA_UNSET if absent */
     css_forced_color_adjust forced_color_adjust; /* CSS_FCA_UNSET if absent */
+    css_mix_blend        mix_blend_mode;          /* CSS_MB_UNSET if absent */
+    css_object_fit       object_fit;              /* CSS_OFI_UNSET if absent */
+    css_list_pos         list_style_pos;          /* CSS_LP_UNSET if absent */
+    css_font_kerning     font_kerning;            /* CSS_FK_UNSET if absent */
+    css_text_rendering   text_rendering;          /* CSS_TR_UNSET if absent */
+    css_font_stretch     font_stretch;            /* CSS_FS_UNSET if absent */
+    css_resize           resize;                  /* CSS_RS_UNSET if absent */
+    css_scroll_behavior  scroll_behavior;         /* CSS_SB_UNSET if absent */
+    css_touch_action     touch_action;            /* CSS_TA_UNSET if absent */
+    css_overscroll       overscroll_behavior;     /* CSS_OS_UNSET if absent */
+    css_backface         backface_visibility;     /* CSS_BF_UNSET if absent */
 } css_style;
 
 typedef enum css_position {
@@ -685,6 +707,17 @@ typedef enum css_image_rendering { CSS_IR_UNSET = 0, CSS_IR_AUTO, CSS_IR_PIXELAT
 typedef enum css_color_scheme { CSS_CSH_UNSET = 0, CSS_CSH_NORMAL, CSS_CSH_LIGHT, CSS_CSH_DARK } css_color_scheme;
 typedef enum css_print_color_adjust { CSS_PCA_UNSET = 0, CSS_PCA_ECONOMY, CSS_PCA_EXACT } css_print_color_adjust;
 typedef enum css_forced_color_adjust { CSS_FCA_UNSET = 0, CSS_FCA_AUTO, CSS_FCA_NONE } css_forced_color_adjust;
+typedef enum css_mix_blend { CSS_MB_UNSET = 0, CSS_MB_NORMAL, CSS_MB_MULTIPLY, CSS_MB_SCREEN, CSS_MB_OVERLAY, CSS_MB_DARKEN, CSS_MB_LIGHTEN, CSS_MB_COLOR_DODGE, CSS_MB_COLOR_BURN, CSS_MB_DIFFERENCE, CSS_MB_EXCLUSION, CSS_MB_HUE, CSS_MB_SATURATION, CSS_MB_COLOR, CSS_MB_LUMINOSITY } css_mix_blend;
+typedef enum css_object_fit { CSS_OFI_UNSET = 0, CSS_OFI_FILL, CSS_OFI_CONTAIN, CSS_OFI_COVER, CSS_OFI_NONE, CSS_OFI_SCALE_DOWN } css_object_fit;
+typedef enum css_list_pos { CSS_LP_UNSET = 0, CSS_LP_OUTSIDE, CSS_LP_INSIDE } css_list_pos;
+typedef enum css_font_kerning { CSS_FK_UNSET = 0, CSS_FK_AUTO, CSS_FK_NORMAL, CSS_FK_NONE } css_font_kerning;
+typedef enum css_text_rendering { CSS_TR_UNSET = 0, CSS_TR_AUTO, CSS_TR_OPTIMIZE_SPEED, CSS_TR_OPTIMIZE_LEGIBILITY, CSS_TR_GEOMETRIC_PRECISION } css_text_rendering;
+typedef enum css_font_stretch { CSS_FS_UNSET = 0, CSS_FS_NORMAL, CSS_FS_CONDENSED, CSS_FS_EXPANDED, CSS_FS_ULTRA_CONDENSED, CSS_FS_EXTRA_CONDENSED, CSS_FS_SEMI_CONDENSED, CSS_FS_SEMI_EXPANDED, CSS_FS_EXTRA_EXPANDED, CSS_FS_ULTRA_EXPANDED } css_font_stretch;
+typedef enum css_resize { CSS_RS_UNSET = 0, CSS_RS_NONE, CSS_RS_BOTH, CSS_RS_HORIZONTAL, CSS_RS_VERTICAL } css_resize;
+typedef enum css_scroll_behavior { CSS_SB_UNSET = 0, CSS_SB_AUTO, CSS_SB_SMOOTH } css_scroll_behavior;
+typedef enum css_touch_action { CSS_TA_UNSET = 0, CSS_TA_AUTO, CSS_TA_NONE, CSS_TA_MANIPULATION } css_touch_action;
+typedef enum css_overscroll { CSS_OS_UNSET = 0, CSS_OS_AUTO, CSS_OS_CONTAIN, CSS_OS_NONE } css_overscroll;
+typedef enum css_backface { CSS_BF_UNSET = 0, CSS_BF_VISIBLE, CSS_BF_HIDDEN } css_backface;
 typedef enum css_list_style {
     CSS_LS_UNSET = 0, CSS_LS_NONE, CSS_LS_DISC, CSS_LS_CIRCLE, CSS_LS_SQUARE,
     CSS_LS_DECIMAL, CSS_LS_LOWER_ALPHA, CSS_LS_UPPER_ALPHA, CSS_LS_LOWER_ROMAN, CSS_LS_UPPER_ROMAN
