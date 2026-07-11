@@ -25,6 +25,7 @@
 #include "link_nav.h"
 #include "net_realm.h"
 #include "pdf_export.h"
+#include "prefetch.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "request_policy.h"
@@ -1110,6 +1111,53 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     return 0;
 }
 
+/* pf_fetch_fn for page images (Hito 29): resolves the raw src against the page
+ * origin and fetches it under the SAME gates as the serial image loop always
+ * applied (auth, realm routing fail-closed, body cap, per-host allowlist
+ * override). Runs on prefetch-pool threads too: it only READS window state,
+ * which is stable while the image pass runs on the GUI thread. */
+static int gui_image_fetch(void *vctx, const char *method, const char *url,
+                           const char *body, size_t body_len,
+                           int *out_status, char **out_body, size_t *out_len,
+                           char **out_ctype) {
+    browser_window *w = (browser_window *)vctx;
+    (void)method; (void)body; (void)body_len;
+    *out_status = 0; *out_body = NULL; *out_len = 0; *out_ctype = NULL;
+    if (w == NULL || url == NULL || w->cur_top == NULL) return -1;
+
+    char abs[URL_MAX_LEN];
+    if (url_resolve_https(w->cur_top, url, abs, sizeof abs) != URL_OK) return -1;
+
+    sf_config cfg = sf_config_default();
+    cfg.user_agent = tf_text(&w->ua_field);
+    cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
+    apply_auth(w, abs, &cfg);
+
+    /* Route the image like the page: a .onion/.i2p image with its proxy off is
+     * skipped, never leaked over clearnet (fail closed). */
+    if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;
+
+    int dg = 0; /* page-level toast already warns; per-image is moot */
+    char ihost[256];
+    int img_allow = host_from_url(abs, ihost, sizeof ihost)
+                    && hb_is_allowlisted(w->hosts, ihost);
+    sf_response resp;
+    memset(&resp, 0, sizeof resp);
+    if (fetch_follow_navigable(abs, &cfg, &resp, &dg, img_allow) != SF_OK) {
+        sf_response_free(&resp);
+        return -1;
+    }
+    char *rb = (char *)malloc(resp.body_len + 1);
+    if (rb == NULL) { sf_response_free(&resp); return -1; }
+    if (resp.body_len != 0) memcpy(rb, resp.body, resp.body_len);
+    rb[resp.body_len] = '\0';
+    *out_status = (int)resp.http_code;
+    *out_body = rb;
+    *out_len = resp.body_len;
+    sf_response_free(&resp);
+    return 0;
+}
+
 /* Outcome of the pre-fetch gates shared by GET (do_load) and POST (do_submit_post).
  * Both MUST pass through the SAME host filter, per-host exception, allowlist override
  * and Tor/I2P realm route before any socket opens -- otherwise a POST could reach the
@@ -1373,6 +1421,25 @@ static void load_images(browser_window *w, tab *t) {
     w->images = (ui_image *)calloc(nimg, sizeof *w->images);
     if (w->images == NULL) return; /* fail closed: no images, page still shows */
 
+    /* Hito 29: fetch the page's network images IN PARALLEL through the same
+     * per-image gates (gui_image_fetch); decoding stays serial in the confined
+     * worker (one pipe). The pooled URL list is exactly what the serial loop
+     * would fetch -- rd_build already applied the per-image policy -- so the
+     * pool changes WHEN bytes move, never WHAT is fetched. */
+    const char *purls[PF_MAX_REFS];
+    size_t np = 0;
+    if (w->cur_top != NULL && !url_is_file(w->cur_top)) {
+        for (size_t i = 0; i < n && np < PF_MAX_REFS; ++i) {
+            const rd_block *b = rd_at(w->doc, i);
+            if (b->kind == RD_IMAGE && b->img_decision == RDP_IMG_ALLOW
+                && b->href != NULL)
+                purls[np++] = b->href;
+        }
+    }
+    pf_pool imgpool;
+    int pooled = np > 1
+                 && pf_pool_start(&imgpool, purls, np, gui_image_fetch, w) == 0;
+
     size_t k = 0;
     for (size_t i = 0; i < n; ++i) {
         const rd_block *b = rd_at(w->doc, i);
@@ -1390,9 +1457,6 @@ static void load_images(browser_window *w, tab *t) {
          * inside the sandboxed worker (tab_decode_image), never in this process. */
         uint8_t *bytes = NULL;
         size_t   bytes_len = 0;
-        sf_response resp;
-        memset(&resp, 0, sizeof resp);
-        int from_network = 0;
 
         if (url_is_file(w->cur_top)) {
             /* Local page: b->href is a file:// URL already CONFINED to the document
@@ -1403,35 +1467,23 @@ static void load_images(browser_window *w, tab *t) {
             bytes = read_file_bounded(p, UI_IMAGE_MAX_BODY, &bytes_len);
             if (bytes == NULL) continue;
         } else {
-            char abs[URL_MAX_LEN];
-            if (url_resolve_https(w->cur_top, b->href, abs, sizeof abs) != URL_OK)
-                continue;
-
-            sf_config cfg = sf_config_default();
-            cfg.user_agent = tf_text(&w->ua_field);
-            cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
-            apply_auth(w, abs, &cfg);
-
-            /* Route the image like the page: a .onion/.i2p image with its proxy off is
-             * skipped, never leaked over clearnet (fail closed). */
-            if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) continue;
-
-            int img_downgraded = 0; /* page-level toast already warns; per-image is moot */
-            char ihost[256];
-            int img_allow = host_from_url(abs, ihost, sizeof ihost)
-                            && hb_is_allowlisted(w->hosts, ihost);
-            if (fetch_follow_navigable(abs, &cfg, &resp, &img_downgraded, img_allow) != SF_OK) {
-                sf_response_free(&resp);
-                continue;
-            }
-            bytes = resp.body;
-            bytes_len = resp.body_len;
-            from_network = 1;
+            /* Pool hit hands the prefetched bytes over (a failed prefetch is
+             * final: the serial fetch would have failed the same way); a miss
+             * (duplicate src, pool off) falls back to the direct fetch. */
+            int rc = -1, st = 0;
+            char *bd = NULL, *ct = NULL;
+            size_t bl = 0;
+            if (!(pooled && pf_pool_take(&imgpool, b->href, &rc, &st, &bd, &bl, &ct)))
+                rc = gui_image_fetch(w, "GET", b->href, NULL, 0, &st, &bd, &bl, &ct);
+            free(ct);
+            if (rc != 0 || bd == NULL) { free(bd); continue; }
+            bytes = (uint8_t *)bd;
+            bytes_len = bl;
         }
 
         tab_image img;
         tab_status ds = tab_decode_image(t, bytes, bytes_len, &img);
-        if (from_network) sf_response_free(&resp); else free(bytes);
+        free(bytes);
         if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); continue; }
 
         slot->surface = surface_from_pixels(&img);
@@ -1442,6 +1494,7 @@ static void load_images(browser_window *w, tab *t) {
         tab_image_free(&img);
     }
     w->image_count = k;
+    if (pooled) pf_pool_finish(&imgpool);
 }
 
 static void do_load(browser_window *w, const char *url); /* JS navigation re-enters it */
@@ -1468,6 +1521,14 @@ static int compute_page_js(const browser_window *w) {
     if (w->cur_top != NULL && host_from_url(w->cur_top, js_host, sizeof js_host))
         js_host_ok = hb_is_allowlisted(w->js_hosts, js_host);
     return jsp_enabled(w->js_mode, js_host_ok);
+}
+
+/* Trusted-host doctrine (Hito 28): a host the user declared trustworthy twice --
+ * JS enabled for it AND explicitly on allow.conf -- gets the full modern
+ * experience (author CSS + images on, and page-JS network access) without
+ * per-session toggles. Reader mode is applied afterwards by callers and wins. */
+static int page_trusted(const browser_window *w) {
+    return jsp_trusted(compute_page_js(w), page_host_allowlisted(w));
 }
 
 /* Drops the kept-alive REPL worker and clears the (active-tab) console transcript.
@@ -1498,11 +1559,38 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
 
     /* Page-JS network (XHR/fetch) is granted only for a host in allow.conf AND js.conf
      * (the sovereignty boundary): the fetcher re-applies the full network policy.
-     * External stylesheets (Hito 27) follow the author-styles opt-in instead (GET-only
-     * at the parent gate); reader mode ignores author styling, so it fetches none. */
-    tab_set_fetcher(t, gui_subresource_fetch, w);
-    tab_set_net_allowed(t, w->caps.js && page_host_allowlisted(w));
-    tab_set_css_allowed(t, w->caps.css && !w->reader);
+     * External stylesheets (Hito 27) follow the author-styles opt-in -- or the
+     * trusted-host doctrine (Hito 28) -- (GET-only at the parent gate); reader mode
+     * ignores author styling, so it fetches none. */
+    int trusted = page_trusted(w);
+    int css_grant = (w->caps.css || trusted) && !w->reader;
+    int js_grant  = w->caps.js && trusted;
+    tab_set_net_allowed(t, trusted);
+    tab_set_css_allowed(t, css_grant);
+
+    /* Hito 29 (lookahead prefetch): scan the raw HTML for the external
+     * stylesheets/scripts the worker will request over TAG_SUBREQ and download
+     * them in parallel through the SAME policy-gated fetcher while the worker
+     * parses. Protocol and policy are unchanged: a pool hit only changes WHEN
+     * the bytes were fetched; a miss falls back to the serial path. Each kind
+     * is queued only under the grant that would let the worker request it. */
+    pf_list scanned;
+    scanned.count = 0;
+    pf_pool subpool;
+    pf_gated_fetch gated = { gui_subresource_fetch, w, NULL };
+    if ((css_grant || js_grant)
+        && pf_scan(w->cur_html, w->cur_html_len, &scanned) == 0) {
+        const char *urls[PF_MAX_REFS];
+        size_t nurl = 0;
+        for (size_t i = 0; i < scanned.count; ++i) {
+            int want = (scanned.refs[i].kind == PF_STYLESHEET) ? css_grant : js_grant;
+            if (want) urls[nurl++] = scanned.refs[i].url;
+        }
+        if (nurl > 0
+            && pf_pool_start(&subpool, urls, nurl, gui_subresource_fetch, w) == 0)
+            gated.pool = &subpool;
+    }
+    tab_set_fetcher(t, pf_pooled_fetch, &gated);
 
     tab_page page;
     memset(&page, 0, sizeof page);
@@ -1510,8 +1598,17 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * theme makes the author's @media(prefers-color-scheme:dark) rules apply (auto
      * dark mode). Reader forces a clean view, so it never reports a dark preference. */
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
-    if (tab_load_full(t, w->cur_html, w->cur_html_len, w->cur_top, w->caps.js, w->reader,
-                      prefers_dark, &page) != TAB_OK) {
+    tab_status load_ts = tab_load_full(t, w->cur_html, w->cur_html_len, w->cur_top,
+                                       w->caps.js, w->reader, prefers_dark, &page);
+
+    /* The prefetch window ends with the load: rebind the direct fetcher (the
+     * kept-alive REPL worker must never point at this stack frame) and drop the
+     * pool -- unconsumed results are freed, in-flight fetches are joined. */
+    tab_set_fetcher(t, gui_subresource_fetch, w);
+    if (gated.pool != NULL) pf_pool_finish(&subpool);
+    pf_list_free(&scanned);
+
+    if (load_ts != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
         tab_close(t);
         return;
@@ -1538,10 +1635,13 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
 
     browser_set_page(&w->bs, page.title, page.text, 0);
 
-    /* Distraction-free mode also ignores author styling and images (a clean reading
-     * view), without disturbing the user's persistent toggles: gate a local copy of
-     * the capabilities, not w->caps. */
+    /* Trusted-host doctrine (Hito 28): a doubly-declared host gets full author
+     * presentation without session toggles. Distraction-free mode still ignores
+     * author styling and images (a clean reading view) and wins over the doctrine;
+     * neither disturbs the user's persistent toggles: gate a local copy, not
+     * w->caps. */
     rdp_caps eff = w->caps;
+    if (trusted) { eff.css = true; eff.images = true; }
     if (w->reader) { eff.css = false; eff.images = false; }
 
     /* The top-level URL is the https origin (per-image policy) or NULL for a local
@@ -5267,10 +5367,11 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         /* Clicking the active palette returns to light; otherwise select it. */
         w->theme_mode = (w->theme_mode == it->theme_val) ? UI_THEME_LIGHT : it->theme_val;
         apply_theme(w);
-        /* With author styles on, the color scheme drives the page's own
-         * @media(prefers-color-scheme) CSS, so re-render from cache (no network) to
-         * pick up its dark/light rules. Otherwise a repaint suffices. */
-        if (w->caps.css && w->cur_html != NULL) render_current(w);
+        /* With author styles on (session toggle or trusted-host doctrine), the
+         * color scheme drives the page's own @media(prefers-color-scheme) CSS, so
+         * re-render from cache (no network) to pick up its dark/light rules.
+         * Otherwise a repaint suffices. */
+        if ((w->caps.css || page_trusted(w)) && w->cur_html != NULL) render_current(w);
         return;
     }
     if (it->action == UI_MENU_FORCE) {
@@ -6366,9 +6467,10 @@ static tab *freebug_repl_worker(browser_window *w) {
     if (w->cur_html == NULL) return NULL;
     tab *t = NULL;
     if (tab_open(&t) != TAB_OK) return NULL;
+    int trusted = page_trusted(w);
     tab_set_fetcher(t, gui_subresource_fetch, w);
-    tab_set_net_allowed(t, compute_page_js(w) && page_host_allowlisted(w));
-    tab_set_css_allowed(t, w->caps.css && !w->reader);
+    tab_set_net_allowed(t, trusted);
+    tab_set_css_allowed(t, (w->caps.css || trusted) && !w->reader);
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);

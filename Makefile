@@ -99,9 +99,9 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
-             $(BUILD_DIR)/test_dom_debug
+             $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -224,6 +224,11 @@ $(BUILD_DIR)/test_url: $(TEST_DIR)/test_url.c $(BUILD_DIR)/url.o | $(BUILD_DIR)
 # Pure per-host JavaScript policy decision. No I/O deps.
 $(BUILD_DIR)/test_js_policy: $(TEST_DIR)/test_js_policy.c $(BUILD_DIR)/js_policy.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Trusted-side lookahead scanner + parallel subresource pool (Hito 29). The
+# scanner is pure; the pool uses pthreads with a fake fetcher in the test.
+$(BUILD_DIR)/test_prefetch: $(TEST_DIR)/test_prefetch.c $(BUILD_DIR)/prefetch.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) -lpthread $(CMOCKA_LIBS)
 
 # Clicked-link navigation policy: reuses the pure url module, no I/O deps.
 $(BUILD_DIR)/test_link_nav: $(TEST_DIR)/test_link_nav.c $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
@@ -351,7 +356,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
-                      $(BUILD_DIR)/dom_debug.o \
+                      $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -487,6 +492,17 @@ fuzz-url: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_url.c $(SRC_DIR)/url.c $(SRC_DIR)/link_nav.c \
 	  -o $(BUILD_DIR)/fuzz_url
 	./$(BUILD_DIR)/fuzz_url -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the prefetch lookahead scanner (clang + libFuzzer).
+# The scanned HTML is hostile remote content read on the TRUSTED side: arbitrary
+# bytes through pf_scan must never crash/leak/UB, must stay within PF_MAX_REFS
+# and must never perform I/O.
+fuzz-pf: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_prefetch.c $(SRC_DIR)/prefetch.c \
+	  -o $(BUILD_DIR)/fuzz_prefetch -lpthread
+	./$(BUILD_DIR)/fuzz_prefetch -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the console-log buffer (clang + libFuzzer). Hostile
 # console output (arbitrary bytes, huge lines, unbounded volume) through push must

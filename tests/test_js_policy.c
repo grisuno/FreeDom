@@ -62,12 +62,27 @@ static void test_mode_str_roundtrip(void **state) {
     assert_int_equal(jsp_mode_from_str(jsp_mode_str(JSP_ON)), JSP_ON);
 }
 
+/* Hito 28: a host is TRUSTED (full author CSS + images, on top of full JS) only
+ * when the user declared it twice: JS enabled for it AND explicitly on allow.conf.
+ * Either signal alone must fail closed. */
+static void test_trusted_requires_both_signals(void **state) {
+    (void)state;
+    assert_true(jsp_trusted(true, 1));
+    assert_false(jsp_trusted(true, 0));  /* JS on (e.g. global JSP_ON) but not allowlisted */
+    assert_false(jsp_trusted(false, 1)); /* allowlisted but JS off for this host */
+    assert_false(jsp_trusted(false, 0));
+    /* Any nonzero allowlist membership value counts as listed (hostblock returns
+     * truthy ints, not strictly 1). */
+    assert_true(jsp_trusted(true, 42));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_enabled_matrix),
         cmocka_unit_test(test_enabled_fail_closed_on_bad_mode),
         cmocka_unit_test(test_mode_from_str),
         cmocka_unit_test(test_mode_str_roundtrip),
+        cmocka_unit_test(test_trusted_requires_both_signals),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

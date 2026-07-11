@@ -406,6 +406,27 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   activo solo durante la ventana de scripts de la carga (no en el REPL ni en eventos post-carga), y la
   respuesta pasa por string UTF-8 (sin `arrayBuffer` binario real). Ver `spec/threat-model.md` §3,
   `[[freedom-sop-by-construction]]`, `[[freedom-parent-gated-xhr]]`, `[[freedom-js-network-and-media-authorized]]`.
+- **Doctrina trusted-host (Hito 28) — allow∩js ⇒ experiencia completa:** un host que el usuario
+  declaró de confianza DOS veces (JS habilitado para él **y** presente explícito en `allow.conf`)
+  recibe TODO el JS (ya lo tenía: ejecución, XHR/fetch, scripts externos) **y toda la presentación
+  de autor** (CSS + imágenes) sin toggles de sesión: `jsp_trusted` (pura, `js_policy`) decide y la
+  GUI enciende `caps.css`/`caps.images` **efectivos** (el modo lectura gana; los toggles
+  persistentes del usuario no se tocan). Racional: donde el XHR gateado por el padre ya puede traer
+  bytes arbitrarios, dejar imágenes/CSS apagados no añade privacidad — solo fricción. Un modo
+  global `JSP_ON` **no** es confianza (falla cerrado: exige la entrada explícita en `allow.conf`).
+  Ver `[[freedom-trusted-host-full-caps]]`.
+- **Prefetch paralelo del lado confiable (Hito 29) — pipeline no bloqueante sin tocar el worker:**
+  módulo `prefetch` (`pf_`): pre-scanner lookahead **puro** (fuzzeado; comentarios/`<script>`/
+  `<style>` opacos, `rel` distinto de stylesheet descartado) sobre el HTML crudo + **pool de hilos**
+  (`PF_MAX_THREADS`=4) que baja stylesheets/scripts externos e imágenes **en paralelo** por el
+  MISMO `tab_fetch_fn` gateado del camino serial; `pf_pooled_fetch` sirve los `TAG_SUBREQ` del
+  worker cache-first (miss ⇒ fetch directo). El worker y su protocolo no cambian un byte: un hit
+  solo cambia **cuándo** se buscó, jamás **qué** (quitar el pool no cambia el conjunto de fetches).
+  E2E verificado: 4 hojas con 400 ms de latencia artificial llegan con ~4 ms de dispersión
+  (suma→máximo), 5 GETs exactos (cero re-fetch). Las **fronteras del motor moderno** siguen siendo
+  doctrina, no gaps: **JIT dentro del worker es estructuralmente imposible** (el W^X de seccomp
+  deniega `PROT_EXEC`; QuickJS es intérprete de bytecode a propósito) y el worker **no toca GPU**
+  (el compositor vive en el lado confiable). Ver `[[freedom-prefetch-parallel-pool]]`.
 - **`io_uring` PROHIBIDO en el worker confinado (la doctrina io_uring es solo del lado confiable):**
   la §3 pide I/O asíncrona con `io_uring`, pero `io_uring` es una **primitiva de bypass de seccomp**
   (sus `IORING_OP_*` no atraviesan el syscall entry que filtra el BPF), así que **nunca** entra al
@@ -509,6 +530,9 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   siendo un tope finito (anti-DoS), solo dimensionado para una hoja real de librería
   en vez de una de juguete. Ver `spec/css.md` §Security posture.
 
+- **Hito 28 — Doctrina trusted-host.** allow∩js ⇒ `caps.css`+`caps.images` automáticos (`jsp_trusted` pura; reader gana; JSP_ON global no basta). Ver `[[freedom-trusted-host-full-caps]]`.
+- **Hito 29 — Prefetch paralelo (pipeline no bloqueante).** Pre-scanner lookahead puro (fuzzeado) + pool pthreads en el lado confiable; stylesheets/scripts/imágenes en paralelo bajo el mismo fetcher gateado; worker intacto; E2E suma→máximo (4 ms de dispersión). Ver `[[freedom-prefetch-parallel-pool]]`.
+
 ### 7.3 Roadmap — por cruzar
 
 > Mismo criterio de compresión que §7.2: los sub-hitos ya **cerrados** dentro de un roadmap más
@@ -520,8 +544,17 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   visualmente vía weston+Xvfb) + ubicación `file:line:col` por error. Ver `[[freedom-freebug-console]]`,
   `[[freedom-freebug-error-locations]]`. **Abierto:** consola por-pestaña persistente (hoy se limpia
   al cambiar de tab), auto-repeat en el editor del REPL, scroll-a-cursor multilínea.
-- **Hito 9b — Fetch asíncrono (imágenes + multipestaña).** Las imágenes siguen síncronas dentro del
-  worker; falta carga concurrente entre pestañas (hoy una carga activa a la vez). Destraba I2P.
+- **Hito 9b — Fetch asíncrono (imágenes + multipestaña).** Las imágenes de una página ya bajan **en
+  paralelo** (pool del Hito 29), pero la pasada completa (fetch+decode) aún bloquea el hilo de GUI
+  hasta terminar; falta despacharla al fetch-thread y la carga concurrente entre pestañas (hoy una
+  carga activa a la vez). Destraba I2P.
+- **Hito 30 — Parse incremental / streaming (por iniciar).** `OP_LOAD` envía el documento entero;
+  un parse por chunks (Lexbor lo soporta) exige rediseñar el protocolo y el ciclo de subreqs. El
+  prefetch (Hito 29) ya entrega la mitad del beneficio (descarga temprana paralela) sin ese
+  rediseño; el resto (DOM visible antes del EOF) es este hito.
+- **Hito 31 — Compositor-lite (por iniciar).** Cachear la página pintada en una superficie Cairo
+  offscreen y blitear en el scroll (hoy el display list se repinta por frame). GPU real/capas
+  quedan fuera por doctrina: el worker no toca GPU y el pintado vive en el lado confiable.
 - **Hito 19b — Imágenes: formatos + lazy.** JPEG cerrado (Ver `[[freedom-jpeg-decode]]`). Falta SVG
   (evaluar superficie), WebP/GIF (autorizados por el dueño, Ver `[[freedom-js-network-and-media-authorized]]`;
   AVIF/AV1 NO autorizado), lazy loading real.

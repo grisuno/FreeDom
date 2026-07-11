@@ -28,6 +28,10 @@ bool jsp_enabled(jsp_mode mode, int host_allowlisted) {
     return false; /* fail closed on an out-of-range mode */
 }
 
+bool jsp_trusted(bool js_enabled, int host_allowlisted) {
+    return js_enabled && host_allowlisted != 0;
+}
+
 jsp_mode jsp_mode_from_str(const char *s) {
     if (s == NULL) return JSP_ALLOWLIST;
     if (eq_ci(s, "off") || eq_ci(s, "0") || eq_ci(s, "no") ||

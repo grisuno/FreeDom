@@ -2,6 +2,7 @@
 
 > Hito 20 — Allowlist de JavaScript por dominio (granular). Estado: **cerrado** (spec + test verde +
 > ASan/UBSan + fuzz). Metodología: SDD + TDD.
+> Hito 28 — Doctrina *trusted host* (`jsp_trusted`): estado **cerrado** (spec + test verde + ASan).
 
 ## 1. Propósito
 
@@ -27,9 +28,31 @@ typedef enum jsp_mode {
 } jsp_mode;
 
 bool        jsp_enabled(jsp_mode mode, int host_allowlisted);
+bool        jsp_trusted(bool js_enabled, int host_allowlisted);
 jsp_mode    jsp_mode_from_str(const char *s);   /* NULL/desconocido => JSP_ALLOWLIST */
 const char *jsp_mode_str(jsp_mode mode);        /* "off"/"allowlist"/"on" */
 ```
+
+### 2b. Doctrina *trusted host* (`jsp_trusted`, Hito 28)
+
+Un host que el usuario declaró de confianza **dos veces** — está en `allow.conf` (soberanía TLS)
+**y** su JS está habilitado (en `js.conf`, o modo global `JSP_ON`) — recibe la **experiencia
+completa de navegador moderno**: todo el JS (ya lo tenía: ejecución + XHR/fetch + scripts
+externos) **y toda la presentación de autor** (colores/box-model/tipografía CSS **e imágenes**)
+sin toggles de sesión adicionales. Es la misma frontera de soberanía del Hito 26 (red-en-JS):
+para un host donde el JS puede ya buscar bytes arbitrarios vía XHR gateado por el padre, dejar
+las imágenes/CSS apagados no añade privacidad — solo fricción.
+
+- **Dado** un host cuyo JS está habilitado **y** que está explícitamente en `allow.conf`,
+  **cuando** se deriva la capacidad de render, **entonces** `jsp_trusted` es `true` y el
+  orquestador enciende `caps.css` y `caps.images` efectivos para esa página.
+- **Dado** un host con JS habilitado pero **no** allowlisteado (p. ej. modo global `JSP_ON`),
+  **cuando** se consulta, **entonces** `jsp_trusted` es `false` (fail-closed: la confianza exige
+  la declaración explícita en `allow.conf`, no un modo global).
+- **Dado** un host allowlisteado pero con JS deshabilitado, **entonces** `false` (una sola
+  declaración no basta).
+- **Dado** el modo lectura (reader), **cuando** el usuario lo activa, **entonces** gana sobre la
+  doctrina (es una acción explícita de "vista limpia"); el orquestador aplica reader después.
 
 ## 3. Semántica
 
@@ -51,7 +74,8 @@ const char *jsp_mode_str(jsp_mode mode);        /* "off"/"allowlist"/"on" */
 ## 5. Matriz de pruebas
 
 `tests/test_js_policy.c` (cmocka): matriz off/allowlist/on × (host listado / no); modo inválido →
-`false`; parser de modos (alias, case, NULL, desconocido→allowlist); roundtrip `str→mode→str`.
+`false`; parser de modos (alias, case, NULL, desconocido→allowlist); roundtrip `str→mode→str`;
+`jsp_trusted` exige ambas señales (cada una sola → `false`; membresía truthy ≠ 1 cuenta).
 Fuzz: `jsp_mode_from_str` sobre bytes aleatorios (sin crash; resultado siempre un modo válido).
 
 ## 6. Fuera de alcance

@@ -65,6 +65,19 @@ The name reflects its core goals:
 - Comprehensive test suite, fuzzing, and integration tests
 
 ### New Features & Improvements (Latest)
+- **Trusted-host full experience (Hito 28)**: a host you trusted **twice** (in `allow.conf` *and*
+  with JS enabled for it via `js.conf`) automatically gets the full modern experience — author CSS
+  **and** images on, plus the full JS it already had (execution, gated `XMLHttpRequest`/`fetch`,
+  external scripts) — no per-session toggles needed. Rationale: where gated XHR can already fetch
+  arbitrary bytes, keeping images/CSS off adds no privacy, only friction. Reader mode still wins,
+  and a global `js on` mode alone is **not** trust (the explicit `allow.conf` entry is required).
+- **Parallel subresource prefetch (Hito 29)**: a browser-style *preload scanner* on the trusted
+  side. The raw HTML is scanned (pure, fuzzed) for `<link rel=stylesheet>` and `<script src>`;
+  those — and the page's policy-approved images — download **in parallel** (up to 4 threads)
+  through the *same* policy-gated fetcher as before, while the sandboxed worker parses. The worker
+  and its serial pipe protocol are untouched: total wait tends to the **max** of the latencies
+  instead of the sum (E2E-verified: 4 stylesheets behind an artificial 400 ms server arrive within
+  ~4 ms of each other, with zero duplicate requests).
 - **Advanced Layout Engine**:
   - Full box model per HTML tag (margins, padding, display, border)
   - Flexbox layout support (`gap`, `justify-content`, `flex-wrap` multi-line, `align-items`/`align-self` cross-axis), fed from inline `style=` *and* `<style>` rules

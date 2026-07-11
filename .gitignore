@@ -165,9 +165,11 @@ cython_debug/
 
 graphify-out/
 
-# Fuzzing
+# Fuzzing: corpora and findings are generated; the harness SOURCES are code the
+# Makefile targets depend on and must be tracked (fuzz/ wholesale hid 10 of them).
 
-fuzz/
+fuzz/in/
+fuzz/out/
 
 # Packaging
 

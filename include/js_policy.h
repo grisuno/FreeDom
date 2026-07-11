@@ -35,6 +35,14 @@ typedef enum jsp_mode {
  * yields false. */
 bool jsp_enabled(jsp_mode mode, int host_allowlisted);
 
+/* Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE --
+ * its JS is enabled (js_enabled, e.g. the jsp_enabled result) AND it is explicitly
+ * on allow.conf (host_allowlisted, e.g. hb_is_allowlisted over allow.conf) -- gets
+ * the full modern experience: author CSS and images on without per-session toggles.
+ * Either signal alone fails closed; a global JSP_ON without the allowlist entry is
+ * NOT trust. Reader mode is applied by the orchestrator afterwards and wins. */
+bool jsp_trusted(bool js_enabled, int host_allowlisted);
+
 /* Parses a CLI/env mode string. NULL or an unrecognized value yields the default
  * JSP_ALLOWLIST (conservative: only explicit hosts run JS). "off"/"0"/"no"/"false"/
  * "none" => JSP_OFF; "on"/"1"/"yes"/"true"/"all" => JSP_ON;

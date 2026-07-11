@@ -13,6 +13,7 @@
 #include "js_policy.h"
 #include "link_nav.h"
 #include "net_realm.h"
+#include "prefetch.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "secure_fetch.h"
@@ -314,15 +315,43 @@ static int render_page(const char *html, size_t len, const char *top_url,
     /* Page-JS network (XHR/fetch + external <script src>): in headless the operator's
      * --js=on is the trust signal (the GUI gates this per host on allow.conf AND
      * js.conf). The page URL is the resolution base for relative subresources. */
-    tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
     tab_set_net_allowed(t, g_headless_js);
     /* --author-css also authorizes external <link rel=stylesheet> fetches for a
      * remote page (GET-only at the parent gate; spec/freedom.md §6). */
     tab_set_css_allowed(t, g_author_css);
 
+    /* Hito 29 (lookahead prefetch): pre-scan the HTML and download the external
+     * stylesheets/scripts the worker will request in parallel, through the same
+     * policy-gated headless_fetch. A miss falls back to the serial path. */
+    pf_list scanned;
+    scanned.count = 0;
+    pf_pool subpool;
+    pf_gated_fetch gated = { headless_fetch, (void *)(uintptr_t)top_url, NULL };
+    if ((g_headless_js || g_author_css) && pf_scan(html, len, &scanned) == 0) {
+        const char *urls[PF_MAX_REFS];
+        size_t nurl = 0;
+        for (size_t i = 0; i < scanned.count; ++i) {
+            int want = (scanned.refs[i].kind == PF_STYLESHEET) ? g_author_css
+                                                               : g_headless_js;
+            if (want) urls[nurl++] = scanned.refs[i].url;
+        }
+        if (nurl > 0
+            && pf_pool_start(&subpool, urls, nurl, headless_fetch,
+                             (void *)(uintptr_t)top_url) == 0)
+            gated.pool = &subpool;
+    }
+    tab_set_fetcher(t, pf_pooled_fetch, &gated);
+
     tab_page page;
     memset(&page, 0, sizeof page);
     ts = tab_load_full(t, html, len, top_url, g_headless_js, 0, 0, &page);
+
+    /* The prefetch window ends with the load: rebind the direct fetcher and drop
+     * the pool (unconsumed results freed, in-flight fetches joined). */
+    tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
+    if (gated.pool != NULL) pf_pool_finish(&subpool);
+    pf_list_free(&scanned);
+
     if (ts != TAB_OK) {
         fprintf(stderr, "freedom: failed to load page (status %d)\n", (int)ts);
         tab_close(t);
