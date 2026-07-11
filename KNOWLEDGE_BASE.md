@@ -1,12 +1,18 @@
 # Polyglot Codebase Knowledge Graph
 
 > Generated offline by **readmenator**. Supports C, C++, Python, Go, Rust, JS/TS, Java, C#, Shell, PHP, Dart, GDScript, Nim, ASM.
+<<<<<<< HEAD
 > No LLMs. No tokens. Pure static analysis. See more [here](https://github.com/grisuno/ReadMenator)
 
 **Total Files Parsed:** 147 | **Total Symbols Extracted:** 2720 | **Total Imports:** 821
+=======
+> No LLMs. No tokens. Pure static analysis.
+
+**Total Files Parsed:** 137 | **Total Symbols Extracted:** 2705 | **Total Imports:** 774
+>>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
 
 ## Structural Knowledge Map
-> **Note:** The visual graph below has been intelligently pruned to the top 300 most relevant nodes to prevent rendering crashes. Full details of all 147 files are documented below.
+> **Note:** The visual graph below has been intelligently pruned to the top 300 most relevant nodes to prevent rendering crashes. Full details of all 137 files are documented below.
 
 ```mermaid
 graph TD
@@ -609,11 +615,6 @@ graph TD
     tests_test_renderer_c_test_render_binary_does_not_crash_parent["test_render_binary_does_not_crash_parent"]
     class tests_test_renderer_c_test_render_binary_does_not_crash_parent fn;
     tests_test_renderer_c --> tests_test_renderer_c_test_render_binary_does_not_crash_parent
-    fuzz_fuzz_dom_debug_c["fuzz_dom_debug.c (c)"]
-    class fuzz_fuzz_dom_debug_c mod;
-    fuzz_fuzz_dom_debug_c_pass["pass"]
-    class fuzz_fuzz_dom_debug_c_pass fn;
-    fuzz_fuzz_dom_debug_c --> fuzz_fuzz_dom_debug_c_pass
     tests_test_js_sandbox_c["test_js_sandbox.c (c)"]
     class tests_test_js_sandbox_c mod;
     tests_test_js_sandbox_c_test_validate_rejects_null["test_validate_rejects_null"]
@@ -863,12 +864,19 @@ graph TD
     tests_test_ui_c_test_wrap_empty["test_wrap_empty"]
     class tests_test_ui_c_test_wrap_empty fn;
     tests_test_ui_c --> tests_test_ui_c_test_wrap_empty
+    tests_test_ui_c_test_wrap_short_single_line["test_wrap_short_single_line"]
+    class tests_test_ui_c_test_wrap_short_single_line fn;
+    tests_test_ui_c --> tests_test_ui_c_test_wrap_short_single_line
+    tests_test_ui_c_test_wrap_breaks_at_space["test_wrap_breaks_at_space"]
+    class tests_test_ui_c_test_wrap_breaks_at_space fn;
+    tests_test_ui_c --> tests_test_ui_c_test_wrap_breaks_at_space
 ```
 
 ---
 
 ## Architecture Reference
 
+<<<<<<< HEAD
 ### C (98 files)
 
 #### `fuzz_css.c`
@@ -903,12 +911,16 @@ graph TD
 
 **Functions:**
 - `LLVMFuzzerTestOneInput` (line 36) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+=======
+### C (88 files)
+>>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
 
 #### `fuzz_html_parse.c`
 **Path:** `fuzz/fuzz_html_parse.c`
 
 *No symbols extracted*
 
+<<<<<<< HEAD
 #### `fuzz_image_decode.c`
 **Path:** `fuzz/fuzz_image_decode.c`
 
@@ -916,11 +928,14 @@ graph TD
 - `poke_and_free` (line 21) `static void poke_and_free(img_pixels *px)` - *Touch every claimed pixel corner so the sanitizer flags an out-of-bounds extent, * then release. Safe on a zeroed (failed-decode) struct.*
 - `LLVMFuzzerTestOneInput` (line 31) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
+=======
+>>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
 #### `fuzz_js_sandbox.c`
 **Path:** `fuzz/fuzz_js_sandbox.c`
 
 *No symbols extracted*
 
+<<<<<<< HEAD
 #### `fuzz_page_view.c`
 **Path:** `fuzz/fuzz_page_view.c`
 
@@ -948,6 +963,8 @@ graph TD
 - `check_split` (line 29) `static void check_split(const char *url)`
 - `LLVMFuzzerTestOneInput` (line 57) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
+=======
+>>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
 #### `browser_ui.c`
 **Path:** `gui/browser_ui.c`
 
