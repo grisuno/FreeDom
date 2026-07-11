@@ -1777,6 +1777,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     const lxb_dom_node_t *prev_block = NULL;
     const lxb_dom_node_t *prev_li = NULL;  /* last <li> seen, to mark each item once */
     int pending_break = 0;
+    int prev_float_id = -1;  /* adjacent floats in the same group suppress block_break */
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
     pv_container_reg reg = { { NULL }, 0 };  /* flex/grid containers, document order */
@@ -2054,16 +2055,71 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (collapsed == NULL) { rc = PV_ERR_OOM; goto cleanup; }
         if (collapsed[0] == '\0') { free(collapsed); continue; }
 
-        /* Honor the <pre> tag's UA default of `white-space: pre` even when
-         * the cascade hasn't set the property. The GUI's flow_text keys
-         * on ext.white_space to decide whether to expand tabs; without
-         * this UA fill-in, a vanilla <pre> would render raw \t glyphs. */
-        if (ext.white_space == 0 && block != NULL && node_tag(block) == LXB_TAG_PRE)
-            ext.white_space = CSS_WS_PRE;
+        /* UA-defaults for <pre>: white-space:pre to preserve whitespace,
+         * font-family:monospace as required by the HTML spec. */
+        if (block != NULL && node_tag(block) == LXB_TAG_PRE) {
+            if (ext.white_space == 0)
+                ext.white_space = CSS_WS_PRE;
+            if (ext.font_family == CSS_FF_UNSET)
+                ext.font_family = CSS_FF_MONO;
+        }
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
         prev_block = block;
+
+        /* <pre> elements split each source newline into its own run with a
+         * block_break, so ASCII art and code blocks render line-by-line.
+         * The UA white-space:pre preserves the raw \n chars; here they become
+         * structural breaks instead of flowing as one long nowrap line. */
+        int is_pre_tag = (is_pre_like && block != NULL && node_tag(block) == LXB_TAG_PRE);
+        if (is_pre_tag) {
+            char *start = collapsed;
+            int first = 1;
+            while (*start != '\0') {
+                char *nl = strchr(start, '\n');
+                size_t len = nl ? (size_t)(nl - start) : strlen(start);
+                if (len > 0 && start[len - 1] == '\r') --len;
+
+                char *href_dup2 = NULL;
+                if (href != NULL) {
+                    href_dup2 = dup_n(href, href_len);
+                    if (href_dup2 == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+                }
+                char *line = dup_n(start, len);
+                if (line == NULL) { free(href_dup2); free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+
+                int line_brk = first ? brk : 1;
+                first = 0;
+                pv_status st = pv_append(v, href_dup2 != NULL ? PV_LINK : PV_TEXT,
+                                         heading, line_brk, line, href_dup2);
+                free(line);
+                free(href_dup2);
+                if (st != PV_OK) { free(collapsed); rc = st; goto cleanup; }
+
+                pv_set_emphasis(v, bold, italic);
+                pv_set_indent(v, list_depth);
+                pv_set_color(v, fg);
+                pv_set_bgcolor(v, bg);
+                pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
+                pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
+                                 cont.wrap, cont.row_gap, cont.align_items);
+                pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
+                           cont.align_self);
+                pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
+                pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
+                pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
+                pv_set_text_ext(v, &ext);
+                pv_set_block_id(v, bdeco);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
+
+                if (nl == NULL) break;
+                start = nl + 1;
+            }
+            last_was_gap = 0;
+            free(collapsed);
+            continue;
+        }
 
         /* Prepend the list marker ("* "/"N. ") to the first text run of each <li>,
          * once per item. The marker is plain ASCII text, so it inherits the run's
@@ -2073,6 +2129,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         int has_content = 0;
         for (const char *c = collapsed; *c != '\0'; ++c) {
             if (*c != ' ') { has_content = 1; break; }
+        }
+        /* Whitespace-only text inside a heading is source formatting, never content:
+         * a heading's visual identity comes from its child elements (links, spans).
+         * Emitting an empty heading block for a \n between <h2> and <a> creates
+         * a gap equal to the heading's font size + margins that has no text in it,
+         * and on article-heavy sites that means dozens of blank lines. */
+        if (heading != 0 && !has_content) {
+            free(collapsed);
+            continue;
         }
         /* CSS anonymous-box rules for whitespace-only text: (a) one that would START
          * a block generates no box at all — each source newline between <div>s used
@@ -2084,7 +2149,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * the flowed-table inter-cell separator is appended elsewhere (no break). */
         if (!has_content) {
             int direct_in_cont = cont.id >= 0 && (size_t)cont.id < reg.count &&
-                                 n->parent == reg.node[cont.id];
+                                  n->parent == reg.node[cont.id];
             if (brk || direct_in_cont) {
                 if (brk) pending_break = 1;
                 free(collapsed);
@@ -2117,6 +2182,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         free(href_dup);
         if (st != PV_OK) { rc = st; goto cleanup; }
         last_was_gap = 0;
+        /* Adjacent floated elements in the same float group (e.g. <li> links in a
+         * navigation bar) flow side-by-side as one float column; suppress the block
+         * break so the next one does not stack as a separate vertical block. Applied
+         * AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
+        if (cont.float_id >= 0) {
+            if (cont.float_id == prev_float_id)
+                v->runs[v->count - 1].block_break = 0;
+            prev_float_id = cont.float_id;
+        } else {
+            prev_float_id = -1;
+        }
         pv_set_emphasis(v, bold, italic);
         pv_set_indent(v, list_depth);
         pv_set_color(v, fg);

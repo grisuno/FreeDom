@@ -44,6 +44,7 @@
 #include <poll.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/eventfd.h>
 #include <sys/timerfd.h>
 #include <errno.h>
 #include <signal.h>
@@ -363,6 +364,18 @@ typedef struct browser_window {
     int      fetch_pipe[2];  /* [0] read end (polled), [1] write end (threads) */
     uint64_t net_gen;        /* current navigation generation */
     int js_nav_depth;        /* consecutive JS-driven navigations (location.href=); capped */
+
+    /* Streaming progressive render: the fetch thread copies accumulated body here
+     * as data downloads, then signals the main loop via stream_evfd (eventfd). The
+     * main handler reads under stream_lock, copies to cur_html, and re-renders, so
+     * the page appears BEFORE the full response arrives. The final deliver_fetch_result
+     * supersedes this with the complete body. */
+    pthread_mutex_t stream_lock;
+    char           *stream_body;
+    size_t          stream_body_len;
+    int             stream_evfd;
+    uint64_t        stream_launch_gen; /* net_gen at launch; progress_cb checks this */
+    uint64_t        last_stream_render;/* timestamp of last streaming render (rate limit) */
 
     /* Tabs. The active tab's state lives in the fields above; the other tabs are
      * parked in tab_slots. tab_count >= 1 always; active_tab is in [0, tab_count). */
@@ -1169,8 +1182,10 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
 /* A network request handed to the fetch thread. It owns deep copies of every input
  * string (the window's buffers may change while the fetch runs), and is filled with
  * the result before being posted back to the main thread, which owns it from then on.
- * The thread NEVER touches the browser_window -- only this self-contained job. */
+ * The thread ONLY accesses the browser_window's stream_* fields (under stream_lock)
+ * and the fetch_pipe/stream_evfd for I/O -- never any other field. */
 typedef struct fetch_job {
+    browser_window *window;  /* for streaming progress; the thread is disciplined */
     int       write_fd;     /* fetch_pipe[1]: where the thread posts itself when done */
     uint64_t  gen;          /* navigation generation; stale results are discarded */
     int       is_post;
@@ -1216,11 +1231,37 @@ static void fetch_job_free(fetch_job *j) {
     free(j);
 }
 
+/* Called by the fetch thread (~1/sec) with the downloaded body so far. Copies
+ * the data to the window's thread-safe streaming buffer and signals the main
+ * loop via eventfd, which triggers a progressive re-render. Runs under the
+ * curl transfer thread, not the main thread: only touches stream_* fields. */
+static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata) {
+    browser_window *w = (browser_window *)userdata;
+    if (w == NULL || w->stream_evfd < 0) return;
+    /* Discard if the main thread has launched a new navigation since this fetch
+     * started (net_gen was bumped). Reading net_gen from the fetch thread is safe:
+     * the main thread only writes it before launching, and x86_64 reads are atomic. */
+    if (w->net_gen != w->stream_launch_gen) return;
+    pthread_mutex_lock(&w->stream_lock);
+    free(w->stream_body);
+    w->stream_body = (char *)malloc(body_len + 1);
+    if (w->stream_body != NULL) {
+        memcpy(w->stream_body, body, body_len);
+        w->stream_body[body_len] = '\0';
+    }
+    w->stream_body_len = body_len;
+    pthread_mutex_unlock(&w->stream_lock);
+    uint64_t one = 1;
+    ssize_t wr = write(w->stream_evfd, &one, sizeof one);
+    (void)wr; /* signal best-effort */
+}
+
 /* Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer
  * back to the event loop. Pure with respect to the window: it reads/writes only the
  * job and writes one pointer to the pipe. */
 static void *fetch_thread(void *arg) {
     fetch_job *j = (fetch_job *)arg;
+    browser_window *w = j->window;
 
     sf_config cfg = sf_config_default();
     cfg.user_agent = j->user_agent; /* NULL => sf default */
@@ -1230,6 +1271,13 @@ static void *fetch_thread(void *arg) {
     cfg.policy = j->policy;
     cfg.username = j->username;
     cfg.password = j->password;
+    /* Enable streaming progress so the page renders before the full download
+     * finishes. Only for GET (not POST); the callback copies data under the
+     * window's stream_lock and signals the main loop via eventfd. */
+    if (!j->is_post && w != NULL) {
+        cfg.progress_cb = stream_progress_cb;
+        cfg.progress_ctx = w;
+    }
 
     sf_response resp;
     memset(&resp, 0, sizeof resp);
@@ -1265,8 +1313,12 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
     fetch_job *j = (fetch_job *)calloc(1, sizeof *j);
     if (j == NULL) return 0;
 
+    j->window = w;
     j->write_fd = w->fetch_pipe[1];
     j->gen = w->net_gen;
+    /* Snapshot the launch generation so the progress callback discards its data
+     * if the main thread starts a new navigation before this fetch finishes. */
+    w->stream_launch_gen = w->net_gen;
     j->is_post = is_post;
     j->proxy_type = cfg->proxy_type;
     j->allow_overlay_http = cfg->allow_overlay_http;
@@ -7488,6 +7540,14 @@ ui_status ui_run_browser(const char *start_url) {
         fcntl(w.fetch_pipe[0], F_SETFD, FD_CLOEXEC);
         fcntl(w.fetch_pipe[1], F_SETFD, FD_CLOEXEC);
     }
+    /* Streaming progressive render: eventfd the fetch thread signals when new
+     * body data arrives; the main loop picks it up and re-renders the page. */
+    pthread_mutex_init(&w.stream_lock, NULL);
+    w.stream_body = NULL;
+    w.stream_body_len = 0;
+    w.stream_evfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    w.stream_launch_gen = 0;
+    w.last_stream_render = 0;
 
     if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
 
@@ -7608,10 +7668,10 @@ ui_status ui_run_browser(const char *start_url) {
         /* Poll the Wayland fd, the key-repeat timer, and the async-fetch result pipe
          * together. The Wayland fd keeps the prepare_read/read_events contract; the
          * timer fires a held key's repeat; the pipe carries completed fetches. */
-        struct pollfd pfds[3];
+        struct pollfd pfds[4];
         int nfds = 0;
         pfds[nfds].fd = wl_display_get_fd(w.display); pfds[nfds].events = POLLIN; pfds[nfds].revents = 0; nfds++;
-        int timer_idx = -1, fetch_idx = -1;
+        int timer_idx = -1, fetch_idx = -1, stream_idx = -1;
         if (w.repeat_timer_fd >= 0) {
             pfds[nfds].fd = w.repeat_timer_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             timer_idx = nfds++;
@@ -7619,6 +7679,10 @@ ui_status ui_run_browser(const char *start_url) {
         if (w.fetch_pipe[0] >= 0) {
             pfds[nfds].fd = w.fetch_pipe[0]; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             fetch_idx = nfds++;
+        }
+        if (w.stream_evfd >= 0) {
+            pfds[nfds].fd = w.stream_evfd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
+            stream_idx = nfds++;
         }
         int pr = poll(pfds, (nfds_t)nfds, timeout);
 
@@ -7643,6 +7707,33 @@ ui_status ui_run_browser(const char *start_url) {
         /* One or more fetches completed: render them on this (main) thread. */
         if (pr > 0 && fetch_idx >= 0 && (pfds[fetch_idx].revents & POLLIN))
             drain_fetch_results(&w);
+
+        /* Streaming fetch: new body data arrived. Drain the eventfd counter,
+         * copy the accumulated page to cur_html, and re-render progressively.
+         * Guarded: only when configured, loading, and rate-limited to ~4 fps
+         * (250ms min interval) to avoid overwhelming the tab worker + fork. */
+        if (pr > 0 && stream_idx >= 0 && (pfds[stream_idx].revents & POLLIN)) {
+            uint64_t cnt = 0;
+            ssize_t rd = read(w.stream_evfd, &cnt, sizeof cnt); /* drain counter */
+            (void)rd;
+            uint64_t now = now_ms();
+            if (w.configured && w.loading &&
+                now - w.last_stream_render >= 250) {
+                pthread_mutex_lock(&w.stream_lock);
+                if (w.stream_body != NULL && w.stream_body_len > 0) {
+                    free(w.cur_html);
+                    w.cur_html = w.stream_body;
+                    w.cur_html_len = w.stream_body_len;
+                    w.stream_body = NULL;
+                    w.stream_body_len = 0;
+                }
+                pthread_mutex_unlock(&w.stream_lock);
+                if (w.cur_html != NULL && w.cur_html_len > 0) {
+                    render_current(&w);
+                    w.last_stream_render = now;
+                }
+            }
+        }
     }
 
     destroy_buffer(&w);
@@ -7676,6 +7767,12 @@ ui_status ui_run_browser(const char *start_url) {
      * exiting, so the OS reclaims the rest. */
     if (w.fetch_pipe[0] >= 0) close(w.fetch_pipe[0]);
     if (w.fetch_pipe[1] >= 0) close(w.fetch_pipe[1]);
+    if (w.stream_evfd >= 0) close(w.stream_evfd);
+    pthread_mutex_lock(&w.stream_lock);
+    free(w.stream_body);
+    w.stream_body = NULL;
+    pthread_mutex_unlock(&w.stream_lock);
+    pthread_mutex_destroy(&w.stream_lock);
     if (w.xkb_keymap) xkb_keymap_unref(w.xkb_keymap);
     if (w.xkb_state) xkb_state_unref(w.xkb_state);
     xkb_context_unref(w.xkb_ctx);

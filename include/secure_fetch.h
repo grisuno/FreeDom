@@ -86,6 +86,12 @@ typedef struct sf_config {
     const char *username;       /* HTTP Basic Auth username (NULL/"" => no auth) */
     const char *password;       /* HTTP Basic Auth password (ignored when username is NULL/empty) */
     int         insecure;       /* skip TLS cert verification (self-signed/dev); default 0 */
+    /* Streaming progress: called ~1/sec during download with the accumulated body so
+     * far, allowing the caller to progressively render before the full response arrives.
+     * The callback runs on the curl transfer thread (same thread as sf_get), so data
+     * must be copied to thread-safe storage. NULL/0 => no callback. */
+    void *progress_ctx;       /* userdata for progress_cb */
+    void (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
 } sf_config;
 
 typedef struct sf_response {

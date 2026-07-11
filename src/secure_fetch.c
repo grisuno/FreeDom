@@ -325,6 +325,8 @@ typedef struct fetch_ctx {
     int         have_location;
     char        disposition[SF_MAX_URL]; /* last Content-Disposition value, if any */
     int         have_disposition;
+    void       *progress_ctx; /* userdata passed to the progress callback */
+    void      (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
 } fetch_ctx;
 
 static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len);
@@ -557,6 +559,19 @@ static sf_status map_curl_error(CURLcode rc, const body_sink *sink) {
     }
 }
 
+/* Fires from libcurl's transfer timer (~1/sec) while data is downloading. Calls
+ * the user's progress callback with the accumulated body so far. Runs in the same
+ * thread as write_cb (the curl transfer thread). */
+static int xferinfo_cb(void *userdata, curl_off_t dltotal, curl_off_t dlnow,
+                       curl_off_t ultotal, curl_off_t ulnow) {
+    (void)dltotal; (void)ultotal; (void)ulnow;
+    fetch_ctx *ctx = (fetch_ctx *)userdata;
+    if (ctx->progress_cb != NULL && ctx->sink.len > 0 && dlnow > 0) {
+        ctx->progress_cb(ctx->sink.data, ctx->sink.len, ctx->progress_ctx);
+    }
+    return 0;
+}
+
 /* --- public: orchestrator --- */
 
 /* The shared request engine for sf_get and sf_post. When post_body == NULL it is a
@@ -602,6 +617,8 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     memset(&ctx, 0, sizeof ctx);
     ctx.sink.limit = local.max_body_bytes;
     ctx.cap.curl = curl;
+    ctx.progress_cb = local.progress_cb;
+    ctx.progress_ctx = local.progress_ctx;
 
     struct curl_slist *hdrs = NULL;
     sf_status result = SF_ERR_INTERNAL;
@@ -659,6 +676,15 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &ctx);
+
+    /* Streaming progress: fires xferinfo_cb ~1/sec during download, passing the
+     * accumulated body to the caller's progress callback so it can progressively
+     * render before the response is complete. Only enabled when requested. */
+    if (ctx.progress_cb != NULL) {
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &ctx);
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    }
 
     /* Send a normalized Accept-Language on every request (anti-fingerprinting): the
      * value matches the JS-visible identity, so the on-the-wire and in-page locales
