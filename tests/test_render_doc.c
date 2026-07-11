@@ -336,11 +336,12 @@ static void test_text_overflow_word_break_gated_by_css(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "clipped", NULL), PV_OK);
-    pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
-                    PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK,
-                    -1, 0, -1,
-                    /* 2026-07-10 batch: tab_size, direction, font_variant, list_style_pos */
-                    0, 0, 0, 0);
+    pv_text_ext te;
+    pv_text_ext_reset(&te);
+    te.white_space = CSS_WS_NOWRAP;
+    te.text_overflow = CSS_TO_ELLIPSIS;
+    te.word_break = CSS_WB_BREAK;
+    pv_set_text_ext(v, &te);
 
     rd_doc *d = NULL;
     assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
@@ -370,10 +371,13 @@ static void test_text_ext_2026_07_10_batch_gated_by_css(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "smallcaps", NULL), PV_OK);
-    /* tab_size=4, direction=RTL, font_variant=SMALL_CAPS, list_style_pos=INSIDE */
-    pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
-                    PV_LEN_UNSET, 0, 0, 0, -1, 0, -1,
-                    4, CSS_DIR_RTL, CSS_FV_SMALL_CAPS, CSS_LP_INSIDE);
+    pv_text_ext te;
+    pv_text_ext_reset(&te);
+    te.tab_size = 4;
+    te.direction = CSS_DIR_RTL;
+    te.font_variant = CSS_FV_SMALL_CAPS;
+    te.list_style_pos = CSS_LP_INSIDE;
+    pv_set_text_ext(v, &te);
 
     /* CSS off: every field is reset to the no-effect default. */
     rd_doc *d = NULL;
@@ -396,6 +400,65 @@ static void test_text_ext_2026_07_10_batch_gated_by_css(void **state) {
     assert_int_equal(p->direction, CSS_DIR_RTL);
     assert_int_equal(p->font_variant, CSS_FV_SMALL_CAPS);
     assert_int_equal(p->list_style_pos, CSS_LP_INSIDE);
+    rd_free(d);
+
+    pv_free(v);
+}
+
+/* 2026-07-10 wiring batch: image_rendering reaches RD_IMAGE only with caps.css
+ * (presentation; it also needs caps.images to matter, but the gate is css). */
+static void test_image_rendering_gated_on_image(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 1, "px",
+                                     "https://example.com/p.png", 64, 64), PV_OK);
+    pv_text_ext e;
+    pv_text_ext_reset(&e);
+    e.image_rendering = CSS_IR_PIXELATED;
+    pv_set_text_ext(v, &e);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->image_rendering, 0);
+    rd_free(d);
+
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->image_rendering, CSS_IR_PIXELATED);
+    rd_free(d);
+
+    pv_free(v);
+}
+
+/* 2026-07-10 wiring batch: caret_color reaches RD_INPUT only with caps.css. */
+static void test_caret_color_gated_on_input(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_input(v, 0, 1, PV_IN_TEXT, "Search...",
+                                     "q", "seed", "/search", 0, PV_METHOD_GET), PV_OK);
+    pv_text_ext e;
+    pv_text_ext_reset(&e);
+    e.caret_color = 0x112233;
+    pv_set_text_ext(v, &e);
+
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *in = first_kind(d, RD_INPUT);
+    assert_non_null(in);
+    assert_int_equal(in->caret_color, -1);
+    rd_free(d);
+
+    rdp_caps caps = rdp_caps_safe();
+    caps.css = true;
+    assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);
+    in = first_kind(d, RD_INPUT);
+    assert_non_null(in);
+    assert_int_equal(in->caret_color, 0x112233);
     rd_free(d);
 
     pv_free(v);
@@ -704,6 +767,8 @@ int main(void) {
         cmocka_unit_test(test_author_color_gated_by_css),
         cmocka_unit_test(test_text_overflow_word_break_gated_by_css),
         cmocka_unit_test(test_text_ext_2026_07_10_batch_gated_by_css),
+        cmocka_unit_test(test_image_rendering_gated_on_image),
+        cmocka_unit_test(test_caret_color_gated_on_input),
         cmocka_unit_test(test_input_passthrough),
         cmocka_unit_test(test_input_label_total),
         cmocka_unit_test(test_node_id_carried_by_default),

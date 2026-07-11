@@ -83,6 +83,12 @@ typedef struct rd_block {
     int              list_style_pos;
     int              text_overflow;  /* author text-overflow (css_text_overflow); set only with caps.css, else 0 */
     int              word_break;     /* author word-break (css_word_break); set only with caps.css, else 0 */
+    /* 2026-07-10 wiring batch, same caps.css gate. image_rendering is meaningful
+     * on RD_IMAGE (pixelated/crisp-edges ask the painter for a nearest-neighbour
+     * scaling filter); caret_color on RD_INPUT (tints the focused control's
+     * caret; -1 = theme caret). */
+    int              image_rendering; /* css_image_rendering; set only with caps.css, else 0 */
+    int              caret_color;     /* 0xRRGGBB; set only with caps.css, else -1 */
     /* Nearest author flex/grid container of this block (page_view), carried by
      * default (layout is structure, not author styling, and leaks nothing to the
      * network) so the presentation layer can lay it out with box_tree/flex_layout.

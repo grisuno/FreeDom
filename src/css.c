@@ -288,12 +288,16 @@ static int interp_display(const char *v) {
 
 /* gap / grid-gap / column-gap: leading length as px (a two-value gap keeps the
  * first), "normal" -> 0; clamped to [0, CSS_GAP_MAX]. -1 when not a length. */
+static int interp_len(const char *v, int allow_auto, int *out);
+
+/* One gap length. Reuses interp_len (px / em / rem / bare 0 / calc() / math
+ * functions), so a `gap: 1em` is 16px instead of the old misparse-as-1px, and a
+ * trailing junk token fails closed. Negative fails; clamped to CSS_GAP_MAX. */
 static int interp_gap(const char *v) {
     if (csel_ci_eq(v, "normal")) return 0;
-    double num;
-    const char *end;
-    if (!parse_num(v, &num, &end)) return -1;
-    return round_clamp(num, 0, CSS_GAP_MAX);
+    int px;
+    if (!interp_len(v, 0, &px) || px < 0) return -1;
+    return (px > CSS_GAP_MAX) ? CSS_GAP_MAX : px;
 }
 
 static int interp_justify(const char *v) {
@@ -408,6 +412,10 @@ static int interp_gridcols(const char *v) {
  * *result* (e.g. calc(2 * 3), no length anywhere) is not a valid length -> fails. */
 #define CSS_CALC_MAX_DEPTH 8
 
+/* Max arguments of one min()/max() call (clamp() takes exactly three). More fail
+ * the declaration (anti-DoS; the whole value already fits one CSS_TOK_MAX token). */
+#define CSS_MATHFN_MAX_ARGS 8
+
 typedef struct calc_val { double px; int is_length; } calc_val;
 typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
 
@@ -417,9 +425,70 @@ static void calc_skip_ws(calc_parser *p) {
 
 static int calc_expr(calc_parser *p, calc_val *out, int depth);
 
-/* One number or length token, or a parenthesized sub-expression. */
+/* Consumes "name(" (case-insensitive) at the cursor; 0 leaves the cursor put. */
+static int calc_match_fn(calc_parser *p, const char *name) {
+    size_t len = strlen(name);
+    if (p->i + len + 1 > p->n) return 0;
+    for (size_t k = 0; k < len; ++k)
+        if (csel_lower_ch(p->s[p->i + k]) != name[k]) return 0;
+    if (p->s[p->i + len] != '(') return 0;
+    p->i += len + 1;
+    return 1;
+}
+
+/* min()/max()/clamp() (2026-07-10): comma-separated full expressions, every
+ * argument the same shape (all lengths or all bare numbers, like +/-). clamp(lo,
+ * mid, hi) is max(lo, min(mid, hi)) per CSS and takes exactly three arguments;
+ * min/max take 1..CSS_MATHFN_MAX_ARGS. Depth-bounded with the parens. kind: 0
+ * min, 1 max, 2 clamp. */
+static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind) {
+    if (depth >= CSS_CALC_MAX_DEPTH) return 0;
+    calc_val args[CSS_MATHFN_MAX_ARGS];
+    int nargs = 0;
+    for (;;) {
+        if (nargs >= CSS_MATHFN_MAX_ARGS) return 0;
+        if (!calc_expr(p, &args[nargs], depth + 1)) return 0;
+        ++nargs;
+        calc_skip_ws(p);
+        if (p->i < p->n && p->s[p->i] == ',') { ++p->i; continue; }
+        break;
+    }
+    if (p->i >= p->n || p->s[p->i] != ')') return 0;
+    ++p->i;
+    for (int k = 1; k < nargs; ++k)
+        if (args[k].is_length != args[0].is_length) return 0;
+    if (kind == 2) {
+        if (nargs != 3) return 0;
+        double m = (args[1].px < args[2].px) ? args[1].px : args[2].px;
+        out->px = (args[0].px > m) ? args[0].px : m;
+        out->is_length = args[0].is_length;
+        return 1;
+    }
+    double best = args[0].px;
+    for (int k = 1; k < nargs; ++k) {
+        if (kind == 0) { if (args[k].px < best) best = args[k].px; }
+        else           { if (args[k].px > best) best = args[k].px; }
+    }
+    out->px = best;
+    out->is_length = args[0].is_length;
+    return 1;
+}
+
+/* One number or length token, a parenthesized sub-expression, a nested calc(),
+ * or a math function call (min/max/clamp). */
 static int calc_factor(calc_parser *p, calc_val *out, int depth) {
     calc_skip_ws(p);
+    if (calc_match_fn(p, "min"))   return calc_mathfn(p, out, depth, 0);
+    if (calc_match_fn(p, "max"))   return calc_mathfn(p, out, depth, 1);
+    if (calc_match_fn(p, "clamp")) return calc_mathfn(p, out, depth, 2);
+    if (calc_match_fn(p, "calc")) {          /* nested calc(): plain grouping */
+        if (depth >= CSS_CALC_MAX_DEPTH) return 0;
+        if (!calc_expr(p, out, depth + 1)) return 0;
+        calc_skip_ws(p);
+        if (p->i >= p->n || p->s[p->i] != ')') return 0;
+        ++p->i;
+        return 1;
+    }
     if (p->i < p->n && p->s[p->i] == '(') {
         if (depth >= CSS_CALC_MAX_DEPTH) return 0;
         ++p->i;
@@ -533,6 +602,25 @@ static int interp_len(const char *v, int allow_auto, int *out) {
         *out = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
         return 1;
     }
+    /* A bare math-function value (min()/max()/clamp() without a calc() wrapper).
+     * The m/c prefix check keeps plain lengths off the calc machinery; the whole
+     * value must be exactly one function call whose result is a length. */
+    if (csel_lower_ch(v[0]) == 'm' || csel_lower_ch(v[0]) == 'c') {
+        size_t n = strlen(v);
+        calc_parser p = { v, n, 0 };
+        int kind = -1;
+        if (calc_match_fn(&p, "min")) kind = 0;
+        else if (calc_match_fn(&p, "max")) kind = 1;
+        else if (calc_match_fn(&p, "clamp")) kind = 2;
+        if (kind >= 0) {
+            calc_val r;
+            if (!calc_mathfn(&p, &r, 0, kind)) return 0;
+            calc_skip_ws(&p);
+            if (p.i != n || !r.is_length) return 0;
+            *out = round_clamp(r.px, -CSS_LEN_MAX, CSS_LEN_MAX);
+            return 1;
+        }
+    }
 
     const char *p = v;
     int neg = 0;
@@ -631,6 +719,27 @@ static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_
     return n;
 }
 
+/* Expands a two-slot logical shorthand (margin-inline / padding-block /
+ * inset-inline: one value sets both sides, two set start then end; 2026-07-10).
+ * Fail closed on zero, more than two, or any uninterpretable token. */
+static int expand_box2(const char *val, int slot_start, int slot_end,
+                       int allow_auto, int allow_neg, css_decl *dst, int cap) {
+    int vals[2], nv = 0;
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    while (nv < 2 && next_ws_token(&p, tok, sizeof tok)) {
+        int o;
+        if (!interp_len(tok, allow_auto, &o)) return 0;
+        if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
+        vals[nv++] = o;
+    }
+    if (nv == 0 || next_ws_token(&p, tok, sizeof tok)) return 0;
+    if (cap < 2) return 0;
+    dst[0].prop = slot_start; dst[0].ival = vals[0];
+    dst[1].prop = slot_end;   dst[1].ival = (nv == 2) ? vals[1] : vals[0];
+    return 2;
+}
+
 /* --- text-presentation extensions (Hito 23b-6) --- */
 
 /* Maps one font-family name (a generic keyword or a common family) to a generic
@@ -718,6 +827,9 @@ static int interp_whitespace(const char *v) {
     if (csel_ci_eq(v, "pre"))      return CSS_WS_PRE;
     if (csel_ci_eq(v, "pre-wrap")) return CSS_WS_PRE_WRAP;
     if (csel_ci_eq(v, "pre-line")) return CSS_WS_PRE_LINE;
+    /* break-spaces preserves whitespace and wraps; this engine only models the
+     * wrap/keep distinction, so it collapses to pre-wrap (2026-07-10). */
+    if (csel_ci_eq(v, "break-spaces")) return CSS_WS_PRE_WRAP;
     return -1;
 }
 
@@ -1793,6 +1905,120 @@ static int resolve_var(const char *val, char *out, size_t outcap,
     return 1;
 }
 
+/* gap / grid-gap (2026-07-10): one value keeps the pre-existing semantics (both
+ * axes; row-gap stays unset and falls back to gap downstream), two values are
+ * `<row> <col>` (row feeds row-gap, col feeds gap). column-gap stays a
+ * single-value longhand in the dispatch below. */
+static int expand_gap(const char *val, css_decl *dst, int cap) {
+    char a[CSS_TOK_MAX], b[CSS_TOK_MAX], extra[CSS_TOK_MAX];
+    const char *p = val;
+    if (!next_ws_token(&p, a, sizeof a)) return 0;
+    int has_b = next_ws_token(&p, b, sizeof b);
+    if (has_b && next_ws_token(&p, extra, sizeof extra)) return 0;
+    int ga = interp_gap(a);
+    if (ga < 0 || cap < 1) return 0;
+    if (!has_b) { dst[0].prop = P_GAP; dst[0].ival = ga; return 1; }
+    int gb = interp_gap(b);
+    if (gb < 0 || cap < 2) return 0;
+    dst[0].prop = P_ROW_GAP; dst[0].ival = ga;
+    dst[1].prop = P_GAP;     dst[1].ival = gb;
+    return 2;
+}
+
+/* place-items / place-content / place-self (2026-07-10): `<align> [<justify>]`,
+ * the justify half defaulting to the align token. place-content's justify half
+ * feeds justify-content (its own keyword set). place-self's justify half has no
+ * engine slot and is ignored (documented simplification, like list-style's
+ * ignored tokens). An uninterpretable align token (or, where a slot exists, an
+ * uninterpretable justify token) drops the whole shorthand (fail closed). */
+static int expand_place(const char *prop, const char *val, css_decl *dst, int cap) {
+    char a[CSS_TOK_MAX], b[CSS_TOK_MAX], extra[CSS_TOK_MAX];
+    const char *p = val;
+    if (!next_ws_token(&p, a, sizeof a)) return 0;
+    int has_b = next_ws_token(&p, b, sizeof b);
+    if (has_b && next_ws_token(&p, extra, sizeof extra)) return 0;
+
+    if (strcmp(prop, "place-self") == 0) {
+        int av = interp_align_kw(a, 1, 0);
+        if (av < 0 || cap < 1) return 0;
+        dst[0].prop = P_ALIGN_SELF; dst[0].ival = av;
+        return 1;
+    }
+    if (strcmp(prop, "place-items") == 0) {
+        int av = interp_align_kw(a, 0, 0);
+        int jv = interp_align_kw(has_b ? b : a, 0, 0);
+        if (av < 0 || jv < 0 || cap < 2) return 0;
+        dst[0].prop = P_ALIGN_ITEMS;   dst[0].ival = av;
+        dst[1].prop = P_JUSTIFY_ITEMS; dst[1].ival = jv;
+        return 2;
+    }
+    int av = interp_align_kw(a, 0, 1);
+    int jv = interp_justify(has_b ? b : a);
+    if (av < 0 || jv < 0 || cap < 2) return 0;
+    dst[0].prop = P_ALIGN_CONTENT; dst[0].ival = av;
+    dst[1].prop = P_JUSTIFY;       dst[1].ival = jv;
+    return 2;
+}
+
+/* font shorthand (2026-07-10): `[style|variant|weight|normal]* size[/line-height]
+ * family...`. size and family are both required (per CSS); system keywords
+ * (`font: caption` etc.) have no size token and drop the whole shorthand (fail
+ * closed). Unmentioned longhands stay unset -- this cascade has no
+ * reset-to-initial, a documented simplification. A family that maps to no
+ * generic bucket keeps the rest of the shorthand (same net effect as the
+ * font-family longhand dropping an unknown name). */
+static int expand_font(const char *val, css_decl *dst, int cap) {
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    int style = -1, weight = -1, variant = -1;
+
+    for (;;) {
+        const char *save = p;
+        if (!next_ws_token(&p, tok, sizeof tok)) return 0;  /* ran out: no size */
+        if (csel_ci_eq(tok, "normal")) continue;  /* ambiguous reset: leave unset */
+        if (csel_ci_eq(tok, "italic") || csel_ci_eq(tok, "oblique")) { style = 1; continue; }
+        if (csel_ci_eq(tok, "small-caps")) { variant = CSS_FV_SMALL_CAPS; continue; }
+        if (csel_ci_eq(tok, "bold") || csel_ci_eq(tok, "bolder")) { weight = 1; continue; }
+        if (csel_ci_eq(tok, "lighter")) { weight = 0; continue; }
+        {   /* a bare 100..900 number is a weight (a size always carries a unit) */
+            const char *q = tok;
+            int all_digits = (*q != '\0');
+            while (*q != '\0') { if (*q < '0' || *q > '9') { all_digits = 0; break; } ++q; }
+            if (all_digits) {
+                int w = interp_weight(tok);
+                if (w >= 0) { weight = w; continue; }
+            }
+        }
+        p = save;   /* not a leading keyword: must be the size token */
+        break;
+    }
+
+    if (!next_ws_token(&p, tok, sizeof tok)) return 0;
+    int line = 0;
+    char *slash = strchr(tok, '/');
+    if (slash != NULL) *slash = '\0';
+    int size = interp_fontsize(tok);
+    if (size < 0) return 0;
+    if (slash != NULL) {
+        line = interp_lineheight(slash + 1);
+        if (line < 0) return 0;   /* a present but invalid line-height: all invalid */
+    }
+
+    while (*p == ' ' || *p == '\t') ++p;
+    if (*p == '\0') return 0;     /* family required */
+    int fam = interp_fontfamily(p);
+
+    int n = 0;
+    if (cap < 6) return 0;
+    if (style >= 0)   { dst[n].prop = P_STYLE;        dst[n].ival = style;   ++n; }
+    if (weight >= 0)  { dst[n].prop = P_WEIGHT;       dst[n].ival = weight;  ++n; }
+    if (variant >= 0) { dst[n].prop = P_FONT_VARIANT; dst[n].ival = variant; ++n; }
+    dst[n].prop = P_FONTSIZE; dst[n].ival = size; ++n;
+    if (line > 0)     { dst[n].prop = P_LINEHEIGHT;   dst[n].ival = line;    ++n; }
+    if (fam > 0)      { dst[n].prop = P_FONTFAMILY;   dst[n].ival = fam;     ++n; }
+    return n;
+}
+
 /* Maps property name `prop` (lowercased) + value `val` to css_decl(s) in dst (up to
  * cap). Returns the number written (0 if unsupported). Most properties emit one; the
  * margin/padding shorthands expand to up to four (one per side). The important flag is
@@ -1816,6 +2042,42 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "height") == 0)    return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
     if (strcmp(prop, "min-height") == 0)return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
     if (strcmp(prop, "max-height") == 0)return emit_len(dst, cap, P_MAXHEIGHT, val, 0, 0);
+
+    /* Logical properties (2026-07-10): physical horizontal-tb LTR mapping (the
+     * engine has no writing-mode, and the cascade interprets values before it
+     * knows the element's resolved direction -- see spec/css.md). */
+    if (strcmp(prop, "margin-inline-start") == 0)  return emit_len(dst, cap, P_MARGIN_LEFT, val, 1, 1);
+    if (strcmp(prop, "margin-inline-end") == 0)    return emit_len(dst, cap, P_MARGIN_RIGHT, val, 1, 1);
+    if (strcmp(prop, "margin-block-start") == 0)   return emit_len(dst, cap, P_MARGIN_TOP, val, 1, 1);
+    if (strcmp(prop, "margin-block-end") == 0)     return emit_len(dst, cap, P_MARGIN_BOTTOM, val, 1, 1);
+    if (strcmp(prop, "margin-inline") == 0)  return expand_box2(val, P_MARGIN_LEFT, P_MARGIN_RIGHT, 1, 1, dst, cap);
+    if (strcmp(prop, "margin-block") == 0)   return expand_box2(val, P_MARGIN_TOP, P_MARGIN_BOTTOM, 1, 1, dst, cap);
+    if (strcmp(prop, "padding-inline-start") == 0) return emit_len(dst, cap, P_PAD_LEFT, val, 0, 0);
+    if (strcmp(prop, "padding-inline-end") == 0)   return emit_len(dst, cap, P_PAD_RIGHT, val, 0, 0);
+    if (strcmp(prop, "padding-block-start") == 0)  return emit_len(dst, cap, P_PAD_TOP, val, 0, 0);
+    if (strcmp(prop, "padding-block-end") == 0)    return emit_len(dst, cap, P_PAD_BOTTOM, val, 0, 0);
+    if (strcmp(prop, "padding-inline") == 0) return expand_box2(val, P_PAD_LEFT, P_PAD_RIGHT, 0, 0, dst, cap);
+    if (strcmp(prop, "padding-block") == 0)  return expand_box2(val, P_PAD_TOP, P_PAD_BOTTOM, 0, 0, dst, cap);
+    if (strcmp(prop, "inset-inline-start") == 0)   return emit_len(dst, cap, P_INSET_LEFT, val, 1, 1);
+    if (strcmp(prop, "inset-inline-end") == 0)     return emit_len(dst, cap, P_INSET_RIGHT, val, 1, 1);
+    if (strcmp(prop, "inset-block-start") == 0)    return emit_len(dst, cap, P_INSET_TOP, val, 1, 1);
+    if (strcmp(prop, "inset-block-end") == 0)      return emit_len(dst, cap, P_INSET_BOTTOM, val, 1, 1);
+    if (strcmp(prop, "inset-inline") == 0)   return expand_box2(val, P_INSET_LEFT, P_INSET_RIGHT, 1, 1, dst, cap);
+    if (strcmp(prop, "inset-block") == 0)    return expand_box2(val, P_INSET_TOP, P_INSET_BOTTOM, 1, 1, dst, cap);
+    if (strcmp(prop, "inline-size") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
+    if (strcmp(prop, "block-size") == 0)      return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
+    if (strcmp(prop, "min-inline-size") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
+    if (strcmp(prop, "max-inline-size") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
+    if (strcmp(prop, "min-block-size") == 0)  return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
+    if (strcmp(prop, "max-block-size") == 0)  return emit_len(dst, cap, P_MAXHEIGHT, val, 0, 0);
+
+    /* Multi-slot shorthands (2026-07-10): two-value gap, place-*, font. */
+    if (strcmp(prop, "gap") == 0 || strcmp(prop, "grid-gap") == 0)
+        return expand_gap(val, dst, cap);
+    if (strcmp(prop, "place-items") == 0 || strcmp(prop, "place-content") == 0 ||
+        strcmp(prop, "place-self") == 0)
+        return expand_place(prop, val, dst, cap);
+    if (strcmp(prop, "font") == 0) return expand_font(val, dst, cap);
 
     /* Text-presentation extensions whose value may legitimately be 0 or negative
      * (so they bypass the generic ival<0 drop, like the box-model lengths). */
@@ -1902,9 +2164,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         return 2;
     }
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
-    else if (strcmp(prop, "gap") == 0 ||
-             strcmp(prop, "grid-gap") == 0 ||
-             strcmp(prop, "column-gap") == 0)         { prop_id = P_GAP;      ival = interp_gap(val); }
+    else if (strcmp(prop, "column-gap") == 0)         { prop_id = P_GAP;      ival = interp_gap(val); }
     else if (strcmp(prop, "justify-content") == 0)    { prop_id = P_JUSTIFY;  ival = interp_justify(val); }
     else if (strcmp(prop, "grid-template-columns") == 0) { prop_id = P_GRIDCOLS; ival = interp_gridcols(val); }
     else if (strcmp(prop, "font-family") == 0)        { prop_id = P_FONTFAMILY;    ival = interp_fontfamily(val); }

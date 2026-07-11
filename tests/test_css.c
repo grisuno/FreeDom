@@ -205,7 +205,8 @@ static void test_white_space(void **state) {
     assert_int_equal(css_parse_inline("white-space:pre", 0).white_space, CSS_WS_PRE);
     assert_int_equal(css_parse_inline("white-space:normal", 0).white_space, CSS_WS_NORMAL);
     assert_int_equal(css_parse_inline("white-space:pre-wrap", 0).white_space, CSS_WS_PRE_WRAP);
-    assert_int_equal(css_parse_inline("white-space:break-spaces", 0).white_space, CSS_WS_UNSET);
+    /* break-spaces collapses to pre-wrap since 2026-07-10 (wrap distinction only) */
+    assert_int_equal(css_parse_inline("white-space:break-spaces", 0).white_space, CSS_WS_PRE_WRAP);
     assert_int_equal(css_parse_inline("color:red", 0).white_space, CSS_WS_UNSET);
 }
 
@@ -269,10 +270,11 @@ static void test_inline_container_props(void **state) {
     assert_int_equal(css_parse_inline("justify-content:space-around", 0).justify, CSS_JUSTIFY_SPACE_AROUND);
     assert_int_equal(css_parse_inline("justify-content:space-evenly", 0).justify, CSS_JUSTIFY_SPACE_EVENLY);
 
-    /* gap aliases and a two-value gap (first token wins). */
+    /* gap aliases; a two-value gap is row then column (2026-07-10). */
     assert_int_equal(css_parse_inline("grid-gap:8px", 0).gap, 8);
     assert_int_equal(css_parse_inline("column-gap:6px", 0).gap, 6);
-    assert_int_equal(css_parse_inline("gap:10px 4px", 0).gap, 10);
+    assert_int_equal(css_parse_inline("gap:10px 4px", 0).gap, 4);
+    assert_int_equal(css_parse_inline("gap:10px 4px", 0).row_gap, 10);
     assert_int_equal(css_parse_inline("gap:normal", 0).gap, 0);
 }
 
@@ -2373,6 +2375,158 @@ static void test_inline_backface_visibility(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).backface_visibility, CSS_BF_UNSET);
 }
 
+/* --- Math functions min()/max()/clamp() (2026-07-10) --- */
+static void test_math_min_max_top_level(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("width:min(600px, 40em)", 0).width, 600);
+    assert_int_equal(css_parse_inline("width:max(600px, 40em)", 0).width, 640);
+    assert_int_equal(css_parse_inline("margin-left:min(10px)", 0).margin_left, 10);
+    /* mixing a length with a bare number fails the declaration (dimensional check) */
+    assert_int_equal(css_parse_inline("width:min(600px, 5)", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width:min()", 0).width, CSS_LEN_UNSET);
+    /* %/viewport units stay rejected inside math functions too */
+    assert_int_equal(css_parse_inline("width:min(50%, 600px)", 0).width, CSS_LEN_UNSET);
+}
+
+static void test_math_clamp(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("width:clamp(100px, 50px, 300px)", 0).width, 100);
+    assert_int_equal(css_parse_inline("width:clamp(100px, 200px, 300px)", 0).width, 200);
+    assert_int_equal(css_parse_inline("width:clamp(100px, 500px, 300px)", 0).width, 300);
+    /* clamp takes exactly three arguments */
+    assert_int_equal(css_parse_inline("width:clamp(1px, 2px)", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width:clamp(1px, 2px, 3px, 4px)", 0).width, CSS_LEN_UNSET);
+}
+
+static void test_math_nested_in_calc(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("width:calc(min(10px, 2em) * 2)", 0).width, 20);
+    assert_int_equal(css_parse_inline("width:clamp(1em, calc(2px + 3px), 10px)", 0).width, 16);
+    assert_int_equal(css_parse_inline("width:calc(100px * min(2, 3))", 0).width, 200);
+    /* math functions inside a shorthand token (paren-aware splitter) */
+    css_style s = css_parse_inline("margin:min(4px, 1em) max(2px, 8px)", 0);
+    assert_int_equal(s.margin_top, 4);
+    assert_int_equal(s.margin_right, 8);
+    assert_int_equal(s.margin_bottom, 4);
+    assert_int_equal(s.margin_left, 8);
+}
+
+/* --- Logical properties (physical LTR mapping, 2026-07-10) --- */
+static void test_logical_margin_padding(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("margin-inline-start:10px; margin-inline-end:20px", 0);
+    assert_int_equal(s.margin_left, 10);
+    assert_int_equal(s.margin_right, 20);
+    s = css_parse_inline("margin-inline:30px", 0);
+    assert_int_equal(s.margin_left, 30);
+    assert_int_equal(s.margin_right, 30);
+    s = css_parse_inline("margin-inline:1px 2px", 0);
+    assert_int_equal(s.margin_left, 1);
+    assert_int_equal(s.margin_right, 2);
+    s = css_parse_inline("margin-block:5px 6px", 0);
+    assert_int_equal(s.margin_top, 5);
+    assert_int_equal(s.margin_bottom, 6);
+    s = css_parse_inline("padding-inline:7px; padding-block-start:8px", 0);
+    assert_int_equal(s.pad_left, 7);
+    assert_int_equal(s.pad_right, 7);
+    assert_int_equal(s.pad_top, 8);
+    s = css_parse_inline("margin-inline:auto", 0);
+    assert_int_equal(s.margin_left, CSS_LEN_AUTO);
+    assert_int_equal(s.margin_right, CSS_LEN_AUTO);
+    /* padding rejects negatives through the logical alias too (fail closed) */
+    s = css_parse_inline("padding-inline:-4px", 0);
+    assert_int_equal(s.pad_left, CSS_LEN_UNSET);
+}
+
+static void test_logical_inset_and_sizes(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("inset-inline:4px 5px; inset-block:6px 7px", 0);
+    assert_int_equal(s.inset_left, 4);
+    assert_int_equal(s.inset_right, 5);
+    assert_int_equal(s.inset_top, 6);
+    assert_int_equal(s.inset_bottom, 7);
+    s = css_parse_inline("inset-inline-start:1px; inset-block-end:2px", 0);
+    assert_int_equal(s.inset_left, 1);
+    assert_int_equal(s.inset_bottom, 2);
+    s = css_parse_inline("inline-size:200px; block-size:100px", 0);
+    assert_int_equal(s.width, 200);
+    assert_int_equal(s.height, 100);
+    s = css_parse_inline("min-inline-size:10px; max-inline-size:20px;"
+                         "min-block-size:30px; max-block-size:40px", 0);
+    assert_int_equal(s.min_width, 10);
+    assert_int_equal(s.max_width, 20);
+    assert_int_equal(s.min_height, 30);
+    assert_int_equal(s.max_height, 40);
+}
+
+/* --- place-* shorthands + two-value gap (2026-07-10) --- */
+static void test_place_shorthands(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("place-items:center", 0);
+    assert_int_equal(s.align_items, CSS_AK_CENTER);
+    assert_int_equal(s.justify_items, CSS_AK_CENTER);
+    s = css_parse_inline("place-items:start end", 0);
+    assert_int_equal(s.align_items, CSS_AK_START);
+    assert_int_equal(s.justify_items, CSS_AK_END);
+    s = css_parse_inline("place-content:center space-between", 0);
+    assert_int_equal(s.align_content, CSS_AK_CENTER);
+    assert_int_equal(s.justify, CSS_JUSTIFY_SPACE_BETWEEN);
+    s = css_parse_inline("place-content:center", 0);
+    assert_int_equal(s.align_content, CSS_AK_CENTER);
+    assert_int_equal(s.justify, CSS_JUSTIFY_CENTER);
+    /* the justify-self half has no engine slot: align half still applies */
+    s = css_parse_inline("place-self:center stretch", 0);
+    assert_int_equal(s.align_self, CSS_AK_CENTER);
+    /* an invalid keyword drops the whole shorthand (fail closed) */
+    s = css_parse_inline("place-items:blargh", 0);
+    assert_int_equal(s.align_items, CSS_AK_UNSET);
+    assert_int_equal(s.justify_items, CSS_AK_UNSET);
+}
+
+static void test_gap_two_value(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("gap:10px 20px", 0);
+    assert_int_equal(s.row_gap, 10);
+    assert_int_equal(s.gap, 20);
+    s = css_parse_inline("gap:12px", 0);
+    assert_int_equal(s.gap, 12);
+    assert_int_equal(s.row_gap, -1);   /* one value keeps the prior semantics */
+    s = css_parse_inline("grid-gap:1px 2px", 0);
+    assert_int_equal(s.row_gap, 1);
+    assert_int_equal(s.gap, 2);
+    /* column-gap is a longhand: never takes two values */
+    s = css_parse_inline("column-gap:3px 4px", 0);
+    assert_int_equal(s.gap, -1);
+}
+
+/* --- font shorthand (2026-07-10) --- */
+static void test_font_shorthand(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("font:italic bold 32px/1.5 monospace", 0);
+    assert_int_equal(s.italic, 1);
+    assert_int_equal(s.bold, 1);
+    assert_int_equal(s.font_scale, 200);   /* 32px on the 16px base */
+    assert_int_equal(s.line_scale, 150);
+    assert_int_equal(s.font_family, CSS_FF_MONO);
+    s = css_parse_inline("font:16px sans-serif", 0);
+    assert_int_equal(s.font_scale, 100);
+    assert_int_equal(s.font_family, CSS_FF_SANS);
+    assert_int_equal(s.bold, -1);          /* unmentioned longhands stay unset */
+    s = css_parse_inline("font:small-caps 16px serif", 0);
+    assert_int_equal(s.font_variant, CSS_FV_SMALL_CAPS);
+    assert_int_equal(s.font_family, CSS_FF_SERIF);
+    /* size + family are both required; system keywords drop the shorthand */
+    assert_int_equal(css_parse_inline("font:caption", 0).font_scale, 0);
+    assert_int_equal(css_parse_inline("font:16px", 0).font_scale, 0);
+    assert_int_equal(css_parse_inline("font:sans-serif", 0).font_family, CSS_FF_UNSET);
+}
+
+/* --- white-space: break-spaces (2026-07-10) --- */
+static void test_white_space_break_spaces(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("white-space:break-spaces", 0).white_space, CSS_WS_PRE_WRAP);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -2533,6 +2687,15 @@ int main(void) {
         cmocka_unit_test(test_inline_touch_action),
         cmocka_unit_test(test_inline_overscroll_behavior),
         cmocka_unit_test(test_inline_backface_visibility),
+        cmocka_unit_test(test_math_min_max_top_level),
+        cmocka_unit_test(test_math_clamp),
+        cmocka_unit_test(test_math_nested_in_calc),
+        cmocka_unit_test(test_logical_margin_padding),
+        cmocka_unit_test(test_logical_inset_and_sizes),
+        cmocka_unit_test(test_place_shorthands),
+        cmocka_unit_test(test_gap_two_value),
+        cmocka_unit_test(test_font_shorthand),
+        cmocka_unit_test(test_white_space_break_spaces),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

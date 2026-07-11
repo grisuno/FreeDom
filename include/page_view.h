@@ -139,6 +139,13 @@ typedef struct pv_run {
      * with caps.css. Defaults: 0 (unset). */
     int     text_overflow;   /* css_text_overflow */
     int     word_break;      /* css_word_break */
+    /* 2026-07-10 wiring batch, both inherited like the rest of the text
+     * extensions and gated by caps.css downstream. image_rendering asks the
+     * painter for a nearest-neighbour filter when blitting a decoded image
+     * (pixelated/crisp-edges); caret_color tints the caret of a focused form
+     * control (0xRRGGBB, or -1 for auto/unset). */
+    int     image_rendering; /* css_image_rendering, 0 (unset) */
+    int     caret_color;     /* 0xRRGGBB, or -1 (auto/unset) */
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -274,12 +281,22 @@ typedef struct pv_box_def {
     /* visibility / overflow / cursor (not inherited, like border/position -- read
      * from the box's own resolved style). visibility gates painting of this box and
      * everything it encloses while still reserving its layout space (see
-     * css_visibility). overflow_x/_y clip in-flow rows and positioned boxes to
-     * ancestor overflow:hidden rects (2026-07-09). cursor drives the hover cursor
-     * shape (see css_cursor). */
+     * css_visibility). A content-visibility:hidden on the element folds into
+     * visibility here (page_view maps it to CSS_VIS_HIDDEN when visibility itself
+     * is unset -- same documented simplification as visibility:collapse).
+     * overflow_x/_y clip in-flow rows and positioned boxes to ancestor
+     * overflow:hidden rects (2026-07-09). cursor drives the hover cursor shape
+     * (see css_cursor). */
     int visibility;
     int overflow_x, overflow_y;
     int cursor;
+    /* pointer-events (2026-07-10). CSS_PE_NONE on this box (or, at hit-test time,
+     * on an ancestor box -- the GUI resolves the nearest box in the parent chain
+     * that sets the property, like cursor) removes the box's content from
+     * hit-testing: links under it do not hover or click, and cursor does not
+     * resolve there. Rides the box-def tree, so it is caps.css-gated by
+     * construction (no boxes without author CSS). */
+    int pointer_events;
     /* aspect-ratio (numerator/denominator x1000, both 0 = unset/auto) */
     int aspect_num, aspect_den;
 } pv_box_def;
@@ -392,22 +409,39 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
 
 /* Sets the author text-presentation extensions (Hito 23b-6, plus text_overflow/
  * word_break, plus the 2026-07-10 batch: tab_size/direction/font_variant/list_style_pos)
- * on the most recently appended run: the generic font_family, text_transform, signed
- * letter_spacing/word_spacing (PV_LEN_UNSET = unset), text-shadow (shadow_dx/dy
- * offsets + shadow_color packed 0xRRGGBB or -1 for none), opacity (0..100 or -1),
- * valign, signed text_indent (PV_LEN_UNSET = unset), white_space, text_overflow
- * (css_text_overflow), word_break (css_word_break), the text-decoration sub-
- * properties (color/style/thickness), and the new batch: tab_size (0 unset ->
- * 8 in <pre>), direction (css_direction), font_variant (css_font_variant) and
- * list_style_pos (css_list_pos). No-op on an empty or NULL view. Like author
- * colors, render_doc applies these only with caps.css. */
-void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
-                     int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
-                     int shadow_color, int opacity, int valign, int text_indent,
-                     int white_space, int text_overflow, int word_break,
-                     int text_decoration_color, int text_decoration_style,
-                     int text_decoration_thickness,
-                     int tab_size, int direction, int font_variant, int list_style_pos);
+ * on the most recently appended run, from a pv_text_ext value (below). No-op on an
+ * empty or NULL view (or a NULL ext). Like author colors, render_doc applies these
+ * only with caps.css. */
+
+/* The author text-presentation extensions of one run, resolved from the nearest
+ * ancestor that sets each field (they all inherit in CSS). The 20+ fields used to
+ * be positional parameters of pv_set_text_ext -- a signature that grew with every
+ * property batch; the struct is the contract now. list_style is resolved here too
+ * but is NOT a run field: page_view bakes the <li> marker into the run text
+ * (structure), so pv_set_text_ext ignores it. Initialise with pv_text_ext_reset
+ * (every field to its "unset" sentinel), then set what the caller resolved. */
+typedef struct pv_text_ext {
+    int font_family, text_transform, letter_spacing, word_spacing;
+    int shadow_dx, shadow_dy, shadow_color;
+    int opacity, valign, text_indent, white_space;
+    int list_style;
+    int text_overflow, word_break;
+    int text_decoration_color;     /* 0xRRGGBB, or -1 (unset) */
+    int text_decoration_style;     /* css_text_decoration_style, 0 unset */
+    int text_decoration_thickness; /* px, -1 unset, 0 from-font */
+    int tab_size;        /* 0 unset -> 8 at paint time */
+    int direction;       /* css_direction */
+    int font_variant;    /* css_font_variant */
+    int list_style_pos;  /* css_list_pos */
+    /* 2026-07-10 wiring batch. */
+    int image_rendering; /* css_image_rendering, 0 unset */
+    int caret_color;     /* 0xRRGGBB, -1 unset; CSS_LEN_AUTO = explicit auto */
+} pv_text_ext;
+
+/* Initialises every field of *e to its "unset" sentinel. NULL-safe. */
+void pv_text_ext_reset(pv_text_ext *e);
+
+void pv_set_text_ext(pv_view *v, const pv_text_ext *e);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/

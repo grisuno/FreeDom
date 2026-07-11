@@ -144,6 +144,20 @@ también se resuelve en la fusión, pero **no es un campo de run**: `list_marker
 glyph/numeración del marcador del `<li>` (disc/circle/square/decimal/alpha/roman; `none` ⇒ sin marcador),
 que se hornea en el texto del run — estructura, no gateada.
 
+**Extensiones 2026-07-10 (`image_rendering`, `caret_color`).** Dos campos heredables más en la misma
+fusión `pv_text_ext`: `image_rendering` (`css_image_rendering`; `pixelated`/`crisp-edges` piden filtro
+nearest-neighbour al escalar la imagen decodificada) y `caret_color` (0xRRGGBB o -1; tiñe el caret de un
+control de formulario enfocado; `auto` ⇒ -1). Mismo gate `caps.css` aguas abajo. `pv_set_text_ext` pasa
+a recibir la struct completa (`const pv_text_ext *`, ahora pública en `page_view.h`) en lugar de una
+lista posicional de ints — con 20+ campos la firma posicional era deuda técnica.
+
+**`pointer-events` y `content-visibility` (caja, no run).** `pointer-events` viaja en `pv_box_def`
+(como `cursor`): la GUI resuelve el valor por la cadena de cajas ancestras y, con `none`, excluye el
+elemento del hit-testing (hover/click/cursor). `content-visibility: hidden` **no** añade campo: se
+pliega en `pv_box_def.visibility` (⇒ `CSS_VIS_HIDDEN`, si `visibility` no estaba fijada) al construir
+la definición — misma simplificación documentada que `visibility: collapse` (se salta el pintado, se
+reserva el espacio).
+
 **`display:none` (estructura).** Un run cuyo elemento o algún ancestro tenga `display:none` (de la hoja
 o en línea) **no se emite** (`in_hidden_subtree`). Es visibilidad estructural: se aplica siempre,
 independiente de `caps.css` (el contenido oculto sigue oculto, como el caso `display:none` con JS off).

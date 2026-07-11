@@ -117,6 +117,10 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->list_style_pos = 0;
     b->text_overflow = 0;
     b->word_break = 0;
+    /* 2026-07-10 wiring batch (image-rendering on RD_IMAGE, caret-color on
+     * RD_INPUT), gated by caps.css downstream like the rest. */
+    b->image_rendering = 0;
+    b->caret_color = -1;
     b->cont_id = -1;
     b->cont_display = 0;
     b->cont_gap = 0;
@@ -255,6 +259,16 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 break;
         }
         if (rc != 0) { rd_free(d); return RD_ERR_OOM; }
+
+        /* 2026-07-10 wiring batch: image-rendering rides RD_IMAGE (the painter
+         * picks the scaling filter) and caret-color rides RD_INPUT (the painter
+         * tints the focused caret). Presentation, so caps.css-gated like the
+         * text extensions. */
+        if (caps.css && d->count > 0) {
+            rd_block *nb = &d->blocks[d->count - 1];
+            if (r->kind == PV_IMAGE) nb->image_rendering = r->image_rendering;
+            if (r->kind == PV_INPUT) nb->caret_color = r->caret_color;
+        }
 
         /* Author flex/grid container layout is structure, not author styling: it
          * reveals nothing to the network (no fetch, no fingerprint), so the box

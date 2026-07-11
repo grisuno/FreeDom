@@ -158,6 +158,8 @@ static void run_init_common(pv_run *r) {
     r->list_style_pos = 0;
     r->text_overflow = 0;
     r->word_break = 0;
+    r->image_rendering = 0;
+    r->caret_color = -1;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -397,35 +399,33 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
     r->text_decoration = text_decoration;
 }
 
-void pv_set_text_ext(pv_view *v, int font_family, int text_transform,
-                     int letter_spacing, int word_spacing, int shadow_dx, int shadow_dy,
-                     int shadow_color, int opacity, int valign, int text_indent,
-                     int white_space, int text_overflow, int word_break,
-                     int text_decoration_color, int text_decoration_style,
-                     int text_decoration_thickness,
-                     int tab_size, int direction, int font_variant, int list_style_pos) {
-    if (v == NULL || v->count == 0) return;
+void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
+    if (v == NULL || v->count == 0 || e == NULL) return;
     pv_run *r = &v->runs[v->count - 1];
-    r->font_family = font_family;
-    r->text_transform = text_transform;
-    r->letter_spacing = letter_spacing;
-    r->word_spacing = word_spacing;
-    r->shadow_dx = shadow_dx;
-    r->shadow_dy = shadow_dy;
-    r->shadow_color = shadow_color;
-    r->opacity = opacity;
-    r->valign = valign;
-    r->text_indent = text_indent;
-    r->white_space = white_space;
-    r->text_overflow = text_overflow;
-    r->word_break = word_break;
-    r->text_decoration_color = text_decoration_color;
-    r->text_decoration_style = text_decoration_style;
-    r->text_decoration_thickness = text_decoration_thickness;
-    r->tab_size = tab_size;
-    r->direction = direction;
-    r->font_variant = font_variant;
-    r->list_style_pos = list_style_pos;
+    r->font_family = e->font_family;
+    r->text_transform = e->text_transform;
+    r->letter_spacing = e->letter_spacing;
+    r->word_spacing = e->word_spacing;
+    r->shadow_dx = e->shadow_dx;
+    r->shadow_dy = e->shadow_dy;
+    r->shadow_color = e->shadow_color;
+    r->opacity = e->opacity;
+    r->valign = e->valign;
+    r->text_indent = e->text_indent;
+    r->white_space = e->white_space;
+    r->text_overflow = e->text_overflow;
+    r->word_break = e->word_break;
+    r->text_decoration_color = e->text_decoration_color;
+    r->text_decoration_style = e->text_decoration_style;
+    r->text_decoration_thickness = e->text_decoration_thickness;
+    r->tab_size = e->tab_size;
+    r->direction = e->direction;
+    r->font_variant = e->font_variant;
+    r->list_style_pos = e->list_style_pos;
+    r->image_rendering = e->image_rendering;
+    /* CSS_LEN_AUTO is an explicit caret-color:auto -- resolved, but the theme
+     * caret is the effect, so the run carries the same -1 as unset. */
+    r->caret_color = (e->caret_color == CSS_LEN_AUTO) ? -1 : e->caret_color;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -695,34 +695,13 @@ typedef struct pv_box_info {
     int l, r, w, center, mt, mb;
 } pv_box_info;
 
-/* Author text-presentation extensions resolved for a run (Hito 23b-6): each from the
- * nearest ancestor that sets it (they inherit in CSS). list_style drives the <li>
- * marker (structural); the rest are gated by caps.css downstream. Defaults mirror the
- * pv_run / css_style "unset" sentinels. */
-typedef struct pv_text_ext {
-    int font_family, text_transform, letter_spacing, word_spacing;
-    int shadow_dx, shadow_dy, shadow_color;
-    int opacity, valign, text_indent, white_space;
-    int list_style;
-    int text_overflow, word_break;
-    /* Author text-decoration sub-properties (color, style, thickness). Inherit
-     * (nearest ancestor wins). -1/UNSET = unset. The line TYPE itself (underline/
-     * line-through/overline) is on pv_run.text_decoration; these three are its
-     * knobs. */
-    int text_decoration_color;     /* 0xRRGGBB, or -1 (unset) */
-    int text_decoration_style;     /* css_text_decoration_style, 0 unset */
-    int text_decoration_thickness; /* px, -1 unset, 0 from-font */
-    /* 2026-07-10 batch: tab_size (0 unset -> 8), direction (CSS text direction,
-     * not flex-direction), font_variant (small-caps), list_style_pos (inside/outside).
-     * Inherit like the rest. */
-    int tab_size;        /* 0 unset -> 8 at paint time */
-    int direction;       /* css_direction */
-    int font_variant;    /* css_font_variant */
-    int list_style_pos;  /* css_list_pos */
-} pv_text_ext;
+/* The author text-presentation extensions struct (pv_text_ext) is public now
+ * (include/page_view.h): each field resolves from the nearest ancestor that sets
+ * it (they inherit in CSS). list_style drives the <li> marker (structural); the
+ * rest are gated by caps.css downstream. */
 
-/* Initialises an ext to "unset" (no author text extension applied). */
-static void pv_text_ext_reset(pv_text_ext *e) {
+void pv_text_ext_reset(pv_text_ext *e) {
+    if (e == NULL) return;
     e->font_family = 0; e->text_transform = 0;
     e->letter_spacing = PV_LEN_UNSET; e->word_spacing = PV_LEN_UNSET;
     e->shadow_dx = 0; e->shadow_dy = 0; e->shadow_color = -1;
@@ -733,6 +712,8 @@ static void pv_text_ext_reset(pv_text_ext *e) {
     e->text_decoration_style = 0;
     e->text_decoration_thickness = -1;
     e->tab_size = 0; e->direction = 0; e->font_variant = 0; e->list_style_pos = 0;
+    e->image_rendering = 0;
+    e->caret_color = -1;
 }
 
 /* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
@@ -767,6 +748,11 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     if (e->direction == 0 && cs->direction != CSS_DIR_UNSET) e->direction = cs->direction;
     if (e->font_variant == 0 && cs->font_variant != CSS_FV_UNSET) e->font_variant = cs->font_variant;
     if (e->list_style_pos == 0 && cs->list_style_pos != CSS_LP_UNSET) e->list_style_pos = cs->list_style_pos;
+    if (e->image_rendering == 0 && cs->image_rendering != CSS_IR_UNSET)
+        e->image_rendering = cs->image_rendering;
+    /* caret-color: an explicit `auto` (CSS_LEN_AUTO) on a nearer ancestor is a
+     * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. */
+    if (e->caret_color == -1 && cs->caret_color != -1) e->caret_color = cs->caret_color;
 }
 
 /* True if the resolved style declares any HORIZONTAL box property. */
@@ -814,6 +800,10 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->outline_width != CSS_LEN_UNSET || css_has_position(cs) ||
            cs->visibility != CSS_VIS_UNSET || cs->overflow_x != CSS_OF_UNSET ||
            cs->overflow_y != CSS_OF_UNSET || cs->cursor != CSS_CUR_UNSET ||
+           /* pointer-events / content-visibility:hidden alone make the box worth
+            * tracking (hit-test skip / the visibility fold need the def). */
+           cs->pointer_events != CSS_PE_UNSET ||
+           cs->content_visibility == CSS_CV_HIDDEN ||
            /* Author vertical dimensions or aspect-ratio alone make the box worth
             * tracking (the painter needs them at open_box). */
            cs->height > 0 || cs->min_height > 0 || cs->max_height > 0 ||
@@ -880,8 +870,14 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->inset_bottom = cs->inset_bottom; d->inset_left = cs->inset_left;
     d->z_index = cs->z_index;
     d->visibility = cs->visibility;
+    /* content-visibility: hidden folds into visibility (skip paint, keep space --
+     * the documented visibility:collapse simplification). An explicit visibility
+     * on the element wins. */
+    if (d->visibility == CSS_VIS_UNSET && cs->content_visibility == CSS_CV_HIDDEN)
+        d->visibility = CSS_VIS_HIDDEN;
     d->overflow_x = cs->overflow_x; d->overflow_y = cs->overflow_y;
     d->cursor = cs->cursor;
+    d->pointer_events = cs->pointer_events;
     d->aspect_num = cs->aspect_num; d->aspect_den = cs->aspect_den;
     /* Author vertical dimensions (this batch, 2026-07-10): height/min-height/
      * max-height in px, 0 unset; min-width too. A negative css_style value is the
@@ -1900,15 +1896,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_color(v, cfg);
                 pv_set_bgcolor(v, cbg);
                 pv_set_text_style(v, calign, cfs, clh, cdeco);
-                pv_set_text_ext(v, cext.font_family, cext.text_transform,
-                                cext.letter_spacing, cext.word_spacing,
-                                cext.shadow_dx, cext.shadow_dy, cext.shadow_color,
-                                cext.opacity, cext.valign, cext.text_indent,
-                                cext.white_space, cext.text_overflow, cext.word_break,
-                                cext.text_decoration_color, cext.text_decoration_style,
-                                cext.text_decoration_thickness,
-                                cext.tab_size, cext.direction, cext.font_variant,
-                                cext.list_style_pos);
+                pv_set_text_ext(v, &cext);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
                 /* Every collected cell is its own grid item (the cell node is the
@@ -1934,13 +1922,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
-                pv_text_ext unused_ext;
+                pv_text_ext ctl_ext;
                 int unused_bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont, &unused_box, &unused_ext,
+                                &reg, &unused_cont, &unused_box, &ctl_ext,
                                 &box_reg, &float_reg, &unused_bdeco, &cache);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
@@ -1960,6 +1948,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                                name, value, action, fidx, method);
                 free(label); free(name); free(value);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                /* The resolved inherited text extensions ride the input run too:
+                 * caret_color tints the caret of the focused control (2026-07-10). */
+                pv_set_text_ext(v, &ctl_ext);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
@@ -1993,13 +1984,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
-                pv_text_ext unused_ext;
+                pv_text_ext img_ext;
                 int unused_bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont, &unused_box, &unused_ext,
+                                &reg, &unused_cont, &unused_box, &img_ext,
                                 &box_reg, &float_reg, &unused_bdeco, &cache);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
@@ -2014,6 +2005,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(src_dup);
                 free(alt_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                /* The resolved inherited text extensions ride the image run too:
+                 * image_rendering picks the paint scaling filter (2026-07-10). */
+                pv_set_text_ext(v, &img_ext);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
             }
             continue;
@@ -2135,13 +2129,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
         pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
-        pv_set_text_ext(v, ext.font_family, ext.text_transform, ext.letter_spacing,
-                        ext.word_spacing, ext.shadow_dx, ext.shadow_dy, ext.shadow_color,
-                        ext.opacity, ext.valign, ext.text_indent, ext.white_space,
-                        ext.text_overflow, ext.word_break,
-                        ext.text_decoration_color, ext.text_decoration_style,
-                        ext.text_decoration_thickness,
-                        ext.tab_size, ext.direction, ext.font_variant, ext.list_style_pos);
+        pv_set_text_ext(v, &ext);
         pv_set_block_id(v, bdeco);
         pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
     }

@@ -102,6 +102,11 @@ const char    *rd_image_label(rdp_img_decision d); /* etiqueta del placeholder *
   `letter_spacing`/`word_spacing`/`shadow_*`/`opacity`/`valign`/`text_indent`/`white_space`) se
   gatean igual; con `caps.css` apagado quedan en sus defaults sin efecto (0 / `PV_LEN_UNSET` / -1). El
   `list-style` NO viaja por aquí: ya está horneado en el texto del run por `page_view` (estructura).
+  **2026-07-10:** `image_rendering` se propaga además a `RD_IMAGE` (el painter elige filtro
+  nearest-neighbour con `pixelated`/`crisp-edges`) y `caret_color` a `RD_INPUT` (tiñe el caret del
+  control enfocado); ambos con el mismo gate `caps.css` (0 / -1 apagados). `pointer-events` no es un
+  campo de `rd_block`: viaja en el árbol de cajas (`pv_box_def`), que `rd_build` ya copia solo con
+  `caps.css`.
 - **Contenedor flex/grid del autor (`cont_id`/`cont_display`/`cont_gap`/`cont_justify`/`cont_cols`),
   flex por-item (`flex_grow`/`flex_shrink`/`flex_basis`/`flex_order`/`flex_direction`, Stage 3),
   identidad de ítem (`cont_item`), y **flex-wrap/row-gap/align-items/align-self**

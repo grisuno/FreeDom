@@ -3698,7 +3698,12 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         double cx = tx + measure_slice(cr, shown, cur);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
-        set_rgb(cr, th->caret);
+        /* caret-color (2026-07-10): the author tint, already caps.css-gated by
+         * rd_build (-1 = auto/off -> theme caret). */
+        if (b->caret_color >= 0 && !w->force_theme)
+            set_rgb(cr, rgb_from_packed(b->caret_color));
+        else
+            set_rgb(cr, th->caret);
         cairo_rectangle(cr, cx, ty - fe.ascent, 1.5, fe.height);
         cairo_fill(cr);
     }
@@ -3727,7 +3732,12 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
         cairo_clip(cr);
         cairo_scale(cr, scale, scale); /* uniform => aspect preserved */
         cairo_set_source_surface(cr, im->surface, 0.0, 0.0);
-        cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_GOOD);
+        /* image-rendering: pixelated/crisp-edges ask for nearest-neighbour
+         * scaling (2026-07-10); everything else keeps the smooth default. */
+        int nearest = (blk->image_rendering == CSS_IR_PIXELATED ||
+                       blk->image_rendering == CSS_IR_CRISP_EDGES);
+        cairo_pattern_set_filter(cairo_get_source(cr),
+                                 nearest ? CAIRO_FILTER_NEAREST : CAIRO_FILTER_GOOD);
         cairo_paint(cr);
         cairo_restore(cr);
         return;
@@ -4651,6 +4661,8 @@ ui_status ui_dump_layout(const rd_doc *doc) {
  * screen. The returned pointer aliases the current rd_doc (it is not owned) and
  * stays valid until the document is replaced; the caller must resolve it before
  * triggering a load that frees the document. */
+static int box_pointer_events_none(const rd_doc *doc, int block_id);
+
 static const char *link_at_point(browser_window *w, double px, double py) {
     if (w->doc == NULL || w->cairo_surface == NULL) return NULL;
 
@@ -4683,6 +4695,7 @@ static const char *link_at_point(browser_window *w, double px, double py) {
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
             if (f->href == NULL) continue;
+            if (box_pointer_events_none(w->doc, f->block_id)) continue;
             double fx = left + r->x_off + ax + f->x;
             if (px >= fx && px <= fx + f->width) { hit = f->href; break; }
         }
@@ -4705,6 +4718,20 @@ static int resolve_box_cursor(const rd_doc *doc, int block_id) {
         id = d->parent_id;
     }
     return CSS_CUR_UNSET;
+}
+
+/* True when author `pointer-events: none` removes block_id's content from
+ * hit-testing (2026-07-10): the nearest box in the parent chain that sets the
+ * property wins, exactly like resolve_box_cursor. The box tree only exists with
+ * caps.css, so the default render hit-tests everything (byte-identical). */
+static int box_pointer_events_none(const rd_doc *doc, int block_id) {
+    for (int id = block_id, n = 0; id >= 0 && n < RC_BOX_STACK_MAX; ++n) {
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        if (d == NULL) break;
+        if (d->pointer_events != CSS_PE_UNSET) return d->pointer_events == CSS_PE_NONE;
+        id = d->parent_id;
+    }
+    return 0;
 }
 
 /* Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET
@@ -4744,6 +4771,7 @@ static int cursor_at_point(browser_window *w, double px, double py) {
         double ax = row_align_offset(&L, r, content_w);
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
+            if (box_pointer_events_none(w->doc, f->block_id)) continue;
             double fx = left + r->x_off + ax + f->x;
             if (px >= fx && px <= fx + f->width) {
                 cur = resolve_box_cursor(w->doc, f->block_id);
@@ -4791,6 +4819,7 @@ static dom_node_id node_at_point(browser_window *w, double px, double py) {
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
             if (f->node_id == DOM_NODE_NONE) continue;
+            if (box_pointer_events_none(w->doc, f->block_id)) continue;
             double fx = left + r->x_off + ax + f->x;
             if (px >= fx && px <= fx + f->width) { hit = f->node_id; break; }
         }

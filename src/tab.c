@@ -311,6 +311,9 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t tdir = (int32_t)r->direction;
         int32_t tfvar = (int32_t)r->font_variant;
         int32_t tlpos = (int32_t)r->list_style_pos;
+        /* 2026-07-10 wiring batch (image_rendering/caret_color). */
+        int32_t tirend = (int32_t)r->image_rendering;
+        int32_t tcaret = (int32_t)r->caret_color;
         int32_t cid = (int32_t)r->cont_id;
         int32_t cdisp = (int32_t)r->cont_display;
         int32_t cgap = (int32_t)r->cont_gap;
@@ -385,6 +388,8 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &tdir, sizeof tdir) != 0) return -1;
         if (write_full(wfd, &tfvar, sizeof tfvar) != 0) return -1;
         if (write_full(wfd, &tlpos, sizeof tlpos) != 0) return -1;
+        if (write_full(wfd, &tirend, sizeof tirend) != 0) return -1;
+        if (write_full(wfd, &tcaret, sizeof tcaret) != 0) return -1;
         if (write_full(wfd, &cid, sizeof cid) != 0) return -1;
         if (write_full(wfd, &cdisp, sizeof cdisp) != 0) return -1;
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
@@ -429,7 +434,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[50] = {
+        int32_t f[51] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -456,6 +461,8 @@ static int write_view(int wfd, const pv_view *v) {
             /* 2026-07-10 author vertical dimensions (appended; read_view mirrors this) */
             (int32_t)bd->box_h, (int32_t)bd->box_min_h, (int32_t)bd->box_max_h,
             (int32_t)bd->box_min_w,
+            /* 2026-07-10 wiring batch: pointer-events (appended; read_view mirrors this) */
+            (int32_t)bd->pointer_events,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
     }
@@ -1055,6 +1062,8 @@ static int read_view(int fd, pv_view **out) {
         int32_t tdeco_color = -1, tdeco_style = 0, tdeco_thick = -1;
         /* 2026-07-10 text-extension batch (tab_size/direction/font_variant/list_style_pos). */
         int32_t ttsize = 0, tdir = 0, tfvar = 0, tlpos = 0;
+        /* 2026-07-10 wiring batch (image_rendering/caret_color). */
+        int32_t tirend = 0, tcaret = -1;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
         int32_t fgrow = -1, fshrink = -1;
         int32_t fbasis = CSS_LEN_UNSET, forder = CSS_LEN_UNSET, fdir = 0;
@@ -1108,6 +1117,8 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &tdir, sizeof tdir) != 0
          || read_full(fd, &tfvar, sizeof tfvar) != 0
          || read_full(fd, &tlpos, sizeof tlpos) != 0
+         || read_full(fd, &tirend, sizeof tirend) != 0
+         || read_full(fd, &tcaret, sizeof tcaret) != 0
          || read_full(fd, &cid, sizeof cid) != 0
          || read_full(fd, &cdisp, sizeof cdisp) != 0
          || read_full(fd, &cgap, sizeof cgap) != 0
@@ -1161,17 +1172,31 @@ static int read_view(int fd, pv_view **out) {
         free(name);
         free(value);
         if (st != PV_OK) { pv_free(v); return -1; }
+        /* The text extensions ride every run kind (an input's caret_color and an
+         * image's image_rendering would vanish inside the old non-input branch). */
+        {
+            pv_text_ext e;
+            pv_text_ext_reset(&e);
+            e.font_family = (int)ffam; e.text_transform = (int)ttrans;
+            e.letter_spacing = (int)lspc; e.word_spacing = (int)wspc;
+            e.shadow_dx = (int)shdx; e.shadow_dy = (int)shdy; e.shadow_color = (int)shcol;
+            e.opacity = (int)opac; e.valign = (int)valgn; e.text_indent = (int)tindent;
+            e.white_space = (int)wspace;
+            e.text_overflow = (int)toverflow; e.word_break = (int)wbreak;
+            e.text_decoration_color = (int)tdeco_color;
+            e.text_decoration_style = (int)tdeco_style;
+            e.text_decoration_thickness = (int)tdeco_thick;
+            e.tab_size = (int)ttsize; e.direction = (int)tdir;
+            e.font_variant = (int)tfvar; e.list_style_pos = (int)tlpos;
+            e.image_rendering = (int)tirend; e.caret_color = (int)tcaret;
+            pv_set_text_ext(v, &e);
+        }
         if (kind != PV_INPUT) {
             pv_set_emphasis(v, (int)bold, (int)italic);
             pv_set_indent(v, (int)indent);
             pv_set_color(v, (int)fg);
             pv_set_bgcolor(v, (int)bg);
             pv_set_text_style(v, (int)talign, (int)fscale, (int)lscale, (int)deco);
-            pv_set_text_ext(v, (int)ffam, (int)ttrans, (int)lspc, (int)wspc, (int)shdx,
-                            (int)shdy, (int)shcol, (int)opac, (int)valgn, (int)tindent,
-                            (int)wspace, (int)toverflow, (int)wbreak,
-                            (int)tdeco_color, (int)tdeco_style, (int)tdeco_thick,
-                            (int)ttsize, (int)tdir, (int)tfvar, (int)tlpos);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
                              (int)cwrap, (int)crgap, (int)calign);
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
@@ -1191,7 +1216,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[50];
+        int32_t f[51];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1216,6 +1241,8 @@ static int read_view(int fd, pv_view **out) {
             .aspect_num = f[44], .aspect_den = f[45],
             /* 2026-07-10 batch (4 appended fields). */
             .box_h = f[46], .box_min_h = f[47], .box_max_h = f[48], .box_min_w = f[49],
+            /* 2026-07-10 wiring batch: pointer-events. */
+            .pointer_events = f[50],
         };
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
     }

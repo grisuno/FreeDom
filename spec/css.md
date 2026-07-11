@@ -302,7 +302,9 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
    as a record — the v1 engine already prepends the marker, so inside/outside
    differ only when the marker layout differs, which a v1 follow-up will
    refine),
-   **`hyphens`**, **`user-select`**, **`caret-color`**.
+   **`hyphens`**, **`user-select`**, **`caret-color`** (**painted** 2026-07-10:
+   tints the text caret of a focused form control; `auto`/unset keeps the theme
+   caret; gated by `caps.css`).
 - *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
    `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
    (+longhands), `padding`(+longhands), `width`, `min-width`, `max-width`,
@@ -311,7 +313,26 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
    `min-height`/`max-height` applied at `open_box`/`close_top_box`),
    `aspect-ratio` (carried on `pv_box_def`, **painted** 2026-07-10: a fixed
    aspect ratio sizes the box's height from its width when no explicit
-   height is given) — all length-valued properties among these accept `calc()`.
+   height is given) — all length-valued properties among these accept `calc()`
+   and the math functions `min()`/`max()`/`clamp()` (see *Math functions* below).
+- *Logical properties* (2026-07-10, physical mapping — see *Logical properties*
+   below): `margin-inline`(`-start`/`-end`), `margin-block`(`-start`/`-end`),
+   `padding-inline`(`-start`/`-end`), `padding-block`(`-start`/`-end`),
+   `inset-inline`(`-start`/`-end`), `inset-block`(`-start`/`-end`),
+   `inline-size`, `block-size`, `min-inline-size`, `max-inline-size`,
+   `min-block-size`, `max-block-size`.
+- *Alignment shorthands* (2026-07-10): **`place-items`** (→ `align-items` +
+   `justify-items`), **`place-content`** (→ `align-content` + `justify-content`),
+   **`place-self`** (→ `align-self`; the justify-self half has no engine slot and
+   is ignored — documented simplification, like `list-style`'s ignored tokens).
+   **`gap`/`grid-gap`** accept the two-value form `gap: <row> <col>` (row feeds
+   `row-gap`, column feeds `gap`; the one-value form keeps its prior semantics).
+- *Font shorthand* (2026-07-10): **`font`** — `[style] [variant] [weight]
+   size[/line-height] family`, e.g. `font: italic bold 16px/1.5 sans-serif`.
+   Emits `font-style`/`font-variant`/`font-weight`/`font-size`/`line-height`/
+   `font-family` through the same interpreters as the longhands. `size` and
+   `family` are both required (per CSS); system keywords (`caption`/`menu`/…)
+   and unparseable sizes drop the whole shorthand (fail closed).
 - *Layout / box decoration* (**Hito 23b-7**): **`position`** (+`top`/`right`/
    `bottom`/`left`/`inset`/`z-index`), **`box-sizing`**, **`border`**(/`-width`/
    `-style`/`-color`, per-side + longhands), **`border-radius`**, **`box-shadow`**
@@ -340,9 +361,17 @@ already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
 - *Visibility / overflow / cursor / interaction*: **`visibility`** (painted: skip-draw, space
    reserved), **`overflow`**/**`overflow-x`**/**`overflow-y`** (painted: clips
    in-flow rows and positioned boxes to ancestor `overflow:hidden` rects;
-   2026-07-09), **`cursor`** (painted: `pointer` shows the hand cursor on any
+   2026-07-09; the `clip` keyword resolves to the same clipping as `hidden`),
+   **`cursor`** (painted: `pointer` shows the hand cursor on any
    element, the rest resolve but paint as the default arrow),
-   **`appearance`**, **`pointer-events`**.
+   **`appearance`**, **`pointer-events`** (**wired** 2026-07-10: `none` on a
+   box or an ancestor box removes the element from hit-testing — links under it
+   do not hover/click, `cursor` does not resolve there; rides the box-def tree
+   like `cursor`, so it is caps.css-gated by construction),
+   **`content-visibility`** (**wired** 2026-07-10: `hidden` folds into the box's
+   `visibility` at page_view time — contents skip painting but keep their layout
+   space, the same documented simplification as `visibility: collapse`; `auto`/
+   `visible` have no effect).
 - *At-rules / cascade*: `@media` (subset: `prefers-color-scheme`, `screen`/`print`/
   `all`, `min/max-width`), `!important`.
 - *Values*: **`calc()`** (`+`/`-`/`*`/`/`, parens, dimensionally checked) and
@@ -373,11 +402,21 @@ of them, the field already has the value ready. Grouped by family:
   attachment` (no CSS `background-image` painting — `url()` is dropped
   by doctrine, and CSS-painted gradients would need a compositing path
   the flat painter does not have).
-- *Compositing / containment*: `isolation`, `contain`, `content-visibility`
-  (no stacking-context / paint-tree partitioning in the v1 painter).
+- *Compositing / containment*: `isolation`, `contain` (no stacking-context /
+  paint-tree partitioning in the v1 painter). `content-visibility` left this
+  list 2026-07-10 (`hidden` folds into `visibility`, see above).
 - *Color/meta*: `color-scheme`, `print-color-adjust`, `forced-color-adjust`,
-  `image-rendering`, `object-fit`, `accent-color`, `caret-color`,
-  `appearance`, `pointer-events`, `mix-blend-mode`.
+  `object-fit`, `accent-color` (no checkbox/radio widgets to tint yet —
+  form controls collapse to text boxes/buttons), `appearance`,
+  `mix-blend-mode`. `image-rendering`, `caret-color` and `pointer-events`
+  left this list 2026-07-10 (painted/wired, see above). `image-rendering:
+  pixelated`/`crisp-edges` selects the nearest-neighbour scaling filter when
+  the painter blits a decoded image (needs `caps.images` to matter, gated by
+  `caps.css` like the rest of the author presentation). The `image-rendering`
+  filter, the `caret-color` tint and the `pointer-events` hit-test skip are
+  unit-tested through rd_build and compile-verified in the GUI painter, but not
+  yet visually verified in a live session (headless export has no images-on
+  flag, no focused caret and no pointer).
 - *Interaction*: `hyphens`, `user-select`, `resize`, `scroll-behavior`,
   `touch-action`, `overscroll-behavior`, `backface-visibility`,
   `font-kerning`, `text-rendering`, `font-stretch`.
@@ -535,6 +574,35 @@ caught by `/visual-review` (a `flex: 0 0 calc(100px + 120px)` silently dropped t
 the shorthand's fallback share because the old per-shorthand tokenizers split the
 value at the space after `100px`) and is now covered by
 `test_calc_inside_shorthands`.
+
+**Math functions `min()` / `max()` / `clamp()` (2026-07-10).** Anywhere a length
+accepts `calc()` it also accepts `min(a, b, ...)`, `max(a, b, ...)` and
+`clamp(lo, mid, hi)` — both as the **whole value** (`width: min(600px, 40em)`)
+and **nested inside** `calc()`/each other (`calc(min(10px, 2em) * 2)`,
+`clamp(1em, calc(2px + 3px), 10px)`). Each argument is a full calc expression
+over the same units (`px`, `em`/`rem` ×16, bare `0`; no `%`/viewport units —
+same containing-block limitation as `calc()`). Dimensional rules: every argument
+of one call must have the same shape (all lengths or all bare numbers — mixing
+fails the declaration); `clamp()` takes exactly three arguments and resolves to
+`max(lo, min(mid, hi))` per CSS; `min()`/`max()` take 1..`CSS_MATHFN_MAX_ARGS`
+(8) arguments (more fail closed). Bounded like `calc()`: the value lives inside
+one `CSS_TOK_MAX` token and shares `CSS_CALC_MAX_DEPTH` for nesting — a hostile
+sheet cannot recurse or expand unboundedly.
+
+**Logical properties (2026-07-10, physical v1 mapping).** The inline/block
+logical properties map to their **physical** equivalents assuming
+`horizontal-tb` + LTR (the engine does not support `writing-mode`, and the
+cascade interprets values before it knows the element's resolved `direction` —
+a `direction: rtl` page keeps the LTR mapping; documented simplification, fail
+closed nowhere): `*-inline-start` → `*-left`, `*-inline-end` → `*-right`,
+`*-block-start` → `*-top`, `*-block-end` → `*-bottom`; the two-value shorthands
+`margin-inline: A B` / `padding-block: A B` / `inset-inline: A B` set
+start/end (one value sets both). `inline-size`/`min-inline-size`/
+`max-inline-size` → `width`/`min-width`/`max-width`; `block-size`/
+`min-block-size`/`max-block-size` → `height`/`min-height`/`max-height`. All
+reuse the physical properties' interpreters, so `auto`, negatives (margins
+only), `calc()` and the math functions behave identically; the caps.css gates
+downstream are those of the mapped physical property.
 
 **`@media` (Hito 23b).** A `@media <query> { ... }` block is **parsed**, not dropped: its
 inner rules are kept **only if the query matches** the render-time `css_media` context

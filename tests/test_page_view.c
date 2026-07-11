@@ -2236,6 +2236,98 @@ static void test_set_text_style_model(void **state) {
     pv_free(v);
 }
 
+/* --- 2026-07-10 wiring batch: pointer-events / content-visibility on the box
+ * tree, image-rendering / caret-color on runs. --- */
+
+/* pointer-events rides the box-def tree like cursor: a block whose style sets it
+ * becomes box-carrying and the def records the value, so the GUI hit-test can
+ * resolve it up the parent chain. */
+static void test_build_pointer_events_on_box(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='pointer-events:none'><p>inert</p></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *p = find_text(v, "inert");
+    assert_non_null(p);
+    assert_true(p->block_id >= 0);
+    const pv_box_def *b = pv_box_at(v, (size_t)p->block_id);
+    assert_non_null(b);
+    assert_int_equal(b->pointer_events, CSS_PE_NONE);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* content-visibility: hidden folds into the box's visibility (skip paint, keep
+ * space) -- the documented visibility:collapse simplification. An explicit
+ * visibility on the same element wins over the fold. */
+static void test_build_content_visibility_hidden_folds(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='content-visibility:hidden'><p>ghost</p></div>"
+        "<div style='content-visibility:hidden;visibility:visible'><p>seen</p></div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *p = find_text(v, "ghost");
+    assert_non_null(p);
+    assert_true(p->block_id >= 0);
+    const pv_box_def *b = pv_box_at(v, (size_t)p->block_id);
+    assert_non_null(b);
+    assert_int_equal(b->visibility, CSS_VIS_HIDDEN);
+    const pv_run *q = find_text(v, "seen");
+    assert_non_null(q);
+    assert_true(q->block_id >= 0);
+    const pv_box_def *b2 = pv_box_at(v, (size_t)q->block_id);
+    assert_non_null(b2);
+    assert_int_equal(b2->visibility, CSS_VIS_VISIBLE);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* image-rendering inherits (nearest ancestor) and is stamped on IMAGE runs so the
+ * painter can pick the nearest-neighbour filter. */
+static void test_build_image_rendering_inherited(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='image-rendering:pixelated'>"
+        "<img src='https://site.example/a.png' alt='px' width='10' height='10'>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i)
+        if (pv_at(v, i)->kind == PV_IMAGE) { img = pv_at(v, i); break; }
+    assert_non_null(img);
+    assert_int_equal(img->image_rendering, CSS_IR_PIXELATED);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* caret-color inherits and is stamped on INPUT runs so the painter can tint the
+ * caret of a focused control. auto/unset stays -1. */
+static void test_build_caret_color_inherited(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='caret-color:#ff0000'>"
+        "<form action='https://x.example/s'><input type='text' name='q'></form>"
+        "</div><input type='text' name='plain'></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *in1 = NULL, *in2 = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        if (pv_at(v, i)->kind != PV_INPUT) continue;
+        if (in1 == NULL) in1 = pv_at(v, i);
+        else if (in2 == NULL) in2 = pv_at(v, i);
+    }
+    assert_non_null(in1);
+    assert_non_null(in2);
+    assert_int_equal(in1->caret_color, 0xff0000);
+    assert_int_equal(in2->caret_color, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
@@ -2328,6 +2420,10 @@ int main(void) {
         cmocka_unit_test(test_set_node_id_model),
         cmocka_unit_test(test_build_node_id_matches_dom_index),
         cmocka_unit_test(test_set_text_style_model),
+        cmocka_unit_test(test_build_pointer_events_on_box),
+        cmocka_unit_test(test_build_content_visibility_hidden_folds),
+        cmocka_unit_test(test_build_image_rendering_inherited),
+        cmocka_unit_test(test_build_caret_color_inherited),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

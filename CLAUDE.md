@@ -484,6 +484,18 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito (CSS) — `var()`/`calc()`/`repeat()`/`minmax()`/`flex-wrap`/`align-items`/`row-gap`.** Custom properties page-global; bug real de tokenizer de shorthand encontrado y unificado. Ver `[[freedom-css-layout-expansion]]`.
 - **Hito (CSS) — `visibility`/`overflow`(pintado)/`cursor`/`text-overflow`/`word-break`.** `visibility:hidden` reserva espacio sin pintar; `overflow:hidden` clipea in-flow rows + positioned boxes (2026-07-09); gap conocido: anidamiento flex/grid dentro de `hidden`. Ver `[[freedom-visibility-overflow-cursor-textwrap]]`.
 - **Hito (CSS 2026-07-10) — Auditoría del pipeline CSS→pintura + Tier-2 carried.** Se cableó el resto del pipeline css_style hasta el GUI: `tab_size` (expansión en `<pre>`, 0→8 por defecto), `direction`, `font-variant: small-caps` (v1 = mayúsculas), `list-style-position`, `min_width`/`min_height`/`max_height`/`height` (cajas con esos solos campos se registran y se honran en `open_box`/`close_top_box`), `aspect-ratio` (siza la altura a partir del ancho), `box-shadow: inset` (ahora se pinta, no solo outset). Tier 2 documentado en `spec/css.md`: `background-image*`/`compositing`/`color-scheme`/`interaction`/extras de flex-grid/`table-*` se parsean y portan en `css_style` pero la v1 no los pinta. Ver `[[freedom-css-pipeline-audit-tier2]]`.
+- **Hito (CSS 2026-07-10) — Math functions + propiedades lógicas + shorthands + cableado pe/ir/caret/cv.**
+  `min()`/`max()`/`clamp()` (valor completo y dentro de `calc()`), propiedades lógicas
+  (`margin-inline`/`padding-block`/`inset-inline`/`inline-size`… → mapeo físico LTR), `place-items`/
+  `place-content`/`place-self`, `gap: <row> <col>` (2 valores → `row-gap`+`gap`; `interp_gap` ahora usa
+  `interp_len`: em/rem/calc correctos, junk falla cerrado), shorthand `font`, `white-space: break-spaces`.
+  Cableado a pintura de 4 props que morían en `css_style`: `pointer-events: none` (skip de hit-test por
+  cadena de cajas, como `cursor`), `image-rendering: pixelated` (filtro NEAREST en `paint_image_row`),
+  `caret-color` (tinte del caret del input enfocado), `content-visibility: hidden` (pliegue a
+  `visibility` en el box def). `pv_set_text_ext` refactorizada a struct (`pv_text_ext` pública) — la
+  firma posicional de 20 ints era deuda. IPC: +2 int32 de run, caja 50→51. Verificado con PNG headless
+  (clamp/logical/gap/font/cv); filtro de imagen, caret y hit-test unit-tested pero pendientes de
+  verificación visual en sesión viva. Ver `[[freedom-css-math-logical-and-wiring-batch]]`.
 - **Hito (CSS) — Caps de `css.c` 16x + `pv_style_cache` (2026-07-09).** Auditoría real
   contra un sitio propio (LazyOwn C2, Bootstrap 4.5.2 vendorizado) mostró que
   `CSS_MAX_RULES` (384) descartaba en silencio casi todas las utility classes

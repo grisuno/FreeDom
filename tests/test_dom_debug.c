@@ -156,11 +156,12 @@ static void test_visibility_overflow_cursor_and_text_wrap(void **state) {
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "inside the box", NULL), PV_OK);
     pv_set_block_id(v, 0);
-    pv_set_text_ext(v, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, 0, -1, -1, 0,
-                    PV_LEN_UNSET, CSS_WS_NOWRAP, CSS_TO_ELLIPSIS, CSS_WB_BREAK,
-                    -1, 0, -1,
-                    /* 2026-07-10 batch: tab_size, direction, font_variant, list_style_pos */
-                    0, 0, 0, 0);
+    pv_text_ext te;
+    pv_text_ext_reset(&te);
+    te.white_space = CSS_WS_NOWRAP;
+    te.text_overflow = CSS_TO_ELLIPSIS;
+    te.word_break = CSS_WB_BREAK;
+    pv_set_text_ext(v, &te);
 
     pv_box_def b;
     memset(&b, 0, sizeof b);
