@@ -1,18 +1,12 @@
 # Polyglot Codebase Knowledge Graph
 
 > Generated offline by **readmenator**. Supports C, C++, Python, Go, Rust, JS/TS, Java, C#, Shell, PHP, Dart, GDScript, Nim, ASM.
-<<<<<<< HEAD
 > No LLMs. No tokens. Pure static analysis. See more [here](https://github.com/grisuno/ReadMenator)
 
-**Total Files Parsed:** 147 | **Total Symbols Extracted:** 2720 | **Total Imports:** 821
-=======
-> No LLMs. No tokens. Pure static analysis.
-
-**Total Files Parsed:** 137 | **Total Symbols Extracted:** 2705 | **Total Imports:** 774
->>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
+**Total Files Parsed:** 158 | **Total Symbols Extracted:** 2758 | **Total Imports:** 869
 
 ## Structural Knowledge Map
-> **Note:** The visual graph below has been intelligently pruned to the top 300 most relevant nodes to prevent rendering crashes. Full details of all 137 files are documented below.
+> **Note:** The visual graph below has been intelligently pruned to the top 300 most relevant nodes to prevent rendering crashes. Full details of all 158 files are documented below.
 
 ```mermaid
 graph TD
@@ -37,23 +31,6 @@ graph TD
     gui_browser_ui_c_browser_window["browser_window"]
     class gui_browser_ui_c_browser_window cls;
     gui_browser_ui_c --> gui_browser_ui_c_browser_window
-    src_local_store_c["local_store.c (c)"]
-    class src_local_store_c mod;
-    src_local_store_c_cipher_for["cipher_for"]
-    class src_local_store_c_cipher_for fn;
-    src_local_store_c --> src_local_store_c_cipher_for
-    src_local_store_c_argon2id_derive["argon2id_derive"]
-    class src_local_store_c_argon2id_derive fn;
-    src_local_store_c --> src_local_store_c_argon2id_derive
-    src_local_store_c_ls_derive_key["ls_derive_key"]
-    class src_local_store_c_ls_derive_key fn;
-    src_local_store_c --> src_local_store_c_ls_derive_key
-    src_local_store_c_aead_encrypt["aead_encrypt"]
-    class src_local_store_c_aead_encrypt fn;
-    src_local_store_c --> src_local_store_c_aead_encrypt
-    src_local_store_c_aead_decrypt["aead_decrypt"]
-    class src_local_store_c_aead_decrypt fn;
-    src_local_store_c --> src_local_store_c_aead_decrypt
     src_tab_c["tab.c (c)"]
     class src_tab_c mod;
     src_tab_c_child_state["child_state"]
@@ -122,6 +99,40 @@ graph TD
     src_page_view_c_pv_container_reg["pv_container_reg"]
     class src_page_view_c_pv_container_reg cls;
     src_page_view_c --> src_page_view_c_pv_container_reg
+    src_freedom_c["freedom.c (c)"]
+    class src_freedom_c mod;
+    src_freedom_c_print_usage["print_usage"]
+    class src_freedom_c_print_usage fn;
+    src_freedom_c --> src_freedom_c_print_usage
+    src_freedom_c_is_https_url["is_https_url"]
+    class src_freedom_c_is_https_url fn;
+    src_freedom_c --> src_freedom_c_is_https_url
+    src_freedom_c_is_http_url["is_http_url"]
+    class src_freedom_c_is_http_url fn;
+    src_freedom_c --> src_freedom_c_is_http_url
+    src_freedom_c_is_overlay_http["is_overlay_http"]
+    class src_freedom_c_is_overlay_http fn;
+    src_freedom_c --> src_freedom_c_is_overlay_http
+    src_freedom_c_read_file["read_file"]
+    class src_freedom_c_read_file fn;
+    src_freedom_c --> src_freedom_c_read_file
+    tests_test_profile_c["test_profile.c (c)"]
+    class tests_test_profile_c mod;
+    tests_test_profile_c_fixture["fixture"]
+    class tests_test_profile_c_fixture cls;
+    tests_test_profile_c --> tests_test_profile_c_fixture
+    tests_test_profile_c_setup["setup"]
+    class tests_test_profile_c_setup fn;
+    tests_test_profile_c --> tests_test_profile_c_setup
+    tests_test_profile_c_teardown["teardown"]
+    class tests_test_profile_c_teardown fn;
+    tests_test_profile_c --> tests_test_profile_c_teardown
+    tests_test_profile_c_path_of["path_of"]
+    class tests_test_profile_c_path_of fn;
+    tests_test_profile_c --> tests_test_profile_c_path_of
+    tests_test_profile_c_file_size["file_size"]
+    class tests_test_profile_c_file_size fn;
+    tests_test_profile_c --> tests_test_profile_c_file_size
     tests_test_disk_store_c["test_disk_store.c (c)"]
     class tests_test_disk_store_c mod;
     tests_test_disk_store_c_fixture["fixture"]
@@ -207,23 +218,6 @@ graph TD
     tests_test_render_doc_c_test_heading_paragraph_link["test_heading_paragraph_link"]
     class tests_test_render_doc_c_test_heading_paragraph_link fn;
     tests_test_render_doc_c --> tests_test_render_doc_c_test_heading_paragraph_link
-    src_freedom_c["freedom.c (c)"]
-    class src_freedom_c mod;
-    src_freedom_c_print_usage["print_usage"]
-    class src_freedom_c_print_usage fn;
-    src_freedom_c --> src_freedom_c_print_usage
-    src_freedom_c_is_https_url["is_https_url"]
-    class src_freedom_c_is_https_url fn;
-    src_freedom_c --> src_freedom_c_is_https_url
-    src_freedom_c_is_http_url["is_http_url"]
-    class src_freedom_c_is_http_url fn;
-    src_freedom_c --> src_freedom_c_is_http_url
-    src_freedom_c_is_overlay_http["is_overlay_http"]
-    class src_freedom_c_is_overlay_http fn;
-    src_freedom_c --> src_freedom_c_is_overlay_http
-    src_freedom_c_read_file["read_file"]
-    class src_freedom_c_read_file fn;
-    src_freedom_c --> src_freedom_c_read_file
     tests_test_js_env_c["test_js_env.c (c)"]
     class tests_test_js_env_c mod;
     tests_test_js_env_c_fixture["fixture"]
@@ -258,6 +252,23 @@ graph TD
     tests_test_js_dom_c_test_install_null_args["test_install_null_args"]
     class tests_test_js_dom_c_test_install_null_args fn;
     tests_test_js_dom_c --> tests_test_js_dom_c_test_install_null_args
+    src_profile_c["profile.c (c)"]
+    class src_profile_c mod;
+    src_profile_c_join_path["join_path"]
+    class src_profile_c_join_path fn;
+    src_profile_c --> src_profile_c_join_path
+    src_profile_c_keyfile_create["keyfile_create"]
+    class src_profile_c_keyfile_create fn;
+    src_profile_c --> src_profile_c_keyfile_create
+    src_profile_c_profile_open["profile_open"]
+    class src_profile_c_profile_open fn;
+    src_profile_c --> src_profile_c_profile_open
+    src_profile_c_map_ds["map_ds"]
+    class src_profile_c_map_ds fn;
+    src_profile_c --> src_profile_c_map_ds
+    src_profile_c_profile_load["profile_load"]
+    class src_profile_c_profile_load fn;
+    src_profile_c --> src_profile_c_profile_load
     gui_ui_render_c["ui_render.c (c)"]
     class gui_ui_render_c mod;
     gui_ui_render_c_ui_window["ui_window"]
@@ -292,6 +303,40 @@ graph TD
     tests_test_freedom_c_cleanup_files["cleanup_files"]
     class tests_test_freedom_c_cleanup_files fn;
     tests_test_freedom_c --> tests_test_freedom_c_cleanup_files
+    tests_test_prefs_c["test_prefs.c (c)"]
+    class tests_test_prefs_c mod;
+    tests_test_prefs_c_test_init_defaults["test_init_defaults"]
+    class tests_test_prefs_c_test_init_defaults fn;
+    tests_test_prefs_c --> tests_test_prefs_c_test_init_defaults
+    tests_test_prefs_c_test_roundtrip["test_roundtrip"]
+    class tests_test_prefs_c_test_roundtrip fn;
+    tests_test_prefs_c --> tests_test_prefs_c_test_roundtrip
+    tests_test_prefs_c_test_parse_bad_magic["test_parse_bad_magic"]
+    class tests_test_prefs_c_test_parse_bad_magic fn;
+    tests_test_prefs_c --> tests_test_prefs_c_test_parse_bad_magic
+    tests_test_prefs_c_test_parse_too_large["test_parse_too_large"]
+    class tests_test_prefs_c_test_parse_too_large fn;
+    tests_test_prefs_c --> tests_test_prefs_c_test_parse_too_large
+    tests_test_prefs_c_test_parse_unknown_and_malformed_skipped["test_parse_unknown_and_malformed_skipped"]
+    class tests_test_prefs_c_test_parse_unknown_and_malformed_skipped fn;
+    tests_test_prefs_c --> tests_test_prefs_c_test_parse_unknown_and_malformed_skipped
+    tests_test_prefetch_c["test_prefetch.c (c)"]
+    class tests_test_prefetch_c mod;
+    tests_test_prefetch_c_fake_ctx["fake_ctx"]
+    class tests_test_prefetch_c_fake_ctx cls;
+    tests_test_prefetch_c --> tests_test_prefetch_c_fake_ctx
+    tests_test_prefetch_c_test_scan_null_args["test_scan_null_args"]
+    class tests_test_prefetch_c_test_scan_null_args fn;
+    tests_test_prefetch_c --> tests_test_prefetch_c_test_scan_null_args
+    tests_test_prefetch_c_test_scan_basic_stylesheet_and_script["test_scan_basic_stylesheet_and_script"]
+    class tests_test_prefetch_c_test_scan_basic_stylesheet_and_script fn;
+    tests_test_prefetch_c --> tests_test_prefetch_c_test_scan_basic_stylesheet_and_script
+    tests_test_prefetch_c_test_scan_ref_cap["test_scan_ref_cap"]
+    class tests_test_prefetch_c_test_scan_ref_cap fn;
+    tests_test_prefetch_c --> tests_test_prefetch_c_test_scan_ref_cap
+    tests_test_prefetch_c_fake_fetch["fake_fetch"]
+    class tests_test_prefetch_c_fake_fetch fn;
+    tests_test_prefetch_c --> tests_test_prefetch_c_fake_fetch
     src_disk_store_c["disk_store.c (c)"]
     class src_disk_store_c mod;
     src_disk_store_c_write_full["write_full"]
@@ -377,6 +422,23 @@ graph TD
     tests_test_dom_c_test_node_count["test_node_count"]
     class tests_test_dom_c_test_node_count fn;
     tests_test_dom_c --> tests_test_dom_c_test_node_count
+    src_local_store_c["local_store.c (c)"]
+    class src_local_store_c mod;
+    src_local_store_c_cipher_for["cipher_for"]
+    class src_local_store_c_cipher_for fn;
+    src_local_store_c --> src_local_store_c_cipher_for
+    src_local_store_c_argon2id_derive["argon2id_derive"]
+    class src_local_store_c_argon2id_derive fn;
+    src_local_store_c --> src_local_store_c_argon2id_derive
+    src_local_store_c_ls_derive_key["ls_derive_key"]
+    class src_local_store_c_ls_derive_key fn;
+    src_local_store_c --> src_local_store_c_ls_derive_key
+    src_local_store_c_aead_encrypt["aead_encrypt"]
+    class src_local_store_c_aead_encrypt fn;
+    src_local_store_c --> src_local_store_c_aead_encrypt
+    src_local_store_c_aead_decrypt["aead_decrypt"]
+    class src_local_store_c_aead_decrypt fn;
+    src_local_store_c --> src_local_store_c_aead_decrypt
     tests_test_html_parse_c["test_html_parse.c (c)"]
     class tests_test_html_parse_c mod;
     tests_test_html_parse_c_test_config_default_is_secure["test_config_default_is_secure"]
@@ -615,6 +677,11 @@ graph TD
     tests_test_renderer_c_test_render_binary_does_not_crash_parent["test_render_binary_does_not_crash_parent"]
     class tests_test_renderer_c_test_render_binary_does_not_crash_parent fn;
     tests_test_renderer_c --> tests_test_renderer_c_test_render_binary_does_not_crash_parent
+    fuzz_fuzz_dom_debug_c["fuzz_dom_debug.c (c)"]
+    class fuzz_fuzz_dom_debug_c mod;
+    fuzz_fuzz_dom_debug_c_pass["pass"]
+    class fuzz_fuzz_dom_debug_c_pass fn;
+    fuzz_fuzz_dom_debug_c --> fuzz_fuzz_dom_debug_c_pass
     tests_test_js_sandbox_c["test_js_sandbox.c (c)"]
     class tests_test_js_sandbox_c mod;
     tests_test_js_sandbox_c_test_validate_rejects_null["test_validate_rejects_null"]
@@ -649,23 +716,6 @@ graph TD
     tests_test_pdf_export_c_test_basename_dotdot_only_falls_back["test_basename_dotdot_only_falls_back"]
     class tests_test_pdf_export_c_test_basename_dotdot_only_falls_back fn;
     tests_test_pdf_export_c --> tests_test_pdf_export_c_test_basename_dotdot_only_falls_back
-    tests_test_image_decode_c["test_image_decode.c (c)"]
-    class tests_test_image_decode_c mod;
-    tests_test_image_decode_c_px["px"]
-    class tests_test_image_decode_c_px fn;
-    tests_test_image_decode_c --> tests_test_image_decode_c_px
-    tests_test_image_decode_c_test_sniff_png["test_sniff_png"]
-    class tests_test_image_decode_c_test_sniff_png fn;
-    tests_test_image_decode_c --> tests_test_image_decode_c_test_sniff_png
-    tests_test_image_decode_c_test_sniff_unsupported["test_sniff_unsupported"]
-    class tests_test_image_decode_c_test_sniff_unsupported fn;
-    tests_test_image_decode_c --> tests_test_image_decode_c_test_sniff_unsupported
-    tests_test_image_decode_c_test_dimensions_from_ihdr["test_dimensions_from_ihdr"]
-    class tests_test_image_decode_c_test_dimensions_from_ihdr fn;
-    tests_test_image_decode_c --> tests_test_image_decode_c_test_dimensions_from_ihdr
-    tests_test_image_decode_c_test_dimensions_truncated["test_dimensions_truncated"]
-    class tests_test_image_decode_c_test_dimensions_truncated fn;
-    tests_test_image_decode_c --> tests_test_image_decode_c_test_dimensions_truncated
     tests_test_flex_layout_c["test_flex_layout.c (c)"]
     class tests_test_flex_layout_c mod;
     tests_test_flex_layout_c_assert_item["assert_item"]
@@ -683,6 +733,23 @@ graph TD
     tests_test_flex_layout_c_test_shrink_with_min_clamp["test_shrink_with_min_clamp"]
     class tests_test_flex_layout_c_test_shrink_with_min_clamp fn;
     tests_test_flex_layout_c --> tests_test_flex_layout_c_test_shrink_with_min_clamp
+    tests_test_image_decode_c["test_image_decode.c (c)"]
+    class tests_test_image_decode_c mod;
+    tests_test_image_decode_c_px["px"]
+    class tests_test_image_decode_c_px fn;
+    tests_test_image_decode_c --> tests_test_image_decode_c_px
+    tests_test_image_decode_c_test_sniff_png["test_sniff_png"]
+    class tests_test_image_decode_c_test_sniff_png fn;
+    tests_test_image_decode_c --> tests_test_image_decode_c_test_sniff_png
+    tests_test_image_decode_c_test_sniff_unsupported["test_sniff_unsupported"]
+    class tests_test_image_decode_c_test_sniff_unsupported fn;
+    tests_test_image_decode_c --> tests_test_image_decode_c_test_sniff_unsupported
+    tests_test_image_decode_c_test_dimensions_from_ihdr["test_dimensions_from_ihdr"]
+    class tests_test_image_decode_c_test_dimensions_from_ihdr fn;
+    tests_test_image_decode_c --> tests_test_image_decode_c_test_dimensions_from_ihdr
+    tests_test_image_decode_c_test_dimensions_truncated["test_dimensions_truncated"]
+    class tests_test_image_decode_c_test_dimensions_truncated fn;
+    tests_test_image_decode_c --> tests_test_image_decode_c_test_dimensions_truncated
     tests_test_box_style_c["test_box_style.c (c)"]
     class tests_test_box_style_c mod;
     tests_test_box_style_c_dbl_eq["dbl_eq"]
@@ -796,88 +863,13 @@ graph TD
     tests_test_css_color_c_test_hex_short_alpha["test_hex_short_alpha"]
     class tests_test_css_color_c_test_hex_short_alpha fn;
     tests_test_css_color_c --> tests_test_css_color_c_test_hex_short_alpha
-    tests_test_css_color_c_test_hex_long["test_hex_long"]
-    class tests_test_css_color_c_test_hex_long fn;
-    tests_test_css_color_c --> tests_test_css_color_c_test_hex_long
-    tests_test_css_color_c_test_hex_long_alpha["test_hex_long_alpha"]
-    class tests_test_css_color_c_test_hex_long_alpha fn;
-    tests_test_css_color_c --> tests_test_css_color_c_test_hex_long_alpha
-    tests_test_anti_fp_c["test_anti_fp.c (c)"]
-    class tests_test_anti_fp_c mod;
-    tests_test_anti_fp_c_test_coarsen_time["test_coarsen_time"]
-    class tests_test_anti_fp_c_test_coarsen_time fn;
-    tests_test_anti_fp_c --> tests_test_anti_fp_c_test_coarsen_time
-    tests_test_anti_fp_c_test_identity_is_fixed["test_identity_is_fixed"]
-    class tests_test_anti_fp_c_test_identity_is_fixed fn;
-    tests_test_anti_fp_c --> tests_test_anti_fp_c_test_identity_is_fixed
-    tests_test_anti_fp_c_test_bucket_screen["test_bucket_screen"]
-    class tests_test_anti_fp_c_test_bucket_screen fn;
-    tests_test_anti_fp_c --> tests_test_anti_fp_c_test_bucket_screen
-    tests_test_anti_fp_c_test_perturb_deterministic["test_perturb_deterministic"]
-    class tests_test_anti_fp_c_test_perturb_deterministic fn;
-    tests_test_anti_fp_c --> tests_test_anti_fp_c_test_perturb_deterministic
-    tests_test_anti_fp_c_test_perturb_bounded_lsb["test_perturb_bounded_lsb"]
-    class tests_test_anti_fp_c_test_perturb_bounded_lsb fn;
-    tests_test_anti_fp_c --> tests_test_anti_fp_c_test_perturb_bounded_lsb
-    tests_test_net_realm_c["test_net_realm.c (c)"]
-    class tests_test_net_realm_c mod;
-    tests_test_net_realm_c_test_classify_host_onion["test_classify_host_onion"]
-    class tests_test_net_realm_c_test_classify_host_onion fn;
-    tests_test_net_realm_c --> tests_test_net_realm_c_test_classify_host_onion
-    tests_test_net_realm_c_test_classify_host_i2p["test_classify_host_i2p"]
-    class tests_test_net_realm_c_test_classify_host_i2p fn;
-    tests_test_net_realm_c --> tests_test_net_realm_c_test_classify_host_i2p
-    tests_test_net_realm_c_test_classify_host_clearnet["test_classify_host_clearnet"]
-    class tests_test_net_realm_c_test_classify_host_clearnet fn;
-    tests_test_net_realm_c --> tests_test_net_realm_c_test_classify_host_clearnet
-    tests_test_net_realm_c_test_classify_host_lookalikes["test_classify_host_lookalikes"]
-    class tests_test_net_realm_c_test_classify_host_lookalikes fn;
-    tests_test_net_realm_c --> tests_test_net_realm_c_test_classify_host_lookalikes
-    tests_test_net_realm_c_test_classify_host_edges["test_classify_host_edges"]
-    class tests_test_net_realm_c_test_classify_host_edges fn;
-    tests_test_net_realm_c --> tests_test_net_realm_c_test_classify_host_edges
-    tests_test_request_policy_c["test_request_policy.c (c)"]
-    class tests_test_request_policy_c mod;
-    tests_test_request_policy_c_test_host_of_basic["test_host_of_basic"]
-    class tests_test_request_policy_c_test_host_of_basic fn;
-    tests_test_request_policy_c --> tests_test_request_policy_c_test_host_of_basic
-    tests_test_request_policy_c_test_host_of_invalid["test_host_of_invalid"]
-    class tests_test_request_policy_c_test_host_of_invalid fn;
-    tests_test_request_policy_c --> tests_test_request_policy_c_test_host_of_invalid
-    tests_test_request_policy_c_test_host_of_overflow["test_host_of_overflow"]
-    class tests_test_request_policy_c_test_host_of_overflow fn;
-    tests_test_request_policy_c --> tests_test_request_policy_c_test_host_of_overflow
-    tests_test_request_policy_c_test_site_of["test_site_of"]
-    class tests_test_request_policy_c_test_site_of fn;
-    tests_test_request_policy_c --> tests_test_request_policy_c_test_site_of
-    tests_test_request_policy_c_test_site_of_multi_suffix["test_site_of_multi_suffix"]
-    class tests_test_request_policy_c_test_site_of_multi_suffix fn;
-    tests_test_request_policy_c --> tests_test_request_policy_c_test_site_of_multi_suffix
-    tests_test_ui_c["test_ui.c (c)"]
-    class tests_test_ui_c mod;
-    tests_test_ui_c_assert_line["assert_line"]
-    class tests_test_ui_c_assert_line fn;
-    tests_test_ui_c --> tests_test_ui_c_assert_line
-    tests_test_ui_c_test_wrap_null_args["test_wrap_null_args"]
-    class tests_test_ui_c_test_wrap_null_args fn;
-    tests_test_ui_c --> tests_test_ui_c_test_wrap_null_args
-    tests_test_ui_c_test_wrap_empty["test_wrap_empty"]
-    class tests_test_ui_c_test_wrap_empty fn;
-    tests_test_ui_c --> tests_test_ui_c_test_wrap_empty
-    tests_test_ui_c_test_wrap_short_single_line["test_wrap_short_single_line"]
-    class tests_test_ui_c_test_wrap_short_single_line fn;
-    tests_test_ui_c --> tests_test_ui_c_test_wrap_short_single_line
-    tests_test_ui_c_test_wrap_breaks_at_space["test_wrap_breaks_at_space"]
-    class tests_test_ui_c_test_wrap_breaks_at_space fn;
-    tests_test_ui_c --> tests_test_ui_c_test_wrap_breaks_at_space
 ```
 
 ---
 
 ## Architecture Reference
 
-<<<<<<< HEAD
-### C (98 files)
+### C (106 files)
 
 #### `fuzz_css.c`
 **Path:** `fuzz/fuzz_css.c`
@@ -911,16 +903,12 @@ graph TD
 
 **Functions:**
 - `LLVMFuzzerTestOneInput` (line 36) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
-=======
-### C (88 files)
->>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
 
 #### `fuzz_html_parse.c`
 **Path:** `fuzz/fuzz_html_parse.c`
 
 *No symbols extracted*
 
-<<<<<<< HEAD
 #### `fuzz_image_decode.c`
 **Path:** `fuzz/fuzz_image_decode.c`
 
@@ -928,14 +916,11 @@ graph TD
 - `poke_and_free` (line 21) `static void poke_and_free(img_pixels *px)` - *Touch every claimed pixel corner so the sanitizer flags an out-of-bounds extent, * then release. Safe on a zeroed (failed-decode) struct.*
 - `LLVMFuzzerTestOneInput` (line 31) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
-=======
->>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
 #### `fuzz_js_sandbox.c`
 **Path:** `fuzz/fuzz_js_sandbox.c`
 
 *No symbols extracted*
 
-<<<<<<< HEAD
 #### `fuzz_page_view.c`
 **Path:** `fuzz/fuzz_page_view.c`
 
@@ -946,6 +931,18 @@ graph TD
 
 **Functions:**
 - `LLVMFuzzerTestOneInput` (line 29) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+
+#### `fuzz_prefetch.c`
+**Path:** `fuzz/fuzz_prefetch.c`
+
+**Functions:**
+- `LLVMFuzzerTestOneInput` (line 9) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)` - *include "prefetch.h"*
+
+#### `fuzz_prefs.c`
+**Path:** `fuzz/fuzz_prefs.c`
+
+**Functions:**
+- `LLVMFuzzerTestOneInput` (line 20) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
 #### `fuzz_text_shape.c`
 **Path:** `fuzz/fuzz_text_shape.c`
@@ -963,369 +960,370 @@ graph TD
 - `check_split` (line 29) `static void check_split(const char *url)`
 - `LLVMFuzzerTestOneInput` (line 57) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
-=======
->>>>>>> db5cff8a0bfe4fddf6c9c519cacf1bfe3448b313
 #### `browser_ui.c`
 **Path:** `gui/browser_ui.c`
 
 **Functions:**
-- `now_ms` (line 128) `static uint64_t now_ms(void)` - *Largest text slice measured/drawn at once (one word, or one clipped label). * Words longer than this are still placed, just measured up to the cap....*
-- `gutter` (line 427) `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
+- `now_ms` (line 131) `static uint64_t now_ms(void)` - *Largest text slice measured/drawn at once (one word, or one clipped label). * Words longer than this are still placed, just measured up to the cap....*
+- `gutter` (line 445) `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
  * zoom. The PDF ...`
-- `apply_zoom` (line 448) `static void apply_zoom(browser_window *w)` - *Applies a new zoom level: rebuild the theme and repaint. The page is laid out fresh from w->theme on every paint, so no re-fetch and no worker roun...*
-- `buffer_release` (line 457) `static void buffer_release(void *data, struct wl_buffer *wl_buffer)` - *Applies a new zoom level: rebuild the theme and repaint. The page is laid out fresh from w->theme on every paint, so no re-fetch and no worker roun...*
-- `destroy_buffer` (line 463) `static void destroy_buffer(browser_window *w)`
-- `ensure_buffer` (line 469) `static int ensure_buffer(browser_window *w)`
-- `read_file` (line 499) `static char *read_file(const char *path, size_t *out_len)` - *w->buffer = wl_shm_pool_create_buffer(pool, 0, w->width, w->height, stride, WL_SHM_FORMAT_ARGB8888); wl_shm_pool_destroy(pool); close(fd); if (w->b...*
-- `build_file_origin` (line 539) `static int build_file_origin(const char *path_or_url, char *out, size_t outsz)` - *Builds a "file:///<canonical absolute path>" origin from a local path (or passes through a file:// URL's path). realpath canonicalizes; on failure ...*
-- `load_host_file` (line 549) `static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list)` - *Loads one /etc/hosts-format .conf file (if present and readable) into the given * list. A missing file is not an error: the filter fails open, neve...*
-- `build_host_filter` (line 566) `static hb_set *build_host_filter(void)` - *Builds the host filter from the user's .conf lists. Privacy by Default: block.conf (a /etc/hosts-format blocklist) blocks trackers/ads and their su...*
-- `freedom_write_dir` (line 616) `static int freedom_write_dir(char *out, size_t cap)` - *The writable Freedom config dir: $FREEDOM_HOSTS_DIR if set, else ~/.config/freedom (created if absent). Returns 0 on success. Mirrors the read sear...*
-- `add_current_host_to_list` (line 641) `static void add_current_host_to_list(browser_window *w, int sel)` - *Appends the current page's host to one of the user's .conf lists (block/allow/js), then reloads the in-memory filter so it applies. The host is hos...*
-- `load_favorites` (line 709) `static void load_favorites(browser_window *w)` - *Concatenates the allow.conf bodies along the same search path build_host_filter uses into one string: the omnibox "favorites". Frees any previous v...*
-- `omni_refresh` (line 752) `static void omni_refresh(browser_window *w)` - *Recomputes the omnibox autocomplete suggestions for the current URL-bar text. Shown only while the URL bar is focused and something is typed; other...*
-- `proxy_addr_from_env` (line 766) `static int proxy_addr_from_env(const char *envname, const char *deflt,
+- `apply_zoom` (line 466) `static void apply_zoom(browser_window *w)` - *Applies a new zoom level: rebuild the theme and repaint. The page is laid out fresh from w->theme on every paint, so no re-fetch and no worker roun...*
+- `buffer_release` (line 476) `static void buffer_release(void *data, struct wl_buffer *wl_buffer)` - *Applies a new zoom level: rebuild the theme and repaint. The page is laid out fresh from w->theme on every paint, so no re-fetch and no worker roun...*
+- `destroy_buffer` (line 482) `static void destroy_buffer(browser_window *w)`
+- `ensure_buffer` (line 488) `static int ensure_buffer(browser_window *w)`
+- `read_file` (line 518) `static char *read_file(const char *path, size_t *out_len)` - *w->buffer = wl_shm_pool_create_buffer(pool, 0, w->width, w->height, stride, WL_SHM_FORMAT_ARGB8888); wl_shm_pool_destroy(pool); close(fd); if (w->b...*
+- `build_file_origin` (line 558) `static int build_file_origin(const char *path_or_url, char *out, size_t outsz)` - *Builds a "file:///<canonical absolute path>" origin from a local path (or passes through a file:// URL's path). realpath canonicalizes; on failure ...*
+- `load_host_file` (line 568) `static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list)` - *Loads one /etc/hosts-format .conf file (if present and readable) into the given * list. A missing file is not an error: the filter fails open, neve...*
+- `build_host_filter` (line 585) `static hb_set *build_host_filter(void)` - *Builds the host filter from the user's .conf lists. Privacy by Default: block.conf (a /etc/hosts-format blocklist) blocks trackers/ads and their su...*
+- `freedom_write_dir` (line 635) `static int freedom_write_dir(char *out, size_t cap)` - *The writable Freedom config dir: $FREEDOM_HOSTS_DIR if set, else ~/.config/freedom (created if absent). Returns 0 on success. Mirrors the read sear...*
+- `add_current_host_to_list` (line 660) `static void add_current_host_to_list(browser_window *w, int sel)` - *Appends the current page's host to one of the user's .conf lists (block/allow/js), then reloads the in-memory filter so it applies. The host is hos...*
+- `load_favorites` (line 728) `static void load_favorites(browser_window *w)` - *Concatenates the allow.conf bodies along the same search path build_host_filter uses into one string: the omnibox "favorites". Frees any previous v...*
+- `omni_refresh` (line 772) `static void omni_refresh(browser_window *w)` - *Recomputes the omnibox autocomplete suggestions for the current URL-bar text. Shown only while the URL bar is focused and something is typed; other...*
+- `profile_sync` (line 803) `static void profile_sync(browser_window *w)` - *Mirrors the session's persistable choices into w->prefs and seals them to disk. Called after any preference change; with a read-only profile (absen...*
+- `remember_visit` (line 820) `static void remember_visit(browser_window *w, const char *url)` - *Records a committed navigation in the persistent history (dedup + cap live in prefs). Opt-out via the "Remember history" toggle; internal pages are...*
+- `bookmark_toggle_current` (line 828) `static void bookmark_toggle_current(browser_window *w)` - *Records a committed navigation in the persistent history (dedup + cap live in prefs). Opt-out via the "Remember history" toggle; internal pages are...*
+- `proxy_addr_from_env` (line 852) `static int proxy_addr_from_env(const char *envname, const char *deflt,
                           ...` - *Copies a proxy "host:port" into dst: if the env value is unset/empty the default is used; the literal "1" also means "use the default" (a convenien...*
-- `init_net_config` (line 780) `static void init_net_config(browser_window *w)` - *Builds the Tor/I2P routing config from the environment (Privacy by Default: opt-in, everything off unless explicitly enabled). FREEDOM_TOR_PROXY / ...*
-- `is_https_url` (line 789) `static int is_https_url(const char *s)`
-- `is_http_url` (line 793) `static int is_http_url(const char *s)`
-- `host_from_url` (line 805) `static int host_from_url(const char *url, char *out, size_t outsz)` - *A plain-http URL whose realm self-authenticates (an i2p eepsite today): it is * fetched over the network (through the overlay proxy), not read as a...*
-- `input_is_editable` (line 827) `static int input_is_editable(int input_type)` - *const char *colon = memchr(p, ':', (size_t)(end - p)); const char *host_end = colon != NULL ? colon : end; size_t len = (size_t)(host_end - p); if ...*
-- `free_inputs` (line 833) `static void free_inputs(browser_window *w)` - *return 1; } #include "form.h" #include "secure_fetch.h" #include "tab.h" /* An editable control gets a live text field; submit/button/hidden do not...*
-- `free_images` (line 841) `static void free_images(browser_window *w)` - *static int input_is_editable(int input_type) { return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD || input_type == PV_IN_TEXTAREA; } /...*
-- `find_image` (line 851) `static const ui_image *find_image(const browser_window *w, const rd_block *blk)` - *w->focused_input = -1; } /* Releases the decoded image surfaces of the current page and the array. static void free_images(browser_window *w) { for...*
-- `layout` (line 861) `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
+- `init_net_config` (line 866) `static void init_net_config(browser_window *w)` - *Builds the Tor/I2P routing config from the environment (Privacy by Default: opt-in, everything off unless explicitly enabled). FREEDOM_TOR_PROXY / ...*
+- `is_https_url` (line 875) `static int is_https_url(const char *s)`
+- `is_http_url` (line 879) `static int is_http_url(const char *s)`
+- `host_from_url` (line 891) `static int host_from_url(const char *url, char *out, size_t outsz)` - *A plain-http URL whose realm self-authenticates (an i2p eepsite today): it is * fetched over the network (through the overlay proxy), not read as a...*
+- `input_is_editable` (line 913) `static int input_is_editable(int input_type)` - *const char *colon = memchr(p, ':', (size_t)(end - p)); const char *host_end = colon != NULL ? colon : end; size_t len = (size_t)(host_end - p); if ...*
+- `free_inputs` (line 919) `static void free_inputs(browser_window *w)` - *return 1; } #include "form.h" #include "secure_fetch.h" #include "tab.h" /* An editable control gets a live text field; submit/button/hidden do not...*
+- `free_images` (line 927) `static void free_images(browser_window *w)` - *static int input_is_editable(int input_type) { return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD || input_type == PV_IN_TEXTAREA; } /...*
+- `find_image` (line 937) `static const ui_image *find_image(const browser_window *w, const rd_block *blk)` - *w->focused_input = -1; } /* Releases the decoded image surfaces of the current page and the array. static void free_images(browser_window *w) { for...*
+- `layout` (line 947) `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
 static int image...`
-- `rebuild_inputs` (line 875) `static void rebuild_inputs(browser_window *w)` - *Builds the live editable state for the current doc: one entry per editable * control, seeded with its declared value. Aliases the doc blocks (not o...*
-- `find_input_state` (line 900) `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)` - *if (w->inputs == NULL) return; /* fail closed: no editable fields, page still shows size_t k = 0; for (size_t i = 0; i < n; ++i) { const rd_block *...*
-- `clear_doc` (line 908) `static void clear_doc(browser_window *w)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
-- `set_cache` (line 917) `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
-- `surface_from_pixels` (line 928) `static cairo_surface_t *surface_from_pixels(const tab_image *img)` - *Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row by row because Cairo may use a wider stride than the tightly packed...*
-- `fetch_follow_navigable` (line 994) `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
+- `rebuild_inputs` (line 961) `static void rebuild_inputs(browser_window *w)` - *Builds the live editable state for the current doc: one entry per editable * control, seeded with its declared value. Aliases the doc blocks (not o...*
+- `find_input_state` (line 986) `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)` - *if (w->inputs == NULL) return; /* fail closed: no editable fields, page still shows size_t k = 0; for (size_t i = 0; i < n; ++i) { const rd_block *...*
+- `clear_doc` (line 994) `static void clear_doc(browser_window *w)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
+- `set_cache` (line 1003) `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
+- `surface_from_pixels` (line 1014) `static cairo_surface_t *surface_from_pixels(const tab_image *img)` - *Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row by row because Cairo may use a wider stride than the tightly packed...*
+- `fetch_follow_navigable` (line 1080) `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
                         ...` - *Fetches url (following redirects) under cfg's policy, applying two navigability fallbacks in order of decreasing security: 1) If the only obstacle ...*
-- `GET` (line 1027) `* a GET (Zero Trust). cfg->policy is restored before returning. */
+- `GET` (line 1113) `* a GET (Zero Trust). cfg->policy is restored before returning. */
 static sf_status fetch_post_na...`
-- `gui_subresource_fetch` (line 1073) `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
+- `gui_subresource_fetch` (line 1159) `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
                ...` - *tab_fetch_fn: the trusted parent's policy-checked subresource fetch for page XHR/fetch. The worker has no network; it proxied the request here. We ...*
-- `prepare_fetch` (line 1126) `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
+- `prepare_fetch` (line 1259) `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
                     ...` - *Builds cfg for url and applies the pre-fetch gates. Returns nonzero when the fetch may proceed (cfg and pr->allowlisted are then set); returns 0 wh...*
-- `fetch_job_free` (line 1217) `static void fetch_job_free(fetch_job *j)`
-- `stream_progress_cb` (line 1238) `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` - *Called by the fetch thread (~1/sec) with the downloaded body so far. Copies the data to the window's thread-safe streaming buffer and signals the m...*
-- `fetch_thread` (line 1262) `static void *fetch_thread(void *arg)` - *Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer back to the event loop. Pure with respect to the window: it rea...*
-- `fetch_launch` (line 1309) `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
+- `fetch_job_free` (line 1350) `static void fetch_job_free(fetch_job *j)`
+- `stream_progress_cb` (line 1371) `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` - *Called by the fetch thread (~1/sec) with the downloaded body so far. Copies the data to the window's thread-safe streaming buffer and signals the m...*
+- `fetch_thread` (line 1395) `static void *fetch_thread(void *arg)` - *Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer back to the event loop. Pure with respect to the window: it rea...*
+- `fetch_launch` (line 1442) `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
                ...` - *Spawns a detached worker to fetch url under cfg (already gated by prepare_fetch). The caller has bumped w->net_gen for this navigation; the job sna...*
-- `load_images` (line 1365) `static void load_images(browser_window *w, tab *t)` - *Fetches and decodes every allowed image of the current doc into w->images (one entry per RD_IMAGE block). Each fetch re-applies the full TLS/PQ/cha...*
-- `compute_page_js` (line 1465) `static int compute_page_js(const browser_window *w)` - *Resolves the JS policy for the current page's host (Secure by Default: off unless the global mode is ON or the host is on the js.conf allowlist). P...*
-- `drop_repl_worker` (line 1476) `static void drop_repl_worker(browser_window *w)` - *Drops the kept-alive REPL worker and clears the (active-tab) console transcript. Used when the active page changes WITHOUT a re-render (tab switch ...*
-- `render_current_ex` (line 1481) `static void render_current_ex(browser_window *w, int allow_js_nav)`
-- `render_current` (line 1570) `static void render_current(browser_window *w)` - *Move the page's captured console transcript into the window for Freebug, then keep the worker ALIVE (tab_worker) so the console REPL can tab_eval a...*
-- `show_busy` (line 1577) `static void show_busy(browser_window *w)` - *Marks a request in flight and paints a frame so the spinner appears at once. The fetch now runs on a worker thread, so the event loop keeps animati...*
-- `show_fetch_error` (line 1586) `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
+- `load_images` (line 1498) `static void load_images(browser_window *w, tab *t)` - *Fetches and decodes every allowed image of the current doc into w->images (one entry per RD_IMAGE block). Each fetch re-applies the full TLS/PQ/cha...*
+- `compute_page_js` (line 1603) `static int compute_page_js(const browser_window *w)` - *Resolves the JS policy for the current page's host (Secure by Default: off unless the global mode is ON or the host is on the js.conf allowlist). P...*
+- `drop_repl_worker` (line 1622) `static void drop_repl_worker(browser_window *w)` - *Drops the kept-alive REPL worker and clears the (active-tab) console transcript. Used when the active page changes WITHOUT a re-render (tab switch ...*
+- `render_current_ex` (line 1627) `static void render_current_ex(browser_window *w, int allow_js_nav)`
+- `render_current` (line 1755) `static void render_current(browser_window *w)` - *Move the page's captured console transcript into the window for Freebug, then keep the worker ALIVE (tab_worker) so the console REPL can tab_eval a...*
+- `show_busy` (line 1762) `static void show_busy(browser_window *w)` - *Marks a request in flight and paints a frame so the spinner appears at once. The fetch now runs on a worker thread, so the event loop keeps animati...*
+- `show_fetch_error` (line 1771) `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
                   ...` - *Replaces the page with the standard "Failed to load" diagnostic for status ss on url. allowlisted tailors the hint (already retried vs. how to over...*
-- `arrives` (line 1637) `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
+- `arrives` (line 1822) `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
  * and local ...`
-- `strcmp` (line 1675) `&& strcmp(auth_host_buf, w->auth_host) != 0)`
-- `tab_save` (line 1734) `static void tab_save(browser_window *w)` - *Parks the active tab's live state into its slot (a shallow move: the slot and the live fields briefly alias the same allocations; the live fields a...*
-- `tab_restore` (line 1750) `static void tab_restore(browser_window *w)` - *c->bs = w->bs; c->doc = w->doc; c->caps = w->caps; c->scroll = w->scroll; c->content_total_h = w->content_total_h; c->inputs = w->inputs; c->input_...*
-- `free_live_page` (line 1766) `static void free_live_page(browser_window *w)` - *w->bs = c->bs; w->doc = c->doc; w->caps = c->caps; w->scroll = c->scroll; w->content_total_h = c->content_total_h; w->inputs = c->inputs; w->input_...*
-- `tab_ctx_release` (line 1775) `static void tab_ctx_release(tab_ctx *c)` - *w->hover_href = c->hover_href; w->hover_cursor = c->hover_cursor; } /* Frees the LIVE page's owned state (used when closing the foreground tab). st...*
-- `tab_switch` (line 1790) `static void tab_switch(browser_window *w, int idx)` - *if (c->images != NULL) { for (size_t i = 0; i < c->image_count; ++i) if (c->images[i].surface != NULL) cairo_surface_destroy(c->images[i].surface);...*
-- `tab_new` (line 1809) `static void tab_new(browser_window *w, const char *url)` - *w->net_gen++; w->loading = 0; drop_repl_worker(w); /* active page changes without a render; rebind on next eval tab_save(w); w->active_tab = idx; t...*
-- `uitab_close` (line 1841) `static void uitab_close(browser_window *w, int idx)` - *w->inputs = NULL; w->input_count = 0; w->focused_input = -1; w->images = NULL; w->image_count = 0; w->cur_html = NULL; w->cur_html_len = 0; w->cur_...*
-- `newtab_x` (line 1883) `static double newtab_x(const browser_window *w)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge.*
-- `tab_title` (line 1890) `static const char *tab_title(const browser_window *w, int i)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge. static double newtab_x(const browser_win...*
-- `tabbar_top` (line 1906) `static double tabbar_top(const browser_window *w)` - *Top of the tab strip: directly under the client-side titlebar (or at the surface * top under server-side decorations).*
-- `toolbar_top` (line 1912) `static double toolbar_top(const browser_window *w)` - *Top of the toolbar: under the tab strip, which is always reserved. The whole * content area derives from this, so adding the strip reflows everythi...*
-- `content_geometry` (line 1919) `static void content_geometry(const browser_window *w, double *top, double *height)` - *The content area rectangle below the toolbar, in surface coordinates. The single source of truth for both painting and click hit-testing so they ca...*
-- `content_width` (line 1945) `static double content_width(const browser_window *w)`
-- `scrollbar_metrics` (line 1956) `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
+- `strcmp` (line 1880) `&& strcmp(auth_host_buf, w->auth_host) != 0)`
+- `tab_save` (line 1941) `static void tab_save(browser_window *w)` - *Parks the active tab's live state into its slot (a shallow move: the slot and the live fields briefly alias the same allocations; the live fields a...*
+- `tab_restore` (line 1957) `static void tab_restore(browser_window *w)` - *c->bs = w->bs; c->doc = w->doc; c->caps = w->caps; c->scroll = w->scroll; c->content_total_h = w->content_total_h; c->inputs = w->inputs; c->input_...*
+- `free_live_page` (line 1973) `static void free_live_page(browser_window *w)` - *w->bs = c->bs; w->doc = c->doc; w->caps = c->caps; w->scroll = c->scroll; w->content_total_h = c->content_total_h; w->inputs = c->inputs; w->input_...*
+- `tab_ctx_release` (line 1982) `static void tab_ctx_release(tab_ctx *c)` - *w->hover_href = c->hover_href; w->hover_cursor = c->hover_cursor; } /* Frees the LIVE page's owned state (used when closing the foreground tab). st...*
+- `tab_switch` (line 1997) `static void tab_switch(browser_window *w, int idx)` - *if (c->images != NULL) { for (size_t i = 0; i < c->image_count; ++i) if (c->images[i].surface != NULL) cairo_surface_destroy(c->images[i].surface);...*
+- `tab_new` (line 2016) `static void tab_new(browser_window *w, const char *url)` - *w->net_gen++; w->loading = 0; drop_repl_worker(w); /* active page changes without a render; rebind on next eval tab_save(w); w->active_tab = idx; t...*
+- `uitab_close` (line 2048) `static void uitab_close(browser_window *w, int idx)` - *w->inputs = NULL; w->input_count = 0; w->focused_input = -1; w->images = NULL; w->image_count = 0; w->cur_html = NULL; w->cur_html_len = 0; w->cur_...*
+- `newtab_x` (line 2090) `static double newtab_x(const browser_window *w)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge.*
+- `tab_title` (line 2097) `static const char *tab_title(const browser_window *w, int i)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge. static double newtab_x(const browser_win...*
+- `tabbar_top` (line 2113) `static double tabbar_top(const browser_window *w)` - *Top of the tab strip: directly under the client-side titlebar (or at the surface * top under server-side decorations).*
+- `toolbar_top` (line 2119) `static double toolbar_top(const browser_window *w)` - *Top of the toolbar: under the tab strip, which is always reserved. The whole * content area derives from this, so adding the strip reflows everythi...*
+- `content_geometry` (line 2126) `static void content_geometry(const browser_window *w, double *top, double *height)` - *The content area rectangle below the toolbar, in surface coordinates. The single source of truth for both painting and click hit-testing so they ca...*
+- `content_width` (line 2152) `static double content_width(const browser_window *w)`
+- `scrollbar_metrics` (line 2163) `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
          ...` - *Geometry of the vertical scrollbar in surface coordinates, plus the current thumb position. Returns 0 (and leaves outputs untouched) when the conte...*
-- `scrollbar_drag_to` (line 1984) `static void scrollbar_drag_to(browser_window *w)` - *Maps the current pointer Y (less the grab offset) to a scroll offset while the * thumb is being dragged, then repaints. No-op when there is no scro...*
-- `draw_scrollbar` (line 2001) `static void draw_scrollbar(cairo_t *cr, const browser_window *w)` - *Paints the scrollbar track and thumb. The thumb highlights while hovered or * dragged, the same affordance the toolbar buttons and links get.*
-- `window_button_rects` (line 2037) `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
-- `toolbar_rects` (line 2047) `static void toolbar_rects(const browser_window *w,
+- `scrollbar_drag_to` (line 2191) `static void scrollbar_drag_to(browser_window *w)` - *Maps the current pointer Y (less the grab offset) to a scroll offset while the * thumb is being dragged, then repaints. No-op when there is no scro...*
+- `draw_scrollbar` (line 2208) `static void draw_scrollbar(cairo_t *cr, const browser_window *w)` - *Paints the scrollbar track and thumb. The thumb highlights while hovered or * dragged, the same affordance the toolbar buttons and links get.*
+- `window_button_rects` (line 2244) `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
+- `toolbar_rects` (line 2254) `static void toolbar_rects(const browser_window *w,
                           double *back_x, doub...` - *The reload button sits as the third left chrome button (after back/forward), at a * fixed x; callers that need it derive it here so the layout stay...*
-- `toolbar_button_at` (line 2063) `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` - *Which toolbar button (if any) is at (px, py). Shared by the hover highlight and * the cursor shape so they cannot drift from the click hit-test.*
-- `hot_actionable` (line 2079) `static int hot_actionable(const browser_window *w, ui_hot hot)` - *A hovered button is "actionable" (gets the hand cursor) when clicking it would * do something: Go/menu always, Back/Forward only when there is hist...*
-- `menu_panel_rect` (line 2090) `static void menu_panel_rect(const browser_window *w, double *x, double *y,
+- `toolbar_button_at` (line 2270) `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` - *Which toolbar button (if any) is at (px, py). Shared by the hover highlight and * the cursor shape so they cannot drift from the click hit-test.*
+- `hot_actionable` (line 2286) `static int hot_actionable(const browser_window *w, ui_hot hot)` - *A hovered button is "actionable" (gets the hand cursor) when clicking it would * do something: Go/menu always, Back/Forward only when there is hist...*
+- `menu_panel_rect` (line 2297) `static void menu_panel_rect(const browser_window *w, double *x, double *y,
                       ...` - *The options-menu panel rectangle (below the gear button), and its per-item row * height. The single source of truth for drawing and hit-testing the...*
-- `ua_box_rect` (line 2106) `static void ua_box_rect(const browser_window *w, double *x, double *y,
+- `ua_box_rect` (line 2313) `static void ua_box_rect(const browser_window *w, double *x, double *y,
                         do...` - *The editable User-Agent box rectangle inside the options panel. The single * source of truth for drawing and hit-testing the field.*
-- `draw_text` (line 2115) `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
-- `rc_free` (line 2278) `static void rc_free(rc_layout *L)`
-- `rc_add_box` (line 2287) `static rc_box *rc_add_box(rc_layout *L)`
-- `rc_add_frag` (line 2299) `static rc_frag *rc_add_frag(rc_layout *L)`
-- `rc_add_row` (line 2309) `static rc_row *rc_add_row(rc_layout *L)`
-- `family_face` (line 2322) `static const char *family_face(int family)` - *Maps an author font-family bucket (css_font_family) to a Cairo toy-font family. * The engine matches no exact families, only the generic groups.*
-- `content_font` (line 2339) `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)`
-- `set_rgb_alpha` (line 2353) `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` - *Sets the source color, applying an author opacity (0..100) as an alpha when set * (-1 = fully opaque). Used for author text and its shadow.*
-- `utf8_clen` (line 2362) `static size_t utf8_clen(const char *s, size_t n)` - *Bytes in the UTF-8 cluster starting at s[0] (1 for a stray/continuation byte), * clamped to n.*
-- `draw_slice` (line 2402) `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)` - *Draws a text slice at (x, baseline) in the current content font/source. Shapes with HarfBuzz when available; otherwise the Cairo toy API. Mirrors m...*
-- `frag_styled` (line 2415) `static int frag_styled(const rc_frag *f)` - *True if a fragment needs the per-cluster path (text-transform other than none/unset, or a non-zero letter-spacing). Otherwise the fast whole-slice ...*
-- `styled_advance` (line 2422) `static double styled_advance(cairo_t *cr, const rc_frag *f)` - *Advance (px) of a fragment's text under its text-transform + letter-spacing. The current Cairo font must already be selected. Mirrors styled_draw e...*
-- `styled_draw` (line 2438) `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` - *Draws a fragment's text starting at (x, baseline) under its text-transform + * letter-spacing. The current Cairo font/source must already be set.*
-- `block_style` (line 2454) `static void block_style(const ui_theme *th, const rd_block *b,
+- `draw_text` (line 2322) `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
+- `rc_free` (line 2485) `static void rc_free(rc_layout *L)`
+- `rc_add_box` (line 2494) `static rc_box *rc_add_box(rc_layout *L)`
+- `rc_add_frag` (line 2506) `static rc_frag *rc_add_frag(rc_layout *L)`
+- `rc_add_row` (line 2516) `static rc_row *rc_add_row(rc_layout *L)`
+- `family_face` (line 2529) `static const char *family_face(int family)` - *Maps an author font-family bucket (css_font_family) to a Cairo toy-font family. * The engine matches no exact families, only the generic groups.*
+- `content_font` (line 2546) `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)`
+- `set_rgb_alpha` (line 2560) `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` - *Sets the source color, applying an author opacity (0..100) as an alpha when set * (-1 = fully opaque). Used for author text and its shadow.*
+- `utf8_clen` (line 2569) `static size_t utf8_clen(const char *s, size_t n)` - *Bytes in the UTF-8 cluster starting at s[0] (1 for a stray/continuation byte), * clamped to n.*
+- `draw_slice` (line 2609) `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)` - *Draws a text slice at (x, baseline) in the current content font/source. Shapes with HarfBuzz when available; otherwise the Cairo toy API. Mirrors m...*
+- `frag_styled` (line 2622) `static int frag_styled(const rc_frag *f)` - *True if a fragment needs the per-cluster path (text-transform other than none/unset, or a non-zero letter-spacing). Otherwise the fast whole-slice ...*
+- `styled_advance` (line 2629) `static double styled_advance(cairo_t *cr, const rc_frag *f)` - *Advance (px) of a fragment's text under its text-transform + letter-spacing. The current Cairo font must already be selected. Mirrors styled_draw e...*
+- `styled_draw` (line 2645) `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` - *Draws a fragment's text starting at (x, baseline) under its text-transform + * letter-spacing. The current Cairo font/source must already be set.*
+- `block_style` (line 2661) `static void block_style(const ui_theme *th, const rd_block *b,
                         double *si...`
-- `block_margins` (line 2478) `static void block_margins(const ui_theme *th, const rd_block *b,
+- `block_margins` (line 2685) `static void block_margins(const ui_theme *th, const rd_block *b,
                           double...` - *Vertical margins (px) of a block from the user-agent box model (box_style), resolved against the block's own font size (em -> px). The user-agent n...*
-- `flush_line` (line 2490) `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
-- `open_line` (line 2510) `static void open_line(rc_layout *L, rc_state *s)`
-- `flow_emit_frag` (line 2548) `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
+- `flush_line` (line 2697) `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
+- `open_line` (line 2717) `static void open_line(rc_layout *L, rc_state *s)`
+- `flow_emit_frag` (line 2755) `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
                  ...` - *Emits one fragment at the current pen position, advancing it. Shared by the * whole-word path and the word-break split path in flow_text.*
-- `flow_text` (line 2595) `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
+- `flow_text` (line 2802) `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                ...` - *owning box (for the hover-cursor lookup), -1 if none.  word-break/overflow-wrap (s->break_words): a single word wider than the WHOLE line (not just...*
-- `flow_text_block` (line 2743) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
+- `flow_text_block` (line 2950) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                  ...` - *Flows one text/link/notice block into L at content_w using state s. The caller sets s->bg_rgb (the block's author background, or -1) beforehand; th...*
-- `effect` (line 2824) `* effect (byte-identical default). */
+- `effect` (line 3031) `* effect (byte-identical default). */
 static int container_has_flex_items(const rd_doc *doc, size...`
-- `css_align_to_bt` (line 2840) `static int css_align_to_bt(int align_kw)` - *Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-* (align-content only, never...*
-- `layout_container` (line 2848) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+- `css_align_to_bt` (line 3047) `static int css_align_to_bt(int align_kw)` - *Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-* (align-content only, never...*
+- `layout_container` (line 3055) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-- `ITEMS` (line 2898) `* between ITEMS (not between the lines inside one item). column-reverse
+- `ITEMS` (line 3105) `* between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visua...`
-- `slot` (line 2976) `* layout slot (item 0 → rightmost, last item → leftmost). */
+- `slot` (line 3183) `* layout slot (item 0 → rightmost, last item → leftmost). */
         if (head->flex_direction == ...`
-- `box_edge_px` (line 3081) `static double box_edge_px(int wpx)` - *if (bt_layout(&root, content_w) != BT_OK) return; /* Translate each item's rows into its column rectangle. for (size_t j = 0; j < g; ++j) { const b...*
-- `box_line_visible` (line 3087) `static int box_line_visible(int style)` - *True iff a border/outline style paints a line (solid..outset); none/hidden/unset * paint nothing. The fancier 3D styles collapse to solid at paint ...*
-- `close_top_box` (line 3093) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)` - *Closes the open block box: flushes the current line, reserves the box's bottom * padding+border, and finalizes the recorded border-box height. No-o...*
-- `rc_box_context` (line 3124) `static void rc_box_context(const rc_state *s, double content_w,
+- `box_edge_px` (line 3288) `static double box_edge_px(int wpx)` - *if (bt_layout(&root, content_w) != BT_OK) return; /* Translate each item's rows into its column rectangle. for (size_t j = 0; j < g; ++j) { const b...*
+- `box_line_visible` (line 3294) `static int box_line_visible(int style)` - *True iff a border/outline style paints a line (solid..outset); none/hidden/unset * paint nothing. The fancier 3D styles collapse to solid at paint ...*
+- `close_top_box` (line 3300) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)` - *Closes the open block box: flushes the current line, reserves the box's bottom * padding+border, and finalizes the recorded border-box height. No-o...*
+- `rc_box_context` (line 3331) `static void rc_box_context(const rc_state *s, double content_w,
                            double...` - *Content rect (left, width) the current run/box is laid out in: the innermost open * box's, or the page content box when no box is open (default fla...*
-- `children` (line 3139) `* own content rect onto the stack so its children (text or nested boxes) place inside
+- `children` (line 3346) `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...`
-- `reconcile_boxes` (line 3240) `static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
+- `reconcile_boxes` (line 3448) `static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
                       ...` - *Reconciles the open-box stack so it equals block b's box path (root..b->block_id), derived from the box-def parent_id chain. Closes any open box no...*
-- `box_path_of` (line 3275) `static int box_path_of(const rd_doc *doc, int block_id, int *out)` - *Box path root..block_id via the box-def parent_id chain (root first), written into * out (bounded by RC_BOX_STACK_MAX). Returns the path length; bl...*
-- `band_common_box` (line 3291) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)` - *The innermost box that is an ancestor (or self) of EVERY block in [start, end), via the longest common prefix of their box paths — the box a float ...*
-- `layout_float_band` (line 3310) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
+- `box_path_of` (line 3483) `static int box_path_of(const rd_doc *doc, int block_id, int *out)` - *Box path root..block_id via the box-def parent_id chain (root first), written into * out (bounded by RC_BOX_STACK_MAX). Returns the path length; bl...*
+- `band_common_box` (line 3499) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)` - *The innermost box that is an ancestor (or self) of EVERY block in [start, end), via the longest common prefix of their box paths — the box a float ...*
+- `layout_float_band` (line 3521) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...` - *Lays a float band [start, end) — a maximal run of blocks each with float_id >= 0 — side by side inside the current box context (spec/float.md). Blo...*
-- `layout_doc` (line 3393) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
+- `layout_doc` (line 3619) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...`
-- `position_doc` (line 3566) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
+- `position_doc` (line 3793) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...` - *Stage 2: resolves out-of-flow positioning for every absolute/fixed block in the document and stores the stacking-ordered result in L->positioned. R...*
-- `input_box_width` (line 3668) `static double input_box_width(double content_w)` - *make the painter repaint the box on TOP of its rows — covering everything past the first block with the box background. So drop the in-flow (relati...*
-- `button_box_width` (line 3673) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
+- `input_box_width` (line 3894) `static double input_box_width(double content_w)` - *make the painter repaint the box on TOP of its rows — covering everything past the first block with the box background. So drop the in-flow (relati...*
+- `button_box_width` (line 3899) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...` - *for (size_t i = 0; i < L->npositioned; ++i) { size_t bid = L->positioned[i].box_index; if (bid < BT_MAX_POSITIONED && in_flow[bid]) continue; L->po...*
-- `row_align_offset` (line 3823) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` - *Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and the line's right edge. 0 for le...*
-- `paint_box_decoration` (line 3838) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy)` - *Paints one block box's decoration (Hito 23b-8 Step C): box-shadow, background fill, the four borders and the outline, behind the rows it encloses. ...*
-- `paint_content_row` (line 3934) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
+- `row_align_offset` (line 4049) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` - *Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and the line's right edge. 0 for le...*
+- `paint_box_decoration` (line 4064) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy)` - *Paints one block box's decoration (Hito 23b-8 Step C): box-shadow, background fill, the four borders and the outline, behind the rows it encloses. ...*
+- `paint_content_row` (line 4160) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...` - *Paints one laid-out row at vertical position ry. Shared by the on-screen painter and the PDF exporter so both render identically (same fonts, colou...*
-- `cairo_set_dash` (line 4003) `cairo_set_dash(cr, (double[])`
-- `cairo_set_dash` (line 4005) `cairo_set_dash(cr, (double[])`
-- `ov_box_clips` (line 4031) `static int ov_box_clips(const pv_box_def *d)` - *} if (f->overline) { double oy = fbaseline - f->font_size * UI_OVERLINE_OFFSET; cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(...*
-- `ov_collect_chain` (line 4039) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` - *Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first). Returns count, limited to OV_MAX_DEPTH.*
-- `ov_find_box` (line 4053) `static const rc_box *ov_find_box(const rc_layout *L, int bid)` - *static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap) { int tmp[OV_MAX_DEPTH], n = 0; for (int id = block_id; id >= 0 && ...*
-- `ov_content_rect` (line 4061) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
+- `cairo_set_dash` (line 4229) `cairo_set_dash(cr, (double[])`
+- `cairo_set_dash` (line 4231) `cairo_set_dash(cr, (double[])`
+- `ov_box_clips` (line 4257) `static int ov_box_clips(const pv_box_def *d)` - *} if (f->overline) { double oy = fbaseline - f->font_size * UI_OVERLINE_OFFSET; cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(...*
+- `ov_collect_chain` (line 4265) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` - *Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first). Returns count, limited to OV_MAX_DEPTH.*
+- `ov_find_box` (line 4279) `static const rc_box *ov_find_box(const rc_layout *L, int bid)` - *static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap) { int tmp[OV_MAX_DEPTH], n = 0; for (int id = block_id; id >= 0 && ...*
+- `ov_content_rect` (line 4287) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...` - *Computes the padding-box content rect (in page coords: y, x, w, h) for a box. * Used as the clip region for overflow:hidden children.*
-- `paint_structured` (line 4117) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
+- `paint_structured` (line 4343) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-- `write_doc_pdf` (line 4265) `static long write_doc_pdf(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter. Returns the page count (0 when the document lays o...*
-- `export_pdf` (line 4401) `static void export_pdf(browser_window *w)`
-- `write_doc_png` (line 4453) `static long write_doc_png(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as the screen and the PDF export, i...*
-- `export_png` (line 4582) `static void export_png(browser_window *w)`
-- `caller` (line 4617) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
+- `write_doc_pdf` (line 4491) `static long write_doc_pdf(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter. Returns the page count (0 when the document lays o...*
+- `export_pdf` (line 4627) `static void export_pdf(browser_window *w)`
+- `write_doc_png` (line 4679) `static long write_doc_png(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as the screen and the PDF export, i...*
+- `export_png` (line 4808) `static void export_png(browser_window *w)`
+- `caller` (line 4843) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-- `ui_render_png` (line 4640) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` - *Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the whole page, the cheapest artifact for visual review (no PDF raste...*
-- `ui_dump_layout` (line 4665) `ui_status ui_dump_layout(const rd_doc *doc)` - *Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the resolved box geometry (in-flow boxe...*
-- `link_at_point` (line 4717) `static const char *link_at_point(browser_window *w, double px, double py)`
-- `resolve_box_cursor` (line 4765) `static int resolve_box_cursor(const rd_doc *doc, int block_id)` - *First non-unset author `cursor` on block_id's box or an ancestor (nearest wins, like the rest of the box-decoration fields), or CSS_CUR_UNSET if no...*
-- `box_pointer_events_none` (line 4779) `static int box_pointer_events_none(const rd_doc *doc, int block_id)` - *True when author `pointer-events: none` removes block_id's content from hit-testing (2026-07-10): the nearest box in the parent chain that sets the...*
-- `cursor_at_point` (line 4795) `static int cursor_at_point(browser_window *w, double px, double py)` - *Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET when outside content / no box sets one. Unlike link_at_point this t...*
-- `node_at_point` (line 4843) `static dom_node_id node_at_point(browser_window *w, double px, double py)` - *Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the point is over blank space / outside content. Mirrors layout and scro...*
-- `reference` (line 4888) `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
+- `ui_render_png` (line 4866) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` - *Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the whole page, the cheapest artifact for visual review (no PDF raste...*
+- `ui_dump_layout` (line 4891) `ui_status ui_dump_layout(const rd_doc *doc)` - *Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the resolved box geometry (in-flow boxe...*
+- `link_at_point` (line 4943) `static const char *link_at_point(browser_window *w, double px, double py)`
+- `resolve_box_cursor` (line 4991) `static int resolve_box_cursor(const rd_doc *doc, int block_id)` - *First non-unset author `cursor` on block_id's box or an ancestor (nearest wins, like the rest of the box-decoration fields), or CSS_CUR_UNSET if no...*
+- `box_pointer_events_none` (line 5005) `static int box_pointer_events_none(const rd_doc *doc, int block_id)` - *True when author `pointer-events: none` removes block_id's content from hit-testing (2026-07-10): the nearest box in the parent chain that sets the...*
+- `cursor_at_point` (line 5021) `static int cursor_at_point(browser_window *w, double px, double py)` - *Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET when outside content / no box sets one. Unlike link_at_point this t...*
+- `node_at_point` (line 5069) `static dom_node_id node_at_point(browser_window *w, double px, double py)` - *Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the point is over blank space / outside content. Mirrors layout and scro...*
+- `reference` (line 5114) `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
  * hostile content...`
-- `apply_click_result` (line 4909) `static void apply_click_result(browser_window *w, tab_page *page)` - *Applies a click result returned by the worker: rebuild the rendered document and refresh inputs/console, but keep the current page in history (a cl...*
-- `memory` (line 4930) `* memory (the href pointer, not its contents, was all the old code preserved). */
+- `apply_click_result` (line 5135) `static void apply_click_result(browser_window *w, tab_page *page)` - *Applies a click result returned by the worker: rebuild the rendered document and refresh inputs/console, but keep the current page in history (a cl...*
+- `memory` (line 5156) `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...`
-- `GET` (line 5001) `* the network under weaker rules than a GET (Zero Trust). */
+- `GET` (line 5227) `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...`
-- `ensure_download_dir` (line 5035) `static int ensure_download_dir(char *out, size_t outsz)` - *Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine). Returns 1 on success. Falls back to $HOME...*
-- `write_file_atomic` (line 5050) `static int write_file_atomic(const char *path, const void *bytes, size_t len)` - *Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash mid-write never leaves a half file at...*
-- `save_download` (line 5072) `static void save_download(browser_window *w, const char *url, const char *bytes,
+- `ensure_download_dir` (line 5261) `static int ensure_download_dir(char *out, size_t outsz)` - *Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine). Returns 1 on success. Falls back to $HOME...*
+- `write_file_atomic` (line 5276) `static int write_file_atomic(const char *path, const void *bytes, size_t len)` - *Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash mid-write never leaves a half file at...*
+- `save_download` (line 5298) `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...` - *Saves a fetched resource to ~/Downloads/freedom instead of rendering it. The filename is derived fail-closed from the hostile Content-Disposition /...*
-- `save_current_page` (line 5105) `static void save_current_page(browser_window *w)` - *Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network * round-trip -- the bytes already in the page cache are written.*
-- `deliver_fetch_result` (line 5114) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-- `drain_fetch_results` (line 5169) `static void drain_fetch_results(browser_window *w)` - *Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are atomic). Called when the loop s...*
-- `toggle_reader` (line 5236) `static void toggle_reader(browser_window *w)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
-- `menu_item_checked` (line 5246) `static int menu_item_checked(const browser_window *w, size_t i)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
-- `menu_item_toggle` (line 5264) `static void menu_item_toggle(browser_window *w, size_t i)` - *Toggles options-menu item i and applies its effect. Theme and force-colors only affect presentation (a repaint, which re-runs layout, suffices); a ...*
-- `draw_clock` (line 5342) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
+- `save_current_page` (line 5331) `static void save_current_page(browser_window *w)` - *Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network * round-trip -- the bytes already in the page cache are written.*
+- `deliver_fetch_result` (line 5340) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
+- `drain_fetch_results` (line 5395) `static void drain_fetch_results(browser_window *w)` - *Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are atomic). Called when the loop s...*
+- `toggle_reader` (line 5462) `static void toggle_reader(browser_window *w)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
+- `menu_item_checked` (line 5473) `static int menu_item_checked(const browser_window *w, size_t i)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
+- `menu_item_toggle` (line 5495) `static void menu_item_toggle(browser_window *w, size_t i)` - *Toggles options-menu item i and applies its effect. Theme and force-colors only affect presentation (a repaint, which re-runs layout, suffices); a ...*
+- `draw_clock` (line 5605) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...` - *A small spinner meaning "busy". Now that the fetch runs off the event-loop thread, the loop ticks ~12 fps while loading and rotates a leading arc s...*
-- `draw_hamburger` (line 5353) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- `draw_reload` (line 5370) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` - *The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx. Drawn with Cairo (not a font glyph) so it never ...*
-- `draw_menu` (line 5392) `static void draw_menu(cairo_t *cr, browser_window *w)` - *double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx, cy, r, a0, a1); cairo_stroke(cr)...*
-- `draw_hover_url` (line 5503) `static double draw_hover_url(cairo_t *cr, browser_window *w)` - *Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click will go. Returns the strip height ...*
-- `draw_toast` (line 5535) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` - *Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks above the hover-URL strip when bo...*
-- `draw_tabstrip` (line 5565) `static void draw_tabstrip(cairo_t *cr, browser_window *w)` - *Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each with its clipped title and a clo...*
-- `draw_omnibox` (line 5620) `static void draw_omnibox(cairo_t *cr, browser_window *w)` - *Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top of content) while the URL bar is...*
-- `paint` (line 5653) `static void paint(browser_window *w)`
-- `redraw` (line 5894) `static void redraw(browser_window *w)`
-- `wm_base_ping` (line 5905) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` - *cairo_surface_flush(w->cairo_surface); cairo_destroy(cr); } static void redraw(browser_window *w) { if (!w->configured) return; if (ensure_buffer(w...*
-- `xdg_surface_configure` (line 5911) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- `toplevel_configure` (line 5919) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
+- `draw_hamburger` (line 5616) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
+- `draw_reload` (line 5633) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` - *The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx. Drawn with Cairo (not a font glyph) so it never ...*
+- `draw_menu` (line 5655) `static void draw_menu(cairo_t *cr, browser_window *w)` - *double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx, cy, r, a0, a1); cairo_stroke(cr)...*
+- `draw_hover_url` (line 5766) `static double draw_hover_url(cairo_t *cr, browser_window *w)` - *Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click will go. Returns the strip height ...*
+- `draw_toast` (line 5798) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` - *Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks above the hover-URL strip when bo...*
+- `draw_tabstrip` (line 5828) `static void draw_tabstrip(cairo_t *cr, browser_window *w)` - *Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each with its clipped title and a clo...*
+- `draw_omnibox` (line 5883) `static void draw_omnibox(cairo_t *cr, browser_window *w)` - *Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top of content) while the URL bar is...*
+- `paint` (line 5916) `static void paint(browser_window *w)`
+- `redraw` (line 6157) `static void redraw(browser_window *w)`
+- `wm_base_ping` (line 6168) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` - *cairo_surface_flush(w->cairo_surface); cairo_destroy(cr); } static void redraw(browser_window *w) { if (!w->configured) return; if (ensure_buffer(w...*
+- `xdg_surface_configure` (line 6174) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+- `toplevel_configure` (line 6182) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-- `wl_array_for_each` (line 5935) `wl_array_for_each(st, states)`
-- `toplevel_close` (line 5940) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-- `deco_configure` (line 5948) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-- `set_cursor` (line 5962) `static void set_cursor(browser_window *w, int hand)` - *Applies the hand (over a link) or default arrow cursor for the current pointer enter serial. A no-op when no themed cursor is available (the compos...*
-- `update_hover` (line 5984) `static void update_hover(browser_window *w)` - *Recomputes which link (if any) is under the pointer; on a change, updates the cursor shape and repaints so the hover highlight follows. The author ...*
-- `fbw_split_y` (line 6039) `static double fbw_split_y(const freebug_window *fb)` - *int    width, height; int    configured; int    visible; struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface...*
-- `freebug_ensure_buffer` (line 6047) `static int freebug_ensure_buffer(freebug_window *fb)`
-- `fbw_level_rgb` (line 6075) `static void fbw_level_rgb(int level, double *r, double *g, double *b)` - *struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer = wl_shm_pool_create_buffer(pool, 0, fb->width, fb->he...*
-- `fbw_console_lines` (line 6086) `static size_t fbw_console_lines(const fb_buffer *log)` - *} /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g, double *b) { switch (level) { ca...*
-- `freebug_paint` (line 6095) `static void freebug_paint(freebug_window *fb)`
-- `freebug_redraw_fb` (line 6254) `static void freebug_redraw_fb(freebug_window *fb)`
-- `freebug_redraw` (line 6263) `static void freebug_redraw(browser_window *w)`
-- `freebug_hide` (line 6267) `static void freebug_hide(browser_window *w)`
-- `fbw_xdg_surface_configure` (line 6283) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- `fbw_toplevel_configure` (line 6291) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
+- `wl_array_for_each` (line 6198) `wl_array_for_each(st, states)`
+- `toplevel_close` (line 6203) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
+- `deco_configure` (line 6211) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
+- `set_cursor` (line 6225) `static void set_cursor(browser_window *w, int hand)` - *Applies the hand (over a link) or default arrow cursor for the current pointer enter serial. A no-op when no themed cursor is available (the compos...*
+- `update_hover` (line 6247) `static void update_hover(browser_window *w)` - *Recomputes which link (if any) is under the pointer; on a change, updates the cursor shape and repaints so the hover highlight follows. The author ...*
+- `fbw_split_y` (line 6302) `static double fbw_split_y(const freebug_window *fb)` - *int    width, height; int    configured; int    visible; struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface...*
+- `freebug_ensure_buffer` (line 6310) `static int freebug_ensure_buffer(freebug_window *fb)`
+- `fbw_level_rgb` (line 6338) `static void fbw_level_rgb(int level, double *r, double *g, double *b)` - *struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer = wl_shm_pool_create_buffer(pool, 0, fb->width, fb->he...*
+- `fbw_console_lines` (line 6349) `static size_t fbw_console_lines(const fb_buffer *log)` - *} /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g, double *b) { switch (level) { ca...*
+- `freebug_paint` (line 6358) `static void freebug_paint(freebug_window *fb)`
+- `freebug_redraw_fb` (line 6517) `static void freebug_redraw_fb(freebug_window *fb)`
+- `freebug_redraw` (line 6526) `static void freebug_redraw(browser_window *w)`
+- `freebug_hide` (line 6530) `static void freebug_hide(browser_window *w)`
+- `fbw_xdg_surface_configure` (line 6546) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+- `fbw_toplevel_configure` (line 6554) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-- `fbw_toplevel_close` (line 6301) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-- `freebug_show` (line 6310) `static void freebug_show(browser_window *w)`
-- `freebug_toggle` (line 6340) `static void freebug_toggle(browser_window *w)`
-- `freebug_destroy` (line 6345) `static void freebug_destroy(browser_window *w)`
-- `freebug_owns_surface` (line 6352) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-- `freebug_is_open` (line 6356) `static int freebug_is_open(const browser_window *w)`
-- `freebug_repl_worker` (line 6364) `static tab *freebug_repl_worker(browser_window *w)` - *Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept alive (e.g. just after a tab swi...*
-- `freebug_eval` (line 6387) `static void freebug_eval(browser_window *w)`
-- `freebug_handle_key` (line 6426) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+- `fbw_toplevel_close` (line 6564) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
+- `freebug_show` (line 6573) `static void freebug_show(browser_window *w)`
+- `freebug_toggle` (line 6603) `static void freebug_toggle(browser_window *w)`
+- `freebug_destroy` (line 6608) `static void freebug_destroy(browser_window *w)`
+- `freebug_owns_surface` (line 6615) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
+- `freebug_is_open` (line 6619) `static int freebug_is_open(const browser_window *w)`
+- `freebug_repl_worker` (line 6627) `static tab *freebug_repl_worker(browser_window *w)` - *Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept alive (e.g. just after a tab swi...*
+- `freebug_eval` (line 6651) `static void freebug_eval(browser_window *w)`
+- `freebug_handle_key` (line 6690) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-- `freebug_pointer_button` (line 6458) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
+- `freebug_pointer_button` (line 6722) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-- `freebug_pointer_motion` (line 6469) `static void freebug_pointer_motion(browser_window *w)`
-- `freebug_pointer_axis` (line 6481) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-- `ptr_enter` (line 6492) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
+- `freebug_pointer_motion` (line 6733) `static void freebug_pointer_motion(browser_window *w)`
+- `freebug_pointer_axis` (line 6745) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
+- `ptr_enter` (line 6756) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...` - *fb->split = s; freebug_redraw_fb(fb); } static void freebug_pointer_axis(browser_window *w, wl_fixed_t value) { freebug_window *fb = w->freebug; if...*
-- `ptr_leave` (line 6505) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-- `ptr_motion` (line 6516) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-- `load_current` (line 6525) `static void load_current(browser_window *w)`
-- `go_omnibox` (line 6539) `static void go_omnibox(browser_window *w)` - *Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure) decides between navigating to a s...*
-- `ptr_button` (line 6571) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
+- `ptr_leave` (line 6769) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
+- `ptr_motion` (line 6780) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
+- `load_current` (line 6789) `static void load_current(browser_window *w)`
+- `go_omnibox` (line 6803) `static void go_omnibox(browser_window *w)` - *Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure) decides between navigating to a s...*
+- `ptr_button` (line 6843) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-- `scroll_line_px` (line 6761) `static double scroll_line_px(const browser_window *w)` - *} else if (input_is_editable(ctl->input_type)) { for (size_t i = 0; i < w->input_count; ++i) { if (w->inputs[i].blk == ctl) { w->focused_input = (i...*
-- `ptr_axis` (line 6764) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
+- `scroll_line_px` (line 7033) `static double scroll_line_px(const browser_window *w)` - *} else if (input_is_editable(ctl->input_type)) { for (size_t i = 0; i < w->input_count; ++i) { if (w->inputs[i].blk == ctl) { w->focused_input = (i...*
+- `ptr_axis` (line 7036) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-- `mime_is_text` (line 6791) `static int mime_is_text(const char *mime)` - *redraw(w); } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion = ptr_motion, .button = p...*
-- `data_offer_source_actions` (line 6809) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_offer_action` (line 6812) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_device_data_offer` (line 6822) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
+- `mime_is_text` (line 7063) `static int mime_is_text(const char *mime)` - *redraw(w); } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion = ptr_motion, .button = p...*
+- `data_offer_source_actions` (line 7081) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_offer_action` (line 7084) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_device_data_offer` (line 7094) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...` - *} static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) { (void)d; (void)o; (void)a; } static void data_offer_action(...*
-- `data_device_selection` (line 6834) `static void data_device_selection(void *data, struct wl_data_device *dev,
+- `data_device_selection` (line 7106) `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...` - *The clipboard selection changed. Commit the new offer (or NULL when the clipboard * was cleared), destroying any previous one we held.*
-- `data_device_enter` (line 6853) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+- `data_device_enter` (line 7125) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...` - *wl_data_offer_destroy(w->selection_offer); if (offer == NULL) { w->selection_offer = NULL; w->selection_offer_has_text = 0; w->sel_mime[0] = '\0'; ...*
-- `data_device_leave` (line 6858) `static void data_device_leave(void *d, struct wl_data_device *dev)`
-- `data_device_motion` (line 6859) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+- `data_device_leave` (line 7130) `static void data_device_leave(void *d, struct wl_data_device *dev)`
+- `data_device_motion` (line 7131) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-- `data_device_drop` (line 6863) `static void data_device_drop(void *d, struct wl_data_device *dev)`
-- `data_source_cancelled` (line 6874) `static void data_source_cancelled(void *data, struct wl_data_source *src)` - *wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d, struct wl_data_device *dev) { ...*
-- `data_source_send` (line 6880) `static void data_source_send(void *data, struct wl_data_source *src,
+- `data_device_drop` (line 7135) `static void data_device_drop(void *d, struct wl_data_device *dev)`
+- `data_source_cancelled` (line 7146) `static void data_source_cancelled(void *data, struct wl_data_source *src)` - *wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d, struct wl_data_device *dev) { ...*
+- `data_source_send` (line 7152) `static void data_source_send(void *data, struct wl_data_source *src,
                             ...` - *.enter = data_device_enter, .leave = data_device_leave, .motion = data_device_motion, .drop = data_device_drop, .selection = data_device_selection,...*
-- `data_source_target` (line 6893) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-- `insert_pasted_text` (line 6906) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` - *Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar). Control bytes -- including embedd...*
-- `clipboard_copy` (line 6970) `static void clipboard_copy(browser_window *w)` - *Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a wl_data_source that serves it on ...*
-- `keyboard_keymap` (line 7017) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
+- `data_source_target` (line 7165) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
+- `insert_pasted_text` (line 7178) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` - *Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar). Control bytes -- including embedd...*
+- `clipboard_copy` (line 7242) `static void clipboard_copy(browser_window *w)` - *Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a wl_data_source that serves it on ...*
+- `keyboard_keymap` (line 7289) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...` - *Cut the omnibar selection: copy it to the clipboard, then remove it. v1 cut is the * URL bar only (page inputs / the UA box have no selection model...*
-- `keyboard_enter` (line 7038) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_enter` (line 7310) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-- `keyboard_leave` (line 7045) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-- `handle_key_press` (line 7054) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+- `keyboard_leave` (line 7317) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
+- `handle_key_press` (line 7326) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...` - *Performs the effect of a single key press. Factored out of keyboard_key so a held key can be re-fired from the repeat timer with the exact same sem...*
-- `key_is_repeatable` (line 7335) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` - *Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling. A Ctrl chord (tab spawn, reload, image toggle...) o...*
-- `key_repeat_arm` (line 7351) `static void key_repeat_arm(browser_window *w, uint32_t key)` - *Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s. A held key thus repeats until released (key_repeat_s...*
-- `key_repeat_stop` (line 7364) `static void key_repeat_stop(browser_window *w)` - *1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). static void key_repeat_arm(browser_window *w, uint32_t key) { if (w->rep...*
-- `key_repeat_fire` (line 7375) `static void key_repeat_fire(browser_window *w)` - *Re-fires the currently held key. Called from the event loop when the timer expires. Modifiers/keysym are recomputed from the live xkb_state, so a c...*
-- `keyboard_key` (line 7388) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+- `key_is_repeatable` (line 7616) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` - *Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling. A Ctrl chord (tab spawn, reload, image toggle...) o...*
+- `key_repeat_arm` (line 7632) `static void key_repeat_arm(browser_window *w, uint32_t key)` - *Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s. A held key thus repeats until released (key_repeat_s...*
+- `key_repeat_stop` (line 7645) `static void key_repeat_stop(browser_window *w)` - *1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). static void key_repeat_arm(browser_window *w, uint32_t key) { if (w->rep...*
+- `key_repeat_fire` (line 7656) `static void key_repeat_fire(browser_window *w)` - *Re-fires the currently held key. Called from the event loop when the timer expires. Modifiers/keysym are recomputed from the live xkb_state, so a c...*
+- `keyboard_key` (line 7669) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-- `keyboard_modifiers` (line 7427) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_modifiers` (line 7708) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-- `keyboard_repeat_info` (line 7437) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-- `seat_caps` (line 7455) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` - *w->repeat_rate = rate; w->repeat_delay = delay; } static const struct wl_keyboard_listener keyboard_listener = { .keymap = keyboard_keymap, .enter ...*
-- `seat_name` (line 7467) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-- `registry_global` (line 7473) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+- `keyboard_repeat_info` (line 7718) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
+- `seat_caps` (line 7736) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` - *w->repeat_rate = rate; w->repeat_delay = delay; } static const struct wl_keyboard_listener keyboard_listener = { .keymap = keyboard_keymap, .enter ...*
+- `seat_name` (line 7748) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
+- `registry_global` (line 7754) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...` - *w->pointer = wl_seat_get_pointer(seat); wl_pointer_add_listener(w->pointer, &pointer_listener, w); } if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && w-...*
-- `registry_remove` (line 7494) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-- `ui_run_browser` (line 7503) `ui_status ui_run_browser(const char *start_url)` - *w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1); } else if (strcmp(iface, zxdg_decoration_manager_v1_int...*
+- `registry_remove` (line 7775) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
+- `ui_run_browser` (line 7784) `ui_status ui_run_browser(const char *start_url)` - *w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1); } else if (strcmp(iface, zxdg_decoration_manager_v1_int...*
 
 **Macros:**
 - `_GNU_SOURCE` (line 11)
-- `UI_TOOLBAR_H` (line 66)
-- `UI_TITLEBAR_H` (line 68)
-- `UI_TABBAR_H` (line 69)
-- `UI_TAB_MIN_W` (line 70)
-- `UI_TAB_MAX_W` (line 71)
-- `UI_TAB_NEW_W` (line 72)
-- `UI_TAB_CLOSE_W` (line 73)
-- `UI_BTN_W` (line 74)
-- `UI_WIN_BTN_W` (line 75)
-- `UI_MARGIN` (line 76)
-- `UI_BTN_LEFT` (line 77)
-- `UI_LIST_INDENT` (line 78)
-- `UI_SCROLLBAR_W` (line 83)
-- `UI_SCROLLBAR_MIN` (line 84)
-- `UI_SCROLLBAR_PAD` (line 85)
-- `UI_RESIZE_MARGIN` (line 89)
-- `UI_MENU_W` (line 94)
-- `UI_MENU_ITEM_H` (line 95)
-- `UI_MENU_PAD` (line 96)
-- `UI_CHECK_SZ` (line 97)
-- `UI_MENU_LABEL_H` (line 98)
-- `UI_MENU_INPUT_H` (line 99)
-- `UI_HAMBURGER_W` (line 100)
-- `UI_HAMBURGER_GAP` (line 101)
-- `UI_CURSOR_SIZE` (line 102)
-- `UI_TOAST_PAD` (line 103)
-- `OMNI_MAX_SUGG` (line 104)
-- `UI_OMNI_ROW_H` (line 105)
-- `UI_TWO_PI` (line 106)
-- `UI_INPUT_PAD` (line 110)
-- `UI_INPUT_WIDTH` (line 111)
-- `UI_BUTTON_HPAD` (line 112)
-- `UI_FORM_FIELDS_MAX` (line 113)
-- `UI_UNDERLINE_OFFSET` (line 118)
-- `UI_UNDERLINE_THICK` (line 119)
-- `UI_STRIKE_OFFSET` (line 120)
-- `UI_OVERLINE_OFFSET` (line 121)
-- `UI_SLICE_MAX` (line 125)
-- `UI_MENU_COUNT` (line 178)
-- `UI_IMAGE_MAX_BODY` (line 196)
-- `UI_MAX_TABS` (line 211)
-- `UI_READER_COLUMN_W` (line 431)
-- `JS_NAV_MAX` (line 1451)
-- `UI_RELOAD_X` (line 2046)
-- `RC_BOX_STACK_MAX` (line 2245)
-- `RC_MAX_OUT_OF_FLOW` (line 3271)
-- `OV_MAX_DEPTH` (line 4028)
-- `PDF_PAGE_W` (line 4249)
-- `PDF_PAGE_H` (line 4250)
-- `PDF_MARGIN` (line 4251)
-- `PNG_PAGE_W` (line 4444)
-- `PNG_MARGIN` (line 4445)
-- `PNG_MAX_H` (line 4446)
-- `FBW_W` (line 6009)
-- `FBW_H` (line 6011)
-- `FBW_HEADER` (line 6012)
-- `FBW_PAD` (line 6013)
-- `FBW_LINE` (line 6014)
-- `FBW_GUTTER` (line 6015)
-- `FBW_MIN_SPLIT` (line 6016)
-- `FBW_MAX_SPLIT` (line 6017)
+- `UI_TOOLBAR_H` (line 69)
+- `UI_TITLEBAR_H` (line 71)
+- `UI_TABBAR_H` (line 72)
+- `UI_TAB_MIN_W` (line 73)
+- `UI_TAB_MAX_W` (line 74)
+- `UI_TAB_NEW_W` (line 75)
+- `UI_TAB_CLOSE_W` (line 76)
+- `UI_BTN_W` (line 77)
+- `UI_WIN_BTN_W` (line 78)
+- `UI_MARGIN` (line 79)
+- `UI_BTN_LEFT` (line 80)
+- `UI_LIST_INDENT` (line 81)
+- `UI_SCROLLBAR_W` (line 86)
+- `UI_SCROLLBAR_MIN` (line 87)
+- `UI_SCROLLBAR_PAD` (line 88)
+- `UI_RESIZE_MARGIN` (line 92)
+- `UI_MENU_W` (line 97)
+- `UI_MENU_ITEM_H` (line 98)
+- `UI_MENU_PAD` (line 99)
+- `UI_CHECK_SZ` (line 100)
+- `UI_MENU_LABEL_H` (line 101)
+- `UI_MENU_INPUT_H` (line 102)
+- `UI_HAMBURGER_W` (line 103)
+- `UI_HAMBURGER_GAP` (line 104)
+- `UI_CURSOR_SIZE` (line 105)
+- `UI_TOAST_PAD` (line 106)
+- `OMNI_MAX_SUGG` (line 107)
+- `UI_OMNI_ROW_H` (line 108)
+- `UI_TWO_PI` (line 109)
+- `UI_INPUT_PAD` (line 113)
+- `UI_INPUT_WIDTH` (line 114)
+- `UI_BUTTON_HPAD` (line 115)
+- `UI_FORM_FIELDS_MAX` (line 116)
+- `UI_UNDERLINE_OFFSET` (line 121)
+- `UI_UNDERLINE_THICK` (line 122)
+- `UI_STRIKE_OFFSET` (line 123)
+- `UI_OVERLINE_OFFSET` (line 124)
+- `UI_SLICE_MAX` (line 128)
+- `UI_MENU_COUNT` (line 187)
+- `UI_IMAGE_MAX_BODY` (line 205)
+- `UI_MAX_TABS` (line 220)
+- `UI_READER_COLUMN_W` (line 449)
+- `JS_NAV_MAX` (line 1589)
+- `UI_RELOAD_X` (line 2253)
+- `RC_BOX_STACK_MAX` (line 2452)
+- `RC_MAX_OUT_OF_FLOW` (line 3479)
+- `OV_MAX_DEPTH` (line 4254)
+- `PDF_PAGE_W` (line 4475)
+- `PDF_PAGE_H` (line 4476)
+- `PDF_MARGIN` (line 4477)
+- `PNG_PAGE_W` (line 4670)
+- `PNG_MARGIN` (line 4671)
+- `PNG_MAX_H` (line 4672)
+- `FBW_W` (line 6272)
+- `FBW_H` (line 6274)
+- `FBW_HEADER` (line 6275)
+- `FBW_PAD` (line 6276)
+- `FBW_LINE` (line 6277)
+- `FBW_GUTTER` (line 6278)
+- `FBW_MIN_SPLIT` (line 6279)
+- `FBW_MAX_SPLIT` (line 6280)
 
 **Structs:**
-- `ui_menu_item` (line 154)
-- `ui_input_state` (line 189) - *Live editable state for one form text control, aliasing a block of the current rd_doc (not owned; valid until the doc is replaced). The field carri...*
-- `ui_image` (line 202) - *A decoded image for one RD_IMAGE block of the current doc. surface owns the pixels (ARGB32) and is NULL when the image was blocked, not fetched, or...*
-- `tab_ctx` (line 219) - *One tab's complete per-page state: everything that must persist when the tab is not the foreground one. The browser_window keeps the ACTIVE tab's c...*
-- `browser_window` (line 232)
-- `fetch_prep` (line 1117) - *Outcome of the pre-fetch gates shared by GET (do_load) and POST (do_submit_post). Both MUST pass through the SAME host filter, per-host exception, ...*
-- `fetch_job` (line 1187) - *A network request handed to the fetch thread. It owns deep copies of every input string (the window's buffers may change while the fetch runs), and...*
-- `rc_frag` (line 2136)
-- `rc_row` (line 2170)
-- `rc_box` (line 2189) - *One painted block box (Hito 23b-8 Step C): a border-box rectangle in layout space with its author decoration, painted behind the rows it encloses. ...*
-- `rc_layout` (line 2210)
-- `rc_open_box` (line 2236) - *Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content rect (inner_left/inner_w) is the coordinate context its children (...*
-- `rc_state` (line 2247)
-- `rc_ext` (line 2525) - *Author text-presentation extensions for a block, derived from its rd_block (already * gated by caps.css upstream) and handed to flow_text.*
-- `freebug_window` (line 6019)
+- `ui_menu_item` (line 160)
+- `ui_input_state` (line 198) - *Live editable state for one form text control, aliasing a block of the current rd_doc (not owned; valid until the doc is replaced). The field carri...*
+- `ui_image` (line 211) - *A decoded image for one RD_IMAGE block of the current doc. surface owns the pixels (ARGB32) and is NULL when the image was blocked, not fetched, or...*
+- `tab_ctx` (line 228) - *One tab's complete per-page state: everything that must persist when the tab is not the foreground one. The browser_window keeps the ACTIVE tab's c...*
+- `browser_window` (line 241)
+- `fetch_prep` (line 1250) - *Outcome of the pre-fetch gates shared by GET (do_load) and POST (do_submit_post). Both MUST pass through the SAME host filter, per-host exception, ...*
+- `fetch_job` (line 1320) - *A network request handed to the fetch thread. It owns deep copies of every input string (the window's buffers may change while the fetch runs), and...*
+- `rc_frag` (line 2343)
+- `rc_row` (line 2377)
+- `rc_box` (line 2396) - *One painted block box (Hito 23b-8 Step C): a border-box rectangle in layout space with its author decoration, painted behind the rows it encloses. ...*
+- `rc_layout` (line 2417)
+- `rc_open_box` (line 2443) - *Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content rect (inner_left/inner_w) is the coordinate context its children (...*
+- `rc_state` (line 2454)
+- `rc_ext` (line 2732) - *Author text-presentation extensions for a block, derived from its rd_block (already * gated by caps.css upstream) and handed to flow_text.*
+- `freebug_window` (line 6282)
 
 #### `bui_theme.c`
 **Path:** `gui/bui_theme.c`
@@ -1416,11 +1414,12 @@ static void do_submit_post(browser_w...`
 - `is_ws` (line 27) `static int is_ws(char c)`
 - `copy_lower_trim` (line 34) `static int copy_lower_trim(const char *in, char *out, size_t out_size)` - *Copies in into out, trimming ASCII whitespace and lowercasing. Returns 0 on * success, -1 if in is NULL, the trimmed token is empty, or it does not...*
 - `name_cmp` (line 47) `static int name_cmp(const void *key, const void *elem)` - *Both row structs start with `const char *name`, so a pointer to a row is also a * pointer to its name field: one comparator serves both binary sear...*
-- `bx_default_for_tag` (line 117) `bx_box bx_default_for_tag(const char *tag)` - *define TAG_N (sizeof TAG_TABLE / sizeof TAG_TABLE[0])*
-- `bx_parse_display` (line 147) `bx_status bx_parse_display(const char *token, bx_display *out)` - *define DISP_N (sizeof DISP_TABLE / sizeof DISP_TABLE[0])*
-- `bx_place` (line 157) `bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
+- `bx_default_for_tag` (line 118) `bx_box bx_default_for_tag(const char *tag)` - *define TAG_N (sizeof TAG_TABLE / sizeof TAG_TABLE[0])*
+- `bx_parse_display` (line 148) `bx_status bx_parse_display(const char *token, bx_display *out)` - *define DISP_N (sizeof DISP_TABLE / sizeof DISP_TABLE[0])*
+- `bx_place` (line 158) `bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
                 ...`
-- `bx_display_name` (line 174) `const char *bx_display_name(bx_display d)`
+- `bx_width_cap` (line 175) `double bx_width_cap(int w_px, int w_pct, double avail_w)`
+- `bx_display_name` (line 183) `const char *bx_display_name(bx_display d)`
 
 **Macros:**
 - `BX_TAG_MAX` (line 21)
@@ -1432,12 +1431,12 @@ static void do_submit_post(browser_w...`
 - `NONE` (line 62)
 - `EDG` (line 63)
 - `ZERO` (line 64)
-- `TAG_N` (line 116)
-- `DISP_N` (line 146)
+- `TAG_N` (line 117)
+- `DISP_N` (line 147)
 
 **Structs:**
 - `tag_row` (line 53)
-- `disp_row` (line 128)
+- `disp_row` (line 129)
 
 #### `box_tree.c`
 **Path:** `src/box_tree.c`
@@ -1515,151 +1514,152 @@ static void do_submit_post(browser_w...`
 **Path:** `src/css.c`
 
 **Functions:**
-- `parse_num` (line 133) `static int parse_num(const char *s, double *out, const char **endp)` - *Parses a leading non-negative number (digits + optional fraction). Returns 1 on * success, setting *out and *endp to the first unconsumed char.*
-- `round_clamp` (line 153) `static int round_clamp(double v, int lo, int hi)` - *Rounds v to the nearest int, clamped to [lo, hi]. Clamping the double BEFORE the cast avoids undefined behaviour: casting an out-of-range double (e...*
-- `interp_color` (line 160) `static int interp_color(const char *v)` - *Rounds v to the nearest int, clamped to [lo, hi]. Clamping the double BEFORE the cast avoids undefined behaviour: casting an out-of-range double (e...*
-- `interp_bg` (line 165) `static int interp_bg(const char *v)`
-- `interp_align` (line 192) `static int interp_align(const char *v)`
-- `interp_fontsize` (line 200) `static int interp_fontsize(const char *v)`
-- `interp_lineheight` (line 227) `static int interp_lineheight(const char *v)` - *line-height as a percent of the natural line box. A unitless multiplier ("1.5" -> 150) or a percent ("160%" -> 160); "normal" is unset (the UA defa...*
-- `interp_weight` (line 239) `static int interp_weight(const char *v)`
-- `interp_style` (line 248) `static int interp_style(const char *v)`
-- `interp_textdeco` (line 259) `static int interp_textdeco(const char *v)` - *text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the (space-separated) value. "none" ->...*
-- `interp_display` (line 278) `static int interp_display(const char *v)`
-- `interp_gap` (line 296) `static int interp_gap(const char *v)` - *One gap length. Reuses interp_len (px / em / rem / bare 0 / calc() / math functions), so a `gap: 1em` is 16px instead of the old misparse-as-1px, a...*
-- `interp_justify` (line 302) `static int interp_justify(const char *v)`
-- `count_one_repeat` (line 325) `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen)`
-- `count_tracks` (line 355) `static int count_tracks(const char *s, size_t n)`
-- `calc_skip_ws` (line 421) `static void calc_skip_ws(calc_parser *p)`
-- `calc_match_fn` (line 429) `static int calc_match_fn(calc_parser *p, const char *name)` - *Max arguments of one min()/max() call (clamp() takes exactly three). More fail * the declaration (anti-DoS; the whole value already fits one CSS_TO...*
-- `calc_mathfn` (line 444) `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` - *min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or all bare numbers, like +/-). clam...*
-- `calc_term` (line 528) `static int calc_term(calc_parser *p, calc_val *out, int depth)` - *} if (p->i + 3 <= p->n && csel_lower_ch(p->s[p->i]) == 'r' && csel_lower_ch(p->s[p->i + 1]) == 'e' && csel_lower_ch(p->s[p->i + 2]) == 'm') { out->...*
-- `calc_expr` (line 547) `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
-- `calc_eval` (line 565) `static int calc_eval(const char *v, size_t vlen, double *out_px)` - *Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching ")" already stripped by the caller). Fails closed on any leftover/u...*
-- `calc_unwrap` (line 578) `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` - *True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced trailing paren); on success the arg...*
-- `interp_len` (line 595) `static int interp_len(const char *v, int allow_auto, int *out)` - *Parses one box-model length. Accepts "Npx", a bare "0", "Nem"/"Nrem" (x16 px, the engine's base font), "calc(...)" over the same units (+, -, *, /,...*
-- `emit_len` (line 653) `static int emit_len(css_decl *dst, int cap, int slot, const char *val,
+- `parse_num` (line 134) `static int parse_num(const char *s, double *out, const char **endp)` - *Parses a leading non-negative number (digits + optional fraction). Returns 1 on * success, setting *out and *endp to the first unconsumed char.*
+- `round_clamp` (line 154) `static int round_clamp(double v, int lo, int hi)` - *Rounds v to the nearest int, clamped to [lo, hi]. Clamping the double BEFORE the cast avoids undefined behaviour: casting an out-of-range double (e...*
+- `interp_color` (line 161) `static int interp_color(const char *v)` - *Rounds v to the nearest int, clamped to [lo, hi]. Clamping the double BEFORE the cast avoids undefined behaviour: casting an out-of-range double (e...*
+- `interp_bg` (line 166) `static int interp_bg(const char *v)`
+- `interp_align` (line 193) `static int interp_align(const char *v)`
+- `interp_fontsize` (line 201) `static int interp_fontsize(const char *v)`
+- `interp_lineheight` (line 228) `static int interp_lineheight(const char *v)` - *line-height as a percent of the natural line box. A unitless multiplier ("1.5" -> 150) or a percent ("160%" -> 160); "normal" is unset (the UA defa...*
+- `interp_weight` (line 242) `static int interp_weight(const char *v)`
+- `interp_style` (line 251) `static int interp_style(const char *v)`
+- `interp_textdeco` (line 262) `static int interp_textdeco(const char *v)` - *text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the (space-separated) value. "none" ->...*
+- `interp_display` (line 281) `static int interp_display(const char *v)`
+- `interp_gap` (line 300) `static int interp_gap(const char *v)` - *One gap length. Reuses interp_len (px / em / rem / bare 0 / calc() / math functions), so a `gap: 1em` is 16px instead of the old misparse-as-1px, a...*
+- `interp_justify` (line 306) `static int interp_justify(const char *v)`
+- `count_one_repeat` (line 329) `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen)`
+- `count_tracks` (line 359) `static int count_tracks(const char *s, size_t n)`
+- `calc_skip_ws` (line 425) `static void calc_skip_ws(calc_parser *p)`
+- `calc_match_fn` (line 433) `static int calc_match_fn(calc_parser *p, const char *name)` - *Max arguments of one min()/max() call (clamp() takes exactly three). More fail * the declaration (anti-DoS; the whole value already fits one CSS_TO...*
+- `calc_mathfn` (line 448) `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` - *min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or all bare numbers, like +/-). clam...*
+- `calc_term` (line 532) `static int calc_term(calc_parser *p, calc_val *out, int depth)` - *} if (p->i + 3 <= p->n && csel_lower_ch(p->s[p->i]) == 'r' && csel_lower_ch(p->s[p->i + 1]) == 'e' && csel_lower_ch(p->s[p->i + 2]) == 'm') { out->...*
+- `calc_expr` (line 551) `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
+- `calc_eval` (line 569) `static int calc_eval(const char *v, size_t vlen, double *out_px)` - *Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching ")" already stripped by the caller). Fails closed on any leftover/u...*
+- `calc_unwrap` (line 582) `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` - *True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced trailing paren); on success the arg...*
+- `interp_len` (line 599) `static int interp_len(const char *v, int allow_auto, int *out)` - *Parses one box-model length. Accepts "Npx", a bare "0", "Nem"/"Nrem" (x16 px, the engine's base font), "calc(...)" over the same units (+, -, *, /,...*
+- `emit_len` (line 657) `static int emit_len(css_decl *dst, int cap, int slot, const char *val,
                     int al...` - *Emits one box length declaration for slot into dst (cap permitting). A negative value is rejected unless allow_neg (margins allow it; padding/width...*
-- `interp_len` (line 669) `* this file that might hand a token to interp_len (transitively: margin/padding/
+- `emit_pct` (line 671) `static int emit_pct(css_decl *dst, int cap, int slot, const char *val)` - *Emits a symbolic percentage width for slot (Hito 32): "<num>%" with num > 0, carried as per-mille (99.8% -> 998) and saturating at 1000% (10000). T...*
+- `interp_len` (line 696) `* this file that might hand a token to interp_len (transitively: margin/padding/
  * inset, flex-b...`
-- `expand_box2` (line 725) `static int expand_box2(const char *val, int slot_start, int slot_end,
+- `expand_box2` (line 752) `static int expand_box2(const char *val, int slot_start, int slot_end,
                        int ...` - *Expands a two-slot logical shorthand (margin-inline / padding-block / inset-inline: one value sets both sides, two set start then end; 2026-07-10)....*
-- `family_of` (line 748) `static int family_of(const char *name)` - *Maps one font-family name (a generic keyword or a common family) to a generic css_font_family bucket; -1 if unrecognised. Case-insensitive; multi-w...*
-- `interp_fontfamily` (line 773) `static int interp_fontfamily(const char *v)` - *font-family: the first recognised name in the comma-separated stack wins (its * generic bucket). Quotes are stripped. url() defensively dropped. -1...*
-- `interp_texttransform` (line 794) `static int interp_texttransform(const char *v)`
-- `interp_valign` (line 816) `static int interp_valign(const char *v)`
-- `interp_whitespace` (line 823) `static int interp_whitespace(const char *v)`
-- `interp_tabsize` (line 837) `static int interp_tabsize(const char *v)` - *break-spaces preserves whitespace and wraps; this engine only models the * wrap/keep distinction, so it collapses to pre-wrap (2026-07-10). if (cse...*
-- `interp_textdeco_style` (line 848) `static int interp_textdeco_style(const char *v)` - *} /* tab-size: a non-negative integer (number of spaces). -1 if unsupported. static int interp_tabsize(const char *v) { double num; const char *end...*
-- `interp_textdeco_thickness` (line 859) `static int interp_textdeco_thickness(const char *v)` - *text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length * (px -> px, em/rem x16). -1 if unsupported (negative, %, etc -> dr...*
-- `interp_aspect_ratio` (line 871) `static int interp_aspect_ratio(const char *v, int *num, int *den)` - *aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>` (auto fallback). Stores both numerator and denominator x1000 (for sub-...*
-- `interp_direction` (line 904) `static int interp_direction(const char *v)` - *num = round_clamp(nv * 1000.0, 1, CSS_LEN_MAX); den = round_clamp(dv * 1000.0, 1, CSS_LEN_MAX); return 1; } /* Bare number: treat as w/h = N/1 doub...*
-- `liststyle_kw` (line 909) `static int liststyle_kw(const char *t)`
-- `interp_liststyle` (line 925) `static int interp_liststyle(const char *v)` - *list-style-type, or the type token of the list-style shorthand: the first * recognised keyword wins. url() (a list-style-image) is dropped: never f...*
-- `emit_spacing` (line 954) `static int emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
-- `expand_shadow` (line 968) `static int expand_shadow(const char *val, css_decl *dst, int cap)` - *text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is ignored) and an optional color, in any order. "none" emits an expl...*
-- `interp_position` (line 999) `static int interp_position(const char *v)` - *} if (nlen < 2) return 0;  /* need both offsets int dx = lens[0], dy = lens[1]; if (dx > CSS_SHADOW_MAX) dx = CSS_SHADOW_MAX; if (dx < -CSS_SHADOW_...*
-- `interp_boxsizing` (line 1008) `static int interp_boxsizing(const char *v)`
-- `interp_float` (line 1014) `static int interp_float(const char *v)`
-- `interp_clear` (line 1021) `static int interp_clear(const char *v)`
-- `interp_visibility` (line 1031) `static int interp_visibility(const char *v)` - *if (csel_ci_eq(v, "left"))  return CSS_FLOAT_LEFT; if (csel_ci_eq(v, "right")) return CSS_FLOAT_RIGHT; return -1; } static int interp_clear(const c...*
-- `interp_overflow` (line 1038) `static int interp_overflow(const char *v)`
-- `expand_overflow` (line 1050) `static int expand_overflow(const char *val, css_decl *dst, int cap)` - *`overflow: X` sets both overflow-x and overflow-y to the same value. The two-token * per-axis form (`overflow: hidden visible`) is out of scope -- ...*
-- `interp_cursor` (line 1057) `static int interp_cursor(const char *v)`
-- `interp_text_overflow` (line 1073) `static int interp_text_overflow(const char *v)`
-- `interp_word_break` (line 1079) `static int interp_word_break(const char *v)`
-- `interp_overflow_wrap` (line 1086) `static int interp_overflow_wrap(const char *v)`
-- `interp_border_collapse` (line 1095) `static int interp_border_collapse(const char *v)` - *if (csel_ci_eq(v, "normal"))    return CSS_WB_NORMAL; if (csel_ci_eq(v, "break-all")) return CSS_WB_BREAK; if (csel_ci_eq(v, "keep-all"))  return C...*
-- `number` (line 1104) `* number (no unit) as px (common in shorthand context like "10 5"). */
+- `family_of` (line 775) `static int family_of(const char *name)` - *Maps one font-family name (a generic keyword or a common family) to a generic css_font_family bucket; -1 if unrecognised. Case-insensitive; multi-w...*
+- `interp_fontfamily` (line 800) `static int interp_fontfamily(const char *v)` - *font-family: the first recognised name in the comma-separated stack wins (its * generic bucket). Quotes are stripped. url() defensively dropped. -1...*
+- `interp_texttransform` (line 821) `static int interp_texttransform(const char *v)`
+- `interp_valign` (line 843) `static int interp_valign(const char *v)`
+- `interp_whitespace` (line 850) `static int interp_whitespace(const char *v)`
+- `interp_tabsize` (line 864) `static int interp_tabsize(const char *v)` - *break-spaces preserves whitespace and wraps; this engine only models the * wrap/keep distinction, so it collapses to pre-wrap (2026-07-10). if (cse...*
+- `interp_textdeco_style` (line 875) `static int interp_textdeco_style(const char *v)` - *} /* tab-size: a non-negative integer (number of spaces). -1 if unsupported. static int interp_tabsize(const char *v) { double num; const char *end...*
+- `interp_textdeco_thickness` (line 886) `static int interp_textdeco_thickness(const char *v)` - *text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length * (px -> px, em/rem x16). -1 if unsupported (negative, %, etc -> dr...*
+- `interp_aspect_ratio` (line 898) `static int interp_aspect_ratio(const char *v, int *num, int *den)` - *aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>` (auto fallback). Stores both numerator and denominator x1000 (for sub-...*
+- `interp_direction` (line 931) `static int interp_direction(const char *v)` - *num = round_clamp(nv * 1000.0, 1, CSS_LEN_MAX); den = round_clamp(dv * 1000.0, 1, CSS_LEN_MAX); return 1; } /* Bare number: treat as w/h = N/1 doub...*
+- `liststyle_kw` (line 936) `static int liststyle_kw(const char *t)`
+- `interp_liststyle` (line 952) `static int interp_liststyle(const char *v)` - *list-style-type, or the type token of the list-style shorthand: the first * recognised keyword wins. url() (a list-style-image) is dropped: never f...*
+- `emit_spacing` (line 981) `static int emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+- `expand_shadow` (line 995) `static int expand_shadow(const char *val, css_decl *dst, int cap)` - *text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is ignored) and an optional color, in any order. "none" emits an expl...*
+- `interp_position` (line 1026) `static int interp_position(const char *v)` - *} if (nlen < 2) return 0;  /* need both offsets int dx = lens[0], dy = lens[1]; if (dx > CSS_SHADOW_MAX) dx = CSS_SHADOW_MAX; if (dx < -CSS_SHADOW_...*
+- `interp_boxsizing` (line 1035) `static int interp_boxsizing(const char *v)`
+- `interp_float` (line 1041) `static int interp_float(const char *v)`
+- `interp_clear` (line 1048) `static int interp_clear(const char *v)`
+- `interp_visibility` (line 1058) `static int interp_visibility(const char *v)` - *if (csel_ci_eq(v, "left"))  return CSS_FLOAT_LEFT; if (csel_ci_eq(v, "right")) return CSS_FLOAT_RIGHT; return -1; } static int interp_clear(const c...*
+- `interp_overflow` (line 1065) `static int interp_overflow(const char *v)`
+- `expand_overflow` (line 1077) `static int expand_overflow(const char *val, css_decl *dst, int cap)` - *`overflow: X` sets both overflow-x and overflow-y to the same value. The two-token * per-axis form (`overflow: hidden visible`) is out of scope -- ...*
+- `interp_cursor` (line 1084) `static int interp_cursor(const char *v)`
+- `interp_text_overflow` (line 1100) `static int interp_text_overflow(const char *v)`
+- `interp_word_break` (line 1106) `static int interp_word_break(const char *v)`
+- `interp_overflow_wrap` (line 1113) `static int interp_overflow_wrap(const char *v)`
+- `interp_border_collapse` (line 1122) `static int interp_border_collapse(const char *v)` - *if (csel_ci_eq(v, "normal"))    return CSS_WB_NORMAL; if (csel_ci_eq(v, "break-all")) return CSS_WB_BREAK; if (csel_ci_eq(v, "keep-all"))  return C...*
+- `number` (line 1131) `* number (no unit) as px (common in shorthand context like "10 5"). */
 static int interp_border_s...`
-- `interp_empty_cells` (line 1129) `static int interp_empty_cells(const char *v)` - *if (interp_len(tok, 0, &px) && px >= 0) { if (px > CSS_BORDER_SPACING_MAX) px = CSS_BORDER_SPACING_MAX; return px; } double num; const char *end; i...*
-- `interp_caption_side` (line 1136) `static int interp_caption_side(const char *v)` - *px = round_clamp(num, 0, CSS_BORDER_SPACING_MAX); return px; } return -1; } /* empty-cells: show/hide. -1 unknown. static int interp_empty_cells(co...*
-- `interp_table_layout` (line 1143) `static int interp_table_layout(const char *v)` - *static int interp_empty_cells(const char *v) { if (csel_ci_eq(v, "show")) return CSS_EC_SHOW; if (csel_ci_eq(v, "hide")) return CSS_EC_HIDE; return...*
-- `interp_font_variant` (line 1150) `static int interp_font_variant(const char *v)` - *static int interp_caption_side(const char *v) { if (csel_ci_eq(v, "top"))    return CSS_CS_TOP; if (csel_ci_eq(v, "bottom")) return CSS_CS_BOTTOM; ...*
-- `interp_hyphens` (line 1158) `static int interp_hyphens(const char *v)` - *if (csel_ci_eq(v, "auto"))  return CSS_TL_AUTO; if (csel_ci_eq(v, "fixed")) return CSS_TL_FIXED; return -1; } /* font-variant (subset: only small-c...*
-- `interp_user_select` (line 1166) `static int interp_user_select(const char *v)` - *if (csel_ci_eq(v, "small-caps")) return CSS_FV_SMALL_CAPS; /* all-small-caps, petite-caps, etc: out of scope, fail closed return -1; } /* hyphens: ...*
-- `interp_caret_color` (line 1175) `static int interp_caret_color(const char *v)` - *if (csel_ci_eq(v, "auto"))   return CSS_HY_AUTO; return -1; } /* user-select: none/text/all/auto. -1 unknown. static int interp_user_select(const c...*
-- `interp_appearance` (line 1182) `static int interp_appearance(const char *v)` - *if (csel_ci_eq(v, "text")) return CSS_US_TEXT; if (csel_ci_eq(v, "all"))  return CSS_US_ALL; if (csel_ci_eq(v, "auto")) return CSS_US_AUTO; return ...*
-- `interp_pointer_events` (line 1189) `static int interp_pointer_events(const char *v)` - *static int interp_caret_color(const char *v) { if (csel_ci_eq(v, "auto")) return CSS_LEN_AUTO; cc_rgb c; return (cc_parse(v, &c) == CC_OK) ? cc_pac...*
-- `interp_bg_repeat` (line 1196) `static int interp_bg_repeat(const char *v)` - *static int interp_appearance(const char *v) { if (csel_ci_eq(v, "auto")) return CSS_AP_AUTO; if (csel_ci_eq(v, "none")) return CSS_AP_NONE; return ...*
-- `interp_bg_size` (line 1206) `static int interp_bg_size(const char *v)` - *return -1; } /* background-repeat: repeat/no-repeat/repeat-x/repeat-y/space/round. -1 unknown. static int interp_bg_repeat(const char *v) { if (cse...*
-- `interp_bg_clip` (line 1213) `static int interp_bg_clip(const char *v)` - *if (csel_ci_eq(v, "repeat-x"))  return CSS_BGR_REPEAT_X; if (csel_ci_eq(v, "repeat-y"))  return CSS_BGR_REPEAT_Y; if (csel_ci_eq(v, "space"))     r...*
-- `interp_bg_origin` (line 1221) `static int interp_bg_origin(const char *v)` - *if (csel_ci_eq(v, "auto"))    return CSS_BGS_AUTO; if (csel_ci_eq(v, "cover"))   return CSS_BGS_COVER; if (csel_ci_eq(v, "contain")) return CSS_BGS...*
-- `interp_bg_attachment` (line 1228) `static int interp_bg_attachment(const char *v)` - *if (csel_ci_eq(v, "border-box"))   return CSS_BGC_BORDER_BOX; if (csel_ci_eq(v, "padding-box"))  return CSS_BGC_PADDING_BOX; if (csel_ci_eq(v, "con...*
-- `interp_isolation` (line 1235) `static int interp_isolation(const char *v)` - *static int interp_bg_origin(const char *v) { if (csel_ci_eq(v, "padding-box"))  return CSS_BGO_PADDING_BOX; if (csel_ci_eq(v, "border-box"))   retu...*
-- `interp_contain` (line 1241) `static int interp_contain(const char *v)` - */* background-attachment: scroll/fixed/local. -1 unknown. static int interp_bg_attachment(const char *v) { if (csel_ci_eq(v, "scroll")) return CSS_...*
-- `interp_content_visibility` (line 1262) `static int interp_content_visibility(const char *v)` - *while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char tok[CSS_TOK_MAX]; size_t k = 0; while (*p != '\0' && *p != ' ' && *p != '\t' && k ...*
-- `interp_image_rendering` (line 1269) `static int interp_image_rendering(const char *v)` - *else if (csel_ci_eq(tok, "layout")) mask |= CSS_CONTAIN_LAYOUT; else if (csel_ci_eq(tok, "style"))  mask |= CSS_CONTAIN_STYLE; else if (csel_ci_eq(...*
-- `interp_color_scheme` (line 1276) `static int interp_color_scheme(const char *v)` - *static int interp_content_visibility(const char *v) { if (csel_ci_eq(v, "visible")) return CSS_CV_VISIBLE; if (csel_ci_eq(v, "auto"))    return CSS...*
-- `interp_accent_color` (line 1294) `static int interp_accent_color(const char *v)` - *const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char tok[CSS_TOK_MAX]; size_t k = 0; while (*p ...*
-- `interp_print_color_adjust` (line 1300) `static int interp_print_color_adjust(const char *v)` - *while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++; tok[k] = '\0'; if (csel_ci_eq(tok, "light")) return CSS_CSH_LI...*
-- `interp_forced_color_adjust` (line 1306) `static int interp_forced_color_adjust(const char *v)` - *} /* accent-color: auto -> CSS_LEN_AUTO; color -> 0xRRGGBB; -1 unknown. static int interp_accent_color(const char *v) { if (csel_ci_eq(v, "auto")) ...*
-- `interp_mix_blend_mode` (line 1313) `static int interp_mix_blend_mode(const char *v)` - */* print-color-adjust: economy/exact. -1 unknown. static int interp_print_color_adjust(const char *v) { if (csel_ci_eq(v, "economy")) return CSS_PC...*
-- `interp_object_fit` (line 1331) `static int interp_object_fit(const char *v)` - *if (csel_ci_eq(v, "overlay"))      return CSS_MB_OVERLAY; if (csel_ci_eq(v, "darken"))       return CSS_MB_DARKEN; if (csel_ci_eq(v, "lighten"))   ...*
-- `interp_list_style_pos` (line 1340) `static int interp_list_style_pos(const char *v)` - *if (csel_ci_eq(v, "color"))        return CSS_MB_COLOR; if (csel_ci_eq(v, "luminosity"))   return CSS_MB_LUMINOSITY; return -1; } /* object-fit: fi...*
-- `interp_font_kerning` (line 1346) `static int interp_font_kerning(const char *v)` - *if (csel_ci_eq(v, "fill"))        return CSS_OFI_FILL; if (csel_ci_eq(v, "contain"))     return CSS_OFI_CONTAIN; if (csel_ci_eq(v, "cover"))       ...*
-- `interp_text_rendering` (line 1353) `static int interp_text_rendering(const char *v)` - */* list-style-position: inside/outside. -1 unknown. static int interp_list_style_pos(const char *v) { if (csel_ci_eq(v, "inside"))  return CSS_LP_I...*
-- `interp_font_stretch` (line 1361) `static int interp_font_stretch(const char *v)` - *if (csel_ci_eq(v, "auto"))   return CSS_FK_AUTO; if (csel_ci_eq(v, "normal")) return CSS_FK_NORMAL; if (csel_ci_eq(v, "none"))   return CSS_FK_NONE...*
-- `interp_resize` (line 1374) `static int interp_resize(const char *v)` - */* font-stretch: normal/condensed/expanded/etc. -1 unknown. static int interp_font_stretch(const char *v) { if (csel_ci_eq(v, "normal"))           ...*
-- `interp_scroll_behavior` (line 1382) `static int interp_scroll_behavior(const char *v)` - *if (csel_ci_eq(v, "semi-expanded"))      return CSS_FS_SEMI_EXPANDED; if (csel_ci_eq(v, "extra-expanded"))     return CSS_FS_EXTRA_EXPANDED; if (cs...*
-- `interp_touch_action` (line 1388) `static int interp_touch_action(const char *v)` - *static int interp_resize(const char *v) { if (csel_ci_eq(v, "none"))        return CSS_RS_NONE; if (csel_ci_eq(v, "both"))        return CSS_RS_BOT...*
-- `interp_overscroll_behavior` (line 1395) `static int interp_overscroll_behavior(const char *v)` - */* scroll-behavior: auto/smooth. -1 unknown. static int interp_scroll_behavior(const char *v) { if (csel_ci_eq(v, "auto"))   return CSS_SB_AUTO; if...*
-- `interp_backface_visibility` (line 1402) `static int interp_backface_visibility(const char *v)` - *static int interp_touch_action(const char *v) { if (csel_ci_eq(v, "auto"))         return CSS_TA_AUTO; if (csel_ci_eq(v, "none"))         return CS...*
-- `interp_border_style` (line 1424) `static int interp_border_style(const char *v)`
-- `interp_bwidth1` (line 1450) `static int interp_bwidth1(const char *v)`
-- `interp_border_radius` (line 1458) `static int interp_border_radius(const char *v)` - *border-radius: the first value only (corner-by-corner / elliptical out of scope). * px >= 0, or -1 (unsupported: %/units dropped -> stays unset).*
-- `interp_bw_tok` (line 1472) `static int interp_bw_tok(const char *t, int *o)` - *static int interp_border_radius(const char *v) { char tok[CSS_TOK_MAX]; size_t k = 0; const char *p = v; while (*p == ' ' || *p == '\t') ++p; while...*
-- `interp_bs_tok` (line 1473) `static int interp_bs_tok(const char *t, int *o)`
-- `interp_bc_tok` (line 1474) `static int interp_bc_tok(const char *t, int *o)`
-- `expand_outline` (line 1538) `static int expand_outline(const char *val, css_decl *dst, int cap)`
-- `expand_box_shadow` (line 1553) `static int expand_box_shadow(const char *val, css_decl *dst, int cap)` - *box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an optional color, and an optional `inset` keyword, in any order. Need...*
-- `interp_flex_factor` (line 1582) `static int interp_flex_factor(const char *v)` - *flex-grow / flex-shrink: a non-negative number stored x100 (0.5 -> 50), clamped to * [0, CSS_FLEX_FACTOR_MAX]. Negative / unparseable -> -1 (droppe...*
-- `expand_flex` (line 1603) `static int expand_flex(const char *val, css_decl *dst, int cap)` - *flex shorthand -> the three contiguous P_FLEX_GROW/SHRINK/BASIS slots. Keywords none/auto/initial; otherwise up to three values (a unitless number ...*
-- `interp_align_kw` (line 1643) `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` - *align-items / align-self / align-content / justify-items keyword. allow_auto is for * align-self; allow_dist (space-*) is for align-content. Unknow...*
-- `interp_flex_direction` (line 1655) `static int interp_flex_direction(const char *v)`
-- `interp_flex_wrap` (line 1663) `static int interp_flex_wrap(const char *v)`
-- `interp_grid_flow` (line 1672) `static int interp_grid_flow(const char *v)` - *if (csel_ci_eq(v, "row-reverse")) return CSS_FD_ROW_REVERSE; if (csel_ci_eq(v, "column")) return CSS_FD_COLUMN; if (csel_ci_eq(v, "column-reverse")...*
-- `interp_grid_span` (line 1698) `static int interp_grid_span(const char *v)` - *grid-column / grid-row: only the `span N` form is supported -> N (clamped to * [1, CSS_GRID_SPAN_MAX]). Line-number / named-line placement is out o...*
-- `copy_trim` (line 1717) `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` - *Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from * both ends. Returns the trimmed length, or SIZE_MAX if it does no...*
-- `strip_important` (line 1730) `static int strip_important(char *val)` - *Strips a trailing "!important" (case-insensitive, with optional whitespace before '!' and between '!' and the keyword) from val, in place. Returns ...*
-- `var_append` (line 1811) `static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n)` - *} } i = v; continue; } } ++i; } } static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap, size_t *o, const css_custom_pr...*
-- `value` (line 1838) `* any other unsupported value (fail closed, never a partially-substituted value). */
+- `interp_empty_cells` (line 1156) `static int interp_empty_cells(const char *v)` - *if (interp_len(tok, 0, &px) && px >= 0) { if (px > CSS_BORDER_SPACING_MAX) px = CSS_BORDER_SPACING_MAX; return px; } double num; const char *end; i...*
+- `interp_caption_side` (line 1163) `static int interp_caption_side(const char *v)` - *px = round_clamp(num, 0, CSS_BORDER_SPACING_MAX); return px; } return -1; } /* empty-cells: show/hide. -1 unknown. static int interp_empty_cells(co...*
+- `interp_table_layout` (line 1170) `static int interp_table_layout(const char *v)` - *static int interp_empty_cells(const char *v) { if (csel_ci_eq(v, "show")) return CSS_EC_SHOW; if (csel_ci_eq(v, "hide")) return CSS_EC_HIDE; return...*
+- `interp_font_variant` (line 1177) `static int interp_font_variant(const char *v)` - *static int interp_caption_side(const char *v) { if (csel_ci_eq(v, "top"))    return CSS_CS_TOP; if (csel_ci_eq(v, "bottom")) return CSS_CS_BOTTOM; ...*
+- `interp_hyphens` (line 1185) `static int interp_hyphens(const char *v)` - *if (csel_ci_eq(v, "auto"))  return CSS_TL_AUTO; if (csel_ci_eq(v, "fixed")) return CSS_TL_FIXED; return -1; } /* font-variant (subset: only small-c...*
+- `interp_user_select` (line 1193) `static int interp_user_select(const char *v)` - *if (csel_ci_eq(v, "small-caps")) return CSS_FV_SMALL_CAPS; /* all-small-caps, petite-caps, etc: out of scope, fail closed return -1; } /* hyphens: ...*
+- `interp_caret_color` (line 1202) `static int interp_caret_color(const char *v)` - *if (csel_ci_eq(v, "auto"))   return CSS_HY_AUTO; return -1; } /* user-select: none/text/all/auto. -1 unknown. static int interp_user_select(const c...*
+- `interp_appearance` (line 1209) `static int interp_appearance(const char *v)` - *if (csel_ci_eq(v, "text")) return CSS_US_TEXT; if (csel_ci_eq(v, "all"))  return CSS_US_ALL; if (csel_ci_eq(v, "auto")) return CSS_US_AUTO; return ...*
+- `interp_pointer_events` (line 1216) `static int interp_pointer_events(const char *v)` - *static int interp_caret_color(const char *v) { if (csel_ci_eq(v, "auto")) return CSS_LEN_AUTO; cc_rgb c; return (cc_parse(v, &c) == CC_OK) ? cc_pac...*
+- `interp_bg_repeat` (line 1223) `static int interp_bg_repeat(const char *v)` - *static int interp_appearance(const char *v) { if (csel_ci_eq(v, "auto")) return CSS_AP_AUTO; if (csel_ci_eq(v, "none")) return CSS_AP_NONE; return ...*
+- `interp_bg_size` (line 1233) `static int interp_bg_size(const char *v)` - *return -1; } /* background-repeat: repeat/no-repeat/repeat-x/repeat-y/space/round. -1 unknown. static int interp_bg_repeat(const char *v) { if (cse...*
+- `interp_bg_clip` (line 1240) `static int interp_bg_clip(const char *v)` - *if (csel_ci_eq(v, "repeat-x"))  return CSS_BGR_REPEAT_X; if (csel_ci_eq(v, "repeat-y"))  return CSS_BGR_REPEAT_Y; if (csel_ci_eq(v, "space"))     r...*
+- `interp_bg_origin` (line 1248) `static int interp_bg_origin(const char *v)` - *if (csel_ci_eq(v, "auto"))    return CSS_BGS_AUTO; if (csel_ci_eq(v, "cover"))   return CSS_BGS_COVER; if (csel_ci_eq(v, "contain")) return CSS_BGS...*
+- `interp_bg_attachment` (line 1255) `static int interp_bg_attachment(const char *v)` - *if (csel_ci_eq(v, "border-box"))   return CSS_BGC_BORDER_BOX; if (csel_ci_eq(v, "padding-box"))  return CSS_BGC_PADDING_BOX; if (csel_ci_eq(v, "con...*
+- `interp_isolation` (line 1262) `static int interp_isolation(const char *v)` - *static int interp_bg_origin(const char *v) { if (csel_ci_eq(v, "padding-box"))  return CSS_BGO_PADDING_BOX; if (csel_ci_eq(v, "border-box"))   retu...*
+- `interp_contain` (line 1268) `static int interp_contain(const char *v)` - */* background-attachment: scroll/fixed/local. -1 unknown. static int interp_bg_attachment(const char *v) { if (csel_ci_eq(v, "scroll")) return CSS_...*
+- `interp_content_visibility` (line 1289) `static int interp_content_visibility(const char *v)` - *while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char tok[CSS_TOK_MAX]; size_t k = 0; while (*p != '\0' && *p != ' ' && *p != '\t' && k ...*
+- `interp_image_rendering` (line 1296) `static int interp_image_rendering(const char *v)` - *else if (csel_ci_eq(tok, "layout")) mask |= CSS_CONTAIN_LAYOUT; else if (csel_ci_eq(tok, "style"))  mask |= CSS_CONTAIN_STYLE; else if (csel_ci_eq(...*
+- `interp_color_scheme` (line 1303) `static int interp_color_scheme(const char *v)` - *static int interp_content_visibility(const char *v) { if (csel_ci_eq(v, "visible")) return CSS_CV_VISIBLE; if (csel_ci_eq(v, "auto"))    return CSS...*
+- `interp_accent_color` (line 1321) `static int interp_accent_color(const char *v)` - *const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char tok[CSS_TOK_MAX]; size_t k = 0; while (*p ...*
+- `interp_print_color_adjust` (line 1327) `static int interp_print_color_adjust(const char *v)` - *while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++; tok[k] = '\0'; if (csel_ci_eq(tok, "light")) return CSS_CSH_LI...*
+- `interp_forced_color_adjust` (line 1333) `static int interp_forced_color_adjust(const char *v)` - *} /* accent-color: auto -> CSS_LEN_AUTO; color -> 0xRRGGBB; -1 unknown. static int interp_accent_color(const char *v) { if (csel_ci_eq(v, "auto")) ...*
+- `interp_mix_blend_mode` (line 1340) `static int interp_mix_blend_mode(const char *v)` - */* print-color-adjust: economy/exact. -1 unknown. static int interp_print_color_adjust(const char *v) { if (csel_ci_eq(v, "economy")) return CSS_PC...*
+- `interp_object_fit` (line 1358) `static int interp_object_fit(const char *v)` - *if (csel_ci_eq(v, "overlay"))      return CSS_MB_OVERLAY; if (csel_ci_eq(v, "darken"))       return CSS_MB_DARKEN; if (csel_ci_eq(v, "lighten"))   ...*
+- `interp_list_style_pos` (line 1367) `static int interp_list_style_pos(const char *v)` - *if (csel_ci_eq(v, "color"))        return CSS_MB_COLOR; if (csel_ci_eq(v, "luminosity"))   return CSS_MB_LUMINOSITY; return -1; } /* object-fit: fi...*
+- `interp_font_kerning` (line 1373) `static int interp_font_kerning(const char *v)` - *if (csel_ci_eq(v, "fill"))        return CSS_OFI_FILL; if (csel_ci_eq(v, "contain"))     return CSS_OFI_CONTAIN; if (csel_ci_eq(v, "cover"))       ...*
+- `interp_text_rendering` (line 1380) `static int interp_text_rendering(const char *v)` - */* list-style-position: inside/outside. -1 unknown. static int interp_list_style_pos(const char *v) { if (csel_ci_eq(v, "inside"))  return CSS_LP_I...*
+- `interp_font_stretch` (line 1388) `static int interp_font_stretch(const char *v)` - *if (csel_ci_eq(v, "auto"))   return CSS_FK_AUTO; if (csel_ci_eq(v, "normal")) return CSS_FK_NORMAL; if (csel_ci_eq(v, "none"))   return CSS_FK_NONE...*
+- `interp_resize` (line 1401) `static int interp_resize(const char *v)` - */* font-stretch: normal/condensed/expanded/etc. -1 unknown. static int interp_font_stretch(const char *v) { if (csel_ci_eq(v, "normal"))           ...*
+- `interp_scroll_behavior` (line 1409) `static int interp_scroll_behavior(const char *v)` - *if (csel_ci_eq(v, "semi-expanded"))      return CSS_FS_SEMI_EXPANDED; if (csel_ci_eq(v, "extra-expanded"))     return CSS_FS_EXTRA_EXPANDED; if (cs...*
+- `interp_touch_action` (line 1415) `static int interp_touch_action(const char *v)` - *static int interp_resize(const char *v) { if (csel_ci_eq(v, "none"))        return CSS_RS_NONE; if (csel_ci_eq(v, "both"))        return CSS_RS_BOT...*
+- `interp_overscroll_behavior` (line 1422) `static int interp_overscroll_behavior(const char *v)` - */* scroll-behavior: auto/smooth. -1 unknown. static int interp_scroll_behavior(const char *v) { if (csel_ci_eq(v, "auto"))   return CSS_SB_AUTO; if...*
+- `interp_backface_visibility` (line 1429) `static int interp_backface_visibility(const char *v)` - *static int interp_touch_action(const char *v) { if (csel_ci_eq(v, "auto"))         return CSS_TA_AUTO; if (csel_ci_eq(v, "none"))         return CS...*
+- `interp_border_style` (line 1451) `static int interp_border_style(const char *v)`
+- `interp_bwidth1` (line 1477) `static int interp_bwidth1(const char *v)`
+- `interp_border_radius` (line 1485) `static int interp_border_radius(const char *v)` - *border-radius: the first value only (corner-by-corner / elliptical out of scope). * px >= 0, or -1 (unsupported: %/units dropped -> stays unset).*
+- `interp_bw_tok` (line 1499) `static int interp_bw_tok(const char *t, int *o)` - *static int interp_border_radius(const char *v) { char tok[CSS_TOK_MAX]; size_t k = 0; const char *p = v; while (*p == ' ' || *p == '\t') ++p; while...*
+- `interp_bs_tok` (line 1500) `static int interp_bs_tok(const char *t, int *o)`
+- `interp_bc_tok` (line 1501) `static int interp_bc_tok(const char *t, int *o)`
+- `expand_outline` (line 1565) `static int expand_outline(const char *val, css_decl *dst, int cap)`
+- `expand_box_shadow` (line 1580) `static int expand_box_shadow(const char *val, css_decl *dst, int cap)` - *box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an optional color, and an optional `inset` keyword, in any order. Need...*
+- `interp_flex_factor` (line 1609) `static int interp_flex_factor(const char *v)` - *flex-grow / flex-shrink: a non-negative number stored x100 (0.5 -> 50), clamped to * [0, CSS_FLEX_FACTOR_MAX]. Negative / unparseable -> -1 (droppe...*
+- `expand_flex` (line 1630) `static int expand_flex(const char *val, css_decl *dst, int cap)` - *flex shorthand -> the three contiguous P_FLEX_GROW/SHRINK/BASIS slots. Keywords none/auto/initial; otherwise up to three values (a unitless number ...*
+- `interp_align_kw` (line 1670) `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` - *align-items / align-self / align-content / justify-items keyword. allow_auto is for * align-self; allow_dist (space-*) is for align-content. Unknow...*
+- `interp_flex_direction` (line 1682) `static int interp_flex_direction(const char *v)`
+- `interp_flex_wrap` (line 1690) `static int interp_flex_wrap(const char *v)`
+- `interp_grid_flow` (line 1699) `static int interp_grid_flow(const char *v)` - *if (csel_ci_eq(v, "row-reverse")) return CSS_FD_ROW_REVERSE; if (csel_ci_eq(v, "column")) return CSS_FD_COLUMN; if (csel_ci_eq(v, "column-reverse")...*
+- `interp_grid_span` (line 1725) `static int interp_grid_span(const char *v)` - *grid-column / grid-row: only the `span N` form is supported -> N (clamped to * [1, CSS_GRID_SPAN_MAX]). Line-number / named-line placement is out o...*
+- `copy_trim` (line 1744) `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` - *Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from * both ends. Returns the trimmed length, or SIZE_MAX if it does no...*
+- `strip_important` (line 1757) `static int strip_important(char *val)` - *Strips a trailing "!important" (case-insensitive, with optional whitespace before '!' and between '!' and the keyword) from val, in place. Returns ...*
+- `var_append` (line 1838) `static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n)` - *} } i = v; continue; } } ++i; } } static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap, size_t *o, const css_custom_pr...*
+- `value` (line 1865) `* any other unsupported value (fail closed, never a partially-substituted value). */
 static int r...`
-- `overflowed` (line 1898) `* overflowed (caller drops the declaration). */
+- `overflowed` (line 1925) `* overflowed (caller drops the declaration). */
 static int resolve_var(const char *val, char *out...`
-- `expand_gap` (line 1912) `static int expand_gap(const char *val, css_decl *dst, int cap)` - *gap / grid-gap (2026-07-10): one value keeps the pre-existing semantics (both axes; row-gap stays unset and falls back to gap downstream), two valu...*
-- `ignored` (line 1931) `* engine slot and is ignored (documented simplification, like list-style's
+- `expand_gap` (line 1939) `static int expand_gap(const char *val, css_decl *dst, int cap)` - *gap / grid-gap (2026-07-10): one value keeps the pre-existing semantics (both axes; row-gap stays unset and falls back to gap downstream), two valu...*
+- `ignored` (line 1958) `* engine slot and is ignored (documented simplification, like list-style's
  * ignored tokens). An...`
-- `shorthand` (line 1968) `* generic bucket keeps the rest of the shorthand (same net effect as the
+- `shorthand` (line 1995) `* generic bucket keeps the rest of the shorthand (same net effect as the
  * font-family longhand ...`
-- `caller` (line 2025) `* left to the caller (parse_one_decl stamps it). */
+- `caller` (line 2052) `* left to the caller (parse_one_decl stamps it). */
 static int interpret_prop(const char *prop, c...`
-- `interpret_decls` (line 2306) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+- `interpret_decls` (line 2342) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
                ...` - *Splits a ';'-separated declaration block into dst (up to cap). Returns count. tab/ntab is the custom-property table var() resolves against (NULL/0 ...*
-- `add_rule` (line 2319) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
+- `add_rule` (line 2355) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      siz...` - *e.g. an inline style resolved against a NULL sheet). static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap, const css_cu...*
-- `skip_at_rule` (line 2355) `static size_t skip_at_rule(const char *s, size_t i, size_t n)` - *Skips an @-rule starting at s[i] ('@'): to the terminating ';' or past a * brace-balanced block. Returns the index just past it.*
-- `block_end` (line 2371) `static size_t block_end(const char *s, size_t open, size_t n)` - *Index just past the '}' that closes the block whose '{' is at s[open]. n if * unbalanced.*
-- `trim_inplace` (line 2393) `static void trim_inplace(char *s)` - *-- @media query evaluation (Hito 23b). All inputs are bounded substrings; the * query never fetches and unknown features fail closed (do not match)...*
-- `copy_lower_trim` (line 2402) `static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` - *const char *e; return parse_num(v, &d, &e) ? round_clamp(d, 0, CSS_LEN_MAX) : 0; } /* Trims ASCII spaces/tabs from both ends of a NUL-terminated st...*
-- `media_part_matches` (line 2411) `static int media_part_matches(const char *p, const css_media *m)` - *One media part: a type word ("screen"/"print"/"all") or a "(feature: value)". * p is already lowercased and trimmed. Unknown -> 0 (fail closed).*
-- `media_segment_matches` (line 2440) `static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m)` - *One media query segment (between commas): an AND of parts. `not`/`or`/unknown * fail closed. An empty segment matches (all).*
-- `media_matches` (line 2477) `static int media_matches(const char *s, size_t a, size_t b, const css_media *m)` - *if (strcmp(buf, "and") == 0 || strcmp(buf, "only") == 0) { /* connector / legacy keyword: ignore } else if (strcmp(buf, "not") == 0 || strcmp(buf, ...*
-- `at_is_media` (line 2491) `static int at_is_media(const char *s, size_t i, size_t n)` - *static int media_matches(const char *s, size_t a, size_t b, const css_media *m) { while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s...*
-- `parse_block` (line 2504) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+- `skip_at_rule` (line 2391) `static size_t skip_at_rule(const char *s, size_t i, size_t n)` - *Skips an @-rule starting at s[i] ('@'): to the terminating ';' or past a * brace-balanced block. Returns the index just past it.*
+- `block_end` (line 2407) `static size_t block_end(const char *s, size_t open, size_t n)` - *Index just past the '}' that closes the block whose '{' is at s[open]. n if * unbalanced.*
+- `trim_inplace` (line 2429) `static void trim_inplace(char *s)` - *-- @media query evaluation (Hito 23b). All inputs are bounded substrings; the * query never fetches and unknown features fail closed (do not match)...*
+- `copy_lower_trim` (line 2438) `static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` - *const char *e; return parse_num(v, &d, &e) ? round_clamp(d, 0, CSS_LEN_MAX) : 0; } /* Trims ASCII spaces/tabs from both ends of a NUL-terminated st...*
+- `media_part_matches` (line 2447) `static int media_part_matches(const char *p, const css_media *m)` - *One media part: a type word ("screen"/"print"/"all") or a "(feature: value)". * p is already lowercased and trimmed. Unknown -> 0 (fail closed).*
+- `media_segment_matches` (line 2476) `static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m)` - *One media query segment (between commas): an AND of parts. `not`/`or`/unknown * fail closed. An empty segment matches (all).*
+- `media_matches` (line 2513) `static int media_matches(const char *s, size_t a, size_t b, const css_media *m)` - *if (strcmp(buf, "and") == 0 || strcmp(buf, "only") == 0) { /* connector / legacy keyword: ignore } else if (strcmp(buf, "not") == 0 || strcmp(buf, ...*
+- `at_is_media` (line 2527) `static int at_is_media(const char *s, size_t i, size_t n)` - *static int media_matches(const char *s, size_t a, size_t b, const css_media *m) { while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s...*
+- `parse_block` (line 2540) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                  ...` - *Parses rules in s[start,end). A matched @media block is descended into (bounded * depth); @import/@font-face/other @-rules and a non-matching @medi...*
-- `strip_comments` (line 2546) `static char *strip_comments(const char *text, size_t len, size_t *outlen)` - *Removes C-style block comments into a fresh NUL-terminated buffer (each comment * becomes one space). Caller frees.*
-- `css_parse` (line 2564) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
-- `css_parse_media` (line 2568) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
+- `strip_comments` (line 2582) `static char *strip_comments(const char *text, size_t len, size_t *outlen)` - *Removes C-style block comments into a fresh NUL-terminated buffer (each comment * becomes one space). Caller frees.*
+- `css_parse` (line 2600) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
+- `css_parse_media` (line 2604) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
                 ...`
-- `css_free` (line 2588) `void css_free(css_sheet *s)`
-- `apply_decl` (line 2598) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
+- `css_free` (line 2624) `void css_free(css_sheet *s)`
+- `apply_decl` (line 2634) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
               ...` - *Applies one declaration to the running style if it wins its property slot. The cascade is two-tiered: an !important declaration beats any non-impor...*
-- `css_resolve_el` (line 2746) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+- `css_resolve_el` (line 2784) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          ...`
-- `css_resolve` (line 2866) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+- `css_resolve` (line 2904) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-- `css_parse_inline` (line 2877) `css_style css_parse_inline(const char *style, size_t len)`
+- `css_parse_inline` (line 2915) `css_style css_parse_inline(const char *style, size_t len)`
 
 **Macros:**
 - `CSS_MAX_SELS` (line 34)
@@ -1670,17 +1670,17 @@ static int interpret_prop(const char *prop, c...`
 - `CSS_INLINE_SPEC` (line 39)
 - `CSS_MAX_CUSTOM_PROPS` (line 50)
 - `CSS_VAR_MAX_DEPTH` (line 51)
-- `CSS_CALC_MAX_DEPTH` (line 413)
-- `CSS_MATHFN_MAX_ARGS` (line 417)
-- `CSS_MEDIA_TOK` (line 2382)
-- `CSS_MEDIA_MAX_DEPTH` (line 2499)
+- `CSS_CALC_MAX_DEPTH` (line 417)
+- `CSS_MATHFN_MAX_ARGS` (line 421)
+- `CSS_MEDIA_TOK` (line 2418)
+- `CSS_MEDIA_MAX_DEPTH` (line 2535)
 
 **Structs:**
-- `css_decl` (line 101)
-- `css_custom_prop` (line 109) - *One custom property (--name: value), for var() lookups. Both fields are bounded * like every other token buffer here.*
-- `css_sheet` (line 117)
-- `calc_val` (line 419)
-- `calc_parser` (line 420)
+- `css_decl` (line 102)
+- `css_custom_prop` (line 110) - *One custom property (--name: value), for var() lookups. Both fields are bounded * like every other token buffer here.*
+- `css_sheet` (line 118)
+- `calc_val` (line 423)
+- `calc_parser` (line 424)
 
 #### `css_chain.c`
 **Path:** `src/css_chain.c`
@@ -1862,9 +1862,9 @@ static dom_node_id qs_walk(const dom_inde...`
 - `dd_inset` (line 168) `static int dd_inset(int v)` - *case CSS_CUR_WAIT:        return "wait"; case CSS_CUR_CROSSHAIR:   return "crosshair"; case CSS_CUR_GRAB:        return "grab"; case CSS_CUR_ZOOM_I...*
 - `dd_border_style_name` (line 171) `static const char *dd_border_style_name(int s)`
 - `dd_box_line` (line 204) `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
-- `dd_block_line` (line 235) `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
-- `dd_format` (line 291) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
-- `dd_format_css` (line 324) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` - *} dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b != NULL) dd_block_line(&c, i, b); } /*...*
+- `dd_block_line` (line 236) `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
+- `dd_format` (line 293) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
+- `dd_format_css` (line 326) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` - *} dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b != NULL) dd_block_line(&c, i, b); } /*...*
 
 **Structs:**
 - `dd_cursor` (line 24) - *Bounded write cursor: `pos` bytes are committed to `out` (always leaving room for the terminating NUL); `need` counts every byte that WOULD be writ...*
@@ -1896,10 +1896,14 @@ static dom_node_id qs_walk(const dom_inde...`
                 ...`
 - `fx_grid_columns` (line 126) `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
                           doubl...`
-- `fx_float_pack` (line 142) `fx_status fx_float_pack(const double *width, const int *side, size_t n,
+- `float_pack_impl` (line 147) `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
+                ...` - *Shared packer: wrap == 0 is the single-row v1 contract (overflow clamps in place); wrap != 0 starts a new row (cursors reset) for an item that no l...*
+- `fx_float_pack` (line 186) `fx_status fx_float_pack(const double *width, const int *side, size_t n,
                         d...`
-- `fx_grid_cell` (line 165) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
-- `fx_justify_name` (line 176) `const char *fx_justify_name(fx_justify j)`
+- `fx_float_pack_wrap` (line 191) `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
+                    ...`
+- `fx_grid_cell` (line 197) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
+- `fx_justify_name` (line 208) `const char *fx_justify_name(fx_justify j)`
 
 **Macros:**
 - `FX_EPS` (line 14)
@@ -1938,33 +1942,33 @@ static dom_node_id qs_walk(const dom_inde...`
 **Path:** `src/freedom.c`
 
 **Functions:**
-- `print_usage` (line 29) `static void print_usage(FILE *fp, const char *prog)` - *define EXIT_OK     0 define EXIT_ERROR  1 define EXIT_USAGE  2*
-- `is_https_url` (line 48) `static int is_https_url(const char *s)`
-- `is_http_url` (line 52) `static int is_http_url(const char *s)`
-- `is_overlay_http` (line 58) `static int is_overlay_http(const char *s)` - *fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n"); fprintf(fp, "  --dump-css: headle...*
-- `read_file` (line 114) `static char *read_file(const char *path, size_t *out_len)` - *When nonzero, the headless render runs the page's inline JS (tab_load_full run_js). * Set by --dump-console and by --js resolving to "on". Default ...*
-- `is_blank_text` (line 132) `static int is_blank_text(const char *s)` - *long sz = ftell(f); if (sz < 0) { fclose(f); return NULL; } rewind(f); char *buf = (char *)malloc((size_t)sz + 1); if (buf == NULL) { fclose(f); re...*
-- `print_doc` (line 145) `static void print_doc(const rd_doc *doc)` - *Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data, never instruction). Inline run...*
-- `print_console` (line 206) `static void print_console(const fb_buffer *log)` - *Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed with its level and (for located e...*
-- `print_dom` (line 223) `static void print_dom(const rd_doc *doc)` - *Prints the paint-ready render tree (dom_debug) to stdout. Two-pass: measure, then allocate exactly and format. The dump is bounded by the document;...*
-- `print_dom_css` (line 237) `static void print_dom_css(const rd_doc *doc)` - *Prints the CSS property inspector (dd_format_css) to stdout. Same contract as * print_dom: two-pass measure-then-allocate.*
-- `headless_fetch` (line 260) `static int headless_fetch(void *ctx, const char *method, const char *url,
+- `print_usage` (line 30) `static void print_usage(FILE *fp, const char *prog)` - *define EXIT_OK     0 define EXIT_ERROR  1 define EXIT_USAGE  2*
+- `is_https_url` (line 49) `static int is_https_url(const char *s)`
+- `is_http_url` (line 53) `static int is_http_url(const char *s)`
+- `is_overlay_http` (line 59) `static int is_overlay_http(const char *s)` - *fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n"); fprintf(fp, "  --dump-css: headle...*
+- `read_file` (line 115) `static char *read_file(const char *path, size_t *out_len)` - *When nonzero, the headless render runs the page's inline JS (tab_load_full run_js). * Set by --dump-console and by --js resolving to "on". Default ...*
+- `is_blank_text` (line 133) `static int is_blank_text(const char *s)` - *long sz = ftell(f); if (sz < 0) { fclose(f); return NULL; } rewind(f); char *buf = (char *)malloc((size_t)sz + 1); if (buf == NULL) { fclose(f); re...*
+- `print_doc` (line 146) `static void print_doc(const rd_doc *doc)` - *Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data, never instruction). Inline run...*
+- `print_console` (line 207) `static void print_console(const fb_buffer *log)` - *Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed with its level and (for located e...*
+- `print_dom` (line 224) `static void print_dom(const rd_doc *doc)` - *Prints the paint-ready render tree (dom_debug) to stdout. Two-pass: measure, then allocate exactly and format. The dump is bounded by the document;...*
+- `print_dom_css` (line 238) `static void print_dom_css(const rd_doc *doc)` - *Prints the CSS property inspector (dd_format_css) to stdout. Same contract as * print_dom: two-pass measure-then-allocate.*
+- `headless_fetch` (line 261) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...` - *tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script src>. ctx is the page's top URL ...*
-- `render_page` (line 305) `static int render_page(const char *html, size_t len, const char *top_url,
+- `render_page` (line 306) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...` - *out_nav (may be NULL): receives an owned copy of the JS-requested navigation target, if any. The tab layer already resolved and policy-gated it aga...*
-- `sf_reason` (line 409) `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (line 429) `static int fetch_and_render_one(const char *url, char **out_nav)` - *Fetches one url with secure_fetch and renders the result. The response body is * consumed directly; no extra copy is made. out_nav as in render_page.*
-- `elsewhere` (line 471) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+- `sf_reason` (line 438) `static const char *sf_reason(sf_status ss)`
+- `fetch_and_render_one` (line 458) `static int fetch_and_render_one(const char *url, char **out_nav)` - *Fetches one url with secure_fetch and renders the result. The response body is * consumed directly; no extra copy is made. out_nav as in render_page.*
+- `elsewhere` (line 500) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- `run_headless` (line 489) `static int run_headless(const char *target)`
-- `main` (line 508) `int main(int argc, char **argv)`
+- `run_headless` (line 518) `static int run_headless(const char *target)`
+- `main` (line 537) `int main(int argc, char **argv)`
 
 **Macros:**
 - `_POSIX_C_SOURCE` (line 8)
-- `EXIT_OK` (line 25)
-- `EXIT_ERROR` (line 27)
-- `EXIT_USAGE` (line 28)
-- `HL_JS_NAV_MAX` (line 425)
+- `EXIT_OK` (line 26)
+- `EXIT_ERROR` (line 28)
+- `EXIT_USAGE` (line 29)
+- `HL_JS_NAV_MAX` (line 454)
 
 #### `hostblock.c`
 **Path:** `src/hostblock.c`
@@ -2204,8 +2208,9 @@ static int cb_append(char **bu...`
 **Functions:**
 - `eq_ci` (line 12) `static int eq_ci(const char *a, const char *b)` - *js_policy — implementation: pure per-host JavaScript policy decision.  No I/O, no global state. Fail-closed: an unknown mode never enables JS.  #in...*
 - `jsp_enabled` (line 21) `bool jsp_enabled(jsp_mode mode, int host_allowlisted)`
-- `jsp_mode_from_str` (line 30) `jsp_mode jsp_mode_from_str(const char *s)`
-- `jsp_mode_str` (line 42) `const char *jsp_mode_str(jsp_mode mode)`
+- `jsp_trusted` (line 30) `bool jsp_trusted(bool js_enabled, int host_allowlisted)`
+- `jsp_mode_from_str` (line 34) `jsp_mode jsp_mode_from_str(const char *s)`
+- `jsp_mode_str` (line 46) `const char *jsp_mode_str(jsp_mode mode)`
 
 #### `js_sandbox.c`
 **Path:** `src/js_sandbox.c`
@@ -2264,142 +2269,45 @@ static int cb_append(char **bu...`
 **Path:** `src/local_store.c`
 
 **Functions:**
-- `cipher_for` (line 319) `static const EVP_CIPHER *cipher_for(ls_aead aead)` - *#define LS_ARGON2_M_KIB  19456u  /* memory cost in KiB (19 MiB) #define LS_ARGON2_P      1u      /* lanes / parallelism /* Container field offsets....*
-- `argon2id_derive` (line 329) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (line 56) `static const EVP_CIPHER *cipher_for(ls_aead aead)` - *#define LS_ARGON2_M_KIB  19456u  /* memory cost in KiB (19 MiB) #define LS_ARGON2_P      1u      /* lanes / parallelism /* Container field offsets....*
+- `argon2id_derive` (line 66) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...` - *static const uint8_t LS_MAGIC[4] = { 'F', 'R', 'Z', 'S' }; /* --- AEAD selection --- static const EVP_CIPHER *cipher_for(ls_aead aead) { switch (ae...*
-- `ls_derive_key` (line 358) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (line 95) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (line 367) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (line 104) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...` - *int rc = EVP_KDF_derive(kctx, out, out_len, params); EVP_KDF_CTX_free(kctx); return (rc == 1) ? LS_OK : LS_ERR_KDF; } ls_status ls_derive_key(const...*
-- `aead_decrypt` (line 393) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (line 130) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (line 421) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (line 158) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...` - *if (aad_len > 0 && EVP_DecryptUpdate(ctx, NULL, &len, aad, (int)aad_len) != 1) goto done; if (ct_len > 0) { if (EVP_DecryptUpdate(ctx, pt, &len, ct...*
-- `decrypt_blob` (line 458) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (line 195) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (line 489) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (line 226) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...` - *if (pt == NULL) return LS_ERR_OOM; ls_status st = aead_decrypt(cipher, key, nonce, blob, LS_HEADER_LEN, ct, ct_len, tag, pt); if (st != LS_OK) { OP...*
-- `ls_open` (line 502) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (line 239) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (line 513) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (line 250) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...` - *memset(salt, 0, sizeof salt); /* unused under kdf_id = none return seal_core(key, aead, LS_KDF_NONE, salt, plaintext, pt_len, out, out_len); } ls_s...*
-- `ls_open_passphrase` (line 534) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (line 271) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (line 554) `void ls_free(uint8_t *buf, size_t len)`
+- `ls_free` (line 291) `void ls_free(uint8_t *buf, size_t len)`
 
 **Macros:**
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 3)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 6)
-- `OSSL_KDF_PARAM_THREADS` (line 9)
-- `_GNU_SOURCE` (line 11)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 14)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 17)
-- `OSSL_KDF_PARAM_THREADS` (line 20)
-- `_GNU_SOURCE` (line 22)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 25)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 28)
-- `OSSL_KDF_PARAM_THREADS` (line 31)
-- `_GNU_SOURCE` (line 33)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 36)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 39)
-- `OSSL_KDF_PARAM_THREADS` (line 42)
-- `_GNU_SOURCE` (line 44)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 47)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 50)
-- `OSSL_KDF_PARAM_THREADS` (line 53)
-- `_GNU_SOURCE` (line 55)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 58)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 61)
-- `OSSL_KDF_PARAM_THREADS` (line 64)
-- `_GNU_SOURCE` (line 66)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 69)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 72)
-- `OSSL_KDF_PARAM_THREADS` (line 75)
-- `_GNU_SOURCE` (line 77)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 80)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 83)
-- `OSSL_KDF_PARAM_THREADS` (line 86)
-- `_GNU_SOURCE` (line 88)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 91)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 94)
-- `OSSL_KDF_PARAM_THREADS` (line 97)
-- `_GNU_SOURCE` (line 99)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 102)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 105)
-- `OSSL_KDF_PARAM_THREADS` (line 108)
-- `_GNU_SOURCE` (line 110)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 113)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 116)
-- `OSSL_KDF_PARAM_THREADS` (line 119)
-- `_GNU_SOURCE` (line 121)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 124)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 127)
-- `OSSL_KDF_PARAM_THREADS` (line 130)
-- `_GNU_SOURCE` (line 132)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 135)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 138)
-- `OSSL_KDF_PARAM_THREADS` (line 141)
-- `_GNU_SOURCE` (line 143)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 146)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 149)
-- `OSSL_KDF_PARAM_THREADS` (line 152)
-- `_GNU_SOURCE` (line 154)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 157)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 160)
-- `OSSL_KDF_PARAM_THREADS` (line 163)
-- `_GNU_SOURCE` (line 165)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 168)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 171)
-- `OSSL_KDF_PARAM_THREADS` (line 174)
-- `_GNU_SOURCE` (line 176)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 179)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 182)
-- `OSSL_KDF_PARAM_THREADS` (line 185)
-- `_GNU_SOURCE` (line 187)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 190)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 193)
-- `OSSL_KDF_PARAM_THREADS` (line 196)
-- `_GNU_SOURCE` (line 198)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 201)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 204)
-- `OSSL_KDF_PARAM_THREADS` (line 207)
-- `_GNU_SOURCE` (line 209)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 212)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 215)
-- `OSSL_KDF_PARAM_THREADS` (line 218)
-- `_GNU_SOURCE` (line 220)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 223)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 226)
-- `OSSL_KDF_PARAM_THREADS` (line 229)
-- `_GNU_SOURCE` (line 231)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 234)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 237)
-- `OSSL_KDF_PARAM_THREADS` (line 240)
-- `_GNU_SOURCE` (line 242)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 245)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 248)
-- `OSSL_KDF_PARAM_THREADS` (line 251)
-- `_GNU_SOURCE` (line 253)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 256)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 259)
-- `OSSL_KDF_PARAM_THREADS` (line 262)
-- `_GNU_SOURCE` (line 264)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 267)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 270)
-- `OSSL_KDF_PARAM_THREADS` (line 273)
-- `_GNU_SOURCE` (line 275)
-- `LS_VERSION` (line 298)
-- `LS_KDF_NONE` (line 300)
-- `LS_KDF_ARGON2ID` (line 301)
-- `LS_ARGON2_T` (line 304)
-- `LS_ARGON2_M_KIB` (line 305)
-- `LS_ARGON2_P` (line 306)
-- `OFF_MAGIC` (line 309)
-- `OFF_VERSION` (line 310)
-- `OFF_AEAD` (line 311)
-- `OFF_KDF` (line 312)
-- `OFF_SALT` (line 313)
-- `OFF_NONCE` (line 314)
+- `OSSL_KDF_PARAM_ARGON2_LANES` (line 27)
+- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 30)
+- `OSSL_KDF_PARAM_THREADS` (line 33)
+- `LS_VERSION` (line 35)
+- `LS_KDF_NONE` (line 37)
+- `LS_KDF_ARGON2ID` (line 38)
+- `LS_ARGON2_T` (line 41)
+- `LS_ARGON2_M_KIB` (line 42)
+- `LS_ARGON2_P` (line 43)
+- `OFF_MAGIC` (line 46)
+- `OFF_VERSION` (line 47)
+- `OFF_AEAD` (line 48)
+- `OFF_KDF` (line 49)
+- `OFF_SALT` (line 50)
+- `OFF_NONCE` (line 51)
 
 #### `net_realm.c`
 **Path:** `src/net_realm.c`
@@ -2467,127 +2375,130 @@ int os_namespac...`
 - `utf8_sanitized_dup` (line 80) `static char *utf8_sanitized_dup(const char *s)`
 - `dup_n` (line 112) `static char *dup_n(const char *s, size_t n)`
 - `run_init_common` (line 126) `static void run_init_common(pv_run *r)` - *Common field initialization shared by all append helpers. Keeps the three constructors DRY and guarantees every run starts from the same sentinel s...*
-- `pv_node_map_init` (line 210) `static int pv_node_map_init(pv_node_map *m)`
-- `pv_node_map_free` (line 218) `static void pv_node_map_free(pv_node_map *m)`
-- `pv_node_map_build` (line 255) `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` - *Builds a document-order map of all element nodes under root. Returns 0, or -1 on * allocation failure.*
-- `pv_new` (line 263) `pv_view *pv_new(void)`
-- `pv_append` (line 267) `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
+- `pv_node_map_init` (line 211) `static int pv_node_map_init(pv_node_map *m)`
+- `pv_node_map_free` (line 219) `static void pv_node_map_free(pv_node_map *m)`
+- `pv_node_map_build` (line 256) `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` - *Builds a document-order map of all element nodes under root. Returns 0, or -1 on * allocation failure.*
+- `pv_new` (line 264) `pv_view *pv_new(void)`
+- `pv_append` (line 268) `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     c...`
-- `pv_append_image` (line 300) `pv_status pv_append_image(pv_view *v, int heading, int block_break,
+- `pv_append_image` (line 301) `pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           con...`
-- `pv_append_input` (line 329) `pv_status pv_append_input(pv_view *v, int heading, int block_break,
+- `pv_append_input` (line 330) `pv_status pv_append_input(pv_view *v, int heading, int block_break,
                           pv_...`
-- `pv_set_emphasis` (line 369) `void pv_set_emphasis(pv_view *v, int bold, int italic)`
-- `pv_set_indent` (line 376) `void pv_set_indent(pv_view *v, int indent)`
-- `pv_set_color` (line 381) `void pv_set_color(pv_view *v, int fg_rgb)`
-- `pv_set_bgcolor` (line 386) `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
-- `pv_set_text_style` (line 391) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
+- `pv_set_emphasis` (line 370) `void pv_set_emphasis(pv_view *v, int bold, int italic)`
+- `pv_set_indent` (line 377) `void pv_set_indent(pv_view *v, int indent)`
+- `pv_set_color` (line 382) `void pv_set_color(pv_view *v, int fg_rgb)`
+- `pv_set_bgcolor` (line 387) `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
+- `pv_set_text_style` (line 392) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
               ...`
-- `pv_set_text_ext` (line 401) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
-- `pv_set_container` (line 430) `void pv_set_container(pv_view *v, int cont_id, int cont_display,
+- `pv_set_text_ext` (line 402) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
+- `pv_set_container` (line 431) `void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_g...`
-- `pv_set_flex` (line 445) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
+- `pv_set_flex` (line 446) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int...`
-- `pv_set_cont_item` (line 457) `void pv_set_cont_item(pv_view *v, int cont_item)`
-- `pv_set_float` (line 462) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear)`
-- `pv_set_box` (line 470) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+- `pv_set_cont_item` (line 458) `void pv_set_cont_item(pv_view *v, int cont_item)`
+- `pv_set_float` (line 463) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear)`
+- `pv_set_box` (line 471) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int ...`
-- `pv_set_node_id` (line 482) `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
-- `pv_set_block_id` (line 487) `void pv_set_block_id(pv_view *v, int block_id)`
-- `pv_add_box_def` (line 492) `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
-- `pv_free` (line 505) `void pv_free(pv_view *v)`
-- `pv_count` (line 519) `size_t pv_count(const pv_view *v)`
-- `pv_at` (line 523) `const pv_run *pv_at(const pv_view *v, size_t i)`
-- `pv_box_count` (line 528) `size_t pv_box_count(const pv_view *v)`
-- `pv_box_at` (line 532) `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
-- `node_next` (line 541) `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` - *} size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const pv_view *v, size_t i) { if (v == NU...*
-- `is_block_tag` (line 550) `static int is_block_tag(lxb_tag_id_t t)`
-- `heading_level` (line 568) `static int heading_level(lxb_tag_id_t t)`
-- `is_skipped_tag` (line 580) `static int is_skipped_tag(lxb_tag_id_t t)`
-- `node_tag` (line 590) `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
-- `in_skipped_subtree` (line 599) `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `pv_set_box_pct` (line 483) `void pv_set_box_pct(pv_view *v, int box_w_pct)`
+- `pv_set_node_id` (line 488) `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
+- `pv_set_block_id` (line 493) `void pv_set_block_id(pv_view *v, int block_id)`
+- `pv_add_box_def` (line 498) `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
+- `pv_free` (line 511) `void pv_free(pv_view *v)`
+- `pv_count` (line 525) `size_t pv_count(const pv_view *v)`
+- `pv_at` (line 529) `const pv_run *pv_at(const pv_view *v, size_t i)`
+- `pv_box_count` (line 534) `size_t pv_box_count(const pv_view *v)`
+- `pv_box_at` (line 538) `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
+- `node_next` (line 547) `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` - *} size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const pv_view *v, size_t i) { if (v == NU...*
+- `is_block_tag` (line 556) `static int is_block_tag(lxb_tag_id_t t)`
+- `is_block_like` (line 581) `static int is_block_like(lxb_tag_id_t t, css_display display)` - *An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display property indicates a block-level box, ...*
+- `causes_block_break` (line 591) `static int causes_block_break(lxb_tag_id_t t, css_display display)` - *Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do NOT cause a break; they flow *...*
+- `heading_level` (line 596) `static int heading_level(lxb_tag_id_t t)`
+- `is_skipped_tag` (line 608) `static int is_skipped_tag(lxb_tag_id_t t)`
+- `node_tag` (line 618) `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
+- `in_skipped_subtree` (line 627) `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
               ...` - *Nonzero if any ancestor up to base is a non-rendered container. When js_enabled, a <noscript> ancestor also suppresses content (the script would ru...*
-- `font_color_attr` (line 632) `static int font_color_attr(lxb_dom_element_t *el)`
-- `bgcolor_attr` (line 639) `static int bgcolor_attr(lxb_dom_element_t *el)` - *Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News' orange bar and beige page) still us...*
-- `item_ordinal` (line 682) `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` - *Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its own item). -1 when the run has no...*
-- `pv_text_ext_reset` (line 702) `void pv_text_ext_reset(pv_text_ext *e)` - *The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field resolves from the nearest ancestor tha...*
-- `pv_text_ext_merge` (line 721) `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` - *Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten — keeps the nearest, matching i...*
-- `css_has_hbox` (line 759) `static int css_has_hbox(const css_style *cs)` - *caret-color: an explicit `auto` (CSS_LEN_AUTO) on a nearer ancestor is a * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. ...*
-- `css_hbox_resolve` (line 769) `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` - *Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side (clamped >= 0); w = the tightest...*
-- `css_has_position` (line 789) `static int css_has_position(const css_style *cs)` - *A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree (painted for relative; carried...*
-- `css_has_boxdeco` (line 793) `static int css_has_boxdeco(const css_style *cs)`
-- `container_id` (line 824) `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id. typedef struct pv_container_reg { const lxb...*
-- `boxdef_from_style` (line 844) `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` - *Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style. Padding unset -> 0 (geometry default); the rest keep the css mod...*
-- `box_reg_id` (line 894) `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs)` - *Id of node in the box registry, recording its decoration on first sight. -1 when * full. The parent link is stamped separately as the ancestor walk...*
-- `pv_style_cache_init` (line 920) `static int pv_style_cache_init(pv_style_cache *c)`
-- `pv_style_cache_free` (line 933) `static void pv_style_cache_free(pv_style_cache *c)`
-- `cached_element_style` (line 942) `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
+- `font_color_attr` (line 660) `static int font_color_attr(lxb_dom_element_t *el)`
+- `bgcolor_attr` (line 667) `static int bgcolor_attr(lxb_dom_element_t *el)` - *Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News' orange bar and beige page) still us...*
+- `item_ordinal` (line 710) `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` - *Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its own item). -1 when the run has no...*
+- `pv_text_ext_reset` (line 732) `void pv_text_ext_reset(pv_text_ext *e)` - *The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field resolves from the nearest ancestor tha...*
+- `pv_text_ext_merge` (line 751) `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` - *Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten — keeps the nearest, matching i...*
+- `css_has_hbox` (line 789) `static int css_has_hbox(const css_style *cs)` - *caret-color: an explicit `auto` (CSS_LEN_AUTO) on a nearer ancestor is a * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. ...*
+- `css_hbox_resolve` (line 800) `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` - *Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side (clamped >= 0); w = the tightest...*
+- `css_has_position` (line 828) `static int css_has_position(const css_style *cs)` - *A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree (painted for relative; carried...*
+- `css_has_boxdeco` (line 832) `static int css_has_boxdeco(const css_style *cs)`
+- `container_id` (line 863) `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id. typedef struct pv_container_reg { const lxb...*
+- `boxdef_from_style` (line 883) `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` - *Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style. Padding unset -> 0 (geometry default); the rest keep the css mod...*
+- `box_reg_id` (line 934) `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs)` - *Id of node in the box registry, recording its decoration on first sight. -1 when * full. The parent link is stamped separately as the ancestor walk...*
+- `pv_style_cache_init` (line 960) `static int pv_style_cache_init(pv_style_cache *c)`
+- `pv_style_cache_free` (line 973) `static void pv_style_cache_free(pv_style_cache *c)`
+- `cached_element_style` (line 982) `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
             ...` - *cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init, or a caller that opts out) simply calls through uncached -- never a ha...*
-- `css_to_fx_justify` (line 971) `static int css_to_fx_justify(css_justify j)` - *Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to FX_JUSTIFY_START (the default).*
-- `is_bold_tag` (line 986) `static int is_bold_tag(lxb_tag_id_t t)` - *Inline emphasis carried by a tag: bold from <b>/<strong>/<th>, italic from * <i>/<em>. <th> is a header cell, conventionally bold.*
-- `is_italic_tag` (line 989) `static int is_italic_tag(lxb_tag_id_t t)`
-- `resolve_context` (line 1008) `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `css_to_fx_justify` (line 1011) `static int css_to_fx_justify(css_justify j)` - *Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to FX_JUSTIFY_START (the default).*
+- `is_bold_tag` (line 1026) `static int is_bold_tag(lxb_tag_id_t t)` - *Inline emphasis carried by a tag: bold from <b>/<strong>/<th>, italic from * <i>/<em>. <th> is a header cell, conventionally bold.*
+- `is_italic_tag` (line 1029) `static int is_italic_tag(lxb_tag_id_t t)`
+- `resolve_context` (line 1048) `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...` - *level, nearest block-level ancestor (defaults to base), the inherited author color (nearest ancestor that sets one, packed 0xRRGGBB, or -1), the au...*
-- `collapse_ws` (line 1184) `static char *collapse_ws(const char *s, size_t n)` - *prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink; prev_basis = cs.flex_basis; prev_order = cs.order; prev_align_self = cs.align_self; have_pr...*
-- `parse_dim` (line 1207) `static int parse_dim(const lxb_char_t *s, size_t len)` - *Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%"). Returns the value clamped to a sane bound, ...*
-- `find_body` (line 1219) `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-- `forms_free` (line 1242) `static void forms_free(form_table *ft)`
-- `ascii_ieq` (line 1250) `static int ascii_ieq(const char *s, const char *lit)` - *} form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void forms_free(form_table *ft) { for (size_t i ...*
-- `attr_dup` (line 1262) `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
-- `forms_add` (line 1271) `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
-- `form_for` (line 1291) `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+- `collapse_ws` (line 1224) `static char *collapse_ws(const char *s, size_t n)` - *prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink; prev_basis = cs.flex_basis; prev_order = cs.order; prev_align_self = cs.align_self; have_pr...*
+- `parse_dim` (line 1247) `static int parse_dim(const lxb_char_t *s, size_t len)` - *Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%"). Returns the value clamped to a sane bound, ...*
+- `find_body` (line 1259) `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
+- `forms_free` (line 1282) `static void forms_free(form_table *ft)`
+- `ascii_ieq` (line 1290) `static int ascii_ieq(const char *s, const char *lit)` - *} form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void forms_free(form_table *ft) { for (size_t i ...*
+- `attr_dup` (line 1302) `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
+- `forms_add` (line 1311) `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
+- `form_for` (line 1331) `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...` - *} lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method", 6); int m = ascii_ieq(method, "p...*
-- `under_unrendered` (line 1307) `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` - *Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected subtree -- with run_js the parse...*
-- `collect_text` (line 1320) `static char *collect_text(const lxb_dom_node_t *el)` - *Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of a <button> / a flattened table...*
-- `classify_input` (line 1343) `static pv_input_type classify_input(const char *type)`
-- `describe_control` (line 1360) `static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
+- `under_unrendered` (line 1347) `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` - *Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected subtree -- with run_js the parse...*
+- `collect_text` (line 1360) `static char *collect_text(const lxb_dom_node_t *el)` - *Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of a <button> / a flattened table...*
+- `classify_input` (line 1383) `static pv_input_type classify_input(const char *type)`
+- `describe_control` (line 1400) `static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
                             ...` - *Fills owned label/name/value for a control element and its classified type. * Returns 0, or -1 on OOM (caller frees whatever is non-NULL).*
-- `li_ordinal` (line 1422) `static int li_ordinal(const lxb_dom_node_t *li)` - *1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out of scope). Counts preceding ele...*
-- `roman_marker` (line 1448) `static void roman_marker(int n, int upper, char *out, size_t cap)` - *int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ? 'A' : 'a') + r); n = (n - 1) /...*
-- `list_marker` (line 1473) `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+- `li_ordinal` (line 1462) `static int li_ordinal(const lxb_dom_node_t *li)` - *1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out of scope). Counts preceding ele...*
+- `roman_marker` (line 1488) `static void roman_marker(int n, int upper, char *out, size_t cap)` - *int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ? 'A' : 'a') + r); n = (n - 1) /...*
+- `list_marker` (line 1513) `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...` - *Builds the list marker for the first run of an <li>. With no author list-style (CSS_LS_UNSET) it is the UA default: "N. " for an ordered list, "* "...*
-- `nearest_table` (line 1493) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *case CSS_LS_CIRCLE:      snprintf(out, cap, "\xE2\x97\xA6 "); return; /* U+25E6 white bullet case CSS_LS_SQUARE:      snprintf(out, cap, "\xE2\x96\...*
-- `cell_has_nested_table` (line 1518) `static int cell_has_nested_table(const lxb_dom_node_t *cell)` - *Nonzero if cell has a descendant <table>: it is then a structural CONTAINER, not a leaf cell. Only leaf cells (no nested table) are collected as on...*
-- `next_skip` (line 1527) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` - *Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the table scan).*
-- `cell_anchors` (line 1538) `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` - *First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only none / exactly-one / several m...*
-- `links` (line 1556) `* its links (the Hacker News case: every story link lives inside a <td>), so the
+- `nearest_table` (line 1533) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *case CSS_LS_CIRCLE:      snprintf(out, cap, "\xE2\x97\xA6 "); return; /* U+25E6 white bullet case CSS_LS_SQUARE:      snprintf(out, cap, "\xE2\x96\...*
+- `cell_has_nested_table` (line 1558) `static int cell_has_nested_table(const lxb_dom_node_t *cell)` - *Nonzero if cell has a descendant <table>: it is then a structural CONTAINER, not a leaf cell. Only leaf cells (no nested table) are collected as on...*
+- `next_skip` (line 1567) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` - *Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the table scan).*
+- `cell_anchors` (line 1578) `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` - *First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only none / exactly-one / several m...*
+- `links` (line 1596) `* its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows ...`
-- `flow_table` (line 1587) `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
-- `table` (line 1603) `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
+- `flow_table` (line 1627) `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
+- `table` (line 1643) `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
  * content -- their ...`
-- `collect_style_text` (line 1650) `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)` - *Concatenates the text of every <style> element in the document (head included) into one owned, NUL-terminated buffer, capped at PV_MAX_STYLE_BYTES....*
-- `in_hidden_subtree` (line 1684) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `collect_style_text` (line 1690) `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)` - *Concatenates the text of every <style> element in the document (head included) into one owned, NUL-terminated buffer, capped at PV_MAX_STYLE_BYTES....*
+- `in_hidden_subtree` (line 1724) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...` - *Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none is structural visibility, appl...*
-- `in_boilerplate_subtree` (line 1699) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>). Used only in distraction-free (reader) mode to drop...*
-- `pv_build` (line 1710) `pv_status pv_build(const hp_document *doc, pv_view **out)`
-- `pv_build_ex` (line 1714) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-- `pv_build_full` (line 1718) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+- `in_boilerplate_subtree` (line 1739) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>). Used only in distraction-free (reader) mode to drop...*
+- `pv_build` (line 1750) `pv_status pv_build(const hp_document *doc, pv_view **out)`
+- `pv_build_ex` (line 1754) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+- `pv_build_full` (line 1758) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-- `pv_build_styled` (line 1723) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+- `pv_build_styled` (line 1763) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-- `appended` (line 2188) `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
+- `appended` (line 2229) `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
         if (cont.fl...`
 
 **Macros:**
 - `_POSIX_C_SOURCE` (line 9)
 - `PV_MAX_DIM` (line 32)
-- `PV_NODE_MAP_INIT_CAP` (line 203)
-- `PV_COLOR_TOKEN_MAX` (line 614)
-- `PV_MAX_CONTAINERS` (line 648)
-- `PV_MAX_GRID_COLS` (line 650)
-- `PV_MAX_STYLE_BYTES` (line 1644)
+- `PV_NODE_MAP_INIT_CAP` (line 204)
+- `PV_COLOR_TOKEN_MAX` (line 642)
+- `PV_MAX_CONTAINERS` (line 676)
+- `PV_MAX_GRID_COLS` (line 678)
+- `PV_MAX_STYLE_BYTES` (line 1684)
 
 **Structs:**
-- `pv_node_map` (line 205)
-- `pv_cont_info` (line 658) - *Nearest-container info attached to a run, plus the flex per-item values (Stage 3): grow/shrink/basis/order come from the ITEM element (the containe...*
-- `pv_item_track` (line 675) - *Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for container cid, node[cid] the direct-child element it belongs to. A ...*
-- `pv_box_info` (line 694) - *Author box model resolved for a run: horizontal placement (l/r insets, w cap, centered) from the nearest block ancestor that declares a box, plus t...*
-- `pv_container_reg` (line 818) - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id.*
-- `pv_box_reg` (line 835) - *Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block nodes plus each box's resolved definition (decoration + parent link)....*
-- `pv_style_cache` (line 915) - *Per-document memo of cch_element_style() results, keyed by element pointer. resolve_context()/in_hidden_subtree() call cch_element_style once per A...*
-- `form_rec` (line 1232) - *One <form> seen in document order: its grouping id is its index. action is an owned NUL-terminated copy of the raw action attribute (or NULL); meth...*
-- `form_table` (line 1238)
-- `pv_flow_reg` (line 1582) - *Cache of the per-table flow decision (a table subtree is scanned at most once, * anti-DoS). Registry full => grid (the previous behaviour), bounded...*
+- `pv_node_map` (line 206)
+- `pv_cont_info` (line 686) - *Nearest-container info attached to a run, plus the flex per-item values (Stage 3): grow/shrink/basis/order come from the ITEM element (the containe...*
+- `pv_item_track` (line 703) - *Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for container cid, node[cid] the direct-child element it belongs to. A ...*
+- `pv_box_info` (line 722) - *Author box model resolved for a run: horizontal placement (l/r insets, w cap, centered) from the nearest block ancestor that declares a box, plus t...*
+- `pv_container_reg` (line 857) - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id.*
+- `pv_box_reg` (line 874) - *Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block nodes plus each box's resolved definition (decoration + parent link)....*
+- `pv_style_cache` (line 955) - *Per-document memo of cch_element_style() results, keyed by element pointer. resolve_context()/in_hidden_subtree() call cch_element_style once per A...*
+- `form_rec` (line 1272) - *One <form> seen in document order: its grouping id is its index. action is an owned NUL-terminated copy of the raw action attribute (or NULL); meth...*
+- `form_table` (line 1278)
+- `pv_flow_reg` (line 1622) - *Cache of the per-table flow decision (a table subtree is scanned at most once, * anti-DoS). Registry full => grid (the previous behaviour), bounded...*
 
 #### `pdf_export.c`
 **Path:** `src/pdf_export.c`
@@ -2600,6 +2511,91 @@ int os_namespac...`
 - `pe_paginate` (line 94) `size_t pe_paginate(const double *tops, const double *heights, size_t n,
                    double...`
 
+#### `prefetch.c`
+**Path:** `src/prefetch.c`
+
+**Functions:**
+- `is_ws` (line 22) `static int is_ws(char c)` - *Longest raw reference the scanner keeps; matches URL_MAX_LEN (url.h) so a * ref the fetch path would reject on length is never even queued. define ...*
+- `is_name_char` (line 26) `static int is_name_char(char c)`
+- `lower` (line 31) `static int lower(int c)`
+- `ci_starts` (line 37) `static int ci_starts(const char *p, const char *end, const char *kw)` - *static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f'; } static int is_name_char(char c) { return (c >= 'a...*
+- `ci_find` (line 46) `static const char *ci_find(const char *p, const char *end, const char *kw)` - *static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* Case-insensitive: [p,end) starts with kw. static int ci_starts(...*
+- `ci_eq_span` (line 54) `static int ci_eq_span(const char *s, size_t n, const char *kw)`
+- `emit` (line 116) `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)`
+- `pf_scan` (line 128) `int pf_scan(const char *html, size_t len, pf_list *out)`
+- `pf_list_free` (line 191) `void pf_list_free(pf_list *l)`
+- `pf_worker` (line 199) `static void *pf_worker(void *arg)` - *} p++; } return 0; } void pf_list_free(pf_list *l) { if (l == NULL) return; for (size_t i = 0; i < l->count; ++i) free(l->refs[i].url); l->count = ...*
+- `pf_pool_start` (line 225) `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,
+                  pf_fetch_f...`
+- `pf_pool_take` (line 269) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,
+                 char **body,...`
+- `pf_pool_finish` (line 308) `void pf_pool_finish(pf_pool *p)`
+- `pf_pooled_fetch` (line 322) `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
+                    const ch...`
+
+**Macros:**
+- `_POSIX_C_SOURCE` (line 11)
+- `PF_MAX_URL` (line 21)
+
+**Structs:**
+- `attr_span` (line 62)
+
+#### `prefs.c`
+**Path:** `src/prefs.c`
+
+**Functions:**
+- `url_valid` (line 26) `static int url_valid(const char *url)` - *A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is allowed (local paths may carry it; fields are tab-separated).*
+- `title_clean` (line 39) `static char *title_clean(const char *src)` - *Copies src into a fresh buffer, mapping control bytes/DEL to ' ' and truncating to PREFS_MAX_TITLE bytes on a UTF-8 sequence boundary. A NULL * src...*
+- `prefs_init` (line 65) `void prefs_init(prefs_state *p)` - *((unsigned char)dst[n - 1 - back] & 0xC0u) == 0x80u) { ++back; } if (back < n) { unsigned char lead = (unsigned char)dst[n - 1 - back]; size_t need...*
+- `prefs_free` (line 73) `void prefs_free(prefs_state *p)`
+- `bookmark_push` (line 91) `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)` - *Appends a cleaned bookmark. Duplicate URLs are skipped (PREFS_OK). Used by * the toggle's add path and by the parser.*
+- `history_push_back` (line 109) `static prefs_status history_push_back(prefs_state *p, const char *url)` - *Appends a history entry at the BACK preserving document order (parser path; * the API path inserts at the front). Duplicates and overflow are skipped.*
+- `prefs_bookmark_index` (line 124) `int prefs_bookmark_index(const prefs_state *p, const char *url)` - *if (p->history_len >= PREFS_MAX_HISTORY) return PREFS_OK; for (size_t i = 0; i < p->history_len; ++i) if (strcmp(p->history[i], url) == 0) return P...*
+- `prefs_bookmark_toggle` (line 131) `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url,
+                             ...`
+- `prefs_history_add` (line 151) `prefs_status prefs_history_add(prefs_state *p, const char *url)`
+- `prefs_format` (line 182) `prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)` - *p->history_len--; } char **grown = (char **)realloc(p->history, (p->history_len + 1) * sizeof *grown); if (grown == NULL) { free(u); return PREFS_E...*
+- `apply_kv` (line 215) `static void apply_kv(prefs_state *out, const char *key, long val)` - *PREFS_VERSION, p->theme_mode, p->force_theme, p->images, p->css, p->reader, p->js_mode, p->tor, p->i2p, p->torify, p->zoom_pct, p->remember_history...*
+- `prefs_parse` (line 230) `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)`
+- `ci_eq` (line 289) `static int ci_eq(char a, char b)` - *char *eq = strchr(lbuf, '='); if (eq != NULL && eq != lbuf) { eq = '\0'; apply_kv(out, lbuf, strtol(eq + 1, NULL, 10)); } } } /* Oversized or malfo...*
+- `ci_starts` (line 295) `static int ci_starts(const char *s, const char *q)`
+- `ci_contains` (line 303) `static int ci_contains(const char *s, const char *q)`
+- `url_prefix_match` (line 313) `static int url_prefix_match(const char *url, const char *q)` - *Prefix match as the user types it: the raw URL, past the scheme, and past a * leading "www." ("wiki" hits "https://www.wikipedia.org/").*
+- `sugg_push` (line 325) `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,
+                      cons...` - *Prefix match as the user types it: the raw URL, past the scheme, and past a * leading "www." ("wiki" hits "https://www.wikipedia.org/"). static int...*
+- `prefs_suggest` (line 333) `int prefs_suggest(const prefs_state *p, const char *query,
+                  char *out, size_t ro...`
+- `sb_put` (line 358) `static void sb_put(sbuf *b, const char *s, size_t n)`
+- `sb_str` (line 373) `static void sb_str(sbuf *b, const char *s)`
+- `sb_esc` (line 377) `static void sb_esc(sbuf *b, const char *s)` - *while (nc < b->len + n + 1) nc *= 2; char *nd = (char *)realloc(b->data, nc); if (nd == NULL) { b->oom = 1; return; } b->data = nd; b->cap = nc; } ...*
+- `sb_link_item` (line 389) `static void sb_link_item(sbuf *b, const char *url, const char *label)`
+- `prefs_bookmarks_page` (line 397) `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
+
+**Macros:**
+- `_POSIX_C_SOURCE` (line 10)
+- `PREFS_MAGIC` (line 19)
+
+**Structs:**
+- `sbuf` (line 357)
+
+#### `profile.c`
+**Path:** `src/profile.c`
+
+**Functions:**
+- `join_path` (line 28) `static int join_path(const profile_ctx *ctx, const char *name,
+                     char *out, si...` - *#include "disk_store.h" #include <errno.h> #include <fcntl.h> #include <stdio.h> #include <stdlib.h> #include <string.h> #include <sys/stat.h> #inc...*
+- `keyfile_create` (line 36) `static profile_status keyfile_create(const char *dir, const char *path,
+                         ...` - *#include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h> #define PROFILE_KEYFILE_LEN (LS_SALT_LEN + LS_KEY_LEN)  /* 16 + 32 static...*
+- `profile_open` (line 58) `profile_status profile_open(profile_ctx *ctx, const char *dir)`
+- `map_ds` (line 97) `static profile_status map_ds(ds_status ds)`
+- `profile_load` (line 111) `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)`
+- `profile_save` (line 132) `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)`
+- `profile_close` (line 148) `void profile_close(profile_ctx *ctx)`
+
+**Macros:**
+- `_POSIX_C_SOURCE` (line 10)
+- `PROFILE_KEYFILE_LEN` (line 26)
+
 #### `render_doc.c`
 **Path:** `src/render_doc.c`
 
@@ -2608,20 +2604,20 @@ int os_namespac...`
 - `utf8_sanitized_dup` (line 31) `static char *utf8_sanitized_dup(const char *s)`
 - `rd_push` (line 63) `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
                  ...` - *Appends one block, taking owned copies of text (required) and href (optional). * Returns 0 on success, -1 on allocation failure (the doc is left co...*
-- `rd_push_input` (line 160) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` - *Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value. Returns 0, or -1 on allocation f...*
-- `rd_build` (line 177) `rd_status rd_build(const pv_view *view, rdp_caps caps,
+- `rd_push_input` (line 161) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` - *Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value. Returns 0, or -1 on allocation f...*
+- `rd_build` (line 178) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-- `url_resolve_file` (line 226) `url_resolve_file(top_level_url, r->src,
+- `url_resolve_file` (line 227) `url_resolve_file(top_level_url, r->src,
                                                 resolved,...`
-- `rd_free` (line 383) `void rd_free(rd_doc *d)`
-- `rd_count` (line 396) `size_t rd_count(const rd_doc *d)`
-- `rd_at` (line 400) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-- `rd_box_count` (line 405) `size_t rd_box_count(const rd_doc *d)`
-- `rd_box_at` (line 409) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-- `rd_kind_name` (line 414) `const char *rd_kind_name(rd_kind k)`
-- `rd_block_tag` (line 426) `const char *rd_block_tag(const rd_block *b)`
-- `rd_input_label` (line 451) `const char *rd_input_label(int input_type)`
-- `rd_image_label` (line 463) `const char *rd_image_label(rdp_img_decision d)`
+- `rd_free` (line 385) `void rd_free(rd_doc *d)`
+- `rd_count` (line 398) `size_t rd_count(const rd_doc *d)`
+- `rd_at` (line 402) `const rd_block *rd_at(const rd_doc *d, size_t i)`
+- `rd_box_count` (line 407) `size_t rd_box_count(const rd_doc *d)`
+- `rd_box_at` (line 411) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+- `rd_kind_name` (line 416) `const char *rd_kind_name(rd_kind k)`
+- `rd_block_tag` (line 428) `const char *rd_block_tag(const rd_block *b)`
+- `rd_input_label` (line 453) `const char *rd_input_label(int input_type)`
+- `rd_image_label` (line 465) `const char *rd_image_label(rdp_img_decision d)`
 
 #### `render_policy.c`
 **Path:** `src/render_policy.c`
@@ -2730,53 +2726,53 @@ int os_namespac...`
 - `run_js` (line 189) `* regardless of run_js (a no-JS load simply never records a request). */
 static int child_load(ch...`
 - `write_view` (line 274) `static int write_view(int wfd, const pv_view *v)` - *cont_id,cont_display,cont_gap,cont_justify,cont_cols, flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item, cont_wrap,cont_row_gap,...*
-- `FB_MAX_FILE_BYTES` (line 475) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+- `FB_MAX_FILE_BYTES` (line 479) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-- `budget_remaining_ms` (line 505) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` - *Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS budget across the inline scrip...*
-- `ctype_is_javascript` (line 519) `static int ctype_is_javascript(const char *ctype)` - *Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types): accept a missing/empty type -- class...*
-- `ctype_is_css` (line 528) `static int ctype_is_css(const char *ctype)` - *Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is accepted, anything else must mention...*
-- `log_external_skip` (line 536) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+- `budget_remaining_ms` (line 509) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` - *Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS budget across the inline scrip...*
+- `ctype_is_javascript` (line 523) `static int ctype_is_javascript(const char *ctype)` - *Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types): accept a missing/empty type -- class...*
+- `ctype_is_css` (line 532) `static int ctype_is_css(const char *ctype)` - *Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is accepted, anything else must mention...*
+- `log_external_skip` (line 540) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...` - *Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused). The raw hostile src is bounded by the messag...*
-- `window` (line 556) `* net window (cs->net_active). */
+- `window` (line 560) `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-- `child_handle_load` (line 596) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+- `child_handle_load` (line 600) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-- `click` (line 753) `* No navigation is produced by a click (the parent decides default actions). */
+- `click` (line 757) `* No navigation is produced by a click (the parent decides default actions). */
 static void child...`
-- `child_handle_eval` (line 792) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` - *Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a JS-level error is ok==1 with the...*
-- `child_handle_decode_image` (line 821) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` - *Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data]. Decoding hostile image bytes happens here, inside the confinement...*
-- `gen_session_key` (line 837) `static uint64_t gen_session_key(void)`
-- `tab_worker_run` (line 858) `static void tab_worker_run(int rfd, int wfd)` - *The confined request loop. Runs in the re-exec'd worker image (see * tab_worker_dispatch). Never returns to the caller (always _exit).*
-- `parse_worker_fd` (line 954) `static int parse_worker_fd(const char *s, int *out)` - *else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len); else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len); fr...*
-- `tab_parse_worker_args` (line 965) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- `tab_worker_dispatch` (line 975) `void tab_worker_dispatch(int argc, char **argv)`
-- `ignore_sigpipe` (line 1004) `static void ignore_sigpipe(void)` - *A write to a dead child must not kill the parent with SIGPIPE. Idempotent; * no module-level mutable state of our own (the disposition is process-w...*
-- `tab_refresh_alive` (line 1010) `static void tab_refresh_alive(tab *t)`
-- `read_field` (line 1030) `static int read_field(int fd, char **out, size_t *out_len)` - *Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.*
-- `read_view` (line 1045) `static int read_view(int fd, pv_view **out)` - *Reads a display list serialised by write_view into a fresh pv_view. The run * count and each field are capped against amplification from a hostile ...*
-- `read_console` (line 1257) `static int read_console(int fd, fb_buffer *out)` - *Reads the console section written by write_console into out (a zero-initialised fb_buffer). Bounds the entry count and each length against amplific...*
-- `send_request` (line 1293) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` - *if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt, elen) != 0) { free(txt); free(file)...*
-- `io_failure` (line 1302) `static tab_status io_failure(tab *t)`
-- `exec_worker_child` (line 1311) `static void exec_worker_child(int rfd, int wfd)` - *Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other tabs' content from tab_slots[], fr...*
-- `tab_set_fetcher` (line 1379) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- `tab_set_net_allowed` (line 1385) `void tab_set_net_allowed(tab *t, int allowed)`
-- `tab_set_css_allowed` (line 1390) `void tab_set_css_allowed(tab *t, int allowed)`
-- `tab_subreq_permitted` (line 1395) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- `answered` (line 1408) `* A refused frame is still consumed and answered (status 0), so the protocol never
+- `child_handle_eval` (line 796) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` - *Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a JS-level error is ok==1 with the...*
+- `child_handle_decode_image` (line 825) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` - *Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data]. Decoding hostile image bytes happens here, inside the confinement...*
+- `gen_session_key` (line 841) `static uint64_t gen_session_key(void)`
+- `tab_worker_run` (line 862) `static void tab_worker_run(int rfd, int wfd)` - *The confined request loop. Runs in the re-exec'd worker image (see * tab_worker_dispatch). Never returns to the caller (always _exit).*
+- `parse_worker_fd` (line 958) `static int parse_worker_fd(const char *s, int *out)` - *else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len); else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len); fr...*
+- `tab_parse_worker_args` (line 969) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
+- `tab_worker_dispatch` (line 979) `void tab_worker_dispatch(int argc, char **argv)`
+- `ignore_sigpipe` (line 1008) `static void ignore_sigpipe(void)` - *A write to a dead child must not kill the parent with SIGPIPE. Idempotent; * no module-level mutable state of our own (the disposition is process-w...*
+- `tab_refresh_alive` (line 1014) `static void tab_refresh_alive(tab *t)`
+- `read_field` (line 1034) `static int read_field(int fd, char **out, size_t *out_len)` - *Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.*
+- `read_view` (line 1049) `static int read_view(int fd, pv_view **out)` - *Reads a display list serialised by write_view into a fresh pv_view. The run * count and each field are capped against amplification from a hostile ...*
+- `read_console` (line 1266) `static int read_console(int fd, fb_buffer *out)` - *Reads the console section written by write_console into out (a zero-initialised fb_buffer). Bounds the entry count and each length against amplific...*
+- `send_request` (line 1302) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` - *if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt, elen) != 0) { free(txt); free(file)...*
+- `io_failure` (line 1311) `static tab_status io_failure(tab *t)`
+- `exec_worker_child` (line 1320) `static void exec_worker_child(int rfd, int wfd)` - *Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other tabs' content from tab_slots[], fr...*
+- `tab_set_fetcher` (line 1388) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+- `tab_set_net_allowed` (line 1394) `void tab_set_net_allowed(tab *t, int allowed)`
+- `tab_set_css_allowed` (line 1399) `void tab_set_css_allowed(tab *t, int allowed)`
+- `tab_subreq_permitted` (line 1404) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+- `answered` (line 1417) `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-- `tab_load` (line 1443) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- `tab_load_ex` (line 1447) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- `tab_load_full` (line 1451) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+- `tab_load` (line 1452) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+- `tab_load_ex` (line 1456) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+- `tab_load_full` (line 1460) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- `tab_click` (line 1555) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- `tab_eval` (line 1618) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- `tab_decode_image` (line 1655) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- `tab_alive` (line 1698) `int tab_alive(const tab *t)`
-- `tab_child_pid` (line 1704) `pid_t tab_child_pid(const tab *t)`
-- `tab_close` (line 1708) `void tab_close(tab *t)`
-- `tab_page_free` (line 1720) `void tab_page_free(tab_page *p)`
-- `tab_eval_result_free` (line 1736) `void tab_eval_result_free(tab_eval_result *r)`
-- `tab_image_free` (line 1745) `void tab_image_free(tab_image *img)`
+- `tab_click` (line 1564) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+- `tab_eval` (line 1627) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+- `tab_decode_image` (line 1664) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+- `tab_alive` (line 1707) `int tab_alive(const tab *t)`
+- `tab_child_pid` (line 1713) `pid_t tab_child_pid(const tab *t)`
+- `tab_close` (line 1717) `void tab_close(tab *t)`
+- `tab_page_free` (line 1729) `void tab_page_free(tab_page *p)`
+- `tab_eval_result_free` (line 1745) `void tab_eval_result_free(tab_eval_result *r)`
+- `tab_image_free` (line 1754) `void tab_image_free(tab_image *img)`
 
 **Macros:**
 - `_GNU_SOURCE` (line 13)
@@ -2787,11 +2783,11 @@ static void child...`
 - `TAB_MAX_SUBREQ` (line 71)
 - `TAB_MAX_SUBRESOURCE` (line 72)
 - `TAB_MAX_JS_JOBS` (line 73)
-- `TAB_MAX_EXTERN_CSS` (line 548)
+- `TAB_MAX_EXTERN_CSS` (line 552)
 
 **Structs:**
 - `child_state` (line 105)
-- `tab` (line 986)
+- `tab` (line 990)
 
 #### `text_shape.c`
 **Path:** `src/text_shape.c`
@@ -2949,7 +2945,7 @@ static int looks_like_host(const c...`
 - `test_place_centering` (line 227) `static void test_place_centering(void **state)`
 - `test_place_insets` (line 239) `static void test_place_insets(void **state)`
 - `test_place_failclosed_bounds` (line 251) `static void test_place_failclosed_bounds(void **state)`
-- `main` (line 265) `int main(void)`
+- `main` (line 279) `int main(void)`
 
 #### `test_box_tree.c`
 **Path:** `tests/test_box_tree.c`
@@ -3019,185 +3015,186 @@ static int looks_like_host(const c...`
 - `test_inline_text_align` (line 31) `static void test_inline_text_align(void **state)`
 - `test_inline_font_size` (line 39) `static void test_inline_font_size(void **state)`
 - `test_inline_line_height` (line 49) `static void test_inline_line_height(void **state)`
-- `test_inline_font_weight_style` (line 62) `static void test_inline_font_weight_style(void **state)`
-- `test_inline_text_decoration` (line 74) `static void test_inline_text_decoration(void **state)`
-- `test_font_family` (line 101) `static void test_font_family(void **state)` - */* none is an explicit value (0), distinct from unset (-1). assert_int_equal(css_parse_inline("text-decoration:none", 0).text_decoration, 0); /* Co...*
-- `test_text_transform` (line 122) `static void test_text_transform(void **state)`
-- `test_letter_word_spacing` (line 136) `static void test_letter_word_spacing(void **state)`
-- `test_text_shadow` (line 151) `static void test_text_shadow(void **state)`
-- `test_opacity` (line 173) `static void test_opacity(void **state)`
-- `test_vertical_align` (line 183) `static void test_vertical_align(void **state)`
-- `test_text_indent` (line 192) `static void test_text_indent(void **state)`
-- `test_white_space` (line 201) `static void test_white_space(void **state)`
-- `test_list_style_type` (line 212) `static void test_list_style_type(void **state)`
-- `test_text_ext_cascade_and_important` (line 226) `static void test_text_ext_cascade_and_important(void **state)`
-- `test_inline_display` (line 241) `static void test_inline_display(void **state)`
-- `test_inline_container_props` (line 252) `static void test_inline_container_props(void **state)` - *assert_int_equal(s.font_family, CSS_FF_MONO);          /* inline wins css_free(sh); } static void test_inline_display(void **state) { (void)state; ...*
-- `test_sheet_container_props` (line 280) `static void test_sheet_container_props(void **state)`
-- `test_container_cascade_inline_wins` (line 301) `static void test_container_cascade_inline_wins(void **state)` - *const char *row[] = { "row" }; css_style f = css_resolve(sh, "div", NULL, row, 1, NULL, 0); assert_int_equal(f.display, CSS_DISP_FLEX); assert_int_...*
-- `test_container_fail_closed_and_bounds` (line 316) `static void test_container_fail_closed_and_bounds(void **state)` - *Fail closed: a bad justify keyword is dropped (unset); grid-template-columns:none * is unset; gap and column count are clamped to their anti-DoS bo...*
-- `test_grid_minmax_counts_as_one_track` (line 348) `static void test_grid_minmax_counts_as_one_track(void **state)`
-- `test_grid_repeat_autofill_fails_closed` (line 356) `static void test_grid_repeat_autofill_fails_closed(void **state)`
-- `test_grid_repeat_malformed_fails_closed` (line 367) `static void test_grid_repeat_malformed_fails_closed(void **state)`
-- `test_grid_repeat_clamped_anti_dos` (line 374) `static void test_grid_repeat_clamped_anti_dos(void **state)`
-- `test_container_unset` (line 381) `static void test_container_unset(void **state)`
-- `test_url_value_dropped` (line 391) `static void test_url_value_dropped(void **state)` - *assert_int_equal( css_parse_inline("grid-template-columns: repeat(999, 1fr)", 0).grid_cols, (int)CSS_GRID_COLS_MAX); } static void test_container_u...*
-- `test_unknown_props_ignored` (line 401) `static void test_unknown_props_ignored(void **state)`
-- `test_malformed_inline_no_crash` (line 408) `static void test_malformed_inline_no_crash(void **state)`
-- `test_custom_prop_var_basic` (line 416) `static void test_custom_prop_var_basic(void **state)` - *static void test_unknown_props_ignored(void **state) { (void)state; css_style s = css_parse_inline("position:absolute; z-index:9; color:#abcdef; --...*
-- `test_custom_prop_var_fallback_used_when_missing` (line 427) `static void test_custom_prop_var_fallback_used_when_missing(void **state)`
-- `test_custom_prop_var_no_fallback_drops_decl` (line 433) `static void test_custom_prop_var_no_fallback_drops_decl(void **state)`
-- `test_custom_prop_var_chain` (line 442) `static void test_custom_prop_var_chain(void **state)`
-- `test_custom_prop_var_self_reference_fails_closed` (line 450) `static void test_custom_prop_var_self_reference_fails_closed(void **state)`
-- `test_custom_prop_var_in_shorthand` (line 459) `static void test_custom_prop_var_in_shorthand(void **state)`
-- `test_custom_prop_var_later_declaration_wins` (line 469) `static void test_custom_prop_var_later_declaration_wins(void **state)`
-- `test_custom_prop_var_unbalanced_paren_drops` (line 482) `static void test_custom_prop_var_unbalanced_paren_drops(void **state)`
-- `test_custom_prop_var_never_phones_home` (line 489) `static void test_custom_prop_var_never_phones_home(void **state)`
-- `test_sheet_type_selector` (line 503) `static void test_sheet_type_selector(void **state)` - *A custom property whose value contains url() — colour IS honoured, * the URL is never fetched. css_style s = css_parse_inline( "--evil: url(http://...*
-- `test_sheet_class_and_id` (line 514) `static void test_sheet_class_and_id(void **state)`
-- `test_sheet_universal_and_group` (line 524) `static void test_sheet_universal_and_group(void **state)`
-- `test_sheet_compound_selector` (line 534) `static void test_sheet_compound_selector(void **state)`
-- `el_node` (line 548) `static css_element el_node(const char *tag, const char *id,
+- `test_inline_font_weight_style` (line 64) `static void test_inline_font_weight_style(void **state)`
+- `test_inline_text_decoration` (line 76) `static void test_inline_text_decoration(void **state)`
+- `test_font_family` (line 103) `static void test_font_family(void **state)` - */* none is an explicit value (0), distinct from unset (-1). assert_int_equal(css_parse_inline("text-decoration:none", 0).text_decoration, 0); /* Co...*
+- `test_text_transform` (line 124) `static void test_text_transform(void **state)`
+- `test_letter_word_spacing` (line 138) `static void test_letter_word_spacing(void **state)`
+- `test_text_shadow` (line 153) `static void test_text_shadow(void **state)`
+- `test_opacity` (line 175) `static void test_opacity(void **state)`
+- `test_vertical_align` (line 185) `static void test_vertical_align(void **state)`
+- `test_text_indent` (line 194) `static void test_text_indent(void **state)`
+- `test_white_space` (line 203) `static void test_white_space(void **state)`
+- `test_list_style_type` (line 214) `static void test_list_style_type(void **state)`
+- `test_text_ext_cascade_and_important` (line 228) `static void test_text_ext_cascade_and_important(void **state)`
+- `test_inline_display` (line 243) `static void test_inline_display(void **state)`
+- `test_inline_container_props` (line 254) `static void test_inline_container_props(void **state)` - *assert_int_equal(s.font_family, CSS_FF_MONO);          /* inline wins css_free(sh); } static void test_inline_display(void **state) { (void)state; ...*
+- `test_sheet_container_props` (line 282) `static void test_sheet_container_props(void **state)`
+- `test_container_cascade_inline_wins` (line 303) `static void test_container_cascade_inline_wins(void **state)` - *const char *row[] = { "row" }; css_style f = css_resolve(sh, "div", NULL, row, 1, NULL, 0); assert_int_equal(f.display, CSS_DISP_FLEX); assert_int_...*
+- `test_container_fail_closed_and_bounds` (line 318) `static void test_container_fail_closed_and_bounds(void **state)` - *Fail closed: a bad justify keyword is dropped (unset); grid-template-columns:none * is unset; gap and column count are clamped to their anti-DoS bo...*
+- `test_grid_minmax_counts_as_one_track` (line 350) `static void test_grid_minmax_counts_as_one_track(void **state)`
+- `test_grid_repeat_autofill_fails_closed` (line 358) `static void test_grid_repeat_autofill_fails_closed(void **state)`
+- `test_grid_repeat_malformed_fails_closed` (line 369) `static void test_grid_repeat_malformed_fails_closed(void **state)`
+- `test_grid_repeat_clamped_anti_dos` (line 376) `static void test_grid_repeat_clamped_anti_dos(void **state)`
+- `test_container_unset` (line 383) `static void test_container_unset(void **state)`
+- `test_url_value_dropped` (line 393) `static void test_url_value_dropped(void **state)` - *assert_int_equal( css_parse_inline("grid-template-columns: repeat(999, 1fr)", 0).grid_cols, (int)CSS_GRID_COLS_MAX); } static void test_container_u...*
+- `test_unknown_props_ignored` (line 403) `static void test_unknown_props_ignored(void **state)`
+- `test_malformed_inline_no_crash` (line 410) `static void test_malformed_inline_no_crash(void **state)`
+- `test_custom_prop_var_basic` (line 418) `static void test_custom_prop_var_basic(void **state)` - *static void test_unknown_props_ignored(void **state) { (void)state; css_style s = css_parse_inline("position:absolute; z-index:9; color:#abcdef; --...*
+- `test_custom_prop_var_fallback_used_when_missing` (line 429) `static void test_custom_prop_var_fallback_used_when_missing(void **state)`
+- `test_custom_prop_var_no_fallback_drops_decl` (line 435) `static void test_custom_prop_var_no_fallback_drops_decl(void **state)`
+- `test_custom_prop_var_chain` (line 444) `static void test_custom_prop_var_chain(void **state)`
+- `test_custom_prop_var_self_reference_fails_closed` (line 452) `static void test_custom_prop_var_self_reference_fails_closed(void **state)`
+- `test_custom_prop_var_in_shorthand` (line 461) `static void test_custom_prop_var_in_shorthand(void **state)`
+- `test_custom_prop_var_later_declaration_wins` (line 471) `static void test_custom_prop_var_later_declaration_wins(void **state)`
+- `test_custom_prop_var_unbalanced_paren_drops` (line 484) `static void test_custom_prop_var_unbalanced_paren_drops(void **state)`
+- `test_custom_prop_var_never_phones_home` (line 491) `static void test_custom_prop_var_never_phones_home(void **state)`
+- `test_sheet_type_selector` (line 505) `static void test_sheet_type_selector(void **state)` - *A custom property whose value contains url() — colour IS honoured, * the URL is never fetched. css_style s = css_parse_inline( "--evil: url(http://...*
+- `test_sheet_class_and_id` (line 516) `static void test_sheet_class_and_id(void **state)`
+- `test_sheet_universal_and_group` (line 526) `static void test_sheet_universal_and_group(void **state)`
+- `test_sheet_compound_selector` (line 536) `static void test_sheet_compound_selector(void **state)`
+- `el_node` (line 550) `static css_element el_node(const char *tag, const char *id,
                            const char...` - *static void test_sheet_compound_selector(void **state) { (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse("a.button { color:#0a0b0c }"...*
-- `el_sib_node` (line 559) `static css_element el_sib_node(const char *tag, int nth, int nsib,
+- `el_sib_node` (line 561) `static css_element el_sib_node(const char *tag, int nth, int nsib,
                               ...` - *} /* Builds one css_element node aliasing the given fields (test-local helper). static css_element el_node(const char *tag, const char *id, const c...*
-- `el_attr_node` (line 567) `static css_element el_attr_node(const char *tag, const char *id,
+- `el_attr_node` (line 569) `static css_element el_attr_node(const char *tag, const char *id,
                                 ...` - *e.attrs = NULL; e.nattrs = 0; e.parent = parent; e.nth = 0; e.nsib = 0; e.prev = NULL;   /* sibling context unknown by default return e; } /* Like ...*
-- `test_text_decoration_cascade` (line 575) `static void test_text_decoration_cascade(void **state)`
-- `test_descendant_combinator` (line 594) `static void test_descendant_combinator(void **state)`
-- `test_child_combinator` (line 610) `static void test_child_combinator(void **state)`
-- `test_combinator_specificity_sum` (line 623) `static void test_combinator_specificity_sum(void **state)`
-- `test_combinator_class_chain` (line 638) `static void test_combinator_class_chain(void **state)`
-- `test_adjacent_sibling_combinator` (line 657) `static void test_adjacent_sibling_combinator(void **state)` - *const char *nav[] = { "nav" }; const char *item[] = { "item" }; css_element navdiv = el_node("div", NULL, nav, 1, NULL); css_element li     = el_no...*
-- `test_general_sibling_combinator` (line 672) `static void test_general_sibling_combinator(void **state)`
-- `test_sibling_mixed_with_child` (line 687) `static void test_sibling_mixed_with_child(void **state)`
-- `test_pseudo_link` (line 704) `static void test_pseudo_link(void **state)`
-- `test_pseudo_never_match_keeps_group` (line 722) `static void test_pseudo_never_match_keeps_group(void **state)`
-- `test_pseudo_structural` (line 739) `static void test_pseudo_structural(void **state)`
-- `test_pseudo_nth_child` (line 759) `static void test_pseudo_nth_child(void **state)`
-- `assert_int_equal` (line 763) `assert_int_equal(css_parse("tr:nth-child(even)`
-- `test_pseudo_nth_last_child` (line 782) `static void test_pseudo_nth_last_child(void **state)`
-- `assert_int_equal` (line 786) `assert_int_equal(css_parse("li:nth-last-child(2)`
-- `test_pseudo_root_and_form_state` (line 793) `static void test_pseudo_root_and_form_state(void **state)`
-- `test_pseudo_unknown_drops_selector` (line 817) `static void test_pseudo_unknown_drops_selector(void **state)`
-- `test_pseudo_specificity` (line 839) `static void test_pseudo_specificity(void **state)`
-- `test_pseudo_with_sibling_combinator` (line 857) `static void test_pseudo_with_sibling_combinator(void **state)`
-- `test_pseudo_nth_malformed_drops` (line 874) `static void test_pseudo_nth_malformed_drops(void **state)`
-- `assert_int_equal` (line 880) `assert_int_equal(css_parse("li:nth-child()` - *Malformed or oversized An+B drops the selector (fail closed); partner rules * survive.*
-- `test_resolve_el_inline_only` (line 890) `static void test_resolve_el_inline_only(void **state)`
-- `test_attr_presence` (line 898) `static void test_attr_presence(void **state)` - *"li{background:#101010}", 0, &sh), CSS_OK); css_element li = el_sib_node("li", 1, 1, NULL, NULL); assert_int_equal(css_resolve_el(sh, &li, NULL, 0)...*
-- `test_attr_equals` (line 911) `static void test_attr_equals(void **state)`
-- `test_attr_operators` (line 929) `static void test_attr_operators(void **state)`
-- `test_attr_case_insensitive_flag` (line 961) `static void test_attr_case_insensitive_flag(void **state)`
-- `test_attr_name_case_insensitive` (line 976) `static void test_attr_name_case_insensitive(void **state)`
-- `test_attr_quoted_value_with_space` (line 987) `static void test_attr_quoted_value_with_space(void **state)`
-- `test_attr_specificity_and_compound` (line 1001) `static void test_attr_specificity_and_compound(void **state)`
-- `test_attr_in_combinator` (line 1018) `static void test_attr_in_combinator(void **state)`
-- `test_attr_malformed_fail_closed` (line 1034) `static void test_attr_malformed_fail_closed(void **state)`
-- `test_important_inline_not_dropped` (line 1052) `static void test_important_inline_not_dropped(void **state)` - *Unbalanced/empty/unknown-operator brackets drop only that selector; the plain * rule in the group survives. assert_int_equal(css_parse("input[ {col...*
-- `test_important_beats_specificity` (line 1062) `static void test_important_beats_specificity(void **state)`
-- `test_important_tier_then_normal_order` (line 1071) `static void test_important_tier_then_normal_order(void **state)`
-- `test_important_inline_beats_sheet_important` (line 1081) `static void test_important_inline_beats_sheet_important(void **state)`
-- `test_important_in_shorthand` (line 1093) `static void test_important_in_shorthand(void **state)`
-- `test_cascade_specificity` (line 1110) `static void test_cascade_specificity(void **state)` - */* !important stamps every side a shorthand expands to. css_style s = css_parse_inline("margin:10px !important", 0); assert_int_equal(s.margin_top,...*
-- `silent` (line 1127) `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
+- `test_text_decoration_cascade` (line 577) `static void test_text_decoration_cascade(void **state)`
+- `test_descendant_combinator` (line 596) `static void test_descendant_combinator(void **state)`
+- `test_child_combinator` (line 612) `static void test_child_combinator(void **state)`
+- `test_combinator_specificity_sum` (line 625) `static void test_combinator_specificity_sum(void **state)`
+- `test_combinator_class_chain` (line 640) `static void test_combinator_class_chain(void **state)`
+- `test_adjacent_sibling_combinator` (line 659) `static void test_adjacent_sibling_combinator(void **state)` - *const char *nav[] = { "nav" }; const char *item[] = { "item" }; css_element navdiv = el_node("div", NULL, nav, 1, NULL); css_element li     = el_no...*
+- `test_general_sibling_combinator` (line 674) `static void test_general_sibling_combinator(void **state)`
+- `test_sibling_mixed_with_child` (line 689) `static void test_sibling_mixed_with_child(void **state)`
+- `test_pseudo_link` (line 706) `static void test_pseudo_link(void **state)`
+- `test_pseudo_never_match_keeps_group` (line 724) `static void test_pseudo_never_match_keeps_group(void **state)`
+- `test_pseudo_structural` (line 741) `static void test_pseudo_structural(void **state)`
+- `test_pseudo_nth_child` (line 761) `static void test_pseudo_nth_child(void **state)`
+- `assert_int_equal` (line 765) `assert_int_equal(css_parse("tr:nth-child(even)`
+- `test_pseudo_nth_last_child` (line 784) `static void test_pseudo_nth_last_child(void **state)`
+- `assert_int_equal` (line 788) `assert_int_equal(css_parse("li:nth-last-child(2)`
+- `test_pseudo_root_and_form_state` (line 795) `static void test_pseudo_root_and_form_state(void **state)`
+- `test_pseudo_unknown_drops_selector` (line 819) `static void test_pseudo_unknown_drops_selector(void **state)`
+- `test_pseudo_specificity` (line 841) `static void test_pseudo_specificity(void **state)`
+- `test_pseudo_with_sibling_combinator` (line 859) `static void test_pseudo_with_sibling_combinator(void **state)`
+- `test_pseudo_nth_malformed_drops` (line 876) `static void test_pseudo_nth_malformed_drops(void **state)`
+- `assert_int_equal` (line 882) `assert_int_equal(css_parse("li:nth-child()` - *Malformed or oversized An+B drops the selector (fail closed); partner rules * survive.*
+- `test_resolve_el_inline_only` (line 892) `static void test_resolve_el_inline_only(void **state)`
+- `test_attr_presence` (line 900) `static void test_attr_presence(void **state)` - *"li{background:#101010}", 0, &sh), CSS_OK); css_element li = el_sib_node("li", 1, 1, NULL, NULL); assert_int_equal(css_resolve_el(sh, &li, NULL, 0)...*
+- `test_attr_equals` (line 913) `static void test_attr_equals(void **state)`
+- `test_attr_operators` (line 931) `static void test_attr_operators(void **state)`
+- `test_attr_case_insensitive_flag` (line 963) `static void test_attr_case_insensitive_flag(void **state)`
+- `test_attr_name_case_insensitive` (line 978) `static void test_attr_name_case_insensitive(void **state)`
+- `test_attr_quoted_value_with_space` (line 989) `static void test_attr_quoted_value_with_space(void **state)`
+- `test_attr_specificity_and_compound` (line 1003) `static void test_attr_specificity_and_compound(void **state)`
+- `test_attr_in_combinator` (line 1020) `static void test_attr_in_combinator(void **state)`
+- `test_attr_malformed_fail_closed` (line 1036) `static void test_attr_malformed_fail_closed(void **state)`
+- `test_important_inline_not_dropped` (line 1054) `static void test_important_inline_not_dropped(void **state)` - *Unbalanced/empty/unknown-operator brackets drop only that selector; the plain * rule in the group survives. assert_int_equal(css_parse("input[ {col...*
+- `test_important_beats_specificity` (line 1064) `static void test_important_beats_specificity(void **state)`
+- `test_important_tier_then_normal_order` (line 1073) `static void test_important_tier_then_normal_order(void **state)`
+- `test_important_inline_beats_sheet_important` (line 1083) `static void test_important_inline_beats_sheet_important(void **state)`
+- `test_important_in_shorthand` (line 1095) `static void test_important_in_shorthand(void **state)`
+- `test_cascade_specificity` (line 1112) `static void test_cascade_specificity(void **state)` - */* !important stamps every side a shorthand expands to. css_style s = css_parse_inline("margin:10px !important", 0); assert_int_equal(s.margin_top,...*
+- `silent` (line 1129) `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past
  * the OLD cap...`
-- `test_cascade_document_order` (line 1151) `static void test_cascade_document_order(void **state)`
-- `test_cascade_inline_wins` (line 1160) `static void test_cascade_inline_wins(void **state)`
-- `test_at_rules_skipped` (line 1169) `static void test_at_rules_skipped(void **state)`
-- `test_media_screen_and_print` (line 1187) `static void test_media_screen_and_print(void **state)` - *@import is skipped entirely (no network). @media screen matches the default context, so its rule applies, then the later same-specificity plain rul...*
-- `test_media_prefers_color_scheme` (line 1206) `static void test_media_prefers_color_scheme(void **state)` - *"@media print { p { color:#010101 } }", 0, &sh), CSS_OK); assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0xabcdef); css_free(...*
-- `test_media_width_queries` (line 1222) `static void test_media_width_queries(void **state)` - *const char *css = "@media (prefers-color-scheme: dark) { body { color:#ffffff } }"; css_sheet *sh = NULL; assert_int_equal(css_parse(css, 0, &sh), ...*
-- `assert_int_equal` (line 1225) `assert_int_equal(css_parse(
+- `test_cascade_document_order` (line 1153) `static void test_cascade_document_order(void **state)`
+- `test_cascade_inline_wins` (line 1162) `static void test_cascade_inline_wins(void **state)`
+- `test_at_rules_skipped` (line 1171) `static void test_at_rules_skipped(void **state)`
+- `test_media_screen_and_print` (line 1189) `static void test_media_screen_and_print(void **state)` - *@import is skipped entirely (no network). @media screen matches the default context, so its rule applies, then the later same-specificity plain rul...*
+- `test_media_prefers_color_scheme` (line 1208) `static void test_media_prefers_color_scheme(void **state)` - *"@media print { p { color:#010101 } }", 0, &sh), CSS_OK); assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0xabcdef); css_free(...*
+- `test_media_width_queries` (line 1224) `static void test_media_width_queries(void **state)` - *const char *css = "@media (prefers-color-scheme: dark) { body { color:#ffffff } }"; css_sheet *sh = NULL; assert_int_equal(css_parse(css, 0, &sh), ...*
+- `assert_int_equal` (line 1227) `assert_int_equal(css_parse(
         "@media (min-width: 600px)`
-- `test_media_and_or` (line 1237) `static void test_media_and_or(void **state)` - *(void)state; css_sheet *sh = NULL; assert_int_equal(css_parse( "@media (min-width: 600px) { p { color:#111111 } }\n" "@media (min-width: 3000px) { ...*
-- `assert_int_equal` (line 1240) `assert_int_equal(css_parse(
+- `test_media_and_or` (line 1239) `static void test_media_and_or(void **state)` - *(void)state; css_sheet *sh = NULL; assert_int_equal(css_parse( "@media (min-width: 600px) { p { color:#111111 } }\n" "@media (min-width: 3000px) { ...*
+- `assert_int_equal` (line 1242) `assert_int_equal(css_parse(
         "@media screen and (min-width: 600px)`
-- `test_media_unknown_fails_closed` (line 1251) `static void test_media_unknown_fails_closed(void **state)` - *static void test_media_and_or(void **state) { (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse( "@media screen and (min-width: 600px) ...*
-- `assert_int_equal` (line 1254) `assert_int_equal(css_parse(
+- `test_media_unknown_fails_closed` (line 1253) `static void test_media_unknown_fails_closed(void **state)` - *static void test_media_and_or(void **state) { (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse( "@media screen and (min-width: 600px) ...*
+- `assert_int_equal` (line 1256) `assert_int_equal(css_parse(
         "@media (hover: hover)`
-- `test_parse_null_args` (line 1268) `static void test_parse_null_args(void **state)` - *assert_int_equal(css_parse( "@media (hover: hover) { p { color:#cccccc } }\n" "@media tv { a { color:#dddddd } }\n" "@media not screen { b { color:...*
-- `test_resolve_null_safe` (line 1278) `static void test_resolve_null_safe(void **state)`
-- `test_inline_box_longhands` (line 1292) `static void test_inline_box_longhands(void **state)` - *static void test_resolve_null_safe(void **state) { (void)state; /* NULL sheet and NULL tag are safe; everything unset. css_style s = css_resolve(NU...*
-- `test_box_shorthand_expansion` (line 1310) `static void test_box_shorthand_expansion(void **state)`
-- `test_box_auto_and_centering` (line 1338) `static void test_box_auto_and_centering(void **state)`
-- `test_box_units_and_failclosed` (line 1355) `static void test_box_units_and_failclosed(void **state)`
-- `test_calc_basic_arithmetic` (line 1378) `static void test_calc_basic_arithmetic(void **state)`
-- `test_calc_precedence_and_parens` (line 1387) `static void test_calc_precedence_and_parens(void **state)`
-- `test_calc_units_and_signs` (line 1394) `static void test_calc_units_and_signs(void **state)`
-- `test_calc_dimension_errors_fail_closed` (line 1402) `static void test_calc_dimension_errors_fail_closed(void **state)`
-- `test_calc_clamped_anti_dos` (line 1417) `static void test_calc_clamped_anti_dos(void **state)`
-- `test_calc_inside_shorthands` (line 1428) `static void test_calc_inside_shorthands(void **state)` - *calc() must survive being ONE token inside a multi-value shorthand: a naive whitespace splitter would break "calc(10px + 5px)" apart at the interna...*
-- `test_calc_with_custom_property` (line 1465) `static void test_calc_with_custom_property(void **state)`
-- `test_box_clamp_anti_dos` (line 1472) `static void test_box_clamp_anti_dos(void **state)`
-- `test_inline_min_width_height` (line 1481) `static void test_inline_min_width_height(void **state)` - *(void)state; /* calc() and var() compose: var() substitutes text before calc() is parsed. css_style s = css_parse_inline("--base: 20px; width: calc...*
-- `test_inline_min_max_height` (line 1508) `static void test_inline_min_max_height(void **state)`
-- `test_box_extension_sheet_cascade` (line 1522) `static void test_box_extension_sheet_cascade(void **state)`
-- `test_inline_text_decoration_color_style` (line 1542) `static void test_inline_text_decoration_color_style(void **state)` - *"#s { height:400px }", 0, &sh), CSS_OK); const char *cls[] = { "card" }; css_style s = css_resolve(sh, "div", NULL, cls, 1, NULL, 0); assert_int_eq...*
-- `test_inline_text_decoration_thickness` (line 1571) `static void test_inline_text_decoration_thickness(void **state)` - */* All style keywords. assert_int_equal(css_parse_inline("text-decoration-style:solid", 0).text_decoration_style, CSS_TDS_SOLID); assert_int_equal(...*
-- `test_inline_aspect_ratio` (line 1588) `static void test_inline_aspect_ratio(void **state)` - */* from-font -> 0 (the painter treats 0 as "default thickness" via cairo). assert_int_equal(css_parse_inline("text-decoration-thickness:from-font",...*
-- `test_inline_direction` (line 1618) `static void test_inline_direction(void **state)` - *css_style d = css_parse_inline("aspect-ratio:auto", 0); assert_int_equal(d.aspect_num, 0); assert_int_equal(d.aspect_den, 0); /* Bad value -> 0/0 (...*
-- `test_inline_outline_offset` (line 1627) `static void test_inline_outline_offset(void **state)` - *assert_int_equal(def.aspect_num, 0); assert_int_equal(def.aspect_den, 0); } /* --- direction --- static void test_inline_direction(void **state) { ...*
-- `test_inline_tab_size` (line 1639) `static void test_inline_tab_size(void **state)` - */* --- outline-offset --- static void test_inline_outline_offset(void **state) { (void)state; assert_int_equal(css_parse_inline("outline-offset:2px...*
-- `test_box_sheet_cascade_inline_wins` (line 1649) `static void test_box_sheet_cascade_inline_wins(void **state)`
-- `test_position_and_insets` (line 1664) `static void test_position_and_insets(void **state)` - *static void test_box_sheet_cascade_inline_wins(void **state) { (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse(".card{max-width:600px...*
-- `test_float_and_clear` (line 1695) `static void test_float_and_clear(void **state)`
-- `test_visibility` (line 1719) `static void test_visibility(void **state)`
-- `test_overflow` (line 1736) `static void test_overflow(void **state)`
-- `test_cursor` (line 1759) `static void test_cursor(void **state)`
-- `test_text_overflow_and_word_break` (line 1775) `static void test_text_overflow_and_word_break(void **state)`
-- `test_box_sizing` (line 1800) `static void test_box_sizing(void **state)`
-- `test_border_shorthand` (line 1808) `static void test_border_shorthand(void **state)`
-- `test_border_longhands` (line 1838) `static void test_border_longhands(void **state)`
-- `test_box_shadow_and_outline` (line 1864) `static void test_box_shadow_and_outline(void **state)`
-- `test_flex_item` (line 1889) `static void test_flex_item(void **state)`
-- `test_flex_align` (line 1918) `static void test_flex_align(void **state)`
-- `test_grid_extras` (line 1940) `static void test_grid_extras(void **state)`
-- `test_layout_sheet_cascade_and_unset` (line 1958) `static void test_layout_sheet_cascade_and_unset(void **state)`
-- `test_inline_outline_longhands` (line 1995) `static void test_inline_outline_longhands(void **state)` - *const char *cls[] = { "card" }; css_style s = css_resolve(sh, "div", NULL, cls, 1, "z-index:9", 0); assert_int_equal(s.position, CSS_POS_ABSOLUTE);...*
-- `test_inline_border_collapse` (line 2026) `static void test_inline_border_collapse(void **state)` - *assert_int_equal(css_parse_inline("outline-style:none", 0).outline_style, CSS_BST_NONE); assert_int_equal(css_parse_inline("outline-style:ridge", 0...*
-- `test_inline_border_spacing` (line 2035) `static void test_inline_border_spacing(void **state)` - *assert_int_equal(css_parse_inline("outline-color:auto", 0).outline_color, -1); /* dropped assert_int_equal(css_parse_inline("color:red", 0).outline...*
-- `test_inline_empty_cells` (line 2046) `static void test_inline_empty_cells(void **state)` - *} /* --- border-spacing --- static void test_inline_border_spacing(void **state) { (void)state; assert_int_equal(css_parse_inline("border-spacing:2...*
-- `test_inline_caption_side` (line 2055) `static void test_inline_caption_side(void **state)` - *assert_int_equal(css_parse_inline("border-spacing:auto", 0).border_spacing, CSS_LEN_UNSET); /* dropped assert_int_equal(css_parse_inline("color:red...*
-- `test_inline_table_layout` (line 2064) `static void test_inline_table_layout(void **state)` - *assert_int_equal(css_parse_inline("empty-cells:auto", 0).empty_cells, CSS_EC_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red", 0).e...*
-- `test_inline_font_variant` (line 2073) `static void test_inline_font_variant(void **state)` - *assert_int_equal(css_parse_inline("caption-side:left", 0).caption_side, CSS_CS_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red", 0)...*
-- `test_inline_hyphens` (line 2082) `static void test_inline_hyphens(void **state)` - *assert_int_equal(css_parse_inline("table-layout:collapse", 0).table_layout, CSS_TL_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red"...*
-- `test_inline_user_select` (line 2092) `static void test_inline_user_select(void **state)` - *assert_int_equal(css_parse_inline("color:red", 0).font_variant, CSS_FV_UNSET); } /* --- hyphens --- static void test_inline_hyphens(void **state) {...*
-- `test_inline_caret_color` (line 2103) `static void test_inline_caret_color(void **state)` - *} /* --- user-select --- static void test_inline_user_select(void **state) { (void)state; assert_int_equal(css_parse_inline("user-select:none", 0)....*
-- `test_inline_appearance` (line 2113) `static void test_inline_appearance(void **state)` - *assert_int_equal(css_parse_inline("color:red", 0).user_select, CSS_US_UNSET); } /* --- caret-color --- static void test_inline_caret_color(void **s...*
-- `test_inline_pointer_events` (line 2122) `static void test_inline_pointer_events(void **state)` - *assert_int_equal(css_parse_inline("caret-color:blargh", 0).caret_color, -1); /* unknown -> unset assert_int_equal(css_parse_inline("color:red", 0)....*
-- `test_table_sheet_cascade` (line 2131) `static void test_table_sheet_cascade(void **state)` - *assert_int_equal(css_parse_inline("appearance:button", 0).appearance, CSS_AP_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red", 0).a...*
-- `test_inline_bg_repeat` (line 2146) `static void test_inline_bg_repeat(void **state)` - *(void)state; css_sheet *sh = NULL; assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fix...*
-- `test_inline_bg_size` (line 2157) `static void test_inline_bg_size(void **state)`
-- `test_inline_bg_clip_origin_attachment` (line 2166) `static void test_inline_bg_clip_origin_attachment(void **state)`
-- `test_inline_isolation` (line 2186) `static void test_inline_isolation(void **state)`
-- `test_inline_contain` (line 2194) `static void test_inline_contain(void **state)`
-- `test_inline_content_visibility` (line 2209) `static void test_inline_content_visibility(void **state)`
-- `test_inline_image_rendering` (line 2218) `static void test_inline_image_rendering(void **state)`
-- `test_inline_color_scheme` (line 2227) `static void test_inline_color_scheme(void **state)`
-- `test_inline_accent_color` (line 2237) `static void test_inline_accent_color(void **state)`
-- `test_inline_print_forced_adjust` (line 2246) `static void test_inline_print_forced_adjust(void **state)`
-- `test_inline_mix_blend_mode` (line 2260) `static void test_inline_mix_blend_mode(void **state)` - *static void test_inline_print_forced_adjust(void **state) { (void)state; assert_int_equal(css_parse_inline("print-color-adjust:economy", 0).print_c...*
-- `test_inline_object_fit` (line 2280) `static void test_inline_object_fit(void **state)`
-- `test_inline_list_style_pos` (line 2291) `static void test_inline_list_style_pos(void **state)`
-- `test_inline_font_kerning` (line 2299) `static void test_inline_font_kerning(void **state)`
-- `test_inline_text_rendering` (line 2308) `static void test_inline_text_rendering(void **state)`
-- `test_inline_font_stretch` (line 2318) `static void test_inline_font_stretch(void **state)`
-- `test_inline_resize` (line 2333) `static void test_inline_resize(void **state)`
-- `test_inline_scroll_behavior` (line 2343) `static void test_inline_scroll_behavior(void **state)`
-- `test_inline_touch_action` (line 2351) `static void test_inline_touch_action(void **state)`
-- `test_inline_overscroll_behavior` (line 2360) `static void test_inline_overscroll_behavior(void **state)`
-- `test_inline_backface_visibility` (line 2369) `static void test_inline_backface_visibility(void **state)`
-- `test_math_min_max_top_level` (line 2379) `static void test_math_min_max_top_level(void **state)` - *assert_int_equal(css_parse_inline("overscroll-behavior:none", 0).overscroll_behavior, CSS_OS_NONE); assert_int_equal(css_parse_inline("overscroll-b...*
-- `test_math_clamp` (line 2390) `static void test_math_clamp(void **state)`
-- `test_math_nested_in_calc` (line 2400) `static void test_math_nested_in_calc(void **state)`
-- `test_logical_margin_padding` (line 2415) `static void test_logical_margin_padding(void **state)` - *static void test_math_nested_in_calc(void **state) { (void)state; assert_int_equal(css_parse_inline("width:calc(min(10px, 2em) * 2)", 0).width, 20)...*
-- `test_logical_inset_and_sizes` (line 2440) `static void test_logical_inset_and_sizes(void **state)`
-- `test_place_shorthands` (line 2463) `static void test_place_shorthands(void **state)` - *assert_int_equal(s.inset_left, 1); assert_int_equal(s.inset_bottom, 2); s = css_parse_inline("inline-size:200px; block-size:100px", 0); assert_int_...*
-- `test_gap_two_value` (line 2485) `static void test_gap_two_value(void **state)`
-- `test_font_shorthand` (line 2503) `static void test_font_shorthand(void **state)` - *assert_int_equal(s.row_gap, 10); assert_int_equal(s.gap, 20); s = css_parse_inline("gap:12px", 0); assert_int_equal(s.gap, 12); assert_int_equal(s....*
-- `test_white_space_break_spaces` (line 2525) `static void test_white_space_break_spaces(void **state)` - *s = css_parse_inline("font:16px sans-serif", 0); assert_int_equal(s.font_scale, 100); assert_int_equal(s.font_family, CSS_FF_SANS); assert_int_equa...*
-- `main` (line 2529) `int main(void)`
+- `test_parse_null_args` (line 1270) `static void test_parse_null_args(void **state)` - *assert_int_equal(css_parse( "@media (hover: hover) { p { color:#cccccc } }\n" "@media tv { a { color:#dddddd } }\n" "@media not screen { b { color:...*
+- `test_resolve_null_safe` (line 1280) `static void test_resolve_null_safe(void **state)`
+- `test_inline_box_longhands` (line 1294) `static void test_inline_box_longhands(void **state)` - *static void test_resolve_null_safe(void **state) { (void)state; /* NULL sheet and NULL tag are safe; everything unset. css_style s = css_resolve(NU...*
+- `test_box_shorthand_expansion` (line 1312) `static void test_box_shorthand_expansion(void **state)`
+- `test_box_auto_and_centering` (line 1340) `static void test_box_auto_and_centering(void **state)`
+- `test_box_units_and_failclosed` (line 1357) `static void test_box_units_and_failclosed(void **state)`
+- `test_width_percent_carried_symbolically` (line 1385) `static void test_width_percent_carried_symbolically(void **state)` - *Hito 32: width/max-width percentages are carried SYMBOLICALLY (per-mille in width_pct/max_width_pct; the px channel stays UNSET) and resolved at la...*
+- `test_calc_basic_arithmetic` (line 1412) `static void test_calc_basic_arithmetic(void **state)`
+- `test_calc_precedence_and_parens` (line 1421) `static void test_calc_precedence_and_parens(void **state)`
+- `test_calc_units_and_signs` (line 1428) `static void test_calc_units_and_signs(void **state)`
+- `test_calc_dimension_errors_fail_closed` (line 1436) `static void test_calc_dimension_errors_fail_closed(void **state)`
+- `test_calc_clamped_anti_dos` (line 1451) `static void test_calc_clamped_anti_dos(void **state)`
+- `test_calc_inside_shorthands` (line 1462) `static void test_calc_inside_shorthands(void **state)` - *calc() must survive being ONE token inside a multi-value shorthand: a naive whitespace splitter would break "calc(10px + 5px)" apart at the interna...*
+- `test_calc_with_custom_property` (line 1499) `static void test_calc_with_custom_property(void **state)`
+- `test_box_clamp_anti_dos` (line 1506) `static void test_box_clamp_anti_dos(void **state)`
+- `test_inline_min_width_height` (line 1515) `static void test_inline_min_width_height(void **state)` - *(void)state; /* calc() and var() compose: var() substitutes text before calc() is parsed. css_style s = css_parse_inline("--base: 20px; width: calc...*
+- `test_inline_min_max_height` (line 1542) `static void test_inline_min_max_height(void **state)`
+- `test_box_extension_sheet_cascade` (line 1556) `static void test_box_extension_sheet_cascade(void **state)`
+- `test_inline_text_decoration_color_style` (line 1576) `static void test_inline_text_decoration_color_style(void **state)` - *"#s { height:400px }", 0, &sh), CSS_OK); const char *cls[] = { "card" }; css_style s = css_resolve(sh, "div", NULL, cls, 1, NULL, 0); assert_int_eq...*
+- `test_inline_text_decoration_thickness` (line 1605) `static void test_inline_text_decoration_thickness(void **state)` - */* All style keywords. assert_int_equal(css_parse_inline("text-decoration-style:solid", 0).text_decoration_style, CSS_TDS_SOLID); assert_int_equal(...*
+- `test_inline_aspect_ratio` (line 1622) `static void test_inline_aspect_ratio(void **state)` - */* from-font -> 0 (the painter treats 0 as "default thickness" via cairo). assert_int_equal(css_parse_inline("text-decoration-thickness:from-font",...*
+- `test_inline_direction` (line 1652) `static void test_inline_direction(void **state)` - *css_style d = css_parse_inline("aspect-ratio:auto", 0); assert_int_equal(d.aspect_num, 0); assert_int_equal(d.aspect_den, 0); /* Bad value -> 0/0 (...*
+- `test_inline_outline_offset` (line 1661) `static void test_inline_outline_offset(void **state)` - *assert_int_equal(def.aspect_num, 0); assert_int_equal(def.aspect_den, 0); } /* --- direction --- static void test_inline_direction(void **state) { ...*
+- `test_inline_tab_size` (line 1673) `static void test_inline_tab_size(void **state)` - */* --- outline-offset --- static void test_inline_outline_offset(void **state) { (void)state; assert_int_equal(css_parse_inline("outline-offset:2px...*
+- `test_box_sheet_cascade_inline_wins` (line 1683) `static void test_box_sheet_cascade_inline_wins(void **state)`
+- `test_position_and_insets` (line 1698) `static void test_position_and_insets(void **state)` - *static void test_box_sheet_cascade_inline_wins(void **state) { (void)state; css_sheet *sh = NULL; assert_int_equal(css_parse(".card{max-width:600px...*
+- `test_float_and_clear` (line 1729) `static void test_float_and_clear(void **state)`
+- `test_visibility` (line 1753) `static void test_visibility(void **state)`
+- `test_overflow` (line 1770) `static void test_overflow(void **state)`
+- `test_cursor` (line 1793) `static void test_cursor(void **state)`
+- `test_text_overflow_and_word_break` (line 1809) `static void test_text_overflow_and_word_break(void **state)`
+- `test_box_sizing` (line 1834) `static void test_box_sizing(void **state)`
+- `test_border_shorthand` (line 1842) `static void test_border_shorthand(void **state)`
+- `test_border_longhands` (line 1872) `static void test_border_longhands(void **state)`
+- `test_box_shadow_and_outline` (line 1898) `static void test_box_shadow_and_outline(void **state)`
+- `test_flex_item` (line 1923) `static void test_flex_item(void **state)`
+- `test_flex_align` (line 1952) `static void test_flex_align(void **state)`
+- `test_grid_extras` (line 1974) `static void test_grid_extras(void **state)`
+- `test_layout_sheet_cascade_and_unset` (line 1992) `static void test_layout_sheet_cascade_and_unset(void **state)`
+- `test_inline_outline_longhands` (line 2029) `static void test_inline_outline_longhands(void **state)` - *const char *cls[] = { "card" }; css_style s = css_resolve(sh, "div", NULL, cls, 1, "z-index:9", 0); assert_int_equal(s.position, CSS_POS_ABSOLUTE);...*
+- `test_inline_border_collapse` (line 2060) `static void test_inline_border_collapse(void **state)` - *assert_int_equal(css_parse_inline("outline-style:none", 0).outline_style, CSS_BST_NONE); assert_int_equal(css_parse_inline("outline-style:ridge", 0...*
+- `test_inline_border_spacing` (line 2069) `static void test_inline_border_spacing(void **state)` - *assert_int_equal(css_parse_inline("outline-color:auto", 0).outline_color, -1); /* dropped assert_int_equal(css_parse_inline("color:red", 0).outline...*
+- `test_inline_empty_cells` (line 2080) `static void test_inline_empty_cells(void **state)` - *} /* --- border-spacing --- static void test_inline_border_spacing(void **state) { (void)state; assert_int_equal(css_parse_inline("border-spacing:2...*
+- `test_inline_caption_side` (line 2089) `static void test_inline_caption_side(void **state)` - *assert_int_equal(css_parse_inline("border-spacing:auto", 0).border_spacing, CSS_LEN_UNSET); /* dropped assert_int_equal(css_parse_inline("color:red...*
+- `test_inline_table_layout` (line 2098) `static void test_inline_table_layout(void **state)` - *assert_int_equal(css_parse_inline("empty-cells:auto", 0).empty_cells, CSS_EC_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red", 0).e...*
+- `test_inline_font_variant` (line 2107) `static void test_inline_font_variant(void **state)` - *assert_int_equal(css_parse_inline("caption-side:left", 0).caption_side, CSS_CS_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red", 0)...*
+- `test_inline_hyphens` (line 2116) `static void test_inline_hyphens(void **state)` - *assert_int_equal(css_parse_inline("table-layout:collapse", 0).table_layout, CSS_TL_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red"...*
+- `test_inline_user_select` (line 2126) `static void test_inline_user_select(void **state)` - *assert_int_equal(css_parse_inline("color:red", 0).font_variant, CSS_FV_UNSET); } /* --- hyphens --- static void test_inline_hyphens(void **state) {...*
+- `test_inline_caret_color` (line 2137) `static void test_inline_caret_color(void **state)` - *} /* --- user-select --- static void test_inline_user_select(void **state) { (void)state; assert_int_equal(css_parse_inline("user-select:none", 0)....*
+- `test_inline_appearance` (line 2147) `static void test_inline_appearance(void **state)` - *assert_int_equal(css_parse_inline("color:red", 0).user_select, CSS_US_UNSET); } /* --- caret-color --- static void test_inline_caret_color(void **s...*
+- `test_inline_pointer_events` (line 2156) `static void test_inline_pointer_events(void **state)` - *assert_int_equal(css_parse_inline("caret-color:blargh", 0).caret_color, -1); /* unknown -> unset assert_int_equal(css_parse_inline("color:red", 0)....*
+- `test_table_sheet_cascade` (line 2165) `static void test_table_sheet_cascade(void **state)` - *assert_int_equal(css_parse_inline("appearance:button", 0).appearance, CSS_AP_UNSET); /* unknown assert_int_equal(css_parse_inline("color:red", 0).a...*
+- `test_inline_bg_repeat` (line 2180) `static void test_inline_bg_repeat(void **state)` - *(void)state; css_sheet *sh = NULL; assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fix...*
+- `test_inline_bg_size` (line 2191) `static void test_inline_bg_size(void **state)`
+- `test_inline_bg_clip_origin_attachment` (line 2200) `static void test_inline_bg_clip_origin_attachment(void **state)`
+- `test_inline_isolation` (line 2220) `static void test_inline_isolation(void **state)`
+- `test_inline_contain` (line 2228) `static void test_inline_contain(void **state)`
+- `test_inline_content_visibility` (line 2243) `static void test_inline_content_visibility(void **state)`
+- `test_inline_image_rendering` (line 2252) `static void test_inline_image_rendering(void **state)`
+- `test_inline_color_scheme` (line 2261) `static void test_inline_color_scheme(void **state)`
+- `test_inline_accent_color` (line 2271) `static void test_inline_accent_color(void **state)`
+- `test_inline_print_forced_adjust` (line 2280) `static void test_inline_print_forced_adjust(void **state)`
+- `test_inline_mix_blend_mode` (line 2294) `static void test_inline_mix_blend_mode(void **state)` - *static void test_inline_print_forced_adjust(void **state) { (void)state; assert_int_equal(css_parse_inline("print-color-adjust:economy", 0).print_c...*
+- `test_inline_object_fit` (line 2314) `static void test_inline_object_fit(void **state)`
+- `test_inline_list_style_pos` (line 2325) `static void test_inline_list_style_pos(void **state)`
+- `test_inline_font_kerning` (line 2333) `static void test_inline_font_kerning(void **state)`
+- `test_inline_text_rendering` (line 2342) `static void test_inline_text_rendering(void **state)`
+- `test_inline_font_stretch` (line 2352) `static void test_inline_font_stretch(void **state)`
+- `test_inline_resize` (line 2367) `static void test_inline_resize(void **state)`
+- `test_inline_scroll_behavior` (line 2377) `static void test_inline_scroll_behavior(void **state)`
+- `test_inline_touch_action` (line 2385) `static void test_inline_touch_action(void **state)`
+- `test_inline_overscroll_behavior` (line 2394) `static void test_inline_overscroll_behavior(void **state)`
+- `test_inline_backface_visibility` (line 2403) `static void test_inline_backface_visibility(void **state)`
+- `test_math_min_max_top_level` (line 2413) `static void test_math_min_max_top_level(void **state)` - *assert_int_equal(css_parse_inline("overscroll-behavior:none", 0).overscroll_behavior, CSS_OS_NONE); assert_int_equal(css_parse_inline("overscroll-b...*
+- `test_math_clamp` (line 2424) `static void test_math_clamp(void **state)`
+- `test_math_nested_in_calc` (line 2434) `static void test_math_nested_in_calc(void **state)`
+- `test_logical_margin_padding` (line 2449) `static void test_logical_margin_padding(void **state)` - *static void test_math_nested_in_calc(void **state) { (void)state; assert_int_equal(css_parse_inline("width:calc(min(10px, 2em) * 2)", 0).width, 20)...*
+- `test_logical_inset_and_sizes` (line 2474) `static void test_logical_inset_and_sizes(void **state)`
+- `test_place_shorthands` (line 2497) `static void test_place_shorthands(void **state)` - *assert_int_equal(s.inset_left, 1); assert_int_equal(s.inset_bottom, 2); s = css_parse_inline("inline-size:200px; block-size:100px", 0); assert_int_...*
+- `test_gap_two_value` (line 2519) `static void test_gap_two_value(void **state)`
+- `test_font_shorthand` (line 2537) `static void test_font_shorthand(void **state)` - *assert_int_equal(s.row_gap, 10); assert_int_equal(s.gap, 20); s = css_parse_inline("gap:12px", 0); assert_int_equal(s.gap, 12); assert_int_equal(s....*
+- `test_white_space_break_spaces` (line 2559) `static void test_white_space_break_spaces(void **state)` - *s = css_parse_inline("font:16px sans-serif", 0); assert_int_equal(s.font_scale, 100); assert_int_equal(s.font_family, CSS_FF_SANS); assert_int_equa...*
+- `main` (line 2563) `int main(void)`
 
 #### `test_css_color.c`
 **Path:** `tests/test_css_color.c`
@@ -3357,8 +3354,12 @@ static int looks_like_host(const c...`
 - `test_float_pack_left_and_right` (line 205) `static void test_float_pack_left_and_right(void **state)`
 - `test_float_pack_two_right` (line 217) `static void test_float_pack_two_right(void **state)`
 - `test_float_pack_edges` (line 228) `static void test_float_pack_edges(void **state)`
-- `test_justify_name` (line 241) `static void test_justify_name(void **state)`
-- `main` (line 252) `int main(void)`
+- `test_float_pack_wrap_full_width_stack` (line 245) `static void test_float_pack_wrap_full_width_stack(void **state)` - *Hito 32 (band wrap): two consecutive full-width floats (Slashdot's .grid_24 { width:99.8% }) must STACK -- one per row at x = 0 -- instead of * bei...*
+- `test_float_pack_wrap_fits_matches_v1` (line 259) `static void test_float_pack_wrap_fits_matches_v1(void **state)` - *static void test_float_pack_wrap_full_width_stack(void **state) { (void)state; double w[3] = { 998.0, 998.0, 998.0 }; int side[3] = { 0, 0, 0 }; do...*
+- `test_float_pack_wrap_partial` (line 282) `static void test_float_pack_wrap_partial(void **state)` - *assert_int_equal((int)row[i], 0); assert_true(dbl_eq(x[i], xv1[i])); } /* Left main + right sidebar share row 0 exactly like v1. double w2[2] = { 3...*
+- `test_float_pack_wrap_errors` (line 304) `static void test_float_pack_wrap_errors(void **state)`
+- `test_justify_name` (line 313) `static void test_justify_name(void **state)`
+- `main` (line 324) `int main(void)`
 
 #### `test_form.c`
 **Path:** `tests/test_form.c`
@@ -3654,7 +3655,8 @@ static int looks_like_host(const c...`
 - `test_enabled_fail_closed_on_bad_mode` (line 30) `static void test_enabled_fail_closed_on_bad_mode(void **state)`
 - `test_mode_from_str` (line 35) `static void test_mode_from_str(void **state)`
 - `test_mode_str_roundtrip` (line 52) `static void test_mode_str_roundtrip(void **state)`
-- `main` (line 64) `int main(void)`
+- `test_trusted_requires_both_signals` (line 68) `static void test_trusted_requires_both_signals(void **state)` - *Hito 28: a host is TRUSTED (full author CSS + images, on top of full JS) only when the user declared it twice: JS enabled for it AND explicitly on ...*
+- `main` (line 78) `int main(void)`
 
 #### `test_js_sandbox.c`
 **Path:** `tests/test_js_sandbox.c`
@@ -3910,6 +3912,74 @@ static int looks_like_host(const c...`
 - `test_paginate_preserves_gaps` (line 263) `static void test_paginate_preserves_gaps(void **state)`
 - `test_paginate_invalid_args` (line 275) `static void test_paginate_invalid_args(void **state)`
 - `main` (line 289) `int main(void)`
+
+#### `test_prefetch.c`
+**Path:** `tests/test_prefetch.c`
+
+**Functions:**
+- `test_scan_null_args` (line 21) `static void test_scan_null_args(void **state)` - *#include <stdarg.h> #include <stddef.h> #include <setjmp.h> #include <stdint.h> #include <cmocka.h> #include <pthread.h> #include <stdlib.h> #inclu...*
+- `test_scan_basic_stylesheet_and_script` (line 31) `static void test_scan_basic_stylesheet_and_script(void **state)`
+- `test_scan_ref_cap` (line 104) `static void test_scan_ref_cap(void **state)` - *(void)state; const char *html = "<!-- <link rel=stylesheet href=commented.css> -->" "<script>document.write('<link rel=stylesheet href=fromjs.css>'...*
+- `fake_fetch` (line 132) `static int fake_fetch(void *vctx, const char *method, const char *url,
+                      cons...`
+- `test_pool_parallel_fetch_and_take` (line 150) `static void test_pool_parallel_fetch_and_take(void **state)`
+- `test_pool_miss_consume_and_failure` (line 182) `static void test_pool_miss_consume_and_failure(void **state)`
+- `test_pool_finish_unconsumed_and_empty` (line 226) `static void test_pool_finish_unconsumed_and_empty(void **state)` - *finish() with results nobody took must free them all (ASan-verified) and be * idempotent. An empty pool is a no-op that reports -1 from start.*
+- `test_pooled_fetch_adapter` (line 247) `static void test_pooled_fetch_adapter(void **state)` - *The shared cache-first adapter: pooled GETs hit the pool, everything else * (POST, miss, no pool) falls through to the inner fetcher exactly once.*
+- `main` (line 286) `int main(void)`
+
+**Macros:**
+- `_POSIX_C_SOURCE` (line 4)
+
+**Structs:**
+- `fake_ctx` (line 124) - *Deterministic fake fetcher: body echoes the URL so take() can verify the per-URL mapping; a barrier proves REAL concurrency (the test only passes i...*
+
+#### `test_prefs.c`
+**Path:** `tests/test_prefs.c`
+
+**Functions:**
+- `test_init_defaults` (line 24) `static void test_init_defaults(void **state)` - *#include <stdarg.h> #include <stddef.h> #include <stdint.h> #include <stdio.h> #include <stdlib.h> #include <setjmp.h> #include <string.h> #include...*
+- `test_roundtrip` (line 49) `static void test_roundtrip(void **state)` - *assert_int_equal(p.tor, 0); assert_int_equal(p.i2p, 0); assert_int_equal(p.torify, 0); assert_int_equal(p.zoom_pct, 100); assert_int_equal(p.rememb...*
+- `test_parse_bad_magic` (line 109) `static void test_parse_bad_magic(void **state)` - *assert_string_equal(q.bookmarks[0].url, "https://example.com/a"); assert_string_equal(q.bookmarks[0].title, "Example A"); assert_string_equal(q.boo...*
+- `test_parse_too_large` (line 125) `static void test_parse_too_large(void **state)`
+- `test_parse_unknown_and_malformed_skipped` (line 134) `static void test_parse_unknown_and_malformed_skipped(void **state)`
+- `test_parse_clamps_out_of_range` (line 156) `static void test_parse_clamps_out_of_range(void **state)`
+- `test_invalid_urls_rejected` (line 178) `static void test_invalid_urls_rejected(void **state)` - *"js=7\n" "zoom=9999\n" "images=5\n" "tor=-3\n"; assert_int_equal(prefs_parse(text, strlen(text), &p), PREFS_OK); assert_int_equal(p.theme_mode, 0);...*
+- `test_hostile_title_cleaned` (line 206) `static void test_hostile_title_cleaned(void **state)` - *PREFS_ERR_INVALID); char big[PREFS_MAX_URL + 8]; memset(big, 'a', sizeof big - 1); big[sizeof big - 1] = '\0'; assert_int_equal(prefs_bookmark_togg...*
+- `test_bookmark_toggle_and_cap` (line 236) `static void test_bookmark_toggle_and_cap(void **state)` - *long_title[n++] = (char)0xA1; } long_title[n] = '\0'; assert_int_equal(prefs_bookmark_toggle(&p, "https://y.test/", long_title, &added), PREFS_OK);...*
+- `test_history_dedup_and_evict` (line 264) `static void test_history_dedup_and_evict(void **state)` - *assert_int_equal(p.bookmarks_len, 0); char url[64]; for (size_t i = 0; i < PREFS_MAX_BOOKMARKS; ++i) { snprintf(url, sizeof url, "https://cap.test/...*
+- `test_suggest_priorities` (line 289) `static void test_suggest_priorities(void **state)` - *assert_string_equal(p.history[0], "https://a.test/"); assert_string_equal(p.history[1], "https://b.test/"); char url[64]; for (size_t i = 0; i < PR...*
+- `test_bookmarks_page_escapes` (line 344) `static void test_bookmarks_page_escapes(void **state)` - */* Rows too small for a URL: that URL is skipped, no overflow. char tiny[6][16]; n = prefs_suggest(&p, "wiki", (char *)tiny, sizeof tiny[0], 6); as...*
+- `test_format_null_args` (line 381) `static void test_format_null_args(void **state)` - */* Empty state still yields a valid page. prefs_state q; prefs_init(&q); assert_int_equal(prefs_bookmarks_page(&q, &html, &len), PREFS_OK); assert_...*
+- `main` (line 393) `int main(void)`
+
+**Macros:**
+- `_POSIX_C_SOURCE` (line 8)
+
+#### `test_profile.c`
+**Path:** `tests/test_profile.c`
+
+**Functions:**
+- `setup` (line 29) `static int setup(void **state)`
+- `teardown` (line 38) `static int teardown(void **state)`
+- `path_of` (line 59) `static void path_of(const fixture *f, const char *name, char *out, size_t cap)`
+- `file_size` (line 63) `static size_t file_size(const char *path)`
+- `test_open_creates_keyfile` (line 71) `static void test_open_creates_keyfile(void **state)` - *return 0; } static void path_of(const fixture *f, const char *name, char *out, size_t cap) { snprintf(out, cap, "%s/%s", f->dir, name); } static si...*
+- `test_open_rejects_corrupt_keyfile` (line 88) `static void test_open_rejects_corrupt_keyfile(void **state)`
+- `test_open_bad_dir` (line 102) `static void test_open_bad_dir(void **state)`
+- `test_first_launch_defaults` (line 114) `static void test_first_launch_defaults(void **state)` - *assert_int_equal(file_size(kp), 5); } static void test_open_bad_dir(void **state) { (void)state; profile_ctx ctx; assert_int_equal(profile_open(&ct...*
+- `test_save_load_roundtrip_two_ctx` (line 127) `static void test_save_load_roundtrip_two_ctx(void **state)`
+- `test_nothing_readable_on_disk` (line 173) `static void test_nothing_readable_on_disk(void **state)` - */* prefs.bin is 0600. char pp[512]; path_of(f, PROFILE_PREFS_FILE, pp, sizeof pp); struct stat st; assert_int_equal(stat(pp, &st), 0); assert_int_e...*
+- `test_tampered_blob_auth_fails` (line 203) `static void test_tampered_blob_auth_fails(void **state)` - *assert_non_null(fp); static uint8_t blob[1 << 20]; size_t blen = fread(blob, 1, sizeof blob, fp); fclose(fp); assert_true(blen > 0); assert_null(me...*
+- `test_foreign_key_auth_fails` (line 235) `static void test_foreign_key_auth_fails(void **state)`
+- `test_null_and_not_ready` (line 260) `static void test_null_and_not_ready(void **state)` - *char kp[512]; path_of(f, PROFILE_KEY_FILE, kp, sizeof kp); assert_int_equal(unlink(kp), 0); profile_ctx other; assert_int_equal(profile_open(&other...*
+- `main` (line 277) `int main(void)`
+
+**Macros:**
+- `_GNU_SOURCE` (line 8)
+
+**Structs:**
+- `fixture` (line 28)
 
 #### `test_render_doc.c`
 **Path:** `tests/test_render_doc.c`
@@ -4262,7 +4332,7 @@ static void tes...`
 **Structs:**
 - `vec` (line 21)
 
-### H (42 files)
+### H (45 files)
 
 #### `browser_ui_internal.h`
 **Path:** `gui/browser_ui_internal.h`
@@ -4337,37 +4407,37 @@ static void tes...`
 
 **Macros:**
 - `FREEDOM_CSS_H` (line 2)
-- `CSS_GAP_MAX` (line 63)
-- `CSS_GRID_COLS_MAX` (line 64)
-- `CSS_LINE_MIN` (line 65)
-- `CSS_LINE_MAX` (line 66)
-- `CSS_DECO_UNDERLINE` (line 71)
-- `CSS_DECO_LINE_THROUGH` (line 72)
-- `CSS_DECO_OVERLINE` (line 73)
-- `CSS_CONTAIN_SIZE` (line 307)
-- `CSS_CONTAIN_LAYOUT` (line 308)
-- `CSS_CONTAIN_STYLE` (line 309)
-- `CSS_CONTAIN_PAINT` (line 310)
-- `CSS_BORDER_W_MAX` (line 387)
-- `CSS_BORDER_SPACING_MAX` (line 388)
-- `CSS_FLEX_FACTOR_MAX` (line 389)
-- `CSS_GRID_SPAN_MAX` (line 390)
-- `CSS_SPACING_MAX` (line 394)
-- `CSS_SHADOW_MAX` (line 395)
-- `CSS_LEN_MAX` (line 400)
-- `CSS_LEN_UNSET` (line 401)
-- `CSS_LEN_AUTO` (line 402)
-- `CSS_MAX_COMPOUNDS` (line 406)
-- `CSS_MAX_ATTR_SEL` (line 410)
-- `CSS_MAX_PSEUDO_SEL` (line 414)
-- `CSS_NTH_MAX` (line 418)
-- `CSS_MEDIA_DEFAULT_WIDTH` (line 570)
+- `CSS_GAP_MAX` (line 64)
+- `CSS_GRID_COLS_MAX` (line 65)
+- `CSS_LINE_MIN` (line 66)
+- `CSS_LINE_MAX` (line 67)
+- `CSS_DECO_UNDERLINE` (line 72)
+- `CSS_DECO_LINE_THROUGH` (line 73)
+- `CSS_DECO_OVERLINE` (line 74)
+- `CSS_CONTAIN_SIZE` (line 308)
+- `CSS_CONTAIN_LAYOUT` (line 309)
+- `CSS_CONTAIN_STYLE` (line 310)
+- `CSS_CONTAIN_PAINT` (line 311)
+- `CSS_BORDER_W_MAX` (line 388)
+- `CSS_BORDER_SPACING_MAX` (line 389)
+- `CSS_FLEX_FACTOR_MAX` (line 390)
+- `CSS_GRID_SPAN_MAX` (line 391)
+- `CSS_SPACING_MAX` (line 395)
+- `CSS_SHADOW_MAX` (line 396)
+- `CSS_LEN_MAX` (line 401)
+- `CSS_LEN_UNSET` (line 402)
+- `CSS_LEN_AUTO` (line 403)
+- `CSS_MAX_COMPOUNDS` (line 407)
+- `CSS_MAX_ATTR_SEL` (line 411)
+- `CSS_MAX_PSEUDO_SEL` (line 415)
+- `CSS_NTH_MAX` (line 419)
+- `CSS_MEDIA_DEFAULT_WIDTH` (line 577)
 
 **Structs:**
-- `css_style` (line 425) - *A resolved presentation. Each field uses a sentinel for "unset" so the caller can layer inheritance (take the first ancestor that sets each inherit...*
-- `css_media` (line 565) - *Render-time media context for evaluating @media at parse time. width_px is a fixed, normalized desktop width, so a (min/max-width) query leaks no r...*
-- `css_attr` (line 602) - *One element attribute, for attribute selectors ([attr], [attr=v], [attr~=v], ...). name is the lowercased local name; value is the attribute text (...*
-- `css_element` (line 612) - *An element plus its ancestor chain, for combinator matching. Each field aliases caller storage (nothing is copied/owned). parent walks toward the r...*
+- `css_style` (line 426) - *A resolved presentation. Each field uses a sentinel for "unset" so the caller can layer inheritance (take the first ancestor that sets each inherit...*
+- `css_media` (line 572) - *Render-time media context for evaluating @media at parse time. width_px is a fixed, normalized desktop width, so a (min/max-width) query leaks no r...*
+- `css_attr` (line 609) - *One element attribute, for attribute selectors ([attr], [attr=v], [attr~=v], ...). name is the lowercased local name; value is the attribute text (...*
+- `css_element` (line 619) - *An element plus its ancestor chain, for combinator matching. Each field aliases caller storage (nothing is copied/owned). parent walks toward the r...*
 
 #### `css_chain.h`
 **Path:** `include/css_chain.h`
@@ -4599,9 +4669,9 @@ static void tes...`
 
 **Structs:**
 - `pv_run` (line 77) - *One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-ter...*
-- `pv_box_def` (line 242) - *Box engine (Hito 23b-8 Step D): one entry of the box-definition TREE. The box decoration and the parent link live here, not on each run, so a box i...*
-- `pv_view` (line 304)
-- `pv_text_ext` (line 423) - *The author text-presentation extensions of one run, resolved from the nearest ancestor that sets each field (they all inherit in CSS). The 20+ fiel...*
+- `pv_box_def` (line 247) - *Box engine (Hito 23b-8 Step D): one entry of the box-definition TREE. The box decoration and the parent link live here, not on each run, so a box i...*
+- `pv_view` (line 310)
+- `pv_text_ext` (line 429) - *The author text-presentation extensions of one run, resolved from the nearest ancestor that sets each field (they all inherit in CSS). The 20+ fiel...*
 
 #### `pdf_export.h`
 **Path:** `include/pdf_export.h`
@@ -4612,6 +4682,49 @@ static void tes...`
 - `PE_EXT` (line 29)
 - `PE_EXT_PNG` (line 30)
 - `PE_FALLBACK_NAME` (line 31)
+
+#### `prefetch.h`
+**Path:** `include/prefetch.h`
+
+**Macros:**
+- `FREEDOM_PREFETCH_H` (line 2)
+- `PF_MAX_REFS` (line 46)
+- `PF_MAX_THREADS` (line 48)
+
+**Structs:**
+- `pf_ref` (line 42) - *One scanned reference. url is the RAW attribute value (the policy-gated fetcher * resolves and validates it, exactly as it does for the worker's ow...*
+- `pf_list` (line 50)
+- `pf_job` (line 77)
+- `pf_pool` (line 87)
+- `pf_gated_fetch` (line 129) - *Cache-first fetcher adapter, shared by every frontend (DRY): install pf_pooled_fetch as the tab fetcher with a pf_gated_fetch as its ctx. A GET who...*
+
+#### `prefs.h`
+**Path:** `include/prefs.h`
+
+**Macros:**
+- `FREEDOM_PREFS_H` (line 2)
+- `PREFS_VERSION` (line 25)
+- `PREFS_MAX_URL` (line 27)
+- `PREFS_MAX_TITLE` (line 28)
+- `PREFS_MAX_BOOKMARKS` (line 29)
+- `PREFS_MAX_HISTORY` (line 30)
+- `PREFS_MAX_TEXT` (line 31)
+- `PREFS_PAGE_HISTORY` (line 34)
+
+**Structs:**
+- `prefs_entry` (line 45)
+- `prefs_state` (line 50)
+
+#### `profile.h`
+**Path:** `include/profile.h`
+
+**Macros:**
+- `FREEDOM_PROFILE_H` (line 2)
+- `PROFILE_KEY_FILE` (line 31)
+- `PROFILE_PREFS_FILE` (line 33)
+
+**Structs:**
+- `profile_ctx` (line 46)
 
 #### `psl_data.h`
 **Path:** `include/psl_data.h`
@@ -4627,7 +4740,7 @@ static void tes...`
 
 **Structs:**
 - `rd_block` (line 44) - *One paint-ready block in document order. text is owned, NUL-terminated and valid UTF-8. href is owned and NUL-terminated for RD_LINK (link target),...*
-- `rd_doc` (line 149)
+- `rd_doc` (line 152)
 
 #### `render_policy.h`
 **Path:** `include/render_policy.h`
