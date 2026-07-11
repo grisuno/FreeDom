@@ -53,7 +53,9 @@ static void test_inline_line_height(void **state) {
     assert_int_equal(css_parse_inline("line-height:2", 0).line_scale, 200);
     assert_int_equal(css_parse_inline("line-height:160%", 0).line_scale, 160); /* percent */
     assert_int_equal(css_parse_inline("line-height:normal", 0).line_scale, 0); /* unset */
-    assert_int_equal(css_parse_inline("line-height:24px", 0).line_scale, 0);   /* absolute: dropped */
+    assert_int_equal(css_parse_inline("line-height:24px", 0).line_scale, 150);  /* px: 24/16*100 */
+    assert_int_equal(css_parse_inline("line-height:1.5em", 0).line_scale, 150); /* em: 1.5*100 */
+    assert_int_equal(css_parse_inline("line-height:2rem", 0).line_scale, 200);  /* rem: 2*100 */
     assert_int_equal(css_parse_inline("color:red", 0).line_scale, 0);          /* unset */
     /* Clamped to the anti-DoS range [CSS_LINE_MIN, CSS_LINE_MAX]. */
     assert_int_equal(css_parse_inline("line-height:99", 0).line_scale, CSS_LINE_MAX);
@@ -1376,6 +1378,38 @@ static void test_box_units_and_failclosed(void **state) {
     assert_int_equal(def.max_width, CSS_LEN_UNSET);
 }
 
+/* Hito 32: width/max-width percentages are carried SYMBOLICALLY (per-mille in
+ * width_pct/max_width_pct; the px channel stays UNSET) and resolved at layout
+ * time against the real containing width. Junk still fails closed; every other
+ * % length keeps failing closed. */
+static void test_width_percent_carried_symbolically(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("width:99.8%", 0);
+    assert_int_equal(s.width, CSS_LEN_UNSET);          /* px channel untouched */
+    assert_int_equal(s.width_pct, 998);
+    assert_int_equal(css_parse_inline("max-width:50%", 0).max_width_pct, 500);
+    assert_int_equal(css_parse_inline("width:100%", 0).width_pct, 1000);
+    /* logical alias rides the same slots. */
+    assert_int_equal(css_parse_inline("inline-size:25%", 0).width_pct, 250);
+    assert_int_equal(css_parse_inline("max-inline-size:75%", 0).max_width_pct, 750);
+    /* junk fails closed (unset = 0). */
+    assert_int_equal(css_parse_inline("width:-5%", 0).width_pct, 0);
+    assert_int_equal(css_parse_inline("width:%", 0).width_pct, 0);
+    assert_int_equal(css_parse_inline("width:abc%", 0).width_pct, 0);
+    assert_int_equal(css_parse_inline("width:0%", 0).width_pct, 0);
+    /* clamp: anything past 1000% saturates instead of overflowing. */
+    assert_int_equal(css_parse_inline("width:5000%", 0).width_pct, 10000);
+    /* px and pct coexist across properties (each keeps its own channel). */
+    css_style t = css_parse_inline("width:600px; max-width:50%", 0);
+    assert_int_equal(t.width, 600);
+    assert_int_equal(t.width_pct, 0);
+    assert_int_equal(t.max_width_pct, 500);
+    assert_int_equal(t.max_width, CSS_LEN_UNSET);
+    /* other % lengths still fail closed. */
+    assert_int_equal(css_parse_inline("margin-left:10%", 0).margin_left, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("min-width:10%", 0).min_width, CSS_LEN_UNSET);
+}
+
 static void test_calc_basic_arithmetic(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("width: calc(100px + 50px)", 0).width, 150);
@@ -2551,6 +2585,7 @@ int main(void) {
         cmocka_unit_test(test_calc_precedence_and_parens),
         cmocka_unit_test(test_calc_units_and_signs),
         cmocka_unit_test(test_calc_dimension_errors_fail_closed),
+        cmocka_unit_test(test_width_percent_carried_symbolically),
         cmocka_unit_test(test_calc_clamped_anti_dos),
         cmocka_unit_test(test_calc_inside_shorthands),
         cmocka_unit_test(test_calc_with_custom_property),

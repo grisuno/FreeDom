@@ -184,6 +184,7 @@ static void run_init_common(pv_run *r) {
     r->box_center = 0;
     r->box_mt = PV_LEN_UNSET;
     r->box_mb = PV_LEN_UNSET;
+    r->box_w_pct = 0;
     r->node_id = DOM_NODE_NONE;
     r->block_id = -1;
     r->input_type = 0;
@@ -480,6 +481,11 @@ void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
     r->box_mb = box_mb;
 }
 
+void pv_set_box_pct(pv_view *v, int box_w_pct) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].box_w_pct = box_w_pct;
+}
+
 void pv_set_node_id(pv_view *v, dom_node_id node_id) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].node_id = node_id;
@@ -560,10 +566,32 @@ static int is_block_tag(lxb_tag_id_t t) {
         case LXB_TAG_TABLE: case LXB_TAG_TR: case LXB_TAG_FIGURE:
         case LXB_TAG_FORM: case LXB_TAG_FIELDSET: case LXB_TAG_DL:
         case LXB_TAG_DT: case LXB_TAG_DD:
+        case LXB_TAG_MENU:
             return 1;
         default:
             return 0;
     }
+}
+
+/* An element should be treated as block-like (eligible for box registration,
+ * hbox, float) when its CSS display property indicates a block-level box, even
+ * if the tag itself is normally inline. This lets author CSS like
+ *   a { display: inline-block; width: 22px; }
+ * actually create a box for the <a> tag. */
+static int is_block_like(lxb_tag_id_t t, css_display display) {
+    if (display == CSS_DISP_INLINE) return 0;
+    if (display == CSS_DISP_BLOCK || display == CSS_DISP_INLINE_BLOCK
+        || display == CSS_DISP_LIST_ITEM) return 1;
+    return is_block_tag(t);
+}
+
+/* Returns 1 when the element should cause a block break (start a new line).
+ * display:inline-block and display:inline do NOT cause a break; they flow
+ * inline while still being eligible for box registration. */
+static int causes_block_break(lxb_tag_id_t t, css_display display) {
+    if (display == CSS_DISP_INLINE || display == CSS_DISP_INLINE_BLOCK) return 0;
+    if (display == CSS_DISP_BLOCK) return 1;
+    return is_block_tag(t);
 }
 
 static int heading_level(lxb_tag_id_t t) {
@@ -693,6 +721,8 @@ static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item) 
  * block's own vertical-margin override (mt/mb, or PV_LEN_UNSET). */
 typedef struct pv_box_info {
     int l, r, w, center, mt, mb;
+    int w_pct;   /* per-mille width cap (Hito 32), 0 = none; LAST so the existing
+                  * positional initializers keep meaning what they say */
 } pv_box_info;
 
 /* The author text-presentation extensions struct (pv_text_ext) is public now
@@ -760,6 +790,7 @@ static int css_has_hbox(const css_style *cs) {
     return cs->margin_left != CSS_LEN_UNSET || cs->margin_right != CSS_LEN_UNSET ||
            cs->pad_left   != CSS_LEN_UNSET || cs->pad_right   != CSS_LEN_UNSET ||
            cs->width != CSS_LEN_UNSET || cs->max_width != CSS_LEN_UNSET ||
+           cs->width_pct > 0 || cs->max_width_pct > 0 ||
            cs->min_width > 0;
 }
 
@@ -776,10 +807,18 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
     if (cs->width != CSS_LEN_UNSET) w = cs->width;
     if (cs->max_width != CSS_LEN_UNSET && (w == CSS_LEN_UNSET || cs->max_width < w))
         w = cs->max_width;
+    /* Percentage caps stay symbolic (per-mille, both against the same containing
+     * width, so the tighter per-mille IS the tighter cap); the painter resolves
+     * px-vs-pct with bx_width_cap at layout time. */
+    int wp = (cs->width_pct > 0) ? cs->width_pct : 0;
+    if (cs->max_width_pct > 0 && (wp == 0 || cs->max_width_pct < wp))
+        wp = cs->max_width_pct;
     out->l = (l > 0) ? l : 0;
     out->r = (r > 0) ? r : 0;
     out->w = (w != CSS_LEN_UNSET && w > 0) ? w : 0;
-    out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO && out->w > 0) ? 1 : 0;
+    out->w_pct = wp;
+    out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO &&
+                   (out->w > 0 || wp > 0)) ? 1 : 0;
 }
 
 /* True if the resolved style declares any paintable box (border/padding/radius/
@@ -843,9 +882,10 @@ typedef struct pv_box_reg {
  * (PV_LEN_UNSET width/radius/outline width, -1 colors, 0 the rest). */
 static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->parent_id = -1;
-    pv_box_info hb = { 0, 0, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET };
+    pv_box_info hb = { 0, 0, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0 };
     css_hbox_resolve(cs, &hb);
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
+    d->box_w_pct = hb.w_pct;
     d->bg_rgb = (cs->background >= 0) ? cs->background : -1;
     d->box_sizing = cs->box_sizing;
     d->pad_t = (cs->pad_top    != CSS_LEN_UNSET) ? cs->pad_top    : 0;
@@ -1075,7 +1115,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 if (h != NULL && hl > 0) { *href = (const char *)h; *href_len = hl; got_link = 1; }
             }
             if (!got_heading) { int lv = heading_level(t); if (lv) { *heading = lv; got_heading = 1; } }
-            if (!got_block && is_block_tag(t)) {
+            if (!got_block && causes_block_break(t, cs.display)) {
                 *block = p; got_block = 1;
                 /* The leaf block's OWN vertical margins override the UA (a wrapper's
                  * do not, so they are not duplicated across its inner blocks). */
@@ -1086,7 +1126,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             /* Nearest floated self-or-ancestor block: its side + a document-order id so
              * the painter groups the runs of one floated element into one column. */
-            if (!got_float && float_reg != NULL && is_block_tag(t) &&
+            if (!got_float && float_reg != NULL && is_block_like(t, cs.display) &&
                 (cs.float_side == CSS_FLOAT_LEFT || cs.float_side == CSS_FLOAT_RIGHT)) {
                 cont->float_side = cs.float_side;
                 cont->float_id = container_id(float_reg, p);
@@ -1094,7 +1134,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             /* Horizontal box from the nearest block ancestor that declares one, so a
              * wrapper's max-width/centering/padding reaches all its descendants. */
-            if (!got_hbox && is_block_tag(t) && css_has_hbox(&cs)) {
+            if (!got_hbox && is_block_like(t, cs.display) && css_has_hbox(&cs)) {
                 css_hbox_resolve(&cs, box);
                 got_hbox = 1;
             }
@@ -1105,7 +1145,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * (outer) box found, so the registry holds the parent links. block_id is
              * structure; the decoration (on the box def) is author presentation that
              * render_doc gates behind caps.css. */
-            if (box_reg != NULL && is_block_tag(t) && css_has_boxdeco(&cs)) {
+            if (box_reg != NULL && is_block_like(t, cs.display) && css_has_boxdeco(&cs)) {
                 int bid = box_reg_id(box_reg, p, &cs);
                 if (bid >= 0) {
                     if (!got_boxdeco) {
@@ -2109,6 +2149,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
+                pv_set_box_pct(v, box.w_pct);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
@@ -2205,6 +2246,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
         pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
         pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
+        pv_set_box_pct(v, box.w_pct);
         pv_set_text_ext(v, &ext);
         pv_set_block_id(v, bdeco);
         pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));

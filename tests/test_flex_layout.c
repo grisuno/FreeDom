@@ -239,6 +239,78 @@ static void test_float_pack_edges(void **state) {
     assert_true(xo[0] >= 0.0);
 }
 
+/* Hito 32 (band wrap): two consecutive full-width floats (Slashdot's
+ * .grid_24 { width:99.8% }) must STACK -- one per row at x = 0 -- instead of
+ * being crammed side by side into one row. */
+static void test_float_pack_wrap_full_width_stack(void **state) {
+    (void)state;
+    double w[3] = { 998.0, 998.0, 998.0 };
+    int side[3] = { 0, 0, 0 };
+    double x[3];
+    size_t row[3];
+    assert_int_equal(fx_float_pack_wrap(w, side, 3, 1000.0, 0, x, row), FX_OK);
+    for (size_t i = 0; i < 3; ++i) {
+        assert_int_equal((int)row[i], (int)i);
+        assert_true(dbl_eq(x[i], 0.0));
+    }
+}
+
+/* When everything fits in one row the wrap variant must agree with v1. */
+static void test_float_pack_wrap_fits_matches_v1(void **state) {
+    (void)state;
+    double w[4] = { 250.0, 250.0, 250.0, 250.0 };
+    int side[4] = { 0, 0, 0, 0 };
+    double x[4], xv1[4];
+    size_t row[4];
+    assert_int_equal(fx_float_pack_wrap(w, side, 4, 1000.0, 0, x, row), FX_OK);
+    assert_int_equal(fx_float_pack(w, side, 4, 1000.0, 0, xv1), FX_OK);
+    for (size_t i = 0; i < 4; ++i) {
+        assert_int_equal((int)row[i], 0);
+        assert_true(dbl_eq(x[i], xv1[i]));
+    }
+    /* Left main + right sidebar share row 0 exactly like v1. */
+    double w2[2] = { 300.0, 300.0 };
+    int side2[2] = { 0, 1 };
+    assert_int_equal(fx_float_pack_wrap(w2, side2, 2, 1000.0, 0, x, row), FX_OK);
+    assert_int_equal((int)row[0], 0);
+    assert_int_equal((int)row[1], 0);
+    assert_true(dbl_eq(x[0], 0.0));
+    assert_true(dbl_eq(x[1], 700.0));
+}
+
+/* Partial fit: the overflowing item opens the next row and packing resumes there. */
+static void test_float_pack_wrap_partial(void **state) {
+    (void)state;
+    double w[3] = { 600.0, 600.0, 300.0 };
+    int side[3] = { 0, 0, 0 };
+    double x[3];
+    size_t row[3];
+    assert_int_equal(fx_float_pack_wrap(w, side, 3, 1000.0, 0, x, row), FX_OK);
+    assert_int_equal((int)row[0], 0);
+    assert_true(dbl_eq(x[0], 0.0));
+    assert_int_equal((int)row[1], 1);       /* 600 + 600 > 1000: wraps */
+    assert_true(dbl_eq(x[1], 0.0));
+    assert_int_equal((int)row[2], 1);       /* 600 + 300 <= 1000: shares row 1 */
+    assert_true(dbl_eq(x[2], 600.0));
+    /* An item wider than avail alone still lands clamped at x=0 on its own row. */
+    double wo[2] = { 1500.0, 100.0 };
+    int so[2] = { 0, 0 };
+    assert_int_equal(fx_float_pack_wrap(wo, so, 2, 1000.0, 0, x, row), FX_OK);
+    assert_int_equal((int)row[0], 0);
+    assert_true(dbl_eq(x[0], 0.0));
+    assert_int_equal((int)row[1], 1);
+    assert_true(dbl_eq(x[1], 0.0));
+}
+
+static void test_float_pack_wrap_errors(void **state) {
+    (void)state;
+    double w[2] = { 10, 10 }; int side[2] = { 0, 0 }; double x[2]; size_t row[2];
+    assert_int_equal(fx_float_pack_wrap(NULL, NULL, 0, 100, 0, NULL, NULL), FX_OK);
+    assert_int_equal(fx_float_pack_wrap(NULL, side, 2, 100, 0, x, row), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_pack_wrap(w, side, 2, 100, 0, x, NULL), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_pack_wrap(w, side, 2, -1, 0, x, row), FX_ERR_RANGE);
+}
+
 static void test_justify_name(void **state) {
     (void)state;
     assert_string_equal(fx_justify_name(FX_JUSTIFY_START), "start");
@@ -271,6 +343,10 @@ int main(void) {
         cmocka_unit_test(test_grid_columns_edges),
         cmocka_unit_test(test_grid_cell),
         cmocka_unit_test(test_float_pack_left),
+        cmocka_unit_test(test_float_pack_wrap_full_width_stack),
+        cmocka_unit_test(test_float_pack_wrap_fits_matches_v1),
+        cmocka_unit_test(test_float_pack_wrap_partial),
+        cmocka_unit_test(test_float_pack_wrap_errors),
         cmocka_unit_test(test_float_pack_left_and_right),
         cmocka_unit_test(test_float_pack_two_right),
         cmocka_unit_test(test_float_pack_edges),

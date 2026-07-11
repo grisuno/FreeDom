@@ -140,16 +140,35 @@ fx_status fx_grid_columns(double avail, size_t ncols, double gap,
     return FX_OK;
 }
 
-fx_status fx_float_pack(const double *width, const int *side, size_t n,
-                        double avail, double gap, double *out_x) {
+/* Shared packer: wrap == 0 is the single-row v1 contract (overflow clamps in
+ * place); wrap != 0 starts a new row (cursors reset) for an item that no longer
+ * fits between the cursors, reporting rows via out_row. Half-pixel tolerance so
+ * a 99.8% item is not wrapped by floating-point jitter. */
+static fx_status float_pack_impl(const double *width, const int *side, size_t n,
+                                 double avail, double gap, int wrap,
+                                 double *out_x, size_t *out_row) {
     if (n == 0) return FX_OK;
-    if (width == NULL || side == NULL || out_x == NULL) return FX_ERR_NULL_ARG;
+    if (width == NULL || side == NULL || out_x == NULL ||
+        (wrap && out_row == NULL))
+        return FX_ERR_NULL_ARG;
     if (avail < 0.0 || gap < 0.0 || n > FX_MAX_ITEMS) return FX_ERR_RANGE;
 
     double cur_l = 0.0;      /* left cursor advances rightward */
     double cur_r = avail;    /* right cursor advances leftward */
+    size_t row = 0;
+    int row_used = 0;
     for (size_t i = 0; i < n; ++i) {
         double w = nn(width[i]);
+        if (wrap && row_used) {
+            int fits = (side[i] == 1) ? (cur_r - w >= cur_l - 0.5)
+                                      : (cur_l + w <= cur_r + 0.5);
+            if (!fits) {
+                ++row;
+                cur_l = 0.0;
+                cur_r = avail;
+                row_used = 0;
+            }
+        }
         if (side[i] == 1) {          /* right float: pack from the right edge */
             double x = cur_r - w;
             if (x < 0.0) x = 0.0;
@@ -159,8 +178,21 @@ fx_status fx_float_pack(const double *width, const int *side, size_t n,
             out_x[i] = (cur_l < 0.0) ? 0.0 : cur_l;
             cur_l += w + gap;
         }
+        if (out_row != NULL) out_row[i] = row;
+        row_used = 1;
     }
     return FX_OK;
+}
+
+fx_status fx_float_pack(const double *width, const int *side, size_t n,
+                        double avail, double gap, double *out_x) {
+    return float_pack_impl(width, side, n, avail, gap, 0, out_x, NULL);
+}
+
+fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
+                             double avail, double gap, double *out_x,
+                             size_t *out_row) {
+    return float_pack_impl(width, side, n, avail, gap, 1, out_x, out_row);
 }
 
 void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) {

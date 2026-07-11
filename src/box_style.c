@@ -95,6 +95,7 @@ static const tag_row TAG_TABLE[] = {
     { "li",         { LITEM,  ZERO, ZERO } },
     { "link",       { NONE,   ZERO, ZERO } },
     { "main",       { BLOCK,  ZERO, ZERO } },
+    { "menu",       { BLOCK,  ZERO, ZERO } },
     { "meta",       { NONE,   ZERO, ZERO } },
     { "nav",        { BLOCK,  ZERO, ZERO } },
     { "ol",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) } },
@@ -170,6 +171,14 @@ bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
     }
     bx_hplace p = { x, w };
     return p;
+}
+
+double bx_width_cap(int w_px, int w_pct, double avail_w) {
+    double px = (w_px > 0) ? (double)w_px : 0.0;
+    double pc = (w_pct > 0 && avail_w > 0.0)
+                ? avail_w * (double)w_pct / 1000.0 : 0.0;
+    if (px > 0.0 && pc > 0.0) return (px < pc) ? px : pc;
+    return (px > 0.0) ? px : pc;
 }
 
 const char *bx_display_name(bx_display d) {

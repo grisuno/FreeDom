@@ -3258,7 +3258,8 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
 
     double avail_w = ctx_w;
     if (avail_w < 1.0) avail_w = 1.0;
-    bx_hplace hp = bx_place((double)def->box_l, (double)def->box_r, (double)def->box_w,
+    bx_hplace hp = bx_place((double)def->box_l, (double)def->box_r,
+                            bx_width_cap(def->box_w, def->box_w_pct, avail_w),
                             def->box_center, avail_w);
     double box_left = ctx_left + hp.x_off - pl;
     double box_width = hp.content_w + pl + pr;
@@ -3403,10 +3404,13 @@ static int band_common_box(const rd_doc *doc, size_t start, size_t end) {
 
 /* Lays a float band [start, end) — a maximal run of blocks each with float_id >= 0 —
  * side by side inside the current box context (spec/float.md). Blocks are grouped by
- * float_id into items (document order); each item's width is its author box_w, and
- * width-less items split the leftover evenly; left/right sides pack via fx_float_pack.
- * Each item's blocks flow into its column (a fresh sub-state, like the flex per-item
- * pass); the band height is the tallest column. Structure, applied by default. */
+ * float_id into items (document order); each item's width is its author box_w (px or
+ * % via bx_width_cap, Hito 32), and width-less items split the leftover evenly;
+ * left/right sides pack via fx_float_pack_wrap: an item that no longer fits opens a
+ * NEW band row (spec/float.md §7b), so consecutive full-width floats stack. Each
+ * item's blocks flow into its column (a fresh sub-state, like the flex per-item
+ * pass); the band height is the sum over rows of each row's tallest column.
+ * Structure, applied by default. */
 static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                               rc_state *s, const ui_theme *th, double content_w,
                               const rd_doc *doc, size_t start, size_t end) {
@@ -3444,16 +3448,19 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     double base_top = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
     s->pending_gap = 0;
 
-    /* Item widths + sides: explicit author width wins; width-less items split leftover. */
+    /* Item widths + sides: explicit author width (px or % of the band context,
+     * Hito 32) wins; width-less items split the leftover evenly. */
     double width[BT_MAX_CHILDREN];
     int    side[BT_MAX_CHILDREN];
     double outx[BT_MAX_CHILDREN];
+    size_t outrow[BT_MAX_CHILDREN];
     double explicit_sum = 0.0;
     size_t nfree = 0;
     for (size_t j = 0; j < g; ++j) {
         const rd_block *bk = rd_at(doc, gstart[j]);
         side[j] = (bk->float_side == CSS_FLOAT_RIGHT) ? 1 : 0;
-        width[j] = (bk->box_w > 0) ? (double)bk->box_w : -1.0;
+        double capw = bx_width_cap(bk->box_w, bk->box_w_pct, ctx_w);
+        width[j] = (capw > 0.0) ? capw : -1.0;
         if (width[j] > 0.0) explicit_sum += width[j]; else ++nfree;
     }
     double leftover = ctx_w - explicit_sum;
@@ -3461,15 +3468,27 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     if (share < 1.0) share = 1.0;
     for (size_t j = 0; j < g; ++j) if (width[j] < 0.0) width[j] = share;
 
-    if (fx_float_pack(width, side, g, ctx_w, 0.0, outx) != FX_OK) {
+    /* Greedy row wrap (Hito 32): an item that no longer fits opens a new band
+     * row -- consecutive full-width floats (.grid_24) stack instead of cramming. */
+    if (fx_float_pack_wrap(width, side, g, ctx_w, 0.0, outx, outrow) != FX_OK) {
         for (size_t k = start; k < end; ++k)
             flow_text_block(cr, w, L, s, th, rd_at(doc, k), ctx_w);
         return;
     }
 
-    /* Flow each item into its column, then translate its rows to the column rect. */
-    double band_h = 0.0;
+    /* Flow each item into its column, then translate its rows to the column rect.
+     * Band rows stack: a row's top is the summed height of the rows above it and
+     * its height is its tallest column (items arrive in document order, so row
+     * indices are non-decreasing). */
+    double row_top = 0.0;
+    double row_h = 0.0;
+    size_t cur_row = 0;
     for (size_t j = 0; j < g; ++j) {
+        if (outrow[j] != cur_row) {
+            row_top += row_h;
+            row_h = 0.0;
+            cur_row = outrow[j];
+        }
         rc_state si;
         memset(&si, 0, sizeof si);
         double cw = (width[j] < 1.0) ? 1.0 : width[j];
@@ -3482,13 +3501,13 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             flow_text_block(cr, w, L, &si, th, bk, cw);
         }
         flush_line(L, &si, th);
-        if (si.cur_top > band_h) band_h = si.cur_top;
+        if (si.cur_top > row_h) row_h = si.cur_top;
         for (size_t r = sr; r < L->nrow; ++r) {
-            L->rows[r].top += base_top;
+            L->rows[r].top += base_top + row_top;
             L->rows[r].x_off = ctx_left + outx[j];
         }
     }
-    s->cur_top = base_top + band_h;
+    s->cur_top = base_top + row_top + row_h;
 }
 
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
@@ -3644,7 +3663,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * when there is no author box (all zero). */
             double avail_w = content_w - base_l;
             if (avail_w < 1.0) avail_w = 1.0;
-            bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r, (double)b->box_w,
+            bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r,
+                                    bx_width_cap(b->box_w, b->box_w_pct, avail_w),
                                     b->box_center, avail_w);
             s.indent_px = base_l + hp.x_off;
             inner_w = hp.content_w;
@@ -3713,11 +3733,10 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
         const pv_box_def *bd = rd_box_at(doc, bid);
         if (bd == NULL) continue;
 
-        /* Width: author width cap, else the box's own bx_place against content_w. */
-        double bw = 0.0;
-        if (bd->box_w > 0) {
-            bw = (double)bd->box_w;
-        } else {
+        /* Width: author width cap (px or %), else the box's own bx_place against
+         * content_w. */
+        double bw = bx_width_cap(bd->box_w, bd->box_w_pct, content_w);
+        if (bw <= 0.0) {
             bx_hplace hp = bx_place((double)bd->box_l, (double)bd->box_r, 0, 0, content_w);
             bw = hp.content_w;
         }

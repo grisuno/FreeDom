@@ -85,4 +85,10 @@ const char *bx_display_name(bx_display d);
 bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
                    double avail_w);
 
+/* Effective width cap combining the px cap (w_px, 0 = none) with a symbolic
+ * per-mille cap (w_pct, 0 = none; Hito 32) resolved against the real available
+ * width: both set => the tighter wins; neither (or avail_w <= 0 for the pct)
+ * => 0 (no cap). Never negative. Pure. */
+double bx_width_cap(int w_px, int w_pct, double avail_w);
+
 #endif /* FREEDOM_BOX_STYLE_H */

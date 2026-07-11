@@ -127,6 +127,9 @@ typedef struct rd_block {
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or
      * PV_LEN_UNSET (use the user-agent margin). */
     int              box_l, box_r, box_w, box_center, box_mt, box_mb;
+    /* Symbolic per-mille width cap (Hito 32), 0 = none; resolved against the real
+     * available width by the painter (bx_width_cap). Gated by caps.css like box_w. */
+    int              box_w_pct;
     /* Keystone (Stage 0): stable document-order element identity. node_id is the
      * dom_node_id of the source element for this block, copied from pv_run. It is
      * STRUCTURE, carried regardless of caps.css (like block_id). DOM_NODE_NONE when

@@ -489,7 +489,13 @@ into the run text, so it is carried by default, not gated). None can ever phone 
 all feed them, inline winning). **Lengths** accept `px`, a bare `0`, `em`/`rem` (×16 px,
 the engine's base font), and `calc()` of the same (see *`calc()`* above); `%`/`vw`/`vh`
 and other units are **dropped** (fail closed — they need a containing-block width the
-parser does not have). They are **not inherited** (a box
+parser does not have). **Exception (Hito 32): `width` and `max-width` accept `%`** —
+the parser cannot resolve them either, so they are carried **symbolically** as
+per-mille (`css_style.width_pct`/`max_width_pct`, `99.8%` → `998`, clamped to
+`(0, 1000%]`, junk fails closed) and resolved at **layout time** against the actual
+containing width by the pure `bx_width_cap(px_cap, pct, avail)` (`[[box_style]]`; both
+caps set ⇒ the tighter wins). This is what 960.gs-grid sites (Slashdot's
+`.grid_24{width:99.8%}`) need to lay out. They are **not inherited** (a box
 describes its own element, so page_view reads them from that element's resolved style, not up
 the ancestor chain). page_view turns them into a per-block placement (left/right inset, an
 optional width cap, a centered flag, and a top/bottom margin override) that the presentation

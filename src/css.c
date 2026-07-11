@@ -59,6 +59,7 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
        P_PAD_TOP, P_PAD_RIGHT, P_PAD_BOTTOM, P_PAD_LEFT,
        P_WIDTH, P_MAXWIDTH, P_MINWIDTH, P_HEIGHT, P_MINHEIGHT, P_MAXHEIGHT,
+       P_WIDTH_PCT, P_MAXWIDTH_PCT,
        /* Text-presentation extensions (Hito 23b-6). The three text-shadow slots are
         * contiguous (dx,dy,color) so expand_shadow writes them as a group. */
        P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING,
@@ -233,7 +234,9 @@ static int interp_lineheight(const char *v) {
     double pct;
     if (end[0] == '\0')                       pct = num * 100.0; /* unitless */
     else if (end[0] == '%' && end[1] == '\0') pct = num;
-    else return -1;  /* px/em/other: out of scope, dropped */
+    else if (csel_ci_eq(end, "px"))           pct = num / 16.0 * 100.0; /* rel to base */
+    else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) pct = num * 100.0;
+    else return -1;  /* other: out of scope, dropped */
     return round_clamp(pct, CSS_LINE_MIN, CSS_LINE_MAX);
 }
 
@@ -281,6 +284,7 @@ static int interp_display(const char *v) {
     if (csel_ci_eq(v, "block")) return CSS_DISP_BLOCK;
     if (csel_ci_eq(v, "inline")) return CSS_DISP_INLINE;
     if (csel_ci_eq(v, "inline-block")) return CSS_DISP_INLINE_BLOCK;
+    if (csel_ci_eq(v, "list-item")) return CSS_DISP_LIST_ITEM;
     if (csel_ci_eq(v, "flex") || csel_ci_eq(v, "inline-flex")) return CSS_DISP_FLEX;
     if (csel_ci_eq(v, "grid") || csel_ci_eq(v, "inline-grid")) return CSS_DISP_GRID;
     return -1;  /* unknown display: leave unset */
@@ -657,6 +661,29 @@ static int emit_len(css_decl *dst, int cap, int slot, const char *val,
     if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
     dst[0].prop = slot;
     dst[0].ival = o;
+    return 1;
+}
+
+/* Emits a symbolic percentage width for slot (Hito 32): "<num>%" with num > 0,
+ * carried as per-mille (99.8% -> 998) and saturating at 1000% (10000). The parser
+ * has no containing block, so the value stays symbolic until layout resolves it
+ * (bx_width_cap). Junk or a non-positive number fails closed (returns 0). */
+static int emit_pct(css_decl *dst, int cap, int slot, const char *val) {
+    if (cap < 1) return 0;
+    const char *p = val;
+    if (*p == '+') ++p;
+    double num;
+    const char *end;
+    if (!parse_num(p, &num, &end)) return 0;
+    while (*end == ' ' || *end == '\t') ++end;
+    if (end[0] != '%' || end[1] != '\0') return 0;
+    if (num <= 0.0) return 0;
+    double pm = num * 10.0;
+    if (pm > 10000.0) pm = 10000.0;
+    int v = (int)(pm + 0.5);
+    if (v < 1) return 0;
+    dst[0].prop = slot;
+    dst[0].ival = v;
     return 1;
 }
 
@@ -2036,8 +2063,13 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "padding-right") == 0)  return emit_len(dst, cap, P_PAD_RIGHT, val, 0, 0);
     if (strcmp(prop, "padding-bottom") == 0) return emit_len(dst, cap, P_PAD_BOTTOM, val, 0, 0);
     if (strcmp(prop, "padding-left") == 0)   return emit_len(dst, cap, P_PAD_LEFT, val, 0, 0);
-    if (strcmp(prop, "width") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
-    if (strcmp(prop, "max-width") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
+    /* width/max-width: px path first; a % value is carried symbolically (Hito 32). */
+    if (strcmp(prop, "width") == 0)
+        return emit_len(dst, cap, P_WIDTH, val, 0, 0)
+            || emit_pct(dst, cap, P_WIDTH_PCT, val);
+    if (strcmp(prop, "max-width") == 0)
+        return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0)
+            || emit_pct(dst, cap, P_MAXWIDTH_PCT, val);
     if (strcmp(prop, "min-width") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
     if (strcmp(prop, "height") == 0)    return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
     if (strcmp(prop, "min-height") == 0)return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
@@ -2064,10 +2096,14 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "inset-block-end") == 0)      return emit_len(dst, cap, P_INSET_BOTTOM, val, 1, 1);
     if (strcmp(prop, "inset-inline") == 0)   return expand_box2(val, P_INSET_LEFT, P_INSET_RIGHT, 1, 1, dst, cap);
     if (strcmp(prop, "inset-block") == 0)    return expand_box2(val, P_INSET_TOP, P_INSET_BOTTOM, 1, 1, dst, cap);
-    if (strcmp(prop, "inline-size") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
+    if (strcmp(prop, "inline-size") == 0)
+        return emit_len(dst, cap, P_WIDTH, val, 0, 0)
+            || emit_pct(dst, cap, P_WIDTH_PCT, val);
     if (strcmp(prop, "block-size") == 0)      return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
     if (strcmp(prop, "min-inline-size") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
-    if (strcmp(prop, "max-inline-size") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
+    if (strcmp(prop, "max-inline-size") == 0)
+        return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0)
+            || emit_pct(dst, cap, P_MAXWIDTH_PCT, val);
     if (strcmp(prop, "min-block-size") == 0)  return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
     if (strcmp(prop, "max-block-size") == 0)  return emit_len(dst, cap, P_MAXHEIGHT, val, 0, 0);
 
@@ -2630,6 +2666,8 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_PAD_LEFT:   o->pad_left = d->ival; break;
             case P_WIDTH:      o->width = d->ival; break;
             case P_MAXWIDTH:   o->max_width = d->ival; break;
+            case P_WIDTH_PCT:    o->width_pct = d->ival; break;
+            case P_MAXWIDTH_PCT: o->max_width_pct = d->ival; break;
             case P_MINWIDTH:   o->min_width = d->ival; break;
             case P_HEIGHT:     o->height = d->ival; break;
             case P_MINHEIGHT:  o->min_height = d->ival; break;

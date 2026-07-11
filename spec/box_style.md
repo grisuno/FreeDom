@@ -73,7 +73,23 @@ bx_status  bx_parse_display(const char *token, bx_display *out);
 const char *bx_display_name(bx_display d);
 bx_hplace  bx_place(double inset_l, double inset_r, double width_cap, int center,
                     double avail_w);
+double     bx_width_cap(int w_px, int w_pct, double avail_w);
 ```
+
+### `bx_width_cap` (Hito 32 — anchos porcentuales)
+
+Resuelve el tope de ancho efectivo de una caja combinando el tope en px (`box_w`, `0` =
+ninguno) con el tope porcentual (`box_w_pct`, por-mille del contenedor, `0` = ninguno)
+contra el ancho disponible real, que recién se conoce en layout:
+
+- **Dado** solo `w_px > 0`, **entonces** devuelve `w_px`.
+- **Dado** solo `w_pct > 0`, **entonces** devuelve `avail_w * w_pct / 1000`
+  (`998` ⇒ 99.8% del contenedor).
+- **Dado** ambos, **entonces** devuelve el **menor** (el tope más estricto gana, igual
+  que la regla px de `css_hbox_resolve`).
+- **Dado** ninguno (o `avail_w <= 0`), **entonces** `0` (= sin tope). Nunca negativo.
+Pura, sin I/O; consumida por el painter (banda de floats y flujo normal) y por
+`layout_float_band` para el ancho de cada ítem flotado.
 
 ### `bx_default_for_tag`
 - Busca, **sin distinguir mayúsculas/minúsculas**, la etiqueta en la tabla UA ordenada (búsqueda

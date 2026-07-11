@@ -204,6 +204,11 @@ typedef struct pv_run {
     int     box_center;
     int     box_mt;
     int     box_mb;
+    /* Symbolic percentage width cap (Hito 32): per-mille of the containing width
+     * (99.8% -> 998), 0 = none. Rides beside the px cap box_w; the painter
+     * resolves the effective cap with bx_width_cap against the real available
+     * width (the tighter of the two wins). Gated by caps.css like box_w. */
+    int     box_w_pct;
     /* Keystone (Stage 0): stable document-order element identity. node_id is the
      * dom_node_id of the source element for this run, assigned by the same pre-order
      * walk that dom_build uses, so it agrees with the JS sandbox's index. It is
@@ -254,6 +259,7 @@ typedef struct pv_box_def {
     int box_min_h;      /* min-height (px >= 0), or 0 unset */
     int box_max_h;      /* max-height (px > 0), or 0 unset */
     int box_min_w;      /* min-width  (px >= 0), or 0 unset */
+    int box_w_pct;      /* per-mille width cap (Hito 32), 0 = none; see pv_run */
     int bg_rgb;   /* author background-color of the box (0xRRGGBB), or -1 */
     int box_sizing;
     int pad_t, pad_r, pad_b, pad_l;
@@ -476,6 +482,11 @@ void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear);
  * box_l/r/w/center to 0 and box_mt/box_mb to PV_LEN_UNSET. */
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int box_mt, int box_mb);
+
+/* Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the
+ * most recently appended run. No-op on an empty or NULL view; the append helpers
+ * default box_w_pct to 0. */
+void pv_set_box_pct(pv_view *v, int box_w_pct);
 
 /* Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of
  * the source element. No-op on an empty or NULL view; the append helpers default

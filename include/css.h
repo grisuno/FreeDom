@@ -44,6 +44,7 @@ typedef enum css_display {
     CSS_DISP_BLOCK,
     CSS_DISP_INLINE,
     CSS_DISP_INLINE_BLOCK,
+    CSS_DISP_LIST_ITEM,
     CSS_DISP_FLEX,
     CSS_DISP_GRID,
     CSS_DISP_OTHER
@@ -446,6 +447,12 @@ typedef struct css_style {
     int         pad_top, pad_right, pad_bottom, pad_left;
     int         width, max_width, min_width;
     int         height, min_height, max_height;
+    /* Symbolic percentage width caps (Hito 32): per-mille of the containing
+     * width (99.8% -> 998), 0 = unset. Carried separately from the px channel
+     * (the parser has no containing block) and resolved at layout time by
+     * bx_width_cap; the tighter of px/pct wins. Only width/max-width accept %;
+     * every other % length still fails closed. */
+    int         width_pct, max_width_pct;
     /* Author text-presentation extensions (Hito 23b-6). All inherit in CSS; in this
      * flat model the caller takes the nearest ancestor that sets each. Like the other
      * author presentation, they are gated behind caps.css downstream. */

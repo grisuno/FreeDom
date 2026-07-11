@@ -143,8 +143,33 @@ In `layout_doc`, a **float band** is a maximal run of consecutive blocks each wi
 - **`clear` granularity collapsed.** `clear:left`/`right`/`both` all end the band; the
   cleared block flows below the whole band (no per-side float context in v1).
 - **Width-less floats split leftover evenly** (no shrink-to-fit content measure).
-- **No percentage widths** (the cascade already drops `%` for box-model lengths).
 - **Nesting depth** bounded by `RC_BOX_STACK_MAX`; band item count by `BT_MAX_CHILDREN`.
+
+## 7b. Band wrap + percentage widths (v2, Hito 32)
+
+v1's "the band does not wrap" broke every 960.gs-era site (Slashdot): consecutive
+`.grid_24 { width:99.8%; float:left }` items packed side by side into one row, and with
+the `%` width dropped by the cascade each item degraded to an equal share — the page
+became unreadable one-word columns. v2 fixes both, keeping the packer pure:
+
+- **`fx_float_pack_wrap(width, side, n, avail, gap, out_x, out_row)`** — same cursor
+  discipline as v1 plus a greedy row break: an item that no longer fits between the two
+  cursors starts a **new row** (cursors reset; `out_row[i]` reports each item's row).
+  An item wider than `avail` alone still gets a clamped `x = 0` and consumes its row
+  (fail-open geometry, never an error). `fx_float_pack` (v1, single row) remains; both
+  share one implementation.
+- **Dado** dos floats `width:99.8%` consecutivos, **cuando** se empaqueta con wrap,
+  **entonces** cada uno ocupa su PROPIA fila (`out_row` = 0, 1) en `x = 0` — apilados.
+- **Dado** cuatro floats que sí caben juntos, **entonces** comparten la fila 0 con las
+  mismas x que daba v1.
+- `layout_float_band` lays each row's columns independently; the band height is the
+  **sum over rows** of each row's tallest column.
+- **Percentage widths** resolve at layout time: a run/box carries `box_w_pct`
+  (per-mille, `0` = none) next to the px cap `box_w`; the effective cap is
+  `bx_width_cap(box_w_px, box_w_pct, avail)` (`[[box_style]]`, pure; both set ⇒ the
+  tighter wins). The cascade parses `width`/`max-width` percentages into
+  `css_style.width_pct`/`max_width_pct` (`[[css]]`, per-mille, fail-closed on junk);
+  every other `%` length still fails closed.
 
 ## 8. Errors
 

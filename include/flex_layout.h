@@ -84,6 +84,18 @@ void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);
 fx_status fx_float_pack(const double *width, const int *side, size_t n,
                         double avail, double gap, double *out_x);
 
+/* Float packing with greedy row wrap (v2, Hito 32; spec/float.md §7b). Same cursor
+ * discipline as fx_float_pack, but an item that no longer fits between the two
+ * cursors starts a NEW row (cursors reset; out_row[n] receives each item's 0-based
+ * row). An item wider than avail alone still gets a clamped x = 0 and consumes its
+ * row. This is what makes consecutive full-width floats
+ * (.grid_24 { width:99.8%; float:left }) STACK instead of cramming one row.
+ * out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG); other errors as
+ * fx_float_pack. */
+fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
+                             double avail, double gap, double *out_x,
+                             size_t *out_row);
+
 /* Stable, short English name of a justify mode for structured/agent output. Never
  * NULL; an unknown enum value yields "start". */
 const char *fx_justify_name(fx_justify j);

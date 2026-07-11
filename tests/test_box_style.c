@@ -263,6 +263,20 @@ static void test_place_failclosed_bounds(void **state) {
     assert_true(r.content_w >= 1.0);
 }
 
+/* Hito 32: effective width cap combining the px cap with a per-mille cap
+ * resolved against the real available width (the tighter one wins). */
+static void test_width_cap_pct(void **state) {
+    (void)state;
+    assert_true(dbl_eq(bx_width_cap(0, 0, 800.0), 0.0));       /* none */
+    assert_true(dbl_eq(bx_width_cap(600, 0, 800.0), 600.0));   /* px only */
+    assert_true(dbl_eq(bx_width_cap(0, 998, 1000.0), 998.0));  /* 99.8% of 1000 */
+    assert_true(dbl_eq(bx_width_cap(0, 500, 800.0), 400.0));   /* 50% of 800 */
+    assert_true(dbl_eq(bx_width_cap(300, 500, 800.0), 300.0)); /* px tighter */
+    assert_true(dbl_eq(bx_width_cap(700, 500, 800.0), 400.0)); /* pct tighter */
+    assert_true(dbl_eq(bx_width_cap(0, 500, 0.0), 0.0));       /* no avail: none */
+    assert_true(dbl_eq(bx_width_cap(-5, -3, 800.0), 0.0));     /* junk: none */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_place_no_box_is_identity),
@@ -270,6 +284,7 @@ int main(void) {
         cmocka_unit_test(test_place_centering),
         cmocka_unit_test(test_place_insets),
         cmocka_unit_test(test_place_failclosed_bounds),
+        cmocka_unit_test(test_width_cap_pct),
         cmocka_unit_test(test_body_has_no_margin),
         cmocka_unit_test(test_paragraph),
         cmocka_unit_test(test_heading_ladder),

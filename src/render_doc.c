@@ -145,6 +145,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_center = 0;
     b->box_mt = PV_LEN_UNSET;
     b->box_mb = PV_LEN_UNSET;
+    b->box_w_pct = 0;
     b->node_id = DOM_NODE_NONE;
     b->block_id = -1;
     b->input_type = 0;
@@ -345,6 +346,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->box_center = r->box_center;
                 lb->box_mt = r->box_mt;
                 lb->box_mb = r->box_mb;
+                lb->box_w_pct = r->box_w_pct;
             }
             /* Keystone (Stage 0): node_id is structure (the source DOM element), not
              * author presentation, so it is carried regardless of caps.css. This is the

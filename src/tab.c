@@ -261,7 +261,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
  *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
  *            cont_wrap,cont_row_gap,cont_align_items,flex_align_self,
  *            float_side,float_id,float_clear,
- *            box_l,box_r,box_w,box_center,box_mt,box_mb,
+ *            box_l,box_r,box_w,box_center,box_mt,box_mb,box_w_pct,
  *            block_id,
  *            input_type,form_id,form_method, name, value )*
  * then the box-definition tree (Step D): [nbox]( the 39 box fields )*. block_id on a
@@ -338,6 +338,7 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t bcenter = (int32_t)r->box_center;
         int32_t bmt = (int32_t)r->box_mt;
         int32_t bmb = (int32_t)r->box_mb;
+        int32_t bwpct = (int32_t)r->box_w_pct;
         int32_t blkid = (int32_t)r->block_id;
         int32_t nodeid = (int32_t)r->node_id;
         int32_t itype = (int32_t)r->input_type;
@@ -414,6 +415,7 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &bcenter, sizeof bcenter) != 0) return -1;
         if (write_full(wfd, &bmt, sizeof bmt) != 0) return -1;
         if (write_full(wfd, &bmb, sizeof bmb) != 0) return -1;
+        if (write_full(wfd, &bwpct, sizeof bwpct) != 0) return -1;
         if (write_full(wfd, &blkid, sizeof blkid) != 0) return -1;
         if (write_full(wfd, &nodeid, sizeof nodeid) != 0) return -1;
         if (write_full(wfd, &itype, sizeof itype) != 0) return -1;
@@ -434,7 +436,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[51] = {
+        int32_t f[52] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -463,6 +465,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->box_min_w,
             /* 2026-07-10 wiring batch: pointer-events (appended; read_view mirrors this) */
             (int32_t)bd->pointer_events,
+            /* Hito 32: symbolic per-mille width cap (appended; read_view mirrors this) */
+            (int32_t)bd->box_w_pct,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
     }
@@ -1072,6 +1076,7 @@ static int read_view(int fd, pv_view **out) {
         int32_t flside = 0, flid = -1, flclear = 0;
         int32_t bl = 0, br = 0, bw = 0, bcenter = 0;
         int32_t bmt = PV_LEN_UNSET, bmb = PV_LEN_UNSET;
+        int32_t bwpct = 0;
         int32_t blkid = -1;
         int32_t nodeid = (int32_t)DOM_NODE_NONE;
         int32_t itype = 0, fid = -1, method = 0;
@@ -1143,6 +1148,7 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &bcenter, sizeof bcenter) != 0
          || read_full(fd, &bmt, sizeof bmt) != 0
          || read_full(fd, &bmb, sizeof bmb) != 0
+         || read_full(fd, &bwpct, sizeof bwpct) != 0
          || read_full(fd, &blkid, sizeof blkid) != 0
          || read_full(fd, &nodeid, sizeof nodeid) != 0
          || read_full(fd, &itype, sizeof itype) != 0
@@ -1204,6 +1210,7 @@ static int read_view(int fd, pv_view **out) {
             pv_set_cont_item(v, (int)citem);
             pv_set_float(v, (int)flside, (int)flid, (int)flclear);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
+            pv_set_box_pct(v, (int)bwpct);
             pv_set_block_id(v, (int)blkid);
             pv_set_node_id(v, (dom_node_id)nodeid);
         }
@@ -1216,7 +1223,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[51];
+        int32_t f[52];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1243,6 +1250,8 @@ static int read_view(int fd, pv_view **out) {
             .box_h = f[46], .box_min_h = f[47], .box_max_h = f[48], .box_min_w = f[49],
             /* 2026-07-10 wiring batch: pointer-events. */
             .pointer_events = f[50],
+            /* Hito 32: symbolic per-mille width cap. */
+            .box_w_pct = f[51],
         };
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
     }
