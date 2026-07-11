@@ -26,6 +26,8 @@
 #include "net_realm.h"
 #include "pdf_export.h"
 #include "prefetch.h"
+#include "prefs.h"
+#include "profile.h"
 #include "render_doc.h"
 #include "render_policy.h"
 #include "request_policy.h"
@@ -149,7 +151,10 @@ typedef enum ui_menu_action {
     UI_MENU_PDF,      /* action (not a toggle): export the page to a vector PDF */
     UI_MENU_PNG,      /* action (not a toggle): export the page to a raster PNG */
     UI_MENU_FREEBUG,  /* toggles the Freebug developer console (second window) */
-    UI_MENU_HOSTADD   /* action: add the current host to a .conf list (theme_val selects which) */
+    UI_MENU_HOSTADD,  /* action: add the current host to a .conf list (theme_val selects which) */
+    UI_MENU_BOOKMARK, /* action: toggle a bookmark for the current page (Ctrl+B) */
+    UI_MENU_BOOKMARKS,/* action: open the internal about:bookmarks page */
+    UI_MENU_REMHIST   /* toggles persistent history (off also forgets it) */
 } ui_menu_action;
 
 typedef struct ui_menu_item {
@@ -166,6 +171,9 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
     { "Load images",          UI_MENU_CAP,   offsetof(rdp_caps, images), 0 },
     { "Author styles (CSS)",  UI_MENU_CAP,   offsetof(rdp_caps, css),    0 },
     { "Distraction-free (Ctrl+D)", UI_MENU_READER, 0,                    0 },
+    { "Bookmark page (Ctrl+B)", UI_MENU_BOOKMARK, 0,                     0 },
+    { "Bookmarks & history",  UI_MENU_BOOKMARKS, 0,                      0 },
+    { "Remember history",     UI_MENU_REMHIST, 0,                        0 },
     { "Tor routing (.onion)", UI_MENU_TOR,   0,                          0 },
     { "I2P routing (.i2p)",   UI_MENU_I2P,   0,                          0 },
     { "JavaScript",           UI_MENU_JS,    0,                          0 },
@@ -270,6 +278,14 @@ typedef struct browser_window {
     char   omni_sugg[OMNI_MAX_SUGG][HE_MAX_HOST + 1];
     int    omni_sugg_n;
     int    omni_sel;
+
+    /* Persisted profile (Hito 10): preferences + bookmarks + history, sealed to
+     * the config dir via profile (AEAD, per-device key). profile_rw is 1 only
+     * when the profile opened AND authenticated; otherwise saves are disabled so
+     * a foreign/corrupt prefs.bin is never clobbered (session stays memory-only). */
+    prefs_state prefs;
+    profile_ctx profile;
+    int         profile_rw;
 
     ui_theme  theme;
     int       theme_mode;  /* ui_theme_mode selected in the options menu */
@@ -421,6 +437,7 @@ static void freebug_pointer_motion(browser_window *w);
 static void freebug_pointer_axis(browser_window *w, wl_fixed_t value);
 
 static void redraw(browser_window *w);
+static void profile_sync(browser_window *w);  /* persists preference changes (Hito 10) */
 
 /* Rebuilds the live theme for the current mode and scales the font-driven metrics
  * by the page zoom. Layout and text flow read these straight from the theme, so a
@@ -451,6 +468,7 @@ static void apply_zoom(browser_window *w) {
     char msg[48];
     snprintf(msg, sizeof msg, "Zoom %d%%", w->zoom_pct);
     browser_set_status(&w->bs, msg, now_ms());
+    profile_sync(w);  /* the zoom level persists across sessions */
     redraw(w);
 }
 
@@ -749,16 +767,83 @@ static void load_favorites(browser_window *w) {
 
 /* Recomputes the omnibox autocomplete suggestions for the current URL-bar text. Shown
  * only while the URL bar is focused and something is typed; otherwise cleared. Pure
- * matching (he_suggest) over the favorites text; no I/O. */
+ * matching: the user's own bookmarks/history first (prefs_suggest), then the
+ * allow.conf favorites (he_suggest), deduplicated; no I/O. */
 static void omni_refresh(browser_window *w) {
-    if (!w->url_bar_focused || w->favorites == NULL || w->bs.url_bar_len == 0) {
+    if (!w->url_bar_focused || w->bs.url_bar_len == 0) {
         w->omni_sugg_n = 0;
         w->omni_sel = -1;
         return;
     }
-    w->omni_sugg_n = he_suggest(w->favorites, w->bs.url_bar, w->omni_sugg, OMNI_MAX_SUGG);
-    if (w->omni_sugg_n == 0) w->omni_sel = -1;
-    else if (w->omni_sel >= w->omni_sugg_n) w->omni_sel = w->omni_sugg_n - 1;
+    int n = prefs_suggest(&w->prefs, w->bs.url_bar, (char *)w->omni_sugg,
+                          sizeof w->omni_sugg[0], OMNI_MAX_SUGG);
+    if (n < OMNI_MAX_SUGG && w->favorites != NULL) {
+        char more[OMNI_MAX_SUGG][HE_MAX_HOST + 1];
+        int m = he_suggest(w->favorites, w->bs.url_bar, more, OMNI_MAX_SUGG);
+        for (int i = 0; i < m && n < OMNI_MAX_SUGG; ++i) {
+            int dup = 0;
+            for (int j = 0; j < n; ++j)
+                if (strcmp(w->omni_sugg[j], more[i]) == 0) { dup = 1; break; }
+            if (!dup) {
+                memcpy(w->omni_sugg[n], more[i], sizeof more[i]);
+                n++;
+            }
+        }
+    }
+    w->omni_sugg_n = n;
+    if (n == 0) w->omni_sel = -1;
+    else if (w->omni_sel >= n) w->omni_sel = n - 1;
+}
+
+/* --- persisted profile (Hito 10) --- */
+
+/* Mirrors the session's persistable choices into w->prefs and seals them to disk.
+ * Called after any preference change; with a read-only profile (absent config dir,
+ * foreign/corrupt prefs.bin) it is memory-only, so the session still works. */
+static void profile_sync(browser_window *w) {
+    w->prefs.theme_mode  = w->theme_mode;
+    w->prefs.force_theme = w->force_theme;
+    w->prefs.images      = w->caps.images ? 1 : 0;
+    w->prefs.css         = w->caps.css ? 1 : 0;
+    w->prefs.reader      = w->reader;
+    w->prefs.js_mode     = (int)w->js_mode;
+    w->prefs.tor         = w->net_cfg.tor_enabled;
+    w->prefs.i2p         = w->net_cfg.i2p_enabled;
+    w->prefs.torify      = w->net_cfg.torify_clearnet;
+    w->prefs.zoom_pct    = w->zoom_pct;
+    if (w->profile_rw) profile_save(&w->profile, &w->prefs);
+}
+
+/* Records a committed navigation in the persistent history (dedup + cap live in
+ * prefs). Opt-out via the "Remember history" toggle; internal pages are never
+ * recorded. Only URLs that already passed the pre-fetch gates reach this. */
+static void remember_visit(browser_window *w, const char *url) {
+    if (!w->prefs.remember_history || url == NULL) return;
+    if (strncmp(url, "about:", 6) == 0) return;
+    if (prefs_history_add(&w->prefs, url) == PREFS_OK && w->profile_rw)
+        profile_save(&w->profile, &w->prefs);
+}
+
+/* Ctrl+B / menu: toggles a bookmark for the current page (title from the page). */
+static void bookmark_toggle_current(browser_window *w) {
+    const char *url = browser_current_url(&w->bs);
+    if (url == NULL || url[0] == '\0' || strncmp(url, "about:", 6) == 0) {
+        browser_set_status(&w->bs, "Nothing to bookmark here.", now_ms());
+        redraw(w);
+        return;
+    }
+    int added = 0;
+    prefs_status ps = prefs_bookmark_toggle(&w->prefs, url, w->bs.page_title, &added);
+    if (ps == PREFS_ERR_FULL) {
+        browser_set_status(&w->bs, "Bookmark list is full.", now_ms());
+    } else if (ps != PREFS_OK) {
+        browser_set_status(&w->bs, "Cannot bookmark this URL.", now_ms());
+    } else {
+        if (w->profile_rw) profile_save(&w->profile, &w->prefs);
+        browser_set_status(&w->bs, added ? "Bookmarked. See Bookmarks & history in the menu."
+                                         : "Bookmark removed.", now_ms());
+    }
+    redraw(w);
 }
 
 /* Copies a proxy "host:port" into dst: if the env value is unset/empty the default is
@@ -1751,6 +1836,26 @@ static void do_load(browser_window *w, const char *url) {
         return;
     }
 
+    /* Internal bookmarks + recent-history page (Hito 10). Generated pure and
+     * escaped (prefs_bookmarks_page), then rendered by the normal confined
+     * pipeline like any other page -- never interpreted on the trusted side. */
+    if (strcmp(url, "about:bookmarks") == 0) {
+        clear_doc(w);
+        w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
+        w->loading = 0;
+        char *html = NULL;
+        size_t hlen = 0;
+        if (prefs_bookmarks_page(&w->prefs, &html, &hlen) != PREFS_OK) {
+            set_cache(w, NULL, 0, NULL);
+            browser_set_page(&w->bs, NULL, "Could not build the bookmarks page.", 1);
+            return;
+        }
+        set_cache(w, html, hlen, NULL);
+        browser_set_url_bar(&w->bs, "about:bookmarks");
+        render_current(w);
+        return;
+    }
+
     if (is_https_url(url) || is_overlay_http_url(url)) {
         /* Extract HTTP Basic Auth credentials from the URL (https://user:pass@host/)
          * before the pre-fetch gates: strip them from the URL and store in the window
@@ -1800,6 +1905,7 @@ static void do_load(browser_window *w, const char *url) {
                 "Could not start the request (out of resources).", 1);
             return;
         }
+        remember_visit(w, fetch_url); /* passed the gates: persist the visit */
         show_busy(w); /* spinner on; the old page stays visible until the result lands */
         return;
     }
@@ -1823,6 +1929,7 @@ static void do_load(browser_window *w, const char *url) {
     char origin[PATH_MAX + 16];
     const char *top = build_file_origin(url, origin, sizeof origin) ? origin : NULL;
     set_cache(w, html, html_len, top);
+    remember_visit(w, url);  /* local pages count as visits too */
     render_current_ex(w, 1); /* a fresh load may honor a JS-requested navigation */
 }
 
@@ -5358,6 +5465,7 @@ static void toggle_reader(browser_window *w) {
     browser_set_status(&w->bs, w->reader
         ? "Distraction-free mode ON (boilerplate and author styles hidden)."
         : "Distraction-free mode OFF.", now_ms());
+    profile_sync(w);
     render_current(w);
 }
 
@@ -5374,6 +5482,10 @@ static int menu_item_checked(const browser_window *w, size_t i) {
     if (it->action == UI_MENU_PDF)   return 0; /* an action, never "checked" */
     if (it->action == UI_MENU_PNG)   return 0; /* an action, never "checked" */
     if (it->action == UI_MENU_HOSTADD) return 0; /* an action, never "checked" */
+    if (it->action == UI_MENU_BOOKMARK)
+        return prefs_bookmark_index(&w->prefs, browser_current_url(&w->bs)) >= 0;
+    if (it->action == UI_MENU_BOOKMARKS) return 0; /* an action, never "checked" */
+    if (it->action == UI_MENU_REMHIST) return w->prefs.remember_history;
     return *(const bool *)((const char *)&w->caps + it->cap_offset);
 }
 
@@ -5386,6 +5498,7 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         /* Clicking the active palette returns to light; otherwise select it. */
         w->theme_mode = (w->theme_mode == it->theme_val) ? UI_THEME_LIGHT : it->theme_val;
         apply_theme(w);
+        profile_sync(w);
         /* With author styles on (session toggle or trusted-host doctrine), the
          * color scheme drives the page's own @media(prefers-color-scheme) CSS, so
          * re-render from cache (no network) to pick up its dark/light rules.
@@ -5395,6 +5508,7 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     }
     if (it->action == UI_MENU_FORCE) {
         w->force_theme = !w->force_theme;
+        profile_sync(w);
         return;  /* layout re-applies author colors (or not) on the next paint */
     }
     if (it->action == UI_MENU_TOR) {
@@ -5406,6 +5520,7 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         browser_set_status(&w->bs, w->net_cfg.tor_enabled
             ? "Tor routing ON (needs a Tor proxy on the configured port). Reload to apply."
             : "Tor routing OFF.", now_ms());
+        profile_sync(w);
         return;
     }
     if (it->action == UI_MENU_I2P) {
@@ -5413,6 +5528,7 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         browser_set_status(&w->bs, w->net_cfg.i2p_enabled
             ? "I2P routing ON for .i2p (needs an I2P HTTP proxy). Reload to apply."
             : "I2P routing OFF.", now_ms());
+        profile_sync(w);
         return;
     }
     if (it->action == UI_MENU_JS) {
@@ -5425,6 +5541,7 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         char msg[96];
         snprintf(msg, sizeof msg, "JavaScript policy: %s.", jsp_mode_str(w->js_mode));
         browser_set_status(&w->bs, msg, now_ms());
+        profile_sync(w);
         render_current(w);
         return;
     }
@@ -5451,8 +5568,34 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         add_current_host_to_list(w, it->theme_val);  /* theme_val = HOSTLIST_* */
         return;
     }
+    if (it->action == UI_MENU_BOOKMARK) {
+        w->menu_open = 0;
+        bookmark_toggle_current(w);
+        return;
+    }
+    if (it->action == UI_MENU_BOOKMARKS) {
+        w->menu_open = 0;
+        do_load(w, "about:bookmarks");
+        return;
+    }
+    if (it->action == UI_MENU_REMHIST) {
+        /* Zero Knowledge bias: opting out also forgets what was retained. */
+        w->prefs.remember_history = !w->prefs.remember_history;
+        if (!w->prefs.remember_history) {
+            for (size_t h = 0; h < w->prefs.history_len; ++h) free(w->prefs.history[h]);
+            free(w->prefs.history);
+            w->prefs.history = NULL;
+            w->prefs.history_len = 0;
+        }
+        browser_set_status(&w->bs, w->prefs.remember_history
+            ? "History will be remembered (encrypted at rest)."
+            : "History OFF and forgotten.", now_ms());
+        if (w->profile_rw) profile_save(&w->profile, &w->prefs);
+        return;
+    }
     bool *flag = (bool *)((char *)&w->caps + it->cap_offset);
     *flag = !*flag;
+    profile_sync(w);
     render_current(w);
 }
 
@@ -6661,6 +6804,14 @@ static void go_omnibox(browser_window *w) {
     const char *raw = w->bs.url_bar;
     if (raw == NULL || raw[0] == '\0') return;
 
+    /* Internal pages navigate directly (url_omnibox would fail-closed a foreign
+     * scheme into a web search, which is right for javascript:/file: but not for
+     * the browser's own about: pages). */
+    if (strcmp(raw, "about:bookmarks") == 0 || strcmp(raw, "about:blank") == 0) {
+        do_load(w, raw);
+        return;
+    }
+
     /* A typed file:// URL navigates to its path (do_load rebuilds the file:// origin),
      * so the URL bar / history / link base stay a plain path that link_nav resolves. */
     if (url_is_file(raw)) {
@@ -7228,8 +7379,17 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
      * placeholders update to the new posture. */
     if (ctrl && !shift && (sym == XKB_KEY_i || sym == XKB_KEY_I)) {
         w->caps.images = !w->caps.images;
+        profile_sync(w);
         render_current(w);
         redraw(w);
+        return;
+    }
+
+    /* Ctrl+B toggles a bookmark for the current page (title from the page). The
+     * bookmarks live encrypted in the profile; browse them via the menu's
+     * "Bookmarks & history" (about:bookmarks). */
+    if (ctrl && !shift && (sym == XKB_KEY_b || sym == XKB_KEY_B)) {
+        bookmark_toggle_current(w);
         return;
     }
 
@@ -7629,9 +7789,29 @@ ui_status ui_run_browser(const char *start_url) {
     w.height = 700;
     w.running = 1;
     w.use_csd = 1;
-    w.zoom_pct = zm_reset();    /* 100%; Ctrl +/-/0 steps the zoom ladder */
-    apply_theme(&w);            /* theme_mode is 0 (light) via memset */
     w.caps = rdp_caps_safe();   /* Privacy by Default: images/CSS/JS off */
+
+    /* Persisted profile (Hito 10): open the encrypted profile in the writable
+     * config dir and apply the remembered choices before the first paint/load.
+     * Fail closed: an unreadable/foreign prefs.bin leaves the safe defaults AND
+     * disables saving (never clobber); no config dir means memory-only. */
+    prefs_init(&w.prefs);
+    w.profile_rw = 0;
+    {
+        char profile_dir[PATH_MAX];
+        if (freedom_write_dir(profile_dir, sizeof profile_dir) == 0 &&
+            profile_open(&w.profile, profile_dir) == PROFILE_OK &&
+            profile_load(&w.profile, &w.prefs) == PROFILE_OK) {
+            w.profile_rw = 1;
+        }
+    }
+    w.theme_mode  = w.prefs.theme_mode;
+    w.force_theme = w.prefs.force_theme;
+    w.reader      = w.prefs.reader;
+    w.caps.images = w.prefs.images != 0;
+    w.caps.css    = w.prefs.css != 0;
+    w.zoom_pct    = zm_clamp(w.prefs.zoom_pct); /* Ctrl +/-/0 steps the ladder */
+    apply_theme(&w);
     w.scroll = 0.0;
     w.focused_input = -1;       /* no form control focused */
     w.tab_count = 1;            /* the foreground tab lives in the window's own fields */
@@ -7743,8 +7923,17 @@ ui_status ui_run_browser(const char *start_url) {
     w.js_hosts = build_js_filter();        /* per-host JS allowlist (js.conf) */
     w.omni_sel = -1;
     load_favorites(&w);                    /* omnibox autocomplete from allow.conf */
-    w.js_mode = jsp_mode_from_str(getenv("FREEDOM_JS")); /* default JSP_ALLOWLIST */
+    /* JS policy: an explicit FREEDOM_JS env wins for this session; otherwise the
+     * persisted choice applies (prefs_parse already clamped it to a valid mode). */
+    const char *js_env = getenv("FREEDOM_JS");
+    w.js_mode = (js_env != NULL && js_env[0] != '\0') ? jsp_mode_from_str(js_env)
+                                                      : (jsp_mode)w.prefs.js_mode;
     init_net_config(&w);  /* Tor/I2P routing config from the environment (opt-in) */
+    /* Remembered routing choices apply where the environment did not opt in
+     * (the env stays a per-session override; both are explicit user opt-ins). */
+    if (w.prefs.tor && !w.net_cfg.tor_enabled) w.net_cfg.tor_enabled = 1;
+    if (w.prefs.i2p && !w.net_cfg.i2p_enabled) w.net_cfg.i2p_enabled = 1;
+    if (w.prefs.torify && w.net_cfg.tor_enabled) w.net_cfg.torify_clearnet = 1;
 
     /* Optionally start in distraction-free (reader) mode: set FREEDOM_READER to any
      * value (like a startup affordance for the Ctrl+D toggle). Set before the first
@@ -7857,6 +8046,8 @@ ui_status ui_run_browser(const char *start_url) {
         }
     }
 
+    profile_sync(&w);  /* final state (zoom/toggles) sealed before teardown */
+
     destroy_buffer(&w);
     freebug_destroy(&w);                       /* tear down the console window if open */
     if (w.tab_worker) tab_close(w.tab_worker); /* the kept-alive REPL worker */
@@ -7913,6 +8104,8 @@ ui_status ui_run_browser(const char *start_url) {
     free(w.auth_user);
     free(w.auth_pass);
     browser_free(&w.bs);
+    prefs_free(&w.prefs);
+    profile_close(&w.profile);
 
     /* Release the process-wide font caches so a leak checker sees a clean exit.
      * tsh_shutdown drops the HarfBuzz shaper's cached FT/cairo faces first, then

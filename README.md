@@ -128,6 +128,7 @@ The name reflects its core goals:
 - ✅ Save page as vector PDF (`Ctrl+P`) or as a single PNG image (`Ctrl+Shift+P`)
 - ✅ Safe downloads (`Ctrl+S` / auto for non-renderable resources, fail-closed filenames, 0600)
 - ✅ Page zoom (`Ctrl++`/`Ctrl+-`/`Ctrl+0`) and reload (`Ctrl+R`/`F5`)
+- ✅ Encrypted persistent profile (Hito 10): preferences (theme/zoom/toggles/JS policy/Tor-I2P), **bookmarks** (`Ctrl+B`, browse at `about:bookmarks`) and **history** (feeds omnibox autocomplete; "Remember history" opt-out forgets it) — sealed with AES-256-GCM under a per-device Argon2id key, atomic 0600, nothing readable on disk
 - ✅ Author CSS (`<style>` + inline `style=`, simple subset; descendant/child/sibling combinators, attribute selectors `[attr=v]`/`^=`/`$=`/`*=`/`~=`/`|=`, pseudo-classes `:link`/`:nth-child()`/…, `!important`; never phones home) — menu "Author styles (CSS)"
 - ✅ External stylesheets (`<link rel=stylesheet>`): fetched by the **trusted parent** under the full network policy (tracker blocklist, realm routing, TLS-PQ) when Author styles is on — the sandboxed worker never touches a socket, and the parent serves style-only loads as `GET` exclusively
 - ✅ Author box model (`margin`/`padding`/`width`/`max-width`): centered reading columns (`max-width` + `margin: 0 auto`)
@@ -370,6 +371,7 @@ leave it empty to use the anti-fingerprint default.
 | `Ctrl++` / `Ctrl+-` / `Ctrl+0` | Zoom in / out (50–300% ladder) / reset to 100% |
 | `Ctrl+C` / `Ctrl+X` / `Ctrl+V` | Copy (selection or field) / cut the omnibar selection / paste into the focused field |
 | `Ctrl+A` | Select all in the URL bar (Shift+arrows / Shift+Home/End extend a selection) |
+| `Ctrl+B` | Bookmark the current page (toggle); browse at `about:bookmarks` (menu: "Bookmarks & history") |
 | `Ctrl+T` / `Ctrl+W` / `Ctrl+Tab` | New tab / close tab / next tab |
 | `Ctrl+Shift+B` / `Ctrl+Shift+A` / `Ctrl+Shift+J` | Add the current host to `block.conf` / `allow.conf` / `js.conf` (applies immediately) |
 | `Ctrl+Shift+E` | Per-host exception for a weak-but-valid certificate (this session) |

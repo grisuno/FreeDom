@@ -1,8 +1,7 @@
 # Especificación: `disk_store`
 
-> Hito 5 — Zero Knowledge: persistencia cifrada en disco. Estado: **SPEC + TEST (rojo)**.
-> Metodología: SDD + TDD. `tests/test_disk_store.c` debe fallar (no enlaza) hasta que exista
-> `src/disk_store.c`.
+> Hito 5 — Zero Knowledge: persistencia cifrada en disco. Estado: **CERRADO** (implementado,
+> suite verde, ASan limpio). Consumido por `profile` (Hito 10) para el perfil persistente.
 
 ## 1. Propósito
 

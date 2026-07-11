@@ -99,9 +99,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
-             $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch
+             $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch \
+             $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -230,6 +231,18 @@ $(BUILD_DIR)/test_js_policy: $(TEST_DIR)/test_js_policy.c $(BUILD_DIR)/js_policy
 $(BUILD_DIR)/test_prefetch: $(TEST_DIR)/test_prefetch.c $(BUILD_DIR)/prefetch.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) -lpthread $(CMOCKA_LIBS)
 
+# Pure user-profile model (Hito 10): preferences + bookmarks + history and the
+# versioned fail-closed text codec. Links zoom.o (zm_clamp owns the ladder bounds).
+$(BUILD_DIR)/test_prefs: $(TEST_DIR)/test_prefs.c $(BUILD_DIR)/prefs.o $(BUILD_DIR)/zoom.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Encrypted persistence orchestrator (Hito 10): per-device key (Argon2id) over
+# disk_store/local_store; exercised on a real temporary directory.
+$(BUILD_DIR)/test_profile: $(TEST_DIR)/test_profile.c $(BUILD_DIR)/profile.o \
+                           $(BUILD_DIR)/prefs.o $(BUILD_DIR)/zoom.o \
+                           $(BUILD_DIR)/disk_store.o $(BUILD_DIR)/local_store.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(LS_LIBS) $(CMOCKA_LIBS)
+
 # Clicked-link navigation policy: reuses the pure url module, no I/O deps.
 $(BUILD_DIR)/test_link_nav: $(TEST_DIR)/test_link_nav.c $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -357,6 +370,8 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
                       $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
+                      $(BUILD_DIR)/prefs.o $(BUILD_DIR)/profile.o \
+                      $(BUILD_DIR)/disk_store.o $(BUILD_DIR)/local_store.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -503,6 +518,17 @@ fuzz-pf: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_prefetch.c $(SRC_DIR)/prefetch.c \
 	  -o $(BUILD_DIR)/fuzz_prefetch -lpthread
 	./$(BUILD_DIR)/fuzz_prefetch -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the prefs codec (clang + libFuzzer). Bookmark titles
+# were born in hostile remote pages and round-trip through parse/format and the
+# generated bookmarks page: arbitrary bytes must never crash/leak/UB, the caps
+# must hold, and every parsed state must re-serialize.
+fuzz-prefs: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_prefs.c $(SRC_DIR)/prefs.c $(SRC_DIR)/zoom.c \
+	  -o $(BUILD_DIR)/fuzz_prefs
+	./$(BUILD_DIR)/fuzz_prefs -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the console-log buffer (clang + libFuzzer). Hostile
 # console output (arbitrary bytes, huge lines, unbounded volume) through push must
