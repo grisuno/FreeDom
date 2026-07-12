@@ -52,6 +52,48 @@ int fp_device_memory_gb(void) {
     return 8; /* fixed: do not reveal the real memory size */
 }
 
+/* --- legacy navigator properties (Hito 30b: blend-in) --- */
+
+const char *fp_app_version(void) {
+    return FP_USER_AGENT; /* Firefox uses the UA string as appVersion */
+}
+
+const char *fp_app_code_name(void) {
+    return "Mozilla";
+}
+
+const char *fp_product(void) {
+    return "Gecko";
+}
+
+const char *fp_app_name(void) {
+    return "Netscape";
+}
+
+const char *fp_product_sub(void) {
+    return "20100101";
+}
+
+const char *fp_oscpu(void) {
+    return "Linux x86_64";
+}
+
+const char *fp_build_id(void) {
+    return "20181001000000";
+}
+
+int fp_max_touch_points(void) {
+    return 0;
+}
+
+int fp_on_line(void) {
+    return 1;
+}
+
+int fp_cookie_enabled(void) {
+    return 1;
+}
+
 /* --- screen bucketing --- */
 
 void fp_bucket_screen(int w, int h, int *out_w, int *out_h) {

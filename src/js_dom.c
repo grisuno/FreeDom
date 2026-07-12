@@ -913,6 +913,16 @@ static const char JD_MODERN_SHIM[] =
     "  if(typeof g.__NEXT_DATA__==='undefined') g.__NEXT_DATA__={props:{}};"
     "  if(typeof g.__NEXT_PRELOADREADY==='undefined') g.__NEXT_PRELOADREADY=function(){};"
     "  if(typeof g.locale_data==='undefined') g.locale_data={};"
+    /* navigator.permissions.query (Hito 30b): Google bot detection queries this.
+     * Identity-safe stub: always resolves to {state:'prompt'}. Never leaks real
+     * permission state. */
+    "  if(g.navigator&&typeof g.navigator.permissions==='undefined'){"
+    "    g.navigator.permissions={query:function(desc){"
+    "      var result={state:'prompt',onchange:null};"
+    "      result.addEventListener=function(){}; result.removeEventListener=function(){};"
+    "      return {then:function(cb){ return cb(result); }};"
+    "    }};"
+    "  }"
     "})();";
 
 /* WHATWG URL + URLSearchParams as a pure-JS ambient surface. No network, no disk,

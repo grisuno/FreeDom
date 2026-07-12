@@ -31,6 +31,16 @@ static void test_config_default_is_secure(void **state) {
     assert_null(c.user_agent); /* NULL => resolved to the default at request time */
 }
 
+static void test_config_blend_fields_default_null(void **state) {
+    (void)state;
+    sf_config c = sf_config_default();
+    assert_null(c.referrer_url);
+    assert_null(c.sec_fetch_dest);
+    assert_null(c.sec_fetch_mode);
+    assert_null(c.progress_ctx);
+    assert_null(c.progress_cb);
+}
+
 /* --- sf_user_agent_or_default --- */
 
 static void test_user_agent_default_when_unset(void **state) {
@@ -522,6 +532,7 @@ static void test_cookie_jar_put_and_header(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
+        cmocka_unit_test(test_config_blend_fields_default_null),
         cmocka_unit_test(test_user_agent_default_when_unset),
         cmocka_unit_test(test_user_agent_uses_override),
         cmocka_unit_test(test_url_rejects_null),

@@ -86,6 +86,13 @@ typedef struct sf_config {
     const char *username;       /* HTTP Basic Auth username (NULL/"" => no auth) */
     const char *password;       /* HTTP Basic Auth password (ignored when username is NULL/empty) */
     int         insecure;       /* skip TLS cert verification (self-signed/dev); default 0 */
+    /* Sec-Fetch metadata for bot-blending (Hito 30b). All real browsers send these
+     * per-section headers; their absence is a bot signal. dest/mode NULL => navigation
+     * defaults ("document"/"navigate"). referrer_url is the current page URL used to
+     * compute Sec-Fetch-Site (NULL => "none" for top-level navigation). */
+    const char *referrer_url;    /* document URL of the initiator; NULL => top-level nav */
+    const char *sec_fetch_dest;  /* NULL => "document"; set to "script"/"image"/"style" etc. */
+    const char *sec_fetch_mode;  /* NULL => "navigate"; set to "no-cors"/"cors" etc. */
     /* Streaming progress: called ~1/sec during download with the accumulated body so
      * far, allowing the caller to progressively render before the full response arrives.
      * The callback runs on the curl transfer thread (same thread as sf_get), so data

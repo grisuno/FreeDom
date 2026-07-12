@@ -33,6 +33,20 @@
 #define FP_ACCEPT_LANGUAGE        "en-US,en"       /* list form (navigator.languages) */
 #define FP_ACCEPT_LANGUAGE_HEADER "en-US,en;q=0.5" /* HTTP Accept-Language header value */
 
+/*
+ * Blending-in network constants (Hito 30b): Firefox-like HTTP headers shared with
+ * secure_fetch so the JS-visible identity and on-the-wire identity agree.
+ */
+#define FP_ACCEPT_HEADER_NAV \
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+
+/* Sec-Fetch headers for top-level navigation. Subresource requests (images, scripts,
+ * stylesheets) use the dest string from sf_config.sec_fetch_dest. */
+#define FP_SEC_FETCH_DEST_NAV  "document"
+#define FP_SEC_FETCH_MODE_NAV  "navigate"
+#define FP_SEC_FETCH_SITE_NONE "none"
+#define FP_SEC_FETCH_USER_ON   "?1"
+
 /* --- clocks: coarse granularity against high-resolution timing --- */
 
 uint64_t fp_timer_resolution_ms(void);
@@ -48,6 +62,21 @@ const char *fp_platform(void);        /* "Linux x86_64" (consistent with the UA)
 const char *fp_vendor(void);          /* "" (no vendor; minimal entropy) */
 int         fp_hardware_concurrency(void);
 int         fp_device_memory_gb(void);
+
+/*
+ * Legacy navigator properties (Hito 30b): normalized Firefox values shared by
+ * js_env and the network layer so JS and HTTP present the same identity.
+ */
+const char *fp_app_version(void);       /* same string as fp_user_agent() */
+const char *fp_app_code_name(void);     /* "Mozilla" (historic, all browsers) */
+const char *fp_product(void);           /* "Gecko" (Firefox engine identity) */
+const char *fp_app_name(void);          /* "Netscape" (historic) */
+const char *fp_product_sub(void);       /* "20100101" (Gecko build date) */
+const char *fp_oscpu(void);             /* "Linux x86_64" (consistent with UA) */
+const char *fp_build_id(void);          /* fixed Firefox build ID */
+int         fp_max_touch_points(void);  /* 0 (desktop, no touch) */
+int         fp_on_line(void);           /* 1 (connected) */
+int         fp_cookie_enabled(void);    /* 1 (cookies enabled) */
 
 /* Snaps a screen size to a standard bucket (cuts entropy). out_w/out_h non-NULL.
  * Picks the largest-area bucket that fits in (w,h); if none fits, the smallest. */

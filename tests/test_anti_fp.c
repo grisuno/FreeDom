@@ -56,6 +56,28 @@ static void test_identity_is_fixed(void **state) {
     assert_string_equal(fp_platform(), fp_platform());
 }
 
+/* --- legacy navigator identity (Hito 30b: blend-in surface) --- */
+
+static void test_legacy_identity_fixed(void **state) {
+    (void)state;
+    assert_non_null(fp_app_version());
+    assert_string_equal(fp_app_version(), FP_USER_AGENT);
+    assert_string_equal(fp_app_code_name(), "Mozilla");
+    assert_string_equal(fp_app_name(), "Netscape");
+    assert_string_equal(fp_product(), "Gecko");
+    assert_string_equal(fp_product_sub(), "20100101");
+    assert_string_equal(fp_oscpu(), "Linux x86_64");
+    assert_non_null(fp_build_id());
+    assert_true(strlen(fp_build_id()) > 0);
+}
+
+static void test_boolean_props(void **state) {
+    (void)state;
+    assert_int_equal(fp_max_touch_points(), 0);
+    assert_int_equal(fp_on_line(), 1);
+    assert_int_equal(fp_cookie_enabled(), 1);
+}
+
 /* --- screen bucketing --- */
 
 static void test_bucket_screen(void **state) {
@@ -176,6 +198,8 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_coarsen_time),
         cmocka_unit_test(test_identity_is_fixed),
+        cmocka_unit_test(test_legacy_identity_fixed),
+        cmocka_unit_test(test_boolean_props),
         cmocka_unit_test(test_bucket_screen),
         cmocka_unit_test(test_perturb_deterministic),
         cmocka_unit_test(test_perturb_bounded_lsb),

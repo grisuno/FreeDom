@@ -87,6 +87,80 @@ static void test_navigator_identity(void **state) {
     EXPECT(f, "navigator.doNotTrack === null", "true");
 }
 
+/* --- legacy navigator properties (Hito 30b) --- */
+
+static void test_legacy_nav_props(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "navigator.appCodeName", "Mozilla");
+    EXPECT(f, "navigator.appName", "Netscape");
+    EXPECT(f, "navigator.product", "Gecko");
+    EXPECT(f, "navigator.productSub", "20100101");
+    EXPECT(f, "navigator.oscpu", "Linux x86_64");
+    EXPECT(f, "navigator.appVersion.length > 0", "true");
+    EXPECT(f, "navigator.buildID.length > 0", "true");
+}
+
+static void test_bool_nav_props(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "navigator.maxTouchPoints", "0");
+    EXPECT(f, "navigator.onLine", "true");
+    EXPECT(f, "navigator.cookieEnabled", "true");
+}
+
+/* --- plugins and mimeTypes (Hito 30b) --- */
+
+static void test_navigator_plugins(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "navigator.plugins.length > 0", "true");
+    EXPECT(f, "navigator.plugins[0].name.length > 0", "true");
+    EXPECT(f, "navigator.plugins[0].filename.length > 0", "true");
+    EXPECT(f, "typeof navigator.plugins.refresh", "function");
+}
+
+static void test_navigator_mime_types(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "navigator.mimeTypes.length >= 2", "true");
+    EXPECT(f, "navigator.mimeTypes[0].type === 'application/pdf'", "true");
+    EXPECT(f, "navigator.mimeTypes[0].suffixes === 'pdf'", "true");
+}
+
+/* --- crypto (Hito 30b) --- */
+
+static void test_crypto_present(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof crypto", "object");
+    EXPECT(f, "typeof crypto.getRandomValues", "function");
+    EXPECT(f, "typeof crypto.randomUUID", "function");
+    EXPECT(f, "typeof crypto.subtle", "object");
+}
+
+static void test_crypto_random_uuid(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var u=crypto.randomUUID(); typeof u", "string");
+    EXPECT(f, "var u=crypto.randomUUID(); u.split('-').length===5?'ok':'bad'", "ok");
+    EXPECT(f, "var u=crypto.randomUUID(); u.charAt(14)==='4'?'v4':'not-v4'", "v4");
+    EXPECT(f, "var a=crypto.randomUUID(),b=crypto.randomUUID(); a!==b?'distinct':'equal'",
+           "distinct");
+}
+
+static void test_crypto_random_values(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var a=new Uint8Array(32); crypto.getRandomValues(a);"
+              "var z=0;for(var i=0;i<32;i++)z|=a[i]; z>0?'filled':'empty'", "filled");
+    EXPECT(f, "var a=new Uint32Array(4); var b=crypto.getRandomValues(a);"
+              "a===b?'returned-same':'different'", "returned-same");
+}
+
+/* --- screen orientation (Hito 30b) --- */
+
+static void test_screen_orientation(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof screen.orientation", "object");
+    EXPECT(f, "screen.orientation.type", "landscape-primary");
+    EXPECT(f, "screen.orientation.angle", "0");
+    EXPECT(f, "typeof screen.orientation.addEventListener", "function");
+}
+
 /* --- screen bucketing: real (1680,1050) snaps to 1600x900 --- */
 
 static void test_screen_bucketed(void **state) {
@@ -282,6 +356,14 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
         cmocka_unit_test_setup_teardown(test_navigator_identity, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_legacy_nav_props, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_bool_nav_props, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_navigator_plugins, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_navigator_mime_types, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_crypto_present, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_crypto_random_uuid, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_crypto_random_values, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_screen_orientation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_screen_bucketed, setup, teardown),
         cmocka_unit_test_setup_teardown(test_clocks_coarse, setup, teardown),
         cmocka_unit_test_setup_teardown(test_performance_timing_identity_safe, setup, teardown),

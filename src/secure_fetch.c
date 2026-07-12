@@ -12,6 +12,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "secure_fetch.h"
+#include "anti_fp.h"
 #include "url.h"
 
 #include <stdlib.h>
@@ -212,6 +213,7 @@ void sf_cookie_put(const char *url, const char *namevalue) {
 
 sf_config sf_config_default(void) {
     sf_config c;
+    memset(&c, 0, sizeof c);
     c.policy = SF_POLICY_PQ_HYBRID_KE;
     c.timeout_ms = SF_DEFAULT_TIMEOUT_MS;
     c.max_body_bytes = SF_DEFAULT_MAX_BODY;
@@ -223,6 +225,11 @@ sf_config sf_config_default(void) {
     c.username = NULL;
     c.password = NULL;
     c.insecure = 0;
+    c.referrer_url = NULL;
+    c.sec_fetch_dest = NULL;
+    c.sec_fetch_mode = NULL;
+    c.progress_ctx = NULL;
+    c.progress_cb = NULL;
     return c;
 }
 
@@ -812,6 +819,44 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
      * agree. Omitting it is itself a signal; the real system locale must never leak. */
     hdrs = curl_slist_append(hdrs, "Accept-Language: " FP_ACCEPT_LANGUAGE_HEADER);
     if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+
+    /* Browser-like Accept header (Hito 30b): replaces libcurl's generic accept with a
+     * standard Firefox content-negotiation string. Every real browser sends this;
+     * a bare wildcard accept is a bot/script signal. */
+    hdrs = curl_slist_append(hdrs, "Accept: " FP_ACCEPT_HEADER_NAV);
+    if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+
+    /* DNT: 1 matches Firefox privacy defaults (Hito 30b). */
+    hdrs = curl_slist_append(hdrs, "DNT: 1");
+    if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+
+    /* Sec-Fetch-* headers (Hito 30b): absent from all non-browser HTTP clients;
+     * every real browser sends them. The dest/mode come from sf_config
+     * (defaulting to document/navigate for top-level navigation); Site is
+     * "none" for direct nav, "same-origin"/"cross-site" from referrer_url. */
+    {
+        const char *dest  = (local.sec_fetch_dest != NULL)
+                                ? local.sec_fetch_dest : FP_SEC_FETCH_DEST_NAV;
+        const char *mode  = (local.sec_fetch_mode != NULL)
+                                ? local.sec_fetch_mode : FP_SEC_FETCH_MODE_NAV;
+        char sfh[128];
+        int sn = snprintf(sfh, sizeof sfh, "Sec-Fetch-Dest: %s", dest);
+        if (sn > 0 && (size_t)sn < sizeof sfh) {
+            hdrs = curl_slist_append(hdrs, sfh);
+            if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+        }
+        sn = snprintf(sfh, sizeof sfh, "Sec-Fetch-Mode: %s", mode);
+        if (sn > 0 && (size_t)sn < sizeof sfh) {
+            hdrs = curl_slist_append(hdrs, sfh);
+            if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+        }
+        hdrs = curl_slist_append(hdrs,
+            "Sec-Fetch-Site: " FP_SEC_FETCH_SITE_NONE);
+        if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+        hdrs = curl_slist_append(hdrs,
+            "Sec-Fetch-User: " FP_SEC_FETCH_USER_ON);
+        if (hdrs == NULL) { result = SF_ERR_OOM; goto done; }
+    }
 
     if (post_body != NULL || post_len != 0) {
         const char *ct = (content_type != NULL) ? content_type

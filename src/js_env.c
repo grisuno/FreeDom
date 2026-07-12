@@ -22,8 +22,10 @@
 #include "js_sandbox.h"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/random.h>
 #include <time.h>
 
 #include "quickjs.h"
@@ -78,6 +80,70 @@ static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
     return JS_NewArray(ctx);
 }
 
+/* --- crypto native functions (Hito 30b: blend-in surface) --- */
+
+static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
+                                    int argc, JSValueConst *argv) {
+    (void)this_val;
+    if (argc < 1) return JS_ThrowTypeError(ctx, "getRandomValues requires 1 argument");
+    uint8_t *buf = NULL;
+    size_t byte_len = 0, byte_off = 0;
+    size_t ab_len = 0;
+    buf = JS_GetArrayBuffer(ctx, &ab_len, argv[0]);
+    if (buf != NULL) {
+        byte_len = ab_len;
+    } else {
+        JSValue ab = JS_GetPropertyStr(ctx, argv[0], "buffer");
+        if (JS_IsException(ab))
+            return ab;
+        if (JS_IsUndefined(ab))
+            return JS_ThrowTypeError(ctx, "getRandomValues requires a TypedArray");
+        buf = JS_GetArrayBuffer(ctx, &byte_len, ab);
+        JS_FreeValue(ctx, ab);
+        if (buf == NULL)
+            return JS_ThrowTypeError(ctx, "getRandomValues requires a TypedArray");
+        JSValue off_val = JS_GetPropertyStr(ctx, argv[0], "byteOffset");
+        if (JS_IsException(off_val))
+            return off_val;
+        if (!JS_IsUndefined(off_val)) {
+            int32_t off32 = 0;
+            JS_ToInt32(ctx, &off32, off_val);
+            byte_off = (size_t)(off32 >= 0 ? off32 : 0);
+        }
+        JS_FreeValue(ctx, off_val);
+    }
+    if (byte_len > 65536u) return JS_ThrowTypeError(ctx, "TypedArray too large");
+    size_t got = 0;
+    while (got < byte_len) {
+        ssize_t n = getrandom(buf + byte_off + got, byte_len - got, 0);
+        if (n < 0) return JS_ThrowInternalError(ctx, "getrandom failed");
+        got += (size_t)n;
+    }
+    return JS_DupValue(ctx, argv[0]);
+}
+
+static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
+                              int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc; (void)argv;
+    uint8_t r[16];
+    ssize_t n = getrandom(r, sizeof r, 0);
+    if (n < 0) return JS_ThrowInternalError(ctx, "getrandom failed");
+    r[6] = (r[6] & 0x0fu) | 0x40u;
+    r[8] = (r[8] & 0x3fu) | 0x80u;
+    char buf[37];
+    snprintf(buf, sizeof buf,
+             "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+             r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
+             r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15]);
+    return JS_NewString(ctx, buf);
+}
+
+static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
+                              int argc, JSValueConst *argv) {
+    (void)ctx; (void)this_val; (void)argc; (void)argv;
+    return JS_NULL;
+}
+
 /* --- read-only property helpers --- */
 
 /* Always takes ownership of v: JS_DefinePropertyValueStr consumes it (freeing it
@@ -95,6 +161,11 @@ static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const cha
 
 static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n) {
     return def_val(ctx, obj, name, JS_NewInt32(ctx, n));
+}
+
+static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
+                  JSCFunction *fn) {
+    return def_val(ctx, obj, name, JS_NewCFunction(ctx, fn, name, 0));
 }
 
 /* navigator.languages: a sealed array built by splitting fp_accept_language()
@@ -130,16 +201,90 @@ static int build_navigator(JSContext *ctx, JSValueConst global) {
     JSValue languages = build_languages(ctx);
     if (JS_IsException(languages)) { JS_FreeValue(ctx, nav); return -1; }
 
-    /* languages is consumed by the first def_val regardless of later failures. */
-    int ok = def_val(ctx, nav, "languages", languages) == 0
+    JSValue plugins = JS_NewArray(ctx);
+    if (JS_IsException(plugins)) { JS_FreeValue(ctx, languages); JS_FreeValue(ctx, nav); return -1; }
+    {
+        JSValue p0 = JS_NewObject(ctx);
+        JS_DefinePropertyValueStr(ctx, p0, "name", JS_NewString(ctx, "Chrome PDF Plugin"),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, p0, "filename", JS_NewString(ctx, "internal-pdf-viewer"),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, p0, "description",
+                                  JS_NewString(ctx, "Portable Document Format"),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, p0, "length", JS_NewInt32(ctx, 1),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueUint32(ctx, plugins, 0, p0, JS_PROP_ENUMERABLE);
+    }
+    {
+        JSValue p1 = JS_NewObject(ctx);
+        JS_DefinePropertyValueStr(ctx, p1, "name", JS_NewString(ctx, "Chrome PDF Viewer"),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, p1, "filename",
+                                  JS_NewString(ctx, "mhjfbmdgcfjbbpaeojofohoefgiehjai"),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, p1, "description", JS_NewString(ctx, ""),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, p1, "length", JS_NewInt32(ctx, 1),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueUint32(ctx, plugins, 1, p1, JS_PROP_ENUMERABLE);
+    }
+    {
+        JSValue re = JS_NewCFunction(ctx, m_noop, "refresh", 0);
+        JS_DefinePropertyValueStr(ctx, plugins, "refresh", re, JS_PROP_ENUMERABLE);
+    }
+    JS_PreventExtensions(ctx, plugins);
+
+    JSValue mime_types = JS_NewArray(ctx);
+    if (JS_IsException(mime_types)) {
+        JS_FreeValue(ctx, plugins); JS_FreeValue(ctx, languages);
+        JS_FreeValue(ctx, nav); return -1;
+    }
+    static const char *MTYPES[] = {
+        "application/pdf", "text/pdf",
+        "application/x-google-chrome-pdf", "application/x-pdf"
+    };
+    static const char *MSUFF[] = { "pdf", "pdf", "pdf", "pdf" };
+    static const char *MDESC[] = {
+        "Portable Document Format", "Portable Document Format",
+        "Portable Document Format", "Portable Document Format"
+    };
+    #define FP_MIME_COUNT (sizeof MTYPES / sizeof MTYPES[0])
+    for (size_t i = 0; i < FP_MIME_COUNT; ++i) {
+        JSValue mt = JS_NewObject(ctx);
+        JS_DefinePropertyValueStr(ctx, mt, "type", JS_NewString(ctx, MTYPES[i]),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, mt, "suffixes", JS_NewString(ctx, MSUFF[i]),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueStr(ctx, mt, "description", JS_NewString(ctx, MDESC[i]),
+                                  JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValueUint32(ctx, mime_types, (uint32_t)i, mt,
+                                     JS_PROP_ENUMERABLE);
+    }
+    #undef FP_MIME_COUNT
+    JS_PreventExtensions(ctx, mime_types);
+
+    int ok = def_str(ctx, nav, "appCodeName", fp_app_code_name()) == 0
+          && def_str(ctx, nav, "appName", fp_app_name()) == 0
+          && def_str(ctx, nav, "appVersion", fp_app_version()) == 0
+          && def_str(ctx, nav, "product", fp_product()) == 0
+          && def_str(ctx, nav, "productSub", fp_product_sub()) == 0
+          && def_str(ctx, nav, "oscpu", fp_oscpu()) == 0
+          && def_str(ctx, nav, "buildID", fp_build_id()) == 0
+          && def_val(ctx, nav, "languages", languages) == 0
           && def_str(ctx, nav, "userAgent", fp_user_agent()) == 0
           && def_str(ctx, nav, "language", "en-US") == 0
           && def_str(ctx, nav, "platform", fp_platform()) == 0
           && def_str(ctx, nav, "vendor", fp_vendor()) == 0
           && def_int(ctx, nav, "hardwareConcurrency", fp_hardware_concurrency()) == 0
           && def_int(ctx, nav, "deviceMemory", fp_device_memory_gb()) == 0
+          && def_int(ctx, nav, "maxTouchPoints", fp_max_touch_points()) == 0
+          && def_val(ctx, nav, "onLine", JS_NewBool(ctx, fp_on_line())) == 0
+          && def_val(ctx, nav, "cookieEnabled", JS_NewBool(ctx, fp_cookie_enabled())) == 0
           && def_val(ctx, nav, "webdriver", JS_NewBool(ctx, 0)) == 0
-          && def_val(ctx, nav, "doNotTrack", JS_NULL) == 0;
+          && def_val(ctx, nav, "doNotTrack", JS_NULL) == 0
+          && def_val(ctx, nav, "plugins", plugins) == 0
+          && def_val(ctx, nav, "mimeTypes", mime_types) == 0;
     if (!ok) { JS_FreeValue(ctx, nav); return -1; }
     JS_PreventExtensions(ctx, nav);
     return (JS_DefinePropertyValueStr(ctx, global, "navigator", nav,
@@ -153,12 +298,24 @@ static int build_screen(JSContext *ctx, JSValueConst global, int w, int h) {
     JSValue scr = JS_NewObject(ctx);
     if (JS_IsException(scr)) return -1;
 
+    JSValue ori = JS_NewObject(ctx);
+    if (JS_IsException(ori)) { JS_FreeValue(ctx, scr); return -1; }
+
+    int ok_ori = def_str(ctx, ori, "type", "landscape-primary") == 0
+              && def_int(ctx, ori, "angle", 0) == 0
+              && def_fn(ctx, ori, "addEventListener", m_noop) == 0
+              && def_fn(ctx, ori, "removeEventListener", m_noop) == 0
+              && def_fn(ctx, ori, "dispatchEvent", m_noop) == 0;
+    if (!ok_ori) { JS_FreeValue(ctx, ori); JS_FreeValue(ctx, scr); return -1; }
+    JS_PreventExtensions(ctx, ori);
+
     int ok = def_int(ctx, scr, "width", bw) == 0
           && def_int(ctx, scr, "height", bh) == 0
           && def_int(ctx, scr, "availWidth", bw) == 0
           && def_int(ctx, scr, "availHeight", bh) == 0
           && def_int(ctx, scr, "colorDepth", 24) == 0
-          && def_int(ctx, scr, "pixelDepth", 24) == 0;
+          && def_int(ctx, scr, "pixelDepth", 24) == 0
+          && def_val(ctx, scr, "orientation", ori) == 0;
     if (!ok) { JS_FreeValue(ctx, scr); return -1; }
     JS_PreventExtensions(ctx, scr);
     return (JS_DefinePropertyValueStr(ctx, global, "screen", scr,
@@ -178,9 +335,32 @@ static const char *const PERF_TIMING_FIELDS[] = {
 };
 #define PERF_ORIGIN_EPOCH 1700000000000.0
 
-static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
-                  JSCFunction *fn) {
-    return def_val(ctx, obj, name, JS_NewCFunction(ctx, fn, name, 0));
+static int build_crypto(JSContext *ctx, JSValueConst global) {
+    JSValue crypto = JS_NewObject(ctx);
+    if (JS_IsException(crypto)) return -1;
+    JSValue subtle = JS_NewObject(ctx);
+    if (JS_IsException(subtle)) { JS_FreeValue(ctx, crypto); return -1; }
+    int ok = def_fn(ctx, subtle, "digest", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "encrypt", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "decrypt", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "generateKey", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "importKey", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "exportKey", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "sign", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "verify", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "deriveBits", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "deriveKey", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "wrapKey", m_subtle_null) == 0
+          && def_fn(ctx, subtle, "unwrapKey", m_subtle_null) == 0;
+    if (!ok) { JS_FreeValue(ctx, subtle); JS_FreeValue(ctx, crypto); return -1; }
+    JS_PreventExtensions(ctx, subtle);
+    ok = def_fn(ctx, crypto, "getRandomValues", m_get_random_values) == 0
+      && def_fn(ctx, crypto, "randomUUID", m_random_uuid) == 0
+      && def_val(ctx, crypto, "subtle", subtle) == 0;
+    if (!ok) { JS_FreeValue(ctx, crypto); return -1; }
+    JS_PreventExtensions(ctx, crypto);
+    return (JS_DefinePropertyValueStr(ctx, global, "crypto", crypto,
+                                      JS_PROP_ENUMERABLE) < 0) ? -1 : 0;
 }
 
 static int build_perf_timing(JSContext *ctx, JSValueConst perf) {
@@ -318,6 +498,7 @@ je_status je_install(js_context *ctx, int screen_w, int screen_h) {
     int ok = build_navigator(jsctx, global) == 0
           && build_screen(jsctx, global, screen_w, screen_h) == 0
           && build_performance(jsctx, global) == 0
+          && build_crypto(jsctx, global) == 0
           && override_date_now(jsctx, global) == 0;
 
     JS_FreeValue(jsctx, global);
