@@ -919,7 +919,16 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "secure_fetch.h"
 #include "tab.h"
 
-/* An editable control gets a live text field; submit/button/hidden do not. */
+/* An editable control gets a live text field; submit/button/hidden do not.
+ * Checkboxes, radios, and selects are interactive (click toggles/opens) but
+ * are not text-editable -- they are tracked via rebuild_inputs so clicks
+ * dispatch to them, but they have no tf_field. */
+static int input_is_interactive(int input_type) {
+    return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD
+        || input_type == PV_IN_TEXTAREA || input_type == PV_IN_CHECKBOX
+        || input_type == PV_IN_RADIO || input_type == PV_IN_SELECT;
+}
+
 static int input_is_editable(int input_type) {
     return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD
         || input_type == PV_IN_TEXTAREA;
@@ -975,7 +984,7 @@ static void rebuild_inputs(browser_window *w) {
     size_t editable = 0;
     for (size_t i = 0; i < n; ++i) {
         const rd_block *b = rd_at(w->doc, i);
-        if (b->kind == RD_INPUT && input_is_editable(b->input_type)) editable++;
+        if (b->kind == RD_INPUT && input_is_interactive(b->input_type)) editable++;
     }
     if (editable == 0) return;
     w->inputs = (ui_input_state *)calloc(editable, sizeof *w->inputs);
@@ -983,7 +992,7 @@ static void rebuild_inputs(browser_window *w) {
     size_t k = 0;
     for (size_t i = 0; i < n; ++i) {
         const rd_block *b = rd_at(w->doc, i);
-        if (b->kind != RD_INPUT || !input_is_editable(b->input_type)) continue;
+        if (b->kind != RD_INPUT || !input_is_interactive(b->input_type)) continue;
         ui_input_state *st = &w->inputs[k++];
         st->blk = b;
         tf_init(&st->field);
@@ -3956,6 +3965,10 @@ static double input_box_width(double content_w) {
     return (content_w < UI_INPUT_WIDTH) ? content_w : UI_INPUT_WIDTH;
 }
 
+static double select_box_width(double content_w) {
+    return input_box_width(content_w);
+}
+
 /* Width of a painted button: its label plus horizontal padding, clamped. */
 static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
                                double content_w) {
@@ -3989,6 +4002,103 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
         draw_slice(cr, left + UI_BUTTON_HPAD, ry + ascent + UI_INPUT_PAD, label, strlen(label));
         cairo_restore(cr);
+        return;
+    }
+
+    if (b->input_type == PV_IN_CHECKBOX || b->input_type == PV_IN_RADIO) {
+        /* Checkbox: square box; Radio: circle. Both 14×14 px, UX clickable. */
+        double bx = left, by = ry + (height - 14.0) * 0.5;
+        int is_checked = (b->checked >= 1) ? 1 : 0;
+        double lw = 1.5;
+        set_rgb(cr, focused ? th->link : th->input_border);
+        cairo_set_line_width(cr, lw);
+        if (b->input_type == PV_IN_RADIO) {
+            double r = 6.5;
+            cairo_arc(cr, bx + 7.0, by + 7.0, r, 0, 2 * M_PI);
+            cairo_stroke(cr);
+            if (is_checked) {
+                set_rgb(cr, focused ? th->link : th->button_bg);
+                cairo_arc(cr, bx + 7.0, by + 7.0, 4.0, 0, 2 * M_PI);
+                cairo_fill(cr);
+            }
+        } else {
+            cairo_rectangle(cr, bx + 1.0, by + 1.0, 12.0, 12.0);
+            cairo_stroke(cr);
+            if (is_checked) {
+                set_rgb(cr, th->link);
+                cairo_move_to(cr, bx + 3.0, by + 7.0);
+                cairo_line_to(cr, bx + 6.5, by + 10.5);
+                cairo_line_to(cr, bx + 11.0, by + 3.0);
+                cairo_set_line_width(cr, 2.0);
+                cairo_stroke(cr);
+            }
+        }
+        /* Label after the widget */
+        if (b->text != NULL && b->text[0] != '\0') {
+            set_rgb(cr, th->input_text);
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+            draw_slice(cr, bx + 18.0, ry + ascent + UI_INPUT_PAD, b->text, strlen(b->text));
+        }
+        return;
+    }
+
+    if (b->input_type == PV_IN_SELECT) {
+        double bw = select_box_width(content_w);
+        set_rgb(cr, focused ? th->input_bg_focused : th->input_bg);
+        cairo_rectangle(cr, left, ry, bw, height);
+        cairo_fill(cr);
+        set_rgb(cr, focused ? th->link : th->input_border);
+        cairo_set_line_width(cr, 1.0);
+        cairo_rectangle(cr, left, ry, bw, height);
+        cairo_stroke(cr);
+        /* Look up the display label for the current value from options. */
+        char selbuf[128];
+        const char *shown = selbuf;
+        selbuf[0] = '\0';
+        if (b->select_opts != NULL) {
+            const char *opts = b->select_opts;
+            const char *needle = (b->value != NULL) ? b->value : "";
+            while (*opts) {
+                const char *sep = strstr(opts, "||");
+                if (sep == NULL) break;
+                size_t vlen = (size_t)(sep - opts);
+                const char *lbl_start = sep + 2;
+                size_t ll = strcspn(lbl_start, "|");
+                if (vlen == strlen(needle) && memcmp(opts, needle, vlen) == 0) {
+                    size_t cp = (ll < sizeof selbuf - 1) ? ll : sizeof selbuf - 1;
+                    memcpy(selbuf, lbl_start, cp);
+                    selbuf[cp] = '\0';
+                    break;
+                }
+                opts = lbl_start + ll;
+                if (*opts == '|') opts++; /* skip second | */
+                if (*opts == '|') opts++;
+                if (*opts == '\0') break;
+            }
+        }
+        if (selbuf[0] == '\0' && b->value != NULL && b->value[0] != '\0')
+            shown = b->value;
+        if (shown[0] == '\0' && b->text != NULL && b->text[0] != '\0') {
+            set_rgb(cr, th->input_placeholder);
+            shown = b->text;
+        } else {
+            set_rgb(cr, th->input_text);
+        }
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        cairo_save(cr);
+        cairo_rectangle(cr, left + 2.0, ry + 1.0, bw - 24.0, height - 2.0);
+        cairo_clip(cr);
+        draw_slice(cr, left + UI_INPUT_PAD, ry + ascent + UI_INPUT_PAD, shown, strlen(shown));
+        cairo_restore(cr);
+        /* Downward triangle */
+        set_rgb(cr, th->input_border);
+        double ax = left + bw - 16.0;
+        double ay = ry + height * 0.5;
+        cairo_move_to(cr, ax, ay - 3.0);
+        cairo_line_to(cr, ax + 8.0, ay - 3.0);
+        cairo_line_to(cr, ax + 4.0, ay + 4.0);
+        cairo_close_path(cr);
+        cairo_fill(cr);
         return;
     }
 

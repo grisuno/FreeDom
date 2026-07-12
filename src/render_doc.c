@@ -155,6 +155,8 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->value = NULL;
     b->form_id = -1;
     b->form_method = 0;
+    b->checked = -1;
+    b->select_opts = NULL;
     return 0;
 }
 
@@ -174,6 +176,11 @@ static int rd_push_input(rd_doc *d, int block_break, const pv_run *r) {
     if (r->value != NULL) {
         b->value = utf8_sanitized_dup(r->value);
         if (b->value == NULL) return -1;
+    }
+    b->checked = r->checked;
+    if (r->select_opts != NULL) {
+        b->select_opts = utf8_sanitized_dup(r->select_opts);
+        if (b->select_opts == NULL) return -1;
     }
     return 0;
 }
@@ -395,6 +402,7 @@ void rd_free(rd_doc *d) {
         free(d->blocks[i].href);
         free(d->blocks[i].name);
         free(d->blocks[i].value);
+        free(d->blocks[i].select_opts);
     }
     free(d->blocks);
     free(d->boxes);
@@ -449,6 +457,7 @@ const char *rd_block_tag(const rd_block *b) {
                 case PV_IN_TEXTAREA: return "textarea";
                 case PV_IN_SUBMIT:
                 case PV_IN_BUTTON:   return "button";
+                case PV_IN_SELECT:   return "select";
                 default:             return "input";
             }
         case RD_NOTICE:    return NULL;
@@ -464,6 +473,9 @@ const char *rd_input_label(int input_type) {
         case PV_IN_HIDDEN:   return "hidden";
         case PV_IN_SUBMIT:   return "submit";
         case PV_IN_BUTTON:   return "button";
+        case PV_IN_CHECKBOX: return "checkbox";
+        case PV_IN_RADIO:    return "radio";
+        case PV_IN_SELECT:   return "select";
     }
     return "field";
 }

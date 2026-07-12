@@ -59,7 +59,10 @@ typedef enum pv_input_type {
     PV_IN_TEXTAREA,   /* <textarea>: editable (one-line box for now); value = its content */
     PV_IN_HIDDEN,     /* hidden: not painted; value still submitted */
     PV_IN_SUBMIT,     /* submit button (triggers the owning form) */
-    PV_IN_BUTTON      /* non-submitting button (button/reset): painted, inert */
+    PV_IN_BUTTON,     /* non-submitting button (button/reset): painted, inert */
+    PV_IN_CHECKBOX,   /* <input type="checkbox">: toggleable box, checked=value set */
+    PV_IN_RADIO,      /* <input type="radio">: grouped by name, one selected */
+    PV_IN_SELECT      /* <select> with <option> children: painted value, click->options */
 } pv_input_type;
 
 /* Form method carried on a PV_INPUT run (denormalised from the owning <form>). */
@@ -240,6 +243,8 @@ typedef struct pv_run {
     char   *value;        /* control current/default value, or NULL */
     int     form_id;      /* owning-form group id in document order, or -1 */
     int     form_method;  /* pv_form_method of the owning form */
+    int     checked;       /* -1=n/a, 0=unchecked, 1=checked (checkbox/radio) */
+    char   *select_opts;   /* NULL or "optval||lbl||optval||lbl" for <select> */
 } pv_run;
 
 /* Box engine (Hito 23b-8 Step D): one entry of the box-definition TREE. The box
@@ -526,6 +531,14 @@ void pv_set_block_id(pv_view *v, int block_id);
  * PV_ERR_NULL_ARG on NULL args. Used by pv_build (after the run walk) and by the IPC
  * deserialiser. */
 pv_status pv_add_box_def(pv_view *v, const pv_box_def *d);
+
+/* Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most
+ * recently appended run. No-op on an empty or NULL view. */
+void pv_set_input_checked(pv_view *v, int checked);
+
+/* Sets the <select> options string ("opt||label||opt||label") on the most recently
+ * appended run, taking an owned copy. No-op on a NULL view or empty cap. */
+void pv_set_input_select_opts(pv_view *v, const char *select_opts);
 
 /* Idempotent; safe on NULL and safe to call twice. */
 void pv_free(pv_view *v);

@@ -199,6 +199,8 @@ static void run_init_common(pv_run *r) {
     r->value = NULL;
     r->form_id = -1;
     r->form_method = PV_METHOD_GET;
+    r->checked = -1;
+    r->select_opts = NULL;
 }
 
 /* Forward declaration: the iterative pre-order successor is defined below. */
@@ -513,6 +515,19 @@ void pv_set_block_id(pv_view *v, int block_id) {
     v->runs[v->count - 1].block_id = block_id;
 }
 
+void pv_set_input_checked(pv_view *v, int checked) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].checked = checked;
+}
+
+void pv_set_input_select_opts(pv_view *v, const char *select_opts) {
+    if (v == NULL || v->count == 0 || select_opts == NULL) return;
+    char *cp = dup_n(select_opts, strlen(select_opts));
+    if (cp == NULL) return;
+    free(v->runs[v->count - 1].select_opts);
+    v->runs[v->count - 1].select_opts = cp;
+}
+
 pv_status pv_add_box_def(pv_view *v, const pv_box_def *d) {
     if (v == NULL || d == NULL) return PV_ERR_NULL_ARG;
     if (v->nbox == v->boxcap) {
@@ -534,6 +549,7 @@ void pv_free(pv_view *v) {
         free(v->runs[i].src);
         free(v->runs[i].name);
         free(v->runs[i].value);
+        free(v->runs[i].select_opts);
     }
     free(v->runs);
     free(v->boxes);
@@ -712,9 +728,13 @@ typedef struct pv_cont_info {
     /* Float context (spec/float.md): float_side/float_id from the nearest floated
      * self-or-ancestor block, float_clear from the run's own leaf block. */
     int float_side, float_id, float_clear;
-    /* flex-wrap / row-gap / align-items (CONTAINER); align-self (ITEM, tracked
-     * like grow/shrink/basis/order via the previous element on the walk). */
-    int wrap, row_gap, align_items, align_self;
+/* flex-wrap / row-gap / align-items (CONTAINER); align-self (ITEM, tracked
+ * like grow/shrink/basis/order via the previous element on the walk).
+ * align_content / justify_items (CONTAINER), grid_rows / grid_flow (grid
+ * container), row_span (ITEM) — 2026-07-12 batch. */
+int wrap, row_gap, align_items, align_self;
+int align_content, justify_items;
+int grid_rows, grid_flow, row_span;
 } pv_cont_info;
 
 /* Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for
@@ -1098,6 +1118,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->item = NULL;
     cont->float_side = 0; cont->float_id = -1; cont->float_clear = 0;
     cont->wrap = 0; cont->row_gap = -1; cont->align_items = 0; cont->align_self = 0;
+    cont->align_content = 0; cont->justify_items = 0;
+    cont->grid_rows = 0; cont->grid_flow = 0; cont->row_span = 0;
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     pv_text_ext_reset(ext);
@@ -1116,6 +1138,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int prev_basis = CSS_LEN_UNSET, prev_order = CSS_LEN_UNSET;
     int prev_align_self = CSS_AK_UNSET;
     int prev_col_span = 0;
+    int prev_row_span = 0;
     int have_prev_el = 0;
     const lxb_dom_node_t *prev_el = NULL;
 
@@ -1234,11 +1257,20 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 cont->wrap = (cs.flex_wrap != CSS_FW_UNSET) ? cs.flex_wrap : 0;
                 cont->row_gap = (cs.row_gap >= 0) ? cs.row_gap : -1;
                 cont->align_items = (cs.align_items != CSS_AK_UNSET) ? cs.align_items : 0;
+                /* 2026-07-12 batch: container alignment extras. */
+                cont->align_content = (cs.align_content != CSS_AK_UNSET) ? cs.align_content : 0;
+                cont->justify_items = (cs.justify_items != CSS_AK_UNSET) ? cs.justify_items : 0;
+                /* Grid extras (grid container only). */
+                if (cs.display == CSS_DISP_GRID) {
+                    cont->grid_rows = (cs.grid_rows > 0) ? cs.grid_rows : 0;
+                    cont->grid_flow = (cs.grid_auto_flow != CSS_GF_UNSET) ? cs.grid_auto_flow : 0;
+                }
                 if (have_prev_el) {
                     cont->grow = prev_grow; cont->shrink = prev_shrink;
                     cont->basis = prev_basis; cont->order = prev_order;
                     cont->align_self = prev_align_self;
                     cont->col_span = prev_col_span;
+                    cont->row_span = prev_row_span;
                     cont->item = prev_el;
                 }
                 got_cont = 1;
@@ -1426,19 +1458,79 @@ static pv_input_type classify_input(const char *type) {
     if (ascii_ieq(type, "image"))    return PV_IN_SUBMIT; /* image button submits */
     if (ascii_ieq(type, "button"))   return PV_IN_BUTTON;
     if (ascii_ieq(type, "reset"))    return PV_IN_BUTTON;
-    /* text/search/email/url/tel/number and any other (date, color, checkbox, ...)
-     * collapse to a one-line editable box for v1 (see spec: checkbox/radio/select
-     * are out of scope). */
+    if (ascii_ieq(type, "checkbox")) return PV_IN_CHECKBOX;
+    if (ascii_ieq(type, "radio"))    return PV_IN_RADIO;
     return PV_IN_TEXT;
 }
 
-/* Fills owned label/name/value for a control element and its classified type.
- * Returns 0, or -1 on OOM (caller frees whatever is non-NULL). */
+/* Fills owned label/name/value for a control element and its classified type,
+ * plus the checked state (-1, 0, 1) and the pipe-separated options string for
+ * <select>. Returns 0, or -1 on OOM (caller frees whatever is non-NULL). */
 static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
                             const lxb_dom_node_t *node, pv_input_type *out_type,
-                            char **out_label, char **out_name, char **out_value) {
+                            char **out_label, char **out_name, char **out_value,
+                            int *out_checked, char **out_select_opts) {
     *out_label = NULL; *out_name = NULL; *out_value = NULL;
+    *out_checked = -1; *out_select_opts = NULL;
     *out_type = PV_IN_TEXT;
+
+    if (tag == LXB_TAG_SELECT) {
+        *out_type = PV_IN_SELECT;
+        *out_name = attr_dup(el, "name", 4);
+        /* Build pipe-separated "value||label||value||label" from <option> children */
+        size_t opts_cap = 256, opts_len = 0;
+        char *opts = (char *)malloc(opts_cap);
+        if (opts == NULL) return -1;
+        opts[0] = '\0';
+        for (lxb_dom_node_t *ch = node->first_child; ch != NULL; ch = ch->next) {
+            if (ch->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(ch) != LXB_TAG_OPTION)
+                continue;
+            lxb_dom_element_t *opt_el = lxb_dom_interface_element(ch);
+            /* value attribute, or the option's text content */
+            size_t vl = 0;
+            const lxb_char_t *vattr =
+                lxb_dom_element_get_attribute(opt_el, (const lxb_char_t *)"value", 5, &vl);
+            char *opt_val = NULL;
+            if (vattr != NULL && vl > 0) {
+                opt_val = dup_n((const char *)vattr, vl);
+            } else {
+                opt_val = collect_text(ch);
+            }
+            if (opt_val == NULL) continue;
+            char *opt_label = collect_text(ch);
+            if (opt_label == NULL) { free(opt_val); continue; }
+            size_t need = strlen(opt_val) + 2 + strlen(opt_label) + 2;
+            if (opts_len + need >= opts_cap) {
+                size_t ncap = opts_cap * 2;
+                if (ncap < opts_len + need + 1) ncap = opts_len + need + 1;
+                char *g = (char *)realloc(opts, ncap);
+                if (g == NULL) { free(opt_val); free(opt_label); break; }
+                opts = g; opts_cap = ncap;
+            }
+            size_t n = (size_t)snprintf(opts + opts_len, opts_cap - opts_len,
+                                         "%s||%s||", opt_val, opt_label);
+            opts_len += (n < opts_cap - opts_len) ? n : 0;
+            free(opt_val); free(opt_label);
+        }
+        /* Remove trailing || if present */
+        if (opts_len >= 2 && memcmp(opts + opts_len - 2, "||", 2) == 0) {
+            opts_len -= 2;
+            opts[opts_len] = '\0';
+        }
+        *out_select_opts = opts;
+        *out_label = dup_n("", 0);
+        char *ph = attr_dup(el, "placeholder", 11);
+        if (ph != NULL) { free(*out_label); *out_label = ph; }
+        /* Default value: first selected option or the first option */
+        char *sel = collect_text(node);
+        if (sel != NULL && sel[0] != '\0') {
+            char *trimmed = collapse_ws(sel, strlen(sel));
+            free(sel); sel = trimmed;
+        }
+        *out_value = (sel != NULL) ? sel : dup_n("", 0);
+        if (*out_label == NULL || *out_value == NULL) return -1;
+        return 0;
+    }
 
     if (tag == LXB_TAG_TEXTAREA) {
         *out_type = PV_IN_TEXTAREA;
@@ -1479,6 +1571,13 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
     free(type);
     *out_name = attr_dup(el, "name", 4);
     *out_value = attr_dup(el, "value", 5);
+    /* checked attribute for checkbox/radio */
+    if (*out_type == PV_IN_CHECKBOX || *out_type == PV_IN_RADIO) {
+        size_t cl = 0;
+        const lxb_char_t *ch =
+            lxb_dom_element_get_attribute(el, (const lxb_char_t *)"checked", 7, &cl);
+        *out_checked = (ch != NULL) ? 1 : 0;
+    }
     if (*out_type == PV_IN_SUBMIT || *out_type == PV_IN_BUTTON) {
         const char *def = (*out_type == PV_IN_SUBMIT) ? "Submit" : "Button";
         const char *lab = (*out_value != NULL && (*out_value)[0] != '\0') ? *out_value : def;
@@ -1985,11 +2084,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 continue;
             }
 
-            if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON)
+            if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON
+                 || t == LXB_TAG_SELECT)
                 && !in_skipped_subtree(n, base, js_enabled)
                 && !in_hidden_subtree(n, base, sheet, &cache)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
+                pv_input_type itype;
+                char *label = NULL, *name = NULL, *value = NULL;
 
                 const char *unused_href = NULL;
                 size_t unused_hl = 0;
@@ -2016,16 +2118,23 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 const char *action = (fidx >= 0) ? forms.recs[fidx].action : NULL;
                 int method = (fidx >= 0) ? forms.recs[fidx].method : PV_METHOD_GET;
 
-                pv_input_type itype;
-                char *label = NULL, *name = NULL, *value = NULL;
-                if (describe_control(el, t, n, &itype, &label, &name, &value) != 0) {
-                    free(label); free(name); free(value);
+                /* Extract checked and options too for checkbox/radio/select */
+                int ictl_checked = -1;
+                char *ictl_opts = NULL;
+                if (describe_control(el, t, n, &itype, &label, &name, &value,
+                                     &ictl_checked, &ictl_opts) != 0) {
+                    free(label); free(name); free(value); free(ictl_opts);
                     rc = PV_ERR_OOM; goto cleanup;
                 }
                 pv_status st = pv_append_input(v, heading, brk, itype, label,
                                                name, value, action, fidx, method);
                 free(label); free(name); free(value);
-                if (st != PV_OK) { rc = st; goto cleanup; }
+                if (st != PV_OK) { free(ictl_opts); rc = st; goto cleanup; }
+                if (ictl_checked >= 0) pv_set_input_checked(v, ictl_checked);
+                if (ictl_opts != NULL) {
+                    pv_set_input_select_opts(v, ictl_opts);
+                    free(ictl_opts);
+                }
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
@@ -2278,7 +2387,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_bgcolor(v, bg);
         pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
-                         cont.wrap, cont.row_gap, cont.align_items);
+                          cont.wrap, cont.row_gap, cont.align_items);
         pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
         pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                    cont.align_self);

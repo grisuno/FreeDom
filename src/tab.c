@@ -346,11 +346,13 @@ static int write_view(int wfd, const pv_view *v) {
         int32_t itype = (int32_t)r->input_type;
         int32_t fid = (int32_t)r->form_id;
         int32_t method = (int32_t)r->form_method;
+        int32_t ckd = (int32_t)r->checked;
         size_t tlen = (r->text != NULL) ? strlen(r->text) : 0;
         size_t hlen = (r->href != NULL) ? strlen(r->href) : 0;
         size_t slen = (r->src != NULL) ? strlen(r->src) : 0;
         size_t nmlen = (r->name != NULL) ? strlen(r->name) : 0;
         size_t vllen = (r->value != NULL) ? strlen(r->value) : 0;
+        size_t oplen = (r->select_opts != NULL) ? strlen(r->select_opts) : 0;
         if (write_full(wfd, &kind, sizeof kind) != 0) return -1;
         if (write_full(wfd, &heading, sizeof heading) != 0) return -1;
         if (write_full(wfd, &bold, sizeof bold) != 0) return -1;
@@ -430,6 +432,9 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &itype, sizeof itype) != 0) return -1;
         if (write_full(wfd, &fid, sizeof fid) != 0) return -1;
         if (write_full(wfd, &method, sizeof method) != 0) return -1;
+        if (write_full(wfd, &ckd, sizeof ckd) != 0) return -1;
+        if (write_full(wfd, &oplen, sizeof oplen) != 0) return -1;
+        if (oplen != 0 && write_full(wfd, r->select_opts, oplen) != 0) return -1;
         if (write_full(wfd, &nmlen, sizeof nmlen) != 0) return -1;
         if (nmlen != 0 && write_full(wfd, r->name, nmlen) != 0) return -1;
         if (write_full(wfd, &vllen, sizeof vllen) != 0) return -1;
@@ -1141,6 +1146,7 @@ static int read_view(int fd, pv_view **out) {
         int32_t blkid = -1;
         int32_t nodeid = (int32_t)DOM_NODE_NONE;
         int32_t itype = 0, fid = -1, method = 0;
+        int32_t ckd = -1;
         if (read_full(fd, &kind, sizeof kind) != 0
          || read_full(fd, &heading, sizeof heading) != 0
          || read_full(fd, &bold, sizeof bold) != 0
@@ -1215,12 +1221,18 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &nodeid, sizeof nodeid) != 0
          || read_full(fd, &itype, sizeof itype) != 0
          || read_full(fd, &fid, sizeof fid) != 0
-         || read_full(fd, &method, sizeof method) != 0) {
+         || read_full(fd, &method, sizeof method) != 0
+         || read_full(fd, &ckd, sizeof ckd) != 0) {
             free(text); free(href); free(src); pv_free(v); return -1;
         }
-        if (read_field(fd, &name, &nl) != 0) { free(text); free(href); free(src); pv_free(v); return -1; }
+        char *opts = NULL;
+        size_t ol = 0;
+        if (read_field(fd, &opts, &ol) != 0) {
+            free(text); free(href); free(src); pv_free(v); return -1;
+        }
+        if (read_field(fd, &name, &nl) != 0) { free(text); free(href); free(src); free(opts); pv_free(v); return -1; }
         if (read_field(fd, &value, &vl) != 0) {
-            free(text); free(href); free(src); free(name); pv_free(v); return -1;
+            free(text); free(href); free(src); free(name); free(opts); pv_free(v); return -1;
         }
 
         pv_status st;
@@ -1239,7 +1251,14 @@ static int read_view(int fd, pv_view **out) {
         free(src);
         free(name);
         free(value);
-        if (st != PV_OK) { pv_free(v); return -1; }
+        if (st != PV_OK) { free(opts); pv_free(v); return -1; }
+        /* Input-specific: checked and select options from the wire. */
+        if (kind == PV_INPUT) {
+            pv_set_input_checked(v, (int)ckd);
+            if (ol > 0 && opts != NULL)
+                pv_set_input_select_opts(v, opts);
+        }
+        free(opts);
         /* The text extensions ride every run kind (an input's caret_color and an
          * image's image_rendering would vanish inside the old non-input branch). */
         {

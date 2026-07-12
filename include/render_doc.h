@@ -152,6 +152,8 @@ typedef struct rd_block {
     char            *value;          /* RD_INPUT: control value, or NULL */
     int              form_id;        /* RD_INPUT: owning-form group id, or -1 */
     int              form_method;    /* RD_INPUT: pv_form_method */
+    int              checked;        /* RD_INPUT: -1=n/a, 0=unchecked, 1=checked */
+    char            *select_opts;    /* RD_INPUT: pipe-sep options for select, or NULL */
 } rd_block;
 
 typedef struct rd_doc {
