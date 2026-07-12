@@ -20,6 +20,7 @@
 #include "request_policy.h"
 #include "secure_fetch.h"
 #include "tab.h"
+#include "tls_impersonate.h"
 #include "ui.h"
 #include "url.h"
 
@@ -115,6 +116,7 @@ static char global_tor_addr[64] = "127.0.0.1:9050";
 static char global_i2p_addr[64] = "127.0.0.1:4444";
 
 static hb_set *g_hosts = NULL;
+static hb_set *g_impersonate = NULL; /* impersonate.conf: triple-opt-in TLS-blend hosts */
 
 /* Reads the whole file into a NUL-terminated buffer. Caller frees with free(). */
 static char *read_file(const char *path, size_t *out_len) {
@@ -136,6 +138,7 @@ static char *read_file(const char *path, size_t *out_len) {
 
 static void headless_load_hosts(void) {
     g_hosts = hb_new();
+    g_impersonate = hb_new();
     if (g_hosts == NULL) return;
     const char *dirs[] = { NULL, "config", NULL };
     /* home_dir must live for the whole function: dirs[2] aliases it and is read in
@@ -157,9 +160,16 @@ static void headless_load_hosts(void) {
         if (n <= 0 || (size_t)n >= sizeof path) continue;
         size_t len = 0;
         char *txt = read_file(path, &len);
-        if (txt == NULL) continue;
-        hb_load(g_hosts, txt, HB_LIST_ALLOW);
-        free(txt);
+        if (txt != NULL) { hb_load(g_hosts, txt, HB_LIST_ALLOW); free(txt); }
+        /* impersonate.conf lives in the same search dirs; load it as an allowlist so
+         * hb_is_allowlisted answers the third gate signal (covers subdomains). */
+        if (g_impersonate != NULL) {
+            n = snprintf(path, sizeof path, "%s/impersonate.conf", dirs[i]);
+            if (n > 0 && (size_t)n < sizeof path) {
+                char *itxt = read_file(path, NULL);
+                if (itxt != NULL) { hb_load(g_impersonate, itxt, HB_LIST_ALLOW); free(itxt); }
+            }
+        }
     }
 }
 
@@ -310,9 +320,13 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     sf_config cfg = sf_config_default();
     if (g_hosts != NULL) {
         char host[512];
-        if (rp_host_of(url, host, sizeof host) == 0
-            && hb_is_allowlisted(g_hosts, host))
-            cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+        if (rp_host_of(url, host, sizeof host) == 0) {
+            int allowed = hb_is_allowlisted(g_hosts, host);
+            if (allowed) cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+            /* Triple opt-in TLS blend: allow.conf AND JS-on AND impersonate.conf. */
+            cfg.impersonate = ti_should_impersonate(
+                allowed, g_headless_js, hb_is_allowlisted(g_impersonate, host));
+        }
     }
     if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
     if (g_auth_user[0] != '\0') { cfg.username = g_auth_user; cfg.password = g_auth_pass; }
@@ -553,9 +567,12 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
     sf_config cfg = sf_config_default();
     if (g_hosts != NULL) {
         char host[512];
-        if (rp_host_of(url, host, sizeof host) == 0
-            && hb_is_allowlisted(g_hosts, host))
-            cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+        if (rp_host_of(url, host, sizeof host) == 0) {
+            int allowed = hb_is_allowlisted(g_hosts, host);
+            if (allowed) cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+            cfg.impersonate = ti_should_impersonate(
+                allowed, g_headless_js, hb_is_allowlisted(g_impersonate, host));
+        }
     }
     if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
     if (g_auth_user[0] != '\0') { cfg.username = g_auth_user; cfg.password = g_auth_pass; }

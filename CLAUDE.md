@@ -463,6 +463,20 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   lado confiable (event loop Wayland + fetch en hilo desacoplado, Hito 9), **jamás** donde corre
   contenido hostil; el worker solo hace I/O bloqueante sobre dos pipes. Análogo a SOP por
   construcción. Ver `spec/os_sandbox.md` §13, `[[freedom-io-uring-forbidden-in-worker]]`.
+- **Impersonación de TLS (JA3/JA4) por host triple-opt-in (Hito TLS, autorizado como excepción §4):**
+  el discriminador que bloquea a Freedom en Google/FB/YT **no** son las cabeceras HTTP (ya son
+  Firefox-completas; `Sec-Ch-Ua` bajo UA Firefox *empeoraría*), sino el **ClientHello TLS**: nuestro
+  PQ-by-default (`X25519MLKEM768` bajo UA Firefox 128 que no lo manda) es el tell más ruidoso. Gate
+  **triple** (`ti_should_impersonate`, puro): un host en `allow.conf` ∩ `js.conf` ∩ **`impersonate.conf`**
+  recibe `sf_config.impersonate` ⇒ `secure_fetch` deja el ClientHello consistente con la identidad
+  Firefox que ya mandamos (quita MLKEM, ordena cifras TLS1.3/1.2 estilo Firefox, grupos clásicos).
+  **Verificado E2E** (`tls.peet.ws`): ON ⇒ JA4 con componente de cifras idéntico al de Firefox 128 real,
+  sin MLKEM; OFF ⇒ default PQ. **Solo relaja la fuerza del KE (clásico) en esa ruta, nunca la
+  autenticidad** (VERIFYPEER intacto); el resto del navegador mantiene PQ. **Fase 2** (gate + códec IPC
+  `ti_`, fuzzeado) y **Fase 3** (blend interino OpenSSL) cerradas; **Fase 1** (JA3 byte-exacto vía
+  curl-impersonate+BoringSSL, proceso helper aislado) queda **bloqueada** en este host (no empaquetado).
+  **NO** derriba reCAPTCHA/BotGuard/IP (muros de motor/red, no TLS). Ver `spec/tls_impersonate.md`,
+  `[[freedom-tls-impersonate]]`.
 - **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
   contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
 - **`-fvisibility=hidden` es invariante de build (no quitar):** el binario `freedom` no exporta API,

@@ -225,6 +225,7 @@ sf_config sf_config_default(void) {
     c.username = NULL;
     c.password = NULL;
     c.insecure = 0;
+    c.impersonate = 0; /* default hardened PQ-hybrid ClientHello; opt-in per trusted host */
     c.referrer_url = NULL;
     c.sec_fetch_dest = NULL;
     c.sec_fetch_mode = NULL;
@@ -236,6 +237,9 @@ sf_config sf_config_default(void) {
 const char *sf_user_agent_or_default(const char *ua) {
     return (ua != NULL && ua[0] != '\0') ? ua : SF_DEFAULT_USER_AGENT;
 }
+
+const char *sf_impersonate_kex_groups(void)    { return SF_IMPERSONATE_KEX_GROUPS; }
+const char *sf_impersonate_tls13_ciphers(void) { return SF_IMPERSONATE_TLS13_CIPHERS; }
 
 /* --- public: pure validators --- */
 
@@ -770,7 +774,18 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
                   ? CURL_SSLVERSION_TLSv1_2 : CURL_SSLVERSION_TLSv1_3;
     curl_easy_setopt(curl, CURLOPT_SSLVERSION,
                      (long)(sslmin | CURL_SSLVERSION_MAX_TLSv1_3));
-    curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, local.kex_groups);
+    if (local.impersonate) {
+        /* Interim Chrome/Firefox-consistent ClientHello blend (spec/tls_impersonate.md
+         * Fase 3): drop X25519MLKEM768 and order the TLS 1.3 ciphersuites like the
+         * browser we advertise, so the JA3 stops contradicting the UA. Only the KE
+         * strength relaxes to classical -- authenticity (VERIFYPEER) is untouched, and
+         * the caller pairs this with a classical-KE-tolerant policy. */
+        curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, SF_IMPERSONATE_KEX_GROUPS);
+        curl_easy_setopt(curl, CURLOPT_TLS13_CIPHERS, SF_IMPERSONATE_TLS13_CIPHERS);
+        curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, SF_IMPERSONATE_TLS12_CIPHERS);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_SSL_EC_CURVES, local.kex_groups);
+    }
     if (local.insecure) {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);

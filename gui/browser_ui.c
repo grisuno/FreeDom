@@ -299,6 +299,7 @@ typedef struct browser_window {
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     hb_set   *hosts;    /* /etc/hosts-format blocklist + allowlist; consulted pre-fetch */
     hb_set   *js_hosts; /* js.conf allowlist (HB_LIST_ALLOW): hosts permitted to run JS */
+    hb_set   *impersonate_hosts; /* impersonate.conf: triple-opt-in TLS-blend hosts */
     jsp_mode  js_mode;  /* global JS policy (Secure by Default: JSP_ALLOWLIST) */
     nr_config net_cfg;  /* Tor/I2P routing (Privacy by Default: opt-in, off by default) */
     char      tor_addr[64];  /* Tor SOCKS5h proxy "host:port" (default 127.0.0.1:9050) */
@@ -621,23 +622,28 @@ static hb_set *build_host_filter(void) {
  * order as the host filter). Loaded as HB_LIST_ALLOW so hb_is_allowlisted reports
  * membership (subdomains covered). Returns NULL on OOM (then no host is allowlisted,
  * so under JSP_ALLOWLIST no page runs JS -- fail closed). */
-static hb_set *build_js_filter(void) {
+static hb_set *build_conf_allowlist(const char *fname) {
     hb_set *s = hb_new();
     if (s == NULL) return NULL;
 
     const char *env = getenv("FREEDOM_HOSTS_DIR");
-    if (env != NULL && env[0] != '\0') load_host_file(s, env, "js.conf", HB_LIST_ALLOW);
+    if (env != NULL && env[0] != '\0') load_host_file(s, env, fname, HB_LIST_ALLOW);
 
     const char *home = getenv("HOME");
     if (home != NULL && home[0] != '\0') {
         char dir[1024];
         int n = snprintf(dir, sizeof dir, "%s/.config/freedom", home);
-        if (n > 0 && (size_t)n < sizeof dir) load_host_file(s, dir, "js.conf", HB_LIST_ALLOW);
+        if (n > 0 && (size_t)n < sizeof dir) load_host_file(s, dir, fname, HB_LIST_ALLOW);
     }
 
-    load_host_file(s, "config", "js.conf", HB_LIST_ALLOW);
+    load_host_file(s, "config", fname, HB_LIST_ALLOW);
     return s;
 }
+
+static hb_set *build_js_filter(void)          { return build_conf_allowlist("js.conf"); }
+/* impersonate.conf: the THIRD opt-in signal. A host here (and in allow.conf and js.conf)
+ * gets the Chrome/Firefox-consistent TLS ClientHello blend (spec/tls_impersonate.md). */
+static hb_set *build_impersonate_filter(void) { return build_conf_allowlist("impersonate.conf"); }
 
 /* The writable Freedom config dir: $FREEDOM_HOSTS_DIR if set, else ~/.config/freedom
  * (created if absent). Returns 0 on success. Mirrors the read search path so an edit
@@ -918,6 +924,7 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "form.h"
 #include "secure_fetch.h"
 #include "tab.h"
+#include "tls_impersonate.h"
 
 /* An editable control gets a live text field; submit/button/hidden do not.
  * Checkboxes, radios, and selects are interactive (click toggles/opens) but
@@ -1196,6 +1203,9 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     apply_auth(w, abs, &cfg);
     if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;  /* realm fail-closed */
     int allowlisted = hb_is_allowlisted(w->hosts, host), dg = 0;
+    /* Subrequests to a triple-opt-in host share the page's TLS-blend identity. */
+    cfg.impersonate = ti_should_impersonate(allowlisted,
+        hb_is_allowlisted(w->js_hosts, host), hb_is_allowlisted(w->impersonate_hosts, host));
     sf_response resp; memset(&resp, 0, sizeof resp);
     int is_post = (method != NULL && (strcmp(method, "POST") == 0 || strcmp(method, "post") == 0));
     sf_status s = is_post
@@ -1245,6 +1255,9 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
     char ihost[256];
     int img_allow = host_from_url(abs, ihost, sizeof ihost)
                     && hb_is_allowlisted(w->hosts, ihost);
+    /* An image from a triple-opt-in host uses the same TLS-blend as its page. */
+    cfg.impersonate = ti_should_impersonate(img_allow,
+        hb_is_allowlisted(w->js_hosts, ihost), hb_is_allowlisted(w->impersonate_hosts, ihost));
     sf_response resp;
     memset(&resp, 0, sizeof resp);
     if (fetch_follow_navigable(abs, &cfg, &resp, &dg, img_allow) != SF_OK) {
@@ -1306,6 +1319,14 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
     /* The user's sovereign override: a host explicitly on allow.conf may be navigated
      * below Freedom's standard (TLS 1.2, classical KE, weak cert) if strict fails. */
     pr->allowlisted = have_host && hb_is_allowlisted(w->hosts, host);
+
+    /* Triple opt-in TLS-ClientHello blend: allow.conf AND js.conf AND impersonate.conf.
+     * Drops the X25519MLKEM768 tell and matches the browser cipher order we advertise
+     * (spec/tls_impersonate.md). Only shapes the handshake; authenticity is untouched. */
+    cfg->impersonate = ti_should_impersonate(
+        pr->allowlisted,
+        have_host && hb_is_allowlisted(w->js_hosts, host),
+        have_host && hb_is_allowlisted(w->impersonate_hosts, host));
 
     /* Socket-level anonymity routing (Tor/I2P). A .onion/.i2p host with its proxy
      * disabled is BLOCKED, never leaked over clearnet (fail closed). */
@@ -8206,6 +8227,7 @@ ui_status ui_run_browser(const char *start_url) {
      * the fallible Wayland setup so its error returns above never leak it. */
     w.hosts = build_host_filter();
     w.js_hosts = build_js_filter();        /* per-host JS allowlist (js.conf) */
+    w.impersonate_hosts = build_impersonate_filter(); /* per-host TLS blend (impersonate.conf) */
     w.omni_sel = -1;
     load_favorites(&w);                    /* omnibox autocomplete from allow.conf */
     /* JS policy: an explicit FREEDOM_JS env wins for this session; otherwise the
@@ -8411,6 +8433,7 @@ ui_status ui_run_browser(const char *start_url) {
     clear_doc(&w);
     hb_free(w.hosts);
     hb_free(w.js_hosts);
+    hb_free(w.impersonate_hosts);
     free(w.favorites);
     free(w.cur_html);
     free(w.cur_top);

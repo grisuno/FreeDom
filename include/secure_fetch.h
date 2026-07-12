@@ -86,6 +86,15 @@ typedef struct sf_config {
     const char *username;       /* HTTP Basic Auth username (NULL/"" => no auth) */
     const char *password;       /* HTTP Basic Auth password (ignored when username is NULL/empty) */
     int         insecure;       /* skip TLS cert verification (self-signed/dev); default 0 */
+    int         impersonate;    /* interim TLS-ClientHello blend for a triple-opt-in trusted host
+                                 * (allow.conf AND js.conf AND impersonate.conf): drop the
+                                 * X25519MLKEM768 group (the loudest JA3 tell under our Firefox UA)
+                                 * and order the TLS 1.3 ciphersuites like the browser we already
+                                 * present. Reduces the JA3-vs-UA mismatch; NOT byte-exact JA3 (that
+                                 * is the BoringSSL helper, spec/tls_impersonate.md Fase 1). Only the
+                                 * KE strength relaxes to classical, so the caller MUST use a
+                                 * classical-KE-tolerant policy (impersonate hosts are on allow.conf
+                                 * => SF_POLICY_ALLOWLISTED_INSECURE, which already tolerates it). */
     /* Sec-Fetch metadata for bot-blending (Hito 30b). All real browsers send these
      * per-section headers; their absence is a bot signal. dest/mode NULL => navigation
      * defaults ("document"/"navigate"). referrer_url is the current page URL used to
@@ -128,6 +137,25 @@ typedef struct sf_response {
  * group never weakens the strict policy: a classical *negotiated* group is still
  * rejected by sf_check_group_is_pq. */
 #define SF_DEFAULT_KEX_GROUPS  "X25519MLKEM768:X25519:secp256r1"
+/* Interim impersonation ClientHello shaping (OpenSSL, Hito TLS Fase 3). A classical
+ * profile consistent with FP_USER_AGENT (Firefox): it DROPS X25519MLKEM768 (almost no
+ * shipping Firefox of our advertised version offers MLKEM, so offering it under that UA
+ * is the single loudest TLS tell) and orders the TLS 1.3 ciphersuites Firefox-style
+ * (AES-128-GCM, CHACHA20, AES-256-GCM). A Chrome ClientHello under a Firefox UA would be
+ * a NEW mismatch, so the interim matches the identity we already send; byte-exact Chrome
+ * JA3 is the BoringSSL helper (spec/tls_impersonate.md). Groups mirror Firefox 128's
+ * supported_groups order. */
+#define SF_IMPERSONATE_KEX_GROUPS    "X25519:secp256r1:secp384r1:secp521r1:ffdhe2048:ffdhe3072"
+#define SF_IMPERSONATE_TLS13_CIPHERS "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384"
+/* Firefox 128 TLS 1.2 ciphersuite list (OpenSSL names, in wire order). OpenSSL's
+ * default advertises ~80 TLS 1.2 suites; Firefox advertises ~14, so restricting the
+ * list is the single biggest shrink of the JA3/JA4 cipher field toward the browser. */
+#define SF_IMPERSONATE_TLS12_CIPHERS \
+    "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:" \
+    "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:" \
+    "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:" \
+    "ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:" \
+    "ECDHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA:AES256-SHA"
 /* The default User-Agent IS the anti-fingerprinting identity (FP_USER_AGENT): it
  * must match navigator.userAgent exactly and must not advertise "Freedom" (that is
  * a unique fingerprint and a bot signal that breaks sites like Google). Demoting
@@ -173,6 +201,11 @@ sf_config sf_config_default(void);
  * single place that resolves the effective User-Agent, so the orchestrator never
  * sends an empty header and the default lives in one tested spot. */
 const char *sf_user_agent_or_default(const char *ua);
+
+/* The interim impersonation ClientHello strings (pure; single source of truth so the
+ * shaping is unit-testable without a live handshake). Both are classical (no MLKEM). */
+const char *sf_impersonate_kex_groups(void);
+const char *sf_impersonate_tls13_ciphers(void);
 
 /* --- Pure validators (no I/O): the primary unit-test surface. --- */
 

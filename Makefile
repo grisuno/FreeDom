@@ -102,9 +102,10 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
              $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch \
-             $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile
+             $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile \
+             $(BUILD_DIR)/test_tls_impersonate
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -226,6 +227,12 @@ $(BUILD_DIR)/test_url: $(TEST_DIR)/test_url.c $(BUILD_DIR)/url.o | $(BUILD_DIR)
 
 # Pure per-host JavaScript policy decision. No I/O deps.
 $(BUILD_DIR)/test_js_policy: $(TEST_DIR)/test_js_policy.c $(BUILD_DIR)/js_policy.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure TLS-impersonation surface (Hito TLS): the triple opt-in gate + the
+# parent<->helper IPC codec. No I/O deps; the BoringSSL handshake lives in the
+# separate freedom-tls-helper worker (Fase 1), not here. See spec/tls_impersonate.md.
+$(BUILD_DIR)/test_tls_impersonate: $(TEST_DIR)/test_tls_impersonate.c $(BUILD_DIR)/tls_impersonate.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Trusted-side lookahead scanner + parallel subresource pool (Hito 29). The
@@ -374,6 +381,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
                       $(BUILD_DIR)/prefs.o $(BUILD_DIR)/profile.o \
                       $(BUILD_DIR)/disk_store.o $(BUILD_DIR)/local_store.o \
+                      $(BUILD_DIR)/tls_impersonate.o \
                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                       | $(BUILD_DIR) \
                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -541,6 +549,17 @@ fuzz-fb: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_freebug.c $(SRC_DIR)/freebug.c \
 	  -o $(BUILD_DIR)/fuzz_freebug
 	./$(BUILD_DIR)/fuzz_freebug -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of the TLS-impersonation IPC codec (clang + libFuzzer).
+# A hostile helper (or a corrupt socketpair frame) is arbitrary bytes: ti_decode_req
+# / ti_decode_resp must never crash/leak/UB, must keep every TI_MAX_* cap fail-closed
+# and must never over-read the frame.
+fuzz-ti: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_tls_impersonate.c $(SRC_DIR)/tls_impersonate.c \
+	  -o $(BUILD_DIR)/fuzz_tls_impersonate
+	./$(BUILD_DIR)/fuzz_tls_impersonate -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the HarfBuzz shaper (clang + libFuzzer). The shaped
 # TEXT is hostile remote content: arbitrary bytes through tsh_shape must never
