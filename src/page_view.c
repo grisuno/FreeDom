@@ -116,6 +116,7 @@ static char *utf8_sanitized_dup(const char *s) {
 }
 
 static char *dup_n(const char *s, size_t n) {
+    if (n == (size_t)-1) return NULL; /* guard: n+1 would overflow to 0 */
     char *d = (char *)malloc(n + 1);
     if (d == NULL) return NULL;
     if (n != 0 && s != NULL) memcpy(d, s, n);

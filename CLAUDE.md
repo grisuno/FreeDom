@@ -695,6 +695,13 @@ pedido:
   desincronizan (ver §5).
 - Modo **boyscout**: resolver deuda técnica y fallos de seguridad nunca está fuera de scope, siempre
   sin perder funcionalidad.
+- **Doctrina `malloc(n+1)` fail-closed (V-001):** todo patrón `malloc(len + 1)` → `memcpy(dst, src, len)`
+  debe llevar un `if (len == (size_t)-1) return NULL;` antes de `malloc`. `len + 1` sin esa guarda
+  revienta el heap cuando `len == SIZE_MAX` (wrap a 0, `malloc(0)` devuelve puntero válido, `memcpy`
+  escribe `SIZE_MAX` bytes). Aplica a `dup_bytes`, `dup_n`, `host_dup` y cualquier helper análogo
+  que aparezca. La guarda cuesta 0 en runtime y es defensa en profundidad aunque el llamador acote
+  la longitud. Esta regla se verifica en code review y vale también para `realloc(n * sizeof(T))` y
+  cualquier suma/tamaño cuya fuente sea remotamente controlable.
 - **Este archivo nunca debe superar ~150.000 caracteres** (`wc -c CLAUDE.md`). Es doctrina, no
   sugerencia: un `CLAUDE.md` que crece sin límite deja de leerse. El historial de hitos cerrados
   (§7.2/§7.3) se comprime a **una línea por hito** (título + resultado en una frase + `[[link]]` a

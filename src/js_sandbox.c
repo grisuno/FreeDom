@@ -87,6 +87,7 @@ static const JSMallocFunctions FREEDOM_MF = {
 /* --- helpers --- */
 
 static char *host_dup(const char *src, size_t len) {
+    if (len == (size_t)-1) return NULL; /* guard: len+1 would overflow to 0 */
     char *out = (char *)malloc(len + 1);
     if (out == NULL) return NULL;
     if (len != 0 && src != NULL) memcpy(out, src, len);
