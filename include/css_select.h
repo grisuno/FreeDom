@@ -35,10 +35,12 @@ enum { ATTR_PRESENT = 0, ATTR_EQ, ATTR_TILDE, ATTR_PIPE, ATTR_CARET, ATTR_DOLLAR
        ATTR_STAR };
 
 /* Pseudo-class kind (Hito 23b-9). NEVER covers :visited (Zero Knowledge: no
- * history to match, and no CSS history sniffing) and the dynamic pseudos
- * (:hover/:active/:focus/:focus-within/:focus-visible — the cascade is resolved
- * once per load): they parse, count specificity, and never match. */
-enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ROOT,
+ * history to match, and no CSS history sniffing). ALWAYS covers the dynamic
+ * pseudos (:hover/:active/:focus/:focus-within/:focus-visible) — the cascade
+ * is resolved once per load, so they always match: content hidden behind
+ * :hover (common on Slashdot, menus etc.) becomes visible instead of
+ * invisible. :visited stays NEVER (we never leak history). */
+enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ALWAYS, PSEUDO_ROOT,
        PSEUDO_FIRST_CHILD, PSEUDO_LAST_CHILD, PSEUDO_ONLY_CHILD,
        PSEUDO_NTH_CHILD, PSEUDO_NTH_LAST_CHILD,
        PSEUDO_CHECKED, PSEUDO_DISABLED, PSEUDO_ENABLED };

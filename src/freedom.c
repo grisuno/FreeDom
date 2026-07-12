@@ -358,6 +358,18 @@ static int render_page(const char *html, size_t len, const char *top_url,
         return EXIT_ERROR;
     }
 
+    /* Real async timers (2026-07-11): pump up to HL_TICK_MAX virtual ticks so a
+     * page that renders via setTimeout/setInterval shows its final state in the
+     * export. Each tick advances the worker's virtual clock straight to the next
+     * pending timer; the shared per-page JS budget still bounds total work. */
+    enum { HL_TICK_MAX = 8 };
+    for (int tick = 0; tick < HL_TICK_MAX && page.next_timer_ms >= 0; ++tick) {
+        tab_page ticked;
+        if (tab_tick(t, page.next_timer_ms, &ticked) != TAB_OK) break;
+        tab_page_free(&page);
+        page = ticked;
+    }
+
     /* In stdout mode the title leads the output; in PDF mode it is carried inside
      * the document, so stdout stays a single confirmation line. */
     if (g_pdf_out == NULL && g_png_out == NULL && page.title != NULL && page.title_len > 0) {

@@ -96,7 +96,7 @@ Supported, with their Zero-Knowledge/static-render semantics:
 | :-- | :-- |
 | `:link`, `:any-link` | the element is `a`/`area` **with an `href` attribute`**. Zero Knowledge: Freedom keeps no history, so every link is unvisited and `:link` covers them all. |
 | `:visited` | **never** (no history by design — CSS history sniffing is impossible). |
-| `:hover`, `:active`, `:focus`, `:focus-within`, `:focus-visible` | **never** (the cascade is resolved once per load; there is no interactive state plumbing yet). Parsed so the selector and its group survive. |
+| `:hover`, `:active`, `:focus`, `:focus-within`, `:focus-visible` | **always** (PSEUDO_ALWAYS, 2026-07-11): the cascade is resolved once per load so dynamic pseudos always match — content hidden behind `:hover` (common on Slashdot, dropdown menus) becomes visible instead of invisible. `:visited` stays NEVER for Zero Knowledge. The downside (always-open dropdowns) is cosmetic vs. content being invisible. |
 | `:root` | the element's tag is `html`. |
 | `:first-child` | `el->nth == 1`. |
 | `:last-child` | `el->nth == el->nsib` (both known). |
@@ -146,7 +146,9 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | Property | Resolved into `css_style` |
 | :-- | :-- |
 | `color` | `color` (packed 0xRRGGBB via css_color), or -1 |
-| `background-color`, `background` | `background` (color only; a `background` with `url(` is dropped) |
+| `background-color` | `background` (color only; a value with `url(` is dropped) |
+| `background` | `background` (color) **and** the gradient fields below. Shorthand semantics: a `background` value always resets *both* — a plain color emits gradient-unset (`bg_grad_n = 0`), a gradient emits color-unset (-1) — so a higher-tier `background: red` clears a lower-tier gradient and vice versa. `url(` tokens are skipped (never fetched); any color token outside the gradient still resolves. |
+| `background-image` | `bg_grad_*` only: `linear-gradient(...)` resolves to the gradient fields; `url(...)`/`none`/`radial-gradient`/`conic-gradient`/`repeating-*` → gradient-unset (fail closed, never fetch) |
 | `text-align` | `text_align`: left/center/right/justify |
 | `font-size` | `font_scale` (percent): `px` relative to 16px base, `em`/`rem` ×100, `%`, and keywords (`small`=85, `medium`=100, `large`=120, `x-large`=150, `xx-large`=200, `smaller`=85, `larger`=120) |
 | `line-height` | `line_scale` (percent of the natural line box): unitless multiplier (`1.5` → 150) or `%` (`160%` → 160), clamped `[CSS_LINE_MIN, CSS_LINE_MAX]`; `normal` → 0 (unset, uses the UA default). Absolute `px`/`em` line-heights are out of scope (dropped). Inherits, like `font-size`. |
@@ -158,7 +160,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `display` | `display`: `none`/`block`/`inline`/`inline-block`/`flex`/`grid`/other |
 | `gap`, `grid-gap`, `column-gap` | `gap`: leading px of the value (`12px 8px` → 12; `normal` → 0), clamped `[0, CSS_GAP_MAX]`, or -1 (unset) |
 | `justify-content` | `justify`: `flex-start`/`start`→START, `flex-end`/`end`→END, `center`, `space-between`, `space-around`, `space-evenly`; unknown dropped |
-| `grid-template-columns` | `grid_cols`: track **count**, clamped `[1, CSS_GRID_COLS_MAX]`, or 0 (unset). `none` is dropped. `repeat(N, track-list)` expands to `N * tracks-in-pattern` (`repeat(auto-fill\|auto-fit, ...)` needs an available width this pure parser does not have, so it fails the WHOLE value); `minmax(a,b)` counts as ONE track. Track **sizes** (incl. `fr` weights) are still not resolved — every counted track lays out as an equal-width column downstream (see *Container layout params* below) |
+| `grid-template-columns` | `grid_cols`: track **count**, clamped `[1, CSS_GRID_COLS_MAX]`, or 0 (unset). `none` is dropped. `repeat(N, track-list)` expands to `N * tracks-in-pattern` (`repeat(auto-fill\|auto-fit, ...)` needs an available width this pure parser does not have, so it fails the WHOLE value); `minmax(a,b)` counts as ONE track. **Track sizes** (2026-07-11): the first `CSS_GRID_TRACKS_MAX` (8) tracks also resolve a size each into `grid_col_w[]` — `<N>fr` → `-(N×100)` (weight), `px`/`em`/`rem` → fixed px (> 0), `auto`/`%`/unknown → 0 (an equal `1fr` share); `minmax(a,b)` takes its **max** component; tracks past the cap are `auto`. Downstream, fixed-px columns reserve their width first and the remaining space splits by `fr` weight (all-`auto` keeps the historical equal columns byte-identical). |
 | `margin`, `margin-top/right/bottom/left` | `margin_top/right/bottom/left` (px). The shorthand expands 1–4 values (CSS order: all / `v h` / `t h b` / `t r b l`). `auto` → `CSS_LEN_AUTO` (meaningful for the horizontal sides: `margin: 0 auto` centers). Negative px allowed. Clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`. |
 | `padding`, `padding-top/right/bottom/left` | `pad_top/right/bottom/left` (px ≥ 0). Same 1–4 shorthand. `auto`/negative → that side dropped (fail closed). Clamped `[0, CSS_LEN_MAX]`. |
 | `width` | `width` (px content width, or `CSS_LEN_UNSET`). `auto` → unset. |
@@ -185,6 +187,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `caret-color` | `caret_color` (0xRRGGBB or `CSS_LEN_AUTO` for `auto`, or -1 unset): color of the text-input caret |
 | `appearance` | `appearance` (`css_appearance`): `auto`/`none`; unknown dropped |
 | `pointer-events` | `pointer_events` (`css_pointer_events`): `auto`/`none`; unknown dropped |
+| *(gradient fields)* | `bg_grad_n` (stop count, 0 = no gradient, 2..`CSS_GRAD_STOPS_MAX` (4)), `bg_grad_angle` (CSS degrees normalized `[0,359]`: 0 = to top, 90 = to right; default 180 = to bottom), `bg_grad_c[4]` (packed 0xRRGGBB per stop). Grammar: `linear-gradient(<dir>?, <color-stop>{2,})` where `<dir>` is `to <side-or-corner>` (two keywords in either order for corners) or `<int>deg`. Stop **positions** (`%`/lengths after a color) are accepted but ignored — stops paint evenly spaced. An unparseable color or fewer than 2 stops drops the whole gradient (fail closed); more than 4 stops keep the first 4 (bounded, anti-DoS). Painted by the GUI as a Cairo linear pattern across the border box (rounded by `border-radius`), gated by `caps.css` by construction (rides the box-def tree). Never fetches: there is no URL anywhere in the accepted grammar. |
 | `background-repeat` | `bg_repeat` (`css_bg_repeat`): `repeat`/`no-repeat`/`repeat-x`/`repeat-y`/`space`/`round`; unknown dropped |
 | `background-size` | `bg_size` (`css_bg_size`): `auto`/`cover`/`contain`; `<length>`/`<percentage>` dropped |
 | `background-clip` | `bg_clip` (`css_bg_clip`): `border-box`/`padding-box`/`content-box`/`text`; unknown dropped |
@@ -397,11 +400,12 @@ engine does not act on them yet. Listed here so a reader of `css_style`
 does not assume every field is wired; when a later milestone wires one
 of them, the field already has the value ready. Grouped by family:
 
-- *Background image / decoration*: `background-image`/`background-repeat`/
+- *Background image / decoration*: `background-repeat`/
   `background-size`/`background-clip`/`background-origin`/`background-
-  attachment` (no CSS `background-image` painting — `url()` is dropped
-  by doctrine, and CSS-painted gradients would need a compositing path
-  the flat painter does not have).
+  attachment` (no CSS `background-image` painting for `url()` — dropped
+  by doctrine). `background-image: linear-gradient(...)` left this list
+  2026-07-11: it resolves to the `bg_grad_*` fields and paints as a Cairo
+  linear pattern (see the property inventory above).
 - *Compositing / containment*: `isolation`, `contain` (no stacking-context /
   paint-tree partitioning in the v1 painter). `content-visibility` left this
   list 2026-07-10 (`hidden` folds into `visibility`, see above).
@@ -422,8 +426,12 @@ of them, the field already has the value ready. Grouped by family:
   `font-kerning`, `text-rendering`, `font-stretch`.
 - *Flex/grid extras (parsed, not yet placed)*: `align-content`,
   `justify-items`, `grid-template-rows`, `grid-auto-flow`,
-  `grid-column`/`grid-row` `span N` (every grid item still occupies one
-  cell — `span N` is resolved but not honored in the layout engine).
+  `grid-row: span N` (row spans are resolved but not honored — the flat
+  row-major placement has no per-item row height accounting). `grid-column:
+  span N` left this list 2026-07-11: a column span is honored by the layout
+  engine (the item occupies N consecutive columns + the gaps between them,
+  clamped to the columns remaining in its row, which is CSS auto-placement
+  behaviour).
 - *Table properties*: `border-collapse`, `border-spacing`, `empty-cells`,
   `caption-side`, `table-layout` (no proper table layout; the engine
   flattens `<table>` to per-cell block-defs, so these would only
@@ -438,8 +446,10 @@ of them, the field already has the value ready. Grouped by family:
    spec/float.md), line-number / named grid placement (only `span N` is
    resolved), `position: sticky` scroll pinning. `overflow` clipping and
    `z-index` negative stacking **are** painted since 2026-07-09.
-- *Backgrounds beyond a solid color*: `background-image`/gradients (and any
-  `url()` — by doctrine, never fetched), `background-position`.
+- *Backgrounds beyond a solid color or a linear gradient*: `background-image:
+  url()` (by doctrine, never fetched), `radial-gradient`/`conic-gradient`/
+  `repeating-*` (fail closed to unset), gradient stop positions (evenly
+  spaced in v1), `background-position`.
 - *Transforms / filters / transitions*: `transform`, `filter`, `transition`,
   `animation`, `@keyframes`.
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
@@ -504,13 +514,17 @@ layer applies; like the author *colors* and `text-align`/`font-size`, the **box 
 unreadability, so they stay off until the user opts in). The geometry math (cap + centering +
 insets within an available width) lives in the pure, tested `box_style` helper `bx_place`.
 
-**Out of scope of the box model (v1, Hito 23b-3), fail closed / UA fallback:** vertical
-`padding-top/bottom` application (parsed and stored, but the flat display list has no per-block
-box to inflate yet — needs the box-grouping of a later milestone), `border` (width/style/color),
-`box-sizing` (every `width` is treated as a content-box width), `%`/viewport units, and
-**nested** author boxes do not compose (the nearest block ancestor that sets a box wins for the
-horizontal placement; an outer wrapper's `max-width`/centering still reaches its descendants
-because they all share that ancestor).
+**Out of scope of the box model (v1, Hito 23b-3), fail closed / UA fallback — updated
+2026-07-11:** `%`/viewport units (except the symbolic `width`/`max-width` per-mille channel,
+Hito 32), and **nested** author boxes do not compose for the run-level horizontal placement
+(the nearest block ancestor that sets a box wins; an outer wrapper's `max-width`/centering
+still reaches its descendants because they all share that ancestor) — the box-def TREE
+(Step D) does compose decoration. No longer out of scope: vertical `padding-top/bottom`
+(the box engine reserves top/bottom padding+border at open/close, Hito 23b-8), `border`
+(painted since Step C), and `box-sizing` (2026-07-11: `border-box` subtracts the horizontal
+padding+border from the width cap via the pure `bx_content_cap` before `bx_place`; without a
+declared padding/border the two models coincide, so the box-def path — which exists exactly
+when padding/border/etc. are declared — is the only place that needs it).
 
 **Container layout params (Hito 23b-2, extended by the CSS layout expansion batch).**
 `gap` / `justify-content` / `grid-template-columns` / **`flex-wrap`** / **`row-gap`** /
@@ -996,16 +1010,18 @@ common case.)
 - The author box model `margin`/`padding`/`width`/`max-width` **is now resolved through the
   cascade** (Hito 23b-3) and applied (gated by `caps.css`): horizontal insets, an optional
   width cap, `margin: 0 auto` centering, and a top/bottom margin override; all four (plus
-  `calc()` of them) are supported. Still out of scope: `border` (values resolved, not yet
-  painted), `box-sizing`, vertical `padding-top/bottom` application, `%`/viewport units, and
-  nested box composition (see *Box model* above). `display:flex|grid` *parameters*
-  (`gap`/`justify-content`/`grid-template-columns`/`flex-wrap`/`row-gap`/`align-items`/
-  `align-self`) are resolved through the cascade (Hito 23b-2) **and painted** (the CSS layout
-  expansion batch: multi-line flex wrapping, distinct grid/flex-wrap row-gap, flex row
-  cross-axis alignment). Still out of scope: grid cross-axis alignment, `align-content`, grid
-  per-item placement (`grid-column`/`grid-row: span N` resolved, not yet honoured), and named/
-  `auto`/`fr`-weighted grid tracks (every counted track — `repeat()`/`minmax()`-aware — still
-  lays out as an equal-width column).
+  `calc()` of them) are supported. 2026-07-11: `border` **is painted** (Step C), vertical
+  padding is reserved by the box engine, and `box-sizing: border-box` **is consumed**
+  (`bx_content_cap`). Still out of scope: `%`/viewport units (beyond the Hito 32 per-mille
+  width channel) and run-level nested box composition (see *Box model* above).
+  `display:flex|grid` *parameters* (`gap`/`justify-content`/`grid-template-columns`/
+  `flex-wrap`/`row-gap`/`align-items`/`align-self`) are resolved through the cascade (Hito
+  23b-2) **and painted** (the CSS layout expansion batch: multi-line flex wrapping, distinct
+  grid/flex-wrap row-gap, flex row cross-axis alignment). 2026-07-11: **`fr`-weighted and
+  fixed-px grid tracks are honoured** (`fx_grid_columns_weighted`; first `CSS_GRID_TRACKS_MAX`
+  tracks) and **`grid-column: span N` is placed** (`fx_grid_place_span`). Still out of scope:
+  grid cross-axis alignment, `align-content`, `grid-row: span N` (resolved, not placed), named
+  tracks / line-number placement.
 - `url()` anything, `@import`/`@font-face`/other `@`-rules. `!important` **is** honored (Hito
   23b-4): the suffix is stripped and the declaration raised to a higher cascade tier (was
   previously dropped). `@media` is supported (subset above); `not`/unknown features fail

@@ -12,23 +12,30 @@
  * image_decode — turns raw image bytes into paint-ready pixels.
  *
  * Deterministic, no network and no filesystem: it only reads the input buffer and
- * allocates the output bitmap. Decoding hostile image bytes (libpng + zlib, libjpeg)
- * is a classic attack surface, so this code is meant to run inside the confined tab
- * worker (seccomp allowlist + Landlock), never in the parent. The parent fetches
- * the bytes through secure_fetch and paints the result; it never decodes.
+ * allocates the output bitmap. Decoding hostile image bytes (libpng + zlib, libjpeg,
+ * libwebp) is a classic attack surface, so this code is meant to run inside the
+ * confined tab worker (seccomp allowlist + Landlock), never in the parent. The
+ * parent fetches the bytes through secure_fetch and paints the result; it never
+ * decodes.
  *
- * Scope: PNG and JPEG (baseline + progressive). Any other format is rejected
- * (IMG_ERR_FORMAT) and the orchestrator shows the placeholder. JPEG is an owner-
- * authorised exception to the PNG-only doctrine, contained by the same sandbox plus
- * libjpeg-specific guards (in-memory source only, longjmp error manager so a bad
- * stream never calls exit(), dimension caps before decode); see spec/image_decode.md
- * §0.1. Fails closed on every doubt.
+ * Scope: PNG, JPEG (baseline + progressive), static GIF (first frame) and WebP
+ * (lossless/lossy). Any other format is rejected (IMG_ERR_FORMAT) and the
+ * orchestrator shows the placeholder. JPEG is an owner-authorised exception to
+ * the PNG-only doctrine, contained by the same sandbox plus libjpeg-specific
+ * guards (in-memory source only, longjmp error manager so a bad stream never
+ * calls exit(), dimension caps before decode); see spec/image_decode.md §0.1.
+ * GIF is decoded by an OWN pure-C LZW decoder (no giflib: fewer dependencies
+ * to audit; spec §0.2), bounded and fuzzed like the rest. WebP uses libwebp's
+ * in-memory API (WebPDecodeBGRAInto), with dimension caps before full decode.
+ * Fails closed on every doubt.
  */
 
 typedef enum img_format {
     IMG_FMT_UNKNOWN = 0,
     IMG_FMT_PNG = 1,
-    IMG_FMT_JPEG = 2
+    IMG_FMT_JPEG = 2,
+    IMG_FMT_GIF = 3,
+    IMG_FMT_WEBP = 4
 } img_format;
 
 typedef enum img_status {
@@ -88,9 +95,25 @@ img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out);
  * exit()). Ownership/zeroing/reentrancy as img_decode_png. */
 img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out);
 
-/* Generic entry point: sniffs the format and routes to img_decode_png/img_decode_jpeg;
- * an unrecognised format yields IMG_ERR_FORMAT. This is what the confined worker calls.
- * Fails closed. */
+/* Decodes the FIRST frame of a GIF87a/GIF89a into out (premultiplied ARGB32; a
+ * GCE-transparent index yields 0x00000000). Own bounded LZW decoder (dict <= 4096
+ * codes, expansion capped by the frame area — never hangs); global/local palette,
+ * 4-pass interlace. Logical-screen dimensions are bounded BEFORE any allocation.
+ * Rejects non-GIF, truncated streams, out-of-range LZW codes and palette indexes.
+ * Ownership/zeroing/reentrancy as img_decode_png. See spec/image_decode.md §0.2. */
+img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out);
+
+/* Decodes a WebP image into out (premultiplied ARGB32). Uses libwebp's
+ * in-memory source API (WebPDecodeBGRA). Declared dimensions are bounded
+ * BEFORE the full decode (anti decompression bomb). Rejects non-WebP
+ * (IMG_ERR_FORMAT), out-of-bounds dimensions (IMG_ERR_DIMENSIONS) and
+ * corrupt streams (IMG_ERR_DECODE). Ownership/zeroing/reentrancy as
+ * img_decode_png. */
+img_status img_decode_webp(const uint8_t *bytes, size_t len, img_pixels *out);
+
+/* Generic entry point: sniffs the format and routes to img_decode_png/
+ * img_decode_jpeg/img_decode_gif/img_decode_webp; an unrecognised format
+ * yields IMG_ERR_FORMAT. This is what the confined worker calls. Fails closed. */
 img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out);
 
 /* Releases data and zeroes the struct. Idempotent; safe on NULL and on a zeroed

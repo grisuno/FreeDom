@@ -59,7 +59,12 @@ fx_status   fx_flex_line(const fx_item *items, size_t n, double avail, double ga
                          fx_justify justify, fx_result *out);
 fx_status   fx_grid_columns(double avail, size_t ncols, double gap,
                             double *col_x, double *col_w);
+fx_status   fx_grid_columns_weighted(double avail, size_t ncols, double gap,
+                                     const int *track, size_t ntrack,
+                                     double *col_x, double *col_w);
 void        fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);
+fx_status   fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+                               size_t *out_row, size_t *out_col);
 const char *fx_justify_name(fx_justify j);
 ```
 
@@ -91,9 +96,24 @@ const char *fx_justify_name(fx_justify j);
 - `col_w = max(0, (avail − gap·(ncols−1)) / ncols)` (igual para todas; se acota a 0 si no cabe).
   `col_x[k] = k · (col_w + gap)`.
 
+### `fx_grid_columns_weighted` (2026-07-11)
+- Mismos contratos de rango/NULL que `fx_grid_columns`. `track[i]` codifica el tamaño de la pista
+  `i`: `0` = `auto` (peso `1fr`), `> 0` = **px fijos**, `< 0` = peso **fr ×100** (`2fr` → `-200`).
+  Pistas con `i >= ntrack` (o `track == NULL`) son `auto`.
+- Algoritmo: las pistas fijas reservan sus px primero; el resto
+  (`avail − gaps − Σfijas`, acotado a ≥ 0) se reparte proporcional al peso fr. Todo-`auto`
+  reproduce **byte-idéntico** el reparto igualitario de `fx_grid_columns`. Si las fijas exceden
+  `avail`, las fr quedan en 0 (overflow a la derecha, como CSS).
+
 ### `fx_grid_cell`
 - `row = index / ncols`, `col = index % ncols` (colocación fila-por-fila). `ncols == 0` →
   `row = col = 0` (defensivo, sin dividir por cero).
+
+### `fx_grid_place_span` (2026-07-11)
+- Colocación fila-por-fila con `grid-column: span N`: `span[i]` (≤ 0 o `NULL` = 1) se acota a
+  `[1, ncols]`; si el span no cabe en las columnas restantes de la fila, el ítem **salta a la fila
+  siguiente** (auto-placement CSS). Escribe fila y columna inicial por ítem. `nitems == 0` → `FX_OK`;
+  `ncols == 0`, `nitems > FX_MAX_ITEMS` o punteros de salida NULL → error (falla cerrado).
 
 ### `fx_justify_name`
 - Nombre en inglés, corto y estable (`"start"`, `"space-between"`, ...) para salida estructurada.
@@ -121,6 +141,8 @@ const char *fx_justify_name(fx_justify j);
 
 - `flex-wrap` y múltiples líneas; el eje cruzado (`align-items`/`align-content`/`align-self`).
 - Tamaños base de contenido (`flex-basis: auto`/`content`): el llamante resuelve `basis` antes.
-- Grid real: pistas mixtas `px`/`fr`/`auto`/`minmax`, `grid-template-areas`, posicionamiento por
-  línea, `grid-auto-flow: column`, gaps por eje distintos.
+- Grid real restante: `grid-template-areas`, posicionamiento por línea (`grid-column: 2 / 4`),
+  `grid-auto-flow: column`, `span` de FILA (solo el de columna se coloca). Las pistas mixtas
+  `px`/`fr`/`auto` y `minmax` (componente max) ya se resuelven vía `fx_grid_columns_weighted`
+  (2026-07-11).
 - Aplicar los rectángulos a Cairo / construir el árbol de cajas: eso es el orquestador (la GUI).

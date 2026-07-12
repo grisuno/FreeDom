@@ -28,9 +28,11 @@
   regla pierde solo ese selector (los demás del grupo por coma siguen).
 - **Dado** `a:link{...}` y un elemento `a` con atributo `href` — **cuando** se
   matchea — **entonces** aplica (Zero Knowledge: sin historial, todo enlace está
-  no-visitado). **Dado** `:visited`/`:hover`/`:focus`/`:active` — **entonces**
-  jamás matchean (sin historial por diseño; sin re-cascada interactiva aún),
-  pero el selector parsea y cuenta especificidad.
+  no-visitado). **Dado** `:visited` — **entonces** jamás matchea (sin historial
+  por diseño). **Dado** `:hover`/`:focus`/`:active` — **entonces** siempre
+  matchean (PSEUDO_ALWAYS, 2026-07-11: la cascada se resuelve una vez por carga;
+  el contenido oculto tras `:hover` se vuelve visible. Sin re-cascada interactiva
+  aún). El selector parsea y cuenta especificidad en todos los casos.
 - **Dado** `li:nth-child(2n)` y un elemento con `nth=4` — **entonces** matchea;
   con `nth=0` (desconocido) — **entonces** NO matchea (fail closed).
 - **Dado** `A + B` (`A ~ B`) y un sujeto con `prev` poblado — **entonces** `+`

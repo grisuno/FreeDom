@@ -1,4 +1,4 @@
-# spec/image_decode.md — Decodificado de imágenes (PNG + JPEG)
+# spec/image_decode.md — Decodificado de imágenes (PNG + JPEG + GIF estático)
 
 > Módulo `image_decode` (prefijo `img_`). Lógica **determinista, sin red y sin acceso a
 > ficheros**: recibe los *bytes* crudos de una imagen (dato hostil con procedencia) y los
@@ -23,8 +23,9 @@ Este módulo es la pieza que corre en el sandbox: por eso es C puro, sin estado 
 
 ### 0.1 Alcance: PNG **y** JPEG (excepción de doctrina, autorizada por el dueño)
 
-Alcance: **PNG y JPEG** (baseline + progressive). El resto (WebP/GIF/AVIF) sigue rechazado con
-`IMG_ERR_FORMAT` y el orquestador muestra el placeholder con su razón.
+Alcance: **PNG, JPEG** (baseline + progressive) **y GIF estático** (§0.2). El resto (WebP —
+autorizado por el dueño pero bloqueado por dependencia, ver §5 — y AVIF, NO autorizado) sigue
+rechazado con `IMG_ERR_FORMAT` y el orquestador muestra el placeholder con su razón.
 
 JPEG **rompe la doctrina PNG-only** (`libjpeg-turbo` es una dependencia nueva y código que
 parsea bytes hostiles — superficie de CVE histórica). Se admite **solo** porque (a) el dueño lo
@@ -53,6 +54,26 @@ a PNG, más unas específicas de libjpeg. El balance se mantiene **Secure by Def
 - **Privacy by Default intacto**: las imágenes siguen *opt-in* (`Ctrl+I`); JPEG no auto-carga.
 - **Fuzzeado** en la misma malla que PNG (`make fuzz-img` sobre `img_decode`/`img_decode_jpeg`).
 
+### 0.2 GIF estático: decoder PROPIO en C puro (2026-07-11, autorizado por el dueño)
+
+GIF entra **sin dependencia nueva**: un decoder propio (~300 líneas de C11 puro) en vez de
+`giflib` (historial de CVEs propio, y sus headers no están en este host). Menos superficie
+que auditar, y superficie que **nosotros** fuzzeamos — la dirección que la doctrina prefiere.
+
+- **Alcance:** GIF87a/GIF89a, **primera frame solamente** (un GIF animado muestra su primer
+  cuadro, estático — la animación necesita un motor de repintado por tiempo que está fuera
+  del alcance del painter v1, como `transition`/`animation`). Paleta global y local,
+  entrelazado (Adam-de-4-pasadas GIF), transparencia del Graphic Control Extension.
+- **LZW acotado:** diccionario máx. 4096 entradas (12 bits, del estándar), expansión por
+  cadena de prefijos con tope de longitud = área de la imagen; un código fuera de rango o
+  una cadena que excedería el área devuelven `IMG_ERR_DECODE` (falla cerrado, jamás cuelga).
+- **Anti-bomba:** dimensiones del Logical Screen Descriptor acotadas con `img_dimensions_ok`
+  **antes** de asignar nada (mismos topes que PNG/JPEG). El frame se recorta al lienzo.
+- **Salida:** el mismo ARGB32 premultiplicado que PNG/JPEG; píxel transparente ⇒ 0x00000000,
+  el resto alfa opaco. Índice de paleta fuera de la tabla ⇒ `IMG_ERR_DECODE`.
+- Corre **solo en el worker confinado**, mismo régimen que PNG/JPEG; fuzzeado por
+  `make fuzz-img` (mismo harness, `img_decode` sniffea y rutea).
+
 ## 1. Tipos
 
 ### `img_format` — formato detectado por *sniffing* de cabecera
@@ -60,7 +81,8 @@ a PNG, más unas específicas de libjpeg. El balance se mantiene **Secure by Def
 typedef enum img_format {
     IMG_FMT_UNKNOWN = 0,
     IMG_FMT_PNG = 1,
-    IMG_FMT_JPEG = 2
+    IMG_FMT_JPEG = 2,
+    IMG_FMT_GIF = 3
 } img_format;
 ```
 
@@ -177,9 +199,29 @@ const char *img_format_name(img_format f);
 - **Dado** un PNG, **cuando** `img_decode` (despachador), **entonces** enruta a la ruta PNG e
   `IMG_OK` (paridad con el comportamiento previo).
 
+### 4.2 Dado-Cuando-Entonces (GIF, §0.2)
+
+- **Dado** un GIF89a válido con paleta global, **cuando** `img_decode_gif`, **entonces**
+  `IMG_OK` y los píxeles ARGB coinciden con la paleta (alfa 0xFF).
+- **Dado** un GIF con Graphic Control Extension y color transparente, **cuando** decode,
+  **entonces** ese índice produce 0x00000000 (transparente premultiplicado).
+- **Dado** un GIF entrelazado, **cuando** decode, **entonces** las filas quedan en orden
+  visual correcto (des-entrelazado de 4 pasadas).
+- **Dado** un GIF que declara dimensiones sobre `IMG_MAX_*`, **cuando** decode, **entonces**
+  `IMG_ERR_DIMENSIONS` antes de asignar el bitmap.
+- **Dado** un GIF truncado, con código LZW fuera de rango, o con índice de color fuera de la
+  paleta, **cuando** decode, **entonces** `IMG_ERR_TRUNCATED`/`IMG_ERR_DECODE`, `*out` a cero,
+  sin fugas, sin cuelgues (expansión LZW topada por el área del frame).
+- **Dado** un GIF animado (varias Image Descriptors), **cuando** decode, **entonces** `IMG_OK`
+  con la PRIMERA frame solamente.
+
 ## 5. Fuera de alcance
 
-- Otros formatos (WebP/GIF/AVIF): rechazados (`IMG_ERR_FORMAT`).
+- WebP (lossless + lossy): **soportado desde 2026-07-11** (`IMG_FMT_WEBP`). Usa `libwebp` vía
+  `WebPGetInfo` + `WebPDecodeBGRAInto` (fuente en memoria, dimensiones acotadas antes del
+  decode, salida BGRA premultiplicada). Se detecta por la cabecera `RIFF....WEBP`. AVIF/AV1:
+  **NO autorizado**, rechazado.
+- GIF: animación (solo la primera frame, ver §0.2), disposal methods, loops.
 - JPEG CMYK/YCCK (4 canales) y *arithmetic coding*: rechazados (`IMG_ERR_DECODE`); no se
   intenta conversión de espacio de color exótica.
 - EXIF (orientación), perfiles ICC y metadatos: ignorados; la imagen se pinta tal cual decodifica.

@@ -1856,11 +1856,12 @@ static void test_build_pseudo_classes_and_siblings(void **state) {
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
 
-    /* a:link matches the anchor (ZK: every link unvisited); :visited/:hover never
-     * match, so their #bad000 never applies. */
+    /* a:link matches the anchor (ZK: every link unvisited); :hover always matches
+     * (PSEUDO_ALWAYS) so a:visited,a:hover's #bad000 wins (same specificity as
+     * a:link, later in source). */
     const pv_run *link = find_text(v, "homelink");
     assert_non_null(link);
-    assert_int_equal(link->fg_rgb, 0x123123);
+    assert_int_equal(link->fg_rgb, 0xbad000);
     assert_int_equal(link->text_decoration, 0);   /* explicit none drops underline */
 
     /* Zebra: li #1 first-child, #2 and #4 even, #3 unstyled. */

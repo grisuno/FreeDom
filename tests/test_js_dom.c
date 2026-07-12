@@ -481,6 +481,16 @@ static void test_inner_html_builds_and_queryable(void **state) {
     assert_int_not_equal(ih, DOM_NODE_NONE);
 }
 
+/* innerHTML GETTER (2026-07-11): serializes the node's children back to markup. */
+static void test_inner_html_getter_serializes(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f,
+        "document.getElementById('main').innerHTML='<p id=\"gh\">hi</p>';"
+        "document.getElementById('main').innerHTML", "<p id=\"gh\">hi</p>");
+    /* a text-only child serializes as its text */
+    EXPECT(f, "document.getElementById('gh').innerHTML", "hi");
+}
+
 /* Identity-safe ambient globals: present (no throws) but leak nothing. */
 static void test_storage_is_ephemeral(void **state) {
     fixture *f = (fixture *)*state;
@@ -829,6 +839,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_onload_runs_and_mutates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_settimeout_flushed_by_pump, setup, teardown),
         cmocka_unit_test_setup_teardown(test_inner_html_builds_and_queryable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_inner_html_getter_serializes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_storage_is_ephemeral, setup, teardown),
         cmocka_unit_test_setup_teardown(test_cookie_and_referrer_leak_nothing, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ambient_apis_do_not_throw, setup, teardown),

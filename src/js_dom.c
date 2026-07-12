@@ -281,6 +281,22 @@ static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
+/* innerHTML getter (2026-07-11): serializes the node's children (bounded in dom.c;
+ * over-cap or invalid handle yields "" -- a getter never throws page scripts dead). */
+static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
+                                int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    char *html = NULL;
+    size_t len = 0;
+    if (dom_get_inner_html(jd_idx(ctx), h, &html, &len) != DOM_OK)
+        return JS_NewString(ctx, "");
+    JSValue v = JS_NewStringLen(ctx, html, len);
+    free(html);
+    return v;
+}
+
 /* --- install --- */
 
 typedef struct jd_method {
@@ -401,6 +417,7 @@ static const jd_method JD_METHODS[] = {
     { "setAttribute",   m_set_attribute,     3 },
     { "removeAttribute", m_remove_attribute, 2 },
     { "setInnerHtml",   m_set_inner_html,    2 },
+    { "getInnerHtml",   m_get_inner_html,    1 },
     { "registerClick",  m_register_click,    2 },
     { "querySelector",    m_query_selector,     2 },
     { "querySelectorAll", m_query_selector_all, 2 },
@@ -453,7 +470,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      get className(){ var v=dom.getAttribute(h,'class'); return v===null?'':v; },"
     "      set className(v){ dom.setAttribute(h,'class',String(v)); },"
     "      set innerHTML(v){ dom.setInnerHtml(h, String(v)); },"
-    "      get innerHTML(){ return ''; },"
+    "      get innerHTML(){ return dom.getInnerHtml(h); },"
     /* A DocumentFragment carries its collected children in __frag; appending the
      * fragment re-parents each child (its contents), never the fragment node. */
     "      appendChild: function(c){ if(c&&c.__frag){ for(var i=0;i<c.__frag.length;i++) dom.appendChild(h,c.__frag[i]._h); c.__frag.length=0; return c; } if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
@@ -611,30 +628,66 @@ static const char JD_DOCUMENT_SHIM[] =
     "      info:function(){},debug:function(){}};"
     "  globalThis.addEventListener=function(type,fn){ addL(String(type),fn); };"
     "  globalThis.removeEventListener=function(){};"
-    "  globalThis.setTimeout=function(fn){ if(typeof fn==='function') timers.push(fn); return timers.length; };"
-    "  globalThis.setInterval=function(fn){ if(typeof fn==='function') timers.push(fn); return timers.length; };"
-    "  globalThis.clearTimeout=function(){}; globalThis.clearInterval=function(){};"
+    /* Timers with REAL delays (2026-07-11): each entry is {f, due, iv, id} where
+     * due is the remaining virtual ms (the trusted parent advances the clock via
+     * OP_TICK -> __tickTimers(elapsed); no real clock leaks -- anti-fp) and iv is
+     * the setInterval period (0 = one-shot). A missing/invalid delay is 0 (fires
+     * on the load pump, the historical behaviour). clearTimeout/clearInterval
+     * cancel by id. rAF/rIC keep due 0 (the v1 "frame" is the pump). */
+    "  var tmSeq=0;"
+    "  function tmAdd(fn,ms,iv){ if(typeof fn!=='function') return 0;"
+    "    var d=(typeof ms==='number'&&ms>0)?ms:0;"
+    "    timers.push({f:fn,due:d,iv:iv?Math.max(d,16):0,id:++tmSeq}); return tmSeq; }"
+    "  function tmDel(id){ for(var i=0;i<timers.length;i++)"
+    "    if(timers[i].id===id){ timers.splice(i,1); return; } }"
+    "  globalThis.setTimeout=function(fn,ms){ return tmAdd(fn,ms,0); };"
+    "  globalThis.setInterval=function(fn,ms){ return tmAdd(fn,ms,1); };"
+    "  globalThis.clearTimeout=tmDel; globalThis.clearInterval=tmDel;"
     /* rAF/rIC feed the same synthetic timer queue; the callback gets a fixed
      * timestamp (identity-safe: no real high-res clock leaks through animation). */
-    "  globalThis.requestAnimationFrame=function(fn){ if(typeof fn==='function') timers.push(function(){ fn(0); }); return timers.length; };"
-    "  globalThis.cancelAnimationFrame=function(){};"
-    "  globalThis.requestIdleCallback=function(fn){ if(typeof fn==='function') timers.push(function(){ fn({didTimeout:false,timeRemaining:function(){return 0;}}); }); return timers.length; };"
-    "  globalThis.cancelIdleCallback=function(){};"
+    "  globalThis.requestAnimationFrame=function(fn){ if(typeof fn!=='function') return 0;"
+    "    return tmAdd(function(){ fn(0); },0,0); };"
+    "  globalThis.cancelAnimationFrame=tmDel;"
+    "  globalThis.requestIdleCallback=function(fn){ if(typeof fn!=='function') return 0;"
+    "    return tmAdd(function(){ fn({didTimeout:false,timeRemaining:function(){return 0;}}); },0,0); };"
+    "  globalThis.cancelIdleCallback=tmDel;"
     "  globalThis.queueMicrotask=function(fn){ if(typeof fn==='function') Promise.resolve().then(fn); };"
+    /* Advances the virtual clock and fires everything due, in bounded ROUNDS (a
+     * timer may schedule more timers). Intervals re-arm. Returns fired count. */
+    "  globalThis.__tickTimers=function(elapsed){"
+    "    var e=Number(elapsed)||0, fired=0, rounds=0;"
+    "    for (var i=0;i<timers.length;i++) timers[i].due-=e;"
+    "    while (rounds<8 && fired<256){"
+    "      var due=[], rest=[];"
+    "      for (var i=0;i<timers.length;i++) (timers[i].due<=0?due:rest).push(timers[i]);"
+    "      if (due.length===0) break;"
+    "      timers=rest; rounds++;"
+    "      for (var j=0;j<due.length && fired<256;j++){ fired++;"
+    "        try{ due[j].f.call(globalThis); }catch(ex){}"
+    "        if (due[j].iv>0){ due[j].due=due[j].iv; timers.push(due[j]); }"
+    "      }"
+    "    }"
+    "    return fired;"
+    "  };"
+    /* Smallest remaining delay (>= 0), or -1 when nothing is pending -- the parent
+     * uses it to schedule the next OP_TICK. */
+    "  globalThis.__nextTimerMs=function(){"
+    "    var m=-1;"
+    "    for (var i=0;i<timers.length;i++){"
+    "      var d=timers[i].due>0?timers[i].due:0;"
+    "      if (m<0||d<m) m=d;"
+    "    }"
+    "    return m;"
+    "  };"
     /* Synthetic, bounded "page loaded" pump: fire load handlers, then drain the
-     * timer queue in bounded ROUNDS (a timer may schedule more timers -- rAF loops,
-     * chained setTimeout). Capped total invocations, since this is not a real async
-     * event loop; microtasks (Promise/queueMicrotask) are drained by js_pump_jobs. */
+     * zero-delay timers (rAF loops, chained setTimeout with no delay). Timers with
+     * a real delay stay queued for __tickTimers; microtasks are js_pump_jobs'. */
     "  globalThis.__fireDeferred=function(){"
     "    d.readyState='complete';"
     "    for (var i=0;i<loadCbs.length;i++){ try{ loadCbs[i].call(globalThis); }catch(e){} }"
     "    if (typeof globalThis.onload==='function'){ try{ globalThis.onload(); }catch(e){} }"
     "    if (typeof d.onload==='function'){ try{ d.onload(); }catch(e){} }"
-    "    var total=0, rounds=0;"
-    "    while (timers.length>0 && rounds<8 && total<256){"
-    "      var batch=timers; timers=[]; rounds++;"
-    "      for (var j=0;j<batch.length && total<256;j++){ total++; try{ batch[j].call(globalThis); }catch(e){} }"
-    "    }"
+    "    globalThis.__tickTimers(0);"
     "  };"
     "})();";
 

@@ -192,6 +192,104 @@ static void test_grid_cell(void **state) {
     fx_grid_cell(3, 0, &r, &c); assert_int_equal(r, 0); assert_int_equal(c, 0); /* no div by zero */
 }
 
+/* --- weighted tracks + column spans (2026-07-11) --- */
+
+static void test_grid_weighted_fr(void **state) {
+    (void)state;
+    /* 2fr 1fr 1fr over 400px, no gap -> 200/100/100 */
+    int track[3] = { -200, -100, -100 };
+    double x[3], w[3];
+    assert_int_equal(fx_grid_columns_weighted(400, 3, 0, track, 3, x, w), FX_OK);
+    assert_true(dbl_eq(w[0], 200.0)); assert_true(dbl_eq(w[1], 100.0));
+    assert_true(dbl_eq(w[2], 100.0));
+    assert_true(dbl_eq(x[0], 0.0)); assert_true(dbl_eq(x[1], 200.0));
+    assert_true(dbl_eq(x[2], 300.0));
+}
+
+static void test_grid_weighted_fixed_px_reserved_first(void **state) {
+    (void)state;
+    /* 100px 1fr 1fr over 400px with gap 10: fixed 100 first, gaps 20,
+     * remaining 280 split 140/140 */
+    int track[3] = { 100, -100, -100 };
+    double x[3], w[3];
+    assert_int_equal(fx_grid_columns_weighted(400, 3, 10, track, 3, x, w), FX_OK);
+    assert_true(dbl_eq(w[0], 100.0)); assert_true(dbl_eq(w[1], 140.0));
+    assert_true(dbl_eq(w[2], 140.0));
+    assert_true(dbl_eq(x[1], 110.0)); assert_true(dbl_eq(x[2], 260.0));
+}
+
+static void test_grid_weighted_all_auto_matches_equal(void **state) {
+    (void)state;
+    /* auto tracks (0) and a NULL track array must be byte-identical to
+     * fx_grid_columns */
+    int track[2] = { 0, 0 };
+    double x[2], w[2], ex[2], ew[2];
+    assert_int_equal(fx_grid_columns(305, 2, 5, ex, ew), FX_OK);
+    assert_int_equal(fx_grid_columns_weighted(305, 2, 5, track, 2, x, w), FX_OK);
+    assert_true(dbl_eq(w[0], ew[0])); assert_true(dbl_eq(x[1], ex[1]));
+    assert_int_equal(fx_grid_columns_weighted(305, 2, 5, NULL, 0, x, w), FX_OK);
+    assert_true(dbl_eq(w[1], ew[1])); assert_true(dbl_eq(x[0], ex[0]));
+}
+
+static void test_grid_weighted_fixed_overflow_zeroes_fr(void **state) {
+    (void)state;
+    /* fixed tracks larger than avail: fr tracks get 0, never negative */
+    int track[2] = { 500, -100 };
+    double x[2], w[2];
+    assert_int_equal(fx_grid_columns_weighted(300, 2, 0, track, 2, x, w), FX_OK);
+    assert_true(dbl_eq(w[0], 500.0));
+    assert_true(dbl_eq(w[1], 0.0));
+}
+
+static void test_grid_weighted_errors(void **state) {
+    (void)state;
+    double x[2], w[2];
+    int track[2] = { 0, 0 };
+    assert_int_equal(fx_grid_columns_weighted(300, 0, 0, track, 2, x, w), FX_OK); /* no-op */
+    assert_int_equal(fx_grid_columns_weighted(-1, 2, 0, track, 2, x, w), FX_ERR_RANGE);
+    assert_int_equal(fx_grid_columns_weighted(300, 2, -1, track, 2, x, w), FX_ERR_RANGE);
+    assert_int_equal(fx_grid_columns_weighted(300, 2, 0, track, 2, NULL, w), FX_ERR_NULL_ARG);
+}
+
+static void test_grid_place_span_basic(void **state) {
+    (void)state;
+    /* 3 columns; item0 spans 2 -> (0,0); item1 span 1 -> (0,2); item2 span 1 -> (1,0) */
+    int span[3] = { 2, 1, 1 };
+    size_t row[3], col[3];
+    assert_int_equal(fx_grid_place_span(3, 3, span, row, col), FX_OK);
+    assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
+    assert_int_equal(row[1], 0); assert_int_equal(col[1], 2);
+    assert_int_equal(row[2], 1); assert_int_equal(col[2], 0);
+}
+
+static void test_grid_place_span_wraps_when_it_does_not_fit(void **state) {
+    (void)state;
+    /* 3 columns; item0 span 1 -> (0,0); item1 span 3 does not fit after col 0 ->
+     * jumps to (1,0); item2 -> (2,0) */
+    int span[3] = { 1, 3, 1 };
+    size_t row[3], col[3];
+    assert_int_equal(fx_grid_place_span(3, 3, span, row, col), FX_OK);
+    assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
+    assert_int_equal(row[1], 1); assert_int_equal(col[1], 0);
+    assert_int_equal(row[2], 2); assert_int_equal(col[2], 0);
+}
+
+static void test_grid_place_span_clamps_and_defaults(void **state) {
+    (void)state;
+    /* span > ncols clamps to ncols; span <= 0 and NULL spans mean 1 */
+    int span[2] = { 9, 0 };
+    size_t row[2], col[2];
+    assert_int_equal(fx_grid_place_span(2, 3, span, row, col), FX_OK);
+    assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
+    assert_int_equal(row[1], 1); assert_int_equal(col[1], 0);
+    assert_int_equal(fx_grid_place_span(2, 3, NULL, row, col), FX_OK);
+    assert_int_equal(row[1], 0); assert_int_equal(col[1], 1);
+    /* fail-closed edges */
+    assert_int_equal(fx_grid_place_span(0, 3, NULL, NULL, NULL), FX_OK);   /* no-op */
+    assert_int_equal(fx_grid_place_span(2, 0, span, row, col), FX_ERR_RANGE);
+    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, col), FX_ERR_NULL_ARG);
+}
+
 static void test_float_pack_left(void **state) {
     (void)state;
     /* Two left floats pack from the left edge, separated by gap. */
@@ -342,6 +440,14 @@ int main(void) {
         cmocka_unit_test(test_grid_columns_too_narrow_clamps_to_zero),
         cmocka_unit_test(test_grid_columns_edges),
         cmocka_unit_test(test_grid_cell),
+        cmocka_unit_test(test_grid_weighted_fr),
+        cmocka_unit_test(test_grid_weighted_fixed_px_reserved_first),
+        cmocka_unit_test(test_grid_weighted_all_auto_matches_equal),
+        cmocka_unit_test(test_grid_weighted_fixed_overflow_zeroes_fr),
+        cmocka_unit_test(test_grid_weighted_errors),
+        cmocka_unit_test(test_grid_place_span_basic),
+        cmocka_unit_test(test_grid_place_span_wraps_when_it_does_not_fit),
+        cmocka_unit_test(test_grid_place_span_clamps_and_defaults),
         cmocka_unit_test(test_float_pack_left),
         cmocka_unit_test(test_float_pack_wrap_full_width_stack),
         cmocka_unit_test(test_float_pack_wrap_fits_matches_v1),

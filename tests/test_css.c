@@ -337,6 +337,35 @@ static void test_container_fail_closed_and_bounds(void **state) {
 /* repeat()/minmax() track-count correctness (Hito: CSS layout expansion). Track
  * SIZES still are not resolved (every track lays out equal-width downstream), but
  * the COUNT is now correct instead of naive whitespace tokenization. */
+static void test_grid_track_sizes_resolved(void **state) {
+    (void)state;
+    /* fr weights encode as -(N*100); px as positive px; auto as 0 */
+    css_style s = css_parse_inline("grid-template-columns: 2fr 1fr", 0);
+    assert_int_equal(s.grid_cols, 2);
+    assert_int_equal(s.grid_col_w[0], -200);
+    assert_int_equal(s.grid_col_w[1], -100);
+    s = css_parse_inline("grid-template-columns: 200px 1fr auto", 0);
+    assert_int_equal(s.grid_cols, 3);
+    assert_int_equal(s.grid_col_w[0], 200);
+    assert_int_equal(s.grid_col_w[1], -100);
+    assert_int_equal(s.grid_col_w[2], 0);
+    /* minmax takes its max component; repeat replicates the pattern's sizes */
+    s = css_parse_inline("grid-template-columns: repeat(2, minmax(100px, 1fr))", 0);
+    assert_int_equal(s.grid_cols, 2);
+    assert_int_equal(s.grid_col_w[0], -100);
+    assert_int_equal(s.grid_col_w[1], -100);
+    /* tracks past CSS_GRID_TRACKS_MAX still count but stay auto */
+    s = css_parse_inline("grid-template-columns: repeat(12, 2fr)", 0);
+    assert_int_equal(s.grid_cols, 12);
+    assert_int_equal(s.grid_col_w[0], -200);
+    assert_int_equal(s.grid_col_w[CSS_GRID_TRACKS_MAX - 1], -200);
+    /* fractional fr and unknown tokens */
+    s = css_parse_inline("grid-template-columns: 1.5fr min-content", 0);
+    assert_int_equal(s.grid_cols, 2);
+    assert_int_equal(s.grid_col_w[0], -150);
+    assert_int_equal(s.grid_col_w[1], 0);   /* unknown -> auto share */
+}
+
 static void test_grid_repeat_expands_count(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("grid-template-columns: repeat(3, 1fr)", 0).grid_cols, 3);
@@ -406,6 +435,96 @@ static void test_unknown_props_ignored(void **state) {
     css_style s = css_parse_inline("position:absolute; z-index:9; color:#abcdef; --x:1", 0);
     assert_int_equal(s.color, 0xabcdef);
     assert_int_equal(s.text_align, CSS_ALIGN_UNSET);
+}
+
+/* --- linear-gradient backgrounds (2026-07-11) --- */
+
+static void test_linear_gradient_basic(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background: linear-gradient(to right, #ff0000, #0000ff)", 0);
+    assert_int_equal(s.bg_grad_n, 2);
+    assert_int_equal(s.bg_grad_angle, 90);
+    assert_int_equal(s.bg_grad_c[0], 0xff0000);
+    assert_int_equal(s.bg_grad_c[1], 0x0000ff);
+    /* the background shorthand with a gradient resets the color part */
+    assert_int_equal(s.background, -1);
+}
+
+static void test_linear_gradient_directions(void **state) {
+    (void)state;
+    /* no direction -> default 180 (to bottom) */
+    assert_int_equal(css_parse_inline(
+        "background-image: linear-gradient(red, blue)", 0).bg_grad_angle, 180);
+    /* angle form, and a negative angle normalizes mod 360 */
+    assert_int_equal(css_parse_inline(
+        "background-image: linear-gradient(45deg, red, blue)", 0).bg_grad_angle, 45);
+    assert_int_equal(css_parse_inline(
+        "background-image: linear-gradient(-90deg, red, blue)", 0).bg_grad_angle, 270);
+    /* corner keywords, either order */
+    assert_int_equal(css_parse_inline(
+        "background-image: linear-gradient(to top right, red, blue)", 0).bg_grad_angle, 45);
+    assert_int_equal(css_parse_inline(
+        "background-image: linear-gradient(to right top, red, blue)", 0).bg_grad_angle, 45);
+    assert_int_equal(css_parse_inline(
+        "background-image: linear-gradient(to left, red, blue)", 0).bg_grad_angle, 270);
+}
+
+static void test_linear_gradient_stops(void **state) {
+    (void)state;
+    /* stop positions are accepted but ignored (evenly spaced) */
+    css_style s = css_parse_inline(
+        "background: linear-gradient(to bottom, #111111 0%, #222222 100%)", 0);
+    assert_int_equal(s.bg_grad_n, 2);
+    assert_int_equal(s.bg_grad_c[0], 0x111111);
+    assert_int_equal(s.bg_grad_c[1], 0x222222);
+    /* three stops resolve; more than CSS_GRAD_STOPS_MAX keep the first four */
+    s = css_parse_inline(
+        "background-image: linear-gradient(red, #00ff00, blue)", 0);
+    assert_int_equal(s.bg_grad_n, 3);
+    assert_int_equal(s.bg_grad_c[1], 0x00ff00);
+    s = css_parse_inline(
+        "background: linear-gradient(red, blue, green, yellow, white)", 0);
+    assert_int_equal(s.bg_grad_n, CSS_GRAD_STOPS_MAX);
+}
+
+static void test_linear_gradient_fail_closed(void **state) {
+    (void)state;
+    /* fewer than 2 stops, junk color, or a non-linear gradient function: all unset */
+    assert_int_equal(css_parse_inline("background: linear-gradient(red)", 0).bg_grad_n, 0);
+    assert_int_equal(css_parse_inline(
+        "background: linear-gradient(red, bogusnothing)", 0).bg_grad_n, 0);
+    assert_int_equal(css_parse_inline(
+        "background: radial-gradient(red, blue)", 0).bg_grad_n, 0);
+    assert_int_equal(css_parse_inline(
+        "background-image: repeating-linear-gradient(red, blue)", 0).bg_grad_n, 0);
+    assert_int_equal(css_parse_inline(
+        "background-image: conic-gradient(red, blue)", 0).bg_grad_n, 0);
+    /* url() in background-image never fetches and never becomes a gradient */
+    assert_int_equal(css_parse_inline(
+        "background-image: url(http://evil/x.png)", 0).bg_grad_n, 0);
+    /* the color-extraction path of the background shorthand is unchanged */
+    css_style s = css_parse_inline("background: url(http://evil/x.png) #112233", 0);
+    assert_int_equal(s.bg_grad_n, 0);
+    assert_int_equal(s.background, 0x112233);
+}
+
+static void test_background_shorthand_resets_gradient(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "div { background: linear-gradient(red, blue) }\n"
+        ".flat { background: #333333 }\n"
+        "#grad { background: linear-gradient(to right, #aaaaaa, #bbbbbb) }", 0, &sh), CSS_OK);
+    /* higher-specificity plain color CLEARS a lower-tier gradient (shorthand reset) */
+    const char *flat[] = { "flat" };
+    css_style a = css_resolve(sh, "div", NULL, flat, 1, NULL, 0);
+    assert_int_equal(a.background, 0x333333);
+    assert_int_equal(a.bg_grad_n, 0);
+    /* and a higher-specificity gradient CLEARS a lower-tier color */
+    css_style b = css_resolve(sh, "div", "grad", NULL, 0, NULL, 0);
+    assert_int_equal(b.bg_grad_n, 2);
+    assert_int_equal(b.background, -1);
+    css_free(sh);
 }
 
 static void test_malformed_inline_no_crash(void **state) {
@@ -725,15 +844,17 @@ static void test_pseudo_link(void **state) {
 static void test_pseudo_never_match_keeps_group(void **state) {
     (void)state;
     css_sheet *sh = NULL;
-    /* :visited never matches (no history by design); :hover/:focus/:active never
-     * match (static cascade). The selectors still PARSE, so the comma group and
-     * the rest of the sheet survive. */
+    /* :visited never matches (no history by design); :hover/:focus/:active
+     * now always match (PSEUDO_ALWAYS) so that content hidden behind hover
+     * becomes visible. The selectors still PARSE, so the comma group and
+     * the rest of the sheet survive. The last matching rule wins (same
+     * specificity, all 0,0,1,0): a:active. */
     assert_int_equal(css_parse("a:visited, b{color:#040404} a:hover{color:#050505} "
-                               "a:focus{color:#060606} a:active{color:#070707}",
-                               0, &sh), CSS_OK);
+                                "a:focus{color:#060606} a:active{color:#070707}",
+                                0, &sh), CSS_OK);
     css_attr href[] = { { "href", "/x" } };
     css_element a = el_attr_node("a", NULL, NULL, 0, href, 1, NULL);
-    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, -1);
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x070707);
     css_element b = el_node("b", NULL, NULL, 0, NULL);
     assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x040404);
     css_free(sh);
@@ -2622,6 +2743,7 @@ int main(void) {
         cmocka_unit_test(test_sheet_container_props),
         cmocka_unit_test(test_container_cascade_inline_wins),
         cmocka_unit_test(test_container_fail_closed_and_bounds),
+        cmocka_unit_test(test_grid_track_sizes_resolved),
         cmocka_unit_test(test_grid_repeat_expands_count),
         cmocka_unit_test(test_grid_minmax_counts_as_one_track),
         cmocka_unit_test(test_grid_repeat_autofill_fails_closed),
@@ -2630,6 +2752,11 @@ int main(void) {
         cmocka_unit_test(test_container_unset),
         cmocka_unit_test(test_url_value_dropped),
         cmocka_unit_test(test_unknown_props_ignored),
+        cmocka_unit_test(test_linear_gradient_basic),
+        cmocka_unit_test(test_linear_gradient_directions),
+        cmocka_unit_test(test_linear_gradient_stops),
+        cmocka_unit_test(test_linear_gradient_fail_closed),
+        cmocka_unit_test(test_background_shorthand_resets_gradient),
         cmocka_unit_test(test_malformed_inline_no_crash),
         cmocka_unit_test(test_custom_prop_var_basic),
         cmocka_unit_test(test_custom_prop_var_fallback_used_when_missing),

@@ -277,6 +277,22 @@ static void test_width_cap_pct(void **state) {
     assert_true(dbl_eq(bx_width_cap(-5, -3, 800.0), 0.0));     /* junk: none */
 }
 
+/* 2026-07-11: box-sizing: border-box subtracts the horizontal padding + border
+ * from the width cap (bx_place interprets the cap as CONTENT width). */
+static void test_content_cap_border_box(void **state) {
+    (void)state;
+    /* content-box / unset: identity */
+    assert_true(dbl_eq(bx_content_cap(300.0, 0, 20.0, 20.0, 2.0, 2.0), 300.0));
+    /* no cap: identity regardless of model */
+    assert_true(dbl_eq(bx_content_cap(0.0, 1, 20.0, 20.0, 2.0, 2.0), 0.0));
+    /* border-box: 300 - 20 - 20 - 2 - 2 = 256 */
+    assert_true(dbl_eq(bx_content_cap(300.0, 1, 20.0, 20.0, 2.0, 2.0), 256.0));
+    /* narrower than its own edges: clamps to 1, never negative */
+    assert_true(dbl_eq(bx_content_cap(30.0, 1, 20.0, 20.0, 2.0, 2.0), 1.0));
+    /* negative edges treated as 0 (defensive) */
+    assert_true(dbl_eq(bx_content_cap(300.0, 1, -5.0, 20.0, -1.0, 2.0), 278.0));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_place_no_box_is_identity),
@@ -285,6 +301,7 @@ int main(void) {
         cmocka_unit_test(test_place_insets),
         cmocka_unit_test(test_place_failclosed_bounds),
         cmocka_unit_test(test_width_cap_pct),
+        cmocka_unit_test(test_content_cap_border_box),
         cmocka_unit_test(test_body_has_no_margin),
         cmocka_unit_test(test_paragraph),
         cmocka_unit_test(test_heading_ladder),

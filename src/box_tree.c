@@ -82,10 +82,10 @@ static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
 
     size_t line_start[BT_MAX_CHILDREN + 1];
     size_t nlines;
+    line_start[0] = 0;   /* line 0 always starts at item 0 (both paths read it) */
     if (node->wrap) {
         nlines = 0;
         size_t i = 0;
-        line_start[0] = 0;
         while (i < nk) {
             double used = bt_nn(kids[i]->basis);
             size_t j = i + 1;
@@ -184,11 +184,15 @@ static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
     return BT_OK;
 }
 
-/* Grid: equal columns via flex_layout, row-major placement, per-row max height.
- * The column gap is always `gap`; the ROW gap is `row_gap` when has_row_gap is set
- * (author `row-gap`, distinct from `column-gap`), else it falls back to `gap` too
- * (a plain `gap: N` applies to both axes) -- has_row_gap defaults to 0 under
- * zero-init, so every caller that predates row-gap keeps its exact geometry. */
+/* Grid: sized columns via flex_layout (fixed px reserved first, the rest split by
+ * fr weight; a NULL grid_track keeps the historical equal columns), placement
+ * row-major honouring per-item column spans (fx_grid_place_span: a span occupies
+ * N consecutive columns plus the gaps between them; one that does not fit in the
+ * row's remaining columns jumps to the next row), per-row max height. The column
+ * gap is always `gap`; the ROW gap is `row_gap` when has_row_gap is set (author
+ * `row-gap`, distinct from `column-gap`), else it falls back to `gap` too (a plain
+ * `gap: N` applies to both axes) -- has_row_gap defaults to 0 under zero-init, so
+ * every caller that predates row-gap keeps its exact geometry. */
 static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                              double pl, double pt, double pb, double cw, unsigned depth) {
     size_t cols = node->grid_cols;
@@ -199,18 +203,30 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
 
     double col_x[BT_MAX_CHILDREN];
     double col_w[BT_MAX_CHILDREN];
-    if (fx_grid_columns(cw, cols, node->gap, col_x, col_w) != FX_OK) return BT_ERR_RANGE;
+    if (fx_grid_columns_weighted(cw, cols, node->gap, node->grid_track,
+                                 node->grid_ntrack, col_x, col_w) != FX_OK)
+        return BT_ERR_RANGE;
 
-    size_t nrows = (nk + cols - 1) / cols;
+    /* Place every child (row, start column) honouring its span. Each row index
+     * holds at least one item, so nrows <= nk <= BT_MAX_CHILDREN. */
+    int    span[BT_MAX_CHILDREN];
+    size_t prow[BT_MAX_CHILDREN], pcol[BT_MAX_CHILDREN];
+    for (size_t i = 0; i < nk; ++i) span[i] = kids[i]->grid_span;
+    if (fx_grid_place_span(nk, cols, span, prow, pcol) != FX_OK) return BT_ERR_RANGE;
+
+    size_t nrows = (nk > 0) ? prow[nk - 1] + 1 : 0;
+    if (nrows > BT_MAX_CHILDREN) return BT_ERR_RANGE;
     double rowh[BT_MAX_CHILDREN];
     for (size_t r = 0; r < nrows; ++r) rowh[r] = 0.0;
 
     for (size_t i = 0; i < nk; ++i) {
-        size_t rr, cc;
-        fx_grid_cell(i, cols, &rr, &cc);
-        bt_status r = layout_node(kids[i], col_w[cc], depth + 1);
+        size_t sp = (span[i] > 1) ? ((size_t)span[i] > cols ? cols : (size_t)span[i]) : 1;
+        double iw = 0.0;
+        for (size_t c = pcol[i]; c < pcol[i] + sp && c < cols; ++c) iw += col_w[c];
+        iw += node->gap * (double)(sp - 1);
+        bt_status r = layout_node(kids[i], iw, depth + 1);
         if (r != BT_OK) return r;
-        if (kids[i]->h > rowh[rr]) rowh[rr] = kids[i]->h;
+        if (kids[i]->h > rowh[prow[i]]) rowh[prow[i]] = kids[i]->h;
     }
 
     double rowy[BT_MAX_CHILDREN];
@@ -220,10 +236,8 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
         yy += rowh[r] + rgap;
     }
     for (size_t i = 0; i < nk; ++i) {
-        size_t rr, cc;
-        fx_grid_cell(i, cols, &rr, &cc);
-        kids[i]->x = pl + col_x[cc];
-        kids[i]->y = rowy[rr];
+        kids[i]->x = pl + col_x[pcol[i]];
+        kids[i]->y = rowy[prow[i]];
     }
     /* yy = pt + sum(rowh) + rgap*nrows; drop the trailing gap, add bottom padding. */
     node->h = (nrows > 0) ? (yy - rgap + pb) : (pt + pb);

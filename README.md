@@ -81,7 +81,7 @@ The name reflects its core goals:
 - **Advanced Layout Engine**:
   - Full box model per HTML tag (margins, padding, display, border)
   - Flexbox layout support (`gap`, `justify-content`, `flex-wrap` multi-line, `align-items`/`align-self` cross-axis), fed from inline `style=` *and* `<style>` rules
-  - Basic equal-column CSS Grid (`grid-template-columns`/`-rows` track count, `repeat()`/`minmax()`-aware; `row-gap` distinct from column gap; every track still 1fr — `fr` weights not resolved yet)
+  - CSS Grid with sized tracks (`grid-template-columns` resolves `fr` weights and fixed `px` tracks — `2fr 1fr`, `150px 1fr` — `repeat()`/`minmax()`-aware; `grid-column: span N` places across columns with CSS auto-placement wrap; `row-gap` distinct from column gap; row spans and `grid-template-rows` sizing still pending)
   - Recursive box-tree layout with margin collapsing
 - **GUI & Usability**:
   - Visible vertical scrollbar with drag and click support
@@ -121,7 +121,11 @@ The name reflects its core goals:
 
 ## Current Status (Updated - June 21, 2026)
 - ✅ Advanced HTML rendering with box model, flex/grid and margin collapsing
-- ✅ Clickable links + image support (PNG + JPEG, decoded inside the sandboxed worker)
+- ✅ Clickable links + image support (PNG + JPEG + static GIF — the GIF decoder is our own bounded pure-C LZW, no giflib — all decoded inside the sandboxed worker)
+- ✅ CSS `linear-gradient()` backgrounds (pure grammar, no URL form — can never fetch) and rounded corners (`border-radius` on backgrounds, borders, shadows and outlines)
+- ✅ `box-sizing: border-box` honored (declared width includes padding + border)
+- ✅ Real async JS timers: `setTimeout`/`setInterval` with actual delays on a **virtual clock the trusted parent drives** (the sandboxed worker cannot wake itself); chained timers render progressively in the GUI and in headless exports
+- ✅ `innerHTML` getter (bounded serialization) alongside the existing setter
 - ✅ Anti-fingerprinting network identity (normalized User-Agent + Accept-Language)
 - ✅ Omnibox address bar (navigate or DuckDuckGo HTML search)
 - ✅ Native forms (GET/POST, no JS)
@@ -146,8 +150,8 @@ The name reflects its core goals:
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; `calc()`, `min()`/`max()`/`clamp()` and `var()`/custom properties supported — bounded, non-executing; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` + `flex-wrap` multi-line + `align-items`/`align-self` — lays out for real; borders/`box-shadow`/`outline` and `position`/`z-index` stacking are painted, `overflow: hidden` clips; `grid-template-columns`/`-rows` count `repeat()`/`minmax()` correctly and `row-gap` is distinct from column gap, but every track is still 1fr (`fr` weights unresolved), grid items don't yet honor `span N`, and `align-content`/`justify-items` resolve without a paint effect; no transforms/animations; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
-- ⚠️ JavaScript support remains basic
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model incl. `box-sizing: border-box` + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; `calc()`, `min()`/`max()`/`clamp()` and `var()`/custom properties supported — bounded, non-executing; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` + `flex-wrap` multi-line + `align-items`/`align-self` — lays out for real; borders/`box-shadow`/`outline` and `position`/`z-index` stacking are painted with `border-radius` rounding, `linear-gradient()` backgrounds paint, `overflow: hidden` clips; grid tracks resolve `fr` weights and fixed px and `grid-column: span N` places, but `grid-row` spans, `grid-template-rows` sizing and `align-content`/`justify-items` resolve without a paint effect; no transforms/animations; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
+- ⚠️ JavaScript support still partial (no ES modules/`defer`, no events beyond click, no Web Components upgrade — but timers are real and async now)
 - ⚠️ Full async networking/caching in progress
 
 **Status**: Rapidly progressing Alpha — strong focus on secure rendering, usable GUI, and powerful anonymity tools (Tor/I2P).

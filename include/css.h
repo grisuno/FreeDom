@@ -63,6 +63,8 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 /* Anti-DoS bounds for the flex/grid container params. */
 #define CSS_GAP_MAX       4096   /* px cap on gap */
 #define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns track count */
+#define CSS_GRID_TRACKS_MAX 8    /* cap on SIZED tracks (tracks past it lay out as auto) */
+#define CSS_GRAD_STOPS_MAX 4     /* cap on linear-gradient color stops (extra kept out) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
 
@@ -426,6 +428,15 @@ typedef enum css_backface {
 typedef struct css_style {
     int         color;       /* 0xRRGGBB or -1 (unset) */
     int         background;  /* 0xRRGGBB or -1 (unset) */
+    /* linear-gradient background (2026-07-11). NOT inherited, like background.
+     * bg_grad_n: stop count (0 = no gradient, 2..CSS_GRAD_STOPS_MAX). bg_grad_angle:
+     * CSS degrees normalized [0,359] (0 = to top, 90 = to right; 180 = to bottom is
+     * the default). bg_grad_c: packed 0xRRGGBB stops, painted evenly spaced (stop
+     * positions are parsed but ignored in v1). The accepted grammar has no URL form:
+     * a gradient can never fetch. */
+    int         bg_grad_n;
+    int         bg_grad_angle;
+    int         bg_grad_c[CSS_GRAD_STOPS_MAX];
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
     int         line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
@@ -440,6 +451,11 @@ typedef struct css_style {
     int         gap;         /* px between flex/grid items, or -1 (unset) */
     css_justify justify;     /* justify-content; CSS_JUSTIFY_UNSET if absent */
     int         grid_cols;   /* grid-template-columns track count, or 0 (unset) */
+    /* Sizes of the first CSS_GRID_TRACKS_MAX tracks (2026-07-11): 0 = auto (an
+     * equal 1fr share), > 0 = fixed px, < 0 = fr weight x100 (2fr -> -200).
+     * minmax(a,b) resolves to its max component; %/unknown fall to auto. Tracks
+     * past the cap lay out as auto. Only meaningful when grid_cols > 0. */
+    int         grid_col_w[CSS_GRID_TRACKS_MAX];
     /* Author box model (px; NOT inherited — read from the element's own style).
      * margins: CSS_LEN_UNSET / CSS_LEN_AUTO / signed px. padding: CSS_LEN_UNSET /
      * px >= 0. width/max_width: CSS_LEN_UNSET / px > 0 (auto/none -> unset). */

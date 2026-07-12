@@ -79,10 +79,7 @@ static void test_sniff_png(void **state) {
 
 static void test_sniff_unsupported(void **state) {
     (void)state;
-    /* An unsupported format (GIF) and garbage both sniff as UNKNOWN; PNG and JPEG
-     * are the only recognised signatures (see test_sniff_png/test_sniff_jpeg). */
-    const uint8_t gif[] = { 'G', 'I', 'F', '8', '9', 'a', 0, 0 };
-    assert_int_equal(img_sniff(gif, sizeof gif), IMG_FMT_UNKNOWN);
+    /* Garbage and too-short buffers sniff as UNKNOWN. */
     assert_int_equal(img_sniff(NULL, 0), IMG_FMT_UNKNOWN);
     assert_int_equal(img_sniff(PNG_2x2, 4), IMG_FMT_UNKNOWN); /* too short for the magic */
 }
@@ -310,6 +307,188 @@ static void test_decode_jpeg_null_args(void **state) {
                      IMG_ERR_NULL_ARG);
 }
 
+/* --- GIF (own pure-C decoder, spec §0.2; goldens verified against Pillow) --- */
+
+/* GIF87a 2x2, 2-color global palette: red, blue / blue, red */
+static const uint8_t GIF_2x2[] = {
+    0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x02, 0x00, 0x02, 0x00, 0x80, 0x00,
+    0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0x2c, 0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x02, 0x00, 0x00, 0x02, 0x04, 0x04, 0xc3, 0x10, 0x05, 0x00,
+    0x3b,
+};
+
+/* GIF89a 2x2 with a Graphic Control Extension marking index 1 transparent:
+ * green, transparent / transparent, green */
+static const uint8_t GIF_TRANSPARENT[] = {
+    0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x02, 0x00, 0x02, 0x00, 0x80, 0x00,
+    0x00, 0x00, 0xff, 0x00, 0x09, 0x09, 0x09, 0x21, 0xf9, 0x04, 0x01, 0x00,
+    0x00, 0x01, 0x00, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x02, 0x00,
+    0x00, 0x02, 0x04, 0x04, 0xc3, 0x10, 0x05, 0x00, 0x3b,
+};
+
+/* GIF87a 4x4 INTERLACED; visual rows: red, green, blue, white (stored in the
+ * 4-pass interlace order 0,2,1,3) */
+static const uint8_t GIF_INTERLACED[] = {
+    0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x04, 0x00, 0x04, 0x00, 0x81, 0x00,
+    0x00, 0xff, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff,
+    0xff, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x04, 0x00, 0x40, 0x02,
+    0x0d, 0x04, 0x41, 0x10, 0x14, 0x45, 0x51, 0x0c, 0xc3, 0x30, 0x1c, 0xc7,
+    0x71, 0x05, 0x00, 0x3b,
+};
+
+/* GIF89a with TWO frames: frame 0 all red, frame 1 all blue (decode = frame 0) */
+static const uint8_t GIF_ANIMATED[] = {
+    0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x02, 0x00, 0x02, 0x00, 0x80, 0x00,
+    0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0x2c, 0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x02, 0x00, 0x00, 0x02, 0x04, 0x04, 0x41, 0x10, 0x05, 0x00,
+    0x2c, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x02, 0x00, 0x00, 0x02, 0x04,
+    0x0c, 0xc3, 0x30, 0x05, 0x00, 0x3b,
+};
+
+/* Same as GIF_2x2 but the Logical Screen Descriptor declares 60000x60000 */
+static const uint8_t GIF_HUGE_DIMS[] = {
+    0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x60, 0xea, 0x60, 0xea, 0x80, 0x00,
+    0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0x2c, 0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x02, 0x00, 0x00, 0x02, 0x04, 0x04, 0xc3, 0x10, 0x05, 0x00,
+    0x3b,
+};
+
+static void test_sniff_gif(void **state) {
+    (void)state;
+    assert_int_equal(img_sniff(GIF_2x2, sizeof GIF_2x2), IMG_FMT_GIF);
+    assert_int_equal(img_sniff(GIF_TRANSPARENT, sizeof GIF_TRANSPARENT), IMG_FMT_GIF);
+    assert_string_equal(img_format_name(IMG_FMT_GIF), "gif");
+}
+
+static void test_decode_gif_pixels(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_gif(GIF_2x2, sizeof GIF_2x2, &p), IMG_OK);
+    assert_int_equal(p.width, 2u);
+    assert_int_equal(p.height, 2u);
+    assert_int_equal(p.stride, 8u);
+    const uint32_t *px = (const uint32_t *)(const void *)p.data;
+    assert_int_equal(px[0], 0xffff0000u);  /* red */
+    assert_int_equal(px[1], 0xff0000ffu);  /* blue */
+    assert_int_equal(px[2], 0xff0000ffu);
+    assert_int_equal(px[3], 0xffff0000u);
+    img_pixels_free(&p);
+}
+
+static void test_decode_gif_transparency(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_gif(GIF_TRANSPARENT, sizeof GIF_TRANSPARENT, &p), IMG_OK);
+    const uint32_t *px = (const uint32_t *)(const void *)p.data;
+    assert_int_equal(px[0], 0xff00ff00u);  /* green, opaque */
+    assert_int_equal(px[1], 0x00000000u);  /* transparent premultiplied */
+    assert_int_equal(px[2], 0x00000000u);
+    assert_int_equal(px[3], 0xff00ff00u);
+    img_pixels_free(&p);
+}
+
+static void test_decode_gif_interlaced(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_gif(GIF_INTERLACED, sizeof GIF_INTERLACED, &p), IMG_OK);
+    assert_int_equal(p.width, 4u);
+    assert_int_equal(p.height, 4u);
+    const uint32_t *px = (const uint32_t *)(const void *)p.data;
+    /* de-interlaced visual order: row 0 red, 1 green, 2 blue, 3 white */
+    assert_int_equal(px[0],  0xffff0000u);
+    assert_int_equal(px[4],  0xff00ff00u);
+    assert_int_equal(px[8],  0xff0000ffu);
+    assert_int_equal(px[12], 0xffffffffu);
+    img_pixels_free(&p);
+}
+
+static void test_decode_gif_animated_first_frame(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_gif(GIF_ANIMATED, sizeof GIF_ANIMATED, &p), IMG_OK);
+    const uint32_t *px = (const uint32_t *)(const void *)p.data;
+    for (int i = 0; i < 4; ++i) assert_int_equal(px[i], 0xffff0000u); /* frame 0: red */
+    img_pixels_free(&p);
+}
+
+static void test_decode_gif_fail_closed(void **state) {
+    (void)state;
+    img_pixels p;
+    /* oversized dims rejected before any allocation */
+    assert_int_equal(img_decode_gif(GIF_HUGE_DIMS, sizeof GIF_HUGE_DIMS, &p),
+                     IMG_ERR_DIMENSIONS);
+    assert_null(p.data);
+    /* truncated stream fails closed */
+    assert_int_not_equal(img_decode_gif(GIF_2x2, 25u, &p), IMG_OK);
+    assert_null(p.data);
+    /* non-GIF and NULLs */
+    assert_int_equal(img_decode_gif(PNG_2x2, sizeof PNG_2x2, &p), IMG_ERR_FORMAT);
+    assert_int_equal(img_decode_gif(NULL, 10u, &p), IMG_ERR_NULL_ARG);
+    assert_int_equal(img_decode_gif(GIF_2x2, sizeof GIF_2x2, NULL), IMG_ERR_NULL_ARG);
+}
+
+static void test_decode_dispatch_routes_gif(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode(GIF_2x2, sizeof GIF_2x2, &p), IMG_OK);
+    assert_int_equal(p.width, 2u);
+    img_pixels_free(&p);
+}
+
+/* --- WebP (libwebp, spec §0.3) --- */
+
+static const uint8_t WEBP_2x2[] = {
+    0x52, 0x49, 0x46, 0x46, 0x2c, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+    0x56, 0x50, 0x38, 0x4c, 0x1f, 0x00, 0x00, 0x00, 0x2f, 0x01, 0x40, 0x00,
+    0x00, 0x1f, 0x20, 0x10, 0x48, 0xde, 0x1f, 0x3a, 0x8d, 0xf9, 0x17, 0x10,
+    0x14, 0xfc, 0x1f, 0xdd, 0xfc, 0x47, 0x64, 0x0f, 0xe0, 0x06, 0x0c, 0x11,
+    0xfd, 0x0f, 0x01, 0x00,
+};
+
+static void test_sniff_webp(void **state) {
+    (void)state;
+    assert_int_equal(img_sniff(WEBP_2x2, sizeof WEBP_2x2), IMG_FMT_WEBP);
+    assert_string_equal(img_format_name(IMG_FMT_WEBP), "webp");
+}
+
+static void test_decode_webp_dimensions_and_pixels(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_webp(WEBP_2x2, sizeof WEBP_2x2, &p), IMG_OK);
+    assert_int_equal(p.width, 2u);
+    assert_int_equal(p.height, 2u);
+    assert_int_equal(p.stride, 8u);
+    assert_non_null(p.data);
+    /* RGBA(255,0,0) -> 0xFFFF0000 premultiplied (opaque). */
+    uint32_t *px = (uint32_t *)(void *)p.data;
+    assert_int_equal(px[0], 0xFFFF0000u);
+    assert_int_equal(px[1], 0xFF00FF00u);
+    assert_int_equal(px[2], 0xFF0000FFu);
+    assert_int_equal(px[3], 0xFFFFFFFFu);
+    img_pixels_free(&p);
+}
+
+static void test_decode_webp_fail_closed(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode_webp(NULL, 10u, &p), IMG_ERR_NULL_ARG);
+    assert_int_equal(img_decode_webp(WEBP_2x2, sizeof WEBP_2x2, NULL), IMG_ERR_NULL_ARG);
+    assert_int_equal(img_decode_webp(PNG_2x2, sizeof PNG_2x2, &p), IMG_ERR_FORMAT);
+    /* Garbage that looks like RIFF... but is not real WebP. */
+    uint8_t riff_garbage[] = { 'R','I','F','F', 8,0,0,0, 'W','E','B','P', 0,0,0,0 };
+    assert_int_equal(img_decode_webp(riff_garbage, sizeof riff_garbage, &p), IMG_ERR_DECODE);
+    assert_null(p.data);
+}
+
+static void test_decode_dispatch_routes_webp(void **state) {
+    (void)state;
+    img_pixels p;
+    assert_int_equal(img_decode(WEBP_2x2, sizeof WEBP_2x2, &p), IMG_OK);
+    assert_int_equal(p.width, 2u);
+    assert_int_equal(p.height, 2u);
+    img_pixels_free(&p);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_sniff_png),
@@ -336,6 +515,17 @@ int main(void) {
         cmocka_unit_test(test_decode_jpeg_rejects_truncated),
         cmocka_unit_test(test_decode_jpeg_rejects_non_jpeg),
         cmocka_unit_test(test_decode_jpeg_null_args),
+        cmocka_unit_test(test_sniff_gif),
+        cmocka_unit_test(test_decode_gif_pixels),
+        cmocka_unit_test(test_decode_gif_transparency),
+        cmocka_unit_test(test_decode_gif_interlaced),
+        cmocka_unit_test(test_decode_gif_animated_first_frame),
+        cmocka_unit_test(test_decode_gif_fail_closed),
+        cmocka_unit_test(test_decode_dispatch_routes_gif),
+        cmocka_unit_test(test_sniff_webp),
+        cmocka_unit_test(test_decode_webp_dimensions_and_pixels),
+        cmocka_unit_test(test_decode_webp_fail_closed),
+        cmocka_unit_test(test_decode_dispatch_routes_webp),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

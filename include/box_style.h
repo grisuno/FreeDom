@@ -91,4 +91,13 @@ bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
  * => 0 (no cap). Never negative. Pure. */
 double bx_width_cap(int w_px, int w_pct, double avail_w);
 
+/* Content-width cap adjusted for box-sizing (2026-07-11). With border_box set,
+ * the declared width includes the horizontal padding and border, so the cap on
+ * the CONTENT is width_cap minus those edges, clamped >= 1 (a border-box
+ * narrower than its own edges never yields a negative width). border_box == 0
+ * (content-box or unset) or width_cap <= 0 (no cap) are the identity. Negative
+ * edges are treated as 0. Pure. */
+double bx_content_cap(double width_cap, int border_box,
+                      double pad_l, double pad_r, double bord_l, double bord_r);
+
 #endif /* FREEDOM_BOX_STYLE_H */

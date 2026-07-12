@@ -63,6 +63,11 @@ typedef struct tab_page {
      * while loading the page, for the Freebug devtools. Owned; drained from the
      * worker. Empty when JS did not run. Release via tab_page_free. */
     fb_buffer console;
+    /* Smallest pending JS timer delay in ms (2026-07-11), or -1 when none. The
+     * trusted parent schedules the next tab_tick from it (the worker has no push
+     * channel and no real clock: the virtual timer clock only advances when the
+     * parent says so -- anti-fp, and a compromised worker cannot busy-wake). */
+    int      next_timer_ms;
 } tab_page;
 
 /* Result of evaluating script: the value, or a JS error message. */
@@ -171,6 +176,13 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
  * caller can repaint DOM mutations caused by the handler. On TAB_OK, *out is
  * populated and must be released with tab_page_free. */
 tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out);
+
+/* Advances the page's virtual timer clock by elapsed_ms (OP_TICK): the worker
+ * fires every due setTimeout/setInterval callback (bounded rounds), re-derives
+ * the view, and *out carries the refreshed page + the new next_timer_ms. The
+ * caller schedules ticks from tab_page.next_timer_ms; the worker cannot wake
+ * itself. Same ownership/error contract as tab_click. */
+tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out);
 
 /* Evaluates untrusted JS in the tab's current context (sees the loaded DOM,
  * navigator/screen/performance, canvas/audio). A JS-level error is reported via

@@ -267,6 +267,44 @@ static void test_grid(void **state) {
     assert_true(dbl_eq(root.h, 70)); /* 20 + 10 + 40 */
 }
 
+static void test_grid_weighted_tracks(void **state) {
+    (void)state;
+    /* 2fr 1fr over 310px, gap 10: remaining 300 -> 200/100 */
+    int track[2] = { -200, -100 };
+    bt_node kids[2] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 2, .gap = 10,
+        .grid_track = track, .grid_ntrack = 2,
+        .children = kids, .child_count = 2,
+    };
+    assert_int_equal(bt_layout(&root, 310), BT_OK);
+    assert_rect(&kids[0], 0,   0, 200, 10);
+    assert_rect(&kids[1], 210, 0, 100, 10);
+}
+
+static void test_grid_column_span(void **state) {
+    (void)state;
+    /* 3 equal columns of 100 (gap 10, avail 320); item0 spans 2 -> width
+     * 100+10+100 = 210 at col 0; item1 -> col 2; item2 wraps to row 1 */
+    bt_node kids[3] = {
+        { .display = BX_DISPLAY_BLOCK, .content_h = 10, .grid_span = 2 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 20 },
+        { .display = BX_DISPLAY_BLOCK, .content_h = 30 },
+    };
+    bt_node root = {
+        .display = BX_DISPLAY_GRID, .grid_cols = 3, .gap = 10,
+        .children = kids, .child_count = 3,
+    };
+    assert_int_equal(bt_layout(&root, 320), BT_OK);
+    assert_rect(&kids[0], 0,   0,  210, 10);
+    assert_rect(&kids[1], 220, 0,  100, 20);
+    assert_rect(&kids[2], 0,   30, 100, 30);  /* row 1 at maxh 20 + gap 10 */
+    assert_true(dbl_eq(root.h, 60));          /* 20 + 10 + 30 */
+}
+
 static void test_nested_flex_in_block(void **state) {
     (void)state;
     bt_node fkids[2] = {
@@ -582,6 +620,8 @@ int main(void) {
         cmocka_unit_test(test_grid_row_gap_distinct_from_gap),
         cmocka_unit_test(test_grid_without_row_gap_falls_back_to_gap),
         cmocka_unit_test(test_grid),
+        cmocka_unit_test(test_grid_weighted_tracks),
+        cmocka_unit_test(test_grid_column_span),
         cmocka_unit_test(test_nested_flex_in_block),
         cmocka_unit_test(test_display_none_skipped),
         cmocka_unit_test(test_grid_bad_columns),

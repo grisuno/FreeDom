@@ -126,16 +126,59 @@ fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
 
 fx_status fx_grid_columns(double avail, size_t ncols, double gap,
                           double *col_x, double *col_w) {
+    return fx_grid_columns_weighted(avail, ncols, gap, NULL, 0, col_x, col_w);
+}
+
+fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
+                                   const int *track, size_t ntrack,
+                                   double *col_x, double *col_w) {
     if (ncols == 0) return FX_OK;
     if (avail < 0.0 || gap < 0.0 || ncols > FX_MAX_ITEMS) return FX_ERR_RANGE;
     if (col_x == NULL || col_w == NULL) return FX_ERR_NULL_ARG;
 
-    double total_gap = gap * (double)(ncols - 1);
-    double w = (avail - total_gap) / (double)ncols;
-    if (w < 0.0) w = 0.0;  /* too narrow: clamp, never negative */
+    double fixed = 0.0, frsum = 0.0;
     for (size_t i = 0; i < ncols; ++i) {
+        int t = (track != NULL && i < ntrack) ? track[i] : 0;
+        if (t > 0) fixed += (double)t;
+        else if (t < 0) frsum += (double)(-t) / 100.0;
+        else frsum += 1.0;   /* auto = a 1fr share */
+    }
+    double remaining = avail - gap * (double)(ncols - 1) - fixed;
+    if (remaining < 0.0) remaining = 0.0;  /* fixed overflow: fr tracks collapse to 0 */
+
+    double x = 0.0;
+    for (size_t i = 0; i < ncols; ++i) {
+        int t = (track != NULL && i < ntrack) ? track[i] : 0;
+        double w;
+        if (t > 0) {
+            w = (double)t;
+        } else {
+            double fr = (t < 0) ? (double)(-t) / 100.0 : 1.0;
+            w = (frsum > 0.0) ? remaining * fr / frsum : 0.0;
+        }
+        col_x[i] = x;
         col_w[i] = w;
-        col_x[i] = (double)i * (w + gap);
+        x += w + gap;
+    }
+    return FX_OK;
+}
+
+fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+                             size_t *out_row, size_t *out_col) {
+    if (nitems == 0) return FX_OK;
+    if (ncols == 0 || nitems > FX_MAX_ITEMS) return FX_ERR_RANGE;
+    if (out_row == NULL || out_col == NULL) return FX_ERR_NULL_ARG;
+
+    size_t r = 0, c = 0;
+    for (size_t i = 0; i < nitems; ++i) {
+        size_t sp = 1;
+        if (span != NULL && span[i] > 1)
+            sp = ((size_t)span[i] > ncols) ? ncols : (size_t)span[i];
+        if (c + sp > ncols) { ++r; c = 0; }   /* does not fit: next row */
+        out_row[i] = r;
+        out_col[i] = c;
+        c += sp;
+        if (c >= ncols) { ++r; c = 0; }        /* row full */
     }
     return FX_OK;
 }

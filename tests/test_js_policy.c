@@ -76,6 +76,16 @@ static void test_trusted_requires_both_signals(void **state) {
     assert_true(jsp_trusted(true, 42));
 }
 
+/* Presentation-trust (2026-07-11): allow.conf membership ALONE unlocks author CSS +
+ * images (presentation), independent of JS -- lower risk than script/network, which
+ * stay double-gated via jsp_trusted. Fails closed for a non-allowlisted host. */
+static void test_present_trusted_on_allowlist_alone(void **state) {
+    (void)state;
+    assert_true(jsp_present_trusted(1));
+    assert_true(jsp_present_trusted(7));  /* any truthy membership value */
+    assert_false(jsp_present_trusted(0)); /* not on allow.conf: no presentation trust */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_enabled_matrix),
@@ -83,6 +93,7 @@ int main(void) {
         cmocka_unit_test(test_mode_from_str),
         cmocka_unit_test(test_mode_str_roundtrip),
         cmocka_unit_test(test_trusted_requires_both_signals),
+        cmocka_unit_test(test_present_trusted_on_allowlist_alone),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -181,6 +181,17 @@ double bx_width_cap(int w_px, int w_pct, double avail_w) {
     return (px > 0.0) ? px : pc;
 }
 
+double bx_content_cap(double width_cap, int border_box,
+                      double pad_l, double pad_r, double bord_l, double bord_r) {
+    if (!border_box || width_cap <= 0.0) return width_cap;
+    if (pad_l < 0.0) pad_l = 0.0;
+    if (pad_r < 0.0) pad_r = 0.0;
+    if (bord_l < 0.0) bord_l = 0.0;
+    if (bord_r < 0.0) bord_r = 0.0;
+    double w = width_cap - pad_l - pad_r - bord_l - bord_r;
+    return (w < 1.0) ? 1.0 : w;
+}
+
 const char *bx_display_name(bx_display d) {
     switch (d) {
         case BX_DISPLAY_BLOCK:        return "block";

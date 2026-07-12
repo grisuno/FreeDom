@@ -29,8 +29,10 @@ PNG_CFLAGS    := $(shell pkg-config --cflags libpng 2>/dev/null)
 PNG_LIBS      := $(shell pkg-config --libs libpng 2>/dev/null || echo -lpng16)
 JPEG_CFLAGS   := $(shell pkg-config --cflags libjpeg 2>/dev/null)
 JPEG_LIBS     := $(shell pkg-config --libs libjpeg 2>/dev/null || echo -ljpeg)
-IMG_CFLAGS    := $(PNG_CFLAGS) $(JPEG_CFLAGS)
-IMG_LIBS      := $(PNG_LIBS) $(JPEG_LIBS)
+WEBP_CFLAGS   := $(shell pkg-config --cflags libwebp 2>/dev/null)
+WEBP_LIBS     := $(shell pkg-config --libs libwebp 2>/dev/null || echo -lwebp)
+IMG_CFLAGS    := $(PNG_CFLAGS) $(JPEG_CFLAGS) $(WEBP_CFLAGS)
+IMG_LIBS      := $(PNG_LIBS) $(JPEG_LIBS) $(WEBP_LIBS)
 
 # UI (Hito 4+): Wayland + Cairo + xkbcommon for the browser GUI. fontconfig is
 # linked explicitly so the GUI can call FcFini() at shutdown (clean leak exit).

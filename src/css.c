@@ -97,6 +97,14 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_RESIZE, P_SCROLL_BEHAVIOR, P_TOUCH_ACTION, P_OVERSCROLL_BEHAVIOR,
         P_BACKFACE_VISIBILITY,
         P_TEXTDECO_THICKNESS, P_ASPECT_NUM, P_ASPECT_DEN,
+        /* linear-gradient background (2026-07-11). Contiguous group: one declaration
+         * emits angle + stop count + the stop colors in lock-step. */
+        P_BG_GRAD_ANGLE, P_BG_GRAD_N,
+        P_BG_GRAD_C0, P_BG_GRAD_C1, P_BG_GRAD_C2, P_BG_GRAD_C3,
+        /* grid-template-columns track sizes (2026-07-11). Contiguous group of
+         * CSS_GRID_TRACKS_MAX slots emitted in lock-step with P_GRIDCOLS. */
+        P_GRID_TRACK0, P_GRID_TRACK1, P_GRID_TRACK2, P_GRID_TRACK3,
+        P_GRID_TRACK4, P_GRID_TRACK5, P_GRID_TRACK6, P_GRID_TRACK7,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -189,6 +197,205 @@ static int interp_bg(const char *v) {
         if (cc_parse(tok, &c) == CC_OK) return cc_pack(c);
     }
     return -1;
+}
+
+/* --- linear-gradient backgrounds (2026-07-11, spec/css.md) ---
+ * The accepted grammar has no URL form, so a gradient can never fetch. Everything
+ * else about it fails closed: an unparseable direction or color, unbalanced parens
+ * or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
+ * the whole declaration). */
+
+/* `to <side-or-corner>` (two keywords in either order) or `<int>deg` -> CSS degrees
+ * normalized [0,359]. Returns -1 when seg is not direction syntax at all (it may be
+ * the first color stop), -2 when it IS direction syntax but invalid (poisons the
+ * gradient). */
+static int grad_direction(const char *seg) {
+    const char *p = seg;
+    if (*p == '-' || *p == '+' || (*p >= '0' && *p <= '9')) {
+        char *end = NULL;
+        long a = strtol(seg, &end, 10);
+        if (end != seg && csel_ci_eq(end, "deg"))
+            return (int)(((a % 360) + 360) % 360);
+        return -2;   /* rad/grad/turn/junk angles: unsupported */
+    }
+    if (!(csel_lower_ch(p[0]) == 't' && csel_lower_ch(p[1]) == 'o' &&
+          (p[2] == ' ' || p[2] == '\t')))
+        return -1;
+    p += 3;
+    int vert = -1, horiz = -1;
+    for (int w = 0; w < 2; ++w) {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        char word[16];
+        size_t k = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof word)
+            word[k++] = csel_lower_ch(*p++);
+        word[k] = '\0';
+        if      (strcmp(word, "top") == 0    && vert  < 0) vert = 0;
+        else if (strcmp(word, "bottom") == 0 && vert  < 0) vert = 1;
+        else if (strcmp(word, "right") == 0  && horiz < 0) horiz = 0;
+        else if (strcmp(word, "left") == 0   && horiz < 0) horiz = 1;
+        else return -2;
+    }
+    while (*p == ' ' || *p == '\t') ++p;
+    if (*p != '\0') return -2;
+    if (vert < 0 && horiz < 0) return -2;
+    if (horiz < 0) return vert == 0 ? 0 : 180;
+    if (vert < 0)  return horiz == 0 ? 90 : 270;
+    if (vert == 0) return horiz == 0 ? 45 : 315;
+    return horiz == 0 ? 135 : 225;
+}
+
+/* Locates a plain linear-gradient(...) call in v (case-insensitive; an occurrence
+ * that is the tail of a longer ident, e.g. repeating-linear-gradient, does not
+ * count). Writes the call span [start,end) (end past the closing paren) and the
+ * argument span. 1 = found, 0 = absent, -1 = found but unbalanced (malformed). */
+static int find_linear_gradient(const char *v, size_t *start, size_t *end,
+                                size_t *args, size_t *argn) {
+    static const char fn[] = "linear-gradient(";
+    const size_t fnlen = sizeof fn - 1;
+    size_t n = strlen(v);
+    for (size_t i = 0; i + fnlen <= n; ++i) {
+        size_t k = 0;
+        while (k < fnlen && csel_lower_ch(v[i + k]) == fn[k]) ++k;
+        if (k != fnlen) continue;
+        if (i > 0) {
+            char pc = v[i - 1];
+            if (pc == '-' || (pc >= 'a' && pc <= 'z') || (pc >= 'A' && pc <= 'Z') ||
+                (pc >= '0' && pc <= '9'))
+                continue;
+        }
+        size_t j = i + fnlen;
+        int depth = 1;
+        while (j < n && depth > 0) {
+            if (v[j] == '(') ++depth;
+            else if (v[j] == ')') --depth;
+            ++j;
+        }
+        if (depth != 0) return -1;
+        *start = i; *end = j;
+        *args = i + fnlen; *argn = (j - 1) - (i + fnlen);
+        return 1;
+    }
+    return 0;
+}
+
+/* Parses the argument list of linear-gradient (s[0,n) is the text inside the
+ * parens): optional direction, then color stops split on top-level commas. Stop
+ * positions after a color are accepted and ignored (evenly spaced in v1). Fills
+ * *angle and colors[CSS_GRAD_STOPS_MAX]; returns the stop count clamped to
+ * CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when the
+ * gradient fails closed. */
+static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *colors) {
+    *angle = 180;
+    int nstops = 0, first = 1;
+    size_t i = 0;
+    while (i < n) {
+        size_t j = i;
+        int depth = 0;
+        while (j < n && (depth > 0 || s[j] != ',')) {
+            if (s[j] == '(') ++depth;
+            else if (s[j] == ')' && depth > 0) --depth;
+            ++j;
+        }
+        size_t a = i, b = j;
+        while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+        while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+        if (a == b) return 0;   /* empty segment */
+        char seg[CSS_TOK_MAX];
+        size_t len = b - a;
+        if (len >= sizeof seg) return 0;
+        memcpy(seg, s + a, len);
+        seg[len] = '\0';
+
+        if (first) {
+            first = 0;
+            int d = grad_direction(seg);
+            if (d >= 0) { *angle = d; i = j + 1; continue; }
+            if (d == -2) return 0;
+        }
+        if (nstops < CSS_GRAD_STOPS_MAX) {
+            size_t ce = 0;
+            const char *lp = strchr(seg, '(');
+            if (lp != NULL) {
+                const char *rp = strchr(lp, ')');
+                if (rp == NULL) return 0;
+                ce = (size_t)(rp - seg) + 1;
+            } else {
+                while (seg[ce] != '\0' && seg[ce] != ' ' && seg[ce] != '\t') ++ce;
+            }
+            char color[CSS_TOK_MAX];
+            memcpy(color, seg, ce);
+            color[ce] = '\0';
+            cc_rgb c;
+            if (cc_parse(color, &c) != CC_OK) return 0;
+            colors[nstops] = cc_pack(c);
+        }
+        ++nstops;
+        i = j + 1;
+    }
+    if (nstops < 2) return 0;
+    return nstops > CSS_GRAD_STOPS_MAX ? CSS_GRAD_STOPS_MAX : nstops;
+}
+
+/* Emits the gradient decl group. nstops == 0 emits only the explicit reset
+ * (P_BG_GRAD_N = 0), which is how a shorthand clears a lower-tier gradient. */
+static int emit_gradient(css_decl *dst, int cap, int angle, int nstops, const int *colors) {
+    if (nstops <= 0) {
+        if (cap < 1) return 0;
+        dst[0].prop = P_BG_GRAD_N;
+        dst[0].ival = 0;
+        return 1;
+    }
+    if (cap < 2 + nstops) return 0;
+    dst[0].prop = P_BG_GRAD_ANGLE; dst[0].ival = angle;
+    dst[1].prop = P_BG_GRAD_N;     dst[1].ival = nstops;
+    for (int k = 0; k < nstops; ++k) {
+        dst[2 + k].prop = P_BG_GRAD_C0 + k;
+        dst[2 + k].ival = colors[k];
+    }
+    return 2 + nstops;
+}
+
+/* background-image: linear-gradient resolves to the gradient group; url()/none/
+ * radial/conic/repeating-gradients/malformed all emit the explicit gradient reset
+ * (never fetch, fail closed). */
+static int expand_bg_image(const char *val, css_decl *dst, int cap) {
+    size_t gs, ge, as, an;
+    int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
+    int angle = 180, nst = 0;
+    if (find_linear_gradient(val, &gs, &ge, &as, &an) == 1)
+        nst = parse_linear_gradient_args(val + as, an, &angle, colors);
+    return emit_gradient(dst, cap, angle, nst, colors);
+}
+
+/* background shorthand: CSS resets BOTH the color and the image layer, so a color
+ * emits gradient-unset and a gradient emits color-unset. A present-but-broken
+ * gradient drops the whole declaration (fail closed); a value with neither a color
+ * nor a gradient keeps the historical drop path (url()-only stays unset). */
+static int expand_background(const char *val, css_decl *dst, int cap) {
+    size_t gs = 0, ge = 0, as = 0, an = 0;
+    int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
+    int angle = 180, nst = 0;
+    int f = find_linear_gradient(val, &gs, &ge, &as, &an);
+    if (f < 0) return 0;
+    if (f == 1) {
+        nst = parse_linear_gradient_args(val + as, an, &angle, colors);
+        if (nst == 0) return 0;
+    }
+    char rest[CSS_TOK_MAX];
+    size_t n = strlen(val), r = 0;
+    for (size_t i = 0; i < n && r + 1 < sizeof rest; ++i) {
+        if (f == 1 && i >= gs && i < ge) continue;
+        rest[r++] = val[i];
+    }
+    rest[r] = '\0';
+    int color = interp_bg(rest);
+    if (f != 1 && color < 0) return 0;
+    if (cap < 1) return 0;
+    dst[0].prop = P_BG;
+    dst[0].ival = color;
+    return 1 + emit_gradient(dst + 1, cap - 1, angle, nst, colors);
 }
 
 static int interp_align(const char *v) {
@@ -322,12 +529,54 @@ static int interp_justify(const char *v) {
  * repeat(auto-fill|...) / repeat(auto-fit|...) need an available width this pure
  * parser does not have, so they fail the WHOLE value (return -1), like %/vw
  * elsewhere in this module -- never a wrong guess. A malformed repeat() (no comma,
- * non-integer count) likewise fails the whole value. The named/fr-weighted TRACK
- * SIZES themselves are still not resolved (every track lays out as an equal-width
- * column downstream; see spec/css.md) -- this only fixes the track COUNT. */
-static int count_tracks(const char *s, size_t n);
+ * non-integer count) likewise fails the whole value.
+ * TRACK SIZES (2026-07-11): the walker optionally resolves the size of each of the
+ * first `szcap` tracks into `sizes` (0 auto / >0 px / <0 fr x100 -- see
+ * css_style.grid_col_w); *pos is the running track index across the recursion.
+ * count_tracks (sizes == NULL) keeps the count-only behaviour. */
+static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos);
+static int starts_with_ci(const char *s, const char *pre);
 
-static int count_one_repeat(const char *s, size_t tokstart, size_t toklen) {
+static int count_tracks(const char *s, size_t n) {
+    int pos = 0;
+    return walk_tracks(s, n, NULL, 0, &pos);
+}
+
+/* Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0);
+ * minmax(a,b) -> the size of its max component b; auto/%/unknown -> 0 (an equal
+ * `auto` share downstream, never a wrong guess). */
+static int track_size_of(const char *tok) {
+    size_t len = strlen(tok);
+    if (len > 7 && starts_with_ci(tok, "minmax(") && tok[len - 1] == ')') {
+        /* take the max component: the part after the top-level comma */
+        size_t comma = 0;
+        int depth = 0;
+        for (size_t k = 7; k + 1 < len; ++k) {
+            if (tok[k] == '(') ++depth;
+            else if (tok[k] == ')') --depth;
+            else if (tok[k] == ',' && depth == 0) { comma = k; break; }
+        }
+        if (comma == 0) return 0;
+        char mx[CSS_TOK_MAX];
+        size_t a = comma + 1, b = len - 1;
+        while (a < b && (tok[a] == ' ' || tok[a] == '\t')) ++a;
+        while (b > a && (tok[b - 1] == ' ' || tok[b - 1] == '\t')) --b;
+        if (a >= b || b - a >= sizeof mx) return 0;
+        memcpy(mx, tok + a, b - a);
+        mx[b - a] = '\0';
+        return track_size_of(mx);
+    }
+    double num;
+    const char *end;
+    if (parse_num(tok, &num, &end) && csel_ci_eq(end, "fr") && num > 0.0)
+        return -round_clamp(num * 100.0, 1, CSS_FLEX_FACTOR_MAX);
+    int px;
+    if (interp_len(tok, 0, &px) && px > 0) return px;
+    return 0;
+}
+
+static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
+                            int *sizes, int szcap, int *pos) {
     size_t inner_a = tokstart + 7;                  /* past "repeat(" */
     size_t inner_b = tokstart + toklen - 1;          /* before the matching ')' */
     size_t comma = inner_b;
@@ -351,13 +600,25 @@ static int count_one_repeat(const char *s, size_t tokstart, size_t toklen) {
     const char *end;
     if (!parse_num(cbuf, &num, &end) || *end != '\0' || num < 1.0) return -1;
     int reps = round_clamp(num, 1, (int)CSS_GRID_COLS_MAX);
-    int inner_tracks = count_tracks(s + comma + 1, inner_b - (comma + 1));
+    /* Walk the pattern once (its own sizes into a local buffer), then replicate. */
+    int inner_sz[CSS_GRID_TRACKS_MAX];
+    int inner_pos = 0;
+    int inner_tracks = walk_tracks(s + comma + 1, inner_b - (comma + 1),
+                                   (sizes != NULL) ? inner_sz : NULL,
+                                   (sizes != NULL) ? CSS_GRID_TRACKS_MAX : 0,
+                                   &inner_pos);
     if (inner_tracks < 1) return -1;
+    for (int r = 0; r < reps; ++r)
+        for (int t = 0; t < inner_tracks; ++t) {
+            if (sizes != NULL && *pos < szcap)
+                sizes[*pos] = (t < CSS_GRID_TRACKS_MAX) ? inner_sz[t] : 0;
+            if (*pos < (int)CSS_GRID_COLS_MAX) ++(*pos);
+        }
     long total = (long)reps * (long)inner_tracks;
     return (total > (long)CSS_GRID_COLS_MAX) ? (int)CSS_GRID_COLS_MAX : (int)total;
 }
 
-static int count_tracks(const char *s, size_t n) {
+static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos) {
     int total = 0;
     size_t i = 0;
     while (i < n) {
@@ -378,10 +639,21 @@ static int count_tracks(const char *s, size_t n) {
             csel_lower_ch(s[start + 4]) == 'a' && csel_lower_ch(s[start + 5]) == 't' &&
             s[start + 6] == '(';
         if (is_repeat) {
-            int rc = count_one_repeat(s, start, toklen);
+            int rc = count_one_repeat(s, start, toklen, sizes, szcap, pos);
             if (rc < 0) return -1;
             total += rc;
         } else {
+            if (sizes != NULL && *pos < szcap) {
+                char tok[CSS_TOK_MAX];
+                if (toklen < sizeof tok) {
+                    memcpy(tok, s + start, toklen);
+                    tok[toklen] = '\0';
+                    sizes[*pos] = track_size_of(tok);
+                } else {
+                    sizes[*pos] = 0;   /* overlong token: auto */
+                }
+            }
+            if (*pos < (int)CSS_GRID_COLS_MAX) ++(*pos);
             total += 1;
         }
         if (total > (int)CSS_GRID_COLS_MAX) total = (int)CSS_GRID_COLS_MAX;
@@ -400,6 +672,28 @@ static int interp_gridcols(const char *v) {
     if (n < 1) return -1;
     if (n > CSS_GRID_COLS_MAX) n = CSS_GRID_COLS_MAX;
     return n;
+}
+
+/* grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track
+ * sizes, emitted in lock-step (P_GRIDCOLS + P_GRID_TRACK0..7; unsized slots emit
+ * 0 = auto so a higher-tier declaration fully resets a lower-tier one).
+ * none/url()/malformed drop the declaration, exactly like interp_gridcols. */
+static int expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none")) return 0;
+    int sizes[CSS_GRID_TRACKS_MAX] = { 0 };
+    int pos = 0;
+    int n = walk_tracks(val, strlen(val), sizes, CSS_GRID_TRACKS_MAX, &pos);
+    if (n < 1) return 0;
+    if (n > CSS_GRID_COLS_MAX) n = CSS_GRID_COLS_MAX;
+    if (cap < 1 + CSS_GRID_TRACKS_MAX) return 0;
+    dst[0].prop = P_GRIDCOLS;
+    dst[0].ival = n;
+    for (int k = 0; k < CSS_GRID_TRACKS_MAX; ++k) {
+        dst[1 + k].prop = P_GRID_TRACK0 + k;
+        dst[1 + k].ival = sizes[k];
+    }
+    return 1 + CSS_GRID_TRACKS_MAX;
 }
 
 /* --- calc() for length values -------------------------------------------------
@@ -2173,11 +2467,14 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         dst[0].prop = P_OUTLINE_C; dst[0].ival = o; return 1;
     }
     if (strcmp(prop, "overflow") == 0)      return expand_overflow(val, dst, cap);
+    if (strcmp(prop, "background") == 0)       return expand_background(val, dst, cap);
+    if (strcmp(prop, "background-image") == 0) return expand_bg_image(val, dst, cap);
+    if (strcmp(prop, "grid-template-columns") == 0)
+        return expand_grid_template_cols(val, dst, cap);
 
     int prop_id, ival;
     if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
-    else if (strcmp(prop, "background-color") == 0 ||
-             strcmp(prop, "background") == 0)        { prop_id = P_BG;       ival = interp_bg(val); }
+    else if (strcmp(prop, "background-color") == 0)  { prop_id = P_BG;       ival = interp_bg(val); }
     else if (strcmp(prop, "text-align") == 0)        { prop_id = P_ALIGN;    ival = interp_align(val); }
     else if (strcmp(prop, "font-size") == 0)         { prop_id = P_FONTSIZE; ival = interp_fontsize(val); }
     else if (strcmp(prop, "line-height") == 0)       { prop_id = P_LINEHEIGHT; ival = interp_lineheight(val); }
@@ -2202,7 +2499,6 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "display") == 0)           { prop_id = P_DISPLAY;  ival = interp_display(val); }
     else if (strcmp(prop, "column-gap") == 0)         { prop_id = P_GAP;      ival = interp_gap(val); }
     else if (strcmp(prop, "justify-content") == 0)    { prop_id = P_JUSTIFY;  ival = interp_justify(val); }
-    else if (strcmp(prop, "grid-template-columns") == 0) { prop_id = P_GRIDCOLS; ival = interp_gridcols(val); }
     else if (strcmp(prop, "font-family") == 0)        { prop_id = P_FONTFAMILY;    ival = interp_fontfamily(val); }
     else if (strcmp(prop, "text-transform") == 0)     { prop_id = P_TEXTTRANSFORM; ival = interp_texttransform(val); }
     else if (strcmp(prop, "opacity") == 0)            { prop_id = P_OPACITY;       ival = interp_opacity(val); }
@@ -2644,6 +2940,11 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
         switch (d->prop) {
             case P_COLOR:    o->color = d->ival; break;
             case P_BG:       o->background = d->ival; break;
+            case P_BG_GRAD_ANGLE: o->bg_grad_angle = d->ival; break;
+            case P_BG_GRAD_N:     o->bg_grad_n = d->ival; break;
+            case P_BG_GRAD_C0: case P_BG_GRAD_C1:
+            case P_BG_GRAD_C2: case P_BG_GRAD_C3:
+                o->bg_grad_c[d->prop - P_BG_GRAD_C0] = d->ival; break;
             case P_ALIGN:    o->text_align = (css_align)d->ival; break;
             case P_FONTSIZE: o->font_scale = d->ival; break;
             case P_LINEHEIGHT: o->line_scale = d->ival; break;
@@ -2656,6 +2957,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_GAP:      o->gap = d->ival; break;
             case P_JUSTIFY:  o->justify = (css_justify)d->ival; break;
             case P_GRIDCOLS: o->grid_cols = d->ival; break;
+            case P_GRID_TRACK0: case P_GRID_TRACK1: case P_GRID_TRACK2:
+            case P_GRID_TRACK3: case P_GRID_TRACK4: case P_GRID_TRACK5:
+            case P_GRID_TRACK6: case P_GRID_TRACK7:
+                o->grid_col_w[d->prop - P_GRID_TRACK0] = d->ival; break;
             case P_MARGIN_TOP:    o->margin_top = d->ival; break;
             case P_MARGIN_RIGHT:  o->margin_right = d->ival; break;
             case P_MARGIN_BOTTOM: o->margin_bottom = d->ival; break;
@@ -2792,6 +3097,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .text_decoration_style = CSS_TDS_UNSET,
         .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,
         .gap = -1, .justify = CSS_JUSTIFY_UNSET, .grid_cols = 0,
+        .grid_col_w = { 0 },
         .margin_top = CSS_LEN_UNSET, .margin_right = CSS_LEN_UNSET,
         .margin_bottom = CSS_LEN_UNSET, .margin_left = CSS_LEN_UNSET,
         .pad_top = CSS_LEN_UNSET, .pad_right = CSS_LEN_UNSET,
@@ -2859,6 +3165,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .backface_visibility = CSS_BF_UNSET,
         .text_decoration_thickness = -1,
         .aspect_num = 0, .aspect_den = 0,
+        .bg_grad_n = 0, .bg_grad_angle = 180,
+        .bg_grad_c = { -1, -1, -1, -1 },
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

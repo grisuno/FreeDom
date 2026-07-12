@@ -142,10 +142,12 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
 
     int wants_arg = 0;
     if (csel_ci_eq(name, "link") || csel_ci_eq(name, "any-link")) pm->kind = PSEUDO_LINK;
-    else if (csel_ci_eq(name, "visited") || csel_ci_eq(name, "hover") ||
-             csel_ci_eq(name, "active") || csel_ci_eq(name, "focus") ||
-             csel_ci_eq(name, "focus-within") || csel_ci_eq(name, "focus-visible"))
+    else if (csel_ci_eq(name, "visited"))
         pm->kind = PSEUDO_NEVER;
+    else if (csel_ci_eq(name, "hover") || csel_ci_eq(name, "active") ||
+             csel_ci_eq(name, "focus") || csel_ci_eq(name, "focus-within") ||
+             csel_ci_eq(name, "focus-visible"))
+        pm->kind = PSEUDO_ALWAYS;
     else if (csel_ci_eq(name, "root"))        pm->kind = PSEUDO_ROOT;
     else if (csel_ci_eq(name, "first-child")) pm->kind = PSEUDO_FIRST_CHILD;
     else if (csel_ci_eq(name, "last-child"))  pm->kind = PSEUDO_LAST_CHILD;
@@ -371,8 +373,10 @@ static int is_form_control(const char *tag) {
 
 /* True if pseudo-class `pm` matches element `el`. Zero Knowledge semantics:
  * :link covers every a/area[href] (no history, everything is unvisited) and
- * PSEUDO_NEVER (:visited and the dynamic pseudos) never matches. Structural
- * pseudos read nth/nsib, where 0 = unknown = no match (fail closed). */
+ * PSEUDO_NEVER (:visited) never matches. PSEUDO_ALWAYS (:hover/:active/:focus)
+ * always matches — the cascade is resolved once per load, so dynamic pseudos
+ * are treated as always-on (content hidden behind hover becomes visible).
+ * Structural pseudos read nth/nsib, where 0 = unknown = no match (fail closed). */
 static int pseudo_matches(const css_pseudo_match *pm, const css_element *el) {
     switch (pm->kind) {
         case PSEUDO_LINK:
@@ -380,6 +384,7 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el) {
                    (csel_ci_eq(el->tag, "a") || csel_ci_eq(el->tag, "area")) &&
                    el_attr_value(el, "href") != NULL;
         case PSEUDO_NEVER:        return 0;
+        case PSEUDO_ALWAYS:       return 1;
         case PSEUDO_ROOT:         return el->tag != NULL && csel_ci_eq(el->tag, "html");
         case PSEUDO_FIRST_CHILD:  return el->nth == 1;
         case PSEUDO_LAST_CHILD:   return el->nth > 0 && el->nth == el->nsib;

@@ -332,6 +332,29 @@ static void test_construction_invalid_args(void **state) {
     assert_int_equal(dom_set_attribute(idx, DOM_NODE_NONE, "id", "x"), DOM_ERR_NULL_ARG);
 }
 
+static void test_get_inner_html(void **state) {
+    dom_index *idx = IDX(state);
+    dom_node_id main_id = dom_get_element_by_id(idx, "main");
+    char *html = NULL;
+    size_t len = 0;
+    assert_int_equal(dom_get_inner_html(idx, main_id, &html, &len), DOM_OK);
+    assert_non_null(html);
+    assert_int_equal(strlen(html), len);
+    /* children of #main serialize back with their markup */
+    assert_non_null(strstr(html, "<p class=\"text\">Hello</p>"));
+    assert_non_null(strstr(html, "<button id=\"go\""));
+    free(html);
+    /* roundtrip: set then get reflects the new subtree */
+    assert_int_equal(dom_set_inner_html(idx, main_id, "<em>x</em>", 10), DOM_OK);
+    assert_int_equal(dom_get_inner_html(idx, main_id, &html, &len), DOM_OK);
+    assert_non_null(strstr(html, "<em>x</em>"));
+    free(html);
+    /* fail closed on invalid args */
+    assert_int_equal(dom_get_inner_html(idx, DOM_NODE_NONE, &html, &len),
+                     DOM_ERR_NULL_ARG);
+    assert_int_equal(dom_get_inner_html(idx, main_id, NULL, &len), DOM_ERR_NULL_ARG);
+}
+
 /* --- CSS-selector queries (querySelector / matches / closest) --- */
 
 /* Fixture tree (inside body): div#main.container.box > [ p.text "Hello",
@@ -453,6 +476,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_set_attribute_reindexes_id, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_remove_attribute, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_set_inner_html, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_get_inner_html, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_construction_invalid_args, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_type_class_id, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_all_counts, setup_doc, teardown_doc),

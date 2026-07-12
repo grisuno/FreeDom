@@ -73,6 +73,24 @@ fx_status fx_grid_columns(double avail, size_t ncols, double gap,
  * ncols == 0 yields row = col = 0 (defensive; no divide-by-zero). */
 void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);
 
+/* Grid columns with per-track sizes (2026-07-11). track[i] encodes track i:
+ * 0 = auto (a 1fr share), > 0 = fixed px, < 0 = fr weight x100 (2fr -> -200);
+ * tracks at i >= ntrack (or a NULL track) are auto. Fixed tracks reserve their px
+ * first; the remaining space (avail - gaps - fixed, clamped >= 0) splits
+ * proportionally by fr weight. All-auto reproduces fx_grid_columns exactly.
+ * Same contracts as fx_grid_columns otherwise. */
+fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
+                                   const int *track, size_t ntrack,
+                                   double *col_x, double *col_w);
+
+/* Row-major placement honouring grid-column spans (2026-07-11). span[i] (<= 0 or a
+ * NULL span array = 1) is clamped to [1, ncols]; an item whose span does not fit in
+ * the columns remaining on its row jumps to the next row (CSS auto-placement).
+ * Writes each item's row and starting column. nitems == 0 is a no-op; ncols == 0 or
+ * nitems > FX_MAX_ITEMS fails closed. */
+fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+                             size_t *out_row, size_t *out_col);
+
 /* Float packing (one band; spec/float.md). Packs n float items along one axis:
  * side[i] == 0 (left) items advance a cursor from the content start (0) rightward in
  * document order; side[i] == 1 (right) items advance a cursor from `avail` leftward in

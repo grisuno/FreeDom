@@ -19,7 +19,11 @@ este módulo garantiza es que esa API sea **rápida**.
 > Invariante clave: los hijos removidos se **detachan** (`lxb_dom_node_remove`), **nunca** se
 > destruyen → ningún handle del índice queda colgando (cero UAF, verificado con stress ASan). El índice
 > **crece** para los nodos nuevos (handle consultable; `setAttribute('id'/'class')` re-indexa lookups).
-> `append` rechaza ciclos. `innerHTML`, eventos interactivos y timers reales siguen fuera de alcance.
+> `append` rechaza ciclos. El setter de `innerHTML` re-parsea el fragmento (detach-nunca-free);
+> el **getter** (2026-07-11) serializa los HIJOS del nodo con `lxb_html_serialize_deep_cb` a un
+> buffer del llamante, **acotado** a `DOM_INNER_HTML_MAX` (1 MiB — por encima falla cerrado con
+> `DOM_ERR_OOM`, nunca una asignación sin tope sobre contenido hostil). Eventos interactivos y
+> timers reales siguen fuera de alcance.
 
 La entrega original era **solo lectura**. La mutación (appendChild/removeChild/setAttribute con
 mantenimiento incremental de índices) queda para un hito posterior.

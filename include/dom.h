@@ -182,4 +182,16 @@ dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *na
 dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
                               const char *html, size_t len);
 
+/* Cap on one innerHTML serialization (anti-DoS: hostile content cannot force an
+ * unbounded allocation through the getter). Over the cap => DOM_ERR_OOM. */
+#define DOM_INNER_HTML_MAX (1024u * 1024u)
+
+/* Serializes node's CHILDREN back to HTML (the innerHTML getter). On DOM_OK *out
+ * is a NUL-terminated heap buffer the CALLER frees (free()) and *out_len its
+ * length (no children => an owned empty string). Bounded by DOM_INNER_HTML_MAX
+ * (fail closed, nothing allocated on error). Invalid handle / NULL out =>
+ * DOM_ERR_NULL_ARG. */
+dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
+                              char **out, size_t *out_len);
+
 #endif /* FREEDOM_DOM_H */

@@ -772,3 +772,53 @@ dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
     }
     return DOM_OK;
 }
+
+/* Accumulator for the serializer callback: a growing buffer hard-capped at
+ * DOM_INNER_HTML_MAX so hostile content cannot force an unbounded allocation. */
+typedef struct ih_acc {
+    char  *buf;
+    size_t len, cap;
+    int    overflow;
+} ih_acc;
+
+static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx) {
+    ih_acc *a = (ih_acc *)ctx;
+    if (a->overflow) return LXB_STATUS_ERROR;
+    if (a->len + len + 1u > DOM_INNER_HTML_MAX) {
+        a->overflow = 1;
+        return LXB_STATUS_ERROR;
+    }
+    if (a->len + len + 1u > a->cap) {
+        size_t nc = (a->cap != 0u) ? a->cap * 2u : 256u;
+        while (nc < a->len + len + 1u) nc *= 2u;
+        char *g = (char *)realloc(a->buf, nc);
+        if (g == NULL) { a->overflow = 1; return LXB_STATUS_ERROR; }
+        a->buf = g;
+        a->cap = nc;
+    }
+    memcpy(a->buf + a->len, data, len);
+    a->len += len;
+    return LXB_STATUS_OK;
+}
+
+dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
+                              char **out, size_t *out_len) {
+    if (out != NULL) *out = NULL;
+    if (out_len != NULL) *out_len = 0;
+    if (!valid(idx, node) || out == NULL || out_len == NULL) return DOM_ERR_NULL_ARG;
+
+    ih_acc a = { NULL, 0, 0, 0 };
+    lxb_status_t st = lxb_html_serialize_deep_cb(idx->nodes[node], ih_append, &a);
+    if (st != LXB_STATUS_OK) {
+        free(a.buf);
+        return DOM_ERR_OOM;   /* over the cap or allocation failure: fail closed */
+    }
+    if (a.buf == NULL) {
+        a.buf = (char *)malloc(1u);
+        if (a.buf == NULL) return DOM_ERR_OOM;
+    }
+    a.buf[a.len] = '\0';
+    *out = a.buf;
+    *out_len = a.len;
+    return DOM_OK;
+}

@@ -74,7 +74,24 @@ const char *bx_display_name(bx_display d);
 bx_hplace  bx_place(double inset_l, double inset_r, double width_cap, int center,
                     double avail_w);
 double     bx_width_cap(int w_px, int w_pct, double avail_w);
+double     bx_content_cap(double width_cap, int border_box,
+                          double pad_l, double pad_r, double bord_l, double bord_r);
 ```
+
+### `bx_content_cap` (2026-07-11 — `box-sizing: border-box`)
+
+Ajusta el tope de ancho al modelo de caja declarado, ANTES de `bx_place` (que interpreta
+el tope como ancho de **contenido**):
+
+- **Dado** `border_box == 0` (content-box o unset) o `width_cap <= 0` (sin tope),
+  **entonces** identidad: devuelve `width_cap` sin tocar.
+- **Dado** `border_box != 0` y un tope, **entonces** devuelve
+  `width_cap − pad_l − pad_r − bord_l − bord_r` acotado a `>= 1` (un border-box más
+  angosto que sus propios bordes no colapsa a ancho negativo).
+- Bordes/padding negativos se tratan como 0 (defensivo).
+Pura, sin I/O; consumida por `open_box` en el painter — el único sitio que necesita el
+ajuste, porque sin padding/border declarados los dos modelos coinciden y el box-def
+existe exactamente cuando se declaran.
 
 ### `bx_width_cap` (Hito 32 — anchos porcentuales)
 

@@ -473,6 +473,75 @@ static void test_click_runs_handler_and_returns_view(void **state) {
     tab_close(t);
 }
 
+/* Real async timers (2026-07-11): a setTimeout with a delay does NOT fire on the
+ * load pump; the load response reports the smallest pending delay; tab_tick
+ * advances the virtual clock, fires it, and the refreshed view shows the
+ * mutation. Intervals re-arm (next_timer_ms stays set). */
+static void test_tick_fires_delayed_timer(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>T</title></head><body>"
+        "<p id=\"t\">waiting</p>"
+        "<script>setTimeout(function(){"
+        "  document.getElementById('t').textContent = 'ticked';"
+        "}, 100);</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_non_null(p.view);
+    /* the delayed timer did not fire on the pump and is reported pending */
+    int saw_wait = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text != NULL && strcmp(r->text, "waiting") == 0) saw_wait = 1;
+    }
+    assert_true(saw_wait);
+    assert_int_equal(p.next_timer_ms, 100);
+    tab_page_free(&p);
+
+    tab_page p2;
+    assert_int_equal(tab_tick(t, 100, &p2), TAB_OK);
+    assert_non_null(p2.view);
+    int saw_ticked = 0;
+    for (size_t i = 0; i < pv_count(p2.view); ++i) {
+        const pv_run *r = pv_at(p2.view, i);
+        if (r->text != NULL && strcmp(r->text, "ticked") == 0) saw_ticked = 1;
+    }
+    assert_true(saw_ticked);
+    assert_int_equal(p2.next_timer_ms, -1);   /* nothing pending anymore */
+    tab_page_free(&p2);
+    tab_close(t);
+}
+
+static void test_tick_interval_rearms(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>I</title></head><body>"
+        "<p id=\"n\">0</p>"
+        "<script>var c=0; setInterval(function(){"
+        "  c++; document.getElementById('n').textContent = String(c);"
+        "}, 50);</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_int_equal(p.next_timer_ms, 50);
+    tab_page_free(&p);
+
+    tab_page p2;
+    assert_int_equal(tab_tick(t, 50, &p2), TAB_OK);
+    int saw_one = 0;
+    for (size_t i = 0; i < pv_count(p2.view); ++i) {
+        const pv_run *r = pv_at(p2.view, i);
+        if (r->text != NULL && strcmp(r->text, "1") == 0) saw_one = 1;
+    }
+    assert_true(saw_one);
+    assert_int_equal(p2.next_timer_ms, 50);   /* the interval re-armed */
+    tab_page_free(&p2);
+    tab_close(t);
+}
+
 /* Box-engine identity + decoration resolved in the confined child must survive the
  * IPC round-trip (write_view/read_view symmetry for the new fields). */
 static void test_load_carries_box_decoration(void **state) {
@@ -1690,6 +1759,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_cont_item),
         cmocka_unit_test(test_load_carries_node_id),
         cmocka_unit_test(test_click_runs_handler_and_returns_view),
+        cmocka_unit_test(test_tick_fires_delayed_timer),
+        cmocka_unit_test(test_tick_interval_rearms),
         cmocka_unit_test(test_load_carries_box_decoration),
         cmocka_unit_test(test_load_carries_box_tree),
         cmocka_unit_test(test_load_carries_form_control),

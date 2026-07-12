@@ -37,6 +37,7 @@
 #include "url.h"
 #include "zoom.h"
 
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -308,6 +309,15 @@ typedef struct browser_window {
     int       dragging_scroll;  /* the scrollbar thumb is being dragged */
     double    scroll_grab_dy;   /* pointer offset within the thumb at drag start */
     int       pending_g;        /* a 'g' was pressed; a second one scrolls to the top (vim gg) */
+
+    /* Real async JS timers (2026-07-11): the worker reports its smallest pending
+     * timer delay (tab_page.next_timer_ms); the trusted parent schedules an
+     * OP_TICK from it via the event-loop poll timeout. js_ticks_left caps the
+     * ticks per page load (anti battery-drain; the shared per-page JS budget
+     * bounds the work itself). js_tick_due_ms 0 = no tick pending. */
+    uint64_t    js_tick_due_ms;   /* absolute now_ms() deadline, 0 = none */
+    int         js_tick_elapsed;  /* virtual ms to advance when the tick fires */
+    int         js_ticks_left;    /* remaining ticks for this page load */
 
     int         menu_open;     /* the options (gear) panel is showing */
     const char *hover_href;    /* link target under the pointer (aliases doc), or NULL */
@@ -1625,9 +1635,28 @@ static void drop_repl_worker(browser_window *w) {
     if (w->freebug != NULL) freebug_redraw(w);
 }
 
+/* Cap on OP_TICKs per page load (anti battery-drain; the shared per-page JS
+ * budget already bounds the total script time). ~240 ticks at the 16 ms floor is
+ * a few seconds of animation, plenty for progressive-render patterns. */
+#define JS_TICKS_PER_LOAD 240
+
+/* Schedules the next JS timer tick from the worker's reported smallest pending
+ * delay (tab_page.next_timer_ms; < 0 = nothing pending). The event loop fires it
+ * through the poll timeout; a 16 ms floor keeps a 0 ms chain from busy-spinning. */
+static void schedule_js_tick(browser_window *w, int next_ms) {
+    if (next_ms < 0 || w->js_ticks_left <= 0) {
+        w->js_tick_due_ms = 0;
+        return;
+    }
+    int delay = (next_ms < 16) ? 16 : next_ms;
+    w->js_tick_elapsed = next_ms;
+    w->js_tick_due_ms = now_ms() + (uint64_t)delay;
+}
+
 static void render_current_ex(browser_window *w, int allow_js_nav) {
     clear_doc(w);
     if (w->cur_html == NULL) return;
+    w->js_tick_due_ms = 0;   /* a new render cancels any pending JS tick */
 
     /* A fresh render replaces the page: drop the previous tab's still-alive worker
      * (kept for the Freebug REPL) so a new one binds to the new page. */
@@ -1648,7 +1677,8 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * trusted-host doctrine (Hito 28) -- (GET-only at the parent gate); reader mode
      * ignores author styling, so it fetches none. */
     int trusted = page_trusted(w);
-    int css_grant = (w->caps.css || trusted) && !w->reader;
+    int present_trusted = jsp_present_trusted(page_host_allowlisted(w));
+    int css_grant = (w->caps.css || trusted || present_trusted) && !w->reader;
     int js_grant  = w->caps.js && trusted;
     tab_set_net_allowed(t, trusted);
     tab_set_css_allowed(t, css_grant);
@@ -1720,13 +1750,17 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
 
     browser_set_page(&w->bs, page.title, page.text, 0);
 
-    /* Trusted-host doctrine (Hito 28): a doubly-declared host gets full author
-     * presentation without session toggles. Distraction-free mode still ignores
-     * author styling and images (a clean reading view) and wins over the doctrine;
-     * neither disturbs the user's persistent toggles: gate a local copy, not
+    /* Trusted-host doctrine (Hito 28) + presentation-trust (2026-07-11): a host
+     * explicitly on allow.conf gets author PRESENTATION (CSS + images) without
+     * session toggles -- presentation is lower risk than script/network, which stay
+     * double-gated (allow.conf AND js.conf) via `trusted`. Distraction-free mode
+     * still ignores author styling and images (a clean reading view) and wins over
+     * both; neither disturbs the user's persistent toggles: gate a local copy, not
      * w->caps. */
     rdp_caps eff = w->caps;
-    if (trusted) { eff.css = true; eff.images = true; }
+    if (trusted || jsp_present_trusted(page_host_allowlisted(w))) {
+        eff.css = true; eff.images = true;
+    }
     if (w->reader) { eff.css = false; eff.images = false; }
 
     /* The top-level URL is the https origin (per-image policy) or NULL for a local
@@ -1745,6 +1779,11 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     fb_buffer_free(&w->console);
     w->console = page.console;
     fb_buffer_init(&page.console); /* ownership moved; tab_page_free frees an empty buffer */
+
+    /* Real async timers: a fresh load resets the per-page tick budget and schedules
+     * the first OP_TICK from the worker's reported smallest pending delay. */
+    w->js_ticks_left = JS_TICKS_PER_LOAD;
+    schedule_js_tick(w, page.next_timer_ms);
 
     tab_page_free(&page);
     w->tab_worker = t;
@@ -2412,6 +2451,10 @@ typedef struct rc_box {
      * (num/den x1000) sizes a box that has one dimension only. */
     int    box_h, box_min_h, box_max_h, box_min_w;
     int    aspect_num, aspect_den;
+    /* linear-gradient background (2026-07-11): stop count (0 = none), CSS degrees,
+     * packed stops. Wins over bg_rgb when set. */
+    int    grad_n, grad_angle;
+    int    grad_c[4];
 } rc_box;
 
 typedef struct rc_layout {
@@ -3231,7 +3274,19 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     } else {
         root.display = BX_DISPLAY_GRID;   /* flex row == grid with g columns, one row */
         root.grid_cols = ncols;
-        for (size_t j = 0; j < g; ++j) kids[j].display = BX_DISPLAY_BLOCK;
+        /* Sized tracks + column spans (2026-07-11): only a real author grid carries
+         * them (the flex-degrade row keeps equal columns and 1-cell items). */
+        if (is_grid) {
+            root.grid_track = head->cont_col_w;
+            root.grid_ntrack = PV_GRID_TRACKS;
+        }
+        for (size_t j = 0; j < g; ++j) {
+            kids[j].display = BX_DISPLAY_BLOCK;
+            if (is_grid) {
+                const rd_block *bk = rd_at(doc, gstart[j]);
+                kids[pos_of[j]].grid_span = bk->grid_span;
+            }
+        }
     }
 
     /* First pass: column widths (heights still 0). */
@@ -3365,9 +3420,12 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
 
     double avail_w = ctx_w;
     if (avail_w < 1.0) avail_w = 1.0;
+    /* box-sizing: border-box (2026-07-11): the declared width includes the
+     * horizontal padding + border, so the CONTENT cap shrinks by those edges. */
+    double wcap = bx_content_cap(bx_width_cap(def->box_w, def->box_w_pct, avail_w),
+                                 def->box_sizing == CSS_BOXS_BORDER, pl, pr, bl, br);
     bx_hplace hp = bx_place((double)def->box_l, (double)def->box_r,
-                            bx_width_cap(def->box_w, def->box_w_pct, avail_w),
-                            def->box_center, avail_w);
+                            wcap, def->box_center, avail_w);
     double box_left = ctx_left + hp.x_off - pl;
     double box_width = hp.content_w + pl + pr;
 
@@ -3396,6 +3454,9 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->outline_color = def->outline_color;
         bx->outline_offset = (def->outline_offset != PV_LEN_UNSET) ? def->outline_offset : 0;
         bx->bg_rgb = def->bg_rgb;
+        bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
+        bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
+        bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
         bx->hidden = inherited_hidden || this_hidden;
         /* 2026-07-10 author vertical dimensions + aspect-ratio. box_min_w enlarges
          * box_width when the layout was smaller; box_h sets a fixed height (the
@@ -4056,17 +4117,39 @@ static double row_align_offset(const rc_layout *L, const rc_row *r, double conte
     return (r->align == CSS_ALIGN_CENTER) ? slack / 2.0 : slack;
 }
 
+/* Appends a rectangle path with radius r (px) to cr. r <= 0 falls back to a plain
+ * rectangle; r is clamped so opposite corners never overlap (min(w,h)/2). One radius
+ * for all four corners: per-corner / elliptical radii collapse to the first value
+ * upstream (see spec/css.md). */
+static void box_path(cairo_t *cr, double x, double y, double w, double h, double r) {
+    if (r <= 0.0 || w <= 0.0 || h <= 0.0) {
+        cairo_rectangle(cr, x, y, w, h);
+        return;
+    }
+    double half = (w < h ? w : h) / 2.0;
+    if (r > half) r = half;
+    cairo_new_sub_path(cr);
+    cairo_arc(cr, x + w - r, y + r,     r, -M_PI / 2.0, 0.0);
+    cairo_arc(cr, x + w - r, y + h - r, r, 0.0,          M_PI / 2.0);
+    cairo_arc(cr, x + r,     y + h - r, r, M_PI / 2.0,   M_PI);
+    cairo_arc(cr, x + r,     y + r,     r, M_PI,         3.0 * M_PI / 2.0);
+    cairo_close_path(cr);
+}
+
 /* Paints one block box's decoration (Hito 23b-8 Step C): box-shadow, background fill,
  * the four borders and the outline, behind the rows it encloses. (ox, oy) is the
- * absolute offset for the box's layout-space rect. Square corners + solid lines in
- * v1: border-radius is threaded but not yet rounded, and dashed/dotted collapse to
- * solid. The box decoration was gated behind caps.css upstream (render_doc). */
+ * absolute offset for the box's layout-space rect. Solid lines in v1 (dashed/dotted
+ * collapse to solid). border-radius rounds the shadow, background, outline and --
+ * when the four borders are uniform -- the border ring; mixed per-side borders keep
+ * square corners. Content is not clipped to the rounded rect (v1). The box
+ * decoration was gated behind caps.css upstream (render_doc). */
 static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy) {
     if (bx->hidden) return;  /* visibility:hidden: geometry stood, decoration does not paint */
     double x = ox + bx->x, y = oy + bx->top, w = bx->w, h = bx->h;
     if (w <= 0.0 || h <= 0.0) return;
     double bt = box_edge_px(bx->bord_tw), br = box_edge_px(bx->bord_rw);
     double bb = box_edge_px(bx->bord_bw), bl = box_edge_px(bx->bord_lw);
+    double rad = (bx->radius > 0 && bx->radius != CSS_LEN_UNSET) ? (double)bx->radius : 0.0;
 
     /* box-shadow (single layer, outset OR inset): expanding translucent rects fake
      * the blur. OUTSET: clipped to OUTSIDE the border box (CSS paints an outset
@@ -4083,12 +4166,12 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                 ui_rgb sc = rgb_from_packed(bx->bsh_color);
                 int steps = (blur > 0.0) ? 4 : 1;
                 cairo_save(cr);
-                cairo_rectangle(cr, x, y, w, h);        /* clip to inside the box */
+                box_path(cr, x, y, w, h, rad);          /* clip to inside the box */
                 cairo_clip(cr);
                 for (int k = steps; k >= 1; --k) {
                     double g = blur * (double)k / (double)steps;
                     cairo_set_source_rgba(cr, sc.r, sc.g, sc.b, 0.30 / (double)steps);
-                    cairo_rectangle(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g);
+                    box_path(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g, rad + g);
                     cairo_fill(cr);
                 }
                 cairo_restore(cr);
@@ -4102,13 +4185,13 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                 int steps = (blur > 0.0) ? 4 : 1;
                 cairo_save(cr);
                 cairo_rectangle(cr, sx - blur, sy - blur, sw + 2.0 * blur, sh + 2.0 * blur);
-                cairo_rectangle(cr, x, y, w, h);            /* punch out the border box */
+                box_path(cr, x, y, w, h, rad);              /* punch out the border box */
                 cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
                 cairo_clip(cr);
                 for (int k = steps; k >= 1; --k) {
                     double g = blur * (double)k / (double)steps;
                     cairo_set_source_rgba(cr, sc.r, sc.g, sc.b, 0.30 / (double)steps);
-                    cairo_rectangle(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g);
+                    box_path(cr, sx - g, sy - g, sw + 2.0 * g, sh + 2.0 * g, rad + g);
                     cairo_fill(cr);
                 }
                 cairo_restore(cr);
@@ -4116,26 +4199,61 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         }
     }
 
-    /* Background fill inside the border box (covers the padding area). */
-    if (bx->bg_rgb >= 0) {
+    /* Background fill inside the border box (covers the padding area). A linear
+     * gradient wins over the solid color: the gradient line runs through the box
+     * center along the CSS angle (0 = to top, 90 = to right), long enough that the
+     * first/last stops land on the box corners; stops paint evenly spaced. */
+    if (bx->grad_n >= 2) {
+        double a = (double)bx->grad_angle * M_PI / 180.0;
+        double dx = sin(a), dy = -cos(a);
+        double half = (fabs(dx) * w + fabs(dy) * h) / 2.0;
+        double cx = x + w / 2.0, cy = y + h / 2.0;
+        cairo_pattern_t *pat = cairo_pattern_create_linear(
+            cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
+        int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
+        for (int k = 0; k < nst; ++k) {
+            ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
+            cairo_pattern_add_color_stop_rgb(pat, (double)k / (double)(nst - 1),
+                                             sc.r, sc.g, sc.b);
+        }
+        cairo_set_source(cr, pat);
+        box_path(cr, x, y, w, h, rad);
+        cairo_fill(cr);
+        cairo_pattern_destroy(pat);
+    } else if (bx->bg_rgb >= 0) {
         set_rgb(cr, rgb_from_packed(bx->bg_rgb));
-        cairo_rectangle(cr, x, y, w, h);
+        box_path(cr, x, y, w, h, rad);
         cairo_fill(cr);
     }
 
-    /* The four borders, each a filled rect of its width along its edge. An unset
-     * color falls back to a dark grey (CSS would use currentColor). */
+    /* The four borders. With a radius and UNIFORM sides (same width, colour and a
+     * visible style on all four) the ring is one rounded stroke centred on the
+     * half-width inset; otherwise each side is a filled rect of its width along its
+     * edge (square corners). An unset color falls back to a dark grey (CSS would
+     * use currentColor). */
     const double bw[4] = { bt, br, bb, bl };
     const int    bs[4] = { bx->bord_ts, bx->bord_rs, bx->bord_bs, bx->bord_ls };
     const int    bc[4] = { bx->bord_tc, bx->bord_rc, bx->bord_bc, bx->bord_lc };
-    for (int k = 0; k < 4; ++k) {
-        if (bw[k] <= 0.0 || !box_line_visible(bs[k])) continue;
-        set_rgb(cr, rgb_from_packed(bc[k] >= 0 ? bc[k] : 0x333333));
-        if      (k == 0) cairo_rectangle(cr, x, y, w, bt);            /* top */
-        else if (k == 1) cairo_rectangle(cr, x + w - br, y, br, h);   /* right */
-        else if (k == 2) cairo_rectangle(cr, x, y + h - bb, w, bb);   /* bottom */
-        else             cairo_rectangle(cr, x, y, bl, h);            /* left */
-        cairo_fill(cr);
+    int uniform = rad > 0.0 && bt > 0.0 && bt == br && bt == bb && bt == bl &&
+                  box_line_visible(bs[0]) && bs[0] == bs[1] && bs[0] == bs[2] &&
+                  bs[0] == bs[3] && bc[0] == bc[1] && bc[0] == bc[2] && bc[0] == bc[3];
+    if (uniform) {
+        set_rgb(cr, rgb_from_packed(bc[0] >= 0 ? bc[0] : 0x333333));
+        cairo_set_line_width(cr, bt);
+        double inner_rad = rad - bt / 2.0;
+        box_path(cr, x + bt / 2.0, y + bt / 2.0, w - bt, h - bt,
+                 inner_rad > 0.0 ? inner_rad : 0.0);
+        cairo_stroke(cr);
+    } else {
+        for (int k = 0; k < 4; ++k) {
+            if (bw[k] <= 0.0 || !box_line_visible(bs[k])) continue;
+            set_rgb(cr, rgb_from_packed(bc[k] >= 0 ? bc[k] : 0x333333));
+            if      (k == 0) cairo_rectangle(cr, x, y, w, bt);            /* top */
+            else if (k == 1) cairo_rectangle(cr, x + w - br, y, br, h);   /* right */
+            else if (k == 2) cairo_rectangle(cr, x, y + h - bb, w, bb);   /* bottom */
+            else             cairo_rectangle(cr, x, y, bl, h);            /* left */
+            cairo_fill(cr);
+        }
     }
 
     /* Outline: stroked just outside the border box, offset by outline_offset
@@ -4145,8 +4263,9 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         set_rgb(cr, rgb_from_packed(bx->outline_color >= 0 ? bx->outline_color : 0x333333));
         cairo_set_line_width(cr, ow);
         double oo = (double)bx->outline_offset;
-        cairo_rectangle(cr, x - ow / 2.0 - oo, y - ow / 2.0 - oo,
-                        w + ow + 2.0 * oo, h + ow + 2.0 * oo);
+        box_path(cr, x - ow / 2.0 - oo, y - ow / 2.0 - oo,
+                 w + ow + 2.0 * oo, h + ow + 2.0 * oo,
+                 rad > 0.0 ? rad + ow / 2.0 + oo : 0.0);
         cairo_stroke(cr);
     }
 }
@@ -4419,6 +4538,8 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 .outline_w = def->outline_w, .outline_style = def->outline_style,
                 .outline_color = def->outline_color,
                 .bg_rgb = def->bg_rgb,
+                .grad_n = def->grad_n, .grad_angle = def->grad_angle,
+                .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
             };
             paint_box_decoration(cr, &bx, left, origin);
             /* The text content: one synthetic row at the box's content origin. v1
@@ -4573,6 +4694,8 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                     .outline_w = def->outline_w, .outline_style = def->outline_style,
                     .outline_color = def->outline_color,
                     .bg_rgb = def->bg_rgb,
+                    .grad_n = def->grad_n, .grad_angle = def->grad_angle,
+                    .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
                 };
                 paint_box_decoration(cr, &bx, PDF_MARGIN, PDF_MARGIN);
                 for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
@@ -4755,6 +4878,8 @@ static long write_doc_png(browser_window *w, const char *path) {
                 .outline_w = def->outline_w, .outline_style = def->outline_style,
                 .outline_color = def->outline_color,
                 .bg_rgb = def->bg_rgb,
+                .grad_n = def->grad_n, .grad_angle = def->grad_angle,
+                .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
             };
             paint_box_decoration(cr, &bx, PNG_MARGIN, PNG_MARGIN);
             for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
@@ -5147,6 +5272,8 @@ static void apply_click_result(browser_window *w, tab_page *page) {
     w->console = page->console;
     fb_buffer_init(&page->console);
     browser_set_page(&w->bs, page->title, page->text, 0);
+    /* Handlers may have (re)armed timers: schedule the next tick from the report. */
+    schedule_js_tick(w, page->next_timer_ms);
 }
 
 /* Dispatches a click to the live worker for the node under the cursor. If the node
@@ -7940,6 +8067,11 @@ ui_status ui_run_browser(const char *start_url) {
      * load so the worker drops boilerplate and the paint centers the reading column. */
     if (getenv("FREEDOM_READER") != NULL) w.reader = 1;
 
+    /* Optionally start with images enabled: set FREEDOM_IMAGES to any value (a
+     * startup affordance for the Ctrl+I toggle, for agent-verifiable sessions --
+     * images remain opt-in by default, Privacy by Default). */
+    if (getenv("FREEDOM_IMAGES") != NULL) w.caps.images = true;
+
     /* Initial page. Provide instructions because the strict TLS policy means
        many public sites will be rejected. */
     if (start_url != NULL) {
@@ -7974,6 +8106,11 @@ ui_status ui_run_browser(const char *start_url) {
         }
         /* While a fetch is in flight, wake ~12 fps to animate the spinner. */
         if (w.loading && (timeout < 0 || timeout > 80)) timeout = 80;
+        /* A pending JS timer tick bounds the wait too (real async timers). */
+        if (w.js_tick_due_ms != 0) {
+            int tk = (w.js_tick_due_ms > t) ? (int)(w.js_tick_due_ms - t) : 0;
+            if (timeout < 0 || tk < timeout) timeout = tk;
+        }
 
         /* Poll the Wayland fd, the key-repeat timer, and the async-fetch result pipe
          * together. The Wayland fd keeps the prepare_read/read_events contract; the
@@ -8017,6 +8154,24 @@ ui_status ui_run_browser(const char *start_url) {
         /* One or more fetches completed: render them on this (main) thread. */
         if (pr > 0 && fetch_idx >= 0 && (pfds[fetch_idx].revents & POLLIN))
             drain_fetch_results(&w);
+
+        /* A JS timer came due: advance the worker's virtual clock (OP_TICK), apply
+         * the refreshed view and schedule the next tick from its report. Bounded
+         * per load by js_ticks_left; skipped while a page load is in flight. */
+        if (w.js_tick_due_ms != 0 && now_ms() >= w.js_tick_due_ms &&
+            !w.loading && w.tab_worker != NULL) {
+            w.js_tick_due_ms = 0;
+            if (w.js_ticks_left > 0) {
+                w.js_ticks_left--;
+                tab_page tp;
+                memset(&tp, 0, sizeof tp);
+                if (tab_tick(w.tab_worker, w.js_tick_elapsed, &tp) == TAB_OK) {
+                    apply_click_result(&w, &tp);
+                    tab_page_free(&tp);
+                    redraw(&w);
+                }
+            }
+        }
 
         /* Streaming fetch: new body data arrived. Drain the eventfd counter,
          * copy the accumulated page to cur_html, and re-render progressively.

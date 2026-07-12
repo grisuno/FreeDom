@@ -40,6 +40,9 @@ typedef enum pv_status {
 /* Sentinel for an unset author box vertical-margin override (box_mt/box_mb): the
  * presentation layer then uses the user-agent margin. Matches CSS_LEN_UNSET. */
 #define PV_LEN_UNSET (-2147483647 - 1)
+/* Sized grid tracks carried per run (2026-07-11). Mirrors CSS_GRID_TRACKS_MAX in
+ * css.h (page_view.c static-asserts they agree); tracks past it lay out as auto. */
+#define PV_GRID_TRACKS 8
 
 typedef enum pv_kind {
     PV_TEXT = 0,   /* inline text */
@@ -157,6 +160,12 @@ typedef struct pv_run {
     int     cont_gap;     /* container gap in px (>= 0) */
     int     cont_justify; /* fx_justify of the container */
     int     cont_cols;    /* grid column count (>= 1 for grid), or 0 */
+    /* Grid track sizes of the container (2026-07-11; mirrors css_style.grid_col_w:
+     * 0 auto / >0 px / <0 fr x100, first PV_GRID_TRACKS tracks) and this run's
+     * ITEM column span (grid-column: span N; <= 0 = 1). Structure like cont_*,
+     * carried regardless of caps.css. Defaults: all 0. */
+    int     cont_col_w[PV_GRID_TRACKS];
+    int     grid_span;
     /* Stage 3a: flex per-item values from the BLOCK element's own css_style (the
      * flex item = the nearest block ancestor of this run). Like cont_*, these are
      * layout STRUCTURE (not author styling), carried regardless of caps.css. The
@@ -305,6 +314,12 @@ typedef struct pv_box_def {
     int pointer_events;
     /* aspect-ratio (numerator/denominator x1000, both 0 = unset/auto) */
     int aspect_num, aspect_den;
+    /* linear-gradient background (2026-07-11): stop count (0 = none, else
+     * 2..CSS_GRAD_STOPS_MAX), CSS degrees (0 = to top, 90 = to right), and the
+     * packed 0xRRGGBB stops (unused -1). Painted evenly spaced across the border
+     * box, rounded by border_radius. When set it wins over bg_rgb. */
+    int grad_n, grad_angle;
+    int grad_c0, grad_c1, grad_c2, grad_c3;
 } pv_box_def;
 
 typedef struct pv_view {
@@ -457,6 +472,13 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e);
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_gap, int cont_justify, int cont_cols,
                       int cont_wrap, int cont_row_gap, int cont_align_items);
+
+/* Sets the container's grid track sizes and this run's ITEM column span on the
+ * most recently appended run (2026-07-11). col_w points at up to PV_GRID_TRACKS
+ * encoded sizes (0 auto / >0 px / <0 fr x100; NULL or n <= 0 leaves all-auto);
+ * col_span is the item's `grid-column: span N` (<= 0 = 1). No-op on an empty or
+ * NULL view. The append helpers default everything to 0. */
+void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);
 
 /* Stage 3: sets the flex per-item values on the most recently appended run — the
  * ITEM's resolved grow/shrink (x100, -1 unset), basis (px / CSS_LEN_AUTO /

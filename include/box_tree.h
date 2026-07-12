@@ -63,7 +63,10 @@ typedef struct bt_node {
     /* container parameters (FLEX / GRID): */
     double          gap;         /* px between children (FLEX: main axis; GRID: columns) */
     fx_justify      justify;     /* FLEX main-axis distribution */
-    size_t          grid_cols;   /* GRID: number of equal columns (>= 1) */
+    size_t          grid_cols;   /* GRID: number of columns (>= 1) */
+    const int      *grid_track;  /* GRID: per-track sizes (0 auto / >0 px / <0 fr x100);
+                                  * NULL (zero-init default) = equal columns, unchanged */
+    size_t          grid_ntrack; /* valid entries in grid_track (tracks past it are auto) */
     int             wrap;        /* FLEX: nonzero packs items onto multiple lines instead
                                   * of forcing them all onto one (flex-wrap); 0 (default)
                                   * is the original single-line behaviour, unchanged. */
@@ -81,6 +84,10 @@ typedef struct bt_node {
     int             align;       /* BT_ALIGN_*: this item's cross-axis alignment within
                                   * its line (already resolved from align-self / the
                                   * container's align-items by the caller). */
+    /* this node as a grid item of its GRID parent (2026-07-11): columns it spans
+     * (grid-column: span N); <= 0 (zero-init default) = 1 column. Clamped to the
+     * columns remaining on its row (CSS auto-placement). */
+    int             grid_span;
 
     /* leaf content height in px (ignored for containers; computed): */
     double          content_h;

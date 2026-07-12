@@ -98,6 +98,11 @@ typedef struct rd_block {
     int              cont_gap;       /* container gap in px */
     int              cont_justify;   /* fx_justify of the container */
     int              cont_cols;      /* grid column count, or 0 */
+    /* Grid track sizes of the container (2026-07-11; 0 auto / >0 px / <0 fr x100,
+     * see pv_run) and this block's ITEM column span (<= 0 = 1). Structure like
+     * cont_*, never gated. */
+    int              cont_col_w[PV_GRID_TRACKS];
+    int              grid_span;
     /* Stage 3a: flex per-item values (structure, carried regardless of caps.css,
      * like cont_*). Copied from pv_run; the GUI's layout_container feeds them to
      * bt_node.grow/shrink/basis. Defaults: grow -1, shrink -1, basis CSS_LEN_UNSET,

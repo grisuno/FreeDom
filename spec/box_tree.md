@@ -33,10 +33,16 @@ coordenadas absolutas (acumulando el origen de cada padre) también es del llama
   línea, cada hijo se alinea en el eje cruzado según su `align` resuelto (`BT_ALIGN_START`/`_CENTER`/
   `_END`; `_STRETCH` se aproxima en v1 a `_START` — el motor no tiene forma de forzar que el
   contenido de una hoja crezca para llenar la línea).
-- **Contenedor grid**: `grid_cols` columnas iguales vía `flex_layout`, colocación fila-por-fila, con
+- **Contenedor grid**: `grid_cols` columnas vía `flex_layout`, colocación fila-por-fila, con
   altura de fila = máxima altura de los hijos de esa fila. El gap de **columna** siempre es `gap`; el
   de **fila** es `row_gap` si `has_row_gap` está fijado (author `row-gap`, distinto de `column-gap`),
   si no cae también a `gap` (un `gap: N` simple sirve a los dos ejes, comportamiento previo intacto).
+  **Pistas con tamaño (2026-07-11):** `grid_track`/`grid_ntrack` (puntero del llamante, `NULL` =
+  todas iguales) codifican por pista `0` = auto (`1fr`), `> 0` = px fijos, `< 0` = peso fr ×100;
+  se resuelven con `fx_grid_columns_weighted` (fijas primero, el resto proporcional al peso).
+  **Span de columna:** el `grid_span` de un hijo (≤ 0 = 1) lo coloca `fx_grid_place_span` ocupando
+  N columnas consecutivas + los gaps intermedios (acotado a las columnas restantes de su fila;
+  si no cabe, salta de fila — auto-placement CSS). El span de FILA no se coloca (v1).
 - **Hoja** (nodo sin hijos): su altura es `content_h` (+ padding); su ancho lo fija el padre.
 - **Anidamiento** arbitrario (con tope de profundidad) y `display:none` (no ocupa espacio).
 
@@ -50,7 +56,10 @@ typedef struct bt_node {
     /* parametros de contenedor (FLEX/GRID): */
     double          gap;         /* px entre hijos (FLEX: eje principal; GRID: columnas) */
     fx_justify      justify;     /* reparto del eje principal en FLEX */
-    size_t          grid_cols;   /* GRID: numero de columnas iguales (>=1) */
+    size_t          grid_cols;   /* GRID: numero de columnas (>=1) */
+    const int      *grid_track;  /* GRID: tamanos de pista (0 auto / >0 px / <0 fr x100),
+                                  * NULL (default de zero-init) = columnas iguales */
+    size_t          grid_ntrack; /* pistas validas en grid_track (resto = auto) */
     int             wrap;        /* FLEX: no-cero empaqueta en varias lineas (flex-wrap);
                                   * 0 (default de zero-init) = comportamiento previo, sin cambios */
     double          row_gap;     /* gap del eje cruzado (filas GRID / lineas FLEX envueltas);
@@ -60,6 +69,9 @@ typedef struct bt_node {
                                   * para el eje de fila/cruzado (author `row-gap`) */
     /* este nodo como item flex de su padre FLEX: */
     double          grow, shrink, basis, min_main;
+    /* este nodo como item grid de su padre GRID (2026-07-11): columnas que ocupa
+     * (grid-column: span N); <= 0 (default de zero-init) = 1 columna. */
+    int             grid_span;
     int             align;       /* BT_ALIGN_*: alineacion en el eje cruzado de este item dentro
                                   * de su linea (ya resuelta por el llamante desde align-self o
                                   * el align-items del contenedor) */

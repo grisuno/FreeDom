@@ -1,12 +1,14 @@
 /*
- * image_decode — implementation: PNG / JPEG -> Cairo-native ARGB32.
+ * image_decode — implementation: PNG / JPEG / GIF / WebP -> Cairo-native ARGB32.
  *
  * PNG uses libpng's simplified read API (no setjmp; success is a return value).
  * JPEG uses libjpeg with an in-memory source and a longjmp error manager so a
- * malformed stream fails closed instead of calling exit(). Output is tightly packed
- * BGRA (Cairo's native CAIRO_FORMAT_ARGB32 byte order); PNG is premultiplied, JPEG
- * is fully opaque (alpha 0xFF, so premultiply is a no-op). No filesystem, no network:
- * this is the piece that runs inside the confined tab worker. See spec/image_decode.md.
+ * malformed stream fails closed instead of calling exit(). GIF uses an own pure-C
+ * bounded LZW decoder (no giflib). WebP uses libwebp's WebPDecodeBGRA in-memory
+ * API. Output is tightly packed BGRA (Cairo's native CAIRO_FORMAT_ARGB32 byte
+ * order); PNG is premultiplied, JPEG is fully opaque (alpha 0xFF). No filesystem,
+ * no network: this is the piece that runs inside the confined tab worker. See
+ * spec/image_decode.md.
  */
 
 #include "image_decode.h"
@@ -17,10 +19,14 @@
 
 #include <png.h>
 #include <jpeglib.h>
+#include <webp/decode.h>
 
-/* The 8-byte PNG signature, and the 3-byte JPEG SOI+marker prefix. */
+/* The 8-byte PNG signature, the 3-byte JPEG SOI+marker prefix, and the
+ * 12-byte RIFF....WEBP signature (the 4-byte size field at offset 4-7
+ * varies per image, so only the first 4 and last 4 bytes are fixed). */
 static const uint8_t PNG_MAGIC[8] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
 static const uint8_t JPEG_MAGIC[3] = { 0xff, 0xd8, 0xff };
+static const uint8_t WEBP_MAGIC[4] = { 'W', 'E', 'B', 'P' };
 
 /* Bytes needed to read width+height: signature(8) + IHDR len(4) + "IHDR"(4) +
  * width(4) + height(4) = 24, with the type tag at offset 12 and the dimensions at
@@ -33,6 +39,13 @@ img_format img_sniff(const uint8_t *bytes, size_t len) {
         return IMG_FMT_PNG;
     if (len >= sizeof JPEG_MAGIC && memcmp(bytes, JPEG_MAGIC, sizeof JPEG_MAGIC) == 0)
         return IMG_FMT_JPEG;
+    if (len >= 6u && memcmp(bytes, "GIF8", 4) == 0 &&
+        (bytes[4] == '7' || bytes[4] == '9') && bytes[5] == 'a')
+        return IMG_FMT_GIF;
+    /* WebP: RIFF + 4-byte size + WEBP. */
+    if (len >= 12u && memcmp(bytes, "RIFF", 4) == 0 &&
+        memcmp(bytes + 8, WEBP_MAGIC, 4) == 0)
+        return IMG_FMT_WEBP;
     return IMG_FMT_UNKNOWN;
 }
 
@@ -231,11 +244,319 @@ img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out) {
     return IMG_OK;
 }
 
+/* --- GIF: own bounded pure-C decoder (spec/image_decode.md §0.2) ------------
+ * First frame only. No dependency: LZW is ~100 lines and giflib would be one
+ * more hostile-input parser to audit. Every read is bounds-checked; the LZW
+ * expansion is capped by the frame area, so a corrupt stream can neither hang
+ * nor write out of bounds. */
+
+#define GIF_LZW_MAX_CODES 4096u
+
+typedef struct gif_reader {
+    const uint8_t *p;
+    size_t len, pos;
+} gif_reader;
+
+static int gr_u8(gif_reader *r, uint8_t *out) {
+    if (r->pos >= r->len) return 0;
+    *out = r->p[r->pos++];
+    return 1;
+}
+
+static int gr_u16le(gif_reader *r, uint16_t *out) {
+    if (r->pos + 2u > r->len) return 0;
+    *out = (uint16_t)(r->p[r->pos] | ((uint16_t)r->p[r->pos + 1] << 8));
+    r->pos += 2u;
+    return 1;
+}
+
+static int gr_skip(gif_reader *r, size_t n) {
+    if (r->pos + n > r->len) return 0;
+    r->pos += n;
+    return 1;
+}
+
+/* Skips a chain of data sub-blocks up to and including the 0 terminator. */
+static int gr_skip_subblocks(gif_reader *r) {
+    uint8_t n;
+    for (;;) {
+        if (!gr_u8(r, &n)) return 0;
+        if (n == 0u) return 1;
+        if (!gr_skip(r, n)) return 0;
+    }
+}
+
+/* Bit reader over the LZW data sub-block chain, LSB-first. */
+typedef struct gif_bits {
+    gif_reader *r;
+    uint32_t    acc;
+    unsigned    nbits;
+    uint8_t     block_left;   /* bytes left in the current sub-block */
+    int         ended;        /* saw the 0-length terminator */
+} gif_bits;
+
+static int gb_next_code(gif_bits *b, unsigned width, unsigned *out) {
+    while (b->nbits < width) {
+        if (b->block_left == 0u) {
+            uint8_t n;
+            if (b->ended || !gr_u8(b->r, &n)) return 0;
+            if (n == 0u) { b->ended = 1; return 0; }
+            b->block_left = n;
+        }
+        uint8_t byte;
+        if (!gr_u8(b->r, &byte)) return 0;
+        b->block_left--;
+        b->acc |= (uint32_t)byte << b->nbits;
+        b->nbits += 8u;
+    }
+    *out = b->acc & ((1u << width) - 1u);
+    b->acc >>= width;
+    b->nbits -= width;
+    return 1;
+}
+
+/* Visual row of interlaced-frame row `r` (4-pass GIF interlace). */
+static uint32_t gif_deinterlace_row(uint32_t r, uint32_t fh) {
+    uint32_t pass1 = (fh + 7u) / 8u;          /* rows 0, 8, 16, ... */
+    uint32_t pass2 = (fh + 3u) / 8u;          /* rows 4, 12, ... */
+    uint32_t pass3 = (fh + 1u) / 4u;          /* rows 2, 6, ... */
+    if (r < pass1) return r * 8u;
+    r -= pass1;
+    if (r < pass2) return r * 8u + 4u;
+    r -= pass2;
+    if (r < pass3) return r * 4u + 2u;
+    r -= pass3;
+    return r * 2u + 1u;
+}
+
+/* Writes one palette pixel into the canvas at frame-relative index i (clipped to
+ * the canvas; transparent index -> 0x00000000, already premultiplied). */
+static void gif_put_pixel(uint32_t *canvas, uint32_t cw, uint32_t ch,
+                          uint32_t fx0, uint32_t fy0, uint32_t fw, uint32_t fh,
+                          int interlaced, uint32_t i,
+                          const uint8_t *pal, unsigned pal_n, unsigned idx,
+                          int transparent_idx, int *bad_index) {
+    if (idx >= pal_n) { *bad_index = 1; return; }
+    uint32_t fx = i % fw, fy = i / fw;
+    if (interlaced) fy = gif_deinterlace_row(fy, fh);
+    uint32_t x = fx0 + fx, y = fy0 + fy;
+    if (x >= cw || y >= ch) return;
+    uint32_t px;
+    if ((int)idx == transparent_idx) {
+        px = 0u;
+    } else {
+        const uint8_t *c = pal + idx * 3u;
+        px = 0xff000000u | ((uint32_t)c[0] << 16) | ((uint32_t)c[1] << 8) | c[2];
+    }
+    canvas[(size_t)y * cw + x] = px;
+}
+
+img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out) {
+    if (bytes == NULL || out == NULL) return IMG_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    if (img_sniff(bytes, len) != IMG_FMT_GIF) return IMG_ERR_FORMAT;
+
+    gif_reader r = { bytes, len, 6u };   /* past "GIF8?a" */
+    uint16_t cw16, ch16;
+    uint8_t lsd_flags, bg, aspect;
+    if (!gr_u16le(&r, &cw16) || !gr_u16le(&r, &ch16) ||
+        !gr_u8(&r, &lsd_flags) || !gr_u8(&r, &bg) || !gr_u8(&r, &aspect))
+        return IMG_ERR_TRUNCATED;
+    uint32_t cw = cw16, ch = ch16;
+    if (!img_dimensions_ok(cw, ch)) return IMG_ERR_DIMENSIONS;
+
+    const uint8_t *gct = NULL;
+    unsigned gct_n = 0;
+    if (lsd_flags & 0x80u) {
+        gct_n = 1u << ((lsd_flags & 0x07u) + 1u);
+        if (r.pos + (size_t)gct_n * 3u > r.len) return IMG_ERR_TRUNCATED;
+        gct = bytes + r.pos;
+        r.pos += (size_t)gct_n * 3u;
+    }
+
+    int transparent_idx = -1;
+    for (;;) {
+        uint8_t block;
+        if (!gr_u8(&r, &block)) return IMG_ERR_TRUNCATED;
+        if (block == 0x3bu) return IMG_ERR_DECODE;   /* trailer before any image */
+        if (block == 0x21u) {
+            uint8_t label;
+            if (!gr_u8(&r, &label)) return IMG_ERR_TRUNCATED;
+            if (label == 0xf9u) {
+                /* Graphic Control Extension: size(4) flags delay(2) tidx term */
+                uint8_t sz, flags, tidx;
+                if (!gr_u8(&r, &sz) || sz != 4u) return IMG_ERR_DECODE;
+                if (!gr_u8(&r, &flags) || !gr_skip(&r, 2u) || !gr_u8(&r, &tidx))
+                    return IMG_ERR_TRUNCATED;
+                transparent_idx = (flags & 0x01u) ? (int)tidx : -1;
+                if (!gr_skip_subblocks(&r)) return IMG_ERR_TRUNCATED;
+            } else {
+                if (!gr_skip_subblocks(&r)) return IMG_ERR_TRUNCATED;
+            }
+            continue;
+        }
+        if (block != 0x2cu) return IMG_ERR_DECODE;   /* not an Image Descriptor */
+        break;
+    }
+
+    uint16_t fx16, fy16, fw16, fh16;
+    uint8_t id_flags;
+    if (!gr_u16le(&r, &fx16) || !gr_u16le(&r, &fy16) ||
+        !gr_u16le(&r, &fw16) || !gr_u16le(&r, &fh16) || !gr_u8(&r, &id_flags))
+        return IMG_ERR_TRUNCATED;
+    uint32_t fw = fw16, fh = fh16;
+    if (!img_dimensions_ok(fw, fh)) return IMG_ERR_DIMENSIONS;
+    int interlaced = (id_flags & 0x40u) != 0;
+
+    const uint8_t *pal = gct;
+    unsigned pal_n = gct_n;
+    if (id_flags & 0x80u) {   /* local color table overrides the global one */
+        pal_n = 1u << ((id_flags & 0x07u) + 1u);
+        if (r.pos + (size_t)pal_n * 3u > r.len) return IMG_ERR_TRUNCATED;
+        pal = bytes + r.pos;
+        r.pos += (size_t)pal_n * 3u;
+    }
+    if (pal == NULL || pal_n == 0u) return IMG_ERR_DECODE;
+
+    uint8_t root;
+    if (!gr_u8(&r, &root)) return IMG_ERR_TRUNCATED;
+    if (root < 2u || root > 11u) return IMG_ERR_DECODE;
+
+    /* canvas starts fully transparent; unfilled pixels stay that way */
+    size_t npix = (size_t)cw * ch;
+    uint32_t *canvas = (uint32_t *)calloc(npix, 4u);
+    if (canvas == NULL) return IMG_ERR_OOM;
+
+    /* LZW dictionary: prefix chain + last byte per code. */
+    uint16_t *prefix = (uint16_t *)malloc(GIF_LZW_MAX_CODES * sizeof *prefix);
+    uint8_t  *suffix = (uint8_t *)malloc(GIF_LZW_MAX_CODES);
+    uint8_t  *stack  = (uint8_t *)malloc(GIF_LZW_MAX_CODES);
+    if (prefix == NULL || suffix == NULL || stack == NULL) {
+        free(prefix); free(suffix); free(stack); free(canvas);
+        return IMG_ERR_OOM;
+    }
+
+    unsigned clear = 1u << root, eoi = clear + 1u;
+    unsigned next = eoi + 1u, width = root + 1u;
+    unsigned prev = GIF_LZW_MAX_CODES;   /* sentinel: no previous code */
+    uint32_t emitted = 0;
+    uint32_t frame_pixels = fw * fh;
+    int bad_index = 0;
+    img_status st = IMG_OK;
+    gif_bits gb = { &r, 0u, 0u, 0u, 0 };
+
+    for (unsigned c = 0; c < clear; ++c) { prefix[c] = 0xffffu; suffix[c] = (uint8_t)c; }
+
+    while (emitted < frame_pixels) {
+        unsigned code;
+        if (!gb_next_code(&gb, width, &code)) { st = IMG_ERR_TRUNCATED; break; }
+        if (code == clear) {
+            next = eoi + 1u;
+            width = root + 1u;
+            prev = GIF_LZW_MAX_CODES;
+            continue;
+        }
+        if (code == eoi) break;
+        if (code > next || code >= GIF_LZW_MAX_CODES ||
+            (code == next && prev == GIF_LZW_MAX_CODES)) {
+            st = IMG_ERR_DECODE;
+            break;
+        }
+
+        /* Expand the code's string (KwKwK case: prev + first(prev)) onto the
+         * stack; bounded by the dictionary size, so this can never run away. */
+        unsigned sp = 0;
+        unsigned cur = code;
+        uint8_t first;
+        if (code == next) {
+            /* not yet defined: prev's string + prev's first byte */
+            cur = prev;
+        }
+        while (cur >= clear) {
+            if (sp >= GIF_LZW_MAX_CODES) { st = IMG_ERR_DECODE; break; }
+            stack[sp++] = suffix[cur];
+            cur = prefix[cur];
+        }
+        if (st != IMG_OK) break;
+        first = suffix[cur];
+
+        /* Emit: root byte first, then the stacked bytes in reverse; the KwKwK
+         * case (code == next) appends first(prev) once more after the chain. */
+        gif_put_pixel(canvas, cw, ch, fx16, fy16, fw, fh, interlaced, emitted++,
+                      pal, pal_n, first, transparent_idx, &bad_index);
+        while (sp > 0 && emitted < frame_pixels) {
+            gif_put_pixel(canvas, cw, ch, fx16, fy16, fw, fh, interlaced, emitted++,
+                          pal, pal_n, stack[--sp], transparent_idx, &bad_index);
+        }
+        if (code == next && emitted < frame_pixels) {
+            gif_put_pixel(canvas, cw, ch, fx16, fy16, fw, fh, interlaced, emitted++,
+                          pal, pal_n, first, transparent_idx, &bad_index);
+        }
+        if (bad_index) { st = IMG_ERR_DECODE; break; }
+
+        if (prev != GIF_LZW_MAX_CODES && next < GIF_LZW_MAX_CODES) {
+            prefix[next] = (uint16_t)prev;
+            suffix[next] = first;
+            ++next;
+            if (next == (1u << width) && width < 12u) ++width;
+        }
+        prev = code;
+    }
+
+    free(prefix);
+    free(suffix);
+    free(stack);
+    if (st != IMG_OK) {
+        free(canvas);
+        return st;
+    }
+    out->width = cw;
+    out->height = ch;
+    out->stride = cw * 4u;
+    out->data = (uint8_t *)canvas;
+    return IMG_OK;
+}
+
+img_status img_decode_webp(const uint8_t *bytes, size_t len, img_pixels *out) {
+    if (bytes == NULL || out == NULL) return IMG_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    if (img_sniff(bytes, len) != IMG_FMT_WEBP) return IMG_ERR_FORMAT;
+
+    /* WebPGetInfo gives dimensions without full decode (anti-bomb). */
+    int iw = 0, ih = 0;
+    if (!WebPGetInfo(bytes, len, &iw, &ih)) return IMG_ERR_DECODE;
+    uint32_t w = (uint32_t)iw, h = (uint32_t)ih;
+    if (!img_dimensions_ok(w, h)) return IMG_ERR_DIMENSIONS;
+
+    /* Decode to BGRA (native Cairo byte order: B,G,R,A in memory). libwebp
+     * returns straight alpha; premultiply afterwards. */
+    size_t stride = (size_t)w * 4u;
+    size_t nbytes = stride * (size_t)h;
+    uint8_t *buf = (uint8_t *)malloc(nbytes);
+    if (buf == NULL) return IMG_ERR_OOM;
+
+    uint8_t *result = WebPDecodeBGRAInto(bytes, len, buf, nbytes, (int)stride);
+    if (result == NULL) {
+        free(buf);
+        return IMG_ERR_DECODE;
+    }
+
+    premultiply(buf, (size_t)w * (size_t)h);
+
+    out->width = w;
+    out->height = h;
+    out->stride = (uint32_t)stride;
+    out->data = buf;
+    return IMG_OK;
+}
+
 img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out) {
     if (bytes == NULL || out == NULL) return IMG_ERR_NULL_ARG;
     switch (img_sniff(bytes, len)) {
         case IMG_FMT_PNG:  return img_decode_png(bytes, len, out);
         case IMG_FMT_JPEG: return img_decode_jpeg(bytes, len, out);
+        case IMG_FMT_GIF:  return img_decode_gif(bytes, len, out);
+        case IMG_FMT_WEBP: return img_decode_webp(bytes, len, out);
         default:
             memset(out, 0, sizeof *out);
             return IMG_ERR_FORMAT;
@@ -255,6 +576,8 @@ const char *img_format_name(img_format f) {
     switch (f) {
         case IMG_FMT_PNG: return "png";
         case IMG_FMT_JPEG: return "jpeg";
+        case IMG_FMT_GIF: return "gif";
+        case IMG_FMT_WEBP: return "webp";
         case IMG_FMT_UNKNOWN: return "unknown";
         default: return "unknown";
     }

@@ -58,7 +58,8 @@ static void ignore_sigpipe(void);
 #define TAB_MAX_URL ((size_t)(64u * 1024u))
 
 /* Request opcodes (parent -> child). */
-enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5 };
+enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
+       OP_TICK = 6 };
 
 /* OP_LOAD response tags (child -> parent). While running the page's scripts the child
  * may issue zero or more TAG_SUBREQ subresource requests (XMLHttpRequest/fetch), which
@@ -258,13 +259,14 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
  *            shadow_dx,shadow_dy,shadow_color,opacity,valign,text_indent,white_space,
  *            text_overflow,word_break,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
+ *            cont_col_w[PV_GRID_TRACKS],grid_span,
  *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
  *            cont_wrap,cont_row_gap,cont_align_items,flex_align_self,
  *            float_side,float_id,float_clear,
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,box_w_pct,
  *            block_id,
  *            input_type,form_id,form_method, name, value )*
- * then the box-definition tree (Step D): [nbox]( the 39 box fields )*. block_id on a
+ * then the box-definition tree (Step D): [nbox]( the 58 box int32 fields )*. block_id on a
  * run says which box it belongs to; boxes[block_id] carries the decoration + parent.
  * with each string length-prefixed (a length of 0 means absent). The fixed-width
  * fields travel for every run so a hostile child cannot desync the stream by
@@ -396,6 +398,13 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
         if (write_full(wfd, &cjust, sizeof cjust) != 0) return -1;
         if (write_full(wfd, &ccols, sizeof ccols) != 0) return -1;
+        {
+            int32_t gtw[PV_GRID_TRACKS + 1];
+            for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+                gtw[gk] = (int32_t)r->cont_col_w[gk];
+            gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
+            if (write_full(wfd, gtw, sizeof gtw) != 0) return -1;
+        }
         if (write_full(wfd, &fgrow, sizeof fgrow) != 0) return -1;
         if (write_full(wfd, &fshrink, sizeof fshrink) != 0) return -1;
         if (write_full(wfd, &fbasis, sizeof fbasis) != 0) return -1;
@@ -436,7 +445,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[52] = {
+        int32_t f[58] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -467,6 +476,10 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->pointer_events,
             /* Hito 32: symbolic per-mille width cap (appended; read_view mirrors this) */
             (int32_t)bd->box_w_pct,
+            /* linear-gradient background (2026-07-11; read_view mirrors this) */
+            (int32_t)bd->grad_n, (int32_t)bd->grad_angle,
+            (int32_t)bd->grad_c0, (int32_t)bd->grad_c1,
+            (int32_t)bd->grad_c2, (int32_t)bd->grad_c3,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
     }
@@ -597,6 +610,8 @@ static void child_fetch_stylesheets(child_state *cs) {
     }
     hp_free_stylesheet_hrefs(hrefs, nhrefs);
 }
+
+static int32_t child_next_timer_ms(child_state *cs);
 
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
@@ -734,6 +749,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     /* TAG_RESULT marks the end of any subresource frames: the page result follows. */
     uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
+    int32_t next_ms = child_next_timer_ms(cs);
     if (write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &k, sizeof k) == 0 && ok) {
         size_t nlen = strlen(navbuf);
         (void)(write_full(wfd, &tl, sizeof tl) == 0
@@ -744,24 +760,48 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && write_full(wfd, &nlen, sizeof nlen) == 0
             && (nlen == 0 || write_full(wfd, navbuf, nlen) == 0)
             && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
-            && write_console(wfd, &cs->log) == 0);
+            && write_console(wfd, &cs->log) == 0
+            && write_full(wfd, &next_ms, sizeof next_ms) == 0);
     }
     hp_free(title);
     hp_free(text);
     pv_free(view);
 }
 
-/* Fire click handlers for node_id in the live DOM, then re-derive the view so the
- * parent can repaint mutations caused by the handler. Response format matches the
- * tail of OP_LOAD: [ok:int32][title_len][title][text_len][text][view][nav_len=''][console].
- * No navigation is produced by a click (the parent decides default actions). */
-static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
+/* Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the
+ * eval fails, or nothing is pending. Does NOT touch the console transcript. */
+static int32_t child_next_timer_ms(child_state *cs) {
+    if (cs->js == NULL) return -1;
+    static const char q[] = "typeof __nextTimerMs==='function'?__nextTimerMs():-1";
+    js_result r;
+    if (js_eval(cs->js, q, sizeof q - 1, &r) != JS_OK) return -1;
+    int32_t ms = (r.value != NULL) ? (int32_t)atoi(r.value) : -1;
+    js_result_free(&r);
+    return (ms >= 0) ? ms : -1;
+}
+
+/* Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock
+ * (OP_TICK), then re-derive the view so the parent can repaint mutations caused
+ * by the handlers. Response format matches the tail of OP_LOAD: [ok:int32]
+ * [title_len][title][text_len][text][view][nav_len=''][nav_replace][console]
+ * [next_timer_ms:int32]. Neither produces a navigation. */
+static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+                                  dom_node_id node_id, int32_t elapsed_ms) {
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
     int ok = 0;
     if (cs->js != NULL && cs->doc != NULL && cs->idx != NULL) {
-        (void)jd_fire_click(cs->js, node_id);
+        if (is_tick) {
+            char tick[64];
+            int n = snprintf(tick, sizeof tick, "__tickTimers(%d)",
+                             (int)(elapsed_ms >= 0 ? elapsed_ms : 0));
+            js_result r;
+            if (n > 0 && js_eval(cs->js, tick, (size_t)n, &r) == JS_OK)
+                js_result_free(&r);
+        } else {
+            (void)jd_fire_click(cs->js, node_id);
+        }
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
         if (title != NULL && text != NULL
@@ -774,7 +814,9 @@ static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
 
     uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
+    int32_t zero32 = 0;
     size_t zero = 0;
+    int32_t next_ms = child_next_timer_ms(cs);
     if (write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &k, sizeof k) == 0 && ok) {
         (void)(write_full(wfd, &tl, sizeof tl) == 0
             && (tl == 0 || write_full(wfd, title, tl) == 0)
@@ -782,12 +824,21 @@ static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
             && (xl == 0 || write_full(wfd, text, xl) == 0)
             && write_view(wfd, view) == 0
             && write_full(wfd, &zero, sizeof zero) == 0
-            && write_full(wfd, &k, sizeof k) == 0 /* nav_replace = 0 */
-            && write_console(wfd, &cs->log) == 0);
+            && write_full(wfd, &zero32, sizeof zero32) == 0 /* nav_replace = 0 */
+            && write_console(wfd, &cs->log) == 0
+            && write_full(wfd, &next_ms, sizeof next_ms) == 0);
     }
     hp_free(title);
     hp_free(text);
     pv_free(view);
+}
+
+static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
+    child_handle_mutation(wfd, cs, 0, node_id, 0);
+}
+
+static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms) {
+    child_handle_mutation(wfd, cs, 1, DOM_NODE_NONE, elapsed_ms);
 }
 
 /* Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a
@@ -899,7 +950,8 @@ static void tab_worker_run(int rfd, int wfd) {
         uint8_t op;
         if (read_full(rfd, &op, 1) != 0) break; /* EOF / error => quit */
         if (op == OP_QUIT) break;
-        if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE && op != OP_CLICK)
+        if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE &&
+            op != OP_CLICK && op != OP_TICK)
             break; /* desync */
 
         /* OP_CLICK is a short command: just the target node id. */
@@ -907,6 +959,14 @@ static void tab_worker_run(int rfd, int wfd) {
             int32_t nid = (int32_t)DOM_NODE_NONE;
             if (read_full(rfd, &nid, sizeof nid) != 0) break;
             child_handle_click(wfd, &cs, (dom_node_id)nid);
+            continue;
+        }
+
+        /* OP_TICK is a short command: the elapsed virtual ms to advance. */
+        if (op == OP_TICK) {
+            int32_t elapsed = 0;
+            if (read_full(rfd, &elapsed, sizeof elapsed) != 0) break;
+            child_handle_tick(wfd, &cs, elapsed);
             continue;
         }
 
@@ -1069,6 +1129,7 @@ static int read_view(int fd, pv_view **out) {
         /* 2026-07-10 wiring batch (image_rendering/caret_color). */
         int32_t tirend = 0, tcaret = -1;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
+        int32_t gtw[PV_GRID_TRACKS + 1] = { 0 };   /* track sizes + grid_span */
         int32_t fgrow = -1, fshrink = -1;
         int32_t fbasis = CSS_LEN_UNSET, forder = CSS_LEN_UNSET, fdir = 0;
         int32_t citem = -1;
@@ -1129,6 +1190,7 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &cgap, sizeof cgap) != 0
          || read_full(fd, &cjust, sizeof cjust) != 0
          || read_full(fd, &ccols, sizeof ccols) != 0
+         || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, &fgrow, sizeof fgrow) != 0
          || read_full(fd, &fshrink, sizeof fshrink) != 0
          || read_full(fd, &fbasis, sizeof fbasis) != 0
@@ -1205,6 +1267,11 @@ static int read_view(int fd, pv_view **out) {
             pv_set_text_style(v, (int)talign, (int)fscale, (int)lscale, (int)deco);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
                              (int)cwrap, (int)crgap, (int)calign);
+            {
+                int gw[PV_GRID_TRACKS];
+                for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) gw[gk] = (int)gtw[gk];
+                pv_set_grid(v, gw, PV_GRID_TRACKS, (int)gtw[PV_GRID_TRACKS]);
+            }
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
                        (int)fself);
             pv_set_cont_item(v, (int)citem);
@@ -1223,7 +1290,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[52];
+        int32_t f[58];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1252,6 +1319,9 @@ static int read_view(int fd, pv_view **out) {
             .pointer_events = f[50],
             /* Hito 32: symbolic per-mille width cap. */
             .box_w_pct = f[51],
+            /* linear-gradient background (2026-07-11). */
+            .grad_n = f[52], .grad_angle = f[53],
+            .grad_c0 = f[54], .grad_c1 = f[55], .grad_c2 = f[56], .grad_c3 = f[57],
         };
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
     }
@@ -1535,6 +1605,13 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
         fb_buffer_free(&console);
         return io_failure(t);
     }
+    /* Smallest pending JS timer delay (2026-07-11). */
+    int32_t next_ms = -1;
+    if (read_full(t->resp_fd, &next_ms, sizeof next_ms) != 0) {
+        free(title); free(text); free(navreq); pv_free(view);
+        fb_buffer_free(&console);
+        return io_failure(t);
+    }
 
     /* Gate the raw request HERE (trusted parent, Zero Trust): a compromised worker
      * cannot drive the browser off-policy. ln_resolve allows only https / a local
@@ -1559,20 +1636,19 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     out->nav_url = nav_url;
     out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
     out->console = console; /* ownership moves to the caller (tab_page_free) */
+    out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
     return TAB_OK;
 }
 
-tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
-    if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
-    memset(out, 0, sizeof *out);
-
+/* Shared request/response for the two short mutation commands (OP_CLICK with the
+ * node id / OP_TICK with the elapsed ms): the worker fires handlers, re-derives
+ * the view and answers with the OP_LOAD tail (no navigation) + next_timer_ms. */
+static tab_status tab_mutation_request(tab *t, uint8_t op, int32_t arg, tab_page *out) {
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    uint8_t op = OP_CLICK;
-    int32_t nid = (int32_t)node_id;
     if (write_full(t->req_fd, &op, 1) != 0
-     || write_full(t->req_fd, &nid, sizeof nid) != 0) {
+     || write_full(t->req_fd, &arg, sizeof arg) != 0) {
         tab_refresh_alive(t);
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
     }
@@ -1597,7 +1673,7 @@ tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
         free(title); free(text);
         return io_failure(t);
     }
-    /* Click responses carry an empty navigation field. */
+    /* Mutation responses carry an empty navigation field. */
     char *navreq = NULL;
     size_t nlen = 0;
     int32_t nav_replace = 0;
@@ -1615,6 +1691,12 @@ tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
         fb_buffer_free(&console);
         return io_failure(t);
     }
+    int32_t next_ms = -1;
+    if (read_full(t->resp_fd, &next_ms, sizeof next_ms) != 0) {
+        free(title); free(text); pv_free(view);
+        fb_buffer_free(&console);
+        return io_failure(t);
+    }
 
     out->title = title; out->title_len = tl;
     out->text  = text;  out->text_len  = xl;
@@ -1622,7 +1704,22 @@ tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
     out->nav_url = NULL;
     out->nav_replace = 0;
     out->console = console;
+    out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
     return TAB_OK;
+}
+
+tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
+    if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+
+    return tab_mutation_request(t, OP_CLICK, (int32_t)node_id, out);
+}
+
+tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out) {
+    if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    return tab_mutation_request(t, OP_TICK,
+                                (int32_t)(elapsed_ms >= 0 ? elapsed_ms : 0), out);
 }
 
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out) {

@@ -135,9 +135,20 @@ scripts; **el padre (proceso confiable) la resuelve y gatea** con `ln_resolve(UR
 (Zero Trust: el worker no resuelve, así un worker comprometido no puede colar `file:///etc/passwd`).
 Sin URL (página local/about) `location` cae al stub no-op previo. Última asignación gana.
 
-Lo que **no** existe aún (por diseño): `innerHTML` (getter — serialización), timers **asíncronos**
-reales (event loop que empuje vistas), scripts externos (`src`), eventos distintos a click
-(keydown, mousemove, submit, etc.). Todas las mutaciones son **memory-safe**: remover detacha
+**Cerrado 2026-07-11:** el **getter de `innerHTML`** serializa los hijos del nodo
+(`dom_get_inner_html`, acotado a `DOM_INNER_HTML_MAX` = 1 MiB, falla cerrado; sobre-tope o handle
+inválido ⇒ `""`, un getter jamás mata los scripts de la página). Y los **timers asíncronos son
+reales**: `setTimeout`/`setInterval` registran `{fn, due, iv, id}` con su **delay virtual** en ms
+(`clearTimeout`/`clearInterval` cancelan por id); el pump de carga (`__fireDeferred`) dispara solo
+los de delay 0 (comportamiento histórico); `__tickTimers(elapsed)` avanza el reloj **virtual** y
+dispara los vencidos en rondas acotadas (los intervalos se re-arman, mínimo 16 ms anti-loop);
+`__nextTimerMs()` reporta el mínimo delay pendiente (o -1). **El reloj solo avanza cuando el padre
+confiable lo dice** (`OP_TICK`/`tab_tick` — el worker no tiene reloj real ni canal de push: anti-fp
+y un worker comprometido no puede auto-despertarse). La GUI y el headless programan los ticks desde
+`tab_page.next_timer_ms`, con tope de ticks por carga.
+
+Lo que **no** existe aún (por diseño): eventos distintos a click (keydown, mousemove, submit,
+etc.). Todas las mutaciones son **memory-safe**: remover detacha
 (no destruye) → un handle previo nunca cuelga; agregar nodos nunca libera. Un handle inválido
 produce `null`/`""`/`false`, **nunca** un fallo del host.
 
@@ -218,10 +229,11 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
 
 ## 8. Fuera de alcance
 
-- Eventos **interactivos** (clic del usuario → handler → re-render): Hito 20e parte 2.
-- Timers **asíncronos** reales (event loop en el worker que empuje vistas nuevas).
-- Getter de `innerHTML` (serialización del subárbol).
+- Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del
+  usuario → handler → re-render ya funciona vía el dispatcher).
 - Navegación con anclas de fragmento (`#id`).
+- (Cerrados 2026-07-11, ver §3: timers asíncronos reales vía `OP_TICK` y el getter de
+  `innerHTML` — ya **no** están fuera de alcance.)
 - Selectores CSS **completos**: `querySelector` cubre el subconjunto de `css_select`
   (tipo/`.clase`/`#id`/`*`/`[attr]` + combinadores + pseudo-clases estructurales/`:link`); quedan
   fuera `:not()`/`:is()`/`:where()`/`:has()`, of-type y pseudo-elementos `::` (fail closed).

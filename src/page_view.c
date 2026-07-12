@@ -20,6 +20,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+/* The per-run sized-track cap mirrors the css module's; a divergence would
+ * silently truncate track sizes on the wire. */
+_Static_assert(PV_GRID_TRACKS == CSS_GRID_TRACKS_MAX,
+               "PV_GRID_TRACKS must mirror CSS_GRID_TRACKS_MAX");
 #include <string.h>
 
 #include <lexbor/dom/dom.h>
@@ -165,6 +170,8 @@ static void run_init_common(pv_run *r) {
     r->cont_gap = 0;
     r->cont_justify = 0;
     r->cont_cols = 0;
+    for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) r->cont_col_w[gk] = 0;
+    r->grid_span = 0;
     r->flex_grow = -1;
     r->flex_shrink = -1;
     r->flex_basis = CSS_LEN_UNSET;
@@ -444,6 +451,16 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
     r->cont_align_items = cont_align_items;
 }
 
+void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span) {
+    if (v == NULL || v->count == 0) return;
+    pv_run *r = &v->runs[v->count - 1];
+    if (col_w != NULL) {
+        int lim = (n < PV_GRID_TRACKS) ? n : PV_GRID_TRACKS;
+        for (int k = 0; k < lim; ++k) r->cont_col_w[k] = col_w[k];
+    }
+    r->grid_span = (col_span > 0) ? col_span : 0;
+}
+
 void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int flex_order, int flex_direction, int flex_align_self) {
     if (v == NULL || v->count == 0) return;
@@ -685,6 +702,11 @@ static int bgcolor_attr(lxb_dom_element_t *el) {
  * to the run's cont_item ordinal so inline fragments of one child share one item. */
 typedef struct pv_cont_info {
     int id, display, gap, justify, cols;
+    /* Grid track sizes of the container (0 auto / >0 px / <0 fr x100) and the
+     * ITEM's grid-column span (tracked like grow/shrink via the previous element
+     * on the walk; 0 = 1 column). */
+    int col_w[PV_GRID_TRACKS];
+    int col_span;
     int grow, shrink, basis, order, direction;
     const lxb_dom_node_t *item;
     /* Float context (spec/float.md): float_side/float_id from the nearest floated
@@ -849,7 +871,10 @@ static int css_has_boxdeco(const css_style *cs) {
            (cs->aspect_num > 0 && cs->aspect_den > 0) ||
            /* min-width alone too: a div with only `min-width:Npx` is a paintable
             * floor; the painter needs the box entry to honour it. */
-           cs->min_width > 0;
+           cs->min_width > 0 ||
+           /* a linear-gradient background needs the box machinery to paint (a solid
+            * background alone still rides the runs, unchanged). */
+           cs->bg_grad_n >= 2;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -927,6 +952,10 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->box_min_h = (cs->min_height > 0) ? cs->min_height : 0;
     d->box_max_h = (cs->max_height > 0) ? cs->max_height : 0;
     d->box_min_w = (cs->min_width > 0) ? cs->min_width : 0;
+    d->grad_n = (cs->bg_grad_n >= 2) ? cs->bg_grad_n : 0;
+    d->grad_angle = cs->bg_grad_angle;
+    d->grad_c0 = cs->bg_grad_c[0]; d->grad_c1 = cs->bg_grad_c[1];
+    d->grad_c2 = cs->bg_grad_c[2]; d->grad_c3 = cs->bg_grad_c[3];
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
@@ -1062,6 +1091,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     *li = NULL; *list_depth = 0; *ordered = 0;
     cont->id = -1; cont->display = 0; cont->gap = 0;
     cont->justify = FX_JUSTIFY_START; cont->cols = 0;
+    for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cont->col_w[gk] = 0;
+    cont->col_span = 0;
     cont->grow = -1; cont->shrink = -1; cont->basis = CSS_LEN_UNSET;
     cont->order = CSS_LEN_UNSET; cont->direction = 0;
     cont->item = NULL;
@@ -1084,6 +1115,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     int prev_grow = -1, prev_shrink = -1;
     int prev_basis = CSS_LEN_UNSET, prev_order = CSS_LEN_UNSET;
     int prev_align_self = CSS_AK_UNSET;
+    int prev_col_span = 0;
     int have_prev_el = 0;
     const lxb_dom_node_t *prev_el = NULL;
 
@@ -1190,6 +1222,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 cont->justify = css_to_fx_justify(cs.justify);
                 cont->cols = (cs.display == CSS_DISP_GRID)
                              ? (cs.grid_cols > 0 ? cs.grid_cols : 1) : 0;
+                if (cs.display == CSS_DISP_GRID)
+                    for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+                        cont->col_w[gk] = cs.grid_col_w[gk];
                 cont->id = container_id(reg, p);
                 /* Stage 3: direction is the CONTAINER's; grow/shrink/basis/order are
                  * the ITEM's (the element one step more inner on this walk). */
@@ -1203,6 +1238,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     cont->grow = prev_grow; cont->shrink = prev_shrink;
                     cont->basis = prev_basis; cont->order = prev_order;
                     cont->align_self = prev_align_self;
+                    cont->col_span = prev_col_span;
                     cont->item = prev_el;
                 }
                 got_cont = 1;
@@ -1210,6 +1246,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink;
             prev_basis = cs.flex_basis; prev_order = cs.order;
             prev_align_self = cs.align_self;
+            prev_col_span = (cs.grid_col_span > 0) ? cs.grid_col_span : 0;
             have_prev_el = 1;
             prev_el = p;
         }
@@ -2144,6 +2181,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
                 pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
                                  cont.wrap, cont.row_gap, cont.align_items);
+                pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                            cont.align_self);
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
@@ -2241,6 +2279,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
                          cont.wrap, cont.row_gap, cont.align_items);
+        pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
         pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                    cont.align_self);
         pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
