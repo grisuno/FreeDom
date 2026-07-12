@@ -10,12 +10,14 @@
 
 #include "dom_debug.h"
 #include "freebug.h"
+#include "hostblock.h"
 #include "js_policy.h"
 #include "link_nav.h"
 #include "net_realm.h"
 #include "prefetch.h"
 #include "render_doc.h"
 #include "render_policy.h"
+#include "request_policy.h"
 #include "secure_fetch.h"
 #include "tab.h"
 #include "ui.h"
@@ -111,6 +113,8 @@ static nr_config global_net = { 0, 0, 0 };
 static char global_tor_addr[64] = "127.0.0.1:9050";
 static char global_i2p_addr[64] = "127.0.0.1:4444";
 
+static hb_set *g_hosts = NULL;
+
 /* Reads the whole file into a NUL-terminated buffer. Caller frees with free(). */
 static char *read_file(const char *path, size_t *out_len) {
     FILE *f = fopen(path, "rb");
@@ -127,6 +131,33 @@ static char *read_file(const char *path, size_t *out_len) {
     buf[n] = '\0';
     if (out_len != NULL) *out_len = n;
     return buf;
+}
+
+static void headless_load_hosts(void) {
+    g_hosts = hb_new();
+    if (g_hosts == NULL) return;
+    const char *dirs[] = { NULL, "config", NULL };
+    {
+        char path[512];
+        const char *home = getenv("HOME");
+        if (home != NULL) {
+            snprintf(path, sizeof path, "%s/.config/freedom", home);
+            dirs[2] = path;
+        }
+    }
+    const char *env = getenv("FREEDOM_HOSTS_DIR");
+    if (env != NULL) dirs[0] = env;
+    for (int i = 0; i < 3; ++i) {
+        if (dirs[i] == NULL) continue;
+        char path[1024];
+        int n = snprintf(path, sizeof path, "%s/allow.conf", dirs[i]);
+        if (n <= 0 || (size_t)n >= sizeof path) continue;
+        size_t len = 0;
+        char *txt = read_file(path, &len);
+        if (txt == NULL) continue;
+        hb_load(g_hosts, txt, HB_LIST_ALLOW);
+        free(txt);
+    }
 }
 
 /* True if s holds only ASCII spaces/tabs (or is empty). */
@@ -274,6 +305,12 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     }
 
     sf_config cfg = sf_config_default();
+    if (g_hosts != NULL) {
+        char host[512];
+        if (rp_host_of(url, host, sizeof host) == 0
+            && hb_is_allowlisted(g_hosts, host))
+            cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+    }
     if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
     if (g_auth_user[0] != '\0') { cfg.username = g_auth_user; cfg.password = g_auth_pass; }
     nr_route route = nr_route_for(url, global_net);
@@ -473,6 +510,12 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
     if (out_nav != NULL) *out_nav = NULL;
 
     sf_config cfg = sf_config_default();
+    if (g_hosts != NULL) {
+        char host[512];
+        if (rp_host_of(url, host, sizeof host) == 0
+            && hb_is_allowlisted(g_hosts, host))
+            cfg.policy = SF_POLICY_ALLOWLISTED_INSECURE;
+    }
     if (global_insecure) { cfg.policy = SF_POLICY_PERMISSIVE; cfg.insecure = 1; }
     if (g_auth_user[0] != '\0') { cfg.username = g_auth_user; cfg.password = g_auth_pass; }
 
@@ -529,6 +572,7 @@ static int fetch_and_render(const char *url) {
 }
 
 static int run_headless(const char *target) {
+    headless_load_hosts();
     if (is_https_url(target) || is_overlay_http(target)) {
         return fetch_and_render(target);
     }

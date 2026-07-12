@@ -3,7 +3,7 @@
 > Generated offline by **readmenator**. Supports C, C++, Python, Go, Rust, JS/TS, Java, C#, Shell, PHP, Dart, GDScript, Nim, ASM.
 > No LLMs. No tokens. Pure static analysis. See more [here](https://github.com/grisuno/ReadMenator)
 
-**Total Files Parsed:** 158 | **Total Symbols Extracted:** 2834 | **Total Imports:** 872
+**Total Files Parsed:** 158 | **Total Symbols Extracted:** 2842 | **Total Imports:** 875
 
 ## Structural Knowledge Map
 > **Note:** The visual graph below has been intelligently pruned to the top 300 most relevant nodes to prevent rendering crashes. Full details of all 158 files are documented below.
@@ -82,23 +82,6 @@ graph TD
     tests_test_os_sandbox_c_test_harden_kills_denied_syscall["test_harden_kills_denied_syscall"]
     class tests_test_os_sandbox_c_test_harden_kills_denied_syscall fn;
     tests_test_os_sandbox_c --> tests_test_os_sandbox_c_test_harden_kills_denied_syscall
-    src_page_view_c["page_view.c (c)"]
-    class src_page_view_c mod;
-    src_page_view_c_pv_node_map["pv_node_map"]
-    class src_page_view_c_pv_node_map cls;
-    src_page_view_c --> src_page_view_c_pv_node_map
-    src_page_view_c_pv_cont_info["pv_cont_info"]
-    class src_page_view_c_pv_cont_info cls;
-    src_page_view_c --> src_page_view_c_pv_cont_info
-    src_page_view_c_pv_item_track["pv_item_track"]
-    class src_page_view_c_pv_item_track cls;
-    src_page_view_c --> src_page_view_c_pv_item_track
-    src_page_view_c_pv_box_info["pv_box_info"]
-    class src_page_view_c_pv_box_info cls;
-    src_page_view_c --> src_page_view_c_pv_box_info
-    src_page_view_c_pv_container_reg["pv_container_reg"]
-    class src_page_view_c_pv_container_reg cls;
-    src_page_view_c --> src_page_view_c_pv_container_reg
     src_freedom_c["freedom.c (c)"]
     class src_freedom_c mod;
     src_freedom_c_print_usage["print_usage"]
@@ -116,6 +99,23 @@ graph TD
     src_freedom_c_read_file["read_file"]
     class src_freedom_c_read_file fn;
     src_freedom_c --> src_freedom_c_read_file
+    src_page_view_c["page_view.c (c)"]
+    class src_page_view_c mod;
+    src_page_view_c_pv_node_map["pv_node_map"]
+    class src_page_view_c_pv_node_map cls;
+    src_page_view_c --> src_page_view_c_pv_node_map
+    src_page_view_c_pv_cont_info["pv_cont_info"]
+    class src_page_view_c_pv_cont_info cls;
+    src_page_view_c --> src_page_view_c_pv_cont_info
+    src_page_view_c_pv_item_track["pv_item_track"]
+    class src_page_view_c_pv_item_track cls;
+    src_page_view_c --> src_page_view_c_pv_item_track
+    src_page_view_c_pv_box_info["pv_box_info"]
+    class src_page_view_c_pv_box_info cls;
+    src_page_view_c --> src_page_view_c_pv_box_info
+    src_page_view_c_pv_container_reg["pv_container_reg"]
+    class src_page_view_c_pv_container_reg cls;
+    src_page_view_c --> src_page_view_c_pv_container_reg
     tests_test_profile_c["test_profile.c (c)"]
     class tests_test_profile_c mod;
     tests_test_profile_c_fixture["fixture"]
@@ -252,23 +252,6 @@ graph TD
     tests_test_js_dom_c_test_install_null_args["test_install_null_args"]
     class tests_test_js_dom_c_test_install_null_args fn;
     tests_test_js_dom_c --> tests_test_js_dom_c_test_install_null_args
-    src_profile_c["profile.c (c)"]
-    class src_profile_c mod;
-    src_profile_c_join_path["join_path"]
-    class src_profile_c_join_path fn;
-    src_profile_c --> src_profile_c_join_path
-    src_profile_c_keyfile_create["keyfile_create"]
-    class src_profile_c_keyfile_create fn;
-    src_profile_c --> src_profile_c_keyfile_create
-    src_profile_c_profile_open["profile_open"]
-    class src_profile_c_profile_open fn;
-    src_profile_c --> src_profile_c_profile_open
-    src_profile_c_map_ds["map_ds"]
-    class src_profile_c_map_ds fn;
-    src_profile_c --> src_profile_c_map_ds
-    src_profile_c_profile_load["profile_load"]
-    class src_profile_c_profile_load fn;
-    src_profile_c --> src_profile_c_profile_load
     src_local_store_c["local_store.c (c)"]
     class src_local_store_c mod;
     src_local_store_c_cipher_for["cipher_for"]
@@ -286,6 +269,23 @@ graph TD
     src_local_store_c_aead_decrypt["aead_decrypt"]
     class src_local_store_c_aead_decrypt fn;
     src_local_store_c --> src_local_store_c_aead_decrypt
+    src_profile_c["profile.c (c)"]
+    class src_profile_c mod;
+    src_profile_c_join_path["join_path"]
+    class src_profile_c_join_path fn;
+    src_profile_c --> src_profile_c_join_path
+    src_profile_c_keyfile_create["keyfile_create"]
+    class src_profile_c_keyfile_create fn;
+    src_profile_c --> src_profile_c_keyfile_create
+    src_profile_c_profile_open["profile_open"]
+    class src_profile_c_profile_open fn;
+    src_profile_c --> src_profile_c_profile_open
+    src_profile_c_map_ds["map_ds"]
+    class src_profile_c_map_ds fn;
+    src_profile_c --> src_profile_c_map_ds
+    src_profile_c_profile_load["profile_load"]
+    class src_profile_c_profile_load fn;
+    src_profile_c --> src_profile_c_profile_load
     gui_ui_render_c["ui_render.c (c)"]
     class gui_ui_render_c mod;
     gui_ui_render_c_ui_window["ui_window"]
@@ -988,264 +988,266 @@ graph TD
 - `is_https_url` (line 885) `static int is_https_url(const char *s)`
 - `is_http_url` (line 889) `static int is_http_url(const char *s)`
 - `host_from_url` (line 901) `static int host_from_url(const char *url, char *out, size_t outsz)` - *A plain-http URL whose realm self-authenticates (an i2p eepsite today): it is * fetched over the network (through the overlay proxy), not read as a...*
-- `input_is_editable` (line 923) `static int input_is_editable(int input_type)` - *const char *colon = memchr(p, ':', (size_t)(end - p)); const char *host_end = colon != NULL ? colon : end; size_t len = (size_t)(host_end - p); if ...*
-- `free_inputs` (line 929) `static void free_inputs(browser_window *w)` - *return 1; } #include "form.h" #include "secure_fetch.h" #include "tab.h" /* An editable control gets a live text field; submit/button/hidden do not...*
-- `free_images` (line 937) `static void free_images(browser_window *w)` - *static int input_is_editable(int input_type) { return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD || input_type == PV_IN_TEXTAREA; } /...*
-- `find_image` (line 947) `static const ui_image *find_image(const browser_window *w, const rd_block *blk)` - *w->focused_input = -1; } /* Releases the decoded image surfaces of the current page and the array. static void free_images(browser_window *w) { for...*
-- `layout` (line 957) `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
+- `input_is_interactive` (line 926) `static int input_is_interactive(int input_type)` - *An editable control gets a live text field; submit/button/hidden do not. Checkboxes, radios, and selects are interactive (click toggles/opens) but ...*
+- `input_is_editable` (line 931) `static int input_is_editable(int input_type)`
+- `free_inputs` (line 938) `static void free_inputs(browser_window *w)` - *are not text-editable -- they are tracked via rebuild_inputs so clicks * dispatch to them, but they have no tf_field. static int input_is_interacti...*
+- `free_images` (line 946) `static void free_images(browser_window *w)` - *static int input_is_editable(int input_type) { return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD || input_type == PV_IN_TEXTAREA; } /...*
+- `find_image` (line 956) `static const ui_image *find_image(const browser_window *w, const rd_block *blk)` - *w->focused_input = -1; } /* Releases the decoded image surfaces of the current page and the array. static void free_images(browser_window *w) { for...*
+- `layout` (line 966) `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
 static int image...`
-- `rebuild_inputs` (line 971) `static void rebuild_inputs(browser_window *w)` - *Builds the live editable state for the current doc: one entry per editable * control, seeded with its declared value. Aliases the doc blocks (not o...*
-- `find_input_state` (line 996) `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)` - *if (w->inputs == NULL) return; /* fail closed: no editable fields, page still shows size_t k = 0; for (size_t i = 0; i < n; ++i) { const rd_block *...*
-- `clear_doc` (line 1004) `static void clear_doc(browser_window *w)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
-- `set_cache` (line 1013) `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
-- `surface_from_pixels` (line 1024) `static cairo_surface_t *surface_from_pixels(const tab_image *img)` - *Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row by row because Cairo may use a wider stride than the tightly packed...*
-- `fetch_follow_navigable` (line 1090) `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
+- `rebuild_inputs` (line 980) `static void rebuild_inputs(browser_window *w)` - *Builds the live editable state for the current doc: one entry per editable * control, seeded with its declared value. Aliases the doc blocks (not o...*
+- `find_input_state` (line 1005) `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)` - *if (w->inputs == NULL) return; /* fail closed: no editable fields, page still shows size_t k = 0; for (size_t i = 0; i < n; ++i) { const rd_block *...*
+- `clear_doc` (line 1013) `static void clear_doc(browser_window *w)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
+- `set_cache` (line 1022) `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` - *Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls alias the doc, so they are c...*
+- `surface_from_pixels` (line 1033) `static cairo_surface_t *surface_from_pixels(const tab_image *img)` - *Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row by row because Cairo may use a wider stride than the tightly packed...*
+- `fetch_follow_navigable` (line 1099) `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
                         ...` - *Fetches url (following redirects) under cfg's policy, applying two navigability fallbacks in order of decreasing security: 1) If the only obstacle ...*
-- `GET` (line 1123) `* a GET (Zero Trust). cfg->policy is restored before returning. */
+- `GET` (line 1132) `* a GET (Zero Trust). cfg->policy is restored before returning. */
 static sf_status fetch_post_na...`
-- `gui_subresource_fetch` (line 1169) `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
+- `gui_subresource_fetch` (line 1178) `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
                ...` - *tab_fetch_fn: the trusted parent's policy-checked subresource fetch for page XHR/fetch. The worker has no network; it proxied the request here. We ...*
-- `prepare_fetch` (line 1269) `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
+- `prepare_fetch` (line 1278) `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
                     ...` - *Builds cfg for url and applies the pre-fetch gates. Returns nonzero when the fetch may proceed (cfg and pr->allowlisted are then set); returns 0 wh...*
-- `fetch_job_free` (line 1360) `static void fetch_job_free(fetch_job *j)`
-- `stream_progress_cb` (line 1381) `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` - *Called by the fetch thread (~1/sec) with the downloaded body so far. Copies the data to the window's thread-safe streaming buffer and signals the m...*
-- `fetch_thread` (line 1405) `static void *fetch_thread(void *arg)` - *Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer back to the event loop. Pure with respect to the window: it rea...*
-- `fetch_launch` (line 1452) `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
+- `fetch_job_free` (line 1369) `static void fetch_job_free(fetch_job *j)`
+- `stream_progress_cb` (line 1390) `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` - *Called by the fetch thread (~1/sec) with the downloaded body so far. Copies the data to the window's thread-safe streaming buffer and signals the m...*
+- `fetch_thread` (line 1414) `static void *fetch_thread(void *arg)` - *Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer back to the event loop. Pure with respect to the window: it rea...*
+- `fetch_launch` (line 1461) `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
                ...` - *Spawns a detached worker to fetch url under cfg (already gated by prepare_fetch). The caller has bumped w->net_gen for this navigation; the job sna...*
-- `load_images` (line 1508) `static void load_images(browser_window *w, tab *t)` - *Fetches and decodes every allowed image of the current doc into w->images (one entry per RD_IMAGE block). Each fetch re-applies the full TLS/PQ/cha...*
-- `compute_page_js` (line 1613) `static int compute_page_js(const browser_window *w)` - *Resolves the JS policy for the current page's host (Secure by Default: off unless the global mode is ON or the host is on the js.conf allowlist). P...*
-- `drop_repl_worker` (line 1632) `static void drop_repl_worker(browser_window *w)` - *Drops the kept-alive REPL worker and clears the (active-tab) console transcript. Used when the active page changes WITHOUT a re-render (tab switch ...*
-- `schedule_js_tick` (line 1646) `static void schedule_js_tick(browser_window *w, int next_ms)` - *Schedules the next JS timer tick from the worker's reported smallest pending delay (tab_page.next_timer_ms; < 0 = nothing pending). The event loop ...*
-- `render_current_ex` (line 1655) `static void render_current_ex(browser_window *w, int allow_js_nav)`
-- `render_current` (line 1794) `static void render_current(browser_window *w)` - *Real async timers: a fresh load resets the per-page tick budget and schedules * the first OP_TICK from the worker's reported smallest pending delay...*
-- `show_busy` (line 1801) `static void show_busy(browser_window *w)` - *Marks a request in flight and paints a frame so the spinner appears at once. The fetch now runs on a worker thread, so the event loop keeps animati...*
-- `show_fetch_error` (line 1810) `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
+- `load_images` (line 1517) `static void load_images(browser_window *w, tab *t)` - *Fetches and decodes every allowed image of the current doc into w->images (one entry per RD_IMAGE block). Each fetch re-applies the full TLS/PQ/cha...*
+- `compute_page_js` (line 1622) `static int compute_page_js(const browser_window *w)` - *Resolves the JS policy for the current page's host (Secure by Default: off unless the global mode is ON or the host is on the js.conf allowlist). P...*
+- `drop_repl_worker` (line 1641) `static void drop_repl_worker(browser_window *w)` - *Drops the kept-alive REPL worker and clears the (active-tab) console transcript. Used when the active page changes WITHOUT a re-render (tab switch ...*
+- `schedule_js_tick` (line 1655) `static void schedule_js_tick(browser_window *w, int next_ms)` - *Schedules the next JS timer tick from the worker's reported smallest pending delay (tab_page.next_timer_ms; < 0 = nothing pending). The event loop ...*
+- `render_current_ex` (line 1664) `static void render_current_ex(browser_window *w, int allow_js_nav)`
+- `render_current` (line 1803) `static void render_current(browser_window *w)` - *Real async timers: a fresh load resets the per-page tick budget and schedules * the first OP_TICK from the worker's reported smallest pending delay...*
+- `show_busy` (line 1810) `static void show_busy(browser_window *w)` - *Marks a request in flight and paints a frame so the spinner appears at once. The fetch now runs on a worker thread, so the event loop keeps animati...*
+- `show_fetch_error` (line 1819) `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
                   ...` - *Replaces the page with the standard "Failed to load" diagnostic for status ss on url. allowlisted tailors the hint (already retried vs. how to over...*
-- `arrives` (line 1861) `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
+- `arrives` (line 1870) `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
  * and local ...`
-- `strcmp` (line 1919) `&& strcmp(auth_host_buf, w->auth_host) != 0)`
-- `tab_save` (line 1980) `static void tab_save(browser_window *w)` - *Parks the active tab's live state into its slot (a shallow move: the slot and the live fields briefly alias the same allocations; the live fields a...*
-- `tab_restore` (line 1996) `static void tab_restore(browser_window *w)` - *c->bs = w->bs; c->doc = w->doc; c->caps = w->caps; c->scroll = w->scroll; c->content_total_h = w->content_total_h; c->inputs = w->inputs; c->input_...*
-- `free_live_page` (line 2012) `static void free_live_page(browser_window *w)` - *w->bs = c->bs; w->doc = c->doc; w->caps = c->caps; w->scroll = c->scroll; w->content_total_h = c->content_total_h; w->inputs = c->inputs; w->input_...*
-- `tab_ctx_release` (line 2021) `static void tab_ctx_release(tab_ctx *c)` - *w->hover_href = c->hover_href; w->hover_cursor = c->hover_cursor; } /* Frees the LIVE page's owned state (used when closing the foreground tab). st...*
-- `tab_switch` (line 2036) `static void tab_switch(browser_window *w, int idx)` - *if (c->images != NULL) { for (size_t i = 0; i < c->image_count; ++i) if (c->images[i].surface != NULL) cairo_surface_destroy(c->images[i].surface);...*
-- `tab_new` (line 2055) `static void tab_new(browser_window *w, const char *url)` - *w->net_gen++; w->loading = 0; drop_repl_worker(w); /* active page changes without a render; rebind on next eval tab_save(w); w->active_tab = idx; t...*
-- `uitab_close` (line 2087) `static void uitab_close(browser_window *w, int idx)` - *w->inputs = NULL; w->input_count = 0; w->focused_input = -1; w->images = NULL; w->image_count = 0; w->cur_html = NULL; w->cur_html_len = 0; w->cur_...*
-- `newtab_x` (line 2129) `static double newtab_x(const browser_window *w)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge.*
-- `tab_title` (line 2136) `static const char *tab_title(const browser_window *w, int i)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge. static double newtab_x(const browser_win...*
-- `tabbar_top` (line 2152) `static double tabbar_top(const browser_window *w)` - *Top of the tab strip: directly under the client-side titlebar (or at the surface * top under server-side decorations).*
-- `toolbar_top` (line 2158) `static double toolbar_top(const browser_window *w)` - *Top of the toolbar: under the tab strip, which is always reserved. The whole * content area derives from this, so adding the strip reflows everythi...*
-- `content_geometry` (line 2165) `static void content_geometry(const browser_window *w, double *top, double *height)` - *The content area rectangle below the toolbar, in surface coordinates. The single source of truth for both painting and click hit-testing so they ca...*
-- `content_width` (line 2191) `static double content_width(const browser_window *w)`
-- `scrollbar_metrics` (line 2202) `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
+- `strcmp` (line 1928) `&& strcmp(auth_host_buf, w->auth_host) != 0)`
+- `tab_save` (line 1989) `static void tab_save(browser_window *w)` - *Parks the active tab's live state into its slot (a shallow move: the slot and the live fields briefly alias the same allocations; the live fields a...*
+- `tab_restore` (line 2005) `static void tab_restore(browser_window *w)` - *c->bs = w->bs; c->doc = w->doc; c->caps = w->caps; c->scroll = w->scroll; c->content_total_h = w->content_total_h; c->inputs = w->inputs; c->input_...*
+- `free_live_page` (line 2021) `static void free_live_page(browser_window *w)` - *w->bs = c->bs; w->doc = c->doc; w->caps = c->caps; w->scroll = c->scroll; w->content_total_h = c->content_total_h; w->inputs = c->inputs; w->input_...*
+- `tab_ctx_release` (line 2030) `static void tab_ctx_release(tab_ctx *c)` - *w->hover_href = c->hover_href; w->hover_cursor = c->hover_cursor; } /* Frees the LIVE page's owned state (used when closing the foreground tab). st...*
+- `tab_switch` (line 2045) `static void tab_switch(browser_window *w, int idx)` - *if (c->images != NULL) { for (size_t i = 0; i < c->image_count; ++i) if (c->images[i].surface != NULL) cairo_surface_destroy(c->images[i].surface);...*
+- `tab_new` (line 2064) `static void tab_new(browser_window *w, const char *url)` - *w->net_gen++; w->loading = 0; drop_repl_worker(w); /* active page changes without a render; rebind on next eval tab_save(w); w->active_tab = idx; t...*
+- `uitab_close` (line 2096) `static void uitab_close(browser_window *w, int idx)` - *w->inputs = NULL; w->input_count = 0; w->focused_input = -1; w->images = NULL; w->image_count = 0; w->cur_html = NULL; w->cur_html_len = 0; w->cur_...*
+- `newtab_x` (line 2138) `static double newtab_x(const browser_window *w)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge.*
+- `tab_title` (line 2145) `static const char *tab_title(const browser_window *w, int i)` - *X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge. static double newtab_x(const browser_win...*
+- `tabbar_top` (line 2161) `static double tabbar_top(const browser_window *w)` - *Top of the tab strip: directly under the client-side titlebar (or at the surface * top under server-side decorations).*
+- `toolbar_top` (line 2167) `static double toolbar_top(const browser_window *w)` - *Top of the toolbar: under the tab strip, which is always reserved. The whole * content area derives from this, so adding the strip reflows everythi...*
+- `content_geometry` (line 2174) `static void content_geometry(const browser_window *w, double *top, double *height)` - *The content area rectangle below the toolbar, in surface coordinates. The single source of truth for both painting and click hit-testing so they ca...*
+- `content_width` (line 2200) `static double content_width(const browser_window *w)`
+- `scrollbar_metrics` (line 2211) `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
          ...` - *Geometry of the vertical scrollbar in surface coordinates, plus the current thumb position. Returns 0 (and leaves outputs untouched) when the conte...*
-- `scrollbar_drag_to` (line 2230) `static void scrollbar_drag_to(browser_window *w)` - *Maps the current pointer Y (less the grab offset) to a scroll offset while the * thumb is being dragged, then repaints. No-op when there is no scro...*
-- `draw_scrollbar` (line 2247) `static void draw_scrollbar(cairo_t *cr, const browser_window *w)` - *Paints the scrollbar track and thumb. The thumb highlights while hovered or * dragged, the same affordance the toolbar buttons and links get.*
-- `window_button_rects` (line 2283) `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
-- `toolbar_rects` (line 2293) `static void toolbar_rects(const browser_window *w,
+- `scrollbar_drag_to` (line 2239) `static void scrollbar_drag_to(browser_window *w)` - *Maps the current pointer Y (less the grab offset) to a scroll offset while the * thumb is being dragged, then repaints. No-op when there is no scro...*
+- `draw_scrollbar` (line 2256) `static void draw_scrollbar(cairo_t *cr, const browser_window *w)` - *Paints the scrollbar track and thumb. The thumb highlights while hovered or * dragged, the same affordance the toolbar buttons and links get.*
+- `window_button_rects` (line 2292) `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
+- `toolbar_rects` (line 2302) `static void toolbar_rects(const browser_window *w,
                           double *back_x, doub...` - *The reload button sits as the third left chrome button (after back/forward), at a * fixed x; callers that need it derive it here so the layout stay...*
-- `toolbar_button_at` (line 2309) `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` - *Which toolbar button (if any) is at (px, py). Shared by the hover highlight and * the cursor shape so they cannot drift from the click hit-test.*
-- `hot_actionable` (line 2325) `static int hot_actionable(const browser_window *w, ui_hot hot)` - *A hovered button is "actionable" (gets the hand cursor) when clicking it would * do something: Go/menu always, Back/Forward only when there is hist...*
-- `menu_panel_rect` (line 2336) `static void menu_panel_rect(const browser_window *w, double *x, double *y,
+- `toolbar_button_at` (line 2318) `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` - *Which toolbar button (if any) is at (px, py). Shared by the hover highlight and * the cursor shape so they cannot drift from the click hit-test.*
+- `hot_actionable` (line 2334) `static int hot_actionable(const browser_window *w, ui_hot hot)` - *A hovered button is "actionable" (gets the hand cursor) when clicking it would * do something: Go/menu always, Back/Forward only when there is hist...*
+- `menu_panel_rect` (line 2345) `static void menu_panel_rect(const browser_window *w, double *x, double *y,
                       ...` - *The options-menu panel rectangle (below the gear button), and its per-item row * height. The single source of truth for drawing and hit-testing the...*
-- `ua_box_rect` (line 2352) `static void ua_box_rect(const browser_window *w, double *x, double *y,
+- `ua_box_rect` (line 2361) `static void ua_box_rect(const browser_window *w, double *x, double *y,
                         do...` - *The editable User-Agent box rectangle inside the options panel. The single * source of truth for drawing and hit-testing the field.*
-- `draw_text` (line 2361) `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
-- `rc_free` (line 2528) `static void rc_free(rc_layout *L)`
-- `rc_add_box` (line 2537) `static rc_box *rc_add_box(rc_layout *L)`
-- `rc_add_frag` (line 2549) `static rc_frag *rc_add_frag(rc_layout *L)`
-- `rc_add_row` (line 2559) `static rc_row *rc_add_row(rc_layout *L)`
-- `family_face` (line 2572) `static const char *family_face(int family)` - *Maps an author font-family bucket (css_font_family) to a Cairo toy-font family. * The engine matches no exact families, only the generic groups.*
-- `content_font` (line 2589) `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)`
-- `set_rgb_alpha` (line 2603) `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` - *Sets the source color, applying an author opacity (0..100) as an alpha when set * (-1 = fully opaque). Used for author text and its shadow.*
-- `utf8_clen` (line 2612) `static size_t utf8_clen(const char *s, size_t n)` - *Bytes in the UTF-8 cluster starting at s[0] (1 for a stray/continuation byte), * clamped to n.*
-- `draw_slice` (line 2652) `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)` - *Draws a text slice at (x, baseline) in the current content font/source. Shapes with HarfBuzz when available; otherwise the Cairo toy API. Mirrors m...*
-- `frag_styled` (line 2665) `static int frag_styled(const rc_frag *f)` - *True if a fragment needs the per-cluster path (text-transform other than none/unset, or a non-zero letter-spacing). Otherwise the fast whole-slice ...*
-- `styled_advance` (line 2672) `static double styled_advance(cairo_t *cr, const rc_frag *f)` - *Advance (px) of a fragment's text under its text-transform + letter-spacing. The current Cairo font must already be selected. Mirrors styled_draw e...*
-- `styled_draw` (line 2688) `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` - *Draws a fragment's text starting at (x, baseline) under its text-transform + * letter-spacing. The current Cairo font/source must already be set.*
-- `block_style` (line 2704) `static void block_style(const ui_theme *th, const rd_block *b,
+- `draw_text` (line 2370) `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
+- `rc_free` (line 2537) `static void rc_free(rc_layout *L)`
+- `rc_add_box` (line 2546) `static rc_box *rc_add_box(rc_layout *L)`
+- `rc_add_frag` (line 2558) `static rc_frag *rc_add_frag(rc_layout *L)`
+- `rc_add_row` (line 2568) `static rc_row *rc_add_row(rc_layout *L)`
+- `family_face` (line 2581) `static const char *family_face(int family)` - *Maps an author font-family bucket (css_font_family) to a Cairo toy-font family. * The engine matches no exact families, only the generic groups.*
+- `content_font` (line 2598) `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)`
+- `set_rgb_alpha` (line 2612) `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` - *Sets the source color, applying an author opacity (0..100) as an alpha when set * (-1 = fully opaque). Used for author text and its shadow.*
+- `utf8_clen` (line 2621) `static size_t utf8_clen(const char *s, size_t n)` - *Bytes in the UTF-8 cluster starting at s[0] (1 for a stray/continuation byte), * clamped to n.*
+- `draw_slice` (line 2661) `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)` - *Draws a text slice at (x, baseline) in the current content font/source. Shapes with HarfBuzz when available; otherwise the Cairo toy API. Mirrors m...*
+- `frag_styled` (line 2674) `static int frag_styled(const rc_frag *f)` - *True if a fragment needs the per-cluster path (text-transform other than none/unset, or a non-zero letter-spacing). Otherwise the fast whole-slice ...*
+- `styled_advance` (line 2681) `static double styled_advance(cairo_t *cr, const rc_frag *f)` - *Advance (px) of a fragment's text under its text-transform + letter-spacing. The current Cairo font must already be selected. Mirrors styled_draw e...*
+- `styled_draw` (line 2697) `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` - *Draws a fragment's text starting at (x, baseline) under its text-transform + * letter-spacing. The current Cairo font/source must already be set.*
+- `block_style` (line 2713) `static void block_style(const ui_theme *th, const rd_block *b,
                         double *si...`
-- `block_margins` (line 2728) `static void block_margins(const ui_theme *th, const rd_block *b,
+- `block_margins` (line 2737) `static void block_margins(const ui_theme *th, const rd_block *b,
                           double...` - *Vertical margins (px) of a block from the user-agent box model (box_style), resolved against the block's own font size (em -> px). The user-agent n...*
-- `flush_line` (line 2740) `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
-- `open_line` (line 2760) `static void open_line(rc_layout *L, rc_state *s)`
-- `flow_emit_frag` (line 2798) `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
+- `flush_line` (line 2749) `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
+- `open_line` (line 2769) `static void open_line(rc_layout *L, rc_state *s)`
+- `flow_emit_frag` (line 2807) `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
                  ...` - *Emits one fragment at the current pen position, advancing it. Shared by the * whole-word path and the word-break split path in flow_text.*
-- `flow_text` (line 2845) `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
+- `flow_text` (line 2854) `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                ...` - *owning box (for the hover-cursor lookup), -1 if none.  word-break/overflow-wrap (s->break_words): a single word wider than the WHOLE line (not just...*
-- `flow_text_block` (line 2993) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
+- `flow_text_block` (line 3002) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                  ...` - *Flows one text/link/notice block into L at content_w using state s. The caller sets s->bg_rgb (the block's author background, or -1) beforehand; th...*
-- `effect` (line 3074) `* effect (byte-identical default). */
+- `effect` (line 3083) `* effect (byte-identical default). */
 static int container_has_flex_items(const rd_doc *doc, size...`
-- `css_align_to_bt` (line 3090) `static int css_align_to_bt(int align_kw)` - *Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-* (align-content only, never...*
-- `layout_container` (line 3098) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+- `css_align_to_bt` (line 3099) `static int css_align_to_bt(int align_kw)` - *Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-* (align-content only, never...*
+- `layout_container` (line 3107) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-- `ITEMS` (line 3148) `* between ITEMS (not between the lines inside one item). column-reverse
+- `ITEMS` (line 3157) `* between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visua...`
-- `slot` (line 3226) `* layout slot (item 0 → rightmost, last item → leftmost). */
+- `slot` (line 3235) `* layout slot (item 0 → rightmost, last item → leftmost). */
         if (head->flex_direction == ...`
-- `box_edge_px` (line 3343) `static double box_edge_px(int wpx)` - *if (bt_layout(&root, content_w) != BT_OK) return; /* Translate each item's rows into its column rectangle. for (size_t j = 0; j < g; ++j) { const b...*
-- `box_line_visible` (line 3349) `static int box_line_visible(int style)` - *True iff a border/outline style paints a line (solid..outset); none/hidden/unset * paint nothing. The fancier 3D styles collapse to solid at paint ...*
-- `close_top_box` (line 3355) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)` - *Closes the open block box: flushes the current line, reserves the box's bottom * padding+border, and finalizes the recorded border-box height. No-o...*
-- `rc_box_context` (line 3386) `static void rc_box_context(const rc_state *s, double content_w,
+- `box_edge_px` (line 3352) `static double box_edge_px(int wpx)` - *if (bt_layout(&root, content_w) != BT_OK) return; /* Translate each item's rows into its column rectangle. for (size_t j = 0; j < g; ++j) { const b...*
+- `box_line_visible` (line 3358) `static int box_line_visible(int style)` - *True iff a border/outline style paints a line (solid..outset); none/hidden/unset * paint nothing. The fancier 3D styles collapse to solid at paint ...*
+- `close_top_box` (line 3364) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)` - *Closes the open block box: flushes the current line, reserves the box's bottom * padding+border, and finalizes the recorded border-box height. No-o...*
+- `rc_box_context` (line 3395) `static void rc_box_context(const rc_state *s, double content_w,
                            double...` - *Content rect (left, width) the current run/box is laid out in: the innermost open * box's, or the page content box when no box is open (default fla...*
-- `children` (line 3401) `* own content rect onto the stack so its children (text or nested boxes) place inside
+- `children` (line 3410) `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...`
-- `reconcile_boxes` (line 3509) `static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
+- `reconcile_boxes` (line 3518) `static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
                       ...` - *Reconciles the open-box stack so it equals block b's box path (root..b->block_id), derived from the box-def parent_id chain. Closes any open box no...*
-- `box_path_of` (line 3544) `static int box_path_of(const rd_doc *doc, int block_id, int *out)` - *Box path root..block_id via the box-def parent_id chain (root first), written into * out (bounded by RC_BOX_STACK_MAX). Returns the path length; bl...*
-- `band_common_box` (line 3560) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)` - *The innermost box that is an ancestor (or self) of EVERY block in [start, end), via the longest common prefix of their box paths — the box a float ...*
-- `layout_float_band` (line 3582) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
+- `box_path_of` (line 3553) `static int box_path_of(const rd_doc *doc, int block_id, int *out)` - *Box path root..block_id via the box-def parent_id chain (root first), written into * out (bounded by RC_BOX_STACK_MAX). Returns the path length; bl...*
+- `band_common_box` (line 3569) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)` - *The innermost box that is an ancestor (or self) of EVERY block in [start, end), via the longest common prefix of their box paths — the box a float ...*
+- `layout_float_band` (line 3591) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...` - *Lays a float band [start, end) — a maximal run of blocks each with float_id >= 0 — side by side inside the current box context (spec/float.md). Blo...*
-- `layout_doc` (line 3680) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
+- `layout_doc` (line 3689) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...`
-- `position_doc` (line 3854) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
+- `position_doc` (line 3863) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...` - *Stage 2: resolves out-of-flow positioning for every absolute/fixed block in the document and stores the stacking-ordered result in L->positioned. R...*
-- `input_box_width` (line 3955) `static double input_box_width(double content_w)` - *make the painter repaint the box on TOP of its rows — covering everything past the first block with the box background. So drop the in-flow (relati...*
-- `button_box_width` (line 3960) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
-              ...` - *for (size_t i = 0; i < L->npositioned; ++i) { size_t bid = L->positioned[i].box_index; if (bid < BT_MAX_POSITIONED && in_flow[bid]) continue; L->po...*
-- `row_align_offset` (line 4110) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` - *Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and the line's right edge. 0 for le...*
-- `upstream` (line 4123) `* upstream (see spec/css.md). */
+- `input_box_width` (line 3964) `static double input_box_width(double content_w)` - *make the painter repaint the box on TOP of its rows — covering everything past the first block with the box background. So drop the in-flow (relati...*
+- `select_box_width` (line 3967) `static double select_box_width(double content_w)`
+- `button_box_width` (line 3973) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
+              ...` - *} L->npositioned = keep; } /* Width of a painted text-input box: the preferred width clamped to the content. static double input_box_width(double c...*
+- `row_align_offset` (line 4220) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` - *Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and the line's right edge. 0 for le...*
+- `upstream` (line 4233) `* upstream (see spec/css.md). */
 static void box_path(cairo_t *cr, double x, double y, double w, ...`
-- `paint_box_decoration` (line 4146) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy)` - *Paints one block box's decoration (Hito 23b-8 Step C): box-shadow, background fill, the four borders and the outline, behind the rows it encloses. ...*
-- `paint_content_row` (line 4279) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
+- `paint_box_decoration` (line 4256) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy)` - *Paints one block box's decoration (Hito 23b-8 Step C): box-shadow, background fill, the four borders and the outline, behind the rows it encloses. ...*
+- `paint_content_row` (line 4389) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...` - *Paints one laid-out row at vertical position ry. Shared by the on-screen painter and the PDF exporter so both render identically (same fonts, colou...*
-- `cairo_set_dash` (line 4348) `cairo_set_dash(cr, (double[])`
-- `cairo_set_dash` (line 4350) `cairo_set_dash(cr, (double[])`
-- `ov_box_clips` (line 4376) `static int ov_box_clips(const pv_box_def *d)` - *} if (f->overline) { double oy = fbaseline - f->font_size * UI_OVERLINE_OFFSET; cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(...*
-- `ov_collect_chain` (line 4384) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` - *Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first). Returns count, limited to OV_MAX_DEPTH.*
-- `ov_find_box` (line 4398) `static const rc_box *ov_find_box(const rc_layout *L, int bid)` - *static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap) { int tmp[OV_MAX_DEPTH], n = 0; for (int id = block_id; id >= 0 && ...*
-- `ov_content_rect` (line 4406) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
+- `cairo_set_dash` (line 4458) `cairo_set_dash(cr, (double[])`
+- `cairo_set_dash` (line 4460) `cairo_set_dash(cr, (double[])`
+- `ov_box_clips` (line 4486) `static int ov_box_clips(const pv_box_def *d)` - *} if (f->overline) { double oy = fbaseline - f->font_size * UI_OVERLINE_OFFSET; cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(...*
+- `ov_collect_chain` (line 4494) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)` - *Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first). Returns count, limited to OV_MAX_DEPTH.*
+- `ov_find_box` (line 4508) `static const rc_box *ov_find_box(const rc_layout *L, int bid)` - *static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap) { int tmp[OV_MAX_DEPTH], n = 0; for (int id = block_id; id >= 0 && ...*
+- `ov_content_rect` (line 4516) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...` - *Computes the padding-box content rect (in page coords: y, x, w, h) for a box. * Used as the clip region for overflow:hidden children.*
-- `paint_structured` (line 4462) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
+- `paint_structured` (line 4572) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-- `write_doc_pdf` (line 4612) `static long write_doc_pdf(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter. Returns the page count (0 when the document lays o...*
-- `export_pdf` (line 4750) `static void export_pdf(browser_window *w)`
-- `write_doc_png` (line 4802) `static long write_doc_png(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as the screen and the PDF export, i...*
-- `export_png` (line 4933) `static void export_png(browser_window *w)`
-- `caller` (line 4968) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
+- `write_doc_pdf` (line 4722) `static long write_doc_pdf(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter. Returns the page count (0 when the document lays o...*
+- `export_pdf` (line 4860) `static void export_pdf(browser_window *w)`
+- `write_doc_png` (line 4912) `static long write_doc_png(browser_window *w, const char *path)` - *Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as the screen and the PDF export, i...*
+- `export_png` (line 5043) `static void export_png(browser_window *w)`
+- `caller` (line 5078) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-- `ui_render_png` (line 4991) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` - *Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the whole page, the cheapest artifact for visual review (no PDF raste...*
-- `ui_dump_layout` (line 5016) `ui_status ui_dump_layout(const rd_doc *doc)` - *Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the resolved box geometry (in-flow boxe...*
-- `link_at_point` (line 5068) `static const char *link_at_point(browser_window *w, double px, double py)`
-- `resolve_box_cursor` (line 5116) `static int resolve_box_cursor(const rd_doc *doc, int block_id)` - *First non-unset author `cursor` on block_id's box or an ancestor (nearest wins, like the rest of the box-decoration fields), or CSS_CUR_UNSET if no...*
-- `box_pointer_events_none` (line 5130) `static int box_pointer_events_none(const rd_doc *doc, int block_id)` - *True when author `pointer-events: none` removes block_id's content from hit-testing (2026-07-10): the nearest box in the parent chain that sets the...*
-- `cursor_at_point` (line 5146) `static int cursor_at_point(browser_window *w, double px, double py)` - *Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET when outside content / no box sets one. Unlike link_at_point this t...*
-- `node_at_point` (line 5194) `static dom_node_id node_at_point(browser_window *w, double px, double py)` - *Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the point is over blank space / outside content. Mirrors layout and scro...*
-- `reference` (line 5239) `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
+- `ui_render_png` (line 5101) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` - *Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the whole page, the cheapest artifact for visual review (no PDF raste...*
+- `ui_dump_layout` (line 5126) `ui_status ui_dump_layout(const rd_doc *doc)` - *Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the resolved box geometry (in-flow boxe...*
+- `link_at_point` (line 5178) `static const char *link_at_point(browser_window *w, double px, double py)`
+- `resolve_box_cursor` (line 5226) `static int resolve_box_cursor(const rd_doc *doc, int block_id)` - *First non-unset author `cursor` on block_id's box or an ancestor (nearest wins, like the rest of the box-decoration fields), or CSS_CUR_UNSET if no...*
+- `box_pointer_events_none` (line 5240) `static int box_pointer_events_none(const rd_doc *doc, int block_id)` - *True when author `pointer-events: none` removes block_id's content from hit-testing (2026-07-10): the nearest box in the parent chain that sets the...*
+- `cursor_at_point` (line 5256) `static int cursor_at_point(browser_window *w, double px, double py)` - *Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET when outside content / no box sets one. Unlike link_at_point this t...*
+- `node_at_point` (line 5304) `static dom_node_id node_at_point(browser_window *w, double px, double py)` - *Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the point is over blank space / outside content. Mirrors layout and scro...*
+- `reference` (line 5349) `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
  * hostile content...`
-- `apply_click_result` (line 5260) `static void apply_click_result(browser_window *w, tab_page *page)` - *Applies a click result returned by the worker: rebuild the rendered document and refresh inputs/console, but keep the current page in history (a cl...*
-- `memory` (line 5283) `* memory (the href pointer, not its contents, was all the old code preserved). */
+- `apply_click_result` (line 5370) `static void apply_click_result(browser_window *w, tab_page *page)` - *Applies a click result returned by the worker: rebuild the rendered document and refresh inputs/console, but keep the current page in history (a cl...*
+- `memory` (line 5393) `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...`
-- `GET` (line 5354) `* the network under weaker rules than a GET (Zero Trust). */
+- `GET` (line 5464) `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...`
-- `ensure_download_dir` (line 5388) `static int ensure_download_dir(char *out, size_t outsz)` - *Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine). Returns 1 on success. Falls back to $HOME...*
-- `write_file_atomic` (line 5403) `static int write_file_atomic(const char *path, const void *bytes, size_t len)` - *Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash mid-write never leaves a half file at...*
-- `save_download` (line 5425) `static void save_download(browser_window *w, const char *url, const char *bytes,
+- `ensure_download_dir` (line 5498) `static int ensure_download_dir(char *out, size_t outsz)` - *Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine). Returns 1 on success. Falls back to $HOME...*
+- `write_file_atomic` (line 5513) `static int write_file_atomic(const char *path, const void *bytes, size_t len)` - *Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash mid-write never leaves a half file at...*
+- `save_download` (line 5535) `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...` - *Saves a fetched resource to ~/Downloads/freedom instead of rendering it. The filename is derived fail-closed from the hostile Content-Disposition /...*
-- `save_current_page` (line 5458) `static void save_current_page(browser_window *w)` - *Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network * round-trip -- the bytes already in the page cache are written.*
-- `deliver_fetch_result` (line 5467) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-- `drain_fetch_results` (line 5522) `static void drain_fetch_results(browser_window *w)` - *Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are atomic). Called when the loop s...*
-- `toggle_reader` (line 5589) `static void toggle_reader(browser_window *w)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
-- `menu_item_checked` (line 5600) `static int menu_item_checked(const browser_window *w, size_t i)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
-- `menu_item_toggle` (line 5622) `static void menu_item_toggle(browser_window *w, size_t i)` - *Toggles options-menu item i and applies its effect. Theme and force-colors only affect presentation (a repaint, which re-runs layout, suffices); a ...*
-- `draw_clock` (line 5732) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
+- `save_current_page` (line 5568) `static void save_current_page(browser_window *w)` - *Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network * round-trip -- the bytes already in the page cache are written.*
+- `deliver_fetch_result` (line 5577) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
+- `drain_fetch_results` (line 5632) `static void drain_fetch_results(browser_window *w)` - *Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are atomic). Called when the loop s...*
+- `toggle_reader` (line 5699) `static void toggle_reader(browser_window *w)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
+- `menu_item_checked` (line 5710) `static int menu_item_checked(const browser_window *w, size_t i)` - *Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styling/images are gated off, a...*
+- `menu_item_toggle` (line 5732) `static void menu_item_toggle(browser_window *w, size_t i)` - *Toggles options-menu item i and applies its effect. Theme and force-colors only affect presentation (a repaint, which re-runs layout, suffices); a ...*
+- `draw_clock` (line 5842) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...` - *A small spinner meaning "busy". Now that the fetch runs off the event-loop thread, the loop ticks ~12 fps while loading and rotates a leading arc s...*
-- `draw_hamburger` (line 5743) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- `draw_reload` (line 5760) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` - *The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx. Drawn with Cairo (not a font glyph) so it never ...*
-- `draw_menu` (line 5782) `static void draw_menu(cairo_t *cr, browser_window *w)` - *double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx, cy, r, a0, a1); cairo_stroke(cr)...*
-- `draw_hover_url` (line 5893) `static double draw_hover_url(cairo_t *cr, browser_window *w)` - *Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click will go. Returns the strip height ...*
-- `draw_toast` (line 5925) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` - *Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks above the hover-URL strip when bo...*
-- `draw_tabstrip` (line 5955) `static void draw_tabstrip(cairo_t *cr, browser_window *w)` - *Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each with its clipped title and a clo...*
-- `draw_omnibox` (line 6010) `static void draw_omnibox(cairo_t *cr, browser_window *w)` - *Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top of content) while the URL bar is...*
-- `paint` (line 6043) `static void paint(browser_window *w)`
-- `redraw` (line 6284) `static void redraw(browser_window *w)`
-- `wm_base_ping` (line 6295) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` - *cairo_surface_flush(w->cairo_surface); cairo_destroy(cr); } static void redraw(browser_window *w) { if (!w->configured) return; if (ensure_buffer(w...*
-- `xdg_surface_configure` (line 6301) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- `toplevel_configure` (line 6309) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
+- `draw_hamburger` (line 5853) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
+- `draw_reload` (line 5870) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)` - *The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx. Drawn with Cairo (not a font glyph) so it never ...*
+- `draw_menu` (line 5892) `static void draw_menu(cairo_t *cr, browser_window *w)` - *double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx, cy, r, a0, a1); cairo_stroke(cr)...*
+- `draw_hover_url` (line 6003) `static double draw_hover_url(cairo_t *cr, browser_window *w)` - *Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click will go. Returns the strip height ...*
+- `draw_toast` (line 6035) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)` - *Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks above the hover-URL strip when bo...*
+- `draw_tabstrip` (line 6065) `static void draw_tabstrip(cairo_t *cr, browser_window *w)` - *Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each with its clipped title and a clo...*
+- `draw_omnibox` (line 6120) `static void draw_omnibox(cairo_t *cr, browser_window *w)` - *Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top of content) while the URL bar is...*
+- `paint` (line 6153) `static void paint(browser_window *w)`
+- `redraw` (line 6394) `static void redraw(browser_window *w)`
+- `wm_base_ping` (line 6405) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` - *cairo_surface_flush(w->cairo_surface); cairo_destroy(cr); } static void redraw(browser_window *w) { if (!w->configured) return; if (ensure_buffer(w...*
+- `xdg_surface_configure` (line 6411) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+- `toplevel_configure` (line 6419) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-- `wl_array_for_each` (line 6325) `wl_array_for_each(st, states)`
-- `toplevel_close` (line 6330) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-- `deco_configure` (line 6338) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-- `set_cursor` (line 6352) `static void set_cursor(browser_window *w, int hand)` - *Applies the hand (over a link) or default arrow cursor for the current pointer enter serial. A no-op when no themed cursor is available (the compos...*
-- `update_hover` (line 6374) `static void update_hover(browser_window *w)` - *Recomputes which link (if any) is under the pointer; on a change, updates the cursor shape and repaints so the hover highlight follows. The author ...*
-- `fbw_split_y` (line 6429) `static double fbw_split_y(const freebug_window *fb)` - *int    width, height; int    configured; int    visible; struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface...*
-- `freebug_ensure_buffer` (line 6437) `static int freebug_ensure_buffer(freebug_window *fb)`
-- `fbw_level_rgb` (line 6465) `static void fbw_level_rgb(int level, double *r, double *g, double *b)` - *struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer = wl_shm_pool_create_buffer(pool, 0, fb->width, fb->he...*
-- `fbw_console_lines` (line 6476) `static size_t fbw_console_lines(const fb_buffer *log)` - *} /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g, double *b) { switch (level) { ca...*
-- `freebug_paint` (line 6485) `static void freebug_paint(freebug_window *fb)`
-- `freebug_redraw_fb` (line 6644) `static void freebug_redraw_fb(freebug_window *fb)`
-- `freebug_redraw` (line 6653) `static void freebug_redraw(browser_window *w)`
-- `freebug_hide` (line 6657) `static void freebug_hide(browser_window *w)`
-- `fbw_xdg_surface_configure` (line 6673) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- `fbw_toplevel_configure` (line 6681) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
+- `wl_array_for_each` (line 6435) `wl_array_for_each(st, states)`
+- `toplevel_close` (line 6440) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
+- `deco_configure` (line 6448) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
+- `set_cursor` (line 6462) `static void set_cursor(browser_window *w, int hand)` - *Applies the hand (over a link) or default arrow cursor for the current pointer enter serial. A no-op when no themed cursor is available (the compos...*
+- `update_hover` (line 6484) `static void update_hover(browser_window *w)` - *Recomputes which link (if any) is under the pointer; on a change, updates the cursor shape and repaints so the hover highlight follows. The author ...*
+- `fbw_split_y` (line 6539) `static double fbw_split_y(const freebug_window *fb)` - *int    width, height; int    configured; int    visible; struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface...*
+- `freebug_ensure_buffer` (line 6547) `static int freebug_ensure_buffer(freebug_window *fb)`
+- `fbw_level_rgb` (line 6575) `static void fbw_level_rgb(int level, double *r, double *g, double *b)` - *struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer = wl_shm_pool_create_buffer(pool, 0, fb->width, fb->he...*
+- `fbw_console_lines` (line 6586) `static size_t fbw_console_lines(const fb_buffer *log)` - *} /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g, double *b) { switch (level) { ca...*
+- `freebug_paint` (line 6595) `static void freebug_paint(freebug_window *fb)`
+- `freebug_redraw_fb` (line 6754) `static void freebug_redraw_fb(freebug_window *fb)`
+- `freebug_redraw` (line 6763) `static void freebug_redraw(browser_window *w)`
+- `freebug_hide` (line 6767) `static void freebug_hide(browser_window *w)`
+- `fbw_xdg_surface_configure` (line 6783) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+- `fbw_toplevel_configure` (line 6791) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-- `fbw_toplevel_close` (line 6691) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-- `freebug_show` (line 6700) `static void freebug_show(browser_window *w)`
-- `freebug_toggle` (line 6730) `static void freebug_toggle(browser_window *w)`
-- `freebug_destroy` (line 6735) `static void freebug_destroy(browser_window *w)`
-- `freebug_owns_surface` (line 6742) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-- `freebug_is_open` (line 6746) `static int freebug_is_open(const browser_window *w)`
-- `freebug_repl_worker` (line 6754) `static tab *freebug_repl_worker(browser_window *w)` - *Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept alive (e.g. just after a tab swi...*
-- `freebug_eval` (line 6778) `static void freebug_eval(browser_window *w)`
-- `freebug_handle_key` (line 6817) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+- `fbw_toplevel_close` (line 6801) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
+- `freebug_show` (line 6810) `static void freebug_show(browser_window *w)`
+- `freebug_toggle` (line 6840) `static void freebug_toggle(browser_window *w)`
+- `freebug_destroy` (line 6845) `static void freebug_destroy(browser_window *w)`
+- `freebug_owns_surface` (line 6852) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
+- `freebug_is_open` (line 6856) `static int freebug_is_open(const browser_window *w)`
+- `freebug_repl_worker` (line 6864) `static tab *freebug_repl_worker(browser_window *w)` - *Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept alive (e.g. just after a tab swi...*
+- `freebug_eval` (line 6888) `static void freebug_eval(browser_window *w)`
+- `freebug_handle_key` (line 6927) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-- `freebug_pointer_button` (line 6849) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
+- `freebug_pointer_button` (line 6959) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-- `freebug_pointer_motion` (line 6860) `static void freebug_pointer_motion(browser_window *w)`
-- `freebug_pointer_axis` (line 6872) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-- `ptr_enter` (line 6883) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
+- `freebug_pointer_motion` (line 6970) `static void freebug_pointer_motion(browser_window *w)`
+- `freebug_pointer_axis` (line 6982) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
+- `ptr_enter` (line 6993) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...` - *fb->split = s; freebug_redraw_fb(fb); } static void freebug_pointer_axis(browser_window *w, wl_fixed_t value) { freebug_window *fb = w->freebug; if...*
-- `ptr_leave` (line 6896) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-- `ptr_motion` (line 6907) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-- `load_current` (line 6916) `static void load_current(browser_window *w)`
-- `go_omnibox` (line 6930) `static void go_omnibox(browser_window *w)` - *Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure) decides between navigating to a s...*
-- `ptr_button` (line 6970) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
+- `ptr_leave` (line 7006) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
+- `ptr_motion` (line 7017) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
+- `load_current` (line 7026) `static void load_current(browser_window *w)`
+- `go_omnibox` (line 7040) `static void go_omnibox(browser_window *w)` - *Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure) decides between navigating to a s...*
+- `ptr_button` (line 7080) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-- `scroll_line_px` (line 7160) `static double scroll_line_px(const browser_window *w)` - *} else if (input_is_editable(ctl->input_type)) { for (size_t i = 0; i < w->input_count; ++i) { if (w->inputs[i].blk == ctl) { w->focused_input = (i...*
-- `ptr_axis` (line 7163) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
+- `scroll_line_px` (line 7270) `static double scroll_line_px(const browser_window *w)` - *} else if (input_is_editable(ctl->input_type)) { for (size_t i = 0; i < w->input_count; ++i) { if (w->inputs[i].blk == ctl) { w->focused_input = (i...*
+- `ptr_axis` (line 7273) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-- `mime_is_text` (line 7190) `static int mime_is_text(const char *mime)` - *redraw(w); } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion = ptr_motion, .button = p...*
-- `data_offer_source_actions` (line 7208) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_offer_action` (line 7211) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-- `data_device_data_offer` (line 7221) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
+- `mime_is_text` (line 7300) `static int mime_is_text(const char *mime)` - *redraw(w); } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion = ptr_motion, .button = p...*
+- `data_offer_source_actions` (line 7318) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_offer_action` (line 7321) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
+- `data_device_data_offer` (line 7331) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...` - *} static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) { (void)d; (void)o; (void)a; } static void data_offer_action(...*
-- `data_device_selection` (line 7233) `static void data_device_selection(void *data, struct wl_data_device *dev,
+- `data_device_selection` (line 7343) `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...` - *The clipboard selection changed. Commit the new offer (or NULL when the clipboard * was cleared), destroying any previous one we held.*
-- `data_device_enter` (line 7252) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+- `data_device_enter` (line 7362) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...` - *wl_data_offer_destroy(w->selection_offer); if (offer == NULL) { w->selection_offer = NULL; w->selection_offer_has_text = 0; w->sel_mime[0] = '\0'; ...*
-- `data_device_leave` (line 7257) `static void data_device_leave(void *d, struct wl_data_device *dev)`
-- `data_device_motion` (line 7258) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+- `data_device_leave` (line 7367) `static void data_device_leave(void *d, struct wl_data_device *dev)`
+- `data_device_motion` (line 7368) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-- `data_device_drop` (line 7262) `static void data_device_drop(void *d, struct wl_data_device *dev)`
-- `data_source_cancelled` (line 7273) `static void data_source_cancelled(void *data, struct wl_data_source *src)` - *wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d, struct wl_data_device *dev) { ...*
-- `data_source_send` (line 7279) `static void data_source_send(void *data, struct wl_data_source *src,
+- `data_device_drop` (line 7372) `static void data_device_drop(void *d, struct wl_data_device *dev)`
+- `data_source_cancelled` (line 7383) `static void data_source_cancelled(void *data, struct wl_data_source *src)` - *wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d, struct wl_data_device *dev) { ...*
+- `data_source_send` (line 7389) `static void data_source_send(void *data, struct wl_data_source *src,
                             ...` - *.enter = data_device_enter, .leave = data_device_leave, .motion = data_device_motion, .drop = data_device_drop, .selection = data_device_selection,...*
-- `data_source_target` (line 7292) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-- `insert_pasted_text` (line 7305) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` - *Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar). Control bytes -- including embedd...*
-- `clipboard_copy` (line 7369) `static void clipboard_copy(browser_window *w)` - *Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a wl_data_source that serves it on ...*
-- `keyboard_keymap` (line 7416) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
+- `data_source_target` (line 7402) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
+- `insert_pasted_text` (line 7415) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)` - *Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar). Control bytes -- including embedd...*
+- `clipboard_copy` (line 7479) `static void clipboard_copy(browser_window *w)` - *Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a wl_data_source that serves it on ...*
+- `keyboard_keymap` (line 7526) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...` - *Cut the omnibar selection: copy it to the clipboard, then remove it. v1 cut is the * URL bar only (page inputs / the UA box have no selection model...*
-- `keyboard_enter` (line 7437) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_enter` (line 7547) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-- `keyboard_leave` (line 7444) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-- `handle_key_press` (line 7453) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+- `keyboard_leave` (line 7554) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
+- `handle_key_press` (line 7563) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...` - *Performs the effect of a single key press. Factored out of keyboard_key so a held key can be re-fired from the repeat timer with the exact same sem...*
-- `key_is_repeatable` (line 7743) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` - *Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling. A Ctrl chord (tab spawn, reload, image toggle...) o...*
-- `key_repeat_arm` (line 7759) `static void key_repeat_arm(browser_window *w, uint32_t key)` - *Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s. A held key thus repeats until released (key_repeat_s...*
-- `key_repeat_stop` (line 7772) `static void key_repeat_stop(browser_window *w)` - *1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). static void key_repeat_arm(browser_window *w, uint32_t key) { if (w->rep...*
-- `key_repeat_fire` (line 7783) `static void key_repeat_fire(browser_window *w)` - *Re-fires the currently held key. Called from the event loop when the timer expires. Modifiers/keysym are recomputed from the live xkb_state, so a c...*
-- `keyboard_key` (line 7796) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+- `key_is_repeatable` (line 7853) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)` - *Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling. A Ctrl chord (tab spawn, reload, image toggle...) o...*
+- `key_repeat_arm` (line 7869) `static void key_repeat_arm(browser_window *w, uint32_t key)` - *Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s. A held key thus repeats until released (key_repeat_s...*
+- `key_repeat_stop` (line 7882) `static void key_repeat_stop(browser_window *w)` - *1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). static void key_repeat_arm(browser_window *w, uint32_t key) { if (w->rep...*
+- `key_repeat_fire` (line 7893) `static void key_repeat_fire(browser_window *w)` - *Re-fires the currently held key. Called from the event loop when the timer expires. Modifiers/keysym are recomputed from the live xkb_state, so a c...*
+- `keyboard_key` (line 7906) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-- `keyboard_modifiers` (line 7835) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+- `keyboard_modifiers` (line 7945) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-- `keyboard_repeat_info` (line 7845) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-- `seat_caps` (line 7863) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` - *w->repeat_rate = rate; w->repeat_delay = delay; } static const struct wl_keyboard_listener keyboard_listener = { .keymap = keyboard_keymap, .enter ...*
-- `seat_name` (line 7875) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-- `registry_global` (line 7881) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+- `keyboard_repeat_info` (line 7955) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
+- `seat_caps` (line 7973) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` - *w->repeat_rate = rate; w->repeat_delay = delay; } static const struct wl_keyboard_listener keyboard_listener = { .keymap = keyboard_keymap, .enter ...*
+- `seat_name` (line 7985) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
+- `registry_global` (line 7991) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...` - *w->pointer = wl_seat_get_pointer(seat); wl_pointer_add_listener(w->pointer, &pointer_listener, w); } if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && w-...*
-- `registry_remove` (line 7902) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-- `ui_run_browser` (line 7911) `ui_status ui_run_browser(const char *start_url)` - *w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1); } else if (strcmp(iface, zxdg_decoration_manager_v1_int...*
+- `registry_remove` (line 8012) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
+- `ui_run_browser` (line 8021) `ui_status ui_run_browser(const char *start_url)` - *w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1); } else if (strcmp(iface, zxdg_decoration_manager_v1_int...*
 
 **Macros:**
 - `_GNU_SOURCE` (line 11)
@@ -1291,26 +1293,26 @@ static void do_submit_post(browser_w...`
 - `UI_IMAGE_MAX_BODY` (line 206)
 - `UI_MAX_TABS` (line 221)
 - `UI_READER_COLUMN_W` (line 459)
-- `JS_NAV_MAX` (line 1599)
-- `JS_TICKS_PER_LOAD` (line 1641)
-- `UI_RELOAD_X` (line 2292)
-- `RC_BOX_STACK_MAX` (line 2495)
-- `RC_MAX_OUT_OF_FLOW` (line 3540)
-- `OV_MAX_DEPTH` (line 4373)
-- `PDF_PAGE_W` (line 4596)
-- `PDF_PAGE_H` (line 4597)
-- `PDF_MARGIN` (line 4598)
-- `PNG_PAGE_W` (line 4793)
-- `PNG_MARGIN` (line 4794)
-- `PNG_MAX_H` (line 4795)
-- `FBW_W` (line 6399)
-- `FBW_H` (line 6401)
-- `FBW_HEADER` (line 6402)
-- `FBW_PAD` (line 6403)
-- `FBW_LINE` (line 6404)
-- `FBW_GUTTER` (line 6405)
-- `FBW_MIN_SPLIT` (line 6406)
-- `FBW_MAX_SPLIT` (line 6407)
+- `JS_NAV_MAX` (line 1608)
+- `JS_TICKS_PER_LOAD` (line 1650)
+- `UI_RELOAD_X` (line 2301)
+- `RC_BOX_STACK_MAX` (line 2504)
+- `RC_MAX_OUT_OF_FLOW` (line 3549)
+- `OV_MAX_DEPTH` (line 4483)
+- `PDF_PAGE_W` (line 4706)
+- `PDF_PAGE_H` (line 4707)
+- `PDF_MARGIN` (line 4708)
+- `PNG_PAGE_W` (line 4903)
+- `PNG_MARGIN` (line 4904)
+- `PNG_MAX_H` (line 4905)
+- `FBW_W` (line 6509)
+- `FBW_H` (line 6511)
+- `FBW_HEADER` (line 6512)
+- `FBW_PAD` (line 6513)
+- `FBW_LINE` (line 6514)
+- `FBW_GUTTER` (line 6515)
+- `FBW_MIN_SPLIT` (line 6516)
+- `FBW_MAX_SPLIT` (line 6517)
 
 **Structs:**
 - `ui_menu_item` (line 161)
@@ -1318,16 +1320,16 @@ static void do_submit_post(browser_w...`
 - `ui_image` (line 212) - *A decoded image for one RD_IMAGE block of the current doc. surface owns the pixels (ARGB32) and is NULL when the image was blocked, not fetched, or...*
 - `tab_ctx` (line 229) - *One tab's complete per-page state: everything that must persist when the tab is not the foreground one. The browser_window keeps the ACTIVE tab's c...*
 - `browser_window` (line 242)
-- `fetch_prep` (line 1260) - *Outcome of the pre-fetch gates shared by GET (do_load) and POST (do_submit_post). Both MUST pass through the SAME host filter, per-host exception, ...*
-- `fetch_job` (line 1330) - *A network request handed to the fetch thread. It owns deep copies of every input string (the window's buffers may change while the fetch runs), and...*
-- `rc_frag` (line 2382)
-- `rc_row` (line 2416)
-- `rc_box` (line 2435) - *One painted block box (Hito 23b-8 Step C): a border-box rectangle in layout space with its author decoration, painted behind the rows it encloses. ...*
-- `rc_layout` (line 2460)
-- `rc_open_box` (line 2486) - *Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content rect (inner_left/inner_w) is the coordinate context its children (...*
-- `rc_state` (line 2497)
-- `rc_ext` (line 2775) - *Author text-presentation extensions for a block, derived from its rd_block (already * gated by caps.css upstream) and handed to flow_text.*
-- `freebug_window` (line 6409)
+- `fetch_prep` (line 1269) - *Outcome of the pre-fetch gates shared by GET (do_load) and POST (do_submit_post). Both MUST pass through the SAME host filter, per-host exception, ...*
+- `fetch_job` (line 1339) - *A network request handed to the fetch thread. It owns deep copies of every input string (the window's buffers may change while the fetch runs), and...*
+- `rc_frag` (line 2391)
+- `rc_row` (line 2425)
+- `rc_box` (line 2444) - *One painted block box (Hito 23b-8 Step C): a border-box rectangle in layout space with its author decoration, painted behind the rows it encloses. ...*
+- `rc_layout` (line 2469)
+- `rc_open_box` (line 2495) - *Box engine (Hito 23b-8 Step D): one entry of the open-box stack. A box's content rect (inner_left/inner_w) is the coordinate context its children (...*
+- `rc_state` (line 2506)
+- `rc_ext` (line 2784) - *Author text-presentation extensions for a block, derived from its rd_block (already * gated by caps.css upstream) and handed to flow_text.*
+- `freebug_window` (line 6519)
 
 #### `bui_theme.c`
 **Path:** `gui/bui_theme.c`
@@ -1970,33 +1972,34 @@ static dom_node_id qs_walk(const dom_inde...`
 **Path:** `src/freedom.c`
 
 **Functions:**
-- `print_usage` (line 30) `static void print_usage(FILE *fp, const char *prog)` - *define EXIT_OK     0 define EXIT_ERROR  1 define EXIT_USAGE  2*
-- `is_https_url` (line 49) `static int is_https_url(const char *s)`
-- `is_http_url` (line 53) `static int is_http_url(const char *s)`
-- `is_overlay_http` (line 59) `static int is_overlay_http(const char *s)` - *fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n"); fprintf(fp, "  --dump-css: headle...*
-- `read_file` (line 115) `static char *read_file(const char *path, size_t *out_len)` - *When nonzero, the headless render runs the page's inline JS (tab_load_full run_js). * Set by --dump-console and by --js resolving to "on". Default ...*
-- `is_blank_text` (line 133) `static int is_blank_text(const char *s)` - *long sz = ftell(f); if (sz < 0) { fclose(f); return NULL; } rewind(f); char *buf = (char *)malloc((size_t)sz + 1); if (buf == NULL) { fclose(f); re...*
-- `print_doc` (line 146) `static void print_doc(const rd_doc *doc)` - *Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data, never instruction). Inline run...*
-- `print_console` (line 207) `static void print_console(const fb_buffer *log)` - *Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed with its level and (for located e...*
-- `print_dom` (line 224) `static void print_dom(const rd_doc *doc)` - *Prints the paint-ready render tree (dom_debug) to stdout. Two-pass: measure, then allocate exactly and format. The dump is bounded by the document;...*
-- `print_dom_css` (line 238) `static void print_dom_css(const rd_doc *doc)` - *Prints the CSS property inspector (dd_format_css) to stdout. Same contract as * print_dom: two-pass measure-then-allocate.*
-- `headless_fetch` (line 261) `static int headless_fetch(void *ctx, const char *method, const char *url,
+- `print_usage` (line 32) `static void print_usage(FILE *fp, const char *prog)` - *define EXIT_OK     0 define EXIT_ERROR  1 define EXIT_USAGE  2*
+- `is_https_url` (line 51) `static int is_https_url(const char *s)`
+- `is_http_url` (line 55) `static int is_http_url(const char *s)`
+- `is_overlay_http` (line 61) `static int is_overlay_http(const char *s)` - *fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n"); fprintf(fp, "  --dump-css: headle...*
+- `read_file` (line 119) `static char *read_file(const char *path, size_t *out_len)` - *static int g_headless_js = 0; /* HTTP Basic Authentication for headless mode. Set by --user=username:password. static char g_auth_user[256] = ""; s...*
+- `headless_load_hosts` (line 135) `static void headless_load_hosts(void)`
+- `is_blank_text` (line 164) `static int is_blank_text(const char *s)` - *for (int i = 0; i < 3; ++i) { if (dirs[i] == NULL) continue; char path[1024]; int n = snprintf(path, sizeof path, "%s/allow.conf", dirs[i]); if (n ...*
+- `print_doc` (line 177) `static void print_doc(const rd_doc *doc)` - *Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data, never instruction). Inline run...*
+- `print_console` (line 238) `static void print_console(const fb_buffer *log)` - *Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed with its level and (for located e...*
+- `print_dom` (line 255) `static void print_dom(const rd_doc *doc)` - *Prints the paint-ready render tree (dom_debug) to stdout. Two-pass: measure, then allocate exactly and format. The dump is bounded by the document;...*
+- `print_dom_css` (line 269) `static void print_dom_css(const rd_doc *doc)` - *Prints the CSS property inspector (dd_format_css) to stdout. Same contract as * print_dom: two-pass measure-then-allocate.*
+- `headless_fetch` (line 292) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...` - *tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script src>. ctx is the page's top URL ...*
-- `render_page` (line 306) `static int render_page(const char *html, size_t len, const char *top_url,
+- `render_page` (line 343) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...` - *out_nav (may be NULL): receives an owned copy of the JS-requested navigation target, if any. The tab layer already resolved and policy-gated it aga...*
-- `sf_reason` (line 450) `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (line 470) `static int fetch_and_render_one(const char *url, char **out_nav)` - *Fetches one url with secure_fetch and renders the result. The response body is * consumed directly; no extra copy is made. out_nav as in render_page.*
-- `elsewhere` (line 512) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+- `sf_reason` (line 487) `static const char *sf_reason(sf_status ss)`
+- `fetch_and_render_one` (line 507) `static int fetch_and_render_one(const char *url, char **out_nav)` - *Fetches one url with secure_fetch and renders the result. The response body is * consumed directly; no extra copy is made. out_nav as in render_page.*
+- `elsewhere` (line 555) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- `run_headless` (line 530) `static int run_headless(const char *target)`
-- `main` (line 549) `int main(int argc, char **argv)`
+- `run_headless` (line 573) `static int run_headless(const char *target)`
+- `main` (line 593) `int main(int argc, char **argv)`
 
 **Macros:**
 - `_POSIX_C_SOURCE` (line 8)
-- `EXIT_OK` (line 26)
-- `EXIT_ERROR` (line 28)
-- `EXIT_USAGE` (line 29)
-- `HL_JS_NAV_MAX` (line 466)
+- `EXIT_OK` (line 28)
+- `EXIT_ERROR` (line 30)
+- `EXIT_USAGE` (line 31)
+- `HL_JS_NAV_MAX` (line 503)
 
 #### `hostblock.c`
 **Path:** `src/hostblock.c`
@@ -2186,30 +2189,30 @@ static dom_node_id qs_walk(const dom_inde...`
                          int argc...`
 - `js_env` (line 703) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-- `jd_lp_set` (line 875) `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
+- `jd_lp_set` (line 936) `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
                       const ...` - *Defines a string property on the __locParts data object from a (ptr,len) span. * The span is copied into an engine string; a NULL span becomes "".*
-- `jd_install` (line 916) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `fails` (line 977) `* cap is reached or an allocation fails (caller stops), else 0. */
+- `jd_install` (line 977) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `fails` (line 1038) `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-- `jd_install_console` (line 1034) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_location` (line 1070) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
-- `jd_take_nav_request` (line 1104) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
-- `jd_pack_ptr` (line 1147) `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` - *Carry the host fetch fn + its ctx as a function's closure data, each split into 32-bit halves (no assumption about JS number width). The data lives...*
-- `jd_unpack_ptr` (line 1152) `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
-- `m_host_fetch` (line 1165) `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
+- `jd_install_console` (line 1095) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_location` (line 1131) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
+- `jd_take_nav_request` (line 1165) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
+- `jd_pack_ptr` (line 1208) `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` - *Carry the host fetch fn + its ctx as a function's closure data, each split into 32-bit halves (no assumption about JS number width). The data lives...*
+- `jd_unpack_ptr` (line 1213) `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
+- `m_host_fetch` (line 1226) `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
                             in...` - *__hostFetch(method, url, body) -> { status, body, contentType }. The ONLY network primitive exposed to script; it does NOT touch a socket -- it cal...*
-- `jd_install_xhr` (line 1244) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
-- `jd_click_state_new` (line 1274) `jd_click_state *jd_click_state_new(void)`
-- `jd_click_state_free` (line 1279) `void jd_click_state_free(jd_click_state *s)`
-- `jd_install_events` (line 1283) `jd_status jd_install_events(js_context *ctx, jd_click_state *state)`
-- `jd_fire_click` (line 1294) `int jd_fire_click(js_context *ctx, dom_node_id node_id)`
+- `jd_install_xhr` (line 1305) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
+- `jd_click_state_new` (line 1335) `jd_click_state *jd_click_state_new(void)`
+- `jd_click_state_free` (line 1340) `void jd_click_state_free(jd_click_state *s)`
+- `jd_install_events` (line 1344) `jd_status jd_install_events(js_context *ctx, jd_click_state *state)`
+- `jd_fire_click` (line 1355) `int jd_fire_click(js_context *ctx, dom_node_id node_id)`
 
 **Macros:**
 - `_POSIX_C_SOURCE` (line 9)
 
 **Structs:**
 - `jd_method` (line 302)
-- `jd_click_state` (line 1271)
+- `jd_click_state` (line 1332)
 
 #### `js_env.c`
 **Path:** `src/js_env.c`
@@ -2313,49 +2316,53 @@ static int cb_append(char **bu...`
 **Path:** `src/local_store.c`
 
 **Functions:**
-- `cipher_for` (line 67) `static const EVP_CIPHER *cipher_for(ls_aead aead)` - *#define LS_ARGON2_M_KIB  19456u  /* memory cost in KiB (19 MiB) #define LS_ARGON2_P      1u      /* lanes / parallelism /* Container field offsets....*
-- `argon2id_derive` (line 77) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (line 78) `static const EVP_CIPHER *cipher_for(ls_aead aead)` - *#define LS_ARGON2_M_KIB  19456u  /* memory cost in KiB (19 MiB) #define LS_ARGON2_P      1u      /* lanes / parallelism /* Container field offsets....*
+- `argon2id_derive` (line 88) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...` - *static const uint8_t LS_MAGIC[4] = { 'F', 'R', 'Z', 'S' }; /* --- AEAD selection --- static const EVP_CIPHER *cipher_for(ls_aead aead) { switch (ae...*
-- `ls_derive_key` (line 106) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (line 117) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (line 115) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (line 126) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...` - *int rc = EVP_KDF_derive(kctx, out, out_len, params); EVP_KDF_CTX_free(kctx); return (rc == 1) ? LS_OK : LS_ERR_KDF; } ls_status ls_derive_key(const...*
-- `aead_decrypt` (line 141) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (line 152) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (line 169) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (line 180) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...` - *if (aad_len > 0 && EVP_DecryptUpdate(ctx, NULL, &len, aad, (int)aad_len) != 1) goto done; if (ct_len > 0) { if (EVP_DecryptUpdate(ctx, pt, &len, ct...*
-- `decrypt_blob` (line 206) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (line 217) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (line 237) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (line 248) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...` - *if (pt == NULL) return LS_ERR_OOM; ls_status st = aead_decrypt(cipher, key, nonce, blob, LS_HEADER_LEN, ct, ct_len, tag, pt); if (st != LS_OK) { OP...*
-- `ls_open` (line 250) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (line 261) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (line 261) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (line 272) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...` - *memset(salt, 0, sizeof salt); /* unused under kdf_id = none return seal_core(key, aead, LS_KDF_NONE, salt, plaintext, pt_len, out, out_len); } ls_s...*
-- `ls_open_passphrase` (line 282) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (line 293) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (line 302) `void ls_free(uint8_t *buf, size_t len)`
+- `ls_free` (line 313) `void ls_free(uint8_t *buf, size_t len)`
 
 **Macros:**
 - `OSSL_KDF_PARAM_ARGON2_LANES` (line 3)
 - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 6)
 - `OSSL_KDF_PARAM_THREADS` (line 9)
 - `_GNU_SOURCE` (line 11)
-- `OSSL_KDF_PARAM_ARGON2_LANES` (line 38)
-- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 41)
-- `OSSL_KDF_PARAM_THREADS` (line 44)
-- `LS_VERSION` (line 46)
-- `LS_KDF_NONE` (line 48)
-- `LS_KDF_ARGON2ID` (line 49)
-- `LS_ARGON2_T` (line 52)
-- `LS_ARGON2_M_KIB` (line 53)
-- `LS_ARGON2_P` (line 54)
-- `OFF_MAGIC` (line 57)
-- `OFF_VERSION` (line 58)
-- `OFF_AEAD` (line 59)
-- `OFF_KDF` (line 60)
-- `OFF_SALT` (line 61)
-- `OFF_NONCE` (line 62)
+- `OSSL_KDF_PARAM_ARGON2_LANES` (line 14)
+- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 17)
+- `OSSL_KDF_PARAM_THREADS` (line 20)
+- `_GNU_SOURCE` (line 22)
+- `OSSL_KDF_PARAM_ARGON2_LANES` (line 49)
+- `OSSL_KDF_PARAM_ARGON2_MEMCOST` (line 52)
+- `OSSL_KDF_PARAM_THREADS` (line 55)
+- `LS_VERSION` (line 57)
+- `LS_KDF_NONE` (line 59)
+- `LS_KDF_ARGON2ID` (line 60)
+- `LS_ARGON2_T` (line 63)
+- `LS_ARGON2_M_KIB` (line 64)
+- `LS_ARGON2_P` (line 65)
+- `OFF_MAGIC` (line 68)
+- `OFF_VERSION` (line 69)
+- `OFF_AEAD` (line 70)
+- `OFF_KDF` (line 71)
+- `OFF_SALT` (line 72)
+- `OFF_NONCE` (line 73)
 
 #### `net_realm.c`
 **Path:** `src/net_realm.c`
@@ -2423,131 +2430,131 @@ int os_namespac...`
 - `utf8_sanitized_dup` (line 85) `static char *utf8_sanitized_dup(const char *s)`
 - `dup_n` (line 117) `static char *dup_n(const char *s, size_t n)`
 - `run_init_common` (line 131) `static void run_init_common(pv_run *r)` - *Common field initialization shared by all append helpers. Keeps the three constructors DRY and guarantees every run starts from the same sentinel s...*
-- `pv_node_map_init` (line 218) `static int pv_node_map_init(pv_node_map *m)`
-- `pv_node_map_free` (line 226) `static void pv_node_map_free(pv_node_map *m)`
-- `pv_node_map_build` (line 263) `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` - *Builds a document-order map of all element nodes under root. Returns 0, or -1 on * allocation failure.*
-- `pv_new` (line 271) `pv_view *pv_new(void)`
-- `pv_append` (line 275) `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
+- `pv_node_map_init` (line 220) `static int pv_node_map_init(pv_node_map *m)`
+- `pv_node_map_free` (line 228) `static void pv_node_map_free(pv_node_map *m)`
+- `pv_node_map_build` (line 265) `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` - *Builds a document-order map of all element nodes under root. Returns 0, or -1 on * allocation failure.*
+- `pv_new` (line 273) `pv_view *pv_new(void)`
+- `pv_append` (line 277) `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     c...`
-- `pv_append_image` (line 308) `pv_status pv_append_image(pv_view *v, int heading, int block_break,
+- `pv_append_image` (line 310) `pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           con...`
-- `pv_append_input` (line 337) `pv_status pv_append_input(pv_view *v, int heading, int block_break,
+- `pv_append_input` (line 339) `pv_status pv_append_input(pv_view *v, int heading, int block_break,
                           pv_...`
-- `pv_set_emphasis` (line 377) `void pv_set_emphasis(pv_view *v, int bold, int italic)`
-- `pv_set_indent` (line 384) `void pv_set_indent(pv_view *v, int indent)`
-- `pv_set_color` (line 389) `void pv_set_color(pv_view *v, int fg_rgb)`
-- `pv_set_bgcolor` (line 394) `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
-- `pv_set_text_style` (line 399) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
+- `pv_set_emphasis` (line 379) `void pv_set_emphasis(pv_view *v, int bold, int italic)`
+- `pv_set_indent` (line 386) `void pv_set_indent(pv_view *v, int indent)`
+- `pv_set_color` (line 391) `void pv_set_color(pv_view *v, int fg_rgb)`
+- `pv_set_bgcolor` (line 396) `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
+- `pv_set_text_style` (line 401) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
               ...`
-- `pv_set_text_ext` (line 409) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
-- `pv_set_container` (line 438) `void pv_set_container(pv_view *v, int cont_id, int cont_display,
+- `pv_set_text_ext` (line 411) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
+- `pv_set_container` (line 440) `void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_g...`
-- `pv_set_grid` (line 453) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
-- `pv_set_flex` (line 463) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
+- `pv_set_grid` (line 455) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
+- `pv_set_flex` (line 465) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int...`
-- `pv_set_cont_item` (line 475) `void pv_set_cont_item(pv_view *v, int cont_item)`
-- `pv_set_float` (line 480) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear)`
-- `pv_set_box` (line 488) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+- `pv_set_cont_item` (line 477) `void pv_set_cont_item(pv_view *v, int cont_item)`
+- `pv_set_float` (line 482) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear)`
+- `pv_set_box` (line 490) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int ...`
-- `pv_set_box_pct` (line 500) `void pv_set_box_pct(pv_view *v, int box_w_pct)`
-- `pv_set_node_id` (line 505) `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
-- `pv_set_block_id` (line 510) `void pv_set_block_id(pv_view *v, int block_id)`
-- `pv_add_box_def` (line 515) `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
-- `pv_free` (line 528) `void pv_free(pv_view *v)`
-- `pv_count` (line 542) `size_t pv_count(const pv_view *v)`
-- `pv_at` (line 546) `const pv_run *pv_at(const pv_view *v, size_t i)`
-- `pv_box_count` (line 551) `size_t pv_box_count(const pv_view *v)`
-- `pv_box_at` (line 555) `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
-- `node_next` (line 564) `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` - *} size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const pv_view *v, size_t i) { if (v == NU...*
-- `is_block_tag` (line 573) `static int is_block_tag(lxb_tag_id_t t)`
-- `is_block_like` (line 598) `static int is_block_like(lxb_tag_id_t t, css_display display)` - *An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display property indicates a block-level box, ...*
-- `causes_block_break` (line 608) `static int causes_block_break(lxb_tag_id_t t, css_display display)` - *Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do NOT cause a break; they flow *...*
-- `heading_level` (line 613) `static int heading_level(lxb_tag_id_t t)`
-- `is_skipped_tag` (line 625) `static int is_skipped_tag(lxb_tag_id_t t)`
-- `node_tag` (line 635) `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
-- `in_skipped_subtree` (line 644) `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `pv_set_box_pct` (line 502) `void pv_set_box_pct(pv_view *v, int box_w_pct)`
+- `pv_set_node_id` (line 507) `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
+- `pv_set_block_id` (line 512) `void pv_set_block_id(pv_view *v, int block_id)`
+- `pv_set_input_checked` (line 517) `void pv_set_input_checked(pv_view *v, int checked)`
+- `pv_set_input_select_opts` (line 522) `void pv_set_input_select_opts(pv_view *v, const char *select_opts)`
+- `pv_add_box_def` (line 530) `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
+- `pv_free` (line 543) `void pv_free(pv_view *v)`
+- `pv_count` (line 558) `size_t pv_count(const pv_view *v)`
+- `pv_at` (line 562) `const pv_run *pv_at(const pv_view *v, size_t i)`
+- `pv_box_count` (line 567) `size_t pv_box_count(const pv_view *v)`
+- `pv_box_at` (line 571) `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
+- `node_next` (line 580) `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` - *} size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const pv_view *v, size_t i) { if (v == NU...*
+- `is_block_tag` (line 589) `static int is_block_tag(lxb_tag_id_t t)`
+- `is_block_like` (line 614) `static int is_block_like(lxb_tag_id_t t, css_display display)` - *An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display property indicates a block-level box, ...*
+- `causes_block_break` (line 624) `static int causes_block_break(lxb_tag_id_t t, css_display display)` - *Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do NOT cause a break; they flow *...*
+- `heading_level` (line 629) `static int heading_level(lxb_tag_id_t t)`
+- `is_skipped_tag` (line 641) `static int is_skipped_tag(lxb_tag_id_t t)`
+- `node_tag` (line 651) `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
+- `in_skipped_subtree` (line 660) `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
               ...` - *Nonzero if any ancestor up to base is a non-rendered container. When js_enabled, a <noscript> ancestor also suppresses content (the script would ru...*
-- `font_color_attr` (line 677) `static int font_color_attr(lxb_dom_element_t *el)`
-- `bgcolor_attr` (line 684) `static int bgcolor_attr(lxb_dom_element_t *el)` - *Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News' orange bar and beige page) still us...*
-- `item_ordinal` (line 732) `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` - *Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its own item). -1 when the run has no...*
-- `pv_text_ext_reset` (line 754) `void pv_text_ext_reset(pv_text_ext *e)` - *The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field resolves from the nearest ancestor tha...*
-- `pv_text_ext_merge` (line 773) `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` - *Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten — keeps the nearest, matching i...*
-- `css_has_hbox` (line 811) `static int css_has_hbox(const css_style *cs)` - *caret-color: an explicit `auto` (CSS_LEN_AUTO) on a nearer ancestor is a * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. ...*
-- `css_hbox_resolve` (line 822) `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` - *Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side (clamped >= 0); w = the tightest...*
-- `css_has_position` (line 850) `static int css_has_position(const css_style *cs)` - *A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree (painted for relative; carried...*
-- `css_has_boxdeco` (line 854) `static int css_has_boxdeco(const css_style *cs)`
-- `container_id` (line 888) `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id. typedef struct pv_container_reg { const lxb...*
-- `boxdef_from_style` (line 908) `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` - *Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style. Padding unset -> 0 (geometry default); the rest keep the css mod...*
-- `box_reg_id` (line 963) `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs)` - *Id of node in the box registry, recording its decoration on first sight. -1 when * full. The parent link is stamped separately as the ancestor walk...*
-- `pv_style_cache_init` (line 989) `static int pv_style_cache_init(pv_style_cache *c)`
-- `pv_style_cache_free` (line 1002) `static void pv_style_cache_free(pv_style_cache *c)`
-- `cached_element_style` (line 1011) `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
+- `font_color_attr` (line 693) `static int font_color_attr(lxb_dom_element_t *el)`
+- `bgcolor_attr` (line 700) `static int bgcolor_attr(lxb_dom_element_t *el)` - *Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News' orange bar and beige page) still us...*
+- `item_ordinal` (line 752) `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` - *Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its own item). -1 when the run has no...*
+- `pv_text_ext_reset` (line 774) `void pv_text_ext_reset(pv_text_ext *e)` - *The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field resolves from the nearest ancestor tha...*
+- `pv_text_ext_merge` (line 793) `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` - *Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten — keeps the nearest, matching i...*
+- `css_has_hbox` (line 831) `static int css_has_hbox(const css_style *cs)` - *caret-color: an explicit `auto` (CSS_LEN_AUTO) on a nearer ancestor is a * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. ...*
+- `css_hbox_resolve` (line 842) `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` - *Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side (clamped >= 0); w = the tightest...*
+- `css_has_position` (line 870) `static int css_has_position(const css_style *cs)` - *A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree (painted for relative; carried...*
+- `css_has_boxdeco` (line 874) `static int css_has_boxdeco(const css_style *cs)`
+- `container_id` (line 908) `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id. typedef struct pv_container_reg { const lxb...*
+- `boxdef_from_style` (line 928) `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` - *Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style. Padding unset -> 0 (geometry default); the rest keep the css mod...*
+- `box_reg_id` (line 983) `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs)` - *Id of node in the box registry, recording its decoration on first sight. -1 when * full. The parent link is stamped separately as the ancestor walk...*
+- `pv_style_cache_init` (line 1009) `static int pv_style_cache_init(pv_style_cache *c)`
+- `pv_style_cache_free` (line 1022) `static void pv_style_cache_free(pv_style_cache *c)`
+- `cached_element_style` (line 1031) `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
             ...` - *cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init, or a caller that opts out) simply calls through uncached -- never a ha...*
-- `css_to_fx_justify` (line 1040) `static int css_to_fx_justify(css_justify j)` - *Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to FX_JUSTIFY_START (the default).*
-- `is_bold_tag` (line 1055) `static int is_bold_tag(lxb_tag_id_t t)` - *Inline emphasis carried by a tag: bold from <b>/<strong>/<th>, italic from * <i>/<em>. <th> is a header cell, conventionally bold.*
-- `is_italic_tag` (line 1058) `static int is_italic_tag(lxb_tag_id_t t)`
-- `resolve_context` (line 1077) `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `css_to_fx_justify` (line 1060) `static int css_to_fx_justify(css_justify j)` - *Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to FX_JUSTIFY_START (the default).*
+- `is_bold_tag` (line 1075) `static int is_bold_tag(lxb_tag_id_t t)` - *Inline emphasis carried by a tag: bold from <b>/<strong>/<th>, italic from * <i>/<em>. <th> is a header cell, conventionally bold.*
+- `is_italic_tag` (line 1078) `static int is_italic_tag(lxb_tag_id_t t)`
+- `resolve_context` (line 1097) `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...` - *level, nearest block-level ancestor (defaults to base), the inherited author color (nearest ancestor that sets one, packed 0xRRGGBB, or -1), the au...*
-- `collapse_ws` (line 1261) `static char *collapse_ws(const char *s, size_t n)` - *prev_basis = cs.flex_basis; prev_order = cs.order; prev_align_self = cs.align_self; prev_col_span = (cs.grid_col_span > 0) ? cs.grid_col_span : 0; ...*
-- `parse_dim` (line 1284) `static int parse_dim(const lxb_char_t *s, size_t len)` - *Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%"). Returns the value clamped to a sane bound, ...*
-- `find_body` (line 1296) `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-- `forms_free` (line 1319) `static void forms_free(form_table *ft)`
-- `ascii_ieq` (line 1327) `static int ascii_ieq(const char *s, const char *lit)` - *} form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void forms_free(form_table *ft) { for (size_t i ...*
-- `attr_dup` (line 1339) `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
-- `forms_add` (line 1348) `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
-- `form_for` (line 1368) `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+- `collapse_ws` (line 1293) `static char *collapse_ws(const char *s, size_t n)` - *prev_basis = cs.flex_basis; prev_order = cs.order; prev_align_self = cs.align_self; prev_col_span = (cs.grid_col_span > 0) ? cs.grid_col_span : 0; ...*
+- `parse_dim` (line 1316) `static int parse_dim(const lxb_char_t *s, size_t len)` - *Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%"). Returns the value clamped to a sane bound, ...*
+- `find_body` (line 1328) `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
+- `forms_free` (line 1351) `static void forms_free(form_table *ft)`
+- `ascii_ieq` (line 1359) `static int ascii_ieq(const char *s, const char *lit)` - *} form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void forms_free(form_table *ft) { for (size_t i ...*
+- `attr_dup` (line 1371) `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
+- `forms_add` (line 1380) `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` - *Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute yields a "" string (distingu...*
+- `form_for` (line 1400) `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...` - *} lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method", 6); int m = ascii_ieq(method, "p...*
-- `under_unrendered` (line 1384) `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` - *Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected subtree -- with run_js the parse...*
-- `collect_text` (line 1397) `static char *collect_text(const lxb_dom_node_t *el)` - *Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of a <button> / a flattened table...*
-- `classify_input` (line 1420) `static pv_input_type classify_input(const char *type)`
-- `describe_control` (line 1437) `static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
-                            ...` - *Fills owned label/name/value for a control element and its classified type. * Returns 0, or -1 on OOM (caller frees whatever is non-NULL).*
-- `li_ordinal` (line 1499) `static int li_ordinal(const lxb_dom_node_t *li)` - *1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out of scope). Counts preceding ele...*
-- `roman_marker` (line 1525) `static void roman_marker(int n, int upper, char *out, size_t cap)` - *int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ? 'A' : 'a') + r); n = (n - 1) /...*
-- `list_marker` (line 1550) `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+- `under_unrendered` (line 1416) `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` - *Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected subtree -- with run_js the parse...*
+- `collect_text` (line 1429) `static char *collect_text(const lxb_dom_node_t *el)` - *Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of a <button> / a flattened table...*
+- `classify_input` (line 1452) `static pv_input_type classify_input(const char *type)`
+- `li_ordinal` (line 1598) `static int li_ordinal(const lxb_dom_node_t *li)` - *1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out of scope). Counts preceding ele...*
+- `roman_marker` (line 1624) `static void roman_marker(int n, int upper, char *out, size_t cap)` - *int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ? 'A' : 'a') + r); n = (n - 1) /...*
+- `list_marker` (line 1649) `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...` - *Builds the list marker for the first run of an <li>. With no author list-style (CSS_LS_UNSET) it is the UA default: "N. " for an ordered list, "* "...*
-- `nearest_table` (line 1570) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *case CSS_LS_CIRCLE:      snprintf(out, cap, "\xE2\x97\xA6 "); return; /* U+25E6 white bullet case CSS_LS_SQUARE:      snprintf(out, cap, "\xE2\x96\...*
-- `cell_has_nested_table` (line 1595) `static int cell_has_nested_table(const lxb_dom_node_t *cell)` - *Nonzero if cell has a descendant <table>: it is then a structural CONTAINER, not a leaf cell. Only leaf cells (no nested table) are collected as on...*
-- `next_skip` (line 1604) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` - *Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the table scan).*
-- `cell_anchors` (line 1615) `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` - *First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only none / exactly-one / several m...*
-- `links` (line 1633) `* its links (the Hacker News case: every story link lives inside a <td>), so the
+- `nearest_table` (line 1669) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *case CSS_LS_CIRCLE:      snprintf(out, cap, "\xE2\x97\xA6 "); return; /* U+25E6 white bullet case CSS_LS_SQUARE:      snprintf(out, cap, "\xE2\x96\...*
+- `cell_has_nested_table` (line 1694) `static int cell_has_nested_table(const lxb_dom_node_t *cell)` - *Nonzero if cell has a descendant <table>: it is then a structural CONTAINER, not a leaf cell. Only leaf cells (no nested table) are collected as on...*
+- `next_skip` (line 1703) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` - *Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the table scan).*
+- `cell_anchors` (line 1714) `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` - *First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only none / exactly-one / several m...*
+- `links` (line 1732) `* its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows ...`
-- `flow_table` (line 1664) `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
-- `table` (line 1680) `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
+- `flow_table` (line 1763) `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
+- `table` (line 1779) `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
  * content -- their ...`
-- `collect_style_text` (line 1727) `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)` - *Concatenates the text of every <style> element in the document (head included) into one owned, NUL-terminated buffer, capped at PV_MAX_STYLE_BYTES....*
-- `in_hidden_subtree` (line 1761) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `collect_style_text` (line 1826) `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)` - *Concatenates the text of every <style> element in the document (head included) into one owned, NUL-terminated buffer, capped at PV_MAX_STYLE_BYTES....*
+- `in_hidden_subtree` (line 1860) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...` - *Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none is structural visibility, appl...*
-- `in_boilerplate_subtree` (line 1776) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>). Used only in distraction-free (reader) mode to drop...*
-- `pv_build` (line 1787) `pv_status pv_build(const hp_document *doc, pv_view **out)`
-- `pv_build_ex` (line 1791) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-- `pv_build_full` (line 1795) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+- `in_boilerplate_subtree` (line 1875) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` - *Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>). Used only in distraction-free (reader) mode to drop...*
+- `pv_build` (line 1886) `pv_status pv_build(const hp_document *doc, pv_view **out)`
+- `pv_build_ex` (line 1890) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+- `pv_build_full` (line 1894) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-- `pv_build_styled` (line 1800) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+- `pv_build_styled` (line 1899) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-- `appended` (line 2267) `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
+- `appended` (line 2376) `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
         if (cont.fl...`
 
 **Macros:**
 - `_POSIX_C_SOURCE` (line 9)
 - `PV_MAX_DIM` (line 37)
-- `PV_NODE_MAP_INIT_CAP` (line 211)
-- `PV_COLOR_TOKEN_MAX` (line 659)
-- `PV_MAX_CONTAINERS` (line 693)
-- `PV_MAX_GRID_COLS` (line 695)
-- `PV_MAX_STYLE_BYTES` (line 1721)
+- `PV_NODE_MAP_INIT_CAP` (line 213)
+- `PV_COLOR_TOKEN_MAX` (line 675)
+- `PV_MAX_CONTAINERS` (line 709)
+- `PV_MAX_GRID_COLS` (line 711)
+- `PV_MAX_STYLE_BYTES` (line 1820)
 
 **Structs:**
-- `pv_node_map` (line 213)
-- `pv_cont_info` (line 703) - *Nearest-container info attached to a run, plus the flex per-item values (Stage 3): grow/shrink/basis/order come from the ITEM element (the containe...*
-- `pv_item_track` (line 725) - *Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for container cid, node[cid] the direct-child element it belongs to. A ...*
-- `pv_box_info` (line 744) - *Author box model resolved for a run: horizontal placement (l/r insets, w cap, centered) from the nearest block ancestor that declares a box, plus t...*
-- `pv_container_reg` (line 882) - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id.*
-- `pv_box_reg` (line 899) - *Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block nodes plus each box's resolved definition (decoration + parent link)....*
-- `pv_style_cache` (line 984) - *Per-document memo of cch_element_style() results, keyed by element pointer. resolve_context()/in_hidden_subtree() call cch_element_style once per A...*
-- `form_rec` (line 1309) - *One <form> seen in document order: its grouping id is its index. action is an owned NUL-terminated copy of the raw action attribute (or NULL); meth...*
-- `form_table` (line 1315)
-- `pv_flow_reg` (line 1659) - *Cache of the per-table flow decision (a table subtree is scanned at most once, * anti-DoS). Registry full => grid (the previous behaviour), bounded...*
+- `pv_node_map` (line 215)
+- `pv_cont_info` (line 719) - *Nearest-container info attached to a run, plus the flex per-item values (Stage 3): grow/shrink/basis/order come from the ITEM element (the containe...*
+- `pv_item_track` (line 745) - *Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for container cid, node[cid] the direct-child element it belongs to. A ...*
+- `pv_box_info` (line 764) - *Author box model resolved for a run: horizontal placement (l/r insets, w cap, centered) from the nearest block ancestor that declares a box, plus t...*
+- `pv_container_reg` (line 902) - *Document-order registry of flex/grid container nodes, so the runs of one * container share a stable id.*
+- `pv_box_reg` (line 919) - *Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block nodes plus each box's resolved definition (decoration + parent link)....*
+- `pv_style_cache` (line 1004) - *Per-document memo of cch_element_style() results, keyed by element pointer. resolve_context()/in_hidden_subtree() call cch_element_style once per A...*
+- `form_rec` (line 1341) - *One <form> seen in document order: its grouping id is its index. action is an owned NUL-terminated copy of the raw action attribute (or NULL); meth...*
+- `form_table` (line 1347)
+- `pv_flow_reg` (line 1758) - *Cache of the per-table flow decision (a table subtree is scanned at most once, * anti-DoS). Registry full => grid (the previous behaviour), bounded...*
 
 #### `pdf_export.c`
 **Path:** `src/pdf_export.c`
@@ -2653,20 +2660,20 @@ int os_namespac...`
 - `utf8_sanitized_dup` (line 31) `static char *utf8_sanitized_dup(const char *s)`
 - `rd_push` (line 63) `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
                  ...` - *Appends one block, taking owned copies of text (required) and href (optional). * Returns 0 on success, -1 on allocation failure (the doc is left co...*
-- `rd_push_input` (line 163) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` - *Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value. Returns 0, or -1 on allocation f...*
-- `rd_build` (line 180) `rd_status rd_build(const pv_view *view, rdp_caps caps,
+- `rd_push_input` (line 165) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` - *Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value. Returns 0, or -1 on allocation f...*
+- `rd_build` (line 187) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-- `url_resolve_file` (line 229) `url_resolve_file(top_level_url, r->src,
+- `url_resolve_file` (line 236) `url_resolve_file(top_level_url, r->src,
                                                 resolved,...`
-- `rd_free` (line 390) `void rd_free(rd_doc *d)`
-- `rd_count` (line 403) `size_t rd_count(const rd_doc *d)`
-- `rd_at` (line 407) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-- `rd_box_count` (line 412) `size_t rd_box_count(const rd_doc *d)`
-- `rd_box_at` (line 416) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-- `rd_kind_name` (line 421) `const char *rd_kind_name(rd_kind k)`
-- `rd_block_tag` (line 433) `const char *rd_block_tag(const rd_block *b)`
-- `rd_input_label` (line 458) `const char *rd_input_label(int input_type)`
-- `rd_image_label` (line 470) `const char *rd_image_label(rdp_img_decision d)`
+- `rd_free` (line 397) `void rd_free(rd_doc *d)`
+- `rd_count` (line 411) `size_t rd_count(const rd_doc *d)`
+- `rd_at` (line 415) `const rd_block *rd_at(const rd_doc *d, size_t i)`
+- `rd_box_count` (line 420) `size_t rd_box_count(const rd_doc *d)`
+- `rd_box_at` (line 424) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+- `rd_kind_name` (line 429) `const char *rd_kind_name(rd_kind k)`
+- `rd_block_tag` (line 441) `const char *rd_block_tag(const rd_block *b)`
+- `rd_input_label` (line 467) `const char *rd_input_label(int input_type)`
+- `rd_image_label` (line 482) `const char *rd_image_label(rdp_img_decision d)`
 
 #### `render_policy.c`
 **Path:** `src/render_policy.c`
@@ -2775,57 +2782,57 @@ int os_namespac...`
 - `run_js` (line 190) `* regardless of run_js (a no-JS load simply never records a request). */
 static int child_load(ch...`
 - `write_view` (line 276) `static int write_view(int wfd, const pv_view *v)` - *cont_col_w[PV_GRID_TRACKS],grid_span, flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item, cont_wrap,cont_row_gap,cont_align_items...*
-- `FB_MAX_FILE_BYTES` (line 492) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+- `FB_MAX_FILE_BYTES` (line 497) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-- `budget_remaining_ms` (line 522) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` - *Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS budget across the inline scrip...*
-- `ctype_is_javascript` (line 536) `static int ctype_is_javascript(const char *ctype)` - *Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types): accept a missing/empty type -- class...*
-- `ctype_is_css` (line 545) `static int ctype_is_css(const char *ctype)` - *Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is accepted, anything else must mention...*
-- `log_external_skip` (line 553) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+- `budget_remaining_ms` (line 527) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` - *Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS budget across the inline scrip...*
+- `ctype_is_javascript` (line 541) `static int ctype_is_javascript(const char *ctype)` - *Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types): accept a missing/empty type -- class...*
+- `ctype_is_css` (line 550) `static int ctype_is_css(const char *ctype)` - *Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is accepted, anything else must mention...*
+- `log_external_skip` (line 558) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...` - *Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused). The raw hostile src is bounded by the messag...*
-- `window` (line 573) `* net window (cs->net_active). */
+- `window` (line 578) `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-- `child_handle_load` (line 615) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+- `child_handle_load` (line 620) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-- `child_next_timer_ms` (line 773) `static int32_t child_next_timer_ms(child_state *cs)` - *Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending. Does NOT touch the console trans...*
-- `child_handle_mutation` (line 788) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+- `child_next_timer_ms` (line 778) `static int32_t child_next_timer_ms(child_state *cs)` - *Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending. Does NOT touch the console trans...*
+- `child_handle_mutation` (line 793) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...` - *Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so the parent can repaint mutation...*
-- `child_handle_click` (line 835) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- `child_handle_tick` (line 839) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- `child_handle_eval` (line 847) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` - *Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a JS-level error is ok==1 with the...*
-- `child_handle_decode_image` (line 876) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` - *Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data]. Decoding hostile image bytes happens here, inside the confinement...*
-- `gen_session_key` (line 892) `static uint64_t gen_session_key(void)`
-- `tab_worker_run` (line 913) `static void tab_worker_run(int rfd, int wfd)` - *The confined request loop. Runs in the re-exec'd worker image (see * tab_worker_dispatch). Never returns to the caller (always _exit).*
-- `parse_worker_fd` (line 1018) `static int parse_worker_fd(const char *s, int *out)` - *else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len); else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len); fr...*
-- `tab_parse_worker_args` (line 1029) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- `tab_worker_dispatch` (line 1039) `void tab_worker_dispatch(int argc, char **argv)`
-- `ignore_sigpipe` (line 1068) `static void ignore_sigpipe(void)` - *A write to a dead child must not kill the parent with SIGPIPE. Idempotent; * no module-level mutable state of our own (the disposition is process-w...*
-- `tab_refresh_alive` (line 1074) `static void tab_refresh_alive(tab *t)`
-- `read_field` (line 1094) `static int read_field(int fd, char **out, size_t *out_len)` - *Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.*
-- `read_view` (line 1109) `static int read_view(int fd, pv_view **out)` - *Reads a display list serialised by write_view into a fresh pv_view. The run * count and each field are capped against amplification from a hostile ...*
-- `read_console` (line 1336) `static int read_console(int fd, fb_buffer *out)` - *Reads the console section written by write_console into out (a zero-initialised fb_buffer). Bounds the entry count and each length against amplific...*
-- `send_request` (line 1372) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` - *if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt, elen) != 0) { free(txt); free(file)...*
-- `io_failure` (line 1381) `static tab_status io_failure(tab *t)`
-- `exec_worker_child` (line 1390) `static void exec_worker_child(int rfd, int wfd)` - *Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other tabs' content from tab_slots[], fr...*
-- `tab_set_fetcher` (line 1458) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- `tab_set_net_allowed` (line 1464) `void tab_set_net_allowed(tab *t, int allowed)`
-- `tab_set_css_allowed` (line 1469) `void tab_set_css_allowed(tab *t, int allowed)`
-- `tab_subreq_permitted` (line 1474) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- `answered` (line 1487) `* A refused frame is still consumed and answered (status 0), so the protocol never
+- `child_handle_click` (line 840) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
+- `child_handle_tick` (line 844) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
+- `child_handle_eval` (line 852) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` - *Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a JS-level error is ok==1 with the...*
+- `child_handle_decode_image` (line 881) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` - *Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data]. Decoding hostile image bytes happens here, inside the confinement...*
+- `gen_session_key` (line 897) `static uint64_t gen_session_key(void)`
+- `tab_worker_run` (line 918) `static void tab_worker_run(int rfd, int wfd)` - *The confined request loop. Runs in the re-exec'd worker image (see * tab_worker_dispatch). Never returns to the caller (always _exit).*
+- `parse_worker_fd` (line 1023) `static int parse_worker_fd(const char *s, int *out)` - *else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len); else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len); fr...*
+- `tab_parse_worker_args` (line 1034) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
+- `tab_worker_dispatch` (line 1044) `void tab_worker_dispatch(int argc, char **argv)`
+- `ignore_sigpipe` (line 1073) `static void ignore_sigpipe(void)` - *A write to a dead child must not kill the parent with SIGPIPE. Idempotent; * no module-level mutable state of our own (the disposition is process-w...*
+- `tab_refresh_alive` (line 1079) `static void tab_refresh_alive(tab *t)`
+- `read_field` (line 1099) `static int read_field(int fd, char **out, size_t *out_len)` - *Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.*
+- `read_view` (line 1114) `static int read_view(int fd, pv_view **out)` - *Reads a display list serialised by write_view into a fresh pv_view. The run * count and each field are capped against amplification from a hostile ...*
+- `read_console` (line 1355) `static int read_console(int fd, fb_buffer *out)` - *Reads the console section written by write_console into out (a zero-initialised fb_buffer). Bounds the entry count and each length against amplific...*
+- `send_request` (line 1391) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` - *if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt, elen) != 0) { free(txt); free(file)...*
+- `io_failure` (line 1400) `static tab_status io_failure(tab *t)`
+- `exec_worker_child` (line 1409) `static void exec_worker_child(int rfd, int wfd)` - *Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other tabs' content from tab_slots[], fr...*
+- `tab_set_fetcher` (line 1477) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+- `tab_set_net_allowed` (line 1483) `void tab_set_net_allowed(tab *t, int allowed)`
+- `tab_set_css_allowed` (line 1488) `void tab_set_css_allowed(tab *t, int allowed)`
+- `tab_subreq_permitted` (line 1493) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+- `answered` (line 1506) `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-- `tab_load` (line 1522) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- `tab_load_ex` (line 1526) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- `tab_load_full` (line 1530) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+- `tab_load` (line 1541) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+- `tab_load_ex` (line 1545) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+- `tab_load_full` (line 1549) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- `tab_click` (line 1710) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- `tab_tick` (line 1717) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- `tab_eval` (line 1724) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- `tab_decode_image` (line 1761) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- `tab_alive` (line 1804) `int tab_alive(const tab *t)`
-- `tab_child_pid` (line 1810) `pid_t tab_child_pid(const tab *t)`
-- `tab_close` (line 1814) `void tab_close(tab *t)`
-- `tab_page_free` (line 1826) `void tab_page_free(tab_page *p)`
-- `tab_eval_result_free` (line 1842) `void tab_eval_result_free(tab_eval_result *r)`
-- `tab_image_free` (line 1851) `void tab_image_free(tab_image *img)`
+- `tab_click` (line 1729) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+- `tab_tick` (line 1736) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+- `tab_eval` (line 1743) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+- `tab_decode_image` (line 1780) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+- `tab_alive` (line 1823) `int tab_alive(const tab *t)`
+- `tab_child_pid` (line 1829) `pid_t tab_child_pid(const tab *t)`
+- `tab_close` (line 1833) `void tab_close(tab *t)`
+- `tab_page_free` (line 1845) `void tab_page_free(tab_page *p)`
+- `tab_eval_result_free` (line 1861) `void tab_eval_result_free(tab_eval_result *r)`
+- `tab_image_free` (line 1870) `void tab_image_free(tab_image *img)`
 
 **Macros:**
 - `_GNU_SOURCE` (line 13)
@@ -2836,11 +2843,11 @@ static void child_fetch_stylesheets(child_state *cs)`
 - `TAB_MAX_SUBREQ` (line 72)
 - `TAB_MAX_SUBRESOURCE` (line 73)
 - `TAB_MAX_JS_JOBS` (line 74)
-- `TAB_MAX_EXTERN_CSS` (line 565)
+- `TAB_MAX_EXTERN_CSS` (line 570)
 
 **Structs:**
 - `child_state` (line 106)
-- `tab` (line 1050)
+- `tab` (line 1055)
 
 #### `text_shape.c`
 **Path:** `src/text_shape.c`
@@ -4756,10 +4763,10 @@ static void tes...`
 - `PV_GRID_TRACKS` (line 45)
 
 **Structs:**
-- `pv_run` (line 80) - *One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-ter...*
-- `pv_box_def` (line 256) - *Box engine (Hito 23b-8 Step D): one entry of the box-definition TREE. The box decoration and the parent link live here, not on each run, so a box i...*
-- `pv_view` (line 325)
-- `pv_text_ext` (line 444) - *The author text-presentation extensions of one run, resolved from the nearest ancestor that sets each field (they all inherit in CSS). The 20+ fiel...*
+- `pv_run` (line 83) - *One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-ter...*
+- `pv_box_def` (line 261) - *Box engine (Hito 23b-8 Step D): one entry of the box-definition TREE. The box decoration and the parent link live here, not on each run, so a box i...*
+- `pv_view` (line 330)
+- `pv_text_ext` (line 449) - *The author text-presentation extensions of one run, resolved from the nearest ancestor that sets each field (they all inherit in CSS). The 20+ fiel...*
 
 #### `pdf_export.h`
 **Path:** `include/pdf_export.h`
@@ -4828,7 +4835,7 @@ static void tes...`
 
 **Structs:**
 - `rd_block` (line 44) - *One paint-ready block in document order. text is owned, NUL-terminated and valid UTF-8. href is owned and NUL-terminated for RD_LINK (link target),...*
-- `rd_doc` (line 157)
+- `rd_doc` (line 159)
 
 #### `render_policy.h`
 **Path:** `include/render_policy.h`
