@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <time.h>
 
 #include <curl/curl.h>
 #include <openssl/ssl.h>
@@ -87,6 +88,126 @@ void sf_global_init(void) {
         curl_share_setopt(sf_share, CURLSHOPT_LOCKFUNC, sf_share_lock);
         curl_share_setopt(sf_share, CURLSHOPT_UNLOCKFUNC, sf_share_unlock);
     }
+}
+
+int sf_cookie_line_matches(const char *line, const char *host, const char *path,
+                           long now, char *out, size_t outsz) {
+    if (out != NULL && outsz > 0) out[0] = '\0';
+    if (line == NULL || host == NULL || out == NULL || outsz == 0) return 0;
+    /* A leading '#' is a Netscape comment OR curl's "#HttpOnly_" marker; either way
+     * the line is not part of the document.cookie view (HttpOnly is network-only). */
+    if (line[0] == '#') return 0;
+    const char *reqpath = (path != NULL && path[0] != '\0') ? path : "/";
+
+    const char *f[7]; size_t fl[7]; int nf = 0;
+    for (const char *q = line; nf < 7; ++nf) {
+        const char *tab = strchr(q, '\t');
+        f[nf] = q;
+        fl[nf] = (tab != NULL) ? (size_t)(tab - q) : strlen(q);
+        if (tab == NULL) { ++nf; break; }
+        q = tab + 1;
+    }
+    if (nf < 7) return 0;
+
+    /* domain (f0, optional leading dot) + include-subdomains flag (f1) */
+    const char *dom = f[0]; size_t domlen = fl[0];
+    if (domlen > 0 && dom[0] == '.') { ++dom; --domlen; }
+    if (domlen == 0) return 0;
+    int subdom = (fl[1] == 4 && strncmp(f[1], "TRUE", 4) == 0);
+    size_t hostlen = strlen(host);
+    int dmatch = (hostlen == domlen && strncmp(host, dom, domlen) == 0);
+    if (!dmatch && subdom && hostlen > domlen
+        && host[hostlen - domlen - 1] == '.'
+        && strncmp(host + hostlen - domlen, dom, domlen) == 0) dmatch = 1;
+    if (!dmatch) return 0;
+
+    /* path prefix (f2) */
+    if (fl[2] > 0 && strncmp(reqpath, f[2], fl[2]) != 0) return 0;
+
+    /* expiry (f4): 0 => session cookie; otherwise expired when <= now */
+    if (fl[4] > 0) {
+        char eb[32];
+        size_t el = (fl[4] < sizeof eb - 1) ? fl[4] : sizeof eb - 1;
+        memcpy(eb, f[4], el); eb[el] = '\0';
+        long exp = strtol(eb, NULL, 10);
+        if (exp != 0 && exp <= now) return 0;
+    }
+
+    /* name=value (f5, f6) */
+    size_t need = fl[5] + 1 + fl[6];
+    if (fl[5] == 0 || need + 1 > outsz) return 0;
+    memcpy(out, f[5], fl[5]);
+    out[fl[5]] = '=';
+    memcpy(out + fl[5] + 1, f[6], fl[6]);
+    out[need] = '\0';
+    return 1;
+}
+
+/* Extracts host + path from a validated https url into caller buffers (path defaults
+ * to "/"). Returns 0 on success, -1 on failure. */
+static int sf_url_host_path(const char *url, char *host, size_t hostsz,
+                            char *path, size_t pathsz) {
+    url_parts p;
+    if (url_split(url, &p) != URL_OK || p.hostname_len == 0
+        || p.hostname_len >= hostsz) return -1;
+    memcpy(host, p.hostname, p.hostname_len); host[p.hostname_len] = '\0';
+    if (p.pathname_len == 0 || pathsz < 2) {
+        if (pathsz >= 2) { path[0] = '/'; path[1] = '\0'; }
+    } else {
+        size_t pl = (p.pathname_len < pathsz - 1) ? p.pathname_len : pathsz - 1;
+        memcpy(path, p.pathname, pl); path[pl] = '\0';
+    }
+    return 0;
+}
+
+size_t sf_cookie_header_for(const char *url, char *out, size_t outsz) {
+    if (out != NULL && outsz > 0) out[0] = '\0';
+    if (url == NULL || out == NULL || outsz == 0 || sf_share == NULL) return 0;
+    char host[256], path[512];
+    if (sf_url_host_path(url, host, sizeof host, path, sizeof path) != 0) return 0;
+
+    CURL *h = curl_easy_init();
+    if (h == NULL) return 0;
+    curl_easy_setopt(h, CURLOPT_SHARE, sf_share);
+    curl_easy_setopt(h, CURLOPT_COOKIEFILE, "");
+    struct curl_slist *list = NULL;
+    curl_easy_getinfo(h, CURLINFO_COOKIELIST, &list);
+
+    long now = (long)time(NULL);
+    size_t used = 0;
+    for (struct curl_slist *c = list; c != NULL; c = c->next) {
+        char nv[600];
+        if (!sf_cookie_line_matches(c->data, host, path, now, nv, sizeof nv)) continue;
+        size_t nvlen = strlen(nv);
+        size_t need = (used == 0) ? nvlen : nvlen + 2; /* "; " separator */
+        if (used + need + 1 > outsz) break;
+        if (used != 0) { out[used++] = ';'; out[used++] = ' '; }
+        memcpy(out + used, nv, nvlen); used += nvlen; out[used] = '\0';
+    }
+    curl_slist_free_all(list);
+    curl_easy_cleanup(h);
+    return used;
+}
+
+void sf_cookie_put(const char *url, const char *namevalue) {
+    if (url == NULL || namevalue == NULL || sf_share == NULL) return;
+    const char *semi = strchr(namevalue, ';');
+    size_t nvlen = (semi != NULL) ? (size_t)(semi - namevalue) : strlen(namevalue);
+    const char *eq = (const char *)memchr(namevalue, '=', nvlen);
+    if (eq == NULL || eq == namevalue) return; /* need a non-empty name */
+    char host[256], path[512];
+    if (sf_url_host_path(url, host, sizeof host, path, sizeof path) != 0) return;
+
+    char line[900];
+    int n = snprintf(line, sizeof line, "Set-Cookie: %.*s; domain=%s; path=/",
+                     (int)nvlen, namevalue, host);
+    if (n <= 0 || (size_t)n >= sizeof line) return;
+    CURL *h = curl_easy_init();
+    if (h == NULL) return;
+    curl_easy_setopt(h, CURLOPT_SHARE, sf_share);
+    curl_easy_setopt(h, CURLOPT_COOKIEFILE, "");
+    curl_easy_setopt(h, CURLOPT_COOKIELIST, line);
+    curl_easy_cleanup(h);
 }
 
 sf_config sf_config_default(void) {

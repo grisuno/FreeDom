@@ -77,6 +77,20 @@ int jd_fire_click(js_context *ctx, dom_node_id node_id);
  * jd_install, on the page's context. ctx == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts);
 
+/* Enables and seeds the page's in-memory session cookie jar (document.cookie). Call ONLY
+ * for a trusted host (allow.conf AND js.conf); until called, document.cookie is a no-op
+ * ('' on get, ignored on set) so untrusted sites see no cookies (Zero Knowledge). cookies
+ * is a "name=value; name=value" string (may be NULL/empty). It is passed as a JS string
+ * VALUE, never interpolated into source (the hostile bytes cannot inject code). Call after
+ * jd_install. ctx == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_set_cookies(js_context *ctx, const char *cookies);
+
+/* Serialises the page's current cookie jar ("name=value; ...") into buf (bounded,
+ * NUL-terminated) and returns its length, so the trusted parent can fold JS-set cookies
+ * back into its ephemeral network jar. Returns 0 when the jar is disabled/empty or on any
+ * error. Never throws into the page. */
+int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);
+
 /* Reads and CLEARS the navigation the page's JS requested (globalThis.__navReq). Returns
  * 1 and copies the raw (unresolved) target into buf (bounded, NUL-terminated) with
  * *replace set from location.replace; returns 0 when no (non-empty) request is pending.

@@ -371,6 +371,58 @@ url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t
     return build_search(start, out, outsz);
 }
 
+/* Case-insensitive exact match of a url_parts hostname against want. */
+static int host_equals(const url_parts *p, const char *want) {
+    size_t wl = strlen(want);
+    if (p->hostname_len != wl) return 0;
+    for (size_t i = 0; i < wl; ++i) {
+        char a = p->hostname[i], b = want[i];
+        if (a >= 'A' && a <= 'Z') a = (char)(a + 32);
+        if (b >= 'A' && b <= 'Z') b = (char)(b + 32);
+        if (a != b) return 0;
+    }
+    return 1;
+}
+
+/* Returns a pointer to the value of the "q" parameter within a "?a=b&q=v&..."
+ * search span, with its length in *vlen (up to the next '&' or the end), or NULL
+ * when there is no "q" key. The leading '?' (if any) is skipped. */
+static const char *query_find_q(const char *search, size_t len, size_t *vlen) {
+    size_t i = (len > 0 && search[0] == '?') ? 1 : 0;
+    while (i < len) {
+        size_t k = i;
+        while (k < len && search[k] != '=' && search[k] != '&') ++k;
+        int is_q = (k - i == 1 && search[i] == 'q');
+        if (k < len && search[k] == '=') {
+            size_t v = ++k;
+            while (v < len && search[v] != '&') ++v;
+            if (is_q) { *vlen = v - k; return search + k; }
+            i = (v < len) ? v + 1 : v;
+        } else {
+            i = (k < len) ? k + 1 : k;
+        }
+    }
+    return NULL;
+}
+
+url_status url_search_rewrite(const char *url, char *out, size_t outsz) {
+    if (url == NULL || out == NULL || outsz == 0) return URL_ERR_NULL_ARG;
+    url_parts p;
+    if (url_split(url, &p) != URL_OK) return URL_ERR_NOT_HTTPS;
+    if (!host_equals(&p, "duckduckgo.com") && !host_equals(&p, "www.duckduckgo.com"))
+        return URL_ERR_NOT_HTTPS;
+    if (p.search_len == 0) return URL_ERR_NOT_HTTPS;
+    size_t qv = 0;
+    const char *q = query_find_q(p.search, p.search_len, &qv);
+    if (q == NULL) return URL_ERR_NOT_HTTPS;
+    const size_t plen = sizeof(URL_SEARCH_ENDPOINT) - 1;
+    if (plen + qv + 1 > outsz) return URL_ERR_OVERFLOW;
+    memcpy(out, URL_SEARCH_ENDPOINT, plen);
+    memcpy(out + plen, q, qv);
+    out[plen + qv] = '\0';
+    return URL_OK;
+}
+
 /* --- HTTP Basic Auth: extract userinfo from URL --- */
 
 url_status url_extract_userinfo(const char *url, char *out, size_t outsz,

@@ -701,6 +701,55 @@ static void test_load_ex_runs_script_and_mutates(void **state) {
     tab_close(t);
 }
 
+/* Session cookies (trusted host): the parent seeds document.cookie from its ephemeral
+ * network jar (tab_set_cookies), the page's JS reads and sets cookies, and the worker
+ * dumps the jar back (tab_page.set_cookies) for the parent to fold in. In-memory only. */
+static void test_load_session_cookies_roundtrip(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>document.title=document.cookie;document.cookie='newpref=42';</script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 1);                 /* trusted host (allow.conf AND js.conf) */
+    tab_set_cookies(t, "sid=abc; theme=dark"); /* parent seeded from its network jar */
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://trusted.example/",
+                                   1, 0, 0, &p), TAB_OK);
+    /* the seed reached document.cookie inside the worker */
+    assert_non_null(p.title);
+    assert_non_null(strstr(p.title, "sid=abc"));
+    /* the JS-set cookie (and the seed) come back for the parent to fold into its jar */
+    assert_non_null(p.set_cookies);
+    assert_non_null(strstr(p.set_cookies, "newpref=42"));
+    assert_non_null(strstr(p.set_cookies, "sid=abc"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Untrusted host (net off): the cookie jar stays disabled -- document.cookie is '' even
+ * if the parent were to seed it, and nothing is dumped back (Zero Knowledge default). */
+static void test_load_no_session_cookies_when_untrusted(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<script>document.title='['+document.cookie+']';document.cookie='x=1';</script>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 0);                 /* untrusted */
+    tab_set_cookies(t, "sid=abc");             /* ignored: jar stays disabled */
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://untrusted.example/",
+                                   1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "[]");        /* document.cookie is empty */
+    assert_null(p.set_cookies);                /* nothing folded back */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Live JS construction (Hito 20c): a script builds a node and an onload handler
  * mutates it; both must be reflected in the worker's returned view. */
 static void test_load_ex_builds_dom_and_fires_onload(void **state) {
@@ -1766,6 +1815,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_ex_runs_script_and_mutates),
+        cmocka_unit_test(test_load_session_cookies_roundtrip),
+        cmocka_unit_test(test_load_no_session_cookies_when_untrusted),
         cmocka_unit_test(test_load_ex_builds_dom_and_fires_onload),
         cmocka_unit_test(test_load_ex_inner_html_renders),
         cmocka_unit_test(test_load_without_js_does_not_run_script),

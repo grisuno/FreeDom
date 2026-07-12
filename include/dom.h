@@ -121,6 +121,13 @@ const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);
 const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                               const char *name, size_t *len);
 
+/* Qualified names of node's attributes, in document order, written to names[]
+ * (borrowed, valid while idx/doc are alive) with matching lens[] (excluding NUL).
+ * Writes at most cap entries; returns the total attribute count (which may exceed
+ * cap, so the caller can tell it truncated). node without attributes returns 0. */
+size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
+                           const char **names, size_t *lens, size_t cap);
+
 /* Concatenated text content of node's subtree (borrowed, valid while idx/doc are
  * alive), or NULL. *len (optional) excludes the NUL. */
 const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);

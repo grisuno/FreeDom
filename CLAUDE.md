@@ -307,6 +307,30 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   búsqueda muestra **página en blanco / sin JS**, es que el `allow.conf` con `duckduckgo.com` **no está
   en el search path en runtime** (`$FREEDOM_HOSTS_DIR`, `~/.config/freedom`, `./config`): correr desde
   la raíz del repo o copiar el config a `~/.config/freedom/` lo resuelve. Ver `[[freedom-search-needs-allowlist]]`.
+- **SPA de buscador ⇒ endpoint no-JS server-rendered (rewrite transparente):** navegar directo a la
+  **SPA de DuckDuckGo** (`duckduckgo.com/?q=...`) se reescribe transparente a su endpoint HTML sin JS
+  (`URL_SEARCH_ENDPOINT` + la misma query) en el único choke point de navegación (`do_load` GUI,
+  `fetch_and_render_one` headless), vía `url_search_rewrite` (puro). La SPA trae resultados por XHR
+  async + framework de render de cliente que el modelo síncrono no completa ⇒ pinta en blanco; el
+  endpoint HTML da los mismos resultados sin nada de eso. Transparente: barra/historial guardan la URL
+  pedida (Recargar/Atrás re-aplican). Google **no** se toca (sin endpoint no-JS fiable; su "tráfico
+  inusual" es server-side). Aparte, se corrigieron los gaps del shim JS que hacían fallar la consola
+  de la SPA (y de **toda** la web jQuery/`Intl`): `document.nodeType===9`+`defaultView` (el
+  `setDocument` de Sizzle), `element.attributes` NamedNodeMap + `getAttributeNames`/`hasAttributes`
+  (via C `dom_attribute_names`), y stub de `Intl` (QuickJS-ng sin ICU) ⇒ consola 0. Ver
+  `[[freedom-search-spa-noscript-rewrite]]`.
+- **Cookies de sesión EN MEMORIA para hosts de confianza (doctrina 2026-07-12, aprobada por el dueño):**
+  un host allow∩js recibe cookies **efímeras en memoria** (nunca a disco, mueren al cerrar la app —
+  mismo espíritu que el `localStorage` efímero), **sin romper Zero Knowledge ni Zero Trust**. El jar de
+  red ya existía (`sf_share` CURLSH); lo que faltaba y se cerró: **`document.cookie` real** en el worker
+  (jar deshabilitado por defecto = `''`/no-op para no-confiables → ZK; habilitado y sembrado por
+  `jd_set_cookies`, volcado por `jd_get_cookies`), helpers `sf_cookie_header_for`/`sf_cookie_put`
+  (excluyen `HttpOnly` — network-only — y expirados) y el puente IPC (OP_LOAD lleva cookies-in y el tail
+  del resultado lleva el dump-out; solo en el path OP_LOAD, no en la cola de mutación). La GUI y headless
+  siembran desde el jar antes de cargar y hacen foldback antes de cualquier salto de nav JS. **Google
+  sigue sin renderizar** (su muro es botguard/consent/IP server-side, no algo que las cookies resuelvan;
+  se lo dije al dueño): la capacidad sirve para sitios de confianza que usan cookies cooperativamente. El
+  rewrite no-JS de DuckDuckGo se mantiene. Ver `[[freedom-session-cookies-trusted-spa]]`.
 - **JS Secure by Default + allowlist por host + ejecución viva:** el JS de página está **apagado**
   salvo opt-in por host. Modo global tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`(defecto)/`JSP_ON`);
   pertenencia por host en `js.conf` (reusa `hostblock`, cubre subdominios). `js_policy` (puro) decide;
@@ -542,6 +566,8 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Hito (doctrina 2026-07-11) — PSEUDO_ALWAYS: `:hover`/`:focus`/`:active` ahora siempre matchean.** Contenido oculto tras `:hover` (Slashdot, menús) se vuelve visible sin re-cascada interactiva. `:visited` se queda PSEUDO_NEVER (ZK). Cambio simple: ~5 líneas en `css_select.c`/`.h`. Ver `[[freedom-pseudo-always]]`.
 - **Hito (doctrina 2026-07-11) — Presentation-trust: allow.conf sin JS ya habilita CSS+imágenes.** Nueva `jsp_present_trusted` pura: un host en allow.conf recibe autor-presentation sin necesidad de JS. JS/red siguen doble-gateados (allow∩js). Ver `[[freedom-presentation-trust]]`.
 - **Hito 19b (WebP) — WebP decoder vía libwebp.** Nuevo `IMG_FMT_WEBP` + `img_decode_webp()` con sniff `RIFF....WEBP`, WebPGetInfo anti-bomb, WebPDecodeBGRAInto → premultiplied BGRA. Tests goldens + fail-closed. Ver `[[freedom-webp-decoder]]`.
+- **Hito (2026-07-12) — Cookies de sesión en memoria para hosts allow∩js.** `document.cookie` real en el worker (`jd_set_cookies`/`jd_get_cookies`, jar deshabilitado=no-op por defecto → ZK) + `sf_cookie_header_for`/`sf_cookie_put` sobre el jar CURLSH (excluye HttpOnly/expirados) + puente IPC OP_LOAD (cookies-in tras URL, dump-out en el tail) + seed/foldback en GUI y headless, gateado a trusted. Efímeras (mueren al cerrar la app), sin romper ZK/ZT. Google sigue con su muro botguard (documentado). Ver `[[freedom-session-cookies-trusted-spa]]`.
+- **Hito (search 2026-07-12) — SPA de DuckDuckGo → endpoint no-JS + fixes de shim JS.** `url_search_rewrite` (puro, testeado) reescribe `duckduckgo.com/?q=` a `html.duckduckgo.com/html/?q=` en el choke point (`do_load`/`fetch_and_render_one`); shim JS: `document.nodeType===9`+`defaultView`, `element.attributes` NamedNodeMap (`dom_attribute_names` en C), `Intl` stub ⇒ consola de la SPA de 3→0 errores (beneficia toda la web jQuery/Intl). Boy-scout: extinguido stack-use-after-scope pre-existente en `headless_load_hosts` (buffer de bloque interno aliaseado por `dirs[2]` y leído fuera de scope; ASan lo cazaba). Ver `[[freedom-search-spa-noscript-rewrite]]`.
 
 ### 7.3 Roadmap — por cruzar
 

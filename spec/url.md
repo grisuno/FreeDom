@@ -144,6 +144,30 @@ Default):
 (una función pura no puede `stat` el FS). `out` queda NUL-terminado en `URL_OK`; punteros NULL /
 `outsz==0` → `URL_ERR_NULL_ARG`; URL construida que no cabe → `URL_ERR_OVERFLOW`.
 
+### `url_search_rewrite`
+
+Reescribe la URL de una SPA de buscador cuyos resultados **solo** los produce JavaScript de cliente
+que no podemos correr completo (la SPA de DuckDuckGo, `duckduckgo.com/?q=...`) a su equivalente
+**server-rendered sin JS** (`URL_SEARCH_ENDPOINT` + la misma query), que Freedom pinta directo. El
+valor de la query se copia **verbatim** (ya viene percent-encoded). Reescribe **solo** los hosts
+exactos `duckduckgo.com` / `www.duckduckgo.com` con parámetro `q`; los hosts no-JS `html.`/`lite.`,
+la home desnuda y cualquier otro sitio quedan intactos (`URL_ERR_NOT_HTTPS` ⇒ el llamador navega el
+original). Google **no** se reescribe (no tiene endpoint no-JS fiable; su muro de "tráfico inusual"
+es decisión server-side). Puro, sin I/O. Se cablea en el único choke point de navegación (`do_load`
+en la GUI, `fetch_and_render_one` en headless): la reescritura es **transparente** — la barra de URL
+y el historial guardan la dirección pedida, así Recargar y Atrás re-aplican el mismo rewrite.
+`url == NULL` / `out == NULL` / `outsz==0` → `URL_ERR_NULL_ARG`; no es una SPA reescribible →
+`URL_ERR_NOT_HTTPS` (`out` intacto); overflow → `URL_ERR_OVERFLOW`.
+
+> **Por qué no correr la SPA:** con las correcciones del shim JS (`document.nodeType===9` +
+> `defaultView` para el `setDocument` de jQuery/Sizzle, `element.attributes` NamedNodeMap para la
+> detección de features de jQuery, `getAttributeNames`/`hasAttributes`, y un stub de `Intl` porque
+> QuickJS-ng se compila sin ICU) la consola de la SPA baja de errores a **cero** y todo su jQuery
+> corre — pero DuckDuckGo trae los resultados por XHR async + un framework de render de cliente que
+> el modelo síncrono de Freedom no completa, así que la SPA pinta en blanco. El endpoint HTML da los
+> mismos resultados sin nada de eso. Esas correcciones del shim quedan igual (benefician a **toda**
+> la web jQuery/`Intl`, no solo a DDG).
+
 ### `url_is_file` / `url_file_path` / `url_resolve_file`
 
 Origen **local** `file://` para que una página de archivo "actúe como https" (resolución de

@@ -1635,6 +1635,37 @@ static int page_trusted(const browser_window *w) {
     return jsp_trusted(compute_page_js(w), page_host_allowlisted(w));
 }
 
+/* Seeds document.cookie for the next load from the ephemeral network jar (trusted host
+ * only); reset to none otherwise so a persistent worker never leaks stale cookies. */
+static void seed_session_cookies(tab *t, int trusted, const char *url) {
+    if (trusted && url != NULL && url[0] != '\0') {
+        char ckhdr[4096];
+        if (sf_cookie_header_for(url, ckhdr, sizeof ckhdr) > 0) {
+            tab_set_cookies(t, ckhdr);
+            return;
+        }
+    }
+    tab_set_cookies(t, NULL);
+}
+
+/* Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network jar
+ * one pair at a time, so JS-set session cookies reach the next request. */
+static void foldback_session_cookies(const char *url, const char *jar) {
+    if (url == NULL || jar == NULL) return;
+    for (const char *p = jar; *p != '\0'; ) {
+        while (*p == ' ' || *p == ';') ++p;
+        const char *end = p;
+        while (*end != '\0' && *end != ';') ++end;
+        size_t plen = (size_t)(end - p);
+        if (plen > 0 && plen < 700) {
+            char pair[768];
+            memcpy(pair, p, plen); pair[plen] = '\0';
+            sf_cookie_put(url, pair);
+        }
+        p = end;
+    }
+}
+
 /* Drops the kept-alive REPL worker and clears the (active-tab) console transcript.
  * Used when the active page changes WITHOUT a re-render (tab switch / new / close):
  * a later eval lazily rebinds the worker to the now-active page. */
@@ -1691,6 +1722,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     int js_grant  = w->caps.js && trusted;
     tab_set_net_allowed(t, trusted);
     tab_set_css_allowed(t, css_grant);
+    seed_session_cookies(t, trusted, w->cur_top);
 
     /* Hito 29 (lookahead prefetch): scan the raw HTML for the external
      * stylesheets/scripts the worker will request over TAG_SUBREQ and download
@@ -1737,6 +1769,11 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         tab_close(t);
         return;
     }
+
+    /* Fold JS-set session cookies back into the ephemeral network jar before any
+     * JS-driven navigation, so a consent/redirect hop carries them (trusted host only). */
+    if (trusted && page.set_cookies != NULL)
+        foldback_session_cookies(w->cur_top, page.set_cookies);
 
     /* JS-requested navigation (location.href=/assign/replace). page.nav_url is already
      * resolved AND policy-gated by the trusted parent; we never render the transient
@@ -1904,6 +1941,16 @@ static void do_load(browser_window *w, const char *url) {
         return;
     }
 
+    /* A search-engine page whose results are built only by client-side JavaScript we
+     * cannot fully run (DuckDuckGo's SPA) is transparently redirected to its no-JS
+     * server-rendered endpoint, which Freedom renders directly. Pure decision in
+     * url_search_rewrite. The redirect is transparent: the URL bar / history keep the
+     * address the user requested, so Reload and Back re-apply the same rewrite. */
+    char search_rw[URL_MAX_LEN + 1];
+    if (url_search_rewrite(url, search_rw, sizeof search_rw) == URL_OK) {
+        url = search_rw;
+    }
+
     if (is_https_url(url) || is_overlay_http_url(url)) {
         /* Extract HTTP Basic Auth credentials from the URL (https://user:pass@host/)
          * before the pre-fetch gates: strip them from the URL and store in the window
@@ -1969,7 +2016,7 @@ static void do_load(browser_window *w, const char *url) {
     char *html = read_file(path, &html_len);
     if (html == NULL) {
         char msg[256];
-        snprintf(msg, sizeof msg, "Cannot read file '%s': %s.", path, strerror(errno));
+        snprintf(msg, sizeof msg, "Cannot read file '%.160s': %s.", path, strerror(errno));
         set_cache(w, NULL, 0, NULL);
         browser_set_page(&w->bs, NULL, msg, 1);
         return;
@@ -6870,6 +6917,7 @@ static tab *freebug_repl_worker(browser_window *w) {
     tab_set_fetcher(t, gui_subresource_fetch, w);
     tab_set_net_allowed(t, trusted);
     tab_set_css_allowed(t, (w->caps.css || trusted) && !w->reader);
+    seed_session_cookies(t, trusted, w->cur_top); /* REPL worker sees the same cookies */
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);

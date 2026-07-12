@@ -620,7 +620,7 @@ static int32_t child_next_timer_ms(child_state *cs);
 
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
-                              int css, const char *page_url) {
+                              int css, const char *page_url, const char *cookies) {
     cs->last_run_js = run_js;
     cs->last_reader = reader;
     cs->last_prefers_dark = prefers_dark;
@@ -632,6 +632,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     navbuf[0] = '\0';
     int32_t nav_replace = 0;
     int ok = (child_load(cs, html, len, run_js, net, page_url) == 0);
+    /* Enable + seed document.cookie ONLY for a trusted host (net => allow.conf AND
+     * js.conf). Untrusted stays a no-op jar (Zero Knowledge). The cookie bytes are a
+     * JS string value, never interpolated into source. */
+    if (ok && net && cookies != NULL && cookies[0] != '\0')
+        (void)jd_set_cookies(cs->js, cookies);
     if (ok && css) {
         /* External stylesheets (Hito 27) come before the scripts, as a browser
          * fetches them. Independent of run_js: author CSS needs no JS. The parent
@@ -751,6 +756,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         }
     }
 
+    /* Dump the page's cookie jar so the parent can fold JS-set session cookies back
+     * into its network jar (empty when the jar was disabled -- untrusted host). */
+    char ckdump[4096];
+    size_t cklen = (size_t)jd_get_cookies(cs->js, ckdump, sizeof ckdump);
+
     /* TAG_RESULT marks the end of any subresource frames: the page result follows. */
     uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
@@ -766,7 +776,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && (nlen == 0 || write_full(wfd, navbuf, nlen) == 0)
             && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
             && write_console(wfd, &cs->log) == 0
-            && write_full(wfd, &next_ms, sizeof next_ms) == 0);
+            && write_full(wfd, &next_ms, sizeof next_ms) == 0
+            && write_full(wfd, &cklen, sizeof cklen) == 0
+            && (cklen == 0 || write_full(wfd, ckdump, cklen) == 0));
     }
     hp_free(title);
     hp_free(text);
@@ -980,7 +992,7 @@ static void tab_worker_run(int rfd, int wfd) {
          * (prefers-color-scheme) and css (external stylesheet fetch, Hito 27), then
          * the page URL (for the real location), before length+payload. */
         uint8_t run_js = 0, net = 0, reader = 0, dark = 0, css = 0;
-        char *url = NULL;
+        char *url = NULL, *cookies = NULL;
         if (op == OP_LOAD) {
             if (read_full(rfd, &run_js, 1) != 0
              || read_full(rfd, &net, 1) != 0
@@ -994,6 +1006,13 @@ static void tab_worker_run(int rfd, int wfd) {
             if (url == NULL) break;
             if (ulen != 0 && read_full(rfd, url, ulen) != 0) { free(url); break; }
             url[ulen] = '\0';
+            size_t cklen = 0;
+            if (read_full(rfd, &cklen, sizeof cklen) != 0) { free(url); break; }
+            if (cklen > TAB_MAX_URL * 8) { free(url); break; } /* defensive cap */
+            cookies = (char *)malloc(cklen + 1);
+            if (cookies == NULL) { free(url); break; }
+            if (cklen != 0 && read_full(rfd, cookies, cklen) != 0) { free(cookies); free(url); break; }
+            cookies[cklen] = '\0';
         }
 
         size_t len = 0;
@@ -1005,11 +1024,12 @@ static void tab_worker_run(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); free(url); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, url);
+        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, url, cookies);
         else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
         else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
         free(buf);
         free(url);
+        free(cookies);
     }
 
     child_reset_page(&cs);
@@ -1064,6 +1084,7 @@ struct tab {
      * opt-in); fetcher does the policy-checked fetch in the trusted parent. */
     int            net_allowed;
     int            css_allowed;
+    char          *cookies_in;   /* seeds document.cookie for the next load (owned) */
     tab_fetch_fn   fetcher;
     void          *fetcher_ctx;
 };
@@ -1491,6 +1512,12 @@ void tab_set_css_allowed(tab *t, int allowed) {
     t->css_allowed = allowed ? 1 : 0;
 }
 
+void tab_set_cookies(tab *t, const char *cookies) {
+    if (t == NULL) return;
+    free(t->cookies_in);
+    t->cookies_in = (cookies != NULL && cookies[0] != '\0') ? strdup(cookies) : NULL;
+}
+
 int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method) {
     if (method == NULL || method[0] == '\0') return 0; /* malformed: fail closed */
     if (net_allowed) return 1;
@@ -1559,13 +1586,16 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     if (!t->alive) return TAB_ERR_DEAD;
 
     /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][url_len][url]
-     * [len][html] (the flags and URL precede the payload so the html stays
-     * zero-copy). net grants XHR/fetch and is only meaningful with JS on; css
-     * grants GET-only external stylesheet fetches (Hito 27). */
+     * [ck_len][cookies][len][html] (the flags, URL and cookie seed precede the payload
+     * so the html stays zero-copy). net grants XHR/fetch and is only meaningful with JS
+     * on; css grants GET-only external stylesheet fetches (Hito 27); cookies seed
+     * document.cookie for a trusted host (empty otherwise). */
     uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0,
             nflag = (run_js && t->net_allowed) ? 1 : 0,
             rflag = reader ? 1 : 0, dflag = prefers_dark ? 1 : 0,
             cflag = t->css_allowed ? 1 : 0;
+    const char *ck = (nflag && t->cookies_in != NULL) ? t->cookies_in : "";
+    size_t cklen = strlen(ck);
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &jflag, 1) != 0
      || write_full(t->req_fd, &nflag, 1) != 0
@@ -1574,6 +1604,8 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
      || write_full(t->req_fd, &cflag, 1) != 0
      || write_full(t->req_fd, &ulen, sizeof ulen) != 0
      || (ulen != 0 && write_full(t->req_fd, page_url, ulen) != 0)
+     || write_full(t->req_fd, &cklen, sizeof cklen) != 0
+     || (cklen != 0 && write_full(t->req_fd, ck, cklen) != 0)
      || write_full(t->req_fd, &len, sizeof len) != 0
      || (len != 0 && write_full(t->req_fd, html, len) != 0)) {
         tab_refresh_alive(t);
@@ -1631,6 +1663,16 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
         fb_buffer_free(&console);
         return io_failure(t);
     }
+    /* The page's document.cookie jar after the scripts ran (empty for an untrusted
+     * host). The caller folds it back into the ephemeral network jar. */
+    char *set_cookies = NULL;
+    size_t sclen = 0;
+    if (read_field(t->resp_fd, &set_cookies, &sclen) != 0) {
+        free(title); free(text); free(navreq); pv_free(view);
+        fb_buffer_free(&console);
+        return io_failure(t);
+    }
+    if (set_cookies != NULL && set_cookies[0] == '\0') { free(set_cookies); set_cookies = NULL; }
 
     /* Gate the raw request HERE (trusted parent, Zero Trust): a compromised worker
      * cannot drive the browser off-policy. ln_resolve allows only https / a local
@@ -1642,7 +1684,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
             nav_url = strdup(ln.target);
             if (nav_url == NULL) {
                 free(title); free(text); free(navreq); pv_free(view);
-                fb_buffer_free(&console);
+                fb_buffer_free(&console); free(set_cookies);
                 return TAB_ERR_OOM;
             }
         }
@@ -1656,6 +1698,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
     out->console = console; /* ownership moves to the caller (tab_page_free) */
     out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
+    out->set_cookies = set_cookies; /* ownership moves to the caller */
     return TAB_OK;
 }
 
@@ -1840,6 +1883,7 @@ void tab_close(tab *t) {
         int st;
         while (waitpid(t->pid, &st, 0) < 0 && errno == EINTR) { /* retry */ }
     }
+    free(t->cookies_in);
     free(t);
 }
 
@@ -1849,11 +1893,13 @@ void tab_page_free(tab_page *p) {
     free(p->text);
     pv_free(p->view);
     free(p->nav_url);
+    free(p->set_cookies);
     fb_buffer_free(&p->console);
     p->title = NULL;
     p->text = NULL;
     p->view = NULL;
     p->nav_url = NULL;
+    p->set_cookies = NULL;
     p->nav_replace = 0;
     p->title_len = 0;
     p->text_len = 0;

@@ -21,6 +21,7 @@
 #include "secure_fetch.h"
 #include "tab.h"
 #include "ui.h"
+#include "url.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -137,13 +138,15 @@ static void headless_load_hosts(void) {
     g_hosts = hb_new();
     if (g_hosts == NULL) return;
     const char *dirs[] = { NULL, "config", NULL };
-    {
-        char path[512];
-        const char *home = getenv("HOME");
-        if (home != NULL) {
-            snprintf(path, sizeof path, "%s/.config/freedom", home);
-            dirs[2] = path;
-        }
+    /* home_dir must live for the whole function: dirs[2] aliases it and is read in
+     * the loop below. A previous inner-block buffer went out of scope while dirs[2]
+     * still pointed at it (stack-use-after-scope: the config path was then built from
+     * a dangling pointer). */
+    char home_dir[512];
+    const char *home = getenv("HOME");
+    if (home != NULL) {
+        snprintf(home_dir, sizeof home_dir, "%s/.config/freedom", home);
+        dirs[2] = home_dir;
     }
     const char *env = getenv("FREEDOM_HOSTS_DIR");
     if (env != NULL) dirs[0] = env;
@@ -340,6 +343,24 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
  * target, if any. The tab layer already resolved and policy-gated it against the
  * page's real URL (ln_resolve); the caller still drives it through the normal
  * fetch path, re-applying the full network policy. */
+/* Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network
+ * jar, one pair at a time, so JS-set session cookies reach the next request. */
+static void foldback_cookies(const char *url, const char *jar) {
+    if (url == NULL || jar == NULL) return;
+    for (const char *p = jar; *p != '\0'; ) {
+        while (*p == ' ' || *p == ';') ++p;
+        const char *end = p;
+        while (*end != '\0' && *end != ';') ++end;
+        size_t plen = (size_t)(end - p);
+        if (plen > 0 && plen < 700) {
+            char pair[768];
+            memcpy(pair, p, plen); pair[plen] = '\0';
+            sf_cookie_put(url, pair);
+        }
+        p = end;
+    }
+}
+
 static int render_page(const char *html, size_t len, const char *top_url,
                        char **out_nav) {
     tab *t = NULL;
@@ -379,6 +400,14 @@ static int render_page(const char *html, size_t len, const char *top_url,
     }
     tab_set_fetcher(t, pf_pooled_fetch, &gated);
 
+    /* Session cookies (trusted host only, --js=on here): seed document.cookie from the
+     * ephemeral network jar so the page's consent/session JS can read existing cookies. */
+    if (g_headless_js && top_url != NULL) {
+        char ckhdr[4096];
+        if (sf_cookie_header_for(top_url, ckhdr, sizeof ckhdr) > 0)
+            tab_set_cookies(t, ckhdr);
+    }
+
     tab_page page;
     memset(&page, 0, sizeof page);
     ts = tab_load_full(t, html, len, top_url, g_headless_js, 0, 0, &page);
@@ -406,6 +435,11 @@ static int render_page(const char *html, size_t len, const char *top_url,
         tab_page_free(&page);
         page = ticked;
     }
+
+    /* Fold JS-set session cookies back into the ephemeral network jar so a JS-driven
+     * consent/redirect hop (followed by fetch_and_render) carries them. */
+    if (g_headless_js && top_url != NULL && page.set_cookies != NULL)
+        foldback_cookies(top_url, page.set_cookies);
 
     /* In stdout mode the title leads the output; in PDF mode it is carried inside
      * the document, so stdout stays a single confirmation line. */
@@ -508,6 +542,13 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
     sf_response resp;
     memset(&resp, 0, sizeof resp);
     if (out_nav != NULL) *out_nav = NULL;
+
+    /* Mirror the GUI: a search-engine SPA whose results are built only by client-side
+     * JavaScript we cannot fully run (DuckDuckGo's "duckduckgo.com/?q=...") is
+     * transparently redirected to its no-JS server-rendered endpoint (see
+     * url_search_rewrite). The rewritten URL becomes the fetch AND the render base. */
+    char search_rw[URL_MAX_LEN + 1];
+    if (url_search_rewrite(url, search_rw, sizeof search_rw) == URL_OK) url = search_rw;
 
     sf_config cfg = sf_config_default();
     if (g_hosts != NULL) {

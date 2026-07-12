@@ -96,6 +96,19 @@ typedef enum url_omni_kind {
  * a built URL that does not fit => URL_ERR_OVERFLOW. */
 url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz);
 
+/* Rewrites a search-engine URL whose results are produced only by client-side
+ * JavaScript we cannot fully run (DuckDuckGo's SPA, "duckduckgo.com/?q=...") into
+ * its server-rendered no-JS equivalent (URL_SEARCH_ENDPOINT + the same query),
+ * which Freedom renders directly. The query value is copied verbatim (it is already
+ * percent-encoded). Only the exact SPA hosts "duckduckgo.com" / "www.duckduckgo.com"
+ * with a "q" parameter are rewritten; the html./lite. no-JS hosts, the bare
+ * homepage, and every other site are left untouched (returns URL_ERR_NOT_HTTPS so
+ * the caller navigates the original). Google is deliberately not rewritten: it has
+ * no reliable no-JS results endpoint. Pure, no I/O. url == NULL / out == NULL /
+ * outsz == 0 => URL_ERR_NULL_ARG; a URL that is not a rewritable SPA search =>
+ * URL_ERR_NOT_HTTPS (out untouched); overflow => URL_ERR_OVERFLOW. */
+url_status url_search_rewrite(const char *url, char *out, size_t outsz);
+
 /* --- local file:// origin (for local pages, "acting like https") --- */
 
 /* Nonzero iff s begins (case-insensitively) with "file://" followed by an

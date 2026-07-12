@@ -573,6 +573,24 @@ const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
     return (const char *)val;
 }
 
+size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
+                           const char **names, size_t *lens, size_t cap) {
+    if (!valid(idx, node)) return 0;
+    lxb_dom_element_t *el = lxb_dom_interface_element(idx->nodes[node]);
+    size_t count = 0;
+    for (lxb_dom_attr_t *attr = lxb_dom_element_first_attribute(el);
+         attr != NULL; attr = lxb_dom_element_next_attribute(attr)) {
+        size_t nlen = 0;
+        const lxb_char_t *nm = lxb_dom_attr_qualified_name(attr, &nlen);
+        if (nm != NULL && count < cap) {
+            names[count] = (const char *)nm;
+            if (lens != NULL) lens[count] = nlen;
+        }
+        count++;
+    }
+    return count;
+}
+
 const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len) {
     if (len != NULL) *len = 0;
     if (!valid(idx, node)) return NULL;

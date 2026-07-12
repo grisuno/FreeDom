@@ -319,6 +319,58 @@ static void test_omnibox_nulls_and_empty(void **state) {
     assert_string_equal(out, URL_SEARCH_ENDPOINT);
 }
 
+/* --- url_search_rewrite: JS-SPA search page -> no-JS server-rendered endpoint --- */
+
+static void test_search_rewrite_ddg_spa(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    /* the JS SPA results URL is rewritten to the html endpoint, query preserved */
+    assert_int_equal(url_search_rewrite("https://duckduckgo.com/?q=grisuno",
+                                        out, sizeof out), URL_OK);
+    assert_string_equal(out, URL_SEARCH_ENDPOINT "grisuno");
+    /* www host too, and extra params are dropped (only q survives) */
+    assert_int_equal(url_search_rewrite("https://www.duckduckgo.com/?q=hello&t=h_&ia=web",
+                                        out, sizeof out), URL_OK);
+    assert_string_equal(out, URL_SEARCH_ENDPOINT "hello");
+    /* q anywhere in the query, already percent-encoded value copied verbatim */
+    assert_int_equal(url_search_rewrite("https://duckduckgo.com/?ia=web&q=a%20b",
+                                        out, sizeof out), URL_OK);
+    assert_string_equal(out, URL_SEARCH_ENDPOINT "a%20b");
+}
+
+static void test_search_rewrite_leaves_others_alone(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    /* already the no-JS endpoint: no rewrite (would loop) */
+    assert_int_equal(url_search_rewrite("https://html.duckduckgo.com/html/?q=x",
+                                        out, sizeof out), URL_ERR_NOT_HTTPS);
+    /* the DDG homepage / no query is left as-is */
+    assert_int_equal(url_search_rewrite("https://duckduckgo.com/", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+    /* unrelated sites are never rewritten */
+    assert_int_equal(url_search_rewrite("https://example.com/?q=x", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+    /* a host that merely ends with duckduckgo.com is NOT matched (exact host) */
+    assert_int_equal(url_search_rewrite("https://evilduckduckgo.com/?q=x",
+                                        out, sizeof out), URL_ERR_NOT_HTTPS);
+    /* Google is deliberately left untouched (no reliable no-JS endpoint) */
+    assert_int_equal(url_search_rewrite("https://www.google.com/search?q=x",
+                                        out, sizeof out), URL_ERR_NOT_HTTPS);
+}
+
+static void test_search_rewrite_nulls(void **state) {
+    (void)state;
+    char out[URL_MAX_LEN + 1];
+    assert_int_equal(url_search_rewrite(NULL, out, sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_search_rewrite("https://duckduckgo.com/?q=x", NULL,
+                                        sizeof out), URL_ERR_NULL_ARG);
+    assert_int_equal(url_search_rewrite("https://duckduckgo.com/?q=x", out, 0),
+                     URL_ERR_NULL_ARG);
+    /* not even a valid absolute https URL: fails closed, not a crash */
+    assert_int_equal(url_search_rewrite("not a url", out, sizeof out),
+                     URL_ERR_NOT_HTTPS);
+}
+
 /* --- url_is_file / url_file_path / url_resolve_file --- */
 
 static void test_is_file_and_path(void **state) {
@@ -604,6 +656,9 @@ int main(void) {
         cmocka_unit_test(test_omnibox_search_for_queries),
         cmocka_unit_test(test_omnibox_foreign_scheme_is_searched_not_executed),
         cmocka_unit_test(test_omnibox_nulls_and_empty),
+        cmocka_unit_test(test_search_rewrite_ddg_spa),
+        cmocka_unit_test(test_search_rewrite_leaves_others_alone),
+        cmocka_unit_test(test_search_rewrite_nulls),
         cmocka_unit_test(test_is_file_and_path),
         cmocka_unit_test(test_resolve_file_relative),
         cmocka_unit_test(test_resolve_file_confinement_fail_closed),

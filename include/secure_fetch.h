@@ -140,6 +140,25 @@ typedef struct sf_response {
  * shutdown, and the OS reclaims everything on exit. */
 void sf_global_init(void);
 
+/* --- ephemeral session cookie jar (in-memory, never persisted) --- */
+
+/* Builds the document.cookie view ("name=value; name=value") for url from the shared
+ * in-memory jar into out (NUL-terminated, bounded), returning its length. HttpOnly
+ * cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped.
+ * Only for a TRUSTED host (the caller gates on allow.conf AND js.conf). 0 on empty/error. */
+size_t sf_cookie_header_for(const char *url, char *out, size_t outsz);
+
+/* Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if
+ * it arrived via Set-Cookie -- so a trusted page's document.cookie writes reach the next
+ * request. namevalue past the first ';' (attributes) is ignored. No-op on malformed input. */
+void sf_cookie_put(const char *url, const char *namevalue);
+
+/* Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t
+ * expiry\\tname\\tvalue"); if the cookie applies to (host, path), is not HttpOnly and is
+ * unexpired at `now`, writes "name=value" to out (bounded) and returns 1, else 0. */
+int sf_cookie_line_matches(const char *line, const char *host, const char *path,
+                           long now, char *out, size_t outsz);
+
 /* Returns a configuration with the secure defaults applied. */
 sf_config sf_config_default(void);
 

@@ -465,6 +465,60 @@ static void test_post_rejects_non_https(void **state) {
                      SF_ERR_INVALID_URL);
 }
 
+/* --- session cookie jar (document.cookie bridge for trusted hosts) --- */
+
+static void test_cookie_line_matches_pure(void **state) {
+    (void)state;
+    char out[256];
+    const long now = 2000000000L; /* far future: session cookies (expiry 0) stay valid */
+    /* domain cookie (.google.com) reaches www.google.com */
+    assert_int_equal(sf_cookie_line_matches(
+        ".google.com\tTRUE\t/\tFALSE\t0\tSID\tabc", "www.google.com", "/search",
+        now, out, sizeof out), 1);
+    assert_string_equal(out, "SID=abc");
+    /* host-only cookie matches exact host but NOT a bare parent domain */
+    assert_int_equal(sf_cookie_line_matches(
+        "google.com\tFALSE\t/\tFALSE\t0\tA\t1", "www.google.com", "/",
+        now, out, sizeof out), 0);
+    /* unrelated domain never matches */
+    assert_int_equal(sf_cookie_line_matches(
+        ".evil.com\tTRUE\t/\tFALSE\t0\tX\t1", "www.google.com", "/",
+        now, out, sizeof out), 0);
+    /* HttpOnly marker is network-only -> excluded from the document.cookie view */
+    assert_int_equal(sf_cookie_line_matches(
+        "#HttpOnly_.google.com\tTRUE\t/\tFALSE\t0\tSEC\ty", "www.google.com", "/",
+        now, out, sizeof out), 0);
+    /* an expired cookie is skipped; a path that is not a prefix is skipped */
+    assert_int_equal(sf_cookie_line_matches(
+        ".google.com\tTRUE\t/\tFALSE\t1000000000\tOLD\tz", "www.google.com", "/",
+        now, out, sizeof out), 0);
+    assert_int_equal(sf_cookie_line_matches(
+        ".google.com\tTRUE\t/deep\tFALSE\t0\tP\t1", "www.google.com", "/",
+        now, out, sizeof out), 0);
+    assert_int_equal(sf_cookie_line_matches(
+        ".google.com\tTRUE\t/deep\tFALSE\t0\tP\t1", "www.google.com", "/deep/x",
+        now, out, sizeof out), 1);
+    /* a Netscape comment line is ignored */
+    assert_int_equal(sf_cookie_line_matches(
+        "# Netscape HTTP Cookie File", "www.google.com", "/", now, out, sizeof out), 0);
+}
+
+static void test_cookie_jar_put_and_header(void **state) {
+    (void)state;
+    sf_global_init(); /* creates the shared in-memory jar */
+    sf_cookie_put("https://www.google.com/", "SOCS=xyz123");
+    sf_cookie_put("https://www.google.com/", "CONSENT=yes; path=/; SameSite=Lax");
+    char buf[512];
+    size_t n = sf_cookie_header_for("https://www.google.com/search?q=x", buf, sizeof buf);
+    assert_true(n > 0);
+    assert_non_null(strstr(buf, "SOCS=xyz123"));
+    assert_non_null(strstr(buf, "CONSENT=yes")); /* attributes past ';' were dropped */
+    /* an unrelated host never receives google's cookies (domain-scoped) */
+    char buf2[512];
+    sf_cookie_header_for("https://example.com/", buf2, sizeof buf2);
+    assert_null(strstr(buf2, "SOCS"));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
@@ -513,6 +567,8 @@ int main(void) {
         cmocka_unit_test(test_get_follow_null_args),
         cmocka_unit_test(test_post_null_args),
         cmocka_unit_test(test_post_rejects_non_https),
+        cmocka_unit_test(test_cookie_line_matches_pure),
+        cmocka_unit_test(test_cookie_jar_put_and_header),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -68,6 +68,12 @@ typedef struct tab_page {
      * channel and no real clock: the virtual timer clock only advances when the
      * parent says so -- anti-fp, and a compromised worker cannot busy-wake). */
     int      next_timer_ms;
+    /* The page's document.cookie jar after the scripts ran ("name=value; ..."), or
+     * NULL when the jar was disabled (untrusted host) or empty. The trusted parent
+     * folds it back into the ephemeral network jar so JS-set session cookies reach the
+     * next request. In-memory only; never persisted (Zero Knowledge). Owned; freed by
+     * tab_page_free. */
+    char    *set_cookies;
 } tab_page;
 
 /* Result of evaluating script: the value, or a JS error message. */
@@ -136,6 +142,13 @@ void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);
  * true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sovereignty
  * boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction). */
 void tab_set_net_allowed(tab *t, int allowed);
+
+/* Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...")
+ * the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only
+ * meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherwise so the
+ * jar stays disabled (untrusted sites see no cookies -- Zero Knowledge). The bytes are
+ * copied. In-memory only; never persisted. */
+void tab_set_cookies(tab *t, const char *cookies);
 
 /* Grants/revokes external stylesheet fetches (<link rel=stylesheet>, Hito 27) for the
  * NEXT load. Independent of JS: derive it from the author-styles opt-in (caps.css in the

@@ -282,6 +282,11 @@ The address bar works like a real **omnibox**:
 - **`http://site`** → **upgraded to https** (Secure by Default: a downgrade is never representable).
 - **`best linux distro`** (or anything that is not a URL) → runs a **DuckDuckGo HTML** search (the
   no-JS endpoint, which renders cleanly in Freedom).
+- **`duckduckgo.com/?q=...`** (DuckDuckGo's JS SPA) → **transparently routed** to the same no-JS HTML
+  results endpoint. The SPA builds its results through async client-side scripts Freedom's
+  synchronous model can't finish (it paints blank), so navigating there directly serves the real
+  server-rendered results instead; Reload and Back re-apply the route. Google is left as-is (no
+  reliable no-JS endpoint; its "unusual traffic" wall is a server-side IP/cookie decision).
 - **`javascript:...` / `file:...` / `data:...`** → searched as text, **never executed** (fail-closed).
 - An existing **local path** (e.g. `examples/rich.html`) still opens from disk. A local page gets a
   `file://` origin and **acts like https** for resolution: its relative links and images load from
@@ -308,10 +313,14 @@ freed, so a script can never dangle a handle (no use-after-free), and `appendChi
 
 To run more real-world JS **without leaking your identity**, Freedom also provides an *identity-safe*
 ambient surface: `localStorage`/`sessionStorage` are **in-memory and ephemeral** (Zero Knowledge —
-never written to disk, cleared every load), `document.cookie` is always empty (set is a no-op),
-`document.referrer` is empty, and `history`/`location` are benign stubs — so detection scripts run
-without throwing while nothing about the user or device is revealed. With JS off, `<noscript>`
-fallback content is shown.
+never written to disk, cleared every load), `document.referrer` is empty, and `history`/`location`
+are benign stubs — so detection scripts run without throwing while nothing about the user or device
+is revealed. `document.cookie` is empty for every untrusted site; a host you trust twice (in
+`allow.conf` **and** `js.conf`) instead gets a **real in-memory session cookie jar** so its
+consent/session JS works — but those cookies live only in RAM and are **gone when you close Freedom**
+(never persisted; HttpOnly cookies stay network-only, never exposed to JS). Note that adversarial
+targets like Google may still serve a botguard/consent wall that session cookies do not defeat. With
+JS off, `<noscript>` fallback content is shown.
 
 **Real `querySelector` + a modern DOM surface.** `document.querySelector`/`querySelectorAll` and
 `element.matches`/`closest` run through the **same author-CSS selector engine** the stylesheets use,

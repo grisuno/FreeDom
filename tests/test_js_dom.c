@@ -271,6 +271,55 @@ static void test_modern_globals_do_not_throw(void **state) {
     EXPECT(f, "window.innerWidth", "1920");
 }
 
+/* Document node identity: jQuery/Sizzle's setDocument binds its internal document
+ * reference only when 9===doc.nodeType && doc.documentElement; without nodeType:9
+ * that reference stayed undefined and doc.createElement() threw, aborting the whole
+ * library bundle (DuckDuckGo's l.js "cannot read property createElement of
+ * undefined"). This locks the contract that unblocked it. */
+static void test_document_node_identity(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "document.nodeType", "9");
+    EXPECT(f, "document.DOCUMENT_NODE", "9");
+    EXPECT(f, "document.nodeName", "#document");
+    EXPECT(f, "document.defaultView === window", "true");
+    EXPECT(f, "document.documentElement !== null", "true");
+    EXPECT(f, "document.documentElement.nodeType", "1");
+}
+
+/* element.attributes as a NamedNodeMap-ish view: jQuery's event-bubbling feature
+ * detection reads f.attributes['on'+type].expando on a freshly-built element; a
+ * missing 'attributes' threw "cannot read property 'onsubmit' of undefined" and
+ * aborted the bundle. Named + indexed access, length and getAttributeNames() are
+ * backed by the sealed dom methods (this element's own attributes only). */
+static void test_element_attributes_named_node_map(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var e=document.createElement('div'); e.setAttribute('onsubmit','t');"
+              "e.attributes['onsubmit'].value", "t");
+    EXPECT(f, "var e=document.createElement('div'); e.setAttribute('onsubmit','t');"
+              "e.attributes['onsubmit'].expando===undefined", "true");
+    EXPECT(f, "var e=document.createElement('div'); e.attributes['nope']===undefined", "true");
+    EXPECT(f, "var e=document.createElement('a'); e.setAttribute('href','/x');"
+              "e.setAttribute('rel','nofollow'); e.attributes.length", "2");
+    EXPECT(f, "var e=document.createElement('a'); e.setAttribute('data-x','1');"
+              "e.getAttributeNames().indexOf('data-x')>=0", "true");
+    EXPECT(f, "var e=document.createElement('a'); e.setAttribute('id','k');"
+              "e.attributes[0].name", "id");
+}
+
+/* Intl stub: QuickJS-ng builds without ICU, so Intl is otherwise undefined and any
+ * locale-aware script (DuckDuckGo's wplv.js: "Intl is not defined") dies. The stub
+ * is identity-neutral (fixed en-US-ish behaviour, no real locale/timezone leak). */
+static void test_intl_stub_does_not_throw(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof Intl", "object");
+    EXPECT(f, "typeof new Intl.NumberFormat().format", "function");
+    EXPECT(f, "typeof new Intl.DateTimeFormat('en-US').format(0)", "string");
+    EXPECT(f, "new Intl.Collator().compare('a','b')", "-1");
+    EXPECT(f, "new Intl.PluralRules().select(1)", "one");
+    EXPECT(f, "new Intl.ListFormat().format(['a','b'])", "a, b");
+    EXPECT(f, "Intl.NumberFormat('en-US').resolvedOptions().locale", "en-US");
+}
+
 /* WHATWG URL: identity-safe, pure string parsing (no network/IO). This was
  * Slashdot's first JS error (ReferenceError: URL is not defined). */
 static void test_url_constructor_parses_components(void **state) {
@@ -501,9 +550,41 @@ static void test_storage_is_ephemeral(void **state) {
 
 static void test_cookie_and_referrer_leak_nothing(void **state) {
     fixture *f = (fixture *)*state;
-    /* cookie set is a no-op; get is always empty; referrer empty. */
+    /* Default (untrusted host, jar disabled): cookie set is a no-op; get is always
+     * empty; referrer empty; the parent reads nothing back. */
     EXPECT(f, "document.cookie='track=1'; document.cookie", "");
     EXPECT(f, "document.referrer", "");
+    char buf[64];
+    assert_int_equal(jd_get_cookies(f->ctx, buf, sizeof buf), 0);
+    assert_string_equal(buf, "");
+}
+
+/* Trusted host (allow.conf AND js.conf): the parent enables + seeds the in-memory
+ * session cookie jar via jd_set_cookies, so consent/session JS can read and set
+ * document.cookie; the parent folds the result back via jd_get_cookies. Ephemeral --
+ * never persisted (process-lifetime only). */
+static void test_cookie_jar_enabled_for_trusted_host(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_set_cookies(f->ctx, "sid=abc; theme=dark"), JD_OK);
+    /* seeded pairs are visible */
+    EXPECT(f, "document.cookie", "sid=abc; theme=dark");
+    /* a page assignment adds one pair, ignoring attributes (path/SameSite) */
+    EXPECT(f, "document.cookie='pref=1; path=/; SameSite=Lax';"
+              "document.cookie.indexOf('pref=1')>=0", "true");
+    /* assignment updates an existing name */
+    EXPECT(f, "document.cookie='sid=xyz'; document.cookie.indexOf('sid=xyz')>=0", "true");
+    /* an expiry in the past deletes the cookie */
+    EXPECT(f, "document.cookie='theme=dark; expires=Thu, 01 Jan 1970 00:00:00 GMT';"
+              "document.cookie.indexOf('theme=')>=0", "false");
+    /* max-age<=0 deletes too */
+    EXPECT(f, "document.cookie='pref=1; max-age=0';"
+              "document.cookie.indexOf('pref=')>=0", "false");
+    /* the parent reads the live jar back to fold into its network jar */
+    char buf[256];
+    int n = jd_get_cookies(f->ctx, buf, sizeof buf);
+    assert_true(n > 0);
+    assert_non_null(strstr(buf, "sid=xyz"));
+    assert_null(strstr(buf, "theme="));
 }
 
 static void test_ambient_apis_do_not_throw(void **state) {
@@ -822,6 +903,9 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_document_fragment_reparents, setup, teardown),
         cmocka_unit_test_setup_teardown(test_fragment_clone_chain_does_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_modern_globals_do_not_throw, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_document_node_identity, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_element_attributes_named_node_map, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_intl_stub_does_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_url_constructor_parses_components, setup, teardown),
         cmocka_unit_test_setup_teardown(test_url_search_params, setup, teardown),
         cmocka_unit_test_setup_teardown(test_settimeout_chains_across_rounds, setup, teardown),
@@ -842,6 +926,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_inner_html_getter_serializes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_storage_is_ephemeral, setup, teardown),
         cmocka_unit_test_setup_teardown(test_cookie_and_referrer_leak_nothing, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_cookie_jar_enabled_for_trusted_host, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ambient_apis_do_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_location_reads_real_components, setup, teardown),
         cmocka_unit_test_setup_teardown(test_location_pathname_defaults_slash, setup, teardown),

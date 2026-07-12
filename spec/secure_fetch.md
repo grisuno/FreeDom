@@ -244,6 +244,28 @@ expone el `Location` como dato y `sf_get_follow` orquesta el seguimiento:
 `sf_get_follow` no comparte estado entre saltos salvo la URL resuelta: cada salto es una
 conexión nueva auditada de cero.
 
+## 6ter. Jar de cookies de sesión (en memoria, Zero Knowledge)
+
+`secure_fetch` mantiene un **jar de cookies compartido en memoria** (`CURLSH` con
+`CURL_LOCK_DATA_COOKIE`; `sf_global_init`), **nunca persistido a disco** y liberado al terminar el
+proceso. Toda petición HTTP (página, XHR gateado, redirecciones) envía/almacena cookies por él
+automáticamente. Sobre ese jar hay tres funciones para el **puente `document.cookie`** de un host de
+confianza (allow∩js; el llamador gatea):
+
+- `sf_cookie_header_for(url, out, outsz)` — construye la vista `document.cookie` (`name=value; ...`)
+  para `url` desde el jar. **Excluye cookies `HttpOnly`** (son network-only, jamás visibles a JS) y las
+  expiradas. Devuelve la longitud; 0 si vacío.
+- `sf_cookie_put(url, "name=value")` — inyecta una cookie que el JS de la página fijó, con alcance al
+  host de `url` (como si llegara por `Set-Cookie`), para que llegue a la siguiente petición.
+- `sf_cookie_line_matches(line, host, path, now, out, outsz)` — **puro**: matcher de una línea
+  Netscape de `CURLINFO_COOKIELIST` (dominio con/sin punto inicial + flag de subdominios, prefijo de
+  path, expiración) usado por `sf_cookie_header_for`. Testeable en aislamiento.
+
+El worker confinado (sin red) recibe el seed vía IPC (`tab_set_cookies`/OP_LOAD) y devuelve el jar
+volcado (`tab_page.set_cookies`); el orquestador hace el *foldback* con `sf_cookie_put`. Para un host
+no-confiable el jar de JS queda **deshabilitado** (`document.cookie` = `''`, set no-op) — Zero
+Knowledge por defecto. Ver `[[freedom-session-cookies-trusted-spa]]`.
+
 ## 7. Garantías de memoria
 
 - Sin estado global mutable; reentrante.

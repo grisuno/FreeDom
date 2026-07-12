@@ -396,7 +396,27 @@ static JSValue m_closest(JSContext *ctx, JSValueConst this_val,
     return jd_handle_or_null(ctx, r);
 }
 
+static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,
+                            int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    enum { CAP = 256 };
+    const char *names[CAP];
+    size_t lens[CAP];
+    size_t n = dom_attribute_names(jd_idx(ctx), h, names, lens, CAP);
+    if (n > CAP) n = CAP;
+    JSValue arr = JS_NewArray(ctx);
+    if (JS_IsException(arr)) return arr;
+    for (size_t i = 0; i < n; i++) {
+        JS_SetPropertyUint32(ctx, arr, (uint32_t)i,
+                             JS_NewStringLen(ctx, names[i], lens[i]));
+    }
+    return arr;
+}
+
 static const jd_method JD_METHODS[] = {
+    { "attrNames",      m_attr_names,        1 },
     { "nodeCount",      m_node_count,        0 },
     { "getElementById", m_get_element_by_id, 1 },
     { "getByTag",       m_get_by_tag,        1 },
@@ -444,6 +464,27 @@ static const char JD_DOCUMENT_SHIM[] =
     "      setAttribute: function(n,v){ dom.setAttribute(h, String(n), String(v)); },"
     "      removeAttribute: function(n){ dom.removeAttribute(h, String(n)); },"
     "      hasAttribute: function(n){ return dom.getAttribute(h, String(n))!==null; },"
+    "      getAttributeNames: function(){ return dom.attrNames(h); },"
+    "      hasAttributes: function(){ return dom.attrNames(h).length>0; },"
+    /* attributes: a NamedNodeMap-ish view backed by the sealed dom methods.
+     * Named access (attrs['onsubmit']) and indexed access (attrs[0]) both return
+     * a minimal attr node {name,value,specified}; length/enumeration come from the
+     * native attrNames(). jQuery's feature detection reads attrs[name].expando, so
+     * a missing 'attributes' aborted the whole library bundle. Identity-safe: only
+     * this element's own attributes, never anything else. */
+    "      get attributes(){"
+    "        function node(nm){ var v=dom.getAttribute(h,nm); if(v===null) return undefined;"
+    "          return {name:nm,nodeName:nm,localName:nm,value:v,nodeValue:v,specified:true,expando:undefined}; }"
+    "        return new Proxy({}, {"
+    "          get:function(t,p){ if(p==='length') return dom.attrNames(h).length;"
+    "            if(p==='getNamedItem') return function(nm){ var r=node(String(nm)); return r===undefined?null:r; };"
+    "            if(p==='item') return function(i){ var ns=dom.attrNames(h); return i>=0&&i<ns.length?node(ns[i]):null; };"
+    "            if(typeof p==='symbol') return undefined;"
+    "            if(/^[0-9]+$/.test(p)){ var ns=dom.attrNames(h); var i=+p; return i<ns.length?node(ns[i]):undefined; }"
+    "            return node(String(p)); },"
+    "          has:function(t,p){ if(typeof p!=='string') return false; return dom.getAttribute(h,p)!==null; },"
+    "          ownKeys:function(){ var ns=dom.attrNames(h),k=[]; for(var i=0;i<ns.length;i++) k.push(String(i)); k.push('length'); return k; },"
+    "          getOwnPropertyDescriptor:function(t,p){ return {enumerable:/^[0-9]+$/.test(p),configurable:true}; } }); },"
     /* dataset: data-* attributes via a Proxy, so reads like el.dataset.fooBar map to
      * the data-foo-bar attribute (missing => undefined, never a throw). Identity-safe:
      * only this element's own attributes, no enumeration of anything else. */
@@ -539,8 +580,15 @@ static const char JD_DOCUMENT_SHIM[] =
     "    createElement: function(t){ return wrap(dom.createElement(String(t))); },"
     "    createTextNode: function(t){ return {nodeType:3, textContent:String(t)}; },"
     "    addEventListener: function(type,fn){ addL(String(type),fn); },"
-    "    removeEventListener: function(){}, readyState:'loading'"
+    /* Node identity of the document itself: Sizzle/jQuery's setDocument gates on
+     * 9===doc.nodeType && doc.documentElement before it binds its internal document
+     * reference; without nodeType:9 that reference stays undefined and every later
+     * doc.createElement() throws "cannot read property createElement of undefined",
+     * aborting the whole library bundle. defaultView is the window it lives in. */
+    "    removeEventListener: function(){}, readyState:'loading',"
+    "    nodeType:9, DOCUMENT_NODE:9, nodeName:'#document', ownerDocument:null"
     "  };"
+    "  Object.defineProperty(d,'defaultView',{get:function(){return globalThis;},enumerable:true});"
     "  Object.defineProperty(d,'title',{get:function(){return dom.getTitle();},"
     "    set:function(v){dom.setTitle(String(v));},enumerable:true});"
     "  function tagOne(t){ var a=dom.getByTag(t); return a.length?wrap(a[0]):null; }"
@@ -557,7 +605,28 @@ static const char JD_DOCUMENT_SHIM[] =
     "    addEventListener:function(){},removeEventListener:function(){}};"
     /* Identity-safe ambient surface: no real cookie/referrer leaks, storage is
      * EPHEMERAL in-memory (Zero Knowledge -- never persisted, gone each load). */
-    "  Object.defineProperty(d,'cookie',{get:function(){return '';},set:function(){},enumerable:true});"
+    /* document.cookie: an in-memory session cookie jar, DISABLED by default (__ck
+     * null => get returns '' and set is a no-op: identity-safe, Zero Knowledge for
+     * every untrusted site). The trusted parent ENABLES and seeds it via jd_set_cookies
+     * (globalThis.__ckEnable) only for a host in allow.conf AND js.conf, so a page's
+     * consent/session JS (e.g. Google) can read and set cookies. Jar contents never
+     * touch disk (the process holds them; gone on exit) and cross back to the parent's
+     * ephemeral network jar via jd_get_cookies (globalThis.__ckDump). */
+    "  var __ck=null;"
+    "  function __ckSer(){ if(__ck===null) return ''; var a=[]; for(var k in __ck) if(Object.prototype.hasOwnProperty.call(__ck,k)) a.push(k+'='+__ck[k]); return a.join('; '); }"
+    "  function __ckAssign(v){ if(__ck===null) return; v=String(v); var semi=v.indexOf(';');"
+    "    var pair=(semi<0?v:v.substring(0,semi)); var eq=pair.indexOf('='); if(eq<0) return;"
+    "    var name=pair.substring(0,eq).replace(/^\\s+|\\s+$/g,''); if(name==='') return;"
+    "    var val=pair.substring(eq+1).replace(/^\\s+|\\s+$/g,'');"
+    "    var attrs=(semi<0?'':v.substring(semi+1)).toLowerCase(); var del=false;"
+    "    var mm=attrs.match(/max-age\\s*=\\s*(-?[0-9]+)/); if(mm&&parseInt(mm[1],10)<=0) del=true;"
+    "    var me=attrs.match(/expires\\s*=\\s*([^;]+)/); if(me){ var t=Date.parse(me[1]); if(!isNaN(t)&&t<=Date.now()) del=true; }"
+    "    if(del) delete __ck[name]; else __ck[name]=val; }"
+    "  globalThis.__ckEnable=function(seed){ __ck={}; seed=String(seed||'');"
+    "    var parts=seed.split(';'); for(var i=0;i<parts.length;i++){ var p=parts[i]; var eq=p.indexOf('=');"
+    "      if(eq>0){ var n=p.substring(0,eq).replace(/^\\s+|\\s+$/g,''); if(n) __ck[n]=p.substring(eq+1).replace(/^\\s+|\\s+$/g,''); } } };"
+    "  globalThis.__ckDump=function(){ return __ckSer(); };"
+    "  Object.defineProperty(d,'cookie',{get:function(){return __ckSer();},set:function(v){__ckAssign(v);},enumerable:true});"
     "  Object.defineProperty(d,'referrer',{get:function(){return '';},enumerable:true});"
     "  d.querySelector=function(s){ return wrap(dom.querySelector(-1, String(s))); };"
     "  d.querySelectorAll=function(s){ return wrapList(dom.querySelectorAll(-1, String(s))); };"
@@ -626,6 +695,38 @@ static const char JD_DOCUMENT_SHIM[] =
     "  if (typeof globalThis.console==='undefined')"
     "    globalThis.console={log:function(){},warn:function(){},error:function(){},"
     "      info:function(){},debug:function(){}};"
+    /* Intl: a minimal, identity-neutral stub (QuickJS-ng builds without ICU, so
+     * Intl is otherwise undefined and any locale-aware script -- DuckDuckGo's
+     * result formatting, date/number rendering -- dies with "Intl is not defined").
+     * Everything resolves to a fixed en-US-ish behaviour via the engine's own
+     * toLocaleString/toString: no real locale/timezone enumeration leaks (anti-fp). */
+    "  if (typeof globalThis.Intl==='undefined'){ (function(){"
+    "    function res(){ return {locale:'en-US',numberingSystem:'latn',calendar:'gregory',timeZone:'UTC'}; }"
+    "    function NumberFormat(l,o){ if(!(this instanceof NumberFormat)) return new NumberFormat(l,o); this._o=o||{}; }"
+    "    NumberFormat.prototype.format=function(n){ try{ return Number(n).toLocaleString('en-US'); }catch(e){ return String(n); } };"
+    "    NumberFormat.prototype.formatToParts=function(n){ return [{type:'integer',value:this.format(n)}]; };"
+    "    NumberFormat.prototype.resolvedOptions=res;"
+    "    function DateTimeFormat(l,o){ if(!(this instanceof DateTimeFormat)) return new DateTimeFormat(l,o); this._o=o||{}; }"
+    "    DateTimeFormat.prototype.format=function(d){ try{ return new Date(d).toString(); }catch(e){ return String(d); } };"
+    "    DateTimeFormat.prototype.formatToParts=function(d){ return [{type:'literal',value:this.format(d)}]; };"
+    "    DateTimeFormat.prototype.resolvedOptions=res;"
+    "    function Collator(l,o){ if(!(this instanceof Collator)) return new Collator(l,o); }"
+    "    Collator.prototype.compare=function(a,b){ a=String(a); b=String(b); return a<b?-1:(a>b?1:0); };"
+    "    Collator.prototype.resolvedOptions=res;"
+    "    function PluralRules(l,o){ if(!(this instanceof PluralRules)) return new PluralRules(l,o); }"
+    "    PluralRules.prototype.select=function(n){ return Number(n)===1?'one':'other'; };"
+    "    PluralRules.prototype.resolvedOptions=res;"
+    "    function RelativeTimeFormat(l,o){ if(!(this instanceof RelativeTimeFormat)) return new RelativeTimeFormat(l,o); }"
+    "    RelativeTimeFormat.prototype.format=function(v,u){ return String(v)+' '+String(u); };"
+    "    RelativeTimeFormat.prototype.formatToParts=function(v,u){ return [{type:'literal',value:this.format(v,u)}]; };"
+    "    RelativeTimeFormat.prototype.resolvedOptions=res;"
+    "    function ListFormat(l,o){ if(!(this instanceof ListFormat)) return new ListFormat(l,o); }"
+    "    ListFormat.prototype.format=function(a){ return (a||[]).join(', '); };"
+    "    ListFormat.prototype.resolvedOptions=res;"
+    "    globalThis.Intl={NumberFormat:NumberFormat,DateTimeFormat:DateTimeFormat,Collator:Collator,"
+    "      PluralRules:PluralRules,RelativeTimeFormat:RelativeTimeFormat,ListFormat:ListFormat,"
+    "      getCanonicalLocales:function(l){ return l==null?[]:(Array.isArray(l)?l.slice():[String(l)]); }};"
+    "  })(); }"
     "  globalThis.addEventListener=function(type,fn){ addL(String(type),fn); };"
     "  globalThis.removeEventListener=function(){};"
     /* Timers with REAL delays (2026-07-11): each entry is {f, due, iv, id} where
@@ -1161,6 +1262,48 @@ jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *pa
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
+jd_status jd_set_cookies(js_context *ctx, const char *cookies) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    /* The cookie string is hostile (from the network jar); it is passed as a JS
+     * STRING VALUE, never interpolated into source, so it cannot inject code. */
+    JSValue global = JS_GetGlobalObject(jsctx);
+    if (JS_IsException(global)) return JD_ERR_OOM;
+    JS_SetPropertyStr(jsctx, global, "__ckSeed",
+                      JS_NewString(jsctx, (cookies != NULL) ? cookies : ""));
+    JS_FreeValue(jsctx, global);
+    static const char en[] =
+        "if(typeof __ckEnable==='function'){__ckEnable(globalThis.__ckSeed);"
+        "globalThis.__ckSeed=undefined;}";
+    JSValue r = JS_Eval(jsctx, en, sizeof en - 1, "<cookie-seed>", JS_EVAL_TYPE_GLOBAL);
+    int ok = !JS_IsException(r);
+    JS_FreeValue(jsctx, r);
+    return ok ? JD_OK : JD_ERR_INTERNAL;
+}
+
+int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz) {
+    if (ctx == NULL || buf == NULL || bufsz == 0) return 0;
+    if (bufsz > 0) buf[0] = '\0';
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 0;
+    static const char q[] = "(typeof __ckDump==='function')?__ckDump():''";
+    JSValue r = JS_Eval(jsctx, q, sizeof q - 1, "<cookie-dump>", JS_EVAL_TYPE_GLOBAL);
+    if (JS_IsException(r)) { JS_FreeValue(jsctx, JS_GetException(jsctx)); return 0; }
+    size_t slen = 0;
+    const char *s = JS_ToCStringLen(jsctx, &slen, r);
+    int n = 0;
+    if (s != NULL) {
+        if (slen >= bufsz) slen = bufsz - 1;
+        memcpy(buf, s, slen);
+        buf[slen] = '\0';
+        n = (int)slen;
+        JS_FreeCString(jsctx, s);
+    }
+    JS_FreeValue(jsctx, r);
+    return n;
 }
 
 int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace) {
