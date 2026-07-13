@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="mydiv">Existing</div>
+<script>
+// jQuery's getElementById test
+var div = document.createElement('div');
+div.innerHTML = '<a href="/a">link</a><input type="checkbox">';
+div.id = 'fiq';
+document.body.appendChild(div);
+
+// Now getElementById
+var found = document.getElementById('fiq');
+console.log('found:', found ? 'YES' : 'NO');
+
+// Remove
+document.body.removeChild(div);
+
+console.log('After remove:');
+console.log('  body children:', document.body.children.length);
+for (var i = 0; i < document.body.children.length; i++) {
+    console.log('  ' + i + ': ' + document.body.children[i].tagName + ' id=' + (document.body.children[i].id || 'none'));
+}
+console.log('  original mydiv:', document.getElementById('mydiv') ? 'found' : 'NOT FOUND');
+console.log('  fiq still:', document.getElementById('fiq') ? 'YES (leaked!)' : 'gone');
+</script>
+</body>
+</html>

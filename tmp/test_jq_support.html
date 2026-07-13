@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="d1">Div 1</div>
+<script>
+// Simulate jQuery's support test
+(function() {
+    var body = document.body;
+    var form = document.createElement("form");
+    body.appendChild(form);
+    // jQuery checks form.submit or similar
+    body.removeChild(form);
+})();
+console.log('Body children:', document.body.children.length);
+for (var i = 0; i < document.body.children.length; i++) {
+    console.log('  ' + i + ': ' + document.body.children[i].tagName + ' ' + (document.body.children[i].id || ''));
+}
+</script>
+</body>
+</html>

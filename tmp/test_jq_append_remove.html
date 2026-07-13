@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="d1">Original</div>
+<script>
+function testAppendRemove() {
+    for (var i = 0; i < 5; i++) {
+        var f = document.createElement('form');
+        document.body.appendChild(f);
+        document.body.removeChild(f);
+    }
+    console.log('After 5 append/remove cycles:');
+    console.log('  children count:', document.body.children.length);
+    for (var i = 0; i < document.body.children.length; i++) {
+        console.log('  ' + i + ': ' + document.body.children[i].tagName + ' id=' + document.body.children[i].id);
+    }
+}
+testAppendRemove();
+</script>
+</body>
+</html>

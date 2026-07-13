@@ -620,6 +620,7 @@ static const char JD_DOCUMENT_SHIM[] =
      * doc.createElement() throws "cannot read property createElement of undefined",
      * aborting the whole library bundle. defaultView is the window it lives in. */
     "    removeEventListener: function(){}, readyState:'loading',"
+    "    write: function(){}, writeln: function(){}, open: function(){}, close: function(){},"
     "    nodeType:9, DOCUMENT_NODE:9, nodeName:'#document', ownerDocument:null,"
     /* createDocumentFragment: jQuery's buildFragment uses this during DOM manipulation.
      * Returns a fragment object (__frag[] accumulates appended children; when the

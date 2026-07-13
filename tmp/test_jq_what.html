@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<div>Content 1</div>
+<div>Content 2</div>
+<script>
+console.log('Body children before:');
+var c = document.body.children;
+for (var i = 0; i < c.length; i++) {
+  console.log('  ' + i + ': ' + c[i].tagName + ' ' + (c[i].id || c[i].className || ''));
+}
+</script>
+<script src="https://cdn.jkdesa.com/assets3/js/jquery-3.3.1.min.js?v=2.0.184"></script>
+<script>
+console.log('Body children after:');
+var c = document.body.children;
+for (var i = 0; i < c.length; i++) {
+  console.log('  ' + i + ': ' + c[i].tagName + ' ' + (c[i].id || c[i].className || ''));
+}
+</script>
+</body>
+</html>

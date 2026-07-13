@@ -649,6 +649,16 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         child_fetch_stylesheets(cs);
         cs->net_active = 0;
     }
+    /* Pre-script DOM snapshot: build the view BEFORE scripts run, for a
+     * fallback when the post-script view is empty (jQuery's DOM support tests
+     * can corrupt Lexbor's sibling pointers for XHTML pages). The post-view
+     * is still built for comparison; the snapshot wins when it has more blocks. */
+    pv_view *preserve_view = NULL;
+    if (ok) {
+        (void)pv_build_styled(cs->doc, 0, reader, prefers_dark,
+                              cs->extern_css, cs->extern_css_len,
+                              &preserve_view);
+    }
     if (ok && run_js) {
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
          * Closed again before deriving the view so a later REPL eval cannot use it. */
@@ -766,7 +776,17 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                                cs->extern_css, cs->extern_css_len, &view) != PV_OK) {
             ok = 0;
             child_reset_page(cs);
+        } else {
+            /* Preserve pre-script DOM: fall back to the snapshot when the
+             * post-script view is empty (jQuery corrupts the Lexbor tree). */
+            if (preserve_view != NULL
+                && pv_count(preserve_view) > pv_count(view)) {
+                pv_free(view);
+                view = preserve_view;
+                preserve_view = NULL;
+            }
         }
+        pv_free(preserve_view);
     }
 
     /* Dump the page's cookie jar so the parent can fold JS-set session cookies back

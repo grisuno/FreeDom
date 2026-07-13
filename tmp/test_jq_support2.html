@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="d1">Original</div>
+<script>
+// Simulate MORE of jQuery's support tests
+(function() {
+    // Test 1: innerHTML + cloneNode
+    var div1 = document.createElement("div");
+    div1.innerHTML = "<input type='radio' name='t' checked='checked'/>";
+    var cloned = div1.cloneNode(true);
+    
+    // Test 2: form append/remove
+    var form = document.createElement("form");
+    document.body.appendChild(form);
+    document.body.removeChild(form);
+    
+    // Test 3: script evaluation
+    var div2 = document.createElement("div");
+    div2.innerHTML = "   <link/><table></table><a href='/a'>a</a><input type='checkbox'/>";
+    
+    console.log('After support tests:');
+    console.log('  children count:', document.body.children.length);
+    for (var i = 0; i < document.body.children.length; i++) {
+        console.log('  ' + i + ': ' + document.body.children[i].tagName + ' id=' + document.body.children[i].id);
+    }
+    console.log('  d1 exists:', document.getElementById('d1') !== null);
+})();
+</script>
+</body>
+</html>

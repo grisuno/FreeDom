@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<div id="content">Hello World</div>
+<script>
+console.log('BEFORE jQuery: document.body children:', document.body.childNodes.length);
+</script>
+<script src="https://cdn.jkdesa.com/assets3/js/jquery-3.3.1.min.js?v=2.0.184"></script>
+<script>
+console.log('AFTER jQuery: document.body children:', document.body.childNodes.length);
+console.log('content exists:', document.getElementById('content') !== null);
+</script>
+</body>
+</html>
