@@ -47,6 +47,7 @@
 #include <unistd.h>
 #include <poll.h>
 #include <sys/mman.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/eventfd.h>
 #include <sys/timerfd.h>
@@ -430,6 +431,17 @@ typedef struct browser_window {
     struct freebug_window *freebug;
     struct wl_surface *kbd_focus;
     struct wl_surface *ptr_focus;
+
+    /* Video playback (Fase 1+): the media decoder child process, its pipe fds,
+     * and the current decoded frame for the active video element. */
+    pid_t    decoder_pid;      /* 0 = not running */
+    int      decoder_out_fd;   /* read decoded frames from decoder */
+    int      decoder_cmd_fd;   /* write commands to decoder */
+    uint8_t *video_frame;      /* current decoded ARGB frame (owned) */
+    int      video_w;          /* frame width */
+    int      video_h;          /* frame height */
+    int      video_active;     /* nonzero when video is playing */
+    int      video_pending;    /* nonzero when a frame may be on the pipe */
 } browser_window;
 
 /* Freebug second-window forward declarations (defined further down, but referenced
@@ -927,6 +939,12 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "secure_fetch.h"
 #include "tab.h"
 #include "tls_impersonate.h"
+#include "hls.h"
+#include "media_decoder.h"
+
+/* Video playback functions (defined below; forward declarations for render path). */
+static void video_stop(browser_window *w);
+static int  video_play(browser_window *w, const char *m3u8_url);
 
 /* An editable control gets a live text field; submit/button/hidden do not.
  * Checkboxes, radios, and selects are interactive (click toggles/opens) but
@@ -1842,6 +1860,19 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t); /* fetch + decode allowed images in the still-open worker */
+
+    /* Start video playback for any HLS video detected in the page. */
+    video_stop(w);
+    if (w->doc != NULL) {
+        for (size_t vi = 0; vi < rd_count(w->doc); ++vi) {
+            const rd_block *b = rd_at(w->doc, vi);
+            if (b->kind == RD_VIDEO && b->href != NULL
+                && strstr(b->href, ".m3u8") != NULL) {
+                video_play(w, b->href);
+                break;
+            }
+        }
+    }
 
     /* Move the page's captured console transcript into the window for Freebug, then
      * keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this
@@ -4308,11 +4339,238 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
 /* Paints one RD_VIDEO row inside the content rectangle: a placeholder rectangle
  * with the video URL label. When the video frame pipeline (Fase 1+) is active,
  * the decoded frame will be blitted here instead. */
+/* Frees the video decoder process and its cached frame. Safe to call
+ * when no decoder is running (decoder_pid == 0). NULL-safe on w. */
+/* EINTR-safe pipe write (local version of the tab.c helper). */
+static int v_write(int fd, const void *buf, size_t n) {
+    const uint8_t *p = (const uint8_t *)buf;
+    size_t done = 0;
+    while (done < n) {
+        ssize_t w = write(fd, p + done, n - done);
+        if (w < 0) { if (errno == EINTR) continue; return -1; }
+        done += (size_t)w;
+    }
+    return 0;
+}
+
+/* EINTR-safe pipe read (local version of the tab.c helper). */
+static int v_read(int fd, void *buf, size_t n) {
+    uint8_t *p = (uint8_t *)buf;
+    size_t got = 0;
+    while (got < n) {
+        ssize_t r = read(fd, p + got, n - got);
+        if (r < 0) { if (errno == EINTR) continue; return -1; }
+        if (r == 0) return -1;
+        got += (size_t)r;
+    }
+    return 0;
+}
+
+static void video_stop(browser_window *w) {
+    if (w == NULL) return;
+    if (w->decoder_pid > 0) {
+        uint8_t q = MD_QUIT;
+        (void)v_write(w->decoder_cmd_fd, &q, 1);
+        int st;
+        waitpid(w->decoder_pid, &st, WNOHANG);
+        close(w->decoder_cmd_fd);
+        close(w->decoder_out_fd);
+    }
+    free(w->video_frame);
+    w->decoder_pid = 0;
+    w->decoder_cmd_fd = -1;
+    w->decoder_out_fd = -1;
+    w->video_frame = NULL;
+    w->video_w = 0;
+    w->video_h = 0;
+    w->video_active = 0;
+    w->video_pending = 0;
+}
+
+/* Reads one decoded ARGB frame from the decoder process pipe and caches
+ * it in w->video_frame. Returns 1 if a frame was read, 0 if none available
+ * (EAGAIN / EOF), -1 on error. */
+static int video_read_frame(browser_window *w) {
+    if (w == NULL || w->decoder_out_fd < 0) return -1;
+    uint8_t tag;
+    ssize_t r = read(w->decoder_out_fd, &tag, 1);
+    if (r <= 0) {
+        if (r < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) return 0;
+        return -1;
+    }
+    if (tag == MD_EOS) {
+        w->video_active = 0;
+        return 0;
+    }
+    if (tag == MD_STREAM_INFO) {
+        int32_t codec, w32, h32, ha32;
+        if (v_read(w->decoder_out_fd, &codec, sizeof codec) != 0
+         || v_read(w->decoder_out_fd, &w32, sizeof w32) != 0
+         || v_read(w->decoder_out_fd, &h32, sizeof h32) != 0
+         || v_read(w->decoder_out_fd, &ha32, sizeof ha32) != 0)
+            return -1;
+        (void)codec; (void)ha32;
+        w->video_w = (int)w32;
+        w->video_h = (int)h32;
+        return video_read_frame(w);
+    }
+    if (tag == MD_FRAME) {
+        int64_t pts_s;
+        int32_t w32, h32;
+        size_t dlen;
+        if (v_read(w->decoder_out_fd, &pts_s, sizeof pts_s) != 0
+         || v_read(w->decoder_out_fd, &w32, sizeof w32) != 0
+         || v_read(w->decoder_out_fd, &h32, sizeof h32) != 0
+         || v_read(w->decoder_out_fd, &dlen, sizeof dlen) != 0)
+            return -1;
+        (void)pts_s;
+        if (dlen > 0) {
+            uint8_t *frame = (uint8_t *)realloc(w->video_frame, dlen);
+            if (frame == NULL) return -1;
+            w->video_frame = frame;
+            if (v_read(w->decoder_out_fd, w->video_frame, dlen) != 0)
+                return -1;
+            w->video_w = (int)w32;
+            w->video_h = (int)h32;
+        }
+        return 1;
+    }
+    if (tag == MD_ERROR) {
+        size_t elen;
+        if (v_read(w->decoder_out_fd, &elen, sizeof elen) != 0) return -1;
+        if (elen > 0) {
+            char *emsg = (char *)malloc(elen + 1);
+            if (emsg) {
+                v_read(w->decoder_out_fd, emsg, elen);
+                emsg[elen] = '\0';
+                fprintf(stderr, "[video] decoder error: %s\n", emsg);
+                free(emsg);
+            }
+        }
+        return video_read_frame(w);
+    }
+    return 0;
+}
+
+/* Starts video playback from an m3u8 playlist URL. Fetches the playlist,
+ * parses segments, spawns the decoder, and begins feeding segments.
+ * Returns 0 on success, -1 on failure. */
+static int video_play(browser_window *w, const char *m3u8_url) {
+    if (w == NULL || m3u8_url == NULL) return -1;
+    video_stop(w);
+
+    /* Fetch the m3u8 playlist. */
+    sf_config cfg = sf_config_default();
+    sf_response resp;
+    memset(&resp, 0, sizeof resp);
+    if (sf_get(m3u8_url, &cfg, &resp) != SF_OK
+        || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
+        sf_response_free(&resp);
+        return -1;
+    }
+
+    /* Parse the playlist. */
+    hls_playlist *pl = NULL;
+    if (hls_parse((const char *)resp.body, resp.body_len, &pl) != HLS_OK
+        || pl->count == 0 || pl->is_variant) {
+        sf_response_free(&resp);
+        hls_playlist_free(pl);
+        return -1;
+    }
+    sf_response_free(&resp);
+
+    /* Spawn the decoder process. */
+    int out_fd = -1, cmd_fd = -1;
+    pid_t pid = 0;
+    if (media_decoder_spawn(&pid, &out_fd, &cmd_fd) != 0) {
+        hls_playlist_free(pl);
+        return -1;
+    }
+    w->decoder_pid = pid;
+    w->decoder_out_fd = out_fd;
+    w->decoder_cmd_fd = cmd_fd;
+    w->video_active = 1;
+    w->video_pending = 1;
+
+    /* Make the decoder output fd non-blocking for the event loop. */
+    int flags = fcntl(out_fd, F_GETFD, 0);
+    if (flags >= 0) fcntl(out_fd, F_SETFL, flags | O_NONBLOCK);
+
+    /* Send segments to the decoder (in a background thread would be ideal;
+     * for now, synchronous — the page load is already async from the user's
+     * perspective). Each segment is a separate MD_DECODE command. */
+    for (size_t i = 0; i < pl->count; ++i) {
+        if (!w->video_active) break; /* stop requested */
+
+        char abs_url[4096];
+        size_t n = hls_resolve_url(m3u8_url, pl->segments[i].url,
+                                    abs_url, sizeof abs_url);
+        if (n == 0) continue;
+
+        /* Fetch this segment. */
+        memset(&resp, 0, sizeof resp);
+        if (sf_get(abs_url, &cfg, &resp) != SF_OK
+            || resp.body == NULL || resp.body_len == 0) {
+            sf_response_free(&resp);
+            continue;
+        }
+
+        /* Send to decoder. */
+        uint8_t cmd = MD_DECODE;
+        size_t slen = resp.body_len;
+        v_write(cmd_fd, &cmd, 1);
+        v_write(cmd_fd, &slen, sizeof slen);
+        v_write(cmd_fd, resp.body, resp.body_len);
+        sf_response_free(&resp);
+
+        /* Read any pending frames the decoder produced. This is synchronous
+         * for each segment; future versions can thread this. */
+        while (1) {
+            int fr = video_read_frame(w);
+            if (fr <= 0) break;
+        }
+    }
+
+    /* Flush: signal end of stream. */
+    uint8_t f = MD_FLUSH;
+    v_write(cmd_fd, &f, 1);
+
+    hls_playlist_free(pl);
+    return 0;
+}
+
 static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                             double left, double ry, double content_w, double row_h) {
-    (void)blk;
     const ui_theme *th = &w->theme;
     double pad = 4.0;
+
+    /* If a decoded frame is available, blit it. */
+    if (w->video_active && w->video_frame != NULL && w->video_w > 0) {
+        cairo_surface_t *surf = cairo_image_surface_create_for_data(
+            w->video_frame, CAIRO_FORMAT_ARGB32,
+            w->video_w, w->video_h,
+            w->video_w * 4);
+        if (cairo_surface_status(surf) == CAIRO_STATUS_SUCCESS) {
+            double scale_x = content_w / (double)w->video_w;
+            double scale_y = row_h / (double)w->video_h;
+            double scale = (scale_x < scale_y) ? scale_x : scale_y;
+            double dw = (double)w->video_w * scale;
+            double dh = (double)w->video_h * scale;
+            double dx = left + (content_w - dw) / 2.0;
+            double dy = ry + (row_h - dh) / 2.0;
+            cairo_save(cr);
+            cairo_rectangle(cr, left, ry, content_w, row_h);
+            cairo_clip(cr);
+            cairo_translate(cr, dx, dy);
+            cairo_scale(cr, scale, scale);
+            cairo_set_source_surface(cr, surf, 0.0, 0.0);
+            cairo_paint(cr);
+            cairo_restore(cr);
+            cairo_surface_destroy(surf);
+            return;
+        }
+        cairo_surface_destroy(surf);
+    }
 
     /* Placeholder background */
     set_rgb(cr, th->image_box);
@@ -8161,6 +8419,8 @@ static const struct wl_registry_listener registry_listener = {
 ui_status ui_run_browser(const char *start_url) {
     browser_window w;
     memset(&w, 0, sizeof w);
+    w.decoder_cmd_fd = -1;
+    w.decoder_out_fd = -1;
     w.width = 900;
     w.height = 700;
     w.running = 1;
@@ -8361,14 +8621,17 @@ ui_status ui_run_browser(const char *start_url) {
             int tk = (w.js_tick_due_ms > t) ? (int)(w.js_tick_due_ms - t) : 0;
             if (timeout < 0 || tk < timeout) timeout = tk;
         }
+        /* While video is playing, wake at ~30 fps to check for new frames. */
+        if (w.video_active && w.decoder_out_fd >= 0
+            && (timeout < 0 || timeout > 33)) timeout = 33;
 
         /* Poll the Wayland fd, the key-repeat timer, and the async-fetch result pipe
          * together. The Wayland fd keeps the prepare_read/read_events contract; the
          * timer fires a held key's repeat; the pipe carries completed fetches. */
-        struct pollfd pfds[4];
+        struct pollfd pfds[5];
         int nfds = 0;
         pfds[nfds].fd = wl_display_get_fd(w.display); pfds[nfds].events = POLLIN; pfds[nfds].revents = 0; nfds++;
-        int timer_idx = -1, fetch_idx = -1, stream_idx = -1;
+        int timer_idx = -1, fetch_idx = -1, stream_idx = -1, video_idx = -1;
         if (w.repeat_timer_fd >= 0) {
             pfds[nfds].fd = w.repeat_timer_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             timer_idx = nfds++;
@@ -8380,6 +8643,10 @@ ui_status ui_run_browser(const char *start_url) {
         if (w.stream_evfd >= 0) {
             pfds[nfds].fd = w.stream_evfd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             stream_idx = nfds++;
+        }
+        if (w.decoder_out_fd >= 0 && w.video_active) {
+            pfds[nfds].fd = w.decoder_out_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
+            video_idx = nfds++;
         }
         int pr = poll(pfds, (nfds_t)nfds, timeout);
 
@@ -8449,8 +8716,17 @@ ui_status ui_run_browser(const char *start_url) {
                 }
             }
         }
+
+        /* A decoded video frame arrived from the media decoder process. Read
+         * it and trigger a repaint so the video element updates on screen. */
+        if (pr > 0 && video_idx >= 0 && (pfds[video_idx].revents & POLLIN)) {
+            while (video_read_frame(&w) > 0) { /* drain pending frames */ }
+            if (w.video_frame != NULL)
+                redraw(&w);
+        }
     }
 
+    video_stop(&w);    /* stop the video decoder if running */
     profile_sync(&w);  /* final state (zoom/toggles) sealed before teardown */
 
     destroy_buffer(&w);
