@@ -205,6 +205,7 @@ la compilación (y por eso se desincronizaban: `fuzz.sh` quedó obsoleto y dejó
 `docker_run.sh`→`docker`, `run_freedom.sh`→`run`. Targets de desarrollo/empaquetado centralizados:
 - `make deps` — dependencias del sistema + Lexbor desde fuente (subconjunto seguro de `install.sh`;
   **sin** los `sed` que mutan fuentes: un target jamás reescribe código versionado).
+  **Video playback requires FFmpeg dev libraries:** `sudo apt install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev`.
 - `make run [URL=...]` — corre la GUI.
 - `make deb` — construye el `.deb` y **restaura el dueño de `build/`** (`debuild` corre bajo
   fakeroot/sudo y lo deja root; el target hace `chown -R $(id -u):$(id -g) build`, si no `make`

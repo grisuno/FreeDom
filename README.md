@@ -17,7 +17,17 @@ From the creators of LazyOwn Redteam Framework comes a free and open-source mini
 git clone https://github.com/grisuno/FreeDom.git
 cd FreeDom
 
-# Docker (strongly recommended for testing)
+### Native build (Linux)
+
+**Dependencies:** `libavformat-dev libavcodec-dev libavutil-dev libswscale-dev` (FFmpeg for H.264/H.265 video decoding), plus the same as the Dockerfile.
+
+```bash
+sudo apt install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev
+make
+./build/freedom
+```
+
+## Docker (strongly recommended for testing)
 sudo docker build -t freedom-browser . 
 
 sudo docker run -it \
