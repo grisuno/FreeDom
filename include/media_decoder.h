@@ -37,7 +37,8 @@ enum md_resp {
     MD_STREAM_INFO = 1, /* payload: [codec:int32][w:int32][h:int32][has_audio:int32] */
     MD_FRAME       = 2, /* payload: [pts_s:int64][w:int32][h:int32][dlen:size_t][ARGB data] */
     MD_EOS         = 3, /* no payload — end of stream */
-    MD_ERROR       = 4  /* payload: [elen:size_t][msg] — non-fatal error, stream continues */
+    MD_ERROR       = 4, /* payload: [elen:size_t][msg] — non-fatal error, stream continues */
+    MD_AUDIO_FRAME = 5  /* payload: [pts_s:int64][rate:int32][ch:int32][dlen:size_t][PCM_S16LE data] */
 };
 
 #define MD_MAX_SEGMENT_BYTES ((size_t)(32u << 20)) /* 32 MiB per segment */

@@ -4435,6 +4435,27 @@ static int video_read_frame(browser_window *w) {
         }
         return 1;
     }
+    if (tag == MD_AUDIO_FRAME) {
+        /* Audio frame: read and discard (audio output is future work). The
+         * format is PCM S16LE interleaved; we just drain the pipe here. */
+        int64_t pts_s;
+        int32_t rate, ch;
+        size_t dlen;
+        if (v_read(w->decoder_out_fd, &pts_s, sizeof pts_s) != 0
+         || v_read(w->decoder_out_fd, &rate, sizeof rate) != 0
+         || v_read(w->decoder_out_fd, &ch, sizeof ch) != 0
+         || v_read(w->decoder_out_fd, &dlen, sizeof dlen) != 0)
+            return -1;
+        (void)pts_s; (void)rate; (void)ch;
+        if (dlen > 0) {
+            uint8_t *drop = (uint8_t *)malloc(dlen);
+            if (drop != NULL) {
+                v_read(w->decoder_out_fd, drop, dlen);
+                free(drop);
+            }
+        }
+        return video_read_frame(w); /* read next frame */
+    }
     if (tag == MD_ERROR) {
         size_t elen;
         if (v_read(w->decoder_out_fd, &elen, sizeof elen) != 0) return -1;
