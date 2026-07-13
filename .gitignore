@@ -174,3 +174,4 @@ fuzz/out/
 # Packaging
 
 debian/
+tmp/
