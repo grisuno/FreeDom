@@ -2876,6 +2876,7 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
 /* Removes C-style block comments into a fresh NUL-terminated buffer (each comment
  * becomes one space). Caller frees. */
 static char *strip_comments(const char *text, size_t len, size_t *outlen) {
+    if (len == (size_t)-1) return NULL;
     char *buf = (char *)malloc(len + 1);
     if (buf == NULL) return NULL;
     size_t o = 0, i = 0;

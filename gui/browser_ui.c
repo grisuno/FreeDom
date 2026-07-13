@@ -702,7 +702,7 @@ static void add_current_host_to_list(browser_window *w, int sel) {
     size_t cur_len = 0;
     uint8_t *cur = read_file_bounded(path, 1u << 20, &cur_len);
     if (cur != NULL) {
-        char *txt = (char *)malloc(cur_len + 1);
+        char *txt = (cur_len <= (1u << 20)) ? (char *)malloc(cur_len + 1) : NULL;
         int dup = 0;
         if (txt != NULL) {
             memcpy(txt, cur, cur_len);
@@ -768,13 +768,15 @@ static void load_favorites(browser_window *w) {
         size_t flen = 0;
         char *txt = read_file(path, &flen);
         if (txt == NULL) continue;
-        char *na = (char *)realloc(acc, len + flen + 2);
-        if (na != NULL) {
-            acc = na;
-            memcpy(acc + len, txt, flen);
-            len += flen;
-            acc[len++] = '\n';
-            acc[len] = '\0';
+        if (len + flen + 2 > len && len + flen + 2 <= (1u << 20)) {
+            char *na = (char *)realloc(acc, len + flen + 2);
+            if (na != NULL) {
+                acc = na;
+                memcpy(acc + len, txt, flen);
+                len += flen;
+                acc[len++] = '\n';
+                acc[len] = '\0';
+            }
         }
         free(txt);
     }
@@ -1049,6 +1051,7 @@ static cairo_surface_t *surface_from_pixels(const tab_image *img) {
     unsigned char *dst = cairo_image_surface_get_data(s);
     int dstride = cairo_image_surface_get_stride(s);
     size_t rowbytes = (size_t)img->width * 4u;
+    if (dstride < 0 || (size_t)dstride < rowbytes) { cairo_surface_destroy(s); return NULL; }
     for (uint32_t y = 0; y < img->height; ++y) {
         memcpy(dst + (size_t)y * (size_t)dstride,
                img->data + (size_t)y * (size_t)img->stride, rowbytes);
@@ -2488,7 +2491,7 @@ typedef struct rc_frag {
     int         font_variant; /* css_font_variant (small-caps etc.) */
 } rc_frag;
 
-typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT } rc_rowkind;
+typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT, RC_VIDEO } rc_rowkind;
 
 typedef struct rc_row {
     rc_rowkind      kind;
@@ -3833,7 +3836,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         reconcile_boxes(L, &s, th, doc, content_w, b->block_id);
 
         int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE
-                       || b->kind == RD_HEADING || b->kind == RD_INPUT);
+                       || b->kind == RD_HEADING || b->kind == RD_INPUT
+                       || b->kind == RD_VIDEO);
         if (standalone || b->block_break) {
             flush_line(L, &s, th);
             /* Space before this block = its top margin collapsed with the previous
@@ -3881,6 +3885,26 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
             }
             s.cur_top = top + h;
+            continue;
+        }
+
+        if (b->kind == RD_VIDEO) {
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+            cairo_font_extents_t fe;
+            cairo_font_extents(cr, &fe);
+            /* Placeholder row: use declared dimensions or a default box. Later
+             * (Fase 1+) this row will contain the decoded video frame. */
+            double vh = (b->video_h > 0) ? (double)b->video_h
+                       : fe.height * 6.0;  /* ~matched to video aspect ratio default */
+            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
+            s.pending_gap = 0;
+            rc_row *r = rc_add_row(L);
+            if (r != NULL) {
+                r->kind = RC_VIDEO; r->top = top; r->height = vh; r->ascent = fe.ascent;
+                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
+                r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
+            }
+            s.cur_top = top + vh;
             continue;
         }
 
@@ -4281,6 +4305,48 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     cairo_restore(cr);
 }
 
+/* Paints one RD_VIDEO row inside the content rectangle: a placeholder rectangle
+ * with the video URL label. When the video frame pipeline (Fase 1+) is active,
+ * the decoded frame will be blitted here instead. */
+static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+                            double left, double ry, double content_w, double row_h) {
+    (void)blk;
+    const ui_theme *th = &w->theme;
+    double pad = 4.0;
+
+    /* Placeholder background */
+    set_rgb(cr, th->image_box);
+    cairo_set_line_width(cr, 1.0);
+    cairo_rectangle(cr, left, ry, content_w, row_h);
+    cairo_fill_preserve(cr);
+    set_rgb(cr, th->input_border);
+    cairo_stroke(cr);
+
+    /* Play button icon (triangle) */
+    double cx = left + content_w / 2.0;
+    double cy = ry + row_h / 2.0;
+    double size = (row_h < content_w ? row_h : content_w) * 0.3;
+    if (size > 48.0) size = 48.0;
+    if (size < 12.0) size = 12.0;
+    set_rgb(cr, th->chrome_text);
+    cairo_move_to(cr, cx - size * 0.4, cy - size * 0.5);
+    cairo_line_to(cr, cx - size * 0.4, cy + size * 0.5);
+    cairo_line_to(cr, cx + size * 0.5, cy);
+    cairo_close_path(cr);
+    cairo_fill(cr);
+
+    /* Label: video URL or alt text */
+    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    const char *label = (blk->text != NULL && blk->text[0] != '\0')
+                        ? blk->text
+                        : (blk->href != NULL ? blk->href : "video");
+    cairo_move_to(cr, left + pad, ry + row_h - pad);
+    set_rgb(cr, th->chrome_text_dim);
+    cairo_show_text(cr, label);
+}
+
 /* Horizontal shift a row's text gets from author text-align (center/right): the
  * slack between the available width and the line's right edge. 0 for left/justify/
  * unset, and for non-text rows. Shared by the painter and the link hit-test so the
@@ -4463,6 +4529,10 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
 
     if (r->kind == RC_IMAGE && r->blk != NULL) {
         paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
+        return;
+    }
+    if (r->kind == RC_VIDEO && r->blk != NULL) {
+        paint_video_row(cr, w, r->blk, left, ry, content_w, r->height);
         return;
     }
     if (r->kind == RC_INPUT && r->blk != NULL) {
@@ -4810,10 +4880,10 @@ static long write_doc_pdf(browser_window *w, const char *path) {
     double *tops = NULL, *heights = NULL, *yof = NULL;
     int *pageof = NULL;
     if (L.nrow > 0) {
-        tops    = (double *)malloc(L.nrow * sizeof *tops);
-        heights = (double *)malloc(L.nrow * sizeof *heights);
-        yof     = (double *)malloc(L.nrow * sizeof *yof);
-        pageof  = (int *)malloc(L.nrow * sizeof *pageof);
+        tops    = (double *)calloc(L.nrow, sizeof *tops);
+        heights = (double *)calloc(L.nrow, sizeof *heights);
+        yof     = (double *)calloc(L.nrow, sizeof *yof);
+        pageof  = (int *)calloc(L.nrow, sizeof *pageof);
     }
     if (L.nrow > 0 && tops != NULL && heights != NULL && yof != NULL && pageof != NULL) {
         for (size_t i = 0; i < L.nrow; ++i) {

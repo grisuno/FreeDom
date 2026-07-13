@@ -8,6 +8,9 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "dom_debug.h"
 #include "freebug.h"
 #include "hostblock.h"
@@ -20,6 +23,7 @@
 #include "request_policy.h"
 #include "secure_fetch.h"
 #include "tab.h"
+#include "media_decoder.h"
 #include "tls_impersonate.h"
 #include "ui.h"
 #include "url.h"
@@ -651,8 +655,16 @@ static int run_headless(const char *target) {
 
 int main(int argc, char **argv) {
     /* A per-tab worker is spawned by re-exec'ing this binary (tab.c fork+exec) so it
-     * inherits none of the GUI's memory. When invoked as one, run the confined worker
-     * loop and never return; otherwise this is a no-op and normal startup proceeds. */
+     * inherits none of the GUI's memory. When invoked as --tab-worker, run the confined
+     * worker loop and never return. Similarly, --media-decoder starts the decoder helper
+     * (a separate process, sandboxed, that decodes H.264/H.265 TS segments via FFmpeg). */
+    if (argc >= 4 && strcmp(argv[1], "--media-decoder") == 0) {
+        int out_fd = (int)strtol(argv[2], NULL, 10);
+        int cmd_fd = (int)strtol(argv[3], NULL, 10);
+        if (out_fd > 0 && cmd_fd > 0)
+            media_decoder_run(out_fd, cmd_fd);
+        _exit(1);
+    }
     tab_worker_dispatch(argc, argv);
 
     int headless = 0;

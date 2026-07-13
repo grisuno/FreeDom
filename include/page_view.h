@@ -48,7 +48,10 @@ typedef enum pv_kind {
     PV_TEXT = 0,   /* inline text */
     PV_LINK = 1,   /* inline text that is a hyperlink (href is set) */
     PV_IMAGE = 2,  /* an <img>: src is set, text holds the alt text */
-    PV_INPUT = 3   /* a form control (<input>/<textarea>/<button>): see pv_input_type */
+    PV_INPUT = 3,  /* a form control (<input>/<textarea>/<button>): see pv_input_type */
+    PV_VIDEO = 4,  /* a <video> or <audio> element: src is set, text is alt/label,
+                    * poster_src is the poster URL (NULL for audio), img_w/img_h
+                    * hold declared dimensions (-1 unknown) */
 } pv_kind;
 
 /* Class of a PV_INPUT control. Drives how the GUI paints and submits it. Unknown
@@ -89,9 +92,10 @@ typedef struct pv_run {
     int     block_break;  /* nonzero: a block boundary precedes this run */
     char   *text;         /* PV_INPUT: the placeholder (text) or button label */
     char   *href;         /* PV_LINK target; PV_INPUT: the owning form's raw action */
-    char   *src;          /* PV_IMAGE only: image URL; NULL otherwise */
-    int     img_w;        /* PV_IMAGE declared width in px, or -1 if unknown */
-    int     img_h;        /* PV_IMAGE declared height in px, or -1 if unknown */
+    char   *src;          /* PV_IMAGE/PV_VIDEO: image/video URL; NULL otherwise */
+    char   *poster_src;   /* PV_VIDEO only: poster image URL; NULL otherwise */
+    int     img_w;        /* PV_IMAGE/PV_VIDEO declared width in px, or -1 if unknown */
+    int     img_h;        /* PV_IMAGE/PV_VIDEO declared height in px, or -1 if unknown */
     int     fg_rgb;       /* author color packed 0xRRGGBB, or -1 if none */
     int     bg_rgb;       /* author background-color packed 0xRRGGBB, or -1 if none */
     /* Author text presentation resolved from <style> + inline style= (the css
@@ -397,6 +401,15 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
                           pv_input_type input_type, const char *text,
                           const char *name, const char *value,
                           const char *action, int form_id, int method);
+
+/* Appends one PV_VIDEO run (a <video> or <audio> element). src is required (the
+ * media URL); alt may be NULL (stored as ""). poster is the poster image URL (may
+ * be NULL, only meaningful for video). w/h are the declared dimensions, or -1
+ * when unknown. text/alt/src/poster are normalised to valid UTF-8. Returns PV_OK
+ * or PV_ERR_OOM / PV_ERR_NULL_ARG. */
+pv_status pv_append_video(pv_view *v, int heading, int block_break,
+                          const char *alt, const char *src,
+                          const char *poster, int w, int h);
 
 /* Sets the author foreground color (packed 0xRRGGBB, or -1 for none) on the most
  * recently appended run. No-op when the view is empty or NULL. Both append helpers

@@ -32,6 +32,7 @@ static size_t utf8_seq_len(unsigned char c) {
 static char *utf8_sanitized_dup(const char *s) {
     if (s == NULL) return NULL;
     size_t n = strlen(s);
+    if (n == (size_t)-1) return NULL;
     char *d = (char *)malloc(n + 1);
     if (d == NULL) return NULL;
     size_t i = 0, o = 0;
@@ -89,6 +90,9 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->text = t;
     b->href = h;
     b->img_decision = dec;
+    b->poster_src = NULL;
+    b->video_w = -1;
+    b->video_h = -1;
     b->fg_rgb = fg_rgb;
     b->bg_rgb = bg_rgb;
     b->text_align = 0;
@@ -216,6 +220,38 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         int bg = (caps.css && r->bg_rgb >= 0) ? r->bg_rgb : -1;
         int rc;
         switch (r->kind) {
+            case PV_VIDEO: {
+                /* Resolve the video src against the page URL (same as images). The
+                 * video is not fetched here -- the orchestrator decides playback. */
+                char resolved[URL_MAX_LEN + 1] = "";
+                const char *vid_url = r->src;
+                if (top_level_url != NULL && r->src != NULL
+                    && url_resolve_https(top_level_url, r->src, resolved,
+                                         sizeof resolved) == URL_OK) {
+                    vid_url = resolved;
+                }
+                const char *poster_url = r->poster_src;
+                char presolved[URL_MAX_LEN + 1] = "";
+                if (top_level_url != NULL && r->poster_src != NULL
+                    && url_resolve_https(top_level_url, r->poster_src, presolved,
+                                         sizeof presolved) == URL_OK) {
+                    poster_url = presolved;
+                }
+                rc = rd_push(d, RD_VIDEO, 0, r->block_break, r->text,
+                             vid_url, RDP_IMG_ALLOW, -1, -1);
+                if (rc == 0 && d->count > 0) {
+                    rd_block *vb = &d->blocks[d->count - 1];
+                    vb->video_w = r->img_w;
+                    vb->video_h = r->img_h;
+                    if (poster_url != NULL) {
+                        vb->poster_src = utf8_sanitized_dup(poster_url);
+                        if (vb->poster_src == NULL) {
+                            rd_free(d); return RD_ERR_OOM;
+                        }
+                    }
+                }
+                break;
+            }
             case PV_IMAGE: {
                 /* Resolve a (possibly relative) image src against the page URL before
                  * judging it: a relative "/logo.png" is NOT an invalid URL, it resolves
@@ -283,9 +319,9 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         /* Author flex/grid container layout is structure, not author styling: it
          * reveals nothing to the network (no fetch, no fingerprint), so the box
          * model and column layout apply by default, decoupled from caps.css (which
-         * still gates author *colors* above). Carried only on text/link blocks (the
-         * flex content this engine groups). */
-        if ((r->kind == PV_TEXT || r->kind == PV_LINK) && d->count > 0) {
+         * still gates author *colors* above). Carried on text/link blocks (the
+         * flex content this engine groups) and video blocks (layout container). */
+        if ((r->kind == PV_TEXT || r->kind == PV_LINK || r->kind == PV_VIDEO) && d->count > 0) {
             rd_block *lb = &d->blocks[d->count - 1];
             lb->bold = r->bold;
             lb->italic = r->italic;
@@ -400,6 +436,7 @@ void rd_free(rd_doc *d) {
     for (size_t i = 0; i < d->count; ++i) {
         free(d->blocks[i].text);
         free(d->blocks[i].href);
+        free(d->blocks[i].poster_src);
         free(d->blocks[i].name);
         free(d->blocks[i].value);
         free(d->blocks[i].select_opts);
@@ -435,6 +472,7 @@ const char *rd_kind_name(rd_kind k) {
         case RD_IMAGE:     return "image";
         case RD_NOTICE:    return "notice";
         case RD_INPUT:     return "input";
+        case RD_VIDEO:     return "video";
     }
     return "block";
 }
@@ -452,6 +490,7 @@ const char *rd_block_tag(const rd_block *b) {
         case RD_PARAGRAPH: return "p";
         case RD_LINK:      return "a";
         case RD_IMAGE:     return "img";
+        case RD_VIDEO:     return "video";
         case RD_INPUT:
             switch (b->input_type) {
                 case PV_IN_TEXTAREA: return "textarea";

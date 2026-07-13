@@ -19,6 +19,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include <curl/curl.h>
 #include <openssl/ssl.h>
@@ -231,6 +232,8 @@ sf_config sf_config_default(void) {
     c.sec_fetch_mode = NULL;
     c.progress_ctx = NULL;
     c.progress_cb = NULL;
+    c.range_start = -1; /* -1 means no byte-range */
+    c.range_end = -1;
     return c;
 }
 
@@ -799,6 +802,20 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, protos);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, local.timeout_ms);
+    /* Byte-range HTTP request (Range: bytes=N-M). When range_start >= 0, set the
+     * range header. libcurl handles the splitting of multipart responses (206 Partial).
+     * An open-ended range uses range_end < 0 (i.e., "bytes=N-"). */
+    if (local.range_start >= 0) {
+        char rbuf[64];
+        int rn;
+        if (local.range_end >= local.range_start)
+            rn = snprintf(rbuf, sizeof rbuf, "%" PRId64 "-%" PRId64,
+                          local.range_start, local.range_end);
+        else
+            rn = snprintf(rbuf, sizeof rbuf, "%" PRId64 "-", local.range_start);
+        if (rn > 0 && (size_t)rn < sizeof rbuf)
+            curl_easy_setopt(curl, CURLOPT_RANGE, rbuf);
+    }
     curl_easy_setopt(curl, CURLOPT_USERAGENT, sf_user_agent_or_default(local.user_agent));
     /* HTTP Basic Authentication. When username is set, build a "user:pass" string
      * and hand it to curl, which sends an Authorization: Basic header preemptively

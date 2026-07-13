@@ -120,4 +120,14 @@ typedef int (*jd_fetch_fn)(void *ctx, const char *method, const char *url,
  * page's context. ctx == NULL / fn == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx);
 
+/* Processes any <iframe> elements in the DOM that were created during JS execution
+ * (via createElement/appendChild or innerHTML): for each iframe with a non-empty `src`,
+ * fetches the content via `fn` (the same fetch mechanism as XHR), scans the response for
+ * video URLs (.m3u8 patterns), and creates <video> elements in the document for any found.
+ * Does NOT re-process iframes already processed (tracks them by node_id in a bloom-light
+ * manner). Call after every DOM mutation that may have added iframes (innerHTML setter,
+ * appendChild). fn/fetch_ctx must outlive ctx. ctx == NULL => no-op. */
+void jd_process_iframes(js_context *ctx, dom_index *idx,
+                        jd_fetch_fn fn, void *fetch_ctx);
+
 #endif /* FREEDOM_JS_DOM_H */

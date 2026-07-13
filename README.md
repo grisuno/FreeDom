@@ -43,6 +43,9 @@ The name reflects its core goals:
 - **Free**: Libre (freedom) and open source
 - **Dom**: Reference to the DOM (Document Object Model) and domain-level control
 
+## FreeDom officially bans Google.
+Their services cannot be implemented without compromising user privacy through telemetry, mandatory API keys, or hidden solver workers. We refuse to do so.
+
 ## Features
 - Written in portable C11
 - Strong process-based sandboxing for each tab: the worker is **forked _and re-exec'd_** so it

@@ -350,6 +350,7 @@ static int write_view(int wfd, const pv_view *v) {
         size_t tlen = (r->text != NULL) ? strlen(r->text) : 0;
         size_t hlen = (r->href != NULL) ? strlen(r->href) : 0;
         size_t slen = (r->src != NULL) ? strlen(r->src) : 0;
+        size_t plen = (r->poster_src != NULL) ? strlen(r->poster_src) : 0;
         size_t nmlen = (r->name != NULL) ? strlen(r->name) : 0;
         size_t vllen = (r->value != NULL) ? strlen(r->value) : 0;
         size_t oplen = (r->select_opts != NULL) ? strlen(r->select_opts) : 0;
@@ -365,6 +366,8 @@ static int write_view(int wfd, const pv_view *v) {
         if (hlen != 0 && write_full(wfd, r->href, hlen) != 0) return -1;
         if (write_full(wfd, &slen, sizeof slen) != 0) return -1;
         if (slen != 0 && write_full(wfd, r->src, slen) != 0) return -1;
+        if (write_full(wfd, &plen, sizeof plen) != 0) return -1;
+        if (plen != 0 && write_full(wfd, r->poster_src, plen) != 0) return -1;
         if (write_full(wfd, &img_w, sizeof img_w) != 0) return -1;
         if (write_full(wfd, &img_h, sizeof img_h) != 0) return -1;
         if (write_full(wfd, &fg, sizeof fg) != 0) return -1;
@@ -735,6 +738,12 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             js_result_free(&fr);
             (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS); /* drain deferred promise jobs */
         }
+        /* Process any <iframe src=...> elements created by the page's scripts
+         * (including via innerHTML=). Fetch the iframe content (same-origin fetches
+         * through the trusted parent), scan for video URLs (.m3u8), and create
+         * <video> elements in the DOM for any found. */
+        if (cs->idx != NULL)
+            jd_process_iframes(cs->js, cs->idx, child_fetch, cs);
         /* Close the network window: no XHR/fetch outside the load script phase. */
         cs->net_active = 0;
         /* Restore the full per-eval budget for any REPL (tab_eval) on this context. */
@@ -1177,11 +1186,12 @@ static int read_view(int fd, pv_view **out) {
             pv_free(v);
             return -1;
         }
-        char *text = NULL, *href = NULL, *src = NULL, *name = NULL, *value = NULL;
-        size_t tl = 0, hl = 0, sl = 0, nl = 0, vl = 0;
+        char *text = NULL, *href = NULL, *src = NULL, *poster = NULL, *name = NULL, *value = NULL;
+        size_t tl = 0, hl = 0, sl = 0, pl = 0, nl = 0, vl = 0;
         if (read_field(fd, &text, &tl) != 0) { pv_free(v); return -1; }
         if (read_field(fd, &href, &hl) != 0) { free(text); pv_free(v); return -1; }
         if (read_field(fd, &src, &sl) != 0) { free(text); free(href); pv_free(v); return -1; }
+        if (read_field(fd, &poster, &pl) != 0) { free(text); free(href); free(src); pv_free(v); return -1; }
         if (read_full(fd, &img_w, sizeof img_w) != 0
          || read_full(fd, &img_h, sizeof img_h) != 0
          || read_full(fd, &fg, sizeof fg) != 0
@@ -1263,6 +1273,9 @@ static int read_view(int fd, pv_view **out) {
                                  (hl > 0) ? href : NULL, (int)fid, (int)method);
         } else if (kind == PV_IMAGE && sl > 0) {
             st = pv_append_image(v, heading, brk, text, src, img_w, img_h);
+        } else if (kind == PV_VIDEO && sl > 0) {
+            st = pv_append_video(v, heading, brk, text, src,
+                                 (pl > 0) ? poster : NULL, img_w, img_h);
         } else {
             pv_kind k = (kind == PV_LINK && hl > 0) ? PV_LINK : PV_TEXT;
             st = pv_append(v, k, heading, brk, text, (hl > 0) ? href : NULL);
@@ -1270,6 +1283,7 @@ static int read_view(int fd, pv_view **out) {
         free(text);
         free(href);
         free(src);
+        free(poster);
         free(name);
         free(value);
         if (st != PV_OK) { free(opts); pv_free(v); return -1; }

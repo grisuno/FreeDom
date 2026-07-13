@@ -31,7 +31,9 @@ typedef enum rd_kind {
     RD_LINK,          /* hyperlink text; href is the target */
     RD_IMAGE,         /* image placeholder; href is the src, img_decision is set */
     RD_NOTICE,        /* a user-agent notice (e.g. the image tracking warning) */
-    RD_INPUT          /* a form control; text is placeholder/label, href is the form action */
+    RD_INPUT,         /* a form control; text is placeholder/label, href is the form action */
+    RD_VIDEO          /* a <video>/<audio> element; href is the src, text is alt/label
+                       * poster_src holds the poster URL (NULL for audio) */
 } rd_kind;
 
 /* One paint-ready block in document order. text is owned, NUL-terminated and
@@ -51,6 +53,9 @@ typedef struct rd_block {
     char            *text;
     char            *href;
     rdp_img_decision img_decision;
+    char            *poster_src;     /* RD_VIDEO: poster image URL; NULL otherwise */
+    int              video_w;        /* RD_VIDEO: declared width in px, or -1 */
+    int              video_h;        /* RD_VIDEO: declared height in px, or -1 */
     int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */
     int              bg_rgb;         /* author background-color packed 0xRRGGBB, or -1; set only with caps.css */
     int              text_align;     /* author text-align (css_align); set only with caps.css, else 0 */

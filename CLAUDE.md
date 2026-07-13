@@ -701,7 +701,18 @@ pedido:
   escribe `SIZE_MAX` bytes). Aplica a `dup_bytes`, `dup_n`, `host_dup` y cualquier helper análogo
   que aparezca. La guarda cuesta 0 en runtime y es defensa en profundidad aunque el llamador acote
   la longitud. Esta regla se verifica en code review y vale también para `realloc(n * sizeof(T))` y
-  cualquier suma/tamaño cuya fuente sea remotamente controlable.
+     cualquier suma/tamaño cuya fuente sea remotamente controlable.
+- **Doctrina `calloc` sobre `malloc` para arreglos (V-002):** todo patrón de asignación de
+  múltiples arreglos del mismo tamaño (`malloc(n * sizeof(T))` para varios punteros) debe
+  usar `calloc(n, sizeof(T))` en lugar de `malloc(n * sizeof(T))` para garantizar
+  zero-initialization y prevenir lecturas de memoria no inicializada. Además, toda operación
+  `memcpy(dst, src, len)` donde `len` sea un valor en tiempo de ejecución debe llevar una
+  verificación explícita de que `len` no excede el tamaño del destino, ya sea por cota
+  conocida (check antes del malloc/realloc) o por guarda inmediata antes del memcpy.
+  `calloc` cuesta lo mismo que `malloc` (la memoria ya viene zeroed del kernel por razones
+  de seguridad) y previene fugas de información por páginas no inicializadas. Esta regla se
+  verifica en code review y aplica a archivos nuevos y existentes (boy-scout: nunca está
+  fuera de scope arreglar un V-002 donde se encuentre).
 - **Este archivo nunca debe superar ~150.000 caracteres** (`wc -c CLAUDE.md`). Es doctrina, no
   sugerencia: un `CLAUDE.md` que crece sin límite deja de leerse. El historial de hitos cerrados
   (§7.2/§7.3) se comprime a **una línea por hito** (título + resultado en una frase + `[[link]]` a

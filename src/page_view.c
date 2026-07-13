@@ -84,7 +84,9 @@ static size_t utf8_encode(unsigned int cp, char *out) {
 }
 
 static char *utf8_sanitized_dup(const char *s) {
+    if (s == NULL) return NULL;
     size_t n = strlen(s);
+    if (n == (size_t)-1 || n > (size_t)-1 / 3) return NULL;
     char *d = (char *)malloc(3 * n + 1); /* worst case: every byte -> 3-byte UTF-8 */
     if (d == NULL) return NULL;
     size_t i = 0, o = 0;
@@ -136,6 +138,7 @@ static void run_init_common(pv_run *r) {
     r->text = NULL;
     r->href = NULL;
     r->src = NULL;
+    r->poster_src = NULL;
     r->img_w = -1;
     r->img_h = -1;
     r->bold = 0;
@@ -304,6 +307,7 @@ pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
     r->text = t;
     r->href = h;
     r->src = NULL;
+    r->poster_src = NULL;
     r->img_w = -1;
     r->img_h = -1;
     return PV_OK;
@@ -333,6 +337,7 @@ pv_status pv_append_image(pv_view *v, int heading, int block_break,
     r->block_break = block_break;
     r->text = t;
     r->src = s;
+    r->poster_src = NULL;
     r->img_w = w;
     r->img_h = h;
     return PV_OK;
@@ -375,6 +380,42 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
     r->value = vl;
     r->form_id = form_id;
     r->form_method = method;
+    return PV_OK;
+}
+
+pv_status pv_append_video(pv_view *v, int heading, int block_break,
+                          const char *alt, const char *src,
+                          const char *poster, int w, int h) {
+    if (v == NULL || src == NULL) return PV_ERR_NULL_ARG;
+
+    if (v->count == v->cap) {
+        size_t ncap = v->cap ? v->cap * 2 : 32;
+        pv_run *grown = (pv_run *)realloc(v->runs, ncap * sizeof *grown);
+        if (grown == NULL) return PV_ERR_OOM;
+        v->runs = grown;
+        v->cap = ncap;
+    }
+
+    char *t = utf8_sanitized_dup(alt != NULL ? alt : "");
+    if (t == NULL) return PV_ERR_OOM;
+    char *s = utf8_sanitized_dup(src);
+    if (s == NULL) { free(t); return PV_ERR_OOM; }
+    char *p = NULL;
+    if (poster != NULL) {
+        p = utf8_sanitized_dup(poster);
+        if (p == NULL) { free(t); free(s); return PV_ERR_OOM; }
+    }
+
+    pv_run *r = &v->runs[v->count++];
+    run_init_common(r);
+    r->kind = PV_VIDEO;
+    r->heading = heading;
+    r->block_break = block_break;
+    r->text = t;
+    r->src = s;
+    r->poster_src = p;
+    r->img_w = w;
+    r->img_h = h;
     return PV_OK;
 }
 
@@ -548,6 +589,7 @@ void pv_free(pv_view *v) {
         free(v->runs[i].text);
         free(v->runs[i].href);
         free(v->runs[i].src);
+        free(v->runs[i].poster_src);
         free(v->runs[i].name);
         free(v->runs[i].value);
         free(v->runs[i].select_opts);
@@ -1292,6 +1334,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
 
 /* Collapses ASCII whitespace runs to a single space into a fresh buffer. */
 static char *collapse_ws(const char *s, size_t n) {
+    if (n == (size_t)-1) return NULL;
     char *out = (char *)malloc(n + 1);
     if (out == NULL) return NULL;
     size_t o = 0;
@@ -2196,6 +2239,84 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 /* The resolved inherited text extensions ride the image run too:
                  * image_rendering picks the paint scaling filter (2026-07-10). */
                 pv_set_text_ext(v, &img_ext);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
+            } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
+                       && !in_skipped_subtree(n, base, js_enabled)
+                       && !in_hidden_subtree(n, base, sheet, &cache)
+                       && !(reader && in_boilerplate_subtree(n, base))) {
+                lxb_dom_element_t *el = lxb_dom_interface_element(n);
+                size_t sl = 0;
+                const lxb_char_t *src =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
+                /* If no direct src, try the first <source> child */
+                if ((src == NULL || sl == 0)) {
+                    for (lxb_dom_node_t *ch = n->first_child; ch != NULL; ch = ch->next) {
+                        if (ch->type == LXB_DOM_NODE_TYPE_ELEMENT
+                            && node_tag(ch) == LXB_TAG_SOURCE) {
+                            lxb_dom_element_t *sel = lxb_dom_interface_element(ch);
+                            src = lxb_dom_element_get_attribute(sel,
+                                (const lxb_char_t *)"src", 3, &sl);
+                            if (src != NULL && sl > 0) break;
+                        }
+                    }
+                }
+                if (src == NULL || sl == 0) continue; /* no source: nothing to show */
+
+                size_t al = 0;
+                const lxb_char_t *alt =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"alt", 3, &al);
+                size_t wl = 0, hl = 0;
+                const lxb_char_t *ws =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"width", 5, &wl);
+                const lxb_char_t *hs =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
+                int iw = parse_dim(ws, wl);
+                int ih = parse_dim(hs, hl);
+
+                size_t pl = 0;
+                const lxb_char_t *poster = NULL;
+                if (t == LXB_TAG_VIDEO) {
+                    poster = lxb_dom_element_get_attribute(el,
+                        (const lxb_char_t *)"poster", 6, &pl);
+                }
+
+                const char *unused_href = NULL;
+                size_t unused_hl = 0;
+                const lxb_dom_node_t *block = NULL;
+                int heading = 0, unused_fg = -1, unused_bg = -1;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                const lxb_dom_node_t *unused_li = NULL;
+                int unused_depth = 0, unused_ordered = 0;
+                pv_cont_info unused_cont;
+                pv_box_info unused_box;
+                pv_text_ext vid_ext;
+                int unused_bdeco;
+                resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
+                                &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_li, &unused_depth, &unused_ordered,
+                                &reg, &unused_cont, &unused_box, &vid_ext,
+                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                int brk = pending_break || (block != prev_block);
+                pending_break = 0;
+                prev_block = block;
+
+                char *src_dup = dup_n((const char *)src, sl);
+                if (src_dup == NULL) { rc = PV_ERR_OOM; goto cleanup; }
+                char *alt_dup = (alt != NULL) ? collapse_ws((const char *)alt, al) : dup_n("", 0);
+                if (alt_dup == NULL) { free(src_dup); rc = PV_ERR_OOM; goto cleanup; }
+                char *poster_dup = (poster != NULL && pl > 0)
+                                   ? dup_n((const char *)poster, pl) : NULL;
+                if (poster != NULL && pl > 0 && poster_dup == NULL) {
+                    free(src_dup); free(alt_dup); rc = PV_ERR_OOM; goto cleanup;
+                }
+
+                pv_status st = pv_append_video(v, heading, brk, alt_dup,
+                                                src_dup, poster_dup, iw, ih);
+                free(src_dup);
+                free(alt_dup);
+                free(poster_dup);
+                if (st != PV_OK) { rc = st; goto cleanup; }
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
             }
             continue;

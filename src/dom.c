@@ -117,6 +117,7 @@ static int sm_put(strmap *m, const char *key, size_t klen, dom_node_id id) {
         i = (i + 1) & mask;
     }
     sm_entry *e = &m->buckets[i];
+    if (klen == (size_t)-1) return -1;
     e->key = (char *)malloc(klen + 1);
     if (e->key == NULL) return -1;
     memcpy(e->key, key, klen);

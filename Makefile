@@ -34,6 +34,12 @@ WEBP_LIBS     := $(shell pkg-config --libs libwebp 2>/dev/null || echo -lwebp)
 IMG_CFLAGS    := $(PNG_CFLAGS) $(JPEG_CFLAGS) $(WEBP_CFLAGS)
 IMG_LIBS      := $(PNG_LIBS) $(JPEG_LIBS) $(WEBP_LIBS)
 
+# Media decoder (Fase 1): FFmpeg for demuxing + decoding H.264/H.265 from
+# MPEG-TS segments. Linked into the main binary and called via re-exec as
+# --media-decoder. Used only for video playback, never by the page worker.
+AV_CFLAGS   := $(shell pkg-config --cflags libavformat libavcodec libavutil libswscale 2>/dev/null)
+AV_LIBS     := $(shell pkg-config --libs libavformat libavcodec libavutil libswscale 2>/dev/null || echo -lavformat -lavcodec -lavutil -lswscale)
+
 # UI (Hito 4+): Wayland + Cairo + xkbcommon for the browser GUI. fontconfig is
 # linked explicitly so the GUI can call FcFini() at shutdown (clean leak exit).
 WL_CFLAGS   := $(shell pkg-config --cflags wayland-client wayland-cursor cairo fontconfig xkbcommon 2>/dev/null)
@@ -103,7 +109,8 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
              $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch \
              $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile \
-             $(BUILD_DIR)/test_tls_impersonate
+             $(BUILD_DIR)/test_tls_impersonate \
+             $(BUILD_DIR)/test_hls
 
 .PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-afl \
         deps run deb docker view clean
@@ -134,6 +141,10 @@ $(BUILD_DIR)/image_decode.o: $(SRC_DIR)/image_decode.c include/image_decode.h | 
 # their include dirs are added explicitly. Trusted-side painter helper only.
 $(BUILD_DIR)/text_shape.o: $(SRC_DIR)/text_shape.c include/text_shape.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(TSH_CFLAGS) -c $< -o $@
+
+# media_decoder pulls in FFmpeg headers (libavformat, libavcodec, libavutil, libswscale).
+$(BUILD_DIR)/media_decoder.o: $(SRC_DIR)/media_decoder.c include/media_decoder.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(AV_CFLAGS) -c $< -o $@
 
 # js_sandbox / js_dom include the vendored quickjs.h: keep our code under the
 # hardened flags, but pull the header via -isystem so its warnings do not trip
@@ -233,6 +244,10 @@ $(BUILD_DIR)/test_js_policy: $(TEST_DIR)/test_js_policy.c $(BUILD_DIR)/js_policy
 # parent<->helper IPC codec. No I/O deps; the BoringSSL handshake lives in the
 # separate freedom-tls-helper worker (Fase 1), not here. See spec/tls_impersonate.md.
 $(BUILD_DIR)/test_tls_impersonate: $(TEST_DIR)/test_tls_impersonate.c $(BUILD_DIR)/tls_impersonate.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure HLS playlist parser (no I/O). Fuzzed separately.
+$(BUILD_DIR)/test_hls: $(TEST_DIR)/test_hls.c $(BUILD_DIR)/hls.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Trusted-side lookahead scanner + parallel subresource pool (Hito 29). The
@@ -381,12 +396,14 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
                       $(BUILD_DIR)/prefs.o $(BUILD_DIR)/profile.o \
                       $(BUILD_DIR)/disk_store.o $(BUILD_DIR)/local_store.o \
-                      $(BUILD_DIR)/tls_impersonate.o \
-                      $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
-                      | $(BUILD_DIR) \
-                      $(BUILD_DIR)/xdg-shell-client-protocol.h \
-                      $(BUILD_DIR)/xdg-decoration-client-protocol.h
-	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(WL_CFLAGS) $(TSH_CFLAGS) $^ -o $@ $(LDFLAGS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(WL_LIBS) $(TSH_LIBS)
+                       $(BUILD_DIR)/tls_impersonate.o \
+                       $(BUILD_DIR)/hls.o \
+                       $(BUILD_DIR)/media_decoder.o \
+                       $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
+                       | $(BUILD_DIR) \
+                       $(BUILD_DIR)/xdg-shell-client-protocol.h \
+                       $(BUILD_DIR)/xdg-decoration-client-protocol.h
+	$(CC) $(CFLAGS) -I$(BUILD_DIR) $(AV_CFLAGS) $(WL_CFLAGS) $(TSH_CFLAGS) $^ -o $@ $(LDFLAGS) $(AV_LIBS) $(SF_LIBS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(WL_LIBS) $(TSH_LIBS)
 
 $(BUILD_DIR)/test_browser: $(TEST_DIR)/test_browser.c $(BUILD_DIR)/browser.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)

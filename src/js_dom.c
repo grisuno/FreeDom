@@ -13,6 +13,7 @@
 
 #include "dom.h"
 #include "freebug.h"
+#include "html_parse.h"
 #include "js_sandbox.h"
 
 #include <stdint.h>
@@ -1530,4 +1531,130 @@ int jd_fire_click(js_context *ctx, dom_node_id node_id) {
     }
     JS_FreeValue(jsctx, r);
     return default_action;
+}
+
+/* Scans `body` (length `blen`) for `.m3u8` URLs and writes the first one found
+ * into `out` (bounded by `outsz`). Returns 1 if found, 0 otherwise.
+ * Looks for patterns like: https://...m3u8... (with optional query params). */
+static int scan_m3u8_url(const char *body, size_t blen,
+                          char *out, size_t outsz) {
+    if (body == NULL || blen == 0 || out == NULL || outsz == 0) return 0;
+    const char *m3u8 = ".m3u8";
+    size_t m3u8len = 5;
+    const char *end = body + blen;
+    for (const char *p = body; p + m3u8len <= end; ++p) {
+        if ((p == body || p[-1] != '/') && memcmp(p, m3u8, m3u8len) == 0) {
+            /* Found ".m3u8" — walk backward to find the start of the URL */
+            const char *url_start = p;
+            while (url_start > body && url_start[-1] != '\'' && url_start[-1] != '"'
+                   && url_start[-1] != ' ' && url_start[-1] != '>' && url_start[-1] != '<'
+                   && url_start[-1] != ')' && url_start[-1] != '}' && url_start[-1] != ']'
+                   && url_start[-1] != ';' && url_start[-1] != ',' && url_start[-1] != '\n'
+                   && url_start[-1] != '\r' && url_start[-1] != '\t')
+                --url_start;
+            /* Walk forward past .m3u8 to find the end of the URL */
+            const char *url_end = p + m3u8len;
+            while (url_end < end && *url_end != '\'' && *url_end != '"'
+                   && *url_end != ' ' && *url_end != '>' && *url_end != '<'
+                   && *url_end != ')' && *url_end != '}' && *url_end != ']'
+                   && *url_end != ';' && *url_end != ',' && *url_end != '\n'
+                   && *url_end != '\r' && *url_end != '\t')
+                ++url_end;
+            size_t ulen = (size_t)(url_end - url_start);
+            if (ulen > 0 && ulen < outsz) {
+                memcpy(out, url_start, ulen);
+                out[ulen] = '\0';
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+/* Maximum number of iframes we track as "already processed" to avoid re-fetching. */
+#define JD_IFRAME_TRACK_MAX 16
+
+void jd_process_iframes(js_context *ctx, dom_index *idx,
+                        jd_fetch_fn fn, void *fetch_ctx) {
+    if (ctx == NULL || idx == NULL || fn == NULL) return;
+
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return;
+
+    /* Static list of already-processed iframe node ids (simple, no dynamic alloc). */
+    static dom_node_id processed[JD_IFRAME_TRACK_MAX];
+    static size_t nprocessed = 0;
+
+    /* Find all iframe elements in the index. */
+    size_t niframe = dom_get_by_tag(idx, "iframe", NULL, 0);
+    if (niframe == 0) return;
+    dom_node_id *iframes = (dom_node_id *)malloc(niframe * sizeof(dom_node_id));
+    if (iframes == NULL) return;
+    dom_get_by_tag(idx, "iframe", iframes, niframe);
+
+    for (size_t i = 0; i < niframe; ++i) {
+        dom_node_id nid = iframes[i];
+        if (nid == DOM_NODE_NONE) continue;
+
+        /* Skip already-processed iframes. */
+        int already = 0;
+        for (size_t j = 0; j < nprocessed; ++j) {
+            if (processed[j] == nid) { already = 1; break; }
+        }
+        if (already) continue;
+
+        /* Get the src attribute. */
+        size_t slen = 0;
+        const char *src = dom_get_attribute(idx, nid, "src", &slen);
+        if (src == NULL || slen == 0) continue;
+
+        /* Track this iframe as processed. */
+        if (nprocessed < JD_IFRAME_TRACK_MAX)
+            processed[nprocessed++] = nid;
+
+        /* Fetch the iframe content. */
+        int status = 0;
+        char *body = NULL;
+        size_t blen = 0;
+        char *ctype = NULL;
+        int fr = fn(fetch_ctx, "GET", src, "", 0,
+                    &status, &body, &blen, &ctype);
+        free(ctype);
+
+        if (fr != 0 || body == NULL || blen == 0) {
+            free(body);
+            continue;
+        }
+
+        /* Scan for .m3u8 video URLs in the response. */
+        char m3u8_url[2048];
+        if (scan_m3u8_url(body, blen, m3u8_url, sizeof m3u8_url)) {
+            /* Create a <video> element in the document with this URL.
+             * This flows through the standard PV_VIDEO → RD_VIDEO → RC_VIDEO pipeline.
+             * Append it as a child of the root element (html) — the body element
+             * is the first descendant with tag "body". */
+            dom_node_id root_id = 0; /* document root is always index 0 */
+            dom_node_id body_id = DOM_NODE_NONE;
+            for (dom_node_id sib = dom_first_child(idx, root_id);
+                 sib != DOM_NODE_NONE;
+                 sib = dom_next_sibling(idx, sib)) {
+                size_t tlen = 0;
+                const char *tag = dom_tag_name(idx, sib, &tlen);
+                if (tag != NULL && tlen == 4 && memcmp(tag, "body", 4) == 0) {
+                    body_id = sib;
+                    break;
+                }
+            }
+            if (body_id != DOM_NODE_NONE) {
+                dom_node_id vid_id = DOM_NODE_NONE;
+                if (dom_create_element(idx, "video", &vid_id) == DOM_OK) {
+                    dom_set_attribute(idx, vid_id, "src", m3u8_url);
+                    dom_append_child(idx, body_id, vid_id);
+                }
+            }
+        }
+
+        free(body);
+    }
+    free(iframes);
 }

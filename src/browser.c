@@ -71,6 +71,7 @@ static int url_is_allowed(const char *url) {
 static char *xstrdup(const char *s) {
     if (s == NULL) return NULL;
     size_t n = strlen(s);
+    if (n == (size_t)-1) return NULL;
     char *d = (char *)malloc(n + 1);
     if (d == NULL) return NULL;
     memcpy(d, s, n + 1);
@@ -128,6 +129,7 @@ static size_t utf8_encode(unsigned int cp, char *out) {
 static char *utf8_sanitized_dup(const char *s) {
     if (s == NULL) return NULL;
     size_t n = strlen(s);
+    if (n == (size_t)-1 || n > (size_t)-1 / 3) return NULL;
     char *d = (char *)malloc(3 * n + 1);
     if (d == NULL) return NULL;
 

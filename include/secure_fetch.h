@@ -108,6 +108,10 @@ typedef struct sf_config {
      * must be copied to thread-safe storage. NULL/0 => no callback. */
     void *progress_ctx;       /* userdata for progress_cb */
     void (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
+    /* Byte-range request (HTTP Range: header). range_start >= 0 enables it;
+     * range_end >= range_start specifies an inclusive end, or -1 for open-ended. */
+    int64_t range_start;
+    int64_t range_end;
 } sf_config;
 
 typedef struct sf_response {

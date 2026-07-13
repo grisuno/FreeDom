@@ -49,6 +49,15 @@ static const pv_run *find_image(const pv_view *v, const char *src) {
     return NULL;
 }
 
+/* Finds the first video run whose src equals `src`; NULL if none. */
+static const pv_run *find_video(const pv_view *v, const char *src) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_VIDEO && r->src != NULL && strcmp(r->src, src) == 0) return r;
+    }
+    return NULL;
+}
+
 /* --- pure model: pv_new / pv_append / pv_free --- */
 
 static void test_new_is_empty(void **state) {
@@ -2329,12 +2338,127 @@ static void test_build_caret_color_inherited(void **state) {
     hp_document_free(doc);
 }
 
+/* --- video model tests --- */
+
+static void test_append_video_copies_fields(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_video(v, 0, 1, "My Video",
+        "https://e.example/video.mp4", "https://e.example/poster.jpg",
+        640, 480), PV_OK);
+    const pv_run *r = pv_at(v, 0);
+    assert_non_null(r);
+    assert_int_equal(r->kind, PV_VIDEO);
+    assert_int_equal(r->block_break, 1);
+    assert_string_equal(r->text, "My Video");
+    assert_string_equal(r->src, "https://e.example/video.mp4");
+    assert_string_equal(r->poster_src, "https://e.example/poster.jpg");
+    assert_null(r->href);
+    assert_int_equal(r->img_w, 640);
+    assert_int_equal(r->img_h, 480);
+    pv_free(v);
+}
+
+static void test_append_video_no_poster(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_video(v, 0, 0, "audio only",
+        "https://e.example/audio.mp3", NULL, -1, -1), PV_OK);
+    const pv_run *r = pv_at(v, 0);
+    assert_non_null(r);
+    assert_int_equal(r->kind, PV_VIDEO);
+    assert_string_equal(r->text, "audio only");
+    assert_string_equal(r->src, "https://e.example/audio.mp3");
+    assert_null(r->poster_src);
+    assert_int_equal(r->img_w, -1);
+    assert_int_equal(r->img_h, -1);
+    pv_free(v);
+}
+
+static void test_append_video_null_args(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_video(NULL, 0, 0, "alt", "src", NULL, 1, 1), PV_ERR_NULL_ARG);
+    assert_int_equal(pv_append_video(v, 0, 0, "alt", NULL, NULL, 1, 1), PV_ERR_NULL_ARG);
+    assert_int_equal(pv_append_video(v, 0, 0, NULL, "src", NULL, -1, -1), PV_OK);
+    assert_string_equal(pv_at(v, 0)->text, "");
+    pv_free(v);
+}
+
+static void test_build_video_with_source(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><video src='https://e.example/vid.mp4' width=640 height=360 "
+        "poster='https://e.example/poster.png'>fallback text</video></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *vid = find_video(v, "https://e.example/vid.mp4");
+    assert_non_null(vid);
+    assert_int_equal(vid->kind, PV_VIDEO);
+    assert_int_equal(vid->img_w, 640);
+    assert_int_equal(vid->img_h, 360);
+    assert_string_equal(vid->poster_src, "https://e.example/poster.png");
+    /* The fallback text is emitted as a separate text run, not the video alt */
+    assert_string_equal(vid->text, "");
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_video_uses_source_child(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><video width=320 height=240>"
+        "<source src='https://e.example/clip.webm' type='video/webm'>"
+        "</video></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *vid = find_video(v, "https://e.example/clip.webm");
+    assert_non_null(vid);
+    assert_int_equal(vid->kind, PV_VIDEO);
+    assert_int_equal(vid->img_w, 320);
+    assert_int_equal(vid->img_h, 240);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_video_without_src_ignored(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><video>no source</video></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    for (size_t i = 0; i < pv_count(v); ++i)
+        assert_int_not_equal(pv_at(v, i)->kind, PV_VIDEO);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_audio_as_video_kind(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><audio src='https://e.example/sound.mp3'></audio></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_video(v, "https://e.example/sound.mp3");
+    assert_non_null(a);
+    assert_int_equal(a->kind, PV_VIDEO);
+    assert_null(a->poster_src); /* audio has no poster */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
         cmocka_unit_test(test_append_copies_fields),
         cmocka_unit_test(test_append_image_copies_fields),
         cmocka_unit_test(test_append_image_null_args),
+        cmocka_unit_test(test_append_video_copies_fields),
+        cmocka_unit_test(test_append_video_no_poster),
+        cmocka_unit_test(test_append_video_null_args),
+        cmocka_unit_test(test_build_video_with_source),
+        cmocka_unit_test(test_build_video_uses_source_child),
+        cmocka_unit_test(test_build_video_without_src_ignored),
+        cmocka_unit_test(test_build_audio_as_video_kind),
         cmocka_unit_test(test_append_transcodes_latin1),
         cmocka_unit_test(test_append_transcodes_word),
         cmocka_unit_test(test_append_transcodes_cp1252_quotes),
