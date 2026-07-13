@@ -120,6 +120,13 @@ typedef int (*jd_fetch_fn)(void *ctx, const char *method, const char *url,
  * page's context. ctx == NULL / fn == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx);
 
+/* Injects a JS shim that creates <iframe> elements from a page's `video[]` array
+ * (or `video_data` variable) into the DOM, emulating the missing `video_min.js`
+ * script. Must be called AFTER all page scripts have run (so video[] exists) and
+ * BEFORE jd_process_iframes() (so iframes are in the DOM for it to process).
+ * ctx == NULL => JD_ERR_NULL_ARG. */
+jd_status jd_inject_video_shim(js_context *ctx);
+
 /* Processes any <iframe> elements in the DOM that were created during JS execution
  * (via createElement/appendChild or innerHTML): for each iframe with a non-empty `src`,
  * fetches the content via `fn` (the same fetch mechanism as XHR), scans the response for
@@ -129,5 +136,15 @@ jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx);
  * appendChild). fn/fetch_ctx must outlive ctx. ctx == NULL => no-op. */
 void jd_process_iframes(js_context *ctx, dom_index *idx,
                         jd_fetch_fn fn, void *fetch_ctx);
+
+/* Creates <iframe> elements in the DOM from video data (`video[N]` / `video_data`)
+ * found in inline script text, WITHOUT executing JS. Runs before the pre-script
+ * preserve_view snapshot so video elements survive jQuery corruption fallback.
+ * Scans each script for patterns matching video array/data assignments, extracts the
+ * iframe src URL, and creates an <iframe> in the DOM. page_url resolves relative URLs
+ * (may be NULL). Returns the number of iframes created (0 if none/error). */
+size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
+                              const size_t *script_lens, size_t nscripts,
+                              const char *page_url);
 
 #endif /* FREEDOM_JS_DOM_H */

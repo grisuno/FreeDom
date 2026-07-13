@@ -1,6 +1,6 @@
 # Video Playback Pipeline
 
-> Fase 0: element `<video>`/`<audio>` reconocido en el DOM, transportado como run/blocks/rows, renderizado como placeholder.
+> Fase 0: elemento `<video>`/`<audio>` reconocido en el DOM, transportado como run/blocks/rows, renderizado como placeholder.
 
 ## Contrato
 
@@ -34,3 +34,33 @@
 - `play()` / `pause()` desde JS
 - iframe anidado (Fase 0d)
 - Audio output
+
+## Fase 1a: Iframe shim para sitios con `video[]` array
+
+### Contrato
+
+Un shim JS que se inyecta en el contexto de página DESPUÉS de ejecutar todos los scripts de la página y ANTES de `jd_process_iframes()`. Su función es emular lo que haría un script externo faltante (p.ej. `video_min.js` 404): crear `<iframe>` en el DOM a partir del array `video[]` definido por un script inline de la página.
+
+### Comportamiento
+
+1. Si la variable global `video_data` está definida y no es vacía, la usa directamente como HTML string del iframe (porque la página ya la preparó).
+2. Si no, lee `video[1]` (proveedor por defecto, Magi) o `video[0]` (Desu, fallback).
+3. Extrae el `src` del iframe parseando el HTML string con una expresión regular simple (`/src\s*=\s*["']([^"']+)["']/`).
+4. Si el `src` es relativo (empieza con `/`), lo resuelve contra `location.protocol + "//" + location.hostname`.
+5. Crea un elemento `<iframe>` en el DOM mediante `dom.createElement`, le asigna el `src` resuelto, y lo añade al `<body>`.
+
+### Seguridad
+
+- El shim corre en el mismo contexto JS aislado que la página (sin I/O de red, sin acceso a sistema)
+- Usa exclusivamente la API `dom.*` del bridge C (handles validados, sin objetos vivos)
+- No ejecuta ningún contenido externo; solo crea un nodo DOM que luego `jd_process_iframes()` procesa con su pipeline gateado
+- Try/catch alrededor de todo: si algo falla (página sin `video` array, sin `dom`, etc.), el shim es no-op
+- Zero Trust: el flujo final del iframe sigue pasando por `jl_process_iframes()` → fetch gateado por el padre → `scan_m3u8_url()` → creación de `<video>` en el DOM
+
+### API
+
+```c
+jd_status jd_inject_video_shim(js_context *ctx);
+```
+
+Inyecta el shim JS en el contexto. Debe llamarse después de que los scripts de la página hayan ejecutado (para que `video[]` exista) y antes de `jd_process_iframes()`.

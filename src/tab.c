@@ -576,6 +576,37 @@ static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
  * closed, never truncated mid-rule). */
 #define TAB_MAX_EXTERN_CSS ((size_t)(1u << 20))
 
+/* Injects PV_VIDEO runs from DOM-index video elements directly into the view,
+ * bypassing the Lexbor tree walk which may miss them due to jQuery corruption
+ * of sibling/child pointers. Scans cs->idx for <video> elements with non-empty
+ * src and appends the first one found via pv_append_video. Skips if the view
+ * already contains a PV_VIDEO run (avoids duplicates on repeated injection).
+ * Call after every pv_build_styled so video survives both the initial load and
+ * timer ticks. */
+static void inject_video_into_view(child_state *cs, pv_view **vp) {
+    if (cs == NULL || cs->idx == NULL || vp == NULL || *vp == NULL) return;
+    /* Skip if the view already has a video run (already injected). */
+    size_t nviews = pv_count(*vp);
+    for (size_t i = 0; i < nviews; i++) {
+        const pv_run *r = pv_at(*vp, i);
+        if (r != NULL && r->kind == PV_VIDEO) return;
+    }
+    if (dom_get_by_tag(cs->idx, "video", NULL, 0) == 0) return;
+    size_t nvids = dom_get_by_tag(cs->idx, "video", NULL, 0);
+    dom_node_id *vids = (dom_node_id *)malloc(nvids * sizeof(dom_node_id));
+    if (vids == NULL) return;
+    size_t filled = dom_get_by_tag(cs->idx, "video", vids, nvids);
+    for (size_t i = 0; i < filled; i++) {
+        size_t sl = 0;
+        const char *src = dom_get_attribute(cs->idx, vids[i], "src", &sl);
+        if (src != NULL && sl > 0) {
+            pv_append_video(*vp, 0, 1, NULL, src, NULL, -1, -1);
+            break;
+        }
+    }
+    free(vids);
+}
+
 /* Fetches the page's <link rel=stylesheet> sheets through the trusted parent
  * (TAG_SUBREQ; the confined worker never touches a socket) and accumulates the
  * accepted bodies into cs->extern_css, newline-separated, in document order.
@@ -653,10 +684,41 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         child_fetch_stylesheets(cs);
         cs->net_active = 0;
     }
+    /* Extract inline scripts BEFORE the preserve_view snapshot, so the native
+     * video data scanner can read their text and create <iframe> elements in the
+     * Lexbor tree while it is still uncorrupted by jQuery's DOM support tests.
+     * The iframes are captured by the preserve_view snapshot, survive the jQuery
+     * corruption fallback, and are later fetched by jd_process_iframes(). */
+    size_t nscripts = 0;
+    hp_script *scripts = NULL;
+    if (ok) {
+        scripts = hp_extract_script_list(cs->doc, &nscripts);
+        /* Native (non-JS) extraction of video data from inline scripts: scan for
+         * `video[N]='<iframe src=...>'` or `video_data='<iframe src=...>'` and
+         * create <iframe> elements in the DOM. This runs BEFORE JS execution, so
+         * the iframes are already in the Lexbor tree when the preserve_view
+         * snapshot is taken. The JS shim (jd_inject_video_shim) remains as a
+         * fallback for pages whose video data is populated by executed scripts. */
+        if (nscripts > 0 && cs->idx != NULL) {
+            const char **texts = (const char **)malloc(nscripts * sizeof(char *));
+            size_t *lens = (size_t *)malloc(nscripts * sizeof(size_t));
+            if (texts != NULL && lens != NULL) {
+                for (size_t i = 0; i < nscripts; i++) {
+                    texts[i] = scripts[i].text;
+                    lens[i] = scripts[i].len;
+                }
+                (void)jd_video_from_scripts(cs->idx, texts, lens, nscripts, page_url);
+            }
+            free(texts);
+            free(lens);
+        }
+    }
     /* Pre-script DOM snapshot: build the view BEFORE scripts run, for a
-     * fallback when the post-script view is empty (jQuery's DOM support tests
-     * can corrupt Lexbor's sibling pointers for XHTML pages). The post-view
-     * is still built for comparison; the snapshot wins when it has more blocks. */
+     * fallback when the post-script view is smaller (jQuery's DOM support
+     * tests can corrupt Lexbor's sibling pointers). The snapshot wins when
+     * it has more blocks -- and now includes the <iframe> elements created
+     * by the native video extractor above, so video blocks survive the
+     * fallback. */
     pv_view *preserve_view = NULL;
     if (ok) {
         (void)pv_build_styled(cs->doc, 0, reader, prefers_dark,
@@ -676,8 +738,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
          * wall-clock budget is shared across every script and the synthetic load/timer
          * pump, so isolating scripts never multiplies the cap. The DOM bridge is
          * read-mostly (safe mutators), so a script cannot corrupt the tree. */
-        size_t nscripts = 0;
-        hp_script *scripts = hp_extract_script_list(cs->doc, &nscripts);
+        /* scripts/nscripts extracted above; reuse the same arrays */
         /* Trusted hosts (allow.conf AND js.conf) get a larger JS budget: they
          * load heavier libraries (jQuery, Bootstrap, etc.) that need more time.
          * Untrusted hosts get the default budget (1s) to limit abuse. */
@@ -759,10 +820,16 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             js_result_free(&fr);
             (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS); /* drain deferred promise jobs */
         }
+        /* Inject the video shim if the page defines `video[]` / `video_data`
+         * (e.g. jkanime.net whose video_min.js is 404). It creates <iframe>
+         * elements from the array, which the next step fetches and scans. */
+        if (cs->js != NULL)
+            jd_inject_video_shim(cs->js);
         /* Process any <iframe src=...> elements created by the page's scripts
-         * (including via innerHTML=). Fetch the iframe content (same-origin fetches
-         * through the trusted parent), scan for video URLs (.m3u8), and create
-         * <video> elements in the DOM for any found. */
+         * (including via innerHTML= or the video shim above). Fetch the iframe
+         * content (same-origin fetches through the trusted parent), scan for
+         * video URLs (.m3u8), and create <video> elements in the DOM for any
+         * found. */
         if (cs->idx != NULL)
             jd_process_iframes(cs->js, cs->idx, child_fetch, cs);
         /* Close the network window: no XHR/fetch outside the load script phase. */
@@ -774,6 +841,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         int rep = 0;
         (void)jd_take_nav_request(cs->js, navbuf, sizeof navbuf, &rep);
         nav_replace = rep ? 1 : 0;
+    } else if (scripts != NULL) {
+        /* Scripts were extracted for native video extraction but not executed
+         * (run_js == 0). Free them explicitly since hp_free_scripts is inside
+         * the run_js branch above. */
+        hp_free_scripts(scripts, nscripts);
     }
     if (ok) {
         title = hp_get_title(cs->doc, &tl);
@@ -795,8 +867,14 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             }
         }
     }
-    /* Decide which view to write: use the preserved one when the post-script
-     * view is smaller (corrupted tree). This does NOT take ownership. */
+    /* Decide which view to write. The preserved view (pre-script snapshot)
+     * carries all page text; when jQuery corrupts Lexbor, the post-script
+     * view has fewer blocks. We inject video into both views so whichever
+     * wins carries the .m3u8 block. The duplicate guard in inject_video_into_view
+     * ensures the preserved view gets the video only once (initial load). */
+    inject_video_into_view(cs, &view);
+    inject_video_into_view(cs, &cs->preserved_view);
+
     pv_view *write_which = view;
     if (ok && view != NULL && cs->preserved_view != NULL
         && pv_count(cs->preserved_view) > pv_count(view)) {
@@ -882,11 +960,13 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
         }
     }
 
+    inject_video_into_view(cs, &view);
+
     uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
     /* Mutation may corrupt the DOM (jQuery's support tests break Lexbor siblings).
-     * Fall back to the preserved pre-script view when the rebuilt view is smaller,
-     * without taking ownership of it (it stays in cs for future mutations). */
+     * Fall back to the preserved pre-script view when the rebuilt view is smaller.
+     * The preserved view already carries the video injected during initial load. */
     pv_view *write_which = view;
     if (ok && view != NULL && cs->preserved_view != NULL
         && pv_count(cs->preserved_view) > pv_count(view)) {

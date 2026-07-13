@@ -884,6 +884,100 @@ static void test_click_no_handler_allows_default(void **state) {
     jd_click_state_free(cs);
 }
 
+/* --- video shim --- */
+
+/* No `video` variable defined: shim is a no-op, no iframe created. */
+static void test_video_shim_no_video(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_inject_video_shim(f->ctx), JD_OK);
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", NULL, 0), 0);
+}
+
+/* `video[0..2]` defined with absolute iframe src: shim creates iframe from
+ * video[1] (default provider, Magi), ignoring video[0] (Desu). */
+static void test_video_shim_uses_index_1(void **state) {
+    fixture *f = (fixture *)*state;
+    js_result r;
+    assert_int_equal(js_eval(f->ctx,
+        "var video = [];"
+        "video[0] = '<iframe src=\"https://srv0.example/vid\"></iframe>';"
+        "video[1] = '<iframe src=\"https://srv1.example/vid\"></iframe>';"
+        "video[2] = '<iframe src=\"https://srv2.example/vid\"></iframe>';",
+        strlen("var video = [];"
+        "video[0] = '<iframe src=\"https://srv0.example/vid\"></iframe>';"
+        "video[1] = '<iframe src=\"https://srv1.example/vid\"></iframe>';"
+        "video[2] = '<iframe src=\"https://srv2.example/vid\"></iframe>';"), &r), JS_OK);
+    js_result_free(&r);
+    assert_int_equal(jd_inject_video_shim(f->ctx), JD_OK);
+    dom_node_id ids[2];
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", ids, 2), 1);
+    size_t slen = 0;
+    const char *src = dom_get_attribute(f->idx, ids[0], "src", &slen);
+    assert_non_null(src);
+    assert_string_equal(src, "https://srv1.example/vid");
+}
+
+/* `video_data` (prepared by the page) takes precedence over `video[]`: when
+ * both exist, the shim creates an iframe from video_data, not video[1]. */
+static void test_video_shim_video_data_wins(void **state) {
+    fixture *f = (fixture *)*state;
+    js_result r;
+    assert_int_equal(js_eval(f->ctx,
+        "var video = [];"
+        "video[0] = '<iframe src=\"https://srv0.example/vid\"></iframe>';"
+        "video[1] = '<iframe src=\"https://srv1.example/vid\"></iframe>';"
+        "var video_data = '<iframe src=\"https://data.example/vid\"></iframe>';",
+        strlen("var video = [];"
+        "video[0] = '<iframe src=\"https://srv0.example/vid\"></iframe>';"
+        "video[1] = '<iframe src=\"https://srv1.example/vid\"></iframe>';"
+        "var video_data = '<iframe src=\"https://data.example/vid\"></iframe>';"), &r), JS_OK);
+    js_result_free(&r);
+    assert_int_equal(jd_inject_video_shim(f->ctx), JD_OK);
+    dom_node_id ids[2];
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", ids, 2), 1);
+    size_t slen = 0;
+    const char *src = dom_get_attribute(f->idx, ids[0], "src", &slen);
+    assert_non_null(src);
+    assert_string_equal(src, "https://data.example/vid");
+}
+
+/* `video_data` with relative src gets resolved against location.protocol and
+ * location.hostname. Only for relative URLs starting with '/'. */
+static void test_video_shim_relative_url_resolved(void **state) {
+    fixture *f = (fixture *)*state;
+    set_https_location(f, "https://anime.test/dragon-ball/1");
+    js_result r;
+    assert_int_equal(js_eval(f->ctx,
+        "var video_data = '<iframe src=\"/jkplayer/umv?e=abc\"></iframe>';",
+        strlen("var video_data = '<iframe src=\"/jkplayer/umv?e=abc\"></iframe>';"), &r), JS_OK);
+    js_result_free(&r);
+    assert_int_equal(jd_inject_video_shim(f->ctx), JD_OK);
+    dom_node_id ids[2];
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", ids, 2), 1);
+    size_t slen = 0;
+    const char *src = dom_get_attribute(f->idx, ids[0], "src", &slen);
+    assert_non_null(src);
+    assert_string_equal(src, "https://anime.test/jkplayer/umv?e=abc");
+}
+
+/* `video[1]` is empty string: no iframe created. */
+static void test_video_shim_empty_html(void **state) {
+    fixture *f = (fixture *)*state;
+    js_result r;
+    assert_int_equal(js_eval(f->ctx,
+        "var video = []; video[1] = '';",
+        strlen("var video = []; video[1] = '';"), &r), JS_OK);
+    js_result_free(&r);
+    assert_int_equal(jd_inject_video_shim(f->ctx), JD_OK);
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", NULL, 0), 0);
+}
+
+/* NULL context returns JD_ERR_NULL_ARG. */
+static void test_video_shim_null_ctx(void **state) {
+    (void)state;
+    assert_int_equal(jd_inject_video_shim(NULL), JD_ERR_NULL_ARG);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
@@ -947,6 +1041,12 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_click_onclick_fires, setup, teardown),
         cmocka_unit_test_setup_teardown(test_click_prevent_default, setup, teardown),
         cmocka_unit_test_setup_teardown(test_click_no_handler_allows_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_shim_no_video, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_shim_uses_index_1, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_shim_video_data_wins, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_shim_relative_url_resolved, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_shim_empty_html, setup, teardown),
+        cmocka_unit_test(test_video_shim_null_ctx),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -1861,18 +1861,14 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t); /* fetch + decode allowed images in the still-open worker */
 
-    /* Start video playback for any HLS video detected in the page. */
+    /* Video playback is user-initiated (click), not auto-played. The auto-play
+     * via video_play() would block the Wayland event loop with a synchronous
+     * sf_get() to the .m3u8 URL, freezing the GUI. The placeholder (play
+     * button + URL label) is painted by paint_video_row; clicking it triggers
+     * the video frame pipeline through the normal pointer dispatch. */
     video_stop(w);
-    if (w->doc != NULL) {
-        for (size_t vi = 0; vi < rd_count(w->doc); ++vi) {
-            const rd_block *b = rd_at(w->doc, vi);
-            if (b->kind == RD_VIDEO && b->href != NULL
-                && strstr(b->href, ".m3u8") != NULL) {
-                video_play(w, b->href);
-                break;
-            }
-        }
-    }
+    (void)w->doc; /* keep - video detection via block scan is deferred to click */
+
 
     /* Move the page's captured console transcript into the window for Freebug, then
      * keep the worker ALIVE (tab_worker) so the console REPL can tab_eval against this
