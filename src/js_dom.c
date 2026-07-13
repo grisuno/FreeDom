@@ -810,7 +810,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      if (due.length===0) break;"
     "      timers=rest; rounds++;"
     "      for (var j=0;j<due.length && fired<256;j++){ fired++;"
-    "        try{ due[j].f.call(globalThis); }catch(ex){}"
+    "        try{ due[j].f.call(globalThis); }catch(ex){ try{console.error(ex.stack||String(ex));}catch(e){} }"
     "        if (due[j].iv>0){ due[j].due=due[j].iv; timers.push(due[j]); }"
     "      }"
     "    }"
@@ -830,10 +830,10 @@ static const char JD_DOCUMENT_SHIM[] =
      * zero-delay timers (rAF loops, chained setTimeout with no delay). Timers with
      * a real delay stay queued for __tickTimers; microtasks are js_pump_jobs'. */
     "  globalThis.__fireDeferred=function(){"
-    "    d.readyState='complete';"
-    "    for (var i=0;i<loadCbs.length;i++){ try{ loadCbs[i].call(globalThis); }catch(e){} }"
-    "    if (typeof globalThis.onload==='function'){ try{ globalThis.onload(); }catch(e){} }"
-    "    if (typeof d.onload==='function'){ try{ d.onload(); }catch(e){} }"
+    "    function fbLogErr(ex){ try{console.error(ex.stack||String(ex));}catch(e){} }"
+    "    for (var i=0;i<loadCbs.length;i++){ try{ loadCbs[i].call(globalThis); }catch(e){fbLogErr(e);} }"
+    "    if (typeof globalThis.onload==='function'){ try{ globalThis.onload(); }catch(e){fbLogErr(e);} }"
+    "    if (typeof d.onload==='function'){ try{ d.onload(); }catch(e){fbLogErr(e);} }"
     "    globalThis.__tickTimers(0);"
     "  };"
     "})();";
@@ -1228,11 +1228,23 @@ static JSValue m_console(JSContext *ctx, JSValueConst this_val,
     for (int i = 0; i < argc && !full; ++i) {
         if (i > 0 && cb_append(&msg, &len, &cap, " ", 1)) break;
         size_t sl = 0;
-        const char *s = JS_ToCStringLen(ctx, &sl, argv[i]);
+        const char *s = NULL;
+        if (JS_IsObject(argv[i])) {
+            JSValue json = JS_JSONStringify(ctx, argv[i], JS_UNDEFINED, JS_UNDEFINED);
+            if (!JS_IsException(json)) {
+                if (JS_IsString(json)) s = JS_ToCStringLen(ctx, &sl, json);
+                JS_FreeValue(ctx, json);
+            } else {
+                JS_FreeValue(ctx, JS_GetException(ctx));
+            }
+        }
         if (s == NULL) {
-            JS_FreeValue(ctx, JS_GetException(ctx)); /* swallow toString error */
-            full = cb_append(&msg, &len, &cap, "<unprintable>", 13);
-            continue;
+            s = JS_ToCStringLen(ctx, &sl, argv[i]);
+            if (s == NULL) {
+                JS_FreeValue(ctx, JS_GetException(ctx));
+                full = cb_append(&msg, &len, &cap, "<unprintable>", 13);
+                continue;
+            }
         }
         full = cb_append(&msg, &len, &cap, s, sl);
         JS_FreeCString(ctx, s);

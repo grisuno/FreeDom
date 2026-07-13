@@ -51,10 +51,11 @@ typedef struct fb_buffer {
     int       overflow;    /* set once any push was dropped by a cap */
 } fb_buffer;
 
-/* Caps (Secure by Default: unbounded is not representable). */
-#define FB_MAX_ENTRIES      ((size_t)512)
-#define FB_MAX_ENTRY_BYTES  ((size_t)(8u * 1024u))
-#define FB_MAX_TOTAL_BYTES  ((size_t)(256u * 1024u))
+/* Caps (Secure by Default: unbounded is not representable). Large enough that a
+ * real page's JS console flood is captured without truncation in normal use. */
+#define FB_MAX_ENTRIES      ((size_t)8192)
+#define FB_MAX_ENTRY_BYTES  ((size_t)(16u * 1024u))
+#define FB_MAX_TOTAL_BYTES  ((size_t)(4u * 1024u * 1024u))
 /* A stored source name is truncated to this many bytes (NUL excluded). It is not
  * counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file memory is
  * bounded at FB_MAX_ENTRIES * FB_MAX_FILE_BYTES regardless. */

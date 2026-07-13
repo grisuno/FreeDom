@@ -657,6 +657,8 @@ FreeDom/
 └── Makefile       # Build system
 ```
 
+## See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
 ## CI/CD & Enterprise Deployment
 
 FreeDom is built for deterministic environments and integrates a layered deployment strategy:

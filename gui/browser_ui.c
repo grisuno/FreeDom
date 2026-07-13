@@ -6983,6 +6983,8 @@ static void update_hover(browser_window *w) {
 #define FBW_GUTTER     16.0
 #define FBW_MIN_SPLIT   0.20
 #define FBW_MAX_SPLIT   0.88
+#define FBW_COPY_BTN_W 56.0
+#define FBW_COPY_BTN_H 16.0
 
 struct freebug_window {
     browser_window      *owner;
@@ -7000,6 +7002,9 @@ struct freebug_window {
     double split;          /* log-pane fraction of the body height */
     double scroll;         /* log scroll offset (px) */
     int    dragging_split; /* the divider is being dragged */
+    int    hover_copy;     /* mouse is over the copy button */
+    int    copy_status;    /* 0=idle, 1=no-clipboard(red), 2=OK(green) */
+    uint64_t copy_ts;      /* last copy timestamp (ms), for "Copied!" feedback */
     tf_field editor;       /* the JS REPL input (newlines allowed) */
 };
 
@@ -7061,6 +7066,9 @@ static size_t fbw_console_lines(const fb_buffer *log) {
     return lines;
 }
 
+/* Forward declaration (defined in the clipboard section below). */
+static void freebug_copy_console(browser_window *w);
+
 static void freebug_paint(freebug_window *fb) {
     browser_window *w = fb->owner;
     cairo_t *cr = cairo_create(fb->cairo_surface);
@@ -7075,7 +7083,41 @@ static void freebug_paint(freebug_window *fb) {
     cairo_fill(cr);
     cairo_set_source_rgb(cr, 0.80, 0.82, 0.86);
     cairo_move_to(cr, FBW_PAD, FBW_HEADER - 8.0);
-    cairo_show_text(cr, "Freebug  -  F12 close  -  Ctrl+Enter run  -  Ctrl+L clear");
+    cairo_show_text(cr, "Freebug  -  F12 close  -  Ctrl+Enter run  - Ctrl+L clear  - Ctrl+C copy");
+
+    /* copy button (right side of header) */
+    double cbx = fb->width - FBW_PAD - FBW_COPY_BTN_W;
+    double cby = (FBW_HEADER - FBW_COPY_BTN_H) / 2.0;
+    uint64_t now = now_ms();
+    int copied = (fb->copy_ts > 0 && now - fb->copy_ts < 2000);
+    if (copied) {
+        if (fb->copy_status == 1)
+            cairo_set_source_rgb(cr, 0.50, 0.15, 0.15); /* red: no clipboard */
+        else
+            cairo_set_source_rgb(cr, 0.20, 0.50, 0.25); /* green: success */
+    } else if (fb->hover_copy) {
+        cairo_set_source_rgb(cr, 0.30, 0.45, 0.65);
+    } else {
+        cairo_set_source_rgb(cr, 0.25, 0.27, 0.30);
+    }
+    cairo_rectangle(cr, cbx, cby, FBW_COPY_BTN_W, FBW_COPY_BTN_H);
+    cairo_fill(cr);
+    cairo_set_source_rgb(cr, 0.75, 0.78, 0.82);
+    cairo_set_font_size(cr, 10.0);
+    cairo_move_to(cr, cbx + 4.0, cby + 12.0);
+    cairo_show_text(cr, copied ? "OK" : "[C]");
+    /* clipboard icon: a small rectangle with a handle on top */
+    double icx = cbx + FBW_COPY_BTN_W - 18.0;
+    double icy = cby + 2.0;
+    cairo_set_line_width(cr, 1.2);
+    cairo_rectangle(cr, icx, icy + 4.0, 10.0, 11.0);
+    cairo_stroke(cr);
+    cairo_move_to(cr, icx + 2.0, icy + 4.0);
+    cairo_line_to(cr, icx + 2.0, icy + 1.0);
+    cairo_line_to(cr, icx + 8.0, icy + 1.0);
+    cairo_line_to(cr, icx + 8.0, icy + 4.0);
+    cairo_stroke(cr);
+    cairo_set_font_size(cr, 13.0);
 
     double split_y = fbw_split_y(fb);
     double logh = split_y - FBW_HEADER;
@@ -7141,6 +7183,12 @@ static void freebug_paint(freebug_window *fb) {
             rem -= (linelen + 1);
             p = nl + 1;
         }
+    }
+    if (w->console.overflow) {
+        static const char notice[] = "[console output was truncated]";
+        cairo_set_source_rgb(cr, 0.55, 0.58, 0.64);
+        cairo_move_to(cr, FBW_PAD, y);
+        cairo_show_text(cr, notice);
     }
     cairo_restore(cr);
 
@@ -7379,7 +7427,8 @@ static void freebug_eval(browser_window *w) {
         } else {
             for (size_t i = 0; i < fb_buffer_count(&r.console); ++i) {
                 const fb_entry *e = fb_buffer_at(&r.console, i);
-                fb_buffer_push(&w->console, e->level, e->text, e->len);
+                fb_buffer_push_loc(&w->console, e->level, e->text, e->len,
+                                   e->file, e->line, e->col);
             }
             char out[1100];
             int m = snprintf(out, sizeof out, "%s %.1000s",
@@ -7401,6 +7450,9 @@ static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
     (void)shift;
     if (sym == XKB_KEY_F12 || sym == XKB_KEY_Escape) { freebug_hide(w); redraw(w); return; }
     if (ctrl && (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter)) { freebug_eval(w); return; }
+    if (ctrl && (sym == XKB_KEY_c || sym == XKB_KEY_C)) {
+        freebug_copy_console(w); freebug_redraw_fb(fb); return;
+    }
     if (ctrl && (sym == XKB_KEY_l || sym == XKB_KEY_L)) {
         tf_clear(&fb->editor); freebug_redraw_fb(fb); return;
     }
@@ -7427,19 +7479,37 @@ static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
 }
 
 static void freebug_pointer_button(browser_window *w, uint32_t serial,
-                                   uint32_t button, uint32_t state) {
-    (void)serial;
+                                    uint32_t button, uint32_t state) {
     freebug_window *fb = w->freebug;
     if (fb == NULL) return;
     if (button != UI_BTN_LEFT) return;
     if (state == WL_POINTER_BUTTON_STATE_RELEASED) { fb->dragging_split = 0; return; }
+    w->last_serial = serial;
     double sy = fbw_split_y(fb);
-    if (w->ptr_y >= sy - 4.0 && w->ptr_y <= sy + 7.0) fb->dragging_split = 1; /* grab the divider */
+    if (w->ptr_y >= sy - 4.0 && w->ptr_y <= sy + 7.0) { fb->dragging_split = 1; return; }
+    /* copy button hit-test */
+    double cbx = fb->width - FBW_PAD - FBW_COPY_BTN_W;
+    double cby = (FBW_HEADER - FBW_COPY_BTN_H) / 2.0;
+    if (w->ptr_x >= cbx && w->ptr_x < cbx + FBW_COPY_BTN_W &&
+        w->ptr_y >= cby && w->ptr_y < cby + FBW_COPY_BTN_H) {
+        freebug_copy_console(w);
+        return;
+    }
 }
 
 static void freebug_pointer_motion(browser_window *w) {
     freebug_window *fb = w->freebug;
-    if (fb == NULL || !fb->dragging_split) return;
+    if (fb == NULL) return;
+    /* Track hover over the copy button for the visual highlight. */
+    double cbx = fb->width - FBW_PAD - FBW_COPY_BTN_W;
+    double cby = (FBW_HEADER - FBW_COPY_BTN_H) / 2.0;
+    int over = (w->ptr_x >= cbx && w->ptr_x < cbx + FBW_COPY_BTN_W &&
+                w->ptr_y >= cby && w->ptr_y < cby + FBW_COPY_BTN_H);
+    if (over != fb->hover_copy) {
+        fb->hover_copy = over;
+        freebug_redraw_fb(fb);
+    }
+    if (!fb->dragging_split) return;
     double body = (double)fb->height - FBW_HEADER;
     if (body < 1.0) body = 1.0;
     double s = (w->ptr_y - FBW_HEADER) / body;
@@ -7876,6 +7946,63 @@ static const struct wl_data_source_listener data_source_listener = {
     .send = data_source_send,
     .cancelled = data_source_cancelled,
 };
+
+/* Formats the entire Freebug console buffer and places it on the Wayland clipboard,
+ * so the user can paste the developer console output elsewhere. The format matches
+ * print_console in freedom.c. Called from the Copy button in the Freebug header. */
+static void freebug_copy_console(browser_window *w) {
+    freebug_window *fb = w->freebug;
+    if (fb != NULL) fb->copy_ts = now_ms();
+    if (fb != NULL) fb->copy_status = 0;
+    if (w->data_device == NULL || w->data_device_manager == NULL) {
+        if (fb != NULL) fb->copy_status = 1; /* red: no clipboard */
+        return;
+    }
+    if (fb != NULL) fb->copy_status = 2; /* green: OK */
+    size_t n = fb_buffer_count(&w->console);
+    size_t est = 128;
+    for (size_t i = 0; i < n; ++i) {
+        const fb_entry *e = fb_buffer_at(&w->console, i);
+        est += e->len + 96;
+    }
+    if (est > 4u * 1024u * 1024u) est = 4u * 1024u * 1024u;
+    char *buf = (char *)malloc(est);
+    if (buf == NULL) return;
+    size_t pos = 0;
+    int rem = (int)est;
+    int m = snprintf(buf + pos, (size_t)rem > 0 ? (size_t)rem : 0,
+                     "=== Freebug console (%zu) ===\n", n);
+    if (m > 0 && m < rem) { pos += (size_t)m; rem -= m; }
+    for (size_t i = 0; i < n && rem > 0; ++i) {
+        const fb_entry *e = fb_buffer_at(&w->console, i);
+        if (e->file != NULL && e->file[0] != '\0')
+            m = snprintf(buf + pos, (size_t)rem > 0 ? (size_t)rem : 0,
+                         "[%s] %s:%d:%d  %s\n", fb_level_name(e->level),
+                         e->file, e->line, e->col, e->text);
+        else
+            m = snprintf(buf + pos, (size_t)rem > 0 ? (size_t)rem : 0,
+                         "[%s] %s\n", fb_level_name(e->level), e->text);
+        if (m > 0 && m < rem) { pos += (size_t)m; rem -= m; }
+    }
+    if (w->console.overflow && rem > 0) {
+        m = snprintf(buf + pos, (size_t)rem > 0 ? (size_t)rem : 0,
+                     "[notice] console output was truncated (buffer full)\n");
+        if (m > 0 && m < rem) pos += (size_t)m;
+    }
+    free(w->copy_text);
+    w->copy_text = buf;
+    if (w->copy_source != NULL) wl_data_source_destroy(w->copy_source);
+    w->copy_source = wl_data_device_manager_create_data_source(w->data_device_manager);
+    if (w->copy_source == NULL) return;
+    wl_data_source_add_listener(w->copy_source, &data_source_listener, w);
+    wl_data_source_offer(w->copy_source, "text/plain;charset=utf-8");
+    wl_data_source_offer(w->copy_source, "text/plain");
+    wl_data_device_set_selection(w->data_device, w->copy_source, w->last_serial);
+    /* Roundtrip to ensure the compositor has processed the selection request before
+     * we return to the event loop (without this, the clipboard offer stays queued
+     * and a paste that follows immediately might miss it). */
+    wl_display_roundtrip(w->display);
+}
 
 /* Inserts pasted bytes into whichever text target currently has focus (page input,
  * User-Agent box, or the URL bar). Control bytes -- including embedded CR/LF/TAB that

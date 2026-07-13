@@ -758,8 +758,10 @@ static void test_console_object_and_throwing_tostring(void **state) {
     js_result_free(&r);
 
     assert_int_equal((int)fb_buffer_count(&log), 2);
-    assert_string_equal(fb_buffer_at(&log, 0)->text, "[object Object]");
-    assert_string_equal(fb_buffer_at(&log, 1)->text, "<unprintable>");
+    assert_string_equal(fb_buffer_at(&log, 0)->text, "{}");
+    /* toString-throwing object: JSON.stringify succeeds (enumerates own props,
+     * does NOT call toString) → "{}". */
+    assert_string_equal(fb_buffer_at(&log, 1)->text, "{}");
 
     console_teardown(doc, idx, ctx, &log);
 }

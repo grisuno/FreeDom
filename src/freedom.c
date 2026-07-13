@@ -446,7 +446,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * page that renders via setTimeout/setInterval shows its final state in the
      * export. Each tick advances the worker's virtual clock straight to the next
      * pending timer; the shared per-page JS budget still bounds total work. */
-    enum { HL_TICK_MAX = 8 };
+    enum { HL_TICK_MAX = 240 };
     for (int tick = 0; tick < HL_TICK_MAX && page.next_timer_ms >= 0; ++tick) {
         tab_page ticked;
         if (tab_tick(t, page.next_timer_ms, &ticked) != TAB_OK) break;

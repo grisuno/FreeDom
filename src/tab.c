@@ -861,8 +861,14 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
             int n = snprintf(tick, sizeof tick, "__tickTimers(%d)",
                              (int)(elapsed_ms >= 0 ? elapsed_ms : 0));
             js_result r;
-            if (n > 0 && js_eval(cs->js, tick, (size_t)n, &r) == JS_OK)
+            memset(&r, 0, sizeof r);
+            if (n > 0 && js_eval(cs->js, tick, (size_t)n, &r) == JS_OK) {
+                if (r.is_exception && r.value != NULL)
+                    fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
+                                       r.file, r.line, r.col);
                 js_result_free(&r);
+                (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
+            }
         } else {
             (void)jd_fire_click(cs->js, node_id);
         }
@@ -928,6 +934,10 @@ static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t l
 
     js_result r;
     js_status s = js_eval_named(cs->js, js, len, "<repl>", &r);
+    if (s != JS_OK && r.is_exception && r.value != NULL)
+        fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
+                           r.file, r.line, r.col);
+    (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
     int32_t  ok = 1;
     int32_t  is_exc = (s != JS_OK) ? 1 : 0;
     const char *val = (r.value != NULL) ? r.value : "";
