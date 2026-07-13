@@ -462,6 +462,55 @@ void js_result_free(js_result *res) {
     res->status = JS_OK;
 }
 
+void js_set_current_script(js_context *ctx, const char *src, const char *type) {
+    if (ctx == NULL) return;
+    JSContext *jc = ctx->ctx;
+    JSValue global = JS_GetGlobalObject(jc);
+    if (JS_IsException(global)) return;
+    JSValue doc = JS_GetPropertyStr(jc, global, "document");
+    if (JS_IsException(doc)) { JS_FreeValue(jc, global); return; }
+    if (src == NULL) {
+        JS_SetPropertyStr(jc, doc, "currentScript", JS_NULL);
+    } else {
+        char escaped_src[4096], escaped_type[64];
+        size_t sl = strlen(src);
+        int si = 0, di = 0;
+        for (; si < (int)sl && di < (int)sizeof escaped_src - 6; ++si) {
+            if (src[si] == '\\' || src[si] == '"' || src[si] == '\'')
+                escaped_src[di++] = '\\';
+            escaped_src[di++] = src[si];
+        }
+        escaped_src[di] = '\0';
+        const char *ts = (type != NULL && type[0] != '\0') ? type : "";
+        sl = strlen(ts); di = 0;
+        for (si = 0; si < (int)sl && di < (int)sizeof escaped_type - 6; ++si) {
+            if (ts[si] == '\\' || ts[si] == '"' || ts[si] == '\'')
+                escaped_type[di++] = '\\';
+            escaped_type[di++] = ts[si];
+        }
+        escaped_type[di] = '\0';
+
+        char setup[4608];
+        int n = snprintf(setup, sizeof setup,
+            "(function(){"
+            "var e={src:'%s',type:'%s'};"
+            "e.getAttribute=function(n){"
+            "  var v=e[n];"
+            "  return v!==undefined?String(v):null;"
+            "};"
+            "document.currentScript=e;"
+            "})();",
+            escaped_src, escaped_type);
+        if (n > 0 && (size_t)n < sizeof setup) {
+            JSValue r = JS_Eval(jc, setup, (size_t)n, "<set-currentScript>",
+                                JS_EVAL_TYPE_GLOBAL);
+            JS_FreeValue(jc, r);
+        }
+    }
+    JS_FreeValue(jc, doc);
+    JS_FreeValue(jc, global);
+}
+
 void *js_context_raw(js_context *ctx) {
     return (ctx != NULL) ? (void *)ctx->ctx : NULL;
 }

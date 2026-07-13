@@ -149,22 +149,30 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
         size_t slen = 0;
         int cls = script_classify(n, &sattr, &slen);
         if (cls == SCRIPT_SKIP) continue;
-        char  *text = NULL, *src = NULL;
+        char  *text = NULL, *src = NULL, *type = NULL;
         size_t tl = 0;
+        {
+            size_t tlen = 0;
+            const lxb_char_t *tval =
+                lxb_dom_element_get_attribute(
+                    lxb_dom_interface_element((lxb_dom_node_t *)n),
+                    (const lxb_char_t *)"type", 4, &tlen);
+            if (tval != NULL) type = dup_bytes(tval, tlen);
+        }
         if (cls == SCRIPT_INLINE) {
             const lxb_char_t *t = lxb_dom_node_text_content(n, &tl);
-            if (t == NULL || tl == 0) continue;
+            if (t == NULL || tl == 0) { free(type); continue; }
             text = dup_bytes(t, tl);
-            if (text == NULL) { hp_free_scripts(list, count); return NULL; }
+            if (text == NULL) { free(type); hp_free_scripts(list, count); return NULL; }
         } else {
             src = dup_bytes(sattr, slen);
-            if (src == NULL) { hp_free_scripts(list, count); return NULL; }
+            if (src == NULL) { free(type); hp_free_scripts(list, count); return NULL; }
         }
         if (count == cap) {
             size_t ncap = cap ? cap * 2 : 8;
             hp_script *grown = (hp_script *)realloc(list, ncap * sizeof *grown);
             if (grown == NULL) {
-                free(text); free(src);
+                free(text); free(src); free(type);
                 hp_free_scripts(list, count);
                 return NULL;
             }
@@ -173,6 +181,7 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
         list[count].text = text;
         list[count].len  = tl;
         list[count].src  = src;
+        list[count].type = type;
         count++;
     }
     if (count == 0) { free(list); return NULL; }
@@ -185,6 +194,7 @@ void hp_free_scripts(hp_script *scripts, size_t count) {
     for (size_t i = 0; i < count; ++i) {
         free(scripts[i].text);
         free(scripts[i].src);
+        free(scripts[i].type);
     }
     free(scripts);
 }

@@ -5636,6 +5636,49 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     return hit;
 }
 
+/* Returns the video source URL when the point (px, py) falls on an RC_VIDEO row,
+ * or NULL. The caller should call video_play with the returned URL. The returned
+ * string aliases the currently rendered document (w->doc), valid until the doc
+ * is rebuilt or freed. */
+static const char *video_at_point(browser_window *w, double px, double py) {
+    if (w->doc == NULL || w->cairo_surface == NULL) return NULL;
+
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    if (py < content_top || py > content_top + content_h) return NULL;
+
+    const ui_theme *th = &w->theme;
+    double left = content_margin_x(w);
+    double content_w = content_width(w);
+
+    cairo_t *cr = cairo_create(w->cairo_surface);
+    rc_layout L;
+    layout_doc(cr, w, content_w, &L);
+
+    double max_scroll = L.total_h - content_h;
+    if (max_scroll < 0.0) max_scroll = 0.0;
+    double scroll = w->scroll;
+    if (scroll < 0.0) scroll = 0.0;
+    if (scroll > max_scroll) scroll = max_scroll;
+    double origin = content_top + th->content_margin - scroll;
+
+    (void)left;
+    (void)px;
+    (void)content_w;
+    const char *hit = NULL;
+    for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
+        const rc_row *r = &L.rows[i];
+        if (r->kind != RC_VIDEO || r->blk == NULL) continue;
+        double ry = origin + r->top;
+        if (py < ry || py > ry + r->height) continue;
+        hit = r->blk->href;
+    }
+
+    rc_free(&L);
+    cairo_destroy(cr);
+    return hit;
+}
+
 /* First non-unset author `cursor` on block_id's box or an ancestor (nearest wins,
  * like the rest of the box-decoration fields), or CSS_CUR_UNSET if none set the
  * property or block_id < 0. Bounded by the box-def parent chain (RC_BOX_STACK_MAX,
@@ -5809,6 +5852,14 @@ static void apply_click_result(browser_window *w, tab_page *page) {
  * the view; own a copy up front so following the link afterward never reads freed
  * memory (the href pointer, not its contents, was all the old code preserved). */
 static void dispatch_click(browser_window *w, double px, double py) {
+    /* Check video click (play button / placeholder) before dispatching to the
+     * worker, since video blocks have no text fragments for node_at_point. */
+    const char *video_url = video_at_point(w, px, py);
+    if (video_url != NULL) {
+        video_play(w, video_url);
+        return;
+    }
+
     if (w->tab_worker == NULL) return;
     dom_node_id nid = node_at_point(w, px, py);
     if (nid == DOM_NODE_NONE) return;
@@ -8525,6 +8576,13 @@ ui_status ui_run_browser(const char *start_url) {
 
     w.display = wl_display_connect(NULL);
     if (w.display == NULL) { browser_free(&w.bs); xkb_context_unref(w.xkb_ctx); return UI_ERR_DISPLAY; }
+
+    /* Raise the Wayland output buffer from the default (4096 on this version)
+     * so a large page with frequent redraws (spinner, JS ticks, video frames)
+     * never hits "Data too big for buffer". A 4 KiB buffer overflows when
+     * accumulated messages exceed that, since manual flushes don't always drain
+     * before the next redraw queues more. 1 MiB is generous for any page. */
+    wl_display_set_max_buffer_size(w.display, 1024u * 1024u);
 
     w.registry = wl_display_get_registry(w.display);
     wl_registry_add_listener(w.registry, &registry_listener, &w);

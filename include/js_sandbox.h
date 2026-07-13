@@ -138,4 +138,11 @@ int js_pump_jobs(js_context *ctx, int max_jobs);
  * Valid only while ctx is alive. Binding modules are the intended consumers. */
 void *js_context_raw(js_context *ctx);
 
+/* Sets document.currentScript on the global object so external scripts can
+ * read their own src / type / data-* attributes through getAttribute. The
+ * script element is a fabricated plain object with {src, type, getAttribute}
+ * that answers these three keys. Pass src=NULL for an inline script (no src
+ * attribute). Call after the evaluation to restore currentScript to null. */
+void js_set_current_script(js_context *ctx, const char *src, const char *type);
+
 #endif /* FREEDOM_JS_SANDBOX_H */

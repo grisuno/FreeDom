@@ -120,6 +120,8 @@ typedef struct child_state {
     int             last_prefers_dark;
     char           *extern_css;        /* fetched <link rel=stylesheet> bodies (Hito 27); */
     size_t          extern_css_len;    /* kept so click/re-derive restyles without refetch */
+    pv_view        *preserved_view;    /* pre-script DOM snapshot (fallback when jQuery */
+                                        /* corrupts the tree on mutation re-derive) */
 } child_state;
 
 static void child_reset_page(child_state *cs) {
@@ -130,6 +132,8 @@ static void child_reset_page(child_state *cs) {
     free(cs->extern_css);
     cs->extern_css = NULL;
     cs->extern_css_len = 0;
+    pv_free(cs->preserved_view);
+    cs->preserved_view = NULL;
 }
 
 /* jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). An XHR/fetch
@@ -726,6 +730,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             } else {
                 snprintf(sname, sizeof sname, "inline #%zu", i + 1);
             }
+            js_set_current_script(cs->js,
+                scripts[i].src, scripts[i].type);
             js_result r;
             memset(&r, 0, sizeof r);
             js_status es = js_eval_named(cs->js, code, code_len, sname, &r);
@@ -733,6 +739,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                 fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
                                    r.file, r.line, r.col);
             js_result_free(&r);
+            js_set_current_script(cs->js, NULL, NULL);
             free(ext_body);
             /* Drain promise microtasks queued by this script (e.g. fetch().then),
              * so continuations run before the next script / view derivation. */
@@ -777,16 +784,23 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             ok = 0;
             child_reset_page(cs);
         } else {
-            /* Preserve pre-script DOM: fall back to the snapshot when the
-             * post-script view is empty (jQuery corrupts the Lexbor tree). */
-            if (preserve_view != NULL
-                && pv_count(preserve_view) > pv_count(view)) {
-                pv_free(view);
-                view = preserve_view;
+            /* Preserve pre-script DOM: keep the snapshot for the initial load
+             * AND for mutation fallback (jQuery's support tests corrupt the tree).
+             * Ownership goes to cs->preserved_view; the initial write below uses
+             * whichever view is fuller without transferring ownership. */
+            if (preserve_view != NULL) {
+                pv_free(cs->preserved_view);
+                cs->preserved_view = preserve_view;
                 preserve_view = NULL;
             }
         }
-        pv_free(preserve_view);
+    }
+    /* Decide which view to write: use the preserved one when the post-script
+     * view is smaller (corrupted tree). This does NOT take ownership. */
+    pv_view *write_which = view;
+    if (ok && view != NULL && cs->preserved_view != NULL
+        && pv_count(cs->preserved_view) > pv_count(view)) {
+        write_which = cs->preserved_view;
     }
 
     /* Dump the page's cookie jar so the parent can fold JS-set session cookies back
@@ -804,7 +818,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && (tl == 0 || write_full(wfd, title, tl) == 0)
             && write_full(wfd, &xl, sizeof xl) == 0
             && (xl == 0 || write_full(wfd, text, xl) == 0)
-            && write_view(wfd, view) == 0
+            && write_view(wfd, write_which) == 0
             && write_full(wfd, &nlen, sizeof nlen) == 0
             && (nlen == 0 || write_full(wfd, navbuf, nlen) == 0)
             && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
@@ -864,6 +878,14 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
 
     uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
+    /* Mutation may corrupt the DOM (jQuery's support tests break Lexbor siblings).
+     * Fall back to the preserved pre-script view when the rebuilt view is smaller,
+     * without taking ownership of it (it stays in cs for future mutations). */
+    pv_view *write_which = view;
+    if (ok && view != NULL && cs->preserved_view != NULL
+        && pv_count(cs->preserved_view) > pv_count(view)) {
+        write_which = cs->preserved_view;
+    }
     int32_t zero32 = 0;
     size_t zero = 0;
     int32_t next_ms = child_next_timer_ms(cs);
@@ -872,7 +894,7 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
             && (tl == 0 || write_full(wfd, title, tl) == 0)
             && write_full(wfd, &xl, sizeof xl) == 0
             && (xl == 0 || write_full(wfd, text, xl) == 0)
-            && write_view(wfd, view) == 0
+            && write_view(wfd, write_which) == 0
             && write_full(wfd, &zero, sizeof zero) == 0
             && write_full(wfd, &zero32, sizeof zero32) == 0 /* nav_replace = 0 */
             && write_console(wfd, &cs->log) == 0
