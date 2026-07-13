@@ -576,7 +576,11 @@ static const char JD_DOCUMENT_SHIM[] =
     "      webkitMatchesSelector: function(s){ return dom.matches(h, String(s)); },"
     "      closest: function(s){ return wrap(dom.closest(h, String(s))); },"
     "      focus: function(){}, blur: function(){}, click: function(){},"
-    "      scrollIntoView: function(){}, getBoundingClientRect: function(){ return {x:0,y:0,top:0,left:0,right:0,bottom:0,width:0,height:0}; },"
+     "      scrollIntoView: function(){}, getBoundingClientRect: function(){ return {x:0,y:0,top:0,left:0,right:0,bottom:0,width:0,height:0}; },"
+     "      getClientRects: function(){ return [this.getBoundingClientRect()]; },"
+     "      get offsetWidth(){ return 0; }, get offsetHeight(){ return 0; },"
+     "      get offsetLeft(){ return 0; }, get offsetTop(){ return 0; },"
+     "      get offsetParent(){ return null; },"
     /* classList backed by the class attribute (identity-safe: only this element). */
     "      get classList(){"
     "        function toks(){ var c=dom.getAttribute(h,'class'); return c?c.split(/\\s+/).filter(Boolean):[]; }"

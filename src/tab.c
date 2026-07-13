@@ -664,10 +664,14 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
          * read-mostly (safe mutators), so a script cannot corrupt the tree. */
         size_t nscripts = 0;
         hp_script *scripts = hp_extract_script_list(cs->doc, &nscripts);
+        /* Trusted hosts (allow.conf AND js.conf) get a larger JS budget: they
+         * load heavier libraries (jQuery, Bootstrap, etc.) that need more time.
+         * Untrusted hosts get the default budget (1s) to limit abuse. */
+        uint64_t total_budget = net ? 5000 : JS_DEFAULT_TIME_BUDGET;
         struct timespec t0;
         clock_gettime(CLOCK_MONOTONIC, &t0);
         for (size_t i = 0; i < nscripts; i++) {
-            uint64_t rem = budget_remaining_ms(&t0, JS_DEFAULT_TIME_BUDGET);
+            uint64_t rem = budget_remaining_ms(&t0, total_budget);
             if (rem == 0) break; /* page JS budget spent; stop running scripts */
             js_set_time_budget(cs->js, rem);
             const char *code = scripts[i].text;
@@ -728,7 +732,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         /* Fire synthetic DOMContentLoaded/load handlers + flush queued timers once
          * (bounded; not a real event loop), so onload-wrapped code runs -- under the
          * same remaining page budget. */
-        uint64_t rem = budget_remaining_ms(&t0, JS_DEFAULT_TIME_BUDGET);
+        uint64_t rem = budget_remaining_ms(&t0, total_budget);
         if (rem > 0) {
             js_set_time_budget(cs->js, rem);
             static const char fire[] = "if(typeof __fireDeferred==='function')__fireDeferred();";
