@@ -240,6 +240,8 @@ typedef struct tab_ctx {
     int             hover_cursor; /* css_cursor resolved at the pointer, moves with hover_href */
 } tab_ctx;
 
+#include "hls.h"
+
 typedef struct browser_window {
     struct wl_display    *display;
     struct wl_registry   *registry;
@@ -442,6 +444,12 @@ typedef struct browser_window {
     int      video_h;          /* frame height */
     int      video_active;     /* nonzero when video is playing */
     int      video_pending;    /* nonzero when a frame may be on the pipe */
+    /* Async segment feeding: the playlist and cursor are owned by this window;
+     * video_pump() feeds one segment per event-loop tick so the GUI stays alive. */
+    hls_playlist *video_pl;    /* parsed segment list (owned; NULL when idle) */
+    size_t        video_seg_idx; /* index of next segment to fetch+feed */
+    char         *video_base_url; /* m3u8 base URL for segment resolution (owned) */
+    int           video_eof;      /* all segments have been sent to the decoder */
 } browser_window;
 
 /* Freebug second-window forward declarations (defined further down, but referenced
@@ -939,12 +947,12 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "secure_fetch.h"
 #include "tab.h"
 #include "tls_impersonate.h"
-#include "hls.h"
 #include "media_decoder.h"
 
 /* Video playback functions (defined below; forward declarations for render path). */
 static void video_stop(browser_window *w);
 static int  video_play(browser_window *w, const char *m3u8_url);
+static int  video_pump(browser_window *w);
 
 /* An editable control gets a live text field; submit/button/hidden do not.
  * Checkboxes, radios, and selects are interactive (click toggles/opens) but
@@ -1392,6 +1400,7 @@ typedef struct fetch_job {
     int           allow_overlay_http;
     sf_policy     policy;
     int           allowlisted;
+    int           impersonate;   /* TLS-ClientHello blend for triple-opt-in hosts */
     char         *username;      /* HTTP Basic Auth username (may be NULL) */
     char         *password;      /* HTTP Basic Auth password (may be NULL) */
     void         *body;          /* POST body (owned), or NULL */
@@ -1463,6 +1472,7 @@ static void *fetch_thread(void *arg) {
     cfg.proxy_address = j->proxy_address;
     cfg.allow_overlay_http = j->allow_overlay_http;
     cfg.policy = j->policy;
+    cfg.impersonate = j->impersonate;
     cfg.username = j->username;
     cfg.password = j->password;
     /* Enable streaming progress so the page renders before the full download
@@ -1518,6 +1528,7 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
     j->allow_overlay_http = cfg->allow_overlay_http;
     j->policy = cfg->policy;
     j->allowlisted = allowlisted;
+    j->impersonate = cfg->impersonate;
     j->url = strdup(url);
     j->user_agent = (cfg->user_agent != NULL) ? strdup(cfg->user_agent) : NULL;
     j->proxy_address = (cfg->proxy_address != NULL) ? strdup(cfg->proxy_address) : NULL;
@@ -4373,6 +4384,8 @@ static void video_stop(browser_window *w) {
         close(w->decoder_out_fd);
     }
     free(w->video_frame);
+    hls_playlist_free(w->video_pl);
+    free(w->video_base_url);
     w->decoder_pid = 0;
     w->decoder_cmd_fd = -1;
     w->decoder_out_fd = -1;
@@ -4381,6 +4394,10 @@ static void video_stop(browser_window *w) {
     w->video_h = 0;
     w->video_active = 0;
     w->video_pending = 0;
+    w->video_pl = NULL;
+    w->video_seg_idx = 0;
+    w->video_base_url = NULL;
+    w->video_eof = 0;
 }
 
 /* Reads one decoded ARGB frame from the decoder process pipe and caches
@@ -4469,38 +4486,111 @@ static int video_read_frame(browser_window *w) {
     return 0;
 }
 
+/* Builds a properly-gated sf_config for a video-related fetch (m3u8 playlist or TS
+ * segment). Applies the SAME gates as gui_subresource_fetch: host-based impersonation,
+ * realm routing (fail-closed), auth scoped to origin, and the allowlist override for
+ * navigability fallbacks. The hostblock tracker filter is NOT applied (the user opted
+ * in by clicking the placeholder). Returns 1 on success, 0 on realm route blocked. */
+static int video_build_fetch_config(browser_window *w, const char *url, sf_config *cfg,
+                                     int *allowlisted) {
+    *cfg = sf_config_default();
+    *allowlisted = 0;
+    if (w == NULL || url == NULL) return 1;
+
+    char host[256];
+    int have_host = (rp_host_of(url, host, sizeof host) == 0);
+
+    *allowlisted = have_host && hb_is_allowlisted(w->hosts, host);
+    apply_auth(w, url, cfg);
+    if (apply_route(w, url, cfg) == NR_ROUTE_BLOCKED) return 0;
+
+    cfg->impersonate = ti_should_impersonate(*allowlisted,
+        have_host && hb_is_allowlisted(w->js_hosts, host),
+        have_host && hb_is_allowlisted(w->impersonate_hosts, host));
+    return 1;
+}
+
+/* Fetches a single resource (m3u8 or TS segment) under the full policy gates:
+ * impersonation, routing, auth, navigability fallbacks. Returns 0 on success;
+ * *resp is populated and must be freed with sf_response_free. */
+static sf_status video_fetch(const char *url, browser_window *w,
+                              sf_response *resp) {
+    memset(resp, 0, sizeof *resp);
+    sf_config cfg;
+    int allowlisted = 0;
+    if (!video_build_fetch_config(w, url, &cfg, &allowlisted))
+        return SF_ERR_NETWORK;
+    int dg = 0;
+    return fetch_follow_navigable(url, &cfg, resp, &dg, allowlisted);
+}
+
 /* Starts video playback from an m3u8 playlist URL. Fetches the playlist,
- * parses segments, spawns the decoder, and begins feeding segments.
- * Returns 0 on success, -1 on failure. */
+ * parses it, handles multi-variant master playlists, and spawns the decoder
+ * process. DOES NOT feed segments here (that would block the GUI for the full
+ * video duration). Returns 0 on success, -1 on failure.
+ *
+ * After this returns 0, the event loop calls video_pump() each iteration to
+ * feed one segment per tick, keeping the GUI responsive. */
 static int video_play(browser_window *w, const char *m3u8_url) {
     if (w == NULL || m3u8_url == NULL) return -1;
     video_stop(w);
 
-    /* Fetch the m3u8 playlist. */
-    sf_config cfg = sf_config_default();
+    /* Fetch the m3u8 playlist under full policy gates. */
     sf_response resp;
-    memset(&resp, 0, sizeof resp);
-    if (sf_get(m3u8_url, &cfg, &resp) != SF_OK
+    if (video_fetch(m3u8_url, w, &resp) != SF_OK
         || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
         sf_response_free(&resp);
         return -1;
     }
 
-    /* Parse the playlist. */
     hls_playlist *pl = NULL;
-    if (hls_parse((const char *)resp.body, resp.body_len, &pl) != HLS_OK
-        || pl->count == 0 || pl->is_variant) {
+    if (hls_parse((const char *)resp.body, resp.body_len, &pl) != HLS_OK) {
         sf_response_free(&resp);
         hls_playlist_free(pl);
         return -1;
     }
     sf_response_free(&resp);
 
+    /* Multi-variant (master) playlist: select the best variant and re-fetch. */
+    if (pl->is_variant && pl->nvariants > 0) {
+        size_t vi = hls_select_variant(pl, 1920, 1080);
+        if (vi == (size_t)-1) { hls_playlist_free(pl); return -1; }
+        char var_url[4096];
+        size_t vn = hls_resolve_url(m3u8_url, pl->variants[vi].url,
+                                     var_url, sizeof var_url);
+        hls_playlist_free(pl);
+        pl = NULL;
+        if (vn == 0) return -1;
+        if (video_fetch(var_url, w, &resp) != SF_OK
+            || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
+            sf_response_free(&resp);
+            return -1;
+        }
+        if (hls_parse((const char *)resp.body, resp.body_len, &pl) != HLS_OK) {
+            sf_response_free(&resp);
+            hls_playlist_free(pl);
+            return -1;
+        }
+        sf_response_free(&resp);
+        w->video_base_url = strdup(var_url);
+    } else {
+        w->video_base_url = strdup(m3u8_url);
+    }
+
+    if (pl == NULL || pl->count == 0) {
+        hls_playlist_free(pl);
+        free(w->video_base_url);
+        w->video_base_url = NULL;
+        return -1;
+    }
+
     /* Spawn the decoder process. */
     int out_fd = -1, cmd_fd = -1;
     pid_t pid = 0;
     if (media_decoder_spawn(&pid, &out_fd, &cmd_fd) != 0) {
         hls_playlist_free(pl);
+        free(w->video_base_url);
+        w->video_base_url = NULL;
         return -1;
     }
     w->decoder_pid = pid;
@@ -4508,51 +4598,63 @@ static int video_play(browser_window *w, const char *m3u8_url) {
     w->decoder_cmd_fd = cmd_fd;
     w->video_active = 1;
     w->video_pending = 1;
+    w->video_pl = pl;
+    w->video_seg_idx = 0;
+    w->video_eof = 0;
 
-    /* Make the decoder output fd non-blocking for the event loop. */
     int flags = fcntl(out_fd, F_GETFD, 0);
     if (flags >= 0) fcntl(out_fd, F_SETFL, flags | O_NONBLOCK);
+    return 0;
+}
 
-    /* Send segments to the decoder (in a background thread would be ideal;
-     * for now, synchronous — the page load is already async from the user's
-     * perspective). Each segment is a separate MD_DECODE command. */
-    for (size_t i = 0; i < pl->count; ++i) {
-        if (!w->video_active) break; /* stop requested */
+/* Feeds at most one TS segment to the decoder process. Called from the event
+ * loop each iteration while video_active is set, so the GUI dispatches events
+ * between segment downloads instead of freezing for the entire playlist.
+ * Returns 1 if there is more work to do, 0 when all segments have been sent
+ * (including the final MD_FLUSH). */
+static int video_pump(browser_window *w) {
+    if (w == NULL || !w->video_active || w->video_pl == NULL) return 0;
+    if (w->decoder_cmd_fd < 0) return 0;
 
+    /* Drain any pending frames from the decoder so the screen updates. */
+    while (video_read_frame(w) > 0) {}
+
+    /* All segments sent: we are waiting for the decoder to finish frames. The
+     * event loop's POLLIN on decoder_out_fd handles frame arrival + redraw. */
+    if (w->video_eof) return 0;
+
+    /* Feed the next segment. */
+    if (w->video_seg_idx < w->video_pl->count) {
         char abs_url[4096];
-        size_t n = hls_resolve_url(m3u8_url, pl->segments[i].url,
+        size_t n = hls_resolve_url(w->video_base_url,
+                                    w->video_pl->segments[w->video_seg_idx].url,
                                     abs_url, sizeof abs_url);
-        if (n == 0) continue;
+        w->video_seg_idx++;
+        if (n == 0) return 1; /* skip unresolvable segment, try next */
 
-        /* Fetch this segment. */
-        memset(&resp, 0, sizeof resp);
-        if (sf_get(abs_url, &cfg, &resp) != SF_OK
+        sf_response resp;
+        if (video_fetch(abs_url, w, &resp) != SF_OK
             || resp.body == NULL || resp.body_len == 0) {
             sf_response_free(&resp);
-            continue;
+            return 1; /* skip failed segment, try next */
         }
 
-        /* Send to decoder. */
         uint8_t cmd = MD_DECODE;
         size_t slen = resp.body_len;
-        v_write(cmd_fd, &cmd, 1);
-        v_write(cmd_fd, &slen, sizeof slen);
-        v_write(cmd_fd, resp.body, resp.body_len);
+        v_write(w->decoder_cmd_fd, &cmd, 1);
+        v_write(w->decoder_cmd_fd, &slen, sizeof slen);
+        v_write(w->decoder_cmd_fd, resp.body, resp.body_len);
         sf_response_free(&resp);
 
-        /* Read any pending frames the decoder produced. This is synchronous
-         * for each segment; future versions can thread this. */
-        while (1) {
-            int fr = video_read_frame(w);
-            if (fr <= 0) break;
-        }
+        /* Drain any frames this segment already produced. */
+        while (video_read_frame(w) > 0) {}
+        return 1;
     }
 
-    /* Flush: signal end of stream. */
+    /* Last segment sent: flush and enter drain-only mode. */
     uint8_t f = MD_FLUSH;
-    v_write(cmd_fd, &f, 1);
-
-    hls_playlist_free(pl);
+    v_write(w->decoder_cmd_fd, &f, 1);
+    w->video_eof = 1;
     return 0;
 }
 
@@ -8920,12 +9022,16 @@ ui_status ui_run_browser(const char *start_url) {
         }
 
         /* A decoded video frame arrived from the media decoder process. Read
-         * it and trigger a repaint so the video element updates on screen. */
+         * it and trigger a repaint so the video element updates on screen.
+         * Then feed the next TS segment (one per event-loop tick) so the GUI
+         * stays responsive instead of freezing for the entire playlist. */
         if (pr > 0 && video_idx >= 0 && (pfds[video_idx].revents & POLLIN)) {
-            while (video_read_frame(&w) > 0) { /* drain pending frames */ }
+            while (video_read_frame(&w) > 0) {}
             if (w.video_frame != NULL)
                 redraw(&w);
         }
+        if (w.video_active && w.video_pl != NULL && !w.video_eof)
+            video_pump(&w);
     }
 
     video_stop(&w);    /* stop the video decoder if running */
