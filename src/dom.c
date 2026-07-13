@@ -565,13 +565,22 @@ const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                               const char *name, size_t *len) {
     if (len != NULL) *len = 0;
     if (!valid(idx, node) || name == NULL) return NULL;
+    lxb_dom_element_t *el = lxb_dom_interface_element(idx->nodes[node]);
     size_t vlen = 0;
-    const lxb_char_t *val =
-        lxb_dom_element_get_attribute(lxb_dom_interface_element(idx->nodes[node]),
-                                      (const lxb_char_t *)name, strlen(name), &vlen);
-    if (val == NULL) return NULL;
-    if (len != NULL) *len = vlen;
-    return (const char *)val;
+    const lxb_char_t *val = lxb_dom_element_get_attribute(el,
+        (const lxb_char_t *)name, strlen(name), &vlen);
+    if (val != NULL) {
+        if (len != NULL) *len = vlen;
+        return (const char *)val;
+    }
+    /* Boolean HTML attributes (checked, disabled, selected, readonly, etc.) are
+     * stored by Lexbor with a NULL value pointer (valueless). Check existence via
+     * has_attribute and return "" so the caller sees the attribute IS present. */
+    if (lxb_dom_element_has_attribute(el, (const lxb_char_t *)name, strlen(name))) {
+        if (len != NULL) *len = 0;
+        return "";
+    }
+    return NULL;
 }
 
 size_t dom_attribute_names(const dom_index *idx, dom_node_id node,

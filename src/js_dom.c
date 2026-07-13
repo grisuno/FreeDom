@@ -460,6 +460,9 @@ static const char JD_DOCUMENT_SHIM[] =
     "    if (h in __wc) return __wc[h];"
     "    var el={_h:h, nodeType:1, ELEMENT_NODE:1, nodeName:'',"
     "      get textContent(){ return dom.textContent(h); },"
+    /* ownerDocument: needed by jQuery's buildFragment to access document methods
+     * from any element's context (elem.ownerDocument.createDocumentFragment()). */
+    "      get ownerDocument(){ return document; },"
     "      set textContent(v){ dom.setText(h, String(v)); },"
     "      getAttribute: function(n){ return dom.getAttribute(h, String(n)); },"
     "      setAttribute: function(n,v){ dom.setAttribute(h, String(n), String(v)); },"
@@ -499,20 +502,37 @@ static const char JD_DOCUMENT_SHIM[] =
     "        set:function(t,p,v){ if(typeof p==='string'){"
     "          var k='data-'+p.replace(/[A-Z]/g,function(m){return '-'+m.toLowerCase();});"
     "          dom.setAttribute(h,k,String(v)); } return true; } }); },"
-    /* src/href reflect the attribute as a string ('' when absent) so common idioms
-     * (img.src.substring(...), a.href) never read a property of undefined. The raw
-     * attribute is returned (not a resolved absolute URL): no base-URL leak into JS. */
-    "      get src(){ var v=dom.getAttribute(h,'src'); return v===null?'':v; },"
-    "      set src(v){ dom.setAttribute(h,'src',String(v)); },"
-    "      get href(){ var v=dom.getAttribute(h,'href'); return v===null?'':v; },"
-    "      set href(v){ dom.setAttribute(h,'href',String(v)); },"
-    "      get tagName(){ var t=dom.tagName(h); return t===null?null:String(t).toUpperCase(); },"
+     /* src/href reflect the attribute as a string ('' when absent) so common idioms
+      * (img.src.substring(...), a.href) never read a property of undefined. The raw
+      * attribute is returned (not a resolved absolute URL): no base-URL leak into JS. */
+     "      get src(){ var v=dom.getAttribute(h,'src'); return v===null?'':v; },"
+     "      set src(v){ dom.setAttribute(h,'src',String(v)); },"
+     "      get href(){ var v=dom.getAttribute(h,'href'); return v===null?'':v; },"
+     "      set href(v){ dom.setAttribute(h,'href',String(v)); },"
+     /* Form element properties (jQuery/Bootstrap feature detection needs these).
+      * checked/value/type/disabled map to their attributes; defaultChecked/selected
+      * fall back to the attribute when the property itself is unset. These are
+      * identity-safe: they expose ONLY this element's own attributes, never anything
+      * else, and the attribute values come from the document data with provenance. */
+     "      get checked(){ var v=dom.getAttribute(h,'checked'); return v!==null; },"
+     "      set checked(v){ if(v) dom.setAttribute(h,'checked','checked'); else dom.removeAttribute(h,'checked'); },"
+     "      get value(){ var v=dom.getAttribute(h,'value'); return v===null?'':v; },"
+     "      set value(v){ dom.setAttribute(h,'value',String(v)); },"
+     "      get type(){ var v=dom.getAttribute(h,'type'); return v===null?'text':v; },"
+     "      set type(v){ dom.setAttribute(h,'type',String(v)); },"
+     "      get disabled(){ var v=dom.getAttribute(h,'disabled'); return v!==null; },"
+     "      set disabled(v){ if(v) dom.setAttribute(h,'disabled','disabled'); else dom.removeAttribute(h,'disabled'); },"
+     "      get selected(){ var v=dom.getAttribute(h,'selected'); return v!==null; },"
+     "      set selected(v){ if(v) dom.setAttribute(h,'selected','selected'); else dom.removeAttribute(h,'selected'); },"
+     "      get tagName(){ var t=dom.tagName(h); return t===null?null:String(t).toUpperCase(); },"
     "      get id(){ var v=dom.getAttribute(h,'id'); return v===null?'':v; },"
     "      set id(v){ dom.setAttribute(h,'id',String(v)); },"
     "      get className(){ var v=dom.getAttribute(h,'class'); return v===null?'':v; },"
     "      set className(v){ dom.setAttribute(h,'class',String(v)); },"
-    "      set innerHTML(v){ dom.setInnerHtml(h, String(v)); },"
-    "      get innerHTML(){ return dom.getInnerHtml(h); },"
+     "      set innerHTML(v){ dom.setInnerHtml(h, String(v)); },"
+     "      get innerHTML(){ return dom.getInnerHtml(h); },"
+     "      get innerText(){ return dom.textContent(h); },"
+     "      set innerText(v){ dom.setText(h, String(v)); },"
     /* A DocumentFragment carries its collected children in __frag; appending the
      * fragment re-parents each child (its contents), never the fragment node. */
     "      appendChild: function(c){ if(c&&c.__frag){ for(var i=0;i<c.__frag.length;i++) dom.appendChild(h,c.__frag[i]._h); c.__frag.length=0; return c; } if(c&&c._h!==undefined) dom.appendChild(h,c._h); return c; },"
@@ -522,7 +542,16 @@ static const char JD_DOCUMENT_SHIM[] =
     "      append: function(){ for(var i=0;i<arguments.length;i++){ var a=arguments[i]; if(a&&a.__frag){ for(var j=0;j<a.__frag.length;j++) dom.appendChild(h,a.__frag[j]._h); a.__frag.length=0; } else if(a&&a._h!==undefined) dom.appendChild(h,a._h); } },"
     "      prepend: function(){ for(var i=0;i<arguments.length;i++){ var a=arguments[i]; if(a&&a._h!==undefined) dom.appendChild(h,a._h); } },"
     "      remove: function(){ var p=dom.parent(h); if(p!==null) dom.removeChild(p,h); },"
-    "      cloneNode: function(){ var t=dom.tagName(h); if(t===null) return null; return wrap(dom.createElement(String(t))); },"
+     "      cloneNode: function(deep){ var t=dom.tagName(h); if(t===null) return null;"
+     "        function deepClone(src){"
+     "          var tag=dom.tagName(src); if(!tag) return null;"
+     "          var c=wrap(dom.createElement(String(tag)));"
+     "          var ns=dom.attrNames(src); for(var i=0;i<ns.length;i++){"
+     "            var v=dom.getAttribute(src,ns[i]); if(v!==null) dom.setAttribute(c._h,ns[i],v); }"
+     "          var ch=dom.firstChild(src);"
+     "          while(ch!==null){ var cc=deepClone(ch); if(cc) dom.appendChild(c._h,cc._h); ch=dom.nextSibling(ch); }"
+     "          return c; }"
+     "        return deep ? deepClone(h) : wrap(dom.createElement(String(t))); },"
     "      insertAdjacentHTML: function(){}, insertAdjacentElement: function(){}, insertAdjacentText: function(){},"
     "      get parentNode(){ var p=dom.parent(h); return p===null?null:wrap(p); },"
     "      get parentElement(){ var p=dom.parent(h); return p===null?null:wrap(p); },"
@@ -537,8 +566,8 @@ static const char JD_DOCUMENT_SHIM[] =
     "      get childElementCount(){ var n=0; var c=dom.firstChild(h); while(c!==null){ n++; c=dom.nextSibling(c); } return n; },"
     "      hasChildNodes: function(){ return dom.firstChild(h)!==null; },"
     "      contains: function(o){ if(!o||o._h===undefined) return false; for(var p=o._h;p!==null&&p!==undefined;){ if(p===h) return true; p=dom.parent(p); } return false; },"
-    "      getElementsByTagName: function(t){ return wrapList(dom.querySelectorAll(h, String(t))); },"
-    "      getElementsByClassName: function(c){ return wrapList(dom.querySelectorAll(h, '.'+String(c))); },"
+     "      getElementsByTagName: function(t){ return wrapList(dom.querySelectorAll(h, String(t))); },"
+     "      getElementsByClassName: function(c){ return wrapList(dom.querySelectorAll(h, '.'+String(c))); },"
     "      addEventListener: function(t,fn){ if(t==='click'&&typeof fn==='function') dom.registerClick(h, fn); },"
     "      removeEventListener: function(){}, dispatchEvent: function(){ return true; },"
     "      querySelector: function(s){ return wrap(dom.querySelector(h, String(s))); },"
@@ -587,7 +616,18 @@ static const char JD_DOCUMENT_SHIM[] =
      * doc.createElement() throws "cannot read property createElement of undefined",
      * aborting the whole library bundle. defaultView is the window it lives in. */
     "    removeEventListener: function(){}, readyState:'loading',"
-    "    nodeType:9, DOCUMENT_NODE:9, nodeName:'#document', ownerDocument:null"
+    "    nodeType:9, DOCUMENT_NODE:9, nodeName:'#document', ownerDocument:null,"
+    /* createDocumentFragment: jQuery's buildFragment uses this during DOM manipulation.
+     * Returns a fragment object (__frag[] accumulates appended children; when the
+     * fragment is appended to a real node its children are moved, not the fragment). */
+    "    createDocumentFragment: function(){ return {__frag:[], nodeType:11,"
+    "      appendChild:function(c){ if(c&&c._h!==undefined) this.__frag.push(c); return c; },"
+    "      firstChild:null, lastChild:null, childNodes:[], textContent:'',"
+    "      querySelector:function(){return null;}, querySelectorAll:function(){return [];},"
+    "      getElementById:function(){return null;}, getElementsByTagName:function(){return [];},"
+    "      cloneNode:function(){return {__frag:[],nodeType:11,appendChild:function(c){if(c&&c._h!==undefined)this.__frag.push(c);return c;}};},"
+    "      removeChild:function(c){return c;}, replaceChild:function(n,o){return o;},"
+    "      insertBefore:function(n,ref){return n;}, hasChildNodes:function(){return false;} } },"
     "  };"
     "  Object.defineProperty(d,'defaultView',{get:function(){return globalThis;},enumerable:true});"
     "  Object.defineProperty(d,'title',{get:function(){return dom.getTitle();},"
