@@ -32,6 +32,21 @@ This project and everyone participating in it is governed by the
 By participating, you are expected to uphold this code. Please report unacceptable behavior
 to <>.
 
+### Areas Especially Welcome
+- Memory safety improvements
+- Browser engine / rendering fixes
+- Security hardening
+- Documentation and examples
+
+### Special Thanks
+Huge thanks to **orbisai0security** for the recent security fixes and pull requests that significantly improved the stability and safety of FreeDom.
+
+## Guidelines
+- Write clean, commented code
+- Test your changes
+- Follow existing code style
+
+We're excited to build this together!
 
 ## I Have a Question
 
