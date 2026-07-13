@@ -702,7 +702,7 @@ static void add_current_host_to_list(browser_window *w, int sel) {
     size_t cur_len = 0;
     uint8_t *cur = read_file_bounded(path, 1u << 20, &cur_len);
     if (cur != NULL) {
-        char *txt = (char *)malloc(cur_len + 1);
+        char *txt = (cur_len <= (1u << 20)) ? (char *)malloc(cur_len + 1) : NULL;
         int dup = 0;
         if (txt != NULL) {
             memcpy(txt, cur, cur_len);
@@ -4810,10 +4810,10 @@ static long write_doc_pdf(browser_window *w, const char *path) {
     double *tops = NULL, *heights = NULL, *yof = NULL;
     int *pageof = NULL;
     if (L.nrow > 0) {
-        tops    = (double *)malloc(L.nrow * sizeof *tops);
-        heights = (double *)malloc(L.nrow * sizeof *heights);
-        yof     = (double *)malloc(L.nrow * sizeof *yof);
-        pageof  = (int *)malloc(L.nrow * sizeof *pageof);
+        tops    = (double *)calloc(L.nrow, sizeof *tops);
+        heights = (double *)calloc(L.nrow, sizeof *heights);
+        yof     = (double *)calloc(L.nrow, sizeof *yof);
+        pageof  = (int *)calloc(L.nrow, sizeof *pageof);
     }
     if (L.nrow > 0 && tops != NULL && heights != NULL && yof != NULL && pageof != NULL) {
         for (size_t i = 0; i < L.nrow; ++i) {
