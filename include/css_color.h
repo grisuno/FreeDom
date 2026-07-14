@@ -15,9 +15,11 @@
  * the rest of the pipeline carries the validated result).
  *
  * Supports #rgb / #rgba / #rrggbb / #rrggbbaa hex (alpha validated then dropped),
- * rgb()/rgba() with integer or percentage components, and the extended set of CSS
- * named colors. Anything else (hsl(), currentColor, var(), unknown names, junk)
- * is CC_ERR_SYNTAX so the caller can fall back to the theme color.
+ * rgb()/rgba() with integer or percentage components, hsl()/hsla() with integer
+ * H and percentage S/L, the extended set of CSS named colors,
+ * transparent (stores as rbga(0,0,0,0)), and currentColor (resolved at render
+ * time to the element's `color` property). Anything else (var(), color-mix(),
+ * unknown names, junk) is CC_ERR_SYNTAX so the caller can fall back to the theme.
  *
  * See spec/css_color.md for the full contract.
  */
@@ -29,13 +31,17 @@ typedef struct cc_rgb {
 typedef enum cc_status {
     CC_OK = 0,
     CC_ERR_NULL_ARG,  /* token or out was NULL */
-    CC_ERR_SYNTAX     /* not a recognised color (fails closed) */
+    CC_ERR_SYNTAX,    /* not a recognised color (fails closed) */
+    CC_CURRENT_COLOR, /* token was "currentColor" */
+    CC_TRANSPARENT    /* token was "transparent" */
 } cc_status;
 
 /* Parses a CSS color token into out (opaque RGB). Case-insensitive; surrounding
  * ASCII whitespace is trimmed. token/out == NULL => CC_ERR_NULL_ARG; an empty,
- * oversized, out-of-range, transparent, or unsupported token => CC_ERR_SYNTAX
- * (out untouched). On CC_OK, *out is set. */
+ * oversized, out-of-range, or unsupported token => CC_ERR_SYNTAX
+ * (out untouched). Returns CC_CURRENT_COLOR for "currentColor" or
+ * CC_TRANSPARENT for "transparent" (out is set to black, the caller
+ * must handle the sentinel via the packed color). */
 cc_status cc_parse(const char *token, cc_rgb *out);
 
 /* Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport
@@ -44,5 +50,13 @@ int cc_pack(cc_rgb c);
 
 /* Inverse of cc_pack; bits above the low 24 are ignored. */
 cc_rgb cc_unpack(int packed);
+
+/* Sentinel values used by the cascade to represent special CSS color keywords.
+ * -1  = unset / not specified (inherits or defaults to theme)
+ * -2  = CC_COLOR_CURRENT   ("currentColor": use the element's `color` value)
+ * -3  = CC_COLOR_TRANSPARENT ("transparent": fully transparent)
+ */
+#define CC_COLOR_CURRENT    (-2)
+#define CC_COLOR_TRANSPARENT (-3)
 
 #endif /* FREEDOM_CSS_COLOR_H */

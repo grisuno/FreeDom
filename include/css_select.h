@@ -43,13 +43,31 @@ enum { ATTR_PRESENT = 0, ATTR_EQ, ATTR_TILDE, ATTR_PIPE, ATTR_CARET, ATTR_DOLLAR
 enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ALWAYS, PSEUDO_ROOT,
        PSEUDO_FIRST_CHILD, PSEUDO_LAST_CHILD, PSEUDO_ONLY_CHILD,
        PSEUDO_NTH_CHILD, PSEUDO_NTH_LAST_CHILD,
-       PSEUDO_CHECKED, PSEUDO_DISABLED, PSEUDO_ENABLED };
+       PSEUDO_CHECKED, PSEUDO_DISABLED, PSEUDO_ENABLED,
+       PSEUDO_NOT, PSEUDO_IS, PSEUDO_WHERE };
+
+/* Sub-selector for :not()/:is()/:where(): a simple compound with only
+ * tag/.class/#id (no combinators, no attributes, no pseudo-classes inside
+ * sub-selectors). Bounded: CSS_MAX_SUB_SELS per selector, one level deep. */
+#define CSS_MAX_SUB_SELS 4
+
+typedef struct css_sub_sel {
+    char tag[CSS_TOK_MAX];
+    int  has_tag;
+    char id[CSS_TOK_MAX];
+    int  has_id;
+    char cls[CSS_TOK_MAX];
+    int  has_cls;
+} css_sub_sel;
 
 /* One pseudo-class inside a compound. a/b are the An+B coefficients of the
- * nth-child family (unused otherwise). */
+ * nth-child family (unused otherwise). sub_first/sub_count index into the
+ * parent css_sel.subs[] for :not/:is/:where, or -1/0 for no sub-selectors. */
 typedef struct css_pseudo_match {
     int kind;  /* PSEUDO_* */
     int a, b;
+    int sub_first; /* first sub-selector in parent sel->subs[], -1 = none */
+    int sub_count; /* number of consecutive sub-selectors */
 } css_pseudo_match;
 
 /* One attribute selector inside a compound: name OP value, with a case flag. */
@@ -77,7 +95,8 @@ typedef struct css_compound {
 
 /* A complex selector: a chain of compounds, parts[nparts-1] being the subject (the
  * element a rule styles). comb[k] (k>=1) is the combinator to the LEFT of parts[k];
- * comb[0] is unused. A single compound is nparts == 1. */
+ * comb[0] is unused. A single compound is nparts == 1. subs[] holds sub-selectors
+ * for :not()/:is()/:where() pseudo-classes, indexed by css_pseudo_match.sub_first. */
 typedef struct css_sel {
     css_compound parts[CSS_MAX_COMPOUNDS];
     int  comb[CSS_MAX_COMPOUNDS];
@@ -85,6 +104,8 @@ typedef struct css_sel {
     int  spec;
     int  order;     /* document order (tie-break) */
     int  rule;      /* index into rules[] */
+    css_sub_sel subs[CSS_MAX_SUB_SELS];
+    int  nsubs;
 } css_sel;
 
 /* Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to

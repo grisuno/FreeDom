@@ -441,7 +441,7 @@ static void test_query_selector_fail_closed(void **state) {
     dom_node_id buf[8];
     /* Unsupported constructs drop the whole selector -> no match (never a throw). */
     assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p::before"), DOM_NODE_NONE);
-    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, ":not(div)"), DOM_NODE_NONE);
+    assert_true(dom_query_selector(idx, DOM_NODE_NONE, ":not(div)") != DOM_NODE_NONE);
     assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, ""), DOM_NODE_NONE);
     assert_int_equal(dom_query_selector_all(idx, DOM_NODE_NONE, "@#$%", buf, 8), 0);
     /* But a valid selector in a list survives an invalid sibling. */

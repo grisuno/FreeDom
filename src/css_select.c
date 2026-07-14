@@ -120,13 +120,17 @@ static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B) {
     return 1;
 }
 
+/* Forward declaration for parse_pseudo sub-selector parsing. */
+static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub);
+
 /* Parses one pseudo-class starting at s[*ip] == ':' (within s[.,b)) into *pm.
  * Advances *ip past it (including a (arg) for the nth-child family). Returns 1
  * if supported, 0 (fail closed) otherwise — unknown names, functional pseudos
  * other than nth-child/nth-last-child, and every pseudo-ELEMENT (`::name` and
  * the legacy single-colon spellings :before/:after/:first-line/:first-letter)
  * drop the whole selector. */
-static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *pm) {
+static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *pm,
+                        css_sel *sel) {
     size_t i = *ip + 1;  /* past ':' */
     memset(pm, 0, sizeof *pm);
     if (i < b && s[i] == ':') return 0;   /* pseudo-element */
@@ -157,14 +161,56 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     else if (csel_ci_eq(name, "checked"))  pm->kind = PSEUDO_CHECKED;
     else if (csel_ci_eq(name, "disabled")) pm->kind = PSEUDO_DISABLED;
     else if (csel_ci_eq(name, "enabled"))  pm->kind = PSEUDO_ENABLED;
+    else if (csel_ci_eq(name, "not"))      { pm->kind = PSEUDO_NOT; wants_arg = 2; }
+    else if (csel_ci_eq(name, "is"))       { pm->kind = PSEUDO_IS; wants_arg = 2; }
+    else if (csel_ci_eq(name, "where"))    { pm->kind = PSEUDO_WHERE; wants_arg = 2; }
     else return 0;   /* unknown pseudo-class: drop the selector */
 
-    if (wants_arg) {
+    if (wants_arg == 1) {
         if (i >= b || s[i] != '(') return 0;
         size_t as = ++i;
         while (i < b && s[i] != ')') ++i;
         if (i >= b) return 0;   /* unterminated */
         if (!parse_nth_arg(s, as, i, &pm->a, &pm->b)) return 0;
+        ++i;   /* past ')' */
+    } else if (wants_arg == 2) {
+        /* Parse comma-separated sub-selectors inside (:not/.is/:where). The content
+         * between ( and ) is split on commas (not inside [] or ()); each segment is
+         * parsed as a simple compound (tag, .class, #id only, no combinators). At
+         * most CSS_MAX_SUB_SELS total per selector, no nesting. */
+        if (i >= b || s[i] != '(') return 0;
+        size_t as = ++i;
+        int depth = 0;
+        size_t seg_start = as;
+        pm->sub_first = sel->nsubs;
+        pm->sub_count = 0;
+        while (i < b) {
+            if (s[i] == ')' && depth == 0) break;
+            if (s[i] == '(') ++depth;
+            else if (s[i] == '[') ++depth;
+            else if (s[i] == ']' || s[i] == ')') { if (depth > 0) --depth; }
+            else if (s[i] == ',' && depth == 0) {
+                if (sel->nsubs < CSS_MAX_SUB_SELS) {
+                    size_t sa = seg_start, sb = i;
+                    while (sa < sb && (s[sa] == ' ' || s[sa] == '\t')) ++sa;
+                    while (sb > sa && (s[sb-1] == ' ' || s[sb-1] == '\t')) --sb;
+                    if (parse_sub_compound(s, sa, sb, &sel->subs[sel->nsubs]))
+                        ++sel->nsubs;
+                }
+                seg_start = i + 1;
+            }
+            ++i;
+        }
+        if (i >= b) return 0;   /* unterminated */
+        /* Parse the last segment (after the last comma, or the only one). */
+        if (sel->nsubs < CSS_MAX_SUB_SELS) {
+            size_t sa = seg_start, sb = i;
+            while (sa < sb && (s[sa] == ' ' || s[sa] == '\t')) ++sa;
+            while (sb > sa && (s[sb-1] == ' ' || s[sb-1] == '\t')) --sb;
+            if (parse_sub_compound(s, sa, sb, &sel->subs[sel->nsubs]))
+                ++sel->nsubs;
+        }
+        pm->sub_count = sel->nsubs - pm->sub_first;
         ++i;   /* past ')' */
     } else if (i < b && s[i] == '(') {
         return 0;   /* argument on a non-functional pseudo-class */
@@ -174,9 +220,59 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     return 1;
 }
 
+/* Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only
+ * tag name, .class, or #id (no attributes, no pseudo-classes, no combinators).
+ * The caller MUST trim leading/trailing space. Returns 1 if any component was
+ * parsed; 0 means the span is empty or junk (fail closed for that alternative). */
+static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub) {
+    if (a >= b) return 0;
+    memset(sub, 0, sizeof *sub);
+    size_t i = a;
+    if (s[i] == '*') {
+        ++i;  /* universal: no type */
+    } else if ((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z') ||
+               s[i] == '_') {
+        size_t k = 0;
+        while (i < b && csel_ident_ch(s[i])) {
+            if (k + 1 < CSS_TOK_MAX) sub->tag[k++] = csel_lower_ch(s[i]);
+            ++i;
+        }
+        sub->tag[k] = '\0';
+        sub->has_tag = 1;
+    }
+    while (i < b) {
+        if (s[i] == '.') {
+            ++i;
+            if (i >= b || !csel_ident_ch(s[i])) return 0;
+            size_t k = 0;
+            while (i < b && csel_ident_ch(s[i])) {
+                if (k + 1 < CSS_TOK_MAX) sub->cls[k++] = s[i];
+                ++i;
+            }
+            sub->cls[k] = '\0';
+            sub->has_cls = 1;
+        } else if (s[i] == '#') {
+            ++i;
+            if (i >= b || !csel_ident_ch(s[i]) || sub->has_id) return 0;
+            size_t k = 0;
+            while (i < b && csel_ident_ch(s[i])) {
+                if (k + 1 < CSS_TOK_MAX) sub->id[k++] = s[i];
+                ++i;
+            }
+            sub->id[k] = '\0';
+            sub->has_id = 1;
+        } else {
+            return 0;
+        }
+    }
+    return sub->has_tag || sub->has_cls || sub->has_id;
+}
+
 /* Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space)
- * into *cp. Returns 1 if supported (type, .class, #id, *, [attr], :pseudo). */
-static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
+ * into *cp. sel holds the sub-selector storage for :not()/:is()/:where() 
+ * pseudo-classes being parsed. Returns 1 if supported. */
+static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
+                          css_sel *sel) {
     if (a >= b) return 0;
     memset(cp, 0, sizeof *cp);
     size_t i = a;
@@ -197,7 +293,7 @@ static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp) {
     while (i < b) {
         if (s[i] == ':') {
             if (cp->npseudo >= CSS_MAX_PSEUDO_SEL) return 0;
-            if (!parse_pseudo(s, &i, b, &cp->pseudos[cp->npseudo])) return 0;
+            if (!parse_pseudo(s, &i, b, &cp->pseudos[cp->npseudo], sel)) return 0;
             ++cp->npseudo;
         } else if (s[i] == '.') {
             ++i;
@@ -282,7 +378,7 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
         }
         if (par != 0) return 0;                        /* unbalanced parenthesis */
         if (n >= CSS_MAX_COMPOUNDS) return 0;          /* too deep: fail closed */
-        if (!parse_compound(s, ts, i, &sel->parts[n])) return 0;
+        if (!parse_compound(s, ts, i, &sel->parts[n], sel)) return 0;
         sel->comb[n] = (n == 0) ? COMB_DESCENDANT : comb;
         ++n;
     }
@@ -290,11 +386,37 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
     sel->nparts = n;
 
     int spec = 0;
-    for (int k = 0; k < n; ++k)
+    for (int k = 0; k < n; ++k) {
+        int psel = 0;
+        for (int p = 0; p < sel->parts[k].npseudo; ++p) {
+            int pk = sel->parts[k].pseudos[p].kind;
+            if (pk == PSEUDO_WHERE) {
+                /* :where() contributes 0 specificity. */
+            } else if (pk == PSEUDO_NOT || pk == PSEUDO_IS) {
+                /* :not()/:is() contribute the max specificity of their sub-selectors.
+                 * For v1, each sub is at most a single compound with tag=1, class=10, id=100. */
+                int max_sub = 0;
+                int first = sel->parts[k].pseudos[p].sub_first;
+                int cnt   = sel->parts[k].pseudos[p].sub_count;
+                for (int si = 0; si < cnt; ++si) {
+                    int idx = first + si;
+                    if (idx >= 0 && idx < sel->nsubs) {
+                        int ss = (sel->subs[idx].has_id ? 100 : 0) +
+                                 (sel->subs[idx].has_cls ? 10 : 0) +
+                                 (sel->subs[idx].has_tag ? 1 : 0);
+                        if (ss > max_sub) max_sub = ss;
+                    }
+                }
+                psel += max_sub;
+            } else {
+                psel += 10;
+            }
+        }
         spec += 100 * (sel->parts[k].has_id ? 1 : 0) +
-                10 * (sel->parts[k].ncls + sel->parts[k].nattrs +
-                      sel->parts[k].npseudo) +
+                10 * (sel->parts[k].ncls + sel->parts[k].nattrs) +
+                psel +
                 (sel->parts[k].has_tag ? 1 : 0);
+    }
     sel->spec = spec;
     return 1;
 }
@@ -371,13 +493,33 @@ static int is_form_control(const char *tag) {
            csel_ci_eq(tag, "fieldset");
 }
 
+/* True if a css_sub_sel (simple tag/class/id) matches element el. */
+static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
+    if (sub->has_tag && (el->tag == NULL || !csel_ci_eq(sub->tag, el->tag)))
+        return 0;
+    if (sub->has_id && (el->id == NULL || strcmp(sub->id, el->id) != 0))
+        return 0;
+    if (sub->has_cls) {
+        int found = 0;
+        for (size_t j = 0; j < el->nclasses; ++j) {
+            if (el->classes[j] != NULL && strcmp(sub->cls, el->classes[j]) == 0) {
+                found = 1; break;
+            }
+        }
+        if (!found) return 0;
+    }
+    return 1;
+}
+
 /* True if pseudo-class `pm` matches element `el`. Zero Knowledge semantics:
  * :link covers every a/area[href] (no history, everything is unvisited) and
  * PSEUDO_NEVER (:visited) never matches. PSEUDO_ALWAYS (:hover/:active/:focus)
  * always matches — the cascade is resolved once per load, so dynamic pseudos
  * are treated as always-on (content hidden behind hover becomes visible).
- * Structural pseudos read nth/nsib, where 0 = unknown = no match (fail closed). */
-static int pseudo_matches(const css_pseudo_match *pm, const css_element *el) {
+ * Structural pseudos read nth/nsib, where 0 = unknown = no match (fail closed).
+ * For :not/:is/:where, the sel pointer provides the sub-selector array. */
+static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
+                          const css_sel *sel) {
     switch (pm->kind) {
         case PSEUDO_LINK:
             return el->tag != NULL &&
@@ -397,12 +539,30 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el) {
         case PSEUDO_DISABLED:     return el_attr_value(el, "disabled") != NULL;
         case PSEUDO_ENABLED:
             return is_form_control(el->tag) && el_attr_value(el, "disabled") == NULL;
+        case PSEUDO_NOT:
+            if (sel == NULL || pm->sub_first < 0) return 0;
+            for (int si = 0; si < pm->sub_count; ++si) {
+                int idx = pm->sub_first + si;
+                if (idx < sel->nsubs && sub_sel_matches(&sel->subs[idx], el))
+                    return 0;  /* a sub-selector matches → :not() fails */
+            }
+            return 1;  /* no sub-selector matched */
+        case PSEUDO_IS:
+        case PSEUDO_WHERE:
+            if (sel == NULL || pm->sub_first < 0) return 0;
+            for (int si = 0; si < pm->sub_count; ++si) {
+                int idx = pm->sub_first + si;
+                if (idx < sel->nsubs && sub_sel_matches(&sel->subs[idx], el))
+                    return 1;  /* any sub-selector matches → succeed */
+            }
+            return 0;  /* none matched */
         default:                  return 0;
     }
 }
 
 /* True if one compound matches one element (no ancestor context). */
-static int compound_matches(const css_compound *c, const css_element *el) {
+static int compound_matches(const css_compound *c, const css_element *el,
+                            const css_sel *sel) {
     if (el == NULL) return 0;
     if (c->has_tag) { if (el->tag == NULL || !csel_ci_eq(c->tag, el->tag)) return 0; }
     if (c->has_id)  { if (el->id == NULL || strcmp(c->id, el->id) != 0) return 0; }
@@ -418,7 +578,7 @@ static int compound_matches(const css_compound *c, const css_element *el) {
     for (int i = 0; i < c->nattrs; ++i)
         if (!attr_matches(&c->attrs[i], el)) return 0;
     for (int i = 0; i < c->npseudo; ++i)
-        if (!pseudo_matches(&c->pseudos[i], el)) return 0;
+        if (!pseudo_matches(&c->pseudos[i], el, sel)) return 0;
     return 1;
 }
 
@@ -429,7 +589,7 @@ static int compound_matches(const css_compound *c, const css_element *el) {
  * (<= CSS_MAX_COMPOUNDS) and by the chains the caller built (an element without
  * parent/prev links simply never matches through that combinator — fail closed). */
 static int complex_matches(const css_sel *sel, int k, const css_element *el) {
-    if (!compound_matches(&sel->parts[k], el)) return 0;
+    if (!compound_matches(&sel->parts[k], el, sel)) return 0;
     if (k == 0) return 1;
     switch (sel->comb[k]) {
         case COMB_CHILD:

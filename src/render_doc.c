@@ -529,3 +529,14 @@ const char *rd_image_label(rdp_img_decision d) {
     }
     return "image";
 }
+
+const char *rd_image_fail_label(img_fail_reason reason) {
+    switch (reason) {
+        case IMG_FAIL_FETCH:      return "image (TLS/network error)";
+        case IMG_FAIL_DECODE:     return "image (unsupported format)";
+        case IMG_FAIL_LOCAL_READ: return "image (file not found)";
+        case IMG_FAIL_SURFACE:    return "image (out of memory)";
+        case IMG_FAIL_OK:         return NULL;
+        default: return NULL;
+    }
+}

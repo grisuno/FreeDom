@@ -713,7 +713,20 @@ pedido:
   `calloc` cuesta lo mismo que `malloc` (la memoria ya viene zeroed del kernel por razones
   de seguridad) y previene fugas de información por páginas no inicializadas. Esta regla se
   verifica en code review y aplica a archivos nuevos y existentes (boy-scout: nunca está
-  fuera de scope arreglar un V-002 donde se encuentre).
+   fuera de scope arreglar un V-002 donde se encuentre).
+- **Doctrina de buffer encadenado (V-003):** todo acumulador/acopiador de datos cuyo tamaño
+  no sea estrictamente acotado por un límite de protocolo (p. ej. un solo campo de formulario)
+  debe implementarse como una **cadena de bloques de tamaño fijo** (linked list de bloques de
+  64 KiB por defecto), donde cuando un bloque se llena se asigna otro. Esto evita límites
+  artificiales que pueden romper páginas legítimas y previene que contenido hostil fuerce una
+  asignación contigua enorme. El único límite es OOM de `malloc`. NO usar un solo buffer que
+  crece con `realloc` (riesgo de fragmentación / OOM en asignación contigua grande). NO poner
+  un tope duro tipo "#define ..._MAX  (1024u * 1024u)" — la cadena de bloques escala sin tope
+  excepto la memoria disponible. El patrón es `ih_block`/`ih_acc` en `dom.c:805`:
+  un callback que recibe chunks y los copia al bloque actual, allocando un nuevo bloque
+  encadenado cuando se llena, y un `ih_flatten` final que recorre la cadena y produce un solo
+  buffer contiguo. Esta regla se verifica en code review y aplica a todo nuevo recolector de
+  datos cuyo tamaño sea controlado por contenido remoto.
 - **Este archivo nunca debe superar ~150.000 caracteres** (`wc -c CLAUDE.md`). Es doctrina, no
   sugerencia: un `CLAUDE.md` que crece sin límite deja de leerse. El historial de hitos cerrados
   (§7.2/§7.3) se comprime a **una línea por hito** (título + resultado en una frase + `[[link]]` a

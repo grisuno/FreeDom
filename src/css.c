@@ -167,14 +167,23 @@ static int round_clamp(double v, int lo, int hi) {
 
 /* --- value interpreters (return -1 / sentinel when the value is unsupported) --- */
 
-static int interp_color(const char *v) {
+/* Like cc_parse but returns packed int with sentinels for currentColor/transparent. */
+static int parse_color(const char *v) {
     cc_rgb c;
-    return (cc_parse(v, &c) == CC_OK) ? cc_pack(c) : -1;
+    cc_status st = cc_parse(v, &c);
+    if (st == CC_OK) return cc_pack(c);
+    if (st == CC_CURRENT_COLOR) return CC_COLOR_CURRENT;
+    if (st == CC_TRANSPARENT) return CC_COLOR_TRANSPARENT;
+    return -1;
+}
+
+static int interp_color(const char *v) {
+    return parse_color(v);
 }
 
 static int interp_bg(const char *v) {
-    cc_rgb c;
-    if (cc_parse(v, &c) == CC_OK) return cc_pack(c);
+    int result = parse_color(v);
+    if (result != -1) return result;
     /* token-iterate: skip url() tokens (never phone home), parse each other
      * token as a color */
     char tok[CSS_TOK_MAX];
@@ -194,7 +203,8 @@ static int interp_bg(const char *v) {
         size_t k = 0;
         while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
         tok[k] = '\0';
-        if (cc_parse(tok, &c) == CC_OK) return cc_pack(c);
+        int tok_col = parse_color(tok);
+        if (tok_col != -1) return tok_col;
     }
     return -1;
 }
@@ -327,9 +337,9 @@ static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *
             char color[CSS_TOK_MAX];
             memcpy(color, seg, ce);
             color[ce] = '\0';
-            cc_rgb c;
-            if (cc_parse(color, &c) != CC_OK) return 0;
-            colors[nstops] = cc_pack(c);
+            int cv = parse_color(color);
+            if (cv == -1) return 0;
+            colors[nstops] = cv;
         }
         ++nstops;
         i = j + 1;
@@ -1300,9 +1310,8 @@ static int expand_shadow(const char *val, css_decl *dst, int cap) {
     char tok[CSS_TOK_MAX];
     while (next_ws_token(&p, tok, sizeof tok)) {
         int px;
-        cc_rgb c;
         if (interp_len(tok, 0, &px)) { if (nlen < 3) lens[nlen++] = px; }
-        else if (!have_color && cc_parse(tok, &c) == CC_OK) { color = cc_pack(c); have_color = 1; }
+        else if (!have_color) { int cv = parse_color(tok); if (cv != -1) { color = cv; have_color = 1; } }
     }
     if (nlen < 2) return 0;  /* need both offsets */
     int dx = lens[0], dy = lens[1];
@@ -1312,7 +1321,7 @@ static int expand_shadow(const char *val, css_decl *dst, int cap) {
     if (dy < -CSS_SHADOW_MAX) dy = -CSS_SHADOW_MAX;
     dst[0].prop = P_SHADOW_DX;    dst[0].ival = dx;
     dst[1].prop = P_SHADOW_DY;    dst[1].ival = dy;
-    dst[2].prop = P_SHADOW_COLOR; dst[2].ival = have_color ? color : 0x000000;
+    dst[2].prop = P_SHADOW_COLOR; dst[2].ival = have_color ? color : CC_COLOR_CURRENT;
     return 3;
 }
 
@@ -1495,8 +1504,7 @@ static int interp_user_select(const char *v) {
 /* caret-color: auto -> CSS_LEN_AUTO sentinel; color -> 0xRRGGBB; -1 unset. */
 static int interp_caret_color(const char *v) {
     if (csel_ci_eq(v, "auto")) return CSS_LEN_AUTO;
-    cc_rgb c;
-    return (cc_parse(v, &c) == CC_OK) ? cc_pack(c) : -1;
+    return parse_color(v);
 }
 
 /* appearance: auto/none. -1 unknown. */
@@ -1614,8 +1622,7 @@ static int interp_color_scheme(const char *v) {
 /* accent-color: auto -> CSS_LEN_AUTO; color -> 0xRRGGBB; -1 unknown. */
 static int interp_accent_color(const char *v) {
     if (csel_ci_eq(v, "auto")) return CSS_LEN_AUTO;
-    cc_rgb c;
-    return (cc_parse(v, &c) == CC_OK) ? cc_pack(c) : -1;
+    return parse_color(v);
 }
 /* print-color-adjust: economy/exact. -1 unknown. */
 static int interp_print_color_adjust(const char *v) {
@@ -1881,9 +1888,8 @@ static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
         while (next_ws_token(&p, tok, sizeof tok)) {
             if (csel_ci_eq(tok, "inset")) { inset = 1; continue; }
             int px;
-            cc_rgb c;
             if (interp_len(tok, 0, &px)) { if (nlen < 4) lens[nlen++] = px; }
-            else if (!have_color && cc_parse(tok, &c) == CC_OK) { color = cc_pack(c); have_color = 1; }
+            else if (!have_color) { int cv = parse_color(tok); if (cv != -1) { color = cv; have_color = 1; } }
             /* else: unknown token ignored */
         }
         if (nlen < 2) return 0;   /* need both offsets */
@@ -1893,7 +1899,7 @@ static int expand_box_shadow(const char *val, css_decl *dst, int cap) {
     dst[2].prop = P_BSHADOW_BLUR;   dst[2].ival = nlen > 2 ? lens[2] : 0;
     dst[3].prop = P_BSHADOW_SPREAD; dst[3].ival = nlen > 3 ? lens[3] : 0;
     dst[4].prop = P_BSHADOW_COLOR;  dst[4].ival = csel_ci_eq(val, "none") ? -1
-                                                : (have_color ? color : 0x000000);
+                                                : (have_color ? color : CC_COLOR_CURRENT);
     dst[5].prop = P_BSHADOW_INSET;  dst[5].ival = inset;
     return 6;
 }

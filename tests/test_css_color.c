@@ -2,9 +2,9 @@
  * test_css_color — CMocka suite for the pure CSS color parser.
  *
  * Covers hex (#rgb/#rgba/#rrggbb/#rrggbbaa), functional rgb()/rgba() with integer
- * and percentage components, the named-color table, case-insensitivity and
- * whitespace, the pack/unpack round trip, and the fail-closed edges (bad hex,
- * out-of-range channels, transparent, hsl(), junk, NULL).
+ * and percentage components, hsl()/hsla(), the named-color table, case-insensitivity
+ * and whitespace, transparent/currentColor sentinels, the pack/unpack round trip,
+ * and the fail-closed edges (bad hex, out-of-range channels, junk, NULL).
  */
 
 #include <setjmp.h>
@@ -117,18 +117,59 @@ static void test_named(void **state) {
 
 static void test_named_bad(void **state) {
     (void)state;
-    assert_int_equal(cc_parse("transparent", &C), CC_ERR_SYNTAX); /* invisible: fail closed */
     assert_int_equal(cc_parse("notacolor", &C), CC_ERR_SYNTAX);
     assert_int_equal(cc_parse("reddish", &C), CC_ERR_SYNTAX);
     assert_int_equal(cc_parse("", &C), CC_ERR_SYNTAX);
     assert_int_equal(cc_parse("   ", &C), CC_ERR_SYNTAX);
 }
 
+static void test_transparent_currentcolor(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("transparent", &C), CC_TRANSPARENT);
+    assert_int_equal(cc_parse("currentColor", &C), CC_CURRENT_COLOR);
+    assert_int_equal(cc_parse("CURRENTCOLOR", &C), CC_CURRENT_COLOR);
+    assert_int_equal(cc_parse("  transparent  ", &C), CC_TRANSPARENT);
+}
+
+static void test_hsl(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("hsl(0,100%,50%)", &C), CC_OK);
+    assert_int_equal(C.r, 255); assert_int_equal(C.g, 0); assert_int_equal(C.b, 0);
+}
+
+static void test_hsl_120(void **state) {
+    (void)state;
+    /* hsl(120,100%,50%) = green */
+    assert_int_equal(cc_parse("hsl(120,100%,50%)", &C), CC_OK);
+    assert_int_equal(C.r, 0); assert_int_equal(C.g, 255); assert_int_equal(C.b, 0);
+}
+
+static void test_hsl_240(void **state) {
+    (void)state;
+    /* hsl(240,100%,50%) = blue */
+    assert_int_equal(cc_parse("hsl(240,100%,50%)", &C), CC_OK);
+    assert_int_equal(C.r, 0); assert_int_equal(C.g, 0); assert_int_equal(C.b, 255);
+}
+
+static void test_hsla(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("hsla(0,100%,50%,0.5)", &C), CC_OK);
+    assert_int_equal(C.r, 255); assert_int_equal(C.g, 0); assert_int_equal(C.b, 0);
+}
+
+static void test_hsl_out_of_range(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("hsl(0,50%,150%)", &C), CC_ERR_SYNTAX);     /* L > 100 */
+    assert_int_equal(cc_parse("hsl(0,150%,50%)", &C), CC_ERR_SYNTAX);     /* S > 100 */
+    assert_int_equal(cc_parse("hsl(0,50)", &C), CC_ERR_SYNTAX);           /* too few */
+    assert_int_equal(cc_parse("HSL(0,100%,50%,0,0)", &C), CC_ERR_SYNTAX); /* too many */
+}
+
 static void test_unsupported_syntax(void **state) {
     (void)state;
-    assert_int_equal(cc_parse("hsl(0,100%,50%)", &C), CC_ERR_SYNTAX);
-    assert_int_equal(cc_parse("currentColor", &C), CC_ERR_SYNTAX);
     assert_int_equal(cc_parse("var(--x)", &C), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("color-mix(in srgb, red, blue)", &C), CC_ERR_SYNTAX);
+    assert_int_equal(cc_parse("hwb(0,100%,0%)", &C), CC_ERR_SYNTAX);
 }
 
 static void test_pack_unpack(void **state) {
@@ -159,6 +200,12 @@ int main(void) {
         cmocka_unit_test(test_rgb_out_of_range),
         cmocka_unit_test(test_named),
         cmocka_unit_test(test_named_bad),
+        cmocka_unit_test(test_transparent_currentcolor),
+        cmocka_unit_test(test_hsl),
+        cmocka_unit_test(test_hsl_120),
+        cmocka_unit_test(test_hsl_240),
+        cmocka_unit_test(test_hsla),
+        cmocka_unit_test(test_hsl_out_of_range),
         cmocka_unit_test(test_unsupported_syntax),
         cmocka_unit_test(test_pack_unpack),
     };

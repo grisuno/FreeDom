@@ -729,7 +729,10 @@ static int color_attr(lxb_dom_element_t *el, const char *name, size_t name_len) 
         memcpy(buf, col, cl);
         buf[cl] = '\0';
         cc_rgb rgb;
-        if (cc_parse(buf, &rgb) == CC_OK) return cc_pack(rgb);
+        cc_status st = cc_parse(buf, &rgb);
+        if (st == CC_OK) return cc_pack(rgb);
+        if (st == CC_TRANSPARENT) return CC_COLOR_TRANSPARENT;
+        if (st == CC_CURRENT_COLOR) return CC_COLOR_CURRENT;
     }
     return -1;
 }
@@ -974,7 +977,11 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     css_hbox_resolve(cs, &hb);
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
     d->box_w_pct = hb.w_pct;
-    d->bg_rgb = (cs->background >= 0) ? cs->background : -1;
+    int bg = cs->background;
+    d->bg_rgb = (bg >= 0) ? bg
+              : (bg == CC_COLOR_TRANSPARENT) ? CC_COLOR_TRANSPARENT
+              : (bg == CC_COLOR_CURRENT) ? -1
+              : -1;
     d->box_sizing = cs->box_sizing;
     d->pad_t = (cs->pad_top    != CSS_LEN_UNSET) ? cs->pad_top    : 0;
     d->pad_r = (cs->pad_right  != CSS_LEN_UNSET) ? cs->pad_right  : 0;
@@ -1256,16 +1263,23 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 }
             }
             if (!got_color) {
-                int c = (cs.color >= 0) ? cs.color
-                        : ((t == LXB_TAG_FONT) ? font_color_attr(el) : -1);
+                int c = -1;
+                if (cs.color >= 0) c = cs.color;
+                else if (t == LXB_TAG_FONT) c = font_color_attr(el);
                 if (c >= 0) { *fg = c; got_color = 1; }
             }
             /* background-color does not inherit in CSS; in this flat model we take
              * the nearest ancestor's so a block's background shows behind its text.
-             * The legacy bgcolor attribute is the fallback when no CSS won. */
+             * The legacy bgcolor attribute is the fallback when no CSS won.
+             * currentColor resolves to the element's own color (already resolved in
+             * this pass), and transparent propagates as a sentinel. */
             if (!got_bg) {
-                int b = (cs.background >= 0) ? cs.background : bgcolor_attr(el);
-                if (b >= 0) { *bg = b; got_bg = 1; }
+                int b = -1;
+                if (cs.background >= 0) b = cs.background;
+                else if (cs.background == CC_COLOR_CURRENT && got_color) b = *fg;
+                else if (cs.background == CC_COLOR_TRANSPARENT) b = CC_COLOR_TRANSPARENT;
+                else b = bgcolor_attr(el);
+                if (b >= 0 || b == CC_COLOR_TRANSPARENT) { *bg = b; got_bg = 1; }
             }
             if (!got_align && cs.text_align != CSS_ALIGN_UNSET) {
                 *align = (int)cs.text_align; got_align = 1;

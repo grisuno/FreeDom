@@ -43,6 +43,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --download-pdf=PATH: headless render to a vector PDF at PATH (implies --headless)\n");
     fprintf(fp, "  --download-png=PATH: headless render to a single PNG image at PATH (implies --headless)\n");
     fprintf(fp, "  --author-css: apply author CSS (colors/sizing/line-height) in the headless render (local only)\n");
+    fprintf(fp, "  --images: enable image loading in headless render (off by default: Privacy by Default)\n");
     fprintf(fp, "  --user=user:password: HTTP Basic Authentication credentials (headless only)\n");
     fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
@@ -85,6 +86,10 @@ static const char *g_png_out = NULL;
  * reviewable without a Wayland window. Local render only; the network image cap
  * stays off, so this never fetches or phones home. Default off (Privacy by Default). */
 static int g_author_css = 0;
+
+/* Set by --images: enable image loading in headless mode (otherwise images are
+ * blocked by default: Privacy by Default doctrine). Respects FREEDOM_IMAGES env var. */
+static int g_images = 0;
 
 /* Set by --dump-console: after the headless render, print the captured Freebug
  * console (page console.* output + any uncaught script error). Implies running JS. */
@@ -206,9 +211,14 @@ static void print_doc(const rd_doc *doc) {
             }
             case RD_IMAGE:
                 if (line_open) { putchar('\n'); line_open = 0; }
-                printf("\n[%s]", rd_image_label(b->img_decision));
-                if (b->text[0] != '\0') printf(" %s", b->text);
-                if (b->href != NULL && b->href[0] != '\0') printf(" <%s>", b->href);
+                {
+                    const char *lab = rd_image_label(b->img_decision);
+                    const char *fail = (b->img_decision == RDP_IMG_ALLOW && b->img_fail != IMG_FAIL_OK)
+                                     ? rd_image_fail_label(b->img_fail) : NULL;
+                    printf("\n[%s]", fail ? fail : lab);
+                    if (b->text[0] != '\0') printf(" %s", b->text);
+                    if (b->href != NULL && b->href[0] != '\0') printf(" <%s>", b->href);
+                }
                 putchar('\n');
                 break;
             case RD_NOTICE:
@@ -467,9 +477,12 @@ static int render_page(const char *html, size_t len, const char *top_url,
 
     /* Images stay off by default (Privacy by Default); render_doc prepends the
      * tracking warning when the page declares images. --author-css opts into author
-     * styling for the local render only (no network: the image cap stays off). */
+     * styling for the local render only (no network). --images enables image loading
+     * AND rendering, including remote fetches (so --download-png --images actually
+     * shows images in the bitmap). */
     rdp_caps caps = rdp_caps_safe();
     if (g_author_css) caps.css = true;
+    if (g_images || getenv("FREEDOM_IMAGES") != NULL) caps.images = true;
     rd_doc *doc = NULL;
     rd_status rs = rd_build(page.view, caps, top_url, &doc);
     int out_rc = (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;
@@ -707,6 +720,8 @@ int main(int argc, char **argv) {
             headless = 1; /* PNG export is a headless operation (no window) */
         } else if (strcmp(arg, "--author-css") == 0) {
             g_author_css = 1; /* author CSS in the headless render + external sheet fetch */
+        } else if (strcmp(arg, "--images") == 0) {
+            g_images = 1; /* image loading in the headless render */
         } else if (strncmp(arg, "--user=", 7) == 0) {
             const char *val = arg + 7;
             const char *colon = strchr(val, ':');

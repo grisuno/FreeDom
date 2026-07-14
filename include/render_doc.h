@@ -25,6 +25,20 @@
  * one tested place. See spec/render_doc.md for the full contract.
  */
 
+/* Reason an ALLOWed image could not be loaded (post-decision failure). Zero means
+ * no failure (loaded OK or not yet attempted). Fetched images that fail network/TLS
+ * get IMG_FAIL_FETCH; those that the worker cannot decode get IMG_FAIL_DECODE;
+ * local file reads that fail get IMG_FAIL_LOCAL_READ. Stored per block so the
+ * painter can give a diagnostic (e.g. "image (TLS/network error)") instead of a
+ * generic placeholder. */
+typedef enum img_fail_reason {
+    IMG_FAIL_OK = 0,
+    IMG_FAIL_FETCH,       /* network/TLS/policy error during fetch */
+    IMG_FAIL_DECODE,      /* format not recognised by the worker decode (SVG, BMP, ICO, corrupt) */
+    IMG_FAIL_LOCAL_READ,  /* local file:// page: read failed (missing, oversized) */
+    IMG_FAIL_SURFACE,     /* Cairo surface creation failed (OOM) */
+} img_fail_reason;
+
 typedef enum rd_kind {
     RD_HEADING = 0,   /* heading text; heading_level is 1..6 */
     RD_PARAGRAPH,     /* body text */
@@ -53,6 +67,7 @@ typedef struct rd_block {
     char            *text;
     char            *href;
     rdp_img_decision img_decision;
+    img_fail_reason  img_fail;       /* IMG_OK unless the image's fetch/decode failed */
     char            *poster_src;     /* RD_VIDEO: poster image URL; NULL otherwise */
     int              video_w;        /* RD_VIDEO: declared width in px, or -1 */
     int              video_h;        /* RD_VIDEO: declared height in px, or -1 */
@@ -222,6 +237,11 @@ const char *rd_block_tag(const rd_block *b);
  * decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never
  * NULL. */
 const char *rd_image_label(rdp_img_decision d);
+
+/* Stable, short English diagnostic for a post-decision image failure (the reason
+ * an ALLOWed image ended up as a placeholder). Returns NULL when reason is
+ * IMG_FAIL_OK (not a failure) or the reason is unknown. */
+const char *rd_image_fail_label(img_fail_reason reason);
 
 /* Stable, short English name of a form control type (a pv_input_type value), e.g.
  * "text" / "password" / "submit". Never NULL; an unknown value yields "field". */

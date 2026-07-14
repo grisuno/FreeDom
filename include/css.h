@@ -2,6 +2,7 @@
 #define FREEDOM_CSS_H
 
 #include <stddef.h>
+#include "css_color.h"
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."

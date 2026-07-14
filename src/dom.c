@@ -801,32 +801,76 @@ dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
     return DOM_OK;
 }
 
-/* Accumulator for the serializer callback: a growing buffer hard-capped at
- * DOM_INNER_HTML_MAX so hostile content cannot force an unbounded allocation. */
+/* Accumulator for innerHTML serialization using a chain of fixed-size blocks.
+ * When one block fills up, a new one is allocated and linked — no single
+ * contiguous allocation cap (anti-DoS is OOM from malloc, not an arbitrary cap).
+ * Blocks are freed by freeing the chain head. */
+#define IH_BLOCK_SIZE ((size_t)(64u * 1024u))  /* 64 KiB per block */
+
+typedef struct ih_block {
+    struct ih_block *next;
+    char             data[IH_BLOCK_SIZE];
+} ih_block;
+
 typedef struct ih_acc {
-    char  *buf;
-    size_t len, cap;
-    int    overflow;
+    ih_block *head;       /* first block (freed to free all) */
+    ih_block *cur;        /* current block being written to */
+    size_t    pos;        /* write position within cur->data */
+    size_t    total;      /* total bytes written (sum of all blocks) */
+    int       overflow;
 } ih_acc;
 
 static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx) {
     ih_acc *a = (ih_acc *)ctx;
     if (a->overflow) return LXB_STATUS_ERROR;
-    if (a->len + len + 1u > DOM_INNER_HTML_MAX) {
-        a->overflow = 1;
-        return LXB_STATUS_ERROR;
+    const char *src = (const char *)data;
+    while (len > 0) {
+        if (a->cur == NULL || a->pos >= IH_BLOCK_SIZE) {
+            ih_block *b = (ih_block *)calloc(1, sizeof(ih_block));
+            if (b == NULL) { a->overflow = 1; return LXB_STATUS_ERROR; }
+            if (a->head == NULL) {
+                a->head = b;
+            } else {
+                a->cur->next = b;
+            }
+            a->cur = b;
+            a->pos = 0;
+        }
+        size_t room = IH_BLOCK_SIZE - a->pos - 1u; /* reserve 1 for NUL */
+        size_t copy = (len < room) ? len : room;
+        memcpy(a->cur->data + a->pos, src, copy);
+        a->pos += copy;
+        src += copy;
+        len -= copy;
+        a->total += copy;
     }
-    if (a->len + len + 1u > a->cap) {
-        size_t nc = (a->cap != 0u) ? a->cap * 2u : 256u;
-        while (nc < a->len + len + 1u) nc *= 2u;
-        char *g = (char *)realloc(a->buf, nc);
-        if (g == NULL) { a->overflow = 1; return LXB_STATUS_ERROR; }
-        a->buf = g;
-        a->cap = nc;
-    }
-    memcpy(a->buf + a->len, data, len);
-    a->len += len;
     return LXB_STATUS_OK;
+}
+
+static void ih_free(ih_acc *a) {
+    ih_block *b = a->head;
+    while (b != NULL) {
+        ih_block *n = b->next;
+        free(b);
+        b = n;
+    }
+    a->head = NULL; a->cur = NULL; a->pos = 0; a->total = 0;
+}
+
+/* Flattens the chain into a single contiguous malloc'd NUL-terminated buffer.
+ * Returns NULL on allocation failure (caller must still call ih_free). */
+static char *ih_flatten(ih_acc *a) {
+    if (a->head == NULL) return NULL;
+    char *buf = (char *)malloc(a->total + 1u);
+    if (buf == NULL) return NULL;
+    char *p = buf;
+    for (ih_block *b = a->head; b != NULL; b = b->next) {
+        size_t n = (b == a->cur) ? a->pos : IH_BLOCK_SIZE;
+        memcpy(p, b->data, n);
+        p += n;
+    }
+    buf[a->total] = '\0';
+    return buf;
 }
 
 dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
@@ -835,18 +879,26 @@ dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
     if (out_len != NULL) *out_len = 0;
     if (!valid(idx, node) || out == NULL || out_len == NULL) return DOM_ERR_NULL_ARG;
 
-    ih_acc a = { NULL, 0, 0, 0 };
+    ih_acc a = { NULL, NULL, 0, 0, 0 };
     lxb_status_t st = lxb_html_serialize_deep_cb(idx->nodes[node], ih_append, &a);
-    if (st != LXB_STATUS_OK) {
-        free(a.buf);
-        return DOM_ERR_OOM;   /* over the cap or allocation failure: fail closed */
+    size_t total = a.total;
+    int ov = a.overflow;
+    if (st != LXB_STATUS_OK || total == 0) {
+        ih_free(&a);
+        if (!ov && total == 0) {
+            /* No content serialized and no error: empty element, return empty string. */
+            *out = (char *)malloc(1u);
+            if (*out == NULL) return DOM_ERR_OOM;
+            *out[0] = '\0';
+            *out_len = 0;
+            return DOM_OK;
+        }
+        return DOM_ERR_OOM;
     }
-    if (a.buf == NULL) {
-        a.buf = (char *)malloc(1u);
-        if (a.buf == NULL) return DOM_ERR_OOM;
-    }
-    a.buf[a.len] = '\0';
-    *out = a.buf;
-    *out_len = a.len;
+    char *buf = ih_flatten(&a);
+    ih_free(&a);
+    if (buf == NULL) return DOM_ERR_OOM;
+    *out = buf;
+    *out_len = total;
     return DOM_OK;
 }

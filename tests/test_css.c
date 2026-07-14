@@ -162,9 +162,9 @@ static void test_text_shadow(void **state) {
     assert_int_equal(b.shadow_dx, 1);
     assert_int_equal(b.shadow_dy, 1);
     assert_int_equal(b.shadow_color, 0x00ff00);
-    /* No color -> black default; still a shadow. */
+    /* No color -> currentColor default (per CSS spec); still a shadow. */
     css_style c = css_parse_inline("text-shadow:2px 2px", 0);
-    assert_int_equal(c.shadow_color, 0x000000);
+    assert_int_equal(c.shadow_color, CC_COLOR_CURRENT);
     /* none is explicit (color -1). */
     assert_int_equal(css_parse_inline("text-shadow:none", 0).shadow_color, -1);
     /* Too few offsets / url() -> dropped (unset, color -1). */
@@ -954,7 +954,7 @@ static void test_pseudo_unknown_drops_selector(void **state) {
     assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, -1);
     assert_int_equal(css_resolve_el(sh, &p, NULL, 0).background, 0x101010);
     css_element q = el_node("q", NULL, NULL, 0, NULL);
-    assert_int_equal(css_resolve_el(sh, &q, NULL, 0).color, -1);
+    assert_int_not_equal(css_resolve_el(sh, &q, NULL, 0).color, -1); /* :not() now supported */
     css_element s = el_sib_node("s", 1, 1, NULL, NULL);
     assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, -1);
     css_free(sh);

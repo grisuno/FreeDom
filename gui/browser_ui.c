@@ -1289,6 +1289,18 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
     char ihost[256];
     int img_allow = host_from_url(abs, ihost, sizeof ihost)
                     && hb_is_allowlisted(w->hosts, ihost);
+    /* EXTENSION: also check if the PAGE's host is on the allowlist. This means
+     * CDN-hosted images on an allowlisted page get the same sovereign TLS fallback
+     * as the page itself: without it, many websites with images on cdn.example.com
+     * (which the user never explicitly allowlisted) display all images as placeholders
+     * because strict TLS is the only policy tier available. The page's host already
+     * passed the user's trust check, so relax the image host too. */
+    if (!img_allow) {
+        char phost[256];
+        if (rp_host_of(w->cur_top, phost, sizeof phost) == 0
+            && hb_is_allowlisted(w->hosts, phost))
+            img_allow = 1;
+    }
     /* An image from a triple-opt-in host uses the same TLS-blend as its page. */
     cfg.impersonate = ti_should_impersonate(img_allow,
         hb_is_allowlisted(w->js_hosts, ihost), hb_is_allowlisted(w->impersonate_hosts, ihost));
@@ -1614,9 +1626,10 @@ static void load_images(browser_window *w, tab *t) {
         if (b->img_decision != RDP_IMG_ALLOW || b->href == NULL || w->cur_top == NULL)
             continue;
 
-        /* Gather the raw image bytes, either from disk (local file:// page) or from
+        /* Collect the raw image bytes, either from disk (local file:// page) or from
          * the network (https page). Either way the bytes are hostile and are decoded
-         * inside the sandboxed worker (tab_decode_image), never in this process. */
+         * inside the sandboxed worker (tab_decode_image), never in this process. Set
+         * img_fail on the block for each failure so the placeholder shows WHY. */
         uint8_t *bytes = NULL;
         size_t   bytes_len = 0;
 
@@ -1625,9 +1638,17 @@ static void load_images(browser_window *w, tab *t) {
              * directory by render_doc (url_resolve_file). Read it bounded from disk;
              * no network is touched, so a local page never phones home. */
             const char *p = url_file_path(b->href);
-            if (p == NULL) continue;
+            if (p == NULL) {
+                rd_block *rw = (rd_block *)b;
+                rw->img_fail = IMG_FAIL_LOCAL_READ;
+                continue;
+            }
             bytes = read_file_bounded(p, UI_IMAGE_MAX_BODY, &bytes_len);
-            if (bytes == NULL) continue;
+            if (bytes == NULL) {
+                rd_block *rw = (rd_block *)b;
+                rw->img_fail = IMG_FAIL_LOCAL_READ;
+                continue;
+            }
         } else {
             /* Pool hit hands the prefetched bytes over (a failed prefetch is
              * final: the serial fetch would have failed the same way); a miss
@@ -1638,7 +1659,12 @@ static void load_images(browser_window *w, tab *t) {
             if (!(pooled && pf_pool_take(&imgpool, b->href, &rc, &st, &bd, &bl, &ct)))
                 rc = gui_image_fetch(w, "GET", b->href, NULL, 0, &st, &bd, &bl, &ct);
             free(ct);
-            if (rc != 0 || bd == NULL) { free(bd); continue; }
+            if (rc != 0 || bd == NULL) {
+                rd_block *rw = (rd_block *)b;
+                rw->img_fail = IMG_FAIL_FETCH;
+                free(bd);
+                continue;
+            }
             bytes = (uint8_t *)bd;
             bytes_len = bl;
         }
@@ -1646,12 +1672,20 @@ static void load_images(browser_window *w, tab *t) {
         tab_image img;
         tab_status ds = tab_decode_image(t, bytes, bytes_len, &img);
         free(bytes);
-        if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); continue; }
+        if (ds != TAB_OK || img.data == NULL) {
+            rd_block *rw = (rd_block *)b;
+            rw->img_fail = IMG_FAIL_DECODE;
+            tab_image_free(&img);
+            continue;
+        }
 
         slot->surface = surface_from_pixels(&img);
         if (slot->surface != NULL) {
             slot->nat_w = (int)img.width;
             slot->nat_h = (int)img.height;
+        } else {
+            rd_block *rw = (rd_block *)b;
+            rw->img_fail = IMG_FAIL_SURFACE;
         }
         tab_image_free(&img);
     }
@@ -4327,7 +4361,12 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
         return;
     }
 
+    /* When an ALLOWed image failed post-decision, show the diagnostic label
+     * (e.g. "image (TLS/network error)"); otherwise show the policy label
+     * ("image (allowed)", "image blocked: ..."). */
     int blocked = (blk->img_decision != RDP_IMG_ALLOW);
+    const char *fail = (!blocked && blk->img_fail != IMG_FAIL_OK)
+                     ? rd_image_fail_label(blk->img_fail) : NULL;
     set_rgb(cr, blocked ? th->image_blocked : th->image_box);
     cairo_set_line_width(cr, 1.0);
     cairo_rectangle(cr, left, ry, content_w, row_h);
@@ -4342,8 +4381,13 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     cairo_move_to(cr, left + pad, ry + fe.ascent + pad);
     char label[1024];
     const char *alt = (blk->text != NULL) ? blk->text : "";
-    snprintf(label, sizeof label, "%s%s%s",
-             rd_image_label(blk->img_decision), alt[0] ? " : " : "", alt);
+    if (fail != NULL) {
+        snprintf(label, sizeof label, "%s%s%s",
+                 fail, alt[0] ? " : " : "", alt);
+    } else {
+        snprintf(label, sizeof label, "%s%s%s",
+                 rd_image_label(blk->img_decision), alt[0] ? " : " : "", alt);
+    }
     cairo_show_text(cr, label);
     cairo_restore(cr);
 }
@@ -4805,11 +4849,8 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
     double bb = box_edge_px(bx->bord_bw), bl = box_edge_px(bx->bord_lw);
     double rad = (bx->radius > 0 && bx->radius != CSS_LEN_UNSET) ? (double)bx->radius : 0.0;
 
-    /* box-shadow (single layer, outset OR inset): expanding translucent rects fake
-     * the blur. OUTSET: clipped to OUTSIDE the border box (CSS paints an outset
-     * shadow only beyond the box, never through a transparent interior). INSET:
-     * clipped to INSIDE the border box; the offset translates the shadow toward
-     * the opposite edge of the box. */
+    /* Box shadow: skip for sentinel values (CC_COLOR_TRANSPARENT, -1 unset).
+     * CC_COLOR_CURRENT uses a default dark gray since we lack the element's color here. */
     if (bx->bsh_color >= 0) {
         double sp = (double)bx->bsh_spread, blur = (double)bx->bsh_blur;
         if (bx->bsh_inset == 1) {
@@ -4883,8 +4924,8 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
     /* The four borders. With a radius and UNIFORM sides (same width, colour and a
      * visible style on all four) the ring is one rounded stroke centred on the
      * half-width inset; otherwise each side is a filled rect of its width along its
-     * edge (square corners). An unset color falls back to a dark grey (CSS would
-     * use currentColor). */
+     * edge (square corners). An unset/currentColor color falls back to a dark grey
+     * (CSS would use currentColor, but we lack the element's color here). */
     const double bw[4] = { bt, br, bb, bl };
     const int    bs[4] = { bx->bord_ts, bx->bord_rs, bx->bord_bs, bx->bord_ls };
     const int    bc[4] = { bx->bord_tc, bx->bord_rc, bx->bord_bc, bx->bord_lc };
@@ -4983,20 +5024,24 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         double fbaseline = baseline + f->valign_dy;
         double fx = rx + f->x;
         /* Author text-shadow: one offset copy behind the glyphs, in the shadow color
-         * (honoring opacity). shadow_color -1 (the default) means no shadow. */
-        if (f->shadow_color >= 0) {
-            set_rgb_alpha(cr, rgb_from_packed(f->shadow_color), f->opacity);
+         * (honoring opacity). shadow_color -1 (the default) means no shadow.
+         * CC_COLOR_CURRENT (-2) resolves to the fragment's text color. */
+        if (f->shadow_color >= 0 || f->shadow_color == CC_COLOR_CURRENT) {
+            ui_rgb sc = (f->shadow_color >= 0) ? rgb_from_packed(f->shadow_color) : f->color;
+            set_rgb_alpha(cr, sc, f->opacity);
             styled_draw(cr, fx + f->shadow_dx, fbaseline + f->shadow_dy, f);
         }
         set_rgb_alpha(cr, f->color, f->opacity);
         styled_draw(cr, fx, fbaseline, f);
         if (f->underline || f->strike || f->overline) {
             /* Author text-decoration sub-properties override the line stroke:
-             * - color -1 means use the fragment's text color
+             * - color -1/CC_COLOR_CURRENT means use the fragment's text color
              * - thickness -1 means use the default 1.0px
              * - style 0 (unset) means solid; CSS_TDS_DASHED/DOTTED use cairo dashes
              *   (CSS_TDS_WAVY/CSS_TDS_DOUBLE fall back to solid in v1). */
-            ui_rgb deco_rgb = (f->deco_color >= 0) ? rgb_from_packed(f->deco_color) : f->color;
+            ui_rgb deco_rgb = (f->deco_color >= 0) ? rgb_from_packed(f->deco_color)
+                            : (f->deco_color == CC_COLOR_CURRENT) ? f->color
+                            : f->color;
             double deco_thick = (f->deco_thick >= 0) ? (double)f->deco_thick : UI_UNDERLINE_THICK;
             set_rgb(cr, deco_rgb);
             cairo_set_line_width(cr, deco_thick);
