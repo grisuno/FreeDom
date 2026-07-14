@@ -744,6 +744,8 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 This project is licensed under the **AGPL-3.0** license - see the [LICENSE](LICENSE) file for details.
 
+<img width="300" height="124" alt="image" src="https://github.com/user-attachments/assets/db766969-44c2-4466-9529-5aef9908bdc8" />
+
 ---
 
 For more information, visit the [GitHub repository](https://github.com/grisuno/FreeDom).
