@@ -47,9 +47,18 @@ enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ALWAYS, PSEUDO_ROOT,
        PSEUDO_NOT, PSEUDO_IS, PSEUDO_WHERE };
 
 /* Sub-selector for :not()/:is()/:where(): a simple compound with only
- * tag/.class/#id (no combinators, no attributes, no pseudo-classes inside
+ * tag/.class/#id/[attr] (no combinators, no pseudo-classes inside
  * sub-selectors). Bounded: CSS_MAX_SUB_SELS per selector, one level deep. */
 #define CSS_MAX_SUB_SELS 4
+#define CSS_SUB_MAX_ATTRS 1
+
+/* One attribute selector inside a compound: name OP value, with a case flag. */
+typedef struct css_attr_match {
+    char name[CSS_TOK_MAX];
+    char value[CSS_TOK_MAX];
+    int  op;   /* ATTR_* */
+    int  ci;   /* 1 = match the value case-insensitively (the trailing `i` flag) */
+} css_attr_match;
 
 typedef struct css_sub_sel {
     char tag[CSS_TOK_MAX];
@@ -58,6 +67,8 @@ typedef struct css_sub_sel {
     int  has_id;
     char cls[CSS_TOK_MAX];
     int  has_cls;
+    css_attr_match attrs[CSS_SUB_MAX_ATTRS];
+    int  nattrs;
 } css_sub_sel;
 
 /* One pseudo-class inside a compound. a/b are the An+B coefficients of the
@@ -69,14 +80,6 @@ typedef struct css_pseudo_match {
     int sub_first; /* first sub-selector in parent sel->subs[], -1 = none */
     int sub_count; /* number of consecutive sub-selectors */
 } css_pseudo_match;
-
-/* One attribute selector inside a compound: name OP value, with a case flag. */
-typedef struct css_attr_match {
-    char name[CSS_TOK_MAX];
-    char value[CSS_TOK_MAX];
-    int  op;   /* ATTR_* */
-    int  ci;   /* 1 = match the value case-insensitively (the trailing `i` flag) */
-} css_attr_match;
 
 /* One compound selector: optional type, optional id, zero+ classes, zero+ [attr],
  * zero+ pseudo-classes. */

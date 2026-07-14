@@ -221,7 +221,7 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
 }
 
 /* Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only
- * tag name, .class, or #id (no attributes, no pseudo-classes, no combinators).
+ * tag name, .class, #id, or [attr] (no pseudo-classes, no combinators).
  * The caller MUST trim leading/trailing space. Returns 1 if any component was
  * parsed; 0 means the span is empty or junk (fail closed for that alternative). */
 static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub) {
@@ -261,11 +261,15 @@ static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *su
             }
             sub->id[k] = '\0';
             sub->has_id = 1;
+        } else if (s[i] == '[') {
+            if (sub->nattrs >= CSS_SUB_MAX_ATTRS) return 0;
+            if (!parse_attr_sel(s, &i, b, &sub->attrs[sub->nattrs])) return 0;
+            ++sub->nattrs;
         } else {
             return 0;
         }
     }
-    return sub->has_tag || sub->has_cls || sub->has_id;
+    return sub->has_tag || sub->has_cls || sub->has_id || sub->nattrs > 0;
 }
 
 /* Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space)
@@ -394,7 +398,7 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
                 /* :where() contributes 0 specificity. */
             } else if (pk == PSEUDO_NOT || pk == PSEUDO_IS) {
                 /* :not()/:is() contribute the max specificity of their sub-selectors.
-                 * For v1, each sub is at most a single compound with tag=1, class=10, id=100. */
+                 * Each sub is a compound with tag=1, class=10, id=100, [attr]=10. */
                 int max_sub = 0;
                 int first = sel->parts[k].pseudos[p].sub_first;
                 int cnt   = sel->parts[k].pseudos[p].sub_count;
@@ -403,6 +407,7 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
                     if (idx >= 0 && idx < sel->nsubs) {
                         int ss = (sel->subs[idx].has_id ? 100 : 0) +
                                  (sel->subs[idx].has_cls ? 10 : 0) +
+                                 (sel->subs[idx].nattrs * 10) +
                                  (sel->subs[idx].has_tag ? 1 : 0);
                         if (ss > max_sub) max_sub = ss;
                     }
@@ -493,7 +498,7 @@ static int is_form_control(const char *tag) {
            csel_ci_eq(tag, "fieldset");
 }
 
-/* True if a css_sub_sel (simple tag/class/id) matches element el. */
+/* True if a css_sub_sel (tag/class/id/[attr]) matches element el. */
 static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
     if (sub->has_tag && (el->tag == NULL || !csel_ci_eq(sub->tag, el->tag)))
         return 0;
@@ -508,6 +513,8 @@ static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
         }
         if (!found) return 0;
     }
+    for (int i = 0; i < sub->nattrs; ++i)
+        if (!attr_matches(&sub->attrs[i], el)) return 0;
     return 1;
 }
 
