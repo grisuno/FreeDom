@@ -6348,6 +6348,15 @@ static void submit_form(browser_window *w, const rd_block *rep) {
         nf++;
     }
 
+    /* Dispatch submit event to JS before proceeding. If the handler calls
+     * preventDefault(), abort the native form submission. */
+    if (w->js_mode != JSP_OFF && w->tab_worker != NULL && rep->node_id != DOM_NODE_NONE) {
+        int prevented = 0;
+        if (tab_submit(w->tab_worker, rep->node_id, &prevented) == TAB_OK && prevented) {
+            return;
+        }
+    }
+
     const char *base = browser_current_url(&w->bs);
     if (base == NULL) base = ""; /* "" => fm_build blocks (no https base, fail closed) */
     fm_plan plan;

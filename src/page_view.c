@@ -642,9 +642,10 @@ static int is_block_tag(lxb_tag_id_t t) {
         case LXB_TAG_FOOTER: case LXB_TAG_NAV: case LXB_TAG_MAIN:
         case LXB_TAG_ASIDE: case LXB_TAG_BLOCKQUOTE: case LXB_TAG_PRE:
         case LXB_TAG_TABLE: case LXB_TAG_TR: case LXB_TAG_FIGURE:
-        case LXB_TAG_FORM: case LXB_TAG_FIELDSET: case LXB_TAG_DL:
+        case LXB_TAG_FORM: case LXB_TAG_FIELDSET:         case LXB_TAG_DL:
         case LXB_TAG_DT: case LXB_TAG_DD:
         case LXB_TAG_MENU:
+        case LXB_TAG_DETAILS: case LXB_TAG_SUMMARY:
             return 1;
         default:
             return 0;
@@ -1946,6 +1947,29 @@ static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t 
     return 0;
 }
 
+/* Nonzero if n or any ancestor up to base is inside a <details> without an `open`
+ * attribute and n is NOT inside its <summary> (the summary is always visible).
+ * Used to suppress content of collapsed disclosure widgets. */
+static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+    int passed_summary = 0;
+    for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_tag_id_t t = node_tag(p);
+            if (t == LXB_TAG_SUMMARY) passed_summary = 1;
+            if (t == LXB_TAG_DETAILS) {
+                lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
+                int has_open = lxb_dom_element_has_attribute(el,
+                    (const lxb_char_t *)"open", 4);
+                if (!has_open && !passed_summary) return 1; /* closed, hide */
+                /* Open details or inside summary: keep walking up to catch outer closed details. */
+                passed_summary = 0;
+            }
+        }
+        if (p == base) break;
+    }
+    return 0;
+}
+
 pv_status pv_build(const hp_document *doc, pv_view **out) {
     return pv_build_full(doc, 0, 0, 0, out); /* JS off by default: <noscript> fallback shown */
 }
@@ -2036,6 +2060,11 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 if (forms_add(&forms, n) != 0) { rc = PV_ERR_OOM; goto cleanup; }
                 continue;
             }
+
+            /* Skip elements inside a collapsed <details> (no `open` attribute).
+             * The <summary> is always visible, but its children are already text
+             * nodes that pass through the filter below. */
+            if (in_closed_details_subtree(n, base)) continue;
 
             /* A table cell of a DATA table becomes one collected text run annotated
              * as a grid item: the table is a grid container (cont_id), its column
@@ -2343,6 +2372,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (in_skipped_subtree(n, base, js_enabled)) continue;
         if (in_collected_cell(n, base, &flowreg)) continue; /* emitted as a collected cell run */
         if (in_hidden_subtree(n, base, sheet, &cache)) continue; /* display:none */
+        if (in_closed_details_subtree(n, base)) continue; /* collapsed <details> */
         if (reader && in_boilerplate_subtree(n, base)) continue; /* distraction-free */
 
         lxb_dom_text_t *txt = lxb_dom_interface_text(n);

@@ -190,6 +190,13 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
  * populated and must be released with tab_page_free. */
 tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out);
 
+/* Dispatches a submit event on the form that contains the element with node_id.
+ * The worker walks up the DOM to find the enclosing <form>, fires any JS submit
+ * handlers registered there, and returns 1 if the default action (form submission)
+ * should proceed, 0 if preventDefault() was called. *prevented must be non-NULL.
+ * Returns TAB_OK on success, TAB_ERR_* on transport/worker failure. */
+tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented);
+
 /* Advances the page's virtual timer clock by elapsed_ms (OP_TICK): the worker
  * fires every due setTimeout/setInterval callback (bounded rounds), re-derives
  * the view, and *out carries the refreshed page + the new next_timer_ms. The

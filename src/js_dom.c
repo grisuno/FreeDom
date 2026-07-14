@@ -328,6 +328,28 @@ static JSValue m_register_click(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
+static JSValue m_register_submit(JSContext *ctx, JSValueConst this_val,
+                                 int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    if (!JS_IsFunction(ctx, argv[1])) return JS_UNDEFINED;
+
+    JSValue global = JS_GetGlobalObject(ctx);
+    if (JS_IsException(global)) return JS_EXCEPTION;
+    JSValue reg = JS_GetPropertyStr(ctx, global, "__submitRegistry");
+    if (JS_IsUndefined(reg) || JS_IsNull(reg)) {
+        JS_FreeValue(ctx, reg);
+        reg = JS_NewObject(ctx);
+        if (JS_IsException(reg)) { JS_FreeValue(ctx, global); return JS_EXCEPTION; }
+        JS_SetPropertyStr(ctx, global, "__submitRegistry", JS_DupValue(ctx, reg));
+    }
+    JS_SetPropertyUint32(ctx, reg, (uint32_t)h, JS_DupValue(ctx, argv[1]));
+    JS_FreeValue(ctx, reg);
+    JS_FreeValue(ctx, global);
+    return JS_UNDEFINED;
+}
+
 /* --- CSS-selector queries (querySelector / matches / closest) --- */
 
 /* dom.querySelector(root, sel): root is a handle or -1 for document scope. */
@@ -440,6 +462,7 @@ static const jd_method JD_METHODS[] = {
     { "setInnerHtml",   m_set_inner_html,    2 },
     { "getInnerHtml",   m_get_inner_html,    1 },
     { "registerClick",  m_register_click,    2 },
+    { "registerSubmit", m_register_submit,   2 },
     { "querySelector",    m_query_selector,     2 },
     { "querySelectorAll", m_query_selector_all, 2 },
     { "matches",          m_matches,            2 },
@@ -454,6 +477,7 @@ static const jd_method JD_METHODS[] = {
 static const char JD_DOCUMENT_SHIM[] =
     "(function(){"
     "  globalThis.__clickRegistry={};"
+    "  globalThis.__submitRegistry={};"
     "  var __wc={};"                          /* handle -> wrapper: stable node identity (===) */
     "  function wrap(h){"
     "    if (h===null||h===undefined) return null;"
@@ -568,8 +592,8 @@ static const char JD_DOCUMENT_SHIM[] =
     "      contains: function(o){ if(!o||o._h===undefined) return false; for(var p=o._h;p!==null&&p!==undefined;){ if(p===h) return true; p=dom.parent(p); } return false; },"
      "      getElementsByTagName: function(t){ return wrapList(dom.querySelectorAll(h, String(t))); },"
      "      getElementsByClassName: function(c){ return wrapList(dom.querySelectorAll(h, '.'+String(c))); },"
-    "      addEventListener: function(t,fn){ if(t==='click'&&typeof fn==='function') dom.registerClick(h, fn); },"
-    "      removeEventListener: function(){}, dispatchEvent: function(){ return true; },"
+"      addEventListener: function(t,fn){ if(t==='click'&&typeof fn==='function') dom.registerClick(h, fn); else if(t==='submit'&&typeof fn==='function') dom.registerSubmit(h, fn); },"
+      "      removeEventListener: function(){}, dispatchEvent: function(){ return true; },"
     "      querySelector: function(s){ return wrap(dom.querySelector(h, String(s))); },"
     "      querySelectorAll: function(s){ return wrapList(dom.querySelectorAll(h, String(s))); },"
     "      matches: function(s){ return dom.matches(h, String(s)); },"
@@ -601,6 +625,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      style:{ setProperty:function(k,v){ this[String(k)]=String(v); }, getPropertyValue:function(k){ var v=this[String(k)]; return v===undefined?'':v; }, removeProperty:function(k){ var v=this[String(k)]; delete this[String(k)]; return v===undefined?'':v; }, cssText:'' }"
     "    };"
     "    Object.defineProperty(el,'onclick',{set:function(fn){ if(typeof fn==='function') dom.registerClick(h, fn); },get:function(){return null;}});"
+    "    Object.defineProperty(el,'onsubmit',{set:function(fn){ if(typeof fn==='function') dom.registerSubmit(h, fn); },get:function(){return null;}});"
     "    __wc[h]=el;"
     "    return el;"
     "  }"
@@ -1652,6 +1677,33 @@ int jd_fire_click(js_context *ctx, dom_node_id node_id) {
     if (n < 0 || (size_t)n >= sizeof src) return 1;
 
     JSValue r = JS_Eval(jsctx, src, (size_t)n, "<click-fire>", JS_EVAL_TYPE_GLOBAL);
+    int default_action = 1;
+    if (!JS_IsException(r)) {
+        int32_t v = 1;
+        JS_ToInt32(jsctx, &v, r);
+        default_action = v != 0 ? 1 : 0;
+    }
+    JS_FreeValue(jsctx, r);
+    return default_action;
+}
+
+/* Fires the submit event for form_node_id. Returns 0 if preventDefault() was
+ * called, 1 if the default action should proceed. */
+int jd_fire_submit(js_context *ctx, dom_node_id form_node_id) {
+    if (ctx == NULL || form_node_id == DOM_NODE_NONE) return 1;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 1;
+
+    char src[512];
+    int n = snprintf(src, sizeof src,
+        "(function(){var n=%u;var f=globalThis.__submitRegistry[n];"
+        "if(typeof f!=='function')return 1;"
+        "var e={target:globalThis.__wrap(n),type:'submit',preventDefault:function(){this.defaultPrevented=true},defaultPrevented:false};"
+        "f.call(e.target,e);return e.defaultPrevented?0:1;})();",
+        (unsigned)form_node_id);
+    if (n < 0 || (size_t)n >= sizeof src) return 1;
+
+    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<submit-fire>", JS_EVAL_TYPE_GLOBAL);
     int default_action = 1;
     if (!JS_IsException(r)) {
         int32_t v = 1;

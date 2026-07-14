@@ -68,6 +68,12 @@ jd_status jd_install_events(js_context *ctx, jd_click_state *state);
  * default action, since no script can prevent it). */
 int jd_fire_click(js_context *ctx, dom_node_id node_id);
 
+/* Fires the submit event on the form with node_id. Walks up the DOM from the given
+ * node to find the form; dispatches any registered submit handler and returns 0 if
+ * preventDefault() was called, 1 if the default (form submission) should proceed.
+ * ctx == NULL or no form found => 1 (fail-open: submission proceeds). */
+int jd_fire_submit(js_context *ctx, dom_node_id form_node_id);
+
 /* Installs a real, read-only `location` (and document.location / document.URL) over
  * the page's URL, and arms JS-navigation capture: location.href= / assign / replace /
  * reload / window.location= record the RAW requested string (never executed, never

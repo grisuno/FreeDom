@@ -28,6 +28,10 @@ static const char HTML[] =
     "<p class=\"text\">Hello</p>"
     "<p class=\"text muted\">World</p>"
     "<button id=\"go\" class=\"btn\">Go</button>"
+    "<form id=\"frm\" action=\"/submit\" method=\"post\">"
+    "<input type=\"text\" name=\"q\">"
+    "<input type=\"submit\" id=\"sbm\" value=\"Send\">"
+    "</form>"
     "</div>"
     "</body></html>";
 
@@ -205,9 +209,9 @@ static void test_node_identity_is_cached(void **state) {
 static void test_element_traversal(void **state) {
     fixture *f = (fixture *)*state;
     EXPECT(f, "document.getElementById('go').parentNode.id", "main");
-    EXPECT(f, "document.getElementById('main').children.length", "3");
+    EXPECT(f, "document.getElementById('main').children.length", "4");
     EXPECT(f, "document.getElementById('main').firstElementChild.tagName", "P");
-    EXPECT(f, "document.getElementById('main').childElementCount", "3");
+    EXPECT(f, "document.getElementById('main').childElementCount", "4");
     EXPECT(f, "document.getElementById('main').contains(document.getElementById('go'))", "true");
 }
 
@@ -884,6 +888,73 @@ static void test_click_no_handler_allows_default(void **state) {
     jd_click_state_free(cs);
 }
 
+/* --- submit events --- */
+
+/* Registers a submit listener via addEventListener and fires it. */
+static void test_submit_add_event_listener_fires(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    const char *src =
+        "var fm = document.getElementById('frm');"
+        "fm.addEventListener('submit', function(e){ fm._submitted = true; });"
+        "fm._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_submit(f->ctx, h), 1); /* default action allowed */
+    EXPECT(f, "document.getElementById('frm')._submitted", "true");
+}
+
+/* onsubmit property also registers a handler. */
+static void test_submit_onsubmit_fires(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    const char *src =
+        "var fm = document.getElementById('frm');"
+        "fm.onsubmit = function(e){ fm._submitted = true; };"
+        "fm._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_submit(f->ctx, h), 1);
+    EXPECT(f, "document.getElementById('frm')._submitted", "true");
+}
+
+/* preventDefault() stops the default action. */
+static void test_submit_prevent_default(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    const char *src =
+        "var fm = document.getElementById('frm');"
+        "fm.onsubmit = function(e){ e.preventDefault(); fm._prevented = true; };"
+        "fm._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_submit(f->ctx, h), 0); /* default action cancelled */
+    EXPECT(f, "document.getElementById('frm')._prevented", "true");
+}
+
+/* No handler registered => default action proceeds. */
+static void test_submit_no_handler_allows_default(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    assert_int_equal(jd_fire_submit(f->ctx, 9999), 1);
+}
+
 /* --- video shim --- */
 
 /* No `video` variable defined: shim is a no-op, no iframe created. */
@@ -1041,6 +1112,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_click_onclick_fires, setup, teardown),
         cmocka_unit_test_setup_teardown(test_click_prevent_default, setup, teardown),
         cmocka_unit_test_setup_teardown(test_click_no_handler_allows_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_submit_add_event_listener_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_submit_onsubmit_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_submit_prevent_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_submit_no_handler_allows_default, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_shim_no_video, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_shim_uses_index_1, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_shim_video_data_wins, setup, teardown),
