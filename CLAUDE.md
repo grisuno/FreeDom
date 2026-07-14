@@ -726,7 +726,14 @@ pedido:
   un callback que recibe chunks y los copia al bloque actual, allocando un nuevo bloque
   encadenado cuando se llena, y un `ih_flatten` final que recorre la cadena y produce un solo
   buffer contiguo. Esta regla se verifica en code review y aplica a todo nuevo recolector de
-  datos cuyo tamaño sea controlado por contenido remoto.
+     datos cuyo tamaño sea controlado por contenido remoto.
+- **Doctrina `snprintf` fail-closed (V-004):** nunca usar `n += (size_t)snprintf(buf + n, rem, ...)` sin
+  verificar que `rem` no se desbordó. `snprintf` retorna el número de bytes que *habría* escrito (no el
+  real); si ese valor >= `rem`, hubo truncamiento y `n` crece más allá de la capacidad → en la siguiente
+  iteración `rem` wrappea a un valor enorme y la escritura desborda el buffer. El patrón correcto es:
+  `size_t space = cap - n; if (space == 0) break; int r = snprintf(buf + n, space, ...);
+  if (r < 0 || (size_t)r >= space) { n = cap; break; } n += (size_t)r;`. Esta regla se verifica en
+  code review y aplica a todo `snprintf`/`vsnprintf` cuyo tamaño dependa de un acumulador.
 - **Este archivo nunca debe superar ~150.000 caracteres** (`wc -c CLAUDE.md`). Es doctrina, no
   sugerencia: un `CLAUDE.md` que crece sin límite deja de leerse. El historial de hitos cerrados
   (§7.2/§7.3) se comprime a **una línea por hito** (título + resultado en una frase + `[[link]]` a

@@ -201,11 +201,21 @@ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len) {
         PREFS_VERSION,
         p->theme_mode, p->force_theme, p->images, p->css, p->reader, p->js_mode,
         p->tor, p->i2p, p->torify, p->zoom_pct, p->remember_history);
-    for (size_t i = 0; i < p->bookmarks_len; ++i)
-        n += (size_t)snprintf(buf + n, cap - n, "b\t%s\t%s\n",
-                              p->bookmarks[i].url, p->bookmarks[i].title);
-    for (size_t i = 0; i < p->history_len; ++i)
-        n += (size_t)snprintf(buf + n, cap - n, "h\t%s\n", p->history[i]);
+    for (size_t i = 0; i < p->bookmarks_len; ++i) {
+        size_t space = cap - n;
+        if (space == 0) break;
+        int r = snprintf(buf + n, space, "b\t%s\t%s\n",
+                         p->bookmarks[i].url, p->bookmarks[i].title);
+        if (r < 0 || (size_t)r >= space) { n = cap; break; }
+        n += (size_t)r;
+    }
+    for (size_t i = 0; i < p->history_len; ++i) {
+        size_t space = cap - n;
+        if (space == 0) break;
+        int r = snprintf(buf + n, space, "h\t%s\n", p->history[i]);
+        if (r < 0 || (size_t)r >= space) { n = cap; break; }
+        n += (size_t)r;
+    }
     *out = buf;
     *out_len = n;
     return PREFS_OK;
