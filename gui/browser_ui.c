@@ -435,21 +435,26 @@ typedef struct browser_window {
     struct wl_surface *ptr_focus;
 
     /* Video playback (Fase 1+): the media decoder child process, its pipe fds,
-     * and the current decoded frame for the active video element. */
-    pid_t    decoder_pid;      /* 0 = not running */
-    int      decoder_out_fd;   /* read decoded frames from decoder */
-    int      decoder_cmd_fd;   /* write commands to decoder */
-    uint8_t *video_frame;      /* current decoded ARGB frame (owned) */
-    int      video_w;          /* frame width */
-    int      video_h;          /* frame height */
-    int      video_active;     /* nonzero when video is playing */
-    int      video_pending;    /* nonzero when a frame may be on the pipe */
-    /* Async segment feeding: the playlist and cursor are owned by this window;
-     * video_pump() feeds one segment per event-loop tick so the GUI stays alive. */
-    hls_playlist *video_pl;    /* parsed segment list (owned; NULL when idle) */
-    size_t        video_seg_idx; /* index of next segment to fetch+feed */
-    char         *video_base_url; /* m3u8 base URL for segment resolution (owned) */
-    int           video_eof;      /* all segments have been sent to the decoder */
+     * and the current decoded frame for the active video element.
+     *
+     * Feeder thread: downloads TS segments and writes them to the decoder pipe
+     * so the main (Wayland) thread never blocks on HTTP. The thread is spawned by
+     * video_play() and joined by video_stop(); it reads video_pl/video_base_url
+     * (set once before spawn, freed after join) and checks video_active (set to 0
+     * by the main thread before join) at the top of each segment loop. The eventfd
+     * signals the event loop to drain decoder frames + redraw. */
+    pid_t        decoder_pid;      /* 0 = not running */
+    int          decoder_out_fd;   /* read decoded frames from decoder */
+    int          decoder_cmd_fd;   /* write commands to decoder (thread writes, main never) */
+    uint8_t     *video_frame;      /* current decoded ARGB frame (owned) */
+    int          video_w, video_h; /* frame dimensions */
+    int          video_active;     /* nonzero when playing; set to 0 to stop the feeder thread */
+    int          video_pending;    /* nonzero when a frame may be on the pipe */
+    hls_playlist *video_pl;        /* parsed segment list (owned; freed in video_stop after join) */
+    char         *video_base_url;  /* m3u8 base URL for segment resolution (owned) */
+    int           video_eof;       /* feeder thread has sent MD_FLUSH */
+    pthread_t     video_thread;    /* feeder thread handle */
+    int           video_evfd;      /* eventfd: feeder thread → main thread wake */
 } browser_window;
 
 /* Freebug second-window forward declarations (defined further down, but referenced
@@ -952,7 +957,7 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 /* Video playback functions (defined below; forward declarations for render path). */
 static void video_stop(browser_window *w);
 static int  video_play(browser_window *w, const char *m3u8_url);
-static int  video_pump(browser_window *w);
+static void *video_feeder_thread(void *arg);
 
 /* An editable control gets a live text field; submit/button/hidden do not.
  * Checkboxes, radios, and selects are interactive (click toggles/opens) but
@@ -4375,6 +4380,20 @@ static int v_read(int fd, void *buf, size_t n) {
 
 static void video_stop(browser_window *w) {
     if (w == NULL) return;
+
+    /* Tell the feeder thread to exit, then wait for it. */
+    w->video_active = 0;
+    if (w->video_thread != 0) {
+        /* Wake the eventfd so the thread doesn't deadlock waiting for a pipe
+         * that the main thread already polled. The thread checks video_active
+         * before writing and will see 0 and exit. */
+        uint64_t one = 1;
+        ssize_t wr = write(w->video_evfd, &one, sizeof one);
+        (void)wr;
+        pthread_join(w->video_thread, NULL);
+        w->video_thread = 0;
+    }
+
     if (w->decoder_pid > 0) {
         uint8_t q = MD_QUIT;
         (void)v_write(w->decoder_cmd_fd, &q, 1);
@@ -4382,6 +4401,10 @@ static void video_stop(browser_window *w) {
         waitpid(w->decoder_pid, &st, WNOHANG);
         close(w->decoder_cmd_fd);
         close(w->decoder_out_fd);
+    }
+    if (w->video_evfd >= 0) {
+        close(w->video_evfd);
+        w->video_evfd = -1;
     }
     free(w->video_frame);
     hls_playlist_free(w->video_pl);
@@ -4395,7 +4418,6 @@ static void video_stop(browser_window *w) {
     w->video_active = 0;
     w->video_pending = 0;
     w->video_pl = NULL;
-    w->video_seg_idx = 0;
     w->video_base_url = NULL;
     w->video_eof = 0;
 }
@@ -4525,17 +4547,15 @@ static sf_status video_fetch(const char *url, browser_window *w,
 }
 
 /* Starts video playback from an m3u8 playlist URL. Fetches the playlist,
- * parses it, handles multi-variant master playlists, and spawns the decoder
- * process. DOES NOT feed segments here (that would block the GUI for the full
- * video duration). Returns 0 on success, -1 on failure.
- *
- * After this returns 0, the event loop calls video_pump() each iteration to
- * feed one segment per tick, keeping the GUI responsive. */
+ * parses it, handles multi-variant master playlists, spawns the decoder
+ * process AND a feeder thread that downloads TS segments and writes them
+ * to the decoder pipe. The main (Wayland) thread never blocks on HTTP for
+ * video: the event loop drains decoder frames and paints.
+ * Returns 0 on success, -1 on failure. */
 static int video_play(browser_window *w, const char *m3u8_url) {
     if (w == NULL || m3u8_url == NULL) return -1;
     video_stop(w);
 
-    /* Fetch the m3u8 playlist under full policy gates. */
     sf_response resp;
     if (video_fetch(m3u8_url, w, &resp) != SF_OK
         || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
@@ -4551,7 +4571,6 @@ static int video_play(browser_window *w, const char *m3u8_url) {
     }
     sf_response_free(&resp);
 
-    /* Multi-variant (master) playlist: select the best variant and re-fetch. */
     if (pl->is_variant && pl->nvariants > 0) {
         size_t vi = hls_select_variant(pl, 1920, 1080);
         if (vi == (size_t)-1) { hls_playlist_free(pl); return -1; }
@@ -4584,7 +4603,6 @@ static int video_play(browser_window *w, const char *m3u8_url) {
         return -1;
     }
 
-    /* Spawn the decoder process. */
     int out_fd = -1, cmd_fd = -1;
     pid_t pid = 0;
     if (media_decoder_spawn(&pid, &out_fd, &cmd_fd) != 0) {
@@ -4599,44 +4617,54 @@ static int video_play(browser_window *w, const char *m3u8_url) {
     w->video_active = 1;
     w->video_pending = 1;
     w->video_pl = pl;
-    w->video_seg_idx = 0;
     w->video_eof = 0;
 
     int flags = fcntl(out_fd, F_GETFD, 0);
     if (flags >= 0) fcntl(out_fd, F_SETFL, flags | O_NONBLOCK);
+
+    w->video_evfd = eventfd(0, EFD_NONBLOCK);
+    if (w->video_evfd < 0) {
+        video_stop(w);
+        return -1;
+    }
+
+    if (pthread_create(&w->video_thread, NULL, video_feeder_thread, w) != 0) {
+        video_stop(w);
+        return -1;
+    }
     return 0;
 }
 
-/* Feeds at most one TS segment to the decoder process. Called from the event
- * loop each iteration while video_active is set, so the GUI dispatches events
- * between segment downloads instead of freezing for the entire playlist.
- * Returns 1 if there is more work to do, 0 when all segments have been sent
- * (including the final MD_FLUSH). */
-static int video_pump(browser_window *w) {
-    if (w == NULL || !w->video_active || w->video_pl == NULL) return 0;
-    if (w->decoder_cmd_fd < 0) return 0;
+/* Feeder thread: downloads every TS segment and writes them to the decoder
+ * pipe. Runs detached from the Wayland event loop — the main thread never
+ * blocks on HTTP for video. Signals video_evfd after each segment so the
+ * event loop drains frames and redraws. Checks video_active at the top of
+ * each segment loop so a video_stop() in the main thread (which sets it to 0
+ * then calls pthread_join) causes an orderly exit. */
+static void *video_feeder_thread(void *arg) {
+    browser_window *w = (browser_window *)arg;
+    if (w == NULL || w->video_pl == NULL || w->video_base_url == NULL) {
+        if (w != NULL) w->video_eof = 1;
+        return NULL;
+    }
+    signal(SIGPIPE, SIG_IGN);
+    size_t total = w->video_pl->count;
 
-    /* Drain any pending frames from the decoder so the screen updates. */
-    while (video_read_frame(w) > 0) {}
+    for (size_t i = 0; i < total; i++) {
+        if (!w->video_active) break;
 
-    /* All segments sent: we are waiting for the decoder to finish frames. The
-     * event loop's POLLIN on decoder_out_fd handles frame arrival + redraw. */
-    if (w->video_eof) return 0;
-
-    /* Feed the next segment. */
-    if (w->video_seg_idx < w->video_pl->count) {
         char abs_url[4096];
         size_t n = hls_resolve_url(w->video_base_url,
-                                    w->video_pl->segments[w->video_seg_idx].url,
+                                    w->video_pl->segments[i].url,
                                     abs_url, sizeof abs_url);
-        w->video_seg_idx++;
-        if (n == 0) return 1; /* skip unresolvable segment, try next */
+        if (n == 0) continue;
 
         sf_response resp;
+        memset(&resp, 0, sizeof resp);
         if (video_fetch(abs_url, w, &resp) != SF_OK
             || resp.body == NULL || resp.body_len == 0) {
             sf_response_free(&resp);
-            return 1; /* skip failed segment, try next */
+            continue;
         }
 
         uint8_t cmd = MD_DECODE;
@@ -4646,16 +4674,21 @@ static int video_pump(browser_window *w) {
         v_write(w->decoder_cmd_fd, resp.body, resp.body_len);
         sf_response_free(&resp);
 
-        /* Drain any frames this segment already produced. */
-        while (video_read_frame(w) > 0) {}
-        return 1;
+        /* Wake the event loop so it drains frames and paints. */
+        uint64_t one = 1;
+        ssize_t wr = write(w->video_evfd, &one, sizeof one);
+        (void)wr;
     }
 
-    /* Last segment sent: flush and enter drain-only mode. */
-    uint8_t f = MD_FLUSH;
-    v_write(w->decoder_cmd_fd, &f, 1);
-    w->video_eof = 1;
-    return 0;
+    if (w->video_active) {
+        uint8_t f = MD_FLUSH;
+        v_write(w->decoder_cmd_fd, &f, 1);
+        w->video_eof = 1;
+        uint64_t one = 1;
+        ssize_t wr = write(w->video_evfd, &one, sizeof one);
+        (void)wr;
+    }
+    return NULL;
 }
 
 static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
@@ -7719,6 +7752,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
                        uint32_t button, uint32_t state) {
     (void)p; (void)t;
     browser_window *w = (browser_window *)d;
+    w->last_serial = serial; /* pointer.button serial is valid for set_selection */
     if (freebug_owns_surface(w, w->ptr_focus)) {
         freebug_pointer_button(w, serial, button, state);
         return;
@@ -8241,9 +8275,10 @@ static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
 
 static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                            struct wl_surface *sf, struct wl_array *keys) {
-    (void)kbd; (void)s; (void)keys;
+    (void)kbd; (void)keys;
     browser_window *w = (browser_window *)d;
-    w->kbd_focus = sf; /* so keyboard_key routes to the focused window (main vs Freebug) */
+    w->last_serial = s; /* keyboard.enter serial is valid for set_selection */
+    w->kbd_focus = sf;
 }
 static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf) {
     (void)kbd; (void)s;
@@ -8600,9 +8635,10 @@ static void key_repeat_fire(browser_window *w) {
 
 static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                          uint32_t time, uint32_t key, uint32_t state) {
-    (void)kbd; (void)time;
+    (void)kbd; (void)time; (void)serial;
     browser_window *w = (browser_window *)data;
-    w->last_serial = serial; /* for wl_data_device_set_selection on Ctrl+C */
+    /* last_serial for set_selection is set by keyboard_enter / ptr_button —
+     * keyboard.key serials are NOT valid for wl_data_device.set_selection. */
     if (w->xkb_state == NULL) return;
 
     /* Releasing the held key (or any other key while it repeats) stops the repeat. */
@@ -8782,6 +8818,8 @@ ui_status ui_run_browser(const char *start_url) {
     w.stream_evfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     w.stream_launch_gen = 0;
     w.last_stream_render = 0;
+    w.video_evfd = -1;
+    w.video_thread = 0;
 
     if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
 
@@ -8929,13 +8967,13 @@ ui_status ui_run_browser(const char *start_url) {
         if (w.video_active && w.decoder_out_fd >= 0
             && (timeout < 0 || timeout > 33)) timeout = 33;
 
-        /* Poll the Wayland fd, the key-repeat timer, and the async-fetch result pipe
-         * together. The Wayland fd keeps the prepare_read/read_events contract; the
-         * timer fires a held key's repeat; the pipe carries completed fetches. */
-        struct pollfd pfds[5];
+        /* Poll the Wayland fd, the key-repeat timer, the async-fetch result pipe,
+         * and the video decoder + feeder-thread eventfds together. */
+        struct pollfd pfds[6];
         int nfds = 0;
         pfds[nfds].fd = wl_display_get_fd(w.display); pfds[nfds].events = POLLIN; pfds[nfds].revents = 0; nfds++;
-        int timer_idx = -1, fetch_idx = -1, stream_idx = -1, video_idx = -1;
+        int timer_idx = -1, fetch_idx = -1, stream_idx = -1,
+            video_idx = -1, video_ev_idx = -1;
         if (w.repeat_timer_fd >= 0) {
             pfds[nfds].fd = w.repeat_timer_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             timer_idx = nfds++;
@@ -8951,6 +8989,10 @@ ui_status ui_run_browser(const char *start_url) {
         if (w.decoder_out_fd >= 0 && w.video_active) {
             pfds[nfds].fd = w.decoder_out_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             video_idx = nfds++;
+        }
+        if (w.video_evfd >= 0 && w.video_active) {
+            pfds[nfds].fd = w.video_evfd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
+            video_ev_idx = nfds++;
         }
         int pr = poll(pfds, (nfds_t)nfds, timeout);
 
@@ -9021,17 +9063,25 @@ ui_status ui_run_browser(const char *start_url) {
             }
         }
 
-        /* A decoded video frame arrived from the media decoder process. Read
-         * it and trigger a repaint so the video element updates on screen.
-         * Then feed the next TS segment (one per event-loop tick) so the GUI
-         * stays responsive instead of freezing for the entire playlist. */
+        /* A decoded video frame arrived from the media decoder process, or the
+         * feeder thread signalled that it sent one or more new TS segments.
+         * Drain the eventfd counter, read all available frames, and repaint. */
+        if (pr > 0 && video_ev_idx >= 0 && (pfds[video_ev_idx].revents & POLLIN)) {
+            uint64_t cnt = 0;
+            ssize_t rd = read(w.video_evfd, &cnt, sizeof cnt);
+            (void)rd;
+        }
         if (pr > 0 && video_idx >= 0 && (pfds[video_idx].revents & POLLIN)) {
             while (video_read_frame(&w) > 0) {}
-            if (w.video_frame != NULL)
-                redraw(&w);
         }
-        if (w.video_active && w.video_pl != NULL && !w.video_eof)
-            video_pump(&w);
+        /* After both fd events are handled (either can fire independently),
+         * redraw if we have a frame. Also drain any frames that arrived via the
+         * eventfd without a simultaneous pipe event. */
+        if (w.video_active && w.decoder_out_fd >= 0) {
+            while (video_read_frame(&w) > 0) {}
+        }
+        if (w.video_frame != NULL)
+            redraw(&w);
     }
 
     video_stop(&w);    /* stop the video decoder if running */
