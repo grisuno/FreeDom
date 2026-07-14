@@ -156,6 +156,11 @@ typedef struct pv_run {
      * control (0xRRGGBB, or -1 for auto/unset). */
     int     image_rendering; /* css_image_rendering, 0 (unset) */
     int     caret_color;     /* 0xRRGGBB, or -1 (auto/unset) */
+    /* Image/video object-fit from the element's own CSS (2026-07-12). Controls how
+     * the decoded image is scaled into its declared box: fill/contain/cover/none/
+     * scale-down. 0 = unset (fill). Non-inherited; meaningful only on PV_IMAGE and
+     * PV_VIDEO runs but carried on all for simplicity. */
+    int     object_fit;      /* css_object_fit, 0 (unset, same as fill) */
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -475,6 +480,7 @@ typedef struct pv_text_ext {
     /* 2026-07-10 wiring batch. */
     int image_rendering; /* css_image_rendering, 0 unset */
     int caret_color;     /* 0xRRGGBB, -1 unset; CSS_LEN_AUTO = explicit auto */
+    int object_fit;      /* css_object_fit; 0 (unset) = fill */
 } pv_text_ext;
 
 /* Initialises every field of *e to its "unset" sentinel. NULL-safe. */

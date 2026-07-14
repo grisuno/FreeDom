@@ -4342,16 +4342,52 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
 
     double dw, dh;
     if (image_display_size(w, blk, box_w, &dw, &dh)) {
-        const ui_image *im = find_image(w, blk); /* non-NULL with surface, nat_w > 0 */
-        double scale = dw / (double)im->nat_w;
+        const ui_image *im = find_image(w, blk);
+        int of = blk->object_fit;
+        if (of == 0) of = CSS_OFI_FILL; /* unset = fill */
         cairo_save(cr);
         cairo_translate(cr, left + pad, ry + pad);
         cairo_rectangle(cr, 0.0, 0.0, dw, dh);
         cairo_clip(cr);
-        cairo_scale(cr, scale, scale); /* uniform => aspect preserved */
+        switch (of) {
+            case CSS_OFI_FILL:
+                /* Stretch to fill box, ignoring aspect ratio. */
+                cairo_scale(cr, dw / (double)im->nat_w, dh / (double)im->nat_h);
+                break;
+            case CSS_OFI_CONTAIN:
+                /* Fit within box, aspect preserved, centred. */
+                { double sx = dw / (double)im->nat_w, sy = dh / (double)im->nat_h;
+                  double s = (sx < sy) ? sx : sy;
+                  cairo_translate(cr, (dw - im->nat_w * s) * 0.5, (dh - im->nat_h * s) * 0.5);
+                  cairo_scale(cr, s, s); }
+                break;
+            case CSS_OFI_COVER:
+                /* Fill box, aspect preserved, cropped. */
+                { double sx = dw / (double)im->nat_w, sy = dh / (double)im->nat_h;
+                  double s = (sx > sy) ? sx : sy;
+                  cairo_translate(cr, (dw - im->nat_w * s) * 0.5, (dh - im->nat_h * s) * 0.5);
+                  cairo_scale(cr, s, s); }
+                break;
+            case CSS_OFI_NONE:
+                /* No scaling, centred in box. */
+                cairo_translate(cr, (dw - (double)im->nat_w) * 0.5,
+                                (dh - (double)im->nat_h) * 0.5);
+                break;
+            case CSS_OFI_SCALE_DOWN:
+                /* Like none or contain, whichever gives a SMALLER image. */
+                { double sx = dw / (double)im->nat_w, sy = dh / (double)im->nat_h;
+                  double s = (sx < sy) ? sx : sy;
+                  if (s > 1.0) { s = 1.0;
+                      cairo_translate(cr, (dw - (double)im->nat_w) * 0.5,
+                                      (dh - (double)im->nat_h) * 0.5);
+                  } else {
+                      cairo_translate(cr, (dw - im->nat_w * s) * 0.5,
+                                      (dh - im->nat_h * s) * 0.5);
+                  }
+                  cairo_scale(cr, s, s); }
+                break;
+        }
         cairo_set_source_surface(cr, im->surface, 0.0, 0.0);
-        /* image-rendering: pixelated/crisp-edges ask for nearest-neighbour
-         * scaling (2026-07-10); everything else keeps the smooth default. */
         int nearest = (blk->image_rendering == CSS_IR_PIXELATED ||
                        blk->image_rendering == CSS_IR_CRISP_EDGES);
         cairo_pattern_set_filter(cairo_get_source(cr),

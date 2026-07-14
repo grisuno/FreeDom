@@ -320,6 +320,7 @@ static int write_view(int wfd, const pv_view *v) {
         /* 2026-07-10 wiring batch (image_rendering/caret_color). */
         int32_t tirend = (int32_t)r->image_rendering;
         int32_t tcaret = (int32_t)r->caret_color;
+        int32_t tobject_fit = (int32_t)r->object_fit;
         int32_t cid = (int32_t)r->cont_id;
         int32_t cdisp = (int32_t)r->cont_display;
         int32_t cgap = (int32_t)r->cont_gap;
@@ -402,6 +403,7 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_full(wfd, &tlpos, sizeof tlpos) != 0) return -1;
         if (write_full(wfd, &tirend, sizeof tirend) != 0) return -1;
         if (write_full(wfd, &tcaret, sizeof tcaret) != 0) return -1;
+        if (write_full(wfd, &tobject_fit, sizeof tobject_fit) != 0) return -1;
         if (write_full(wfd, &cid, sizeof cid) != 0) return -1;
         if (write_full(wfd, &cdisp, sizeof cdisp) != 0) return -1;
         if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
@@ -1298,7 +1300,7 @@ static int read_view(int fd, pv_view **out) {
         /* 2026-07-10 text-extension batch (tab_size/direction/font_variant/list_style_pos). */
         int32_t ttsize = 0, tdir = 0, tfvar = 0, tlpos = 0;
         /* 2026-07-10 wiring batch (image_rendering/caret_color). */
-        int32_t tirend = 0, tcaret = -1;
+        int32_t tirend = 0, tcaret = -1, tobject_fit = 0;
         int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
         int32_t gtw[PV_GRID_TRACKS + 1] = { 0 };   /* track sizes + grid_span */
         int32_t fgrow = -1, fshrink = -1;
@@ -1358,6 +1360,7 @@ static int read_view(int fd, pv_view **out) {
          || read_full(fd, &tlpos, sizeof tlpos) != 0
          || read_full(fd, &tirend, sizeof tirend) != 0
          || read_full(fd, &tcaret, sizeof tcaret) != 0
+         || read_full(fd, &tobject_fit, sizeof tobject_fit) != 0
          || read_full(fd, &cid, sizeof cid) != 0
          || read_full(fd, &cdisp, sizeof cdisp) != 0
          || read_full(fd, &cgap, sizeof cgap) != 0
@@ -1447,6 +1450,7 @@ static int read_view(int fd, pv_view **out) {
             e.tab_size = (int)ttsize; e.direction = (int)tdir;
             e.font_variant = (int)tfvar; e.list_style_pos = (int)tlpos;
             e.image_rendering = (int)tirend; e.caret_color = (int)tcaret;
+            e.object_fit = (int)tobject_fit;
             pv_set_text_ext(v, &e);
         }
         if (kind != PV_INPUT) {

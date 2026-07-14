@@ -169,6 +169,7 @@ static void run_init_common(pv_run *r) {
     r->word_break = 0;
     r->image_rendering = 0;
     r->caret_color = -1;
+    r->object_fit = 0;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -478,6 +479,7 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
     /* CSS_LEN_AUTO is an explicit caret-color:auto -- resolved, but the theme
      * caret is the effect, so the run carries the same -1 as unset. */
     r->caret_color = (e->caret_color == CSS_LEN_AUTO) ? -1 : e->caret_color;
+    r->object_fit = e->object_fit;
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -832,6 +834,7 @@ void pv_text_ext_reset(pv_text_ext *e) {
     e->tab_size = 0; e->direction = 0; e->font_variant = 0; e->list_style_pos = 0;
     e->image_rendering = 0;
     e->caret_color = -1;
+    e->object_fit = 0;
 }
 
 /* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
@@ -871,6 +874,7 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     /* caret-color: an explicit `auto` (CSS_LEN_AUTO) on a nearer ancestor is a
      * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. */
     if (e->caret_color == -1 && cs->caret_color != -1) e->caret_color = cs->caret_color;
+    if (e->object_fit == 0 && cs->object_fit != CSS_OFI_UNSET) e->object_fit = cs->object_fit;
 }
 
 /* True if the resolved style declares any HORIZONTAL box property. */

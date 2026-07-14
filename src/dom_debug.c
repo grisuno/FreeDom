@@ -169,6 +169,26 @@ static int dd_inset(int v) {
     return (v == PV_LEN_UNSET || v == CSS_LEN_AUTO) ? 0 : v;
 }
 
+static const char *dd_object_fit_name(int o) {
+    switch (o) {
+        case CSS_OFI_FILL:       return "fill";
+        case CSS_OFI_CONTAIN:    return "contain";
+        case CSS_OFI_COVER:      return "cover";
+        case CSS_OFI_NONE:       return "none";
+        case CSS_OFI_SCALE_DOWN: return "scale-down";
+        default:                 return "unset";
+    }
+}
+
+static const char *dd_image_rendering_name(int r) {
+    switch (r) {
+        case CSS_IR_AUTO:         return "auto";
+        case CSS_IR_PIXELATED:    return "pixelated";
+        case CSS_IR_CRISP_EDGES:  return "crisp-edges";
+        default:                  return "unset";
+    }
+}
+
 static const char *dd_border_style_name(int s) {
     switch (s) {
         case CSS_BST_SOLID:  return "solid";
@@ -283,6 +303,11 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
      * like white-space), so the common case stays byte-identical/compact. */
     if (b->text_overflow) dd_printf(c, " text-overflow=%s", dd_text_overflow_name(b->text_overflow));
     if (b->word_break == CSS_WB_BREAK) dd_puts(c, " word-break=break");
+
+    if (b->kind == RD_IMAGE) {
+        if (b->object_fit)      dd_printf(c, " of=%s", dd_object_fit_name(b->object_fit));
+        if (b->image_rendering) dd_printf(c, " ir=%s", dd_image_rendering_name(b->image_rendering));
+    }
 
     if (b->href != NULL && b->href[0] != '\0') { dd_puts(c, " href="); dd_field(c, b->href); }
 
@@ -432,6 +457,10 @@ size_t dd_format_css(const rd_doc *doc, char *out, size_t cap) {
                 dd_printf(&c, " text-decoration-thickness=%dpx", blk->text_decoration_thickness);
             if (blk->box_w)          dd_printf(&c, " width=%d", blk->box_w);
             if (blk->box_center)     dd_puts(&c, " margin=auto");
+            if (blk->kind == RD_IMAGE) {
+                if (blk->object_fit)      dd_printf(&c, " object-fit=%s", dd_object_fit_name(blk->object_fit));
+                if (blk->image_rendering) dd_printf(&c, " image-rendering=%s", dd_image_rendering_name(blk->image_rendering));
+            }
             dd_putc(&c, '\n');
         }
     }

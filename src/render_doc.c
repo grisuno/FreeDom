@@ -125,6 +125,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
      * RD_INPUT), gated by caps.css downstream like the rest. */
     b->image_rendering = 0;
     b->caret_color = -1;
+    b->object_fit = 0;
     b->cont_id = -1;
     b->cont_display = 0;
     b->cont_gap = 0;
@@ -313,6 +314,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         if (caps.css && d->count > 0) {
             rd_block *nb = &d->blocks[d->count - 1];
             if (r->kind == PV_IMAGE) nb->image_rendering = r->image_rendering;
+            if (r->kind == PV_IMAGE) nb->object_fit = r->object_fit;
             if (r->kind == PV_INPUT) nb->caret_color = r->caret_color;
         }
 
