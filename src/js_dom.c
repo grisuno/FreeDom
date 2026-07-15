@@ -350,6 +350,66 @@ static JSValue m_register_submit(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
+/* Generic event registration: dom.registerEvent(node_id, event_type, fn).
+ * Stores in __eventRegistry[node_id][event_type] = [fn, ...]. */
+static JSValue m_register_event(JSContext *ctx, JSValueConst this_val,
+                                int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc;
+    dom_node_id h;
+    if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION;
+    const char *type = JS_ToCString(ctx, argv[1]);
+    if (type == NULL) return JS_EXCEPTION;
+    if (!JS_IsFunction(ctx, argv[2])) { JS_FreeCString(ctx, type); return JS_UNDEFINED; }
+
+    JSValue global = JS_GetGlobalObject(ctx);
+    if (JS_IsException(global)) { JS_FreeCString(ctx, type); return JS_EXCEPTION; }
+
+    /* Get or create __eventRegistry */
+    JSValue reg = JS_GetPropertyStr(ctx, global, "__eventRegistry");
+    if (JS_IsUndefined(reg) || JS_IsNull(reg)) {
+        JS_FreeValue(ctx, reg);
+        reg = JS_NewObject(ctx);
+        if (JS_IsException(reg)) { JS_FreeValue(ctx, global); JS_FreeCString(ctx, type); return JS_EXCEPTION; }
+        JS_SetPropertyStr(ctx, global, "__eventRegistry", JS_DupValue(ctx, reg));
+    }
+
+    /* Get or create the map for this node_id */
+    char nstr[32];
+    snprintf(nstr, sizeof nstr, "%u", (unsigned)h);
+    JSValue node_map = JS_GetPropertyStr(ctx, reg, nstr);
+    if (JS_IsUndefined(node_map) || JS_IsNull(node_map)) {
+        JS_FreeValue(ctx, node_map);
+        node_map = JS_NewObject(ctx);
+        if (JS_IsException(node_map)) { JS_FreeValue(ctx, reg); JS_FreeValue(ctx, global); JS_FreeCString(ctx, type); return JS_EXCEPTION; }
+        JS_SetPropertyStr(ctx, reg, nstr, JS_DupValue(ctx, node_map));
+    }
+
+    /* Get or create the handler array for this event type.
+     * JS_SetProperty* steals a reference, so dup before storing and keep the local ref. */
+    JSValue type_arr = JS_GetPropertyStr(ctx, node_map, type);
+    if (JS_IsUndefined(type_arr) || JS_IsNull(type_arr)) {
+        JS_FreeValue(ctx, type_arr);
+        JSValue arr = JS_NewArray(ctx);
+        if (JS_IsException(arr)) { JS_FreeValue(ctx, node_map); JS_FreeValue(ctx, reg); JS_FreeValue(ctx, global); JS_FreeCString(ctx, type); return JS_EXCEPTION; }
+        JS_SetPropertyStr(ctx, node_map, type, JS_DupValue(ctx, arr));
+        type_arr = arr; /* arr still valid: SetPropertyStr stole the dup, not the original */
+    }
+
+    /* Append the handler to the array */
+    int32_t len = 0;
+    JSValue lv = JS_GetPropertyStr(ctx, type_arr, "length");
+    if (!JS_IsUndefined(lv) && !JS_IsException(lv)) JS_ToInt32(ctx, &len, lv);
+    JS_FreeValue(ctx, lv);
+    JS_SetPropertyUint32(ctx, type_arr, (uint32_t)len, JS_DupValue(ctx, argv[2]));
+
+    JS_FreeValue(ctx, type_arr);
+    JS_FreeValue(ctx, node_map);
+    JS_FreeValue(ctx, reg);
+    JS_FreeValue(ctx, global);
+    JS_FreeCString(ctx, type);
+    return JS_UNDEFINED;
+}
+
 /* --- CSS-selector queries (querySelector / matches / closest) --- */
 
 /* dom.querySelector(root, sel): root is a handle or -1 for document scope. */
@@ -463,6 +523,7 @@ static const jd_method JD_METHODS[] = {
     { "getInnerHtml",   m_get_inner_html,    1 },
     { "registerClick",  m_register_click,    2 },
     { "registerSubmit", m_register_submit,   2 },
+    { "registerEvent",  m_register_event,    3 },
     { "querySelector",    m_query_selector,     2 },
     { "querySelectorAll", m_query_selector_all, 2 },
     { "matches",          m_matches,            2 },
@@ -592,7 +653,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      contains: function(o){ if(!o||o._h===undefined) return false; for(var p=o._h;p!==null&&p!==undefined;){ if(p===h) return true; p=dom.parent(p); } return false; },"
      "      getElementsByTagName: function(t){ return wrapList(dom.querySelectorAll(h, String(t))); },"
      "      getElementsByClassName: function(c){ return wrapList(dom.querySelectorAll(h, '.'+String(c))); },"
-"      addEventListener: function(t,fn){ if(t==='click'&&typeof fn==='function') dom.registerClick(h, fn); else if(t==='submit'&&typeof fn==='function') dom.registerSubmit(h, fn); },"
+      "      addEventListener: function(t,fn){ if(typeof fn!=='function') return; if(t==='click') dom.registerClick(h, fn); else if(t==='submit') dom.registerSubmit(h, fn); else dom.registerEvent(h, String(t), fn); },"
       "      removeEventListener: function(){}, dispatchEvent: function(){ return true; },"
     "      querySelector: function(s){ return wrap(dom.querySelector(h, String(s))); },"
     "      querySelectorAll: function(s){ return wrapList(dom.querySelectorAll(h, String(s))); },"
@@ -626,6 +687,9 @@ static const char JD_DOCUMENT_SHIM[] =
     "    };"
     "    Object.defineProperty(el,'onclick',{set:function(fn){ if(typeof fn==='function') dom.registerClick(h, fn); },get:function(){return null;}});"
     "    Object.defineProperty(el,'onsubmit',{set:function(fn){ if(typeof fn==='function') dom.registerSubmit(h, fn); },get:function(){return null;}});"
+    "    ['keydown','keyup','keypress','input','change','focus','blur','scroll','mouseover','mouseout','mousemove','mouseenter','mouseleave','wheel'].forEach(function(t){"
+    "      Object.defineProperty(el,'on'+t,{set:function(fn){ if(typeof fn==='function') dom.registerEvent(h, String(t), fn); },get:function(){return null;}});"
+    "    });"
     "    __wc[h]=el;"
     "    return el;"
     "  }"
@@ -864,6 +928,28 @@ static const char JD_DOCUMENT_SHIM[] =
     "    if (typeof globalThis.onload==='function'){ try{ globalThis.onload(); }catch(e){fbLogErr(e);} }"
     "    if (typeof d.onload==='function'){ try{ d.onload(); }catch(e){fbLogErr(e);} }"
     "    globalThis.__tickTimers(0);"
+    "  };"
+    /* Generic event dispatcher: looks up handlers in __eventRegistry[node_id][type]
+     * and calls each with an event object. The event props are passed by the C side
+     * (trusted parent) as a plain object; we add target/preventDefault/type here.
+     * Returns 0 if a handler called preventDefault(), 1 otherwise. */
+    "  globalThis.__eventRegistry={};"
+    "  globalThis.__dispatchEvent=function(n,type,props){"
+    "    if(!type) return 1; type=String(type);"
+    "    var reg=globalThis.__eventRegistry; if(!reg) return 1;"
+    "    var na=reg[String(n)]; if(!na) return 1;"
+    "    var ha=na[type]; if(!ha||!ha.length) return 1;"
+    "    var e=props||{}; e.target=globalThis.__wrap(n);"
+    "    e.type=type;"
+    "    e.defaultPrevented=false;"
+    "    e.preventDefault=function(){this.defaultPrevented=true;};"
+    "    e.stopPropagation=function(){}; e.stopImmediatePropagation=function(){};"
+    "    for(var i=0;i<ha.length;i++){"
+    "      try{ ha[i].call(e.target,e); }catch(ex){"
+    "        try{ console.error(ex.stack||String(ex)); }catch(e2){}"
+    "      }"
+    "    }"
+    "    return e.defaultPrevented?0:1;"
     "  };"
     "})();";
 
@@ -1709,6 +1795,118 @@ int jd_fire_submit(js_context *ctx, dom_node_id form_node_id) {
         int32_t v = 1;
         JS_ToInt32(jsctx, &v, r);
         default_action = v != 0 ? 1 : 0;
+    }
+    JS_FreeValue(jsctx, r);
+    return default_action;
+}
+
+/* Escapes a string for safe interpolation into JS double-quoted string literal:
+ * replaces backslash with \\ and double-quote with \". Returns number of bytes
+ * written. Truncates if dst is too small (intended for bounded stack buffers). */
+static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz) {
+    size_t pos = 0;
+    if (dstsz == 0) return 0;
+    for (const char *p = src; *p != '\0' && pos + 6 < dstsz; ++p) {
+        unsigned char c = (unsigned char)*p;
+        if (c < 0x20) {  /* control chars: skip */
+            continue;
+        } else if (c == '\\' || c == '"') {
+            if (pos + 2 >= dstsz) break;
+            dst[pos++] = '\\';
+            dst[pos++] = c;
+        } else {
+            dst[pos++] = c;
+        }
+    }
+    dst[pos] = '\0';
+    return pos;
+}
+
+/* Fires a generic DOM event on node_id by calling
+ * __dispatchEvent(node_id, event_type, {key, keyCode, value}).
+ * Returns 1 if the default action should proceed, 0 if a handler called
+ * preventDefault(). Fail-open: if anything goes wrong, action proceeds.
+ * The key and value strings are escaped before interpolation into JS source
+ * (defence in depth: the data comes from the trusted GUI, but a hostile
+ * keyboard/input value must not be able to inject code). */
+int jd_fire_event(js_context *ctx, dom_node_id node_id,
+                  const char *event_type,
+                  const char *key, int key_code,
+                  const char *value) {
+    if (ctx == NULL || node_id == DOM_NODE_NONE || event_type == NULL) return 1;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 1;
+
+    /* Sanitise the event_type string: must be a simple identifier (no injection). */
+    for (const char *p = event_type; *p != '\0'; ++p) {
+        if (!((*p >= 'a' && *p <= 'z') || *p == '_')) return 1;
+    }
+
+    /* Escape key and value strings to prevent JS injection. */
+    char escaped_key[128];
+    char escaped_val[512];
+    if (key != NULL) jd_escape_js_str(key, escaped_key, sizeof escaped_key);
+    else escaped_key[0] = '\0';
+    if (value != NULL) jd_escape_js_str(value, escaped_val, sizeof escaped_val);
+    else escaped_val[0] = '\0';
+
+    /* Build: __dispatchEvent(NODE_ID, "event_type", {key: "...", keyCode: N, value: "..."}) */
+    char src[1536];
+    int n;
+    if (key != NULL && key[0] != '\0' && value != NULL && value[0] != '\0') {
+        n = snprintf(src, sizeof src,
+            "__dispatchEvent(%u,\"%s\",{key:\"%s\",keyCode:%d,value:\"%s\"})",
+            (unsigned)node_id, event_type, escaped_key, key_code, escaped_val);
+    } else if (key != NULL && key[0] != '\0') {
+        n = snprintf(src, sizeof src,
+            "__dispatchEvent(%u,\"%s\",{key:\"%s\",keyCode:%d})",
+            (unsigned)node_id, event_type, escaped_key, key_code);
+    } else if (value != NULL && value[0] != '\0') {
+        n = snprintf(src, sizeof src,
+            "__dispatchEvent(%u,\"%s\",{value:\"%s\"})",
+            (unsigned)node_id, event_type, escaped_val);
+    } else {
+        n = snprintf(src, sizeof src,
+            "__dispatchEvent(%u,\"%s\",{keyCode:%d})",
+            (unsigned)node_id, event_type, key_code);
+    }
+    if (n < 0 || (size_t)n >= sizeof src) return 1;
+
+    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<event-fire>", JS_EVAL_TYPE_GLOBAL);
+    int default_action = 1;
+    if (!JS_IsException(r)) {
+        int32_t v = 1;
+        JS_ToInt32(jsctx, &v, r);
+        default_action = (v != 0) ? 1 : 0;
+    }
+    JS_FreeValue(jsctx, r);
+    return default_action;
+}
+
+int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
+                        const char *event_type,
+                        int client_x, int client_y, int button) {
+    if (ctx == NULL || node_id == DOM_NODE_NONE || event_type == NULL) return 1;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 1;
+
+    /* Sanitise the event_type string. */
+    for (const char *p = event_type; *p != '\0'; ++p) {
+        if (!((*p >= 'a' && *p <= 'z') || *p == '_')) return 1;
+    }
+
+    char src[1536];
+    int n = snprintf(src, sizeof src,
+        "__dispatchEvent(%u,\"%s\",{clientX:%d,clientY:%d,button:%d})",
+        (unsigned)node_id, event_type, client_x, client_y, button);
+    if (n < 0 || (size_t)n >= sizeof src) return 1;
+
+    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<mouse-event>", JS_EVAL_TYPE_GLOBAL);
+    int default_action = 1;
+    if (!JS_IsException(r)) {
+        int32_t v = 1;
+        JS_ToInt32(jsctx, &v, r);
+        default_action = (v != 0) ? 1 : 0;
     }
     JS_FreeValue(jsctx, r);
     return default_action;

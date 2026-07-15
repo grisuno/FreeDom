@@ -798,6 +798,324 @@ static void test_console_null_ctx(void **state) {
     fb_buffer_free(&log);
 }
 
+/* --- generic events (Phase 1.1 dispatcher) --- */
+
+static void test_event_add_event_listener_fires(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    const char *src =
+        "var i = document.getElementsByTagName('input')[0];"
+        "i.addEventListener('keydown', function(e){ i.value = e.key || 'no-key'; });"
+        "i._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_event(f->ctx, h, "keydown", "Enter", 13, NULL), 1);
+    EXPECT(f, "document.getElementsByTagName('input')[0].value", "Enter");
+}
+
+static void test_event_onkeydown_fires(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    const char *src =
+        "var i = document.getElementsByTagName('input')[0];"
+        "i.onkeydown = function(e){ i.value = e.keyCode + ':x'; };"
+        "i._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_event(f->ctx, h, "keydown", "a", 65, NULL), 1);
+    EXPECT(f, "document.getElementsByTagName('input')[0].value", "65:x");
+}
+
+static void test_event_input_handler_fires_with_value(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    const char *src =
+        "var i = document.getElementsByTagName('input')[0];"
+        "i.addEventListener('input', function(e){ i.dataset.lastVal = e.value || ''; });"
+        "i._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_event(f->ctx, h, "input", NULL, 0, "hello"), 1);
+    EXPECT(f, "document.getElementsByTagName('input')[0].dataset.lastVal", "hello");
+}
+
+static void test_event_prevent_default_suppresses(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    const char *src =
+        "var i = document.getElementsByTagName('input')[0];"
+        "i.addEventListener('keydown', function(e){ e.preventDefault(); });"
+        "i._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    assert_int_equal(jd_fire_event(f->ctx, h, "keydown", "Enter", 13, NULL), 0);
+}
+
+static void test_event_no_handler_allows_default(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    assert_int_equal(jd_fire_event(f->ctx, (dom_node_id)1, "keydown", "x", 88, NULL), 1);
+}
+
+static void test_event_null_args(void **state) {
+    (void)state;
+    fixture *f = (fixture *)*state;
+
+    assert_int_equal(jd_fire_event(NULL, (dom_node_id)1, "keydown", "x", 88, NULL), 1);
+    assert_int_equal(jd_fire_event(f->ctx, DOM_NODE_NONE, "keydown", "x", 88, NULL), 1);
+    assert_int_equal(jd_fire_event(f->ctx, (dom_node_id)1, NULL, "x", 88, NULL), 1);
+}
+
+/* --- focus/blur/scroll events (Phase 1.3 dispatcher) --- */
+
+/* Registers a focus listener via addEventListener and fires it. */
+static void test_focus_add_event_listener_fires(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var i = document.getElementsByTagName('input')[0];"
+        "i.addEventListener('focus', function(e){"
+        "  i.value = 'focused';"
+        "}); i._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_not_equal(jd_fire_event(f->ctx, h, "focus", NULL, 0, NULL), 0);
+    EXPECT(f, "document.getElementsByTagName('input')[0].value", "focused");
+}
+
+/* Registers an onblur handler via property setter and fires it. */
+static void test_blur_onblur_fires(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var i = document.getElementsByTagName('input')[0];"
+        "i.onblur = function(e){ i.value = 'lost'; };"
+        "i._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_not_equal(jd_fire_event(f->ctx, h, "blur", NULL, 0, NULL), 0);
+    EXPECT(f, "document.getElementsByTagName('input')[0].value", "lost");
+}
+
+/* Registers a scroll listener via addEventListener and fires it. */
+static void test_scroll_add_event_listener_fires(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var p = document.getElementById('main');"
+        "p.addEventListener('scroll', function(e){"
+        "  p.textContent = 'scrolled';"
+        "}); p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_not_equal(jd_fire_event(f->ctx, h, "scroll", NULL, 0, NULL), 0);
+    EXPECT(f, "document.getElementById('main').textContent", "scrolled");
+}
+
+/* Registers an onscroll handler via property setter and fires it. */
+static void test_scroll_onscroll_fires(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var p = document.getElementById('main');"
+        "p.onscroll = function(e){ p.textContent = 's'; };"
+        "p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_not_equal(jd_fire_event(f->ctx, h, "scroll", NULL, 0, NULL), 0);
+    EXPECT(f, "document.getElementById('main').textContent", "s");
+}
+
+/* preventDefault on focus/blur/scroll. */
+static void test_focus_blur_scroll_prevent_default(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var i = document.getElementsByTagName('input')[0];"
+        "i.addEventListener('focus', function(e){ e.preventDefault(); });"
+        "i.addEventListener('blur', function(e){ e.preventDefault(); });"
+        "i._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_equal(jd_fire_event(f->ctx, h, "focus", NULL, 0, NULL), 0);
+    assert_int_equal(jd_fire_event(f->ctx, h, "blur", NULL, 0, NULL), 0);
+
+    /* scroll on a different element that has a scroll handler. */
+    const char *src2 =
+        "var p = document.getElementById('main');"
+        "p.addEventListener('scroll', function(e){ e.preventDefault(); });"
+        "p._h;";
+    assert_int_equal(js_eval(f->ctx, src2, strlen(src2), &r), JS_OK);
+    dom_node_id h2 = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h2, DOM_NODE_NONE);
+    assert_int_equal(jd_fire_event(f->ctx, h2, "scroll", NULL, 0, NULL), 0);
+}
+
+/* No handler = default action allowed. */
+static void test_focus_blur_scroll_no_handler_allows_default(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_fire_event(f->ctx, (dom_node_id)1, "focus", NULL, 0, NULL), 1);
+    assert_int_equal(jd_fire_event(f->ctx, (dom_node_id)1, "blur", NULL, 0, NULL), 1);
+    assert_int_equal(jd_fire_event(f->ctx, (dom_node_id)1, "scroll", NULL, 0, NULL), 1);
+}
+
+/* Null args. */
+static void test_focus_blur_scroll_null_args(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_fire_event(NULL, (dom_node_id)1, "focus", NULL, 0, NULL), 1);
+    assert_int_equal(jd_fire_event(f->ctx, DOM_NODE_NONE, "focus", NULL, 0, NULL), 1);
+    assert_int_equal(jd_fire_event(f->ctx, (dom_node_id)1, NULL, NULL, 0, NULL), 1);
+}
+
+/* --- mouse events (Phase 1.2 dispatcher) --- */
+
+/* Registers a mouseover listener via addEventListener and fires it. */
+static void test_mouse_add_event_listener_fires(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var p = document.getElementById('main');"
+        "p.addEventListener('mouseover', function(e){"
+        "  p.textContent = 'over';"
+        "}); p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_not_equal(jd_fire_mouse_event(f->ctx, h, "mouseover", 100, 200, 0), 0);
+    EXPECT(f, "document.getElementById('main').textContent", "over");
+}
+
+/* Registers an onmouseout handler via property setter and fires it. */
+static void test_mouse_onmouseout_fires(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var p = document.getElementById('main');"
+        "p.onmouseout = function(e){ p.textContent = 'out'; };"
+        "p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_not_equal(jd_fire_mouse_event(f->ctx, h, "mouseout", 150, 250, -1), 0);
+    EXPECT(f, "document.getElementById('main').textContent", "out");
+}
+
+/* Fires a mousemove event with coordinates and verifies the handler sees them. */
+static void test_mouse_mousemove_sees_coords(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var p = document.getElementById('main');"
+        "p.addEventListener('mousemove', function(e){"
+        "  p.textContent = e.clientX + ',' + e.clientY;"
+        "}); p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    assert_int_not_equal(jd_fire_mouse_event(f->ctx, h, "mousemove", 42, 73, 0), 0);
+    EXPECT(f, "document.getElementById('main').textContent", "42,73");
+}
+
+/* Fires on multiple mouse event types and verifies each triggers separately. */
+static void test_mouse_multi_event_fires(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var p = document.getElementById('main');"
+        "var n = 0;"
+        "p.addEventListener('mouseover', function(e){ n += 1; });"
+        "p.addEventListener('mouseout', function(e){ n += 10; });"
+        "p.addEventListener('mousemove', function(e){ n += 100; });"
+        "p.addEventListener('mouseenter', function(e){ n += 1000; });"
+        "p.addEventListener('mouseleave', function(e){ n += 10000; });"
+        "p.addEventListener('wheel', function(e){ n += 100000; });"
+        "p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+
+    /* fire events and check n via EXPECT */
+    (void)jd_fire_mouse_event(f->ctx, h, "mouseover", 0, 0, 0);
+    EXPECT(f, "n", "1");
+    (void)jd_fire_mouse_event(f->ctx, h, "mouseout", 0, 0, 0);
+    EXPECT(f, "n", "11");
+    (void)jd_fire_mouse_event(f->ctx, h, "mousemove", 0, 0, 0);
+    EXPECT(f, "n", "111");
+    (void)jd_fire_mouse_event(f->ctx, h, "mouseenter", 0, 0, 0);
+    EXPECT(f, "n", "1111");
+    (void)jd_fire_mouse_event(f->ctx, h, "mouseleave", 0, 0, 0);
+    EXPECT(f, "n", "11111");
+    (void)jd_fire_mouse_event(f->ctx, h, "wheel", 0, 0, -1);
+    EXPECT(f, "n", "111111");
+}
+
+/* preventDefault on a mouse event suppresses the default action. */
+static void test_mouse_prevent_default_suppresses(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *src =
+        "var p = document.getElementById('main');"
+        "p.addEventListener('mousedown', function(e){ e.preventDefault(); });"
+        "p._h;";
+    js_result r;
+    assert_int_equal(js_eval(f->ctx, src, strlen(src), &r), JS_OK);
+    dom_node_id h = (dom_node_id)strtoull(r.value, NULL, 10);
+    js_result_free(&r);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    int def = jd_fire_mouse_event(f->ctx, h, "mousedown", 10, 20, 0);
+    assert_int_equal(def, 0);
+}
+
+/* No handler = default action allowed. */
+static void test_mouse_no_handler_allows_default(void **state) {
+    fixture *f = (fixture *)*state;
+    int def = jd_fire_mouse_event(f->ctx, (dom_node_id)1, "mouseover", 5, 10, 0);
+    assert_int_equal(def, 1);
+}
+
+/* Null arguments are fail-open. */
+static void test_mouse_null_args(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_fire_mouse_event(NULL, (dom_node_id)1, "mouseover", 0, 0, 0), 1);
+    assert_int_equal(jd_fire_mouse_event(f->ctx, DOM_NODE_NONE, "mouseover", 0, 0, 0), 1);
+    assert_int_equal(jd_fire_mouse_event(f->ctx, (dom_node_id)1, NULL, 0, 0, 0), 1);
+}
+
 /* --- click events (Stage 4 dispatcher) --- */
 
 static void test_click_install_null_args(void **state) {
@@ -1107,6 +1425,26 @@ int main(void) {
         cmocka_unit_test(test_console_object_and_throwing_tostring),
         cmocka_unit_test(test_console_null_buffer_is_noop),
         cmocka_unit_test(test_console_null_ctx),
+        cmocka_unit_test_setup_teardown(test_event_add_event_listener_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_event_onkeydown_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_event_input_handler_fires_with_value, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_event_prevent_default_suppresses, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_event_no_handler_allows_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_event_null_args, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_focus_add_event_listener_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_blur_onblur_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_scroll_add_event_listener_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_scroll_onscroll_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_focus_blur_scroll_prevent_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_focus_blur_scroll_no_handler_allows_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_focus_blur_scroll_null_args, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mouse_add_event_listener_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mouse_onmouseout_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mouse_mousemove_sees_coords, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mouse_multi_event_fires, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mouse_prevent_default_suppresses, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mouse_no_handler_allows_default, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_mouse_null_args, setup, teardown),
         cmocka_unit_test(test_click_install_null_args),
         cmocka_unit_test_setup_teardown(test_click_add_event_listener_fires, setup, teardown),
         cmocka_unit_test_setup_teardown(test_click_onclick_fires, setup, teardown),

@@ -59,7 +59,7 @@ static void ignore_sigpipe(void);
 
 /* Request opcodes (parent -> child). */
 enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
-       OP_TICK = 6, OP_SUBMIT = 7 };
+       OP_TICK = 6, OP_SUBMIT = 7, OP_EVENT = 8, OP_MOUSE = 9 };
 
 /* OP_LOAD response tags (child -> parent). While running the page's scripts the child
  * may issue zero or more TAG_SUBREQ subresource requests (XMLHttpRequest/fetch), which
@@ -1001,6 +1001,90 @@ static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms) {
     child_handle_mutation(wfd, cs, 1, DOM_NODE_NONE, elapsed_ms);
 }
 
+/* Handles a generic DOM event (OP_EVENT). Reads: node_id:int32, event_type_len:size_t,
+ * event_type, key_len:size_t, key, key_code:int32, value_len:size_t, value.
+ * Fires JS handlers via jd_fire_event, re-derives the view. */
+/* read_field reads a size-prefixed field from fd; defined below. */
+static int read_field(int fd, char **out, size_t *out_len);
+
+static void child_handle_event(int wfd, child_state *cs) {
+    if (cs->js == NULL || cs->idx == NULL || cs->doc == NULL) {
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    int32_t nid;
+    if (read_full(cs->rfd, &nid, sizeof nid) != 0) {
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    size_t tlen = 0;
+    char *etype = NULL;
+    if (read_field(cs->rfd, &etype, &tlen) != 0) {
+        free(etype);
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    size_t klen = 0;
+    char *key = NULL;
+    if (read_field(cs->rfd, &key, &klen) != 0) {
+        free(etype); free(key);
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    int32_t key_code = 0;
+    if (read_full(cs->rfd, &key_code, sizeof key_code) != 0) {
+        free(etype); free(key);
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    size_t vlen = 0;
+    char *value = NULL;
+    if (read_field(cs->rfd, &value, &vlen) != 0) {
+        free(etype); free(key); free(value);
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+
+    (void)jd_fire_event(cs->js, (dom_node_id)nid, etype, key, (int)key_code, value);
+    free(etype); free(key); free(value);
+
+    /* Re-derive the view (same as mutation path). */
+    child_handle_mutation(wfd, cs, 0, (dom_node_id)nid, 0);
+}
+
+/* Handles a mouse DOM event (OP_MOUSE). Reads: node_id:int32,
+ * event_type_len:size_t, event_type, client_x:int32, client_y:int32,
+ * button:int32. Fires JS handlers via jd_fire_mouse_event, re-derives the view. */
+static void child_handle_mouse(int wfd, child_state *cs) {
+    if (cs->js == NULL || cs->idx == NULL || cs->doc == NULL) {
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    int32_t nid;
+    if (read_full(cs->rfd, &nid, sizeof nid) != 0) {
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    size_t tlen = 0;
+    char *etype = NULL;
+    if (read_field(cs->rfd, &etype, &tlen) != 0) {
+        free(etype);
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    int32_t cx = 0, cy = 0, btn = -1;
+    if (read_full(cs->rfd, &cx, sizeof cx) != 0
+     || read_full(cs->rfd, &cy, sizeof cy) != 0
+     || read_full(cs->rfd, &btn, sizeof btn) != 0) {
+        free(etype);
+        child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+        return;
+    }
+    (void)jd_fire_mouse_event(cs->js, (dom_node_id)nid, etype, (int)cx, (int)cy, (int)btn);
+    free(etype);
+    child_handle_mutation(wfd, cs, 0, (dom_node_id)nid, 0);
+}
+
 /* Fires a submit event on the form enclosing node_id. Walks up the DOM to find
  * the <form> element, dispatches the event, and reports whether preventDefault
  * was called. Response: [TAG_RESULT][ok:int32][prevented:int32]. No view
@@ -1150,7 +1234,8 @@ static void tab_worker_run(int rfd, int wfd) {
         if (read_full(rfd, &op, 1) != 0) break; /* EOF / error => quit */
         if (op == OP_QUIT) break;
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE &&
-            op != OP_CLICK && op != OP_TICK && op != OP_SUBMIT)
+            op != OP_CLICK && op != OP_TICK && op != OP_SUBMIT &&
+            op != OP_EVENT && op != OP_MOUSE)
             break; /* desync */
 
         /* OP_CLICK is a short command: just the target node id. */
@@ -1174,6 +1259,20 @@ static void tab_worker_run(int rfd, int wfd) {
             int32_t nid = (int32_t)DOM_NODE_NONE;
             if (read_full(rfd, &nid, sizeof nid) != 0) break;
             child_handle_submit(wfd, &cs, (dom_node_id)nid);
+            continue;
+        }
+
+        /* OP_EVENT dispatches a generic DOM event. Reads: node_id, event_type (size+str),
+         * key (size+str), key_code, value (size+str). */
+        if (op == OP_EVENT) {
+            child_handle_event(wfd, &cs);
+            continue;
+        }
+
+        /* OP_MOUSE dispatches a mouse DOM event. Reads: node_id, event_type (size+str),
+         * client_x:int32, client_y:int32, button:int32. */
+        if (op == OP_MOUSE) {
+            child_handle_mouse(wfd, &cs);
             continue;
         }
 
@@ -1912,59 +2011,7 @@ static tab_status tab_mutation_request(tab *t, uint8_t op, int32_t arg, tab_page
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
     }
 
-    uint8_t tag = 0;
-    if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
-    if (tag != TAG_RESULT) return io_failure(t);
-
-    int32_t ok = 0;
-    if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
-    if (!ok) return TAB_ERR_RENDER;
-
-    char *title = NULL, *text = NULL;
-    size_t tl = 0, xl = 0;
-    if (read_field(t->resp_fd, &title, &tl) != 0
-     || read_field(t->resp_fd, &text, &xl) != 0) {
-        free(title); free(text);
-        return io_failure(t);
-    }
-    pv_view *view = NULL;
-    if (read_view(t->resp_fd, &view) != 0) {
-        free(title); free(text);
-        return io_failure(t);
-    }
-    /* Mutation responses carry an empty navigation field. */
-    char *navreq = NULL;
-    size_t nlen = 0;
-    int32_t nav_replace = 0;
-    if (read_field(t->resp_fd, &navreq, &nlen) != 0
-     || read_full(t->resp_fd, &nav_replace, sizeof nav_replace) != 0) {
-        free(title); free(text); free(navreq); pv_free(view);
-        return io_failure(t);
-    }
-    free(navreq);
-
-    fb_buffer console;
-    fb_buffer_init(&console);
-    if (read_console(t->resp_fd, &console) != 0) {
-        free(title); free(text); pv_free(view);
-        fb_buffer_free(&console);
-        return io_failure(t);
-    }
-    int32_t next_ms = -1;
-    if (read_full(t->resp_fd, &next_ms, sizeof next_ms) != 0) {
-        free(title); free(text); pv_free(view);
-        fb_buffer_free(&console);
-        return io_failure(t);
-    }
-
-    out->title = title; out->title_len = tl;
-    out->text  = text;  out->text_len  = xl;
-    out->view  = view;
-    out->nav_url = NULL;
-    out->nav_replace = 0;
-    out->console = console;
-    out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
-    return TAB_OK;
+    return tab_read_view(t, out);
 }
 
 tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out) {
@@ -2005,6 +2052,142 @@ tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented) {
     if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
     if (read_full(t->resp_fd, &p, sizeof p) != 0) return io_failure(t);
     *prevented = (ok && !p) ? 1 : 0;
+    return TAB_OK;
+}
+
+/* Sends a generic DOM event to the worker. Wire format:
+ * OP_EVENT(1) + node_id:int32 + event_type_len:size_t + event_type +
+ * key_len:size_t + key + key_code:int32 + value_len:size_t + value.
+ * Returns TAB_OK if the event was dispatched and the worker replied (which
+ * includes a re-derived view for repainting). If *out is populated on TAB_OK,
+ * it must be released with tab_page_free. */
+tab_status tab_dispatch_event(tab *t, dom_node_id node_id,
+                              const char *event_type,
+                              const char *key, int key_code,
+                              const char *value,
+                              tab_page *out) {
+    if (t == NULL || out == NULL || event_type == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    if (node_id == DOM_NODE_NONE) return TAB_ERR_NULL_ARG;
+
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+
+    size_t tlen = strlen(event_type);
+    size_t klen = (key != NULL) ? strlen(key) : 0;
+    size_t vlen = (value != NULL) ? strlen(value) : 0;
+
+    uint8_t op = OP_EVENT;
+    int32_t nid = (int32_t)node_id;
+    int32_t kc = key_code;
+    if (write_full(t->req_fd, &op, 1) != 0
+     || write_full(t->req_fd, &nid, sizeof nid) != 0
+     || write_full(t->req_fd, &tlen, sizeof tlen) != 0
+     || (tlen > 0 && write_full(t->req_fd, event_type, tlen) != 0)
+     || write_full(t->req_fd, &klen, sizeof klen) != 0
+     || (klen > 0 && write_full(t->req_fd, key, klen) != 0)
+     || write_full(t->req_fd, &kc, sizeof kc) != 0
+     || write_full(t->req_fd, &vlen, sizeof vlen) != 0
+     || (vlen > 0 && write_full(t->req_fd, value, vlen) != 0)) {
+        tab_refresh_alive(t);
+        return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
+
+    /* The worker replies with TAG_RESULT + TAG_VIEW (re-derived page view). */
+    return tab_read_view(t, out);
+}
+
+/* Sends a mouse DOM event to the worker. Wire format:
+ * OP_MOUSE(1) + node_id:int32 + event_type_len:size_t + event_type +
+ * client_x:int32 + client_y:int32 + button:int32.
+ * Returns TAB_OK if the event was dispatched and the worker replied (which
+ * includes a re-derived view for repainting). */
+tab_status tab_dispatch_mouse(tab *t, dom_node_id node_id,
+                              const char *event_type,
+                              int client_x, int client_y, int button,
+                              tab_page *out) {
+    if (t == NULL || out == NULL || event_type == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    if (node_id == DOM_NODE_NONE) return TAB_ERR_NULL_ARG;
+
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+
+    size_t tlen = strlen(event_type);
+    if (tlen == 0) return TAB_ERR_NULL_ARG;
+
+    uint8_t op = OP_MOUSE;
+    int32_t nid = (int32_t)node_id;
+    int32_t cx = client_x, cy = client_y, btn = button;
+    if (write_full(t->req_fd, &op, 1) != 0
+     || write_full(t->req_fd, &nid, sizeof nid) != 0
+     || write_full(t->req_fd, &tlen, sizeof tlen) != 0
+     || write_full(t->req_fd, event_type, tlen) != 0
+     || write_full(t->req_fd, &cx, sizeof cx) != 0
+     || write_full(t->req_fd, &cy, sizeof cy) != 0
+     || write_full(t->req_fd, &btn, sizeof btn) != 0) {
+        tab_refresh_alive(t);
+        return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
+
+    return tab_read_view(t, out);
+}
+
+/* Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console).
+ * Used by tab_mutation_request, tab_subreq, tab_dispatch_event. */
+tab_status tab_read_view(tab *t, tab_page *out) {
+    if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
+    uint8_t tag = 0;
+    if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
+    if (tag != TAG_RESULT) return io_failure(t);
+
+    int32_t ok = 0;
+    if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
+    if (!ok) return TAB_ERR_RENDER;
+
+    char *title = NULL, *text = NULL;
+    size_t tl = 0, xl = 0;
+    if (read_field(t->resp_fd, &title, &tl) != 0
+     || read_field(t->resp_fd, &text, &xl) != 0) {
+        free(title); free(text);
+        return io_failure(t);
+    }
+    pv_view *view = NULL;
+    if (read_view(t->resp_fd, &view) != 0) {
+        free(title); free(text);
+        return io_failure(t);
+    }
+    char *navreq = NULL;
+    size_t nlen = 0;
+    int32_t nav_replace = 0;
+    if (read_field(t->resp_fd, &navreq, &nlen) != 0
+     || read_full(t->resp_fd, &nav_replace, sizeof nav_replace) != 0) {
+        free(title); free(text); free(navreq); pv_free(view);
+        return io_failure(t);
+    }
+    free(navreq);
+
+    fb_buffer console;
+    fb_buffer_init(&console);
+    if (read_console(t->resp_fd, &console) != 0) {
+        free(title); free(text); pv_free(view);
+        fb_buffer_free(&console);
+        return io_failure(t);
+    }
+    int32_t next_ms = -1;
+    if (read_full(t->resp_fd, &next_ms, sizeof next_ms) != 0) {
+        free(title); free(text); pv_free(view);
+        fb_buffer_free(&console);
+        return io_failure(t);
+    }
+
+    out->title = title; out->title_len = tl;
+    out->text  = text;  out->text_len  = xl;
+    out->view  = view;
+    out->nav_url = NULL;
+    out->nav_replace = 0;
+    out->console = console;
+    out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
     return TAB_OK;
 }
 

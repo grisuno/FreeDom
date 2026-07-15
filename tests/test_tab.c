@@ -473,6 +473,149 @@ static void test_click_runs_handler_and_returns_view(void **state) {
     tab_close(t);
 }
 
+static void test_event_ipc_via_tab_eval(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>E</title></head><body>"
+        "<p id=\"status\">waiting</p>"
+        "<input id=\"inp\" type=\"text\">"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_non_null(p.view);
+    tab_page_free(&p);
+
+    /* Get the input's DOM node_id from JS. */
+    tab_eval_result er;
+    const char *hjs = "document.getElementById('inp')._h";
+    int er_st = tab_eval(t, hjs, strlen(hjs), &er);
+    assert_int_equal(er_st, TAB_OK);
+    assert_int_equal(er.is_exception, 0);
+    dom_node_id h = (dom_node_id)strtoull(er.value, NULL, 10);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    tab_eval_result_free(&er);
+
+    /* Register a keydown handler via tab_eval. */
+    const char *register_js =
+        "var i=document.getElementById('inp');"
+        "i.addEventListener('keydown',function(e){"
+        "  document.getElementById('status').textContent = e.key||'none';"
+        "}); i._h;";
+    assert_int_equal(tab_eval(t, register_js, strlen(register_js), &er), TAB_OK);
+    assert_int_equal(er.is_exception, 0);
+    dom_node_id h2 = (dom_node_id)strtoull(er.value, NULL, 10);
+    assert_int_equal(h2, h);
+    tab_eval_result_free(&er);
+
+    /* Dispatch a keydown event on the input's DOM handle. */
+    tab_page p2;
+    tab_status st = tab_dispatch_event(t, h, "keydown", "Enter", 13, NULL, &p2);
+    assert_int_equal(st, TAB_OK);
+    assert_non_null(p2.view);
+
+    /* Verify handler ran: status.textContent should now be "Enter". */
+    int saw = 0;
+    for (size_t i = 0; i < pv_count(p2.view); ++i) {
+        const pv_run *r = pv_at(p2.view, i);
+        if (r->text && strcmp(r->text, "Enter") == 0) { saw = 1; break; }
+    }
+    assert_true(saw);
+    tab_page_free(&p2);
+    tab_close(t);
+}
+
+/* Dispatches a mouse event (mouseover) via tab_dispatch_mouse and verifies the
+ * handler fires and mutates the DOM. Covers the IPC round-trip. */
+static void test_mouse_ipc_round_trip(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>M</title></head><body>"
+        "<p id=\"status\">waiting</p>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_non_null(p.view);
+    tab_page_free(&p);
+
+    /* Register a mouseover handler via tab_eval. */
+    tab_eval_result er;
+    const char *register_js =
+        "var p=document.getElementById('status');"
+        "p.addEventListener('mouseover',function(e){"
+        "  p.textContent = 'over';"
+        "}); p._h;";
+    assert_int_equal(tab_eval(t, register_js, strlen(register_js), &er), TAB_OK);
+    assert_int_equal(er.is_exception, 0);
+    dom_node_id h = (dom_node_id)strtoull(er.value, NULL, 10);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    tab_eval_result_free(&er);
+
+    /* Dispatch a mouseover event on the paragraph. */
+    tab_page p2;
+    tab_status st = tab_dispatch_mouse(t, h, "mouseover", 42, 73, 0, &p2);
+    assert_int_equal(st, TAB_OK);
+    assert_non_null(p2.view);
+
+    /* Verify handler ran: status.textContent should now be "over". */
+    int saw = 0;
+    for (size_t i = 0; i < pv_count(p2.view); ++i) {
+        const pv_run *r = pv_at(p2.view, i);
+        if (r->text && strcmp(r->text, "over") == 0) { saw = 1; break; }
+    }
+    assert_true(saw);
+    tab_page_free(&p2);
+    tab_close(t);
+}
+
+/* Dispatches a focus event via tab_dispatch_event (OP_EVENT path) and verifies
+ * the handler fires and mutates the DOM. Covers focus/blur/scroll via IPC. */
+static void test_focus_ipc_round_trip(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>F</title></head><body>"
+        "<input id=\"inp\" type=\"text\">"
+        "<p id=\"status\">waiting</p>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_non_null(p.view);
+    tab_page_free(&p);
+
+    /* Register a focus handler on the input via tab_eval. */
+    tab_eval_result er;
+    const char *register_js =
+        "var i=document.getElementById('inp');"
+        "i.addEventListener('focus',function(e){"
+        "  document.getElementById('status').textContent = 'focused';"
+        "}); i._h;";
+    assert_int_equal(tab_eval(t, register_js, strlen(register_js), &er), TAB_OK);
+    assert_int_equal(er.is_exception, 0);
+    dom_node_id h = (dom_node_id)strtoull(er.value, NULL, 10);
+    assert_int_not_equal(h, DOM_NODE_NONE);
+    tab_eval_result_free(&er);
+
+    /* Dispatch a focus event via tab_dispatch_event. */
+    tab_page p2;
+    tab_status st = tab_dispatch_event(t, h, "focus", NULL, 0, NULL, &p2);
+    assert_int_equal(st, TAB_OK);
+    assert_non_null(p2.view);
+
+    int saw = 0;
+    for (size_t i = 0; i < pv_count(p2.view); ++i) {
+        const pv_run *r = pv_at(p2.view, i);
+        if (r->text && strcmp(r->text, "focused") == 0) { saw = 1; break; }
+    }
+    assert_true(saw);
+    tab_page_free(&p2);
+    tab_close(t);
+}
+
 /* Real async timers (2026-07-11): a setTimeout with a delay does NOT fire on the
  * load pump; the load response reports the smallest pending delay; tab_tick
  * advances the virtual clock, fires it, and the refreshed view shows the
@@ -1808,6 +1951,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_cont_item),
         cmocka_unit_test(test_load_carries_node_id),
         cmocka_unit_test(test_click_runs_handler_and_returns_view),
+        cmocka_unit_test(test_event_ipc_via_tab_eval),
+        cmocka_unit_test(test_mouse_ipc_round_trip),
+        cmocka_unit_test(test_focus_ipc_round_trip),
         cmocka_unit_test(test_tick_fires_delayed_timer),
         cmocka_unit_test(test_tick_interval_rearms),
         cmocka_unit_test(test_load_carries_box_decoration),

@@ -184,6 +184,36 @@ tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_pag
 tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
                          int run_js, int reader, int prefers_dark, tab_page *out);
 
+/* Dispatches an event on the loaded page's node_id. The worker fires any JS
+ * handlers registered for that node and returns the re-derived view, so the
+ * caller can repaint DOM mutations caused by the handler. On TAB_OK, *out is
+ * populated and must be released with tab_page_free.
+ * event_type is a JS event type string (e.g. "keydown", "input", "change").
+ * key is the keyboard key value (may be NULL).
+ * key_code is the numeric keyCode/key value.
+ * value is the element's current value for input/change events (may be NULL). */
+tab_status tab_dispatch_event(tab *t, dom_node_id node_id,
+                              const char *event_type,
+                              const char *key, int key_code,
+                              const char *value,
+                              tab_page *out);
+
+/* Dispatches a mouse DOM event on the loaded page's node_id. The worker fires any JS
+ * handlers registered for that node and returns the re-derived view.
+ * event_type is a JS event type string (e.g. "mouseover", "mouseout", "mousemove",
+ * "mouseenter", "mouseleave", "wheel").
+ * client_x and client_y are viewport-relative coordinates.
+ * button is the mouse button: -1 = none/move, 0 = left, 1 = middle, 2 = right.
+ * On TAB_OK, *out must be released with tab_page_free. */
+tab_status tab_dispatch_mouse(tab *t, dom_node_id node_id,
+                              const char *event_type,
+                              int client_x, int client_y, int button,
+                              tab_page *out);
+
+/* Reads a TAG_RESULT + TAG_VIEW response and populates *out. Returns TAB_OK on
+ * success. Used internally by tab_mutation_request, tab_subreq, tab_dispatch_event. */
+tab_status tab_read_view(tab *t, tab_page *out);
+
 /* Dispatches a click event on the loaded page's node_id. The worker fires any JS
  * click handlers registered for that node and returns the re-derived view, so the
  * caller can repaint DOM mutations caused by the handler. On TAB_OK, *out is

@@ -455,6 +455,10 @@ typedef struct browser_window {
     int           video_eof;       /* feeder thread has sent MD_FLUSH */
     pthread_t     video_thread;    /* feeder thread handle */
     int           video_evfd;      /* eventfd: feeder thread → main thread wake */
+
+    /* Mouse event dispatch (Phase 1.2). Caches the DOM node under the pointer for
+     * mouseover/mouseout detection between motion events. DOM_NODE_NONE = no hover. */
+    dom_node_id mouse_hover_node;
 } browser_window;
 
 /* Freebug second-window forward declarations (defined further down, but referenced
@@ -7751,6 +7755,13 @@ static void freebug_pointer_axis(browser_window *w, wl_fixed_t value) {
 
 /* ===================== end Freebug ===================== */
 
+/* Forward declarations for pointer event handlers below. dispatch_mouse_event is
+ * defined further down (after dispatch_js_event) but called from ptr_enter/leave
+ * /motion too. */
+static void dispatch_mouse_event(browser_window *w, dom_node_id node_id,
+                                 const char *event_type,
+                                 int client_x, int client_y, int button);
+
 static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_surface *sf, wl_fixed_t x, wl_fixed_t y) {
     (void)p;
@@ -7760,13 +7771,25 @@ static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
     w->ptr_y = wl_fixed_to_double(y);
     w->ptr_focus = sf; /* route later pointer events to the focused window */
     set_cursor(w, 0);
-    if (freebug_owns_surface(w, sf)) return; /* the console has no link/hover affordance */
+    if (freebug_owns_surface(w, sf)) return;
     update_hover(w);
+    /* Dispatch mouseenter on the element under the pointer. */
+    dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
+    if (nid != DOM_NODE_NONE) {
+        w->mouse_hover_node = nid;
+        dispatch_mouse_event(w, nid, "mouseenter", (int)w->ptr_x, (int)w->ptr_y, 0);
+    }
 }
 static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf) {
     (void)p; (void)s;
     browser_window *w = (browser_window *)d;
     if (w->ptr_focus == sf) w->ptr_focus = NULL;
+    /* Dispatch mouseleave on the last hovered node before clearing. */
+    if (w->mouse_hover_node != DOM_NODE_NONE) {
+        dispatch_mouse_event(w, w->mouse_hover_node, "mouseleave",
+                             (int)w->ptr_x, (int)w->ptr_y, 0);
+        w->mouse_hover_node = DOM_NODE_NONE;
+    }
     if (w->hover_href != NULL || w->hot != UI_HOT_NONE) {
         w->hover_href = NULL;
         w->hover_cursor = CSS_CUR_UNSET;
@@ -7782,6 +7805,21 @@ static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, 
     if (freebug_owns_surface(w, w->ptr_focus)) { freebug_pointer_motion(w); return; }
     if (w->dragging_scroll) { scrollbar_drag_to(w); return; }
     update_hover(w);
+    /* Track hovered-node changes for JS mouseover/mouseout events. */
+    if (w->js_mode != JSP_OFF && w->tab_worker != NULL) {
+        dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
+        if (nid != w->mouse_hover_node) {
+            if (w->mouse_hover_node != DOM_NODE_NONE) {
+                dispatch_mouse_event(w, w->mouse_hover_node, "mouseout",
+                                     (int)w->ptr_x, (int)w->ptr_y, 0);
+            }
+            if (nid != DOM_NODE_NONE) {
+                dispatch_mouse_event(w, nid, "mouseover",
+                                     (int)w->ptr_x, (int)w->ptr_y, 0);
+            }
+            w->mouse_hover_node = nid;
+        }
+    }
 }
 
 static void load_current(browser_window *w) {
@@ -7838,6 +7876,10 @@ static void go_omnibox(browser_window *w) {
     load_current(w);
 }
 
+static void dispatch_js_event(browser_window *w, dom_node_id node_id,
+                              const char *event_type, const char *key,
+                              int key_code, const char *value);
+
 static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
                        uint32_t button, uint32_t state) {
     (void)p; (void)t;
@@ -7850,9 +7892,28 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     if (button != UI_BTN_LEFT) return;
     if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
         if (w->dragging_scroll) { w->dragging_scroll = 0; redraw(w); }
+        /* Dispatch mouseup on the element under the pointer. */
+        if (w->js_mode != JSP_OFF && w->tab_worker != NULL && !freebug_owns_surface(w, w->ptr_focus)) {
+            dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
+            if (nid != DOM_NODE_NONE)
+                dispatch_mouse_event(w, nid, "mouseup", (int)w->ptr_x, (int)w->ptr_y, 0);
+        }
         return;
     }
     /* state == WL_POINTER_BUTTON_STATE_PRESSED below. */
+    /* Dispatch mousedown before any chrome logic so JS handlers see the press even
+     * when the UI consumes the release (e.g. toolbar click). Only content-area
+     * presses get dispatched (chrome has no DOM element). */
+    if (w->js_mode != JSP_OFF && w->tab_worker != NULL && !freebug_owns_surface(w, w->ptr_focus)) {
+        double tbtop = tabbar_top(w);
+        double top_of_toolbar = toolbar_top(w);
+        double bottom_of_chrome = top_of_toolbar + UI_TOOLBAR_H;
+        if (w->ptr_y >= tbtop + UI_TABBAR_H && w->ptr_y >= bottom_of_chrome) {
+            dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
+            if (nid != DOM_NODE_NONE)
+                dispatch_mouse_event(w, nid, "mousedown", (int)w->ptr_x, (int)w->ptr_y, 0);
+        }
+    }
 
     double ttop = toolbar_top(w);
 
@@ -8007,20 +8068,40 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
         }
         /* Content area. A click first hit-tests the form controls: an editable box
          * takes focus, a submit button submits its form. Otherwise a hyperlink is
-         * followed (the security decision lives in the pure ln_resolve). */
+         * followed (the security decision lives in the pure ln_resolve).
+         * Before clearing focus, dispatch blur on the old focused input so JS sees
+         * the loss of focus. */
+        dom_node_id old_nid = DOM_NODE_NONE;
+        if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
+            const rd_block *b = w->inputs[w->focused_input].blk;
+            if (b != NULL) old_nid = b->node_id;
+        }
         w->url_bar_focused = 0;
         w->focused_input = -1;
         const rd_block *ctl = input_at_point(w, w->ptr_x, w->ptr_y);
         if (ctl != NULL) {
             if (ctl->input_type == PV_IN_SUBMIT) {
+                /* Dispatch blur before submit. */
+                if (old_nid != DOM_NODE_NONE)
+                    dispatch_js_event(w, old_nid, "blur", NULL, 0, NULL);
                 submit_form(w, ctl);
             } else if (input_is_editable(ctl->input_type)) {
                 for (size_t i = 0; i < w->input_count; ++i) {
-                    if (w->inputs[i].blk == ctl) { w->focused_input = (int)i; break; }
+                    if (w->inputs[i].blk == ctl) {
+                        /* Dispatch blur on old, focus on new. */
+                        if (old_nid != ctl->node_id && old_nid != DOM_NODE_NONE)
+                            dispatch_js_event(w, old_nid, "blur", NULL, 0, NULL);
+                        w->focused_input = (int)i;
+                        dispatch_js_event(w, ctl->node_id, "focus", NULL, 0, NULL);
+                        break;
+                    }
                 }
             }
             /* PV_IN_BUTTON (reset/generic) is inert in v1. */
         } else {
+            /* Clicking non-input: dispatch blur on old if any. */
+            if (old_nid != DOM_NODE_NONE)
+                dispatch_js_event(w, old_nid, "blur", NULL, 0, NULL);
             dispatch_click(w, w->ptr_x, w->ptr_y);
         }
     }
@@ -8045,6 +8126,19 @@ static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
     w->scroll += (v > 0.0) ? step : -step;
     if (w->scroll < 0.0) w->scroll = 0.0; /* the upper bound is clamped during paint */
     redraw(w);
+
+    /* Dispatch wheel + scroll events to the element under the pointer. */
+    if (w->js_mode != JSP_OFF && w->tab_worker != NULL) {
+        dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
+        if (nid != DOM_NODE_NONE) {
+            dispatch_mouse_event(w, nid, "wheel", (int)w->ptr_x, (int)w->ptr_y, -1);
+            dispatch_js_event(w, nid, "scroll", NULL, 0, NULL);
+        }
+    }
+}
+
+static void ptr_frame(void *d, struct wl_pointer *p) {
+    (void)d; (void)p;
 }
 
 static const struct wl_pointer_listener pointer_listener = {
@@ -8053,6 +8147,7 @@ static const struct wl_pointer_listener pointer_listener = {
     .motion = ptr_motion,
     .button = ptr_button,
     .axis = ptr_axis,
+    .frame = ptr_frame,
 };
 
 /* --- clipboard (wl_data_device) --- */
@@ -8376,6 +8471,113 @@ static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct 
     if (w->kbd_focus == sf) w->kbd_focus = NULL;
 }
 
+/* Maps an xkb keysym to a JS event.key string. Returns NULL for printable chars
+ * (the utf8 bytes should be used as the key). */
+static const char *key_sym_to_js_key(xkb_keysym_t sym) {
+    switch (sym) {
+    case XKB_KEY_Return: case XKB_KEY_KP_Enter: return "Enter";
+    case XKB_KEY_BackSpace: return "Backspace";
+    case XKB_KEY_Delete: case XKB_KEY_KP_Delete: return "Delete";
+    case XKB_KEY_Escape: return "Escape";
+    case XKB_KEY_Tab: case XKB_KEY_KP_Tab: return "Tab";
+    case XKB_KEY_Left: return "ArrowLeft";
+    case XKB_KEY_Right: return "ArrowRight";
+    case XKB_KEY_Up: return "ArrowUp";
+    case XKB_KEY_Down: return "ArrowDown";
+    case XKB_KEY_Home: return "Home";
+    case XKB_KEY_End: return "End";
+    case XKB_KEY_Page_Up: return "PageUp";
+    case XKB_KEY_Page_Down: return "PageDown";
+    case XKB_KEY_Shift_L: case XKB_KEY_Shift_R: return "Shift";
+    case XKB_KEY_Control_L: case XKB_KEY_Control_R: return "Control";
+    case XKB_KEY_Alt_L: case XKB_KEY_Alt_R: return "Alt";
+    case XKB_KEY_Meta_L: case XKB_KEY_Meta_R: return "Meta";
+    case XKB_KEY_Caps_Lock: return "CapsLock";
+    default: return NULL;
+    }
+}
+
+/* Maps an xkb keysym to a JS keyCode number. For printable ASCII, returns the
+ * ASCII value; for special keys, returns the standard JS keyCode. */
+static int key_sym_to_keycode(xkb_keysym_t sym) {
+    if (sym >= 0x20 && sym <= 0x7E) return (int)sym;
+    switch (sym) {
+    case XKB_KEY_Return: case XKB_KEY_KP_Enter: return 13;
+    case XKB_KEY_BackSpace: return 8;
+    case XKB_KEY_Delete: case XKB_KEY_KP_Delete: return 46;
+    case XKB_KEY_Escape: return 27;
+    case XKB_KEY_Tab: case XKB_KEY_KP_Tab: return 9;
+    case XKB_KEY_Left: return 37;
+    case XKB_KEY_Right: return 39;
+    case XKB_KEY_Up: return 38;
+    case XKB_KEY_Down: return 40;
+    case XKB_KEY_Home: return 36;
+    case XKB_KEY_End: return 35;
+    case XKB_KEY_Page_Up: return 33;
+    case XKB_KEY_Page_Down: return 34;
+    default: return 0;
+    }
+}
+
+/* Dispatches a JS DOM event to the worker for the given node_id. The worker
+ * returns a re-derived view which is applied via apply_click_result. Since that
+ * replaces w->doc and rebuilds w->inputs, focus is cleared before the call and
+ * restored afterward if the input still exists. The text value is saved before
+ * dispatch and restored after, so live typed content is not lost. */
+static void dispatch_js_event(browser_window *w, dom_node_id node_id,
+                              const char *event_type, const char *key,
+                              int key_code, const char *value) {
+    if (w->js_mode == JSP_OFF || w->tab_worker == NULL) return;
+    if (node_id == DOM_NODE_NONE || event_type == NULL) return;
+
+    /* Clear focus before apply_click_result (which rebuilds w->inputs). */
+    int old_focus = w->focused_input;
+    w->focused_input = -1;
+
+    tab_page page;
+    memset(&page, 0, sizeof page);
+    if (tab_dispatch_event(w->tab_worker, node_id, event_type,
+                           key, key_code, value, &page) != TAB_OK) {
+        tab_page_free(&page);
+        return;
+    }
+    apply_click_result(w, &page);
+    tab_page_free(&page);
+
+    /* Restore focus and value: the fresh inputs have default values from the HTML
+     * value attribute; re-set from the saved copy so live typing survives. */
+    if (value != NULL && old_focus >= 0) {
+        for (size_t i = 0; i < w->input_count; ++i) {
+            if (w->inputs[i].blk != NULL && w->inputs[i].blk->node_id == node_id
+                && input_is_editable(w->inputs[i].blk->input_type)) {
+                tf_set(&w->inputs[i].field, value);
+                w->focused_input = (int)i;
+                break;
+            }
+        }
+    }
+}
+
+/* Dispatches a mouse DOM event to the live JS worker. Like dispatch_js_event but
+ * for mouse events (mouseover/mouseout/mousemove/etc.) via tab_dispatch_mouse.
+ * The refreshed view is applied with apply_click_result (same as click). */
+static void dispatch_mouse_event(browser_window *w, dom_node_id node_id,
+                                 const char *event_type,
+                                 int client_x, int client_y, int button) {
+    if (w->js_mode == JSP_OFF || w->tab_worker == NULL) return;
+    if (node_id == DOM_NODE_NONE || event_type == NULL) return;
+
+    tab_page page;
+    memset(&page, 0, sizeof page);
+    if (tab_dispatch_mouse(w->tab_worker, node_id, event_type,
+                           client_x, client_y, button, &page) != TAB_OK) {
+        tab_page_free(&page);
+        return;
+    }
+    apply_click_result(w, &page);
+    tab_page_free(&page);
+}
+
 /* Performs the effect of a single key press. Factored out of keyboard_key so a held
  * key can be re-fired from the repeat timer with the exact same semantics (the caller
  * recomputes sym/utf8/modifiers from the live xkb_state each time). */
@@ -8572,26 +8774,41 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
      * block is captured and focus dropped before calling it. */
     if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
         tf_field *field = &w->inputs[w->focused_input].field;
+        dom_node_id nid = w->inputs[w->focused_input].blk != NULL
+                            ? w->inputs[w->focused_input].blk->node_id : DOM_NODE_NONE;
+        const char *old_val = tf_text(field);
+        const char *js_key = key_sym_to_js_key(sym);
+        int kc = key_sym_to_keycode(sym);
+
         if (sym == XKB_KEY_Escape) {
+            /* Dispatch blur before clearing focus. */
+            dispatch_js_event(w, nid, "blur", NULL, 0, NULL);
             w->focused_input = -1;
         } else if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
+            /* Dispatch change event with current value before submit. */
+            dispatch_js_event(w, nid, "change", js_key, kc, old_val);
             const rd_block *blk = w->inputs[w->focused_input].blk;
             w->focused_input = -1;
             submit_form(w, blk);
         } else if (sym == XKB_KEY_BackSpace) {
             tf_backspace(field);
+            const char *new_val = tf_text(field);
+            dispatch_js_event(w, nid, "input", js_key, kc, new_val);
         } else if (sym == XKB_KEY_Delete || sym == XKB_KEY_KP_Delete) {
             tf_delete(field);
-        } else if (sym == XKB_KEY_Left) {
-            tf_move(field, -1);
-        } else if (sym == XKB_KEY_Right) {
-            tf_move(field, 1);
-        } else if (sym == XKB_KEY_Home) {
-            tf_home(field);
-        } else if (sym == XKB_KEY_End) {
-            tf_end(field);
+            const char *new_val = tf_text(field);
+            dispatch_js_event(w, nid, "input", js_key, kc, new_val);
+        } else if (sym == XKB_KEY_Left || sym == XKB_KEY_Right
+                   || sym == XKB_KEY_Up || sym == XKB_KEY_Down
+                   || sym == XKB_KEY_Home || sym == XKB_KEY_End
+                   || sym == XKB_KEY_Page_Up || sym == XKB_KEY_Page_Down) {
+            tf_move(field, (sym == XKB_KEY_Right || sym == XKB_KEY_Down) ? 1 : -1);
+            /* Cursor-only event: just keydown */
+            dispatch_js_event(w, nid, "keydown", js_key, kc, old_val);
         } else if (n > 0 && (unsigned char)utf8[0] >= 0x20) {
             for (int i = 0; i < n; ++i) tf_insert(field, utf8[i]);
+            const char *new_val = tf_text(field);
+            dispatch_js_event(w, nid, "input", js_key, kc, new_val);
         }
         redraw(w);
         return;
@@ -8604,15 +8821,23 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         double page = w->theme.page_step_lines * line;
         int was_g = w->pending_g;
         w->pending_g = 0;
+        int scrolled = 1;
         if (sym == XKB_KEY_Up || sym == XKB_KEY_k) { w->scroll -= line; }
         else if (sym == XKB_KEY_Down || sym == XKB_KEY_j) { w->scroll += line; }
         else if (sym == XKB_KEY_Page_Up || sym == XKB_KEY_b) { w->scroll -= page; }
         else if (sym == XKB_KEY_Page_Down || sym == XKB_KEY_space) { w->scroll += page; }
         else if (sym == XKB_KEY_Home) { w->scroll = 0.0; }
         else if (sym == XKB_KEY_End || sym == XKB_KEY_G) { w->scroll = w->content_total_h; }
-        else if (sym == XKB_KEY_g) { if (was_g) w->scroll = 0.0; else w->pending_g = 1; }
+        else if (sym == XKB_KEY_g) { if (was_g) w->scroll = 0.0; else w->pending_g = 1; scrolled = 0; }
+        else { scrolled = 0; }
         if (w->scroll < 0.0) w->scroll = 0.0;
         redraw(w);
+        /* Dispatch scroll event if the page actually scrolled. */
+        if (scrolled && w->js_mode != JSP_OFF && w->tab_worker != NULL) {
+            dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
+            if (nid != DOM_NODE_NONE)
+                dispatch_js_event(w, nid, "scroll", NULL, 0, NULL);
+        }
         return;
     }
 

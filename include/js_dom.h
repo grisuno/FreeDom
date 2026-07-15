@@ -74,6 +74,28 @@ int jd_fire_click(js_context *ctx, dom_node_id node_id);
  * ctx == NULL or no form found => 1 (fail-open: submission proceeds). */
 int jd_fire_submit(js_context *ctx, dom_node_id form_node_id);
 
+/* Fires a generic DOM event on node_id. event_type is the event name string
+ * (e.g. "keydown", "input", "change", "focus", "blur", "mouseover", "mouseout").
+ * key is the KeyboardEvent.key value (may be NULL for non-keyboard events).
+ * key_code is the keyCode/charCode value (0 for non-keyboard events).
+ * value is the current element value for input/change events (may be NULL).
+ * Returns 1 if the default action should proceed, 0 if a handler called
+ * preventDefault(). ctx == NULL => 1 (fail-open). */
+int jd_fire_event(js_context *ctx, dom_node_id node_id,
+                  const char *event_type,
+                  const char *key, int key_code,
+                  const char *value);
+
+/* Fires a mouse DOM event on node_id. event_type is the event name
+ * (e.g. "mouseover", "mouseout", "mousemove", "mouseenter", "mouseleave", "wheel").
+ * client_x and client_y are viewport-relative coordinates (pass 0 for wheel events).
+ * button is the mouse button: -1 = none/move, 0 = left, 1 = middle, 2 = right.
+ * Returns 1 if the default action should proceed, 0 if a handler called
+ * preventDefault(). ctx == NULL => 1 (fail-open). */
+int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
+                        const char *event_type,
+                        int client_x, int client_y, int button);
+
 /* Installs a real, read-only `location` (and document.location / document.URL) over
  * the page's URL, and arms JS-navigation capture: location.href= / assign / replace /
  * reload / window.location= record the RAW requested string (never executed, never
