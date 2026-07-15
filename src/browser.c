@@ -7,6 +7,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "browser.h"
+#include "util.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -78,15 +79,6 @@ static char *xstrdup(const char *s) {
     return d;
 }
 
-/* UTF-8 sequence length implied by a lead byte, or 0 for a continuation byte or
- * an invalid lead. */
-static size_t utf8_seq_len(unsigned char c) {
-    if (c < 0x80) return 1;
-    if (c >= 0xC2 && c <= 0xDF) return 2;
-    if (c >= 0xE0 && c <= 0xEF) return 3;
-    if (c >= 0xF0 && c <= 0xF4) return 4;
-    return 0;
-}
 
 /* Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80). 0xA0..
  * 0xFF map identically to Latin-1; 0x80..0x9F carry the Windows-1252 glyphs; the

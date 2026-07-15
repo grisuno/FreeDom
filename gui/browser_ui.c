@@ -4275,6 +4275,149 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         return;
     }
 
+    if (b->input_type == PV_IN_PROGRESS || b->input_type == PV_IN_METER) {
+        double bar_w = input_box_width(content_w);
+        if (bar_w < 20.0) bar_w = 20.0;
+        double bar_h = height - 4.0;
+        if (bar_h < 4.0) bar_h = 4.0;
+        double bar_x = left;
+        double bar_y = ry + (height - bar_h) * 0.5;
+
+        /* Parse value and max (the same fields used by the text-input fallthrough) */
+        double val_d = 0.0, max_d = 1.0;
+        if (b->value != NULL) val_d = atof(b->value);
+        if (b->input_type == PV_IN_PROGRESS) {
+            if (b->text != NULL && b->text[0] != '\0') max_d = atof(b->text);
+        } else {
+            /* meter: text holds "min,max,low,high,optimum" */
+            double min_d = 0.0, low_d = 0.0, high_d = 0.0, opt_d = 0.0;
+            if (b->text != NULL && b->text[0] != '\0') {
+                int nf = sscanf(b->text, "%lf,%lf,%lf,%lf,%lf",
+                                &min_d, &max_d, &low_d, &high_d, &opt_d);
+                (void)nf;
+            }
+            if (max_d <= min_d) max_d = min_d + 1.0;
+            if (val_d < min_d) val_d = min_d;
+            if (val_d > max_d) val_d = max_d;
+            double span = max_d - min_d;
+            double ratio = (span > 0.0) ? (val_d - min_d) / span : 0.0;
+
+            /* Background track */
+            set_rgb(cr, th->input_bg);
+            cairo_rectangle(cr, bar_x, bar_y, bar_w, bar_h);
+            cairo_fill(cr);
+
+            /* Determine color band: green (good), yellow (warn), red (danger)
+             * using low/high as the "good" range and optimum for coloring. */
+            ui_rgb fill_col = { 0.4, 0.8, 0.3 }; /* green default */
+            int has_low = (low_d > min_d && low_d <= max_d);
+            int has_high = (high_d >= min_d && high_d < max_d);
+            double good_low = has_low ? low_d : min_d;
+            double good_high = has_high ? high_d : max_d;
+
+            if (val_d < good_low) {
+                /* Below the low threshold: yellow if optimum is high, red otherwise */
+                fill_col = (opt_d >= good_high) ? (ui_rgb){0.9, 0.7, 0.1} : (ui_rgb){0.9, 0.3, 0.2};
+            } else if (val_d > good_high) {
+                /* Above the high threshold: yellow if optimum is low, red otherwise */
+                fill_col = (opt_d <= good_low) ? (ui_rgb){0.9, 0.7, 0.1} : (ui_rgb){0.9, 0.3, 0.2};
+            }
+
+            double fill_w = ratio * bar_w;
+            if (fill_w > 0.0) {
+                cairo_set_source_rgb(cr, fill_col.r, fill_col.g, fill_col.b);
+                cairo_rectangle(cr, bar_x, bar_y, fill_w, bar_h);
+                cairo_fill(cr);
+            }
+
+            /* Thin border */
+            set_rgb(cr, th->input_border);
+            cairo_set_line_width(cr, 1.0);
+            cairo_rectangle(cr, bar_x, bar_y, bar_w, bar_h);
+            cairo_stroke(cr);
+
+            /* Label: value/max */
+            char label[64];
+            cairo_save(cr);
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+            cairo_font_extents_t fe;
+            cairo_font_extents(cr, &fe);
+            int nw = snprintf(label, sizeof label, "%.*g/%.*g",
+                              (val_d == (int)val_d) ? 0 : 2, val_d,
+                              (max_d == (int)max_d) ? 0 : 2, max_d);
+            (void)nw;
+            set_rgb(cr, th->input_text);
+            double lx = bar_x + 4.0;
+            double ly = bar_y + (bar_h - fe.height) * 0.5 + fe.ascent;
+            draw_slice(cr, lx, ly, label, strlen(label));
+            cairo_restore(cr);
+            return;
+        }
+
+        if (max_d <= 0.0) max_d = 1.0;
+        if (val_d < 0.0) val_d = 0.0;
+        if (val_d > max_d) val_d = max_d;
+        double ratio = val_d / max_d;
+
+        /* Background track (unfilled portion) */
+        set_rgb(cr, th->input_bg);
+        cairo_rectangle(cr, bar_x, bar_y, bar_w, bar_h);
+        cairo_fill(cr);
+
+        /* Filled portion */
+        if (ratio > 0.0) {
+            double fill_w = ratio * bar_w;
+            if (fill_w < 1.0 && ratio > 0.0) fill_w = 1.0;
+            set_rgb(cr, th->link);
+            cairo_rectangle(cr, bar_x, bar_y, fill_w, bar_h);
+            cairo_fill(cr);
+        }
+
+        /* Thin border */
+        set_rgb(cr, th->input_border);
+        cairo_set_line_width(cr, 1.0);
+        cairo_rectangle(cr, bar_x, bar_y, bar_w, bar_h);
+        cairo_stroke(cr);
+
+        /* Label: value / max */
+        char label[64];
+        cairo_save(cr);
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        int nw = snprintf(label, sizeof label, "%.*g / %.*g",
+                          (val_d == (int)val_d) ? 0 : 2, val_d,
+                          (max_d == (int)max_d) ? 0 : 2, max_d);
+        (void)nw;
+        set_rgb(cr, th->input_text);
+        double lx = bar_x + 4.0;
+        double ly = bar_y + (bar_h - fe.height) * 0.5 + fe.ascent;
+        draw_slice(cr, lx, ly, label, strlen(label));
+        cairo_restore(cr);
+        return;
+    }
+
+    if (b->input_type == PV_IN_LEGEND) {
+        const char *legend = (b->text != NULL && b->text[0] != '\0') ? b->text
+                           : (b->value != NULL ? b->value : "");
+        if (legend[0] == '\0') return;
+        cairo_save(cr);
+        content_font(cr, th->body_font, 1, 0, CSS_FF_UNSET); /* bold */
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        double lx = left + 4.0;
+        double ly = ry + ascent - 1.0;
+        /* White background behind the legend text so it covers the border line */
+        double tw = measure_slice(cr, legend, strlen(legend));
+        set_rgb(cr, th->content_bg);
+        cairo_rectangle(cr, lx - 2.0, ly - fe.ascent, tw + 4.0, fe.height);
+        cairo_fill(cr);
+        set_rgb(cr, th->text);
+        draw_slice(cr, lx, ly, legend, strlen(legend));
+        cairo_restore(cr);
+        return;
+    }
+
     double bw = input_box_width(content_w);
     set_rgb(cr, focused ? th->input_bg_focused : th->input_bg);
     cairo_rectangle(cr, left, ry, bw, height);
@@ -4855,6 +4998,27 @@ static double row_align_offset(const rc_layout *L, const rc_row *r, double conte
     return (r->align == CSS_ALIGN_CENTER) ? slack / 2.0 : slack;
 }
 
+/* For text-align: justify, returns the extra width to add per inter-word space
+ * (the slack evenly split across all SPACE characters in the row), or 0.0 when
+ * the row should not be justified (no slack, no spaces, single fragment, not a
+ * justify row). The caller must multiply this by the number of SPACE characters
+ * that precede the current fragment to get the fragment's shift. */
+static double row_justify_gap(const rc_layout *L, const rc_row *r, double content_w) {
+    if (r->align != CSS_ALIGN_JUSTIFY || r->count < 2) return 0.0;
+    if (r->first + r->count > L->nfrag) return 0.0;
+    const rc_frag *last = &L->frags[r->first + r->count - 1];
+    double line_w = last->x + last->width;
+    double slack = (content_w - r->x_off) - line_w;
+    if (slack <= 0.0) return 0.0;
+    size_t nsp = 0;
+    for (size_t k = r->first; k < r->first + r->count; ++k) {
+        const rc_frag *ff = &L->frags[k];
+        for (size_t i = 0; i < ff->len; ++i)
+            if (ff->text[i] == ' ') ++nsp;
+    }
+    return (nsp == 0) ? 0.0 : slack / (double)nsp;
+}
+
 /* Appends a rectangle path with radius r (px) to cr. r <= 0 falls back to a plain
  * rectangle; r is clamped so opposite corners never overlap (min(w,h)/2). One radius
  * for all four corners: per-corner / elliptical radii collapse to the first value
@@ -5049,20 +5213,27 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
     double baseline = ry + r->ascent;
     /* row origin (column offset for flex/grid) plus any author text-align shift. */
     double rx = left + r->x_off + row_align_offset(L, r, content_w);
+    /* text-align: justify: distribute slack evenly between SPACE characters */
+    double jgap = row_justify_gap(L, r, content_w);
+    double jdx = 0.0; /* accumulates per-fragment justify shift */
     for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
         const rc_frag *f = &L->frags[k];
+        double fx = rx + f->x + jdx;
         /* Highlight the link under the pointer (all fragments of that link share
          * its href pointer into the doc). */
         if (show_hover && f->href != NULL && f->href == w->hover_href) {
             set_rgb(cr, th->link_hover_bg);
-            cairo_rectangle(cr, rx + f->x, ry, f->width, r->height);
+            cairo_rectangle(cr, fx, ry, f->width, r->height);
             cairo_fill(cr);
         }
         content_font(cr, f->font_size, f->bold, f->italic, f->family);
         /* vertical-align sub/super shifts this fragment's baseline (and the
          * decorations below); default valign_dy 0 keeps it on the line. */
         double fbaseline = baseline + f->valign_dy;
-        double fx = rx + f->x;
+        /* Accumulate justify offset: count spaces in this fragment */
+        if (jgap > 0.0)
+            for (size_t i = 0; i < f->len; ++i)
+                if (f->text[i] == ' ') jdx += jgap;
         /* Author text-shadow: one offset copy behind the glyphs, in the shadow color
          * (honoring opacity). shadow_color -1 (the default) means no shadow.
          * CC_COLOR_CURRENT (-2) resolves to the fragment's text color. */
@@ -5838,12 +6009,15 @@ static const char *link_at_point(browser_window *w, double px, double py) {
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
         double ax = row_align_offset(&L, r, content_w);
+        double jgap = row_justify_gap(&L, r, content_w);
+        double jdx = 0.0;
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
-            if (f->href == NULL) continue;
-            if (box_pointer_events_none(w->doc, f->block_id)) continue;
-            double fx = left + r->x_off + ax + f->x;
-            if (px >= fx && px <= fx + f->width) { hit = f->href; break; }
+            double fx = left + r->x_off + ax + f->x + jdx;
+            if (f->href != NULL && !box_pointer_events_none(w->doc, f->block_id)
+                && px >= fx && px <= fx + f->width) { hit = f->href; break; }
+            for (size_t j = 0; j < f->len; ++j)
+                if (f->text[j] == ' ') jdx += jgap;
         }
     }
 
@@ -5958,14 +6132,18 @@ static int cursor_at_point(browser_window *w, double px, double py) {
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
         double ax = row_align_offset(&L, r, content_w);
+        double jgap = row_justify_gap(&L, r, content_w);
+        double jdx = 0.0;
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
-            if (box_pointer_events_none(w->doc, f->block_id)) continue;
-            double fx = left + r->x_off + ax + f->x;
-            if (px >= fx && px <= fx + f->width) {
+            double fx = left + r->x_off + ax + f->x + jdx;
+            if (!box_pointer_events_none(w->doc, f->block_id)
+                && px >= fx && px <= fx + f->width) {
                 cur = resolve_box_cursor(w->doc, f->block_id);
                 break;
             }
+            for (size_t j = 0; j < f->len; ++j)
+                if (f->text[j] == ' ') jdx += jgap;
         }
     }
 
@@ -6005,12 +6183,15 @@ static dom_node_id node_at_point(browser_window *w, double px, double py) {
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
         double ax = row_align_offset(&L, r, content_w);
+        double jgap = row_justify_gap(&L, r, content_w);
+        double jdx = 0.0;
         for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
             const rc_frag *f = &L.frags[k];
-            if (f->node_id == DOM_NODE_NONE) continue;
-            if (box_pointer_events_none(w->doc, f->block_id)) continue;
-            double fx = left + r->x_off + ax + f->x;
-            if (px >= fx && px <= fx + f->width) { hit = f->node_id; break; }
+            double fx = left + r->x_off + ax + f->x + jdx;
+            if (f->node_id != DOM_NODE_NONE && !box_pointer_events_none(w->doc, f->block_id)
+                && px >= fx && px <= fx + f->width) { hit = f->node_id; break; }
+            for (size_t j = 0; j < f->len; ++j)
+                if (f->text[j] == ' ') jdx += jgap;
         }
     }
 

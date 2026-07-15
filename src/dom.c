@@ -14,6 +14,7 @@
 #include "html_parse.h"
 #include "css_chain.h"
 #include "css_select.h"
+#include "util.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -40,14 +41,6 @@ static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap) {
     return 0;
 }
 
-static uint64_t fnv1a(const char *s, size_t n) {
-    uint64_t h = 1469598103934665603ULL;
-    for (size_t i = 0; i < n; ++i) {
-        h ^= (unsigned char)s[i];
-        h *= 1099511628211ULL;
-    }
-    return h;
-}
 
 static size_t ptr_hash(const void *p) {
     uintptr_t x = (uintptr_t)p;
@@ -305,7 +298,7 @@ dom_status dom_build(const hp_document *doc, dom_index **out) {
 
     idx->count = n;
     idx->cap = n;
-    idx->nodes = (n > 0) ? (lxb_dom_node_t **)malloc(n * sizeof *idx->nodes) : NULL;
+    idx->nodes = (n > 0) ? (lxb_dom_node_t **)calloc(n, sizeof *idx->nodes) : NULL;
     if (n > 0 && idx->nodes == NULL) {
         free(idx);
         return DOM_ERR_OOM;
@@ -861,6 +854,7 @@ static void ih_free(ih_acc *a) {
  * Returns NULL on allocation failure (caller must still call ih_free). */
 static char *ih_flatten(ih_acc *a) {
     if (a->head == NULL) return NULL;
+    if (a->total == (size_t)-1) return NULL;
     char *buf = (char *)malloc(a->total + 1u);
     if (buf == NULL) return NULL;
     char *p = buf;

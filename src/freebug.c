@@ -43,6 +43,7 @@ int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
         b->cap = ncap;
     }
 
+    if (store == (size_t)-1) return 0;
     char *copy = (char *)malloc(store + 1);
     if (copy == NULL) return 0;
     if (store != 0) memcpy(copy, text, store);
@@ -54,6 +55,7 @@ int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
     if (file != NULL) {
         size_t flen = strlen(file);
         if (flen > FB_MAX_FILE_BYTES) flen = FB_MAX_FILE_BYTES;
+        if (flen == (size_t)-1) flen = 0;
         fcopy = (char *)malloc(flen + 1);
         if (fcopy != NULL) {
             if (flen != 0) memcpy(fcopy, file, flen);

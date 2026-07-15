@@ -104,6 +104,7 @@ static char *get_str(ti_rd *r, size_t cap) {
     uint32_t n = get_u32(r);
     if (r->err) return NULL;
     if ((size_t)n > cap || r->off + (size_t)n > r->len) { r->err = 1; return NULL; }
+    if (n == UINT32_MAX) { r->err = 1; return NULL; }
     char *s = malloc((size_t)n + 1u);
     if (s == NULL) { r->err = 1; return NULL; }
     if (n != 0) memcpy(s, r->p + r->off, n);

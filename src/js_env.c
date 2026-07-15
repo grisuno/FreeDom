@@ -131,10 +131,11 @@ static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
     r[6] = (r[6] & 0x0fu) | 0x40u;
     r[8] = (r[8] & 0x3fu) | 0x80u;
     char buf[37];
-    snprintf(buf, sizeof buf,
-             "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-             r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
-             r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15]);
+    int sn = snprintf(buf, sizeof buf,
+                      "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                      r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
+                      r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15]);
+    if (sn < 0 || (size_t)sn >= sizeof buf) return JS_ThrowInternalError(ctx, "UUID too long");
     return JS_NewString(ctx, buf);
 }
 

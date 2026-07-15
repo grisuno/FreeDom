@@ -23,30 +23,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-/* --- framed I/O over a single fd --- */
+#include "util.h"
 
-static int write_full(int fd, const void *buf, size_t n) {
-    const uint8_t *p = (const uint8_t *)buf;
-    size_t done = 0;
-    while (done < n) {
-        ssize_t w = write(fd, p + done, n - done);
-        if (w < 0) { if (errno == EINTR) continue; return -1; }
-        done += (size_t)w;
-    }
-    return 0;
-}
-
-static int read_full(int fd, void *buf, size_t n) {
-    uint8_t *p = (uint8_t *)buf;
-    size_t got = 0;
-    while (got < n) {
-        ssize_t r = read(fd, p + got, n - got);
-        if (r < 0) { if (errno == EINTR) continue; return -1; }
-        if (r == 0) return -1; /* unexpected EOF (file shrank) */
-        got += (size_t)r;
-    }
-    return 0;
-}
+/* framed I/O via write_full / read_full from util.h */
 
 /* Best-effort fsync of the directory holding path, for crash durability of the
  * rename. Failures are non-fatal (some filesystems do not support it). */
@@ -96,6 +75,7 @@ ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead
     if (ls != LS_OK) return map_ls(ls);
 
     size_t plen = strlen(path);
+    if (plen > (size_t)-1 - 7) { ls_free(blob, blob_len); return DS_ERR_OOM; }
     char *tmp = (char *)malloc(plen + sizeof ".XXXXXX");
     if (tmp == NULL) { ls_free(blob, blob_len); return DS_ERR_OOM; }
     memcpy(tmp, path, plen);

@@ -106,9 +106,11 @@ static void test_scan_ref_cap(void **state) {
     char *html = malloc((PF_MAX_REFS + 8) * 64);
     assert_non_null(html);
     size_t off = 0;
-    for (int i = 0; i < PF_MAX_REFS + 8; ++i)
-        off += (size_t)snprintf(html + off, 64,
-                                "<link rel=stylesheet href=s%d.css>", i);
+    for (int i = 0; i < PF_MAX_REFS + 8; ++i) {
+        int r = snprintf(html + off, 64, "<link rel=stylesheet href=s%d.css>", i);
+        assert_true(r > 0 && (size_t)r < 64);
+        off += (size_t)r;
+    }
     pf_list l;
     assert_int_equal(pf_scan(html, off, &l), 0);
     assert_int_equal(l.count, PF_MAX_REFS);

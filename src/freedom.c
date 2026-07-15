@@ -136,6 +136,7 @@ static char *read_file(const char *path, size_t *out_len) {
     if (sz < 0) { fclose(f); return NULL; }
     rewind(f);
 
+    if ((size_t)sz == (size_t)-1) { fclose(f); return NULL; }
     char *buf = (char *)malloc((size_t)sz + 1);
     if (buf == NULL) { fclose(f); return NULL; }
     size_t n = fread(buf, 1, (size_t)sz, f);
@@ -231,6 +232,33 @@ static void print_doc(const rd_doc *doc) {
                 if (line_open) { putchar('\n'); line_open = 0; }
                 if (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON) {
                     printf("[ %s ]\n", (b->text[0] != '\0') ? b->text : rd_input_label(b->input_type));
+                } else if (b->input_type == PV_IN_PROGRESS || b->input_type == PV_IN_METER) {
+                    double val_d = (b->value != NULL) ? atof(b->value) : 0.0;
+                    double max_d = 1.0;
+                    if (b->input_type == PV_IN_PROGRESS) {
+                        if (b->text != NULL) max_d = atof(b->text);
+                    } else {
+                        double min_d = 0.0;
+                        if (b->text != NULL) sscanf(b->text, "%lf,%lf", &min_d, &max_d);
+                        if (max_d <= min_d) max_d = min_d + 1.0;
+                    }
+                    if (max_d <= 0.0) max_d = 1.0;
+                    if (val_d < 0.0) val_d = 0.0;
+                    if (val_d > max_d) val_d = max_d;
+                    int pct = (int)((val_d / max_d) * 100.0);
+                    if (pct > 100) pct = 100;
+                    int bar_width = 20;
+                    int filled = (pct * bar_width) / 100;
+                    if (filled > bar_width) filled = bar_width;
+                    char bar[21];
+                    memset(bar, '=', (size_t)filled);
+                    memset(bar + filled, ' ', (size_t)(bar_width - filled));
+                    bar[bar_width] = '\0';
+                    printf("[%s] %d%%\n", bar, pct);
+                } else if (b->input_type == PV_IN_LEGEND) {
+                    const char *legend = (b->text != NULL && b->text[0] != '\0') ? b->text
+                                       : (b->value != NULL ? b->value : "");
+                    printf("== %s ==\n", (legend[0] != '\0') ? legend : "(legend)");
                 } else {
                     /* An editable field: show its current value, then the placeholder. */
                     printf("[%s: %s]", rd_input_label(b->input_type),
@@ -281,6 +309,7 @@ static void print_console(const fb_buffer *log) {
  * overruns and allocates nothing itself. */
 static void print_dom(const rd_doc *doc) {
     size_t need = dd_format(doc, NULL, 0);
+    if (need == (size_t)-1) { fprintf(stderr, "freedom: error measuring render tree\n"); return; }
     char *buf = (char *)malloc(need + 1);
     if (buf == NULL) {
         fprintf(stderr, "freedom: out of memory while dumping the render tree\n");
@@ -295,6 +324,7 @@ static void print_dom(const rd_doc *doc) {
  * print_dom: two-pass measure-then-allocate. */
 static void print_dom_css(const rd_doc *doc) {
     size_t need = dd_format_css(doc, NULL, 0);
+    if (need == (size_t)-1) { fprintf(stderr, "freedom: error measuring CSS inspector\n"); return; }
     char *buf = (char *)malloc(need + 1);
     if (buf == NULL) {
         fprintf(stderr, "freedom: out of memory while dumping CSS inspector\n");
@@ -357,6 +387,7 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
         : sf_get_follow(url, &cfg, &resp, SF_DEFAULT_MAX_REDIRECTS);
     if (s != SF_OK) { sf_response_free(&resp); return -1; }
 
+    if (resp.body_len == (size_t)-1) { sf_response_free(&resp); return -1; }
     char *rb = (char *)malloc(resp.body_len + 1);
     if (rb == NULL) { sf_response_free(&resp); return -1; }
     if (resp.body_len != 0) memcpy(rb, resp.body, resp.body_len);

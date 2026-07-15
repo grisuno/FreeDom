@@ -13,6 +13,7 @@
 
 #include "css.h"
 #include "url.h"
+#include "util.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -21,13 +22,6 @@
  * the convention in browser.c and page_view.c). Output is never longer than the
  * input. */
 
-static size_t utf8_seq_len(unsigned char c) {
-    if (c < 0x80) return 1;
-    if (c >= 0xC2 && c <= 0xDF) return 2;
-    if (c >= 0xE0 && c <= 0xEF) return 3;
-    if (c >= 0xF0 && c <= 0xF4) return 4;
-    return 0;
-}
 
 static char *utf8_sanitized_dup(const char *s) {
     if (s == NULL) return NULL;
@@ -418,7 +412,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     if (caps.css) {
         size_t nb = pv_box_count(view);
         if (nb > 0) {
-            d->boxes = (pv_box_def *)malloc(nb * sizeof *d->boxes);
+            d->boxes = (pv_box_def *)calloc(nb, sizeof *d->boxes);
             if (d->boxes == NULL) { rd_free(d); return RD_ERR_OOM; }
             for (size_t i = 0; i < nb; ++i) {
                 const pv_box_def *src = pv_box_at(view, i);
@@ -499,6 +493,9 @@ const char *rd_block_tag(const rd_block *b) {
                 case PV_IN_SUBMIT:
                 case PV_IN_BUTTON:   return "button";
                 case PV_IN_SELECT:   return "select";
+                case PV_IN_PROGRESS: return "progress";
+                case PV_IN_METER:    return "meter";
+                case PV_IN_LEGEND:   return "legend";
                 default:             return "input";
             }
         case RD_NOTICE:    return NULL;
@@ -517,6 +514,9 @@ const char *rd_input_label(int input_type) {
         case PV_IN_CHECKBOX: return "checkbox";
         case PV_IN_RADIO:    return "radio";
         case PV_IN_SELECT:   return "select";
+        case PV_IN_PROGRESS: return "progress";
+        case PV_IN_METER:    return "meter";
+        case PV_IN_LEGEND:   return "legend";
     }
     return "field";
 }

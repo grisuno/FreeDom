@@ -16,6 +16,7 @@
 #include "css_color.h"
 #include "flex_layout.h"
 #include "html_parse.h"
+#include "util.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -44,13 +45,6 @@ _Static_assert(PV_GRID_TRACKS == CSS_GRID_TRACKS_MAX,
  * Output may be longer than the input (a single byte >=0x80 -> up to 3 UTF-8
  * bytes), so the caller sizes for 3x. --- */
 
-static size_t utf8_seq_len(unsigned char c) {
-    if (c < 0x80) return 1;
-    if (c >= 0xC2 && c <= 0xDF) return 2;
-    if (c >= 0xE0 && c <= 0xEF) return 3;
-    if (c >= 0xF0 && c <= 0xF4) return 4;
-    return 0;
-}
 
 /* Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80). 0xA0..
  * 0xFF map identically to Latin-1 (code point == byte). 0x80..0x9F carry the
@@ -689,10 +683,13 @@ static int is_skipped_tag(lxb_tag_id_t t) {
     /* TEXTAREA/SELECT/BUTTON content is a control's value/label, emitted as a
      * PV_INPUT, not as page text; suppress their inner text from the normal walk.
      * NOSCRIPT is handled separately (in_skipped_subtree): its fallback content is
-     * shown when JS is disabled and hidden when JS runs. */
+     * shown when JS is disabled and hidden when JS runs.
+     * PROGRESS/METER/LEGEND content is captured as attributes/text and emitted
+     * as PV_INPUT runs with their respective types. */
     return t == LXB_TAG_SCRIPT || t == LXB_TAG_STYLE || t == LXB_TAG_HEAD
         || t == LXB_TAG_TITLE
-        || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT || t == LXB_TAG_BUTTON;
+        || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT || t == LXB_TAG_BUTTON
+        || t == LXB_TAG_PROGRESS || t == LXB_TAG_METER || t == LXB_TAG_LEGEND;
 }
 
 static lxb_tag_id_t node_tag(const lxb_dom_node_t *n) {
@@ -1064,8 +1061,8 @@ typedef struct pv_style_cache {
 
 static int pv_style_cache_init(pv_style_cache *c) {
     c->cap = 64;
-    c->node = (const lxb_dom_node_t **)malloc(c->cap * sizeof *c->node);
-    c->style = (css_style *)malloc(c->cap * sizeof *c->style);
+    c->node = (const lxb_dom_node_t **)calloc(c->cap, sizeof *c->node);
+    c->style = (css_style *)calloc(c->cap, sizeof *c->style);
     if (c->node == NULL || c->style == NULL) {
         free(c->node); free(c->style);
         c->node = NULL; c->style = NULL; c->cap = 0;
@@ -1208,6 +1205,22 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             lxb_tag_id_t t = lxb_dom_element_tag_id(el);
             css_style cs = cached_element_style(el, sheet, style_cache);
             pv_text_ext_merge(ext, &cs);
+
+            /* UA default styles for specific elements */
+            if (t == LXB_TAG_FIELDSET) {
+                if (cs.border_top_width == CSS_LEN_UNSET || cs.border_top_width <= 0) {
+                    cs.border_top_width = 1;  cs.border_right_width = 1;
+                    cs.border_bottom_width = 1; cs.border_left_width = 1;
+                    cs.border_top_style = CSS_BST_SOLID; cs.border_right_style = CSS_BST_SOLID;
+                    cs.border_bottom_style = CSS_BST_SOLID; cs.border_left_style = CSS_BST_SOLID;
+                    cs.border_top_color = 0xCCCCCC; cs.border_right_color = 0xCCCCCC;
+                    cs.border_bottom_color = 0xCCCCCC; cs.border_left_color = 0xCCCCCC;
+                }
+                if (cs.pad_top == CSS_LEN_UNSET || cs.pad_top <= 0) {
+                    cs.pad_top = 8; cs.pad_right = 8;
+                    cs.pad_bottom = 8; cs.pad_left = 8;
+                }
+            }
 
             if (is_bold_tag(t)) tag_bold = 1;
             if (is_italic_tag(t)) tag_italic = 1;
@@ -1570,9 +1583,11 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
                 if (g == NULL) { free(opt_val); free(opt_label); break; }
                 opts = g; opts_cap = ncap;
             }
-            size_t n = (size_t)snprintf(opts + opts_len, opts_cap - opts_len,
-                                         "%s||%s||", opt_val, opt_label);
-            opts_len += (n < opts_cap - opts_len) ? n : 0;
+            size_t space = opts_cap - opts_len;
+            if (space == 0) { free(opt_val); free(opt_label); continue; }
+            int r = snprintf(opts + opts_len, space, "%s||%s||", opt_val, opt_label);
+            if (r < 0 || (size_t)r >= space) { free(opt_val); free(opt_label); continue; }
+            opts_len += (size_t)r;
             free(opt_val); free(opt_label);
         }
         /* Remove trailing || if present */
@@ -2018,15 +2033,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (extern_len > PV_MAX_STYLE_BYTES) extern_len = PV_MAX_STYLE_BYTES;
         size_t dlen = style_len;
         if (dlen > PV_MAX_STYLE_BYTES - extern_len) dlen = PV_MAX_STYLE_BYTES - extern_len;
-        char *comb = (char *)malloc(extern_len + 1 + dlen + 1);
-        if (comb != NULL) {
-            memcpy(comb, extern_css, extern_len);
-            comb[extern_len] = '\n';
-            if (dlen != 0) memcpy(comb + extern_len + 1, style_text, dlen);
-            comb[extern_len + 1 + dlen] = '\0';
-            free(style_text);
-            style_text = comb;
-            style_len = extern_len + 1 + dlen;
+        if (extern_len != (size_t)-1 && dlen != (size_t)-1) {
+            char *comb = (char *)malloc(extern_len + 1 + dlen + 1);
+            if (comb != NULL) {
+                memcpy(comb, extern_css, extern_len);
+                comb[extern_len] = '\n';
+                if (dlen != 0) memcpy(comb + extern_len + 1, style_text, dlen);
+                comb[extern_len + 1 + dlen] = '\0';
+                free(style_text);
+                style_text = comb;
+                style_len = extern_len + 1 + dlen;
+            }
         }
     }
     css_sheet *sheet = NULL;
@@ -2228,6 +2245,120 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 }
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
+                pv_set_text_ext(v, &ctl_ext);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                continue;
+            }
+
+            /* <progress> and <meter> — native bar widgets */
+            if ((t == LXB_TAG_PROGRESS || t == LXB_TAG_METER)
+                && !in_skipped_subtree(n, base, js_enabled)
+                && !in_hidden_subtree(n, base, sheet, &cache)
+                && !(reader && in_boilerplate_subtree(n, base))) {
+                lxb_dom_element_t *el = lxb_dom_interface_element(n);
+
+                const char *unused_href = NULL;
+                size_t unused_hl = 0;
+                const lxb_dom_node_t *block = NULL;
+                int heading = 0, unused_fg = -1, unused_bg = -1;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                const lxb_dom_node_t *unused_li = NULL;
+                int unused_depth = 0, unused_ordered = 0;
+                pv_cont_info unused_cont;
+                pv_box_info unused_box;
+                pv_text_ext ctl_ext;
+                int unused_bdeco;
+                resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
+                                &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_li, &unused_depth, &unused_ordered,
+                                &reg, &unused_cont, &unused_box, &ctl_ext,
+                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                int brk = pending_break || (block != prev_block);
+                pending_break = 0;
+                prev_block = block;
+
+                size_t vl = 0, ml = 0;
+                const lxb_char_t *vattr = lxb_dom_element_get_attribute(el,
+                    (const lxb_char_t *)"value", 5, &vl);
+                const lxb_char_t *mattr = lxb_dom_element_get_attribute(el,
+                    (const lxb_char_t *)"max", 3, &ml);
+
+                char *val_str = (vattr != NULL && vl > 0)
+                    ? dup_n((const char *)vattr, vl) : dup_n("0", 1);
+                char *max_str = (mattr != NULL && ml > 0)
+                    ? dup_n((const char *)mattr, ml) : dup_n("1", 1);
+
+                if (t == LXB_TAG_METER) {
+                    /* Encode min/max/low/high/optimum as comma-separated */
+                    size_t minl = 0, lowl = 0, highl = 0, optl = 0;
+                    const lxb_char_t *minattr = lxb_dom_element_get_attribute(el,
+                        (const lxb_char_t *)"min", 3, &minl);
+                    const lxb_char_t *lowattr = lxb_dom_element_get_attribute(el,
+                        (const lxb_char_t *)"low", 3, &lowl);
+                    const lxb_char_t *highattr = lxb_dom_element_get_attribute(el,
+                        (const lxb_char_t *)"high", 4, &highl);
+                    const lxb_char_t *optattr = lxb_dom_element_get_attribute(el,
+                        (const lxb_char_t *)"optimum", 7, &optl);
+                    char meta[256];
+                    int nw = snprintf(meta, sizeof meta, "%s,%s,%s,%s,%s",
+                        (minattr && minl > 0) ? (const char *)minattr : "0",
+                        max_str,
+                        (lowattr && lowl > 0) ? (const char *)lowattr : "",
+                        (highattr && highl > 0) ? (const char *)highattr : "",
+                        (optattr && optl > 0) ? (const char *)optattr : "");
+                    (void)nw;
+                    free(max_str);
+                    max_str = dup_n(meta, strlen(meta));
+                    if (max_str == NULL) { free(val_str); rc = PV_ERR_OOM; goto cleanup; }
+                }
+
+                pv_input_type itype = (t == LXB_TAG_METER) ? PV_IN_METER : PV_IN_PROGRESS;
+                pv_status st = pv_append_input(v, heading, brk, itype,
+                    max_str, NULL, val_str, NULL, -1, 0);
+                free(val_str); free(max_str);
+                if (st != PV_OK) { rc = st; goto cleanup; }
+                pv_set_text_ext(v, &ctl_ext);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                continue;
+            }
+
+            /* <legend> inside a <fieldset> */
+            if (t == LXB_TAG_LEGEND
+                && !in_skipped_subtree(n, base, js_enabled)
+                && !in_hidden_subtree(n, base, sheet, &cache)
+                && !(reader && in_boilerplate_subtree(n, base))) {
+                char *legend_text = collect_text(n);
+                if (legend_text == NULL) { rc = PV_ERR_OOM; goto cleanup; }
+                char *collapsed = collapse_ws(legend_text, strlen(legend_text));
+                free(legend_text);
+                if (collapsed == NULL) { rc = PV_ERR_OOM; goto cleanup; }
+
+                const char *unused_href = NULL;
+                size_t unused_hl = 0;
+                const lxb_dom_node_t *block = NULL;
+                int heading = 0, unused_fg = -1, unused_bg = -1;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                const lxb_dom_node_t *unused_li = NULL;
+                int unused_depth = 0, unused_ordered = 0;
+                pv_cont_info unused_cont;
+                pv_box_info unused_box;
+                pv_text_ext ctl_ext;
+                int unused_bdeco;
+                resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
+                                &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_li, &unused_depth, &unused_ordered,
+                                &reg, &unused_cont, &unused_box, &ctl_ext,
+                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                int brk = pending_break || (block != prev_block);
+                pending_break = 0;
+                prev_block = block;
+
+                pv_status st = pv_append_input(v, heading, brk, PV_IN_LEGEND,
+                    collapsed, NULL, collapsed, NULL, -1, 0);
+                free(collapsed);
+                if (st != PV_OK) { rc = st; goto cleanup; }
                 pv_set_text_ext(v, &ctl_ext);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
@@ -2519,6 +2650,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             char mk[32];
             list_marker(ordered, li, ext.list_style, mk, sizeof mk);
             size_t ml = strlen(mk), cl = strlen(collapsed);
+            if (ml == (size_t)-1 || cl == (size_t)-1) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
             marked = (char *)malloc(ml + cl + 1);
             if (marked == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
             memcpy(marked, mk, ml);

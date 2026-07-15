@@ -65,7 +65,10 @@ typedef enum pv_input_type {
     PV_IN_BUTTON,     /* non-submitting button (button/reset): painted, inert */
     PV_IN_CHECKBOX,   /* <input type="checkbox">: toggleable box, checked=value set */
     PV_IN_RADIO,      /* <input type="radio">: grouped by name, one selected */
-    PV_IN_SELECT      /* <select> with <option> children: painted value, click->options */
+    PV_IN_SELECT,     /* <select> with <option> children: painted value, click->options */
+    PV_IN_PROGRESS,   /* <progress>: value/max bar, not interactive */
+    PV_IN_METER,      /* <meter>: colored bar with value/min/max/low/high/optimum */
+    PV_IN_LEGEND      /* <legend> inside <fieldset>: text displayed overlapping border */
 } pv_input_type;
 
 /* Form method carried on a PV_INPUT run (denormalised from the owning <form>). */

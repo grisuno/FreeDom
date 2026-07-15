@@ -29,6 +29,7 @@
 #include "page_view.h"
 #include "request_policy.h"
 #include "url.h"
+#include "util.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -76,30 +77,6 @@ enum { TAG_SUBREQ = 1, TAG_RESULT = 2 };
 /* Handshake bytes (child -> parent) after the confinement attempt. */
 enum { TAB_READY = 0x55, TAB_NO_CONFINE = 0xAA };
 
-/* --- framed pipe I/O (EINTR-safe, all-or-nothing) --- */
-
-static int write_full(int fd, const void *buf, size_t n) {
-    const uint8_t *p = (const uint8_t *)buf;
-    size_t done = 0;
-    while (done < n) {
-        ssize_t w = write(fd, p + done, n - done);
-        if (w < 0) { if (errno == EINTR) continue; return -1; }
-        done += (size_t)w;
-    }
-    return 0;
-}
-
-static int read_full(int fd, void *buf, size_t n) {
-    uint8_t *p = (uint8_t *)buf;
-    size_t got = 0;
-    while (got < n) {
-        ssize_t r = read(fd, p + got, n - got);
-        if (r < 0) { if (errno == EINTR) continue; return -1; }
-        if (r == 0) return -1; /* EOF before n bytes */
-        got += (size_t)r;
-    }
-    return 0;
-}
 
 /* =========================== child side ============================== */
 
@@ -173,11 +150,13 @@ static int child_fetch(void *vctx, const char *method, const char *url,
      || read_full(cs->rfd, &rlen, sizeof rlen) != 0
      || rlen > TAB_MAX_SUBRESOURCE)
         return -1;
+    if (rlen == (size_t)-1) return -1;
     char *rbody = (char *)malloc(rlen + 1);
     if (rbody == NULL) return -1;
     if (rlen != 0 && read_full(cs->rfd, rbody, rlen) != 0) { free(rbody); return -1; }
     rbody[rlen] = '\0';
     if (read_full(cs->rfd, &clen, sizeof clen) != 0 || clen > 256) { free(rbody); return -1; }
+    if (clen == (size_t)-1) { free(rbody); return -1; }
     char *ctype = (char *)malloc(clen + 1);
     if (ctype == NULL) { free(rbody); return -1; }
     if (clen != 0 && read_full(cs->rfd, ctype, clen) != 0) { free(rbody); free(ctype); return -1; }
@@ -595,7 +574,7 @@ static void inject_video_into_view(child_state *cs, pv_view **vp) {
     }
     if (dom_get_by_tag(cs->idx, "video", NULL, 0) == 0) return;
     size_t nvids = dom_get_by_tag(cs->idx, "video", NULL, 0);
-    dom_node_id *vids = (dom_node_id *)malloc(nvids * sizeof(dom_node_id));
+    dom_node_id *vids = (dom_node_id *)calloc(nvids, sizeof(dom_node_id));
     if (vids == NULL) return;
     size_t filled = dom_get_by_tag(cs->idx, "video", vids, nvids);
     for (size_t i = 0; i < filled; i++) {
@@ -626,11 +605,13 @@ static void child_fetch_stylesheets(child_state *cs) {
         int fr = child_fetch(cs, "GET", hrefs[i], NULL, 0, &st, &body, &blen, &ctype);
         if (fr != 0 || st < 200 || st >= 300 || !ctype_is_css(ctype)) {
             char why[96];
+            int why_r;
             if (fr != 0)
-                snprintf(why, sizeof why, "blocked or failed");
+                why_r = snprintf(why, sizeof why, "blocked or failed");
             else
-                snprintf(why, sizeof why, "refused (status %d, type %s)",
-                         st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
+                why_r = snprintf(why, sizeof why, "refused (status %d, type %s)",
+                                 st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
+            if (why_r < 0 || (size_t)why_r >= sizeof why) why[sizeof why - 1] = '\0';
             log_external_skip(&cs->log, "stylesheet", why, hrefs[i]);
             free(body);
             free(ctype);
@@ -702,8 +683,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
          * snapshot is taken. The JS shim (jd_inject_video_shim) remains as a
          * fallback for pages whose video data is populated by executed scripts. */
         if (nscripts > 0 && cs->idx != NULL) {
-            const char **texts = (const char **)malloc(nscripts * sizeof(char *));
-            size_t *lens = (size_t *)malloc(nscripts * sizeof(size_t));
+            const char **texts = (const char **)calloc(nscripts, sizeof(char *));
+            size_t *lens = (size_t *)calloc(nscripts, sizeof(size_t));
             if (texts != NULL && lens != NULL) {
                 for (size_t i = 0; i < nscripts; i++) {
                     texts[i] = scripts[i].text;
@@ -776,11 +757,13 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                                      &st, &ext_body, &blen, &ctype);
                 if (fr != 0 || st < 200 || st >= 300 || !ctype_is_javascript(ctype)) {
                     char why[96];
+                    int why_r;
                     if (fr != 0)
-                        snprintf(why, sizeof why, "blocked or failed");
+                        why_r = snprintf(why, sizeof why, "blocked or failed");
                     else
-                        snprintf(why, sizeof why, "refused (status %d, type %s)",
-                                 st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
+                        why_r = snprintf(why, sizeof why, "refused (status %d, type %s)",
+                                         st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
+                    if (why_r < 0 || (size_t)why_r >= sizeof why) why[sizeof why - 1] = '\0';
                     log_external_skip(&cs->log, "script", why, scripts[i].src);
                     free(ext_body);
                     free(ctype);
@@ -789,9 +772,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                 free(ctype);
                 code = ext_body;
                 code_len = blen;
-                snprintf(sname, sizeof sname, "%s", scripts[i].src);
+                int sn_r = snprintf(sname, sizeof sname, "%s", scripts[i].src);
+                if (sn_r < 0 || (size_t)sn_r >= sizeof sname) sname[sizeof sname - 1] = '\0';
             } else {
-                snprintf(sname, sizeof sname, "inline #%zu", i + 1);
+                int sn_r = snprintf(sname, sizeof sname, "inline #%zu", i + 1);
+                if (sn_r < 0 || (size_t)sn_r >= sizeof sname) sname[sizeof sname - 1] = '\0';
             }
             js_set_current_script(cs->js,
                 scripts[i].src, scripts[i].type);
@@ -942,7 +927,8 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                              (int)(elapsed_ms >= 0 ? elapsed_ms : 0));
             js_result r;
             memset(&r, 0, sizeof r);
-            if (n > 0 && js_eval(cs->js, tick, (size_t)n, &r) == JS_OK) {
+            if (n > 0 && (size_t)n < sizeof tick
+                && js_eval(cs->js, tick, (size_t)n, &r) == JS_OK) {
                 if (r.is_exception && r.value != NULL)
                     fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len,
                                        r.file, r.line, r.col);
@@ -1291,6 +1277,7 @@ static void tab_worker_run(int rfd, int wfd) {
             size_t ulen = 0;
             if (read_full(rfd, &ulen, sizeof ulen) != 0) break;
             if (ulen > TAB_MAX_URL) break; /* defensive: URLs are small */
+            if (ulen == (size_t)-1) break;
             url = (char *)malloc(ulen + 1);
             if (url == NULL) break;
             if (ulen != 0 && read_full(rfd, url, ulen) != 0) { free(url); break; }
@@ -1298,6 +1285,7 @@ static void tab_worker_run(int rfd, int wfd) {
             size_t cklen = 0;
             if (read_full(rfd, &cklen, sizeof cklen) != 0) { free(url); break; }
             if (cklen > TAB_MAX_URL * 8) { free(url); break; } /* defensive cap */
+            if (cklen == (size_t)-1) { free(url); break; }
             cookies = (char *)malloc(cklen + 1);
             if (cookies == NULL) { free(url); break; }
             if (cklen != 0 && read_full(rfd, cookies, cklen) != 0) { free(cookies); free(url); break; }
@@ -1307,6 +1295,7 @@ static void tab_worker_run(int rfd, int wfd) {
         size_t len = 0;
         if (read_full(rfd, &len, sizeof len) != 0) { free(url); break; }
         if (len > TAB_MAX_INPUT) { free(url); break; } /* parent enforces; defensive */
+        if (len == (size_t)-1) { free(url); break; }
 
         char *buf = (char *)malloc(len + 1);
         if (buf == NULL) { free(url); break; }
@@ -1410,6 +1399,7 @@ static int read_field(int fd, char **out, size_t *out_len) {
     size_t n = 0;
     if (read_full(fd, &n, sizeof n) != 0) return -1;
     if (n > TAB_MAX_INPUT) return -1;
+    if (n == (size_t)-1) return -1;
     char *buf = (char *)malloc(n + 1);
     if (buf == NULL) return -1;
     if (n != 0 && read_full(fd, buf, n) != 0) { free(buf); return -1; }
@@ -1681,6 +1671,7 @@ static int read_console(int fd, fb_buffer *out) {
          || read_full(fd, &col, sizeof col) != 0
          || read_full(fd, &flen, sizeof flen) != 0) return -1;
         if (flen > FB_MAX_FILE_BYTES) return -1;
+        if (flen == (size_t)-1) return -1;
         char *file = NULL;
         if (flen != 0) {
             file = (char *)malloc(flen + 1);
@@ -1732,8 +1723,10 @@ static void exec_worker_child(int rfd, int wfd) {
     int wf = fcntl(wfd, F_GETFD); if (wf >= 0) fcntl(wfd, F_SETFD, wf & ~FD_CLOEXEC);
 
     char rbuf[16], wbuf[16];
-    snprintf(rbuf, sizeof rbuf, "%d", rfd);
-    snprintf(wbuf, sizeof wbuf, "%d", wfd);
+    int rn = snprintf(rbuf, sizeof rbuf, "%d", rfd);
+    int wn = snprintf(wbuf, sizeof wbuf, "%d", wfd);
+    if (rn < 0 || (size_t)rn >= sizeof rbuf) rbuf[0] = '\0';
+    if (wn < 0 || (size_t)wn >= sizeof wbuf) wbuf[0] = '\0';
     char *const av[] = { (char *)"freedom", (char *)"--tab-worker", rbuf, wbuf, NULL };
     execv("/proc/self/exe", av);
     /* exec failed: the caller _exit()s without a handshake, so the parent's read

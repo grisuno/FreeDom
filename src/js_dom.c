@@ -77,7 +77,7 @@ static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class) {
     if (JS_IsException(arr)) { JS_FreeCString(ctx, s); return arr; }
 
     if (total > 0) {
-        dom_node_id *buf = (dom_node_id *)malloc(total * sizeof *buf);
+        dom_node_id *buf = (dom_node_id *)calloc(total, sizeof *buf);
         if (buf == NULL) {
             JS_FreeCString(ctx, s);
             JS_FreeValue(ctx, arr);
@@ -439,7 +439,7 @@ static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
     JSValue arr = JS_NewArray(ctx);
     if (JS_IsException(arr)) { JS_FreeCString(ctx, sel); return arr; }
     if (total > 0) {
-        dom_node_id *buf = (dom_node_id *)malloc(total * sizeof *buf);
+        dom_node_id *buf = (dom_node_id *)calloc(total, sizeof *buf);
         if (buf == NULL) {
             JS_FreeCString(ctx, sel);
             JS_FreeValue(ctx, arr);
@@ -982,8 +982,8 @@ static const char JD_MODERN_SHIM[] =
     "   'HTMLObjectElement','HTMLEmbedElement','HTMLParamElement','HTMLBaseElement','HTMLPictureElement',"
     "   'HTMLTimeElement','HTMLMapElement','HTMLAreaElement','HTMLModElement','HTMLMediaElement',"
     "   'HTMLDListElement','HTMLFrameSetElement','HTMLFrameElement','HTMLDirectoryElement','HTMLFontElement',"
-    "   'HTMLDocument','Document','DocumentFragment','ShadowRoot','CharacterData','Text','Comment','Attr',"
-    "   'DOMTokenList','NodeList','HTMLCollection','CSSStyleDeclaration','EventTarget','XMLDocument'].forEach("
+     "   'XMLDocument','HTMLDocument','Document','DocumentFragment','ShadowRoot','CharacterData','Text','Comment','Attr',"
+     "   'DOMTokenList','NodeList','HTMLCollection','CSSStyleDeclaration','EventTarget'].forEach("
     "    function(n){ if(typeof g[n]==='undefined') g[n]=stubCtor(); });"
     "  if(g.Node){ g.Node.ELEMENT_NODE=1; g.Node.TEXT_NODE=3; g.Node.COMMENT_NODE=8;"
     "    g.Node.DOCUMENT_NODE=9; g.Node.DOCUMENT_FRAGMENT_NODE=11; }"
@@ -2197,7 +2197,7 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
     /* Find all iframe elements in the index. */
     size_t niframe = dom_get_by_tag(idx, "iframe", NULL, 0);
     if (niframe == 0) return;
-    dom_node_id *iframes = (dom_node_id *)malloc(niframe * sizeof(dom_node_id));
+    dom_node_id *iframes = (dom_node_id *)calloc(niframe, sizeof(dom_node_id));
     if (iframes == NULL) return;
     dom_get_by_tag(idx, "iframe", iframes, niframe);
 

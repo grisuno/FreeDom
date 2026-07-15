@@ -326,9 +326,16 @@ static void test_container_fail_closed_and_bounds(void **state) {
      * entirely (fail closed, anti-DoS) — never silently truncated. The short
      * display:grid declaration in the same block still parses. */
     char buf[600];
-    size_t k = (size_t)snprintf(buf, sizeof buf, "display:grid;grid-template-columns:");
-    for (int i = 0; i < 100 && k + 4 < sizeof buf; ++i)
-        k += (size_t)snprintf(buf + k, sizeof buf - k, "1fr ");
+    int r0 = snprintf(buf, sizeof buf, "display:grid;grid-template-columns:");
+    assert_true(r0 > 0 && (size_t)r0 < sizeof buf);
+    size_t k = (size_t)r0;
+    for (int i = 0; i < 100; ++i) {
+        size_t space = sizeof buf - k;
+        if (space == 0) break;
+        int r = snprintf(buf + k, space, "1fr ");
+        if (r < 0 || (size_t)r >= space) break;
+        k += (size_t)r;
+    }
     css_style s = css_parse_inline(buf, 0);
     assert_int_equal(s.display, CSS_DISP_GRID);
     assert_int_equal(s.grid_cols, 0);
@@ -1256,13 +1263,18 @@ static void test_large_stylesheet_rules_beyond_old_cap(void **state) {
     assert_non_null(buf);
     size_t off = 0;
     for (int i = 0; i < 500; ++i) {
-        int n = snprintf(buf + off, bufsz - off, ".f%d{color:#%06x}", i, (unsigned)i);
-        assert_true(n > 0);
+        size_t space = bufsz - off;
+        if (space == 0) break;
+        int n = snprintf(buf + off, space, ".f%d{color:#%06x}", i, (unsigned)i);
+        assert_true(n > 0 && (size_t)n < space);
         off += (size_t)n;
     }
-    int n = snprintf(buf + off, bufsz - off, ".target{color:#123456}");
-    assert_true(n > 0);
-    off += (size_t)n;
+    {
+        size_t space = bufsz - off;
+        int n = snprintf(buf + off, space, ".target{color:#123456}");
+        assert_true(n > 0 && (size_t)n < space);
+        if (n > 0 && (size_t)n < space) off += (size_t)n;
+    }
 
     css_sheet *sh = NULL;
     assert_int_equal(css_parse(buf, off, &sh), CSS_OK);

@@ -23,6 +23,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "media_decoder.h"
+#include "util.h"
 
 #include <errno.h>
 #include <signal.h>
@@ -38,30 +39,6 @@
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 
-/* Pipe I/O helpers (EINTR-safe). */
-
-static int write_full(int fd, const void *buf, size_t n) {
-    const uint8_t *p = (const uint8_t *)buf;
-    size_t done = 0;
-    while (done < n) {
-        ssize_t w = write(fd, p + done, n - done);
-        if (w < 0) { if (errno == EINTR) continue; return -1; }
-        done += (size_t)w;
-    }
-    return 0;
-}
-
-static int read_full(int fd, void *buf, size_t n) {
-    uint8_t *p = (uint8_t *)buf;
-    size_t got = 0;
-    while (got < n) {
-        ssize_t r = read(fd, p + got, n - got);
-        if (r < 0) { if (errno == EINTR) continue; return -1; }
-        if (r == 0) return -1;
-        got += (size_t)r;
-    }
-    return 0;
-}
 
 /* Sends an error response to the parent (non-fatal, stream continues). */
 static void send_error(int fd, const char *msg) {
@@ -564,14 +541,18 @@ int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd) {
 
         /* Build --media-decoder <out_fd> <cmd_fd> argv for re-exec. */
         char out_str[16], cmd_str[16];
-        snprintf(out_str, sizeof out_str, "%d", out_pipe[1]);
-        snprintf(cmd_str, sizeof cmd_str, "%d", cmd_pipe[0]);
+        int out_n = snprintf(out_str, sizeof out_str, "%d", out_pipe[1]);
+        int cmd_n = snprintf(cmd_str, sizeof cmd_str, "%d", cmd_pipe[0]);
+        if (out_n < 0 || (size_t)out_n >= sizeof out_str
+            || cmd_n < 0 || (size_t)cmd_n >= sizeof cmd_str)
+            goto media_decoder_fallback;
 
         /* Re-exec ourselves as the decoder. */
         execl("/proc/self/exe", "freedom", "--media-decoder",
               out_str, cmd_str, (char *)NULL);
 
-        /* If exec fails, fall through to run in-process. */
+media_decoder_fallback:
+        /* If exec fails (or snprintf truncated), run in-process. */
         media_decoder_run(out_pipe[1], cmd_pipe[0]);
         close(out_pipe[1]); close(cmd_pipe[0]);
         _exit(1);

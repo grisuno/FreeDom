@@ -159,6 +159,7 @@ hls_status hls_parse(const char *text, size_t len, hls_playlist **out) {
                     pl->varcap = ncap;
                 }
                 hls_variant *v = &pl->variants[pl->nvariants++];
+                if (llen == (size_t)-1) { hls_playlist_free(pl); return HLS_ERR_OOM; }
                 v->url = (char *)malloc(llen + 1);
                 if (v->url == NULL) { hls_playlist_free(pl); return HLS_ERR_OOM; }
                 memcpy(v->url, line, llen);
@@ -180,6 +181,7 @@ hls_status hls_parse(const char *text, size_t len, hls_playlist **out) {
                 }
 
                 hls_segment *seg = &pl->segments[pl->count++];
+                if (llen == (size_t)-1) { hls_playlist_free(pl); return HLS_ERR_OOM; }
                 seg->url = (char *)malloc(llen + 1);
                 if (seg->url == NULL) { hls_playlist_free(pl); return HLS_ERR_OOM; }
                 memcpy(seg->url, line, llen);

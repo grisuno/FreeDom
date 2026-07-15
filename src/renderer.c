@@ -10,6 +10,7 @@
 
 #include "html_parse.h"
 #include "os_sandbox.h"
+#include "util.h"
 
 #include <errno.h>
 #include <stdint.h>
@@ -18,30 +19,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-/* --- framed pipe I/O --- */
-
-static int write_full(int fd, const void *buf, size_t n) {
-    const uint8_t *p = (const uint8_t *)buf;
-    size_t done = 0;
-    while (done < n) {
-        ssize_t w = write(fd, p + done, n - done);
-        if (w < 0) { if (errno == EINTR) continue; return -1; }
-        done += (size_t)w;
-    }
-    return 0;
-}
-
-static int read_full(int fd, void *buf, size_t n) {
-    uint8_t *p = (uint8_t *)buf;
-    size_t got = 0;
-    while (got < n) {
-        ssize_t r = read(fd, p + got, n - got);
-        if (r < 0) { if (errno == EINTR) continue; return -1; }
-        if (r == 0) return -1; /* EOF before n bytes */
-        got += (size_t)r;
-    }
-    return 0;
-}
 
 /* --- child: confine, parse, emit framed result, never return to caller --- */
 
@@ -77,6 +54,7 @@ static int read_field(int fd, char **out, size_t *out_len) {
     size_t n = 0;
     if (read_full(fd, &n, sizeof n) != 0) return -1;
     if (n > RD_MAX_FIELD) return -1; /* anti-amplification: reject huge lengths */
+    if (n == (size_t)-1) return -1;
 
     char *buf = (char *)malloc(n + 1);
     if (buf == NULL) return -1;

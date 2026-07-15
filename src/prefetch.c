@@ -117,6 +117,7 @@ static int rel_has_stylesheet(const char *v, size_t n) {
 static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen) {
     if (out->count >= PF_MAX_REFS || val == NULL || vlen == 0 || vlen >= PF_MAX_URL)
         return;
+    if (vlen == (size_t)-1) return;
     char *u = (char *)malloc(vlen + 1);
     if (u == NULL) return;
     memcpy(u, val, vlen);

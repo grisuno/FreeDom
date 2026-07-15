@@ -278,8 +278,11 @@ static void test_extract_script_list_caps(void **state) {
     char *html = (char *)malloc(buflen);
     assert_non_null(html);
     size_t off = 0;
-    for (size_t i = 0; i < total; i++)
-        off += (size_t)snprintf(html + off, buflen - off, "<script>;</script>");
+    for (size_t i = 0; i < total; i++) {
+        int r = snprintf(html + off, buflen - off, "<script>;</script>");
+        assert_true(r > 0 && (size_t)r < buflen - off);
+        off += (size_t)r;
+    }
     hp_config c = hp_config_default();
     c.strip_scripts = 0;
     hp_document *doc = NULL;
@@ -399,8 +402,11 @@ static void test_extract_stylesheets_caps(void **state) {
     char *html = (char *)malloc(buflen);
     assert_non_null(html);
     size_t off = 0;
-    for (size_t i = 0; i < total; i++)
-        off += (size_t)snprintf(html + off, buflen - off, "%s", one);
+    for (size_t i = 0; i < total; i++) {
+        int r = snprintf(html + off, buflen - off, "%s", one);
+        assert_true(r > 0 && (size_t)r < buflen - off);
+        off += (size_t)r;
+    }
     hp_config c = hp_config_default();
     hp_document *doc = NULL;
     assert_int_equal(hp_parse(html, off, &c, &doc), HP_OK);

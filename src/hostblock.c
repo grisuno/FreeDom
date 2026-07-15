@@ -10,6 +10,7 @@
  */
 
 #include "hostblock.h"
+#include "util.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -31,14 +32,6 @@ struct hb_set {
     hb_table allow;
 };
 
-static uint64_t fnv1a(const char *s, size_t n) {
-    uint64_t h = 1469598103934665603ull;  /* FNV offset basis */
-    for (size_t i = 0; i < n; ++i) {
-        h ^= (unsigned char)s[i];
-        h *= 1099511628211ull;            /* FNV prime */
-    }
-    return h;
-}
 
 /* Finds the slot for key (length klen) in t, which must have a free slot. Returns
  * the index of either the matching entry or the first empty slot for it. */
@@ -86,6 +79,7 @@ static int table_insert(hb_table *t, const char *key, size_t klen) {
     size_t i = table_probe(t, key, klen);
     if (t->slots[i] != NULL) return 0;   /* already present */
 
+    if (klen == (size_t)-1) return -1;
     char *copy = (char *)malloc(klen + 1);
     if (copy == NULL) return -1;
     memcpy(copy, key, klen);
