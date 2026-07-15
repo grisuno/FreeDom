@@ -23,6 +23,7 @@
 #include "request_policy.h"
 #include "secure_fetch.h"
 #include "tab.h"
+#include "webcaps.h"
 #include "media_decoder.h"
 #include "tls_impersonate.h"
 #include "ui.h"
@@ -429,13 +430,15 @@ static int render_page(const char *html, size_t len, const char *top_url,
         return EXIT_ERROR;
     }
 
-    /* Page-JS network (XHR/fetch + external <script src>): in headless the operator's
-     * --js=on is the trust signal (the GUI gates this per host on allow.conf AND
-     * js.conf). The page URL is the resolution base for relative subresources. */
-    tab_set_net_allowed(t, g_headless_js);
-    /* --author-css also authorizes external <link rel=stylesheet> fetches for a
-     * remote page (GET-only at the parent gate; spec/freedom.md §6). */
-    tab_set_css_allowed(t, g_author_css);
+    /* Unified capability model (webcaps): headless does not gate by host -- the
+     * operator's --js=on / --author-css / --images ARE the trust signal. --js=on
+     * grants page-JS network (XHR/fetch + external <script src>) + session cookies;
+     * --author-css also authorizes external <link rel=stylesheet> fetches (GET-only
+     * at the parent gate; spec/freedom.md §6). The page URL is the resolution base. */
+    wc_caps wc = wc_from_flags(g_headless_js, g_author_css,
+                               g_images || getenv("FREEDOM_IMAGES") != NULL);
+    tab_set_net_allowed(t, wc.net);
+    tab_set_css_allowed(t, wc.css);
 
     /* Hito 29 (lookahead prefetch): pre-scan the HTML and download the external
      * stylesheets/scripts the worker will request in parallel, through the same
@@ -444,12 +447,11 @@ static int render_page(const char *html, size_t len, const char *top_url,
     scanned.count = 0;
     pf_pool subpool;
     pf_gated_fetch gated = { headless_fetch, (void *)(uintptr_t)top_url, NULL };
-    if ((g_headless_js || g_author_css) && pf_scan(html, len, &scanned) == 0) {
+    if ((wc.net || wc.css) && pf_scan(html, len, &scanned) == 0) {
         const char *urls[PF_MAX_REFS];
         size_t nurl = 0;
         for (size_t i = 0; i < scanned.count; ++i) {
-            int want = (scanned.refs[i].kind == PF_STYLESHEET) ? g_author_css
-                                                               : g_headless_js;
+            int want = (scanned.refs[i].kind == PF_STYLESHEET) ? wc.css : wc.net;
             if (want) urls[nurl++] = scanned.refs[i].url;
         }
         if (nurl > 0
@@ -461,7 +463,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
 
     /* Session cookies (trusted host only, --js=on here): seed document.cookie from the
      * ephemeral network jar so the page's consent/session JS can read existing cookies. */
-    if (g_headless_js && top_url != NULL) {
+    if (wc.cookies && top_url != NULL) {
         char ckhdr[4096];
         if (sf_cookie_header_for(top_url, ckhdr, sizeof ckhdr) > 0)
             tab_set_cookies(t, ckhdr);
@@ -469,7 +471,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
 
     tab_page page;
     memset(&page, 0, sizeof page);
-    ts = tab_load_full(t, html, len, top_url, g_headless_js, 0, 0, &page);
+    ts = tab_load_full(t, html, len, top_url, wc.js, 0, 0, &page);
 
     /* The prefetch window ends with the load: rebind the direct fetcher and drop
      * the pool (unconsumed results freed, in-flight fetches joined). */
@@ -497,7 +499,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
 
     /* Fold JS-set session cookies back into the ephemeral network jar so a JS-driven
      * consent/redirect hop (followed by fetch_and_render) carries them. */
-    if (g_headless_js && top_url != NULL && page.set_cookies != NULL)
+    if (wc.cookies && top_url != NULL && page.set_cookies != NULL)
         foldback_cookies(top_url, page.set_cookies);
 
     /* In stdout mode the title leads the output; in PDF mode it is carried inside
@@ -511,9 +513,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * styling for the local render only (no network). --images enables image loading
      * AND rendering, including remote fetches (so --download-png --images actually
      * shows images in the bitmap). */
-    rdp_caps caps = rdp_caps_safe();
-    if (g_author_css) caps.css = true;
-    if (g_images || getenv("FREEDOM_IMAGES") != NULL) caps.images = true;
+    rdp_caps caps = wc_render_caps(wc);
     rd_doc *doc = NULL;
     rd_status rs = rd_build(page.view, caps, top_url, &doc);
     int out_rc = (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;

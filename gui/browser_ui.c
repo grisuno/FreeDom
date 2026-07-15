@@ -33,6 +33,7 @@
 #include "request_policy.h"
 #include "text_shape.h"
 #include "textfield.h"
+#include "webcaps.h"
 #include "ui.h"
 #include "url.h"
 #include "zoom.h"
@@ -1715,12 +1716,14 @@ static void do_load(browser_window *w, const char *url); /* JS navigation re-ent
 /* Resolves the JS policy for the current page's host (Secure by Default: off unless
  * the global mode is ON or the host is on the js.conf allowlist). Pure read of the
  * window state; reused by render_current_ex and the Freebug REPL's lazy worker. */
-static int compute_page_js(const browser_window *w) {
-    int js_host_ok = 0;
+static int page_js_host_allowlisted(const browser_window *w) {
     char js_host[256];
     if (w->cur_top != NULL && host_from_url(w->cur_top, js_host, sizeof js_host))
-        js_host_ok = hb_is_allowlisted(w->js_hosts, js_host);
-    return jsp_enabled(w->js_mode, js_host_ok);
+        return hb_is_allowlisted(w->js_hosts, js_host);
+    return 0;
+}
+static int compute_page_js(const browser_window *w) {
+    return jsp_enabled(w->js_mode, page_js_host_allowlisted(w));
 }
 
 /* Trusted-host doctrine (Hito 28): a host the user declared trustworthy twice --
@@ -1812,13 +1815,20 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * External stylesheets (Hito 27) follow the author-styles opt-in -- or the
      * trusted-host doctrine (Hito 28) -- (GET-only at the parent gate); reader mode
      * ignores author styling, so it fetches none. */
-    int trusted = page_trusted(w);
-    int present_trusted = jsp_present_trusted(page_host_allowlisted(w));
-    int css_grant = (w->caps.css || trusted || present_trusted) && !w->reader;
-    int js_grant  = w->caps.js && trusted;
-    tab_set_net_allowed(t, trusted);
-    tab_set_css_allowed(t, css_grant);
-    seed_session_cookies(t, trusted, w->cur_top);
+    wc_caps wc = wc_derive((wc_input){
+        .js_mode       = w->js_mode,
+        .host_in_js    = page_js_host_allowlisted(w),
+        .host_in_allow = page_host_allowlisted(w),
+        .reader        = w->reader,
+        .user_css      = w->caps.css,
+        .user_images   = w->caps.images,
+    });
+    int trusted   = wc.net;   /* privacy caps (net/cookies) == the double-consent */
+    int css_grant = wc.css;   /* external-stylesheet prefetch + author CSS apply */
+    int js_grant  = wc.net;   /* external-script prefetch (was caps.js && trusted) */
+    tab_set_net_allowed(t, wc.net);
+    tab_set_css_allowed(t, wc.css);
+    seed_session_cookies(t, wc.cookies, w->cur_top);
 
     /* Hito 29 (lookahead prefetch): scan the raw HTML for the external
      * stylesheets/scripts the worker will request over TAG_SUBREQ and download
@@ -1899,11 +1909,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * still ignores author styling and images (a clean reading view) and wins over
      * both; neither disturbs the user's persistent toggles: gate a local copy, not
      * w->caps. */
-    rdp_caps eff = w->caps;
-    if (trusted || jsp_present_trusted(page_host_allowlisted(w))) {
-        eff.css = true; eff.images = true;
-    }
-    if (w->reader) { eff.css = false; eff.images = false; }
+    rdp_caps eff = wc_render_caps(wc);
 
     /* The top-level URL is the https origin (per-image policy) or NULL for a local
      * file, which fails image loads closed. On failure doc stays NULL and the
@@ -7788,11 +7794,21 @@ static tab *freebug_repl_worker(browser_window *w) {
     if (w->cur_html == NULL) return NULL;
     tab *t = NULL;
     if (tab_open(&t) != TAB_OK) return NULL;
-    int trusted = page_trusted(w);
+    /* Same unified per-host caps as the visible render (webcaps): the REPL worker
+     * evaluates against THIS page, so its network / author-CSS / cookie grants match
+     * what the user already sees (present-trust included). */
+    wc_caps wc = wc_derive((wc_input){
+        .js_mode       = w->js_mode,
+        .host_in_js    = page_js_host_allowlisted(w),
+        .host_in_allow = page_host_allowlisted(w),
+        .reader        = w->reader,
+        .user_css      = w->caps.css,
+        .user_images   = w->caps.images,
+    });
     tab_set_fetcher(t, gui_subresource_fetch, w);
-    tab_set_net_allowed(t, trusted);
-    tab_set_css_allowed(t, (w->caps.css || trusted) && !w->reader);
-    seed_session_cookies(t, trusted, w->cur_top); /* REPL worker sees the same cookies */
+    tab_set_net_allowed(t, wc.net);
+    tab_set_css_allowed(t, wc.css);
+    seed_session_cookies(t, wc.cookies, w->cur_top); /* REPL worker sees the same cookies */
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);
