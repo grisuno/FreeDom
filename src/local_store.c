@@ -196,6 +196,17 @@
 #define OSSL_KDF_PARAM_THREADS "threads"
 #endif
 #define _GNU_SOURCE
+#include <openssl/kdf.h>
+#ifndef OSSL_KDF_PARAM_ARGON2_LANES
+#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"
+#endif
+#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST
+#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"
+#endif
+#ifndef OSSL_KDF_PARAM_THREADS
+#define OSSL_KDF_PARAM_THREADS "threads"
+#endif
+#define _GNU_SOURCE
 /*
  * local_store — implementation: encrypted local state at rest (Zero Knowledge).
  *
