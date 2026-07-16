@@ -12,6 +12,7 @@
 #include "render_doc.h"
 
 #include "css.h"
+#include "data_url.h"
 #include "url.h"
 #include "util.h"
 
@@ -184,6 +185,40 @@ static int rd_push_input(rd_doc *d, int block_break, const pv_run *r) {
     return 0;
 }
 
+/* Resolves raw_src (possibly relative, or a data: URI) against top_level_url and
+ * judges it under the exact same policy an <img> already goes through: a data:
+ * URI is judged in place (never resolved, never touches the network either way);
+ * a file:// page confines a relative source to its own document subtree (no
+ * escaping "../", no absolute/foreign-scheme read); everything else resolves as
+ * https and is judged by rdp_image_decision (caps.images, tracker heuristics,
+ * scheme/host checks). resolved must be at least URL_MAX_LEN+1 bytes; *out_url
+ * is set to either raw_src or resolved. Shared by the PV_IMAGE run case and the
+ * box background-image case below (2026-07-16) so the two can never drift into
+ * different gates for what is, from a network-trust standpoint, the identical
+ * operation -- a CSS `background-image: url(...)` is not a lesser-trusted or
+ * differently-trusted fetch than an `<img src>`. */
+static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
+                                                const char *raw_src, int w, int h,
+                                                char *resolved, size_t resolved_cap,
+                                                const char **out_url) {
+    *out_url = raw_src;
+    if (raw_src != NULL && du_is_data_url(raw_src))
+        return rdp_image_decision(caps, top_level_url, raw_src, w, h);
+    if (top_level_url != NULL && url_is_file(top_level_url)) {
+        if (!caps.images) return RDP_IMG_BLOCK_DISABLED;
+        if (raw_src != NULL &&
+            url_resolve_file(top_level_url, raw_src, resolved, resolved_cap) == URL_OK) {
+            *out_url = resolved;
+            return rdp_is_tracking_pixel(w, h) ? RDP_IMG_BLOCK_TRACKER : RDP_IMG_ALLOW;
+        }
+        return RDP_IMG_BLOCK_SCHEME;
+    }
+    if (top_level_url != NULL && raw_src != NULL
+        && url_resolve_https(top_level_url, raw_src, resolved, resolved_cap) == URL_OK)
+        *out_url = resolved;
+    return rdp_image_decision(caps, top_level_url, *out_url, w, h);
+}
+
 rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_url, rd_doc **out) {
     if (out == NULL) return RD_ERR_NULL_ARG;
@@ -195,6 +230,16 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     size_t n = pv_count(view);
     for (size_t i = 0; i < n; ++i) {
         if (pv_at(view, i)->kind == PV_IMAGE) { d->has_images = 1; break; }
+    }
+    /* A CSS background-image counts too, but only when author CSS itself would be
+     * honored (caps.css off means no box decoration renders at all, so there is
+     * nothing to warn about from a background-image specifically). */
+    if (!d->has_images && caps.css) {
+        size_t nb0 = pv_box_count(view);
+        for (size_t i = 0; i < nb0; ++i) {
+            const pv_box_def *bx = pv_box_at(view, i);
+            if (bx != NULL && bx->bg_image_url[0] != '\0') { d->has_images = 1; break; }
+        }
     }
 
     /* The user is always told when a page wants to load images while the
@@ -254,35 +299,11 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                  * fetch must both act on the real absolute URL, or every relative image
                  * (the common case) would be blocked as "invalid URL". */
                 char resolved[URL_MAX_LEN + 1] = "";
-                const char *img_url = r->src;
-                rdp_img_decision dec;
-                if (top_level_url != NULL && url_is_file(top_level_url)) {
-                    /* Local (file://) page: only same-subtree LOCAL images load. A
-                     * remote, foreign-scheme or "../"-escaping src fails closed (no
-                     * phone-home, no reading files outside the document directory).
-                     * url_resolve_file enforces the confinement. */
-                    if (!caps.images) {
-                        dec = RDP_IMG_BLOCK_DISABLED;
-                    } else if (r->src != NULL &&
-                               url_resolve_file(top_level_url, r->src,
-                                                resolved, sizeof resolved) == URL_OK) {
-                        img_url = resolved;
-                        dec = rdp_is_tracking_pixel(r->img_w, r->img_h)
-                                  ? RDP_IMG_BLOCK_TRACKER : RDP_IMG_ALLOW;
-                    } else {
-                        dec = RDP_IMG_BLOCK_SCHEME;
-                    }
-                } else {
-                    /* Remote (https) pipeline. On failure (data:/javascript:/no base)
-                     * the raw src is kept and fails closed in rdp_image_decision. */
-                    if (top_level_url != NULL && r->src != NULL
-                        && url_resolve_https(top_level_url, r->src, resolved,
-                                             sizeof resolved) == URL_OK) {
-                        img_url = resolved;
-                    }
-                    dec = rdp_image_decision(caps, top_level_url, img_url,
-                                             r->img_w, r->img_h);
-                }
+                const char *img_url;
+                rdp_img_decision dec = resolve_image_decision(caps, top_level_url, r->src,
+                                                               r->img_w, r->img_h,
+                                                               resolved, sizeof resolved,
+                                                               &img_url);
                 rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, -1, -1);
                 break;
             }
@@ -417,6 +438,34 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             for (size_t i = 0; i < nb; ++i) {
                 const pv_box_def *src = pv_box_at(view, i);
                 d->boxes[i] = *src;
+                /* background-image: url(...) (2026-07-16): resolve the raw,
+                 * possibly-relative author-CSS url() against the page origin and
+                 * gate it under the EXACT same policy as an <img> (see
+                 * resolve_image_decision above) -- caps.images, tracker
+                 * heuristics, file:// subtree confinement, scheme checks all
+                 * apply identically. Anything short of RDP_IMG_ALLOW clears the
+                 * field: the GUI never even sees a URL for a blocked/disabled
+                 * background, so it structurally cannot fetch it. A blocked
+                 * background paints as if unset (no border/box-shadow-style
+                 * "broken image" placeholder) -- it is decoration, not content
+                 * with alt text, matching real-browser behaviour. */
+                if (d->boxes[i].bg_image_url[0] != '\0') {
+                    char resolved[URL_MAX_LEN + 1] = "";
+                    const char *img_url;
+                    rdp_img_decision dec = resolve_image_decision(
+                        caps, top_level_url, d->boxes[i].bg_image_url, -1, -1,
+                        resolved, sizeof resolved, &img_url);
+                    if (dec == RDP_IMG_ALLOW) {
+                        size_t ulen = strlen(img_url);
+                        if (ulen >= sizeof d->boxes[i].bg_image_url) {
+                            d->boxes[i].bg_image_url[0] = '\0';
+                        } else {
+                            memcpy(d->boxes[i].bg_image_url, img_url, ulen + 1);
+                        }
+                    } else {
+                        d->boxes[i].bg_image_url[0] = '\0';
+                    }
+                }
             }
             d->nbox = nb;
             d->boxcap = nb;

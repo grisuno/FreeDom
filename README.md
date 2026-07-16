@@ -132,10 +132,11 @@ Their services cannot be implemented without compromising user privacy through t
   - Full GitHub Actions CI/CD pipeline
   - MCP (Model Context Protocol) server for AI agent integration
 
-## Current Status (Updated - June 21, 2026)
+## Current Status (Updated - July 16, 2026)
 - ✅ Advanced HTML rendering with box model, flex/grid and margin collapsing
-- ✅ Clickable links + image support (PNG + JPEG + static GIF — the GIF decoder is our own bounded pure-C LZW, no giflib — all decoded inside the sandboxed worker)
-- ✅ CSS `linear-gradient()` backgrounds (pure grammar, no URL form — can never fetch) and rounded corners (`border-radius` on backgrounds, borders, shadows and outlines)
+- ✅ Clickable links + image support (PNG + JPEG + WebP + static GIF — the GIF decoder is our own bounded pure-C LZW, no giflib — all decoded inside the sandboxed worker)
+- ✅ Inline `data:` images (`<img src="data:image/png;base64,...">`) decode with zero network request — the base64 payload is only sliced (not decoded) on the trusted side, then base64- and format-decoded inside the same confined worker as any fetched image; `<img>` with no plain `src` falls back to its first `srcset` candidate
+- ✅ CSS `background-image` — both `linear-gradient()` (pure grammar, never fetches) and `url(...)` (fetched/decoded under the exact same policy as an `<img>`: `caps.images`, tracker/scheme checks, worker-confined decode), plus `background-size: cover`/`contain`/`auto` and `background-repeat` (`repeat`/`no-repeat`/`repeat-x`/`repeat-y`) — and rounded corners (`border-radius` on backgrounds, borders, shadows and outlines)
 - ✅ `box-sizing: border-box` honored (declared width includes padding + border)
 - ✅ Real async JS timers: `setTimeout`/`setInterval` with actual delays on a **virtual clock the trusted parent drives** (the sandboxed worker cannot wake itself); chained timers render progressively in the GUI and in headless exports
 - ✅ `innerHTML` getter (bounded serialization) alongside the existing setter
@@ -163,7 +164,7 @@ Their services cannot be implemented without compromising user privacy through t
 - ✅ Distraction-free (reader) mode (`Ctrl+D`): drops boilerplate + author styles, centers the text
 - ✅ Debian packaging
 - ✅ Comprehensive CI/CD + fuzzing + MCP automation
-- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model incl. `box-sizing: border-box` + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; `calc()`, `min()`/`max()`/`clamp()` and `var()`/custom properties supported — bounded, non-executing; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` + `flex-wrap` multi-line + `align-items`/`align-self` — lays out for real; borders/`box-shadow`/`outline` and `position`/`z-index` stacking are painted with `border-radius` rounding, `linear-gradient()` backgrounds paint, `overflow: hidden` clips; grid tracks resolve `fr` weights and fixed px and `grid-column: span N` places, but `grid-row` spans, `grid-template-rows` sizing and `align-content`/`justify-items` resolve without a paint effect; no transforms/animations; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
+- ⚠️ CSS support still limited (author `<style>`/inline subset + safe `@media` + combinators + box model incl. `box-sizing: border-box` + text presentation `font-family`/`text-transform`/`letter-spacing`/`text-shadow`/`opacity`/…; `calc()`, `min()`/`max()`/`clamp()` and `var()`/custom properties supported — bounded, non-executing; per-item flex — `flex-grow`/`shrink`/`basis`/`order` + `flex-direction: column` + `flex-wrap` multi-line + `align-items`/`align-self` — lays out for real; borders/`box-shadow`/`outline` and `position`/`z-index` stacking are painted with `border-radius` rounding, `linear-gradient()`/`url()` backgrounds paint (size/repeat honored, position always top-left), `overflow: hidden` clips; `transform: translate()`/`scale()`/`rotate()` paint via a real Cairo affine matrix (one function per declaration, no `skew()`/`matrix()`/chaining yet, hit-testing stays untransformed); grid tracks resolve `fr` weights and fixed px and `grid-column: span N` places, but `grid-row` spans, `grid-template-rows` sizing and `align-content`/`justify-items` resolve without a paint effect; no animations/`@keyframes`; author-gated — see `spec/css.md` for the full supported-vs-missing inventory)
 - ⚠️ JavaScript support still partial (no ES modules/`defer`, no events beyond click, no Web Components upgrade — but timers are real and async now)
 - ⚠️ Full async networking/caching in progress
 

@@ -159,6 +159,49 @@ static void test_image_block_invalid(void **state) {
         RDP_IMG_BLOCK_INVALID);
 }
 
+/* A data: URI embeds its bytes inline: no socket opens, so it skips the https/
+ * host/tracker checks above but still needs caps.images. See spec/data_url.md. */
+static void test_image_allow_data_url(void **state) {
+    (void)state;
+    assert_int_equal(
+        rdp_image_decision(caps_images_on(), "https://example.com/",
+                           "data:image/png;base64,QQ==", 64, 64),
+        RDP_IMG_ALLOW);
+    /* Even a "tracking pixel"-sized data: URI is allowed: no request, no
+     * correlation possible. */
+    assert_int_equal(
+        rdp_image_decision(caps_images_on(), "https://example.com/",
+                           "data:image/png;base64,QQ==", 1, 1),
+        RDP_IMG_ALLOW);
+    /* Works with no top-level URL at all (e.g. a bare fragment being tested). */
+    assert_int_equal(
+        rdp_image_decision(caps_images_on(), NULL,
+                           "data:image/gif;base64,QQ==", 64, 64),
+        RDP_IMG_ALLOW);
+}
+
+static void test_image_data_url_disabled_by_default(void **state) {
+    (void)state;
+    assert_int_equal(
+        rdp_image_decision(rdp_caps_safe(), "https://example.com/",
+                           "data:image/png;base64,QQ==", 64, 64),
+        RDP_IMG_BLOCK_DISABLED);
+}
+
+static void test_image_data_url_malformed_is_invalid(void **state) {
+    (void)state;
+    /* Percent-encoded (no ;base64 flag) or otherwise malformed data: URIs fail
+     * closed rather than falling through to the https scheme check. */
+    assert_int_equal(
+        rdp_image_decision(caps_images_on(), "https://example.com/",
+                           "data:image/svg+xml,<svg/>", 64, 64),
+        RDP_IMG_BLOCK_INVALID);
+    assert_int_equal(
+        rdp_image_decision(caps_images_on(), "https://example.com/",
+                           "data:image/png;base64", 64, 64),
+        RDP_IMG_BLOCK_INVALID);
+}
+
 /* Disabled capability beats every other reason: a tracker URL with images off is
  * reported as DISABLED, not TRACKER (the gate short-circuits first). */
 static void test_image_disabled_precedence(void **state) {
@@ -209,6 +252,9 @@ int main(void) {
         cmocka_unit_test(test_image_block_tracker),
         cmocka_unit_test(test_image_block_scheme),
         cmocka_unit_test(test_image_block_invalid),
+        cmocka_unit_test(test_image_allow_data_url),
+        cmocka_unit_test(test_image_data_url_disabled_by_default),
+        cmocka_unit_test(test_image_data_url_malformed_is_invalid),
         cmocka_unit_test(test_image_disabled_precedence),
         cmocka_unit_test(test_img_reason_total_and_stable),
         cmocka_unit_test(test_images_warning_present),

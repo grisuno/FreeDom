@@ -719,6 +719,83 @@ static void test_build_image_without_src_ignored(void **state) {
     hp_document_free(doc);
 }
 
+/* An <img> with no plain src but a srcset falls back to the first srcset
+ * candidate -- the common shape of responsive-image markup (<picture><source
+ * srcset=...> siblings are invisible to this loop; a bare <img srcset=...> with
+ * no src is also common in lazy-loading libraries). */
+static void test_build_image_srcset_fallback_when_no_src(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><img srcset=\"https://e.example/a.jpg 1x, https://e.example/b.jpg 2x\" "
+        "alt=\"responsive\"></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = find_image(v, "https://e.example/a.jpg");
+    assert_non_null(img);
+    assert_string_equal(img->text, "responsive");
+    assert_null(find_image(v, "https://e.example/b.jpg"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A plain src, when present, always wins over srcset -- no fallback needed. */
+static void test_build_image_plain_src_wins_over_srcset(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><img src=\"https://e.example/plain.jpg\" "
+        "srcset=\"https://e.example/other.jpg 1x\"></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_image(v, "https://e.example/plain.jpg"));
+    assert_null(find_image(v, "https://e.example/other.jpg"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A single srcset candidate with no descriptor at all (just a bare URL) is still
+ * picked up. */
+static void test_build_image_srcset_single_no_descriptor(void **state) {
+    (void)state;
+    hp_document *doc =
+        parse("<body><img srcset=\"https://e.example/solo.jpg\"></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_image(v, "https://e.example/solo.jpg"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A data: URI candidate in srcset must not be truncated at its internal
+ * ";base64," comma -- that comma is part of the URL, not a candidate separator. */
+static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><img srcset=\"data:image/png;base64,QUFBQQ== 1x, "
+        "https://e.example/fallback.jpg 2x\"></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_image(v, "data:image/png;base64,QUFBQQ=="));
+    assert_null(find_image(v, "https://e.example/fallback.jpg"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Neither src nor srcset (or an empty/whitespace-only srcset): nothing to show,
+ * same as the existing no-src case. */
+static void test_build_image_no_src_and_no_srcset_ignored(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><img alt=\"orphan\" srcset=\"   \">"
+                            "<p>kept</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        assert_int_not_equal(pv_at(v, i)->kind, PV_IMAGE);
+    }
+    assert_non_null(find_text(v, "kept"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_empty_document(void **state) {
     (void)state;
     hp_document *doc = parse("<html><head><title>t</title></head><body></body></html>");
@@ -2490,6 +2567,11 @@ int main(void) {
         cmocka_unit_test(test_build_noscript_shown_when_js_off),
         cmocka_unit_test(test_build_noscript_hidden_when_js_on),
         cmocka_unit_test(test_build_image_without_src_ignored),
+        cmocka_unit_test(test_build_image_srcset_fallback_when_no_src),
+        cmocka_unit_test(test_build_image_plain_src_wins_over_srcset),
+        cmocka_unit_test(test_build_image_srcset_single_no_descriptor),
+        cmocka_unit_test(test_build_image_srcset_data_url_not_truncated_at_comma),
+        cmocka_unit_test(test_build_image_no_src_and_no_srcset_ignored),
         cmocka_unit_test(test_build_empty_document),
         cmocka_unit_test(test_set_color_model),
         cmocka_unit_test(test_build_author_color),

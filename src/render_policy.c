@@ -11,6 +11,7 @@
 
 #include "render_policy.h"
 
+#include "data_url.h"
 #include "request_policy.h"
 
 rdp_caps rdp_caps_safe(void) {
@@ -31,6 +32,18 @@ rdp_img_decision rdp_image_decision(rdp_caps caps,
     /* The capability gate short-circuits: with images off, nothing about the
      * image matters and the URL is not consulted. */
     if (!caps.images) return RDP_IMG_BLOCK_DISABLED;
+
+    /* A data: URI embeds its bytes in the document already delivered -- decoding
+     * it opens no socket, so it cannot leak the reader's IP or serve as a tracking
+     * pixel. It skips the https/host/tracker checks below (they exist only to gate
+     * a NETWORK fetch) but still needs caps.images, like every other image. An
+     * unsupported/malformed data: URI (no base64 payload) fails closed. See
+     * spec/data_url.md. */
+    if (du_is_data_url(image_url)) {
+        const char *payload; size_t plen;
+        return du_base64_payload(image_url, &payload, &plen) == DU_OK
+             ? RDP_IMG_ALLOW : RDP_IMG_BLOCK_INVALID;
+    }
 
     /* Zero Trust: revalidate scheme + host on every image through request_policy.
      * Cross-site (RP_BLOCK_THIRD_PARTY) is allowed for opt-in images; only an

@@ -400,6 +400,16 @@ numérico). El `src` se normaliza igual que el `text` para que sea seguro de pin
 bloque se calcula como para el texto (bloque contenedor distinto del anterior, o `<br>`/`<hr>`
 previo).
 
+**Fallback a `srcset` (sin `src`):** cuando `<img>` no tiene `src` (o está vacío), se usa el
+primer candidato de `srcset` (`srcset_first_url`, pura) — el patrón habitual de imágenes
+responsivas y de `<img srcset=...>` sin `src` de las librerías de lazy-loading (los hermanos
+`<source srcset=...>` de un `<picture>` NO son visitados por este recorrido; solo el `<img>` de
+fallback dentro de `<picture>` lo es, y ya funcionaba antes de este cambio). Un candidato
+normal termina en el primer espacio o coma (su descriptor `2x`/`800w` opcional va separado por
+espacio); un candidato `data:` termina en el primer espacio o el final de la cadena, para no
+cortar en la coma interna de `;base64,`. Sin `src` **ni** `srcset` utilizable: sin run, como
+antes. Ver `[[freedom-data-url-images]]`.
+
 ## 5. Tabla de errores
 
 | Código | Condición |

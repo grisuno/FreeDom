@@ -129,8 +129,8 @@ altera.
   distracciones; `dark` es la preferencia de esquema de color; `css` (Hito 27) autoriza el fetch de
   **hojas de estilo externas** (`<link rel=stylesheet>`) por la misma trama de subrecurso — el padre
   lo decide vía `tab_set_css_allowed` (en la GUI: el toggle "Author styles (CSS)"). `url` es la URL
-  de la página (para el `location` real del JS — `url_len == 0` = sin URL).   `OP_EVAL`/`OP_DECODE_IMAGE` llevan
-  `[op][len][payload]`. `OP_CLICK` es un comando corto:
+  de la página (para el `location` real del JS — `url_len == 0` = sin URL).   `OP_EVAL`/`OP_DECODE_IMAGE`/
+  `OP_DECODE_IMAGE_B64` llevan `[op][len][payload]`. `OP_CLICK` es un comando corto:
   `[op][node_id: int32]` (sin payload de longitud). EOF en la tubería de peticiones equivale a `OP_QUIT`.
 - **Respuesta de `OP_LOAD` (Hito 26: con tramas de subrecurso):** mientras corre los scripts de la
   página el hijo puede emitir **0+ tramas `TAG_SUBREQ`** (un XHR/fetch), cada una
@@ -147,7 +147,17 @@ altera.
   `navreq` (Hito 20e) es la string **cruda** que el JS pidió navegar; el padre la **gatea** con
   `ln_resolve(url_real, navreq)` y solo expone el destino resuelto en `tab_page.nav_url` si la política
   lo permite (Zero Trust). Las tramas de subrecurso solo aparecen en `OP_LOAD` (XHR vive solo en la
-  ventana de scripts de la carga); `OP_EVAL`/`OP_DECODE_IMAGE` no llevan tags.
+  ventana de scripts de la carga); `OP_EVAL`/`OP_DECODE_IMAGE`/`OP_DECODE_IMAGE_B64` no llevan tags.
+- **`OP_DECODE_IMAGE_B64` (2026-07-16, imágenes `data:`):** mismo formato de petición/respuesta que
+  `OP_DECODE_IMAGE` (`[ok:int32]` y, si `1`, `[w][h][stride][dlen][pixels]`), pero `payload` es el
+  **texto base64** que el padre recortó de un `<img src="data:...;base64,...">` con
+  `du_base64_payload` (pura, sin decodificar nada — ver `spec/data_url.md`). El worker
+  confinado decodifica primero el base64 (`du_base64_decode`) y alimenta el resultado al MISMO
+  `img_decode` que `OP_DECODE_IMAGE`: los dos pasos que interpretan bytes hostiles (base64 y
+  formato de imagen) corren confinados, el padre solo hizo aritmética de punteros sobre la URL.
+  `tab_decode_image_data_url` es el wrapper del padre (mismo contrato que `tab_decode_image`: un
+  `data:` inválido o bytes no decodificables responden `TAB_OK` con `out->data == NULL`, nunca un
+  error de transporte). Ver `[[freedom-data-url-images]]`.
 - **Scripts externos `<script src>` (Hito 24 EXT):** con `run_js && net` el worker ejecuta también
   los scripts **externos** de la página, **en orden de documento** intercalados con los inline
   (`hp_extract_script_list` ahora los lista con su `src` crudo). El worker **no tiene red**: pide los

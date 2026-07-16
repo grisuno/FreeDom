@@ -63,6 +63,16 @@ const char      *rdp_images_warning(void);
 Devuelve las capacidades por defecto: `images=false, css=false, js=false`. Equivale al valor
 cero, pero explícito y autodocumentado.
 
+### `data:` URIs (2026-07-16)
+Un `image_url` que empieza con `data:` (`du_is_data_url`, módulo `data_url`) se salta el
+`rp_evaluate` (scheme/host) y la heurística de tracking-pixel de este mismo `rdp_image_decision`:
+decodificarlo no abre ningún socket, así que ni filtra la IP del lector ni sirve como pixel de
+rastreo, y el bloqueo por scheme (pensado para `http://`/`javascript:`/etc.) no tiene sentido
+aplicado a bytes que ya están en el documento. Sigue exigiendo `caps.images` (mismo interruptor
+único que toda imagen) y falla cerrado (`RDP_IMG_BLOCK_INVALID`) si `du_base64_payload` no
+encuentra un payload base64 válido (p. ej. la variante percent-encoded, fuera de alcance). Ver
+`spec/data_url.md`, `[[freedom-data-url-images]]`.
+
 ### `rdp_is_tracking_pixel(w, h)`
 Heurística pura sobre las **dimensiones declaradas** de la imagen (atributos `width`/`height`
 del `<img>`, o el tamaño anunciado). `w`/`h` negativos significan *desconocido*.

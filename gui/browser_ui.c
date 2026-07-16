@@ -17,6 +17,7 @@
 #include "compositor.h"
 #include "css.h"
 #include "css_color.h"
+#include "data_url.h"
 #include "download.h"
 #include "freebug.h"
 #include "hostblock.h"
@@ -212,11 +213,35 @@ typedef struct ui_input_state {
  * pixels (ARGB32) and is NULL when the image was blocked, not fetched, or could
  * not be decoded (the placeholder is drawn instead). nat_w/nat_h are the natural
  * pixel dimensions. The block aliases w->doc (not owned). */
+/* href is an OWNED copy of the image's URL, not a pointer into w->doc (fixed
+ * 2026-07-16): a worker result applied outside a fresh navigation (a click, or a
+ * JS timer firing via OP_TICK -- see apply_click_result) rebuilds w->doc WHOLESALE
+ * from scratch without re-running load_images, so any rd_block* recorded here
+ * would immediately dangle and, worse, silently stop matching ANY block in the
+ * new doc (find_image compared pointer identity) -- every already-decoded image
+ * would revert to its placeholder on the very next repaint even though nothing
+ * about the image actually changed. Matching by URL content instead is stable
+ * across a doc rebuild with no re-fetch needed (the decoded surface is reused
+ * as-is): a JS timer firing seconds into a page like an ad-heavy anime-streaming
+ * site is exactly the case this fixes. */
 typedef struct ui_image {
-    const rd_block  *blk;
+    char            *href;
     cairo_surface_t *surface;
     int              nat_w, nat_h;
 } ui_image;
+
+/* A decoded CSS background-image for one box of the current doc (2026-07-16).
+ * Same shape as ui_image and the same reasoning applies: url is an OWNED copy
+ * (not a pv_box_def* into w->doc), so it survives a doc rebuild that does not
+ * re-run load_bg_images. surface NULL means blocked/unset/failed (paint as if
+ * there were no background-image at all, no placeholder: it is decoration, not
+ * content with alt text, matching real-browser behaviour for a failed
+ * background). */
+typedef struct ui_bg_image {
+    char             *url;
+    cairo_surface_t  *surface;
+    int               nat_w, nat_h;
+} ui_bg_image;
 
 /* Maximum concurrent tabs. Bounded so the per-tab snapshot array is a fixed,
  * auditable size (no unbounded growth from a hostile page opening tabs; this
@@ -236,6 +261,7 @@ typedef struct tab_ctx {
     double          scroll, content_total_h;
     ui_input_state *inputs; size_t input_count; int focused_input;
     ui_image       *images; size_t image_count;
+    ui_bg_image    *bg_images; size_t bg_image_count;
     char           *cur_html; size_t cur_html_len; char *cur_top;
     int             loading;
     const char     *hover_href; /* aliases doc; moves with it */
@@ -339,6 +365,11 @@ typedef struct browser_window {
     /* Decoded images of the current page (rebuilt with the doc; one per RD_IMAGE). */
     ui_image       *images;
     size_t          image_count;
+
+    /* Decoded CSS background-images of the current page (2026-07-16; rebuilt with
+     * the doc, one per box with a resolved bg_image_url). */
+    ui_bg_image    *bg_images;
+    size_t          bg_image_count;
 
     /* Configurable network User-Agent (session only; empty => SF_DEFAULT_USER_AGENT,
      * which IS the anti_fp normalized identity, matching navigator.userAgent). A custom
@@ -992,16 +1023,47 @@ static void free_inputs(browser_window *w) {
 static void free_images(browser_window *w) {
     for (size_t i = 0; i < w->image_count; ++i) {
         if (w->images[i].surface != NULL) cairo_surface_destroy(w->images[i].surface);
+        free(w->images[i].href);
     }
     free(w->images);
     w->images = NULL;
     w->image_count = 0;
 }
 
-/* The decoded image for a doc block, or NULL when it has none (blocked / failed). */
-static const ui_image *find_image(const browser_window *w, const rd_block *blk) {
+/* The decoded image for href (a doc block's URL), or NULL when it has none
+ * (blocked / failed / never fetched). Matches by URL content, not block
+ * identity: a worker result applied outside a fresh navigation (click, JS
+ * timer) rebuilds w->doc from scratch, so the block pointer a slot was loaded
+ * against no longer exists -- see the ui_image comment. */
+static const ui_image *find_image(const browser_window *w, const char *href) {
+    if (href == NULL) return NULL;
     for (size_t i = 0; i < w->image_count; ++i) {
-        if (w->images[i].blk == blk) return &w->images[i];
+        if (w->images[i].href != NULL && strcmp(w->images[i].href, href) == 0)
+            return &w->images[i];
+    }
+    return NULL;
+}
+
+/* Releases the decoded background-image surfaces of the current page and the
+ * array (2026-07-16, mirrors free_images). */
+static void free_bg_images(browser_window *w) {
+    for (size_t i = 0; i < w->bg_image_count; ++i) {
+        if (w->bg_images[i].surface != NULL) cairo_surface_destroy(w->bg_images[i].surface);
+        free(w->bg_images[i].url);
+    }
+    free(w->bg_images);
+    w->bg_images = NULL;
+    w->bg_image_count = 0;
+}
+
+/* The decoded background-image for url (a box's bg_image_url), or NULL when it
+ * has none (unset / blocked / failed -- the caller paints as if there were no
+ * background-image). Matches by URL content, not box identity; see find_image. */
+static const ui_bg_image *find_bg_image(const browser_window *w, const char *url) {
+    if (url == NULL || url[0] == '\0') return NULL;
+    for (size_t i = 0; i < w->bg_image_count; ++i) {
+        if (w->bg_images[i].url != NULL && strcmp(w->bg_images[i].url, url) == 0)
+            return &w->bg_images[i];
     }
     return NULL;
 }
@@ -1012,7 +1074,7 @@ static const ui_image *find_image(const browser_window *w, const rd_block *blk) 
  * shared by layout (row height) and paint (blit), so they cannot drift apart. */
 static int image_display_size(const browser_window *w, const rd_block *blk,
                               double box_w, double *dw, double *dh) {
-    const ui_image *im = find_image(w, blk);
+    const ui_image *im = find_image(w, blk->href);
     if (im == NULL || im->surface == NULL || im->nat_w <= 0 || im->nat_h <= 0) return 0;
     if (box_w < 1.0) box_w = 1.0;
     double scale = ((double)im->nat_w > box_w) ? box_w / (double)im->nat_w : 1.0;
@@ -1059,6 +1121,7 @@ static ui_input_state *find_input_state(browser_window *w, const rd_block *blk) 
 static void clear_doc(browser_window *w) {
     free_inputs(w);
     free_images(w);
+    free_bg_images(w);
     if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
     w->hover_href = NULL;
     w->hover_cursor = CSS_CUR_UNSET;
@@ -1590,6 +1653,70 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
  * rejected, failed or undecodable (non-PNG/JPEG) image keeps surface == NULL and the
  * placeholder is drawn. Synchronous: image loads block this render (acceptable for v1;
  * async fetch is future work). */
+/* Fetches and decodes ONE already-ALLOWed image URL (data:/file:/https -- exactly
+ * the gates rd_build already applied to href) into a cairo surface. Shared by the
+ * <img> loader (load_images) and the CSS background-image loader (load_bg_images,
+ * 2026-07-16): from a trust standpoint the two are the identical operation --
+ * bytes are hostile either way and are decoded inside the confined worker, never
+ * in this process. pool/pooled may be a no-op pool (pooled=0) to always fetch
+ * directly -- background-images are not prefetch-pooled in v1, the pool stays
+ * scoped to <img> which is the overwhelmingly common case. On any failure
+ * *out_surface is left NULL and the returned reason says where it failed (a
+ * background-image caller can ignore the reason and just skip painting: a
+ * blocked/failed decorative background has no natural placeholder, matching
+ * real-browser behaviour, unlike an <img> which shows why via its alt text). */
+static img_fail_reason fetch_decode_image(browser_window *w, tab *t, tab_fetch_fn img_fetch,
+                                          void *fetch_ctx, const char *href,
+                                          pf_pool *pool, int pooled,
+                                          cairo_surface_t **out_surface,
+                                          int *out_w, int *out_h) {
+    *out_surface = NULL;
+    *out_w = 0;
+    *out_h = 0;
+    tab_image img;
+    tab_status ds;
+
+    if (du_is_data_url(href)) {
+        ds = tab_decode_image_data_url(t, href, &img);
+        if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); return IMG_FAIL_DECODE; }
+        *out_surface = surface_from_pixels(&img);
+        img_fail_reason r = IMG_FAIL_OK;
+        if (*out_surface != NULL) { *out_w = (int)img.width; *out_h = (int)img.height; }
+        else r = IMG_FAIL_SURFACE;
+        tab_image_free(&img);
+        return r;
+    }
+
+    uint8_t *bytes = NULL;
+    size_t bytes_len = 0;
+    if (url_is_file(w->cur_top)) {
+        const char *p = url_file_path(href);
+        if (p == NULL) return IMG_FAIL_LOCAL_READ;
+        bytes = read_file_bounded(p, UI_IMAGE_MAX_BODY, &bytes_len);
+        if (bytes == NULL) return IMG_FAIL_LOCAL_READ;
+    } else {
+        int rc = -1, st = 0;
+        char *bd = NULL, *ct = NULL;
+        size_t bl = 0;
+        if (!(pooled && pool != NULL && pf_pool_take(pool, href, &rc, &st, &bd, &bl, &ct)))
+            rc = img_fetch(fetch_ctx, "GET", href, NULL, 0, &st, &bd, &bl, &ct);
+        free(ct);
+        if (rc != 0 || bd == NULL) { free(bd); return IMG_FAIL_FETCH; }
+        bytes = (uint8_t *)bd;
+        bytes_len = bl;
+    }
+
+    ds = tab_decode_image(t, bytes, bytes_len, &img);
+    free(bytes);
+    if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); return IMG_FAIL_DECODE; }
+    *out_surface = surface_from_pixels(&img);
+    img_fail_reason r = IMG_FAIL_OK;
+    if (*out_surface != NULL) { *out_w = (int)img.width; *out_h = (int)img.height; }
+    else r = IMG_FAIL_SURFACE;
+    tab_image_free(&img);
+    return r;
+}
+
 static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx) {
     if (w->doc == NULL) return;
     size_t n = rd_count(w->doc);
@@ -1611,8 +1738,11 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
     if (w->cur_top != NULL && !url_is_file(w->cur_top)) {
         for (size_t i = 0; i < n && np < PF_MAX_REFS; ++i) {
             const rd_block *b = rd_at(w->doc, i);
+            /* A data: URI's bytes are already in the document -- nothing to
+             * prefetch, and it is not a real network request the pool fetcher
+             * could perform. */
             if (b->kind == RD_IMAGE && b->img_decision == RDP_IMG_ALLOW
-                && b->href != NULL)
+                && b->href != NULL && !du_is_data_url(b->href))
                 purls[np++] = b->href;
         }
     }
@@ -1625,78 +1755,58 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
         const rd_block *b = rd_at(w->doc, i);
         if (b->kind != RD_IMAGE) continue;
         ui_image *slot = &w->images[k++];
-        slot->blk = b;
+        slot->href = (b->href != NULL) ? strdup(b->href) : NULL;
 
         /* render_doc already applied the policy: only an ALLOW image with a src is
-         * loaded. cur_top is the origin (https remote, or file:// local). */
-        if (b->img_decision != RDP_IMG_ALLOW || b->href == NULL || w->cur_top == NULL)
-            continue;
+         * loaded. cur_top is the origin (https remote, or file:// local) that a
+         * fetched image is resolved/routed against -- a data: URL needs no origin
+         * at all (render_doc's decision for it is origin-independent too), so it
+         * is exempt from this guard. */
+        if (b->img_decision != RDP_IMG_ALLOW || b->href == NULL) continue;
+        if (w->cur_top == NULL && !du_is_data_url(b->href)) continue;
 
-        /* Collect the raw image bytes, either from disk (local file:// page) or from
-         * the network (https page). Either way the bytes are hostile and are decoded
-         * inside the sandboxed worker (tab_decode_image), never in this process. Set
-         * img_fail on the block for each failure so the placeholder shows WHY. */
-        uint8_t *bytes = NULL;
-        size_t   bytes_len = 0;
-
-        if (url_is_file(w->cur_top)) {
-            /* Local page: b->href is a file:// URL already CONFINED to the document
-             * directory by render_doc (url_resolve_file). Read it bounded from disk;
-             * no network is touched, so a local page never phones home. */
-            const char *p = url_file_path(b->href);
-            if (p == NULL) {
-                rd_block *rw = (rd_block *)b;
-                rw->img_fail = IMG_FAIL_LOCAL_READ;
-                continue;
-            }
-            bytes = read_file_bounded(p, UI_IMAGE_MAX_BODY, &bytes_len);
-            if (bytes == NULL) {
-                rd_block *rw = (rd_block *)b;
-                rw->img_fail = IMG_FAIL_LOCAL_READ;
-                continue;
-            }
-        } else {
-            /* Pool hit hands the prefetched bytes over (a failed prefetch is
-             * final: the serial fetch would have failed the same way); a miss
-             * (duplicate src, pool off) falls back to the direct fetch. */
-            int rc = -1, st = 0;
-            char *bd = NULL, *ct = NULL;
-            size_t bl = 0;
-            if (!(pooled && pf_pool_take(&imgpool, b->href, &rc, &st, &bd, &bl, &ct)))
-                rc = img_fetch(fetch_ctx, "GET", b->href, NULL, 0, &st, &bd, &bl, &ct);
-            free(ct);
-            if (rc != 0 || bd == NULL) {
-                rd_block *rw = (rd_block *)b;
-                rw->img_fail = IMG_FAIL_FETCH;
-                free(bd);
-                continue;
-            }
-            bytes = (uint8_t *)bd;
-            bytes_len = bl;
-        }
-
-        tab_image img;
-        tab_status ds = tab_decode_image(t, bytes, bytes_len, &img);
-        free(bytes);
-        if (ds != TAB_OK || img.data == NULL) {
+        img_fail_reason reason = fetch_decode_image(w, t, img_fetch, fetch_ctx, b->href,
+                                                     &imgpool, pooled,
+                                                     &slot->surface, &slot->nat_w, &slot->nat_h);
+        if (reason != IMG_FAIL_OK) {
             rd_block *rw = (rd_block *)b;
-            rw->img_fail = IMG_FAIL_DECODE;
-            tab_image_free(&img);
-            continue;
+            rw->img_fail = reason;
         }
-
-        slot->surface = surface_from_pixels(&img);
-        if (slot->surface != NULL) {
-            slot->nat_w = (int)img.width;
-            slot->nat_h = (int)img.height;
-        } else {
-            rd_block *rw = (rd_block *)b;
-            rw->img_fail = IMG_FAIL_SURFACE;
-        }
-        tab_image_free(&img);
     }
     w->image_count = k;
     if (pooled) pf_pool_finish(&imgpool);
+}
+
+/* Fetches and decodes every box's resolved CSS background-image into w->bg_images
+ * (2026-07-16, mirrors load_images -- see fetch_decode_image). rd_build already
+ * resolved+gated bg_image_url: a box here either has an ALLOW'd absolute/data URL
+ * or an empty string (unset, blocked, or off by caps.images), so there is no
+ * decision to re-check, unlike load_images which still reads b->img_decision (a
+ * box def carries no decision field, only the already-cleared-or-not URL). Not
+ * prefetch-pooled in v1 (see fetch_decode_image); a page with many distinct
+ * background-images fetches them serially, same as it would without a pool. */
+static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx) {
+    if (w->doc == NULL) return;
+    size_t nb = rd_box_count(w->doc);
+    size_t nwith = 0;
+    for (size_t i = 0; i < nb; ++i)
+        if (rd_box_at(w->doc, i)->bg_image_url[0] != '\0') nwith++;
+    if (nwith == 0) return;
+
+    w->bg_images = (ui_bg_image *)calloc(nwith, sizeof *w->bg_images);
+    if (w->bg_images == NULL) return; /* fail closed: no backgrounds, page still shows */
+
+    size_t k = 0;
+    for (size_t i = 0; i < nb; ++i) {
+        const pv_box_def *bx = rd_box_at(w->doc, i);
+        if (bx->bg_image_url[0] == '\0') continue;
+        if (w->cur_top == NULL && !du_is_data_url(bx->bg_image_url)) continue;
+        ui_bg_image *slot = &w->bg_images[k++];
+        slot->url = strdup(bx->bg_image_url);
+        fetch_decode_image(w, t, img_fetch, fetch_ctx, bx->bg_image_url,
+                           NULL, 0, &slot->surface, &slot->nat_w, &slot->nat_h);
+    }
+    w->bg_image_count = k;
 }
 
 static void do_load(browser_window *w, const char *url); /* JS navigation re-enters it */
@@ -1921,6 +2031,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t, gui_image_fetch, w); /* fetch + decode allowed images in the still-open worker */
+    load_bg_images(w, t, gui_image_fetch, w); /* fetch + decode allowed CSS background-images */
 
     /* Video playback is user-initiated (click), not auto-played. The auto-play
      * via video_play() would block the Wayland event loop with a synchronous
@@ -2154,6 +2265,7 @@ static void tab_save(browser_window *w) {
     c->content_total_h = w->content_total_h;
     c->inputs = w->inputs; c->input_count = w->input_count; c->focused_input = w->focused_input;
     c->images = w->images; c->image_count = w->image_count;
+    c->bg_images = w->bg_images; c->bg_image_count = w->bg_image_count;
     c->cur_html = w->cur_html; c->cur_html_len = w->cur_html_len; c->cur_top = w->cur_top;
     c->loading = w->loading;
     c->hover_href = w->hover_href;
@@ -2170,6 +2282,7 @@ static void tab_restore(browser_window *w) {
     w->content_total_h = c->content_total_h;
     w->inputs = c->inputs; w->input_count = c->input_count; w->focused_input = c->focused_input;
     w->images = c->images; w->image_count = c->image_count;
+    w->bg_images = c->bg_images; w->bg_image_count = c->bg_image_count;
     w->cur_html = c->cur_html; w->cur_html_len = c->cur_html_len; w->cur_top = c->cur_top;
     w->loading = c->loading;
     w->hover_href = c->hover_href;
@@ -2188,9 +2301,18 @@ static void free_live_page(browser_window *w) {
 /* Frees a parked (inactive) tab's owned state. */
 static void tab_ctx_release(tab_ctx *c) {
     if (c->images != NULL) {
-        for (size_t i = 0; i < c->image_count; ++i)
+        for (size_t i = 0; i < c->image_count; ++i) {
             if (c->images[i].surface != NULL) cairo_surface_destroy(c->images[i].surface);
+            free(c->images[i].href);
+        }
         free(c->images);
+    }
+    if (c->bg_images != NULL) {
+        for (size_t i = 0; i < c->bg_image_count; ++i) {
+            if (c->bg_images[i].surface != NULL) cairo_surface_destroy(c->bg_images[i].surface);
+            free(c->bg_images[i].url);
+        }
+        free(c->bg_images);
     }
     free(c->inputs);
     if (c->doc != NULL) rd_free(c->doc);
@@ -2240,6 +2362,7 @@ static void tab_new(browser_window *w, const char *url) {
     w->doc = NULL; w->hover_href = NULL; w->hover_cursor = CSS_CUR_UNSET;
     w->inputs = NULL; w->input_count = 0; w->focused_input = -1;
     w->images = NULL; w->image_count = 0;
+    w->bg_images = NULL; w->bg_image_count = 0;
     w->cur_html = NULL; w->cur_html_len = 0; w->cur_top = NULL;
     w->scroll = 0.0; w->content_total_h = 0.0; w->loading = 0;
     w->caps = rdp_caps_safe();
@@ -2623,6 +2746,12 @@ typedef struct rc_box {
      * packed stops. Wins over bg_rgb when set. */
     int    grad_n, grad_angle;
     int    grad_c[4];
+    /* background-image size/repeat (2026-07-16). css_bg_size/css_bg_repeat, 0
+     * unset (natural size / CSS default "repeat"). The decoded surface itself is
+     * looked up separately by the painter (ui_bg_image, keyed by pv_box_def
+     * pointer) -- not carried here, unlike the color/gradient fields above,
+     * because it is an owned decoded resource, not a small resolved value. */
+    int    bg_size, bg_repeat;
 } rc_box;
 
 typedef struct rc_layout {
@@ -3625,6 +3754,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
         bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
         bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
+        bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
         bx->hidden = inherited_hidden || this_hidden;
         /* 2026-07-10 author vertical dimensions + aspect-ratio. box_min_w enlarges
          * box_width when the layout was smaller; box_h sets a fixed height (the
@@ -4496,7 +4626,7 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
 
     double dw, dh;
     if (image_display_size(w, blk, box_w, &dw, &dh)) {
-        const ui_image *im = find_image(w, blk);
+        const ui_image *im = find_image(w, blk->href);
         int of = blk->object_fit;
         if (of == 0) of = CSS_OFI_FILL; /* unset = fill */
         cairo_save(cr);
@@ -5052,7 +5182,8 @@ static void box_path(cairo_t *cr, double x, double y, double w, double h, double
  * when the four borders are uniform -- the border ring; mixed per-side borders keep
  * square corners. Content is not clipped to the rounded rect (v1). The box
  * decoration was gated behind caps.css upstream (render_doc). */
-static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy) {
+static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
+                                 const ui_bg_image *bgimg) {
     if (bx->hidden) return;  /* visibility:hidden: geometry stood, decoration does not paint */
     double x = ox + bx->x, y = oy + bx->top, w = bx->w, h = bx->h;
     if (w <= 0.0 || h <= 0.0) return;
@@ -5130,6 +5261,54 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         set_rgb(cr, rgb_from_packed(bx->bg_rgb));
         box_path(cr, x, y, w, h, rad);
         cairo_fill(cr);
+    }
+
+    /* CSS background-image (2026-07-16): paints OVER bg_rgb/gradient, UNDER the
+     * border (CSS background layering: color, then image, then border box edge)
+     * -- an image with transparency lets the color underneath show through.
+     * background-size chooses the scale: cover/contain both preserve aspect
+     * ratio (cover fills the box, possibly cropping; contain fits inside,
+     * possibly letterboxing); unset/auto uses the natural pixel size.
+     * background-position is not resolved in v1 (see spec/css.md) so tiling/
+     * placement always starts at the top-left corner, which matches the CSS
+     * initial value 0% 0% -- the common case, not a compromise. repeat-x/
+     * repeat-y clip to a one-tile-tall/-wide strip so Cairo's single
+     * EXTEND_REPEAT (which tiles both axes) only shows through on the axis
+     * that should repeat; space/round fall back to plain repeat (their exact
+     * tile-count/spacing math is a v2 refinement, see spec/css.md). */
+    if (bgimg != NULL && bgimg->surface != NULL && bgimg->nat_w > 0 && bgimg->nat_h > 0
+        && w > 0.0 && h > 0.0) {
+        double sx = 1.0, sy = 1.0;
+        if (bx->bg_size == CSS_BGS_COVER) {
+            double s = (w / (double)bgimg->nat_w > h / (double)bgimg->nat_h)
+                     ? w / (double)bgimg->nat_w : h / (double)bgimg->nat_h;
+            sx = sy = s;
+        } else if (bx->bg_size == CSS_BGS_CONTAIN) {
+            double s = (w / (double)bgimg->nat_w < h / (double)bgimg->nat_h)
+                     ? w / (double)bgimg->nat_w : h / (double)bgimg->nat_h;
+            sx = sy = s;
+        }
+        double iw = (double)bgimg->nat_w * sx, ih = (double)bgimg->nat_h * sy;
+        cairo_save(cr);
+        box_path(cr, x, y, w, h, rad);
+        cairo_clip(cr);
+        if (bx->bg_repeat == CSS_BGR_REPEAT_X && ih > 0.0) {
+            cairo_rectangle(cr, x, y, w, ih);
+            cairo_clip(cr);
+        } else if (bx->bg_repeat == CSS_BGR_REPEAT_Y && iw > 0.0) {
+            cairo_rectangle(cr, x, y, iw, h);
+            cairo_clip(cr);
+        }
+        cairo_translate(cr, x, y);
+        cairo_scale(cr, sx, sy);
+        cairo_pattern_t *ipat = cairo_pattern_create_for_surface(bgimg->surface);
+        cairo_pattern_set_extend(ipat, bx->bg_repeat == CSS_BGR_NO_REPEAT
+                                       ? CAIRO_EXTEND_NONE : CAIRO_EXTEND_REPEAT);
+        cairo_pattern_set_filter(ipat, CAIRO_FILTER_GOOD);
+        cairo_set_source(cr, ipat);
+        cairo_paint(cr);
+        cairo_pattern_destroy(ipat);
+        cairo_restore(cr);
     }
 
     /* The four borders. With a radius and UNIFORM sides (same width, colour and a
@@ -5496,8 +5675,9 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def) {
 static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                                          const rc_box *bx, double ox, double oy) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
+    const ui_bg_image *bgimg = (def != NULL) ? find_bg_image(w, def->bg_image_url) : NULL;
     if (!box_forms_stacking_context(def)) {
-        paint_box_decoration(cr, bx, ox, oy);
+        paint_box_decoration(cr, bx, ox, oy, bgimg);
         return;
     }
     cairo_matrix_t m;
@@ -5505,7 +5685,7 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
-    paint_box_decoration(cr, bx, ox, oy);
+    paint_box_decoration(cr, bx, ox, oy, bgimg);
     cairo_restore(cr);
     bui_pop_group_composite(cr, def);
 }
@@ -5531,8 +5711,9 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
                                       double content_top, double content_h,
                                       int show_hover, char *row_done) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
+    const ui_bg_image *bgimg = (def != NULL) ? find_bg_image(w, def->bg_image_url) : NULL;
     if (!box_forms_stacking_context(def)) {
-        paint_box_decoration(cr, bx, left, origin);
+        paint_box_decoration(cr, bx, left, origin, bgimg);
         return;
     }
     cairo_matrix_t m;
@@ -5546,7 +5727,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
-    paint_box_decoration(cr, bx, left, origin);
+    paint_box_decoration(cr, bx, left, origin, bgimg);
     cairo_restore(cr);
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
@@ -5631,9 +5812,10 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .bg_rgb = def->bg_rgb,
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
+        .bg_size = def->bg_size, .bg_repeat = def->bg_repeat,
     };
     if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
-    paint_box_decoration(cr, &bx, left, origin);
+    paint_box_decoration(cr, &bx, left, origin, find_bg_image(w, def->bg_image_url));
     if (needs_group) cairo_restore(cr);
     for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
         const rd_block *b = rd_at(w->doc, bi);
@@ -6123,11 +6305,17 @@ static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_ur
     w.cur_top = (top_url != NULL) ? strdup(top_url) : NULL;
 
     /* Decode allowed images into w.images (fetch/read + worker decode); a failure per
-     * image just leaves surface == NULL and its placeholder is drawn. */
-    if (t != NULL && img_fetch != NULL) load_images(&w, t, img_fetch, fetch_ctx);
+     * image just leaves surface == NULL and its placeholder is drawn. Background-images
+     * (2026-07-16) follow the same path so --download-png/--download-pdf --images can
+     * actually verify them headless, not just <img>. */
+    if (t != NULL && img_fetch != NULL) {
+        load_images(&w, t, img_fetch, fetch_ctx);
+        load_bg_images(&w, t, img_fetch, fetch_ctx);
+    }
 
     long metric = as_pdf ? write_doc_pdf(&w, out_path) : write_doc_png(&w, out_path);
     free_images(&w);
+    free_bg_images(&w);
     free(w.cur_top);
     if (metric < 0) return UI_ERR_INTERNAL;
     if (out_metric != NULL) *out_metric = metric;

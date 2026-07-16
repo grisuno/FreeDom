@@ -250,6 +250,73 @@ static void test_image_on_local_top_fails_closed(void **state) {
     pv_free(v);
 }
 
+/* --- data: URI images: inline bytes never resolved, never require a network top --- */
+
+static const char PNG_DATA_URI[] =
+    "data:image/png;base64,"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLv"
+    "AAAAAElFTkSuQmCC";
+
+static void test_image_data_url_allowed_remote_top(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 0, "px", PNG_DATA_URI, 1, 1), PV_OK);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, caps_images_on(), TOP, &d), RD_OK);
+    const rd_block *img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->img_decision, RDP_IMG_ALLOW);
+    /* Never resolved/rewritten -- the data: URI is passed through verbatim. */
+    assert_string_equal(img->href, PNG_DATA_URI);
+    rd_free(d);
+    pv_free(v);
+}
+
+/* No top-level URL at all (e.g. a bare fragment): a data: URI needs none, unlike a
+ * relative https src, which fails closed without a base (test_image_on_local_top_
+ * fails_closed above). */
+static void test_image_data_url_allowed_no_top(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 0, "px", PNG_DATA_URI, 1, 1), PV_OK);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, caps_images_on(), NULL, &d), RD_OK);
+    const rd_block *img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->img_decision, RDP_IMG_ALLOW);
+    rd_free(d);
+    pv_free(v);
+}
+
+static void test_image_data_url_disabled_by_default(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 0, "px", PNG_DATA_URI, 1, 1), PV_OK);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, &d), RD_OK);
+    const rd_block *img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->img_decision, RDP_IMG_BLOCK_DISABLED);
+    rd_free(d);
+    pv_free(v);
+}
+
+/* A percent-encoded (non-base64) data: URI is the unsupported variant: fails
+ * closed as invalid rather than silently falling through to the https path. */
+static void test_image_data_url_percent_encoded_blocked_invalid(void **state) {
+    (void)state;
+    pv_view *v = pv_new();
+    assert_int_equal(pv_append_image(v, 0, 0, "", "data:image/svg+xml,<svg/>", 64, 64),
+                     PV_OK);
+    rd_doc *d = NULL;
+    assert_int_equal(rd_build(v, caps_images_on(), TOP, &d), RD_OK);
+    const rd_block *img = first_kind(d, RD_IMAGE);
+    assert_non_null(img);
+    assert_int_equal(img->img_decision, RDP_IMG_BLOCK_INVALID);
+    rd_free(d);
+    pv_free(v);
+}
+
 /* --- UTF-8 safety: an invalid href byte is sanitised in the document --- */
 
 static void test_href_sanitised(void **state) {
@@ -761,6 +828,10 @@ int main(void) {
         cmocka_unit_test(test_image_on_blocks_tracker),
         cmocka_unit_test(test_image_on_blocks_non_https),
         cmocka_unit_test(test_image_on_local_top_fails_closed),
+        cmocka_unit_test(test_image_data_url_allowed_remote_top),
+        cmocka_unit_test(test_image_data_url_allowed_no_top),
+        cmocka_unit_test(test_image_data_url_disabled_by_default),
+        cmocka_unit_test(test_image_data_url_percent_encoded_blocked_invalid),
         cmocka_unit_test(test_href_sanitised),
         cmocka_unit_test(test_kind_name_total),
         cmocka_unit_test(test_image_label_total),

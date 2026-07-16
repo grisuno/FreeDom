@@ -17,6 +17,7 @@
 
 #include "anti_fp.h"
 #include "css.h"
+#include "data_url.h"
 #include "dom.h"
 #include "freebug.h"
 #include "html_parse.h"
@@ -60,7 +61,8 @@ static void ignore_sigpipe(void);
 
 /* Request opcodes (parent -> child). */
 enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
-       OP_TICK = 6, OP_SUBMIT = 7, OP_EVENT = 8, OP_MOUSE = 9 };
+       OP_TICK = 6, OP_SUBMIT = 7, OP_EVENT = 8, OP_MOUSE = 9,
+       OP_DECODE_IMAGE_B64 = 10 };
 
 /* OP_LOAD response tags (child -> parent). While running the page's scripts the child
  * may issue zero or more TAG_SUBREQ subresource requests (XMLHttpRequest/fetch), which
@@ -258,8 +260,10 @@ static int write_field(int fd, const char *s) {
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,box_w_pct,
  *            block_id,
  *            input_type,form_id,form_method, name, value )*
- * then the box-definition tree (Step D): [nbox]( the 63 box int32 fields )*. block_id on a
- * run says which box it belongs to; boxes[block_id] carries the decoration + parent.
+ * then the box-definition tree (Step D): [nbox]( the 68 box int32 fields, then the
+ * background-image url() string, length-prefixed like the run strings above )*.
+ * block_id on a run says which box it belongs to; boxes[block_id] carries the
+ * decoration + parent.
  * with each string length-prefixed (a length of 0 means absent). The fixed-width
  * fields travel for every run so a hostile child cannot desync the stream by
  * varying the per-run layout; non-image runs carry an empty src and -1 dimensions,
@@ -343,7 +347,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[66] = {
+        int32_t f[68] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -387,8 +391,15 @@ static int write_view(int wfd, const pv_view *v) {
             /* transform scale/rotate, M1.2b (appended; read_view mirrors this) */
             (int32_t)bd->transform_sx, (int32_t)bd->transform_sy,
             (int32_t)bd->transform_rotate,
+            /* background-image size/repeat, 2026-07-16 (appended; read_view mirrors) */
+            (int32_t)bd->bg_size, (int32_t)bd->bg_repeat,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
+        /* background-image url() text, 2026-07-16: length-prefixed like the run
+         * string fields above (bg_image_url is bounded PV_BG_URL_MAX but travels
+         * as a normal string field, not padded raw bytes -- read_view bounds it
+         * the same way read_field already bounds every other string here). */
+        if (write_field(wfd, bd->bg_image_url) != 0) return -1;
     }
     return 0;
 }
@@ -1073,6 +1084,23 @@ static void child_handle_decode_image(int wfd, const char *bytes, size_t len) {
     img_pixels_free(&px);
 }
 
+/* data: URI images: the parent only sliced the base64 payload (pure pointer
+ * arithmetic, no interpretation); the base64 DECODE of hostile bytes happens here,
+ * confined, same as the image-format decode it feeds into. A malformed payload
+ * (defense in depth -- render_policy already validated it at the decision layer)
+ * answers exactly like an undecodable image: ok=0, no placeholder-worthy crash. */
+static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len) {
+    uint8_t *raw = NULL;
+    size_t raw_len = 0;
+    if (du_base64_decode(b64, len, &raw, &raw_len) != DU_OK) {
+        int32_t k = 0;
+        write_full(wfd, &k, sizeof k);
+        return;
+    }
+    child_handle_decode_image(wfd, (const char *)raw, raw_len);
+    free(raw);
+}
+
 static uint64_t gen_session_key(void) {
     uint64_t k = 0;
     uint8_t *p = (uint8_t *)&k;
@@ -1134,6 +1162,7 @@ static void tab_worker_run(int rfd, int wfd) {
         if (read_full(rfd, &op, 1) != 0) break; /* EOF / error => quit */
         if (op == OP_QUIT) break;
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE &&
+            op != OP_DECODE_IMAGE_B64 &&
             op != OP_CLICK && op != OP_TICK && op != OP_SUBMIT &&
             op != OP_EVENT && op != OP_MOUSE)
             break; /* desync */
@@ -1216,9 +1245,10 @@ static void tab_worker_run(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); free(url); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)              child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, url, cookies);
-        else if (op == OP_EVAL)         child_handle_eval(wfd, &cs, buf, len);
-        else /* OP_DECODE_IMAGE */      child_handle_decode_image(wfd, buf, len);
+        if (op == OP_LOAD)                   child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, url, cookies);
+        else if (op == OP_EVAL)              child_handle_eval(wfd, &cs, buf, len);
+        else if (op == OP_DECODE_IMAGE)      child_handle_decode_image(wfd, buf, len);
+        else /* OP_DECODE_IMAGE_B64 */       child_handle_decode_image_b64(wfd, buf, len);
         free(buf);
         free(url);
         free(cookies);
@@ -1459,7 +1489,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[66];
+        int32_t f[68];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1499,7 +1529,19 @@ static int read_view(int fd, pv_view **out) {
             .transform_tx = f[61], .transform_ty = f[62],
             /* transform scale/rotate, M1.2b. */
             .transform_sx = f[63], .transform_sy = f[64], .transform_rotate = f[65],
+            /* background-image size/repeat, 2026-07-16. */
+            .bg_size = f[66], .bg_repeat = f[67],
         };
+        /* background-image url() text, 2026-07-16: length-prefixed like the run
+         * string fields. Bounded against PV_BG_URL_MAX like every fixed box
+         * buffer -- a hostile/corrupted stream that claims a longer string fails
+         * closed instead of being silently truncated into a wrong URL. */
+        char *bgurl = NULL;
+        size_t bgurl_len = 0;
+        if (read_field(fd, &bgurl, &bgurl_len) != 0) { pv_free(v); return -1; }
+        if (bgurl_len >= PV_BG_URL_MAX) { free(bgurl); pv_free(v); return -1; }
+        memcpy(bd.bg_image_url, bgurl, bgurl_len + 1);
+        free(bgurl);
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
     }
 
@@ -2072,15 +2114,17 @@ tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out) {
     return TAB_OK;
 }
 
-tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out) {
-    if (t == NULL || out == NULL || (bytes == NULL && len != 0)) return TAB_ERR_NULL_ARG;
-    memset(out, 0, sizeof *out);
+/* Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under
+ * opcode `op` and parses the [ok][w][h][stride][dlen][pixels] response. *out must
+ * already be zeroed by the caller. */
+static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+                                      tab_image *out) {
     if (len > TAB_MAX_INPUT) return TAB_ERR_TOO_LARGE;
 
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    tab_status sr = send_request(t, OP_DECODE_IMAGE, (const char *)bytes, len);
+    tab_status sr = send_request(t, op, bytes, len);
     if (sr != TAB_OK) return sr;
 
     int32_t ok = 0;
@@ -2113,6 +2157,30 @@ tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image 
     out->data = data;
     out->data_len = dlen;
     return TAB_OK;
+}
+
+tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out) {
+    if (t == NULL || out == NULL || (bytes == NULL && len != 0)) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+    return tab_decode_image_op(t, OP_DECODE_IMAGE, (const char *)bytes, len, out);
+}
+
+tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out) {
+    if (t == NULL || data_url == NULL || out == NULL) return TAB_ERR_NULL_ARG;
+    memset(out, 0, sizeof *out);
+
+    /* Slicing the payload substring is pure pointer arithmetic over the hostile
+     * URL string (same trust level as url_resolve_https parsing a hostile href in
+     * this same parent process) -- it never interprets the bytes it points to. The
+     * actual base64 decode, like the image format decode, happens inside the
+     * confined worker. An unsupported/malformed data: URI is not a transport
+     * error: it behaves like "not decodable" (placeholder), matching
+     * tab_decode_image's convention. */
+    const char *payload = NULL;
+    size_t plen = 0;
+    if (du_base64_payload(data_url, &payload, &plen) != DU_OK) return TAB_OK;
+
+    return tab_decode_image_op(t, OP_DECODE_IMAGE_B64, payload, plen, out);
 }
 
 int tab_alive(const tab *t) {

@@ -68,6 +68,7 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_GRAD_STOPS_MAX 4     /* cap on linear-gradient color stops (extra kept out) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
+#define CSS_URL_MAX       1024   /* cap on a captured background-image url() text (anti-DoS; longer -> dropped, fail closed, never truncated-and-fetched). Sized to comfortably hold the RESOLVED absolute URL too (render_doc.c resolves in place against the page origin), not just the raw author-CSS token -- real CDN asset URLs with hashed filenames/query strings routinely exceed a bare 256-byte cap. */
 
 /* text-decoration line bits, OR-combined into css_style.text_decoration. The field
  * is -1 when unset and 0 for an explicit `none` (so `a { text-decoration: none }`
@@ -554,6 +555,15 @@ typedef struct css_style {
     int         pointer_events;   /* css_pointer_events, 0 (unset) */
     int         bg_repeat;        /* css_bg_repeat, 0 (unset) */
     int         bg_size;          /* css_bg_size, 0 (unset) */
+    /* background-image: url(...) (2026-07-16). The RAW, UNRESOLVED url() text
+     * (possibly relative, e.g. "hero.jpg") -- css.c never fetches or resolves it,
+     * same doctrine as bg_grad_*; resolving against the page origin and deciding
+     * whether to actually fetch happens downstream (render_doc.c), under the same
+     * caps.images + rdp_image_decision gate as an <img>. "" (empty) means none.
+     * Mutually exclusive in practice with bg_grad_n>0 (whichever the author's
+     * declaration set last wins the cascade slot; the painter prefers the
+     * gradient when both are somehow set, see gui/browser_ui.c). */
+    char        bg_image_url[CSS_URL_MAX];
     int         bg_clip;          /* css_bg_clip, 0 (unset) */
     int         bg_origin;        /* css_bg_origin, 0 (unset) */
     int         bg_attachment;    /* css_bg_attachment, 0 (unset) */

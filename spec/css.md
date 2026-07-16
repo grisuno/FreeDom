@@ -147,8 +147,8 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | :-- | :-- |
 | `color` | `color` (packed 0xRRGGBB via css_color), or -1 |
 | `background-color` | `background` (color only; a value with `url(` is dropped) |
-| `background` | `background` (color) **and** the gradient fields below. Shorthand semantics: a `background` value always resets *both* — a plain color emits gradient-unset (`bg_grad_n = 0`), a gradient emits color-unset (-1) — so a higher-tier `background: red` clears a lower-tier gradient and vice versa. `url(` tokens are skipped (never fetched); any color token outside the gradient still resolves. |
-| `background-image` | `bg_grad_*` only: `linear-gradient(...)` resolves to the gradient fields; `url(...)`/`none`/`radial-gradient`/`conic-gradient`/`repeating-*` → gradient-unset (fail closed, never fetch) |
+| `background` | `background` (color) **and** the gradient/image fields below. Shorthand semantics: a `background` value always resets *both* layers — a plain color emits gradient-unset+image-unset, a gradient or `url()` emits color-unset (-1) — so a higher-tier `background: red` clears a lower-tier gradient/image and vice versa. Any color token outside the gradient/url still resolves. |
+| `background-image` | `bg_grad_*` (unchanged) **or** `bg_image_url` (2026-07-16): `linear-gradient(...)` resolves to the gradient fields as before; `url(...)` (quoted or bare, 1 layer) captures the **raw, unresolved** URL text into `bg_image_url` (`css_style`, bounded `CSS_URL_MAX` (1024, enough to also hold the resolved absolute URL) — an overlong URL is dropped, fail closed, same as any other overlong token here); `none`/`radial-gradient`/`conic-gradient`/`repeating-*`/multi-layer (comma-separated) → both fields unset. `css.c` itself still never fetches anything — it only extracts the literal string between the parens, same as it already does for `href`/`src` attributes elsewhere in the pipeline; resolving the URL against the page origin and deciding whether to actually fetch it happens downstream in `render_doc`/the GUI, under the exact same `caps.images` + `rdp_image_decision` gate as an `<img>` (see "Background image" below). |
 | `text-align` | `text_align`: left/center/right/justify |
 | `font-size` | `font_scale` (percent): `px` relative to 16px base, `em`/`rem` ×100, `%`, and keywords (`small`=85, `medium`=100, `large`=120, `x-large`=150, `xx-large`=200, `smaller`=85, `larger`=120) |
 | `line-height` | `line_scale` (percent of the natural line box): unitless multiplier (`1.5` → 150) or `%` (`160%` → 160), clamped `[CSS_LINE_MIN, CSS_LINE_MAX]`; `normal` → 0 (unset, uses the UA default). Absolute `px`/`em` line-heights are out of scope (dropped). Inherits, like `font-size`. |
@@ -400,12 +400,18 @@ engine does not act on them yet. Listed here so a reader of `css_style`
 does not assume every field is wired; when a later milestone wires one
 of them, the field already has the value ready. Grouped by family:
 
-- *Background image / decoration*: `background-repeat`/
-  `background-size`/`background-clip`/`background-origin`/`background-
-  attachment` (no CSS `background-image` painting for `url()` — dropped
-  by doctrine). `background-image: linear-gradient(...)` left this list
-  2026-07-11: it resolves to the `bg_grad_*` fields and paints as a Cairo
-  linear pattern (see the property inventory above).
+- *Background image / decoration*: `background-clip`/`background-origin`/
+  `background-attachment` (parsed, no paint effect yet — v1 always paints
+  as if `border-box`/`scroll`). `background-image: linear-gradient(...)`
+  left this list 2026-07-11: it resolves to the `bg_grad_*` fields and
+  paints as a Cairo linear pattern. `background-image: url(...)`,
+  `background-size` and `background-repeat` left this list 2026-07-16
+  (Hito M1.2c, see below): the URL is fetched/decoded under the same
+  `caps.images` + `rdp_image_decision` gate as an `<img>` (never a bypass
+  of policy) and painted scaled per `background-size`
+  (`auto`/`cover`/`contain`) and tiled per `background-repeat`
+  (`repeat`/`no-repeat`/`repeat-x`/`repeat-y`; `space`/`round` fall back to
+  `repeat`, spacing/rounding the tiles is a v2 refinement).
 - *Compositing / containment*: `isolation`, `contain` (no stacking-context /
   paint-tree partitioning in the v1 painter). `content-visibility` left this
   list 2026-07-10 (`hidden` folds into `visibility`, see above).
@@ -446,10 +452,15 @@ of them, the field already has the value ready. Grouped by family:
    spec/float.md), line-number / named grid placement (only `span N` is
    resolved), `position: sticky` scroll pinning. `overflow` clipping and
    `z-index` negative stacking **are** painted since 2026-07-09.
-- *Backgrounds beyond a solid color or a linear gradient*: `background-image:
-  url()` (by doctrine, never fetched), `radial-gradient`/`conic-gradient`/
-  `repeating-*` (fail closed to unset), gradient stop positions (evenly
-  spaced in v1), `background-position`.
+- *Backgrounds beyond a solid color, a linear gradient or a single image*:
+  `radial-gradient`/`conic-gradient`/`repeating-*` (fail closed to unset),
+  gradient stop positions (evenly spaced in v1), multi-layer
+  `background-image` (comma-separated list — v1 keeps only one layer),
+  `background-position` (v1 always paints from the top-left corner, which
+  matches the CSS initial value `0% 0%` so this is the common case, not a
+  visible regression), `background-size` `<length>`/`<percentage>` (only
+  the `auto`/`cover`/`contain` keywords are honored), `background-repeat:
+  space`/`round` spacing (falls back to plain tiling).
 - *Transforms / filters / transitions*: `transform`, `filter`, `transition`,
   `animation`, `@keyframes`.
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
@@ -745,6 +756,7 @@ typedef struct css_style {
     css_pointer_events    pointer_events;     /* CSS_PE_UNSET if absent */
     css_bg_repeat         bg_repeat;          /* CSS_BGR_UNSET if absent */
     css_bg_size           bg_size;            /* CSS_BGS_UNSET if absent */
+    char                  bg_image_url[CSS_URL_MAX]; /* raw url() text, "" if none (2026-07-16) */
     css_bg_clip           bg_clip;            /* CSS_BGC_UNSET if absent */
     css_bg_origin         bg_origin;          /* CSS_BGO_UNSET if absent */
     css_bg_attachment     bg_attachment;      /* CSS_BGA_UNSET if absent */
@@ -881,6 +893,7 @@ typedef enum css_list_style {
 #define CSS_BORDER_W_MAX  CSS_LEN_MAX       /* px clamp for border/outline widths */
 #define CSS_FLEX_FACTOR_MAX 100000          /* clamp for flex-grow/shrink (stored x100) */
 #define CSS_GRID_SPAN_MAX 1000              /* clamp for grid-column/-row span N */
+#define CSS_URL_MAX       1024   /* cap on a captured background-image url(), sized to also hold the resolved absolute URL (anti-DoS; longer -> dropped, fail closed) */
 
 typedef struct css_sheet css_sheet;   /* opaque, owns the parsed rules */
 

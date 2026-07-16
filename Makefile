@@ -111,9 +111,9 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch \
              $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile \
              $(BUILD_DIR)/test_tls_impersonate \
-             $(BUILD_DIR)/test_hls
+             $(BUILD_DIR)/test_hls $(BUILD_DIR)/test_data_url
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -209,13 +209,13 @@ $(BUILD_DIR)/test_anti_fp: $(TEST_DIR)/test_anti_fp.c $(BUILD_DIR)/anti_fp.o | $
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # render_policy reuses rp_evaluate, so it links request_policy.o + the PSL table.
-$(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(PSL_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(BUILD_DIR)/data_url.o $(PSL_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # render_doc builds the paint-ready model from a page_view + render_policy gate,
 # so it links page_view/html_parse (lexbor) plus the render/request policy chain.
 $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_doc.o \
-                              $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
+                              $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(BUILD_DIR)/data_url.o \
                               $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o \
                               $(BUILD_DIR)/css_color.o \
                               $(BUILD_DIR)/box_style.o \
@@ -226,7 +226,7 @@ $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_
 # render_doc chain plus dom_debug.o; the test builds rd_doc through rd_build.
 $(BUILD_DIR)/test_dom_debug: $(TEST_DIR)/test_dom_debug.c $(BUILD_DIR)/dom_debug.o \
                              $(BUILD_DIR)/render_doc.o \
-                             $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o \
+                             $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(BUILD_DIR)/data_url.o \
                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o \
                              $(BUILD_DIR)/css_color.o \
                              $(BUILD_DIR)/box_style.o \
@@ -255,6 +255,11 @@ $(BUILD_DIR)/test_compositor: $(TEST_DIR)/test_compositor.c $(BUILD_DIR)/composi
 # parent<->helper IPC codec. No I/O deps; the BoringSSL handshake lives in the
 # separate freedom-tls-helper worker (Fase 1), not here. See spec/tls_impersonate.md.
 $(BUILD_DIR)/test_tls_impersonate: $(TEST_DIR)/test_tls_impersonate.c $(BUILD_DIR)/tls_impersonate.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure data: URL parsing + base64 decoding (RFC 2397/4648). No I/O deps. See
+# spec/data_url.md.
+$(BUILD_DIR)/test_data_url: $(TEST_DIR)/test_data_url.c $(BUILD_DIR)/data_url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure HLS playlist parser (no I/O). Fuzzed separately.
@@ -370,7 +375,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o \
                        $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o \
                        $(BUILD_DIR)/box_style.o \
-                       $(BUILD_DIR)/image_decode.o \
+                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o \
                        $(BUILD_DIR)/request_policy.o $(PSL_OBJ) \
                        $(BUILD_DIR)/url.o $(BUILD_DIR)/link_nav.o \
                        $(BUILD_DIR)/freebug.o \
@@ -402,7 +407,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/js_policy.o $(BUILD_DIR)/webcaps.o \
                       $(BUILD_DIR)/compositor.o \
-                      $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
+                      $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
                       $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
@@ -549,6 +554,17 @@ fuzz-url: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_url.c $(SRC_DIR)/url.c $(SRC_DIR)/link_nav.c \
 	  -o $(BUILD_DIR)/fuzz_url
 	./$(BUILD_DIR)/fuzz_url -max_total_time=30 -rss_limit_mb=2048
+
+# Coverage-guided fuzzing of data_url (clang + libFuzzer). A data: image src is
+# hostile remote content: du_base64_payload's slicing and du_base64_decode's
+# transform (the latter runs inside the confined worker, OP_DECODE_IMAGE_B64) must
+# never crash/leak/UB, and every payload span must stay within the input.
+fuzz-du: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_data_url.c $(SRC_DIR)/data_url.c \
+	  -o $(BUILD_DIR)/fuzz_data_url
+	./$(BUILD_DIR)/fuzz_data_url -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the prefetch lookahead scanner (clang + libFuzzer).
 # The scanned HTML is hostile remote content read on the TRUSTED side: arbitrary

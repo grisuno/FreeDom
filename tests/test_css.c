@@ -322,14 +322,16 @@ static void test_container_fail_closed_and_bounds(void **state) {
     assert_int_equal(css_parse_inline("grid-template-columns:none", 0).grid_cols, 0);
     assert_int_equal(css_parse_inline("gap:999999px", 0).gap, CSS_GAP_MAX); /* clamped */
 
-    /* A declaration value longer than the per-declaration token cap is dropped
-     * entirely (fail closed, anti-DoS) — never silently truncated. The short
-     * display:grid declaration in the same block still parses. */
-    char buf[600];
+    /* A declaration value longer than the per-declaration value cap (CSS_URL_MAX,
+     * widened 2026-07-16 so a background-image url() with a realistic CDN query
+     * string is not itself dropped) is still dropped entirely (fail closed,
+     * anti-DoS) — never silently truncated. The short display:grid declaration
+     * in the same block still parses. */
+    char buf[CSS_URL_MAX + 512];
     int r0 = snprintf(buf, sizeof buf, "display:grid;grid-template-columns:");
     assert_true(r0 > 0 && (size_t)r0 < sizeof buf);
     size_t k = (size_t)r0;
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < CSS_URL_MAX; ++i) {
         size_t space = sizeof buf - k;
         if (space == 0) break;
         int r = snprintf(buf + k, space, "1fr ");
@@ -532,6 +534,103 @@ static void test_background_shorthand_resets_gradient(void **state) {
     assert_int_equal(b.bg_grad_n, 2);
     assert_int_equal(b.background, -1);
     css_free(sh);
+}
+
+/* --- background-image: url(...) (2026-07-16) --- */
+
+static void test_bg_image_url_basic(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background-image: url(hero.jpg)", 0);
+    assert_string_equal(s.bg_image_url, "hero.jpg");
+    assert_int_equal(s.bg_grad_n, 0);  /* mutually exclusive with the gradient slot */
+}
+
+static void test_bg_image_url_quoted(void **state) {
+    (void)state;
+    assert_string_equal(css_parse_inline(
+        "background-image: url('a/b.png')", 0).bg_image_url, "a/b.png");
+    assert_string_equal(css_parse_inline(
+        "background-image: url(\"a/b.png\")", 0).bg_image_url, "a/b.png");
+    /* bare, with internal whitespace trimmed */
+    assert_string_equal(css_parse_inline(
+        "background-image: url(  hero.jpg  )", 0).bg_image_url, "hero.jpg");
+}
+
+static void test_bg_image_url_absolute(void **state) {
+    (void)state;
+    /* an absolute https URL is captured raw -- css.c never fetches it, resolving
+     * and deciding whether to fetch happens downstream (render_doc.c) */
+    assert_string_equal(css_parse_inline(
+        "background-image: url(https://cdn.example.com/hero.jpg?w=1200)", 0).bg_image_url,
+        "https://cdn.example.com/hero.jpg?w=1200");
+}
+
+static void test_bg_image_url_none_and_junk_reset(void **state) {
+    (void)state;
+    assert_string_equal(css_parse_inline("background-image: none", 0).bg_image_url, "");
+    assert_string_equal(css_parse_inline(
+        "background-image: radial-gradient(red, blue)", 0).bg_image_url, "");
+    /* malformed url(...) (unbalanced paren) resets rather than half-capturing */
+    assert_string_equal(css_parse_inline(
+        "background-image: url(hero.jpg", 0).bg_image_url, "");
+    /* multi-layer (comma-separated) is out of v1 scope: fails closed to unset,
+     * never silently keeps just the first layer */
+    assert_string_equal(css_parse_inline(
+        "background-image: url(a.png), url(b.png)", 0).bg_image_url, "");
+}
+
+static void test_bg_image_url_overlong_fails_closed(void **state) {
+    (void)state;
+    char big[CSS_URL_MAX + 64];
+    memset(big, 'a', sizeof big - 1);
+    big[sizeof big - 1] = '\0';
+    char val[sizeof big + 32];
+    snprintf(val, sizeof val, "background-image: url(%s.png)", big);
+    /* an overlong url() text is dropped, fail closed -- never truncated-and-kept
+     * (a truncated URL could resolve to a completely different, attacker-chosen
+     * resource) */
+    assert_string_equal(css_parse_inline(val, 0).bg_image_url, "");
+}
+
+static void test_bg_image_url_gradient_mutually_exclusive(void **state) {
+    (void)state;
+    /* a valid gradient wins and explicitly clears any image */
+    css_style s = css_parse_inline("background-image: linear-gradient(red, blue)", 0);
+    assert_int_equal(s.bg_grad_n, 2);
+    assert_string_equal(s.bg_image_url, "");
+}
+
+static void test_bg_shorthand_captures_url_and_resets_color(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background: url(hero.jpg)", 0);
+    assert_string_equal(s.bg_image_url, "hero.jpg");
+    assert_int_equal(s.background, -1);
+    assert_int_equal(s.bg_grad_n, 0);
+    /* a plain color shorthand resets a previously-set image the same way it
+     * already resets a gradient (cascade winner tracking) */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "div { background: url(hero.jpg) }\n"
+        ".flat { background: #333333 }", 0, &sh), CSS_OK);
+    const char *flat[] = { "flat" };
+    css_style a = css_resolve(sh, "div", NULL, flat, 1, NULL, 0);
+    assert_int_equal(a.background, 0x333333);
+    assert_string_equal(a.bg_image_url, "");
+    css_free(sh);
+}
+
+static void test_bg_size_and_repeat(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline(
+        "background-size: cover", 0).bg_size, CSS_BGS_COVER);
+    assert_int_equal(css_parse_inline(
+        "background-size: contain", 0).bg_size, CSS_BGS_CONTAIN);
+    assert_int_equal(css_parse_inline(
+        "background-size: auto", 0).bg_size, CSS_BGS_AUTO);
+    assert_int_equal(css_parse_inline(
+        "background-repeat: repeat-x", 0).bg_repeat, CSS_BGR_REPEAT_X);
+    assert_int_equal(css_parse_inline(
+        "background-repeat: no-repeat", 0).bg_repeat, CSS_BGR_NO_REPEAT);
 }
 
 static void test_malformed_inline_no_crash(void **state) {
@@ -2899,6 +2998,14 @@ int main(void) {
         cmocka_unit_test(test_linear_gradient_stops),
         cmocka_unit_test(test_linear_gradient_fail_closed),
         cmocka_unit_test(test_background_shorthand_resets_gradient),
+        cmocka_unit_test(test_bg_image_url_basic),
+        cmocka_unit_test(test_bg_image_url_quoted),
+        cmocka_unit_test(test_bg_image_url_absolute),
+        cmocka_unit_test(test_bg_image_url_none_and_junk_reset),
+        cmocka_unit_test(test_bg_image_url_overlong_fails_closed),
+        cmocka_unit_test(test_bg_image_url_gradient_mutually_exclusive),
+        cmocka_unit_test(test_bg_shorthand_captures_url_and_resets_color),
+        cmocka_unit_test(test_bg_size_and_repeat),
         cmocka_unit_test(test_malformed_inline_no_crash),
         cmocka_unit_test(test_custom_prop_var_basic),
         cmocka_unit_test(test_custom_prop_var_fallback_used_when_missing),

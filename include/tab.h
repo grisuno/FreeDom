@@ -248,6 +248,14 @@ tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out);
  * TAB_ERR_* is reserved for transport/worker failures. */
 tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out);
 
+/* Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64
+ * variant): data_url slices the base64 payload out of `data_url` (no allocation, no
+ * network -- the bytes are already in the document); the confined worker base64-
+ * decodes and format-decodes them, exactly like a fetched image. An unsupported or
+ * malformed data: URI is not a transport error: *out stays zeroed, same as an
+ * undecodable format, and the caller shows the placeholder. */
+tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out);
+
 /* Nonzero while the worker process is believed alive. */
 int tab_alive(const tab *t);
 

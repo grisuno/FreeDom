@@ -43,6 +43,12 @@ typedef enum pv_status {
 /* Sized grid tracks carried per run (2026-07-11). Mirrors CSS_GRID_TRACKS_MAX in
  * css.h (page_view.c static-asserts they agree); tracks past it lay out as auto. */
 #define PV_GRID_TRACKS 8
+/* Background-image url() buffer (2026-07-16). Mirrors CSS_URL_MAX in css.h
+ * (page_view.c static-asserts they agree); page_view stays decoupled from
+ * css.h in this header, like the rest of the css-enum-mirroring int fields.
+ * Sized to hold the RESOLVED absolute URL too (render_doc.c resolves in
+ * place), not just the raw author-CSS token. */
+#define PV_BG_URL_MAX 1024
 
 typedef enum pv_kind {
     PV_TEXT = 0,   /* inline text */
@@ -368,6 +374,18 @@ typedef struct pv_box_def {
     int transform_tx, transform_ty;
     int transform_sx, transform_sy;
     int transform_rotate;
+    /* background-image: url(...) (2026-07-16). The RAW, UNRESOLVED url() text (css
+     * and page_view never fetch/resolve); render_doc.c resolves it against the
+     * page origin and gates it exactly like an <img> src (caps.images +
+     * rdp_image_decision) before the GUI fetches/decodes/paints it. "" = none.
+     * PV_BG_URL_MAX duplicates css.h's CSS_URL_MAX (page_view stays decoupled
+     * from css.h in this header, like the rest of the css-enum-mirroring int
+     * fields below). bg_size/bg_repeat mirror css_bg_size/css_bg_repeat (same
+     * int encoding, 0 = unset). When bg_image_url is set it paints UNDER any
+     * bg_rgb/gradient (CSS background layering: image on top of color). */
+    char bg_image_url[PV_BG_URL_MAX];
+    int bg_size;
+    int bg_repeat;
 } pv_box_def;
 
 typedef struct pv_view {

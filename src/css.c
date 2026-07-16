@@ -50,6 +50,16 @@
 #define CSS_MAX_CUSTOM_PROPS 64u
 #define CSS_VAR_MAX_DEPTH    4
 
+/* background-image: url(...) text pool (2026-07-16). A page-global table, same
+ * flavour as the custom-property table above: parse time appends the raw url()
+ * text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL); apply
+ * time looks the string back up by index. Sized small on purpose (a real page
+ * declares far fewer distinct background-image rules than colors/gradients) so
+ * it does not multiply CSS_MAX_DECLS' footprint the way embedding the string in
+ * every css_decl would. */
+#define CSS_MAX_BG_URLS 256u
+#define CSS_INLINE_BG_URLS 8u
+
 /* Property slots. The enum value IS the css_style slot index used by apply().
  * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
  * left); the four padding slots likewise — expand_box4 relies on that. */
@@ -110,6 +120,12 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * each its own independent-cascade slot (see css.h). */
         P_TRANSFORM_TX, P_TRANSFORM_TY,
         P_TRANSFORM_SX, P_TRANSFORM_SY, P_TRANSFORM_ROTATE,
+        /* background-image: url(...) (2026-07-16). ival is an INDEX into a small
+         * per-parse url table (css_sheet.bg_urls for stylesheet rules, a stack-local
+         * table for inline style="") -- css_decl stays int-only, no per-declaration
+         * string payload, so the 32768-entry decls[] array does not balloon. -1
+         * means the explicit "no image" reset (see expand_bg_image). */
+        P_BG_IMAGE_URL,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -137,6 +153,8 @@ struct css_sheet {
     size_t   nsels;
     css_custom_prop custom[CSS_MAX_CUSTOM_PROPS];  /* --name table, page-global */
     size_t          ncustom;
+    char            bg_urls[CSS_MAX_BG_URLS][CSS_URL_MAX]; /* background-image url() pool */
+    size_t          nbg_urls;
 };
 
 /* The small ASCII helpers (csel_lower_ch / csel_ci_eq / csel_substr /
@@ -372,23 +390,98 @@ static int emit_gradient(css_decl *dst, int cap, int angle, int nstops, const in
     return 2 + nstops;
 }
 
-/* background-image: linear-gradient resolves to the gradient group; url()/none/
- * radial/conic/repeating-gradients/malformed all emit the explicit gradient reset
- * (never fetch, fail closed). */
-static int expand_bg_image(const char *val, css_decl *dst, int cap) {
+/* Finds a single url(...) token in val (bare or quoted). On success (1) sets
+ * [*us,*ue) to the full "url(...)" span in val and copies the trimmed, unquoted
+ * inner text into out (bounded outcap, NUL-terminated). Returns 0 when val has no
+ * url( at all, -1 when it does but the token is malformed (unbalanced parens) or
+ * the inner text does not fit outcap -- fail closed: the caller must drop the
+ * whole image (never fetch a truncated URL). */
+static int find_url_token(const char *val, size_t *us, size_t *ue,
+                          char *out, size_t outcap) {
+    for (const char *p = val; *p != '\0'; ++p) {
+        if (!((p[0] == 'u' || p[0] == 'U') && (p[1] == 'r' || p[1] == 'R') &&
+              (p[2] == 'l' || p[2] == 'L') && p[3] == '('))
+            continue;
+        const char *inner = p + 4;
+        const char *close = strchr(inner, ')');
+        if (close == NULL) return -1;
+        size_t ilen = (size_t)(close - inner);
+        while (ilen > 0 && (*inner == ' ' || *inner == '\t')) { ++inner; --ilen; }
+        while (ilen > 0 && (inner[ilen - 1] == ' ' || inner[ilen - 1] == '\t')) --ilen;
+        if (ilen >= 2 && (inner[0] == '\'' || inner[0] == '"') && inner[ilen - 1] == inner[0]) {
+            ++inner; ilen -= 2;
+        }
+        if (ilen == 0 || ilen >= outcap) return -1;
+        memcpy(out, inner, ilen);
+        out[ilen] = '\0';
+        *us = (size_t)(p - val);
+        *ue = (size_t)(close - val) + 1;
+        return 1;
+    }
+    return 0;
+}
+
+/* Emits the P_BG_IMAGE_URL decl: url==NULL emits the explicit "no image" reset
+ * (ival=-1, mirrors emit_gradient's nstops<=0 reset); otherwise appends url to the
+ * shared pool (bounded urlcap -- a pool overrun fails closed to reset rather than
+ * silently keeping a stale image reference) and emits its index. */
+static int emit_bg_image_url(css_decl *dst, int cap, const char *url,
+                             char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
+    if (cap < 1) return 0;
+    dst[0].prop = P_BG_IMAGE_URL;
+    if (url == NULL || *nurl >= urlcap) {
+        dst[0].ival = -1;
+        return 1;
+    }
+    memcpy(urltab[*nurl], url, strlen(url) + 1);
+    dst[0].ival = (int)*nurl;
+    ++*nurl;
+    return 1;
+}
+
+/* background-image: linear-gradient resolves to the gradient group (image-url
+ * explicitly reset); a single url(...) (bare or quoted, with only whitespace
+ * surrounding it -- multi-layer/trailing junk fails closed) resolves to the image
+ * pool (gradient explicitly reset); none/radial/conic/repeating-gradients/
+ * malformed/multi-layer emit both explicit resets. Never fetches: url() is only
+ * ever a bounded string extraction, the same trust level as reading an href/src
+ * attribute elsewhere in this pipeline -- deciding whether to actually fetch it
+ * happens downstream (render_doc.c), gated by caps.images like an <img>. */
+static int expand_bg_image(const char *val, css_decl *dst, int cap,
+                           char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     size_t gs, ge, as, an;
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int angle = 180, nst = 0;
     if (find_linear_gradient(val, &gs, &ge, &as, &an) == 1)
         nst = parse_linear_gradient_args(val + as, an, &angle, colors);
-    return emit_gradient(dst, cap, angle, nst, colors);
+    int n = emit_gradient(dst, cap, angle, nst, colors);
+    if (nst > 0) {
+        if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
+        return n;
+    }
+    size_t us, ue;
+    char urlbuf[CSS_URL_MAX];
+    int uf = find_url_token(val, &us, &ue, urlbuf, sizeof urlbuf);
+    const char *use_url = NULL;
+    if (uf == 1) {
+        int clean = 1;
+        for (size_t i = 0; clean && i < us; ++i)
+            if (val[i] != ' ' && val[i] != '\t') clean = 0;
+        for (size_t i = ue; clean && val[i] != '\0'; ++i)
+            if (val[i] != ' ' && val[i] != '\t') clean = 0;
+        if (clean) use_url = urlbuf;
+    }
+    if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, use_url, urltab, nurl, urlcap);
+    return n;
 }
 
-/* background shorthand: CSS resets BOTH the color and the image layer, so a color
- * emits gradient-unset and a gradient emits color-unset. A present-but-broken
- * gradient drops the whole declaration (fail closed); a value with neither a color
- * nor a gradient keeps the historical drop path (url()-only stays unset). */
-static int expand_background(const char *val, css_decl *dst, int cap) {
+/* background shorthand: CSS resets BOTH the color and the image layer (gradient or
+ * url), so a color emits gradient-unset+image-unset and a gradient/url emits
+ * color-unset. A present-but-broken gradient or malformed url(...) drops the whole
+ * declaration (fail closed); a value with no color, gradient nor url keeps the
+ * historical drop path. */
+static int expand_background(const char *val, css_decl *dst, int cap,
+                             char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     size_t gs = 0, ge = 0, as = 0, an = 0;
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int angle = 180, nst = 0;
@@ -398,19 +491,31 @@ static int expand_background(const char *val, css_decl *dst, int cap) {
         nst = parse_linear_gradient_args(val + as, an, &angle, colors);
         if (nst == 0) return 0;
     }
-    char rest[CSS_TOK_MAX];
+    size_t us = 0, ue = 0;
+    char urlbuf[CSS_URL_MAX];
+    int uf = 0;
+    if (f != 1) {
+        uf = find_url_token(val, &us, &ue, urlbuf, sizeof urlbuf);
+        if (uf < 0) return 0;
+    }
+    char rest[CSS_URL_MAX];
     size_t n = strlen(val), r = 0;
     for (size_t i = 0; i < n && r + 1 < sizeof rest; ++i) {
         if (f == 1 && i >= gs && i < ge) continue;
+        if (uf == 1 && i >= us && i < ue) continue;
         rest[r++] = val[i];
     }
     rest[r] = '\0';
     int color = interp_bg(rest);
-    if (f != 1 && color < 0) return 0;
+    if (f != 1 && uf != 1 && color < 0) return 0;
     if (cap < 1) return 0;
     dst[0].prop = P_BG;
     dst[0].ival = color;
-    return 1 + emit_gradient(dst + 1, cap - 1, angle, nst, colors);
+    int w = 1;
+    w += emit_gradient(dst + w, cap - w, angle, nst, colors);
+    if (cap - w >= 1) w += emit_bg_image_url(dst + w, cap - w, uf == 1 ? urlbuf : NULL,
+                                             urltab, nurl, urlcap);
+    return w;
 }
 
 static int interp_align(const char *v) {
@@ -2505,7 +2610,8 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
  * cap). Returns the number written (0 if unsupported). Most properties emit one; the
  * margin/padding shorthands expand to up to four (one per side). The important flag is
  * left to the caller (parse_one_decl stamps it). */
-static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap) {
+static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+                          char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     /* Box model: margins allow 'auto' and negatives; padding/width neither. The
      * shorthands expand; the longhands and width/max-width emit one. */
     if (strcmp(prop, "margin") == 0)  return expand_box4(val, P_MARGIN_TOP, 1, 1, dst, cap);
@@ -2629,8 +2735,10 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         dst[0].prop = P_OUTLINE_C; dst[0].ival = o; return 1;
     }
     if (strcmp(prop, "overflow") == 0)      return expand_overflow(val, dst, cap);
-    if (strcmp(prop, "background") == 0)       return expand_background(val, dst, cap);
-    if (strcmp(prop, "background-image") == 0) return expand_bg_image(val, dst, cap);
+    if (strcmp(prop, "background") == 0)
+        return expand_background(val, dst, cap, urltab, nurl, urlcap);
+    if (strcmp(prop, "background-image") == 0)
+        return expand_bg_image(val, dst, cap, urltab, nurl, urlcap);
     if (strcmp(prop, "grid-template-columns") == 0)
         return expand_grid_template_cols(val, dst, cap);
 
@@ -2766,14 +2874,15 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
  * property and falls through interpret_prop's unknown-property path unchanged),
  * then dispatches on the property. */
 static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
-                          const css_custom_prop *tab, size_t ntab) {
+                          const css_custom_prop *tab, size_t ntab,
+                          char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     if (cap < 1) return 0;
     size_t c = 0;
     while (c < n && s[c] != ':') ++c;
     if (c >= n) return 0;  /* no colon */
 
     char prop[CSS_TOK_MAX];
-    char val[CSS_TOK_MAX];
+    char val[CSS_URL_MAX];
     if (copy_trim(s, 0, c, prop, sizeof prop) == (size_t)-1) return 0;
     if (copy_trim(s, c + 1, n, val, sizeof val) == (size_t)-1) return 0;
     if (prop[0] == '\0' || val[0] == '\0') return 0;
@@ -2783,27 +2892,30 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
     if (val[0] == '\0') return 0;  /* bare "!important" with no value */
 
     const char *use_val = val;
-    char resolved[CSS_TOK_MAX];
+    char resolved[CSS_URL_MAX];
     if (csel_substr(val, "var(", 1)) {
         if (!resolve_var(val, resolved, sizeof resolved, tab, ntab)) return 0;
         use_val = resolved;
     }
 
-    int nw = interpret_prop(prop, use_val, dst, cap);
+    int nw = interpret_prop(prop, use_val, dst, cap, urltab, nurl, urlcap);
     for (int i = 0; i < nw; ++i) dst[i].important = important;
     return nw;
 }
 
 /* Splits a ';'-separated declaration block into dst (up to cap). Returns count.
  * tab/ntab is the custom-property table var() resolves against (NULL/0 when none,
- * e.g. an inline style resolved against a NULL sheet). */
+ * e.g. an inline style resolved against a NULL sheet). urltab/nurl/urlcap is the
+ * background-image url() pool (see P_BG_IMAGE_URL). */
 static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
-                              const css_custom_prop *tab, size_t ntab) {
+                              const css_custom_prop *tab, size_t ntab,
+                              char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     size_t count = 0, i = 0;
     while (i < n && count < cap) {
         size_t j = i;
         while (j < n && s[j] != ';') ++j;
-        count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count), tab, ntab);
+        count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count), tab, ntab,
+                                        urltab, nurl, urlcap);
         i = (j < n) ? j + 1 : j;
     }
     return count;
@@ -2825,7 +2937,8 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
 
     size_t dstart = sh->ndecls;
     size_t dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], CSS_MAX_DECLS - dstart,
-                                sh->custom, sh->ncustom);
+                                sh->custom, sh->ncustom,
+                                sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS);
     if (dn == 0) return;
     if (sh->nrules >= CSS_MAX_RULES) return;  /* leave decls; harmless, unreferenced */
 
@@ -3091,7 +3204,7 @@ void css_free(css_sheet *s) {
  * (regardless of specificity); within a tier the higher specificity wins, ties
  * broken by document order. wi/ws/wo track the winning tier/specificity/order so far. */
 static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
-                       int spec, int ord) {
+                       int spec, int ord, const char (*urltab)[CSS_URL_MAX]) {
     int slot = d->prop;
     int imp = d->important;
     int win = imp > wi[slot] ||
@@ -3108,6 +3221,14 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_BG_GRAD_C0: case P_BG_GRAD_C1:
             case P_BG_GRAD_C2: case P_BG_GRAD_C3:
                 o->bg_grad_c[d->prop - P_BG_GRAD_C0] = d->ival; break;
+            case P_BG_IMAGE_URL:
+                if (d->ival < 0) {
+                    o->bg_image_url[0] = '\0';
+                } else {
+                    memcpy(o->bg_image_url, urltab[d->ival], CSS_URL_MAX);
+                    o->bg_image_url[CSS_URL_MAX - 1] = '\0';
+                }
+                break;
             case P_ALIGN:    o->text_align = (css_align)d->ival; break;
             case P_FONTSIZE: o->font_scale = d->ival; break;
             case P_LINEHEIGHT: o->line_scale = d->ival; break;
@@ -3349,7 +3470,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
-                apply_decl(&out, wi, ws, wo, &sheet->decls[start + d], sel->spec, sel->order);
+                apply_decl(&out, wi, ws, wo, &sheet->decls[start + d], sel->spec, sel->order,
+                          sheet->bg_urls);
         }
     }
 
@@ -3372,10 +3494,13 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
             }
         }
         css_decl tmp[CSS_INLINE_DECLS];
+        char inline_bg_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
+        size_t n_inline_bg_urls = 0;
         size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS,
-                                    combined, ncombined);
+                                    combined, ncombined,
+                                    inline_bg_urls, &n_inline_bg_urls, CSS_INLINE_BG_URLS);
         for (size_t d = 0; d < dn; ++d)
-            apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX);
+            apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX, inline_bg_urls);
     }
 
     return out;

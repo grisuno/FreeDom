@@ -26,6 +26,8 @@
  * silently truncate track sizes on the wire. */
 _Static_assert(PV_GRID_TRACKS == CSS_GRID_TRACKS_MAX,
                "PV_GRID_TRACKS must mirror CSS_GRID_TRACKS_MAX");
+_Static_assert(PV_BG_URL_MAX == CSS_URL_MAX,
+               "PV_BG_URL_MAX must mirror CSS_URL_MAX");
 #include <string.h>
 
 #include <lexbor/dom/dom.h>
@@ -954,7 +956,12 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->isolation != CSS_ISO_UNSET ||
            cs->transform_tx != CSS_LEN_UNSET || cs->transform_ty != CSS_LEN_UNSET ||
            cs->transform_sx != CSS_LEN_UNSET || cs->transform_sy != CSS_LEN_UNSET ||
-           cs->transform_rotate != CSS_LEN_UNSET;
+           cs->transform_rotate != CSS_LEN_UNSET ||
+           /* background-image: url(...) (2026-07-16): same reasoning as the
+            * gradient case above -- a `<div style="background-image:url(x)">`
+            * with no other box-triggering property alone still needs the box
+            * def to reach the painter's image path. */
+           cs->bg_image_url[0] != '\0';
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1048,6 +1055,12 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->transform_sx = cs->transform_sx;
     d->transform_sy = cs->transform_sy;
     d->transform_rotate = cs->transform_rotate;
+    /* background-image: url(...) (2026-07-16). Raw, unresolved -- render_doc.c
+     * resolves it against the page origin and gates it like an <img>. */
+    memcpy(d->bg_image_url, cs->bg_image_url, PV_BG_URL_MAX);
+    d->bg_image_url[PV_BG_URL_MAX - 1] = '\0';
+    d->bg_size = cs->bg_size;
+    d->bg_repeat = cs->bg_repeat;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
@@ -1420,6 +1433,48 @@ static int parse_dim(const lxb_char_t *s, size_t len) {
         if (v > PV_MAX_DIM) { v = PV_MAX_DIM; break; }
     }
     return (int)v;
+}
+
+/* First candidate URL from a srcset attribute value ("url1 1x, url2 2x, ..."),
+ * used as a fallback source when an <img> has no plain src -- the common shape
+ * of responsive-image markup and of <picture><source srcset=...> (this parser
+ * has no viewport/DPR to pick among candidates, so the first one is the
+ * deterministic choice, matching how src is otherwise used verbatim). A regular
+ * URL candidate ends at the first whitespace or comma (an optional density/width
+ * descriptor, e.g. "2x", is separated from it by whitespace); a data: URL is
+ * scanned to the first whitespace or the end of the string instead, since its
+ * ";base64," marker contains a comma that is not a candidate separator. Returns
+ * the span via *out and *out_len (points into srcset, not owned, not
+ * NUL-terminated); *out stays NULL when srcset has no usable candidate. */
+static void srcset_first_url(const lxb_char_t *srcset, size_t len,
+                             const char **out, size_t *out_len) {
+    *out = NULL;
+    *out_len = 0;
+    if (srcset == NULL) return;
+
+    size_t i = 0;
+    while (i < len && (srcset[i] == ' ' || srcset[i] == '\t' || srcset[i] == '\n'
+                     || srcset[i] == '\r' || srcset[i] == ',')) ++i;
+    if (i >= len) return;
+
+    int is_data = (len - i >= 5)
+        && (srcset[i]   == 'd' || srcset[i]   == 'D')
+        && (srcset[i+1] == 'a' || srcset[i+1] == 'A')
+        && (srcset[i+2] == 't' || srcset[i+2] == 'T')
+        && (srcset[i+3] == 'a' || srcset[i+3] == 'A')
+        && srcset[i+4]  == ':';
+
+    size_t start = i;
+    while (i < len) {
+        lxb_char_t c = srcset[i];
+        int is_ws = (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+        if (is_ws || (!is_data && c == ',')) break;
+        ++i;
+    }
+    if (i > start) {
+        *out = (const char *)(srcset + start);
+        *out_len = i - start;
+    }
 }
 
 static lxb_dom_node_t *find_body(lxb_dom_node_t *root) {
@@ -2391,7 +2446,19 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 size_t sl = 0;
                 const lxb_char_t *src =
                     lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
-                if (src == NULL || sl == 0) continue; /* no source: nothing to show */
+                const char *img_src = (const char *)src;
+                size_t img_src_len = sl;
+                if (img_src == NULL || img_src_len == 0) {
+                    /* No plain src: fall back to the first srcset candidate, the
+                     * common shape of responsive-image markup (a bare src is not
+                     * guaranteed even inside <picture>, whose own <source
+                     * srcset=...> siblings this loop does not visit at all). */
+                    size_t ssl = 0;
+                    const lxb_char_t *srcset = lxb_dom_element_get_attribute(
+                        el, (const lxb_char_t *)"srcset", 6, &ssl);
+                    srcset_first_url(srcset, ssl, &img_src, &img_src_len);
+                    if (img_src == NULL) continue; /* no usable source: nothing to show */
+                }
 
                 size_t al = 0;
                 const lxb_char_t *alt =
@@ -2425,7 +2492,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pending_break = 0;
                 prev_block = block;
 
-                char *src_dup = dup_n((const char *)src, sl);
+                char *src_dup = dup_n(img_src, img_src_len);
                 if (src_dup == NULL) { rc = PV_ERR_OOM; goto cleanup; }
                 char *alt_dup = (alt != NULL) ? collapse_ws((const char *)alt, al) : dup_n("", 0);
                 if (alt_dup == NULL) { free(src_dup); rc = PV_ERR_OOM; goto cleanup; }

@@ -1885,6 +1885,66 @@ static void test_decode_image_null_args(void **state) {
     tab_close(t);
 }
 
+/* A real 1x1 PNG, base64-encoded as a data: URI (same bytes as test_data_url's
+ * end-to-end fixture). */
+static const char PNG_DATA_URL[] =
+    "data:image/png;base64,"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLv"
+    "AAAAAElFTkSuQmCC";
+
+static void test_decode_image_data_url_in_sandbox(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+
+    tab_image img;
+    assert_int_equal(tab_decode_image_data_url(t, PNG_DATA_URL, &img), TAB_OK);
+    assert_non_null(img.data);
+    assert_int_equal(img.width, 1);
+    assert_int_equal(img.height, 1);
+    tab_image_free(&img);
+    tab_close(t);
+}
+
+/* Malformed/unsupported data: URIs and garbage-but-valid-base64 payloads behave
+ * like an undecodable image (TAB_OK, data == NULL), never a transport error --
+ * exactly tab_decode_image's existing contract for junk bytes. */
+static void test_decode_image_data_url_rejects_malformed(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+
+    tab_image img;
+    assert_int_equal(tab_decode_image_data_url(t, "https://example.com/a.png", &img), TAB_OK);
+    assert_null(img.data);
+    tab_image_free(&img);
+
+    assert_int_equal(
+        tab_decode_image_data_url(t, "data:image/svg+xml,<svg/>", &img), TAB_OK);
+    assert_null(img.data);
+    tab_image_free(&img);
+
+    /* Valid base64, but the decoded bytes are not a real image: the worker's
+     * format decode rejects them, same as test_decode_image_rejects_junk. */
+    assert_int_equal(
+        tab_decode_image_data_url(t, "data:image/png;base64,QUFBQQ==", &img), TAB_OK);
+    assert_null(img.data);
+    tab_image_free(&img);
+
+    tab_close(t);
+}
+
+static void test_decode_image_data_url_null_args(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_image img;
+    assert_int_equal(tab_decode_image_data_url(t, NULL, &img), TAB_ERR_NULL_ARG);
+    assert_int_equal(tab_decode_image_data_url(NULL, PNG_DATA_URL, &img), TAB_ERR_NULL_ARG);
+    assert_int_equal(tab_decode_image_data_url(t, PNG_DATA_URL, NULL), TAB_ERR_NULL_ARG);
+    tab_close(t);
+}
+
 /* --- pure: worker-handoff argument validation (the exec security surface) --- */
 
 static void test_worker_args_valid(void **state) {
@@ -1950,6 +2010,8 @@ static void test_load_view_codec_full_roundtrip(void **state) {
         "transform:translate(12px,-7px)\">boxy</div>"
         "<div style=\"transform:scale(1.5,0.5)\">scaley</div>"
         "<div style=\"transform:rotate(-30deg)\">rotey</div>"
+        "<div style=\"background-image:url(hero.png);background-size:cover;"
+        "background-repeat:repeat-x\">bgbox</div>"
         "<form method=\"post\"><input type=\"checkbox\" checked=\"checked\"></form>"
         "</body></html>";
     tab *t = NULL;
@@ -1959,7 +2021,7 @@ static void test_load_view_codec_full_roundtrip(void **state) {
     assert_non_null(p.view);
 
     int saw_alpha = 0, saw_pic = 0, saw_grid = 0, saw_flexi = 0, saw_boxy = 0, saw_input = 0;
-    int saw_scaley = 0, saw_rotey = 0;
+    int saw_scaley = 0, saw_rotey = 0, saw_bgbox = 0;
     for (size_t i = 0; i < pv_count(p.view); ++i) {
         const pv_run *r = pv_at(p.view, i);
         if (r->kind == PV_IMAGE) {
@@ -2024,10 +2086,18 @@ static void test_load_view_codec_full_roundtrip(void **state) {
             assert_non_null(bx);
             assert_int_equal(bx->transform_rotate, -30);
             saw_rotey = 1;
+        } else if (strcmp(r->text, "bgbox") == 0) {
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_string_equal(bx->bg_image_url, "hero.png");
+            assert_int_equal(bx->bg_size, CSS_BGS_COVER);
+            assert_int_equal(bx->bg_repeat, CSS_BGR_REPEAT_X);
+            saw_bgbox = 1;
         }
     }
     assert_true(saw_alpha && saw_pic && saw_grid && saw_flexi && saw_boxy && saw_input &&
-                saw_scaley && saw_rotey);
+                saw_scaley && saw_rotey && saw_bgbox);
 
     tab_page_free(&p);
     tab_close(t);
@@ -2112,6 +2182,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_decode_image_in_sandbox),
         cmocka_unit_test(test_decode_image_rejects_junk),
         cmocka_unit_test(test_decode_image_null_args),
+        cmocka_unit_test(test_decode_image_data_url_in_sandbox),
+        cmocka_unit_test(test_decode_image_data_url_rejects_malformed),
+        cmocka_unit_test(test_decode_image_data_url_null_args),
         cmocka_unit_test(test_free_null_and_double),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
