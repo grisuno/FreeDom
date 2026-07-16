@@ -384,6 +384,9 @@ typedef struct pv_box_def {
      * int encoding, 0 = unset). When bg_image_url is set it paints UNDER any
      * bg_rgb/gradient (CSS background layering: image on top of color). */
     char bg_image_url[PV_BG_URL_MAX];
+    /* R5b: second background-image layer (behind the first). "" = none. */
+    char bg_image_url2[PV_BG_URL_MAX];
+    int bg_grad_radial;  /* R5c: 0=linear, 1=radial */
     int bg_size;
     int bg_repeat;
     /* animation-duration (Phase R1): parsed time in ms, 0 = no animation.

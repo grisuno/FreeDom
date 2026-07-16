@@ -962,6 +962,7 @@ static int css_has_boxdeco(const css_style *cs) {
             * with no other box-triggering property alone still needs the box
             * def to reach the painter's image path. */
             cs->bg_image_url[0] != '\0' ||
+            cs->bg_image_url2[0] != '\0' ||
             /* animation-duration (Phase R1): a box with an animation needs the box
              * def for the painter's animation-tick path. */
             cs->anim_duration_ms > 0 ||
@@ -1064,6 +1065,9 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
      * resolves it against the page origin and gates it like an <img>. */
     memcpy(d->bg_image_url, cs->bg_image_url, PV_BG_URL_MAX);
     d->bg_image_url[PV_BG_URL_MAX - 1] = '\0';
+    memcpy(d->bg_image_url2, cs->bg_image_url2, PV_BG_URL_MAX);
+    d->bg_image_url2[PV_BG_URL_MAX - 1] = '\0';
+    d->bg_grad_radial = cs->bg_grad_radial;
     d->bg_size = cs->bg_size;
     d->bg_repeat = cs->bg_repeat;
     d->anim_duration_ms = cs->anim_duration_ms;

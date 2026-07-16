@@ -238,7 +238,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         size_t nb0 = pv_box_count(view);
         for (size_t i = 0; i < nb0; ++i) {
             const pv_box_def *bx = pv_box_at(view, i);
-            if (bx != NULL && bx->bg_image_url[0] != '\0') { d->has_images = 1; break; }
+            if (bx != NULL && (bx->bg_image_url[0] != '\0' || bx->bg_image_url2[0] != '\0'))
+            { d->has_images = 1; break; }
         }
     }
 
@@ -464,6 +465,24 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                         }
                     } else {
                         d->boxes[i].bg_image_url[0] = '\0';
+                    }
+                }
+                /* R5b: resolve second background-image layer. */
+                if (d->boxes[i].bg_image_url2[0] != '\0') {
+                    char resolved2[URL_MAX_LEN + 1] = "";
+                    const char *img_url2;
+                    rdp_img_decision dec2 = resolve_image_decision(
+                        caps, top_level_url, d->boxes[i].bg_image_url2, -1, -1,
+                        resolved2, sizeof resolved2, &img_url2);
+                    if (dec2 == RDP_IMG_ALLOW) {
+                        size_t ulen2 = strlen(img_url2);
+                        if (ulen2 >= sizeof d->boxes[i].bg_image_url2) {
+                            d->boxes[i].bg_image_url2[0] = '\0';
+                        } else {
+                            memcpy(d->boxes[i].bg_image_url2, img_url2, ulen2 + 1);
+                        }
+                    } else {
+                        d->boxes[i].bg_image_url2[0] = '\0';
                     }
                 }
             }

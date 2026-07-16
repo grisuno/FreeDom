@@ -439,6 +439,7 @@ typedef struct css_style {
     int         bg_grad_n;
     int         bg_grad_angle;
     int         bg_grad_c[CSS_GRAD_STOPS_MAX];
+    int         bg_grad_radial; /* R5c: 0=linear, 1=radial */
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
     int         line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
@@ -564,6 +565,8 @@ typedef struct css_style {
      * declaration set last wins the cascade slot; the painter prefers the
      * gradient when both are somehow set, see gui/browser_ui.c). */
     char        bg_image_url[CSS_URL_MAX];
+    /* R5b: second background-image layer (painted behind the first). "" = none. */
+    char        bg_image_url2[CSS_URL_MAX];
     int         bg_clip;          /* css_bg_clip, 0 (unset) */
     int         bg_origin;        /* css_bg_origin, 0 (unset) */
     int         bg_attachment;    /* css_bg_attachment, 0 (unset) */

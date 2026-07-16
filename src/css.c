@@ -134,6 +134,10 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_FILTER_BLUR, P_FILTER_GRAYSCALE,
         /* background-position (R5a) */
         P_BG_POS_X, P_BG_POS_Y,
+        /* multi-layer background-image layer 2 (R5b): second url() behind the first. */
+        P_BG_IMAGE_URL2,
+        /* radial-gradient flag (R5c): 0=linear(default), 1=radial */
+        P_BG_GRAD_RADIAL,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -429,6 +433,28 @@ static int find_url_token(const char *val, size_t *us, size_t *ue,
     return 0;
 }
 
+/* R5c: detects radial-gradient(circle at center, color1, color2). Returns 1
+ * with the argument span set. */
+static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+                                 size_t *arg_start, size_t *arg_len) {
+    size_t n = strlen(v);
+    const char pre[] = "radial-gradient(";
+    size_t pl = sizeof pre - 1;
+    if (n < pl || memcmp(v, pre, pl) != 0) return 0;
+    *start = 0;
+    size_t p = pl, depth = 0;
+    while (p < n) {
+        if (v[p] == '(') ++depth;
+        else if (v[p] == ')') { if (depth == 0) break; --depth; }
+        ++p;
+    }
+    if (p >= n) return 0;
+    *end = p + 1;
+    *arg_start = pl;
+    *arg_len = p - pl;
+    return 1;
+}
+
 /* Emits the P_BG_IMAGE_URL decl: url==NULL emits the explicit "no image" reset
  * (ival=-1, mirrors emit_gradient's nstops<=0 reset); otherwise appends url to the
  * shared pool (bounded urlcap -- a pool overrun fails closed to reset rather than
@@ -467,6 +493,16 @@ static int expand_bg_image(const char *val, css_decl *dst, int cap,
         if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
         return n;
     }
+    /* R5c: radial-gradient */
+    if (find_radial_gradient(val, &gs, &ge, &as, &an) == 1) {
+        nst = parse_linear_gradient_args(val + as, an, &angle, colors);
+        n = emit_gradient(dst, cap, angle, nst, colors);
+        if (nst > 0 && cap - n >= 1) {
+            dst[n].prop = P_BG_GRAD_RADIAL; dst[n].ival = 1; ++n;
+            n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
+        }
+        return n;
+    }
     size_t us, ue;
     char urlbuf[CSS_URL_MAX];
     int uf = find_url_token(val, &us, &ue, urlbuf, sizeof urlbuf);
@@ -480,6 +516,21 @@ static int expand_bg_image(const char *val, css_decl *dst, int cap,
         if (clean) use_url = urlbuf;
     }
     if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, use_url, urltab, nurl, urlcap);
+
+    /* R5b: second comma-separated url (layer behind the first). */
+    if (use_url != NULL && cap - n >= 1) {
+        const char *comma = val + ue;
+        while (*comma != '\0' && *comma != ',') ++comma;
+        if (*comma == ',') {
+            char urlbuf2[CSS_URL_MAX];
+            size_t us2, ue2;
+            int uf2 = find_url_token(comma + 1, &us2, &ue2, urlbuf2, sizeof urlbuf2);
+            if (uf2 == 1 && *nurl < urlcap) {
+                memcpy(urltab[*nurl], urlbuf2, strlen(urlbuf2) + 1);
+                dst[n].prop = P_BG_IMAGE_URL2; dst[n].ival = (int)*nurl; ++*nurl; ++n;
+            }
+        }
+    }
     return n;
 }
 
@@ -3311,6 +3362,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_BG:       o->background = d->ival; break;
             case P_BG_GRAD_ANGLE: o->bg_grad_angle = d->ival; break;
             case P_BG_GRAD_N:     o->bg_grad_n = d->ival; break;
+            case P_BG_GRAD_RADIAL: o->bg_grad_radial = d->ival; break;
             case P_BG_GRAD_C0: case P_BG_GRAD_C1:
             case P_BG_GRAD_C2: case P_BG_GRAD_C3:
                 o->bg_grad_c[d->prop - P_BG_GRAD_C0] = d->ival; break;
@@ -3320,6 +3372,14 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
                 } else {
                     memcpy(o->bg_image_url, urltab[d->ival], CSS_URL_MAX);
                     o->bg_image_url[CSS_URL_MAX - 1] = '\0';
+                }
+                break;
+            case P_BG_IMAGE_URL2:
+                if (d->ival < 0) {
+                    o->bg_image_url2[0] = '\0';
+                } else {
+                    memcpy(o->bg_image_url2, urltab[d->ival], CSS_URL_MAX);
+                    o->bg_image_url2[CSS_URL_MAX - 1] = '\0';
                 }
                 break;
             case P_ALIGN:    o->text_align = (css_align)d->ival; break;
@@ -3552,7 +3612,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .backface_visibility = CSS_BF_UNSET,
         .text_decoration_thickness = -1,
         .aspect_num = 0, .aspect_den = 0,
-        .bg_grad_n = 0, .bg_grad_angle = 180,
+        .bg_grad_n = 0, .bg_grad_angle = 180, .bg_grad_radial = 0,
         .bg_grad_c = { -1, -1, -1, -1 },
         .transform_tx = CSS_LEN_UNSET, .transform_ty = CSS_LEN_UNSET,
         .transform_sx = CSS_LEN_UNSET, .transform_sy = CSS_LEN_UNSET,

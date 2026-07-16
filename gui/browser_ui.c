@@ -1798,8 +1798,11 @@ static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, vo
     if (w->doc == NULL) return;
     size_t nb = rd_box_count(w->doc);
     size_t nwith = 0;
-    for (size_t i = 0; i < nb; ++i)
-        if (rd_box_at(w->doc, i)->bg_image_url[0] != '\0') nwith++;
+    for (size_t i = 0; i < nb; ++i) {
+        const pv_box_def *bx = rd_box_at(w->doc, i);
+        if (bx->bg_image_url[0] != '\0') nwith++;
+        if (bx->bg_image_url2[0] != '\0') nwith++;
+    }
     if (nwith == 0) return;
 
     w->bg_images = (ui_bg_image *)calloc(nwith, sizeof *w->bg_images);
@@ -1814,6 +1817,16 @@ static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, vo
         slot->url = strdup(bx->bg_image_url);
         fetch_decode_image(w, t, img_fetch, fetch_ctx, bx->bg_image_url,
                            NULL, 0, &slot->surface, &slot->nat_w, &slot->nat_h);
+        /* R5b: second background layer */
+        if (bx->bg_image_url2[0] != '\0' && k < nwith) {
+            if (w->cur_top != NULL || du_is_data_url(bx->bg_image_url2)) {
+                ui_bg_image *slot2 = &w->bg_images[k++];
+                slot2->url = strdup(bx->bg_image_url2);
+                fetch_decode_image(w, t, img_fetch, fetch_ctx,
+                                   bx->bg_image_url2, NULL, 0,
+                                   &slot2->surface, &slot2->nat_w, &slot2->nat_h);
+            }
+        }
     }
     w->bg_image_count = k;
 }
@@ -2756,6 +2769,7 @@ typedef struct rc_box {
      * packed stops. Wins over bg_rgb when set. */
     int    grad_n, grad_angle;
     int    grad_c[4];
+    int    grad_radial;  /* R5c */
     /* background-image size/repeat (2026-07-16). css_bg_size/css_bg_repeat, 0
      * unset (natural size / CSS default "repeat"). The decoded surface itself is
      * looked up separately by the painter (ui_bg_image, keyed by pv_box_def
@@ -2765,6 +2779,7 @@ typedef struct rc_box {
     /* background-position (R5a): px offset, PV_LEN_UNSET/AUTO → compute from
      * keyword (center = (box_w - img_w)/2). */
     int    bg_pos_x, bg_pos_y;
+    char   bg_url2[PV_BG_URL_MAX];  /* R5b: second bg layer */
 } rc_box;
 
 typedef struct rc_layout {
@@ -3767,8 +3782,11 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
         bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
         bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
+        bx->grad_radial = def->bg_grad_radial;
         bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
         bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
+        memcpy(bx->bg_url2, def->bg_image_url2, sizeof bx->bg_url2);
+        bx->bg_url2[sizeof bx->bg_url2 - 1] = '\0';
         bx->hidden = inherited_hidden || this_hidden;
         /* 2026-07-10 author vertical dimensions + aspect-ratio. box_min_w enlarges
          * box_width when the layout was smaller; box_h sets a fixed height (the
@@ -5255,22 +5273,39 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * center along the CSS angle (0 = to top, 90 = to right), long enough that the
      * first/last stops land on the box corners; stops paint evenly spaced. */
     if (bx->grad_n >= 2) {
-        double a = (double)bx->grad_angle * M_PI / 180.0;
-        double dx = sin(a), dy = -cos(a);
-        double half = (fabs(dx) * w + fabs(dy) * h) / 2.0;
-        double cx = x + w / 2.0, cy = y + h / 2.0;
-        cairo_pattern_t *pat = cairo_pattern_create_linear(
-            cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
-        int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
-        for (int k = 0; k < nst; ++k) {
-            ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
-            cairo_pattern_add_color_stop_rgb(pat, (double)k / (double)(nst - 1),
-                                             sc.r, sc.g, sc.b);
+        if (bx->grad_radial) {
+            /* R5c: radial gradient — center at box center, radius = min(w,h)/2 */
+            double cx = x + w / 2.0, cy = y + h / 2.0;
+            double r = (w < h ? w : h) / 2.0;
+            cairo_pattern_t *pat = cairo_pattern_create_radial(cx, cy, 0.0, cx, cy, r);
+            int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
+            for (int k = 0; k < nst; ++k) {
+                ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
+                cairo_pattern_add_color_stop_rgb(pat, (double)k / (double)(nst - 1),
+                                                  sc.r, sc.g, sc.b);
+            }
+            cairo_set_source(cr, pat);
+            box_path(cr, x, y, w, h, rad);
+            cairo_fill(cr);
+            cairo_pattern_destroy(pat);
+        } else {
+            double a = (double)bx->grad_angle * M_PI / 180.0;
+            double dx = sin(a), dy = -cos(a);
+            double half = (fabs(dx) * w + fabs(dy) * h) / 2.0;
+            double cx = x + w / 2.0, cy = y + h / 2.0;
+            cairo_pattern_t *pat = cairo_pattern_create_linear(
+                cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
+            int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
+            for (int k = 0; k < nst; ++k) {
+                ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
+                cairo_pattern_add_color_stop_rgb(pat, (double)k / (double)(nst - 1),
+                                                  sc.r, sc.g, sc.b);
+            }
+            cairo_set_source(cr, pat);
+            box_path(cr, x, y, w, h, rad);
+            cairo_fill(cr);
+            cairo_pattern_destroy(pat);
         }
-        cairo_set_source(cr, pat);
-        box_path(cr, x, y, w, h, rad);
-        cairo_fill(cr);
-        cairo_pattern_destroy(pat);
     } else if (bx->bg_rgb >= 0) {
         set_rgb(cr, rgb_from_packed(bx->bg_rgb));
         box_path(cr, x, y, w, h, rad);
@@ -5896,6 +5931,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .bg_rgb = def->bg_rgb,
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
+        .grad_radial = def->bg_grad_radial,
         .bg_size = def->bg_size, .bg_repeat = def->bg_repeat,
         .bg_pos_x = def->bg_pos_x, .bg_pos_y = def->bg_pos_y,
     };
