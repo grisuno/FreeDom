@@ -441,6 +441,7 @@ typedef struct css_style {
     int         bg_grad_c[CSS_GRAD_STOPS_MAX];
     int         bg_grad_pos[CSS_GRAD_STOPS_MAX]; /* R5d: stop positions 0-1000 */
     int         bg_grad_radial;                       /* R5c: 0=linear, 1=radial */
+    char        content_str[CSS_URL_MAX];              /* R8: ::before/::after content */
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
     int         line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
@@ -617,6 +618,13 @@ typedef struct css_style {
     /* animation-duration (Phase R1): parsed time in ms, 0 = unset/no-animation.
      * Other animation-* properties and @keyframes follow in Phase R1b. */
     int         anim_duration_ms;
+    /* @keyframes / animation-* (R1b) */
+    char        anim_name[64];  /* @keyframes name, "" = none */
+    int         anim_iterations;          /* -1 = infinite, 0 = unset (default 1) */
+    int         anim_direction;           /* ip_direction: 0=normal, 1=reverse, 2=alternate, 3=alt-reverse, -1=unset */
+    int         anim_fill_mode;           /* ip_fill_mode, -1=unset */
+    int         anim_timing;             /* ip_easing, -1=unset */
+    int         anim_delay_ms;           /* delay in ms, 0=unset */
     /* filter (Phase R3): blur radius in px (0=none), grayscale 0..100% (0=none). */
     int         filter_blur;
     int         filter_grayscale;

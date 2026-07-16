@@ -1060,23 +1060,23 @@ static void test_pseudo_root_and_form_state(void **state) {
 static void test_pseudo_unknown_drops_selector(void **state) {
     (void)state;
     css_sheet *sh = NULL;
-    /* Unknown pseudo-classes, functional pseudos and pseudo-elements (including
-     * the legacy single-colon spellings) drop that selector; the group and the
-     * rest of the sheet survive. */
+    /* Unknown pseudo-classes and pseudo-elements drop the selector.
+     * R8: ::before/::after are now parsed and match in CSS cascade. */
     assert_int_equal(css_parse("a:foo, i{color:#080808} p::before{color:#090909} "
-                               "p:before{color:#0a0a0a} q:not(.x){color:#0b0b0b} "
-                               "s:first-of-type{color:#0c0c0c} p{background:#101010}",
-                               0, &sh), CSS_OK);
+                                "p:before{color:#0a0a0a} q:not(.x){color:#0b0b0b} "
+                                "s:first-of-type{color:#0c0c0c} p{background:#101010}",
+                                0, &sh), CSS_OK);
     css_element i = el_node("i", NULL, NULL, 0, NULL);
     assert_int_equal(css_resolve_el(sh, &i, NULL, 0).color, 0x080808);
     css_element p = el_sib_node("p", 1, 1, NULL, NULL);
-    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, -1);
+    /* ::before matches in CSS cascade */
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, 0x090909);
     assert_int_equal(css_resolve_el(sh, &p, NULL, 0).background, 0x101010);
     css_element q = el_node("q", NULL, NULL, 0, NULL);
-    assert_int_not_equal(css_resolve_el(sh, &q, NULL, 0).color, -1); /* :not() now supported */
+    assert_int_not_equal(css_resolve_el(sh, &q, NULL, 0).color, -1); /* :not() supported */
+    /* single-colon :before is still unknown (pseudo-class, not pseudo-element) */
     css_element s = el_sib_node("s", 1, 1, NULL, NULL);
-    assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, -1);
-    css_free(sh);
+    assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, -1); /* :first-of-type needs type-info */
 }
 
 static void test_pseudo_specificity(void **state) {

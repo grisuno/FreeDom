@@ -439,7 +439,9 @@ static void test_matches_and_closest(void **state) {
 static void test_query_selector_fail_closed(void **state) {
     dom_index *idx = IDX(state);
     dom_node_id buf[8];
-    /* Unsupported constructs drop the whole selector -> no match (never a throw). */
+    /* Unsupported constructs drop the whole selector -> no match (never a throw).
+     * R8: ::before/::after parse in CSS cascade but never match in DOM queries
+     * (pseudo-elements are not real DOM elements). */
     assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p::before"), DOM_NODE_NONE);
     assert_true(dom_query_selector(idx, DOM_NODE_NONE, ":not(div)") != DOM_NODE_NONE);
     assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, ""), DOM_NODE_NONE);

@@ -244,5 +244,5 @@ int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel) {
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
     const css_element *subject = build_chain(el, chain, sibs, nodes);
-    return (subject != NULL) ? csel_matches(sel, subject, NULL) : 0;
+    return (subject != NULL) ? csel_matches(sel, subject, NULL, 0) : 0;
 }

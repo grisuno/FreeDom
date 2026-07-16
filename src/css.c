@@ -58,6 +58,10 @@
  * it does not multiply CSS_MAX_DECLS' footprint the way embedding the string in
  * every css_decl would. */
 #define CSS_MAX_BG_URLS 256u
+
+#define CSS_MAX_KEYFRAMES 4
+#define CSS_MAX_KEYFRAME_STOPS 8
+#define CSS_MAX_KEYFRAME_DECLS 8
 #define CSS_INLINE_BG_URLS 8u
 
 /* Property slots. The enum value IS the css_style slot index used by apply().
@@ -133,6 +137,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * Other animation-* properties and @keyframes parsing are follow-up work
          * (the E2E test uses hardcoded keyframes for v1). */
         P_ANIM_DURATION,
+        /* @keyframes / animation-* (R1b) */
+        P_ANIM_NAME, P_ANIM_ITERS, P_ANIM_DIR, P_ANIM_FILL, P_ANIM_TIMING,
+        P_ANIM_DELAY,
         /* filter (Phase R3) */
         P_FILTER_BLUR, P_FILTER_GRAYSCALE,
         /* background-position (R5a) */
@@ -141,6 +148,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_BG_IMAGE_URL2,
         /* radial-gradient flag (R5c): 0=linear(default), 1=radial */
         P_BG_GRAD_RADIAL,
+        /* content property (R8) for ::before/::after */
+        P_CONTENT,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -170,6 +179,15 @@ struct css_sheet {
     size_t          ncustom;
     char            bg_urls[CSS_MAX_BG_URLS][CSS_URL_MAX]; /* background-image url() pool */
     size_t          nbg_urls;
+    char            content_urls[64][CSS_URL_MAX];  /* R8: ::before/::after content strings */
+    size_t          ncontent_urls;
+    /* @keyframes animation blocks (R1b). Bounded anti-DoS. */
+    struct {
+        char name[CSS_TOK_MAX];
+        struct { double pct; int opacity; } stops[CSS_MAX_KEYFRAME_STOPS];
+        int nstops;
+    } keyframes[CSS_MAX_KEYFRAMES];
+    size_t          nkeyframes;
 };
 
 /* The small ASCII helpers (csel_lower_ch / csel_ci_eq / csel_substr /
@@ -2149,6 +2167,23 @@ static int expand_bg_position(const char *val, css_decl *dst, int cap) {
     return n;
 }
 
+/* R8: content property. Extracts quoted string. Returns 1 if parsed. */
+static int expand_content(const char *val, css_decl *dst, int cap) {
+    if (cap < 1) return 0;
+    if (csel_ci_eq(val, "none") || csel_ci_eq(val, "normal")) return 0;
+    if (csel_substr(val, "url(", 1)) return 0;
+    int q = (val[0] == '"' || val[0] == '\'') ? val[0] : 0;
+    if (!q) return 0;
+    size_t len = strlen(val);
+    if (len < 3 || val[len-1] != q) return 0;
+    /* encode up to 3 chars of inner text in ival: b0-b2 = chars, b3 = count */
+    int enc = 0, n = 0;
+    for (size_t i = 1; i + 1 < len && n < 3; ++i, ++n)
+        enc |= ((int)(unsigned char)val[i]) << (n * 8);
+    dst[0].prop = P_CONTENT; dst[0].ival = enc | (n << 24);
+    return 1;
+}
+
 /* box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an
  * optional color, and an optional `inset` keyword, in any order. Needs >= 2 lengths
  * (dx, dy) or the whole declaration is dropped (fail closed). `none` is an explicit
@@ -3029,8 +3064,53 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         if (ms < 0) return 0;
         dst[0].prop = P_ANIM_DURATION; dst[0].ival = ms; return 1;
     }
+    else if (strcmp(prop, "animation-name") == 0) {
+        /* store name in ival as first-char encoding for cascade */
+        int enc = (int)(val[0]) | ((int)(strlen(val) > 63 ? 63 : strlen(val)) << 8);
+        dst[0].prop = P_ANIM_NAME; dst[0].ival = enc; return 1;
+    }
+    else if (strcmp(prop, "animation-iteration-count") == 0) {
+        if (csel_ci_eq(val, "infinite")) { dst[0].prop = P_ANIM_ITERS; dst[0].ival = -1; return 1; }
+        double d; const char *e;
+        if (!parse_num(val, &d, &e) || *e != '\0' || d < 0.0) return 0;
+        dst[0].prop = P_ANIM_ITERS; dst[0].ival = (int)(d + 0.5); return 1;
+    }
+    else if (strcmp(prop, "animation-direction") == 0) {
+        int iv = -1;
+        if (csel_ci_eq(val, "normal")) iv = 0;
+        else if (csel_ci_eq(val, "reverse")) iv = 1;
+        else if (csel_ci_eq(val, "alternate")) iv = 2;
+        else if (csel_ci_eq(val, "alternate-reverse")) iv = 3;
+        else return 0;
+        dst[0].prop = P_ANIM_DIR; dst[0].ival = iv; return 1;
+    }
+    else if (strcmp(prop, "animation-fill-mode") == 0) {
+        int iv = -1;
+        if (csel_ci_eq(val, "none")) iv = 0;
+        else if (csel_ci_eq(val, "forwards")) iv = 1;
+        else if (csel_ci_eq(val, "backwards")) iv = 2;
+        else if (csel_ci_eq(val, "both")) iv = 3;
+        else return 0;
+        dst[0].prop = P_ANIM_FILL; dst[0].ival = iv; return 1;
+    }
+    else if (strcmp(prop, "animation-timing-function") == 0) {
+        int iv = -1;
+        if (csel_ci_eq(val, "ease")) iv = 1;
+        else if (csel_ci_eq(val, "linear")) iv = 0;
+        else if (csel_ci_eq(val, "ease-in")) iv = 2;
+        else if (csel_ci_eq(val, "ease-out")) iv = 3;
+        else if (csel_ci_eq(val, "ease-in-out")) iv = 4;
+        else return 0;
+        dst[0].prop = P_ANIM_TIMING; dst[0].ival = iv; return 1;
+    }
+    else if (strcmp(prop, "animation-delay") == 0) {
+        int ms = interp_time_ms(val);
+        if (ms < 0) return 0;
+        dst[0].prop = P_ANIM_DELAY; dst[0].ival = ms; return 1;
+    }
     else if (strcmp(prop, "filter") == 0)               return expand_filter(val, dst, cap);
     else if (strcmp(prop, "background-position") == 0)   return expand_bg_position(val, dst, cap);
+    else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap);
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -3302,6 +3382,69 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                 i = (q < end && s[q] == ';') ? q + 1 : end;  /* @media with no block */
                 continue;
             }
+            /* R1b: @keyframes name { percentage { decls } ... } */
+            if (i + 9 < end && memcmp(s + i, "@keyframes", 10) == 0 &&
+                (s[i + 10] == ' ' || s[i + 10] == '\t')) {
+                size_t ns = i + 11;
+                while (ns < end && (s[ns] == ' ' || s[ns] == '\t')) ++ns;
+                size_t ne = ns;
+                while (ne < end && s[ne] != ' ' && s[ne] != '\t' && s[ne] != '{') ++ne;
+                size_t be = 0;
+                if (ne > ns && sh->nkeyframes < CSS_MAX_KEYFRAMES) {
+                    char kname[CSS_TOK_MAX];
+                    size_t kn = ne - ns;
+                    if (kn >= sizeof kname) kn = sizeof kname - 1;
+                    memcpy(kname, s + ns, kn);
+                    kname[kn] = '\0';
+                    size_t ob = ne;
+                    while (ob < end && s[ob] != '{') ++ob;
+                    if (ob < end) {
+                        be = block_end(s, ob, end);
+                        /* Parse stops: 0% { ... } 100% { ... } */
+                        size_t kp = ob + 1, ke = be - 1;
+                        int nst = 0;
+                        while (kp < ke && nst < CSS_MAX_KEYFRAME_STOPS) {
+                            while (kp < ke && (s[kp] == ' ' || s[kp] == '\t' || s[kp] == '\n')) ++kp;
+                            if (kp >= ke || (s[kp] >= '0' && s[kp] <= '9') ||
+                                (s[kp] == 'f' && ke - kp >= 4 && memcmp(s + kp, "from", 4) == 0) ||
+                                (s[kp] == 't' && ke - kp >= 2 && memcmp(s + kp, "to", 2) == 0)) {
+                                double pct;
+                                if (s[kp] == 'f') { pct = 0.0; kp += 4; }
+                                else if (s[kp] == 't') { pct = 100.0; kp += 2; }
+                                else { double d; const char *ep;
+                                       if (!parse_num(s + kp, &d, &ep)) break;
+                                       pct = d; kp = (size_t)(ep - s); }
+                                while (kp < ke && s[kp] != '{') ++kp;
+                                if (kp >= ke) break;
+                                size_t db = kp + 1;
+                                size_t de2 = db;
+                                while (de2 < ke && s[de2] != '}') ++de2;
+                                /* Parse inner declarations to extract opacity */
+                                css_decl kdecls[CSS_MAX_KEYFRAME_DECLS];
+                                int nd = interpret_decls(s + db, de2 - db,
+                                    kdecls, CSS_MAX_KEYFRAME_DECLS, sh->custom, sh->ncustom,
+                                    sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS);
+                                int kop = -1;
+                                for (int dd = 0; dd < nd; ++dd) {
+                                    if (kdecls[dd].prop == P_OPACITY)
+                                        kop = kdecls[dd].ival;
+                                }
+                                sh->keyframes[sh->nkeyframes].stops[nst].pct = pct;
+                                sh->keyframes[sh->nkeyframes].stops[nst].opacity = kop;
+                                ++nst;
+                                kp = de2 + 1;
+                            } else break;
+                        }
+                        if (nst >= 2) {
+                            memcpy(sh->keyframes[sh->nkeyframes].name, kname, kn + 1);
+                            sh->keyframes[sh->nkeyframes].nstops = nst;
+                            ++sh->nkeyframes;
+                        }
+                    }
+                }
+                i = (be > 0) ? be : end;
+                continue;
+            }
             i = skip_at_rule(s, i, end);
             continue;
         }
@@ -3556,10 +3699,22 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_ASPECT_NUM:          o->aspect_num = d->ival; break;
             case P_ASPECT_DEN:          o->aspect_den = d->ival; break;
             case P_ANIM_DURATION:       o->anim_duration_ms = d->ival; break;
+            case P_ANIM_ITERS:          o->anim_iterations = d->ival; break;
+            case P_ANIM_DIR:            o->anim_direction = d->ival; break;
+            case P_ANIM_FILL:           o->anim_fill_mode = d->ival; break;
+            case P_ANIM_TIMING:         o->anim_timing = d->ival; break;
+            case P_ANIM_DELAY:          o->anim_delay_ms = d->ival; break;
             case P_FILTER_BLUR:         o->filter_blur = d->ival; break;
             case P_FILTER_GRAYSCALE:    o->filter_grayscale = d->ival; break;
             case P_BG_POS_X:            o->bg_pos_x = d->ival; break;
             case P_BG_POS_Y:            o->bg_pos_y = d->ival; break;
+            case P_CONTENT: {
+                int n = (d->ival >> 24) & 0xff;
+                int k = 0;
+                for (int b = 0; b < n && b < 3; ++b)
+                    o->content_str[k++] = (char)((d->ival >> (b * 8)) & 0xff);
+                o->content_str[k] = '\0';
+            } break;
             default: break;
         }
     }
@@ -3659,7 +3814,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
     if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
-            if (!csel_matches(sel, el, NULL)) continue;
+            if (!csel_matches(sel, el, NULL, 1)) continue;
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)

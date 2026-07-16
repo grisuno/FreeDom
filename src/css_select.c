@@ -564,7 +564,8 @@ static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
  * Structural pseudos read nth/nsib, where 0 = unknown = no match (fail closed).
  * For :not/:is/:where, the sel pointer provides the sub-selector array. */
 static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
-                          const css_sel *sel, const char *target_id) {
+                          const css_sel *sel, const char *target_id,
+                          int allow_pseudo_el) {
     switch (pm->kind) {
         case PSEUDO_LINK:
             return el->tag != NULL &&
@@ -626,14 +627,15 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
             return (lv[pl] == '\0' || lv[pl] == '-');
         }
         case PSEUDO_BEFORE:
-        case PSEUDO_AFTER:        return 0;  /* R8: pseudo-elements never match in DOM queries */
+        case PSEUDO_AFTER:        return allow_pseudo_el;  /* R8: match only in CSS cascade */
         default:                  return 0;
     }
 }
 
 /* True if one compound matches one element (no ancestor context). */
 static int compound_matches(const css_compound *c, const css_element *el,
-                            const css_sel *sel, const char *target_id) {
+                            const css_sel *sel, const char *target_id,
+                            int allow_pseudo_el) {
     if (el == NULL) return 0;
     if (c->has_tag) { if (el->tag == NULL || !csel_ci_eq(c->tag, el->tag)) return 0; }
     if (c->has_id)  { if (el->id == NULL || strcmp(c->id, el->id) != 0) return 0; }
@@ -649,7 +651,7 @@ static int compound_matches(const css_compound *c, const css_element *el,
     for (int i = 0; i < c->nattrs; ++i)
         if (!attr_matches(&c->attrs[i], el)) return 0;
     for (int i = 0; i < c->npseudo; ++i)
-        if (!pseudo_matches(&c->pseudos[i], el, sel, target_id)) return 0;
+        if (!pseudo_matches(&c->pseudos[i], el, sel, target_id, allow_pseudo_el)) return 0;
     return 1;
 }
 
@@ -660,25 +662,26 @@ static int compound_matches(const css_compound *c, const css_element *el,
  * (<= CSS_MAX_COMPOUNDS) and by the chains the caller built (an element without
  * parent/prev links simply never matches through that combinator — fail closed). */
 static int complex_matches(const css_sel *sel, int k, const css_element *el,
-                           const char *target_id) {
-    if (!compound_matches(&sel->parts[k], el, sel, target_id)) return 0;
+                           const char *target_id, int allow_pseudo_el) {
+    if (!compound_matches(&sel->parts[k], el, sel, target_id, allow_pseudo_el)) return 0;
     if (k == 0) return 1;
     switch (sel->comb[k]) {
         case COMB_CHILD:
-            return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent, target_id);
+            return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent, target_id, allow_pseudo_el);
         case COMB_ADJACENT:
-            return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id);
+            return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el);
         case COMB_GENERAL:
             for (const css_element *sib = el->prev; sib != NULL; sib = sib->prev)
-                if (complex_matches(sel, k - 1, sib, target_id)) return 1;
+                if (complex_matches(sel, k - 1, sib, target_id, allow_pseudo_el)) return 1;
             return 0;
         default:
             for (const css_element *anc = el->parent; anc != NULL; anc = anc->parent)
-                if (complex_matches(sel, k - 1, anc, target_id)) return 1;
+                if (complex_matches(sel, k - 1, anc, target_id, allow_pseudo_el)) return 1;
             return 0;
     }
 }
 
-int csel_matches(const css_sel *sel, const css_element *el, const char *target_id) {
-    return complex_matches(sel, sel->nparts - 1, el, target_id);
+int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+                 int allow_pseudo_el) {
+    return complex_matches(sel, sel->nparts - 1, el, target_id, allow_pseudo_el);
 }

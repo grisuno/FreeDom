@@ -124,8 +124,11 @@ typedef struct css_sel {
 int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
 
 /* True if *sel matches element *el against its ancestor chain. target_id
- * (optional) is the URL fragment for :target matching; NULL → never matches. */
-int csel_matches(const css_sel *sel, const css_element *el, const char *target_id);
+ * (optional) is the URL fragment for :target matching; NULL -> never matches.
+ * allow_pseudo_el: 1 = CSS cascade mode (::before/::after match), 0 = DOM
+ * query mode (pseudo-elements never match real elements). */
+int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+                 int allow_pseudo_el);
 
 /* --- ASCII helpers shared by the selector and cascade sides (internal) --- */
 
