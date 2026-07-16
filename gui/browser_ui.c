@@ -14,6 +14,7 @@
 #include "browser.h"
 #include "box_style.h"
 #include "box_tree.h"
+#include "compositor.h"
 #include "css.h"
 #include "css_color.h"
 #include "download.h"
@@ -5340,6 +5341,19 @@ static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
     *oh = (ch >= 1.0) ? ch : 1.0;
 }
 
+/* A row's owning box index (pv_box_def), for overflow-clip ancestor lookups and
+ * (M1.1 increment 4) stacking-context grouping. rc_row.blk is populated ONLY for
+ * RC_IMAGE rows (see its declaration); a text row's owning box instead rides its
+ * first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
+ * blk->block_id alone silently resolved every text row to "no owning box" (-1),
+ * which meant overflow:hidden ancestor clipping never engaged for a plain text
+ * row (only for images). -1 when neither is available. */
+static int row_owner_block_id(const rc_layout *L, const rc_row *r) {
+    if (r->blk != NULL) return (int)r->blk->block_id;
+    if (r->count > 0 && r->first < L->nfrag) return L->frags[r->first].block_id;
+    return -1;
+}
+
 /* Reconciles the cairo overflow clip stack: pops clips that are no longer
  * ancestors of block_id (common-prefix rule), pushes clips for new overflow:
  * hidden ancestors that aren't on the stack yet, outermost first. clip_stack
@@ -5380,6 +5394,122 @@ static void ov_reconcile(cairo_t *cr, int *clip_stack, int *clip_depth,
     }
 }
 
+/* Does this box need its own offscreen compositing group? Single source of truth:
+ * the compositor's cx_forms_stacking_context (spec/compositor.md), fed straight
+ * from the box's resolved style -- the same predicate box_tree.c already uses to
+ * decide Stage-2 paint ORDER now also decides the painter's compositing MECHANISM.
+ * NULL-safe (cx_forms_stacking_context(NULL) is 0). */
+static int box_forms_stacking_context(const pv_box_def *def) {
+    if (def == NULL) return 0;
+    cx_style st = {
+        .position = def->position,
+        .z_index = (def->z_index == PV_LEN_UNSET) ? 0 : def->z_index,
+        .z_auto = (def->z_index == PV_LEN_UNSET) ? 1 : 0,
+        .opacity = def->opacity,
+        .mix_blend = def->mix_blend,
+        .isolation = def->isolation,
+        .is_float = 0, .is_inline = 0,
+    };
+    return cx_forms_stacking_context(&st);
+}
+
+/* Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's
+ * offscreen group is blended back over its backdrop. Cairo's separable and
+ * non-separable blend operators are a 1:1 match for the CSS values (both trace to
+ * the same Porter-Duff/W3C Compositing spec); NORMAL/unset is the ordinary OVER
+ * operator every other paint call in this file already uses implicitly. */
+static cairo_operator_t bui_blend_operator(int mix_blend) {
+    switch (mix_blend) {
+        case CSS_MB_MULTIPLY:    return CAIRO_OPERATOR_MULTIPLY;
+        case CSS_MB_SCREEN:      return CAIRO_OPERATOR_SCREEN;
+        case CSS_MB_OVERLAY:     return CAIRO_OPERATOR_OVERLAY;
+        case CSS_MB_DARKEN:      return CAIRO_OPERATOR_DARKEN;
+        case CSS_MB_LIGHTEN:     return CAIRO_OPERATOR_LIGHTEN;
+        case CSS_MB_COLOR_DODGE: return CAIRO_OPERATOR_COLOR_DODGE;
+        case CSS_MB_COLOR_BURN:  return CAIRO_OPERATOR_COLOR_BURN;
+        case CSS_MB_DIFFERENCE:  return CAIRO_OPERATOR_DIFFERENCE;
+        case CSS_MB_EXCLUSION:   return CAIRO_OPERATOR_EXCLUSION;
+        case CSS_MB_HUE:         return CAIRO_OPERATOR_HSL_HUE;
+        case CSS_MB_SATURATION:  return CAIRO_OPERATOR_HSL_SATURATION;
+        case CSS_MB_COLOR:       return CAIRO_OPERATOR_HSL_COLOR;
+        case CSS_MB_LUMINOSITY:  return CAIRO_OPERATOR_HSL_LUMINOSITY;
+        default:                  return CAIRO_OPERATOR_OVER;
+    }
+}
+
+/* Composites the currently-pushed group back onto cr using def's opacity/mix-blend
+ * (the group must already be open via cairo_push_group). Restores CAIRO_OPERATOR_OVER
+ * afterwards so callers never leak a non-default operator into later paint calls. */
+static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def) {
+    cairo_pop_group_to_source(cr);
+    double alpha = (def->opacity >= 0 && def->opacity < 100)
+                 ? (double)def->opacity / 100.0 : 1.0;
+    cairo_set_operator(cr, bui_blend_operator(def->mix_blend));
+    cairo_paint_with_alpha(cr, alpha);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+}
+
+/* Paints one IN-FLOW box's decoration ONLY (M1.1 increment 4), compositing it
+ * through an offscreen group when it forms a stacking context. Used where
+ * grouping the box's own rows too (paint_box_and_direct_rows below) isn't worth
+ * the added bookkeeping -- currently just the PDF path, whose pagination already
+ * anchors box decoration to a page-specific box_oy per box, and which already
+ * documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
+ * grouped this way still shows the SAME artifact this file's opacity/blend work
+ * was written to avoid elsewhere: its background/border fades or blends
+ * correctly, but a row's own cascaded background-color (paint_content_row's
+ * r->bg_rgb fill, a separate draw call) does not, and paints solid on top. */
+static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
+                                         const rc_box *bx, double ox, double oy) {
+    const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
+    int needs_group = box_forms_stacking_context(def);
+    if (needs_group) cairo_push_group(cr);
+    paint_box_decoration(cr, bx, ox, oy);
+    if (needs_group) bui_pop_group_composite(cr, def);
+}
+
+/* Paints one IN-FLOW box's decoration AND every row that belongs directly to it
+ * (blk->block_id match), together, when the box forms a stacking context -- so a
+ * translucent/blended box's background and its text row(s) fade or blend as ONE
+ * coherent unit. Grouping decoration alone is not enough: a row's own background
+ * fill (paint_content_row's r->bg_rgb branch) cascades the SAME author
+ * background-color as the box, but paints in the caller's separate row pass --
+ * left ungrouped, it shows as a solid, un-faded rectangle sitting on top of an
+ * otherwise-correctly-translucent box, which looks more broken than doing
+ * nothing. Consumed rows are marked in row_done (indexed like L->rows) so the
+ * caller's row loop skips them. Glyph color still uses the pre-existing
+ * pv_run.opacity/set_rgb_alpha path (untouched, already correct); this only adds
+ * the row BACKGROUND and the box's own decoration to the group. Ungrouped boxes
+ * are unchanged: paint_box_decoration only, rows stay in the normal row loop.
+ * Does not recurse into nested child boxes/their rows -- a full nested layer tree
+ * is out of scope, see spec/compositor.md. */
+static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
+                                      const rc_box *bx, double left, double origin,
+                                      double content_w, double page_w,
+                                      double content_top, double content_h,
+                                      int show_hover, char *row_done) {
+    const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
+    if (!box_forms_stacking_context(def)) {
+        paint_box_decoration(cr, bx, left, origin);
+        return;
+    }
+    cairo_push_group(cr);
+    paint_box_decoration(cr, bx, left, origin);
+    int ov_stack[OV_MAX_DEPTH] = {0};
+    int ov_depth = 0;
+    for (size_t j = 0; j < L->nrow; ++j) {
+        const rc_row *r = &L->rows[j];
+        if (row_owner_block_id(L, r) != bx->block_id) continue;
+        ov_reconcile(cr, ov_stack, &ov_depth, w->doc, bx->block_id, L, origin, left);
+        double ry = origin + r->top;
+        if (!(ry + r->height < content_top || ry > content_top + content_h))
+            paint_content_row(cr, w, L, r, left, ry, content_w, page_w, show_hover);
+        if (row_done != NULL) row_done[j] = 1;
+    }
+    while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
+    bui_pop_group_composite(cr, def);
+}
+
 /* Paints one Stage-2 out-of-flow positioned box: its decoration, then (if it holds
  * a paragraph/heading/link block) one synthetic text row at its content origin. v1
  * only paints the FIRST rd_block whose block_id matches; a positioned box with
@@ -5392,14 +5522,16 @@ static void ov_reconcile(cairo_t *cr, int *clip_stack, int *clip_depth,
  * spec/compositor.md and cx_box_layer). No-ops on missing geometry/box-def
  * (fail-open on hostile/malformed input, matching the rest of the painter).
  *
- * Group opacity (M1.1 increment 3): a box with opacity<1 forms a CSS stacking
- * context (cx_forms_stacking_context) and must be composited as ONE unit -- its
- * decoration and content blended together first, then the whole result faded --
- * not each piece faded independently (naive per-draw alpha double-blends wherever
- * e.g. background and content overlap). cairo_push_group redirects the box's paint
- * calls to a fresh offscreen surface (bounded by the current clip, so this is
- * exactly the "layer" spec/compositor.md describes); pop_group_to_source +
- * paint_with_alpha composites that surface back as a single blend. */
+ * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context
+ * (box_forms_stacking_context: opacity<1, mix-blend != normal, isolation:isolate,
+ * or the position+z-index triggers cx_forms_stacking_context already needed for
+ * paint ORDER) is composited as ONE unit -- its decoration and content blended
+ * together first, then the whole result faded/blended -- not each piece faded
+ * independently (naive per-draw alpha double-blends wherever e.g. background and
+ * content overlap). cairo_push_group redirects the box's paint calls to a fresh
+ * offscreen surface (bounded by the current clip, so this is exactly the "layer"
+ * spec/compositor.md describes); bui_pop_group_composite blends that surface back
+ * with the box's opacity and mix-blend-mode. */
 static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
                                  const bt_positioned *pb, double left, double origin,
                                  double content_top, double content_h, double page_w,
@@ -5410,8 +5542,8 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     /* Constrain the positioned box to its overflow:hidden ancestors. */
     ov_reconcile(cr, clip_stack, clip_depth, w->doc, (int)pb->box_index, L, origin, left);
 
-    int has_opacity = (def->opacity >= 0 && def->opacity < 100);
-    if (has_opacity) cairo_push_group(cr);
+    int needs_group = box_forms_stacking_context(def);
+    if (needs_group) cairo_push_group(cr);
 
     /* Build a transient rc_box for the existing paint helper. */
     rc_box bx = {
@@ -5472,10 +5604,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         break;
     }
 
-    if (has_opacity) {
-        cairo_pop_group_to_source(cr);
-        cairo_paint_with_alpha(cr, (double)def->opacity / 100.0);
-    }
+    if (needs_group) bui_pop_group_composite(cr, def);
 }
 
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
@@ -5518,22 +5647,32 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
 
+    /* row_done marks rows already painted as part of a grouped box (M1.1
+     * increment 4, paint_box_and_direct_rows) so the row loop below doesn't
+     * paint them a second time. NULL (calloc(0) or OOM) degrades to "nothing
+     * grouped skips" -- every row falls through to the normal ungrouped path,
+     * same as before this feature existed. */
+    char *row_done = (L.nrow > 0) ? (char *)calloc(L.nrow, 1) : NULL;
     for (size_t i = 0; i < L.nbox; ++i) {
         const rc_box *bx = &L.boxes[i];
         double by = origin + bx->top;
         if (by + bx->h < content_top || by > content_top + content_h) continue;
-        paint_box_decoration(cr, bx, left, origin);
+        paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
+                                  (double)w->width, content_top, content_h,
+                                  1, row_done);
     }
     for (size_t i = 0; i < L.nrow; ++i) {
+        if (row_done != NULL && row_done[i]) continue;
         const rc_row *r = &L.rows[i];
         /* Each row is clipped to the innermost overflow:hidden ancestor's
          * padding-box (the content rect where children paint). */
-        int row_bid = (r->blk != NULL) ? (int)r->blk->block_id : -1;
+        int row_bid = row_owner_block_id(&L, r);
         ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L, origin, left);
         double ry = origin + r->top;
         if (ry + r->height < content_top || ry > content_top + content_h) continue;
         paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
     }
+    free(row_done);
     /* Pop all overflow clips before painting positioned boxes. */
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
 
@@ -5623,7 +5762,7 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                 /* paint_box_decoration adds bx->top to oy, so oy maps the box's layout
                  * top to the same page line as its first enclosed row. */
                 double box_oy = PDF_MARGIN + yof[k] - L.rows[k].top;
-                paint_box_decoration(cr, bx, PDF_MARGIN, box_oy);
+                paint_box_decoration_grouped(cr, w, bx, PDF_MARGIN, box_oy);
             }
             /* Note: overflow:hidden clipping is NOT applied to the PDF export in v1
              * because PDF pagination uses per-page Y offsets (yof[i]) and per-box
@@ -5635,72 +5774,26 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                 paint_content_row(cr, w, &L, &L.rows[i], PDF_MARGIN,
                                   PDF_MARGIN + yof[i], content_w, PDF_PAGE_W, 0);
             }
-            /* Stage 2: out-of-flow positioned boxes (v1: painted on every page;
-             * a positioned box that should only appear on one specific page is
-             * a follow-up). z_index < 0 is skipped. */
+            /* Stage 2: out-of-flow positioned boxes (v1: painted on every page; a
+             * positioned box that should only appear on one specific page is a
+             * follow-up). z_index < 0 is skipped -- PDF v1 doesn't reproduce the
+             * on-screen/PNG "paints behind in-flow" ordering across page
+             * boundaries (an omission, not a wrong-order bug). Reuses
+             * paint_positioned_one (same helper as the on-screen/PNG paths), so
+             * overflow:hidden ancestor clipping and stacking-context group
+             * compositing (opacity/mix-blend) are no longer PDF-only gaps -- a
+             * fresh page starts with a fresh clip stack, so per-page
+             * reconciliation is safe (no cross-page clip leakage). */
+            int pdf_pos_ov_stack[OV_MAX_DEPTH] = {0};
+            int pdf_pos_ov_depth = 0;
             for (size_t pi = 0; pi < L.npositioned; ++pi) {
                 const bt_positioned *pb = &L.positioned[pi];
                 if (pb->z_index < 0) continue;
-                if (pb->w < 1.0 || pb->h < 1.0) continue;
-                const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
-                if (def == NULL) continue;
-                rc_box bx = {
-                    .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
-                    .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
-                    .bord_bw = def->bord_bw, .bord_lw = def->bord_lw,
-                    .bord_ts = def->bord_ts, .bord_rs = def->bord_rs,
-                    .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
-                    .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
-                    .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
-                    .radius = def->border_radius,
-                    .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
-                    .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
-                    .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
-                    .outline_w = def->outline_w, .outline_style = def->outline_style,
-                    .outline_color = def->outline_color,
-                    .bg_rgb = def->bg_rgb,
-                    .grad_n = def->grad_n, .grad_angle = def->grad_angle,
-                    .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
-                };
-                paint_box_decoration(cr, &bx, PDF_MARGIN, PDF_MARGIN);
-                for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
-                    const rd_block *b = rd_at(w->doc, bi);
-                    if ((int)b->block_id != (int)pb->box_index) continue;
-                    if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
-                        b->kind != RD_LINK) break;
-            rc_frag fg = {
-                .x = 0, .width = 0, .font_size = th->body_font,
-                .bold = b->bold, .italic = b->italic,
-                .underline = 0, .strike = 0, .overline = 0,
-                .color = th->text,
-                .text = b->text, .len = strlen(b->text),
-                .href = b->href, .node_id = b->node_id,
-                .family = CSS_FF_UNSET, .transform = 0,
-                .letter_spacing = 0, .valign_dy = 0,
-                .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
-                .opacity = -1,
-            };
-                    content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
-                    cairo_font_extents_t fe;
-                    cairo_font_extents(cr, &fe);
-                    cairo_text_extents_t te;
-                    cairo_text_extents(cr, b->text, &te);
-                    fg.width = te.x_advance;
-                    rc_row row = {
-                        .kind = RC_TEXT, .top = pb->y, .height = fe.height,
-                        .ascent = fe.ascent, .first = 0, .count = 1,
-                        .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
-                        .x_off = pb->x, .align = 0, .blk = b,
-                    };
-                    rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
-                                       .rows = &row, .nrow = 1, .caprow = 1,
-                                       .boxes = NULL, .nbox = 0, .capbox = 0,
-                                       .total_h = pb->h, .npositioned = 0 };
-                    paint_content_row(cr, w, &mini, &row, PDF_MARGIN,
-                                      PDF_MARGIN + pb->y, pb->w, PDF_PAGE_W, 0);
-                    break;
-                }
+                paint_positioned_one(cr, w, th, pb, PDF_MARGIN, PDF_MARGIN,
+                                     -1e9, 2e9, PDF_PAGE_W,
+                                     pdf_pos_ov_stack, &pdf_pos_ov_depth, &L);
             }
+            while (pdf_pos_ov_depth > 0) { cairo_restore(cr); pdf_pos_ov_depth--; }
             cairo_show_page(cr);
         }
     }
@@ -5815,21 +5908,27 @@ static long write_doc_png(browser_window *w, const char *path) {
     }
 
     /* Box decoration first (behind the rows), then the rows, at a constant origin
-     * (no pagination): both use PNG_MARGIN + their layout-space top. */
+     * (no pagination): both use PNG_MARGIN + their layout-space top. row_done (see
+     * paint_structured) marks rows already painted as part of a grouped box. */
+    char *row_done = (L.nrow > 0) ? (char *)calloc(L.nrow, 1) : NULL;
     for (size_t bi = 0; bi < L.nbox; ++bi)
-        paint_box_decoration(cr, &L.boxes[bi], PNG_MARGIN, PNG_MARGIN);
+        paint_box_and_direct_rows(cr, w, &L, &L.boxes[bi], PNG_MARGIN, PNG_MARGIN,
+                                  content_w, PNG_PAGE_W, no_cull_top, no_cull_h,
+                                  0, row_done);
     {
         int ov_stack[OV_MAX_DEPTH] = {0};
         int ov_depth = 0;
         for (size_t i = 0; i < L.nrow; ++i) {
+            if (row_done != NULL && row_done[i]) continue;
             const rc_row *r = &L.rows[i];
-            int row_bid = (r->blk != NULL) ? (int)r->blk->block_id : -1;
+            int row_bid = row_owner_block_id(&L, r);
             ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L,
                          PNG_MARGIN, PNG_MARGIN);
             paint_content_row(cr, w, &L, r, PNG_MARGIN,
                               PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
         }
         while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
+        free(row_done);
     }
     /* Stage 2, non-negative z-index PAINTS ABOVE in-flow content (same as
      * paint_structured). Honours overflow:hidden ancestors via ov_reconcile. */

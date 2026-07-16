@@ -1946,7 +1946,7 @@ static void test_load_view_codec_full_roundtrip(void **state) {
         "<span style=\"grid-column:span 2\">grid</span></div>"
         "<div style=\"display:flex\"><span style=\"flex:2 0 auto\">flexi</span></div>"
         "<div style=\"border-radius:8px;position:relative;z-index:5;height:77px;"
-        "opacity:0.5\">boxy</div>"
+        "opacity:0.5;mix-blend-mode:multiply;isolation:isolate\">boxy</div>"
         "<form method=\"post\"><input type=\"checkbox\" checked=\"checked\"></form>"
         "</body></html>";
     tab *t = NULL;
@@ -2002,6 +2002,8 @@ static void test_load_view_codec_full_roundtrip(void **state) {
             assert_int_equal(bx->z_index, 5);
             assert_int_equal(bx->box_h, 77);
             assert_int_equal(bx->opacity, 50);
+            assert_int_equal(bx->mix_blend, CSS_MB_MULTIPLY);
+            assert_int_equal(bx->isolation, CSS_ISO_ISOLATE);
             saw_boxy = 1;
         }
     }

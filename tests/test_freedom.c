@@ -440,6 +440,123 @@ static void test_download_png_group_opacity_blends_with_background(void **state)
     unlink(png);
 }
 
+/* Regression for M1.1 increment 4 (in-flow box group opacity): an IN-FLOW
+ * (non-positioned) box with opacity must fade as ONE coherent unit -- its own
+ * decoration (background) AND its text row's cascaded background-color together
+ * -- not just the box decoration alone. A decoration-only group produces a
+ * visible artifact: the row's own bg_rgb fill (paint_content_row, a separate
+ * draw call that cascades the same author background-color) paints solid and
+ * un-faded on top of an otherwise-correctly-faded box, which looks WORSE than no
+ * fix at all. Exercises paint_box_and_direct_rows + row_owner_block_id (which
+ * also fixed row-to-box lookup for plain text rows, previously only correct for
+ * RC_IMAGE rows) in gui/browser_ui.c. */
+static void test_download_png_inflow_opacity_blends_box_and_row_together(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;background:#00ff00;}"
+        "#box{background:#0000ff;opacity:0.5;padding:10px;}"
+        "</style></head><body>"
+        "<div id=\"box\">inflow box text should also be readable</div>"
+        "</body></html>";
+    const char *path = "__freedom_inflow_opacity_page.html";
+    const char *png = "__freedom_inflow_opacity_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    /* Sample two rows: y=30 is inside the padding (box decoration only, no text
+     * row behind it), y=45 is inside the text row itself. Both must show the SAME
+     * blend -- 0.5*(0,0,255 blue) + 0.5*(0,255,0 green) = (0,127.5,127.5) -- proving
+     * the row's background fill is no longer a separate, un-faded solid patch. */
+    assert_true(px.width > 500 && px.height > 45);
+    for (int y = 30; y <= 45; y += 15) {
+        uint32_t pixel = ((const uint32_t *)(const void *)px.data)[y * (px.stride / 4) + 500];
+        uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
+        assert_true(r <= 2);                    /* no red channel in blue+green */
+        assert_true(g >= 125 && g <= 130);
+        assert_true(b >= 125 && b <= 130);
+    }
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* Regression for M1.1 increment 4 (mix-blend-mode wiring): a box with
+ * mix-blend-mode:multiply must composite through the matching Cairo operator
+ * (CAIRO_OPERATOR_MULTIPLY), not the default OVER -- multiply(orange #ff8800,
+ * blue #0000ff) is component-wise (255*0, 136*0, 0*255)/255 = pure black,
+ * visibly different from either input color or an OVER blend (which would show
+ * opaque blue). Exercises box_forms_stacking_context/bui_blend_operator in
+ * gui/browser_ui.c and the mix_blend field through pv_box_def -> tab.c IPC ->
+ * box_tree.c cx_style (M1.1 increment 4 CSS wiring). */
+static void test_download_png_mix_blend_multiply_uses_cairo_operator(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "#behind{position:absolute;top:0;left:0;background:#ff8800;}"
+        "#front{position:absolute;top:0;left:0;background:#0000ff;"
+        "mix-blend-mode:multiply;}"
+        "</style></head><body>"
+        "<div id=\"behind\">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>"
+        "<div id=\"front\">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB</div>"
+        "<p>filler text to give the page a nonzero height for the export</p>"
+        "</body></html>";
+    const char *path = "__freedom_blend_page.html";
+    const char *png = "__freedom_blend_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    assert_true(px.width > 900 && px.height > 30);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[30 * (px.stride / 4) + 900];
+    uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
+    /* multiply(orange, blue) = black. Allow a little slack for antialiasing. */
+    assert_true(r <= 10);
+    assert_true(g <= 10);
+    assert_true(b <= 10);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* --- headless console (Freebug --dump-console) --- */
 
 /* --dump-console runs the page's JS and prints console.* output + uncaught errors. */
@@ -677,6 +794,8 @@ int main(void) {
         cmocka_unit_test(test_download_png_images_local),
         cmocka_unit_test(test_download_png_negative_zindex_paints_behind_inflow),
         cmocka_unit_test(test_download_png_group_opacity_blends_with_background),
+        cmocka_unit_test(test_download_png_inflow_opacity_blends_box_and_row_together),
+        cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),

@@ -345,6 +345,16 @@ typedef struct pv_box_def {
      * and spec/compositor.md). Distinct from pv_run.opacity (per text-run color
      * alpha, pre-existing, not a stacking context). */
     int opacity;
+    /* mix-blend-mode / isolation (M1.1 increment 4, compositor.md's remaining
+     * cx_forms_stacking_context triggers): css_mix_blend (0 unset) and
+     * css_isolation (0 unset). mix_blend maps 1:1 to a Cairo compositing operator
+     * (CAIRO_OPERATOR_MULTIPLY etc.) when the box's group is composited back; the
+     * push_group itself already gives isolation's semantics (blending confined to
+     * the group), so isolation has no separate painter step -- it is carried here
+     * so cx_forms_stacking_context/cx_box_layer (box_tree.c ordering) see the true
+     * value instead of a hardcoded 0. */
+    int mix_blend;
+    int isolation;
 } pv_box_def;
 
 typedef struct pv_view {

@@ -134,6 +134,25 @@ static const char *dd_visibility_name(int v) {
     }
 }
 
+static const char *dd_mix_blend_name(int m) {
+    switch (m) {
+        case CSS_MB_MULTIPLY:    return "multiply";
+        case CSS_MB_SCREEN:      return "screen";
+        case CSS_MB_OVERLAY:     return "overlay";
+        case CSS_MB_DARKEN:      return "darken";
+        case CSS_MB_LIGHTEN:     return "lighten";
+        case CSS_MB_COLOR_DODGE: return "color-dodge";
+        case CSS_MB_COLOR_BURN:  return "color-burn";
+        case CSS_MB_DIFFERENCE:  return "difference";
+        case CSS_MB_EXCLUSION:   return "exclusion";
+        case CSS_MB_HUE:         return "hue";
+        case CSS_MB_SATURATION:  return "saturation";
+        case CSS_MB_COLOR:       return "color";
+        case CSS_MB_LUMINOSITY:  return "luminosity";
+        default:                  return "normal";
+    }
+}
+
 static const char *dd_overflow_name(int o) {
     switch (o) {
         case CSS_OF_HIDDEN: return "hidden";
@@ -254,6 +273,11 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
     /* Box-level opacity (M1.1 increment 3, group compositing trigger): printed only
      * when set, like the other stacking-context signals above. */
     if (b->opacity >= 0) dd_printf(c, " opacity=%d", b->opacity);
+    /* mix-blend-mode / isolation (M1.1 increment 4): printed only when set, same
+     * pattern as the other stacking-context signals above. */
+    if (b->mix_blend > CSS_MB_NORMAL)
+        dd_printf(c, " mix-blend=%s", dd_mix_blend_name(b->mix_blend));
+    if (b->isolation == CSS_ISO_ISOLATE) dd_puts(c, " isolate");
     dd_putc(c, '\n');
 }
 

@@ -1029,6 +1029,8 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->grad_c0 = cs->bg_grad_c[0]; d->grad_c1 = cs->bg_grad_c[1];
     d->grad_c2 = cs->bg_grad_c[2]; d->grad_c3 = cs->bg_grad_c[3];
     d->opacity = cs->opacity;
+    d->mix_blend = cs->mix_blend_mode;
+    d->isolation = cs->isolation;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
