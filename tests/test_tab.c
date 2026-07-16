@@ -1928,6 +1928,87 @@ static void test_worker_args_null_safe(void **state) {
     assert_false(tab_parse_worker_args(0, argv, &rfd, &wfd));
 }
 
+/* M0.2 codec golden: one load packs a broad spread of run + box fields across BOTH
+ * fixed-width run blocks (block A: image/color/text-presentation/container; block B:
+ * flex/box-model/input) and the box-def array, with distinctive numeric values. A wire
+ * desync in write_view/read_view (a swapped or dropped field) surfaces here as a value
+ * read into the wrong slot. Locks the bulk-array refactor: it passes identically before
+ * and after, because the wire bytes are unchanged. */
+static void test_load_view_codec_full_roundtrip(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>C</title></head><body>"
+        "<p style=\"color:#112233;background-color:#445566;font-size:150%;"
+        "line-height:180%;text-indent:13px;tab-size:4;opacity:0.5;"
+        "margin-left:11px;max-width:222px\">alpha</p>"
+        "<img src=\"https://e.example/i.png\" width=\"40\" height=\"20\" alt=\"pic\">"
+        "<div style=\"display:grid;grid-template-columns:100px 1fr\">"
+        "<span style=\"grid-column:span 2\">grid</span></div>"
+        "<div style=\"display:flex\"><span style=\"flex:2 0 auto\">flexi</span></div>"
+        "<div style=\"border-radius:8px;position:relative;z-index:5;height:77px\">boxy</div>"
+        "<form method=\"post\"><input type=\"checkbox\" checked=\"checked\"></form>"
+        "</body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_alpha = 0, saw_pic = 0, saw_grid = 0, saw_flexi = 0, saw_boxy = 0, saw_input = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->kind == PV_IMAGE) {
+            assert_int_equal(r->img_w, 40);
+            assert_int_equal(r->img_h, 20);
+            saw_pic = 1;
+            continue;
+        }
+        if (r->kind == PV_INPUT) {
+            assert_int_equal(r->input_type, PV_IN_CHECKBOX);
+            assert_int_equal(r->checked, 1);
+            assert_int_equal(r->form_method, PV_METHOD_POST);
+            assert_true(r->form_id >= 0);
+            saw_input = 1;
+            continue;
+        }
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "alpha") == 0) {
+            assert_int_equal(r->fg_rgb, 0x112233);
+            assert_int_equal(r->bg_rgb, 0x445566);
+            assert_int_equal(r->font_scale, 150);
+            assert_int_equal(r->line_scale, 180);
+            assert_int_equal(r->text_indent, 13);
+            assert_int_equal(r->tab_size, 4);
+            assert_int_equal(r->opacity, 50);
+            assert_int_equal(r->box_l, 11);
+            assert_int_equal(r->box_w, 222);
+            assert_int_not_equal(r->node_id, DOM_NODE_NONE);
+            saw_alpha = 1;
+        } else if (strcmp(r->text, "grid") == 0) {
+            assert_int_equal(r->cont_cols, 2);
+            assert_int_equal(r->cont_col_w[0], 100);   /* 100px fixed track */
+            assert_int_equal(r->grid_span, 2);
+            saw_grid = 1;
+        } else if (strcmp(r->text, "flexi") == 0) {
+            assert_int_equal(r->flex_grow, 200);       /* flex:2 -> grow x100 */
+            saw_flexi = 1;
+        } else if (strcmp(r->text, "boxy") == 0) {
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->border_radius, 8);
+            assert_int_equal(bx->position, CSS_POS_RELATIVE);
+            assert_int_equal(bx->z_index, 5);
+            assert_int_equal(bx->box_h, 77);
+            saw_boxy = 1;
+        }
+    }
+    assert_true(saw_alpha && saw_pic && saw_grid && saw_flexi && saw_boxy && saw_input);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 int main(int argc, char **argv) {
     /* The worker re-execs /proc/self/exe (this very test binary), so the first thing
      * any tab-linking main() must do is run the worker when invoked as one. */
@@ -1958,6 +2039,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_tick_interval_rearms),
         cmocka_unit_test(test_load_carries_box_decoration),
         cmocka_unit_test(test_load_carries_box_tree),
+        cmocka_unit_test(test_load_view_codec_full_roundtrip),
         cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_ex_runs_script_and_mutates),

@@ -108,6 +108,19 @@ proceso padre (UI/confianza)             proceso hijo (worker de pestaña, confi
 Padre y hijo son el mismo binario y arquitectura (`fork`), así que se intercambian estructuras
 crudas de ancho nativo (`uint8_t` op, `size_t` longitudes, `int32_t` estados), como el `renderer`.
 
+**Marshalling de la vista por bloques bulk (Hito M0.2):** los campos escalares de cada run se
+serializan como **bloques de `int32` de ancho fijo** (`head[6]`, block A[36], el array de grid,
+block B[26]) que listan cada campo **una sola vez** en el mismo orden en `write_view` y `read_view`,
+en vez de un `write_full` por campo — igual que el array `f[]` de la box-def. Añadir un campo nuevo
+es una entrada en el write-block y una en la extracción del read (antes eran ~4 sitios en lock-step),
+lo que hace un desync estructuralmente difícil (los índices del array fijan el orden). **No hay
+tags ni versionado**: el worker es el mismo binario que el padre (`/proc/self/exe --tab-worker`), así
+que `write_view` y `read_view` son siempre la misma build — no existe version skew que tolerar, y un
+codec TLV sería complejidad muerta. Las guardas anti-amplificación (`TAB_MAX_INPUT` por campo,
+`TAB_MAX_RUNS` por conteo) son las mismas; el formato de wire es byte-idéntico al codec posicional
+previo. Las secciones "Wire de la vista" de §4 describen el orden de campos, que este refactor no
+altera.
+
 - **Petición:** `[op: uint8]`. `OP_LOAD` lleva **cinco bytes de bandera** y la **URL de la página**
   antes de la carga: `[op][run_js:1][net:1][reader:1][dark:1][css:1][url_len: size_t][url][len: size_t][html]`
   (las banderas y la URL preceden a la carga para que el HTML quede zero-copy). `run_js` es la política

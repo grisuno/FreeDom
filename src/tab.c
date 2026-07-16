@@ -235,6 +235,15 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
     return 0;
 }
 
+/* Writes one length-prefixed string field (the write mirror of read_field): a size_t
+ * length then the bytes, with NULL/empty encoded as length 0. */
+static int write_field(int fd, const char *s) {
+    size_t len = (s != NULL) ? strlen(s) : 0;
+    if (write_full(fd, &len, sizeof len) != 0) return -1;
+    if (len != 0 && write_full(fd, s, len) != 0) return -1;
+    return 0;
+}
+
 /* Serialises the display list:
  *   [count]( kind,heading,bold,italic,indent,break, text, href, src, img_w,img_h, fg_rgb,bg_rgb,
  *            text_align,font_scale,line_scale,text_decoration,
@@ -255,178 +264,74 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
  * fields travel for every run so a hostile child cannot desync the stream by
  * varying the per-run layout; non-image runs carry an empty src and -1 dimensions,
  * a run without an author color carries fg_rgb == -1, and non-input runs carry an
- * empty name/value, form_id == -1 and form_method == 0. */
+ * empty name/value, form_id == -1 and form_method == 0.
+ *
+ * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
+ * grid array, block B[26]) exactly like the box-def f[] array, NOT one write_full per
+ * field: the block literal lists each field once, so read_view mirrors it by index and
+ * a desync becomes structurally hard. Adding a field is one entry in the write block +
+ * one in the read extraction, like the box def. NO tags/versioning: the worker is the
+ * SAME binary as the parent (/proc/self/exe --tab-worker), so write_view and read_view
+ * are always the same build -- there is no version skew to tolerate. */
 static int write_view(int wfd, const pv_view *v) {
     size_t n = pv_count(v);
     if (write_full(wfd, &n, sizeof n) != 0) return -1;
     for (size_t i = 0; i < n; ++i) {
         const pv_run *r = pv_at(v, i);
-        int32_t kind = (int32_t)r->kind;
-        int32_t heading = (int32_t)r->heading;
-        int32_t bold = (int32_t)r->bold;
-        int32_t italic = (int32_t)r->italic;
-        int32_t indent = (int32_t)r->indent;
-        int32_t brk = (int32_t)r->block_break;
-        int32_t img_w = (int32_t)r->img_w;
-        int32_t img_h = (int32_t)r->img_h;
-        int32_t fg = (int32_t)r->fg_rgb;
-        int32_t bg = (int32_t)r->bg_rgb;
-        int32_t talign = (int32_t)r->text_align;
-        int32_t fscale = (int32_t)r->font_scale;
-        int32_t lscale = (int32_t)r->line_scale;
-        int32_t deco = (int32_t)r->text_decoration;
-        int32_t ffam = (int32_t)r->font_family;
-        int32_t ttrans = (int32_t)r->text_transform;
-        int32_t lspc = (int32_t)r->letter_spacing;
-        int32_t wspc = (int32_t)r->word_spacing;
-        int32_t shdx = (int32_t)r->shadow_dx;
-        int32_t shdy = (int32_t)r->shadow_dy;
-        int32_t shcol = (int32_t)r->shadow_color;
-        int32_t opac = (int32_t)r->opacity;
-        int32_t valgn = (int32_t)r->valign;
-        int32_t tindent = (int32_t)r->text_indent;
-        int32_t wspace = (int32_t)r->white_space;
-        int32_t toverflow = (int32_t)r->text_overflow;
-        int32_t wbreak = (int32_t)r->word_break;
-        int32_t tdeco_color = (int32_t)r->text_decoration_color;
-        int32_t tdeco_style = (int32_t)r->text_decoration_style;
-        int32_t tdeco_thick = (int32_t)r->text_decoration_thickness;
-        /* 2026-07-10 text-extension batch (tab_size/direction/font_variant/list_style_pos). */
-        int32_t ttsize = (int32_t)r->tab_size;
-        int32_t tdir = (int32_t)r->direction;
-        int32_t tfvar = (int32_t)r->font_variant;
-        int32_t tlpos = (int32_t)r->list_style_pos;
-        /* 2026-07-10 wiring batch (image_rendering/caret_color). */
-        int32_t tirend = (int32_t)r->image_rendering;
-        int32_t tcaret = (int32_t)r->caret_color;
-        int32_t tobject_fit = (int32_t)r->object_fit;
-        int32_t cid = (int32_t)r->cont_id;
-        int32_t cdisp = (int32_t)r->cont_display;
-        int32_t cgap = (int32_t)r->cont_gap;
-        int32_t cjust = (int32_t)r->cont_justify;
-        int32_t ccols = (int32_t)r->cont_cols;
-        int32_t fgrow = (int32_t)r->flex_grow;
-        int32_t fshrink = (int32_t)r->flex_shrink;
-        int32_t fbasis = (int32_t)r->flex_basis;
-        int32_t forder = (int32_t)r->flex_order;
-        int32_t fdir = (int32_t)r->flex_direction;
-        int32_t citem = (int32_t)r->cont_item;
-        int32_t cwrap = (int32_t)r->cont_wrap;
-        int32_t crgap = (int32_t)r->cont_row_gap;
-        int32_t calign = (int32_t)r->cont_align_items;
-        int32_t fself = (int32_t)r->flex_align_self;
-        int32_t flside = (int32_t)r->float_side;
-        int32_t flid = (int32_t)r->float_id;
-        int32_t flclear = (int32_t)r->float_clear;
-        int32_t bl = (int32_t)r->box_l;
-        int32_t br = (int32_t)r->box_r;
-        int32_t bw = (int32_t)r->box_w;
-        int32_t bcenter = (int32_t)r->box_center;
-        int32_t bmt = (int32_t)r->box_mt;
-        int32_t bmb = (int32_t)r->box_mb;
-        int32_t bwpct = (int32_t)r->box_w_pct;
-        int32_t blkid = (int32_t)r->block_id;
-        int32_t nodeid = (int32_t)r->node_id;
-        int32_t itype = (int32_t)r->input_type;
-        int32_t fid = (int32_t)r->form_id;
-        int32_t method = (int32_t)r->form_method;
-        int32_t ckd = (int32_t)r->checked;
-        size_t tlen = (r->text != NULL) ? strlen(r->text) : 0;
-        size_t hlen = (r->href != NULL) ? strlen(r->href) : 0;
-        size_t slen = (r->src != NULL) ? strlen(r->src) : 0;
-        size_t plen = (r->poster_src != NULL) ? strlen(r->poster_src) : 0;
-        size_t nmlen = (r->name != NULL) ? strlen(r->name) : 0;
-        size_t vllen = (r->value != NULL) ? strlen(r->value) : 0;
-        size_t oplen = (r->select_opts != NULL) ? strlen(r->select_opts) : 0;
-        if (write_full(wfd, &kind, sizeof kind) != 0) return -1;
-        if (write_full(wfd, &heading, sizeof heading) != 0) return -1;
-        if (write_full(wfd, &bold, sizeof bold) != 0) return -1;
-        if (write_full(wfd, &italic, sizeof italic) != 0) return -1;
-        if (write_full(wfd, &indent, sizeof indent) != 0) return -1;
-        if (write_full(wfd, &brk, sizeof brk) != 0) return -1;
-        if (write_full(wfd, &tlen, sizeof tlen) != 0) return -1;
-        if (tlen != 0 && write_full(wfd, r->text, tlen) != 0) return -1;
-        if (write_full(wfd, &hlen, sizeof hlen) != 0) return -1;
-        if (hlen != 0 && write_full(wfd, r->href, hlen) != 0) return -1;
-        if (write_full(wfd, &slen, sizeof slen) != 0) return -1;
-        if (slen != 0 && write_full(wfd, r->src, slen) != 0) return -1;
-        if (write_full(wfd, &plen, sizeof plen) != 0) return -1;
-        if (plen != 0 && write_full(wfd, r->poster_src, plen) != 0) return -1;
-        if (write_full(wfd, &img_w, sizeof img_w) != 0) return -1;
-        if (write_full(wfd, &img_h, sizeof img_h) != 0) return -1;
-        if (write_full(wfd, &fg, sizeof fg) != 0) return -1;
-        if (write_full(wfd, &bg, sizeof bg) != 0) return -1;
-        if (write_full(wfd, &talign, sizeof talign) != 0) return -1;
-        if (write_full(wfd, &fscale, sizeof fscale) != 0) return -1;
-        if (write_full(wfd, &lscale, sizeof lscale) != 0) return -1;
-        if (write_full(wfd, &deco, sizeof deco) != 0) return -1;
-        if (write_full(wfd, &ffam, sizeof ffam) != 0) return -1;
-        if (write_full(wfd, &ttrans, sizeof ttrans) != 0) return -1;
-        if (write_full(wfd, &lspc, sizeof lspc) != 0) return -1;
-        if (write_full(wfd, &wspc, sizeof wspc) != 0) return -1;
-        if (write_full(wfd, &shdx, sizeof shdx) != 0) return -1;
-        if (write_full(wfd, &shdy, sizeof shdy) != 0) return -1;
-        if (write_full(wfd, &shcol, sizeof shcol) != 0) return -1;
-        if (write_full(wfd, &opac, sizeof opac) != 0) return -1;
-        if (write_full(wfd, &valgn, sizeof valgn) != 0) return -1;
-        if (write_full(wfd, &tindent, sizeof tindent) != 0) return -1;
-        if (write_full(wfd, &wspace, sizeof wspace) != 0) return -1;
-        if (write_full(wfd, &toverflow, sizeof toverflow) != 0) return -1;
-        if (write_full(wfd, &wbreak, sizeof wbreak) != 0) return -1;
-        if (write_full(wfd, &tdeco_color, sizeof tdeco_color) != 0) return -1;
-        if (write_full(wfd, &tdeco_style, sizeof tdeco_style) != 0) return -1;
-        if (write_full(wfd, &tdeco_thick, sizeof tdeco_thick) != 0) return -1;
-        if (write_full(wfd, &ttsize, sizeof ttsize) != 0) return -1;
-        if (write_full(wfd, &tdir, sizeof tdir) != 0) return -1;
-        if (write_full(wfd, &tfvar, sizeof tfvar) != 0) return -1;
-        if (write_full(wfd, &tlpos, sizeof tlpos) != 0) return -1;
-        if (write_full(wfd, &tirend, sizeof tirend) != 0) return -1;
-        if (write_full(wfd, &tcaret, sizeof tcaret) != 0) return -1;
-        if (write_full(wfd, &tobject_fit, sizeof tobject_fit) != 0) return -1;
-        if (write_full(wfd, &cid, sizeof cid) != 0) return -1;
-        if (write_full(wfd, &cdisp, sizeof cdisp) != 0) return -1;
-        if (write_full(wfd, &cgap, sizeof cgap) != 0) return -1;
-        if (write_full(wfd, &cjust, sizeof cjust) != 0) return -1;
-        if (write_full(wfd, &ccols, sizeof ccols) != 0) return -1;
-        {
-            int32_t gtw[PV_GRID_TRACKS + 1];
-            for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
-                gtw[gk] = (int32_t)r->cont_col_w[gk];
-            gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
-            if (write_full(wfd, gtw, sizeof gtw) != 0) return -1;
-        }
-        if (write_full(wfd, &fgrow, sizeof fgrow) != 0) return -1;
-        if (write_full(wfd, &fshrink, sizeof fshrink) != 0) return -1;
-        if (write_full(wfd, &fbasis, sizeof fbasis) != 0) return -1;
-        if (write_full(wfd, &forder, sizeof forder) != 0) return -1;
-        if (write_full(wfd, &fdir, sizeof fdir) != 0) return -1;
-        if (write_full(wfd, &citem, sizeof citem) != 0) return -1;
-        if (write_full(wfd, &cwrap, sizeof cwrap) != 0) return -1;
-        if (write_full(wfd, &crgap, sizeof crgap) != 0) return -1;
-        if (write_full(wfd, &calign, sizeof calign) != 0) return -1;
-        if (write_full(wfd, &fself, sizeof fself) != 0) return -1;
-        if (write_full(wfd, &flside, sizeof flside) != 0) return -1;
-        if (write_full(wfd, &flid, sizeof flid) != 0) return -1;
-        if (write_full(wfd, &flclear, sizeof flclear) != 0) return -1;
-        if (write_full(wfd, &bl, sizeof bl) != 0) return -1;
-        if (write_full(wfd, &br, sizeof br) != 0) return -1;
-        if (write_full(wfd, &bw, sizeof bw) != 0) return -1;
-        if (write_full(wfd, &bcenter, sizeof bcenter) != 0) return -1;
-        if (write_full(wfd, &bmt, sizeof bmt) != 0) return -1;
-        if (write_full(wfd, &bmb, sizeof bmb) != 0) return -1;
-        if (write_full(wfd, &bwpct, sizeof bwpct) != 0) return -1;
-        if (write_full(wfd, &blkid, sizeof blkid) != 0) return -1;
-        if (write_full(wfd, &nodeid, sizeof nodeid) != 0) return -1;
-        if (write_full(wfd, &itype, sizeof itype) != 0) return -1;
-        if (write_full(wfd, &fid, sizeof fid) != 0) return -1;
-        if (write_full(wfd, &method, sizeof method) != 0) return -1;
-        if (write_full(wfd, &ckd, sizeof ckd) != 0) return -1;
-        if (write_full(wfd, &oplen, sizeof oplen) != 0) return -1;
-        if (oplen != 0 && write_full(wfd, r->select_opts, oplen) != 0) return -1;
-        if (write_full(wfd, &nmlen, sizeof nmlen) != 0) return -1;
-        if (nmlen != 0 && write_full(wfd, r->name, nmlen) != 0) return -1;
-        if (write_full(wfd, &vllen, sizeof vllen) != 0) return -1;
-        if (vllen != 0 && write_full(wfd, r->value, vllen) != 0) return -1;
+        int32_t head[6] = {
+            (int32_t)r->kind, (int32_t)r->heading, (int32_t)r->bold,
+            (int32_t)r->italic, (int32_t)r->indent, (int32_t)r->block_break,
+        };
+        /* Block A: fixed-width scalars between the head strings and the grid array
+         * (image dims, colors, the whole text-presentation set, container params). */
+        int32_t a[36] = {
+            (int32_t)r->img_w, (int32_t)r->img_h, (int32_t)r->fg_rgb, (int32_t)r->bg_rgb,
+            (int32_t)r->text_align, (int32_t)r->font_scale, (int32_t)r->line_scale,
+            (int32_t)r->text_decoration, (int32_t)r->font_family, (int32_t)r->text_transform,
+            (int32_t)r->letter_spacing, (int32_t)r->word_spacing,
+            (int32_t)r->shadow_dx, (int32_t)r->shadow_dy, (int32_t)r->shadow_color,
+            (int32_t)r->opacity, (int32_t)r->valign, (int32_t)r->text_indent,
+            (int32_t)r->white_space, (int32_t)r->text_overflow, (int32_t)r->word_break,
+            (int32_t)r->text_decoration_color, (int32_t)r->text_decoration_style,
+            (int32_t)r->text_decoration_thickness,
+            (int32_t)r->tab_size, (int32_t)r->direction, (int32_t)r->font_variant,
+            (int32_t)r->list_style_pos, (int32_t)r->image_rendering, (int32_t)r->caret_color,
+            (int32_t)r->object_fit,
+            (int32_t)r->cont_id, (int32_t)r->cont_display, (int32_t)r->cont_gap,
+            (int32_t)r->cont_justify, (int32_t)r->cont_cols,
+        };
+        int32_t gtw[PV_GRID_TRACKS + 1];
+        for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+            gtw[gk] = (int32_t)r->cont_col_w[gk];
+        gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
+        /* Block B: fixed-width scalars after the grid array (flex item, float, author
+         * box model, block/node id, form control). */
+        int32_t b[26] = {
+            (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
+            (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
+            (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
+            (int32_t)r->flex_align_self,
+            (int32_t)r->float_side, (int32_t)r->float_id, (int32_t)r->float_clear,
+            (int32_t)r->box_l, (int32_t)r->box_r, (int32_t)r->box_w, (int32_t)r->box_center,
+            (int32_t)r->box_mt, (int32_t)r->box_mb, (int32_t)r->box_w_pct,
+            (int32_t)r->block_id, (int32_t)r->node_id,
+            (int32_t)r->input_type, (int32_t)r->form_id, (int32_t)r->form_method,
+            (int32_t)r->checked,
+        };
+        /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
+         * select_opts|name|value. */
+        if (write_full(wfd, head, sizeof head) != 0
+         || write_field(wfd, r->text) != 0
+         || write_field(wfd, r->href) != 0
+         || write_field(wfd, r->src) != 0
+         || write_field(wfd, r->poster_src) != 0
+         || write_full(wfd, a, sizeof a) != 0
+         || write_full(wfd, gtw, sizeof gtw) != 0
+         || write_full(wfd, b, sizeof b) != 0
+         || write_field(wfd, r->select_opts) != 0
+         || write_field(wfd, r->name) != 0
+         || write_field(wfd, r->value) != 0)
+            return -1;
     }
 
     /* Box engine (Step D): the box TREE, after the run array. [nbox] then per box the
@@ -1421,120 +1326,49 @@ static int read_view(int fd, pv_view **out) {
     if (v == NULL) return -1;
 
     for (size_t i = 0; i < n; ++i) {
-        int32_t kind = 0, heading = 0, bold = 0, italic = 0, indent = 0, brk = 0;
-        int32_t img_w = -1, img_h = -1, fg = -1, bg = -1;
-        int32_t talign = 0, fscale = 0, lscale = 0, deco = -1;
-        int32_t ffam = 0, ttrans = 0, lspc = PV_LEN_UNSET, wspc = PV_LEN_UNSET;
-        int32_t shdx = 0, shdy = 0, shcol = -1, opac = -1, valgn = 0;
-        int32_t tindent = PV_LEN_UNSET, wspace = 0;
-        int32_t toverflow = 0, wbreak = 0;
-        int32_t tdeco_color = -1, tdeco_style = 0, tdeco_thick = -1;
-        /* 2026-07-10 text-extension batch (tab_size/direction/font_variant/list_style_pos). */
-        int32_t ttsize = 0, tdir = 0, tfvar = 0, tlpos = 0;
-        /* 2026-07-10 wiring batch (image_rendering/caret_color). */
-        int32_t tirend = 0, tcaret = -1, tobject_fit = 0;
-        int32_t cid = -1, cdisp = 0, cgap = 0, cjust = 0, ccols = 0;
-        int32_t gtw[PV_GRID_TRACKS + 1] = { 0 };   /* track sizes + grid_span */
-        int32_t fgrow = -1, fshrink = -1;
-        int32_t fbasis = CSS_LEN_UNSET, forder = CSS_LEN_UNSET, fdir = 0;
-        int32_t citem = -1;
-        int32_t cwrap = 0, crgap = -1, calign = 0, fself = 0;
-        int32_t flside = 0, flid = -1, flclear = 0;
-        int32_t bl = 0, br = 0, bw = 0, bcenter = 0;
-        int32_t bmt = PV_LEN_UNSET, bmb = PV_LEN_UNSET;
-        int32_t bwpct = 0;
-        int32_t blkid = -1;
-        int32_t nodeid = (int32_t)DOM_NODE_NONE;
-        int32_t itype = 0, fid = -1, method = 0;
-        int32_t ckd = -1;
-        if (read_full(fd, &kind, sizeof kind) != 0
-         || read_full(fd, &heading, sizeof heading) != 0
-         || read_full(fd, &bold, sizeof bold) != 0
-         || read_full(fd, &italic, sizeof italic) != 0
-         || read_full(fd, &indent, sizeof indent) != 0
-         || read_full(fd, &brk, sizeof brk) != 0) {
-            pv_free(v);
-            return -1;
-        }
+        int32_t head[6];
+        if (read_full(fd, head, sizeof head) != 0) { pv_free(v); return -1; }
+        int32_t kind = head[0], heading = head[1], bold = head[2],
+                italic = head[3], indent = head[4], brk = head[5];
         char *text = NULL, *href = NULL, *src = NULL, *poster = NULL, *name = NULL, *value = NULL;
         size_t tl = 0, hl = 0, sl = 0, pl = 0, nl = 0, vl = 0;
         if (read_field(fd, &text, &tl) != 0) { pv_free(v); return -1; }
         if (read_field(fd, &href, &hl) != 0) { free(text); pv_free(v); return -1; }
         if (read_field(fd, &src, &sl) != 0) { free(text); free(href); pv_free(v); return -1; }
         if (read_field(fd, &poster, &pl) != 0) { free(text); free(href); free(src); pv_free(v); return -1; }
-        if (read_full(fd, &img_w, sizeof img_w) != 0
-         || read_full(fd, &img_h, sizeof img_h) != 0
-         || read_full(fd, &fg, sizeof fg) != 0
-         || read_full(fd, &bg, sizeof bg) != 0
-         || read_full(fd, &talign, sizeof talign) != 0
-         || read_full(fd, &fscale, sizeof fscale) != 0
-         || read_full(fd, &lscale, sizeof lscale) != 0
-         || read_full(fd, &deco, sizeof deco) != 0
-         || read_full(fd, &ffam, sizeof ffam) != 0
-         || read_full(fd, &ttrans, sizeof ttrans) != 0
-         || read_full(fd, &lspc, sizeof lspc) != 0
-         || read_full(fd, &wspc, sizeof wspc) != 0
-         || read_full(fd, &shdx, sizeof shdx) != 0
-         || read_full(fd, &shdy, sizeof shdy) != 0
-         || read_full(fd, &shcol, sizeof shcol) != 0
-         || read_full(fd, &opac, sizeof opac) != 0
-         || read_full(fd, &valgn, sizeof valgn) != 0
-         || read_full(fd, &tindent, sizeof tindent) != 0
-         || read_full(fd, &wspace, sizeof wspace) != 0
-         || read_full(fd, &toverflow, sizeof toverflow) != 0
-         || read_full(fd, &wbreak, sizeof wbreak) != 0
-         || read_full(fd, &tdeco_color, sizeof tdeco_color) != 0
-         || read_full(fd, &tdeco_style, sizeof tdeco_style) != 0
-         || read_full(fd, &tdeco_thick, sizeof tdeco_thick) != 0
-         || read_full(fd, &ttsize, sizeof ttsize) != 0
-         || read_full(fd, &tdir, sizeof tdir) != 0
-         || read_full(fd, &tfvar, sizeof tfvar) != 0
-         || read_full(fd, &tlpos, sizeof tlpos) != 0
-         || read_full(fd, &tirend, sizeof tirend) != 0
-         || read_full(fd, &tcaret, sizeof tcaret) != 0
-         || read_full(fd, &tobject_fit, sizeof tobject_fit) != 0
-         || read_full(fd, &cid, sizeof cid) != 0
-         || read_full(fd, &cdisp, sizeof cdisp) != 0
-         || read_full(fd, &cgap, sizeof cgap) != 0
-         || read_full(fd, &cjust, sizeof cjust) != 0
-         || read_full(fd, &ccols, sizeof ccols) != 0
+
+        /* Block A + grid array + block B: contiguous fixed-width scalars, same order
+         * write_view emits them. Reading each block in one shot (not field by field)
+         * makes a wire desync structurally hard -- the arrays list the fields once,
+         * exactly like the box-def f[] array below. */
+        int32_t a[36], gtw[PV_GRID_TRACKS + 1], b[26];
+        if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
-         || read_full(fd, &fgrow, sizeof fgrow) != 0
-         || read_full(fd, &fshrink, sizeof fshrink) != 0
-         || read_full(fd, &fbasis, sizeof fbasis) != 0
-         || read_full(fd, &forder, sizeof forder) != 0
-         || read_full(fd, &fdir, sizeof fdir) != 0
-         || read_full(fd, &citem, sizeof citem) != 0
-         || read_full(fd, &cwrap, sizeof cwrap) != 0
-         || read_full(fd, &crgap, sizeof crgap) != 0
-         || read_full(fd, &calign, sizeof calign) != 0
-         || read_full(fd, &fself, sizeof fself) != 0
-         || read_full(fd, &flside, sizeof flside) != 0
-         || read_full(fd, &flid, sizeof flid) != 0
-         || read_full(fd, &flclear, sizeof flclear) != 0
-         || read_full(fd, &bl, sizeof bl) != 0
-         || read_full(fd, &br, sizeof br) != 0
-         || read_full(fd, &bw, sizeof bw) != 0
-         || read_full(fd, &bcenter, sizeof bcenter) != 0
-         || read_full(fd, &bmt, sizeof bmt) != 0
-         || read_full(fd, &bmb, sizeof bmb) != 0
-         || read_full(fd, &bwpct, sizeof bwpct) != 0
-         || read_full(fd, &blkid, sizeof blkid) != 0
-         || read_full(fd, &nodeid, sizeof nodeid) != 0
-         || read_full(fd, &itype, sizeof itype) != 0
-         || read_full(fd, &fid, sizeof fid) != 0
-         || read_full(fd, &method, sizeof method) != 0
-         || read_full(fd, &ckd, sizeof ckd) != 0) {
-            free(text); free(href); free(src); pv_free(v); return -1;
+         || read_full(fd, b, sizeof b) != 0) {
+            free(text); free(href); free(src); free(poster); pv_free(v); return -1;
         }
+        int32_t img_w = a[0], img_h = a[1], fg = a[2], bg = a[3], talign = a[4],
+                fscale = a[5], lscale = a[6], deco = a[7], ffam = a[8], ttrans = a[9],
+                lspc = a[10], wspc = a[11], shdx = a[12], shdy = a[13], shcol = a[14],
+                opac = a[15], valgn = a[16], tindent = a[17], wspace = a[18],
+                toverflow = a[19], wbreak = a[20], tdeco_color = a[21], tdeco_style = a[22],
+                tdeco_thick = a[23], ttsize = a[24], tdir = a[25], tfvar = a[26],
+                tlpos = a[27], tirend = a[28], tcaret = a[29], tobject_fit = a[30],
+                cid = a[31], cdisp = a[32], cgap = a[33], cjust = a[34], ccols = a[35];
+        int32_t fgrow = b[0], fshrink = b[1], fbasis = b[2], forder = b[3], fdir = b[4],
+                citem = b[5], cwrap = b[6], crgap = b[7], calign = b[8], fself = b[9],
+                flside = b[10], flid = b[11], flclear = b[12], bl = b[13], br = b[14],
+                bw = b[15], bcenter = b[16], bmt = b[17], bmb = b[18], bwpct = b[19],
+                blkid = b[20], nodeid = b[21], itype = b[22], fid = b[23], method = b[24],
+                ckd = b[25];
         char *opts = NULL;
         size_t ol = 0;
         if (read_field(fd, &opts, &ol) != 0) {
-            free(text); free(href); free(src); pv_free(v); return -1;
+            free(text); free(href); free(src); free(poster); pv_free(v); return -1;
         }
-        if (read_field(fd, &name, &nl) != 0) { free(text); free(href); free(src); free(opts); pv_free(v); return -1; }
+        if (read_field(fd, &name, &nl) != 0) { free(text); free(href); free(src); free(poster); free(opts); pv_free(v); return -1; }
         if (read_field(fd, &value, &vl) != 0) {
-            free(text); free(href); free(src); free(name); free(opts); pv_free(v); return -1;
+            free(text); free(href); free(src); free(poster); free(name); free(opts); pv_free(v); return -1;
         }
 
         pv_status st;
