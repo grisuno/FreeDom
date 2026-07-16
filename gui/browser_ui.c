@@ -19,10 +19,12 @@
 #include "css_color.h"
 #include "data_url.h"
 #include "download.h"
+#include "frame_clock.h"
 #include "freebug.h"
 #include "hostblock.h"
 #include "hostedit.h"
 #include "image_decode.h"
+#include "interp.h"
 #include "js_policy.h"
 #include "link_nav.h"
 #include "net_realm.h"
@@ -492,6 +494,13 @@ typedef struct browser_window {
     /* Mouse event dispatch (Phase 1.2). Caches the DOM node under the pointer for
      * mouseover/mouseout detection between motion events. DOM_NODE_NONE = no hover. */
     dom_node_id mouse_hover_node;
+
+    /* Animation frame clock (Phase R1). page_load_mono_ms is the monotonic timestamp
+     * when the current page finished rendering. Animation state is derived from
+     * elapsed wall-clock time relative to this. fc is the pure frame_clock that
+     * signals whether the repaint loop should run when animations are active. */
+    uint64_t page_load_mono_ms;
+    fc_clock fc;
 } browser_window;
 
 /* Freebug second-window forward declarations (defined further down, but referenced
@@ -2029,6 +2038,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     if (rd_build(page.view, eff, w->cur_top, &doc) == RD_OK) {
         w->doc = doc;
     }
+    w->page_load_mono_ms = now_ms();  /* Phase R1: animation frame clock baseline */
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t, gui_image_fetch, w); /* fetch + decode allowed images in the still-open worker */
     load_bg_images(w, t, gui_image_fetch, w); /* fetch + decode allowed CSS background-images */
@@ -5594,6 +5604,7 @@ static int box_forms_stacking_context(const pv_box_def *def) {
                          def->transform_sy != PV_LEN_UNSET ||
                          def->transform_rotate != PV_LEN_UNSET,
     };
+    if (def->anim_duration_ms > 0) return 1;  /* Phase R1: animation needs stacking context */
     return cx_forms_stacking_context(&st);
 }
 
@@ -5652,12 +5663,25 @@ static cairo_operator_t bui_blend_operator(int mix_blend) {
 
 /* Composites the currently-pushed group back onto cr using def's opacity/mix-blend
  * (the group must already be open via cairo_push_group). Restores CAIRO_OPERATOR_OVER
- * afterwards so callers never leak a non-default operator into later paint calls. */
-static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def) {
+ * afterwards so callers never leak a non-default operator into later paint calls.
+ * elapsed_ms: time since page load in ms; used for animation-blended opacity. */
+static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms) {
     cairo_pop_group_to_source(cr);
-    double alpha = (def->opacity >= 0 && def->opacity < 100)
-                 ? (double)def->opacity / 100.0 : 1.0;
-    cairo_set_operator(cr, bui_blend_operator(def->mix_blend));
+    int eff_opacity = (def ? def->opacity : -1);
+    if (def && def->anim_duration_ms > 0) {
+        ip_ease_fn ease = { .kind = IP_EASE_LINEAR };
+        ip_keyframe kf[] = { {0.0, 0.0}, {100.0, 100.0} };
+        ip_anim a;
+        ip_anim_init(&a, IP_VAL_SCALAR, &ease, kf, 2,
+                     (double)def->anim_duration_ms, 0.0,
+                     1, IP_DIR_NORMAL, IP_FILL_FORWARDS);
+        ip_anim_tick(&a, (double)elapsed_ms);
+        int anim = (int)ip_anim_current(&a);
+        if (anim >= 0 && anim <= 100) eff_opacity = anim;
+    }
+    double alpha = (eff_opacity >= 0 && eff_opacity < 100)
+                 ? (double)eff_opacity / 100.0 : 1.0;
+    cairo_set_operator(cr, bui_blend_operator(def ? def->mix_blend : CSS_MB_UNSET));
     cairo_paint_with_alpha(cr, alpha);
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
 }
@@ -5687,7 +5711,7 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
     cairo_transform(cr, &m);
     paint_box_decoration(cr, bx, ox, oy, bgimg);
     cairo_restore(cr);
-    bui_pop_group_composite(cr, def);
+    bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
 }
 
 /* Paints one IN-FLOW box's decoration AND every row that belongs directly to it
@@ -5747,7 +5771,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
         if (row_done != NULL) row_done[j] = 1;
     }
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
-    bui_pop_group_composite(cr, def);
+    bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
 }
 
 /* Paints one Stage-2 out-of-flow positioned box: its decoration, then (if it holds
@@ -5859,7 +5883,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         break;
     }
 
-    if (needs_group) bui_pop_group_composite(cr, def);
+    if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
 }
 
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
@@ -9708,6 +9732,7 @@ ui_status ui_run_browser(const char *start_url) {
     w.tab_count = 1;            /* the foreground tab lives in the window's own fields */
     w.active_tab = 0;
     tf_init(&w.ua_field);       /* empty => SF_DEFAULT_USER_AGENT */
+    fc_init(&w.fc);             /* animation frame scheduler (Phase R1) */
 
     /* Key auto-repeat: a monotonic timerfd polled alongside the Wayland fd. Defaults
      * apply until the compositor sends keyboard_repeat_info. A failed create (-1) just

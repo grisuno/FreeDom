@@ -415,8 +415,9 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/js_policy.o $(BUILD_DIR)/webcaps.o \
-                      $(BUILD_DIR)/compositor.o \
-                      $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
+                       $(BUILD_DIR)/compositor.o \
+                       $(BUILD_DIR)/interp.o $(BUILD_DIR)/frame_clock.o \
+                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
                       $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \

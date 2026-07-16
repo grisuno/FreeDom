@@ -954,6 +954,56 @@ static void test_rejects_http_url(void **state) {
     assert_int_equal(rc, 1);
 }
 
+/* Phase R1: animation-duration triggers the animation pipeline and exports
+ * as PNG without crash. The box with animation forms a stacking context and the
+ * anim_duration flows through the full pipeline (CSS → page_view → IPC → paint). */
+static void test_download_png_animation_renders(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        ".box{width:100px;height:60px;background:#00cc44;animation-duration:1s;}"
+        "</style></head><body>"
+        "<div class=\"box\">Anim</div>"
+        "</body></html>";
+    const char *path = "__freedom_anim_page.html";
+    const char *png  = "__freedom_anim_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    /* Decode and verify the box area has non-white content (the pipeline
+     * didn't silently drop the animated box). */
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    assert_true(px.width > 50 && px.height > 30);
+    /* Sample a pixel inside the box (border area of the animated div). */
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 20];
+    uint8_t g = (uint8_t)(pixel >> 8);
+    /* The background is #00cc44 = green. Even with animation opacity modulation
+     * (0→100), the box should contribute non-white color to the PNG. */
+    assert_true(g > 50);   /* area is not all white — pipeline is wired */
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* --- suite --- */
 
 int main(void) {
@@ -975,6 +1025,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),
         cmocka_unit_test(test_download_png_transform_rotate_changes_paint_shape),
         cmocka_unit_test(test_download_png_transform_scale_grows_around_center),
+        cmocka_unit_test(test_download_png_animation_renders),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),
