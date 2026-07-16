@@ -347,7 +347,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[74] = {
+        int32_t f[78] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -401,6 +401,9 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->bg_pos_x, (int32_t)bd->bg_pos_y,
             /* radial gradient flag, R5c */
             (int32_t)bd->bg_grad_radial,
+            /* gradient stop positions, R5d */
+            (int32_t)bd->bg_grad_pos[0], (int32_t)bd->bg_grad_pos[1],
+            (int32_t)bd->bg_grad_pos[2], (int32_t)bd->bg_grad_pos[3],
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1504,7 +1507,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[74];
+        int32_t f[78];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1555,6 +1558,8 @@ static int read_view(int fd, pv_view **out) {
             /* radial gradient flag, R5c */
             .bg_grad_radial = f[73],
         };
+        for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
+            bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
          * string fields. Bounded against PV_BG_URL_MAX like every fixed box
          * buffer -- a hostile/corrupted stream that claims a longer string fails

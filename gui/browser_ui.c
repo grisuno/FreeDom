@@ -2769,6 +2769,7 @@ typedef struct rc_box {
      * packed stops. Wins over bg_rgb when set. */
     int    grad_n, grad_angle;
     int    grad_c[4];
+    int    grad_pos[4];  /* R5d: stop positions 0-1000, -1=evenly spaced */
     int    grad_radial;  /* R5c */
     /* background-image size/repeat (2026-07-16). css_bg_size/css_bg_repeat, 0
      * unset (natural size / CSS default "repeat"). The decoded surface itself is
@@ -3782,6 +3783,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
         bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
         bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
+        for (int k = 0; k < 4; ++k) bx->grad_pos[k] = def->bg_grad_pos[k];
         bx->grad_radial = def->bg_grad_radial;
         bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
         bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
@@ -5281,8 +5283,9 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
             for (int k = 0; k < nst; ++k) {
                 ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
-                cairo_pattern_add_color_stop_rgb(pat, (double)k / (double)(nst - 1),
-                                                  sc.r, sc.g, sc.b);
+                double pos = (bx->grad_pos[k] >= 0) ? (double)bx->grad_pos[k] / 1000.0
+                                                     : (double)k / (double)(nst - 1);
+                cairo_pattern_add_color_stop_rgb(pat, pos, sc.r, sc.g, sc.b);
             }
             cairo_set_source(cr, pat);
             box_path(cr, x, y, w, h, rad);
@@ -5298,8 +5301,9 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
             for (int k = 0; k < nst; ++k) {
                 ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
-                cairo_pattern_add_color_stop_rgb(pat, (double)k / (double)(nst - 1),
-                                                  sc.r, sc.g, sc.b);
+                double pos = (bx->grad_pos[k] >= 0) ? (double)bx->grad_pos[k] / 1000.0
+                                                     : (double)k / (double)(nst - 1);
+                cairo_pattern_add_color_stop_rgb(pat, pos, sc.r, sc.g, sc.b);
             }
             cairo_set_source(cr, pat);
             box_path(cr, x, y, w, h, rad);
@@ -7879,6 +7883,7 @@ static void redraw(browser_window *w) {
     wl_surface_attach(w->surface, w->buffer, 0, 0);
     wl_surface_damage_buffer(w->surface, 0, 0, w->width, w->height);
     wl_surface_commit(w->surface);
+    wl_display_flush(w->display);  /* drain connection buffer after each paint */
 }
 
 /* --- xdg-shell --- */
@@ -9957,8 +9962,11 @@ ui_status ui_run_browser(const char *start_url) {
      * so a large page with frequent redraws (spinner, JS ticks, video frames)
      * never hits "Data too big for buffer". A 4 KiB buffer overflows when
      * accumulated messages exceed that, since manual flushes don't always drain
-     * before the next redraw queues more. 1 MiB is generous for any page. */
+     * before the next redraw queues more. 1 MiB is generous for any page.
+     * MUST be called BEFORE any protocol message (get_registry etc.) and
+     * force-flushed so the buffer is allocated at the larger size. */
     wl_display_set_max_buffer_size(w.display, 1024u * 1024u);
+    wl_display_flush(w.display);  /* allocate the larger buffer now */
 
     w.registry = wl_display_get_registry(w.display);
     wl_registry_add_listener(w.registry, &registry_listener, &w);

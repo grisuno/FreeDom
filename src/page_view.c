@@ -1067,6 +1067,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bg_image_url[PV_BG_URL_MAX - 1] = '\0';
     memcpy(d->bg_image_url2, cs->bg_image_url2, PV_BG_URL_MAX);
     d->bg_image_url2[PV_BG_URL_MAX - 1] = '\0';
+    for (int k = 0; k < 4; ++k) d->bg_grad_pos[k] = cs->bg_grad_pos[k];
     d->bg_grad_radial = cs->bg_grad_radial;
     d->bg_size = cs->bg_size;
     d->bg_repeat = cs->bg_repeat;

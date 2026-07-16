@@ -133,7 +133,22 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
                         css_sel *sel) {
     size_t i = *ip + 1;  /* past ':' */
     memset(pm, 0, sizeof *pm);
-    if (i < b && s[i] == ':') return 0;   /* pseudo-element */
+    if (i < b && s[i] == ':') {
+        /* ::before / ::after pseudo-element */
+        ++i;  /* past second ':' */
+        char pename[CSS_TOK_MAX];
+        size_t nk = 0;
+        while (i < b && csel_ident_ch(s[i])) {
+            if (nk + 1 < sizeof pename) pename[nk++] = csel_lower_ch(s[i]);
+            ++i;
+        }
+        pename[nk] = '\0';
+        if (csel_ci_eq(pename, "before"))       pm->kind = PSEUDO_BEFORE;
+        else if (csel_ci_eq(pename, "after"))   pm->kind = PSEUDO_AFTER;
+        else return 0;  /* unsupported pseudo-element */
+        *ip = i;
+        return 1;
+    }
 
     char name[CSS_TOK_MAX];
     size_t nk = 0;
@@ -610,6 +625,8 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
             if (!csel_span_eq(lv, pm->lang, pl, 1)) return 0;
             return (lv[pl] == '\0' || lv[pl] == '-');
         }
+        case PSEUDO_BEFORE:
+        case PSEUDO_AFTER:        return 0;  /* R8: pseudo-elements never match in DOM queries */
         default:                  return 0;
     }
 }

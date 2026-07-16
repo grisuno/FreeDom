@@ -111,6 +111,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * emits angle + stop count + the stop colors in lock-step. */
         P_BG_GRAD_ANGLE, P_BG_GRAD_N,
         P_BG_GRAD_C0, P_BG_GRAD_C1, P_BG_GRAD_C2, P_BG_GRAD_C3,
+        /* gradient stop positions (R5d): 0-100% stored as 0-1000. P_BG_GRAD_N
+         * controls how many are valid. */
+        P_BG_GRAD_POS0, P_BG_GRAD_POS1, P_BG_GRAD_POS2, P_BG_GRAD_POS3,
         /* grid-template-columns track sizes (2026-07-11). Contiguous group of
          * CSS_GRID_TRACKS_MAX slots emitted in lock-step with P_GRIDCOLS. */
         P_GRID_TRACK0, P_GRID_TRACK1, P_GRID_TRACK2, P_GRID_TRACK3,
@@ -331,7 +334,8 @@ static int find_linear_gradient(const char *v, size_t *start, size_t *end,
  * *angle and colors[CSS_GRAD_STOPS_MAX]; returns the stop count clamped to
  * CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when the
  * gradient fails closed. */
-static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *colors) {
+static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *colors,
+                                       int *positions) {
     *angle = 180;
     int nstops = 0, first = 1;
     size_t i = 0;
@@ -375,6 +379,21 @@ static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *
             int cv = parse_color(color);
             if (cv == -1) return 0;
             colors[nstops] = cv;
+            /* R5d: parse optional stop position after the color. */
+            if (positions != NULL) {
+                const char *pp = seg + ce;
+                while (*pp == ' ' || *pp == '\t') ++pp;
+                int pos_pct = -1;  /* -1 = evenly spaced */
+                if (*pp != '\0') {
+                    double dd; const char *ee;
+                    if (parse_num(pp, &dd, &ee) && dd >= 0.0 && dd <= 100.0) {
+                        if (*ee == '%') pos_pct = (int)(dd * 10.0 + 0.5); /* 0-1000 */
+                        else if (*ee == '\0' || *ee == ' ' || *ee == '\t')
+                            pos_pct = (int)(dd * 10.0 + 0.5);
+                    }
+                }
+                positions[nstops] = pos_pct;
+            }
         }
         ++nstops;
         i = j + 1;
@@ -385,21 +404,28 @@ static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *
 
 /* Emits the gradient decl group. nstops == 0 emits only the explicit reset
  * (P_BG_GRAD_N = 0), which is how a shorthand clears a lower-tier gradient. */
-static int emit_gradient(css_decl *dst, int cap, int angle, int nstops, const int *colors) {
+static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+                          const int *colors, const int *positions) {
     if (nstops <= 0) {
         if (cap < 1) return 0;
         dst[0].prop = P_BG_GRAD_N;
         dst[0].ival = 0;
         return 1;
     }
-    if (cap < 2 + nstops) return 0;
+    int pos_extra = (positions != NULL) ? nstops : 0;
+    if (cap < 2 + nstops + pos_extra) return 0;
     dst[0].prop = P_BG_GRAD_ANGLE; dst[0].ival = angle;
     dst[1].prop = P_BG_GRAD_N;     dst[1].ival = nstops;
     for (int k = 0; k < nstops; ++k) {
         dst[2 + k].prop = P_BG_GRAD_C0 + k;
         dst[2 + k].ival = colors[k];
     }
-    return 2 + nstops;
+    if (positions != NULL)
+        for (int k = 0; k < nstops; ++k) {
+            dst[2 + nstops + k].prop = P_BG_GRAD_POS0 + k;
+            dst[2 + nstops + k].ival = positions[k];
+        }
+    return 2 + nstops + pos_extra;
 }
 
 /* Finds a single url(...) token in val (bare or quoted). On success (1) sets
@@ -485,18 +511,19 @@ static int expand_bg_image(const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     size_t gs, ge, as, an;
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
+    int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int angle = 180, nst = 0;
     if (find_linear_gradient(val, &gs, &ge, &as, &an) == 1)
-        nst = parse_linear_gradient_args(val + as, an, &angle, colors);
-    int n = emit_gradient(dst, cap, angle, nst, colors);
+        nst = parse_linear_gradient_args(val + as, an, &angle, colors, grad_pos);
+    int n = emit_gradient(dst, cap, angle, nst, colors, NULL);
     if (nst > 0) {
         if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
         return n;
     }
     /* R5c: radial-gradient */
     if (find_radial_gradient(val, &gs, &ge, &as, &an) == 1) {
-        nst = parse_linear_gradient_args(val + as, an, &angle, colors);
-        n = emit_gradient(dst, cap, angle, nst, colors);
+        nst = parse_linear_gradient_args(val + as, an, &angle, colors, grad_pos);
+        n = emit_gradient(dst, cap, angle, nst, colors, NULL);
         if (nst > 0 && cap - n >= 1) {
             dst[n].prop = P_BG_GRAD_RADIAL; dst[n].ival = 1; ++n;
             n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
@@ -543,11 +570,12 @@ static int expand_background(const char *val, css_decl *dst, int cap,
                              char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     size_t gs = 0, ge = 0, as = 0, an = 0;
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
+    int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int angle = 180, nst = 0;
     int f = find_linear_gradient(val, &gs, &ge, &as, &an);
     if (f < 0) return 0;
     if (f == 1) {
-        nst = parse_linear_gradient_args(val + as, an, &angle, colors);
+        nst = parse_linear_gradient_args(val + as, an, &angle, colors, grad_pos);
         if (nst == 0) return 0;
     }
     size_t us = 0, ue = 0;
@@ -571,7 +599,7 @@ static int expand_background(const char *val, css_decl *dst, int cap,
     dst[0].prop = P_BG;
     dst[0].ival = color;
     int w = 1;
-    w += emit_gradient(dst + w, cap - w, angle, nst, colors);
+    w += emit_gradient(dst + w, cap - w, angle, nst, colors, NULL);
     if (cap - w >= 1) w += emit_bg_image_url(dst + w, cap - w, uf == 1 ? urlbuf : NULL,
                                              urltab, nurl, urlcap);
     return w;
@@ -3366,6 +3394,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_BG_GRAD_C0: case P_BG_GRAD_C1:
             case P_BG_GRAD_C2: case P_BG_GRAD_C3:
                 o->bg_grad_c[d->prop - P_BG_GRAD_C0] = d->ival; break;
+            case P_BG_GRAD_POS0: case P_BG_GRAD_POS1:
+            case P_BG_GRAD_POS2: case P_BG_GRAD_POS3:
+                o->bg_grad_pos[d->prop - P_BG_GRAD_POS0] = d->ival; break;
             case P_BG_IMAGE_URL:
                 if (d->ival < 0) {
                     o->bg_image_url[0] = '\0';
@@ -3614,6 +3645,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .aspect_num = 0, .aspect_den = 0,
         .bg_grad_n = 0, .bg_grad_angle = 180, .bg_grad_radial = 0,
         .bg_grad_c = { -1, -1, -1, -1 },
+        .bg_grad_pos = { -1, -1, -1, -1 },
         .transform_tx = CSS_LEN_UNSET, .transform_ty = CSS_LEN_UNSET,
         .transform_sx = CSS_LEN_UNSET, .transform_sy = CSS_LEN_UNSET,
         .transform_rotate = CSS_LEN_UNSET,
