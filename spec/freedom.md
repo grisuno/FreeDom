@@ -83,7 +83,11 @@ SALIDA --download-pdf (fichero):
   un cairo_pdf_surface_t, tema claro forzado). A stdout solo va una línea de
   confirmación ("Saved PDF (<n> pages): <path>"). Sin red más allá del fetch de
   la página; las imágenes siguen apagadas por defecto (Privacy by Default), así
-  que aparecen como placeholders salvo que se habiliten.
+  que aparecen como placeholders. Con `--images` el export DECODIFICA las imágenes
+  permitidas de la página a través del worker confinado (igual que la ventana) y
+  pinta el bitmap real: locales leídas de disco (confinadas al directorio del
+  documento), remotas por el mismo fetcher bajo política — nunca decodifica bytes
+  hostiles en el proceso confiable.
 
 SALIDA --download-png (fichero):
   Un PNG ARGB único (1000px de ancho, altura = contenido maquetado, acotada a
@@ -92,8 +96,11 @@ SALIDA --download-png (fichero):
   un cairo_image_surface_t, tema claro forzado), pero SIN paginar: un solo mapa
   de bits continuo de toda la página. A stdout solo va "Saved PNG (<h> px):
   <path>". Mismas reglas de Privacy by Default que el PDF (imágenes off →
-  placeholders). Es la salida preferida para revisión visual automatizada: se
-  lee la imagen directamente, sin el paso de rasterizado de PDF (mutool).
+  placeholders; `--images` DECODIFICA y pinta las imágenes reales vía el worker
+  confinado — locales de disco, remotas por el fetcher bajo política). Es la salida
+  preferida para revisión visual automatizada: se lee la imagen directamente, sin
+  el paso de rasterizado de PDF (mutool) — y ahora las imágenes se pueden verificar
+  visualmente (antes el export siempre dibujaba placeholders).
 
 SALIDA --dump-layout (stdout):
   === Freedom layout ===

@@ -91,6 +91,30 @@ ui_status ui_render_pdf(const struct rd_doc *doc, const char *out_path, long *ou
  * null or the document is empty; UI_ERR_INTERNAL on a Cairo error. */
 ui_status ui_render_png(const struct rd_doc *doc, const char *out_path, long *out_h);
 
+struct tab;
+
+/* Headless PNG/PDF export WITH image decoding. The plain ui_render_png/ui_render_pdf
+ * above always draw image placeholders (no worker to decode hostile bytes); these
+ * decode the page's allowed images through the still-open confined worker `t`, so
+ * `--download-png --images` (and the visual-review workflow) shows the real bitmaps
+ * instead of "image (allowed)" placeholders. Remote image bytes are fetched via
+ * `img_fetch` (the caller's policy-applying fetcher; ctx = fetch_ctx); local file://
+ * images are read from disk (confined to the document directory by render_doc).
+ * top_url is the page origin (https or file://); a NULL origin, NULL worker or NULL
+ * fetcher loads no images (placeholders, as before). Any image that fails falls back
+ * to its placeholder, byte-identical to the on-screen window path. The fetcher type
+ * matches tab_fetch_fn (include/tab.h). Same return contract as ui_render_png/pdf. */
+ui_status ui_render_png_images(const struct rd_doc *doc, struct tab *t, const char *top_url,
+                               int (*img_fetch)(void *, const char *, const char *,
+                                                const char *, size_t, int *, char **,
+                                                size_t *, char **),
+                               void *fetch_ctx, const char *out_path, long *out_h);
+ui_status ui_render_pdf_images(const struct rd_doc *doc, struct tab *t, const char *top_url,
+                               int (*img_fetch)(void *, const char *, const char *,
+                                                const char *, size_t, int *, char **,
+                                                size_t *, char **),
+                               void *fetch_ctx, const char *out_path, long *out_pages);
+
 /* Headless layout dump: runs the same layout_doc + position_doc pass as the
  * on-screen/PNG renderer and prints the resolved in-flow box rects and the
  * out-of-flow positioned boxes (stacking-ordered) to stdout as agent-readable

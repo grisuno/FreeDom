@@ -90,14 +90,17 @@ Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scou
   a. Exporta a PNG: `./build/freedom --download-png=$SP/frame.png <URL-o-archivo.html>` (`$SP` = el
      scratchpad de la sesión; no `/tmp` ni el árbol del repo). Un solo bitmap de toda la página
      (1000px de ancho; alto = contenido, acotado a 30000px). Añadí `--author-css` para revisar CSS de
-     autor (colores/cajas), `--js=on` para JS, `--tor`/`--i2p`/`--insecure` según haga falta.
+     autor (colores/cajas), `--images` para **decodificar y pintar las imágenes reales** (locales de
+     disco / remotas bajo política, vía el worker confinado — antes el export siempre dibujaba
+     placeholders), `--js=on` para JS, `--tor`/`--i2p`/`--insecure` según haga falta.
   b. Lee la imagen con la herramienta Read: `Read $SP/frame.png`. (Fallback PDF: `--download-pdf` +
      `mutool draw -r 96 -o $SP/frame-%d.png $SP/frame.pdf`, o `Read` del PDF con `pages`.)
   c. Verifica:
     - ¿Se renderiza texto legible?
     - ¿Los elementos tienen posicionamiento correcto (no superpuestos)?
     - ¿Los colores/temas (sepia/oscuro) se aplican? (la exportación fuerza tema claro para imprimir
-      oscuro-sobre-blanco; imágenes y colores de autor están OFF por defecto → placeholders.)
+      oscuro-sobre-blanco; imágenes y colores de autor están OFF por defecto → placeholders; con
+      `--images`/`--author-css` se decodifican/pintan de verdad.)
     - ¿Hay artefactos de rendering?
   d. Compara con screenshot de referencia si existe
 

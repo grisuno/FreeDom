@@ -7,6 +7,7 @@
  */
 
 #define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE 1   /* expose realpath(3) alongside the POSIX.1-2008 surface */
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #define EXIT_OK     0
 #define EXIT_ERROR  1
@@ -518,12 +520,24 @@ static int render_page(const char *html, size_t len, const char *top_url,
     rd_status rs = rd_build(page.view, caps, top_url, &doc);
     int out_rc = (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;
 
+    /* With --images the export DECODES the page's allowed images through the still-open
+     * confined worker (the same load_images the window uses), so the bitmap shows the
+     * real images instead of "image (allowed)" placeholders; without it (Privacy by
+     * Default) the plain export draws placeholders. Remote bytes go through the same
+     * policy-applying headless_fetch as the page; local file:// images are read from
+     * disk. The fetcher ctx is the page origin, exactly like the page/subresource fetch. */
+    tab_fetch_fn img_fetch = caps.images ? headless_fetch : NULL;
+    void *img_ctx = (void *)(uintptr_t)top_url;
+
     if (g_pdf_out != NULL) {
         /* Headless vector-PDF export for visual review: write the SAME display list
          * the GUI would paint, to a PDF, without a Wayland window. */
         if (rs == RD_OK && rd_count(doc) > 0) {
             long pages = 0;
-            if (ui_render_pdf(doc, g_pdf_out, &pages) != UI_OK) {
+            ui_status ur = caps.images
+                ? ui_render_pdf_images(doc, t, top_url, img_fetch, img_ctx, g_pdf_out, &pages)
+                : ui_render_pdf(doc, g_pdf_out, &pages);
+            if (ur != UI_OK) {
                 fprintf(stderr, "freedom: could not write PDF to '%s'\n", g_pdf_out);
                 out_rc = EXIT_ERROR;
             } else {
@@ -539,7 +553,10 @@ static int render_page(const char *html, size_t len, const char *top_url,
          * of the SAME display list the GUI would paint, no Wayland window. */
         if (rs == RD_OK && rd_count(doc) > 0) {
             long img_h = 0;
-            if (ui_render_png(doc, g_png_out, &img_h) != UI_OK) {
+            ui_status ur = caps.images
+                ? ui_render_png_images(doc, t, top_url, img_fetch, img_ctx, g_png_out, &img_h)
+                : ui_render_png(doc, g_png_out, &img_h);
+            if (ur != UI_OK) {
                 fprintf(stderr, "freedom: could not write PNG to '%s'\n", g_png_out);
                 out_rc = EXIT_ERROR;
             } else {
@@ -690,9 +707,21 @@ static int run_headless(const char *target) {
         return EXIT_ERROR;
     }
 
-    /* A local file has no https origin; image decisions then fail closed, and a
-     * JS navigation request has no trusted base, so none is followed. */
-    int rc = render_page(html, len, NULL, NULL);
+    /* A local file gets a file:// origin (its realpath) exactly like the GUI
+     * (build_file_origin): render_doc then resolves relative image src against it,
+     * confined to the document's directory (url_resolve_file -- no "../" escape, no
+     * remote/foreign scheme), so `--images` on a local page shows its local images
+     * instead of "invalid URL" placeholders. A JS navigation request is still gated
+     * against this base by the parent (ln_resolve). If realpath fails, top stays NULL
+     * (image decisions fail closed, as before). */
+    char abs[PATH_MAX];
+    char origin[PATH_MAX + 8];
+    const char *top = NULL;
+    if (realpath(target, abs) != NULL) {
+        int on = snprintf(origin, sizeof origin, "file://%s", abs);
+        if (on > 0 && (size_t)on < sizeof origin) top = origin;
+    }
+    int rc = render_page(html, len, top, NULL);
     free(html);
     return rc;
 }

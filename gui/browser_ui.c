@@ -1589,7 +1589,7 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
  * rejected, failed or undecodable (non-PNG/JPEG) image keeps surface == NULL and the
  * placeholder is drawn. Synchronous: image loads block this render (acceptable for v1;
  * async fetch is future work). */
-static void load_images(browser_window *w, tab *t) {
+static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx) {
     if (w->doc == NULL) return;
     size_t n = rd_count(w->doc);
     size_t nimg = 0;
@@ -1617,7 +1617,7 @@ static void load_images(browser_window *w, tab *t) {
     }
     pf_pool imgpool;
     int pooled = np > 1
-                 && pf_pool_start(&imgpool, purls, np, gui_image_fetch, w) == 0;
+                 && pf_pool_start(&imgpool, purls, np, img_fetch, fetch_ctx) == 0;
 
     size_t k = 0;
     for (size_t i = 0; i < n; ++i) {
@@ -1662,7 +1662,7 @@ static void load_images(browser_window *w, tab *t) {
             char *bd = NULL, *ct = NULL;
             size_t bl = 0;
             if (!(pooled && pf_pool_take(&imgpool, b->href, &rc, &st, &bd, &bl, &ct)))
-                rc = gui_image_fetch(w, "GET", b->href, NULL, 0, &st, &bd, &bl, &ct);
+                rc = img_fetch(fetch_ctx, "GET", b->href, NULL, 0, &st, &bd, &bl, &ct);
             free(ct);
             if (rc != 0 || bd == NULL) {
                 rd_block *rw = (rd_block *)b;
@@ -1919,7 +1919,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         w->doc = doc;
     }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
-    load_images(w, t); /* fetch + decode allowed images in the still-open worker */
+    load_images(w, t, gui_image_fetch, w); /* fetch + decode allowed images in the still-open worker */
 
     /* Video playback is user-initiated (click), not auto-played. The auto-play
      * via video_play() would block the Wayland event loop with a synchronous
@@ -5922,6 +5922,53 @@ ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h) {
     if (h < 0) return UI_ERR_INTERNAL;
     if (out_h != NULL) *out_h = h;
     return UI_OK;
+}
+
+/* Headless PNG/PDF export WITH image decoding (see include/ui.h). Unlike the plain
+ * ui_render_png/pdf (which always draw placeholders), these decode the page's allowed
+ * images through the still-open confined worker `t` -- the hostile image bytes never
+ * touch this process -- exactly as the on-screen window does. Remote image bytes come
+ * from `img_fetch` (the caller's policy-applying fetcher, e.g. headless_fetch); local
+ * file:// images are read from disk (confined to the document directory by render_doc).
+ * top_url is the page origin (https or file://); a NULL origin loads no images. Any
+ * image that fails falls back to its placeholder, byte-identical to the window path.
+ * The zeroed window mirrors ui_render_png; cur_top drives the local-vs-remote branch in
+ * load_images and is released before returning. */
+static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
+                                   tab_fetch_fn img_fetch, void *fetch_ctx,
+                                   const char *out_path, int as_pdf, long *out_metric) {
+    if (out_metric != NULL) *out_metric = 0;
+    if (doc == NULL || out_path == NULL || rd_count(doc) == 0) return UI_ERR_NULL_ARG;
+
+    browser_window w;
+    memset(&w, 0, sizeof w);
+    w.theme = ui_theme_for(UI_THEME_LIGHT);
+    w.doc = (rd_doc *)doc;
+    w.focused_input = -1;
+    w.cur_top = (top_url != NULL) ? strdup(top_url) : NULL;
+
+    /* Decode allowed images into w.images (fetch/read + worker decode); a failure per
+     * image just leaves surface == NULL and its placeholder is drawn. */
+    if (t != NULL && img_fetch != NULL) load_images(&w, t, img_fetch, fetch_ctx);
+
+    long metric = as_pdf ? write_doc_pdf(&w, out_path) : write_doc_png(&w, out_path);
+    free_images(&w);
+    free(w.cur_top);
+    if (metric < 0) return UI_ERR_INTERNAL;
+    if (out_metric != NULL) *out_metric = metric;
+    return UI_OK;
+}
+
+ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
+                               tab_fetch_fn img_fetch, void *fetch_ctx,
+                               const char *out_path, long *out_h) {
+    return render_doc_images(doc, t, top_url, img_fetch, fetch_ctx, out_path, 0, out_h);
+}
+
+ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
+                               tab_fetch_fn img_fetch, void *fetch_ctx,
+                               const char *out_path, long *out_pages) {
+    return render_doc_images(doc, t, top_url, img_fetch, fetch_ctx, out_path, 1, out_pages);
 }
 
 /* Headless layout dump: runs the same layout_doc + position_doc pass as the
