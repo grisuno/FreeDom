@@ -420,8 +420,11 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
 $(BUILD_DIR)/test_browser: $(TEST_DIR)/test_browser.c $(BUILD_DIR)/browser.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_freedom: $(TEST_DIR)/test_freedom.c $(BUILD_DIR)/freedom | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $< -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+# image_decode.o is linked in (not just the freedom binary dependency) so the
+# --download-png pixel-order regression tests can decode the exported PNG and
+# assert on actual pixel colours, not just "a PNG file was written".
+$(BUILD_DIR)/test_freedom: $(TEST_DIR)/test_freedom.c $(BUILD_DIR)/freedom $(BUILD_DIR)/image_decode.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(IMG_CFLAGS) $(CMOCKA_CFLAGS) $< $(BUILD_DIR)/image_decode.o -o $@ $(LDFLAGS) $(IMG_LIBS) $(CMOCKA_LIBS)
 
 # Network-dependent closure of Hito 1: a live GET against an endpoint that
 # negotiates the hybrid PQ key exchange (X25519MLKEM768). Not part of `make test`

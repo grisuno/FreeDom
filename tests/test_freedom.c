@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <cmocka.h>
 
+#include "image_decode.h"
+
 #define FREEDOM_BIN "./build/freedom"
 #define OUT_FILE    "__freedom_test_out.txt"
 #define ERR_FILE    "__freedom_test_err.txt"
@@ -82,6 +84,22 @@ static int is_png_file(const char *path) {
 static void cleanup_files(void) {
     (void)unlink(OUT_FILE);
     (void)unlink(ERR_FILE);
+}
+
+/* Reads a whole file into a malloc'd buffer (caller frees). NULL on any failure. */
+static uint8_t *read_file_all(const char *path, size_t *out_len) {
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) return NULL;
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
+    long sz = ftell(f);
+    if (sz < 0 || fseek(f, 0, SEEK_SET) != 0) { fclose(f); return NULL; }
+    uint8_t *buf = (uint8_t *)malloc((size_t)sz);
+    if (buf == NULL) { fclose(f); return NULL; }
+    size_t got = fread(buf, 1, (size_t)sz, f);
+    fclose(f);
+    if (got != (size_t)sz) { free(buf); return NULL; }
+    *out_len = (size_t)sz;
+    return buf;
 }
 
 /* --- argument handling --- */
@@ -306,6 +324,63 @@ static void test_download_png_requires_path(void **state) {
     int rc = -1;
     assert_int_equal(run_freedom_raw("--download-png examples/sample.html", &rc), 0);
     assert_int_equal(rc, 2);
+}
+
+/* Regression for the M1.1-adjacent paint-order fix in write_doc_png/paint_structured
+ * (gui/browser_ui.c, paint_positioned_one): CSS 2.1 Appendix E puts a negative
+ * z-index stacking context in a paint-order layer that precedes in-flow content,
+ * so it must paint BEHIND, not on top of, an overlapping in-flow box. Before the
+ * fix, Stage 2's two passes both ran after the in-flow paint, so #front (in-flow,
+ * blue, no explicit position) never covered #behind (position:absolute; z-index:-1;
+ * red) even though #behind is meant to sit underneath it -- the sampled pixel came
+ * back pure red. Decodes the exported PNG (via image_decode, the project's own PNG
+ * decoder) and asserts the overlap pixel is blue, not red. */
+static void test_download_png_negative_zindex_paints_behind_inflow(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "#behind{position:absolute;top:0;left:0;background:#ff0000;z-index:-1;}"
+        "#front{background:#0000ff;}"
+        "</style></head><body>"
+        "<div id=\"behind\">X</div><div id=\"front\">Y</div>"
+        "</body></html>";
+    const char *path = "__freedom_negz_page.html";
+    const char *png = "__freedom_negz_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    /* (500, 40): well inside both boxes' shared row, far from either single-glyph
+     * label so font rendering differences can't flip the sampled colour. */
+    assert_true(px.width > 500 && px.height > 40);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 500];
+    uint8_t a = (uint8_t)(pixel >> 24), r = (uint8_t)(pixel >> 16),
+            g = (uint8_t)(pixel >> 8),  b = (uint8_t)pixel;
+    (void)a; (void)g;
+    assert_true(b > 200);  /* the in-flow blue box, painted last, wins the pixel */
+    assert_true(r < 50);   /* not the red negative-z box underneath */
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
 }
 
 /* --- headless console (Freebug --dump-console) --- */
@@ -543,6 +618,7 @@ int main(void) {
         cmocka_unit_test(test_download_pdf_requires_path),
         cmocka_unit_test(test_download_png_local),
         cmocka_unit_test(test_download_png_images_local),
+        cmocka_unit_test(test_download_png_negative_zindex_paints_behind_inflow),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),
