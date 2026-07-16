@@ -1683,10 +1683,19 @@ static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
     if (rc == 0) {
         JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, status));
         JS_SetPropertyStr(ctx, o, "body", JS_NewStringLen(ctx, rbody ? rbody : "", rlen));
+        /* R7e: raw binary body as Uint8Array for arrayBuffer responseType. */
+        JSValue buf = JS_NewArrayBufferCopy(ctx, (const uint8_t *)(rbody ? rbody : ""), rlen);
+        if (!JS_IsException(buf)) {
+            JS_SetPropertyStr(ctx, o, "bodyRaw", buf);
+        } else {
+            JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
+            JS_FreeValue(ctx, buf);
+        }
         JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, rctype ? rctype : ""));
     } else { /* fail-closed */
         JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, 0));
         JS_SetPropertyStr(ctx, o, "body", JS_NewString(ctx, ""));
+        JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
         JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, ""));
     }
     free(rbody); free(rctype);
@@ -1723,7 +1732,11 @@ static const char JD_XHR_SHIM[] =
     "fire(this,'error');fire(this,'loadend');return;}"
     "this.status=r.status|0;this.responseText=r.body||'';"
     "this._h=r.contentType?('content-type: '+r.contentType+'\\r\\n'):'';"
-    "if(this.responseType==='json'){try{this.response=JSON.parse(this.responseText);}catch(e){this.response=null;}}"
+    "if(this.responseType==='arraybuffer'){"
+    "  if(r.bodyRaw&&r.bodyRaw.buffer&&r.bodyRaw.buffer!==r.bodyRaw){"
+    "    try{this.response=r.bodyRaw.buffer;}catch(e){this.response=r.bodyRaw;}"
+    "  }else{this.response=r.bodyRaw;}"
+    "}else if(this.responseType==='json'){try{this.response=JSON.parse(this.responseText);}catch(e){this.response=null;}}"
     "else{this.response=this.responseText;}"
     "this.readyState=4;fire(this,'readystatechange');fire(this,'load');fire(this,'loadend');};"
     "Object.defineProperty(globalThis,'XMLHttpRequest',{configurable:true,writable:true,value:XHR});"
@@ -1736,7 +1749,7 @@ static const char JD_XHR_SHIM[] =
     "has:function(k){return String(k).toLowerCase()==='content-type'&&!!ct;},forEach:function(){}},"
     "text:function(){return Promise.resolve(bt);},"
     "json:function(){try{return Promise.resolve(JSON.parse(bt));}catch(e){return Promise.reject(e);}},"
-    "arrayBuffer:function(){return Promise.resolve(bt);},clone:function(){return resp;}};"
+    "arrayBuffer:function(){return Promise.resolve(r&&r.bodyRaw?r.bodyRaw:new Uint8Array(0).buffer);},clone:function(){return resp;}};"
     "return st===0?Promise.reject(new TypeError('Failed to fetch')):Promise.resolve(resp);};"
     "try{delete globalThis.__hostFetch;}catch(e){}"
     "})();";

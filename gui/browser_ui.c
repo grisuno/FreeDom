@@ -5679,7 +5679,53 @@ static cairo_operator_t bui_blend_operator(int mix_blend) {
  * afterwards so callers never leak a non-default operator into later paint calls.
  * elapsed_ms: time since page load in ms; used for animation-blended opacity. */
 static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms) {
-    cairo_pop_group_to_source(cr);
+    int needs_grayscale = (def && def->filter_grayscale > 0);
+    cairo_pattern_t *group = NULL;
+    cairo_surface_t *flt_surf = NULL;
+
+    if (needs_grayscale) {
+        /* R3: extract the group as a surface, grayscale its pixels, then
+         * use the modified surface as the blend source. */
+        group = cairo_pop_group(cr);
+
+        double x1, y1, x2, y2;
+        cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+        int fw = (int)(x2 - x1 + 0.5), fh = (int)(y2 - y1 + 0.5);
+        if (fw < 1) fw = 1;
+        if (fh < 1) fh = 1;
+        if (fw > 4096) fw = 4096;
+        if (fh > 4096) fh = 4096;
+
+        flt_surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, fw, fh);
+        cairo_t *fcr = cairo_create(flt_surf);
+        cairo_set_source(fcr, group);
+        cairo_paint(fcr);
+
+        unsigned char *data = cairo_image_surface_get_data(flt_surf);
+        int stride = cairo_image_surface_get_stride(flt_surf);
+        int pct = def->filter_grayscale;
+        if (pct > 100) pct = 100;
+        double factor = (double)pct / 100.0;
+        for (int y = 0; y < fh; ++y) {
+            uint32_t *row = (uint32_t *)(data + y * stride);
+            for (int x = 0; x < fw; ++x) {
+                uint32_t px = row[x];
+                int fr = (int)(px >> 16) & 0xff;
+                int fg = (int)(px >> 8) & 0xff;
+                int fb = (int)px & 0xff;
+                int gray = (int)(fr * 0.299 + fg * 0.587 + fb * 0.114 + 0.5);
+                int nr = (int)(fr + (gray - fr) * factor + 0.5);
+                int ng = (int)(fg + (gray - fg) * factor + 0.5);
+                int nb = (int)(fb + (gray - fb) * factor + 0.5);
+                row[x] = (px & 0xff000000) | ((uint32_t)nr << 16) | ((uint32_t)ng << 8) | (uint32_t)nb;
+            }
+        }
+        cairo_destroy(fcr);
+        cairo_set_source_surface(cr, flt_surf, x1, y1);
+        cairo_pattern_destroy(group);
+    } else {
+        cairo_pop_group_to_source(cr);
+    }
     int eff_opacity = (def ? def->opacity : -1);
     if (def && def->anim_duration_ms > 0) {
         ip_ease_fn ease = { .kind = IP_EASE_LINEAR };
@@ -5697,6 +5743,7 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
     cairo_set_operator(cr, bui_blend_operator(def ? def->mix_blend : CSS_MB_UNSET));
     cairo_paint_with_alpha(cr, alpha);
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    if (flt_surf != NULL) cairo_surface_destroy(flt_surf);
 }
 
 /* Paints one IN-FLOW box's decoration ONLY (M1.1 increment 4), compositing it
@@ -5900,6 +5947,39 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
 }
 
+/* R6: recursively paints child boxes of `parent_id` that form stacking
+ * contexts, inside the parent's already-open cairo group. Non-SC children
+ * are painted flat. Marks children in box_done. */
+static void paint_nested_children(cairo_t *cr, browser_window *w,
+                                   const rc_layout *L, int parent_id,
+                                   double left, double origin, double content_w,
+                                   double content_top, double content_h,
+                                   char *box_done, char *row_done) {
+    for (size_t j = 0; j < L->nbox; ++j) {
+        if (box_done != NULL && box_done[j]) continue;
+        int cbid = L->boxes[j].block_id;
+        if (cbid < 0) continue;
+        const pv_box_def *cdef = rd_box_at(w->doc, cbid);
+        if (cdef == NULL || cdef->parent_id != parent_id) continue;
+        int csc = box_forms_stacking_context(cdef);
+        if (csc) {
+            cairo_push_group(cr);
+            paint_box_and_direct_rows(cr, w, L, &L->boxes[j], left, origin,
+                                       content_w, (double)w->width, content_top,
+                                       content_h, 1, row_done);
+            box_done[j] = 1;
+            paint_nested_children(cr, w, L, cbid, left, origin, content_w,
+                                  content_top, content_h, box_done, row_done);
+            bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms);
+        } else {
+            paint_box_and_direct_rows(cr, w, L, &L->boxes[j], left, origin,
+                                       content_w, (double)w->width, content_top,
+                                       content_h, 0, row_done);
+            box_done[j] = 1;
+        }
+    }
+}
+
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
@@ -5960,13 +6040,34 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
      * grouped skips" -- every row falls through to the normal ungrouped path,
      * same as before this feature existed. */
     char *row_done = (L.nrow > 0) ? (char *)calloc(L.nrow, 1) : NULL;
+    /* R6: nested compositor — track which in-flow boxes have been painted
+     * as part of a parent's stacking-context group to avoid double paint. */
+    char *box_done = (L.nbox > 0) ? (char *)calloc(L.nbox, 1) : NULL;
+
     for (size_t i = 0; i < L.nbox; ++i) {
+        if (box_done != NULL && box_done[i]) continue;
         const rc_box *bx = &L.boxes[i];
         double by = origin + bx->top;
         if (by + bx->h < content_top || by > content_top + content_h) continue;
-        paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
-                                  (double)w->width, content_top, content_h,
-                                  1, row_done);
+        int bid = bx->block_id;
+        const pv_box_def *def = (bid >= 0) ? rd_box_at(w->doc, bid) : NULL;
+        int is_sc = def ? box_forms_stacking_context(def) : 0;
+
+        if (is_sc && def->anim_duration_ms <= 0) {
+            /* R6: stacking-context box — paint subtree as one offscreen group. */
+            cairo_push_group(cr);
+            paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
+                                       (double)w->width, content_top, content_h,
+                                       1, row_done);
+            if (box_done != NULL) box_done[i] = 1;
+            paint_nested_children(cr, w, &L, bid, left, origin, content_w,
+                                  content_top, content_h, box_done, row_done);
+            bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
+        } else {
+            paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
+                                       (double)w->width, content_top, content_h,
+                                       1, row_done);
+        }
     }
     for (size_t i = 0; i < L.nrow; ++i) {
         if (row_done != NULL && row_done[i]) continue;
@@ -5980,6 +6081,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
     }
     free(row_done);
+    free(box_done);
     /* Pop all overflow clips before painting positioned boxes. */
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
 
