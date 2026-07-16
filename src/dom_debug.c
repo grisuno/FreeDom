@@ -278,11 +278,19 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
     if (b->mix_blend > CSS_MB_NORMAL)
         dd_printf(c, " mix-blend=%s", dd_mix_blend_name(b->mix_blend));
     if (b->isolation == CSS_ISO_ISOLATE) dd_puts(c, " isolate");
-    /* transform (M1.2, 2D translate only): printed only when set. */
+    /* transform (M1.2 translate; M1.2b scale/rotate): printed only when set. */
     if (b->transform_tx != PV_LEN_UNSET || b->transform_ty != PV_LEN_UNSET)
         dd_printf(c, " translate(%d,%d)",
                   b->transform_tx == PV_LEN_UNSET ? 0 : b->transform_tx,
                   b->transform_ty == PV_LEN_UNSET ? 0 : b->transform_ty);
+    /* Printed as raw percent-of-identity integers (100 = scale(1)), matching
+     * how this dump prints opacity as a raw 0..100 int rather than 0.xx. */
+    if (b->transform_sx != PV_LEN_UNSET || b->transform_sy != PV_LEN_UNSET)
+        dd_printf(c, " scale(%d%%,%d%%)",
+                  b->transform_sx == PV_LEN_UNSET ? 100 : b->transform_sx,
+                  b->transform_sy == PV_LEN_UNSET ? 100 : b->transform_sy);
+    if (b->transform_rotate != PV_LEN_UNSET)
+        dd_printf(c, " rotate(%ddeg)", b->transform_rotate);
     dd_putc(c, '\n');
 }
 

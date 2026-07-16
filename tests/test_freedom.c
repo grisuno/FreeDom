@@ -615,6 +615,124 @@ static void test_download_png_transform_translate_moves_paint_position(void **st
     unlink(png);
 }
 
+/* Regression for M1.2b (CSS transform: rotate, real Cairo affine paint): a wide,
+ * short in-flow box rotated 90deg around its own center must paint as a NARROW,
+ * TALL bar -- not merely shifted like translate. Geometry was measured empirically
+ * against an unrotated control render of the identical markup (a 50-char-wide box
+ * at x:[24,975] y:[24,49], center ~(500,37)): (100,35) sits inside the ORIGINAL
+ * footprint but outside the 90deg-rotated one (must go from blue to white), while
+ * (499,5) sits outside the original footprint but inside the rotated one (must go
+ * from white to blue). A pure additive tx/ty offset (or no transform at all) could
+ * not produce this shape change, only a real affine matrix can. Exercises
+ * box_transform_matrix + parse_rotate_deg (css.c expand_transform). */
+static void test_download_png_transform_rotate_changes_paint_shape(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "#box{background:#0000ff;transform:rotate(90deg);}"
+        "</style></head><body>"
+        "<div id=\"box\">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>"
+        "</body></html>";
+    const char *path = "__freedom_rotate_page.html";
+    const char *png = "__freedom_rotate_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    assert_true(px.width > 900 && px.height > 60);
+    const uint32_t *pix = (const uint32_t *)(const void *)px.data;
+    size_t stride32 = px.stride / 4;
+    uint32_t was_inside = pix[35 * stride32 + 100];  /* inside ORIGINAL box only */
+    uint32_t now_inside = pix[5 * stride32 + 499];   /* inside ROTATED box only */
+    uint8_t wr = (uint8_t)(was_inside >> 16), wg = (uint8_t)(was_inside >> 8),
+            wb = (uint8_t)was_inside;
+    uint8_t nr = (uint8_t)(now_inside >> 16), ng = (uint8_t)(now_inside >> 8),
+            nb = (uint8_t)now_inside;
+    assert_true(wr >= 250 && wg >= 250 && wb >= 250);  /* original footprint: now blank */
+    assert_true(nr <= 5 && ng <= 5 && nb >= 250);      /* rotated footprint: now blue */
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* Regression for M1.2b (CSS transform: scale, real Cairo affine paint): a box
+ * scaled 1.5x around its own center must GROW along both edges symmetrically --
+ * not just repaint at the same size. Geometry measured empirically against an
+ * unscaled control render of the identical markup (box y:[24,49] at x=500,
+ * center y~36.5): y=20 (just above the original top edge) and y=52 (just below
+ * the original bottom edge) are both background in the control but both must
+ * turn blue once scaled 1.5x (half-height 12.5 -> 18.75, covering [17.75,55.25]).
+ * y=36 (well inside both) stays blue as a sanity check that scaling didn't just
+ * move the box off of it. Exercises box_transform_matrix + parse_scale_pct. */
+static void test_download_png_transform_scale_grows_around_center(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "#box{background:#0000ff;transform:scale(1.5);}"
+        "</style></head><body>"
+        "<div id=\"box\">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>"
+        "</body></html>";
+    const char *path = "__freedom_scale_page.html";
+    const char *png = "__freedom_scale_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    assert_true(px.width > 900 && px.height > 60);
+    const uint32_t *pix = (const uint32_t *)(const void *)px.data;
+    size_t stride32 = px.stride / 4;
+    uint32_t above = pix[20 * stride32 + 500];  /* grew upward past the original top */
+    uint32_t below = pix[52 * stride32 + 500];  /* grew downward past the original bottom */
+    uint32_t middle = pix[36 * stride32 + 500]; /* still inside: sanity check */
+    uint8_t ar = (uint8_t)(above >> 16), ag = (uint8_t)(above >> 8), ab = (uint8_t)above;
+    uint8_t br = (uint8_t)(below >> 16), bg = (uint8_t)(below >> 8), bb = (uint8_t)below;
+    uint8_t mr = (uint8_t)(middle >> 16), mg = (uint8_t)(middle >> 8), mb = (uint8_t)middle;
+    assert_true(ar <= 5 && ag <= 5 && ab >= 250);
+    assert_true(br <= 5 && bg <= 5 && bb >= 250);
+    assert_true(mr <= 5 && mg <= 5 && mb >= 250);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* --- headless console (Freebug --dump-console) --- */
 
 /* --dump-console runs the page's JS and prints console.* output + uncaught errors. */
@@ -855,6 +973,8 @@ int main(void) {
         cmocka_unit_test(test_download_png_inflow_opacity_blends_box_and_row_together),
         cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
         cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),
+        cmocka_unit_test(test_download_png_transform_rotate_changes_paint_shape),
+        cmocka_unit_test(test_download_png_transform_scale_grows_around_center),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),

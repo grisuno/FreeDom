@@ -5410,19 +5410,41 @@ static int box_forms_stacking_context(const pv_box_def *def) {
         .isolation = def->isolation,
         .is_float = 0, .is_inline = 0,
         .has_transform = def->transform_tx != PV_LEN_UNSET ||
-                         def->transform_ty != PV_LEN_UNSET,
+                         def->transform_ty != PV_LEN_UNSET ||
+                         def->transform_sx != PV_LEN_UNSET ||
+                         def->transform_sy != PV_LEN_UNSET ||
+                         def->transform_rotate != PV_LEN_UNSET,
     };
     return cx_forms_stacking_context(&st);
 }
 
-/* transform (M1.2, 2D translate only): the box's signed px offset, or (0,0) when
- * unset. Applied as an ADDITIVE offset to the paint origin at each of the three
- * call sites below (Stage 2, in-flow decoration, in-flow decoration+rows) --
- * painting only, the box's stored rect (hit-testing, click dispatch, overflow-clip
- * ancestor resolution) is untouched, see include/page_view.h pv_box_def. */
-static void box_transform_offset(const pv_box_def *def, double *tx, double *ty) {
-    *tx = (def != NULL && def->transform_tx != PV_LEN_UNSET) ? def->transform_tx : 0.0;
-    *ty = (def != NULL && def->transform_ty != PV_LEN_UNSET) ? def->transform_ty : 0.0;
+/* transform (M1.2 translate; M1.2b adds scale/rotate): builds the box's full 2D
+ * affine transform -- translate, then rotate, then scale, pivoted at the box's
+ * own center (CSS's initial transform-origin, 50% 50%, the only pivot this
+ * engine supports) -- as a Cairo matrix. Identity when the box has no
+ * transform, so callers can apply it unconditionally with no visual change for
+ * the untransformed common case. box_x/box_y are the box's DEVICE-space
+ * top-left (e.g. ox+bx->x, oy+bx->top -- what paint_box_decoration receives).
+ * Forward application (cairo_transform around a box's paint calls) lives at
+ * the three call sites below; hit-testing (the inverse) is out of scope for
+ * this increment, see include/page_view.h pv_box_def. */
+static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
+                                 double box_w, double box_h, cairo_matrix_t *m) {
+    cairo_matrix_init_identity(m);
+    if (def == NULL) return;
+    double tx = (def->transform_tx != PV_LEN_UNSET) ? (double)def->transform_tx : 0.0;
+    double ty = (def->transform_ty != PV_LEN_UNSET) ? (double)def->transform_ty : 0.0;
+    double sx = (def->transform_sx != PV_LEN_UNSET) ? (double)def->transform_sx / 100.0 : 1.0;
+    double sy = (def->transform_sy != PV_LEN_UNSET) ? (double)def->transform_sy / 100.0 : 1.0;
+    double rot = (def->transform_rotate != PV_LEN_UNSET)
+               ? (double)def->transform_rotate * (M_PI / 180.0) : 0.0;
+    if (tx == 0.0 && ty == 0.0 && sx == 1.0 && sy == 1.0 && rot == 0.0) return;
+    double cx = box_x + box_w / 2.0, cy = box_y + box_h / 2.0;
+    cairo_matrix_translate(m, tx, ty);
+    cairo_matrix_translate(m, cx, cy);
+    cairo_matrix_rotate(m, rot);
+    cairo_matrix_scale(m, sx, sy);
+    cairo_matrix_translate(m, -cx, -cy);
 }
 
 /* Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's
@@ -5474,12 +5496,18 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def) {
 static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                                          const rc_box *bx, double ox, double oy) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
-    int needs_group = box_forms_stacking_context(def);
-    double tx, ty;
-    box_transform_offset(def, &tx, &ty);
-    if (needs_group) cairo_push_group(cr);
-    paint_box_decoration(cr, bx, ox + tx, oy + ty);
-    if (needs_group) bui_pop_group_composite(cr, def);
+    if (!box_forms_stacking_context(def)) {
+        paint_box_decoration(cr, bx, ox, oy);
+        return;
+    }
+    cairo_matrix_t m;
+    box_transform_matrix(def, ox + bx->x, oy + bx->top, bx->w, bx->h, &m);
+    cairo_push_group(cr);
+    cairo_save(cr);
+    cairo_transform(cr, &m);
+    paint_box_decoration(cr, bx, ox, oy);
+    cairo_restore(cr);
+    bui_pop_group_composite(cr, def);
 }
 
 /* Paints one IN-FLOW box's decoration AND every row that belongs directly to it
@@ -5507,21 +5535,34 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
         paint_box_decoration(cr, bx, left, origin);
         return;
     }
-    double tx, ty;
-    box_transform_offset(def, &tx, &ty);
+    cairo_matrix_t m;
+    box_transform_matrix(def, left + bx->x, origin + bx->top, bx->w, bx->h, &m);
+    /* Cull heuristic only (not a clip): a row's visible vertical range shifts
+     * by the translate component when deciding whether to skip an off-screen
+     * row. Rotate/scale are ignored here -- worst case a row near the cull
+     * boundary is painted (or skipped) a few pixels off from ideal, which the
+     * viewport's own clip (established by the caller) still bounds visually. */
+    double cull_ty = (def->transform_ty != PV_LEN_UNSET) ? (double)def->transform_ty : 0.0;
     cairo_push_group(cr);
-    paint_box_decoration(cr, bx, left + tx, origin + ty);
+    cairo_save(cr);
+    cairo_transform(cr, &m);
+    paint_box_decoration(cr, bx, left, origin);
+    cairo_restore(cr);
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
     for (size_t j = 0; j < L->nrow; ++j) {
         const rc_row *r = &L->rows[j];
         if (row_owner_block_id(L, r) != bx->block_id) continue;
-        /* Overflow-clip ancestor resolution stays at the UNTRANSLATED position
+        /* Overflow-clip ancestor resolution stays at the UNTRANSFORMED position
          * (untransformed layout geometry); only the painted content moves. */
         ov_reconcile(cr, ov_stack, &ov_depth, w->doc, bx->block_id, L, origin, left);
-        double ry = origin + r->top + ty;
-        if (!(ry + r->height < content_top || ry > content_top + content_h))
-            paint_content_row(cr, w, L, r, left + tx, ry, content_w, page_w, show_hover);
+        double ry = origin + r->top;
+        if (!(ry + cull_ty + r->height < content_top || ry + cull_ty > content_top + content_h)) {
+            cairo_save(cr);
+            cairo_transform(cr, &m);
+            paint_content_row(cr, w, L, r, left, ry, content_w, page_w, show_hover);
+            cairo_restore(cr);
+        }
         if (row_done != NULL) row_done[j] = 1;
     }
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
@@ -5550,8 +5591,9 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
  * calls to a fresh offscreen surface (bounded by the current clip, so this is
  * exactly the "layer" spec/compositor.md describes); bui_pop_group_composite
  * blends that surface back with the box's opacity and mix-blend-mode.
- * box_transform_offset (M1.2) shifts where decoration/content PAINT -- the box's
- * stored rect used for hit-testing is untouched, see include/page_view.h. */
+ * box_transform_matrix (M1.2 translate; M1.2b scale/rotate) shifts where
+ * decoration/content PAINT -- the box's stored rect used for hit-testing is
+ * untouched, see include/page_view.h. */
 static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
                                  const bt_positioned *pb, double left, double origin,
                                  double content_top, double content_h, double page_w,
@@ -5563,8 +5605,12 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     ov_reconcile(cr, clip_stack, clip_depth, w->doc, (int)pb->box_index, L, origin, left);
 
     int needs_group = box_forms_stacking_context(def);
-    double tx, ty;
-    box_transform_offset(def, &tx, &ty);
+    cairo_matrix_t m;
+    box_transform_matrix(def, left + pb->x, origin + pb->y, pb->w, pb->h, &m);
+    /* Cull heuristic only (not a clip), same simplification as
+     * paint_box_and_direct_rows: rotate/scale are ignored when deciding
+     * whether the synthetic text row below is off-screen. */
+    double cull_ty = (def->transform_ty != PV_LEN_UNSET) ? (double)def->transform_ty : 0.0;
     if (needs_group) cairo_push_group(cr);
 
     /* Build a transient rc_box for the existing paint helper. */
@@ -5586,7 +5632,9 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
     };
-    paint_box_decoration(cr, &bx, left + tx, origin + ty);
+    if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
+    paint_box_decoration(cr, &bx, left, origin);
+    if (needs_group) cairo_restore(cr);
     for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
         const rd_block *b = rd_at(w->doc, bi);
         if ((int)b->block_id != (int)pb->box_index) continue;
@@ -5620,9 +5668,12 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
                            .rows = &row, .nrow = 1, .caprow = 1,
                            .boxes = NULL, .nbox = 0, .capbox = 0,
                            .total_h = pb->h, .npositioned = 0 };
-        double ry = origin + pb->y + ty;
-        if (ry + fe.height < content_top || ry > content_top + content_h) break;
-        paint_content_row(cr, w, &mini, &row, left + tx, ry, pb->w, page_w, 0);
+        double ry = origin + pb->y;
+        if (ry + cull_ty + fe.height < content_top || ry + cull_ty > content_top + content_h)
+            break;
+        if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
+        paint_content_row(cr, w, &mini, &row, left, ry, pb->w, page_w, 0);
+        if (needs_group) cairo_restore(cr);
         break;
     }
 

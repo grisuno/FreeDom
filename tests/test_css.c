@@ -2474,10 +2474,6 @@ static void test_inline_transform_translate(void **state) {
     s = css_parse_inline("transform:none", 0);
     assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
     assert_int_equal(s.transform_ty, CSS_LEN_UNSET);
-    s = css_parse_inline("transform:scale(2)", 0); /* out of scope this increment */
-    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
-    s = css_parse_inline("transform:rotate(45deg)", 0);
-    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
     s = css_parse_inline("transform:translate(10%,10%)", 0); /* % unsupported */
     assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
     s = css_parse_inline("transform:translateX(1px) translateY(2px)", 0); /* v1: one fn only */
@@ -2487,6 +2483,96 @@ static void test_inline_transform_translate(void **state) {
     s = css_parse_inline("color:red", 0);
     assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
     assert_int_equal(s.transform_ty, CSS_LEN_UNSET);
+}
+
+/* transform: scale()/scaleX()/scaleY() (M1.2b), percent-of-identity ints. */
+static void test_inline_transform_scale(void **state) {
+    (void)state;
+    css_style s;
+
+    s = css_parse_inline("transform:scale(2)", 0); /* scale(sx) means scale(sx,sx) */
+    assert_int_equal(s.transform_sx, 200);
+    assert_int_equal(s.transform_sy, 200);
+
+    s = css_parse_inline("transform:scale(1.5,0.5)", 0);
+    assert_int_equal(s.transform_sx, 150);
+    assert_int_equal(s.transform_sy, 50);
+
+    s = css_parse_inline("transform:scaleX(0.8)", 0);
+    assert_int_equal(s.transform_sx, 80);
+    assert_int_equal(s.transform_sy, CSS_LEN_UNSET);
+
+    s = css_parse_inline("transform:scaleY(1.25)", 0);
+    assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_sy, 125);
+
+    s = css_parse_inline("transform:scale(-1)", 0); /* mirror: negative is valid */
+    assert_int_equal(s.transform_sx, -100);
+    assert_int_equal(s.transform_sy, -100);
+
+    s = css_parse_inline("transform:scale(1)", 0); /* explicit identity still "set" */
+    assert_int_equal(s.transform_sx, 100);
+    assert_int_equal(s.transform_sy, 100);
+
+    /* Unsupported/malformed: fails closed. */
+    s = css_parse_inline("transform:scale(50%)", 0);   /* % unsupported for scale */
+    assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:scale()", 0);
+    assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:scaleX(1) scaleY(2)", 0); /* v1: one fn only */
+    assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
+}
+
+/* transform: rotate() (M1.2b), whole degrees only (deg suffix mandatory, same
+ * convention as the linear-gradient angle grammar). */
+static void test_inline_transform_rotate(void **state) {
+    (void)state;
+    css_style s;
+
+    s = css_parse_inline("transform:rotate(45deg)", 0);
+    assert_int_equal(s.transform_rotate, 45);
+
+    s = css_parse_inline("transform:rotate(-90deg)", 0);
+    assert_int_equal(s.transform_rotate, -90);
+
+    s = css_parse_inline("transform:rotate(0deg)", 0); /* explicit zero still "set" */
+    assert_int_equal(s.transform_rotate, 0);
+
+    s = css_parse_inline("transform:rotate(720deg)", 0); /* not normalized mod 360 */
+    assert_int_equal(s.transform_rotate, 720);
+
+    /* Unsupported/malformed: fails closed (rad/turn/grad/fractional degrees,
+     * matching the pre-existing linear-gradient angle grammar). */
+    s = css_parse_inline("transform:rotate(1.5deg)", 0);
+    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:rotate(0.5turn)", 0);
+    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:rotate(1rad)", 0);
+    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:rotate(45)", 0); /* unitless: invalid */
+    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:matrix(1,0,0,1,0,0)", 0); /* still unsupported */
+    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:skew(10deg)", 0); /* still unsupported */
+    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+}
+
+/* Independent-cascade combination (M1.2b): translate/scale/rotate are separate
+ * cascade slots, so two DIFFERENT rules matching the same element -- neither of
+ * which chains functions -- can still combine into one composite transform. */
+static void test_inline_transform_independent_cascade_combines(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "#a { transform: translate(5px,6px); }"
+        "#a.hot { transform: rotate(30deg); }", 0, &sh), CSS_OK);
+    const char *cls[] = { "hot" };
+    css_style s = css_resolve(sh, "div", "a", cls, 1, NULL, 0);
+    assert_int_equal(s.transform_tx, 5);
+    assert_int_equal(s.transform_ty, 6);
+    assert_int_equal(s.transform_rotate, 30);
+    css_free(sh);
 }
 
 static void test_inline_object_fit(void **state) {
@@ -2896,6 +2982,9 @@ int main(void) {
         cmocka_unit_test(test_inline_print_forced_adjust),
         cmocka_unit_test(test_inline_mix_blend_mode),
         cmocka_unit_test(test_inline_transform_translate),
+        cmocka_unit_test(test_inline_transform_scale),
+        cmocka_unit_test(test_inline_transform_rotate),
+        cmocka_unit_test(test_inline_transform_independent_cascade_combines),
         cmocka_unit_test(test_inline_object_fit),
         cmocka_unit_test(test_inline_list_style_pos),
         cmocka_unit_test(test_inline_font_kerning),

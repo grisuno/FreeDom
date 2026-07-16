@@ -952,7 +952,9 @@ static int css_has_boxdeco(const css_style *cs) {
             * for every other author-CSS box property above. */
            cs->opacity != -1 || cs->mix_blend_mode != CSS_MB_UNSET ||
            cs->isolation != CSS_ISO_UNSET ||
-           cs->transform_tx != CSS_LEN_UNSET || cs->transform_ty != CSS_LEN_UNSET;
+           cs->transform_tx != CSS_LEN_UNSET || cs->transform_ty != CSS_LEN_UNSET ||
+           cs->transform_sx != CSS_LEN_UNSET || cs->transform_sy != CSS_LEN_UNSET ||
+           cs->transform_rotate != CSS_LEN_UNSET;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1043,6 +1045,9 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->isolation = cs->isolation;
     d->transform_tx = cs->transform_tx;
     d->transform_ty = cs->transform_ty;
+    d->transform_sx = cs->transform_sx;
+    d->transform_sy = cs->transform_sy;
+    d->transform_rotate = cs->transform_rotate;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when

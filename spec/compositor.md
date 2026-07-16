@@ -142,18 +142,30 @@ void cx_sort(cx_item *items, size_t n);                   /* orden de pintado, e
   decoración deja el fondo de la fila, un draw call separado que cascadea el mismo color, pintado
   opaco encima). `bui_blend_operator` mapea los 12 valores de `mix-blend-mode` a operadores Cairo
   nativos.
-- ~~`transform` como disparador de contexto~~ **CERRADO parcialmente** M1.2: `cx_style.has_transform`
-  nuevo, `cx_forms_stacking_context` lo dispara. Solo cubre `translate()`/`translateX()`/
-  `translateY()` en px (`css.c` `expand_transform`, gramática de función balanceada tipo
-  `linear-gradient()`); `scale()`/`rotate()`/`skew()`/`matrix()` siguen sin parsear (fallan cerrado
-  a "unset", nunca una transformación a medias). La aplicación real es solo de PINTADO
-  (`gui/browser_ui.c` `box_transform_offset` suma el offset a las coordenadas de
-  `paint_box_decoration`/`paint_content_row`); el hit-testing (clic, `cursor_at_point`, resolución
-  de ancestros `overflow:hidden`) sigue resolviendo contra el rect ORIGINAL sin transformar —
-  transformar el hit-test es trabajo futuro explícito, no cubierto por "M1.2 transform" a secas.
+- ~~`transform` como disparador de contexto~~ **CERRADO** M1.2 (`translate`) **+ M1.2b**
+  (`scale`/`rotate`): `cx_style.has_transform` dispara `cx_forms_stacking_context` para las seis
+  funciones soportadas: `translate()`/`translateX()`/`translateY()` en px, `scale()`/`scaleX()`/
+  `scaleY()` como ratio unitless (`css.c` `parse_scale_pct`, percent-of-identity, 100=`scale(1)`) y
+  `rotate()` en grados enteros (`parse_rotate_deg`, sufijo `deg` obligatorio, misma convención que
+  el ángulo de `linear-gradient`; `rad`/`turn`/`grad`/grados fraccionarios fallan cerrado).
+  `skew()`/`matrix()` siguen sin parsear (fallan cerrado a "unset", nunca una transformación a
+  medias); tampoco hay ENCADENADO de múltiples funciones en una sola declaración (`v1 allows one
+  function only`, sin cambios) — dos funciones SÍ pueden combinarse si vienen de DOS reglas CSS
+  distintas que matchean el mismo elemento, porque cada función es un slot de cascada independiente
+  (`P_TRANSFORM_TX`/`_TY`/`_SX`/`_SY`/`_ROTATE`), igual que ya hacía `translateX`/`translateY`. La
+  aplicación real ahora es una matriz afín Cairo genuina (`gui/browser_ui.c`
+  `box_transform_matrix`: `cairo_matrix_translate`+`_rotate`+`_scale`, pivotada en el CENTRO de la
+  caja — el `transform-origin` inicial de CSS, `50% 50%`, el único pivote soportado; la propiedad
+  `transform-origin` en sí no se parsea) aplicada con `cairo_save`/`cairo_transform`/`cairo_restore`
+  alrededor de cada llamada de pintado en los 3 sitios (reemplaza el offset aditivo tx/ty de M1.2,
+  que era un caso particular de esta misma matriz); el hit-testing (clic, `cursor_at_point`,
+  resolución de ancestros `overflow:hidden`) sigue resolviendo contra el rect ORIGINAL sin
+  transformar — transformar el hit-test sigue siendo trabajo futuro explícito, no cubierto por
+  "M1.2b transform" tampoco.
 - `filter`/`will-change` como disparadores de contexto: se añaden a `cx_style` en M1.4 (campos
-  nuevos, el contrato no cambia). `scale`/`rotate`/`skew`/`matrix` de `transform` también quedan
-  para un incremento M1.2 posterior (necesitan matriz Cairo real, no solo un offset aditivo).
+  nuevos, el contrato no cambia). `skew()`/`matrix()` de `transform`, encadenado de múltiples
+  funciones en una declaración y `transform-origin` quedan para un incremento posterior (necesitan
+  una matriz Cairo arbitraria/no pivotable o multiplicación de matrices en cascada, respectivamente).
 - Contención (`contain`) y `perspective` como disparadores: futuros.
 - Ordenar la geometría o decidir clipping/overflow (eso sigue en `box_tree`/painter).
 - **Árbol de capas anidado real** (contextos de apilamiento DENTRO de otros contextos,

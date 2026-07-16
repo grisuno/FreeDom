@@ -105,8 +105,11 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * CSS_GRID_TRACKS_MAX slots emitted in lock-step with P_GRIDCOLS. */
         P_GRID_TRACK0, P_GRID_TRACK1, P_GRID_TRACK2, P_GRID_TRACK3,
         P_GRID_TRACK4, P_GRID_TRACK5, P_GRID_TRACK6, P_GRID_TRACK7,
-        /* transform (M1.2): translate()/translateX()/translateY() px offsets. */
+        /* transform (M1.2): translate()/translateX()/translateY() px offsets.
+         * M1.2b adds scale()/scaleX()/scaleY() (percent) and rotate() (degrees),
+         * each its own independent-cascade slot (see css.h). */
         P_TRANSFORM_TX, P_TRANSFORM_TY,
+        P_TRANSFORM_SX, P_TRANSFORM_SY, P_TRANSFORM_ROTATE,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -2234,27 +2237,72 @@ static int resolve_var(const char *val, char *out, size_t outcap,
     return 1;
 }
 
-/* transform (M1.2, 2D translate only): translate()/translateX()/translateY(),
- * offsets in px via interp_len (allow_auto=0 -- %, viewport units and bare
- * non-calc numbers all fail closed, same as any other box-model length here).
- * Any other transform function (scale/rotate/skew/matrix/perspective), multiple
- * space-separated functions, or unparseable syntax reject the WHOLE declaration
- * (no decl emitted -> cascades as unset, byte-identical to a page that never
- * declared transform at all -- fail closed, never a half-applied transform).
- * rotate/scale/matrix are architecturally deferred: they need real Cairo matrix
- * composition AND transformed hit-testing coordinates, out of scope for this
- * increment (paint position only; see spec/compositor.md and the "fuera de
- * alcance" note there). "none" is not special-cased -- it simply fails the
- * translate*( prefix match below and emits nothing, same net effect (unset). */
+/* Unitless ratio argument for scale()/scaleX()/scaleY(): a bare signed decimal
+ * number (CSS's <number>, no unit), returned as a PERCENT of identity
+ * (scale(1) -> 100), matching font_scale's percent convention. A unit suffix,
+ * empty string or junk fails closed. */
+static int parse_scale_pct(const char *s, int *out) {
+    const char *p = s;
+    int neg = 0;
+    if (*p == '+') ++p;
+    else if (*p == '-') { neg = 1; ++p; }
+    double num;
+    const char *end;
+    if (!parse_num(p, &num, &end)) return 0;
+    while (*end == ' ' || *end == '\t') ++end;
+    if (*end != '\0') return 0;                /* unitless only */
+    if (neg) num = -num;
+    *out = round_clamp(num * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+    return 1;
+}
+
+/* rotate() argument: a signed WHOLE-DEGREE angle, "deg" suffix mandatory --
+ * same convention as the linear-gradient direction grammar (grad_direction
+ * above): rad/turn/grad and fractional degrees are unsupported, fail closed.
+ * Not normalized mod 360 (a static rotation of e.g. 720deg is visually
+ * identical to 0deg once fed through cos/sin at paint time). */
+static int parse_rotate_deg(const char *s, int *out) {
+    char *end = NULL;
+    long a = strtol(s, &end, 10);
+    if (end == s || !csel_ci_eq(end, "deg")) return 0;
+    if (a > CSS_LEN_MAX) a = CSS_LEN_MAX;
+    if (a < -CSS_LEN_MAX) a = -CSS_LEN_MAX;
+    *out = (int)a;
+    return 1;
+}
+
+/* transform (M1.2 translate; M1.2b adds scale/rotate): translate()/
+ * translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %,
+ * viewport units and bare non-calc numbers all fail closed, same as any other
+ * box-model length here); scale()/scaleX()/scaleY() unitless ratios via
+ * parse_scale_pct; rotate() whole-degree angle via parse_rotate_deg. Any other
+ * transform function (skew/matrix/perspective/3D), multiple space-separated
+ * functions, or unparseable syntax reject the WHOLE declaration (no decl
+ * emitted -> cascades as unset, byte-identical to a page that never declared
+ * transform at all -- fail closed, never a half-applied transform). skew()/
+ * matrix() are architecturally deferred: they need an arbitrary (non-pivotable
+ * or fully general) Cairo matrix, out of scope for this increment (see
+ * spec/compositor.md "fuera de alcance"). Transformed hit-testing (click,
+ * cursor, overflow-clip ancestor resolution) also stays out of scope -- the
+ * painter (gui/browser_ui.c box_transform_matrix) applies the real affine
+ * transform, but hit-testing still resolves against the UNTRANSFORMED layout
+ * rect, same documented limit as M1.2 translate. transform-origin is not
+ * parsed; the pivot is always the box's own center. "none" is not
+ * special-cased -- it simply fails every function-name match below and emits
+ * nothing, same net effect (unset). */
 static int expand_transform(const char *val, css_decl *dst, int cap) {
     if (cap < 2) return 0;
     const char *p = val;
     while (*p == ' ' || *p == '\t') ++p;
 
-    enum { TR_X, TR_Y, TR_BOTH } kind;
+    enum { TR_X, TR_Y, TR_BOTH, SC_X, SC_Y, SC_BOTH, ROTATE } kind;
     if (csel_span_eq(p, "translatex(", 11, 1))      { kind = TR_X;    p += 11; }
     else if (csel_span_eq(p, "translatey(", 11, 1)) { kind = TR_Y;    p += 11; }
     else if (csel_span_eq(p, "translate(", 10, 1))  { kind = TR_BOTH; p += 10; }
+    else if (csel_span_eq(p, "scalex(", 7, 1))      { kind = SC_X;    p += 7; }
+    else if (csel_span_eq(p, "scaley(", 7, 1))      { kind = SC_Y;    p += 7; }
+    else if (csel_span_eq(p, "scale(", 6, 1))       { kind = SC_BOTH; p += 6; }
+    else if (csel_span_eq(p, "rotate(", 7, 1))      { kind = ROTATE;  p += 7; }
     else return 0;
 
     size_t n = strlen(p);
@@ -2282,6 +2330,37 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     if (has_second &&
         (copy_trim(p, comma + 1, argn, b, sizeof b) == (size_t)-1 || b[0] == '\0'))
         return 0;
+
+    if (kind == ROTATE) {
+        int deg;
+        if (has_second || !parse_rotate_deg(a, &deg)) return 0;
+        dst[0].prop = P_TRANSFORM_ROTATE; dst[0].ival = deg;
+        return 1;
+    }
+
+    if (kind == SC_X) {
+        int sx;
+        if (has_second || !parse_scale_pct(a, &sx)) return 0;
+        dst[0].prop = P_TRANSFORM_SX; dst[0].ival = sx;
+        return 1;
+    }
+    if (kind == SC_Y) {
+        int sy;
+        if (has_second || !parse_scale_pct(a, &sy)) return 0;
+        dst[0].prop = P_TRANSFORM_SY; dst[0].ival = sy;
+        return 1;
+    }
+    if (kind == SC_BOTH) {
+        /* scale(sx) means scale(sx, sx) -- unlike translate(), the missing axis
+         * MIRRORS the first argument, not an identity default. */
+        int sx, sy;
+        if (!parse_scale_pct(a, &sx)) return 0;
+        sy = sx;
+        if (has_second && !parse_scale_pct(b, &sy)) return 0;
+        dst[0].prop = P_TRANSFORM_SX; dst[0].ival = sx;
+        dst[1].prop = P_TRANSFORM_SY; dst[1].ival = sy;
+        return 2;
+    }
 
     /* Emit only the axis/axes this function actually specifies: translateX/Y are
      * single-axis (the OTHER axis must stay CSS_LEN_UNSET, not become an implicit
@@ -3155,6 +3234,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_MIX_BLEND_MODE:      o->mix_blend_mode = d->ival; break;
             case P_TRANSFORM_TX:        o->transform_tx = d->ival; break;
             case P_TRANSFORM_TY:        o->transform_ty = d->ival; break;
+            case P_TRANSFORM_SX:        o->transform_sx = d->ival; break;
+            case P_TRANSFORM_SY:        o->transform_sy = d->ival; break;
+            case P_TRANSFORM_ROTATE:    o->transform_rotate = d->ival; break;
             case P_OBJECT_FIT:          o->object_fit = d->ival; break;
             case P_LIST_STYLE_POS:      o->list_style_pos = d->ival; break;
             case P_FONT_KERNING:        o->font_kerning = d->ival; break;
@@ -3254,6 +3336,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .bg_grad_n = 0, .bg_grad_angle = 180,
         .bg_grad_c = { -1, -1, -1, -1 },
         .transform_tx = CSS_LEN_UNSET, .transform_ty = CSS_LEN_UNSET,
+        .transform_sx = CSS_LEN_UNSET, .transform_sy = CSS_LEN_UNSET,
+        .transform_rotate = CSS_LEN_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

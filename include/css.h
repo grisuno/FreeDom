@@ -579,14 +579,27 @@ typedef struct css_style {
     /* aspect-ratio (Hito 2026-07-10). Stored as numerator/denominator x1000
      * (so 16/9 -> num=16000, den=9000). auto/unset -> both 0. */
     int         aspect_num, aspect_den;
-    /* transform (M1.2, 2D translate only): signed px offsets from
-     * translate()/translateX()/translateY(), CSS_LEN_UNSET when transform is
-     * unset/none. rotate()/scale()/skew()/matrix() and percentage arguments are
-     * not supported (the whole declaration fails closed to unset -- see
-     * expand_transform in css.c and spec/compositor.md). A box with either field
-     * set (even to 0, e.g. translate(0,0)) still establishes a CSS stacking
-     * context per spec, independent of the actual offset. */
+    /* transform (M1.2 translate; M1.2b adds scale/rotate): signed px offsets from
+     * translate()/translateX()/translateY(); transform_sx/sy are scale()/scaleX()/
+     * scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's
+     * convention); transform_rotate is rotate() in whole DEGREES (deg unit only,
+     * same convention as the linear-gradient angle grammar -- rad/turn/grad and
+     * fractional degrees are unsupported). CSS_LEN_UNSET on any field means that
+     * function was not declared (identity: 0 offset / 100% scale / 0deg).
+     * skew()/matrix() and percentage translate arguments are not supported (the
+     * whole declaration fails closed to unset -- see expand_transform in css.c
+     * and spec/compositor.md). Exactly one transform FUNCTION may be declared per
+     * `transform` value (no chaining); the fields are independent cascade slots
+     * so two different rules matching the same element (e.g. one setting
+     * translate, a more specific one setting rotate) can still combine -- see
+     * expand_transform's comment. A box with any field set (even to an identity
+     * value, e.g. translate(0,0) or scale(1)) still establishes a CSS stacking
+     * context per spec, independent of the actual value. transform-origin is not
+     * parsed; the pivot is always the box's own center (CSS's initial value,
+     * 50% 50%). */
     int         transform_tx, transform_ty;
+    int         transform_sx, transform_sy;
+    int         transform_rotate;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */
