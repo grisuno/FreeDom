@@ -779,6 +779,7 @@ static css_element el_node(const char *tag, const char *id,
     e.tag = tag; e.id = id; e.classes = classes; e.nclasses = nc;
     e.attrs = NULL; e.nattrs = 0; e.parent = parent;
     e.nth = 0; e.nsib = 0; e.prev = NULL;   /* sibling context unknown by default */
+    e.nth_of_type = 0; e.nsib_of_type = 0; e.child_count = -1;
     return e;
 }
 
@@ -787,6 +788,18 @@ static css_element el_sib_node(const char *tag, int nth, int nsib,
                                const css_element *prev, const css_element *parent) {
     css_element e = el_node(tag, NULL, NULL, 0, parent);
     e.nth = nth; e.nsib = nsib; e.prev = prev;
+    e.nth_of_type = 0; e.nsib_of_type = 0; e.child_count = -1;
+    return e;
+}
+
+/* R2: like el_sib_node but also sets the of-type sibling context. */
+static css_element el_type_node(const char *tag, int nth, int nsib,
+                                int nth_of_type, int nsib_of_type,
+                                int child_count,
+                                const css_element *prev, const css_element *parent) {
+    css_element e = el_sib_node(tag, nth, nsib, prev, parent);
+    e.nth_of_type = nth_of_type; e.nsib_of_type = nsib_of_type;
+    e.child_count = child_count;
     return e;
 }
 
@@ -1117,9 +1130,90 @@ static void test_pseudo_nth_malformed_drops(void **state) {
     css_free(sh);
 }
 
+/* R2: of-type pseudo-classes */
+
+static void test_pseudo_of_type(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("p:first-of-type{color:#f00000} "
+                                "p:last-of-type{color:#0f0000} "
+                                "p:only-of-type{color:#00f000}", 0, &sh), CSS_OK);
+    /* 3 siblings, all <p> — p1 is first but not last */
+    css_element pa = el_type_node("p", 1, 3, 1, 3, -1, NULL, NULL);
+    css_element pb = el_type_node("p", 2, 3, 2, 3, -1, &pa, NULL);
+    css_element pc = el_type_node("p", 3, 3, 3, 3, -1, &pb, NULL);
+    assert_int_equal(css_resolve_el(sh, &pa, NULL, 0).color, 0xf00000); /* first-of-type */
+    assert_int_equal(css_resolve_el(sh, &pb, NULL, 0).color, -1);        /* neither */
+    assert_int_equal(css_resolve_el(sh, &pc, NULL, 0).color, 0x0f0000); /* last-of-type */
+    /* Only one <p> */
+    css_element lone = el_type_node("p", 1, 1, 1, 1, -1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &lone, NULL, 0).color, 0x00f000); /* only-of-type */
+    css_free(sh);
+}
+
+static void test_pseudo_nth_of_type(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("li:nth-of-type(2n){color:#100000} "
+                                "span:nth-of-type(2){color:#200000}", 0, &sh), CSS_OK);
+    /* 5 <li> siblings, elem is 4th */
+    css_element e = el_type_node("li", 4, 5, 4, 5, -1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &e, NULL, 0).color, 0x100000);  /* 2n → even → 4 matches */
+    /* <span>, 2nd of its type */
+    css_element s = el_type_node("span", 2, 5, 2, 2, -1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, 0x200000);  /* nth-of-type(2) matches 2 */
+    css_element s3 = el_type_node("span", 2, 5, 3, 3, -1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &s3, NULL, 0).color, -1);        /* 3 != 2 */
+    css_free(sh);
+}
+
+static void test_pseudo_empty(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div:empty{color:#111111}", 0, &sh), CSS_OK);
+    css_element empty = el_type_node("div", 1, 1, 0, 0, 0, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &empty, NULL, 0).color, 0x111111);
+    css_element haskids = el_type_node("div", 1, 1, 0, 0, 3, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &haskids, NULL, 0).color, -1);
+    css_element unknown = el_type_node("div", 1, 1, 0, 0, -1, NULL, NULL);
+    assert_int_equal(css_resolve_el(sh, &unknown, NULL, 0).color, -1);  /* unknown → fail closed */
+    css_free(sh);
+}
+
+static void test_pseudo_target(void **state) {
+    (void)state;
+    /* :target is parsed but only matches when target_id is set by caller.
+     * The standard CSS cascade path passes NULL, so it never matches. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div:target{color:#999999}", 0, &sh), CSS_OK);
+    css_element e = el_node("div", "foo", NULL, 0, NULL);
+    assert_int_equal(css_resolve_el(sh, &e, NULL, 0).color, -1);  /* NULL target → no match */
+    css_free(sh);
+}
+
+static void test_pseudo_lang(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("html:lang(en){color:#333333} "
+                                "p:lang(es-mx){color:#444444}", 0, &sh), CSS_OK);
+    css_attr lang_en[] = { { "lang", "en" } };
+    css_element en = el_attr_node("html", NULL, NULL, 0, lang_en, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &en, NULL, 0).color, 0x333333);
+    css_attr lang_en_us[] = { { "lang", "en-US" } };
+    css_element en_us = el_attr_node("html", NULL, NULL, 0, lang_en_us, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &en_us, NULL, 0).color, 0x333333); /* en prefix matches */
+    css_attr lang_es_mx[] = { { "lang", "es-MX" } };
+    css_element es_mx = el_attr_node("p", NULL, NULL, 0, lang_es_mx, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &es_mx, NULL, 0).color, 0x444444);
+    /* "fr" does NOT match :lang(en) */
+    css_attr lang_fr[] = { { "lang", "fr" } };
+    css_element fr = el_attr_node("html", NULL, NULL, 0, lang_fr, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &fr, NULL, 0).color, -1);
+    css_free(sh);
+}
+
 static void test_resolve_el_inline_only(void **state) {
     (void)state;
-    /* el == NULL resolves just the inline declarations (no crash, no match). */
     assert_int_equal(css_resolve_el(NULL, NULL, "color:#abcdef", 0).color, 0xabcdef);
 }
 
@@ -2398,7 +2492,7 @@ static void test_table_sheet_cascade(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
-    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL };
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1 };
     css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
     assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
     assert_int_equal(s.empty_cells, CSS_EC_HIDE);
@@ -2923,6 +3017,34 @@ static void test_white_space_break_spaces(void **state) {
     assert_int_equal(css_parse_inline("white-space:break-spaces", 0).white_space, CSS_WS_PRE_WRAP);
 }
 
+static void test_filter_blur_and_grayscale(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".a{filter:blur(5px)}.b{filter:grayscale(0.8)}"
+                                ".c{filter:grayscale(1)}", 0, &sh), CSS_OK);
+    const char *ca[] = { "a" };
+    css_element ea = el_node("div", NULL, ca, 1, NULL);
+    css_style sa = css_resolve_el(sh, &ea, NULL, 0);
+    assert_int_equal(sa.filter_blur, 5);
+    assert_int_equal(sa.filter_grayscale, 0);
+
+    const char *cb[] = { "b" };
+    css_element eb = el_node("div", NULL, cb, 1, NULL);
+    css_style sb = css_resolve_el(sh, &eb, NULL, 0);
+    assert_int_equal(sb.filter_blur, 0);
+    assert_int_equal(sb.filter_grayscale, 80);
+
+    const char *cc[] = { "c" };
+    css_element ec = el_node("div", NULL, cc, 1, NULL);
+    css_style sc = css_resolve_el(sh, &ec, NULL, 0);
+    assert_int_equal(sc.filter_grayscale, 100);
+
+    /* filter:none clears both */
+    css_style sn = css_resolve_el(NULL, NULL, "filter:none", 0);
+    assert_int_equal(sn.filter_blur, 0);
+    css_free(sh);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -3037,6 +3159,11 @@ int main(void) {
         cmocka_unit_test(test_pseudo_specificity),
         cmocka_unit_test(test_pseudo_with_sibling_combinator),
         cmocka_unit_test(test_pseudo_nth_malformed_drops),
+        cmocka_unit_test(test_pseudo_of_type),
+        cmocka_unit_test(test_pseudo_nth_of_type),
+        cmocka_unit_test(test_pseudo_empty),
+        cmocka_unit_test(test_pseudo_target),
+        cmocka_unit_test(test_pseudo_lang),
         cmocka_unit_test(test_resolve_el_inline_only),
         cmocka_unit_test(test_attr_presence),
         cmocka_unit_test(test_attr_equals),
@@ -3111,6 +3238,7 @@ int main(void) {
         cmocka_unit_test(test_gap_two_value),
         cmocka_unit_test(test_font_shorthand),
         cmocka_unit_test(test_white_space_break_spaces),
+        cmocka_unit_test(test_filter_blur_and_grayscale),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

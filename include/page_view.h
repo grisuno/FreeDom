@@ -389,6 +389,9 @@ typedef struct pv_box_def {
     /* animation-duration (Phase R1): parsed time in ms, 0 = no animation.
      * Other animation params and @keyframes are follow-up work. */
     int anim_duration_ms;
+    /* filter (Phase R3) */
+    int filter_blur;
+    int filter_grayscale;
 } pv_box_def;
 
 typedef struct pv_view {

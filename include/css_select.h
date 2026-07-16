@@ -44,7 +44,12 @@ enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ALWAYS, PSEUDO_ROOT,
        PSEUDO_FIRST_CHILD, PSEUDO_LAST_CHILD, PSEUDO_ONLY_CHILD,
        PSEUDO_NTH_CHILD, PSEUDO_NTH_LAST_CHILD,
        PSEUDO_CHECKED, PSEUDO_DISABLED, PSEUDO_ENABLED,
-       PSEUDO_NOT, PSEUDO_IS, PSEUDO_WHERE };
+       PSEUDO_NOT, PSEUDO_IS, PSEUDO_WHERE,
+       /* R2: structural-of-type pseudos */
+       PSEUDO_FIRST_OF_TYPE, PSEUDO_LAST_OF_TYPE, PSEUDO_ONLY_OF_TYPE,
+       PSEUDO_NTH_OF_TYPE, PSEUDO_NTH_LAST_OF_TYPE,
+       /* R2: element-state pseudos */
+       PSEUDO_EMPTY, PSEUDO_TARGET, PSEUDO_LANG };
 
 /* Sub-selector for :not()/:is()/:where(): a simple compound with only
  * tag/.class/#id/[attr] (no combinators, no pseudo-classes inside
@@ -79,6 +84,7 @@ typedef struct css_pseudo_match {
     int a, b;
     int sub_first; /* first sub-selector in parent sel->subs[], -1 = none */
     int sub_count; /* number of consecutive sub-selectors */
+    char lang[CSS_TOK_MAX]; /* :lang() value (lowercased) */
 } css_pseudo_match;
 
 /* One compound selector: optional type, optional id, zero+ classes, zero+ [attr],
@@ -115,8 +121,9 @@ typedef struct css_sel {
  * the caller). Returns 1 if supported, 0 to drop the selector (fail closed). */
 int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
 
-/* True if *sel matches element *el against its ancestor chain. Pure, bounded. */
-int csel_matches(const css_sel *sel, const css_element *el);
+/* True if *sel matches element *el against its ancestor chain. target_id
+ * (optional) is the URL fragment for :target matching; NULL → never matches. */
+int csel_matches(const css_sel *sel, const css_element *el, const char *target_id);
 
 /* --- ASCII helpers shared by the selector and cascade sides (internal) --- */
 

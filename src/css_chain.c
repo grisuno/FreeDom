@@ -107,6 +107,9 @@ static void fill_css_node(lxb_dom_element_t *e, cch_node *node) {
     node->el.parent = NULL;  /* linked by the caller once the chain is built */
     node->el.nth = 0;        /* sibling context filled by the caller (0 = unknown, */
     node->el.nsib = 0;       /* structural pseudo-classes then fail closed) */
+    node->el.nth_of_type = 0;
+    node->el.nsib_of_type = 0;
+    node->el.child_count = -1; /* unknown until the caller fills it */
     node->el.prev = NULL;
 }
 
@@ -127,6 +130,43 @@ static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib) {
     }
     *nth = before + 1;
     *nsib = before + 1 + after;
+}
+
+/* Like sibling_position but only counts siblings with the SAME local name as n.
+ * R2: for :nth-of-type() / :first-of-type / etc. */
+static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib) {
+    size_t nl = 0;
+    const lxb_char_t *name = lxb_dom_element_local_name(lxb_dom_interface_element(n), &nl);
+    if (name == NULL || nl == 0) { *nth = 0; *nsib = 0; return; }
+    int before = 0, after = 0;
+    *nth = 0; *nsib = 0;
+    for (lxb_dom_node_t *p = n->prev; p != NULL; p = p->prev) {
+        if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        size_t pl = 0;
+        const lxb_char_t *pn = lxb_dom_element_local_name(lxb_dom_interface_element(p), &pl);
+        if (pn != NULL && pl == nl && memcmp(name, pn, nl) == 0) {
+            if (++before > CCH_NTH_MAX) return;
+        }
+    }
+    for (lxb_dom_node_t *p = n->next; p != NULL; p = p->next) {
+        if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        size_t pl = 0;
+        const lxb_char_t *pn = lxb_dom_element_local_name(lxb_dom_interface_element(p), &pl);
+        if (pn != NULL && pl == nl && memcmp(name, pn, nl) == 0) {
+            if (++after > CCH_NTH_MAX - before) return;
+        }
+    }
+    *nth = before + 1;
+    *nsib = before + 1 + after;
+}
+
+/* Counts ALL child nodes (elements, text, comments) of the DOM element n.
+ * R2: for :empty matching. */
+static int count_children(lxb_dom_node_t *n) {
+    int count = 0;
+    for (lxb_dom_node_t *ch = n->first_child; ch != NULL; ch = ch->next)
+        ++count;
+    return count;
 }
 
 /* Builds the bounded css_element chain for `el` into the caller's storage:
@@ -152,8 +192,12 @@ static const css_element *build_chain(lxb_dom_element_t *el,
     for (int i = 0; i < n; ++i)
         chain[i].el.parent = (i + 1 < n) ? &chain[i + 1].el : NULL;
 
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < n; ++i) {
         sibling_position(nodes[i], &chain[i].el.nth, &chain[i].el.nsib);
+        sibling_type_position(nodes[i], &chain[i].el.nth_of_type,
+                              &chain[i].el.nsib_of_type);
+        chain[i].el.child_count = count_children(nodes[i]);
+    }
     int ns = 0;
     if (n > 0) {
         for (lxb_dom_node_t *p = nodes[0]->prev; p != NULL && ns < CCH_SIB_MAX;
@@ -165,6 +209,7 @@ static const css_element *build_chain(lxb_dom_element_t *el,
                 sibs[ns].el.nth = chain[0].el.nth - (ns + 1);
                 sibs[ns].el.nsib = chain[0].el.nsib;
             }
+            sibs[ns].el.child_count = count_children(p);
             ++ns;
         }
         chain[0].el.prev = (ns > 0) ? &sibs[0].el : NULL;
@@ -199,5 +244,5 @@ int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel) {
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
     const css_element *subject = build_chain(el, chain, sibs, nodes);
-    return (subject != NULL) ? csel_matches(sel, subject) : 0;
+    return (subject != NULL) ? csel_matches(sel, subject, NULL) : 0;
 }

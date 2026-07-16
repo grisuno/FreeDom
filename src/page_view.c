@@ -964,7 +964,9 @@ static int css_has_boxdeco(const css_style *cs) {
             cs->bg_image_url[0] != '\0' ||
             /* animation-duration (Phase R1): a box with an animation needs the box
              * def for the painter's animation-tick path. */
-            cs->anim_duration_ms > 0;
+            cs->anim_duration_ms > 0 ||
+            /* filter (Phase R3): needs box def for group compositing path */
+            cs->filter_blur > 0 || cs->filter_grayscale > 0;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1065,6 +1067,8 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bg_size = cs->bg_size;
     d->bg_repeat = cs->bg_repeat;
     d->anim_duration_ms = cs->anim_duration_ms;
+    d->filter_blur = cs->filter_blur;
+    d->filter_grayscale = cs->filter_grayscale;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when

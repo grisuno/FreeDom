@@ -434,27 +434,39 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
         (void)cb_h;
 
         double x, y;
+        double inset_l = resolve_inset(boxes[i].inset_left);
+        double inset_r = resolve_inset(boxes[i].inset_right);
+        double inset_t = resolve_inset(boxes[i].inset_top);
+        double inset_b = resolve_inset(boxes[i].inset_bottom);
+
+        int z = (boxes[i].z_index == PV_LEN_UNSET) ? 0 : boxes[i].z_index;
+        double bw = (box_w != NULL) ? box_w[i] : 0.0;
+        double bh = (box_h != NULL) ? box_h[i] : 0.0;
+
         if (pos == BT_POS_RELATIVE || pos == BT_POS_STICKY) {
             x = (box_x != NULL) ? box_x[i] : 0.0;
             y = (box_y != NULL) ? box_y[i] : 0.0;
+            x += inset_l;
+            y += inset_t;
         } else {
-            x = cb_x;
-            y = cb_y;
+            /* R4: honour right/bottom insets for absolute/fixed. */
+            if (boxes[i].inset_right != PV_LEN_UNSET && boxes[i].inset_left == PV_LEN_UNSET)
+                x = cb_x + cb_w - bw - inset_r;
+            else
+                x = cb_x + inset_l;
+            if (boxes[i].inset_bottom != PV_LEN_UNSET && boxes[i].inset_top == PV_LEN_UNSET)
+                y = cb_y + cb_h - bh - inset_b;
+            else
+                y = cb_y + inset_t;
         }
-        x += resolve_inset(boxes[i].inset_left);
-        y += resolve_inset(boxes[i].inset_top);
-
-        int z = (boxes[i].z_index == PV_LEN_UNSET) ? 0 : boxes[i].z_index;
-        double w = (box_w != NULL) ? box_w[i] : 0.0;
-        double h = (box_h != NULL) ? box_h[i] : 0.0;
 
         tmp[tmp_count].box_index = i;
         tmp[tmp_count].z_index = z;
         tmp[tmp_count].doc_order = doc_orders[i];
         tmp[tmp_count].x = x;
         tmp[tmp_count].y = y;
-        tmp[tmp_count].w = w;
-        tmp[tmp_count].h = h;
+        tmp[tmp_count].w = bw;
+        tmp[tmp_count].h = bh;
         tmp_count++;
     }
 

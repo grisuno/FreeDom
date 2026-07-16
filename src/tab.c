@@ -347,7 +347,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[69] = {
+        int32_t f[71] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -395,6 +395,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->bg_size, (int32_t)bd->bg_repeat,
             /* animation-duration, Phase R1 (appended; read_view mirrors this) */
             (int32_t)bd->anim_duration_ms,
+            /* filter, Phase R3 */
+            (int32_t)bd->filter_blur, (int32_t)bd->filter_grayscale,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1491,7 +1493,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[69];
+        int32_t f[71];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1535,6 +1537,8 @@ static int read_view(int fd, pv_view **out) {
             .bg_size = f[66], .bg_repeat = f[67],
             /* animation-duration, Phase R1. */
             .anim_duration_ms = f[68],
+            /* filter, Phase R3 */
+            .filter_blur = f[69], .filter_grayscale = f[70],
         };
         /* background-image url() text, 2026-07-16: length-prefixed like the run
          * string fields. Bounded against PV_BG_URL_MAX like every fixed box

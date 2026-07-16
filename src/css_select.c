@@ -136,13 +136,13 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     if (i < b && s[i] == ':') return 0;   /* pseudo-element */
 
     char name[CSS_TOK_MAX];
-    size_t k = 0;
+    size_t nk = 0;
     while (i < b && csel_ident_ch(s[i])) {
-        if (k + 1 < sizeof name) name[k++] = csel_lower_ch(s[i]);
+        if (nk + 1 < sizeof name) name[nk++] = csel_lower_ch(s[i]);
         ++i;
     }
-    name[k] = '\0';
-    if (k == 0) return 0;
+    name[nk] = '\0';
+    if (nk == 0) return 0;
 
     int wants_arg = 0;
     if (csel_ci_eq(name, "link") || csel_ci_eq(name, "any-link")) pm->kind = PSEUDO_LINK;
@@ -164,6 +164,14 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     else if (csel_ci_eq(name, "not"))      { pm->kind = PSEUDO_NOT; wants_arg = 2; }
     else if (csel_ci_eq(name, "is"))       { pm->kind = PSEUDO_IS; wants_arg = 2; }
     else if (csel_ci_eq(name, "where"))    { pm->kind = PSEUDO_WHERE; wants_arg = 2; }
+    else if (csel_ci_eq(name, "nth-of-type"))      { pm->kind = PSEUDO_NTH_OF_TYPE; wants_arg = 1; }
+    else if (csel_ci_eq(name, "nth-last-of-type")) { pm->kind = PSEUDO_NTH_LAST_OF_TYPE; wants_arg = 1; }
+    else if (csel_ci_eq(name, "first-of-type"))    pm->kind = PSEUDO_FIRST_OF_TYPE;
+    else if (csel_ci_eq(name, "last-of-type"))     pm->kind = PSEUDO_LAST_OF_TYPE;
+    else if (csel_ci_eq(name, "only-of-type"))     pm->kind = PSEUDO_ONLY_OF_TYPE;
+    else if (csel_ci_eq(name, "empty"))            pm->kind = PSEUDO_EMPTY;
+    else if (csel_ci_eq(name, "target"))           pm->kind = PSEUDO_TARGET;
+    else if (csel_ci_eq(name, "lang"))             { pm->kind = PSEUDO_LANG; wants_arg = 3; }
     else return 0;   /* unknown pseudo-class: drop the selector */
 
     if (wants_arg == 1) {
@@ -212,6 +220,21 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
         }
         pm->sub_count = sel->nsubs - pm->sub_first;
         ++i;   /* past ')' */
+    } else if (wants_arg == 3) {
+        /* :lang(ident): capture the language identifier (lowercased). */
+        if (i >= b || s[i] != '(') return 0;
+        size_t as = ++i;
+        while (i < b && s[i] != ')') ++i;
+        if (i >= b) return 0;
+        size_t lk = 0;
+        for (size_t j = as; j < i && lk + 1 < CSS_TOK_MAX; ++j) {
+            if ((s[j] >= 'a' && s[j] <= 'z') || (s[j] >= 'A' && s[j] <= 'Z') ||
+                s[j] == '-' || s[j] == '_')
+                pm->lang[lk++] = csel_lower_ch(s[j]);
+        }
+        pm->lang[lk] = '\0';
+        if (lk == 0) return 0;
+        ++i;
     } else if (i < b && s[i] == '(') {
         return 0;   /* argument on a non-functional pseudo-class */
     }
@@ -526,7 +549,7 @@ static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
  * Structural pseudos read nth/nsib, where 0 = unknown = no match (fail closed).
  * For :not/:is/:where, the sel pointer provides the sub-selector array. */
 static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
-                          const css_sel *sel) {
+                          const css_sel *sel, const char *target_id) {
     switch (pm->kind) {
         case PSEUDO_LINK:
             return el->tag != NULL &&
@@ -563,13 +586,37 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
                     return 1;  /* any sub-selector matches → succeed */
             }
             return 0;  /* none matched */
+        /* R2: structural-of-type — reuses nth with type counting */
+        case PSEUDO_FIRST_OF_TYPE:  return el->nth_of_type == 1 && el->nsib_of_type >= 1;
+        case PSEUDO_LAST_OF_TYPE:   return el->nth_of_type > 0 && el->nsib_of_type > 0 &&
+                                           el->nth_of_type == el->nsib_of_type;
+        case PSEUDO_ONLY_OF_TYPE:   return el->nth_of_type == 1 && el->nsib_of_type == 1;
+        case PSEUDO_NTH_OF_TYPE:    return el->nth_of_type > 0 &&
+                                           nth_matches(pm->a, pm->b, el->nth_of_type);
+        case PSEUDO_NTH_LAST_OF_TYPE:
+            return el->nth_of_type > 0 && el->nsib_of_type >= el->nth_of_type &&
+                   nth_matches(pm->a, pm->b, el->nsib_of_type - el->nth_of_type + 1);
+        /* R2: element-state pseudos */
+        case PSEUDO_EMPTY:          return el->child_count == 0;
+        case PSEUDO_TARGET:         return (target_id != NULL && el->id != NULL &&
+                                           strcmp(el->id, target_id) == 0);
+        case PSEUDO_LANG: {
+            /* Match if element's lang attribute starts with pm->lang (e.g. "en"
+             * matches "en", "en-US"). Fail closed on missing attr. */
+            const char *lv = el_attr_value(el, "lang");
+            if (lv == NULL) return 0;
+            size_t pl = strlen(pm->lang);
+            if (strlen(lv) < pl) return 0;
+            if (!csel_span_eq(lv, pm->lang, pl, 1)) return 0;
+            return (lv[pl] == '\0' || lv[pl] == '-');
+        }
         default:                  return 0;
     }
 }
 
 /* True if one compound matches one element (no ancestor context). */
 static int compound_matches(const css_compound *c, const css_element *el,
-                            const css_sel *sel) {
+                            const css_sel *sel, const char *target_id) {
     if (el == NULL) return 0;
     if (c->has_tag) { if (el->tag == NULL || !csel_ci_eq(c->tag, el->tag)) return 0; }
     if (c->has_id)  { if (el->id == NULL || strcmp(c->id, el->id) != 0) return 0; }
@@ -585,7 +632,7 @@ static int compound_matches(const css_compound *c, const css_element *el,
     for (int i = 0; i < c->nattrs; ++i)
         if (!attr_matches(&c->attrs[i], el)) return 0;
     for (int i = 0; i < c->npseudo; ++i)
-        if (!pseudo_matches(&c->pseudos[i], el, sel)) return 0;
+        if (!pseudo_matches(&c->pseudos[i], el, sel, target_id)) return 0;
     return 1;
 }
 
@@ -595,25 +642,26 @@ static int compound_matches(const css_compound *c, const css_element *el,
  * tries each preceding sibling (the recursion backtracks). Bounded by k
  * (<= CSS_MAX_COMPOUNDS) and by the chains the caller built (an element without
  * parent/prev links simply never matches through that combinator — fail closed). */
-static int complex_matches(const css_sel *sel, int k, const css_element *el) {
-    if (!compound_matches(&sel->parts[k], el, sel)) return 0;
+static int complex_matches(const css_sel *sel, int k, const css_element *el,
+                           const char *target_id) {
+    if (!compound_matches(&sel->parts[k], el, sel, target_id)) return 0;
     if (k == 0) return 1;
     switch (sel->comb[k]) {
         case COMB_CHILD:
-            return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent);
+            return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent, target_id);
         case COMB_ADJACENT:
-            return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev);
+            return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id);
         case COMB_GENERAL:
             for (const css_element *sib = el->prev; sib != NULL; sib = sib->prev)
-                if (complex_matches(sel, k - 1, sib)) return 1;
+                if (complex_matches(sel, k - 1, sib, target_id)) return 1;
             return 0;
         default:
             for (const css_element *anc = el->parent; anc != NULL; anc = anc->parent)
-                if (complex_matches(sel, k - 1, anc)) return 1;
+                if (complex_matches(sel, k - 1, anc, target_id)) return 1;
             return 0;
     }
 }
 
-int csel_matches(const css_sel *sel, const css_element *el) {
-    return complex_matches(sel, sel->nparts - 1, el);
+int csel_matches(const css_sel *sel, const css_element *el, const char *target_id) {
+    return complex_matches(sel, sel->nparts - 1, el, target_id);
 }

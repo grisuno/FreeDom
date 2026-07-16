@@ -5605,6 +5605,7 @@ static int box_forms_stacking_context(const pv_box_def *def) {
                          def->transform_rotate != PV_LEN_UNSET,
     };
     if (def->anim_duration_ms > 0) return 1;  /* Phase R1: animation needs stacking context */
+    if (def->filter_blur > 0 || def->filter_grayscale > 0) return 1;  /* R3: filter needs SC */
     return cx_forms_stacking_context(&st);
 }
 
@@ -5902,6 +5903,20 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (w->scroll < 0.0) w->scroll = 0.0;
     if (w->scroll > max_scroll) w->scroll = max_scroll;
     double origin = content_top + th->content_margin - w->scroll;
+
+    /* R4: sticky positioning adjust — clamp sticky boxes to viewport top
+     * (inset_top) when scrolled past their natural in-flow position. */
+    for (size_t i = 0; i < L.npositioned; ++i) {
+        int bid = (int)L.positioned[i].box_index;
+        if (bid < 0) continue;
+        const pv_box_def *bd = rd_box_at(w->doc, bid);
+        if (bd == NULL || bd->position != CSS_POS_STICKY) continue;
+        double inset = (bd->inset_top != PV_LEN_UNSET && bd->inset_top != CSS_LEN_AUTO)
+                     ? (double)bd->inset_top : 0.0;
+        double natural_y = origin + L.positioned[i].y;
+        double sticky_y = content_top + inset;
+        if (natural_y < sticky_y) L.positioned[i].y = sticky_y - origin;
+    }
 
     /* Stage 2, negative z-index PAINTS FIRST: CSS 2.1 App E layer 1 (NEG_Z)
      * precedes the in-flow BLOCK/FLOAT/INLINE layers, so an overlapping in-flow

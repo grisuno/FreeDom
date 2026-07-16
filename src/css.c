@@ -130,6 +130,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * Other animation-* properties and @keyframes parsing are follow-up work
          * (the E2E test uses hardcoded keyframes for v1). */
         P_ANIM_DURATION,
+        /* filter (Phase R3) */
+        P_FILTER_BLUR, P_FILTER_GRAYSCALE,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -2002,6 +2004,44 @@ static int expand_outline(const char *val, css_decl *dst, int cap) {
     return n;
 }
 
+/* filter (Phase R3): space-separated function list. Supported: blur(Npx),
+ * grayscale(N%) where N is 0..100. Unknown functions and chained filters
+ * beyond the first two are ignored (fail closed). url() never accepted. */
+static int expand_filter(const char *val, css_decl *dst, int cap) {
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none")) return 0;
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    int n = 0;
+    while (n + 2 <= cap && next_ws_token(&p, tok, sizeof tok)) {
+        if (strncmp(tok, "blur(", 5) == 0) {
+            char *ep = strchr(tok, '(');
+            if (ep == NULL) continue;
+            char *cp = strrchr(tok, ')');
+            if (cp == NULL || cp <= ep) continue;
+            *cp = '\0';
+            int px;
+            if (interp_len(ep + 1, 0, &px) && px >= 0) {
+                dst[n].prop = P_FILTER_BLUR; dst[n].ival = px; ++n;
+            }
+        } else if (strncmp(tok, "grayscale(", 10) == 0) {
+            char *ep = strchr(tok, '(');
+            if (ep == NULL) continue;
+            char *cp = strrchr(tok, ')');
+            if (cp == NULL || cp <= ep) continue;
+            *cp = '\0';
+            double d; const char *e;
+            if (parse_num(ep + 1, &d, &e)) {
+                int pct = (int)(d * 100.0 + 0.5);
+                if (pct < 0) pct = 0;
+                if (pct > 100) pct = 100;
+                dst[n].prop = P_FILTER_GRAYSCALE; dst[n].ival = pct; ++n;
+            }
+        }
+    }
+    return n;
+}
+
 /* box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an
  * optional color, and an optional `inset` keyword, in any order. Needs >= 2 lengths
  * (dx, dy) or the whole declaration is dropped (fail closed). `none` is an explicit
@@ -2882,6 +2922,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         if (ms < 0) return 0;
         dst[0].prop = P_ANIM_DURATION; dst[0].ival = ms; return 1;
     }
+    else if (strcmp(prop, "filter") == 0)               return expand_filter(val, dst, cap);
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -3395,6 +3436,8 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_ASPECT_NUM:          o->aspect_num = d->ival; break;
             case P_ASPECT_DEN:          o->aspect_den = d->ival; break;
             case P_ANIM_DURATION:       o->anim_duration_ms = d->ival; break;
+            case P_FILTER_BLUR:         o->filter_blur = d->ival; break;
+            case P_FILTER_GRAYSCALE:    o->filter_grayscale = d->ival; break;
             default: break;
         }
     }
@@ -3484,6 +3527,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .transform_sx = CSS_LEN_UNSET, .transform_sy = CSS_LEN_UNSET,
         .transform_rotate = CSS_LEN_UNSET,
         .anim_duration_ms = 0,
+        .filter_blur = 0, .filter_grayscale = 0,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }
@@ -3491,7 +3535,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
     if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
-            if (!csel_matches(sel, el)) continue;
+            if (!csel_matches(sel, el, NULL)) continue;
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
@@ -3538,7 +3582,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
      * therefore cannot match through its combinator (complex_matches needs parents).
      * No attributes are supplied, so [attr] selectors do not match via this entry
      * point (callers that need them build a css_element with attrs). */
-    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL };
+    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1 };
     return css_resolve_el(sheet, &el, inline_style, inline_len);
 }
 

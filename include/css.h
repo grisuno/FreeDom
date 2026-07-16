@@ -613,6 +613,9 @@ typedef struct css_style {
     /* animation-duration (Phase R1): parsed time in ms, 0 = unset/no-animation.
      * Other animation-* properties and @keyframes follow in Phase R1b. */
     int         anim_duration_ms;
+    /* filter (Phase R3): blur radius in px (0=none), grayscale 0..100% (0=none). */
+    int         filter_blur;
+    int         filter_grayscale;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */
@@ -682,6 +685,13 @@ typedef struct css_element {
     int nth;
     int nsib;
     const struct css_element *prev;
+    /* Sibling-of-type context (R2). Like nth/nsib but only counting siblings with
+     * the SAME tag name. Zero = unknown (pseudo fails closed). */
+    int nth_of_type;
+    int nsib_of_type;
+    /* Total child node count (elements + text + comments, from the DOM walk;
+     * R2). -1 = unknown (:empty fails closed), 0 = truly empty (:empty matches). */
+    int child_count;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators
