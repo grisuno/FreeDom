@@ -386,6 +386,9 @@ typedef struct pv_box_def {
     char bg_image_url[PV_BG_URL_MAX];
     int bg_size;
     int bg_repeat;
+    /* animation-duration (Phase R1): parsed time in ms, 0 = no animation.
+     * Other animation params and @keyframes are follow-up work. */
+    int anim_duration_ms;
 } pv_box_def;
 
 typedef struct pv_view {

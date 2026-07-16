@@ -610,6 +610,9 @@ typedef struct css_style {
     int         transform_tx, transform_ty;
     int         transform_sx, transform_sy;
     int         transform_rotate;
+    /* animation-duration (Phase R1): parsed time in ms, 0 = unset/no-animation.
+     * Other animation-* properties and @keyframes follow in Phase R1b. */
+    int         anim_duration_ms;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

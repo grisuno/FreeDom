@@ -2012,6 +2012,7 @@ static void test_load_view_codec_full_roundtrip(void **state) {
         "<div style=\"transform:rotate(-30deg)\">rotey</div>"
         "<div style=\"background-image:url(hero.png);background-size:cover;"
         "background-repeat:repeat-x\">bgbox</div>"
+        "<div style=\"animation-duration:1500ms\">anibox</div>"
         "<form method=\"post\"><input type=\"checkbox\" checked=\"checked\"></form>"
         "</body></html>";
     tab *t = NULL;
@@ -2021,7 +2022,7 @@ static void test_load_view_codec_full_roundtrip(void **state) {
     assert_non_null(p.view);
 
     int saw_alpha = 0, saw_pic = 0, saw_grid = 0, saw_flexi = 0, saw_boxy = 0, saw_input = 0;
-    int saw_scaley = 0, saw_rotey = 0, saw_bgbox = 0;
+    int saw_scaley = 0, saw_rotey = 0, saw_bgbox = 0, saw_anibox = 0;
     for (size_t i = 0; i < pv_count(p.view); ++i) {
         const pv_run *r = pv_at(p.view, i);
         if (r->kind == PV_IMAGE) {
@@ -2094,10 +2095,16 @@ static void test_load_view_codec_full_roundtrip(void **state) {
             assert_int_equal(bx->bg_size, CSS_BGS_COVER);
             assert_int_equal(bx->bg_repeat, CSS_BGR_REPEAT_X);
             saw_bgbox = 1;
+        } else if (strcmp(r->text, "anibox") == 0) {
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->anim_duration_ms, 1500);
+            saw_anibox = 1;
         }
     }
     assert_true(saw_alpha && saw_pic && saw_grid && saw_flexi && saw_boxy && saw_input &&
-                saw_scaley && saw_rotey && saw_bgbox);
+                saw_scaley && saw_rotey && saw_bgbox && saw_anibox);
 
     tab_page_free(&p);
     tab_close(t);

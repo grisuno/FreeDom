@@ -126,6 +126,10 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * string payload, so the 32768-entry decls[] array does not balloon. -1
          * means the explicit "no image" reset (see expand_bg_image). */
         P_BG_IMAGE_URL,
+        /* animation-duration (Phase R1): parsed time in ms. 0 = unset (no animation).
+         * Other animation-* properties and @keyframes parsing are follow-up work
+         * (the E2E test uses hardcoded keyframes for v1). */
+        P_ANIM_DURATION,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -1893,6 +1897,20 @@ static int interp_bwidth1(const char *v) {
 
 /* border-radius: the first value only (corner-by-corner / elliptical out of scope).
  * px >= 0, or -1 (unsupported: %/units dropped -> stays unset). */
+/* Parses a CSS time: "2s" → 2000, "500ms" → 500, "0s" → 0.
+ * Returns -1 on invalid/missing unit. */
+static int interp_time_ms(const char *v) {
+    double d; const char *e;
+    if (!parse_num(v, &d, &e)) return -1;
+    if (d < 0.0) return -1;
+    while (*e == ' ' || *e == '\t') ++e;
+    if (strcmp(e, "s") == 0 || strcmp(e, "S") == 0)
+        return (int)(d * 1000.0 + 0.5);
+    if (strcmp(e, "ms") == 0 || strcmp(e, "MS") == 0 || strcmp(e, "mS") == 0 || strcmp(e, "Ms") == 0)
+        return (int)(d + 0.5);
+    return -1;
+}
+
 static int interp_border_radius(const char *v) {
     char tok[CSS_TOK_MAX];
     size_t k = 0;
@@ -2859,6 +2877,11 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "touch-action") == 0)         { prop_id = P_TOUCH_ACTION;     ival = interp_touch_action(val); }
     else if (strcmp(prop, "overscroll-behavior") == 0)  { prop_id = P_OVERSCROLL_BEHAVIOR; ival = interp_overscroll_behavior(val); }
     else if (strcmp(prop, "backface-visibility") == 0)  { prop_id = P_BACKFACE_VISIBILITY; ival = interp_backface_visibility(val); }
+    else if (strcmp(prop, "animation-duration") == 0) {
+        int ms = interp_time_ms(val);
+        if (ms < 0) return 0;
+        dst[0].prop = P_ANIM_DURATION; dst[0].ival = ms; return 1;
+    }
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -3368,9 +3391,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_TOUCH_ACTION:        o->touch_action = d->ival; break;
             case P_OVERSCROLL_BEHAVIOR: o->overscroll_behavior = d->ival; break;
             case P_BACKFACE_VISIBILITY: o->backface_visibility = d->ival; break;
-            case P_TEXTDECO_THICKNESS: o->text_decoration_thickness = d->ival; break;
-            case P_ASPECT_NUM: o->aspect_num = d->ival; break;
-            case P_ASPECT_DEN: o->aspect_den = d->ival; break;
+            case P_TEXTDECO_THICKNESS:  o->text_decoration_thickness = d->ival; break;
+            case P_ASPECT_NUM:          o->aspect_num = d->ival; break;
+            case P_ASPECT_DEN:          o->aspect_den = d->ival; break;
+            case P_ANIM_DURATION:       o->anim_duration_ms = d->ival; break;
             default: break;
         }
     }
@@ -3459,6 +3483,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .transform_tx = CSS_LEN_UNSET, .transform_ty = CSS_LEN_UNSET,
         .transform_sx = CSS_LEN_UNSET, .transform_sy = CSS_LEN_UNSET,
         .transform_rotate = CSS_LEN_UNSET,
+        .anim_duration_ms = 0,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

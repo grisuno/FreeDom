@@ -961,7 +961,10 @@ static int css_has_boxdeco(const css_style *cs) {
             * gradient case above -- a `<div style="background-image:url(x)">`
             * with no other box-triggering property alone still needs the box
             * def to reach the painter's image path. */
-           cs->bg_image_url[0] != '\0';
+            cs->bg_image_url[0] != '\0' ||
+            /* animation-duration (Phase R1): a box with an animation needs the box
+             * def for the painter's animation-tick path. */
+            cs->anim_duration_ms > 0;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1061,6 +1064,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bg_image_url[PV_BG_URL_MAX - 1] = '\0';
     d->bg_size = cs->bg_size;
     d->bg_repeat = cs->bg_repeat;
+    d->anim_duration_ms = cs->anim_duration_ms;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
