@@ -300,7 +300,7 @@ $(BUILD_DIR)/test_flex_layout: $(TEST_DIR)/test_flex_layout.c $(BUILD_DIR)/flex_
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure recursive block/flex/grid box-tree layout. Composes flex_layout. No I/O deps.
-$(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o $(BUILD_DIR)/flex_layout.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/compositor.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure /etc/hosts-format host filter (blocklist + allowlist). No I/O deps.

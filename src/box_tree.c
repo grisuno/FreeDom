@@ -12,11 +12,14 @@
  *
  * Stage 2 (bt_resolve_positioning) walks the pv_box_def box tree, assigns
  * depth-first doc_order, and resolves every box with position != STATIC into a
- * final content-box rect against its containing block. Output is sorted by
- * (z_index ASC, doc_order ASC) for the GUI's stacking pass.
+ * final content-box rect against its containing block. Output is ordered by
+ * the compositor's pure paint-order logic (cx_box_layer + cx_sort, see
+ * include/compositor.h) for the GUI's stacking pass -- for this box def's
+ * positioned-only subset that is equivalent to (z_index ASC, doc_order ASC).
  */
 
 #include "box_tree.h"
+#include "compositor.h" /* cx_item/cx_sort: paint-order for Stage 2 (M1.1 increment 2) */
 
 #include <stddef.h>
 
@@ -455,24 +458,33 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
         tmp_count++;
     }
 
-    /* Sort tmp by (z_index ASC, doc_order ASC). Insertion sort — n <= 256, so
-     * O(n²) is trivially fast and the code is simpler than qsort with a
-     * comparator. */
-    for (size_t i = 1; i < tmp_count; ++i) {
-        bt_positioned key = tmp[i];
-        size_t j = i;
-        while (j > 0) {
-            bt_positioned *p = &tmp[j - 1];
-            if (p->z_index > key.z_index ||
-                (p->z_index == key.z_index && p->doc_order > key.doc_order)) {
-                *(&tmp[j]) = *p;
-                j--;
-            } else {
-                break;
-            }
-        }
-        tmp[j] = key;
+    /* Order via the compositor's pure paint-order logic (cx_, M1.1 increment 2)
+     * instead of a hand-rolled flat (z_index ASC, doc_order ASC) sort. Every
+     * entry here is already positioned (RELATIVE/ABSOLUTE/FIXED/STICKY), so its
+     * cx_layer is always one of NEG_Z/ZERO_Z/POS_Z, chosen purely by the sign of
+     * z_index (this box def carries no opacity/mix-blend/isolation to trigger a
+     * context by itself) -- ordering by (layer, z, doc_order) is therefore
+     * exactly the old (z, doc_order) order: byte-identical, per spec/compositor.md
+     * section 5. is_float/is_inline are irrelevant here (a positioned box always
+     * lands in NEG_Z/ZERO_Z/POS_Z regardless of them). */
+    cx_item order[BT_MAX_POSITIONED];
+    for (size_t i = 0; i < tmp_count; ++i) {
+        int z_auto = (boxes[tmp[i].box_index].z_index == PV_LEN_UNSET) ? 1 : 0;
+        cx_style st = { .position = boxes[tmp[i].box_index].position,
+                         .z_index = tmp[i].z_index, .z_auto = z_auto,
+                         .opacity = -1, .mix_blend = 0, .isolation = 0,
+                         .is_float = 0, .is_inline = 0 };
+        order[i].layer = cx_box_layer(&st);
+        order[i].z_index = tmp[i].z_index;
+        order[i].z_auto = z_auto;
+        order[i].doc_order = tmp[i].doc_order;
+        order[i].ref = i;
     }
+    cx_sort(order, tmp_count);
+
+    bt_positioned sorted[BT_MAX_POSITIONED];
+    for (size_t i = 0; i < tmp_count; ++i) sorted[i] = tmp[order[i].ref];
+    for (size_t i = 0; i < tmp_count; ++i) tmp[i] = sorted[i];
 
     /* Copy the top out_cap entries to out. */
     size_t to_copy = (tmp_count < out_cap) ? tmp_count : out_cap;
