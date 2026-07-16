@@ -337,6 +337,14 @@ typedef struct pv_box_def {
      * box, rounded by border_radius. When set it wins over bg_rgb. */
     int grad_n, grad_angle;
     int grad_c0, grad_c1, grad_c2, grad_c3;
+    /* box-level opacity (M1.1 increment 3, compositor group opacity): percent
+     * 0..100, or -1 (unset/opaque). The single trigger of cx_forms_stacking_context
+     * this engine currently wires end-to-end -- the painter composites the whole
+     * box (decoration + its content) to an offscreen surface and blends it as ONE
+     * unit at this alpha, not per-element (see gui/browser_ui.c paint_positioned_one
+     * and spec/compositor.md). Distinct from pv_run.opacity (per text-run color
+     * alpha, pre-existing, not a stacking context). */
+    int opacity;
 } pv_box_def;
 
 typedef struct pv_view {

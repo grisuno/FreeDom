@@ -5390,7 +5390,16 @@ static void ov_reconcile(cairo_t *cr, int *clip_stack, int *clip_depth,
  * stacking contexts in a paint-order layer that precedes in-flow content, so the
  * two passes bracket the in-flow painting rather than running back-to-back (see
  * spec/compositor.md and cx_box_layer). No-ops on missing geometry/box-def
- * (fail-open on hostile/malformed input, matching the rest of the painter). */
+ * (fail-open on hostile/malformed input, matching the rest of the painter).
+ *
+ * Group opacity (M1.1 increment 3): a box with opacity<1 forms a CSS stacking
+ * context (cx_forms_stacking_context) and must be composited as ONE unit -- its
+ * decoration and content blended together first, then the whole result faded --
+ * not each piece faded independently (naive per-draw alpha double-blends wherever
+ * e.g. background and content overlap). cairo_push_group redirects the box's paint
+ * calls to a fresh offscreen surface (bounded by the current clip, so this is
+ * exactly the "layer" spec/compositor.md describes); pop_group_to_source +
+ * paint_with_alpha composites that surface back as a single blend. */
 static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
                                  const bt_positioned *pb, double left, double origin,
                                  double content_top, double content_h, double page_w,
@@ -5400,6 +5409,10 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     if (def == NULL) return;
     /* Constrain the positioned box to its overflow:hidden ancestors. */
     ov_reconcile(cr, clip_stack, clip_depth, w->doc, (int)pb->box_index, L, origin, left);
+
+    int has_opacity = (def->opacity >= 0 && def->opacity < 100);
+    if (has_opacity) cairo_push_group(cr);
+
     /* Build a transient rc_box for the existing paint helper. */
     rc_box bx = {
         .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
@@ -5457,6 +5470,11 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         if (ry + fe.height < content_top || ry > content_top + content_h) break;
         paint_content_row(cr, w, &mini, &row, left, ry, pb->w, page_w, 0);
         break;
+    }
+
+    if (has_opacity) {
+        cairo_pop_group_to_source(cr);
+        cairo_paint_with_alpha(cr, (double)def->opacity / 100.0);
     }
 }
 

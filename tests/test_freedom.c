@@ -383,6 +383,63 @@ static void test_download_png_negative_zindex_paints_behind_inflow(void **state)
     unlink(png);
 }
 
+/* Regression for M1.1 increment 3 (real group opacity): a positioned box with
+ * opacity:0.5 must be composited as ONE unit (decoration + content blended
+ * together, then the whole result faded) via an offscreen Cairo group
+ * (cairo_push_group/pop_group_to_source/paint_with_alpha in paint_positioned_one,
+ * gui/browser_ui.c), not each piece faded independently. Over a plain white page,
+ * a solid #0000ff box at opacity 0.5 must sample as the exact alpha blend
+ * (127,127,255) -- not full-strength blue (opacity ignored, a plumbing bug) and
+ * not some other blend (double-composited or wrong alpha). */
+static void test_download_png_group_opacity_blends_with_background(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "#box{position:absolute;top:0;left:0;background:#0000ff;opacity:0.5;}"
+        "</style></head><body>"
+        "<div id=\"box\">X</div>"
+        "<p>filler text to give the page a nonzero height for the export</p>"
+        "</body></html>";
+    const char *path = "__freedom_opacity_page.html";
+    const char *png = "__freedom_opacity_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    /* (500, 30): inside the box's row, far from the single-glyph "X" label. */
+    assert_true(px.width > 500 && px.height > 30);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[30 * (px.stride / 4) + 500];
+    uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
+    /* 0.5*(0,0,255) + 0.5*(255,255,255 white page) = (127.5,127.5,255). Allow +-2
+     * for rounding, not full-strength blue (opacity ignored) or anything darker
+     * (double-blended / wrong alpha). */
+    assert_true(r >= 125 && r <= 130);
+    assert_true(g >= 125 && g <= 130);
+    assert_true(b >= 253);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* --- headless console (Freebug --dump-console) --- */
 
 /* --dump-console runs the page's JS and prints console.* output + uncaught errors. */
@@ -619,6 +676,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_local),
         cmocka_unit_test(test_download_png_images_local),
         cmocka_unit_test(test_download_png_negative_zindex_paints_behind_inflow),
+        cmocka_unit_test(test_download_png_group_opacity_blends_with_background),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),

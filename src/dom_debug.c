@@ -251,6 +251,9 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
         dd_printf(c, " overflow=%s/%s", dd_overflow_name(b->overflow_x),
                   dd_overflow_name(b->overflow_y));
     if (b->cursor != CSS_CUR_UNSET) dd_printf(c, " cursor=%s", dd_cursor_name(b->cursor));
+    /* Box-level opacity (M1.1 increment 3, group compositing trigger): printed only
+     * when set, like the other stacking-context signals above. */
+    if (b->opacity >= 0) dd_printf(c, " opacity=%d", b->opacity);
     dd_putc(c, '\n');
 }
 

@@ -461,18 +461,19 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
     /* Order via the compositor's pure paint-order logic (cx_, M1.1 increment 2)
      * instead of a hand-rolled flat (z_index ASC, doc_order ASC) sort. Every
      * entry here is already positioned (RELATIVE/ABSOLUTE/FIXED/STICKY), so its
-     * cx_layer is always one of NEG_Z/ZERO_Z/POS_Z, chosen purely by the sign of
-     * z_index (this box def carries no opacity/mix-blend/isolation to trigger a
-     * context by itself) -- ordering by (layer, z, doc_order) is therefore
-     * exactly the old (z, doc_order) order: byte-identical, per spec/compositor.md
-     * section 5. is_float/is_inline are irrelevant here (a positioned box always
-     * lands in NEG_Z/ZERO_Z/POS_Z regardless of them). */
+     * cx_layer is always one of NEG_Z/ZERO_Z/POS_Z whether z-index or opacity is
+     * what forms the context (both land the box in ZERO_Z when z is 0/auto) --
+     * ordering by (layer, z, doc_order) is therefore exactly the old (z, doc_order)
+     * order: byte-identical, per spec/compositor.md section 5. mix_blend/isolation
+     * aren't carried by pv_box_def yet (M1.2+); is_float/is_inline are irrelevant
+     * here (a positioned box always lands in NEG_Z/ZERO_Z/POS_Z regardless). */
     cx_item order[BT_MAX_POSITIONED];
     for (size_t i = 0; i < tmp_count; ++i) {
         int z_auto = (boxes[tmp[i].box_index].z_index == PV_LEN_UNSET) ? 1 : 0;
         cx_style st = { .position = boxes[tmp[i].box_index].position,
                          .z_index = tmp[i].z_index, .z_auto = z_auto,
-                         .opacity = -1, .mix_blend = 0, .isolation = 0,
+                         .opacity = boxes[tmp[i].box_index].opacity,
+                         .mix_blend = 0, .isolation = 0,
                          .is_float = 0, .is_inline = 0 };
         order[i].layer = cx_box_layer(&st);
         order[i].z_index = tmp[i].z_index;

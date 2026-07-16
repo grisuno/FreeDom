@@ -131,10 +131,19 @@ void cx_sort(cx_item *items, size_t n);                   /* orden de pintado, e
 
 ## 7. Fuera de alcance (este incremento)
 
-- **Cableado al painter** (usar `cx_sort` como el comparador del array `positioned` y construir el
-  árbol de capas real): incrementos siguientes de M1.1.
-- **Surfaces offscreen / compose Cairo** (`opacity` de grupo real, blend): M1.1 (painter de capas).
+- ~~Cableado al painter (usar `cx_sort` como el comparador del array `positioned`)~~ **CERRADO**
+  incremento 2 (`box_tree.c` `bt_resolve_positioning`).
+- ~~Surfaces offscreen / compose Cairo (`opacity` de grupo real)~~ **CERRADO** incremento 3, para el
+  caso de cajas Stage 2 (out-of-flow): `pv_box_def.opacity` cableado CSS→IPC→painter,
+  `gui/browser_ui.c` `paint_positioned_one` usa `cairo_push_group`/`pop_group_to_source`/
+  `paint_with_alpha`. **Todavía abierto:** `opacity` en cajas **in-flow** (no positioned) — hoy
+  solo las cajas que pasan por Stage 2 tienen su propio "layer"; una caja estática con
+  `opacity<1` no tiene un punto de composición offscreen equivalente todavía. `mix_blend`/
+  `isolation` siguen sin cablear a `pv_box_def` (parseados en `css_style`, Tier 2, nunca pintados).
 - `transform`/`filter`/`will-change` como disparadores de contexto: se añaden a `cx_style` en
   M1.2/M1.4 (campos nuevos, el contrato no cambia).
 - Contención (`contain`) y `perspective` como disparadores: futuros.
 - Ordenar la geometría o decidir clipping/overflow (eso sigue en `box_tree`/painter).
+- **Árbol de capas anidado real** (contextos de apilamiento DENTRO de otros contextos,
+  recursivamente): el incremento 3 trata cada caja Stage 2 como una unidad plana de composición;
+  no hay todavía un árbol recursivo de sub-contextos.
