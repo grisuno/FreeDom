@@ -105,7 +105,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_hostblock $(BUILD_DIR)/test_net_realm \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
-             $(BUILD_DIR)/test_webcaps \
+             $(BUILD_DIR)/test_webcaps $(BUILD_DIR)/test_compositor \
              $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
              $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch \
@@ -244,6 +244,11 @@ $(BUILD_DIR)/test_js_policy: $(TEST_DIR)/test_js_policy.c $(BUILD_DIR)/js_policy
 # Pure unified per-page capability model (M0.1). Reuses js_policy's predicates;
 # constructs rdp_caps by literal (no render_policy symbol). No I/O deps.
 $(BUILD_DIR)/test_webcaps: $(TEST_DIR)/test_webcaps.c $(BUILD_DIR)/webcaps.o $(BUILD_DIR)/js_policy.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure CSS stacking-context + paint-order logic (M1.1, compositor foundation). Uses
+# only css.h enum constants (no css.o), no I/O deps. See spec/compositor.md.
+$(BUILD_DIR)/test_compositor: $(TEST_DIR)/test_compositor.c $(BUILD_DIR)/compositor.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure TLS-impersonation surface (Hito TLS): the triple opt-in gate + the
@@ -396,6 +401,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/js_policy.o $(BUILD_DIR)/webcaps.o \
+                      $(BUILD_DIR)/compositor.o \
                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \

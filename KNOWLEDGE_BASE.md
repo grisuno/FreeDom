@@ -3,7 +3,7 @@
 > Generated offline by **readmenator**. Supports C, C++, Python, Go, Rust, JS/TS, Java, C#, Shell, PHP, Dart, GDScript, Nim, ASM, Ruby, Swift, Kotlin, Scala, Lua, Elixir.
 > No LLMs. No tokens. Pure static analysis. See more [here](https://github.com/grisuno/ReadMenator)
 
-**Total Files Parsed:** 173 | **Total Symbols Extracted:** 3185 | **Total Imports:** 985
+**Total Files Parsed:** 176 | **Total Symbols Extracted:** 3213 | **Total Imports:** 995
 
 
 ## Table of Contents
@@ -14,8 +14,8 @@
 4. [Suggested Questions](#suggested-questions)
 5. [Structural Knowledge Map](#structural-knowledge-map)
 6. [Architecture Reference](#architecture-reference)
-    - [C (115 files)](#c-115-files)
-    - [H (50 files)](#h-50-files)
+    - [C (117 files)](#c-117-files)
+    - [H (51 files)](#h-51-files)
     - [JS (1 files)](#js-1-files)
     - [PY (1 files)](#py-1-files)
     - [SH (6 files)](#sh-6-files)
@@ -26,13 +26,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Files | 173 |
-| Total Symbols | 3185 |
-| Total Imports | 985 |
+| Total Files | 176 |
+| Total Symbols | 3213 |
+| Total Imports | 995 |
 | Call Edges | 1467 |
 | Inheritance Edges | 0 |
 | Languages | 5 |
-| Avg Symbols/File | 18.4 |
+| Avg Symbols/File | 18.3 |
 | Avg Imports/File | 5.7 |
 
 ### Top Files by Import Count (Fan-Out)
@@ -58,8 +58,8 @@ Auto-detected from path patterns, naming conventions, and imported frameworks.
 
 | Layer | Files |
 |-------|-------|
-| utility | 89 |
-| testing | 48 |
+| utility | 91 |
+| testing | 49 |
 | presentation | 19 |
 | data_access | 7 |
 | infrastructure | 6 |
@@ -82,7 +82,7 @@ Auto-detected from path patterns, naming conventions, and imported frameworks.
 - `fuzz_pdf_export.c` (c, 1 symbols)
 - `fuzz_prefetch.c` (c, 1 symbols)
 - `fuzz_prefs.c` (c, 1 symbols)
-- *... and 74 more*
+- *... and 76 more*
 
 ### presentation
 
@@ -136,6 +136,7 @@ Auto-detected from path patterns, naming conventions, and imported frameworks.
 - `test_box_style.c` (c, 24 symbols)
 - `test_box_tree.c` (c, 36 symbols)
 - `test_browser.c` (c, 15 symbols)
+- `test_compositor.c` (c, 20 symbols)
 - `test_css.c` (c, 182 symbols)
 - `test_css_color.c` (c, 21 symbols)
 - `test_disk_store.c` (c, 15 symbols)
@@ -145,8 +146,7 @@ Auto-detected from path patterns, naming conventions, and imported frameworks.
 - `test_flex_layout.c` (c, 37 symbols)
 - `test_form.c` (c, 20 symbols)
 - `test_freebug.c` (c, 13 symbols)
-- `test_freedom.c` (c, 26 symbols)
-- *... and 33 more*
+- *... and 34 more*
 
 ---
 
@@ -1045,7 +1045,7 @@ graph TD
 
 ## Architecture Reference
 
-### C (115 files)
+### C (117 files)
 
 #### `fuzz_css.c`
 **Path:** `fuzz/fuzz_css.c`
@@ -1737,6 +1737,16 @@ static void do_submit_post(browser_w...`
 
 **Macros:**
 - `_POSIX_C_SOURCE` (line 6)
+
+#### `compositor.c`
+**Path:** `src/compositor.c`
+
+**Functions:**
+- `cx_forms_stacking_context` (line 15) `int cx_forms_stacking_context(const cx_style *s)`
+- `cx_box_layer` (line 31) `cx_layer cx_box_layer(const cx_style *s)`
+- `eff_z` (line 48) `static int eff_z(const cx_item *it)` - *Not a stacking context: a positioned box with z:auto still paints in the * positioned/zero layer (CSS 2.1 App E point 8). if (is_positioned(s->position)) return CX_LAYER_ZERO_Z; if (s->is_float) return CX_LAYER_FLOAT; if (s->is_inline) return CX_LAYER_INLINE; return CX_LAYER_BLOCK; } /* Effective z used to order within a layer: auto collapses to 0 (the ZERO_Z layer).*
+- `cx_item_compare` (line 51) `int cx_item_compare(const cx_item *a, const cx_item *b)`
+- `cx_sort` (line 68) `void cx_sort(cx_item *items, size_t n)` - *Stable insertion sort: n is bounded by the caller (BT_MAX_POSITIONED), so O(n^2) is fine, and stability keeps equal-key boxes in their original relative order (document order is already the final tie-break, so this only matters on true * key collisions). No allocation.*
 
 #### `css.c`
 **Path:** `src/css.c`
@@ -3503,6 +3513,31 @@ static int looks_like_host(const c...`
 **Macros:**
 - `_POSIX_C_SOURCE` (line 7)
 
+#### `test_compositor.c`
+**Path:** `tests/test_compositor.c`
+
+**Functions:**
+- `test_sc_opacity` (line 25) `static void test_sc_opacity(void **state)` - *Build a cx_style with sane defaults (static, opaque, no blend, in-flow block), * then override the fields a test cares about. static cx_style base_style(void) { cx_style s = { .position = CSS_POS_STATIC, .z_index = 0, .z_auto = 1, .opacity = -1, .mix_blend = 0, .isolation = 0, .is_float = 0, .is_inline = 0 }; return s; } /* --- cx_forms_stacking_context ---*
+- `test_sc_mix_blend` (line 34) `static void test_sc_mix_blend(void **state)`
+- `test_sc_isolation` (line 42) `static void test_sc_isolation(void **state)`
+- `test_sc_positioned_z` (line 50) `static void test_sc_positioned_z(void **state)`
+- `test_sc_fixed_sticky_always` (line 62) `static void test_sc_fixed_sticky_always(void **state)`
+- `test_sc_static_none` (line 69) `static void test_sc_static_none(void **state)`
+- `test_layer_negative_z` (line 78) `static void test_layer_negative_z(void **state)` - *(void)state; cx_style s = base_style(); s.position = CSS_POS_FIXED;  assert_int_equal(cx_forms_stacking_context(&s), 1); s.position = CSS_POS_STICKY; assert_int_equal(cx_forms_stacking_context(&s), 1); } static void test_sc_static_none(void **state) { (void)state; cx_style s = base_style(); assert_int_equal(cx_forms_stacking_context(&s), 0); assert_int_equal(cx_forms_stacking_context(NULL), 0); /* NULL-safe } /* --- cx_box_layer ---*
+- `test_layer_positive_z` (line 85) `static void test_layer_positive_z(void **state)`
+- `test_layer_zero_z_context` (line 92) `static void test_layer_zero_z_context(void **state)`
+- `test_layer_zero_z_positioned_auto` (line 101) `static void test_layer_zero_z_positioned_auto(void **state)`
+- `test_layer_float` (line 108) `static void test_layer_float(void **state)`
+- `test_layer_inline_and_block` (line 115) `static void test_layer_inline_and_block(void **state)`
+- `mk` (line 125) `static cx_item mk(cx_layer layer, int z, int z_auto, size_t doc, size_t ref)` - *cx_style s = base_style(); s.is_float = 1; assert_int_equal(cx_box_layer(&s), CX_LAYER_FLOAT); } static void test_layer_inline_and_block(void **state) { (void)state; cx_style s = base_style(); s.is_inline = 1; assert_int_equal(cx_box_layer(&s), CX_LAYER_INLINE); s = base_style(); assert_int_equal(cx_box_layer(&s), CX_LAYER_BLOCK); assert_int_equal(cx_box_layer(NULL), CX_LAYER_BLOCK); /* NULL-safe default } /* --- cx_item_compare ---*
+- `test_compare_layer_then_z_then_doc` (line 131) `static void test_compare_layer_then_z_then_doc(void **state)`
+- `test_sort_full_paint_order` (line 152) `static void test_sort_full_paint_order(void **state)` - *cx_item c = mk(CX_LAYER_POS_Z, 1, 0, 5, 0); cx_item d = mk(CX_LAYER_POS_Z, 9, 0, 1, 0); assert_true(cx_item_compare(&c, &d) < 0);           /* same layer -> z asc cx_item e = mk(CX_LAYER_ZERO_Z, 0, 0, 3, 0); cx_item f = mk(CX_LAYER_ZERO_Z, 0, 1, 8, 0);        /* auto == 0 -> tie on z assert_true(cx_item_compare(&e, &f) < 0);           /* doc order breaks the tie cx_item g = mk(CX_LAYER_BLOCK, 0, 1, 2, 0); assert_int_equal(cx_item_compare(&g, &g), 0);       /* reflexive } /* --- cx_sort ---*
+- `test_sort_z_within_layer` (line 169) `static void test_sort_z_within_layer(void **state)`
+- `test_sort_stability` (line 185) `static void test_sort_stability(void **state)`
+- `test_sort_noop_guards` (line 199) `static void test_sort_noop_guards(void **state)`
+- `test_sort_matches_zindex_only_ordering` (line 211) `static void test_sort_matches_zindex_only_ordering(void **state)` - *The positioned subset the painter already orders by z-index (all in CX_LAYER_ZERO_Z or NEG_Z/POS_Z) sorts identically through cx_sort, so wiring it later changes no * pixels where no new stacking context appears.*
+- `main` (line 223) `int main(void)`
+
 #### `test_css.c`
 **Path:** `tests/test_css.c`
 
@@ -4989,7 +5024,7 @@ static void tes...`
 **Structs:**
 - `vec` (line 21)
 
-### H (50 files)
+### H (51 files)
 
 #### `browser_ui_internal.h`
 **Path:** `gui/browser_ui_internal.h`
@@ -5068,6 +5103,17 @@ static void tes...`
 
 **Structs:**
 - `browser_state` (line 27)
+
+#### `compositor.h`
+**Path:** `include/compositor.h`
+**File Doc:** *ifndef FREEDOM_COMPOSITOR_H define FREEDOM_COMPOSITOR_H  include <stddef.h>  ifdef __cplusplus error "Freedom is pure C (C11). C++ is not supported." endif*
+
+**Macros:**
+- `FREEDOM_COMPOSITOR_H` (line 2)
+
+**Structs:**
+- `cx_style` (line 43) - *A box's resolved style, in the SAME value-spaces as css.h: position uses css_position (CSS_POS_STATIC/RELATIVE/ABSOLUTE/FIXED/STICKY), mix_blend uses css_mix_blend (0 unset, CSS_MB_NORMAL, or a real blend), isolation uses css_isolation (0 unset, CSS_ISO_AUTO, CSS_ISO_ISOLATE). z_auto == 1 means the z-index is auto/unset (z_index is then ignored). opacity is a percent 0..100, or * -1 for unset (opaque). is_float / is_inline classify the box's in-flow role.*
+- `cx_item` (line 65) - *One box to order for painting: its layer, z-index (z_auto treated as 0 within the ZERO_Z layer), document order (stable tie-break), and an opaque caller handle * (e.g. a box index) that this module never interprets.*
 
 #### `css.h`
 **Path:** `include/css.h`
