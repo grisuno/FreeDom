@@ -579,6 +579,14 @@ typedef struct css_style {
     /* aspect-ratio (Hito 2026-07-10). Stored as numerator/denominator x1000
      * (so 16/9 -> num=16000, den=9000). auto/unset -> both 0. */
     int         aspect_num, aspect_den;
+    /* transform (M1.2, 2D translate only): signed px offsets from
+     * translate()/translateX()/translateY(), CSS_LEN_UNSET when transform is
+     * unset/none. rotate()/scale()/skew()/matrix() and percentage arguments are
+     * not supported (the whole declaration fails closed to unset -- see
+     * expand_transform in css.c and spec/compositor.md). A box with either field
+     * set (even to 0, e.g. translate(0,0)) still establishes a CSS stacking
+     * context per spec, independent of the actual offset. */
+    int         transform_tx, transform_ty;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

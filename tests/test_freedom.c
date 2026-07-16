@@ -557,6 +557,64 @@ static void test_download_png_mix_blend_multiply_uses_cairo_operator(void **stat
     unlink(png);
 }
 
+/* Regression for M1.2 (CSS transform: translate, paint-only): a box with
+ * transform:translate(200px,0) must paint at its OFFSET position, not its
+ * original layout position -- the pixel at the untranslated spot must be empty
+ * (page background) and the pixel at the translated spot must be the box's
+ * colour. Exercises box_transform_offset in gui/browser_ui.c and the
+ * css.c expand_transform parser -> pv_box_def.transform_tx/ty -> worker IPC ->
+ * painter chain (M1.2 CSS wiring). Also exercises the css_has_boxdeco fix: this
+ * box has NO other box-triggering property (no padding/border/position) besides
+ * transform, so without that fix it would never get a pv_box_def entry at all
+ * and the translate would silently never apply. */
+static void test_download_png_transform_translate_moves_paint_position(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "#box{background:#0000ff;transform:translate(200px,0);}"
+        "</style></head><body>"
+        "<div id=\"box\">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>"
+        "</body></html>";
+    const char *path = "__freedom_transform_page.html";
+    const char *png = "__freedom_transform_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    /* y=40: inside the box's row, below the "X" glyphs' ink so a clean background
+     * sample isn't confused with glyph antialiasing. x=50 is well before the
+     * translated box (which starts around x=24+200=224); x=300 is inside it. */
+    assert_true(px.width > 900 && px.height > 40);
+    uint32_t before = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 50];
+    uint32_t after  = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 300];
+    uint8_t br = (uint8_t)(before >> 16), bg = (uint8_t)(before >> 8), bb = (uint8_t)before;
+    uint8_t ar = (uint8_t)(after >> 16),  ag = (uint8_t)(after >> 8),  ab = (uint8_t)after;
+    assert_true(br >= 250 && bg >= 250 && bb >= 250); /* untranslated spot: white page */
+    assert_true(ar <= 5 && ag <= 5 && ab >= 250);     /* translated spot: blue box */
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* --- headless console (Freebug --dump-console) --- */
 
 /* --dump-console runs the page's JS and prints console.* output + uncaught errors. */
@@ -796,6 +854,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_group_opacity_blends_with_background),
         cmocka_unit_test(test_download_png_inflow_opacity_blends_box_and_row_together),
         cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
+        cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),

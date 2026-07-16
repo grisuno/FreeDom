@@ -21,6 +21,8 @@ int cx_forms_stacking_context(const cx_style *s) {
     if (s->mix_blend > CSS_MB_NORMAL) return 1;
     /* isolation: isolate. */
     if (s->isolation == CSS_ISO_ISOLATE) return 1;
+    /* transform other than none (M1.2). */
+    if (s->has_transform) return 1;
     /* relative/absolute WITH a real z-index. */
     if ((s->position == CSS_POS_RELATIVE || s->position == CSS_POS_ABSOLUTE)
         && !s->z_auto) return 1;

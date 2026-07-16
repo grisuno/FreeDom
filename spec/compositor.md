@@ -142,8 +142,18 @@ void cx_sort(cx_item *items, size_t n);                   /* orden de pintado, e
   decoración deja el fondo de la fila, un draw call separado que cascadea el mismo color, pintado
   opaco encima). `bui_blend_operator` mapea los 12 valores de `mix-blend-mode` a operadores Cairo
   nativos.
-- `transform`/`filter`/`will-change` como disparadores de contexto: se añaden a `cx_style` en
-  M1.2/M1.4 (campos nuevos, el contrato no cambia).
+- ~~`transform` como disparador de contexto~~ **CERRADO parcialmente** M1.2: `cx_style.has_transform`
+  nuevo, `cx_forms_stacking_context` lo dispara. Solo cubre `translate()`/`translateX()`/
+  `translateY()` en px (`css.c` `expand_transform`, gramática de función balanceada tipo
+  `linear-gradient()`); `scale()`/`rotate()`/`skew()`/`matrix()` siguen sin parsear (fallan cerrado
+  a "unset", nunca una transformación a medias). La aplicación real es solo de PINTADO
+  (`gui/browser_ui.c` `box_transform_offset` suma el offset a las coordenadas de
+  `paint_box_decoration`/`paint_content_row`); el hit-testing (clic, `cursor_at_point`, resolución
+  de ancestros `overflow:hidden`) sigue resolviendo contra el rect ORIGINAL sin transformar —
+  transformar el hit-test es trabajo futuro explícito, no cubierto por "M1.2 transform" a secas.
+- `filter`/`will-change` como disparadores de contexto: se añaden a `cx_style` en M1.4 (campos
+  nuevos, el contrato no cambia). `scale`/`rotate`/`skew`/`matrix` de `transform` también quedan
+  para un incremento M1.2 posterior (necesitan matriz Cairo real, no solo un offset aditivo).
 - Contención (`contain`) y `perspective` como disparadores: futuros.
 - Ordenar la geometría o decidir clipping/overflow (eso sigue en `box_tree`/painter).
 - **Árbol de capas anidado real** (contextos de apilamiento DENTRO de otros contextos,

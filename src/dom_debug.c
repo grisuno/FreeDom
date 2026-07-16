@@ -278,6 +278,11 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
     if (b->mix_blend > CSS_MB_NORMAL)
         dd_printf(c, " mix-blend=%s", dd_mix_blend_name(b->mix_blend));
     if (b->isolation == CSS_ISO_ISOLATE) dd_puts(c, " isolate");
+    /* transform (M1.2, 2D translate only): printed only when set. */
+    if (b->transform_tx != PV_LEN_UNSET || b->transform_ty != PV_LEN_UNSET)
+        dd_printf(c, " translate(%d,%d)",
+                  b->transform_tx == PV_LEN_UNSET ? 0 : b->transform_tx,
+                  b->transform_ty == PV_LEN_UNSET ? 0 : b->transform_ty);
     dd_putc(c, '\n');
 }
 

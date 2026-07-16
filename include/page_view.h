@@ -355,6 +355,13 @@ typedef struct pv_box_def {
      * value instead of a hardcoded 0. */
     int mix_blend;
     int isolation;
+    /* transform (M1.2, 2D translate only): signed px offsets, PV_LEN_UNSET when
+     * transform is unset/none. Applied as an ADDITIVE offset to the box's paint
+     * origin only (gui/browser_ui.c) -- the box's own x/y/w/h here and everywhere
+     * else (hit-testing, click dispatch, overflow-clip ancestor rects) stay at
+     * the UNTRANSFORMED layout position. Transformed hit-testing is out of scope
+     * for this increment (see spec/compositor.md). */
+    int transform_tx, transform_ty;
 } pv_box_def;
 
 typedef struct pv_view {

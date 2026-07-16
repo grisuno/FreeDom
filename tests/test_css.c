@@ -2445,6 +2445,50 @@ static void test_inline_mix_blend_mode(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).mix_blend_mode, CSS_MB_UNSET);
 }
 
+/* transform (M1.2, 2D translate only). */
+static void test_inline_transform_translate(void **state) {
+    (void)state;
+    css_style s;
+
+    s = css_parse_inline("transform:translate(10px,20px)", 0);
+    assert_int_equal(s.transform_tx, 10);
+    assert_int_equal(s.transform_ty, 20);
+
+    s = css_parse_inline("transform:translate(10px)", 0); /* y defaults to 0 */
+    assert_int_equal(s.transform_tx, 10);
+    assert_int_equal(s.transform_ty, 0);
+
+    s = css_parse_inline("transform:translateX(-15px)", 0);
+    assert_int_equal(s.transform_tx, -15);
+    assert_int_equal(s.transform_ty, CSS_LEN_UNSET);
+
+    s = css_parse_inline("transform:translateY(7px)", 0);
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_ty, 7);
+
+    s = css_parse_inline("transform:translate(0,0)", 0); /* explicit zero still "set" */
+    assert_int_equal(s.transform_tx, 0);
+    assert_int_equal(s.transform_ty, 0);
+
+    /* Unsupported/malformed: fails closed to unset, never a half-applied transform. */
+    s = css_parse_inline("transform:none", 0);
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_ty, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:scale(2)", 0); /* out of scope this increment */
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:rotate(45deg)", 0);
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:translate(10%,10%)", 0); /* % unsupported */
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:translateX(1px) translateY(2px)", 0); /* v1: one fn only */
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:translate(10px,20px,30px)", 0); /* too many args */
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("color:red", 0);
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_ty, CSS_LEN_UNSET);
+}
+
 static void test_inline_object_fit(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("object-fit:fill", 0).object_fit, CSS_OFI_FILL);
@@ -2851,6 +2895,7 @@ int main(void) {
         cmocka_unit_test(test_inline_accent_color),
         cmocka_unit_test(test_inline_print_forced_adjust),
         cmocka_unit_test(test_inline_mix_blend_mode),
+        cmocka_unit_test(test_inline_transform_translate),
         cmocka_unit_test(test_inline_object_fit),
         cmocka_unit_test(test_inline_list_style_pos),
         cmocka_unit_test(test_inline_font_kerning),

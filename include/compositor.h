@@ -39,7 +39,10 @@ typedef enum cx_layer {
  * css_mix_blend (0 unset, CSS_MB_NORMAL, or a real blend), isolation uses
  * css_isolation (0 unset, CSS_ISO_AUTO, CSS_ISO_ISOLATE). z_auto == 1 means the
  * z-index is auto/unset (z_index is then ignored). opacity is a percent 0..100, or
- * -1 for unset (opaque). is_float / is_inline classify the box's in-flow role. */
+ * -1 for unset (opaque). is_float / is_inline classify the box's in-flow role.
+ * has_transform (M1.2): 1 iff the box has an author `transform` other than none
+ * (today: translate()/translateX()/translateY() only) -- a transformed element
+ * establishes a stacking context per spec regardless of the actual offset. */
 typedef struct cx_style {
     int position;
     int z_index;
@@ -49,6 +52,7 @@ typedef struct cx_style {
     int isolation;
     int is_float;
     int is_inline;
+    int has_transform;
 } cx_style;
 
 /* Does this box establish a stacking context? (The root context is the caller's.)

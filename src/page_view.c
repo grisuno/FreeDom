@@ -942,7 +942,17 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->min_width > 0 ||
            /* a linear-gradient background needs the box machinery to paint (a solid
             * background alone still rides the runs, unchanged). */
-           cs->bg_grad_n >= 2;
+           cs->bg_grad_n >= 2 ||
+           /* M1.1 increments 3-4 / M1.2: opacity, mix-blend-mode, isolation and
+            * transform all need the box def to reach the painter's group-
+            * compositing path (gui/browser_ui.c box_forms_stacking_context) --
+            * without a box entry a plain `<div style="opacity:.5">` (no padding/
+            * border/position alongside it) would silently never fade, exactly
+            * the class of bug this whole box-registration gate exists to avoid
+            * for every other author-CSS box property above. */
+           cs->opacity != -1 || cs->mix_blend_mode != CSS_MB_UNSET ||
+           cs->isolation != CSS_ISO_UNSET ||
+           cs->transform_tx != CSS_LEN_UNSET || cs->transform_ty != CSS_LEN_UNSET;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1031,6 +1041,8 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->opacity = cs->opacity;
     d->mix_blend = cs->mix_blend_mode;
     d->isolation = cs->isolation;
+    d->transform_tx = cs->transform_tx;
+    d->transform_ty = cs->transform_ty;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when

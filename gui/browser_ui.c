@@ -5409,8 +5409,20 @@ static int box_forms_stacking_context(const pv_box_def *def) {
         .mix_blend = def->mix_blend,
         .isolation = def->isolation,
         .is_float = 0, .is_inline = 0,
+        .has_transform = def->transform_tx != PV_LEN_UNSET ||
+                         def->transform_ty != PV_LEN_UNSET,
     };
     return cx_forms_stacking_context(&st);
+}
+
+/* transform (M1.2, 2D translate only): the box's signed px offset, or (0,0) when
+ * unset. Applied as an ADDITIVE offset to the paint origin at each of the three
+ * call sites below (Stage 2, in-flow decoration, in-flow decoration+rows) --
+ * painting only, the box's stored rect (hit-testing, click dispatch, overflow-clip
+ * ancestor resolution) is untouched, see include/page_view.h pv_box_def. */
+static void box_transform_offset(const pv_box_def *def, double *tx, double *ty) {
+    *tx = (def != NULL && def->transform_tx != PV_LEN_UNSET) ? def->transform_tx : 0.0;
+    *ty = (def != NULL && def->transform_ty != PV_LEN_UNSET) ? def->transform_ty : 0.0;
 }
 
 /* Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's
@@ -5463,8 +5475,10 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                                          const rc_box *bx, double ox, double oy) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
     int needs_group = box_forms_stacking_context(def);
+    double tx, ty;
+    box_transform_offset(def, &tx, &ty);
     if (needs_group) cairo_push_group(cr);
-    paint_box_decoration(cr, bx, ox, oy);
+    paint_box_decoration(cr, bx, ox + tx, oy + ty);
     if (needs_group) bui_pop_group_composite(cr, def);
 }
 
@@ -5493,17 +5507,21 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
         paint_box_decoration(cr, bx, left, origin);
         return;
     }
+    double tx, ty;
+    box_transform_offset(def, &tx, &ty);
     cairo_push_group(cr);
-    paint_box_decoration(cr, bx, left, origin);
+    paint_box_decoration(cr, bx, left + tx, origin + ty);
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
     for (size_t j = 0; j < L->nrow; ++j) {
         const rc_row *r = &L->rows[j];
         if (row_owner_block_id(L, r) != bx->block_id) continue;
+        /* Overflow-clip ancestor resolution stays at the UNTRANSLATED position
+         * (untransformed layout geometry); only the painted content moves. */
         ov_reconcile(cr, ov_stack, &ov_depth, w->doc, bx->block_id, L, origin, left);
-        double ry = origin + r->top;
+        double ry = origin + r->top + ty;
         if (!(ry + r->height < content_top || ry > content_top + content_h))
-            paint_content_row(cr, w, L, r, left, ry, content_w, page_w, show_hover);
+            paint_content_row(cr, w, L, r, left + tx, ry, content_w, page_w, show_hover);
         if (row_done != NULL) row_done[j] = 1;
     }
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
@@ -5524,14 +5542,16 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
  *
  * Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context
  * (box_forms_stacking_context: opacity<1, mix-blend != normal, isolation:isolate,
- * or the position+z-index triggers cx_forms_stacking_context already needed for
- * paint ORDER) is composited as ONE unit -- its decoration and content blended
- * together first, then the whole result faded/blended -- not each piece faded
- * independently (naive per-draw alpha double-blends wherever e.g. background and
- * content overlap). cairo_push_group redirects the box's paint calls to a fresh
- * offscreen surface (bounded by the current clip, so this is exactly the "layer"
- * spec/compositor.md describes); bui_pop_group_composite blends that surface back
- * with the box's opacity and mix-blend-mode. */
+ * transform != none, or the position+z-index triggers cx_forms_stacking_context
+ * already needed for paint ORDER) is composited as ONE unit -- its decoration and
+ * content blended together first, then the whole result faded/blended -- not each
+ * piece faded independently (naive per-draw alpha double-blends wherever e.g.
+ * background and content overlap). cairo_push_group redirects the box's paint
+ * calls to a fresh offscreen surface (bounded by the current clip, so this is
+ * exactly the "layer" spec/compositor.md describes); bui_pop_group_composite
+ * blends that surface back with the box's opacity and mix-blend-mode.
+ * box_transform_offset (M1.2) shifts where decoration/content PAINT -- the box's
+ * stored rect used for hit-testing is untouched, see include/page_view.h. */
 static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
                                  const bt_positioned *pb, double left, double origin,
                                  double content_top, double content_h, double page_w,
@@ -5543,6 +5563,8 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     ov_reconcile(cr, clip_stack, clip_depth, w->doc, (int)pb->box_index, L, origin, left);
 
     int needs_group = box_forms_stacking_context(def);
+    double tx, ty;
+    box_transform_offset(def, &tx, &ty);
     if (needs_group) cairo_push_group(cr);
 
     /* Build a transient rc_box for the existing paint helper. */
@@ -5564,7 +5586,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
     };
-    paint_box_decoration(cr, &bx, left, origin);
+    paint_box_decoration(cr, &bx, left + tx, origin + ty);
     for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
         const rd_block *b = rd_at(w->doc, bi);
         if ((int)b->block_id != (int)pb->box_index) continue;
@@ -5598,9 +5620,9 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
                            .rows = &row, .nrow = 1, .caprow = 1,
                            .boxes = NULL, .nbox = 0, .capbox = 0,
                            .total_h = pb->h, .npositioned = 0 };
-        double ry = origin + pb->y;
+        double ry = origin + pb->y + ty;
         if (ry + fe.height < content_top || ry > content_top + content_h) break;
-        paint_content_row(cr, w, &mini, &row, left, ry, pb->w, page_w, 0);
+        paint_content_row(cr, w, &mini, &row, left + tx, ry, pb->w, page_w, 0);
         break;
     }
 

@@ -105,6 +105,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * CSS_GRID_TRACKS_MAX slots emitted in lock-step with P_GRIDCOLS. */
         P_GRID_TRACK0, P_GRID_TRACK1, P_GRID_TRACK2, P_GRID_TRACK3,
         P_GRID_TRACK4, P_GRID_TRACK5, P_GRID_TRACK6, P_GRID_TRACK7,
+        /* transform (M1.2): translate()/translateX()/translateY() px offsets. */
+        P_TRANSFORM_TX, P_TRANSFORM_TY,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -2232,6 +2234,80 @@ static int resolve_var(const char *val, char *out, size_t outcap,
     return 1;
 }
 
+/* transform (M1.2, 2D translate only): translate()/translateX()/translateY(),
+ * offsets in px via interp_len (allow_auto=0 -- %, viewport units and bare
+ * non-calc numbers all fail closed, same as any other box-model length here).
+ * Any other transform function (scale/rotate/skew/matrix/perspective), multiple
+ * space-separated functions, or unparseable syntax reject the WHOLE declaration
+ * (no decl emitted -> cascades as unset, byte-identical to a page that never
+ * declared transform at all -- fail closed, never a half-applied transform).
+ * rotate/scale/matrix are architecturally deferred: they need real Cairo matrix
+ * composition AND transformed hit-testing coordinates, out of scope for this
+ * increment (paint position only; see spec/compositor.md and the "fuera de
+ * alcance" note there). "none" is not special-cased -- it simply fails the
+ * translate*( prefix match below and emits nothing, same net effect (unset). */
+static int expand_transform(const char *val, css_decl *dst, int cap) {
+    if (cap < 2) return 0;
+    const char *p = val;
+    while (*p == ' ' || *p == '\t') ++p;
+
+    enum { TR_X, TR_Y, TR_BOTH } kind;
+    if (csel_span_eq(p, "translatex(", 11, 1))      { kind = TR_X;    p += 11; }
+    else if (csel_span_eq(p, "translatey(", 11, 1)) { kind = TR_Y;    p += 11; }
+    else if (csel_span_eq(p, "translate(", 10, 1))  { kind = TR_BOTH; p += 10; }
+    else return 0;
+
+    size_t n = strlen(p);
+    size_t j = 0;
+    int depth = 1;
+    while (j < n && depth > 0) {
+        if (p[j] == '(') ++depth;
+        else if (p[j] == ')') --depth;
+        ++j;
+    }
+    if (depth != 0) return 0;                 /* unbalanced parens */
+    size_t argn = j - 1;                       /* [0, argn) is the arg list */
+    const char *rest = p + j;
+    while (*rest == ' ' || *rest == '\t') ++rest;
+    if (*rest != '\0') return 0;               /* trailing junk: v1 allows one function only */
+
+    size_t comma = argn;
+    for (size_t k = 0; k < argn; ++k) {
+        if (p[k] == ',') { comma = k; break; }
+    }
+    int has_second = comma < argn;
+
+    char a[CSS_TOK_MAX], b[CSS_TOK_MAX];
+    if (copy_trim(p, 0, comma, a, sizeof a) == (size_t)-1 || a[0] == '\0') return 0;
+    if (has_second &&
+        (copy_trim(p, comma + 1, argn, b, sizeof b) == (size_t)-1 || b[0] == '\0'))
+        return 0;
+
+    /* Emit only the axis/axes this function actually specifies: translateX/Y are
+     * single-axis (the OTHER axis must stay CSS_LEN_UNSET, not become an implicit
+     * 0 -- a `<div>` with only translateX() must not also pick up a phantom
+     * translateY(0) declaration that shadows a separately-cascaded translateY).
+     * translate(x) alone DOES mean translate(x, 0) per spec, so TR_BOTH always
+     * emits both slots. */
+    int tx, ty;
+    if (kind == TR_X) {
+        if (has_second || !interp_len(a, 0, &tx)) return 0;
+        dst[0].prop = P_TRANSFORM_TX; dst[0].ival = tx;
+        return 1;
+    }
+    if (kind == TR_Y) {
+        if (has_second || !interp_len(a, 0, &ty)) return 0;
+        dst[0].prop = P_TRANSFORM_TY; dst[0].ival = ty;
+        return 1;
+    }
+    ty = 0;
+    if (!interp_len(a, 0, &tx)) return 0;
+    if (has_second && !interp_len(b, 0, &ty)) return 0;
+    dst[0].prop = P_TRANSFORM_TX; dst[0].ival = tx;
+    dst[1].prop = P_TRANSFORM_TY; dst[1].ival = ty;
+    return 2;
+}
+
 /* gap / grid-gap (2026-07-10): one value keeps the pre-existing semantics (both
  * axes; row-gap stays unset and falls back to gap downstream), two values are
  * `<row> <col>` (row feeds row-gap, col feeds gap). column-gap stays a
@@ -2414,6 +2490,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         strcmp(prop, "place-self") == 0)
         return expand_place(prop, val, dst, cap);
     if (strcmp(prop, "font") == 0) return expand_font(val, dst, cap);
+    if (strcmp(prop, "transform") == 0) return expand_transform(val, dst, cap);
 
     /* Text-presentation extensions whose value may legitimately be 0 or negative
      * (so they bypass the generic ival<0 drop, like the box-model lengths). */
@@ -3076,6 +3153,8 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_PRINT_COLOR_ADJUST:  o->print_color_adjust = d->ival; break;
             case P_FORCED_COLOR_ADJUST: o->forced_color_adjust = d->ival; break;
             case P_MIX_BLEND_MODE:      o->mix_blend_mode = d->ival; break;
+            case P_TRANSFORM_TX:        o->transform_tx = d->ival; break;
+            case P_TRANSFORM_TY:        o->transform_ty = d->ival; break;
             case P_OBJECT_FIT:          o->object_fit = d->ival; break;
             case P_LIST_STYLE_POS:      o->list_style_pos = d->ival; break;
             case P_FONT_KERNING:        o->font_kerning = d->ival; break;
@@ -3174,6 +3253,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .aspect_num = 0, .aspect_den = 0,
         .bg_grad_n = 0, .bg_grad_angle = 180,
         .bg_grad_c = { -1, -1, -1, -1 },
+        .transform_tx = CSS_LEN_UNSET, .transform_ty = CSS_LEN_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

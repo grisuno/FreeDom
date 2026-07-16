@@ -17,7 +17,7 @@
 static cx_style base_style(void) {
     cx_style s = { .position = CSS_POS_STATIC, .z_index = 0, .z_auto = 1,
                    .opacity = -1, .mix_blend = 0, .isolation = 0,
-                   .is_float = 0, .is_inline = 0 };
+                   .is_float = 0, .is_inline = 0, .has_transform = 0 };
     return s;
 }
 
@@ -46,6 +46,13 @@ static void test_sc_isolation(void **state) {
     s.isolation = CSS_ISO_ISOLATE; assert_int_equal(cx_forms_stacking_context(&s), 1);
     s.isolation = CSS_ISO_AUTO;    assert_int_equal(cx_forms_stacking_context(&s), 0);
     s.isolation = CSS_ISO_UNSET;   assert_int_equal(cx_forms_stacking_context(&s), 0);
+}
+
+static void test_sc_transform(void **state) {
+    (void)state;
+    cx_style s = base_style();
+    s.has_transform = 1; assert_int_equal(cx_forms_stacking_context(&s), 1);
+    s.has_transform = 0; assert_int_equal(cx_forms_stacking_context(&s), 0);
 }
 
 static void test_sc_positioned_z(void **state) {
@@ -226,6 +233,7 @@ int main(void) {
         cmocka_unit_test(test_sc_opacity),
         cmocka_unit_test(test_sc_mix_blend),
         cmocka_unit_test(test_sc_isolation),
+        cmocka_unit_test(test_sc_transform),
         cmocka_unit_test(test_sc_positioned_z),
         cmocka_unit_test(test_sc_fixed_sticky_always),
         cmocka_unit_test(test_sc_static_none),
