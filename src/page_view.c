@@ -1069,6 +1069,8 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->anim_duration_ms = cs->anim_duration_ms;
     d->filter_blur = cs->filter_blur;
     d->filter_grayscale = cs->filter_grayscale;
+    d->bg_pos_x = cs->bg_pos_x;
+    d->bg_pos_y = cs->bg_pos_y;
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when

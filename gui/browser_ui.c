@@ -2762,6 +2762,9 @@ typedef struct rc_box {
      * pointer) -- not carried here, unlike the color/gradient fields above,
      * because it is an owned decoded resource, not a small resolved value. */
     int    bg_size, bg_repeat;
+    /* background-position (R5a): px offset, PV_LEN_UNSET/AUTO → compute from
+     * keyword (center = (box_w - img_w)/2). */
+    int    bg_pos_x, bg_pos_y;
 } rc_box;
 
 typedef struct rc_layout {
@@ -3765,6 +3768,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
         bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
         bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
+        bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
         bx->hidden = inherited_hidden || this_hidden;
         /* 2026-07-10 author vertical dimensions + aspect-ratio. box_min_w enlarges
          * box_width when the layout was smaller; box_h sets a fixed height (the
@@ -5309,7 +5313,15 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             cairo_rectangle(cr, x, y, iw, h);
             cairo_clip(cr);
         }
-        cairo_translate(cr, x, y);
+        /* R5a: background-position offset. AUTO = center (resolved to
+         * (box_size - image_size) / 2), UNSET = 0 (top-left). */
+        double pox = 0.0, poy = 0.0;
+        if (bx->bg_pos_x == CSS_LEN_AUTO && iw > 0.0) pox = (w - iw) / 2.0;
+        else if (bx->bg_pos_x != PV_LEN_UNSET) pox = (double)bx->bg_pos_x;
+        if (bx->bg_pos_y == CSS_LEN_AUTO && ih > 0.0) poy = (h - ih) / 2.0;
+        else if (bx->bg_pos_y != PV_LEN_UNSET) poy = (double)bx->bg_pos_y;
+
+        cairo_translate(cr, x + pox, y + poy);
         cairo_scale(cr, sx, sy);
         cairo_pattern_t *ipat = cairo_pattern_create_for_surface(bgimg->surface);
         cairo_pattern_set_extend(ipat, bx->bg_repeat == CSS_BGR_NO_REPEAT
@@ -5838,6 +5850,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
         .bg_size = def->bg_size, .bg_repeat = def->bg_repeat,
+        .bg_pos_x = def->bg_pos_x, .bg_pos_y = def->bg_pos_y,
     };
     if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
     paint_box_decoration(cr, &bx, left, origin, find_bg_image(w, def->bg_image_url));

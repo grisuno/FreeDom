@@ -347,7 +347,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[71] = {
+        int32_t f[73] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -397,6 +397,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->anim_duration_ms,
             /* filter, Phase R3 */
             (int32_t)bd->filter_blur, (int32_t)bd->filter_grayscale,
+            /* background-position, R5a */
+            (int32_t)bd->bg_pos_x, (int32_t)bd->bg_pos_y,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -657,7 +659,12 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         uint64_t total_budget = net ? 5000 : JS_DEFAULT_TIME_BUDGET;
         struct timespec t0;
         clock_gettime(CLOCK_MONOTONIC, &t0);
+        /* R7: two-pass execution — sync/external first, deferred second.
+         * Each pass shares the same page-wide budget. */
+        for (int pass = 0; pass < 2; ++pass) {
         for (size_t i = 0; i < nscripts; i++) {
+            if (pass == 0 && scripts[i].defer) continue;  /* first pass: skip deferred */
+            if (pass == 1 && !scripts[i].defer) continue; /* second pass: only deferred */
             uint64_t rem = budget_remaining_ms(&t0, total_budget);
             if (rem == 0) break; /* page JS budget spent; stop running scripts */
             js_set_time_budget(cs->js, rem);
@@ -722,6 +729,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
              * so continuations run before the next script / view derivation. */
             (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
         }
+        } /* pass loop: sync first, then deferred */
         hp_free_scripts(scripts, nscripts);
         /* Fire synthetic DOMContentLoaded/load handlers + flush queued timers once
          * (bounded; not a real event loop), so onload-wrapped code runs -- under the
@@ -1493,7 +1501,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[71];
+        int32_t f[73];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1539,6 +1547,8 @@ static int read_view(int fd, pv_view **out) {
             .anim_duration_ms = f[68],
             /* filter, Phase R3 */
             .filter_blur = f[69], .filter_grayscale = f[70],
+            /* background-position, R5a */
+            .bg_pos_x = f[71], .bg_pos_y = f[72],
         };
         /* background-image url() text, 2026-07-16: length-prefixed like the run
          * string fields. Bounded against PV_BG_URL_MAX like every fixed box

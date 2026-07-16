@@ -616,6 +616,10 @@ typedef struct css_style {
     /* filter (Phase R3): blur radius in px (0=none), grayscale 0..100% (0=none). */
     int         filter_blur;
     int         filter_grayscale;
+    /* background-position (R5a): px offset from top-left, CSS_LEN_UNSET = unset
+     * ("0% 0%" which is also the CSS initial value). */
+    int         bg_pos_x;
+    int         bg_pos_y;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

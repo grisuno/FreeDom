@@ -392,6 +392,9 @@ typedef struct pv_box_def {
     /* filter (Phase R3) */
     int filter_blur;
     int filter_grayscale;
+    /* background-position (R5a): px offsets, PV_LEN_UNSET = unset. */
+    int bg_pos_x;
+    int bg_pos_y;
 } pv_box_def;
 
 typedef struct pv_view {

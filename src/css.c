@@ -132,6 +132,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_ANIM_DURATION,
         /* filter (Phase R3) */
         P_FILTER_BLUR, P_FILTER_GRAYSCALE,
+        /* background-position (R5a) */
+        P_BG_POS_X, P_BG_POS_Y,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -2042,6 +2044,32 @@ static int expand_filter(const char *val, css_decl *dst, int cap) {
     return n;
 }
 
+/* background-position (R5a): 1 or 2 values. Keywords map to edges/center; px
+ * lengths are used directly. % is not supported in v1 (falls to 0). */
+static int expand_bg_position(const char *val, css_decl *dst, int cap) {
+    if (cap < 2) return 0;
+    int x = CSS_LEN_UNSET, y = CSS_LEN_UNSET;
+    const char *p = val;
+    for (int pass = 0; pass < 2; ++pass) {
+        char tok[CSS_TOK_MAX];
+        if (!next_ws_token(&p, tok, sizeof tok)) break;
+        if (csel_ci_eq(tok, "left"))   { x = 0; continue; }
+        if (csel_ci_eq(tok, "right"))  { x = CSS_LEN_UNSET; continue; }
+        if (csel_ci_eq(tok, "center")) { if (x == CSS_LEN_UNSET) x = CSS_LEN_AUTO; else y = CSS_LEN_AUTO; continue; }
+        if (csel_ci_eq(tok, "top"))    { y = 0; continue; }
+        if (csel_ci_eq(tok, "bottom")) { y = CSS_LEN_UNSET; continue; }
+        int px;
+        if (interp_len(tok, 0, &px) && px >= 0) {
+            if (x == CSS_LEN_UNSET) x = px;
+            else if (y == CSS_LEN_UNSET) y = px;
+        }
+    }
+    int n = 0;
+    if (x != CSS_LEN_UNSET) { dst[n].prop = P_BG_POS_X; dst[n].ival = x; ++n; }
+    if (y != CSS_LEN_UNSET) { dst[n].prop = P_BG_POS_Y; dst[n].ival = y; ++n; }
+    return n;
+}
+
 /* box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an
  * optional color, and an optional `inset` keyword, in any order. Needs >= 2 lengths
  * (dx, dy) or the whole declaration is dropped (fail closed). `none` is an explicit
@@ -2923,6 +2951,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         dst[0].prop = P_ANIM_DURATION; dst[0].ival = ms; return 1;
     }
     else if (strcmp(prop, "filter") == 0)               return expand_filter(val, dst, cap);
+    else if (strcmp(prop, "background-position") == 0)   return expand_bg_position(val, dst, cap);
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -3438,6 +3467,8 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_ANIM_DURATION:       o->anim_duration_ms = d->ival; break;
             case P_FILTER_BLUR:         o->filter_blur = d->ival; break;
             case P_FILTER_GRAYSCALE:    o->filter_grayscale = d->ival; break;
+            case P_BG_POS_X:            o->bg_pos_x = d->ival; break;
+            case P_BG_POS_Y:            o->bg_pos_y = d->ival; break;
             default: break;
         }
     }
@@ -3528,6 +3559,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .transform_rotate = CSS_LEN_UNSET,
         .anim_duration_ms = 0,
         .filter_blur = 0, .filter_grayscale = 0,
+        .bg_pos_x = CSS_LEN_UNSET, .bg_pos_y = CSS_LEN_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }
