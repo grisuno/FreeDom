@@ -424,6 +424,16 @@ static int write_view(int wfd, const pv_view *v) {
          * @keyframes engine to be useful). */
         if (write_field(wfd, bd->anim_name) != 0) return -1;
     }
+    /* CSS 2.1 §14.2: canvas background + root <html> layout properties. These
+     * are pv_view-level fields (not per-run or per-box). Written after the box
+     * tree; read_view reads them in the same order. */
+    {
+        int32_t view_hdr[4] = {
+            (int32_t)v->canvas_bg, (int32_t)v->html_max_width,
+            (int32_t)v->html_margin_top, (int32_t)v->html_center,
+        };
+        if (write_full(wfd, view_hdr, sizeof view_hdr) != 0) return -1;
+    }
     return 0;
 }
 
@@ -1609,6 +1619,20 @@ static int read_view(int fd, pv_view **out) {
         memcpy(bd.anim_name, aname, aname_len + 1);
         free(aname);
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
+    }
+
+    /* CSS 2.1 §14.2: canvas background + root <html> layout properties, written
+     * by write_view after the box tree. On EOF or mismatch, use defaults (no
+     * canvas bg, no html constraints). Bounded against hostile worker. */
+    {
+        int32_t view_hdr[4];
+        ssize_t rv = read_full(fd, view_hdr, sizeof view_hdr);
+        if (rv == 0) {
+            v->canvas_bg      = view_hdr[0];
+            v->html_max_width  = view_hdr[1];
+            v->html_margin_top = view_hdr[2];
+            v->html_center     = view_hdr[3];
+        }
     }
 
     *out = v;

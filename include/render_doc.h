@@ -182,6 +182,11 @@ typedef struct rd_doc {
     rd_block *blocks;
     size_t    count;
     size_t    cap;
+    int       canvas_bg;   /* CSS 2.1 §14.2: root <html> background -> canvas background.
+                            * Packed 0xRRGGBB, or -1 (theme default). Copied from view. */
+    int       html_max_width;  /* root <html> max-width in px (layout cap), or -1 */
+    int       html_margin_top; /* root <html> margin-top in px (content offset), or 0 */
+    int       html_center;     /* 1 if root has margin-left:auto && margin-right:auto */
     int       has_images;  /* the page declared at least one image */
     /* Box engine (Hito 23b-8 Step D): the box-definition TREE. boxes[block_id]
      * describes one block-level box (decoration + parent_id); a block finds its box

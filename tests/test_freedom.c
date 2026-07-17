@@ -1004,6 +1004,58 @@ static void test_download_png_animation_renders(void **state) {
     unlink(png);
 }
 
+/* CSS 2.1 §14.2: the root <html> element's background-color propagates to the
+ * canvas. A page with `html{background-color:#000900}` must paint the entire
+ * content area dark green, not just text-run backgrounds. This test verifies
+ * that a pixel in a "blank" area (far from any text row) is the dark green color
+ * and not white (the old behaviour where only text rows got background fills). */
+static void test_download_png_canvas_background_from_html(void **state) {
+    (void)state;
+    const char *html =
+        "<html style=\"background-color:#000900;color:#18d818;\">"
+        "<head><title>Canvas BG</title></head>"
+        "<body style=\"margin:0;padding:0;\">"
+        "<p style=\"margin:0;\">X</p>"
+        "</body></html>";
+    const char *path = "__freedom_canvas_bg.html";
+    const char *png  = "__freedom_canvas_bg_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    /* Sample a pixel at (5, 5): near the top-left corner, well above the "X" text
+     * row, in the blank canvas area. It must be dark green #000900 (R≈0, G≈9, B≈0),
+     * not white (255,255,255) which would mean the canvas background was ignored. */
+    assert_true(px.width > 5 && px.height > 5);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[5 * (px.stride / 4) + 5];
+    uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
+    (void)r; (void)b;
+    assert_true(g >= 5 && g <= 15);   /* about 9, allow ±6 for rounding */
+    assert_true(r < 30);               /* no red component — pure greenish-black */
+    assert_true(b < 30);               /* no blue component */
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* --- suite --- */
 
 int main(void) {
@@ -1026,6 +1078,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_transform_rotate_changes_paint_shape),
         cmocka_unit_test(test_download_png_transform_scale_grows_around_center),
         cmocka_unit_test(test_download_png_animation_renders),
+        cmocka_unit_test(test_download_png_canvas_background_from_html),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),

@@ -2541,7 +2541,21 @@ static double content_margin_x(const browser_window *w) {
 static double content_width(const browser_window *w) {
     double cw = (double)w->width - 2.0 * content_margin_x(w) - UI_SCROLLBAR_W;
     if (cw < 1.0) cw = 1.0;
+    if (w->doc != NULL && w->doc->html_max_width > 0) {
+        double cap = (double)w->doc->html_max_width;
+        if (cap < cw) cw = cap;
+    }
     return cw;
+}
+
+static double html_center_offset(const browser_window *w) {
+    if (w->doc == NULL || !w->doc->html_center || w->doc->html_max_width <= 0)
+        return 0.0;
+    double avail = (double)w->width - 2.0 * content_margin_x(w) - UI_SCROLLBAR_W;
+    if (avail < 1.0) return 0.0;
+    double cap = (double)w->doc->html_max_width;
+    if (cap >= avail) return 0.0;
+    return (avail - cap) / 2.0;
 }
 
 /* Geometry of the vertical scrollbar in surface coordinates, plus the current
@@ -6387,7 +6401,7 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
-    double left = content_margin_x(w);
+    double left = content_margin_x(w) + html_center_offset(w);
     double content_w = content_width(w);
 
     rc_layout L;
@@ -6687,7 +6701,15 @@ static long write_doc_png(browser_window *w, const char *path) {
     ui_theme saved = w->theme;
     w->theme = ui_theme_for(UI_THEME_LIGHT);
     const ui_theme *th = &w->theme;
+    double png_left = PNG_MARGIN;
     double content_w = PNG_PAGE_W - 2.0 * PNG_MARGIN;
+    if (w->doc != NULL && w->doc->html_max_width > 0) {
+        double cap = (double)w->doc->html_max_width;
+        if (cap < content_w) {
+            if (w->doc->html_center) png_left += (content_w - cap) / 2.0;
+            content_w = cap;
+        }
+    }
 
     /* layout_doc needs a live Cairo context to measure text (font extents), but the
      * image height is unknown until after layout. Measure on a scratch 1x1 surface
@@ -6713,7 +6735,10 @@ static long write_doc_png(browser_window *w, const char *path) {
         cairo_surface_destroy(surf); rc_free(&L); w->theme = saved; return -1;
     }
     cairo_t *cr = cairo_create(surf);
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);   /* white page */
+    if (w->doc != NULL && w->doc->canvas_bg >= 0 && !w->force_theme)
+        set_rgb(cr, rgb_from_packed(w->doc->canvas_bg));
+    else
+        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);   /* white page */
     cairo_paint(cr);
 
     /* PNG export never scrolls/culls, so pass a viewport wide enough that
@@ -6726,7 +6751,7 @@ static long write_doc_png(browser_window *w, const char *path) {
         int neg_ov_stack[OV_MAX_DEPTH] = {0};
         int neg_ov_depth = 0;
         for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
-            paint_positioned_one(cr, w, th, &L.positioned[i], PNG_MARGIN, PNG_MARGIN,
+            paint_positioned_one(cr, w, th, &L.positioned[i], png_left, PNG_MARGIN,
                                  no_cull_top, no_cull_h, PNG_PAGE_W,
                                  neg_ov_stack, &neg_ov_depth, &L);
         }
@@ -6738,7 +6763,7 @@ static long write_doc_png(browser_window *w, const char *path) {
      * paint_structured) marks rows already painted as part of a grouped box. */
     char *row_done = (L.nrow > 0) ? (char *)calloc(L.nrow, 1) : NULL;
     for (size_t bi = 0; bi < L.nbox; ++bi)
-        paint_box_and_direct_rows(cr, w, &L, &L.boxes[bi], PNG_MARGIN, PNG_MARGIN,
+        paint_box_and_direct_rows(cr, w, &L, &L.boxes[bi], png_left, PNG_MARGIN,
                                   content_w, PNG_PAGE_W, no_cull_top, no_cull_h,
                                   0, row_done);
     {
@@ -6749,8 +6774,8 @@ static long write_doc_png(browser_window *w, const char *path) {
             const rc_row *r = &L.rows[i];
             int row_bid = row_owner_block_id(&L, r);
             ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L,
-                         PNG_MARGIN, PNG_MARGIN);
-            paint_content_row(cr, w, &L, r, PNG_MARGIN,
+                         png_left, PNG_MARGIN);
+            paint_content_row(cr, w, &L, r, png_left,
                               PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
         }
         while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
@@ -6764,7 +6789,7 @@ static long write_doc_png(browser_window *w, const char *path) {
         for (size_t pi = 0; pi < L.npositioned; ++pi) {
             const bt_positioned *pb = &L.positioned[pi];
             if (pb->z_index < 0) continue;  /* already painted behind, above */
-            paint_positioned_one(cr, w, th, pb, PNG_MARGIN, PNG_MARGIN,
+            paint_positioned_one(cr, w, th, pb, png_left, PNG_MARGIN,
                                  no_cull_top, no_cull_h, PNG_PAGE_W,
                                  pos_ov_stack, &pos_ov_depth, &L);
         }
@@ -8172,11 +8197,14 @@ static void paint(browser_window *w) {
         draw_clock(cr, th->link, ccx, ccy, r, phase);
     }
 
-    /* Content area. */
+    /* Content area. CSS 2.1 §14.2: root <html> background fills the canvas. */
     double content_top, content_h;
     content_geometry(w, &content_top, &content_h);
 
-    set_rgb(cr, th->content_bg);
+    if (w->doc != NULL && w->doc->canvas_bg >= 0 && !w->force_theme)
+        set_rgb(cr, rgb_from_packed(w->doc->canvas_bg));
+    else
+        set_rgb(cr, th->content_bg);
     cairo_rectangle(cr, 0, content_top, w->width, (double)w->height - content_top);
     cairo_fill(cr);
 

@@ -228,6 +228,11 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     rd_doc *d = (rd_doc *)calloc(1, sizeof *d);
     if (d == NULL) return RD_ERR_OOM;
 
+    d->canvas_bg = (view != NULL) ? view->canvas_bg : -1;
+    d->html_max_width = (view != NULL) ? view->html_max_width : -1;
+    d->html_margin_top = (view != NULL) ? view->html_margin_top : 0;
+    d->html_center = (view != NULL) ? view->html_center : 0;
+
     size_t n = pv_count(view);
     for (size_t i = 0; i < n; ++i) {
         if (pv_at(view, i)->kind == PV_IMAGE) { d->has_images = 1; break; }

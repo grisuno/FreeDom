@@ -1317,6 +1317,10 @@ static int family_of(const char *name) {
         { "courier", CSS_FF_MONO }, { "courier new", CSS_FF_MONO },
         { "consolas", CSS_FF_MONO }, { "monaco", CSS_FF_MONO },
         { "menlo", CSS_FF_MONO }, { "dejavu sans mono", CSS_FF_MONO },
+        { "glass tty vt220", CSS_FF_MONO }, { "glass tty vt220 medium", CSS_FF_MONO },
+        { "vt220", CSS_FF_MONO }, { "xterm", CSS_FF_MONO },
+        { "terminus", CSS_FF_MONO }, { "liberation mono", CSS_FF_MONO },
+        { "inconsolata", CSS_FF_MONO }, { "source code pro", CSS_FF_MONO },
         { "cursive", CSS_FF_CURSIVE }, { "comic sans ms", CSS_FF_CURSIVE },
         { "fantasy", CSS_FF_FANTASY }, { "impact", CSS_FF_FANTASY },
     };

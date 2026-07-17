@@ -428,6 +428,11 @@ typedef struct pv_view {
     pv_box_def *boxes;   /* the box tree (Step D); boxes[block_id] describes a box */
     size_t      nbox;
     size_t      boxcap;
+    int         canvas_bg;  /* CSS 2.1 §14.2: root <html> background → canvas background.
+                             * Packed 0xRRGGBB, or -1 if none (theme default). */
+    int         html_max_width;  /* root <html> max-width in px, or -1 unset */
+    int         html_margin_top; /* root <html> margin-top in px, or 0 */
+    int         html_center;     /* 1 if root has margin-left:auto && margin-right:auto */
 } pv_view;
 
 /* Builds the display list from an already-parsed, sanitised document.

@@ -2344,6 +2344,43 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     pv_style_cache cache;  /* memoized cch_element_style() per element (see above) */
     (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
 
+    /* CSS 2.1 §14.2: the root <html> element's background-color propagates to the
+     * canvas (the full viewport). If <html> itself has no background set, <body>'s
+     * background becomes the canvas background instead. Store it in canvas_bg so the
+     * presentation layer can paint the full page background. Also extract <html>'s
+     * layout properties (max-width, margin) for page-level centering. */
+    v->canvas_bg = -1;
+    v->html_max_width = -1;
+    v->html_margin_top = 0;
+    v->html_center = 0;
+    /* The document root node is NOT the <html> element — it is a DOCUMENT_NODE.
+     * Find the <html> element by scanning from `root`. */
+    lxb_dom_node_t *html_node = NULL;
+    if (root != NULL) {
+        for (lxb_dom_node_t *n = root; n != NULL; n = node_next(n, root)) {
+            if (n->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(n) == LXB_TAG_HTML)
+            { html_node = n; break; }
+        }
+    }
+    if (html_node != NULL) {
+        css_style html_cs = cached_element_style(lxb_dom_interface_element(html_node),
+                                                  sheet, &cache);
+        if (html_cs.background >= 0)
+            v->canvas_bg = html_cs.background;
+        if (html_cs.max_width > 0)
+            v->html_max_width = html_cs.max_width;
+        if (html_cs.margin_top > 0)
+            v->html_margin_top = html_cs.margin_top;
+        if (html_cs.margin_left == CSS_LEN_AUTO && html_cs.margin_right == CSS_LEN_AUTO)
+            v->html_center = 1;
+    }
+    if (v->canvas_bg < 0 && body != NULL) {
+        css_style body_cs = cached_element_style(lxb_dom_interface_element(body),
+                                                  sheet, &cache);
+        if (body_cs.background >= 0)
+            v->canvas_bg = body_cs.background;
+    }
+
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_tag_id_t t = node_tag(n);
