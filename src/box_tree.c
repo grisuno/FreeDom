@@ -213,9 +213,13 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
     /* Place every child (row, start column) honouring its span. Each row index
      * holds at least one item, so nrows <= nk <= BT_MAX_CHILDREN. */
     int    span[BT_MAX_CHILDREN];
+    int    row_span[BT_MAX_CHILDREN];
     size_t prow[BT_MAX_CHILDREN], pcol[BT_MAX_CHILDREN];
-    for (size_t i = 0; i < nk; ++i) span[i] = kids[i]->grid_span;
-    if (fx_grid_place_span(nk, cols, span, prow, pcol) != FX_OK) return BT_ERR_RANGE;
+    for (size_t i = 0; i < nk; ++i) {
+        span[i] = kids[i]->grid_span;
+        row_span[i] = kids[i]->grid_row_span;
+    }
+    if (fx_grid_place_span(nk, cols, span, row_span, prow, pcol) != FX_OK) return BT_ERR_RANGE;
 
     size_t nrows = (nk > 0) ? prow[nk - 1] + 1 : 0;
     if (nrows > BT_MAX_CHILDREN) return BT_ERR_RANGE;

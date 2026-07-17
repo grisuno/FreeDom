@@ -164,21 +164,63 @@ fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
 }
 
 fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+                             const int *row_span,
                              size_t *out_row, size_t *out_col) {
     if (nitems == 0) return FX_OK;
     if (ncols == 0 || nitems > FX_MAX_ITEMS) return FX_ERR_RANGE;
     if (out_row == NULL || out_col == NULL) return FX_ERR_NULL_ARG;
+
+    /* Track columns occupied by row-spanning items from previous rows.
+     * occ[r] bitmask: bit c set = column c is taken by a spanning item. */
+    size_t occ[FX_MAX_ITEMS];  /* max rows <= nitems */
+    size_t nocc = 0;
+    for (size_t i = 0; i < FX_MAX_ITEMS; ++i) occ[i] = 0;
 
     size_t r = 0, c = 0;
     for (size_t i = 0; i < nitems; ++i) {
         size_t sp = 1;
         if (span != NULL && span[i] > 1)
             sp = ((size_t)span[i] > ncols) ? ncols : (size_t)span[i];
-        if (c + sp > ncols) { ++r; c = 0; }   /* does not fit: next row */
+        size_t rsp = 1;
+        if (row_span != NULL && row_span[i] > 1)
+            rsp = (size_t)row_span[i];
+
+        /* Find the first row where `sp` consecutive columns are free,
+         * accounting for occupied cells from row-spanning items above.
+         * Start from current `r,c` (the cursor was advanced past the
+         * previous item). If this is a fresh function call r=c=0. */
+        int placed = 0;
+        while (!placed && r <= nitems) {
+            /* Ensure occ has an entry for this row. */
+            while (nocc <= r) { occ[nocc] = 0; ++nocc; }
+            /* Search forward from current column. If c was advanced past
+             * ncols on the previous item, this inner loop body won't
+             * execute and we'll move to the next row below. */
+            while (c + sp <= ncols) {
+                size_t mask = ((1ull << sp) - 1ull) << c;
+                if (mask == 0 || !(occ[r] & mask)) { placed = 1; break; }
+                ++c;
+            }
+            if (!placed) { ++r; c = 0; }
+        }
+        if (!placed) return FX_ERR_RANGE;
+
         out_row[i] = r;
         out_col[i] = c;
+
+        /* Advance the cursor so the next item does not re-use these cols. */
         c += sp;
-        if (c >= ncols) { ++r; c = 0; }        /* row full */
+        if (c >= ncols) { ++r; c = 0; }
+
+        /* If this item spans multiple rows, mark its occupied columns in
+         * the subsequent (rsp - 1) rows so later items skip them. */
+        if (rsp > 1) {
+            size_t mask = ((1ull << sp) - 1ull) << c;
+            for (size_t kr = r + 1; kr < r + rsp; ++kr) {
+                while (nocc <= kr) { occ[nocc] = 0; ++nocc; }
+                occ[kr] |= mask;
+            }
+        }
     }
     return FX_OK;
 }

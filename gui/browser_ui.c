@@ -3611,6 +3611,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             if (is_grid) {
                 const rd_block *bk = rd_at(doc, gstart[j]);
                 kids[pos_of[j]].grid_span = bk->grid_span;
+                kids[pos_of[j]].grid_row_span = bk->row_span;
             }
         }
     }

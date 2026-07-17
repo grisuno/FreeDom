@@ -310,7 +310,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[26] = {
+        int32_t b[27] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -321,6 +321,7 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->block_id, (int32_t)r->node_id,
             (int32_t)r->input_type, (int32_t)r->form_id, (int32_t)r->form_method,
             (int32_t)r->checked,
+            (int32_t)r->row_span,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -1402,7 +1403,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[36], gtw[PV_GRID_TRACKS + 1], b[26];
+        int32_t a[36], gtw[PV_GRID_TRACKS + 1], b[27];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1492,6 +1493,7 @@ static int read_view(int fd, pv_view **out) {
                 int gw[PV_GRID_TRACKS];
                 for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) gw[gk] = (int)gtw[gk];
                 pv_set_grid(v, gw, PV_GRID_TRACKS, (int)gtw[PV_GRID_TRACKS]);
+                pv_set_row_span(v, (int)b[26]);
             }
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
                        (int)fself);

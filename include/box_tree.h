@@ -88,6 +88,8 @@ typedef struct bt_node {
      * (grid-column: span N); <= 0 (zero-init default) = 1 column. Clamped to the
      * columns remaining on its row (CSS auto-placement). */
     int             grid_span;
+    /* grid-row: span N; 0 (default) = 1 row. */
+    int             grid_row_span;
 
     /* leaf content height in px (ignored for containers; computed): */
     double          content_h;

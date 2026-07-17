@@ -189,6 +189,7 @@ typedef struct pv_run {
      * carried regardless of caps.css. Defaults: all 0. */
     int     cont_col_w[PV_GRID_TRACKS];
     int     grid_span;
+    int     row_span;
     /* Stage 3a: flex per-item values from the BLOCK element's own css_style (the
      * flex item = the nearest block ancestor of this run). Like cont_*, these are
      * layout STRUCTURE (not author styling), carried regardless of caps.css. The
@@ -574,6 +575,7 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
  * encoded sizes (0 auto / >0 px / <0 fr x100; NULL or n <= 0 leaves all-auto);
  * col_span is the item's `grid-column: span N` (<= 0 = 1). No-op on an empty or
  * NULL view. The append helpers default everything to 0. */
+void pv_set_row_span(pv_view *v, int row_span);
 void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);
 
 /* Stage 3: sets the flex per-item values on the most recently appended run — the

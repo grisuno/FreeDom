@@ -173,6 +173,7 @@ static void run_init_common(pv_run *r) {
     r->cont_cols = 0;
     for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) r->cont_col_w[gk] = 0;
     r->grid_span = 0;
+    r->row_span = 0;
     r->flex_grow = -1;
     r->flex_shrink = -1;
     r->flex_basis = CSS_LEN_UNSET;
@@ -491,6 +492,10 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
     r->cont_wrap = cont_wrap;
     r->cont_row_gap = cont_row_gap;
     r->cont_align_items = cont_align_items;
+}
+
+void pv_set_row_span(pv_view *v, int row_span) {
+    if (v != NULL && v->count > 0) v->runs[v->count - 1].row_span = row_span;
 }
 
 void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span) {
@@ -1413,6 +1418,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             prev_basis = cs.flex_basis; prev_order = cs.order;
             prev_align_self = cs.align_self;
             prev_col_span = (cs.grid_col_span > 0) ? cs.grid_col_span : 0;
+            prev_row_span = (cs.grid_row_span > 0) ? cs.grid_row_span : 0;
             have_prev_el = 1;
             prev_el = p;
         }
@@ -2466,8 +2472,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             }
 
             if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)
-                && !in_hidden_subtree(n, base, sheet, &cache)
                 && !(reader && in_boilerplate_subtree(n, base))) {
+                /* `in_hidden_subtree` is intentionally NOT checked here because
+                 * many sites use JS-driven tab systems (display:none on all tabs,
+                 * JS shows one) that we cannot fully execute. Since images already
+                 * require explicit user opt-in (caps.images), showing them even
+                 * in hidden-subtree containers is a reasonable trade-off between
+                 * privacy and usability. */
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 size_t sl = 0;
                 const lxb_char_t *src =
@@ -2835,17 +2846,18 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
                           cont.wrap, cont.row_gap, cont.align_items);
-        pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
-        pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
-                   cont.align_self);
-        pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
-        pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
-        pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
-        pv_set_box_pct(v, box.w_pct);
-        pv_set_text_ext(v, &ext);
-        pv_set_block_id(v, bdeco);
-        pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
-    }
+                pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
+                pv_set_row_span(v, cont.row_span);
+                pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
+                            cont.align_self);
+                pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
+                pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
+                pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
+                pv_set_box_pct(v, box.w_pct);
+                pv_set_text_ext(v, &ext);
+                pv_set_block_id(v, bdeco);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
+            }
 
     /* Box engine (Step D): publish the box tree. box_reg holds one def per
      * box-carrying block in document order (id == index) with parent links resolved

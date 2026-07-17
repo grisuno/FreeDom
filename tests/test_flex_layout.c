@@ -256,7 +256,7 @@ static void test_grid_place_span_basic(void **state) {
     /* 3 columns; item0 spans 2 -> (0,0); item1 span 1 -> (0,2); item2 span 1 -> (1,0) */
     int span[3] = { 2, 1, 1 };
     size_t row[3], col[3];
-    assert_int_equal(fx_grid_place_span(3, 3, span, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(3, 3, span, NULL, row, col), FX_OK);
     assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
     assert_int_equal(row[1], 0); assert_int_equal(col[1], 2);
     assert_int_equal(row[2], 1); assert_int_equal(col[2], 0);
@@ -268,7 +268,7 @@ static void test_grid_place_span_wraps_when_it_does_not_fit(void **state) {
      * jumps to (1,0); item2 -> (2,0) */
     int span[3] = { 1, 3, 1 };
     size_t row[3], col[3];
-    assert_int_equal(fx_grid_place_span(3, 3, span, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(3, 3, span, NULL, row, col), FX_OK);
     assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
     assert_int_equal(row[1], 1); assert_int_equal(col[1], 0);
     assert_int_equal(row[2], 2); assert_int_equal(col[2], 0);
@@ -279,15 +279,15 @@ static void test_grid_place_span_clamps_and_defaults(void **state) {
     /* span > ncols clamps to ncols; span <= 0 and NULL spans mean 1 */
     int span[2] = { 9, 0 };
     size_t row[2], col[2];
-    assert_int_equal(fx_grid_place_span(2, 3, span, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, row, col), FX_OK);
     assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
     assert_int_equal(row[1], 1); assert_int_equal(col[1], 0);
-    assert_int_equal(fx_grid_place_span(2, 3, NULL, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(2, 3, NULL, NULL, row, col), FX_OK);
     assert_int_equal(row[1], 0); assert_int_equal(col[1], 1);
     /* fail-closed edges */
-    assert_int_equal(fx_grid_place_span(0, 3, NULL, NULL, NULL), FX_OK);   /* no-op */
-    assert_int_equal(fx_grid_place_span(2, 0, span, row, col), FX_ERR_RANGE);
-    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, col), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_grid_place_span(0, 3, NULL, NULL, NULL, NULL), FX_OK);   /* no-op */
+    assert_int_equal(fx_grid_place_span(2, 0, span, NULL, row, col), FX_ERR_RANGE);
+    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, NULL, col), FX_ERR_NULL_ARG);
 }
 
 static void test_float_pack_left(void **state) {

@@ -89,7 +89,8 @@ fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
  * Writes each item's row and starting column. nitems == 0 is a no-op; ncols == 0 or
  * nitems > FX_MAX_ITEMS fails closed. */
 fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
-                             size_t *out_row, size_t *out_col);
+                              const int *row_span,
+                              size_t *out_row, size_t *out_col);
 
 /* Float packing (one band; spec/float.md). Packs n float items along one axis:
  * side[i] == 0 (left) items advance a cursor from the content start (0) rightward in
