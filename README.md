@@ -629,6 +629,8 @@ make fuzz-pv      # Fuzz the display-list builder
 make fuzz-img     # Fuzz the PNG+JPEG+WebP+GIF decoder
 make view         # Compile the standalone Wayland + Cairo GUI demo
 make clean        # Wipe the build directory
+make all          # Build the whole proyect
+make deb          # Build debian deb package
 ```
 
 ## Screenshots
