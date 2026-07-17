@@ -407,6 +407,18 @@ typedef struct pv_box_def {
     /* Phase R1b: animation iteration count (-1 = infinite) and timing function. */
     int anim_iterations;
     int anim_timing;
+    /* Phase R4 (2026-07-16): animation direction, fill-mode, delay, and
+     * @keyframes name. anim_direction maps to ip_direction (0=normal,
+     * 1=reverse, 2=alternate, 3=alternate-reverse, -1=unset).
+     * anim_fill_mode maps to ip_fill_mode (-1=unset). anim_delay_ms is
+     * the delay in ms (0=none). anim_name is the @keyframes rule name
+     * (carried for forward compat; the v1 painter uses these only for
+     * the existing opacity animation, not for arbitrary keyframe
+     * property animation which requires the @keyframes engine). */
+    int anim_direction;
+    int anim_fill_mode;
+    int anim_delay_ms;
+    char anim_name[64];
 } pv_box_def;
 
 typedef struct pv_view {

@@ -724,4 +724,13 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
 /* Convenience: resolve only an inline declaration list (no sheet, no selectors). */
 css_style css_parse_inline(const char *style, size_t len);
 
+/* Web font access: returns the number of @font-face declarations parsed into
+ * the sheet, and copies the i-th declaration's family and src URL into the
+ * caller's buffers (both sized CSS_TOK_MAX / CSS_URL_MAX). Returns 0 on
+ * success, -1 if i is out of range. */
+size_t css_font_face_count(const css_sheet *sheet);
+int    css_font_face_at(const css_sheet *sheet, size_t i,
+                        char *family, size_t fam_cap,
+                        char *src_url, size_t url_cap);
+
 #endif /* FREEDOM_CSS_H */

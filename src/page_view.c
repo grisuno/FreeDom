@@ -1083,6 +1083,18 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bg_pos_y = cs->bg_pos_y;
     d->anim_iterations = cs->anim_iterations;
     d->anim_timing = cs->anim_timing;
+    /* Phase R4: animation direction, fill-mode, delay, and @keyframes name. */
+    d->anim_direction = cs->anim_direction;
+    d->anim_fill_mode = cs->anim_fill_mode;
+    d->anim_delay_ms = cs->anim_delay_ms;
+    if (cs->anim_name[0] != '\0') {
+        size_t nlen = strlen(cs->anim_name);
+        if (nlen >= sizeof d->anim_name) nlen = sizeof d->anim_name - 1;
+        memcpy(d->anim_name, cs->anim_name, nlen);
+        d->anim_name[nlen] = '\0';
+    } else {
+        d->anim_name[0] = '\0';
+    }
     /* R8: ::before/::after generated content. Copy up to the field size. */
     if (cs->content_str[0] != '\0') {
         size_t clen = strlen(cs->content_str);

@@ -2816,6 +2816,7 @@ typedef struct rc_box {
      * keyword (center = (box_w - img_w)/2). */
     int    bg_pos_x, bg_pos_y;
     char   bg_url2[PV_BG_URL_MAX];  /* R5b: second bg layer */
+    char   content_str[64];         /* R8: ::before/::after generated content */
 } rc_box;
 
 typedef struct rc_layout {
@@ -3825,6 +3826,8 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
         memcpy(bx->bg_url2, def->bg_image_url2, sizeof bx->bg_url2);
         bx->bg_url2[sizeof bx->bg_url2 - 1] = '\0';
+        memcpy(bx->content_str, def->content_str, sizeof bx->content_str);
+        bx->content_str[sizeof bx->content_str - 1] = '\0';
         bx->hidden = inherited_hidden || this_hidden;
         /* 2026-07-10 author vertical dimensions + aspect-ratio. box_min_w enlarges
          * box_width when the layout was smaller; box_h sets a fixed height (the
@@ -5367,7 +5370,8 @@ static void box_path(cairo_t *cr, double x, double y, double w, double h, double
  * square corners. Content is not clipped to the rounded rect (v1). The box
  * decoration was gated behind caps.css upstream (render_doc). */
 static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
-                                 const ui_bg_image *bgimg) {
+                                 const ui_bg_image *bgimg, const ui_bg_image *bgimg2,
+                                 const ui_theme *th) {
     if (bx->hidden) return;  /* visibility:hidden: geometry stood, decoration does not paint */
     double x = ox + bx->x, y = oy + bx->top, w = bx->w, h = bx->h;
     if (w <= 0.0 || h <= 0.0) return;
@@ -5466,19 +5470,66 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         cairo_fill(cr);
     }
 
-    /* CSS background-image (2026-07-16): paints OVER bg_rgb/gradient, UNDER the
-     * border (CSS background layering: color, then image, then border box edge)
-     * -- an image with transparency lets the color underneath show through.
-     * background-size chooses the scale: cover/contain both preserve aspect
-     * ratio (cover fills the box, possibly cropping; contain fits inside,
-     * possibly letterboxing); unset/auto uses the natural pixel size.
-     * background-position is not resolved in v1 (see spec/css.md) so tiling/
-     * placement always starts at the top-left corner, which matches the CSS
-     * initial value 0% 0% -- the common case, not a compromise. repeat-x/
-     * repeat-y clip to a one-tile-tall/-wide strip so Cairo's single
-     * EXTEND_REPEAT (which tiles both axes) only shows through on the axis
-     * that should repeat; space/round fall back to plain repeat (their exact
-     * tile-count/spacing math is a v2 refinement, see spec/css.md). */
+    /* R5b: second background-image layer (bg_image_url2): paints UNDER the
+     * first layer (CSS multi-background: the first declared URL is the topmost)
+     * and OVER bg_rgb/gradient, UNDER the border. Same sizing/repeat/position
+     * as the first layer, using the SAME rc_box fields (bg_size, bg_repeat,
+     * and bg_pos are shared across layers in v1 -- see spec/css.md). */
+    if (bgimg2 != NULL && bgimg2->surface != NULL && bgimg2->nat_w > 0 && bgimg2->nat_h > 0
+        && w > 0.0 && h > 0.0) {
+        double sx = 1.0, sy = 1.0;
+        if (bx->bg_size == CSS_BGS_COVER) {
+            double s = (w / (double)bgimg2->nat_w > h / (double)bgimg2->nat_h)
+                     ? w / (double)bgimg2->nat_w : h / (double)bgimg2->nat_h;
+            sx = sy = s;
+        } else if (bx->bg_size == CSS_BGS_CONTAIN) {
+            double s = (w / (double)bgimg2->nat_w < h / (double)bgimg2->nat_h)
+                     ? w / (double)bgimg2->nat_w : h / (double)bgimg2->nat_h;
+            sx = sy = s;
+        }
+        double iw = (double)bgimg2->nat_w * sx, ih = (double)bgimg2->nat_h * sy;
+        cairo_save(cr);
+        box_path(cr, x, y, w, h, rad);
+        cairo_clip(cr);
+        if (bx->bg_repeat == CSS_BGR_REPEAT_X && ih > 0.0) {
+            cairo_rectangle(cr, x, y, w, ih);
+            cairo_clip(cr);
+        } else if (bx->bg_repeat == CSS_BGR_REPEAT_Y && iw > 0.0) {
+            cairo_rectangle(cr, x, y, iw, h);
+            cairo_clip(cr);
+        }
+        double pox = 0.0, poy = 0.0;
+        if (bx->bg_pos_x == CSS_LEN_AUTO && iw > 0.0) pox = (w - iw) / 2.0;
+        else if (bx->bg_pos_x == CSS_LEN_END  && iw > 0.0) pox = w - iw;
+        else if (bx->bg_pos_x != PV_LEN_UNSET) pox = (double)bx->bg_pos_x;
+        if (bx->bg_pos_y == CSS_LEN_AUTO && ih > 0.0) poy = (h - ih) / 2.0;
+        else if (bx->bg_pos_y == CSS_LEN_END  && ih > 0.0) poy = h - ih;
+        else if (bx->bg_pos_y != PV_LEN_UNSET) poy = (double)bx->bg_pos_y;
+        cairo_translate(cr, x + pox, y + poy);
+        cairo_scale(cr, sx, sy);
+        cairo_pattern_t *ipat = cairo_pattern_create_for_surface(bgimg2->surface);
+        cairo_pattern_set_extend(ipat, bx->bg_repeat == CSS_BGR_NO_REPEAT
+                                       ? CAIRO_EXTEND_NONE : CAIRO_EXTEND_REPEAT);
+        cairo_pattern_set_filter(ipat, CAIRO_FILTER_GOOD);
+        cairo_set_source(cr, ipat);
+        cairo_paint(cr);
+        cairo_pattern_destroy(ipat);
+        cairo_restore(cr);
+    }
+
+    /* CSS background-image (first layer): paints OVER bg_rgb/gradient (and over the
+     * second layer, if any), UNDER the border (CSS background layering: color, then
+     * image layers from back to front, then border box edge) -- an image with
+     * transparency lets the layers underneath show through. background-size chooses
+     * the scale: cover/contain both preserve aspect ratio (cover fills the box,
+     * possibly cropping; contain fits inside, possibly letterboxing); unset/auto uses
+     * the natural pixel size. background-position is not resolved in v1 (see spec/
+     * css.md) so tiling/placement always starts at the top-left corner, which matches
+     * the CSS initial value 0% 0% -- the common case, not a compromise. repeat-x/
+     * repeat-y clip to a one-tile-tall/-wide strip so Cairo's single EXTEND_REPEAT
+     * (which tiles both axes) only shows through on the axis that should repeat;
+     * space/round fall back to plain repeat (their exact tile-count/spacing math is a
+     * v2 refinement, see spec/css.md). */
     if (bgimg != NULL && bgimg->surface != NULL && bgimg->nat_w > 0 && bgimg->nat_h > 0
         && w > 0.0 && h > 0.0) {
         double sx = 1.0, sy = 1.0;
@@ -5565,6 +5616,31 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                  w + ow + 2.0 * oo, h + ow + 2.0 * oo,
                  rad > 0.0 ? rad + ow / 2.0 + oo : 0.0);
         cairo_stroke(cr);
+    }
+
+    /* R8: ::before/::after generated content text. When a box carries a non-empty
+     * content_str (a block-level pseudo-element with display:block), paint it as
+     * text inside the content area (inside padding, inside border). Inline
+     * pseudo-elements are already handled as text runs by page_view.c -- this only
+     * fires for boxes whose content is the generated text itself. Uses the theme's
+     * body font and text color as sensible defaults (the box itself does not carry
+     * font/color style independently in v1). */
+    if (bx->content_str[0] != '\0' && th != NULL) {
+        double cx = x + bl;  /* content area: inside the border */
+        double cy = y + bt;
+        double cw = w - bl - br;
+        if (cw > 4.0 && bx->h > bt + bb + 2.0) {
+            double fs = (double)th->body_font;
+            content_font(cr, fs, 0, 0, CSS_FF_UNSET);
+            set_rgb(cr, th->text);
+            cairo_save(cr);
+            cairo_rectangle(cr, cx, cy, cw, bx->h - bt - bb);
+            cairo_clip(cr);
+            double tx = cx + 2.0, ty = cy + fs;
+            cairo_move_to(cr, tx, ty);
+            cairo_show_text(cr, bx->content_str);
+            cairo_restore(cr);
+        }
     }
 }
 
@@ -5865,18 +5941,126 @@ static cairo_operator_t bui_blend_operator(int mix_blend) {
     }
 }
 
+/* Applies a separable box blur to the pixels of an image surface in-place.
+ * radius is the CSS blur radius in px (clamped to sane bounds). The blur is a
+ * simple moving-average box blur with two passes (horizontal then vertical),
+ * each pass accumulating in a temporary row/column buffer. Wraps around the
+ * edges by clamping the nearest edge pixel (same as CSS filter: blur()). */
+static void bui_box_blur_surface(cairo_surface_t *surf, int radius) {
+    if (radius <= 0) return;
+    int w = cairo_image_surface_get_width(surf);
+    int h = cairo_image_surface_get_height(surf);
+    if (w <= 0 || h <= 0) return;
+    int stride = cairo_image_surface_get_stride(surf);
+    unsigned char *data = cairo_image_surface_get_data(surf);
+    if (data == NULL) return;
+    /* Clamp radius to a sane max (the whole surface is the practical limit). */
+    if (radius > w) radius = w;
+    if (radius > h) radius = h;
+
+    /* Horizontal pass: for each row, accumulate a sliding window. */
+    uint32_t *tmp = (uint32_t *)malloc((size_t)w * sizeof(uint32_t));
+    if (tmp == NULL) return;
+    int denom = radius * 2 + 1;
+    for (int y = 0; y < h; ++y) {
+        uint32_t *row = (uint32_t *)(data + y * stride);
+        /* First pixel: sum of the first (denom) pixels, clamped at edges. */
+        unsigned long long sr = 0, sg = 0, sb = 0, sa = 0;
+        for (int k = -radius; k <= radius; ++k) {
+            int ix = (k < 0) ? 0 : (k >= w ? w - 1 : k);
+            uint32_t px = row[ix];
+            sa += (px >> 24) & 0xff;
+            sr += (px >> 16) & 0xff;
+            sg += (px >>  8) & 0xff;
+            sb +=  px        & 0xff;
+        }
+        tmp[0] = (uint32_t)((sa / denom) << 24) |
+                 (uint32_t)((sr / denom) << 16) |
+                 (uint32_t)((sg / denom) <<  8) |
+                 (uint32_t) (sb / denom);
+        /* Slide the window across. */
+        for (int x = 1; x < w; ++x) {
+            /* Subtract the pixel leaving the window on the left. */
+            int out_ix = x - radius - 1;
+            if (out_ix < 0) out_ix = 0;
+            uint32_t px_out = row[out_ix];
+            sa -= (px_out >> 24) & 0xff;
+            sr -= (px_out >> 16) & 0xff;
+            sg -= (px_out >>  8) & 0xff;
+            sb -=  px_out        & 0xff;
+            /* Add the pixel entering the window on the right. */
+            int in_ix = x + radius;
+            if (in_ix >= w) in_ix = w - 1;
+            uint32_t px_in = row[in_ix];
+            sa += (px_in >> 24) & 0xff;
+            sr += (px_in >> 16) & 0xff;
+            sg += (px_in >>  8) & 0xff;
+            sb +=  px_in        & 0xff;
+            tmp[x] = (uint32_t)((sa / denom) << 24) |
+                     (uint32_t)((sr / denom) << 16) |
+                     (uint32_t)((sg / denom) <<  8) |
+                     (uint32_t) (sb / denom);
+        }
+        /* Write back the blurred row. */
+        memcpy(row, tmp, (size_t)w * sizeof(uint32_t));
+    }
+
+    /* Vertical pass: for each column, same sliding window. */
+    uint32_t *col = (uint32_t *)malloc((size_t)h * sizeof(uint32_t));
+    if (col == NULL) { free(tmp); return; }
+    for (int x = 0; x < w; ++x) {
+        unsigned long long sa = 0, sr = 0, sg = 0, sb = 0;
+        for (int k = -radius; k <= radius; ++k) {
+            int iy = (k < 0) ? 0 : (k >= h ? h - 1 : k);
+            uint32_t px = ((uint32_t *)(data + iy * stride))[x];
+            sa += (px >> 24) & 0xff;
+            sr += (px >> 16) & 0xff;
+            sg += (px >>  8) & 0xff;
+            sb +=  px        & 0xff;
+        }
+        col[0] = (uint32_t)((sa / denom) << 24) |
+                 (uint32_t)((sr / denom) << 16) |
+                 (uint32_t)((sg / denom) <<  8) |
+                 (uint32_t) (sb / denom);
+        for (int y = 1; y < h; ++y) {
+            int out_iy = y - radius - 1;
+            if (out_iy < 0) out_iy = 0;
+            uint32_t px_out = ((uint32_t *)(data + out_iy * stride))[x];
+            sa -= (px_out >> 24) & 0xff;
+            sr -= (px_out >> 16) & 0xff;
+            sg -= (px_out >>  8) & 0xff;
+            sb -=  px_out        & 0xff;
+            int in_iy = y + radius;
+            if (in_iy >= h) in_iy = h - 1;
+            uint32_t px_in = ((uint32_t *)(data + in_iy * stride))[x];
+            sa += (px_in >> 24) & 0xff;
+            sr += (px_in >> 16) & 0xff;
+            sg += (px_in >>  8) & 0xff;
+            sb +=  px_in        & 0xff;
+            col[y] = (uint32_t)((sa / denom) << 24) |
+                     (uint32_t)((sr / denom) << 16) |
+                     (uint32_t)((sg / denom) <<  8) |
+                     (uint32_t) (sb / denom);
+        }
+        for (int y = 0; y < h; ++y)
+            ((uint32_t *)(data + y * stride))[x] = col[y];
+    }
+    free(col);
+    free(tmp);
+    cairo_surface_mark_dirty(surf);
+}
+
 /* Composites the currently-pushed group back onto cr using def's opacity/mix-blend
  * (the group must already be open via cairo_push_group). Restores CAIRO_OPERATOR_OVER
  * afterwards so callers never leak a non-default operator into later paint calls.
  * elapsed_ms: time since page load in ms; used for animation-blended opacity. */
 static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms) {
+    int needs_blur = (def && def->filter_blur > 0);
     int needs_grayscale = (def && def->filter_grayscale > 0);
     cairo_pattern_t *group = NULL;
     cairo_surface_t *flt_surf = NULL;
 
-    if (needs_grayscale) {
-        /* R3: extract the group as a surface, grayscale its pixels, then
-         * use the modified surface as the blend source. */
+    if (needs_blur || needs_grayscale) {
         group = cairo_pop_group(cr);
 
         double x1, y1, x2, y2;
@@ -5892,23 +6076,33 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
         cairo_set_source(fcr, group);
         cairo_paint(fcr);
 
-        unsigned char *data = cairo_image_surface_get_data(flt_surf);
-        int stride = cairo_image_surface_get_stride(flt_surf);
-        int pct = def->filter_grayscale;
-        if (pct > 100) pct = 100;
-        double factor = (double)pct / 100.0;
-        for (int y = 0; y < fh; ++y) {
-            uint32_t *row = (uint32_t *)(data + y * stride);
-            for (int x = 0; x < fw; ++x) {
-                uint32_t px = row[x];
-                int fr = (int)(px >> 16) & 0xff;
-                int fg = (int)(px >> 8) & 0xff;
-                int fb = (int)px & 0xff;
-                int gray = (int)(fr * 0.299 + fg * 0.587 + fb * 0.114 + 0.5);
-                int nr = (int)(fr + (gray - fr) * factor + 0.5);
-                int ng = (int)(fg + (gray - fg) * factor + 0.5);
-                int nb = (int)(fb + (gray - fb) * factor + 0.5);
-                row[x] = (px & 0xff000000) | ((uint32_t)nr << 16) | ((uint32_t)ng << 8) | (uint32_t)nb;
+        /* Phase R3: filter operations applied in order (blur first, then
+         * grayscale, matching CSS filter list semantics). */
+        if (needs_blur) {
+            int radius = def->filter_blur;
+            if (radius > 256) radius = 256;
+            bui_box_blur_surface(flt_surf, radius);
+        }
+
+        if (needs_grayscale) {
+            unsigned char *data = cairo_image_surface_get_data(flt_surf);
+            int stride = cairo_image_surface_get_stride(flt_surf);
+            int pct = def->filter_grayscale;
+            if (pct > 100) pct = 100;
+            double factor = (double)pct / 100.0;
+            for (int y = 0; y < fh; ++y) {
+                uint32_t *row = (uint32_t *)(data + y * stride);
+                for (int x = 0; x < fw; ++x) {
+                    uint32_t px = row[x];
+                    int fr = (int)(px >> 16) & 0xff;
+                    int fg = (int)(px >> 8) & 0xff;
+                    int fb = (int)px & 0xff;
+                    int gray = (int)(fr * 0.299 + fg * 0.587 + fb * 0.114 + 0.5);
+                    int nr = (int)(fr + (gray - fr) * factor + 0.5);
+                    int ng = (int)(fg + (gray - fg) * factor + 0.5);
+                    int nb = (int)(fb + (gray - fb) * factor + 0.5);
+                    row[x] = (px & 0xff000000) | ((uint32_t)nr << 16) | ((uint32_t)ng << 8) | (uint32_t)nb;
+                }
             }
         }
         cairo_destroy(fcr);
@@ -5926,10 +6120,17 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
         int iters = def->anim_iterations > 0 ? def->anim_iterations
                   : def->anim_iterations == -1 ? IP_ITERATION_INFINITE
                   : 1;
+        /* Phase R4: wire anim_direction (0=normal, 1=reverse, 2=alternate,
+         * 3=alternate-reverse, -1=default=normal), anim_fill_mode (-1=default=
+         * forwards), and anim_delay_ms (delay before start). */
+        int dir = (def->anim_direction >= 0 && def->anim_direction <= 3)
+                ? def->anim_direction : IP_DIR_NORMAL;
+        int fill = (def->anim_fill_mode >= 0) ? def->anim_fill_mode : IP_FILL_FORWARDS;
+        double delay = (def->anim_delay_ms > 0) ? (double)def->anim_delay_ms : 0.0;
         ip_anim a;
         ip_anim_init(&a, IP_VAL_SCALAR, &ease, kf, 2,
-                     (double)def->anim_duration_ms, 0.0,
-                     iters, IP_DIR_NORMAL, IP_FILL_FORWARDS);
+                     (double)def->anim_duration_ms, delay,
+                     iters, dir, fill);
         ip_anim_tick(&a, (double)elapsed_ms);
         int anim = (int)ip_anim_current(&a);
         if (anim >= 0 && anim <= 100) eff_opacity = anim;
@@ -5956,8 +6157,10 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                                          const rc_box *bx, double ox, double oy) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
     const ui_bg_image *bgimg = (def != NULL) ? find_bg_image(w, def->bg_image_url) : NULL;
+    const ui_bg_image *bgimg2 = (def != NULL) ? find_bg_image(w, def->bg_image_url2) : NULL;
+    const ui_theme *th = &w->theme;
     if (!box_forms_stacking_context(def)) {
-        paint_box_decoration(cr, bx, ox, oy, bgimg);
+        paint_box_decoration(cr, bx, ox, oy, bgimg, bgimg2, th);
         return;
     }
     cairo_matrix_t m;
@@ -5965,7 +6168,7 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
-    paint_box_decoration(cr, bx, ox, oy, bgimg);
+    paint_box_decoration(cr, bx, ox, oy, bgimg, bgimg2, th);
     cairo_restore(cr);
     bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
 }
@@ -5992,8 +6195,10 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
                                       int show_hover, char *row_done) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
     const ui_bg_image *bgimg = (def != NULL) ? find_bg_image(w, def->bg_image_url) : NULL;
+    const ui_bg_image *bgimg2 = (def != NULL) ? find_bg_image(w, def->bg_image_url2) : NULL;
+    const ui_theme *th = &w->theme;
     if (!box_forms_stacking_context(def)) {
-        paint_box_decoration(cr, bx, left, origin, bgimg);
+        paint_box_decoration(cr, bx, left, origin, bgimg, bgimg2, th);
         return;
     }
     cairo_matrix_t m;
@@ -6007,7 +6212,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
-    paint_box_decoration(cr, bx, left, origin, bgimg);
+    paint_box_decoration(cr, bx, left, origin, bgimg, bgimg2, th);
     cairo_restore(cr);
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
@@ -6096,8 +6301,10 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .bg_size = def->bg_size, .bg_repeat = def->bg_repeat,
         .bg_pos_x = def->bg_pos_x, .bg_pos_y = def->bg_pos_y,
     };
+    const ui_bg_image *bgimg = find_bg_image(w, def->bg_image_url);
+    const ui_bg_image *bgimg2 = find_bg_image(w, def->bg_image_url2);
     if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
-    paint_box_decoration(cr, &bx, left, origin, find_bg_image(w, def->bg_image_url));
+    paint_box_decoration(cr, &bx, left, origin, bgimg, bgimg2, th);
     if (needs_group) cairo_restore(cr);
     for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
         const rd_block *b = rd_at(w->doc, bi);
@@ -6356,7 +6563,24 @@ static long write_doc_pdf(browser_window *w, const char *path) {
         for (size_t p = 0; p < pages; ++p) {
             cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); /* white page */
             cairo_paint(cr);
-            /* Box decoration first (behind the rows): a box is placed on the page of
+
+            /* Stage 2, negative z-index PAINTS FIRST: behind in-flow content
+             * (CSS 2.1 Appendix E layer NEG_Z precedes in-flow layers). The
+             * compositor (cx_sort) groups L.positioned by layer, so z<0 is a
+             * contiguous prefix. Reuses paint_positioned_one's per-page clip
+             * stack so overflow:hidden ancestors are reconciled per page. */
+            {
+                int neg_ov_stack[OV_MAX_DEPTH] = {0};
+                int neg_ov_depth = 0;
+                for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
+                    paint_positioned_one(cr, w, th, &L.positioned[i], PDF_MARGIN, PDF_MARGIN,
+                                         -1e9, 2e9, PDF_PAGE_W,
+                                         neg_ov_stack, &neg_ov_depth, &L);
+                }
+                while (neg_ov_depth > 0) { cairo_restore(cr); neg_ov_depth--; }
+            }
+
+            /* Box decoration (behind the rows): a box is placed on the page of
              * its first enclosed row, offset to keep its rect aligned with that row. */
             for (size_t bi = 0; bi < L.nbox; ++bi) {
                 const rc_box *bx = &L.boxes[bi];
@@ -6380,16 +6604,12 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                 paint_content_row(cr, w, &L, &L.rows[i], PDF_MARGIN,
                                   PDF_MARGIN + yof[i], content_w, PDF_PAGE_W, 0);
             }
-            /* Stage 2: out-of-flow positioned boxes (v1: painted on every page; a
-             * positioned box that should only appear on one specific page is a
-             * follow-up). z_index < 0 is skipped -- PDF v1 doesn't reproduce the
-             * on-screen/PNG "paints behind in-flow" ordering across page
-             * boundaries (an omission, not a wrong-order bug). Reuses
-             * paint_positioned_one (same helper as the on-screen/PNG paths), so
-             * overflow:hidden ancestor clipping and stacking-context group
-             * compositing (opacity/mix-blend) are no longer PDF-only gaps -- a
-             * fresh page starts with a fresh clip stack, so per-page
-             * reconciliation is safe (no cross-page clip leakage). */
+            /* Stage 2: non-negative z-index PAINTS ABOVE in-flow content
+             * (App E layers ZERO_Z/POS_Z). Reuses paint_positioned_one
+             * (same helper as the on-screen/PNG paths), so overflow:hidden
+             * ancestor clipping and stacking-context group compositing
+             * (opacity/mix-blend) are already honoured. A fresh page starts
+             * with a fresh clip stack, so per-page reconciliation is safe. */
             int pdf_pos_ov_stack[OV_MAX_DEPTH] = {0};
             int pdf_pos_ov_depth = 0;
             for (size_t pi = 0; pi < L.npositioned; ++pi) {

@@ -10,6 +10,7 @@
 #include "css_select.h"
 
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -3970,6 +3971,20 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
      * point (callers that need them build a css_element with attrs). */
     css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL };
     return css_resolve_el(sheet, &el, inline_style, inline_len);
+}
+
+size_t css_font_face_count(const css_sheet *sheet) {
+    return (sheet != NULL) ? sheet->nfont_faces : 0;
+}
+
+int css_font_face_at(const css_sheet *sheet, size_t i,
+                     char *family, size_t fam_cap,
+                     char *src_url, size_t url_cap) {
+    if (sheet == NULL || i >= sheet->nfont_faces
+        || family == NULL || src_url == NULL) return -1;
+    snprintf(family, fam_cap, "%s", sheet->font_faces[i].family);
+    snprintf(src_url, url_cap, "%s", sheet->font_faces[i].src_url);
+    return 0;
 }
 
 css_style css_parse_inline(const char *style, size_t len) {

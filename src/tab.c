@@ -348,7 +348,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[80] = {
+        int32_t f[83] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -407,6 +407,9 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->bg_grad_pos[2], (int32_t)bd->bg_grad_pos[3],
             /* animation iterations/timing, Phase R1b */
             (int32_t)bd->anim_iterations, (int32_t)bd->anim_timing,
+            /* Phase R4: animation direction, fill-mode, delay */
+            (int32_t)bd->anim_direction, (int32_t)bd->anim_fill_mode,
+            (int32_t)bd->anim_delay_ms,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -417,6 +420,9 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_field(wfd, bd->bg_image_url2) != 0) return -1;
         /* R8: ::before/::after generated content text. */
         if (write_field(wfd, bd->content_str) != 0) return -1;
+        /* Phase R4: @keyframes animation name (forward compat, requires the
+         * @keyframes engine to be useful). */
+        if (write_field(wfd, bd->anim_name) != 0) return -1;
     }
     return 0;
 }
@@ -1513,7 +1519,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[80];
+        int32_t f[83];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1565,6 +1571,9 @@ static int read_view(int fd, pv_view **out) {
             .bg_grad_radial = f[73],
             /* animation iterations/timing, Phase R1b */
             .anim_iterations = f[78], .anim_timing = f[79],
+            /* Phase R4: animation direction, fill-mode, delay */
+            .anim_direction = f[80], .anim_fill_mode = f[81],
+            .anim_delay_ms = f[82],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;
@@ -1592,6 +1601,13 @@ static int read_view(int fd, pv_view **out) {
         if (cstr_len >= sizeof bd.content_str) { free(cstr); pv_free(v); return -1; }
         memcpy(bd.content_str, cstr, cstr_len + 1);
         free(cstr);
+        /* Phase R4: @keyframes animation name. */
+        char *aname = NULL;
+        size_t aname_len = 0;
+        if (read_field(fd, &aname, &aname_len) != 0) { pv_free(v); return -1; }
+        if (aname_len >= sizeof bd.anim_name) { free(aname); pv_free(v); return -1; }
+        memcpy(bd.anim_name, aname, aname_len + 1);
+        free(aname);
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
     }
 
