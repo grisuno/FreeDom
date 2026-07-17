@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     # 1. Clonar el repositorio
@@ -43,6 +43,19 @@ jobs:
           pkg-config \
           wayland-protocols \
           fontconfig
+
+        # Compatibilidad con wayland < 1.22: wl_display_set_max_buffer_size
+        # se agregó en 1.22; si el header no lo declara, lo añadimos
+        # (la función está en libwayland-client.so, solo falta en headers viejos).
+        if ! grep -q 'wl_display_set_max_buffer_size' /usr/include/wayland-client-core.h 2>/dev/null; then
+          echo "[*] Adding wl_display_set_max_buffer_size compat declaration"
+          sudo bash -c "cat >> /usr/include/wayland-client-core.h << 'WLDECL'
+
+void
+wl_display_set_max_buffer_size(struct wl_display *display,
+                               size_t max_buffer_size);
+WLDECL"
+        fi
 
     # 3. Descargar, compilar e instalar Lexbor globalmente
     - name: Install Lexbor from source
