@@ -256,7 +256,7 @@ walk is deferred to a follow-up.
 - Math functions, logical properties, `var()`/custom properties
 - Automatic dark mode (`@media (prefers-color-scheme: dark)`)
 - CSS transforms: `translate()`, `scale()`, `rotate()` via Cairo affine matrix
-- Headless mode, `--dump-console`, `--dump-dom`, `--dump-layout`
+- Headless mode, `--dump-console`, `--dump-dom`, `--dump-layout` , `--dump-video`
 - Strong per-tab sandboxing (seccomp-bpf W^X, Landlock, namespaces)
 - Docker + noVNC
 - Tor & I2P routing (`.onion`/`.i2p` + torify)
@@ -360,6 +360,16 @@ content_w=952 total_h=204.7 nbox=2 nrow=4 npositioned=5
 
 Add `--author-css` so the box tree is populated. Headless diagnostic with no
 display required.
+
+### Seeing video layout 
+
+Shows the rectangles the video engine actually reproduced the video 
+
+```bash
+VID=$(./build/freedom --js=on --dump-video-url "https://jkanime.net/dragon-ball-z/01/" 2>/dev/null | grep "\.m3u8" | tail -1)
+./build/freedom --dump-video=- "$VID" 2>/dev/null | ffplay -i pipe:0 2>/dev/null
+
+```
 
 ## Address Bar, Search & Keyboard Shortcuts
 
