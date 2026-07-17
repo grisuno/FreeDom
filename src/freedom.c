@@ -25,8 +25,10 @@
 #include "secure_fetch.h"
 #include "tab.h"
 #include "webcaps.h"
+#include "page_view.h"
 #include "media_decoder.h"
 #include "tls_impersonate.h"
+#include "hls.h"
 #include "ui.h"
 #include "url.h"
 
@@ -57,6 +59,9 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n");
     fprintf(fp, "  --dump-css: headless, print the resolved CSS property dump (boxes + block properties) to stdout\n");
     fprintf(fp, "  --dump-layout: headless, print the resolved layout (box rects + positioned boxes) to stdout\n");
+    fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n");
+    fprintf(fp, "  --dump-video=PATH: headless download and save video stream from a URL to PATH\n");
+    fprintf(fp, "                     ('-' for stdout, pipable to ffplay -i pipe:0)\n");
 }
 
 static int is_https_url(const char *s) {
@@ -114,6 +119,11 @@ static int g_dump_css = 0;
  * engine produced (output). Honours --author-css. */
 static int g_dump_layout = 0;
 
+/* Set by --dump-video-url: after headless render, print the first detected
+ * video source URL (the PV_VIDEO href) to stdout without truncation, so the
+ * user can pipe it to --dump-video or ffmpeg. */
+static int g_dump_video_url = 0;
+
 /* When nonzero, the headless render runs the page's inline JS (tab_load_full run_js).
  * Set by --dump-console and by --js resolving to "on". Default off (Secure by Default). */
 static int g_headless_js = 0;
@@ -124,6 +134,11 @@ static char g_auth_pass[256] = "";
 
 /* Tor/I2P routing for headless mode (off by default; opt-in via CLI flags). */
 static nr_config global_net = { 0, 0, 0 };
+
+/* When non-NULL (set by --dump-video=PATH), headless mode downloads the video
+ * stream from a URL and writes it to the specified path. '-' writes to stdout,
+ * suitable for piping to `ffplay -i pipe:0`. */
+static const char *g_video_out = NULL;
 static char global_tor_addr[64] = "127.0.0.1:9050";
 static char global_i2p_addr[64] = "127.0.0.1:4444";
 
@@ -583,6 +598,19 @@ static int render_page(const char *html, size_t len, const char *top_url,
     /* --dump-css: the resolved CSS property inspector, showing per-element CSS
      * properties as seen by the box engine and painter. */
     if (g_dump_css && rs == RD_OK) print_dom_css(doc);
+    /* --dump-video-url: print the first PV_VIDEO source URL to stdout without
+     * truncation, so the user can pipe it to --dump-video or ffmpeg. Looks at
+     * the raw pv_view (display list) before rd_free. */
+    if (g_dump_video_url && page.view != NULL) {
+        size_t nv = pv_count(page.view);
+        for (size_t i = 0; i < nv; i++) {
+            const pv_run *r = pv_at(page.view, i);
+            if (r != NULL && r->kind == PV_VIDEO && r->src != NULL && r->src[0] != '\0') {
+                printf("%s\n", r->src);
+                break;
+            }
+        }
+    }
     rd_free(doc);
 
     /* Developer console (Freebug): show what the page's JS logged and any error. */
@@ -726,6 +754,164 @@ static int run_headless(const char *target) {
     return rc;
 }
 
+/* Builds the TLS + proxy config for a headless fetch against `url`, same gate
+ * as the GUI thread uses for video fetches (fetch_follow_navigable in browser_ui).
+ * Returns 0 on success, -1 if the host is in a blocked realm. */
+static int build_fetch_config(const char *url, sf_config *cfg,
+                               int *allowlisted) {
+    *cfg = sf_config_default();
+    *allowlisted = 0;
+    if (url == NULL) return -1;
+    char host[512];
+    if (rp_host_of(url, host, sizeof host) != 0) return 0;
+    if (g_hosts != NULL)
+        *allowlisted = hb_is_allowlisted(g_hosts, host);
+    if (global_insecure) { cfg->policy = SF_POLICY_PERMISSIVE; cfg->insecure = 1; }
+    nr_route route = nr_route_for(url, global_net);
+    if (route == NR_ROUTE_BLOCKED) return -1;
+    if (route == NR_ROUTE_TOR) {
+        cfg->proxy_type = SF_PROXY_SOCKS5H; cfg->proxy_address = global_tor_addr;
+    } else if (route == NR_ROUTE_I2P) {
+        cfg->proxy_type = SF_PROXY_HTTP;    cfg->proxy_address = global_i2p_addr;
+    }
+    cfg->impersonate = ti_should_impersonate(
+        *allowlisted, 0, *allowlisted && hb_is_allowlisted(g_impersonate, host));
+    return 0;
+}
+
+/* Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted
+ * insecure), same chain as fetch_follow_navigable in the GUI. Returns SF_OK
+ * on success with resp populated. */
+static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+                                            int allowlisted, sf_response *resp) {
+    sf_status s = sf_get_follow(url, cfg, resp, SF_DEFAULT_MAX_REDIRECTS);
+    if (s == SF_ERR_KEM_NOT_PQ) {
+        sf_response_free(resp);
+        cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
+        s = sf_get_follow(url, cfg, resp, SF_DEFAULT_MAX_REDIRECTS);
+    }
+    if (s != SF_OK && allowlisted) {
+        sf_response_free(resp);
+        cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
+        cfg->insecure = 1;
+        s = sf_get_follow(url, cfg, resp, SF_DEFAULT_MAX_REDIRECTS);
+    }
+    return s;
+}
+
+/* Fetches a video URL and writes the raw stream to `out_fp`. For HLS (.m3u8),
+ * parses the playlist and concatenates all MPEG-TS segments into one stream.
+ * For progressive files (MP4/WebM), writes the response body as-is.
+ * Returns EXIT_OK on success, EXIT_ERROR on failure. */
+static int dump_video_stream(const char *url, FILE *out_fp) {
+    sf_config cfg;
+    int allowlisted = 0;
+    if (build_fetch_config(url, &cfg, &allowlisted) != 0) {
+        fprintf(stderr, "freedom: video realm blocked\n");
+        return EXIT_ERROR;
+    }
+
+    sf_response resp;
+    memset(&resp, 0, sizeof resp);
+    sf_status s = video_fetch_with_fallback(url, &cfg, allowlisted, &resp);
+    if (s != SF_OK || resp.http_code != 200 || resp.body == NULL) {
+        fprintf(stderr, "freedom: video fetch failed (status %d, http %d)\n",
+                (int)s, (int)resp.http_code);
+        sf_response_free(&resp);
+        return EXIT_ERROR;
+    }
+
+    hls_playlist *pl = NULL;
+    int is_hls = (hls_parse((const char *)resp.body, resp.body_len, &pl) == HLS_OK);
+
+    if (is_hls && pl->count > 0) {
+        if (pl->is_variant && pl->nvariants > 0) {
+            size_t vi = hls_select_variant(pl, 1920, 1080);
+            if (vi == (size_t)-1) {
+                hls_playlist_free(pl); sf_response_free(&resp);
+                return EXIT_ERROR;
+            }
+            char var_url[4096];
+            size_t vn = hls_resolve_url(url, pl->variants[vi].url,
+                                         var_url, sizeof var_url);
+            hls_playlist_free(pl); sf_response_free(&resp);
+            if (vn == 0) return EXIT_ERROR;
+            return dump_video_stream(var_url, out_fp);
+        }
+
+        char base_url[4096];
+        size_t blen = strlen(url);
+        if (blen >= sizeof base_url) blen = sizeof base_url - 1;
+        memcpy(base_url, url, blen);
+        base_url[blen] = '\0';
+        /* Cap segments to avoid infinite download on a full episode.
+         * User can adjust by running --dump-video directly on the m3u8
+         * with --insecure if they want the whole thing. */
+        size_t nsegs = pl->count;
+        enum { DV_MAX_SEGMENTS = 8 };
+        if (nsegs > DV_MAX_SEGMENTS) nsegs = DV_MAX_SEGMENTS;
+        size_t segs = 0;
+        for (size_t i = 0; i < nsegs; i++) {
+            char abs_url[4096];
+            size_t n = hls_resolve_url(base_url, pl->segments[i].url,
+                                        abs_url, sizeof abs_url);
+            if (n == 0) continue;
+
+            sf_response sresp;
+            memset(&sresp, 0, sizeof sresp);
+            s = video_fetch_with_fallback(abs_url, &cfg, allowlisted, &sresp);
+            if (s != SF_OK || sresp.body == NULL) {
+                sf_response_free(&sresp);
+                fprintf(stderr, "freedom: segment %zu fetch failed\n", i);
+                continue;
+            }
+            if (fwrite(sresp.body, 1, sresp.body_len, out_fp) != sresp.body_len) {
+                sf_response_free(&sresp);
+                hls_playlist_free(pl);
+                sf_response_free(&resp);
+                return EXIT_ERROR;
+            }
+            sf_response_free(&sresp);
+            segs++;
+        }
+        hls_playlist_free(pl);
+        sf_response_free(&resp);
+        fprintf(stderr, "freedom: wrote %zu segments\n", segs);
+        return (segs > 0) ? EXIT_OK : EXIT_ERROR;
+    }
+
+    hls_playlist_free(pl);
+    size_t wrote = fwrite(resp.body, 1, resp.body_len, out_fp);
+    sf_response_free(&resp);
+    if (wrote != resp.body_len) {
+        fprintf(stderr, "freedom: write error\n");
+        return EXIT_ERROR;
+    }
+    fprintf(stderr, "freedom: wrote %zu bytes (progressive)\n", wrote);
+    return EXIT_OK;
+}
+
+/* --dump-video handler: fetches a video URL and writes the stream to a file
+ * or stdout. */
+static int run_dump_video(const char *url) {
+    if (url == NULL) { fprintf(stderr, "freedom: no URL given for --dump-video\n"); return EXIT_ERROR; }
+    headless_load_hosts();
+    FILE *out = stdout;
+    int close_out = 0;
+    if (g_video_out != NULL && strcmp(g_video_out, "-") != 0) {
+        out = fopen(g_video_out, "wb");
+        if (out == NULL) {
+            fprintf(stderr, "freedom: cannot open '%s' for writing\n", g_video_out);
+            return EXIT_ERROR;
+        }
+        close_out = 1;
+    }
+    int rc = dump_video_stream(url, out);
+    fflush(out);
+    if (close_out) fclose(out);
+    return rc;
+}
+
 int main(int argc, char **argv) {
     /* A per-tab worker is spawned by re-exec'ing this binary (tab.c fork+exec) so it
      * inherits none of the GUI's memory. When invoked as --tab-worker, run the confined
@@ -827,6 +1013,18 @@ int main(int argc, char **argv) {
         } else if (strcmp(arg, "--dump-layout") == 0) {
             g_dump_layout = 1;
             headless = 1;      /* it is a headless diagnostic (no window) */
+        } else if (strcmp(arg, "--dump-video-url") == 0) {
+            g_dump_video_url = 1;
+            headless = 1;
+        } else if (strncmp(arg, "--dump-video=", 13) == 0) {
+            const char *path = arg + 13;
+            if (path[0] == '\0') {
+                fprintf(stderr, "freedom: --dump-video requires a non-empty PATH (use '-' for stdout)\n");
+                print_usage(stderr, argv[0]);
+                return EXIT_USAGE;
+            }
+            g_video_out = path;
+            headless = 1;
         } else if (arg[0] == '-') {
             fprintf(stderr, "freedom: unknown option '%s'\n", arg);
             print_usage(stderr, argv[0]);
@@ -840,6 +1038,14 @@ int main(int argc, char **argv) {
      * forces JS on regardless of any --js flag's order; otherwise headless runs JS
      * only when --js resolved to "on". */
     g_headless_js = g_dump_console || js_on;
+
+    if (g_video_out != NULL) {
+        if (target == NULL) {
+            fprintf(stderr, "freedom: --dump-video requires a URL argument\n");
+            return EXIT_USAGE;
+        }
+        return run_dump_video(target);
+    }
 
     if (headless) {
         if (target == NULL) {

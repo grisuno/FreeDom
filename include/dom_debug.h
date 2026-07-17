@@ -25,7 +25,7 @@
 
 /* Per-field cap for a variable-length value (block text / href) so one block stays
  * one line and a hostile document cannot blow up the dump. */
-#define DD_FIELD_MAX 96
+#define DD_FIELD_MAX 2048
 
 /* Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec
  * for the stable format). Returns the number of bytes that WOULD be written excluding

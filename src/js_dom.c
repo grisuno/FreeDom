@@ -2129,7 +2129,7 @@ static int try_create_iframe_from_script(dom_index *idx,
     if (!found) {
         /* Collect all video[N] assignments, preferring N=1 then N=0 */
         const char *vscan = p;
-        char candidate_urls[3][2048];
+        char candidate_urls[3][2048] = {{0}};
         int ncandidates = 0;
         while ((vscan = (const char *)memmem(vscan, (size_t)(end - vscan), "video", 5)) != NULL
                && ncandidates < 3) {
@@ -2259,46 +2259,46 @@ jd_status jd_inject_video_shim(js_context *ctx) {
     return ok ? JD_OK : JD_ERR_INTERNAL;
 }
 
-/* Scans `body` (length `blen`) for `.m3u8` URLs and writes the first one found
- * into `out` (bounded by `outsz`). Returns 1 if found, 0 otherwise.
- * Looks for patterns like: https://...m3u8... (with optional query params). */
-static int scan_m3u8_url(const char *body, size_t blen,
-                          char *out, size_t outsz) {
+/* Scans a body buffer for `.m3u8` (HLS) or `.mp4` (progressive) video URLs.
+ * Writes the first found URL into `out` (bounded by `outsz`). Prefers .m3u8
+ * over .mp4. Returns 1 if found, 0 otherwise. */
+static int scan_video_url(const char *body, size_t blen,
+                           char *out, size_t outsz) {
     if (body == NULL || blen == 0 || out == NULL || outsz == 0) return 0;
-    const char *m3u8 = ".m3u8";
-    size_t m3u8len = 5;
+    out[0] = '\0';
     const char *end = body + blen;
-    for (const char *p = body; p + m3u8len <= end; ++p) {
-        if ((p == body || p[-1] != '/') && memcmp(p, m3u8, m3u8len) == 0) {
-            /* Found ".m3u8" — walk backward to find the start of the URL */
-            const char *url_start = p;
-            while (url_start > body && url_start[-1] != '\'' && url_start[-1] != '"'
-                   && url_start[-1] != ' ' && url_start[-1] != '>' && url_start[-1] != '<'
-                   && url_start[-1] != ')' && url_start[-1] != '}' && url_start[-1] != ']'
-                   && url_start[-1] != ';' && url_start[-1] != ',' && url_start[-1] != '\n'
-                   && url_start[-1] != '\r' && url_start[-1] != '\t')
-                --url_start;
-            /* Walk forward past .m3u8 to find the end of the URL */
-            const char *url_end = p + m3u8len;
-            while (url_end < end && *url_end != '\'' && *url_end != '"'
-                   && *url_end != ' ' && *url_end != '>' && *url_end != '<'
-                   && *url_end != ')' && *url_end != '}' && *url_end != ']'
-                   && *url_end != ';' && *url_end != ',' && *url_end != '\n'
-                   && *url_end != '\r' && *url_end != '\t')
-                ++url_end;
-            size_t ulen = (size_t)(url_end - url_start);
-            if (ulen > 0 && ulen < outsz) {
-                memcpy(out, url_start, ulen);
-                out[ulen] = '\0';
-                return 1;
+    static const char *exts[] = {".m3u8", ".mp4"};
+    static const size_t extlens[] = {5, 4};
+    for (int ei = 0; ei < 2; ei++) {
+        const char *marker = exts[ei];
+        size_t mlen = extlens[ei];
+        for (const char *p = body; p + mlen <= end; ++p) {
+            if (memcmp(p, marker, mlen) == 0) {
+                const char *url_start = p;
+                while (url_start > body && url_start[-1] != '\'' && url_start[-1] != '"'
+                       && url_start[-1] != ' ' && url_start[-1] != '>' && url_start[-1] != '<'
+                       && url_start[-1] != ')' && url_start[-1] != '}' && url_start[-1] != ']'
+                       && url_start[-1] != ';' && url_start[-1] != ',' && url_start[-1] != '\n'
+                       && url_start[-1] != '\r' && url_start[-1] != '\t')
+                    --url_start;
+                const char *url_end = p + mlen;
+                while (url_end < end && *url_end != '\'' && *url_end != '"'
+                       && *url_end != ' ' && *url_end != '>' && *url_end != '<'
+                       && *url_end != ')' && *url_end != '}' && *url_end != ']'
+                       && *url_end != ';' && *url_end != ',' && *url_end != '\n'
+                       && *url_end != '\r' && *url_end != '\t')
+                    ++url_end;
+                size_t ulen = (size_t)(url_end - url_start);
+                if (ulen > 0 && ulen + 1 <= outsz) {
+                    memcpy(out, url_start, ulen);
+                    out[ulen] = '\0';
+                    return 1;
+                }
             }
         }
     }
     return 0;
 }
-
-/* Maximum number of iframes we track as "already processed" to avoid re-fetching. */
-#define JD_IFRAME_TRACK_MAX 16
 
 void jd_process_iframes(js_context *ctx, dom_index *idx,
                         jd_fetch_fn fn, void *fetch_ctx) {
@@ -2307,9 +2307,10 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return;
 
-    /* Static list of already-processed iframe node ids (simple, no dynamic alloc). */
-    static dom_node_id processed[JD_IFRAME_TRACK_MAX];
-    static size_t nprocessed = 0;
+    /* Per-context iframe tracking (no static state — avoids cross-page leaks). */
+    jd_opaque *o = (jd_opaque *)JS_GetContextOpaque(jsctx);
+    if (o == NULL) return;
+    jd_iframe_track *track = &o->iframe_track;
 
     /* Find all iframe elements in the index. */
     size_t niframe = dom_get_by_tag(idx, "iframe", NULL, 0);
@@ -2324,8 +2325,8 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
 
         /* Skip already-processed iframes. */
         int already = 0;
-        for (size_t j = 0; j < nprocessed; ++j) {
-            if (processed[j] == nid) { already = 1; break; }
+        for (size_t j = 0; j < track->nprocessed; ++j) {
+            if (track->processed[j] == nid) { already = 1; break; }
         }
         if (already) continue;
 
@@ -2335,8 +2336,8 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
         if (src == NULL || slen == 0) continue;
 
         /* Track this iframe as processed. */
-        if (nprocessed < JD_IFRAME_TRACK_MAX)
-            processed[nprocessed++] = nid;
+        if (track->nprocessed < JD_IFRAME_TRACK_MAX)
+            track->processed[track->nprocessed++] = nid;
 
         /* Fetch the iframe content. */
         int status = 0;
@@ -2352,16 +2353,13 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
             continue;
         }
 
-        /* Scan for .m3u8 video URLs in the response. */
-        char m3u8_url[2048];
-        if (scan_m3u8_url(body, blen, m3u8_url, sizeof m3u8_url)) {
+        /* Scan for video URLs in the response (.m3u8 first, then .mp4). */
+        char video_url[2048];
+        if (scan_video_url(body, blen, video_url, sizeof video_url)) {
             /* Create a <video> element in the document with this URL
-             * and append it as a child of <body>. The Lexbor tree walk
-             * (pv_build_styled starting from body) may miss this element
-             * due to jQuery's sibling-pointer corruption, but the DOM
-             * index (hash-based) still tracks it — inject_video_into_view
-             * in tab.c finds it via the index and injects it with
-             * pv_append_video. */
+             * and append it as a child of <body>. The DOM index tracks
+             * it — inject_video_into_view in tab.c finds it via the
+             * index and injects it with pv_append_video. */
             dom_node_id root_id = 0;
             dom_node_id body_id = DOM_NODE_NONE;
             for (dom_node_id sib = dom_first_child(idx, root_id);
@@ -2377,7 +2375,7 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
             if (body_id != DOM_NODE_NONE) {
                 dom_node_id vid_id = DOM_NODE_NONE;
                 if (dom_create_element(idx, "video", &vid_id) == DOM_OK) {
-                    dom_set_attribute(idx, vid_id, "src", m3u8_url);
+                    dom_set_attribute(idx, vid_id, "src", video_url);
                     dom_append_child(idx, body_id, vid_id);
                 }
             }

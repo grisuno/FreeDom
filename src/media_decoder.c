@@ -539,6 +539,21 @@ int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd) {
         close(out_pipe[0]); /* child writes to out_pipe[1] */
         close(cmd_pipe[1]); /* child reads from cmd_pipe[0] */
 
+        /* Close EVERY fd >= 3 EXCEPT our own pipe ends (out_pipe[1] for
+         * writing decoded frames, cmd_pipe[0] for reading commands), to
+         * prevent the Wayland display fd (inherited from the parent) from
+         * surviving the exec. An inherited Wayland fd would be leaked to the
+         * decoder child and, if accidentally written to (e.g. by an FFmpeg
+         * library logging callback), would corrupt the Wayland protocol
+         * connection — the most common cause of the white-flash/render-loop
+         * bug. */
+        int max_fd = (int)sysconf(_SC_OPEN_MAX);
+        if (max_fd < 256) max_fd = 256;
+        for (int fd = 3; fd < max_fd; ++fd) {
+            if (fd == out_pipe[1] || fd == cmd_pipe[0]) continue;
+            close(fd);
+        }
+
         /* Build --media-decoder <out_fd> <cmd_fd> argv for re-exec. */
         char out_str[16], cmd_str[16];
         int out_n = snprintf(out_str, sizeof out_str, "%d", out_pipe[1]);

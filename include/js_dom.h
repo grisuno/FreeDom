@@ -32,9 +32,20 @@ typedef enum jd_status {
  * Lives in the caller's stack (or struct) and must outlive ctx. The caller
  * zero-initialises it; jd_install wires it into the engine's context opaque. */
 typedef struct jd_click_state jd_click_state;
+
+/* Tracks iframes already processed by jd_process_iframes, to avoid re-fetching
+ * the same iframe on repeated calls. Lives in jd_opaque (caller's stack), not
+ * in a static — eliminates cross-page state leaks. Zero-init => fresh state. */
+#define JD_IFRAME_TRACK_MAX 16
+typedef struct jd_iframe_track {
+    dom_node_id processed[JD_IFRAME_TRACK_MAX];
+    size_t      nprocessed;
+} jd_iframe_track;
+
 typedef struct jd_opaque {
     dom_index       *idx;
     jd_click_state  *click;
+    jd_iframe_track  iframe_track;
 } jd_opaque;
 
 /* Installs the `dom` global (and a small standard `document` shim) into the sandbox,
@@ -158,10 +169,11 @@ jd_status jd_inject_video_shim(js_context *ctx);
 /* Processes any <iframe> elements in the DOM that were created during JS execution
  * (via createElement/appendChild or innerHTML): for each iframe with a non-empty `src`,
  * fetches the content via `fn` (the same fetch mechanism as XHR), scans the response for
- * video URLs (.m3u8 patterns), and creates <video> elements in the document for any found.
- * Does NOT re-process iframes already processed (tracks them by node_id in a bloom-light
- * manner). Call after every DOM mutation that may have added iframes (innerHTML setter,
- * appendChild). fn/fetch_ctx must outlive ctx. ctx == NULL => no-op. */
+ * video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for
+ * any found. Does NOT re-process iframes already processed (tracks them by node_id in
+ * jd_opaque.iframe_track, caller stack — not static). Call after every DOM mutation that
+ * may have added iframes (innerHTML setter, appendChild). fn/fetch_ctx must outlive ctx.
+ * ctx == NULL => no-op. */
 void jd_process_iframes(js_context *ctx, dom_index *idx,
                         jd_fetch_fn fn, void *fetch_ctx);
 

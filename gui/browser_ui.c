@@ -1227,29 +1227,32 @@ static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
                                         sf_response *out, int *downgraded,
                                         int allowlisted) {
     *downgraded = DOWNGRADE_NONE;
+    /* For video fetches the caller set timeout_ms=10000 so PQ fails fast
+     * if the CDN does not support it; for every other fetch (CSS, JS,
+     * images) the default 30s timeout applies. */
+    sf_policy saved = cfg->policy;
+    /* Try PQ-hybrid first (the standard secure path). */
     sf_status s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-    if (s == SF_OK) return s;
-
+    if (s == SF_OK) { *downgraded = DOWNGRADE_NONE; cfg->policy = saved; return s; }
+    /* PQ failed — retry with classical KE (TLS 1.3, X25519). */
     if (s == SF_ERR_KEM_NOT_PQ) {
         sf_response_free(out);
-        sf_policy saved = cfg->policy;
         cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
         s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-        cfg->policy = saved;
-        if (s == SF_OK) { *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
+        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
     }
-
-    if (allowlisted) {
+    /* Classical KE failed too and host is allowlisted: try the sovereignty
+     * override (TLS 1.2 min, no cert verification). */
+    if (allowlisted && s != SF_OK) {
         sf_response_free(out);
-        sf_policy saved = cfg->policy;
         int saved_insecure = cfg->insecure;
         cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
         cfg->insecure = 1;
         s = sf_get_follow(url, cfg, out, SF_DEFAULT_MAX_REDIRECTS);
-        cfg->policy = saved;
         cfg->insecure = saved_insecure;
-        if (s == SF_OK) { *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
+        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
     }
+    cfg->policy = saved;
     return s;
 }
 
@@ -1258,33 +1261,29 @@ static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
  * fallbacks apply in the SAME order, so a POST is never sent under weaker rules than
  * a GET (Zero Trust). cfg->policy is restored before returning. */
 static sf_status fetch_post_navigable(const char *url, sf_config *cfg,
-                                      const void *body, size_t body_len,
-                                      const char *content_type, sf_response *out,
-                                      int *downgraded, int allowlisted) {
+                                       const void *body, size_t body_len,
+                                       const char *content_type, sf_response *out,
+                                       int *downgraded, int allowlisted) {
     *downgraded = DOWNGRADE_NONE;
+    sf_policy saved = cfg->policy;
     sf_status s = sf_post(url, cfg, body, body_len, content_type, out);
-    if (s == SF_OK) return s;
-
+    if (s == SF_OK) { cfg->policy = saved; return s; }
     if (s == SF_ERR_KEM_NOT_PQ) {
         sf_response_free(out);
-        sf_policy saved = cfg->policy;
         cfg->policy = SF_POLICY_ALLOW_CLASSICAL_KE;
         s = sf_post(url, cfg, body, body_len, content_type, out);
-        cfg->policy = saved;
-        if (s == SF_OK) { *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
+        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_CLASSICAL_KE; return s; }
     }
-
-    if (allowlisted) {
+    if (allowlisted && s != SF_OK) {
         sf_response_free(out);
-        sf_policy saved = cfg->policy;
         int saved_insecure = cfg->insecure;
         cfg->policy = SF_POLICY_ALLOWLISTED_INSECURE;
         cfg->insecure = 1;
         s = sf_post(url, cfg, body, body_len, content_type, out);
-        cfg->policy = saved;
         cfg->insecure = saved_insecure;
-        if (s == SF_OK) { *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
+        if (s == SF_OK) { cfg->policy = saved; *downgraded = DOWNGRADE_ALLOWLISTED; return s; }
     }
+    cfg->policy = saved;
     return s;
 }
 
@@ -4945,13 +4944,16 @@ static int video_read_frame(browser_window *w) {
     ssize_t r = read(w->decoder_out_fd, &tag, 1);
     if (r <= 0) {
         if (r < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) return 0;
+        fprintf(stderr, "vrf: read err %d\n", errno);
         return -1;
     }
     if (tag == MD_EOS) {
+        fprintf(stderr, "vrf: EOS\n");
         w->video_active = 0;
         return 0;
     }
     if (tag == MD_STREAM_INFO) {
+        fprintf(stderr, "vrf: STREAM_INFO\n");
         int32_t codec, w32, h32, ha32;
         if (v_read(w->decoder_out_fd, &codec, sizeof codec) != 0
          || v_read(w->decoder_out_fd, &w32, sizeof w32) != 0
@@ -4982,7 +4984,19 @@ static int video_read_frame(browser_window *w) {
             w->video_w = (int)w32;
             w->video_h = (int)h32;
         }
+        fprintf(stderr, "vrf: FRAME %dx%d dlen=%zu\n", (int)w32, (int)h32, dlen);
         return 1;
+    }
+    if (tag == MD_ERROR) {
+        size_t elen = 0;
+        char errbuf[256];
+        if (v_read(w->decoder_out_fd, &elen, sizeof elen) == 0 && elen < sizeof errbuf) {
+            if (v_read(w->decoder_out_fd, errbuf, elen) == 0) {
+                errbuf[elen] = '\0';
+                fprintf(stderr, "vrf: MD_ERROR: %s\n", errbuf);
+            }
+        }
+        return 0;
     }
     if (tag == MD_AUDIO_FRAME) {
         int64_t pts_s;
@@ -5036,6 +5050,7 @@ static int video_read_frame(browser_window *w) {
 static int video_build_fetch_config(browser_window *w, const char *url, sf_config *cfg,
                                      int *allowlisted) {
     *cfg = sf_config_default();
+    cfg->timeout_ms = 10000L; /* video fetch is on the main Wayland thread: 10s max */
     *allowlisted = 0;
     if (w == NULL || url == NULL) return 1;
 
@@ -5073,22 +5088,24 @@ static sf_status video_fetch(const char *url, browser_window *w,
  * video: the event loop drains decoder frames and paints.
  * Returns 0 on success, -1 on failure. */
 static int video_play(browser_window *w, const char *m3u8_url) {
-    if (w == NULL || m3u8_url == NULL) return -1;
+    if (w == NULL || m3u8_url == NULL) { fprintf(stderr, "video_play: null args\n"); return -1; }
+    fprintf(stderr, "video_play: url=%s\n", m3u8_url);
     video_stop(w);
 
     sf_response resp;
-    if (video_fetch(m3u8_url, w, &resp) != SF_OK
-        || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
+    sf_status vs = video_fetch(m3u8_url, w, &resp);
+    fprintf(stderr, "video_play: fetch status=%d http=%ld body=%p len=%zu\n",
+            (int)vs, resp.http_code, (void*)resp.body, resp.body_len);
+    if (vs != SF_OK || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
         sf_response_free(&resp);
         return -1;
     }
 
     hls_playlist *pl = NULL;
-    if (hls_parse((const char *)resp.body, resp.body_len, &pl) != HLS_OK) {
-        /* Not an HLS playlist: treat as a progressive file (MP4, WebM, etc.).
-         * Create a single-entry fake playlist so the feeder thread handles it
-         * the same way as an HLS segment. The re-fetch will re-download the
-         * same URL, which curl's cache handles for small files. */
+    int hls_ok = (hls_parse((const char *)resp.body, resp.body_len, &pl) == HLS_OK);
+    fprintf(stderr, "video_play: hls=%d is_var=%d nvar=%d count=%zu\n",
+            hls_ok, pl ? pl->is_variant : 0, pl ? (int)pl->nvariants : 0, pl ? pl->count : 0);
+    if (!hls_ok) {
         sf_response_free(&resp);
         pl = (hls_playlist *)calloc(1, sizeof *pl);
         if (pl == NULL) return -1;
@@ -5105,47 +5122,41 @@ static int video_play(browser_window *w, const char *m3u8_url) {
 
     if (pl->is_variant && pl->nvariants > 0) {
         size_t vi = hls_select_variant(pl, 1920, 1080);
-        if (vi == (size_t)-1) { hls_playlist_free(pl); return -1; }
+        if (vi == (size_t)-1) { fprintf(stderr, "video_play: no variant\n"); hls_playlist_free(pl); return -1; }
         char var_url[4096];
-        size_t vn = hls_resolve_url(m3u8_url, pl->variants[vi].url,
-                                     var_url, sizeof var_url);
-        hls_playlist_free(pl);
-        pl = NULL;
-        if (vn == 0) return -1;
-        if (video_fetch(var_url, w, &resp) != SF_OK
-            || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
-            sf_response_free(&resp);
-            return -1;
+        size_t vn = hls_resolve_url(m3u8_url, pl->variants[vi].url, var_url, sizeof var_url);
+        fprintf(stderr, "video_play: var[%zu]=%s\n", vi, var_url);
+        hls_playlist_free(pl); pl = NULL;
+        if (vn == 0) { fprintf(stderr, "video_play: var resolve fail\n"); return -1; }
+        memset(&resp, 0, sizeof resp);
+        if (video_fetch(var_url, w, &resp) != SF_OK || resp.http_code != 200 || resp.body == NULL || resp.body_len == 0) {
+            fprintf(stderr, "video_play: var fetch fail %d %ld\n", (int)resp.status, resp.http_code);
+            sf_response_free(&resp); return -1;
         }
         if (hls_parse((const char *)resp.body, resp.body_len, &pl) != HLS_OK) {
-            sf_response_free(&resp);
-            hls_playlist_free(pl);
-            return -1;
+            sf_response_free(&resp); return -1;
         }
         sf_response_free(&resp);
         w->video_base_url = strdup(var_url);
     } else if (!pl->is_variant) {
-        /* Progressive file (set above) or direct HLS single playlist: base URL
-         * is the original URL. For the progressive case w->video_base_url is
-         * already set by the segment URL; for HLS it needs to be set now. */
         w->video_base_url = strdup(m3u8_url);
     }
 
     if (pl == NULL || pl->count == 0) {
-        hls_playlist_free(pl);
-        free(w->video_base_url);
-        w->video_base_url = NULL;
+        fprintf(stderr, "video_play: empty pl\n");
+        hls_playlist_free(pl); free(w->video_base_url); w->video_base_url = NULL;
         return -1;
     }
+    fprintf(stderr, "video_play: pl ok count=%zu\n", pl->count);
 
     int out_fd = -1, cmd_fd = -1;
     pid_t pid = 0;
     if (media_decoder_spawn(&pid, &out_fd, &cmd_fd) != 0) {
-        hls_playlist_free(pl);
-        free(w->video_base_url);
-        w->video_base_url = NULL;
+        fprintf(stderr, "video_play: decoder spawn fail\n");
+        hls_playlist_free(pl); free(w->video_base_url); w->video_base_url = NULL;
         return -1;
     }
+    fprintf(stderr, "video_play: decoder spawned pid=%d\n", (int)pid);
     w->decoder_pid = pid;
     w->decoder_out_fd = out_fd;
     w->decoder_cmd_fd = cmd_fd;
@@ -5185,22 +5196,25 @@ static void *video_feeder_thread(void *arg) {
     signal(SIGPIPE, SIG_IGN);
     size_t total = w->video_pl->count;
 
+    fprintf(stderr, "feeder: starting total=%zu base=%s\n", total, w->video_base_url ? w->video_base_url : "NULL");
     for (size_t i = 0; i < total; i++) {
-        if (!w->video_active) break;
+        if (!w->video_active) { fprintf(stderr, "feeder: cancelled at seg %zu\n", i); break; }
 
         char abs_url[4096];
         size_t n = hls_resolve_url(w->video_base_url,
                                     w->video_pl->segments[i].url,
                                     abs_url, sizeof abs_url);
-        if (n == 0) continue;
+        if (n == 0) { fprintf(stderr, "feeder: seg %zu resolve failed\n", i); continue; }
 
         sf_response resp;
         memset(&resp, 0, sizeof resp);
-        if (video_fetch(abs_url, w, &resp) != SF_OK
-            || resp.body == NULL || resp.body_len == 0) {
+        sf_status fs = video_fetch(abs_url, w, &resp);
+        if (fs != SF_OK || resp.body == NULL || resp.body_len == 0) {
+            fprintf(stderr, "feeder: seg %zu fetch failed status=%d http=%ld\n", i, (int)fs, resp.http_code);
             sf_response_free(&resp);
             continue;
         }
+        fprintf(stderr, "feeder: seg %zu fetched %zu bytes\n", i, resp.body_len);
 
         uint8_t cmd = MD_DECODE;
         size_t slen = resp.body_len;
@@ -5209,7 +5223,6 @@ static void *video_feeder_thread(void *arg) {
         v_write(w->decoder_cmd_fd, resp.body, resp.body_len);
         sf_response_free(&resp);
 
-        /* Wake the event loop so it drains frames and paints. */
         uint64_t one = 1;
         ssize_t wr = write(w->video_evfd, &one, sizeof one);
         (void)wr;
@@ -7263,9 +7276,13 @@ static void apply_click_result(browser_window *w, tab_page *page) {
 static void dispatch_click(browser_window *w, double px, double py) {
     /* Check video click (play button / placeholder) before dispatching to the
      * worker, since video blocks have no text fragments for node_at_point. */
+    /* Prevent re-entrant clicks while video is already playing: the feeder
+     * thread writes to decoder pipes and the event loop reads frames. A
+     * second video_play would kill the decoder and restart from scratch. */
+    if (w->video_active) { fprintf(stderr, "dispatch_click: already playing\n"); return; }
     const char *video_url = video_at_point(w, px, py);
     if (video_url != NULL) {
-        video_play(w, video_url);
+        (void)video_play(w, video_url);
         return;
     }
 

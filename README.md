@@ -79,7 +79,7 @@ telemetry, mandatory API keys, or hidden solver workers. We refuse to do so.
 - Lexbor HTML parser and renderer
 - Strict request policy using Public Suffix List + blocklist/allowlist
 - Post-quantum hybrid cryptography support (X25519MLKEM768)
-- Headless mode for automation and testing
+- Headless mode for automation and testing, including `--dump-video` to download and pipe video streams
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
@@ -514,6 +514,29 @@ navigated even when it falls below Freedom's elevated TLS standard (TLS 1.2,
 classical key exchange, weak-but-valid certificate — with a warning). This is
 how TLS-1.2-only sites such as **Hacker News** load. The certificate chain is
 still authenticated; you are sovereign over your own hosts.
+
+## Video Debugging: `--dump-video`
+
+Freedom can download and save video streams from HLS (.m3u8) or progressive
+(MP4/WebM) URLs, bypassing the GUI for testing.
+
+```bash
+# Extract the video URL from a page (the actual .m3u8 from the video pipeline)
+VID=$(./build/freedom --js=on --dump-video-url "https://site.com/episode" 2>/dev/null | grep "\.m3u8" | tail -1)
+
+# Save to file:
+./build/freedom --insecure --dump-video=output.ts "$VID"
+
+# Pipe directly to ffplay for live testing:
+./build/freedom --insecure --dump-video=- "$VID" 2>/dev/null | ffplay -i pipe:0 2>/dev/null
+
+# Or concatenate all HLS segments and pipe:
+./build/freedom --insecure --dump-video=- "https://cdn.example.com/stream.m3u8" 2>/dev/null | ffplay -i pipe:0 2>/dev/null
+```
+
+If the server does not support PQ-hybrid key exchange, add `--insecure` to fall
+back to classical TLS. The tool respects `--tor`, `--i2p`, `--torify`, and
+`--user=username:password`.
 
 ## Fuzzing
 

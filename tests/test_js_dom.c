@@ -1367,6 +1367,105 @@ static void test_video_shim_null_ctx(void **state) {
     assert_int_equal(jd_inject_video_shim(NULL), JD_ERR_NULL_ARG);
 }
 
+/* --- C-level video extraction from scripts --- */
+
+/* jkanime-style: video[0..4] with absolute iframe URLs.
+ * jd_video_from_scripts creates ONE <iframe> for the best server (video[1]). */
+static void test_video_from_scripts_jkanime_style(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *script =
+        "video[0] = '<iframe class=\"pc\" src=\"https://jk/jkplayer/um?e=A\"></iframe>';"
+        "video[1] = '<iframe class=\"pc\" src=\"https://jk/jkplayer/umv?e=B\"></iframe>';"
+        "video[2] = '<iframe class=\"pc\" src=\"https://jk/jkplayer/um?e=C\"></iframe>';";
+    const char *texts[] = {script};
+    size_t lens[] = {strlen(script)};
+    size_t n = jd_video_from_scripts(f->idx, texts, lens, 1, "https://jkanime.net/one-piece/1");
+    /* Should create 1 iframe (video[1], the best candidate). */
+    assert_int_equal(n, 1);
+    dom_node_id ids[4];
+    size_t niframe = dom_get_by_tag(f->idx, "iframe", ids, 4);
+    assert_int_equal(niframe, 1);
+    /* Verify the iframe is video[1] (Magi server). */
+    size_t sl = 0;
+    const char *s0 = dom_get_attribute(f->idx, ids[0], "src", &sl);
+    assert_non_null(s0);
+    assert_string_equal(s0, "https://jk/jkplayer/umv?e=B");
+}
+
+/* video_data with variable-to-variable assignment: video_data = video[N].
+ * The C extractor falls back to the video[N] pattern for the URL. */
+static void test_video_from_scripts_video_data_is_variable(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *script =
+        "video[0] = '<iframe src=\"https://jk/jkplayer/um?e=X\"></iframe>';"
+        "video[1] = '<iframe src=\"https://jk/jkplayer/umv?e=Y\"></iframe>';"
+        "if(video[1] !== undefined) { var video_data = video[1]; }";
+    const char *texts[] = {script};
+    size_t lens[] = {strlen(script)};
+    size_t n = jd_video_from_scripts(f->idx, texts, lens, 1, "https://jkanime.net/one-piece/1");
+    /* video_data = video[1] is not a string literal, but the video[N] scan
+     * finds video[1]. Should create 1 iframe (best candidate). */
+    assert_int_equal(n, 1);
+}
+
+/* jkanime-style with root-relative URLs that get resolved. */
+static void test_video_from_scripts_relative_resolved(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *script =
+        "video[1] = '<iframe src=\"/jkplayer/umv?e=ABC\"></iframe>';";
+    const char *texts[] = {script};
+    size_t lens[] = {strlen(script)};
+    size_t n = jd_video_from_scripts(f->idx, texts, lens, 1,
+                                      "https://anime.test/dragon-ball/1");
+    assert_int_equal(n, 1);
+    dom_node_id ids[2];
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", ids, 2), 1);
+    size_t sl = 0;
+    const char *src = dom_get_attribute(f->idx, ids[0], "src", &sl);
+    assert_non_null(src);
+    assert_string_equal(src, "https://anime.test/jkplayer/umv?e=ABC");
+}
+
+/* video_data = '<iframe ...>' string literal (jkanime's pattern for some pages). */
+static void test_video_from_scripts_video_data_string(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *script =
+        "var video_data = '<iframe src=\"https://data.example/vid\"></iframe>';";
+    const char *texts[] = {script};
+    size_t lens[] = {strlen(script)};
+    size_t n = jd_video_from_scripts(f->idx, texts, lens, 1, NULL);
+    assert_int_equal(n, 1);
+    dom_node_id ids[2];
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", ids, 2), 1);
+    size_t sl = 0;
+    const char *src = dom_get_attribute(f->idx, ids[0], "src", &sl);
+    assert_non_null(src);
+    assert_string_equal(src, "https://data.example/vid");
+}
+
+/* No video data at all: should create zero iframes. */
+static void test_video_from_scripts_no_video(void **state) {
+    fixture *f = (fixture *)*state;
+    const char *script = "var x = 42;";
+    const char *texts[] = {script};
+    size_t lens[] = {strlen(script)};
+    size_t n = jd_video_from_scripts(f->idx, texts, lens, 1, NULL);
+    assert_int_equal(n, 0);
+    assert_int_equal(dom_get_by_tag(f->idx, "iframe", NULL, 0), 0);
+}
+
+/* NULL args return 0 gracefully. */
+static void test_video_from_scripts_null_args(void **state) {
+    (void)state;
+    const char *s = "video[0] = '<iframe src=\"x\"></iframe>';";
+    size_t l = strlen(s);
+    const char *txt[] = {s};
+    size_t ln[] = {l};
+    assert_int_equal(jd_video_from_scripts(NULL, txt, ln, 1, NULL), 0);
+    assert_int_equal(jd_video_from_scripts(NULL, NULL, ln, 1, NULL), 0);
+    assert_int_equal(jd_video_from_scripts(NULL, txt, NULL, 1, NULL), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_install_null_args),
@@ -1460,6 +1559,12 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_video_shim_relative_url_resolved, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_shim_empty_html, setup, teardown),
         cmocka_unit_test(test_video_shim_null_ctx),
+        cmocka_unit_test_setup_teardown(test_video_from_scripts_jkanime_style, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_from_scripts_video_data_is_variable, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_from_scripts_relative_resolved, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_from_scripts_video_data_string, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_video_from_scripts_no_video, setup, teardown),
+        cmocka_unit_test(test_video_from_scripts_null_args),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
