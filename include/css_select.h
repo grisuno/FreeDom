@@ -49,9 +49,11 @@ enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ALWAYS, PSEUDO_ROOT,
        PSEUDO_FIRST_OF_TYPE, PSEUDO_LAST_OF_TYPE, PSEUDO_ONLY_OF_TYPE,
        PSEUDO_NTH_OF_TYPE, PSEUDO_NTH_LAST_OF_TYPE,
        /* R2: element-state pseudos */
-       PSEUDO_EMPTY, PSEUDO_TARGET, PSEUDO_LANG,
-       /* R8: pseudo-elements (::before/::after) */
-       PSEUDO_BEFORE, PSEUDO_AFTER };
+        PSEUDO_EMPTY, PSEUDO_TARGET, PSEUDO_LANG,
+        /* R8: pseudo-elements (::before/::after) */
+        PSEUDO_BEFORE, PSEUDO_AFTER,
+        /* :has() relational pseudo-class (descendant walk) */
+        PSEUDO_HAS };
 
 /* Sub-selector for :not()/:is()/:where(): a simple compound with only
  * tag/.class/#id/[attr] (no combinators, no pseudo-classes inside

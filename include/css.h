@@ -709,6 +709,10 @@ typedef struct css_element {
     /* Total child node count (elements + text + comments, from the DOM walk;
      * R2). -1 = unknown (:empty fails closed), 0 = truly empty (:empty matches). */
     int child_count;
+    /* Pointer back to the source DOM node (lxb_dom_node_t *), for pseudo-classes
+     * that need descendant traversal (:has()). NULL means no DOM access available
+     * (the pseudo fails closed). */
+    const void *dom_node;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators

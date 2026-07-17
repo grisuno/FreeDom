@@ -1730,8 +1730,11 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
     if (w->doc == NULL) return;
     size_t n = rd_count(w->doc);
     size_t nimg = 0;
-    for (size_t i = 0; i < n; ++i)
-        if (rd_at(w->doc, i)->kind == RD_IMAGE) nimg++;
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(w->doc, i);
+        if (b->kind == RD_IMAGE) nimg++;
+        else if (b->kind == RD_VIDEO && b->poster_src != NULL) nimg++;
+    }
     if (nimg == 0) return;
 
     w->images = (ui_image *)calloc(nimg, sizeof *w->images);
@@ -1763,23 +1766,34 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
     for (size_t i = 0; i < n; ++i) {
         const rd_block *b = rd_at(w->doc, i);
         if (b->kind != RD_IMAGE) continue;
+        const char *img_href = (b->kind == RD_VIDEO) ? b->poster_src : b->href;
         ui_image *slot = &w->images[k++];
-        slot->href = (b->href != NULL) ? strdup(b->href) : NULL;
+        slot->href = (img_href != NULL) ? strdup(img_href) : NULL;
 
         /* render_doc already applied the policy: only an ALLOW image with a src is
          * loaded. cur_top is the origin (https remote, or file:// local) that a
          * fetched image is resolved/routed against -- a data: URL needs no origin
          * at all (render_doc's decision for it is origin-independent too), so it
          * is exempt from this guard. */
-        if (b->img_decision != RDP_IMG_ALLOW || b->href == NULL) continue;
-        if (w->cur_top == NULL && !du_is_data_url(b->href)) continue;
-
-        img_fail_reason reason = fetch_decode_image(w, t, img_fetch, fetch_ctx, b->href,
-                                                     &imgpool, pooled,
-                                                     &slot->surface, &slot->nat_w, &slot->nat_h);
-        if (reason != IMG_FAIL_OK) {
-            rd_block *rw = (rd_block *)b;
-            rw->img_fail = reason;
+        int is_poster = (b->kind == RD_VIDEO);
+        const char *target_url = is_poster ? b->poster_src : b->href;
+        if (target_url == NULL) continue;
+        if (is_poster) {
+            /* Poster: always ALLOW (the video block itself was gated by caps.images
+             * in rd_build). No fail reason to set on the block. */
+            fetch_decode_image(w, t, img_fetch, fetch_ctx, target_url,
+                               &imgpool, pooled,
+                               &slot->surface, &slot->nat_w, &slot->nat_h);
+        } else {
+            if (b->img_decision != RDP_IMG_ALLOW) continue;
+            if (w->cur_top == NULL && !du_is_data_url(b->href)) continue;
+            img_fail_reason reason = fetch_decode_image(w, t, img_fetch, fetch_ctx, target_url,
+                                                         &imgpool, pooled,
+                                                         &slot->surface, &slot->nat_w, &slot->nat_h);
+            if (reason != IMG_FAIL_OK) {
+                rd_block *rw = (rd_block *)b;
+                rw->img_fail = reason;
+            }
         }
     }
     w->image_count = k;
@@ -2052,6 +2066,17 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         w->doc = doc;
     }
     w->page_load_mono_ms = now_ms();  /* Phase R1: animation frame clock baseline */
+    /* Activate the frame clock if any box has a CSS animation duration set.
+     * Without this the event loop never repaints for animation frames. */
+    {
+        size_t nb = rd_box_count(doc);
+        int has_anim = 0;
+        for (size_t i = 0; !has_anim && i < nb; ++i) {
+            const pv_box_def *bx = rd_box_at(doc, i);
+            if (bx->anim_duration_ms > 0) has_anim = 1;
+        }
+        fc_set_active(&w->fc, has_anim);
+    }
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t, gui_image_fetch, w); /* fetch + decode allowed images in the still-open worker */
     load_bg_images(w, t, gui_image_fetch, w); /* fetch + decode allowed CSS background-images */
@@ -4964,11 +4989,23 @@ static int video_play(browser_window *w, const char *m3u8_url) {
 
     hls_playlist *pl = NULL;
     if (hls_parse((const char *)resp.body, resp.body_len, &pl) != HLS_OK) {
+        /* Not an HLS playlist: treat as a progressive file (MP4, WebM, etc.).
+         * Create a single-entry fake playlist so the feeder thread handles it
+         * the same way as an HLS segment. The re-fetch will re-download the
+         * same URL, which curl's cache handles for small files. */
         sf_response_free(&resp);
-        hls_playlist_free(pl);
-        return -1;
+        pl = (hls_playlist *)calloc(1, sizeof *pl);
+        if (pl == NULL) return -1;
+        pl->segments = (hls_segment *)calloc(1, sizeof *pl->segments);
+        if (pl->segments == NULL) { free(pl); return -1; }
+        pl->segments[0].url = strdup(m3u8_url);
+        pl->segments[0].duration = 10.0;
+        pl->count = 1;
+        pl->target_duration = 10.0;
+        pl->is_variant = 0;
+    } else {
+        sf_response_free(&resp);
     }
-    sf_response_free(&resp);
 
     if (pl->is_variant && pl->nvariants > 0) {
         size_t vi = hls_select_variant(pl, 1920, 1080);
@@ -4991,7 +5028,10 @@ static int video_play(browser_window *w, const char *m3u8_url) {
         }
         sf_response_free(&resp);
         w->video_base_url = strdup(var_url);
-    } else {
+    } else if (!pl->is_variant) {
+        /* Progressive file (set above) or direct HLS single playlist: base URL
+         * is the original URL. For the progressive case w->video_base_url is
+         * already set by the segment URL; for HLS it needs to be set now. */
         w->video_base_url = strdup(m3u8_url);
     }
 
@@ -5123,13 +5163,43 @@ static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
         cairo_surface_destroy(surf);
     }
 
-    /* Placeholder background */
-    set_rgb(cr, th->image_box);
-    cairo_set_line_width(cr, 1.0);
-    cairo_rectangle(cr, left, ry, content_w, row_h);
-    cairo_fill_preserve(cr);
-    set_rgb(cr, th->input_border);
-    cairo_stroke(cr);
+    /* Poster image: if a poster_src exists and its decoded image is available,
+     * draw it as the background, aspect-fitted and centered. Otherwise fall
+     * through to the plain placeholder background. */
+    int drew_poster = 0;
+    if (blk->poster_src != NULL) {
+        const ui_image *pi = find_image(w, blk->poster_src);
+        if (pi != NULL && pi->surface != NULL && pi->nat_w > 0 && pi->nat_h > 0) {
+            double scale_x = content_w / (double)pi->nat_w;
+            double scale_y = row_h / (double)pi->nat_h;
+            double scale = (scale_x < scale_y) ? scale_x : scale_y;
+            double dw = (double)pi->nat_w * scale;
+            double dh = (double)pi->nat_h * scale;
+            double dx = left + (content_w - dw) / 2.0;
+            double dy = ry + (row_h - dh) / 2.0;
+            cairo_save(cr);
+            cairo_rectangle(cr, left, ry, content_w, row_h);
+            cairo_clip(cr);
+            set_rgb(cr, th->image_box);
+            cairo_paint(cr);
+            cairo_translate(cr, dx, dy);
+            cairo_scale(cr, scale, scale);
+            cairo_set_source_surface(cr, pi->surface, 0.0, 0.0);
+            cairo_paint(cr);
+            cairo_restore(cr);
+            drew_poster = 1;
+        }
+    }
+
+    if (!drew_poster) {
+        /* Placeholder background */
+        set_rgb(cr, th->image_box);
+        cairo_set_line_width(cr, 1.0);
+        cairo_rectangle(cr, left, ry, content_w, row_h);
+        cairo_fill_preserve(cr);
+        set_rgb(cr, th->input_border);
+        cairo_stroke(cr);
+    }
 
     /* Play button icon (triangle) */
     double cx = left + content_w / 2.0;
@@ -10095,6 +10165,12 @@ ui_status ui_run_browser(const char *start_url) {
         /* While video is playing, wake at ~30 fps to check for new frames. */
         if (w.video_active && w.decoder_out_fd >= 0
             && (timeout < 0 || timeout > 33)) timeout = 33;
+        /* If CSS animations are active (frame_clock is ticking), wake up at the
+         * animation interval so painted animations advance smoothly. */
+        if (fc_needs_tick(&w.fc)) {
+            int ai = fc_interval_ms(&w.fc);
+            if (timeout < 0 || ai < timeout) timeout = ai;
+        }
 
         /* Poll the Wayland fd, the key-repeat timer, the async-fetch result pipe,
          * and the video decoder + feeder-thread eventfds together. */
@@ -10131,9 +10207,13 @@ ui_status ui_run_browser(const char *start_url) {
         } else {
             wl_display_cancel_read(w.display);
             if (pr < 0) { if (errno != EINTR) break; }       /* a real poll error */
-            else if (pr == 0) redraw(&w);                    /* toast/spinner tick: repaint */
+            else if (pr == 0) redraw(&w);                    /* toast/spinner/animation tick: repaint */
             else if (pfds[0].revents & (POLLHUP | POLLERR)) break; /* the display is gone */
         }
+        /* If CSS animations are active (frame_clock ticking), poll already timed
+         * out at the animation interval and redraw fired above. Nothing else to do:
+         * the next poll() will again use fc_interval_ms and the animation painter
+         * will recompute the current keyframe value from elapsed wall time. */
 
         /* A held key fired: re-apply it (read drains the expiration count so the timer
          * re-arms cleanly). Only acts while a repeat key is set. */

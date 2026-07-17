@@ -1181,6 +1181,19 @@ static void test_pseudo_empty(void **state) {
     css_free(sh);
 }
 
+static void test_has_parses_and_fails_closed(void **state) {
+    (void)state;
+    /* :has() with a sub-selector: the rule should parse without error.
+     * Since this element has no dom_node (NULL), :has() always fails
+     * closed (never matches), so the color does NOT apply. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div:has(.x){color:#050505}"
+                                "span:has(img){color:#060606}", 0, &sh), CSS_OK);
+    css_element d1 = el_node("div", NULL, (const char *[]){"class","x"}, 1, NULL);
+    assert_int_equal(css_resolve_el(sh, &d1, NULL, 0).color, -1);
+    css_free(sh);
+}
+
 static void test_pseudo_target(void **state) {
     (void)state;
     /* :target is parsed but only matches when target_id is set by caller.
@@ -2493,7 +2506,7 @@ static void test_table_sheet_cascade(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
-    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1 };
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL };
     css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
     assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
     assert_int_equal(s.empty_cells, CSS_EC_HIDE);
@@ -3165,6 +3178,7 @@ int main(void) {
         cmocka_unit_test(test_pseudo_empty),
         cmocka_unit_test(test_pseudo_target),
         cmocka_unit_test(test_pseudo_lang),
+        cmocka_unit_test(test_has_parses_and_fails_closed),
         cmocka_unit_test(test_resolve_el_inline_only),
         cmocka_unit_test(test_attr_presence),
         cmocka_unit_test(test_attr_equals),

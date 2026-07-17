@@ -8,6 +8,9 @@
 
 #include "css_select.h"
 
+/* For :has() pseudo-class: descendant DOM traversal via el->dom_node. */
+#include <lexbor/html/html.h>
+
 /* Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
  * Advances *ip past the closing ']'. Returns 1 if supported, 0 (fail closed) on any
  * malformation (no name, unknown operator, unterminated). Grammar:
@@ -179,6 +182,7 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     else if (csel_ci_eq(name, "not"))      { pm->kind = PSEUDO_NOT; wants_arg = 2; }
     else if (csel_ci_eq(name, "is"))       { pm->kind = PSEUDO_IS; wants_arg = 2; }
     else if (csel_ci_eq(name, "where"))    { pm->kind = PSEUDO_WHERE; wants_arg = 2; }
+    else if (csel_ci_eq(name, "has"))      { pm->kind = PSEUDO_HAS; wants_arg = 2; }
     else if (csel_ci_eq(name, "nth-of-type"))      { pm->kind = PSEUDO_NTH_OF_TYPE; wants_arg = 1; }
     else if (csel_ci_eq(name, "nth-last-of-type")) { pm->kind = PSEUDO_NTH_LAST_OF_TYPE; wants_arg = 1; }
     else if (csel_ci_eq(name, "first-of-type"))    pm->kind = PSEUDO_FIRST_OF_TYPE;
@@ -625,6 +629,145 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
             if (strlen(lv) < pl) return 0;
             if (!csel_span_eq(lv, pm->lang, pl, 1)) return 0;
             return (lv[pl] == '\0' || lv[pl] == '-');
+        }
+        case PSEUDO_HAS: {
+            /* :has(selector): walk DOM descendants and return 1 if any match
+             * any sub-selector. Uses el->dom_node to traverse the real DOM tree.
+             * v1: tag/id/class/attr matching, no combinators in the argument. */
+            if (el->dom_node == NULL || sel == NULL || pm->sub_first < 0)
+                return 0;
+            /* Recursive depth cap to prevent unbounded traversal on deep DOM. */
+            #define HAS_MAX_DEPTH 32
+            /* Stack-based DFS: pairs of (node, depth). */
+            const lxb_dom_node_t *stack[128];
+            int depth[128];
+            int sp = 0;
+            const lxb_dom_node_t *root = (const lxb_dom_node_t *)el->dom_node;
+            for (const lxb_dom_node_t *ch = root->first_child;
+                 ch != NULL && sp < 128; ch = ch->next) {
+                stack[sp] = ch; depth[sp] = 1; ++sp;
+            }
+            while (sp > 0) {
+                --sp;
+                const lxb_dom_node_t *cur = stack[sp];
+                int cd = depth[sp];
+                if (cur->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+                lxb_dom_element_t *cel = (lxb_dom_element_t *)cur;
+                /* Check all sub-selectors against this descendant element. */
+                for (int si = 0; si < pm->sub_count; ++si) {
+                    int idx = pm->sub_first + si;
+                    if (idx >= sel->nsubs) break;
+                    const css_sub_sel *sub = &sel->subs[idx];
+                    int match = 1;
+                    /* Check tag */
+                    if (sub->has_tag) {
+                        size_t nl = 0;
+                        const lxb_char_t *nm = lxb_dom_element_local_name(cel, &nl);
+                        if (nm == NULL || strlen(sub->tag) != nl ||
+                            !csel_span_eq((const char *)nm, sub->tag, nl, 1))
+                            match = 0;
+                    }
+                    if (!match) continue;
+                    /* Check id */
+                    if (sub->has_id) {
+                        size_t il = 0;
+                        const lxb_char_t *idv = lxb_dom_element_get_attribute(
+                            cel, (const lxb_char_t *)"id", 2, &il);
+                        if (idv == NULL || (size_t)il != strlen(sub->id) ||
+                            memcmp(idv, sub->id, il) != 0)
+                            match = 0;
+                    }
+                    if (!match) continue;
+                    /* Check class */
+                    if (sub->has_cls) {
+                        size_t cl = 0;
+                        const lxb_char_t *cv = lxb_dom_element_get_attribute(
+                            cel, (const lxb_char_t *)"class", 5, &cl);
+                        int found = 0;
+                        if (cv != NULL) {
+                            size_t tok_start = 0, tok_end = 0;
+                            while (tok_end <= cl) {
+                                if (tok_end == cl || cv[tok_end] == ' ') {
+                                    size_t tkl = tok_end - tok_start;
+                                    if (tkl > 0 && tkl == strlen(sub->cls) &&
+                                        memcmp(cv + tok_start, sub->cls, tkl) == 0)
+                                        { found = 1; break; }
+                                    tok_start = tok_end + 1;
+                                }
+                                ++tok_end;
+                            }
+                        }
+                        if (!found) match = 0;
+                    }
+                    if (!match) continue;
+                    /* Check attribute selectors */
+                    for (int ai = 0; ai < sub->nattrs; ++ai) {
+                        size_t avl = 0;
+                        const lxb_char_t *av = lxb_dom_element_get_attribute(
+                            cel, (const lxb_char_t *)sub->attrs[ai].name,
+                            strlen(sub->attrs[ai].name), &avl);
+                        if (!av) { match = 0; break; }
+                        if (sub->attrs[ai].op != ATTR_PRESENT) {
+                            const char *val = sub->attrs[ai].value;
+                            size_t vl = strlen(val);
+                            switch (sub->attrs[ai].op) {
+                                case ATTR_EQ:
+                                    if (avl != vl || memcmp(av, val, vl) != 0)
+                                        match = 0;
+                                    break;
+                                case ATTR_TILDE: {
+                                    int f = 0;
+                                    size_t tk_s = 0, tk_e = 0;
+                                    while (tk_e <= avl) {
+                                        if (tk_e == avl || av[tk_e] == ' ') {
+                                            size_t tkl = tk_e - tk_s;
+                                            if (tkl == vl && memcmp(av+tk_s,val,vl)==0)
+                                                { f=1; break; }
+                                            tk_s = tk_e+1;
+                                        }
+                                        ++tk_e;
+                                    }
+                                    if (!f) match = 0;
+                                    break;
+                                }
+                                case ATTR_PIPE: {
+                                    if (avl < vl || memcmp(av, val, vl) != 0)
+                                        { match=0; break; }
+                                    if (avl > vl && av[vl] != '-') match=0;
+                                    break;
+                                }
+                                case ATTR_CARET:
+                                    if (avl < vl || memcmp(av, val, vl) != 0)
+                                        match = 0;
+                                    break;
+                                case ATTR_DOLLAR: {
+                                    if (avl < vl || memcmp(av+avl-vl, val, vl) != 0)
+                                        match = 0;
+                                    break;
+                                }
+                                case ATTR_STAR: {
+                                    int f = 0;
+                                    for (size_t o = 0; o+vl <= avl; ++o)
+                                        if (memcmp(av+o, val, vl)==0) { f=1; break; }
+                                    if (!f) match = 0;
+                                    break;
+                                }
+                                default: match = 0;
+                            }
+                        }
+                        if (!match) break;
+                    }
+                    if (match) return 1;  /* found a matching descendant */
+                }
+                /* Push children for deeper traversal (capped). */
+                if (cd < HAS_MAX_DEPTH) {
+                    for (const lxb_dom_node_t *ch = cur->first_child;
+                         ch != NULL && sp < 128; ch = ch->next) {
+                        stack[sp] = ch; depth[sp] = cd + 1; ++sp;
+                    }
+                }
+            }
+            return 0;  /* no matching descendant found */
         }
         case PSEUDO_BEFORE:
         case PSEUDO_AFTER:        return allow_pseudo_el;  /* R8: match only in CSS cascade */

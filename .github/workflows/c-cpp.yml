@@ -21,20 +21,28 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
+          build-essential \
           cmake \
+          git \
           libcairo2-dev \
-          libwayland-dev \
-          wayland-protocols \
-          libxkbcommon-dev \
-          libcurl4-openssl-dev \
-          libssl-dev \
-          fontconfig \
-          libfreetype6-dev \
           libcmocka-dev \
-          libjpeg-dev \
+          libcurl4-openssl-dev \
           libfreetype6-dev \
-          libcairo2-dev \
-          pkg-config
+          libharfbuzz-dev \
+          libavcodec-dev \
+          libavformat-dev \
+          libavutil-dev \
+          libjpeg-dev \
+          libpng-dev \
+          libssl-dev \
+          libswscale-dev \
+          libwayland-bin \
+          libwayland-dev \
+          libwebp-dev \
+          libxkbcommon-dev \
+          pkg-config \
+          wayland-protocols \
+          fontconfig
 
     # 3. Descargar, compilar e instalar Lexbor globalmente
     - name: Install Lexbor from source

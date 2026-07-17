@@ -111,6 +111,7 @@ static void fill_css_node(lxb_dom_element_t *e, cch_node *node) {
     node->el.nsib_of_type = 0;
     node->el.child_count = -1; /* unknown until the caller fills it */
     node->el.prev = NULL;
+    node->el.dom_node = (const void *)((lxb_dom_node_t *)e);  /* for :has() descendant traversal */
 }
 
 /* Computes the 1-based index of n among its ELEMENT siblings and the total

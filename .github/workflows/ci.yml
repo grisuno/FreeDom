@@ -27,23 +27,37 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            build-essential \
             cmake \
+            git \
             libcairo2-dev \
-            libwayland-dev \
-            wayland-protocols \
-            libxkbcommon-dev \
-            libcurl4-openssl-dev \
-            libssl-dev \
-            fontconfig \
-            libfreetype6-dev \
             libcmocka-dev \
-            libjpeg-dev \
+            libcurl4-openssl-dev \
             libfreetype6-dev \
-            libcairo2-dev \
-            pkg-config
+            libharfbuzz-dev \
+            libavcodec-dev \
+            libavformat-dev \
+            libavutil-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libssl-dev \
+            libswscale-dev \
+            libwayland-bin \
+            libwayland-dev \
+            libwebp-dev \
+            libxkbcommon-dev \
+            pkg-config \
+            wayland-protocols \
+            fontconfig
 
-      - name: Standardize Environment Configuration
-        run: ./configure
+      - name: Build Lexbor from source
+        run: |
+          git clone --depth 1 https://github.com/lexbor/lexbor.git /tmp/lexbor
+          cmake -S /tmp/lexbor -B /tmp/lexbor -DLEXBOR_BUILD_SEPARATELY=OFF
+          make -C /tmp/lexbor -j$(nproc)
+          sudo make -C /tmp/lexbor install
+          sudo ldconfig
+          rm -rf /tmp/lexbor
 
       - name: Compile FreeDom Binaries
         run: make clean && make all
