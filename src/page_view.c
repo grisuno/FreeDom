@@ -1076,6 +1076,17 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->filter_grayscale = cs->filter_grayscale;
     d->bg_pos_x = cs->bg_pos_x;
     d->bg_pos_y = cs->bg_pos_y;
+    d->anim_iterations = cs->anim_iterations;
+    d->anim_timing = cs->anim_timing;
+    /* R8: ::before/::after generated content. Copy up to the field size. */
+    if (cs->content_str[0] != '\0') {
+        size_t clen = strlen(cs->content_str);
+        if (clen >= sizeof d->content_str) clen = sizeof d->content_str - 1;
+        memcpy(d->content_str, cs->content_str, clen);
+        d->content_str[clen] = '\0';
+    } else {
+        d->content_str[0] = '\0';
+    }
 }
 
 /* Id of node in the box registry, recording its decoration on first sight. -1 when
@@ -2651,6 +2662,38 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 ext.white_space = CSS_WS_PRE;
             if (ext.font_family == CSS_FF_UNSET)
                 ext.font_family = CSS_FF_MONO;
+        }
+
+        /* R8: ::before generated content. Emit once per element: check if the
+         * text node's parent element has non-empty content_str in its resolved
+         * style (the ::before content). We compare directly against the block
+         * (most common) and also check the parent inline element. */
+        if (n->parent != NULL && n->parent->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_dom_element_t *pel = lxb_dom_interface_element(n->parent);
+            css_style pcs = cached_element_style(pel, sheet, &cache);
+            if (pcs.content_str[0] != '\0') {
+                int fresh = 1;
+                for (size_t bi = 0; bi < box_reg.count; ++bi) {
+                    if (box_reg.node[bi] == n->parent) {
+                        if (box_reg.def[bi].content_str[0] == '\0') fresh = 0;
+                        else box_reg.def[bi].content_str[0] = '\0';
+                        break;
+                    }
+                }
+                if (fresh) {
+                    char *content_dup = dup_n(pcs.content_str, strlen(pcs.content_str));
+                    if (content_dup == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+                    pv_status st = pv_append(v, PV_TEXT, 0, pending_break ? 1 : 0,
+                                             content_dup, NULL);
+                    free(content_dup);
+                    if (st != PV_OK) { free(collapsed); rc = st; goto cleanup; }
+                    pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
+                    pv_set_color(v, pcs.color);
+                    pv_set_bgcolor(v, pcs.background);
+                    pv_set_emphasis(v, pcs.bold > 0, pcs.italic > 0);
+                    pending_break = 0;
+                }
+            }
         }
 
         int brk = pending_break || (block != prev_block);

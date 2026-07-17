@@ -347,7 +347,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[78] = {
+        int32_t f[80] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -404,6 +404,8 @@ static int write_view(int wfd, const pv_view *v) {
             /* gradient stop positions, R5d */
             (int32_t)bd->bg_grad_pos[0], (int32_t)bd->bg_grad_pos[1],
             (int32_t)bd->bg_grad_pos[2], (int32_t)bd->bg_grad_pos[3],
+            /* animation iterations/timing, Phase R1b */
+            (int32_t)bd->anim_iterations, (int32_t)bd->anim_timing,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -412,6 +414,8 @@ static int write_view(int wfd, const pv_view *v) {
          * the same way read_field already bounds every other string here). */
         if (write_field(wfd, bd->bg_image_url) != 0) return -1;
         if (write_field(wfd, bd->bg_image_url2) != 0) return -1;
+        /* R8: ::before/::after generated content text. */
+        if (write_field(wfd, bd->content_str) != 0) return -1;
     }
     return 0;
 }
@@ -1507,7 +1511,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[78];
+        int32_t f[80];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1557,6 +1561,8 @@ static int read_view(int fd, pv_view **out) {
             .bg_pos_x = f[71], .bg_pos_y = f[72],
             /* radial gradient flag, R5c */
             .bg_grad_radial = f[73],
+            /* animation iterations/timing, Phase R1b */
+            .anim_iterations = f[78], .anim_timing = f[79],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;
@@ -1577,6 +1583,13 @@ static int read_view(int fd, pv_view **out) {
         if (bgurl2_len >= PV_BG_URL_MAX) { free(bgurl2); pv_free(v); return -1; }
         memcpy(bd.bg_image_url2, bgurl2, bgurl2_len + 1);
         free(bgurl2);
+        /* R8: ::before/::after generated content text. */
+        char *cstr = NULL;
+        size_t cstr_len = 0;
+        if (read_field(fd, &cstr, &cstr_len) != 0) { pv_free(v); return -1; }
+        if (cstr_len >= sizeof bd.content_str) { free(cstr); pv_free(v); return -1; }
+        memcpy(bd.content_str, cstr, cstr_len + 1);
+        free(cstr);
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
     }
 

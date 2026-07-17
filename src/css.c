@@ -2151,10 +2151,10 @@ static int expand_bg_position(const char *val, css_decl *dst, int cap) {
         char tok[CSS_TOK_MAX];
         if (!next_ws_token(&p, tok, sizeof tok)) break;
         if (csel_ci_eq(tok, "left"))   { x = 0; continue; }
-        if (csel_ci_eq(tok, "right"))  { x = CSS_LEN_UNSET; continue; }
+        if (csel_ci_eq(tok, "right"))  { x = CSS_LEN_END; continue; }
         if (csel_ci_eq(tok, "center")) { if (x == CSS_LEN_UNSET) x = CSS_LEN_AUTO; else y = CSS_LEN_AUTO; continue; }
         if (csel_ci_eq(tok, "top"))    { y = 0; continue; }
-        if (csel_ci_eq(tok, "bottom")) { y = CSS_LEN_UNSET; continue; }
+        if (csel_ci_eq(tok, "bottom")) { y = CSS_LEN_END; continue; }
         int px;
         if (interp_len(tok, 0, &px) && px >= 0) {
             if (x == CSS_LEN_UNSET) x = px;
@@ -2167,8 +2167,22 @@ static int expand_bg_position(const char *val, css_decl *dst, int cap) {
     return n;
 }
 
-/* R8: content property. Extracts quoted string. Returns 1 if parsed. */
-static int expand_content(const char *val, css_decl *dst, int cap) {
+/* R8: emit a content string into the pool, storing its index in ival (-1 = none). */
+static int emit_content(css_decl *dst, int cap, const char *str,
+                        char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
+    if (cap < 1) return 0;
+    dst[0].prop = P_CONTENT;
+    if (str == NULL || *ncontent >= contentcap) { dst[0].ival = -1; return 1; }
+    memcpy(contenttab[*ncontent], str, strlen(str) + 1);
+    dst[0].ival = (int)*ncontent;
+    ++*ncontent;
+    return 1;
+}
+
+/* R8: content property. Extracts quoted string, stores in content pool, emits
+ * P_CONTENT with pool index. Returns 1 if parsed. */
+static int expand_content(const char *val, css_decl *dst, int cap,
+                          char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
     if (cap < 1) return 0;
     if (csel_ci_eq(val, "none") || csel_ci_eq(val, "normal")) return 0;
     if (csel_substr(val, "url(", 1)) return 0;
@@ -2176,12 +2190,13 @@ static int expand_content(const char *val, css_decl *dst, int cap) {
     if (!q) return 0;
     size_t len = strlen(val);
     if (len < 3 || val[len-1] != q) return 0;
-    /* encode up to 3 chars of inner text in ival: b0-b2 = chars, b3 = count */
-    int enc = 0, n = 0;
-    for (size_t i = 1; i + 1 < len && n < 3; ++i, ++n)
-        enc |= ((int)(unsigned char)val[i]) << (n * 8);
-    dst[0].prop = P_CONTENT; dst[0].ival = enc | (n << 24);
-    return 1;
+    /* Extract inner string, store in pool */
+    size_t inner_len = len - 2;
+    char buf[CSS_URL_MAX];
+    if (inner_len >= sizeof buf) inner_len = sizeof buf - 1;
+    memcpy(buf, val + 1, inner_len);
+    buf[inner_len] = '\0';
+    return emit_content(dst, cap, buf, contenttab, ncontent, contentcap);
 }
 
 /* box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an
@@ -2811,7 +2826,8 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
  * margin/padding shorthands expand to up to four (one per side). The important flag is
  * left to the caller (parse_one_decl stamps it). */
 static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
-                          char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
+                           char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
+                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
     /* Box model: margins allow 'auto' and negatives; padding/width neither. The
      * shorthands expand; the longhands and width/max-width emit one. */
     if (strcmp(prop, "margin") == 0)  return expand_box4(val, P_MARGIN_TOP, 1, 1, dst, cap);
@@ -3110,7 +3126,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     }
     else if (strcmp(prop, "filter") == 0)               return expand_filter(val, dst, cap);
     else if (strcmp(prop, "background-position") == 0)   return expand_bg_position(val, dst, cap);
-    else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap);
+    else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap, contenttab, ncontent, contentcap);
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -3126,8 +3142,9 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
  * property and falls through interpret_prop's unknown-property path unchanged),
  * then dispatches on the property. */
 static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
-                          const css_custom_prop *tab, size_t ntab,
-                          char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
+                           const css_custom_prop *tab, size_t ntab,
+                           char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
+                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
     if (cap < 1) return 0;
     size_t c = 0;
     while (c < n && s[c] != ':') ++c;
@@ -3150,7 +3167,8 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
         use_val = resolved;
     }
 
-    int nw = interpret_prop(prop, use_val, dst, cap, urltab, nurl, urlcap);
+    int nw = interpret_prop(prop, use_val, dst, cap, urltab, nurl, urlcap,
+                             contenttab, ncontent, contentcap);
     for (int i = 0; i < nw; ++i) dst[i].important = important;
     return nw;
 }
@@ -3160,14 +3178,15 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
  * e.g. an inline style resolved against a NULL sheet). urltab/nurl/urlcap is the
  * background-image url() pool (see P_BG_IMAGE_URL). */
 static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
-                              const css_custom_prop *tab, size_t ntab,
-                              char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
+                               const css_custom_prop *tab, size_t ntab,
+                               char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
+                               char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
     size_t count = 0, i = 0;
     while (i < n && count < cap) {
         size_t j = i;
         while (j < n && s[j] != ';') ++j;
         count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count), tab, ntab,
-                                        urltab, nurl, urlcap);
+                                        urltab, nurl, urlcap, contenttab, ncontent, contentcap);
         i = (j < n) ? j + 1 : j;
     }
     return count;
@@ -3190,7 +3209,8 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     size_t dstart = sh->ndecls;
     size_t dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], CSS_MAX_DECLS - dstart,
                                 sh->custom, sh->ncustom,
-                                sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS);
+                                sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
+                                sh->content_urls, &sh->ncontent_urls, 64);
     if (dn == 0) return;
     if (sh->nrules >= CSS_MAX_RULES) return;  /* leave decls; harmless, unreferenced */
 
@@ -3423,7 +3443,8 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                 css_decl kdecls[CSS_MAX_KEYFRAME_DECLS];
                                 int nd = interpret_decls(s + db, de2 - db,
                                     kdecls, CSS_MAX_KEYFRAME_DECLS, sh->custom, sh->ncustom,
-                                    sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS);
+                                    sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
+                                    NULL, NULL, 0);
                                 int kop = -1;
                                 for (int dd = 0; dd < nd; ++dd) {
                                     if (kdecls[dd].prop == P_OPACITY)
@@ -3519,7 +3540,8 @@ void css_free(css_sheet *s) {
  * (regardless of specificity); within a tier the higher specificity wins, ties
  * broken by document order. wi/ws/wo track the winning tier/specificity/order so far. */
 static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
-                       int spec, int ord, const char (*urltab)[CSS_URL_MAX]) {
+                        int spec, int ord, const char (*urltab)[CSS_URL_MAX],
+                        const char (*contenttab)[CSS_URL_MAX]) {
     int slot = d->prop;
     int imp = d->important;
     int win = imp > wi[slot] ||
@@ -3708,13 +3730,14 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_FILTER_GRAYSCALE:    o->filter_grayscale = d->ival; break;
             case P_BG_POS_X:            o->bg_pos_x = d->ival; break;
             case P_BG_POS_Y:            o->bg_pos_y = d->ival; break;
-            case P_CONTENT: {
-                int n = (d->ival >> 24) & 0xff;
-                int k = 0;
-                for (int b = 0; b < n && b < 3; ++b)
-                    o->content_str[k++] = (char)((d->ival >> (b * 8)) & 0xff);
-                o->content_str[k] = '\0';
-            } break;
+            case P_CONTENT:
+                if (d->ival < 0) {
+                    o->content_str[0] = '\0';
+                } else if (contenttab != NULL) {
+                    memcpy(o->content_str, contenttab[d->ival], CSS_URL_MAX);
+                    o->content_str[CSS_URL_MAX - 1] = '\0';
+                }
+                break;
             default: break;
         }
     }
@@ -3819,7 +3842,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
                 apply_decl(&out, wi, ws, wo, &sheet->decls[start + d], sel->spec, sel->order,
-                          sheet->bg_urls);
+                           sheet->bg_urls, sheet->content_urls);
         }
     }
 
@@ -3844,11 +3867,15 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         css_decl tmp[CSS_INLINE_DECLS];
         char inline_bg_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
         size_t n_inline_bg_urls = 0;
+        char inline_content_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
+        size_t n_inline_content_urls = 0;
         size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS,
                                     combined, ncombined,
-                                    inline_bg_urls, &n_inline_bg_urls, CSS_INLINE_BG_URLS);
+                                    inline_bg_urls, &n_inline_bg_urls, CSS_INLINE_BG_URLS,
+                                    inline_content_urls, &n_inline_content_urls, CSS_INLINE_BG_URLS);
         for (size_t d = 0; d < dn; ++d)
-            apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX, inline_bg_urls);
+            apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX,
+                       inline_bg_urls, inline_content_urls);
     }
 
     return out;

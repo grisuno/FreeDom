@@ -5352,12 +5352,14 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             cairo_rectangle(cr, x, y, iw, h);
             cairo_clip(cr);
         }
-        /* R5a: background-position offset. AUTO = center (resolved to
-         * (box_size - image_size) / 2), UNSET = 0 (top-left). */
+        /* R5a: background-position offset. AUTO = center ((box-img)/2),
+         * END = right/bottom edge (box - img), UNSET = 0 (top-left). */
         double pox = 0.0, poy = 0.0;
         if (bx->bg_pos_x == CSS_LEN_AUTO && iw > 0.0) pox = (w - iw) / 2.0;
+        else if (bx->bg_pos_x == CSS_LEN_END  && iw > 0.0) pox = w - iw;
         else if (bx->bg_pos_x != PV_LEN_UNSET) pox = (double)bx->bg_pos_x;
         if (bx->bg_pos_y == CSS_LEN_AUTO && ih > 0.0) poy = (h - ih) / 2.0;
+        else if (bx->bg_pos_y == CSS_LEN_END  && ih > 0.0) poy = h - ih;
         else if (bx->bg_pos_y != PV_LEN_UNSET) poy = (double)bx->bg_pos_y;
 
         cairo_translate(cr, x + pox, y + poy);
@@ -5767,12 +5769,17 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
     }
     int eff_opacity = (def ? def->opacity : -1);
     if (def && def->anim_duration_ms > 0) {
-        ip_ease_fn ease = { .kind = IP_EASE_LINEAR };
+        int ekind = (def->anim_timing >= 0 && def->anim_timing < IP_EASE_COUNT)
+                  ? def->anim_timing : IP_EASE_LINEAR;
+        ip_ease_fn ease = { .kind = ekind, .steps_n = 1, .steps_dir = 0 };
         ip_keyframe kf[] = { {0.0, 0.0}, {100.0, 100.0} };
+        int iters = def->anim_iterations > 0 ? def->anim_iterations
+                  : def->anim_iterations == -1 ? IP_ITERATION_INFINITE
+                  : 1;
         ip_anim a;
         ip_anim_init(&a, IP_VAL_SCALAR, &ease, kf, 2,
                      (double)def->anim_duration_ms, 0.0,
-                     1, IP_DIR_NORMAL, IP_FILL_FORWARDS);
+                     iters, IP_DIR_NORMAL, IP_FILL_FORWARDS);
         ip_anim_tick(&a, (double)elapsed_ms);
         int anim = (int)ip_anim_current(&a);
         if (anim >= 0 && anim <= 100) eff_opacity = anim;

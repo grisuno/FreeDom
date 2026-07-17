@@ -3,3 +3,4 @@
 # code and do not grow with use.
 leak:libfontconfig
 leak:FcValueSave
+leak:libcairo

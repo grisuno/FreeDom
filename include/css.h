@@ -405,6 +405,7 @@ typedef enum css_backface {
 #define CSS_LEN_MAX       100000
 #define CSS_LEN_UNSET     (-2147483647 - 1) /* INT_MIN: property not set */
 #define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
+#define CSS_LEN_END       (-2147483646)     /* INT_MIN+2: 100% offset (right/bottom edge) */
 
 /* Max compounds in one complex selector (subject + ancestor/parent constraints).
  * A deeper chain is dropped (fail closed). */

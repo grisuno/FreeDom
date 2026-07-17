@@ -40,6 +40,8 @@ typedef enum pv_status {
 /* Sentinel for an unset author box vertical-margin override (box_mt/box_mb): the
  * presentation layer then uses the user-agent margin. Matches CSS_LEN_UNSET. */
 #define PV_LEN_UNSET (-2147483647 - 1)
+#define PV_LEN_AUTO  (-2147483647)     /* matches CSS_LEN_AUTO: center */
+#define PV_LEN_END   (-2147483646)     /* matches CSS_LEN_END: right/bottom edge */
 /* Sized grid tracks carried per run (2026-07-11). Mirrors CSS_GRID_TRACKS_MAX in
  * css.h (page_view.c static-asserts they agree); tracks past it lay out as auto. */
 #define PV_GRID_TRACKS 8
@@ -399,6 +401,11 @@ typedef struct pv_box_def {
     /* background-position (R5a): px offsets, PV_LEN_UNSET = unset. */
     int bg_pos_x;
     int bg_pos_y;
+    /* R8: ::before/::after generated content text. Empty string = none. */
+    char content_str[64];
+    /* Phase R1b: animation iteration count (-1 = infinite) and timing function. */
+    int anim_iterations;
+    int anim_timing;
 } pv_box_def;
 
 typedef struct pv_view {

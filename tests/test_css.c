@@ -1077,6 +1077,7 @@ static void test_pseudo_unknown_drops_selector(void **state) {
     /* single-colon :before is still unknown (pseudo-class, not pseudo-element) */
     css_element s = el_sib_node("s", 1, 1, NULL, NULL);
     assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, -1); /* :first-of-type needs type-info */
+    css_free(sh);
 }
 
 static void test_pseudo_specificity(void **state) {
