@@ -1467,17 +1467,152 @@ static int parse_dim(const lxb_char_t *s, size_t len) {
     return (int)v;
 }
 
-/* First candidate URL from a srcset attribute value ("url1 1x, url2 2x, ..."),
- * used as a fallback source when an <img> has no plain src -- the common shape
- * of responsive-image markup and of <picture><source srcset=...> (this parser
- * has no viewport/DPR to pick among candidates, so the first one is the
- * deterministic choice, matching how src is otherwise used verbatim). A regular
- * URL candidate ends at the first whitespace or comma (an optional density/width
- * descriptor, e.g. "2x", is separated from it by whitespace); a data: URL is
- * scanned to the first whitespace or the end of the string instead, since its
- * ";base64," marker contains a comma that is not a candidate separator. Returns
- * the span via *out and *out_len (points into srcset, not owned, not
- * NUL-terminated); *out stays NULL when srcset has no usable candidate. */
+/* Selects the best srcset candidate for a given viewport width. Returns the
+ * URL span via *out / *out_len. Uses the "smallest image >= slot_width" strategy:
+ * pick the first candidate whose width descriptor is >= slot_width, or fall
+ * back to the largest image if none qualifies. Falls back to first candidate
+ * when no width descriptors are present (density-only or bare URLs). */
+static void srcset_best_url(const lxb_char_t *srcset, size_t len,
+                            int slot_width,
+                            const char **out, size_t *out_len) {
+    *out = NULL; *out_len = 0;
+    if (srcset == NULL || len == 0) return;
+
+    /* Collect all candidates: each is a pair of (url_start, url_len). */
+    enum { MAX_CANDS = 16 };
+    size_t ustart[MAX_CANDS], ulen[MAX_CANDS];
+    int    uwidth[MAX_CANDS]; /* 0 = no width descriptor */
+    int    nc = 0;
+
+    size_t i = 0;
+    while (i < len && nc < MAX_CANDS) {
+        /* Skip leading whitespace and commas. */
+        while (i < len && (srcset[i] == ' ' || srcset[i] == '\t'
+                         || srcset[i] == ',' || srcset[i] == '\n'
+                         || srcset[i] == '\r')) ++i;
+        if (i >= len) break;
+
+        /* Check for data: URL (comma is NOT a separator inside data:). */
+        int is_data = (len - i >= 5 && srcset[i] == 'd');
+        if (is_data) {
+            if ((srcset[i+1]|32) != 'a' || (srcset[i+2]|32) != 't'
+             || (srcset[i+3]|32) != 'a' || srcset[i+4] != ':')
+                is_data = 0;
+        }
+
+        /* Scan to the end of this candidate: whitespace+comma for normal URLs,
+         * whitespace (not comma) for data: URLs. */
+        size_t start = i;
+        while (i < len) {
+            lxb_char_t c = srcset[i];
+            if (c == ' ' || c == '\t' || c == '\n' || c == '\r') break;
+            if (!is_data && c == ',') break;
+            ++i;
+        }
+        size_t end = i;
+
+        /* Skip whitespace trailing the URL to check for descriptor. */
+        size_t desc_start = end;
+        while (desc_start < len && (srcset[desc_start] == ' '
+               || srcset[desc_start] == '\t')) ++desc_start;
+        size_t desc_end = desc_start;
+        while (desc_end < len && srcset[desc_end] != ' '
+               && srcset[desc_end] != '\t' && srcset[desc_end] != ','
+               && srcset[desc_end] != '\n' && srcset[desc_end] != '\r')
+            ++desc_end;
+
+        int w = 0;
+        /* Check for width descriptor (e.g. "400w"). */
+        if (desc_end > desc_start && srcset[desc_end - 1] == 'w') {
+            for (size_t j = desc_start; j < desc_end - 1; ++j) {
+                if (srcset[j] >= '0' && srcset[j] <= '9')
+                    w = w * 10 + (srcset[j] - '0');
+                else { w = 0; break; }
+            }
+        }
+
+        if (end > start) {
+            ustart[nc] = start;
+            ulen[nc] = end - start;
+            uwidth[nc] = w;
+            nc++;
+        }
+    }
+
+    if (nc == 0) return;
+
+    /* Select best candidate: smallest >= slot_width, else largest. */
+    int best = -1;
+    int best_w = 0;
+    for (int ci = 0; ci < nc; ++ci) {
+        if (uwidth[ci] <= 0) continue; /* skip density-only */
+        if (slot_width > 0 && uwidth[ci] >= slot_width) {
+            if (best < 0 || uwidth[ci] < best_w) {
+                best = ci;
+                best_w = uwidth[ci];
+            }
+        } else if (best < 0 || uwidth[ci] > best_w) {
+            best = ci;
+            best_w = uwidth[ci];
+        }
+    }
+    /* Fall back to first candidate if no width descriptor matched. */
+    if (best < 0) best = 0;
+
+    *out = (const char *)(srcset + ustart[best]);
+    *out_len = ulen[best];
+}
+
+/* Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns
+ * the effective slot width in px for the given viewport width. Falls back
+ * to 100vw (full viewport) on parse failure — matching browser behavior. */
+static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
+                              int viewport_w) {
+    if (sizes == NULL || slen == 0 || viewport_w <= 0) return viewport_w;
+    /* v1: only handle the simple case "100vw" (no media conditions).
+     * Full media-query evaluation is deferred. */
+    size_t i = 0;
+    /* Skip to the last segment (after the last comma) — the default. */
+    int last_val = viewport_w;
+    while (i < slen) {
+        /* Advance to next segment. */
+        size_t seg_start = i;
+        while (i < slen && sizes[i] != ',') ++i;
+        size_t seg_end = i;
+        if (i < slen) ++i; /* skip comma */
+
+        /* Find the length value in the segment. */
+        size_t j = seg_start;
+        while (j < seg_end && (sizes[j] == ' ' || sizes[j] == '\t')) ++j;
+        int has_condition = 0;
+        /* Check if segment starts with '(' — simple media condition detection. */
+        if (j < seg_end && sizes[j] == '(') has_condition = 1;
+
+        if (!has_condition) {
+            /* This is the default value (no condition). */
+            size_t k = j;
+            int val = 0;
+            while (k < seg_end) {
+                if (sizes[k] >= '0' && sizes[k] <= '9')
+                    val = val * 10 + (sizes[k] - '0');
+                else if ((sizes[k]|32) == 'v' && k + 1 < seg_end
+                         && (sizes[k+1]|32) == 'w') {
+                    val = viewport_w * val / 100;
+                    break;
+                } else if (sizes[k] == 'p' && k + 1 < seg_end && sizes[k+1] == 'x')
+                    break;
+                ++k;
+            }
+            last_val = (val > 0) ? val : viewport_w;
+        }
+    }
+    return (last_val > 0) ? last_val : viewport_w;
+}
+
+/* First candidate URL from a srcset attribute value — legacy fallback used
+ * when no viewport-based best-candidate selection is needed (e.g. in contexts
+ * where slot width is unknown). Kept for callers that do not have access to
+ * viewport dimensions (data: inline detection, <picture> <source> scanning). */
 static void srcset_first_url(const lxb_char_t *srcset, size_t len,
                              const char **out, size_t *out_len) {
     *out = NULL;
@@ -2508,14 +2643,24 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 const char *img_src = (const char *)src;
                 size_t img_src_len = sl;
                 if (img_src == NULL || img_src_len == 0) {
-                    /* No plain src: fall back to the first srcset candidate, the
-                     * common shape of responsive-image markup (a bare src is not
-                     * guaranteed even inside <picture>, whose own <source
-                     * srcset=...> siblings this loop does not visit at all). */
+                    /* No plain src: select the best srcset candidate for the
+                     * viewport width (1000px default for headless/export).
+                     * Also parse the sizes attribute for the effective slot
+                     * width. Falls back to the first candidate on failure. */
                     size_t ssl = 0;
                     const lxb_char_t *srcset = lxb_dom_element_get_attribute(
                         el, (const lxb_char_t *)"srcset", 6, &ssl);
-                    srcset_first_url(srcset, ssl, &img_src, &img_src_len);
+                    if (srcset != NULL && ssl > 0) {
+                        size_t szl = 0;
+                        const lxb_char_t *sizes = lxb_dom_element_get_attribute(
+                            el, (const lxb_char_t *)"sizes", 5, &szl);
+                        int sw = srcset_slot_width(sizes, szl, 1000);
+                        srcset_best_url(srcset, ssl, sw, &img_src, &img_src_len);
+                    }
+                    if (img_src == NULL) {
+                        /* Last resort: first candidate. */
+                        srcset_first_url(srcset, ssl, &img_src, &img_src_len);
+                    }
                     if (img_src == NULL) continue; /* no usable source: nothing to show */
                 }
 

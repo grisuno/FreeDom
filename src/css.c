@@ -188,6 +188,16 @@ struct css_sheet {
         int nstops;
     } keyframes[CSS_MAX_KEYFRAMES];
     size_t          nkeyframes;
+    /* @font-face declarations (v1: font-family name + src URL). No I/O, no
+     * network — the caller resolves and downloads the URL against the page
+     * origin, same as background-image. url() is the only source format that
+     * is not discarded (other formats like local() are ignored). */
+#define CSS_MAX_FONT_FACES 16
+    struct {
+        char family[CSS_TOK_MAX];
+        char src_url[CSS_URL_MAX];
+    } font_faces[CSS_MAX_FONT_FACES];
+    size_t          nfont_faces;
 };
 
 /* The small ASCII helpers (csel_lower_ch / csel_ci_eq / csel_substr /
@@ -3401,6 +3411,76 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                 }
                 i = (q < end && s[q] == ';') ? q + 1 : end;  /* @media with no block */
                 continue;
+            }
+            /* @font-face { font-family: ...; src: url(...); } — v1: only
+             * font-family and src are captured; local() and other descriptors
+             * are ignored. The caller resolves src_url against the page origin
+             * and downloads the font file, same as background-image. */
+            if (i + 9 < end && memcmp(s + i, "@font-face", 10) == 0
+                && (s[i + 10] == ' ' || s[i + 10] == '\t' || s[i + 10] == '{')) {
+                size_t ob = i + 10;
+                while (ob < end && s[ob] != '{') ++ob;
+                if (ob < end && s[ob] == '{') {
+                    size_t be = block_end(s, ob, end);
+                    size_t bstart = ob + 1;
+                    size_t bend = (be > bstart) ? be - 1 : bstart;
+                    char fam[CSS_TOK_MAX] = "";
+                    char surl[CSS_URL_MAX] = "";
+                    /* Manually scan for font-family: and src: url(...). */
+                    size_t j = bstart;
+                    while (j < bend) {
+                        while (j < bend && (s[j] == ' ' || s[j] == '\t'
+                               || s[j] == '\n' || s[j] == '\r')) ++j;
+                        if (j >= bend) break;
+                        size_t pstart = j;
+                        while (j < bend && s[j] != ':') ++j;
+                        if (j >= bend) break;
+                        size_t pnlen = j - pstart;
+                        size_t vstart = j + 1;
+                        while (vstart < bend && (s[vstart] == ' '
+                               || s[vstart] == '\t')) ++vstart;
+                        /* Find end of value (; or end of block). */
+                        size_t vend = vstart;
+                        int paren_depth = 0;
+                        while (vend < bend) {
+                            if (paren_depth == 0 && s[vend] == ';') break;
+                            if (s[vend] == '(') ++paren_depth;
+                            if (s[vend] == ')' && paren_depth > 0) --paren_depth;
+                            ++vend;
+                        }
+                        if (pnlen == 11 && memcmp(s + pstart, "font-family", 11) == 0) {
+                            size_t qs = vstart, qe = vend;
+                            if (vend - vstart >= 2 && (s[qs] == '\'' || s[qs] == '"'))
+                                { ++qs; --qe; }
+                            if (qe > qs) {
+                                size_t fl = qe - qs;
+                                if (fl >= CSS_TOK_MAX) fl = CSS_TOK_MAX - 1;
+                                memcpy(fam, s + qs, fl);
+                                fam[fl] = '\0';
+                            }
+                        } else if (pnlen == 3 && memcmp(s + pstart, "src", 3) == 0) {
+                            /* Extract URL inside url(...). */
+                            size_t us = vstart;
+                            while (us < vend && s[us] != '(') ++us;
+                            if (us < vend) ++us;
+                            size_t ue = us;
+                            while (ue < vend && s[ue] != ')') ++ue;
+                            if (us < ue && ue - us < CSS_URL_MAX) {
+                                memcpy(surl, s + us, ue - us);
+                                surl[ue - us] = '\0';
+                            }
+                        }
+                        j = (vend < bend) ? vend + 1 : bend;
+                    }
+                    if (fam[0] != '\0' && surl[0] != '\0'
+                        && sh->nfont_faces < CSS_MAX_FONT_FACES) {
+                        memcpy(sh->font_faces[sh->nfont_faces].family, fam, sizeof fam);
+                        memcpy(sh->font_faces[sh->nfont_faces].src_url, surl, sizeof surl);
+                        sh->nfont_faces++;
+                    }
+                    i = be;
+                    continue;
+                }
             }
             /* R1b: @keyframes name { percentage { decls } ... } */
             if (i + 9 < end && memcmp(s + i, "@keyframes", 10) == 0 &&

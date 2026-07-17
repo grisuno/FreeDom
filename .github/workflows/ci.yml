@@ -50,13 +50,20 @@ jobs:
             wayland-protocols \
             fontconfig
 
-          # Compatibilidad: wl_display_set_max_buffer_size se agregó en wayland 1.22;
-          # si el header no lo declara (runner antiguo), lo añadimos aquí.
-          # La función existe en libwayland-client.so, solo falta el prototipo.
-          if ! grep -q 'wl_display_set_max_buffer_size' /usr/include/wayland-client-core.h 2>/dev/null; then
-            echo "[*] Adding wl_display_set_max_buffer_size compat declaration"
-            printf '\nvoid\nwl_display_set_max_buffer_size(struct wl_display *display, size_t max_buffer_size);\n' \
-              | sudo tee -a /usr/include/wayland-client-core.h >/dev/null
+          # Compatibilidad: si libwayland no tiene wl_display_set_max_buffer_size
+          # (wayland < 1.22), agregamos un macro al header que hace la llamada no-op
+          # para que compile y linkee sin el símbolo ausente.
+          if ! nm -D /usr/lib/x86_64-linux-gnu/libwayland-client.so 2>/dev/null | grep -q 'wl_display_set_max_buffer_size'; then
+            echo "[*] wl_display_set_max_buffer_size missing, adding no-op macro to wayland-client.h"
+            printf '#define wl_display_set_max_buffer_size(d,s) ((void)(d),(void)(s))\n' \
+              | sudo tee -a /usr/include/wayland-client.h >/dev/null
+          fi
+
+          # Compatibilidad: cmocka < 2.5.8 usa va_list sin incluir <stdarg.h>,
+          # lo que falla bajo -std=c11.
+          if grep -q 'va_list' /usr/include/cmocka.h 2>/dev/null && ! grep -q '#include <stdarg.h>' /usr/include/cmocka.h 2>/dev/null; then
+            echo "[*] cmocka.h missing <stdarg.h> include, adding it"
+            sudo sed -i '1s/^/#include <stdarg.h>\n/' /usr/include/cmocka.h
           fi
 
       - name: Build Lexbor from source
@@ -69,17 +76,7 @@ jobs:
           rm -rf /tmp/lexbor
 
       - name: Compile FreeDom Binaries
-        run: |
-          # Stub para wl_display_set_max_buffer_size si la lib del runner no lo tiene
-          STUB=""
-          if ! nm -D /usr/lib/x86_64-linux-gnu/libwayland-client.so 2>/dev/null | grep -q 'wl_display_set_max_buffer_size'; then
-            echo "[*] wl_display_set_max_buffer_size missing from libwayland, building stub"
-            printf '#include <stddef.h>\n#include <wayland-client-core.h>\nvoid wl_display_set_max_buffer_size(struct wl_display *d, size_t s) { (void)d; (void)s; }\n' > /tmp/wl_stub.c
-            cc -c /tmp/wl_stub.c -o /tmp/wl_stub.o
-            STUB="/tmp/wl_stub.o"
-          fi
-
-          make clean && make all LDFLAGS="-pie -Wl,-z,relro,-z,now,-z,noexecstack ${STUB}"
+        run: make clean && make all
 
       - name: Execute Test Suite
         run: make test
