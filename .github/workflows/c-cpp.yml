@@ -44,17 +44,13 @@ jobs:
           wayland-protocols \
           fontconfig
 
-        # Compatibilidad con wayland < 1.22: wl_display_set_max_buffer_size
-        # se agregó en 1.22; si el header no lo declara, lo añadimos
-        # (la función está en libwayland-client.so, solo falta en headers viejos).
+        # Compatibilidad: wl_display_set_max_buffer_size se agregó en wayland 1.22;
+        # si el header no lo declara (runner antiguo), lo añadimos aquí.
+        # La función existe en libwayland-client.so, solo falta el prototipo.
         if ! grep -q 'wl_display_set_max_buffer_size' /usr/include/wayland-client-core.h 2>/dev/null; then
           echo "[*] Adding wl_display_set_max_buffer_size compat declaration"
-          sudo bash -c "cat >> /usr/include/wayland-client-core.h << 'WLDECL'
-
-void
-wl_display_set_max_buffer_size(struct wl_display *display,
-                               size_t max_buffer_size);
-WLDECL"
+          printf '\nvoid\nwl_display_set_max_buffer_size(struct wl_display *display, size_t max_buffer_size);\n' \
+            | sudo tee -a /usr/include/wayland-client-core.h >/dev/null
         fi
 
     # 3. Descargar, compilar e instalar Lexbor globalmente
