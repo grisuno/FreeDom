@@ -1773,8 +1773,11 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
     size_t k = 0;
     for (size_t i = 0; i < n; ++i) {
         const rd_block *b = rd_at(w->doc, i);
-        if (b->kind != RD_IMAGE) continue;
-        const char *img_href = (b->kind == RD_VIDEO) ? b->poster_src : b->href;
+        /* Process both <img> tags (RD_IMAGE) and <video> poster images (RD_VIDEO
+         * with poster_src). Non-matching blocks are skipped entirely. */
+        int is_poster = (b->kind == RD_VIDEO);
+        if (b->kind != RD_IMAGE && (!is_poster || b->poster_src == NULL)) continue;
+        const char *img_href = is_poster ? b->poster_src : b->href;
         ui_image *slot = &w->images[k++];
         slot->href = (img_href != NULL) ? strdup(img_href) : NULL;
 
@@ -1783,7 +1786,6 @@ static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void 
          * fetched image is resolved/routed against -- a data: URL needs no origin
          * at all (render_doc's decision for it is origin-independent too), so it
          * is exempt from this guard. */
-        int is_poster = (b->kind == RD_VIDEO);
         const char *target_url = is_poster ? b->poster_src : b->href;
         if (target_url == NULL) continue;
         if (is_poster) {
@@ -4822,10 +4824,17 @@ static void audio_spawn(browser_window *w, int rate, int channels) {
     pid_t pid = fork();
     if (pid < 0) { close(p[0]); close(p[1]); return; }
     if (pid == 0) {
-        /* Child: exec aplay with the correct PCM format. */
+        /* Child: exec aplay with the correct PCM format. Close all inherited
+         * file descriptors (especially the Wayland display fd) so aplay does
+         * not corrupt the Wayland protocol connection — the most common cause
+         * of the "page flashes white and render loops" bug on video click. */
         close(p[1]);   /* close write end */
         dup2(p[0], 0); /* redirect stdin to pipe read end */
         close(p[0]);
+        /* Close every fd >= 3 to prevent Wayland fd sharing. */
+        int max_fd = (int)sysconf(_SC_OPEN_MAX);
+        if (max_fd < 256) max_fd = 256;
+        for (int fd = 3; fd < max_fd; ++fd) close(fd);
         char rate_str[16], ch_str[16];
         snprintf(rate_str, sizeof rate_str, "%d", rate);
         snprintf(ch_str, sizeof ch_str, "%d", channels);

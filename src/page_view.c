@@ -2041,13 +2041,35 @@ static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen) {
 
 /* Nonzero if n or any ancestor up to base has display:none (from the <style> sheet
  * or its inline style=). display:none is structural visibility, applied regardless
- * of caps.css (hidden content stays hidden, like the JS-off display:none caveat). */
+ * of caps.css (hidden content stays hidden, like the JS-off display:none caveat).
+ *
+ * When js_enabled == 0 (no JS execution), inline style="display:none" is treated
+ * as a presentation hint rather than structural hiding: many sites use JS to
+ * toggle tab containers between display:none and display:block, and without JS
+ * the page would show no content at all. Stylesheet-level display:none is still
+ * honored regardless of JS state — that is an author's structural choice.
+ * js_enabled == 1 means full JS; the page is expected to toggle its own tabs. */
 static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-                             const css_sheet *sheet, pv_style_cache *style_cache) {
+                             const css_sheet *sheet, pv_style_cache *style_cache,
+                             int js_enabled) {
     for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
-            if (cached_element_style(el, sheet, style_cache).display == CSS_DISP_NONE) return 1;
+            css_style cs = cached_element_style(el, sheet, style_cache);
+            if (cs.display == CSS_DISP_NONE) {
+                /* Let inline display:none through when there is no JS to toggle
+                 * it (the site expects JS to make this content visible). */
+                if (!js_enabled) {
+                    size_t sl = 0;
+                    const lxb_char_t *st = lxb_dom_element_get_attribute(
+                        el, (const lxb_char_t *)"style", 5, &sl);
+                    if (st != NULL && sl > 0) {
+                        /* Inline style attribute with no JS: treat as visible. */
+                        continue;
+                    }
+                }
+                return 1;
+            }
         }
         if (p == base) break;
     }
@@ -2203,7 +2225,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
                 && !in_skipped_subtree(n, base, js_enabled)
                 && !in_collected_cell(n, base, &flowreg)
-                && !in_hidden_subtree(n, base, sheet, &cache)
+                && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 const lxb_dom_node_t *table = nearest_table(n, base);
                 if (cell_has_nested_table(n) || flow_table(&flowreg, table)) {
@@ -2302,7 +2324,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             if ((t == LXB_TAG_INPUT || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON
                  || t == LXB_TAG_SELECT)
                 && !in_skipped_subtree(n, base, js_enabled)
-                && !in_hidden_subtree(n, base, sheet, &cache)
+                && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 pv_input_type itype;
@@ -2360,13 +2382,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             /* <progress> and <meter> — native bar widgets */
             if ((t == LXB_TAG_PROGRESS || t == LXB_TAG_METER)
                 && !in_skipped_subtree(n, base, js_enabled)
-                && !in_hidden_subtree(n, base, sheet, &cache)
+                && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
-                lxb_dom_element_t *el = lxb_dom_interface_element(n);
+            lxb_dom_element_t *el = lxb_dom_interface_element(n);
 
-                const char *unused_href = NULL;
-                size_t unused_hl = 0;
-                const lxb_dom_node_t *block = NULL;
+            const char *unused_href = NULL;
+            size_t unused_hl = 0;
+            const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
                 int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
@@ -2433,7 +2455,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             /* <legend> inside a <fieldset> */
             if (t == LXB_TAG_LEGEND
                 && !in_skipped_subtree(n, base, js_enabled)
-                && !in_hidden_subtree(n, base, sheet, &cache)
+                && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 char *legend_text = collect_text(n);
                 if (legend_text == NULL) { rc = PV_ERR_OOM; goto cleanup; }
@@ -2544,7 +2566,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
             } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
                        && !in_skipped_subtree(n, base, js_enabled)
-                       && !in_hidden_subtree(n, base, sheet, &cache)
+                       && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                        && !(reader && in_boilerplate_subtree(n, base))) {
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 size_t sl = 0;
@@ -2626,7 +2648,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (n->type != LXB_DOM_NODE_TYPE_TEXT) continue;
         if (in_skipped_subtree(n, base, js_enabled)) continue;
         if (in_collected_cell(n, base, &flowreg)) continue; /* emitted as a collected cell run */
-        if (in_hidden_subtree(n, base, sheet, &cache)) continue; /* display:none */
+        if (in_hidden_subtree(n, base, sheet, &cache, js_enabled)) continue; /* display:none */
         if (in_closed_details_subtree(n, base)) continue; /* collapsed <details> */
         if (reader && in_boilerplate_subtree(n, base)) continue; /* distraction-free */
 

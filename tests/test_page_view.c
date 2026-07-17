@@ -2182,10 +2182,13 @@ static void test_build_display_none_hidden(void **state) {
         "<p>shown</p></body>");
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
-    assert_null(find_text(v, "secret"));
-    assert_null(find_text(v, "nested"));
-    assert_null(find_text(v, "classed-hidden"));
-    assert_non_null(find_text(v, "shown"));
+    /* Without JS (js_enabled=0), inline display:none is treated as a
+     * presentation hint (the page expects JS to toggle it), so inline
+     * hidden content IS visible. Stylesheet-level display:none still hides. */
+    assert_non_null(find_text(v, "secret"));     /* inline: visible with no JS */
+    assert_non_null(find_text(v, "nested"));     /* inline on parent: visible with no JS */
+    assert_null(find_text(v, "classed-hidden")); /* stylesheet: still hidden */
+    assert_non_null(find_text(v, "shown"));      /* no display:none at all */
     pv_free(v);
     hp_document_free(doc);
 }
