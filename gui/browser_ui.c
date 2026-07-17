@@ -490,6 +490,12 @@ typedef struct browser_window {
     int           video_eof;       /* feeder thread has sent MD_FLUSH */
     pthread_t     video_thread;    /* feeder thread handle */
     int           video_evfd;      /* eventfd: feeder thread → main thread wake */
+    /* Audio output: aplay subprocess for PCM S16LE playback. Spawned on first
+     * audio frame, killed on video_stop. */
+    pid_t         audio_pid;       /* aplay child PID, 0 = not running */
+    int           audio_fd;        /* write end of pipe to aplay stdin, -1 = none */
+    int           audio_rate;      /* sample rate of current stream */
+    int           audio_ch;        /* channel count of current stream */
 
     /* Mouse event dispatch (Phase 1.2). Caches the DOM node under the pointer for
      * mouseover/mouseout detection between motion events. DOM_NODE_NONE = no hover. */
@@ -1004,6 +1010,8 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 static void video_stop(browser_window *w);
 static int  video_play(browser_window *w, const char *m3u8_url);
 static void *video_feeder_thread(void *arg);
+/* Audio output helpers (called from video_read_frame and video_stop). */
+static void audio_stop(browser_window *w);
 
 /* An editable control gets a live text field; submit/button/hidden do not.
  * Checkboxes, radios, and selects are interactive (click toggles/opens) but
@@ -4802,8 +4810,64 @@ static int v_read(int fd, void *buf, size_t n) {
     return 0;
 }
 
+/* --- Audio output helpers (PCM S16LE via aplay) --- */
+
+static void audio_spawn(browser_window *w, int rate, int channels) {
+    if (w == NULL) return;
+    audio_stop(w);
+    w->audio_rate = rate;
+    w->audio_ch = channels;
+    int p[2];
+    if (pipe(p) != 0) return;
+    pid_t pid = fork();
+    if (pid < 0) { close(p[0]); close(p[1]); return; }
+    if (pid == 0) {
+        /* Child: exec aplay with the correct PCM format. */
+        close(p[1]);   /* close write end */
+        dup2(p[0], 0); /* redirect stdin to pipe read end */
+        close(p[0]);
+        char rate_str[16], ch_str[16];
+        snprintf(rate_str, sizeof rate_str, "%d", rate);
+        snprintf(ch_str, sizeof ch_str, "%d", channels);
+        execlp("aplay", "aplay",
+               "-r", rate_str, "-c", ch_str,
+               "-f", "S16_LE",
+               "-t", "raw",
+               "-q",
+               (char *)NULL);
+        _exit(127);
+    }
+    /* Parent */
+    close(p[0]);
+    w->audio_pid = pid;
+    w->audio_fd = p[1];
+}
+
+static void audio_write(browser_window *w, const uint8_t *data, size_t len) {
+    if (w == NULL || w->audio_fd < 0 || data == NULL || len == 0) return;
+    ssize_t wr = write(w->audio_fd, data, len);
+    (void)wr; /* best-effort: if aplay dies, we just lose audio */
+}
+
+static void audio_stop(browser_window *w) {
+    if (w == NULL) return;
+    if (w->audio_fd >= 0) {
+        close(w->audio_fd);
+        w->audio_fd = -1;
+    }
+    if (w->audio_pid > 0) {
+        kill(w->audio_pid, SIGTERM);
+        waitpid(w->audio_pid, NULL, WNOHANG);
+        w->audio_pid = 0;
+    }
+    w->audio_rate = 0;
+    w->audio_ch = 0;
+}
+
 static void video_stop(browser_window *w) {
     if (w == NULL) return;
+
+    audio_stop(w);
 
     /* Tell the feeder thread to exit, then wait for it. */
     w->video_active = 0;
@@ -4895,8 +4959,6 @@ static int video_read_frame(browser_window *w) {
         return 1;
     }
     if (tag == MD_AUDIO_FRAME) {
-        /* Audio frame: read and discard (audio output is future work). The
-         * format is PCM S16LE interleaved; we just drain the pipe here. */
         int64_t pts_s;
         int32_t rate, ch;
         size_t dlen;
@@ -4905,15 +4967,23 @@ static int video_read_frame(browser_window *w) {
          || v_read(w->decoder_out_fd, &ch, sizeof ch) != 0
          || v_read(w->decoder_out_fd, &dlen, sizeof dlen) != 0)
             return -1;
-        (void)pts_s; (void)rate; (void)ch;
+        (void)pts_s;
         if (dlen > 0) {
-            uint8_t *drop = (uint8_t *)malloc(dlen);
-            if (drop != NULL) {
-                v_read(w->decoder_out_fd, drop, dlen);
-                free(drop);
+            uint8_t *buf = (uint8_t *)malloc(dlen);
+            if (buf != NULL) {
+                if (v_read(w->decoder_out_fd, buf, dlen) == 0) {
+                    /* Spawn aplay on the first frame with matching format. */
+                    if (w->audio_pid == 0 || w->audio_rate != rate
+                        || w->audio_ch != (int)ch) {
+                        audio_stop(w);
+                        audio_spawn(w, rate, (int)ch);
+                    }
+                    audio_write(w, buf, dlen);
+                }
+                free(buf);
             }
         }
-        return video_read_frame(w); /* read next frame */
+        return video_read_frame(w);
     }
     if (tag == MD_ERROR) {
         size_t elen;
