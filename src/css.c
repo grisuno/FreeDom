@@ -185,7 +185,15 @@ struct css_sheet {
     /* @keyframes animation blocks (R1b). Bounded anti-DoS. */
     struct {
         char name[CSS_TOK_MAX];
-        struct { double pct; int opacity; } stops[CSS_MAX_KEYFRAME_STOPS];
+        struct css_keyframe_stop {
+            double pct;
+            int opacity;       /* -1 = unset */
+            int transform_tx;  /* CSS_LEN_UNSET = unset */
+            int transform_ty;  /* CSS_LEN_UNSET = unset */
+            int transform_sx;  /* 0 = unset (meaning 100% = identity) */
+            int transform_sy;  /* 0 = unset */
+            int transform_rotate; /* 0 = unset */
+        } stops[CSS_MAX_KEYFRAME_STOPS];
         int nstops;
     } keyframes[CSS_MAX_KEYFRAMES];
     size_t          nkeyframes;
@@ -3532,13 +3540,25 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                     kdecls, CSS_MAX_KEYFRAME_DECLS, sh->custom, sh->ncustom,
                                     sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
                                     NULL, NULL, 0);
-                                int kop = -1;
+                                int kop = -1, ktx = CSS_LEN_UNSET, kty = CSS_LEN_UNSET, ksx = 0, ksy = 0, krot = 0;
                                 for (int dd = 0; dd < nd; ++dd) {
-                                    if (kdecls[dd].prop == P_OPACITY)
+                                    int p = kdecls[dd].prop;
+                                    if (p == P_OPACITY)
                                         kop = kdecls[dd].ival;
+                                    else if (p == P_TRANSFORM_TX) ktx = kdecls[dd].ival;
+                                    else if (p == P_TRANSFORM_TY) kty = kdecls[dd].ival;
+                                    else if (p == P_TRANSFORM_SX) ksx = kdecls[dd].ival;
+                                    else if (p == P_TRANSFORM_SY) ksy = kdecls[dd].ival;
+                                    else if (p == P_TRANSFORM_ROTATE) krot = kdecls[dd].ival;
                                 }
-                                sh->keyframes[sh->nkeyframes].stops[nst].pct = pct;
-                                sh->keyframes[sh->nkeyframes].stops[nst].opacity = kop;
+                                int kfi = sh->nkeyframes;
+                                sh->keyframes[kfi].stops[nst].pct = pct;
+                                sh->keyframes[kfi].stops[nst].opacity = kop;
+                                sh->keyframes[kfi].stops[nst].transform_tx = ktx;
+                                sh->keyframes[kfi].stops[nst].transform_ty = kty;
+                                sh->keyframes[kfi].stops[nst].transform_sx = ksx;
+                                sh->keyframes[kfi].stops[nst].transform_sy = ksy;
+                                sh->keyframes[kfi].stops[nst].transform_rotate = krot;
                                 ++nst;
                                 kp = de2 + 1;
                             } else break;
@@ -4019,8 +4039,14 @@ void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet) {
     s->anim_name[nlen] = '\0';
     s->anim_nkf = sheet->keyframes[match].nstops;
     for (int k = 0; k < s->anim_nkf && k < CSS_MAX_KF_STOPS; ++k) {
-        s->anim_kf_pct[k] = (int)(sheet->keyframes[match].stops[k].pct * 100.0 + 0.5);
-        s->anim_kf_val[k] = sheet->keyframes[match].stops[k].opacity;
+        const struct css_keyframe_stop *st = &sheet->keyframes[match].stops[k];
+        s->anim_kf_pct[k] = (int)(st->pct * 100.0 + 0.5);
+        s->anim_kf_val[k] = st->opacity;
+        s->anim_kf_tx[k]  = st->transform_tx;
+        s->anim_kf_ty[k]  = st->transform_ty;
+        s->anim_kf_sx[k]  = st->transform_sx;
+        s->anim_kf_sy[k]  = st->transform_sy;
+        s->anim_kf_rot[k] = st->transform_rotate;
     }
 }
 

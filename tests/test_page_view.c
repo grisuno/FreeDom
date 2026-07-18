@@ -1247,6 +1247,52 @@ static void test_build_table_cells_distinct_items(void **state) {
     hp_document_free(doc);
 }
 
+static void test_build_table_colspan_rowspan(void **state) {
+    (void)state;
+    /* 3 columns: Name(1) | Contact(2). John Doe spans 2 rows.
+     * Footer spans all 3 columns. */
+    hp_document *doc = parse(
+        "<body><table>"
+        "<tr><th>Name</th><th colspan='2'>Contact</th></tr>"
+        "<tr><td rowspan='2'>John Doe</td><td>Email</td><td>e@x.com</td></tr>"
+        "<tr><td>Phone</td><td>555</td></tr>"
+        "<tr><td colspan='3'>Footer</td></tr>"
+        "</table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    /* Container has 3 logical columns (sum of colspans). */
+    const pv_run *name = find_text(v, "Name");
+    assert_non_null(name);
+    assert_int_equal(name->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(name->cont_cols, 3);
+
+    /* Contact spans 2 columns via colspan=2. */
+    const pv_run *contact = find_text(v, "Contact");
+    assert_non_null(contact);
+    assert_int_equal(contact->grid_span, 2);
+
+    /* John Doe spans 2 rows via rowspan=2. */
+    const pv_run *john = find_text(v, "John Doe");
+    assert_non_null(john);
+    assert_int_equal(john->row_span, 2);
+    assert_int_equal(john->grid_span, 0); /* no colspan */
+
+    /* Regular cells have no span. */
+    const pv_run *email = find_text(v, "Email");
+    assert_non_null(email);
+    assert_int_equal(email->grid_span, 0);
+    assert_int_equal(email->row_span, 0);
+
+    /* Footer spans all 3 columns. */
+    const pv_run *footer = find_text(v, "Footer");
+    assert_non_null(footer);
+    assert_int_equal(footer->grid_span, 3);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_grid_container(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -2590,6 +2636,7 @@ int main(void) {
         cmocka_unit_test(test_build_inline_whitespace_kept),
         cmocka_unit_test(test_build_cont_item_identity),
         cmocka_unit_test(test_build_table_cells_distinct_items),
+        cmocka_unit_test(test_build_table_colspan_rowspan),
         cmocka_unit_test(test_build_grid_container),
         cmocka_unit_test(test_build_flex_container_from_sheet),
         cmocka_unit_test(test_build_grid_columns_from_sheet),

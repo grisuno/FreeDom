@@ -424,6 +424,14 @@ typedef struct pv_box_def {
     int anim_nkf;
     int anim_kf_pct[8];  /* percentage * 100, max 8 stops */
     int anim_kf_val[8];  /* opacity 0-100 */
+    /* Phase R1d: transform keyframe values per stop. PV_LEN_UNSET = unset for
+     * tx/ty; 0 = unset for sx/sy/rotate (identity). */
+    int anim_kf_tx[8];
+    int anim_kf_ty[8];
+    int anim_kf_sx[8];
+    int anim_kf_sy[8];
+    int anim_kf_rot[8];
+    /* convenience: last field marker for IPC count */
 } pv_box_def;
 
 typedef struct pv_view {

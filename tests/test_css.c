@@ -3092,6 +3092,71 @@ static void test_anim_keyframes_resolved_from_sheet(void **state) {
     css_free(sh);
 }
 
+static void test_anim_transform_keyframes_from_sheet(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Parse @keyframes with transform + a rule that references it */
+    assert_int_equal(css_parse(
+        "@keyframes slideIn {"
+        "  from { transform: translateX(-100px); opacity: 0; }"
+        "  to   { transform: translateX(0); opacity: 1; }"
+        "}\n"
+        "div { animation-name: slideIn; animation-duration: 1000ms; }",
+        0, &sh), CSS_OK);
+
+    /* Resolve for <div>: should find @keyframes and populate transform kf */
+    css_style s = css_resolve(sh, "div", NULL, NULL, 0, NULL, 0);
+    assert_string_equal(s.anim_name, "slideIn");
+    assert_int_equal(s.anim_nkf, 2);
+    assert_int_equal(s.anim_kf_pct[0], 0);
+    assert_int_equal(s.anim_kf_pct[1], 10000);
+    /* Opacity keyframes */
+    assert_int_equal(s.anim_kf_val[0], 0);    /* from opacity: 0 */
+    assert_int_equal(s.anim_kf_val[1], 100);  /* to opacity: 1 */
+    /* Transform keyframes (tx) values are in integer px */
+    assert_int_equal(s.anim_kf_tx[0], -100);  /* -100px */
+    assert_int_equal(s.anim_kf_tx[1], 0);     /* 0px */
+    /* ty should be CSS_LEN_UNSET (not specified) */
+    assert_int_equal(s.anim_kf_ty[0], CSS_LEN_UNSET);
+    assert_int_equal(s.anim_kf_ty[1], CSS_LEN_UNSET);
+    css_free(sh);
+
+    /* Test scale keyframes */
+    sh = NULL;
+    assert_int_equal(css_parse(
+        "@keyframes pulse {"
+        "  0%   { transform: scale(1); }"
+        "  50%  { transform: scale(1.2); }"
+        "  100% { transform: scale(1); }"
+        "}\n"
+        "div { animation-name: pulse; animation-duration: 500ms; }",
+        0, &sh), CSS_OK);
+    css_style s2 = css_resolve(sh, "div", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s2.anim_nkf, 3);
+    assert_int_equal(s2.anim_kf_sx[0], 100);   /* scale(1) = 100% */
+    assert_int_equal(s2.anim_kf_sx[1], 120);   /* scale(1.2) = 120% */
+    assert_int_equal(s2.anim_kf_sx[2], 100);   /* scale(1) = 100% */
+    assert_int_equal(s2.anim_kf_sy[0], 100);
+    assert_int_equal(s2.anim_kf_sy[1], 120);
+    assert_int_equal(s2.anim_kf_sy[2], 100);
+    css_free(sh);
+
+    /* Test rotate keyframes */
+    sh = NULL;
+    assert_int_equal(css_parse(
+        "@keyframes spin {"
+        "  from { transform: rotate(0deg); }"
+        "  to   { transform: rotate(360deg); }"
+        "}\n"
+        "div { animation-name: spin; animation-duration: 1s; }",
+        0, &sh), CSS_OK);
+    css_style s3 = css_resolve(sh, "div", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s3.anim_nkf, 2);
+    assert_int_equal(s3.anim_kf_rot[0], 0);
+    assert_int_equal(s3.anim_kf_rot[1], 360);
+    css_free(sh);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -3288,6 +3353,7 @@ int main(void) {
         cmocka_unit_test(test_white_space_break_spaces),
         cmocka_unit_test(test_filter_blur_and_grayscale),
         cmocka_unit_test(test_anim_keyframes_resolved_from_sheet),
+        cmocka_unit_test(test_anim_transform_keyframes_from_sheet),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

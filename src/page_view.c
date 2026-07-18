@@ -1101,6 +1101,11 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     for (int k = 0; k < cs->anim_nkf && k < 8; ++k) {
         d->anim_kf_pct[k] = cs->anim_kf_pct[k];
         d->anim_kf_val[k] = cs->anim_kf_val[k];
+        d->anim_kf_tx[k]  = cs->anim_kf_tx[k];
+        d->anim_kf_ty[k]  = cs->anim_kf_ty[k];
+        d->anim_kf_sx[k]  = cs->anim_kf_sx[k];
+        d->anim_kf_sy[k]  = cs->anim_kf_sy[k];
+        d->anim_kf_rot[k] = cs->anim_kf_rot[k];
     }
     /* R8: ::before/::after generated content. Copy up to the field size. */
     if (cs->content_str[0] != '\0') {
@@ -2133,9 +2138,9 @@ static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base
     return 0;
 }
 
-/* Grid column count of a table: the maximum number of <td>/<th> direct children of
- * any descendant <tr>, clamped to [1, PV_MAX_GRID_COLS]. A table is laid out as a
- * grid of equal columns (basic: colspan/rowspan are out of scope). */
+/* Grid column count of a table: the maximum number of logical columns across all
+ * <tr> elements, computed by summing each <td>/<th>'s colspan attribute (default 1),
+ * clamped to [1, PV_MAX_GRID_COLS]. */
 static int table_columns(const lxb_dom_node_t *table) {
     int maxc = 1;
     for (lxb_dom_node_t *n = table->first_child; n != NULL; n = node_next(n, table)) {
@@ -2144,7 +2149,18 @@ static int table_columns(const lxb_dom_node_t *table) {
         for (const lxb_dom_node_t *k = n->first_child; k != NULL; k = k->next) {
             if (k->type == LXB_DOM_NODE_TYPE_ELEMENT) {
                 lxb_tag_id_t t = node_tag(k);
-                if (t == LXB_TAG_TD || t == LXB_TAG_TH) ++c;
+                if (t == LXB_TAG_TD || t == LXB_TAG_TH) {
+                    int span = 1;
+                    size_t cl = 0;
+                    const lxb_char_t *cv = lxb_dom_element_get_attribute(
+                        lxb_dom_interface_element((lxb_dom_node_t *)k),
+                        (const lxb_char_t *)"colspan", 7, &cl);
+                    if (cv != NULL && cl > 0) {
+                        long sv = strtol((const char *)cv, NULL, 10);
+                        if (sv > 1) span = (sv > PV_MAX_GRID_COLS) ? PV_MAX_GRID_COLS : (int)sv;
+                    }
+                    c += span;
+                }
             }
         }
         if (c > maxc) maxc = c;
@@ -2491,6 +2507,32 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_text_ext(v, &cext);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
+                /* HTML colspan/rowspan attributes override the CSS grid span for
+                 * table cells. Read them from the cell element and forward through
+                 * pv_set_grid/pv_set_row_span so the flex layout engine places
+                 * spanning cells across the correct columns/rows. */
+                {
+                    size_t span_len = 0;
+                    const lxb_char_t *span_v = lxb_dom_element_get_attribute(
+                        lxb_dom_interface_element((lxb_dom_node_t *)n),
+                        (const lxb_char_t *)"colspan", 7, &span_len);
+                    if (span_v != NULL && span_len > 0) {
+                        long sv = strtol((const char *)span_v, NULL, 10);
+                        if (sv > 1 && sv <= PV_MAX_GRID_COLS)
+                            pv_set_grid(v, NULL, 0, (int)sv);
+                    }
+                }
+                {
+                    size_t rs_len = 0;
+                    const lxb_char_t *rs_v = lxb_dom_element_get_attribute(
+                        lxb_dom_interface_element((lxb_dom_node_t *)n),
+                        (const lxb_char_t *)"rowspan", 7, &rs_len);
+                    if (rs_v != NULL && rs_len > 0) {
+                        long sv = strtol((const char *)rs_v, NULL, 10);
+                        if (sv > 1 && sv <= 1000)
+                            pv_set_row_span(v, (int)sv);
+                    }
+                }
                 /* Every collected cell is its own grid item (the cell node is the
                  * item identity), so item-grouping downstream never merges cells. */
                 pv_set_cont_item(v, item_ordinal(&items, cid, n));

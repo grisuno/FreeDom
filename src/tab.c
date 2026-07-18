@@ -348,7 +348,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[100] = {
+        int32_t f[140] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -420,6 +420,27 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->anim_kf_val[2], (int32_t)bd->anim_kf_val[3],
             (int32_t)bd->anim_kf_val[4], (int32_t)bd->anim_kf_val[5],
             (int32_t)bd->anim_kf_val[6], (int32_t)bd->anim_kf_val[7],
+            /* Phase R1d: transform keyframe values */
+            (int32_t)bd->anim_kf_tx[0],  (int32_t)bd->anim_kf_tx[1],
+            (int32_t)bd->anim_kf_tx[2],  (int32_t)bd->anim_kf_tx[3],
+            (int32_t)bd->anim_kf_tx[4],  (int32_t)bd->anim_kf_tx[5],
+            (int32_t)bd->anim_kf_tx[6],  (int32_t)bd->anim_kf_tx[7],
+            (int32_t)bd->anim_kf_ty[0],  (int32_t)bd->anim_kf_ty[1],
+            (int32_t)bd->anim_kf_ty[2],  (int32_t)bd->anim_kf_ty[3],
+            (int32_t)bd->anim_kf_ty[4],  (int32_t)bd->anim_kf_ty[5],
+            (int32_t)bd->anim_kf_ty[6],  (int32_t)bd->anim_kf_ty[7],
+            (int32_t)bd->anim_kf_sx[0],  (int32_t)bd->anim_kf_sx[1],
+            (int32_t)bd->anim_kf_sx[2],  (int32_t)bd->anim_kf_sx[3],
+            (int32_t)bd->anim_kf_sx[4],  (int32_t)bd->anim_kf_sx[5],
+            (int32_t)bd->anim_kf_sx[6],  (int32_t)bd->anim_kf_sx[7],
+            (int32_t)bd->anim_kf_sy[0],  (int32_t)bd->anim_kf_sy[1],
+            (int32_t)bd->anim_kf_sy[2],  (int32_t)bd->anim_kf_sy[3],
+            (int32_t)bd->anim_kf_sy[4],  (int32_t)bd->anim_kf_sy[5],
+            (int32_t)bd->anim_kf_sy[6],  (int32_t)bd->anim_kf_sy[7],
+            (int32_t)bd->anim_kf_rot[0], (int32_t)bd->anim_kf_rot[1],
+            (int32_t)bd->anim_kf_rot[2], (int32_t)bd->anim_kf_rot[3],
+            (int32_t)bd->anim_kf_rot[4], (int32_t)bd->anim_kf_rot[5],
+            (int32_t)bd->anim_kf_rot[6], (int32_t)bd->anim_kf_rot[7],
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1539,7 +1560,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[100];
+        int32_t f[140];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1598,6 +1619,12 @@ static int read_view(int fd, pv_view **out) {
             .anim_nkf = f[83],
             .anim_kf_pct = { f[84], f[85], f[86], f[87], f[88], f[89], f[90], f[91] },
             .anim_kf_val = { f[92], f[93], f[94], f[95], f[96], f[97], f[98], f[99] },
+            /* Phase R1d: transform keyframe values */
+            .anim_kf_tx = { f[100], f[101], f[102], f[103], f[104], f[105], f[106], f[107] },
+            .anim_kf_ty = { f[108], f[109], f[110], f[111], f[112], f[113], f[114], f[115] },
+            .anim_kf_sx = { f[116], f[117], f[118], f[119], f[120], f[121], f[122], f[123] },
+            .anim_kf_sy = { f[124], f[125], f[126], f[127], f[128], f[129], f[130], f[131] },
+            .anim_kf_rot = { f[132], f[133], f[134], f[135], f[136], f[137], f[138], f[139] },
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

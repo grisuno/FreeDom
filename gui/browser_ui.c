@@ -5926,7 +5926,8 @@ static int box_forms_stacking_context(const pv_box_def *def) {
  * the three call sites below; hit-testing (the inverse) is out of scope for
  * this increment, see include/page_view.h pv_box_def. */
 static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
-                                 double box_w, double box_h, cairo_matrix_t *m) {
+                                 double box_w, double box_h, cairo_matrix_t *m,
+                                 int64_t elapsed_ms) {
     cairo_matrix_init_identity(m);
     if (def == NULL) return;
     double tx = (def->transform_tx != PV_LEN_UNSET) ? (double)def->transform_tx : 0.0;
@@ -5935,6 +5936,83 @@ static void box_transform_matrix(const pv_box_def *def, double box_x, double box
     double sy = (def->transform_sy != PV_LEN_UNSET) ? (double)def->transform_sy / 100.0 : 1.0;
     double rot = (def->transform_rotate != PV_LEN_UNSET)
                ? (double)def->transform_rotate * (M_PI / 180.0) : 0.0;
+    /* Phase R1d: @keyframes transform animation overrides */
+    if (elapsed_ms > 0 && def->anim_duration_ms > 0 && def->anim_nkf > 0) {
+        /* Build progress keyframes: 0% → 100% */
+        ip_keyframe prog_kf[2] = { {0.0, 0.0}, {100.0, 100.0} };
+        int ekind = (def->anim_timing >= 0 && def->anim_timing < IP_EASE_COUNT)
+                  ? def->anim_timing : IP_EASE_LINEAR;
+        ip_ease_fn ease = { .kind = ekind, .steps_n = 1, .steps_dir = 0 };
+        int iters = def->anim_iterations > 0 ? def->anim_iterations
+                  : def->anim_iterations == -1 ? IP_ITERATION_INFINITE : 1;
+        int dir = (def->anim_direction >= 0 && def->anim_direction <= 3)
+                ? def->anim_direction : IP_DIR_NORMAL;
+        int fill = (def->anim_fill_mode >= 0) ? def->anim_fill_mode : IP_FILL_FORWARDS;
+        double delay = (def->anim_delay_ms > 0) ? (double)def->anim_delay_ms : 0.0;
+        ip_anim a;
+        ip_anim_init(&a, IP_VAL_SCALAR, &ease, prog_kf, 2,
+                     (double)def->anim_duration_ms, delay, iters, dir, fill);
+        ip_anim_tick(&a, (double)elapsed_ms);
+        double progress = ip_anim_current(&a);
+        /* Interpolate each transform component that has keyframes */
+        ip_keyframe comp_kf[8];
+        int nkf;
+        /* Translate X */
+        nkf = 0;
+        for (int k = 0; k < def->anim_nkf && k < 8; ++k) {
+            if (def->anim_kf_tx[k] != PV_LEN_UNSET) {
+                comp_kf[nkf].pct = (double)def->anim_kf_pct[k] / 100.0;
+                comp_kf[nkf].val = (double)def->anim_kf_tx[k];
+                ++nkf;
+            }
+        }
+        if (nkf > 0) tx = ip_kf_interp(IP_VAL_SCALAR, comp_kf, nkf, progress);
+        /* Translate Y */
+        nkf = 0;
+        for (int k = 0; k < def->anim_nkf && k < 8; ++k) {
+            if (def->anim_kf_ty[k] != PV_LEN_UNSET) {
+                comp_kf[nkf].pct = (double)def->anim_kf_pct[k] / 100.0;
+                comp_kf[nkf].val = (double)def->anim_kf_ty[k];
+                ++nkf;
+            }
+        }
+        if (nkf > 0) ty = ip_kf_interp(IP_VAL_SCALAR, comp_kf, nkf, progress);
+        /* Scale X */
+        nkf = 0;
+        for (int k = 0; k < def->anim_nkf && k < 8; ++k) {
+            if (def->anim_kf_sx[k] != 0 || def->anim_nkf <= 1) {
+                comp_kf[nkf].pct = (double)def->anim_kf_pct[k] / 100.0;
+                comp_kf[nkf].val = (def->anim_kf_sx[k] != 0)
+                    ? (double)def->anim_kf_sx[k] / 100.0 : 0.0;
+                ++nkf;
+            }
+        }
+        if (nkf > 0) sx = ip_kf_interp(IP_VAL_SCALAR, comp_kf, nkf, progress);
+        /* Scale Y */
+        nkf = 0;
+        for (int k = 0; k < def->anim_nkf && k < 8; ++k) {
+            if (def->anim_kf_sy[k] != 0 || def->anim_nkf <= 1) {
+                comp_kf[nkf].pct = (double)def->anim_kf_pct[k] / 100.0;
+                comp_kf[nkf].val = (def->anim_kf_sy[k] != 0)
+                    ? (double)def->anim_kf_sy[k] / 100.0 : 0.0;
+                ++nkf;
+            }
+        }
+        if (nkf > 0) sy = ip_kf_interp(IP_VAL_SCALAR, comp_kf, nkf, progress);
+        /* Rotate */
+        nkf = 0;
+        for (int k = 0; k < def->anim_nkf && k < 8; ++k) {
+            if (def->anim_kf_rot[k] != 0 || def->anim_nkf <= 1) {
+                comp_kf[nkf].pct = (double)def->anim_kf_pct[k] / 100.0;
+                comp_kf[nkf].val = (double)def->anim_kf_rot[k];
+                ++nkf;
+            }
+        }
+        if (nkf > 0) {
+            double rot_deg = ip_kf_interp(IP_VAL_SCALAR, comp_kf, nkf, progress);
+            rot = rot_deg * (M_PI / 180.0);
+        }
+    }
     if (tx == 0.0 && ty == 0.0 && sx == 1.0 && sy == 1.0 && rot == 0.0) return;
     double cx = box_x + box_w / 2.0, cy = box_y + box_h / 2.0;
     cairo_matrix_translate(m, tx, ty);
@@ -6206,7 +6284,8 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
         return;
     }
     cairo_matrix_t m;
-    box_transform_matrix(def, ox + bx->x, oy + bx->top, bx->w, bx->h, &m);
+    int64_t elapsed = (int64_t)(now_ms() - w->page_load_mono_ms);
+    box_transform_matrix(def, ox + bx->x, oy + bx->top, bx->w, bx->h, &m, elapsed);
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
@@ -6244,7 +6323,8 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
         return;
     }
     cairo_matrix_t m;
-    box_transform_matrix(def, left + bx->x, origin + bx->top, bx->w, bx->h, &m);
+    int64_t elapsed = (int64_t)(now_ms() - w->page_load_mono_ms);
+    box_transform_matrix(def, left + bx->x, origin + bx->top, bx->w, bx->h, &m, elapsed);
     /* Cull heuristic only (not a clip): a row's visible vertical range shifts
      * by the translate component when deciding whether to skip an off-screen
      * row. Rotate/scale are ignored here -- worst case a row near the cull
@@ -6314,7 +6394,8 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
 
     int needs_group = box_forms_stacking_context(def);
     cairo_matrix_t m;
-    box_transform_matrix(def, left + pb->x, origin + pb->y, pb->w, pb->h, &m);
+    int64_t elapsed = (int64_t)(now_ms() - w->page_load_mono_ms);
+    box_transform_matrix(def, left + pb->x, origin + pb->y, pb->w, pb->h, &m, elapsed);
     /* Cull heuristic only (not a clip), same simplification as
      * paint_box_and_direct_rows: rotate/scale are ignored when deciding
      * whether the synthetic text row below is off-screen. */
