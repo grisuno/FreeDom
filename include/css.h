@@ -626,6 +626,13 @@ typedef struct css_style {
     int         anim_fill_mode;           /* ip_fill_mode, -1=unset */
     int         anim_timing;             /* ip_easing, -1=unset */
     int         anim_delay_ms;           /* delay in ms, 0=unset */
+    /* Resolved @keyframes data (Phase R1c): the keyframe stops from the matching
+     * @keyframes rule, resolved after cascade. anim_nkf=0 means no keyframes
+     * (use default 0→100 opacity). */
+#define CSS_MAX_KF_STOPS 8
+    int         anim_nkf;                /* 0..CSS_MAX_KF_STOPS, 0 = use default */
+    int         anim_kf_pct[CSS_MAX_KF_STOPS];  /* percentage * 100 (0..10000) */
+    int         anim_kf_val[CSS_MAX_KF_STOPS];  /* opacity value 0..100 */
     /* filter (Phase R3): blur radius in px (0=none), grayscale 0..100% (0=none). */
     int         filter_blur;
     int         filter_grayscale;
@@ -732,5 +739,11 @@ size_t css_font_face_count(const css_sheet *sheet);
 int    css_font_face_at(const css_sheet *sheet, size_t i,
                         char *family, size_t fam_cap,
                         char *src_url, size_t url_cap);
+
+/* Resolve @keyframes: scans sheet->keyframes[] for a name matching
+ * s->anim_name (first-char match). If found, copies the stops into
+ * s->anim_kf_* fields and updates s->anim_name with the full name.
+ * NULL-safe on both parameters. */
+void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);
 
 #endif /* FREEDOM_CSS_H */

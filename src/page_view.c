@@ -1095,6 +1095,12 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     } else {
         d->anim_name[0] = '\0';
     }
+    /* Phase R1c: resolved @keyframes data. */
+    d->anim_nkf = cs->anim_nkf;
+    for (int k = 0; k < cs->anim_nkf && k < 8; ++k) {
+        d->anim_kf_pct[k] = cs->anim_kf_pct[k];
+        d->anim_kf_val[k] = cs->anim_kf_val[k];
+    }
     /* R8: ::before/::after generated content. Copy up to the field size. */
     if (cs->content_str[0] != '\0') {
         size_t clen = strlen(cs->content_str);

@@ -3059,6 +3059,39 @@ static void test_filter_blur_and_grayscale(void **state) {
     css_free(sh);
 }
 
+static void test_anim_keyframes_resolved_from_sheet(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Parse @keyframes + a rule that references it */
+    assert_int_equal(css_parse(
+        "@keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; } }\n"
+        "div { animation-name: fadeOut; animation-duration: 2000ms; "
+        "animation-iteration-count: infinite; }",
+        0, &sh), CSS_OK);
+
+    /* Resolve for <div>: should find @keyframes and populate anim_kf_* */
+    css_style s = css_resolve(sh, "div", NULL, NULL, 0, NULL, 0);
+    assert_string_equal(s.anim_name, "fadeOut");
+    assert_int_equal(s.anim_duration_ms, 2000);
+    assert_int_equal(s.anim_iterations, -1);  /* infinite */
+    assert_int_equal(s.anim_nkf, 2);
+    assert_int_equal(s.anim_kf_pct[0], 0);    /* 0% */
+    assert_int_equal(s.anim_kf_val[0], 100);  /* opacity: 1 → 100 */
+    assert_int_equal(s.anim_kf_pct[1], 10000);/* 100% * 100 = 10000 */
+    assert_int_equal(s.anim_kf_val[1], 0);    /* opacity: 0 → 0 */
+
+    /* Element without animation-name: no keyframes */
+    css_style s2 = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s2.anim_nkf, 0);
+    assert_int_equal(s2.anim_duration_ms, 0);
+
+    /* NULL sheet: no crash, no keyframes */
+    css_style s3 = css_resolve(NULL, "div", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s3.anim_nkf, 0);
+
+    css_free(sh);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -3254,6 +3287,7 @@ int main(void) {
         cmocka_unit_test(test_font_shorthand),
         cmocka_unit_test(test_white_space_break_spaces),
         cmocka_unit_test(test_filter_blur_and_grayscale),
+        cmocka_unit_test(test_anim_keyframes_resolved_from_sheet),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

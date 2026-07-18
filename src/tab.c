@@ -348,7 +348,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[83] = {
+        int32_t f[100] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -410,6 +410,16 @@ static int write_view(int wfd, const pv_view *v) {
             /* Phase R4: animation direction, fill-mode, delay */
             (int32_t)bd->anim_direction, (int32_t)bd->anim_fill_mode,
             (int32_t)bd->anim_delay_ms,
+            /* Phase R1c: resolved @keyframes data */
+            (int32_t)bd->anim_nkf,
+            (int32_t)bd->anim_kf_pct[0], (int32_t)bd->anim_kf_pct[1],
+            (int32_t)bd->anim_kf_pct[2], (int32_t)bd->anim_kf_pct[3],
+            (int32_t)bd->anim_kf_pct[4], (int32_t)bd->anim_kf_pct[5],
+            (int32_t)bd->anim_kf_pct[6], (int32_t)bd->anim_kf_pct[7],
+            (int32_t)bd->anim_kf_val[0], (int32_t)bd->anim_kf_val[1],
+            (int32_t)bd->anim_kf_val[2], (int32_t)bd->anim_kf_val[3],
+            (int32_t)bd->anim_kf_val[4], (int32_t)bd->anim_kf_val[5],
+            (int32_t)bd->anim_kf_val[6], (int32_t)bd->anim_kf_val[7],
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1529,7 +1539,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[83];
+        int32_t f[100];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1584,6 +1594,10 @@ static int read_view(int fd, pv_view **out) {
             /* Phase R4: animation direction, fill-mode, delay */
             .anim_direction = f[80], .anim_fill_mode = f[81],
             .anim_delay_ms = f[82],
+            /* Phase R1c: resolved @keyframes data */
+            .anim_nkf = f[83],
+            .anim_kf_pct = { f[84], f[85], f[86], f[87], f[88], f[89], f[90], f[91] },
+            .anim_kf_val = { f[92], f[93], f[94], f[95], f[96], f[97], f[98], f[99] },
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

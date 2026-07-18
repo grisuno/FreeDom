@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head><title>Freedom v0.0.3 — Roadmap</title></head>
+<body style="color:#0a0a0a; max-width:900px; margin:2em auto; font-family:sans-serif; line-height:1.5">
+
+<p style="text-align:center"><a href="index.html">&larr; Back to home</a></p>
+<h1 style="color:#061414; text-align:center">Freedom — Strategic Roadmap</h1>
+<p style="color:#555; text-align:center"><em>Phase plan for a modern browser that stays zero-trust, zero-knowledge, and pure C.</em></p>
+
+<hr>
+
+<h2 style="color:#061414">Legend</h2>
+<p>Each milestone follows the strict cycle: <strong style="color:#061414">Spec &rarr; Test (red) &rarr; Code (green) &rarr; Refactor &rarr; Validation (ASan) &rarr; Fuzzing &rarr; Docs</strong>. A milestone is <em>closed</em> only when <code>make test &amp;&amp; make asan</code> passes.</p>
+<ul>
+  <li><strong style="color:#005500">&check; Closed</strong> &mdash; spec + tests + ASan + fuzzing</li>
+  <li><strong style="color:#aa6600">In progress</strong> &mdash; active development</li>
+  <li><strong style="color:#888">Pending</strong> &mdash; not started, awaiting dependencies</li>
+</ul>
+
+<hr>
+
+<h2 style="color:#061414" id="fase0">Fase 0: Cierre de Deuda + Animaci&oacute;n CSS</h2>
+<p style="color:#555"><em>Low effort, high visual impact. Animation is 80% done. Refactors pave the way for everything else.</em></p>
+<table style="border-collapse:collapse; width:100%">
+  <tr style="border-bottom:2px solid #061414"><th style="text-align:left; padding:8px">Milestone</th><th style="text-align:left; padding:8px">Description</th><th style="padding:8px">Dep.</th><th style="padding:8px">Effort</th></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#005500">A.</strong> Animation <code>@keyframes</code></td><td style="padding:8px">Wire <code>interp.c</code> &rarr; <code>frame_clock</code> &rarr; painter. Parser + storage exist. Frame tick to paint pipeline.</td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#005500">Low</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">B.</strong> Refactor painter</td><td style="padding:8px">Extract <code>paint_box_decoration</code>, <code>paint_content_row</code>, <code>paint_structured</code> &rarr; <code>src/painter.c</code></td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#005500">Low</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">C.</strong> Refactor chrome</td><td style="padding:8px">Extract toolbar, tabs, omnibox, menu &rarr; <code>src/chrome.c</code>. Needs painter desacoplado first.</td><td style="text-align:center">B</td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">D.</strong> HTTP/2</td><td style="padding:8px">Native HTTP/2 via libcurl <code>CURL_HTTP_VERSION_2_0</code>. Config toggle. Low risk &mdash; pure config change.</td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#005500">Low</span></td></tr>
+</table>
+<p><strong>Total:</strong> 4 milestones. <code>gui/browser_ui.c</code> (&asymp;10,700 L, known debt) refactored incrementally &mdash; never bloated.</p>
+
+<hr>
+
+<h2 style="color:#061414" id="fase1">Fase 1: Red Moderna + Tiempo Real</h2>
+<p style="color:#555"><em>Without HTTP/2/3, performance on modern networks is poor. WebSockets unblock real-time apps. Concurrent fetches unlock I2P.</em></p>
+<table style="border-collapse:collapse; width:100%">
+  <tr style="border-bottom:2px solid #061414"><th style="text-align:left; padding:8px">Milestone</th><th style="text-align:left; padding:8px">Description</th><th style="padding:8px">Dep.</th><th style="padding:8px">Effort</th></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">E.</strong> HTTP/3 (QUIC)</td><td style="padding:8px">Isolated helper with <code>ngtcp2</code> + <code>nghttp3</code>. Trusted side only &mdash; never the worker. Config toggle.</td><td style="text-align:center">D</td><td style="text-align:center"><span style="color:#aa0000">High</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">F.</strong> WebSockets</td><td style="padding:8px">IPC protocol <code>TAG_WS_*</code> (same pattern as <code>TAG_SUBREQ</code>). Gated by <code>webcaps.net</code> (allow&cap;js). Worker proxies through parent.</td><td style="text-align:center">D</td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">G.</strong> Multi-tab async fetch</td><td style="padding:8px">Concurrent loads across tabs (today one at a time). Fetch-thread serves multiple workers.</td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+</table>
+
+<hr>
+
+<h2 style="color:#061414" id="fase2">Fase 2: APIs JS de Persistencia + Criptograf&iacute;a</h2>
+<p style="color:#555"><em>IndexedDB is the most-requested persistence API. Web Crypto enables signing and encryption without exposing keys.</em></p>
+<table style="border-collapse:collapse; width:100%">
+  <tr style="border-bottom:2px solid #061414"><th style="text-align:left; padding:8px">Milestone</th><th style="text-align:left; padding:8px">Description</th><th style="padding:8px">Dep.</th><th style="padding:8px">Effort</th></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">H.</strong> IndexedDB</td><td style="padding:8px">API over <code>local_store</code> (Argon2id + AES-256-GCM/ChaCha20). Ephemeral per session = Zero Knowledge.</td><td style="text-align:center"><code>local_store</code></td><td style="text-align:center"><span style="color:#aa0000">High</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">I.</strong> Web Crypto full</td><td style="padding:8px"><code>subtle.encrypt/decrypt/sign/verify/digest</code> via native OpenSSL. <code>getRandomValues</code> + <code>randomUUID</code> exist already.</td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">J.</strong> Binary <code>arrayBuffer</code></td><td style="padding:8px"><code>fetch()</code> + XHR with real binary <code>arrayBuffer</code> response (today only UTF-8 string). Streaming deferred.</td><td style="text-align:center">D</td><td style="text-align:center"><span style="color:#005500">Low</span></td></tr>
+</table>
+
+<hr>
+
+<h2 style="color:#061414" id="fase3">Fase 3: Tiempo Real de Confianza + Wasm</h2>
+<p style="color:#555"><em>Wasm and Service Workers are the two most-requested "modern" capabilities. WebRTC only activates with double opt-in (allow&cap;js).</em></p>
+<table style="border-collapse:collapse; width:100%">
+  <tr style="border-bottom:2px solid #061414"><th style="text-align:left; padding:8px">Milestone</th><th style="text-align:left; padding:8px">Description</th><th style="padding:8px">Dep.</th><th style="padding:8px">Effort</th></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">K.</strong> WebRTC (allow&cap;js)</td><td style="padding:8px">Trusted hosts only. Force TURN over Tor, block public STUN. <code>getUserMedia</code> gated. Isolated helper process with its own seccomp profile.</td><td style="text-align:center">F</td><td style="text-align:center"><span style="color:#aa0000">Very high</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">L.</strong> WS for trusted hosts</td><td style="padding:8px">Extension of F: <code>webcaps.rtc</code> gate allows unrestricted WebSocket connections.</td><td style="text-align:center">F</td><td style="text-align:center"><span style="color:#005500">Low</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">M.</strong> Wasm helper process</td><td style="padding:8px">New <code>src/wasm_helper.c</code> with permissive seccomp (<code>PROT_EXEC</code> allowed). Pipe IPC with worker. Interpreter-only runtime (wasm3). Main worker W^X stays intact.</td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#aa0000">High</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">N.</strong> Service Workers (cache only)</td><td style="padding:8px">Limited lifetime: die with tab. Cache API over <code>local_store</code>. No sync, no push, no ghost persistence.</td><td style="text-align:center">H</td><td style="text-align:center"><span style="color:#aa0000">High</span></td></tr>
+</table>
+
+<hr>
+
+<h2 style="color:#061414" id="fase4">Fase 4: DevTools + Ecosistema</h2>
+<p style="color:#555"><em>Freebug 2.0 makes Freedom viable for developers. User Scripts replace Chrome extensions with zero-trust surface.</em></p>
+<table style="border-collapse:collapse; width:100%">
+  <tr style="border-bottom:2px solid #061414"><th style="text-align:left; padding:8px">Milestone</th><th style="text-align:left; padding:8px">Description</th><th style="padding:8px">Dep.</th><th style="padding:8px">Effort</th></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">O.</strong> Freebug Network tab</td><td style="padding:8px">Log all <code>TAG_SUBREQ</code>/<code>TAG_RESULT</code> with status, URL, time, applied policy.</td><td style="text-align:center">B</td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">P.</strong> Freebug Elements tab</td><td style="padding:8px">Live DOM inspector over <code>dom_</code> index + computed CSS (<code>dd_format_css</code>).</td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">Q.</strong> User Scripts (zero-trust)</td><td style="padding:8px">Reduced API: DOM only + gated fetch. No own network, no storage. Loaded from <code>~/.config/freedom/userscripts/</code>.</td><td style="text-align:center">None</td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">R.</strong> Find in page (<code>/</code>)</td><td style="padding:8px">Cairo overlay of matches over display list. <code>n</code>/<code>N</code> to jump.</td><td style="text-align:center">B</td><td style="text-align:center"><span style="color:#005500">Low</span></td></tr>
+</table>
+
+<hr>
+
+<h2 style="color:#061414" id="fase5">Fase 5: UX Cotidiano + Seguridad</h2>
+<p style="color:#555"><em>Password manager and E2EE sync make Freedom a daily driver. Master passphrase protects against disk access.</em></p>
+<table style="border-collapse:collapse; width:100%">
+  <tr style="border-bottom:2px solid #061414"><th style="text-align:left; padding:8px">Milestone</th><th style="text-align:left; padding:8px">Description</th><th style="padding:8px">Dep.</th><th style="padding:8px">Effort</th></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">S.</strong> Password manager</td><td style="padding:8px">Autocomplete over <code>profile.c</code> + master passphrase (Argon2id). Decrypted only in memory.</td><td style="text-align:center"><code>profile</code></td><td style="text-align:center"><span style="color:#aa0000">High</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">T.</strong> E2EE sync via Tor</td><td style="padding:8px">Sync bookmarks/history/prefs encrypted. Self-hosted .onion server. Reuses <code>tls_impersonate</code> for transport.</td><td style="text-align:center"><code>profile</code></td><td style="text-align:center"><span style="color:#aa0000">Very high</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">U.</strong> Master passphrase (opt-in)</td><td style="padding:8px">Unlock profile with passphrase resisting full directory access. Same <code>local_store</code> container.</td><td style="text-align:center"><code>profile</code></td><td style="text-align:center"><span style="color:#aa6600">Medium</span></td></tr>
+  <tr style="border-bottom:1px solid #ccc"><td style="padding:8px"><strong style="color:#888">V.</strong> Persistent back-stack</td><td style="padding:8px">Navigation history (back/forward) survives session close, not just omnibox suggestions.</td><td style="text-align:center"><code>profile</code></td><td style="text-align:center"><span style="color:#005500">Low</span></td></tr>
+</table>
+
+<hr>
+
+<h2 style="color:#061414">Background (not started)</h2>
+<ul>
+  <li><code>colspan</code>/<code>rowspan</code> in tables</li>
+  <li><code>position:sticky</code> with real scroll</li>
+  <li><code>right</code>/<code>bottom</code> insets</li>
+  <li><code>grid-template-rows</code> and <code>grid-row: span N</code> (columns closed)</li>
+  <li>Bookmark import/export</li>
+  <li><code>pledge</code>/<code>unveil</code> for OpenBSD</li>
+  <li>Smooth scroll</li>
+  <li><code>defer</code>/<code>async</code> in <code>&lt;script src&gt;</code></li>
+</ul>
+
+<hr>
+
+<h2 style="color:#061414">Current State (closed July 2026)</h2>
+<ul>
+  <li><strong>52 modules</strong> &mdash; 70,187 lines of C (src/) + 11,540 (gui/)</li>
+  <li><strong>1,317 tests</strong> across 49 test files &mdash; CMocka + ASan/UBSan</li>
+  <li><strong>16 fuzz targets</strong> &mdash; libFuzzer + AFL++</li>
+  <li><strong>Full pipeline:</strong> Network (TLS 1.3 + PQ X25519MLKEM768) &rarr; Parser (Lexbor) &rarr; JS (QuickJS-ng) &rarr; CSS (4K-line pure parser) &rarr; Layout (flex/grid/float) &rarr; Compositor (z-index, opacity, mix-blend, transform) &rarr; Paint (Cairo + HarfBuzz)</li>
+  <li><strong>Sandbox:</strong> fork+exec worker, seccomp W^X, Landlock, CLONE_NEWNET, anti-fingerprint identity, canvas/audio poisoning per-origin</li>
+  <li><strong>Media:</strong> PNG/JPEG/WebP/GIF/AV1 decode &rarr; worker, FFmpeg video/audio pipeline, HLS, data: URIs</li>
+</ul>
+
+<p style="text-align:center; color:#888; margin-top:3em"><em>Freedom v0.0.3 &mdash; July 2026. See <a href="https://github.com/anomalyco/freedom">github.com/anomalyco/freedom</a>.</em></p>
+
+</body>
+</html>

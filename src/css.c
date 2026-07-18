@@ -3096,7 +3096,9 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         dst[0].prop = P_ANIM_DURATION; dst[0].ival = ms; return 1;
     }
     else if (strcmp(prop, "animation-name") == 0) {
-        /* store name in ival as first-char encoding for cascade */
+        /* store name in ival as first-char encoding for cascade; the full
+         * name string is recovered later from sheet->keyframes[] by matching
+         * first character + length (see resolve_anim_keyframes). */
         int enc = (int)(val[0]) | ((int)(strlen(val) > 63 ? 63 : strlen(val)) << 8);
         dst[0].prop = P_ANIM_NAME; dst[0].ival = enc; return 1;
     }
@@ -3806,6 +3808,20 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_ASPECT_NUM:          o->aspect_num = d->ival; break;
             case P_ASPECT_DEN:          o->aspect_den = d->ival; break;
             case P_ANIM_DURATION:       o->anim_duration_ms = d->ival; break;
+            case P_ANIM_NAME: {
+                /* Decode first-char + length from ival. Store the first
+                 * character; the full name is recovered later in
+                 * resolve_anim_keyframes by matching against sheet->keyframes[]. */
+                char fc = (char)(d->ival & 0xff);
+                int nlen = (d->ival >> 8) & 0xff;
+                if (fc != '\0' && nlen > 0) {
+                    o->anim_name[0] = fc;
+                    o->anim_name[1] = '\0';
+                } else {
+                    o->anim_name[0] = '\0';
+                }
+                break;
+            }
             case P_ANIM_ITERS:          o->anim_iterations = d->ival; break;
             case P_ANIM_DIR:            o->anim_direction = d->ival; break;
             case P_ANIM_FILL:           o->anim_fill_mode = d->ival; break;
@@ -3913,6 +3929,9 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .transform_sx = CSS_LEN_UNSET, .transform_sy = CSS_LEN_UNSET,
         .transform_rotate = CSS_LEN_UNSET,
         .anim_duration_ms = 0,
+        .anim_nkf = 0,
+        .anim_kf_pct = { 0 },
+        .anim_kf_val = { 0 },
         .filter_blur = 0, .filter_grayscale = 0,
         .bg_pos_x = CSS_LEN_UNSET, .bg_pos_y = CSS_LEN_UNSET,
     };
@@ -3963,6 +3982,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                        inline_bg_urls, inline_content_urls);
     }
 
+    css_resolve_anim_keyframes(&out, sheet);
     return out;
 }
 
@@ -3975,6 +3995,33 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
      * point (callers that need them build a css_element with attrs). */
     css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL };
     return css_resolve_el(sheet, &el, inline_style, inline_len);
+}
+
+/* Resolve @keyframes for an animated element: scans sheet->keyframes[] for a
+ * name matching anim_name[0] (first char + length from the cascade encoding).
+ * If a unique match is found, copies stops into anim_kf_* fields.
+ * Sheet can be NULL (inline style, no @keyframes). */
+void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet) {
+    if (s == NULL || sheet == NULL || s->anim_name[0] == '\0') return;
+    char fc = s->anim_name[0];
+    int match = -1;
+    for (size_t i = 0; i < sheet->nkeyframes; ++i) {
+        if (sheet->keyframes[i].name[0] == fc) {
+            match = (int)i;
+            break;
+        }
+    }
+    if (match < 0) return;
+    /* Copy full name and stops */
+    size_t nlen = strlen(sheet->keyframes[match].name);
+    if (nlen >= sizeof s->anim_name) nlen = sizeof s->anim_name - 1;
+    memcpy(s->anim_name, sheet->keyframes[match].name, nlen);
+    s->anim_name[nlen] = '\0';
+    s->anim_nkf = sheet->keyframes[match].nstops;
+    for (int k = 0; k < s->anim_nkf && k < CSS_MAX_KF_STOPS; ++k) {
+        s->anim_kf_pct[k] = (int)(sheet->keyframes[match].stops[k].pct * 100.0 + 0.5);
+        s->anim_kf_val[k] = sheet->keyframes[match].stops[k].opacity;
+    }
 }
 
 size_t css_font_face_count(const css_sheet *sheet) {

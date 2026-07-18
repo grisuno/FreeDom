@@ -419,6 +419,11 @@ typedef struct pv_box_def {
     int anim_fill_mode;
     int anim_delay_ms;
     char anim_name[64];
+    /* Resolved @keyframes data (Phase R1c): keyframe stops from the matching
+     * @keyframes rule. anim_nkf=0 means no keyframes (use default 0->100). */
+    int anim_nkf;
+    int anim_kf_pct[8];  /* percentage * 100, max 8 stops */
+    int anim_kf_val[8];  /* opacity 0-100 */
 } pv_box_def;
 
 typedef struct pv_view {

@@ -6143,7 +6143,22 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
         int ekind = (def->anim_timing >= 0 && def->anim_timing < IP_EASE_COUNT)
                   ? def->anim_timing : IP_EASE_LINEAR;
         ip_ease_fn ease = { .kind = ekind, .steps_n = 1, .steps_dir = 0 };
-        ip_keyframe kf[] = { {0.0, 0.0}, {100.0, 100.0} };
+        int kf_n = 0;
+        ip_keyframe kf_buf[8];
+        if (def->anim_nkf > 0) {
+            int nk = def->anim_nkf;
+            if (nk > 8) nk = 8;
+            for (int k = 0; k < nk; ++k) {
+                kf_buf[k].pct = (double)def->anim_kf_pct[k] / 100.0;
+                kf_buf[k].val = (double)def->anim_kf_val[k];
+            }
+            kf_n = nk;
+        }
+        if (kf_n < 2) {
+            kf_buf[0] = (ip_keyframe){0.0, 0.0};
+            kf_buf[1] = (ip_keyframe){100.0, 100.0};
+            kf_n = 2;
+        }
         int iters = def->anim_iterations > 0 ? def->anim_iterations
                   : def->anim_iterations == -1 ? IP_ITERATION_INFINITE
                   : 1;
@@ -6155,7 +6170,7 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
         int fill = (def->anim_fill_mode >= 0) ? def->anim_fill_mode : IP_FILL_FORWARDS;
         double delay = (def->anim_delay_ms > 0) ? (double)def->anim_delay_ms : 0.0;
         ip_anim a;
-        ip_anim_init(&a, IP_VAL_SCALAR, &ease, kf, 2,
+        ip_anim_init(&a, IP_VAL_SCALAR, &ease, kf_buf, kf_n,
                      (double)def->anim_duration_ms, delay,
                      iters, dir, fill);
         ip_anim_tick(&a, (double)elapsed_ms);
@@ -6484,7 +6499,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         const pv_box_def *def = (bid >= 0) ? rd_box_at(w->doc, bid) : NULL;
         int is_sc = def ? box_forms_stacking_context(def) : 0;
 
-        if (is_sc && def->anim_duration_ms <= 0) {
+        if (is_sc) {
             /* R6: stacking-context box — paint subtree as one offscreen group. */
             cairo_push_group(cr);
             paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
