@@ -29,6 +29,7 @@ _Static_assert(PV_GRID_TRACKS == CSS_GRID_TRACKS_MAX,
 _Static_assert(PV_BG_URL_MAX == CSS_URL_MAX,
                "PV_BG_URL_MAX must mirror CSS_URL_MAX");
 #include <string.h>
+#include <ctype.h>
 
 #include <lexbor/dom/dom.h>
 #include <lexbor/html/html.h>
@@ -2205,24 +2206,11 @@ static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen) {
 static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                              const css_sheet *sheet, pv_style_cache *style_cache,
                              int js_enabled) {
+    (void)js_enabled;
     for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
         if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
-            css_style cs = cached_element_style(el, sheet, style_cache);
-            if (cs.display == CSS_DISP_NONE) {
-                /* Let inline display:none through when there is no JS to toggle
-                 * it (the site expects JS to make this content visible). */
-                if (!js_enabled) {
-                    size_t sl = 0;
-                    const lxb_char_t *st = lxb_dom_element_get_attribute(
-                        el, (const lxb_char_t *)"style", 5, &sl);
-                    if (st != NULL && sl > 0) {
-                        /* Inline style attribute with no JS: treat as visible. */
-                        continue;
-                    }
-                }
-                return 1;
-            }
+            if (cached_element_style(el, sheet, style_cache).display == CSS_DISP_NONE) return 1;
         }
         if (p == base) break;
     }

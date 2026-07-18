@@ -2182,12 +2182,14 @@ static void test_build_display_none_hidden(void **state) {
         "<p>shown</p></body>");
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
-    /* Without JS (js_enabled=0), inline display:none is treated as a
-     * presentation hint (the page expects JS to toggle it), so inline
-     * hidden content IS visible. Stylesheet-level display:none still hides. */
-    assert_non_null(find_text(v, "secret"));     /* inline: visible with no JS */
-    assert_non_null(find_text(v, "nested"));     /* inline on parent: visible with no JS */
-    assert_null(find_text(v, "classed-hidden")); /* stylesheet: still hidden */
+    /* display:none is always honored regardless of source. The earlier
+     * behavior of treating inline display:none as visible when JS is off
+     * was reverted (commit 897f414 regression) because it broke many sites:
+     * elements with stylesheet display:none AND any inline style attribute
+     * leaked as empty 1px-wide rows. */
+    assert_null(find_text(v, "secret"));         /* inline, always hidden */
+    assert_null(find_text(v, "nested"));         /* inline on parent, always hidden */
+    assert_null(find_text(v, "classed-hidden")); /* stylesheet, always hidden */
     assert_non_null(find_text(v, "shown"));      /* no display:none at all */
     pv_free(v);
     hp_document_free(doc);

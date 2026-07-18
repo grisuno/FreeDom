@@ -486,6 +486,17 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   `[[freedom-tls-impersonate]]`.
 - **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
   contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
+- **`display:none` es estructural, no una sugerencia de JS — revertida la regresión del commit 897f414:**
+  el commit 897f414 modificó `in_hidden_subtree` en `page_view.c` para tratar
+  `display:none` como "sugerencia de presentación" cuando el elemento tenía inline `style`
+  Y no había JS (`js_enabled==0`). El problema: la comprobación era `st != NULL && sl > 0`
+  (cualquier inline style), no si el inline style específicamente contenía `display:none`.
+  En slashdot.org, muchos elementos con `display:none` del stylesheet tenían inline
+  `style` para colores/posición → se mostraban como filas vacías de 1px → página
+  ilegible (142.000 px de alto, en lugar de ~18.000). Se revirtió a la semántica
+  correcta: `display:none` de cualquier fuente oculta el elemento; la excepción
+  experimental de "JS toggle" se eliminó por romper más sitios de los que arreglaba.
+  Ver `[[freedom-display-none-structural]]`.
 - **`-fvisibility=hidden` es invariante de build (no quitar):** el binario `freedom` no exporta API,
   así que todos sus símbolos van **ocultos** del `.dynsym`. No es solo endurecimiento: un símbolo del
   ejecutable con visibilidad por defecto **preempta** al homónimo de una librería enlazada en TODO el
