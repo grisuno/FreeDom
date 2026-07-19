@@ -73,6 +73,7 @@ typedef enum pv_input_type {
     PV_IN_BUTTON,     /* non-submitting button (button/reset): painted, inert */
     PV_IN_CHECKBOX,   /* <input type="checkbox">: toggleable box, checked=value set */
     PV_IN_RADIO,      /* <input type="radio">: grouped by name, one selected */
+    PV_IN_RANGE,      /* <input type="range">: slider with min/max/value */
     PV_IN_SELECT,     /* <select> with <option> children: painted value, click->options */
     PV_IN_PROGRESS,   /* <progress>: value/max bar, not interactive */
     PV_IN_METER,      /* <meter>: colored bar with value/min/max/low/high/optimum */
@@ -399,6 +400,12 @@ typedef struct pv_box_def {
     /* filter (Phase R3) */
     int filter_blur;
     int filter_grayscale;
+    int filter_brightness;
+    int filter_contrast;
+    int filter_sepia;
+    int filter_invert;
+    int filter_saturate;
+    int filter_hue_rotate;
     /* background-position (R5a): px offsets, PV_LEN_UNSET = unset. */
     int bg_pos_x;
     int bg_pos_y;

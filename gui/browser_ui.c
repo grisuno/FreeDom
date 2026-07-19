@@ -4263,7 +4263,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
  * out-of-flow blocks; pv_box_defs that are not present in either get zero geometry
  * (the solver treats them as zero-size at the containing block's origin). */
 static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
-                        rc_layout *L) {
+                        double vp_h, rc_layout *L) {
     const rd_doc *doc = w->doc;
     size_t nbox = rd_box_count(doc);
     if (nbox == 0) { L->npositioned = 0; return; }
@@ -4342,7 +4342,7 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
     }
 
     bt_status st = bt_resolve_positioning(
-        doc->boxes, nbox, gx, gy, gw, gh, content_w, content_w,
+        doc->boxes, nbox, gx, gy, gw, gh, content_w, vp_h,
         L->positioned, BT_MAX_POSITIONED, &L->npositioned);
     (void)st;  /* BT_OK / BT_ERR_NULL_ARG / BT_ERR_RANGE all logged via dom_debug */
 
@@ -4621,6 +4621,75 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         set_rgb(cr, th->input_text);
         double lx = bar_x + 4.0;
         double ly = bar_y + (bar_h - fe.height) * 0.5 + fe.ascent;
+        draw_slice(cr, lx, ly, label, strlen(label));
+        cairo_restore(cr);
+        return;
+    }
+
+    if (b->input_type == PV_IN_RANGE) {
+        double bar_w = input_box_width(content_w);
+        if (bar_w < 40.0) bar_w = 40.0;
+        double bar_h = 6.0;
+        double thumb_r = 8.0;
+        double bar_x = left;
+        double bar_y = ry + (height - bar_h) * 0.5;
+
+        double val_d = 0.0, min_d = 0.0, max_d = 100.0;
+        if (b->value != NULL) val_d = atof(b->value);
+        if (b->text != NULL && b->text[0] != '\0') {
+            double tmin = 0.0, tmax = 100.0;
+            int nf = sscanf(b->text, "%lf,%lf", &tmin, &tmax);
+            if (nf >= 1) min_d = tmin;
+            if (nf >= 2) max_d = tmax;
+        }
+        if (max_d <= min_d) max_d = min_d + 1.0;
+        if (val_d < min_d) val_d = min_d;
+        if (val_d > max_d) val_d = max_d;
+        double ratio = (max_d > min_d) ? (val_d - min_d) / (max_d - min_d) : 0.0;
+
+        /* Track background */
+        set_rgb(cr, th->input_bg);
+        cairo_rectangle(cr, bar_x, bar_y, bar_w, bar_h);
+        cairo_fill(cr);
+
+        /* Track fill (highlighted portion up to value) */
+        if (ratio > 0.0) {
+            double fill_w = ratio * bar_w;
+            if (fill_w < 1.0) fill_w = 1.0;
+            set_rgb(cr, th->link);
+            cairo_rectangle(cr, bar_x, bar_y, fill_w, bar_h);
+            cairo_fill(cr);
+        }
+
+        /* Track border */
+        set_rgb(cr, th->input_border);
+        cairo_set_line_width(cr, 1.0);
+        cairo_rectangle(cr, bar_x, bar_y, bar_w, bar_h);
+        cairo_stroke(cr);
+
+        /* Thumb (circle) at the value position */
+        double thumb_cx = bar_x + ratio * bar_w;
+        double thumb_cy = bar_y + bar_h / 2.0;
+        set_rgb(cr, th->button_bg);
+        cairo_arc(cr, thumb_cx, thumb_cy, thumb_r, 0.0, 2.0 * M_PI);
+        cairo_fill(cr);
+        set_rgb(cr, th->text);
+        cairo_set_line_width(cr, 1.5);
+        cairo_arc(cr, thumb_cx, thumb_cy, thumb_r, 0.0, 2.0 * M_PI);
+        cairo_stroke(cr);
+
+        /* Value label */
+        char label[32];
+        cairo_save(cr);
+        content_font(cr, th->body_font - 2.0, 0, 0, CSS_FF_UNSET);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        int nw = snprintf(label, sizeof label, "%.*g",
+                          (val_d == (int)val_d) ? 0 : 2, val_d);
+        (void)nw;
+        set_rgb(cr, th->input_text);
+        double lx = bar_x + bar_w + 8.0;
+        double ly = ry + (height - fe.height) * 0.5 + fe.ascent;
         draw_slice(cr, lx, ly, label, strlen(label));
         cairo_restore(cr);
         return;
@@ -6086,7 +6155,10 @@ static int box_forms_stacking_context(const pv_box_def *def) {
                          def->transform_rotate != PV_LEN_UNSET,
     };
     if (def->anim_duration_ms > 0) return 1;  /* Phase R1: animation needs stacking context */
-    if (def->filter_blur > 0 || def->filter_grayscale > 0) return 1;  /* R3: filter needs SC */
+    if (def->filter_blur > 0 || def->filter_grayscale > 0 ||
+        def->filter_brightness > 0 || def->filter_contrast > 0 ||
+        def->filter_sepia > 0 || def->filter_invert > 0 ||
+        def->filter_saturate > 0 || def->filter_hue_rotate > 0) return 1;  /* R3: filter needs SC */
     return cx_forms_stacking_context(&st);
 }
 
@@ -6337,10 +6409,18 @@ static void bui_box_blur_surface(cairo_surface_t *surf, int radius) {
 static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms) {
     int needs_blur = (def && def->filter_blur > 0);
     int needs_grayscale = (def && def->filter_grayscale > 0);
+    int needs_brightness = (def && def->filter_brightness > 0 && def->filter_brightness != 100);
+    int needs_contrast = (def && def->filter_contrast > 0 && def->filter_contrast != 100);
+    int needs_sepia = (def && def->filter_sepia > 0);
+    int needs_invert = (def && def->filter_invert > 0);
+    int needs_saturate = (def && def->filter_saturate > 0 && def->filter_saturate != 100);
+    int needs_hue_rotate = (def && def->filter_hue_rotate > 0);
+    int any_filter = needs_blur || needs_grayscale || needs_brightness || needs_contrast
+                  || needs_sepia || needs_invert || needs_saturate || needs_hue_rotate;
     cairo_pattern_t *group = NULL;
     cairo_surface_t *flt_surf = NULL;
 
-    if (needs_blur || needs_grayscale) {
+    if (any_filter) {
         group = cairo_pop_group(cr);
 
         double x1, y1, x2, y2;
@@ -6364,23 +6444,111 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
             bui_box_blur_surface(flt_surf, radius);
         }
 
-        if (needs_grayscale) {
+        if (needs_blur || needs_grayscale || needs_brightness || needs_contrast
+            || needs_sepia || needs_invert || needs_saturate || needs_hue_rotate) {
             unsigned char *data = cairo_image_surface_get_data(flt_surf);
             int stride = cairo_image_surface_get_stride(flt_surf);
-            int pct = def->filter_grayscale;
-            if (pct > 100) pct = 100;
-            double factor = (double)pct / 100.0;
+            int gs_pct = (def) ? def->filter_grayscale : 0;
+            if (gs_pct > 100) gs_pct = 100;
+            double gs_factor = (double)gs_pct / 100.0;
+            double br_factor = (def && def->filter_brightness != 100)
+                             ? (double)def->filter_brightness / 100.0 : 1.0;
+            double ct_factor = (def && def->filter_contrast != 100)
+                             ? (double)def->filter_contrast / 100.0 : 1.0;
+            double se_factor = (def && def->filter_sepia > 0)
+                             ? (double)def->filter_sepia / 100.0 : 0.0;
+            double in_factor = (def && def->filter_invert > 0)
+                             ? (double)def->filter_invert / 100.0 : 0.0;
+            double sa_factor = (def && def->filter_saturate != 100)
+                             ? (double)def->filter_saturate / 100.0 : 1.0;
+            int h_rot = (def) ? def->filter_hue_rotate : 0;
             for (int y = 0; y < fh; ++y) {
                 uint32_t *row = (uint32_t *)(data + y * stride);
                 for (int x = 0; x < fw; ++x) {
                     uint32_t px = row[x];
-                    int fr = (int)(px >> 16) & 0xff;
-                    int fg = (int)(px >> 8) & 0xff;
-                    int fb = (int)px & 0xff;
-                    int gray = (int)(fr * 0.299 + fg * 0.587 + fb * 0.114 + 0.5);
-                    int nr = (int)(fr + (gray - fr) * factor + 0.5);
-                    int ng = (int)(fg + (gray - fg) * factor + 0.5);
-                    int nb = (int)(fb + (gray - fb) * factor + 0.5);
+                    double fr = (double)((px >> 16) & 0xff);
+                    double fg = (double)((px >> 8) & 0xff);
+                    double fb = (double)(px & 0xff);
+                    /* 1. Grayscale */
+                    if (gs_pct > 0) {
+                        double gray = fr * 0.299 + fg * 0.587 + fb * 0.114;
+                        fr += (gray - fr) * gs_factor;
+                        fg += (gray - fg) * gs_factor;
+                        fb += (gray - fb) * gs_factor;
+                    }
+                    /* 2. Sepia */
+                    if (se_factor > 0.0) {
+                        double sr = fr * 0.393 + fg * 0.769 + fb * 0.189;
+                        double sg = fr * 0.349 + fg * 0.686 + fb * 0.168;
+                        double sb = fr * 0.272 + fg * 0.534 + fb * 0.131;
+                        fr += (sr - fr) * se_factor;
+                        fg += (sg - fg) * se_factor;
+                        fb += (sb - fb) * se_factor;
+                    }
+                    /* 3. Hue-rotate (RGB → HSL → rotate → RGB) */
+                    if (h_rot > 0) {
+                        double hr = fr / 255.0, hg = fg / 255.0, hb = fb / 255.0;
+                        double hmx = hr, hmn = hr;
+                        if (hg > hmx) hmx = hg;
+                        if (hb > hmx) hmx = hb;
+                        if (hg < hmn) hmn = hg;
+                        if (hb < hmn) hmn = hb;
+                        double hl = (hmx + hmn) / 2.0;
+                        double hs = 0.0, hh = 0.0;
+                        if (hmx > hmn) {
+                            double hd = hmx - hmn;
+                            hs = (hl > 0.5) ? hd / (2.0 - hmx - hmn) : hd / (hmx + hmn);
+                            if (hmx == hr) hh = (hg - hb) / hd + (hg < hb ? 6.0 : 0.0);
+                            else if (hmx == hg) hh = (hb - hr) / hd + 2.0;
+                            else hh = (hr - hg) / hd + 4.0;
+                            hh /= 6.0;
+                        }
+                        hh += (double)h_rot / 360.0;
+                        if (hh > 1.0) hh -= 1.0;
+                        /* HSL → RGB: inline hue2rgb helper */
+                        double hq2 = (hl < 0.5) ? hl * (1.0 + hs) : hl + hs - hl * hs;
+                        double hp2 = 2.0 * hl - hq2;
+                        double hh3 = hh + 1.0/3.0;
+                        if (hh3 > 1.0) hh3 -= 1.0;
+                        double hh1 = hh - 1.0/3.0;
+                        if (hh1 < 0.0) hh1 += 1.0;
+                        #define H2R(p,q,t) (((t) < 1.0/6.0) ? (p) + ((q)-(p))*6.0*(t) : \
+                                           ((t) < 1.0/2.0) ? (q) : \
+                                           ((t) < 2.0/3.0) ? (p) + ((q)-(p))*(2.0/3.0-(t))*6.0 : (p))
+                        fr = H2R(hp2, hq2, hh1) * 255.0;
+                        fg = H2R(hp2, hq2, hh) * 255.0;
+                        fb = H2R(hp2, hq2, hh3) * 255.0;
+                        #undef H2R
+                    }
+                    /* 4. Saturate (mix with grayscale) */
+                    if (sa_factor != 1.0) {
+                        double gray = fr * 0.299 + fg * 0.587 + fb * 0.114;
+                        fr += (fr - gray) * (sa_factor - 1.0);
+                        fg += (fg - gray) * (sa_factor - 1.0);
+                        fb += (fb - gray) * (sa_factor - 1.0);
+                    }
+                    /* 5. Contrast */
+                    if (ct_factor != 1.0) {
+                        fr = (fr - 128.0) * ct_factor + 128.0;
+                        fg = (fg - 128.0) * ct_factor + 128.0;
+                        fb = (fb - 128.0) * ct_factor + 128.0;
+                    }
+                    /* 6. Brightness (multiply) */
+                    if (br_factor != 1.0) {
+                        fr *= br_factor;
+                        fg *= br_factor;
+                        fb *= br_factor;
+                    }
+                    /* 7. Invert */
+                    if (in_factor > 0.0) {
+                        fr += (255.0 - fr - fr) * in_factor;
+                        fg += (255.0 - fg - fg) * in_factor;
+                        fb += (255.0 - fb - fb) * in_factor;
+                    }
+                    /* Clamp */
+                    int nr = (int)(fr + 0.5); if (nr < 0) nr = 0; if (nr > 255) nr = 255;
+                    int ng = (int)(fg + 0.5); if (ng < 0) ng = 0; if (ng > 255) ng = 255;
+                    int nb = (int)(fb + 0.5); if (nb < 0) nb = 0; if (nb > 255) nb = 255;
                     row[x] = (px & 0xff000000) | ((uint32_t)nr << 16) | ((uint32_t)ng << 8) | (uint32_t)nb;
                 }
             }
@@ -6690,7 +6858,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
 
     rc_layout L;
     layout_doc(cr, w, content_w, &L);
-    position_doc(cr, w, content_w, &L);
+    position_doc(cr, w, content_w, content_h, &L);
     w->content_total_h = L.total_h;  /* cached for the scrollbar */
 
     double max_scroll = L.total_h - content_h;
@@ -6900,7 +7068,7 @@ static long write_doc_pdf(browser_window *w, const char *path) {
 
     rc_layout L;
     layout_doc(cr, w, content_w, &L);
-    position_doc(cr, w, content_w, &L);
+    position_doc(cr, w, content_w, 30000.0, &L);
 
     size_t pages = 0;
     double *tops = NULL, *heights = NULL, *yof = NULL;
@@ -7062,7 +7230,7 @@ static long write_doc_png(browser_window *w, const char *path) {
     cairo_t *mcr = cairo_create(meas);
     rc_layout L;
     layout_doc(mcr, w, content_w, &L);
-    position_doc(mcr, w, content_w, &L);
+    position_doc(mcr, w, content_w, 30000.0, &L);
     double content_h = L.total_h;
     cairo_destroy(mcr);
     cairo_surface_destroy(meas);
@@ -7296,7 +7464,7 @@ ui_status ui_dump_layout(const rd_doc *doc) {
     cairo_t *cr = cairo_create(meas);
     rc_layout L;
     layout_doc(cr, &w, content_w, &L);
-    position_doc(cr, &w, content_w, &L);
+    position_doc(cr, &w, content_w, 30000.0, &L);
     cairo_destroy(cr);
     cairo_surface_destroy(meas);
 

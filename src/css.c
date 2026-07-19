@@ -142,7 +142,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_ANIM_NAME, P_ANIM_ITERS, P_ANIM_DIR, P_ANIM_FILL, P_ANIM_TIMING,
         P_ANIM_DELAY,
         /* filter (Phase R3) */
-        P_FILTER_BLUR, P_FILTER_GRAYSCALE,
+        P_FILTER_BLUR, P_FILTER_GRAYSCALE, P_FILTER_BRIGHTNESS, P_FILTER_CONTRAST,
+        P_FILTER_SEPIA, P_FILTER_INVERT, P_FILTER_SATURATE, P_FILTER_HUE_ROTATE,
         /* background-position (R5a) */
         P_BG_POS_X, P_BG_POS_Y,
         /* multi-layer background-image layer 2 (R5b): second url() behind the first. */
@@ -2126,9 +2127,51 @@ static int expand_outline(const char *val, css_decl *dst, int cap) {
     return n;
 }
 
+/* Parse a percentage (or 0..1 float) from inside a filter function's parens.
+ * Returns 0..100 (clamped), -1 on error. */
+static int interp_filter_pct(const char *s) {
+    double d; const char *e;
+    if (!parse_num(s, &d, &e)) return -1;
+    int pct;
+    if (*e == '%') pct = (int)(d + 0.5);
+    else pct = (int)(d * 100.0 + 0.5);
+    if (pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+    return pct;
+}
+
+/* Parse a degrees value (e.g. "45deg") from inside a filter function's parens.
+ * Returns degrees 0..360 (modulo), or -1 on error. Returns the integer degree
+ * nearest the parsed value. */
+static int interp_filter_deg(const char *s) {
+    double d; const char *e;
+    if (!parse_num(s, &d, &e)) return -1;
+    if (*e == 'g' && *(e+1) == 'r' && *(e+2) == 'a' && *(e+3) == 'd') d = d * 360.0 / 400.0;
+    else if (*e == 'r' && *(e+1) == 'a' && *(e+2) == 'd') d = d * 57.29577951308232; /* 180/pi */
+    else if (*e == 't' && *(e+1) == 'u' && *(e+2) == 'r' && *(e+3) == 'n') d = d * 360.0;
+    /* otherwise assume deg */
+    int deg = (int)(d + 0.5);
+    deg = deg % 360;
+    if (deg < 0) deg += 360;
+    return deg;
+}
+
+/* Helper: extract content inside filter(...) parens. Modifies tok by replacing
+ * the closing ')' with '\0'. Returns pointer past the opening '(', or NULL. */
+static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen) {
+    if (strncmp(tok, fn, fnlen) != 0) return NULL;
+    char *ep = strchr(tok, '(');
+    if (ep == NULL) return NULL;
+    char *cp = strrchr(tok, ')');
+    if (cp == NULL || cp <= ep) return NULL;
+    *cp = '\0';
+    return ep + 1;
+}
+
 /* filter (Phase R3): space-separated function list. Supported: blur(Npx),
- * grayscale(N%) where N is 0..100. Unknown functions and chained filters
- * beyond the first two are ignored (fail closed). url() never accepted. */
+ * grayscale(N%), brightness(N), contrast(N), sepia(N), invert(N), saturate(N),
+ * hue-rotate(Ndeg). Unknown functions and chained filters beyond the first few
+ * are ignored (fail closed). url() never accepted. */
 static int expand_filter(const char *val, css_decl *dst, int cap) {
     if (csel_substr(val, "url(", 1)) return 0;
     if (csel_ci_eq(val, "none")) return 0;
@@ -2137,28 +2180,47 @@ static int expand_filter(const char *val, css_decl *dst, int cap) {
     int n = 0;
     while (n + 2 <= cap && next_ws_token(&p, tok, sizeof tok)) {
         if (strncmp(tok, "blur(", 5) == 0) {
-            char *ep = strchr(tok, '(');
-            if (ep == NULL) continue;
-            char *cp = strrchr(tok, ')');
-            if (cp == NULL || cp <= ep) continue;
-            *cp = '\0';
+            const char *body = filter_paren_body(tok, "blur(", 5);
+            if (!body) continue;
             int px;
-            if (interp_len(ep + 1, 0, &px) && px >= 0) {
+            if (interp_len(body, 0, &px) && px >= 0) {
                 dst[n].prop = P_FILTER_BLUR; dst[n].ival = px; ++n;
             }
         } else if (strncmp(tok, "grayscale(", 10) == 0) {
-            char *ep = strchr(tok, '(');
-            if (ep == NULL) continue;
-            char *cp = strrchr(tok, ')');
-            if (cp == NULL || cp <= ep) continue;
-            *cp = '\0';
-            double d; const char *e;
-            if (parse_num(ep + 1, &d, &e)) {
-                int pct = (int)(d * 100.0 + 0.5);
-                if (pct < 0) pct = 0;
-                if (pct > 100) pct = 100;
-                dst[n].prop = P_FILTER_GRAYSCALE; dst[n].ival = pct; ++n;
-            }
+            const char *body = filter_paren_body(tok, "grayscale(", 10);
+            if (!body) continue;
+            int pct = interp_filter_pct(body);
+            if (pct >= 0) { dst[n].prop = P_FILTER_GRAYSCALE; dst[n].ival = pct; ++n; }
+        } else if (strncmp(tok, "brightness(", 11) == 0) {
+            const char *body = filter_paren_body(tok, "brightness(", 11);
+            if (!body) continue;
+            int pct = interp_filter_pct(body);
+            if (pct >= 0) { dst[n].prop = P_FILTER_BRIGHTNESS; dst[n].ival = pct; ++n; }
+        } else if (strncmp(tok, "contrast(", 9) == 0) {
+            const char *body = filter_paren_body(tok, "contrast(", 9);
+            if (!body) continue;
+            int pct = interp_filter_pct(body);
+            if (pct >= 0) { dst[n].prop = P_FILTER_CONTRAST; dst[n].ival = pct; ++n; }
+        } else if (strncmp(tok, "sepia(", 6) == 0) {
+            const char *body = filter_paren_body(tok, "sepia(", 6);
+            if (!body) continue;
+            int pct = interp_filter_pct(body);
+            if (pct >= 0) { dst[n].prop = P_FILTER_SEPIA; dst[n].ival = pct; ++n; }
+        } else if (strncmp(tok, "invert(", 7) == 0) {
+            const char *body = filter_paren_body(tok, "invert(", 7);
+            if (!body) continue;
+            int pct = interp_filter_pct(body);
+            if (pct >= 0) { dst[n].prop = P_FILTER_INVERT; dst[n].ival = pct; ++n; }
+        } else if (strncmp(tok, "saturate(", 9) == 0) {
+            const char *body = filter_paren_body(tok, "saturate(", 9);
+            if (!body) continue;
+            int pct = interp_filter_pct(body);
+            if (pct >= 0) { dst[n].prop = P_FILTER_SATURATE; dst[n].ival = pct; ++n; }
+        } else if (strncmp(tok, "hue-rotate(", 11) == 0) {
+            const char *body = filter_paren_body(tok, "hue-rotate(", 11);
+            if (!body) continue;
+            int deg = interp_filter_deg(body);
+            if (deg >= 0) { dst[n].prop = P_FILTER_HUE_ROTATE; dst[n].ival = deg; ++n; }
         }
     }
     return n;
@@ -3849,6 +3911,12 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_ANIM_DELAY:          o->anim_delay_ms = d->ival; break;
             case P_FILTER_BLUR:         o->filter_blur = d->ival; break;
             case P_FILTER_GRAYSCALE:    o->filter_grayscale = d->ival; break;
+            case P_FILTER_BRIGHTNESS:   o->filter_brightness = d->ival; break;
+            case P_FILTER_CONTRAST:     o->filter_contrast = d->ival; break;
+            case P_FILTER_SEPIA:        o->filter_sepia = d->ival; break;
+            case P_FILTER_INVERT:       o->filter_invert = d->ival; break;
+            case P_FILTER_SATURATE:     o->filter_saturate = d->ival; break;
+            case P_FILTER_HUE_ROTATE:   o->filter_hue_rotate = d->ival; break;
             case P_BG_POS_X:            o->bg_pos_x = d->ival; break;
             case P_BG_POS_Y:            o->bg_pos_y = d->ival; break;
             case P_CONTENT:

@@ -348,7 +348,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[140] = {
+        int32_t f[148] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -441,6 +441,10 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->anim_kf_rot[2], (int32_t)bd->anim_kf_rot[3],
             (int32_t)bd->anim_kf_rot[4], (int32_t)bd->anim_kf_rot[5],
             (int32_t)bd->anim_kf_rot[6], (int32_t)bd->anim_kf_rot[7],
+            /* Phase R3b: expanded filter functions */
+            (int32_t)bd->filter_brightness, (int32_t)bd->filter_contrast,
+            (int32_t)bd->filter_sepia, (int32_t)bd->filter_invert,
+            (int32_t)bd->filter_saturate, (int32_t)bd->filter_hue_rotate,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1560,7 +1564,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[140];
+        int32_t f[148];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1625,6 +1629,10 @@ static int read_view(int fd, pv_view **out) {
             .anim_kf_sx = { f[116], f[117], f[118], f[119], f[120], f[121], f[122], f[123] },
             .anim_kf_sy = { f[124], f[125], f[126], f[127], f[128], f[129], f[130], f[131] },
             .anim_kf_rot = { f[132], f[133], f[134], f[135], f[136], f[137], f[138], f[139] },
+            /* Phase R3b: expanded filter functions */
+            .filter_brightness = f[140], .filter_contrast = f[141],
+            .filter_sepia = f[142], .filter_invert = f[143],
+            .filter_saturate = f[144], .filter_hue_rotate = f[145],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

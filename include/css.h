@@ -640,9 +640,18 @@ typedef struct css_style {
     int         anim_kf_sx[CSS_MAX_KF_STOPS];
     int         anim_kf_sy[CSS_MAX_KF_STOPS];
     int         anim_kf_rot[CSS_MAX_KF_STOPS];
-    /* filter (Phase R3): blur radius in px (0=none), grayscale 0..100% (0=none). */
+    /* filter (Phase R3): blur radius in px (0=none), grayscale 0..100% (0=none),
+     * brightness/contrast/sepia/invert/saturate 0..100% (100=identity for
+     * brightness/contrast/saturate, 0=none for sepia/invert),
+     * hue-rotate 0..359 degrees. */
     int         filter_blur;
     int         filter_grayscale;
+    int         filter_brightness;
+    int         filter_contrast;
+    int         filter_sepia;
+    int         filter_invert;
+    int         filter_saturate;
+    int         filter_hue_rotate;
     /* background-position (R5a): px offset from top-left, CSS_LEN_UNSET = unset
      * ("0% 0%" which is also the CSS initial value). */
     int         bg_pos_x;

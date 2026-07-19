@@ -973,7 +973,10 @@ static int css_has_boxdeco(const css_style *cs) {
              * def for the painter's animation-tick path. */
             cs->anim_duration_ms > 0 ||
             /* filter (Phase R3): needs box def for group compositing path */
-            cs->filter_blur > 0 || cs->filter_grayscale > 0;
+            cs->filter_blur > 0 || cs->filter_grayscale > 0 ||
+            cs->filter_brightness > 0 || cs->filter_contrast > 0 ||
+            cs->filter_sepia > 0 || cs->filter_invert > 0 ||
+            cs->filter_saturate > 0 || cs->filter_hue_rotate > 0;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1080,6 +1083,12 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->anim_duration_ms = cs->anim_duration_ms;
     d->filter_blur = cs->filter_blur;
     d->filter_grayscale = cs->filter_grayscale;
+    d->filter_brightness = cs->filter_brightness;
+    d->filter_contrast = cs->filter_contrast;
+    d->filter_sepia = cs->filter_sepia;
+    d->filter_invert = cs->filter_invert;
+    d->filter_saturate = cs->filter_saturate;
+    d->filter_hue_rotate = cs->filter_hue_rotate;
     d->bg_pos_x = cs->bg_pos_x;
     d->bg_pos_y = cs->bg_pos_y;
     d->anim_iterations = cs->anim_iterations;
@@ -1802,6 +1811,7 @@ static pv_input_type classify_input(const char *type) {
     if (ascii_ieq(type, "reset"))    return PV_IN_BUTTON;
     if (ascii_ieq(type, "checkbox")) return PV_IN_CHECKBOX;
     if (ascii_ieq(type, "radio"))    return PV_IN_RADIO;
+    if (ascii_ieq(type, "range"))    return PV_IN_RANGE;
     return PV_IN_TEXT;
 }
 
@@ -1922,7 +1932,20 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
             lxb_dom_element_get_attribute(el, (const lxb_char_t *)"checked", 7, &cl);
         *out_checked = (ch != NULL) ? 1 : 0;
     }
-    if (*out_type == PV_IN_SUBMIT || *out_type == PV_IN_BUTTON) {
+    if (*out_type == PV_IN_RANGE) {
+        /* Encode "min,max" as the label for the painter */
+        size_t minl = 0, maxl = 0;
+        const lxb_char_t *minattr = lxb_dom_element_get_attribute(el,
+            (const lxb_char_t *)"min", 3, &minl);
+        const lxb_char_t *maxattr = lxb_dom_element_get_attribute(el,
+            (const lxb_char_t *)"max", 3, &maxl);
+        char meta[64];
+        int nw = snprintf(meta, sizeof meta, "%s,%s",
+            (minattr && minl > 0) ? (const char *)minattr : "0",
+            (maxattr && maxl > 0) ? (const char *)maxattr : "100");
+        (void)nw;
+        *out_label = dup_n(meta, strlen(meta));
+    } else if (*out_type == PV_IN_SUBMIT || *out_type == PV_IN_BUTTON) {
         const char *def = (*out_type == PV_IN_SUBMIT) ? "Submit" : "Button";
         const char *lab = (*out_value != NULL && (*out_value)[0] != '\0') ? *out_value : def;
         *out_label = dup_n(lab, strlen(lab));

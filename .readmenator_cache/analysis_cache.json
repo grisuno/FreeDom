@@ -3,11 +3,11 @@
     "god_nodes": [
       [
         "gui/browser_ui.c",
-        34.9
+        35.0
       ],
       [
         "src/local_store.c",
-        24.700000000000003
+        25.1
       ],
       [
         "tests/test_css.c",
@@ -15,7 +15,7 @@
       ],
       [
         "src/css.c",
-        17.400000000000002
+        17.7
       ],
       [
         "src/page_view.c",

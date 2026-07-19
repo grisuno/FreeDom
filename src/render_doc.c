@@ -588,6 +588,7 @@ const char *rd_input_label(int input_type) {
         case PV_IN_BUTTON:   return "button";
         case PV_IN_CHECKBOX: return "checkbox";
         case PV_IN_RADIO:    return "radio";
+        case PV_IN_RANGE:    return "range";
         case PV_IN_SELECT:   return "select";
         case PV_IN_PROGRESS: return "progress";
         case PV_IN_METER:    return "meter";
