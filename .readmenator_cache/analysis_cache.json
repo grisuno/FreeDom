@@ -7,19 +7,19 @@
       ],
       [
         "src/local_store.c",
-        23.900000000000002
+        24.3
       ],
       [
         "tests/test_css.c",
-        20.6
+        20.700000000000003
       ],
       [
         "src/css.c",
-        17.3
+        17.400000000000002
       ],
       [
         "src/page_view.c",
-        11.4
+        11.5
       ],
       [
         "tests/test_js_dom.c",
@@ -27,7 +27,7 @@
       ],
       [
         "tests/test_page_view.c",
-        9.8
+        9.9
       ],
       [
         "tests/test_tab.c",

@@ -6524,8 +6524,11 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (w->scroll > max_scroll) w->scroll = max_scroll;
     double origin = content_top + th->content_margin - w->scroll;
 
-    /* R4: sticky positioning adjust — clamp sticky boxes to viewport top
-     * (inset_top) when scrolled past their natural in-flow position. */
+    /* R4: sticky positioning for OUT-OF-FLOW boxes — clamp to viewport top
+     * (inset_top) when scrolled past. For in-flow sticky boxes (the common
+     * case, e.g. a nav bar), the row/box paint loop below adjusts positions
+     * directly rather than going through L.positioned (which drops in-flow
+     * boxes at position_doc). */
     for (size_t i = 0; i < L.npositioned; ++i) {
         int bid = (int)L.positioned[i].box_index;
         if (bid < 0) continue;
@@ -6536,6 +6539,37 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         double natural_y = origin + L.positioned[i].y;
         double sticky_y = content_top + inset;
         if (natural_y < sticky_y) L.positioned[i].y = sticky_y - origin;
+    }
+    /* R6: sticky positioning for IN-FLOW boxes — compute a viewport-relative
+     * sticky offset per box and apply it to the box's rows so the row paint
+     * loop paints them at the clamped (viewport-stuck) Y instead of the
+     * natural in-flow Y. The box loop below also creates a local copy of
+     * the rc_box with adjusted top so the box decoration shifts too.
+     * offset_by_bid[bid] = sticky Y delta in px, 0 = no adjustment needed. */
+    double *sticky_off = NULL;
+    size_t nbox_total = rd_box_count(w->doc);
+    if (nbox_total > 0) {
+        sticky_off = (double *)calloc(nbox_total, sizeof(double));
+        if (sticky_off) {
+            for (size_t i = 0; i < L.nbox; ++i) {
+                int bid = L.boxes[i].block_id;
+                if (bid < 0) continue;
+                const pv_box_def *bd = rd_box_at(w->doc, bid);
+                if (bd == NULL || bd->position != CSS_POS_STICKY) continue;
+                double inset = (bd->inset_top != PV_LEN_UNSET && bd->inset_top != CSS_LEN_AUTO)
+                             ? (double)bd->inset_top : 0.0;
+                double natural_y = L.boxes[i].top - w->scroll;  /* screen-space */
+                double target_y = inset;  /* viewport-relative target */
+                if (natural_y < target_y)
+                    sticky_off[bid] = target_y - natural_y;
+            }
+            /* Apply sticky offsets to row positions */
+            for (size_t i = 0; i < L.nrow; ++i) {
+                int bid = row_owner_block_id(&L, &L.rows[i]);
+                if (bid >= 0 && (size_t)bid < nbox_total && sticky_off[bid] != 0.0)
+                    L.rows[i].top += sticky_off[bid];
+            }
+        }
     }
 
     /* Stage 2, negative z-index PAINTS FIRST: CSS 2.1 App E layer 1 (NEG_Z)
@@ -6573,15 +6607,31 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
 
     for (size_t i = 0; i < L.nbox; ++i) {
         if (box_done != NULL && box_done[i]) continue;
-        const rc_box *bx = &L.boxes[i];
-        double by = origin + bx->top;
-        if (by + bx->h < content_top || by > content_top + content_h) continue;
-        int bid = bx->block_id;
+        const rc_box *orig_bx = &L.boxes[i];
+        int bid = orig_bx->block_id;
         const pv_box_def *def = (bid >= 0) ? rd_box_at(w->doc, bid) : NULL;
         int is_sc = def ? box_forms_stacking_context(def) : 0;
+        /* Sticky boxes: create a local copy with adjusted top so the box
+         * decoration shifts with the viewport clamp. The direct rows of the
+         * sticky box were already adjusted in L.rows[].top above. Nested
+         * children (paint_nested_children) paint at their natural layout
+         * positions — for v1 this is a known limitation (sticky boxes
+         * with complex children get their decoration + direct text rows right,
+         * child boxes inside a sticky bar are uncommon in practice). */
+        double sticky_delta = 0.0;
+        if (sticky_off && bid >= 0 && (size_t)bid < nbox_total)
+            sticky_delta = sticky_off[bid];
+        rc_box sticky_bx;
+        const rc_box *bx = orig_bx;
+        if (sticky_delta != 0.0) {
+            sticky_bx = *orig_bx;
+            sticky_bx.top += sticky_delta;
+            bx = &sticky_bx;
+        }
+        double by = origin + bx->top;
+        if (by + bx->h < content_top || by > content_top + content_h) continue;
 
         if (is_sc) {
-            /* R6: stacking-context box — paint subtree as one offscreen group. */
             cairo_push_group(cr);
             paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
                                        (double)w->width, content_top, content_h,
@@ -6628,6 +6678,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         }
         while (pos_ov_depth > 0) { cairo_restore(cr); pos_ov_depth--; }
     }
+    free(sticky_off);
     rc_free(&L);
 }
 
