@@ -294,7 +294,14 @@ Recorre el subárbol del `<body>` (si no hay, el documento) de forma **iterativa
 la profundidad la controla el atacante). Para cada **nodo de texto**:
 
 - **Subárboles invisibles**: se ignora el texto cuyo ancestro sea `script`, `style`, `head`,
-  `title` o `noscript`.
+  `title`, `noscript` (con JS activo), o `video`/`audio` (2026-07-19: el contenido interno de
+  un elemento de media es fallback para motores SIN soporte; este motor pinta el elemento
+  mismo como `PV_VIDEO`, así que el fallback no se muestra nunca — igual que todo motor
+  moderno. Candado: `test_build_video_fallback_suppressed`).
+- **Selección de `<source>` (2026-07-19)**: un `<video>`/`<audio>` sin `src` directo elige
+  entre sus `<source>` hijos **por `type`**: gana el primero cuyo type contenga
+  `mpegurl`/`mp2t`/`mp4` (lo que el pipeline de media reproduce nativo); si ninguno,
+  el primero con `src`. Candado: `test_build_video_source_type_preference`.
 - **Colapso de espacios**: las secuencias de espacios ASCII (` \t\n\r\f`) se colapsan a un solo
   espacio. Un run que queda vacío se descarta.
 - **Enlace**: si el ancestro más cercano es un `<a>` con `href`, el run es `PV_LINK` y lleva ese

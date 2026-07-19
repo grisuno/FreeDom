@@ -844,6 +844,59 @@ static void test_load_ex_runs_script_and_mutates(void **state) {
     tab_close(t);
 }
 
+/* Given a page with a <noscript> fallback and a script, When loaded with
+ * run_js, Then the fallback text is absent from the view. Regression lock:
+ * the pre-script preserve snapshot was built with js_enabled=0, inflating
+ * its block count with the fallback so the fuller-view heuristic picked it
+ * even with JS on. */
+static void test_load_ex_noscript_hidden_with_js(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p>hello</p>"
+        "<noscript>enable-js-fallback</noscript>"
+        "<script>void 0;</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    int saw_fallback = 0, saw_hello = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const char *txt = pv_at(p.view, i)->text;
+        if (txt != NULL && strstr(txt, "enable-js-fallback") != NULL) saw_fallback = 1;
+        if (txt != NULL && strstr(txt, "hello") != NULL) saw_hello = 1;
+    }
+    assert_false(saw_fallback);
+    assert_true(saw_hello);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* HTMLMediaElement facade: a <video> element wrapper exposes canPlayType /
+ * play (Promise) / attribute-reflected muted, and new Audio() constructs a
+ * media-capable element -- without throwing and without any network. */
+static void test_load_ex_media_element_facade(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>t</title></head><body>"
+        "<video id=\"v\" muted><source src=\"a.webm\" type=\"video/webm\">"
+        "<source src=\"a.mp4\" type=\"video/mp4\"></video>"
+        "<script>var v=document.getElementById('v');"
+        "var au=new Audio('b.mp3');"
+        "document.title=[v.canPlayType('video/mp4'),"
+        "v.canPlayType('application/vnd.apple.mpegurl'),"
+        "v.canPlayType('audio/flac')||'none',"
+        "typeof v.play().then,v.muted,au.tagName].join('|');"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "probably|probably|none|function|true|AUDIO");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Session cookies (trusted host): the parent seeds document.cookie from its ephemeral
  * network jar (tab_set_cookies), the page's JS reads and sets cookies, and the worker
  * dumps the jar back (tab_page.set_cookies) for the parent to fold in. In-memory only. */
@@ -2164,6 +2217,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_form_control),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_ex_runs_script_and_mutates),
+        cmocka_unit_test(test_load_ex_noscript_hidden_with_js),
+        cmocka_unit_test(test_load_ex_media_element_facade),
         cmocka_unit_test(test_load_session_cookies_roundtrip),
         cmocka_unit_test(test_load_no_session_cookies_when_untrusted),
         cmocka_unit_test(test_load_ex_builds_dom_and_fires_onload),

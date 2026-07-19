@@ -3,7 +3,7 @@
     "god_nodes": [
       [
         "gui/browser_ui.c",
-        35.2
+        35.1
       ],
       [
         "src/local_store.c",
@@ -19,7 +19,7 @@
       ],
       [
         "src/page_view.c",
-        11.5
+        11.600000000000001
       ],
       [
         "tests/test_js_dom.c",
@@ -216,6 +216,7 @@
     "tests/test_js_sandbox.c": "testing",
     "tests/test_link_nav.c": "testing",
     "tests/test_local_store.c": "testing",
+    "tests/test_media_decoder.c": "testing",
     "tests/test_net_realm.c": "testing",
     "tests/test_os_sandbox.c": "testing",
     "tests/test_page_view.c": "testing",

@@ -693,11 +693,15 @@ static int is_skipped_tag(lxb_tag_id_t t) {
      * NOSCRIPT is handled separately (in_skipped_subtree): its fallback content is
      * shown when JS is disabled and hidden when JS runs.
      * PROGRESS/METER/LEGEND content is captured as attributes/text and emitted
-     * as PV_INPUT runs with their respective types. */
+     * as PV_INPUT runs with their respective types.
+     * VIDEO/AUDIO children are fallback content for browsers WITHOUT media
+     * support; this browser renders the media element itself (PV_VIDEO run),
+     * so the fallback text is never shown -- same as every modern engine. */
     return t == LXB_TAG_SCRIPT || t == LXB_TAG_STYLE || t == LXB_TAG_HEAD
         || t == LXB_TAG_TITLE
         || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT || t == LXB_TAG_BUTTON
-        || t == LXB_TAG_PROGRESS || t == LXB_TAG_METER || t == LXB_TAG_LEGEND;
+        || t == LXB_TAG_PROGRESS || t == LXB_TAG_METER || t == LXB_TAG_LEGEND
+        || t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO;
 }
 
 static lxb_tag_id_t node_tag(const lxb_dom_node_t *n) {
@@ -2837,17 +2841,35 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 size_t sl = 0;
                 const lxb_char_t *src =
                     lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
-                /* If no direct src, try the first <source> child */
+                /* If no direct src, pick a <source> child. Modern pages list
+                 * several alternatives; prefer, by the type attribute, the
+                 * containers the media pipeline plays natively (HLS playlists
+                 * and MPEG-TS/MP4), falling back to the first source found. */
                 if ((src == NULL || sl == 0)) {
+                    const lxb_char_t *first_src = NULL;
+                    size_t first_sl = 0;
                     for (lxb_dom_node_t *ch = n->first_child; ch != NULL; ch = ch->next) {
-                        if (ch->type == LXB_DOM_NODE_TYPE_ELEMENT
-                            && node_tag(ch) == LXB_TAG_SOURCE) {
-                            lxb_dom_element_t *sel = lxb_dom_interface_element(ch);
-                            src = lxb_dom_element_get_attribute(sel,
-                                (const lxb_char_t *)"src", 3, &sl);
-                            if (src != NULL && sl > 0) break;
+                        if (ch->type != LXB_DOM_NODE_TYPE_ELEMENT
+                            || node_tag(ch) != LXB_TAG_SOURCE)
+                            continue;
+                        lxb_dom_element_t *sel = lxb_dom_interface_element(ch);
+                        size_t ssl = 0;
+                        const lxb_char_t *ssrc = lxb_dom_element_get_attribute(sel,
+                            (const lxb_char_t *)"src", 3, &ssl);
+                        if (ssrc == NULL || ssl == 0) continue;
+                        if (first_src == NULL) { first_src = ssrc; first_sl = ssl; }
+                        size_t tl = 0;
+                        const lxb_char_t *ty = lxb_dom_element_get_attribute(sel,
+                            (const lxb_char_t *)"type", 4, &tl);
+                        if (ty != NULL && tl > 0
+                            && (mem_contains_ci(ty, tl, "mpegurl")
+                                || mem_contains_ci(ty, tl, "mp2t")
+                                || mem_contains_ci(ty, tl, "mp4"))) {
+                            src = ssrc; sl = ssl;
+                            break;
                         }
                     }
+                    if (src == NULL || sl == 0) { src = first_src; sl = first_sl; }
                 }
                 if (src == NULL || sl == 0) continue; /* no source: nothing to show */
 

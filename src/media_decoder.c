@@ -160,13 +160,6 @@ static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len) {
         return -1;
     }
 
-    dc->w = dc->video_codec_ctx->width;
-    dc->h = dc->video_codec_ctx->height;
-    if (dc->w <= 0 || dc->h <= 0 || dc->w > 8192 || dc->h > 8192) {
-        send_error(dc->out_fd, "invalid video dimensions");
-        return -1;
-    }
-
     /* Open audio decoder, if present. */
     if (dc->audio_stream_idx >= 0) {
         AVCodecParameters *apar = dc->fmt_ctx->streams[dc->audio_stream_idx]->codecpar;
@@ -217,6 +210,67 @@ static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len) {
     return 0;
 }
 
+/* Rescales a decoded frame's PTS to microseconds using the time base of the
+ * stream it came from; frames without a PTS get the running fallback. */
+static int64_t frame_pts_us(const AVFrame *f, AVRational tb, int64_t fallback) {
+    if (f->pts == AV_NOPTS_VALUE) return fallback;
+    return av_rescale_q(f->pts, tb, (AVRational){1, 1000000});
+}
+
+/* Converts the current dc->frame (YUV) to BGRA and sends it as MD_FRAME with
+ * the given PTS in microseconds. */
+static void send_video_frame(decoder_ctx *dc, int64_t pts_us) {
+    sws_scale(dc->sws,
+              (const uint8_t *const *)dc->frame->data,
+              dc->frame->linesize, 0, dc->h,
+              dc->rgb->data, dc->rgb->linesize);
+    uint8_t tag = MD_FRAME;
+    int32_t w32 = (int32_t)dc->w, h32 = (int32_t)dc->h;
+    size_t dlen = (size_t)dc->w * (size_t)dc->h * 4u;
+    write_full(dc->out_fd, &tag, 1);
+    write_full(dc->out_fd, &pts_us, sizeof pts_us);
+    write_full(dc->out_fd, &w32, sizeof w32);
+    write_full(dc->out_fd, &h32, sizeof h32);
+    write_full(dc->out_fd, &dlen, sizeof dlen);
+    write_full(dc->out_fd, dc->rgb->data[0], dlen);
+}
+
+/* Converts the current dc->audio_frame to interleaved S16LE PCM and sends it
+ * as MD_AUDIO_FRAME with the given PTS in microseconds. Planar float (the
+ * AAC decoder's native output) is converted; other formats emit silence of
+ * the right duration so the audio clock stays continuous. */
+static void send_audio_frame(decoder_ctx *dc, int64_t pts_us) {
+    int rate = dc->audio_sample_rate > 0 ? dc->audio_sample_rate : 44100;
+    int ch = dc->audio_channels > 0 ? dc->audio_channels : 2;
+    int nsamples = dc->audio_frame->nb_samples;
+    size_t pcm_bytes = (size_t)nsamples * (size_t)ch * 2u;
+    if (pcm_bytes == 0) return;
+    uint8_t *pcm = (uint8_t *)calloc(1, pcm_bytes);
+    if (pcm == NULL) return;
+    if (dc->audio_frame->format == AV_SAMPLE_FMT_FLTP) {
+        for (int s = 0; s < nsamples; ++s) {
+            for (int c = 0; c < ch; ++c) {
+                float val = ((float *)dc->audio_frame->data[c])[s];
+                if (val > 1.0f) val = 1.0f;
+                if (val < -1.0f) val = -1.0f;
+                int16_t s16 = (int16_t)(val * 32767.0f);
+                pcm[(size_t)s * (size_t)ch * 2u + (size_t)c * 2u]      = (uint8_t)(s16 & 0xff);
+                pcm[(size_t)s * (size_t)ch * 2u + (size_t)c * 2u + 1u] = (uint8_t)((s16 >> 8) & 0xff);
+            }
+        }
+    }
+    uint8_t tag = MD_AUDIO_FRAME;
+    int32_t rate32 = (int32_t)rate;
+    int32_t ch32 = (int32_t)ch;
+    write_full(dc->out_fd, &tag, 1);
+    write_full(dc->out_fd, &pts_us, sizeof pts_us);
+    write_full(dc->out_fd, &rate32, sizeof rate32);
+    write_full(dc->out_fd, &ch32, sizeof ch32);
+    write_full(dc->out_fd, &pcm_bytes, sizeof pcm_bytes);
+    write_full(dc->out_fd, pcm, pcm_bytes);
+    free(pcm);
+}
+
 /* Decodes one segment of TS data and sends frames. Returns the number of
  * frames sent, or -1 on fatal error. */
 static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len) {
@@ -232,7 +286,8 @@ static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len) {
         write_full(dc->out_fd, &w32, sizeof w32);
         write_full(dc->out_fd, &h32, sizeof h32);
         write_full(dc->out_fd, &ha32, sizeof ha32);
-        return 0; /* frames from this segment come from subsequent decode calls */
+        /* v2: fall through and decode this same segment. v1 used the first
+         * segment for the probe only, silently dropping its ~10 s of frames. */
     }
 
     /* We need to re-mux the segment into a new format context (each TS segment
@@ -268,9 +323,15 @@ static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len) {
         return 0; /* no video in this segment, not an error */
     }
 
-    /* Use the existing codec context from the first segment. */
+    /* v2: PTS come from THIS segment's stream time bases. v1 applied the
+     * first segment's time base to every later one, corrupting the clock as
+     * soon as stream indices or time bases differed. */
+    AVRational vtb = seg_fmt->streams[seg_vstream]->time_base;
+    AVRational atb = (seg_astream >= 0)
+                     ? seg_fmt->streams[seg_astream]->time_base
+                     : (AVRational){1, 1000000};
 
-    /* Send queued packets through the decoders. */
+    /* Send queued packets through the persistent codec contexts. */
     while (av_read_frame(seg_fmt, dc->pkt) >= 0) {
         if (dc->pkt->stream_index == seg_vstream) {
             if (avcodec_send_packet(dc->video_codec_ctx, dc->pkt) < 0) {
@@ -280,29 +341,9 @@ static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len) {
             av_packet_unref(dc->pkt);
 
             while (avcodec_receive_frame(dc->video_codec_ctx, dc->frame) >= 0) {
-                int64_t pts_us = (dc->frame->pts != AV_NOPTS_VALUE)
-                                 ? (int64_t)((double)dc->frame->pts
-                                      * av_q2d(dc->fmt_ctx->streams[dc->stream_idx]->time_base)
-                                      * 1000000.0)
-                                 : dc->pts_offset_us;
+                int64_t pts_us = frame_pts_us(dc->frame, vtb, dc->pts_offset_us);
                 dc->pts_offset_us = pts_us + 40000;
-
-                /* Convert YUV → ARGB. */
-                sws_scale(dc->sws,
-                          (const uint8_t *const *)dc->frame->data,
-                          dc->frame->linesize, 0, dc->h,
-                          dc->rgb->data, dc->rgb->linesize);
-
-                uint8_t tag = MD_FRAME;
-                int64_t pts_s = pts_us / 1000000;
-                int32_t w32 = (int32_t)dc->w, h32 = (int32_t)dc->h;
-                size_t dlen = (size_t)dc->w * (size_t)dc->h * 4u;
-                write_full(dc->out_fd, &tag, 1);
-                write_full(dc->out_fd, &pts_s, sizeof pts_s);
-                write_full(dc->out_fd, &w32, sizeof w32);
-                write_full(dc->out_fd, &h32, sizeof h32);
-                write_full(dc->out_fd, &dlen, sizeof dlen);
-                write_full(dc->out_fd, dc->rgb->data[0], dlen);
+                send_video_frame(dc, pts_us);
                 ++nframes;
                 av_frame_unref(dc->frame);
             }
@@ -314,46 +355,8 @@ static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len) {
             av_packet_unref(dc->pkt);
 
             while (avcodec_receive_frame(dc->audio_codec_ctx, dc->audio_frame) >= 0) {
-                /* Convert AVFrame (may be planar float) to interleaved S16 PCM. */
-                int rate = dc->audio_sample_rate;
-                int ch = dc->audio_channels;
-                if (rate <= 0) rate = 44100;
-                if (ch <= 0) ch = 2;
-                int nsamples = dc->audio_frame->nb_samples;
-                size_t pcm_bytes = (size_t)nsamples * (size_t)ch * 2u;
-                if (pcm_bytes > 0) {
-                    uint8_t *pcm = (uint8_t *)malloc(pcm_bytes);
-                    if (pcm != NULL) {
-                        /* Simple downmix to S16 interleaved. */
-                        if (dc->audio_frame->format == AV_SAMPLE_FMT_FLTP) {
-                            for (int s = 0; s < nsamples; ++s) {
-                                for (int c = 0; c < ch; ++c) {
-                                    float val = ((float *)dc->audio_frame->data[c])[s];
-                                    if (val > 1.0f) val = 1.0f;
-                                    if (val < -1.0f) val = -1.0f;
-                                    int16_t s16 = (int16_t)(val * 32767.0f);
-                                    pcm[(size_t)s * (size_t)ch * 2u + (size_t)c * 2u]     = s16 & 0xff;
-                                    pcm[(size_t)s * (size_t)ch * 2u + (size_t)c * 2u + 1u] = (s16 >> 8) & 0xff;
-                                }
-                            }
-                        } else {
-                            memset(pcm, 0, pcm_bytes);
-                        }
-                        int64_t pts_s = (dc->audio_frame->pts != AV_NOPTS_VALUE)
-                            ? dc->audio_frame->pts / 1000
-                            : dc->pts_offset_us / 1000000;
-                        uint8_t atag = MD_AUDIO_FRAME;
-                        int32_t rate32 = (int32_t)rate;
-                        int32_t ch32 = (int32_t)ch;
-                        write_full(dc->out_fd, &atag, 1);
-                        write_full(dc->out_fd, &pts_s, sizeof pts_s);
-                        write_full(dc->out_fd, &rate32, sizeof rate32);
-                        write_full(dc->out_fd, &ch32, sizeof ch32);
-                        write_full(dc->out_fd, &pcm_bytes, sizeof pcm_bytes);
-                        write_full(dc->out_fd, pcm, pcm_bytes);
-                        free(pcm);
-                    }
-                }
+                send_audio_frame(dc, frame_pts_us(dc->audio_frame, atb,
+                                                  dc->pts_offset_us));
                 av_frame_unref(dc->audio_frame);
             }
         } else {
@@ -361,58 +364,11 @@ static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len) {
         }
     }
 
-    /* Flush remaining frames from the video decoder. */
-    avcodec_send_packet(dc->video_codec_ctx, NULL);
-    while (avcodec_receive_frame(dc->video_codec_ctx, dc->frame) >= 0) {
-        sws_scale(dc->sws,
-                  (const uint8_t *const *)dc->frame->data,
-                  dc->frame->linesize, 0, dc->h,
-                  dc->rgb->data, dc->rgb->linesize);
-
-        uint8_t tag = MD_FRAME;
-        int64_t pts_s = dc->pts_offset_us / 1000000;
-        int32_t w32 = (int32_t)dc->w, h32 = (int32_t)dc->h;
-        size_t dlen = (size_t)dc->w * (size_t)dc->h * 4u;
-        write_full(dc->out_fd, &tag, 1);
-        write_full(dc->out_fd, &pts_s, sizeof pts_s);
-        write_full(dc->out_fd, &w32, sizeof w32);
-        write_full(dc->out_fd, &h32, sizeof h32);
-        write_full(dc->out_fd, &dlen, sizeof dlen);
-        write_full(dc->out_fd, dc->rgb->data[0], dlen);
-        ++nframes;
-        av_frame_unref(dc->frame);
-    }
-
-    /* Flush remaining audio frames. */
-    if (dc->audio_codec_ctx != NULL) {
-        avcodec_send_packet(dc->audio_codec_ctx, NULL);
-        while (avcodec_receive_frame(dc->audio_codec_ctx, dc->audio_frame) >= 0) {
-            int rate = dc->audio_sample_rate;
-            int ch = dc->audio_channels;
-            if (rate <= 0) rate = 44100;
-            if (ch <= 0) ch = 2;
-            int nsamples = dc->audio_frame->nb_samples;
-            size_t pcm_bytes = (size_t)nsamples * (size_t)ch * 2u;
-            if (pcm_bytes > 0) {
-                uint8_t *pcm = (uint8_t *)malloc(pcm_bytes);
-                if (pcm != NULL) {
-                    memset(pcm, 0, pcm_bytes);
-                    uint8_t atag = MD_AUDIO_FRAME;
-                    int64_t pts_s = dc->pts_offset_us / 1000000;
-                    int32_t rate32 = (int32_t)rate;
-                    int32_t ch32 = (int32_t)ch;
-                    write_full(dc->out_fd, &atag, 1);
-                    write_full(dc->out_fd, &pts_s, sizeof pts_s);
-                    write_full(dc->out_fd, &rate32, sizeof rate32);
-                    write_full(dc->out_fd, &ch32, sizeof ch32);
-                    write_full(dc->out_fd, &pcm_bytes, sizeof pcm_bytes);
-                    write_full(dc->out_fd, pcm, pcm_bytes);
-                    free(pcm);
-                }
-            }
-            av_frame_unref(dc->audio_frame);
-        }
-    }
+    /* v2: NO per-segment codec drain. v1 sent a NULL packet here, which put
+     * the codec in permanent EOF state: every segment after the first decoded
+     * one was silently dropped ("plays a couple of seconds then stops").
+     * Reorder-buffered frames flush with the next segment's packets, or on
+     * the final MD_FLUSH command. */
 
     avformat_close_input(&seg_fmt);
     return nframes;
@@ -461,51 +417,20 @@ void media_decoder_run(int out_fd, int cmd_fd) {
         }
 
         if (cmd == MD_FLUSH) {
-            /* Flush the video decoder. */
+            /* End of stream: drain both codecs (the ONLY place a NULL packet
+             * is sent — a drained codec cannot accept further segments). */
             if (dc.video_codec_ctx != NULL) {
                 avcodec_send_packet(dc.video_codec_ctx, NULL);
                 while (avcodec_receive_frame(dc.video_codec_ctx, dc.frame) >= 0) {
-                    sws_scale(dc.sws,
-                              (const uint8_t *const *)dc.frame->data,
-                              dc.frame->linesize, 0, dc.h,
-                              dc.rgb->data, dc.rgb->linesize);
-
-                    uint8_t tag = MD_FRAME;
-                    int64_t pts_s = dc.pts_offset_us / 1000000;
-                    int32_t w32 = (int32_t)dc.w, h32 = (int32_t)dc.h;
-                    size_t dlen = (size_t)dc.w * (size_t)dc.h * 4u;
-                    write_full(out_fd, &tag, 1);
-                    write_full(out_fd, &pts_s, sizeof pts_s);
-                    write_full(out_fd, &w32, sizeof w32);
-                    write_full(out_fd, &h32, sizeof h32);
-                    write_full(out_fd, &dlen, sizeof dlen);
-                    write_full(out_fd, dc.rgb->data[0], dlen);
+                    send_video_frame(&dc, dc.pts_offset_us);
+                    dc.pts_offset_us += 40000;
                     av_frame_unref(dc.frame);
                 }
             }
-            /* Flush the audio decoder. */
             if (dc.audio_codec_ctx != NULL) {
                 avcodec_send_packet(dc.audio_codec_ctx, NULL);
                 while (avcodec_receive_frame(dc.audio_codec_ctx, dc.audio_frame) >= 0) {
-                    int nsamples = dc.audio_frame->nb_samples;
-                    size_t pcm_bytes = (size_t)nsamples * (size_t)dc.audio_channels * 2u;
-                    if (pcm_bytes > 0) {
-                        uint8_t *pcm = (uint8_t *)malloc(pcm_bytes);
-                        if (pcm != NULL) {
-                            memset(pcm, 0, pcm_bytes);
-                            uint8_t atag = MD_AUDIO_FRAME;
-                            int64_t pts_s = dc.pts_offset_us / 1000000;
-                            int32_t rate32 = (int32_t)dc.audio_sample_rate;
-                            int32_t ch32 = (int32_t)dc.audio_channels;
-                            write_full(out_fd, &atag, 1);
-                            write_full(out_fd, &pts_s, sizeof pts_s);
-                            write_full(out_fd, &rate32, sizeof rate32);
-                            write_full(out_fd, &ch32, sizeof ch32);
-                            write_full(out_fd, &pcm_bytes, sizeof pcm_bytes);
-                            write_full(out_fd, pcm, pcm_bytes);
-                            free(pcm);
-                        }
-                    }
+                    send_audio_frame(&dc, dc.pts_offset_us);
                     av_frame_unref(dc.audio_frame);
                 }
             }

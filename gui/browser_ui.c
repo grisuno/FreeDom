@@ -27,6 +27,7 @@
 #include "interp.h"
 #include "js_policy.h"
 #include "link_nav.h"
+#include "media_decoder.h"
 #include "net_realm.h"
 #include "pdf_export.h"
 #include "prefetch.h"
@@ -490,6 +491,8 @@ typedef struct browser_window {
     int           video_eof;       /* feeder thread has sent MD_FLUSH */
     pthread_t     video_thread;    /* feeder thread handle */
     int           video_evfd;      /* eventfd: feeder thread → main thread wake */
+    md_pacer      video_pacer;     /* pure PTS→wall-clock pacing brain */
+    uint64_t      video_due_ms;    /* when the last-read frame is due on screen */
     /* Audio output: aplay subprocess for PCM S16LE playback. Spawned on first
      * audio frame, killed on video_stop. */
     pid_t         audio_pid;       /* aplay child PID, 0 = not running */
@@ -1004,7 +1007,6 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "secure_fetch.h"
 #include "tab.h"
 #include "tls_impersonate.h"
-#include "media_decoder.h"
 
 /* Video playback functions (defined below; forward declarations for render path). */
 static void video_stop(browser_window *w);
@@ -4957,16 +4959,31 @@ static void audio_spawn(browser_window *w, int rate, int channels) {
                (char *)NULL);
         _exit(127);
     }
-    /* Parent */
+    /* Parent. The pipe to aplay is NON-BLOCKING: a full pipe must NEVER
+     * stall the Wayland thread (v1's blocking write froze the whole browser
+     * a couple of seconds in — aplay drains at real time but the decoder
+     * produced PCM at decode speed). */
     close(p[0]);
+    int fl = fcntl(p[1], F_GETFL, 0);
+    if (fl >= 0) fcntl(p[1], F_SETFL, fl | O_NONBLOCK);
     w->audio_pid = pid;
     w->audio_fd = p[1];
 }
 
+/* Best-effort PCM write: whatever does not fit in the pipe is dropped (with
+ * PTS pacing the producer runs at ~real time, so drops are rare). Never
+ * blocks the UI thread. */
 static void audio_write(browser_window *w, const uint8_t *data, size_t len) {
     if (w == NULL || w->audio_fd < 0 || data == NULL || len == 0) return;
-    ssize_t wr = write(w->audio_fd, data, len);
-    (void)wr; /* best-effort: if aplay dies, we just lose audio */
+    size_t done = 0;
+    while (done < len) {
+        ssize_t wr = write(w->audio_fd, data + done, len - done);
+        if (wr < 0) {
+            if (errno == EINTR) continue;
+            return; /* EAGAIN (full pipe) or dead aplay: drop the rest */
+        }
+        done += (size_t)wr;
+    }
 }
 
 static void audio_stop(browser_window *w) {
@@ -5028,27 +5045,31 @@ static void video_stop(browser_window *w) {
     w->video_pl = NULL;
     w->video_base_url = NULL;
     w->video_eof = 0;
+    memset(&w->video_pacer, 0, sizeof w->video_pacer);
+    w->video_due_ms = 0;
 }
 
-/* Reads one decoded ARGB frame from the decoder process pipe and caches
- * it in w->video_frame. Returns 1 if a frame was read, 0 if none available
- * (EAGAIN / EOF), -1 on error. */
+/* Reads one decoder message from the pipe. Returns 2 when a video frame was
+ * cached in w->video_frame (w->video_due_ms holds its display deadline), 1 on
+ * other progress (audio/info/non-fatal error), 0 if nothing available or the
+ * stream ended, -1 on hard error. Pipe EOF (decoder died) shuts playback down
+ * in an orderly way: video_active=0 removes the fd from the poll set, so a
+ * dead decoder can never busy-loop the event loop on POLLHUP. */
 static int video_read_frame(browser_window *w) {
     if (w == NULL || w->decoder_out_fd < 0) return -1;
     uint8_t tag;
     ssize_t r = read(w->decoder_out_fd, &tag, 1);
     if (r <= 0) {
         if (r < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) return 0;
-        fprintf(stderr, "vrf: read err %d\n", errno);
+        w->video_active = 0;
+        if (w->decoder_pid > 0) waitpid(w->decoder_pid, NULL, WNOHANG);
         return -1;
     }
     if (tag == MD_EOS) {
-        fprintf(stderr, "vrf: EOS\n");
         w->video_active = 0;
         return 0;
     }
     if (tag == MD_STREAM_INFO) {
-        fprintf(stderr, "vrf: STREAM_INFO\n");
         int32_t codec, w32, h32, ha32;
         if (v_read(w->decoder_out_fd, &codec, sizeof codec) != 0
          || v_read(w->decoder_out_fd, &w32, sizeof w32) != 0
@@ -5061,31 +5082,31 @@ static int video_read_frame(browser_window *w) {
         /* Don't recurse: the frame tag+data may not be in the pipe yet
          * (decoder writes STREAM_INFO before the first decoded frame).
          * The next poll iteration will read it when POLLIN fires. */
-        return 0;
+        return 1;
     }
     if (tag == MD_FRAME) {
-        int64_t pts_s;
+        int64_t pts_us;
         int32_t w32, h32;
         size_t dlen;
-        if (v_read(w->decoder_out_fd, &pts_s, sizeof pts_s) != 0
+        if (v_read(w->decoder_out_fd, &pts_us, sizeof pts_us) != 0
          || v_read(w->decoder_out_fd, &w32, sizeof w32) != 0
          || v_read(w->decoder_out_fd, &h32, sizeof h32) != 0
          || v_read(w->decoder_out_fd, &dlen, sizeof dlen) != 0)
             return -1;
-        (void)pts_s;
         if (dlen > 0) {
             uint8_t *frame = (uint8_t *)realloc(w->video_frame, dlen);
             if (frame == NULL) return -1;
             w->video_frame = frame;
-            /* v_read now handles EAGAIN (polls and retries), so even a
-             * 1.2 MB ARGB frame on a non-blocking pipe works correctly. */
+            /* v_read handles EAGAIN (polls and retries), so even a 1.2 MB
+             * ARGB frame on a non-blocking pipe works correctly. */
             if (v_read(w->decoder_out_fd, w->video_frame, dlen) != 0)
                 return -1;
             w->video_w = (int)w32;
             w->video_h = (int)h32;
         }
-        fprintf(stderr, "vrf: FRAME %dx%d dlen=%zu\n", (int)w32, (int)h32, dlen);
-        return 1;
+        /* Pace: schedule this frame's display against the wall clock. */
+        w->video_due_ms = md_pace_due_ms(&w->video_pacer, now_ms(), pts_us);
+        return 2;
     }
     if (tag == MD_ERROR) {
         size_t elen = 0;
@@ -5093,21 +5114,21 @@ static int video_read_frame(browser_window *w) {
         if (v_read(w->decoder_out_fd, &elen, sizeof elen) == 0 && elen < sizeof errbuf) {
             if (v_read(w->decoder_out_fd, errbuf, elen) == 0) {
                 errbuf[elen] = '\0';
-                fprintf(stderr, "vrf: MD_ERROR: %s\n", errbuf);
+                fprintf(stderr, "video: decoder error: %s\n", errbuf);
             }
         }
-        return 0;
+        return 1;
     }
     if (tag == MD_AUDIO_FRAME) {
-        int64_t pts_s;
+        int64_t pts_us;
         int32_t rate, ch;
         size_t dlen;
-        if (v_read(w->decoder_out_fd, &pts_s, sizeof pts_s) != 0
+        if (v_read(w->decoder_out_fd, &pts_us, sizeof pts_us) != 0
          || v_read(w->decoder_out_fd, &rate, sizeof rate) != 0
          || v_read(w->decoder_out_fd, &ch, sizeof ch) != 0
          || v_read(w->decoder_out_fd, &dlen, sizeof dlen) != 0)
             return -1;
-        (void)pts_s;
+        (void)pts_us; /* aplay consumes at real time; coarse A/V sync accepted */
         if (dlen > 0) {
             uint8_t *buf = (uint8_t *)malloc(dlen);
             if (buf != NULL) {
@@ -5125,7 +5146,6 @@ static int video_read_frame(browser_window *w) {
         /* Don't recurse: next tag may not be in the pipe yet. */
         return 1;
     }
-    /* second MD_ERROR handler is a no-op (dead branch — caught above) */
     return 0;
 }
 
@@ -5336,11 +5356,7 @@ static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     double pad = 4.0;
 
     /* If a decoded frame is available, blit it. */
-    fprintf(stderr, "pvr: entered act=%d frame=%p vw=%d cw=%.0f rh=%.0f\n",
-            w->video_active, (void*)w->video_frame, w->video_w, content_w, row_h);
     if (w->video_active && w->video_frame != NULL && w->video_w > 0) {
-        fprintf(stderr, "pvr: DRAW frame %dx%d at %.0f,%.0f\n",
-                w->video_w, w->video_h, left, ry);
         cairo_surface_t *surf = cairo_image_surface_create_for_data(
             w->video_frame, CAIRO_FORMAT_ARGB32,
             w->video_w, w->video_h,
@@ -5957,8 +5973,6 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         return;
     }
     if (r->kind == RC_VIDEO) {
-        fprintf(stderr, "pcr: RC_VIDEO blk=%p href=%s\n",
-                (void*)r->blk, r->blk ? r->blk->href : "(null)");
         if (r->blk != NULL) {
             paint_video_row(cr, w, r->blk, left, ry, content_w, r->height);
             return;
@@ -11132,9 +11146,15 @@ ui_status ui_run_browser(const char *start_url) {
             int tk = (w.js_tick_due_ms > t) ? (int)(w.js_tick_due_ms - t) : 0;
             if (timeout < 0 || tk < timeout) timeout = tk;
         }
-        /* While video is playing, wake at ~30 fps to check for new frames. */
-        if (w.video_active && w.decoder_out_fd >= 0
-            && (timeout < 0 || timeout > 33)) timeout = 33;
+        /* While video is playing, wake at ~30 fps to check for new frames —
+         * or sooner if the already-read frame comes due before that (PTS
+         * pacing: the consumer is the regulator, see spec/media_decoder.md). */
+        if (w.video_active && w.decoder_out_fd >= 0) {
+            int vt = 33;
+            if (w.video_due_ms > t && w.video_due_ms - t < 33u)
+                vt = (int)(w.video_due_ms - t);
+            if (timeout < 0 || vt < timeout) timeout = vt;
+        }
         /* If CSS animations are active (frame_clock is ticking), wake up at the
          * animation interval so painted animations advance smoothly. */
         if (fc_needs_tick(&w.fc)) {
@@ -11161,7 +11181,10 @@ ui_status ui_run_browser(const char *start_url) {
             pfds[nfds].fd = w.stream_evfd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             stream_idx = nfds++;
         }
-        if (w.decoder_out_fd >= 0 && w.video_active) {
+        /* The decoder fd only enters the poll set once the frame already read
+         * is due on screen: not reading is what throttles the pipeline (pipe
+         * backpressure blocks the decoder, which blocks the feeder). */
+        if (w.decoder_out_fd >= 0 && w.video_active && t >= w.video_due_ms) {
             pfds[nfds].fd = w.decoder_out_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             video_idx = nfds++;
         }
@@ -11251,12 +11274,23 @@ ui_status ui_run_browser(const char *start_url) {
             (void)rd;
         }
         if (pr > 0 && video_idx >= 0 && (pfds[video_idx].revents & POLLIN)) {
-            video_read_frame(&w);  /* one frame per poll: data read is blocking */
+            /* Drain up to MD_MAX_CATCHUP_READS frames while they are overdue
+             * (backlog catch-up); stop at the first frame scheduled in the
+             * future — it paints when its due time arrives (poll timeout). */
+            int got_frame = 0;
+            for (int k = 0; k < MD_MAX_CATCHUP_READS; ++k) {
+                int vr = video_read_frame(&w);
+                if (vr < 0 || vr == 0) break;
+                if (vr == 2) {
+                    got_frame = 1;
+                    if (w.video_due_ms > now_ms()) break;
+                }
+                struct pollfd vp = { .fd = w.decoder_out_fd,
+                                     .events = POLLIN, .revents = 0 };
+                if (poll(&vp, 1, 0) <= 0 || !(vp.revents & POLLIN)) break;
+            }
+            if (got_frame) redraw(&w);
         }
-        /* Redraw immediately if a frame was just received, otherwise redraw
-         * at the ~30 fps poll timeout to show any prior frame. */
-        if (w.video_frame != NULL)
-            redraw(&w);
     }
 
     video_stop(&w);    /* stop the video decoder if running */

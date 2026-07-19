@@ -6,6 +6,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -30,6 +31,23 @@ static inline int read_full(int fd, void *buf, size_t n) {
         if (r < 0) { if (errno == EINTR) continue; return -1; }
         if (r == 0) return -1; /* unexpected EOF */
         got += (size_t)r;
+    }
+    return 0;
+}
+
+/* --- case-insensitive bounded substring search --- */
+
+/* Returns 1 when the trusted lowercase-ASCII needle (letters/digits) occurs in
+ * the hostile, length-delimited haystack, matching case-insensitively. The
+ * `| 0x20` fold maps A-Z to a-z and leaves digits unchanged. */
+static inline int mem_contains_ci(const void *hay, size_t hlen, const char *needle) {
+    const unsigned char *h = (const unsigned char *)hay;
+    size_t nlen = strlen(needle);
+    if (h == NULL || nlen == 0 || hlen < nlen) return 0;
+    for (size_t i = 0; i + nlen <= hlen; ++i) {
+        size_t j = 0;
+        while (j < nlen && (char)(h[i + j] | 0x20) == needle[j]) j++;
+        if (j == nlen) return 1;
     }
     return 0;
 }

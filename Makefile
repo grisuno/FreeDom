@@ -114,7 +114,8 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile \
              $(BUILD_DIR)/test_tls_impersonate \
               $(BUILD_DIR)/test_hls $(BUILD_DIR)/test_data_url \
-              $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock
+              $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock \
+              $(BUILD_DIR)/test_media_decoder
 
 .PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
         deps run deb docker view clean
@@ -268,6 +269,11 @@ $(BUILD_DIR)/test_data_url: $(TEST_DIR)/test_data_url.c $(BUILD_DIR)/data_url.o 
 # Pure HLS playlist parser (no I/O). Fuzzed separately.
 $(BUILD_DIR)/test_hls: $(TEST_DIR)/test_hls.c $(BUILD_DIR)/hls.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure video pacing brain (md_pacer, static inline in the header): links no
+# FFmpeg. The decoder process itself is exercised end-to-end via the GUI.
+$(BUILD_DIR)/test_media_decoder: $(TEST_DIR)/test_media_decoder.c include/media_decoder.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $(TEST_DIR)/test_media_decoder.c -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure CSS interpolation engine (Phase R1d). Uses fmod from libm.
 $(BUILD_DIR)/test_interp: $(TEST_DIR)/test_interp.c $(BUILD_DIR)/interp.o | $(BUILD_DIR)

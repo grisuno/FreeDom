@@ -9,6 +9,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "html_parse.h"
+#include "util.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -78,19 +79,6 @@ static void strip_scripts(lxb_html_document_t *document) {
         lxb_dom_node_destroy_deep(list[i]);
     }
     free(list);
-}
-
-/* Case-insensitive (ASCII) substring test over a length-delimited attribute value.
- * needle must be lowercase letters. */
-static int mem_contains_ci(const lxb_char_t *hay, size_t hlen, const char *needle) {
-    size_t nlen = strlen(needle);
-    if (hay == NULL || nlen == 0 || hlen < nlen) return 0;
-    for (size_t i = 0; i + nlen <= hlen; ++i) {
-        size_t j = 0;
-        while (j < nlen && (char)(hay[i + j] | 0x20) == needle[j]) j++;
-        if (j == nlen) return 1;
-    }
-    return 0;
 }
 
 /* How one <script> element executes. */

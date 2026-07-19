@@ -260,6 +260,28 @@ un solo bit real (identity-safe):
   `PerformanceObserver` siguen sin disparar jamás (sin observación no hay
   fuga, y nada visual depende de ellos).
 
+## 7c. Fachada HTMLMediaElement + `new Audio()` (2026-07-19)
+
+- Todo wrapper de `<video>`/`<audio>` lleva la superficie `HTMLMediaElement`
+  **identity-safe y sin red**: `play()` (marca `paused=false`, devuelve
+  `Promise.resolve()` — nunca decodifica), `pause()`, `load()` no-op,
+  `canPlayType()` (`probably` para mp4/mpegurl/mp2t — lo que el pipeline
+  confiable reproduce nativo —, `maybe` para webm/ogg, `''` resto),
+  `muted`/`autoplay`/`loop`/`controls`/`playsinline` reflejados al atributo,
+  `poster`, `currentSrc` (src propio o del primer `<source>`), `buffered`/
+  `played`/`seekable` como TimeRanges vacíos, `videoWidth`/`videoHeight` 0
+  (sin metadata cargada: valor real), `readyState`/`networkState` 0,
+  constantes `HAVE_*`/`NETWORK_*`, `textTracks` vacío y handlers
+  `on<evento>` de media registrados vía `dom.registerEvent` (sintéticos; no
+  disparan — no hay reproducción en el worker). Valores fijos ⇒ cero huella.
+- `new Audio(src)` global: crea un `<audio>` real vía `document.createElement`
+  (recibe la fachada completa por el wrap) y setea su atributo `src`. Crear
+  el objeto **jamás** fetchea.
+- Dado un script de player **cuando** hace feature-detection y llama
+  `v.play()` **entonces** corre sin lanzar y sin tocar la red; la
+  decodificación real ocurre solo en el lado confiable
+  (`spec/media_decoder.md`), disparada por el click del usuario en la GUI.
+
 ## 8. Fuera de alcance
 
 - Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del

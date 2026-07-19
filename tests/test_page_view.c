@@ -2526,7 +2526,8 @@ static void test_build_video_with_source(void **state) {
     assert_int_equal(vid->img_w, 640);
     assert_int_equal(vid->img_h, 360);
     assert_string_equal(vid->poster_src, "https://e.example/poster.png");
-    /* The fallback text is emitted as a separate text run, not the video alt */
+    /* Fallback content inside <video> is for engines WITHOUT media support;
+     * this engine renders the element itself, so the text never appears. */
     assert_string_equal(vid->text, "");
     pv_free(v);
     hp_document_free(doc);
@@ -2545,6 +2546,42 @@ static void test_build_video_uses_source_child(void **state) {
     assert_int_equal(vid->kind, PV_VIDEO);
     assert_int_equal(vid->img_w, 320);
     assert_int_equal(vid->img_h, 240);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Given several <source> children, When one carries a natively-playable type
+ * (HLS playlist / MPEG-TS / MP4), Then it wins over an earlier source of a
+ * type the pipeline would have to transcode around. */
+static void test_build_video_source_type_preference(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><video>"
+        "<source src='https://e.example/clip.webm' type='video/webm'>"
+        "<source src='https://e.example/clip.m3u8' type='application/vnd.apple.mpegurl'>"
+        "</video></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_video(v, "https://e.example/clip.m3u8"));
+    assert_null(find_video(v, "https://e.example/clip.webm"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Given a <video> with fallback markup, When the view is built, Then the
+ * fallback text is suppressed regardless of the JS flag (the media element
+ * itself renders; the fallback is only for engines without media support). */
+static void test_build_video_fallback_suppressed(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><video src='https://e.example/vid.mp4'>"
+        "<p>Your browser cannot play video.</p></video>"
+        "<p>after</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_null(find_text(v, "Your browser cannot play video."));
+    assert_non_null(find_text(v, "after"));
+    assert_non_null(find_video(v, "https://e.example/vid.mp4"));
     pv_free(v);
     hp_document_free(doc);
 }
@@ -2585,6 +2622,8 @@ int main(void) {
         cmocka_unit_test(test_append_video_null_args),
         cmocka_unit_test(test_build_video_with_source),
         cmocka_unit_test(test_build_video_uses_source_child),
+        cmocka_unit_test(test_build_video_source_type_preference),
+        cmocka_unit_test(test_build_video_fallback_suppressed),
         cmocka_unit_test(test_build_video_without_src_ignored),
         cmocka_unit_test(test_build_audio_as_video_kind),
         cmocka_unit_test(test_append_transcodes_latin1),

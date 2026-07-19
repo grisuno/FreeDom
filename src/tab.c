@@ -704,7 +704,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
      * fallback. */
     pv_view *preserve_view = NULL;
     if (ok) {
-        (void)pv_build_styled(cs->doc, 0, reader, prefers_dark,
+        /* The snapshot preserves the PRE-SCRIPT DOM, not no-JS semantics:
+         * it must carry the same js_enabled flag as the final view, or the
+         * <noscript> fallback (rendered only under js=0) inflates the block
+         * count and the fuller-view heuristic picks it even with JS on. */
+        (void)pv_build_styled(cs->doc, run_js, reader, prefers_dark,
                               cs->extern_css, cs->extern_css_len,
                               &preserve_view);
     }

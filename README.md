@@ -232,12 +232,24 @@ walk is deferred to a follow-up.
 - **Image formats:** PNG, JPEG, WebP, and static GIF (own bounded pure-C LZW
   decoder, no giflib). Inline `data:` images. All decoded inside the sandboxed
   worker.
-- **Video pipe hardened:** `video_read_frame` reads one frame per poll iteration
-  (no recursion) with `v_read` handling `EAGAIN` via poll+retry, and
-  `decoder_out_fd` correctly uses `F_GETFL`/`O_NONBLOCK` — ensuring reliable
-  frame delivery from the FFmpeg decoder in the worker.
+- **Video playback paced by PTS (v2, July 19):** frames display at their
+  presentation timestamps against the wall clock (pure `md_pacer` brain; the
+  consumer regulates the whole pipeline through pipe backpressure — no sleeps).
+  The decoder process sends microsecond PTS with per-segment time bases, the
+  first HLS segment's frames are no longer lost to the probe, codecs drain only
+  at end-of-stream (v1 drained per segment, killing every later segment), and
+  audio writes to `aplay` are non-blocking best-effort (the UI thread can never
+  freeze on a full audio pipe). Verified end-to-end: 3 HLS segments in, 150/150
+  frames out, monotonic PTS, clean EOS.
+- **Modern `<video>`/`<audio>` element surface:** multiple `<source>` children
+  are selected by `type` (HLS/MPEG-TS/MP4 preferred), fallback content inside
+  media elements is suppressed (the element renders instead), and page JS gets
+  an identity-safe `HTMLMediaElement` facade — `play()`/`pause()`/
+  `canPlayType()`, attribute-reflected `muted`/`loop`/`controls`, `buffered`
+  TimeRanges, `new Audio(src)` — so player scripts run without throwing and
+  without touching the network.
 
-## Current Status (July 18, 2026)
+## Current Status (July 19, 2026)
 
 - Advanced HTML rendering with box model, flex/grid, margin collapsing
 - Clickable links + image support (PNG + JPEG + WebP + static GIF)

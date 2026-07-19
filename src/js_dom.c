@@ -690,6 +690,42 @@ static const char JD_DOCUMENT_SHIM[] =
     "    ['keydown','keyup','keypress','input','change','focus','blur','scroll','mouseover','mouseout','mousemove','mouseenter','mouseleave','wheel'].forEach(function(t){"
     "      Object.defineProperty(el,'on'+t,{set:function(fn){ if(typeof fn==='function') dom.registerEvent(h, String(t), fn); },get:function(){return null;}});"
     "    });"
+    /* HTMLMediaElement facade for <video>/<audio>: identity-safe stubs so
+     * player scripts (canPlayType feature-detection, play/pause, muted/loop
+     * reflection, buffered ranges) run without throwing. No network, no real
+     * playback in the worker -- actual decoding happens in the trusted-side
+     * media pipeline (spec/media_decoder.md); fixed values leak no identity. */
+    "    (function(){ var tn=dom.tagName(h); tn=tn?String(tn).toLowerCase():'';"
+    "      if(tn!=='video'&&tn!=='audio') return;"
+    "      el.play=function(){ el.paused=false; return Promise.resolve(); };"
+    "      el.pause=function(){ el.paused=true; };"
+    "      el.load=function(){};"
+    "      el.canPlayType=function(t){ t=String(t||'').toLowerCase();"
+    "        if(t.indexOf('mp4')>=0||t.indexOf('mpegurl')>=0||t.indexOf('mp2t')>=0) return 'probably';"
+    "        if(t.indexOf('webm')>=0||t.indexOf('ogg')>=0) return 'maybe'; return ''; };"
+    "      el.paused=true; el.ended=false; el.seeking=false; el.currentTime=0;"
+    "      el.duration=NaN; el.volume=1; el.playbackRate=1; el.defaultPlaybackRate=1;"
+    "      el.readyState=0; el.networkState=0; el.error=null; el.videoWidth=0; el.videoHeight=0;"
+    "      el.HAVE_NOTHING=0; el.HAVE_METADATA=1; el.HAVE_CURRENT_DATA=2; el.HAVE_FUTURE_DATA=3; el.HAVE_ENOUGH_DATA=4;"
+    "      el.NETWORK_EMPTY=0; el.NETWORK_IDLE=1; el.NETWORK_LOADING=2; el.NETWORK_NO_SOURCE=3;"
+    "      var tr={length:0,start:function(){return 0;},end:function(){return 0;}};"
+    "      el.buffered=tr; el.played=tr; el.seekable=tr;"
+    "      el.textTracks={length:0,onaddtrack:null};"
+    "      el.addTextTrack=function(){ return {mode:'disabled',cues:[],addCue:function(){},removeCue:function(){}}; };"
+    "      function battr(nm){ Object.defineProperty(el,nm,{get:function(){return dom.getAttribute(h,nm)!==null;},"
+    "        set:function(v){ if(v) dom.setAttribute(h,nm,nm); else dom.removeAttribute(h,nm); }}); }"
+    "      battr('muted'); battr('autoplay'); battr('loop'); battr('controls'); battr('playsinline');"
+    "      Object.defineProperty(el,'poster',{get:function(){var v=dom.getAttribute(h,'poster');return v===null?'':v;},"
+    "        set:function(v){ dom.setAttribute(h,'poster',String(v)); }});"
+    "      Object.defineProperty(el,'currentSrc',{get:function(){ var v=dom.getAttribute(h,'src');"
+    "        if(v!==null) return v; var s=dom.querySelector(h,'source');"
+    "        if(s!==null){ var sv=dom.getAttribute(s,'src'); if(sv!==null) return sv; } return ''; }});"
+    "      ['play','pause','ended','timeupdate','canplay','canplaythrough','loadedmetadata','loadeddata',"
+    "       'durationchange','volumechange','playing','waiting','seeking','seeked','stalled','suspend',"
+    "       'abort','emptied','ratechange'].forEach(function(t){"
+    "        Object.defineProperty(el,'on'+t,{set:function(fn){ if(typeof fn==='function') dom.registerEvent(h,String(t),fn); },get:function(){return null;}});"
+    "      });"
+    "    })();"
     "    __wc[h]=el;"
     "    return el;"
     "  }"
@@ -1002,6 +1038,13 @@ static const char JD_MODERN_SHIM[] =
     "  ['Event','CustomEvent','MouseEvent','KeyboardEvent','PointerEvent','UIEvent','FocusEvent',"
     "   'InputEvent','TouchEvent','WheelEvent','MessageEvent','PopStateEvent','HashChangeEvent',"
     "   'ErrorEvent','ProgressEvent'].forEach(function(n){ if(typeof g[n]==='undefined') g[n]=evCtor(); });"
+    /* new Audio(src): a real wrapped <audio> element, so it carries the full
+     * HTMLMediaElement facade (play/pause/canPlayType). No network: creating
+     * it never fetches; playback only happens via the trusted-side pipeline. */
+    "  if(typeof g.Audio==='undefined') g.Audio=function(src){"
+    "    var a=(g.document&&g.document.createElement)?g.document.createElement('audio'):{};"
+    "    if(src!==undefined&&a&&a.setAttribute) a.setAttribute('src',String(src));"
+    "    return a; };"
     /* matchMedia evaluates for real (2026-07-19) against the normalized
      * 1920x1080 desktop identity (the same one innerWidth and the CSS viewport
      * units use). Identity signals are ALWAYS normalized: light color scheme,
