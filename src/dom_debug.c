@@ -246,10 +246,14 @@ static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
               id, b->parent_id, b->box_l, b->box_r, b->box_w, b->box_center);
     if (b->box_w_pct) dd_printf(c, " w%%=%d", b->box_w_pct);
     dd_color(c, b->bg_rgb);
-    dd_printf(c, " pad(%d/%d/%d/%d) bord(%d/%d/%d/%d %s) radius=%d shadow=%d outline=%d",
+    dd_printf(c, " pad(%d/%d/%d/%d) bord(%d/%d/%d/%d %s/%s/%s/%s) radius=%d shadow=%d outline=%d",
               dd_w(b->pad_t), dd_w(b->pad_r), dd_w(b->pad_b), dd_w(b->pad_l),
               dd_w(b->bord_tw), dd_w(b->bord_rw), dd_w(b->bord_bw), dd_w(b->bord_lw),
-              dd_border_style_name(b->bord_ts), dd_w(b->border_radius),
+              dd_border_style_name(b->bord_ts),
+              dd_border_style_name(b->bord_rs),
+              dd_border_style_name(b->bord_bs),
+              dd_border_style_name(b->bord_ls),
+              dd_w(b->border_radius),
               (b->bsh_color >= 0) ? 1 : 0, dd_w(b->outline_w));
     /* Positioning, only when a real (non-static) position is set, so the common case
      * stays compact. The painter honors relative; absolute/fixed/sticky are carried
@@ -416,9 +420,12 @@ size_t dd_format_css(const rd_doc *doc, char *out, size_t cap) {
         }
         dd_printf(&c, "  padding: t=%d r=%d b=%d l=%d\n",
                   dd_w(b->pad_t), dd_w(b->pad_r), dd_w(b->pad_b), dd_w(b->pad_l));
-        dd_printf(&c, "  border: w=(%d,%d,%d,%d) style=%s color=(#%06x,#%06x,#%06x,#%06x) radius=%d\n",
+        dd_printf(&c, "  border: w=(%d,%d,%d,%d) style=(%s/%s/%s/%s) color=(#%06x,#%06x,#%06x,#%06x) radius=%d\n",
                   dd_w(b->bord_tw), dd_w(b->bord_rw), dd_w(b->bord_bw), dd_w(b->bord_lw),
                   dd_border_style_name(b->bord_ts),
+                  dd_border_style_name(b->bord_rs),
+                  dd_border_style_name(b->bord_bs),
+                  dd_border_style_name(b->bord_ls),
                   (unsigned)(b->bord_tc >= 0 ? b->bord_tc : 0),
                   (unsigned)(b->bord_rc >= 0 ? b->bord_rc : 0),
                   (unsigned)(b->bord_bc >= 0 ? b->bord_bc : 0),

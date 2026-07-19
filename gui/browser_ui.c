@@ -5622,7 +5622,14 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * visible style on all four) the ring is one rounded stroke centred on the
      * half-width inset; otherwise each side is a filled rect of its width along its
      * edge (square corners). An unset/currentColor color falls back to a dark grey
-     * (CSS would use currentColor, but we lack the element's color here). */
+     * (CSS would use currentColor, but we lack the element's color here).
+     *
+     * Non-solid styles: DASHED/DOTTED use Cairo's cairo_set_dash; DOUBLE paints
+     * two parallel strokes separated by a gap; GROOVE/RIDGE/INSET/OUTSET adjust
+     * colour lightness per side to simulate a 3D bevel (light top/left, dark
+     * right/bottom for OUTSET/RIDGE; the reverse for INSET/GROOVE). The groove/
+     * ridge/inset/outset variants are approximations (no real lighting or bevel
+     * geometry), but convey the intended visual direction. */
     const double bw[4] = { bt, br, bb, bl };
     const int    bs[4] = { bx->bord_ts, bx->bord_rs, bx->bord_bs, bx->bord_ls };
     const int    bc[4] = { bx->bord_tc, bx->bord_rc, bx->bord_bc, bx->bord_lc };
@@ -5630,35 +5637,142 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                   box_line_visible(bs[0]) && bs[0] == bs[1] && bs[0] == bs[2] &&
                   bs[0] == bs[3] && bc[0] == bc[1] && bc[0] == bc[2] && bc[0] == bc[3];
     if (uniform) {
-        set_rgb(cr, rgb_from_packed(bc[0] >= 0 ? bc[0] : 0x333333));
+        int style = bs[0];
+        int col = bc[0] >= 0 ? bc[0] : 0x333333;
+        set_rgb(cr, rgb_from_packed(col));
         cairo_set_line_width(cr, bt);
+        if (style == CSS_BST_DASHED) {
+            double on = 4.0 * bt, off = 2.0 * bt;
+            cairo_set_dash(cr, (double[]){ on, off }, 2, 0.0);
+        } else if (style == CSS_BST_DOTTED) {
+            cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+            cairo_set_dash(cr, (double[]){ 0.0, bt * 2.0 }, 2, 0.0);
+        } else if (style == CSS_BST_DOUBLE) {
+            double third = bt / 3.0;
+            cairo_set_line_width(cr, third);
+            double inner_rad_outer = rad - bt / 2.0 + third / 2.0;
+            double inner_rad_inner = rad - bt / 2.0 - third / 2.0;
+            box_path(cr, x + bt / 2.0 - third / 2.0, y + bt / 2.0 - third / 2.0,
+                     w - bt + third, h - bt + third,
+                     inner_rad_outer > 0.0 ? inner_rad_outer : 0.0);
+            cairo_stroke(cr);
+            set_rgb(cr, rgb_from_packed(col));
+            cairo_set_line_width(cr, third);
+            box_path(cr, x + bt / 2.0 + third / 2.0, y + bt / 2.0 + third / 2.0,
+                     w - bt - third, h - bt - third,
+                     inner_rad_inner > 0.0 ? inner_rad_inner : 0.0);
+            cairo_stroke(cr);
+            goto after_borders;
+        } else {
+            cairo_set_dash(cr, NULL, 0, 0.0);
+        }
         double inner_rad = rad - bt / 2.0;
         box_path(cr, x + bt / 2.0, y + bt / 2.0, w - bt, h - bt,
                  inner_rad > 0.0 ? inner_rad : 0.0);
         cairo_stroke(cr);
+        cairo_set_dash(cr, NULL, 0, 0.0);
+        cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
     } else {
         for (int k = 0; k < 4; ++k) {
-            if (bw[k] <= 0.0 || !box_line_visible(bs[k])) continue;
-            set_rgb(cr, rgb_from_packed(bc[k] >= 0 ? bc[k] : 0x333333));
-            if      (k == 0) cairo_rectangle(cr, x, y, w, bt);            /* top */
-            else if (k == 1) cairo_rectangle(cr, x + w - br, y, br, h);   /* right */
-            else if (k == 2) cairo_rectangle(cr, x, y + h - bb, w, bb);   /* bottom */
-            else             cairo_rectangle(cr, x, y, bl, h);            /* left */
-            cairo_fill(cr);
+            double side_w = bw[k];
+            if (side_w <= 0.0 || !box_line_visible(bs[k])) continue;
+            int style = bs[k];
+            int col = bc[k] >= 0 ? bc[k] : 0x333333;
+            double x1, y1, x2, y2;
+            if      (k == 0) { x1 = x; y1 = y + side_w / 2.0; x2 = x + w; y2 = y1; }
+            else if (k == 1) { x1 = x + w - side_w / 2.0; y1 = y; x2 = x1; y2 = y + h; }
+            else if (k == 2) { x1 = x; y1 = y + h - side_w / 2.0; x2 = x + w; y2 = y1; }
+            else             { x1 = x + side_w / 2.0; y1 = y; x2 = x1; y2 = y + h; }
+            if (style == CSS_BST_DASHED) {
+                double on = 4.0 * side_w, off = 2.0 * side_w;
+                cairo_set_dash(cr, (double[]){ on, off }, 2, 0.0);
+            } else if (style == CSS_BST_DOTTED) {
+                cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+                cairo_set_dash(cr, (double[]){ 0.0, side_w * 2.0 }, 2, 0.0);
+            } else if (style == CSS_BST_DOUBLE) {
+                double third = side_w / 3.0;
+                set_rgb(cr, rgb_from_packed(col));
+                cairo_set_line_width(cr, third);
+                if (k == 0 || k == 2) {
+                    double dy = (k == 0) ? -third : third;
+                    cairo_move_to(cr, x1, y1 + dy); cairo_line_to(cr, x2, y2 + dy); cairo_stroke(cr);
+                    cairo_move_to(cr, x1, y1 - dy); cairo_line_to(cr, x2, y2 - dy); cairo_stroke(cr);
+                } else {
+                    double dx = (k == 1) ? -third : third;
+                    cairo_move_to(cr, x1 + dx, y1); cairo_line_to(cr, x2 + dx, y2); cairo_stroke(cr);
+                    cairo_move_to(cr, x1 - dx, y1); cairo_line_to(cr, x2 - dx, y2); cairo_stroke(cr);
+                }
+                continue;
+            } else {
+                cairo_set_dash(cr, NULL, 0, 0.0);
+            }
+            cairo_set_line_width(cr, side_w);
+            /* GROOVE/RIDGE/INSET/OUTSET: adjust lightness per side based
+             * on the 3D bevel convention (light top/left, dark right/bottom). */
+            int is_3d = (style == CSS_BST_GROOVE || style == CSS_BST_RIDGE ||
+                         style == CSS_BST_INSET || style == CSS_BST_OUTSET);
+            if (is_3d) {
+                int rev = (style == CSS_BST_INSET || style == CSS_BST_GROOVE);
+                int is_lt = (k == 0 || k == 3);
+                ui_rgb c = rgb_from_packed(col);
+                double f = (is_lt == !rev) ? 0.6 : 1.4;
+                double nr = c.r * f;
+                double ng = c.g * f;
+                double nb = c.b * f;
+                if (nr > 1.0) nr = 1.0;
+                if (ng > 1.0) ng = 1.0;
+                if (nb > 1.0) nb = 1.0;
+                set_rgb(cr, (ui_rgb){ nr, ng, nb });
+            } else {
+                set_rgb(cr, rgb_from_packed(col));
+            }
+            cairo_move_to(cr, x1, y1); cairo_line_to(cr, x2, y2); cairo_stroke(cr);
         }
+        cairo_set_dash(cr, NULL, 0, 0.0);
+        cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
     }
 
+after_borders:
+
     /* Outline: stroked just outside the border box, offset by outline_offset
-     * (positive pushes the outline further out, negative pulls it inside). */
+     * (positive pushes the outline further out, negative pulls it inside).
+     * Non-solid outline styles follow the same dash/double pattern as borders. */
     double ow = box_edge_px(bx->outline_w);
     if (ow > 0.0 && box_line_visible(bx->outline_style)) {
-        set_rgb(cr, rgb_from_packed(bx->outline_color >= 0 ? bx->outline_color : 0x333333));
+        int ostyle = bx->outline_style;
+        int ocol = bx->outline_color >= 0 ? bx->outline_color : 0x333333;
+        set_rgb(cr, rgb_from_packed(ocol));
         cairo_set_line_width(cr, ow);
-        double oo = (double)bx->outline_offset;
-        box_path(cr, x - ow / 2.0 - oo, y - ow / 2.0 - oo,
-                 w + ow + 2.0 * oo, h + ow + 2.0 * oo,
-                 rad > 0.0 ? rad + ow / 2.0 + oo : 0.0);
-        cairo_stroke(cr);
+        if (ostyle == CSS_BST_DASHED) {
+            double on = 4.0 * ow, off = 2.0 * ow;
+            cairo_set_dash(cr, (double[]){ on, off }, 2, 0.0);
+        } else if (ostyle == CSS_BST_DOTTED) {
+            cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+            cairo_set_dash(cr, (double[]){ 0.0, ow * 2.0 }, 2, 0.0);
+        } else if (ostyle == CSS_BST_DOUBLE) {
+            double third = ow / 3.0;
+            cairo_set_line_width(cr, third);
+            double oo = (double)bx->outline_offset;
+            box_path(cr, x - ow / 2.0 - oo - third / 2.0, y - ow / 2.0 - oo - third / 2.0,
+                     w + ow + 2.0 * oo + third, h + ow + 2.0 * oo + third,
+                     rad > 0.0 ? rad + ow / 2.0 + oo + third / 2.0 : 0.0);
+            cairo_stroke(cr);
+            set_rgb(cr, rgb_from_packed(ocol));
+            cairo_set_line_width(cr, third);
+            box_path(cr, x - ow / 2.0 - oo + third / 2.0, y - ow / 2.0 - oo + third / 2.0,
+                     w + ow + 2.0 * oo - third, h + ow + 2.0 * oo - third,
+                     rad > 0.0 ? rad + ow / 2.0 + oo - third / 2.0 : 0.0);
+            cairo_stroke(cr);
+        } else {
+            cairo_set_dash(cr, NULL, 0, 0.0);
+            double oo = (double)bx->outline_offset;
+            box_path(cr, x - ow / 2.0 - oo, y - ow / 2.0 - oo,
+                     w + ow + 2.0 * oo, h + ow + 2.0 * oo,
+                     rad > 0.0 ? rad + ow / 2.0 + oo : 0.0);
+            cairo_stroke(cr);
+        }
+        cairo_set_dash(cr, NULL, 0, 0.0);
+        cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
     }
 
     /* R8: ::before/::after generated content text. When a box carries a non-empty
@@ -5684,6 +5798,56 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             cairo_show_text(cr, bx->content_str);
             cairo_restore(cr);
         }
+    }
+}
+
+/* Paints one text-decoration line at a given y. Shared by underline, strikethrough
+ * and overline so the wavy/double/dashed/dotted style logic lives in one place.
+ * Wavy approximates a sine wave with cubic beziers; double draws two parallel strokes
+ * separated by a gap; dashed/dotted use Cairo's cairo_set_dash; solid is a straight
+ * stroke. The line goes from x0 to x1 (the fragment's painted width). */
+static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
+                            double thick, int style) {
+    if (style == CSS_TDS_WAVY) {
+        double amp = thick * 1.2;
+        double wl = thick * 6.0;
+        if (wl < 4.0) wl = 4.0;
+        if (amp < 1.0) amp = 1.0;
+        cairo_set_line_width(cr, thick * 0.8);
+        cairo_move_to(cr, x0, ly);
+        double cx = x0;
+        while (cx < x1) {
+            double nx = cx + wl;
+            if (nx > x1) nx = x1;
+            double half = (nx - cx) / 2.0;
+            double cy = ly + amp;
+            cairo_curve_to(cr, cx + half * 0.5, ly, cx + half * 0.5, cy,
+                           cx + half, cy);
+            cairo_curve_to(cr, cx + half + half * 0.5, cy, cx + half + half * 0.5, ly,
+                           nx, ly);
+            cx = nx;
+        }
+        cairo_stroke(cr);
+    } else if (style == CSS_TDS_DOUBLE) {
+        double gap = thick * 0.5;
+        if (gap < 0.5) gap = 0.5;
+        cairo_set_line_width(cr, thick * 0.5);
+        cairo_move_to(cr, x0, ly - gap); cairo_line_to(cr, x1, ly - gap);
+        cairo_stroke(cr);
+        cairo_move_to(cr, x0, ly + gap); cairo_line_to(cr, x1, ly + gap);
+        cairo_stroke(cr);
+    } else {
+        cairo_set_line_width(cr, thick);
+        if (style == CSS_TDS_DASHED) {
+            double on = 4.0 * thick, off = 2.0 * thick;
+            cairo_set_dash(cr, (double[]){ on, off }, 2, 0.0);
+        } else if (style == CSS_TDS_DOTTED) {
+            cairo_set_dash(cr, (double[]){ 0.0, thick * 2.0 }, 2, 0.0);
+        } else {
+            cairo_set_dash(cr, NULL, 0, 0.0);
+        }
+        cairo_move_to(cr, x0, ly); cairo_line_to(cr, x1, ly); cairo_stroke(cr);
+        cairo_set_dash(cr, NULL, 0, 0.0);
     }
 }
 
@@ -5770,37 +5934,28 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
             /* Author text-decoration sub-properties override the line stroke:
              * - color -1/CC_COLOR_CURRENT means use the fragment's text color
              * - thickness -1 means use the default 1.0px
-             * - style 0 (unset) means solid; CSS_TDS_DASHED/DOTTED use cairo dashes
-             *   (CSS_TDS_WAVY/CSS_TDS_DOUBLE fall back to solid in v1). */
+             * - style 0 (unset) means solid; CSS_TDS_WAVY draws an approximate
+             *   sine wave; CSS_TDS_DOUBLE draws two parallel strokes; CSS_TDS_DASHED
+             *   and DOTTED use cairo dashes. The shared helper paint_deco_line
+             *   handles all six styles at a given y coordinate. */
             ui_rgb deco_rgb = (f->deco_color >= 0) ? rgb_from_packed(f->deco_color)
                             : (f->deco_color == CC_COLOR_CURRENT) ? f->color
                             : f->color;
             double deco_thick = (f->deco_thick >= 0) ? (double)f->deco_thick : UI_UNDERLINE_THICK;
             set_rgb(cr, deco_rgb);
-            cairo_set_line_width(cr, deco_thick);
-            cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-            if (f->deco_style == CSS_TDS_DASHED) {
-                double on = 4.0 * deco_thick, off = 2.0 * deco_thick;
-                cairo_set_dash(cr, (double[]){ on, off }, 2, 0.0);
-            } else if (f->deco_style == CSS_TDS_DOTTED) {
-                cairo_set_dash(cr, (double[]){ 0.0, deco_thick * 2.0 }, 2, 0.0);
-            } else {
-                cairo_set_dash(cr, NULL, 0, 0.0);
-            }
             double x0 = fx, x1 = x0 + f->width;
             if (f->underline) {
                 double uy = fbaseline + f->font_size * UI_UNDERLINE_OFFSET;
-                cairo_move_to(cr, x0, uy); cairo_line_to(cr, x1, uy); cairo_stroke(cr);
+                paint_deco_line(cr, x0, x1, uy, deco_thick, f->deco_style);
             }
             if (f->strike) {
                 double sy = fbaseline - f->font_size * UI_STRIKE_OFFSET;
-                cairo_move_to(cr, x0, sy); cairo_line_to(cr, x1, sy); cairo_stroke(cr);
+                paint_deco_line(cr, x0, x1, sy, deco_thick, f->deco_style);
             }
             if (f->overline) {
                 double oy = fbaseline - f->font_size * UI_OVERLINE_OFFSET;
-                cairo_move_to(cr, x0, oy); cairo_line_to(cr, x1, oy); cairo_stroke(cr);
+                paint_deco_line(cr, x0, x1, oy, deco_thick, f->deco_style);
             }
-            cairo_set_dash(cr, NULL, 0, 0.0);  /* restore solid for next line */
         }
     }
 }

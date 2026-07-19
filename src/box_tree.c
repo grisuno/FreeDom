@@ -242,9 +242,39 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
         rowy[r] = yy;
         yy += rowh[r] + rgap;
     }
+    /* Rowspan height redistribution: for each cell spanning multiple rows,
+     * ensure the cumulative height of the spanned rows is at least the cell's
+     * content height. Add the deficit to the last spanned row so the spanning
+     * cell's paint rect covers the full area. */
+    for (size_t i = 0; i < nk; ++i) {
+        int rsp = row_span[i];
+        if (rsp <= 1) continue;
+        size_t r0 = prow[i], r1 = r0 + (size_t)rsp - 1;
+        if (r1 >= nrows) r1 = nrows > 0 ? nrows - 1 : 0;
+        if (r1 <= r0) continue;
+        double sum_h = 0.0;
+        for (size_t r = r0; r <= r1; ++r) sum_h += rowh[r];
+        double cell_h = kids[i]->h;
+        if (cell_h > sum_h) rowh[r1] += cell_h - sum_h;
+    }
+    /* Recompute row y-positions after the height adjustments above. */
+    yy = pt;
+    for (size_t r = 0; r < nrows; ++r) {
+        rowy[r] = yy;
+        yy += rowh[r] + rgap;
+    }
     for (size_t i = 0; i < nk; ++i) {
         kids[i]->x = pl + col_x[pcol[i]];
         kids[i]->y = rowy[prow[i]];
+        /* For rowspanning cells, set height to the cumulative spanned rows' height
+         * so the paint rect (background/border) covers the full spanned area. */
+        int rsp = row_span[i];
+        if (rsp > 1) {
+            size_t r0 = prow[i], r1 = r0 + (size_t)rsp - 1;
+            if (r1 >= nrows) r1 = nrows > 0 ? nrows - 1 : 0;
+            double span_h = rowy[r1] + rowh[r1] - rowy[r0];
+            if (span_h > kids[i]->h) kids[i]->h = span_h;
+        }
     }
     /* yy = pt + sum(rowh) + rgap*nrows; drop the trailing gap, add bottom padding. */
     node->h = (nrows > 0) ? (yy - rgap + pb) : (pt + pb);

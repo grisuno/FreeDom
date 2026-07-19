@@ -3,7 +3,7 @@
     "god_nodes": [
       [
         "gui/browser_ui.c",
-        34.1
+        34.9
       ],
       [
         "src/local_store.c",
