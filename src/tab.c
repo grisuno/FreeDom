@@ -717,12 +717,16 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         uint64_t total_budget = net ? 5000 : JS_DEFAULT_TIME_BUDGET;
         struct timespec t0;
         clock_gettime(CLOCK_MONOTONIC, &t0);
-        /* R7: two-pass execution — sync/external first, deferred second.
+        /* Three-pass execution: sync/external first, async second, deferred
+         * third. async executes between sync and deferred per spec semantics
+         * (as soon as available, before DOMContentLoaded). When both async and
+         * defer are set on a script, async wins (handled at parse time).
          * Each pass shares the same page-wide budget. */
-        for (int pass = 0; pass < 2; ++pass) {
+        for (int pass = 0; pass < 3; ++pass) {
         for (size_t i = 0; i < nscripts; i++) {
-            if (pass == 0 && scripts[i].defer) continue;  /* first pass: skip deferred */
-            if (pass == 1 && !scripts[i].defer) continue; /* second pass: only deferred */
+            if (pass == 0 && (scripts[i].defer || scripts[i].async)) continue;
+            if (pass == 1 && !scripts[i].async) continue;
+            if (pass == 2 && !scripts[i].defer) continue;
             uint64_t rem = budget_remaining_ms(&t0, total_budget);
             if (rem == 0) break; /* page JS budget spent; stop running scripts */
             js_set_time_budget(cs->js, rem);

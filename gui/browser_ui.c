@@ -3867,10 +3867,16 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
          * own rows (and child boxes) move with it. Inset UNSET/AUTO → 0 offset
          * on that axis (the box anchors at its in-flow position). */
         if (def->position == BT_POS_RELATIVE || def->position == BT_POS_STICKY) {
-            if (def->inset_left != PV_LEN_UNSET && def->inset_left != (int)PV_LEN_UNSET + 1)
-                bx->x += (double)def->inset_left;
-            if (def->inset_top  != PV_LEN_UNSET && def->inset_top  != (int)PV_LEN_UNSET + 1)
-                bx->top += (double)def->inset_top;
+            /* R8: right pushes ← (negative x) and bottom pushes ↑ (negative top),
+             * same semantics as box_tree.c R8. left beats right, top beats bottom. */
+            int l_unset = (def->inset_left == PV_LEN_UNSET || def->inset_left == (int)PV_LEN_UNSET + 1);
+            int t_unset = (def->inset_top  == PV_LEN_UNSET || def->inset_top  == (int)PV_LEN_UNSET + 1);
+            int r_unset = (def->inset_right == PV_LEN_UNSET || def->inset_right == (int)PV_LEN_UNSET + 1);
+            int b_unset = (def->inset_bottom == PV_LEN_UNSET || def->inset_bottom == (int)PV_LEN_UNSET + 1);
+            if (!l_unset) bx->x += (double)def->inset_left;
+            else if (!r_unset) bx->x -= (double)def->inset_right;
+            if (!t_unset) bx->top += (double)def->inset_top;
+            else if (!b_unset) bx->top -= (double)def->inset_bottom;
         }
     }
     s->cur_top += bt + pt;       /* inner content starts below the top border + padding */

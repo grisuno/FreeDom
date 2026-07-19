@@ -443,6 +443,42 @@ static void test_free_null_and_double(void **state) {
     hp_document_free(doc); /* freeing once is enough; NULL-safety covered above */
 }
 
+/* <script defer> and <script async> attributes are extracted correctly.
+ * async wins over defer when both are present. Inline scripts never carry
+ * defer or async. */
+static void test_extract_script_list_defer_async(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body>"
+        "<script src='https://x.example/sync.js'></script>"
+        "<script src='https://x.example/async.js' async></script>"
+        "<script src='https://x.example/defer.js' defer></script>"
+        "<script src='https://x.example/both.js' async defer></script>"
+        "</body></html>";
+    hp_config c = hp_config_default();
+    c.strip_scripts = 0;
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(LIT(H), &c, &doc), HP_OK);
+    size_t n = 0;
+    hp_script *s = hp_extract_script_list(doc, &n);
+    assert_non_null(s);
+    assert_int_equal((unsigned long)n, 4UL);
+    assert_string_equal(s[0].src, "https://x.example/sync.js");
+    assert_string_equal(s[1].src, "https://x.example/async.js");
+    assert_string_equal(s[2].src, "https://x.example/defer.js");
+    assert_string_equal(s[3].src, "https://x.example/both.js");
+    /* defer.js should have defer=1 (already tested by project codebase
+     * which uses this attribute for two-pass execution). async.js
+     * should have async=1 after this commit. */
+    assert_int_equal(s[2].defer, 1);    /* defer.js: defer recognized */
+    assert_int_equal(s[1].async, 1);    /* async.js: async recognized */
+    /* both.js: async wins over defer per spec */
+    assert_int_equal(s[3].async, 1);
+    assert_int_equal(s[3].defer, 0);
+    hp_free_scripts(s, n);
+    hp_document_free(doc);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
@@ -469,6 +505,7 @@ int main(void) {
         cmocka_unit_test(test_event_handlers_kept_when_disabled),
         cmocka_unit_test(test_parse_malformed_does_not_crash),
         cmocka_unit_test(test_free_null_and_double),
+        cmocka_unit_test(test_extract_script_list_defer_async),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

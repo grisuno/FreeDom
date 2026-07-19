@@ -79,6 +79,7 @@ typedef struct hp_script {
     char  *src;
     char  *type;   /* type attribute value, or NULL */
     int    defer;  /* R7: <script defer> — execute after DOM parse, in order */
+    int    async;  /* <script async> — execute as soon as available, no order */
 } hp_script;
 
 /* Returns the executable <script> elements in document order, as an owned array;

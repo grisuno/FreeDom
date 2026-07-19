@@ -450,8 +450,18 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
         if (pos == BT_POS_RELATIVE || pos == BT_POS_STICKY) {
             x = (box_x != NULL) ? box_x[i] : 0.0;
             y = (box_y != NULL) ? box_y[i] : 0.0;
-            x += inset_l;
-            y += inset_t;
+            /* R8: honour right/bottom for relative/sticky. right pushes
+             * LEFT (←) and bottom pushes UP (↑) per CSS 2.2 §9.4.3.
+             * left beats right when both are set, matching absolute/fixed
+             * convention (spec says left wins for relative too). */
+            if (boxes[i].inset_right != PV_LEN_UNSET && boxes[i].inset_left == PV_LEN_UNSET)
+                x -= inset_r;
+            else
+                x += inset_l;
+            if (boxes[i].inset_bottom != PV_LEN_UNSET && boxes[i].inset_top == PV_LEN_UNSET)
+                y -= inset_b;
+            else
+                y += inset_t;
         } else {
             /* R4: honour right/bottom insets for absolute/fixed. */
             if (boxes[i].inset_right != PV_LEN_UNSET && boxes[i].inset_left == PV_LEN_UNSET)

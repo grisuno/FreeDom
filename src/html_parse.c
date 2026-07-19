@@ -182,15 +182,20 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
         list[count].len  = tl;
         list[count].src  = src;
         list[count].type = type;
-        int has_defer = 0;
+        int has_defer = 0, has_async = 0;
         if (src != NULL) {
-            size_t dl = 0;
-            const lxb_char_t *dv = lxb_dom_element_get_attribute(
-                lxb_dom_interface_element((lxb_dom_node_t *)n),
-                (const lxb_char_t *)"defer", 5, &dl);
-            has_defer = (dv != NULL);
+            /* Use attr_by_name: get_attribute returns NULL for bare boolean
+             * attributes (e.g. <script defer>) in Lexbor ≤3.1.0. */
+            lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
+            has_async = (lxb_dom_element_attr_by_name(
+                el, (const lxb_char_t *)"async", 5) != NULL);
+            has_defer = (lxb_dom_element_attr_by_name(
+                el, (const lxb_char_t *)"defer", 5) != NULL);
+            /* Per spec, async wins over defer when both are present */
+            if (has_async) has_defer = 0;
         }
         list[count].defer = has_defer;
+        list[count].async = has_async;
         count++;
     }
     if (count == 0) { free(list); return NULL; }
