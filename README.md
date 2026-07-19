@@ -207,9 +207,26 @@ walk is deferred to a follow-up.
   `inline-size`/`block-size` with physical LTR mapping.
 - **Automatic dark mode:** `@media (prefers-color-scheme: dark)` applies
   automatically when the dark theme is on.
-- **CSS transforms:** `translate()`, `scale()`, `rotate()` via real Cairo affine
-  matrix (pivoted at box center). Single function per declaration; `skew()`/
-  `matrix()`/chaining not yet supported.
+- **CSS transforms:** `translate()`, `scale()`, `rotate()`, `skew()`/`skewX()`/
+  `skewY()`, and `matrix()` (QR-decomposed at parse time) via real Cairo affine
+  matrix, pivoted at `transform-origin` (keywords + percents; default center).
+  Single function per declaration; `matrix()` covers the composed case.
+- **Viewport units:** `vw`/`vh`/`vmin`/`vmax` resolve against the normalized
+  1920x1080 desktop (the same fixed identity `@media` width queries and the
+  anti-fingerprint screen report), inside `calc()`/`min()`/`max()`/`clamp()`
+  and `font-size` too. `min-height:100vh` heroes and `calc(100vh - 80px)`
+  layouts now work with zero real-window leakage.
+- **Glassmorphism:** `backdrop-filter: blur(Npx)` (+ `-webkit-` alias) samples
+  and blurs the already-painted backdrop under the box before its translucent
+  background composites on top; `rgba()`/`hsla()` background alpha is honored
+  in the box fill (`background: rgba(255,255,255,0.25)` panels).
+- **JS media queries + reveal-on-scroll:** `matchMedia()` really evaluates
+  width/height/orientation queries against the same normalized 1920x1080
+  identity (identity signals pinned: light scheme, fine pointer, hover);
+  `IntersectionObserver` delivers one synthetic `isIntersecting:true` entry per
+  `observe()` in the deferred phase — AOS-style scroll-reveal content that
+  used to stay stuck at `opacity:0` now renders. All values are synthetic
+  constants: zero real geometry, scroll order, or timing leaks.
 - **Form controls:** native GET/POST without JS, text inputs, checkboxes,
   select menus, submit buttons.
 - **Image formats:** PNG, JPEG, WebP, and static GIF (own bounded pure-C LZW

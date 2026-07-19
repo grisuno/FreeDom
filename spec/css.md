@@ -146,7 +146,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | Property | Resolved into `css_style` |
 | :-- | :-- |
 | `color` | `color` (packed 0xRRGGBB via css_color), or -1 |
-| `background-color` | `background` (color only; a value with `url(` is dropped) |
+| `background-color` | `background` (color only; a value with `url(` is dropped) **+ `bg_alpha`** (2026-07-19): the 4th component of an `rgba()`/`hsla()` value, as a percent `0..100` (`CSS_LEN_UNSET` = opaque). Alpha 0 keeps the color channel but paints nothing (the painter multiplies). Applies to the BOX background fill (and its direct rows via the row-bg dedup below); `#RRGGBBAA` hex alpha stays out of scope v1. Given-When-Then: **Dado** `background:rgba(255,255,255,0.25)` en un panel glass **cuando** se pinta la caja **entonces** el fill usa alfa 0.25 y el backdrop (o su blur) se ve a través. |
 | `background` | `background` (color) **and** the gradient/image fields below. Shorthand semantics: a `background` value always resets *both* layers — a plain color emits gradient-unset+image-unset, a gradient or `url()` emits color-unset (-1) — so a higher-tier `background: red` clears a lower-tier gradient/image and vice versa. Any color token outside the gradient/url still resolves. |
 | `background-image` | `bg_grad_*` (unchanged) **or** `bg_image_url` (2026-07-16): `linear-gradient(...)` resolves to the gradient fields as before; `url(...)` (quoted or bare, 1 layer) captures the **raw, unresolved** URL text into `bg_image_url` (`css_style`, bounded `CSS_URL_MAX` (1024, enough to also hold the resolved absolute URL) — an overlong URL is dropped, fail closed, same as any other overlong token here); `none`/`radial-gradient`/`conic-gradient`/`repeating-*`/multi-layer (comma-separated) → both fields unset. `css.c` itself still never fetches anything — it only extracts the literal string between the parens, same as it already does for `href`/`src` attributes elsewhere in the pipeline; resolving the URL against the page origin and deciding whether to actually fetch it happens downstream in `render_doc`/the GUI, under the exact same `caps.images` + `rdp_image_decision` gate as an `<img>` (see "Background image" below). |
 | `text-align` | `text_align`: left/center/right/justify |
@@ -508,8 +508,9 @@ into the run text, so it is carried by default, not gated). None can ever phone 
 **Box model (Hito 23b-3).** `margin` / `padding` / `width` / `max-width` resolve through the
 **same cascade** as the other properties (a `<style>` rule, a selector, and inline `style=`
 all feed them, inline winning). **Lengths** accept `px`, a bare `0`, `em`/`rem` (×16 px,
-the engine's base font), and `calc()` of the same (see *`calc()`* above); `%`/`vw`/`vh`
-and other units are **dropped** (fail closed — they need a containing-block width the
+the engine's base font), **viewport units** (`vw`/`vh`/`vmin`/`vmax`, see *Viewport
+units* below), and `calc()` of the same (see *`calc()`* above); `%` and other units
+are **dropped** (fail closed — they need a containing-block width the
 parser does not have). **Exception (Hito 32): `width` and `max-width` accept `%`** —
 the parser cannot resolve them either, so they are carried **symbolically** as
 per-mille (`css_style.width_pct`/`max_width_pct`, `99.8%` → `998`, clamped to
@@ -580,9 +581,12 @@ the same property interpreter, so e.g. `background: var(--evil)` where
 `inset`/`text-indent`, and transitively `flex-basis`/border-width/outline-width/
 text-shadow and box-shadow offsets) accepts `calc(...)`: a small recursive-descent
 evaluator (`calc_eval`) over `+`, `-`, `*`, `/` and parens, with the same units
-`interp_len` already understands (`px`, `em`/`rem` ×16, bare `0`) — no `%`/viewport
-units (this engine has no containing-block/viewport width to resolve them
-against, so `calc()` cannot reach further than a plain length already could).
+`interp_len` already understands (`px`, `em`/`rem` ×16, bare `0`, and — since
+2026-07-19 — the viewport units `vw`/`vh`/`vmin`/`vmax`, resolved against the
+normalized viewport; see *Viewport units*) — no `%` (this engine has no
+containing block to resolve it against, so `calc()` cannot reach further than a
+plain length already could). `calc(100vh - 80px)`, the classic sticky-footer /
+full-height-hero idiom, therefore resolves.
 Dimensionally checked like real `calc()`: `+`/`-` require both sides to be the
 same "shape" (both lengths, or both bare numbers — `calc(10px + 5)` is invalid);
 `*` requires at least one bare-number side (`calc(10px * 5px)` is invalid); `/`
@@ -590,6 +594,24 @@ requires a bare-number, non-zero divisor. A bare-number *result* (`calc(2 * 3)`,
 no length anywhere) is not a valid length and fails, like any other unsupported
 value. Bounded: the whole expression already lives inside one `CSS_TOK_MAX`
 (64-byte) token, and `CSS_CALC_MAX_DEPTH` (8) caps parenthesis nesting.
+
+**Viewport units (2026-07-19).** `vw`/`vh`/`vmin`/`vmax` resolve at parse time
+against the **normalized viewport** `CSS_MEDIA_DEFAULT_WIDTH` ×
+`CSS_MEDIA_DEFAULT_HEIGHT` (1920×1080) — the same fixed desktop the `@media`
+width queries and `fp_bucket_screen`'s top bucket already assume, so a hostile
+stylesheet learns nothing about the real window (anti-fingerprinting: the
+cascade runs on hostile content and must never see real geometry). Conversion:
+`1vw` → 19.2 px, `1vh` → 10.8 px, `1vmin` → 10.8 px, `1vmax` → 19.2 px, rounded
+per `round_clamp`. Given-When-Then: **Dado** `min-height:100vh` **cuando** se
+resuelve la cascada **entonces** `min_height` = 1080 px, sin consultar la
+ventana real. Accepted everywhere `interp_len` flows (box lengths, insets,
+gaps, borders, shadows, `flex-basis`) and inside `calc()`/`min()`/`max()`/
+`clamp()`. Trade-off (documented, accepted): a `100vw` box paints 1920 px wide
+even in a narrower window and is clipped, exactly like the `@media` width
+normalization can mismatch the real window — navigability + zero leak beat
+pixel-perfect geometry. `font-size` in viewport units (responsive typography,
+e.g. `font-size:4vw`) converts through the same normalized pixels into the
+percent-of-base channel.
 **`calc()` composes with `var()`:** `var()` substitution happens first (on the raw
 declaration text), so `calc(var(--gap) * 2)` resolves the custom property's text
 into the expression before it is evaluated.

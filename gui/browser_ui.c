@@ -2805,6 +2805,7 @@ typedef struct rc_box {
     int    outline_w, outline_style, outline_color;
     int    outline_offset;  /* px outset from the border edge; CSS_LEN_UNSET = 0 */
     int    bg_rgb;
+    int    bg_alpha;     /* background alpha percent 0..100; PV_LEN_UNSET opaque */
     int    hidden;   /* visibility:hidden on this box (or an ancestor): geometry (h/w)
                        * is still resolved, decoration painting is skipped */
     /* 2026-07-10 author vertical dimensions: a fixed height/width sets the box's
@@ -3830,6 +3831,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         bx->outline_color = def->outline_color;
         bx->outline_offset = (def->outline_offset != PV_LEN_UNSET) ? def->outline_offset : 0;
         bx->bg_rgb = def->bg_rgb;
+        bx->bg_alpha = def->bg_alpha;
         bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
         bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
         bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
@@ -4339,6 +4341,14 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
              * painter wraps inside the resolved width. */
             gh[bid] = default_h;
         }
+        /* Author height wins over the measured fallback (2026-07-19): a
+         * positioned panel with height:160px must not collapse to one text
+         * line. min-height raises the floor. */
+        if (bd->box_h != PV_LEN_UNSET && bd->box_h > 0)
+            gh[bid] = (double)bd->box_h;
+        else if (bd->box_min_h != PV_LEN_UNSET && bd->box_min_h > 0 &&
+                 gh[bid] < (double)bd->box_min_h)
+            gh[bid] = (double)bd->box_min_h;
     }
 
     bt_status st = bt_resolve_positioning(
@@ -5577,9 +5587,16 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             cairo_pattern_destroy(pat);
         }
     } else if (bx->bg_rgb >= 0) {
-        set_rgb(cr, rgb_from_packed(bx->bg_rgb));
-        box_path(cr, x, y, w, h, rad);
-        cairo_fill(cr);
+        /* Background alpha (2026-07-19): an rgba()/hsla() panel paints
+         * translucent so the backdrop (or its backdrop-filter blur) shows
+         * through. PV_LEN_UNSET = opaque, alpha 0 = nothing to paint. */
+        double bga = (bx->bg_alpha != PV_LEN_UNSET) ? (double)bx->bg_alpha / 100.0 : 1.0;
+        if (bga > 0.0) {
+            ui_rgb bgc = rgb_from_packed(bx->bg_rgb);
+            cairo_set_source_rgba(cr, bgc.r, bgc.g, bgc.b, bga);
+            box_path(cr, x, y, w, h, rad);
+            cairo_fill(cr);
+        }
     }
 
     /* R5b: second background-image layer (bg_image_url2): paints UNDER the
@@ -5926,6 +5943,8 @@ static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
  * links and backgrounds). band_w is the full-bleed width for notice banners (the
  * window width on screen, the page width in the PDF). show_hover draws the link
  * hover highlight (on screen only; suppressed when exporting). */
+static int row_owner_block_id(const rc_layout *L, const rc_row *r);
+
 static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                               const rc_row *r, double left, double ry,
                               double content_w, double band_w, int show_hover) {
@@ -5955,15 +5974,25 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         cairo_rectangle(cr, 0.0, ry, band_w, r->height);
         cairo_fill(cr);
     } else if (r->bg_rgb >= 0) {
-        /* Author background-color behind the block's text (content box).
-         * Stage 2: r->x_off carries the column offset (flex/grid) OR the
-         * positioned box's resolved x. Either way the background sits on
-         * top of the same rect the text is drawn in. A container item's
-         * background is clipped to its own column (bg_w). */
-        double bw = (r->bg_w > 0.0) ? r->bg_w : content_w;
-        set_rgb(cr, rgb_from_packed(r->bg_rgb));
-        cairo_rectangle(cr, left + r->x_off, ry, bw, r->height);
-        cairo_fill(cr);
+        /* Row-bg dedup (2026-07-19): a row whose bg cascades the SAME color
+         * its owning box already filled repaints nothing -- the box covered
+         * the area, and this opaque full-width band would destroy translucent
+         * (rgba/backdrop-filter) panels and overhang narrow boxes. A row with
+         * its own DISTINCT bg (an inline span highlight) still paints. */
+        int own_bid = row_owner_block_id(L, r);
+        const pv_box_def *own_bd = (own_bid >= 0 && w->doc != NULL)
+                                 ? rd_box_at(w->doc, own_bid) : NULL;
+        if (own_bd == NULL || own_bd->bg_rgb != r->bg_rgb) {
+            /* Author background-color behind the block's text (content box).
+             * Stage 2: r->x_off carries the column offset (flex/grid) OR the
+             * positioned box's resolved x. Either way the background sits on
+             * top of the same rect the text is drawn in. A container item's
+             * background is clipped to its own column (bg_w). */
+            double bw = (r->bg_w > 0.0) ? r->bg_w : content_w;
+            set_rgb(cr, rgb_from_packed(r->bg_rgb));
+            cairo_rectangle(cr, left + r->x_off, ry, bw, r->height);
+            cairo_fill(cr);
+        }
     }
     double baseline = ry + r->ascent;
     /* row origin (column offset for flex/grid) plus any author text-align shift. */
@@ -6152,26 +6181,39 @@ static int box_forms_stacking_context(const pv_box_def *def) {
                          def->transform_ty != PV_LEN_UNSET ||
                          def->transform_sx != PV_LEN_UNSET ||
                          def->transform_sy != PV_LEN_UNSET ||
-                         def->transform_rotate != PV_LEN_UNSET,
+                         def->transform_rotate != PV_LEN_UNSET ||
+                         def->transform_skx != PV_LEN_UNSET ||
+                         def->transform_sky != PV_LEN_UNSET,
     };
     if (def->anim_duration_ms > 0) return 1;  /* Phase R1: animation needs stacking context */
     if (def->filter_blur > 0 || def->filter_grayscale > 0 ||
         def->filter_brightness > 0 || def->filter_contrast > 0 ||
         def->filter_sepia > 0 || def->filter_invert > 0 ||
         def->filter_saturate > 0 || def->filter_hue_rotate > 0) return 1;  /* R3: filter needs SC */
+    if (def->backdrop_blur > 0) return 1;  /* backdrop-filter needs SC, like filter */
     return cx_forms_stacking_context(&st);
 }
 
-/* transform (M1.2 translate; M1.2b adds scale/rotate): builds the box's full 2D
- * affine transform -- translate, then rotate, then scale, pivoted at the box's
- * own center (CSS's initial transform-origin, 50% 50%, the only pivot this
- * engine supports) -- as a Cairo matrix. Identity when the box has no
- * transform, so callers can apply it unconditionally with no visual change for
- * the untransformed common case. box_x/box_y are the box's DEVICE-space
- * top-left (e.g. ox+bx->x, oy+bx->top -- what paint_box_decoration receives).
- * Forward application (cairo_transform around a box's paint calls) lives at
- * the three call sites below; hit-testing (the inverse) is out of scope for
- * this increment, see include/page_view.h pv_box_def. */
+/* transform (M1.2 translate; M1.2b scale/rotate; M1.2c skew + origin): builds
+ * the box's full 2D affine transform -- translate, then (pivoted) rotate,
+ * scale and skew -- as a Cairo matrix. The pivot is transform-origin
+ * (percents of the box; PV_LEN_UNSET = the CSS default 50% center). Skew
+ * angles whose tangent is non-finite or enormous (~90deg mod 180) degrade to
+ * identity -- never non-finite coordinates inside Cairo. Identity when the box
+ * has no transform, so callers can apply it unconditionally with no visual
+ * change for the untransformed common case. box_x/box_y are the box's
+ * DEVICE-space top-left (e.g. ox+bx->x, oy+bx->top -- what
+ * paint_box_decoration receives). Forward application (cairo_transform around
+ * a box's paint calls) lives at the three call sites below; hit-testing (the
+ * inverse) is out of scope for this increment, see include/page_view.h
+ * pv_box_def. */
+static double bui_skew_tan(int deg) {
+    if (deg == PV_LEN_UNSET || deg == 0) return 0.0;
+    double t = tan((double)deg * (M_PI / 180.0));
+    if (!isfinite(t) || t > 1e3 || t < -1e3) return 0.0;
+    return t;
+}
+
 static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
                                  double box_w, double box_h, cairo_matrix_t *m,
                                  int64_t elapsed_ms) {
@@ -6260,12 +6302,24 @@ static void box_transform_matrix(const pv_box_def *def, double box_x, double box
             rot = rot_deg * (M_PI / 180.0);
         }
     }
-    if (tx == 0.0 && ty == 0.0 && sx == 1.0 && sy == 1.0 && rot == 0.0) return;
-    double cx = box_x + box_w / 2.0, cy = box_y + box_h / 2.0;
+    double skx_t = bui_skew_tan(def->transform_skx);
+    double sky_t = bui_skew_tan(def->transform_sky);
+    if (tx == 0.0 && ty == 0.0 && sx == 1.0 && sy == 1.0 && rot == 0.0 &&
+        skx_t == 0.0 && sky_t == 0.0) return;
+    /* transform-origin (M1.2c): percents of the box; unset = 50% center. */
+    double opx = (def->transform_ox != PV_LEN_UNSET) ? (double)def->transform_ox : 50.0;
+    double opy = (def->transform_oy != PV_LEN_UNSET) ? (double)def->transform_oy : 50.0;
+    double cx = box_x + box_w * (opx / 100.0), cy = box_y + box_h * (opy / 100.0);
     cairo_matrix_translate(m, tx, ty);
     cairo_matrix_translate(m, cx, cy);
     cairo_matrix_rotate(m, rot);
     cairo_matrix_scale(m, sx, sy);
+    if (skx_t != 0.0 || sky_t != 0.0) {
+        /* Shear applies innermost of the pivoted pipeline (T-P-R-S-K-P inverse):
+         * matches the parse-time matrix() QR decomposition M = R-S-K. */
+        cairo_matrix_t k = { 1.0, sky_t, skx_t, 1.0, 0.0, 0.0 };
+        cairo_matrix_multiply(m, &k, m);
+    }
     cairo_matrix_translate(m, -cx, -cy);
 }
 
@@ -6400,6 +6454,70 @@ static void bui_box_blur_surface(cairo_surface_t *surf, int radius) {
     free(col);
     free(tmp);
     cairo_surface_mark_dirty(surf);
+}
+
+/* backdrop-filter: blur (2026-07-19, glassmorphism v1). Samples the CURRENT
+ * paint target under the box rect (device-space bounding box of the possibly
+ * transformed user rect, expanded by the blur radius), blurs the sample with
+ * the same bui_box_blur_surface filter blur uses, and paints it back clipped
+ * to the box rect (border-radius honoured) -- the box's own translucent
+ * background then composites on top. MUST be called BEFORE the box's
+ * cairo_push_group (a freshly-pushed group is empty; the backdrop lives in the
+ * surface below). Degrades to a no-op when the target is not sampleable (a
+ * vector PDF surface) or on any surface error -- never a crash, never
+ * non-finite coordinates. */
+static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
+                                    double bx, double by, double bw, double bh) {
+    if (def == NULL || def->backdrop_blur <= 0) return;
+    if (bw <= 0.0 || bh <= 0.0) return;
+    int radius = def->backdrop_blur;
+    if (radius > 256) radius = 256;
+    cairo_surface_t *target = cairo_get_group_target(cr);
+    if (target == NULL) return;
+    if (cairo_surface_get_type(target) != CAIRO_SURFACE_TYPE_IMAGE) return;
+
+    double cxs[4] = { bx, bx + bw, bx, bx + bw };
+    double cys[4] = { by, by, by + bh, by + bh };
+    double minx = 0.0, miny = 0.0, maxx = 0.0, maxy = 0.0;
+    for (int i = 0; i < 4; ++i) {
+        double dx = cxs[i], dy = cys[i];
+        cairo_user_to_device(cr, &dx, &dy);
+        if (i == 0 || dx < minx) minx = dx;
+        if (i == 0 || dx > maxx) maxx = dx;
+        if (i == 0 || dy < miny) miny = dy;
+        if (i == 0 || dy > maxy) maxy = dy;
+    }
+    if (!isfinite(minx) || !isfinite(miny) || !isfinite(maxx) || !isfinite(maxy)) return;
+    int sx0 = (int)floor(minx) - radius;
+    int sy0 = (int)floor(miny) - radius;
+    int sw = (int)ceil(maxx - minx) + 2 * radius;
+    int sh = (int)ceil(maxy - miny) + 2 * radius;
+    if (sw < 1 || sh < 1) return;
+    if (sw > 4096) sw = 4096;
+    if (sh > 4096) sh = 4096;
+
+    cairo_surface_t *snap = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, sw, sh);
+    if (cairo_surface_status(snap) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(snap);
+        return;
+    }
+    cairo_surface_flush(target);
+    cairo_t *scr = cairo_create(snap);
+    cairo_set_source_surface(scr, target, (double)-sx0, (double)-sy0);
+    cairo_paint(scr);
+    cairo_destroy(scr);
+    bui_box_blur_surface(snap, radius);
+
+    cairo_save(cr);
+    double rad = (def->border_radius > 0 && def->border_radius != PV_LEN_UNSET)
+               ? (double)def->border_radius : 0.0;
+    box_path(cr, bx, by, bw, bh, rad);
+    cairo_clip(cr);
+    cairo_identity_matrix(cr);
+    cairo_set_source_surface(cr, snap, (double)sx0, (double)sy0);
+    cairo_paint(cr);
+    cairo_restore(cr);
+    cairo_surface_destroy(snap);
 }
 
 /* Composites the currently-pushed group back onto cr using def's opacity/mix-blend
@@ -6629,6 +6747,7 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
     cairo_matrix_t m;
     int64_t elapsed = (int64_t)(now_ms() - w->page_load_mono_ms);
     box_transform_matrix(def, ox + bx->x, oy + bx->top, bx->w, bx->h, &m, elapsed);
+    bui_paint_backdrop_blur(cr, def, ox + bx->x, oy + bx->top, bx->w, bx->h);
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
@@ -6743,7 +6862,10 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
      * paint_box_and_direct_rows: rotate/scale are ignored when deciding
      * whether the synthetic text row below is off-screen. */
     double cull_ty = (def->transform_ty != PV_LEN_UNSET) ? (double)def->transform_ty : 0.0;
-    if (needs_group) cairo_push_group(cr);
+    if (needs_group) {
+        bui_paint_backdrop_blur(cr, def, left + pb->x, origin + pb->y, pb->w, pb->h);
+        cairo_push_group(cr);
+    }
 
     /* Build a transient rc_box for the existing paint helper. */
     rc_box bx = {
@@ -6761,6 +6883,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .outline_w = def->outline_w, .outline_style = def->outline_style,
         .outline_color = def->outline_color,
         .bg_rgb = def->bg_rgb,
+        .bg_alpha = def->bg_alpha,
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },
         .grad_radial = def->bg_grad_radial,
@@ -6833,6 +6956,9 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
         if (cdef == NULL || cdef->parent_id != parent_id) continue;
         int csc = box_forms_stacking_context(cdef);
         if (csc) {
+            bui_paint_backdrop_blur(cr, cdef, left + L->boxes[j].x,
+                                    origin + L->boxes[j].top,
+                                    L->boxes[j].w, L->boxes[j].h);
             cairo_push_group(cr);
             paint_box_and_direct_rows(cr, w, L, &L->boxes[j], left, origin,
                                        content_w, (double)w->width, content_top,
@@ -6975,6 +7101,8 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         if (by + bx->h < content_top || by > content_top + content_h) continue;
 
         if (is_sc) {
+            bui_paint_backdrop_blur(cr, def, left + bx->x, origin + bx->top,
+                                    bx->w, bx->h);
             cairo_push_group(cr);
             paint_box_and_direct_rows(cr, w, &L, bx, left, origin, content_w,
                                        (double)w->width, content_top, content_h,

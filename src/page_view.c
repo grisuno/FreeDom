@@ -963,6 +963,9 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->transform_tx != CSS_LEN_UNSET || cs->transform_ty != CSS_LEN_UNSET ||
            cs->transform_sx != CSS_LEN_UNSET || cs->transform_sy != CSS_LEN_UNSET ||
            cs->transform_rotate != CSS_LEN_UNSET ||
+           /* M1.2c: skew triggers like any other transform function; origin
+            * alone is inert (no transform -> nothing to pivot). */
+           cs->transform_skx != CSS_LEN_UNSET || cs->transform_sky != CSS_LEN_UNSET ||
            /* background-image: url(...) (2026-07-16): same reasoning as the
             * gradient case above -- a `<div style="background-image:url(x)">`
             * with no other box-triggering property alone still needs the box
@@ -976,7 +979,10 @@ static int css_has_boxdeco(const css_style *cs) {
             cs->filter_blur > 0 || cs->filter_grayscale > 0 ||
             cs->filter_brightness > 0 || cs->filter_contrast > 0 ||
             cs->filter_sepia > 0 || cs->filter_invert > 0 ||
-            cs->filter_saturate > 0 || cs->filter_hue_rotate > 0;
+            cs->filter_saturate > 0 || cs->filter_hue_rotate > 0 ||
+            /* backdrop-filter (2026-07-19): needs the box def for the painter's
+             * backdrop-sampling path, same reasoning as filter. */
+            cs->backdrop_blur > 0;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1018,6 +1024,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
               : (bg == CC_COLOR_TRANSPARENT) ? CC_COLOR_TRANSPARENT
               : (bg == CC_COLOR_CURRENT) ? -1
               : -1;
+    d->bg_alpha = cs->bg_alpha;
     d->box_sizing = cs->box_sizing;
     d->pad_t = (cs->pad_top    != CSS_LEN_UNSET) ? cs->pad_top    : 0;
     d->pad_r = (cs->pad_right  != CSS_LEN_UNSET) ? cs->pad_right  : 0;
@@ -1070,6 +1077,10 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->transform_sx = cs->transform_sx;
     d->transform_sy = cs->transform_sy;
     d->transform_rotate = cs->transform_rotate;
+    d->transform_skx = cs->transform_skx;
+    d->transform_sky = cs->transform_sky;
+    d->transform_ox = cs->transform_ox;
+    d->transform_oy = cs->transform_oy;
     /* background-image: url(...) (2026-07-16). Raw, unresolved -- render_doc.c
      * resolves it against the page origin and gates it like an <img>. */
     memcpy(d->bg_image_url, cs->bg_image_url, PV_BG_URL_MAX);
@@ -1089,6 +1100,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->filter_invert = cs->filter_invert;
     d->filter_saturate = cs->filter_saturate;
     d->filter_hue_rotate = cs->filter_hue_rotate;
+    d->backdrop_blur = cs->backdrop_blur;
     d->bg_pos_x = cs->bg_pos_x;
     d->bg_pos_y = cs->bg_pos_y;
     d->anim_iterations = cs->anim_iterations;

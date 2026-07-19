@@ -1707,9 +1707,10 @@ static void test_box_units_and_failclosed(void **state) {
     assert_int_equal(css_parse_inline("padding-top:-8px", 0).pad_top, CSS_LEN_UNSET);
     assert_int_equal(css_parse_inline("padding:auto", 0).pad_top, CSS_LEN_UNSET);
     assert_int_equal(css_parse_inline("width:-8px", 0).width, CSS_LEN_UNSET);
-    /* percent / viewport units dropped (no containing block) -> unset. */
+    /* percent dropped (no containing block) -> unset. Viewport units resolve
+     * against the normalized 1920x1080 viewport since 2026-07-19. */
     assert_int_equal(css_parse_inline("width:50%", 0).width, CSS_LEN_UNSET);
-    assert_int_equal(css_parse_inline("margin-left:5vw", 0).margin_left, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("margin-left:5vw", 0).margin_left, 96);
     /* unset by default (a declaration that touches only color). */
     css_style def = css_parse_inline("color:#000", 0);
     assert_int_equal(def.margin_top, CSS_LEN_UNSET);
@@ -1792,6 +1793,49 @@ static void test_calc_dimension_errors_fail_closed(void **state) {
 static void test_calc_clamped_anti_dos(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("width: calc(99999999999px + 1px)", 0).width, CSS_LEN_MAX);
+}
+
+/* Viewport units (2026-07-19): vw/vh/vmin/vmax resolve at parse time against the
+ * NORMALIZED viewport CSS_MEDIA_DEFAULT_WIDTH x CSS_MEDIA_DEFAULT_HEIGHT
+ * (1920x1080) -- the same fixed desktop the @media width queries assume -- so a
+ * hostile sheet never sees real window geometry (anti-fingerprinting) yet 100vh
+ * heroes and calc(100vh - Npx) stickies lay out. */
+static void test_viewport_units_resolve_normalized(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("width: 100vw", 0).width, 1920);
+    assert_int_equal(css_parse_inline("height: 100vh", 0).height, 1080);
+    assert_int_equal(css_parse_inline("min-height: 100vh", 0).min_height, 1080);
+    assert_int_equal(css_parse_inline("width: 50vw", 0).width, 960);
+    assert_int_equal(css_parse_inline("height: 10vmin", 0).height, 108);
+    assert_int_equal(css_parse_inline("height: 10vmax", 0).height, 192);
+    assert_int_equal(css_parse_inline("width: 2.5vw", 0).width, 48);
+    assert_int_equal(css_parse_inline("margin-top: -10vh", 0).margin_top, -108);
+    /* Case-insensitive like every other unit. */
+    assert_int_equal(css_parse_inline("width: 100VW", 0).width, 1920);
+}
+
+static void test_viewport_units_in_calc_and_mathfn(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("height: calc(100vh - 80px)", 0).height, 1000);
+    assert_int_equal(css_parse_inline("width: calc(50vw + 40px)", 0).width, 1000);
+    assert_int_equal(css_parse_inline("min-height: min(100vh, 500px)", 0).min_height, 500);
+    assert_int_equal(css_parse_inline("width: clamp(100px, 10vw, 150px)", 0).width, 150);
+}
+
+static void test_viewport_units_font_size(void **state) {
+    (void)state;
+    /* Responsive typography: 4vw = 76.8px over the 16px base = 480%. */
+    assert_int_equal(css_parse_inline("font-size: 4vw", 0).font_scale, 480);
+    /* 2vmin = 21.6px -> 135%. */
+    assert_int_equal(css_parse_inline("font-size: 2vmin", 0).font_scale, 135);
+}
+
+static void test_viewport_units_junk_fail_closed(void **state) {
+    (void)state;
+    /* Unknown v-units and bare "v" stay dropped. */
+    assert_int_equal(css_parse_inline("width: 10vq", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width: 10v", 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("width: vw", 0).width, CSS_LEN_UNSET);
 }
 
 /* calc() must survive being ONE token inside a multi-value shorthand: a naive
@@ -2758,11 +2802,126 @@ static void test_inline_transform_rotate(void **state) {
     assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
     s = css_parse_inline("transform:rotate(45)", 0); /* unitless: invalid */
     assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
-    s = css_parse_inline("transform:matrix(1,0,0,1,0,0)", 0); /* still unsupported */
-    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+}
+
+/* transform: skew()/skewX()/skewY() (M1.2c), whole degrees only (deg suffix
+ * mandatory, same grammar as rotate()). skew(a) means skew(a, 0) -- like
+ * translate(x), both slots emitted; skewX/skewY emit only their axis. */
+static void test_inline_transform_skew(void **state) {
+    (void)state;
+    css_style s;
+
+    s = css_parse_inline("transform:skew(20deg)", 0);
+    assert_int_equal(s.transform_skx, 20);
+    assert_int_equal(s.transform_sky, 0);
+
+    s = css_parse_inline("transform:skew(-10deg, 5deg)", 0);
+    assert_int_equal(s.transform_skx, -10);
+    assert_int_equal(s.transform_sky, 5);
+
+    s = css_parse_inline("transform:skewX(15deg)", 0);
+    assert_int_equal(s.transform_skx, 15);
+    assert_int_equal(s.transform_sky, CSS_LEN_UNSET);
+
+    s = css_parse_inline("transform:skewY(-8deg)", 0);
+    assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_sky, -8);
+
+    /* Unsupported/malformed: fails closed, never half-applied. */
+    s = css_parse_inline("transform:skew(0.5turn)", 0);
+    assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:skew(10)", 0);
+    assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:skewX(10deg) skewY(2deg)", 0); /* v1: one fn */
+    assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
+    s = css_parse_inline("color:red", 0);
+    assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_sky, CSS_LEN_UNSET);
+}
+
+/* transform: matrix(a,b,c,d,e,f) (M1.2c): QR-decomposed at parse time into the
+ * existing independent slots (translate/rotate/scale/skewX), rounded to each
+ * slot's integer resolution. Singular matrices fail closed. */
+static void test_inline_transform_matrix_decomposes(void **state) {
+    (void)state;
+    css_style s;
+
+    s = css_parse_inline("transform:matrix(1,0,0,1,50,20)", 0); /* pure translate */
+    assert_int_equal(s.transform_tx, 50);
+    assert_int_equal(s.transform_ty, 20);
+    assert_int_equal(s.transform_sx, 100);
+    assert_int_equal(s.transform_sy, 100);
+    assert_int_equal(s.transform_rotate, 0);
+    assert_int_equal(s.transform_skx, 0);
+    assert_int_equal(s.transform_sky, 0);
+
+    s = css_parse_inline("transform:matrix(0,1,-1,0,0,0)", 0); /* rotate(90deg) */
+    assert_int_equal(s.transform_rotate, 90);
+    assert_int_equal(s.transform_sx, 100);
+    assert_int_equal(s.transform_sy, 100);
+    assert_int_equal(s.transform_skx, 0);
+
+    s = css_parse_inline("transform:matrix(2,0,0,3,0,0)", 0); /* scale(2,3) */
+    assert_int_equal(s.transform_sx, 200);
+    assert_int_equal(s.transform_sy, 300);
+    assert_int_equal(s.transform_rotate, 0);
+
+    s = css_parse_inline("transform:matrix(1,0,1,1,0,0)", 0); /* shear: skewX(45deg) */
+    assert_int_equal(s.transform_skx, 45);
+    assert_int_equal(s.transform_sx, 100);
+    assert_int_equal(s.transform_sy, 100);
+
+    /* Singular / malformed: fails closed, nothing emitted. */
+    s = css_parse_inline("transform:matrix(0,0,0,0,0,0)", 0);
     assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
-    s = css_parse_inline("transform:skew(10deg)", 0); /* still unsupported */
-    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:matrix(1,0,0,1,0)", 0); /* 5 args */
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:matrix(1,0,0,1,0,0,0)", 0); /* 7 args */
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:matrix(1,0,junk,1,0,0)", 0);
+    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+}
+
+/* transform-origin (M1.2c): keywords + percentages into percent slots; unset
+ * means the CSS default 50% 50% (box center). px lengths fail closed (v1). */
+static void test_transform_origin(void **state) {
+    (void)state;
+    css_style s;
+
+    s = css_parse_inline("transform-origin: top left", 0);
+    assert_int_equal(s.transform_ox, 0);
+    assert_int_equal(s.transform_oy, 0);
+
+    s = css_parse_inline("transform-origin: 25% 75%", 0);
+    assert_int_equal(s.transform_ox, 25);
+    assert_int_equal(s.transform_oy, 75);
+
+    s = css_parse_inline("transform-origin: left", 0); /* one value: y = center */
+    assert_int_equal(s.transform_ox, 0);
+    assert_int_equal(s.transform_oy, 50);
+
+    s = css_parse_inline("transform-origin: bottom", 0); /* y-keyword alone */
+    assert_int_equal(s.transform_ox, 50);
+    assert_int_equal(s.transform_oy, 100);
+
+    s = css_parse_inline("transform-origin: right bottom", 0);
+    assert_int_equal(s.transform_ox, 100);
+    assert_int_equal(s.transform_oy, 100);
+
+    s = css_parse_inline("transform-origin: center", 0);
+    assert_int_equal(s.transform_ox, 50);
+    assert_int_equal(s.transform_oy, 50);
+
+    /* px lengths and junk fail closed (both slots stay unset). */
+    s = css_parse_inline("transform-origin: 10px 20px", 0);
+    assert_int_equal(s.transform_ox, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_oy, CSS_LEN_UNSET);
+    s = css_parse_inline("transform-origin: junk", 0);
+    assert_int_equal(s.transform_ox, CSS_LEN_UNSET);
+    s = css_parse_inline("color:red", 0);
+    assert_int_equal(s.transform_ox, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_oy, CSS_LEN_UNSET);
 }
 
 /* Independent-cascade combination (M1.2b): translate/scale/rotate are separate
@@ -3031,6 +3190,48 @@ static void test_white_space_break_spaces(void **state) {
     assert_int_equal(css_parse_inline("white-space:break-spaces", 0).white_space, CSS_WS_PRE_WRAP);
 }
 
+/* background alpha (2026-07-19): rgba()/hsla() keep their 4th component in
+ * bg_alpha (percent 0..100; CSS_LEN_UNSET = opaque). The color channel resolves
+ * exactly as before. Hex #RRGGBBAA stays out of scope (alpha unset). */
+static void test_background_rgba_alpha(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background: rgba(255,255,255,0.25)", 0);
+    assert_int_equal(s.background, 0xffffff);
+    assert_int_equal(s.bg_alpha, 25);
+    s = css_parse_inline("background-color: rgba(0,0,0,0.5)", 0);
+    assert_int_equal(s.background, 0x000000);
+    assert_int_equal(s.bg_alpha, 50);
+    s = css_parse_inline("background: rgba(10,20,30,1)", 0);
+    assert_int_equal(s.bg_alpha, 100);
+    s = css_parse_inline("background: hsla(0,100%,50%,0.4)", 0);
+    assert_int_equal(s.bg_alpha, 40);
+    /* Percent alpha form. */
+    s = css_parse_inline("background: rgba(1,2,3,40%)", 0);
+    assert_int_equal(s.bg_alpha, 40);
+    /* No alpha anywhere: unset (opaque). */
+    s = css_parse_inline("background: rgb(1,2,3)", 0);
+    assert_int_equal(s.bg_alpha, CSS_LEN_UNSET);
+    s = css_parse_inline("background: red", 0);
+    assert_int_equal(s.bg_alpha, CSS_LEN_UNSET);
+    s = css_parse_inline("color:red", 0);
+    assert_int_equal(s.bg_alpha, CSS_LEN_UNSET);
+}
+
+/* backdrop-filter (2026-07-19, glassmorphism v1): blur(Npx) into backdrop_blur;
+ * the -webkit- alias works; other functions in the list are ignored (same lax
+ * list grammar as filter); none/url()/junk leave it 0. */
+static void test_backdrop_filter_blur(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("backdrop-filter: blur(8px)", 0).backdrop_blur, 8);
+    assert_int_equal(css_parse_inline("-webkit-backdrop-filter: blur(12px)", 0).backdrop_blur, 12);
+    /* The common glass combo: blur consumed, saturate ignored (v1). */
+    assert_int_equal(css_parse_inline("backdrop-filter: blur(10px) saturate(1.8)", 0).backdrop_blur, 10);
+    assert_int_equal(css_parse_inline("backdrop-filter: none", 0).backdrop_blur, 0);
+    assert_int_equal(css_parse_inline("backdrop-filter: url(evil)", 0).backdrop_blur, 0);
+    assert_int_equal(css_parse_inline("backdrop-filter: junk", 0).backdrop_blur, 0);
+    assert_int_equal(css_parse_inline("color:red", 0).backdrop_blur, 0);
+}
+
 static void test_filter_blur_and_grayscale(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -3183,6 +3384,10 @@ int main(void) {
         cmocka_unit_test(test_calc_dimension_errors_fail_closed),
         cmocka_unit_test(test_width_percent_carried_symbolically),
         cmocka_unit_test(test_calc_clamped_anti_dos),
+        cmocka_unit_test(test_viewport_units_resolve_normalized),
+        cmocka_unit_test(test_viewport_units_in_calc_and_mathfn),
+        cmocka_unit_test(test_viewport_units_font_size),
+        cmocka_unit_test(test_viewport_units_junk_fail_closed),
         cmocka_unit_test(test_calc_inside_shorthands),
         cmocka_unit_test(test_calc_with_custom_property),
         cmocka_unit_test(test_box_clamp_anti_dos),
@@ -3331,6 +3536,9 @@ int main(void) {
         cmocka_unit_test(test_inline_transform_translate),
         cmocka_unit_test(test_inline_transform_scale),
         cmocka_unit_test(test_inline_transform_rotate),
+        cmocka_unit_test(test_inline_transform_skew),
+        cmocka_unit_test(test_inline_transform_matrix_decomposes),
+        cmocka_unit_test(test_transform_origin),
         cmocka_unit_test(test_inline_transform_independent_cascade_combines),
         cmocka_unit_test(test_inline_object_fit),
         cmocka_unit_test(test_inline_list_style_pos),
@@ -3352,6 +3560,8 @@ int main(void) {
         cmocka_unit_test(test_font_shorthand),
         cmocka_unit_test(test_white_space_break_spaces),
         cmocka_unit_test(test_filter_blur_and_grayscale),
+        cmocka_unit_test(test_backdrop_filter_blur),
+        cmocka_unit_test(test_background_rgba_alpha),
         cmocka_unit_test(test_anim_keyframes_resolved_from_sheet),
         cmocka_unit_test(test_anim_transform_keyframes_from_sheet),
     };

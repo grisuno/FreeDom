@@ -275,6 +275,56 @@ static void test_modern_globals_do_not_throw(void **state) {
     EXPECT(f, "window.innerWidth", "1920");
 }
 
+/* IntersectionObserver fires synthetically (2026-07-19): observe(el) queues ONE
+ * delivery with isIntersecting:true / ratio 1 in the deferred phase (setTimeout
+ * 0). Every value is a synthetic constant -- zero real geometry or timing leaks
+ * -- but scroll-reveal libraries (AOS et al) that keep content at opacity:0
+ * until the observer fires now reveal it. disconnect() before the deferred
+ * phase suppresses delivery; the other observers stay never-fire. */
+static void test_intersection_observer_fires_synthetically(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var hit=0, en=null;"
+              "var io=new IntersectionObserver(function(es){hit=es.length; en=es[0];});"
+              "io.observe(document.body); __fireDeferred();"
+              "'' + hit + ',' + en.isIntersecting + ',' + en.intersectionRatio + ','"
+              " + (en.target===document.body)", "1,true,1,true");
+    EXPECT(f, "var hit2=0; var io2=new IntersectionObserver(function(){hit2++;});"
+              "io2.observe(document.body); io2.disconnect(); __fireDeferred(); hit2", "0");
+    EXPECT(f, "var mh=0; var mo=new MutationObserver(function(){mh++;});"
+              "mo.observe(document.body,{childList:true}); __fireDeferred(); mh", "0");
+}
+
+/* matchMedia evaluates for real against the normalized 1920x1080 desktop
+ * identity (the same one innerWidth and the CSS viewport units use); identity
+ * signals are always normalized (light, no-preference, hover, fine). Unknown
+ * features and junk are false, never a throw. */
+static void test_match_media_normalized_viewport(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "matchMedia('(min-width: 768px)').matches", "true");
+    EXPECT(f, "matchMedia('(min-width: 48em)').matches", "true");
+    EXPECT(f, "matchMedia('(min-width: 2000px)').matches", "false");
+    EXPECT(f, "matchMedia('(max-width: 767px)').matches", "false");
+    EXPECT(f, "matchMedia('(max-width: 1920px)').matches", "true");
+    EXPECT(f, "matchMedia('(min-height: 1080px)').matches", "true");
+    EXPECT(f, "matchMedia('(orientation: landscape)').matches", "true");
+    EXPECT(f, "matchMedia('(orientation: portrait)').matches", "false");
+    EXPECT(f, "matchMedia('screen').matches", "true");
+    EXPECT(f, "matchMedia('print').matches", "false");
+    EXPECT(f, "matchMedia('screen and (min-width: 600px)').matches", "true");
+    EXPECT(f, "matchMedia('(min-width: 600px) and (max-width: 800px)').matches", "false");
+    EXPECT(f, "matchMedia('(max-width: 500px), (min-width: 1000px)').matches", "true");
+    EXPECT(f, "matchMedia('not print').matches", "true");
+    EXPECT(f, "matchMedia('(prefers-color-scheme: dark)').matches", "false");
+    EXPECT(f, "matchMedia('(prefers-color-scheme: light)').matches", "true");
+    EXPECT(f, "matchMedia('(prefers-reduced-motion: reduce)').matches", "false");
+    EXPECT(f, "matchMedia('(hover: hover)').matches", "true");
+    EXPECT(f, "matchMedia('(pointer: fine)').matches", "true");
+    EXPECT(f, "matchMedia('(pointer: coarse)').matches", "false");
+    EXPECT(f, "matchMedia('(min-width: garbage)').matches", "false");
+    EXPECT(f, "matchMedia('garbage !!').matches", "false");
+    EXPECT(f, "typeof matchMedia('(min-width: 1px)').addEventListener", "function");
+}
+
 /* Document node identity: jQuery/Sizzle's setDocument binds its internal document
  * reference only when 9===doc.nodeType && doc.documentElement; without nodeType:9
  * that reference stayed undefined and doc.createElement() threw, aborting the whole
@@ -1487,6 +1537,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_document_fragment_reparents, setup, teardown),
         cmocka_unit_test_setup_teardown(test_fragment_clone_chain_does_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_modern_globals_do_not_throw, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_intersection_observer_fires_synthetically, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_match_media_normalized_viewport, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_node_identity, setup, teardown),
         cmocka_unit_test_setup_teardown(test_element_attributes_named_node_map, setup, teardown),
         cmocka_unit_test_setup_teardown(test_intl_stub_does_not_throw, setup, teardown),

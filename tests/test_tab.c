@@ -2010,6 +2010,8 @@ static void test_load_view_codec_full_roundtrip(void **state) {
         "transform:translate(12px,-7px)\">boxy</div>"
         "<div style=\"transform:scale(1.5,0.5)\">scaley</div>"
         "<div style=\"transform:rotate(-30deg)\">rotey</div>"
+        "<div style=\"transform:skew(20deg,5deg); transform-origin: top left\">skewy</div>"
+        "<div style=\"backdrop-filter: blur(6px)\">glassy</div>"
         "<div style=\"background-image:url(hero.png);background-size:cover;"
         "background-repeat:repeat-x\">bgbox</div>"
         "<div style=\"animation-duration:1500ms\">anibox</div>"
@@ -2022,7 +2024,8 @@ static void test_load_view_codec_full_roundtrip(void **state) {
     assert_non_null(p.view);
 
     int saw_alpha = 0, saw_pic = 0, saw_grid = 0, saw_flexi = 0, saw_boxy = 0, saw_input = 0;
-    int saw_scaley = 0, saw_rotey = 0, saw_bgbox = 0, saw_anibox = 0;
+    int saw_scaley = 0, saw_rotey = 0, saw_bgbox = 0, saw_anibox = 0, saw_skewy = 0,
+        saw_glassy = 0;
     for (size_t i = 0; i < pv_count(p.view); ++i) {
         const pv_run *r = pv_at(p.view, i);
         if (r->kind == PV_IMAGE) {
@@ -2087,6 +2090,23 @@ static void test_load_view_codec_full_roundtrip(void **state) {
             assert_non_null(bx);
             assert_int_equal(bx->transform_rotate, -30);
             saw_rotey = 1;
+        } else if (strcmp(r->text, "skewy") == 0) {
+            /* M1.2c: skew + transform-origin survive the worker IPC round-trip. */
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->transform_skx, 20);
+            assert_int_equal(bx->transform_sky, 5);
+            assert_int_equal(bx->transform_ox, 0);
+            assert_int_equal(bx->transform_oy, 0);
+            saw_skewy = 1;
+        } else if (strcmp(r->text, "glassy") == 0) {
+            /* backdrop-filter blur survives the worker IPC round-trip. */
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->backdrop_blur, 6);
+            saw_glassy = 1;
         } else if (strcmp(r->text, "bgbox") == 0) {
             assert_true(r->block_id >= 0);
             const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
@@ -2104,7 +2124,7 @@ static void test_load_view_codec_full_roundtrip(void **state) {
         }
     }
     assert_true(saw_alpha && saw_pic && saw_grid && saw_flexi && saw_boxy && saw_input &&
-                saw_scaley && saw_rotey && saw_bgbox && saw_anibox);
+                saw_scaley && saw_rotey && saw_bgbox && saw_anibox && saw_skewy && saw_glassy);
 
     tab_page_free(&p);
     tab_close(t);

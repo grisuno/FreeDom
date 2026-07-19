@@ -1002,9 +1002,46 @@ static const char JD_MODERN_SHIM[] =
     "  ['Event','CustomEvent','MouseEvent','KeyboardEvent','PointerEvent','UIEvent','FocusEvent',"
     "   'InputEvent','TouchEvent','WheelEvent','MessageEvent','PopStateEvent','HashChangeEvent',"
     "   'ErrorEvent','ProgressEvent'].forEach(function(n){ if(typeof g[n]==='undefined') g[n]=evCtor(); });"
-    "  if(typeof g.matchMedia==='undefined') g.matchMedia=function(q){ return {matches:false,"
-    "    media:String(q||''),onchange:null,addListener:function(){},removeListener:function(){},"
-    "    addEventListener:function(){},removeEventListener:function(){},dispatchEvent:function(){return false;}}; };"
+    /* matchMedia evaluates for real (2026-07-19) against the normalized
+     * 1920x1080 desktop identity (the same one innerWidth and the CSS viewport
+     * units use). Identity signals are ALWAYS normalized: light color scheme,
+     * no-preference motion, hover-capable fine pointer (the Firefox-desktop
+     * identity already on the wire). Unknown features and junk are false,
+     * never a throw; listeners accept and never fire (the normalized identity
+     * never changes, so zero change events is correct and deterministic). */
+    "  if(typeof g.matchMedia==='undefined') g.matchMedia=function(q){"
+    "    q=String(q||'');"
+    "    function mlen(v){ var n=parseFloat(v); if(!isFinite(n)) return NaN;"
+    "      return v.indexOf('em')>=0 ? n*16 : n; }"
+    "    function term(t){ t=t.trim();"
+    "      if(t===''||t==='all'||t==='screen') return true;"
+    "      if(t==='print'||t==='speech') return false;"
+    "      if(t.charAt(0)!=='('||t.charAt(t.length-1)!==')') return false;"
+    "      var b=t.slice(1,-1), ci=b.indexOf(':'), k, v;"
+    "      if(ci<0){ k=b.trim(); v=''; } else { k=b.slice(0,ci).trim(); v=b.slice(ci+1).trim(); }"
+    "      if(k==='min-width')  return 1920>=mlen(v);"
+    "      if(k==='max-width')  return 1920<=mlen(v);"
+    "      if(k==='width')      return mlen(v)===1920;"
+    "      if(k==='min-height') return 1080>=mlen(v);"
+    "      if(k==='max-height') return 1080<=mlen(v);"
+    "      if(k==='height')     return mlen(v)===1080;"
+    "      if(k==='orientation') return v==='landscape';"
+    "      if(k==='prefers-color-scheme') return v==='light';"
+    "      if(k==='prefers-reduced-motion'||k==='prefers-contrast') return v==='no-preference';"
+    "      if(k==='hover'||k==='any-hover') return v==='hover';"
+    "      if(k==='pointer'||k==='any-pointer') return v==='fine';"
+    "      return false; }"
+    "    function clause(c){ var parts=c.split(' and ');"
+    "      for(var i=0;i<parts.length;i++){ var p=parts[i].trim(), neg=false;"
+    "        if(p.indexOf('not ')===0){ neg=true; p=p.slice(4).trim(); }"
+    "        var r=term(p); if(neg) r=!r; if(!r) return false; }"
+    "      return true; }"
+    "    var m=false, cs=q.toLowerCase().replace(/\\s+/g,' ').split(',');"
+    "    for(var i=0;i<cs.length;i++){ if(clause(cs[i])){ m=true; break; } }"
+    "    return { matches:m, media:q, onchange:null,"
+    "      addListener:function(){}, removeListener:function(){},"
+    "      addEventListener:function(){}, removeEventListener:function(){},"
+    "      dispatchEvent:function(){ return false; } }; };"
   "  /* --- Canvas 2D minimal (v1: fillRect, clearRect, fillStyle, toDataURL) --- */"
   "  function pngEnc(rgba,w,h){"
   "    var g_crc=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=(c&1?0xEDB88320^c>>>1:c>>>1);g_crc[n]=c;}"
@@ -1070,6 +1107,23 @@ static const char JD_MODERN_SHIM[] =
      "    O.prototype.takeRecords=function(){return [];}; return O; }"
      "  ['MutationObserver','IntersectionObserver','ResizeObserver','PerformanceObserver'].forEach("
     "    function(n){ if(typeof g[n]==='undefined') g[n]=observer(); });"
+    /* IntersectionObserver fires synthetically (2026-07-19): one deferred
+     * delivery per observe() with isIntersecting:true and constant synthetic
+     * geometry (zero real layout/scroll/timing leaks). Scroll-reveal libraries
+     * that keep content at opacity:0 until the observer fires now reveal it.
+     * The other observers above stay never-fire (no observation, no leak). */
+    "  (function(){ function IO(cb){ this._cb=cb; this._live=true; }"
+    "    IO.prototype.observe=function(el){ var self=this; if(el===null||el===undefined) return;"
+    "      setTimeout(function(){ if(!self._live) return;"
+    "        var r={x:0,y:0,top:0,left:0,right:0,bottom:0,width:0,height:0};"
+    "        try{ self._cb([{isIntersecting:true,intersectionRatio:1,target:el,time:0,"
+    "          boundingClientRect:r,intersectionRect:r,"
+    "          rootBounds:{x:0,y:0,top:0,left:0,width:1920,height:1080,right:1920,bottom:1080}}],self);"
+    "        }catch(e){} },0); };"
+    "    IO.prototype.unobserve=function(){};"
+    "    IO.prototype.disconnect=function(){ this._live=false; };"
+    "    IO.prototype.takeRecords=function(){ return []; };"
+    "    g.IntersectionObserver=IO; })();"
     "  if(typeof g.getComputedStyle==='undefined') g.getComputedStyle=function(){"
     "    var o={ getPropertyValue:function(){return '';}, getPropertyPriority:function(){return '';},"
     "      length:0, item:function(){return '';} };"

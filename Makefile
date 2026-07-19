@@ -61,7 +61,9 @@ LDFLAGS   ?= $(LDHARDEN)
 
 # Per-module link dependencies.
 SF_LIBS    = -lcurl -lssl -lcrypto -lpthread
-HP_LIBS    = $(LEXBOR_LIBS)
+# css.o needs libm since M1.2c (matrix() QR decomposition: hypot/atan2/atan);
+# css.o links alongside lexbor in every HP_LIBS consumer.
+HP_LIBS    = $(LEXBOR_LIBS) -lm
 JS_LIBS    = -lm -lpthread
 LS_LIBS    = -lcrypto
 
@@ -303,7 +305,7 @@ $(BUILD_DIR)/test_css_color: $(TEST_DIR)/test_css_color.c $(BUILD_DIR)/css_color
 # Pure author-CSS parser + simple cascade. Reuses css_color for color tokens.
 # No I/O deps; hostile content (never phones home: url()/@-rules dropped).
 $(BUILD_DIR)/test_css: $(TEST_DIR)/test_css.c $(BUILD_DIR)/css.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # Pure user-agent box model (per-tag margins/padding + display). No I/O deps.
 $(BUILD_DIR)/test_box_style: $(TEST_DIR)/test_box_style.c $(BUILD_DIR)/box_style.o | $(BUILD_DIR)
@@ -535,10 +537,10 @@ fuzz-dl: | $(BUILD_DIR)
 # css_resolve must never crash/leak/UB, never fetch (url()/@-rules dropped), and
 # stay bounded. Reuses css_color for color tokens.
 fuzz-css: | $(BUILD_DIR)
-	clang $(STD) -g -O1 -Iinclude \
+	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c \
-	  -o $(BUILD_DIR)/fuzz_css
+	  -o $(BUILD_DIR)/fuzz_css $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_css -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of dom_debug (render-tree dump). Arbitrary bytes -> DOM ->

@@ -227,6 +227,39 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
   llamar `jd_fire_click(ctx, h)`; `preventDefault()` hace que `jd_fire_click` devuelva `0`;
   sin handler devuelve `1`; `jd_install_events(NULL, NULL)` falla cerrado.
 
+## 7b. matchMedia real + IntersectionObserver sintético (2026-07-19)
+
+Dos capas de la superficie ambiente dejaron de ser stubs inertes porque su
+inercia ROMPÍA el render visual de webs modernas, y ambas se cierran sin fugar
+un solo bit real (identity-safe):
+
+- **`matchMedia(q)` evalúa de verdad** contra la MISMA identidad normalizada que
+  ya exponen `innerWidth`/`innerHeight` y las viewport units de CSS (desktop
+  1920×1080, ver `[[freedom-anti-fp-network-identity]]` y spec/css.md "Viewport
+  units"): `min/max-width/height` y `width/height` (unidades `px` y `em`×16),
+  `orientation` (landscape), `screen`/`all` (true) vs `print` (false),
+  combinadores `and`, listas con coma (OR) y prefijo `not`. Señales de identidad
+  SIEMPRE normalizadas: `prefers-color-scheme: light`, `prefers-reduced-motion:
+  no-preference`, `hover/any-hover: hover`, `pointer/any-pointer: fine` (la
+  identidad Firefox-desktop que ya mandamos por el cable). Todo lo demás ⇒
+  `false`, nunca lanza. `addListener`/`addEventListener` aceptan y jamás
+  disparan (la identidad normalizada nunca cambia ⇒ cero eventos es correcto y
+  determinista). **Dado** un sitio que elige layout con
+  `matchMedia('(min-width:768px)')` **cuando** corre su JS **entonces** toma la
+  rama desktop, sin conocer la ventana real.
+- **`IntersectionObserver` dispara sintéticamente:** `observe(el)` encola vía
+  `setTimeout(...,0)` (fase diferida, semántica async real) UNA entrega con
+  `[{isIntersecting:true, intersectionRatio:1, target:el, time:0,
+  boundingClientRect/intersectionRect: rect 0, rootBounds: 1920×1080}]`. Todos
+  los valores son constantes sintéticas — cero geometría real, cero orden de
+  scroll, cero timing — pero las librerías de reveal-on-scroll (AOS y familia)
+  que dejan el contenido en `opacity:0` hasta que el observer dispara ahora lo
+  REVELAN (antes: secciones enteras invisibles para siempre). `disconnect()`
+  antes de la fase diferida suprime la entrega; `unobserve()` es no-op v1;
+  `takeRecords()` ⇒ `[]`. `MutationObserver`/`ResizeObserver`/
+  `PerformanceObserver` siguen sin disparar jamás (sin observación no hay
+  fuga, y nada visual depende de ellos).
+
 ## 8. Fuera de alcance
 
 - Eventos **interactivos** más allá del click (keydown/mousemove/submit; el click del

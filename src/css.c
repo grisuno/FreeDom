@@ -10,6 +10,7 @@
 #include "css_select.h"
 
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -128,6 +129,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
          * each its own independent-cascade slot (see css.h). */
         P_TRANSFORM_TX, P_TRANSFORM_TY,
         P_TRANSFORM_SX, P_TRANSFORM_SY, P_TRANSFORM_ROTATE,
+        /* M1.2c: skew()/skewX()/skewY() whole degrees + transform-origin percent
+         * slots (CSS_LEN_UNSET = 50% center default). */
+        P_TRANSFORM_SKX, P_TRANSFORM_SKY, P_TRANSFORM_OX, P_TRANSFORM_OY,
         /* background-image: url(...) (2026-07-16). ival is an INDEX into a small
          * per-parse url table (css_sheet.bg_urls for stylesheet rules, a stack-local
          * table for inline style="") -- css_decl stays int-only, no per-declaration
@@ -144,6 +148,10 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         /* filter (Phase R3) */
         P_FILTER_BLUR, P_FILTER_GRAYSCALE, P_FILTER_BRIGHTNESS, P_FILTER_CONTRAST,
         P_FILTER_SEPIA, P_FILTER_INVERT, P_FILTER_SATURATE, P_FILTER_HUE_ROTATE,
+        /* backdrop-filter: blur(Npx) (2026-07-19, glassmorphism v1). */
+        P_BACKDROP_BLUR,
+        /* Background alpha percent from rgba()/hsla() (2026-07-19). */
+        P_BG_ALPHA,
         /* background-position (R5a) */
         P_BG_POS_X, P_BG_POS_Y,
         /* multi-layer background-image layer 2 (R5b): second url() behind the first. */
@@ -255,6 +263,41 @@ static int parse_color(const char *v) {
 
 static int interp_color(const char *v) {
     return parse_color(v);
+}
+
+/* Alpha (4th) component of the first rgba()/hsla() call inside v, as a percent
+ * 0..100; CSS_LEN_UNSET when there is none. Accepts a bare 0..1 float or an N%
+ * form -- the same shapes css_color validates (it parses the channel and
+ * discards it; the color itself resolves there unchanged). A malformed alpha
+ * yields UNSET here AND an invalid color there, so the declaration still fails
+ * closed as a whole. */
+static int bg_alpha_of(const char *v) {
+    for (const char *p = v; *p != '\0'; ++p) {
+        int is_fn =
+            ((csel_lower_ch(p[0]) == 'r' && csel_lower_ch(p[1]) == 'g' &&
+              csel_lower_ch(p[2]) == 'b' && csel_lower_ch(p[3]) == 'a' && p[4] == '(') ||
+             (csel_lower_ch(p[0]) == 'h' && csel_lower_ch(p[1]) == 's' &&
+              csel_lower_ch(p[2]) == 'l' && csel_lower_ch(p[3]) == 'a' && p[4] == '('));
+        if (!is_fn) continue;
+        const char *close = strchr(p + 5, ')');
+        if (close == NULL) return CSS_LEN_UNSET;
+        int commas = 0;
+        const char *a = NULL;
+        for (const char *q = p + 5; q < close; ++q) {
+            if (*q == ',') {
+                ++commas;
+                if (commas == 3) { a = q + 1; break; }
+            }
+        }
+        if (a == NULL) return CSS_LEN_UNSET;
+        while (a < close && (*a == ' ' || *a == '\t')) ++a;
+        double num;
+        const char *end;
+        if (!parse_num(a, &num, &end)) return CSS_LEN_UNSET;
+        double pct = (*end == '%') ? num : num * 100.0;
+        return round_clamp(pct, 0, 100);
+    }
+    return CSS_LEN_UNSET;
 }
 
 static int interp_bg(const char *v) {
@@ -633,14 +676,34 @@ static int expand_background(const char *val, css_decl *dst, int cap,
     rest[r] = '\0';
     int color = interp_bg(rest);
     if (f != 1 && uf != 1 && color < 0) return 0;
-    if (cap < 1) return 0;
+    if (cap < 2) return 0;
     dst[0].prop = P_BG;
     dst[0].ival = color;
-    int w = 1;
+    /* Alpha rides the shorthand too (2026-07-19); always emitted so
+     * `background: red` resets a lower-tier rgba() alpha to opaque. */
+    dst[1].prop = P_BG_ALPHA;
+    dst[1].ival = bg_alpha_of(rest);
+    int w = 2;
     w += emit_gradient(dst + w, cap - w, angle, nst, colors, NULL);
     if (cap - w >= 1) w += emit_bg_image_url(dst + w, cap - w, uf == 1 ? urlbuf : NULL,
                                              urltab, nurl, urlcap);
     return w;
+}
+
+/* Viewport units resolve against the NORMALIZED 1920x1080 viewport (the same
+ * fixed desktop the @media width queries assume), never the real window --
+ * the cascade runs on hostile content and must not see real geometry. Returns
+ * 1 with *px set when unit (case-insensitive, NUL-terminated) is one of
+ * vw/vh/vmin/vmax; 0 otherwise. */
+static int viewport_unit_px(const char *unit, double num, double *px) {
+    double per;
+    if      (csel_ci_eq(unit, "vw") || csel_ci_eq(unit, "vmax"))
+        per = CSS_MEDIA_DEFAULT_WIDTH  / 100.0;
+    else if (csel_ci_eq(unit, "vh") || csel_ci_eq(unit, "vmin"))
+        per = CSS_MEDIA_DEFAULT_HEIGHT / 100.0;
+    else return 0;
+    *px = num * per;
+    return 1;
 }
 
 static int interp_align(const char *v) {
@@ -664,11 +727,12 @@ static int interp_fontsize(const char *v) {
     const char *end;
     if (!parse_num(v, &num, &end)) return -1;
     while (*end == ' ' || *end == '\t') ++end;
-    double scale;
+    double scale, vpx;
     if (csel_ci_eq(end, "px")) scale = num / 16.0 * 100.0;
     else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) scale = num * 100.0;
     else if (end[0] == '%' && end[1] == '\0') scale = num;
     else if (csel_ci_eq(end, "pt")) scale = num * 1.333 / 16.0 * 100.0;
+    else if (viewport_unit_px(end, num, &vpx)) scale = vpx / 16.0 * 100.0;
     else return -1;
     return round_clamp(scale, 10, 1000);
 }
@@ -944,8 +1008,8 @@ static int expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
 /* --- calc() for length values -------------------------------------------------
  *
  * A small recursive-descent evaluator over +, -, *, / and parens. Operands are
- * plain numbers or px/em/rem lengths -- the same units interp_len itself accepts
- * (no %/vw/vh: this engine has no containing-block/viewport width to resolve them
+ * plain numbers or px/em/rem/vw/vh/vmin/vmax lengths -- the same units interp_len
+ * itself accepts (no %: this engine has no containing block to resolve it
  * against, so calc() cannot reach further than interp_len already can). Bounded:
  * the whole expression already lives inside one CSS_TOK_MAX (64-byte) token,
  * and CSS_CALC_MAX_DEPTH additionally caps parenthesis nesting -- never unbounded
@@ -1062,6 +1126,24 @@ static int calc_factor(calc_parser *p, calc_val *out, int depth) {
     if (p->i + 2 <= p->n && csel_lower_ch(p->s[p->i]) == 'e' && csel_lower_ch(p->s[p->i + 1]) == 'm') {
         out->px = num * 16.0; out->is_length = 1; p->i += 2; return 1;
     }
+    if (p->i < p->n && csel_lower_ch(p->s[p->i]) == 'v') {
+        /* Viewport units: collect the alpha run (<= 4 chars) and try vw/vh/
+         * vmin/vmax against the normalized 1920x1080 viewport. A non-matching
+         * run falls through to the bare-number path, whose leftover characters
+         * then fail the whole expression (fail closed). */
+        char ub[5];
+        size_t un = 0;
+        while (p->i + un < p->n && un < 4) {
+            char c = csel_lower_ch(p->s[p->i + un]);
+            if (c < 'a' || c > 'z') break;
+            ub[un++] = c;
+        }
+        ub[un] = '\0';
+        double vpx;
+        if (viewport_unit_px(ub, num, &vpx)) {
+            out->px = vpx; out->is_length = 1; p->i += un; return 1;
+        }
+    }
     out->px = num;                      /* a bare number: length only if exactly 0 */
     out->is_length = (num == 0.0);
     return 1;
@@ -1130,11 +1212,12 @@ static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len) {
 }
 
 /* Parses one box-model length. Accepts "Npx", a bare "0", "Nem"/"Nrem" (x16 px,
- * the engine's base font), "calc(...)" over the same units (+, -, *, /, parens;
- * see calc_eval), and (when allow_auto) "auto". Rejects %/viewport units and bare
- * non-zero numbers outside calc() (fail closed: they need a containing block the
- * parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a signed px clamped
- * to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
+ * the engine's base font), viewport units (vw/vh/vmin/vmax vs the normalized
+ * 1920x1080 viewport; see viewport_unit_px), "calc(...)" over the same units
+ * (+, -, *, /, parens; see calc_eval), and (when allow_auto) "auto". Rejects %
+ * and bare non-zero numbers outside calc() (fail closed: they need a containing
+ * block the parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a
+ * signed px clamped to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
 static int interp_len(const char *v, int allow_auto, int *out) {
     if (allow_auto && csel_ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
 
@@ -1181,8 +1264,10 @@ static int interp_len(const char *v, int allow_auto, int *out) {
         px = num;
     } else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) {
         px = num * 16.0;
+    } else if (viewport_unit_px(end, num, &px)) {
+        ;                               /* vw/vh/vmin/vmax vs the 1920x1080 normal */
     } else {
-        return 0;                       /* %, vw/vh, pt, ... */
+        return 0;                       /* %, pt, ... */
     }
     int val = round_clamp(px, 0, CSS_LEN_MAX);   /* px >= 0 here; sign applied next */
     if (neg) val = -val;
@@ -2226,6 +2311,30 @@ static int expand_filter(const char *val, css_decl *dst, int cap) {
     return n;
 }
 
+/* backdrop-filter / -webkit-backdrop-filter (2026-07-19, glassmorphism v1):
+ * same lax space-separated function-list grammar as expand_filter, but v1
+ * consumes ONLY blur(Npx); other functions in the list are ignored (so the
+ * ubiquitous "blur(10px) saturate(1.8)" combo still gets its blur). url()
+ * never accepted; "none" emits nothing. */
+static int expand_backdrop_filter(const char *val, css_decl *dst, int cap) {
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none")) return 0;
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    int n = 0;
+    while (n + 1 <= cap && next_ws_token(&p, tok, sizeof tok)) {
+        if (strncmp(tok, "blur(", 5) == 0) {
+            const char *body = filter_paren_body(tok, "blur(", 5);
+            if (!body) continue;
+            int px;
+            if (interp_len(body, 0, &px) && px >= 0) {
+                dst[n].prop = P_BACKDROP_BLUR; dst[n].ival = px; ++n;
+            }
+        }
+    }
+    return n;
+}
+
 /* background-position (R5a): 1 or 2 values. Keywords map to edges/center; px
  * lengths are used directly. % is not supported in v1 (falls to 0). */
 static int expand_bg_position(const char *val, css_decl *dst, int cap) {
@@ -2680,27 +2789,26 @@ static int parse_rotate_deg(const char *s, int *out) {
  * translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %,
  * viewport units and bare non-calc numbers all fail closed, same as any other
  * box-model length here); scale()/scaleX()/scaleY() unitless ratios via
- * parse_scale_pct; rotate() whole-degree angle via parse_rotate_deg. Any other
- * transform function (skew/matrix/perspective/3D), multiple space-separated
- * functions, or unparseable syntax reject the WHOLE declaration (no decl
- * emitted -> cascades as unset, byte-identical to a page that never declared
- * transform at all -- fail closed, never a half-applied transform). skew()/
- * matrix() are architecturally deferred: they need an arbitrary (non-pivotable
- * or fully general) Cairo matrix, out of scope for this increment (see
- * spec/compositor.md "fuera de alcance"). Transformed hit-testing (click,
- * cursor, overflow-clip ancestor resolution) also stays out of scope -- the
+ * parse_scale_pct; rotate()/skew()/skewX()/skewY() whole-degree angles via
+ * parse_rotate_deg; matrix(a,b,c,d,e,f) QR-decomposed at parse time into ALL
+ * seven slots (M1.2c; singular matrices fail closed). Any other transform
+ * function (perspective/3D), multiple space-separated functions, or
+ * unparseable syntax reject the WHOLE declaration (no decl emitted -> cascades
+ * as unset, byte-identical to a page that never declared transform at all --
+ * fail closed, never a half-applied transform). Transformed hit-testing
+ * (click, cursor, overflow-clip ancestor resolution) stays out of scope -- the
  * painter (gui/browser_ui.c box_transform_matrix) applies the real affine
  * transform, but hit-testing still resolves against the UNTRANSFORMED layout
- * rect, same documented limit as M1.2 translate. transform-origin is not
- * parsed; the pivot is always the box's own center. "none" is not
- * special-cased -- it simply fails every function-name match below and emits
- * nothing, same net effect (unset). */
+ * rect, same documented limit as M1.2 translate. "none" is not special-cased
+ * -- it simply fails every function-name match below and emits nothing, same
+ * net effect (unset). */
 static int expand_transform(const char *val, css_decl *dst, int cap) {
     if (cap < 2) return 0;
     const char *p = val;
     while (*p == ' ' || *p == '\t') ++p;
 
-    enum { TR_X, TR_Y, TR_BOTH, SC_X, SC_Y, SC_BOTH, ROTATE } kind;
+    enum { TR_X, TR_Y, TR_BOTH, SC_X, SC_Y, SC_BOTH, ROTATE,
+           SK_X, SK_Y, SK_BOTH, MATRIX } kind;
     if (csel_span_eq(p, "translatex(", 11, 1))      { kind = TR_X;    p += 11; }
     else if (csel_span_eq(p, "translatey(", 11, 1)) { kind = TR_Y;    p += 11; }
     else if (csel_span_eq(p, "translate(", 10, 1))  { kind = TR_BOTH; p += 10; }
@@ -2708,6 +2816,10 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     else if (csel_span_eq(p, "scaley(", 7, 1))      { kind = SC_Y;    p += 7; }
     else if (csel_span_eq(p, "scale(", 6, 1))       { kind = SC_BOTH; p += 6; }
     else if (csel_span_eq(p, "rotate(", 7, 1))      { kind = ROTATE;  p += 7; }
+    else if (csel_span_eq(p, "skewx(", 6, 1))       { kind = SK_X;    p += 6; }
+    else if (csel_span_eq(p, "skewy(", 6, 1))       { kind = SK_Y;    p += 6; }
+    else if (csel_span_eq(p, "skew(", 5, 1))        { kind = SK_BOTH; p += 5; }
+    else if (csel_span_eq(p, "matrix(", 7, 1))      { kind = MATRIX;  p += 7; }
     else return 0;
 
     size_t n = strlen(p);
@@ -2723,6 +2835,54 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     const char *rest = p + j;
     while (*rest == ' ' || *rest == '\t') ++rest;
     if (*rest != '\0') return 0;               /* trailing junk: v1 allows one function only */
+
+    if (kind == MATRIX) {
+        /* matrix(a,b,c,d,e,f) (M1.2c): six comma-separated unitless numbers,
+         * QR-decomposed into the seven independent slots at the resolution each
+         * slot already has (whole degrees / whole percent / whole px -- same
+         * convention as rotate()'s whole-degree grammar; the precision loss is
+         * documented in spec/compositor.md). A matrix() is a COMPLETE transform,
+         * so all seven slots are emitted (a slot it "overwrites" is exactly the
+         * cascade semantics of a full matrix). Singular (det == 0 or zero first
+         * column) fails closed. */
+        if (cap < 7) return 0;
+        double m6[6];
+        size_t k = 0;
+        for (int arg = 0; arg < 6; ++arg) {
+            char tok[CSS_TOK_MAX];
+            size_t stop = argn;
+            for (size_t q = k; q < argn; ++q) {
+                if (p[q] == ',') { stop = q; break; }
+            }
+            if ((arg < 5) != (stop < argn)) return 0;  /* comma count must be 5 */
+            if (copy_trim(p, k, stop, tok, sizeof tok) == (size_t)-1 || tok[0] == '\0')
+                return 0;
+            const char *tp = tok;
+            int neg = 0;
+            if (*tp == '+') ++tp;
+            else if (*tp == '-') { neg = 1; ++tp; }
+            const char *tend;
+            if (!parse_num(tp, &m6[arg], &tend) || *tend != '\0') return 0;
+            if (neg) m6[arg] = -m6[arg];
+            k = stop + 1;
+        }
+        double r11 = hypot(m6[0], m6[1]);
+        double det = m6[0] * m6[3] - m6[1] * m6[2];
+        if (r11 < 1e-9 || det == 0.0) return 0;
+        const double rad2deg = 180.0 / 3.14159265358979323846;
+        double theta = atan2(m6[1], m6[0]) * rad2deg;
+        double r12 = (m6[0] * m6[2] + m6[1] * m6[3]) / r11;
+        double sy = det / r11;
+        double skx = atan(r12 / r11) * rad2deg;
+        dst[0].prop = P_TRANSFORM_TX;     dst[0].ival = round_clamp(m6[4], -CSS_LEN_MAX, CSS_LEN_MAX);
+        dst[1].prop = P_TRANSFORM_TY;     dst[1].ival = round_clamp(m6[5], -CSS_LEN_MAX, CSS_LEN_MAX);
+        dst[2].prop = P_TRANSFORM_ROTATE; dst[2].ival = round_clamp(theta, -CSS_LEN_MAX, CSS_LEN_MAX);
+        dst[3].prop = P_TRANSFORM_SX;     dst[3].ival = round_clamp(r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+        dst[4].prop = P_TRANSFORM_SY;     dst[4].ival = round_clamp(sy * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+        dst[5].prop = P_TRANSFORM_SKX;    dst[5].ival = round_clamp(skx, -CSS_LEN_MAX, CSS_LEN_MAX);
+        dst[6].prop = P_TRANSFORM_SKY;    dst[6].ival = 0;
+        return 7;
+    }
 
     size_t comma = argn;
     for (size_t k = 0; k < argn; ++k) {
@@ -2741,6 +2901,28 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
         if (has_second || !parse_rotate_deg(a, &deg)) return 0;
         dst[0].prop = P_TRANSFORM_ROTATE; dst[0].ival = deg;
         return 1;
+    }
+
+    if (kind == SK_X) {
+        int deg;
+        if (has_second || !parse_rotate_deg(a, &deg)) return 0;
+        dst[0].prop = P_TRANSFORM_SKX; dst[0].ival = deg;
+        return 1;
+    }
+    if (kind == SK_Y) {
+        int deg;
+        if (has_second || !parse_rotate_deg(a, &deg)) return 0;
+        dst[0].prop = P_TRANSFORM_SKY; dst[0].ival = deg;
+        return 1;
+    }
+    if (kind == SK_BOTH) {
+        /* skew(ax) means skew(ax, 0) -- like translate(x), both slots emitted. */
+        int ax, ay = 0;
+        if (!parse_rotate_deg(a, &ax)) return 0;
+        if (has_second && !parse_rotate_deg(b, &ay)) return 0;
+        dst[0].prop = P_TRANSFORM_SKX; dst[0].ival = ax;
+        dst[1].prop = P_TRANSFORM_SKY; dst[1].ival = ay;
+        return 2;
     }
 
     if (kind == SC_X) {
@@ -2789,6 +2971,57 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     if (has_second && !interp_len(b, 0, &ty)) return 0;
     dst[0].prop = P_TRANSFORM_TX; dst[0].ival = tx;
     dst[1].prop = P_TRANSFORM_TY; dst[1].ival = ty;
+    return 2;
+}
+
+/* One transform-origin component: keyword (axis-checked) or a percent.
+ * axis: 0 = x (left/right valid), 1 = y (top/bottom valid). Percents clamp to
+ * [-1000, 1000] (values outside [0,100] are legal CSS, e.g. "150%"). */
+static int origin_component(const char *tok, int axis, int *out) {
+    if (csel_ci_eq(tok, "center"))                { *out = 50;  return 1; }
+    if (axis == 0 && csel_ci_eq(tok, "left"))     { *out = 0;   return 1; }
+    if (axis == 0 && csel_ci_eq(tok, "right"))    { *out = 100; return 1; }
+    if (axis == 1 && csel_ci_eq(tok, "top"))      { *out = 0;   return 1; }
+    if (axis == 1 && csel_ci_eq(tok, "bottom"))   { *out = 100; return 1; }
+    double num;
+    const char *end;
+    if (parse_num(tok, &num, &end) && end[0] == '%' && end[1] == '\0') {
+        *out = round_clamp(num, -1000, 1000);
+        return 1;
+    }
+    return 0;
+}
+
+/* transform-origin (M1.2c): 1-2 values; keywords and percents only (px lengths
+ * fail closed -- the parser has no box size to resolve them against). One value
+ * names the x axis (y = 50% center) unless it is a y-only keyword. Two keyword
+ * values may come in either order ("bottom left" == "left bottom"), per CSS.
+ * Emits both percent slots; unset downstream means the CSS default 50% 50%. */
+static int expand_transform_origin(const char *val, css_decl *dst, int cap) {
+    if (cap < 2) return 0;
+    char a[CSS_TOK_MAX], b[CSS_TOK_MAX], extra[CSS_TOK_MAX];
+    const char *p = val;
+    if (!next_ws_token(&p, a, sizeof a)) return 0;
+    int has_b = next_ws_token(&p, b, sizeof b);
+    if (has_b && next_ws_token(&p, extra, sizeof extra)) return 0;
+    int ox, oy;
+    if (!has_b) {
+        if (csel_ci_eq(a, "top") || csel_ci_eq(a, "bottom")) {
+            ox = 50;
+            if (!origin_component(a, 1, &oy)) return 0;
+        } else {
+            oy = 50;
+            if (!origin_component(a, 0, &ox)) return 0;
+        }
+    } else {
+        const char *xa = a, *ya = b;
+        if (csel_ci_eq(a, "top") || csel_ci_eq(a, "bottom") ||
+            csel_ci_eq(b, "left") || csel_ci_eq(b, "right")) { xa = b; ya = a; }
+        if (!origin_component(xa, 0, &ox)) return 0;
+        if (!origin_component(ya, 1, &oy)) return 0;
+    }
+    dst[0].prop = P_TRANSFORM_OX; dst[0].ival = ox;
+    dst[1].prop = P_TRANSFORM_OY; dst[1].ival = oy;
     return 2;
 }
 
@@ -2977,6 +3210,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         return expand_place(prop, val, dst, cap);
     if (strcmp(prop, "font") == 0) return expand_font(val, dst, cap);
     if (strcmp(prop, "transform") == 0) return expand_transform(val, dst, cap);
+    if (strcmp(prop, "transform-origin") == 0) return expand_transform_origin(val, dst, cap);
 
     /* Text-presentation extensions whose value may legitimately be 0 or negative
      * (so they bypass the generic ival<0 drop, like the box-model lengths). */
@@ -3036,6 +3270,17 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         dst[0].prop = P_OUTLINE_C; dst[0].ival = o; return 1;
     }
     if (strcmp(prop, "overflow") == 0)      return expand_overflow(val, dst, cap);
+    if (strcmp(prop, "background-color") == 0) {
+        /* Longhand: color + its rgba()/hsla() alpha (2026-07-19). Alpha is
+         * always emitted -- a plain color's UNSET resets a lower-tier alpha,
+         * matching how the color slot itself overwrites. */
+        if (cap < 2) return 0;
+        int o = interp_bg(val);
+        if (o < 0) return 0;
+        dst[0].prop = P_BG;       dst[0].ival = o;
+        dst[1].prop = P_BG_ALPHA; dst[1].ival = bg_alpha_of(val);
+        return 2;
+    }
     if (strcmp(prop, "background") == 0)
         return expand_background(val, dst, cap, urltab, nurl, urlcap);
     if (strcmp(prop, "background-image") == 0)
@@ -3045,7 +3290,6 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
 
     int prop_id, ival;
     if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
-    else if (strcmp(prop, "background-color") == 0)  { prop_id = P_BG;       ival = interp_bg(val); }
     else if (strcmp(prop, "text-align") == 0)        { prop_id = P_ALIGN;    ival = interp_align(val); }
     else if (strcmp(prop, "font-size") == 0)         { prop_id = P_FONTSIZE; ival = interp_fontsize(val); }
     else if (strcmp(prop, "line-height") == 0)       { prop_id = P_LINEHEIGHT; ival = interp_lineheight(val); }
@@ -3212,6 +3456,9 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         dst[0].prop = P_ANIM_DELAY; dst[0].ival = ms; return 1;
     }
     else if (strcmp(prop, "filter") == 0)               return expand_filter(val, dst, cap);
+    else if (strcmp(prop, "backdrop-filter") == 0 ||
+             strcmp(prop, "-webkit-backdrop-filter") == 0)
+        return expand_backdrop_filter(val, dst, cap);
     else if (strcmp(prop, "background-position") == 0)   return expand_bg_position(val, dst, cap);
     else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap, contenttab, ncontent, contentcap);
     else return 0;
@@ -3722,6 +3969,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
         switch (d->prop) {
             case P_COLOR:    o->color = d->ival; break;
             case P_BG:       o->background = d->ival; break;
+            case P_BG_ALPHA: o->bg_alpha = d->ival; break;
             case P_BG_GRAD_ANGLE: o->bg_grad_angle = d->ival; break;
             case P_BG_GRAD_N:     o->bg_grad_n = d->ival; break;
             case P_BG_GRAD_RADIAL: o->bg_grad_radial = d->ival; break;
@@ -3876,6 +4124,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_TRANSFORM_SX:        o->transform_sx = d->ival; break;
             case P_TRANSFORM_SY:        o->transform_sy = d->ival; break;
             case P_TRANSFORM_ROTATE:    o->transform_rotate = d->ival; break;
+            case P_TRANSFORM_SKX:       o->transform_skx = d->ival; break;
+            case P_TRANSFORM_SKY:       o->transform_sky = d->ival; break;
+            case P_TRANSFORM_OX:        o->transform_ox = d->ival; break;
+            case P_TRANSFORM_OY:        o->transform_oy = d->ival; break;
             case P_OBJECT_FIT:          o->object_fit = d->ival; break;
             case P_LIST_STYLE_POS:      o->list_style_pos = d->ival; break;
             case P_FONT_KERNING:        o->font_kerning = d->ival; break;
@@ -3917,6 +4169,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_FILTER_INVERT:       o->filter_invert = d->ival; break;
             case P_FILTER_SATURATE:     o->filter_saturate = d->ival; break;
             case P_FILTER_HUE_ROTATE:   o->filter_hue_rotate = d->ival; break;
+            case P_BACKDROP_BLUR:       o->backdrop_blur = d->ival; break;
             case P_BG_POS_X:            o->bg_pos_x = d->ival; break;
             case P_BG_POS_Y:            o->bg_pos_y = d->ival; break;
             case P_CONTENT:
@@ -3937,7 +4190,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
     /* Designated initializers: robust against field insertion/reordering (every
      * "unset" sentinel is named, so a new field cannot silently default to 0). */
     css_style out = {
-        .color = -1, .background = -1, .text_align = CSS_ALIGN_UNSET,
+        .color = -1, .background = -1, .bg_alpha = CSS_LEN_UNSET, .text_align = CSS_ALIGN_UNSET,
         .font_scale = 0, .line_scale = 0,         .text_decoration = -1, .text_decoration_color = -1,
         .text_decoration_style = CSS_TDS_UNSET,
         .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,
@@ -4016,11 +4269,13 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .transform_tx = CSS_LEN_UNSET, .transform_ty = CSS_LEN_UNSET,
         .transform_sx = CSS_LEN_UNSET, .transform_sy = CSS_LEN_UNSET,
         .transform_rotate = CSS_LEN_UNSET,
+        .transform_skx = CSS_LEN_UNSET, .transform_sky = CSS_LEN_UNSET,
+        .transform_ox = CSS_LEN_UNSET, .transform_oy = CSS_LEN_UNSET,
         .anim_duration_ms = 0,
         .anim_nkf = 0,
         .anim_kf_pct = { 0 },
         .anim_kf_val = { 0 },
-        .filter_blur = 0, .filter_grayscale = 0,
+        .filter_blur = 0, .filter_grayscale = 0, .backdrop_blur = 0,
         .bg_pos_x = CSS_LEN_UNSET, .bg_pos_y = CSS_LEN_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];

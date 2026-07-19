@@ -530,7 +530,9 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                      boxes[tmp[i].box_index].transform_ty != PV_LEN_UNSET ||
                      boxes[tmp[i].box_index].transform_sx != PV_LEN_UNSET ||
                      boxes[tmp[i].box_index].transform_sy != PV_LEN_UNSET ||
-                     boxes[tmp[i].box_index].transform_rotate != PV_LEN_UNSET;
+                     boxes[tmp[i].box_index].transform_rotate != PV_LEN_UNSET ||
+                     boxes[tmp[i].box_index].transform_skx != PV_LEN_UNSET ||
+                     boxes[tmp[i].box_index].transform_sky != PV_LEN_UNSET;
         cx_style st = { .position = boxes[tmp[i].box_index].position,
                          .z_index = tmp[i].z_index, .z_auto = z_auto,
                          .opacity = boxes[tmp[i].box_index].opacity,

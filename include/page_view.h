@@ -297,6 +297,9 @@ typedef struct pv_box_def {
     int box_min_w;      /* min-width  (px >= 0), or 0 unset */
     int box_w_pct;      /* per-mille width cap (Hito 32), 0 = none; see pv_run */
     int bg_rgb;   /* author background-color of the box (0xRRGGBB), or -1 */
+    /* Background alpha percent 0..100 from rgba()/hsla() (2026-07-19);
+     * PV_LEN_UNSET = opaque. The box background fill multiplies by it. */
+    int bg_alpha;
     int box_sizing;
     int pad_t, pad_r, pad_b, pad_l;
     int bord_tw, bord_rw, bord_bw, bord_lw;
@@ -378,6 +381,12 @@ typedef struct pv_box_def {
     int transform_tx, transform_ty;
     int transform_sx, transform_sy;
     int transform_rotate;
+    /* M1.2c: skew()/skewX()/skewY() whole degrees (PV_LEN_UNSET = unset) and
+     * transform-origin percents (PV_LEN_UNSET = the CSS default 50% center).
+     * origin alone is inert: it does not trigger box registration nor a
+     * stacking context (see spec/compositor.md M1.2c). */
+    int transform_skx, transform_sky;
+    int transform_ox, transform_oy;
     /* background-image: url(...) (2026-07-16). The RAW, UNRESOLVED url() text (css
      * and page_view never fetch/resolve); render_doc.c resolves it against the
      * page origin and gates it exactly like an <img> src (caps.images +
@@ -406,6 +415,11 @@ typedef struct pv_box_def {
     int filter_invert;
     int filter_saturate;
     int filter_hue_rotate;
+    /* backdrop-filter: blur(Npx) (2026-07-19). 0 = none. The painter blurs the
+     * already-painted backdrop under the box rect before the box's own
+     * (typically translucent) background composites on top; forces a stacking
+     * context like filter. See spec/compositor.md. */
+    int backdrop_blur;
     /* background-position (R5a): px offsets, PV_LEN_UNSET = unset. */
     int bg_pos_x;
     int bg_pos_y;

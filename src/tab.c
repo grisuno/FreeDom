@@ -348,7 +348,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[148] = {
+        int32_t f[152] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -445,6 +445,13 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->filter_brightness, (int32_t)bd->filter_contrast,
             (int32_t)bd->filter_sepia, (int32_t)bd->filter_invert,
             (int32_t)bd->filter_saturate, (int32_t)bd->filter_hue_rotate,
+            /* M1.2c: skew + transform-origin (appended; read_view mirrors this) */
+            (int32_t)bd->transform_skx, (int32_t)bd->transform_sky,
+            (int32_t)bd->transform_ox, (int32_t)bd->transform_oy,
+            /* backdrop-filter blur, 2026-07-19 (appended; read_view mirrors) */
+            (int32_t)bd->backdrop_blur,
+            /* background alpha percent, 2026-07-19 (appended; read_view mirrors) */
+            (int32_t)bd->bg_alpha,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1564,7 +1571,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[148];
+        int32_t f[152];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1633,6 +1640,13 @@ static int read_view(int fd, pv_view **out) {
             .filter_brightness = f[140], .filter_contrast = f[141],
             .filter_sepia = f[142], .filter_invert = f[143],
             .filter_saturate = f[144], .filter_hue_rotate = f[145],
+            /* M1.2c: skew + transform-origin */
+            .transform_skx = f[146], .transform_sky = f[147],
+            .transform_ox = f[148], .transform_oy = f[149],
+            /* backdrop-filter blur, 2026-07-19 */
+            .backdrop_blur = f[150],
+            /* background alpha percent, 2026-07-19 */
+            .bg_alpha = f[151],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

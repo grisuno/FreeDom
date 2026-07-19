@@ -431,6 +431,12 @@ typedef enum css_backface {
 typedef struct css_style {
     int         color;       /* 0xRRGGBB or -1 (unset) */
     int         background;  /* 0xRRGGBB or -1 (unset) */
+    /* Background alpha (2026-07-19): the 4th component of an rgba()/hsla()
+     * background color as a percent 0..100; CSS_LEN_UNSET = opaque. The color
+     * channel above resolves unchanged. The box background fill multiplies by
+     * it (glassmorphism needs translucent panels). #RRGGBBAA hex is out of
+     * scope v1. */
+    int         bg_alpha;
     /* linear-gradient background (2026-07-11). NOT inherited, like background.
      * bg_grad_n: stop count (0 = no gradient, 2..CSS_GRAD_STOPS_MAX). bg_grad_angle:
      * CSS degrees normalized [0,359] (0 = to top, 90 = to right; 180 = to bottom is
@@ -602,20 +608,27 @@ typedef struct css_style {
      * same convention as the linear-gradient angle grammar -- rad/turn/grad and
      * fractional degrees are unsupported). CSS_LEN_UNSET on any field means that
      * function was not declared (identity: 0 offset / 100% scale / 0deg).
-     * skew()/matrix() and percentage translate arguments are not supported (the
-     * whole declaration fails closed to unset -- see expand_transform in css.c
-     * and spec/compositor.md). Exactly one transform FUNCTION may be declared per
+     * Percentage translate arguments are not supported (the whole declaration
+     * fails closed to unset -- see expand_transform in css.c and
+     * spec/compositor.md). Exactly one transform FUNCTION may be declared per
      * `transform` value (no chaining); the fields are independent cascade slots
      * so two different rules matching the same element (e.g. one setting
      * translate, a more specific one setting rotate) can still combine -- see
      * expand_transform's comment. A box with any field set (even to an identity
      * value, e.g. translate(0,0) or scale(1)) still establishes a CSS stacking
-     * context per spec, independent of the actual value. transform-origin is not
-     * parsed; the pivot is always the box's own center (CSS's initial value,
-     * 50% 50%). */
+     * context per spec, independent of the actual value.
+     * M1.2c (2026-07-19): transform_skx/sky are skew()/skewX()/skewY() in whole
+     * DEGREES (same grammar as rotate); matrix(a,b,c,d,e,f) is QR-decomposed at
+     * parse time into ALL seven slots (singular matrices fail closed);
+     * transform_ox/oy are transform-origin as PERCENTS of the box
+     * (CSS_LEN_UNSET = the CSS default 50% center; keywords and % only, px
+     * lengths fail closed). transform-origin alone is inert: it neither forms
+     * a stacking context nor registers a box. */
     int         transform_tx, transform_ty;
     int         transform_sx, transform_sy;
     int         transform_rotate;
+    int         transform_skx, transform_sky;
+    int         transform_ox, transform_oy;
     /* animation-duration (Phase R1): parsed time in ms, 0 = unset/no-animation.
      * Other animation-* properties and @keyframes follow in Phase R1b. */
     int         anim_duration_ms;
@@ -646,6 +659,13 @@ typedef struct css_style {
      * hue-rotate 0..359 degrees. */
     int         filter_blur;
     int         filter_grayscale;
+    /* backdrop-filter: blur(Npx) (2026-07-19, glassmorphism v1). 0 = none.
+     * Parsed from the same lax function-list grammar as filter (unsupported
+     * functions in the list are ignored; -webkit-backdrop-filter aliases).
+     * Painted by blurring the already-painted backdrop under the box rect
+     * before the box's own (typically translucent) background composites on
+     * top. See spec/compositor.md. */
+    int         backdrop_blur;
     int         filter_brightness;
     int         filter_contrast;
     int         filter_sepia;
@@ -670,6 +690,11 @@ typedef struct css_media {
 } css_media;
 
 #define CSS_MEDIA_DEFAULT_WIDTH 1920
+/* Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop,
+ * the top fp_bucket_screen bucket). vw/vh/vmin/vmax lengths resolve against this
+ * fixed 1920x1080 viewport at parse time, so a hostile stylesheet never learns
+ * real window geometry (anti-fingerprinting; see spec/css.md "Viewport units"). */
+#define CSS_MEDIA_DEFAULT_HEIGHT 1080
 
 /* Parses a <style> text (one or many blocks concatenated) into *out. Malformed
  * input never fails: unparseable rules are skipped. text == NULL is treated as

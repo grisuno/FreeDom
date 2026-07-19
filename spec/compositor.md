@@ -162,10 +162,63 @@ void cx_sort(cx_item *items, size_t n);                   /* orden de pintado, e
   resolución de ancestros `overflow:hidden`) sigue resolviendo contra el rect ORIGINAL sin
   transformar — transformar el hit-test sigue siendo trabajo futuro explícito, no cubierto por
   "M1.2b transform" tampoco.
+- ~~`skew()`/`matrix()`/`transform-origin`~~ **CERRADO** M1.2c (2026-07-19):
+  - `skew(ax[, ay])`/`skewX()`/`skewY()` parsean con `parse_rotate_deg` (grados ENTEROS, sufijo
+    `deg` obligatorio, igual que `rotate()`; otro formato falla cerrado la declaración completa).
+    Slots de cascada independientes `P_TRANSFORM_SKX`/`P_TRANSFORM_SKY`; `skew(a)` emite ambos
+    (`skx=a`, `sky=0`, como `translate(x)`→`(x,0)`), `skewX`/`skewY` emiten solo su eje. El painter
+    aplica la cizalla como matriz `K = [[1, tan(skx)], [tan(sky), 1]]` DESPUÉS de la escala en el
+    pipeline pivotado (`T·P·R·S·K·P⁻¹`). **Guarda anti-degenerado en paint:** si `tan()` no es
+    finito o `|tan| > 1e3` (ángulos ≅ 90° mod 180°), esa cizalla se trata como 0 (identidad) — un
+    skew degenerado colapsa la caja a una línea en navegadores reales; aquí degrada a identidad,
+    nunca a coordenadas no finitas dentro de Cairo.
+  - `matrix(a,b,c,d,e,f)`: 6 números unitless separados por comas. Se DESCOMPONE en parse (QR) a
+    los slots existentes: `tx=e`, `ty=f`, `rotate=atan2(b,a)`, `sx=hypot(a,b)`, `sy=det/hypot`,
+    `skx=atan((a·c+b·d)/(a²+b²))`, `sky=0` — todos redondeados a la resolución de su slot (grados
+    enteros / percent entero / px entero; pérdida de precisión documentada, coherente con la
+    convención de grados enteros de `rotate()`). `hypot(a,b)==0` o `det==0` (matriz singular) falla
+    cerrado. Emite los 7 slots (una `matrix()` es una transformación completa, no compone con
+    funciones sueltas de otra regla — los slots que "pisa" son exactamente la semántica de cascada).
+  - `transform-origin`: 1–2 valores; keywords (`left`/`center`/`right` eje X, `top`/`center`/
+    `bottom` eje Y, orden intercambiable cuando ambos son keywords) y porcentajes (clamp
+    `[-1000,1000]`). Longitudes `px` fallan cerrado (v1: el parser no conoce el tamaño de la caja).
+    Un valor: fija X, Y=50%. Slots `P_TRANSFORM_OX`/`_OY` (percent; `CSS_LEN_UNSET` = 50% centro,
+    el default de CSS). El pivote del painter pasa de "centro fijo" a
+    `(x + w·ox/100, y + h·oy/100)`. `transform-origin` SOLO (sin función de transform) es inerte:
+    no dispara contexto de apilamiento ni registro de caja (un origin sin transform no pinta nada
+    distinto, exactamente como en CSS).
+  - `cx_style.has_transform` y el predicado de registro de caja de `page_view` incluyen
+    `skx`/`sky` (no `ox`/`oy`). IPC: 4 campos int32 nuevos al final del array de caja
+    (`tab.c` `f[146..149]`, write/read simétricos). `pv_box_def` crece 4 ints (ABI: `make clean`).
+  - Sigue fuera de alcance: encadenado de múltiples funciones en UNA declaración (`v1 allows one
+    function only`; `matrix()` cubre el caso compuesto), keyframes de skew en `@keyframes`, y el
+    hit-testing transformado (sin cambios: clic/cursor resuelven contra el rect sin transformar).
+- **`backdrop-filter: blur(Npx)` (2026-07-19, glassmorphism v1):** la propiedad (y su alias
+  `-webkit-backdrop-filter`, ubicuo por herencia Safari) parsea su lista de funciones con la misma
+  gramática laxa de `filter` (tokens separados por espacio; funciones no soportadas se ignoran;
+  `url()` y `none` ⇒ nada) pero v1 consume **solo `blur(Npx)`** → `css_style.backdrop_blur`
+  (px, 0 = sin efecto, clamp 256 en paint como `filter: blur`). **Dado** un header translúcido con
+  `backdrop-filter: blur(8px)` sobre contenido ya pintado **cuando** se pinta la caja **entonces**
+  el painter (a) fuerza contexto de apilamiento (como `filter`), y (b) ANTES del
+  `cairo_push_group` de ese contexto captura del target actual el rect de la caja (bounding box en
+  device, expandido por el radio), lo desenfoca con `bui_box_blur_surface` (el MISMO blur de
+  `filter`) y lo repinta recortado al rect de la caja (respetando `border-radius`); el fondo
+  translúcido de la caja compone encima ⇒ vidrio esmerilado real. Fallback documentado: si el
+  target no es una surface de imagen (export PDF vectorial), el backdrop se omite (la caja pinta
+  normal, sin blur detrás — degradación, nunca error). El backdrop muestreado es el contenido del
+  grupo/surface actual (para una caja dentro de un SC anidado, su backdrop es ese grupo — mismo
+  espíritu que el scope de backdrop del spec CSS). IPC: 1 int32 nuevo (`f[150]`), `pv_box_def`
+  crece 1 int (ABI: `make clean`). Funciones de color (`brightness`/`saturate`/…) sobre el
+  backdrop quedan para un incremento posterior. Tres cierres boy-scout que el vidrio necesitaba
+  (2026-07-19): (a) **alfa de fondo** — `rgba()`/`hsla()` conservan su 4º componente en
+  `bg_alpha` (percent, `CSS_LEN_UNSET` = opaco; ver spec/css.md) y el fill de fondo de caja lo
+  multiplica; (b) **dedup del fondo de fila** — una fila cuyo `bg_rgb` cascadea el MISMO color que
+  el fondo de su caja dueña no repinta su banda (la caja ya cubrió el área; antes esa banda opaca
+  de ancho completo tapaba paneles translúcidos y cajas estrechas por igual); (c) **altura de
+  autor out-of-flow** — `position_doc` honra `box_h`/`box_min_h` del box def para cajas
+  absolute/fixed antes de caer a la altura medida de una línea.
 - `filter`/`will-change` como disparadores de contexto: se añaden a `cx_style` en M1.4 (campos
-  nuevos, el contrato no cambia). `skew()`/`matrix()` de `transform`, encadenado de múltiples
-  funciones en una declaración y `transform-origin` quedan para un incremento posterior (necesitan
-  una matriz Cairo arbitraria/no pivotable o multiplicación de matrices en cascada, respectivamente).
+  nuevos, el contrato no cambia).
 - Contención (`contain`) y `perspective` como disparadores: futuros.
 - Ordenar la geometría o decidir clipping/overflow (eso sigue en `box_tree`/painter).
 - **Árbol de capas anidado real** (contextos de apilamiento DENTRO de otros contextos,
