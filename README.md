@@ -83,7 +83,7 @@ telemetry, mandatory API keys, or hidden solver workers. We refuse to do so.
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
-### Modern Web Rendering (R1-R8 — July 2026)
+### Modern Web Rendering (18 July 2026)
 
 A modernization push across eight phases delivered a rendering engine comparable
 to modern browsers for trusted hosts (hosts present in both `allow.conf` and
@@ -220,7 +220,7 @@ walk is deferred to a follow-up.
   `decoder_out_fd` correctly uses `F_GETFL`/`O_NONBLOCK` — ensuring reliable
   frame delivery from the FFmpeg decoder in the worker.
 
-## Current Status (July 16, 2026)
+## Current Status (July 18, 2026)
 
 - Advanced HTML rendering with box model, flex/grid, margin collapsing
 - Clickable links + image support (PNG + JPEG + WebP + static GIF)
