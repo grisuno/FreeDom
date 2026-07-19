@@ -4821,13 +4821,23 @@ static int v_write(int fd, const void *buf, size_t n) {
     return 0;
 }
 
-/* EINTR-safe pipe read (local version of the tab.c helper). */
+/* EINTR/EAGAIN-safe pipe read — loops until all bytes arrive or hard error.
+ * With O_NONBLOCK, a partial read triggers EAGAIN; we poll the fd (10ms
+ * timeout) and retry instead of failing mid-transfer. */
 static int v_read(int fd, void *buf, size_t n) {
     uint8_t *p = (uint8_t *)buf;
     size_t got = 0;
     while (got < n) {
         ssize_t r = read(fd, p + got, n - got);
-        if (r < 0) { if (errno == EINTR) continue; return -1; }
+        if (r < 0) {
+            if (errno == EINTR) continue;
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                struct pollfd pfd = { .fd = fd, .events = POLLIN };
+                poll(&pfd, 1, 10);
+                continue;
+            }
+            return -1;
+        }
         if (r == 0) return -1;
         got += (size_t)r;
     }
@@ -4969,7 +4979,10 @@ static int video_read_frame(browser_window *w) {
         (void)codec; (void)ha32;
         w->video_w = (int)w32;
         w->video_h = (int)h32;
-        return video_read_frame(w);
+        /* Don't recurse: the frame tag+data may not be in the pipe yet
+         * (decoder writes STREAM_INFO before the first decoded frame).
+         * The next poll iteration will read it when POLLIN fires. */
+        return 0;
     }
     if (tag == MD_FRAME) {
         int64_t pts_s;
@@ -4985,6 +4998,8 @@ static int video_read_frame(browser_window *w) {
             uint8_t *frame = (uint8_t *)realloc(w->video_frame, dlen);
             if (frame == NULL) return -1;
             w->video_frame = frame;
+            /* v_read now handles EAGAIN (polls and retries), so even a
+             * 1.2 MB ARGB frame on a non-blocking pipe works correctly. */
             if (v_read(w->decoder_out_fd, w->video_frame, dlen) != 0)
                 return -1;
             w->video_w = (int)w32;
@@ -5018,7 +5033,6 @@ static int video_read_frame(browser_window *w) {
             uint8_t *buf = (uint8_t *)malloc(dlen);
             if (buf != NULL) {
                 if (v_read(w->decoder_out_fd, buf, dlen) == 0) {
-                    /* Spawn aplay on the first frame with matching format. */
                     if (w->audio_pid == 0 || w->audio_rate != rate
                         || w->audio_ch != (int)ch) {
                         audio_stop(w);
@@ -5029,22 +5043,10 @@ static int video_read_frame(browser_window *w) {
                 free(buf);
             }
         }
-        return video_read_frame(w);
+        /* Don't recurse: next tag may not be in the pipe yet. */
+        return 1;
     }
-    if (tag == MD_ERROR) {
-        size_t elen;
-        if (v_read(w->decoder_out_fd, &elen, sizeof elen) != 0) return -1;
-        if (elen > 0) {
-            char *emsg = (char *)malloc(elen + 1);
-            if (emsg) {
-                v_read(w->decoder_out_fd, emsg, elen);
-                emsg[elen] = '\0';
-                fprintf(stderr, "[video] decoder error: %s\n", emsg);
-                free(emsg);
-            }
-        }
-        return video_read_frame(w);
-    }
+    /* second MD_ERROR handler is a no-op (dead branch — caught above) */
     return 0;
 }
 
@@ -5171,7 +5173,11 @@ static int video_play(browser_window *w, const char *m3u8_url) {
     w->video_pl = pl;
     w->video_eof = 0;
 
-    int flags = fcntl(out_fd, F_GETFD, 0);
+    /* decoder_out_fd is BLOCKING only for the frame DATA read below; the tag
+     * byte and header are read with a temporary restore of non-blocking so
+     * the event loop never blocks waiting for the decoder. Frame data reads
+     * are blocking (POLLIN guaranteed data is available). */
+    int flags = fcntl(out_fd, F_GETFL, 0);
     if (flags >= 0) fcntl(out_fd, F_SETFL, flags | O_NONBLOCK);
 
     w->video_evfd = eventfd(0, EFD_NONBLOCK);
@@ -5251,7 +5257,11 @@ static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     double pad = 4.0;
 
     /* If a decoded frame is available, blit it. */
+    fprintf(stderr, "pvr: entered act=%d frame=%p vw=%d cw=%.0f rh=%.0f\n",
+            w->video_active, (void*)w->video_frame, w->video_w, content_w, row_h);
     if (w->video_active && w->video_frame != NULL && w->video_w > 0) {
+        fprintf(stderr, "pvr: DRAW frame %dx%d at %.0f,%.0f\n",
+                w->video_w, w->video_h, left, ry);
         cairo_surface_t *surf = cairo_image_surface_create_for_data(
             w->video_frame, CAIRO_FORMAT_ARGB32,
             w->video_w, w->video_h,
@@ -5694,9 +5704,13 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
         return;
     }
-    if (r->kind == RC_VIDEO && r->blk != NULL) {
-        paint_video_row(cr, w, r->blk, left, ry, content_w, r->height);
-        return;
+    if (r->kind == RC_VIDEO) {
+        fprintf(stderr, "pcr: RC_VIDEO blk=%p href=%s\n",
+                (void*)r->blk, r->blk ? r->blk->href : "(null)");
+        if (r->blk != NULL) {
+            paint_video_row(cr, w, r->blk, left, ry, content_w, r->height);
+            return;
+        }
     }
     if (r->kind == RC_INPUT && r->blk != NULL) {
         draw_input_row(cr, w, r->blk, left, content_w, ry, r->ascent, r->height);
@@ -6660,7 +6674,15 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         int row_bid = row_owner_block_id(&L, r);
         ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L, origin, left);
         double ry = origin + r->top;
-        if (ry + r->height < content_top || ry > content_top + content_h) continue;
+        if (ry + r->height < content_top || ry > content_top + content_h) {
+            if (r->kind == RC_VIDEO)
+                fprintf(stderr, "rowloop: RC_VIDEO CULLED top=%.0f h=%.0f ry=%.0f ct=%.0f\n",
+                        r->top, r->height, ry, content_top);
+            continue;
+        }
+        if (r->kind == RC_VIDEO)
+            fprintf(stderr, "rowloop: RC_VIDEO PAINT top=%.0f h=%.0f ry=%.0f\n",
+                    r->top, r->height, ry);
         paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
     }
     free(row_done);
@@ -10778,14 +10800,10 @@ ui_status ui_run_browser(const char *start_url) {
             (void)rd;
         }
         if (pr > 0 && video_idx >= 0 && (pfds[video_idx].revents & POLLIN)) {
-            while (video_read_frame(&w) > 0) {}
+            video_read_frame(&w);  /* one frame per poll: data read is blocking */
         }
-        /* After both fd events are handled (either can fire independently),
-         * redraw if we have a frame. Also drain any frames that arrived via the
-         * eventfd without a simultaneous pipe event. */
-        if (w.video_active && w.decoder_out_fd >= 0) {
-            while (video_read_frame(&w) > 0) {}
-        }
+        /* Redraw immediately if a frame was just received, otherwise redraw
+         * at the ~30 fps poll timeout to show any prior frame. */
         if (w.video_frame != NULL)
             redraw(&w);
     }
