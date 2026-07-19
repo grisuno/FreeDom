@@ -241,6 +241,13 @@ walk is deferred to a follow-up.
   audio writes to `aplay` are non-blocking best-effort (the UI thread can never
   freeze on a full audio pipe). Verified end-to-end: 3 HLS segments in, 150/150
   frames out, monotonic PTS, clean EOS.
+- **Repaint decoupled from the media pipeline (v2.1):** repainting per received
+  frame let a slow full-window software repaint drag the whole pipeline (audio
+  included) below real time. Video now repaints at most once per 3x its own
+  measured paint cost (33 ms floor): light pages play at full rate, heavy pages
+  degrade to a slideshow while the timeline and the audio stay real-time
+  (skipped frames drop by overwrite, like any player). The `aplay` pipe carries
+  a ~1 MiB cushion so catch-up bursts are re-timed, not dropped.
 - **Modern `<video>`/`<audio>` element surface:** multiple `<source>` children
   are selected by `type` (HLS/MPEG-TS/MP4 preferred), fallback content inside
   media elements is suppressed (the element renders instead), and page JS gets

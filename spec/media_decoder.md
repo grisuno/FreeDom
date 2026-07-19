@@ -73,14 +73,57 @@ uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms, int64_t pts_us);
 
 Bucle de eventos: el fd del decoder solo entra al `poll()` cuando
 `now >= due`; si falta tiempo, el timeout del poll se acota a `due - now`
-(≤ 33 ms de granularidad ya existente). Con `POLLIN` y due vencido se leen
-hasta `MD_MAX_CATCHUP_READS` (4) frames por iteración (drenaje de atraso).
+(≤ 33 ms de granularidad ya existente). Con `POLLIN` y due vencido se drena:
+**solo los frames de VIDEO cuentan** contra el tope `MD_MAX_CATCHUP_READS`
+(4) — audio/info/error fluyen siempre (contarlos mataba de hambre a aplay,
+v2.1). Un frame leído atrasado sobrescribe el slot retenido (frame-drop
+estándar de player); el drenaje para en el primer frame agendado a futuro.
+
+**Pintado desacoplado del drenaje (v2.1, 2026-07-19).** Repintar por cada
+frame recibido hacía que el repaint software de ventana completa (que puede
+costar varios intervalos de frame en páginas pesadas) dominara el tiempo de
+pared: TODO el pipeline —audio incluido— corría muy por debajo de tiempo
+real, lo que se oye como silencio (ráfagas de ~23 ms con huecos de cientos
+de ms). **Dado** un frame recibido **cuando** el último repaint de video
+costó `C` ms **entonces** se repinta como máximo una vez cada `max(33, 3C)`
+ms: páginas livianas pintan a tasa completa (~30 fps), páginas pesadas
+degradan a slideshow **manteniendo la línea de tiempo y el audio a tiempo
+real** (los frames no pintados se descartan por sobrescritura, jamás
+retrasan el reloj). Verificado con el simulador del consumidor
+(`gui_sim`): con repaint de 5/60/300 ms, un stream de 6 s consume en
+~6.5 s de pared con **100 % del PCM entregado** al sink en los tres casos
+(la lógica v2.0 con repaint de 300 ms tardaba >30 s y entregaba audio a
+0.13× — el "no se escucha").
 
 ## Audio
 
-`aplay` (S16LE raw) consume a tiempo real por su cuenta. El fd hacia aplay es
-**O_NONBLOCK** y `audio_write` es **best-effort**: lo que no cabe se descarta
-(con pacing el productor va a ~tiempo real, así que el descarte es raro).
+El sink de PCM (S16LE raw) consume a tiempo real por su cuenta y se elige en
+**orden daemon-primero** (v2.2, 2026-07-19): `pw-play` (PipeWire) →
+`paplay` (PulseAudio) → `aplay` (ALSA crudo, último recurso). Racional:
+en un escritorio el dispositivo ALSA lo retiene el servidor de sonido, así
+que `aplay` directo muere con "Device or resource busy" (la causa literal
+del reporte "no se escucha"; solo sonaba cuando el servidor tenía el
+dispositivo suspendido por inactividad). `pw-play`/`paplay` hablan con el
+daemon y nunca compiten por el hardware.
+
+- **Dado** un sink cuyo hijo muere (exec fallido, dispositivo ocupado,
+  daemon ausente) **cuando** la siguiente escritura PCM devuelve un error
+  duro (`EPIPE`) **entonces** se cosecha el hijo (`SIGKILL`+`waitpid`), la
+  rotación avanza al siguiente sink y el respawn se reintenta con backoff
+  de 2 s — el navegador converge al sink que el sistema realmente tiene y
+  se recupera si muere en caliente. `EAGAIN` (pipe lleno) NO es muerte:
+  se descarta el resto del frame y se sigue.
+- **Dado** un respawn propio (cambio de rate/canales o parada) **cuando** se
+  detiene el sink anterior **entonces** `audio_stop` usa `SIGKILL` +
+  `waitpid` **bloqueante**: el hijo viejo debe soltar el dispositivo ANTES
+  de que el nuevo lo abra (el reap `WNOHANG` de v1 dejaba al viejo vivo lo
+  justo para que el nuevo fallara con "busy").
+
+El fd hacia el sink es **O_NONBLOCK** y `audio_write` es **best-effort**:
+lo que no cabe se descarta (con pacing el productor va a ~tiempo real, así
+que el descarte es raro). El pipe se agranda a ~1 MiB (`F_SETPIPE_SZ`,
+~6 s de PCM 44.1 kHz estéreo, best-effort): las ráfagas de catch-up se
+absorben y el sink las re-temporiza en vez de descartarse (v2.1).
 **Dado** un pipe de audio lleno **cuando** la GUI escribe PCM **entonces**
 NUNCA se bloquea el hilo de UI (v2; antes el `write` bloqueante congelaba todo
 el navegador a los ~2 s: aplay drena 176 KB/s pero el decoder producía PCM a
@@ -109,6 +152,19 @@ velocidad de decode — ese era el "solo reproduce un par de segundos").
    siguiente. Verificado E2E: 3 segmentos HLS de 2 s ⇒ 150/150 frames,
    PTS µs monotónico, `MD_EOS` (harness con feeder separado — alimentar y
    leer desde el mismo hilo se atasca por la contrapresión del diseño).
+7. **(v2.1) Repaint por frame ahogaba el pipeline** ("antes sonaba, ahora
+   no"): la v2.0 repintaba la ventana completa por cada frame recibido; con
+   repaints lentos el consumo caía muy por debajo de tiempo real y el audio
+   (best-effort, ya sin el write bloqueante de v1 que "garantizaba" entrega
+   congelando la UI) quedaba inaudible. Fix: tope de catch-up solo para
+   video, pintado limitado a `max(33, 3×costo_medido)` ms y pipe de aplay
+   de 1 MiB. Ver §Pacing.
+8. **(v2.2) `aplay` moría al nacer con "Device or resource busy"** (el
+   dispositivo ALSA lo retiene PipeWire en el escritorio) y nadie detectaba
+   la muerte (`audio_pid` quedaba apuntando a un muerto ⇒ silencio
+   permanente). Fix: cadena de sinks daemon-primero `pw-play`→`paplay`→
+   `aplay` con rotación al detectar `EPIPE`, backoff de 2 s, y
+   `audio_stop` con `SIGKILL`+`waitpid` bloqueante. Ver §Audio.
 
 ## Superficie HTML/JS/CSS del elemento (2026-07-19)
 

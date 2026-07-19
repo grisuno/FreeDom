@@ -493,12 +493,16 @@ typedef struct browser_window {
     int           video_evfd;      /* eventfd: feeder thread → main thread wake */
     md_pacer      video_pacer;     /* pure PTS→wall-clock pacing brain */
     uint64_t      video_due_ms;    /* when the last-read frame is due on screen */
+    uint64_t      video_last_paint_ms; /* paint rate limiter: last video repaint */
+    uint64_t      video_paint_cost_ms; /* measured cost of that repaint */
     /* Audio output: aplay subprocess for PCM S16LE playback. Spawned on first
      * audio frame, killed on video_stop. */
-    pid_t         audio_pid;       /* aplay child PID, 0 = not running */
-    int           audio_fd;        /* write end of pipe to aplay stdin, -1 = none */
+    pid_t         audio_pid;       /* audio sink child PID, 0 = not running */
+    int           audio_fd;        /* write end of pipe to the sink's stdin, -1 = none */
     int           audio_rate;      /* sample rate of current stream */
     int           audio_ch;        /* channel count of current stream */
+    int           audio_sink_idx;  /* 0=pw-play 1=paplay 2=aplay; rotates on death */
+    uint64_t      audio_retry_ms;  /* no respawn before this instant (backoff) */
 
     /* Mouse event dispatch (Phase 1.2). Caches the DOM node under the pointer for
      * mouseover/mouseout detection between motion events. DOM_NODE_NONE = no hover. */
@@ -4925,10 +4929,28 @@ static int v_read(int fd, void *buf, size_t n) {
     return 0;
 }
 
-/* --- Audio output helpers (PCM S16LE via aplay) --- */
+/* --- Audio output helpers (PCM S16LE via pw-play / paplay / aplay) ---
+ *
+ * The sink is tried in daemon-first order: pw-play (PipeWire) and paplay
+ * (PulseAudio) talk to the sound server and never contend for the ALSA
+ * device; raw aplay is the LAST resort because on a desktop the hardware
+ * device is usually held by the sound server ("Device or resource busy" —
+ * the literal cause of the silent-audio report; it only ever worked when
+ * the server happened to have the device idle-suspended). A sink whose
+ * child dies (exec failed, device busy, daemon absent) is detected on the
+ * next PCM write (EPIPE), the rotation advances to the next sink, and the
+ * respawn is retried with a 2 s backoff — so the browser converges on
+ * whichever sink this system actually has, and recovers if it dies. */
+
+static const char *audio_sink_name(int idx) {
+    return idx == 0 ? "pw-play" : idx == 1 ? "paplay" : "aplay";
+}
 
 static void audio_spawn(browser_window *w, int rate, int channels) {
     if (w == NULL) return;
+    uint64_t now = now_ms();
+    if (now < w->audio_retry_ms) return; /* backoff after a dead sink */
+    w->audio_retry_ms = now + 2000;
     audio_stop(w);
     w->audio_rate = rate;
     w->audio_ch = channels;
@@ -4937,42 +4959,64 @@ static void audio_spawn(browser_window *w, int rate, int channels) {
     pid_t pid = fork();
     if (pid < 0) { close(p[0]); close(p[1]); return; }
     if (pid == 0) {
-        /* Child: exec aplay with the correct PCM format. Close all inherited
-         * file descriptors (especially the Wayland display fd) so aplay does
-         * not corrupt the Wayland protocol connection — the most common cause
-         * of the "page flashes white and render loops" bug on video click. */
+        /* Child: exec the selected sink. Close all inherited file
+         * descriptors (especially the Wayland display fd) so the sink does
+         * not corrupt the Wayland protocol connection — the most common
+         * cause of the "page flashes white and render loops" bug. */
         close(p[1]);   /* close write end */
         dup2(p[0], 0); /* redirect stdin to pipe read end */
         close(p[0]);
-        /* Close every fd >= 3 to prevent Wayland fd sharing. */
         int max_fd = (int)sysconf(_SC_OPEN_MAX);
         if (max_fd < 256) max_fd = 256;
         for (int fd = 3; fd < max_fd; ++fd) close(fd);
-        char rate_str[16], ch_str[16];
+        char rate_str[16], ch_str[16], rate_eq[24], ch_eq[24];
         snprintf(rate_str, sizeof rate_str, "%d", rate);
         snprintf(ch_str, sizeof ch_str, "%d", channels);
-        execlp("aplay", "aplay",
-               "-r", rate_str, "-c", ch_str,
-               "-f", "S16_LE",
-               "-t", "raw",
-               "-q",
-               (char *)NULL);
+        snprintf(rate_eq, sizeof rate_eq, "--rate=%d", rate);
+        snprintf(ch_eq, sizeof ch_eq, "--channels=%d", channels);
+        if (w->audio_sink_idx == 0)
+            execlp("pw-play", "pw-play", "--raw", "--rate", rate_str,
+                   "--channels", ch_str, "--format", "s16", "-", (char *)NULL);
+        else if (w->audio_sink_idx == 1)
+            execlp("paplay", "paplay", "--raw", rate_eq, ch_eq,
+                   "--format=s16le", (char *)NULL);
+        else
+            execlp("aplay", "aplay", "-r", rate_str, "-c", ch_str,
+                   "-f", "S16_LE", "-t", "raw", "-q", (char *)NULL);
         _exit(127);
     }
-    /* Parent. The pipe to aplay is NON-BLOCKING: a full pipe must NEVER
+    /* Parent. The pipe to the sink is NON-BLOCKING: a full pipe must NEVER
      * stall the Wayland thread (v1's blocking write froze the whole browser
-     * a couple of seconds in — aplay drains at real time but the decoder
-     * produced PCM at decode speed). */
+     * a couple of seconds in). Enlarged to ~1 MiB (~6 s of 44.1 kHz stereo
+     * PCM) so catch-up bursts are absorbed and re-timed by the sink instead
+     * of dropped; best-effort. */
     close(p[0]);
+    (void)fcntl(p[1], F_SETPIPE_SZ, 1 << 20);
     int fl = fcntl(p[1], F_GETFL, 0);
     if (fl >= 0) fcntl(p[1], F_SETFL, fl | O_NONBLOCK);
     w->audio_pid = pid;
     w->audio_fd = p[1];
 }
 
+/* Reaps a dead sink child and advances the rotation so the next spawn tries
+ * the next player. Called when a PCM write hits a hard error (EPIPE). */
+static void audio_mark_dead(browser_window *w) {
+    fprintf(stderr, "audio: sink %s died, will try %s\n",
+            audio_sink_name(w->audio_sink_idx),
+            audio_sink_name((w->audio_sink_idx + 1) % 3));
+    if (w->audio_fd >= 0) { close(w->audio_fd); w->audio_fd = -1; }
+    if (w->audio_pid > 0) {
+        kill(w->audio_pid, SIGKILL);
+        waitpid(w->audio_pid, NULL, 0);
+        w->audio_pid = 0;
+    }
+    w->audio_sink_idx = (w->audio_sink_idx + 1) % 3;
+}
+
 /* Best-effort PCM write: whatever does not fit in the pipe is dropped (with
  * PTS pacing the producer runs at ~real time, so drops are rare). Never
- * blocks the UI thread. */
+ * blocks the UI thread. A hard error (EPIPE: the sink is gone) reaps the
+ * child and rotates the sink; the next audio frame respawns under backoff. */
 static void audio_write(browser_window *w, const uint8_t *data, size_t len) {
     if (w == NULL || w->audio_fd < 0 || data == NULL || len == 0) return;
     size_t done = 0;
@@ -4980,7 +5024,9 @@ static void audio_write(browser_window *w, const uint8_t *data, size_t len) {
         ssize_t wr = write(w->audio_fd, data + done, len - done);
         if (wr < 0) {
             if (errno == EINTR) continue;
-            return; /* EAGAIN (full pipe) or dead aplay: drop the rest */
+            if (errno == EAGAIN || errno == EWOULDBLOCK) return; /* full: drop */
+            audio_mark_dead(w);
+            return;
         }
         done += (size_t)wr;
     }
@@ -4993,8 +5039,13 @@ static void audio_stop(browser_window *w) {
         w->audio_fd = -1;
     }
     if (w->audio_pid > 0) {
-        kill(w->audio_pid, SIGTERM);
-        waitpid(w->audio_pid, NULL, WNOHANG);
+        /* SIGKILL + blocking reap: a raw-PCM player holds no state worth a
+         * graceful shutdown, and the old child MUST release the device
+         * before a respawn opens it again (the WNOHANG reap left the old
+         * process alive long enough to make the new one fail with "Device
+         * or resource busy"). Death is immediate, so the wait is too. */
+        kill(w->audio_pid, SIGKILL);
+        waitpid(w->audio_pid, NULL, 0);
         w->audio_pid = 0;
     }
     w->audio_rate = 0;
@@ -5047,6 +5098,8 @@ static void video_stop(browser_window *w) {
     w->video_eof = 0;
     memset(&w->video_pacer, 0, sizeof w->video_pacer);
     w->video_due_ms = 0;
+    w->video_last_paint_ms = 0;
+    w->video_paint_cost_ms = 0;
 }
 
 /* Reads one decoder message from the pipe. Returns 2 when a video frame was
@@ -7139,15 +7192,8 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         int row_bid = row_owner_block_id(&L, r);
         ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L, origin, left);
         double ry = origin + r->top;
-        if (ry + r->height < content_top || ry > content_top + content_h) {
-            if (r->kind == RC_VIDEO)
-                fprintf(stderr, "rowloop: RC_VIDEO CULLED top=%.0f h=%.0f ry=%.0f ct=%.0f\n",
-                        r->top, r->height, ry, content_top);
+        if (ry + r->height < content_top || ry > content_top + content_h)
             continue;
-        }
-        if (r->kind == RC_VIDEO)
-            fprintf(stderr, "rowloop: RC_VIDEO PAINT top=%.0f h=%.0f ry=%.0f\n",
-                    r->top, r->height, ry);
         paint_content_row(cr, w, &L, r, left, ry, content_w, (double)w->width, 1);
     }
     free(row_done);
@@ -10933,6 +10979,7 @@ ui_status ui_run_browser(const char *start_url) {
     memset(&w, 0, sizeof w);
     w.decoder_cmd_fd = -1;
     w.decoder_out_fd = -1;
+    w.audio_fd = -1;
     w.width = 900;
     w.height = 700;
     w.running = 1;
@@ -11274,22 +11321,43 @@ ui_status ui_run_browser(const char *start_url) {
             (void)rd;
         }
         if (pr > 0 && video_idx >= 0 && (pfds[video_idx].revents & POLLIN)) {
-            /* Drain up to MD_MAX_CATCHUP_READS frames while they are overdue
-             * (backlog catch-up); stop at the first frame scheduled in the
-             * future — it paints when its due time arrives (poll timeout). */
-            int got_frame = 0;
-            for (int k = 0; k < MD_MAX_CATCHUP_READS; ++k) {
+            /* Drain decoder messages. Only VIDEO frames count toward the
+             * catch-up cap — audio/info messages are small and must always
+             * flow (counting them starved aplay). A video frame read while
+             * overdue overwrites the held slot (standard player frame drop);
+             * the drain stops at the first frame scheduled in the future. */
+            int got_frame = 0, vcount = 0;
+            for (;;) {
                 int vr = video_read_frame(&w);
                 if (vr < 0 || vr == 0) break;
                 if (vr == 2) {
                     got_frame = 1;
-                    if (w.video_due_ms > now_ms()) break;
+                    vcount++;
+                    if (w.video_due_ms > now_ms()) break; /* caught up */
+                    if (vcount >= MD_MAX_CATCHUP_READS) break;
                 }
                 struct pollfd vp = { .fd = w.decoder_out_fd,
                                      .events = POLLIN, .revents = 0 };
                 if (poll(&vp, 1, 0) <= 0 || !(vp.revents & POLLIN)) break;
             }
-            if (got_frame) redraw(&w);
+            /* Paint decoupled from the drain: a full-window software repaint
+             * can cost several frame intervals, and repainting per received
+             * frame made the repaint dominate wall time — the whole pipeline
+             * (audio included) then ran far below real time, which the user
+             * hears as silence. At most one video repaint per 3x its own
+             * measured cost (floor 33 ms = the existing ~30 fps ceiling):
+             * cheap pages paint at full rate, heavy pages degrade to a
+             * slideshow while audio and the paced timeline stay real-time. */
+            if (got_frame) {
+                uint64_t pnow = now_ms();
+                uint64_t gap = w.video_paint_cost_ms * 3;
+                if (gap < 33) gap = 33;
+                if (pnow - w.video_last_paint_ms >= gap) {
+                    redraw(&w);
+                    w.video_paint_cost_ms = now_ms() - pnow;
+                    w.video_last_paint_ms = pnow;
+                }
+            }
         }
     }
 
