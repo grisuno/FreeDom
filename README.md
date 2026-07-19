@@ -261,8 +261,14 @@ walk is deferred to a follow-up.
 - Advanced HTML rendering with box model, flex/grid, margin collapsing
 - Clickable links + image support (PNG + JPEG + WebP + static GIF)
 - Inline `data:` images with zero network request
-- CSS `background-image` with `linear-gradient()`, `radial-gradient()`, and
+- CSS `background-image` with `linear-gradient()`, `radial-gradient()`,
+  `conic-gradient()` (128-sector fan, `from <deg>`, stop positions in `%`/`deg`,
+  two-position stops = hard edges for pies/stripes), and
   `url(...)` (fetched/decoded under same policy as `<img>`)
+- Gradient text: `background-clip: text` / `-webkit-background-clip: text` +
+  `-webkit-text-fill-color: transparent` fills glyphs with the element gradient
+- `filter: drop-shadow(dx dy blur color)` — shadow of the group's real alpha
+  silhouette (rounded cards, PNG transparency), not the box rect
 - `background-position`, `background-size`, `background-repeat`, multi-layer
 - `border-radius` on backgrounds, borders, shadows, and outlines
 - `box-sizing: border-box` honored

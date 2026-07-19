@@ -2777,6 +2777,11 @@ typedef struct rc_frag {
      * fragment (uppercase + scaled font when set; baked at flow time so the
      * layout/paint stay consistent). */
     int         font_variant; /* css_font_variant (small-caps etc.) */
+    /* Gradient text (2026-07-19): when grad_n >= 2 the painter fills the
+     * glyphs with a Cairo linear pattern spanning the row (continuous across
+     * fragments of one row) instead of the solid color. */
+    int         grad_n, grad_angle;
+    int         grad_c[4];
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT, RC_VIDEO } rc_rowkind;
@@ -3173,6 +3178,9 @@ typedef struct rc_ext {
     int    direction;      /* css_direction (carried; layout is still LTR) */
     int    font_variant;   /* css_font_variant */
     int    list_style_pos; /* css_list_pos */
+    /* Gradient text (2026-07-19): glyph fill gradient (n 0 = none). */
+    int    grad_n, grad_angle;
+    int    grad_c[4];
 } rc_ext;
 
 /* Emits one fragment at the current pen position, advancing it. Shared by the
@@ -3196,6 +3204,8 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->deco_color = x->deco_color; f->deco_style = x->deco_style;
         f->deco_thick = x->deco_thick;
         f->font_variant = x->font_variant;
+        f->grad_n = x->grad_n; f->grad_angle = x->grad_angle;
+        for (int gt = 0; gt < 4; ++gt) f->grad_c[gt] = x->grad_c[gt];
     }
     s->pen_x += width;
     if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
@@ -3417,6 +3427,10 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     x.direction = b->direction;
     x.font_variant = b->font_variant;
     x.list_style_pos = b->list_style_pos;
+    /* Gradient text (2026-07-19). */
+    x.grad_n = b->grad_text_n;
+    x.grad_angle = b->grad_text_angle;
+    for (int gt = 0; gt < 4; ++gt) x.grad_c[gt] = b->grad_text_c[gt];
     if (b->valign == CSS_VA_SUB)        { x.valign_dy =  size * 0.18; size *= 0.83; }
     else if (b->valign == CSS_VA_SUPER) { x.valign_dy = -size * 0.34; size *= 0.83; }
 
@@ -5560,6 +5574,94 @@ static void box_path(cairo_t *cr, double x, double y, double w, double h, double
  * when the four borders are uniform -- the border ring; mixed per-side borders keep
  * square corners. Content is not clipped to the rounded rect (v1). The box
  * decoration was gated behind caps.css upstream (render_doc). */
+/* Linear gradient pattern along the CSS angle (0 = to top, 90 = to right)
+ * across rect (x,y,w,h): the gradient line runs through the rect center, long
+ * enough that the first/last stops land on the corners. Stops at explicit
+ * 0-1000 positions (pos1000, -1 or NULL = evenly spaced); alpha 0..1 rides
+ * every stop. Caller owns (destroys) the pattern. Shared by the box background
+ * fill and gradient text (2026-07-19). */
+static cairo_pattern_t *bui_linear_grad(double x, double y, double w, double h,
+                                        int angle_deg, const int *cols,
+                                        const int *pos1000, int nst, double alpha) {
+    double a = (double)angle_deg * M_PI / 180.0;
+    double dx = sin(a), dy = -cos(a);
+    double half = (fabs(dx) * w + fabs(dy) * h) / 2.0;
+    double cx = x + w / 2.0, cy = y + h / 2.0;
+    cairo_pattern_t *pat = cairo_pattern_create_linear(
+        cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
+    if (nst > 4) nst = 4;
+    for (int k = 0; k < nst; ++k) {
+        ui_rgb sc = rgb_from_packed(cols[k] >= 0 ? cols[k] : 0);
+        double pos = (pos1000 != NULL && pos1000[k] >= 0)
+                   ? (double)pos1000[k] / 1000.0
+                   : (double)k / (double)(nst - 1);
+        cairo_pattern_add_color_stop_rgba(pat, pos, sc.r, sc.g, sc.b, alpha);
+    }
+    return pat;
+}
+
+/* Interpolated gradient color at fraction t (0..1) of the stop run. Stops sit
+ * at explicit 0-1000 positions or evenly spaced; positions are clamped
+ * non-decreasing (author order wins, like browsers); a zero-width segment is a
+ * hard edge. */
+static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
+                                double t) {
+    double p[4];
+    if (nst > 4) nst = 4;
+    for (int k = 0; k < nst; ++k) {
+        p[k] = (pos1000 != NULL && pos1000[k] >= 0)
+             ? (double)pos1000[k] / 1000.0
+             : (double)k / (double)(nst - 1);
+        if (k > 0 && p[k] < p[k - 1]) p[k] = p[k - 1];
+    }
+    if (t <= p[0]) return rgb_from_packed(cols[0] >= 0 ? cols[0] : 0);
+    for (int k = 0; k + 1 < nst; ++k) {
+        if (t > p[k + 1]) continue;
+        ui_rgb c0 = rgb_from_packed(cols[k] >= 0 ? cols[k] : 0);
+        ui_rgb c1 = rgb_from_packed(cols[k + 1] >= 0 ? cols[k + 1] : 0);
+        double span = p[k + 1] - p[k];
+        double u = (span > 0.0) ? (t - p[k]) / span : 1.0;
+        ui_rgb out = { c0.r + (c1.r - c0.r) * u,
+                       c0.g + (c1.g - c0.g) * u,
+                       c0.b + (c1.b - c0.b) * u };
+        return out;
+    }
+    return rgb_from_packed(cols[nst - 1] >= 0 ? cols[nst - 1] : 0);
+}
+
+#define BUI_CONIC_SLICES 128
+
+/* conic-gradient fill (2026-07-19): Cairo has no native conic pattern, so the
+ * rect is filled with BUI_CONIC_SLICES pie sectors interpolating the stops by
+ * turn fraction, starting at `from` (CSS: 0deg = 12 o'clock, clockwise),
+ * clipped by the border-radius path. Stops at 0-1000 turn-fraction positions
+ * or evenly spaced (bui_grad_color_at). */
+static void bui_paint_conic(cairo_t *cr, double x, double y, double w, double h,
+                            double rad_px, int from_deg, const int *cols,
+                            const int *pos1000, int nst) {
+    double cx = x + w / 2.0, cy = y + h / 2.0;
+    double R = sqrt(w * w + h * h) / 2.0 + 1.0;
+    cairo_save(cr);
+    box_path(cr, x, y, w, h, rad_px);
+    cairo_clip(cr);
+    for (int s = 0; s < BUI_CONIC_SLICES; ++s) {
+        double t0 = (double)s / BUI_CONIC_SLICES;
+        double t1 = (double)(s + 1) / BUI_CONIC_SLICES;
+        ui_rgb sc = bui_grad_color_at(cols, pos1000, nst, (t0 + t1) / 2.0);
+        /* CSS 0deg points up and runs clockwise; Cairo's y-down arc runs
+         * clockwise from the +x axis, so shift by -90deg. A hair of overlap on
+         * the closing edge hides antialiasing seams between sectors. */
+        double a0 = ((double)from_deg + t0 * 360.0 - 90.0) * M_PI / 180.0;
+        double a1 = ((double)from_deg + t1 * 360.0 - 90.0) * M_PI / 180.0 + 0.004;
+        cairo_move_to(cr, cx, cy);
+        cairo_arc(cr, cx, cy, R, a0, a1);
+        cairo_close_path(cr);
+        cairo_set_source_rgb(cr, sc.r, sc.g, sc.b);
+        cairo_fill(cr);
+    }
+    cairo_restore(cr);
+}
+
 static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
                                  const ui_bg_image *bgimg, const ui_bg_image *bgimg2,
                                  const ui_theme *th) {
@@ -5620,7 +5722,11 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * center along the CSS angle (0 = to top, 90 = to right), long enough that the
      * first/last stops land on the box corners; stops paint evenly spaced. */
     if (bx->grad_n >= 2) {
-        if (bx->grad_radial) {
+        if (bx->grad_radial == 2) {
+            /* conic-gradient (2026-07-19): pie-sector fan around the center. */
+            bui_paint_conic(cr, x, y, w, h, rad, bx->grad_angle,
+                            bx->grad_c, bx->grad_pos, bx->grad_n);
+        } else if (bx->grad_radial == 1) {
             /* R5c: radial gradient — center at box center, radius = min(w,h)/2 */
             double cx = x + w / 2.0, cy = y + h / 2.0;
             double r = (w < h ? w : h) / 2.0;
@@ -5637,19 +5743,9 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
             cairo_fill(cr);
             cairo_pattern_destroy(pat);
         } else {
-            double a = (double)bx->grad_angle * M_PI / 180.0;
-            double dx = sin(a), dy = -cos(a);
-            double half = (fabs(dx) * w + fabs(dy) * h) / 2.0;
-            double cx = x + w / 2.0, cy = y + h / 2.0;
-            cairo_pattern_t *pat = cairo_pattern_create_linear(
-                cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
-            int nst = bx->grad_n <= 4 ? bx->grad_n : 4;
-            for (int k = 0; k < nst; ++k) {
-                ui_rgb sc = rgb_from_packed(bx->grad_c[k] >= 0 ? bx->grad_c[k] : 0);
-                double pos = (bx->grad_pos[k] >= 0) ? (double)bx->grad_pos[k] / 1000.0
-                                                     : (double)k / (double)(nst - 1);
-                cairo_pattern_add_color_stop_rgb(pat, pos, sc.r, sc.g, sc.b);
-            }
+            cairo_pattern_t *pat = bui_linear_grad(x, y, w, h, bx->grad_angle,
+                                                   bx->grad_c, bx->grad_pos,
+                                                   bx->grad_n, 1.0);
             cairo_set_source(cr, pat);
             box_path(cr, x, y, w, h, rad);
             cairo_fill(cr);
@@ -6067,6 +6163,16 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
     /* text-align: justify: distribute slack evenly between SPACE characters */
     double jgap = row_justify_gap(L, r, content_w);
     double jdx = 0.0; /* accumulates per-fragment justify shift */
+    /* Gradient text (2026-07-19): the pattern spans the row's full text extent
+     * so fragments of one row share a continuous gradient (pattern coordinates
+     * are user-space; each fragment just draws at its own x). Multi-line
+     * restarts per row -- documented v1 approximation (spec/css.md). */
+    double grad_row_w = 0.0;
+    for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
+        const rc_frag *gf = &L->frags[k];
+        if (gf->grad_n >= 2 && gf->x + gf->width > grad_row_w)
+            grad_row_w = gf->x + gf->width;
+    }
     for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
         const rc_frag *f = &L->frags[k];
         double fx = rx + f->x + jdx;
@@ -6093,8 +6199,19 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
             set_rgb_alpha(cr, sc, f->opacity);
             styled_draw(cr, fx + f->shadow_dx, fbaseline + f->shadow_dy, f);
         }
-        set_rgb_alpha(cr, f->color, f->opacity);
-        styled_draw(cr, fx, fbaseline, f);
+        if (f->grad_n >= 2 && grad_row_w > 0.0) {
+            double ga = (f->opacity >= 0 && f->opacity <= 100)
+                      ? (double)f->opacity / 100.0 : 1.0;
+            cairo_pattern_t *tp = bui_linear_grad(rx, ry, grad_row_w, r->height,
+                                                  f->grad_angle, f->grad_c, NULL,
+                                                  f->grad_n, ga);
+            cairo_set_source(cr, tp);
+            styled_draw(cr, fx, fbaseline, f);
+            cairo_pattern_destroy(tp);
+        } else {
+            set_rgb_alpha(cr, f->color, f->opacity);
+            styled_draw(cr, fx, fbaseline, f);
+        }
         if (f->underline || f->strike || f->overline) {
             /* Author text-decoration sub-properties override the line stroke:
              * - color -1/CC_COLOR_CURRENT means use the fragment's text color
@@ -6256,7 +6373,8 @@ static int box_forms_stacking_context(const pv_box_def *def) {
     if (def->filter_blur > 0 || def->filter_grayscale > 0 ||
         def->filter_brightness > 0 || def->filter_contrast > 0 ||
         def->filter_sepia > 0 || def->filter_invert > 0 ||
-        def->filter_saturate > 0 || def->filter_hue_rotate > 0) return 1;  /* R3: filter needs SC */
+        def->filter_saturate > 0 || def->filter_hue_rotate > 0 ||
+        def->filter_drop_color >= 0) return 1;  /* R3: filter needs SC */
     if (def->backdrop_blur > 0) return 1;  /* backdrop-filter needs SC, like filter */
     return cx_forms_stacking_context(&st);
 }
@@ -6600,8 +6718,10 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
     int needs_invert = (def && def->filter_invert > 0);
     int needs_saturate = (def && def->filter_saturate > 0 && def->filter_saturate != 100);
     int needs_hue_rotate = (def && def->filter_hue_rotate > 0);
+    int needs_drop = (def && def->filter_drop_color >= 0);
     int any_filter = needs_blur || needs_grayscale || needs_brightness || needs_contrast
-                  || needs_sepia || needs_invert || needs_saturate || needs_hue_rotate;
+                  || needs_sepia || needs_invert || needs_saturate || needs_hue_rotate
+                  || needs_drop;
     cairo_pattern_t *group = NULL;
     cairo_surface_t *flt_surf = NULL;
 
@@ -6739,6 +6859,29 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
             }
         }
         cairo_destroy(fcr);
+        if (needs_drop) {
+            /* filter: drop-shadow (2026-07-19): tint the ALPHA silhouette of
+             * the (already filtered) group with the shadow color, blur it, and
+             * paint it under the group at the declared offset -- the shadow
+             * follows the real content shape (PNG transparency, glyphs), not
+             * the box rect like box-shadow. */
+            cairo_surface_t *sh = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, fw, fh);
+            if (cairo_surface_status(sh) == CAIRO_STATUS_SUCCESS) {
+                cairo_t *scr = cairo_create(sh);
+                ui_rgb dc = rgb_from_packed(def->filter_drop_color);
+                cairo_set_source_rgb(scr, dc.r, dc.g, dc.b);
+                cairo_mask_surface(scr, flt_surf, 0, 0);
+                cairo_destroy(scr);
+                int drad = def->filter_drop_blur;
+                if (drad > 256) drad = 256;
+                if (drad > 0) bui_box_blur_surface(sh, drad);
+                cairo_set_source_surface(cr, sh,
+                                         x1 + (double)def->filter_drop_dx,
+                                         y1 + (double)def->filter_drop_dy);
+                cairo_paint(cr);
+            }
+            cairo_surface_destroy(sh);
+        }
         cairo_set_source_surface(cr, flt_surf, x1, y1);
         cairo_pattern_destroy(group);
     } else {

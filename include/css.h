@@ -447,7 +447,7 @@ typedef struct css_style {
     int         bg_grad_angle;
     int         bg_grad_c[CSS_GRAD_STOPS_MAX];
     int         bg_grad_pos[CSS_GRAD_STOPS_MAX]; /* R5d: stop positions 0-1000 */
-    int         bg_grad_radial;                       /* R5c: 0=linear, 1=radial */
+    int         bg_grad_radial;   /* gradient KIND: 0=linear, 1=radial, 2=conic */
     char        content_str[CSS_URL_MAX];              /* R8: ::before/::after content */
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
@@ -577,6 +577,11 @@ typedef struct css_style {
     /* R5b: second background-image layer (painted behind the first). "" = none. */
     char        bg_image_url2[CSS_URL_MAX];
     int         bg_clip;          /* css_bg_clip, 0 (unset) */
+    /* -webkit-text-fill-color (2026-07-19, gradient text): packed 0xRRGGBB,
+     * CC_COLOR_TRANSPARENT, or -1 (unset). With bg_clip == CSS_BGC_TEXT and a
+     * gradient/bg color, `transparent` yields gradient-filled glyphs; without
+     * a clip source, `transparent` is ignored downstream (fail-visible). */
+    int         text_fill_color;
     int         bg_origin;        /* css_bg_origin, 0 (unset) */
     int         bg_attachment;    /* css_bg_attachment, 0 (unset) */
     int         isolation;        /* css_isolation, 0 (unset) */
@@ -672,6 +677,15 @@ typedef struct css_style {
     int         filter_invert;
     int         filter_saturate;
     int         filter_hue_rotate;
+    /* filter: drop-shadow(dx dy [blur] [color]) (2026-07-19): signed px
+     * offsets, blur radius px (0 = sharp), packed color. drop_color -1 =
+     * no drop-shadow declared (dx/dy/blur then meaningless). Unlike
+     * box-shadow this follows the ALPHA of the composited group (the real
+     * content silhouette), see spec/css.md. */
+    int         filter_drop_dx;
+    int         filter_drop_dy;
+    int         filter_drop_blur;
+    int         filter_drop_color;
     /* background-position (R5a): px offset from top-left, CSS_LEN_UNSET = unset
      * ("0% 0%" which is also the CSS initial value). */
     int         bg_pos_x;

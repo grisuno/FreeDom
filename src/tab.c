@@ -310,7 +310,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[27] = {
+        int32_t b[33] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -322,6 +322,10 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->input_type, (int32_t)r->form_id, (int32_t)r->form_method,
             (int32_t)r->checked,
             (int32_t)r->row_span,
+            /* gradient text, 2026-07-19 (appended; read_view mirrors this) */
+            (int32_t)r->grad_text_n, (int32_t)r->grad_text_angle,
+            (int32_t)r->grad_text_c[0], (int32_t)r->grad_text_c[1],
+            (int32_t)r->grad_text_c[2], (int32_t)r->grad_text_c[3],
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -348,7 +352,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[152] = {
+        int32_t f[156] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -452,6 +456,9 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->backdrop_blur,
             /* background alpha percent, 2026-07-19 (appended; read_view mirrors) */
             (int32_t)bd->bg_alpha,
+            /* filter: drop-shadow, 2026-07-19 (appended; read_view mirrors) */
+            (int32_t)bd->filter_drop_dx, (int32_t)bd->filter_drop_dy,
+            (int32_t)bd->filter_drop_blur, (int32_t)bd->filter_drop_color,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1465,7 +1472,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[36], gtw[PV_GRID_TRACKS + 1], b[27];
+        int32_t a[36], gtw[PV_GRID_TRACKS + 1], b[33];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1542,6 +1549,12 @@ static int read_view(int fd, pv_view **out) {
             e.image_rendering = (int)tirend; e.caret_color = (int)tcaret;
             e.object_fit = (int)tobject_fit;
             pv_set_text_ext(v, &e);
+            /* gradient text, 2026-07-19: already resolved at build time, so it
+             * travels verbatim (block B tail) and lands via the direct setter. */
+            {
+                int gtc[4] = { (int)b[29], (int)b[30], (int)b[31], (int)b[32] };
+                pv_set_grad_text(v, (int)b[27], (int)b[28], gtc);
+            }
         }
         if (kind != PV_INPUT) {
             pv_set_emphasis(v, (int)bold, (int)italic);
@@ -1575,7 +1588,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[152];
+        int32_t f[156];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1651,6 +1664,9 @@ static int read_view(int fd, pv_view **out) {
             .backdrop_blur = f[150],
             /* background alpha percent, 2026-07-19 */
             .bg_alpha = f[151],
+            /* filter: drop-shadow, 2026-07-19 */
+            .filter_drop_dx = f[152], .filter_drop_dy = f[153],
+            .filter_drop_blur = f[154], .filter_drop_color = f[155],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

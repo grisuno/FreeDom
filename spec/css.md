@@ -148,7 +148,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `color` | `color` (packed 0xRRGGBB via css_color), or -1 |
 | `background-color` | `background` (color only; a value with `url(` is dropped) **+ `bg_alpha`** (2026-07-19): the 4th component of an `rgba()`/`hsla()` value, as a percent `0..100` (`CSS_LEN_UNSET` = opaque). Alpha 0 keeps the color channel but paints nothing (the painter multiplies). Applies to the BOX background fill (and its direct rows via the row-bg dedup below); `#RRGGBBAA` hex alpha stays out of scope v1. Given-When-Then: **Dado** `background:rgba(255,255,255,0.25)` en un panel glass **cuando** se pinta la caja **entonces** el fill usa alfa 0.25 y el backdrop (o su blur) se ve a través. |
 | `background` | `background` (color) **and** the gradient/image fields below. Shorthand semantics: a `background` value always resets *both* layers — a plain color emits gradient-unset+image-unset, a gradient or `url()` emits color-unset (-1) — so a higher-tier `background: red` clears a lower-tier gradient/image and vice versa. Any color token outside the gradient/url still resolves. |
-| `background-image` | `bg_grad_*` (unchanged) **or** `bg_image_url` (2026-07-16): `linear-gradient(...)` resolves to the gradient fields as before; `url(...)` (quoted or bare, 1 layer) captures the **raw, unresolved** URL text into `bg_image_url` (`css_style`, bounded `CSS_URL_MAX` (1024, enough to also hold the resolved absolute URL) — an overlong URL is dropped, fail closed, same as any other overlong token here); `none`/`radial-gradient`/`conic-gradient`/`repeating-*`/multi-layer (comma-separated) → both fields unset. `css.c` itself still never fetches anything — it only extracts the literal string between the parens, same as it already does for `href`/`src` attributes elsewhere in the pipeline; resolving the URL against the page origin and deciding whether to actually fetch it happens downstream in `render_doc`/the GUI, under the exact same `caps.images` + `rdp_image_decision` gate as an `<img>` (see "Background image" below). |
+| `background-image` | `bg_grad_*` (unchanged) **or** `bg_image_url` (2026-07-16): `linear-gradient(...)` resolves to the gradient fields as before; `url(...)` (quoted or bare, 1 layer) captures the **raw, unresolved** URL text into `bg_image_url` (`css_style`, bounded `CSS_URL_MAX` (1024, enough to also hold the resolved absolute URL) — an overlong URL is dropped, fail closed, same as any other overlong token here); `radial-gradient(...)`/`conic-gradient(...)` resolve to the same gradient fields with the kind flag (1/2, 2026-07-19); `none`/`repeating-*`/multi-layer (comma-separated) → both fields unset. `css.c` itself still never fetches anything — it only extracts the literal string between the parens, same as it already does for `href`/`src` attributes elsewhere in the pipeline; resolving the URL against the page origin and deciding whether to actually fetch it happens downstream in `render_doc`/the GUI, under the exact same `caps.images` + `rdp_image_decision` gate as an `<img>` (see "Background image" below). |
 | `text-align` | `text_align`: left/center/right/justify |
 | `font-size` | `font_scale` (percent): `px` relative to 16px base, `em`/`rem` ×100, `%`, and keywords (`small`=85, `medium`=100, `large`=120, `x-large`=150, `xx-large`=200, `smaller`=85, `larger`=120) |
 | `line-height` | `line_scale` (percent of the natural line box): unitless multiplier (`1.5` → 150) or `%` (`160%` → 160), clamped `[CSS_LINE_MIN, CSS_LINE_MAX]`; `normal` → 0 (unset, uses the UA default). Absolute `px`/`em` line-heights are out of scope (dropped). Inherits, like `font-size`. |
@@ -187,7 +187,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `caret-color` | `caret_color` (0xRRGGBB or `CSS_LEN_AUTO` for `auto`, or -1 unset): color of the text-input caret |
 | `appearance` | `appearance` (`css_appearance`): `auto`/`none`; unknown dropped |
 | `pointer-events` | `pointer_events` (`css_pointer_events`): `auto`/`none`; unknown dropped |
-| *(gradient fields)* | `bg_grad_n` (stop count, 0 = no gradient, 2..`CSS_GRAD_STOPS_MAX` (4)), `bg_grad_angle` (CSS degrees normalized `[0,359]`: 0 = to top, 90 = to right; default 180 = to bottom), `bg_grad_c[4]` (packed 0xRRGGBB per stop). Grammar: `linear-gradient(<dir>?, <color-stop>{2,})` where `<dir>` is `to <side-or-corner>` (two keywords in either order for corners) or `<int>deg`. Stop **positions** (`%`/lengths after a color) are accepted but ignored — stops paint evenly spaced. An unparseable color or fewer than 2 stops drops the whole gradient (fail closed); more than 4 stops keep the first 4 (bounded, anti-DoS). Painted by the GUI as a Cairo linear pattern across the border box (rounded by `border-radius`), gated by `caps.css` by construction (rides the box-def tree). Never fetches: there is no URL anywhere in the accepted grammar. |
+| *(gradient fields)* | `bg_grad_n` (stop count, 0 = no gradient, 2..`CSS_GRAD_STOPS_MAX` (4)), `bg_grad_angle` (CSS degrees normalized `[0,359]`: 0 = to top, 90 = to right; default 180 = to bottom; for conic it is the `from` angle, default 0), `bg_grad_c[4]` (packed 0xRRGGBB per stop), `bg_grad_pos[4]` (stop positions 0-1000, -1 = evenly spaced), `bg_grad_radial` (**kind**: 0 = linear, 1 = radial, 2 = conic). Grammar: `linear-gradient(<dir>?, <color-stop>{2,})` where `<dir>` is `to <side-or-corner>` or `<int>deg`; `radial-gradient([circle|ellipse|at <pos>]?, ...)` (prelude consumed and ignored — centered circle v1); `conic-gradient([from <int>deg]? [at <pos>]?, ...)`. Stop **positions** (2026-07-19, R5d completed): `%` → 0-1000; conic also accepts `deg` (fraction of the turn); a stop with TWO positions emits its color twice = hard edge (pies, stripes). An unparseable color or fewer than 2 stops drops the whole gradient (fail closed); more than 4 stops keep the first 4 (bounded, anti-DoS). Painted by the GUI as a Cairo linear/radial pattern (conic: 128-sector fan, `bui_paint_conic`) across the border box (rounded by `border-radius`), gated by `caps.css` by construction (rides the box-def tree). Never fetches: there is no URL anywhere in the accepted grammars. |
 | `background-repeat` | `bg_repeat` (`css_bg_repeat`): `repeat`/`no-repeat`/`repeat-x`/`repeat-y`/`space`/`round`; unknown dropped |
 | `background-size` | `bg_size` (`css_bg_size`): `auto`/`cover`/`contain`; `<length>`/`<percentage>` dropped |
 | `background-clip` | `bg_clip` (`css_bg_clip`): `border-box`/`padding-box`/`content-box`/`text`; unknown dropped |
@@ -452,17 +452,17 @@ of them, the field already has the value ready. Grouped by family:
    spec/float.md), line-number / named grid placement (only `span N` is
    resolved), `position: sticky` scroll pinning. `overflow` clipping and
    `z-index` negative stacking **are** painted since 2026-07-09.
-- *Backgrounds beyond a solid color, a linear gradient or a single image*:
-  `radial-gradient`/`conic-gradient`/`repeating-*` (fail closed to unset),
-  gradient stop positions (evenly spaced in v1), multi-layer
+- *Backgrounds beyond a solid color, a linear/radial/conic gradient or a
+  single image*: `repeating-*` gradients (fail closed to unset), multi-layer
   `background-image` (comma-separated list — v1 keeps only one layer),
   `background-position` (v1 always paints from the top-left corner, which
   matches the CSS initial value `0% 0%` so this is the common case, not a
   visible regression), `background-size` `<length>`/`<percentage>` (only
   the `auto`/`cover`/`contain` keywords are honored), `background-repeat:
   space`/`round` spacing (falls back to plain tiling).
-- *Transforms / filters / transitions*: `transform`, `filter`, `transition`,
-  `animation`, `@keyframes`.
+- *Transitions*: `transition` (hover interpolation). `transform`, `filter`
+  (incl. `drop-shadow`), `animation`/`@keyframes` **are** supported — see
+  the compositor/interp specs and the dated sections above.
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
   in `%`/viewport units, `text-decoration-thickness`,
   `vertical-align` length/`top`/`middle`/`bottom`, `white-space` whitespace
@@ -612,6 +612,67 @@ normalization can mismatch the real window — navigability + zero leak beat
 pixel-perfect geometry. `font-size` in viewport units (responsive typography,
 e.g. `font-size:4vw`) converts through the same normalized pixels into the
 percent-of-base channel.
+
+**Gradient text, conic-gradient, drop-shadow (2026-07-19).** Three
+presentation features closing the highest-visual-impact gaps against modern
+browsers. All fail closed, none can fetch (no URL anywhere in the accepted
+grammars), all gated by `caps.css` downstream like every author color.
+
+1. *Gradient text* — `background-clip: text` (and the ubiquitous
+   `-webkit-background-clip: text` alias) plus `-webkit-text-fill-color`
+   (new `css_style.text_fill_color`, packed color / `CC_COLOR_TRANSPARENT` /
+   -1 unset). **Dado** un elemento con `background: linear-gradient(...)`,
+   `-webkit-background-clip: text` y `-webkit-text-fill-color: transparent`
+   (el patrón Tailwind/landing) **cuando** se resuelve y pinta **entonces**
+   sus runs de texto llevan el gradiente del elemento (`grad_text_*`,
+   resuelto del ancestro más cercano con `bg_clip == CSS_BGC_TEXT`, mismo
+   patrón "nearest ancestor" que `color`) y el painter rellena los glifos
+   con un patrón lineal Cairo que abarca la fila (continuo entre fragmentos
+   de la misma fila; multilinea reinicia por fila — aproximación v1
+   documentada), y la caja NO pinta ese fondo como banda (el fondo vive solo
+   dentro del texto). **Dado** `-webkit-text-fill-color: transparent` SIN
+   fuente de recorte (sin `bg_clip:text` con gradiente/color en la cadena)
+   **cuando** se pinta **entonces** el color de texto normal se mantiene
+   (fail-visible: nunca texto invisible por una feature a medias). Un
+   `-webkit-text-fill-color` con color real (no transparent) simplemente
+   sobreescribe `color` para los glifos, como en los navegadores.
+   `background-clip` con `border-box`/`padding-box`/`content-box` se sigue
+   aceptando y se ignora aguas abajo (sin efecto de pintado v1).
+
+2. *`conic-gradient()`* — `background`/`background-image` aceptan
+   `conic-gradient([from <int>deg]? [at <pos>]?, <stop>{2,})`. El ángulo
+   `from` reutiliza `bg_grad_angle`; `at <pos>` se acepta y se ignora
+   (siempre centro, v1). `bg_grad_radial` pasa a ser un *kind*:
+   0 = linear, 1 = radial, 2 = conic (mismo campo, mismo cableado IPC).
+   Stops: mismos colores/cap que linear (`CSS_GRAD_STOPS_MAX` 4, primeros 4,
+   anti-DoS); posiciones en `%` o `deg` se normalizan a fracción de vuelta
+   (0-1000); un stop con DOS posiciones (`red 0 25%`) emite el color
+   duplicado en ambas posiciones si cabe en el cap — así los pie charts de
+   dos colores (`conic-gradient(red 0 25%, #eee 25%)`) tienen borde duro.
+   La duplicación de dos-posiciones aplica también a `linear-gradient`
+   (rayas duras), mismo parser. **Dado** `background: conic-gradient(red,
+   yellow, lime, red)` **cuando** se pinta **entonces** el painter dibuja un
+   abanico de sectores (128 slices interpolando los stops por fracción
+   angular, pivotado en el centro de la caja, arrancando en `from`,
+   recortado por `border-radius`) — Cairo no tiene patrón cónico nativo;
+   el abanico es la aproximación documentada. `repeating-*` sigue fuera
+   (fail closed a unset).
+
+3. *`filter: drop-shadow(<dx> <dy> [<blur>] [<color>])`* — se une a la
+   lista de funciones de `expand_filter` (el tokenizador `next_ws_token` ya
+   es paren-aware, el token llega entero). Longitudes en px
+   (clamp `CSS_LEN_MAX`; blur clamp 256 como `blur()`); color por
+   `parse_color` (defecto: negro; `currentColor` → negro v1). Campos
+   `filter_drop_dx/dy/blur/color` (color -1 = sin drop-shadow). **Dado** un
+   PNG con transparencia dentro de una caja con `filter: drop-shadow(4px
+   4px 8px #000)` **cuando** se compone el grupo del stacking context
+   **entonces** el painter pinta primero la silueta alfa del grupo teñida
+   del color y desenfocada (reusa `bui_box_blur_surface`), desplazada
+   (dx,dy), y encima el grupo intacto — sombra que sigue la forma real del
+   contenido, no el rect de la caja (a diferencia de `box-shadow`).
+   Malformado (longitudes no parseables) descarta solo esa función de la
+   lista, como el resto de funciones de filtro.
+
 **`calc()` composes with `var()`:** `var()` substitution happens first (on the raw
 declaration text), so `calc(var(--gap) * 2)` resolves the custom property's text
 into the expression before it is evaluated.

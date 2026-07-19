@@ -148,6 +148,11 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         /* filter (Phase R3) */
         P_FILTER_BLUR, P_FILTER_GRAYSCALE, P_FILTER_BRIGHTNESS, P_FILTER_CONTRAST,
         P_FILTER_SEPIA, P_FILTER_INVERT, P_FILTER_SATURATE, P_FILTER_HUE_ROTATE,
+        /* filter: drop-shadow (2026-07-19). Contiguous group emitted in
+         * lock-step by expand_filter's drop-shadow branch. */
+        P_FILTER_DROP_DX, P_FILTER_DROP_DY, P_FILTER_DROP_BLUR, P_FILTER_DROP_COLOR,
+        /* -webkit-text-fill-color (2026-07-19, gradient text) */
+        P_TEXT_FILL,
         /* backdrop-filter: blur(Npx) (2026-07-19, glassmorphism v1). */
         P_BACKDROP_BLUR,
         /* Background alpha percent from rgba()/hsla() (2026-07-19). */
@@ -375,14 +380,14 @@ static int grad_direction(const char *seg) {
     return horiz == 0 ? 135 : 225;
 }
 
-/* Locates a plain linear-gradient(...) call in v (case-insensitive; an occurrence
- * that is the tail of a longer ident, e.g. repeating-linear-gradient, does not
- * count). Writes the call span [start,end) (end past the closing paren) and the
- * argument span. 1 = found, 0 = absent, -1 = found but unbalanced (malformed). */
-static int find_linear_gradient(const char *v, size_t *start, size_t *end,
-                                size_t *args, size_t *argn) {
-    static const char fn[] = "linear-gradient(";
-    const size_t fnlen = sizeof fn - 1;
+/* Locates a gradient function call `fn` (e.g. "linear-gradient(") in v
+ * (case-insensitive; an occurrence that is the tail of a longer ident, e.g.
+ * repeating-linear-gradient, does not count). Writes the call span [start,end)
+ * (end past the closing paren) and the argument span. 1 = found, 0 = absent,
+ * -1 = found but unbalanced (malformed). */
+static int find_gradient_call(const char *v, const char *fn, size_t *start,
+                              size_t *end, size_t *args, size_t *argn) {
+    const size_t fnlen = strlen(fn);
     size_t n = strlen(v);
     for (size_t i = 0; i + fnlen <= n; ++i) {
         size_t k = 0;
@@ -409,15 +414,89 @@ static int find_linear_gradient(const char *v, size_t *start, size_t *end,
     return 0;
 }
 
-/* Parses the argument list of linear-gradient (s[0,n) is the text inside the
- * parens): optional direction, then color stops split on top-level commas. Stop
- * positions after a color are accepted and ignored (evenly spaced in v1). Fills
+/* conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>`
+ * (position accepted and ignored -- always center, v1), or `at <pos>` alone.
+ * Returns 1 = consumed (angle possibly set), 0 = not a prelude (it is the
+ * first color stop), -1 = prelude syntax but malformed (poisons the gradient,
+ * mirrors grad_direction's -2). */
+static int conic_prelude(const char *seg, int *angle) {
+    const char *p = seg;
+    int saw = 0;
+    if (csel_lower_ch(p[0]) == 'f' && csel_lower_ch(p[1]) == 'r' &&
+        csel_lower_ch(p[2]) == 'o' && csel_lower_ch(p[3]) == 'm' &&
+        (p[4] == ' ' || p[4] == '\t')) {
+        p += 5;
+        while (*p == ' ' || *p == '\t') ++p;
+        char *end = NULL;
+        long a = strtol(p, &end, 10);
+        if (end == p ||
+            !(csel_lower_ch(end[0]) == 'd' && csel_lower_ch(end[1]) == 'e' &&
+              csel_lower_ch(end[2]) == 'g'))
+            return -1;
+        *angle = (int)(((a % 360) + 360) % 360);
+        p = end + 3;
+        saw = 1;
+        while (*p == ' ' || *p == '\t') ++p;
+    }
+    if (csel_lower_ch(p[0]) == 'a' && csel_lower_ch(p[1]) == 't' &&
+        (p[2] == ' ' || p[2] == '\t'))
+        return 1;
+    if (saw) return (*p == '\0') ? 1 : -1;
+    return 0;
+}
+
+/* radial-gradient prelude (`circle ...`, `ellipse ...`, `at <pos>`): consumed
+ * and ignored (always a centered circle, v1). 1 = consumed, 0 = not a prelude. */
+static int radial_prelude(const char *seg) {
+    static const char *const kw[] = { "circle", "ellipse", "at " };
+    for (size_t k = 0; k < sizeof kw / sizeof kw[0]; ++k) {
+        size_t kl = strlen(kw[k]);
+        size_t m = 0;
+        while (m < kl && csel_lower_ch(seg[m]) == kw[k][m]) ++m;
+        if (m == kl) return 1;
+    }
+    return 0;
+}
+
+/* One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts
+ * `Ndeg` -> the same 0-1000 turn fraction; legacy bare 0..100 -> x10. Returns
+ * the position or -1 (not a position / out of range; *endp untouched then). */
+static int grad_stop_pos(const char *pp, int conic, const char **endp) {
+    double dd;
+    const char *ee;
+    if (!parse_num(pp, &dd, &ee)) return -1;
+    if (*ee == '%') {
+        if (dd < 0.0 || dd > 100.0) return -1;
+        *endp = ee + 1;
+        return (int)(dd * 10.0 + 0.5);
+    }
+    if (conic && csel_lower_ch(ee[0]) == 'd' && csel_lower_ch(ee[1]) == 'e' &&
+        csel_lower_ch(ee[2]) == 'g') {
+        if (dd < 0.0 || dd > 360.0) return -1;
+        *endp = ee + 3;
+        return (int)(dd / 360.0 * 1000.0 + 0.5);
+    }
+    if (*ee == '\0' || *ee == ' ' || *ee == '\t') {
+        if (dd < 0.0 || dd > 100.0) return -1;
+        *endp = ee;
+        return (int)(dd * 10.0 + 0.5);
+    }
+    return -1;
+}
+
+/* Parses the argument list shared by linear-/radial-/conic-gradient (s[0,n) is
+ * the text inside the parens): optional kind-specific prelude, then color stops
+ * split on top-level commas. kind: 0 = linear (`to <side>`/`<int>deg` prelude),
+ * 1 = radial (`circle`/`ellipse`/`at` prelude, ignored), 2 = conic (`from
+ * <int>deg [at <pos>]` prelude; stop positions may be `deg`). Stop positions
+ * (R5d, completed 2026-07-19) land in positions[] as 0-1000 (-1 = evenly
+ * spaced); a stop with TWO positions emits its color twice (hard edge). Fills
  * *angle and colors[CSS_GRAD_STOPS_MAX]; returns the stop count clamped to
- * CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when the
- * gradient fails closed. */
-static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *colors,
-                                       int *positions) {
-    *angle = 180;
+ * CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+ * the gradient fails closed. */
+static int parse_gradient_args(const char *s, size_t n, int kind, int *angle,
+                               int *colors, int *positions) {
+    *angle = (kind == 2) ? 0 : 180;
     int nstops = 0, first = 1;
     size_t i = 0;
     while (i < n) {
@@ -440,11 +519,19 @@ static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *
 
         if (first) {
             first = 0;
-            int d = grad_direction(seg);
-            if (d >= 0) { *angle = d; i = j + 1; continue; }
-            if (d == -2) return 0;
+            if (kind == 2) {
+                int c = conic_prelude(seg, angle);
+                if (c == 1) { i = j + 1; continue; }
+                if (c == -1) return 0;
+            } else if (kind == 1) {
+                if (radial_prelude(seg)) { i = j + 1; continue; }
+            } else {
+                int d = grad_direction(seg);
+                if (d >= 0) { *angle = d; i = j + 1; continue; }
+                if (d == -2) return 0;
+            }
         }
-        if (nstops < CSS_GRAD_STOPS_MAX) {
+        {
             size_t ce = 0;
             const char *lp = strchr(seg, '(');
             if (lp != NULL) {
@@ -459,24 +546,36 @@ static int parse_linear_gradient_args(const char *s, size_t n, int *angle, int *
             color[ce] = '\0';
             int cv = parse_color(color);
             if (cv == -1) return 0;
-            colors[nstops] = cv;
-            /* R5d: parse optional stop position after the color. */
-            if (positions != NULL) {
-                const char *pp = seg + ce;
-                while (*pp == ' ' || *pp == '\t') ++pp;
-                int pos_pct = -1;  /* -1 = evenly spaced */
-                if (*pp != '\0') {
-                    double dd; const char *ee;
-                    if (parse_num(pp, &dd, &ee) && dd >= 0.0 && dd <= 100.0) {
-                        if (*ee == '%') pos_pct = (int)(dd * 10.0 + 0.5); /* 0-1000 */
-                        else if (*ee == '\0' || *ee == ' ' || *ee == '\t')
-                            pos_pct = (int)(dd * 10.0 + 0.5);
+            int p1 = -1, p2 = -1;
+            const char *pp = seg + ce;
+            while (*pp == ' ' || *pp == '\t') ++pp;
+            if (*pp != '\0') {
+                const char *e1 = pp;
+                p1 = grad_stop_pos(pp, kind == 2, &e1);
+                if (p1 >= 0) {
+                    pp = e1;
+                    while (*pp == ' ' || *pp == '\t') ++pp;
+                    if (*pp != '\0') {
+                        const char *e2 = pp;
+                        p2 = grad_stop_pos(pp, kind == 2, &e2);
                     }
                 }
-                positions[nstops] = pos_pct;
+            }
+            if (nstops < CSS_GRAD_STOPS_MAX) {
+                colors[nstops] = cv;
+                if (positions != NULL) positions[nstops] = p1;
+            }
+            ++nstops;
+            if (p2 >= 0) {
+                /* two-position stop (`red 0 25%`): duplicate the color at the
+                 * second position -> a hard edge (pie slices, stripes). */
+                if (nstops < CSS_GRAD_STOPS_MAX) {
+                    colors[nstops] = cv;
+                    if (positions != NULL) positions[nstops] = p2;
+                }
+                ++nstops;
             }
         }
-        ++nstops;
         i = j + 1;
     }
     if (nstops < 2) return 0;
@@ -593,22 +692,23 @@ static int expand_bg_image(const char *val, css_decl *dst, int cap,
     size_t gs, ge, as, an;
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
-    int angle = 180, nst = 0;
-    if (find_linear_gradient(val, &gs, &ge, &as, &an) == 1)
-        nst = parse_linear_gradient_args(val + as, an, &angle, colors, grad_pos);
-    int n = emit_gradient(dst, cap, angle, nst, colors, NULL);
-    if (nst > 0) {
-        if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
-        return n;
+    int angle = 180, nst = 0, kind = 0;
+    if (find_gradient_call(val, "linear-gradient(", &gs, &ge, &as, &an) == 1)
+        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos);
+    if (nst == 0 && find_gradient_call(val, "conic-gradient(", &gs, &ge, &as, &an) == 1) {
+        nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos);
+        if (nst > 0) kind = 2;
     }
-    /* R5c: radial-gradient */
-    if (find_radial_gradient(val, &gs, &ge, &as, &an) == 1) {
-        nst = parse_linear_gradient_args(val + as, an, &angle, colors, grad_pos);
-        n = emit_gradient(dst, cap, angle, nst, colors, NULL);
-        if (nst > 0 && cap - n >= 1) {
-            dst[n].prop = P_BG_GRAD_RADIAL; dst[n].ival = 1; ++n;
-            n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
-        }
+    if (nst == 0 && find_radial_gradient(val, &gs, &ge, &as, &an) == 1) {
+        nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos);
+        if (nst > 0) kind = 1;
+    }
+    int n = emit_gradient(dst, cap, angle, nst, colors, nst > 0 ? grad_pos : NULL);
+    if (nst > 0) {
+        /* the kind rides every gradient emission so a higher-tier linear fully
+         * overrides a lower-tier radial/conic (independent cascade slots). */
+        if (cap - n >= 1) { dst[n].prop = P_BG_GRAD_RADIAL; dst[n].ival = kind; ++n; }
+        if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
         return n;
     }
     size_t us, ue;
@@ -652,12 +752,30 @@ static int expand_background(const char *val, css_decl *dst, int cap,
     size_t gs = 0, ge = 0, as = 0, an = 0;
     int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
     int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
-    int angle = 180, nst = 0;
-    int f = find_linear_gradient(val, &gs, &ge, &as, &an);
+    int angle = 180, nst = 0, kind = 0;
+    int f = find_gradient_call(val, "linear-gradient(", &gs, &ge, &as, &an);
     if (f < 0) return 0;
     if (f == 1) {
-        nst = parse_linear_gradient_args(val + as, an, &angle, colors, grad_pos);
+        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos);
         if (nst == 0) return 0;
+    }
+    if (f == 0) {
+        f = find_gradient_call(val, "conic-gradient(", &gs, &ge, &as, &an);
+        if (f < 0) return 0;
+        if (f == 1) {
+            nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos);
+            if (nst == 0) return 0;
+            kind = 2;
+        }
+    }
+    if (f == 0) {
+        f = find_gradient_call(val, "radial-gradient(", &gs, &ge, &as, &an);
+        if (f < 0) return 0;
+        if (f == 1) {
+            nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos);
+            if (nst == 0) return 0;
+            kind = 1;
+        }
     }
     size_t us = 0, ue = 0;
     char urlbuf[CSS_URL_MAX];
@@ -684,7 +802,10 @@ static int expand_background(const char *val, css_decl *dst, int cap,
     dst[1].prop = P_BG_ALPHA;
     dst[1].ival = bg_alpha_of(rest);
     int w = 2;
-    w += emit_gradient(dst + w, cap - w, angle, nst, colors, NULL);
+    w += emit_gradient(dst + w, cap - w, angle, nst, colors, nst > 0 ? grad_pos : NULL);
+    if (nst > 0 && cap - w >= 1) {
+        dst[w].prop = P_BG_GRAD_RADIAL; dst[w].ival = kind; ++w;
+    }
     if (cap - w >= 1) w += emit_bg_image_url(dst + w, cap - w, uf == 1 ? urlbuf : NULL,
                                              urltab, nurl, urlcap);
     return w;
@@ -2306,6 +2427,37 @@ static int expand_filter(const char *val, css_decl *dst, int cap) {
             if (!body) continue;
             int deg = interp_filter_deg(body);
             if (deg >= 0) { dst[n].prop = P_FILTER_HUE_ROTATE; dst[n].ival = deg; ++n; }
+        } else if (strncmp(tok, "drop-shadow(", 12) == 0) {
+            /* drop-shadow(<dx> <dy> [<blur>] [<color>]) (2026-07-19). The
+             * outer tokenizer is paren-aware, so the whole call is one token.
+             * Lengths in declaration order (dx, dy, optional blur >= 0); one
+             * optional color anywhere among them. Malformed drops only this
+             * function (the rest of the list still applies). Emits the whole
+             * 4-decl group in lock-step or nothing. */
+            const char *body = filter_paren_body(tok, "drop-shadow(", 12);
+            if (!body) continue;
+            if (cap - n < 4) continue;
+            int lens[3], nl = 0, color = -1, ok = 1;
+            const char *q = body;
+            char arg[CSS_TOK_MAX];
+            while (next_ws_token(&q, arg, sizeof arg)) {
+                int px;
+                if (interp_len(arg, 0, &px)) {
+                    if (nl < 3) lens[nl++] = px;
+                    else { ok = 0; break; }
+                } else {
+                    int cv = parse_color(arg);
+                    if (color == -1 && cv >= 0) color = cv;
+                    else if (color == -1 && cv == CC_COLOR_CURRENT) color = 0x000000;
+                    else { ok = 0; break; }
+                }
+            }
+            if (!ok || nl < 2) continue;
+            if (nl >= 3 && lens[2] < 0) continue;   /* negative blur invalid */
+            dst[n].prop = P_FILTER_DROP_DX;    dst[n].ival = lens[0]; ++n;
+            dst[n].prop = P_FILTER_DROP_DY;    dst[n].ival = lens[1]; ++n;
+            dst[n].prop = P_FILTER_DROP_BLUR;  dst[n].ival = nl >= 3 ? lens[2] : 0; ++n;
+            dst[n].prop = P_FILTER_DROP_COLOR; dst[n].ival = color == -1 ? 0x000000 : color; ++n;
         }
     }
     return n;
@@ -3378,7 +3530,18 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "pointer-events") == 0)        { prop_id = P_POINTER_EVENTS;  ival = interp_pointer_events(val); }
     else if (strcmp(prop, "background-repeat") == 0)    { prop_id = P_BG_REPEAT;     ival = interp_bg_repeat(val); }
     else if (strcmp(prop, "background-size") == 0)      { prop_id = P_BG_SIZE;       ival = interp_bg_size(val); }
-    else if (strcmp(prop, "background-clip") == 0)      { prop_id = P_BG_CLIP;       ival = interp_bg_clip(val); }
+    else if (strcmp(prop, "background-clip") == 0 ||
+             strcmp(prop, "-webkit-background-clip") == 0)
+                                                        { prop_id = P_BG_CLIP;       ival = interp_bg_clip(val); }
+    else if (strcmp(prop, "-webkit-text-fill-color") == 0 ||
+             strcmp(prop, "text-fill-color") == 0) {
+        /* transparent (CC_COLOR_TRANSPARENT, negative) must survive: the generic
+         * `ival < 0` drop below would eat it. currentColor is a no-op (the fill
+         * IS the element color) and junk fails closed, both dropped here. */
+        int o = interp_color(val);
+        if (o == -1 || o == CC_COLOR_CURRENT) return 0;
+        dst[0].prop = P_TEXT_FILL; dst[0].ival = o; return 1;
+    }
     else if (strcmp(prop, "background-origin") == 0)    { prop_id = P_BG_ORIGIN;     ival = interp_bg_origin(val); }
     else if (strcmp(prop, "background-attachment") == 0){ prop_id = P_BG_ATTACHMENT; ival = interp_bg_attachment(val); }
     else if (strcmp(prop, "isolation") == 0)            { prop_id = P_ISOLATION;     ival = interp_isolation(val); }
@@ -4108,6 +4271,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_BG_REPEAT:           o->bg_repeat = d->ival; break;
             case P_BG_SIZE:             o->bg_size = d->ival; break;
             case P_BG_CLIP:             o->bg_clip = d->ival; break;
+            case P_TEXT_FILL:           o->text_fill_color = d->ival; break;
             case P_BG_ORIGIN:           o->bg_origin = d->ival; break;
             case P_BG_ATTACHMENT:       o->bg_attachment = d->ival; break;
             case P_ISOLATION:           o->isolation = d->ival; break;
@@ -4169,6 +4333,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_FILTER_INVERT:       o->filter_invert = d->ival; break;
             case P_FILTER_SATURATE:     o->filter_saturate = d->ival; break;
             case P_FILTER_HUE_ROTATE:   o->filter_hue_rotate = d->ival; break;
+            case P_FILTER_DROP_DX:      o->filter_drop_dx = d->ival; break;
+            case P_FILTER_DROP_DY:      o->filter_drop_dy = d->ival; break;
+            case P_FILTER_DROP_BLUR:    o->filter_drop_blur = d->ival; break;
+            case P_FILTER_DROP_COLOR:   o->filter_drop_color = d->ival; break;
             case P_BACKDROP_BLUR:       o->backdrop_blur = d->ival; break;
             case P_BG_POS_X:            o->bg_pos_x = d->ival; break;
             case P_BG_POS_Y:            o->bg_pos_y = d->ival; break;
@@ -4276,6 +4444,9 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .anim_kf_pct = { 0 },
         .anim_kf_val = { 0 },
         .filter_blur = 0, .filter_grayscale = 0, .backdrop_blur = 0,
+        .filter_drop_dx = 0, .filter_drop_dy = 0, .filter_drop_blur = 0,
+        .filter_drop_color = -1,
+        .text_fill_color = -1,
         .bg_pos_x = CSS_LEN_UNSET, .bg_pos_y = CSS_LEN_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];

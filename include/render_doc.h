@@ -110,6 +110,11 @@ typedef struct rd_block {
     int              image_rendering; /* css_image_rendering; set only with caps.css, else 0 */
     int              caret_color;     /* 0xRRGGBB; set only with caps.css, else -1 */
     int              object_fit;      /* css_object_fit; set only with caps.css, else 0 */
+    /* Gradient text (2026-07-19): glyph fill gradient from the nearest
+     * background-clip:text ancestor. Set only with caps.css, else n = 0. */
+    int              grad_text_n;
+    int              grad_text_angle;
+    int              grad_text_c[4];
     /* Nearest author flex/grid container of this block (page_view), carried by
      * default (layout is structure, not author styling, and leaks nothing to the
      * network) so the presentation layer can lay it out with box_tree/flex_layout.

@@ -498,16 +498,25 @@ static void test_linear_gradient_stops(void **state) {
 
 static void test_linear_gradient_fail_closed(void **state) {
     (void)state;
-    /* fewer than 2 stops, junk color, or a non-linear gradient function: all unset */
+    /* fewer than 2 stops, junk color, or a repeating-* gradient: all unset */
     assert_int_equal(css_parse_inline("background: linear-gradient(red)", 0).bg_grad_n, 0);
     assert_int_equal(css_parse_inline(
         "background: linear-gradient(red, bogusnothing)", 0).bg_grad_n, 0);
-    assert_int_equal(css_parse_inline(
-        "background: radial-gradient(red, blue)", 0).bg_grad_n, 0);
+    /* radial via the background shorthand works since 2026-07-19 (kind 1) */
+    {
+        css_style rs = css_parse_inline("background: radial-gradient(red, blue)", 0);
+        assert_int_equal(rs.bg_grad_n, 2);
+        assert_int_equal(rs.bg_grad_radial, 1);
+    }
     assert_int_equal(css_parse_inline(
         "background-image: repeating-linear-gradient(red, blue)", 0).bg_grad_n, 0);
-    assert_int_equal(css_parse_inline(
-        "background-image: conic-gradient(red, blue)", 0).bg_grad_n, 0);
+    /* conic via background-image works since 2026-07-19 (kind 2) */
+    {
+        css_style cs2 = css_parse_inline(
+            "background-image: conic-gradient(red, blue)", 0);
+        assert_int_equal(cs2.bg_grad_n, 2);
+        assert_int_equal(cs2.bg_grad_radial, 2);
+    }
     /* url() in background-image never fetches and never becomes a gradient */
     assert_int_equal(css_parse_inline(
         "background-image: url(http://evil/x.png)", 0).bg_grad_n, 0);
@@ -3220,6 +3229,133 @@ static void test_background_rgba_alpha(void **state) {
 /* backdrop-filter (2026-07-19, glassmorphism v1): blur(Npx) into backdrop_blur;
  * the -webkit- alias works; other functions in the list are ignored (same lax
  * list grammar as filter); none/url()/junk leave it 0. */
+/* --- gradient text / conic-gradient / drop-shadow (2026-07-19) --- */
+
+static void test_background_clip_text(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("background-clip: text", 0).bg_clip, CSS_BGC_TEXT);
+    /* the ubiquitous vendor alias (the Tailwind/landing pattern ships it) */
+    assert_int_equal(css_parse_inline("-webkit-background-clip: text", 0).bg_clip,
+                     CSS_BGC_TEXT);
+    assert_int_equal(css_parse_inline("color:red", 0).bg_clip, CSS_BGC_UNSET);
+}
+
+static void test_text_fill_color(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("-webkit-text-fill-color: transparent", 0)
+                         .text_fill_color, CC_COLOR_TRANSPARENT);
+    assert_int_equal(css_parse_inline("-webkit-text-fill-color: #ff0000", 0)
+                         .text_fill_color, 0xff0000);
+    assert_int_equal(css_parse_inline("-webkit-text-fill-color: junk", 0)
+                         .text_fill_color, -1);
+    assert_int_equal(css_parse_inline("color:red", 0).text_fill_color, -1);
+}
+
+static void test_conic_gradient_basic(void **state) {
+    (void)state;
+    css_style s = css_parse_inline(
+        "background: conic-gradient(#ff0000, #ffff00, #0000ff)", 0);
+    assert_int_equal(s.bg_grad_n, 3);
+    assert_int_equal(s.bg_grad_radial, 2);   /* kind: 0=linear 1=radial 2=conic */
+    assert_int_equal(s.bg_grad_angle, 0);    /* default `from 0deg` */
+    assert_int_equal(s.bg_grad_c[0], 0xff0000);
+    assert_int_equal(s.bg_grad_c[2], 0x0000ff);
+    assert_int_equal(s.background, -1);      /* shorthand resets the color part */
+}
+
+static void test_conic_gradient_from_angle(void **state) {
+    (void)state;
+    css_style s = css_parse_inline(
+        "background-image: conic-gradient(from 45deg, red, blue)", 0);
+    assert_int_equal(s.bg_grad_n, 2);
+    assert_int_equal(s.bg_grad_radial, 2);
+    assert_int_equal(s.bg_grad_angle, 45);
+    /* `at <pos>` accepted and ignored (always center, v1) */
+    css_style c = css_parse_inline(
+        "background-image: conic-gradient(from 90deg at center, red, blue)", 0);
+    assert_int_equal(c.bg_grad_n, 2);
+    assert_int_equal(c.bg_grad_angle, 90);
+}
+
+static void test_conic_gradient_pie_hard_stop(void **state) {
+    (void)state;
+    /* a two-position stop duplicates its color -> hard edge (2-color pie) */
+    css_style s = css_parse_inline(
+        "background: conic-gradient(#ff0000 0% 25%, #eeeeee 25%)", 0);
+    assert_int_equal(s.bg_grad_radial, 2);
+    assert_int_equal(s.bg_grad_n, 3);
+    assert_int_equal(s.bg_grad_c[0], 0xff0000);
+    assert_int_equal(s.bg_grad_c[1], 0xff0000);
+    assert_int_equal(s.bg_grad_c[2], 0xeeeeee);
+    assert_int_equal(s.bg_grad_pos[0], 0);
+    assert_int_equal(s.bg_grad_pos[1], 250);
+    assert_int_equal(s.bg_grad_pos[2], 250);
+}
+
+static void test_conic_gradient_deg_positions(void **state) {
+    (void)state;
+    /* deg stop positions normalize to the same 0-1000 turn fraction as % */
+    css_style s = css_parse_inline(
+        "background: conic-gradient(red 90deg, blue 270deg)", 0);
+    assert_int_equal(s.bg_grad_n, 2);
+    assert_int_equal(s.bg_grad_pos[0], 250);
+    assert_int_equal(s.bg_grad_pos[1], 750);
+}
+
+static void test_conic_gradient_fails_closed(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("background: conic-gradient(red)", 0).bg_grad_n, 0);
+    assert_int_equal(css_parse_inline("background: conic-gradient(bogus, blue)", 0)
+                         .bg_grad_n, 0);
+    /* repeating-* still fail closed to unset */
+    assert_int_equal(css_parse_inline(
+        "background: repeating-conic-gradient(red, blue)", 0).bg_grad_n, 0);
+}
+
+static void test_linear_gradient_positions_emitted(void **state) {
+    (void)state;
+    /* R5d completed: stop positions now reach css_style (they used to be
+     * parsed and dropped -- every emit_gradient caller passed NULL) */
+    css_style s = css_parse_inline(
+        "background: linear-gradient(90deg, #000000 20%, #ffffff 80%)", 0);
+    assert_int_equal(s.bg_grad_n, 2);
+    assert_int_equal(s.bg_grad_pos[0], 200);
+    assert_int_equal(s.bg_grad_pos[1], 800);
+    /* two-position duplication gives linear hard stripes too */
+    css_style h = css_parse_inline(
+        "background: linear-gradient(90deg, #000000 0% 50%, #ffffff 50%)", 0);
+    assert_int_equal(h.bg_grad_n, 3);
+    assert_int_equal(h.bg_grad_c[1], 0x000000);
+    assert_int_equal(h.bg_grad_pos[1], 500);
+}
+
+static void test_filter_drop_shadow(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("filter: drop-shadow(4px 6px 8px #112233)", 0);
+    assert_int_equal(s.filter_drop_dx, 4);
+    assert_int_equal(s.filter_drop_dy, 6);
+    assert_int_equal(s.filter_drop_blur, 8);
+    assert_int_equal(s.filter_drop_color, 0x112233);
+    /* negative offsets are valid (shadow up-left) */
+    css_style n = css_parse_inline("filter: drop-shadow(-2px -3px 1px red)", 0);
+    assert_int_equal(n.filter_drop_dx, -2);
+    assert_int_equal(n.filter_drop_dy, -3);
+}
+
+static void test_filter_drop_shadow_defaults_and_failclosed(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("filter: drop-shadow(2px 3px)", 0);
+    assert_int_equal(s.filter_drop_dx, 2);
+    assert_int_equal(s.filter_drop_dy, 3);
+    assert_int_equal(s.filter_drop_blur, 0);
+    assert_int_equal(s.filter_drop_color, 0x000000); /* default black (v1) */
+    /* malformed drop-shadow drops only that function; the rest of the list lives */
+    css_style m = css_parse_inline("filter: drop-shadow(red) blur(5px)", 0);
+    assert_int_equal(m.filter_drop_color, -1);
+    assert_int_equal(m.filter_blur, 5);
+    assert_int_equal(css_parse_inline("color:red", 0).filter_drop_color, -1);
+}
+
 static void test_backdrop_filter_blur(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("backdrop-filter: blur(8px)", 0).backdrop_blur, 8);
@@ -3561,6 +3697,16 @@ int main(void) {
         cmocka_unit_test(test_white_space_break_spaces),
         cmocka_unit_test(test_filter_blur_and_grayscale),
         cmocka_unit_test(test_backdrop_filter_blur),
+        cmocka_unit_test(test_background_clip_text),
+        cmocka_unit_test(test_text_fill_color),
+        cmocka_unit_test(test_conic_gradient_basic),
+        cmocka_unit_test(test_conic_gradient_from_angle),
+        cmocka_unit_test(test_conic_gradient_pie_hard_stop),
+        cmocka_unit_test(test_conic_gradient_deg_positions),
+        cmocka_unit_test(test_conic_gradient_fails_closed),
+        cmocka_unit_test(test_linear_gradient_positions_emitted),
+        cmocka_unit_test(test_filter_drop_shadow),
+        cmocka_unit_test(test_filter_drop_shadow_defaults_and_failclosed),
         cmocka_unit_test(test_background_rgba_alpha),
         cmocka_unit_test(test_anim_keyframes_resolved_from_sheet),
         cmocka_unit_test(test_anim_transform_keyframes_from_sheet),

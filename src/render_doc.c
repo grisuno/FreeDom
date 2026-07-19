@@ -121,6 +121,9 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->image_rendering = 0;
     b->caret_color = -1;
     b->object_fit = 0;
+    b->grad_text_n = 0;
+    b->grad_text_angle = 0;
+    for (int gt = 0; gt < 4; ++gt) b->grad_text_c[gt] = -1;
     b->cont_id = -1;
     b->cont_display = 0;
     b->cont_gap = 0;
@@ -384,6 +387,12 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->list_style_pos = r->list_style_pos;
                 lb->text_overflow = r->text_overflow;
                 lb->word_break = r->word_break;
+                /* Gradient text (2026-07-19): pure author presentation, same
+                 * gate as fg_rgb -- with caps.css off the glyphs keep the
+                 * theme color. */
+                lb->grad_text_n = r->grad_text_n;
+                lb->grad_text_angle = r->grad_text_angle;
+                for (int gt = 0; gt < 4; ++gt) lb->grad_text_c[gt] = r->grad_text_c[gt];
             }
             lb->cont_id = r->cont_id;
             lb->cont_display = r->cont_display;

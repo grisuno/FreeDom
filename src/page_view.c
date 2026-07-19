@@ -167,6 +167,9 @@ static void run_init_common(pv_run *r) {
     r->image_rendering = 0;
     r->caret_color = -1;
     r->object_fit = 0;
+    r->grad_text_n = 0;
+    r->grad_text_angle = 0;
+    for (int gt = 0; gt < 4; ++gt) r->grad_text_c[gt] = -1;
     r->cont_id = -1;
     r->cont_display = 0;
     r->cont_gap = 0;
@@ -450,6 +453,14 @@ void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scal
     r->text_decoration = text_decoration;
 }
 
+void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4) {
+    if (v == NULL || v->count == 0 || c4 == NULL || n < 2) return;
+    pv_run *r = &v->runs[v->count - 1];
+    r->grad_text_n = (n > 4) ? 4 : n;
+    r->grad_text_angle = angle;
+    for (int gt = 0; gt < 4; ++gt) r->grad_text_c[gt] = c4[gt];
+}
+
 void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
     if (v == NULL || v->count == 0 || e == NULL) return;
     pv_run *r = &v->runs[v->count - 1];
@@ -478,6 +489,22 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
      * caret is the effect, so the run carries the same -1 as unset. */
     r->caret_color = (e->caret_color == CSS_LEN_AUTO) ? -1 : e->caret_color;
     r->object_fit = e->object_fit;
+    /* Gradient text (2026-07-19). Engaged only by the full pattern:
+     * -webkit-text-fill-color:transparent WITH a background-clip:text source
+     * (gradient -> grad_text_*, solid -> fg override). transparent without a
+     * source is ignored (fail-visible: never invisible text from half a
+     * pattern). A real text-fill color simply overrides the glyph color. */
+    if (e->text_fill == CC_COLOR_TRANSPARENT) {
+        if (e->grad_text_n >= 2) {
+            r->grad_text_n = e->grad_text_n;
+            r->grad_text_angle = e->grad_text_angle;
+            for (int gt = 0; gt < 4; ++gt) r->grad_text_c[gt] = e->grad_text_c[gt];
+        } else if (e->bgclip_src_bg >= 0) {
+            r->fg_rgb = e->bgclip_src_bg;
+        }
+    } else if (e->text_fill >= 0) {
+        r->fg_rgb = e->text_fill;
+    }
 }
 
 void pv_set_container(pv_view *v, int cont_id, int cont_display,
@@ -845,6 +872,12 @@ void pv_text_ext_reset(pv_text_ext *e) {
     e->image_rendering = 0;
     e->caret_color = -1;
     e->object_fit = 0;
+    e->text_fill = -1;
+    e->bgclip_seen = 0;
+    e->bgclip_src_bg = -1;
+    e->grad_text_n = 0;
+    e->grad_text_angle = 0;
+    for (int gt = 0; gt < 4; ++gt) e->grad_text_c[gt] = -1;
 }
 
 /* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
@@ -885,6 +918,20 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
      * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. */
     if (e->caret_color == -1 && cs->caret_color != -1) e->caret_color = cs->caret_color;
     if (e->object_fit == 0 && cs->object_fit != CSS_OFI_UNSET) e->object_fit = cs->object_fit;
+    /* Gradient text (2026-07-19): -webkit-text-fill-color inherits like color;
+     * the NEAREST ancestor with background-clip:text latches its background
+     * (gradient or solid) as the glyph fill source. */
+    if (e->text_fill == -1 && cs->text_fill_color != -1) e->text_fill = cs->text_fill_color;
+    if (!e->bgclip_seen && cs->bg_clip == CSS_BGC_TEXT) {
+        e->bgclip_seen = 1;
+        if (cs->bg_grad_n >= 2) {
+            e->grad_text_n = cs->bg_grad_n;
+            e->grad_text_angle = cs->bg_grad_angle;
+            for (int gt = 0; gt < 4; ++gt) e->grad_text_c[gt] = cs->bg_grad_c[gt];
+        } else if (cs->background >= 0) {
+            e->bgclip_src_bg = cs->background;
+        }
+    }
 }
 
 /* True if the resolved style declares any HORIZONTAL box property. */
@@ -984,6 +1031,8 @@ static int css_has_boxdeco(const css_style *cs) {
             cs->filter_brightness > 0 || cs->filter_contrast > 0 ||
             cs->filter_sepia > 0 || cs->filter_invert > 0 ||
             cs->filter_saturate > 0 || cs->filter_hue_rotate > 0 ||
+            /* drop-shadow (2026-07-19): same group-compositing reasoning */
+            cs->filter_drop_color != -1 ||
             /* backdrop-filter (2026-07-19): needs the box def for the painter's
              * backdrop-sampling path, same reasoning as filter. */
             cs->backdrop_blur > 0;
@@ -1095,6 +1144,15 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bg_grad_radial = cs->bg_grad_radial;
     d->bg_size = cs->bg_size;
     d->bg_repeat = cs->bg_repeat;
+    /* background-clip:text (2026-07-19): the background lives INSIDE the
+     * glyphs (the runs carry it as their fill source); the box paints none
+     * of it (no band, no gradient rect, no image). */
+    if (cs->bg_clip == CSS_BGC_TEXT) {
+        d->bg_rgb = -1;
+        d->grad_n = 0;
+        d->bg_image_url[0] = '\0';
+        d->bg_image_url2[0] = '\0';
+    }
     d->anim_duration_ms = cs->anim_duration_ms;
     d->filter_blur = cs->filter_blur;
     d->filter_grayscale = cs->filter_grayscale;
@@ -1104,6 +1162,10 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->filter_invert = cs->filter_invert;
     d->filter_saturate = cs->filter_saturate;
     d->filter_hue_rotate = cs->filter_hue_rotate;
+    d->filter_drop_dx = cs->filter_drop_dx;
+    d->filter_drop_dy = cs->filter_drop_dy;
+    d->filter_drop_blur = cs->filter_drop_blur;
+    d->filter_drop_color = cs->filter_drop_color;
     d->backdrop_blur = cs->backdrop_blur;
     d->bg_pos_x = cs->bg_pos_x;
     d->bg_pos_y = cs->bg_pos_y;
@@ -1404,7 +1466,11 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * The legacy bgcolor attribute is the fallback when no CSS won.
              * currentColor resolves to the element's own color (already resolved in
              * this pass), and transparent propagates as a sentinel. */
-            if (!got_bg) {
+            /* background-clip:text (2026-07-19): that ancestor's background
+             * lives INSIDE the glyphs (pv_text_ext_merge captures it as the
+             * fill source), never as a band behind the text -- skip it here
+             * and let an outer ancestor still supply a band background. */
+            if (!got_bg && cs.bg_clip != CSS_BGC_TEXT) {
                 int b = -1;
                 if (cs.background >= 0) b = cs.background;
                 else if (cs.background == CC_COLOR_CURRENT && got_color) b = *fg;

@@ -877,6 +877,85 @@ static void test_build_author_color(void **state) {
     hp_document_free(doc);
 }
 
+/* Gradient text (2026-07-19): an element with background gradient +
+ * background-clip:text hands its gradient to the text runs inside it
+ * (nearest-ancestor resolution, like color). */
+static void test_gradient_text_runs(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>"
+        "h1 { background: linear-gradient(90deg, #ff0000, #0000ff);"
+        "     -webkit-background-clip: text;"
+        "     -webkit-text-fill-color: transparent; }"
+        "</style></head><body>"
+        "<h1>Gradient headline</h1>"
+        "<p>plain</p>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *g = find_text(v, "Gradient headline");
+    assert_non_null(g);
+    assert_int_equal(g->grad_text_n, 2);
+    assert_int_equal(g->grad_text_angle, 90);
+    assert_int_equal(g->grad_text_c[0], 0xff0000);
+    assert_int_equal(g->grad_text_c[1], 0x0000ff);
+
+    const pv_run *p = find_text(v, "plain");
+    assert_non_null(p);
+    assert_int_equal(p->grad_text_n, 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* -webkit-text-fill-color: a real color overrides the glyph color; transparent
+ * WITHOUT a bg-clip:text source keeps the author color (fail-visible: a half
+ * pattern must never hide text). */
+static void test_text_fill_color_runs(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<p style='color:#ff0000; -webkit-text-fill-color:#00ff00'>green glyphs</p>"
+        "<p style='color:#123456; -webkit-text-fill-color:transparent'>still visible</p>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *g = find_text(v, "green glyphs");
+    assert_non_null(g);
+    assert_int_equal(g->fg_rgb, 0x00ff00);
+
+    const pv_run *t = find_text(v, "still visible");
+    assert_non_null(t);
+    assert_int_equal(t->fg_rgb, 0x123456);
+    assert_int_equal(t->grad_text_n, 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* bg-clip:text with a SOLID background color: the text takes the bg color as
+ * its fill (the background lives only inside the glyphs). */
+static void test_bgclip_text_solid_color_runs(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><h2 style='background-color:#aa5500;"
+        " -webkit-background-clip:text; -webkit-text-fill-color:transparent'>"
+        "solid clip</h2></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *s = find_text(v, "solid clip");
+    assert_non_null(s);
+    assert_int_equal(s->fg_rgb, 0xaa5500);
+    /* the band behind the text must NOT paint that bg (it lives in the glyphs) */
+    assert_int_equal(s->bg_rgb, -1);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* Descendant (`div p`) and child (`nav > a`) combinators from a <style> sheet
  * resolve through the real DOM ancestor chain. */
 static void test_build_combinator_selectors(void **state) {
@@ -2666,6 +2745,9 @@ int main(void) {
         cmocka_unit_test(test_set_color_model),
         cmocka_unit_test(test_build_author_color),
         cmocka_unit_test(test_build_combinator_selectors),
+        cmocka_unit_test(test_gradient_text_runs),
+        cmocka_unit_test(test_text_fill_color_runs),
+        cmocka_unit_test(test_bgclip_text_solid_color_runs),
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_flex_item_values),
         cmocka_unit_test(test_build_flex_wrap_align_row_gap),

@@ -173,6 +173,15 @@ typedef struct pv_run {
      * scale-down. 0 = unset (fill). Non-inherited; meaningful only on PV_IMAGE and
      * PV_VIDEO runs but carried on all for simplicity. */
     int     object_fit;      /* css_object_fit, 0 (unset, same as fill) */
+    /* Gradient text (2026-07-19): the nearest ancestor with background-clip:
+     * text + -webkit-text-fill-color:transparent hands its background gradient
+     * to the runs inside it; the painter fills the glyphs with it (the band
+     * behind the text does NOT paint that background). grad_text_n 0 = none;
+     * angle in CSS degrees; c[] packed 0xRRGGBB stops (-1 unused). Author
+     * presentation: render_doc applies it only with caps.css, like fg_rgb. */
+    int     grad_text_n;
+    int     grad_text_angle;
+    int     grad_text_c[4];
     /* Nearest author flex/grid container ancestor (display:flex|grid in style), so
      * the presentation layer can lay the container's children out with box_tree.
      * cont_id groups runs of one container (-1 = none); cont_display is the
@@ -415,6 +424,13 @@ typedef struct pv_box_def {
     int filter_invert;
     int filter_saturate;
     int filter_hue_rotate;
+    /* filter: drop-shadow (2026-07-19): signed px offsets, blur px, packed
+     * color (-1 = none). Painted from the ALPHA silhouette of the composited
+     * group (the real content shape), unlike box-shadow's rect. */
+    int filter_drop_dx;
+    int filter_drop_dy;
+    int filter_drop_blur;
+    int filter_drop_color;
     /* backdrop-filter: blur(Npx) (2026-07-19). 0 = none. The painter blurs the
      * already-painted backdrop under the box rect before the box's own
      * (typically translucent) background composites on top; forces a stacking
@@ -605,12 +621,28 @@ typedef struct pv_text_ext {
     int image_rendering; /* css_image_rendering, 0 unset */
     int caret_color;     /* 0xRRGGBB, -1 unset; CSS_LEN_AUTO = explicit auto */
     int object_fit;      /* css_object_fit; 0 (unset) = fill */
+    /* Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the
+     * nearest ancestor that sets it (packed / CC_COLOR_TRANSPARENT / -1 unset).
+     * bgclip_seen latches the NEAREST ancestor with background-clip:text; that
+     * ancestor's gradient lands in grad_text_* (or its solid background in
+     * bgclip_src_bg) as the glyph fill source. */
+    int text_fill;
+    int bgclip_seen;
+    int bgclip_src_bg;   /* solid background of the bg-clip:text ancestor, -1 none */
+    int grad_text_n, grad_text_angle;
+    int grad_text_c[4];
 } pv_text_ext;
 
 /* Initialises every field of *e to its "unset" sentinel. NULL-safe. */
 void pv_text_ext_reset(pv_text_ext *e);
 
 void pv_set_text_ext(pv_view *v, const pv_text_ext *e);
+
+/* Sets the gradient-text fill (grad_text_*) verbatim on the most recently
+ * appended run. n < 2 is a no-op (no gradient). Used by the IPC read path,
+ * which receives the already-resolved fields; the build path engages gradient
+ * text through pv_set_text_ext's bg-clip:text + transparent-fill rule. */
+void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);
 
 /* Sets the nearest flex/grid container annotation on the most recently appended
  * run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/
