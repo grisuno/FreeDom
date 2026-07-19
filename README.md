@@ -215,6 +215,10 @@ walk is deferred to a follow-up.
 - **Image formats:** PNG, JPEG, WebP, and static GIF (own bounded pure-C LZW
   decoder, no giflib). Inline `data:` images. All decoded inside the sandboxed
   worker.
+- **Video pipe hardened:** `video_read_frame` reads one frame per poll iteration
+  (no recursion) with `v_read` handling `EAGAIN` via poll+retry, and
+  `decoder_out_fd` correctly uses `F_GETFL`/`O_NONBLOCK` — ensuring reliable
+  frame delivery from the FFmpeg decoder in the worker.
 
 ## Current Status (July 16, 2026)
 
