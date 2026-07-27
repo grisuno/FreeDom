@@ -697,6 +697,16 @@ static int is_block_like(lxb_tag_id_t t, css_display display) {
     return is_block_tag(t);
 }
 
+/* An element that can carry a BOX (border/background/padding rect). Table cells are
+ * box-generating even though they are not block tags: they must not cause a block
+ * break (a row of cells flows as one line through the grid container, and making
+ * <td> a block tag would split multi-link nav cells), but `td { border: 1px solid }`
+ * is one of the most common declarations on the web and used to paint nothing at all
+ * because no box was ever registered for the cell. */
+static int generates_box(lxb_tag_id_t t, css_display display) {
+    return is_block_like(t, display) || t == LXB_TAG_TD || t == LXB_TAG_TH;
+}
+
 /* Returns 1 when the element should cause a block break (start a new line).
  * display:inline-block and display:inline do NOT cause a break; they flow
  * inline while still being eligible for box registration. */
@@ -711,22 +721,21 @@ static int causes_block_break(lxb_tag_id_t t, css_display display) {
  * is never reached by the text-node walk, so page_view emits a placeholder run
  * for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
  * vacías"). Comment and other node types are ignored (they carry no content). */
-static int element_is_content_leaf(const lxb_dom_node_t *n) {
-    for (const lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
-        if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) return 0;
-        if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
-            lxb_dom_text_t *tx = lxb_dom_interface_text((lxb_dom_node_t *)c);
-            const char *d = (const char *)tx->char_data.data.data;
-            size_t len = tx->char_data.data.length;
-            for (size_t i = 0; i < len; ++i) {
-                char ch = d[i];
-                if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' && ch != '\f')
-                    return 0;
-            }
-        }
+/* True iff a TEXT node carries nothing but HTML whitespace (so it contributes no
+ * content of its own). */
+static int text_node_is_blank(const lxb_dom_node_t *c) {
+    lxb_dom_text_t *tx = lxb_dom_interface_text((lxb_dom_node_t *)c);
+    const char *d = (const char *)tx->char_data.data.data;
+    size_t len = tx->char_data.data.length;
+    for (size_t i = 0; i < len; ++i) {
+        char ch = d[i];
+        if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' && ch != '\f')
+            return 0;
     }
     return 1;
 }
+
+/* element_is_content_leaf lives further down, next to the style cache it needs. */
 
 static int heading_level(lxb_tag_id_t t) {
     switch (t) {
@@ -1349,6 +1358,65 @@ static int is_italic_tag(lxb_tag_id_t t) {
  * emphasis from tags (<b>/<em>/...) still applies; an explicit CSS font-weight /
  * font-style on the nearest ancestor that sets it takes precedence over the tag
  * default. The <font color> attribute is a legacy fallback when no CSS color won. */
+/* True iff element `p` lays its children out as a ROW of inline-level boxes: it has
+ * at least one element child, EVERY element child is display:inline-block, and it
+ * carries no text of its own beyond whitespace. Such a parent -- a nav bar, a badge
+ * strip, a button group, a tag list -- flows its children side by side shrink-wrapped
+ * to their content, which is exactly the flex-row model the presentation layer
+ * already implements, so page_view stamps it as an ANONYMOUS flex container.
+ * Without this every inline-block child opened a full-width block box and they
+ * stacked vertically, one per line.
+ *
+ * Deliberately narrow: MIXED content (text sitting next to an inline-block) is left
+ * alone, because that needs real inline layout inside a line box, not a flex row --
+ * turning it into a row would reflow the surrounding sentence. Bounded so a hostile
+ * page cannot build an unbounded row; past the cap the presentation layer would
+ * degrade the container to plain flow anyway. */
+#define PV_MAX_INLINE_ROW_ITEMS 128   /* mirrors the layout engine's per-container item cap */
+
+static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
+                               pv_style_cache *cache) {
+    int nel = 0;
+    for (const lxb_dom_node_t *c = p->first_child; c != NULL; c = c->next) {
+        if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
+            if (!text_node_is_blank(c)) return 0;
+        } else if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_dom_element_t *ce = lxb_dom_interface_element((lxb_dom_node_t *)c);
+            css_style ccs = cached_element_style(ce, sheet, cache);
+            if (ccs.display != CSS_DISP_INLINE_BLOCK) return 0;
+            if (++nel > PV_MAX_INLINE_ROW_ITEMS) return 0;
+        }
+    }
+    return nel > 0;
+}
+
+/* True iff an element has NO IN-FLOW content of its own: no in-flow child elements
+ * and no non-whitespace text. Such a decorated element (a styled bar, spacer, tile,
+ * icon) is never reached by the text-node walk, so page_view emits a placeholder run
+ * for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
+ *
+ * A child that is display:none or OUT OF FLOW (position:absolute/fixed) is not
+ * content: it is painted by the positioning pass, not by the parent's flow. Counting
+ * such a child as content meant a `position:relative` wrapper holding only absolutely
+ * positioned children (a hero with an overlay, a card with a corner badge) registered
+ * no box at all -- so it painted nothing, reserved no height, and, worst of all, its
+ * children lost their containing block and resolved their insets against a degenerate
+ * 0x0 rect, landing off-screen. Comment and other node types carry no content. */
+static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
+                                   pv_style_cache *cache) {
+    for (const lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
+        if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_dom_element_t *ce = lxb_dom_interface_element((lxb_dom_node_t *)c);
+            css_style ccs = cached_element_style(ce, sheet, cache);
+            if (ccs.display == CSS_DISP_NONE) continue;
+            if (ccs.position == CSS_POS_ABSOLUTE || ccs.position == CSS_POS_FIXED) continue;
+            return 0;
+        }
+        if (c->type == LXB_DOM_NODE_TYPE_TEXT && !text_node_is_blank(c)) return 0;
+    }
+    return 1;
+}
+
 static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const css_sheet *sheet,
                             const char **href, size_t *href_len,
@@ -1471,7 +1539,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * (outer) box found, so the registry holds the parent links. block_id is
              * structure; the decoration (on the box def) is author presentation that
              * render_doc gates behind caps.css. */
-            if (box_reg != NULL && is_block_like(t, cs.display) && css_has_boxdeco(&cs)) {
+            if (box_reg != NULL && generates_box(t, cs.display) && css_has_boxdeco(&cs)) {
                 int bid = box_reg_id(box_reg, p, &cs);
                 if (bid >= 0) {
                     if (!got_boxdeco) {
@@ -1553,6 +1621,26 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     cont->align_self = prev_align_self;
                     cont->col_span = prev_col_span;
                     cont->row_span = prev_row_span;
+                    cont->item = prev_el;
+                }
+                got_cont = 1;
+            }
+            /* Anonymous flex row for a parent whose children are all inline-block
+             * (see is_inline_block_row). The parent's text-align chooses where the
+             * row sits, mirroring how inline-level boxes are aligned in a line box:
+             * center/right map to the matching justify-content. */
+            else if (!got_cont && reg != NULL && is_inline_block_row(p, sheet, style_cache)) {
+                cont->display = BX_DISPLAY_FLEX;
+                cont->gap = 0;
+                cont->justify = (cs.text_align == CSS_ALIGN_CENTER) ? FX_JUSTIFY_CENTER
+                              : (cs.text_align == CSS_ALIGN_RIGHT)  ? FX_JUSTIFY_END
+                                                                    : FX_JUSTIFY_START;
+                cont->cols = 0;
+                cont->id = container_id(reg, p);
+                if (have_prev_el) {
+                    cont->grow = prev_grow; cont->shrink = prev_shrink;
+                    cont->basis = prev_basis; cont->order = prev_order;
+                    cont->align_self = prev_align_self;
                     cont->item = prev_el;
                 }
                 got_cont = 1;
@@ -2636,7 +2724,11 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_emphasis(v, (t == LXB_TAG_TH) ? 1 : cbold, citalic);
                 pv_set_color(v, cfg);
                 pv_set_bgcolor(v, cbg);
-                pv_set_text_style(v, calign, cfs, clh, cdeco);
+                /* UA default: a <th> centers its text unless the author says otherwise. */
+                pv_set_text_style(v,
+                                  (t == LXB_TAG_TH && calign == CSS_ALIGN_UNSET)
+                                      ? (int)CSS_ALIGN_CENTER : calign,
+                                  cfs, clh, cdeco);
                 pv_set_text_ext(v, &cext);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
@@ -2670,6 +2762,11 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * item identity), so item-grouping downstream never merges cells. */
                 pv_set_cont_item(v, item_ordinal(&items, cid, n));
                 pv_set_float(v, cu_cont.float_side, cu_cont.float_id, cu_cont.float_clear);
+                /* The cell's own box (`td { border: 1px solid; padding: 5px }`).
+                 * resolve_context registered it, but the id was resolved and then
+                 * dropped, so the cell's border/padding/background never reached the
+                 * painter -- bordered tables rendered as bare text columns. */
+                pv_set_block_id(v, cu_bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
@@ -3023,7 +3120,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(poster_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
-            } else if (element_is_content_leaf(n)
+            } else if (element_is_content_leaf(n, sheet, &cache)
                        && !in_skipped_subtree(n, base, js_enabled)
                        && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                        && !in_closed_details_subtree(n, base)

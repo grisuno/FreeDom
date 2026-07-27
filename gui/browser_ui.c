@@ -2760,6 +2760,12 @@ typedef struct rc_frag {
     const char *href;     /* link target (aliases the rd_block href, not owned); NULL if not a link */
     dom_node_id node_id;  /* element that produced this fragment (DOM_NODE_NONE if none) */
     int         block_id; /* owning box-def index (-1 if none), for hover-cursor lookup */
+    /* Author background of the INLINE run this fragment came from (0xRRGGBB, or -1).
+     * An inline element (<code>, <mark>, a highlighted <span>) paints its background
+     * behind its own glyphs only -- it is not a full-width band. The row-level bg_rgb
+     * covers the block-level band case; a line whose fragments disagree paints no row
+     * band at all and leaves it to these per-fragment fills. */
+    int         bg_rgb;
     /* Author text-presentation extensions (Hito 23b-6), applied by the painter and
      * consistently by the layout measure. Defaults (no author style): family 0
      * (sans), transform 0 (none), letter_spacing 0, valign_dy 0, shadow_color -1
@@ -2891,6 +2897,8 @@ typedef struct rc_state {
     double indent_px;    /* left indent of the current line (list nesting), applied as row x_off */
     int    line_open, banner;
     int    bg_rgb;       /* current block's author background-color, or -1 */
+    int    line_bg;      /* background shared by the fragments of the open line, or -1 */
+    int    line_bg_mixed;/* set when the open line's fragments disagree on background */
     double bg_w;         /* background width for the current rows; 0 = full content width */
     int    align;        /* current block's author text-align (css_align), 0 = left/unset */
     int    line_scale;   /* current block's author line-height percent, 0 = use theme spacing */
@@ -3120,7 +3128,14 @@ static void block_margins(const ui_theme *th, const rd_block *b,
                           double *top_px, double *bottom_px) {
     const char *tag = rd_block_tag(b);
     if (tag == NULL) { *top_px = th->paragraph_gap; *bottom_px = th->paragraph_gap; return; }
-    bx_box box = bx_default_for_tag(tag);
+    /* rd_block_tag reports every body-text block as "p", so a plain <li> inherited
+     * <p>'s 1em UA margins and list items were spread a full blank line apart, each
+     * with its own background stripe, instead of the tight block a browser draws.
+     * A block inside a list (indent > 0) takes the <li> UA box (zero margins); the
+     * list's own <ul>/<ol> margins still space it from the surrounding text. The
+     * approximation is deliberate: a real <p> nested inside an <li> also loses its
+     * margins, which is far rarer than the plain list this fixes. */
+    bx_box box = bx_default_for_tag((b->indent > 0 && b->kind != RD_HEADING) ? "li" : tag);
     double size; int bold, italic, underline; ui_rgb color;
     block_style(th, b, &size, &bold, &italic, &underline, &color);
     /* An author margin-top/bottom (px, only with caps.css) overrides the UA margin;
@@ -3139,7 +3154,13 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (r != NULL) {
         r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
         r->first = s->line_first; r->count = L->nfrag - s->line_first;
-        r->banner = s->banner; r->bg_rgb = s->bg_rgb; r->bg_w = s->bg_w;
+        r->banner = s->banner;
+        /* Only a line whose fragments all share one background gets a full-width
+         * band; a mixed line (body text with an inline <code>/<mark> highlight)
+         * leaves the painting to the per-fragment fills, instead of smearing the
+         * LAST run's colour across the whole line. */
+        r->bg_rgb = (r->count > 0 && s->line_bg_mixed) ? -1 : s->bg_rgb;
+        r->bg_w = s->bg_w;
         r->x_off = s->indent_px;
         r->align = s->align; r->blk = NULL;
         r->hidden = (s->hidden_from != 0);
@@ -3201,6 +3222,12 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->strike = strike; f->overline = overline; f->color = color;
         f->text = text; f->len = len; f->href = href; f->node_id = node_id;
         f->block_id = block_id;
+        f->bg_rgb = s->bg_rgb;
+        /* Track whether this line's fragments all share one background, so flush_line
+         * knows if a full-width row band is right (they agree) or would smear an
+         * inline highlight across the whole line (they do not). */
+        if (s->line_first == L->nfrag - 1) { s->line_bg = s->bg_rgb; s->line_bg_mixed = 0; }
+        else if (s->bg_rgb != s->line_bg) s->line_bg_mixed = 1;
         f->family = x->family; f->transform = x->transform;
         f->letter_spacing = x->letter_spacing; f->valign_dy = x->valign_dy;
         f->shadow_dx = x->shadow_dx; f->shadow_dy = x->shadow_dy;
@@ -3519,21 +3546,6 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
  * the text and translates the rows. Visual-only structure, applied by default
  * (decoupled from caps.css, which gates only author colors). A run that falls
  * outside the engine's range degrades to plain vertical flow. */
-/* Stage 3: true iff any block in [start, end) declares a flex per-item property
- * (grow/shrink/basis/order/align-self). Without one -- and without a container-level
- * flex-wrap/align-items (checked by the caller) -- the equal-columns path stays in
- * effect (byte-identical default). */
-static int container_has_flex_items(const rd_doc *doc, size_t start, size_t end) {
-    for (size_t k = start; k < end; ++k) {
-        const rd_block *bk = rd_at(doc, k);
-        if (bk->flex_grow >= 0 || bk->flex_shrink >= 0 ||
-            bk->flex_basis != CSS_LEN_UNSET || bk->flex_order != CSS_LEN_UNSET ||
-            (bk->flex_align_self != CSS_AK_UNSET && bk->flex_align_self != CSS_AK_AUTO))
-            return 1;
-    }
-    return 0;
-}
-
 /* Root box of a flex/grid item = the box (pv_box_def) closest to the container
  * (least parent_id depth) among the item's blocks [b0, b1). -1 when the item
  * carries no box (author CSS off, table cells, or an item with no decorated
@@ -3614,8 +3626,134 @@ static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def) {
     bx->aspect_num = def->aspect_num; bx->aspect_den = def->aspect_den;
 }
 
+/* Padding + border edges (px) of a flex/grid item's ROOT box, plus that box's
+ * index (-1 when the item carries none: table cells, author CSS off). Extracted
+ * so the auto-basis measuring pre-pass and the flow loop below cannot drift on
+ * what an item's content inset is. */
+typedef struct item_sides {
+    double ml, mr;           /* horizontal margin */
+    double pl, pr, pt, pb;   /* padding */
+    double bl, br, bt, bb;   /* border */
+    int    box;              /* item_root_box index, -1 when none */
+} item_sides;
+
+static item_sides item_sides_of(const rd_doc *doc, size_t b0, size_t b1) {
+    item_sides sd;
+    memset(&sd, 0, sizeof sd);
+    sd.box = item_root_box(doc, b0, b1);
+    const pv_box_def *d = (sd.box >= 0) ? rd_box_at(doc, (size_t)sd.box) : NULL;
+    if (d == NULL) return sd;
+    sd.pl = (d->pad_l > 0) ? (double)d->pad_l : 0.0;
+    sd.pr = (d->pad_r > 0) ? (double)d->pad_r : 0.0;
+    sd.pt = (d->pad_t > 0) ? (double)d->pad_t : 0.0;
+    sd.pb = (d->pad_b > 0) ? (double)d->pad_b : 0.0;
+    sd.bl = box_edge_px(d->bord_lw); sd.br = box_edge_px(d->bord_rw);
+    sd.bt = box_edge_px(d->bord_tw); sd.bb = box_edge_px(d->bord_bw);
+    /* page_view packs the horizontal box inset as padding + margin (css_hbox_resolve),
+     * so the item's own margin is what is left once its padding is taken back out.
+     * A flex item's margin is part of the space it occupies on the main axis. */
+    sd.ml = (double)d->box_l - sd.pl; if (sd.ml < 0.0) sd.ml = 0.0;
+    sd.mr = (double)d->box_r - sd.pr; if (sd.mr < 0.0) sd.mr = 0.0;
+    return sd;
+}
+
+/* The innermost box ENCLOSING a flex/grid container's items: the parent shared by
+ * the items' root boxes. page_view stamps no explicit "this box is the container",
+ * but the item root boxes are exactly its children, so their common parent_id is
+ * either the container's OWN box (when it carries decoration/padding/margin) or,
+ * when it does not, the nearest ancestor wrapper. Both are the right rect to lay the
+ * items out in -- the container's padding box, or the wrapper's content box.
+ * Returns -1 when no item carries a box or the items disagree on a parent (fail
+ * closed: lay out at top level rather than inside the wrong rect).
+ *
+ * The container used to close every open box, which lost BOTH: its own backdrop
+ * never painted, and a flex row inside a `max-width; margin:0 auto` wrapper escaped
+ * to full page width. */
+static int container_box_of(const rd_doc *doc, size_t start, size_t end) {
+    int parent = -1;
+    int seen = 0;
+    for (size_t k = start; k < end; ) {
+        size_t j = k + 1;
+        int item = rd_at(doc, k)->cont_item;
+        while (j < end && rd_at(doc, j)->cont_item == item && item >= 0) ++j;
+        int rb = item_root_box(doc, k, j);
+        if (rb >= 0) {
+            const pv_box_def *d = rd_box_at(doc, (size_t)rb);
+            int p = (d != NULL) ? d->parent_id : -1;
+            if (!seen) { parent = p; seen = 1; }
+            else if (p != parent) return -1;
+        }
+        k = j;
+    }
+    return seen ? parent : -1;
+}
+
+/* Wrap threshold used when measuring an item's MAX-CONTENT width: wide enough that
+ * no realistic line wraps, small enough to stay far from any overflow in the
+ * accumulating pen arithmetic. */
+#define FLEX_MEASURE_W  100000.0
+
+/* Max-content width (px) of a flex item: the widest line its blocks [b0, b1)
+ * produce when flowed with no wrapping pressure. This is CSS `flex-basis: auto`
+ * resolving to the content size -- a flex item shrink-wraps its content and the
+ * LEFTOVER space is what justify-content distributes. The measurement reuses the
+ * real flow_text_block (same fonts, shaping, letter-spacing, transforms), so a
+ * measured width cannot drift from the width the item actually lays out at; the
+ * scratch layout is discarded. Returns 0.0 for an item with no text. */
+static double measure_item_content_w(cairo_t *cr, const browser_window *w,
+                                     const ui_theme *th, const rd_doc *doc,
+                                     size_t b0, size_t b1) {
+    rc_layout M;
+    rc_state  si;
+    memset(&M, 0, sizeof M);
+    memset(&si, 0, sizeof si);
+    for (size_t k = b0; k < b1; ++k) {
+        const rd_block *bk = rd_at(doc, k);
+        if (k > b0 && bk->block_break) flush_line(&M, &si, th);
+        si.bg_rgb = -1;
+        flow_text_block(cr, w, &M, &si, th, bk, FLEX_MEASURE_W);
+    }
+    flush_line(&M, &si, th);
+    double maxw = 0.0;
+    for (size_t r = 0; r < M.nrow; ++r) {
+        const rc_row *rr = &M.rows[r];
+        if (rr->count == 0 || rr->first + rr->count > M.nfrag) continue;
+        const rc_frag *last = &M.frags[rr->first + rr->count - 1];
+        double lw = last->x + last->width;
+        if (lw > maxw) maxw = lw;
+    }
+    rc_free(&M);
+    return maxw;
+}
+
+/* Main-axis base size of one flex item, in BORDER-BOX px (what bt_layout lays out).
+ * CSS resolution order: an explicit `flex-basis` wins; else an explicit author
+ * `width` (px or % of the container); else `auto` == the item's max-content width
+ * plus its own padding+border. Clamped to the container so one long item cannot
+ * push the line past the page. */
+static double flex_item_basis(cairo_t *cr, const browser_window *w,
+                              const ui_theme *th, const rd_doc *doc,
+                              size_t b0, size_t b1, const item_sides *sd,
+                              double content_w) {
+    const rd_block *bk = rd_at(doc, b0);
+    double edges = sd->ml + sd->mr;
+    if (bk->flex_basis >= 0) return (double)bk->flex_basis + edges;
+    double explicit_w = bx_width_cap(bk->box_w, bk->box_w_pct, content_w);
+    if (explicit_w > 0.0) return explicit_w + edges;
+    double basis = measure_item_content_w(cr, w, th, doc, b0, b1)
+                 + sd->pl + sd->pr + sd->bl + sd->br + edges;
+    if (basis > content_w) basis = content_w;
+    if (basis < 1.0) basis = 1.0;
+    return basis;
+}
+
+/* Lays the container's items inside the content rect [origin_x, origin_x+content_w).
+ * origin_x is non-zero when the container sits inside an open box (its own decorated
+ * box, or an ancestor wrapper): every column x and row x_off is placed relative to
+ * it, so a flex row nested in a max-width wrapper stays inside the wrapper. */
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
-                             rc_state *s, const ui_theme *th, double content_w,
+                             rc_state *s, const ui_theme *th,
+                             double origin_x, double content_w,
                              const rd_doc *doc, size_t start, size_t end) {
     size_t nruns = end - start;
     const rd_block *head = rd_at(doc, start);
@@ -3714,10 +3852,14 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * the identity map unless `order` reorders the main axis (stable insertion
      * sort: equal order keeps document order, matching CSS). An item's flex
      * values are read from its first run (fragments share them). */
-    int use_flex = !is_grid &&
-        (container_has_flex_items(doc, start, end) ||
-         head->cont_wrap == CSS_FW_WRAP || head->cont_wrap == CSS_FW_WRAP_REVERSE ||
-         head->cont_align_items != CSS_AK_UNSET);
+    /* Every flex container goes through the flex engine. It used to fall back to
+     * "g equal columns" unless an item declared a flex property, which made
+     * justify-content a no-op (equal columns leave no free space to distribute) and
+     * stretched every item to a full share -- a nav bar of three links filled the
+     * page instead of shrink-wrapping. Items now take their content size as base
+     * (flex_item_basis) and the leftover is justify-content's to place, matching
+     * the CSS flex model. */
+    int use_flex = !is_grid;
     size_t pos_of[BT_MAX_CHILDREN];
     for (size_t j = 0; j < g; ++j) pos_of[j] = j;
     /* CSS order reorders flex AND grid main-axis items (stable insertion
@@ -3774,25 +3916,21 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         root.row_gap = (double)head->cont_row_gap;
     }
     if (use_flex) {
-        /* An item without an explicit basis takes an equal share of the line
-         * (basis auto == content size needs text measured before layout; the
-         * equal share is the flat model's stand-in and matches the default path).
-         * With wrap, this share is still content_w/g (not per-line): an accurate
-         * per-line auto-basis needs measuring content before layout, so wrapping
-         * items that want real auto-sizing should set an explicit basis/width --
-         * the common case in practice (cards, nav items with a fixed min width). */
+        /* An item's base size is its content size unless the author sized it
+         * (flex_item_basis). That is what makes justify-content mean anything: the
+         * line's leftover space is content_w minus the sum of the base sizes. */
         root.display = BX_DISPLAY_FLEX;
         root.wrap = (head->cont_wrap == CSS_FW_WRAP || head->cont_wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
         root.wrap_reverse = (head->cont_wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
-        double share = (content_w - (double)head->cont_gap * (double)(g - 1)) / (double)g;
-        if (share < 1.0) share = 1.0;
         for (size_t j = 0; j < g; ++j) {
             const rd_block *bk = rd_at(doc, gstart[j]);
             bt_node *kid = &kids[pos_of[j]];
+            item_sides sd = item_sides_of(doc, gstart[j], gstart[j + 1]);
             kid->display = BX_DISPLAY_BLOCK;
             kid->grow = (bk->flex_grow >= 0) ? (double)bk->flex_grow / 100.0 : 0.0;
             kid->shrink = (bk->flex_shrink >= 0) ? (double)bk->flex_shrink / 100.0 : 1.0;
-            kid->basis = (bk->flex_basis >= 0) ? (double)bk->flex_basis : share;
+            kid->basis = flex_item_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
+                                         &sd, content_w);
             int akw = (bk->flex_align_self != CSS_AK_UNSET && bk->flex_align_self != CSS_AK_AUTO)
                       ? bk->flex_align_self : head->cont_align_items;
             kid->align = css_align_to_bt(akw);
@@ -3835,6 +3973,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
     int    item_box[BT_MAX_CHILDREN];
     double item_ox[BT_MAX_CHILDREN], item_oy[BT_MAX_CHILDREN];
+    double item_ml[BT_MAX_CHILDREN], item_mx[BT_MAX_CHILDREN];
     for (size_t j = 0; j < g; ++j) {
         rc_state si;
         memset(&si, 0, sizeof si);
@@ -3846,21 +3985,17 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * to zero height and a flex card lost its background/border/radius/shadow
          * (spec/page_view.md §4 "Ítems flex/grid"). block_id < 0 (table cells,
          * author CSS off) => no box => byte-identical to the pre-existing path. */
-        int rb = item_root_box(doc, gstart[j], gstart[j + 1]);
+        item_sides sd = item_sides_of(doc, gstart[j], gstart[j + 1]);
+        int rb = sd.box;
         item_box[j] = rb;
         const pv_box_def *rbd = (rb >= 0) ? rd_box_at(doc, (size_t)rb) : NULL;
-        double pl = 0, pr = 0, pt = 0, pb = 0, bl = 0, br = 0, bt = 0, bb = 0;
-        if (rbd != NULL) {
-            pl = (rbd->pad_l > 0) ? (double)rbd->pad_l : 0;
-            pr = (rbd->pad_r > 0) ? (double)rbd->pad_r : 0;
-            pt = (rbd->pad_t > 0) ? (double)rbd->pad_t : 0;
-            pb = (rbd->pad_b > 0) ? (double)rbd->pad_b : 0;
-            bl = box_edge_px(rbd->bord_lw); br = box_edge_px(rbd->bord_rw);
-            bt = box_edge_px(rbd->bord_tw); bb = box_edge_px(rbd->bord_bw);
-        }
-        item_ox[j] = pl + bl;
+        double pl = sd.pl, pr = sd.pr, pt = sd.pt, pb = sd.pb;
+        double bl = sd.bl, br = sd.br, bt = sd.bt, bb = sd.bb;
+        item_ox[j] = sd.ml + pl + bl;
         item_oy[j] = pt + bt;
-        double inner_w = cw - pl - pr - bl - br;
+        item_ml[j] = sd.ml;
+        item_mx[j] = sd.ml + sd.mr;
+        double inner_w = cw - sd.ml - sd.mr - pl - pr - bl - br;
         if (inner_w < 1.0) inner_w = 1.0;
         /* The item's author background paints its own column rect (zebra rows in
          * data tables via tr:nth-child(even), header bands...). The root box now
@@ -3902,14 +4037,19 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         const bt_node *kid = &kids[pos_of[j]];
         for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r) {
             L->rows[r].top += base_top + kid->y + item_oy[j];
-            L->rows[r].x_off = kid->x + item_ox[j];
+            L->rows[r].x_off = origin_x + kid->x + item_ox[j];
         }
         if (item_box[j] >= 0) {
             const pv_box_def *def = rd_box_at(doc, (size_t)item_box[j]);
             rc_box *bx = rc_add_box(L);
             if (bx != NULL && def != NULL) {
-                bx->x = kid->x; bx->top = base_top + kid->y;
-                bx->w = (kid->w < 0.0) ? 0.0 : kid->w;
+                /* The item's border box sits inside its margin box (kid->w spans
+                 * margin+border box, since the margin is part of the main-axis
+                 * space the item takes). */
+                double bw = kid->w - item_mx[j];
+                bx->x = origin_x + kid->x + item_ml[j];
+                bx->top = base_top + kid->y;
+                bx->w = (bw < 0.0) ? 0.0 : bw;
                 bx->h = (kid->h < 0.0) ? 0.0 : kid->h;
                 bx->block_id = item_box[j];
                 rc_box_copy_decoration(bx, def);
@@ -4272,13 +4412,28 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * columns and then skipped. */
         if (b->cont_id >= 0 &&
             (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID)) {
-            close_all_boxes(L, &s, th);  /* a container ends any open block box (v1) */
             size_t j = i + 1;
             while (j < rd_count(doc) && rd_at(doc, j)->cont_id == b->cont_id) ++j;
             double mt, mb;
             block_margins(th, b, &mt, &mb);
-            s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
-            layout_container(cr, w, L, &s, th, content_w, doc, i, j);
+            /* Reconcile to the innermost box ENCLOSING the container's items, exactly
+             * as the float band below does, instead of closing every open box. That
+             * box is the container's own (background/border/padding/margin/radius --
+             * so a flex toolbar or grid section finally paints its backdrop and insets
+             * its items), or, when the container carries no box, the nearest ancestor
+             * wrapper -- which is what keeps a flex row inside a `max-width; margin:0
+             * auto` container instead of spanning the whole page. Closing all boxes
+             * threw both away. The box is left OPEN: the next block's reconcile (or
+             * close_all_boxes at the end) finalizes its height, so it wraps the whole
+             * container. */
+            int cbox = container_box_of(doc, i, j);
+            reconcile_boxes(L, &s, th, doc, content_w, cbox);
+            double in_l, in_w;
+            rc_box_context(&s, content_w, &in_l, &in_w);
+            if (cbox < 0) s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
+            s.indent_px = in_l;   /* degrade paths flow through the same rect */
+            layout_container(cr, w, L, &s, th, in_l, in_w, doc, i, j);
+            s.indent_px = 0.0;
             s.prev_bottom = mb;
             i = j - 1;  /* the loop's ++i moves past the container */
             continue;
@@ -4446,6 +4601,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
  * built from the rc_box rects (in-flow boxes) plus a content-measurement pass for
  * out-of-flow blocks; pv_box_defs that are not present in either get zero geometry
  * (the solver treats them as zero-size at the containing block's origin). */
+static double input_box_width(double content_w);
+
 static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                         double vp_h, rc_layout *L) {
     const rd_doc *doc = w->doc;
@@ -4493,17 +4650,39 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
         if (bid >= nbox) continue;
         if (in_flow[bid]) continue;  /* already set from rc_box */
 
+        if (gw[bid] > 0.0) continue;  /* already sized from an earlier block of this box */
+
         const pv_box_def *bd = rd_box_at(doc, bid);
         if (bd == NULL) continue;
 
-        /* Width: author width cap (px or %), else the box's own bx_place against
-         * content_w. */
+        /* The maximal run of blocks belonging to this box (they are consecutive), so
+         * a multi-fragment positioned element measures all of its content. */
+        size_t bend = i + 1;
+        while (bend < rd_count(doc) && rd_at(doc, bend)->block_id == b->block_id) ++bend;
+
+        /* Width: an author width cap (px or %) wins. Otherwise `width: auto` on an
+         * out-of-flow box SHRINK-WRAPS to its content (CSS 2.2 §10.3.7) -- it does
+         * not fill its containing block. It used to fall back to the full content
+         * width, which made every absolutely positioned badge/label/overlay a
+         * full-width bar and sent `right`-anchored boxes far off-screen (their x is
+         * cb_right - width). The both-left-and-right case is stretched by the solver,
+         * which is the only place that knows the containing block. */
         double bw = bx_width_cap(bd->box_w, bd->box_w_pct, content_w);
         if (bw <= 0.0) {
-            bx_hplace hp = bx_place((double)bd->box_l, (double)bd->box_r, 0, 0, content_w);
-            bw = hp.content_w;
+            double pl = (bd->pad_l > 0) ? (double)bd->pad_l : 0.0;
+            double pr = (bd->pad_r > 0) ? (double)bd->pad_r : 0.0;
+            double edges = pl + pr + box_edge_px(bd->bord_lw) + box_edge_px(bd->bord_rw);
+            if (b->kind == RD_IMAGE) {
+                double dw, dh, ibox = content_w - 2.0 * th->image_box_pad;
+                bw = image_display_size(w, b, ibox, &dw, &dh)
+                     ? dw + 2.0 * th->image_box_pad : content_w;
+            } else if (b->kind == RD_INPUT) {
+                bw = input_box_width(content_w);
+            } else {
+                bw = measure_item_content_w(cr, w, th, doc, i, bend) + edges;
+            }
+            if (bw > content_w) bw = content_w;
         }
-        if (bw < 1.0) bw = content_w;
         if (bw < 1.0) bw = 1.0;
         gw[bid] = bw;
 
@@ -5675,16 +5854,27 @@ static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
     cairo_show_text(cr, label);
 }
 
+/* Free space left on a row's LINE BOX after its last fragment, or a negative/zero
+ * value when the line is full. The line box of a flex/grid cell or float band is
+ * the item's own column (bg_w) -- NOT the page's content width: centering "g2" in
+ * a grid cell must center it in the cell, not in the remaining page width. bg_w is
+ * set only by layout_container/the float band path, so a plain flow row (bg_w == 0)
+ * keeps the full-width behaviour. Shared by the align and justify helpers. */
+static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w) {
+    if (r->count == 0 || r->first + r->count > L->nfrag) return 0.0;
+    const rc_frag *last = &L->frags[r->first + r->count - 1];
+    double line_w = last->x + last->width;
+    double avail = (r->bg_w > 0.0) ? r->bg_w : (content_w - r->x_off);
+    return avail - line_w;
+}
+
 /* Horizontal shift a row's text gets from author text-align (center/right): the
  * slack between the available width and the line's right edge. 0 for left/justify/
  * unset, and for non-text rows. Shared by the painter and the link hit-test so the
  * click target matches exactly what is drawn. */
 static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w) {
-    if ((r->align != CSS_ALIGN_CENTER && r->align != CSS_ALIGN_RIGHT)
-        || r->count == 0 || r->first + r->count > L->nfrag) return 0.0;
-    const rc_frag *last = &L->frags[r->first + r->count - 1];
-    double line_w = last->x + last->width;
-    double slack = (content_w - r->x_off) - line_w;
+    if (r->align != CSS_ALIGN_CENTER && r->align != CSS_ALIGN_RIGHT) return 0.0;
+    double slack = row_line_slack(L, r, content_w);
     if (slack <= 0.0) return 0.0;
     return (r->align == CSS_ALIGN_CENTER) ? slack / 2.0 : slack;
 }
@@ -5696,10 +5886,7 @@ static double row_align_offset(const rc_layout *L, const rc_row *r, double conte
  * that precede the current fragment to get the fragment's shift. */
 static double row_justify_gap(const rc_layout *L, const rc_row *r, double content_w) {
     if (r->align != CSS_ALIGN_JUSTIFY || r->count < 2) return 0.0;
-    if (r->first + r->count > L->nfrag) return 0.0;
-    const rc_frag *last = &L->frags[r->first + r->count - 1];
-    double line_w = last->x + last->width;
-    double slack = (content_w - r->x_off) - line_w;
+    double slack = row_line_slack(L, r, content_w);
     if (slack <= 0.0) return 0.0;
     size_t nsp = 0;
     for (size_t k = r->first; k < r->first + r->count; ++k) {
@@ -6338,6 +6525,25 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
     for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
         const rc_frag *f = &L->frags[k];
         double fx = rx + f->x + jdx;
+        /* Inline background (<code>, <mark>, a highlighted <span>): fills behind
+         * THIS fragment's glyphs only, not the whole line. The row band above only
+         * covers a line whose fragments agree on a background; an inline highlight
+         * lives inside a line that does not, so without this it painted nothing at
+         * all. Skipped when the row band already filled the same colour. */
+        if (f->bg_rgb >= 0 && f->bg_rgb != r->bg_rgb) {
+            /* Reach to the next fragment when it shares this background: words are
+             * separate fragments and the inter-word space is pen advance, not
+             * fragment width, so filling each fragment alone left a hole in the
+             * middle of `<code>code span</code>`. A browser paints ONE box. */
+            double bgw = f->width;
+            if (k + 1 < r->first + r->count && k + 1 < L->nfrag) {
+                const rc_frag *nf = &L->frags[k + 1];
+                if (nf->bg_rgb == f->bg_rgb && nf->x > f->x) bgw = nf->x - f->x;
+            }
+            set_rgb(cr, rgb_from_packed(f->bg_rgb));
+            cairo_rectangle(cr, fx, ry, bgw, r->height);
+            cairo_fill(cr);
+        }
         /* Highlight the link under the pointer (all fragments of that link share
          * its href pointer into the doc). */
         if (show_hover && f->href != NULL && f->href == w->hover_href) {
@@ -7354,6 +7560,10 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
             .letter_spacing = 0, .valign_dy = 0,
             .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
             .opacity = -1,
+            /* -1 = no inline background. Omitting it would zero-init to 0, which is
+             * a VALID colour (black) rather than "unset", and the per-fragment fill
+             * would paint a black rect over the positioned box. */
+            .bg_rgb = -1,
         };
         content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
         cairo_font_extents_t fe;

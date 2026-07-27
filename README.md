@@ -126,6 +126,38 @@ positioned boxes: when `right` is set and `left` is auto, the box anchors to
 the right edge of its containing block (and similarly for `bottom`). These were
 already parsed but previously ignored in the box-tree position resolver.
 
+**Firefox-parity pass on modern layout (2026-07-27):** the render was diffed
+against Firefox 140 ESR headless on the same HTML, and the gaps that broke modern
+pages were closed rather than guessed at.
+
+- **Flex actually flexes.** A flex item without `flex-basis` is sized to its
+  *measured content* instead of an equal share of the row, so `justify-content`
+  (`space-between`/`center`/`space-around`) finally has leftover space to
+  distribute and a three-link nav bar shrink-wraps instead of spanning the page.
+  Item `margin` counts as main-axis space. Every flex container goes through the
+  flex engine (previously only those whose items declared a flex property).
+- **Containers paint their own box.** A `display:flex`/`display:grid` container
+  now paints its background/border/radius and lays its items out inside its
+  padding; nesting is preserved, so a flex row inside a
+  `max-width; margin: 0 auto` wrapper stays inside the wrapper.
+- **`display:inline-block` flows horizontally.** A parent whose element children
+  are all inline-block lays out as an anonymous flex row — nav bars, badge
+  strips and button groups no longer stack one per line.
+- **Out-of-flow boxes shrink-wrap.** `position:absolute` with `width:auto` sizes
+  to its content (a `right`-anchored badge lands at the right edge instead of
+  off-screen), and a `position:relative` wrapper holding *only* positioned
+  children generates its own box, so it paints, reserves its height and acts as
+  their containing block.
+- **Table cells generate boxes**, so `td { border: 1px solid }` paints (`<th>`
+  centered by UA default); **inline backgrounds** (`<code>`, `<mark>`) paint
+  behind their own glyphs instead of smearing across the line; `text-align`
+  inside a grid/flex cell centers within that cell; and `<li>` no longer
+  inherits a paragraph's `1em` margin, so lists are tight like a browser's.
+
+Still v1: text does not wrap *beside* a lone float, `align-items` centers
+against the tallest item rather than an explicitly taller container, and
+`width:auto` is not stretched between `left`+`right`.
+
 **Background Enhancements (R5):** `background-position` parsed with keyword
 (`left`/`center`/`right`/`top`/`bottom`) and pixel value support. Applied as
 a Cairo translate offset in the box decoration painter, with `center`

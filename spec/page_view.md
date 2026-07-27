@@ -461,6 +461,36 @@ colapsaba a altura 0 (la grilla entera desaparecía). Ahora, para cada ítem:
   `<span>` pill, un ícono circular dentro de una tarjeta) sigue sin pintar su decoración (el camino
   de contenedor aplana el interior a texto). Es el próximo incremento.
 
+### Paridad con Firefox: fila inline-block, hoja out-of-flow, caja de celda (2026-07-27)
+
+Tres reglas de generación de estructura que separaban el render de Freedom del de Firefox en
+páginas modernas. Verificadas comparando el mismo HTML en **Firefox 140 ESR headless**
+(`firefox --headless --screenshot`) contra `--download-png`.
+
+- **Fila anónima de inline-blocks** (`is_inline_block_row`). **Dado** un elemento cuyos hijos
+  elemento son **todos** `display:inline-block`, que no tiene texto propio más allá de espacios,
+  **cuando** se resuelve su contexto, **entonces** se marca como **contenedor flex anónimo**
+  (`BX_DISPLAY_FLEX`, `gap` 0, `justify` derivado del `text-align` del padre: `center`→`CENTER`,
+  `right`→`END`). Antes cada hijo `inline-block` abría una caja de bloque a ancho completo y se
+  **apilaban verticalmente, uno por línea** — una barra de navegación, una tira de badges o un
+  grupo de botones se rompía por completo. Deliberadamente **estrecho**: el contenido **mixto**
+  (texto junto a un inline-block) se deja intacto, porque necesita maquetación inline real dentro
+  de una línea, no una fila flex — convertirlo reflowaría la frase que lo rodea. Acotado por
+  `PV_MAX_INLINE_ROW_ITEMS` (128).
+- **Hoja de contenido ignora hijos fuera de flujo** (`element_is_content_leaf`). Un hijo
+  `display:none` o **fuera de flujo** (`position:absolute`/`fixed`) **no es contenido**: lo pinta
+  la pasada de posicionamiento, no el flujo del padre. Contarlo como contenido hacía que un
+  wrapper `position:relative` que solo contiene hijos posicionados **no registrara caja alguna**,
+  así que no pintaba, no reservaba altura y — lo peor — sus hijos **perdían su bloque contenedor**
+  y resolvían sus insets contra un rect degenerado de 0x0, aterrizando fuera de pantalla. Es el
+  patrón "hero con overlay" / "tarjeta con badge en la esquina".
+- **Las celdas de tabla generan caja** (`generates_box`). `<td>`/`<th>` **no** son block tags (no
+  deben cortar línea: una fila de celdas fluye como una línea por el contenedor grid, y hacer
+  `<td>` block partiría las celdas de navegación multi-enlace), pero **sí** generan caja:
+  `td { border: 1px solid }` es de lo más común en la web y no pintaba **nada** porque nunca se
+  registraba caja para la celda. Además el `block_id` resuelto de la celda se **reenvía** con
+  `pv_set_block_id` (se calculaba y se descartaba), y un `<th>` centra su texto por defecto de UA.
+
 ## 5. Tabla de errores
 
 | Código | Condición |

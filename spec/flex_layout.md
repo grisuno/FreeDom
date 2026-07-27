@@ -90,6 +90,26 @@ const char *fx_justify_name(fx_justify j);
      `gap` se respeta siempre y el sobrante se **suma** a él.
 - Escribe `n` `fx_result` en `out` (eje principal). El llamante aporta `out` (sin asignación).
 
+#### Contrato del llamante: `basis` es el tamaño BASE, no un reparto (2026-07-27)
+
+`fx_flex_line` es puro y no mide texto: el `basis` que recibe **es** el tamaño base del ítem. El
+orquestador (`layout_container`, `gui/browser_ui.c`) lo resolvía como un **reparto en partes
+iguales** (`content_w / n`) cuando el ítem no declaraba `flex-basis`, y solo entraba al motor flex
+si algún ítem declaraba una propiedad flex. Dos consecuencias, ambas visibles contra Firefox:
+
+- `justify-content` **no hacía nada**: columnas iguales llenan la línea, así que `leftover` era 0 y
+  no había sobrante que repartir. `space-between`, `center`, `space-around` eran no-ops.
+- Cada ítem se **estiraba** a su parte: una barra de navegación de tres enlaces ocupaba todo el
+  ancho de la página en vez de encogerse a su contenido.
+
+Ahora **todo** contenedor flex pasa por el motor, y el `basis` de un ítem sin `flex-basis` es
+(en este orden): un `width` de autor, o su **ancho de max-content** medido —
+`measure_item_content_w` fluye los bloques del ítem por el mismo `flow_text_block` que los maqueta,
+en un layout de usar y tirar, así la medida no puede divergir del render — **más su padding, borde
+y margen horizontal**, acotado al ancho del contenedor. El margen del ítem forma parte del espacio
+que ocupa en el eje principal (`kid->w` es la caja de margen; la caja de borde se inserta por
+`ml`), que es lo que separa los ítems cuando el autor usa `margin-right` en vez de `gap`.
+
 ### `fx_grid_columns`
 - `ncols == 0` → `FX_OK` sin escribir nada. `ncols > FX_MAX_ITEMS`, `avail < 0` o `gap < 0` →
   `FX_ERR_RANGE`. Con `ncols > 0`, `col_x`/`col_w` no pueden ser `NULL`.

@@ -569,8 +569,8 @@ Carried from the previous steps plus the new positioning scope:
   honored. A box without `top` anchors at the containing block's top; without
   `left`, at its left. Adding `right`/`bottom` is a future extension (no
   algorithm blocker; just the containing-block math).
-- **`CSS_LEN_AUTO` for insets treated as `CSS_LEN_UNSET`.** No shrink-to-fit
-  solver (the box uses its measured content size).
+- **`CSS_LEN_AUTO` for insets treated as `CSS_LEN_UNSET`.** No inset solver; the
+  box uses its measured content size (see "Out-of-flow width" below).
 - **`position:sticky` → `relative`.** No scroll hooks in the render; the user
   can still see the value in `dom_debug`. Real sticky needs an event from the
   scroll path that the render currently doesn't have.
@@ -589,10 +589,41 @@ Carried from the previous steps plus the new positioning scope:
 - **Positioned image / input blocks** (rare but possible) paint their text
   placeholder at the resolved rect; the image decode path is unchanged.
 
+### Out-of-flow width: shrink-to-fit + the missing containing block (2026-07-27)
+
+Two defects that only showed up together, found by rendering the same page in
+Firefox 140 ESR headless and in `--download-png`:
+
+- **`width: auto` on an out-of-flow box SHRINK-WRAPS to its content**
+  (CSS 2.2 §10.3.7); it does not fill its containing block. `position_doc` used to
+  fall back to the full page content width, so every absolutely positioned badge,
+  label, tooltip or overlay became a full-width bar — and, because a `right`-anchored
+  box is placed at `cb_right − width`, a right-anchored badge landed far off the
+  **left** edge of the page (verified: x = −954 for a 90px label). The width now
+  comes from measuring the box's own blocks through the real text-flow
+  (`measure_item_content_w`, the same code that lays them out, so the measurement
+  cannot drift), plus its padding and border, clamped to the content width. An author
+  `width` still wins; images use their display size, inputs their control width.
+- **A wrapper holding only out-of-flow children generates its own box.** See
+  `spec/page_view.md` §4 "hoja out-of-flow": such a wrapper registered no box at all,
+  so it painted nothing, reserved no height, and left its children resolving insets
+  against a degenerate 0×0 containing block.
+
+`right`/`bottom` insets are honored (box_tree R8), so with both fixes a
+`position:relative` panel with `top/left` and `right/bottom` badges matches Firefox.
+Regression lock: `test_download_png_absolute_shrinks_and_anchors_right` (scans the
+export for the badge and asserts it is narrow and right-anchored, and that the
+wrapper's background painted).
+
+**Still v1:** a box with BOTH `left` and `right` set and `width:auto` shrink-wraps
+instead of stretching between the two insets — the stretch needs the containing-block
+width, which only `bt_resolve_positioning` knows (it already computes `cb_w`, today
+unused). Full-bleed overlays (`left:0;right:0`) are the case this leaves short.
+
 ### Out of scope (Stage 2)
 
 - `position:sticky` with scroll (own follow-up: needs the scroll path).
-- `right`/`bottom` insets and shrink-to-fit (`CSS_LEN_AUTO` math).
+- `width:auto` stretched between `left` and `right` (see above).
 - Negative `z-index` paint (two-pass painter).
 - Padding-box vs border-box containing block (precision).
 - Flex/grid per-item sizing (Stage 3 of the plan).

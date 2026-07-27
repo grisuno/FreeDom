@@ -396,7 +396,10 @@ static void test_download_png_group_opacity_blends_with_background(void **state)
     const char *html =
         "<html><head><style>"
         "body{margin:0;padding:0;}"
-        "#box{position:absolute;top:0;left:0;background:#0000ff;opacity:0.5;}"
+        /* Explicit width: `width:auto` on an out-of-flow box shrink-wraps to its
+         * content (CSS 2.2 §10.3.7), so the sample point below would fall outside
+         * the box. This test is about the opacity BLEND, not about auto-sizing. */
+        "#box{position:absolute;top:0;left:0;width:800px;background:#0000ff;opacity:0.5;}"
         "</style></head><body>"
         "<div id=\"box\">X</div>"
         "<p>filler text to give the page a nonzero height for the export</p>"
@@ -434,6 +437,89 @@ static void test_download_png_group_opacity_blends_with_background(void **state)
     assert_true(r >= 125 && r <= 130);
     assert_true(g >= 125 && g <= 130);
     assert_true(b >= 253);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* An out-of-flow box with `width: auto` SHRINK-WRAPS to its content (CSS 2.2
+ * §10.3.7) instead of filling its containing block, and a `position:relative`
+ * wrapper that holds only out-of-flow children still generates its own box (so it
+ * paints and acts as their containing block).
+ *
+ * Both used to be wrong together: the wrapper registered no box at all (its only
+ * children were out of flow, so nothing in the flow referenced it), which left the
+ * absolutes resolving against a degenerate 0x0 containing block; and auto width fell
+ * back to the FULL content width, so a right-anchored badge was placed at
+ * cb_right - full_width, i.e. far off the left edge of the page. Verified against
+ * Firefox: the badge sits at the wrapper's right edge, and the area to its left is
+ * the wrapper's own background. */
+static void test_download_png_absolute_shrinks_and_anchors_right(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "#rel{position:relative;height:80px;background:#00ff00;}"
+        "#badge{position:absolute;top:10px;right:0;background:#0000ff;}"
+        "</style></head><body>"
+        "<div id=\"rel\"><div id=\"badge\">B</div></div>"
+        "<p>filler text to give the page a nonzero height for the export</p>"
+        "</body></html>";
+    const char *path = "__freedom_abs_shrink_page.html";
+    const char *png = "__freedom_abs_shrink_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    assert_true(px.width > 600 && px.height > 60);
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+
+    /* Scan the whole wrapper for the badge rather than hardcoding pixels (the export
+     * adds a page margin and the badge is only as wide as one glyph). Record the
+     * horizontal extent of the blue badge and confirm the wrapper's green paints. */
+    size_t blue_min = px.width, blue_max = 0, green_seen = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r <= 8 && g <= 8 && b >= 200) {          /* badge blue */
+                if (x < blue_min) blue_min = x;
+                if (x > blue_max) blue_max = x;
+            } else if (r <= 8 && g >= 200 && b <= 8) {   /* wrapper green */
+                ++green_seen;
+            }
+        }
+    }
+    /* The wrapper generated its own box and painted: a wrapper holding only
+     * out-of-flow children used to register no box at all and stayed blank. */
+    assert_true(green_seen > 1000);
+    /* The badge painted somewhere. */
+    assert_true(blue_max >= blue_min);
+    /* SHRINK-WRAPPED: one glyph plus padding, nowhere near the full page width.
+     * Auto width used to fall back to the whole content width. */
+    assert_true((blue_max - blue_min) < px.width / 5);
+    /* RIGHT-ANCHORED: sits in the right fifth of the page. With the old full-width
+     * fallback, x = cb_right - full_width put it off the LEFT edge instead. */
+    assert_true(blue_min > (px.width * 4) / 5);
     img_pixels_free(&px);
 
     unlink(path);
@@ -513,8 +599,11 @@ static void test_download_png_mix_blend_multiply_uses_cairo_operator(void **stat
     const char *html =
         "<html><head><style>"
         "body{margin:0;padding:0;}"
-        "#behind{position:absolute;top:0;left:0;background:#ff8800;}"
-        "#front{position:absolute;top:0;left:0;background:#0000ff;"
+        /* Explicit widths: an out-of-flow box with `width:auto` shrink-wraps to its
+         * content, which would put the sample point outside both boxes. This test is
+         * about the multiply BLEND, not about auto-sizing. */
+        "#behind{position:absolute;top:0;left:0;width:940px;background:#ff8800;}"
+        "#front{position:absolute;top:0;left:0;width:940px;background:#0000ff;"
         "mix-blend-mode:multiply;}"
         "</style></head><body>"
         "<div id=\"behind\">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>"
@@ -1072,6 +1161,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_images_local),
         cmocka_unit_test(test_download_png_negative_zindex_paints_behind_inflow),
         cmocka_unit_test(test_download_png_group_opacity_blends_with_background),
+        cmocka_unit_test(test_download_png_absolute_shrinks_and_anchors_right),
         cmocka_unit_test(test_download_png_inflow_opacity_blends_box_and_row_together),
         cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
         cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),

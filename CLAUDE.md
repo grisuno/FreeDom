@@ -414,6 +414,32 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   gateado por `caps.css`; sin CSS de autor `layout_doc` lo salta y los ítems no tienen caja → render
   idéntico. **Límite v1:** una caja **anidada dentro** de un ítem (un `<span>` pill, un ícono dentro
   de una tarjeta) aún no pinta su decoración. Ver `spec/page_view.md` §4, `[[freedom-empty-and-item-boxes]]`.
+- **Paridad con Firefox medida, no supuesta (2026-07-27):** las diferencias de render contra
+  navegadores modernos se **miden** con Firefox instalado en este host
+  (`firefox --headless --screenshot X.png --window-size=1000 file://...`) contra
+  `--download-png` del mismo HTML, no se adivinan. Ese diff empírico cerró siete brechas que
+  rompían páginas modernas: (1) **flex real** — `basis` de un ítem sin `flex-basis` es su
+  **max-content medido** (+padding/borde/margen), no un reparto `content_w/n`, y **todo**
+  contenedor flex pasa por el motor: antes `justify-content` era un no-op (columnas iguales no
+  dejan sobrante) y una nav de 3 enlaces ocupaba la página entera; (2) el **contenedor pinta su
+  propia caja** y sus ítems se maquetan **dentro** de ella — `layout_container` ya no hace
+  `close_all_boxes` sino `reconcile_boxes` (como la banda de floats), lo que además mantiene una
+  fila flex **dentro** de un wrapper `max-width; margin:0 auto` en vez de escaparse a ancho
+  completo; (3) `text-align` dentro de una celda flex/grid se centra en **la celda** (`bg_w`), no
+  en el ancho de página restante; (4) **`inline-block` fluye horizontal** — un padre cuyos hijos
+  son todos `inline-block` es un **contenedor flex anónimo** (antes cada hijo se apilaba en su
+  propia línea a ancho completo); (5) **out-of-flow** — `width:auto` **encoge al contenido** (antes
+  ancho completo ⇒ un badge anclado a `right` aterrizaba fuera de la pantalla por la izquierda) y un
+  wrapper `position:relative` con **solo** hijos posicionados **sí genera caja** (antes ninguna ⇒
+  sus hijos resolvían contra un bloque contenedor degenerado 0×0); (6) **celdas de tabla generan
+  caja** (`td{border}` no pintaba nada) y su `block_id` se reenvía; (7) **fondos inline**
+  (`<code>`, `<mark>`) pintan tras sus glifos, y una línea con fondos mixtos ya no embadurna el
+  color del último run a lo ancho. `<li>` deja de heredar el margen 1em de `<p>`. Cerrado con
+  `make test`+`make asan` limpios (51 suites), `fuzz-pv` 79k execs y revisión visual.
+  **Sigue abierto:** texto que fluye **al lado** de un `float` (hoy va debajo), `align-items` contra
+  una altura **explícita** del contenedor (centra respecto al ítem más alto, no a la caja), y
+  `width:auto` estirado entre `left`+`right`. Ver `spec/page_view.md` §4, `spec/box_engine.md`,
+  `spec/flex_layout.md`, `[[freedom-firefox-parity-batch]]`.
 - **Filtro de hosts opcional + override:** `block.conf`/`allow.conf` (formato `/etc/hosts`) se leen
   de `$FREEDOM_HOSTS_DIR`, `~/.config/freedom` y `./config`; la GUI consulta `hb_check` antes del
   fetch (la blanca gana y cubre subdominios). Falla **abierto**: sin listas no bloquea nada. La
