@@ -652,6 +652,10 @@ typedef struct css_style {
     int         anim_nkf;                /* 0..CSS_MAX_KF_STOPS, 0 = use default */
     int         anim_kf_pct[CSS_MAX_KF_STOPS];  /* percentage * 100 (0..10000) */
     int         anim_kf_val[CSS_MAX_KF_STOPS];  /* opacity value 0..100 */
+    /* Phase R1e: background/foreground color keyframe values per stop.
+     * -1 = unset; otherwise packed 0xRRGGBB. */
+    int         anim_kf_bg[CSS_MAX_KF_STOPS];  /* background-color per stop */
+    int         anim_kf_fg[CSS_MAX_KF_STOPS];  /* color per stop */
     /* Phase R1d: transform keyframe values per stop. PV_LEN_UNSET = unset for
      * tx/ty; 0 = unset for sx/sy/rotate (identity). */
     int         anim_kf_tx[CSS_MAX_KF_STOPS];

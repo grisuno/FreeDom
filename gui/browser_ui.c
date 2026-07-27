@@ -3691,6 +3691,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         if (is_grid) {
             root.grid_track = head->cont_col_w;
             root.grid_ntrack = PV_GRID_TRACKS;
+            root.grid_rows = (head->cont_rows > 0) ? (size_t)head->cont_rows : 0;
         }
         for (size_t j = 0; j < g; ++j) {
             kids[j].display = BX_DISPLAY_BLOCK;
@@ -6960,14 +6961,81 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
  * was written to avoid elsewhere: its background/border fades or blends
  * correctly, but a row's own cascaded background-color (paint_content_row's
  * r->bg_rgb fill, a separate draw call) does not, and paints solid on top. */
+
+/* Phase R1e: compute interpolated color from @keyframes data for a box,
+ * given an array of per-stop color values (kf_colors, one 0xRRGGBB per stop).
+ * Returns the static fallback_colour if the box has no active animation
+ * or no valid keyframe color data. Pure math, no I/O. */
+static int anim_kf_color(const pv_box_def *def, const int *kf_colors,
+                         int fallback_colour, uint64_t page_load_ms) {
+    if (def == NULL || kf_colors == NULL) return fallback_colour;
+    if (def->anim_duration_ms <= 0 || def->anim_nkf <= 0) return fallback_colour;
+
+    int has_color = 0;
+    for (int k = 0; k < def->anim_nkf && k < CSS_MAX_KF_STOPS; ++k) {
+        if (kf_colors[k] >= 0) { has_color = 1; break; }
+    }
+    if (!has_color) return fallback_colour;
+
+    ip_keyframe kf_buf[CSS_MAX_KF_STOPS * 2];
+    int kf_n = 0;
+    for (int k = 0; k < def->anim_nkf && k < CSS_MAX_KF_STOPS; ++k) {
+        if (kf_colors[k] >= 0) {
+            kf_buf[kf_n].pct = (double)def->anim_kf_pct[k] / 100.0;
+            kf_buf[kf_n].val = (double)kf_colors[k];
+            ++kf_n;
+        }
+    }
+    if (kf_n < 2) return fallback_colour;
+
+    ip_ease_fn ease;
+    if (def->anim_timing >= 0 && def->anim_timing < IP_EASE_COUNT) {
+        ease.kind = (ip_easing)def->anim_timing;
+        ease.steps_n = 1;
+        ease.steps_dir = 0;
+        ease.cx1 = ease.cy1 = ease.cx2 = ease.cy2 = 0.0;
+    } else {
+        ease.kind = IP_EASE_LINEAR;
+        ease.steps_n = 1;
+        ease.steps_dir = 0;
+        ease.cx1 = ease.cy1 = ease.cx2 = ease.cy2 = 0.0;
+    }
+
+    int iters = (def->anim_iterations != 0) ? def->anim_iterations : 1;
+    int dir = def->anim_direction;
+    if (dir < 0 || dir > 3) dir = 0;
+    int fill = def->anim_fill_mode;
+    if (fill < 0 || fill > 3) fill = 0;
+    int delay_ms = def->anim_delay_ms;
+    if (delay_ms < 0) delay_ms = 0;
+
+    ip_anim a;
+    ip_anim_init(&a, IP_VAL_SCALAR, &ease, kf_buf, kf_n,
+                 (double)def->anim_duration_ms, (double)delay_ms,
+                 iters, dir, fill);
+    int64_t elapsed = (int64_t)(now_ms() - page_load_ms);
+    if (elapsed < 0) elapsed = 0;
+    ip_anim_tick(&a, (double)elapsed);
+    double val = ip_anim_current(&a);
+    /* The interpolated value is a packed 0xRRGGBB color. Rounding and clamping:
+     * ip_lerp_color already clamps R/G/B to [0,255] and produces a valid
+     * packed uint32_t; the double result faithfully represents that. */
+    int result = (int)(val + 0.5);
+    if (result < 0) result = 0;
+    return result;
+}
+
 static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                                          const rc_box *bx, double ox, double oy) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
     const ui_bg_image *bgimg = (def != NULL) ? find_bg_image(w, def->bg_image_url) : NULL;
     const ui_bg_image *bgimg2 = (def != NULL) ? find_bg_image(w, def->bg_image_url2) : NULL;
     const ui_theme *th = &w->theme;
+    rc_box bx_anim = *bx;
+    if (def != NULL)
+        bx_anim.bg_rgb = anim_kf_color(def, def->anim_kf_bg, def->bg_rgb, w->page_load_mono_ms);
     if (!box_forms_stacking_context(def)) {
-        paint_box_decoration(cr, bx, ox, oy, bgimg, bgimg2, th);
+        paint_box_decoration(cr, &bx_anim, ox, oy, bgimg, bgimg2, th);
         return;
     }
     cairo_matrix_t m;
@@ -6977,7 +7045,7 @@ static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
-    paint_box_decoration(cr, bx, ox, oy, bgimg, bgimg2, th);
+    paint_box_decoration(cr, &bx_anim, ox, oy, bgimg, bgimg2, th);
     cairo_restore(cr);
     bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
 }
@@ -7006,8 +7074,11 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
     const ui_bg_image *bgimg = (def != NULL) ? find_bg_image(w, def->bg_image_url) : NULL;
     const ui_bg_image *bgimg2 = (def != NULL) ? find_bg_image(w, def->bg_image_url2) : NULL;
     const ui_theme *th = &w->theme;
+    rc_box bx_anim = *bx;
+    if (def != NULL)
+        bx_anim.bg_rgb = anim_kf_color(def, def->anim_kf_bg, def->bg_rgb, w->page_load_mono_ms);
     if (!box_forms_stacking_context(def)) {
-        paint_box_decoration(cr, bx, left, origin, bgimg, bgimg2, th);
+        paint_box_decoration(cr, &bx_anim, left, origin, bgimg, bgimg2, th);
         return;
     }
     cairo_matrix_t m;
@@ -7022,7 +7093,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
     cairo_push_group(cr);
     cairo_save(cr);
     cairo_transform(cr, &m);
-    paint_box_decoration(cr, bx, left, origin, bgimg, bgimg2, th);
+    paint_box_decoration(cr, &bx_anim, left, origin, bgimg, bgimg2, th);
     cairo_restore(cr);
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
@@ -7094,6 +7165,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     }
 
     /* Build a transient rc_box for the existing paint helper. */
+    int anim_bg = anim_kf_color(def, def->anim_kf_bg, def->bg_rgb, w->page_load_mono_ms);
     rc_box bx = {
         .x = pb->x, .top = pb->y, .w = pb->w, .h = pb->h, .block_id = -1,
         .bord_tw = def->bord_tw, .bord_rw = def->bord_rw,
@@ -7108,7 +7180,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,
         .outline_w = def->outline_w, .outline_style = def->outline_style,
         .outline_color = def->outline_color,
-        .bg_rgb = def->bg_rgb,
+        .bg_rgb = anim_bg,
         .bg_alpha = def->bg_alpha,
         .grad_n = def->grad_n, .grad_angle = def->grad_angle,
         .grad_c = { def->grad_c0, def->grad_c1, def->grad_c2, def->grad_c3 },

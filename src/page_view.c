@@ -536,6 +536,10 @@ void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span) {
     r->grid_span = (col_span > 0) ? col_span : 0;
 }
 
+void pv_set_grid_rows(pv_view *v, int grid_rows) {
+    if (v != NULL && v->count > 0) v->runs[v->count - 1].cont_rows = grid_rows;
+}
+
 void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int flex_order, int flex_direction, int flex_align_self) {
     if (v == NULL || v->count == 0) return;
@@ -1193,6 +1197,8 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
         d->anim_kf_sx[k]  = cs->anim_kf_sx[k];
         d->anim_kf_sy[k]  = cs->anim_kf_sy[k];
         d->anim_kf_rot[k] = cs->anim_kf_rot[k];
+        d->anim_kf_bg[k]  = cs->anim_kf_bg[k];
+        d->anim_kf_fg[k]  = cs->anim_kf_fg[k];
     }
     /* R8: ::before/::after generated content. Copy up to the field size. */
     if (cs->content_str[0] != '\0') {
@@ -3123,6 +3129,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
                                  cont.wrap, cont.row_gap, cont.align_items);
                 pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
+                pv_set_grid_rows(v, cont.grid_rows);
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                            cont.align_self);
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
@@ -3222,6 +3229,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
                           cont.wrap, cont.row_gap, cont.align_items);
                 pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
+                pv_set_grid_rows(v, cont.grid_rows);
                 pv_set_row_span(v, cont.row_span);
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                             cont.align_self);

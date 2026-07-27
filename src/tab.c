@@ -252,7 +252,7 @@ static int write_field(int fd, const char *s) {
  *            font_family,text_transform,letter_spacing,word_spacing,
  *            shadow_dx,shadow_dy,shadow_color,opacity,valign,text_indent,white_space,
  *            text_overflow,word_break,
- *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,
+ *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,cont_rows,
  *            cont_col_w[PV_GRID_TRACKS],grid_span,
  *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
  *            cont_wrap,cont_row_gap,cont_align_items,flex_align_self,
@@ -260,7 +260,7 @@ static int write_field(int fd, const char *s) {
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,box_w_pct,
  *            block_id,
  *            input_type,form_id,form_method, name, value )*
- * then the box-definition tree (Step D): [nbox]( the 68 box int32 fields, then the
+ * then the box-definition tree (Step D): [nbox]( the 172 box int32 fields, then the
  * background-image url() string, length-prefixed like the run strings above )*.
  * block_id on a run says which box it belongs to; boxes[block_id] carries the
  * decoration + parent.
@@ -288,7 +288,7 @@ static int write_view(int wfd, const pv_view *v) {
         };
         /* Block A: fixed-width scalars between the head strings and the grid array
          * (image dims, colors, the whole text-presentation set, container params). */
-        int32_t a[36] = {
+        int32_t a[37] = {
             (int32_t)r->img_w, (int32_t)r->img_h, (int32_t)r->fg_rgb, (int32_t)r->bg_rgb,
             (int32_t)r->text_align, (int32_t)r->font_scale, (int32_t)r->line_scale,
             (int32_t)r->text_decoration, (int32_t)r->font_family, (int32_t)r->text_transform,
@@ -302,7 +302,7 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->list_style_pos, (int32_t)r->image_rendering, (int32_t)r->caret_color,
             (int32_t)r->object_fit,
             (int32_t)r->cont_id, (int32_t)r->cont_display, (int32_t)r->cont_gap,
-            (int32_t)r->cont_justify, (int32_t)r->cont_cols,
+            (int32_t)r->cont_justify, (int32_t)r->cont_cols, (int32_t)r->cont_rows,
         };
         int32_t gtw[PV_GRID_TRACKS + 1];
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
@@ -352,7 +352,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[156] = {
+        int32_t f[172] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -445,6 +445,15 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->anim_kf_rot[2], (int32_t)bd->anim_kf_rot[3],
             (int32_t)bd->anim_kf_rot[4], (int32_t)bd->anim_kf_rot[5],
             (int32_t)bd->anim_kf_rot[6], (int32_t)bd->anim_kf_rot[7],
+            /* Phase R1e: background/foreground color keyframes */
+            (int32_t)bd->anim_kf_bg[0],  (int32_t)bd->anim_kf_bg[1],
+            (int32_t)bd->anim_kf_bg[2],  (int32_t)bd->anim_kf_bg[3],
+            (int32_t)bd->anim_kf_bg[4],  (int32_t)bd->anim_kf_bg[5],
+            (int32_t)bd->anim_kf_bg[6],  (int32_t)bd->anim_kf_bg[7],
+            (int32_t)bd->anim_kf_fg[0],  (int32_t)bd->anim_kf_fg[1],
+            (int32_t)bd->anim_kf_fg[2],  (int32_t)bd->anim_kf_fg[3],
+            (int32_t)bd->anim_kf_fg[4],  (int32_t)bd->anim_kf_fg[5],
+            (int32_t)bd->anim_kf_fg[6],  (int32_t)bd->anim_kf_fg[7],
             /* Phase R3b: expanded filter functions */
             (int32_t)bd->filter_brightness, (int32_t)bd->filter_contrast,
             (int32_t)bd->filter_sepia, (int32_t)bd->filter_invert,
@@ -739,12 +748,14 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         uint64_t total_budget = net ? 5000 : JS_DEFAULT_TIME_BUDGET;
         struct timespec t0;
         clock_gettime(CLOCK_MONOTONIC, &t0);
-        /* R7: two-pass execution — sync/external first, deferred second.
-         * Each pass shares the same page-wide budget. */
-        for (int pass = 0; pass < 2; ++pass) {
+        /* R7: three-pass execution — sync first, async second, deferred last.
+         * Each pass shares the same page-wide budget. When both async and defer
+         * are present, async wins per HTML spec (handled during extraction). */
+        for (int pass = 0; pass < 3; ++pass) {
         for (size_t i = 0; i < nscripts; i++) {
-            if (pass == 0 && scripts[i].defer) continue;  /* first pass: skip deferred */
-            if (pass == 1 && !scripts[i].defer) continue; /* second pass: only deferred */
+            if (pass == 0 && (scripts[i].defer || scripts[i].async)) continue; /* first pass: sync only */
+            if (pass == 1 && !scripts[i].async) continue;  /* second pass: async only */
+            if (pass == 2 && !scripts[i].defer) continue;   /* third pass: deferred only */
             uint64_t rem = budget_remaining_ms(&t0, total_budget);
             if (rem == 0) break; /* page JS budget spent; stop running scripts */
             js_set_time_budget(cs->js, rem);
@@ -1472,7 +1483,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[36], gtw[PV_GRID_TRACKS + 1], b[33];
+        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[33];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1485,7 +1496,7 @@ static int read_view(int fd, pv_view **out) {
                 toverflow = a[19], wbreak = a[20], tdeco_color = a[21], tdeco_style = a[22],
                 tdeco_thick = a[23], ttsize = a[24], tdir = a[25], tfvar = a[26],
                 tlpos = a[27], tirend = a[28], tcaret = a[29], tobject_fit = a[30],
-                cid = a[31], cdisp = a[32], cgap = a[33], cjust = a[34], ccols = a[35];
+                cid = a[31], cdisp = a[32], cgap = a[33], cjust = a[34], ccols = a[35], crows = a[36];
         int32_t fgrow = b[0], fshrink = b[1], fbasis = b[2], forder = b[3], fdir = b[4],
                 citem = b[5], cwrap = b[6], crgap = b[7], calign = b[8], fself = b[9],
                 flside = b[10], flid = b[11], flclear = b[12], bl = b[13], br = b[14],
@@ -1564,6 +1575,7 @@ static int read_view(int fd, pv_view **out) {
             pv_set_text_style(v, (int)talign, (int)fscale, (int)lscale, (int)deco);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
                              (int)cwrap, (int)crgap, (int)calign);
+            pv_set_grid_rows(v, (int)crows);
             {
                 int gw[PV_GRID_TRACKS];
                 for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) gw[gk] = (int)gtw[gk];
@@ -1588,7 +1600,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[156];
+        int32_t f[172];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1653,20 +1665,23 @@ static int read_view(int fd, pv_view **out) {
             .anim_kf_sx = { f[116], f[117], f[118], f[119], f[120], f[121], f[122], f[123] },
             .anim_kf_sy = { f[124], f[125], f[126], f[127], f[128], f[129], f[130], f[131] },
             .anim_kf_rot = { f[132], f[133], f[134], f[135], f[136], f[137], f[138], f[139] },
+            /* Phase R1e: background/foreground color keyframes */
+            .anim_kf_bg = { f[140], f[141], f[142], f[143], f[144], f[145], f[146], f[147] },
+            .anim_kf_fg = { f[148], f[149], f[150], f[151], f[152], f[153], f[154], f[155] },
             /* Phase R3b: expanded filter functions */
-            .filter_brightness = f[140], .filter_contrast = f[141],
-            .filter_sepia = f[142], .filter_invert = f[143],
-            .filter_saturate = f[144], .filter_hue_rotate = f[145],
+            .filter_brightness = f[156], .filter_contrast = f[157],
+            .filter_sepia = f[158], .filter_invert = f[159],
+            .filter_saturate = f[160], .filter_hue_rotate = f[161],
             /* M1.2c: skew + transform-origin */
-            .transform_skx = f[146], .transform_sky = f[147],
-            .transform_ox = f[148], .transform_oy = f[149],
+            .transform_skx = f[162], .transform_sky = f[163],
+            .transform_ox = f[164], .transform_oy = f[165],
             /* backdrop-filter blur, 2026-07-19 */
-            .backdrop_blur = f[150],
+            .backdrop_blur = f[166],
             /* background alpha percent, 2026-07-19 */
-            .bg_alpha = f[151],
+            .bg_alpha = f[167],
             /* filter: drop-shadow, 2026-07-19 */
-            .filter_drop_dx = f[152], .filter_drop_dy = f[153],
-            .filter_drop_blur = f[154], .filter_drop_color = f[155],
+            .filter_drop_dx = f[168], .filter_drop_dy = f[169],
+            .filter_drop_blur = f[170], .filter_drop_color = f[171],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

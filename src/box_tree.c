@@ -222,6 +222,12 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
     if (fx_grid_place_span(nk, cols, span, row_span, prow, pcol) != FX_OK) return BT_ERR_RANGE;
 
     size_t nrows = (nk > 0) ? prow[nk - 1] + 1 : 0;
+    /* Explicit grid rows (grid-template-rows) set a floor row count. When
+     * the placement algorithm produces fewer rows than declared, the explicit
+     * rows still occupy space (with zero-height measurements, their row-gap
+     * still applies). More items than explicit rows flow into implicit rows,
+     * already handled by the placement algorithm above. */
+    if (node->grid_rows > nrows) nrows = node->grid_rows;
     if (nrows > BT_MAX_CHILDREN) return BT_ERR_RANGE;
     double rowh[BT_MAX_CHILDREN];
     for (size_t r = 0; r < nrows; ++r) rowh[r] = 0.0;

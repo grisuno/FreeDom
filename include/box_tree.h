@@ -64,6 +64,7 @@ typedef struct bt_node {
     double          gap;         /* px between children (FLEX: main axis; GRID: columns) */
     fx_justify      justify;     /* FLEX main-axis distribution */
     size_t          grid_cols;   /* GRID: number of columns (>= 1) */
+    size_t          grid_rows;   /* GRID: explicit row count from grid-template-rows, 0 = auto */
     const int      *grid_track;  /* GRID: per-track sizes (0 auto / >0 px / <0 fr x100);
                                   * NULL (zero-init default) = equal columns, unchanged */
     size_t          grid_ntrack; /* valid entries in grid_track (tracks past it are auto) */

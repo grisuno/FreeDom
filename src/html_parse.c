@@ -171,14 +171,22 @@ hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count) {
         list[count].src  = src;
         list[count].type = type;
         int has_defer = 0;
+        int has_async = 0;
         if (src != NULL) {
             size_t dl = 0;
             const lxb_char_t *dv = lxb_dom_element_get_attribute(
                 lxb_dom_interface_element((lxb_dom_node_t *)n),
                 (const lxb_char_t *)"defer", 5, &dl);
             has_defer = (dv != NULL);
+            size_t al = 0;
+            const lxb_char_t *av = lxb_dom_element_get_attribute(
+                lxb_dom_interface_element((lxb_dom_node_t *)n),
+                (const lxb_char_t *)"async", 5, &al);
+            has_async = (av != NULL);
         }
-        list[count].defer = has_defer;
+        /* Per HTML spec: when both async and defer are present, async wins. */
+        list[count].defer = has_defer && !has_async;
+        list[count].async = has_async;
         count++;
     }
     if (count == 0) { free(list); return NULL; }

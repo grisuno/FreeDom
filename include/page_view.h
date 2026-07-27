@@ -193,6 +193,7 @@ typedef struct pv_run {
     int     cont_gap;     /* container gap in px (>= 0) */
     int     cont_justify; /* fx_justify of the container */
     int     cont_cols;    /* grid column count (>= 1 for grid), or 0 */
+    int     cont_rows;    /* grid row count (explicit grid-template-rows), or 0 */
     /* Grid track sizes of the container (2026-07-11; mirrors css_style.grid_col_w:
      * 0 auto / >0 px / <0 fr x100, first PV_GRID_TRACKS tracks) and this run's
      * ITEM column span (grid-column: span N; <= 0 = 1). Structure like cont_*,
@@ -468,6 +469,9 @@ typedef struct pv_box_def {
     int anim_kf_sx[8];
     int anim_kf_sy[8];
     int anim_kf_rot[8];
+    /* Phase R1e: background/foreground color keyframe values per stop. */
+    int anim_kf_bg[8];  /* bg color 0xRRGGBB or -1 */
+    int anim_kf_fg[8];  /* fg color 0xRRGGBB or -1 */
     /* convenience: last field marker for IPC count */
 } pv_box_def;
 
@@ -659,6 +663,7 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
  * col_span is the item's `grid-column: span N` (<= 0 = 1). No-op on an empty or
  * NULL view. The append helpers default everything to 0. */
 void pv_set_row_span(pv_view *v, int row_span);
+void pv_set_grid_rows(pv_view *v, int grid_rows);
 void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);
 
 /* Stage 3: sets the flex per-item values on the most recently appended run — the

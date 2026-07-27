@@ -205,6 +205,8 @@ struct css_sheet {
         struct css_keyframe_stop {
             double pct;
             int opacity;       /* -1 = unset */
+            int bg_color;      /* -1 = unset, packed 0xRRGGBB */
+            int fg_color;      /* -1 = unset, packed 0xRRGGBB */
             int transform_tx;  /* CSS_LEN_UNSET = unset */
             int transform_ty;  /* CSS_LEN_UNSET = unset */
             int transform_sx;  /* 0 = unset (meaning 100% = identity) */
@@ -4115,11 +4117,15 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                     kdecls, CSS_MAX_KEYFRAME_DECLS, sh->custom, sh->ncustom,
                                     sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
                                     NULL, NULL, 0);
-                                int kop = -1, ktx = CSS_LEN_UNSET, kty = CSS_LEN_UNSET, ksx = 0, ksy = 0, krot = 0;
+                                int kop = -1, kbg = -1, kfg = -1, ktx = CSS_LEN_UNSET, kty = CSS_LEN_UNSET, ksx = 0, ksy = 0, krot = 0;
                                 for (int dd = 0; dd < nd; ++dd) {
                                     int p = kdecls[dd].prop;
                                     if (p == P_OPACITY)
                                         kop = kdecls[dd].ival;
+                                    else if (p == P_BG)
+                                        kbg = kdecls[dd].ival;
+                                    else if (p == P_COLOR)
+                                        kfg = kdecls[dd].ival;
                                     else if (p == P_TRANSFORM_TX) ktx = kdecls[dd].ival;
                                     else if (p == P_TRANSFORM_TY) kty = kdecls[dd].ival;
                                     else if (p == P_TRANSFORM_SX) ksx = kdecls[dd].ival;
@@ -4129,6 +4135,8 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                 int kfi = sh->nkeyframes;
                                 sh->keyframes[kfi].stops[nst].pct = pct;
                                 sh->keyframes[kfi].stops[nst].opacity = kop;
+                                sh->keyframes[kfi].stops[nst].bg_color = kbg;
+                                sh->keyframes[kfi].stops[nst].fg_color = kfg;
                                 sh->keyframes[kfi].stops[nst].transform_tx = ktx;
                                 sh->keyframes[kfi].stops[nst].transform_ty = kty;
                                 sh->keyframes[kfi].stops[nst].transform_sx = ksx;
@@ -4550,6 +4558,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .anim_nkf = 0,
         .anim_kf_pct = { 0 },
         .anim_kf_val = { 0 },
+        .anim_kf_bg = { 0 },
+        .anim_kf_fg = { 0 },
         .filter_blur = 0, .filter_grayscale = 0, .backdrop_blur = 0,
         .filter_drop_dx = 0, .filter_drop_dy = 0, .filter_drop_blur = 0,
         .filter_drop_color = -1,
@@ -4643,6 +4653,8 @@ void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet) {
         const struct css_keyframe_stop *st = &sheet->keyframes[match].stops[k];
         s->anim_kf_pct[k] = (int)(st->pct * 100.0 + 0.5);
         s->anim_kf_val[k] = st->opacity;
+        s->anim_kf_bg[k]  = st->bg_color;
+        s->anim_kf_fg[k]  = st->fg_color;
         s->anim_kf_tx[k]  = st->transform_tx;
         s->anim_kf_ty[k]  = st->transform_ty;
         s->anim_kf_sx[k]  = st->transform_sx;
