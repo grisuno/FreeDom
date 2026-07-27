@@ -165,6 +165,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         P_BG_GRAD_RADIAL,
         /* content property (R8) for ::before/::after */
         P_CONTENT,
+        /* transition (v1 parse-only, runtime deferred to hito phase-4) */
+        P_TRANSITION_DURATION, P_TRANSITION_PROPERTY,
+        P_TRANSITION_TIMING, P_TRANSITION_DELAY,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -1594,7 +1597,21 @@ static int interp_valign(const char *v) {
     if (csel_ci_eq(v, "baseline")) return CSS_VA_BASELINE;
     if (csel_ci_eq(v, "sub"))      return CSS_VA_SUB;
     if (csel_ci_eq(v, "super"))    return CSS_VA_SUPER;
-    return -1;  /* top/middle/bottom/<length>: out of scope, fail closed */
+    if (csel_ci_eq(v, "middle"))   return CSS_VA_MIDDLE;
+    if (csel_ci_eq(v, "top"))      return CSS_VA_TOP;
+    if (csel_ci_eq(v, "bottom"))   return CSS_VA_BOTTOM;
+    /* text-top/text-bottom/<length>/<percentage>: fail closed for now. */
+    return -1;
+}
+
+/* transition-property value encoding: -1 = unset, 0 = none, 1 = all,
+ * 2 = opacity, 3 = transform. Other values not yet supported. */
+static int interp_transition_property(const char *v) {
+    if (csel_ci_eq(v, "none"))  return 0;
+    if (csel_ci_eq(v, "all"))   return 1;
+    if (csel_ci_eq(v, "opacity"))    return 2;
+    if (csel_ci_eq(v, "transform"))  return 3;
+    return -1;
 }
 
 static int interp_whitespace(const char *v) {
@@ -2372,6 +2389,65 @@ static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen) {
     if (cp == NULL || cp <= ep) return NULL;
     *cp = '\0';
     return ep + 1;
+}
+
+/* transition shorthand: "<property> <duration> <timing> <delay>". v1 handles
+ * a single value set (non-comma). Returns the number of decls emitted. */
+static int expand_transition(const char *val, css_decl *dst, int cap) {
+    if (cap < 4) return 0;
+    if (csel_ci_eq(val, "none")) {
+        dst[0].prop = P_TRANSITION_PROPERTY; dst[0].ival = 0; return 1;
+    }
+    char tok[CSS_TOK_MAX];
+    char toks[4][CSS_TOK_MAX];
+    int nt = 0;
+    const char *p = val;
+    while (nt < 4 && next_ws_token(&p, tok, sizeof tok)) {
+        size_t tl = strlen(tok);
+        if (tl >= CSS_TOK_MAX) break;
+        memcpy(toks[nt], tok, tl + 1);
+        ++nt;
+    }
+    int nout = 0;
+    int has_prop = 0, has_dur = 0, has_timing = 0, has_delay = 0;
+    for (int i = 0; i < nt && nout + 1 <= cap; ++i) {
+        if (!has_dur) {
+            int ms = interp_time_ms(toks[i]);
+            if (ms >= 0) {
+                if (!has_delay && has_dur) {
+                    dst[nout].prop = P_TRANSITION_DELAY; dst[nout].ival = ms;
+                    has_delay = 1;
+                } else {
+                    dst[nout].prop = P_TRANSITION_DURATION; dst[nout].ival = ms;
+                    has_dur = 1;
+                }
+                ++nout;
+                continue;
+            }
+        }
+        if (!has_timing && (csel_ci_eq(toks[i], "ease") ||
+            csel_ci_eq(toks[i], "linear") || csel_ci_eq(toks[i], "ease-in") ||
+            csel_ci_eq(toks[i], "ease-out") || csel_ci_eq(toks[i], "ease-in-out"))) {
+            int iv = -1;
+            if (csel_ci_eq(toks[i], "ease")) iv = 1;
+            else if (csel_ci_eq(toks[i], "linear")) iv = 0;
+            else if (csel_ci_eq(toks[i], "ease-in")) iv = 2;
+            else if (csel_ci_eq(toks[i], "ease-out")) iv = 3;
+            else if (csel_ci_eq(toks[i], "ease-in-out")) iv = 4;
+            dst[nout].prop = P_TRANSITION_TIMING; dst[nout].ival = iv;
+            has_timing = 1; ++nout;
+            continue;
+        }
+        if (!has_prop) {
+            int v = interp_transition_property(toks[i]);
+            if (v >= 0) {
+                dst[nout].prop = P_TRANSITION_PROPERTY; dst[nout].ival = v;
+                has_prop = 1; ++nout;
+                continue;
+            }
+        }
+    }
+    return nout;
 }
 
 /* filter (Phase R3): space-separated function list. Supported: blur(Npx),
@@ -3618,6 +3694,33 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         if (ms < 0) return 0;
         dst[0].prop = P_ANIM_DELAY; dst[0].ival = ms; return 1;
     }
+    else if (strcmp(prop, "transition-duration") == 0) {
+        int ms = interp_time_ms(val);
+        if (ms < 0) return 0;
+        dst[0].prop = P_TRANSITION_DURATION; dst[0].ival = ms; return 1;
+    }
+    else if (strcmp(prop, "transition-property") == 0) {
+        int v = interp_transition_property(val);
+        if (v < 0) return 0;
+        dst[0].prop = P_TRANSITION_PROPERTY; dst[0].ival = v; return 1;
+    }
+    else if (strcmp(prop, "transition-timing-function") == 0) {
+        int iv = -1;
+        if (csel_ci_eq(val, "ease")) iv = 1;
+        else if (csel_ci_eq(val, "linear")) iv = 0;
+        else if (csel_ci_eq(val, "ease-in")) iv = 2;
+        else if (csel_ci_eq(val, "ease-out")) iv = 3;
+        else if (csel_ci_eq(val, "ease-in-out")) iv = 4;
+        else return 0;
+        dst[0].prop = P_TRANSITION_TIMING; dst[0].ival = iv; return 1;
+    }
+    else if (strcmp(prop, "transition-delay") == 0) {
+        int ms = interp_time_ms(val);
+        if (ms < 0) return 0;
+        dst[0].prop = P_TRANSITION_DELAY; dst[0].ival = ms; return 1;
+    }
+    else if (strcmp(prop, "transition") == 0)
+        return expand_transition(val, dst, cap);
     else if (strcmp(prop, "filter") == 0)               return expand_filter(val, dst, cap);
     else if (strcmp(prop, "backdrop-filter") == 0 ||
              strcmp(prop, "-webkit-backdrop-filter") == 0)
@@ -4325,6 +4428,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_ANIM_FILL:           o->anim_fill_mode = d->ival; break;
             case P_ANIM_TIMING:         o->anim_timing = d->ival; break;
             case P_ANIM_DELAY:          o->anim_delay_ms = d->ival; break;
+            case P_TRANSITION_DURATION: o->transition_duration_ms = d->ival; break;
+            case P_TRANSITION_PROPERTY: o->transition_property = d->ival; break;
+            case P_TRANSITION_TIMING:   o->transition_timing = d->ival; break;
+            case P_TRANSITION_DELAY:    o->transition_delay_ms = d->ival; break;
             case P_FILTER_BLUR:         o->filter_blur = d->ival; break;
             case P_FILTER_GRAYSCALE:    o->filter_grayscale = d->ival; break;
             case P_FILTER_BRIGHTNESS:   o->filter_brightness = d->ival; break;

@@ -91,7 +91,8 @@ typedef enum css_text_transform {
 
 /* vertical-align (subset: only the inline shifts). 0 unset. */
 typedef enum css_valign {
-    CSS_VA_UNSET = 0, CSS_VA_BASELINE, CSS_VA_SUB, CSS_VA_SUPER
+    CSS_VA_UNSET = 0, CSS_VA_BASELINE, CSS_VA_SUB, CSS_VA_SUPER,
+    CSS_VA_MIDDLE, CSS_VA_TOP, CSS_VA_BOTTOM
 } css_valign;
 
 /* white-space (subset: only the wrap/keep distinction is consumed). 0 unset. */
@@ -658,6 +659,11 @@ typedef struct css_style {
     int         anim_kf_sx[CSS_MAX_KF_STOPS];
     int         anim_kf_sy[CSS_MAX_KF_STOPS];
     int         anim_kf_rot[CSS_MAX_KF_STOPS];
+    /* transition (v1 parse-only; runtime interpolation deferred). */
+    int         transition_duration_ms;
+    int         transition_property;      /* -1=unset, 0=none, 1=all, 2=opacity, 3=transform */
+    int         transition_timing;        /* ip_easing, -1=unset */
+    int         transition_delay_ms;
     /* filter (Phase R3): blur radius in px (0=none), grayscale 0..100% (0=none),
      * brightness/contrast/sepia/invert/saturate 0..100% (100=identity for
      * brightness/contrast/saturate, 0=none for sepia/invert),

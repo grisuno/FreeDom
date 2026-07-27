@@ -188,7 +188,10 @@ static void test_vertical_align(void **state) {
     assert_int_equal(css_parse_inline("vertical-align:super", 0).valign, CSS_VA_SUPER);
     assert_int_equal(css_parse_inline("vertical-align:sub", 0).valign, CSS_VA_SUB);
     assert_int_equal(css_parse_inline("vertical-align:baseline", 0).valign, CSS_VA_BASELINE);
-    assert_int_equal(css_parse_inline("vertical-align:middle", 0).valign, CSS_VA_UNSET);
+    assert_int_equal(css_parse_inline("vertical-align:middle", 0).valign, CSS_VA_MIDDLE);
+    assert_int_equal(css_parse_inline("vertical-align:top", 0).valign, CSS_VA_TOP);
+    assert_int_equal(css_parse_inline("vertical-align:bottom", 0).valign, CSS_VA_BOTTOM);
+    assert_int_equal(css_parse_inline("vertical-align:text-top", 0).valign, CSS_VA_UNSET); /* not yet supported */
     assert_int_equal(css_parse_inline("color:red", 0).valign, CSS_VA_UNSET);
 }
 

@@ -389,8 +389,12 @@ typedef struct browser_window {
 
     uint32_t            pointer_serial; /* last pointer-enter serial, for set_cursor */
     struct wl_cursor_theme *cursor_theme;
-    struct wl_cursor       *cursor_default;
-    struct wl_cursor       *cursor_hand;
+    struct wl_cursor       *cursor_default;   /* left_ptr */
+    struct wl_cursor       *cursor_hand;      /* pointer / hand2 / hand1 */
+    struct wl_cursor       *cursor_text;      /* xterm */
+    struct wl_cursor       *cursor_move;      /* move */
+    struct wl_cursor       *cursor_wait;      /* watch */
+    struct wl_cursor       *cursor_not_allowed; /* not-allowed */
     struct wl_surface      *cursor_surface;
 
     /* xkbcommon state for keyboard input. */
@@ -3431,8 +3435,11 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     x.grad_n = b->grad_text_n;
     x.grad_angle = b->grad_text_angle;
     for (int gt = 0; gt < 4; ++gt) x.grad_c[gt] = b->grad_text_c[gt];
-    if (b->valign == CSS_VA_SUB)        { x.valign_dy =  size * 0.18; size *= 0.83; }
-    else if (b->valign == CSS_VA_SUPER) { x.valign_dy = -size * 0.34; size *= 0.83; }
+    if (b->valign == CSS_VA_SUB)           { x.valign_dy =  size * 0.18; size *= 0.83; }
+    else if (b->valign == CSS_VA_SUPER)    { x.valign_dy = -size * 0.34; size *= 0.83; }
+    else if (b->valign == CSS_VA_MIDDLE)   { x.valign_dy =  size * 0.20; /* center relative to parent baseline */ }
+    else if (b->valign == CSS_VA_TOP)       { x.valign_dy = -size * 0.50; /* align top of text to parent ascent */ }
+    else if (b->valign == CSS_VA_BOTTOM)    { x.valign_dy =  size * 0.50; /* align bottom of text to parent descent */ }
 
     s->nowrap = (b->white_space == CSS_WS_NOWRAP || b->white_space == CSS_WS_PRE);
     s->break_words = (b->word_break == CSS_WB_BREAK);
@@ -3598,32 +3605,41 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          head->cont_align_items != CSS_AK_UNSET);
     size_t pos_of[BT_MAX_CHILDREN];
     for (size_t j = 0; j < g; ++j) pos_of[j] = j;
-    if (use_flex) {
-        size_t slot[BT_MAX_CHILDREN];   /* slot[j] = document item at layout slot j */
-        for (size_t j = 0; j < g; ++j) slot[j] = j;
-        for (size_t j = 1; j < g; ++j) {
-            size_t it = slot[j];
-            const rd_block *bi = rd_at(doc, gstart[it]);
-            int oi = (bi->flex_order != CSS_LEN_UNSET) ? bi->flex_order : 0;
-            size_t m = j;
-            while (m > 0) {
-                const rd_block *bj = rd_at(doc, gstart[slot[m - 1]]);
-                int oj = (bj->flex_order != CSS_LEN_UNSET) ? bj->flex_order : 0;
-                if (oj <= oi) break;
-                slot[m] = slot[m - 1];
-                --m;
+    /* CSS order reorders flex AND grid main-axis items (stable insertion
+     * sort: equal order keeps document order). */
+    {
+        int has_order = 0;
+        for (size_t j = 0; j < g; ++j) {
+            const rd_block *bj = rd_at(doc, gstart[j]);
+            if (bj->flex_order != CSS_LEN_UNSET) { has_order = 1; break; }
+        }
+        if (has_order) {
+            size_t slot[BT_MAX_CHILDREN];
+            for (size_t j = 0; j < g; ++j) slot[j] = j;
+            for (size_t j = 1; j < g; ++j) {
+                size_t it = slot[j];
+                const rd_block *bi = rd_at(doc, gstart[it]);
+                int oi = (bi->flex_order != CSS_LEN_UNSET) ? bi->flex_order : 0;
+                size_t m = j;
+                while (m > 0) {
+                    const rd_block *bj = rd_at(doc, gstart[slot[m - 1]]);
+                    int oj = (bj->flex_order != CSS_LEN_UNSET) ? bj->flex_order : 0;
+                    if (oj <= oi) break;
+                    slot[m] = slot[m - 1];
+                    --m;
+                }
+                slot[m] = it;
             }
-            slot[m] = it;
+            for (size_t j = 0; j < g; ++j) pos_of[slot[j]] = j;
         }
-        for (size_t j = 0; j < g; ++j) pos_of[slot[j]] = j;
-        /* flex-direction: row-reverse reverses the visual order of flex items.
-         * After the order sort, the slot array has the visual order (slot[0] =
-         * leftmost item). Reversing pos_of maps each document item to its reversed
-         * layout slot (item 0 → rightmost, last item → leftmost). */
-        if (head->flex_direction == CSS_FD_ROW_REVERSE) {
-            for (size_t j = 0; j < g; ++j)
-                pos_of[j] = g - 1 - pos_of[j];
-        }
+    }
+    /* flex-direction: row-reverse reverses the visual order of flex items.
+     * After the order sort, the slot array has the visual order (slot[0] =
+     * leftmost item). Reversing pos_of maps each document item to its reversed
+     * layout slot (item 0 → rightmost, last item → leftmost). */
+    if (use_flex && head->flex_direction == CSS_FD_ROW_REVERSE) {
+        for (size_t j = 0; j < g; ++j)
+            pos_of[j] = g - 1 - pos_of[j];
     }
 
     bt_node kids[BT_MAX_CHILDREN];
@@ -9192,12 +9208,24 @@ static const struct zxdg_toplevel_decoration_v1_listener deco_listener = { deco_
 
 /* --- input --- */
 
-/* Applies the hand (over a link) or default arrow cursor for the current pointer
- * enter serial. A no-op when no themed cursor is available (the compositor keeps
- * its own default). */
-static void set_cursor(browser_window *w, int hand) {
+/* Applies the appropriate Wayland cursor for the given CSS cursor value.
+ * A no-op when no themed cursor is available (the compositor keeps its own default). */
+static void set_cursor(browser_window *w, int cur_kind) {
     if (w->pointer == NULL || w->cursor_surface == NULL) return;
-    struct wl_cursor *c = hand ? w->cursor_hand : w->cursor_default;
+    struct wl_cursor *c = w->cursor_default;
+    switch (cur_kind) {
+        case CSS_CUR_POINTER:     c = w->cursor_hand; break;
+        case CSS_CUR_TEXT:        c = w->cursor_text; break;
+        case CSS_CUR_MOVE:        c = w->cursor_move; break;
+        case CSS_CUR_WAIT:        c = w->cursor_wait; break;
+        case CSS_CUR_NOT_ALLOWED: c = w->cursor_not_allowed; break;
+        case CSS_CUR_CROSSHAIR:   /* fallback to default arrow */ break;
+        case CSS_CUR_HELP:        /* fallback to default arrow */ break;
+        case CSS_CUR_GRAB:        /* fallback to default arrow */ break;
+        case CSS_CUR_ZOOM_IN:     /* fallback to default arrow */ break;
+        case CSS_CUR_NONE:        return; /* hide cursor */
+        default:                  c = w->cursor_default; break;
+    }
     if (c == NULL || c->image_count == 0) return;
     struct wl_cursor_image *img = c->images[0];
     struct wl_buffer *buf = wl_cursor_image_get_buffer(img);
@@ -9213,10 +9241,8 @@ static void set_cursor(browser_window *w, int hand) {
  * cursor shape and repaints so the hover highlight follows. The author `cursor`
  * (css_cursor) at the point is folded into the hand-vs-arrow decision: a
  * cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
- * even without an href. v1 only distinguishes pointer from everything else (the
- * rest of the keyword set resolves for completeness/debug_dom but still paints as
- * the default arrow -- see spec/css.md); overriding a LINK's hand cursor away
- * (e.g. `a{cursor:default}`) is a known v1 gap. */
+ * even without an href. v1 supports: default (arrow), pointer (hand), text (I-beam),
+ * move, wait (watch), not-allowed, crosshair, help, grab, zoom-in, none. */
 static void update_hover(browser_window *w) {
     const char *h = (w->doc != NULL && !w->menu_open)
                     ? link_at_point(w, w->ptr_x, w->ptr_y) : NULL;
@@ -9225,13 +9251,20 @@ static void update_hover(browser_window *w) {
     ui_hot hot = toolbar_button_at(w, w->ptr_x, w->ptr_y);
     if (h == w->hover_href && cur == w->hover_cursor && hot == w->hot) return;
 
-    int hand_was = (w->hover_href != NULL) || hot_actionable(w, w->hot) ||
-                   w->hover_cursor == CSS_CUR_POINTER;
-    int hand_now = (h != NULL) || hot_actionable(w, hot) || cur == CSS_CUR_POINTER;
+    int cursor_kind = cur;
+    if (cursor_kind == CSS_CUR_UNSET || cursor_kind == CSS_CUR_AUTO) {
+        int is_link = (h != NULL) || hot_actionable(w, hot);
+        cursor_kind = is_link ? CSS_CUR_POINTER : CSS_CUR_DEFAULT;
+    }
+    int old_cursor_kind = w->hover_cursor;
+    if (old_cursor_kind == CSS_CUR_UNSET || old_cursor_kind == CSS_CUR_AUTO) {
+        int was_link = (w->hover_href != NULL) || hot_actionable(w, w->hot);
+        old_cursor_kind = was_link ? CSS_CUR_POINTER : CSS_CUR_DEFAULT;
+    }
     w->hover_href = h;
     w->hover_cursor = cur;
     w->hot = hot;
-    if (hand_was != hand_now) set_cursor(w, hand_now);
+    if (cursor_kind != old_cursor_kind) set_cursor(w, cursor_kind);
     redraw(w);
 }
 
@@ -11254,15 +11287,20 @@ ui_status ui_run_browser(const char *start_url) {
             ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
     }
 
-    /* Themed cursors: a hand over links, the default arrow elsewhere. Best-effort
-     * from the system theme (no absolute paths); if unavailable the compositor's
-     * own default cursor is used. */
+    /* Themed cursors from the system theme (no absolute paths); if a cursor is
+     * unavailable its slot stays NULL and the compositor's own default is used. */
     w.cursor_theme = wl_cursor_theme_load(NULL, UI_CURSOR_SIZE, w.shm);
     if (w.cursor_theme != NULL) {
         w.cursor_default = wl_cursor_theme_get_cursor(w.cursor_theme, "left_ptr");
-        w.cursor_hand = wl_cursor_theme_get_cursor(w.cursor_theme, "pointer");
+        w.cursor_hand    = wl_cursor_theme_get_cursor(w.cursor_theme, "pointer");
         if (w.cursor_hand == NULL) w.cursor_hand = wl_cursor_theme_get_cursor(w.cursor_theme, "hand2");
         if (w.cursor_hand == NULL) w.cursor_hand = wl_cursor_theme_get_cursor(w.cursor_theme, "hand1");
+        w.cursor_text   = wl_cursor_theme_get_cursor(w.cursor_theme, "xterm");
+        if (w.cursor_text == NULL) w.cursor_text = wl_cursor_theme_get_cursor(w.cursor_theme, "ibeam");
+        w.cursor_move   = wl_cursor_theme_get_cursor(w.cursor_theme, "move");
+        w.cursor_wait   = wl_cursor_theme_get_cursor(w.cursor_theme, "watch");
+        w.cursor_not_allowed = wl_cursor_theme_get_cursor(w.cursor_theme, "not-allowed");
+        if (w.cursor_not_allowed == NULL) w.cursor_not_allowed = wl_cursor_theme_get_cursor(w.cursor_theme, "crossed_circle");
     }
     w.cursor_surface = wl_compositor_create_surface(w.compositor);
 
