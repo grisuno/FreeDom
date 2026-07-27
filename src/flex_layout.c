@@ -215,7 +215,7 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
         /* If this item spans multiple rows, mark its occupied columns in
          * the subsequent (rsp - 1) rows so later items skip them. */
         if (rsp > 1) {
-            size_t mask = ((1ull << sp) - 1ull) << c;
+            size_t mask = ((1ull << sp) - 1ull) << out_col[i];
             for (size_t kr = r + 1; kr < r + rsp; ++kr) {
                 while (nocc <= kr) { occ[nocc] = 0; ++nocc; }
                 occ[kr] |= mask;

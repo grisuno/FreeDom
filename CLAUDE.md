@@ -399,6 +399,21 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   se aplica **siempre**, desacoplada de `caps.css`; es estructura, no abre sockets ni filtra a la
   red. Solo los **colores** de autor (`fg_rgb`/`bg_rgb`) siguen gateados por `caps.css`. El gate
   vive en `render_doc` (`rd_build`). Antes flex/grid estaba gateado y no se veía nunca.
+- **Cajas vacías y decoración de ítems flex/grid pintan como en Firefox (2026-07-26):** el
+  render era **por nodo de texto**, así que un elemento decorado pero **sin contenido** (una barra
+  `<div style="background;height">`, un separador, un ícono, una `tile` de grid) nunca registraba
+  su caja y **desaparecía**; y un **ítem flex/grid** perdía la decoración de su caja raíz (fondo/
+  borde/radio/sombra de una tarjeta) y, si estaba vacío, colapsaba a altura 0 (la grilla entera se
+  esfumaba). Dos arreglos: (a) `page_view` emite un **run placeholder vacío** para toda hoja
+  box-generadora (mismo gate `css_has_boxdeco` que con contenido — la caja la decide el estilo, no
+  el contenido); el `open_box`/`close_top_box` existente reserva `box_h` y pinta. (b)
+  `layout_container` da a cada ítem su **caja raíz** (`item_root_box`, la de menor profundidad):
+  reserva su `box_h`/`min-height`, inserta el contenido por su padding+borde, y crea una `rc_box`
+  que pinta la decoración por el mismo bucle del painter (deco copiada por `rc_box_copy_decoration`,
+  DRY con `open_box`). **Byte-identical por defecto:** el placeholder es texto vacío con `block_id`
+  gateado por `caps.css`; sin CSS de autor `layout_doc` lo salta y los ítems no tienen caja → render
+  idéntico. **Límite v1:** una caja **anidada dentro** de un ítem (un `<span>` pill, un ícono dentro
+  de una tarjeta) aún no pinta su decoración. Ver `spec/page_view.md` §4, `[[freedom-empty-and-item-boxes]]`.
 - **Filtro de hosts opcional + override:** `block.conf`/`allow.conf` (formato `/etc/hosts`) se leen
   de `$FREEDOM_HOSTS_DIR`, `~/.config/freedom` y `./config`; la GUI consulta `hb_check` antes del
   fetch (la blanca gana y cubre subdominios). Falla **abierto**: sin listas no bloquea nada. La

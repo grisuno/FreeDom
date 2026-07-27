@@ -417,6 +417,50 @@ espacio); un candidato `data:` termina en el primer espacio o el final de la cad
 cortar en la coma interna de `;base64,`. Sin `src` **ni** `srcset` utilizable: sin run, como
 antes. Ver `[[freedom-data-url-images]]`.
 
+### Cajas vacías: el elemento decorado sin contenido también genera caja (2026-07-26)
+
+El recorrido es **por nodos de texto**: una caja (`pv_box_def`) solo se registraba cuando
+`resolve_context` la alcanzaba subiendo desde un texto descendiente. Un elemento **decorado pero
+vacío** (una barra `<div style="background:#f00;height:8px"></div>`, un separador con `height`,
+un ícono `<div>` circular, una `tile` de grid) **no tiene texto descendiente**, así que su caja
+nunca se registraba y **desaparecía del render** — justo lo contrario de un navegador real, donde
+un `<div>` vacío con fondo/tamaño **sí** pinta y reserva su espacio.
+
+- **Dado** un elemento que (a) **generaría una caja** (`css_has_boxdeco`: padding/borde/radio/
+  sombra/outline/posición/`height`/`min-height`/`aspect-ratio`/gradiente/opacity/blend/transform)
+  y (b) es una **hoja de contenido** — sin elementos hijo y sin texto que no sea espacio en blanco —
+  **cuando** el recorrido lo visita, **entonces** `page_view` emite **un run placeholder de texto
+  vacío** que lleva el `block_id` de esa caja (más su pertenencia flex/grid `cont_*` e ítem, vía
+  `resolve_context` sobre el propio elemento). El painter ya reserva `box_h`/`min-height` y pinta la
+  decoración al abrir/cerrar la caja (`open_box`/`close_top_box`), así que el placeholder es el único
+  eslabón que faltaba. El predicado de generación de caja es el **mismo** para elementos con y sin
+  contenido (semántica CSS: la caja la decide el estilo, no el contenido).
+- Las cajas **anidadas vacías** se resuelven solas por el mecanismo de padres existente: un
+  `<div bg>` cuyo único hijo es un `<div vacío>` no es hoja (tiene hijo elemento) → no emite
+  placeholder, pero el hijo hoja sí, y su `resolve_context` registra ambas cajas con su enlace
+  `parent_id`; al abrir/cerrar, el padre reserva la altura del hijo + su padding. Candado:
+  `test_build_empty_box_gets_run_and_box`.
+- **Byte-identical por defecto:** el placeholder es texto vacío (no emite fila) y su `block_id`
+  está gateado por `caps.css` en `render_doc`; con CSS de autor apagado (Privacy by Default) no hay
+  caja ni fila → render idéntico al previo.
+
+### Ítems flex/grid: reservan su altura de caja y pintan su decoración (2026-07-26)
+
+Un ítem de contenedor flex/grid se maqueta en `layout_container` (no por el camino de cajas plano),
+que antes solo **fluía el texto** del ítem: se perdía la **decoración de la caja raíz del ítem**
+(fondo/borde/radio/sombra de una tarjeta) y un ítem **vacío** (una `tile` de grid sin texto)
+colapsaba a altura 0 (la grilla entera desaparecía). Ahora, para cada ítem:
+
+- La **caja raíz** del ítem = la caja de menor profundidad (más cercana al contenedor) entre los
+  `block_id` de sus runs.
+- Su **`box_h`/`min-height`** es un piso de la altura del ítem (una `tile` vacía reserva su alto).
+- El contenido del ítem se **inserta por el padding+borde** de esa caja.
+- Se crea una `rc_box` con el rect final de la columna del ítem, así la decoración pinta por el
+  mismo bucle de cajas del painter.
+- **Límite v1:** solo pinta la caja **raíz** del ítem; una caja **anidada dentro** del ítem (un
+  `<span>` pill, un ícono circular dentro de una tarjeta) sigue sin pintar su decoración (el camino
+  de contenedor aplana el interior a texto). Es el próximo incremento.
+
 ## 5. Tabla de errores
 
 | Código | Condición |

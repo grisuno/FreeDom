@@ -706,6 +706,28 @@ static int causes_block_break(lxb_tag_id_t t, css_display display) {
     return is_block_tag(t);
 }
 
+/* True iff an element has NO content of its own: no child elements and no
+ * non-whitespace text. Such a decorated element (a styled bar/spacer/tile/icon)
+ * is never reached by the text-node walk, so page_view emits a placeholder run
+ * for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
+ * vacías"). Comment and other node types are ignored (they carry no content). */
+static int element_is_content_leaf(const lxb_dom_node_t *n) {
+    for (const lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
+        if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+        if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
+            lxb_dom_text_t *tx = lxb_dom_interface_text((lxb_dom_node_t *)c);
+            const char *d = (const char *)tx->char_data.data.data;
+            size_t len = tx->char_data.data.length;
+            for (size_t i = 0; i < len; ++i) {
+                char ch = d[i];
+                if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' && ch != '\f')
+                    return 0;
+            }
+        }
+    }
+    return 1;
+}
+
 static int heading_level(lxb_tag_id_t t) {
     switch (t) {
         case LXB_TAG_H1: return 1;
@@ -3001,6 +3023,64 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(poster_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
+            } else if (element_is_content_leaf(n)
+                       && !in_skipped_subtree(n, base, js_enabled)
+                       && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
+                       && !in_closed_details_subtree(n, base)
+                       && !(reader && in_boilerplate_subtree(n, base))) {
+                /* Empty box-generating leaf (2026-07-26, spec/page_view.md §4
+                 * "Cajas vacías"): a decorated element with no content of its own
+                 * -- a styled bar, spacer, grid tile, or icon. The text-node walk
+                 * never reaches it, so its box would never be registered and it
+                 * would vanish, unlike a real browser where an empty <div> with a
+                 * background/size paints and reserves space. Emit a zero-content
+                 * placeholder run carrying its box block_id and flex/grid
+                 * membership so open_box/close_top_box reserve box_h and paint the
+                 * decoration through the existing machinery. The box-generation
+                 * gate is the SAME as for elements with content (is_block_like +
+                 * css_has_boxdeco): whether a box exists is decided by style, not
+                 * by content (CSS semantics). */
+                css_style ecs = cached_element_style(lxb_dom_interface_element(n), sheet, &cache);
+                if (is_block_like(node_tag(n), ecs.display) && css_has_boxdeco(&ecs)) {
+                    const char *ehref = NULL; size_t ehl = 0;
+                    const lxb_dom_node_t *eblock = NULL;
+                    int eheading = 0, efg = -1, ebg = -1, ebold = 0, eitalic = 0;
+                    int ealign = 0, efs = 0, elh = 0, edeco = -1;
+                    const lxb_dom_node_t *eli = NULL;
+                    int edepth = 0, eordered = 0, ebdeco = -1;
+                    pv_cont_info econt;
+                    pv_box_info ebox;
+                    pv_text_ext eext;
+                    resolve_context(n, base, sheet, &ehref, &ehl, &eblock, &eheading,
+                                    &efg, &ebg, &ebold, &eitalic, &ealign, &efs, &elh, &edeco,
+                                    &eli, &edepth, &eordered, &reg, &econt, &ebox, &eext,
+                                    &box_reg, &float_reg, &ebdeco, &cache);
+                    int ebrk = pending_break || (eblock != prev_block);
+                    pending_break = 0;
+                    prev_block = eblock;
+                    pv_status st = pv_append(v, PV_TEXT, 0, ebrk, "", NULL);
+                    if (st != PV_OK) { rc = st; goto cleanup; }
+                    last_was_gap = 0;
+                    pv_set_emphasis(v, ebold, eitalic);
+                    pv_set_indent(v, edepth);
+                    pv_set_color(v, efg);
+                    pv_set_bgcolor(v, ebg);
+                    pv_set_text_style(v, ealign, efs, elh, edeco);
+                    pv_set_container(v, econt.id, econt.display, econt.gap, econt.justify,
+                                     econt.cols, econt.wrap, econt.row_gap, econt.align_items);
+                    pv_set_grid(v, econt.col_w, PV_GRID_TRACKS, econt.col_span);
+                    pv_set_grid_rows(v, econt.grid_rows);
+                    pv_set_row_span(v, econt.row_span);
+                    pv_set_flex(v, econt.grow, econt.shrink, econt.basis, econt.order,
+                                econt.direction, econt.align_self);
+                    pv_set_cont_item(v, item_ordinal(&items, econt.id, econt.item));
+                    pv_set_float(v, econt.float_side, econt.float_id, econt.float_clear);
+                    pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
+                    pv_set_box_pct(v, ebox.w_pct);
+                    pv_set_text_ext(v, &eext);
+                    pv_set_block_id(v, ebdeco);
+                    pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                }
             }
             continue;
         }

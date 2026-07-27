@@ -3302,18 +3302,23 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
     if (space_w < 0.0) space_w = 0.0;
 
     size_t i = 0, n = src_len;
+    int is_pre = (s->white_space == CSS_WS_PRE || s->white_space == CSS_WS_PRE_WRAP ||
+                  s->white_space == CSS_WS_PRE_LINE);
     while (i < n) {
-        while (i < n && text[i] == ' ') ++i;
+        if (is_pre) {
+            while (i < n && text[i] == ' ') { ++i; s->pen_x += space_w; }
+            if (i >= n) break;
+        } else {
+            while (i < n && text[i] == ' ') ++i;
+        }
         size_t ws = i;
         while (i < n && text[i] != ' ') ++i;
         size_t wl = i - ws;
         if (wl == 0) break;
 
         open_line(L, s);
-        /* A leading inter-word gap only between words already on this line (not at a
-         * line start), so an author text-indent does not gain a phantom space. */
         int line_has_frag = (L->nfrag > s->line_first);
-        double adv = line_has_frag ? space_w : 0.0;
+        double adv = (line_has_frag && !is_pre) ? space_w : 0.0;
 
         rc_frag probe = (rc_frag){ 0 };
         probe.text = src + ws; probe.len = wl;
@@ -3321,10 +3326,53 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         double ww = styled_advance(cr, &probe);
 
         if (line_has_frag && !s->nowrap && s->pen_x + adv + ww > content_w) {
-            flush_line(L, s, th);
-            open_line(L, s);
-            adv = 0.0;
-            line_has_frag = 0;
+            if (s->break_words && content_w > 0.0) {
+                s->pen_x += adv;
+                double budget = content_w - s->pen_x;
+                size_t p = ws;
+                double acc = 0.0;
+                if (budget > 0.0) {
+                    while (p < ws + wl) {
+                        size_t clen = utf8_clen(src + p, (ws + wl) - p);
+                        rc_frag cprobe = (rc_frag){ 0 };
+                        cprobe.text = src + p; cprobe.len = clen;
+                        cprobe.transform = xform; cprobe.letter_spacing = x->letter_spacing;
+                        double cw = styled_advance(cr, &cprobe);
+                        if (acc + cw > budget) break;
+                        acc += cw; p += clen;
+                    }
+                }
+                if (p > ws)
+                    flow_emit_frag(L, s, &fe, src + ws, p - ws, acc, size, bold, italic,
+                                   underline, strike, overline, color, href, node_id,
+                                   block_id, x);
+                flush_line(L, s, th);
+                open_line(L, s);
+                size_t rem_start = p;
+                while (rem_start < ws + wl) {
+                    size_t chunk_start = rem_start;
+                    double chunk_w = 0.0;
+                    while (rem_start < ws + wl) {
+                        size_t clen = utf8_clen(src + rem_start, (ws + wl) - rem_start);
+                        rc_frag cprobe = (rc_frag){ 0 };
+                        cprobe.text = src + rem_start; cprobe.len = clen;
+                        cprobe.transform = xform; cprobe.letter_spacing = x->letter_spacing;
+                        double cw = styled_advance(cr, &cprobe);
+                        if (chunk_w + cw > content_w && rem_start > chunk_start) break;
+                        chunk_w += cw; rem_start += clen;
+                    }
+                    flow_emit_frag(L, s, &fe, src + chunk_start, rem_start - chunk_start,
+                                   chunk_w, size, bold, italic, underline, strike,
+                                   overline, color, href, node_id, block_id, x);
+                    if (rem_start < ws + wl) { flush_line(L, s, th); open_line(L, s); }
+                }
+                continue;
+            } else {
+                flush_line(L, s, th);
+                open_line(L, s);
+                adv = 0.0;
+                line_has_frag = 0;
+            }
         }
 
         if (s->nowrap && s->text_overflow == CSS_TO_ELLIPSIS &&
@@ -3486,6 +3534,30 @@ static int container_has_flex_items(const rd_doc *doc, size_t start, size_t end)
     return 0;
 }
 
+/* Root box of a flex/grid item = the box (pv_box_def) closest to the container
+ * (least parent_id depth) among the item's blocks [b0, b1). -1 when the item
+ * carries no box (author CSS off, table cells, or an item with no decorated
+ * element). This is the item's OWN element box -- the card/tile/icon rect the
+ * painter fills behind the item's content (spec/page_view.md §4 "Ítems flex/grid").
+ * A nested box deeper inside the item (a pill span) is NOT the root and is not
+ * painted by the container path in v1. The parent walk is bounded (acyclic by
+ * construction, but capped for safety). */
+static int item_root_box(const rd_doc *doc, size_t b0, size_t b1) {
+    int best = -1;
+    int best_depth = 1 << 30;
+    for (size_t k = b0; k < b1; ++k) {
+        int bid = rd_at(doc, k)->block_id;
+        if (bid < 0) continue;
+        int depth = 0;
+        for (int id = bid; id >= 0 && depth < 256; ++depth) {
+            const pv_box_def *d = rd_box_at(doc, (size_t)id);
+            id = (d != NULL) ? d->parent_id : -1;
+        }
+        if (depth < best_depth) { best_depth = depth; best = bid; }
+    }
+    return best;
+}
+
 /* Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis
  * alignment it drives. BASELINE/AUTO/UNSET/space-* (align-content only, never
  * seen here) all fall back to START; STRETCH is v1-approximated as START too
@@ -3497,6 +3569,49 @@ static int css_align_to_bt(int align_kw) {
         case CSS_AK_STRETCH: return BT_ALIGN_STRETCH;
         default:              return BT_ALIGN_START;
     }
+}
+
+/* A border/outline width in px, or 0 when unset/non-positive. */
+static double box_edge_px(int wpx) {
+    return (wpx != PV_LEN_UNSET && wpx > 0) ? (double)wpx : 0.0;
+}
+
+/* Copies a box def's paint-time decoration (borders, radius, shadow, outline,
+ * background, gradient, background-image params, generated content, and author
+ * vertical dimensions) into an rc_box. Geometry (x/top/w/h), block_id, hidden
+ * state and the position:relative inset offset are the caller's to set -- this is
+ * only the appearance, shared by open_box (flat flow) and layout_container
+ * (flex/grid items) so the two paths cannot drift into painting boxes differently. */
+static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def) {
+    bx->bord_tw = def->bord_tw; bx->bord_rw = def->bord_rw;
+    bx->bord_bw = def->bord_bw; bx->bord_lw = def->bord_lw;
+    bx->bord_ts = def->bord_ts; bx->bord_rs = def->bord_rs;
+    bx->bord_bs = def->bord_bs; bx->bord_ls = def->bord_ls;
+    bx->bord_tc = def->bord_tc; bx->bord_rc = def->bord_rc;
+    bx->bord_bc = def->bord_bc; bx->bord_lc = def->bord_lc;
+    bx->radius = def->border_radius;
+    bx->bsh_dx = def->bsh_dx; bx->bsh_dy = def->bsh_dy; bx->bsh_blur = def->bsh_blur;
+    bx->bsh_spread = def->bsh_spread; bx->bsh_color = def->bsh_color;
+    bx->bsh_inset = def->bsh_inset;
+    bx->outline_w = def->outline_w; bx->outline_style = def->outline_style;
+    bx->outline_color = def->outline_color;
+    bx->outline_offset = (def->outline_offset != PV_LEN_UNSET) ? def->outline_offset : 0;
+    bx->bg_rgb = def->bg_rgb;
+    bx->bg_alpha = def->bg_alpha;
+    bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
+    bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
+    bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
+    for (int k = 0; k < 4; ++k) bx->grad_pos[k] = def->bg_grad_pos[k];
+    bx->grad_radial = def->bg_grad_radial;
+    bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
+    bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
+    memcpy(bx->bg_url2, def->bg_image_url2, sizeof bx->bg_url2);
+    bx->bg_url2[sizeof bx->bg_url2 - 1] = '\0';
+    memcpy(bx->content_str, def->content_str, sizeof bx->content_str);
+    bx->content_str[sizeof bx->content_str - 1] = '\0';
+    bx->box_h = def->box_h; bx->box_min_h = def->box_min_h;
+    bx->box_max_h = def->box_max_h; bx->box_min_w = def->box_min_w;
+    bx->aspect_num = def->aspect_num; bx->aspect_den = def->aspect_den;
 }
 
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
@@ -3718,44 +3833,92 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * A multi-run item flows its fragments inline, breaking a line only where a
      * run inside the item starts a new block. */
     size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
+    int    item_box[BT_MAX_CHILDREN];
+    double item_ox[BT_MAX_CHILDREN], item_oy[BT_MAX_CHILDREN];
     for (size_t j = 0; j < g; ++j) {
         rc_state si;
         memset(&si, 0, sizeof si);
         bt_node *kid = &kids[pos_of[j]];
         double cw = (kid->w < 1.0) ? 1.0 : kid->w;
+        /* The item's ROOT box (its own element's card/tile decoration) reserves
+         * its box_h/min-height and insets the content by its padding+border; an
+         * rc_box painted below draws it. Without this an empty grid tile collapsed
+         * to zero height and a flex card lost its background/border/radius/shadow
+         * (spec/page_view.md §4 "Ítems flex/grid"). block_id < 0 (table cells,
+         * author CSS off) => no box => byte-identical to the pre-existing path. */
+        int rb = item_root_box(doc, gstart[j], gstart[j + 1]);
+        item_box[j] = rb;
+        const pv_box_def *rbd = (rb >= 0) ? rd_box_at(doc, (size_t)rb) : NULL;
+        double pl = 0, pr = 0, pt = 0, pb = 0, bl = 0, br = 0, bt = 0, bb = 0;
+        if (rbd != NULL) {
+            pl = (rbd->pad_l > 0) ? (double)rbd->pad_l : 0;
+            pr = (rbd->pad_r > 0) ? (double)rbd->pad_r : 0;
+            pt = (rbd->pad_t > 0) ? (double)rbd->pad_t : 0;
+            pb = (rbd->pad_b > 0) ? (double)rbd->pad_b : 0;
+            bl = box_edge_px(rbd->bord_lw); br = box_edge_px(rbd->bord_rw);
+            bt = box_edge_px(rbd->bord_tw); bb = box_edge_px(rbd->bord_bw);
+        }
+        item_ox[j] = pl + bl;
+        item_oy[j] = pt + bt;
+        double inner_w = cw - pl - pr - bl - br;
+        if (inner_w < 1.0) inner_w = 1.0;
         /* The item's author background paints its own column rect (zebra rows in
-         * data tables via tr:nth-child(even), header bands...). */
-        si.bg_w = cw;
+         * data tables via tr:nth-child(even), header bands...). The root box now
+         * paints its OWN bg via the rc_box, so suppress the row-level bg for runs
+         * that belong to it -- else a rectangular row bg would fill in a rounded
+         * box's corners over the decoration. Non-root (nested) runs keep their bg. */
+        si.bg_w = inner_w;
         size_t sr = L->nrow;
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bk = rd_at(doc, k);
             if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
-            si.bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
-            flow_text_block(cr, w, L, &si, th, bk, cw);
+            int owns = (rb >= 0 && bk->block_id == rb);
+            si.bg_rgb = (owns || w->force_theme) ? -1 : bk->bg_rgb;
+            flow_text_block(cr, w, L, &si, th, bk, inner_w);
         }
         flush_line(L, &si, th);
         row_start[j] = sr;
         row_count[j] = L->nrow - sr;
-        kid->content_h = si.cur_top;
+        /* Item cell height = content + vertical padding/border, floored by the
+         * box's own height/min-height and capped by max-height (mirrors
+         * close_top_box so the flat and container paths agree). */
+        double ih = si.cur_top + pt + pb + bt + bb;
+        if (rbd != NULL) {
+            if (rbd->box_h > 0) ih = (double)rbd->box_h;
+            if (rbd->box_min_h > 0 && ih < (double)rbd->box_min_h) ih = (double)rbd->box_min_h;
+            if (rbd->box_max_h > 0 && ih > (double)rbd->box_max_h) ih = (double)rbd->box_max_h;
+        }
+        kid->content_h = ih;
     }
 
     /* Second pass: final row packing + y now that the heights are known. */
     if (bt_layout(&root, content_w) != BT_OK) return;
 
-    /* Translate each item's rows into its column rectangle. */
+    /* Translate each item's rows into its column rectangle (offset by the item's
+     * padding+border so the content sits inside the box) and add an rc_box for the
+     * item's root box so its decoration paints behind the content, through the same
+     * box loop the flat path uses. */
     for (size_t j = 0; j < g; ++j) {
         const bt_node *kid = &kids[pos_of[j]];
         for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r) {
-            L->rows[r].top += base_top + kid->y;
-            L->rows[r].x_off = kid->x;
+            L->rows[r].top += base_top + kid->y + item_oy[j];
+            L->rows[r].x_off = kid->x + item_ox[j];
+        }
+        if (item_box[j] >= 0) {
+            const pv_box_def *def = rd_box_at(doc, (size_t)item_box[j]);
+            rc_box *bx = rc_add_box(L);
+            if (bx != NULL && def != NULL) {
+                bx->x = kid->x; bx->top = base_top + kid->y;
+                bx->w = (kid->w < 0.0) ? 0.0 : kid->w;
+                bx->h = (kid->h < 0.0) ? 0.0 : kid->h;
+                bx->block_id = item_box[j];
+                rc_box_copy_decoration(bx, def);
+                bx->hidden = (def->visibility == CSS_VIS_HIDDEN ||
+                              def->visibility == CSS_VIS_COLLAPSE);
+            }
         }
     }
     s->cur_top = base_top + root.h;
-}
-
-/* A border/outline width in px, or 0 when unset/non-positive. */
-static double box_edge_px(int wpx) {
-    return (wpx != PV_LEN_UNSET && wpx > 0) ? (double)wpx : 0.0;
 }
 
 /* True iff a border/outline style paints a line (solid..outset); none/hidden/unset
@@ -3854,40 +4017,12 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
     if (bx != NULL) {
         bx->x = box_left; bx->top = s->cur_top; bx->w = box_width; bx->h = 0.0;
         bx->block_id = block_id;
-        bx->bord_tw = def->bord_tw; bx->bord_rw = def->bord_rw;
-        bx->bord_bw = def->bord_bw; bx->bord_lw = def->bord_lw;
-        bx->bord_ts = def->bord_ts; bx->bord_rs = def->bord_rs;
-        bx->bord_bs = def->bord_bs; bx->bord_ls = def->bord_ls;
-        bx->bord_tc = def->bord_tc; bx->bord_rc = def->bord_rc;
-        bx->bord_bc = def->bord_bc; bx->bord_lc = def->bord_lc;
-        bx->radius = def->border_radius;
-        bx->bsh_dx = def->bsh_dx; bx->bsh_dy = def->bsh_dy; bx->bsh_blur = def->bsh_blur;
-        bx->bsh_spread = def->bsh_spread; bx->bsh_color = def->bsh_color;
-        bx->bsh_inset = def->bsh_inset;
-        bx->outline_w = def->outline_w; bx->outline_style = def->outline_style;
-        bx->outline_color = def->outline_color;
-        bx->outline_offset = (def->outline_offset != PV_LEN_UNSET) ? def->outline_offset : 0;
-        bx->bg_rgb = def->bg_rgb;
-        bx->bg_alpha = def->bg_alpha;
-        bx->grad_n = def->grad_n; bx->grad_angle = def->grad_angle;
-        bx->grad_c[0] = def->grad_c0; bx->grad_c[1] = def->grad_c1;
-        bx->grad_c[2] = def->grad_c2; bx->grad_c[3] = def->grad_c3;
-        for (int k = 0; k < 4; ++k) bx->grad_pos[k] = def->bg_grad_pos[k];
-        bx->grad_radial = def->bg_grad_radial;
-        bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
-        bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
-        memcpy(bx->bg_url2, def->bg_image_url2, sizeof bx->bg_url2);
-        bx->bg_url2[sizeof bx->bg_url2 - 1] = '\0';
-        memcpy(bx->content_str, def->content_str, sizeof bx->content_str);
-        bx->content_str[sizeof bx->content_str - 1] = '\0';
+        /* 2026-07-10 author vertical dimensions + aspect-ratio (in the shared
+         * decoration copy below). box_min_w enlarges box_width when the layout was
+         * smaller; box_h sets a fixed height (the content still flows; the painted
+         * box keeps the larger of content vs box_h). aspect-ratio is honoured below. */
+        rc_box_copy_decoration(bx, def);
         bx->hidden = inherited_hidden || this_hidden;
-        /* 2026-07-10 author vertical dimensions + aspect-ratio. box_min_w enlarges
-         * box_width when the layout was smaller; box_h sets a fixed height (the
-         * content still flows; the painted box keeps the larger of content vs
-         * box_h). aspect-ratio is honoured below alongside the box. */
-        bx->box_h = def->box_h; bx->box_min_h = def->box_min_h;
-        bx->box_max_h = def->box_max_h; bx->box_min_w = def->box_min_w;
-        bx->aspect_num = def->aspect_num; bx->aspect_den = def->aspect_den;
         if (def->box_min_w > 0 && box_width < (double)def->box_min_w) {
             box_width = (double)def->box_min_w;
             bx->w = box_width;
@@ -4121,6 +4256,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         const rd_block *b = rd_at(doc, i);
         /* Hidden controls are never painted (their value still submits). */
         if (b->kind == RD_INPUT && b->input_type == PV_IN_HIDDEN) continue;
+
+        /* A zero-content placeholder (an empty box-generating leaf, page_view §4)
+         * whose box was gated off with author CSS (block_id < 0) carries no box to
+         * open and no text to flow: skip it so default (author-CSS-off) layout is
+         * byte-identical to before empty boxes existed. With author CSS on its
+         * block_id is set, so it falls through and opens/reserves its box below.
+         * Container items (cont_id >= 0) are handled by layout_container. */
+        if ((b->kind == RD_PARAGRAPH || b->kind == RD_LINK) && b->block_id < 0
+            && b->cont_id < 0 && b->text != NULL && b->text[0] == '\0')
+            continue;
 
         /* A maximal run of blocks sharing one author flex/grid container (carried
          * by default; layout is structure, not gated by caps.css) is laid out in

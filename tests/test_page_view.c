@@ -1582,6 +1582,35 @@ static void test_build_boxdeco_border_padding(void **state) {
     hp_document_free(doc);
 }
 
+/* An empty <div> with a background + explicit height paints an 8px bar in a real
+ * browser. It has no text, so the text-node walk never reaches it; page_view must
+ * still emit a placeholder run carrying its box so the layout reserves the height
+ * and the painter draws the background. Nested empty boxes resolve via parent links. */
+static void test_build_empty_box_gets_run_and_box(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><p>before</p>"
+        "<div style='background:#ff0000;height:8px'></div>"
+        "<p>after</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    /* The bar's box exists with the right background + height. */
+    int box_ok = 0, box_idx = -1;
+    for (size_t i = 0; i < pv_box_count(v); ++i) {
+        const pv_box_def *b = pv_box_at(v, i);
+        if (b != NULL && b->bg_rgb == 0xff0000 && b->box_h == 8) { box_ok = 1; box_idx = (int)i; }
+    }
+    assert_true(box_ok);
+    /* Some run anchors that box as its block_id (the placeholder). */
+    int anchored = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        if (pv_at(v, i)->block_id == box_idx) anchored = 1;
+    }
+    assert_true(anchored);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_boxdeco_shadow_outline(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -2767,6 +2796,7 @@ int main(void) {
         cmocka_unit_test(test_build_box_leaf_inline),
         cmocka_unit_test(test_box_defaults_and_setter),
         cmocka_unit_test(test_build_boxdeco_border_padding),
+        cmocka_unit_test(test_build_empty_box_gets_run_and_box),
         cmocka_unit_test(test_build_boxdeco_shadow_outline),
         cmocka_unit_test(test_build_boxdeco_visibility_overflow_cursor),
         cmocka_unit_test(test_build_cursor_alone_triggers_box),

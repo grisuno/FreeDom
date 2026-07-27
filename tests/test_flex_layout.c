@@ -290,6 +290,23 @@ static void test_grid_place_span_clamps_and_defaults(void **state) {
     assert_int_equal(fx_grid_place_span(2, 3, span, NULL, NULL, col), FX_ERR_NULL_ARG);
 }
 
+static void test_grid_place_rowspan(void **state) {
+    (void)state;
+    /* 3 cols x 4 items:
+     * item0: rowspan 2 → (row=0,col=0), blocks col 0 of row 1
+     * item1: span 1    → (row=0,col=1)
+     * item2: rowspan 2 → (row=0,col=2), blocks col 2 of row 1
+     * item3: span 1    → cursor at row 1, col 0 blocked, col 1 free → (row=1,col=1) */
+    int span[4]      = { 1, 1, 1, 1 };
+    int row_span[4]  = { 2, 1, 2, 1 };
+    size_t row[4], col[4];
+    assert_int_equal(fx_grid_place_span(4, 3, span, row_span, row, col), FX_OK);
+    assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
+    assert_int_equal(row[1], 0); assert_int_equal(col[1], 1);
+    assert_int_equal(row[2], 0); assert_int_equal(col[2], 2);
+    assert_int_equal(row[3], 1); assert_int_equal(col[3], 1);
+}
+
 static void test_float_pack_left(void **state) {
     (void)state;
     /* Two left floats pack from the left edge, separated by gap. */
@@ -448,6 +465,7 @@ int main(void) {
         cmocka_unit_test(test_grid_place_span_basic),
         cmocka_unit_test(test_grid_place_span_wraps_when_it_does_not_fit),
         cmocka_unit_test(test_grid_place_span_clamps_and_defaults),
+        cmocka_unit_test(test_grid_place_rowspan),
         cmocka_unit_test(test_float_pack_left),
         cmocka_unit_test(test_float_pack_wrap_full_width_stack),
         cmocka_unit_test(test_float_pack_wrap_fits_matches_v1),
