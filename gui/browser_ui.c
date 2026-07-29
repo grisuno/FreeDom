@@ -340,8 +340,9 @@ typedef struct browser_window {
     char      i2p_addr[64];  /* I2P HTTP proxy "host:port" (default 127.0.0.1:4444) */
     double    scroll;   /* content scroll offset in pixels */
     double    content_total_h;  /* full height of the laid-out content, cached each paint */
-    int       maximized;        /* toplevel currently maximized (from xdg states) */
-    int       dragging_scroll;  /* the scrollbar thumb is being dragged */
+     int       maximized;        /* toplevel currently maximized (from xdg states) */
+     int       fullscreen;       /* toplevel currently fullscreen */
+     int       dragging_scroll;  /* the scrollbar thumb is being dragged */
     double    scroll_grab_dy;   /* pointer offset within the thumb at drag start */
     int       pending_g;        /* a 'g' was pressed; a second one scrolls to the top (vim gg) */
 
@@ -1022,6 +1023,18 @@ static int  video_play(browser_window *w, const char *m3u8_url);
 static void *video_feeder_thread(void *arg);
 /* Audio output helpers (called from video_read_frame and video_stop). */
 static void audio_stop(browser_window *w);
+/* Fullscreen toggle: ALT+ENTER switches the window between windowed and
+ * compositor-managed fullscreen. ESC exits fullscreen. */
+static void toggle_fullscreen(browser_window *w) {
+    if (w == NULL || w->xdg_toplevel == NULL) return;
+    if (w->fullscreen) {
+        xdg_toplevel_unset_fullscreen(w->xdg_toplevel);
+    } else {
+        xdg_toplevel_set_fullscreen(w->xdg_toplevel, NULL);
+    }
+    w->fullscreen = !w->fullscreen;
+    redraw(w);
+}
 
 /* An editable control gets a live text field; submit/button/hidden do not.
  * Checkboxes, radios, and selects are interactive (click toggles/opens) but
@@ -5758,101 +5771,111 @@ static void *video_feeder_thread(void *arg) {
     return NULL;
 }
 
-static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
-                            double left, double ry, double content_w, double row_h) {
-    const ui_theme *th = &w->theme;
-    double pad = 4.0;
+ static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+                                double left, double ry, double content_w, double row_h) {
+     const ui_theme *th = &w->theme;
+     double pad = 4.0;
 
-    /* If a decoded frame is available, blit it. */
-    if (w->video_active && w->video_frame != NULL && w->video_w > 0) {
-        cairo_surface_t *surf = cairo_image_surface_create_for_data(
-            w->video_frame, CAIRO_FORMAT_ARGB32,
-            w->video_w, w->video_h,
-            w->video_w * 4);
-        if (cairo_surface_status(surf) == CAIRO_STATUS_SUCCESS) {
-            double scale_x = content_w / (double)w->video_w;
-            double scale_y = row_h / (double)w->video_h;
-            double scale = (scale_x < scale_y) ? scale_x : scale_y;
-            double dw = (double)w->video_w * scale;
-            double dh = (double)w->video_h * scale;
-            double dx = left + (content_w - dw) / 2.0;
-            double dy = ry + (row_h - dh) / 2.0;
-            cairo_save(cr);
-            cairo_rectangle(cr, left, ry, content_w, row_h);
-            cairo_clip(cr);
-            cairo_translate(cr, dx, dy);
-            cairo_scale(cr, scale, scale);
-            cairo_set_source_surface(cr, surf, 0.0, 0.0);
-            cairo_paint(cr);
-            cairo_restore(cr);
-            cairo_surface_destroy(surf);
-            return;
-        }
-        cairo_surface_destroy(surf);
-    }
+     /* In fullscreen mode the video occupies the entire viewport
+      * (titlebar excluded when CSD is active). */
+     double draw_left = left, draw_top = ry, draw_w = content_w, draw_h = row_h;
+     if (w->fullscreen) {
+         draw_left = 0.0;
+         draw_top = w->use_csd ? UI_TITLEBAR_H : 0.0;
+         draw_w = (double)w->width - UI_SCROLLBAR_W;
+         draw_h = (double)w->height - draw_top;
+     }
 
-    /* Poster image: if a poster_src exists and its decoded image is available,
-     * draw it as the background, aspect-fitted and centered. Otherwise fall
-     * through to the plain placeholder background. */
-    int drew_poster = 0;
-    if (blk->poster_src != NULL) {
-        const ui_image *pi = find_image(w, blk->poster_src);
-        if (pi != NULL && pi->surface != NULL && pi->nat_w > 0 && pi->nat_h > 0) {
-            double scale_x = content_w / (double)pi->nat_w;
-            double scale_y = row_h / (double)pi->nat_h;
-            double scale = (scale_x < scale_y) ? scale_x : scale_y;
-            double dw = (double)pi->nat_w * scale;
-            double dh = (double)pi->nat_h * scale;
-            double dx = left + (content_w - dw) / 2.0;
-            double dy = ry + (row_h - dh) / 2.0;
-            cairo_save(cr);
-            cairo_rectangle(cr, left, ry, content_w, row_h);
-            cairo_clip(cr);
-            set_rgb(cr, th->image_box);
-            cairo_paint(cr);
-            cairo_translate(cr, dx, dy);
-            cairo_scale(cr, scale, scale);
-            cairo_set_source_surface(cr, pi->surface, 0.0, 0.0);
-            cairo_paint(cr);
-            cairo_restore(cr);
-            drew_poster = 1;
-        }
-    }
+     /* If a decoded frame is available, blit it. */
+     if (w->video_active && w->video_frame != NULL && w->video_w > 0) {
+         cairo_surface_t *surf = cairo_image_surface_create_for_data(
+             w->video_frame, CAIRO_FORMAT_ARGB32,
+             w->video_w, w->video_h,
+             w->video_w * 4);
+         if (cairo_surface_status(surf) == CAIRO_STATUS_SUCCESS) {
+             double scale_x = draw_w / (double)w->video_w;
+             double scale_y = draw_h / (double)w->video_h;
+             double scale = (scale_x < scale_y) ? scale_x : scale_y;
+             double dw = (double)w->video_w * scale;
+             double dh = (double)w->video_h * scale;
+             double ox = draw_left + (draw_w - dw) / 2.0;
+             double oy = draw_top + (draw_h - dh) / 2.0;
+             cairo_save(cr);
+             cairo_rectangle(cr, draw_left, draw_top, draw_w, draw_h);
+             cairo_clip(cr);
+             cairo_translate(cr, ox, oy);
+             cairo_scale(cr, scale, scale);
+             cairo_set_source_surface(cr, surf, 0.0, 0.0);
+             cairo_paint(cr);
+             cairo_restore(cr);
+             cairo_surface_destroy(surf);
+             return;
+         }
+         cairo_surface_destroy(surf);
+     }
 
-    if (!drew_poster) {
-        /* Placeholder background */
-        set_rgb(cr, th->image_box);
-        cairo_set_line_width(cr, 1.0);
-        cairo_rectangle(cr, left, ry, content_w, row_h);
-        cairo_fill_preserve(cr);
-        set_rgb(cr, th->input_border);
-        cairo_stroke(cr);
-    }
+     /* Poster image: if a poster_src exists and its decoded image is available,
+      * draw it as the background, aspect-fitted and centered. Otherwise fall
+      * through to the plain placeholder background. */
+     int drew_poster = 0;
+     if (blk->poster_src != NULL) {
+         const ui_image *pi = find_image(w, blk->poster_src);
+         if (pi != NULL && pi->surface != NULL && pi->nat_w > 0 && pi->nat_h > 0) {
+             double scale_x = draw_w / (double)pi->nat_w;
+             double scale_y = draw_h / (double)pi->nat_h;
+             double scale = (scale_x < scale_y) ? scale_x : scale_y;
+             double dw = (double)pi->nat_w * scale;
+             double dh = (double)pi->nat_h * scale;
+             double dx = draw_left + (draw_w - dw) / 2.0;
+             double dy = draw_top + (draw_h - dh) / 2.0;
+             cairo_save(cr);
+             cairo_rectangle(cr, draw_left, draw_top, draw_w, draw_h);
+             cairo_clip(cr);
+             set_rgb(cr, th->image_box);
+             cairo_paint(cr);
+             cairo_translate(cr, dx, dy);
+             cairo_scale(cr, scale, scale);
+             cairo_set_source_surface(cr, pi->surface, 0.0, 0.0);
+             cairo_paint(cr);
+             cairo_restore(cr);
+             drew_poster = 1;
+         }
+     }
 
-    /* Play button icon (triangle) */
-    double cx = left + content_w / 2.0;
-    double cy = ry + row_h / 2.0;
-    double size = (row_h < content_w ? row_h : content_w) * 0.3;
-    if (size > 48.0) size = 48.0;
-    if (size < 12.0) size = 12.0;
-    set_rgb(cr, th->chrome_text);
-    cairo_move_to(cr, cx - size * 0.4, cy - size * 0.5);
-    cairo_line_to(cr, cx - size * 0.4, cy + size * 0.5);
-    cairo_line_to(cr, cx + size * 0.5, cy);
-    cairo_close_path(cr);
-    cairo_fill(cr);
+     if (!drew_poster) {
+         /* Placeholder background */
+         set_rgb(cr, th->image_box);
+         cairo_set_line_width(cr, 1.0);
+         cairo_rectangle(cr, draw_left, draw_top, draw_w, draw_h);
+         cairo_fill_preserve(cr);
+         set_rgb(cr, th->input_border);
+         cairo_stroke(cr);
+     }
 
-    /* Label: video URL or alt text */
-    content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
-    cairo_font_extents_t fe;
-    cairo_font_extents(cr, &fe);
-    const char *label = (blk->text != NULL && blk->text[0] != '\0')
-                        ? blk->text
-                        : (blk->href != NULL ? blk->href : "video");
-    cairo_move_to(cr, left + pad, ry + row_h - pad);
-    set_rgb(cr, th->chrome_text_dim);
-    cairo_show_text(cr, label);
-}
+     /* Play button icon (triangle) */
+     double cx = draw_left + draw_w / 2.0;
+     double cy = draw_top + draw_h / 2.0;
+     double size = (draw_h < draw_w ? draw_h : draw_w) * 0.3;
+     if (size > 48.0) size = 48.0;
+     if (size < 12.0) size = 12.0;
+     set_rgb(cr, th->chrome_text);
+     cairo_move_to(cr, cx - size * 0.4, cy - size * 0.5);
+     cairo_line_to(cr, cx - size * 0.4, cy + size * 0.5);
+     cairo_line_to(cr, cx + size * 0.5, cy);
+     cairo_close_path(cr);
+     cairo_fill(cr);
+
+     /* Label: video URL or alt text */
+     content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+     cairo_font_extents_t fe;
+     cairo_font_extents(cr, &fe);
+     const char *label = (blk->text != NULL && blk->text[0] != '\0')
+                         ? blk->text
+                         : (blk->href != NULL ? blk->href : "video");
+     cairo_move_to(cr, draw_left + pad, draw_top + draw_h - pad);
+     set_rgb(cr, th->chrome_text_dim);
+     cairo_show_text(cr, label);
+ }
 
 /* Free space left on a row's LINE BOX after its last fragment, or a negative/zero
  * value when the line is full. The line box of a flex/grid cell or float band is
@@ -9609,10 +9632,12 @@ static void toplevel_configure(void *data, struct xdg_toplevel *t,
     }
     /* Track the maximized state so the titlebar button toggles correctly. */
     w->maximized = 0;
+    w->fullscreen = 0;
     if (states != NULL) {
         const uint32_t *st;
         wl_array_for_each(st, states) {
             if (*st == XDG_TOPLEVEL_STATE_MAXIMIZED) w->maximized = 1;
+            if (*st == XDG_TOPLEVEL_STATE_FULLSCREEN) w->fullscreen = 1;
         }
     }
 }
@@ -11099,9 +11124,26 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     /* F12 opens / closes the Freebug developer console (second window). Works from the
      * main window regardless of which field is focused; closing it from inside is handled
      * in freebug_handle_key. */
-    if (sym == XKB_KEY_F12) { freebug_toggle(w); return; }
+     if (sym == XKB_KEY_F12) { freebug_toggle(w); return; }
 
-    /* Ctrl+L focuses and clears the URL bar. */
+      /* Alt+Enter toggles compositor-managed fullscreen. While a video is
+       * playing the frame fills the viewport; otherwise it is a no-op on
+       * the page layout but still toggles the window state. */
+      if (!ctrl && !shift && (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter)
+          && xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_ALT,
+                                         XKB_STATE_MODS_EFFECTIVE)) {
+          toggle_fullscreen(w);
+          return;
+      }
+
+      /* Escape exits fullscreen if active, regardless of which field
+       * has focus (standard browser behaviour: Esc is a global escape). */
+      if (w->fullscreen && sym == XKB_KEY_Escape) {
+          toggle_fullscreen(w);
+          return;
+      }
+
+      /* Ctrl+L focuses and clears the URL bar. */
     if (ctrl && !shift && (sym == XKB_KEY_l || sym == XKB_KEY_L)) {
         w->url_bar_focused = 1;
         browser_url_bar_clear(&w->bs);

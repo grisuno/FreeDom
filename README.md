@@ -515,6 +515,8 @@ shared by all Freedom users — a common Firefox-on-Linux identity that matches
 | `Space` / `b` | Scroll one page down / up |
 | `gg` / `G` | Jump to top / bottom |
 | `F12` | Open/close Freebug developer console |
+| `Alt+Enter` | Toggle fullscreen (video fills viewport when playing) |
+| `Escape` | Exit fullscreen (when in fullscreen mode) |
 | `Ctrl+Enter` | Run code in Freebug REPL editor |
 
 ### Downloads & zoom
