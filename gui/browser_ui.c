@@ -2847,6 +2847,7 @@ typedef struct rc_box {
      * caps the painted height. 0 = unset. Applied at open_box time; aspect_ratio
      * (num/den x1000) sizes a box that has one dimension only. */
     int    box_h, box_min_h, box_max_h, box_min_w;
+    int    box_h_set;  /* 1 = author declared height (incl. 0px), 0 = auto/unset */
     int    aspect_num, aspect_den;
     /* linear-gradient background (2026-07-11): stop count (0 = none), CSS degrees,
      * packed stops. Wins over bg_rgb when set. */
@@ -3646,6 +3647,7 @@ static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def) {
     bx->content_str[sizeof bx->content_str - 1] = '\0';
     bx->box_h = def->box_h; bx->box_min_h = def->box_min_h;
     bx->box_max_h = def->box_max_h; bx->box_min_w = def->box_min_w;
+    bx->box_h_set = def->box_h_set;
     bx->aspect_num = def->aspect_num; bx->aspect_den = def->aspect_den;
 }
 
@@ -4042,7 +4044,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * close_top_box so the flat and container paths agree). */
         double ih = si.cur_top + pt + pb + bt + bb;
         if (rbd != NULL) {
-            if (rbd->box_h > 0) ih = (double)rbd->box_h;
+            if (rbd->box_h > 0 || rbd->box_h_set) ih = (double)rbd->box_h;
             if (rbd->box_min_h > 0 && ih < (double)rbd->box_min_h) ih = (double)rbd->box_min_h;
             if (rbd->box_max_h > 0 && ih > (double)rbd->box_max_h) ih = (double)rbd->box_max_h;
         }
@@ -4105,7 +4107,7 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
          * a floor, max_h a cap. The v1 model is intentionally simple: the box
          * is the larger of content vs min_h, smaller of result vs max_h, and
          * the fixed box_h when set overrides both. */
-        if (bx->box_h > 0) h = (double)bx->box_h;
+        if (bx->box_h > 0 || bx->box_h_set) h = (double)bx->box_h;
         if (bx->box_min_h > 0 && h < (double)bx->box_min_h) h = (double)bx->box_min_h;
         if (bx->box_max_h > 0 && h > (double)bx->box_max_h) h = (double)bx->box_max_h;
         bx->h = h;
@@ -4195,7 +4197,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
              * versa. With a fixed width, the height is width * den / num. */
             if (box_width > 0.0) {
                 double h = box_width * (double)bx->aspect_den / (double)bx->aspect_num;
-                if (bx->box_h == 0 && h > bx->h) bx->h = h;
+                if (!bx->box_h_set && h > bx->h) bx->h = h;
             }
         }
 
@@ -7500,6 +7502,24 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
     cairo_restore(cr);
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
+    /* When overflow:hidden (or scroll/clip) is set on a box with a declared
+     * height (including 0px), clip its own in-flow content to the padding edge
+     * so height:0 + overflow:hidden hides all content (CSS standard overflow
+     * clipping). */
+    int own_clip = 0;
+    if (def != NULL && (bx->box_h > 0 || bx->box_h_set)
+        && (def->overflow_y != CSS_OF_VISIBLE && def->overflow_y != CSS_OF_UNSET)) {
+        cairo_save(cr);
+        own_clip = 1;
+        double ox = left + bx->x + (double)bx->bord_lw;
+        double oy = origin + bx->top + (double)bx->bord_tw;
+        double ow = bx->w - (double)(bx->bord_lw + bx->bord_rw);
+        double oh = bx->h - (double)(bx->bord_tw + bx->bord_bw);
+        if (ow < 0.0) ow = 0.0;
+        if (oh < 0.0) oh = 0.0;
+        cairo_rectangle(cr, ox, oy, ow, oh);
+        cairo_clip(cr);
+    }
     for (size_t j = 0; j < L->nrow; ++j) {
         const rc_row *r = &L->rows[j];
         if (row_owner_block_id(L, r) != bx->block_id) continue;
@@ -7516,6 +7536,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
         if (row_done != NULL) row_done[j] = 1;
     }
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
+    if (own_clip) cairo_restore(cr);
     bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
 }
 
@@ -7848,9 +7869,30 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     for (size_t i = 0; i < L.nrow; ++i) {
         if (row_done != NULL && row_done[i]) continue;
         const rc_row *r = &L.rows[i];
+        int row_bid = row_owner_block_id(&L, r);
+        /* Skip rows that overflow past their OWN box's bottom when the box has
+         * overflow:hidden and a declared height (including 0px). The box's
+         * decoration still paints; only the content rows past the content edge
+         * are hidden. */
+        int skip_overflowed = 0;
+        if (row_bid >= 0) {
+            for (size_t bi = 0; bi < L.nbox; ++bi) {
+                const rc_box *bx = &L.boxes[bi];
+                if (bx->block_id != row_bid) continue;
+                if ((bx->box_h > 0 || bx->box_h_set) && bx->h >= 0.0) {
+                    const pv_box_def *bd = rd_box_at(w->doc, (size_t)row_bid);
+                    if (bd != NULL && bd->overflow_y != CSS_OF_VISIBLE
+                        && bd->overflow_y != CSS_OF_UNSET) {
+                        double box_bottom = bx->top + bx->h;
+                        if (r->top + r->height > box_bottom) skip_overflowed = 1;
+                    }
+                }
+                break;
+            }
+        }
+        if (skip_overflowed) continue;
         /* Each row is clipped to the innermost overflow:hidden ancestor's
          * padding-box (the content rect where children paint). */
-        int row_bid = row_owner_block_id(&L, r);
         ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L, origin, left);
         double ry = origin + r->top;
         if (ry + r->height < content_top || ry > content_top + content_h)

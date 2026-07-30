@@ -302,6 +302,9 @@ typedef struct pv_box_def {
      * on the painted box, and a fixed height only when no content-driven size wins).
      * Like the rest of the box model, gated by caps.css upstream. */
     int box_h;          /* height (px > 0), or 0 unset */
+    int box_h_set;      /* 1 when height was explicitly declared (including 0px),
+                         * 0 when height is auto/unset. Sent so close_top_box can
+                         * honour height:0 with overflow:hidden (clip content). */
     int box_min_h;      /* min-height (px >= 0), or 0 unset */
     int box_max_h;      /* max-height (px > 0), or 0 unset */
     int box_min_w;      /* min-width  (px >= 0), or 0 unset */

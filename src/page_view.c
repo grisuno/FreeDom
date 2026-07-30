@@ -1163,6 +1163,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
      * CSS_LEN_AUTO sentinel for height/width -- the user-agent's auto-sizing is
      * always 0 here (the engine sizes boxes by their content). */
     d->box_h = (cs->height > 0) ? cs->height : 0;
+    d->box_h_set = (cs->height != CSS_LEN_UNSET) ? 1 : 0;
     d->box_min_h = (cs->min_height > 0) ? cs->min_height : 0;
     d->box_max_h = (cs->max_height > 0) ? cs->max_height : 0;
     d->box_min_w = (cs->min_width > 0) ? cs->min_width : 0;
