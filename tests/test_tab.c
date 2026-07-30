@@ -803,6 +803,59 @@ static void test_load_carries_form_control(void **state) {
     tab_close(t);
 }
 
+/* Stage 2d + P5 regression: (a) a form control's own box (the checkbox-hack
+ * pattern: position:absolute; opacity:0) must reach the parent -- the run codec
+ * used to drop block_id/node_id for PV_INPUT runs inside the non-input branch,
+ * so the control never entered the positioned pipeline and painted in flow; and
+ * (b) the box-def clip:rect() fields must survive the wire -- they were set by
+ * page_view but never serialized, so the read side got 0/0/0/0 (a VALID rect,
+ * not the unset sentinel) and clipped every positioned box to nothing. */
+static void test_load_carries_input_box_and_clip(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>C</title><style>"
+        ".dd { position: relative; }"
+        ".cb { position: absolute; top: 0; left: 0; opacity: 0; }"
+        ".clip { position: absolute; clip: rect(1px, 2px, 3px, 4px); }"
+        "</style></head><body>"
+        "<div class=\"dd\"><input type=\"checkbox\" class=\"cb\">"
+        "<div class=\"clip\">clipped</div></div>"
+        "<p>after</p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int saw_input = 0, saw_clip = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->kind == PV_INPUT) {
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->position, CSS_POS_ABSOLUTE);
+            assert_int_equal(bx->opacity, 0);
+            saw_input = 1;
+        }
+        if (r->text != NULL && strcmp(r->text, "clipped") == 0) {
+            assert_true(r->block_id >= 0);
+            const pv_box_def *bx = pv_box_at(p.view, (size_t)r->block_id);
+            assert_non_null(bx);
+            assert_int_equal(bx->clip_top, 1);
+            assert_int_equal(bx->clip_right, 2);
+            assert_int_equal(bx->clip_bottom, 3);
+            assert_int_equal(bx->clip_left, 4);
+            saw_clip = 1;
+        }
+    }
+    assert_true(saw_input);
+    assert_true(saw_clip);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 static void test_load_strips_script(void **state) {
     (void)state;
     tab *t = NULL;
@@ -2215,6 +2268,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_box_tree),
         cmocka_unit_test(test_load_view_codec_full_roundtrip),
         cmocka_unit_test(test_load_carries_form_control),
+        cmocka_unit_test(test_load_carries_input_box_and_clip),
         cmocka_unit_test(test_load_strips_script),
         cmocka_unit_test(test_load_ex_runs_script_and_mutates),
         cmocka_unit_test(test_load_ex_noscript_hidden_with_js),

@@ -592,6 +592,33 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
     return BT_OK;
 }
 
+/* Shared walk for the Stage 2d classifiers: nearest==1 stops at the first
+ * ABSOLUTE/FIXED box, nearest==0 remembers the last one seen (outermost). */
+static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest) {
+    if (boxes == NULL || bid < 0 || (size_t)bid >= nbox) return -1;
+    int found = -1;
+    size_t cur = (size_t)bid;
+    for (size_t steps = 0; steps <= nbox; ++steps) {
+        const pv_box_def *b = &boxes[cur];
+        if (b->position == BT_POS_ABSOLUTE || b->position == BT_POS_FIXED) {
+            if (nearest) return (int)cur;
+            found = (int)cur;
+        }
+        if (b->parent_id < 0) return found;                /* reached the root */
+        if ((size_t)b->parent_id >= nbox) return -1;       /* dangling: fail open */
+        cur = (size_t)b->parent_id;
+    }
+    return -1;  /* more links than boxes: a parent cycle, fail open */
+}
+
+int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid) {
+    return oof_walk(boxes, nbox, bid, 1);
+}
+
+int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid) {
+    return oof_walk(boxes, nbox, bid, 0);
+}
+
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid) {
     if (boxes == NULL || bid >= nbox) return 1;  /* fail closed: hidden */
     for (size_t steps = 0; steps <= nbox; ++steps) {

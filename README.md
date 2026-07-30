@@ -158,6 +158,29 @@ Still v1: text does not wrap *beside* a lone float, `align-items` centers
 against the tallest item rather than an explicitly taller container, and
 `width:auto` is not stretched between `left`+`right`.
 
+**Out-of-flow subtree + line-box pass (2026-07-30, Stage 2d):** measured against
+Firefox on a live Wikipedia article; four chained pipeline bugs closed.
+
+- **The whole `position:absolute`/`fixed` subtree leaves the flow.** Blocks
+  living in *child* boxes of an absolute box (a dropdown menu's `<li>` items)
+  used to lay out in flow, reserving huge blank bands before the article; a
+  flex/grid container inside an absolute subtree slipped past the check
+  entirely. Pure `bt_oof_anchor`/`bt_oof_root` classify each block's box chain
+  (cycle-bounded, fail-open); the positioned pass measures and paints the whole
+  subtree stacked. Wikipedia's header shed ~2700px of reserved blanks.
+- **The IPC codec now carries `clip: rect()` and the explicit-height flag.**
+  Both were resolved by the worker but never serialized, so the trusted side got
+  a valid-looking 0×0 clip rect and clipped every positioned box to nothing.
+- **Form controls keep their own box across the pipe.** The run reader dropped
+  `block_id`/`node_id` for input runs, so a checkbox-hack control
+  (`position:absolute; opacity:0`) painted as a visible ghost checkbox instead
+  of entering the positioned pipeline.
+- **A line box is as tall as its tallest fragment (CSS 2.1 §10.8).** The last
+  run's `line-height` used to win: Wikipedia's `.mw-editsection{line-height:0}`
+  after every heading collapsed the heading's line and the next paragraph
+  painted through the glyphs. The line now takes the max leading over its
+  fragments.
+
 **Background Enhancements (R5):** `background-position` parsed with keyword
 (`left`/`center`/`right`/`top`/`bottom`) and pixel value support. Applied as
 a Cairo translate offset in the box decoration painter, with `center`

@@ -352,7 +352,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[172] = {
+        int32_t f[177] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -468,6 +468,13 @@ static int write_view(int wfd, const pv_view *v) {
             /* filter: drop-shadow, 2026-07-19 (appended; read_view mirrors) */
             (int32_t)bd->filter_drop_dx, (int32_t)bd->filter_drop_dy,
             (int32_t)bd->filter_drop_blur, (int32_t)bd->filter_drop_color,
+            /* clip: rect() (P3) + explicit-height flag (Stage 2c), 2026-07-30.
+             * These were set by page_view but never crossed the pipe: the read
+             * side zero-filled them, and clip 0/0/0/0 (a VALID rect, not the
+             * PV_LEN_UNSET sentinel) clipped every positioned box to nothing. */
+            (int32_t)bd->clip_top, (int32_t)bd->clip_right,
+            (int32_t)bd->clip_bottom, (int32_t)bd->clip_left,
+            (int32_t)bd->box_h_set,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1596,9 +1603,13 @@ static int read_view(int fd, pv_view **out) {
             pv_set_float(v, (int)flside, (int)flid, (int)flclear);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
             pv_set_box_pct(v, (int)bwpct);
-            pv_set_block_id(v, (int)blkid);
-            pv_set_node_id(v, (dom_node_id)nodeid);
         }
+        /* block_id/node_id ride EVERY run kind: an input's own box (position:
+         * absolute, opacity:0 -- the checkbox-hack pattern) travelled on the
+         * wire but was dropped inside the non-input branch, so form controls
+         * never reached the positioned/box pipeline (the P5 known limitation). */
+        pv_set_block_id(v, (int)blkid);
+        pv_set_node_id(v, (dom_node_id)nodeid);
     }
 
     /* Box engine (Step D): the box tree, same order/shape as write_view. Bounded by
@@ -1608,7 +1619,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[172];
+        int32_t f[177];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1690,6 +1701,10 @@ static int read_view(int fd, pv_view **out) {
             /* filter: drop-shadow, 2026-07-19 */
             .filter_drop_dx = f[168], .filter_drop_dy = f[169],
             .filter_drop_blur = f[170], .filter_drop_color = f[171],
+            /* clip: rect() (P3) + explicit-height flag (Stage 2c), 2026-07-30 */
+            .clip_top = f[172], .clip_right = f[173],
+            .clip_bottom = f[174], .clip_left = f[175],
+            .box_h_set = f[176],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

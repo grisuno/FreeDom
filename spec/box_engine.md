@@ -674,6 +674,77 @@ arrays come from the trusted layout pass, never from author input; the hidden wa
 is cycle-bounded and fail-closed. `visibility` remains author presentation gated by
 `caps.css` upstream (no boxes without author CSS).
 
+### Stage 2d — the out-of-flow SUBTREE leaves the flow (2026-07-30)
+
+Found by the Firefox-parity diff on a live Wikipedia article: the Stage-2 skip in
+`layout_doc` only fired when the block's **own** box (`b->block_id`) was
+ABSOLUTE/FIXED. A block living in a **child box** of an absolute box (the `<li>`
+items of a Vector dropdown, each with its own static box under the
+`position:absolute` menu container) was laid out **in flow**, reserving hundreds of
+px of blank space before the article; worse, `reconcile_boxes` opened the absolute
+ancestor as a normal in-flow box (giving it an `rc_box`), which then made
+`position_doc` treat it as in-flow and drop it from the positioned list. A flex/grid
+container inside an absolute subtree hit the container branch *before* the Stage-2
+check and laid out in flow too (Wikipedia's language menu). CSS 2.2 §9.6: an
+absolutely positioned element establishes a new block formatting context — **its
+whole subtree is out of flow**, not just its root.
+
+Two pure classification helpers in `box_tree` close the gap:
+
+- `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` — walks
+  self→parent and returns the index of the **nearest** box on the chain whose
+  `position` is ABSOLUTE or FIXED, or -1 when the chain is static/relative all the
+  way up. This is the box a block's content belongs to for out-of-flow
+  **measurement and painting** (a nested absolute box owns its own content, so the
+  nearest anchor wins over an outer one).
+- `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` — same walk,
+  returns the **outermost** ABSOLUTE/FIXED box on the chain, or -1. This is the box
+  whose **static position** the flow records when it skips the subtree (the
+  outermost box is the one that left the normal flow at this pen position).
+
+Both are pure, cycle-bounded to `nbox` steps, and **fail-open** (-1: treat as
+in-flow) on NULL/out-of-range/cycle — a misclassified hostile chain renders
+somewhere visible rather than vanishing (fail-visible, same posture as the rest of
+the painter).
+
+Consumers (`gui/browser_ui.c`):
+
+1. `layout_doc` computes `bt_oof_anchor` for every boxed block **before** the
+   flex/grid container branch; a block inside an out-of-flow subtree records the
+   static position of its `bt_oof_root` (first fragment wins, as before) and is
+   skipped from flow — container or not.
+2. `position_doc`'s measurement pass sizes an out-of-flow box from **all** blocks
+   whose `bt_oof_anchor` is that box (the subtree run), not just blocks whose
+   `block_id` equals the box: width = the widest measured block run (author width
+   cap still wins), height = the sum of the stacked line heights of those blocks.
+3. `paint_positioned_one` paints every block whose `bt_oof_anchor` is the box,
+   stacked vertically inside the box's content origin (one line per block, the same
+   v1 approximation as before), instead of only the first block whose `block_id`
+   matches exactly.
+
+**Given** a checkbox-hack dropdown (`position:absolute; visibility:hidden` content
+holding a 12-item list, each item its own static box), **when** the page is laid out,
+**then** no in-flow row is reserved for any of the 12 items (the article starts right
+under the dropdown button) and nothing paints for the hidden subtree.
+
+**Given** the same dropdown with `visibility:visible`, **when** painted, **then** the
+12 items paint stacked inside the absolutely positioned box at its resolved rect,
+overlapping the article like Firefox — not woven into the flow.
+
+**Given** a flex container inside a `position:absolute` box, **when** laid out,
+**then** the container branch never runs for it in flow (the subtree is skipped
+first).
+
+**Given** a page whose absolute boxes only ever carry their own blocks (no child
+boxes), **when** laid out and painted, **then** the result is identical to Stage 2b
+(the nearest/outermost anchor of those blocks is the box itself).
+
+v1 limits (recorded, not hidden): a nested absolute box with all-auto insets inside
+another absolute box gets a zero static position (its hypothetical spot inside the
+outer box's content is not tracked); boxless continuation runs (`block_id < 0`)
+inside an out-of-flow subtree still flow (no chain to classify); the stacked
+one-line-per-block paint approximation stays.
+
 ### Out of scope (Stage 2)
 
 - `position:sticky` with scroll (own follow-up: needs the scroll path).

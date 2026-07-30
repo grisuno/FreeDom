@@ -188,4 +188,19 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
  * bounds. Pure; no allocation. */
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);
 
+/* Stage 2d out-of-flow subtree classification (spec/box_engine.md). Both walk
+ * the parent_id chain from `bid` (self first) looking for a box whose position
+ * is ABSOLUTE or FIXED:
+ *   - bt_oof_anchor returns the NEAREST such box: the box a block's content
+ *     belongs to for out-of-flow measurement and painting (a nested absolute
+ *     box owns its own content).
+ *   - bt_oof_root returns the OUTERMOST such box: the box whose static
+ *     position the flow records when it skips the subtree.
+ * Both return -1 (in flow) when the chain has none, and FAIL OPEN to -1 on
+ * NULL boxes, out-of-range/negative bid, a dangling link or a parent cycle --
+ * a misclassified hostile chain renders in flow (visible) rather than
+ * vanishing. Pure; bounded by nbox links; no allocation. */
+int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);
+int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
+
 #endif /* FREEDOM_BOX_TREE_H */

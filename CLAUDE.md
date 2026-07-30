@@ -430,9 +430,38 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   vacía y las celdas de una tabla flow **no llevan caja propia** y su bloque es la **fila**
   (`in_flow_table_cell`); un run de continuación sin caja **no cierra** las cajas abiertas
   (gui/browser_ui.c); y un bloque `<tr>` defaultea margen 0 (los márgenes no aplican a filas).
-  Ver `spec/page_view.md` "Tablas flow", `[[freedom-flow-table-row-line]]`. **Abierto:** la zona
-  de menús de Wikipedia (lista de idiomas con float+flex pinta fuera de canvas, vacíos reservados
-  antes del artículo) y la banda naranja del nav de HN (línea con fondos mixtos no pinta banda).
+  Ver `spec/page_view.md` "Tablas flow", `[[freedom-flow-table-row-line]]`. (Los dos "abiertos"
+  de esta entrada quedaron cerrados: la zona de menús de Wikipedia por Stage 2d —abajo— y la
+  banda naranja del nav de HN se verificó pintando el 2026-07-30.)
+- **Stage 2d — el SUBÁRBOL out-of-flow sale del flujo + tres regresiones de pipeline (2026-07-30):**
+  el diff contra Firefox en Wikipedia real destapó cuatro bugs encadenados. (1) **Subárbol
+  absolute en flujo:** el skip Stage-2 de `layout_doc` solo miraba la caja PROPIA del bloque; los
+  `<li>` de un dropdown `position:absolute;visibility:hidden` (cajas hijas estáticas) se maquetaban
+  en flujo reservando cientos de px en blanco (los menús Vector), y `reconcile_boxes` abría la caja
+  absolute como ancestro in-flow (lo que además la echaba de la lista posicionada). Cierre: puros
+  `bt_oof_anchor` (ancestro abs/fixed más CERCANO — dueño de contenido para medir/pintar) y
+  `bt_oof_root` (el más EXTERNO — dueño de la posición estática), cycle-bounded, **fail-open** a
+  -1 (contenido hostil mal clasificado se pinta en flujo, nunca desaparece); el chequeo corre
+  **antes** de la rama flex/grid (un menú flex dentro de un absolute ya no se maqueta en flujo);
+  `position_doc` mide y `paint_positioned_one` pinta TODO el subárbol (una línea por bloque,
+  apilado, pen-x para continuaciones). Wikipedia: 11612→~8900px y el artículo arranca arriba.
+  (2) **Códec IPC amputaba clip/box_h_set:** los 4 `clip_*` de P3 y `box_h_set` de Stage 2c se
+  seteaban en `pv_box_def` pero **nunca se serializaban** (`f[172]`→`f[177]` en `tab.c`); el lado
+  lector recibía clip 0/0/0/0 (rect VÁLIDO, no el centinela) y **clipeaba todo box posicionado a
+  0×0** — por eso 3 tests PNG (opacity/blend/abs-shrink) estaban rojos en main. Recordatorio de
+  `[[freedom-render-pipeline-ipc]]`: campo nuevo que no cruza el pipe = feature muerta silenciosa.
+  (3) **La "limitación conocida" de P5 era el códec, no page_view:** el lector de runs saltaba
+  `pv_set_block_id`/`pv_set_node_id` dentro del branch `kind != PV_INPUT` — el worker SÍ mandaba
+  el box del input (checkbox-hack `position:absolute;opacity:0`); ahora block_id/node_id viajan en
+  TODO run y el checkbox fantasma de Wikipedia desapareció (candado
+  `test_load_carries_input_box_and_clip`). (4) **Línea = máximo leading de sus fragmentos (CSS 2.1
+  §10.8):** `flush_line` usaba el `line_scale` del ÚLTIMO bloque; el `.mw-editsection{line-height:0}`
+  tras cada heading colapsaba la línea del heading y el párrafo siguiente pintaba ENCIMA de los
+  glifos (todas las secciones de Wikipedia ilegibles). Ahora se acumula el máximo factor por
+  fragmento (candado `test_download_png_line_height_zero_does_not_shrink_line`). Límites v1
+  registrados en `spec/box_engine.md` Stage 2d (absolute anidado con insets auto ⇒ estática 0;
+  runs sin caja dentro del subárbol siguen en flujo; pintado una-línea-por-bloque). Ver
+  `[[freedom-oof-subtree-stage2d]]`.
 - **Paridad con Firefox medida, no supuesta (2026-07-27):** las diferencias de render contra
   navegadores modernos se **miden** con Firefox instalado en este host
   (`firefox --headless --screenshot X.png --window-size=1000 file://...`) contra

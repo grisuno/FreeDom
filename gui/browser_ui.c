@@ -2926,6 +2926,13 @@ typedef struct rc_state {
     double bg_w;         /* background width for the current rows; 0 = full content width */
     int    align;        /* current block's author text-align (css_align), 0 = left/unset */
     int    line_scale;   /* current block's author line-height percent, 0 = use theme spacing */
+    /* Per-LINE leading (CSS 2.1 §10.8): a line box is as tall as the largest
+     * leaded fragment on it, so a trailing low line-height run (Wikipedia's
+     * `.mw-editsection{line-height:0}` after a heading) must not shrink the
+     * whole line. flow_emit_frag accumulates the max author factor and whether
+     * any fragment uses the theme default; flush_line takes the max of both. */
+    double line_scale_maxf; /* max author line-height factor of the open line's fragments */
+    int    line_any_theme;  /* 1 when a fragment of the open line has no author line-height */
     double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
     int    nowrap;       /* current block's white-space suppresses line wrapping */
     int    break_words;  /* current block's word-break/overflow-wrap allows a mid-word split */
@@ -3171,8 +3178,13 @@ static void block_margins(const ui_theme *th, const rd_block *b,
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (!s->line_open) return;
     /* Author line-height (percent of the natural line box) replaces the theme's
-     * default spacing when set; render_doc gated it behind caps.css (0 when off). */
-    double spacing = (s->line_scale > 0) ? (double)s->line_scale / 100.0 : th->line_spacing;
+     * default spacing when set; render_doc gated it behind caps.css (0 when off).
+     * The line takes the MAX leading of its fragments (CSS 2.1 §10.8): the last
+     * block's value must not shrink a taller earlier fragment's line. */
+    double spacing = s->line_scale_maxf;
+    if (s->line_any_theme && th->line_spacing > spacing) spacing = th->line_spacing;
+    if (spacing <= 0.0)
+        spacing = (s->line_scale > 0) ? (double)s->line_scale / 100.0 : th->line_spacing;
     double h = (s->line_asc + s->line_desc) * spacing;
     rc_row *r = rc_add_row(L);
     if (r != NULL) {
@@ -3191,6 +3203,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     }
     s->cur_top += h;
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
+    s->line_scale_maxf = 0.0; s->line_any_theme = 0;
     s->line_first = L->nfrag;
 }
 
@@ -3265,6 +3278,12 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
     s->pen_x += width;
     if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
     if (fe->descent > s->line_desc) s->line_desc = fe->descent;
+    if (s->line_scale > 0) {
+        double lf = (double)s->line_scale / 100.0;
+        if (lf > s->line_scale_maxf) s->line_scale_maxf = lf;
+    } else {
+        s->line_any_theme = 1;
+    }
 }
 
 /* U+2026 HORIZONTAL ELLIPSIS, UTF-8. Static storage: safe for a zero-copy rc_frag.text
@@ -4432,6 +4451,31 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             && b->cont_id < 0 && b->text != NULL && b->text[0] == '\0')
             continue;
 
+        /* Stage 2d (spec/box_engine.md): a block anywhere inside an out-of-flow
+         * (absolute/fixed) SUBTREE leaves the flow -- its own box OR any ancestor
+         * box on the parent chain. Classified BEFORE the flex/grid container
+         * branch: a flex/grid menu inside an absolute dropdown used to lay out in
+         * flow, reserving blank bands (Wikipedia's hidden Vector menus). The
+         * static position is recorded for the OUTERMOST out-of-flow box on the
+         * chain (the box that left the normal flow at this pen position); first
+         * fragment wins. position_doc measures and the positioned pass paints
+         * the subtree; nothing is reserved in flow. */
+        if (b->block_id >= 0) {
+            int oroot = bt_oof_root(doc->boxes, rd_box_count(doc), b->block_id);
+            if (oroot >= 0) {
+                size_t sbid = (size_t)oroot;
+                if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
+                    double in_l, in_w;
+                    rc_box_context(&s, content_w, &in_l, &in_w);
+                    (void)in_w;
+                    L->oof_sx[sbid] = in_l;
+                    L->oof_sy[sbid] = s.cur_top + ((L->nrow > 0) ? s.pending_gap : 0.0);
+                    L->oof_static_set[sbid] = 1;
+                }
+                continue;
+            }
+        }
+
         /* A maximal run of blocks sharing one author flex/grid container (carried
          * by default; layout is structure, not gated by caps.css) is laid out in
          * columns and then skipped. */
@@ -4464,33 +4508,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             continue;
         }
 
-        /* Stage 2: out-of-flow blocks (position:absolute / fixed) are skipped from
-         * the in-flow layout — they take no space, don't open a box, and don't
-         * collapse margins. position_doc resolves their final rect after this pass.
-         * The parent wrapper is NOT closed: an absolute/fixed child must not
-         * fragment its in-flow ancestor (the spec says "skip the in-flow placement
-         * entirely; prev_bottom/pending_gap not touched" — closing boxes here was a
-         * regression that split the wrapper into N zero-height pieces, making the
-         * LAST piece the containing block and pushing the absolutes to the page
-         * bottom). The next in-flow block reconciles the box stack normally. */
-        if (b->block_id >= 0) {
-            const pv_box_def *bd = rd_box_at(doc, (size_t)b->block_id);
-            if (bd != NULL && (bd->position == BT_POS_ABSOLUTE || bd->position == BT_POS_FIXED)) {
-                /* Stage 2b: record the static position before skipping — where
-                 * this block would have started in flow (current inner-left,
-                 * current line top incl. the pending gap). First fragment wins. */
-                size_t sbid = (size_t)b->block_id;
-                if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
-                    double in_l, in_w;
-                    rc_box_context(&s, content_w, &in_l, &in_w);
-                    (void)in_w;
-                    L->oof_sx[sbid] = in_l;
-                    L->oof_sy[sbid] = s.cur_top + ((L->nrow > 0) ? s.pending_gap : 0.0);
-                    L->oof_static_set[sbid] = 1;
-                }
-                continue;
-            }
-        }
+        /* (The old Stage-2 own-box skip lived here; Stage 2d above subsumes it —
+         * the subtree walk finds the block's own box first.) */
 
         /* Float band (spec/float.md): a maximal run of blocks each with float_id >= 0
          * lays side by side. Unlike a flex/grid container it does NOT close the open
@@ -4686,8 +4705,12 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
     for (size_t i = 0; i < rd_count(doc); ++i) {
         const rd_block *b = rd_at(doc, i);
         if (b->block_id < 0) continue;
-        size_t bid = (size_t)b->block_id;
-        if (bid >= nbox) continue;
+        /* Stage 2d: content belongs to its NEAREST absolute/fixed ancestor box
+         * (or its own box when that box is itself out of flow) -- the whole
+         * subtree left the flow, so the whole subtree sizes the box. */
+        int anchor = bt_oof_anchor(doc->boxes, nbox, b->block_id);
+        if (anchor < 0) continue;  /* in-flow content: rc_box already sized it */
+        size_t bid = (size_t)anchor;
         if (in_flow[bid]) continue;  /* already set from rc_box */
 
         if (gw[bid] > 0.0) continue;  /* already sized from an earlier block of this box */
@@ -4695,10 +4718,17 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
         const pv_box_def *bd = rd_box_at(doc, bid);
         if (bd == NULL) continue;
 
-        /* The maximal run of blocks belonging to this box (they are consecutive), so
-         * a multi-fragment positioned element measures all of its content. */
+        /* The maximal run of blocks belonging to this box's subtree (they are
+         * consecutive in document order), so a multi-fragment or multi-child
+         * positioned element measures all of its content. A nested absolute box
+         * ends the run (its content sizes that box, not this one). */
         size_t bend = i + 1;
-        while (bend < rd_count(doc) && rd_at(doc, bend)->block_id == b->block_id) ++bend;
+        while (bend < rd_count(doc)) {
+            const rd_block *bn = rd_at(doc, bend);
+            if (bn->block_id < 0) break;
+            if (bt_oof_anchor(doc->boxes, nbox, bn->block_id) != anchor) break;
+            ++bend;
+        }
 
         /* Width: an author width cap (px or %) wins. Otherwise `width: auto` on an
          * out-of-flow box SHRINK-WRAPS to its content (CSS 2.2 §10.3.7) -- it does
@@ -4726,7 +4756,10 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
         if (bw < 1.0) bw = 1.0;
         gw[bid] = bw;
 
-        /* Height: measured for text, default for the rest. */
+        /* Height: one stacked line per block of the subtree run (the same
+         * approximation the positioned painter uses), image/input rows at their
+         * own heights. Runs that continue the previous line (no block_break)
+         * don't add a line, so inline fragments don't inflate the box. */
         if (b->kind == RD_IMAGE) {
             double dw, dh, box_w = content_w - 2.0 * th->image_box_pad;
             if (image_display_size(w, b, box_w, &dw, &dh)) {
@@ -4737,10 +4770,16 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
         } else if (b->kind == RD_INPUT) {
             gh[bid] = default_h + 2.0 * UI_INPUT_PAD;
         } else {
-            /* Text block: the same single-line height used by the in-flow rows.
-             * Multi-line absolute/fixed is approximated as one line in v1; the
-             * painter wraps inside the resolved width. */
-            gh[bid] = default_h;
+            double sub_h = default_h;
+            for (size_t k = i + 1; k < bend; ++k) {
+                const rd_block *bk = rd_at(doc, k);
+                if (bk->kind == RD_IMAGE || bk->kind == RD_INPUT || bk->block_break)
+                    sub_h += default_h;
+            }
+            double pt = (bd->pad_t > 0) ? (double)bd->pad_t : 0.0;
+            double pb = (bd->pad_b > 0) ? (double)bd->pad_b : 0.0;
+            gh[bid] = sub_h + pt + pb
+                    + box_edge_px(bd->bord_tw) + box_edge_px(bd->bord_bw);
         }
         /* Author height wins over the measured fallback (2026-07-19): a
          * positioned panel with height:160px must not collapse to one text
@@ -7644,63 +7683,106 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
     paint_box_decoration(cr, &bx, left, origin, bgimg, bgimg2, th);
     if (needs_group) cairo_restore(cr);
-    for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
-        const rd_block *b = rd_at(w->doc, bi);
-        if ((int)b->block_id != (int)pb->box_index) continue;
-        if (b->kind == RD_INPUT) {
-            double rx = left + pb->x;
+    /* Stage 2d: paint every block of the box's out-of-flow SUBTREE (nearest
+     * absolute/fixed anchor == this box), stacked one line per block inside the
+     * content origin -- not just the first block whose block_id matches. A block
+     * under a hidden child box is skipped individually; a nested absolute box's
+     * content belongs to that box (painted by its own positioned entry). */
+    {
+        size_t doc_nbox = rd_box_count(w->doc);
+        double edge_l = box_edge_px(def->bord_lw) + ((def->pad_l > 0) ? (double)def->pad_l : 0.0);
+        double edge_t = box_edge_px(def->bord_tw) + ((def->pad_t > 0) ? (double)def->pad_t : 0.0);
+        double edge_r = box_edge_px(def->bord_rw) + ((def->pad_r > 0) ? (double)def->pad_r : 0.0);
+        double cx = pb->x + edge_l;
+        double cy = pb->y + edge_t;
+        double cw = pb->w - edge_l - edge_r;
+        if (cw < 1.0) cw = 1.0;
+        double pen_x = cx;  /* inline advance for continuation runs on one line */
+        int seen = 0;
+        for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
+            const rd_block *b = rd_at(w->doc, bi);
+            if (b->block_id < 0 ||
+                bt_oof_anchor(w->doc->boxes, doc_nbox, b->block_id) != (int)pb->box_index) {
+                if (seen) break;  /* the subtree run is consecutive: past its end */
+                continue;
+            }
+            /* A hidden child box inside a visible positioned box: skip its rows. */
+            if ((size_t)b->block_id != pb->box_index &&
+                bt_box_hidden(w->doc->boxes, doc_nbox, (size_t)b->block_id)) {
+                seen = 1;
+                continue;
+            }
+            if (b->kind == RD_INPUT) {
+                if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
+                draw_input_row(cr, w, b, left + cx, cw, origin + cy, 0, pb->h);
+                if (needs_group) cairo_restore(cr);
+                content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+                cairo_font_extents_t fei;
+                cairo_font_extents(cr, &fei);
+                cy += fei.height + 2.0 * UI_INPUT_PAD;
+                seen = 1;
+                continue;
+            }
+            if (b->kind == RD_IMAGE) {
+                if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
+                paint_image_row(cr, w, b, left + cx, origin + cy, cw, 0);
+                if (needs_group) cairo_restore(cr);
+                double dw, dh;
+                cy += image_display_size(w, b, cw, &dw, &dh)
+                      ? dh + 2.0 * th->image_box_pad : 2.0 * th->image_box_pad;
+                seen = 1;
+                continue;
+            }
+            if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
+                b->kind != RD_LINK) {
+                seen = 1;
+                continue;
+            }
+            content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
+            cairo_font_extents_t fe;
+            cairo_font_extents(cr, &fe);
+            /* A continuation run (no break) shares the previous block's line and
+             * advances the pen; a break starts a fresh line at the content left. */
+            if (seen && b->block_break) { cy += fe.height; pen_x = cx; }
+            rc_frag fg = {
+                .x = 0, .width = 0, .font_size = th->body_font,
+                .bold = b->bold, .italic = b->italic,
+                .underline = 0, .strike = 0, .overline = 0,
+                .color = th->text,
+                .text = b->text, .len = strlen(b->text),
+                .href = b->href, .node_id = b->node_id,
+                .family = CSS_FF_UNSET, .transform = 0,
+                .letter_spacing = 0, .valign_dy = 0,
+                .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
+                .opacity = -1,
+                /* -1 = no inline background. Omitting it would zero-init to 0, which
+                 * is a VALID colour (black) rather than "unset", and the per-fragment
+                 * fill would paint a black rect over the positioned box. */
+                .bg_rgb = -1,
+            };
+            cairo_text_extents_t te;
+            cairo_text_extents(cr, b->text, &te);
+            fg.width = te.x_advance;
+            rc_row row = {
+                .kind = RC_TEXT, .top = cy, .height = fe.height,
+                .ascent = fe.ascent, .first = 0, .count = 1,
+                .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
+                .x_off = pen_x, .align = 0, .blk = b,
+            };
+            rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
+                               .rows = &row, .nrow = 1, .caprow = 1,
+                               .boxes = NULL, .nbox = 0, .capbox = 0,
+                               .total_h = pb->h, .npositioned = 0 };
+            double ry = origin + cy;
+            seen = 1;
+            pen_x += fg.width;
+            if (ry + cull_ty + fe.height < content_top ||
+                ry + cull_ty > content_top + content_h)
+                continue;  /* off-screen row: skip the paint, keep stacking */
             if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
-            draw_input_row(cr, w, b, rx, pb->w, origin + pb->y, 0, pb->h);
+            paint_content_row(cr, w, &mini, &row, left, ry, cw, page_w, 0);
             if (needs_group) cairo_restore(cr);
-            break;
         }
-        if (b->kind == RD_IMAGE) {
-            if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
-            paint_image_row(cr, w, b, left + pb->x, origin + pb->y, pb->w, 0);
-            if (needs_group) cairo_restore(cr);
-            break;
-        }
-        if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
-            b->kind != RD_LINK) break;
-        rc_frag fg = {
-            .x = 0, .width = 0, .font_size = th->body_font,
-            .bold = b->bold, .italic = b->italic,
-            .underline = 0, .strike = 0, .overline = 0,
-            .color = th->text,
-            .text = b->text, .len = strlen(b->text),
-            .href = b->href, .node_id = b->node_id,
-            .family = CSS_FF_UNSET, .transform = 0,
-            .letter_spacing = 0, .valign_dy = 0,
-            .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
-            .opacity = -1,
-            /* -1 = no inline background. Omitting it would zero-init to 0, which is
-             * a VALID colour (black) rather than "unset", and the per-fragment fill
-             * would paint a black rect over the positioned box. */
-            .bg_rgb = -1,
-        };
-        content_font(cr, th->body_font, b->bold, b->italic, CSS_FF_UNSET);
-        cairo_font_extents_t fe;
-        cairo_font_extents(cr, &fe);
-        cairo_text_extents_t te;
-        cairo_text_extents(cr, b->text, &te);
-        fg.width = te.x_advance;
-        rc_row row = {
-            .kind = RC_TEXT, .top = pb->y, .height = fe.height,
-            .ascent = fe.ascent, .first = 0, .count = 1,
-            .banner = 0, .bg_rgb = (!w->force_theme) ? b->bg_rgb : -1,
-            .x_off = pb->x, .align = 0, .blk = b,
-        };
-        rc_layout mini = { .frags = &fg, .nfrag = 1, .capfrag = 1,
-                           .rows = &row, .nrow = 1, .caprow = 1,
-                           .boxes = NULL, .nbox = 0, .capbox = 0,
-                           .total_h = pb->h, .npositioned = 0 };
-        double ry = origin + pb->y;
-        if (ry + cull_ty + fe.height < content_top || ry + cull_ty > content_top + content_h)
-            break;
-        if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
-        paint_content_row(cr, w, &mini, &row, left, ry, pb->w, page_w, 0);
-        if (needs_group) cairo_restore(cr);
-        break;
     }
 
     if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);

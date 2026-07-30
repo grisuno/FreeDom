@@ -755,6 +755,83 @@ static void test_box_hidden_fail_closed(void **state) {
     assert_int_equal(bt_box_hidden(boxes, 2, 0), 1);  /* cycle 0↔1, no explicit value */
 }
 
+static void test_oof_anchor_none_on_static_chain(void **state) {
+    (void)state;
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_STATIC },
+        { .parent_id =  0, .position = BT_POS_RELATIVE },
+    };
+    assert_int_equal(bt_oof_anchor(boxes, 2, 1), -1);
+    assert_int_equal(bt_oof_root(boxes, 2, 1), -1);
+}
+
+static void test_oof_anchor_self(void **state) {
+    (void)state;
+    pv_box_def boxes[1] = {{ .parent_id = -1, .position = BT_POS_ABSOLUTE }};
+    assert_int_equal(bt_oof_anchor(boxes, 1, 0), 0);
+    assert_int_equal(bt_oof_root(boxes, 1, 0), 0);
+}
+
+static void test_oof_anchor_via_ancestor(void **state) {
+    (void)state;
+    /* Wikipedia dropdown shape: absolute content (0) > static list (1) >
+     * static item (2). The item's anchor and root are both box 0. */
+    pv_box_def boxes[3] = {
+        { .parent_id = -1, .position = BT_POS_ABSOLUTE },
+        { .parent_id =  0, .position = BT_POS_STATIC },
+        { .parent_id =  1, .position = BT_POS_STATIC },
+    };
+    assert_int_equal(bt_oof_anchor(boxes, 3, 2), 0);
+    assert_int_equal(bt_oof_root(boxes, 3, 2), 0);
+}
+
+static void test_oof_nested_absolute_anchor_vs_root(void **state) {
+    (void)state;
+    /* absolute (0) > static (1) > absolute (2) > static (3): the leaf's
+     * NEAREST anchor is 2 (it owns the content), the OUTERMOST root is 0
+     * (it is the box that left the flow). Fixed counts the same as absolute. */
+    pv_box_def boxes[4] = {
+        { .parent_id = -1, .position = BT_POS_ABSOLUTE },
+        { .parent_id =  0, .position = BT_POS_STATIC },
+        { .parent_id =  1, .position = BT_POS_FIXED },
+        { .parent_id =  2, .position = BT_POS_STATIC },
+    };
+    assert_int_equal(bt_oof_anchor(boxes, 4, 3), 2);
+    assert_int_equal(bt_oof_root(boxes, 4, 3), 0);
+}
+
+static void test_oof_relative_does_not_anchor(void **state) {
+    (void)state;
+    /* relative (0) > absolute (1) > relative (2): relative never anchors; the
+     * subtree under the absolute box is out of flow via box 1. */
+    pv_box_def boxes[3] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE },
+        { .parent_id =  0, .position = BT_POS_ABSOLUTE },
+        { .parent_id =  1, .position = BT_POS_RELATIVE },
+    };
+    assert_int_equal(bt_oof_anchor(boxes, 3, 2), 1);
+    assert_int_equal(bt_oof_root(boxes, 3, 2), 1);
+    assert_int_equal(bt_oof_anchor(boxes, 3, 0), -1);
+}
+
+static void test_oof_fail_open(void **state) {
+    (void)state;
+    /* NULL / out-of-range / negative bid / parent cycle: -1 (in flow) so
+     * hostile input renders visibly instead of vanishing. */
+    pv_box_def boxes[2] = {
+        { .parent_id =  1, .position = BT_POS_STATIC },
+        { .parent_id =  0, .position = BT_POS_STATIC },
+    };
+    assert_int_equal(bt_oof_anchor(NULL, 1, 0), -1);
+    assert_int_equal(bt_oof_anchor(boxes, 2, 5), -1);
+    assert_int_equal(bt_oof_anchor(boxes, 2, -1), -1);
+    assert_int_equal(bt_oof_anchor(boxes, 2, 0), -1);  /* cycle 0<->1 */
+    assert_int_equal(bt_oof_root(NULL, 1, 0), -1);
+    assert_int_equal(bt_oof_root(boxes, 2, 5), -1);
+    assert_int_equal(bt_oof_root(boxes, 2, -1), -1);
+    assert_int_equal(bt_oof_root(boxes, 2, 0), -1);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_root),
@@ -800,6 +877,12 @@ int main(void) {
         cmocka_unit_test(test_box_hidden_self),
         cmocka_unit_test(test_box_hidden_ancestor),
         cmocka_unit_test(test_box_hidden_fail_closed),
+        cmocka_unit_test(test_oof_anchor_none_on_static_chain),
+        cmocka_unit_test(test_oof_anchor_self),
+        cmocka_unit_test(test_oof_anchor_via_ancestor),
+        cmocka_unit_test(test_oof_nested_absolute_anchor_vs_root),
+        cmocka_unit_test(test_oof_relative_does_not_anchor),
+        cmocka_unit_test(test_oof_fail_open),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

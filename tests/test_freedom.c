@@ -526,6 +526,74 @@ static void test_download_png_absolute_shrinks_and_anchors_right(void **state) {
     unlink(png);
 }
 
+/* CSS 2.1 §10.8 line-box regression (Wikipedia headings): the line takes the MAX
+ * leading of its fragments. A trailing `line-height:0` run (the vector skin's
+ * `.mw-editsection` after every section heading) used to overwrite the whole
+ * line's spacing -- the heading row flushed at near-zero height and the next
+ * paragraph painted THROUGH the heading glyphs. The red paragraph must start
+ * strictly below the lowest dark heading pixel. */
+static void test_download_png_line_height_zero_does_not_shrink_line(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        ".big{font-size:2em;}"
+        ".ed{line-height:0;font-size:0.8em;}"
+        ".after{color:#ff0000;}"
+        "</style></head><body>"
+        "<div><span class=\"big\">Heading glyphs</span>"
+        "<span class=\"ed\">[edit]</span></div>"
+        "<p class=\"after\">paragraph below the heading</p>"
+        "</body></html>";
+    const char *path = "__freedom_lh0_page.html";
+    const char *png = "__freedom_lh0_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t dark_max_y = 0, red_min_y = px.height;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r >= 200 && g <= 80 && b <= 80) {          /* paragraph red */
+                if (y < red_min_y) red_min_y = y;
+            } else if (r < 150 && g < 150 && b < 200 &&
+                       (int)r + g + b < 380 && r <= (int)g + 40) {
+                /* heading ink; r<=g+40 excludes the paragraph's red antialias */
+                if (y > dark_max_y) dark_max_y = y;
+            }
+        }
+    }
+    assert_true(dark_max_y > 0);          /* the heading painted */
+    assert_true(red_min_y < px.height);   /* the paragraph painted */
+    /* The paragraph starts BELOW the heading's lowest glyph pixel. */
+    assert_true(red_min_y > dark_max_y);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* Regression for M1.1 increment 4 (in-flow box group opacity): an IN-FLOW
  * (non-positioned) box with opacity must fade as ONE coherent unit -- its own
  * decoration (background) AND its text row's cascaded background-color together
@@ -1163,6 +1231,7 @@ int main(void) {
         cmocka_unit_test(test_download_png_group_opacity_blends_with_background),
         cmocka_unit_test(test_download_png_absolute_shrinks_and_anchors_right),
         cmocka_unit_test(test_download_png_inflow_opacity_blends_box_and_row_together),
+        cmocka_unit_test(test_download_png_line_height_zero_does_not_shrink_line),
         cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
         cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),
         cmocka_unit_test(test_download_png_transform_rotate_changes_paint_shape),
