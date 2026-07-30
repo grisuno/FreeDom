@@ -16,6 +16,8 @@
 #include "box_tree.h"
 #include "compositor.h"
 #include "css.h"
+#include "svg_paint.h"
+#include "svg_render.h"
 #include "css_color.h"
 #include "data_url.h"
 #include "download.h"
@@ -1117,9 +1119,23 @@ static int image_display_size(const browser_window *w, const rd_block *blk,
     const ui_image *im = find_image(w, blk->href);
     if (im == NULL || im->surface == NULL || im->nat_w <= 0 || im->nat_h <= 0) return 0;
     if (box_w < 1.0) box_w = 1.0;
-    double scale = ((double)im->nat_w > box_w) ? box_w / (double)im->nat_w : 1.0;
-    *dw = (double)im->nat_w * scale;
-    *dh = (double)im->nat_h * scale;
+    /* The markup's declared size wins over the decoded bitmap's: <img width="180">
+     * asks for 180px, whatever the file happens to contain. One declared axis
+     * scales the other so the aspect ratio survives. */
+    double base_w = (double)im->nat_w, base_h = (double)im->nat_h;
+    if (blk->video_w > 0 && blk->video_h > 0) {
+        base_w = (double)blk->video_w;
+        base_h = (double)blk->video_h;
+    } else if (blk->video_w > 0) {
+        base_h = base_h * ((double)blk->video_w / base_w);
+        base_w = (double)blk->video_w;
+    } else if (blk->video_h > 0) {
+        base_w = base_w * ((double)blk->video_h / base_h);
+        base_h = (double)blk->video_h;
+    }
+    double scale = (base_w > box_w) ? box_w / base_w : 1.0;
+    *dw = base_w * scale;
+    *dh = base_h * scale;
     return 1;
 }
 
@@ -2807,7 +2823,7 @@ typedef struct rc_frag {
     int         grad_c[4];
 } rc_frag;
 
-typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT, RC_VIDEO } rc_rowkind;
+typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT, RC_VIDEO, RC_SVG } rc_rowkind;
 
 typedef struct rc_row {
     rc_rowkind      kind;
@@ -3598,17 +3614,37 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
  * painted by the container path in v1. The parent walk is bounded (acyclic by
  * construction, but capped for safety). */
 static int item_root_box(const rd_doc *doc, size_t b0, size_t b1) {
+    /* The container's own box (cont_box_id) is an ANCESTOR of the items, never an
+     * item box: without this bound, items whose elements carry no box of their own
+     * all resolved to the CONTAINER's box and each painted the container's
+     * background over its own column -- a `justify-content:space-between` header
+     * drew its band twice with the page showing through the middle. */
+    int cbox = (b0 < rd_count(doc)) ? rd_at(doc, b0)->cont_box_id : -1;
     int best = -1;
     int best_depth = 1 << 30;
     for (size_t k = b0; k < b1; ++k) {
         int bid = rd_at(doc, k)->block_id;
         if (bid < 0) continue;
+        /* Walk out to the box that is a CHILD of the container box (or, with no
+         * container box, to the outermost box). Any box at or above the container
+         * belongs to the container, not to this item. */
+        int cur = -1;
+        int guard = 0;
+        for (int id = bid; id >= 0 && guard < 256; ++guard) {
+            if (id == cbox) { cur = -1; break; }   /* reached the container itself */
+            const pv_box_def *d = rd_box_at(doc, (size_t)id);
+            int parent = (d != NULL) ? d->parent_id : -1;
+            cur = id;
+            if (parent == cbox) break;             /* child of the container box */
+            id = parent;
+        }
+        if (cur < 0) continue;
         int depth = 0;
-        for (int id = bid; id >= 0 && depth < 256; ++depth) {
+        for (int id = cur; id >= 0 && depth < 256; ++depth) {
             const pv_box_def *d = rd_box_at(doc, (size_t)id);
             id = (d != NULL) ? d->parent_id : -1;
         }
-        if (depth < best_depth) { best_depth = depth; best = bid; }
+        if (depth < best_depth) { best_depth = depth; best = cur; }
     }
     return best;
 }
@@ -3714,6 +3750,14 @@ static item_sides item_sides_of(const rd_doc *doc, size_t b0, size_t b1) {
  * never painted, and a flex row inside a `max-width; margin:0 auto` wrapper escaped
  * to full page width. */
 static int container_box_of(const rd_doc *doc, size_t start, size_t end) {
+    /* page_view now stamps the enclosing box directly (cont_box_id): the container
+     * element's OWN box when it has one, else the nearest ancestor wrapper. The
+     * derivation below is the fallback for runs that carry no stamp (collected
+     * table grids, older views). */
+    if (start < rd_count(doc)) {
+        int stamped = rd_at(doc, start)->cont_box_id;
+        if (stamped >= 0) return stamped;
+    }
     int parent = -1;
     int seen = 0;
     for (size_t k = start; k < end; ) {
@@ -3795,6 +3839,15 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
  * origin_x is non-zero when the container sits inside an open box (its own decorated
  * box, or an ancestor wrapper): every column x and row x_off is placed relative to
  * it, so a flex row nested in a max-width wrapper stays inside the wrapper. */
+/* Defined below with the flat-flow box machinery; a flex/grid item's interior uses
+ * the SAME box opening/closing code, so the two paths cannot drift on how a nested
+ * box is sized, insets its content or finalises its height. */
+static void close_all_boxes(rc_layout *L, rc_state *s, const ui_theme *th);
+static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
+                                  rc_layout *L, rc_state *s, const ui_theme *th,
+                                  const rd_doc *doc, double content_w, int block_id,
+                                  size_t run_i, int stop_at);
+
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th,
                              double origin_x, double content_w,
@@ -4018,6 +4071,14 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     int    item_box[BT_MAX_CHILDREN];
     double item_ox[BT_MAX_CHILDREN], item_oy[BT_MAX_CHILDREN];
     double item_ml[BT_MAX_CHILDREN], item_mx[BT_MAX_CHILDREN];
+    /* The item's own rc_box slot, RESERVED before its content flows so it paints
+     * UNDER the boxes nested inside it (the painter walks boxes in array order),
+     * plus the range of those nested boxes so the second pass can translate them
+     * into the item's column exactly like it translates the item's rows. Without
+     * this a box inside a card -- a badge pill, an icon chip, an avatar -- laid
+     * out but never painted (the documented v1 gap in spec/page_view.md §4). */
+    size_t item_root_idx[BT_MAX_CHILDREN];
+    size_t item_box_start[BT_MAX_CHILDREN], item_box_count[BT_MAX_CHILDREN];
     for (size_t j = 0; j < g; ++j) {
         rc_state si;
         memset(&si, 0, sizeof si);
@@ -4047,15 +4108,39 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * that belong to it -- else a rectangular row bg would fill in a rounded
          * box's corners over the decoration. Non-root (nested) runs keep their bg. */
         si.bg_w = inner_w;
+        item_root_idx[j] = (size_t)-1;
+        if (rb >= 0) {
+            rc_box *slot = rc_add_box(L);
+            if (slot != NULL) {
+                memset(slot, 0, sizeof *slot);
+                slot->block_id = -1;   /* inert until the second pass fills it in */
+                item_root_idx[j] = L->nbox - 1;
+            }
+        }
+        size_t sb = L->nbox;
         size_t sr = L->nrow;
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bk = rd_at(doc, k);
             if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
+            /* Boxes nested INSIDE the item open here, in item-local coordinates
+             * (the second pass translates them into the column). rb bounds the
+             * walk so the item's own root box is not reopened. */
+            /* Called for EVERY block, including those that belong to the item's
+             * root box: reconciling is what CLOSES a nested box once the flow
+             * leaves its subtree. Skipping those blocks left a badge's pill open
+             * for the rest of the card and stretched it the card's full height. */
+            reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, bk->block_id, k, rb);
             int owns = (rb >= 0 && bk->block_id == rb);
             si.bg_rgb = (owns || w->force_theme) ? -1 : bk->bg_rgb;
             flow_text_block(cr, w, L, &si, th, bk, inner_w);
         }
+        /* close_all_boxes finalises any box still open inside the item; it is a
+         * no-op when none is, so the line flush stays explicit -- dropping it lost
+         * the last line of every wrapped paragraph in a card. */
+        close_all_boxes(L, &si, th);
         flush_line(L, &si, th);
+        item_box_start[j] = sb;
+        item_box_count[j] = L->nbox - sb;
         row_start[j] = sr;
         row_count[j] = L->nrow - sr;
         /* Item cell height = content + vertical padding/border, floored by the
@@ -4083,10 +4168,16 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             L->rows[r].top += base_top + kid->y + item_oy[j];
             L->rows[r].x_off = origin_x + kid->x + item_ox[j];
         }
-        if (item_box[j] >= 0) {
+        /* Translate the boxes that opened inside this item into its column. */
+        for (size_t bi = item_box_start[j]; bi < item_box_start[j] + item_box_count[j]
+                                            && bi < L->nbox; ++bi) {
+            L->boxes[bi].x += origin_x + kid->x + item_ox[j];
+            L->boxes[bi].top += base_top + kid->y + item_oy[j];
+        }
+        if (item_box[j] >= 0 && item_root_idx[j] < L->nbox) {
             const pv_box_def *def = rd_box_at(doc, (size_t)item_box[j]);
-            rc_box *bx = rc_add_box(L);
-            if (bx != NULL && def != NULL) {
+            rc_box *bx = &L->boxes[item_root_idx[j]];
+            if (def != NULL) {
                 /* The item's border box sits inside its margin box (kid->w spans
                  * margin+border box, since the margin is part of the main-axis
                  * space the item takes). */
@@ -4164,7 +4255,8 @@ static void rc_box_context(const rc_state *s, double content_w,
  * box geometry exactly, so single boxes and the default path stay byte-identical. */
 static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
                      int block_id, const pv_box_def *def,
-                     double ctx_left, double ctx_w) {
+                     double ctx_left, double ctx_w,
+                     double shrink_w, int align) {
     flush_line(L, s, th);
     if (L->nrow > 0) {
         double gap = (s->prev_bottom > th->paragraph_gap) ? s->prev_bottom : th->paragraph_gap;
@@ -4185,8 +4277,28 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
      * horizontal padding + border, so the CONTENT cap shrinks by those edges. */
     double wcap = bx_content_cap(bx_width_cap(def->box_w, def->box_w_pct, avail_w),
                                  def->box_sizing == CSS_BOXS_BORDER, pl, pr, bl, br);
+    /* An inline-level box with `width:auto` SHRINK-WRAPS to its content instead of
+     * filling the line (CSS 2.2 §10.3.9): shrink_w is that measured content width,
+     * passed in by the caller. Without it a centred `display:inline-block` button
+     * painted as a full-page-width bar. */
+    if (shrink_w > 0.0 && wcap <= 0.0) {
+        wcap = shrink_w;
+        double room = avail_w - pl - pr - bl - br;
+        if (wcap > room) wcap = room;
+        if (wcap < 1.0) wcap = 1.0;
+    }
     bx_hplace hp = bx_place((double)def->box_l, (double)def->box_r,
                             wcap, def->box_center, avail_w);
+    /* A shrink-wrapped box with no author margin is placed by the parent's
+     * text-align, exactly like the inline box it is. page_view packs the box's
+     * horizontal inset as padding + margin, so the author margin is what is left
+     * once the padding is taken back out (same unpacking as item_sides_of). */
+    double auth_ml = (double)def->box_l - pl, auth_mr = (double)def->box_r - pr;
+    if (shrink_w > 0.0 && !def->box_center && auth_ml <= 0.0 && auth_mr <= 0.0
+        && (align == CSS_ALIGN_CENTER || align == CSS_ALIGN_RIGHT)) {
+        double slack = avail_w - (hp.content_w + pl + pr + bl + br);
+        if (slack > 0.0) hp.x_off += (align == CSS_ALIGN_CENTER) ? slack / 2.0 : slack;
+    }
     double box_left = ctx_left + hp.x_off - pl;
     double box_width = hp.content_w + pl + pr;
 
@@ -4254,8 +4366,35 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
  * derived from the box-def parent_id chain. Closes any open box not on the path
  * (innermost first), then opens any path box not yet open (outermost first), nesting
  * each inside its parent's content rect. Bounded by RC_BOX_STACK_MAX. */
-static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
-                            const rd_doc *doc, double content_w, int block_id) {
+/* True iff box `want` is on the box path of block_id (self or ancestor). */
+static int box_path_has(const rd_doc *doc, int block_id, int want) {
+    int guard = 0;
+    for (int id = block_id; id >= 0 && guard < RC_BOX_STACK_MAX; ++guard) {
+        if (id == want) return 1;
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        id = (d != NULL) ? d->parent_id : -1;
+    }
+    return 0;
+}
+
+/* Max-content width (px) of the box `box_id` opening at run `start`: the widest
+ * line produced by the maximal run of blocks that box encloses, measured through
+ * the real flow so it cannot drift from the width the content lays out at. Returns
+ * 0.0 when the box encloses no measurable run. Only meaningful for a shrink-wrapped
+ * (inline-level) box; block boxes fill their containing block and never call it. */
+static double box_shrink_width(cairo_t *cr, const browser_window *w,
+                               const ui_theme *th, const rd_doc *doc,
+                               size_t start, int box_id) {
+    size_t j = start;
+    while (j < rd_count(doc) && box_path_has(doc, rd_at(doc, j)->block_id, box_id)) ++j;
+    if (j <= start) return 0.0;
+    return measure_item_content_w(cr, w, th, doc, start, j);
+}
+
+static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
+                                  rc_layout *L, rc_state *s, const ui_theme *th,
+                                  const rd_doc *doc, double content_w, int block_id,
+                                  size_t run_i, int stop_at) {
     int path[RC_BOX_STACK_MAX];
     int n = 0;
     for (int id = block_id; id >= 0 && n < RC_BOX_STACK_MAX; ) {
@@ -4265,6 +4404,21 @@ static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
     }
     /* path is innermost..outermost; reverse to root..innermost. */
     for (int a = 0, b = n - 1; a < b; ++a, --b) { int t = path[a]; path[a] = path[b]; path[b] = t; }
+
+    /* stop_at (>= 0) is a box the CALLER has already established as the layout
+     * context -- a flex/grid item's root box, whose rect the item flow is already
+     * relative to. Everything at or above it is dropped from the path so only the
+     * boxes strictly INSIDE the item are opened here. */
+    if (stop_at >= 0) {
+        int cut = -1;
+        for (int k = 0; k < n; ++k) if (path[k] == stop_at) { cut = k; break; }
+        if (cut < 0) { n = 0; }
+        else {
+            int m = 0;
+            for (int k = cut + 1; k < n; ++k) path[m++] = path[k];
+            n = m;
+        }
+    }
 
     /* Keep the common prefix; close the divergent tail of the open stack. */
     int common = 0;
@@ -4278,8 +4432,21 @@ static void reconcile_boxes(rc_layout *L, rc_state *s, const ui_theme *th,
         if (d == NULL) break;
         double ctx_left, ctx_w;
         rc_box_context(s, content_w, &ctx_left, &ctx_w);
-        open_box(L, s, th, path[k], d, ctx_left, ctx_w);
+        double shrink = 0.0;
+        int align = CSS_ALIGN_UNSET;
+        if (d->display == CSS_DISP_INLINE_BLOCK && cr != NULL && run_i < rd_count(doc)) {
+            shrink = box_shrink_width(cr, w, th, doc, run_i, path[k]);
+            align = rd_at(doc, run_i)->text_align;
+        }
+        open_box(L, s, th, path[k], d, ctx_left, ctx_w, shrink, align);
     }
+}
+
+static void reconcile_boxes(cairo_t *cr, const browser_window *w,
+                            rc_layout *L, rc_state *s, const ui_theme *th,
+                            const rd_doc *doc, double content_w, int block_id,
+                            size_t run_i) {
+    reconcile_boxes_below(cr, w, L, s, th, doc, content_w, block_id, run_i, -1);
 }
 
 /* Stage 2: positioned blocks (absolute/fixed) that were skipped from the in-flow
@@ -4496,7 +4663,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * close_all_boxes at the end) finalizes its height, so it wraps the whole
              * container. */
             int cbox = container_box_of(doc, i, j);
-            reconcile_boxes(L, &s, th, doc, content_w, cbox);
+            reconcile_boxes(cr, w, L, &s, th, doc, content_w, cbox, i);
             double in_l, in_w;
             rc_box_context(&s, content_w, &in_l, &in_w);
             if (cbox < 0) s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
@@ -4524,7 +4691,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 if (bj->float_id < 0 || bj->float_clear != 0) break;
                 ++j;
             }
-            reconcile_boxes(L, &s, th, doc, content_w, band_common_box(doc, i, j));
+            reconcile_boxes(cr, w, L, &s, th, doc, content_w, band_common_box(doc, i, j), i);
             double mt, mb;
             block_margins(th, b, &mt, &mb);
             s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
@@ -4545,7 +4712,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * stays in the current box context too; closing would flush the line and
          * split e.g. a flowed table row at its inter-cell gap runs. */
         if (standalone || b->block_break || b->block_id >= 0)
-            reconcile_boxes(L, &s, th, doc, content_w, b->block_id);
+            reconcile_boxes(cr, w, L, &s, th, doc, content_w, b->block_id, i);
         if (standalone || b->block_break) {
             flush_line(L, &s, th);
             /* Space before this block = its top margin collapsed with the previous
@@ -4570,6 +4737,41 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
             }
             s.cur_top = top + h;
+            continue;
+        }
+
+        /* Inline SVG: a replaced element sized by its intrinsic dimensions (the
+         * parser resolves width/height/viewBox), capped to the content width so a
+         * hostile width="99999" cannot stretch the page. */
+        if (b->kind == RD_SVG) {
+            double sw = (b->video_w > 0) ? (double)b->video_w : 0.0;
+            double sh = (b->video_h > 0) ? (double)b->video_h : 0.0;
+            if (sw <= 0.0 || sh <= 0.0) {
+                sv_image *probe = (sv_image *)calloc(1, sizeof *probe);
+                if (probe != NULL) {
+                    if (b->text != NULL
+                        && sv_parse(b->text, strlen(b->text), probe) == SV_OK) {
+                        if (sw <= 0.0) sw = probe->width;
+                        if (sh <= 0.0) sh = probe->height;
+                    }
+                    free(probe);
+                }
+            }
+            if (sw <= 0.0) sw = SV_DEFAULT_W;
+            if (sh <= 0.0) sh = SV_DEFAULT_H;
+            double avail = content_w;
+            if (sw > avail && sw > 0.0) { sh *= avail / sw; sw = avail; }
+            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
+            s.pending_gap = 0;
+            rc_row *r = rc_add_row(L);
+            if (r != NULL) {
+                r->kind = RC_SVG; r->top = top; r->height = sh; r->ascent = sh;
+                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1;
+                r->x_off = 0.0; r->align = b->text_align; r->blk = b;
+                r->hidden = (s.hidden_from != 0);
+                r->bg_w = sw;   /* the painter's draw width */
+            }
+            s.cur_top = top + sh;
             continue;
         }
 
@@ -4632,8 +4834,25 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * Re-applying the run's bx_place would double-count the box's insets. */
             double ctx_left, ctx_w;
             rc_box_context(&s, content_w, &ctx_left, &ctx_w);
-            s.indent_px = ctx_left + base_l;
-            inner_w = ctx_w - base_l;
+            double avail_in = ctx_w - base_l;
+            if (avail_in < 1.0) avail_in = 1.0;
+            /* The box already consumed its OWN padding/border/margin, so re-applying
+             * the run's insets would double-count them -- but the run's own width cap
+             * and `margin:0 auto` centring are its own and still apply. Passing 0/0
+             * for the insets takes the cap and the centring without the double count:
+             * a `max-width:560px; margin:0 auto` paragraph inside a hero stayed
+             * full-bleed before this, so its text never wrapped where Firefox wraps it. */
+            bx_hplace hp_in = bx_place(0.0, 0.0,
+                                       bx_width_cap(b->box_w, b->box_w_pct, avail_in),
+                                       b->box_center, avail_in);
+            s.indent_px = ctx_left + base_l + hp_in.x_off;
+            inner_w = hp_in.content_w;
+            /* The LINE BOX of a row inside a box is that box's content width, not
+             * the page's: `text-align:center` inside a shrink-wrapped button must
+             * centre in the button. Without this the row centred against the whole
+             * page and drifted right, out of the box that had just been placed --
+             * the same rule layout_container already applies to a flex/grid cell. */
+            s.bg_w = inner_w;
         } else {
             /* Top level: apply the block's own author box model (insets, width cap,
              * margin:0 auto centering) via the pure bx_place. Byte-identical to before
@@ -5249,8 +5468,16 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
         const ui_image *im = find_image(w, blk->href);
         int of = blk->object_fit;
         if (of == 0) of = CSS_OFI_FILL; /* unset = fill */
+        /* An image is an inline-level replaced element: the parent's text-align
+         * places it, exactly like a line of text (a centred logo was pinned left). */
+        double ax = 0.0;
+        double img_slack = box_w - dw;
+        if (img_slack > 0.0) {
+            if (blk->text_align == CSS_ALIGN_CENTER)     ax = img_slack / 2.0;
+            else if (blk->text_align == CSS_ALIGN_RIGHT) ax = img_slack;
+        }
         cairo_save(cr);
-        cairo_translate(cr, left + pad, ry + pad);
+        cairo_translate(cr, left + pad + ax, ry + pad);
         cairo_rectangle(cr, 0.0, 0.0, dw, dh);
         cairo_clip(cr);
         switch (of) {
@@ -6564,6 +6791,37 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
 
     if (r->hidden) return;  /* visibility:hidden: space stood, nothing paints */
 
+    if (r->kind == RC_SVG && r->blk != NULL && r->blk->text != NULL) {
+        /* Parse per paint: the markup is small, the parser is pure and bounded, and
+         * keeping no cache means a re-render can never paint stale geometry. */
+        sv_image *img = (sv_image *)calloc(1, sizeof *img);
+        if (img != NULL) {
+            if (sv_parse(r->blk->text, strlen(r->blk->text), img) == SV_OK) {
+                double dw = (r->bg_w > 0.0) ? r->bg_w : content_w;
+                double dx = left + r->x_off;
+                /* An SVG is an inline-level replaced element: the parent's
+                 * text-align places it, like any other inline box. */
+                double slack = content_w - dw;
+                if (slack > 0.0) {
+                    if (r->align == CSS_ALIGN_CENTER)     dx += slack / 2.0;
+                    else if (r->align == CSS_ALIGN_RIGHT) dx += slack;
+                }
+                /* currentColor resolves to the run's own author colour when it has
+                 * one, else the theme's text colour, so a monochrome icon matches
+                 * the prose around it in every theme. */
+                int cur = r->blk->fg_rgb;
+                if (cur < 0) {
+                    ui_rgb tc = w->theme.text;
+                    cur = ((int)(tc.r * 255.0 + 0.5) << 16)
+                        | ((int)(tc.g * 255.0 + 0.5) << 8)
+                        |  (int)(tc.b * 255.0 + 0.5);
+                }
+                svp_draw(cr, img, dx, ry, dw, r->height, cur);
+            }
+            free(img);
+        }
+        return;
+    }
     if (r->kind == RC_IMAGE && r->blk != NULL) {
         paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
         return;

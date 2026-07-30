@@ -242,8 +242,9 @@ static size_t dd_count_containers(const rd_doc *doc) {
 }
 
 static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b) {
-    dd_printf(c, "  #%zu parent=%d place(l=%d r=%d w=%d center=%d) bg=",
-              id, b->parent_id, b->box_l, b->box_r, b->box_w, b->box_center);
+    dd_printf(c, "  #%zu parent=%d disp=%d place(l=%d r=%d w=%d center=%d) bg=",
+              id, b->parent_id, b->display,
+              b->box_l, b->box_r, b->box_w, b->box_center);
     if (b->box_w_pct) dd_printf(c, " w%%=%d", b->box_w_pct);
     dd_color(c, b->bg_rgb);
     dd_printf(c, " pad(%d/%d/%d/%d) bord(%d/%d/%d/%d %s/%s/%s/%s) radius=%d shadow=%d outline=%d",

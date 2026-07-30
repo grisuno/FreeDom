@@ -115,9 +115,9 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_tls_impersonate \
               $(BUILD_DIR)/test_hls $(BUILD_DIR)/test_data_url \
               $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock \
-              $(BUILD_DIR)/test_media_decoder
+              $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render
 
-.PHONY: all install test itest asan fuzz fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
+.PHONY: all install test itest asan fuzz fuzz-svg fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
         deps run deb docker view clean
 
 all: $(BUILD_DIR)/freedom
@@ -254,6 +254,11 @@ $(BUILD_DIR)/test_webcaps: $(TEST_DIR)/test_webcaps.c $(BUILD_DIR)/webcaps.o $(B
 # only css.h enum constants (no css.o), no I/O deps. See spec/compositor.md.
 $(BUILD_DIR)/test_compositor: $(TEST_DIR)/test_compositor.c $(BUILD_DIR)/compositor.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure inline-SVG parser (spec/svg_render.md): hostile markup in, bounded geometry
+# out. No I/O, no Cairo -- the Cairo half lives in svg_paint.c on the trusted side.
+$(BUILD_DIR)/test_svg_render: $(TEST_DIR)/test_svg_render.c $(BUILD_DIR)/svg_render.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
 # Pure TLS-impersonation surface (Hito TLS): the triple opt-in gate + the
 # parent<->helper IPC codec. No I/O deps; the BoringSSL handshake lives in the
@@ -404,6 +409,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
 FREEDOM_UI_OBJ = $(BUILD_DIR)/browser.o $(BUILD_DIR)/ui_layout.o
 FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
                   $(GUI_DIR)/bui_theme.c \
+                  $(GUI_DIR)/svg_paint.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 
@@ -434,6 +440,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/tls_impersonate.o \
                        $(BUILD_DIR)/hls.o \
                        $(BUILD_DIR)/media_decoder.o \
+                       $(BUILD_DIR)/svg_render.o \
                        $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                        | $(BUILD_DIR) \
                        $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -577,6 +584,17 @@ fuzz-url: | $(BUILD_DIR)
 # hostile remote content: du_base64_payload's slicing and du_base64_decode's
 # transform (the latter runs inside the confined worker, OP_DECODE_IMAGE_B64) must
 # never crash/leak/UB, and every payload span must stay within the input.
+# Coverage-guided fuzzing of svg_render (clang + libFuzzer). Inline <svg> markup is
+# hostile remote content parsed on the TRUSTED side (like author CSS), so the pure
+# parser is the whole security surface: it must never crash/leak/UB, never exceed a
+# pool, and never hand the Cairo painter a span outside the pool it indexes.
+fuzz-svg: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_svg_render.c $(SRC_DIR)/svg_render.c $(SRC_DIR)/css_color.c \
+	  -o $(BUILD_DIR)/fuzz_svg_render -lm
+	./$(BUILD_DIR)/fuzz_svg_render -max_total_time=30 -rss_limit_mb=2048
+
 fuzz-du: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \

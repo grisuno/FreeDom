@@ -1213,6 +1213,157 @@ static void test_download_png_canvas_background_from_html(void **state) {
     unlink(png);
 }
 
+/* Samples one pixel of a PNG exported from `html`. Writes the markup to a temp
+ * file, runs the headless export with `extra` flags, decodes the result and hands
+ * the (x, y) pixel back as r/g/b. Every Firefox-parity pixel test below shares it,
+ * so they cannot drift on how the page is exported or how a pixel is read. */
+static void sample_png_pixel(const char *html, const char *extra, const char *tag,
+                             int x, int y, uint8_t *r, uint8_t *g, uint8_t *b) {
+    char path[128], png[128];
+    assert_true((size_t)snprintf(path, sizeof path, "__freedom_%s.html", tag) < sizeof path);
+    assert_true((size_t)snprintf(png, sizeof png, "__freedom_%s_out.png", tag) < sizeof png);
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args, "%s --download-png=%s %s",
+                                 extra, png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_true(is_png_file(png));
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    assert_true(x >= 0 && y >= 0);
+    assert_true(px.width > (uint32_t)x && px.height > (uint32_t)y);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[(size_t)y * (px.stride / 4) + (size_t)x];
+    *r = (uint8_t)(pixel >> 16); *g = (uint8_t)(pixel >> 8); *b = (uint8_t)pixel;
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* Firefox parity: a text row inside a box whose background is a GRADIENT (or an
+ * image) must not repaint an OUTER ancestor's flat background behind its glyphs.
+ *
+ * The flat render model gives each row the nearest ancestor background so a
+ * block's colour shows behind its text. A gradient sets no flat colour, so the
+ * walk used to sail past the gradient box and pick up <body>'s colour -- painting
+ * an opaque band of the PAGE background on top of the gradient the box had just
+ * drawn. Every gradient hero on the modern web lost its text band to it. */
+static void test_download_png_gradient_box_text_keeps_gradient(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;background:#ff0000;}"
+        ".hero{padding:40px;background:linear-gradient(#0000ff,#0000ff);}"
+        ".hero h1{color:#ffffff;margin:0;}"
+        "</style></head><body>"
+        "<div class=\"hero\"><h1>Build faster</h1></div>"
+        "</body></html>";
+    uint8_t r = 0, g = 0, b = 0;
+    /* (900, 85): inside the hero box, on the heading's row band, far to the right
+     * of the glyphs -- so only a background can own the pixel. */
+    sample_png_pixel(html, "--author-css", "gradrow", 900, 85, &r, &g, &b);
+    assert_true(b > 200);   /* the hero's gradient */
+    assert_true(r < 60);    /* not the page's red background repainted on top */
+}
+
+/* Firefox parity: a flex container's own background is ONE band across the
+ * container, not one rectangle per item.
+ *
+ * A `display:flex; justify-content:space-between` header whose items carry no box
+ * of their own left both items pointing at the CONTAINER's box as their "item root
+ * box", so the painter drew the header's dark background twice -- once behind each
+ * item, with the page showing through the gap between them. */
+static void test_download_png_flex_container_paints_one_band(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;}"
+        "header{display:flex;justify-content:space-between;padding:20px;background:#0000ff;}"
+        "</style></head><body>"
+        "<header><strong>Acme</strong><nav>Docs</nav></header>"
+        "</body></html>";
+    uint8_t r = 0, g = 0, b = 0;
+    /* (500, 25): the middle of the header band, between the two items. */
+    sample_png_pixel(html, "--author-css", "flexband", 500, 25, &r, &g, &b);
+    assert_true(b > 200);            /* the container's band reaches the middle */
+    assert_true(r < 60 && g < 60);   /* not the white page showing through */
+}
+
+/* Firefox parity: `display:inline-block` shrink-wraps to its content and is placed
+ * by the parent's text-align, instead of opening a full-width block box.
+ *
+ * A centred call-to-action button used to paint as a full-page-width bar. */
+static void test_download_png_inline_block_shrinks_and_centers(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;text-align:center;}"
+        ".btn{display:inline-block;padding:12px 28px;background:#0000ff;color:#ffffff;}"
+        "</style></head><body>"
+        "<div><a class=\"btn\" href=\"#\">Get started</a></div>"
+        "</body></html>";
+    uint8_t r = 0, g = 0, b = 0;
+    /* (980, 45): the far right of the button's row, vertically at its middle. A
+     * shrink-wrapped button never reaches it; a full-width block box would paint
+     * it blue. */
+    sample_png_pixel(html, "--author-css", "iblockw", 980, 45, &r, &g, &b);
+    assert_true(!(b > 200 && r < 60 && g < 60));   /* not the button's blue */
+    /* ... and the button itself is centred, so the middle of the row IS blue. */
+    uint8_t r2 = 0, g2 = 0, b2 = 0;
+    sample_png_pixel(html, "--author-css", "iblockc", 500, 45, &r2, &g2, &b2);
+    assert_true(b2 > 200);
+    assert_true(r2 < 60 && g2 < 60);
+}
+
+/* Inline <svg> paints its geometry (spec/svg_render.md). Three things at once:
+ * the shape reaches the screen through the whole pipeline (page_view run -> IPC
+ * codec -> render_doc block -> Cairo painter), it is NOT gated by the images
+ * capability (an inline SVG names no resource, so there is no fetch to gate), and
+ * its markup never leaks into the page as prose. */
+static void test_download_png_inline_svg_paints_shapes(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0}</style></head><body>"
+        "<svg width=\"200\" height=\"100\" viewBox=\"0 0 200 100\">"
+        "<rect x=\"0\" y=\"0\" width=\"200\" height=\"100\" fill=\"#0000ff\"/>"
+        "</svg></body></html>";
+    uint8_t r = 0, g = 0, b = 0;
+    /* (100, 60): inside the rect. No --images flag: inline SVG must paint anyway. */
+    sample_png_pixel(html, "--author-css", "svgrect", 100, 60, &r, &g, &b);
+    assert_true(b > 200);
+    assert_true(r < 60 && g < 60);
+}
+
+/* A <path> with a fill reaches the painter, and an element that could name a
+ * resource is dropped instead: the same page carries an <image> pointing at a
+ * remote URL, which must contribute nothing. */
+static void test_download_png_inline_svg_path_and_drops_image(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0}</style></head><body>"
+        "<svg width=\"200\" height=\"200\" viewBox=\"0 0 200 200\">"
+        "<image href=\"https://tracker.example/p.png\" x=\"0\" y=\"0\" width=\"200\" height=\"200\"/>"
+        "<path d=\"M 0 0 L 200 0 L 200 200 L 0 200 Z\" fill=\"#00ff00\"/>"
+        "</svg></body></html>";
+    uint8_t r = 0, g = 0, b = 0;
+    sample_png_pixel(html, "--author-css", "svgpath", 100, 100, &r, &g, &b);
+    assert_true(g > 200);
+    assert_true(r < 60 && b < 60);
+}
+
 /* --- suite --- */
 
 int main(void) {
@@ -1238,6 +1389,11 @@ int main(void) {
         cmocka_unit_test(test_download_png_transform_scale_grows_around_center),
         cmocka_unit_test(test_download_png_animation_renders),
         cmocka_unit_test(test_download_png_canvas_background_from_html),
+        cmocka_unit_test(test_download_png_gradient_box_text_keeps_gradient),
+        cmocka_unit_test(test_download_png_flex_container_paints_one_band),
+        cmocka_unit_test(test_download_png_inline_block_shrinks_and_centers),
+        cmocka_unit_test(test_download_png_inline_svg_paints_shapes),
+        cmocka_unit_test(test_download_png_inline_svg_path_and_drops_image),
         cmocka_unit_test(test_download_png_requires_path),
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),

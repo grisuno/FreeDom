@@ -310,7 +310,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[33] = {
+        int32_t b[34] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -326,6 +326,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->grad_text_n, (int32_t)r->grad_text_angle,
             (int32_t)r->grad_text_c[0], (int32_t)r->grad_text_c[1],
             (int32_t)r->grad_text_c[2], (int32_t)r->grad_text_c[3],
+            /* the box enclosing this run's flex/grid container (appended) */
+            (int32_t)r->cont_box_id,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -352,7 +354,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[177] = {
+        int32_t f[178] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -475,6 +477,9 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->clip_top, (int32_t)bd->clip_right,
             (int32_t)bd->clip_bottom, (int32_t)bd->clip_left,
             (int32_t)bd->box_h_set,
+            /* css display, 2026-07-30 (appended; read_view mirrors). An
+             * inline-level box shrink-wraps instead of filling its line. */
+            (int32_t)bd->display,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1498,7 +1503,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[33];
+        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[34];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1538,6 +1543,12 @@ static int read_view(int fd, pv_view **out) {
         } else if (kind == PV_VIDEO && sl > 0) {
             st = pv_append_video(v, heading, brk, text, src,
                                  (pl > 0) ? poster : NULL, img_w, img_h);
+        } else if (kind == PV_SVG) {
+            /* Inline SVG markup rides the text field. Without this branch the run
+             * degraded to PV_TEXT and the page painted its own <svg> source as
+             * prose -- the recurring "a new kind that does not cross the pipe is a
+             * silently dead feature" trap. */
+            st = pv_append_svg(v, heading, brk, (text != NULL) ? text : "", img_w, img_h);
         } else {
             pv_kind k = (kind == PV_LINK && hl > 0) ? PV_LINK : PV_TEXT;
             st = pv_append(v, k, heading, brk, text, (hl > 0) ? href : NULL);
@@ -1591,6 +1602,7 @@ static int read_view(int fd, pv_view **out) {
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
                              (int)cwrap, (int)crgap, (int)calign);
             pv_set_grid_rows(v, (int)crows);
+            pv_set_cont_box(v, (int)b[33]);
             {
                 int gw[PV_GRID_TRACKS];
                 for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) gw[gk] = (int)gtw[gk];
@@ -1619,7 +1631,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[177];
+        int32_t f[178];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1705,6 +1717,8 @@ static int read_view(int fd, pv_view **out) {
             .clip_top = f[172], .clip_right = f[173],
             .clip_bottom = f[174], .clip_left = f[175],
             .box_h_set = f[176],
+            /* css display, 2026-07-30 */
+            .display = f[177],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

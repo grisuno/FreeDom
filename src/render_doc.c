@@ -129,6 +129,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->cont_gap = 0;
     b->cont_justify = 0;
     b->cont_cols = 0;
+    b->cont_box_id = -1;
     for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) b->cont_col_w[gk] = 0;
     b->grid_span = 0;
     b->row_span = 0;
@@ -315,6 +316,30 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                                                                resolved, sizeof resolved,
                                                                &img_url);
                 rc = rd_push(d, RD_IMAGE, 0, r->block_break, r->text, img_url, dec, -1, -1);
+                if (rc == 0 && d->count > 0) {
+                    /* The DECLARED <img width height> ride the block: a browser
+                     * lays an image out at the size the markup asked for, not at
+                     * whatever the decoded bitmap happens to be (a 1024px logo
+                     * tagged width="180" must paint 180 wide, as Firefox does). */
+                    rd_block *ib = &d->blocks[d->count - 1];
+                    ib->video_w = r->img_w;
+                    ib->video_h = r->img_h;
+                }
+                break;
+            }
+            case PV_SVG: {
+                /* Inline SVG is CONTENT, not a resource: the markup travels as-is
+                 * and svg_render parses it at paint time under fixed bounds. There
+                 * is no URL to resolve and no fetch to gate, so unlike PV_IMAGE it
+                 * carries no image decision and no caps.images check
+                 * (spec/svg_render.md §1). */
+                rc = rd_push(d, RD_SVG, 0, r->block_break, r->text, NULL,
+                             RDP_IMG_ALLOW, fg, bg);
+                if (rc == 0 && d->count > 0) {
+                    rd_block *sb = &d->blocks[d->count - 1];
+                    sb->video_w = r->img_w;
+                    sb->video_h = r->img_h;
+                }
                 break;
             }
             case PV_INPUT:
@@ -340,6 +365,9 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             rd_block *nb = &d->blocks[d->count - 1];
             if (r->kind == PV_IMAGE) nb->image_rendering = r->image_rendering;
             if (r->kind == PV_IMAGE) nb->object_fit = r->object_fit;
+            /* A replaced element is placed by the inherited text-align, like the
+             * inline box it is (a centred logo used to be pinned to the left). */
+            if (r->kind == PV_IMAGE || r->kind == PV_SVG) nb->text_align = r->text_align;
             if (r->kind == PV_INPUT) nb->caret_color = r->caret_color;
             if (r->kind == PV_INPUT) nb->block_id = r->block_id;
         }
@@ -401,6 +429,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->cont_justify = r->cont_justify;
             lb->cont_cols = r->cont_cols;
             lb->cont_rows = r->cont_rows;
+            lb->cont_box_id = r->cont_box_id;
             for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
                 lb->cont_col_w[gk] = r->cont_col_w[gk];
             lb->grid_span = r->grid_span;
@@ -555,6 +584,7 @@ const char *rd_kind_name(rd_kind k) {
         case RD_NOTICE:    return "notice";
         case RD_INPUT:     return "input";
         case RD_VIDEO:     return "video";
+        case RD_SVG:       return "svg";
     }
     return "block";
 }
@@ -573,6 +603,7 @@ const char *rd_block_tag(const rd_block *b) {
         case RD_LINK:      return "a";
         case RD_IMAGE:     return "img";
         case RD_VIDEO:     return "video";
+        case RD_SVG:       return "svg";
         case RD_INPUT:
             switch (b->input_type) {
                 case PV_IN_TEXTAREA: return "textarea";

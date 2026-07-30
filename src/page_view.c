@@ -16,6 +16,7 @@
 #include "css_color.h"
 #include "flex_layout.h"
 #include "html_parse.h"
+#include "svg_render.h"
 #include "util.h"
 
 #include <stdint.h>
@@ -175,6 +176,7 @@ static void run_init_common(pv_run *r) {
     r->cont_gap = 0;
     r->cont_justify = 0;
     r->cont_cols = 0;
+    r->cont_box_id = -1;
     for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) r->cont_col_w[gk] = 0;
     r->grid_span = 0;
     r->row_span = 0;
@@ -421,6 +423,35 @@ pv_status pv_append_video(pv_view *v, int heading, int block_break,
     return PV_OK;
 }
 
+pv_status pv_append_svg(pv_view *v, int heading, int block_break,
+                        const char *markup, int w, int h) {
+    if (v == NULL || markup == NULL) return PV_ERR_NULL_ARG;
+
+    if (v->count == v->cap) {
+        size_t ncap = v->cap ? v->cap * 2 : 32;
+        pv_run *grown = (pv_run *)realloc(v->runs, ncap * sizeof *grown);
+        if (grown == NULL) return PV_ERR_OOM;
+        v->runs = grown;
+        v->cap = ncap;
+    }
+
+    /* The markup rides the run's text field, sanitised to well-formed UTF-8 like
+     * every other run string. It is DATA: svg_render parses it under fixed bounds
+     * at paint time, and its grammar cannot express a URL. */
+    char *t = utf8_sanitized_dup(markup);
+    if (t == NULL) return PV_ERR_OOM;
+
+    pv_run *r = &v->runs[v->count++];
+    run_init_common(r);
+    r->kind = PV_SVG;
+    r->heading = heading;
+    r->block_break = block_break;
+    r->text = t;
+    r->img_w = w;
+    r->img_h = h;
+    return PV_OK;
+}
+
 void pv_set_emphasis(pv_view *v, int bold, int italic) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
@@ -538,6 +569,10 @@ void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span) {
 
 void pv_set_grid_rows(pv_view *v, int grid_rows) {
     if (v != NULL && v->count > 0) v->runs[v->count - 1].cont_rows = grid_rows;
+}
+
+void pv_set_cont_box(pv_view *v, int cont_box_id) {
+    if (v != NULL && v->count > 0) v->runs[v->count - 1].cont_box_id = cont_box_id;
 }
 
 void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
@@ -766,11 +801,14 @@ static int is_skipped_tag(lxb_tag_id_t t) {
      * VIDEO/AUDIO children are fallback content for browsers WITHOUT media
      * support; this browser renders the media element itself (PV_VIDEO run),
      * so the fallback text is never shown -- same as every modern engine. */
+    /* SVG children are GEOMETRY, not prose: an <svg> is emitted whole as a PV_SVG
+     * run, so its <text>/<title>/<desc> content must not also flow into the page
+     * as paragraphs (it used to land mid-article as loose words). */
     return t == LXB_TAG_SCRIPT || t == LXB_TAG_STYLE || t == LXB_TAG_HEAD
         || t == LXB_TAG_TITLE
         || t == LXB_TAG_TEXTAREA || t == LXB_TAG_SELECT || t == LXB_TAG_BUTTON
         || t == LXB_TAG_PROGRESS || t == LXB_TAG_METER || t == LXB_TAG_LEGEND
-        || t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO;
+        || t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO || t == LXB_TAG_SVG;
 }
 
 static lxb_tag_id_t node_tag(const lxb_dom_node_t *n) {
@@ -862,6 +900,15 @@ typedef struct pv_cont_info {
 int wrap, row_gap, align_items, align_self;
 int align_content, justify_items;
 int grid_rows, grid_flow, row_span;
+/* The box enclosing the container's items (see pv_run.cont_box_id): the container
+ * element's own box, else the nearest box-carrying ancestor, else -1. box_pending
+ * is the walk's bookkeeping -- set when the container itself carried no box, so the
+ * first box found further out claims the slot. */
+int box_id, box_pending;
+/* Set when this container is the ANONYMOUS row synthesised for a parent whose
+ * children are all inline-block: its justify comes from the INHERITED text-align,
+ * which is only known once the ancestor walk finishes. */
+int anon_row;
 } pv_cont_info;
 
 /* Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for
@@ -1152,6 +1199,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->outline_color = cs->outline_color;
     d->outline_offset = cs->outline_offset;
     d->position = cs->position;
+    d->display = cs->display;
     d->inset_top = cs->inset_top; d->inset_right = cs->inset_right;
     d->inset_bottom = cs->inset_bottom; d->inset_left = cs->inset_left;
     d->z_index = cs->z_index;
@@ -1476,6 +1524,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->wrap = 0; cont->row_gap = -1; cont->align_items = 0; cont->align_self = 0;
     cont->align_content = 0; cont->justify_items = 0;
     cont->grid_rows = 0; cont->grid_flow = 0; cont->row_span = 0;
+    cont->box_id = -1; cont->box_pending = 0; cont->anon_row = 0;
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     pv_text_ext_reset(ext);
@@ -1576,6 +1625,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * (outer) box found, so the registry holds the parent links. block_id is
              * structure; the decoration (on the box def) is author presentation that
              * render_doc gates behind caps.css. */
+            int this_box = -1;   /* box registered for THIS ancestor, or -1 */
             if (box_reg != NULL && generates_box(t, cs.display) && css_has_boxdeco(&cs)
                 && !((t == LXB_TAG_TD || t == LXB_TAG_TH)
                      && in_flow_table_cell(p, base, flowreg))) {
@@ -1588,7 +1638,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     if (prev_box_id >= 0)
                         box_reg->def[prev_box_id].parent_id = bid;
                     prev_box_id = bid;
+                    this_box = bid;
                 }
+            }
+            /* The container found one step in carried no box of its own: the first
+             * box further out is the rect its items lay out in. */
+            if (cont != NULL && cont->box_pending && this_box >= 0) {
+                cont->box_id = this_box;
+                cont->box_pending = 0;
             }
             if (!got_color) {
                 int c = -1;
@@ -1605,6 +1662,18 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * lives INSIDE the glyphs (pv_text_ext_merge captures it as the
              * fill source), never as a band behind the text -- skip it here
              * and let an outer ancestor still supply a band background. */
+            /* An ancestor that REGISTERS A BOX and paints a background of its own
+             * (colour, gradient or image) ends the search with NO row band: that
+             * box paints the background itself, over its exact rect. Letting the
+             * walk continue past it handed the row an OUTER element's colour and
+             * painted it, full width, on top of what the box had just drawn --
+             * every gradient hero lost its heading to a band of the page colour,
+             * and a narrow box's band overhung its edges. */
+            if (!got_bg && cs.bg_clip != CSS_BGC_TEXT && this_box >= 0 &&
+                (cs.background >= 0 || cs.bg_grad_n >= 2 || cs.bg_image_url[0] != '\0')) {
+                *bg = -1;
+                got_bg = 1;
+            }
             if (!got_bg && cs.bg_clip != CSS_BGC_TEXT) {
                 int b = -1;
                 if (cs.background >= 0) b = cs.background;
@@ -1662,6 +1731,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     cont->row_span = prev_row_span;
                     cont->item = prev_el;
                 }
+                if (this_box >= 0) cont->box_id = this_box;
+                else cont->box_pending = 1;
                 got_cont = 1;
             }
             /* Anonymous flex row for a parent whose children are all inline-block
@@ -1674,6 +1745,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 cont->justify = (cs.text_align == CSS_ALIGN_CENTER) ? FX_JUSTIFY_CENTER
                               : (cs.text_align == CSS_ALIGN_RIGHT)  ? FX_JUSTIFY_END
                                                                     : FX_JUSTIFY_START;
+                cont->anon_row = 1;
                 cont->cols = 0;
                 cont->id = container_id(reg, p);
                 if (have_prev_el) {
@@ -1682,6 +1754,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     cont->align_self = prev_align_self;
                     cont->item = prev_el;
                 }
+                if (this_box >= 0) cont->box_id = this_box;
+                else cont->box_pending = 1;
                 got_cont = 1;
             }
             prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink;
@@ -1697,6 +1771,64 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
 
     *bold = got_css_bold ? css_bold : tag_bold;
     *italic = got_css_italic ? css_italic : tag_italic;
+
+    /* text-align INHERITS, so the anonymous inline-block row's own element rarely
+     * declares it -- a `body{text-align:center}` page centres its buttons through
+     * inheritance. The resolved value is only known now that the walk has finished,
+     * so the row adopts it here. A real flex container keeps its justify-content. */
+    if (cont != NULL && cont->anon_row && cont->justify == FX_JUSTIFY_START) {
+        if (*align == CSS_ALIGN_CENTER)     cont->justify = FX_JUSTIFY_CENTER;
+        else if (*align == CSS_ALIGN_RIGHT) cont->justify = FX_JUSTIFY_END;
+    }
+}
+
+/* Serialises an element subtree (the element itself included) into a fresh
+ * NUL-terminated buffer. Two passes -- one to measure, one to fill -- so nothing
+ * grows by realloc and nothing is over-allocated.
+ *
+ * The V-003 chained-block rule targets collectors with NO protocol bound; this one
+ * has one: svg_render refuses anything past SV_MAX_INPUT, so a document that
+ * serialises larger is rejected here instead of being copied first. Returns NULL on
+ * OOM, on serialisation failure, or past the bound (all fail closed: no run is
+ * emitted, and the page renders without that graphic). */
+static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx) {
+    (void)data;
+    size_t *total = (size_t *)ctx;
+    if (*total > SV_MAX_INPUT) return LXB_STATUS_ERROR;
+    *total += len;
+    return LXB_STATUS_OK;
+}
+
+typedef struct sz_fill {
+    char  *buf;
+    size_t cap;
+    size_t pos;
+} sz_fill;
+
+static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx) {
+    sz_fill *f = (sz_fill *)ctx;
+    if (len > f->cap - f->pos) return LXB_STATUS_ERROR;
+    memcpy(f->buf + f->pos, data, len);
+    f->pos += len;
+    return LXB_STATUS_OK;
+}
+
+static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len) {
+    if (out_len != NULL) *out_len = 0;
+    size_t total = 0;
+    if (lxb_html_serialize_tree_cb((lxb_dom_node_t *)n, sz_count, &total) != LXB_STATUS_OK)
+        return NULL;
+    if (total == 0 || total > SV_MAX_INPUT) return NULL;
+    char *buf = (char *)calloc(1, total + 1u);
+    if (buf == NULL) return NULL;
+    sz_fill f = { buf, total, 0 };
+    if (lxb_html_serialize_tree_cb((lxb_dom_node_t *)n, sz_write, &f) != LXB_STATUS_OK) {
+        free(buf);
+        return NULL;
+    }
+    buf[f.pos] = '\0';
+    if (out_len != NULL) *out_len = f.pos;
+    return buf;
 }
 
 /* Collapses ASCII whitespace runs to a single space into a fresh buffer. */
@@ -3051,6 +3183,68 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 continue;
             }
 
+            /* Inline <svg>: emitted WHOLE as one run carrying its serialised
+             * markup. Unlike <img> it is not gated by caps.images -- the grammar
+             * svg_render accepts has no url form at all, so an inline SVG
+             * structurally cannot fetch (spec/svg_render.md §1). Its own subtree
+             * is suppressed from the text walk by is_skipped_tag; a NESTED <svg>
+             * therefore never reaches here, it travels inside its parent's markup. */
+            if (t == LXB_TAG_SVG && !in_skipped_subtree(n, base, js_enabled)
+                && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
+                && !(reader && in_boilerplate_subtree(n, base))) {
+                size_t mlen = 0;
+                char *markup = serialize_subtree(n, &mlen);
+                if (markup == NULL) { pending_break = 1; continue; }
+
+                lxb_dom_element_t *el = lxb_dom_interface_element(n);
+                size_t wl = 0, hl = 0;
+                const lxb_char_t *ws =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"width", 5, &wl);
+                const lxb_char_t *hs =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
+                int iw = parse_dim(ws, wl);
+                int ih = parse_dim(hs, hl);
+
+                const char *unused_href = NULL;
+                size_t unused_hl2 = 0;
+                const lxb_dom_node_t *block = NULL;
+                int heading = 0, unused_fg = -1, unused_bg = -1;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0;
+                int unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                const lxb_dom_node_t *unused_li = NULL;
+                int unused_depth = 0, unused_ordered = 0;
+                pv_cont_info svg_cont;
+                pv_box_info svg_box;
+                pv_text_ext svg_ext;
+                int bdeco;
+                resolve_context(n, base, sheet, &unused_href, &unused_hl2, &block, &heading,
+                                &unused_fg, &unused_bg, &unused_bold, &unused_italic,
+                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_li, &unused_depth, &unused_ordered,
+                                &reg, &svg_cont, &svg_box, &svg_ext,
+                                &box_reg, &float_reg, &bdeco, &cache, &flowreg);
+                int brk = pending_break || (block != prev_block);
+                pending_break = 0;
+                prev_block = block;
+
+                pv_status st = pv_append_svg(v, heading, brk, markup, iw, ih);
+                free(markup);
+                if (st != PV_OK) { rc = st; goto cleanup; }
+                /* The inherited text colour rides the run: an icon drawn with
+                 * fill="currentColor" takes the colour of the text around it. */
+                pv_set_text_ext(v, &svg_ext);
+                pv_set_color(v, unused_fg);
+                pv_set_text_style(v, unused_align, unused_fs, unused_lh, unused_deco);
+                pv_set_container(v, svg_cont.id, svg_cont.display, svg_cont.gap,
+                                 svg_cont.justify, svg_cont.cols, svg_cont.wrap,
+                                 svg_cont.row_gap, svg_cont.align_items);
+                pv_set_cont_box(v, svg_cont.box_id);
+                pv_set_cont_item(v, item_ordinal(&items, svg_cont.id, svg_cont.item));
+                pv_set_block_id(v, bdeco);
+                pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                continue;
+            }
+
             if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
                 /* `in_hidden_subtree` is intentionally NOT checked here because
@@ -3128,6 +3322,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(src_dup);
                 free(alt_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                /* The inherited text-align rides the image run: a replaced element
+                 * is placed by it exactly like a line of text. */
+                pv_set_text_style(v, unused_align, unused_fs, unused_lh, unused_deco);
                 /* The resolved inherited text extensions ride the image run too:
                  * image_rendering picks the paint scaling filter (2026-07-10). */
                 pv_set_text_ext(v, &img_ext);
@@ -3289,6 +3486,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                      econt.cols, econt.wrap, econt.row_gap, econt.align_items);
                     pv_set_grid(v, econt.col_w, PV_GRID_TRACKS, econt.col_span);
                     pv_set_grid_rows(v, econt.grid_rows);
+                    pv_set_cont_box(v, econt.box_id);
                     pv_set_row_span(v, econt.row_span);
                     pv_set_flex(v, econt.grow, econt.shrink, econt.basis, econt.order,
                                 econt.direction, econt.align_self);
@@ -3429,6 +3627,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                  cont.wrap, cont.row_gap, cont.align_items);
                 pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
                 pv_set_grid_rows(v, cont.grid_rows);
+                pv_set_cont_box(v, cont.box_id);
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                            cont.align_self);
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
@@ -3529,6 +3728,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           cont.wrap, cont.row_gap, cont.align_items);
                 pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
                 pv_set_grid_rows(v, cont.grid_rows);
+                pv_set_cont_box(v, cont.box_id);
                 pv_set_row_span(v, cont.row_span);
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                             cont.align_self);

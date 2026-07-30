@@ -60,6 +60,10 @@ typedef enum pv_kind {
     PV_VIDEO = 4,  /* a <video> or <audio> element: src is set, text is alt/label,
                     * poster_src is the poster URL (NULL for audio), img_w/img_h
                     * hold declared dimensions (-1 unknown) */
+    PV_SVG = 5,    /* an inline <svg>: text holds the serialised markup (inert data,
+                    * parsed by svg_render at paint time), img_w/img_h the intrinsic
+                    * size in px. src is NULL -- inline SVG names no resource, which
+                    * is why it renders without the images capability. */
 } pv_kind;
 
 /* Class of a PV_INPUT control. Drives how the GUI paints and submits it. Unknown
@@ -194,6 +198,15 @@ typedef struct pv_run {
     int     cont_justify; /* fx_justify of the container */
     int     cont_cols;    /* grid column count (>= 1 for grid), or 0 */
     int     cont_rows;    /* grid row count (explicit grid-template-rows), or 0 */
+    /* The box that ENCLOSES this container's items: the container element's own box
+     * when it registers one (its background/padding/border), else the nearest
+     * box-carrying ancestor, else -1. The presentation layer lays the items out
+     * inside this rect, and an item's own root box must be a STRICT DESCENDANT of
+     * it -- without that, a container whose items carry no box of their own had
+     * every item claim the CONTAINER's box as its root and paint the container
+     * background once per item (a `space-between` header painted two bands with the
+     * page showing through the middle). Structure, never gated. */
+    int     cont_box_id;
     /* Grid track sizes of the container (2026-07-11; mirrors css_style.grid_col_w:
      * 0 auto / >0 px / <0 fr x100, first PV_GRID_TRACKS tracks) and this run's
      * ITEM column span (grid-column: span N; <= 0 = 1). Structure like cont_*,
@@ -482,6 +495,11 @@ typedef struct pv_box_def {
     /* Phase R1e: background/foreground color keyframe values per stop. */
     int anim_kf_bg[8];  /* bg color 0xRRGGBB or -1 */
     int anim_kf_fg[8];  /* fg color 0xRRGGBB or -1 */
+    /* The element's css_display. The painter needs it to tell an INLINE-LEVEL box
+     * (inline-block: a button, a badge, a pill) from a block one: an inline-level
+     * box shrink-wraps to its content and is placed by the parent's text-align,
+     * instead of opening a full-width block box. CSS_DISP_UNSET (0) = not stated. */
+    int display;
     /* convenience: last field marker for IPC count */
 } pv_box_def;
 
@@ -569,6 +587,12 @@ pv_status pv_append_input(pv_view *v, int heading, int block_break,
 pv_status pv_append_video(pv_view *v, int heading, int block_break,
                           const char *alt, const char *src,
                           const char *poster, int w, int h);
+
+/* Appends one PV_SVG run. markup is the serialised <svg> subtree (copied; may be
+ * any bytes -- it is parsed later by the bounded, fuzzed svg_render, never
+ * executed). w/h are the intrinsic pixel dimensions, or -1 when undeclared. */
+pv_status pv_append_svg(pv_view *v, int heading, int block_break,
+                        const char *markup, int w, int h);
 
 /* Sets the author foreground color (packed 0xRRGGBB, or -1 for none) on the most
  * recently appended run. No-op when the view is empty or NULL. Both append helpers
@@ -674,6 +698,10 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
  * NULL view. The append helpers default everything to 0. */
 void pv_set_row_span(pv_view *v, int row_span);
 void pv_set_grid_rows(pv_view *v, int grid_rows);
+
+/* Sets the last run's cont_box_id (the box enclosing its container's items; -1 =
+ * none). No-op on an empty view. */
+void pv_set_cont_box(pv_view *v, int cont_box_id);
 void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);
 
 /* Stage 3: sets the flex per-item values on the most recently appended run — the

@@ -46,8 +46,12 @@ typedef enum rd_kind {
     RD_IMAGE,         /* image placeholder; href is the src, img_decision is set */
     RD_NOTICE,        /* a user-agent notice (e.g. the image tracking warning) */
     RD_INPUT,         /* a form control; text is placeholder/label, href is the form action */
-    RD_VIDEO          /* a <video>/<audio> element; href is the src, text is alt/label
+    RD_VIDEO,         /* a <video>/<audio> element; href is the src, text is alt/label
                        * poster_src holds the poster URL (NULL for audio) */
+    RD_SVG            /* an inline <svg>; text is its serialised markup, video_w/
+                       * video_h its intrinsic size. Carried unconditionally: the
+                       * markup names no resource, so there is no fetch to gate
+                       * (spec/svg_render.md §1). */
 } rd_kind;
 
 /* One paint-ready block in document order. text is owned, NUL-terminated and
@@ -69,8 +73,12 @@ typedef struct rd_block {
     rdp_img_decision img_decision;
     img_fail_reason  img_fail;       /* IMG_OK unless the image's fetch/decode failed */
     char            *poster_src;     /* RD_VIDEO: poster image URL; NULL otherwise */
-    int              video_w;        /* RD_VIDEO: declared width in px, or -1 */
-    int              video_h;        /* RD_VIDEO: declared height in px, or -1 */
+    /* Declared intrinsic size in px, or -1/0 when undeclared. Shared by every
+     * replaced element: RD_VIDEO (the <video> attributes), RD_IMAGE (the <img>
+     * attributes, which the painter lays out at) and RD_SVG (the parsed <svg>
+     * width/height). */
+    int              video_w;
+    int              video_h;
     int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */
     int              bg_rgb;         /* author background-color packed 0xRRGGBB, or -1; set only with caps.css */
     int              text_align;     /* author text-align (css_align); set only with caps.css, else 0 */
@@ -125,6 +133,11 @@ typedef struct rd_block {
     int              cont_justify;   /* fx_justify of the container */
     int              cont_cols;      /* grid column count, or 0 */
     int              cont_rows;      /* explicit grid row count, or 0 */
+    /* The box enclosing this container's items (pv_run.cont_box_id): its own box
+     * when it registers one, else the nearest box-carrying ancestor, else -1.
+     * The container lays its items out inside this rect and an item's root box
+     * must be a strict descendant of it. Structure, never gated. */
+    int              cont_box_id;
     /* Grid track sizes of the container (2026-07-11; 0 auto / >0 px / <0 fr x100,
      * see pv_run) and this block's ITEM column span (<= 0 = 1). Structure like
      * cont_*, never gated. */

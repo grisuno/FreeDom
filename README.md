@@ -83,6 +83,35 @@ telemetry, mandatory API keys, or hidden solver workers. We refuse to do so.
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
+### Inline SVG + Firefox render parity (30 July 2026)
+
+Inline `<svg>` renders: shapes (`rect`/`circle`/`ellipse`/`line`/`polyline`/`polygon`),
+full `<path>` data (including elliptical arcs), `<g>` groups with inherited paint and
+composed `transform`, `fill="currentColor"` icons that take the surrounding text colour,
+`viewBox` scaling, and `<text>`.
+
+It renders **unconditionally** — unlike `<img>`, which stays behind the images toggle —
+because the grammar the parser accepts has **no URL form at all**: `<image>`, `<use>`,
+`<foreignObject>`, `<script>` and `<style>` are dropped together with their subtrees, so
+an inline SVG structurally cannot fetch. The parser (`svg_render`, `sv_`) is pure, bounded
+and fuzzed (`make fuzz-svg`); the Cairo half (`svg_paint`, `svp_`) only draws already
+validated geometry. See `spec/svg_render.md`.
+
+The same push closed five render gaps **measured** against Firefox
+(`firefox --headless --screenshot` versus `freedom --download-png` on the same file):
+
+- A row's background band now stops at the first ancestor **box** that paints a background
+  of its own. Every gradient hero used to lose its headline under an opaque band of the
+  page colour, painted on top of the gradient the box had just drawn.
+- A flex/grid container knows its own box, so `justify-content: space-between` paints one
+  band across the header instead of one rectangle per item with the page showing through.
+- `display: inline-block` shrink-wraps to its content and is placed by the parent's
+  `text-align` — a centred call-to-action button was a full-page-width bar.
+- A box **nested inside** a flex/grid item paints (badge pills, icon chips, avatars).
+- Replaced elements (`<img>`, `<svg>`) are placed by `text-align` and honour their
+  **declared** `width`/`height`, and a `max-width; margin: 0 auto` block keeps its width
+  cap inside a decorated ancestor.
+
 ### Modern Web Rendering (18 July 2026)
 
 A modernization push across eight phases delivered a rendering engine comparable
@@ -311,9 +340,11 @@ walk is deferred to a follow-up.
   TimeRanges, `new Audio(src)` — so player scripts run without throwing and
   without touching the network.
 
-## Current Status (July 19, 2026)
+## Current Status (July 30, 2026)
 
 - Advanced HTML rendering with box model, flex/grid, margin collapsing
+- Inline `<svg>`: shapes, `<path>` (arcs included), `<g>` transforms, `currentColor`,
+  `viewBox` scaling, `<text>` — always rendered, structurally unable to fetch
 - Clickable links + image support (PNG + JPEG + WebP + static GIF)
 - Inline `data:` images with zero network request
 - CSS `background-image` with `linear-gradient()`, `radial-gradient()`,
@@ -763,6 +794,7 @@ make fuzz-js      # 30-second libFuzzer session on the JS sandbox
 make fuzz-css     # Fuzz the author-CSS parser + cascade
 make fuzz-pv      # Fuzz the display-list builder
 make fuzz-img     # Fuzz the PNG+JPEG+WebP+GIF decoder
+make fuzz-svg     # Fuzz the inline-SVG parser (geometry + pool bounds)
 make view         # Compile the standalone Wayland + Cairo GUI demo
 make clean        # Wipe the build directory
 make all          # Build the whole proyect

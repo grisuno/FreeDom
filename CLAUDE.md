@@ -197,8 +197,9 @@ Targets:
 - `make test` — compila y ejecuta la suite CMocka. Hasta que exista la implementación de un
   módulo, **enlaza con fallo a propósito** (estado rojo de TDD).
 - `make asan` — la misma suite bajo AddressSanitizer + UBSan.
-- `make fuzz` / `fuzz-pv` / `fuzz-js` / `fuzz-img` / `fuzz-dom` — libFuzzer (parser HTML / display
-  list `page_view` / sandbox JS / decoder PNG / selectores `querySelector` sobre DOM real).
+- `make fuzz` / `fuzz-pv` / `fuzz-js` / `fuzz-img` / `fuzz-dom` / `fuzz-svg` — libFuzzer (parser HTML /
+  display list `page_view` / sandbox JS / decoder PNG / selectores `querySelector` sobre DOM real /
+  parser SVG en línea).
   `make fuzz-afl` — AFL++ sobre el binario headless.
 - `make clean`.
 
@@ -270,338 +271,170 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 | Descargas | `download` (`dl_`) | Guardar recurso a `~/Downloads/freedom/`. Nombre fail-closed (reusa `pe_safe_basename`), escritura atómica 0600. |
 | Pool/prefetch | `prefetch` (`pf_`) | Pre-scanner lookahead puro (fuzzeado) + pool pthreads (4 hilos) que baja stylesheets/scripts/imágenes en paralelo. Worker intacto. |
 | DevTools | `freebug` (`fb_`), `dom_debug` (`dd_`) | Consola JS (`F12`, `--dump-console`): log coloreado por nivel + ubicación `file:line:col` + REPL. `--dump-dom`/`--dump-layout` para debugging headless. Persistencia por-pestaña pendiente. |
-| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo, 10.712 L — deuda) | Toolbar, tabs, barra URL, scroll, menú de opciones, clic, submit. Multi-pestaña, atajos (`Ctrl+T/W/Tab`, `Ctrl+R`, `Ctrl+P/S`, `Ctrl++/-/0`). Temas claro/oscuro/sepia. `Ctrl+D` reader mode. **DEUDA:** extraer painter/chrome a módulos propios. |
-| Auditoría | `spec/threat-model.md` | Activos/adversarios/fronteras → mitigaciones. 16 fuzz targets, 1354 tests. |
+| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo, ~12.400 L — deuda) | Toolbar, tabs, barra URL, scroll, menú de opciones, clic, submit. Multi-pestaña, atajos (`Ctrl+T/W/Tab`, `Ctrl+R`, `Ctrl+P/S`, `Ctrl++/-/0`). Temas claro/oscuro/sepia. `Ctrl+D` reader mode. **DEUDA:** extraer painter/chrome a módulos propios. |
+| SVG | `svg_render` (`sv_`), `svg_paint` (`svp_`) | `<svg>` en línea: parser **puro y fuzzeado** (formas, `<path>` con arcos, `<g>`+transform, `currentColor`) + pintor Cairo. La gramática **no tiene forma de URL** ⇒ cero red ⇒ se renderiza siempre. |
+| Auditoría | `spec/threat-model.md` | Activos/adversarios/fronteras → mitigaciones. 17 fuzz targets, 53 suites CMocka. |
 
-**Decisiones de doctrina vigentes** (no evidentes en el código; no re-litigar):
-- **Navegabilidad sobre PQ estricto:** un host que no puede KE híbrido PQ **avisa** (toast
-  "classical TLS 1.3"), no bloquea (`SF_POLICY_ALLOW_CLASSICAL_KE`). Por defecto, TLS<1.3 / cadena
-  inválida / SHA-1 siguen fatales — **salvo** que el host esté en la allowlist (override de
-  soberanía, abajo). Ver `[[freedom-navigability-over-strict-pq]]`.
-- **La allowlist es el override de soberanía (no dictadura):** un host en `allow.conf` se navega
-  bajo `SF_POLICY_ALLOWLISTED_INSECURE` (TLS 1.2, KE clásico, cert débil-pero-válido) si el
-  estricto falla, con aviso; la autenticidad de la cadena se mantiene (VERIFYPEER). Es el caso
-  de Hacker News (`news.ycombinator.com`, solo TLS 1.2). `hb_is_allowlisted` distingue "en la
-  blanca explícita" de "permitido por defecto". Ver `[[freedom-navigability-over-strict-pq]]`.
-- **Umbral RSA<3072 solo al leaf** (los intermedios RSA-2048 de la Web PKI son válidos). Un
-  sitio con leaf RSA-2048 se sortea con la excepción por host **Ctrl+Shift+E** (PERMISSIVE, solo
-  sesión).
-- **Identidad de red = identidad anti-fingerprinting (no "Freedom/0.1"):** el `User-Agent` por
-  defecto de la red **es** `FP_USER_AGENT` (cadena común de Firefox/Linux, fuente única en
-  `anti_fp`) y **coincide** con `navigator.userAgent`; toda petición (GET y POST) envía además un
-  `Accept-Language` normalizado (`FP_ACCEPT_LANGUAGE_HEADER`). Mandar `"Freedom"` por el cable era
-  huella única + señal de bot (rompía Google/Cloudflare). El usuario puede sobrescribir la UA por
-  sesión (menú); vacío ⇒ default anti-fp. Ver `[[freedom-anti-fp-network-identity]]`.
-- **Readback de canvas/audio por origen (eTLD+1), no por sesión cruda:** la clave que envenena la
-  lectura de `canvas`/`audio` se deriva por sitio con `fp_origin_key(session_key, eTLD+1)` (pura, en
-  `anti_fp`: FNV-1a del dominio mezclado con el secreto de sesión y finalizado con `splitmix64`). El
-  secreto de sesión sigue siendo aleatorio por worker (`getrandom`); en cada `OP_LOAD` el worker
-  calcula el dominio registrable con `request_policy` (`rp_host_of`→`rp_site_of`, tabla PSL) sobre la
-  URL de la página y se lo pasa a `je_install_canvas`. Así dos sitios renderizados por el mismo
-  worker ven ruido distinto: se cierra el **cross-origin linking** de la huella de readback (antes la
-  spec lo difería al "orquestador de sesión"). URL sin host (`file://`, vacía) ⇒ `NULL` ⇒ namespace
-  propio estable; nunca aborta ni filtra. Layout/estructura no se ven afectados. Ver
-  `[[freedom-anti-fp-origin-readback-key]]`.
-- **Omnibox en la barra de URL:** `url_omnibox` (puro) decide navegar vs buscar — host desnudo ⇒
-  `https://`, `http://` ⇒ promovido a https, esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda**
-  (nunca ejecución, fail-closed), texto libre ⇒ DuckDuckGo HTML (sin JS). El orquestador (`go_omnibox`)
-  resuelve primero un archivo local existente (la función pura no hace I/O). Ver `[[freedom-omnibox-search]]`.
-  **El buscador depende de la allowlist:** `html.duckduckgo.com` (todos los endpoints de DuckDuckGo)
-  presenta un **leaf RSA-2048**, que la política por defecto **rechaza** (`RSA<3072` ⇒ status 5). Por
-  eso `config/allow.conf` **incluye `duckduckgo.com`** (cubre subdominios): el override de soberanía
-  (`SF_POLICY_ALLOWLISTED_INSECURE`) acepta el cert débil-pero-válido **manteniendo** la autenticidad
-  de cadena — y de hecho aún negocia **TLS 1.3 + X25519MLKEM768** (solo se relajó el cert). Si la
-  búsqueda muestra **página en blanco / sin JS**, es que el `allow.conf` con `duckduckgo.com` **no está
-  en el search path en runtime** (`$FREEDOM_HOSTS_DIR`, `~/.config/freedom`, `./config`): correr desde
-  la raíz del repo o copiar el config a `~/.config/freedom/` lo resuelve. Ver `[[freedom-search-needs-allowlist]]`.
-- **SPA de buscador ⇒ endpoint no-JS server-rendered (rewrite transparente):** navegar directo a la
-  **SPA de DuckDuckGo** (`duckduckgo.com/?q=...`) se reescribe transparente a su endpoint HTML sin JS
-  (`URL_SEARCH_ENDPOINT` + la misma query) en el único choke point de navegación (`do_load` GUI,
-  `fetch_and_render_one` headless), vía `url_search_rewrite` (puro). La SPA trae resultados por XHR
-  async + framework de render de cliente que el modelo síncrono no completa ⇒ pinta en blanco; el
-  endpoint HTML da los mismos resultados sin nada de eso. Transparente: barra/historial guardan la URL
-  pedida (Recargar/Atrás re-aplican). Google **no** se toca (sin endpoint no-JS fiable; su "tráfico
-  inusual" es server-side). Aparte, se corrigieron los gaps del shim JS que hacían fallar la consola
-  de la SPA (y de **toda** la web jQuery/`Intl`): `document.nodeType===9`+`defaultView` (el
-  `setDocument` de Sizzle), `element.attributes` NamedNodeMap + `getAttributeNames`/`hasAttributes`
-  (via C `dom_attribute_names`), y stub de `Intl` (QuickJS-ng sin ICU) ⇒ consola 0. Ver
-  `[[freedom-search-spa-noscript-rewrite]]`.
-- **Cookies de sesión EN MEMORIA para hosts de confianza (doctrina 2026-07-12, aprobada por el dueño):**
-  un host allow∩js recibe cookies **efímeras en memoria** (nunca a disco, mueren al cerrar la app —
-  mismo espíritu que el `localStorage` efímero), **sin romper Zero Knowledge ni Zero Trust**. El jar de
-  red ya existía (`sf_share` CURLSH); lo que faltaba y se cerró: **`document.cookie` real** en el worker
-  (jar deshabilitado por defecto = `''`/no-op para no-confiables → ZK; habilitado y sembrado por
-  `jd_set_cookies`, volcado por `jd_get_cookies`), helpers `sf_cookie_header_for`/`sf_cookie_put`
-  (excluyen `HttpOnly` — network-only — y expirados) y el puente IPC (OP_LOAD lleva cookies-in y el tail
-  del resultado lleva el dump-out; solo en el path OP_LOAD, no en la cola de mutación). La GUI y headless
-  siembran desde el jar antes de cargar y hacen foldback antes de cualquier salto de nav JS. **Google
-  sigue sin renderizar** (su muro es botguard/consent/IP server-side, no algo que las cookies resuelvan;
-  se lo dije al dueño): la capacidad sirve para sitios de confianza que usan cookies cooperativamente. El
-  rewrite no-JS de DuckDuckGo se mantiene. Ver `[[freedom-session-cookies-trusted-spa]]`.
-- **JS Secure by Default + allowlist por host + ejecución viva:** el JS de página está **apagado**
-  salvo opt-in por host. Modo global tri-estado (`JSP_OFF`/`JSP_ALLOWLIST`(defecto)/`JSP_ON`);
-  pertenencia por host en `js.conf` (reusa `hostblock`, cubre subdominios). `js_policy` (puro) decide;
-  la GUI deriva `caps.js` por host y lo pasa al worker con `tab_load_ex(run_js)`. Con JS habilitado,
-  el worker **ejecuta** los scripts inline de la página (Hito 20b) sobre un **DOM escribible pero
-  seguro**: los mutadores (`dom_set_text_content`/`dom_set_document_title`) **DETACHAN** hijos
-  (`lxb_dom_node_remove`, nunca `destroy`), así un handle del índice nunca queda colgando (cero UAF);
-  el bridge expone una fachada estándar `document` (`document.title`, `getElementById().textContent`,
-  **`createElement`/`appendChild`/`removeChild`/`setAttribute`**, `body`/`head`, `addEventListener`/
-  `onload`, `setTimeout`) sobre handles enteros validados, sin objetos-nodo vivos. El índice **crece**
-  para nodos nuevos; `append` rechaza ciclos; `setAttribute('id'/'class')` re-indexa lookups. Eventos
-  y timers son **sintéticos y acotados**: el worker llama `__fireDeferred()` una vez tras los scripts
-  (dispara handlers de carga + vacía la cola de timers ≤64). `<noscript>` se muestra con JS off, se
-  oculta con JS on. **`innerHTML`** (setter) re-parsea un fragmento, detacha los hijos viejos e indexa
-  el subárbol nuevo (memory-safe). **Superficie ambiente identity-safe** (Hito 20d): `localStorage`/
-  `sessionStorage` **efímeros en memoria** (Zero Knowledge — nunca persisten), `document.cookie` (get
-  `""`/set no-op), `document.referrer` `""`, `history` stub no-op — para que el JS de
-  detección **corra sin lanzar** sin filtrar identidad. **`location` real + navegación por JS**
-  (Hito 20e parte 1): el worker recibe la URL de la página, inyecta `__locParts` **en C** (`url_split`;
-  la URL hostil nunca se interpola en JS) y expone un `location` real de **solo lectura**; las
-  escrituras que navegan (`location.href=`/`assign`/`replace`/`reload`/`window.location=`) solo
-  **registran la string cruda** — **el padre confiable la gatea** con `ln_resolve(URL_real, cruda)` (un
-  worker comprometido no puede colar `file://`/downgrade) y la GUI navega por el camino normal
-  (re-aplica TODA la política), con cap anti-bucle. **Fuera de alcance (parte 2):** eventos
-  interactivos (clic), timers async reales, getter de `innerHTML`, scroll a ancla `#id`. (Los
-  **scripts externos `src`** dejaron de estar fuera de alcance: corren para hosts allow∩js desde el
-  **Hito 24 EXT**.) No usar `lxb_dom_node_destroy` en mutadores (colgaría el índice). **No** persistir
-  el storage ni poblar cookie/referrer con datos reales (rompería Zero Knowledge). Ver `[[freedom-live-js]]`.
-- **Aislamiento de scripts por `<script>` (browser semantics) + `document.fonts` stub:** el worker
-  ejecuta **cada** `<script>` inline como su **propio programa** (`hp_extract_script_list` → un
-  `js_eval` por script), no concatenados en un único eval. Antes, una excepción no capturada en el
-  primer script **abortaba todos** los siguientes — por eso google.com "no cargaba nada": su primer
-  script llama `document.fonts.load(...)` y, sin ese global, lanzaba `cannot read property 'load' of
-  undefined`, matando el resto. Dos arreglos: (a) cada error de script se reporta a Freebug
-  (`FB_ERROR`) pero **no** corta los demás; (b) `document.fonts` es un stub `FontFaceSet` benigno
-  (identity-safe, sin red). Un **único presupuesto de reloj por página** (`js_set_time_budget`) se
-  reparte entre todos los scripts + `__fireDeferred`, así aislar **no** multiplica el tope de 1 s
-  (fail-closed: scripts tras agotarlo no corren); tope `HP_MAX_SCRIPTS` (4096) anti-DoS. Desde el
-  **Hito 24 EXT** el JS externo (`<script src>`) de un host allow∩js **sí corre** (fetcheado por el
-  padre bajo política); si Google aun así sirve su muro anti-bot, es decisión server-side (IP/cookies)
-  — la omnibox (→ DuckDuckGo) sigue siendo el buscador por defecto. Ver `[[freedom-live-js]]`,
-  `[[freedom-per-script-isolation]]`, `[[freedom-external-scripts]]`.
-- **Privacy by Default:** imágenes y colores de autor (CSS) **apagados**; opt-in en el menú
-  (`Ctrl+I`; `FREEDOM_IMAGES=1` al arrancar). Imágenes **PNG, JPEG y GIF estático** (resto →
-  placeholder) y fetch **síncrono**; el decode corre
-  en el worker confinado (JPEG es excepción de doctrina autorizada por el dueño, contenida por el
-  sandbox + guardas de libjpeg; ver `[[freedom-jpeg-decode]]`). El toggle de imágenes cubre
-  **remotas y locales** por igual (una regla, fail-closed): un HTML local hostil tampoco autocarga
-  nada hasta que el usuario habilita imágenes.
-- **Origen `file://` para páginas locales (actúan como https):** una página de archivo recibe origen
-  `file:///realpath` (`build_file_origin`/`realpath` en la GUI), así sus `src` relativos resuelven
-  con `url_resolve_file` (puro) **confinado al subárbol del directorio del documento** (sin escape
-  `../`, sin path absoluto fuera, sin esquema remoto/ajeno → no telefonea a casa, no lee
-  `/etc/passwd`). Con imágenes ON (`Ctrl+I`) el `logo.png` de `docs/index.html` se ve dentro de
-  Freedom; la lectura de disco es acotada (`read_file_bounded`) y el decode sigue en el worker. La
-  navegación local sigue usando paths planos (historial/barra/base de link), `file://` es solo el
-  origen de render; un `file://` tecleado se normaliza a su path. Ver `[[freedom-local-file-origin]]`.
-- **Layout != estilo de autor:** la **maquetación** (box model UA, flex/grid, márgenes/columnas)
-  se aplica **siempre**, desacoplada de `caps.css`; es estructura, no abre sockets ni filtra a la
-  red. Solo los **colores** de autor (`fg_rgb`/`bg_rgb`) siguen gateados por `caps.css`. El gate
-  vive en `render_doc` (`rd_build`). Antes flex/grid estaba gateado y no se veía nunca.
-- **Cajas vacías y decoración de ítems flex/grid pintan como en Firefox (2026-07-26):** el
-  render era **por nodo de texto**, así que un elemento decorado pero **sin contenido** (una barra
-  `<div style="background;height">`, un separador, un ícono, una `tile` de grid) nunca registraba
-  su caja y **desaparecía**; y un **ítem flex/grid** perdía la decoración de su caja raíz (fondo/
-  borde/radio/sombra de una tarjeta) y, si estaba vacío, colapsaba a altura 0 (la grilla entera se
-  esfumaba). Dos arreglos: (a) `page_view` emite un **run placeholder vacío** para toda hoja
-  box-generadora (mismo gate `css_has_boxdeco` que con contenido — la caja la decide el estilo, no
-  el contenido); el `open_box`/`close_top_box` existente reserva `box_h` y pinta. (b)
-  `layout_container` da a cada ítem su **caja raíz** (`item_root_box`, la de menor profundidad):
-  reserva su `box_h`/`min-height`, inserta el contenido por su padding+borde, y crea una `rc_box`
-  que pinta la decoración por el mismo bucle del painter (deco copiada por `rc_box_copy_decoration`,
-  DRY con `open_box`). **Byte-identical por defecto:** el placeholder es texto vacío con `block_id`
-  gateado por `caps.css`; sin CSS de autor `layout_doc` lo salta y los ítems no tienen caja → render
-  idéntico. **Límite v1:** una caja **anidada dentro** de un ítem (un `<span>` pill, un ícono dentro
-  de una tarjeta) aún no pinta su decoración. Ver `spec/page_view.md` §4, `[[freedom-empty-and-item-boxes]]`.
-- **Custom properties con recolección scoped (2026-07-29):** la tabla page-global de `--name`
-  ya no se llena con un escaneo de texto plano: `collect_custom_props_scoped` respeta el gate de
-  `@media` (mismo `media_matches` que las reglas) y solo recolecta de reglas con selector
-  **root-scoped** (`:root`/`html`/`body`/`*`/`.clase` presente de verdad en `<html>`/`<body>`;
-  la GUI pasa la lista viva vía `css_parse_scoped`). Antes la paleta oscura INACTIVA de un sitio
-  (Wikipedia: `.skin-theme-clientpref-night`, `@media dark`) pisaba la clara y pintaba texto
-  blanco-sobre-blanco (artículo entero invisible). Lo no reconocible se salta **fail-safe** (var
-  ausente ⇒ declaración cae ⇒ default UA legible). `CSS_MAX_CUSTOM_PROPS` 64→512 (Wikipedia sola
-  define 201). Ver `spec/css.md` "Custom properties", `[[freedom-scoped-custom-props]]`.
-- **Tablas flow: la fila es UNA línea; decoración cero no es caja (2026-07-29):** HN pasó de
-  5208px a 1896px (Firefox: 1330) con cuatro reglas: `padding:0`/`border:0`/`visibility:visible`
-  **no** registran caja (`css_has_boxdeco` exige valor > 0 — el reset universal creaba una caja
-  por elemento y el painter hace flush de línea en cada transición de caja); la hoja decorada
-  vacía y las celdas de una tabla flow **no llevan caja propia** y su bloque es la **fila**
-  (`in_flow_table_cell`); un run de continuación sin caja **no cierra** las cajas abiertas
-  (gui/browser_ui.c); y un bloque `<tr>` defaultea margen 0 (los márgenes no aplican a filas).
-  Ver `spec/page_view.md` "Tablas flow", `[[freedom-flow-table-row-line]]`. (Los dos "abiertos"
-  de esta entrada quedaron cerrados: la zona de menús de Wikipedia por Stage 2d —abajo— y la
-  banda naranja del nav de HN se verificó pintando el 2026-07-30.)
-- **Stage 2d — el SUBÁRBOL out-of-flow sale del flujo + tres regresiones de pipeline (2026-07-30):**
-  el diff contra Firefox en Wikipedia real destapó cuatro bugs encadenados. (1) **Subárbol
-  absolute en flujo:** el skip Stage-2 de `layout_doc` solo miraba la caja PROPIA del bloque; los
-  `<li>` de un dropdown `position:absolute;visibility:hidden` (cajas hijas estáticas) se maquetaban
-  en flujo reservando cientos de px en blanco (los menús Vector), y `reconcile_boxes` abría la caja
-  absolute como ancestro in-flow (lo que además la echaba de la lista posicionada). Cierre: puros
-  `bt_oof_anchor` (ancestro abs/fixed más CERCANO — dueño de contenido para medir/pintar) y
-  `bt_oof_root` (el más EXTERNO — dueño de la posición estática), cycle-bounded, **fail-open** a
-  -1 (contenido hostil mal clasificado se pinta en flujo, nunca desaparece); el chequeo corre
-  **antes** de la rama flex/grid (un menú flex dentro de un absolute ya no se maqueta en flujo);
-  `position_doc` mide y `paint_positioned_one` pinta TODO el subárbol (una línea por bloque,
-  apilado, pen-x para continuaciones). Wikipedia: 11612→~8900px y el artículo arranca arriba.
-  (2) **Códec IPC amputaba clip/box_h_set:** los 4 `clip_*` de P3 y `box_h_set` de Stage 2c se
-  seteaban en `pv_box_def` pero **nunca se serializaban** (`f[172]`→`f[177]` en `tab.c`); el lado
-  lector recibía clip 0/0/0/0 (rect VÁLIDO, no el centinela) y **clipeaba todo box posicionado a
-  0×0** — por eso 3 tests PNG (opacity/blend/abs-shrink) estaban rojos en main. Recordatorio de
-  `[[freedom-render-pipeline-ipc]]`: campo nuevo que no cruza el pipe = feature muerta silenciosa.
-  (3) **La "limitación conocida" de P5 era el códec, no page_view:** el lector de runs saltaba
-  `pv_set_block_id`/`pv_set_node_id` dentro del branch `kind != PV_INPUT` — el worker SÍ mandaba
-  el box del input (checkbox-hack `position:absolute;opacity:0`); ahora block_id/node_id viajan en
-  TODO run y el checkbox fantasma de Wikipedia desapareció (candado
-  `test_load_carries_input_box_and_clip`). (4) **Línea = máximo leading de sus fragmentos (CSS 2.1
-  §10.8):** `flush_line` usaba el `line_scale` del ÚLTIMO bloque; el `.mw-editsection{line-height:0}`
-  tras cada heading colapsaba la línea del heading y el párrafo siguiente pintaba ENCIMA de los
-  glifos (todas las secciones de Wikipedia ilegibles). Ahora se acumula el máximo factor por
-  fragmento (candado `test_download_png_line_height_zero_does_not_shrink_line`). Límites v1
-  registrados en `spec/box_engine.md` Stage 2d (absolute anidado con insets auto ⇒ estática 0;
-  runs sin caja dentro del subárbol siguen en flujo; pintado una-línea-por-bloque). Ver
-  `[[freedom-oof-subtree-stage2d]]`.
-- **Paridad con Firefox medida, no supuesta (2026-07-27):** las diferencias de render contra
-  navegadores modernos se **miden** con Firefox instalado en este host
-  (`firefox --headless --screenshot X.png --window-size=1000 file://...`) contra
-  `--download-png` del mismo HTML, no se adivinan. Ese diff empírico cerró siete brechas que
-  rompían páginas modernas: (1) **flex real** — `basis` de un ítem sin `flex-basis` es su
-  **max-content medido** (+padding/borde/margen), no un reparto `content_w/n`, y **todo**
-  contenedor flex pasa por el motor: antes `justify-content` era un no-op (columnas iguales no
-  dejan sobrante) y una nav de 3 enlaces ocupaba la página entera; (2) el **contenedor pinta su
-  propia caja** y sus ítems se maquetan **dentro** de ella — `layout_container` ya no hace
-  `close_all_boxes` sino `reconcile_boxes` (como la banda de floats), lo que además mantiene una
-  fila flex **dentro** de un wrapper `max-width; margin:0 auto` en vez de escaparse a ancho
-  completo; (3) `text-align` dentro de una celda flex/grid se centra en **la celda** (`bg_w`), no
-  en el ancho de página restante; (4) **`inline-block` fluye horizontal** — un padre cuyos hijos
-  son todos `inline-block` es un **contenedor flex anónimo** (antes cada hijo se apilaba en su
-  propia línea a ancho completo); (5) **out-of-flow** — `width:auto` **encoge al contenido** (antes
-  ancho completo ⇒ un badge anclado a `right` aterrizaba fuera de la pantalla por la izquierda) y un
-  wrapper `position:relative` con **solo** hijos posicionados **sí genera caja** (antes ninguna ⇒
-  sus hijos resolvían contra un bloque contenedor degenerado 0×0); (6) **celdas de tabla generan
-  caja** (`td{border}` no pintaba nada) y su `block_id` se reenvía; (7) **fondos inline**
-  (`<code>`, `<mark>`) pintan tras sus glifos, y una línea con fondos mixtos ya no embadurna el
-  color del último run a lo ancho. `<li>` deja de heredar el margen 1em de `<p>`. Cerrado con
-  `make test`+`make asan` limpios (51 suites), `fuzz-pv` 79k execs y revisión visual.
-  **Sigue abierto:** texto que fluye **al lado** de un `float` (hoy va debajo), `align-items` contra
-  una altura **explícita** del contenedor (centra respecto al ítem más alto, no a la caja), y
-  `width:auto` estirado entre `left`+`right`. Ver `spec/page_view.md` §4, `spec/box_engine.md`,
-  `spec/flex_layout.md`, `[[freedom-firefox-parity-batch]]`.
-- **Filtro de hosts opcional + override:** `block.conf`/`allow.conf` (formato `/etc/hosts`) se leen
-  de `$FREEDOM_HOSTS_DIR`, `~/.config/freedom` y `./config`; la GUI consulta `hb_check` antes del
-  fetch (la blanca gana y cubre subdominios). Falla **abierto**: sin listas no bloquea nada. La
-  blanca tiene **doble rol**: des-bloquea del adblock **y** habilita el override TLS por host.
-- **Tor/I2P a nivel de socket (opt-in):** integración por **proxy local** (Tor SOCKS5h
-  `127.0.0.1:9050` / I2P HTTP `127.0.0.1:4444`), **nunca** embebiendo el daemon (superficie). El
-  cerebro es `net_realm` (puro): `.onion`→solo Tor, `.i2p`→solo I2P, clearnet→directo o Tor si
-  "torify". Dos invariantes: **DNS remoto** (SOCKS5h, sin fuga) y **fail-closed** (realm sin su
-  proxy → bloqueado, jamás directo). `.onion` sigue **https-only**; **`.i2p` acepta `http://`**
-  (`nr_realm_allows_http`/`sf_config.allow_overlay_http`): los eepsites son http y el overlay ya
-  cifra/autentica por dirección, así que no es downgrade; `http://` clearnet **sigue rechazado**.
-  TLS 1.3 sigue vigente en `.onion` (el override por host de `allow.conf` aplica si hace falta).
-  Redirects overlay http se resuelven en http (sin salir del overlay). GUI: toggles "Tor/I2P
-  routing"; headless: `--tor[=addr]`/`--i2p[=addr]`/`--torify`; env: `FREEDOM_TOR_PROXY`/
-  `FREEDOM_I2P_PROXY`/`FREEDOM_TORIFY_CLEARNET`. **Verificado de extremo a extremo** (jun 2026):
-  `.onion` vía Tor y `.i2p` vía el router Java (`stats.i2p`, `i2p-projekt.i2p` con redirect).
-- **SOP por construcción por defecto + red-en-JS SOLO para hosts en allow.conf ∩ js.conf
-  (override de soberanía, Hito 26):** por defecto el sandbox JS **no expone** ninguna API de red
-  (`fetch`/`XMLHttpRequest`/`WebSocket`/`EventSource`/`sendBeacon`/`Image`), no hay `iframe`,
-  `window.open`/`postMessage`/`opener`, el readback de canvas/audio está envenenado y el worker **no
-  tiene red** (`CLONE_NEWNET`+seccomp): para un sitio normal la SOP clásica es **estructuralmente
-  imposible** y no se implementa CORS (sería código muerto). **Excepción gateada:** un host presente
-  en **allow.conf Y js.conf** (el usuario lo declaró de confianza dos veces) recibe `XMLHttpRequest`
-  y `fetch` **reales** — pero el JS **nunca toca el socket**: el worker confinado proxya la petición
-  al **padre confiable** (`tab_set_fetcher`/`tab_set_net_allowed`; protocolo `TAG_SUBREQ`/`TAG_RESULT`
-  en `tab.c`), que **re-aplica TODA la política** (hostblock/filtro de rastreadores, `net_realm`
-  fail-closed, TLS-PQ con los fallbacks de navegabilidad) antes de buscar. Así "la web moderna
-  funciona" para sitios de confianza **bloqueando rastreadores en la capa de red** ("si el JS no toca
-  el socket, no hay espionaje"). Para esos sitios SÍ hay lecturas cross-origin (no implementamos CORS;
-  la protección es: solo hosts explícitamente confiables, rastreadores hostbloqueados, `document.cookie`
-  vacío → nada sensible que robar). El candado de regresión **se mantiene**:
-  `test_eval_no_network_or_cross_origin_api` corre con la red **apagada** (sitio no-confiable) y exige
-  que XHR/fetch sigan `undefined` por defecto; tests nuevos (`test_xhr_works_when_net_allowed`,
-  `test_xhr_undefined_when_net_not_allowed`, `test_xhr_blocked_host_refused_by_parent`) candan la ruta
-  gateada y que el padre rechaza un host bloqueado. **Límites v1:** síncrono bajo el capó (el worker —y
-  en el GUI el hilo de render— se bloquea durante el round-trip; aceptable por host de confianza),
-  activo solo durante la ventana de scripts de la carga (no en el REPL ni en eventos post-carga), y la
-  respuesta pasa por string UTF-8 (sin `arrayBuffer` binario real). Ver `spec/threat-model.md` §3,
-  `[[freedom-sop-by-construction]]`, `[[freedom-parent-gated-xhr]]`, `[[freedom-js-network-and-media-authorized]]`.
-- **Doctrina trusted-host (Hito 28) — allow∩js ⇒ experiencia completa:** un host que el usuario
-  declaró de confianza DOS veces (JS habilitado para él **y** presente explícito en `allow.conf`)
-  recibe TODO el JS (ya lo tenía: ejecución, XHR/fetch, scripts externos) **y toda la presentación
-  de autor** (CSS + imágenes) sin toggles de sesión: `jsp_trusted` (pura, `js_policy`) decide y la
-  GUI enciende `caps.css`/`caps.images` **efectivos** (el modo lectura gana; los toggles
-  persistentes del usuario no se tocan). Racional: donde el XHR gateado por el padre ya puede traer
-  bytes arbitrarios, dejar imágenes/CSS apagados no añade privacidad — solo fricción. Un modo
-  global `JSP_ON` **no** es confianza (falla cerrado: exige la entrada explícita en `allow.conf`).
-  Ver `[[freedom-trusted-host-full-caps]]`.
-- **Prefetch paralelo del lado confiable (Hito 29) — pipeline no bloqueante sin tocar el worker:**
-  módulo `prefetch` (`pf_`): pre-scanner lookahead **puro** (fuzzeado; comentarios/`<script>`/
-  `<style>` opacos, `rel` distinto de stylesheet descartado) sobre el HTML crudo + **pool de hilos**
-  (`PF_MAX_THREADS`=4) que baja stylesheets/scripts externos e imágenes **en paralelo** por el
-  MISMO `tab_fetch_fn` gateado del camino serial; `pf_pooled_fetch` sirve los `TAG_SUBREQ` del
-  worker cache-first (miss ⇒ fetch directo). El worker y su protocolo no cambian un byte: un hit
-  solo cambia **cuándo** se buscó, jamás **qué** (quitar el pool no cambia el conjunto de fetches).
-  E2E verificado: 4 hojas con 400 ms de latencia artificial llegan con ~4 ms de dispersión
-  (suma→máximo), 5 GETs exactos (cero re-fetch). Las **fronteras del motor moderno** siguen siendo
-  doctrina, no gaps: **JIT dentro del worker es estructuralmente imposible** (el W^X de seccomp
-  deniega `PROT_EXEC`; QuickJS es intérprete de bytecode a propósito) y el worker **no toca GPU**
-  (el compositor vive en el lado confiable). Ver `[[freedom-prefetch-parallel-pool]]`.
-- **`io_uring` PROHIBIDO en el worker confinado (la doctrina io_uring es solo del lado confiable):**
-  la §3 pide I/O asíncrona con `io_uring`, pero `io_uring` es una **primitiva de bypass de seccomp**
-  (sus `IORING_OP_*` no atraviesan el syscall entry que filtra el BPF), así que **nunca** entra al
-  allowlist del worker: un ring le permitiría a un worker comprometido `openat`/`connect`/`read`
-  burlando el filtro, W^X y `CLONE_NEWNET` — anularía toda la frontera Zero-Trust (como en Docker/
-  ChromeOS/Android, que lo bloquean). Ya está denegado **por construcción** (el allowlist es blanco,
-  deny-by-default), y se candadea con regresión: `test_policy_denies_io_uring` (puro) +
-  `test_harden_kills_io_uring_setup` (`io_uring_setup` ⇒ `SIGSYS`). La asincronía de la UI vive en el
-  lado confiable (event loop Wayland + fetch en hilo desacoplado, Hito 9), **jamás** donde corre
-  contenido hostil; el worker solo hace I/O bloqueante sobre dos pipes. Análogo a SOP por
-  construcción. Ver `spec/os_sandbox.md` §13, `[[freedom-io-uring-forbidden-in-worker]]`.
-- **Impersonación de TLS (JA3/JA4) por host triple-opt-in (Hito TLS, autorizado como excepción §4):**
-  el discriminador que bloquea a Freedom en Google/FB/YT **no** son las cabeceras HTTP (ya son
-  Firefox-completas; `Sec-Ch-Ua` bajo UA Firefox *empeoraría*), sino el **ClientHello TLS**: nuestro
-  PQ-by-default (`X25519MLKEM768` bajo UA Firefox 128 que no lo manda) es el tell más ruidoso. Gate
-  **triple** (`ti_should_impersonate`, puro): un host en `allow.conf` ∩ `js.conf` ∩ **`impersonate.conf`**
-  recibe `sf_config.impersonate` ⇒ `secure_fetch` deja el ClientHello consistente con la identidad
-  Firefox que ya mandamos (quita MLKEM, ordena cifras TLS1.3/1.2 estilo Firefox, grupos clásicos).
-  **Verificado E2E** (`tls.peet.ws`): ON ⇒ JA4 con componente de cifras idéntico al de Firefox 128 real,
-  sin MLKEM; OFF ⇒ default PQ. **Solo relaja la fuerza del KE (clásico) en esa ruta, nunca la
-  autenticidad** (VERIFYPEER intacto); el resto del navegador mantiene PQ. **Fase 2** (gate + códec IPC
-  `ti_`, fuzzeado) y **Fase 3** (blend interino OpenSSL) cerradas; **Fase 1** (JA3 byte-exacto vía
-  curl-impersonate+BoringSSL, proceso helper aislado) queda **bloqueada** en este host (no empaquetado).
-  **NO** derriba reCAPTCHA/BotGuard/IP (muros de motor/red, no TLS). Ver `spec/tls_impersonate.md`,
-  `[[freedom-tls-impersonate]]`.
-- **Modo boyscout:** un "fix" puede destrozar un módulo de seguridad; ante una regresión, diff
-  contra el commit inicial antes de tocar nada. Ver `[[freedom-security-modules-butchered-by-fix-commits]]`.
-- **`display:none` es estructural, no una sugerencia de JS — revertida la regresión del commit 897f414:**
-  el commit 897f414 modificó `in_hidden_subtree` en `page_view.c` para tratar
-  `display:none` como "sugerencia de presentación" cuando el elemento tenía inline `style`
-  Y no había JS (`js_enabled==0`). El problema: la comprobación era `st != NULL && sl > 0`
-  (cualquier inline style), no si el inline style específicamente contenía `display:none`.
-  En slashdot.org, muchos elementos con `display:none` del stylesheet tenían inline
-  `style` para colores/posición → se mostraban como filas vacías de 1px → página
-  ilegible (142.000 px de alto, en lugar de ~18.000). Se revirtió a la semántica
-  correcta: `display:none` de cualquier fuente oculta el elemento; la excepción
-  experimental de "JS toggle" se eliminó por romper más sitios de los que arreglaba.
-  Ver `[[freedom-display-none-structural]]`.
-- **`preserved_view` fallback en `tab.c` — umbral `>= 2` blocks:** el snapshot pre-script
-  gana al view post-script cuando tiene más bloques (fallback por corrupción DOM de
-  jQuery). Antes el umbral era `preserved > view` (cualquier diferencia) — regresión
-  cuando CSS display:none ocultaba elementos post-script (swing JS `client-nojs→client-js`,
-  skip-links con `visually-hidden`, etc.) — la view post-script perdía 1 bloque por cada
-  elemento oculto, el snapshot pre-script contaba ese elemento → snapshot gana → elementos
-  CSS-hidden pintaban visibles. Corregido: el fallback sólo actúa si el view post-script
-  tiene >= 2 bloques menos (preserved_count > view_count + 1), umbral que cubre corrupción
-  jQuery (subárboles enteros eliminados) sin activarse por ocultación CSS individual.
-- **`-fvisibility=hidden` es invariante de build (no quitar):** el binario `freedom` no exporta API,
-  así que todos sus símbolos van **ocultos** del `.dynsym`. No es solo endurecimiento: un símbolo del
-  ejecutable con visibilidad por defecto **preempta** al homónimo de una librería enlazada en TODO el
-  proceso. Concreto: `hostblock` usa prefijo `hb_` y HarfBuzz (Hito 25) exporta un `hb_free` público
-  → sin la flag, el `hb_free` del ejecutable secuestra el alocador de HarfBuzz y lo crashea dentro de
-  `hb_shape`. La flag vive en `HARDEN` **y** en el `CFLAGS` de `asan` (asan no hereda HARDEN, y su build
-  de `freedom` vía `test_freedom --download-pdf` también enlaza HarfBuzz). Ver `[[freedom-harfbuzz-shaping]]`.
+**Decisiones de doctrina vigentes** (no evidentes en el código; **no re-litigar**). Cada regla
+es la decisión + su porqué; el detalle vive en `spec/`, en `git log` y en la memoria enlazada.
+
+*Red, TLS y soberanía del usuario*
+
+- **Navegabilidad sobre PQ estricto:** un host que no negocia KE híbrido PQ **avisa** (toast
+  "classical TLS 1.3"), no bloquea. TLS<1.3 / cadena inválida / SHA-1 siguen fatales salvo
+  override de allowlist. `[[freedom-navigability-over-strict-pq]]`
+- **La allowlist es el override de soberanía, no una dictadura:** un host explícito en
+  `allow.conf` se navega bajo `SF_POLICY_ALLOWLISTED_INSECURE` (TLS 1.2, KE clásico, cert
+  débil-pero-válido) si el intento estricto falla. Se relaja la **fuerza** criptográfica,
+  nunca la **autenticidad** (VERIFYPEER intacto): llegás al sitio real sobre cripto vieja, no
+  a un impostor. `hb_is_allowlisted` distingue "en la blanca explícita" de "permitido por
+  defecto". Caso real: Hacker News. `[[freedom-navigability-over-strict-pq]]`
+- **El umbral RSA<3072 aplica solo al leaf** (los intermedios RSA-2048 son toda la Web PKI
+  pública). Un leaf RSA-2048 se sortea con la excepción por host **Ctrl+Shift+E** (solo sesión).
+- **Identidad de red = identidad anti-fingerprinting:** el `User-Agent` por cable **es**
+  `FP_USER_AGENT` (Firefox/Linux, fuente única en `anti_fp`) y **coincide** con
+  `navigator.userAgent`; toda petición manda además `Accept-Language` normalizado. Mandar
+  `"Freedom"` era huella única y señal de bot. `[[freedom-anti-fp-network-identity]]`
+- **Tor/I2P a nivel de socket, nunca embebido:** proxy local (Tor SOCKS5h `127.0.0.1:9050`,
+  I2P HTTP `127.0.0.1:4444`). `net_realm` (puro) decide: `.onion`→solo Tor, `.i2p`→solo I2P,
+  clearnet→directo o Tor si "torify". Dos invariantes: **DNS remoto** (sin fuga) y
+  **fail-closed** (realm sin su proxy ⇒ bloqueado, jamás directo). `.onion` sigue https-only;
+  **`.i2p` acepta `http://`** (el overlay ya cifra/autentica por dirección); `http://` clearnet
+  sigue rechazado. Verificado E2E. `[[freedom-tor-i2p-integration]]`
+- **Filtro de hosts opcional con override:** `block.conf`/`allow.conf` (formato `/etc/hosts`)
+  desde `$FREEDOM_HOSTS_DIR`, `~/.config/freedom`, `./config`. Falla **abierto** (sin listas no
+  bloquea). La blanca gana, cubre subdominios y tiene **doble rol**: des-bloquea del adblock
+  **y** habilita el override TLS por host.
+- **Impersonación de TLS (JA3/JA4) por triple opt-in** (`allow.conf` ∩ `js.conf` ∩
+  `impersonate.conf`, `ti_should_impersonate` puro): lo que delata a Freedom en Google/FB/YT no
+  son las cabeceras (ya son Firefox-completas) sino el **ClientHello** — nuestro PQ-by-default
+  bajo UA Firefox 128 es el tell. Solo relaja el KE en esa ruta, **nunca la autenticidad**.
+  Verificado E2E en `tls.peet.ws`. NO derriba reCAPTCHA/BotGuard (muros server-side).
+  `spec/tls_impersonate.md`, `[[freedom-tls-impersonate]]`
+
+*Aislamiento y superficie JS*
+
+- **`io_uring` está PROHIBIDO dentro del worker confinado.** Es una **primitiva de bypass de
+  seccomp** (sus `IORING_OP_*` no atraviesan el syscall entry que filtra el BPF): un ring
+  anularía el allowlist, W^X y `CLONE_NEWNET`. Ya está denegado por construcción (allowlist
+  blanca) y candado con regresión. La asincronía vive en el lado confiable.
+  `spec/os_sandbox.md` §13, `[[freedom-io-uring-forbidden-in-worker]]`
+- **SOP por construcción, por defecto:** el sandbox JS no expone **ninguna** API de red, ni
+  `iframe`/`window.open`/`postMessage`/`opener`; el readback de canvas/audio está envenenado y
+  el worker no tiene red (`CLONE_NEWNET`+seccomp). Para un sitio normal la SOP clásica es
+  **estructuralmente imposible**, y por eso **no se implementa CORS** (sería código muerto).
+  `[[freedom-sop-by-construction]]`
+- **Excepción gateada allow∩js:** un host declarado de confianza DOS veces recibe
+  `XMLHttpRequest`/`fetch` reales, pero **el JS nunca toca el socket**: el worker proxya al
+  padre (`TAG_SUBREQ`/`TAG_RESULT`), que **re-aplica TODA la política** antes de buscar. "Si el
+  JS no toca el socket, no hay espionaje". Límites v1: síncrono bajo el capó, solo durante la
+  ventana de scripts, respuesta como string UTF-8. `[[freedom-parent-gated-xhr]]`
+- **Readback de canvas/audio por origen (eTLD+1), no por sesión:** `fp_origin_key(session_key,
+  eTLD+1)` (puro) — dos sitios en el mismo worker ven ruido distinto, lo que cierra el
+  **cross-origin linking** de la huella. `[[freedom-anti-fp-origin-readback-key]]`
+- **JS Secure by Default + allowlist por host + ejecución viva:** apagado salvo opt-in
+  (`JSP_OFF`/`JSP_ALLOWLIST` por defecto/`JSP_ON`, pertenencia en `js.conf`). Con JS activo el
+  worker ejecuta los scripts sobre un **DOM escribible pero seguro**: los mutadores **DETACHAN**
+  (`lxb_dom_node_remove`, **nunca** `destroy`), así ningún handle del índice queda colgando
+  (cero UAF). `location` es real y de solo lectura; una escritura que navega solo **registra la
+  string** y **el padre la gatea** con `ln_resolve` (un worker comprometido no cuela `file://`
+  ni downgrade). Storage/cookies/referrer son **efímeros o vacíos** (Zero Knowledge): no
+  persistir ni poblar con datos reales. `[[freedom-live-js]]`
+- **Cada `<script>` es su propio programa** (`hp_extract_script_list` → un `js_eval` por script):
+  una excepción no capturada ya no aborta los siguientes, solo reporta a Freebug. Un **único
+  presupuesto de reloj por página** se reparte entre todos (aislar no multiplica el tope de 1 s).
+  `[[freedom-per-script-isolation]]`
+- **Doctrina trusted-host (Hito 28):** allow∩js ⇒ además CSS de autor e imágenes **efectivos**
+  sin toggles. Donde el XHR gateado ya puede traer bytes arbitrarios, apagar imágenes no añade
+  privacidad, solo fricción. `JSP_ON` global **no** es confianza (exige la entrada explícita).
+  `[[freedom-trusted-host-full-caps]]`
+- **Cookies de sesión EN MEMORIA para hosts allow∩js** (aprobado por el dueño): `document.cookie`
+  real, nunca a disco, mueren con la app. Google sigue sin renderizar (su muro es
+  botguard/consent/IP, no cookies). `[[freedom-session-cookies-trusted-spa]]`
+
+*Buscador y navegación*
+
+- **Omnibox:** `url_omnibox` (puro) decide navegar vs buscar — host desnudo ⇒ `https://`,
+  `http://` ⇒ promovido, esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda** (nunca ejecución),
+  texto libre ⇒ DuckDuckGo HTML. `[[freedom-omnibox-search]]`
+- **El buscador depende de la allowlist:** DuckDuckGo presenta leaf **RSA-2048**, que la política
+  por defecto rechaza; por eso `config/allow.conf` incluye `duckduckgo.com`. Si la búsqueda sale
+  en blanco, es que ese `allow.conf` no está en el search path en runtime.
+  `[[freedom-search-needs-allowlist]]`
+- **SPA de buscador ⇒ endpoint no-JS (rewrite transparente):** `duckduckgo.com/?q=` se reescribe
+  a su endpoint HTML en el único choke point de navegación (`url_search_rewrite`, puro). La barra
+  y el historial guardan la URL pedida. Google **no** se toca. `[[freedom-search-spa-noscript-rewrite]]`
+
+*Render y presentación*
+
+- **Privacy by Default:** imágenes y CSS de autor **apagados**; opt-in por menú (`Ctrl+I`,
+  `FREEDOM_IMAGES=1`). El toggle cubre remotas **y** locales por igual: un HTML local hostil
+  tampoco autocarga nada. El decode corre en el worker confinado.
+- **Layout != estilo de autor:** la **maquetación** (box model UA, flex/grid, márgenes) se aplica
+  **siempre** — es estructura, no abre sockets. Solo los **colores** de autor siguen tras
+  `caps.css`. El gate vive en `rd_build`.
+- **Origen `file://` para páginas locales:** una página de disco recibe `file:///realpath`, así sus
+  `src` relativos resuelven **confinados al subárbol del documento** (sin escape `../`, sin
+  esquema ajeno). La navegación local sigue usando paths planos. `[[freedom-local-file-origin]]`
+- **`display:none` es estructural, no una sugerencia** (revertido el commit 897f414, que lo trataba
+  como "presentación" cuando había inline style sin JS: en slashdot volvía visibles filas ocultas y
+  la página crecía a 142.000 px). `[[freedom-display-none-structural]]`
+- **`preserved_view` gana solo con `>= 2` bloques de diferencia:** el snapshot pre-script cubre la
+  corrupción DOM de jQuery (subárboles enteros borrados); con el umbral en "cualquier diferencia"
+  ganaba también cuando el CSS ocultaba un solo elemento y lo volvía a pintar.
+- **La paridad con Firefox se MIDE, no se supone:** Firefox está instalado en este host —
+  `firefox --headless --screenshot X.png --window-size=1000 file://...` contra `--download-png`
+  del mismo HTML. Ese diff empírico cerró las tandas 2026-07-27 y 2026-07-30 (flex real con basis
+  max-content, contenedor que pinta su caja, `inline-block` como fila anónima, out-of-flow
+  shrink-to-fit, celdas con caja, fondos inline). `[[freedom-firefox-parity-batch]]`
+- **Tanda 2026-07-30 (ver `spec/page_view.md` "Paridad con Firefox, tanda 2026-07-30"):** la banda
+  de fondo de una fila **muere donde empieza una caja** que pinta fondo propio (antes toda hero con
+  gradiente perdía su titular bajo una banda del color de la página); el contenedor flex/grid lleva
+  su **`cont_box_id`** y la caja raíz de un ítem debe ser **descendiente estricta** de ella (antes
+  un `space-between` pintaba su banda dos veces); `inline-block` **encoge y lo coloca el
+  `text-align` heredado**; una **caja anidada dentro de un ítem** ya pinta (cerrado el límite v1);
+  y un elemento reemplazado se coloca por `text-align` y respeta sus dimensiones **declaradas**.
+  `[[freedom-firefox-parity-2026-07-30]]`
+- **SVG en línea se renderiza SIEMPRE** (`spec/svg_render.md`): la gramática que acepta
+  `svg_render` **no tiene forma de URL** (`<image>`/`<use>`/`<script>`/`<style>` se descartan con su
+  subárbol), así que un SVG no puede hacer fetch — no hay nada que gatear. El parser es **puro y
+  fuzzeado** (`make fuzz-svg`) y corre del lado confiable, igual que `css_parse`; `svg_paint` solo
+  traduce geometría validada a Cairo. `[[freedom-inline-svg]]`
+- **Cajas vacías y decoración de ítems flex/grid pintan como en Firefox:** el render era por nodo de
+  texto, así que un elemento decorado **sin contenido** (barra, separador, tile) desaparecía y un
+  ítem flex/grid perdía la decoración de su caja raíz. `[[freedom-empty-and-item-boxes]]`
+- **Custom properties con recolección scoped:** la tabla de `--name` respeta el gate de `@media` y
+  solo recolecta de reglas root-scoped. Antes la paleta oscura INACTIVA de Wikipedia pisaba la clara
+  y pintaba blanco sobre blanco. `[[freedom-scoped-custom-props]]`
+- **Tablas flow: la fila es UNA línea y la decoración cero no es caja** (`padding:0`/`border:0` del
+  reset universal creaba una caja por elemento, y el pintor hace flush de línea en cada transición
+  de caja). HN pasó de 5208 px a 1896. `[[freedom-flow-table-row-line]]`
+- **El SUBÁRBOL out-of-flow sale del flujo (Stage 2d):** `bt_oof_anchor`/`bt_oof_root` (puros,
+  cycle-bounded, **fail-open** a -1 para que contenido hostil mal clasificado se pinte en flujo y
+  nunca desaparezca), chequeados **antes** de la rama flex/grid. `[[freedom-oof-subtree-stage2d]]`
+- **Prefetch paralelo del lado confiable (Hito 29):** pre-scanner puro + pool de 4 hilos por el
+  MISMO fetcher gateado. Un hit cambia **cuándo** se buscó, jamás **qué**. El worker y su protocolo
+  no cambian un byte. `[[freedom-prefetch-parallel-pool]]`
+
+*Invariantes de build y de proceso*
+
+- **Un campo nuevo que no cruza el códec IPC es una feature muerta en silencio.** Todo campo de
+  `pv_run`/`pv_box_def`/`rd_block` —y todo `pv_kind` nuevo— se hilvana en `write_view`/`read_view`
+  (`src/tab.c`) o el lado lector recibe ceros. Ya pasó tres veces: `clip_*`+`box_h_set` (clipeaba
+  todo box posicionado a 0×0), el `block_id` de los inputs, y `PV_SVG` (degradaba a texto y la
+  página pintaba su propio marcado SVG como prosa). `[[freedom-render-pipeline-ipc]]`
+- **`make clean` es obligatorio cuando crece una struct compartida** (`css_style`, `pv_box_def`,
+  `pv_run`): el Makefile no rastrea dependencias de headers, así que los `.o` no recompilados
+  quedan con el layout viejo y se leen campos basura. Igual tras `make asan` (deja objetos
+  instrumentados que no enlazan sin el runtime).
+- **`-fvisibility=hidden` es invariante de build (no quitar):** un símbolo del ejecutable con
+  visibilidad por defecto **preempta** al homónimo de una librería en TODO el proceso. Concreto:
+  `hostblock` usa prefijo `hb_` y HarfBuzz exporta `hb_free` → sin la flag, el `hb_free` del
+  ejecutable secuestra el alocador de HarfBuzz y lo crashea. Vive en `HARDEN` **y** en el `CFLAGS`
+  de `asan`. `[[freedom-harfbuzz-shaping]]`
+- **Modo boyscout con memoria:** un "fix" puede destrozar un módulo de seguridad; ante una regresión,
+  diff contra el commit inicial antes de tocar nada.
+  `[[freedom-security-modules-butchered-by-fix-commits]]`
 
 ### 7.2 Hitos cerrados (resumen)
 
@@ -618,6 +451,7 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - **Video pacing v2 + superficie media moderna (Julio 19):** `md_pacer` puro (spec/media_decoder.md; 6 tests, ASan, hostile-PTS sin UB) + 5 fixes v1 (audio bloqueante, sin pacing, primer segmento perdido, PTS en segundos, drain por segmento ⇒ codec EOF permanente) + fachada `HTMLMediaElement`/`Audio` (spec/js_dom.md §7c) + `<source>` por type + fallback de media suprimido + fix noscript-con-JS (snapshot preserve llevaba js=0). **v2.1 (mismo día):** el repaint-por-frame ahogaba el pipeline (audio inaudible) — tope de catch-up solo-video, pintado desacoplado a `max(33, 3×costo medido)` ms y pipe de aplay 1 MiB; validado con simulador del consumidor (repaint 5/60/300 ms ⇒ 100 % del PCM a tiempo real). Ver `[[freedom-video-pacing-v2]]`.
 - **Fullscreen video toggle (Julio 2026):** `Alt+Enter` alterna pantalla completa del navegador (compositor Wayland) tanto con video activo como sin él; `Escape` sale de pantalla completa también estando en un campo de texto. El estado `w->fullscreen` se sincroniza con el compositor en cada `toplevel_configure` (Alt+Tab, workspace switch). En fullscreen el frame de video escala al viewport completo (`w->width × w->height`, excluyendo la barra de título CSD). `w->fullscreen` resetea a `0` en cada configure sin `XDG_TOPLEVEL_STATE_FULLSCREEN`. Ver `spec/video_fullscreen.md`.
 - **Batch impacto visual moderno (Julio 19):** viewport units `vw`/`vh`/`vmin`/`vmax` vs 1920×1080 normalizado (spec/css.md "Viewport units"); M1.2c `skew()`/`matrix()` QR-decompuesta/`transform-origin` (spec/compositor.md); `backdrop-filter: blur()` + alfa de fondo `rgba()`/`hsla()` + dedup fila-vs-caja + altura de autor out-of-flow (glassmorphism E2E); `matchMedia` real + `IntersectionObserver` sintético identity-safe (spec/js_dom.md §7b, destraba reveal-on-scroll). Fuzz-css re-enlazado (bit rot lexbor). Ver `[[freedom-visual-impact-batch]]`.
+- **Paridad Firefox + SVG en línea (2026-07-30):** medido con Firefox headless contra `--download-png`. Banda de fila que muere donde empieza una caja, `cont_box_id` del contenedor flex/grid, `inline-block` shrink-to-fit centrado por `text-align`, cajas anidadas dentro de ítems flex/grid, elementos reemplazados alineados y con dimensiones declaradas, `max-width`/`margin:auto` dentro de una caja. Módulos nuevos `svg_render` (puro, 14 tests, `make fuzz-svg`) + `svg_paint` (Cairo). `spec/svg_render.md`, `spec/page_view.md`, `[[freedom-inline-svg]]`, `[[freedom-firefox-parity-2026-07-30]]`.
 - **Tooling & seguridad:** Doctrinas V-001 (SIZE_MAX guard), V-002 (`calloc`), V-003 (buffer encadenado), V-004 (`snprintf` fail-closed). `-fvisibility=hidden` invariante. `io_uring` PROHIBIDO en worker.
 
 ### 7.3 Plan Estratégico — Hitos abiertos por fase
@@ -714,6 +548,12 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
 - `pledge`/`unveil` para OpenBSD
 - Scroll suave (smooth scroll)
 - `defer`/`async` en `<script src>`
+- Texto que fluye **al lado** de un `float` (hoy va debajo)
+- `align-items` contra una altura **explícita** del contenedor
+- Un elemento reemplazado (`<img>`/`<svg>`) fluye **en su propia fila**, no dentro de la
+  línea de texto que lo rodea (hace falta layout inline real para el ícono junto a la frase)
+- SVG: gradientes/patrones (`<defs>`), `<animate>`, filtros/máscaras, y `.svg` como recurso
+  externo de `<img src>` (hoy solo `<svg>` en línea) — `spec/svg_render.md` "Fuera de alcance"
 
 ## 8. Reglas para el asistente (IA)
 

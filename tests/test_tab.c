@@ -2107,6 +2107,11 @@ static void test_load_view_codec_full_roundtrip(void **state) {
         "<p style=\"color:#112233;background-color:#445566;font-size:150%;"
         "line-height:180%;text-indent:13px;tab-size:4;opacity:0.5;"
         "margin-left:11px;max-width:222px\">alpha</p>"
+        /* A run whose background rides the RUN (no box-registering property, so
+         * page_view leaves the colour on the run itself). The <p> above declares
+         * opacity, which registers a box -- and a box paints its own background,
+         * so its runs carry none. */
+        "<p style=\"background-color:#778899\">bgrun</p>"
         "<img src=\"https://e.example/i.png\" width=\"40\" height=\"20\" alt=\"pic\">"
         "<div style=\"display:grid;grid-template-columns:100px 1fr\">"
         "<span style=\"grid-column:span 2\">grid</span></div>"
@@ -2131,7 +2136,7 @@ static void test_load_view_codec_full_roundtrip(void **state) {
 
     int saw_alpha = 0, saw_pic = 0, saw_grid = 0, saw_flexi = 0, saw_boxy = 0, saw_input = 0;
     int saw_scaley = 0, saw_rotey = 0, saw_bgbox = 0, saw_anibox = 0, saw_skewy = 0,
-        saw_glassy = 0;
+        saw_glassy = 0, saw_bgrun = 0;
     for (size_t i = 0; i < pv_count(p.view); ++i) {
         const pv_run *r = pv_at(p.view, i);
         if (r->kind == PV_IMAGE) {
@@ -2149,9 +2154,15 @@ static void test_load_view_codec_full_roundtrip(void **state) {
             continue;
         }
         if (r->text == NULL) continue;
-        if (strcmp(r->text, "alpha") == 0) {
+        if (strcmp(r->text, "bgrun") == 0) {
+            assert_int_equal(r->bg_rgb, 0x778899);
+            saw_bgrun = 1;
+        } else if (strcmp(r->text, "alpha") == 0) {
             assert_int_equal(r->fg_rgb, 0x112233);
-            assert_int_equal(r->bg_rgb, 0x445566);
+            /* The background travels on this run's BOX (opacity registered one);
+             * the run carries no band of its own. */
+            assert_true(r->block_id >= 0);
+            assert_int_equal(pv_box_at(p.view, (size_t)r->block_id)->bg_rgb, 0x445566);
             assert_int_equal(r->font_scale, 150);
             assert_int_equal(r->line_scale, 180);
             assert_int_equal(r->text_indent, 13);
@@ -2230,7 +2241,8 @@ static void test_load_view_codec_full_roundtrip(void **state) {
         }
     }
     assert_true(saw_alpha && saw_pic && saw_grid && saw_flexi && saw_boxy && saw_input &&
-                saw_scaley && saw_rotey && saw_bgbox && saw_anibox && saw_skewy && saw_glassy);
+                saw_scaley && saw_rotey && saw_bgbox && saw_anibox && saw_skewy && saw_glassy &&
+                saw_bgrun);
 
     tab_page_free(&p);
     tab_close(t);

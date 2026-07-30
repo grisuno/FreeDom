@@ -527,6 +527,60 @@ páginas modernas. Verificadas comparando el mismo HTML en **Firefox 140 ESR hea
   registraba caja para la celda. Además el `block_id` resuelto de la celda se **reenvía** con
   `pv_set_block_id` (se calculaba y se descartaba), y un `<th>` centra su texto por defecto de UA.
 
+### Paridad con Firefox, tanda 2026-07-30: la banda, el contenedor y la caja inline
+
+Cinco reglas medidas contra Firefox (`firefox --headless --screenshot` del mismo HTML) sobre
+páginas modernas reales. Todas comparten un mismo síntoma: el modelo plano pintaba **algo**
+donde el navegador pinta **otra cosa**, no donde no pinta nada.
+
+- **La banda de fondo de una fila muere donde empieza una caja.** El fondo de fila es la
+  aproximación del modelo plano a "se ve el fondo del ancestro detrás del texto". Si ese
+  ancestro **registra una caja** y pinta un fondo propio (color, gradiente o imagen), la
+  búsqueda **termina ahí sin banda**: la caja ya lo pinta, sobre su rect exacto. Antes el
+  recorrido seguía hacia afuera, se llevaba el color de un ancestro EXTERNO y lo pintaba a
+  ancho completo **encima** de lo que la caja acababa de dibujar — todo hero con gradiente
+  perdía su titular bajo una banda del color de la página, y la banda de una caja angosta
+  se desbordaba por sus lados.
+- **El contenedor flex/grid conoce su propia caja (`cont_box_id`).** Es la caja del elemento
+  contenedor cuando registra una, si no la del ancestro con caja más cercano, si no -1. La
+  capa de presentación maqueta los ítems **dentro** de ese rect, y la caja raíz de un ítem
+  debe ser **descendiente estricta** de ella. Sin ese límite, un contenedor cuyos ítems no
+  llevan caja propia hacía que **todos** reclamaran la caja DEL CONTENEDOR como raíz: un
+  `header{display:flex;justify-content:space-between}` pintaba su banda **dos veces**, una
+  por ítem, con la página asomando por el medio. Campo nuevo ⇒ cruza el códec IPC
+  (`spec/tab.md`), o la función queda muerta en silencio.
+- **`display:inline-block` encoge al contenido y lo coloca el `text-align` del padre**
+  (CSS 2.2 §10.3.9). Un botón centrado se pintaba como una barra del ancho de la página.
+  Dos caminos, una regla: en flujo plano la caja mide su contenido máximo
+  (`box_shrink_width`, la misma medición que usa el motor flex) y se desplaza con el
+  sobrante; y la **fila flex anónima** que se sintetiza para un padre de hijos inline-block
+  adopta el `text-align` **heredado** (sólo se conoce al terminar el recorrido de ancestros:
+  el elemento casi nunca lo declara, lo hereda de `body`).
+- **Una caja anidada dentro de un ítem flex/grid ya pinta** (cerrado el límite v1 de
+  "Ítems flex/grid" de arriba): el interior del ítem se maqueta con el MISMO
+  `reconcile_boxes`, acotado a la caja raíz del ítem, y las cajas que abre se trasladan a la
+  columna igual que sus filas. La caja raíz se **reserva antes** de que fluya el contenido,
+  porque el pintor recorre las cajas en orden de array y si no taparía a las de dentro. Es
+  la píldora de un badge, el chip de un ícono, el avatar de una tarjeta.
+- **Un elemento reemplazado se coloca como la caja inline que es.** El `text-align` heredado
+  viaja en los runs `PV_IMAGE`/`PV_SVG` y los centra/alinea; y las dimensiones
+  **declaradas** (`<img width height>`) mandan sobre las del bitmap decodificado — un logo
+  de 1024px con `width="180"` mide 180, como en Firefox. Además, dentro de una caja el run
+  conserva su **propio** tope de ancho y su `margin:0 auto` (antes se descartaban por evitar
+  el doble conteo de los insets de la caja, y un `max-width:560px; margin:0 auto` dentro de
+  un hero nunca envolvía donde envuelve Firefox).
+
+### SVG en línea: `PV_SVG` (2026-07-30)
+
+Un `<svg>` se emite **entero** como un run `PV_SVG` que lleva su marcado serializado en
+`text` y su tamaño intrínseco en `img_w`/`img_h`. Su subárbol queda **suprimido** del
+recorrido de texto (`is_skipped_tag`), porque el contenido de un `<text>` es geometría, no
+prosa de la página: antes aterrizaba en medio del artículo como palabras sueltas.
+
+No lo gatea `caps.images`: la gramática que acepta `svg_render` **no tiene forma de URL**,
+así que un SVG en línea no puede hacer fetch — no hay nada que gatear. Contrato completo
+del parser y del pintor en `spec/svg_render.md`.
+
 ## 5. Tabla de errores
 
 | Código | Condición |
