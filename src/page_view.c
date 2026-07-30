@@ -704,7 +704,14 @@ static int is_block_like(lxb_tag_id_t t, css_display display) {
  * is one of the most common declarations on the web and used to paint nothing at all
  * because no box was ever registered for the cell. */
 static int generates_box(lxb_tag_id_t t, css_display display) {
-    return is_block_like(t, display) || t == LXB_TAG_TD || t == LXB_TAG_TH;
+    /* Form controls (input/select/textarea/button) are inline-block by default
+     * but can carry author CSS like position:absolute, opacity:0, borders, etc.
+     * that need a box entry — otherwise they never register and the painter
+     * ignores author styles on them entirely. */
+    return is_block_like(t, display)
+        || t == LXB_TAG_TD || t == LXB_TAG_TH
+        || t == LXB_TAG_INPUT || t == LXB_TAG_SELECT
+        || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON;
 }
 
 /* Returns 1 when the element should cause a block break (start a new line).
@@ -2880,13 +2887,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
                 pv_text_ext ctl_ext;
-                int unused_bdeco;
+                int bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &ctl_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
+                                &box_reg, &float_reg, &bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -2907,6 +2914,16 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                                name, value, action, fidx, method);
                 free(label); free(name); free(value);
                 if (st != PV_OK) { free(ictl_opts); rc = st; goto cleanup; }
+                /* Form controls need their own box when the author sets
+                 * position/opacity/height etc. resolve_context sets bdeco for box-
+                 * generating ancestors but may miss the input itself (got_boxdeco
+                 * tracks the innermost block-like ancestor, not the input tag).
+                 * So register the input's own box directly if needed. */
+                if (bdeco < 0) {
+                    css_style cs = cached_element_style(el, sheet, &cache);
+                    if (css_has_boxdeco(&cs))
+                        bdeco = box_reg_id(&box_reg, n, &cs);
+                }
                 if (ictl_checked >= 0) pv_set_input_checked(v, ictl_checked);
                 if (ictl_opts != NULL) {
                     pv_set_input_select_opts(v, ictl_opts);
@@ -2915,6 +2932,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
+                pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
             }
@@ -3090,13 +3108,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
                 pv_text_ext img_ext;
-                int unused_bdeco;
+                int bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &img_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
+                                &box_reg, &float_reg, &bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -3182,13 +3200,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_cont_info unused_cont;
                 pv_box_info unused_box;
                 pv_text_ext vid_ext;
-                int unused_bdeco;
+                int bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &vid_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
+                                &box_reg, &float_reg, &bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;

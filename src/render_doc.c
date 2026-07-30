@@ -341,6 +341,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             if (r->kind == PV_IMAGE) nb->image_rendering = r->image_rendering;
             if (r->kind == PV_IMAGE) nb->object_fit = r->object_fit;
             if (r->kind == PV_INPUT) nb->caret_color = r->caret_color;
+            if (r->kind == PV_INPUT) nb->block_id = r->block_id;
         }
 
         /* Author flex/grid container layout is structure, not author styling: it

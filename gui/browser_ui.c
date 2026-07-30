@@ -4804,6 +4804,11 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
     const ui_theme *th = &w->theme;
     int focused = (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count
                    && w->inputs[w->focused_input].blk == b);
+    /* Author opacity on the box that wraps this input: 0 = hidden. */
+    if (b->block_id >= 0) {
+        const pv_box_def *def = rd_box_at(w->doc, (size_t)b->block_id);
+        if (def != NULL && def->opacity == 0) return;
+    }
 
     if (b->input_type == PV_IN_SUBMIT || b->input_type == PV_IN_BUTTON) {
         const char *label = (b->text != NULL && b->text[0] != '\0') ? b->text
@@ -7642,6 +7647,19 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     for (size_t bi = 0; bi < rd_count(w->doc); ++bi) {
         const rd_block *b = rd_at(w->doc, bi);
         if ((int)b->block_id != (int)pb->box_index) continue;
+        if (b->kind == RD_INPUT) {
+            double rx = left + pb->x;
+            if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
+            draw_input_row(cr, w, b, rx, pb->w, origin + pb->y, 0, pb->h);
+            if (needs_group) cairo_restore(cr);
+            break;
+        }
+        if (b->kind == RD_IMAGE) {
+            if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
+            paint_image_row(cr, w, b, left + pb->x, origin + pb->y, pb->w, 0);
+            if (needs_group) cairo_restore(cr);
+            break;
+        }
         if (b->kind != RD_PARAGRAPH && b->kind != RD_HEADING &&
             b->kind != RD_LINK) break;
         rc_frag fg = {
