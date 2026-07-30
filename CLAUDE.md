@@ -557,6 +557,15 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   correcta: `display:none` de cualquier fuente oculta el elemento; la excepción
   experimental de "JS toggle" se eliminó por romper más sitios de los que arreglaba.
   Ver `[[freedom-display-none-structural]]`.
+- **`preserved_view` fallback en `tab.c` — umbral `>= 2` blocks:** el snapshot pre-script
+  gana al view post-script cuando tiene más bloques (fallback por corrupción DOM de
+  jQuery). Antes el umbral era `preserved > view` (cualquier diferencia) — regresión
+  cuando CSS display:none ocultaba elementos post-script (swing JS `client-nojs→client-js`,
+  skip-links con `visually-hidden`, etc.) — la view post-script perdía 1 bloque por cada
+  elemento oculto, el snapshot pre-script contaba ese elemento → snapshot gana → elementos
+  CSS-hidden pintaban visibles. Corregido: el fallback sólo actúa si el view post-script
+  tiene >= 2 bloques menos (preserved_count > view_count + 1), umbral que cubre corrupción
+  jQuery (subárboles enteros eliminados) sin activarse por ocultación CSS individual.
 - **`-fvisibility=hidden` es invariante de build (no quitar):** el binario `freedom` no exporta API,
   así que todos sus símbolos van **ocultos** del `.dynsym`. No es solo endurecimiento: un símbolo del
   ejecutable con visibilidad por defecto **preempta** al homónimo de una librería enlazada en TODO el
