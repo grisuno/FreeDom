@@ -7558,6 +7558,24 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     /* Constrain the positioned box to its overflow:hidden ancestors. */
     ov_reconcile(cr, clip_stack, clip_depth, w->doc, (int)pb->box_index, L, origin, left);
 
+    /* clip: rect(...) for this positioned box (CSS 2.1 §11.1.2). The rect is
+     * relative to the border-box top-left; auto on a side means the edge. */
+    int clip_saved = 0;
+    if (def->clip_top != PV_LEN_UNSET || def->clip_right != PV_LEN_UNSET
+        || def->clip_bottom != PV_LEN_UNSET || def->clip_left != PV_LEN_UNSET) {
+        double c_l = (def->clip_left  != PV_LEN_UNSET) ? (double)def->clip_left  : 0.0;
+        double c_t = (def->clip_top   != PV_LEN_UNSET) ? (double)def->clip_top   : 0.0;
+        double c_r = (def->clip_right != PV_LEN_UNSET) ? (double)def->clip_right : pb->w;
+        double c_b = (def->clip_bottom!= PV_LEN_UNSET) ? (double)def->clip_bottom: pb->h;
+        double c_w = c_r - c_l, c_h = c_b - c_t;
+        if (c_w >= 0.0 && c_h >= 0.0) {
+            cairo_save(cr);
+            clip_saved = 1;
+            cairo_rectangle(cr, left + pb->x + c_l, origin + pb->y + c_t, c_w, c_h);
+            cairo_clip(cr);
+        }
+    }
+
     int needs_group = box_forms_stacking_context(def);
     cairo_matrix_t m;
     int64_t elapsed = (int64_t)(now_ms() - w->page_load_mono_ms);
@@ -7647,6 +7665,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     }
 
     if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms);
+    if (clip_saved) cairo_restore(cr);
 }
 
 /* R6: recursively paints child boxes of `parent_id` that form stacking

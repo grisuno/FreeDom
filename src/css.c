@@ -168,6 +168,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
         /* transition (v1 parse-only, runtime deferred to hito phase-4) */
         P_TRANSITION_DURATION, P_TRANSITION_PROPERTY,
         P_TRANSITION_TIMING, P_TRANSITION_DELAY,
+        /* clip: rect(top,right,bottom,left) for positioned boxes (2016-07-30).
+         * Each slot carries px, CSS_LEN_UNSET = auto (the border-box edge). */
+        P_CLIP_TOP, P_CLIP_RIGHT, P_CLIP_BOTTOM, P_CLIP_LEFT,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -3378,6 +3381,47 @@ static int expand_place(const char *prop, const char *val, css_decl *dst, int ca
     return 2;
 }
 
+/* clip: rect() / auto for positioned boxes (CSS 2.1 §11.1.2). Emits four
+ * P_CLIP_TOP/RIGHT/BOTTOM/LEFT decls. auto → all CSS_LEN_UNSET (edge of
+ * border-box). rect(t r b l) with commas or spaces → px values. Any parse
+ * error drops the whole property (fail closed). */
+static int expand_clip(const char *val, css_decl *dst, int cap) {
+    if (cap < 4) return 0;
+    const char *p = val;
+    while (*p == ' ' || *p == '\t') ++p;
+    if (p[0] == 'a' && p[1] == 'u' && p[2] == 't' && p[3] == 'o'
+        && (p[4] == '\0' || p[4] == ' ' || p[4] == '\t' || p[4] == ';')) {
+        for (int i = 0; i < 4; ++i)
+            { dst[i].prop = P_CLIP_TOP + i; dst[i].ival = CSS_LEN_UNSET; }
+        return 4;
+    }
+    if (!(p[0] == 'r' && p[1] == 'e' && p[2] == 'c' && p[3] == 't' && p[4] == '('))
+        return 0;
+    p += 5;  /* past "rect(" */
+    int vals[4] = { CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET };
+    for (int i = 0; i < 4; ++i) {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == ')') break;
+        if (*p == ',') { ++p; while (*p == ' ' || *p == '\t') ++p; }
+        if (*p == 'a' && *(p + 1) == 'u' && *(p + 2) == 't' && *(p + 3) == 'o') {
+            p += 4; vals[i] = CSS_LEN_UNSET; continue;
+        }
+        double d = 0.0; int neg = (*p == '-') ? (++p, 1) : 0;
+        const char *e = p; int has_digit = 0;
+        while (*e >= '0' && *e <= '9') { d = d * 10.0 + (double)(*e - '0'); ++e; has_digit = 1; }
+        if (*e == '.') { double f = 0.1; ++e;
+            while (*e >= '0' && *e <= '9') { d += (double)(*e - '0') * f; f *= 0.1; ++e; has_digit = 1; } }
+        if (!has_digit) return 0;
+        if (neg) d = -d;
+        vals[i] = (int)(d + (d < 0 ? -0.5 : 0.5));
+        while ((*e >= 'a' && *e <= 'z') || (*e >= 'A' && *e <= 'Z') || *e == '%' || *e == '-') ++e;
+        p = e;
+    }
+    for (int i = 0; i < 4; ++i)
+        { dst[i].prop = P_CLIP_TOP + i; dst[i].ival = vals[i]; }
+    return 4;
+}
+
 /* font shorthand (2026-07-10): `[style|variant|weight|normal]* size[/line-height]
  * family...`. size and family are both required (per CSS); system keywords
  * (`font: caption` etc.) have no size token and drop the whole shorthand (fail
@@ -3509,6 +3553,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "font") == 0) return expand_font(val, dst, cap);
     if (strcmp(prop, "transform") == 0) return expand_transform(val, dst, cap);
     if (strcmp(prop, "transform-origin") == 0) return expand_transform_origin(val, dst, cap);
+    if (strcmp(prop, "clip") == 0)   return expand_clip(val, dst, cap);
 
     /* Text-presentation extensions whose value may legitimately be 0 or negative
      * (so they bypass the generic ival<0 drop, like the box-model lengths). */
@@ -4590,6 +4635,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_BACKDROP_BLUR:       o->backdrop_blur = d->ival; break;
             case P_BG_POS_X:            o->bg_pos_x = d->ival; break;
             case P_BG_POS_Y:            o->bg_pos_y = d->ival; break;
+            case P_CLIP_TOP:            o->clip_top = d->ival; break;
+            case P_CLIP_RIGHT:          o->clip_right = d->ival; break;
+            case P_CLIP_BOTTOM:         o->clip_bottom = d->ival; break;
+            case P_CLIP_LEFT:           o->clip_left = d->ival; break;
             case P_CONTENT:
                 if (d->ival < 0) {
                     o->content_str[0] = '\0';
@@ -4700,6 +4749,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .filter_drop_color = -1,
         .text_fill_color = -1,
         .bg_pos_x = CSS_LEN_UNSET, .bg_pos_y = CSS_LEN_UNSET,
+        .clip_top = CSS_LEN_UNSET, .clip_right = CSS_LEN_UNSET,
+        .clip_bottom = CSS_LEN_UNSET, .clip_left = CSS_LEN_UNSET,
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }

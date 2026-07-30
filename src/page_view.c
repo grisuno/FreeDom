@@ -1078,7 +1078,12 @@ static int css_has_boxdeco(const css_style *cs) {
             cs->filter_drop_color != -1 ||
             /* backdrop-filter (2026-07-19): needs the box def for the painter's
              * backdrop-sampling path, same reasoning as filter. */
-            cs->backdrop_blur > 0;
+            cs->backdrop_blur > 0 ||
+            /* clip:rect(...) (2026-07-30): a positioned box with a clip rect
+             * needs the box def so paint_positioned_one can apply the Cairo
+             * clip. Without the box entry the painter never sees it. */
+            cs->clip_top != CSS_LEN_UNSET || cs->clip_right != CSS_LEN_UNSET ||
+            cs->clip_bottom != CSS_LEN_UNSET || cs->clip_left != CSS_LEN_UNSET;
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1211,6 +1216,10 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->filter_drop_color = cs->filter_drop_color;
     d->backdrop_blur = cs->backdrop_blur;
     d->bg_pos_x = cs->bg_pos_x;
+    d->clip_top = cs->clip_top;
+    d->clip_right = cs->clip_right;
+    d->clip_bottom = cs->clip_bottom;
+    d->clip_left = cs->clip_left;
     d->bg_pos_y = cs->bg_pos_y;
     d->anim_iterations = cs->anim_iterations;
     d->anim_timing = cs->anim_timing;

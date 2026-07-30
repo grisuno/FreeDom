@@ -3581,6 +3581,27 @@ static void test_anim_transform_keyframes_from_sheet(void **state) {
     css_free(sh);
 }
 
+/* --- clip:rect() property (2026-07-30) --- */
+
+static void test_clip_rect(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("clip:rect(1px,2px,3px,4px);position:absolute", 0);
+    assert_int_equal(s.clip_top, 1);
+    assert_int_equal(s.clip_right, 2);
+    assert_int_equal(s.clip_bottom, 3);
+    assert_int_equal(s.clip_left, 4);
+    assert_int_equal(s.position, CSS_POS_ABSOLUTE);
+}
+
+static void test_clip_auto(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("clip:auto", 0);
+    assert_int_equal(s.clip_top, CSS_LEN_UNSET);
+    assert_int_equal(s.clip_right, CSS_LEN_UNSET);
+    assert_int_equal(s.clip_bottom, CSS_LEN_UNSET);
+    assert_int_equal(s.clip_left, CSS_LEN_UNSET);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -3803,6 +3824,8 @@ int main(void) {
         cmocka_unit_test(test_background_rgba_alpha),
         cmocka_unit_test(test_anim_keyframes_resolved_from_sheet),
         cmocka_unit_test(test_anim_transform_keyframes_from_sheet),
+        cmocka_unit_test(test_clip_rect),
+        cmocka_unit_test(test_clip_auto),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

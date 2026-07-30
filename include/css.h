@@ -700,6 +700,13 @@ typedef struct css_style {
      * ("0% 0%" which is also the CSS initial value). */
     int         bg_pos_x;
     int         bg_pos_y;
+    /* clip: rect(top,right,bottom,left) for positioned boxes (CSS 2.1 §11.1.2).
+     * px values, CSS_LEN_UNSET on a side = auto (the border-box edge). Only
+     * applies to position:absolute/fixed per spec. */
+    int         clip_top;
+    int         clip_right;
+    int         clip_bottom;
+    int         clip_left;
 } css_style;
 
 typedef struct css_sheet css_sheet; /* opaque; owns the parsed rules */

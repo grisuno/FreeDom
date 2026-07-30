@@ -437,6 +437,13 @@ typedef struct pv_box_def {
      * (typically translucent) background composites on top; forces a stacking
      * context like filter. See spec/compositor.md. */
     int backdrop_blur;
+    /* clip: rect(top,right,bottom,left) for positioned boxes (CSS 2.1 §11.1.2).
+     * px values, PV_LEN_UNSET = auto (the border-box edge). Only applied by the
+     * positioned painter (paint_positioned_one) to absolute/fixed boxes. */
+    int clip_top;
+    int clip_right;
+    int clip_bottom;
+    int clip_left;
     /* background-position (R5a): px offsets, PV_LEN_UNSET = unset. */
     int bg_pos_x;
     int bg_pos_y;
