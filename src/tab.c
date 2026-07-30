@@ -891,8 +891,14 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     inject_video_into_view(cs, &cs->preserved_view);
 
     pv_view *write_which = view;
+    /* Prefer the post-script view for rendering. The preserved
+     * snapshot is a fallback only when the post-script view lost
+     * >= 2 blocks (severe DOM corruption, e.g. jQuery sibling
+     * pointer breakage). A diff of exactly 1 is almost always a
+     * display:none hiding an element via class swap (CSS, not
+     * DOM removal). */
     if (ok && view != NULL && cs->preserved_view != NULL
-        && pv_count(cs->preserved_view) > pv_count(view)) {
+        && pv_count(cs->preserved_view) > pv_count(view) + 1) {
         write_which = cs->preserved_view;
     }
 
@@ -980,12 +986,14 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
 
     uint8_t rtag = TAG_RESULT;
     int32_t k = ok ? 1 : 0;
-    /* Mutation may corrupt the DOM (jQuery's support tests break Lexbor siblings).
-     * Fall back to the preserved pre-script view when the rebuilt view is smaller.
-     * The preserved view already carries the video injected during initial load. */
+    /* Mutation may corrupt the DOM (jQuery's support tests break Lexbor
+     * siblings). Fall back to the preserved pre-script view when the
+     * rebuilt view lost >= 2 blocks (severe DOM corruption). A diff of
+     * exactly 1 is almost always a display:none hiding an element via
+     * class swap (CSS, not DOM removal). */
     pv_view *write_which = view;
     if (ok && view != NULL && cs->preserved_view != NULL
-        && pv_count(cs->preserved_view) > pv_count(view)) {
+        && pv_count(cs->preserved_view) > pv_count(view) + 1) {
         write_which = cs->preserved_view;
     }
     int32_t zero32 = 0;
