@@ -1015,13 +1015,21 @@ static int css_has_position(const css_style *cs) {
 }
 
 static int css_has_boxdeco(const css_style *cs) {
-    return cs->pad_top != CSS_LEN_UNSET || cs->pad_right != CSS_LEN_UNSET ||
-           cs->pad_bottom != CSS_LEN_UNSET || cs->pad_left != CSS_LEN_UNSET ||
-           cs->border_top_width != CSS_LEN_UNSET || cs->border_right_width != CSS_LEN_UNSET ||
-           cs->border_bottom_width != CSS_LEN_UNSET || cs->border_left_width != CSS_LEN_UNSET ||
-           cs->border_radius != CSS_LEN_UNSET || cs->box_shadow_color != -1 ||
-           cs->outline_width != CSS_LEN_UNSET || css_has_position(cs) ||
-           cs->visibility != CSS_VIS_UNSET || cs->overflow_x != CSS_OF_UNSET ||
+    /* A ZERO-valued edge is not decoration: `padding: 0` / `border: 0` (the
+     * universal reset half the web ships) paints nothing and insets nothing, and
+     * registering a box for it makes the painter flush lines at every element
+     * (e.g. every `td {padding:0}` cell of a flowed table split its row).
+     * Same for `visibility: visible` (the default, declared or not). */
+    return cs->pad_top > 0 || cs->pad_right > 0 ||
+           cs->pad_bottom > 0 || cs->pad_left > 0 ||
+           cs->border_top_width > 0 || cs->border_right_width > 0 ||
+           cs->border_bottom_width > 0 || cs->border_left_width > 0 ||
+           (cs->border_radius != CSS_LEN_UNSET && cs->border_radius > 0) ||
+           cs->box_shadow_color != -1 ||
+           (cs->outline_width != CSS_LEN_UNSET && cs->outline_width > 0) ||
+           css_has_position(cs) ||
+           cs->visibility == CSS_VIS_HIDDEN || cs->visibility == CSS_VIS_COLLAPSE ||
+           cs->overflow_x != CSS_OF_UNSET ||
            cs->overflow_y != CSS_OF_UNSET || cs->cursor != CSS_CUR_UNSET ||
            /* pointer-events / content-visibility:hidden alone make the box worth
             * tracking (hit-test skip / the visibility fold need the def). */
@@ -1417,6 +1425,14 @@ static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *she
     return 1;
 }
 
+/* Nonzero when cell (a td/th) is a WALKED cell of a FLOW table (defined after the
+ * flow-table machinery below): such a cell's content shares its ROW's line, so the
+ * cell must not carry its own box (the painter flushes the line at every box
+ * transition -- a per-cell box would split the row). */
+struct pv_flow_reg;
+static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+                              struct pv_flow_reg *fr);
+
 static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const css_sheet *sheet,
                             const char **href, size_t *href_len,
@@ -1427,7 +1443,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box,
                             pv_text_ext *ext, pv_box_reg *box_reg,
                             pv_container_reg *float_reg, int *block_id_out,
-                            pv_style_cache *style_cache) {
+                            pv_style_cache *style_cache, struct pv_flow_reg *flowreg) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
     *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
     *deco = -1;
@@ -1512,9 +1528,13 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             if (!got_block && causes_block_break(t, cs.display)) {
                 *block = p; got_block = 1;
                 /* The leaf block's OWN vertical margins override the UA (a wrapper's
-                 * do not, so they are not duplicated across its inner blocks). */
-                box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : PV_LEN_UNSET;
-                box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : PV_LEN_UNSET;
+                 * do not, so they are not duplicated across its inner blocks).
+                 * A table row has NO margins in real CSS (margins do not apply to
+                 * table-row boxes): default it to 0 explicitly, or the painter
+                 * spaces every row a full paragraph apart (4x-tall tables). */
+                int row_zero = (t == LXB_TAG_TR) ? 0 : PV_LEN_UNSET;
+                box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : row_zero;
+                box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : row_zero;
                 /* The leaf block's own `clear` ends any preceding float band (float.md). */
                 cont->float_clear = (cs.clear != CSS_CLEAR_UNSET) ? cs.clear : 0;
             }
@@ -1539,7 +1559,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * (outer) box found, so the registry holds the parent links. block_id is
              * structure; the decoration (on the box def) is author presentation that
              * render_doc gates behind caps.css. */
-            if (box_reg != NULL && generates_box(t, cs.display) && css_has_boxdeco(&cs)) {
+            if (box_reg != NULL && generates_box(t, cs.display) && css_has_boxdeco(&cs)
+                && !((t == LXB_TAG_TD || t == LXB_TAG_TH)
+                     && in_flow_table_cell(p, base, flowreg))) {
                 int bid = box_reg_id(box_reg, p, &cs);
                 if (bid >= 0) {
                     if (!got_boxdeco) {
@@ -1880,6 +1902,41 @@ static lxb_dom_node_t *find_body(lxb_dom_node_t *root) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(n) == LXB_TAG_BODY) return n;
     }
     return NULL;
+}
+
+/* Space-joined class attributes of the document's <html> and <body> elements: the
+ * root scope css_parse_scoped gates custom-property collection with (a theme
+ * palette keyed by `.theme-x` applies only when the class is really there).
+ * Returns a heap string (caller frees) or NULL when neither carries a class —
+ * NULL simply means class-scoped rules are skipped, fail-safe. */
+static char *collect_root_scope(lxb_dom_node_t *root) {
+    const lxb_char_t *cls[2] = { NULL, NULL };
+    size_t clen[2] = { 0, 0 };
+    int slot = 0;
+    for (lxb_dom_node_t *n = root; n != NULL && slot < 2; n = node_next(n, root)) {
+        if (n->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        lxb_tag_id_t t = node_tag(n);
+        if (t != LXB_TAG_HTML && t != LXB_TAG_BODY) continue;
+        cls[slot] = lxb_dom_element_get_attribute(lxb_dom_interface_element(n),
+                                                  (const lxb_char_t *)"class", 5,
+                                                  &clen[slot]);
+        if (cls[slot] != NULL && clen[slot] > 0) ++slot;
+        if (t == LXB_TAG_BODY) break;
+    }
+    if (clen[0] > SIZE_MAX - clen[1]) return NULL;
+    size_t total = clen[0] + clen[1];
+    if (total == 0 || total > SIZE_MAX - 2) return NULL;
+    char *scope = (char *)malloc(total + 2);
+    if (scope == NULL) return NULL;
+    size_t o = 0;
+    for (int k = 0; k < 2; ++k) {
+        if (cls[k] == NULL || clen[k] == 0) continue;
+        if (o > 0) scope[o++] = ' ';
+        memcpy(scope + o, cls[k], clen[k]);
+        o += clen[k];
+    }
+    scope[o] = '\0';
+    return scope;
 }
 
 /* --- form controls --- */
@@ -2250,6 +2307,18 @@ static const lxb_dom_node_t *nearest_row(const lxb_dom_node_t *n, const lxb_dom_
     return NULL;
 }
 
+/* Nearest <td>/<th> ancestor of n up to base, or NULL. */
+static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+    for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
+        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            lxb_tag_id_t t = node_tag(p);
+            if (t == LXB_TAG_TD || t == LXB_TAG_TH) return p;
+        }
+        if (p == base) break;
+    }
+    return NULL;
+}
+
 /* Nonzero if cell has a descendant <table>: it is then a structural CONTAINER, not a
  * leaf cell. Only leaf cells (no nested table) are collected as one text run; a
  * container cell is walked so the inner table's cells are collected separately. This
@@ -2336,6 +2405,12 @@ static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table) {
     fr->flow[fr->count] = (unsigned char)f;
     fr->count++;
     return f;
+}
+
+static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+                              struct pv_flow_reg *fr) {
+    return fr != NULL && cell != NULL && !cell_has_nested_table(cell)
+        && flow_table(fr, nearest_table(cell, base));
 }
 
 /* Nonzero if n's NEAREST <td>/<th> ancestor (up to base) is a COLLECTED leaf cell:
@@ -2555,9 +2630,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     }
     css_sheet *sheet = NULL;
     /* @media gated against the user's color scheme (auto dark mode) and a fixed,
-     * normalized desktop width (no real viewport size leaks). Screen context. */
+     * normalized desktop width (no real viewport size leaks). Screen context.
+     * The live <html>/<body> class list scopes custom-property collection, so a
+     * theme palette keyed by a class the page actually carries applies and an
+     * inactive one never clobbers it. */
     css_media media = { prefers_dark ? 1 : 0, 0, CSS_MEDIA_DEFAULT_WIDTH };
-    (void)css_parse_media(style_text, style_len, &media, &sheet);
+    char *root_scope = collect_root_scope(root);
+    (void)css_parse_scoped(style_text, style_len, &media, root_scope, &sheet);
+    free(root_scope);
     free(style_text);
 
     const lxb_dom_node_t *prev_block = NULL;
@@ -2711,7 +2791,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &calign, &cfs, &clh, &cdeco,
                                 &cu_li, &cu_depth, &cu_ordered,
                                 &reg, &cu_cont, &cu_box, &cext,
-                                &box_reg, &float_reg, &cu_bdeco, &cache);
+                                &box_reg, &float_reg, &cu_bdeco, &cache, &flowreg);
 
                 /* An empty cell still occupies its column. */
                 pv_status st = pv_append(v, (cell_href != NULL) ? PV_LINK : PV_TEXT,
@@ -2796,7 +2876,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &ctl_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -2852,7 +2932,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &ctl_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -2929,7 +3009,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &ctl_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -3006,7 +3086,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &img_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -3098,7 +3178,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_lh, &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &vid_ext,
-                                &box_reg, &float_reg, &unused_bdeco, &cache);
+                                &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
                 prev_block = block;
@@ -3151,7 +3231,21 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     resolve_context(n, base, sheet, &ehref, &ehl, &eblock, &eheading,
                                     &efg, &ebg, &ebold, &eitalic, &ealign, &efs, &elh, &edeco,
                                     &eli, &edepth, &eordered, &reg, &econt, &ebox, &eext,
-                                    &box_reg, &float_reg, &ebdeco, &cache);
+                                    &box_reg, &float_reg, &ebdeco, &cache, &flowreg);
+                    /* Inside a walked cell of a FLOW table the ROW is the line: a
+                     * decorated leaf (e.g. Hacker News' votearrow icon <div>) must
+                     * join the row's line like its sibling cell text, not split the
+                     * row into three lines. Its box is dropped from the run too --
+                     * the painter flushes the line at every box transition, so a
+                     * boxed placeholder would still split the row. v1 limit: the
+                     * icon's own decoration (a sprite background) does not paint
+                     * inside a flowed row; the row's integrity wins. */
+                    const lxb_dom_node_t *fcell = nearest_cell(n, base);
+                    if (in_flow_table_cell(fcell, base, &flowreg)) {
+                        const lxb_dom_node_t *frow = nearest_row(n, base);
+                        if (frow != NULL) eblock = frow;
+                        ebdeco = -1;
+                    }
                     int ebrk = pending_break || (eblock != prev_block);
                     pending_break = 0;
                     prev_block = eblock;
@@ -3207,7 +3301,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
                         &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
                         &li, &list_depth, &ordered, &reg, &cont, &box, &ext,
-                        &box_reg, &float_reg, &bdeco, &cache);
+                        &box_reg, &float_reg, &bdeco, &cache, &flowreg);
 
         /* Pre-like blocks (white-space: pre / pre-wrap / pre-line) preserve
          * whitespace: the HTML parser keeps the source tabs and newlines, and

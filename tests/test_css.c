@@ -708,14 +708,98 @@ static void test_custom_prop_var_in_shorthand(void **state) {
 
 static void test_custom_prop_var_later_declaration_wins(void **state) {
     (void)state;
-    /* Global-pool simplification: the LAST --name declaration in the whole
-     * stylesheet wins, regardless of which rule declared it. */
+    /* Among APPLICABLE rules, the last --name declaration wins (document order
+     * approximates the cascade for the common multi-:root case). */
     css_sheet *sh = NULL;
     assert_int_equal(
-        css_parse(":root{--c:#111111;} .later{--c:#222222;} p{color:var(--c);}", 0, &sh),
+        css_parse(":root{--c:#111111;} html{--c:#222222;} p{color:var(--c);}", 0, &sh),
         CSS_OK);
     css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
     assert_int_equal(s.color, 0x222222);
+    css_free(sh);
+}
+
+static void test_custom_prop_dark_media_not_collected_in_light(void **state) {
+    (void)state;
+    /* The dark-palette override lives inside @media (prefers-color-scheme: dark);
+     * a light render must keep the light value (Wikipedia's night palette used to
+     * clobber the day one and paint white-on-white). */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ":root{--c:#111111;}"
+        "@media (prefers-color-scheme: dark){:root{--c:#eeeeee;}}"
+        "p{color:var(--c);}", 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0x111111);
+    css_free(sh);
+}
+
+static void test_custom_prop_dark_media_collected_in_dark(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    css_media m = { 1, 0, CSS_MEDIA_DEFAULT_WIDTH };
+    assert_int_equal(css_parse_media(
+        ":root{--c:#111111;}"
+        "@media (prefers-color-scheme: dark){:root{--c:#eeeeee;}}"
+        "p{color:var(--c);}", 0, &m, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0xeeeeee);
+    css_free(sh);
+}
+
+static void test_custom_prop_class_scoped_skipped_without_scope(void **state) {
+    (void)state;
+    /* A theme class the document root does not carry must not feed the table. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        ":root{--c:#111111;} html.theme-dark{--c:#eeeeee;} p{color:var(--c);}",
+        0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0x111111);
+    css_free(sh);
+}
+
+static void test_custom_prop_class_scoped_applies_with_root_scope(void **state) {
+    (void)state;
+    /* The same rule DOES apply when the class is present on <html>/<body>
+     * (css_parse_scoped receives the live class list). */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse_scoped(
+        ":root{--c:#111111;} html.theme-dark{--c:#eeeeee;} p{color:var(--c);}",
+        0, NULL, "client-js theme-dark ltr", &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0xeeeeee);
+    css_free(sh);
+}
+
+static void test_custom_prop_descendant_scoped_skipped(void **state) {
+    (void)state;
+    /* A descendant-scoped declaration is not document-wide: skipped. */
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse_scoped(
+        ":root{--c:#111111;} .card .x{--c:#eeeeee;} p{color:var(--c);}",
+        0, NULL, "card x", &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0x111111);
+    css_free(sh);
+}
+
+static void test_custom_prop_table_holds_hundreds(void **state) {
+    (void)state;
+    /* Real pages (Wikipedia: 201 distinct --names) exceed the old 64-entry cap;
+     * the table must hold at least a few hundred without dropping the tail. */
+    char sheet_text[16384];
+    size_t o = 0;
+    o += (size_t)snprintf(sheet_text + o, sizeof sheet_text - o, ":root{");
+    for (int i = 0; i < 300; ++i)
+        o += (size_t)snprintf(sheet_text + o, sizeof sheet_text - o, "--v%d:#101010;", i);
+    o += (size_t)snprintf(sheet_text + o, sizeof sheet_text - o,
+                          "--last:#445566;} p{color:var(--last);}");
+    assert_true(o < sizeof sheet_text);
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(sheet_text, 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.color, 0x445566);
     css_free(sh);
 }
 
@@ -3592,6 +3676,12 @@ int main(void) {
         cmocka_unit_test(test_custom_prop_var_self_reference_fails_closed),
         cmocka_unit_test(test_custom_prop_var_in_shorthand),
         cmocka_unit_test(test_custom_prop_var_later_declaration_wins),
+        cmocka_unit_test(test_custom_prop_dark_media_not_collected_in_light),
+        cmocka_unit_test(test_custom_prop_dark_media_collected_in_dark),
+        cmocka_unit_test(test_custom_prop_class_scoped_skipped_without_scope),
+        cmocka_unit_test(test_custom_prop_class_scoped_applies_with_root_scope),
+        cmocka_unit_test(test_custom_prop_descendant_scoped_skipped),
+        cmocka_unit_test(test_custom_prop_table_holds_hundreds),
         cmocka_unit_test(test_custom_prop_var_unbalanced_paren_drops),
         cmocka_unit_test(test_custom_prop_var_never_phones_home),
         cmocka_unit_test(test_sheet_type_selector),

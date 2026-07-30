@@ -555,14 +555,30 @@ consume `flex-wrap` (multi-line packing by flex basis), `row-gap` (falls back to
 predates the property keeps its exact prior geometry), and `align-items`/`align-self`
 (cross-axis offset within a flex line; grid cross-axis alignment is still deferred).
 
-**Custom properties + `var()` (CSS layout expansion).** A `--name: value` declaration
-anywhere in the stylesheet — any rule, any `@media` block — feeds one flat,
-**page-global** table (`collect_custom_props`, up to `CSS_MAX_CUSTOM_PROPS` (64)
-entries, each name/value bounded like every other token here to `CSS_TOK_MAX`; a
-later declaration of the same name overwrites an earlier one). This is a
-deliberate simplification of real CSS's cascade-scoped custom properties, chosen
-because it covers the overwhelmingly common `:root { --x: ... }` pattern without
-needing per-element scoping. `var(--name)` / `var(--name, fallback)` is resolved
+**Custom properties + `var()` (CSS layout expansion; scoped collection 2026-07-29).**
+`--name: value` declarations feed one flat, **page-global** table (up to
+`CSS_MAX_CUSTOM_PROPS` (512) entries, each name/value bounded like every other token
+here to `CSS_TOK_MAX`; a later *collected* declaration of the same name overwrites an
+earlier one). Collection is **structure-aware**, not a raw text scan
+(`collect_custom_props_scoped`): a declaration is collected only when **(a)** every
+enclosing `@media` block matches the render context (same `media_matches` gate as
+rule parsing — a dark-palette block under `@media (prefers-color-scheme: dark)` is
+invisible in a light render), and **(b)** its rule's selector group contains at least
+one **root-scoped** selector: a single compound (no combinators) made only of
+`:root`, `html`, `body`, `*`, and/or `.class` parts whose classes are actually
+present on the document's `<html>`/`<body>` elements. The caller passes those classes
+via `css_parse_scoped(text, len, media, root_scope, out)` (`root_scope` = space-
+separated class list, NULL = none); `css_parse`/`css_parse_media` pass NULL. Anything
+else — `.theme-dark` when the class is absent, `#id`, attribute selectors, pseudos
+other than `:root`, any descendant scope — is **skipped, fail-safe**: a skipped
+palette makes the referencing declaration drop to UA defaults (readable dark-on-
+light), whereas the old whole-text scan let an *inactive* theme palette (e.g.
+Wikipedia's `.skin-theme-clientpref-night` values, `#eaecf0` text) clobber the active
+one and paint white-on-white. This remains a deliberate simplification of real CSS's
+cascade-scoped custom properties: per-element scoping is still out; the table is
+page-global, but only *applicable* rules feed it. An inline `style=` collects its own
+`--name` declarations with a plain declaration-span scan (no selector, no media —
+`collect_custom_decls`). `var(--name)` / `var(--name, fallback)` is resolved
 (`resolve_var`) when a declaration's value is interpreted: a hit substitutes the
 custom property's (recursively resolved) value; a miss uses the fallback if given,
 else the **whole declaration fails** (matches real CSS: an unresolvable `var()`

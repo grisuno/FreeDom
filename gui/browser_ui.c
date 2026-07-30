@@ -4491,15 +4491,18 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             continue;
         }
 
-        /* Box engine (Hito 23b-8 Step D): reconcile the open-box stack with this
-         * block's box path (root..block_id) from the box-def parent chain, so a child
-         * box nests inside its parent instead of splitting it. block_id < 0 (images,
-         * inputs, blocks outside any box) closes all open boxes. */
-        reconcile_boxes(L, &s, th, doc, content_w, b->block_id);
-
         int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE
                        || b->kind == RD_HEADING || b->kind == RD_INPUT
                        || b->kind == RD_VIDEO);
+        /* Box engine (Hito 23b-8 Step D): reconcile the open-box stack with this
+         * block's box path (root..block_id) from the box-def parent chain, so a child
+         * box nests inside its parent instead of splitting it. block_id < 0 (images,
+         * inputs, blocks outside any box) closes all open boxes -- EXCEPT for a
+         * boxless continuation run (no break): it stays on the current line, so it
+         * stays in the current box context too; closing would flush the line and
+         * split e.g. a flowed table row at its inter-cell gap runs. */
+        if (standalone || b->block_break || b->block_id >= 0)
+            reconcile_boxes(L, &s, th, doc, content_w, b->block_id);
         if (standalone || b->block_break) {
             flush_line(L, &s, th);
             /* Space before this block = its top margin collapsed with the previous

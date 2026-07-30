@@ -1611,6 +1611,58 @@ static void test_build_empty_box_gets_run_and_box(void **state) {
     hp_document_free(doc);
 }
 
+static void test_build_zero_padding_is_not_a_box(void **state) {
+    (void)state;
+    /* `padding: 0` / `border: 0` (the universal reset) paints nothing and insets
+     * nothing: no box may be registered for it (a box per reset element made the
+     * painter flush lines at every element). */
+    hp_document *doc = parse(
+        "<body><div style='padding:0;border:0'>plain</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "plain");
+    assert_non_null(r);
+    assert_int_equal(r->block_id, -1);
+    assert_int_equal((int)pv_box_count(v), 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_flow_table_row_is_one_block(void **state) {
+    (void)state;
+    /* A FLOW table (a leaf cell with 2+ anchors: Hacker News): the whole row's
+     * content shares ONE block -- the rank cell, a decorated empty leaf (the
+     * votearrow icon) and the multi-link title cell must all land on the row's
+     * line. The icon's placeholder carries no box (a box transition would split
+     * the line in the painter), and no run after the row's first breaks. */
+    hp_document *doc = parse(
+        "<body><table><tr>"
+        "<td style='padding-right:5px'>1.</td>"
+        "<td><a href='v'><div style='background:#cccccc;height:10px'></div></a></td>"
+        "<td><a href='https://a.com/x'>Title</a> (<a href='https://a.com'>a.com</a>)</td>"
+        "</tr></table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *rank = find_text(v, "1.");
+    const pv_run *title = find_text(v, "Title");
+    assert_non_null(rank);
+    assert_non_null(title);
+    /* Everything between the rank and the title stays on the rank's line: no
+     * block break, and no run in between carries a box (block_id must be -1). */
+    size_t from = 0, to = 0;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        if (pv_at(v, i) == rank) from = i;
+        if (pv_at(v, i) == title) to = i;
+    }
+    assert_true(from < to);
+    for (size_t i = from + 1; i <= to; ++i) {
+        assert_int_equal(pv_at(v, i)->block_break, 0);
+        assert_int_equal(pv_at(v, i)->block_id, -1);
+    }
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_boxdeco_shadow_outline(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -2797,6 +2849,8 @@ int main(void) {
         cmocka_unit_test(test_box_defaults_and_setter),
         cmocka_unit_test(test_build_boxdeco_border_padding),
         cmocka_unit_test(test_build_empty_box_gets_run_and_box),
+        cmocka_unit_test(test_build_zero_padding_is_not_a_box),
+        cmocka_unit_test(test_build_flow_table_row_is_one_block),
         cmocka_unit_test(test_build_boxdeco_shadow_outline),
         cmocka_unit_test(test_build_boxdeco_visibility_overflow_cursor),
         cmocka_unit_test(test_build_cursor_alone_triggers_box),

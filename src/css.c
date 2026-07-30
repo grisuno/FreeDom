@@ -49,7 +49,7 @@
  * could never fit a re-substituted declaration value anyway), and lookups recurse
  * at most CSS_VAR_MAX_DEPTH deep (a chain or cycle beyond that fails the var(),
  * bounding the work to O(depth * CSS_TOK_MAX) -- anti-DoS, never a crash or hang). */
-#define CSS_MAX_CUSTOM_PROPS 64u
+#define CSS_MAX_CUSTOM_PROPS 512u
 #define CSS_VAR_MAX_DEPTH    4
 
 /* background-image: url(...) text pool (2026-07-16). A page-global table, same
@@ -2820,41 +2820,43 @@ static int strip_important(char *val) {
 
 /* --- Custom properties (--name: value) + var(--name[, fallback]) ---------------
  *
- * Deliberately simplified: collect_custom_props scans the WHOLE stylesheet text
- * once for `--ident: value` pairs regardless of which rule/selector/@media they
- * appear in (a later occurrence of the same name overwrites an earlier one), into
- * one flat page-global table. This covers the overwhelmingly common
- * `:root { --x: ... }` pattern without needing real cascade-scoped custom
- * properties. resolve_var then substitutes var() references against that table
+ * Deliberately simplified vs. real cascade-scoped custom properties: all collected
+ * declarations feed one flat page-global table. Collection, however, is
+ * structure-aware (collect_custom_props_scoped, further below): only rules whose
+ * enclosing @media blocks match the render context AND whose selector is
+ * root-scoped (`:root`, `html`, `body`, the universal selector, or a .class
+ * actually present on <html>/<body>) contribute — an inactive theme palette
+ * (e.g. a dark palette under
+ * `.theme-night` or `@media (prefers-color-scheme: dark)`) must never clobber the
+ * active one. resolve_var then substitutes var() references against that table
  * when a declaration's value is interpreted (parse_one_decl), bounded to
  * CSS_VAR_MAX_DEPTH nested lookups so a reference cycle (`--a: var(--a)`) or a
  * long chain fails the declaration instead of recursing/expanding unboundedly. */
 
-/* Scans s[0,n) for `--ident : value ;|}` declarations anywhere in the text. A name
- * is recognised only where it cannot be part of a longer identifier (its preceding
- * character, if any, is not itself an identifier character), so it never matches
- * inside e.g. a longer token. Later occurrences of the same name overwrite earlier
- * ones (last-in-source wins, approximating cascade for the common single-:root
- * case). An overlong name or value (would not fit CSS_TOK_MAX) is dropped, not
- * truncated -- a truncated custom property would silently feed a wrong value to
- * every var() that references it. Bounded to cap entries (extra distinct names are
- * ignored, fail closed, never an overflow). */
-static void collect_custom_props(const char *s, size_t n, css_custom_prop *tab,
-                                 size_t cap, size_t *ntab) {
-    *ntab = 0;
-    size_t i = 0;
-    while (i < n) {
-        if (s[i] == '-' && i + 1 < n && s[i + 1] == '-' &&
-            (i == 0 || !csel_ident_ch(s[i - 1]))) {
+/* Scans the declaration span s[a,b) for `--ident : value ;|}` pairs and folds them
+ * into tab. A name is recognised only where it cannot be part of a longer
+ * identifier (its preceding character, if any, is not itself an identifier
+ * character). A later occurrence of a name overwrites an earlier one (last
+ * collected wins, approximating the cascade among applicable rules). An overlong
+ * name or value (would not fit CSS_TOK_MAX) is dropped, not truncated -- a
+ * truncated custom property would silently feed a wrong value to every var() that
+ * references it. Bounded to cap entries (extra distinct names are ignored, fail
+ * closed, never an overflow). Does NOT reset *ntab: callers accumulate. */
+static void collect_custom_decls(const char *s, size_t a, size_t b,
+                                 css_custom_prop *tab, size_t cap, size_t *ntab) {
+    size_t i = a;
+    while (i < b) {
+        if (s[i] == '-' && i + 1 < b && s[i + 1] == '-' &&
+            (i == a || !csel_ident_ch(s[i - 1]))) {
             size_t j = i + 2;
-            while (j < n && csel_ident_ch(s[j])) ++j;
+            while (j < b && csel_ident_ch(s[j])) ++j;
             size_t name_len = j - i;
             size_t k = j;
-            while (k < n && (s[k] == ' ' || s[k] == '\t' || s[k] == '\n' || s[k] == '\r')) ++k;
-            if (k < n && s[k] == ':' && name_len < CSS_TOK_MAX) {
+            while (k < b && (s[k] == ' ' || s[k] == '\t' || s[k] == '\n' || s[k] == '\r')) ++k;
+            if (k < b && s[k] == ':' && name_len < CSS_TOK_MAX) {
                 size_t v0 = k + 1;
                 size_t v = v0;
-                while (v < n && s[v] != ';' && s[v] != '}') ++v;
+                while (v < b && s[v] != ';' && s[v] != '}') ++v;
                 char namebuf[CSS_TOK_MAX];
                 memcpy(namebuf, s + i, name_len);
                 namebuf[name_len] = '\0';
@@ -2878,6 +2880,72 @@ static void collect_custom_props(const char *s, size_t n, css_custom_prop *tab,
         }
         ++i;
     }
+}
+
+/* True when name[0,len) appears as a whole space-separated token in list. */
+static int scope_has_class(const char *list, const char *name, size_t len) {
+    if (list == NULL || len == 0) return 0;
+    const char *p = list;
+    while (*p != '\0') {
+        while (*p == ' ' || *p == '\t') ++p;
+        const char *t = p;
+        while (*p != '\0' && *p != ' ' && *p != '\t') ++p;
+        if ((size_t)(p - t) == len && memcmp(t, name, len) == 0) return 1;
+    }
+    return 0;
+}
+
+/* True when the selector s[a,b) is root-scoped: a single compound (no
+ * combinators) made only of `:root`, `html`, `body`, `*` and/or `.class` parts
+ * whose classes appear in root_scope (the space-separated class list of the
+ * document's <html>/<body>). Anything else — an absent theme class, #id, [attr],
+ * other pseudos, any descendant scope — is not document-wide: fail closed (a
+ * skipped palette degrades to UA defaults, never to the wrong palette). */
+static int selector_is_root_scoped(const char *s, size_t a, size_t b,
+                                   const char *root_scope) {
+    while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
+    while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
+    if (a >= b) return 0;
+    size_t i = a;
+    while (i < b) {
+        char c = s[i];
+        if (c == ' ' || c == '\t' || c == '\n' || c == '\r' ||
+            c == '>' || c == '+' || c == '~')
+            return 0;                       /* combinator: not document-wide */
+        if (c == '*') { ++i; continue; }
+        if (c == '.') {
+            size_t j = i + 1;
+            while (j < b && csel_ident_ch(s[j])) ++j;
+            if (j == i + 1 || !scope_has_class(root_scope, s + i + 1, j - i - 1))
+                return 0;
+            i = j;
+            continue;
+        }
+        if (c == ':') {
+            static const char kw[4] = { 'r', 'o', 'o', 't' };
+            if (i + 5 > b) return 0;
+            for (int k = 0; k < 4; ++k)
+                if (csel_lower_ch(s[i + 1 + k]) != kw[k]) return 0;
+            if (i + 5 < b && csel_ident_ch(s[i + 5])) return 0;
+            i += 5;
+            continue;
+        }
+        if (csel_ident_ch(c)) {
+            size_t j = i;
+            char t[8];
+            size_t k = 0;
+            while (j < b && csel_ident_ch(s[j])) {
+                if (k + 1 < sizeof t) t[k++] = csel_lower_ch(s[j]);
+                ++j;
+            }
+            t[k] = '\0';
+            if (strcmp(t, "html") != 0 && strcmp(t, "body") != 0) return 0;
+            i = j;
+            continue;
+        }
+        return 0;                           /* #id, [attr], anything unknown */
+    }
+    return 1;
 }
 
 static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap,
@@ -3980,6 +4048,67 @@ static int at_is_media(const char *s, size_t i, size_t n) {
 
 #define CSS_MEDIA_MAX_DEPTH 4
 
+/* Structure-aware custom-property collection (see the block comment above
+ * collect_custom_decls): walks s[start,end) with the same @media gating as
+ * parse_block (a non-matching block — e.g. a dark palette in a light render — is
+ * skipped whole; other @-rules are opaque) and folds `--name: value` declarations
+ * into tab only from rules with a root-scoped selector (selector_is_root_scoped
+ * against root_scope). Runs BEFORE parse_block so every rule's var() references
+ * resolve against the complete applicable table regardless of document order. */
+static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+                                        const css_media *m, const char *root_scope,
+                                        css_custom_prop *tab, size_t cap,
+                                        size_t *ntab, int depth) {
+    size_t i = start;
+    while (i < end) {
+        while (i < end && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r')) ++i;
+        if (i >= end) break;
+        if (s[i] == '@') {
+            if (at_is_media(s, i, end)) {
+                size_t q = i + 6;
+                while (q < end && s[q] != '{' && s[q] != ';') ++q;
+                if (q < end && s[q] == '{') {
+                    size_t be = block_end(s, q, end);
+                    size_t body_start = q + 1;
+                    size_t body_end = (be > body_start) ? be - 1 : body_start;
+                    if (depth < CSS_MEDIA_MAX_DEPTH && media_matches(s, i + 6, q, m))
+                        collect_custom_props_scoped(s, body_start, body_end, m,
+                                                    root_scope, tab, cap, ntab,
+                                                    depth + 1);
+                    i = be;
+                    continue;
+                }
+                i = (q < end && s[q] == ';') ? q + 1 : end;
+                continue;
+            }
+            i = skip_at_rule(s, i, end);
+            continue;
+        }
+        if (s[i] == '}') { ++i; continue; }  /* stray */
+
+        size_t ss = i;
+        while (i < end && s[i] != '{' && s[i] != '}') ++i;
+        if (i >= end || s[i] != '{') { if (i < end && s[i] == '}') ++i; continue; }
+        size_t se = i;
+        ++i;
+        size_t ds = i;
+        while (i < end && s[i] != '}') ++i;
+        size_t de = i;
+        if (i < end) ++i;
+
+        size_t p = ss;
+        while (p < se) {
+            size_t q = p;
+            while (q < se && s[q] != ',') ++q;
+            if (selector_is_root_scoped(s, p, q, root_scope)) {
+                collect_custom_decls(s, ds, de, tab, cap, ntab);
+                break;
+            }
+            p = (q < se) ? q + 1 : q;
+        }
+    }
+}
+
 /* Parses rules in s[start,end). A matched @media block is descended into (bounded
  * depth); @import/@font-face/other @-rules and a non-matching @media are skipped. */
 static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
@@ -4202,6 +4331,11 @@ css_status css_parse(const char *text, size_t len, css_sheet **out) {
 
 css_status css_parse_media(const char *text, size_t len, const css_media *media,
                            css_sheet **out) {
+    return css_parse_scoped(text, len, media, NULL, out);
+}
+
+css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+                            const char *root_scope, css_sheet **out) {
     if (out == NULL) return CSS_ERR_NULL_ARG;
     css_sheet *sh = (css_sheet *)calloc(1, sizeof *sh);
     if (sh == NULL) return CSS_ERR_OOM;
@@ -4212,7 +4346,8 @@ css_status css_parse_media(const char *text, size_t len, const css_media *media,
         size_t clen = 0;
         char *clean = strip_comments(text, len, &clen);
         if (clean == NULL) { free(sh); return CSS_ERR_OOM; }
-        collect_custom_props(clean, clen, sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom);
+        collect_custom_props_scoped(clean, 0, clen, m, root_scope,
+                                    sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
         parse_block(sh, clean, 0, clen, m, 0);
         free(clean);
     }
@@ -4587,16 +4722,19 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
          * either in this SAME inline block (`style="--x:1;color:var(--x)"`) or in
          * the stylesheet (e.g. a `:root` rule). Inline-declared names win on a
          * collision (closer to the use site), so they go first in the combined
-         * table -- expand_lookup takes the first match. */
-        css_custom_prop combined[2 * CSS_MAX_CUSTOM_PROPS];
+         * table -- expand_lookup takes the first match, which also makes
+         * deduplicating the sheet's entries unnecessary. Heap-allocated (the
+         * table is too large for the stack); OOM degrades to sheet-only vars. */
+        css_custom_prop *combined =
+            (css_custom_prop *)calloc(2 * CSS_MAX_CUSTOM_PROPS, sizeof *combined);
         size_t ncombined = 0;
-        collect_custom_props(inline_style, inline_len, combined, CSS_MAX_CUSTOM_PROPS, &ncombined);
-        if (sheet != NULL) {
-            for (size_t i = 0; i < sheet->ncustom && ncombined < 2 * CSS_MAX_CUSTOM_PROPS; ++i) {
-                int dup = 0;
-                for (size_t k = 0; k < ncombined; ++k)
-                    if (strcmp(combined[k].name, sheet->custom[i].name) == 0) { dup = 1; break; }
-                if (!dup) combined[ncombined++] = sheet->custom[i];
+        if (combined != NULL) {
+            collect_custom_decls(inline_style, 0, inline_len,
+                                 combined, CSS_MAX_CUSTOM_PROPS, &ncombined);
+            if (sheet != NULL) {
+                for (size_t i = 0; i < sheet->ncustom &&
+                                   ncombined < 2 * CSS_MAX_CUSTOM_PROPS; ++i)
+                    combined[ncombined++] = sheet->custom[i];
             }
         }
         css_decl tmp[CSS_INLINE_DECLS];
@@ -4604,13 +4742,20 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         size_t n_inline_bg_urls = 0;
         char inline_content_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
         size_t n_inline_content_urls = 0;
+        const css_custom_prop *vtab = combined;
+        size_t nvtab = ncombined;
+        if (vtab == NULL && sheet != NULL) {  /* OOM: degrade to sheet-only vars */
+            vtab = sheet->custom;
+            nvtab = sheet->ncustom;
+        }
         size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS,
-                                    combined, ncombined,
+                                    vtab, nvtab,
                                     inline_bg_urls, &n_inline_bg_urls, CSS_INLINE_BG_URLS,
                                     inline_content_urls, &n_inline_content_urls, CSS_INLINE_BG_URLS);
         for (size_t d = 0; d < dn; ++d)
             apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX,
                        inline_bg_urls, inline_content_urls);
+        free(combined);
     }
 
     css_resolve_anim_keyframes(&out, sheet);

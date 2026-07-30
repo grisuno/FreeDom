@@ -414,6 +414,25 @@ El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módu
   gateado por `caps.css`; sin CSS de autor `layout_doc` lo salta y los ítems no tienen caja → render
   idéntico. **Límite v1:** una caja **anidada dentro** de un ítem (un `<span>` pill, un ícono dentro
   de una tarjeta) aún no pinta su decoración. Ver `spec/page_view.md` §4, `[[freedom-empty-and-item-boxes]]`.
+- **Custom properties con recolección scoped (2026-07-29):** la tabla page-global de `--name`
+  ya no se llena con un escaneo de texto plano: `collect_custom_props_scoped` respeta el gate de
+  `@media` (mismo `media_matches` que las reglas) y solo recolecta de reglas con selector
+  **root-scoped** (`:root`/`html`/`body`/`*`/`.clase` presente de verdad en `<html>`/`<body>`;
+  la GUI pasa la lista viva vía `css_parse_scoped`). Antes la paleta oscura INACTIVA de un sitio
+  (Wikipedia: `.skin-theme-clientpref-night`, `@media dark`) pisaba la clara y pintaba texto
+  blanco-sobre-blanco (artículo entero invisible). Lo no reconocible se salta **fail-safe** (var
+  ausente ⇒ declaración cae ⇒ default UA legible). `CSS_MAX_CUSTOM_PROPS` 64→512 (Wikipedia sola
+  define 201). Ver `spec/css.md` "Custom properties", `[[freedom-scoped-custom-props]]`.
+- **Tablas flow: la fila es UNA línea; decoración cero no es caja (2026-07-29):** HN pasó de
+  5208px a 1896px (Firefox: 1330) con cuatro reglas: `padding:0`/`border:0`/`visibility:visible`
+  **no** registran caja (`css_has_boxdeco` exige valor > 0 — el reset universal creaba una caja
+  por elemento y el painter hace flush de línea en cada transición de caja); la hoja decorada
+  vacía y las celdas de una tabla flow **no llevan caja propia** y su bloque es la **fila**
+  (`in_flow_table_cell`); un run de continuación sin caja **no cierra** las cajas abiertas
+  (gui/browser_ui.c); y un bloque `<tr>` defaultea margen 0 (los márgenes no aplican a filas).
+  Ver `spec/page_view.md` "Tablas flow", `[[freedom-flow-table-row-line]]`. **Abierto:** la zona
+  de menús de Wikipedia (lista de idiomas con float+flex pinta fuera de canvas, vacíos reservados
+  antes del artículo) y la banda naranja del nav de HN (línea con fondos mixtos no pinta banda).
 - **Paridad con Firefox medida, no supuesta (2026-07-27):** las diferencias de render contra
   navegadores modernos se **miden** con Firefox instalado en este host
   (`firefox --headless --screenshot X.png --window-size=1000 file://...`) contra

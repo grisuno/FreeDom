@@ -734,6 +734,19 @@ css_status css_parse(const char *text, size_t len, css_sheet **out);
 css_status css_parse_media(const char *text, size_t len, const css_media *media,
                            css_sheet **out);
 
+/* As css_parse_media, plus a root scope for custom-property collection:
+ * root_scope is a space-separated list of the class names actually present on the
+ * document's <html>/<body> elements (NULL = none). A `--name: value` declaration
+ * is collected into the page-global var() table only from rules whose enclosing
+ * @media blocks match *media and whose selector group contains a root-scoped
+ * selector (`:root`, `html`, `body`, the universal selector, and/or .classes from
+ * root_scope; one compound, no combinators). Everything else is skipped fail-safe,
+ * so an inactive theme
+ * palette (a dark palette in a light render) can never clobber the active one.
+ * css_parse/css_parse_media delegate here with root_scope == NULL. */
+css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+                            const char *root_scope, css_sheet **out);
+
 /* Idempotent; NULL-safe. */
 void css_free(css_sheet *s);
 

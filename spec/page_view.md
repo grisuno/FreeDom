@@ -427,7 +427,9 @@ nunca se registraba y **desaparecía del render** — justo lo contrario de un n
 un `<div>` vacío con fondo/tamaño **sí** pinta y reserva su espacio.
 
 - **Dado** un elemento que (a) **generaría una caja** (`css_has_boxdeco`: padding/borde/radio/
-  sombra/outline/posición/`height`/`min-height`/`aspect-ratio`/gradiente/opacity/blend/transform)
+  sombra/outline **con valor > 0** — un `padding:0`/`border:0` de reset no es decoración, ver
+  «Tablas flow» abajo —, posición/`height`/`min-height`/`aspect-ratio`/gradiente/opacity/blend/
+  transform)
   y (b) es una **hoja de contenido** — sin elementos hijo y sin texto que no sea espacio en blanco —
   **cuando** el recorrido lo visita, **entonces** `page_view` emite **un run placeholder de texto
   vacío** que lleva el `block_id` de esa caja (más su pertenencia flex/grid `cont_*` e ítem, vía
@@ -460,6 +462,40 @@ colapsaba a altura 0 (la grilla entera desaparecía). Ahora, para cada ítem:
 - **Límite v1:** solo pinta la caja **raíz** del ítem; una caja **anidada dentro** del ítem (un
   `<span>` pill, un ícono circular dentro de una tarjeta) sigue sin pintar su decoración (el camino
   de contenedor aplana el interior a texto). Es el próximo incremento.
+
+### Tablas flow: la fila es la línea; decoración cero no es caja (2026-07-29)
+
+Una tabla **flow** (alguna celda hoja con 2+ anclas — el caso Hacker News) se recorre por el
+camino normal para no destruir sus links. La intención de siempre («cada `<tr>` es un bloque: la
+primera celda de la fila rompe línea, el resto la comparte») estaba rota por tres vías, y las tres
+partían cada fila de HN en 3–4 líneas con huecos de párrafo (5208px de alto contra 1330px de
+Firefox para la misma portada):
+
+- **Dado** un elemento decorado **vacío** dentro de una celda walked de una tabla flow (la flecha
+  de voto de HN: `<div class="votearrow">`), **cuando** se emite su run placeholder, **entonces**
+  su bloque es **la fila** (`nearest_row`), no el propio `<div>` (que como block-tag rompería la
+  línea), y **no lleva caja** (`block_id -1`): el painter hace flush de línea en cada transición
+  de caja, así que una caja intercalada también partiría la fila. **Límite v1:** la decoración
+  propia del ícono (su sprite de fondo) no pinta dentro de una fila flowed; la integridad de la
+  fila gana. Helper: `in_flow_table_cell` (celda td/th sin tabla anidada cuya tabla decide flow).
+- **Dado** un `<td>`/`<th>` de una tabla flow con decoración propia (el `td.title{padding-right}`
+  de HN), **cuando** `resolve_context` registra cajas ancestrales, **entonces** la celda se
+  **salta** (mismo helper): la caja por-celda partiría la fila en el painter. Las celdas de tablas
+  **grid** (datos) no cambian: sus cajas viven en el camino de contenedor (`layout_container`).
+- **Dado** un bloque cuyo elemento es `<tr>` sin margen de autor, **cuando** se resuelven los
+  márgenes verticales del bloque, **entonces** default **0** (en CSS real los márgenes no aplican
+  a cajas table-row) en vez del margen UA de `<p>` (1em arriba y abajo, que espaciaba cada fila
+  una línea entera).
+
+Dos arreglos de soporte en el mismo lote, ambos generales (no solo tablas):
+
+- **`css_has_boxdeco` exige valor > 0:** `padding: 0` / `border: 0` (el reset universal que media
+  web declara) y `visibility: visible` **no** son decoración — registraban una caja que no pinta
+  ni inseta nada y cuyo único efecto era partir líneas y sumar huecos en el painter.
+- **Run de continuación sin caja no cierra cajas (painter):** un run sin `block_break` y con
+  `block_id < 0` (los separadores « » entre celdas walked) sigue en la línea abierta, así que
+  sigue en el **contexto de caja** abierto; reconciliar a -1 cerraba la caja y hacía flush de la
+  línea a mitad de fila.
 
 ### Paridad con Firefox: fila inline-block, hoja out-of-flow, caja de celda (2026-07-27)
 
