@@ -18,6 +18,7 @@
 
 #include "box_tree.h"
 #include "page_view.h"   /* pv_box_def for Stage 2 positioning tests */
+#include "css.h"         /* CSS_VIS_* for the Stage 2b visibility-gate tests */
 
 static int dbl_eq(double a, double b) {
     double d = a - b;
@@ -604,6 +605,156 @@ static void test_positioning_nbox_cap(void **state) {
                      BT_ERR_RANGE);
 }
 
+/* --- Stage 2b: static position + visibility gate (red until they exist) --- */
+
+#define UNSET4 .inset_top = PV_LEN_UNSET, .inset_right = PV_LEN_UNSET, \
+               .inset_bottom = PV_LEN_UNSET, .inset_left = PV_LEN_UNSET
+
+static void test_static_position_absolute_auto_insets(void **state) {
+    (void)state;
+    /* Absolute, every inset unset, static recorded at (30,40) → resolves there
+     * (CSS 2.2 §10.3.7: top:auto → the hypothetical in-flow position). */
+    pv_box_def boxes[1] = {{ .parent_id = -1, .position = BT_POS_ABSOLUTE, UNSET4 }};
+    double gx[1] = {0}, gy[1] = {0}, gw[1] = {50}, gh[1] = {20};
+    double sx[1] = {30}, sy[1] = {40};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy,
+                                               800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    assert_true(dbl_eq(out[0].x, 30));
+    assert_true(dbl_eq(out[0].y, 40));
+}
+
+static void test_static_position_fixed_auto_insets(void **state) {
+    (void)state;
+    /* Fixed with auto insets also uses the static position, not the viewport
+     * origin (CSS 2.2 §10.3.7 applies to the fixed containing block too). */
+    pv_box_def boxes[1] = {{ .parent_id = -1, .position = BT_POS_FIXED, UNSET4 }};
+    double gx[1] = {0}, gy[1] = {0}, gw[1] = {50}, gh[1] = {20};
+    double sx[1] = {15}, sy[1] = {120};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy,
+                                               800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    assert_true(dbl_eq(out[0].x, 15));
+    assert_true(dbl_eq(out[0].y, 120));
+}
+
+static void test_static_position_explicit_insets_win(void **state) {
+    (void)state;
+    /* Explicit top/left beat the recorded static position (Stage-2 behaviour
+     * unchanged for boxes that declare insets). */
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE, UNSET4 },
+        { .parent_id =  0, .position = BT_POS_ABSOLUTE,
+          .inset_top = 5, .inset_right = PV_LEN_UNSET,
+          .inset_bottom = PV_LEN_UNSET, .inset_left = 10 },
+    };
+    double gx[2] = {50, 60}, gy[2] = {50, 60}, gw[2] = {200, 80}, gh[2] = {100, 40};
+    double sx[2] = {0, 300}, sy[2] = {0, 300};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 2, gx, gy, gw, gh, sx, sy,
+                                               800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 2);
+    assert_true(dbl_eq(out[1].x, 60));
+    assert_true(dbl_eq(out[1].y, 55));
+}
+
+static void test_static_position_mixed_axis(void **state) {
+    (void)state;
+    /* left:10 explicit (→ containing block + inset) but top:auto (→ static y). */
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE, UNSET4 },
+        { .parent_id =  0, .position = BT_POS_ABSOLUTE,
+          .inset_top = PV_LEN_UNSET, .inset_right = PV_LEN_UNSET,
+          .inset_bottom = PV_LEN_UNSET, .inset_left = 10 },
+    };
+    double gx[2] = {50, 60}, gy[2] = {50, 60}, gw[2] = {200, 80}, gh[2] = {100, 40};
+    double sx[2] = {0, 0}, sy[2] = {0, 75};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 2, gx, gy, gw, gh, sx, sy,
+                                               800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 2);
+    assert_true(dbl_eq(out[1].x, 60));
+    assert_true(dbl_eq(out[1].y, 75));
+}
+
+static void test_static_position_right_inset_keeps_anchor(void **state) {
+    (void)state;
+    /* right:10 with left:auto keeps the R4 right anchor; only top:auto falls
+     * back to the static y. */
+    pv_box_def boxes[1] = {{ .parent_id = -1, .position = BT_POS_ABSOLUTE,
+                             .inset_top = PV_LEN_UNSET, .inset_right = 10,
+                             .inset_bottom = PV_LEN_UNSET,
+                             .inset_left = PV_LEN_UNSET }};
+    double gx[1] = {0}, gy[1] = {0}, gw[1] = {80}, gh[1] = {40};
+    double sx[1] = {30}, sy[1] = {40};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy,
+                                               800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    /* x = viewport_w - w - inset_r = 800 - 80 - 10 = 710 */
+    assert_true(dbl_eq(out[0].x, 710));
+    assert_true(dbl_eq(out[0].y, 40));
+}
+
+static void test_static_position_null_arrays_legacy(void **state) {
+    (void)state;
+    /* NULL static arrays → the legacy containing-block-edge anchoring. */
+    pv_box_def boxes[1] = {{ .parent_id = -1, .position = BT_POS_ABSOLUTE, UNSET4 }};
+    double gx[1] = {0}, gy[1] = {0}, gw[1] = {50}, gh[1] = {20};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, NULL, NULL,
+                                               800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 1);
+    assert_true(dbl_eq(out[0].x, 0));
+    assert_true(dbl_eq(out[0].y, 0));
+}
+
+static void test_box_hidden_self(void **state) {
+    (void)state;
+    pv_box_def boxes[1] = {{ .parent_id = -1, .visibility = CSS_VIS_HIDDEN }};
+    assert_int_equal(bt_box_hidden(boxes, 1, 0), 1);
+    boxes[0].visibility = CSS_VIS_COLLAPSE;
+    assert_int_equal(bt_box_hidden(boxes, 1, 0), 1);
+    boxes[0].visibility = CSS_VIS_VISIBLE;
+    assert_int_equal(bt_box_hidden(boxes, 1, 0), 0);
+    boxes[0].visibility = CSS_VIS_UNSET;
+    assert_int_equal(bt_box_hidden(boxes, 1, 0), 0);
+}
+
+static void test_box_hidden_ancestor(void **state) {
+    (void)state;
+    /* Hidden grandfather hides the whole subtree. */
+    pv_box_def boxes[3] = {
+        { .parent_id = -1, .visibility = CSS_VIS_HIDDEN },
+        { .parent_id =  0, .visibility = CSS_VIS_UNSET },
+        { .parent_id =  1, .visibility = CSS_VIS_UNSET },
+    };
+    assert_int_equal(bt_box_hidden(boxes, 3, 2), 1);
+    assert_int_equal(bt_box_hidden(boxes, 3, 1), 1);
+    assert_int_equal(bt_box_hidden(boxes, 3, 0), 1);
+}
+
+static void test_box_hidden_fail_closed(void **state) {
+    (void)state;
+    /* NULL / out-of-range / a parent cycle: hidden (fail closed), and the walk
+     * terminates (bounded by nbox steps). */
+    pv_box_def boxes[2] = {
+        { .parent_id =  1, .visibility = CSS_VIS_UNSET },
+        { .parent_id =  0, .visibility = CSS_VIS_UNSET },
+    };
+    assert_int_equal(bt_box_hidden(NULL, 1, 0), 1);
+    assert_int_equal(bt_box_hidden(boxes, 2, 5), 1);
+    assert_int_equal(bt_box_hidden(boxes, 2, 0), 1);  /* cycle 0↔1, no explicit value */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_root),
@@ -640,6 +791,15 @@ int main(void) {
         cmocka_unit_test(test_positioning_no_insets),
         cmocka_unit_test(test_positioning_null_geometry),
         cmocka_unit_test(test_positioning_nbox_cap),
+        cmocka_unit_test(test_static_position_absolute_auto_insets),
+        cmocka_unit_test(test_static_position_fixed_auto_insets),
+        cmocka_unit_test(test_static_position_explicit_insets_win),
+        cmocka_unit_test(test_static_position_mixed_axis),
+        cmocka_unit_test(test_static_position_right_inset_keeps_anchor),
+        cmocka_unit_test(test_static_position_null_arrays_legacy),
+        cmocka_unit_test(test_box_hidden_self),
+        cmocka_unit_test(test_box_hidden_ancestor),
+        cmocka_unit_test(test_box_hidden_fail_closed),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -2879,6 +2879,16 @@ typedef struct rc_layout {
      * in v1 (would need a two-pass painter to paint behind in-flow). */
     bt_positioned positioned[BT_MAX_POSITIONED];
     size_t        npositioned;
+    /* Stage 2b: static (hypothetical in-flow) position of each out-of-flow box,
+     * recorded by layout_doc at the moment it skips the block — the pen position
+     * where the box would have started in flow (CSS 2.2 §10.3.7: top/left:auto
+     * resolve to this, not to the containing-block origin). Indexed by block_id;
+     * oof_static_set guards the first fragment (a multi-fragment box keeps the
+     * position of its first block). Unrecorded boxes (no laid-out blocks) keep
+     * zeros and never paint (zero geometry). */
+    double oof_sx[BT_MAX_POSITIONED];
+    double oof_sy[BT_MAX_POSITIONED];
+    char   oof_static_set[BT_MAX_POSITIONED];
     /* 2026-07-10 tab expansion in <pre> needs a buffer that lives as long as
      * the layout: the rc_frag.text slice is just an offset into one of these
      * owned buffers (heap-allocated, freed by rc_free). Without this, a
@@ -4464,6 +4474,18 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         if (b->block_id >= 0) {
             const pv_box_def *bd = rd_box_at(doc, (size_t)b->block_id);
             if (bd != NULL && (bd->position == BT_POS_ABSOLUTE || bd->position == BT_POS_FIXED)) {
+                /* Stage 2b: record the static position before skipping — where
+                 * this block would have started in flow (current inner-left,
+                 * current line top incl. the pending gap). First fragment wins. */
+                size_t sbid = (size_t)b->block_id;
+                if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
+                    double in_l, in_w;
+                    rc_box_context(&s, content_w, &in_l, &in_w);
+                    (void)in_w;
+                    L->oof_sx[sbid] = in_l;
+                    L->oof_sy[sbid] = s.cur_top + ((L->nrow > 0) ? s.pending_gap : 0.0);
+                    L->oof_static_set[sbid] = 1;
+                }
                 continue;
             }
         }
@@ -4728,8 +4750,12 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
             gh[bid] = (double)bd->box_min_h;
     }
 
-    bt_status st = bt_resolve_positioning(
-        doc->boxes, nbox, gx, gy, gw, gh, content_w, vp_h,
+    /* Stage 2b: pass the recorded static positions so auto-inset boxes land at
+     * their hypothetical in-flow spot. Boxes never visited by layout_doc keep a
+     * zero static position, but they also keep zero geometry (gw/gh == 0), so
+     * the painter skips them regardless — the zero never reaches the screen. */
+    bt_status st = bt_resolve_positioning_ex(
+        doc->boxes, nbox, gx, gy, gw, gh, L->oof_sx, L->oof_sy, content_w, vp_h,
         L->positioned, BT_MAX_POSITIONED, &L->npositioned);
     (void)st;  /* BT_OK / BT_ERR_NULL_ARG / BT_ERR_RANGE all logged via dom_debug */
 
@@ -7525,6 +7551,10 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
     if (pb->w < 1.0 || pb->h < 1.0) return;
     const pv_box_def *def = rd_box_at(w->doc, pb->box_index);
     if (def == NULL) return;
+    /* Stage 2b visibility gate: a positioned box with visibility:hidden/collapse
+     * on itself or an ancestor box paints nothing (out-of-flow reserves no
+     * in-flow space, so nothing is reserved either). Pure walk, cycle-bounded. */
+    if (bt_box_hidden(w->doc->boxes, rd_box_count(w->doc), pb->box_index)) return;
     /* Constrain the positioned box to its overflow:hidden ancestors. */
     ov_reconcile(cr, clip_stack, clip_depth, w->doc, (int)pb->box_index, L, origin, left);
 

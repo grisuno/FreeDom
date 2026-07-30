@@ -160,4 +160,32 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                                  bt_positioned *out, size_t out_cap,
                                  size_t *out_count);
 
+/* Stage 2b: bt_resolve_positioning plus the STATIC position of each out-of-flow
+ * box (static_x/static_y, indexed by box_index; either may be NULL). The static
+ * position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);
+ * the GUI's layout pass records it when it skips the block. For an
+ * ABSOLUTE/FIXED box:
+ *   - left unset/auto  -> x = static_x[i] when provided (else the legacy
+ *     containing-block edge). An explicit left wins; right with auto left still
+ *     anchors right (R4).
+ *   - top  unset/auto  -> y = static_y[i] same rule. An explicit top wins;
+ *     bottom with auto top still anchors bottom (R8).
+ * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */
+bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+                                    const double *box_x, const double *box_y,
+                                    const double *box_w, const double *box_h,
+                                    const double *static_x, const double *static_y,
+                                    double viewport_w, double viewport_h,
+                                    bt_positioned *out, size_t out_cap,
+                                    size_t *out_count);
+
+/* Stage 2b visibility gate: 1 when the box at `bid` or any ancestor on the
+ * parent_id chain has visibility HIDDEN/COLLAPSE (the same simplification the
+ * in-flow path makes -- a visible re-entry under a hidden ancestor stays
+ * hidden). The walk is bounded by nbox links and fails closed (returns 1,
+ * hidden) on NULL boxes, an out-of-range bid, a dangling parent link or a
+ * parent cycle -- a hostile box tree can never make it loop or read out of
+ * bounds. Pure; no allocation. */
+int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);
+
 #endif /* FREEDOM_BOX_TREE_H */

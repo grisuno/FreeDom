@@ -20,6 +20,7 @@
 
 #include "box_tree.h"
 #include "compositor.h" /* cx_item/cx_sort: paint-order for Stage 2 (M1.1 increment 2) */
+#include "css.h"        /* CSS_VIS_HIDDEN/COLLAPSE for bt_box_hidden (Stage 2b) */
 
 #include <stddef.h>
 
@@ -408,12 +409,30 @@ static double resolve_inset(int v) {
     return (double)v;
 }
 
+/* Stage 2b: an inset axis the author left undeclared (UNSET) or `auto`. Both
+ * mean "no inset" for the unset checks; resolve_inset maps them to a 0 offset. */
+static int inset_unset(int v) {
+    return v == PV_LEN_UNSET || v == BT_LEN_AUTO;
+}
+
 bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                                  const double *box_x, const double *box_y,
                                  const double *box_w, const double *box_h,
                                  double viewport_w, double viewport_h,
                                  bt_positioned *out, size_t out_cap,
                                  size_t *out_count) {
+    return bt_resolve_positioning_ex(boxes, nbox, box_x, box_y, box_w, box_h,
+                                     NULL, NULL, viewport_w, viewport_h,
+                                     out, out_cap, out_count);
+}
+
+bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+                                    const double *box_x, const double *box_y,
+                                    const double *box_w, const double *box_h,
+                                    const double *static_x, const double *static_y,
+                                    double viewport_w, double viewport_h,
+                                    bt_positioned *out, size_t out_cap,
+                                    size_t *out_count) {
     if (out_count == NULL) return BT_ERR_NULL_ARG;
     if (nbox > 0 && boxes == NULL) return BT_ERR_NULL_ARG;
     if (nbox > BT_MAX_POSITIONED) return BT_ERR_RANGE;
@@ -489,23 +508,32 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
             /* R8: honour right/bottom for relative/sticky. right pushes
              * LEFT (←) and bottom pushes UP (↑) per CSS 2.2 §9.4.3.
              * left beats right when both are set, matching absolute/fixed
-             * convention (spec says left wins for relative too). */
-            if (boxes[i].inset_right != PV_LEN_UNSET && boxes[i].inset_left == PV_LEN_UNSET)
+             * convention (spec says left wins for relative too). An AUTO inset
+             * counts as unset (Stage 2b inset_unset). */
+            if (!inset_unset(boxes[i].inset_right) && inset_unset(boxes[i].inset_left))
                 x -= inset_r;
             else
                 x += inset_l;
-            if (boxes[i].inset_bottom != PV_LEN_UNSET && boxes[i].inset_top == PV_LEN_UNSET)
+            if (!inset_unset(boxes[i].inset_bottom) && inset_unset(boxes[i].inset_top))
                 y -= inset_b;
             else
                 y += inset_t;
         } else {
-            /* R4: honour right/bottom insets for absolute/fixed. */
-            if (boxes[i].inset_right != PV_LEN_UNSET && boxes[i].inset_left == PV_LEN_UNSET)
+            /* R4: honour right/bottom insets for absolute/fixed.
+             * Stage 2b: an axis left UNSET/AUTO uses the STATIC position (the
+             * hypothetical in-flow spot, CSS 2.2 §10.3.7/§10.6.4) when the
+             * caller provides it; the containing-block edge is the fallback.
+             * An explicit inset always wins; right/bottom keep their anchor. */
+            if (!inset_unset(boxes[i].inset_right) && inset_unset(boxes[i].inset_left))
                 x = cb_x + cb_w - bw - inset_r;
+            else if (inset_unset(boxes[i].inset_left) && static_x != NULL)
+                x = static_x[i];
             else
                 x = cb_x + inset_l;
-            if (boxes[i].inset_bottom != PV_LEN_UNSET && boxes[i].inset_top == PV_LEN_UNSET)
+            if (!inset_unset(boxes[i].inset_bottom) && inset_unset(boxes[i].inset_top))
                 y = cb_y + cb_h - bh - inset_b;
+            else if (inset_unset(boxes[i].inset_top) && static_y != NULL)
+                y = static_y[i];
             else
                 y = cb_y + inset_t;
         }
@@ -562,4 +590,17 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
     for (size_t i = 0; i < to_copy; ++i) out[i] = tmp[i];
     *out_count = tmp_count;
     return BT_OK;
+}
+
+int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid) {
+    if (boxes == NULL || bid >= nbox) return 1;  /* fail closed: hidden */
+    for (size_t steps = 0; steps <= nbox; ++steps) {
+        const pv_box_def *b = &boxes[bid];
+        if (b->visibility == CSS_VIS_HIDDEN || b->visibility == CSS_VIS_COLLAPSE)
+            return 1;
+        if (b->parent_id < 0) return 0;                    /* reached the root */
+        if ((size_t)b->parent_id >= nbox) return 1;        /* dangling link */
+        bid = (size_t)b->parent_id;
+    }
+    return 1;  /* more links than boxes: a parent cycle */
 }

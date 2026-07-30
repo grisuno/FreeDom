@@ -370,8 +370,8 @@ direct copy of `css_position` and avoids an extra translation layer.
 
 | Sentinel | Meaning | Stage 2 handling |
 | :-- | :-- | :-- |
-| `CSS_LEN_UNSET` (0) | Not declared | Default: at the containing block's edge (left=cb.x, top=cb.y) |
-| `CSS_LEN_AUTO` (-2147483647) | `auto` | Treated as unset in v1 (no shrink-to-fit solver) |
+| `CSS_LEN_UNSET` (0) | Not declared | Static position (Stage 2b); legacy fallback: the containing block's edge (left=cb.x, top=cb.y) |
+| `CSS_LEN_AUTO` (-2147483647) | `auto` | Static position (Stage 2b), same as unset |
 | signed px | Pixels | Used as-is |
 
 Only `top` and `left` insets are honored in v1. `right`/`bottom` are read but
@@ -620,10 +620,67 @@ instead of stretching between the two insets — the stretch needs the containin
 width, which only `bt_resolve_positioning` knows (it already computes `cb_w`, today
 unused). Full-bleed overlays (`left:0;right:0`) are the case this leaves short.
 
+### Stage 2b — static position + visibility gate (2026-07-30)
+
+Found by the same Firefox-parity diff (`examples/` micro-tests + a saved Wikipedia
+article): an out-of-flow box whose insets are all `auto` was anchored at the
+containing block's **origin** instead of its **static position** (CSS 2.2
+§10.3.7/§10.6.4: "with `top:auto`, the used value is the position the box would have
+had in the flow"), and the positioned paint pass ignored `visibility:hidden`
+entirely. Real-world symptom: Wikipedia's Vector menus
+(`position:absolute; visibility:hidden; height:0` dropdowns) painted stacked at the
+top of the page, pushing the article thousands of px down.
+
+Two rules close the gap:
+
+1. **Static position for auto insets.** `bt_resolve_positioning_ex` is
+   `bt_resolve_positioning` plus two extra caller-provided arrays,
+   `static_x[]`/`static_y[]` (indexed by box_index; either may be NULL). The GUI's
+   `layout_doc` records, at the moment it skips an out-of-flow block, the pen
+   position where that block *would* have started in flow (current inner-left,
+   current line top incl. the pending gap). In the solver, for an
+   ABSOLUTE/FIXED box:
+   - `left` unset/auto → `x = static_x[i]` when the array is provided, else the
+     legacy containing-block edge. An explicit `left` still wins; `right` with
+     auto `left` still anchors right (R4/R8 unchanged).
+   - `top` unset/auto → `y = static_y[i]` same rule. An explicit `top` wins;
+     `bottom` with auto `top` still anchors bottom.
+   The legacy entry point `bt_resolve_positioning` delegates with NULL arrays
+   (byte-identical behaviour for callers that cannot know a static position).
+2. **Visibility gate.** `bt_box_hidden(boxes, nbox, bid)` (pure) walks the
+   `parent_id` chain from `bid` and returns 1 when the nearest explicit
+   `visibility` on the chain is HIDDEN or COLLAPSE (the same simplification the
+   in-flow path makes — no `visible`-override re-entry), bounded to `nbox` steps
+   so a hostile cycle terminates, fail-closed to 1 (hidden) on NULL/range/cycle.
+   The positioned painter (`paint_positioned_one`) skips a box whose chain is
+   hidden: out-of-flow reserves no in-flow space anyway, so nothing is reserved
+   and nothing paints.
+
+**Given** an `<div style="position:absolute;visibility:hidden">x</div>` between two
+paragraphs, **when** the page is laid out and painted, **then** the positioned pass
+resolves the box's rect but paints nothing for it, and the paragraphs flow as if it
+were not there.
+
+**Given** `<p>a</p><div style="position:absolute">B</div><p>c</p>` (no insets),
+**when** positioning resolves, **then** B's top-left is the pen position right after
+`a` (its hypothetical in-flow spot), not the page/viewport origin — matching Firefox.
+
+**Given** the same box with `top:5px;left:10px`, **when** positioning resolves,
+**then** the explicit insets win over the recorded static position (regression: the
+Stage-2 behaviour is unchanged).
+
+Security posture: unchanged — pure geometry on already-clamped values; the static
+arrays come from the trusted layout pass, never from author input; the hidden walk
+is cycle-bounded and fail-closed. `visibility` remains author presentation gated by
+`caps.css` upstream (no boxes without author CSS).
+
 ### Out of scope (Stage 2)
 
 - `position:sticky` with scroll (own follow-up: needs the scroll path).
 - `width:auto` stretched between `left` and `right` (see above).
+- `visibility:visible` re-entry under a `visibility:hidden` ancestor (both the
+  in-flow and the positioned paths treat a hidden chain as hidden, matching the
+  existing in-flow simplification).
 - Negative `z-index` paint (two-pass painter).
 - Padding-box vs border-box containing block (precision).
 - Flex/grid per-item sizing (Stage 3 of the plan).
