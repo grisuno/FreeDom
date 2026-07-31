@@ -2442,7 +2442,9 @@ static void test_flex_item(void **state) {
     assert_int_equal(css_parse_inline("flex-basis:120px", 0).flex_basis, 120);
     assert_int_equal(css_parse_inline("flex-basis:auto", 0).flex_basis, CSS_LEN_AUTO);
     assert_int_equal(css_parse_inline("flex-basis:content", 0).flex_basis, CSS_LEN_AUTO);
-    assert_int_equal(css_parse_inline("flex-basis:10%", 0).flex_basis, CSS_LEN_UNSET);
+    assert_int_not_equal(css_parse_inline("flex-basis:10%", 0).flex_basis, CSS_LEN_UNSET);
+    /* 10% → -(1000000 + 100) = -1000100 */
+    assert_int_equal(css_parse_inline("flex-basis:10%", 0).flex_basis, -1000100);
     /* shorthand. */
     css_style f1 = css_parse_inline("flex:1", 0);
     assert_int_equal(f1.flex_grow, 100); assert_int_equal(f1.flex_shrink, 100);

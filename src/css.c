@@ -2692,10 +2692,29 @@ static int interp_flex_factor(const char *v) {
     return round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
 }
 
-/* flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; %/units
- * dropped (returns 0, leaving unset). Returns 1 with *out, 0 if unsupported. */
+/* flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; a
+ * percentage as per-mille encoded negative (e.g. 75% -> -(1000000+750)). Returns 1
+ * with *out, 0 if unsupported. */
 static int interp_flex_basis(const char *v, int *out) {
     if (csel_ci_eq(v, "auto") || csel_ci_eq(v, "content")) { *out = CSS_LEN_AUTO; return 1; }
+    /* Percentage: per-mille encoding so the painter can resolve against the
+     * container width (no new IPC field needed). */
+    {
+        const char *p = v;
+        if (*p == '+') ++p;
+        double num;
+        const char *end;
+        if (parse_num(p, &num, &end)) {
+            while (*end == ' ' || *end == '\t') ++end;
+            if (end[0] == '%' && end[1] == '\0') {
+                if (num <= 0.0 || num > 1000.0) return 0;
+                double pm = num * 10.0;
+                if (pm > 10000.0) pm = 10000.0;
+                *out = -(int)(1000000.0 + pm + 0.5);
+                return 1;
+            }
+        }
+    }
     int px;
     if (!interp_len(v, 0, &px) || px < 0) return 0;
     *out = px;

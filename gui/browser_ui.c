@@ -4010,6 +4010,12 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
     const rd_block *bk = rd_at(doc, b0);
     double edges = sd->ml + sd->mr;
     if (bk->flex_basis >= 0) return (double)bk->flex_basis + edges;
+    /* Percentage flex-basis encoded as -(1000000 + per_mille) in the int
+     * field (same per-mille convention as box_w_pct / emit_pct). */
+    if (bk->flex_basis <= -1000000 && bk->flex_basis > -2000000) {
+        double pm = (double)(-bk->flex_basis - 1000000);
+        return (content_w * pm / 1000.0) + edges;
+    }
     double explicit_w = bx_width_cap(bk->box_w, bk->box_w_pct, content_w);
     if (explicit_w > 0.0) return explicit_w + edges;
     double basis = measure_item_content_w(cr, w, th, doc, b0, b1)
