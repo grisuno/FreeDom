@@ -659,6 +659,28 @@ void pv_set_input_select_opts(pv_view *v, const char *select_opts) {
     v->runs[v->count - 1].select_opts = cp;
 }
 
+pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d) {
+    if (v == NULL || d == NULL) return PV_ERR_NULL_ARG;
+    if (v->ncont == v->contcap) {
+        size_t nc = v->contcap ? v->contcap * 2 : 8;
+        pv_cont_def *g = (pv_cont_def *)realloc(v->conts, nc * sizeof *g);
+        if (g == NULL) return PV_ERR_OOM;
+        v->conts = g;
+        v->contcap = nc;
+    }
+    v->conts[v->ncont++] = *d;
+    return PV_OK;
+}
+
+size_t pv_cont_count(const pv_view *v) {
+    return (v != NULL) ? v->ncont : 0;
+}
+
+const pv_cont_def *pv_cont_at(const pv_view *v, size_t i) {
+    if (v == NULL || i >= v->ncont) return NULL;
+    return &v->conts[i];
+}
+
 pv_status pv_add_box_def(pv_view *v, const pv_box_def *d) {
     if (v == NULL || d == NULL) return PV_ERR_NULL_ARG;
     if (v->nbox == v->boxcap) {
@@ -685,6 +707,7 @@ void pv_free(pv_view *v) {
     }
     free(v->runs);
     free(v->boxes);
+    free(v->conts);
     free(v);
 }
 
@@ -955,6 +978,14 @@ int box_id, box_pending;
  * children are all inline-block: its justify comes from the INHERITED text-align,
  * which is only known once the ancestor walk finishes. */
 int anon_row;
+/* Ancestor container chain for this run, INNERMOST FIRST (anc_id[0] == id).
+ * pv_build turns it into parent_id/parent_item links on the descriptor table,
+ * which is what lets a nested container lay out as one item of its parent.
+ * Bounded: past PV_CONT_DEPTH the outer levels are dropped and those containers
+ * lay out as top level (degrades to today's flat behaviour, never crashes). */
+int anc_id[PV_CONT_DEPTH];
+const lxb_dom_node_t *anc_item[PV_CONT_DEPTH];
+int anc_n;
 } pv_cont_info;
 
 /* Per-container item-ordinal tracker: ord[cid] is the ordinal last handed out for
@@ -1190,8 +1221,21 @@ static int css_has_boxdeco(const css_style *cs) {
  * container share a stable id. */
 typedef struct pv_container_reg {
     const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    /* Per-container parameters + parent linkage (2026-07-31). Mirrors pv_box_reg's
+     * def[] array: the registry is the one place that knows a container by identity,
+     * so it is also the one place that describes it. See pv_cont_def. */
+    pv_cont_def           def[PV_MAX_CONTAINERS];
     size_t count;
 } pv_container_reg;
+
+/* Resets a descriptor to "registered but undescribed": no parent, no parameters. */
+static void cont_def_reset(pv_cont_def *d) {
+    memset(d, 0, sizeof *d);
+    d->parent_id = -1;
+    d->parent_item = -1;
+    d->row_gap = -1;
+    d->box_id = -1;
+}
 
 /* Id of node in reg, registering it on first sight. -1 when reg is full. */
 static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
@@ -1199,8 +1243,32 @@ static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
         if (reg->node[i] == node) return (int)i;
     if (reg->count >= PV_MAX_CONTAINERS) return -1;
     reg->node[reg->count] = node;
+    cont_def_reset(&reg->def[reg->count]);
     return (int)reg->count++;
 }
+
+/* Links the ancestor container chain of one run onto the descriptor table: for each
+ * pair (inner, outer) on the chain, records that `inner` is item N of `outer`. The
+ * ordinal comes from the SAME per-container tracker the runs use, called here in
+ * document order, so a nested container occupies exactly one of its parent's item
+ * slots -- interleaved with the parent's own direct runs, in the right order.
+ *
+ * Idempotent per (inner, outer): the link is written every time a run of `inner` is
+ * seen, and item_ordinal only advances when the direct-child element changes, so
+ * repeated calls for the same child keep the same ordinal. */
+static void link_cont_chain(pv_container_reg *reg, pv_item_track *tr,
+                            const pv_cont_info *cont) {
+    if (reg == NULL || tr == NULL || cont == NULL) return;
+    for (int k = 0; k + 1 < cont->anc_n; ++k) {
+        int inner = cont->anc_id[k];
+        int outer = cont->anc_id[k + 1];
+        if (inner < 0 || (size_t)inner >= reg->count) continue;
+        if (outer < 0 || (size_t)outer >= reg->count) continue;
+        reg->def[inner].parent_id = outer;
+        reg->def[inner].parent_item = item_ordinal(tr, outer, cont->anc_item[k + 1]);
+    }
+}
+
 
 /* Box engine (Hito 23b-8 Step D): document-order registry of box-carrying block
  * nodes plus each box's resolved definition (decoration + parent link). A box's
@@ -1579,6 +1647,11 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->align_content = 0; cont->justify_items = 0;
     cont->grid_rows = 0; cont->grid_flow = 0; cont->row_span = 0;
     cont->box_id = -1; cont->box_pending = 0; cont->anon_row = 0;
+    cont->anc_n = 0;
+    for (int ak = 0; ak < PV_CONT_DEPTH; ++ak) {
+        cont->anc_id[ak] = -1;
+        cont->anc_item[ak] = NULL;
+    }
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     pv_text_ext_reset(ext);
@@ -1770,68 +1843,116 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * not just an inline style=. Its runs share one id so the presentation
              * layer can lay the container out. Structure, so render_doc applies it
              * regardless of caps.css. */
-            if (!got_cont && reg != NULL &&
-                (cs.display == CSS_DISP_FLEX || cs.display == CSS_DISP_GRID)) {
-                cont->display = (cs.display == CSS_DISP_FLEX) ? BX_DISPLAY_FLEX
-                                                             : BX_DISPLAY_GRID;
-                cont->gap = (cs.gap >= 0) ? cs.gap : 0;
-                cont->justify = css_to_fx_justify(cs.justify);
-                cont->cols = (cs.display == CSS_DISP_GRID)
-                             ? (cs.grid_cols > 0 ? cs.grid_cols : 1) : 0;
-                if (cs.display == CSS_DISP_GRID)
-                    for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
-                        cont->col_w[gk] = cs.grid_col_w[gk];
-                cont->id = container_id(reg, p);
-                /* Stage 3: direction is the CONTAINER's; grow/shrink/basis/order are
-                 * the ITEM's (the element one step more inner on this walk). */
-                cont->direction = (cs.flex_direction != CSS_FD_UNSET) ? cs.flex_direction : 0;
-                /* flex-wrap / row-gap / align-items are the CONTAINER's own; row-gap
-                 * falls back to -1 (unset -> the presentation layer uses cont_gap). */
-                cont->wrap = (cs.flex_wrap != CSS_FW_UNSET) ? cs.flex_wrap : 0;
-                cont->row_gap = (cs.row_gap >= 0) ? cs.row_gap : -1;
-                cont->align_items = (cs.align_items != CSS_AK_UNSET) ? cs.align_items : 0;
-                /* 2026-07-12 batch: container alignment extras. */
-                cont->align_content = (cs.align_content != CSS_AK_UNSET) ? cs.align_content : 0;
-                cont->justify_items = (cs.justify_items != CSS_AK_UNSET) ? cs.justify_items : 0;
-                /* Grid extras (grid container only). */
-                if (cs.display == CSS_DISP_GRID) {
-                    cont->grid_rows = (cs.grid_rows > 0) ? cs.grid_rows : 0;
-                    cont->grid_flow = (cs.grid_auto_flow != CSS_GF_UNSET) ? cs.grid_auto_flow : 0;
+            /* Flex/grid containers on the walk. EVERY one is registered and
+             * DESCRIBED (reg->def), not just the innermost: laying out an outer
+             * container needs its own parameters, and a grid whose children are all
+             * flex containers has no run that would otherwise carry them. The
+             * ancestor chain (anc_id/anc_item) is recorded innermost-first so
+             * pv_build can link parent_id/parent_item. The INNERMOST one additionally
+             * fills *cont (the run's own container annotation), exactly as before.
+             *
+             * A real display:flex|grid wins over the anonymous inline-block row: the
+             * two are mutually exclusive for one element, and the author's own
+             * declaration is never overwritten by the synthesised row. */
+            {
+                int is_real = (cs.display == CSS_DISP_FLEX || cs.display == CSS_DISP_GRID);
+                int is_anon = !is_real && is_inline_block_row(p, sheet, style_cache);
+                if (reg != NULL && (is_real || is_anon)) {
+                    int cid_here = container_id(reg, p);
+                    if (cid_here >= 0) {
+                        pv_cont_def *cd = &reg->def[cid_here];
+                        if (is_real) {
+                            cd->display = (cs.display == CSS_DISP_FLEX) ? BX_DISPLAY_FLEX
+                                                                        : BX_DISPLAY_GRID;
+                            cd->gap = (cs.gap >= 0) ? cs.gap : 0;
+                            cd->justify = css_to_fx_justify(cs.justify);
+                            cd->cols = (cs.display == CSS_DISP_GRID)
+                                       ? (cs.grid_cols > 0 ? cs.grid_cols : 1) : 0;
+                            if (cs.display == CSS_DISP_GRID) {
+                                for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+                                    cd->col_w[gk] = cs.grid_col_w[gk];
+                                cd->rows = (cs.grid_rows > 0) ? cs.grid_rows : 0;
+                                cd->grid_flow = (cs.grid_auto_flow != CSS_GF_UNSET)
+                                                ? cs.grid_auto_flow : 0;
+                            }
+                            cd->direction = (cs.flex_direction != CSS_FD_UNSET)
+                                            ? cs.flex_direction : 0;
+                            cd->wrap = (cs.flex_wrap != CSS_FW_UNSET) ? cs.flex_wrap : 0;
+                            cd->row_gap = (cs.row_gap >= 0) ? cs.row_gap : -1;
+                            cd->align_items = (cs.align_items != CSS_AK_UNSET)
+                                              ? cs.align_items : 0;
+                            cd->align_content = (cs.align_content != CSS_AK_UNSET)
+                                                ? cs.align_content : 0;
+                            cd->justify_items = (cs.justify_items != CSS_AK_UNSET)
+                                                ? cs.justify_items : 0;
+                        } else {
+                            cd->display = BX_DISPLAY_FLEX;
+                            cd->gap = 0;
+                            cd->anon_row = 1;
+                            cd->cols = 0;
+                            cd->justify = (cs.text_align == CSS_ALIGN_CENTER) ? FX_JUSTIFY_CENTER
+                                        : (cs.text_align == CSS_ALIGN_RIGHT)  ? FX_JUSTIFY_END
+                                                                              : FX_JUSTIFY_START;
+                        }
+                        if (this_box >= 0 && cd->box_id < 0) cd->box_id = this_box;
+                        if (cont != NULL && cont->anc_n < PV_CONT_DEPTH) {
+                            cont->anc_id[cont->anc_n] = cid_here;
+                            cont->anc_item[cont->anc_n] = have_prev_el ? prev_el : NULL;
+                            cont->anc_n++;
+                        }
+
+                        /* A container with NO box of its own inherits the first box
+                         * found FURTHER OUT -- the same "box_pending" rule the run's
+                         * own annotation uses. Without it such a container reported
+                         * box_id -1, the presentation layer had no boundary to stop
+                         * the item box walk at, and it re-opened the wrapper box
+                         * inside every item. Applied to every container recorded so
+                         * far on this walk (they are all inside this element). */
+
+                        /* The innermost container is also the run's own annotation. */
+                        if (!got_cont && cont != NULL) {
+                            cont->id = cid_here;
+                            cont->display = cd->display;
+                            cont->gap = cd->gap;
+                            cont->justify = cd->justify;
+                            cont->cols = cd->cols;
+                            for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+                                cont->col_w[gk] = cd->col_w[gk];
+                            cont->direction = cd->direction;
+                            cont->wrap = cd->wrap;
+                            cont->row_gap = cd->row_gap;
+                            cont->align_items = cd->align_items;
+                            cont->align_content = cd->align_content;
+                            cont->justify_items = cd->justify_items;
+                            cont->grid_rows = cd->rows;
+                            cont->grid_flow = cd->grid_flow;
+                            cont->anon_row = cd->anon_row;
+                            /* Stage 3: direction is the CONTAINER's; grow/shrink/basis/
+                             * order are the ITEM's (the element one step more inner). */
+                            if (have_prev_el) {
+                                cont->grow = prev_grow; cont->shrink = prev_shrink;
+                                cont->basis = prev_basis; cont->order = prev_order;
+                                cont->align_self = prev_align_self;
+                                if (is_real) {
+                                    cont->col_span = prev_col_span;
+                                    cont->row_span = prev_row_span;
+                                }
+                                cont->item = prev_el;
+                            }
+                            if (this_box >= 0) cont->box_id = this_box;
+                            else cont->box_pending = 1;
+                            got_cont = 1;
+                        }
+                    }
                 }
-                if (have_prev_el) {
-                    cont->grow = prev_grow; cont->shrink = prev_shrink;
-                    cont->basis = prev_basis; cont->order = prev_order;
-                    cont->align_self = prev_align_self;
-                    cont->col_span = prev_col_span;
-                    cont->row_span = prev_row_span;
-                    cont->item = prev_el;
+                if (this_box >= 0 && cont != NULL) {
+                    for (int ak = 0; ak < cont->anc_n; ++ak) {
+                        int aid = cont->anc_id[ak];
+                        if (aid >= 0 && (size_t)aid < reg->count &&
+                            reg->def[aid].box_id < 0)
+                            reg->def[aid].box_id = this_box;
+                    }
                 }
-                if (this_box >= 0) cont->box_id = this_box;
-                else cont->box_pending = 1;
-                got_cont = 1;
-            }
-            /* Anonymous flex row for a parent whose children are all inline-block
-             * (see is_inline_block_row). The parent's text-align chooses where the
-             * row sits, mirroring how inline-level boxes are aligned in a line box:
-             * center/right map to the matching justify-content. */
-            else if (!got_cont && reg != NULL && is_inline_block_row(p, sheet, style_cache)) {
-                cont->display = BX_DISPLAY_FLEX;
-                cont->gap = 0;
-                cont->justify = (cs.text_align == CSS_ALIGN_CENTER) ? FX_JUSTIFY_CENTER
-                              : (cs.text_align == CSS_ALIGN_RIGHT)  ? FX_JUSTIFY_END
-                                                                    : FX_JUSTIFY_START;
-                cont->anon_row = 1;
-                cont->cols = 0;
-                cont->id = container_id(reg, p);
-                if (have_prev_el) {
-                    cont->grow = prev_grow; cont->shrink = prev_shrink;
-                    cont->basis = prev_basis; cont->order = prev_order;
-                    cont->align_self = prev_align_self;
-                    cont->item = prev_el;
-                }
-                if (this_box >= 0) cont->box_id = this_box;
-                else cont->box_pending = 1;
-                got_cont = 1;
             }
             prev_grow = cs.flex_grow; prev_shrink = cs.flex_shrink;
             prev_basis = cs.flex_basis; prev_order = cs.order;
@@ -1862,6 +1983,11 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     if (cont != NULL && cont->anon_row && cont->justify == FX_JUSTIFY_START) {
         if (*align == CSS_ALIGN_CENTER)     cont->justify = FX_JUSTIFY_CENTER;
         else if (*align == CSS_ALIGN_RIGHT) cont->justify = FX_JUSTIFY_END;
+        /* The DESCRIPTOR must learn it too: the presentation layer lays a container
+         * out from the table, so leaving the inherited alignment only on the run
+         * annotation put every centred call-to-action button back on the left. */
+        if (reg != NULL && cont->id >= 0 && (size_t)cont->id < reg->count)
+            reg->def[cont->id].justify = cont->justify;
     }
 }
 
@@ -2878,8 +3004,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     int prev_float_id = -1;  /* adjacent floats in the same group suppress block_break */
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
-    pv_container_reg reg = { { NULL }, 0 };  /* flex/grid containers, document order */
-    pv_container_reg float_reg = { { NULL }, 0 };  /* floated elements, document order */
+    pv_container_reg reg = { { NULL }, { { 0 } }, 0 };  /* flex/grid containers + defs */
+    pv_container_reg float_reg = { { NULL }, { { 0 } }, 0 };  /* floated elements */
     pv_box_reg box_reg = { { NULL }, { { 0 } }, 0 };  /* box-carrying blocks + their defs */
     pv_flow_reg flowreg = { { NULL }, { 0 }, 0 };  /* per-table flow-vs-grid decisions */
     pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
@@ -3046,6 +3172,18 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_text_ext(v, &cext);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
+                /* A table's grid container is SYNTHESISED here, not discovered by
+                 * resolve_context's display:flex|grid walk, so its descriptor has to
+                 * be filled here too -- the presentation layer reads the table, and
+                 * an undescribed entry made every table lay out as a single flex row
+                 * (all cells on one line) instead of a grid of `cols` columns. */
+                if (cid >= 0 && (size_t)cid < reg.count) {
+                    reg.def[cid].display = BX_DISPLAY_GRID;
+                    reg.def[cid].cols = cols;
+                    reg.def[cid].justify = FX_JUSTIFY_START;
+                    reg.def[cid].gap = 0;
+                    if (reg.def[cid].box_id < 0) reg.def[cid].box_id = cu_cont.box_id;
+                }
                 /* HTML colspan/rowspan attributes override the CSS grid span for
                  * table cells. Read them from the cell element and forward through
                  * pv_set_grid/pv_set_row_span so the flex layout engine places
@@ -3332,6 +3470,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                  svg_cont.row_gap, svg_cont.align_items);
                 pv_set_cont_box(v, svg_cont.box_id);
                 pv_set_cont_item(v, item_ordinal(&items, svg_cont.id, svg_cont.item));
+                link_cont_chain(&reg, &items, &svg_cont);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;
@@ -3588,6 +3727,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_flex(v, econt.grow, econt.shrink, econt.basis, econt.order,
                                 econt.direction, econt.align_self);
                     pv_set_cont_item(v, item_ordinal(&items, econt.id, econt.item));
+                    link_cont_chain(&reg, &items, &econt);
                     pv_set_float(v, econt.float_side, econt.float_id, econt.float_clear);
                     pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
                     pv_set_box_pct(v, ebox.w_pct);
@@ -3730,6 +3870,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                            cont.align_self);
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
+                link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_box_pct(v, box.w_pct);
@@ -3832,6 +3973,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_flex(v, cont.grow, cont.shrink, cont.basis, cont.order, cont.direction,
                             cont.align_self);
                 pv_set_cont_item(v, item_ordinal(&items, cont.id, cont.item));
+                link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_box_pct(v, box.w_pct);
@@ -3845,6 +3987,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
      * during the ancestor walks; copy them into the view in id order. */
     for (size_t bi = 0; bi < box_reg.count; ++bi) {
         pv_status st = pv_add_box_def(v, &box_reg.def[bi]);
+        if (st != PV_OK) { rc = st; goto cleanup; }
+    }
+
+    /* Container table (2026-07-31): one def per flex/grid container in document
+     * order (id == index == a run's cont_id), with parent_id/parent_item resolved
+     * during the ancestor walks. This is what lets the presentation layer lay a
+     * nested container out as one item of its parent. */
+    for (size_t ci = 0; ci < reg.count; ++ci) {
+        pv_status st = pv_add_cont_def(v, &reg.def[ci]);
         if (st != PV_OK) { rc = st; goto cleanup; }
     }
 

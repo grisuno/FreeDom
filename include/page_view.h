@@ -45,6 +45,11 @@ typedef enum pv_status {
 /* Sized grid tracks carried per run (2026-07-11). Mirrors CSS_GRID_TRACKS_MAX in
  * css.h (page_view.c static-asserts they agree); tracks past it lay out as auto. */
 #define PV_GRID_TRACKS 8
+/* Depth of the flex/grid container chain page_view tracks and the presentation layer
+ * walks. Real pages nest a few levels (header > nav > ul, or grid > flex card > flex
+ * row); past this the outer levels are dropped and those containers lay out as top
+ * level -- degrading to flat layout, never looping. */
+#define PV_CONT_DEPTH 8
 /* Background-image url() buffer (2026-07-16). Mirrors CSS_URL_MAX in css.h
  * (page_view.c static-asserts they agree); page_view stays decoupled from
  * css.h in this header, like the rest of the css-enum-mirroring int fields.
@@ -507,6 +512,41 @@ typedef struct pv_box_def {
     /* convenience: last field marker for IPC count */
 } pv_box_def;
 
+/* Flex/grid container descriptor (2026-07-31). One entry per container element, its
+ * index IS the run's cont_id. Two reasons it exists instead of the container params
+ * riding every run:
+ *
+ *   1. NESTING. A run carries only its INNERMOST container. Laying out an outer
+ *      container needs the outer container's own parameters, and there is a common
+ *      case where no run carries them at all: a grid whose children are all flex
+ *      containers (`.cards{display:grid}` holding `display:flex` cards) has no run
+ *      with cont_id == the grid. parent_id/parent_item rebuild the whole chain.
+ *   2. The parameters are per-container, not per-run: carrying them on every run of
+ *      a container was pure duplication across the IPC.
+ *
+ * parent_id is the id of the enclosing container (-1 = top level) and parent_item is
+ * THIS container's item ordinal within that parent, so a nested container is one item
+ * of its parent. Structure (like cont_id itself), carried regardless of caps.css. */
+typedef struct pv_cont_def {
+    int parent_id;      /* enclosing container id, or -1 */
+    int parent_item;    /* this container's item ordinal in its parent, or -1 */
+    int display;        /* bx_display (flex/grid) */
+    int gap;            /* column gap px */
+    int justify;        /* fx_justify */
+    int cols;           /* grid column count (>= 1 for grid), else 0 */
+    int rows;           /* explicit grid-template-rows count, else 0 */
+    int direction;      /* css_flex_direction */
+    int col_w[PV_GRID_TRACKS];  /* grid track sizes (0 auto / >0 px / <0 fr x100) */
+    int wrap;           /* css_flex_wrap */
+    int row_gap;        /* px, or -1 (unset -> falls back to gap) */
+    int align_items;    /* css_align_kw */
+    int align_content;  /* css_align_kw */
+    int justify_items;  /* css_align_kw */
+    int grid_flow;      /* css_grid_auto_flow */
+    int box_id;         /* box enclosing this container's items, or -1 */
+    int anon_row;       /* 1 = anonymous row synthesised for an inline-block parent */
+} pv_cont_def;
+
 typedef struct pv_view {
     pv_run    *runs;
     size_t     count;
@@ -514,6 +554,9 @@ typedef struct pv_view {
     pv_box_def *boxes;   /* the box tree (Step D); boxes[block_id] describes a box */
     size_t      nbox;
     size_t      boxcap;
+    pv_cont_def *conts;  /* flex/grid containers; conts[cont_id] describes one */
+    size_t       ncont;
+    size_t       contcap;
     int         canvas_bg;  /* CSS 2.1 §14.2: root <html> background → canvas background.
                              * Packed 0xRRGGBB, or -1 if none (theme default). */
     int         html_max_width;  /* root <html> max-width in px, or -1 unset */
@@ -755,6 +798,15 @@ void pv_set_block_id(pv_view *v, int block_id);
  * PV_ERR_NULL_ARG on NULL args. Used by pv_build (after the run walk) and by the IPC
  * deserialiser. */
 pv_status pv_add_box_def(pv_view *v, const pv_box_def *d);
+
+/* Appends a container descriptor; its index becomes a cont_id. NULL args =>
+ * PV_ERR_NULL_ARG, allocation failure => PV_ERR_OOM. */
+pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d);
+
+/* pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i]
+ * (i == a cont_id) or NULL when out of range / NULL view. */
+size_t pv_cont_count(const pv_view *v);
+const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);
 
 /* Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most
  * recently appended run. No-op on an empty or NULL view. */

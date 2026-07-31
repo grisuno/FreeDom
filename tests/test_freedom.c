@@ -753,6 +753,158 @@ static void test_absolute_span_honours_right_bottom(void **state) {
     unlink(png);
 }
 
+/* Nested flex/grid containers lay out as ONE container, not two stacked rows.
+ * A `header{display:flex}` holding a flex `<nav><ul>` is the navbar of nearly every
+ * modern site; grouping runs by the INNERMOST container split it in half and stacked
+ * the halves, with the inner items' boxes drawn at the wrong size.
+ * spec/page_view.md "Contenedores flex/grid ANIDADOS". */
+static void test_download_png_nested_flex_lays_out_on_one_row(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0}"
+        "header{display:flex;justify-content:space-between;padding:10px;background:#eeeeee}"
+        "nav ul{display:flex;gap:10px;list-style:none;margin:0;padding:0}"
+        ".logo{background:#00ff00}"
+        "li{background:#0000ff;color:#ffffff}"
+        "</style></head><body>"
+        "<header><div class=\"logo\">LOGO</div>"
+        "<nav><ul><li>One</li><li>Two</li></ul></nav></header>"
+        "</body></html>";
+    const char *path = "__freedom_nestflex_page.html";
+    const char *png = "__freedom_nestflex_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    /* Vertical extent of the green logo and of the blue nav items. */
+    size_t gy_min = px.height, gy_max = 0, by_min = px.height, by_max = 0;
+    size_t bx_min = px.width, bx_max = 0, gx_max = 0;
+    int g_seen = 0, b_seen = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), gg = (uint8_t)(p >> 8), bb = (uint8_t)p;
+            if (r <= 8 && gg >= 200 && bb <= 8) {
+                if (y < gy_min) gy_min = y;
+                if (y > gy_max) gy_max = y;
+                if (x > gx_max) gx_max = x;
+                g_seen = 1;
+            } else if (r <= 8 && gg <= 8 && bb >= 200) {
+                if (y < by_min) by_min = y;
+                if (y > by_max) by_max = y;
+                if (x < bx_min) bx_min = x;
+                if (x > bx_max) bx_max = x;
+                b_seen = 1;
+            }
+        }
+    }
+    assert_true(g_seen);
+    assert_true(b_seen);
+    /* SAME ROW: the nav items overlap the logo vertically. Stacked rows (the bug)
+     * put the blue strictly below the green with no overlap at all. */
+    assert_true(by_min <= gy_max);
+    assert_true(gy_min <= by_max);
+    /* The nav sits to the RIGHT of the logo (space-between), not under it. */
+    assert_true(bx_min > gx_max);
+    /* Both nav items are on that row and shrink-wrapped, not one full-width bar. */
+    assert_true((bx_max - bx_min) < px.width / 2);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* display:inline-block flows INSIDE the line it sits in (a badge, a pill, a chip in
+ * the middle of a sentence). Registering a box used to open a BLOCK box, which
+ * flushed the line: the sentence broke into three, with the badge alone on a
+ * full-width row. spec/page_view.md "Cajas de nivel inline". */
+static void test_download_png_inline_block_flows_in_line(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0;font-size:16px}"
+        ".badge{display:inline-block;background:#0000ff;color:#ffffff;padding:2px 8px}"
+        "</style></head><body>"
+        "<p>Before <span class=\"badge\">TAG</span> after</p>"
+        "</body></html>";
+    const char *path = "__freedom_iblkflow_page.html";
+    const char *png = "__freedom_iblkflow_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t bx_min = px.width, bx_max = 0, by_min = px.height, by_max = 0;
+    size_t ink_min = px.width, ink_max = 0;
+    int b_seen = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r <= 8 && g <= 8 && b >= 200) {          /* the badge's blue box */
+                if (x < bx_min) bx_min = x;
+                if (x > bx_max) bx_max = x;
+                if (y < by_min) by_min = y;
+                if (y > by_max) by_max = y;
+                b_seen = 1;
+            } else if (r < 128 && g < 128 && b < 128) {  /* black body text */
+                if (x < ink_min) ink_min = x;
+                if (x > ink_max) ink_max = x;
+            }
+        }
+    }
+    assert_true(b_seen);
+    /* ONE line: the whole page is about as tall as a single line box. Three stacked
+     * rows (the bug) made it several times taller. */
+    assert_true(px.height < 60);
+    /* The badge shrink-wraps to "TAG" plus its padding -- nowhere near full width. */
+    assert_true((bx_max - bx_min) < px.width / 3);
+    /* Text sits on BOTH sides of it: "Before" starts left of the badge and "after"
+     * ends right of it, which is only possible if all three share the line. */
+    assert_true(ink_min < bx_min);
+    assert_true(ink_max > bx_max);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
 /* CSS whitespace collapsing does NOT invent a space where the source had none.
  * The word flow used to insert one before every non-line-opening word, so
  * `<strong>bold</strong>,` painted as `bold ,` -- a comma detached from its word
@@ -1667,6 +1819,8 @@ int main(void) {
         cmocka_unit_test(test_download_png_line_height_zero_does_not_shrink_line),
         cmocka_unit_test(test_absolute_font_size_lands_exact),
         cmocka_unit_test(test_absolute_span_honours_right_bottom),
+        cmocka_unit_test(test_download_png_nested_flex_lays_out_on_one_row),
+        cmocka_unit_test(test_download_png_inline_block_flows_in_line),
         cmocka_unit_test(test_heading_colour_matches_body_text),
         cmocka_unit_test(test_author_can_unbold_a_heading),
         cmocka_unit_test(test_author_font_size_on_heading_replaces_ua_scale),

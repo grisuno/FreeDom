@@ -269,6 +269,10 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
   - Colapso de espacio en el borde entre runs: CSS colapsa una secuencia de espacios pero **no inventa** uno donde no lo había — `<strong>bold</strong>,` ya no pinta `bold ,`. `spec/page_view.md`.
   - `position:absolute|fixed` (y `float`) vuelven al elemento de bloque (CSS 2.2 §9.7): un `<span>` absoluto ya registra caja, con lo que `right`/`bottom` (que `box_tree` ya resolvía) por fin posicionan.
   - El PNG se dimensiona por la caja más baja, no solo por las filas de texto: una página hecha solo de cajas exportaba **0 px**.
+- **Paridad Firefox tanda 4 (jul 31) — estructura: anidamiento y flujo inline.** Las dos roturas estructurales que quedaban, medidas contra Firefox:
+  - **Contenedores flex/grid ANIDADOS.** Nueva tabla de descriptores `pv_cont_def` (indexada por `cont_id`, con `parent_id`/`parent_item` + los parámetros del contenedor) que cruza el IPC como arreglo propio; `resolve_context` describe **toda** la cadena en vez de cortar en el más interno; el bucle de layout agrupa por el contenedor **raíz** y `layout_container` **recursiona** sobre los ítems que son contenedores, con su base de flex = max-content del anidado. Un `header{display:flex}` con `nav>ul{display:flex}` ya maqueta en una fila, como Firefox. `spec/page_view.md`, `[[freedom-nested-flex-containers-design]]`
+  - **`display:inline-block` fluye DENTRO de la línea.** Una caja de nivel inline no entra en la pila de cajas (abrir caja es operación de bloque: hace flush de línea): se sigue aparte y se materializa en `flush_line` desde la extensión de **sus** fragmentos. Un badge en medio de una frase ya no la parte en tres. El `inline-block` que **abre** línea conserva el tratamiento de bloque (encoge + `text-align`), que es lo que necesita un botón centrado. `spec/page_view.md` "Cajas de nivel inline".
+  - Tres reglas que costaron sangre y son contrato: la caja raíz de un ítem anidado es la del **contenedor hijo** (no la que deriva `item_root_box` del `cont_box_id` del run); un contenedor **sin caja propia hereda la primera de más afuera** (regla `box_pending`), si no el walk de cajas del ítem reabre el envoltorio dentro de cada ítem; y **los contenedores sintetizados** (el grid de una tabla, la fila anónima de `inline-block`) tienen que llenar el descriptor **también** — si no, toda tabla se maquetaba como una fila flex con las celdas en línea.
 - **Tooling & seguridad:** doctrinas V-001..V-004 (abajo). `-fvisibility=hidden` invariante. `io_uring` prohibido en worker.
 
 ### 7.4 Abierto — por valor visual medido
@@ -277,13 +281,12 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
 
 | # | Hito | Estado | Esfuerzo |
 | :-- | :-- | :-- | :-- |
-| R1 | **Contenedores flex/grid anidados** — `header{display:flex}` con `nav>ul{display:flex}` se parte en dos filas. Rompe casi toda barra de navegación y toda grilla de tarjetas flex. | **Diseño escrito** en `spec/page_view.md` (tabla `pv_cont_def` con `parent_id`/`parent_item` + recursión en `layout_container`) | Alto |
-| R2 | **`inline-block` dentro de la línea** — un badge/pill parte la línea en tres. Necesita formato inline real (caja inline que no hace flush y se dimensiona por sus fragmentos). | Sin empezar | Alto |
-| R3 | **Tablas: ancho automático (shrink-to-fit) + `colspan`/`rowspan`** — hoy toda tabla ocupa el ancho completo y los spans se ignoran. | Sin empezar | Medio-alto |
+| R3 | **Tablas: ancho automático (shrink-to-fit) + `colspan`/`rowspan`** — hoy toda tabla ocupa el ancho completo y los spans se ignoran. Es la rotura visual más grande que queda. | Sin empezar | Medio-alto |
 | R4 | Texto que fluye **al lado** de un `float` (hoy va debajo) | Sin empezar | Medio |
 | R5 | `grid-template-rows` y `grid-row: span N` (las columnas ya están) | Sin empezar | Medio |
 | R6 | `position:sticky` con scroll real | Sin empezar | Medio |
-| R7 | Un elemento reemplazado (`<img>`/`<svg>`) fluye en su propia fila, no dentro de la línea (depende de R2) | Sin empezar | — |
+| R7 | Un elemento reemplazado (`<img>`/`<svg>`) fluye en su propia fila, no dentro de la línea. Ahora que existen las cajas de nivel inline, el mismo mecanismo debería servir. | Sin empezar | Medio |
+| R10 | Una caja de nivel inline que **cruza un salto de línea** termina en el salto (no se parte en dos rects), y su rect no sigue el desplazamiento de `text-align` al pintar | Sin empezar | Bajo |
 | R8 | `html{font-size:62.5%}` no cambia lo que vale `rem` (el root queda fijo en 16 px) | Sin empezar | Bajo |
 | R9 | SVG: gradientes/patrones (`<defs>`), `<animate>`, filtros/máscaras, y `.svg` como recurso externo de `<img src>` | Sin empezar | Medio |
 

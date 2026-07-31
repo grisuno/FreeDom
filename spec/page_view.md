@@ -631,54 +631,104 @@ sea** su etiqueta o su `display` declarado, incluido `display:inline`.
 Es solo la regla de **elegibilidad**: no fuerza salto de bloque (`causes_block_break` sigue
 mandando en el flujo) ni cambia el gate de `caps.css`.
 
-### Contenedores flex/grid ANIDADOS — diseño pendiente (2026-07-31)
+### Cajas de nivel inline: `display:inline-block` dentro de una línea (2026-07-31)
 
-**Estado: NO implementado.** Medido contra Firefox: un `header{display:flex}` que contiene
-`nav > ul{display:flex}` se parte en **dos filas apiladas** y las cajas de los ítems
-internos salen deformadas. Es el patrón de la barra de navegación de casi cualquier sitio
-moderno (y el de una grilla de tarjetas donde cada tarjeta es flex), así que es la rotura
-estructural más cara que queda.
+Un `inline-block` en medio de una frase — un *badge*, una píldora, un *chip*, un botón
+pequeño — **fluye dentro de la línea**. Antes partía la frase en tres: el texto anterior, el
+badge en su propia línea a ancho completo, y el resto del texto.
 
-**Causa raíz.** Un run lleva **un solo** contenedor: el más interno (`cont_id`), resuelto
-por `resolve_context`, que **corta el ascenso** en el primer `display:flex|grid`. El bucle
-de layout agrupa runs consecutivos por `cont_id`, así que "LOGO" (cuyo contenedor es
-`header`) y "One/Two" (cuyo contenedor es `ul`) caen en **grupos distintos** y se maquetan
-como dos contenedores hermanos, no como uno dentro del otro.
+**Causa.** `causes_block_break` ya devolvía 0 para `inline-block`, pero el elemento
+**registra caja**, y abrir una caja es una operación de bloque: `open_box` hace `flush_line`
+y estrecha el rect de contenido. Eso es exactamente lo que no debe pasarle a algo que fluye
+dentro de una oración.
 
-**Por qué no se arregla llevando el padre en el run.** El layout del nivel externo
-necesita las **propiedades** del contenedor externo (display/gap/justify/cols…), y hay un
-caso frecuente en el que **ningún** run las lleva: una grilla cuyos hijos son *todos*
-contenedores (`.cards{display:grid}` con tarjetas `display:flex`). Ahí no existe run con
-`cont_id == .cards`.
+**Modelo.** Una caja de nivel inline **no entra en la pila de cajas** (`box_stack`). Se
+sigue aparte en `rc_state` (`inline_box_def`, NULL = ninguna abierta — un centinela NULL, no
+un id, para que el `memset(0)` que recibe todo `rc_state` ya signifique "ninguna"):
 
-**Diseño acordado** (espeja la tabla `pv_box_def`, que ya resuelve exactamente este
-problema para las cajas):
+**Dado** un run cuya caja más profunda es `display:inline-block`
+**cuando** la línea ya está abierta y **tiene fragmentos** (hay texto antes en la misma línea)
+**entonces** la caja no se abre como bloque: se anota su fragmento inicial y el `pen_x` de
+arranque, se reserva su padding/borde izquierdo avanzando el `pen_x`, y el texto sigue en la
+**misma** línea.
 
-1. `pv_view`/`rd_doc` ganan una **tabla de descriptores de contenedor** indexada por
-   `cont_id`:
-   ```c
-   typedef struct pv_cont_def {
-       int parent_id;    /* contenedor que lo encierra, -1 = nivel superior */
-       int parent_item;  /* ordinal de ESTE contenedor como ítem de su padre */
-       int display, gap, justify, cols, rows, direction;
-       int col_w[PV_GRID_TRACKS];
-       int wrap, row_gap, align_items, align_content, justify_items, grid_flow;
-       int box_id, anon_row;
-   } pv_cont_def;
-   ```
-   Las propiedades **se mueven** ahí desde `pv_run`: hoy viajan duplicadas en *cada* run
-   del contenedor (~20 int por run), así que la tabla además **reduce** el IPC.
-2. `resolve_context` deja de cortar en el primer contenedor: sigue subiendo y registra la
-   cadena, fijando `parent_id`/`parent_item` de cada contenedor que ya conocía.
-3. El bucle de layout agrupa por el contenedor **raíz** (siguiendo `parent_id`), y
-   `layout_container` recibe un `const pv_cont_def *` en vez de leer `head->cont_*`.
-4. Un grupo de ítems cuyos runs pertenecen a un contenedor **más profundo** se resuelve
-   por **recursión**: el ancho de contenido que el solver de flex mide para ese ítem es el
-   que devuelve la llamada recursiva.
+**Dado** que el flujo abandona esa caja (un run posterior pertenece a otra)
+**entonces** se registra su fragmento final y se reserva su padding/borde derecho, para que
+el texto que sigue no se le encime.
 
-Riesgo conocido: el paso 4 toca el solver de flex/grid, que es la parte más cargada de
-`layout_container`. Hay que hacerlo con la suite de PNG delante (`test_freedom.c`), no a
-ciegas — y con `make clean` obligatorio, porque `pv_run` cambia de tamaño.
+**Dado** que la línea se vacía (`flush_line`)
+**entonces** la caja se materializa como un `rc_box`: `x`/ancho salen de la extensión de
+**sus** fragmentos (del inicial al final registrado), `y`/alto de la fila que se está
+cerrando — que es el único momento en que se conocen.
+
+**Dado** un `inline-block` que **abre** la línea (no hay texto antes)
+**entonces** conserva el tratamiento de bloque de siempre (encoge a su contenido y lo coloca
+el `text-align` del padre), que es lo que necesita un botón de llamada a la acción centrado.
+
+**Fuera de alcance (v1):** una caja inline que **cruza un salto de línea** termina en el
+salto (no se parte en dos rects), y su rect no sigue el desplazamiento que `text-align`
+aplica a la línea al pintar — el caso centrado frecuente (todos los hijos `inline-block`) ya
+lo cubre la fila anónima.
+
+### Contenedores flex/grid ANIDADOS (2026-07-31)
+
+Un `header{display:flex}` que contiene `nav > ul{display:flex}` se maqueta como **un**
+contenedor con el `ul` dentro, no como dos hermanos apilados. Es el patrón de la barra de
+navegación de casi cualquier sitio moderno, y el de una grilla de tarjetas donde cada
+tarjeta es flex.
+
+**Por qué no bastaba llevar el padre en el run.** Un run lleva **un solo** contenedor: el
+más interno. Maquetar el nivel externo necesita las **propiedades** del contenedor externo,
+y hay un caso frecuente en el que **ningún** run las lleva: una grilla cuyos hijos son
+*todos* contenedores (`.cards{display:grid}` con tarjetas `display:flex`) no tiene ningún
+run con `cont_id == .cards`.
+
+**Diseño implementado** (espeja la tabla `pv_box_def`):
+
+1. `pv_view`/`rd_doc` llevan una **tabla de descriptores** (`pv_cont_def`) indexada por
+   `cont_id`: `parent_id`, `parent_item` y los parámetros del contenedor
+   (display/gap/justify/cols/rows/direction/col_w/wrap/row_gap/align_*/grid_flow/box_id/
+   anon_row). Cruza el IPC como un arreglo propio, después del árbol de cajas.
+2. `resolve_context` **no corta** en el primer contenedor: describe **todos** los de la
+   cadena y registra `anc_id[]`/`anc_item[]` (de dentro hacia fuera). `pv_build` los enlaza
+   con `link_cont_chain`, que pide el ordinal al **mismo** tracker por contenedor que usan
+   los runs — así un contenedor anidado ocupa exactamente **una** ranura de ítem de su
+   padre, intercalada en orden con los runs directos del padre.
+3. El bucle de layout agrupa por el contenedor **raíz** (`root_cont_of`), y
+   `layout_container` recibe el `cid` que maqueta y lee sus parámetros de la tabla.
+4. El ordinal de ítem se toma **a ese nivel** (`item_at_level`): un run dentro de un
+   contenedor anidado reporta la ranura del contenedor anidado, así que todos sus runs
+   colapsan en **un** ítem del externo.
+5. Un ítem cuyos runs pertenecen a un contenedor más profundo se resuelve por
+   **recursión**; su base de flex es el **max-content** del contenedor anidado
+   (`nested_cont_basis`: suma de las bases de sus ítems más sus gaps), no el ancho de su
+   texto puesto en fila.
+
+**Tres reglas que costaron sangre y son parte del contrato:**
+
+- **La caja raíz de un ítem anidado es la caja del contenedor HIJO**, no la que devuelve
+  `item_root_box` (que la deriva del `cont_box_id` del run, o sea del rect del contenedor
+  **interno**, y por eso devolvía la caja de un ítem interno suelto). Sigue exigiéndose que
+  sea **descendiente estricta** de la caja de este contenedor.
+- **Un contenedor sin caja propia hereda la primera caja de más afuera** (la misma regla
+  `box_pending` que ya tenía la anotación del run). Sin eso su `box_id` quedaba en -1, el
+  pintor no tenía frontera donde parar el walk de cajas del ítem y **reabría la caja del
+  envoltorio dentro de cada ítem**.
+- **El walk de cajas de un ítem para en la caja del CONTENEDOR** cuando el ítem no tiene
+  caja propia (`stop_at = rb >= 0 ? rb : cdv.box_id`). Una caja en el contenedor o por
+  encima es del contenedor, no del ítem.
+
+**Contenedores sintetizados.** El contenedor de una tabla no lo descubre el walk de
+`display:flex|grid`: lo sintetiza la ruta de celdas. Esa ruta **debe llenar el descriptor
+también** — un descriptor sin describir dejaba `display = 0` y toda tabla se maquetaba como
+una única fila flex con todas las celdas en línea. Lo mismo vale para la fila anónima de
+`inline-block`, cuyo `justify` se resuelve por **herencia** de `text-align` *después* del
+walk: ese valor tardío hay que escribirlo en el descriptor, no solo en el run.
+
+**Cotas.** `PV_CONT_DEPTH` (8) acota la cadena; más allá los niveles externos se descartan y
+esos contenedores se maquetan como nivel superior — degrada a lo de antes, nunca cicla.
+`read_view` rechaza un `parent_id` fuera de rango o que apunte a sí mismo degradándolo a
+nivel superior, así que un worker hostil no puede indexar fuera de la tabla.
 
 ## 5. Tabla de errores
 

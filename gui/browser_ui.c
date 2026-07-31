@@ -2964,6 +2964,23 @@ typedef struct rc_state {
      * did not open a line, so `<strong>bold</strong>,` painted as `bold ,`.
      * spec/page_view.md "Colapso de espacio en el borde entre runs". */
     int    prev_ended_ws;
+    /* INLINE-LEVEL box currently spanning the open line (display:inline-block sitting
+     * in a line of text: a badge, a pill, a chip). It is deliberately NOT on
+     * box_stack: a block box flushes the line and insets the content rect, which is
+     * exactly what must not happen to something that flows inside a sentence. Its
+     * rect is materialised at flush_line from the fragments it produced.
+     * inline_box_def == NULL = none open -- a NULL sentinel, not an id, so the
+     * memset(0) every rc_state gets means "none" without a separate init.
+     * spec/page_view.md "Cajas de nivel inline". */
+    const pv_box_def *inline_box_def;
+    int    inline_box_id;
+    size_t inline_box_frag0;
+    /* Fragment index one past the box's last fragment, or (size_t)-1 while it is
+     * still open. Without it the rect was measured at flush_line over EVERY
+     * fragment on the line, so the badge's pill swallowed the rest of the sentence. */
+    size_t inline_box_frag1;
+    double inline_box_pen0;
+    double inline_box_pad_r;   /* right padding+border to add once it closes */
     size_t line_first;
     /* Box engine (Hito 23b-8 Step D) visibility: hidden_from is 0 (not hidden) or the
      * box_stack depth (1-based) at which a visibility:hidden box was opened -- every
@@ -3199,6 +3216,58 @@ static void block_margins(const ui_theme *th, const rd_block *b,
     *bottom_px = (b->box_mb != PV_LEN_UNSET) ? (double)b->box_mb : box.margin.bottom * size;
 }
 
+static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def);
+
+/* Materialises the currently open inline-level box as an rc_box spanning the
+ * fragments it produced on the open line, then clears it. The rect is known only
+ * now: x/width come from the fragment extents, y/height from the row the caller is
+ * about to add (top/h passed in). A box that survived a line wrap simply ends at the
+ * wrap -- multi-line inline boxes are out of scope (v1). */
+static void close_inline_box(rc_layout *L, rc_state *s, double row_top, double row_h) {
+    const pv_box_def *d = s->inline_box_def;
+    if (d == NULL) return;
+    int bid = s->inline_box_id;
+    s->inline_box_def = NULL;
+    double x0 = s->inline_box_pen0;
+    double x1 = x0;
+    size_t fend = (s->inline_box_frag1 != (size_t)-1) ? s->inline_box_frag1 : L->nfrag;
+    if (fend > L->nfrag) fend = L->nfrag;
+    for (size_t i = s->inline_box_frag0; i < fend; ++i) {
+        double e = L->frags[i].x + L->frags[i].width;
+        if (e > x1) x1 = e;
+    }
+    x1 += s->inline_box_pad_r;
+    if (x1 <= x0) return;                     /* produced nothing: no box to paint */
+    rc_box *bx = rc_add_box(L);
+    if (bx == NULL) return;
+    memset(bx, 0, sizeof *bx);
+    bx->block_id = bid;
+    bx->x = s->indent_px + x0;
+    bx->top = row_top;
+    bx->w = x1 - x0;
+    bx->h = row_h;
+    rc_box_copy_decoration(bx, d);
+    bx->hidden = (s->hidden_from != 0) ||
+                 (d->visibility == CSS_VIS_HIDDEN || d->visibility == CSS_VIS_COLLAPSE);
+}
+
+/* The flow left the open inline-level box (this block belongs to a different one):
+ * freeze its fragment range and reserve its right padding+border so the text that
+ * follows clears it. Its rect is still materialised by the next flush_line.
+ *
+ * Called for EVERY block, not only those that reconcile the box stack: a boxless
+ * continuation run (block_id < 0 with no block break) deliberately skips reconcile
+ * to stay on the line, and that is exactly the run that follows a badge inside a
+ * paragraph -- so hanging the close off reconcile let the pill's rect swallow the
+ * rest of the sentence. */
+static void leave_inline_box(rc_layout *L, rc_state *s, int block_id) {
+    if (s->inline_box_def == NULL) return;
+    if (block_id == s->inline_box_id) return;
+    if (s->inline_box_frag1 != (size_t)-1) return;
+    s->inline_box_frag1 = L->nfrag;
+    s->pen_x += s->inline_box_pad_r;
+}
+
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (!s->line_open) return;
     /* Author line-height (percent of the natural line box) replaces the theme's
@@ -3210,6 +3279,9 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (spacing <= 0.0)
         spacing = (s->line_scale > 0) ? (double)s->line_scale / 100.0 : th->line_spacing;
     double h = (s->line_asc + s->line_desc) * spacing;
+    /* An inline-level box ends at the line end at the latest: its rect needs the
+     * row's top and height, which are only known now. */
+    close_inline_box(L, s, s->cur_top, h);
     rc_row *r = rc_add_row(L);
     if (r != NULL) {
         r->kind = RC_TEXT; r->top = s->cur_top; r->height = h; r->ascent = s->line_asc;
@@ -3751,10 +3823,11 @@ typedef struct item_sides {
     int    box;              /* item_root_box index, -1 when none */
 } item_sides;
 
-static item_sides item_sides_of(const rd_doc *doc, size_t b0, size_t b1) {
+/* Fills an item_sides from an already-chosen root box. */
+static item_sides item_sides_from_box(const rd_doc *doc, int box) {
     item_sides sd;
     memset(&sd, 0, sizeof sd);
-    sd.box = item_root_box(doc, b0, b1);
+    sd.box = box;
     const pv_box_def *d = (sd.box >= 0) ? rd_box_at(doc, (size_t)sd.box) : NULL;
     if (d == NULL) return sd;
     sd.pl = (d->pad_l > 0) ? (double)d->pad_l : 0.0;
@@ -3763,13 +3836,47 @@ static item_sides item_sides_of(const rd_doc *doc, size_t b0, size_t b1) {
     sd.pb = (d->pad_b > 0) ? (double)d->pad_b : 0.0;
     sd.bl = box_edge_px(d->bord_lw); sd.br = box_edge_px(d->bord_rw);
     sd.bt = box_edge_px(d->bord_tw); sd.bb = box_edge_px(d->bord_bw);
-    /* page_view packs the horizontal box inset as padding + margin (css_hbox_resolve),
-     * so the item's own margin is what is left once its padding is taken back out.
-     * A flex item's margin is part of the space it occupies on the main axis. */
     sd.ml = (double)d->box_l - sd.pl; if (sd.ml < 0.0) sd.ml = 0.0;
     sd.mr = (double)d->box_r - sd.pr; if (sd.mr < 0.0) sd.mr = 0.0;
     return sd;
 }
+
+/* True iff box `id` is a STRICT descendant of `anc` in the box tree (or anc < 0,
+ * which means "no container box", where any box qualifies). Bounded walk. */
+static int box_is_strict_descendant(const rd_doc *doc, int id, int anc) {
+    if (id < 0) return 0;
+    if (anc < 0) return 1;
+    if (id == anc) return 0;
+    for (int guard = 0; id >= 0 && guard < 256; ++guard) {
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        int parent = (d != NULL) ? d->parent_id : -1;
+        if (parent == anc) return 1;
+        id = parent;
+    }
+    return 0;
+}
+
+static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid);
+
+/* item_sides for one item of container `cid`. A NESTED container item takes the
+ * child container's OWN box, not item_root_box's answer: item_root_box derives the
+ * box from the run's cont_box_id, which for a nested run names the INNER container's
+ * rect -- so it returned one of the inner ITEMS' boxes (a single <span>'s pill) and
+ * the nested item inherited that box's padding and, worse, painted its decoration at
+ * the inner item's size. The child's box must still be a strict descendant of this
+ * container's box, the same rule item_root_box applies, or it is not an item box. */
+static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
+                                      int cid, int cont_box) {
+    int child = child_cont_at_level(doc, rd_at(doc, b0), cid);
+    if (child >= 0) {
+        const pv_cont_def *ccd = rd_cont_at(doc, (size_t)child);
+        int cbox = (ccd != NULL) ? ccd->box_id : -1;
+        if (!box_is_strict_descendant(doc, cbox, cont_box)) cbox = -1;
+        return item_sides_from_box(doc, cbox);
+    }
+    return item_sides_from_box(doc, item_root_box(doc, b0, b1));
+}
+
 
 /* The innermost box ENCLOSING a flex/grid container's items: the parent shared by
  * the items' root boxes. page_view stamps no explicit "this box is the container",
@@ -3856,6 +3963,49 @@ static double measure_item_content_w(cairo_t *cr, const browser_window *w,
 static double flex_item_basis(cairo_t *cr, const browser_window *w,
                               const ui_theme *th, const rd_doc *doc,
                               size_t b0, size_t b1, const item_sides *sd,
+                              double content_w);
+static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid);
+static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid);
+
+/* Max-content width of a NESTED container acting as one item: the sum of its own
+ * items' bases plus its gaps. Measuring its runs as if they flowed one after another
+ * (what measure_item_content_w does) undercounts badly -- it ignores the gaps and the
+ * per-item padding/border, so a nested nav collapsed to a sliver and its labels
+ * overflowed their pills. Recurses through flex_item_basis, so a doubly-nested
+ * container measures correctly too; bounded by depth. */
+static double nested_cont_basis(cairo_t *cr, const browser_window *w,
+                                const ui_theme *th, const rd_doc *doc,
+                                size_t b0, size_t b1, int cid, double content_w,
+                                int depth) {
+    const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
+    if (cd == NULL || depth > PV_CONT_DEPTH) return 0.0;
+    double total = 0.0;
+    size_t n_items = 0;
+    size_t k = b0;
+    while (k < b1) {
+        int it = item_at_level(doc, rd_at(doc, k), cid);
+        size_t e = k + 1;
+        while (e < b1 && it >= 0 && item_at_level(doc, rd_at(doc, e), cid) == it) ++e;
+        item_sides isd = item_sides_at_level(doc, k, e, cid, cd->box_id);
+        int child = child_cont_at_level(doc, rd_at(doc, k), cid);
+        double base;
+        if (child >= 0) {
+            base = nested_cont_basis(cr, w, th, doc, k, e, child, content_w, depth + 1)
+                 + isd.pl + isd.pr + isd.bl + isd.br + isd.ml + isd.mr;
+        } else {
+            base = flex_item_basis(cr, w, th, doc, k, e, &isd, content_w);
+        }
+        total += base;
+        ++n_items;
+        k = e;
+    }
+    if (n_items > 1 && cd->gap > 0) total += (double)cd->gap * (double)(n_items - 1);
+    return total;
+}
+
+static double flex_item_basis(cairo_t *cr, const browser_window *w,
+                              const ui_theme *th, const rd_doc *doc,
+                              size_t b0, size_t b1, const item_sides *sd,
                               double content_w) {
     const rd_block *bk = rd_at(doc, b0);
     double edges = sd->ml + sd->mr;
@@ -3882,13 +4032,85 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                                   const rd_doc *doc, double content_w, int block_id,
                                   size_t run_i, int stop_at);
 
+/* Item index of run `bk` at container level `cid`: the run's own cont_item when it
+ * sits directly in cid, otherwise the parent_item of whichever container on its
+ * ancestor chain is a direct child of cid. -1 when the run does not belong to cid's
+ * subtree at all. Bounded by the chain depth, so a hostile parent cycle that survived
+ * read_view's range check still terminates. */
+static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid) {
+    if (bk->cont_id == cid) return bk->cont_item;
+    int c = bk->cont_id;
+    for (int guard = 0; c >= 0 && guard < PV_CONT_DEPTH + 2; ++guard) {
+        const pv_cont_def *cd = rd_cont_at(doc, (size_t)c);
+        if (cd == NULL) return -1;
+        if (cd->parent_id == cid) return cd->parent_item;
+        c = cd->parent_id;
+    }
+    return -1;
+}
+
+/* The container on `bk`'s ancestor chain that is a DIRECT child of cid, or -1 when
+ * the run sits directly in cid. That child is the nested container the item's
+ * content must be laid out by. */
+static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid) {
+    if (bk->cont_id == cid) return -1;
+    int c = bk->cont_id;
+    for (int guard = 0; c >= 0 && guard < PV_CONT_DEPTH + 2; ++guard) {
+        const pv_cont_def *cd = rd_cont_at(doc, (size_t)c);
+        if (cd == NULL) return -1;
+        if (cd->parent_id == cid) return c;
+        c = cd->parent_id;
+    }
+    return -1;
+}
+
+/* Root of a run's container chain: the outermost container that encloses it. That is
+ * the container the main layout loop groups and lays out; the nested ones are reached
+ * by recursion from inside it. */
+static int root_cont_of(const rd_doc *doc, int cid) {
+    int c = cid;
+    for (int guard = 0; c >= 0 && guard < PV_CONT_DEPTH + 2; ++guard) {
+        const pv_cont_def *cd = rd_cont_at(doc, (size_t)c);
+        if (cd == NULL || cd->parent_id < 0) return c;
+        c = cd->parent_id;
+    }
+    return cid;
+}
+
+/* Lays out container `cid` over the runs [start, end). The parameters come from the
+ * container TABLE (rd_cont_at) rather than from the head run, because a container
+ * whose children are all containers has no run of its own to read them from -- that
+ * is the whole reason the table exists. An absent entry falls back to the head run's
+ * legacy per-run fields, so a view from an older code path still lays out. */
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th,
                              double origin_x, double content_w,
-                             const rd_doc *doc, size_t start, size_t end) {
+                             const rd_doc *doc, size_t start, size_t end, int cid) {
     size_t nruns = end - start;
     const rd_block *head = rd_at(doc, start);
-    int is_grid = (head->cont_display == BX_DISPLAY_GRID);
+    pv_cont_def cdv;
+    {
+        const pv_cont_def *t = (cid >= 0) ? rd_cont_at(doc, (size_t)cid) : NULL;
+        if (t != NULL) {
+            cdv = *t;
+        } else {
+            memset(&cdv, 0, sizeof cdv);
+            cdv.parent_id = -1; cdv.parent_item = -1;
+            cdv.display = head->cont_display;
+            cdv.gap = head->cont_gap;
+            cdv.justify = head->cont_justify;
+            cdv.cols = head->cont_cols;
+            cdv.rows = head->cont_rows;
+            cdv.direction = head->flex_direction;
+            cdv.wrap = head->cont_wrap;
+            cdv.row_gap = head->cont_row_gap;
+            cdv.align_items = head->cont_align_items;
+            cdv.box_id = head->cont_box_id;
+            for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+                cdv.col_w[gk] = head->cont_col_w[gk];
+        }
+    }
+    int is_grid = (cdv.display == BX_DISPLAY_GRID);
 
     /* Group consecutive runs into ITEMS by cont_item: inline fragments of one
      * direct child of the container share an ordinal and flow together in one
@@ -3903,16 +4125,20 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         int have_prev = 0;
         for (size_t k = start; k < end; ++k) {
             const rd_block *bk = rd_at(doc, k);
-            if (!have_prev || bk->cont_item < 0 || bk->cont_item != prev_item) {
+            /* The ordinal is taken AT THIS LEVEL: a run inside a nested container
+             * reports the nested container's own item slot in cid, so every run of
+             * that container collapses into ONE item of this one. */
+            int it = item_at_level(doc, bk, cid);
+            if (!have_prev || it < 0 || it != prev_item) {
                 if (g >= BT_MAX_CHILDREN) { grp_overflow = 1; break; }
                 gstart[g++] = k;
             }
-            prev_item = bk->cont_item;
+            prev_item = it;
             have_prev = 1;
         }
         gstart[g] = end;
     }
-    size_t ncols = is_grid ? (size_t)head->cont_cols : g;
+    size_t ncols = is_grid ? (size_t)cdv.cols : g;
     if (ncols < 1) ncols = 1;
 
     if (nruns == 0 || grp_overflow || ncols > BT_MAX_CHILDREN) {
@@ -3934,8 +4160,8 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * exactly wrong for vertical navs). The container gap becomes vertical space
      * between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visual order: last item at top, first at bottom. */
-    if (!is_grid && (head->flex_direction == CSS_FD_COLUMN ||
-                     head->flex_direction == CSS_FD_COLUMN_REVERSE)) {
+    if (!is_grid && (cdv.direction == CSS_FD_COLUMN ||
+                     cdv.direction == CSS_FD_COLUMN_REVERSE)) {
         size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
         double item_h[BT_MAX_CHILDREN], cum_off[BT_MAX_CHILDREN];
         double base = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
@@ -3943,8 +4169,8 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         double cur = base;
         for (size_t j = 0; j < g; ++j) {
             flush_line(L, s, th);
-            if (j > 0 && head->cont_gap > 0)
-                cur += (double)head->cont_gap;
+            if (j > 0 && cdv.gap > 0)
+                cur += (double)cdv.gap;
             s->cur_top = cur;
             cum_off[j] = cur;
             size_t sr = L->nrow;
@@ -3960,7 +4186,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             item_h[j] = s->cur_top - cur;
             cur = s->cur_top;
         }
-        if (head->flex_direction == CSS_FD_COLUMN_REVERSE) {
+        if (cdv.direction == CSS_FD_COLUMN_REVERSE) {
             double total_h = s->cur_top - base;
             double rev = base + total_h;
             for (size_t j = 0; j < g; ++j) {
@@ -3968,7 +4194,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 double delta = rev - cum_off[j];
                 for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r)
                     L->rows[r].top += delta;
-                rev -= (double)((head->cont_gap > 0) ? head->cont_gap : 0);
+                rev -= (double)((cdv.gap > 0) ? cdv.gap : 0);
             }
             s->cur_top = base + total_h;
         }
@@ -4025,7 +4251,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * After the order sort, the slot array has the visual order (slot[0] =
      * leftmost item). Reversing pos_of maps each document item to its reversed
      * layout slot (item 0 → rightmost, last item → leftmost). */
-    if (use_flex && head->flex_direction == CSS_FD_ROW_REVERSE) {
+    if (use_flex && cdv.direction == CSS_FD_ROW_REVERSE) {
         for (size_t j = 0; j < g; ++j)
             pos_of[j] = g - 1 - pos_of[j];
     }
@@ -4034,36 +4260,49 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     bt_node root;
     memset(&root, 0, sizeof root);
     memset(kids, 0, sizeof kids[0] * g);
-    root.gap = (double)head->cont_gap;
-    root.justify = (fx_justify)head->cont_justify;
+    root.gap = (double)cdv.gap;
+    root.justify = (fx_justify)cdv.justify;
     root.children = kids;
     root.child_count = g;
     /* row-gap (author `row-gap`, distinct from `gap`/column-gap): applies to both
      * the flex-wrap cross axis and grid row spacing below. Unset (-1) leaves
      * has_row_gap at its zero-init 0, so `gap` keeps serving both axes exactly as
      * before this property existed. */
-    if (head->cont_row_gap >= 0) {
+    if (cdv.row_gap >= 0) {
         root.has_row_gap = 1;
-        root.row_gap = (double)head->cont_row_gap;
+        root.row_gap = (double)cdv.row_gap;
     }
     if (use_flex) {
         /* An item's base size is its content size unless the author sized it
          * (flex_item_basis). That is what makes justify-content mean anything: the
          * line's leftover space is content_w minus the sum of the base sizes. */
         root.display = BX_DISPLAY_FLEX;
-        root.wrap = (head->cont_wrap == CSS_FW_WRAP || head->cont_wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
-        root.wrap_reverse = (head->cont_wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
+        root.wrap = (cdv.wrap == CSS_FW_WRAP || cdv.wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
+        root.wrap_reverse = (cdv.wrap == CSS_FW_WRAP_REVERSE) ? 1 : 0;
         for (size_t j = 0; j < g; ++j) {
             const rd_block *bk = rd_at(doc, gstart[j]);
             bt_node *kid = &kids[pos_of[j]];
-            item_sides sd = item_sides_of(doc, gstart[j], gstart[j + 1]);
+            item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                                                cid, cdv.box_id);
             kid->display = BX_DISPLAY_BLOCK;
             kid->grow = (bk->flex_grow >= 0) ? (double)bk->flex_grow / 100.0 : 0.0;
             kid->shrink = (bk->flex_shrink >= 0) ? (double)bk->flex_shrink / 100.0 : 1.0;
-            kid->basis = flex_item_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
-                                         &sd, content_w);
+            /* A nested container's base size is its OWN max-content width (items +
+             * gaps), not the width of its text flowed end to end. */
+            int nb_child = child_cont_at_level(doc, bk, cid);
+            if (nb_child >= 0) {
+                double nbw = nested_cont_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
+                                               nb_child, content_w, 0)
+                           + sd.pl + sd.pr + sd.bl + sd.br + sd.ml + sd.mr;
+                if (nbw > content_w) nbw = content_w;
+                if (nbw < 1.0) nbw = 1.0;
+                kid->basis = nbw;
+            } else {
+                kid->basis = flex_item_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
+                                             &sd, content_w);
+            }
             int akw = (bk->flex_align_self != CSS_AK_UNSET && bk->flex_align_self != CSS_AK_AUTO)
-                      ? bk->flex_align_self : head->cont_align_items;
+                      ? bk->flex_align_self : cdv.align_items;
             kid->align = css_align_to_bt(akw);
             kid->min_main = 1.0;
         }
@@ -4073,9 +4312,9 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         /* Sized tracks + column spans (2026-07-11): only a real author grid carries
          * them (the flex-degrade row keeps equal columns and 1-cell items). */
         if (is_grid) {
-            root.grid_track = head->cont_col_w;
+            root.grid_track = cdv.col_w;
             root.grid_ntrack = PV_GRID_TRACKS;
-            root.grid_rows = (head->cont_rows > 0) ? (size_t)head->cont_rows : 0;
+            root.grid_rows = (cdv.rows > 0) ? (size_t)cdv.rows : 0;
         }
         for (size_t j = 0; j < g; ++j) {
             kids[j].display = BX_DISPLAY_BLOCK;
@@ -4113,6 +4352,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * out but never painted (the documented v1 gap in spec/page_view.md §4). */
     size_t item_root_idx[BT_MAX_CHILDREN];
     size_t item_box_start[BT_MAX_CHILDREN], item_box_count[BT_MAX_CHILDREN];
+    /* Which items were laid out by a NESTED container (their rows already carry an
+     * x of their own, so the translation pass adds instead of overwriting). */
+    int item_nested[BT_MAX_CHILDREN];
+    for (size_t jz = 0; jz < g; ++jz) item_nested[jz] = 0;
     for (size_t j = 0; j < g; ++j) {
         rc_state si;
         memset(&si, 0, sizeof si);
@@ -4124,7 +4367,8 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * to zero height and a flex card lost its background/border/radius/shadow
          * (spec/page_view.md §4 "Ítems flex/grid"). block_id < 0 (table cells,
          * author CSS off) => no box => byte-identical to the pre-existing path. */
-        item_sides sd = item_sides_of(doc, gstart[j], gstart[j + 1]);
+        item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                                            cid, cdv.box_id);
         int rb = sd.box;
         item_box[j] = rb;
         const pv_box_def *rbd = (rb >= 0) ? rd_box_at(doc, (size_t)rb) : NULL;
@@ -4153,6 +4397,18 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         }
         size_t sb = L->nbox;
         size_t sr = L->nrow;
+        /* A nested flex/grid container is ONE item of this one: recurse instead of
+         * flowing its runs as plain text. layout_container emits rows/boxes into L
+         * in item-local coordinates and advances si.cur_top, which is exactly what
+         * the translation pass below expects -- so nesting costs one call, not a
+         * second engine. spec/page_view.md "Contenedores flex/grid ANIDADOS". */
+        int nested = child_cont_at_level(doc, rd_at(doc, gstart[j]), cid);
+        item_nested[j] = (nested >= 0);
+        if (nested >= 0) {
+            layout_container(cr, w, L, &si, th, 0.0, inner_w, doc,
+                             gstart[j], gstart[j + 1], nested);
+            flush_line(L, &si, th);
+        } else
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bk = rd_at(doc, k);
             if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
@@ -4163,7 +4419,15 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
              * root box: reconciling is what CLOSES a nested box once the flow
              * leaves its subtree. Skipping those blocks left a badge's pill open
              * for the rest of the card and stretched it the card's full height. */
-            reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, bk->block_id, k, rb);
+            /* Boxes at or ABOVE the container belong to the container, not to this
+             * item: the container level already opened them. When the item has no
+             * root box of its own (rb < 0) the walk must still stop at the
+             * container's box, or it re-opens the container (and its ancestors)
+             * INSIDE the item -- which is what painted a nested nav's own backdrop a
+             * second time, at item size, on top of itself. */
+            leave_inline_box(L, &si, bk->block_id);
+            int stop_at = (rb >= 0) ? rb : cdv.box_id;
+            reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, bk->block_id, k, stop_at);
             int owns = (rb >= 0 && bk->block_id == rb);
             si.bg_rgb = (owns || w->force_theme) ? -1 : bk->bg_rgb;
             flow_text_block(cr, w, L, &si, th, bk, inner_w);
@@ -4200,7 +4464,11 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         const bt_node *kid = &kids[pos_of[j]];
         for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r) {
             L->rows[r].top += base_top + kid->y + item_oy[j];
-            L->rows[r].x_off = origin_x + kid->x + item_ox[j];
+            /* A recursed item's rows already carry the nested container's own x
+             * placement, so this level ADDS its column origin; a flat item has no
+             * x of its own and takes the column origin outright (unchanged). */
+            if (item_nested[j]) L->rows[r].x_off += origin_x + kid->x + item_ox[j];
+            else                L->rows[r].x_off  = origin_x + kid->x + item_ox[j];
         }
         /* Translate the boxes that opened inside this item into its column. */
         for (size_t bi = item_box_start[j]; bi < item_box_start[j] + item_box_count[j]
@@ -4464,6 +4732,28 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
     for (int k = common; k < n; ++k) {
         const pv_box_def *d = rd_box_at(doc, (size_t)path[k]);
         if (d == NULL) break;
+        /* An INLINE-LEVEL box sitting on a line that already has text (a badge, a
+         * pill, a chip inside a sentence) must flow INSIDE that line: opening it as
+         * a block box flushes the line and insets the content rect, which broke the
+         * sentence into three -- text, badge on its own line, rest of the text. It
+         * is tracked off the box stack and materialised at flush_line from the
+         * fragments it produces. An inline-block that OPENS a line keeps the old
+         * block treatment (shrink-wrapped and placed by text-align), which is what a
+         * standalone centred call-to-action button needs.
+         * spec/page_view.md "Cajas de nivel inline". */
+        if (d->display == CSS_DISP_INLINE_BLOCK && k == n - 1 &&
+            s->line_open && L->nfrag > s->line_first && s->inline_box_def == NULL) {
+            s->inline_box_def = d;
+            s->inline_box_id = path[k];
+            s->inline_box_frag0 = L->nfrag;
+            s->inline_box_frag1 = (size_t)-1;
+            s->inline_box_pen0 = s->pen_x;
+            double ipl = (d->pad_l > 0) ? (double)d->pad_l : 0.0;
+            double ipr = (d->pad_r > 0) ? (double)d->pad_r : 0.0;
+            s->inline_box_pad_r = ipr + box_edge_px(d->bord_rw);
+            s->pen_x += ipl + box_edge_px(d->bord_lw);
+            break;
+        }
         double ctx_left, ctx_w;
         rc_box_context(s, content_w, &ctx_left, &ctx_w);
         double shrink = 0.0;
@@ -4682,8 +4972,17 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * columns and then skipped. */
         if (b->cont_id >= 0 &&
             (b->cont_display == BX_DISPLAY_FLEX || b->cont_display == BX_DISPLAY_GRID)) {
+            /* The group is the OUTERMOST container's subtree, not the innermost:
+             * a flex header holding a flex <nav> is ONE container to lay out, and
+             * the nested one is reached by recursion from inside it. Grouping by the
+             * innermost id split it in two and stacked the halves. */
+            int rootc = root_cont_of(doc, b->cont_id);
             size_t j = i + 1;
-            while (j < rd_count(doc) && rd_at(doc, j)->cont_id == b->cont_id) ++j;
+            while (j < rd_count(doc)) {
+                const rd_block *bj = rd_at(doc, j);
+                if (bj->cont_id < 0 || root_cont_of(doc, bj->cont_id) != rootc) break;
+                ++j;
+            }
             double mt, mb;
             block_margins(th, b, &mt, &mb);
             /* Reconcile to the innermost box ENCLOSING the container's items, exactly
@@ -4702,7 +5001,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             rc_box_context(&s, content_w, &in_l, &in_w);
             if (cbox < 0) s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
             s.indent_px = in_l;   /* degrade paths flow through the same rect */
-            layout_container(cr, w, L, &s, th, in_l, in_w, doc, i, j);
+            layout_container(cr, w, L, &s, th, in_l, in_w, doc, i, j, rootc);
             s.indent_px = 0.0;
             s.prev_bottom = mb;
             i = j - 1;  /* the loop's ++i moves past the container */
@@ -4745,6 +5044,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * boxless continuation run (no break): it stays on the current line, so it
          * stays in the current box context too; closing would flush the line and
          * split e.g. a flowed table row at its inter-cell gap runs. */
+        leave_inline_box(L, &s, b->block_id);
         if (standalone || b->block_break || b->block_id >= 0)
             reconcile_boxes(cr, w, L, &s, th, doc, content_w, b->block_id, i);
         if (standalone || b->block_break) {
@@ -8788,6 +9088,15 @@ ui_status ui_dump_layout(const rd_doc *doc) {
         const bt_positioned *p = &L.positioned[i];
         printf("  pos[%zu] box=%zu z=%d x=%.1f y=%.1f w=%.1f h=%.1f\n",
                i, p->box_index, p->z_index, p->x, p->y, p->w, p->h);
+    }
+    /* Container table: the nesting chain is invisible in the row/box dumps, and it
+     * is exactly what breaks when a navbar collapses. */
+    for (size_t i = 0; i < rd_cont_count(doc); ++i) {
+        const pv_cont_def *cd = rd_cont_at(doc, i);
+        if (cd == NULL) continue;
+        printf("  cont[%zu] disp=%d parent=%d parent_item=%d gap=%d justify=%d cols=%d box=%d%s\n",
+               i, cd->display, cd->parent_id, cd->parent_item, cd->gap,
+               cd->justify, cd->cols, cd->box_id, cd->anon_row ? " anon" : "");
     }
     rc_free(&L);
     return UI_OK;

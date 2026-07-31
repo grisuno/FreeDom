@@ -55,6 +55,10 @@ static void ignore_sigpipe(void);
 /* Anti-amplification cap on the number of display-list runs the parent will
  * accept from the (possibly exploited) child. Plenty for any real page. */
 #define TAB_MAX_RUNS ((size_t)(2u * 1024u * 1024u))
+/* Upper bound on the container table coming off the wire. Mirrors page_view's own
+ * PV_MAX_CONTAINERS: the worker can never register more than that, so a larger
+ * count is a corrupt or hostile stream and the whole view is rejected. */
+#define PV_MAX_CONTAINERS_WIRE ((size_t)256u)
 
 /* Cap on the page URL carried by OP_LOAD (URLs are small; defensive vs a desync). */
 #define TAB_MAX_URL ((size_t)(64u * 1024u))
@@ -497,6 +501,38 @@ static int write_view(int wfd, const pv_view *v) {
         /* Phase R4: @keyframes animation name (forward compat, requires the
          * @keyframes engine to be useful). */
         if (write_field(wfd, bd->anim_name) != 0) return -1;
+    }
+
+    /* Container table (2026-07-31), after the box tree: [ncont] then per container
+     * its fixed-width fields, same order read_view reconstructs them. A run's
+     * cont_id indexes this array; parent_id/parent_item make a nested container one
+     * item of its parent. Without this the whole nesting feature would be invisible
+     * on the far side -- the recurring "a field that does not cross the codec is a
+     * dead feature" trap. */
+    size_t nc = pv_cont_count(v);
+    if (write_full(wfd, &nc, sizeof nc) != 0) return -1;
+    for (size_t ci = 0; ci < nc; ++ci) {
+        const pv_cont_def *cd = pv_cont_at(v, ci);
+        int32_t cf[16 + PV_GRID_TRACKS];
+        size_t k = 0;
+        cf[k++] = (int32_t)cd->parent_id;
+        cf[k++] = (int32_t)cd->parent_item;
+        cf[k++] = (int32_t)cd->display;
+        cf[k++] = (int32_t)cd->gap;
+        cf[k++] = (int32_t)cd->justify;
+        cf[k++] = (int32_t)cd->cols;
+        cf[k++] = (int32_t)cd->rows;
+        cf[k++] = (int32_t)cd->direction;
+        cf[k++] = (int32_t)cd->wrap;
+        cf[k++] = (int32_t)cd->row_gap;
+        cf[k++] = (int32_t)cd->align_items;
+        cf[k++] = (int32_t)cd->align_content;
+        cf[k++] = (int32_t)cd->justify_items;
+        cf[k++] = (int32_t)cd->grid_flow;
+        cf[k++] = (int32_t)cd->box_id;
+        cf[k++] = (int32_t)cd->anon_row;
+        for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->col_w[gk];
+        if (write_full(wfd, cf, sizeof cf) != 0) return -1;
     }
     /* CSS 2.1 §14.2: canvas background + root <html> layout properties. These
      * are pv_view-level fields (not per-run or per-box). Written after the box
@@ -1759,6 +1795,45 @@ static int read_view(int fd, pv_view **out) {
         memcpy(bd.anim_name, aname, aname_len + 1);
         free(aname);
         if (pv_add_box_def(v, &bd) != PV_OK) { pv_free(v); return -1; }
+    }
+
+    /* Container table, mirroring write_view's emission exactly. */
+    {
+        size_t nc = 0;
+        if (read_full(fd, &nc, sizeof nc) != 0) { pv_free(v); return -1; }
+        if (nc > PV_MAX_CONTAINERS_WIRE) { pv_free(v); return -1; }
+        for (size_t ci = 0; ci < nc; ++ci) {
+            int32_t cf[16 + PV_GRID_TRACKS];
+            if (read_full(fd, cf, sizeof cf) != 0) { pv_free(v); return -1; }
+            pv_cont_def cd;
+            memset(&cd, 0, sizeof cd);
+            size_t k = 0;
+            cd.parent_id     = cf[k++];
+            cd.parent_item   = cf[k++];
+            cd.display       = cf[k++];
+            cd.gap           = cf[k++];
+            cd.justify       = cf[k++];
+            cd.cols          = cf[k++];
+            cd.rows          = cf[k++];
+            cd.direction     = cf[k++];
+            cd.wrap          = cf[k++];
+            cd.row_gap       = cf[k++];
+            cd.align_items   = cf[k++];
+            cd.align_content = cf[k++];
+            cd.justify_items = cf[k++];
+            cd.grid_flow     = cf[k++];
+            cd.box_id        = cf[k++];
+            cd.anon_row      = cf[k++];
+            for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.col_w[gk] = cf[k++];
+            /* A hostile worker cannot make the parent chain point outside the
+             * table: an out-of-range parent degrades the container to top level
+             * (flat layout, exactly today's behaviour) instead of indexing wild. */
+            if (cd.parent_id < 0 || (size_t)cd.parent_id >= nc || (size_t)cd.parent_id == ci) {
+                cd.parent_id = -1;
+                cd.parent_item = -1;
+            }
+            if (pv_add_cont_def(v, &cd) != PV_OK) { pv_free(v); return -1; }
+        }
     }
 
     /* CSS 2.1 §14.2: canvas background + root <html> layout properties, written

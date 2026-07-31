@@ -83,6 +83,34 @@ telemetry, mandatory API keys, or hidden solver workers. We refuse to do so.
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
+### Nested flex/grid + inline-block flow (31 July 2026)
+
+The two structural render breaks are closed, both **measured** against Firefox headless:
+
+- **Nested flex/grid containers.** A `header{display:flex}` holding a flex
+  `<nav><ul>` — the navbar of nearly every modern site — used to split into two
+  stacked rows with the inner items' boxes drawn at the wrong size. A run carries only
+  its *innermost* container, and laying out the outer one needs the outer container's
+  parameters, which in a grid-of-flex-cards **no run carries at all**. So containers
+  now have a descriptor table (`pv_cont_def`, indexed by `cont_id`) holding
+  `parent_id`/`parent_item` plus the container parameters; it crosses the IPC as its
+  own array. `resolve_context` describes the whole ancestor chain instead of stopping
+  at the innermost, the layout loop groups by the **root** container, and
+  `layout_container` **recurses** into items that are themselves containers, sizing
+  them by the nested container's max-content width.
+- **`display:inline-block` flows inside its line.** A badge, pill or chip in the
+  middle of a sentence used to break it into three: text, badge alone on a full-width
+  row, rest of the text. Registering a box was the problem — opening a box is a block
+  operation that flushes the line. An inline-level box is now tracked *off* the box
+  stack and materialised when the line flushes, from the extent of its own fragments.
+  An inline-block that *opens* a line keeps the old block treatment (shrink-wrapped and
+  placed by `text-align`), which is what a standalone centred call-to-action needs.
+
+Both are locked by pixel regression tests. See `spec/page_view.md`.
+
+**Still open, and now the loudest remaining gap:** table auto width (shrink-to-fit)
+plus `colspan`/`rowspan` — every table still spans the full page and ignores spans.
+
 ### Typography & inline flow parity (31 July 2026)
 
 Four defects that made ordinary pages look broken, all **measured** against Firefox
@@ -111,10 +139,8 @@ headless on the same HTML (`firefox --headless --screenshot` versus
 
 All four are locked by pixel regression tests in `tests/test_freedom.c`.
 
-**Still open, and the loudest remaining gaps:** nested `display:flex` containers (a flex
-header holding a flex `<nav>` still breaks into two stacked rows — design recorded in
-`spec/page_view.md`), `display:inline-block` interrupting the line it sits in, and table
-auto width plus `colspan`/`rowspan`.
+(Nested flex and inline-block flow, listed as open when this section was written, are
+closed above.)
 
 ### Inline SVG + Firefox render parity (30 July 2026)
 

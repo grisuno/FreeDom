@@ -215,6 +215,12 @@ typedef struct rd_doc {
      * otherwise -> default render byte-identical). Reuses pv_box_def (same shape). */
     pv_box_def *boxes;
     size_t      nbox;
+    /* Flex/grid container table (2026-07-31). conts[cont_id] describes one container:
+     * its layout parameters plus parent_id/parent_item, which make a nested container
+     * one ITEM of its parent. Unlike the box tree this is STRUCTURE, so it is carried
+     * regardless of caps.css -- layout is not author styling. */
+    pv_cont_def *conts;
+    size_t       ncont;
     size_t      boxcap;
 } rd_doc;
 
@@ -247,6 +253,11 @@ const rd_block *rd_at(const rd_doc *d, size_t i);
  * caps.css is off); rd_box_at returns boxes[i] (i == a block_id) or NULL. */
 size_t            rd_box_count(const rd_doc *d);
 const pv_box_def *rd_box_at(const rd_doc *d, size_t i);
+
+/* Container table accessors. rd_cont_count is the number of containers; rd_cont_at
+ * returns conts[i] (i == a run's cont_id) or NULL when out of range. */
+size_t             rd_cont_count(const rd_doc *d);
+const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);
 
 /* Stable, short English name of a block kind for structured/agent output. Never
  * NULL; an unknown enum value yields "block". */

@@ -540,6 +540,23 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         }
     }
 
+    /* Container table: STRUCTURE, so unlike the box tree it is NOT gated by
+     * caps.css -- layout (flex/grid, including nesting) applies always; only author
+     * colours are gated. Gating it would have collapsed every nested navbar the
+     * moment the user turned author styling off. */
+    {
+        size_t nc = pv_cont_count(view);
+        if (nc > 0) {
+            d->conts = (pv_cont_def *)calloc(nc, sizeof *d->conts);
+            if (d->conts == NULL) { rd_free(d); return RD_ERR_OOM; }
+            for (size_t i = 0; i < nc; ++i) {
+                const pv_cont_def *src = pv_cont_at(view, i);
+                if (src != NULL) d->conts[i] = *src;
+            }
+            d->ncont = nc;
+        }
+    }
+
     *out = d;
     return RD_OK;
 }
@@ -556,6 +573,7 @@ void rd_free(rd_doc *d) {
     }
     free(d->blocks);
     free(d->boxes);
+    free(d->conts);
     free(d);
 }
 
@@ -575,6 +593,15 @@ size_t rd_box_count(const rd_doc *d) {
 const pv_box_def *rd_box_at(const rd_doc *d, size_t i) {
     if (d == NULL || i >= d->nbox) return NULL;
     return &d->boxes[i];
+}
+
+size_t rd_cont_count(const rd_doc *d) {
+    return (d != NULL) ? d->ncont : 0;
+}
+
+const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i) {
+    if (d == NULL || i >= d->ncont) return NULL;
+    return &d->conts[i];
 }
 
 const char *rd_kind_name(rd_kind k) {
