@@ -18,25 +18,24 @@ repositorio. **Estas reglas anulan comportamientos por defecto.**
 2. **Zero Knowledge** — El navegador no sabe del usuario más de lo estrictamente necesario para
    renderizar. Sin historial en claro, sin fingerprinting pasivo, sin fugas de IP (WebRTC
    deshabilitado por defecto).
-3. **Privacy by Default** — Bloqueo total de terceros a nivel del motor de red. Sin telemetría, tecnicas anti tracing o anti rastreo
+3. **Privacy by Default** — Bloqueo total de terceros a nivel del motor de red. Sin telemetría
    ni siquiera "anónima" u "opt-out". Integración opcional con Tor/I2P a nivel de socket.
 4. **Secure by Default** — La configuración insegura **no debe ser representable** en la API.
    El camino por defecto es siempre el seguro. Fallar cerrado: si una garantía no se puede
    verificar, se rechaza la operación.
-5. **Post-Quantum by Default** — TLS 1.3 es el mínimo absoluto. El intercambio de claves es
-   **híbrido** (clásico + ML-KEM) para neutralizar *Harvest-Now, Decrypt-Later*. Nunca PQ puro
-   (si ML-KEM cae, el componente clásico debe resistir); nunca clásico puro.
-6. **Agent-Safe & Agent-Friendly** — El navegador es seguro para el usuario **y** para el agente
-   de IA que lo opere, en ambas direcciones: el contenido remoto es hostil también para el agente
-   (inyección de prompts), así que se le entrega siempre como **dato con procedencia, nunca como
+5. **Post-Quantum by Default** — TLS 1.3 mínimo. Intercambio de claves **híbrido** (clásico +
+   ML-KEM) para neutralizar *Harvest-Now, Decrypt-Later*. Nunca PQ puro (si ML-KEM cae, el
+   componente clásico debe resistir); nunca clásico puro.
+6. **Agent-Safe & Agent-Friendly** — Seguro para el usuario **y** para el agente de IA que lo
+   opere, en ambas direcciones: el contenido remoto es hostil también para el agente (inyección
+   de prompts), así que se le entrega siempre como **dato con procedencia, nunca como
    instrucción**, y sin acción implícita; y el navegador es manejable por un agente (salidas
-   deterministas, estructuradas, con códigos de estado, sin estado oculto, *headless*). El agente
-   opera dentro de los mismos sandboxes que el usuario. Contrato completo en
-   `spec/agent-safety.md`.
+   deterministas, con códigos de estado, sin estado oculto, *headless*). El agente opera dentro
+   de los mismos sandboxes que el usuario. Contrato completo en `spec/agent-safety.md`.
 
-**Doctrina anti-vigilancia:** no se permite ninguna cadena de texto, dependencia,
-endpoint ni comentario que apunte a servicios de terceros no esenciales. Cada dependencia debe
-justificarse por reducción de superficie de ataque, no por conveniencia.
+**Doctrina anti-vigilancia:** no se permite ninguna cadena de texto, dependencia, endpoint ni
+comentario que apunte a servicios de terceros no esenciales. Cada dependencia se justifica por
+reducción de superficie de ataque, no por conveniencia.
 
 ---
 
@@ -46,8 +45,8 @@ justificarse por reducción de superficie de ataque, no por conveniencia.
   `#error`.
 - **Identificadores y strings en inglés.** La documentación (`spec/`, este archivo) puede estar
   en español; el código, no.
-- Sin emojis en el código. Comentarios solo cuando explican un *porqué* no evidente; nada de
-  ruido. Los headers llevan documentación de contrato.
+- Sin emojis en el código. Comentarios solo cuando explican un *porqué* no evidente. Los headers
+  llevan documentación de contrato.
 - Nombres con prefijo de módulo (`sf_` para `secure_fetch`, etc.). Sin estado global mutable;
   todo reentrante. Cada asignación tiene un único dueño y un único liberador idempotente.
 
@@ -55,91 +54,50 @@ justificarse por reducción de superficie de ataque, no por conveniencia.
 
 ## 3. Metodología: SDD + TDD estricto + BDD Given-When-Then
 
-Para cada módulo, el ciclo es inviolable y **en este orden** orientado boy scout extintor de deuda tecnica:
+Para cada módulo el ciclo es inviolable y **en este orden**:
 
-1. **Spec** — `spec/<modulo>.md`: entradas, salidas, tabla de errores, garantías de seguridad,
-   y qué queda fuera de alcance. Usando Dado-Cuando-Entonces o BDD
-2. **Test (rojo)** — `tests/test_<modulo>.c` con CMocka. Debe **fallar** porque no hay
-   implementación todavía. usando ATDD (Acceptance Test-Driven Development - Desarrollo Orientado a Pruebas de Aceptación):
-3. **Code (verde)** — `src/<modulo>.c` con el código mínimo para pasar. La I/O del **lado
-   confiable** (orquestador / event loop, el que NO toca contenido hostil) debe ser **asíncrona** —
-   `io_uring` cuando aplique — de modo que no bloquee la UI ni el hilo. **Excepción de seguridad
-   inquebrantable:** `io_uring` está **PROHIBIDO dentro del worker confinado** (`tab`/`renderer`),
-   porque es una **primitiva de bypass de seccomp** (sus `IORING_OP_*` no atraviesan el syscall entry
-   que filtra el BPF → un ring anularía el allowlist, W^X y netns). El worker hace I/O **bloqueante**
-   sobre los dos pipes ya abiertos y punto. La regla "usar io_uring" jamás se aplica donde corre
-   contenido remoto. Ver `spec/os_sandbox.md` §13 y `[[freedom-io-uring-forbidden-in-worker]]`.
-4. **Refactor** — endurecer punteros, límites, legibilidad, sin romper pruebas. si vez codigo duplicado lo unificas esto es imperativo busca codigo dduplicado y extinguelo sin perder funcionalidad, nunca esta fuera de scope, modo boy scout si ves deuda tecnica la extingues sin romper funcionalidades, lo mismo con las fallas de seguridad o vulnerabilidades la extincion de estas nunca esta fuera de scope, si puedes hacer lo mismo que haces en 40 lineas de codigo lo puedes hacer en 10 o 1 bienvenido siempre y cuando respete el dry solid y no pierda funcionalidad ni agregue mas deuda tecnica.
-   **Cláusula anti-monolito (parte del modo boy-scout, nunca fuera de scope):** ningún
-   archivo debe convertirse en un monolito. Si un archivo **roza las ~2000 líneas**, se
-   **parte según contratos** (un módulo = un contrato `spec/<modulo>.md` + `include/<modulo>.h`
-   + `src/<modulo>.c`), extrayendo unidades coherentes a módulos nuevos con su prefijo, sin
-   perder funcionalidad ni añadir deuda. Aplica especialmente al añadir código: si tu cambio
-   empujaría un archivo más allá del umbral, primero extrae. **Deuda conocida:**
-   `gui/browser_ui.c` ya excede el umbral (>5000 líneas) — al tocarlo, la lógica nueva
-   (especialmente lógica pura) va a un módulo nuevo, no a engordarlo más.
-5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`. como parte de la
-   validacion quiero que utilices ya sea urls y archivos html para revisar el comportamiento de la
-   GUI al renderizar. La GUI necesita Wayland (no siempre disponible para un agente), así que el
-   render se inspecciona **headless** exportando la página a **PNG** (método nativo "Save as PNG",
-   flag `--download-png=PATH`) y leyendo la imagen directamente. **Preferí PNG sobre PDF:** un PNG es
-   una sola imagen que se lee en **un paso** y cuesta muchos menos tokens; el PDF (`--download-pdf`)
-   queda para cuando se necesita el documento vectorial real (texto seleccionable, paginación), y aún
-   requiere rasterizar con `mutool`. Es la **skill `/visual-review`**
-   (`.claude/skills/visual-review/SKILL.md`). ## Pasos
-  a. Exporta a PNG: `./build/freedom --download-png=$SP/frame.png <URL-o-archivo.html>` (`$SP` = el
-     scratchpad de la sesión; no `/tmp` ni el árbol del repo). Un solo bitmap de toda la página
-     (1000px de ancho; alto = contenido, acotado a 30000px). Añadí `--author-css` para revisar CSS de
-     autor (colores/cajas), `--images` para **decodificar y pintar las imágenes reales** (locales de
-     disco / remotas bajo política, vía el worker confinado — antes el export siempre dibujaba
-     placeholders), `--js=on` para JS, `--tor`/`--i2p`/`--insecure` según haga falta.
-  b. Lee la imagen con la herramienta Read: `Read $SP/frame.png`. (Fallback PDF: `--download-pdf` +
-     `mutool draw -r 96 -o $SP/frame-%d.png $SP/frame.pdf`, o `Read` del PDF con `pages`.)
-  c. Verifica:
-    - ¿Se renderiza texto legible?
-    - ¿Los elementos tienen posicionamiento correcto (no superpuestos)?
-    - ¿Los colores/temas (sepia/oscuro) se aplican? (la exportación fuerza tema claro para imprimir
-      oscuro-sobre-blanco; imágenes y colores de autor están OFF por defecto → placeholders; con
-      `--images`/`--author-css` se decodifican/pintan de verdad.)
-    - ¿Hay artefactos de rendering?
-  d. Compara con screenshot de referencia si existe
-
-   **Verificación visual de Freebug (la consola de devtools) — parte del contrato.** El render de
-   página se revisa headless con `--download-pdf`, pero **Freebug es una ventana Wayland aparte**
-   (segundo `xdg_toplevel`): su panel de log, los colores por nivel y la **ubicación `file:line:col`**
-   de cada error **no** salen en el PDF. Por eso **todo cambio que toque Freebug** (captura de consola,
-   ubicación de errores, REPL, colores, layout del panel) se verifica **en pantalla** con el flujo
-   weston-sobre-Xvfb (el único modo agent-verificable aquí, sin GPU ni Wayland real):
-  i.   `Xvfb :99` + `weston --backend=x11 --renderer=pixman` (NO `--renderer=noop`, da pantalla en
-       blanco; NO `weston-screenshooter`, está gateado). `XDG_RUNTIME_DIR` **corto** (p. ej.
-       `/tmp/wlfb`): la ruta del socket AF_UNIX no puede pasar 108 bytes, y el scratchpad de sesión
-       la excede.
-  ii.  Arranca Freedom con la afordancia de env **`FREEDOM_FREEBUG=1`** (abre Freebug al inicio, como
-       auto-open-devtools) sobre `WAYLAND_DISPLAY` de weston, con `--js=on` y una página que produzca
-       entradas (p. ej. un HTML con `console.*` y un `<script>` que lance en su 2ª línea). No hay
-       `wtype`/`ydotool`, así que el *keypress* F12/`Ctrl+Enter` no se inyecta: la afordancia de env
-       ejercita la apertura, y el REPL queda cubierto por `tab_eval`/`--dump-console`.
-  iii. Captura: `DISPLAY=:99 import -window root $SP/freebug.png` (ImageMagick; raíz X = salida de
-       weston, ambos toplevels visibles).
-  iv.  `Read $SP/freebug.png` y verifica: el panel de log; **niveles coloreados** (log gris, info cian,
-       warn amarillo, error rojo); y que cada error muestre su **`file:line:col` en tono atenuado**
-       antes del mensaje (p. ej. `inline #2:3:1`), mientras un `console.log` no lleva ubicación.
-   Validación cruzada sin GUI: `./build/freedom --js=on --dump-console <URL|archivo>` imprime la misma
-   consola con `[nivel] file:line:col  texto` (ver `[[freedom-freebug-console]]`,
-   `[[freedom-gui-visual-verification-weston]]`).
-
-6. **Fuzzing** — el path que toca contenido remoto se fuzzea (libFuzzer: `make fuzz`/`fuzz-pv`/
-   `fuzz-js`/`fuzz-img`; AFL++: `make fuzz-afl`). Cero crashes/leaks/UB antes de cerrar.
-7. **Documentación** — **recién después de validar y fuzzear** se documenta: se actualiza la spec,
-   este `CLAUDE.md` (hito → cerrado, doctrina nueva) y la memoria. Documentar antes de validar es
-   documentar lo que todavía no es verdad. y casi mas importante actualizar docs/index.html ya que es el "home page" poner todos los atajos, etc. y el README.md
+1. **Spec** — `spec/<modulo>.md`: entradas, salidas, tabla de errores, garantías de seguridad y
+   qué queda fuera de alcance, en Dado-Cuando-Entonces.
+2. **Test (rojo)** — `tests/test_<modulo>.c` con CMocka (ATDD). Debe **fallar de verdad**:
+   verificá el rojo revirtiendo el fix, no lo supongas. Un build que falla por `-Werror` deja el
+   binario viejo en su sitio y el test "pasa" — eso no es rojo, es un experimento inválido.
+3. **Code (verde)** — `src/<modulo>.c`, el código mínimo para pasar. La I/O del **lado confiable**
+   (orquestador / event loop, el que NO toca contenido hostil) debe ser **asíncrona** (`io_uring`
+   cuando aplique). **Excepción inquebrantable:** `io_uring` está **PROHIBIDO dentro del worker
+   confinado** (`tab`/`renderer`): es una **primitiva de bypass de seccomp** (sus `IORING_OP_*` no
+   atraviesan el syscall entry que filtra el BPF → anularía allowlist, W^X y netns). El worker hace
+   I/O **bloqueante** sobre sus dos pipes. `spec/os_sandbox.md` §13,
+   `[[freedom-io-uring-forbidden-in-worker]]`.
+4. **Refactor** — endurecer punteros y límites. **Modo boy scout, nunca fuera de scope:** código
+   duplicado se unifica; deuda técnica y vulnerabilidades se extinguen sin perder funcionalidad;
+   si algo se hace en 10 líneas en vez de 40 respetando DRY/SOLID, se hace.
+   **Cláusula anti-monolito:** ningún archivo se vuelve monolito. Al rozar las **~2000 líneas** se
+   **parte según contratos** (módulo = `spec/` + `include/` + `src/`). Si tu cambio empujaría un
+   archivo más allá del umbral, **primero extraé**. **Deuda conocida:** `gui/browser_ui.c` ya
+   excede el umbral (>12.000 líneas) — al tocarlo, la lógica nueva (sobre todo la pura) va a un
+   módulo nuevo, no a engordarlo.
+5. **Validación** — `make asan` (ASan+UBSan) limpio, `valgrind`, `cppcheck`, **más revisión visual
+   del render**. La GUI necesita Wayland (no siempre disponible), así que se inspecciona headless:
+   `./build/freedom --download-png=$SP/frame.png <URL-o-archivo.html>` y `Read` de la imagen.
+   Procedimiento completo, flags (`--author-css`, `--images`, `--js=on`) y checklist en la skill
+   **`/visual-review`** (`.claude/skills/visual-review/SKILL.md`) y en
+   `[[freedom-visual-review-headless]]`. Preferí **PNG sobre PDF**: una sola imagen, un paso,
+   muchos menos tokens.
+   **Freebug** (la consola devtools) es una ventana Wayland aparte y **no** sale en el PNG: todo
+   cambio que la toque se verifica en pantalla con el flujo Xvfb+weston descrito en
+   `[[freedom-gui-visual-verification-weston]]`, con validación cruzada por `--dump-console`.
+6. **Fuzzing** — todo path que toca contenido remoto se fuzzea (`make fuzz`/`fuzz-pv`/`fuzz-js`/
+   `fuzz-img`/`fuzz-dom`/`fuzz-svg`/`fuzz-css`; AFL++ con `make fuzz-afl`). Cero crashes/leaks/UB
+   antes de cerrar.
+7. **Documentación** — **recién después de validar y fuzzear**: spec, este `CLAUDE.md`, la memoria,
+   `docs/index.html` (el "home page": atajos, features) y `README.md`. Documentar antes de validar
+   es documentar lo que todavía no es verdad.
 
 **No escribas la implementación antes que la spec y el test.** No avances de hito sin que el
 anterior esté verde, validado y fuzzeado.
 
-**Diseño orientado a prueba:** la lógica de seguridad va en **funciones puras sin I/O** (la
-superficie verificable directamente); los orquestadores con red/SO solo cablean y llaman a esas
-funciones puras sobre el estado real.
+**Diseño orientado a prueba:** la lógica de seguridad va en **funciones puras sin I/O**; los
+orquestadores con red/SO solo cablean y llaman a esas funciones puras sobre el estado real.
 
 ---
 
@@ -147,80 +105,55 @@ funciones puras sobre el estado real.
 
 | Módulo | Biblioteca | Nota |
 | :-- | :-- | :-- |
-| Red & TLS | `libcurl` + **OpenSSL 3.5+ nativo** | **No usar `liboqs`/`oqsprovider`.** OpenSSL 3.5+ trae `X25519MLKEM768`, `ML-DSA`, `SLH-DSA` en el `default` provider. Una dependencia menos que auditar. |
-| Parser HTML/CSS | `Lexbor` | C puro, superficie de ataque mínima. Sin ejecución de scripts inline por defecto. |
-| Motor JS | `QuickJS` / `MuJS` | C puro, sandboxed. Bridge C que expone **solo** APIs validadas. Sin `XHR` a terceros, sin WebRTC, sin WebGL, sin acceso a FS. |
+| Red & TLS | `libcurl` + **OpenSSL 3.5+ nativo** | **No usar `liboqs`/`oqsprovider`.** OpenSSL 3.5+ trae `X25519MLKEM768`, `ML-DSA`, `SLH-DSA` en el provider `default`. Una dependencia menos que auditar. |
+| Parser HTML/CSS | `Lexbor` | C puro, superficie mínima. Sin ejecución de scripts inline por defecto. |
+| Motor JS | `QuickJS-ng` (vendorizado) | C puro, sandboxed. Bridge C que expone **solo** APIs validadas. Sin XHR a terceros, sin WebRTC, sin WebGL, sin FS. |
 | UI/Gráficos | `Cairo` + **Wayland** (nunca X11) | X11 permite keylogging entre ventanas. |
-| Shaping de texto | **HarfBuzz** + FreeType + fontconfig (Hito 25) | C, lado confiable. Da ligaduras, kerning GPOS y formas contextuales (scripts complejos). Dependencia autorizada por el dueño: **solo** maqueta texto (hostil pero saneado, fuzzeado) con **fuentes locales**; **nunca** entra al worker confinado ni a la red. Ver `[[freedom-harfbuzz-shaping]]`. |
-| Pruebas | `CMocka` | TDD. Instalar con `sudo apt install libcmocka-dev`. |
-| Memoria | asignador endurecido / `mimalloc` | Mitigar UAF y overflows; canaries y hardening. |
+| Shaping de texto | **HarfBuzz** + FreeType + fontconfig | Lado confiable, **fuentes locales**, nunca en el worker ni en la red. `[[freedom-harfbuzz-shaping]]`. |
+| Vídeo/Audio | FFmpeg | En proceso decoder aislado (`OS_PROFILE_MEDIA_DECODER`). |
+| Pruebas | `CMocka` | `sudo apt install libcmocka-dev`. |
+| Memoria | asignador endurecido / `mimalloc` | Mitigar UAF y overflows. |
 
-> Verificación de capacidad PQC en este host:
-> `openssl list -tls-groups | grep -i mlkem` debe mostrar `X25519MLKEM768`.
+> Verificación PQC en este host: `openssl list -tls-groups | grep -i mlkem` debe mostrar
+> `X25519MLKEM768`.
 
 ### Política criptográfica concreta
-- **KEM por defecto:** `X25519MLKEM768` (híbrido).
-- **Firmas (cuando estén en la cadena):** `ML-DSA-65`; alternativa basada en hash `SLH-DSA`.
-- **Rechazos por defecto:** TLS < 1.3, KE no híbrido, **leaf (end-entity) con RSA < 3072**,
-  y cualquier cert de la cadena firmado con SHA-1. El umbral RSA aplica solo al cert del sitio,
-  no a los intermedios de CA (RSA 2048 universal en la Web PKI pública de 2026); SHA-1 es fatal
-  en cualquier posición. Ver `spec/secure_fetch.md` §3.
-- **Soberanía del usuario (la allowlist no es dictadura):** un host **explícitamente** en
-  `allow.conf` se navega bajo `SF_POLICY_ALLOWLISTED_INSECURE` si el intento estricto falla:
-  acepta **TLS 1.2** (mínimo; 1.3 sigue preferido), KE clásico y cert débil-pero-válido. La
-  **autenticidad de la cadena se mantiene** (VERIFYPEER sigue activo): se relaja la fuerza
-  criptográfica, nunca la autenticidad — llegás al sitio real sobre cripto vieja, no a un
-  impostor. Por debajo de TLS 1.2 sigue rechazado. Es opt-in, por host, con aviso (toast).
-- **Política por niveles** (ver `spec/secure_fetch.md`): `SF_POLICY_PQ_HYBRID_KE` (por defecto;
-  exige KE híbrido, acepta certs clásicos válidos porque la Web PKI pública aún no tiene certs
-  PQ en 2026), `SF_POLICY_STRICT_PQ` (opt-in; exige además firma PQ en la cadena),
-  `SF_POLICY_ALLOW_CLASSICAL_KE` (fallback de navegabilidad PQ) y `SF_POLICY_ALLOWLISTED_INSECURE`
-  (override por host de la allowlist; ver arriba).
-- **Estado local (Zero Knowledge):** caché/marcadores/credenciales cifrados con AES-256-GCM o
+
+- **KEM por defecto:** `X25519MLKEM768` (híbrido). **Firmas:** `ML-DSA-65`; alternativa `SLH-DSA`.
+- **Rechazos por defecto:** TLS < 1.3, KE no híbrido, **leaf con RSA < 3072**, y cualquier cert de
+  la cadena firmado con SHA-1. El umbral RSA aplica **solo al leaf** (RSA-2048 es universal en los
+  intermedios de la Web PKI pública); SHA-1 es fatal en cualquier posición. `spec/secure_fetch.md` §3.
+- **Soberanía del usuario:** un host **explícitamente** en `allow.conf` se navega bajo
+  `SF_POLICY_ALLOWLISTED_INSECURE` si el intento estricto falla (TLS 1.2 mínimo, KE clásico, cert
+  débil-pero-válido). Se relaja la **fuerza** criptográfica, **nunca la autenticidad**
+  (VERIFYPEER intacto): llegás al sitio real sobre cripto vieja, no a un impostor. Opt-in, por
+  host, con toast.
+- **Niveles:** `SF_POLICY_PQ_HYBRID_KE` (defecto), `SF_POLICY_STRICT_PQ` (opt-in, exige firma PQ),
+  `SF_POLICY_ALLOW_CLASSICAL_KE` (fallback) y `SF_POLICY_ALLOWLISTED_INSECURE` (override por host).
+- **Estado local (Zero Knowledge):** caché/marcadores/credenciales con AES-256-GCM o
   ChaCha20-Poly1305; clave derivada con **Argon2id** y sal única por dispositivo.
 
 ---
 
 ## 5. Compilación, hardening y auditoría
 
-`make` aplica por defecto (ver `Makefile`):
+`make` aplica por defecto:
 
 ```
 -std=c11 -Wall -Wextra -Werror -Wshadow -Wpointer-arith -Wvla -Wwrite-strings
 -fstack-protector-strong -fstack-clash-protection -fcf-protection=full
--D_FORTIFY_SOURCE=3 -fPIE -O2
+-D_FORTIFY_SOURCE=3 -fPIE -fvisibility=hidden -O2
 -pie -Wl,-z,relro,-z,now,-z,noexecstack
 ```
 
-Targets:
-- `make` / `make all` — compila `src/` (no requiere CMocka).
-- `make test` — compila y ejecuta la suite CMocka. Hasta que exista la implementación de un
-  módulo, **enlaza con fallo a propósito** (estado rojo de TDD).
-- `make asan` — la misma suite bajo AddressSanitizer + UBSan.
-- `make fuzz` / `fuzz-pv` / `fuzz-js` / `fuzz-img` / `fuzz-dom` / `fuzz-svg` — libFuzzer (parser HTML /
-  display list `page_view` / sandbox JS / decoder PNG / selectores `querySelector` sobre DOM real /
-  parser SVG en línea).
-  `make fuzz-afl` — AFL++ sobre el binario headless.
-- `make clean`.
+Targets: `make` (compila `src/`), `make test` (suite CMocka), `make asan` (ASan+UBSan),
+`make fuzz*` (libFuzzer / AFL++), `make clean`, `make deps`, `make run [URL=...]`, `make deb`,
+`make docker`.
 
-**El Makefile es la única fuente de verdad de los comandos.** Los scripts `*.sh` que duplicaban
-la compilación (y por eso se desincronizaban: `fuzz.sh` quedó obsoleto y dejó de compilar) ahora son
-**wrappers delgados** que delegan a un target: `fuzz.sh`→`fuzz-afl`, `build_deb.sh`→`deb`,
-`docker_run.sh`→`docker`, `run_freedom.sh`→`run`. Targets de desarrollo/empaquetado centralizados:
-- `make deps` — dependencias del sistema + Lexbor desde fuente (subconjunto seguro de `install.sh`;
-  **sin** los `sed` que mutan fuentes: un target jamás reescribe código versionado).
-  **Video playback requires FFmpeg dev libraries:** `sudo apt install libavformat-dev libavcodec-dev libavutil-dev libswscale-dev`.
-- `make run [URL=...]` — corre la GUI.
-- `make deb` — construye el `.deb` y **restaura el dueño de `build/`** (`debuild` corre bajo
-  fakeroot/sudo y lo deja root; el target hace `chown -R $(id -u):$(id -g) build`, si no `make`
-  posterior falla por permisos).
-- `make docker` — build + run de la imagen Zero-Trust (el entrypoint del contenedor sigue en
-  `docker-entrypoint.sh`, que corre dentro de la imagen, no es comando de host).
-
-Si agregás una fuente nueva a la compilación, queda parametrizada en el Makefile y todos los targets
-(incluido `fuzz-afl`, que reusa el target `freedom` con `CC=afl-clang-fast`) la toman solos.
-
-Todo PR debe pasar `make test` y `make asan` limpios antes de integrarse.
+**El Makefile es la única fuente de verdad de los comandos.** Los `*.sh` son wrappers delgados que
+delegan a un target (`fuzz.sh`→`fuzz-afl`, `build_deb.sh`→`deb`, `docker_run.sh`→`docker`,
+`run_freedom.sh`→`run`). Una fuente nueva se parametriza en el Makefile y todos los targets la
+toman solos. Todo PR pasa `make test` y `make asan` limpios.
 
 ---
 
@@ -229,390 +162,177 @@ Todo PR debe pasar `make test` y `make asan` limpios antes de integrarse.
 ```
 freedom/
 ├── CLAUDE.md              # este archivo
-├── Makefile               # build endurecido + targets test/asan
+├── Makefile               # build endurecido + targets test/asan/fuzz
 ├── include/<modulo>.h     # contratos públicos
 ├── src/<modulo>.c         # implementaciones
+├── gui/                   # orquestador Wayland+Cairo (browser_ui.c, bui_theme.c, svg_paint.c)
 ├── spec/<modulo>.md       # especificaciones SDD
 └── tests/test_<modulo>.c  # suites CMocka (TDD)
 ```
 
 ---
 
-## 7. Hoja de ruta por hitos
+## 7. Estado y hoja de ruta
 
-> **Convención de estado:** *cerrado* = spec + test verde + ASan/UBSan limpio (y, donde
-> aplique, fuzzing y prueba de integración de red real). Lo que solo compila pero no se pudo
-> ejercitar aquí (GUI Wayland, red real) se marca **sin verificar visualmente / pendiente de
-> itest**, nunca como verificado.
+### 7.1 Núcleo cerrado — de la red a la pantalla
 
-### 7.1 Estado actual (cerrado) — núcleo seguro de extremo a extremo
-
-El pipeline va de la red a la pantalla sin confiar en el contenido remoto. Módulos cerrados
-(prefijo entre paréntesis), todos con suites CMocka + ASan/UBSan limpio:
+Todos con suites CMocka + ASan/UBSan limpio (53 suites, 17 targets de fuzzing).
 
 | Capa | Módulo(s) | Garantía clave |
 | :-- | :-- | :-- |
-| Red/TLS | `secure_fetch` (`sf_`), `tls_impersonate` (`ti_`) | TLS 1.3 mínimo, KE híbrido PQ preferido, validación de cadena; cada redirección re-aplica TODA la política (Zero Trust). Impersonación JA3/JA4 por triple opt-in (allow∩js∩impersonate). |
-| URL/enlaces | `url` (`url_`), `link_nav` (`ln_`) | RFC 3986; "qué es una https absoluta válida" y "qué hace un clic" en un solo sitio; downgrade a http / esquemas ajenos no representables. |
-| Política de red | `request_policy` (`rp_`), `render_policy` (`rdp_`), `webcaps` (`wc_`) | Bloqueo de terceros por defecto, https-only, gate de imágenes/CSS/JS (todo opt-in). `webcaps` unifica todas las capacidades por página desde señales de confianza. |
-| Filtro de hosts | `hostblock` (`hb_`), `js_policy` (`jsp_`) | Lista negra + blanca `/etc/hosts`; la blanca gana y cubre subdominios. `js_policy` decide JS por host (off/allowlist/on/trusted/present_trusted). Ambos puros, falla abierto. |
-| Enrutado de red | `net_realm` (`nr_`) | Clasifica clearnet / `.onion` / `.i2p` y decide ruta (directo / Tor SOCKS5h / I2P HTTP / **bloqueado**). Puro. Aislamiento de realm + **fail-closed** (nunca fuga `.onion` por clearnet). |
-| Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice consultable de solo lectura con handles enteros. |
-| JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng vendorizado sin I/O; bindings sellados; relojes/pantalla normalizados; readback de canvas/audio envenenado **por origen** (`fp_origin_key`). `navigator` Firefox-completo, `crypto.getRandomValues` real, `Intl` stub, `customElements` stub. |
-| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | **fork+exec** (`/proc/self/exe --tab-worker`, sin COW cross-pestaña) + seccomp-bpf fail-closed con **W^X** (deniega `mmap`/`mprotect` con `PROT_EXEC`) + anti-volcado + Landlock + `unshare` user/net/ipc/uts. Worker NO toca red (pipe IPC al padre). |
-| Estado cifrado | `local_store`, `disk_store`, `prefs` (`prefs_`), `profile` (`profile_`) | AEAD (AES-256-GCM/ChaCha20) + Argon2id; escritura atómica 0600 (Zero Knowledge). Perfil persistente (preferencias + marcadores + historial): modelo puro `prefs` fuzzeado sellado por `profile` con clave por dispositivo; AUTH-fail ⇒ defaults sin clobber. |
-| Render pipeline | `page_view` (`pv_`), `render_doc` (`rd_`), `box_tree` (`bt_`), `flex_layout` (`fx_`), `compositor` (`cx_`), `dom_debug` (`dd_`) | DOM → display list → cajas (block/flex/grid) → stacking context (`cx_sort`, 7 capas CSS 2.1 App E). Posicionamiento, z-index, opacity de grupo, mix-blend-mode, transform matricial, overflow clipping, float. **Stage 2b (2026-07-30):** absolute/fixed boxes honran `visibility:hidden/collapse` (incluyendo ancestros; el pintor salta cajas ocultas, sin espacio reservado — no pinta) y resuelven `top/left:auto` a su **posición estática in-flow** (CSS 2.2 §10.3.7/§10.6.4, no al origen del CB — Wikipedia: menús ya no se apilan en la esquina). **Stage 2c (2026-07-30):** `clip:rect()` en positioned boxes (patrón visually-hidden / skip-link; pipeline css→pv_box_def→rend→painter con Cairo clip) y `overflow:hidden` con `height:0` (o cualquier altura declarada) clipea las content rows in-flow al padding edge de la caja (flag `box_h_set` para distinguir height:0 de height:auto). `--dump-dom`/`--dump-layout` para depuración headless. |
-| CSS | `css` (`css_`), `css_select` (`csel_`), `css_color` (`cc_`), `interp` | Parser + cascada pura (~4000 líneas). Selectores: tipo/clase/id/grupos, 4 combinadores (descendiente, hijo, hermano `+`/`~`), atributos (`[attr]`/`[op=v]` con flags `i`/`s`), pseudo-clases (`:nth-child(An+B)`/`:hover`/`:focus`/`:checked`/`:has()`), pseudo-elementos (`::before`/`::after`). `!important`, `@media` (`prefers-color-scheme`, width queries), `@keyframes` (parseado+almacenado), custom properties con `var()`, `calc()`/`min()`/`max()`/`clamp()`. Props de layout: flex/grid completos con `fr`/px tracks, `gap`, `flex-wrap`, `align-items`, `grid-column: span N`, `grid-row: span N`. Decoración: `border-radius`, `box-shadow` (outset+inset), `linear-gradient`/`radial-gradient`/`conic-gradient` (kind 0/1/2; conic = abanico de 128 sectores, `from <deg>`, posiciones de stop en `%`/`deg`; posiciones R5d emitidas de verdad y stop de DOS posiciones = borde duro para pies/rayas; radial/conic también vía el shorthand `background:`), **texto degradado** (`background-clip: text` + `-webkit-background-clip` + `-webkit-text-fill-color`: los glifos se rellenan con el gradiente del ancestro, la caja no pinta esa banda; transparent sin fuente de clip = fail-visible), `filter: drop-shadow(dx dy blur color)` (sombra de la silueta ALFA del grupo compuesto, no del rect), `background-image: url()` real (fetcheado bajo política) con `background-size`/`background-repeat`, `opacity`/`mix-blend-mode`/`isolation`, `backdrop-filter: blur()` (glassmorphism: muestrea+desenfoca el backdrop ya pintado; alias `-webkit-`), alfa de fondo `rgba()`/`hsla()` (`bg_alpha`, fill translúcido real). Transform: `translate()`, `scale()`, `rotate()`, `skew()`/`skewX()`/`skewY()`, `matrix()` (descompuesta QR en parse) con matriz Cairo afín real, pivotada en `transform-origin` (keywords+`%`). Unidades de viewport `vw`/`vh`/`vmin`/`vmax` contra el desktop normalizado 1920×1080 (mismo que `@media`/anti-fp; también dentro de `calc()`/math fns y `font-size`). Texto: `font-family` (bucket), `text-transform`, `letter-spacing`, `word-spacing`, `text-shadow`, `text-decoration`, `vertical-align`, `text-indent`, `white-space`, `word-break`, `overflow-wrap`, `text-overflow: ellipsis`, `font-variant: small-caps`, `direction`, `tab-size`, `line-height`. Caja: `margin`/`padding`/`width`/`min-width`/`max-width`/`height`/`min-height`/`max-height`/`aspect-ratio`/`box-sizing`/`visibility`/`overflow`/`cursor`/`pointer-events`/`caret-color`/`content-visibility`/`image-rendering: pixelated`. Shorthands: `font`, `background`, `place-items`/`place-content`/`place-self`. **Fail-closed:** `url()`/`@import`/`@font-face` descartados (cero red), topes anti-DoS, fuzzeado. |
-| Imágenes | `image_decode` (`img_`), `data_url` (`du_`) | Decodificado **PNG + JPEG + WebP + GIF estático dentro del worker confinado**; topes anti-DoS; salida ARGB lista para Cairo. JPEG: libjpeg-turbo con `longjmp` que nunca llama `exit()`. GIF: decoder LZW **propio** en C puro (~300 líneas, sin giflib, fuzzeado). WebP: libwebp. `data_url`: base64 inline sin red. |
-| Video/Audio | `media_decoder` (`md_`), `hls` | FFmpeg pipeline para H.264/H.265 desde MPEG-TS o `.m3u8` HLS en **proceso decoder aislado** (fork+exec, `OS_PROFILE_MEDIA_DECODER`). **v2 (2026-07-19):** reproducción a **ritmo de PTS** contra reloj de pared (`md_pacer` puro, testeado; el consumidor regula el pipeline por contrapresión de pipes), PTS en µs con time_base por segmento, primer segmento decodificado (no solo probe), drain solo en flush (v1 dejaba el codec en EOF tras cada segmento: solo se reproducía uno), audio `aplay` O_NONBLOCK best-effort (jamás bloquea el hilo Wayland), EOF del decoder ⇒ cierre ordenado. E2E: 3 segmentos HLS ⇒ 150/150 frames. Fachada JS `HTMLMediaElement` + `new Audio()` identity-safe en el worker (`spec/js_dom.md` §7c); `<source>` elegido por `type`; fallback interno de `<video>` suprimido. Integración jkanime: extracción de iframe→.m3u8/.mp4. |
-| Formularios | `form` (`fm_`), `textfield` | **GET/POST nativos sin JS**; target no-https no representable (fail-closed). Campos `<input>`/`<textarea>`/`<button>`/`<select>` nativos. |
-| Shaping | `text_shape` (`tsh_`) | HarfBuzz + FreeType + fontconfig. Ligaduras, kerning GPOS, formas contextuales. **Solo lado confiable**, fuentes locales, fuzzeado. |
-| Export | `pdf_export` (`pe_`), `zoom` (`zm_`) | PDF vectorial (texto seleccionable, paginación determinista, nombre fail-closed). Zoom 50–300% ladder, página reflowa al repintar. |
-| Descargas | `download` (`dl_`) | Guardar recurso a `~/Downloads/freedom/`. Nombre fail-closed (reusa `pe_safe_basename`), escritura atómica 0600. |
-| Pool/prefetch | `prefetch` (`pf_`) | Pre-scanner lookahead puro (fuzzeado) + pool pthreads (4 hilos) que baja stylesheets/scripts/imágenes en paralelo. Worker intacto. |
-| DevTools | `freebug` (`fb_`), `dom_debug` (`dd_`) | Consola JS (`F12`, `--dump-console`): log coloreado por nivel + ubicación `file:line:col` + REPL. `--dump-dom`/`--dump-layout` para debugging headless. Persistencia por-pestaña pendiente. |
-| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador Wayland+Cairo, ~12.400 L — deuda) | Toolbar, tabs, barra URL, scroll, menú de opciones, clic, submit. Multi-pestaña, atajos (`Ctrl+T/W/Tab`, `Ctrl+R`, `Ctrl+P/S`, `Ctrl++/-/0`). Temas claro/oscuro/sepia. `Ctrl+D` reader mode. **DEUDA:** extraer painter/chrome a módulos propios. |
-| SVG | `svg_render` (`sv_`), `svg_paint` (`svp_`) | `<svg>` en línea: parser **puro y fuzzeado** (formas, `<path>` con arcos, `<g>`+transform, `currentColor`) + pintor Cairo. La gramática **no tiene forma de URL** ⇒ cero red ⇒ se renderiza siempre. |
-| Auditoría | `spec/threat-model.md` | Activos/adversarios/fronteras → mitigaciones. 17 fuzz targets, 53 suites CMocka. |
+| Red/TLS | `secure_fetch` (`sf_`), `tls_impersonate` (`ti_`) | TLS 1.3 mínimo, KE híbrido PQ preferido; cada redirección re-aplica TODA la política. Impersonación JA3/JA4 por triple opt-in. |
+| URL/enlaces | `url` (`url_`), `link_nav` (`ln_`) | RFC 3986; downgrade a http / esquemas ajenos no representables. |
+| Política de red | `request_policy` (`rp_`), `render_policy` (`rdp_`), `webcaps` (`wc_`) | Bloqueo de terceros por defecto, https-only, gate de imágenes/CSS/JS (todo opt-in). |
+| Filtro de hosts | `hostblock` (`hb_`), `js_policy` (`jsp_`) | Lista negra + blanca formato `/etc/hosts`; la blanca gana y cubre subdominios. Puros, fallan abierto. |
+| Enrutado | `net_realm` (`nr_`) | clearnet / `.onion` / `.i2p` → directo / Tor SOCKS5h / I2P HTTP / **bloqueado**. Puro, fail-closed. |
+| Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice de solo lectura con handles enteros. |
+| JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng sin I/O; bindings sellados; relojes/pantalla normalizados; readback de canvas/audio envenenado **por origen**. |
+| Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | fork+exec + seccomp-bpf fail-closed con **W^X** + anti-volcado + Landlock + `unshare` user/net/ipc/uts. El worker NO toca red. |
+| Estado cifrado | `local_store`, `disk_store`, `prefs`, `profile` | AEAD + Argon2id; escritura atómica 0600. AUTH-fail ⇒ defaults sin clobber. |
+| Render | `page_view` (`pv_`), `render_doc` (`rd_`), `box_tree` (`bt_`), `flex_layout` (`fx_`), `compositor` (`cx_`) | DOM → display list → cajas (block/flex/grid) → stacking context (7 capas CSS 2.1 App E). Posicionamiento, z-index, opacity, blend, transform matricial, clipping, float. |
+| CSS | `css` (`css_`), `css_select` (`csel_`), `css_color` (`cc_`), `interp` | Parser + cascada pura. Selectores (tipo/clase/id/grupos, 4 combinadores, atributos, pseudo-clases, `::before`/`::after`), `!important`, `@media`, `@keyframes`, custom properties + `var()`, `calc()`/`min()`/`max()`/`clamp()`, flex/grid, gradientes, sombras, filtros, transform, unidades de viewport. **Fail-closed:** `url()` de `@import`/`@font-face` descartados, topes anti-DoS, fuzzeado. Inventario completo en `spec/css.md`. |
+| Imágenes | `image_decode` (`img_`), `data_url` (`du_`) | PNG + JPEG + WebP + GIF estático **dentro del worker confinado**; topes anti-DoS; ARGB listo para Cairo. GIF con decoder LZW propio. |
+| Vídeo/Audio | `media_decoder` (`md_`), `hls` | H.264/H.265 desde MPEG-TS o HLS en proceso aislado; reproducción a ritmo de PTS (`md_pacer` puro). |
+| Formularios | `form` (`fm_`), `textfield` | GET/POST nativos sin JS; target no-https no representable. |
+| Shaping | `text_shape` (`tsh_`) | HarfBuzz + FreeType. Ligaduras, kerning GPOS, formas contextuales. Solo lado confiable, fuzzeado. |
+| Export | `pdf_export` (`pe_`), `zoom` (`zm_`), `download` (`dl_`) | PDF vectorial; zoom 50–300 %; descargas con nombre fail-closed y escritura atómica 0600. |
+| Prefetch | `prefetch` (`pf_`) | Pre-scanner puro + pool de 4 hilos por el MISMO fetcher gateado. |
+| DevTools | `freebug` (`fb_`), `dom_debug` (`dd_`) | Consola JS (`F12`, `--dump-console`) con nivel y `file:line:col`; `--dump-dom`/`--dump-layout`/`--dump-css`. |
+| UI | `ui`/`browser` (puros) + `gui/browser_ui.c` (orquestador) | Toolbar, tabs, omnibox, scroll, menú, multi-pestaña, atajos, temas. **DEUDA:** extraer painter/chrome. |
+| SVG | `svg_render` (`sv_`), `svg_paint` (`svp_`) | `<svg>` en línea: parser puro y fuzzeado + pintor Cairo. La gramática **no tiene forma de URL** ⇒ cero red. |
+| Auditoría | `spec/threat-model.md` | Activos/adversarios/fronteras → mitigaciones. |
 
-**Decisiones de doctrina vigentes** (no evidentes en el código; **no re-litigar**). Cada regla
-es la decisión + su porqué; el detalle vive en `spec/`, en `git log` y en la memoria enlazada.
+### 7.2 Doctrina vigente (no re-litigar)
 
-*Red, TLS y soberanía del usuario*
+Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git log` y en la memoria.
 
-- **Navegabilidad sobre PQ estricto:** un host que no negocia KE híbrido PQ **avisa** (toast
-  "classical TLS 1.3"), no bloquea. TLS<1.3 / cadena inválida / SHA-1 siguen fatales salvo
-  override de allowlist. `[[freedom-navigability-over-strict-pq]]`
-- **La allowlist es el override de soberanía, no una dictadura:** un host explícito en
-  `allow.conf` se navega bajo `SF_POLICY_ALLOWLISTED_INSECURE` (TLS 1.2, KE clásico, cert
-  débil-pero-válido) si el intento estricto falla. Se relaja la **fuerza** criptográfica,
-  nunca la **autenticidad** (VERIFYPEER intacto): llegás al sitio real sobre cripto vieja, no
-  a un impostor. `hb_is_allowlisted` distingue "en la blanca explícita" de "permitido por
-  defecto". Caso real: Hacker News. `[[freedom-navigability-over-strict-pq]]`
-- **El umbral RSA<3072 aplica solo al leaf** (los intermedios RSA-2048 son toda la Web PKI
-  pública). Un leaf RSA-2048 se sortea con la excepción por host **Ctrl+Shift+E** (solo sesión).
-- **Identidad de red = identidad anti-fingerprinting:** el `User-Agent` por cable **es**
-  `FP_USER_AGENT` (Firefox/Linux, fuente única en `anti_fp`) y **coincide** con
-  `navigator.userAgent`; toda petición manda además `Accept-Language` normalizado. Mandar
-  `"Freedom"` era huella única y señal de bot. `[[freedom-anti-fp-network-identity]]`
-- **Tor/I2P a nivel de socket, nunca embebido:** proxy local (Tor SOCKS5h `127.0.0.1:9050`,
-  I2P HTTP `127.0.0.1:4444`). `net_realm` (puro) decide: `.onion`→solo Tor, `.i2p`→solo I2P,
-  clearnet→directo o Tor si "torify". Dos invariantes: **DNS remoto** (sin fuga) y
-  **fail-closed** (realm sin su proxy ⇒ bloqueado, jamás directo). `.onion` sigue https-only;
-  **`.i2p` acepta `http://`** (el overlay ya cifra/autentica por dirección); `http://` clearnet
-  sigue rechazado. Verificado E2E. `[[freedom-tor-i2p-integration]]`
-- **Filtro de hosts opcional con override:** `block.conf`/`allow.conf` (formato `/etc/hosts`)
-  desde `$FREEDOM_HOSTS_DIR`, `~/.config/freedom`, `./config`. Falla **abierto** (sin listas no
-  bloquea). La blanca gana, cubre subdominios y tiene **doble rol**: des-bloquea del adblock
-  **y** habilita el override TLS por host.
-- **Impersonación de TLS (JA3/JA4) por triple opt-in** (`allow.conf` ∩ `js.conf` ∩
-  `impersonate.conf`, `ti_should_impersonate` puro): lo que delata a Freedom en Google/FB/YT no
-  son las cabeceras (ya son Firefox-completas) sino el **ClientHello** — nuestro PQ-by-default
-  bajo UA Firefox 128 es el tell. Solo relaja el KE en esa ruta, **nunca la autenticidad**.
-  Verificado E2E en `tls.peet.ws`. NO derriba reCAPTCHA/BotGuard (muros server-side).
-  `spec/tls_impersonate.md`, `[[freedom-tls-impersonate]]`
+**Red, TLS y soberanía**
+- Navegabilidad sobre PQ estricto: un host sin KE híbrido **avisa** (toast), no bloquea. `[[freedom-navigability-over-strict-pq]]`
+- La allowlist es el override de soberanía, no una dictadura: relaja **fuerza**, nunca **autenticidad**. Caso real: Hacker News. `[[freedom-navigability-over-strict-pq]]`
+- El umbral RSA<3072 aplica **solo al leaf**; un leaf RSA-2048 se sortea con **Ctrl+Shift+E** (solo sesión).
+- Identidad de red = identidad anti-fingerprinting: el `User-Agent` por cable **es** `FP_USER_AGENT` y coincide con `navigator.userAgent`. `[[freedom-anti-fp-network-identity]]`
+- Tor/I2P a nivel de socket, nunca embebido. `.onion` https-only; `.i2p` acepta `http://` (el overlay ya cifra). Fail-closed. `[[freedom-tor-i2p-integration]]`
+- Filtro de hosts opcional con override; falla **abierto**. La blanca gana y tiene doble rol (des-bloquea del adblock **y** habilita el override TLS).
+- Impersonación TLS por triple opt-in (`allow` ∩ `js` ∩ `impersonate`). NO derriba reCAPTCHA/BotGuard. `[[freedom-tls-impersonate]]`
 
-*Aislamiento y superficie JS*
+**Aislamiento y superficie JS**
+- `io_uring` PROHIBIDO en el worker (bypass de seccomp). `[[freedom-io-uring-forbidden-in-worker]]`
+- SOP por construcción: sin API de red, sin `iframe`/`window.open`/`postMessage`/`opener`. Por eso **no se implementa CORS** (sería código muerto). `[[freedom-sop-by-construction]]`
+- Excepción gateada allow∩js: XHR/`fetch` reales, pero **el JS nunca toca el socket** — el worker proxya al padre, que re-aplica TODA la política. `[[freedom-parent-gated-xhr]]`
+- Readback de canvas/audio por origen (eTLD+1), no por sesión: cierra el cross-origin linking. `[[freedom-anti-fp-origin-readback-key]]`
+- JS apagado salvo opt-in. Con JS activo los mutadores del DOM **DETACHAN** (`lxb_dom_node_remove`, nunca `destroy`): cero UAF. `location` real y de solo lectura; la navegación la gatea el padre con `ln_resolve`. Storage/cookies/referrer efímeros o vacíos. `[[freedom-live-js]]`
+- Cada `<script>` es su propio programa; un **único** presupuesto de reloj por página se reparte entre todos. `[[freedom-per-script-isolation]]`
+- Doctrina trusted-host: allow∩js ⇒ CSS de autor e imágenes efectivos sin toggles. `JSP_ON` global **no** es confianza. `[[freedom-trusted-host-full-caps]]`
+- Cookies de sesión EN MEMORIA para allow∩js; nunca a disco. `[[freedom-session-cookies-trusted-spa]]`
 
-- **`io_uring` está PROHIBIDO dentro del worker confinado.** Es una **primitiva de bypass de
-  seccomp** (sus `IORING_OP_*` no atraviesan el syscall entry que filtra el BPF): un ring
-  anularía el allowlist, W^X y `CLONE_NEWNET`. Ya está denegado por construcción (allowlist
-  blanca) y candado con regresión. La asincronía vive en el lado confiable.
-  `spec/os_sandbox.md` §13, `[[freedom-io-uring-forbidden-in-worker]]`
-- **SOP por construcción, por defecto:** el sandbox JS no expone **ninguna** API de red, ni
-  `iframe`/`window.open`/`postMessage`/`opener`; el readback de canvas/audio está envenenado y
-  el worker no tiene red (`CLONE_NEWNET`+seccomp). Para un sitio normal la SOP clásica es
-  **estructuralmente imposible**, y por eso **no se implementa CORS** (sería código muerto).
-  `[[freedom-sop-by-construction]]`
-- **Excepción gateada allow∩js:** un host declarado de confianza DOS veces recibe
-  `XMLHttpRequest`/`fetch` reales, pero **el JS nunca toca el socket**: el worker proxya al
-  padre (`TAG_SUBREQ`/`TAG_RESULT`), que **re-aplica TODA la política** antes de buscar. "Si el
-  JS no toca el socket, no hay espionaje". Límites v1: síncrono bajo el capó, solo durante la
-  ventana de scripts, respuesta como string UTF-8. `[[freedom-parent-gated-xhr]]`
-- **Readback de canvas/audio por origen (eTLD+1), no por sesión:** `fp_origin_key(session_key,
-  eTLD+1)` (puro) — dos sitios en el mismo worker ven ruido distinto, lo que cierra el
-  **cross-origin linking** de la huella. `[[freedom-anti-fp-origin-readback-key]]`
-- **JS Secure by Default + allowlist por host + ejecución viva:** apagado salvo opt-in
-  (`JSP_OFF`/`JSP_ALLOWLIST` por defecto/`JSP_ON`, pertenencia en `js.conf`). Con JS activo el
-  worker ejecuta los scripts sobre un **DOM escribible pero seguro**: los mutadores **DETACHAN**
-  (`lxb_dom_node_remove`, **nunca** `destroy`), así ningún handle del índice queda colgando
-  (cero UAF). `location` es real y de solo lectura; una escritura que navega solo **registra la
-  string** y **el padre la gatea** con `ln_resolve` (un worker comprometido no cuela `file://`
-  ni downgrade). Storage/cookies/referrer son **efímeros o vacíos** (Zero Knowledge): no
-  persistir ni poblar con datos reales. `[[freedom-live-js]]`
-- **Cada `<script>` es su propio programa** (`hp_extract_script_list` → un `js_eval` por script):
-  una excepción no capturada ya no aborta los siguientes, solo reporta a Freebug. Un **único
-  presupuesto de reloj por página** se reparte entre todos (aislar no multiplica el tope de 1 s).
-  `[[freedom-per-script-isolation]]`
-- **Doctrina trusted-host (Hito 28):** allow∩js ⇒ además CSS de autor e imágenes **efectivos**
-  sin toggles. Donde el XHR gateado ya puede traer bytes arbitrarios, apagar imágenes no añade
-  privacidad, solo fricción. `JSP_ON` global **no** es confianza (exige la entrada explícita).
-  `[[freedom-trusted-host-full-caps]]`
-- **Cookies de sesión EN MEMORIA para hosts allow∩js** (aprobado por el dueño): `document.cookie`
-  real, nunca a disco, mueren con la app. Google sigue sin renderizar (su muro es
-  botguard/consent/IP, no cookies). `[[freedom-session-cookies-trusted-spa]]`
+**Buscador y navegación**
+- Omnibox (`url_omnibox`, puro): host desnudo ⇒ `https://`; esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda**, nunca ejecución. `[[freedom-omnibox-search]]`
+- El buscador depende de la allowlist: DuckDuckGo presenta leaf RSA-2048. `[[freedom-search-needs-allowlist]]`
+- SPA de buscador ⇒ endpoint no-JS por rewrite transparente en el único choke point. Google **no** se toca. `[[freedom-search-spa-noscript-rewrite]]`
 
-*Buscador y navegación*
+**Render y presentación**
+- Privacy by Default: imágenes y CSS de autor **apagados**; opt-in (`Ctrl+I`, `FREEDOM_IMAGES=1`). Cubre remotas **y** locales por igual.
+- **Layout != estilo de autor:** la maquetación (box model UA, flex/grid, márgenes) se aplica **siempre** — es estructura, no abre sockets. Solo los **colores** siguen tras `caps.css`.
+- Origen `file://` para páginas locales, confinado al subárbol del documento. `[[freedom-local-file-origin]]`
+- `display:none` es estructural, no una sugerencia. `[[freedom-display-none-structural]]`
+- `preserved_view` gana solo con `>= 2` bloques de diferencia.
+- **La paridad con Firefox se MIDE, no se supone:** `firefox --headless --screenshot X.png --window-size=1000 file://...` contra `--download-png` del mismo HTML. `[[freedom-firefox-parity-batch]]`, `[[freedom-firefox-parity-2026-07-30]]`
+- SVG en línea se renderiza SIEMPRE: su gramática no tiene forma de URL. `[[freedom-inline-svg]]`
+- Cajas vacías y decoración de ítems flex/grid pintan como en Firefox. `[[freedom-empty-and-item-boxes]]`
+- Custom properties con recolección scoped (respeta el gate de `@media`). `[[freedom-scoped-custom-props]]`
+- Tablas flow: la fila es UNA línea y la decoración cero no es caja. `[[freedom-flow-table-row-line]]`
+- El SUBÁRBOL out-of-flow sale del flujo, **fail-open** a -1 para que nunca desaparezca contenido. `[[freedom-oof-subtree-stage2d]]`
+- Prefetch paralelo del lado confiable: un hit cambia **cuándo** se buscó, jamás **qué**. `[[freedom-prefetch-parallel-pool]]`
 
-- **Omnibox:** `url_omnibox` (puro) decide navegar vs buscar — host desnudo ⇒ `https://`,
-  `http://` ⇒ promovido, esquema ajeno (`javascript:`/`file:`) ⇒ **búsqueda** (nunca ejecución),
-  texto libre ⇒ DuckDuckGo HTML. `[[freedom-omnibox-search]]`
-- **El buscador depende de la allowlist:** DuckDuckGo presenta leaf **RSA-2048**, que la política
-  por defecto rechaza; por eso `config/allow.conf` incluye `duckduckgo.com`. Si la búsqueda sale
-  en blanco, es que ese `allow.conf` no está en el search path en runtime.
-  `[[freedom-search-needs-allowlist]]`
-- **SPA de buscador ⇒ endpoint no-JS (rewrite transparente):** `duckduckgo.com/?q=` se reescribe
-  a su endpoint HTML en el único choke point de navegación (`url_search_rewrite`, puro). La barra
-  y el historial guardan la URL pedida. Google **no** se toca. `[[freedom-search-spa-noscript-rewrite]]`
+**Invariantes de build y de proceso**
+- **Un campo nuevo que no cruza el códec IPC es una feature muerta en silencio.** Todo campo de `pv_run`/`pv_box_def`/`rd_block` —y todo `pv_kind` nuevo— se hilvana en `write_view`/`read_view` (`src/tab.c`). Ya pasó cuatro veces. `[[freedom-render-pipeline-ipc]]`
+- **`make clean` es obligatorio cuando crece una struct compartida** (`css_style`, `pv_run`, `pv_box_def`): el Makefile no rastrea dependencias de headers. Igual tras `make asan`.
+- **`-fvisibility=hidden` es invariante de build (no quitar):** sin él, `hb_free` del ejecutable secuestra el alocador de HarfBuzz. Vive en `HARDEN` **y** en el `CFLAGS` de `asan`. `[[freedom-harfbuzz-shaping]]`
+- Modo boyscout con memoria: ante una regresión, diff contra el commit inicial antes de tocar nada. `[[freedom-security-modules-butchered-by-fix-commits]]`
 
-*Render y presentación*
+### 7.3 Hitos cerrados (una línea por hito)
 
-- **Privacy by Default:** imágenes y CSS de autor **apagados**; opt-in por menú (`Ctrl+I`,
-  `FREEDOM_IMAGES=1`). El toggle cubre remotas **y** locales por igual: un HTML local hostil
-  tampoco autocarga nada. El decode corre en el worker confinado.
-- **Layout != estilo de autor:** la **maquetación** (box model UA, flex/grid, márgenes) se aplica
-  **siempre** — es estructura, no abre sockets. Solo los **colores** de autor siguen tras
-  `caps.css`. El gate vive en `rd_build`.
-- **Origen `file://` para páginas locales:** una página de disco recibe `file:///realpath`, así sus
-  `src` relativos resuelven **confinados al subárbol del documento** (sin escape `../`, sin
-  esquema ajeno). La navegación local sigue usando paths planos. `[[freedom-local-file-origin]]`
-- **`display:none` es estructural, no una sugerencia** (revertido el commit 897f414, que lo trataba
-  como "presentación" cuando había inline style sin JS: en slashdot volvía visibles filas ocultas y
-  la página crecía a 142.000 px). `[[freedom-display-none-structural]]`
-- **`preserved_view` gana solo con `>= 2` bloques de diferencia:** el snapshot pre-script cubre la
-  corrupción DOM de jQuery (subárboles enteros borrados); con el umbral en "cualquier diferencia"
-  ganaba también cuando el CSS ocultaba un solo elemento y lo volvía a pintar.
-- **La paridad con Firefox se MIDE, no se supone:** Firefox está instalado en este host —
-  `firefox --headless --screenshot X.png --window-size=1000 file://...` contra `--download-png`
-  del mismo HTML. Ese diff empírico cerró las tandas 2026-07-27 y 2026-07-30 (flex real con basis
-  max-content, contenedor que pinta su caja, `inline-block` como fila anónima, out-of-flow
-  shrink-to-fit, celdas con caja, fondos inline). `[[freedom-firefox-parity-batch]]`
-- **Tanda 2026-07-30 (ver `spec/page_view.md` "Paridad con Firefox, tanda 2026-07-30"):** la banda
-  de fondo de una fila **muere donde empieza una caja** que pinta fondo propio (antes toda hero con
-  gradiente perdía su titular bajo una banda del color de la página); el contenedor flex/grid lleva
-  su **`cont_box_id`** y la caja raíz de un ítem debe ser **descendiente estricta** de ella (antes
-  un `space-between` pintaba su banda dos veces); `inline-block` **encoge y lo coloca el
-  `text-align` heredado**; una **caja anidada dentro de un ítem** ya pinta (cerrado el límite v1);
-  y un elemento reemplazado se coloca por `text-align` y respeta sus dimensiones **declaradas**.
-  `[[freedom-firefox-parity-2026-07-30]]`
-- **SVG en línea se renderiza SIEMPRE** (`spec/svg_render.md`): la gramática que acepta
-  `svg_render` **no tiene forma de URL** (`<image>`/`<use>`/`<script>`/`<style>` se descartan con su
-  subárbol), así que un SVG no puede hacer fetch — no hay nada que gatear. El parser es **puro y
-  fuzzeado** (`make fuzz-svg`) y corre del lado confiable, igual que `css_parse`; `svg_paint` solo
-  traduce geometría validada a Cairo. `[[freedom-inline-svg]]`
-- **Cajas vacías y decoración de ítems flex/grid pintan como en Firefox:** el render era por nodo de
-  texto, así que un elemento decorado **sin contenido** (barra, separador, tile) desaparecía y un
-  ítem flex/grid perdía la decoración de su caja raíz. `[[freedom-empty-and-item-boxes]]`
-- **Custom properties con recolección scoped:** la tabla de `--name` respeta el gate de `@media` y
-  solo recolecta de reglas root-scoped. Antes la paleta oscura INACTIVA de Wikipedia pisaba la clara
-  y pintaba blanco sobre blanco. `[[freedom-scoped-custom-props]]`
-- **Tablas flow: la fila es UNA línea y la decoración cero no es caja** (`padding:0`/`border:0` del
-  reset universal creaba una caja por elemento, y el pintor hace flush de línea en cada transición
-  de caja). HN pasó de 5208 px a 1896. `[[freedom-flow-table-row-line]]`
-- **El SUBÁRBOL out-of-flow sale del flujo (Stage 2d):** `bt_oof_anchor`/`bt_oof_root` (puros,
-  cycle-bounded, **fail-open** a -1 para que contenido hostil mal clasificado se pinte en flujo y
-  nunca desaparezca), chequeados **antes** de la rama flex/grid. `[[freedom-oof-subtree-stage2d]]`
-- **Prefetch paralelo del lado confiable (Hito 29):** pre-scanner puro + pool de 4 hilos por el
-  MISMO fetcher gateado. Un hit cambia **cuándo** se buscó, jamás **qué**. El worker y su protocolo
-  no cambian un byte. `[[freedom-prefetch-parallel-pool]]`
+> Comprimido 2026-07-17 y 2026-07-31. El detalle vive en `git log`, `spec/` y la memoria.
 
-*Invariantes de build y de proceso*
+- **Foundation (6–18):** GUI interactiva, CSS estático + box model UA, `hostblock`, Tor/I2P, charset, render moderno, multi-pestaña, fetch asíncrono, PDF export, tooling headless, XHR/fetch gateados, scripts externos, namespaces + seccomp W^X + fork+exec, identidad anti-fp + omnibox, fullscreen (`Alt+Enter`).
+- **CSS moderno (19–25):** origen `file://`, JPEG/GIF/WebP en worker, `line-height` + `--author-css`, allowlist JS, JS vivo, zoom + descargas, CSS de autor + reader mode, `@media`, flex/grid, box model de autor, selectores de atributo + `!important`, HarfBuzz shaping.
+- **JS & render avanzado (26–30):** `querySelector`, `URL`/`URLSearchParams`, `float`/`clear`, `var()`/`calc()`, `visibility`/`overflow`, math functions + propiedades lógicas + shorthands, caps CSS 16x + `pv_style_cache`, doctrina trusted-host, prefetch paralelo, perfil cifrado, `border-radius` + gradientes, `fr`/px tracks, `box-sizing`, timers async, cookies de sesión, rewrite DuckDuckGo.
+- **Compositor & transform (M0.1–M1.2c):** `webcaps` unificado, códec IPC bulk, `compositor` puro, z-index negativo, opacity de grupo, `mix-blend-mode` + `isolation`, transform con matriz Cairo afín (incl. `skew`/`matrix`/`transform-origin`).
+- **Imágenes & datos:** `data_url` (fuzzeado, 17M execs), `srcset`, `background-image: url()` con `size`/`repeat`, webp, pipeline vídeo jkanime.
+- **Vídeo pacing v2 + superficie media (jul 19):** `md_pacer` puro + 5 fixes v1 + fachada `HTMLMediaElement`/`Audio` + `<source>` por type. **v2.1:** nunca acoplar audio/pipeline a la cadencia de repintado. `[[freedom-video-pacing-v2]]`
+- **Batch impacto visual (jul 19):** unidades de viewport, `skew`/`matrix`/`origin`, `backdrop-filter` + alfa de fondo, `matchMedia` + `IntersectionObserver`. `[[freedom-visual-impact-batch]]`
+- **Paridad Firefox tanda 1 y 2 (jul 27 y 30):** banda de fila que muere donde empieza una caja, `cont_box_id`, `inline-block` shrink-to-fit, cajas anidadas en ítems, elementos reemplazados, `max-width`/`margin:auto`. Módulos nuevos `svg_render` + `svg_paint`. `[[freedom-firefox-parity-2026-07-30]]`
+- **Paridad Firefox tanda 3 (jul 31) — tipografía y flujo inline.** Medido contra Firefox headless:
+  - `font-size` absoluto vs relativo (`css_style.font_abs`): `px`/`pt`/`rem`/viewport/keywords resuelven contra el root de 16 px y **reemplazan** la escala UA; `em`/`%` siguen multiplicando y **encadenan** hacia afuera hasta topar con una absoluta. Antes todo `<h1>` con `font-size` de autor salía al **doble**. `spec/css.md`.
+  - Métricas UA alineadas con la hoja del navegador: base **16 px** (= el root contra el que `css.c` resuelve `px`, un solo número para los dos lados), `heading_scale` 2.0/1.5/1.17/1.0/0.83/0.67, `line_spacing` 1.2, y **los títulos heredan el color** en vez de un azul del tema. `spec/box_style.md` §4b.
+  - Un `<h1>` puede des-negritarse: la negrita UA de los títulos viaja en el peso **resuelto** (`is_bold_tag`), no forzada en el pintor.
+  - Colapso de espacio en el borde entre runs: CSS colapsa una secuencia de espacios pero **no inventa** uno donde no lo había — `<strong>bold</strong>,` ya no pinta `bold ,`. `spec/page_view.md`.
+  - `position:absolute|fixed` (y `float`) vuelven al elemento de bloque (CSS 2.2 §9.7): un `<span>` absoluto ya registra caja, con lo que `right`/`bottom` (que `box_tree` ya resolvía) por fin posicionan.
+  - El PNG se dimensiona por la caja más baja, no solo por las filas de texto: una página hecha solo de cajas exportaba **0 px**.
+- **Tooling & seguridad:** doctrinas V-001..V-004 (abajo). `-fvisibility=hidden` invariante. `io_uring` prohibido en worker.
 
-- **Un campo nuevo que no cruza el códec IPC es una feature muerta en silencio.** Todo campo de
-  `pv_run`/`pv_box_def`/`rd_block` —y todo `pv_kind` nuevo— se hilvana en `write_view`/`read_view`
-  (`src/tab.c`) o el lado lector recibe ceros. Ya pasó tres veces: `clip_*`+`box_h_set` (clipeaba
-  todo box posicionado a 0×0), el `block_id` de los inputs, y `PV_SVG` (degradaba a texto y la
-  página pintaba su propio marcado SVG como prosa). `[[freedom-render-pipeline-ipc]]`
-- **`make clean` es obligatorio cuando crece una struct compartida** (`css_style`, `pv_box_def`,
-  `pv_run`): el Makefile no rastrea dependencias de headers, así que los `.o` no recompilados
-  quedan con el layout viejo y se leen campos basura. Igual tras `make asan` (deja objetos
-  instrumentados que no enlazan sin el runtime).
-- **`-fvisibility=hidden` es invariante de build (no quitar):** un símbolo del ejecutable con
-  visibilidad por defecto **preempta** al homónimo de una librería en TODO el proceso. Concreto:
-  `hostblock` usa prefijo `hb_` y HarfBuzz exporta `hb_free` → sin la flag, el `hb_free` del
-  ejecutable secuestra el alocador de HarfBuzz y lo crashea. Vive en `HARDEN` **y** en el `CFLAGS`
-  de `asan`. `[[freedom-harfbuzz-shaping]]`
-- **Modo boyscout con memoria:** un "fix" puede destrozar un módulo de seguridad; ante una regresión,
-  diff contra el commit inicial antes de tocar nada.
-  `[[freedom-security-modules-butchered-by-fix-commits]]`
+### 7.4 Abierto — por valor visual medido
 
-### 7.2 Hitos cerrados (resumen)
+**Paridad de render (lo que hoy más rompe una página real):**
 
-> Comprimido 2026-07-17 — ~70 hitos menores cerrados (julio 2026). El detalle completo vive en
-> `git log`, `spec/`, y la memoria persistente del agente. Ver §8 sobre el límite de tamaño.
+| # | Hito | Estado | Esfuerzo |
+| :-- | :-- | :-- | :-- |
+| R1 | **Contenedores flex/grid anidados** — `header{display:flex}` con `nav>ul{display:flex}` se parte en dos filas. Rompe casi toda barra de navegación y toda grilla de tarjetas flex. | **Diseño escrito** en `spec/page_view.md` (tabla `pv_cont_def` con `parent_id`/`parent_item` + recursión en `layout_container`) | Alto |
+| R2 | **`inline-block` dentro de la línea** — un badge/pill parte la línea en tres. Necesita formato inline real (caja inline que no hace flush y se dimensiona por sus fragmentos). | Sin empezar | Alto |
+| R3 | **Tablas: ancho automático (shrink-to-fit) + `colspan`/`rowspan`** — hoy toda tabla ocupa el ancho completo y los spans se ignoran. | Sin empezar | Medio-alto |
+| R4 | Texto que fluye **al lado** de un `float` (hoy va debajo) | Sin empezar | Medio |
+| R5 | `grid-template-rows` y `grid-row: span N` (las columnas ya están) | Sin empezar | Medio |
+| R6 | `position:sticky` con scroll real | Sin empezar | Medio |
+| R7 | Un elemento reemplazado (`<img>`/`<svg>`) fluye en su propia fila, no dentro de la línea (depende de R2) | Sin empezar | — |
+| R8 | `html{font-size:62.5%}` no cambia lo que vale `rem` (el root queda fijo en 16 px) | Sin empezar | Bajo |
+| R9 | SVG: gradientes/patrones (`<defs>`), `<animate>`, filtros/máscaras, y `.svg` como recurso externo de `<img src>` | Sin empezar | Medio |
 
-**Hitos mayores por etapa:**
-- **Foundation (Hitos 6–18):** GUI interactiva (temas/atajos), CSS estático+box model UA, filtro de hosts (`hostblock`), Tor/I2P (`net_realm`), charset, render moderno (listas/tablas/énfasis), multi-pestaña, fetch asíncrono, PDF export, tooling headless (`--download-png`/`--download-pdf`/`--dump-dom`), XHR/fetch gateados (Hito 26), scripts externos (Hito 24 EXT), namespaces+seccomp W^X+fork+exec worker, identidad anti-fp+omnibox, fullscreen video toggle (`Alt+Enter`/`Esc`).
-- **CSS moderno (Hitos 19–25):** `file://` origen local, decodificación JPEG/GIF/WebP en worker, `line-height`+`--author-css`, allowlist JS, JS vivo (DOM bridge, timers sintéticos, `innerHTML`, `location`), zoom+descargas, CSS de autor+reader mode, `@media`, flex/grid desde `<style>`, box model de autor, selectores atributo+`!important`, `text-decoration`, props presentación, layout values, tablas anidadas, external stylesheets, HarfBuzz shaping.
-- **JS & render avanzado (Hitos 26–30):** `querySelector`, `URL`/`URLSearchParams`, `float`/`clear`, `var()`/`calc()`/`repeat()`/`minmax()`/`flex-wrap`, `visibility`/`overflow` pintado, pipeline CSS→pintura completo, math functions+propiedades lógicas+shorthands, caps CSS 16x+`pv_style_cache`, trusted-host doctrina, prefetch paralelo, perfil persistente cifrado, `border-radius`+`linear-gradient`, `fr`/px grid tracks, `box-sizing: border-box`, timers async reales, PSEUDO_ALWAYS, presentation-trust, cookies sesión, DuckDuckGo SPA→rewrite, blend-in surface.
-- **Compositor & transform (M0.1–M1.2b):** `webcaps` unificado, codec IPC bulk, `compositor` puro (`cx_`), z-index negativo fix, opacity grupo real, mix-blend-mode+isolation, CSS `transform` translate/scale/rotate con matriz Cairo afín.
-- **Imágenes & datos (Julio 16–17):** `data_url` (base64 inline fuzzeado, 17M execs), `srcset` fallback, `background-image: url()` real con `background-size`/`background-repeat`, webp decoder, pipeline video jkanime (iframe→.m3u8/.mp4).
-- **Video pipe hardening (Julio 18):** `video_read_frame` reads one frame per poll (no recursion), `v_read` handles `EAGAIN` via poll+retry, `decoder_out_fd` fixed `F_GETFL`/`O_NONBLOCK`. Script async attribute removed; R7 simplified to two-pass (sync→defer).
-- **Video pacing v2 + superficie media moderna (Julio 19):** `md_pacer` puro (spec/media_decoder.md; 6 tests, ASan, hostile-PTS sin UB) + 5 fixes v1 (audio bloqueante, sin pacing, primer segmento perdido, PTS en segundos, drain por segmento ⇒ codec EOF permanente) + fachada `HTMLMediaElement`/`Audio` (spec/js_dom.md §7c) + `<source>` por type + fallback de media suprimido + fix noscript-con-JS (snapshot preserve llevaba js=0). **v2.1 (mismo día):** el repaint-por-frame ahogaba el pipeline (audio inaudible) — tope de catch-up solo-video, pintado desacoplado a `max(33, 3×costo medido)` ms y pipe de aplay 1 MiB; validado con simulador del consumidor (repaint 5/60/300 ms ⇒ 100 % del PCM a tiempo real). Ver `[[freedom-video-pacing-v2]]`.
-- **Fullscreen video toggle (Julio 2026):** `Alt+Enter` alterna pantalla completa del navegador (compositor Wayland) tanto con video activo como sin él; `Escape` sale de pantalla completa también estando en un campo de texto. El estado `w->fullscreen` se sincroniza con el compositor en cada `toplevel_configure` (Alt+Tab, workspace switch). En fullscreen el frame de video escala al viewport completo (`w->width × w->height`, excluyendo la barra de título CSD). `w->fullscreen` resetea a `0` en cada configure sin `XDG_TOPLEVEL_STATE_FULLSCREEN`. Ver `spec/video_fullscreen.md`.
-- **Batch impacto visual moderno (Julio 19):** viewport units `vw`/`vh`/`vmin`/`vmax` vs 1920×1080 normalizado (spec/css.md "Viewport units"); M1.2c `skew()`/`matrix()` QR-decompuesta/`transform-origin` (spec/compositor.md); `backdrop-filter: blur()` + alfa de fondo `rgba()`/`hsla()` + dedup fila-vs-caja + altura de autor out-of-flow (glassmorphism E2E); `matchMedia` real + `IntersectionObserver` sintético identity-safe (spec/js_dom.md §7b, destraba reveal-on-scroll). Fuzz-css re-enlazado (bit rot lexbor). Ver `[[freedom-visual-impact-batch]]`.
-- **Paridad Firefox + SVG en línea (2026-07-30):** medido con Firefox headless contra `--download-png`. Banda de fila que muere donde empieza una caja, `cont_box_id` del contenedor flex/grid, `inline-block` shrink-to-fit centrado por `text-align`, cajas anidadas dentro de ítems flex/grid, elementos reemplazados alineados y con dimensiones declaradas, `max-width`/`margin:auto` dentro de una caja. Módulos nuevos `svg_render` (puro, 14 tests, `make fuzz-svg`) + `svg_paint` (Cairo). `spec/svg_render.md`, `spec/page_view.md`, `[[freedom-inline-svg]]`, `[[freedom-firefox-parity-2026-07-30]]`.
-- **Tooling & seguridad:** Doctrinas V-001 (SIZE_MAX guard), V-002 (`calloc`), V-003 (buffer encadenado), V-004 (`snprintf` fail-closed). `-fvisibility=hidden` invariante. `io_uring` PROHIBIDO en worker.
+**Deuda estructural:** extraer painter y chrome de `gui/browser_ui.c` a `src/painter.c` y
+`src/chrome.c` (§3 cláusula anti-monolito). Cerrar la animación `@keyframes` (ya parseado y
+almacenado; falta cablear `frame_clock` → pintado).
 
-### 7.3 Plan Estratégico — Hitos abiertos por fase
-
-> Convención: cada hito abierto requiere spec → test rojo → código verde → refactor →
-> validación (ASan) → fuzzing → documentación. Un hito se marca cerrado solo cuando pasa
-> `make test && make asan` y, donde aplique, `make fuzz-*`.
+**Plataforma:** HTTP/2 y HTTP/3 (QUIC, helper aislado, solo lado confiable), WebSockets
+(`TAG_WS_*` con el patrón de `TAG_SUBREQ`, gateado por `webcaps.net`), fetch concurrente
+multipestaña, IndexedDB sobre `local_store`, Web Crypto real, `arrayBuffer` binario, Wasm en
+proceso helper (intérprete, sin JIT), Service Workers solo caché, Freebug 2.0 (Network/Elements),
+user scripts zero-trust, buscar en página, gestor de contraseñas, sincro E2EE por Tor, passphrase
+maestra, back-stack persistente, `pledge`/`unveil` (OpenBSD), scroll suave, `defer`/`async`,
+import/export de marcadores.
 
 ---
-
-#### FASE 0: Cierre de Deuda + Animación CSS (prioridad inmediata)
-
-| Hito | Descripción | Dependencias | Esfuerzo |
-|:--|:--|:--|:--|
-| **A. Cerrar animación `@keyframes`** | `interp.c` cableado al `frame_clock` → painter. `@keyframes` ya parseado+almacenado, `frame_clock` existe, `interp.c` listo. Falta: conectar el frame tick al pipeline de pintado. | Ninguna | Bajo |
-| **B. Refactor painter (extraer de browser_ui.c)** | `paint_box_decoration`, `paint_content_row`, `paint_structured`, z-index painter → `src/painter.c` + `include/painter.h` | Ninguna | Bajo |
-| **C. Refactor chrome (extraer de browser_ui.c)** | Toolbar, tabs, omnibox, menú de opciones → `src/chrome.c` + `include/chrome.h` | Hito B (desacople de painter) | Medio |
-| **D. HTTP/2 en secure_fetch** | Negociación nativa HTTP/2 vía libcurl (`CURL_HTTP_VERSION_2_0`). Configurable por política. | Ninguna | Bajo |
-
-**Driver:** Bajo esfuerzo, alto impacto visual. La animación es el 80% listo. El refactor de `gui/browser_ui.c` (~10.700 L → deuda §5) se hace incremental — estos dos hitos extraen la lógica más caliente. HTTP/2 es un cambio de configuración en curl, casi cero riesgo.
-
----
-
-#### FASE 1: Red Moderna + Tiempo Real
-
-| Hito | Descripción | Dependencias | Esfuerzo |
-|:--|:--|:--|:--|
-| **E. HTTP/3 (QUIC)** | Helper aislado con `ngtcp2` + `nghttp3`. Solo en el lado confiable (padre), nunca en el worker. Config toggle. | Hito D | Alto |
-| **F. WebSockets** | Nuevo protocolo IPC `TAG_WS_*` (mismo patrón que `TAG_SUBREQ`). Gateado por `webcaps.net` (allow∩js). El worker proxea al padre, que abre el socket real. | Hito D (HTTP/1.1 upgrade base) | Medio |
-| **G. Fetch asíncrono multipestaña** | Cargas concurrentes entre pestañas (hoy una a la vez). El fetch-thread atiende múltiples workers. | Hito 9 (existente) | Medio |
-
-**Driver:** Sin HTTP/2/3, el rendimiento en redes modernas es pobre. WebSockets destraba apps real-time (chats, dashboards, notificaciones). Fetch concurrente destraba I2P (latencia alta).
-
----
-
-#### FASE 2: APIs JS de Persistencia + Criptografía
-
-| Hito | Descripción | Dependencias | Esfuerzo |
-|:--|:--|:--|:--|
-| **H. IndexedDB** | API `indexedDB` sobre `local_store` (cifrado Argon2id + AES-256-GCM/ChaCha20). Efímero por sesión = Zero Knowledge. | `local_store` (existente) | Alto |
-| **I. Web Crypto (subtle full)** | `subtle.encrypt/decrypt/sign/verify/digest` real con OpenSSL nativo. `getRandomValues` y `randomUUID` ya existen. | Ninguna | Medio |
-| **J. `arrayBuffer` binario real** | `fetch()` y XHR con response `arrayBuffer` (hoy solo string UTF-8). Streaming diferido. | Hito D (HTTP/2) | Bajo |
-
-**Driver:** IndexedDB es la API de persistencia más solicitada para PWAs. Web Crypto permite firmas y cifrado sin exponer claves al contenido remoto.
-
----
-
-#### FASE 3: Tiempo Real de Confianza + Wasm
-
-| Hito | Descripción | Dependencias | Esfuerzo |
-|:--|:--|:--|:--|
-| **K. WebRTC (allow∩js)** | Solo para trusted hosts (allow∩js). Forzar TURN sobre Tor, bloquear STUN público. `getUserMedia` gateado. Proceso helper aislado con su propio perfil seccomp. | F (WebSockets, signaling) | Muy alto |
-| **L. WebSocket para trusted hosts** | Extensión de F: el gate `webcaps.rtc` permite conexiones WebSocket sin restricción de proxy. | F (WebSockets) | Bajo |
-| **M. Wasm helper process** | Nuevo `src/wasm_helper.c` con seccomp más permisivo (PROT_EXEC permitido). Comunicación pipe con el worker. Runtime interpreter-only (wasm3 modo intérprete, sin JIT). W^X del worker principal intacto. | Ninguna | Alto |
-| **N. Service Workers (solo cache offline)** | Ciclo de vida limitado: mueren con la pestaña. Cache API sobre `local_store`. Sin sync en background, sin push, sin persistencia fantasma. | H (IndexedDB) | Alto |
-
-**Driver:** Wasm y SW son las dos capacidades "modernas" más pedidas. WebRTC solo se activa con doble opt-in explícito (allow∩js es la llave maestra).
-
----
-
-#### FASE 4: DevTools + Ecosistema
-
-| Hito | Descripción | Dependencias | Esfuerzo |
-|:--|:--|:--|:--|
-| **O. Freebug 2.0 (Network tab)** | Log de todos los `TAG_SUBREQ`/`TAG_RESULT` con estado, URL, tiempo, política aplicada. | Hito B (painter hook) | Medio |
-| **P. Freebug 2.0 (Elements tab)** | Inspector DOM en vivo sobre el índice `dom_` + CSS calculado (`dd_format_css`). | Ninguna | Medio |
-| **Q. User Scripts zero-trust** | API reducida: solo manipulación DOM (`document`, `Element`) + fetch gateado. Sin red propia, sin almacenamiento. Cargados desde `~/.config/freedom/userscripts/`. | Ninguna | Medio |
-| **R. Buscar en página (`/`)** | Overlay Cairo de coincidencias sobre display list. `n`/`N` para saltar. | Hito B | Bajo |
-
-**Driver:** Freebug 2.0 convierte a Freedom en un navegador utilizable para desarrolladores. User Scripts son el equivalente de extensiones sin la superficie de ataque de Chrome.
-
----
-
-#### FASE 5: UX Cotidiano + Seguridad
-
-| Hito | Descripción | Dependencias | Esfuerzo |
-|:--|:--|:--|:--|
-| **S. Gestor de contraseñas** | Autocompletado sobre `profile.c` + master passphrase (Argon2id). Datos desencriptados solo en memoria. | Hito 10 (existente) | Alto |
-| **T. Sincronización E2EE vía Tor** | Sincro de marcadores/historial/prefs cifrados. Servidor .onion autoalojado. Reusa `tls_impersonate` para transporte. | Hito 10 (existente) | Muy alto |
-| **U. Passphrase maestra (opt-in)** | Desbloqueo del perfil con passphrase que resiste acceso total al directorio. Mismo contenedor `local_store`. | Hito 10 (existente) | Medio |
-| **V. Back-stack persistente entre sesiones** | Historial de navegación (atrás/adelante) sobrevive al cierre, no solo la omnibox. | H 10 (existente) | Bajo |
-
-**Driver:** Gestor de contraseñas y sincro hacen de Freedom un daily driver. La passphrase maestra protege contra acceso al disco.
-
----
-
-#### PENDIENTE DE FONDO (sin iniciar)
-
-- `colspan`/`rowspan` en tablas
-- `position:sticky` con scroll real
-- `right`/`bottom` insets
-- `grid-template-rows` y `grid-row: span N` (columnas ya cerradas)
-- Import/export de bookmarks
-- `pledge`/`unveil` para OpenBSD
-- Scroll suave (smooth scroll)
-- `defer`/`async` en `<script src>`
-- Texto que fluye **al lado** de un `float` (hoy va debajo)
-- `align-items` contra una altura **explícita** del contenedor
-- Un elemento reemplazado (`<img>`/`<svg>`) fluye **en su propia fila**, no dentro de la
-  línea de texto que lo rodea (hace falta layout inline real para el ícono junto a la frase)
-- SVG: gradientes/patrones (`<defs>`), `<animate>`, filtros/máscaras, y `.svg` como recurso
-  externo de `<img src>` (hoy solo `<svg>` en línea) — `spec/svg_render.md` "Fuera de alcance"
 
 ## 8. Reglas para el asistente (IA)
 
-- Aplica el ciclo completo de §3 **en orden**: spec → test rojo → código verde → refactor →
-  validación (ASan) → fuzzing → documentación. No te saltes pasos ni adelantes implementación sin
+- Aplica el ciclo completo de §3 **en orden**. No te saltes pasos ni adelantes implementación sin
   spec+test, y no documentes antes de validar y fuzzear.
 - **Falla cerrado.** Ante la duda de seguridad, rechaza; nunca degrades una garantía por conveniencia.
 - No introduzcas dependencias nuevas sin justificarlas por reducción de superficie de ataque, y nunca
-  `liboqs`/`oqsprovider` (OpenSSL nativo cubre PQC).
-- Sé honesto sobre lo no verificado: el código de red/GUI que no se pueda ejercitar aquí se marca como
-  pendiente de prueba de integración / verificación visual, no como verificado.
-- Verifica que cada símbolo/flag/algoritmo existe en este host antes de recomendarlo
-  (`openssl list ...`, `pkg-config ...`).
-- Comandos nuevos van al **Makefile** (única fuente de verdad), no a scripts sueltos que se
-  desincronizan (ver §5).
-- Modo **boyscout**: resolver deuda técnica y fallos de seguridad nunca está fuera de scope, siempre
-  sin perder funcionalidad.
-- **Doctrina `malloc(n+1)` fail-closed (V-001):** todo patrón `malloc(len + 1)` → `memcpy(dst, src, len)`
-  debe llevar un `if (len == (size_t)-1) return NULL;` antes de `malloc`. `len + 1` sin esa guarda
-  revienta el heap cuando `len == SIZE_MAX` (wrap a 0, `malloc(0)` devuelve puntero válido, `memcpy`
-  escribe `SIZE_MAX` bytes). Aplica a `dup_bytes`, `dup_n`, `host_dup` y cualquier helper análogo
-  que aparezca. La guarda cuesta 0 en runtime y es defensa en profundidad aunque el llamador acote
-  la longitud. Esta regla se verifica en code review y vale también para `realloc(n * sizeof(T))` y
-     cualquier suma/tamaño cuya fuente sea remotamente controlable.
-- **Doctrina `calloc` sobre `malloc` para arreglos (V-002):** todo patrón de asignación de
-  múltiples arreglos del mismo tamaño (`malloc(n * sizeof(T))` para varios punteros) debe
-  usar `calloc(n, sizeof(T))` en lugar de `malloc(n * sizeof(T))` para garantizar
-  zero-initialization y prevenir lecturas de memoria no inicializada. Además, toda operación
-  `memcpy(dst, src, len)` donde `len` sea un valor en tiempo de ejecución debe llevar una
-  verificación explícita de que `len` no excede el tamaño del destino, ya sea por cota
-  conocida (check antes del malloc/realloc) o por guarda inmediata antes del memcpy.
-  `calloc` cuesta lo mismo que `malloc` (la memoria ya viene zeroed del kernel por razones
-  de seguridad) y previene fugas de información por páginas no inicializadas. Esta regla se
-  verifica en code review y aplica a archivos nuevos y existentes (boy-scout: nunca está
-   fuera de scope arreglar un V-002 donde se encuentre).
-- **Doctrina de buffer encadenado (V-003):** todo acumulador/acopiador de datos cuyo tamaño
-  no sea estrictamente acotado por un límite de protocolo (p. ej. un solo campo de formulario)
-  debe implementarse como una **cadena de bloques de tamaño fijo** (linked list de bloques de
-  64 KiB por defecto), donde cuando un bloque se llena se asigna otro. Esto evita límites
-  artificiales que pueden romper páginas legítimas y previene que contenido hostil fuerce una
-  asignación contigua enorme. El único límite es OOM de `malloc`. NO usar un solo buffer que
-  crece con `realloc` (riesgo de fragmentación / OOM en asignación contigua grande). NO poner
-  un tope duro tipo "#define ..._MAX  (1024u * 1024u)" — la cadena de bloques escala sin tope
-  excepto la memoria disponible. El patrón es `ih_block`/`ih_acc` en `dom.c:805`:
-  un callback que recibe chunks y los copia al bloque actual, allocando un nuevo bloque
-  encadenado cuando se llena, y un `ih_flatten` final que recorre la cadena y produce un solo
-  buffer contiguo. Esta regla se verifica en code review y aplica a todo nuevo recolector de
-     datos cuyo tamaño sea controlado por contenido remoto.
-- **Doctrina `snprintf` fail-closed (V-004):** nunca usar `n += (size_t)snprintf(buf + n, rem, ...)` sin
-  verificar que `rem` no se desbordó. `snprintf` retorna el número de bytes que *habría* escrito (no el
-  real); si ese valor >= `rem`, hubo truncamiento y `n` crece más allá de la capacidad → en la siguiente
-  iteración `rem` wrappea a un valor enorme y la escritura desborda el buffer. El patrón correcto es:
+  `liboqs`/`oqsprovider`.
+- Sé honesto sobre lo no verificado: el código de red/GUI que no se pueda ejercitar aquí se marca
+  como pendiente de prueba de integración / verificación visual, no como verificado.
+- Verifica que cada símbolo/flag/algoritmo existe en este host antes de recomendarlo.
+- Comandos nuevos van al **Makefile**, no a scripts sueltos.
+- Modo **boyscout**: resolver deuda técnica y fallos de seguridad nunca está fuera de scope.
+- **V-001 — `malloc(n+1)` fail-closed:** todo `malloc(len + 1)` → `memcpy(dst, src, len)` lleva
+  `if (len == (size_t)-1) return NULL;` antes del `malloc`. Sin esa guarda, `len == SIZE_MAX`
+  wrapea a 0 y el `memcpy` escribe `SIZE_MAX` bytes. Aplica a `dup_bytes`/`dup_n`/`host_dup` y
+  análogos, y a `realloc(n * sizeof(T))` o cualquier suma/tamaño de fuente remota.
+- **V-002 — `calloc` sobre `malloc` para arreglos:** asignar varios arreglos del mismo tamaño usa
+  `calloc(n, sizeof(T))`, no `malloc(n * sizeof(T))`: garantiza zero-init y evita fugas por páginas
+  no inicializadas, al mismo costo. Todo `memcpy` con `len` de runtime lleva verificación explícita
+  de que no excede el destino.
+- **V-003 — buffer encadenado:** todo acumulador cuyo tamaño no esté acotado por un límite de
+  protocolo se implementa como **cadena de bloques fijos** (64 KiB), no como un buffer que crece con
+  `realloc` ni con un tope duro artificial. Patrón de referencia: `ih_block`/`ih_acc`/`ih_flatten`
+  en `dom.c`.
+- **V-004 — `snprintf` fail-closed:** nunca `n += (size_t)snprintf(buf + n, rem, ...)` sin
+  comprobar truncamiento. Patrón correcto:
   `size_t space = cap - n; if (space == 0) break; int r = snprintf(buf + n, space, ...);
-  if (r < 0 || (size_t)r >= space) { n = cap; break; } n += (size_t)r;`. Esta regla se verifica en
-  code review y aplica a todo `snprintf`/`vsnprintf` cuyo tamaño dependa de un acumulador.
-- **Este archivo nunca debe superar ~150.000 caracteres** (`wc -c CLAUDE.md`). Es doctrina, no
-  sugerencia: un `CLAUDE.md` que crece sin límite deja de leerse. El historial de hitos cerrados
-  (§7.2/§7.3) se comprime a **una línea por hito** (título + resultado en una frase + `[[link]]` a
-  la memoria persistente del agente o a `spec/`) apenas se cierra; el detalle extenso vive en la
-  memoria (`~/.claude/projects/.../memory/freedom-*.md`), en `spec/<modulo>.md` y en `git log`,
-  nunca en prosa acumulada aquí. Si al documentar un hito nuevo el archivo se acercaría al límite,
-  comprimí hitos viejos **antes** de añadir el nuevo, no después.
+  if (r < 0 || (size_t)r >= space) { n = cap; break; } n += (size_t)r;`
+- **Un test rojo se verifica revirtiendo el fix.** Un binario que no relinkeó (p. ej. porque
+  `-Werror` abortó el build) hace pasar el test con el código viejo: eso no es rojo.
+- **Este archivo nunca debe superar ~150.000 caracteres** (`wc -c CLAUDE.md`), y el objetivo real es
+  mantenerlo **bien por debajo**: un `CLAUDE.md` que crece sin límite deja de leerse. El historial de
+  hitos se comprime a **una línea por hito** (título + resultado + `[[link]]`) apenas se cierra; el
+  detalle vive en la memoria, en `spec/<modulo>.md` y en `git log`, nunca en prosa acumulada aquí.
+  Si al documentar un hito nuevo el archivo creciera de más, comprimí lo viejo **antes**, no después.

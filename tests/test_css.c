@@ -47,6 +47,38 @@ static void test_inline_font_size(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).font_scale, 0);          /* unset */
 }
 
+/* 2026-07-31: a font-size carries whether its percent is OF THE 16px ROOT (absolute
+ * units and the absolute keywords) or of the inherited size (em/%/smaller/larger).
+ * Without the flag the painter multiplied an absolute px onto the UA heading scale
+ * and every author-styled <h1> rendered at double size. spec/css.md "font-size:
+ * absolute vs relative". */
+static void test_inline_font_size_absolute_flag(void **state) {
+    (void)state;
+    /* Absolute units: percent is of the 16px root, font_abs set. */
+    assert_int_equal(css_parse_inline("font-size:40px", 0).font_abs, 1);
+    assert_int_equal(css_parse_inline("font-size:40px", 0).font_scale, 250);
+    assert_int_equal(css_parse_inline("font-size:12pt", 0).font_abs, 1);
+    assert_int_equal(css_parse_inline("font-size:1.5rem", 0).font_abs, 1);
+    assert_int_equal(css_parse_inline("font-size:1.5rem", 0).font_scale, 150);
+    assert_int_equal(css_parse_inline("font-size:4vw", 0).font_abs, 1);
+
+    /* Absolute keywords. */
+    assert_int_equal(css_parse_inline("font-size:medium", 0).font_abs, 1);
+    assert_int_equal(css_parse_inline("font-size:large", 0).font_abs, 1);
+    assert_int_equal(css_parse_inline("font-size:xx-small", 0).font_abs, 1);
+
+    /* Relative: em/% and the relative keywords keep multiplying the inherited size. */
+    assert_int_equal(css_parse_inline("font-size:2em", 0).font_abs, 0);
+    assert_int_equal(css_parse_inline("font-size:2em", 0).font_scale, 200);
+    assert_int_equal(css_parse_inline("font-size:150%", 0).font_abs, 0);
+    assert_int_equal(css_parse_inline("font-size:smaller", 0).font_abs, 0);
+    assert_int_equal(css_parse_inline("font-size:larger", 0).font_abs, 0);
+
+    /* Unset stays unset on both fields. */
+    assert_int_equal(css_parse_inline("color:red", 0).font_abs, 0);
+    assert_int_equal(css_parse_inline("color:red", 0).font_scale, 0);
+}
+
 static void test_inline_line_height(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("line-height:1.5", 0).line_scale, 150);  /* unitless */
@@ -3648,6 +3680,7 @@ int main(void) {
         cmocka_unit_test(test_inline_color_and_bg),
         cmocka_unit_test(test_inline_text_align),
         cmocka_unit_test(test_inline_font_size),
+        cmocka_unit_test(test_inline_font_size_absolute_flag),
         cmocka_unit_test(test_inline_line_height),
         cmocka_unit_test(test_inline_font_weight_style),
         cmocka_unit_test(test_inline_text_decoration),

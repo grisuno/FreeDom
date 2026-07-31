@@ -2518,19 +2518,25 @@ static void test_build_node_id_matches_dom_index(void **state) {
 static void test_set_text_style_model(void **state) {
     (void)state;
     pv_view *v = pv_new();
-    pv_set_text_style(v, CSS_ALIGN_CENTER, 150, 140, CSS_DECO_UNDERLINE); /* no-op: empty view */
+    pv_set_text_style(v, CSS_ALIGN_CENTER, 150, 1, 140, CSS_DECO_UNDERLINE); /* no-op: empty view */
     assert_int_equal((int)pv_count(v), 0);
     assert_int_equal(pv_append(v, PV_TEXT, 0, 0, "x", NULL), PV_OK);
     assert_int_equal(pv_at(v, 0)->text_align, 0); /* default */
     assert_int_equal(pv_at(v, 0)->font_scale, 0);
+    assert_int_equal(pv_at(v, 0)->font_abs, 0);
     assert_int_equal(pv_at(v, 0)->line_scale, 0);
     assert_int_equal(pv_at(v, 0)->text_decoration, -1); /* default unset */
-    pv_set_text_style(v, CSS_ALIGN_RIGHT, 175, 160, CSS_DECO_LINE_THROUGH);
+    pv_set_text_style(v, CSS_ALIGN_RIGHT, 175, 1, 160, CSS_DECO_LINE_THROUGH);
     assert_int_equal(pv_at(v, 0)->text_align, CSS_ALIGN_RIGHT);
     assert_int_equal(pv_at(v, 0)->font_scale, 175);
+    assert_int_equal(pv_at(v, 0)->font_abs, 1);
     assert_int_equal(pv_at(v, 0)->line_scale, 160);
     assert_int_equal(pv_at(v, 0)->text_decoration, CSS_DECO_LINE_THROUGH);
-    pv_set_text_style(NULL, 0, 0, 0, 0); /* NULL-safe */
+    /* A relative size lands with the flag clear. */
+    pv_set_text_style(v, CSS_ALIGN_RIGHT, 50, 0, 160, CSS_DECO_LINE_THROUGH);
+    assert_int_equal(pv_at(v, 0)->font_scale, 50);
+    assert_int_equal(pv_at(v, 0)->font_abs, 0);
+    pv_set_text_style(NULL, 0, 0, 0, 0, 0); /* NULL-safe */
     pv_free(v);
 }
 

@@ -83,6 +83,7 @@ typedef struct rd_block {
     int              bg_rgb;         /* author background-color packed 0xRRGGBB, or -1; set only with caps.css */
     int              text_align;     /* author text-align (css_align); set only with caps.css, else 0 */
     int              font_scale;     /* author font-size percent (100=normal); set only with caps.css, else 0 */
+    int              font_abs;       /* 1: font_scale is of the 16px ROOT (absolute), 0: of the block's UA size */
     int              line_scale;     /* author line-height percent of the line box; set only with caps.css, else 0 */
     int              text_decoration;/* author text-decoration (OR of CSS_DECO_*); set only with caps.css, else -1 (unset) */
     /* Author text-decoration sub-properties (color/style/thickness). Same caps.css

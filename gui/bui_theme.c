@@ -14,14 +14,17 @@
 ui_theme ui_theme_default(void) {
     ui_theme t;
     t.body_font = UI_FONT_SIZE;
+    /* CSS 2.1 App. D / the HTML user-agent sheet, so a heading measures what it
+     * measures in a real browser: an <h4> is body size, not 1.2x of it.
+     * spec/box_style.md "Metricas UA del tema". */
     t.heading_scale[0] = 1.0;
     t.heading_scale[1] = 2.0;
-    t.heading_scale[2] = 1.6;
-    t.heading_scale[3] = 1.35;
-    t.heading_scale[4] = 1.2;
-    t.heading_scale[5] = 1.1;
-    t.heading_scale[6] = 1.05;
-    t.line_spacing = 1.3;
+    t.heading_scale[2] = 1.5;
+    t.heading_scale[3] = 1.17;
+    t.heading_scale[4] = 1.0;
+    t.heading_scale[5] = 0.83;
+    t.heading_scale[6] = 0.67;
+    t.line_spacing = 1.2;   /* approximates `line-height: normal` for these faces */
     t.paragraph_gap = 8.0;
     t.content_margin = UI_TEXT_MARGIN;
     t.image_box_pad = 6.0;
@@ -31,7 +34,10 @@ ui_theme ui_theme_default(void) {
     t.window_bg      = (ui_rgb){ 0.96, 0.96, 0.96 };
     t.content_bg     = (ui_rgb){ 1.00, 1.00, 1.00 };
     t.text           = (ui_rgb){ 0.10, 0.10, 0.10 };
-    t.heading        = (ui_rgb){ 0.06, 0.08, 0.20 };
+    /* CSS `color` inherits and the user-agent sheet gives a heading none of its
+     * own: a heading paints in the SAME ink as body text unless the author says
+     * otherwise. The field stays per-palette so dark/sepia can tint both together. */
+    t.heading        = (ui_rgb){ 0.10, 0.10, 0.10 };
     t.link           = (ui_rgb){ 0.10, 0.33, 0.80 };
     t.notice_bg      = (ui_rgb){ 1.00, 0.95, 0.70 };
     t.notice_text    = (ui_rgb){ 0.40, 0.28, 0.00 };
@@ -75,7 +81,7 @@ ui_theme ui_theme_dark(void) {
     t.window_bg      = (ui_rgb){ 0.12, 0.12, 0.13 };
     t.content_bg     = (ui_rgb){ 0.13, 0.13, 0.15 };
     t.text           = (ui_rgb){ 0.85, 0.86, 0.88 };
-    t.heading        = (ui_rgb){ 0.78, 0.84, 1.00 };
+    t.heading        = (ui_rgb){ 0.85, 0.86, 0.88 };
     t.link           = (ui_rgb){ 0.50, 0.70, 1.00 };
     t.notice_bg      = (ui_rgb){ 0.28, 0.25, 0.10 };
     t.notice_text    = (ui_rgb){ 0.95, 0.90, 0.70 };
@@ -120,7 +126,7 @@ ui_theme ui_theme_sepia(void) {
     t.window_bg      = (ui_rgb){ 0.90, 0.85, 0.74 };
     t.content_bg     = (ui_rgb){ 0.96, 0.92, 0.82 };
     t.text           = (ui_rgb){ 0.24, 0.18, 0.10 };
-    t.heading        = (ui_rgb){ 0.30, 0.20, 0.10 };
+    t.heading        = (ui_rgb){ 0.24, 0.18, 0.10 };
     t.link           = (ui_rgb){ 0.40, 0.26, 0.10 };
     t.notice_bg      = (ui_rgb){ 0.93, 0.86, 0.62 };
     t.notice_text    = (ui_rgb){ 0.40, 0.28, 0.05 };

@@ -83,6 +83,39 @@ telemetry, mandatory API keys, or hidden solver workers. We refuse to do so.
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
+### Typography & inline flow parity (31 July 2026)
+
+Four defects that made ordinary pages look broken, all **measured** against Firefox
+headless on the same HTML (`firefox --headless --screenshot` versus
+`freedom --download-png`):
+
+- **Absolute font sizes are absolute.** `px`, `pt`, `rem`, viewport units and the size
+  keywords resolve against the 16px root and **replace** the user-agent heading scale;
+  `em`/`%` stay relative and chain outward until an absolute size anchors them
+  (`.card{font-size:14px} .card h3{font-size:1.2em}` → 16.8px). Before this the percent
+  was multiplied onto the UA size, so every author-styled `<h1>` painted at **double**
+  its declared size. See `spec/css.md`, "font-size: absolute vs relative".
+- **The user-agent metrics match a real browser.** A 16px base — the same root the CSS
+  engine resolves `px`/`rem` against, so the two cannot drift — the CSS 2.1 heading scale
+  (2.0 / 1.5 / 1.17 / 1.0 / 0.83 / 0.67), `line-height` 1.2, and headings that **inherit**
+  their colour instead of taking a theme accent. A heading's bold now rides the resolved
+  font weight, so `h1{font-weight:normal}` finally works. See `spec/box_style.md` §4b.
+- **Whitespace is collapsed, never invented.** `<strong>bold</strong>,` renders as `bold,`
+  and no longer as `bold ,`. The word flow inserted a space before every word that did not
+  open a line, which put a stray gap before every comma, bracket and full stop following an
+  inline element — on every page with emphasis, links or `<code>`.
+- **Out-of-flow elements are block boxes** (CSS 2.2 §9.7), so an absolutely positioned
+  `<span>` registers a box and honours `right`/`bottom` instead of landing in the flow at
+  full width. As a side effect the PNG export is now sized by the lowest box rather than by
+  the text flow alone: a page made only of boxes used to export as a 0px image.
+
+All four are locked by pixel regression tests in `tests/test_freedom.c`.
+
+**Still open, and the loudest remaining gaps:** nested `display:flex` containers (a flex
+header holding a flex `<nav>` still breaks into two stacked rows — design recorded in
+`spec/page_view.md`), `display:inline-block` interrupting the line it sits in, and table
+auto width plus `colspan`/`rowspan`.
+
 ### Inline SVG + Firefox render parity (30 July 2026)
 
 Inline `<svg>` renders: shapes (`rect`/`circle`/`ellipse`/`line`/`polyline`/`polygon`),
@@ -340,9 +373,14 @@ walk is deferred to a follow-up.
   TimeRanges, `new Audio(src)` — so player scripts run without throwing and
   without touching the network.
 
-## Current Status (July 30, 2026)
+## Current Status (July 31, 2026)
 
 - Advanced HTML rendering with box model, flex/grid, margin collapsing
+- Browser-accurate typography: 16px root shared by the theme and the CSS engine,
+  CSS 2.1 heading scale, absolute `px`/`pt`/`rem` sizes that replace (not multiply)
+  the user-agent size, and headings that inherit their colour
+- CSS whitespace collapsing at inline-run boundaries (no invented space before
+  punctuation that follows `<strong>`/`<em>`/`<a>`/`<code>`)
 - Inline `<svg>`: shapes, `<path>` (arcs included), `<g>` transforms, `currentColor`,
   `viewBox` scaling, `<text>` — always rendered, structurally unable to fetch
 - Clickable links + image support (PNG + JPEG + WebP + static GIF)
@@ -364,7 +402,8 @@ walk is deferred to a follow-up.
   `:not()`/`:is()`/`:where()`
 - `::before`/`::after` parsed and matched in CSS cascade
 - `position: sticky` (pins to viewport on scroll)
-- `right`/`bottom` insets honored for absolute/fixed positioning
+- `right`/`bottom` insets honored for absolute/fixed positioning, including on
+  inline tags (`position:absolute` makes an element a block box, CSS 2.2 §9.7)
 - Gradient stop positions consumed (not always evenly spaced)
 - Nested compositor tree (opacity of parent blends entire subtree)
 - `<script defer>` two-pass execution

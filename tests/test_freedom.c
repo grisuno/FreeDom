@@ -526,6 +526,275 @@ static void test_download_png_absolute_shrinks_and_anchors_right(void **state) {
     unlink(png);
 }
 
+/* Renders `html` to a PNG and returns the horizontal extent of its dark ink, or
+ * -1. The ink extent is the direct measure of "how wide did this line come out",
+ * which is what a whitespace bug moves. */
+static double ink_width(const char *html) {
+    const char *path = "__freedom_ws_page.html";
+    const char *png = "__freedom_ws_out.png";
+    FILE *f = fopen(path, "w");
+    if (f == NULL) return -1.0;
+    if (fwrite(html, 1, strlen(html), f) != strlen(html)) { fclose(f); return -1.0; }
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    if ((size_t)snprintf(args, sizeof args, "--author-css --download-png=%s %s", png, path)
+        >= sizeof args) { unlink(path); return -1.0; }
+    int rc = -1;
+    if (run_freedom_raw(args, &rc) != 0 || rc != 0) { unlink(path); return -1.0; }
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    if (bytes == NULL) { unlink(path); unlink(png); return -1.0; }
+    img_pixels px;
+    int ok = (img_decode(bytes, len, &px) == IMG_OK);
+    free(bytes);
+    if (!ok) { unlink(path); unlink(png); return -1.0; }
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t min_x = px.width, max_x = 0;
+    int any = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r < 128 && g < 128 && b < 128) {   /* glyph ink on the white page */
+                if (x < min_x) min_x = x;
+                if (x > max_x) max_x = x;
+                any = 1;
+            }
+        }
+    }
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+    if (!any) return -1.0;
+    return (double)(max_x - min_x);
+}
+
+/* An absolute font-size must land at exactly that many pixels, which means a 32px
+ * declaration measures twice as wide as a 16px one on the same glyphs. */
+static void test_absolute_font_size_lands_exact(void **state) {
+    (void)state;
+    const char *small =
+        "<html><head><style>body{margin:0;padding:0}p{font-size:16px}</style></head>"
+        "<body><p>Hamburgefonstiv</p></body></html>";
+    const char *big =
+        "<html><head><style>body{margin:0;padding:0}p{font-size:32px}</style></head>"
+        "<body><p>Hamburgefonstiv</p></body></html>";
+    double w_small = ink_width(small);
+    double w_big = ink_width(big);
+    assert_true(w_small > 0.0 && w_big > 0.0);
+    double ratio = w_big / w_small;
+    assert_true(ratio > 1.9 && ratio < 2.1);
+}
+
+/* An <h1> with an author font-size takes THAT size, not the size multiplied by the
+ * user-agent heading scale (the doubled-heading bug). h1{font-size:16px} must
+ * measure like a 16px paragraph, not like a 32px one. */
+static void test_author_font_size_on_heading_replaces_ua_scale(void **state) {
+    (void)state;
+    const char *heading =
+        "<html><head><style>body{margin:0;padding:0}h1{font-size:16px}"
+        "</style></head><body><h1>Hamburgefonstiv</h1></body></html>";
+    /* Bold, because a heading IS bold in the user-agent sheet -- this test is about
+     * size only. */
+    const char *para =
+        "<html><head><style>body{margin:0;padding:0}p{font-size:16px;font-weight:bold}"
+        "</style></head><body><p>Hamburgefonstiv</p></body></html>";
+    double w_h = ink_width(heading);
+    double w_p = ink_width(para);
+    assert_true(w_h > 0.0 && w_p > 0.0);
+    assert_true(w_h < w_p + 3.0 && w_h > w_p - 3.0);
+}
+
+/* CSS `color` INHERITS: the user-agent sheet gives a heading no colour of its own,
+ * so a document that sets none must paint its headings in the same ink as its body.
+ * The theme used to hand headings a navy accent, which made every unstyled page
+ * two-coloured where Firefox paints one. spec/box_style.md "Metricas UA del tema". */
+static void test_heading_colour_matches_body_text(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;padding:0}</style></head>"
+        "<body><h1>Heading</h1><p>Paragraph</p></body></html>";
+    const char *path = "__freedom_hcol_page.html";
+    const char *png = "__freedom_hcol_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    /* Every dark pixel on the page must be neutral ink: no blue-dominant glyph.
+     * A navy heading shows up as b - r well above zero. */
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    int blue_ink = 0, dark_seen = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            int r = (int)(uint8_t)(p >> 16), g = (int)(uint8_t)(p >> 8), b = (int)(uint8_t)p;
+            if (r < 120 && g < 120 && b < 160) {
+                ++dark_seen;
+                /* The old theme heading was (15,20,51): b - r = 36. Body ink is
+                 * neutral grey, where b - r is 0. */
+                if (b - r > 20) ++blue_ink;
+            }
+        }
+    }
+    img_pixels_free(&px);
+    assert_true(dark_seen > 100);      /* the page did paint text */
+    assert_int_equal(blue_ink, 0);     /* none of it tinted */
+
+    unlink(path);
+    unlink(png);
+}
+
+/* A heading is bold in the user-agent sheet, but the author can turn that OFF.
+ * block_style forced bold for every RD_HEADING and only OR-ed the author value in,
+ * so `h1{font-weight:normal}` was unrepresentable. */
+static void test_author_can_unbold_a_heading(void **state) {
+    (void)state;
+    const char *bold =
+        "<html><head><style>body{margin:0;padding:0}h1{font-size:16px}</style></head>"
+        "<body><h1>Hamburgefonstiv</h1></body></html>";
+    const char *normal =
+        "<html><head><style>body{margin:0;padding:0}h1{font-size:16px;font-weight:normal}"
+        "</style></head><body><h1>Hamburgefonstiv</h1></body></html>";
+    double w_bold = ink_width(bold);
+    double w_normal = ink_width(normal);
+    assert_true(w_bold > 0.0 && w_normal > 0.0);
+    /* Bold text is wider than the same glyphs at the same size. */
+    assert_true(w_bold > w_normal + 2.0);
+}
+
+/* CSS 2.2 section 9.7: position:absolute|fixed computes display to block, so an
+ * absolutely positioned <span> is a block box and gets a box entry -- without one
+ * there is nothing for the positioned pass to place and right/bottom did nothing.
+ * spec/page_view.md "position:absolute|fixed y float vuelven al elemento de bloque". */
+static void test_absolute_span_honours_right_bottom(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "body{margin:0;padding:0}"
+        ".wrap{position:relative;height:200px;background:#eeeeff}"
+        ".tag{position:absolute;right:10px;bottom:10px;background:#00ff00;padding:4px}"
+        "</style></head><body>"
+        "<div class=\"wrap\"><span class=\"tag\">corner</span></div>"
+        "</body></html>";
+    const char *path = "__freedom_absspan_page.html";
+    const char *png = "__freedom_absspan_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t gx_min = px.width, gx_max = 0, gy_min = px.height, gy_max = 0;
+    int seen = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r <= 8 && g >= 200 && b <= 8) {
+                if (x < gx_min) gx_min = x;
+                if (x > gx_max) gx_max = x;
+                if (y < gy_min) gy_min = y;
+                if (y > gy_max) gy_max = y;
+                seen = 1;
+            }
+        }
+    }
+    /* px must stay LIVE for these: img_pixels_free zeroes the struct, so reading
+     * px.width afterwards compares against 0 and every bound trivially fails. */
+    assert_true(seen);
+    /* Shrink-wrapped, not full width. */
+    assert_true((gx_max - gx_min) < px.width / 3);
+    /* Anchored to the RIGHT edge of the wrapper, not the left origin. */
+    assert_true(gx_min > (px.width * 2) / 3);
+    /* Anchored to the BOTTOM of the 200px wrapper, not its top. */
+    assert_true(gy_min > 100);
+    assert_true(gy_max > gy_min);
+    img_pixels_free(&px);
+
+    unlink(path);
+    unlink(png);
+}
+
+/* CSS whitespace collapsing does NOT invent a space where the source had none.
+ * The word flow used to insert one before every non-line-opening word, so
+ * `<strong>bold</strong>,` painted as `bold ,` -- a comma detached from its word
+ * on every page that uses inline emphasis, links or <code>.
+ * spec/page_view.md "Colapso de espacio en el borde entre runs". */
+static void test_inline_run_boundary_does_not_invent_space(void **state) {
+    (void)state;
+    const char *tight =
+        "<html><head><style>body{margin:0;padding:0;font-size:16px}</style></head>"
+        "<body><p><strong>bold</strong>,<em>italic</em>,<code>code</code></p></body></html>";
+    const char *spaced =
+        "<html><head><style>body{margin:0;padding:0;font-size:16px}</style></head>"
+        "<body><p><strong>bold</strong> , <em>italic</em> , <code>code</code></p></body></html>";
+
+    double w_tight = ink_width(tight);
+    double w_spaced = ink_width(spaced);
+    assert_true(w_tight > 0.0);
+    assert_true(w_spaced > 0.0);
+
+    /* The source with explicit spaces must come out WIDER: four separator spaces
+     * against none. With the bug both rows measured identically. */
+    assert_true(w_spaced > w_tight + 4.0);
+}
+
+/* The collapse still happens: a run of several spaces between two runs paints ONE
+ * space, so it must measure the same as a single space. */
+static void test_inline_run_boundary_collapses_runs_of_space(void **state) {
+    (void)state;
+    const char *one =
+        "<html><head><style>body{margin:0;padding:0;font-size:16px}</style></head>"
+        "<body><p><strong>bold</strong> <em>italic</em></p></body></html>";
+    const char *many =
+        "<html><head><style>body{margin:0;padding:0;font-size:16px}</style></head>"
+        "<body><p><strong>bold</strong>     <em>italic</em></p></body></html>";
+
+    double w_one = ink_width(one);
+    double w_many = ink_width(many);
+    assert_true(w_one > 0.0);
+    assert_true(w_many > 0.0);
+    assert_true(w_many < w_one + 1.0 && w_many > w_one - 1.0);
+}
+
 /* CSS 2.1 §10.8 line-box regression (Wikipedia headings): the line takes the MAX
  * leading of its fragments. A trailing `line-height:0` run (the vector skin's
  * `.mw-editsection` after every section heading) used to overwrite the whole
@@ -756,16 +1025,29 @@ static void test_download_png_transform_translate_moves_paint_position(void **st
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    /* y=16: inside the box's row, below the "X" glyphs' ink so a clean background
-     * sample isn't confused with glyph antialiasing. x=50 is well before the
-     * translated box (which starts around x=200); x=300 is inside it. */
-    assert_true(px.width > 900 && px.height > 16);
-    uint32_t before = ((const uint32_t *)(const void *)px.data)[16 * (px.stride / 4) + 50];
-    uint32_t after  = ((const uint32_t *)(const void *)px.data)[16 * (px.stride / 4) + 300];
-    uint8_t br = (uint8_t)(before >> 16), bg = (uint8_t)(before >> 8), bb = (uint8_t)before;
-    uint8_t ar = (uint8_t)(after >> 16),  ag = (uint8_t)(after >> 8),  ab = (uint8_t)after;
-    assert_true(br >= 250 && bg >= 250 && bb >= 250); /* untranslated spot: white page */
-    assert_true(ar <= 5 && ag <= 5 && ab >= 250);     /* translated spot: blue box */
+    /* Scan the whole image for the blue box rather than sampling fixed pixels: the
+     * row's height follows the user-agent font size, so a hardcoded y silently
+     * drifts onto glyph antialiasing the moment that metric changes. */
+    assert_true(px.width > 900);
+    const uint32_t *rowpx = (const uint32_t *)(const void *)px.data;
+    const size_t stride = px.stride / 4;
+    size_t blue_min = px.width, blue_max = 0;
+    int blue_seen = 0;
+    for (size_t y = 0; y < px.height; ++y) {
+        for (size_t x = 0; x < px.width; ++x) {
+            uint32_t p = rowpx[y * stride + x];
+            uint8_t r = (uint8_t)(p >> 16), g = (uint8_t)(p >> 8), b = (uint8_t)p;
+            if (r <= 5 && g <= 5 && b >= 250) {
+                if (x < blue_min) blue_min = x;
+                if (x > blue_max) blue_max = x;
+                blue_seen = 1;
+            }
+        }
+    }
+    assert_true(blue_seen);
+    /* translate(200px,0) moved the box's LEFT edge away from the page origin. */
+    assert_true(blue_min >= 190);
+    assert_true(blue_max > blue_min);
     img_pixels_free(&px);
 
     unlink(path);
@@ -1383,6 +1665,13 @@ int main(void) {
         cmocka_unit_test(test_download_png_absolute_shrinks_and_anchors_right),
         cmocka_unit_test(test_download_png_inflow_opacity_blends_box_and_row_together),
         cmocka_unit_test(test_download_png_line_height_zero_does_not_shrink_line),
+        cmocka_unit_test(test_absolute_font_size_lands_exact),
+        cmocka_unit_test(test_absolute_span_honours_right_bottom),
+        cmocka_unit_test(test_heading_colour_matches_body_text),
+        cmocka_unit_test(test_author_can_unbold_a_heading),
+        cmocka_unit_test(test_author_font_size_on_heading_replaces_ua_scale),
+        cmocka_unit_test(test_inline_run_boundary_does_not_invent_space),
+        cmocka_unit_test(test_inline_run_boundary_collapses_runs_of_space),
         cmocka_unit_test(test_download_png_mix_blend_multiply_uses_cairo_operator),
         cmocka_unit_test(test_download_png_transform_translate_moves_paint_position),
         cmocka_unit_test(test_download_png_transform_rotate_changes_paint_shape),

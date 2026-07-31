@@ -248,7 +248,7 @@ static int write_field(int fd, const char *s) {
 
 /* Serialises the display list:
  *   [count]( kind,heading,bold,italic,indent,break, text, href, src, img_w,img_h, fg_rgb,bg_rgb,
- *            text_align,font_scale,line_scale,text_decoration,
+ *            text_align,font_scale,font_abs,line_scale,text_decoration,
  *            font_family,text_transform,letter_spacing,word_spacing,
  *            shadow_dx,shadow_dy,shadow_color,opacity,valign,text_indent,white_space,
  *            text_overflow,word_break,
@@ -310,7 +310,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[34] = {
+        int32_t b[35] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -328,6 +328,10 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->grad_text_c[2], (int32_t)r->grad_text_c[3],
             /* the box enclosing this run's flex/grid container (appended) */
             (int32_t)r->cont_box_id,
+            /* font-size absolute flag, 2026-07-31 (appended; read_view mirrors this).
+             * Without it an author `font-size:40px` on an <h1> reached the painter as
+             * a bare 250% and got multiplied by the UA heading scale -> 80px. */
+            (int32_t)r->font_abs,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -1503,7 +1507,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[34];
+        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[35];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1522,7 +1526,7 @@ static int read_view(int fd, pv_view **out) {
                 flside = b[10], flid = b[11], flclear = b[12], bl = b[13], br = b[14],
                 bw = b[15], bcenter = b[16], bmt = b[17], bmb = b[18], bwpct = b[19],
                 blkid = b[20], nodeid = b[21], itype = b[22], fid = b[23], method = b[24],
-                ckd = b[25];
+                ckd = b[25], fabs_flag = b[34];
         char *opts = NULL;
         size_t ol = 0;
         if (read_field(fd, &opts, &ol) != 0) {
@@ -1598,7 +1602,8 @@ static int read_view(int fd, pv_view **out) {
             pv_set_indent(v, (int)indent);
             pv_set_color(v, (int)fg);
             pv_set_bgcolor(v, (int)bg);
-            pv_set_text_style(v, (int)talign, (int)fscale, (int)lscale, (int)deco);
+            pv_set_text_style(v, (int)talign, (int)fscale, (int)fabs_flag, (int)lscale,
+                              (int)deco);
             pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
                              (int)cwrap, (int)crgap, (int)calign);
             pv_set_grid_rows(v, (int)crows);

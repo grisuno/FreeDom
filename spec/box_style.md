@@ -185,6 +185,26 @@ Reglas (deterministas, sin asignación):
 - **Sin asignación dinámica:** opera sobre buffers de pila acotados y devuelve por valor.
 - Objetivo de auditoría: `-fsanitize=address,undefined` limpio.
 
+## 4b. Métricas UA del tema (2026-07-31)
+
+`box_style` da los márgenes **en em**; quien los convierte a píxeles es el tema de la GUI
+(`gui/bui_theme.c`), que es también la fuente única del **tamaño base** y de la escala de
+títulos. Esos números son parte de la hoja UA aunque vivan en el pintor, así que su
+contrato está aquí.
+
+| Métrica | Valor | Por qué |
+| :-- | :-- | :-- |
+| `body_font` (`UI_FONT_SIZE`) | **16.0 px** | Es el tamaño base de la web y, sobre todo, **el mismo root contra el que `css.c` resuelve `px`/`rem`**. Estaba en 14: todo el texto salía un 12 % más chico que en Firefox y, peor, un `font-size:40px` absoluto aterrizaba en `250 % × 14 = 35px`. Un solo número gobierna los dos lados o vuelven a divergir. |
+| `heading_scale[1..6]` | **2.0, 1.5, 1.17, 1.0, 0.83, 0.67** | Los múltiplos de CSS 2.1 §App.D / HTML. Estaban en 2.0/1.6/1.35/1.2/1.1/1.05: un `<h4>` se pintaba 1.2× cuando debe ser exactamente el tamaño del cuerpo. |
+| `line_spacing` | **1.2** | Aproxima `line-height: normal` de las fuentes que usa este host. Estaba en 1.3, que estiraba cada página. |
+| `heading` (color) | **igual que `text`** | En CSS `color` **hereda**; la hoja UA no le da color propio a un `<h1>`. El tema pintaba los títulos en azul marino, así que toda página sin `color` de autor salía bicolor donde Firefox la pinta negra. El campo se conserva por tema (oscuro/sepia siguen tiñendo texto y títulos juntos). |
+
+**Dado** un documento sin CSS de autor **cuando** se pinta **entonces** el cuerpo mide 16 px,
+un `<h1>` 32 px y un `<h4>` 16 px, y ningún título toma un color que el documento no pidió.
+
+`zoom` sigue escalando `body_font`, así que un `font-size` absoluto escala con el zoom
+(que es lo que hace un navegador real).
+
 ## 5. Tabla de estados (`bx_parse_display`)
 
 | `bx_status` | Condición |

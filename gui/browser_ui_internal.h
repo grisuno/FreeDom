@@ -21,7 +21,11 @@
 
 /* --- chrome metrics shared by the theme and the painters --- */
 
-#define UI_FONT_SIZE      14.0
+/* The web's base font size AND the root css.c resolves px/rem against. One number
+ * governs both or the two drift: at 14 every page rendered ~12% small and an
+ * absolute `font-size:40px` landed at 250% x 14 = 35px.
+ * spec/box_style.md "Metricas UA del tema". */
+#define UI_FONT_SIZE      16.0
 #define UI_TEXT_MARGIN    20.0   /* left/right/top breathing room around page content */
 #define UI_HEADING_LEVELS 6      /* heading levels h1..h6; scale index 0 is body text */
 

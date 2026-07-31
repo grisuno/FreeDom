@@ -2958,6 +2958,12 @@ typedef struct rc_state {
      * (0 -> 8). The rest are read from rc_ext in flow_text and not cached here. */
     int    white_space;  /* css_white_space of the current block */
     int    tab_size;     /* author tab-size of the current block (0 -> 8) */
+    /* Whether the last run flowed onto the open line ENDED in whitespace. CSS
+     * collapses a sequence of spaces into one but never invents one where the
+     * source had none: without this the flow put a space before every word that
+     * did not open a line, so `<strong>bold</strong>,` painted as `bold ,`.
+     * spec/page_view.md "Colapso de espacio en el borde entre runs". */
+    int    prev_ended_ws;
     size_t line_first;
     /* Box engine (Hito 23b-8 Step D) visibility: hidden_from is 0 (not hidden) or the
      * box_stack depth (1-based) at which a visibility:hidden box was opened -- every
@@ -3155,7 +3161,9 @@ static void block_style(const ui_theme *th, const rd_block *b,
         int lv = (b->heading_level >= 1 && b->heading_level <= UI_HEADING_LEVELS)
                  ? b->heading_level : 1;
         *size = th->body_font * th->heading_scale[lv];
-        *bold = 1; *color = th->heading;
+        /* The heading's user-agent bold rides the RESOLVED weight (is_bold_tag), not
+         * a force here: forcing it made `h1{font-weight:normal}` unrepresentable. */
+        *color = th->heading;
     } else if (b->kind == RD_LINK) {
         *color = th->link; *underline = 1;
     } else if (b->kind == RD_NOTICE) {
@@ -3390,21 +3398,35 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
     size_t i = 0, n = src_len;
     int is_pre = (s->white_space == CSS_WS_PRE || s->white_space == CSS_WS_PRE_WRAP ||
                   s->white_space == CSS_WS_PRE_LINE);
+    /* Whitespace at the two ENDS of this run decides whether it is separated from
+     * its neighbours on the line (spec/page_view.md "Colapso de espacio en el borde
+     * entre runs"). Read from src, the same buffer the loop scans, so a tab-expanded
+     * <pre> agrees with itself. */
+    int starts_ws = (n > 0 && src[0] == ' ');
+    int ends_ws   = (n > 0 && src[n - 1] == ' ');
+    int first_word = 1;
     while (i < n) {
         if (is_pre) {
-            while (i < n && text[i] == ' ') { ++i; s->pen_x += space_w; }
+            while (i < n && src[i] == ' ') { ++i; s->pen_x += space_w; }
             if (i >= n) break;
         } else {
-            while (i < n && text[i] == ' ') ++i;
+            while (i < n && src[i] == ' ') ++i;
         }
         size_t ws = i;
-        while (i < n && text[i] != ' ') ++i;
+        while (i < n && src[i] != ' ') ++i;
         size_t wl = i - ws;
         if (wl == 0) break;
 
         open_line(L, s);
         int line_has_frag = (L->nfrag > s->line_first);
-        double adv = (line_has_frag && !is_pre) ? space_w : 0.0;
+        /* Words WITHIN one run were split on a real space, so they always separate.
+         * The FIRST word only separates from the previous run when one of the two
+         * sides actually carried whitespace -- that is the collapse rule, and it is
+         * what keeps `<strong>bold</strong>,` from painting as `bold ,`. */
+        int separate = line_has_frag && !is_pre;
+        if (separate && first_word) separate = s->prev_ended_ws || starts_ws;
+        double adv = separate ? space_w : 0.0;
+        first_word = 0;
 
         rc_frag probe = (rc_frag){ 0 };
         probe.text = src + ws; probe.len = wl;
@@ -3515,6 +3537,10 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         flow_emit_frag(L, s, &fe, src + ws, wl, ww, size, bold, italic, underline,
                        strike, overline, color, href, node_id, block_id, x);
     }
+    /* Hand the trailing-whitespace half of the collapse rule to the next run. A run
+     * that emitted nothing (all whitespace) still passes its whitespace along, which
+     * is what makes `<b>a</b> <i>b</i>` separate through the blank text node. */
+    s->prev_ended_ws = ends_ws;
 }
 
 /* Flows one text/link/notice block into L at content_w using state s. The caller
@@ -3526,9 +3552,17 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     double size; int bold, italic, underline; ui_rgb color;
     block_style(th, b, &size, &bold, &italic, &underline, &color);
     if (!w->force_theme && b->fg_rgb >= 0) color = rgb_from_packed(b->fg_rgb);
-    /* Author font-size scales the block's base size (composes with a heading's own
-     * scale); render_doc already gated this behind caps.css (0 when off). */
-    if (b->font_scale > 0) size = size * (double)b->font_scale / 100.0;
+    /* Author font-size. An ABSOLUTE size (px/pt/rem/viewport/keyword) REPLACES the
+     * block's base size -- the user-agent heading scale is discarded, exactly as a
+     * real cascade discards it when the author sets the property; multiplying it
+     * instead rendered every author-styled <h1> at double size. A RELATIVE size
+     * (em/%) still scales the base, which is what an inline inside a heading needs.
+     * render_doc already gated both behind caps.css (0 when off).
+     * spec/css.md "font-size: absolute vs relative". */
+    if (b->font_scale > 0) {
+        double base = b->font_abs ? th->body_font : size;
+        size = base * (double)b->font_scale / 100.0;
+    }
     /* Author text-align travels on the rows this block flushes (paint centers/right-
      * aligns each line); render_doc gated it behind caps.css (0 when off). */
     s->align = b->text_align;
@@ -8483,10 +8517,23 @@ static long write_doc_png(browser_window *w, const char *path) {
     layout_doc(mcr, w, content_w, &L);
     position_doc(mcr, w, content_w, 30000.0, &L);
     double content_h = L.total_h;
+    /* The document is as tall as its tallest THING, not as its text flow: a page
+     * whose content is entirely boxes (a hero, a card grid, an absolutely placed
+     * badge -- modern layouts are full of them) has no in-flow rows at all, and
+     * sizing the canvas from rows alone exported it as a 0 px image. Positioned
+     * boxes count too: one placed past the flow used to be cropped off. */
+    for (size_t i = 0; i < L.nbox; ++i) {
+        double bot = L.boxes[i].top + L.boxes[i].h;
+        if (bot > content_h) content_h = bot;
+    }
+    for (size_t i = 0; i < L.npositioned; ++i) {
+        double bot = L.positioned[i].y + L.positioned[i].h;
+        if (bot > content_h) content_h = bot;
+    }
     cairo_destroy(mcr);
     cairo_surface_destroy(meas);
 
-    if (L.nrow == 0 || content_h <= 0.0) { rc_free(&L); w->theme = saved; return 0; }
+    if (content_h <= 0.0) { rc_free(&L); w->theme = saved; return 0; }
 
     long img_h = (long)(content_h + 2.0 * png_margin + 0.5);
     if (img_h > PNG_MAX_H) img_h = PNG_MAX_H;

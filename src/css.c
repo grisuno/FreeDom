@@ -72,7 +72,7 @@
 /* Property slots. The enum value IS the css_style slot index used by apply().
  * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
  * left); the four padding slots likewise — expand_box4 relies on that. */
-enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
+enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
        P_TEXTDECO, P_TEXTDECO_COLOR, P_TEXTDECO_STYLE,
        P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
        P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
@@ -854,28 +854,44 @@ static int interp_align(const char *v) {
     return -1;
 }
 
-static int interp_fontsize(const char *v) {
+/* font-size as a percent, plus whether that percent is ABSOLUTE (of the 16px root)
+ * or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the
+ * absolute keywords. Relative: em, %, and smaller/larger. *abs is written on every
+ * path, including the -1 failure, so the caller never reads it uninitialised.
+ *
+ * The distinction is load-bearing, not cosmetic: without it the painter multiplied
+ * an absolute `font-size: 40px` onto the user-agent heading scale and every author-
+ * styled <h1> came out at 80px. See spec/css.md "font-size: absolute vs relative". */
+static int interp_fontsize_ex(const char *v, int *abs_out) {
+    *abs_out = 1;
     if (csel_ci_eq(v, "medium")) return 100;
-    if (csel_ci_eq(v, "small") || csel_ci_eq(v, "smaller")) return 85;
-    if (csel_ci_eq(v, "large") || csel_ci_eq(v, "larger")) return 120;
+    if (csel_ci_eq(v, "small")) return 85;
+    if (csel_ci_eq(v, "large")) return 120;
     if (csel_ci_eq(v, "x-large")) return 150;
     if (csel_ci_eq(v, "xx-large")) return 200;
     if (csel_ci_eq(v, "x-small")) return 75;
     if (csel_ci_eq(v, "xx-small")) return 60;
+    /* smaller/larger step off the INHERITED size, so they stay relative. */
+    if (csel_ci_eq(v, "smaller")) { *abs_out = 0; return 85; }
+    if (csel_ci_eq(v, "larger"))  { *abs_out = 0; return 120; }
 
     double num;
     const char *end;
-    if (!parse_num(v, &num, &end)) return -1;
+    if (!parse_num(v, &num, &end)) { *abs_out = 0; return -1; }
     while (*end == ' ' || *end == '\t') ++end;
     double scale, vpx;
+    /* rem is the ROOT em and this engine's root is always 16px, so it resolves
+     * exactly like px -- absolute. Plain em is relative to the inherited size. */
     if (csel_ci_eq(end, "px")) scale = num / 16.0 * 100.0;
-    else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) scale = num * 100.0;
-    else if (end[0] == '%' && end[1] == '\0') scale = num;
+    else if (csel_ci_eq(end, "rem")) scale = num * 100.0;
+    else if (csel_ci_eq(end, "em")) { *abs_out = 0; scale = num * 100.0; }
+    else if (end[0] == '%' && end[1] == '\0') { *abs_out = 0; scale = num; }
     else if (csel_ci_eq(end, "pt")) scale = num * 1.333 / 16.0 * 100.0;
     else if (viewport_unit_px(end, num, &vpx)) scale = vpx / 16.0 * 100.0;
-    else return -1;
+    else { *abs_out = 0; return -1; }
     return round_clamp(scale, 10, 1000);
 }
+
 
 /* line-height as a percent of the natural line box. A unitless multiplier ("1.5" ->
  * 150) or a percent ("160%" -> 160); "normal" is unset (the UA default). Absolute px/em
@@ -3470,7 +3486,8 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
     int line = 0;
     char *slash = strchr(tok, '/');
     if (slash != NULL) *slash = '\0';
-    int size = interp_fontsize(tok);
+    int size_abs;
+    int size = interp_fontsize_ex(tok, &size_abs);
     if (size < 0) return 0;
     if (slash != NULL) {
         line = interp_lineheight(slash + 1);
@@ -3482,11 +3499,12 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
     int fam = interp_fontfamily(p);
 
     int n = 0;
-    if (cap < 6) return 0;
+    if (cap < 7) return 0;
     if (style >= 0)   { dst[n].prop = P_STYLE;        dst[n].ival = style;   ++n; }
     if (weight >= 0)  { dst[n].prop = P_WEIGHT;       dst[n].ival = weight;  ++n; }
     if (variant >= 0) { dst[n].prop = P_FONT_VARIANT; dst[n].ival = variant; ++n; }
-    dst[n].prop = P_FONTSIZE; dst[n].ival = size; ++n;
+    dst[n].prop = P_FONTSIZE; dst[n].ival = size;     ++n;
+    dst[n].prop = P_FONTABS;  dst[n].ival = size_abs; ++n;
     if (line > 0)     { dst[n].prop = P_LINEHEIGHT;   dst[n].ival = line;    ++n; }
     if (fam > 0)      { dst[n].prop = P_FONTFAMILY;   dst[n].ival = fam;     ++n; }
     return n;
@@ -3645,7 +3663,17 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     int prop_id, ival;
     if (strcmp(prop, "color") == 0)                 { prop_id = P_COLOR;    ival = interp_color(val); }
     else if (strcmp(prop, "text-align") == 0)        { prop_id = P_ALIGN;    ival = interp_align(val); }
-    else if (strcmp(prop, "font-size") == 0)         { prop_id = P_FONTSIZE; ival = interp_fontsize(val); }
+    /* font-size emits TWO pairs (percent + absolute flag) so the cascade keeps them
+     * in lock-step, exactly like aspect-ratio's num/den below. */
+    else if (strcmp(prop, "font-size") == 0) {
+        int fabs_flag;
+        int fs = interp_fontsize_ex(val, &fabs_flag);
+        if (fs < 0) return 0;
+        if (cap < 2) return 0;
+        dst[0].prop = P_FONTSIZE; dst[0].ival = fs;
+        dst[1].prop = P_FONTABS;  dst[1].ival = fabs_flag;
+        return 2;
+    }
     else if (strcmp(prop, "line-height") == 0)       { prop_id = P_LINEHEIGHT; ival = interp_lineheight(val); }
     else if (strcmp(prop, "font-weight") == 0)       { prop_id = P_WEIGHT;   ival = interp_weight(val); }
     else if (strcmp(prop, "font-style") == 0)        { prop_id = P_STYLE;    ival = interp_style(val); }
@@ -4501,6 +4529,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
                 break;
             case P_ALIGN:    o->text_align = (css_align)d->ival; break;
             case P_FONTSIZE: o->font_scale = d->ival; break;
+            case P_FONTABS:  o->font_abs = d->ival; break;
             case P_LINEHEIGHT: o->line_scale = d->ival; break;
             case P_WEIGHT:   o->bold = d->ival; break;
             case P_STYLE:    o->italic = d->ival; break;
@@ -4708,7 +4737,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
      * "unset" sentinel is named, so a new field cannot silently default to 0). */
     css_style out = {
         .color = -1, .background = -1, .bg_alpha = CSS_LEN_UNSET, .text_align = CSS_ALIGN_UNSET,
-        .font_scale = 0, .line_scale = 0,         .text_decoration = -1, .text_decoration_color = -1,
+        .font_scale = 0, .font_abs = 0, .line_scale = 0, .text_decoration = -1, .text_decoration_color = -1,
         .text_decoration_style = CSS_TDS_UNSET,
         .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,
         .gap = -1, .justify = CSS_JUSTIFY_UNSET, .grid_cols = 0,

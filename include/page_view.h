@@ -122,6 +122,10 @@ typedef struct pv_run {
      * like fg_rgb/bg_rgb. Defaults: text_align 0, font_scale 0, line_scale 0. */
     int     text_align;
     int     font_scale;
+    /* Whether font_scale is a percent of the 16px ROOT (1) or of the block's
+     * user-agent size (0). An absolute size REPLACES the UA heading scale; a
+     * relative one multiplies it. spec/css.md "font-size: absolute vs relative". */
+    int     font_abs;
     int     line_scale;
     /* Author text-decoration (OR of CSS_DECO_UNDERLINE/LINE_THROUGH/OVERLINE; 0 =
      * none, -1 = unset). Presentation: render_doc applies it only with caps.css,
@@ -621,13 +625,14 @@ void pv_set_color(pv_view *v, int fg_rgb);
 void pv_set_bgcolor(pv_view *v, int bg_rgb);
 
 /* Sets the author text presentation (text_align as a css_align, font_scale as a
- * font-size percent or 0, line_scale as a line-height percent or 0, text_decoration
- * as an OR of CSS_DECO_* / 0 none / -1 unset) on the most recently appended run.
+ * font-size percent or 0, font_abs as 1 when that percent is of the 16px root,
+ * line_scale as a line-height percent or 0, text_decoration as an OR of
+ * CSS_DECO_* / 0 none / -1 unset) on the most recently appended run.
  * No-op on an empty or NULL view. The append helpers default text_align/font_scale/
- * line_scale to 0 and text_decoration to -1. Like author colors, render_doc applies
- * these only with caps.css. */
-void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
-                       int text_decoration);
+ * font_abs/line_scale to 0 and text_decoration to -1. Like author colors, render_doc
+ * applies these only with caps.css. */
+void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
+                       int line_scale, int text_decoration);
 
 /* Sets the author text-presentation extensions (Hito 23b-6, plus text_overflow/
  * word_break, plus the 2026-07-10 batch: tab_size/direction/font_variant/list_style_pos)

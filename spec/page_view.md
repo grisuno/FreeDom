@@ -581,6 +581,105 @@ No lo gatea `caps.images`: la gramática que acepta `svg_render` **no tiene form
 así que un SVG en línea no puede hacer fetch — no hay nada que gatear. Contrato completo
 del parser y del pintor en `spec/svg_render.md`.
 
+### Colapso de espacio en el borde entre runs (2026-07-31)
+
+CSS colapsa una **secuencia** de espacios en uno solo; **no inventa** un espacio donde el
+documento no tenía ninguno. El flujo de palabras del pintor hacía lo segundo: insertaba
+`space_w` antes de cada palabra que no abriera la línea, así que
+`<strong>bold</strong>, <em>italic</em>` se pintaba `bold , italic ,` — una coma separada
+de su palabra en cada elemento inline de toda página con énfasis, enlaces o `<code>`.
+
+**Dado** dos runs consecutivos en la misma línea
+**cuando** el primero **no termina** en espacio y el segundo **no empieza** con espacio
+**entonces** entre ellos no se pinta separación (`bold,`).
+
+**Dado** que el primero termina en espacio **o** el segundo empieza con espacio
+**cuando** se pinta el primer fragmento del segundo run
+**entonces** se pinta **un** espacio, nunca dos (el colapso sigue valiendo).
+
+Dentro de **un mismo** run las palabras siempre estuvieron separadas por espacio en la
+fuente (el bucle parte en `' '`), así que ahí la separación se mantiene incondicional.
+El estado vive en `rc_state.prev_ended_ws`, que se actualiza al terminar cada run y solo
+importa a mitad de línea (al abrir línea no hay fragmento previo y no se separa nada).
+
+`white-space: pre`/`pre-wrap`/`pre-line` no pasa por esta regla: ahí los espacios son
+literales y ya se pintan uno a uno.
+
+### `position:absolute|fixed` y `float` vuelven al elemento de bloque (2026-07-31)
+
+CSS 2.2 §9.7: sacar un elemento del flujo (`position: absolute|fixed`, o un `float`
+distinto de `none`) hace que su `display` **compute a `block`**. Un `<span>` absoluto es
+una caja de bloque, no una caja en línea.
+
+Freedom no aplicaba esa regla: la elegibilidad para registrar caja (`is_block_like`) se
+decidía solo con la etiqueta y el `display` **declarado**, así que
+
+```html
+<div style="position:relative"><span style="position:absolute;right:10px;bottom:10px">x</span></div>
+```
+
+**no registraba ninguna caja** para el `<span>` — y sin caja no hay entrada en el árbol de
+posicionados, con lo cual `right`/`bottom` (que `box_tree.c` ya resuelve, reglas R4/R8) no
+tenían nada que posicionar. El mismo marcado con un `<div>` funcionaba. El síntoma es que
+todo *badge* / *close button* / *tooltip* escrito sobre un `<span>` aterrizaba en el flujo,
+a ancho completo, en vez de en su esquina.
+
+**Dado** un elemento cuyo `position` resuelto es `absolute` o `fixed` (o cuyo `float` no es
+`none`) **cuando** se decide si genera caja **entonces** se trata como de bloque **sea cual
+sea** su etiqueta o su `display` declarado, incluido `display:inline`.
+
+Es solo la regla de **elegibilidad**: no fuerza salto de bloque (`causes_block_break` sigue
+mandando en el flujo) ni cambia el gate de `caps.css`.
+
+### Contenedores flex/grid ANIDADOS — diseño pendiente (2026-07-31)
+
+**Estado: NO implementado.** Medido contra Firefox: un `header{display:flex}` que contiene
+`nav > ul{display:flex}` se parte en **dos filas apiladas** y las cajas de los ítems
+internos salen deformadas. Es el patrón de la barra de navegación de casi cualquier sitio
+moderno (y el de una grilla de tarjetas donde cada tarjeta es flex), así que es la rotura
+estructural más cara que queda.
+
+**Causa raíz.** Un run lleva **un solo** contenedor: el más interno (`cont_id`), resuelto
+por `resolve_context`, que **corta el ascenso** en el primer `display:flex|grid`. El bucle
+de layout agrupa runs consecutivos por `cont_id`, así que "LOGO" (cuyo contenedor es
+`header`) y "One/Two" (cuyo contenedor es `ul`) caen en **grupos distintos** y se maquetan
+como dos contenedores hermanos, no como uno dentro del otro.
+
+**Por qué no se arregla llevando el padre en el run.** El layout del nivel externo
+necesita las **propiedades** del contenedor externo (display/gap/justify/cols…), y hay un
+caso frecuente en el que **ningún** run las lleva: una grilla cuyos hijos son *todos*
+contenedores (`.cards{display:grid}` con tarjetas `display:flex`). Ahí no existe run con
+`cont_id == .cards`.
+
+**Diseño acordado** (espeja la tabla `pv_box_def`, que ya resuelve exactamente este
+problema para las cajas):
+
+1. `pv_view`/`rd_doc` ganan una **tabla de descriptores de contenedor** indexada por
+   `cont_id`:
+   ```c
+   typedef struct pv_cont_def {
+       int parent_id;    /* contenedor que lo encierra, -1 = nivel superior */
+       int parent_item;  /* ordinal de ESTE contenedor como ítem de su padre */
+       int display, gap, justify, cols, rows, direction;
+       int col_w[PV_GRID_TRACKS];
+       int wrap, row_gap, align_items, align_content, justify_items, grid_flow;
+       int box_id, anon_row;
+   } pv_cont_def;
+   ```
+   Las propiedades **se mueven** ahí desde `pv_run`: hoy viajan duplicadas en *cada* run
+   del contenedor (~20 int por run), así que la tabla además **reduce** el IPC.
+2. `resolve_context` deja de cortar en el primer contenedor: sigue subiendo y registra la
+   cadena, fijando `parent_id`/`parent_item` de cada contenedor que ya conocía.
+3. El bucle de layout agrupa por el contenedor **raíz** (siguiendo `parent_id`), y
+   `layout_container` recibe un `const pv_cont_def *` en vez de leer `head->cont_*`.
+4. Un grupo de ítems cuyos runs pertenecen a un contenedor **más profundo** se resuelve
+   por **recursión**: el ancho de contenido que el solver de flex mide para ese ítem es el
+   que devuelve la llamada recursiva.
+
+Riesgo conocido: el paso 4 toca el solver de flex/grid, que es la parte más cargada de
+`layout_container`. Hay que hacerlo con la suite de PNG delante (`test_freedom.c`), no a
+ciegas — y con `make clean` obligatorio, porque `pv_run` cambia de tamaño.
+
 ## 5. Tabla de errores
 
 | Código | Condición |

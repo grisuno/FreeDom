@@ -150,7 +150,7 @@ shorthands (`margin: 0 auto !important` stamps all four sides important).
 | `background` | `background` (color) **and** the gradient/image fields below. Shorthand semantics: a `background` value always resets *both* layers — a plain color emits gradient-unset+image-unset, a gradient or `url()` emits color-unset (-1) — so a higher-tier `background: red` clears a lower-tier gradient/image and vice versa. Any color token outside the gradient/url still resolves. |
 | `background-image` | `bg_grad_*` (unchanged) **or** `bg_image_url` (2026-07-16): `linear-gradient(...)` resolves to the gradient fields as before; `url(...)` (quoted or bare, 1 layer) captures the **raw, unresolved** URL text into `bg_image_url` (`css_style`, bounded `CSS_URL_MAX` (1024, enough to also hold the resolved absolute URL) — an overlong URL is dropped, fail closed, same as any other overlong token here); `radial-gradient(...)`/`conic-gradient(...)` resolve to the same gradient fields with the kind flag (1/2, 2026-07-19); `none`/`repeating-*`/multi-layer (comma-separated) → both fields unset. `css.c` itself still never fetches anything — it only extracts the literal string between the parens, same as it already does for `href`/`src` attributes elsewhere in the pipeline; resolving the URL against the page origin and deciding whether to actually fetch it happens downstream in `render_doc`/the GUI, under the exact same `caps.images` + `rdp_image_decision` gate as an `<img>` (see "Background image" below). |
 | `text-align` | `text_align`: left/center/right/justify |
-| `font-size` | `font_scale` (percent): `px` relative to 16px base, `em`/`rem` ×100, `%`, and keywords (`small`=85, `medium`=100, `large`=120, `x-large`=150, `xx-large`=200, `smaller`=85, `larger`=120) |
+| `font-size` | `font_scale` (percent) **+ `font_abs`** (2026-07-31): `px`/`pt`/`rem`/`vw`/`vh`/`vmin`/`vmax` and the absolute keywords (`xx-small`=60, `x-small`=75, `small`=85, `medium`=100, `large`=120, `x-large`=150, `xx-large`=200) resolve against the **16px root** and set `font_abs = 1`; `em`/`%` and the relative keywords (`smaller`=85, `larger`=120) keep `font_abs = 0`. See "font-size: absolute vs relative" below. |
 | `line-height` | `line_scale` (percent of the natural line box): unitless multiplier (`1.5` → 150) or `%` (`160%` → 160), clamped `[CSS_LINE_MIN, CSS_LINE_MAX]`; `normal` → 0 (unset, uses the UA default). Absolute `px`/`em` line-heights are out of scope (dropped). Inherits, like `font-size`. **Line-box rule (2026-07-30, CSS 2.1 §10.8):** when several runs share one flushed line, the line takes the **max** leaded height over its fragments (each fragment leads with its own `line_scale`, unset → UA spacing) — the last run's value must never shrink the line. Regression: Wikipedia's `.mw-editsection{line-height:0}` after every heading collapsed the heading line and the next paragraph painted through the glyphs. Locked by `test_download_png_line_height_zero_does_not_shrink_line`. |
 | `font-weight` | `bold`: `bold`/`bolder` or numeric ≥ 600 → 1; `normal`/`lighter`/< 600 → 0 |
 | `font-style` | `italic`: `italic`/`oblique` → 1; `normal` → 0 |
@@ -279,6 +279,48 @@ tags (the same scope the rest of the box model has — `cursor:pointer` on a bar
 `<a>` does not register a box; wrap it in a block-level element, or rely on the link's
 already-hand-cursor default). `text_overflow`/`word_break` **inherit** like
 `white-space` (nearest ancestor wins) and live on the run (`pv_run`/`rd_block`).
+
+### font-size: absolute vs relative (2026-07-31)
+
+Until this milestone `font_scale` was a single percent that the painter **multiplied**
+onto the block's user-agent size. That is correct for `em`/`%` and wrong for every
+absolute unit: `h1 { font-size: 40px }` became `250% × (16px × 2.0 heading scale) = 80px`,
+exactly twice what Firefox paints. Every author-styled heading on the web rendered at
+double size, which is the single loudest "this page is broken" signal.
+
+`css_style` therefore carries a companion flag:
+
+```c
+int font_scale;  /* percent, or 0 (unset) */
+int font_abs;    /* 1: percent is OF THE 16px ROOT (absolute); 0: of the inherited size */
+```
+
+**Given** a declaration `font-size: V`
+**when** `V` uses an absolute unit (`px`, `pt`, `rem`, `vw`/`vh`/`vmin`/`vmax`) or an
+absolute keyword (`xx-small`…`xx-large`, `medium`)
+**then** `font_scale = round(V_in_px / 16 × 100)` and `font_abs = 1`, and the painter
+uses `16px × font_scale/100` — the user-agent heading scale is **discarded**, exactly as
+a real cascade discards it when the author sets the property.
+
+**Given** a declaration using `em`, `%`, `smaller` or `larger`
+**when** it is resolved
+**then** `font_abs = 0` and the painter keeps multiplying the block's UA size, so
+`<h1>big <span style="font-size:.5em">small</span></h1>` still halves the heading.
+
+**Chained relatives.** `resolve_context` walks from the run outward. A relative
+declaration does not stop the walk: it accumulates into a multiplier and the walk
+continues, so `.card{font-size:14px} .card h3{font-size:1.2em}` resolves to
+`14 × 1.2 = 16.8px` (absolute). The walk stops at the first **absolute** declaration, or
+at the root — where a leftover pure-relative chain keeps `font_abs = 0` (the pre-existing
+behaviour, which is right for an inline inside a heading).
+
+`rem` is absolute by definition (root em) and this engine's root is always 16px, so it
+never differs from `px`. Viewport units resolve through the same normalized 1920×1080
+desktop the `@media` queries use, then become an absolute percent of 16px.
+
+**Out of scope:** `font-size` on the root element itself changing what `rem` means
+(the root stays 16px, so a page that sets `html{font-size:62.5%}` and then writes
+`1.6rem` renders at 16px, not 10px — tracked as a follow-up).
 
 ### Property inventory (supported vs missing)
 

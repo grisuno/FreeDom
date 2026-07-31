@@ -452,6 +452,12 @@ typedef struct css_style {
     char        content_str[CSS_URL_MAX];              /* R8: ::before/::after content */
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
+    /* Whether font_scale is a percent OF THE 16px ROOT (1: px/pt/rem/viewport units
+     * and the absolute keywords) or of the INHERITED size (0: em/%/smaller/larger).
+     * Meaningless when font_scale is 0. An absolute size REPLACES the user-agent
+     * heading scale instead of multiplying it -- without this every author-styled
+     * <h1> rendered at double size. spec/css.md "font-size: absolute vs relative". */
+    int         font_abs;
     int         line_scale;  /* line-height percent of the natural line box, or 0 (unset) */
     int         text_decoration; /* OR of CSS_DECO_*; 0 = none; -1 = unset */
     int         text_decoration_color; /* 0xRRGGBB or -1 (unset) */

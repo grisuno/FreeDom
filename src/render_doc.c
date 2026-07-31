@@ -92,6 +92,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->bg_rgb = bg_rgb;
     b->text_align = 0;
     b->font_scale = 0;
+    b->font_abs = 0;
     b->line_scale = 0;
     b->text_decoration = -1;
     b->text_decoration_color = -1;
@@ -387,6 +388,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
              * Default keeps author styling off until the user opts in). */
             lb->text_align = caps.css ? r->text_align : 0;
             lb->font_scale = (caps.css && r->font_scale > 0) ? r->font_scale : 0;
+            lb->font_abs = (caps.css && r->font_scale > 0) ? r->font_abs : 0;
             lb->line_scale = (caps.css && r->line_scale > 0) ? r->line_scale : 0;
             lb->text_decoration = caps.css ? r->text_decoration : -1;
             /* Author text-decoration sub-properties: same caps.css gate as above. */

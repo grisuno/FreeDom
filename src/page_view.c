@@ -41,6 +41,23 @@ _Static_assert(PV_BG_URL_MAX == CSS_URL_MAX,
  * rather than trusted; this also keeps parse_dim free of integer overflow. */
 #define PV_MAX_DIM 1000000
 
+/* Bounds for the font-size relative chain (spec/css.md "font-size: absolute vs
+ * relative"). Same window the css module clamps a single declaration to (percent
+ * 10..1000), so a chain can never resolve outside what one declaration could. */
+#define PV_FONT_REL_MIN 0.1
+#define PV_FONT_REL_MAX 10.0
+#define PV_FONT_PCT_MIN 10
+#define PV_FONT_PCT_MAX 1000
+
+/* Rounds a font-size percent to int, clamped to the same window one declaration
+ * gets. Clamping BEFORE the cast keeps the conversion defined for any input
+ * (a double past INT_MAX is undefined behaviour when cast directly). */
+static int round_pct(double pct) {
+    if (!(pct > (double)PV_FONT_PCT_MIN)) return PV_FONT_PCT_MIN;
+    if (pct > (double)PV_FONT_PCT_MAX) return PV_FONT_PCT_MAX;
+    return (int)(pct + 0.5);
+}
+
 /* --- UTF-8 sanitisation (cairo rejects invalid UTF-8; legacy-encoded pages
  * carry bytes that are invalid UTF-8). Mirrors browser.c's sanitiser; kept local
  * so page_view stays self-contained. Valid UTF-8 passes through; a byte that is
@@ -146,6 +163,7 @@ static void run_init_common(pv_run *r) {
     r->bg_rgb = -1;
     r->text_align = 0;
     r->font_scale = 0;
+    r->font_abs = 0;
     r->line_scale = 0;
     r->text_decoration = -1;
     r->font_family = 0;
@@ -474,12 +492,13 @@ void pv_set_bgcolor(pv_view *v, int bg_rgb) {
     v->runs[v->count - 1].bg_rgb = bg_rgb;
 }
 
-void pv_set_text_style(pv_view *v, int text_align, int font_scale, int line_scale,
-                       int text_decoration) {
+void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
+                       int line_scale, int text_decoration) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->text_align = text_align;
     r->font_scale = font_scale;
+    r->font_abs = font_abs;
     r->line_scale = line_scale;
     r->text_decoration = text_decoration;
 }
@@ -732,12 +751,34 @@ static int is_block_like(lxb_tag_id_t t, css_display display) {
     return is_block_tag(t);
 }
 
+/* CSS 2.2 section 9.7: taking an element OUT OF FLOW -- position:absolute|fixed, or
+ * any float other than none -- computes its `display` to `block`. An absolutely
+ * positioned <span> is a block box, whatever its tag says.
+ *
+ * This matters beyond pedantry: without it such an element registered no box, and
+ * with no box there is no entry in the positioned tree, so the right/bottom insets
+ * box_tree already resolves (R4/R8) had nothing to place -- every badge/close
+ * button/tooltip written on a <span> landed in the flow at full width instead of in
+ * its corner. spec/page_view.md "position:absolute|fixed y float...". */
+static int is_out_of_flow(const css_style *cs) {
+    return cs->position == CSS_POS_ABSOLUTE || cs->position == CSS_POS_FIXED
+        || cs->float_side == CSS_FLOAT_LEFT || cs->float_side == CSS_FLOAT_RIGHT;
+}
+
+/* is_block_like with the out-of-flow coercion applied. Takes the resolved style
+ * because the answer depends on position/float, not just the declared display. */
+static int is_block_like_style(lxb_tag_id_t t, const css_style *cs) {
+    return is_out_of_flow(cs) || is_block_like(t, cs->display);
+}
+
 /* An element that can carry a BOX (border/background/padding rect). Table cells are
  * box-generating even though they are not block tags: they must not cause a block
  * break (a row of cells flows as one line through the grid container, and making
  * <td> a block tag would split multi-link nav cells), but `td { border: 1px solid }`
  * is one of the most common declarations on the web and used to paint nothing at all
  * because no box was ever registered for the cell. */
+static int generates_box_style(lxb_tag_id_t t, const css_style *cs);
+
 static int generates_box(lxb_tag_id_t t, css_display display) {
     /* Form controls (input/select/textarea/button) are inline-block by default
      * but can carry author CSS like position:absolute, opacity:0, borders, etc.
@@ -747,6 +788,11 @@ static int generates_box(lxb_tag_id_t t, css_display display) {
         || t == LXB_TAG_TD || t == LXB_TAG_TH
         || t == LXB_TAG_INPUT || t == LXB_TAG_SELECT
         || t == LXB_TAG_TEXTAREA || t == LXB_TAG_BUTTON;
+}
+
+/* generates_box with the out-of-flow coercion (see is_block_like_style). */
+static int generates_box_style(lxb_tag_id_t t, const css_style *cs) {
+    return is_out_of_flow(cs) || generates_box(t, cs->display);
 }
 
 /* Returns 1 when the element should cause a block break (start a new line).
@@ -1409,8 +1455,14 @@ static int css_to_fx_justify(css_justify j) {
 
 /* Inline emphasis carried by a tag: bold from <b>/<strong>/<th>, italic from
  * <i>/<em>. <th> is a header cell, conventionally bold. */
+/* Tags the user-agent sheet renders bold. Headings belong here: making the UA bold
+ * part of the RESOLVED weight is what lets an author turn it off -- the painter used
+ * to force bold for every heading and only OR the author's value in, so
+ * `h1{font-weight:normal}` was unrepresentable. */
 static int is_bold_tag(lxb_tag_id_t t) {
-    return t == LXB_TAG_B || t == LXB_TAG_STRONG || t == LXB_TAG_TH;
+    return t == LXB_TAG_B || t == LXB_TAG_STRONG || t == LXB_TAG_TH
+        || t == LXB_TAG_H1 || t == LXB_TAG_H2 || t == LXB_TAG_H3
+        || t == LXB_TAG_H4 || t == LXB_TAG_H5 || t == LXB_TAG_H6;
 }
 static int is_italic_tag(lxb_tag_id_t t) {
     return t == LXB_TAG_I || t == LXB_TAG_EM;
@@ -1503,14 +1555,16 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             const char **href, size_t *href_len,
                             const lxb_dom_node_t **block, int *heading,
                             int *fg, int *bg, int *bold, int *italic,
-                            int *align, int *font_scale, int *line_scale, int *deco,
+                            int *align, int *font_scale, int *font_abs,
+                            int *line_scale, int *deco,
                             const lxb_dom_node_t **li, int *list_depth, int *ordered,
                             pv_container_reg *reg, pv_cont_info *cont, pv_box_info *box,
                             pv_text_ext *ext, pv_box_reg *box_reg,
                             pv_container_reg *float_reg, int *block_id_out,
                             pv_style_cache *style_cache, struct pv_flow_reg *flowreg) {
     *href = NULL; *href_len = 0; *block = base; *heading = 0; *fg = -1; *bg = -1;
-    *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *line_scale = 0;
+    *bold = 0; *italic = 0; *align = CSS_ALIGN_UNSET; *font_scale = 0; *font_abs = 0;
+    *line_scale = 0;
     *deco = -1;
     *li = NULL; *list_depth = 0; *ordered = 0;
     cont->id = -1; cont->display = 0; cont->gap = 0;
@@ -1531,6 +1585,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     *block_id_out = -1;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
     int got_align = 0, got_fs = 0, got_lh = 0, got_deco = 0, got_hbox = 0, got_boxdeco = 0;
+    /* font-size chaining (spec/css.md "font-size: absolute vs relative"): a RELATIVE
+     * declaration (em/%/smaller/larger) does not end the search -- it multiplies into
+     * fs_rel and the walk continues outward until an ABSOLUTE one anchors the chain
+     * (`.card{font-size:14px} .card h3{font-size:1.2em}` -> 16.8px). A chain that
+     * reaches the root with no anchor stays relative, which is what an inline inside
+     * a heading needs. */
+    double fs_rel = 1.0;
+    int fs_rel_any = 0;
     int got_li = 0, got_list_kind = 0, got_float = 0;
     int prev_box_id = -1;  /* the box-carrying block seen one step more inner, for parent linking */
     int tag_bold = 0, tag_italic = 0;
@@ -1606,7 +1668,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             /* Nearest floated self-or-ancestor block: its side + a document-order id so
              * the painter groups the runs of one floated element into one column. */
-            if (!got_float && float_reg != NULL && is_block_like(t, cs.display) &&
+            if (!got_float && float_reg != NULL && is_block_like_style(t, &cs) &&
                 (cs.float_side == CSS_FLOAT_LEFT || cs.float_side == CSS_FLOAT_RIGHT)) {
                 cont->float_side = cs.float_side;
                 cont->float_id = container_id(float_reg, p);
@@ -1614,7 +1676,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             }
             /* Horizontal box from the nearest block ancestor that declares one, so a
              * wrapper's max-width/centering/padding reaches all its descendants. */
-            if (!got_hbox && is_block_like(t, cs.display) && css_has_hbox(&cs)) {
+            if (!got_hbox && is_block_like_style(t, &cs) && css_has_hbox(&cs)) {
                 css_hbox_resolve(&cs, box);
                 got_hbox = 1;
             }
@@ -1626,7 +1688,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * structure; the decoration (on the box def) is author presentation that
              * render_doc gates behind caps.css. */
             int this_box = -1;   /* box registered for THIS ancestor, or -1 */
-            if (box_reg != NULL && generates_box(t, cs.display) && css_has_boxdeco(&cs)
+            if (box_reg != NULL && generates_box_style(t, &cs) && css_has_boxdeco(&cs)
                 && !((t == LXB_TAG_TD || t == LXB_TAG_TH)
                      && in_flow_table_cell(p, base, flowreg))) {
                 int bid = box_reg_id(box_reg, p, &cs);
@@ -1685,7 +1747,20 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             if (!got_align && cs.text_align != CSS_ALIGN_UNSET) {
                 *align = (int)cs.text_align; got_align = 1;
             }
-            if (!got_fs && cs.font_scale != 0) { *font_scale = cs.font_scale; got_fs = 1; }
+            if (!got_fs && cs.font_scale != 0) {
+                if (cs.font_abs) {
+                    *font_scale = round_pct(cs.font_scale * fs_rel);
+                    *font_abs = 1;
+                    got_fs = 1;
+                } else {
+                    fs_rel *= (double)cs.font_scale / 100.0;
+                    /* Clamp every step, not just the product: a hostile page nesting
+                     * hundreds of `font-size:2em` must not overflow the accumulator. */
+                    if (fs_rel > PV_FONT_REL_MAX) fs_rel = PV_FONT_REL_MAX;
+                    else if (fs_rel < PV_FONT_REL_MIN) fs_rel = PV_FONT_REL_MIN;
+                    fs_rel_any = 1;
+                }
+            }
             if (!got_lh && cs.line_scale != 0) { *line_scale = cs.line_scale; got_lh = 1; }
             /* text-decoration: nearest ancestor that sets it (incl. an explicit
              * `none` = 0, which drops a link underline). -1 means still unset. */
@@ -1767,6 +1842,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             prev_el = p;
         }
         if (p == base) break;
+    }
+
+    /* The walk ended with relative font-sizes and no absolute anchor: the product
+     * stays RELATIVE to the block's user-agent size, which is exactly right for an
+     * inline inside a heading (`<h1>big <span style="font-size:.5em">small</span>`). */
+    if (!got_fs && fs_rel_any) {
+        *font_scale = round_pct(100.0 * fs_rel);
+        *font_abs = 0;
     }
 
     *bold = got_css_bold ? css_bold : tag_bold;
@@ -2932,14 +3015,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 const lxb_dom_node_t *cu_block = NULL;
                 const lxb_dom_node_t *cu_li = NULL;
                 int cu_heading = 0, cfg = -1, cbg = -1, cbold = 0, citalic = 0;
-                int calign = 0, cfs = 0, clh = 0, cdeco = -1;
+                int calign = 0, cfs = 0, cfs_abs = 0, clh = 0, cdeco = -1;
                 int cu_depth = 0, cu_ordered = 0, cu_bdeco = -1;
                 pv_cont_info cu_cont;
                 pv_box_info cu_box;
                 pv_text_ext cext;
                 resolve_context(n, base, sheet, &cu_href, &cu_hl, &cu_block,
                                 &cu_heading, &cfg, &cbg, &cbold, &citalic,
-                                &calign, &cfs, &clh, &cdeco,
+                                &calign, &cfs, &cfs_abs, &clh, &cdeco,
                                 &cu_li, &cu_depth, &cu_ordered,
                                 &reg, &cu_cont, &cu_box, &cext,
                                 &box_reg, &float_reg, &cu_bdeco, &cache, &flowreg);
@@ -2959,7 +3042,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_text_style(v,
                                   (t == LXB_TAG_TH && calign == CSS_ALIGN_UNSET)
                                       ? (int)CSS_ALIGN_CENTER : calign,
-                                  cfs, clh, cdeco);
+                                  cfs, cfs_abs, clh, cdeco);
                 pv_set_text_ext(v, &cext);
                 pv_set_container(v, cid, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, cols,
                                  0, -1, CSS_AK_UNSET);
@@ -3015,7 +3098,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
+                int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
@@ -3024,7 +3108,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
+                                &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &ctl_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
@@ -3082,7 +3167,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             size_t unused_hl = 0;
             const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
+                int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
@@ -3091,7 +3177,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int unused_bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
+                                &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &ctl_ext,
                                 &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
@@ -3159,7 +3246,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
+                int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
@@ -3168,7 +3256,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int unused_bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
+                                &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &ctl_ext,
                                 &box_reg, &float_reg, &unused_bdeco, &cache, &flowreg);
@@ -3212,7 +3301,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
                 int unused_bold = 0, unused_italic = 0, unused_align = 0;
-                int unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                int unused_fs = 0, unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info svg_cont;
@@ -3221,7 +3310,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl2, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
+                                &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &svg_cont, &svg_box, &svg_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
@@ -3236,7 +3326,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * fill="currentColor" takes the colour of the text around it. */
                 pv_set_text_ext(v, &svg_ext);
                 pv_set_color(v, unused_fg);
-                pv_set_text_style(v, unused_align, unused_fs, unused_lh, unused_deco);
+                pv_set_text_style(v, unused_align, unused_fs, unused_fs_abs, unused_lh, unused_deco);
                 pv_set_container(v, svg_cont.id, svg_cont.display, svg_cont.gap,
                                  svg_cont.justify, svg_cont.cols, svg_cont.wrap,
                                  svg_cont.row_gap, svg_cont.align_items);
@@ -3298,7 +3388,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
+                int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
@@ -3307,7 +3398,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
+                                &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &img_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
@@ -3326,7 +3418,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 if (st != PV_OK) { rc = st; goto cleanup; }
                 /* The inherited text-align rides the image run: a replaced element
                  * is placed by it exactly like a line of text. */
-                pv_set_text_style(v, unused_align, unused_fs, unused_lh, unused_deco);
+                pv_set_text_style(v, unused_align, unused_fs, unused_fs_abs, unused_lh, unused_deco);
                 /* The resolved inherited text extensions ride the image run too:
                  * image_rendering picks the paint scaling filter (2026-07-10). */
                 pv_set_text_ext(v, &img_ext);
@@ -3393,7 +3485,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 size_t unused_hl = 0;
                 const lxb_dom_node_t *block = NULL;
                 int heading = 0, unused_fg = -1, unused_bg = -1;
-                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0, unused_lh = 0, unused_deco = 0;
+                int unused_bold = 0, unused_italic = 0, unused_align = 0, unused_fs = 0;
+                int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
                 pv_cont_info unused_cont;
@@ -3402,7 +3495,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int bdeco;
                 resolve_context(n, base, sheet, &unused_href, &unused_hl, &block, &heading,
                                 &unused_fg, &unused_bg, &unused_bold, &unused_italic,
-                                &unused_align, &unused_fs, &unused_lh, &unused_deco,
+                                &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
+                                &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &unused_cont, &unused_box, &vid_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
@@ -3445,18 +3539,19 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * css_has_boxdeco): whether a box exists is decided by style, not
                  * by content (CSS semantics). */
                 css_style ecs = cached_element_style(lxb_dom_interface_element(n), sheet, &cache);
-                if (is_block_like(node_tag(n), ecs.display) && css_has_boxdeco(&ecs)) {
+                if (is_block_like_style(node_tag(n), &ecs) && css_has_boxdeco(&ecs)) {
                     const char *ehref = NULL; size_t ehl = 0;
                     const lxb_dom_node_t *eblock = NULL;
                     int eheading = 0, efg = -1, ebg = -1, ebold = 0, eitalic = 0;
-                    int ealign = 0, efs = 0, elh = 0, edeco = -1;
+                    int ealign = 0, efs = 0, efs_abs = 0, elh = 0, edeco = -1;
                     const lxb_dom_node_t *eli = NULL;
                     int edepth = 0, eordered = 0, ebdeco = -1;
                     pv_cont_info econt;
                     pv_box_info ebox;
                     pv_text_ext eext;
                     resolve_context(n, base, sheet, &ehref, &ehl, &eblock, &eheading,
-                                    &efg, &ebg, &ebold, &eitalic, &ealign, &efs, &elh, &edeco,
+                                    &efg, &ebg, &ebold, &eitalic, &ealign, &efs, &efs_abs,
+                                    &elh, &edeco,
                                     &eli, &edepth, &eordered, &reg, &econt, &ebox, &eext,
                                     &box_reg, &float_reg, &ebdeco, &cache, &flowreg);
                     /* Inside a walked cell of a FLOW table the ROW is the line: a
@@ -3483,7 +3578,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_indent(v, edepth);
                     pv_set_color(v, efg);
                     pv_set_bgcolor(v, ebg);
-                    pv_set_text_style(v, ealign, efs, elh, edeco);
+                    pv_set_text_style(v, ealign, efs, efs_abs, elh, edeco);
                     pv_set_container(v, econt.id, econt.display, econt.gap, econt.justify,
                                      econt.cols, econt.wrap, econt.row_gap, econt.align_items);
                     pv_set_grid(v, econt.col_w, PV_GRID_TRACKS, econt.col_span);
@@ -3519,6 +3614,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         size_t href_len = 0;
         const lxb_dom_node_t *block = NULL;
         int heading = 0, fg = -1, bg = -1, bold = 0, italic = 0, align = 0, font_scale = 0;
+        int font_abs = 0;
         int line_scale = 0, text_decoration = -1;
         const lxb_dom_node_t *li = NULL;
         int list_depth = 0, ordered = 0;
@@ -3527,7 +3623,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_text_ext ext;
         int bdeco;
         resolve_context(n, base, sheet, &href, &href_len, &block, &heading, &fg, &bg,
-                        &bold, &italic, &align, &font_scale, &line_scale, &text_decoration,
+                        &bold, &italic, &align, &font_scale, &font_abs, &line_scale,
+                        &text_decoration,
                         &li, &list_depth, &ordered, &reg, &cont, &box, &ext,
                         &box_reg, &float_reg, &bdeco, &cache, &flowreg);
 
@@ -3624,7 +3721,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_indent(v, list_depth);
                 pv_set_color(v, fg);
                 pv_set_bgcolor(v, bg);
-                pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
+                pv_set_text_style(v, align, font_scale, font_abs, line_scale, text_decoration);
                 pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
                                  cont.wrap, cont.row_gap, cont.align_items);
                 pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
@@ -3725,7 +3822,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         pv_set_indent(v, list_depth);
         pv_set_color(v, fg);
         pv_set_bgcolor(v, bg);
-        pv_set_text_style(v, align, font_scale, line_scale, text_decoration);
+        pv_set_text_style(v, align, font_scale, font_abs, line_scale, text_decoration);
         pv_set_container(v, cont.id, cont.display, cont.gap, cont.justify, cont.cols,
                           cont.wrap, cont.row_gap, cont.align_items);
                 pv_set_grid(v, cont.col_w, PV_GRID_TRACKS, cont.col_span);
