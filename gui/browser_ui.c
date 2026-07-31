@@ -8461,8 +8461,10 @@ static long write_doc_png(browser_window *w, const char *path) {
     ui_theme saved = w->theme;
     w->theme = ui_theme_for(UI_THEME_LIGHT);
     const ui_theme *th = &w->theme;
-    double png_left = PNG_MARGIN;
-    double content_w = PNG_PAGE_W - 2.0 * PNG_MARGIN;
+    double png_margin = (w->doc != NULL && w->doc->html_margin_top >= 0)
+                            ? (double)w->doc->html_margin_top : PNG_MARGIN;
+    double png_left = png_margin;
+    double content_w = PNG_PAGE_W - 2.0 * png_margin;
     if (w->doc != NULL && w->doc->html_max_width > 0) {
         double cap = (double)w->doc->html_max_width;
         if (cap < content_w) {
@@ -8486,7 +8488,7 @@ static long write_doc_png(browser_window *w, const char *path) {
 
     if (L.nrow == 0 || content_h <= 0.0) { rc_free(&L); w->theme = saved; return 0; }
 
-    long img_h = (long)(content_h + 2.0 * PNG_MARGIN + 0.5);
+    long img_h = (long)(content_h + 2.0 * png_margin + 0.5);
     if (img_h > PNG_MAX_H) img_h = PNG_MAX_H;
 
     cairo_surface_t *surf =
@@ -8511,7 +8513,7 @@ static long write_doc_png(browser_window *w, const char *path) {
         int neg_ov_stack[OV_MAX_DEPTH] = {0};
         int neg_ov_depth = 0;
         for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
-            paint_positioned_one(cr, w, th, &L.positioned[i], png_left, PNG_MARGIN,
+            paint_positioned_one(cr, w, th, &L.positioned[i], png_left, png_margin,
                                  no_cull_top, no_cull_h, PNG_PAGE_W,
                                  neg_ov_stack, &neg_ov_depth, &L);
         }
@@ -8519,11 +8521,11 @@ static long write_doc_png(browser_window *w, const char *path) {
     }
 
     /* Box decoration first (behind the rows), then the rows, at a constant origin
-     * (no pagination): both use PNG_MARGIN + their layout-space top. row_done (see
+     * (no pagination): both use png_margin + their layout-space top. row_done (see
      * paint_structured) marks rows already painted as part of a grouped box. */
     char *row_done = (L.nrow > 0) ? (char *)calloc(L.nrow, 1) : NULL;
     for (size_t bi = 0; bi < L.nbox; ++bi)
-        paint_box_and_direct_rows(cr, w, &L, &L.boxes[bi], png_left, PNG_MARGIN,
+        paint_box_and_direct_rows(cr, w, &L, &L.boxes[bi], png_left, png_margin,
                                   content_w, PNG_PAGE_W, no_cull_top, no_cull_h,
                                   0, row_done);
     {
@@ -8534,9 +8536,9 @@ static long write_doc_png(browser_window *w, const char *path) {
             const rc_row *r = &L.rows[i];
             int row_bid = row_owner_block_id(&L, r);
             ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, &L,
-                         png_left, PNG_MARGIN);
+                         png_left, png_margin);
             paint_content_row(cr, w, &L, r, png_left,
-                              PNG_MARGIN + r->top, content_w, PNG_PAGE_W, 0);
+                              png_margin + r->top, content_w, PNG_PAGE_W, 0);
         }
         while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
         free(row_done);
@@ -8549,7 +8551,7 @@ static long write_doc_png(browser_window *w, const char *path) {
         for (size_t pi = 0; pi < L.npositioned; ++pi) {
             const bt_positioned *pb = &L.positioned[pi];
             if (pb->z_index < 0) continue;  /* already painted behind, above */
-            paint_positioned_one(cr, w, th, pb, png_left, PNG_MARGIN,
+            paint_positioned_one(cr, w, th, pb, png_left, png_margin,
                                  no_cull_top, no_cull_h, PNG_PAGE_W,
                                  pos_ov_stack, &pos_ov_depth, &L);
         }

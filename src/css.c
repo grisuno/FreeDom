@@ -33,9 +33,12 @@
  * per-element style cache in page_view.c's pv_style_cache: with the cascade now
  * O(nsels) per unique element instead of per (element, ancestor-visit) pair,
  * a bigger nsels does not multiply page_view's runtime by every text node. */
-#define CSS_MAX_SELS            8192u
-#define CSS_MAX_DECLS           32768u
-#define CSS_MAX_RULES           6144u
+/* Initial capacities (anti-DoS hint: start small, grow on demand).
+ * Every real browser does this; hardcoding an artificial ceiling is
+ * a bug, not a feature. */
+#define CSS_INIT_SELS            512u
+#define CSS_INIT_DECLS           1024u
+#define CSS_INIT_RULES           256u
 #define CSS_SELS_PER_GROUP      32
 #define CSS_INLINE_DECLS        64u
 #define CSS_INLINE_SPEC         (1 << 20)
@@ -189,13 +192,21 @@ typedef struct css_custom_prop {
 /* The selector types (css_attr_match/css_compound/css_sel) and their parser/matcher
  * live in css_select.{h,c}. */
 
+typedef struct { size_t start, count; } css_rule;
+
 struct css_sheet {
-    css_decl decls[CSS_MAX_DECLS];
-    size_t   ndecls;
-    struct { size_t start, count; } rules[CSS_MAX_RULES];
-    size_t   nrules;
-    css_sel  sels[CSS_MAX_SELS];
-    size_t   nsels;
+    css_decl *decls;
+    size_t    decls_cap;
+    size_t    ndecls;
+
+    css_rule *rules;
+    size_t    rules_cap;
+    size_t    nrules;
+
+    css_sel  *sels;
+    size_t    sels_cap;
+    size_t    nsels;
+
     css_custom_prop custom[CSS_MAX_CUSTOM_PROPS];  /* --name table, page-global */
     size_t          ncustom;
     char            bg_urls[CSS_MAX_BG_URLS][CSS_URL_MAX]; /* background-image url() pool */
@@ -3921,21 +3932,46 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     }
     if (got == 0) return;  /* no supported selector: skip the whole rule */
 
+    /* Grow decls array if needed. */
+    if (sh->ndecls >= sh->decls_cap) {
+        size_t nc = sh->decls_cap ? sh->decls_cap * 2 : CSS_INIT_DECLS;
+        css_decl *g = (css_decl *)realloc(sh->decls, nc * sizeof *g);
+        if (g == NULL) return;
+        sh->decls = g;
+        sh->decls_cap = nc;
+    }
     size_t dstart = sh->ndecls;
-    size_t dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], CSS_MAX_DECLS - dstart,
-                                sh->custom, sh->ncustom,
-                                sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
-                                sh->content_urls, &sh->ncontent_urls, 64);
+    size_t dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart],
+                                 sh->decls_cap - dstart,
+                                 sh->custom, sh->ncustom,
+                                 sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
+                                 sh->content_urls, &sh->ncontent_urls, 64);
     if (dn == 0) return;
-    if (sh->nrules >= CSS_MAX_RULES) return;  /* leave decls; harmless, unreferenced */
 
     sh->ndecls += dn;
+
+    /* Grow rules array if needed. */
+    if (sh->nrules >= sh->rules_cap) {
+        size_t nc = sh->rules_cap ? sh->rules_cap * 2 : CSS_INIT_RULES;
+        css_rule *g = (css_rule *)realloc(sh->rules, nc * sizeof *g);
+        if (g == NULL) return;
+        sh->rules = g;
+        sh->rules_cap = nc;
+    }
     size_t rule_idx = sh->nrules;
     sh->rules[rule_idx].start = dstart;
     sh->rules[rule_idx].count = dn;
     ++sh->nrules;
 
-    for (int g = 0; g < got && sh->nsels < CSS_MAX_SELS; ++g) {
+    /* Grow sels array if needed. */
+    for (int g = 0; g < got; ++g) {
+        if (sh->nsels >= sh->sels_cap) {
+            size_t nc = sh->sels_cap ? sh->sels_cap * 2 : CSS_INIT_SELS;
+            css_sel *gr = (css_sel *)realloc(sh->sels, nc * sizeof *gr);
+            if (gr == NULL) break;  /* keep what we have */
+            sh->sels = gr;
+            sh->sels_cap = nc;
+        }
         css_sel *dst = &sh->sels[sh->nsels];
         *dst = tmp[g];
         dst->rule = (int)rule_idx;
@@ -4386,11 +4422,21 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
     if (sh == NULL) return CSS_ERR_OOM;
     css_media def = { 0, 0, CSS_MEDIA_DEFAULT_WIDTH };  /* screen / light / desktop */
     const css_media *m = (media != NULL) ? media : &def;
+
+    /* Allocate initial dynamic arrays. Start small; add_rule doubles on demand.
+     * Leak-safe: if any alloc fails, css_free releases whatever was allocated. */
+    sh->decls = (css_decl *)malloc(CSS_INIT_DECLS * sizeof(css_decl));
+    sh->decls_cap = sh->decls ? CSS_INIT_DECLS : 0;
+    sh->rules = (css_rule *)malloc(CSS_INIT_RULES * sizeof(css_rule));
+    sh->rules_cap = sh->rules ? CSS_INIT_RULES : 0;
+    sh->sels = (css_sel *)malloc(CSS_INIT_SELS * sizeof(css_sel));
+    sh->sels_cap = sh->sels ? CSS_INIT_SELS : 0;
+
     if (text != NULL) {
         if (len == 0) len = strlen(text);
         size_t clen = 0;
         char *clean = strip_comments(text, len, &clen);
-        if (clean == NULL) { free(sh); return CSS_ERR_OOM; }
+        if (clean == NULL) { css_free(sh); return CSS_ERR_OOM; }
         collect_custom_props_scoped(clean, 0, clen, m, root_scope,
                                     sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
         parse_block(sh, clean, 0, clen, m, 0);
@@ -4401,6 +4447,10 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
 }
 
 void css_free(css_sheet *s) {
+    if (s == NULL) return;
+    free(s->decls);
+    free(s->rules);
+    free(s->sels);
     free(s);
 }
 

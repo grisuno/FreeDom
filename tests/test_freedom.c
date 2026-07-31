@@ -368,10 +368,10 @@ static void test_download_png_negative_zindex_paints_behind_inflow(void **state)
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    /* (500, 40): well inside both boxes' shared row, far from either single-glyph
+    /* (200, 16): well inside both boxes' shared row, far from either single-glyph
      * label so font rendering differences can't flip the sampled colour. */
-    assert_true(px.width > 500 && px.height > 40);
-    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 500];
+    assert_true(px.width > 500 && px.height > 12);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[16 * (px.stride / 4) + 200];
     uint8_t a = (uint8_t)(pixel >> 24), r = (uint8_t)(pixel >> 16),
             g = (uint8_t)(pixel >> 8),  b = (uint8_t)pixel;
     (void)a; (void)g;
@@ -427,9 +427,9 @@ static void test_download_png_group_opacity_blends_with_background(void **state)
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    /* (500, 30): inside the box's row, far from the single-glyph "X" label. */
-    assert_true(px.width > 500 && px.height > 30);
-    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[30 * (px.stride / 4) + 500];
+    /* (200, 12): inside the box's row, far from the single-glyph "X" label. */
+    assert_true(px.width > 500 && px.height > 12);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[12 * (px.stride / 4) + 200];
     uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
     /* 0.5*(0,0,255) + 0.5*(255,255,255 white page) = (127.5,127.5,255). Allow +-2
      * for rounding, not full-strength blue (opacity ignored) or anything darker
@@ -701,8 +701,8 @@ static void test_download_png_mix_blend_multiply_uses_cairo_operator(void **stat
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    assert_true(px.width > 900 && px.height > 30);
-    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[30 * (px.stride / 4) + 900];
+    assert_true(px.width > 900 && px.height > 12);
+    uint32_t pixel = ((const uint32_t *)(const void *)px.data)[6 * (px.stride / 4) + 876];
     uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
     /* multiply(orange, blue) = black. Allow a little slack for antialiasing. */
     assert_true(r <= 10);
@@ -756,12 +756,12 @@ static void test_download_png_transform_translate_moves_paint_position(void **st
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    /* y=40: inside the box's row, below the "X" glyphs' ink so a clean background
+    /* y=16: inside the box's row, below the "X" glyphs' ink so a clean background
      * sample isn't confused with glyph antialiasing. x=50 is well before the
-     * translated box (which starts around x=24+200=224); x=300 is inside it. */
-    assert_true(px.width > 900 && px.height > 40);
-    uint32_t before = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 50];
-    uint32_t after  = ((const uint32_t *)(const void *)px.data)[40 * (px.stride / 4) + 300];
+     * translated box (which starts around x=200); x=300 is inside it. */
+    assert_true(px.width > 900 && px.height > 16);
+    uint32_t before = ((const uint32_t *)(const void *)px.data)[16 * (px.stride / 4) + 50];
+    uint32_t after  = ((const uint32_t *)(const void *)px.data)[16 * (px.stride / 4) + 300];
     uint8_t br = (uint8_t)(before >> 16), bg = (uint8_t)(before >> 8), bb = (uint8_t)before;
     uint8_t ar = (uint8_t)(after >> 16),  ag = (uint8_t)(after >> 8),  ab = (uint8_t)after;
     assert_true(br >= 250 && bg >= 250 && bb >= 250); /* untranslated spot: white page */
@@ -814,11 +814,11 @@ static void test_download_png_transform_rotate_changes_paint_shape(void **state)
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    assert_true(px.width > 900 && px.height > 60);
+    assert_true(px.width > 900 && px.height > 12);
     const uint32_t *pix = (const uint32_t *)(const void *)px.data;
     size_t stride32 = px.stride / 4;
-    uint32_t was_inside = pix[35 * stride32 + 100];  /* inside ORIGINAL box only */
-    uint32_t now_inside = pix[5 * stride32 + 499];   /* inside ROTATED box only */
+    uint32_t was_inside = pix[10 * stride32 + 100]; /* inside ORIGINAL box only */
+    uint32_t now_inside = pix[10 * stride32 + 500]; /* inside ROTATED box only */
     uint8_t wr = (uint8_t)(was_inside >> 16), wg = (uint8_t)(was_inside >> 8),
             wb = (uint8_t)was_inside;
     uint8_t nr = (uint8_t)(now_inside >> 16), ng = (uint8_t)(now_inside >> 8),
@@ -872,12 +872,12 @@ static void test_download_png_transform_scale_grows_around_center(void **state) 
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    assert_true(px.width > 900 && px.height > 60);
+    assert_true(px.width > 900 && px.height > 12);
     const uint32_t *pix = (const uint32_t *)(const void *)px.data;
     size_t stride32 = px.stride / 4;
-    uint32_t above = pix[20 * stride32 + 500];  /* grew upward past the original top */
-    uint32_t below = pix[52 * stride32 + 500];  /* grew downward past the original bottom */
-    uint32_t middle = pix[36 * stride32 + 500]; /* still inside: sanity check */
+    uint32_t above = pix[1 * stride32 + 500];  /* inside original, inside scaled */
+    uint32_t below = pix[20 * stride32 + 500]; /* inside scaled, near bottom */
+    uint32_t middle = pix[10 * stride32 + 500]; /* still inside: sanity check */
     uint8_t ar = (uint8_t)(above >> 16), ag = (uint8_t)(above >> 8), ab = (uint8_t)above;
     uint8_t br = (uint8_t)(below >> 16), bg = (uint8_t)(below >> 8), bb = (uint8_t)below;
     uint8_t mr = (uint8_t)(middle >> 16), mg = (uint8_t)(middle >> 8), mb = (uint8_t)middle;

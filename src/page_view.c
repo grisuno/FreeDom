@@ -2811,7 +2811,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
      * layout properties (max-width, margin) for page-level centering. */
     v->canvas_bg = -1;
     v->html_max_width = -1;
-    v->html_margin_top = 0;
+    v->html_margin_top = -1;
     v->html_center = 0;
     /* The document root node is NOT the <html> element — it is a DOCUMENT_NODE.
      * Find the <html> element by scanning from `root`. */
@@ -2829,16 +2829,18 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             v->canvas_bg = html_cs.background;
         if (html_cs.max_width > 0)
             v->html_max_width = html_cs.max_width;
-        if (html_cs.margin_top > 0)
+        if (html_cs.margin_top != CSS_LEN_UNSET)
             v->html_margin_top = html_cs.margin_top;
         if (html_cs.margin_left == CSS_LEN_AUTO && html_cs.margin_right == CSS_LEN_AUTO)
             v->html_center = 1;
     }
-    if (v->canvas_bg < 0 && body != NULL) {
+    if (body != NULL) {
         css_style body_cs = cached_element_style(lxb_dom_interface_element(body),
                                                   sheet, &cache);
-        if (body_cs.background >= 0)
+        if (v->canvas_bg < 0 && body_cs.background >= 0)
             v->canvas_bg = body_cs.background;
+        if (v->html_margin_top < 0 && body_cs.margin_top != CSS_LEN_UNSET)
+            v->html_margin_top = body_cs.margin_top;
     }
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {

@@ -3,23 +3,23 @@
     "god_nodes": [
       [
         "gui/browser_ui.c",
-        35.1
+        37.0
       ],
       [
         "src/local_store.c",
-        25.5
+        27.1
       ],
       [
         "tests/test_css.c",
-        21.5
+        23.3
       ],
       [
         "src/css.c",
-        18.2
+        18.900000000000002
       ],
       [
         "src/page_view.c",
-        11.600000000000001
+        13.3
       ],
       [
         "tests/test_js_dom.c",
@@ -27,15 +27,15 @@
       ],
       [
         "tests/test_page_view.c",
-        9.9
+        10.600000000000001
       ],
       [
         "tests/test_tab.c",
-        8.3
+        8.5
       ],
       [
         "src/tab.c",
-        7.0
+        7.1000000000000005
       ],
       [
         "src/dom.c",
@@ -68,6 +68,7 @@
     "fuzz/fuzz_pdf_export.c": "utility",
     "fuzz/fuzz_prefetch.c": "utility",
     "fuzz/fuzz_prefs.c": "utility",
+    "fuzz/fuzz_svg_render.c": "presentation",
     "fuzz/fuzz_text_shape.c": "utility",
     "fuzz/fuzz_tls_impersonate.c": "utility",
     "fuzz/fuzz_url.c": "utility",
@@ -76,6 +77,7 @@
     "gui/browser_ui_internal.h": "presentation",
     "gui/bui_theme.c": "presentation",
     "gui/freedom_view.c": "presentation",
+    "gui/svg_paint.c": "presentation",
     "gui/ui_render.c": "presentation",
     "include/anti_fp.h": "utility",
     "include/box_style.h": "utility",
@@ -122,6 +124,8 @@
     "include/renderer.h": "presentation",
     "include/request_policy.h": "business_logic",
     "include/secure_fetch.h": "utility",
+    "include/svg_paint.h": "utility",
+    "include/svg_render.h": "presentation",
     "include/tab.h": "utility",
     "include/text_shape.h": "utility",
     "include/textfield.h": "utility",
@@ -178,6 +182,7 @@
     "src/renderer.c": "presentation",
     "src/request_policy.c": "business_logic",
     "src/secure_fetch.c": "utility",
+    "src/svg_render.c": "presentation",
     "src/tab.c": "utility",
     "src/text_shape.c": "utility",
     "src/textfield.c": "utility",
@@ -230,6 +235,7 @@
     "tests/test_renderer.c": "testing",
     "tests/test_request_policy.c": "testing",
     "tests/test_secure_fetch.c": "testing",
+    "tests/test_svg_render.c": "testing",
     "tests/test_tab.c": "testing",
     "tests/test_text_shape.c": "testing",
     "tests/test_textfield.c": "testing",
