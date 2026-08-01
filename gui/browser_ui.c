@@ -5222,6 +5222,20 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * through the shared helper -- identical to the flex/grid item flow, so a
          * replaced element paints the same in flow and inside a column. */
         if (emit_replaced_row(cr, w, L, &s, th, b, content_w)) {
+            /* A form control inside an open box must sit within that box's content
+             * rect, exactly as the text rows do via s.indent_px. The row was emitted
+             * with x_off 0 / bg_w content_w (page width), so a width:100% <input>
+             * escaped its padded, max-width form to the page's left edge and full
+             * width (the login-form overflow). Re-seat it on the box. Outside a box
+             * this is a no-op (ctx_left 0, ctx_w content_w) and byte-identical; image/
+             * video/svg rows are left untouched to keep the change contained. */
+            if (b->kind == RD_INPUT && s.box_depth > 0 && L->nrow > 0) {
+                double ctx_left, ctx_w;
+                rc_box_context(&s, content_w, &ctx_left, &ctx_w);
+                rc_row *rr = &L->rows[L->nrow - 1];
+                rr->x_off = ctx_left;
+                if (rr->bg_w > ctx_w) rr->bg_w = ctx_w;
+            }
             continue;
         }
 

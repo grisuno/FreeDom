@@ -1529,6 +1529,22 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
     return cs;
 }
 
+/* Overrides the intrinsic dimensions of a replaced element (iw, ih) with the
+ * element's OWN resolved CSS width/height when each is a positive px. auto,
+ * percent and unset are left untouched: percent has no containing block in this
+ * flat model, and auto keeps the intrinsic/attribute size (so the common
+ * `img{max-width:100%;height:auto}` rule does not disturb it). This is layout,
+ * not author colour, so it applies unconditionally (CLAUDE.md: layout != style).
+ * An author rule therefore wins over the width/height presentation attribute,
+ * matching the browser cascade. Regression it fixes: inline icons drawn at their
+ * viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
+static void apply_css_replaced_size(lxb_dom_element_t *el, const css_sheet *sheet,
+                                    pv_style_cache *cache, int *iw, int *ih) {
+    css_style own = cached_element_style(el, sheet, cache);
+    if (own.width  > 0 && own.width  <= CSS_LEN_MAX) *iw = own.width;
+    if (own.height > 0 && own.height <= CSS_LEN_MAX) *ih = own.height;
+}
+
 /* Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify.
  * Unset / start / unknown all fall to FX_JUSTIFY_START (the default). */
 static int css_to_fx_justify(css_justify j) {
@@ -3483,6 +3499,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
                 int iw = parse_dim(ws, wl);
                 int ih = parse_dim(hs, hl);
+                apply_css_replaced_size(el, sheet, &cache, &iw, &ih);
 
                 const char *unused_href = NULL;
                 size_t unused_hl2 = 0;
@@ -3572,6 +3589,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
                 int iw = parse_dim(ws, wl);
                 int ih = parse_dim(hs, hl);
+                apply_css_replaced_size(el, sheet, &cache, &iw, &ih);
 
                 const char *unused_href = NULL;
                 size_t unused_hl = 0;
@@ -3743,7 +3761,23 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * css_has_boxdeco): whether a box exists is decided by style, not
                  * by content (CSS semantics). */
                 css_style ecs = cached_element_style(lxb_dom_interface_element(n), sheet, &cache);
-                if (is_block_like_style(node_tag(n), &ecs) && css_has_boxdeco(&ecs)) {
+                /* An empty, decoration-less flex/grid item that GROWS is a layout
+                 * spacer (a nav bar's <span style="flex:1"></span>): it holds no
+                 * content of its own yet must reserve the free space so its siblings
+                 * distribute correctly (the "Sign in pushed to the far right"
+                 * pattern). A flex-grow value only takes effect when the direct
+                 * parent is a flex/grid container, so gate on that too -- otherwise a
+                 * stray flex-grow on a block-flow element would emit a blank line. */
+                int flex_spacer = 0;
+                if (ecs.flex_grow > 0 && n->parent != NULL
+                    && n->parent->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+                    css_style pcs = cached_element_style(
+                        lxb_dom_interface_element((lxb_dom_node_t *)n->parent), sheet, &cache);
+                    if (pcs.display == CSS_DISP_FLEX || pcs.display == CSS_DISP_GRID)
+                        flex_spacer = 1;
+                }
+                if ((is_block_like_style(node_tag(n), &ecs) && css_has_boxdeco(&ecs))
+                    || flex_spacer) {
                     const char *ehref = NULL; size_t ehl = 0;
                     const lxb_dom_node_t *eblock = NULL;
                     int eheading = 0, efg = -1, ebg = -1, ebold = 0, eitalic = 0;

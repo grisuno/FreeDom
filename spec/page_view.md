@@ -417,6 +417,41 @@ espacio); un candidato `data:` termina en el primer espacio o el final de la cad
 cortar en la coma interna de `;base64,`. Sin `src` **ni** `srcset` utilizable: sin run, como
 antes. Ver `[[freedom-data-url-images]]`.
 
+### Tamaño CSS de elementos reemplazados: `width`/`height` gana al atributo (2026-08-01)
+
+`img_w`/`img_h` de un `<img>` o `<svg>` en línea se toman primero de los atributos
+`width`/`height`, y luego se **sobreescriben** con el `width`/`height` **resueltos por CSS** del
+propio elemento cuando cada uno es un px positivo (`apply_css_replaced_size`, sobre
+`cached_element_style`). Es **maquetación, no color de autor**: se aplica siempre (no tras
+`caps.css`), y una regla de autor gana al atributo de presentación como en la cascada real. `auto`,
+porcentaje y unset se dejan intactos (el porcentaje no tiene bloque contenedor en este modelo
+plano; `img{max-width:100%;height:auto}` no toca el tamaño intrínseco). Regresión que cierra: los
+íconos (X, Bluesky, favicons) se pintaban a su tamaño natural de `viewBox` (~100–1792 px) en lugar
+de los 20–40 px del CSS, reventando las corridas flex. Tests `test_build_svg_css_size`,
+`test_build_image_css_size_overrides_attr`, `test_build_image_auto_size_keeps_attr`.
+Ver `[[freedom-replaced-css-sizing-and-flex-spacer]]`.
+
+### Spacer flex vacío: un ítem sin contenido que **crece** reserva su hueco (2026-08-01)
+
+Un ítem flex/grid **vacío y sin decoración** con `flex-grow > 0` (el clásico
+`<span style="flex:1"></span>` de una barra de navegación) antes se descartaba —solo los leaves
+vacíos **decorados** recibían run placeholder— así que no participaba en la línea del contenedor y
+la distribución de espacio libre colapsaba (el botón final "Sign in" quedaba pegado a la izquierda
+en vez de empujado al extremo derecho). Ahora `pv_build` emite el placeholder también cuando el
+elemento tiene `flex_grow > 0` **y** su padre directo es contenedor `flex`/`grid` (la condición del
+padre evita emitir una línea en blanco por un `flex-grow` suelto en flujo de bloque).
+Test `test_build_empty_flex_grow_spacer`.
+
+### Control de formulario dentro de una caja: se sienta en el rect de contenido (2026-08-01)
+
+En el painter, una fila reemplazada de `RD_INPUT` se emitía con `x_off = 0` y `bg_w = content_w`
+(ancho de página), por lo que un `<input>` con `width:100%` dentro de un `<form>` con
+`padding`/`max-width` se escapaba al borde izquierdo de la página y a ancho completo. Al volver de
+`emit_replaced_row`, si hay una caja abierta (`box_depth > 0`) la fila del input se **re-asienta**
+sobre el rect de contenido de la caja (`rc_box_context` → `x_off`, `bg_w` acotado), igual que ya
+hacen las filas de texto vía `s.indent_px`. Fuera de caja es idéntico byte a byte; imagen/vídeo/svg
+quedan intactos para acotar el cambio.
+
 ### Cajas vacías: el elemento decorado sin contenido también genera caja (2026-07-26)
 
 El recorrido es **por nodos de texto**: una caja (`pv_box_def`) solo se registraba cuando

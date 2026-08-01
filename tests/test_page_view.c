@@ -58,6 +58,15 @@ static const pv_run *find_video(const pv_view *v, const char *src) {
     return NULL;
 }
 
+/* Finds the first inline-SVG run; NULL if none. */
+static const pv_run *find_svg(const pv_view *v) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_SVG) return r;
+    }
+    return NULL;
+}
+
 /* --- pure model: pv_new / pv_append / pv_free --- */
 
 static void test_new_is_empty(void **state) {
@@ -662,6 +671,82 @@ static void test_build_image_px_and_tracking_dims(void **state) {
     assert_non_null(beacon);
     assert_int_equal(beacon->img_w, 1);
     assert_int_equal(beacon->img_h, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* CSS width/height on a replaced element (inline <svg>) sizes its box even with no
+ * width/height presentation attribute. This is layout, not author colour, so it
+ * applies unconditionally. Regression: icons rendered at their viewBox natural
+ * size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */
+static void test_build_svg_css_size(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>.s{width:40px;height:24px}</style></head>"
+        "<body><svg class='s' viewBox='0 0 100 100'><rect width='100' height='100'/></svg></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *s = find_svg(v);
+    assert_non_null(s);
+    assert_int_equal(s->img_w, 40);
+    assert_int_equal(s->img_h, 24);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* An author CSS width/height wins over the width/height presentation attribute
+ * (presentation attrs sit at ~zero specificity below the author sheet). */
+static void test_build_image_css_size_overrides_attr(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>.icon{width:32px;height:32px}</style></head>"
+        "<body><img class='icon' src='https://e.example/i.png' width='200' height='80'></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = find_image(v, "https://e.example/i.png");
+    assert_non_null(img);
+    assert_int_equal(img->img_w, 32);
+    assert_int_equal(img->img_h, 32);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A responsive-image rule (max-width:100%;height:auto) leaves the intrinsic/attr
+ * size intact: width stays auto, height:auto is not a px override. */
+static void test_build_image_auto_size_keeps_attr(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>img{max-width:100%;height:auto}</style></head>"
+        "<body><img src='https://e.example/p.png' width='640' height='480'></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = find_image(v, "https://e.example/p.png");
+    assert_non_null(img);
+    assert_int_equal(img->img_w, 640);
+    assert_int_equal(img->img_h, 480);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* An empty flex item with flex-grow (a nav spacer: <span class="grow"></span> with
+ * flex:1) must be emitted as a placeholder run so it participates in the flex line
+ * and consumes the free space. Otherwise it is dropped and the grow distribution
+ * collapses: the trailing "Sign in" button stays packed left instead of pushed to
+ * the far right. Only decorated empty leaves used to get a placeholder. */
+static void test_build_empty_flex_grow_spacer(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>.nav{display:flex}.grow{flex:1}</style>"
+        "<div class='nav'><span>L</span><span class='grow'></span><span>R</span></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *spacer = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->cont_id >= 0 && r->flex_grow > 0
+            && r->text != NULL && r->text[0] == '\0') { spacer = r; break; }
+    }
+    assert_non_null(spacer);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -2819,6 +2904,10 @@ int main(void) {
         cmocka_unit_test(test_build_image_with_dims),
         cmocka_unit_test(test_build_image_unknown_dims),
         cmocka_unit_test(test_build_image_px_and_tracking_dims),
+        cmocka_unit_test(test_build_svg_css_size),
+        cmocka_unit_test(test_build_image_css_size_overrides_attr),
+        cmocka_unit_test(test_build_image_auto_size_keeps_attr),
+        cmocka_unit_test(test_build_empty_flex_grow_spacer),
         cmocka_unit_test(test_build_image_in_skipped_subtree_ignored),
         cmocka_unit_test(test_build_noscript_shown_when_js_off),
         cmocka_unit_test(test_build_noscript_hidden_when_js_on),
