@@ -156,6 +156,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         P_FILTER_DROP_DX, P_FILTER_DROP_DY, P_FILTER_DROP_BLUR, P_FILTER_DROP_COLOR,
         /* -webkit-text-fill-color (2026-07-19, gradient text) */
         P_TEXT_FILL,
+        /* SVG `fill` presentation property: colours inline-<svg> shapes without
+         * their own fill (the .social svg{fill:#fff} icon-tint pattern). */
+        P_SVG_FILL,
         /* backdrop-filter: blur(Npx) (2026-07-19, glassmorphism v1). */
         P_BACKDROP_BLUR,
         /* Background alpha percent from rgba()/hsla() (2026-07-19). */
@@ -3791,6 +3794,14 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         if (o == -1 || o == CC_COLOR_CURRENT) return 0;
         dst[0].prop = P_TEXT_FILL; dst[0].ival = o; return 1;
     }
+    else if (strcmp(prop, "fill") == 0) {
+        /* SVG `fill` on an element tints its inline-<svg> shapes that carry no fill
+         * of their own. currentColor stays a sentinel (the painter substitutes the
+         * element colour); junk/none fail closed to unset (the SVG default black). */
+        int o = interp_color(val);
+        if (o == -1) return 0;
+        prop_id = P_SVG_FILL; ival = o;
+    }
     else if (strcmp(prop, "background-origin") == 0)    { prop_id = P_BG_ORIGIN;     ival = interp_bg_origin(val); }
     else if (strcmp(prop, "background-attachment") == 0){ prop_id = P_BG_ATTACHMENT; ival = interp_bg_attachment(val); }
     else if (strcmp(prop, "isolation") == 0)            { prop_id = P_ISOLATION;     ival = interp_isolation(val); }
@@ -4519,6 +4530,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
         wo[slot] = ord;
         switch (d->prop) {
             case P_COLOR:    o->color = d->ival; break;
+            case P_SVG_FILL: o->svg_fill = d->ival; break;
             case P_BG:       o->background = d->ival; break;
             case P_BG_ALPHA: o->bg_alpha = d->ival; break;
             case P_BG_GRAD_ANGLE: o->bg_grad_angle = d->ival; break;
@@ -4755,7 +4767,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
     /* Designated initializers: robust against field insertion/reordering (every
      * "unset" sentinel is named, so a new field cannot silently default to 0). */
     css_style out = {
-        .color = -1, .background = -1, .bg_alpha = CSS_LEN_UNSET, .text_align = CSS_ALIGN_UNSET,
+        .color = -1, .svg_fill = -1, .background = -1, .bg_alpha = CSS_LEN_UNSET, .text_align = CSS_ALIGN_UNSET,
         .font_scale = 0, .font_abs = 0, .line_scale = 0, .text_decoration = -1, .text_decoration_color = -1,
         .text_decoration_style = CSS_TDS_UNSET,
         .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,

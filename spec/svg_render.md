@@ -61,9 +61,17 @@ vacío (nunca a medio llenar).
   cero red.
 - **Dado** `fill="currentColor"`, **cuando** se pinta, **entonces** se usa el color de texto
   heredado que el llamador pasa a `svp_draw` (así un ícono monocromo toma el color del texto).
+- **Dado** un `fill:` de CSS resuelto sobre el elemento `<svg>` (p. ej. `.social svg{fill:#fff}`),
+  **cuando** se parsea con `sv_parse_ex(markup, len, out, root_fill)`, **entonces** ese color
+  siembra el **fill raíz**: toda figura que no declara `fill` propio ni lo hereda de un `<g>`
+  lo toma. `sv_parse` es exactamente `sv_parse_ex(..., negro)`. El pipeline coloca el `fill`
+  de CSS (si el autor lo puso) o el `color` del elemento en el color del run, y el pintor lo usa
+  a la vez como fill raíz y como `currentColor`. Un ícono sin color de autor sigue en negro.
 - **Dado** un `<svg>` sin `width`/`height` pero con `viewBox`, **entonces** las dimensiones
   intrínsecas son las del `viewBox`; sin ninguno de los dos, `SV_DEFAULT_SIZE` (300×150,
-  el default de CSS).
+  el default de CSS). **Un solo eje declarado** (CSS o atributo `width`/`height`) deriva el otro
+  por la razón de aspecto del `viewBox` — igual que un `<img>` — en vez de tomar el ancho crudo
+  del `viewBox` (un ícono de 1792 unidades ya no se infla al contenedor si solo se le dio `height`).
 
 ### Elementos soportados
 

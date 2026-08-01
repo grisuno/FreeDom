@@ -761,9 +761,18 @@ void sv_fit(const sv_image *img, double dw, double dh,
 /* --- entry point ---------------------------------------------------------- */
 
 sv_status sv_parse(const char *markup, size_t len, sv_image *out) {
+    return sv_parse_ex(markup, len, out, 0x000000);
+}
+
+sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill) {
     if (markup == NULL || out == NULL) return SV_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
     if (len > SV_MAX_INPUT) return SV_ERR_LIMIT;
+    /* root_fill seeds the default fill every shape inherits until a fill attribute up
+     * its <g> chain overrides it: the CSS `fill` on the <svg> element. A negative
+     * value other than currentColor is meaningless as a root default, so it falls back
+     * to the SVG default (black) -- sv_parse's own callers pass black. */
+    if (root_fill < 0 && root_fill != CC_COLOR_CURRENT) root_fill = 0x000000;
 
     out->width = 0.0; out->height = 0.0;
 
@@ -772,7 +781,7 @@ sv_status sv_parse(const char *markup, size_t len, sv_image *out) {
     sv_ctx stack[SV_MAX_DEPTH + 1];
     size_t depth = 0;
     memset(&stack[0], 0, sizeof stack[0]);
-    stack[0].fill = 0x000000;      /* SVG default fill is black... */
+    stack[0].fill = root_fill;     /* SVG default fill is black, or the CSS override */
     stack[0].stroke = -1;          /* ...and the default stroke is none */
     stack[0].stroke_w = 1.0;
     stack[0].opacity = 100;

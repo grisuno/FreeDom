@@ -3527,10 +3527,18 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_status st = pv_append_svg(v, heading, brk, markup, iw, ih);
                 free(markup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
-                /* The inherited text colour rides the run: an icon drawn with
-                 * fill="currentColor" takes the colour of the text around it. */
+                /* The colour that rides the run is the SVG root fill: a CSS `fill`
+                 * on the element (the .social svg{fill:#fff} icon-tint pattern) wins,
+                 * else the element's own text colour, so an icon drawn with
+                 * fill="currentColor" OR with no fill at all takes the intended colour
+                 * instead of the SVG default black. The painter seeds both the root
+                 * fill and currentColor from it. */
+                {
+                    css_style svg_own = cached_element_style(el, sheet, &cache);
+                    int svg_fg = (svg_own.svg_fill != -1) ? svg_own.svg_fill : unused_fg;
+                    pv_set_color(v, svg_fg);
+                }
                 pv_set_text_ext(v, &svg_ext);
-                pv_set_color(v, unused_fg);
                 pv_set_text_style(v, unused_align, unused_fs, unused_fs_abs, unused_lh, unused_deco);
                 pv_set_container(v, svg_cont.id, svg_cont.display, svg_cont.gap,
                                  svg_cont.justify, svg_cont.cols, svg_cont.wrap,

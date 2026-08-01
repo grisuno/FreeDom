@@ -119,6 +119,11 @@ typedef struct sv_image {
  * never leaves a half-filled image. Reentrant; allocates nothing. */
 sv_status sv_parse(const char *markup, size_t len, sv_image *out);
 
+/* Like sv_parse, but seeds the root (default) fill of shapes that declare no fill of
+ * their own -- the CSS `fill` resolved on the <svg> element (0xRRGGBB, or
+ * CC_COLOR_CURRENT for currentColor). sv_parse is exactly sv_parse_ex(..., black). */
+sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill);
+
 /* Maps the image's user space onto the destination rect [dx, dy, dw, dh] the way a
  * `preserveAspectRatio="xMidYMid meet"` SVG does: uniform scale, centred. Writes the
  * scale and the translation the painter must apply. Never divides by zero (a

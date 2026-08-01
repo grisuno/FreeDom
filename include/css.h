@@ -431,6 +431,9 @@ typedef enum css_backface {
  * element's resolved style, not up the ancestor chain. */
 typedef struct css_style {
     int         color;       /* 0xRRGGBB or -1 (unset) */
+    int         svg_fill;    /* SVG `fill` presentation property: 0xRRGGBB, -1 unset,
+                              * CC_COLOR_CURRENT for currentColor. Colours inline-<svg>
+                              * shapes that declare no fill of their own. */
     int         background;  /* 0xRRGGBB or -1 (unset) */
     /* Background alpha (2026-07-19): the 4th component of an rgba()/hsla()
      * background color as a percent 0..100; CSS_LEN_UNSET = opaque. The color

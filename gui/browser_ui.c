@@ -121,6 +121,9 @@
 /* Form control geometry: inner padding of a text box, the preferred text-box width
  * (clamped to the content width), and the horizontal padding of a button. */
 #define UI_INPUT_PAD     6.0
+/* Conventional main-axis width a form control reserves as a flex item until a real
+ * intrinsic-width model lands (roadmap R11). Roughly a browser's default text input. */
+#define UI_INPUT_MEASURE_W 175.0
 #define UI_INPUT_WIDTH   360.0
 #define UI_BUTTON_HPAD   14.0
 #define UI_FORM_FIELDS_MAX 64  /* matches FM_MAX_FIELDS; cap gathered controls */
@@ -3615,6 +3618,40 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
     s->prev_ended_ws = ends_ws;
 }
 
+/* Intrinsic display size (px) of an inline <svg> block, resolving the CSS/attr width
+ * and height (carried in video_w/video_h) against the parsed viewBox. When only ONE
+ * axis is authored, the other is derived from the viewBox's aspect ratio -- exactly
+ * how a browser sizes a replaced element (image_display_size does the same for <img>).
+ * Before this, an SVG sized by `height` alone fell back to the raw viewBox width (a
+ * 1792-unit icon ballooned to the container) instead of height x aspect. */
+static void svg_intrinsic_size(const rd_block *b, double *out_w, double *out_h) {
+    double sw = (b->video_w > 0) ? (double)b->video_w : 0.0;
+    double sh = (b->video_h > 0) ? (double)b->video_h : 0.0;
+    if (sw <= 0.0 || sh <= 0.0) {
+        double iw = 0.0, ih = 0.0;
+        sv_image *probe = (sv_image *)calloc(1, sizeof *probe);
+        if (probe != NULL) {
+            if (b->text != NULL
+                && sv_parse(b->text, strlen(b->text), probe) == SV_OK) {
+                iw = probe->width; ih = probe->height;
+            }
+            free(probe);
+        }
+        if (sw > 0.0 && sh <= 0.0) {
+            sh = (iw > 0.0) ? sw * ih / iw : 0.0;   /* width given -> derive height */
+        } else if (sh > 0.0 && sw <= 0.0) {
+            sw = (ih > 0.0) ? sh * iw / ih : 0.0;   /* height given -> derive width */
+        } else {
+            if (sw <= 0.0) sw = iw;
+            if (sh <= 0.0) sh = ih;
+        }
+    }
+    if (sw <= 0.0) sw = SV_DEFAULT_W;
+    if (sh <= 0.0) sh = SV_DEFAULT_H;
+    *out_w = sw;
+    *out_h = sh;
+}
+
 /* Flows one text/link/notice block into L at content_w using state s. The caller
  * sets s->bg_rgb (the block's author background, or -1) beforehand; the foreground
  * color and link/heading styling are derived here. */
@@ -3646,21 +3683,8 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         return 1;
     }
     if (b->kind == RD_SVG) {
-        double sw = (b->video_w > 0) ? (double)b->video_w : 0.0;
-        double sh = (b->video_h > 0) ? (double)b->video_h : 0.0;
-        if (sw <= 0.0 || sh <= 0.0) {
-            sv_image *probe = (sv_image *)calloc(1, sizeof *probe);
-            if (probe != NULL) {
-                if (b->text != NULL
-                    && sv_parse(b->text, strlen(b->text), probe) == SV_OK) {
-                    if (sw <= 0.0) sw = probe->width;
-                    if (sh <= 0.0) sh = probe->height;
-                }
-                free(probe);
-            }
-        }
-        if (sw <= 0.0) sw = SV_DEFAULT_W;
-        if (sh <= 0.0) sh = SV_DEFAULT_H;
+        double sw, sh;
+        svg_intrinsic_size(b, &sw, &sh);
         double avail = content_w;
         if (sw > avail && sw > 0.0) { sh *= avail / sw; sw = avail; }
         double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
@@ -4021,6 +4045,33 @@ static int container_box_of(const rd_doc *doc, size_t start, size_t end) {
  * accumulating pen arithmetic. */
 #define FLEX_MEASURE_W  100000.0
 
+/* Intrinsic main-axis width (px) of a REPLACED block (image/svg/video/form control)
+ * for flex-basis measurement. Returns < 0 for a non-replaced block, telling the
+ * caller to flow it as text instead. This mirrors the box emit_replaced_row lays out,
+ * but yields the ELEMENT's own size, not the column width the row records in bg_w --
+ * measuring the raw SVG markup or an <img>'s alt text as prose inflated a 24px icon's
+ * flex-basis to hundreds of px, so a nav's icons spread across the whole line and the
+ * label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
+static double replaced_item_width(const browser_window *w, const ui_theme *th,
+                                  const rd_block *b) {
+    if (b->kind == RD_SVG) {
+        double sw, sh;
+        svg_intrinsic_size(b, &sw, &sh);
+        return sw;
+    }
+    if (b->kind == RD_IMAGE) {
+        double dw, dh;
+        if (image_display_size(w, b, FLEX_MEASURE_W, &dw, &dh))
+            return dw + 2.0 * th->image_box_pad;
+        return -1.0;   /* image unavailable: measure the alt text instead */
+    }
+    if (b->kind == RD_VIDEO)
+        return (b->video_w > 0) ? (double)b->video_w : 320.0;
+    if (b->kind == RD_INPUT)
+        return UI_INPUT_MEASURE_W;   /* no intrinsic-width model yet; conventional box */
+    return -1.0;
+}
+
 /* Max-content width (px) of a flex item: the widest line its blocks [b0, b1)
  * produce when flowed with no wrapping pressure. This is CSS `flex-basis: auto`
  * resolving to the content size -- a flex item shrink-wraps its content and the
@@ -4035,14 +4086,23 @@ static double measure_item_content_w(cairo_t *cr, const browser_window *w,
     rc_state  si;
     memset(&M, 0, sizeof M);
     memset(&si, 0, sizeof si);
+    double repl_max = 0.0;
     for (size_t k = b0; k < b1; ++k) {
         const rd_block *bk = rd_at(doc, k);
         if (k > b0 && bk->block_break) flush_line(&M, &si, th);
         si.bg_rgb = -1;
-        flow_text_block(cr, w, &M, &si, th, bk, FLEX_MEASURE_W);
+        /* A replaced element contributes its own intrinsic box, not the width of its
+         * markup/alt flowed as text. It sits on its own row, so max (not sum) over the
+         * item's rows is the right max-content width. */
+        double rw = replaced_item_width(w, th, bk);
+        if (rw >= 0.0) {
+            if (rw > repl_max) repl_max = rw;
+        } else {
+            flow_text_block(cr, w, &M, &si, th, bk, FLEX_MEASURE_W);
+        }
     }
     flush_line(&M, &si, th);
-    double maxw = 0.0;
+    double maxw = repl_max;
     for (size_t r = 0; r < M.nrow; ++r) {
         const rc_row *rr = &M.rows[r];
         if (rr->count == 0 || rr->first + rr->count > M.nfrag) continue;
@@ -7217,7 +7277,25 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
          * keeping no cache means a re-render can never paint stale geometry. */
         sv_image *img = (sv_image *)calloc(1, sizeof *img);
         if (img != NULL) {
-            if (sv_parse(r->blk->text, strlen(r->blk->text), img) == SV_OK) {
+            /* currentColor resolves to the run's own author colour when it has
+             * one, else the theme's text colour, so a monochrome icon matches
+             * the prose around it in every theme. That same colour also seeds the
+             * SVG root fill (page_view put the CSS `fill` there when the author set
+             * one), so an icon whose shapes declare no fill paints the intended
+             * colour instead of the SVG default black. */
+            int cur = r->blk->fg_rgb;
+            if (cur < 0) {
+                ui_rgb tc = w->theme.text;
+                cur = ((int)(tc.r * 255.0 + 0.5) << 16)
+                    | ((int)(tc.g * 255.0 + 0.5) << 8)
+                    |  (int)(tc.b * 255.0 + 0.5);
+            }
+            /* The root fill only overrides shapes with NO fill of their own; an
+             * explicit fill or currentColor up the <g> chain still wins. Seed it
+             * only when the author actually set a colour on the element (fg_rgb >= 0)
+             * -- a bare icon with no author colour keeps the SVG default black. */
+            int root_fill = (r->blk->fg_rgb >= 0) ? cur : 0x000000;
+            if (sv_parse_ex(r->blk->text, strlen(r->blk->text), img, root_fill) == SV_OK) {
                 double dw = (r->bg_w > 0.0) ? r->bg_w : content_w;
                 double dx = left + r->x_off;
                 /* An SVG is an inline-level replaced element: the parent's
@@ -7226,16 +7304,6 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
                 if (slack > 0.0) {
                     if (r->align == CSS_ALIGN_CENTER)     dx += slack / 2.0;
                     else if (r->align == CSS_ALIGN_RIGHT) dx += slack;
-                }
-                /* currentColor resolves to the run's own author colour when it has
-                 * one, else the theme's text colour, so a monochrome icon matches
-                 * the prose around it in every theme. */
-                int cur = r->blk->fg_rgb;
-                if (cur < 0) {
-                    ui_rgb tc = w->theme.text;
-                    cur = ((int)(tc.r * 255.0 + 0.5) << 16)
-                        | ((int)(tc.g * 255.0 + 0.5) << 8)
-                        |  (int)(tc.b * 255.0 + 0.5);
                 }
                 svp_draw(cr, img, dx, ry, dw, r->height, cur);
             }
