@@ -3618,6 +3618,105 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
 /* Flows one text/link/notice block into L at content_w using state s. The caller
  * sets s->bg_rgb (the block's author background, or -1) beforehand; the foreground
  * color and link/heading styling are derived here. */
+/* Replaced/atomic blocks (image, inline SVG, form control, video) emit ONE special
+ * row sized to the element rather than flowing as text. The top-level layout loop and
+ * the flex/grid item flow (layout_container) share this so a replaced element inside a
+ * flex column paints exactly as one at top level -- before extraction it only ran at
+ * top level, so an <img>/<select> that became flex content (its cont_id now keeps it
+ * inside the container's run) produced a zero-width text placeholder and vanished.
+ * Returns 1 when it emitted the row (caller advances), 0 for a normal text block. */
+static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
+                             rc_state *s, const ui_theme *th, const rd_block *b,
+                             double content_w) {
+    if (b->kind == RD_INPUT) {
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        double h = fe.height + 2.0 * UI_INPUT_PAD;
+        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        s->pending_gap = 0;
+        rc_row *r = rc_add_row(L);
+        if (r != NULL) {
+            r->kind = RC_INPUT; r->top = top; r->height = h; r->ascent = fe.ascent;
+            r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
+            r->align = 0; r->blk = b; r->hidden = (s->hidden_from != 0);
+            r->bg_w = content_w;   /* the column width; the translation pass adds x_off */
+        }
+        s->cur_top = top + h;
+        return 1;
+    }
+    if (b->kind == RD_SVG) {
+        double sw = (b->video_w > 0) ? (double)b->video_w : 0.0;
+        double sh = (b->video_h > 0) ? (double)b->video_h : 0.0;
+        if (sw <= 0.0 || sh <= 0.0) {
+            sv_image *probe = (sv_image *)calloc(1, sizeof *probe);
+            if (probe != NULL) {
+                if (b->text != NULL
+                    && sv_parse(b->text, strlen(b->text), probe) == SV_OK) {
+                    if (sw <= 0.0) sw = probe->width;
+                    if (sh <= 0.0) sh = probe->height;
+                }
+                free(probe);
+            }
+        }
+        if (sw <= 0.0) sw = SV_DEFAULT_W;
+        if (sh <= 0.0) sh = SV_DEFAULT_H;
+        double avail = content_w;
+        if (sw > avail && sw > 0.0) { sh *= avail / sw; sw = avail; }
+        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        s->pending_gap = 0;
+        rc_row *r = rc_add_row(L);
+        if (r != NULL) {
+            r->kind = RC_SVG; r->top = top; r->height = sh; r->ascent = sh;
+            r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1;
+            r->x_off = 0.0; r->align = b->text_align; r->blk = b;
+            r->hidden = (s->hidden_from != 0);
+            r->bg_w = sw;
+        }
+        s->cur_top = top + sh;
+        return 1;
+    }
+    if (b->kind == RD_IMAGE) {
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        double dw, dh;
+        double box_w = content_w - 2.0 * th->image_box_pad;
+        double h = image_display_size(w, b, box_w, &dw, &dh)
+                   ? dh + 2.0 * th->image_box_pad
+                   : fe.height + 2.0 * th->image_box_pad;
+        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        s->pending_gap = 0;
+        rc_row *r = rc_add_row(L);
+        if (r != NULL) {
+            r->kind = RC_IMAGE; r->top = top; r->height = h; r->ascent = fe.ascent;
+            r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
+            r->align = 0; r->blk = b; r->hidden = (s->hidden_from != 0);
+            r->bg_w = content_w;   /* the column width; the translation pass adds x_off */
+        }
+        s->cur_top = top + h;
+        return 1;
+    }
+    if (b->kind == RD_VIDEO) {
+        content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        double vh = (b->video_h > 0) ? (double)b->video_h : fe.height * 6.0;
+        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        s->pending_gap = 0;
+        rc_row *r = rc_add_row(L);
+        if (r != NULL) {
+            r->kind = RC_VIDEO; r->top = top; r->height = vh; r->ascent = fe.ascent;
+            r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
+            r->align = 0; r->blk = b; r->hidden = (s->hidden_from != 0);
+            r->bg_w = content_w;   /* the column width; the translation pass adds x_off */
+        }
+        s->cur_top = top + vh;
+        return 1;
+    }
+    return 0;
+}
+
 static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                             rc_state *s, const ui_theme *th, const rd_block *b,
                             double content_w) {
@@ -4083,6 +4182,20 @@ static int root_cont_of(const rd_doc *doc, int cid) {
     return cid;
 }
 
+/* CSS `order` of the item whose first run is b0, for container cid. A nested
+ * container reads it from its own descriptor (item_order) -- the wrapper element that
+ * is the item carries no run -- and a plain item from its run. CSS_LEN_UNSET when
+ * unset either way. */
+static int item_order_at(const rd_doc *doc, size_t b0, int cid) {
+    const rd_block *bk = rd_at(doc, b0);
+    int child = child_cont_at_level(doc, bk, cid);
+    if (child >= 0) {
+        const pv_cont_def *ncd = rd_cont_at(doc, (size_t)child);
+        if (ncd != NULL && ncd->item_order != CSS_LEN_UNSET) return ncd->item_order;
+    }
+    return bk->flex_order;
+}
+
 /* Lays out container `cid` over the runs [start, end). The parameters come from the
  * container TABLE (rd_cont_at) rather than from the head run, because a container
  * whose children are all containers has no run of its own to read them from -- that
@@ -4230,20 +4343,19 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     {
         int has_order = 0;
         for (size_t j = 0; j < g; ++j) {
-            const rd_block *bj = rd_at(doc, gstart[j]);
-            if (bj->flex_order != CSS_LEN_UNSET) { has_order = 1; break; }
+            if (item_order_at(doc, gstart[j], cid) != CSS_LEN_UNSET) { has_order = 1; break; }
         }
         if (has_order) {
             size_t slot[BT_MAX_CHILDREN];
             for (size_t j = 0; j < g; ++j) slot[j] = j;
             for (size_t j = 1; j < g; ++j) {
                 size_t it = slot[j];
-                const rd_block *bi = rd_at(doc, gstart[it]);
-                int oi = (bi->flex_order != CSS_LEN_UNSET) ? bi->flex_order : 0;
+                int oi_raw = item_order_at(doc, gstart[it], cid);
+                int oi = (oi_raw != CSS_LEN_UNSET) ? oi_raw : 0;
                 size_t m = j;
                 while (m > 0) {
-                    const rd_block *bj = rd_at(doc, gstart[slot[m - 1]]);
-                    int oj = (bj->flex_order != CSS_LEN_UNSET) ? bj->flex_order : 0;
+                    int oj_raw = item_order_at(doc, gstart[slot[m - 1]], cid);
+                    int oj = (oj_raw != CSS_LEN_UNSET) ? oj_raw : 0;
                     if (oj <= oi) break;
                     slot[m] = slot[m - 1];
                     --m;
@@ -4291,24 +4403,45 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
                                                 cid, cdv.box_id);
             kid->display = BX_DISPLAY_BLOCK;
-            kid->grow = (bk->flex_grow >= 0) ? (double)bk->flex_grow / 100.0 : 0.0;
-            kid->shrink = (bk->flex_shrink >= 0) ? (double)bk->flex_shrink / 100.0 : 1.0;
-            /* A nested container's base size is its OWN max-content width (items +
-             * gaps), not the width of its text flowed end to end. */
+            /* An item that is a nested container reads its flex props from that
+             * container's descriptor (item_*): bk is a run INSIDE the nested
+             * container and carries the nested level's item values, not this
+             * wrapper's. Without this a Bootstrap `.col{flex:1 0 0%}` that wraps a
+             * `.row` never grew -- it froze at the nested content's width. */
             int nb_child = child_cont_at_level(doc, bk, cid);
+            const pv_cont_def *ncd = (nb_child >= 0) ? rd_cont_at(doc, (size_t)nb_child) : NULL;
+            int it_grow  = (ncd != NULL && ncd->item_grow  >= 0) ? ncd->item_grow  : bk->flex_grow;
+            int it_shrink= (ncd != NULL && ncd->item_shrink>= 0) ? ncd->item_shrink: bk->flex_shrink;
+            int it_align = (ncd != NULL && ncd->item_align_self != CSS_AK_UNSET)
+                           ? ncd->item_align_self : bk->flex_align_self;
+            kid->grow = (it_grow >= 0) ? (double)it_grow / 100.0 : 0.0;
+            kid->shrink = (it_shrink >= 0) ? (double)it_shrink / 100.0 : 1.0;
             if (nb_child >= 0) {
-                double nbw = nested_cont_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
-                                               nb_child, content_w, 0)
-                           + sd.pl + sd.pr + sd.bl + sd.br + sd.ml + sd.mr;
-                if (nbw > content_w) nbw = content_w;
-                if (nbw < 1.0) nbw = 1.0;
-                kid->basis = nbw;
+                /* An explicit item flex-basis/width (col-lg-9's 75%, `.col`'s 0) wins;
+                 * otherwise the nested container's OWN max-content width (items+gaps),
+                 * never its text flowed end to end. */
+                int ib = (ncd != NULL) ? ncd->item_basis : CSS_LEN_UNSET;
+                double ib_px = -1.0;
+                if (ib >= 0) ib_px = (double)ib;
+                else if (ib <= -1000000 && ib > -2000000)
+                    ib_px = content_w * (double)(-ib - 1000000) / 1000.0;
+                double b;
+                if (ib_px >= 0.0) {
+                    b = ib_px + sd.ml + sd.mr;
+                } else {
+                    b = nested_cont_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
+                                          nb_child, content_w, 0)
+                      + sd.pl + sd.pr + sd.bl + sd.br + sd.ml + sd.mr;
+                }
+                if (b > content_w) b = content_w;
+                if (b < 1.0) b = 1.0;
+                kid->basis = b;
             } else {
                 kid->basis = flex_item_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
                                              &sd, content_w);
             }
-            int akw = (bk->flex_align_self != CSS_AK_UNSET && bk->flex_align_self != CSS_AK_AUTO)
-                      ? bk->flex_align_self : cdv.align_items;
+            int akw = (it_align != CSS_AK_UNSET && it_align != CSS_AK_AUTO)
+                      ? it_align : cdv.align_items;
             kid->align = css_align_to_bt(akw);
             kid->min_main = 1.0;
         }
@@ -4403,40 +4536,62 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         }
         size_t sb = L->nbox;
         size_t sr = L->nrow;
-        /* A nested flex/grid container is ONE item of this one: recurse instead of
-         * flowing its runs as plain text. layout_container emits rows/boxes into L
-         * in item-local coordinates and advances si.cur_top, which is exactly what
-         * the translation pass below expects -- so nesting costs one call, not a
-         * second engine. spec/page_view.md "Contenedores flex/grid ANIDADOS". */
-        int nested = child_cont_at_level(doc, rd_at(doc, gstart[j]), cid);
-        item_nested[j] = (nested >= 0);
-        if (nested >= 0) {
-            layout_container(cr, w, L, &si, th, 0.0, inner_w, doc,
-                             gstart[j], gstart[j + 1], nested);
-            flush_line(L, &si, th);
-        } else
-        for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
-            const rd_block *bk = rd_at(doc, k);
-            if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
-            /* Boxes nested INSIDE the item open here, in item-local coordinates
-             * (the second pass translates them into the column). rb bounds the
-             * walk so the item's own root box is not reopened. */
-            /* Called for EVERY block, including those that belong to the item's
-             * root box: reconciling is what CLOSES a nested box once the flow
-             * leaves its subtree. Skipping those blocks left a badge's pill open
-             * for the rest of the card and stretched it the card's full height. */
-            /* Boxes at or ABOVE the container belong to the container, not to this
-             * item: the container level already opened them. When the item has no
-             * root box of its own (rb < 0) the walk must still stop at the
-             * container's box, or it re-opens the container (and its ancestors)
-             * INSIDE the item -- which is what painted a nested nav's own backdrop a
-             * second time, at item size, on top of itself. */
-            leave_inline_box(L, &si, bk->block_id);
-            int stop_at = (rb >= 0) ? rb : cdv.box_id;
-            reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, bk->block_id, k, stop_at);
-            int owns = (rb >= 0 && bk->block_id == rb);
-            si.bg_rgb = (owns || w->force_theme) ? -1 : bk->bg_rgb;
-            flow_text_block(cr, w, L, &si, th, bk, inner_w);
+        /* An item's content is a sequence of segments: plain runs that flow as text,
+         * and nested flex/grid containers that recurse. The container a run belongs
+         * to (a direct child of cid, or -1 for plain) splits the item into maximal
+         * same-container segments -- so a col that holds [heading, nested .row,
+         * paragraph] lays the heading and paragraph as text and the .row as a real
+         * side-by-side row. Deciding by the FIRST run alone flowed the whole item flat
+         * whenever any plain content preceded a nested row, which stacked every
+         * Bootstrap sub-row (jkanime's player column). Both a recursed segment and a
+         * flat one emit item-local coordinates and advance si.cur_top, so the
+         * translation pass below just adds this item's origin. */
+        item_nested[j] = 0;
+        for (size_t k = gstart[j]; k < gstart[j + 1]; ) {
+            int seg_cont = child_cont_at_level(doc, rd_at(doc, k), cid);
+            size_t seg_end = k + 1;
+            while (seg_end < gstart[j + 1] &&
+                   child_cont_at_level(doc, rd_at(doc, seg_end), cid) == seg_cont)
+                ++seg_end;
+            if (seg_cont >= 0) {
+                /* A nested flex/grid container is ONE run-range of this item: recurse
+                 * instead of flowing its runs as plain text. layout_container emits
+                 * rows/boxes into L in item-local coordinates and advances si.cur_top.
+                 * spec/page_view.md "Contenedores flex/grid ANIDADOS". */
+                layout_container(cr, w, L, &si, th, 0.0, inner_w, doc,
+                                 k, seg_end, seg_cont);
+                flush_line(L, &si, th);
+                item_nested[j] = 1;
+            } else
+            for (size_t m = k; m < seg_end; ++m) {
+                const rd_block *bk = rd_at(doc, m);
+                if (m > gstart[j] && bk->block_break) flush_line(L, &si, th);
+                /* Boxes nested INSIDE the item open here, in item-local coordinates
+                 * (the second pass translates them into the column). rb bounds the
+                 * walk so the item's own root box is not reopened. */
+                /* Called for EVERY block, including those that belong to the item's
+                 * root box: reconciling is what CLOSES a nested box once the flow
+                 * leaves its subtree. Skipping those blocks left a badge's pill open
+                 * for the rest of the card and stretched it the card's full height. */
+                /* Boxes at or ABOVE the container belong to the container, not to this
+                 * item: the container level already opened them. When the item has no
+                 * root box of its own (rb < 0) the walk must still stop at the
+                 * container's box, or it re-opens the container (and its ancestors)
+                 * INSIDE the item -- which is what painted a nested nav's own backdrop a
+                 * second time, at item size, on top of itself. */
+                leave_inline_box(L, &si, bk->block_id);
+                int stop_at = (rb >= 0) ? rb : cdv.box_id;
+                reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, bk->block_id, m, stop_at);
+                int owns = (rb >= 0 && bk->block_id == rb);
+                si.bg_rgb = (owns || w->force_theme) ? -1 : bk->bg_rgb;
+                /* A replaced element (image/svg/form control/video) inside a flex item
+                 * emits its atomic row here, sized to the element, rather than flowing
+                 * as zero-width text -- the same row the top-level path produces, so the
+                 * translation pass places it in the column and the painter blits it. */
+                if (!emit_replaced_row(cr, w, L, &si, th, bk, inner_w))
+                    flow_text_block(cr, w, L, &si, th, bk, inner_w);
+            }
+            k = seg_end;
         }
         /* close_all_boxes finalises any box still open inside the item; it is a
          * no-op when none is, so the line flush stays explicit -- dropping it lost
@@ -5063,98 +5218,10 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             s.prev_bottom = mb;
         }
 
-        if (b->kind == RD_INPUT) {
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
-            cairo_font_extents_t fe;
-            cairo_font_extents(cr, &fe);
-            double h = fe.height + 2.0 * UI_INPUT_PAD;
-            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
-            s.pending_gap = 0;
-            rc_row *r = rc_add_row(L);
-            if (r != NULL) {
-                r->kind = RC_INPUT; r->top = top; r->height = h; r->ascent = fe.ascent;
-                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-                r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
-            }
-            s.cur_top = top + h;
-            continue;
-        }
-
-        /* Inline SVG: a replaced element sized by its intrinsic dimensions (the
-         * parser resolves width/height/viewBox), capped to the content width so a
-         * hostile width="99999" cannot stretch the page. */
-        if (b->kind == RD_SVG) {
-            double sw = (b->video_w > 0) ? (double)b->video_w : 0.0;
-            double sh = (b->video_h > 0) ? (double)b->video_h : 0.0;
-            if (sw <= 0.0 || sh <= 0.0) {
-                sv_image *probe = (sv_image *)calloc(1, sizeof *probe);
-                if (probe != NULL) {
-                    if (b->text != NULL
-                        && sv_parse(b->text, strlen(b->text), probe) == SV_OK) {
-                        if (sw <= 0.0) sw = probe->width;
-                        if (sh <= 0.0) sh = probe->height;
-                    }
-                    free(probe);
-                }
-            }
-            if (sw <= 0.0) sw = SV_DEFAULT_W;
-            if (sh <= 0.0) sh = SV_DEFAULT_H;
-            double avail = content_w;
-            if (sw > avail && sw > 0.0) { sh *= avail / sw; sw = avail; }
-            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
-            s.pending_gap = 0;
-            rc_row *r = rc_add_row(L);
-            if (r != NULL) {
-                r->kind = RC_SVG; r->top = top; r->height = sh; r->ascent = sh;
-                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1;
-                r->x_off = 0.0; r->align = b->text_align; r->blk = b;
-                r->hidden = (s.hidden_from != 0);
-                r->bg_w = sw;   /* the painter's draw width */
-            }
-            s.cur_top = top + sh;
-            continue;
-        }
-
-        if (b->kind == RD_IMAGE) {
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
-            cairo_font_extents_t fe;
-            cairo_font_extents(cr, &fe);
-            /* A decoded image sizes the row to its on-screen height; otherwise the
-             * row is a single-line placeholder box. Same box width used to paint. */
-            double dw, dh;
-            double box_w = content_w - 2.0 * th->image_box_pad;
-            double h = image_display_size(w, b, box_w, &dw, &dh)
-                       ? dh + 2.0 * th->image_box_pad
-                       : fe.height + 2.0 * th->image_box_pad;
-            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
-            s.pending_gap = 0;
-            rc_row *r = rc_add_row(L);
-            if (r != NULL) {
-                r->kind = RC_IMAGE; r->top = top; r->height = h; r->ascent = fe.ascent;
-                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-                r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
-            }
-            s.cur_top = top + h;
-            continue;
-        }
-
-        if (b->kind == RD_VIDEO) {
-            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
-            cairo_font_extents_t fe;
-            cairo_font_extents(cr, &fe);
-            /* Placeholder row: use declared dimensions or a default box. Later
-             * (Fase 1+) this row will contain the decoded video frame. */
-            double vh = (b->video_h > 0) ? (double)b->video_h
-                       : fe.height * 6.0;  /* ~matched to video aspect ratio default */
-            double top = s.cur_top + (L->nrow > 0 ? s.pending_gap : 0.0);
-            s.pending_gap = 0;
-            rc_row *r = rc_add_row(L);
-            if (r != NULL) {
-                r->kind = RC_VIDEO; r->top = top; r->height = vh; r->ascent = fe.ascent;
-                r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-                r->align = 0; r->blk = b; r->hidden = (s.hidden_from != 0);
-            }
-            s.cur_top = top + vh;
+        /* Replaced/atomic blocks (input/svg/image/video) emit their element-sized row
+         * through the shared helper -- identical to the flex/grid item flow, so a
+         * replaced element paints the same in flow and inside a column. */
+        if (emit_replaced_row(cr, w, L, &s, th, b, content_w)) {
             continue;
         }
 
@@ -7162,18 +7229,26 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
         }
         return;
     }
+    /* A replaced row placed in a flex/grid column carries its column offset in
+     * r->x_off and the column width in r->bg_w (both 0 for a normal in-flow row, so
+     * top-level layout is unchanged). Painting at `left` with the full content width
+     * ignored the column and stacked every column's replaced element at x=0, on top
+     * of each other -- the jkanime header/poster overlap. */
     if (r->kind == RC_IMAGE && r->blk != NULL) {
-        paint_image_row(cr, w, r->blk, left, ry, content_w, r->height);
+        double cw = (r->bg_w > 0.0) ? r->bg_w : content_w;
+        paint_image_row(cr, w, r->blk, left + r->x_off, ry, cw, r->height);
         return;
     }
     if (r->kind == RC_VIDEO) {
         if (r->blk != NULL) {
-            paint_video_row(cr, w, r->blk, left, ry, content_w, r->height);
+            double cw = (r->bg_w > 0.0) ? r->bg_w : content_w;
+            paint_video_row(cr, w, r->blk, left + r->x_off, ry, cw, r->height);
             return;
         }
     }
     if (r->kind == RC_INPUT && r->blk != NULL) {
-        draw_input_row(cr, w, r->blk, left, content_w, ry, r->ascent, r->height);
+        double cw = (r->bg_w > 0.0) ? r->bg_w : content_w;
+        draw_input_row(cr, w, r->blk, left + r->x_off, cw, ry, r->ascent, r->height);
         return;
     }
 

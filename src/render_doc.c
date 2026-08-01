@@ -475,6 +475,42 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
              * byte-identical. The decoration itself lives on rd_doc.boxes, not here. */
             if (caps.css) lb->block_id = r->block_id;
         }
+
+        /* Flex/grid container membership + float are STRUCTURE (no network, no
+         * fingerprint) and belong to REPLACED runs too. The text-presentation block
+         * above is TEXT/LINK/VIDEO-only, so an <input>/<select>/<img>/inline <svg>
+         * inside a flex column lost its cont_id (-1) -- which BREAKS the container's
+         * maximal run in the layout loop and stacked the flex row into a narrow
+         * column (jkanime's player). Copy just the structural fields the flex/grid
+         * engine reads; presentation stays with the kind-specific handling above. */
+        if ((r->kind == PV_INPUT || r->kind == PV_IMAGE || r->kind == PV_SVG)
+            && d->count > 0) {
+            rd_block *lb = &d->blocks[d->count - 1];
+            lb->cont_id = r->cont_id;
+            lb->cont_display = r->cont_display;
+            lb->cont_gap = r->cont_gap;
+            lb->cont_justify = r->cont_justify;
+            lb->cont_cols = r->cont_cols;
+            lb->cont_rows = r->cont_rows;
+            lb->cont_box_id = r->cont_box_id;
+            for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
+                lb->cont_col_w[gk] = r->cont_col_w[gk];
+            lb->grid_span = r->grid_span;
+            lb->row_span = r->row_span;
+            lb->flex_grow = r->flex_grow;
+            lb->flex_shrink = r->flex_shrink;
+            lb->flex_basis = r->flex_basis;
+            lb->flex_order = r->flex_order;
+            lb->flex_direction = r->flex_direction;
+            lb->cont_item = r->cont_item;
+            lb->cont_wrap = r->cont_wrap;
+            lb->cont_row_gap = r->cont_row_gap;
+            lb->cont_align_items = r->cont_align_items;
+            lb->flex_align_self = r->flex_align_self;
+            lb->float_side = r->float_side;
+            lb->float_id = r->float_id;
+            lb->float_clear = r->float_clear;
+        }
     }
 
     /* Box engine (Step D): copy the box tree, gated by caps.css. Without author CSS

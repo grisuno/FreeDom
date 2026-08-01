@@ -985,6 +985,16 @@ int anon_row;
  * lay out as top level (degrades to today's flat behaviour, never crashes). */
 int anc_id[PV_CONT_DEPTH];
 const lxb_dom_node_t *anc_item[PV_CONT_DEPTH];
+/* Flex/grid ITEM properties of anc_item[k] (the direct child of container
+ * anc_id[k] on this run's chain). pv_build copies anc_item_*[k+1] onto the
+ * descriptor of the container at anc_id[k], because that container occupies
+ * anc_item[k+1]'s item slot in its parent anc_id[k+1] -- so the wrapper element's
+ * flex props reach the parent even though the wrapper carries no run. */
+int anc_item_grow[PV_CONT_DEPTH];
+int anc_item_shrink[PV_CONT_DEPTH];
+int anc_item_basis[PV_CONT_DEPTH];
+int anc_item_order[PV_CONT_DEPTH];
+int anc_item_align[PV_CONT_DEPTH];
 int anc_n;
 } pv_cont_info;
 
@@ -1235,6 +1245,11 @@ static void cont_def_reset(pv_cont_def *d) {
     d->parent_item = -1;
     d->row_gap = -1;
     d->box_id = -1;
+    d->item_grow = -1;
+    d->item_shrink = -1;
+    d->item_basis = CSS_LEN_UNSET;
+    d->item_order = CSS_LEN_UNSET;
+    d->item_align_self = CSS_AK_UNSET;
 }
 
 /* Id of node in reg, registering it on first sight. -1 when reg is full. */
@@ -1266,6 +1281,14 @@ static void link_cont_chain(pv_container_reg *reg, pv_item_track *tr,
         if (outer < 0 || (size_t)outer >= reg->count) continue;
         reg->def[inner].parent_id = outer;
         reg->def[inner].parent_item = item_ordinal(tr, outer, cont->anc_item[k + 1]);
+        /* The flex props of the wrapper element (outer's direct child = anc_item[k+1])
+         * that `inner` sits inside: this is how a nested container's item grow/shrink/
+         * basis/order/align-self reach its parent's layout. */
+        reg->def[inner].item_grow       = cont->anc_item_grow[k + 1];
+        reg->def[inner].item_shrink     = cont->anc_item_shrink[k + 1];
+        reg->def[inner].item_basis      = cont->anc_item_basis[k + 1];
+        reg->def[inner].item_order      = cont->anc_item_order[k + 1];
+        reg->def[inner].item_align_self = cont->anc_item_align[k + 1];
     }
 }
 
@@ -1896,8 +1919,17 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                         }
                         if (this_box >= 0 && cd->box_id < 0) cd->box_id = this_box;
                         if (cont != NULL && cont->anc_n < PV_CONT_DEPTH) {
-                            cont->anc_id[cont->anc_n] = cid_here;
-                            cont->anc_item[cont->anc_n] = have_prev_el ? prev_el : NULL;
+                            int a = cont->anc_n;
+                            cont->anc_id[a] = cid_here;
+                            cont->anc_item[a] = have_prev_el ? prev_el : NULL;
+                            /* prev_* hold the flex props of prev_el, the direct child
+                             * of this container (p) on the chain -- exactly the item
+                             * whose slot the NEXT-inner container occupies. */
+                            cont->anc_item_grow[a]   = have_prev_el ? prev_grow       : -1;
+                            cont->anc_item_shrink[a] = have_prev_el ? prev_shrink     : -1;
+                            cont->anc_item_basis[a]  = have_prev_el ? prev_basis      : CSS_LEN_UNSET;
+                            cont->anc_item_order[a]  = have_prev_el ? prev_order      : CSS_LEN_UNSET;
+                            cont->anc_item_align[a]  = have_prev_el ? prev_align_self : CSS_AK_UNSET;
                             cont->anc_n++;
                         }
 
@@ -3240,7 +3272,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
-                pv_cont_info unused_cont;
+                pv_cont_info ictl_cont;
                 pv_box_info unused_box;
                 pv_text_ext ctl_ext;
                 int bdeco;
@@ -3249,7 +3281,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
                                 &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont, &unused_box, &ctl_ext,
+                                &reg, &ictl_cont, &unused_box, &ctl_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
@@ -3286,6 +3318,24 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_input_select_opts(v, ictl_opts);
                     free(ictl_opts);
                 }
+                /* A form control inside a flex/grid container is one of its items:
+                 * carry the container annotation exactly as text runs and placeholder
+                 * leaves do. Without it the control's run had cont_id -1, which BREAKS
+                 * the container's maximal run in the top-level layout loop -- a
+                 * <select>/<input> mid-column split the flex row into stacked pieces
+                 * (jkanime's player column collapsed to one narrow column). */
+                pv_set_container(v, ictl_cont.id, ictl_cont.display, ictl_cont.gap,
+                                 ictl_cont.justify, ictl_cont.cols, ictl_cont.wrap,
+                                 ictl_cont.row_gap, ictl_cont.align_items);
+                pv_set_grid(v, ictl_cont.col_w, PV_GRID_TRACKS, ictl_cont.col_span);
+                pv_set_grid_rows(v, ictl_cont.grid_rows);
+                pv_set_cont_box(v, ictl_cont.box_id);
+                pv_set_row_span(v, ictl_cont.row_span);
+                pv_set_flex(v, ictl_cont.grow, ictl_cont.shrink, ictl_cont.basis,
+                            ictl_cont.order, ictl_cont.direction, ictl_cont.align_self);
+                pv_set_cont_item(v, item_ordinal(&items, ictl_cont.id, ictl_cont.item));
+                link_cont_chain(&reg, &items, &ictl_cont);
+                pv_set_float(v, ictl_cont.float_side, ictl_cont.float_id, ictl_cont.float_clear);
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
@@ -3531,7 +3581,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
-                pv_cont_info unused_cont;
+                pv_cont_info img_cont;
                 pv_box_info unused_box;
                 pv_text_ext img_ext;
                 int bdeco;
@@ -3540,7 +3590,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
                                 &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont, &unused_box, &img_ext,
+                                &reg, &img_cont, &unused_box, &img_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
@@ -3558,6 +3608,21 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 /* The inherited text-align rides the image run: a replaced element
                  * is placed by it exactly like a line of text. */
                 pv_set_text_style(v, unused_align, unused_fs, unused_fs_abs, unused_lh, unused_deco);
+                /* An <img> inside a flex/grid container is one of its items: carry the
+                 * container annotation so it does not break the container's maximal run
+                 * in the top-level layout loop (a poster mid-column split the flex row). */
+                pv_set_container(v, img_cont.id, img_cont.display, img_cont.gap,
+                                 img_cont.justify, img_cont.cols, img_cont.wrap,
+                                 img_cont.row_gap, img_cont.align_items);
+                pv_set_grid(v, img_cont.col_w, PV_GRID_TRACKS, img_cont.col_span);
+                pv_set_grid_rows(v, img_cont.grid_rows);
+                pv_set_cont_box(v, img_cont.box_id);
+                pv_set_row_span(v, img_cont.row_span);
+                pv_set_flex(v, img_cont.grow, img_cont.shrink, img_cont.basis,
+                            img_cont.order, img_cont.direction, img_cont.align_self);
+                pv_set_cont_item(v, item_ordinal(&items, img_cont.id, img_cont.item));
+                link_cont_chain(&reg, &items, &img_cont);
+                pv_set_float(v, img_cont.float_side, img_cont.float_id, img_cont.float_clear);
                 /* The resolved inherited text extensions ride the image run too:
                  * image_rendering picks the paint scaling filter (2026-07-10). */
                 pv_set_text_ext(v, &img_ext);

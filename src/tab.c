@@ -513,7 +513,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nc, sizeof nc) != 0) return -1;
     for (size_t ci = 0; ci < nc; ++ci) {
         const pv_cont_def *cd = pv_cont_at(v, ci);
-        int32_t cf[16 + PV_GRID_TRACKS];
+        int32_t cf[21 + PV_GRID_TRACKS];
         size_t k = 0;
         cf[k++] = (int32_t)cd->parent_id;
         cf[k++] = (int32_t)cd->parent_item;
@@ -531,6 +531,12 @@ static int write_view(int wfd, const pv_view *v) {
         cf[k++] = (int32_t)cd->grid_flow;
         cf[k++] = (int32_t)cd->box_id;
         cf[k++] = (int32_t)cd->anon_row;
+        /* item flex props of a nested container (2026-08-01; read_view mirrors). */
+        cf[k++] = (int32_t)cd->item_grow;
+        cf[k++] = (int32_t)cd->item_shrink;
+        cf[k++] = (int32_t)cd->item_basis;
+        cf[k++] = (int32_t)cd->item_order;
+        cf[k++] = (int32_t)cd->item_align_self;
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cf[k++] = (int32_t)cd->col_w[gk];
         if (write_full(wfd, cf, sizeof cf) != 0) return -1;
     }
@@ -1656,6 +1662,28 @@ static int read_view(int fd, pv_view **out) {
             pv_set_float(v, (int)flside, (int)flid, (int)flclear);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
             pv_set_box_pct(v, (int)bwpct);
+        } else {
+            /* An input skips the text-presentation restore above (its value/label
+             * handling owns those slots), but its flex/grid container membership must
+             * still ride the wire: a <select>/<input> inside a flex column is one of
+             * that column's items. Dropping it left cont_id -1, which BREAKS the
+             * container's maximal run in the layout loop and stacked the flex row into
+             * a narrow column (jkanime's player). Mirrors the emission side, where a
+             * control now carries the same annotation as text runs. */
+            pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols,
+                             (int)cwrap, (int)crgap, (int)calign);
+            pv_set_grid_rows(v, (int)crows);
+            pv_set_cont_box(v, (int)b[33]);
+            {
+                int gw[PV_GRID_TRACKS];
+                for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) gw[gk] = (int)gtw[gk];
+                pv_set_grid(v, gw, PV_GRID_TRACKS, (int)gtw[PV_GRID_TRACKS]);
+                pv_set_row_span(v, (int)b[26]);
+            }
+            pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
+                       (int)fself);
+            pv_set_cont_item(v, (int)citem);
+            pv_set_float(v, (int)flside, (int)flid, (int)flclear);
         }
         /* block_id/node_id ride EVERY run kind: an input's own box (position:
          * absolute, opacity:0 -- the checkbox-hack pattern) travelled on the
@@ -1803,7 +1831,7 @@ static int read_view(int fd, pv_view **out) {
         if (read_full(fd, &nc, sizeof nc) != 0) { pv_free(v); return -1; }
         if (nc > PV_MAX_CONTAINERS_WIRE) { pv_free(v); return -1; }
         for (size_t ci = 0; ci < nc; ++ci) {
-            int32_t cf[16 + PV_GRID_TRACKS];
+            int32_t cf[21 + PV_GRID_TRACKS];
             if (read_full(fd, cf, sizeof cf) != 0) { pv_free(v); return -1; }
             pv_cont_def cd;
             memset(&cd, 0, sizeof cd);
@@ -1824,6 +1852,11 @@ static int read_view(int fd, pv_view **out) {
             cd.grid_flow     = cf[k++];
             cd.box_id        = cf[k++];
             cd.anon_row      = cf[k++];
+            cd.item_grow       = cf[k++];
+            cd.item_shrink     = cf[k++];
+            cd.item_basis      = cf[k++];
+            cd.item_order      = cf[k++];
+            cd.item_align_self = cf[k++];
             for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) cd.col_w[gk] = cf[k++];
             /* A hostile worker cannot make the parent chain point outside the
              * table: an out-of-range parent degrades the container to top level

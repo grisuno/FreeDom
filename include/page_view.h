@@ -545,6 +545,16 @@ typedef struct pv_cont_def {
     int grid_flow;      /* css_grid_auto_flow */
     int box_id;         /* box enclosing this container's items, or -1 */
     int anon_row;       /* 1 = anonymous row synthesised for an inline-block parent */
+    /* The flex/grid ITEM properties of the element this container occupies as one
+     * item of its PARENT container: grow/shrink (x100, -1 unset), basis (px, or a
+     * percentage encoded -(1000000+per_mille), or CSS_LEN_AUTO/CSS_LEN_UNSET), order
+     * (CSS_LEN_UNSET unset) and align_self (css_align_kw, CSS_AK_UNSET=0 unset). A
+     * nested container's item props live on the wrapper element between it and the
+     * parent (e.g. Bootstrap's `.col{flex:1 0 0%}` wrapping a `.row`); that wrapper
+     * carries no run of its own, so the parent could not read them from a run and
+     * fell back to a run INSIDE the nested container -- the wrong element -- so the
+     * item never grew. Set only when parent_id >= 0. */
+    int item_grow, item_shrink, item_basis, item_order, item_align_self;
 } pv_cont_def;
 
 typedef struct pv_view {
