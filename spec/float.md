@@ -94,7 +94,15 @@ In `layout_doc`, a **float band** is a maximal run of consecutive blocks each wi
    rect (`[ctx_left, ctx_left + ctx_w)`).
 4. **Flow** each item's blocks into its column (a fresh sub-state, like the flex
    per-item pass), translate the rows to `(base_top + column_x, column_y)`, and set the
-   band height to the tallest column.
+   band height to the tallest column. A column's block formatting context is a real
+   BFC, so a **flex/grid container nested inside a float column** (e.g. a data `<table>`
+   in Slashdot's floated story body) is laid out by `layout_container` at the **column
+   width**, exactly as the top-level loop does — not flowed run-by-run as plain lines
+   (which dropped every table cell onto its own row, collapsing a 2-column table to a
+   1-column list). The container's grid runs carry a per-column `x_off`; the row
+   translation therefore **adds** `ctx_left + column_x` (symmetric with the box shift)
+   instead of assigning it, so grid column offsets survive. A plain flowed row has
+   `x_off = 0` in a column, so the add is identical to the old assignment.
 5. Advance `cur_top` past the band; the next block (e.g. the `clear:both` footer)
    reconciles the box stack normally and flows below.
 

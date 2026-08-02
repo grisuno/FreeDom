@@ -212,6 +212,13 @@ sigue emitiendo — ese espacio es contenido. Caso particular ya existente (Stag
 espacios **hijo directo** del elemento contenedor flex/grid tampoco se emite aunque no lleve break
 (CSS: el whitespace entre items no crea items anónimos). El separador inter-celda de las tablas
 fluidas no se ve afectado (se emite por otro camino y lleva `cont_id == -1`, sin break).
+**Whitespace en estructura de tabla (CSS 2.1 §17.2.1).** Un run de solo espacios cuyo **padre
+directo** es estructura de tabla que no es celda (`<table>`/`<tbody>`/`<thead>`/`<tfoot>`/`<tr>`/
+`<colgroup>`) **no se emite** — es el whitespace fuente entre `</td>` y `<td>` (o entre filas), que
+por CSS no genera caja. Sin esta regla ese run partía la corrida contigua de ítems del grid
+sintetizado de la tabla (el motor de layout agrupa ítems **contiguos**), tirando cada celda a su
+propia fila: una tabla de datos de 2 columnas colapsaba a una lista vertical de 1 columna. Texto
+no-whitespace ahí (raro; los navegadores lo foster-parentean) se deja intacto.
 
 **Identidad de ítem del contenedor (`cont_item`).** Cada run de un contenedor lleva el **ordinal del
 ítem** al que pertenece: el elemento **hijo directo** del contenedor en la cadena de ancestros del run

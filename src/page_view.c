@@ -2779,6 +2779,24 @@ static const lxb_dom_node_t *nearest_row(const lxb_dom_node_t *n, const lxb_dom_
     return NULL;
 }
 
+/* Nonzero when n's DIRECT parent is table structure that is not a cell -- <table>,
+ * <tbody>/<thead>/<tfoot>, <tr> or <colgroup>. Text there is "between cells/rows"
+ * rather than inside a cell (<td>/<th>). Per CSS 2.1 §17.2.1 (anonymous table
+ * objects) a whitespace-only such node generates no box; the caller drops it so it
+ * does not split a data table's grid-container item run (which the layout engine
+ * gathers contiguously -- a stray run drops every cell onto its own line). */
+static int parent_is_table_internal(const lxb_dom_node_t *n) {
+    const lxb_dom_node_t *p = n->parent;
+    if (p == NULL || p->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+    switch (node_tag(p)) {
+        case LXB_TAG_TABLE: case LXB_TAG_TBODY: case LXB_TAG_THEAD:
+        case LXB_TAG_TFOOT: case LXB_TAG_TR:    case LXB_TAG_COLGROUP:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 /* Nearest <td>/<th> ancestor of n up to base, or NULL. */
 static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
@@ -4083,6 +4101,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * a gap equal to the heading's font size + margins that has no text in it,
          * and on article-heavy sites that means dozens of blank lines. */
         if (heading != 0 && !has_content) {
+            free(collapsed);
+            continue;
+        }
+        /* CSS 2.1 §17.2.1: whitespace directly inside table structure (between two
+         * cells or two rows -- its parent is <table>/<tbody>/<tr>/...) generates no
+         * box. HTML routinely puts a newline between </td> and <td>; emitting it as a
+         * run splits the table's synthesised grid container item sequence, so the
+         * layout engine (contiguous item gather) drops every cell onto its own row and
+         * a 2-column data table collapses to a 1-column vertical list. Non-whitespace
+         * text there is rare (foster-parented by real browsers) and left untouched. */
+        if (!has_content && parent_is_table_internal(n)) {
             free(collapsed);
             continue;
         }

@@ -355,6 +355,53 @@ static void test_build_table_grid(void **state) {
     hp_document_free(doc);
 }
 
+/* CSS 2.1 §17.2.1 (anonymous table objects): white space directly inside table
+ * structure -- a text node whose parent is <table>/<tbody>/<tr>/... (between cells
+ * or rows, NOT inside a cell) -- generates no boxes. HTML sources routinely put a
+ * newline/space between </td> and <td>. Such a stray whitespace run splits the
+ * data table's grid-container item sequence, and because the layout engine gathers
+ * only CONTIGUOUS container items, every cell lands on its own row (a 2-column table
+ * collapses to a 1-column vertical list -- the slashdot / market-share bug). This
+ * asserts the whitespace is dropped: the two cells of a row are ADJACENT runs. */
+static void test_build_table_intercell_whitespace_dropped(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><table>\n"
+                             "<tr> <td>India</td> <td>14.73%</td> </tr>\n"
+                             "<tr> <td>United States</td> <td>11.87%</td> </tr>\n"
+                             "</table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    /* No whitespace-only run survives anywhere in the built view. */
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_TEXT && r->text != NULL)
+            assert_string_not_equal(r->text, " ");
+    }
+
+    /* The two cells of the first row are ADJACENT (nothing emitted between them),
+     * so the grid engine can pack them onto one row. */
+    long ia = -1, ib = -1;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "India") == 0) ia = (long)i;
+        else if (strcmp(r->text, "14.73%") == 0) ib = (long)i;
+    }
+    assert_true(ia >= 0 && ib >= 0);
+    assert_int_equal(ib, ia + 1);
+
+    const pv_run *india = pv_at(v, (size_t)ia);
+    const pv_run *pct = pv_at(v, (size_t)ib);
+    assert_int_equal(india->cont_display, BX_DISPLAY_GRID);
+    assert_int_equal(india->cont_cols, 2);
+    assert_int_equal(pct->cont_id, india->cont_id);
+    assert_true(india->cont_id >= 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* Cell inner markup is flattened into the cell's text and not re-emitted as a
  * separate run; the column count comes from the widest row. */
 static void test_build_table_flattens_cell(void **state) {
@@ -3030,6 +3077,7 @@ int main(void) {
         cmocka_unit_test(test_build_unordered_list),
         cmocka_unit_test(test_build_ordered_and_nested_list),
         cmocka_unit_test(test_build_table_grid),
+        cmocka_unit_test(test_build_table_intercell_whitespace_dropped),
         cmocka_unit_test(test_build_table_flattens_cell),
         cmocka_unit_test(test_build_collected_text_skips_style_and_script),
         cmocka_unit_test(test_build_multilink_table_flows_links),

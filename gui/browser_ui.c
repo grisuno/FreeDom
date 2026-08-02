@@ -5167,6 +5167,38 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         size_t sbx = L->nbox;
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bk = rd_at(doc, k);
+            /* A flex/grid container nested INSIDE this float column (e.g. a data
+             * table in slashdot's floated story body) is laid out by the grid/flex
+             * engine at the COLUMN width, exactly as the top-level loop does. Without
+             * it every container run flows as its own text line, so a 2-column table
+             * collapses to a 1-column vertical list (CSS 17.5: a table is a block
+             * formatting context inside the float, not a stack of anonymous lines).
+             * Column-local coordinates: the row/box shift below translates the whole
+             * column into place. The run range is bounded by this float item's blocks
+             * ([gstart[j], gstart[j+1])), so it never crosses a column boundary. */
+            if (bk->cont_id >= 0 &&
+                (bk->cont_display == BX_DISPLAY_FLEX ||
+                 bk->cont_display == BX_DISPLAY_GRID)) {
+                int rootc = root_cont_of(doc, bk->cont_id);
+                size_t ce = k + 1;
+                while (ce < gstart[j + 1]) {
+                    const rd_block *bce = rd_at(doc, ce);
+                    if (bce->cont_id < 0 || root_cont_of(doc, bce->cont_id) != rootc)
+                        break;
+                    ++ce;
+                }
+                if (k > gstart[j]) flush_line(L, &si, th);
+                leave_inline_box(L, &si, bk->block_id);
+                reconcile_boxes_below(cr, w, L, &si, th, doc, cw,
+                                      container_box_of(doc, k, ce), k, band_box);
+                double cin_l, cin_w;
+                rc_box_context(&si, cw, &cin_l, &cin_w);
+                si.indent_px = cin_l;
+                layout_container(cr, w, L, &si, th, cin_l, cin_w, doc, k, ce, rootc);
+                si.indent_px = 0.0;
+                k = ce - 1;  /* the loop's ++k moves past the container */
+                continue;
+            }
             if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
             /* Open the decorated boxes that live INSIDE this column (a story <h2>
              * whose padding turns its teal background into a box) in column-local
@@ -5185,7 +5217,12 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         if (si.cur_top > row_h) row_h = si.cur_top;
         for (size_t r = sr; r < L->nrow; ++r) {
             L->rows[r].top += base_top + row_top;
-            L->rows[r].x_off = ctx_left + outx[j];
+            /* ADD, not assign: a plain flowed row is emitted at column-local x_off 0
+             * (indent_px is 0 in a column), so += matches the old assignment; a row
+             * from a nested flex/grid container carries its per-column x_off (grid
+             * column position), which must be preserved and translated, not clobbered.
+             * Symmetric with the box shift below (which already uses +=). */
+            L->rows[r].x_off += ctx_left + outx[j];
         }
         /* Decorated boxes born in this column (an <h2> whose padding makes its teal
          * background a box, not a row band) carry column-relative coordinates; shift
