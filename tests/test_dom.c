@@ -398,6 +398,40 @@ static void test_query_selector_combinators(void **state) {
     assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE, "p + p.muted"), buf[1]);
 }
 
+/* A descendant selector chain deeper than four compounds must still match. Real
+ * sites nest this deep: slashdot styles its story title with
+ * `#firehose article header h2 a` (five compounds) and its comment tables with
+ * `.thresholds-table table tbody tr th ol > li label` (eight). A too-shallow bound
+ * silently drops the whole rule (fail closed), so the title read black-on-teal
+ * instead of the intended white. Self-contained: builds its own deep tree. */
+static void test_query_selector_deep_descendant_chain(void **state) {
+    (void)state;
+    static const char deep[] =
+        "<!DOCTYPE html><html><body>"
+        "<div id=\"firehose\"><article class=\"fhitem-story\"><header>"
+        "<h2 class=\"story\"><span class=\"story-title\">"
+        "<a id=\"title\" href=\"//x\">Story</a></span></h2>"
+        "</header></article></div></body></html>";
+    hp_document *doc = NULL;
+    assert_int_equal(hp_parse(deep, sizeof deep - 1, NULL, &doc), HP_OK);
+    dom_index *idx = NULL;
+    assert_int_equal(dom_build(doc, &idx), DOM_OK);
+
+    dom_node_id title = dom_get_element_by_id(idx, "title");
+    assert_int_not_equal(title, DOM_NODE_NONE);
+    /* Five compounds: subject <a> under h2 under header under article under #firehose. */
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE,
+                     "#firehose article header h2 a"), title);
+    /* Same depth via the child combinator on the tail. */
+    assert_int_equal(dom_query_selector(idx, DOM_NODE_NONE,
+                     "#firehose article header h2 > span > a"), title);
+    /* matches()/closest() ride the same matcher and must agree. */
+    assert_true(dom_matches(idx, title, "#firehose article header h2 a"));
+
+    dom_free(idx);
+    hp_document_free(doc);
+}
+
 static void test_query_selector_nth_and_structural(void **state) {
     dom_index *idx = IDX(state);
     dom_node_id buf[8];
@@ -483,6 +517,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_query_selector_type_class_id, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_all_counts, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_combinators, setup_doc, teardown_doc),
+        cmocka_unit_test(test_query_selector_deep_descendant_chain),
         cmocka_unit_test_setup_teardown(test_query_selector_nth_and_structural, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_query_selector_scope_is_descendants_only, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_matches_and_closest, setup_doc, teardown_doc),

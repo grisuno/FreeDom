@@ -1545,6 +1545,45 @@ static void apply_css_replaced_size(lxb_dom_element_t *el, const css_sheet *shee
     if (own.height > 0 && own.height <= CSS_LEN_MAX) *ih = own.height;
 }
 
+/* Content width (px) of the containing block for a replaced element that has NO
+ * intrinsic pixel size -- specifically a viewBox-only <svg>: the CONTENT width of its
+ * nearest ancestor (up to base) that sets a definite px `width`. Returns 0 when none
+ * does, so an unconstrained element keeps size 0 and fills the available content width
+ * at render, exactly as before.
+ *
+ * Why: per CSS 2.1 an <svg> with only a viewBox has no intrinsic width/height, so its
+ * used width is 100% of its containing block and its height follows the viewBox ratio
+ * (Firefox does exactly this). Freedom previously treated the viewBox extent as
+ * intrinsic px, so an icon in `a{width:1.25rem}` (viewBox 0 260 1792 1260) ballooned to
+ * hundreds of px instead of 20 -- the dominant break on slashdot's social bar. Only
+ * definite px widths qualify: `auto`/unset carry no constraint, and a `%` width is
+ * unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
+ * (the near-universal reset) is honoured so the child fills the true content box. */
+static int nearest_ancestor_content_width(const lxb_dom_node_t *n,
+                                          const lxb_dom_node_t *base,
+                                          const css_sheet *sheet,
+                                          pv_style_cache *cache) {
+    const lxb_dom_node_t *stop = (base != NULL) ? base->parent : NULL;
+    for (const lxb_dom_node_t *p = (n != NULL) ? n->parent : NULL;
+         p != NULL && p != stop; p = p->parent) {
+        if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
+        css_style st = cached_element_style(el, sheet, cache);
+        if (st.width > 0 && st.width <= CSS_LEN_MAX) {
+            int w = st.width;
+            if (st.box_sizing == CSS_BOXS_BORDER) {
+                int pl = (st.pad_left  > 0) ? st.pad_left  : 0;
+                int pr = (st.pad_right > 0) ? st.pad_right : 0;
+                int bl = (st.border_left_width  > 0) ? st.border_left_width  : 0;
+                int br = (st.border_right_width > 0) ? st.border_right_width : 0;
+                w -= pl + pr + bl + br;
+            }
+            return (w > 0) ? w : 0;
+        }
+    }
+    return 0;
+}
+
 /* Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify.
  * Unset / start / unknown all fall to FX_JUSTIFY_START (the default). */
 static int css_to_fx_justify(css_justify j) {
@@ -1706,6 +1745,13 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     double fs_rel = 1.0;
     int fs_rel_any = 0;
     int got_li = 0, got_list_kind = 0, got_float = 0;
+    /* Set once the walk passes through (or starts at) an absolutely/fixed positioned
+     * element. Per CSS 2.2 section 9.7 such an element computes `float` to none and is
+     * taken out of flow, so it does NOT join an ancestor float's column -- the OOF
+     * positioner places it against its containing block instead. Without this a
+     * `position:absolute` comment badge inside a floated story card inherited the
+     * card's float and flowed as an extra line (slashdot's teal header ballooning). */
+    int oof_seen = 0;
     int prev_box_id = -1;  /* the box-carrying block seen one step more inner, for parent linking */
     int tag_bold = 0, tag_italic = 0;
     int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
@@ -1778,13 +1824,33 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 /* The leaf block's own `clear` ends any preceding float band (float.md). */
                 cont->float_clear = (cs.clear != CSS_CLEAR_UNSET) ? cs.clear : 0;
             }
+            /* An absolutely/fixed positioned self-or-ancestor takes this run out of
+             * flow: mark it so no enclosing float claims the run (float:none per
+             * CSS 2.2 section 9.7). Checked before the float test below so the
+             * positioned element itself is never treated as a float either. */
+            if (cs.position == CSS_POS_ABSOLUTE || cs.position == CSS_POS_FIXED)
+                oof_seen = 1;
             /* Nearest floated self-or-ancestor block: its side + a document-order id so
-             * the painter groups the runs of one floated element into one column. */
-            if (!got_float && float_reg != NULL && is_block_like_style(t, &cs) &&
+             * the painter groups the runs of one floated element into one column. A run
+             * inside an out-of-flow (absolute/fixed) subtree is excluded: it is placed
+             * by the positioner, not the float column. */
+            if (!got_float && !oof_seen && float_reg != NULL && is_block_like_style(t, &cs) &&
                 (cs.float_side == CSS_FLOAT_LEFT || cs.float_side == CSS_FLOAT_RIGHT)) {
                 cont->float_side = cs.float_side;
                 cont->float_id = container_id(float_reg, p);
                 got_float = 1;
+                /* The float COLUMN is sized by the floated element's own width, which
+                 * the nearest-hbox search misses whenever a width-less inner wrapper
+                 * (a padding-only <header>/<div>) claimed the hbox first. Seed the box
+                 * width from the float element when still unset, so the whole column
+                 * (headers included) takes the float's width instead of being mistaken
+                 * for width-less and split evenly across the row (slashdot grid_24
+                 * stories collapsing into thin columns). A width-less float seeds
+                 * nothing and keeps its even-split. */
+                if (box != NULL && box->w == 0 && box->w_pct == 0) {
+                    if (cs.width != CSS_LEN_UNSET && cs.width > 0) box->w = cs.width;
+                    if (cs.width_pct > 0) box->w_pct = cs.width_pct;
+                }
             }
             /* Horizontal box from the nearest block ancestor that declares one, so a
              * wrapper's max-width/centering/padding reaches all its descendants. */
@@ -3500,6 +3566,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int iw = parse_dim(ws, wl);
                 int ih = parse_dim(hs, hl);
                 apply_css_replaced_size(el, sheet, &cache, &iw, &ih);
+                /* A viewBox-only <svg> (no width/height, attr or CSS) has no intrinsic
+                 * pixel size: it fills its containing block. Seed the width from the
+                 * nearest definite-width ancestor so svg_intrinsic_size derives the
+                 * height from the viewBox ratio, instead of the render step mistaking
+                 * the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+                if (iw <= 0 && ih <= 0) {
+                    int cbw = nearest_ancestor_content_width(n, base, sheet, &cache);
+                    if (cbw > 0) iw = cbw;
+                }
 
                 const char *unused_href = NULL;
                 size_t unused_hl2 = 0;

@@ -666,6 +666,16 @@ sea** su etiqueta o su `display` declarado, incluido `display:inline`.
 Es solo la regla de **elegibilidad**: no fuerza salto de bloque (`causes_block_break` sigue
 mandando en el flujo) ni cambia el gate de `caps.css`.
 
+**Corolario (2026-08-01): un elemento fuera de flujo por `position:absolute|fixed` NO se
+une a la columna de un `float` ancestro.** CSS 2.2 §9.7 también computa su `float` a `none`:
+lo posiciona el contenedor establecido por el ancestro posicionado, no el band del float.
+`resolve_context` marca `oof_seen` al cruzar (o partir de) un elemento absoluto/fijo y con
+eso **no** le asigna la membresía de float del ancestro. Sin esto, un
+`.comment-bubble{position:absolute;right:12px}` dentro de un `article` flotado heredaba el
+float, fluía como una línea más y **triplicaba la altura** del header teal de slashdot (la
+caja ya era `pos=absolute`; solo la corrida arrastraba el float). Ver
+`[[freedom-slashdot-render-2026-08-01]]`.
+
 ### Cajas de nivel inline: `display:inline-block` dentro de una línea (2026-07-31)
 
 Un `inline-block` en medio de una frase — un *badge*, una píldora, un *chip*, un botón

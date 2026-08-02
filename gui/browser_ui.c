@@ -1142,6 +1142,27 @@ static int image_display_size(const browser_window *w, const rd_block *blk,
     return 1;
 }
 
+/* Box a placeholder should reserve when the image itself is unavailable (blocked by
+ * policy, images off, fetch/decode failed) BUT the markup declared both intrinsic
+ * axes (<img width=64 height=64>). A sized replaced element reserves its box whether
+ * or not the resource loads -- that is what a browser does for a broken image, and it
+ * keeps a small icon a small icon instead of a full-width bar. Returns 1 with dw/dh
+ * fit to box_w (aspect preserved, never upscaled). Returns 0 when a size cannot be
+ * known (no declared dimensions, or only one axis): the caller then draws the
+ * informative full-width labelled bar as before. Privacy by Default makes this the
+ * common path -- images are off unless opted in -- so most pages depend on it to keep
+ * their layout intact. */
+static int placeholder_display_size(const rd_block *blk, double box_w,
+                                    double *dw, double *dh) {
+    if (blk->video_w <= 0 || blk->video_h <= 0) return 0;
+    if (box_w < 1.0) box_w = 1.0;
+    double base_w = (double)blk->video_w, base_h = (double)blk->video_h;
+    double scale = (base_w > box_w) ? box_w / base_w : 1.0;
+    *dw = base_w * scale;
+    *dh = base_h * scale;
+    return 1;
+}
+
 /* Builds the live editable state for the current doc: one entry per editable
  * control, seeded with its declared value. Aliases the doc blocks (not owned). */
 static void rebuild_inputs(browser_window *w) {
@@ -3706,7 +3727,11 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         cairo_font_extents(cr, &fe);
         double dw, dh;
         double box_w = content_w - 2.0 * th->image_box_pad;
-        double h = image_display_size(w, b, box_w, &dw, &dh)
+        /* A decoded image sizes the row to its blit; an unavailable image with a
+         * declared intrinsic size reserves that box (broken-image parity); anything
+         * else falls back to a one-line labelled bar. */
+        double h = (image_display_size(w, b, box_w, &dw, &dh) ||
+                    placeholder_display_size(b, box_w, &dw, &dh))
                    ? dh + 2.0 * th->image_box_pad
                    : fe.height + 2.0 * th->image_box_pad;
         double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
@@ -5046,6 +5071,10 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     double ctx_left, ctx_w;
     rc_box_context(s, content_w, &ctx_left, &ctx_w);
     if (ctx_w < 1.0) ctx_w = 1.0;
+    /* Boxes at or above this are the band's shared context (already opened on the
+     * parent state); per-column reconciliation stops here so only boxes strictly
+     * inside a column are (re)opened for that column. */
+    int band_box = band_common_box(doc, start, end);
 
     /* Group consecutive blocks by float_id into items (one floated element = one item). */
     size_t gstart[BT_MAX_CHILDREN + 1];
@@ -5087,7 +5116,20 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     for (size_t j = 0; j < g; ++j) {
         const rd_block *bk = rd_at(doc, gstart[j]);
         side[j] = (bk->float_side == CSS_FLOAT_RIGHT) ? 1 : 0;
-        double capw = bx_width_cap(bk->box_w, bk->box_w_pct, ctx_w);
+        /* The floated element's width may sit on ANY block that inherited its float
+         * membership, not the group's first block: a `.grid_24` article carries
+         * width:99.8% on its body <p>, while its <header>/<h2> lead the group with no
+         * width of their own. Read from only the first block and the whole column is
+         * mistaken for width-less and split evenly -- N grid rows collapse into N thin
+         * side-by-side columns (the slashdot main-content/rail collapse). Take the
+         * WIDEST cap in the group: that is the floated element's own box, since nested
+         * blocks resolve to narrower ancestors. */
+        double capw = 0.0;
+        for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
+            const rd_block *bb = rd_at(doc, k);
+            double c = bx_width_cap(bb->box_w, bb->box_w_pct, ctx_w);
+            if (c > capw) capw = c;
+        }
         width[j] = (capw > 0.0) ? capw : -1.0;
         if (width[j] > 0.0) explicit_sum += width[j]; else ++nfree;
     }
@@ -5122,17 +5164,37 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         double cw = (width[j] < 1.0) ? 1.0 : width[j];
         si.bg_w = cw;
         size_t sr = L->nrow;
+        size_t sbx = L->nbox;
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bk = rd_at(doc, k);
             if (k > gstart[j] && bk->block_break) flush_line(L, &si, th);
+            /* Open the decorated boxes that live INSIDE this column (a story <h2>
+             * whose padding turns its teal background into a box) in column-local
+             * coordinates, exactly as the flex per-item pass does. stop_at is the
+             * band's common box so ancestors shared by every column are not reopened
+             * per column. Without this the header box is never created, so its bar
+             * never paints and its white-on-teal title reads white-on-white. */
+            leave_inline_box(L, &si, bk->block_id);
+            reconcile_boxes_below(cr, w, L, &si, th, doc, cw, bk->block_id, k, band_box);
             si.bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
-            flow_text_block(cr, w, L, &si, th, bk, cw);
+            if (!emit_replaced_row(cr, w, L, &si, th, bk, cw))
+                flow_text_block(cr, w, L, &si, th, bk, cw);
         }
+        close_all_boxes(L, &si, th);
         flush_line(L, &si, th);
         if (si.cur_top > row_h) row_h = si.cur_top;
         for (size_t r = sr; r < L->nrow; ++r) {
             L->rows[r].top += base_top + row_top;
             L->rows[r].x_off = ctx_left + outx[j];
+        }
+        /* Decorated boxes born in this column (an <h2> whose padding makes its teal
+         * background a box, not a row band) carry column-relative coordinates; shift
+         * them to the column rect exactly as the flex per-item pass does, or they paint
+         * at the page origin / vanish (slashdot story headers). Plain backgrounds ride
+         * the row band above and are already placed. */
+        for (size_t b = sbx; b < L->nbox; ++b) {
+            L->boxes[b].x   += ctx_left + outx[j];
+            L->boxes[b].top += base_top + row_top;
         }
     }
     s->cur_top = base_top + row_top + row_h;
@@ -5462,7 +5524,8 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
          * don't add a line, so inline fragments don't inflate the box. */
         if (b->kind == RD_IMAGE) {
             double dw, dh, box_w = content_w - 2.0 * th->image_box_pad;
-            if (image_display_size(w, b, box_w, &dw, &dh)) {
+            if (image_display_size(w, b, box_w, &dw, &dh) ||
+                placeholder_display_size(b, box_w, &dw, &dh)) {
                 gh[bid] = dh + 2.0 * th->image_box_pad;
             } else {
                 gh[bid] = default_h + 2.0 * th->image_box_pad;
@@ -6017,6 +6080,43 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                      ? rd_image_fail_label(blk->img_fail) : NULL;
     set_rgb(cr, blocked ? th->image_blocked : th->image_box);
     cairo_set_line_width(cr, 1.0);
+
+    /* A markup-sized image reserves its own box even when unavailable: draw a compact
+     * bordered placeholder at the declared size, aligned by the parent's text-align
+     * exactly like a real image, instead of a full-width bar that would spread a 64px
+     * icon across the page (slashdot topic icons; any images-off page). The border
+     * colour already flags "blocked"; the verbose label would not fit, so the alt text
+     * is shown only when it fits inside the reserved box. */
+    double pdw, pdh;
+    if (placeholder_display_size(blk, box_w, &pdw, &pdh)) {
+        double ax = 0.0, slack = box_w - pdw;
+        if (slack > 0.0) {
+            if (blk->text_align == CSS_ALIGN_CENTER)     ax = slack / 2.0;
+            else if (blk->text_align == CSS_ALIGN_RIGHT) ax = slack;
+        }
+        double bx = left + pad + ax, by = ry + pad;
+        cairo_rectangle(cr, bx, by, pdw, pdh);
+        cairo_stroke(cr);
+        const char *alt = (blk->text != NULL) ? blk->text : "";
+        if (alt[0] != '\0') {
+            content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
+            cairo_text_extents_t te;
+            cairo_font_extents_t fe2;
+            cairo_text_extents(cr, alt, &te);
+            cairo_font_extents(cr, &fe2);
+            if (te.width <= pdw - 2.0 && fe2.height <= pdh) {
+                cairo_save(cr);
+                cairo_rectangle(cr, bx, by, pdw, pdh);
+                cairo_clip(cr);
+                cairo_move_to(cr, bx + 1.0, by + fe2.ascent);
+                cairo_show_text(cr, alt);
+                cairo_restore(cr);
+            }
+        }
+        return;
+    }
+
+    /* Unknown size: the informative full-width labelled bar. */
     cairo_rectangle(cr, left, ry, content_w, row_h);
     cairo_stroke(cr);
 

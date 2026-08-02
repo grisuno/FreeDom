@@ -694,6 +694,110 @@ static void test_build_svg_css_size(void **state) {
     hp_document_free(doc);
 }
 
+/* A viewBox-only inline <svg> (no width/height attribute AND no CSS width/height of
+ * its own) has NO intrinsic pixel size: per CSS 2.1 its used width is 100% of its
+ * containing block, height by the viewBox ratio -- exactly what a browser does. So it
+ * fills the CONTENT width of its nearest definite-width ancestor, NOT its raw viewBox
+ * extent. Regression: slashdot's social icons (viewBox `0 260 1792 1260` inside
+ * `a{width:1.25rem}`) ballooned to hundreds of px instead of 20; the height is left
+ * unset (-1) so the render step derives it from the viewBox aspect. */
+static void test_build_svg_fills_narrow_ancestor(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>a.ico{display:block;width:20px}</style></head>"
+        "<body><a class='ico'><svg viewBox='0 260 1792 1260'>"
+        "<path d='M711 1128l484-250-484-253z'/></svg></a></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *s = find_svg(v);
+    assert_non_null(s);
+    assert_int_equal(s->img_w, 20);   /* fills the 20px containing block */
+    assert_int_equal(s->img_h, -1);   /* height derived from the viewBox at render */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The containing block is the CONTENT box: with box-sizing:border-box (the ubiquitous
+ * `*{box-sizing:border-box}` reset) the ancestor's declared width includes its padding,
+ * so the viewBox-only child fills width minus horizontal padding (30 -> 30-2*5 = 20). */
+static void test_build_svg_fills_border_box_ancestor(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>div.box{box-sizing:border-box;width:30px;padding:5px}</style></head>"
+        "<body><div class='box'><svg viewBox='0 0 100 50'>"
+        "<rect width='100' height='50'/></svg></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *s = find_svg(v);
+    assert_non_null(s);
+    assert_int_equal(s->img_w, 20);
+    assert_int_equal(s->img_h, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* No ancestor sets a definite px width -> the viewBox-only SVG keeps its size unset
+ * (-1), so the render step fills the available content width (behavior unchanged). A
+ * percentage-width ancestor is not resolvable in this flat builder and must NOT be
+ * mistaken for a definite constraint. */
+static void test_build_svg_no_ancestor_width_unset(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>div.pct{width:50%}</style></head>"
+        "<body><div class='pct'><svg viewBox='0 0 100 50'>"
+        "<rect width='100' height='50'/></svg></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *s = find_svg(v);
+    assert_non_null(s);
+    assert_int_equal(s->img_w, -1);
+    assert_int_equal(s->img_h, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A floated element's width must define its float column even when the text it wraps
+ * sits under width-less inner wrappers (a padding-only <div>/<header>). The nearest-hbox
+ * resolution stops at the inner wrapper (no width), so the float element's own width is
+ * captured at the float boundary and rides every descendant run. Regression: each
+ * slashdot `.grid_24` story (width:99.8% on the <article>, body nested under wrappers)
+ * was treated as width-less, so the float band split the row evenly and N full-width
+ * stories collapsed into N thin side-by-side columns. */
+static void test_build_float_width_from_float_element(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>.col{float:left;width:99.8%}.inner{padding:10px}</style></head>"
+        "<body><div class='col'><div class='inner'>"
+        "<h2>Head</h2><p>Body text of the story.</p></div></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *p = find_text(v, "Body text of the story.");
+    assert_non_null(p);
+    assert_true(p->float_id >= 0);       /* inside the float */
+    assert_int_equal(p->box_w_pct, 998); /* carries the float element's 99.8% width */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A width-less float stays width-less (box_w_pct 0): the float band still splits the
+ * leftover evenly, so shrink-to-fit floats are unchanged by the capture above. */
+static void test_build_float_widthless_stays_unset(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>.col{float:left}.inner{padding:10px}</style></head>"
+        "<body><div class='col'><div class='inner'>"
+        "<p>Shrink to fit float.</p></div></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *p = find_text(v, "Shrink to fit float.");
+    assert_non_null(p);
+    assert_true(p->float_id >= 0);
+    assert_int_equal(p->box_w_pct, 0);
+    assert_int_equal(p->box_w, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* An author CSS width/height wins over the width/height presentation attribute
  * (presentation attrs sit at ~zero specificity below the author sheet). */
 static void test_build_image_css_size_overrides_attr(void **state) {
@@ -1259,6 +1363,41 @@ static void test_build_float_threading(void **state) {
     assert_int_equal(p->float_side, 0);
     assert_int_equal(p->float_id, -1);
     assert_int_equal(p->float_clear, 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* CSS 2.2 section 9.7: an absolutely (or fixed) positioned element computes `float`
+ * to none and is taken out of flow -- it does NOT participate in an ancestor float's
+ * column. Regression: slashdot's `.comment-bubble{position:absolute;right:12px}` sits
+ * inside a floated `article.fhitem-story`; Freedom tagged its run with the ancestor
+ * float, so the comment count flowed as a second line and inflated the teal story
+ * header to ~3x its height instead of being pinned to the header's top-right corner.
+ * The absolutely-positioned run must carry float_id == -1 while its floated siblings
+ * keep the column. */
+static void test_build_absolute_inside_float_escapes(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='float:left;width:99%;position:relative'>"
+        "  <span>Story Title</span>"
+        "  <span style='position:absolute;right:12px' id='cb'>7</span>"
+        "</div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    /* The plain title stays in the float column. */
+    const pv_run *title = find_text(v, "Story Title");
+    assert_non_null(title);
+    assert_true(title->float_id >= 0);
+
+    /* The absolutely-positioned comment count escapes the float (float:none). */
+    const pv_run *cb = find_text(v, "7");
+    assert_non_null(cb);
+    assert_int_equal(cb->float_id, -1);
+    assert_int_equal(cb->float_side, 0);
 
     pv_free(v);
     hp_document_free(doc);
@@ -2905,6 +3044,11 @@ int main(void) {
         cmocka_unit_test(test_build_image_unknown_dims),
         cmocka_unit_test(test_build_image_px_and_tracking_dims),
         cmocka_unit_test(test_build_svg_css_size),
+        cmocka_unit_test(test_build_svg_fills_narrow_ancestor),
+        cmocka_unit_test(test_build_svg_fills_border_box_ancestor),
+        cmocka_unit_test(test_build_svg_no_ancestor_width_unset),
+        cmocka_unit_test(test_build_float_width_from_float_element),
+        cmocka_unit_test(test_build_float_widthless_stays_unset),
         cmocka_unit_test(test_build_image_css_size_overrides_attr),
         cmocka_unit_test(test_build_image_auto_size_keeps_attr),
         cmocka_unit_test(test_build_empty_flex_grow_spacer),
@@ -2928,6 +3072,7 @@ int main(void) {
         cmocka_unit_test(test_build_flex_item_values),
         cmocka_unit_test(test_build_flex_wrap_align_row_gap),
         cmocka_unit_test(test_build_float_threading),
+        cmocka_unit_test(test_build_absolute_inside_float_escapes),
         cmocka_unit_test(test_build_flex_whitespace_not_item),
         cmocka_unit_test(test_build_interblock_whitespace_not_emitted),
         cmocka_unit_test(test_build_inline_whitespace_kept),

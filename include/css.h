@@ -408,9 +408,18 @@ typedef enum css_backface {
 #define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
 #define CSS_LEN_END       (-2147483646)     /* INT_MIN+2: 100% offset (right/bottom edge) */
 
-/* Max compounds in one complex selector (subject + ancestor/parent constraints).
- * A deeper chain is dropped (fail closed). */
-#define CSS_MAX_COMPOUNDS 4
+/* Max compounds in one complex selector (subject + ancestor/parent constraints),
+ * i.e. the number of space/`>`/`+`/`~`-separated parts. A deeper chain is dropped
+ * (fail closed). Real sites nest well past four: a bound of 4 silently dropped
+ * slashdot's `#firehose article header h2 a` (5) so its story titles rendered
+ * black-on-teal instead of white, and its layout rules on `article header ...`
+ * never applied. Eight covers the overwhelming majority of author selectors
+ * (measured against slashdot's ~3400-selector sheet: depth<=6 is 99 percent;
+ * depth 7-9 are a handful of comment-moderation rules) while staying bounded
+ * against a CSS DoS.
+ * Cost is O(CSS_MAX_COMPOUNDS) per compiled selector (sizeof(css_sel) ~= 1.4 KiB per
+ * compound), so keep this modest. */
+#define CSS_MAX_COMPOUNDS 8
 
 /* Max attribute selectors ([attr], [attr=v], ...) in one compound. More are dropped
  * (the whole selector fails closed). */

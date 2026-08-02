@@ -49,8 +49,12 @@ compounds with the **descendant** combinator (whitespace, `A B`) or the **child*
 combinator (`A > B`), e.g. `div p`, `nav > a`, `#main .card p`. The rightmost
 compound is the *subject* (the element a rule styles); the compounds to its left
 constrain its ancestors (descendant = any ancestor; child = the immediate parent).
-Up to `CSS_MAX_COMPOUNDS` (4) compounds per selector and `CSS_MAX_ATTR_SEL` (4)
-attribute selectors per compound; a deeper chain is **dropped** (fail closed).
+Up to `CSS_MAX_COMPOUNDS` (8) compounds per selector and `CSS_MAX_ATTR_SEL` (4)
+attribute selectors per compound; a deeper chain is **dropped** (fail closed). The
+bound is 8 because real sheets nest past four (slashdot's `#firehose article header
+h2 a` is five, its comment tables reach eight); a bound of 4 silently dropped those
+whole rules. It stays bounded to cap the per-selector cost (`sizeof(css_sel)` grows
+~1.4 KiB per compound) against a CSS DoS.
 Rules may list several comma-separated selectors.
 
 **Attribute selectors** (Hito 23b-4). A compound may carry any number of `[...]`
