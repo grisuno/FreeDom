@@ -1905,16 +1905,17 @@ static int interp_text_overflow(const char *v) {
 }
 
 static int interp_word_break(const char *v) {
-    if (csel_ci_eq(v, "normal"))    return CSS_WB_NORMAL;
-    if (csel_ci_eq(v, "break-all")) return CSS_WB_BREAK;
-    if (csel_ci_eq(v, "keep-all"))  return CSS_WB_NORMAL; /* CJK line-breaking not modeled */
+    if (csel_ci_eq(v, "normal"))     return CSS_WB_NORMAL;
+    if (csel_ci_eq(v, "break-all"))  return CSS_WB_BREAK;       /* greedy mid-line break */
+    if (csel_ci_eq(v, "break-word")) return CSS_WB_BREAK_WORD;  /* deprecated alias of overflow-wrap:break-word */
+    if (csel_ci_eq(v, "keep-all"))   return CSS_WB_NORMAL; /* CJK line-breaking not modeled */
     return -1;
 }
 
 static int interp_overflow_wrap(const char *v) {
     if (csel_ci_eq(v, "normal"))     return CSS_WB_NORMAL;
-    if (csel_ci_eq(v, "break-word")) return CSS_WB_BREAK;
-    if (csel_ci_eq(v, "anywhere"))   return CSS_WB_BREAK;
+    if (csel_ci_eq(v, "break-word")) return CSS_WB_BREAK_WORD;  /* last-resort break only */
+    if (csel_ci_eq(v, "anywhere"))   return CSS_WB_BREAK_WORD;  /* last-resort break only (min-content diff not modeled) */
     return -1;
 }
 
@@ -4519,7 +4520,7 @@ void css_free(css_sheet *s) {
  * broken by document order. wi/ws/wo track the winning tier/specificity/order so far. */
 static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
                         int spec, int ord, const char (*urltab)[CSS_URL_MAX],
-                        const char (*contenttab)[CSS_URL_MAX]) {
+                        const char (*contenttab)[CSS_URL_MAX], int pseudo_kind) {
     int slot = d->prop;
     int imp = d->important;
     int win = imp > wi[slot] ||
@@ -4753,8 +4754,18 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
                 if (d->ival < 0) {
                     o->content_str[0] = '\0';
                 } else if (contenttab != NULL) {
-                    memcpy(o->content_str, contenttab[d->ival], CSS_URL_MAX);
-                    o->content_str[CSS_URL_MAX - 1] = '\0';
+                    if (pseudo_kind == PSEUDO_BEFORE) {
+                        memcpy(o->content_before_str, contenttab[d->ival], CSS_URL_MAX);
+                        o->content_before_str[CSS_URL_MAX - 1] = '\0';
+                        memcpy(o->content_str, contenttab[d->ival], CSS_URL_MAX);
+                        o->content_str[CSS_URL_MAX - 1] = '\0';
+                    } else if (pseudo_kind == PSEUDO_AFTER) {
+                        memcpy(o->content_after_str, contenttab[d->ival], CSS_URL_MAX);
+                        o->content_after_str[CSS_URL_MAX - 1] = '\0';
+                    } else {
+                        memcpy(o->content_str, contenttab[d->ival], CSS_URL_MAX);
+                        o->content_str[CSS_URL_MAX - 1] = '\0';
+                    }
                 }
                 break;
             default: break;
@@ -4868,12 +4879,13 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
     if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
             const css_sel *sel = &sheet->sels[si];
-            if (!csel_matches(sel, el, NULL, 1)) continue;
+            int pseudo_kind = -1;
+            if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
                 apply_decl(&out, wi, ws, wo, &sheet->decls[start + d], sel->spec, sel->order,
-                           sheet->bg_urls, sheet->content_urls);
+                           sheet->bg_urls, sheet->content_urls, pseudo_kind);
         }
     }
 
@@ -4915,7 +4927,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                                     inline_content_urls, &n_inline_content_urls, CSS_INLINE_BG_URLS);
         for (size_t d = 0; d < dn; ++d)
             apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX,
-                       inline_bg_urls, inline_content_urls);
+                       inline_bg_urls, inline_content_urls, -1);
         free(combined);
     }
 

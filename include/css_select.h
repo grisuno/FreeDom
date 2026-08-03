@@ -128,9 +128,12 @@ int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);
 /* True if *sel matches element *el against its ancestor chain. target_id
  * (optional) is the URL fragment for :target matching; NULL -> never matches.
  * allow_pseudo_el: 1 = CSS cascade mode (::before/::after match), 0 = DOM
- * query mode (pseudo-elements never match real elements). */
+ * query mode (pseudo-elements never match real elements).
+ * pseudo_kind (optional, may be NULL): when non-NULL and the subject compound
+ * matched via PSEUDO_BEFORE or PSEUDO_AFTER, *pseudo_kind is set to that
+ * pseudo-element kind; otherwise set to -1. */
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
-                 int allow_pseudo_el);
+                 int allow_pseudo_el, int *pseudo_kind);
 
 /* --- ASCII helpers shared by the selector and cascade sides (internal) --- */
 

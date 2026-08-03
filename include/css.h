@@ -204,15 +204,18 @@ typedef enum css_text_overflow {
     CSS_TO_UNSET = 0, CSS_TO_CLIP, CSS_TO_ELLIPSIS
 } css_text_overflow;
 
-/* word-break / overflow-wrap / word-wrap, UNIFIED (a deliberate simplification, see
- * spec/css.md): 0 unset; NORMAL is the explicit UA default (no mid-word break);
- * BREAK allows a mid-word split when a single word does not fit its line. Real CSS
- * gives `word-break: break-all` (breaks greedily) and `overflow-wrap: break-word`/
- * `anywhere` (breaks only as a last resort) different semantics; this engine only
- * models "may a long word split", so all three keywords that request breaking map to
- * the same BREAK value. */
+/* word-break / overflow-wrap / word-wrap. 0 unset; NORMAL is the explicit UA default
+ * (no mid-word break). The two breaking modes carry the distinct CSS semantics:
+ *   BREAK      -- `word-break: break-all`: break greedily between any two clusters to
+ *                 fill each line, even when the whole word would fit on the next line.
+ *   BREAK_WORD -- `overflow-wrap: break-word`/`anywhere` and the deprecated aliases
+ *                 `word-wrap: break-word`/`word-break: break-word`: break a word ONLY
+ *                 as a last resort, i.e. when it cannot fit on a line by itself. A word
+ *                 that would fit on the next line wraps whole (never mid-cluster).
+ * Collapsing these two into one value made every `word-wrap:break-word` page (a near
+ * universal defensive rule) chop its last word on every line -- see spec/css.md. */
 typedef enum css_word_break {
-    CSS_WB_UNSET = 0, CSS_WB_NORMAL, CSS_WB_BREAK
+    CSS_WB_UNSET = 0, CSS_WB_NORMAL, CSS_WB_BREAK, CSS_WB_BREAK_WORD
 } css_word_break;
 
 /* text-decoration-style (Hito 23b-6 extension). 0 unset; the line drawing style
@@ -461,7 +464,9 @@ typedef struct css_style {
     int         bg_grad_c[CSS_GRAD_STOPS_MAX];
     int         bg_grad_pos[CSS_GRAD_STOPS_MAX]; /* R5d: stop positions 0-1000 */
     int         bg_grad_radial;   /* gradient KIND: 0=linear, 1=radial, 2=conic */
-    char        content_str[CSS_URL_MAX];              /* R8: ::before/::after content */
+    char        content_str[CSS_URL_MAX];                   /* R8: ::before content (backward compat; synced from content_before_str or content_after_str) */
+    char        content_before_str[CSS_URL_MAX];            /* R8: ::before{content:"X"} value */
+    char        content_after_str[CSS_URL_MAX];             /* R8: ::after{content:"X"} value */
     css_align   text_align;  /* CSS_ALIGN_UNSET if absent */
     int         font_scale;  /* percent (e.g. 150), or 0 (unset) */
     /* Whether font_scale is a percent OF THE 16px ROOT (1: px/pt/rem/viewport units

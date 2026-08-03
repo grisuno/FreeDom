@@ -1208,6 +1208,30 @@ static void test_pseudo_unknown_drops_selector(void **state) {
     css_free(sh);
 }
 
+static void test_pseudo_content_before_after_separate(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div::before{content:\"BEFORE\"}"
+                                "div::after{content:\"AFTER\"}", 0, &sh), CSS_OK);
+    css_element el = el_node("div", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "BEFORE");
+    assert_string_equal(out.content_after_str, "AFTER");
+    css_free(sh);
+}
+
+static void test_pseudo_content_empty_without_pseudo(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div{content:\"DIRECT\"}", 0, &sh), CSS_OK);
+    css_element el = el_node("div", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_str, "DIRECT");
+    assert_int_equal(out.content_before_str[0], 0);
+    assert_int_equal(out.content_after_str[0], 0);
+    css_free(sh);
+}
+
 static void test_pseudo_specificity(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -2326,15 +2350,22 @@ static void test_text_overflow_and_word_break(void **state) {
     assert_int_equal(css_parse_inline("text-overflow:bogus", 0).text_overflow, CSS_TO_UNSET);
     assert_int_equal(css_parse_inline("color:red", 0).text_overflow, CSS_TO_UNSET);
 
+    /* word-break: break-all is the GREEDY mid-line break (fills each line). */
     assert_int_equal(css_parse_inline("word-break:break-all", 0).word_break, CSS_WB_BREAK);
     assert_int_equal(css_parse_inline("word-break:normal", 0).word_break, CSS_WB_NORMAL);
     assert_int_equal(css_parse_inline("word-break:keep-all", 0).word_break, CSS_WB_NORMAL);
     assert_int_equal(css_parse_inline("word-break:bogus", 0).word_break, CSS_WB_UNSET);
 
-    assert_int_equal(css_parse_inline("overflow-wrap:break-word", 0).word_break, CSS_WB_BREAK);
-    assert_int_equal(css_parse_inline("overflow-wrap:anywhere", 0).word_break, CSS_WB_BREAK);
+    /* overflow-wrap / word-wrap: break-word|anywhere are the LAST-RESORT break: they
+     * must resolve to a DISTINCT value from break-all so flow_text only splits a word
+     * that cannot fit on a line by itself. word-break:break-word is a deprecated alias
+     * for overflow-wrap:break-word (same last-resort semantics). */
+    assert_int_equal(css_parse_inline("overflow-wrap:break-word", 0).word_break, CSS_WB_BREAK_WORD);
+    assert_int_equal(css_parse_inline("overflow-wrap:anywhere", 0).word_break, CSS_WB_BREAK_WORD);
     assert_int_equal(css_parse_inline("overflow-wrap:normal", 0).word_break, CSS_WB_NORMAL);
-    assert_int_equal(css_parse_inline("word-wrap:break-word", 0).word_break, CSS_WB_BREAK);
+    assert_int_equal(css_parse_inline("word-wrap:break-word", 0).word_break, CSS_WB_BREAK_WORD);
+    assert_int_equal(css_parse_inline("word-break:break-word", 0).word_break, CSS_WB_BREAK_WORD);
+    assert_int_not_equal(CSS_WB_BREAK, CSS_WB_BREAK_WORD);
     assert_int_equal(css_parse_inline("color:red", 0).word_break, CSS_WB_UNSET);
 
     /* Inherits like white-space: nearest ancestor wins. */
@@ -3758,6 +3789,8 @@ int main(void) {
         cmocka_unit_test(test_pseudo_nth_last_child),
         cmocka_unit_test(test_pseudo_root_and_form_state),
         cmocka_unit_test(test_pseudo_unknown_drops_selector),
+        cmocka_unit_test(test_pseudo_content_before_after_separate),
+        cmocka_unit_test(test_pseudo_content_empty_without_pseudo),
         cmocka_unit_test(test_pseudo_specificity),
         cmocka_unit_test(test_pseudo_with_sibling_combinator),
         cmocka_unit_test(test_pseudo_nth_malformed_drops),

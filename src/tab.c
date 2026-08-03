@@ -498,6 +498,8 @@ static int write_view(int wfd, const pv_view *v) {
         if (write_field(wfd, bd->bg_image_url2) != 0) return -1;
         /* R8: ::before/::after generated content text. */
         if (write_field(wfd, bd->content_str) != 0) return -1;
+        if (write_field(wfd, bd->content_before_str) != 0) return -1;
+        if (write_field(wfd, bd->content_after_str) != 0) return -1;
         /* Phase R4: @keyframes animation name (forward compat, requires the
          * @keyframes engine to be useful). */
         if (write_field(wfd, bd->anim_name) != 0) return -1;
@@ -1815,6 +1817,18 @@ static int read_view(int fd, pv_view **out) {
         if (cstr_len >= sizeof bd.content_str) { free(cstr); pv_free(v); return -1; }
         memcpy(bd.content_str, cstr, cstr_len + 1);
         free(cstr);
+        char *cbefore = NULL;
+        size_t cbefore_len = 0;
+        if (read_field(fd, &cbefore, &cbefore_len) != 0) { pv_free(v); return -1; }
+        if (cbefore_len >= sizeof bd.content_before_str) { free(cbefore); pv_free(v); return -1; }
+        memcpy(bd.content_before_str, cbefore, cbefore_len + 1);
+        free(cbefore);
+        char *cafter = NULL;
+        size_t cafter_len = 0;
+        if (read_field(fd, &cafter, &cafter_len) != 0) { pv_free(v); return -1; }
+        if (cafter_len >= sizeof bd.content_after_str) { free(cafter); pv_free(v); return -1; }
+        memcpy(bd.content_after_str, cafter, cafter_len + 1);
+        free(cafter);
         /* Phase R4: @keyframes animation name. */
         char *aname = NULL;
         size_t aname_len = 0;

@@ -347,7 +347,8 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
     /* text-overflow/word-break: printed only when set (inherited run properties,
      * like white-space), so the common case stays byte-identical/compact. */
     if (b->text_overflow) dd_printf(c, " text-overflow=%s", dd_text_overflow_name(b->text_overflow));
-    if (b->word_break == CSS_WB_BREAK) dd_puts(c, " word-break=break");
+    if (b->word_break == CSS_WB_BREAK)      dd_puts(c, " word-break=break");
+    else if (b->word_break == CSS_WB_BREAK_WORD) dd_puts(c, " word-break=break-word");
 
     if (b->kind == RD_IMAGE) {
         if (b->object_fit)      dd_printf(c, " of=%s", dd_object_fit_name(b->object_fit));
@@ -496,7 +497,8 @@ size_t dd_format_css(const rd_doc *doc, char *out, size_t cap) {
             if (blk->text_indent != PV_LEN_UNSET) dd_printf(&c, " text-indent=%d", blk->text_indent);
             if (blk->white_space)    dd_printf(&c, " white-space=%d", blk->white_space);
             if (blk->text_overflow)  dd_printf(&c, " text-overflow=%s", dd_text_overflow_name(blk->text_overflow));
-            if (blk->word_break)     dd_puts(&c, " word-break=break");
+            if (blk->word_break == CSS_WB_BREAK)      dd_puts(&c, " word-break=break");
+            else if (blk->word_break == CSS_WB_BREAK_WORD) dd_puts(&c, " word-break=break-word");
             if (blk->text_decoration_color >= 0)
                 dd_printf(&c, " text-decoration-color=#%06x", (unsigned)blk->text_decoration_color);
             if (blk->text_decoration_style)

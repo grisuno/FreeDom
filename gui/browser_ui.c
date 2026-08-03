@@ -2975,7 +2975,9 @@ typedef struct rc_state {
     int    line_any_theme;  /* 1 when a fragment of the open line has no author line-height */
     double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
     int    nowrap;       /* current block's white-space suppresses line wrapping */
-    int    break_words;  /* current block's word-break/overflow-wrap allows a mid-word split */
+    int    break_words;  /* mid-word split mode: 0 none; 1 greedy (word-break:break-all,
+                          * fills each line); 2 last-resort (overflow-wrap:break-word,
+                          * split only a word that cannot fit on a line by itself). */
     int    text_overflow;/* current block's text-overflow (css_text_overflow) */
     /* 2026-07-10 text-extensions. white_space is the full css_white_space (flow_text
      * uses it to know when to expand tabs in <pre>); tab_size is the author override
@@ -3530,7 +3532,11 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         double ww = styled_advance(cr, &probe);
 
         if (line_has_frag && !s->nowrap && s->pen_x + adv + ww > content_w) {
-            if (s->break_words && content_w > 0.0) {
+            /* Greedy (word-break:break-all, mode 1) splits the word into the space
+             * left on THIS line. Last-resort (overflow-wrap:break-word, mode 2) does
+             * not: it wraps the whole word to the next line (the else branch) and only
+             * splits it there if it is wider than a whole line -- see the block below. */
+            if (s->break_words == 1 && content_w > 0.0) {
                 s->pen_x += adv;
                 double budget = content_w - s->pen_x;
                 size_t p = ws;
@@ -3830,7 +3836,8 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     else if (b->valign == CSS_VA_BOTTOM)    { x.valign_dy =  size * 0.50; /* align bottom of text to parent descent */ }
 
     s->nowrap = (b->white_space == CSS_WS_NOWRAP || b->white_space == CSS_WS_PRE);
-    s->break_words = (b->word_break == CSS_WB_BREAK);
+    s->break_words = (b->word_break == CSS_WB_BREAK)      ? 1 :   /* break-all: greedy */
+                     (b->word_break == CSS_WB_BREAK_WORD) ? 2 : 0;/* break-word: last resort */
     s->text_overflow = b->text_overflow;
     s->white_space = b->white_space;  /* 2026-07-10: page_view fills the pre UA default (CSS_WS_PRE) upstream */
     s->tab_size = b->tab_size;        /* 0 -> 8 at expand time */

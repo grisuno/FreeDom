@@ -265,13 +265,17 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | `overflow`, `overflow-x`, `overflow-y` | `overflow_x`/`overflow_y` (`css_overflow`): `visible`/`hidden`/`scroll`/`auto`; `clip` maps to `hidden` (no scroll). The `overflow` shorthand sets both axes to the same value (the two-token per-axis form is out of scope — use the longhands). | **Yes** (2026-07-09). Clipping is painted for in-flow box rows (the main `paint_structured` loop, `ov_reconcile` per row) and for positioned boxes (the two-pass painter applies the same ancestor clip). The clip rect is the box's content area after padding. `text-overflow:ellipsis` with `overflow:hidden+white-space:nowrap` continues to work (pre-existing). |
 | `cursor` | `cursor` (`css_cursor`): `auto`/`default`/`pointer`/`text`/`move`/`not-allowed`/`help`/`wait`/`crosshair`/`grab`/`zoom-in`/`none`; unknown dropped | **Partially.** v1 only distinguishes `pointer` (shows the existing hand cursor, on ANY element — not just links) from every other value (shows the default arrow); the rest resolve for completeness/`debug_dom` and a future milestone that loads more cursor theme shapes. Overriding a **link's** default hand cursor away (e.g. `a{cursor:default}`) is not yet honoured. |
 | `text-overflow` | `text_overflow` (`css_text_overflow`): `clip`/`ellipsis` | **Yes**, but only where `white-space:nowrap` is also set (the only signal this engine has that a line is meant to stay on one row, since `overflow:hidden` clipping is not painted yet): the line truncates at the character that fits and an ellipsis is appended. Truncating mid-word is at a UTF-8 cluster boundary, not a word boundary (matches real `text-overflow`). Text from a later inline run on the *same* visual line (after the one that triggered truncation) is a known v1 gap. |
-| `word-break`, `overflow-wrap`, `word-wrap` | `word_break` (`css_word_break`, **unified** — see note below): `normal`/`break-all`/`keep-all` (word-break) or `normal`/`break-word`/`anywhere` (overflow-wrap/word-wrap); a "may break" keyword from either property sets `CSS_WB_BREAK` | **Yes**, but only for the pathological case: a single word wider than the *entire* line (not just the remaining space on it — a normal wrap already handles that) is split at UTF-8 cluster boundaries into pieces that each fit, instead of overflowing the box edge unbroken. |
+| `word-break`, `overflow-wrap`, `word-wrap` | `word_break` (`css_word_break`): `normal`/`break-all`/`keep-all` (word-break) or `normal`/`break-word`/`anywhere` (overflow-wrap/word-wrap). `break-all` → `CSS_WB_BREAK` (greedy); `break-word`/`anywhere` and `word-break:break-word` → `CSS_WB_BREAK_WORD` (last resort) — see note below | **Yes**, with the two CSS semantics kept distinct. `break-word` (last resort): a word that does not fit the space left on the line wraps *whole* to the next line, and is split at UTF-8 cluster boundaries only when it is wider than the *entire* line. `break-all` (greedy): a word that does not fit the remaining space is split immediately to fill the current line. |
 
-**word-break/overflow-wrap unification (a deliberate simplification).** Real CSS gives
+**word-break vs overflow-wrap (two distinct behaviours).** Real CSS gives
 `word-break: break-all` (breaks greedily, even where unnecessary) and `overflow-wrap:
-break-word`/`anywhere` (breaks only as a last resort) different semantics. This engine
-only models "may a long word split at all", so every keyword from either property that
-requests breaking maps to the same `CSS_WB_BREAK` value; `word-break: keep-all` (CJK
+break-word`/`anywhere` (breaks only as a last resort) different semantics, and this engine
+now models both: `break-all` → `CSS_WB_BREAK`, `break-word`/`anywhere` → `CSS_WB_BREAK_WORD`
+(the deprecated `word-break: break-word` is an alias of the latter). Collapsing the two into
+one value used to chop the last word on **every** line of any element carrying the near-universal
+defensive rule `word-wrap:break-word` (e.g. DuckDuckGo result snippets: "cre|ating", "u|sed");
+fixed 2026-08-03. `overflow-wrap:anywhere` differs from `break-word` only in min-content sizing,
+which this flat builder does not model, so the two share a value. `word-break: keep-all` (CJK
 line-breaking) is not modeled and falls back to `normal`.
 
 `visibility`/`overflow_x`/`overflow_y`/`cursor` are **not inherited** (read from the
@@ -345,8 +349,8 @@ desktop the `@media` queries use, then become an absolute percent of 16px.
    paint does not actually reorder inline runs RTL, it just carries the
    value downstream),
    **`text-overflow`** (painted with `white-space:nowrap`), **`word-break`**/
-   **`overflow-wrap`**/**`word-wrap`** (unified, painted for the single-word-wider-
-   than-the-line case),
+   **`overflow-wrap`**/**`word-wrap`** (painted; `break-all` greedy vs
+   `break-word`/`anywhere` last-resort kept distinct — 2026-08-03),
    **`list-style-position`** (inside/outside; carried, **painted** 2026-07-10
    as a record — the v1 engine already prepends the marker, so inside/outside
    differ only when the marker layout differs, which a v1 follow-up will
@@ -512,9 +516,8 @@ of them, the field already has the value ready. Grouped by family:
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
   in `%`/viewport units, `text-decoration-thickness`,
   `vertical-align` length/`top`/`middle`/`bottom`, `white-space` whitespace
-  *preservation* (only the wrap distinction is consumed), the greedy-vs-last-resort
-  distinction between `word-break: break-all` and `overflow-wrap: break-word`
-  (unified to one behaviour), `text-overflow: ellipsis` on a line with more inline
+  *preservation* (only the wrap distinction is consumed),
+  `text-overflow: ellipsis` on a line with more inline
   content after the truncation point (v1 gap), `writing-mode`.
 - *Flex/grid, finer grain*: `align-content` (parsed/resolved, not yet painted —
   only `align-items`/`align-self` reach the painter), grid per-item placement

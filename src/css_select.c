@@ -775,10 +775,12 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
     }
 }
 
-/* True if one compound matches one element (no ancestor context). */
+/* True if one compound matches one element (no ancestor context).
+ * When pseudo_kind is non-NULL and the compound matches via PSEUDO_BEFORE or
+ * PSEUDO_AFTER, *pseudo_kind is set to that pseudo-element kind; otherwise -1. */
 static int compound_matches(const css_compound *c, const css_element *el,
                             const css_sel *sel, const char *target_id,
-                            int allow_pseudo_el) {
+                            int allow_pseudo_el, int *pseudo_kind) {
     if (el == NULL) return 0;
     if (c->has_tag) { if (el->tag == NULL || !csel_ci_eq(c->tag, el->tag)) return 0; }
     if (c->has_id)  { if (el->id == NULL || strcmp(c->id, el->id) != 0) return 0; }
@@ -793,38 +795,54 @@ static int compound_matches(const css_compound *c, const css_element *el,
     }
     for (int i = 0; i < c->nattrs; ++i)
         if (!attr_matches(&c->attrs[i], el)) return 0;
-    for (int i = 0; i < c->npseudo; ++i)
+    int pk = -1;
+    for (int i = 0; i < c->npseudo; ++i) {
         if (!pseudo_matches(&c->pseudos[i], el, sel, target_id, allow_pseudo_el)) return 0;
+        if (allow_pseudo_el) {
+            int k = c->pseudos[i].kind;
+            if (k == PSEUDO_BEFORE || k == PSEUDO_AFTER) pk = k;
+        }
+    }
+    if (pseudo_kind != NULL) *pseudo_kind = pk;
     return 1;
 }
 
 /* True if parts[0..k] match the ancestor/sibling chains ending at el (el matches
  * parts[k]). Right-to-left: child requires the immediate parent; descendant tries
  * each ancestor; adjacent requires the immediately preceding sibling; general
- * tries each preceding sibling (the recursion backtracks). Bounded by k
- * (<= CSS_MAX_COMPOUNDS) and by the chains the caller built (an element without
- * parent/prev links simply never matches through that combinator — fail closed). */
+ * tries each preceding sibling. Bounded by k (<= CSS_MAX_COMPOUNDS) and by the
+ * chains the caller built (an element without parent/prev links never matches
+ * through that combinator — fail closed). When pseudo_kind is non-NULL and the
+ * subject compound (rightmost, index k) matches via PSEUDO_BEFORE or
+ * PSEUDO_AFTER, *pseudo_kind is set to that kind. */
 static int complex_matches(const css_sel *sel, int k, const css_element *el,
-                           const char *target_id, int allow_pseudo_el) {
-    if (!compound_matches(&sel->parts[k], el, sel, target_id, allow_pseudo_el)) return 0;
+                           const char *target_id, int allow_pseudo_el,
+                           int *pseudo_kind) {
+    if (!compound_matches(&sel->parts[k], el, sel, target_id, allow_pseudo_el, pseudo_kind))
+        return 0;
     if (k == 0) return 1;
+    int dummy;
+    int *pk = (k == sel->nparts - 1) ? pseudo_kind : &dummy;
     switch (sel->comb[k]) {
         case COMB_CHILD:
-            return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent, target_id, allow_pseudo_el);
+            return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent, target_id, allow_pseudo_el, pk);
         case COMB_ADJACENT:
-            return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el);
+            return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el, pk);
         case COMB_GENERAL:
             for (const css_element *sib = el->prev; sib != NULL; sib = sib->prev)
-                if (complex_matches(sel, k - 1, sib, target_id, allow_pseudo_el)) return 1;
+                if (complex_matches(sel, k - 1, sib, target_id, allow_pseudo_el, pk)) return 1;
             return 0;
         default:
             for (const css_element *anc = el->parent; anc != NULL; anc = anc->parent)
-                if (complex_matches(sel, k - 1, anc, target_id, allow_pseudo_el)) return 1;
+                if (complex_matches(sel, k - 1, anc, target_id, allow_pseudo_el, pk)) return 1;
             return 0;
     }
 }
 
 int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
-                 int allow_pseudo_el) {
-    return complex_matches(sel, sel->nparts - 1, el, target_id, allow_pseudo_el);
+                 int allow_pseudo_el, int *pseudo_kind) {
+    int pk = -1;
+    int ok = complex_matches(sel, sel->nparts - 1, el, target_id, allow_pseudo_el, &pk);
+    if (pseudo_kind != NULL) *pseudo_kind = pk;
+    return ok;
 }

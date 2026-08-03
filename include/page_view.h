@@ -473,7 +473,9 @@ typedef struct pv_box_def {
     int bg_pos_x;
     int bg_pos_y;
     /* R8: ::before/::after generated content text. Empty string = none. */
-    char content_str[64];
+    char content_str[PV_BG_URL_MAX];
+    char content_before_str[PV_BG_URL_MAX];
+    char content_after_str[PV_BG_URL_MAX];
     /* Phase R1b: animation iteration count (-1 = infinite) and timing function. */
     int anim_iterations;
     int anim_timing;

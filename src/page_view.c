@@ -1224,7 +1224,8 @@ static int css_has_boxdeco(const css_style *cs) {
              * needs the box def so paint_positioned_one can apply the Cairo
              * clip. Without the box entry the painter never sees it. */
             cs->clip_top != CSS_LEN_UNSET || cs->clip_right != CSS_LEN_UNSET ||
-            cs->clip_bottom != CSS_LEN_UNSET || cs->clip_left != CSS_LEN_UNSET;
+            cs->clip_bottom != CSS_LEN_UNSET || cs->clip_left != CSS_LEN_UNSET ||
+            cs->content_str[0] != '\0';
 }
 
 /* Document-order registry of flex/grid container nodes, so the runs of one
@@ -1449,6 +1450,22 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
         d->content_str[clen] = '\0';
     } else {
         d->content_str[0] = '\0';
+    }
+    if (cs->content_before_str[0] != '\0') {
+        size_t clen = strlen(cs->content_before_str);
+        if (clen >= sizeof d->content_before_str) clen = sizeof d->content_before_str - 1;
+        memcpy(d->content_before_str, cs->content_before_str, clen);
+        d->content_before_str[clen] = '\0';
+    } else {
+        d->content_before_str[0] = '\0';
+    }
+    if (cs->content_after_str[0] != '\0') {
+        size_t clen = strlen(cs->content_after_str);
+        if (clen >= sizeof d->content_after_str) clen = sizeof d->content_after_str - 1;
+        memcpy(d->content_after_str, cs->content_after_str, clen);
+        d->content_after_str[clen] = '\0';
+    } else {
+        d->content_after_str[0] = '\0';
     }
 }
 
@@ -3162,6 +3179,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     pv_flow_reg flowreg = { { NULL }, { 0 }, 0 };  /* per-table flow-vs-grid decisions */
     pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
     int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
+    const lxb_dom_node_t *after_pending_el = NULL;
+    char *after_pending_text = NULL;
     pv_style_cache cache;  /* memoized cch_element_style() per element (see above) */
     (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
 
@@ -3205,6 +3224,26 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     }
 
     for (lxb_dom_node_t *n = base; n != NULL; n = node_next(n, base)) {
+        if (after_pending_el != NULL) {
+            int inside = 0;
+            for (const lxb_dom_node_t *p = n; p != NULL; p = p->parent) {
+                if (p == after_pending_el) { inside = 1; break; }
+            }
+            if (!inside) {
+                css_style acs = cached_element_style(
+                    lxb_dom_interface_element((lxb_dom_node_t *)after_pending_el),
+                    sheet, &cache);
+                pv_status st = pv_append(v, PV_TEXT, 0, 0, after_pending_text, NULL);
+                if (st != PV_OK) { free(after_pending_text); after_pending_text = NULL; rc = st; goto cleanup; }
+                pv_set_node_id(v, pv_node_map_id(&node_map, after_pending_el));
+                if (acs.color >= 0) pv_set_color(v, acs.color);
+                if (acs.background >= 0) pv_set_bgcolor(v, acs.background);
+                pv_set_emphasis(v, acs.bold > 0, acs.italic > 0);
+                free(after_pending_text);
+                after_pending_text = NULL;
+                after_pending_el = NULL;
+            }
+        }
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_tag_id_t t = node_tag(n);
             if (t == LXB_TAG_BR || t == LXB_TAG_HR) { pending_break = 1; continue; }
@@ -3930,13 +3969,20 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     int ebrk = pending_break || (eblock != prev_block);
                     pending_break = 0;
                     prev_block = eblock;
-                    pv_status st = pv_append(v, PV_TEXT, 0, ebrk, "", NULL);
+                    const char *leaf_text = "";
+                    if (ecs.content_str[0] != '\0') leaf_text = ecs.content_str;
+                    pv_status st = pv_append(v, PV_TEXT, 0, ebrk, leaf_text, NULL);
                     if (st != PV_OK) { rc = st; goto cleanup; }
                     last_was_gap = 0;
                     pv_set_emphasis(v, ebold, eitalic);
                     pv_set_indent(v, edepth);
                     pv_set_color(v, efg);
                     pv_set_bgcolor(v, ebg);
+                    if (leaf_text[0] != '\0') {
+                        if (ecs.color >= 0) pv_set_color(v, ecs.color);
+                        if (ecs.background >= 0) pv_set_bgcolor(v, ecs.background);
+                        pv_set_emphasis(v, ecs.bold > 0, ecs.italic > 0);
+                    }
                     pv_set_text_style(v, ealign, efs, efs_abs, elh, edeco);
                     pv_set_container(v, econt.id, econt.display, econt.gap, econt.justify,
                                      econt.cols, econt.wrap, econt.row_gap, econt.align_items);
@@ -3954,6 +4000,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_text_ext(v, &eext);
                     pv_set_block_id(v, ebdeco);
                     pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                    if (ecs.content_after_str[0] != '\0') {
+                        pv_status st2 = pv_append(v, PV_TEXT, 0, 0, ecs.content_after_str, NULL);
+                        if (st2 != PV_OK) { rc = st2; goto cleanup; }
+                        pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                        if (ecs.color >= 0) pv_set_color(v, ecs.color);
+                        if (ecs.background >= 0) pv_set_bgcolor(v, ecs.background);
+                        pv_set_emphasis(v, ecs.bold > 0, ecs.italic > 0);
+                    }
                 }
             }
             continue;
@@ -4042,7 +4096,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pending_break = 0;
                 }
             }
-        }
+                if (after_pending_el == NULL && pcs.content_after_str[0] != '\0') {
+                    after_pending_el = n->parent;
+                    after_pending_text = dup_n(pcs.content_after_str,
+                                               strlen(pcs.content_after_str));
+                    if (after_pending_text == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
+                }
+            }
 
         int brk = pending_break || (block != prev_block);
         pending_break = 0;
@@ -4230,6 +4290,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (st != PV_OK) { rc = st; goto cleanup; }
     }
 
+    if (after_pending_el != NULL && after_pending_text != NULL) {
+        pv_status st = pv_append(v, PV_TEXT, 0, 0, after_pending_text, NULL);
+        if (st != PV_OK) { rc = st; goto cleanup; }
+        pv_set_node_id(v, pv_node_map_id(&node_map, after_pending_el));
+        free(after_pending_text);
+        after_pending_text = NULL;
+        after_pending_el = NULL;
+    }
+
     *out = v;
     forms_free(&forms);
     css_free(sheet);
@@ -4238,6 +4307,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     return PV_OK;
 
 cleanup:
+    free(after_pending_text);
     forms_free(&forms);
     css_free(sheet);
     pv_node_map_free(&node_map);
