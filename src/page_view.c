@@ -1752,6 +1752,16 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
      * `position:absolute` comment badge inside a floated story card inherited the
      * card's float and flowed as an extra line (slashdot's teal header ballooning). */
     int oof_seen = 0;
+    /* Set once the walk reaches the run's INNERMOST flex/grid container. `width` is not
+     * an inherited property: a container's own width (or a container-float's column
+     * width) sizes the container, never its items. So the run's box width may be seeded
+     * only from its OWN element or inline wrappers BELOW the container; at or above the
+     * container the width belongs to the container's layout, not to this item. Without
+     * this an `.ua{width:50%}` bar of inline-block <li> made every login/sign-up item
+     * 50% of the PAGE (three page-half teal blocks) instead of small shrink-wrapped
+     * links inside the bar. A plain (non-flex) run never crosses a container, so its
+     * float-column/max-width seeding is unchanged. */
+    int crossed_container = 0;
     int prev_box_id = -1;  /* the box-carrying block seen one step more inner, for parent linking */
     int tag_bold = 0, tag_italic = 0;
     int css_bold = 0, css_italic = 0, got_css_bold = 0, got_css_italic = 0;
@@ -1799,6 +1809,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             if (is_italic_tag(t)) tag_italic = 1;
             if (!got_css_bold && cs.bold != -1) { css_bold = cs.bold; got_css_bold = 1; }
             if (!got_css_italic && cs.italic != -1) { css_italic = cs.italic; got_css_italic = 1; }
+            /* Is THIS ancestor a flex/grid container of the run? (Same test used to
+             * register the container below, computed once and reused there.) The moment
+             * the walk reaches it, the item's own width is settled -- see crossed_container. */
+            int is_real_cont = (cs.display == CSS_DISP_FLEX || cs.display == CSS_DISP_GRID);
+            int is_anon_cont = (reg != NULL && !is_real_cont) &&
+                               is_inline_block_row(p, sheet, style_cache);
+            int p_is_container = (reg != NULL) && (is_real_cont || is_anon_cont);
+            if (p_is_container) crossed_container = 1;
             if (!got_li && t == LXB_TAG_LI) { *li = p; got_li = 1; }
             if (t == LXB_TAG_UL || t == LXB_TAG_OL) {
                 ++(*list_depth);
@@ -1847,14 +1865,16 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                  * for width-less and split evenly across the row (slashdot grid_24
                  * stories collapsing into thin columns). A width-less float seeds
                  * nothing and keeps its even-split. */
-                if (box != NULL && box->w == 0 && box->w_pct == 0) {
+                if (box != NULL && !crossed_container && box->w == 0 && box->w_pct == 0) {
                     if (cs.width != CSS_LEN_UNSET && cs.width > 0) box->w = cs.width;
                     if (cs.width_pct > 0) box->w_pct = cs.width_pct;
                 }
             }
             /* Horizontal box from the nearest block ancestor that declares one, so a
-             * wrapper's max-width/centering/padding reaches all its descendants. */
-            if (!got_hbox && is_block_like_style(t, &cs) && css_has_hbox(&cs)) {
+             * wrapper's max-width/centering/padding reaches all its descendants. Skipped
+             * once the walk crossed the run's flex/grid container: that container's width
+             * sizes the container, not this item (crossed_container). */
+            if (!got_hbox && !crossed_container && is_block_like_style(t, &cs) && css_has_hbox(&cs)) {
                 css_hbox_resolve(&cs, box);
                 got_hbox = 1;
             }
@@ -1960,8 +1980,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * two are mutually exclusive for one element, and the author's own
              * declaration is never overwritten by the synthesised row. */
             {
-                int is_real = (cs.display == CSS_DISP_FLEX || cs.display == CSS_DISP_GRID);
-                int is_anon = !is_real && is_inline_block_row(p, sheet, style_cache);
+                int is_real = is_real_cont;
+                int is_anon = is_anon_cont;
                 if (reg != NULL && (is_real || is_anon)) {
                     int cid_here = container_id(reg, p);
                     if (cid_here >= 0) {

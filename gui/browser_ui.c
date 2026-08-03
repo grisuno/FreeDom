@@ -7625,11 +7625,34 @@ static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap) 
     return n;
 }
 
-/* Looks up an rc_box by block_id. */
-static const rc_box *ov_find_box(const rc_layout *L, int bid) {
-    for (size_t i = 0; i < L->nbox; ++i)
-        if (L->boxes[i].block_id == bid) return &L->boxes[i];
-    return NULL;
+/* Fills *out (x/top/w/h only) with the UNION of every rc_box fragment carrying
+ * block_id bid, returning 1 if any exists. A box is split into several rc_boxes
+ * whenever its content spans more than one layout band -- a float column, or a
+ * page-level `body{overflow:hidden}`/`overflow-x:hidden` wrapper whose flow
+ * crosses the header into the results. Clipping overflow:hidden to the FIRST
+ * fragment alone clamped the clip to that first band and hid everything below it
+ * (DuckDuckGo results, any site that puts overflow:hidden on a top-level
+ * wrapper). The clip must be the box's FULL border box. */
+static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out) {
+    int found = 0;
+    double x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+    for (size_t i = 0; i < L->nbox; ++i) {
+        const rc_box *b = &L->boxes[i];
+        if (b->block_id != bid) continue;
+        double bx0 = b->x, by0 = b->top, bx1 = b->x + b->w, by1 = b->top + b->h;
+        if (!found) { x0 = bx0; y0 = by0; x1 = bx1; y1 = by1; found = 1; }
+        else {
+            if (bx0 < x0) x0 = bx0;
+            if (by0 < y0) y0 = by0;
+            if (bx1 > x1) x1 = bx1;
+            if (by1 > y1) y1 = by1;
+        }
+    }
+    if (!found) return 0;
+    memset(out, 0, sizeof *out);
+    out->x = x0; out->top = y0; out->w = x1 - x0; out->h = y1 - y0;
+    out->block_id = bid;
+    return 1;
 }
 
 /* Computes the padding-box content rect (in page coords: y, x, w, h) for a box.
@@ -7690,12 +7713,12 @@ static void ov_reconcile(cairo_t *cr, int *clip_stack, int *clip_depth,
     /* Push new clips (outermost first). Each entry in new_chain beyond the
      * common prefix needs a cairo_save + rectangle clip. */
     for (int k = common; k < new_depth; ++k) {
-        const rc_box *bx = ov_find_box(L, new_chain[k]);
-        if (bx == NULL) continue;  /* no rc_box (positioned?); clip not possible */
+        rc_box bx;
+        if (!ov_box_bounds(L, new_chain[k], &bx)) continue;  /* no rc_box (positioned?) */
         const pv_box_def *d = rd_box_at(doc, (size_t)new_chain[k]);
         if (d == NULL) continue;
         double cy, cx, cw, ch;
-        ov_content_rect(bx, d, origin, left, &cy, &cx, &cw, &ch);
+        ov_content_rect(&bx, d, origin, left, &cy, &cx, &cw, &ch);
         cairo_save(cr);
         cairo_rectangle(cr, cx, cy, cw, ch);
         cairo_clip(cr);
