@@ -1,0 +1,16 @@
+CSS combinator demo
+=== Freedom layout ===
+content_w=952 total_h=490.0 nbox=0 nrow=12 npositioned=0
+  row[0] top=0.0 h=54.0 x_off=0.0
+  row[1] top=75.4 h=40.8 x_off=0.0
+  row[2] top=136.2 h=27.6 x_off=0.0 w=43.0
+  row[3] top=136.2 h=27.6 x_off=75.0 w=34.2
+  row[4] top=136.2 h=27.6 x_off=141.2 w=59.5
+  row[5] top=179.8 h=27.6 x_off=0.0
+  row[6] top=223.4 h=27.6 x_off=0.0
+  row[7] top=267.0 h=27.6 x_off=0.0
+  row[8] top=310.6 h=27.6 x_off=0.0
+  row[9] top=358.1 h=40.8 x_off=0.0
+  row[10] top=418.8 h=27.6 x_off=0.0
+  row[11] top=462.4 h=27.6 x_off=0.0
+  cont[0] disp=4 parent=-1 parent_item=-1 gap=32 justify=0 cols=0 box=-1

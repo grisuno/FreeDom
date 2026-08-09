@@ -1,0 +1,44 @@
+Freedom — rich render demo
+=== Freedom layout ===
+content_w=952 total_h=1697.2 nbox=0 nrow=40 npositioned=0
+  row[0] top=0.0 h=27.6 x_off=0.0
+  row[1] top=49.0 h=54.0 x_off=0.0
+  row[2] top=124.5 h=27.6 x_off=0.0
+  row[3] top=152.1 h=27.6 x_off=0.0
+  row[4] top=199.6 h=40.8 x_off=0.0
+  row[5] top=260.3 h=27.6 x_off=0.0
+  row[6] top=307.8 h=40.8 x_off=0.0
+  row[7] top=368.6 h=27.6 x_off=0.0
+  row[8] top=412.2 h=372.0 x_off=0.0 w=952.0 image
+  row[9] top=800.2 h=27.6 x_off=0.0
+  row[10] top=843.8 h=13.0 x_off=0.0 w=952.0 image
+  row[11] top=856.8 h=34.0 x_off=0.0 w=952.0
+  row[12] top=910.7 h=40.8 x_off=0.0
+  row[13] top=971.4 h=27.6 x_off=0.0
+  row[14] top=999.0 h=27.6 x_off=0.0
+  row[15] top=1046.5 h=40.8 x_off=0.0
+  row[16] top=1107.2 h=27.6 x_off=24.0
+  row[17] top=1134.8 h=27.6 x_off=24.0
+  row[18] top=1162.4 h=27.6 x_off=24.0
+  row[19] top=1190.0 h=27.6 x_off=48.0
+  row[20] top=1217.6 h=27.6 x_off=48.0
+  row[21] top=1265.2 h=40.8 x_off=0.0
+  row[22] top=1325.9 h=27.6 x_off=24.0
+  row[23] top=1353.5 h=27.6 x_off=24.0
+  row[24] top=1381.1 h=27.6 x_off=24.0
+  row[25] top=1428.6 h=40.8 x_off=0.0
+  row[26] top=1489.3 h=27.6 x_off=0.0 w=317.3
+  row[27] top=1489.3 h=27.6 x_off=317.3 w=317.3
+  row[28] top=1489.3 h=27.6 x_off=634.7 w=317.3
+  row[29] top=1516.9 h=27.6 x_off=0.0 w=317.3
+  row[30] top=1516.9 h=27.6 x_off=317.3 w=317.3
+  row[31] top=1516.9 h=27.6 x_off=634.7 w=317.3
+  row[32] top=1544.5 h=27.6 x_off=0.0 w=317.3
+  row[33] top=1544.5 h=27.6 x_off=317.3 w=317.3
+  row[34] top=1544.5 h=27.6 x_off=634.7 w=317.3
+  row[35] top=1572.1 h=27.6 x_off=0.0 w=317.3
+  row[36] top=1572.1 h=27.6 x_off=317.3 w=317.3
+  row[37] top=1572.1 h=27.6 x_off=634.7 w=317.3
+  row[38] top=1618.4 h=32.4 x_off=0.0
+  row[39] top=1669.6 h=27.6 x_off=0.0
+  cont[0] disp=5 parent=-1 parent_item=-1 gap=0 justify=0 cols=3 box=-1

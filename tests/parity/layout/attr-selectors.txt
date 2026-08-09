@@ -1,0 +1,9 @@
+Attribute selectors and !important
+=== Freedom layout ===
+content_w=952 total_h=275.4 nbox=0 nrow=6 npositioned=0
+  row[0] top=0.0 h=31.2 x_off=0.0
+  row[1] top=52.6 h=31.2 x_off=0.0
+  row[2] top=99.8 h=31.2 x_off=0.0
+  row[3] top=147.0 h=31.2 x_off=0.0
+  row[4] top=194.2 h=34.0 x_off=0.0 w=952.0
+  row[5] top=244.2 h=31.2 x_off=0.0

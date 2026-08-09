@@ -1,0 +1,24 @@
+=== Freedom layout ===
+content_w=952 total_h=866.9 nbox=7 nrow=15 npositioned=0
+  row[0] top=0.0 h=31.2 x_off=0.0
+  row[1] top=52.6 h=31.2 x_off=0.0
+  row[2] top=123.8 h=31.2 x_off=4.0 w=944.0
+  row[3] top=191.0 h=31.2 x_off=0.0 w=952.0
+  row[4] top=258.2 h=31.2 x_off=4.0 w=944.0
+  row[5] top=313.3 h=31.2 x_off=0.0 w=944.0
+  row[6] top=389.4 h=31.2 x_off=9.0 w=218.0
+  row[7] top=420.6 h=31.2 x_off=9.0 w=218.0
+  row[8] top=451.8 h=31.2 x_off=9.0 w=218.0
+  row[9] top=483.0 h=31.2 x_off=9.0 w=218.0
+  row[10] top=564.2 h=31.2 x_off=9.0 w=218.0
+  row[11] top=624.3 h=31.2 x_off=0.0 w=218.0
+  row[12] top=700.4 h=31.2 x_off=9.0 w=218.0
+  row[13] top=760.6 h=31.2 x_off=0.0 w=218.0
+  row[14] top=831.7 h=31.2 x_off=4.0 w=944.0
+  box[0] bid=0 x=0.0 top=103.8 w=952.0 h=55.2
+  box[1] bid=1 x=0.0 top=175.0 w=952.0 h=47.2
+  box[2] bid=2 x=0.0 top=238.2 w=952.0 h=55.2
+  box[3] bid=3 x=0.0 top=364.4 w=236.0 h=158.8
+  box[4] bid=4 x=0.0 top=539.2 w=236.0 h=65.2
+  box[5] bid=5 x=0.0 top=675.4 w=236.0 h=65.2
+  box[6] bid=6 x=0.0 top=811.7 w=952.0 h=55.2

@@ -115,10 +115,12 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_tls_impersonate \
               $(BUILD_DIR)/test_hls $(BUILD_DIR)/test_data_url \
               $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock \
-              $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render
+              $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render \
+              $(BUILD_DIR)/test_perf_trace
 
 .PHONY: all install test itest asan fuzz fuzz-svg fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
-        deps run deb docker view clean
+        deps run deb docker view clean \
+        parity parity-update layout-diff layout-update
 
 all: $(BUILD_DIR)/freedom
 
@@ -286,6 +288,10 @@ $(BUILD_DIR)/test_interp: $(TEST_DIR)/test_interp.c $(BUILD_DIR)/interp.o | $(BU
 
 # Pure animation frame scheduler (Phase R1a).
 $(BUILD_DIR)/test_frame_clock: $(TEST_DIR)/test_frame_clock.c $(BUILD_DIR)/frame_clock.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Pure per-stage render timing accumulator (Phase R0).
+$(BUILD_DIR)/test_perf_trace: $(TEST_DIR)/test_perf_trace.c $(BUILD_DIR)/perf_trace.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Trusted-side lookahead scanner + parallel subresource pool (Hito 29). The
@@ -766,6 +772,115 @@ $(BUILD_DIR)/freedom-view: $(GUI_DIR)/freedom_view.c $(GUI_DIR)/ui_render.c \
 	  $(SRC_DIR)/html_parse.c $(BUILD_DIR)/xdg-shell-protocol.c \
 	  $(BUILD_DIR)/xdg-decoration-protocol.c \
 	  -o $@ $(LDHARDEN) $(WL_LIBS) $(HP_LIBS)
+
+# ---------------------------------------------------------------------------
+# Render parity harness (spec/parity.md)
+#
+# `make parity`      measures structural divergence from Firefox over a corpus of
+#                    real, self-contained pages. Lower is better; 0 = identical.
+# `make parity-update` freezes the current numbers as the baseline.
+# `make layout-diff` proves a change is byte-identical by default, by diffing
+#                    --dump-layout over every examples/ page against a frozen
+#                    baseline. Zero diff is the gate every layout change must pass.
+# `make layout-update` re-freezes that baseline (only with a justified diff).
+#
+# The corpus is checked in with every stylesheet inlined, so measuring NEVER
+# touches the network: the numbers are reproducible and nothing phones home.
+# Parity is measured with --author-css --images because that is what the doctrine
+# turns on for a trusted host; the browser's DEFAULTS stay Privacy by Default.
+#
+# Two Firefox headless traps, both of which fail SILENTLY with exit status 0 and
+# no output file, so neither is detectable without checking for the PNG itself:
+#   - --screenshot must be given an ABSOLUTE path (hence $(CURDIR)/...).
+#   - a profile directory shared with a still-running instance makes the new
+#     process attach to the old one and skip the shot, so each page gets a fresh
+#     -profile plus --no-remote.
+# ---------------------------------------------------------------------------
+PARITY_DIR   := tests/parity
+PARITY_PAGES := $(sort $(wildcard $(PARITY_DIR)/pages/*.html))
+PARITY_OUT   := $(BUILD_DIR)/parity
+LAYOUT_PAGES := $(sort $(wildcard examples/*.html))
+LAYOUT_OUT   := $(BUILD_DIR)/layout
+# Both sides render the full page at the same width, and each reports its own
+# natural height -- that height difference is the single highest-signal number the
+# harness produces, so it must NOT be constrained. Passing --window-size a WIDTH
+# ONLY is what makes Firefox emit a full-page shot; adding a height instead clamps
+# it to that viewport and makes the ratio 1.0 by construction, measuring nothing.
+# 1000px matches Freedom's --download-png canvas.
+PARITY_WIDTH := 1000
+
+$(BUILD_DIR)/pngdiff: tools/pngdiff.c | $(BUILD_DIR)
+	$(CC) $(STD) -Wall -Wextra -Werror $(OPT) -o $@ $< $(PNG_CFLAGS) $(PNG_LIBS) -lm
+
+parity: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
+	@command -v firefox >/dev/null 2>&1 || { \
+	  echo "parity: firefox not found -- the reference renderer is required"; exit 1; }
+	@mkdir -p $(PARITY_OUT)/ffprof
+	@printf '%-18s %7s %7s %8s %8s %8s %8s\n' PAGE H_FD H_FF RATIO COL_MAE ROW_MAE SCORE
+	@printf -- '---------------------------------------------------------------------\n'
+	@: > $(PARITY_OUT)/current.tsv
+	@for f in $(PARITY_PAGES); do \
+	  name=$$(basename $$f .html); \
+	  h=$$(./$(BUILD_DIR)/freedom --author-css --images \
+	        --download-png=$(PARITY_OUT)/$$name.fd.png "$$f" 2>/dev/null \
+	      | sed -n 's/^Saved PNG (\([0-9]*\) px).*/\1/p'); \
+	  if [ -z "$$h" ]; then echo "$$name: freedom produced no PNG"; continue; fi; \
+	  rm -f $(PARITY_OUT)/$$name.ff.png; \
+	  rm -rf $(PARITY_OUT)/ffprof; mkdir -p $(PARITY_OUT)/ffprof; \
+	  firefox --headless --no-remote -profile "$(CURDIR)/$(PARITY_OUT)/ffprof" \
+	          --screenshot "$(CURDIR)/$(PARITY_OUT)/$$name.ff.png" \
+	          --window-size=$(PARITY_WIDTH) \
+	          "file://$$(readlink -f $$f)" >/dev/null 2>&1; \
+	  if [ ! -f $(PARITY_OUT)/$$name.ff.png ]; then \
+	    echo "$$name: firefox produced no screenshot"; continue; fi; \
+	  row=$$(./$(BUILD_DIR)/pngdiff $(PARITY_OUT)/$$name.fd.png \
+	                                $(PARITY_OUT)/$$name.ff.png) || continue; \
+	  printf '%-18s %7s %7s %8s %8s %8s %8s\n' $$name $$row; \
+	  printf '%s\t%s\n' "$$name" "$$(echo "$$row" | cut -f6)" >> $(PARITY_OUT)/current.tsv; \
+	done
+	@printf -- '---------------------------------------------------------------------\n'
+	@awk -F'\t' '{s+=$$2} END {printf "%-18s %49.2f\n", "TOTAL", s}' \
+	     $(PARITY_OUT)/current.tsv
+	@if [ -f $(PARITY_DIR)/baseline.tsv ]; then \
+	  echo ""; echo "vs baseline (negative = improvement):"; \
+	  awk -F'\t' 'NR==FNR {b[$$1]=$$2; next} \
+	    { d=$$2-(($$1 in b)?b[$$1]:$$2); t+=d; \
+	      printf "  %-18s %+8.2f%s\n", $$1, d, ($$1 in b)?"":"  (new)" } \
+	    END {printf "  %-18s %+8.2f\n", "TOTAL", t}' \
+	    $(PARITY_DIR)/baseline.tsv $(PARITY_OUT)/current.tsv; \
+	else echo ""; echo "(no baseline yet -- run 'make parity-update' to freeze one)"; fi
+
+parity-update: parity
+	@cp $(PARITY_OUT)/current.tsv $(PARITY_DIR)/baseline.tsv
+	@echo "Froze parity baseline in $(PARITY_DIR)/baseline.tsv"
+
+layout-diff: $(BUILD_DIR)/freedom
+	@mkdir -p $(LAYOUT_OUT)
+	@fail=0; miss=0; \
+	for f in $(LAYOUT_PAGES); do \
+	  name=$$(basename $$f .html); \
+	  ./$(BUILD_DIR)/freedom --dump-layout --author-css "$$f" \
+	      > $(LAYOUT_OUT)/$$name.txt 2>/dev/null; \
+	  if [ -f $(PARITY_DIR)/layout/$$name.txt ]; then \
+	    diff -u $(PARITY_DIR)/layout/$$name.txt $(LAYOUT_OUT)/$$name.txt \
+	      || fail=1; \
+	  else miss=$$((miss+1)); fi; \
+	done; \
+	if [ $$miss -gt 0 ]; then \
+	  echo "layout-diff: $$miss page(s) have no baseline -- run 'make layout-update'"; fi; \
+	if [ $$fail -ne 0 ]; then \
+	  echo "layout-diff: FAIL -- default layout changed (justify it, or fix it)"; exit 1; \
+	fi; \
+	echo "layout-diff: OK -- default layout byte-identical across $(words $(LAYOUT_PAGES)) pages"
+
+layout-update: $(BUILD_DIR)/freedom
+	@mkdir -p $(PARITY_DIR)/layout
+	@for f in $(LAYOUT_PAGES); do \
+	  name=$$(basename $$f .html); \
+	  ./$(BUILD_DIR)/freedom --dump-layout --author-css "$$f" \
+	      > $(PARITY_DIR)/layout/$$name.txt 2>/dev/null; \
+	done
+	@echo "Froze layout baseline for $(words $(LAYOUT_PAGES)) pages in $(PARITY_DIR)/layout/"
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

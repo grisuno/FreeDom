@@ -1,0 +1,28 @@
+Flex per-item demo (Stage 3)
+=== Freedom layout ===
+content_w=952 total_h=670.7 nbox=0 nrow=20 npositioned=0
+  row[0] top=0.0 h=54.0 x_off=0.0
+  row[1] top=75.4 h=40.8 x_off=0.0
+  row[2] top=136.2 h=27.6 x_off=0.0 w=200.0
+  row[3] top=163.8 h=27.6 x_off=0.0 w=200.0
+  row[4] top=136.2 h=27.6 x_off=212.0 w=740.0
+  row[5] top=163.8 h=27.6 x_off=212.0 w=740.0
+  row[6] top=211.3 h=40.8 x_off=0.0
+  row[7] top=272.0 h=27.6 x_off=263.2 w=244.6
+  row[8] top=272.0 h=27.6 x_off=0.0 w=255.2
+  row[9] top=319.5 h=40.8 x_off=0.0
+  row[10] top=339.4 h=27.6 x_off=0.0
+  row[11] top=383.0 h=27.6 x_off=0.0
+  row[12] top=426.6 h=27.6 x_off=0.0
+  row[13] top=474.2 h=40.8 x_off=0.0
+  row[14] top=534.9 h=27.6 x_off=0.0 w=626.7
+  row[15] top=534.9 h=27.6 x_off=638.7 w=313.3
+  row[16] top=582.4 h=40.8 x_off=0.0
+  row[17] top=643.1 h=27.6 x_off=0.0 w=56.2
+  row[18] top=643.1 h=27.6 x_off=68.2 w=56.4
+  row[19] top=643.1 h=27.6 x_off=136.7 w=56.1
+  cont[0] disp=4 parent=-1 parent_item=-1 gap=12 justify=0 cols=0 box=-1
+  cont[1] disp=4 parent=-1 parent_item=-1 gap=8 justify=0 cols=0 box=-1
+  cont[2] disp=4 parent=-1 parent_item=-1 gap=16 justify=0 cols=0 box=-1
+  cont[3] disp=4 parent=-1 parent_item=-1 gap=12 justify=0 cols=0 box=-1
+  cont[4] disp=4 parent=-1 parent_item=-1 gap=12 justify=0 cols=0 box=-1

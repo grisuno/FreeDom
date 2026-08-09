@@ -1,0 +1,31 @@
+Freedom — author stylesheet flex/grid demo
+=== Freedom layout ===
+content_w=952 total_h=637.0 nbox=0 nrow=25 npositioned=0
+  row[0] top=0.0 h=54.0 x_off=0.0
+  row[1] top=75.4 h=27.6 x_off=0.0
+  row[2] top=103.0 h=27.6 x_off=0.0
+  row[3] top=130.6 h=27.6 x_off=0.0
+  row[4] top=178.2 h=40.8 x_off=0.0
+  row[5] top=238.9 h=27.6 x_off=0.0 w=425.7
+  row[6] top=266.5 h=27.6 x_off=0.0 w=425.7
+  row[7] top=238.9 h=27.6 x_off=449.7 w=244.3
+  row[8] top=266.5 h=27.6 x_off=449.7 w=244.3
+  row[9] top=238.9 h=27.6 x_off=718.0 w=234.0
+  row[10] top=266.5 h=27.6 x_off=718.0 w=234.0
+  row[11] top=314.0 h=40.8 x_off=0.0
+  row[12] top=374.7 h=27.6 x_off=0.0 w=306.7
+  row[13] top=402.3 h=27.6 x_off=0.0 w=306.7
+  row[14] top=374.7 h=27.6 x_off=322.7 w=306.7
+  row[15] top=402.3 h=27.6 x_off=322.7 w=306.7
+  row[16] top=374.7 h=27.6 x_off=645.3 w=306.7
+  row[17] top=402.3 h=27.6 x_off=645.3 w=306.7
+  row[18] top=445.9 h=27.6 x_off=0.0 w=306.7
+  row[19] top=473.5 h=27.6 x_off=0.0 w=306.7
+  row[20] top=521.0 h=40.8 x_off=0.0
+  row[21] top=581.8 h=27.6 x_off=0.0 w=742.7
+  row[22] top=609.4 h=27.6 x_off=0.0 w=742.7
+  row[23] top=581.8 h=27.6 x_off=746.7 w=205.3
+  row[24] top=609.4 h=27.6 x_off=746.7 w=205.3
+  cont[0] disp=4 parent=-1 parent_item=-1 gap=24 justify=3 cols=0 box=-1
+  cont[1] disp=5 parent=-1 parent_item=-1 gap=16 justify=0 cols=3 box=-1
+  cont[2] disp=4 parent=-1 parent_item=-1 gap=4 justify=3 cols=0 box=-1

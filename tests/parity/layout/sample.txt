@@ -1,0 +1,35 @@
+Freedom — demo
+=== Freedom layout ===
+content_w=952 total_h=1385.4 nbox=0 nrow=32 npositioned=0
+  row[0] top=0.0 h=54.0 x_off=0.0
+  row[1] top=75.4 h=27.6 x_off=0.0
+  row[2] top=103.0 h=27.6 x_off=0.0
+  row[3] top=146.6 h=34.0 x_off=0.0 w=952.0
+  row[4] top=196.6 h=27.6 x_off=0.0
+  row[5] top=224.2 h=27.6 x_off=0.0
+  row[6] top=267.8 h=27.6 x_off=0.0
+  row[7] top=311.4 h=27.6 x_off=0.0
+  row[8] top=355.0 h=27.6 x_off=0.0
+  row[9] top=398.6 h=27.6 x_off=0.0
+  row[10] top=442.2 h=27.6 x_off=0.0
+  row[11] top=485.8 h=27.6 x_off=0.0
+  row[12] top=529.4 h=27.6 x_off=0.0
+  row[13] top=573.0 h=27.6 x_off=0.0
+  row[14] top=616.6 h=27.6 x_off=0.0
+  row[15] top=660.2 h=27.6 x_off=0.0
+  row[16] top=703.8 h=27.6 x_off=0.0
+  row[17] top=747.4 h=27.6 x_off=0.0
+  row[18] top=791.0 h=27.6 x_off=0.0
+  row[19] top=834.6 h=27.6 x_off=0.0
+  row[20] top=878.2 h=27.6 x_off=0.0
+  row[21] top=921.8 h=27.6 x_off=0.0
+  row[22] top=965.4 h=27.6 x_off=0.0
+  row[23] top=1009.0 h=27.6 x_off=0.0
+  row[24] top=1052.6 h=27.6 x_off=0.0
+  row[25] top=1096.2 h=27.6 x_off=0.0
+  row[26] top=1139.8 h=27.6 x_off=0.0
+  row[27] top=1183.4 h=27.6 x_off=0.0
+  row[28] top=1227.0 h=27.6 x_off=0.0
+  row[29] top=1270.6 h=27.6 x_off=0.0
+  row[30] top=1314.2 h=27.6 x_off=0.0
+  row[31] top=1357.8 h=27.6 x_off=0.0

@@ -1,0 +1,13 @@
+Stage 2 demo: z-index stacking
+=== Freedom layout ===
+content_w=952 total_h=185.6 nbox=2 nrow=4 npositioned=4
+  row[0] top=60.0 h=26.4 x_off=0.0 w=952.0
+  row[1] top=98.4 h=26.4 x_off=0.0 w=952.0
+  row[2] top=124.8 h=26.4 x_off=0.0 w=952.0
+  row[3] top=151.2 h=26.4 x_off=0.0 w=952.0
+  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=185.6
+  box[1] bid=1 x=176.0 top=185.6 w=600.0 h=0.0
+  pos[0] box=5 z=0 x=216.0 y=385.6 w=443.8 h=34.0
+  pos[1] box=2 z=1 x=216.0 y=225.6 w=160.0 h=100.0
+  pos[2] box=4 z=5 x=296.0 y=305.6 w=160.0 h=100.0
+  pos[3] box=3 z=10 x=256.0 y=265.6 w=160.0 h=100.0

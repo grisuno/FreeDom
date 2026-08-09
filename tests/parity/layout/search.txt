@@ -1,0 +1,17 @@
+Freedom — form controls demo
+=== Freedom layout ===
+content_w=952 total_h=654.2 nbox=0 nrow=14 npositioned=0
+  row[0] top=0.0 h=54.0 x_off=0.0
+  row[1] top=75.4 h=27.6 x_off=0.0
+  row[2] top=103.0 h=27.6 x_off=0.0
+  row[3] top=150.6 h=40.8 x_off=0.0
+  row[4] top=211.3 h=34.0 x_off=0.0 w=952.0
+  row[5] top=245.3 h=34.0 x_off=0.0 w=952.0
+  row[6] top=299.2 h=40.8 x_off=0.0
+  row[7] top=359.9 h=34.0 x_off=0.0 w=952.0
+  row[8] top=393.9 h=34.0 x_off=0.0 w=952.0
+  row[9] top=427.9 h=34.0 x_off=0.0 w=952.0
+  row[10] top=481.8 h=40.8 x_off=0.0
+  row[11] top=542.6 h=27.6 x_off=0.0
+  row[12] top=586.2 h=34.0 x_off=0.0 w=952.0
+  row[13] top=620.2 h=34.0 x_off=0.0 w=952.0

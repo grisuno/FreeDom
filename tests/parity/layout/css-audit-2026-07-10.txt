@@ -1,0 +1,39 @@
+CSS properties end-to-end test
+=== Freedom layout ===
+content_w=952 total_h=1562.0 nbox=9 nrow=27 npositioned=0
+  row[0] top=0.0 h=54.0 x_off=0.0
+  row[1] top=75.4 h=40.8 x_off=0.0
+  row[2] top=160.2 h=27.6 x_off=8.0 w=936.0
+  row[3] top=215.7 h=40.8 x_off=0.0 w=936.0
+  row[4] top=292.4 h=27.6 x_off=0.0 w=952.0
+  row[5] top=388.4 h=27.6 x_off=0.0 w=952.0
+  row[6] top=504.4 h=27.6 x_off=0.0 w=952.0
+  row[7] top=551.9 h=40.8 x_off=0.0 w=952.0
+  row[8] top=640.6 h=27.6 x_off=12.0 w=928.0
+  row[9] top=724.2 h=27.6 x_off=12.0 w=928.0
+  row[10] top=783.8 h=40.8 x_off=0.0 w=928.0
+  row[11] top=844.5 h=27.6 x_off=0.0 w=928.0
+  row[12] top=872.1 h=27.6 x_off=0.0 w=928.0
+  row[13] top=919.6 h=40.8 x_off=0.0 w=928.0
+  row[14] top=1004.3 h=22.8 x_off=8.0 w=936.0
+  row[15] top=1043.1 h=22.8 x_off=8.0 w=936.0
+  row[16] top=1113.9 h=22.8 x_off=8.0 w=936.0
+  row[17] top=1152.7 h=22.8 x_off=8.0 w=936.0
+  row[18] top=1203.4 h=40.8 x_off=0.0 w=936.0
+  row[19] top=1284.2 h=27.6 x_off=4.0 w=944.0
+  row[20] top=1335.7 h=40.8 x_off=0.0 w=944.0
+  row[21] top=1396.4 h=27.6 x_off=24.0 w=944.0
+  row[22] top=1424.0 h=27.6 x_off=24.0 w=944.0
+  row[23] top=1451.6 h=27.6 x_off=24.0 w=944.0
+  row[24] top=1479.2 h=27.6 x_off=24.0 w=944.0
+  row[25] top=1506.8 h=27.6 x_off=24.0 w=944.0
+  row[26] top=1534.4 h=27.6 x_off=24.0 w=944.0
+  box[0] bid=0 x=0.0 top=136.2 w=952.0 h=59.6
+  box[1] bid=1 x=0.0 top=276.4 w=952.0 h=80.0
+  box[2] bid=2 x=0.0 top=372.4 w=952.0 h=100.0
+  box[3] bid=3 x=0.0 top=488.4 w=952.0 h=30.0
+  box[4] bid=4 x=0.0 top=612.6 w=952.0 h=67.6
+  box[5] bid=5 x=0.0 top=696.2 w=952.0 h=67.6
+  box[6] bid=6 x=0.0 top=980.3 w=952.0 h=93.6
+  box[7] bid=7 x=0.0 top=1089.9 w=952.0 h=93.6
+  box[8] bid=8 x=0.0 top=1264.2 w=952.0 h=51.6
