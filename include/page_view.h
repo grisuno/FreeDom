@@ -547,6 +547,12 @@ typedef struct pv_cont_def {
     int grid_flow;      /* css_grid_auto_flow */
     int box_id;         /* box enclosing this container's items, or -1 */
     int anon_row;       /* 1 = anonymous row synthesised for an inline-block parent */
+    /* 1 = this grid container was SYNTHESISED from a <table>, not declared by the
+     * author. A table sizes its columns to their content (CSS 2.1 section 17.5.2
+     * automatic table layout); an author grid with auto tracks keeps the historical
+     * equal split. Without the distinction there is no way to tell the two apart
+     * downstream -- both arrive as display:grid with all-auto tracks. */
+    int is_table;
     /* The flex/grid ITEM properties of the element this container occupies as one
      * item of its PARENT container: grow/shrink (x100, -1 unset), basis (px, or a
      * percentage encoded -(1000000+per_mille), or CSS_LEN_AUTO/CSS_LEN_UNSET), order

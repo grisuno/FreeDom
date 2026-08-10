@@ -322,13 +322,54 @@ continues, so `.card{font-size:14px} .card h3{font-size:1.2em}` resolves to
 at the root — where a leftover pure-relative chain keeps `font_abs = 0` (the pre-existing
 behaviour, which is right for an inline inside a heading).
 
-`rem` is absolute by definition (root em) and this engine's root is always 16px, so it
-never differs from `px`. Viewport units resolve through the same normalized 1920×1080
-desktop the `@media` queries use, then become an absolute percent of 16px.
+`rem` is absolute by definition (root em). Viewport units resolve through the same
+normalized 1920×1080 desktop the `@media` queries use, then become an absolute percent
+of 16px.
 
-**Out of scope:** `font-size` on the root element itself changing what `rem` means
-(the root stays 16px, so a page that sets `html{font-size:62.5%}` and then writes
-`1.6rem` renders at 16px, not 10px — tracked as a follow-up).
+### rem is rebased on the root font-size (2026-08-10)
+
+The root element's own `font-size` **defines what `rem` means** for the whole sheet. The
+`html { font-size: 62.5% }` idiom (so that `1rem` = 10px and authors can think in tens)
+is near-universal in real stylesheets, and treating `rem` as a fixed 16px rendered every
+such page **1.6× too large** — measured against Firefox on `tests/parity/pages/rem-62.html`.
+
+**Dado** a stylesheet whose root element (`html` or `:root`) resolves a `font-size`
+**cuando** the sheet is parsed
+**entonces** every `<number>rem` length in it resolves against that root size, not 16px;
+`html{font-size:62.5%}` + `font-size:1.6rem` renders at 16px, and `padding:1.6rem` is 16px.
+
+**Dado** a stylesheet whose root element declares no `font-size`
+**cuando** the sheet is parsed
+**entonces** `rem` stays exactly `px × 16` and the parse is **byte-identical** to before —
+the rebase never runs, so the default path pays nothing.
+
+Mechanism (`css_parse_scoped`): the sheet is parsed once, the root font-size is read back
+through the **real cascade** (`css_resolve` for tag `html`, which is also what matches
+`:root` — so specificity, `!important`, document order and `@media` gating all apply for
+free, with no second selector engine to keep in sync). If that size differs from 16px, the
+sheet's counters are rewound and the text is re-parsed after `rem_rebase` rewrites every
+`<number>rem` token into the equivalent `<number × root>px`. Rewriting the **text** rather
+than threading a base through the 22 `interp_len` call sites is what makes one change cover
+`font-size`, `line-height`, every box length, `calc()`/`min()`/`max()`/`clamp()`,
+shorthands, gradients and `var()`-substituted values at once.
+
+`rem_rebase` is pure (text in, text out) and fails closed — it returns NULL on any
+overflow and the caller keeps the unrebased sheet. What it must **not** touch:
+
+- **At-rule preludes.** Inside `@media (min-width: 48rem)` the spec says `rem` means the
+  *initial* font-size (16px), never the author's root, so everything from `@` to the
+  opening `{` or `;` is copied verbatim. Rebasing it would silently change *which*
+  `@media` blocks apply.
+- **Quoted strings and `url(...)`.** `content: "5rem"` is text, not a length.
+- **Anything not a length token.** `rem` is rewritten only when it directly follows a
+  number whose own preceding character is not an identifier character, and is itself not
+  followed by one — so `x2rem`, `1.5remx` and a `--grem` custom property are left alone,
+  and a leading `-` is preserved (`-1.5rem` → `-15px`).
+
+**Known quantization:** the root size is read back as `font_scale`, an integer percent of
+16px, so `62.5%` round-trips as 63% → 10.08px rather than 10px (≤0.5% on any value, ≤0.25px
+on a 32px heading). Out of scope: `em` remains approximated as ×16 rather than the parent's
+computed size.
 
 ### Property inventory (supported vs missing)
 

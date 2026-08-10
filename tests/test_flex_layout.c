@@ -341,6 +341,107 @@ static void test_float_pack_two_right(void **state) {
     assert_true(dbl_eq(x[1], 290.0));   /* 400 - 10 gap - 100 */
 }
 
+/* --- fx_float_insets: text flows BESIDE a float (v3, spec/float.md §6b.2) ------
+ *
+ * CSS 2.1 §9.5: a float does not move the following block, it SHORTENS the line
+ * boxes it overlaps. Freedom used to push that content below the float instead,
+ * which collapsed every sidebar/infobox page into one tall single column -- the
+ * largest measured divergence from Firefox in the renderer. */
+
+static void test_float_insets_left_overlapping_line(void **state) {
+    (void)state;
+    /* A 220px left float occupying y in [0, 60). */
+    fx_float_rect r[1] = { { 0.0, 60.0, 220.0, 0 } };
+    double l = -1.0, rr = -1.0;
+    assert_int_equal(fx_float_insets(r, 1, 10.0, 20.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 220.0);   /* the line starts past the float */
+    assert_true(rr == 0.0);    /* nothing steals from the right */
+}
+
+static void test_float_insets_line_past_bottom_is_full_width(void **state) {
+    (void)state;
+    fx_float_rect r[1] = { { 0.0, 60.0, 220.0, 0 } };
+    double l = -1.0, rr = -1.0;
+    /* A line that starts at the float's bottom no longer overlaps it (the band is
+     * half-open), so the line recovers the full container width -- this is what
+     * makes the last lines of a long paragraph run edge to edge, as in Firefox. */
+    assert_int_equal(fx_float_insets(r, 1, 60.0, 20.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 0.0);
+    assert_true(rr == 0.0);
+
+    /* A line entirely above the float is unaffected too. */
+    fx_float_rect below[1] = { { 100.0, 160.0, 220.0, 0 } };
+    assert_int_equal(fx_float_insets(below, 1, 0.0, 20.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 0.0 && rr == 0.0);
+}
+
+static void test_float_insets_right(void **state) {
+    (void)state;
+    /* A 176px right float in a 968px content rect: its inner edge is at 792. */
+    fx_float_rect r[1] = { { 0.0, 40.0, 792.0, 1 } };
+    double l = -1.0, rr = -1.0;
+    assert_int_equal(fx_float_insets(r, 1, 0.0, 20.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 0.0);
+    assert_true(rr == 176.0);
+}
+
+static void test_float_insets_both_sides_take_the_tightest(void **state) {
+    (void)state;
+    /* Two left floats and one right float all overlapping the line: the left inset
+     * is the FARTHEST right edge, the right inset the FARTHEST left one. */
+    fx_float_rect r[3] = {
+        { 0.0, 80.0, 120.0, 0 },
+        { 0.0, 80.0, 220.0, 0 },
+        { 0.0, 80.0, 800.0, 1 },
+    };
+    double l = -1.0, rr = -1.0;
+    assert_int_equal(fx_float_insets(r, 3, 10.0, 20.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 220.0);
+    assert_true(rr == 168.0);
+}
+
+static void test_float_insets_never_starve_the_line(void **state) {
+    (void)state;
+    /* A float wider than its container (hostile or just broken CSS) must leave a
+     * usable line, never a zero or negative one: fail-open geometry. */
+    fx_float_rect wide[1] = { { 0.0, 80.0, 5000.0, 0 } };
+    double l = -1.0, rr = -1.0;
+    assert_int_equal(fx_float_insets(wide, 1, 0.0, 20.0, 100.0, &l, &rr), FX_OK);
+    assert_true(l >= 0.0 && l <= 100.0 - FX_FLOAT_MIN_LINE);
+
+    /* Left and right floats that together overflow the rect still leave room. */
+    fx_float_rect both[2] = { { 0.0, 80.0, 90.0, 0 }, { 0.0, 80.0, 10.0, 1 } };
+    assert_int_equal(fx_float_insets(both, 2, 0.0, 20.0, 100.0, &l, &rr), FX_OK);
+    assert_true(l >= 0.0 && rr >= 0.0);
+    assert_true(100.0 - l - rr >= FX_FLOAT_MIN_LINE);
+
+    /* A negative edge (never produced by the packer, but the contract holds) is
+     * clamped rather than shifting the line off the left of the content rect. */
+    fx_float_rect neg[1] = { { 0.0, 80.0, -50.0, 0 } };
+    assert_int_equal(fx_float_insets(neg, 1, 0.0, 20.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 0.0);
+}
+
+static void test_float_insets_edges(void **state) {
+    (void)state;
+    fx_float_rect r[1] = { { 0.0, 60.0, 220.0, 0 } };
+    double l = -1.0, rr = -1.0;
+    /* n == 0 writes zero insets and accepts NULL rects. */
+    assert_int_equal(fx_float_insets(NULL, 0, 0.0, 20.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 0.0 && rr == 0.0);
+    assert_int_equal(fx_float_insets(NULL, 1, 0.0, 20.0, 968.0, &l, &rr), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_insets(r, 1, 0.0, 20.0, 968.0, NULL, &rr), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_insets(r, 1, 0.0, 20.0, 968.0, &l, NULL), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_insets(r, 1, 0.0, -1.0, 968.0, &l, &rr), FX_ERR_RANGE);
+    assert_int_equal(fx_float_insets(r, 1, 0.0, 20.0, -1.0, &l, &rr), FX_ERR_RANGE);
+    assert_int_equal(fx_float_insets(r, (size_t)FX_MAX_ITEMS + 1, 0.0, 20.0, 968.0,
+                                    &l, &rr), FX_ERR_RANGE);
+    /* A zero-height line still consults the float that starts at its y: a line box
+     * is measured before its height is known, so h == 0 must not silently opt out. */
+    assert_int_equal(fx_float_insets(r, 1, 0.0, 0.0, 968.0, &l, &rr), FX_OK);
+    assert_true(l == 220.0);
+}
+
 static void test_float_pack_edges(void **state) {
     (void)state;
     double w[2] = { 10, 10 }; int side[2] = { 0, 0 }; double x[2];
@@ -475,6 +576,12 @@ int main(void) {
         cmocka_unit_test(test_float_pack_two_right),
         cmocka_unit_test(test_float_pack_edges),
         cmocka_unit_test(test_justify_name),
+        cmocka_unit_test(test_float_insets_left_overlapping_line),
+        cmocka_unit_test(test_float_insets_line_past_bottom_is_full_width),
+        cmocka_unit_test(test_float_insets_right),
+        cmocka_unit_test(test_float_insets_both_sides_take_the_tightest),
+        cmocka_unit_test(test_float_insets_never_starve_the_line),
+        cmocka_unit_test(test_float_insets_edges),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

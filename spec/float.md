@@ -139,12 +139,90 @@ In `layout_doc`, a **float band** is a maximal run of consecutive blocks each wi
   rendered, **then** the columns still lay side by side (structure), only the author
   colors are absent.
 
-## 7. v1 limitations (documented, honest)
+## 6b. Text flows BESIDE a single float (v3, 2026-08-10)
 
-- **No text wrap around a single float.** A float followed by *non-floated* content does
-  not flow that content beside the float; the band is a self-contained row and the next
-  non-floated block clears below it. The side-by-side win covers the common case where
-  every column is floated (the two-column era layout).
+> **Why.** v1's headline limitation — "a float followed by non-floated content does not
+> flow that content beside the float" — was the single largest measured divergence from
+> Firefox in the whole renderer (`tests/parity/pages/float-beside.html`: 1.77× too tall,
+> and every sidebar/infobox/pull-quote page collapses into one tall stack). A second bug
+> hid inside the same probe: a **lone `float:right`** painted at the far **left**.
+
+### 6b.1 The lone-float box bug (`band_shared_box`)
+
+`band_common_box` returns the innermost box that is an ancestor **or self** of every
+block in the band. For a band of exactly ONE float that is the float's **own** box, and
+opening it as the band's *shared* context put the float's background/padding in the
+**parent's** coordinates — so a `float:right` sidebar painted its box at the parent's
+left edge while its text was packed to the right.
+
+The band's shared context must be a box that cannot belong to a single float:
+
+- **≥ 2 distinct `float_id`s** in the band: the common box is shared by two different
+  floats, so it is a genuine wrapper. Unchanged — this is what keeps a wrapping
+  `position:relative` panel open in flow and painting behind the columns (§4.2).
+- **exactly 1** `float_id`: every box below the parent's already-open stack belongs to
+  that one float and must be opened **inside its column**. The shared context is the
+  deepest box **already open** on the parent state that lies on the band's common path
+  (`-1` when none). A wrapper that also contains later, non-floated content is still
+  opened — by that content's own reconcile, as any other block's box is.
+
+### 6b.2 Line-box exclusion (`fx_float_insets`, pure)
+
+CSS 2.1 §9.5: a float does not change the block's box, it **shortens the line boxes**
+that overlap it. So the float keeps its column, `cur_top` does **not** jump past it, and
+each following line box asks how much room the float leaves at its own `y`:
+
+```c
+typedef struct fx_float_rect { double top, bottom, edge; int side; } fx_float_rect;
+
+fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
+                          double avail, double *out_l, double *out_r);
+```
+
+`edge` is the **inner** content edge the float steals: for `side == 0` (left) the x just
+past its right margin, for `side == 1` (right) the x of its left margin. A rect
+contributes only when it vertically overlaps the half-open band `[y, y + h)`, which is
+what makes a line **return to the full width** the moment it clears the float's bottom.
+`out_l` is the max left `edge` over overlapping left rects, `out_r` is `avail` minus the
+min right `edge`; both are clamped to `>= 0` and to leave at least
+`FX_FLOAT_MIN_LINE` (1px) of room, so a hostile float wider than the container can never
+produce a negative or zero line width (fail-open geometry, never an error). Pure, no
+allocation, no I/O.
+
+**Dado** un `float:left` de 220px con `bottom = 60`
+**cuando** se pide el inset de una línea en `y = 10, h = 20`
+**entonces** `out_l = 220`, `out_r = 0` — la línea empieza pasado el float.
+
+**Dado** la misma exclusión
+**cuando** la línea está en `y = 70` (ya pasó el `bottom`)
+**entonces** `out_l = 0` — la línea recupera el ancho completo, como en Firefox.
+
+**Dado** un `float:right` cuyo `edge` es `avail - 176`
+**entonces** `out_r = 176` y `out_l = 0`.
+
+### 6b.3 Wiring (`layout_doc` / `open_line` / `flow_text`)
+
+- A band of **one item on one row** registers an exclusion instead of advancing
+  `cur_top`: `top = base_top`, `bottom = base_top + column height`, `edge` from the
+  packer's `outx` + the item width, `side` from the float. `cur_top` returns to
+  `base_top`.
+- Multi-item / multi-row bands keep advancing `cur_top` exactly as before, so the
+  two-column era layout (Slashdot, 960.gs) is byte-identical.
+- `open_line` recomputes the line's insets for its own `cur_top` and starts `pen_x` at
+  the left inset; `flow_text` wraps against `content_w - right_inset`. Both read the
+  cached `float_l`/`float_r` on `rc_state`, refreshed once per line.
+- Exclusions are **dropped** (and `cur_top` advanced to the tallest `bottom`) by: a
+  block whose own `clear` is set, the start of a new float band, a flex/grid container,
+  and the end of the document. That is what keeps a `clear:both` footer below the
+  columns and what makes the page tall enough when the float outlives its text.
+- An exclusion whose `bottom <= cur_top` is expired and discarded.
+- Bounded: `RC_FLOAT_MAX` (8) live exclusions; a ninth is dropped (fail-open — content
+  overlaps a float rather than disappearing).
+
+**Default byte-identical:** a page with no `float` registers nothing, `float_l`/`float_r`
+stay 0, and `open_line`/`flow_text` behave exactly as before.
+
+## 7. v1 limitations (documented, honest)
 - **Float items' own nested box decoration is not composed** inside a column (same v1
   limit as flex/grid containers): a bordered `.story` inside a floated `.main` paints
   its text but not its border. The wrapping panel's background *does* paint (nesting).

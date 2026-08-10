@@ -3646,6 +3646,146 @@ static void test_anim_transform_keyframes_from_sheet(void **state) {
     css_free(sh);
 }
 
+/* --- rem rebased on the root font-size (2026-08-10) ---------------------------
+ *
+ * The root element's font-size defines what `rem` means. `html{font-size:62.5%}`
+ * so that 1rem == 10px is a near-universal idiom, and resolving rem against a
+ * fixed 16px root rendered every such page 1.6x too large (measured against
+ * Firefox on tests/parity/pages/rem-62.html). See spec/css.md "rem is rebased on
+ * the root font-size". A 50% root is used wherever the assertion must be exact:
+ * it round-trips through the integer font_scale percent without quantization. */
+
+static void test_rem_rebased_on_root_font_size(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("html { font-size: 50% } p { font-size: 2rem }",
+                              0, &sh), CSS_OK);
+    /* root = 8px, so 2rem = 16px = 100% of the 16px base, not 200%. */
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.font_scale, 100);
+    assert_int_equal(s.font_abs, 1);       /* rem stays ABSOLUTE after rebasing */
+    css_free(sh);
+}
+
+static void test_rem_rebase_applies_to_box_lengths(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("html { font-size: 50% } "
+                              "p { padding: 2rem; margin-left: -2rem; "
+                              "    width: calc(2rem + 4px) }", 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.pad_top, 16);       /* 2 x 8px, not 2 x 16px */
+    assert_int_equal(s.pad_left, 16);
+    assert_int_equal(s.margin_left, -16);  /* the leading '-' survives */
+    assert_int_equal(s.width, 20);         /* inside calc() too */
+    css_free(sh);
+}
+
+static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* No root font-size anywhere: rem must stay exactly px x 16 and the rebase
+     * must not run at all, so the default path is unchanged. */
+    assert_int_equal(css_parse("p { font-size: 1.5rem; padding: 1rem }", 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.font_scale, 150);
+    assert_int_equal(s.pad_top, 16);
+    css_free(sh);
+}
+
+static void test_rem_rebase_honours_root_pseudo_class(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* :root is the same element as html, and PSEUDO_ROOT matches on tag. */
+    assert_int_equal(css_parse(":root { font-size: 50% } p { padding: 3rem }",
+                              0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).pad_top, 24);
+    css_free(sh);
+}
+
+static void test_rem_rebase_skips_at_rule_prelude(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* Inside a media query `rem` means the INITIAL font-size (16px), never the
+     * author's root: 200rem = 3200px, which the 1920px normalized desktop does
+     * not reach, so the block must NOT apply. Rebasing the prelude would make it
+     * 200 x 8 = 1600px and silently switch the block on. */
+    assert_int_equal(css_parse("html { font-size: 50% } "
+                              "@media (min-width: 200rem) { p { color: #ff0000 } }",
+                              0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, -1);
+    css_free(sh);
+
+    /* Same query below the threshold still applies, so the assertion above is
+     * about the unit and not about media queries being broken outright. */
+    sh = NULL;
+    assert_int_equal(css_parse("html { font-size: 50% } "
+                              "@media (min-width: 60rem) { p { color: #ff0000 } }",
+                              0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0xff0000);
+    css_free(sh);
+}
+
+static void test_rem_rebase_leaves_quoted_text_alone(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* content is text, not a length: "5rem" must survive verbatim. */
+    assert_int_equal(css_parse("html { font-size: 50% } "
+                              "p::before { content: \"5rem\" }", 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_string_equal(s.content_before_str, "5rem");
+    css_free(sh);
+}
+
+static void test_rem_rebase_ignores_identifier_lookalikes(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* `rem` is a unit only when it follows a number and is not itself followed by
+     * an identifier character. A trailing letter makes the whole value invalid,
+     * and it must stay invalid (dropped) rather than being rewritten into a
+     * length that the author never wrote. */
+    assert_int_equal(css_parse("html { font-size: 50% } "
+                              "p { padding: 1.5remx; margin-top: 2rem }", 0, &sh), CSS_OK);
+    css_style s = css_resolve(sh, "p", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.pad_top, CSS_LEN_UNSET);
+    assert_int_equal(s.margin_top, 16);
+    css_free(sh);
+}
+
+static void test_rem_rebase_62_5_percent_idiom(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* The real-world idiom. The root percent round-trips through an integer
+     * (62.5% -> 63%), so the target is 100% within the documented <=0.5%
+     * quantization -- but nowhere near the 160% of the unrebased engine. */
+    assert_int_equal(css_parse("html { font-size: 62.5% } body { font-size: 1.6rem } "
+                              "h1 { font-size: 3.2rem }", 0, &sh), CSS_OK);
+    int body = css_resolve(sh, "body", NULL, NULL, 0, NULL, 0).font_scale;
+    int h1   = css_resolve(sh, "h1", NULL, NULL, 0, NULL, 0).font_scale;
+    assert_true(body >= 99 && body <= 102);
+    assert_true(h1 >= 198 && h1 <= 204);
+    css_free(sh);
+}
+
+static void test_media_query_length_honours_its_unit(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    /* A media-query length used to be read as a bare number with the unit
+     * discarded, so `min-width: 200em` compared 200 against the 1920px viewport
+     * and every em/rem query was effectively always true. 200em is 3200px, which
+     * the viewport does not reach, so the block must not apply. */
+    assert_int_equal(css_parse("@media (min-width: 200em) { p { color: #ff0000 } }",
+                              0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, -1);
+    css_free(sh);
+
+    sh = NULL;
+    assert_int_equal(css_parse("@media (min-width: 40em) { p { color: #ff0000 } }",
+                              0, &sh), CSS_OK);
+    assert_int_equal(css_resolve(sh, "p", NULL, NULL, 0, NULL, 0).color, 0xff0000);
+    css_free(sh);
+}
+
 /* --- clip:rect() property (2026-07-30) --- */
 
 static void test_clip_rect(void **state) {
@@ -3894,6 +4034,15 @@ int main(void) {
         cmocka_unit_test(test_anim_transform_keyframes_from_sheet),
         cmocka_unit_test(test_clip_rect),
         cmocka_unit_test(test_clip_auto),
+        cmocka_unit_test(test_rem_rebased_on_root_font_size),
+        cmocka_unit_test(test_rem_rebase_applies_to_box_lengths),
+        cmocka_unit_test(test_rem_rebase_absent_root_declaration_is_byte_identical),
+        cmocka_unit_test(test_rem_rebase_honours_root_pseudo_class),
+        cmocka_unit_test(test_rem_rebase_skips_at_rule_prelude),
+        cmocka_unit_test(test_rem_rebase_leaves_quoted_text_alone),
+        cmocka_unit_test(test_rem_rebase_ignores_identifier_lookalikes),
+        cmocka_unit_test(test_rem_rebase_62_5_percent_idiom),
+        cmocka_unit_test(test_media_query_length_honours_its_unit),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

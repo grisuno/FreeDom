@@ -3373,6 +3373,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     reg.def[cid].cols = cols;
                     reg.def[cid].justify = FX_JUSTIFY_START;
                     reg.def[cid].gap = 0;
+                    /* Marks the grid as a TABLE so the layout engine sizes its
+                     * columns to their content instead of splitting the width
+                     * evenly (spec/page_view.md "Tablas: ancho automatico"). */
+                    reg.def[cid].is_table = 1;
                     if (reg.def[cid].box_id < 0) reg.def[cid].box_id = cu_cont.box_id;
                 }
                 /* HTML colspan/rowspan attributes override the CSS grid span for

@@ -115,6 +115,33 @@ fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
                              double avail, double gap, double *out_x,
                              size_t *out_row);
 
+/* Minimum room a line box keeps beside a float, in px. A float wider than its
+ * container must still leave a usable line rather than a zero/negative one. */
+#define FX_FLOAT_MIN_LINE 1.0
+
+/* One float exclusion (v3, spec/float.md §6b.2): the vertical band a float occupies
+ * and the INNER content edge it steals. `edge` is measured from the content start:
+ * for side 0 (left) it is the x just past the float's right margin; for side 1
+ * (right) it is the x of the float's left margin. */
+typedef struct fx_float_rect {
+    double top, bottom;
+    double edge;
+    int    side;        /* 0 = left float, 1 = right float */
+} fx_float_rect;
+
+/* Insets a line box occupying [y, y + h) must apply to avoid n float exclusions
+ * (CSS 2.1 section 9.5: a float shortens the line boxes it overlaps, it does not move
+ * the block). *out_l is the left inset, *out_r the right inset, both from the content
+ * edges of an `avail`-wide content rect. A rect contributes only while it vertically
+ * overlaps the half-open band, so a line that clears a float's bottom returns to the
+ * full width. Both insets are clamped to >= 0 and to leave at least FX_FLOAT_MIN_LINE
+ * of room: a float wider than avail yields a narrow line, never a negative one
+ * (fail-open geometry). Pure, no allocation, no I/O. n == 0 writes 0/0.
+ * Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE
+ * (negative h/avail, or n > FX_MAX_ITEMS); nothing is written on error. */
+fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
+                          double avail, double *out_l, double *out_r);
+
 /* Stable, short English name of a justify mode for structured/agent output. Never
  * NULL; an unknown enum value yields "start". */
 const char *fx_justify_name(fx_justify j);

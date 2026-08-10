@@ -269,6 +269,46 @@ static fx_status float_pack_impl(const double *width, const int *side, size_t n,
     return FX_OK;
 }
 
+fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
+                          double avail, double *out_l, double *out_r) {
+    if (out_l == NULL || out_r == NULL) return FX_ERR_NULL_ARG;
+    if (r == NULL && n > 0) return FX_ERR_NULL_ARG;
+    if (h < 0.0 || avail < 0.0 || n > FX_MAX_ITEMS) return FX_ERR_RANGE;
+
+    double left = 0.0;
+    double right_edge = avail;      /* innermost left edge of any right float */
+    for (size_t i = 0; i < n; ++i) {
+        /* Half-open overlap: a line that starts exactly at a float's bottom has
+         * cleared it and returns to the full width. A zero-height line (measured
+         * before its height is known) still consults a float starting at its y,
+         * hence the `>=` on the top edge rather than a strict band intersection. */
+        if (r[i].bottom <= y) continue;
+        if (r[i].top > y + h) continue;
+        if (h > 0.0 && r[i].top >= y + h) continue;
+        if (r[i].side == 1) {
+            if (r[i].edge < right_edge) right_edge = r[i].edge;
+        } else {
+            if (r[i].edge > left) left = r[i].edge;
+        }
+    }
+    double right = avail - right_edge;
+    if (left < 0.0) left = 0.0;
+    if (right < 0.0) right = 0.0;
+
+    /* Fail-open geometry: a float wider than its container (or a left and a right
+     * float that together overflow it) must still leave a usable line box. The left
+     * inset yields first, since dropping it keeps text inside the content rect. */
+    double room = avail - FX_FLOAT_MIN_LINE;
+    if (room < 0.0) room = 0.0;
+    if (right > room) right = room;
+    if (left > room - right) left = room - right;
+    if (left < 0.0) left = 0.0;
+
+    *out_l = left;
+    *out_r = right;
+    return FX_OK;
+}
+
 fx_status fx_float_pack(const double *width, const int *side, size_t n,
                         double avail, double gap, double *out_x) {
     return float_pack_impl(width, side, n, avail, gap, 0, out_x, NULL);

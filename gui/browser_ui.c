@@ -2955,6 +2955,10 @@ typedef struct rc_open_box {
  * the innermost open box, so a pathological tree never overflows the stack). */
 #define RC_BOX_STACK_MAX 16
 
+/* Live float exclusions one layout state tracks (anti-DoS). A ninth float is
+ * dropped, so a pathological page overlaps a float instead of losing content. */
+#define RC_FLOAT_MAX 8
+
 typedef struct rc_state {
     double cur_top, pending_gap, pen_x, line_asc, line_desc;
     double prev_bottom;  /* bottom margin (px) of the last block, for CSS margin collapsing */
@@ -3019,7 +3023,66 @@ typedef struct rc_state {
      * when a child interrupts it. box_depth 0 = no open box (default flat flow). */
     rc_open_box box_stack[RC_BOX_STACK_MAX];
     int         box_depth;
+    /* Float exclusions the following line boxes must flow BESIDE (CSS 2.1 §9.5;
+     * spec/float.md §6b). A single-item float band registers one instead of pushing
+     * cur_top past the float, so the next paragraph wraps in the space that is left
+     * and returns to the full width once it clears the float's bottom.
+     * float_l/float_r are the current line's insets, refreshed once per line by
+     * open_line from cur_top; float_avail is the content width they were measured
+     * against, and float_depth the box_depth in effect at registration -- a block
+     * that opens a box of its own changes the coordinate space, so the exclusions
+     * are dropped there and the old stacking behaviour applies (never an overlap).
+     * All zero by default (memset), which is exactly "no float on this page". */
+    fx_float_rect floats[RC_FLOAT_MAX];
+    int         nfloats;
+    int         float_depth;
+    double      float_avail;
+    double      float_l, float_r;
 } rc_state;
+
+/* Bottom of the lowest live float exclusion, or 0.0 when there is none. */
+static double rc_float_bottom(const rc_state *s) {
+    double b = 0.0;
+    for (int i = 0; i < s->nfloats; ++i) if (s->floats[i].bottom > b) b = s->floats[i].bottom;
+    return b;
+}
+
+/* Ends the float context: drops every exclusion and moves cur_top below the tallest
+ * one. This is what puts a `clear:both` footer under the columns, and what keeps the
+ * page tall enough when a float outlives the text beside it. */
+static void rc_float_clear(rc_state *s) {
+    if (s->nfloats == 0) return;
+    double b = rc_float_bottom(s);
+    if (b > s->cur_top) s->cur_top = b;
+    s->nfloats = 0;
+    s->float_l = 0.0;
+    s->float_r = 0.0;
+}
+
+/* Recomputes the open line's float insets for its own cur_top, discarding exclusions
+ * the flow has already passed. Called once per line by open_line, so a paragraph
+ * narrows beside a float and widens again below it. */
+static void rc_float_refresh(rc_state *s, double line_h) {
+    if (s->nfloats == 0) { s->float_l = 0.0; s->float_r = 0.0; return; }
+    if (s->box_depth != s->float_depth) { rc_float_clear(s); return; }
+    int keep = 0;
+    for (int i = 0; i < s->nfloats; ++i)
+        if (s->floats[i].bottom > s->cur_top) s->floats[keep++] = s->floats[i];
+    s->nfloats = keep;
+    double l = 0.0, r = 0.0;
+    if (fx_float_insets(s->floats, (size_t)s->nfloats, s->cur_top, line_h,
+                        s->float_avail, &l, &r) != FX_OK) { l = 0.0; r = 0.0; }
+    s->float_l = l;
+    s->float_r = r;
+}
+
+/* The right edge available to the open line: the block's content width minus what a
+ * float steals from the right at this line's y. Never below FX_FLOAT_MIN_LINE, so a
+ * float wider than its container still leaves a line to wrap into. */
+static double line_limit(const rc_state *s, double content_w) {
+    double lim = content_w - s->float_r;
+    return (lim < FX_FLOAT_MIN_LINE) ? FX_FLOAT_MIN_LINE : lim;
+}
 
 static void rc_free(rc_layout *L) {
     free(L->frags);
@@ -3334,9 +3397,14 @@ static void open_line(rc_layout *L, rc_state *s) {
     if (L->nrow > 0) s->cur_top += s->pending_gap;  /* no leading gap at the very top */
     s->pending_gap = 0;
     s->line_open = 1;
+    /* This line's float insets, measured at its own top: a line overlapping a float
+     * starts past it, a line below it starts at 0 again (spec/float.md §6b). The
+     * height is not known until flush_line, so the line is probed as zero-height --
+     * fx_float_insets consults a float that starts exactly at this y for that reason. */
+    rc_float_refresh(s, 0.0);
     /* Author text-indent (px) offsets the first line a block opens; cleared so wrapped
      * lines start at 0. Default pending_indent 0 -> identical to before. */
-    s->pen_x = s->pending_indent;
+    s->pen_x = s->pending_indent + s->float_l;
     s->pending_indent = 0;
     s->line_first = L->nfrag;
 }
@@ -3531,14 +3599,14 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         probe.transform = xform; probe.letter_spacing = x->letter_spacing;
         double ww = styled_advance(cr, &probe);
 
-        if (line_has_frag && !s->nowrap && s->pen_x + adv + ww > content_w) {
+        if (line_has_frag && !s->nowrap && s->pen_x + adv + ww > line_limit(s, content_w)) {
             /* Greedy (word-break:break-all, mode 1) splits the word into the space
              * left on THIS line. Last-resort (overflow-wrap:break-word, mode 2) does
              * not: it wraps the whole word to the next line (the else branch) and only
              * splits it there if it is wider than a whole line -- see the block below. */
             if (s->break_words == 1 && content_w > 0.0) {
                 s->pen_x += adv;
-                double budget = content_w - s->pen_x;
+                double budget = line_limit(s, content_w) - s->pen_x;
                 size_t p = ws;
                 double acc = 0.0;
                 if (budget > 0.0) {
@@ -3568,7 +3636,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
                         cprobe.text = src + rem_start; cprobe.len = clen;
                         cprobe.transform = xform; cprobe.letter_spacing = x->letter_spacing;
                         double cw = styled_advance(cr, &cprobe);
-                        if (chunk_w + cw > content_w && rem_start > chunk_start) break;
+                        if (chunk_w + cw > line_limit(s, content_w) && rem_start > chunk_start) break;
                         chunk_w += cw; rem_start += clen;
                     }
                     flow_emit_frag(L, s, &fe, src + chunk_start, rem_start - chunk_start,
@@ -3586,9 +3654,9 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         }
 
         if (s->nowrap && s->text_overflow == CSS_TO_ELLIPSIS &&
-            s->pen_x + adv + ww > content_w) {
+            s->pen_x + adv + ww > line_limit(s, content_w)) {
             double ell_w = measure_slice(cr, FLOW_ELLIPSIS, sizeof FLOW_ELLIPSIS - 1);
-            double budget = content_w - s->pen_x - adv - ell_w;
+            double budget = line_limit(s, content_w) - s->pen_x - adv - ell_w;
             s->pen_x += adv;
             size_t take = 0;
             double acc = 0.0;
@@ -3612,7 +3680,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
             return;
         }
 
-        if (s->break_words && !line_has_frag && ww > content_w && content_w > 0.0) {
+        if (s->break_words && !line_has_frag && ww > line_limit(s, content_w) && content_w > 0.0) {
             s->pen_x += adv;
             size_t p = ws;
             while (p < ws + wl) {
@@ -3624,7 +3692,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
                     cprobe.text = src + p; cprobe.len = clen;
                     cprobe.transform = xform; cprobe.letter_spacing = x->letter_spacing;
                     double cw = styled_advance(cr, &cprobe);
-                    if (chunk_w + cw > content_w && p > chunk_start) break;
+                    if (chunk_w + cw > line_limit(s, content_w) && p > chunk_start) break;
                     chunk_w += cw; p += clen;
                 }
                 flow_emit_frag(L, s, &fe, src + chunk_start, p - chunk_start, chunk_w,
@@ -3874,13 +3942,14 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
  * A nested box deeper inside the item (a pill span) is NOT the root and is not
  * painted by the container path in v1. The parent walk is bounded (acyclic by
  * construction, but capped for safety). */
-static int item_root_box(const rd_doc *doc, size_t b0, size_t b1) {
-    /* The container's own box (cont_box_id) is an ANCESTOR of the items, never an
-     * item box: without this bound, items whose elements carry no box of their own
-     * all resolved to the CONTAINER's box and each painted the container's
-     * background over its own column -- a `justify-content:space-between` header
-     * drew its band twice with the page showing through the middle. */
-    int cbox = (b0 < rd_count(doc)) ? rd_at(doc, b0)->cont_box_id : -1;
+/* As item_root_box, but with the container box given EXPLICITLY rather than read
+ * from the run's cont_box_id stamp. A synthesised table grid carries no stamp, so
+ * the bound walk ran out to the OUTERMOST box and every cell adopted the <body> box
+ * as its own item box -- inheriting the body's padding, which made each table row
+ * reserve roughly twice the height Firefox gives it. */
+static int band_common_box(const rd_doc *doc, size_t start, size_t end);
+
+static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
     int best = -1;
     int best_depth = 1 << 30;
     for (size_t k = b0; k < b1; ++k) {
@@ -3908,6 +3977,17 @@ static int item_root_box(const rd_doc *doc, size_t b0, size_t b1) {
         if (depth < best_depth) { best_depth = depth; best = cur; }
     }
     return best;
+}
+
+/* Root box of a flex/grid item, bounded by the container box page_view stamped on
+ * the item's runs (pv_run.cont_box_id). The container's own box is an ANCESTOR of
+ * the items, never an item box: without the bound, items whose elements carry no box
+ * of their own all resolved to the CONTAINER's box and each painted the container's
+ * background over its own column -- a `justify-content:space-between` header drew its
+ * band twice with the page showing through the middle. */
+static int item_root_box(const rd_doc *doc, size_t b0, size_t b1) {
+    return item_root_box_in(doc, b0, b1,
+                            (b0 < rd_count(doc)) ? rd_at(doc, b0)->cont_box_id : -1);
 }
 
 /* Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis
@@ -4029,7 +4109,11 @@ static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
         if (!box_is_strict_descendant(doc, cbox, cont_box)) cbox = -1;
         return item_sides_from_box(doc, cbox);
     }
-    return item_sides_from_box(doc, item_root_box(doc, b0, b1));
+    /* An explicit container box wins over the run's stamp: a synthesised table has
+     * no stamp, and the caller computed the box every cell shares. */
+    return item_sides_from_box(doc,
+        (cont_box >= 0) ? item_root_box_in(doc, b0, b1, cont_box)
+                        : item_root_box(doc, b0, b1));
 }
 
 
@@ -4352,6 +4436,16 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     size_t ncols = is_grid ? (size_t)cdv.cols : g;
     if (ncols < 1) ncols = 1;
 
+    /* A table's grid is SYNTHESISED, so page_view stamps no container box on its cell
+     * runs. Left unbounded, each cell's item-box walk reaches the outermost box and
+     * the cell adopts it -- every row inheriting the <body> box's padding, which made
+     * a data table about twice as tall as Firefox's. The box every cell shares IS the
+     * table's enclosing box, so use it as the bound. Only tables take this path, so
+     * every author flex/grid container keeps its existing item boxes. */
+    int item_cbox = cdv.box_id;
+    if (item_cbox < 0 && cdv.is_table && end > start)
+        item_cbox = band_common_box(doc, start, end);
+
     if (nruns == 0 || grp_overflow || ncols > BT_MAX_CHILDREN) {
         /* Too many items for the grid engine: degrade to plain flow, but honor each
          * run's block_break so a table that overflows the engine still lays out one
@@ -4468,6 +4562,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
 
     bt_node kids[BT_MAX_CHILDREN];
     bt_node root;
+    /* Measured column widths for a synthesised table grid (automatic table layout);
+     * root.grid_track points here, so it must outlive the block that fills it. */
+    int table_track[PV_GRID_TRACKS];
+    memset(table_track, 0, sizeof table_track);
     memset(&root, 0, sizeof root);
     memset(kids, 0, sizeof kids[0] * g);
     root.gap = (double)cdv.gap;
@@ -4493,7 +4591,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             const rd_block *bk = rd_at(doc, gstart[j]);
             bt_node *kid = &kids[pos_of[j]];
             item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
-                                                cid, cdv.box_id);
+                                                cid, item_cbox);
             kid->display = BX_DISPLAY_BLOCK;
             /* An item that is a nested container reads its flex props from that
              * container's descriptor (item_*): bk is a run INSIDE the nested
@@ -4555,6 +4653,61 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 kids[pos_of[j]].grid_row_span = bk->row_span;
             }
         }
+        /* Automatic table layout (CSS 2.1 §17.5.2): a table's columns are as wide as
+         * their widest cell, not an equal share of the page. Splitting evenly made a
+         * two-character "Qty" column claim a quarter of the width while the long
+         * description column wrapped every row into two or three lines -- the table
+         * came out ~3x taller than Firefox and its narrow columns nearly empty.
+         *
+         * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
+         * the author sized no track and no cell spans columns, so an author
+         * `display:grid` keeps the historical equal split byte-for-byte and colspan
+         * still goes through the engine's own placement. */
+        if (is_grid && cdv.is_table && ncols <= PV_GRID_TRACKS) {
+            int author_track = 0, spans = 0;
+            for (int t = 0; t < PV_GRID_TRACKS; ++t)
+                if (cdv.col_w[t] != 0) author_track = 1;
+            for (size_t j = 0; j < g; ++j)
+                if (rd_at(doc, gstart[j])->grid_span > 1) spans = 1;
+            if (!author_track && !spans) {
+                double colw[PV_GRID_TRACKS];
+                for (size_t t = 0; t < PV_GRID_TRACKS; ++t) colw[t] = 0.0;
+                for (size_t j = 0; j < g; ++j) {
+                    size_t c = j % ncols;
+                    /* The column holds the cell's whole border box, so its own
+                     * padding/border/margin counts -- measuring text alone leaves
+                     * every cell overflowing its column by its padding. */
+                    item_sides cs = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                                                        cid, item_cbox);
+                    double mw = measure_item_content_w(cr, w, th, doc,
+                                                       gstart[j], gstart[j + 1])
+                              + cs.pl + cs.pr + cs.bl + cs.br + cs.ml + cs.mr;
+                    if (mw > colw[c]) colw[c] = mw;
+                }
+                double sum = 0.0;
+                for (size_t t = 0; t < ncols; ++t) sum += colw[t];
+                /* A table wider than its containing block shrinks proportionally
+                 * rather than overflowing: the columns keep their relative weights,
+                 * which is what automatic table layout does when it runs out of room. */
+                double avail = content_w - (double)cdv.gap * (double)(ncols - 1);
+                if (avail < 1.0) avail = 1.0;
+                if (sum > avail && sum > 0.0) {
+                    double k = avail / sum;
+                    for (size_t t = 0; t < ncols; ++t) colw[t] *= k;
+                }
+                for (size_t t = 0; t < PV_GRID_TRACKS; ++t) {
+                    double px = (t < ncols) ? colw[t] : 0.0;
+                    if (px < 1.0 && t < ncols) px = 1.0;
+                    /* CEIL, never round: the track is an integer but the measurement
+                     * is not, and a track half a pixel narrower than its widest cell
+                     * makes that cell wrap into a second line -- which is the very
+                     * thing content-sized columns exist to prevent. */
+                    table_track[t] = (int)ceil(px - 0.001);
+                }
+                root.grid_track = table_track;
+                root.grid_ntrack = PV_GRID_TRACKS;
+            }
+        }
     }
 
     /* First pass: column widths (heights still 0). */
@@ -4599,7 +4752,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * (spec/page_view.md §4 "Ítems flex/grid"). block_id < 0 (table cells,
          * author CSS off) => no box => byte-identical to the pre-existing path. */
         item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
-                                            cid, cdv.box_id);
+                                            cid, item_cbox);
         int rb = sd.box;
         item_box[j] = rb;
         const pv_box_def *rbd = (rb >= 0) ? rd_box_at(doc, (size_t)rb) : NULL;
@@ -5062,6 +5215,45 @@ static int band_common_box(const rd_doc *doc, size_t start, size_t end) {
     return (ncommon > 0) ? common[ncommon - 1] : -1;
 }
 
+/* The box a float band nests inside — the band's SHARED context, opened on the parent
+ * state before the columns are flowed (spec/float.md §6b.1).
+ *
+ * band_common_box alone is wrong for a band of exactly ONE float: the innermost box
+ * an ancestor-OR-SELF of a single block is that block's own box, so the float's own
+ * background/padding was opened in the PARENT's coordinates -- a lone `float:right`
+ * sidebar painted its box at the parent's left edge while its text packed right.
+ *
+ * With >= 2 distinct float_ids the common box is shared by two different floats, so it
+ * is a genuine wrapper and stays on the parent state (that is what keeps a wrapping
+ * position:relative panel painting behind the columns). With exactly one, every box
+ * below the parent's already-open stack belongs to that float and must be opened
+ * inside its column, so the shared context is the deepest box ALREADY OPEN on the
+ * band's common path. A wrapper that also holds later non-floated content is still
+ * opened -- by that content's own reconcile, like any other block's box. */
+static int band_shared_box(const rd_doc *doc, const rc_state *s,
+                           size_t start, size_t end) {
+    int first = rd_at(doc, start)->float_id;
+    for (size_t k = start + 1; k < end; ++k) {
+        if (rd_at(doc, k)->float_id != first)
+            return band_common_box(doc, start, end);
+    }
+    int common[RC_BOX_STACK_MAX];
+    int ncommon = box_path_of(doc, rd_at(doc, start)->block_id, common);
+    for (size_t k = start + 1; k < end && ncommon > 0; ++k) {
+        int path[RC_BOX_STACK_MAX];
+        int n = box_path_of(doc, rd_at(doc, k)->block_id, path);
+        int m = 0;
+        while (m < ncommon && m < n && common[m] == path[m]) ++m;
+        ncommon = m;
+    }
+    int keep = -1;
+    for (int i = 0; i < ncommon && i < s->box_depth; ++i) {
+        if (s->box_stack[i].block_id != common[i]) break;
+        keep = common[i];
+    }
+    return keep;
+}
+
 /* Lays a float band [start, end) — a maximal run of blocks each with float_id >= 0 —
  * side by side inside the current box context (spec/float.md). Blocks are grouped by
  * float_id into items (document order); each item's width is its author box_w (px or
@@ -5073,15 +5265,17 @@ static int band_common_box(const rd_doc *doc, size_t start, size_t end) {
  * Structure, applied by default. */
 static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                               rc_state *s, const ui_theme *th, double content_w,
-                              const rd_doc *doc, size_t start, size_t end) {
+                              const rd_doc *doc, size_t start, size_t end,
+                              int band_box) {
     flush_line(L, s, th);
     double ctx_left, ctx_w;
     rc_box_context(s, content_w, &ctx_left, &ctx_w);
     if (ctx_w < 1.0) ctx_w = 1.0;
-    /* Boxes at or above this are the band's shared context (already opened on the
-     * parent state); per-column reconciliation stops here so only boxes strictly
-     * inside a column are (re)opened for that column. */
-    int band_box = band_common_box(doc, start, end);
+    /* band_box (from band_shared_box, computed by the caller BEFORE its reconcile
+     * opened it) is the band's shared context: boxes at or above it are already open
+     * on the parent state, so per-column reconciliation stops there and only boxes
+     * strictly inside a column are opened for that column. A lone float's own box is
+     * NOT shared and therefore belongs to the column (spec/float.md §6b.1). */
 
     /* Group consecutive blocks by float_id into items (one floated element = one item). */
     size_t gstart[BT_MAX_CHILDREN + 1];
@@ -5241,7 +5435,26 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             L->boxes[b].top += base_top + row_top;
         }
     }
-    s->cur_top = base_top + row_top + row_h;
+    /* A single float on a single row must NOT push the following content down: it
+     * shortens the line boxes beside it (CSS 2.1 §9.5). Register the exclusion and
+     * leave cur_top at the band's top, so the next paragraph flows alongside and
+     * widens again below the float. Multi-item / multi-row bands keep advancing
+     * exactly as before, which is what keeps the two-column era layout (Slashdot,
+     * 960.gs) byte-identical. spec/float.md §6b.3. */
+    if (g == 1 && cur_row == 0 && row_h > 0.0 && s->nfloats < RC_FLOAT_MAX) {
+        fx_float_rect *fr = &s->floats[s->nfloats++];
+        fr->top    = base_top;
+        fr->bottom = base_top + row_h;
+        /* The INNER edge the float steals, in the band context's coordinates: past
+         * its right side for a left float, its left side for a right float. */
+        fr->edge   = (side[0] == 1) ? outx[0] : outx[0] + width[0];
+        fr->side   = side[0];
+        s->float_depth = s->box_depth;
+        s->float_avail = ctx_w;
+        s->cur_top = base_top;
+    } else {
+        s->cur_top = base_top + row_top + row_h;
+    }
 }
 
 static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
@@ -5322,7 +5535,19 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * threw both away. The box is left OPEN: the next block's reconcile (or
              * close_all_boxes at the end) finalizes its height, so it wraps the whole
              * container. */
+            /* A flex/grid container establishes its own formatting context, so it
+             * goes BELOW any live float rather than flowing beside it. */
+            rc_float_clear(&s);
             int cbox = container_box_of(doc, i, j);
+            /* A synthesised table grid stamps no container box, so container_box_of
+             * finds none and every open box would be closed -- the table then starts
+             * at x = 0 and loses the <body> padding Firefox keeps. The box every cell
+             * shares IS the table's enclosing box, exactly as layout_container derives
+             * it for the cells' item boxes. */
+            if (cbox < 0) {
+                const pv_cont_def *tcd = rd_cont_at(doc, (size_t)rootc);
+                if (tcd != NULL && tcd->is_table) cbox = band_common_box(doc, i, j);
+            }
             reconcile_boxes(cr, w, L, &s, th, doc, content_w, cbox, i);
             double in_l, in_w;
             rc_box_context(&s, content_w, &in_l, &in_w);
@@ -5338,6 +5563,14 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         /* (The old Stage-2 own-box skip lived here; Stage 2d above subsumes it —
          * the subtree walk finds the block's own box first.) */
 
+        /* The block's own `clear` ends the float context: it drops below the tallest
+         * live float (spec/float.md §6b.3). This is what puts a clear:both footer
+         * under the columns instead of beside them. */
+        if (b->float_clear != 0 && b->float_id < 0) {
+            flush_line(L, &s, th);
+            rc_float_clear(&s);
+        }
+
         /* Float band (spec/float.md): a maximal run of blocks each with float_id >= 0
          * lays side by side. Unlike a flex/grid container it does NOT close the open
          * boxes — it reconciles to the band's COMMON box so a wrapping
@@ -5351,11 +5584,15 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 if (bj->float_id < 0 || bj->float_clear != 0) break;
                 ++j;
             }
-            reconcile_boxes(cr, w, L, &s, th, doc, content_w, band_common_box(doc, i, j), i);
+            /* A new band ends the previous float context: consecutive bands stack,
+             * as they always have (spec/float.md §6b.3). */
+            rc_float_clear(&s);
+            int shared = band_shared_box(doc, &s, i, j);
+            reconcile_boxes(cr, w, L, &s, th, doc, content_w, shared, i);
             double mt, mb;
             block_margins(th, b, &mt, &mb);
             s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
-            layout_float_band(cr, w, L, &s, th, content_w, doc, i, j);
+            layout_float_band(cr, w, L, &s, th, content_w, doc, i, j, shared);
             s.prev_bottom = mb;
             i = j - 1;  /* the loop's ++i moves past the band */
             continue;
@@ -5457,6 +5694,9 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     }
     close_all_boxes(L, &s, th);
     flush_line(L, &s, th);
+    /* A float taller than the text beside it still occupies the page: end the float
+     * context so total_h covers it (spec/float.md §6b.3). */
+    rc_float_clear(&s);
     L->total_h = s.cur_top;
 }
 

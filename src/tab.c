@@ -515,7 +515,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nc, sizeof nc) != 0) return -1;
     for (size_t ci = 0; ci < nc; ++ci) {
         const pv_cont_def *cd = pv_cont_at(v, ci);
-        int32_t cf[21 + PV_GRID_TRACKS];
+        int32_t cf[22 + PV_GRID_TRACKS];
         size_t k = 0;
         cf[k++] = (int32_t)cd->parent_id;
         cf[k++] = (int32_t)cd->parent_item;
@@ -533,6 +533,7 @@ static int write_view(int wfd, const pv_view *v) {
         cf[k++] = (int32_t)cd->grid_flow;
         cf[k++] = (int32_t)cd->box_id;
         cf[k++] = (int32_t)cd->anon_row;
+        cf[k++] = (int32_t)cd->is_table;
         /* item flex props of a nested container (2026-08-01; read_view mirrors). */
         cf[k++] = (int32_t)cd->item_grow;
         cf[k++] = (int32_t)cd->item_shrink;
@@ -1845,7 +1846,7 @@ static int read_view(int fd, pv_view **out) {
         if (read_full(fd, &nc, sizeof nc) != 0) { pv_free(v); return -1; }
         if (nc > PV_MAX_CONTAINERS_WIRE) { pv_free(v); return -1; }
         for (size_t ci = 0; ci < nc; ++ci) {
-            int32_t cf[21 + PV_GRID_TRACKS];
+            int32_t cf[22 + PV_GRID_TRACKS];
             if (read_full(fd, cf, sizeof cf) != 0) { pv_free(v); return -1; }
             pv_cont_def cd;
             memset(&cd, 0, sizeof cd);
@@ -1866,6 +1867,7 @@ static int read_view(int fd, pv_view **out) {
             cd.grid_flow     = cf[k++];
             cd.box_id        = cf[k++];
             cd.anon_row      = cf[k++];
+            cd.is_table      = cf[k++];
             cd.item_grow       = cf[k++];
             cd.item_shrink     = cf[k++];
             cd.item_basis      = cf[k++];

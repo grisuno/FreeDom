@@ -331,6 +331,34 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
   `[1, PV_MAX_GRID_COLS]`). `<th>` es negrita. Así la capa de presentación reusa el motor flex/grid
   (`box_tree`) y las celdas se alinean en columnas. `colspan`/`rowspan` quedan fuera de alcance
   (tabla rectangular).
+  - **Ancho automático de columna (`is_table`, 2026-08-10).** El grid de una tabla se
+    **sintetiza** acá, así que hay que poder distinguirlo de un `display:grid` de autor: el
+    descriptor lleva `pv_cont_def.is_table = 1` (hilvanado por `write_view`/`read_view` —
+    el arreglo de campos pasa de `21` a `22 + PV_GRID_TRACKS`,
+    `[[freedom-render-pipeline-ipc]]`).
+
+    **Dado** una tabla sin `grid-template-columns` de autor y sin `colspan`
+    **cuando** se maqueta
+    **entonces** cada columna mide **el ancho de su celda más ancha** (CSS 2.1 §17.5.2,
+    *automatic table layout*) y la tabla **encoge** a la suma, en vez de repartir el ancho
+    en partes iguales. Si la suma no cabe, las columnas se escalan proporcionalmente.
+
+    **Dado** un `display:grid` de autor (o una tabla con `colspan`)
+    **entonces** el reparto en partes iguales queda **byte-idéntico**: solo `is_table` entra
+    en este camino.
+
+    El medidor vive en `layout_container` (necesita métricas de Cairo): `measure_item_content_w`
+    por celda **más su propio padding/borde/margen** — medir solo el texto deja cada celda
+    desbordando su columna por su padding. El track se toma con **techo, nunca redondeo**: un
+    track medio píxel más angosto que su celda más ancha la parte en dos líneas, que es
+    exactamente lo que el ancho por contenido viene a evitar.
+  - **La caja de ítem de una celda no puede ser la del `<body>` (2026-08-10).** Como el grid es
+    sintetizado, `page_view` no estampa `cont_box_id` en los runs de celda; sin ese límite la
+    búsqueda de la caja de ítem caminaba hasta la caja **más externa** y cada celda adoptaba la
+    del `<body>`, heredando su padding: cada fila reservaba ~78px en vez de ~38px y la tabla
+    salía al doble de alto que en Firefox. `layout_container` deriva el límite como **la caja
+    que comparten todas las celdas** (`band_common_box`), y el `reconcile` del contenedor usa
+    la misma, así la tabla conserva el padding del `<body>` en vez de arrancar en `x = 0`.
   - **La celda recolectada resuelve su presentación de autor (Hito 23b-9).** El run recolectado
     llama `resolve_context` **en el elemento celda** (no solo en nodos de texto): las reglas
     propias del `td`/`th` (`td{color}`) y la herencia de fila/tabla (zebra

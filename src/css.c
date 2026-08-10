@@ -11,6 +11,7 @@
 
 #include <limits.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -4071,11 +4072,22 @@ static size_t block_end(const char *s, size_t open, size_t n) {
 
 #define CSS_MEDIA_TOK 128u
 
-/* Leading non-negative integer of a length value ("600px" -> 600), unit ignored. */
-static int css_px(const char *v) {
+/* A media-query length in px ("600px" -> 600, "40em" -> 640).
+ *
+ * The unit is load-bearing and used to be discarded, which made the reader return
+ * the bare number: `(min-width: 40em)` compared 40 against the viewport and every
+ * em/rem-based query was therefore true no matter how wide the query asked for.
+ * Inside a media query `em`/`rem` refer to the INITIAL font size (16px), never the
+ * author's root font-size -- which is exactly why rem_rebase leaves at-rule
+ * preludes alone. An unknown unit keeps the historical bare-number reading. */
+static int media_len_px(const char *v) {
     double d;
     const char *e;
-    return parse_num(v, &d, &e) ? round_clamp(d, 0, CSS_LEN_MAX) : 0;
+    if (!parse_num(v, &d, &e)) return 0;
+    while (*e == ' ' || *e == '\t') ++e;
+    if (csel_ci_eq(e, "em") || csel_ci_eq(e, "rem")) d *= 16.0;
+    else if (csel_ci_eq(e, "pt")) d *= 4.0 / 3.0;
+    return round_clamp(d, 0, CSS_LEN_MAX);
 }
 
 /* Trims ASCII spaces/tabs from both ends of a NUL-terminated string, in place. */
@@ -4114,8 +4126,8 @@ static int media_part_matches(const char *p, const css_media *m) {
         if (strcmp(name, "prefers-color-scheme") == 0)
             return (strcmp(value, "dark") == 0)  ? (m->prefers_dark ? 1 : 0)
                  : (strcmp(value, "light") == 0) ? (m->prefers_dark ? 0 : 1) : 0;
-        if (strcmp(name, "min-width") == 0) return m->width_px >= css_px(value);
-        if (strcmp(name, "max-width") == 0) return m->width_px <= css_px(value);
+        if (strcmp(name, "min-width") == 0) return m->width_px >= media_len_px(value);
+        if (strcmp(name, "max-width") == 0) return m->width_px <= media_len_px(value);
         return 0;  /* unknown feature: fail closed */
     }
     if (strcmp(p, "all") == 0) return 1;
@@ -4443,6 +4455,173 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
     }
 }
 
+/* --- rem rebased on the root font-size -------------------------------------
+ *
+ * The root element's font-size defines what `rem` means for the whole sheet, and
+ * `html { font-size: 62.5% }` (so 1rem == 10px) is a near-universal idiom. Holding
+ * rem at a fixed 16px rendered every such page 1.6x too large. See spec/css.md
+ * "rem is rebased on the root font-size".
+ *
+ * The rebase rewrites the sheet TEXT rather than threading a base through the 22
+ * interp_len call sites, so one change covers font-size, line-height, every box
+ * length, calc()/min()/max()/clamp(), shorthands, gradients and var()-substituted
+ * values at once, with no unit decoder left behind on the old base. */
+
+/* True for a character that continues a CSS identifier, so a `rem` glued to one is
+ * part of a name and not a unit. */
+static int rem_ident_ch(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+        || (c >= '0' && c <= '9') || c == '_' || c == '-';
+}
+
+/* True when a number may START at a character preceded by prev -- i.e. prev cannot
+ * be part of a longer name or number. A sign is deliberately allowed through so the
+ * '-' of `-1.5rem` stays in the output and keeps the value negative. */
+static int rem_num_starts_after(char prev) {
+    if ((prev >= 'a' && prev <= 'z') || (prev >= 'A' && prev <= 'Z')) return 0;
+    if (prev >= '0' && prev <= '9') return 0;
+    return prev != '_' && prev != '.' && prev != '#' && prev != '%';
+}
+
+/* Appends the px equivalent of num rem. Returns 0 (and writes nothing) when the
+ * product is not a sane finite length or does not fit, so the caller can fall back
+ * to copying the source token verbatim -- fail closed to the pre-rebase reading
+ * rather than emitting a bogus length. */
+static int rem_emit_px(char *out, size_t cap, size_t *o, double px) {
+    if (!(px > -1e9 && px < 1e9)) return 0;
+    size_t space = cap - *o;
+    if (space == 0) return 0;
+    int r = snprintf(out + *o, space, "%.4f", px);
+    if (r < 0 || (size_t)r >= space) return 0;
+    size_t end = *o + (size_t)r;
+    while (end > *o && out[end - 1] == '0') --end;          /* 10.0800 -> 10.08 */
+    if (end > *o && out[end - 1] == '.') --end;             /* 16.0000 -> 16    */
+    if (cap - end < 3) return 0;
+    out[end++] = 'p';
+    out[end++] = 'x';
+    out[end] = '\0';
+    *o = end;
+    return 1;
+}
+
+/* Rewrites every `<number>rem` length in s[0,n) into `<number x rem_px>px`. Pure:
+ * text in, freshly malloc'd NUL-terminated text out (*outlen excludes the NUL).
+ * Returns NULL on OOM or an unrepresentable size; the caller then keeps the
+ * unrebased sheet, so a failure costs correctness on rem and nothing else.
+ *
+ * Only DECLARATION VALUES are touched -- the scan tracks brace depth and rewrites
+ * solely between a ':' inside a block and the next ';'/'{'/'}'. That single rule is
+ * what keeps three classes of text safe at once:
+ *   - at-rule preludes (`@media (min-width: 48rem)`), which sit at depth 0 and where
+ *     rem means the INITIAL 16px, never the author's root (see media_len_px);
+ *   - selectors, including a class that merely spells a unit (`.mt-1rem`);
+ *   - quoted strings and url(...), skipped explicitly since `content: "5rem"` is
+ *     text and a data: URI is opaque. */
+static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) {
+    /* V-001: a rebased token is at most ~3x its source ("1rem" -> "10.08px" plus
+     * headroom for the widest finite product), and the multiply must not wrap. */
+    if (n > (SIZE_MAX - 64) / 3) return NULL;
+    size_t cap = 3 * n + 64;
+    char *out = (char *)malloc(cap);
+    if (out == NULL) return NULL;
+
+    size_t o = 0, i = 0;
+    int depth = 0, in_value = 0;
+    while (i < n && o + 1 < cap) {
+        char c = s[i];
+
+        if (c == '"' || c == '\'') {                 /* quoted text: verbatim */
+            char q = c;
+            out[o++] = s[i++];
+            while (i < n && o + 2 < cap) {
+                if (s[i] == '\\' && i + 1 < n) { out[o++] = s[i++]; out[o++] = s[i++]; continue; }
+                int closing = (s[i] == q);
+                out[o++] = s[i++];
+                if (closing) break;
+            }
+            continue;
+        }
+        if (in_value && (c == 'u' || c == 'U') && i + 4 <= n
+            && csel_lower_ch(s[i + 1]) == 'r' && csel_lower_ch(s[i + 2]) == 'l'
+            && s[i + 3] == '(') {                    /* url(...): opaque */
+            while (i < n && o + 1 < cap) {
+                int closing = (s[i] == ')');
+                out[o++] = s[i++];
+                if (closing) break;
+            }
+            continue;
+        }
+        if (c == '{')      { ++depth; in_value = 0; out[o++] = s[i++]; continue; }
+        if (c == '}')      { if (depth > 0) --depth; in_value = 0; out[o++] = s[i++]; continue; }
+        if (c == ';')      { in_value = 0; out[o++] = s[i++]; continue; }
+        if (c == ':')      { if (depth > 0) in_value = 1; out[o++] = s[i++]; continue; }
+
+        /* A `<number>rem` unit token, and only in a declaration value. */
+        if (in_value && (c == '.' || (c >= '0' && c <= '9'))
+            && (i == 0 || rem_num_starts_after(s[i - 1]))
+            && !(i >= 2 && s[i - 1] == '-' && s[i - 2] == '-')) {
+            double num;
+            const char *endp;
+            if (parse_num(s + i, &num, &endp)) {
+                size_t nlen = (size_t)(endp - (s + i));
+                size_t u = i + nlen;
+                if (u + 3 <= n && csel_lower_ch(s[u]) == 'r' && csel_lower_ch(s[u + 1]) == 'e'
+                    && csel_lower_ch(s[u + 2]) == 'm'
+                    && (u + 3 >= n || !rem_ident_ch(s[u + 3]))
+                    && rem_emit_px(out, cap, &o, num * rem_px)) {
+                    i = u + 3;
+                    continue;
+                }
+            }
+        }
+        out[o++] = s[i++];
+    }
+    if (i < n) { free(out); return NULL; }   /* fail closed rather than truncate */
+    out[o] = '\0';
+    *outlen = o;
+    return out;
+}
+
+/* Rewinds a sheet to empty while keeping every allocation, so the text can be
+ * re-parsed in place. Caps are preserved; only the counters move. */
+static void sheet_rewind(css_sheet *sh) {
+    sh->ndecls = 0;
+    sh->nrules = 0;
+    sh->nsels = 0;
+    sh->ncustom = 0;
+    sh->nbg_urls = 0;
+    sh->ncontent_urls = 0;
+    sh->nkeyframes = 0;
+    sh->nfont_faces = 0;
+}
+
+static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+                                        const css_media *m, const char *root_scope,
+                                        css_custom_prop *tab, size_t cap,
+                                        size_t *ntab, int depth);
+static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+                        const css_media *media, int depth);
+
+/* Replaces a sheet's contents with the result of parsing s[0,n). Custom properties
+ * are collected first so every var() reference resolves against the complete table
+ * regardless of document order, exactly as on the first parse. */
+static void sheet_reparse(css_sheet *sh, const char *s, size_t n,
+                          const css_media *m, const char *root_scope) {
+    sheet_rewind(sh);
+    collect_custom_props_scoped(s, 0, n, m, root_scope,
+                                sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
+    parse_block(sh, s, 0, n, m, 0);
+}
+
+/* The root element's font-size in px, as the cascade resolves it (16px when the
+ * sheet leaves the root alone). Tag "html" is what PSEUDO_ROOT matches, so `:root`
+ * rules are included. */
+static double sheet_root_font_px(const css_sheet *sh) {
+    css_style root = css_resolve(sh, "html", NULL, NULL, 0, NULL, 0);
+    if (root.font_scale <= 0) return 16.0;
+    return 16.0 * (double)root.font_scale / 100.0;
+}
+
 /* Removes C-style block comments into a fresh NUL-terminated buffer (each comment
  * becomes one space). Caller frees. */
 static char *strip_comments(const char *text, size_t len, size_t *outlen) {
@@ -4499,6 +4678,29 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
         collect_custom_props_scoped(clean, 0, clen, m, root_scope,
                                     sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
         parse_block(sh, clean, 0, clen, m, 0);
+
+        /* Second pass, only when the sheet redefines the root font-size: `rem` is
+         * the ROOT em, so `html{font-size:62.5%}` makes 1rem 10px and not 16px.
+         * The size is read back through the real cascade, so specificity,
+         * !important, document order and @media gating all apply with no second
+         * selector engine to keep in sync. A sheet that leaves the root alone never
+         * reaches the rebase, so the default path is byte-identical. */
+        double rem_px = sheet_root_font_px(sh);
+        if (rem_px != 16.0) {
+            size_t rlen = 0;
+            char *rebased = rem_rebase(clean, clen, rem_px, &rlen);
+            if (rebased != NULL) {
+                sheet_reparse(sh, rebased, rlen, m, root_scope);
+                /* The rebase must be a FIXED POINT. If rewriting the sheet also
+                 * moved the root size, the root declared its own font-size in rem
+                 * -- where the spec says rem means the INITIAL 16px, not the value
+                 * being defined -- so the rewrite fed on itself. Abstain and
+                 * restore the unrebased parse rather than compound the error. */
+                if (sheet_root_font_px(sh) != rem_px)
+                    sheet_reparse(sh, clean, clen, m, root_scope);
+                free(rebased);
+            }
+        }
         free(clean);
     }
     *out = sh;

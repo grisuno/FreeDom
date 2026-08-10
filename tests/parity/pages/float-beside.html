@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>float beside</title>
+<style>
+body { font-family: sans-serif; margin: 0; padding: 16px; background: #fff; color: #111; }
+.sidebar { float: left; width: 220px; background: #d8e8f8; padding: 8px; }
+.aside { float: right; width: 160px; background: #f8e0d8; padding: 8px; }
+.clearer { clear: both; height: 24px; }
+p { margin: 0 0 12px 0; }
+h1 { font-size: 24px; margin: 0 0 12px 0; }
+</style></head>
+<body>
+<h1>Text flowing beside floats</h1>
+<div class="sidebar">Left sidebar box 1 with its own words inside it.</div>
+<p>This paragraph must wrap to the RIGHT of the left sidebar, not below it. Firefox flows the inline content into the space that remains next to the float, shortening each line box while the float overlaps it. A browser that pushes this text below the float wastes the whole right column, and every two-column page collapses into a single tall stack.</p>
+<div class="aside">Right aside 1</div>
+<p>This paragraph must wrap to the LEFT of the right aside. Once the float ends, the line boxes return to the full container width again, which is why the final lines of a long paragraph run edge to edge across the content box.</p>
+<div class="clearer"></div>
+<div class="sidebar">Left sidebar box 2 with its own words inside it.</div>
+<p>This paragraph must wrap to the RIGHT of the left sidebar, not below it. Firefox flows the inline content into the space that remains next to the float, shortening each line box while the float overlaps it. A browser that pushes this text below the float wastes the whole right column, and every two-column page collapses into a single tall stack.</p>
+<div class="aside">Right aside 2</div>
+<p>This paragraph must wrap to the LEFT of the right aside. Once the float ends, the line boxes return to the full container width again, which is why the final lines of a long paragraph run edge to edge across the content box.</p>
+<div class="clearer"></div>
+<div class="sidebar">Left sidebar box 3 with its own words inside it.</div>
+<p>This paragraph must wrap to the RIGHT of the left sidebar, not below it. Firefox flows the inline content into the space that remains next to the float, shortening each line box while the float overlaps it. A browser that pushes this text below the float wastes the whole right column, and every two-column page collapses into a single tall stack.</p>
+<div class="aside">Right aside 3</div>
+<p>This paragraph must wrap to the LEFT of the right aside. Once the float ends, the line boxes return to the full container width again, which is why the final lines of a long paragraph run edge to edge across the content box.</p>
+<div class="clearer"></div>
+<div class="sidebar">Left sidebar box 4 with its own words inside it.</div>
+<p>This paragraph must wrap to the RIGHT of the left sidebar, not below it. Firefox flows the inline content into the space that remains next to the float, shortening each line box while the float overlaps it. A browser that pushes this text below the float wastes the whole right column, and every two-column page collapses into a single tall stack.</p>
+<div class="aside">Right aside 4</div>
+<p>This paragraph must wrap to the LEFT of the right aside. Once the float ends, the line boxes return to the full container width again, which is why the final lines of a long paragraph run edge to edge across the content box.</p>
+<div class="clearer"></div>
+<div class="sidebar">Left sidebar box 5 with its own words inside it.</div>
+<p>This paragraph must wrap to the RIGHT of the left sidebar, not below it. Firefox flows the inline content into the space that remains next to the float, shortening each line box while the float overlaps it. A browser that pushes this text below the float wastes the whole right column, and every two-column page collapses into a single tall stack.</p>
+<div class="aside">Right aside 5</div>
+<p>This paragraph must wrap to the LEFT of the right aside. Once the float ends, the line boxes return to the full container width again, which is why the final lines of a long paragraph run edge to edge across the content box.</p>
+<div class="clearer"></div>
+<div class="sidebar">Left sidebar box 6 with its own words inside it.</div>
+<p>This paragraph must wrap to the RIGHT of the left sidebar, not below it. Firefox flows the inline content into the space that remains next to the float, shortening each line box while the float overlaps it. A browser that pushes this text below the float wastes the whole right column, and every two-column page collapses into a single tall stack.</p>
+<div class="aside">Right aside 6</div>
+<p>This paragraph must wrap to the LEFT of the right aside. Once the float ends, the line boxes return to the full container width again, which is why the final lines of a long paragraph run edge to edge across the content box.</p>
+<div class="clearer"></div>
+</body></html>

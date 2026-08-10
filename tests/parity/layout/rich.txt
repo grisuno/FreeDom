@@ -27,18 +27,18 @@ content_w=952 total_h=1697.2 nbox=0 nrow=40 npositioned=0
   row[23] top=1353.5 h=27.6 x_off=24.0
   row[24] top=1381.1 h=27.6 x_off=24.0
   row[25] top=1428.6 h=40.8 x_off=0.0
-  row[26] top=1489.3 h=27.6 x_off=0.0 w=317.3
-  row[27] top=1489.3 h=27.6 x_off=317.3 w=317.3
-  row[28] top=1489.3 h=27.6 x_off=634.7 w=317.3
-  row[29] top=1516.9 h=27.6 x_off=0.0 w=317.3
-  row[30] top=1516.9 h=27.6 x_off=317.3 w=317.3
-  row[31] top=1516.9 h=27.6 x_off=634.7 w=317.3
-  row[32] top=1544.5 h=27.6 x_off=0.0 w=317.3
-  row[33] top=1544.5 h=27.6 x_off=317.3 w=317.3
-  row[34] top=1544.5 h=27.6 x_off=634.7 w=317.3
-  row[35] top=1572.1 h=27.6 x_off=0.0 w=317.3
-  row[36] top=1572.1 h=27.6 x_off=317.3 w=317.3
-  row[37] top=1572.1 h=27.6 x_off=634.7 w=317.3
+  row[26] top=1489.3 h=27.6 x_off=0.0 w=48.0
+  row[27] top=1489.3 h=27.6 x_off=48.0 w=68.0
+  row[28] top=1489.3 h=27.6 x_off=116.0 w=51.0
+  row[29] top=1516.9 h=27.6 x_off=0.0 w=48.0
+  row[30] top=1516.9 h=27.6 x_off=48.0 w=68.0
+  row[31] top=1516.9 h=27.6 x_off=116.0 w=51.0
+  row[32] top=1544.5 h=27.6 x_off=0.0 w=48.0
+  row[33] top=1544.5 h=27.6 x_off=48.0 w=68.0
+  row[34] top=1544.5 h=27.6 x_off=116.0 w=51.0
+  row[35] top=1572.1 h=27.6 x_off=0.0 w=48.0
+  row[36] top=1572.1 h=27.6 x_off=48.0 w=68.0
+  row[37] top=1572.1 h=27.6 x_off=116.0 w=51.0
   row[38] top=1618.4 h=32.4 x_off=0.0
   row[39] top=1669.6 h=27.6 x_off=0.0
   cont[0] disp=5 parent=-1 parent_item=-1 gap=0 justify=0 cols=3 box=-1
