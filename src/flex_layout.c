@@ -331,6 +331,21 @@ void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) {
     *col = index % ncols;
 }
 
+/* CSS Flexbox 4.5. See the contract in flex_layout.h. */
+double fx_auto_min_size(double min_content, double basis, double author_min,
+                        int scroll_container) {
+    /* An explicit author min-width means min-width is not `auto`, so the automatic
+     * minimum size never applies -- it wins whether it is larger or smaller. */
+    if (author_min >= 0.0) return author_min;
+    /* A scroll container's automatic minimum size is 0: its content can be scrolled
+     * (or clipped) rather than forcing the box wider. */
+    if (scroll_container) return 0.0;
+    double mc = nn(min_content);
+    double b  = nn(basis);
+    /* Content size suggestion, clamped by the specified size suggestion. */
+    return (mc < b) ? mc : b;
+}
+
 const char *fx_justify_name(fx_justify j) {
     switch (j) {
         case FX_JUSTIFY_START:         return "start";

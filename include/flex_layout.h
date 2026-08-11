@@ -142,6 +142,30 @@ typedef struct fx_float_rect {
 fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
                           double avail, double *out_l, double *out_r);
 
+/* Automatic minimum size of a flex item along the main axis (CSS Flexbox 4.5), in px.
+ * This is what `min-width: auto` -- the INITIAL value, so the case for almost every
+ * item on the web -- resolves to. It is the floor fx_flex_line must not shrink an
+ * item below, and getting it wrong is visible everywhere: with a floor of zero an
+ * overflowing line grinds every item down to a sliver and its text falls to one
+ * character per line.
+ *
+ *   min_content  the item's min-content size (its longest unbreakable word, or a
+ *                replaced element's intrinsic size), in the same border-box+margin
+ *                units as fx_item.basis. Negative is treated as 0.
+ *   basis        the item's base size, used as the "specified size suggestion": the
+ *                content-based minimum is clamped by it, so an item the author sized
+ *                small is not inflated by one long word. Negative is treated as 0.
+ *   author_min   the author's own `min-width` in px when they set one (min-width is
+ *                then NOT `auto` and wins outright, larger OR smaller), or < 0 when
+ *                unset.
+ *   scroll_container  non-zero when the item's `overflow` is anything but `visible`.
+ *                Such an item has an automatic minimum size of ZERO -- this is what
+ *                makes the near-universal `overflow:hidden` truncation idiom work.
+ *
+ * Pure, total, no allocation. The result is never negative. */
+double fx_auto_min_size(double min_content, double basis, double author_min,
+                        int scroll_container);
+
 /* Stable, short English name of a justify mode for structured/agent output. Never
  * NULL; an unknown enum value yields "start". */
 const char *fx_justify_name(fx_justify j);

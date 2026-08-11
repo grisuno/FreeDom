@@ -1663,6 +1663,72 @@ static void test_build_grid_container(void **state) {
 
 /* Hito 23b-2: the flex/grid container params now come from the cascade, so a
  * <style> rule (not only inline style=) feeds gap/justify/columns. */
+/* CSS inheritance starts at the ROOT element. The context walk used to stop at the
+ * rendering root (<body>), so every `html { ... }` declaration was dropped: with
+ * `html{font-size:90%}` -- DuckDuckGo's, and an ordinary idiom next to 62.5% -- all
+ * text stayed at 16px while the author asked for 14.4, making every line on the page
+ * ~11% too tall. Inherited properties must reach a run from <html> too. */
+static void test_build_root_element_style_inherits(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>html{font-size:200%;color:#ff0000}</style></head>"
+        "<body><p>root sized</p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "root sized");
+    assert_non_null(r);
+    assert_int_equal(r->font_scale, 200);
+    assert_int_equal(r->fg_rgb, 0xff0000);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A percentage on the root is relative to the UA default, and a nearer ancestor
+ * still wins over it -- the root is the START of the inheritance chain, not an
+ * override of it. */
+static void test_build_root_font_size_is_overridable(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>html{font-size:200%}body{font-size:50%}</style></head>"
+        "<body><p>nearer wins</p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "nearer wins");
+    assert_non_null(r);
+    /* 200% at the root, halved again at body: the relative factors compose. */
+    assert_int_equal(r->font_scale, 100);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* CSS Flexbox 4.1: "An absolutely-positioned child of a flex container does not
+ * participate in flex layout" -- it is not a flex item, so it neither takes a share
+ * of the line nor contributes to sizing it. It used to be grouped as an ordinary
+ * item, which is what squeezed a `flex-grow:1` heading down to a sliver whenever it
+ * had an absolutely-positioned sibling (the measured Wikipedia title bug). */
+static void test_build_abs_child_is_not_a_flex_item(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='display:flex;position:relative'>"
+        "<h1 style='flex-grow:1'>title</h1>"
+        "<div style='position:absolute'>menu</div>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *title = find_text(v, "title");
+    const pv_run *menu = find_text(v, "menu");
+    assert_non_null(title);
+    assert_non_null(menu);
+    /* The in-flow child is a real item of the container. */
+    assert_true(title->cont_id >= 0);
+    assert_int_equal(title->cont_display, BX_DISPLAY_FLEX);
+    /* The absolutely positioned one is not: it must not claim an item slot in
+     * that container, or the line is sized as if it were there. */
+    assert_int_not_equal(menu->cont_id, title->cont_id);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_flex_container_from_sheet(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -2102,6 +2168,41 @@ static void test_build_text_overflow_and_word_break(void **state) {
     assert_non_null(plain);
     assert_int_equal(plain->text_overflow, 0);
     assert_int_equal(plain->word_break, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* CSS 2.1 11.2: visibility INHERITS, and a descendant can turn itself back on.
+ * It used to be read only off an element's own decorated box, so hidden text with
+ * no box of its own (a bare <span>, the near-universal screen-reader label) painted
+ * in full, and a visibility:visible child of a hidden parent stayed hidden. */
+static void test_build_visibility_inherits_and_overrides(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='visibility:hidden'>gone "
+        "<span>also gone</span> <span style='visibility:visible'>back on</span></div>"
+        "<p>A <span style='visibility:hidden'>inline gone</span> B</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *g = find_text(v, "gone ");
+    assert_non_null(g);
+    assert_int_equal(g->visibility, CSS_VIS_HIDDEN);
+    /* Inherited by a child that says nothing. */
+    const pv_run *ag = find_text(v, "also gone");
+    assert_non_null(ag);
+    assert_int_equal(ag->visibility, CSS_VIS_HIDDEN);
+    /* The nearest ancestor wins, so the child turns itself back on. */
+    const pv_run *on = find_text(v, "back on");
+    assert_non_null(on);
+    assert_int_equal(on->visibility, CSS_VIS_VISIBLE);
+    /* An inline span with no box of its own is still hidden. */
+    const pv_run *ig = find_text(v, "inline gone");
+    assert_non_null(ig);
+    assert_int_equal(ig->visibility, CSS_VIS_HIDDEN);
+    /* Its visible siblings are untouched. */
+    const pv_run *a = find_text(v, "A ");
+    assert_non_null(a);
+    assert_int_equal(a->visibility, 0);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -3201,6 +3302,9 @@ int main(void) {
         cmocka_unit_test(test_build_table_cells_distinct_items),
         cmocka_unit_test(test_build_table_colspan_rowspan),
         cmocka_unit_test(test_build_grid_container),
+        cmocka_unit_test(test_build_root_element_style_inherits),
+        cmocka_unit_test(test_build_root_font_size_is_overridable),
+        cmocka_unit_test(test_build_abs_child_is_not_a_flex_item),
         cmocka_unit_test(test_build_flex_container_from_sheet),
         cmocka_unit_test(test_build_grid_columns_from_sheet),
         cmocka_unit_test(test_build_container_sheet_inline_cascade),
@@ -3218,6 +3322,7 @@ int main(void) {
         cmocka_unit_test(test_build_text_ext_2026_07_10_batch),
         cmocka_unit_test(test_build_boxdeco_dims_alone_trigger_box),
         cmocka_unit_test(test_build_text_overflow_and_word_break),
+        cmocka_unit_test(test_build_visibility_inherits_and_overrides),
         cmocka_unit_test(test_build_boxdeco_defaults_no_box),
         cmocka_unit_test(test_build_boxdeco_sibling_blocks_distinct_ids),
         cmocka_unit_test(test_build_boxdeco_shared_id_within_block),

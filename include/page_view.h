@@ -174,6 +174,12 @@ typedef struct pv_run {
      * with caps.css. Defaults: 0 (unset). */
     int     text_overflow;   /* css_text_overflow */
     int     word_break;      /* css_word_break */
+    /* visibility (css_visibility), resolved from the nearest ancestor that sets it.
+     * It INHERITS (CSS 2.1 11.2) and a descendant may set itself back to `visible`,
+     * so it rides here with the other inherited text properties rather than being
+     * read off the element's own box: text with no box of its own must hide too.
+     * The box-level copy (pv_box_def.visibility) still gates the DECORATION. 0 unset. */
+    int     visibility;      /* css_visibility */
     /* 2026-07-10 wiring batch, both inherited like the rest of the text
      * extensions and gated by caps.css downstream. image_rendering asks the
      * painter for a nearest-neighbour filter when blitting a decoded image
@@ -731,6 +737,7 @@ typedef struct pv_text_ext {
     int opacity, valign, text_indent, white_space;
     int list_style;
     int text_overflow, word_break;
+    int visibility;      /* css_visibility, 0 unset -- inherits (CSS 2.1 11.2) */
     int text_decoration_color;     /* 0xRRGGBB, or -1 (unset) */
     int text_decoration_style;     /* css_text_decoration_style, 0 unset */
     int text_decoration_thickness; /* px, -1 unset, 0 from-font */
@@ -756,6 +763,19 @@ typedef struct pv_text_ext {
 
 /* Initialises every field of *e to its "unset" sentinel. NULL-safe. */
 void pv_text_ext_reset(pv_text_ext *e);
+
+/* Does content with this resolved visibility paint? (CSS 2.1 11.2, pure.)
+ * `box_hidden` is what the enclosing box stack decided (an ancestor box carrying
+ * visibility:hidden); `run_visibility` is the value page_view resolved for the run
+ * itself by walking its ancestors (css_visibility, 0 = unset).
+ *
+ * An explicit value on the run WINS over the box stack in both directions: that is
+ * what makes `visibility` inherited-but-overridable, so a descendant of a hidden
+ * subtree can declare `visible` and reappear. With nothing declared the box stack
+ * decides, which keeps a box-only hidden subtree behaving exactly as before.
+ * Returns 1 when the content must not paint (its layout space is still reserved --
+ * unlike display:none, which removes the box entirely). */
+int pv_content_hidden(int box_hidden, int run_visibility);
 
 void pv_set_text_ext(pv_view *v, const pv_text_ext *e);
 

@@ -538,6 +538,33 @@ static void test_justify_name(void **state) {
     assert_string_equal(fx_justify_name((fx_justify)999), "start");
 }
 
+
+/* CSS Flexbox 4.5: the automatic minimum size of a flex item. `min-width:auto` (the
+ * initial value) resolves to the item's content-based minimum, NOT to zero -- an
+ * overflowing line stops shrinking its items at their min-content width instead of
+ * grinding them down to a sliver where every line holds one character. */
+static void test_auto_min_size_is_min_content(void **state) {
+    (void)state;
+    /* Nothing declared: the content-based minimum wins, clamped by the base size. */
+    assert_float_equal(fx_auto_min_size(40.0, 300.0, -1.0, 0), 40.0, 1e-9);
+    /* A base size SMALLER than min-content clamps it (CSS: the content size
+     * suggestion is clamped by the specified size suggestion), so an item the author
+     * sized small does not get inflated by a long word. */
+    assert_float_equal(fx_auto_min_size(120.0, 50.0, -1.0, 0), 50.0, 1e-9);
+    /* An explicit author min-width is not `auto`: it wins outright, in both
+     * directions. */
+    assert_float_equal(fx_auto_min_size(40.0, 300.0, 90.0, 0), 90.0, 1e-9);
+    assert_float_equal(fx_auto_min_size(400.0, 300.0, 10.0, 0), 10.0, 1e-9);
+    /* A scroll container (overflow other than visible) has an automatic minimum
+     * size of ZERO -- that is what makes the near-universal `min-width:0`/
+     * `overflow:hidden` truncation idiom work. */
+    assert_float_equal(fx_auto_min_size(400.0, 300.0, -1.0, 1), 0.0, 1e-9);
+    /* An explicit min-width still applies inside a scroll container. */
+    assert_float_equal(fx_auto_min_size(400.0, 300.0, 25.0, 1), 25.0, 1e-9);
+    /* Degenerate/negative inputs never yield a negative minimum. */
+    assert_float_equal(fx_auto_min_size(-5.0, -5.0, -1.0, 0), 0.0, 1e-9);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_grow_equal),
@@ -582,6 +609,7 @@ int main(void) {
         cmocka_unit_test(test_float_insets_both_sides_take_the_tightest),
         cmocka_unit_test(test_float_insets_never_starve_the_line),
         cmocka_unit_test(test_float_insets_edges),
+        cmocka_unit_test(test_auto_min_size_is_min_content),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

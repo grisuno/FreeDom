@@ -2745,12 +2745,17 @@ static int expand_flex(const char *val, css_decl *dst, int cap) {
             ++ntok;
             double num;
             const char *end;
-            if (parse_num(tok, &num, &end) && *end == '\0') {  /* unitless number */
+            /* A unitless number fills the grow slot, then the shrink slot. Once both
+             * factors are taken only <'flex-basis'> is left in the grammar, and a
+             * unitless ZERO is a valid <length> there -- so `flex: 1 1 0` (one of the
+             * most common idioms on the web) means basis 0, not a third factor.
+             * interp_flex_basis rejects a bare non-zero number, so `flex: 1 1 10`
+             * still fails closed rather than inventing a unit. */
+            if (parse_num(tok, &num, &end) && *end == '\0' && !(have_g && have_sh)) {
                 if (num < 0.0) return 0;
                 int x100 = round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
                 if (!have_g)       { g = x100;  have_g = 1; }
-                else if (!have_sh) { sh = x100; have_sh = 1; }
-                else return 0;
+                else               { sh = x100; have_sh = 1; }
             } else {                                            /* a length / auto */
                 int b;
                 if (have_ba || !interp_flex_basis(tok, &b)) return 0;

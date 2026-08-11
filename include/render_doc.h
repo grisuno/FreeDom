@@ -112,6 +112,13 @@ typedef struct rd_block {
     int              list_style_pos;
     int              text_overflow;  /* author text-overflow (css_text_overflow); set only with caps.css, else 0 */
     int              word_break;     /* author word-break (css_word_break); set only with caps.css, else 0 */
+    /* Inherited visibility (css_visibility) of the run, resolved by page_view from
+     * the nearest ancestor that sets it. CSS 2.1 11.2: a hidden element keeps its
+     * layout space but paints nothing, and a descendant may set itself `visible`
+     * again. The box-level copy (pv_box_def.visibility) gates the DECORATION; this
+     * one gates the TEXT, which may have no box of its own. Set only with caps.css,
+     * else 0 (unset -> visible). */
+    int              visibility;
     /* 2026-07-10 wiring batch, same caps.css gate. image_rendering is meaningful
      * on RD_IMAGE (pixelated/crisp-edges ask the painter for a nearest-neighbour
      * scaling filter); caret_color on RD_INPUT (tints the focused control's

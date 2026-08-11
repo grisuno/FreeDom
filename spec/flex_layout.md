@@ -62,6 +62,8 @@ fx_status   fx_grid_columns(double avail, size_t ncols, double gap,
 fx_status   fx_grid_columns_weighted(double avail, size_t ncols, double gap,
                                      const int *track, size_t ntrack,
                                      double *col_x, double *col_w);
+double      fx_auto_min_size(double min_content, double basis, double author_min,
+                            int scroll_container);
 void        fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);
 fx_status   fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                                size_t *out_row, size_t *out_col);
@@ -134,6 +136,29 @@ que ocupa en el eje principal (`kid->w` es la caja de margen; la caja de borde s
   `[1, ncols]`; si el span no cabe en las columnas restantes de la fila, el ítem **salta a la fila
   siguiente** (auto-placement CSS). Escribe fila y columna inicial por ítem. `nitems == 0` → `FX_OK`;
   `ncols == 0`, `nitems > FX_MAX_ITEMS` o punteros de salida NULL → error (falla cerrado).
+
+### `fx_auto_min_size` (2026-08-11)
+
+*Automatic minimum size* de un ítem flex sobre el eje principal (CSS Flexbox §4.5): lo que resuelve
+`min-width: auto`, que es el valor **inicial** y por lo tanto el caso de casi todo ítem de la web.
+Es el piso que `fx_flex_line` no debe cruzar al encoger.
+
+Antes esto era un **1.0 px hardcodeado** en el llamante. Con un piso de ~0, una línea que desborda
+tritura cada ítem hasta una astilla y su texto cae a **un carácter por línea** — el síntoma que se
+venía atribuyendo a "el contenedor reparte 0 px".
+
+- `author_min >= 0` ⇒ gana **tal cual**, más grande o más chico: si el autor declaró `min-width`,
+  la propiedad ya no es `auto` y el mínimo automático no aplica.
+- `scroll_container != 0` (overflow distinto de `visible`) ⇒ **0**. Es lo que hace funcionar el
+  idioma casi universal de truncado con `overflow:hidden`.
+- Si no: `min(min_content, basis)` — la *content size suggestion* acotada por la *specified size
+  suggestion*, para que un ítem que el autor hizo chico no se infle por una palabra larga.
+- Entradas negativas se tratan como 0; el resultado **nunca** es negativo. Puro, total, sin
+  asignación.
+
+`min_content` y `basis` vienen en las mismas unidades (border-box + márgenes) que `fx_item.basis`.
+El llamante mide `min_content` fluyendo el ítem al extremo angosto de la misma vara con la que mide
+`max-content`, y **se saltea esa medición** cuando no puede cambiar la respuesta.
 
 ### `fx_justify_name`
 - Nombre en inglés, corto y estable (`"start"`, `"space-between"`, ...) para salida estructurada.

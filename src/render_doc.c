@@ -118,6 +118,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->list_style_pos = 0;
     b->text_overflow = 0;
     b->word_break = 0;
+    b->visibility = 0;
     /* 2026-07-10 wiring batch (image-rendering on RD_IMAGE, caret-color on
      * RD_INPUT), gated by caps.css downstream like the rest. */
     b->image_rendering = 0;
@@ -420,6 +421,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->list_style_pos = r->list_style_pos;
                 lb->text_overflow = r->text_overflow;
                 lb->word_break = r->word_break;
+                lb->visibility = r->visibility;
                 /* Gradient text (2026-07-19): pure author presentation, same
                  * gate as fg_rgb -- with caps.css off the glyphs keep the
                  * theme color. */

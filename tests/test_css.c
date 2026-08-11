@@ -2567,6 +2567,19 @@ static void test_flex_item(void **state) {
     css_style fe = css_parse_inline("flex:2 3 10px", 0);
     assert_int_equal(fe.flex_grow, 200); assert_int_equal(fe.flex_shrink, 300);
     assert_int_equal(fe.flex_basis, 10);
+    /* CSS Flexbox 7.1.1: the third component is a <'flex-basis'>, and a unitless
+     * zero is a valid <length>. `flex:1 1 0` is one of the most common idioms on
+     * the web; parsing it as a third flex FACTOR (and dropping the declaration)
+     * left the item at its content width instead of growing. */
+    css_style fz = css_parse_inline("flex:1 1 0", 0);
+    assert_int_equal(fz.flex_grow, 100); assert_int_equal(fz.flex_shrink, 100);
+    assert_int_equal(fz.flex_basis, 0);
+    css_style fz2 = css_parse_inline("flex:2 0 0", 0);
+    assert_int_equal(fz2.flex_grow, 200); assert_int_equal(fz2.flex_shrink, 0);
+    assert_int_equal(fz2.flex_basis, 0);
+    /* Only zero is unitless-valid: a non-zero third number is not a length, so the
+     * declaration stays invalid (fail closed, no invented unit). */
+    assert_int_equal(css_parse_inline("flex:1 1 10", 0).flex_basis, CSS_LEN_UNSET);
     assert_int_equal(css_parse_inline("order:-2", 0).order, -2);
     assert_int_equal(css_parse_inline("order:5", 0).order, 5);
     assert_int_equal(css_parse_inline("color:red", 0).order, CSS_LEN_UNSET);

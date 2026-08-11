@@ -94,7 +94,17 @@ del `style` en línea: `pv_build_full` concatena los bloques `<style>` del docum
 acotado a 1 MiB) y los parsea **una vez** con el módulo puro `[[css]]` en una hoja acotada. Por cada
 ancestro de un run se calcula su `css_style` (reglas de la hoja + su propio `style=`, ganando el
 inline; `[[css]]` hace la cascada por especificidad y orden), y se fusionan los campos heredables
-desde el ancestro más cercano. El cálculo por elemento usa **`css_resolve_el`**: `cch_element_style` (módulo `css_chain`, extraído de page_view por anti-monolito)
+desde el ancestro más cercano.
+
+**El recorrido llega al elemento RAÍZ (2026-08-11).** La herencia CSS empieza en `<html>`, no en el
+raíz de *render*. `resolve_context` cortaba en `if (p == base) break;` con `base == <body>`, así que
+**toda declaración `html { ... }` se descartaba en silencio** — `font-size`, `color`, `font-family`.
+Como `html{font-size:90%|62.5%|...}` es idioma corriente, eso era un **multiplicador de tamaño de
+toda la página**: el texto quedaba a 16 px cuando el autor pedía otra cosa, y además envolvía antes,
+componiendo en alto. El corte se eliminó: por encima de `<html>` solo está el nodo documento, que no
+es elemento, de modo que el bucle termina igual y sigue **acotado por la profundidad del DOM**.
+Ojo con la trampa que lo escondía: `rem_rebase` (`[[css]]`) ya leía el `font-size` de la raíz para
+reescribir unidades `rem`, así que `rem` funcionaba **mientras el texto heredado no**. El cálculo por elemento usa **`css_resolve_el`**: `cch_element_style` (módulo `css_chain`, extraído de page_view por anti-monolito)
 arma la **cadena de ancestros** del elemento (`fill_css_node` extrae tag/id/clases/atributos por
 nivel, acotada a 32 → fail-closed) y se la pasa al módulo, de modo que los **combinadores
 descendiente (`A B`) e hijo (`A > B`)** resuelven sobre el DOM real. Desde el **Hito 23b-9** la

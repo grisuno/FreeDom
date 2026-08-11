@@ -183,6 +183,7 @@ static void run_init_common(pv_run *r) {
     r->list_style_pos = 0;
     r->text_overflow = 0;
     r->word_break = 0;
+    r->visibility = 0;
     r->image_rendering = 0;
     r->caret_color = -1;
     r->object_fit = 0;
@@ -528,6 +529,7 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
     r->white_space = e->white_space;
     r->text_overflow = e->text_overflow;
     r->word_break = e->word_break;
+    r->visibility = e->visibility;
     r->text_decoration_color = e->text_decoration_color;
     r->text_decoration_style = e->text_decoration_style;
     r->text_decoration_thickness = e->text_decoration_thickness;
@@ -1072,6 +1074,13 @@ typedef struct pv_box_info {
  * it (they inherit in CSS). list_style drives the <li> marker (structural); the
  * rest are gated by caps.css downstream. */
 
+/* CSS 2.1 11.2, pure: see the contract in page_view.h. */
+int pv_content_hidden(int box_hidden, int run_visibility) {
+    if (run_visibility == CSS_VIS_HIDDEN || run_visibility == CSS_VIS_COLLAPSE) return 1;
+    if (run_visibility == CSS_VIS_VISIBLE) return 0;
+    return box_hidden ? 1 : 0;
+}
+
 void pv_text_ext_reset(pv_text_ext *e) {
     if (e == NULL) return;
     e->font_family = 0; e->text_transform = 0;
@@ -1080,6 +1089,7 @@ void pv_text_ext_reset(pv_text_ext *e) {
     e->opacity = -1; e->valign = 0; e->text_indent = PV_LEN_UNSET;
     e->white_space = 0; e->list_style = 0;
     e->text_overflow = 0; e->word_break = 0;
+    e->visibility = 0;
     e->text_decoration_color = -1;
     e->text_decoration_style = 0;
     e->text_decoration_thickness = -1;
@@ -1117,6 +1127,9 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     if (e->text_overflow == 0 && cs->text_overflow != CSS_TO_UNSET)
         e->text_overflow = cs->text_overflow;
     if (e->word_break == 0 && cs->word_break != CSS_WB_UNSET) e->word_break = cs->word_break;
+    /* visibility inherits (CSS 2.1 11.2). Nearest-ancestor-wins is what lets a
+     * descendant declare `visible` and reappear inside a hidden subtree. */
+    if (e->visibility == 0 && cs->visibility != CSS_VIS_UNSET) e->visibility = cs->visibility;
     if (e->text_decoration_color == -1 && cs->text_decoration_color != -1)
         e->text_decoration_color = cs->text_decoration_color;
     if (e->text_decoration_style == 0 && cs->text_decoration_style != CSS_TDS_UNSET)
@@ -1903,6 +1916,12 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 /* The leaf block's own `clear` ends any preceding float band (float.md). */
                 cont->float_clear = (cs.clear != CSS_CLEAR_UNSET) ? cs.clear : 0;
             }
+            /* Out-of-flow state BELOW this element: whether the run already crossed
+             * an absolutely/fixed positioned boundary strictly inside `p`. A flex/grid
+             * container's item is `prev_el` (p's direct child on this walk), so this
+             * -- not the post-update oof_seen -- is what decides item membership: an
+             * element that is ITSELF the container still owns its own children. */
+            int oof_below = oof_seen;
             /* An absolutely/fixed positioned self-or-ancestor takes this run out of
              * flow: mark it so no enclosing float claims the run (float:none per
              * CSS 2.2 section 9.7). Checked before the float test below so the
@@ -2043,7 +2062,15 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             {
                 int is_real = is_real_cont;
                 int is_anon = is_anon_cont;
-                if (reg != NULL && (is_real || is_anon)) {
+                /* CSS Flexbox 4.1: an absolutely positioned child of a flex (or grid)
+                 * container is NOT an item -- it is placed by the positioner and takes
+                 * no share of the line. Skipping the whole block leaves the run with no
+                 * membership in this container (and none in any container further out,
+                 * since it is out of flow with respect to those too), while the
+                 * container itself is still registered by the in-flow siblings that DO
+                 * belong to it. Without this an absolutely positioned sibling ate a
+                 * full item share and starved the growing items beside it. */
+                if (reg != NULL && (is_real || is_anon) && !oof_below) {
                     int cid_here = container_id(reg, p);
                     if (cid_here >= 0) {
                         pv_cont_def *cd = &reg->def[cid_here];
@@ -2157,7 +2184,13 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             have_prev_el = 1;
             prev_el = p;
         }
-        if (p == base) break;
+        /* NOT stopped at `base`. Inheritance in CSS starts at the ROOT element, and
+         * base is the RENDERING root (<body>), one level below it. Breaking here
+         * dropped every `html { ... }` declaration -- font-size, color, font-family --
+         * and `html{font-size:90%|62.5%|...}` is an ordinary idiom, so the whole page
+         * rendered at the wrong text size. Only the document node sits above <html>
+         * and it is not an element, so the loop ends immediately after it either way;
+         * the walk stays bounded by the DOM depth exactly as before. */
     }
 
     /* The walk ended with relative font-sizes and no absolute anchor: the product

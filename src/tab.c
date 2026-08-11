@@ -256,7 +256,7 @@ static int write_field(int fd, const char *s) {
  *            text_align,font_scale,font_abs,line_scale,text_decoration,
  *            font_family,text_transform,letter_spacing,word_spacing,
  *            shadow_dx,shadow_dy,shadow_color,opacity,valign,text_indent,white_space,
- *            text_overflow,word_break,
+ *            text_overflow,word_break,visibility,
  *            cont_id,cont_display,cont_gap,cont_justify,cont_cols,cont_rows,
  *            cont_col_w[PV_GRID_TRACKS],grid_span,
  *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
@@ -293,7 +293,7 @@ static int write_view(int wfd, const pv_view *v) {
         };
         /* Block A: fixed-width scalars between the head strings and the grid array
          * (image dims, colors, the whole text-presentation set, container params). */
-        int32_t a[37] = {
+        int32_t a[38] = {
             (int32_t)r->img_w, (int32_t)r->img_h, (int32_t)r->fg_rgb, (int32_t)r->bg_rgb,
             (int32_t)r->text_align, (int32_t)r->font_scale, (int32_t)r->line_scale,
             (int32_t)r->text_decoration, (int32_t)r->font_family, (int32_t)r->text_transform,
@@ -308,6 +308,8 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)r->object_fit,
             (int32_t)r->cont_id, (int32_t)r->cont_display, (int32_t)r->cont_gap,
             (int32_t)r->cont_justify, (int32_t)r->cont_cols, (int32_t)r->cont_rows,
+            /* inherited visibility (appended; read_view mirrors this) */
+            (int32_t)r->visibility,
         };
         int32_t gtw[PV_GRID_TRACKS + 1];
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
@@ -1563,7 +1565,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[36];
+        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[36];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1576,7 +1578,8 @@ static int read_view(int fd, pv_view **out) {
                 toverflow = a[19], wbreak = a[20], tdeco_color = a[21], tdeco_style = a[22],
                 tdeco_thick = a[23], ttsize = a[24], tdir = a[25], tfvar = a[26],
                 tlpos = a[27], tirend = a[28], tcaret = a[29], tobject_fit = a[30],
-                cid = a[31], cdisp = a[32], cgap = a[33], cjust = a[34], ccols = a[35], crows = a[36];
+                cid = a[31], cdisp = a[32], cgap = a[33], cjust = a[34], ccols = a[35], crows = a[36],
+                rvis = a[37];
         int32_t fgrow = b[0], fshrink = b[1], fbasis = b[2], forder = b[3], fdir = b[4],
                 citem = b[5], cwrap = b[6], crgap = b[7], calign = b[8], fself = b[9],
                 flside = b[10], flid = b[11], flclear = b[12], bl = b[13], br = b[14],
@@ -1638,6 +1641,7 @@ static int read_view(int fd, pv_view **out) {
             e.opacity = (int)opac; e.valign = (int)valgn; e.text_indent = (int)tindent;
             e.white_space = (int)wspace;
             e.text_overflow = (int)toverflow; e.word_break = (int)wbreak;
+            e.visibility = (int)rvis;
             e.text_decoration_color = (int)tdeco_color;
             e.text_decoration_style = (int)tdeco_style;
             e.text_decoration_thickness = (int)tdeco_thick;

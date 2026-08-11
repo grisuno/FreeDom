@@ -2848,6 +2848,10 @@ typedef struct rc_frag {
      * fragments of one row) instead of the solid color. */
     int         grad_n, grad_angle;
     int         grad_c[4];
+    /* visibility:hidden reaching this fragment (CSS 2.1 11.2), resolved per-run by
+     * page_view so inline text with no box of its own hides too, and a descendant
+     * that declares `visible` reappears. Space is reserved, glyphs do not paint. */
+    int         hidden;
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT, RC_VIDEO, RC_SVG } rc_rowkind;
@@ -3416,7 +3420,18 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
         r->bg_w = s->bg_w;
         r->x_off = s->indent_px;
         r->align = s->align; r->blk = NULL;
-        r->hidden = (s->hidden_from != 0);
+        /* Each fragment carries its own visibility gate, so the ROW only short-
+         * circuits when every one of them is hidden (an empty row inherits the box
+         * stack's answer). Short-circuiting on the box stack alone would bury a
+         * descendant that declared `visibility:visible` inside a hidden subtree. */
+        {
+            int all_hidden = (s->hidden_from != 0);
+            for (size_t fk = r->first; fk < r->first + r->count && fk < L->nfrag; ++fk) {
+                if (!L->frags[fk].hidden) { all_hidden = 0; break; }
+                all_hidden = 1;
+            }
+            r->hidden = all_hidden;
+        }
     }
     s->cur_top += h;
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
@@ -3465,6 +3480,9 @@ typedef struct rc_ext {
     /* Gradient text (2026-07-19): glyph fill gradient (n 0 = none). */
     int    grad_n, grad_angle;
     int    grad_c[4];
+    /* Resolved visibility of the run these fragments come from (css_visibility,
+     * 0 unset). Combined with the box stack by pv_content_hidden. */
+    int    visibility;
 } rc_ext;
 
 /* Emits one fragment at the current pen position, advancing it. Shared by the
@@ -3496,6 +3514,7 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->font_variant = x->font_variant;
         f->grad_n = x->grad_n; f->grad_angle = x->grad_angle;
         for (int gt = 0; gt < 4; ++gt) f->grad_c[gt] = x->grad_c[gt];
+        f->hidden = pv_content_hidden(s->hidden_from != 0, x->visibility);
     }
     s->pen_x += width;
     if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
@@ -3808,7 +3827,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         if (r != NULL) {
             r->kind = RC_INPUT; r->top = top; r->height = h; r->ascent = fe.ascent;
             r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-            r->align = 0; r->blk = b; r->hidden = (s->hidden_from != 0);
+            r->align = 0; r->blk = b; r->hidden = pv_content_hidden(s->hidden_from != 0, b->visibility);
             r->bg_w = content_w;   /* the column width; the translation pass adds x_off */
         }
         s->cur_top = top + h;
@@ -3826,7 +3845,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
             r->kind = RC_SVG; r->top = top; r->height = sh; r->ascent = sh;
             r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1;
             r->x_off = 0.0; r->align = b->text_align; r->blk = b;
-            r->hidden = (s->hidden_from != 0);
+            r->hidden = pv_content_hidden(s->hidden_from != 0, b->visibility);
             r->bg_w = sw;
         }
         s->cur_top = top + sh;
@@ -3851,7 +3870,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         if (r != NULL) {
             r->kind = RC_IMAGE; r->top = top; r->height = h; r->ascent = fe.ascent;
             r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-            r->align = 0; r->blk = b; r->hidden = (s->hidden_from != 0);
+            r->align = 0; r->blk = b; r->hidden = pv_content_hidden(s->hidden_from != 0, b->visibility);
             r->bg_w = content_w;   /* the column width; the translation pass adds x_off */
         }
         s->cur_top = top + h;
@@ -3868,7 +3887,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         if (r != NULL) {
             r->kind = RC_VIDEO; r->top = top; r->height = vh; r->ascent = fe.ascent;
             r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
-            r->align = 0; r->blk = b; r->hidden = (s->hidden_from != 0);
+            r->align = 0; r->blk = b; r->hidden = pv_content_hidden(s->hidden_from != 0, b->visibility);
             r->bg_w = content_w;   /* the column width; the translation pass adds x_off */
         }
         s->cur_top = top + vh;
@@ -3930,6 +3949,7 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     x.direction = b->direction;
     x.font_variant = b->font_variant;
     x.list_style_pos = b->list_style_pos;
+    x.visibility = b->visibility;
     /* Gradient text (2026-07-19). */
     x.grad_n = b->grad_text_n;
     x.grad_angle = b->grad_text_angle;
@@ -4197,6 +4217,11 @@ static int container_box_of(const rd_doc *doc, size_t start, size_t end) {
  * no realistic line wraps, small enough to stay far from any overflow in the
  * accumulating pen arithmetic. */
 #define FLEX_MEASURE_W  100000.0
+/* The other end of the same measuring stick: flowed this narrow, every legal break
+ * is taken, so the widest resulting line IS the item's MIN-CONTENT width (CSS Sizing
+ * 3 5.1). Like FLEX_MEASURE_W it is a measurement device, not a layout value -- no
+ * rendered geometry is ever placed at this width. */
+#define FLEX_MIN_MEASURE_W  1.0
 
 /* Intrinsic main-axis width (px) of a REPLACED block (image/svg/video/form control)
  * for flex-basis measurement. Returns < 0 for a non-replaced block, telling the
@@ -4287,6 +4312,7 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
                               const ui_theme *th, const rd_doc *doc,
                               size_t b0, size_t b1, const item_sides *sd,
                               double content_w);
+static int ov_box_clips(const pv_box_def *d);
 static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid);
 static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid);
 
@@ -4346,6 +4372,29 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
     if (basis > content_w) basis = content_w;
     if (basis < 1.0) basis = 1.0;
     return basis;
+}
+
+/* Automatic minimum size of one flex item (CSS Flexbox 4.5), in the same
+ * border-box+margin units flex_item_basis returns -- the floor fx_flex_line must not
+ * shrink it below. The RULE lives in fx_auto_min_size (pure, unit-tested); this
+ * wrapper only supplies the three measured inputs: the author's own `min-width`, the
+ * item's min-content width, and whether the item clips (a scroll container's
+ * automatic minimum size is 0, which is what makes `overflow:hidden` truncation
+ * work). The min-content pass is skipped whenever it cannot affect the answer, so
+ * the common cases cost nothing extra. */
+static double flex_item_min_main(cairo_t *cr, const browser_window *w,
+                                 const ui_theme *th, const rd_doc *doc,
+                                 size_t b0, size_t b1, const item_sides *sd,
+                                 double basis) {
+    const pv_box_def *d = (sd->box >= 0) ? rd_box_at(doc, (size_t)sd->box) : NULL;
+    double author_min = (d != NULL && d->box_min_w > 0) ? (double)d->box_min_w : -1.0;
+    int scroll = (d != NULL) ? ov_box_clips(d) : 0;
+    double mc = 0.0;
+    if (author_min < 0.0 && !scroll) {
+        mc = measure_item_w_at(cr, w, th, doc, b0, b1, FLEX_MIN_MEASURE_W)
+           + sd->pl + sd->pr + sd->bl + sd->br + sd->ml + sd->mr;
+    }
+    return fx_auto_min_size(mc, basis, author_min, scroll);
 }
 
 /* Lays the container's items inside the content rect [origin_x, origin_x+content_w).
@@ -4678,10 +4727,11 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 kid->basis = flex_item_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
                                              &sd, content_w);
             }
+            kid->min_main = flex_item_min_main(cr, w, th, doc, gstart[j],
+                                               gstart[j + 1], &sd, kid->basis);
             int akw = (it_align != CSS_AK_UNSET && it_align != CSS_AK_AUTO)
                       ? it_align : cdv.align_items;
             kid->align = css_align_to_bt(akw);
-            kid->min_main = 1.0;
         }
     } else {
         root.display = BX_DISPLAY_GRID;   /* flex row == grid with g columns, one row */
@@ -7874,6 +7924,10 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
     }
     for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
         const rc_frag *f = &L->frags[k];
+        /* visibility:hidden (CSS 2.1 11.2): the fragment kept its width so the line
+         * still breaks where it did, but nothing about it paints -- not the glyphs,
+         * not its inline background, not its decoration. */
+        if (f->hidden) continue;
         double fx = rx + f->x + jdx;
         /* Inline background (<code>, <mark>, a highlighted <span>): fills behind
          * THIS fragment's glyphs only, not the whole line. The row band above only
