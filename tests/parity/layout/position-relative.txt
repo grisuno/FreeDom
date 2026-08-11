@@ -1,16 +1,16 @@
 Stage 2 demo: position relative
 === Freedom layout ===
-content_w=952 total_h=383.2 nbox=5 nrow=7 npositioned=1
-  row[0] top=24.0 h=27.6 x_off=24.0 w=904.0
-  row[1] top=88.6 h=27.6 x_off=37.0 w=878.0
-  row[2] top=158.2 h=27.6 x_off=37.0 w=878.0
-  row[3] top=227.8 h=27.6 x_off=37.0 w=878.0
-  row[4] top=276.4 h=27.6 x_off=24.0 w=904.0
-  row[5] top=304.0 h=27.6 x_off=24.0 w=904.0
-  row[6] top=331.6 h=27.6 x_off=24.0 w=904.0
-  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=383.2
-  box[1] bid=1 x=24.0 top=67.6 w=904.0 h=61.6
-  box[2] bid=2 x=137.6 top=88.6 w=43.1 h=27.6
-  box[3] bid=3 x=24.0 top=137.2 w=904.0 h=61.6
-  box[4] bid=5 x=24.0 top=206.8 w=904.0 h=61.6
+content_w=952 total_h=351.0 nbox=5 nrow=7 npositioned=1
+  row[0] top=24.0 h=23.0 x_off=24.0 w=904.0
+  row[1] top=84.0 h=23.0 x_off=37.0 w=878.0
+  row[2] top=149.0 h=23.0 x_off=37.0 w=878.0
+  row[3] top=214.0 h=23.0 x_off=37.0 w=878.0
+  row[4] top=258.0 h=23.0 x_off=24.0 w=904.0
+  row[5] top=281.0 h=23.0 x_off=24.0 w=904.0
+  row[6] top=304.0 h=23.0 x_off=24.0 w=904.0
+  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=351.0
+  box[1] bid=1 x=24.0 top=63.0 w=904.0 h=57.0
+  box[2] bid=2 x=137.6 top=84.0 w=43.1 h=23.0
+  box[3] bid=3 x=24.0 top=128.0 w=904.0 h=57.0
+  box[4] bid=5 x=24.0 top=193.0 w=904.0 h=57.0
   pos[0] box=4 z=0 x=4.0 y=-2.0 w=0.0 h=0.0

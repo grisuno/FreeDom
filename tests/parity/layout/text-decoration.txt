@@ -1,10 +1,10 @@
 === Freedom layout ===
-content_w=952 total_h=367.0 nbox=0 nrow=8 npositioned=0
-  row[0] top=0.0 h=31.2 x_off=0.0
-  row[1] top=52.6 h=31.2 x_off=0.0
-  row[2] top=99.8 h=31.2 x_off=0.0
-  row[3] top=147.0 h=31.2 x_off=0.0
-  row[4] top=194.2 h=31.2 x_off=0.0
-  row[5] top=241.4 h=31.2 x_off=0.0
-  row[6] top=288.6 h=31.2 x_off=0.0
-  row[7] top=335.8 h=31.2 x_off=0.0
+content_w=952 total_h=325.4 nbox=0 nrow=8 npositioned=0
+  row[0] top=0.0 h=26.0 x_off=0.0
+  row[1] top=47.4 h=26.0 x_off=0.0
+  row[2] top=89.4 h=26.0 x_off=0.0
+  row[3] top=131.4 h=26.0 x_off=0.0
+  row[4] top=173.4 h=26.0 x_off=0.0
+  row[5] top=215.4 h=26.0 x_off=0.0
+  row[6] top=257.4 h=26.0 x_off=0.0
+  row[7] top=299.4 h=26.0 x_off=0.0

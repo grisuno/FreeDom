@@ -196,7 +196,7 @@ contrato está aquí.
 | :-- | :-- | :-- |
 | `body_font` (`UI_FONT_SIZE`) | **16.0 px** | Es el tamaño base de la web y, sobre todo, **el mismo root contra el que `css.c` resuelve `px`/`rem`**. Estaba en 14: todo el texto salía un 12 % más chico que en Firefox y, peor, un `font-size:40px` absoluto aterrizaba en `250 % × 14 = 35px`. Un solo número gobierna los dos lados o vuelven a divergir. |
 | `heading_scale[1..6]` | **2.0, 1.5, 1.17, 1.0, 0.83, 0.67** | Los múltiplos de CSS 2.1 §App.D / HTML. Estaban en 2.0/1.6/1.35/1.2/1.1/1.05: un `<h4>` se pintaba 1.2× cuando debe ser exactamente el tamaño del cuerpo. |
-| `line_spacing` | **1.2** | Aproxima `line-height: normal` de las fuentes que usa este host. Estaba en 1.3, que estiraba cada página. |
+| `line_spacing` | **1.0** | `line-height: normal` **ES** la caja de línea natural de la fuente: `ascent + descent` tal como la reporta Cairo/FreeType, sin factor extra. Medido contra Firefox en este host: una línea de 16 px mide **23 px** en ambos motores cuando el multiplicador es 1.0. Estaba en 1.2 (y antes en 1.3), y ese 1.2 se aplicaba **encima** de una caja que ya era la correcta ⇒ toda página sin `line-height` de autor salía un 20 % más alta. §4c. |
 | `heading` (color) | **igual que `text`** | En CSS `color` **hereda**; la hoja UA no le da color propio a un `<h1>`. El tema pintaba los títulos en azul marino, así que toda página sin `color` de autor salía bicolor donde Firefox la pinta negra. El campo se conserva por tema (oscuro/sepia siguen tiñendo texto y títulos juntos). |
 
 **Dado** un documento sin CSS de autor **cuando** se pinta **entonces** el cuerpo mide 16 px,
@@ -204,6 +204,71 @@ un `<h1>` 32 px y un `<h4>` 16 px, y ningún título toma un color que el docume
 
 `zoom` sigue escalando `body_font`, así que un `font-size` absoluto escala con el zoom
 (que es lo que hace un navegador real).
+
+## 4c. `line-height: normal` es la caja natural, no un múltiplo de ella (2026-08-10)
+
+El pintor calcula el alto de línea como `(line_asc + line_desc) * spacing`, donde
+`line_asc`/`line_desc` son las métricas **escaladas de la fuente**. Esa suma ya **es** la
+caja de línea que CSS llama `normal`; multiplicarla otra vez es inventar interlineado.
+
+**Dado** un `<div>` de `font-size: 16px` sin `line-height` de autor
+**cuando** se calcula su caja de línea
+**entonces** mide `ascent + descent` px (23 px con las fuentes de este host), el mismo
+número que reporta Firefox — **y no** `1.2 x` esa cantidad.
+
+- El multiplicador **solo** deja de ser 1.0 cuando el autor declara `line-height` (llega como
+  `line_scale`, un porcentaje) o cuando un tema lo pide explícitamente.
+- La regla del máximo por fragmento (CSS 2.1 §10.8) no cambia: la línea toma el mayor
+  interlineado de sus fragmentos.
+- **Por qué importa más de lo que parece:** es un factor multiplicativo sobre **cada línea de
+  cada página**, así que se compone con cualquier otra brecha vertical. Medido en
+  `make parity`: −23.03 puntos de una sola constante.
+
+## 4d. El margen UA sale de la etiqueta real, no de una conjetura (2026-08-10)
+
+La hoja UA de HTML le da margen vertical a **muy pocos** elementos: `p`, `h1`–`h6`, `ul`,
+`ol`, `menu`, `dl`, `pre`, `blockquote`, `figure`, `hr`. Todo lo demás —`div`, `section`,
+`header`, `article`, `footer`, `nav`, `main`, `td`, `tr`, `table`, `form`— tiene margen
+**cero**. Un navegador que le da a un `<div>` el `1em` de un `<p>` inserta una línea en
+blanco fantasma antes de **cada** bloque de la página.
+
+**Dado** un `<div>` sin `margin` de autor **cuando** se resuelve su caja UA
+**entonces** su margen vertical es **0**; **y dado** un `<p>` en la misma página
+**entonces** el suyo sigue siendo `1em`.
+
+El bloque no puede adivinar su etiqueta desde `rd_kind` (todo texto de cuerpo es
+`RD_PARAGRAPH`), así que la etiqueta viaja: `bx_ua_tag` es un código chico y estable que
+`page_view` resuelve del ancestro de nivel de bloque y que cruza el códec IPC como un
+`int32` más. Es **estructura**, no estilo de autor — un margen UA no abre sockets ni
+depende de `caps.css`, exactamente igual que el resto del box model UA
+(`CLAUDE.md` §7.2 "Layout != estilo de autor").
+
+`bx_ua_of_tag` / `bx_default_for_ua` son puras y comparten la **misma** `TAG_TABLE` que
+`bx_default_for_tag`: una sola fuente de verdad para la hoja UA.
+
+## 4e. El `line-height` del autor es múltiplo del `font-size`, no de la caja natural (2026-08-10)
+
+CSS 2.1 §10.8.1: `line-height: 1.4` significa **1.4 × el `font-size` del fragmento**. La
+caja de línea natural (`ascent + descent`) es **otra cosa**: en este host mide ≈ **1.44 ×**
+el `font-size`. Son dos unidades distintas y el pintor las estaba mezclando —aplicaba el
+factor del autor sobre la caja natural—, así que **todo** `line-height` de autor salía
+≈ 1.44× de más.
+
+**Dado** un fragmento de `font-size: 13px` con `line-height: 1.4`
+**cuando** se cierra su línea
+**entonces** aporta `13 × 1.4 = 18.2 px` de interlineado — **no** `(asc+desc) × 1.4 ≈ 26 px`.
+
+- El acumulador por línea (`line_lead_px`) guarda **píxeles**, no un factor: es el único
+  lugar donde las dos contribuciones son comparables. Se calcula en `flow_emit_frag`, que
+  es donde se conoce el `font-size` del fragmento.
+- La regla del máximo (§10.8) se mantiene: la línea toma el fragmento **más alto**. Un
+  fragmento sin `line-height` de autor aporta la caja natural × `line_spacing`.
+- Una línea sin ningún fragmento (bloque vacío que abre línea) cae al interlineado del
+  bloque, y si tampoco lo hay, al del tema. Nunca queda en cero.
+- **Por qué importa:** es el complemento de §4c. Una página **sin** `line-height` de autor
+  la arregla §4c; una página **con** `line-height` (todo buscador, todo portal moderno) solo
+  la arregla esto. Medido en `make parity`: −25.32 puntos, con `slashdot` pasando de
+  `h_ratio` 1.27 a **1.04**.
 
 ## 5. Tabla de estados (`bx_parse_display`)
 

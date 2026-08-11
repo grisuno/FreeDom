@@ -123,6 +123,32 @@ structural matching, never mis-match. page_view computes both with a bounded wal
 `:not()`/`:is()`/`:where()`/`:has()`/`:first-of-type`) drop the **whole selector**
 (fail closed); the rest of the comma group still parses.
 
+### `::before` / `::after` estilan la caja generada, nunca el elemento (2026-08-10)
+
+`::before` y `::after` **sí** se parsean y machean en la cascada (para eso está
+`content`), pero CSS 2.1 §12.1 es tajante: una regla de pseudo-elemento estila la caja
+**generada**, no el elemento que la origina.
+
+**Dado** `figure[typeof~='mw:File/Thumb'] > figcaption::before{content:'';width:15px;float:right}`
+**cuando** se resuelve el estilo del `<figcaption>`
+**entonces** su `content_before_str` queda seteado **y** su `width`/`float`/`margin`/
+`background`/`position` siguen **sin declarar**.
+
+- Solo `content` cruza al elemento; es el canal por el que `page_view` materializa el
+  texto generado como un run sintético. Todo lo demás se **descarta antes** de reclamar
+  el slot de cascada, o una regla de pseudo bloquearía a una regla real posterior de la
+  misma propiedad (cambiaría una fuga visible por una pérdida silenciosa).
+- **Falla cerrado:** la geometría propia del pseudo no se representa (no tiene caja aún)
+  ⇒ no pinta nada, en vez de corromper una caja real.
+- **El marcador de pseudo lo produce el compuesto SUBJETO** (el de más a la derecha), y
+  el recorrido hacia los ancestros **no debe pisarlo**: un compuesto sin pseudo reporta
+  "ninguno". `complex_matches` le pasaba el slot del llamante justamente en el nivel del
+  subjeto, así que el ancestro lo sobreescribía con -1 y el marcador **solo sobrevivía en
+  selectores de un único compuesto**. Como toda regla real lleva combinadores, en la
+  práctica la protección no existía: las declaraciones del pseudo se aplicaban al
+  elemento. Ese es el bug que metía los pies de foto de Wikipedia en una columna de
+  15 px, 131 líneas de un carácter.
+
 **Specificity** = sum over all compounds of `100*has_id + 10*(nclasses + nattrs +
 npseudo) + has_type` (an attribute selector and a pseudo-class each count as a
 class, so `input[type=text]` = 11, `a:link` = 11 and `#main .card p` = 100+10+1 =

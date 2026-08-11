@@ -1,32 +1,32 @@
 Freedom — flex / grid layout demo
 === Freedom layout ===
-content_w=952 total_h=813.4 nbox=0 nrow=27 npositioned=0
-  row[0] top=0.0 h=54.0 x_off=0.0
-  row[1] top=75.4 h=27.6 x_off=0.0
-  row[2] top=103.0 h=27.6 x_off=0.0
-  row[3] top=130.6 h=27.6 x_off=0.0
-  row[4] top=178.2 h=40.8 x_off=0.0
-  row[5] top=238.9 h=27.6 x_off=0.0 w=348.1
-  row[6] top=266.5 h=27.6 x_off=0.0 w=348.1
-  row[7] top=294.1 h=27.6 x_off=0.0 w=348.1
-  row[8] top=238.9 h=27.6 x_off=372.1 w=350.3
-  row[9] top=266.5 h=27.6 x_off=372.1 w=350.3
-  row[10] top=294.1 h=27.6 x_off=372.1 w=350.3
-  row[11] top=238.9 h=27.6 x_off=746.4 w=205.6
-  row[12] top=266.5 h=27.6 x_off=746.4 w=205.6
-  row[13] top=294.1 h=27.6 x_off=746.4 w=205.6
-  row[14] top=321.7 h=27.6 x_off=746.4 w=205.6
-  row[15] top=369.2 h=40.8 x_off=0.0
-  row[16] top=429.9 h=27.6 x_off=0.0 w=468.0
-  row[17] top=429.9 h=27.6 x_off=484.0 w=468.0
-  row[18] top=473.5 h=27.6 x_off=0.0 w=468.0
-  row[19] top=473.5 h=27.6 x_off=484.0 w=468.0
-  row[20] top=521.0 h=40.8 x_off=0.0
-  row[21] top=581.8 h=32.4 x_off=0.0
-  row[22] top=632.9 h=27.6 x_off=0.0
-  row[23] top=660.5 h=27.6 x_off=0.0
-  row[24] top=709.4 h=27.6 x_off=0.0
-  row[25] top=758.2 h=27.6 x_off=0.0
-  row[26] top=785.8 h=27.6 x_off=0.0
+content_w=952 total_h=714.2 nbox=0 nrow=27 npositioned=0
+  row[0] top=0.0 h=45.0 x_off=0.0
+  row[1] top=66.4 h=23.0 x_off=0.0
+  row[2] top=89.4 h=23.0 x_off=0.0
+  row[3] top=112.4 h=23.0 x_off=0.0
+  row[4] top=155.4 h=34.0 x_off=0.0
+  row[5] top=209.3 h=23.0 x_off=0.0 w=348.1
+  row[6] top=232.3 h=23.0 x_off=0.0 w=348.1
+  row[7] top=255.3 h=23.0 x_off=0.0 w=348.1
+  row[8] top=209.3 h=23.0 x_off=372.1 w=350.3
+  row[9] top=232.3 h=23.0 x_off=372.1 w=350.3
+  row[10] top=255.3 h=23.0 x_off=372.1 w=350.3
+  row[11] top=209.3 h=23.0 x_off=746.4 w=205.6
+  row[12] top=232.3 h=23.0 x_off=746.4 w=205.6
+  row[13] top=255.3 h=23.0 x_off=746.4 w=205.6
+  row[14] top=278.3 h=23.0 x_off=746.4 w=205.6
+  row[15] top=321.2 h=34.0 x_off=0.0
+  row[16] top=375.1 h=23.0 x_off=0.0 w=468.0
+  row[17] top=375.1 h=23.0 x_off=484.0 w=468.0
+  row[18] top=414.1 h=23.0 x_off=0.0 w=468.0
+  row[19] top=414.1 h=23.0 x_off=484.0 w=468.0
+  row[20] top=457.0 h=34.0 x_off=0.0
+  row[21] top=511.0 h=27.0 x_off=0.0
+  row[22] top=556.7 h=23.0 x_off=0.0
+  row[23] top=579.7 h=23.0 x_off=0.0
+  row[24] top=624.0 h=23.0 x_off=0.0
+  row[25] top=668.2 h=23.0 x_off=0.0
+  row[26] top=691.2 h=23.0 x_off=0.0
   cont[0] disp=4 parent=-1 parent_item=-1 gap=24 justify=3 cols=0 box=-1
   cont[1] disp=5 parent=-1 parent_item=-1 gap=16 justify=0 cols=2 box=-1

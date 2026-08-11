@@ -263,7 +263,7 @@ static int write_field(int fd, const char *s) {
  *            cont_wrap,cont_row_gap,cont_align_items,flex_align_self,
  *            float_side,float_id,float_clear,
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,box_w_pct,
- *            block_id,
+ *            block_id,ua_tag,
  *            input_type,form_id,form_method, name, value )*
  * then the box-definition tree (Step D): [nbox]( the 172 box int32 fields, then the
  * background-image url() string, length-prefixed like the run strings above )*.
@@ -315,7 +315,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[35] = {
+        int32_t b[36] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -337,6 +337,10 @@ static int write_view(int wfd, const pv_view *v) {
              * Without it an author `font-size:40px` on an <h1> reached the painter as
              * a bare 250% and got multiplied by the UA heading scale -> 80px. */
             (int32_t)r->font_abs,
+            /* user-agent box identity of the source block, 2026-08-10 (appended;
+             * read_view mirrors this). Without it the painter cannot tell a <div>
+             * from a <p> and gives both a paragraph's 1em margins. */
+            (int32_t)r->ua_tag,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -1559,7 +1563,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[35];
+        int32_t a[37], gtw[PV_GRID_TRACKS + 1], b[36];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1701,6 +1705,9 @@ static int read_view(int fd, pv_view **out) {
          * never reached the positioned/box pipeline (the P5 known limitation). */
         pv_set_block_id(v, (int)blkid);
         pv_set_node_id(v, (dom_node_id)nodeid);
+        /* ua_tag rides here, in the shared tail, for the same reason block_id does:
+         * it is structure and belongs to EVERY run kind, replaced ones included. */
+        pv_set_ua_tag(v, (int)b[35]);
     }
 
     /* Box engine (Step D): the box tree, same order/shape as write_view. Bounded by

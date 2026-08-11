@@ -64,6 +64,40 @@ typedef struct bx_hplace {
  * allocation. */
 bx_box bx_default_for_tag(const char *tag);
 
+/* Compact, stable identity of a block's SOURCE element, just wide enough to recover
+ * its user-agent box on the far side of the render IPC without shipping a tag string
+ * per block. Only the tags the HTML user-agent sheet gives a non-zero vertical margin
+ * need a code: everything else (div, section, header, article, footer, nav, main,
+ * table, tr, td, form, ...) shares BX_UA_NONE, whose UA margin is zero -- which is
+ * both the correct answer and the fail-closed one (an unrecognised element invents no
+ * spacing). spec/box_style.md 4d.
+ *
+ * The codes are an ABI between page_view, the IPC codec and the painter; APPEND
+ * only, never renumber. */
+typedef enum bx_ua_tag {
+    BX_UA_NONE = 0,   /* no user-agent margin: div/section/td/... and unknown tags */
+    BX_UA_P,
+    BX_UA_H1, BX_UA_H2, BX_UA_H3, BX_UA_H4, BX_UA_H5, BX_UA_H6,
+    BX_UA_UL, BX_UA_OL, BX_UA_MENU,
+    BX_UA_DL,
+    BX_UA_PRE,
+    BX_UA_BLOCKQUOTE,
+    BX_UA_FIGURE,
+    BX_UA_HR,
+    BX_UA_LI,         /* zero margin, but distinct: a list item is NOT an unknown tag */
+    BX_UA_COUNT
+} bx_ua_tag;
+
+/* Maps an HTML tag name (case-insensitive) to its bx_ua_tag code. A tag the user-agent
+ * sheet gives no vertical margin -- and any unknown, empty or NULL tag -- maps to
+ * BX_UA_NONE. Pure, allocation-free, total. */
+bx_ua_tag bx_ua_of_tag(const char *tag);
+
+/* UA default box for a bx_ua_tag code: the same row of the same table
+ * bx_default_for_tag reads, so the user-agent sheet has ONE definition. A code
+ * outside 0..BX_UA_COUNT-1 fails closed to the neutral zero-margin box. Pure. */
+bx_box bx_default_for_ua(bx_ua_tag id);
+
 /* Decodes a CSS display keyword token (case-insensitive, ASCII-trimmed) into *out.
  * Recognises none / block / inline / inline-block / list-item / flex / inline-flex
  * / grid / inline-grid (inline-flex => FLEX, inline-grid => GRID). token/out NULL

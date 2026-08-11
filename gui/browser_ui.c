@@ -2976,9 +2976,17 @@ typedef struct rc_state {
     /* Per-LINE leading (CSS 2.1 §10.8): a line box is as tall as the largest
      * leaded fragment on it, so a trailing low line-height run (Wikipedia's
      * `.mw-editsection{line-height:0}` after a heading) must not shrink the
-     * whole line. flow_emit_frag accumulates the max author factor and whether
-     * any fragment uses the theme default; flush_line takes the max of both. */
-    double line_scale_maxf; /* max author line-height factor of the open line's fragments */
+     * whole line. flow_emit_frag accumulates the tallest leaded fragment and
+     * whether any fragment uses the theme default; flush_line takes the max.
+     *
+     * Accumulated in PIXELS, not as a factor, because the two contributions are
+     * multiples of DIFFERENT things: an author `line-height` is a multiple of the
+     * fragment's own font-size (CSS 2.1 §10.8.1), while the theme default is a
+     * multiple of the font's natural line box (ascent+descent, ~1.44x the font
+     * size on this host). Mixing the two units made every author line-height come
+     * out ~1.44x too tall -- the whole reason a search-results page rendered 1.8x
+     * the height Firefox gives it. spec/box_style.md 4e. */
+    double line_lead_px;    /* tallest author-leaded fragment on the open line, px */
     int    line_any_theme;  /* 1 when a fragment of the open line has no author line-height */
     double pending_indent;/* author text-indent (px) to apply to the next opened line, 0 normally */
     int    nowrap;       /* current block's white-space suppresses line wrapping */
@@ -3292,14 +3300,28 @@ static void block_margins(const ui_theme *th, const rd_block *b,
                           double *top_px, double *bottom_px) {
     const char *tag = rd_block_tag(b);
     if (tag == NULL) { *top_px = th->paragraph_gap; *bottom_px = th->paragraph_gap; return; }
-    /* rd_block_tag reports every body-text block as "p", so a plain <li> inherited
-     * <p>'s 1em UA margins and list items were spread a full blank line apart, each
-     * with its own background stripe, instead of the tight block a browser draws.
-     * A block inside a list (indent > 0) takes the <li> UA box (zero margins); the
-     * list's own <ul>/<ol> margins still space it from the surrounding text. The
-     * approximation is deliberate: a real <p> nested inside an <li> also loses its
-     * margins, which is far rarer than the plain list this fixes. */
-    bx_box box = bx_default_for_tag((b->indent > 0 && b->kind != RD_HEADING) ? "li" : tag);
+    /* Which user-agent box applies is a question about the SOURCE ELEMENT, and
+     * rd_kind cannot answer it: every body-text block arrives as RD_PARAGRAPH, so
+     * asking rd_block_tag returns "p" for a <div>, a <section>, a <td> and a <nav>
+     * alike -- a phantom blank line before every block on every page. ua_tag carries
+     * the real answer from page_view (spec/box_style.md 4d); it is BX_UA_NONE, i.e.
+     * no vertical margin, for every structural wrapper, which is what the HTML
+     * user-agent sheet actually says.
+     *
+     * A block inside a list still takes the <li> box (zero margins) whatever its own
+     * tag: the deliberate approximation from before, which keeps list items tight
+     * instead of a blank line apart.
+     *
+     * A heading keeps the kind-driven path: its level, not its ancestry, is what
+     * picks h1..h6, and RD_HEADING is exactly that level. */
+    bx_box box;
+    if (b->indent > 0 && b->kind != RD_HEADING) {
+        box = bx_default_for_ua(BX_UA_LI);
+    } else if (b->kind == RD_PARAGRAPH) {
+        box = bx_default_for_ua((bx_ua_tag)b->ua_tag);
+    } else {
+        box = bx_default_for_tag(tag);
+    }
     double size; int bold, italic, underline; ui_rgb color;
     block_style(th, b, &size, &bold, &italic, &underline, &color);
     /* An author margin-top/bottom (px, only with caps.css) overrides the UA margin;
@@ -3362,15 +3384,22 @@ static void leave_inline_box(rc_layout *L, rc_state *s, int block_id) {
 
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (!s->line_open) return;
-    /* Author line-height (percent of the natural line box) replaces the theme's
-     * default spacing when set; render_doc gated it behind caps.css (0 when off).
-     * The line takes the MAX leading of its fragments (CSS 2.1 §10.8): the last
-     * block's value must not shrink a taller earlier fragment's line. */
-    double spacing = s->line_scale_maxf;
-    if (s->line_any_theme && th->line_spacing > spacing) spacing = th->line_spacing;
-    if (spacing <= 0.0)
-        spacing = (s->line_scale > 0) ? (double)s->line_scale / 100.0 : th->line_spacing;
-    double h = (s->line_asc + s->line_desc) * spacing;
+    /* The line takes the MAX leading of its fragments (CSS 2.1 §10.8): the last
+     * block's value must not shrink a taller earlier fragment's line. The two
+     * candidates are already in px and are NOT interchangeable factors --
+     * line_lead_px is a multiple of each fragment's font-size (what CSS
+     * `line-height` means), the theme default is a multiple of the font's natural
+     * line box. render_doc gates the author value behind caps.css (0 when off). */
+    double natural = (s->line_asc + s->line_desc) * th->line_spacing;
+    double h = s->line_any_theme ? natural : 0.0;
+    if (s->line_lead_px > h) h = s->line_lead_px;
+    /* A line that emitted no fragment at all (an empty block opening a line) still
+     * needs a height: fall back to the block's own leading, or the theme's. */
+    if (h <= 0.0) {
+        h = (s->line_scale > 0)
+            ? (s->line_asc + s->line_desc) * (double)s->line_scale / 100.0
+            : natural;
+    }
     /* An inline-level box ends at the line end at the latest: its rect needs the
      * row's top and height, which are only known now. */
     close_inline_box(L, s, s->cur_top, h);
@@ -3391,7 +3420,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     }
     s->cur_top += h;
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
-    s->line_scale_maxf = 0.0; s->line_any_theme = 0;
+    s->line_lead_px = 0.0; s->line_any_theme = 0;
     s->line_first = L->nfrag;
 }
 
@@ -3471,9 +3500,14 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
     s->pen_x += width;
     if (fe->ascent  > s->line_asc)  s->line_asc  = fe->ascent;
     if (fe->descent > s->line_desc) s->line_desc = fe->descent;
+    /* CSS 2.1 10.8.1: an author `line-height` is a multiple of THIS fragment's
+     * font-size, so the leading it contributes is computed here, where that size is
+     * known, and carried in px. A fragment with no author value contributes the
+     * theme's multiple of the natural line box instead (flagged, resolved in
+     * flush_line, where the line's max ascent/descent are final). */
     if (s->line_scale > 0) {
-        double lf = (double)s->line_scale / 100.0;
-        if (lf > s->line_scale_maxf) s->line_scale_maxf = lf;
+        double lead = size * (double)s->line_scale / 100.0;
+        if (lead > s->line_lead_px) s->line_lead_px = lead;
     } else {
         s->line_any_theme = 1;
     }

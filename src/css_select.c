@@ -821,8 +821,21 @@ static int complex_matches(const css_sel *sel, int k, const css_element *el,
     if (!compound_matches(&sel->parts[k], el, sel, target_id, allow_pseudo_el, pseudo_kind))
         return 0;
     if (k == 0) return 1;
-    int dummy;
-    int *pk = (k == sel->nparts - 1) ? pseudo_kind : &dummy;
+    /* Only the SUBJECT compound reports the pseudo-element, and the call above --
+     * this level's own compound_matches -- is the one that just did it when k is the
+     * subject index. Every recursive call below walks to an ANCESTOR (k-1), which by
+     * definition carries no pseudo-element and would report "none", so it must write
+     * to a scratch slot instead of the caller's.
+     *
+     * This ternary used to name pseudo_kind for `k == nparts - 1`, which is exactly
+     * backwards: at the subject level it handed the caller's slot to the ancestor
+     * walk, which promptly overwrote PSEUDO_BEFORE with -1. So the marker survived
+     * only for single-compound selectors, and every real-world rule -- they all have
+     * combinators -- silently lost it, leaking the pseudo's declarations onto the
+     * originating element (spec/css.md "pseudo-elementos"). Also matters for the
+     * descendant/general loops, where a FAILED attempt must not leave a mark. */
+    int dummy = -1;
+    int *pk = &dummy;
     switch (sel->comb[k]) {
         case COMB_CHILD:
             return (el->parent != NULL) && complex_matches(sel, k - 1, el->parent, target_id, allow_pseudo_el, pk);

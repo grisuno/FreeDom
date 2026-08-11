@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>UA metrics probe</title>
+<style>
+  /* The probe declares NO vertical margins and NO line-height of its own: every
+     vertical number on this page comes from the user-agent sheet and from
+     `line-height: normal`. That is exactly what it measures. Backgrounds alternate
+     so a band boundary is visible to the column/row ink profiles. */
+  body { margin: 0; font-family: Verdana, Geneva, sans-serif; }
+  .stripe:nth-child(odd)  { background: #eeeeee; }
+  .stripe:nth-child(even) { background: #d8d8d8; }
+  h2 { background: #cfe3f5; }
+  .fs13 { font-size: 13px; }
+  .fs20 { font-size: 20px; }
+  .fs28 { font-size: 28px; }
+  table { border-collapse: collapse; }
+  td { background: #f2f2f2; }
+</style>
+</head>
+<body>
+
+<h2>A. Plain divs: the user-agent sheet gives a div NO vertical margin</h2>
+<div class="wrap">
+  <div class="stripe">Alpha division, one</div>
+  <div class="stripe">Alpha division, two</div>
+  <div class="stripe">Alpha division, three</div>
+  <div class="stripe">Alpha division, four</div>
+  <div class="stripe">Alpha division, five</div>
+  <div class="stripe">Alpha division, six</div>
+  <div class="stripe">Alpha division, seven</div>
+  <div class="stripe">Alpha division, eight</div>
+  <div class="stripe">Alpha division, nine</div>
+  <div class="stripe">Alpha division, ten</div>
+  <div class="stripe">Alpha division, eleven</div>
+  <div class="stripe">Alpha division, twelve</div>
+</div>
+
+<h2>B. Real paragraphs: these DO keep their 1em user-agent margins</h2>
+<p>First paragraph of the second section, which must still be spaced a full line
+away from its neighbour because the user-agent sheet says so.</p>
+<p>Second paragraph of the second section, spaced the same way.</p>
+<p>Third paragraph of the second section, spaced the same way.</p>
+
+<h2>C. Sectioning wrappers carry no margin either</h2>
+<section>
+  <header><div class="stripe">Header division inside a section</div></header>
+  <article>
+    <div class="stripe">Article division one</div>
+    <div class="stripe">Article division two</div>
+    <div class="stripe">Article division three</div>
+  </article>
+  <footer><div class="stripe">Footer division inside a section</div></footer>
+</section>
+
+<h2>D. Line box height at several font sizes (`line-height: normal`)</h2>
+<div class="fs13 stripe">Thirteen pixel line one</div>
+<div class="fs13 stripe">Thirteen pixel line two</div>
+<div class="fs13 stripe">Thirteen pixel line three</div>
+<div class="fs20 stripe">Twenty pixel line one</div>
+<div class="fs20 stripe">Twenty pixel line two</div>
+<div class="fs28 stripe">Twenty eight pixel line one</div>
+<div class="fs28 stripe">Twenty eight pixel line two</div>
+
+<h2>E. List items are tight; the list itself is spaced</h2>
+<ul>
+  <li>List item one</li>
+  <li>List item two</li>
+  <li>List item three</li>
+  <li>List item four</li>
+  <li>List item five</li>
+  <li>List item six</li>
+</ul>
+
+<h2>F. Table rows have no margin at all</h2>
+<table>
+  <tr><td>Row one, cell one</td><td>Row one, cell two</td></tr>
+  <tr><td>Row two, cell one</td><td>Row two, cell two</td></tr>
+  <tr><td>Row three, cell one</td><td>Row three, cell two</td></tr>
+  <tr><td>Row four, cell one</td><td>Row four, cell two</td></tr>
+  <tr><td>Row five, cell one</td><td>Row five, cell two</td></tr>
+  <tr><td>Row six, cell one</td><td>Row six, cell two</td></tr>
+</table>
+
+<h2>G. A blockquote keeps its indent and its margin</h2>
+<blockquote>A quoted block, indented and spaced by the user-agent sheet.</blockquote>
+
+<h2>H. Enough trailing flow to push the page past a viewport</h2>
+<div class="wrap">
+  <div class="stripe">Trailing division, one</div>
+  <div class="stripe">Trailing division, two</div>
+  <div class="stripe">Trailing division, three</div>
+  <div class="stripe">Trailing division, four</div>
+  <div class="stripe">Trailing division, five</div>
+  <div class="stripe">Trailing division, six</div>
+  <div class="stripe">Trailing division, seven</div>
+  <div class="stripe">Trailing division, eight</div>
+  <div class="stripe">Trailing division, nine</div>
+  <div class="stripe">Trailing division, ten</div>
+</div>
+
+</body>
+</html>

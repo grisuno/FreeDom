@@ -11,6 +11,7 @@
 
 #include "render_doc.h"
 
+#include "box_style.h"
 #include "css.h"
 #include "data_url.h"
 #include "url.h"
@@ -154,6 +155,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_mt = PV_LEN_UNSET;
     b->box_mb = PV_LEN_UNSET;
     b->box_w_pct = 0;
+    b->ua_tag = BX_UA_NONE;
     b->node_id = DOM_NODE_NONE;
     b->block_id = -1;
     b->input_type = 0;
@@ -467,6 +469,11 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
              * author presentation, so it is carried regardless of caps.css. This is the
              * stable handle the GUI uses to dispatch clicks to the worker's live DOM. */
             lb->node_id = r->node_id;
+            /* ua_tag rides OUTSIDE the caps.css gate above on purpose: box_mt/box_mb are
+             * the AUTHOR's margins (presentation, gated), ua_tag is which user-agent
+             * margin applies when the author sets none -- the UA sheet, i.e. structure.
+             * Gating it would put the phantom <p> gap back on every default render. */
+            lb->ua_tag = r->ua_tag;
             /* Box engine (Hito 23b-8 Step D): unlike cont_id (flex/grid is page
              * structure, always applied), block_id exists only to GROUP runs into the
              * author box they belong to -- which is presentation. So it is gated by
@@ -510,6 +517,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->float_side = r->float_side;
             lb->float_id = r->float_id;
             lb->float_clear = r->float_clear;
+            lb->ua_tag = r->ua_tag;
         }
     }
 

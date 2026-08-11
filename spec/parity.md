@@ -15,7 +15,8 @@ orthogonal signals composited into a single score.
 
 ## 2. Corpus
 
-`tests/parity/pages/` — 5 self-contained HTML snapshots with inline styles:
+`tests/parity/pages/` — real-page snapshots plus purpose-built probes, all
+self-contained (stylesheets inlined):
 
 | Page | Source | What it exercises |
 | :-- | :-- | :-- |
@@ -24,6 +25,19 @@ orthogonal signals composited into a single score.
 | `ddg-results.html` | duckduckgo.com | Overflow clipping, flex results, word-wrap |
 | `wikipedia.html` | en.wikipedia.org | Long-form article, images, infobox float |
 | `jkanime.html` | jkanime.tv | Bootstrap grid, CSS heavy, flex nesting |
+| `rem-62.html` | probe | `html{font-size:62.5%}` rebasing `rem` |
+| `float-beside.html` | probe | Text flowing BESIDE a float, `float:right` box side |
+| `table-fit.html` | probe | Table columns sized by content |
+| `ua-metrics.html` | probe | User-agent margins per tag + `line-height: normal` |
+
+**Los probes son deliberadamente más altos que 768 px.** Firefox headless reporta la
+altura del *viewport* en páginas cortas, y ahí `h_ratio` —el término dominante del
+score— no mide nada.
+
+Un probe aísla **una** divergencia y la vuelve un número. `ua-metrics.html` es el
+ejemplo canónico: secciones separadas para divs sin margen, `<p>` **con** margen (la
+guarda contra sobre-corregir), listas, filas de tabla, `blockquote` y cajas de línea a
+varios tamaños. Entró en 18.94 y quedó en 0.98.
 
 Each page is saved with its stylesheets inlined — the harness never touches the
 network (deterministic, Zero Trust).

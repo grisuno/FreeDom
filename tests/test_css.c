@@ -1197,8 +1197,12 @@ static void test_pseudo_unknown_drops_selector(void **state) {
     css_element i = el_node("i", NULL, NULL, 0, NULL);
     assert_int_equal(css_resolve_el(sh, &i, NULL, 0).color, 0x080808);
     css_element p = el_sib_node("p", 1, 1, NULL, NULL);
-    /* ::before matches in CSS cascade */
-    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, 0x090909);
+    /* ::before is PARSED and MATCHED (the selector is not dropped, which is what this
+     * case guards) -- but what it declares styles the generated box, so the <p> keeps
+     * its own colour. This assertion used to read `.color == 0x090909`, i.e. it
+     * pinned the leak that made Wikipedia's captions 15px wide; see
+     * test_pseudo_geometry_does_not_leak_to_element. */
+    assert_int_equal(css_resolve_el(sh, &p, NULL, 0).color, -1);
     assert_int_equal(css_resolve_el(sh, &p, NULL, 0).background, 0x101010);
     css_element q = el_node("q", NULL, NULL, 0, NULL);
     assert_int_not_equal(css_resolve_el(sh, &q, NULL, 0).color, -1); /* :not() supported */
@@ -1229,6 +1233,81 @@ static void test_pseudo_content_empty_without_pseudo(void **state) {
     assert_string_equal(out.content_str, "DIRECT");
     assert_int_equal(out.content_before_str[0], 0);
     assert_int_equal(out.content_after_str[0], 0);
+    css_free(sh);
+}
+
+/* CSS 2.1 §12.1: a ::before/::after rule styles the GENERATED box, never the element
+ * it originates from. Only `content` crosses over (it is how the generated text
+ * reaches the render pipeline). Wikipedia's
+ *   figure[typeof~='mw:File/Thumb'] > figcaption::before{content:'';width:15px;float:right}
+ * squeezed the whole caption into a 15px column, 131 one-character lines tall,
+ * because every declaration of that rule landed on the <figcaption> itself. */
+static void test_pseudo_geometry_does_not_leak_to_element(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("figcaption::before{content:'';width:15px;height:11px;"
+                                "float:right;margin-left:3px;background:#ff0000;"
+                                "position:absolute;display:block}", 0, &sh), CSS_OK);
+    css_element el = el_node("figcaption", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    /* The generated content still reaches the element's style... */
+    assert_int_equal(out.content_before_str[0], 0); /* content:'' is empty, not absent */
+    /* ...but NOTHING geometric or visual does. */
+    assert_int_equal(out.width, CSS_LEN_UNSET);
+    assert_int_equal(out.height, CSS_LEN_UNSET);
+    assert_int_equal(out.float_side, CSS_FLOAT_UNSET);
+    assert_int_equal(out.margin_left, CSS_LEN_UNSET);
+    assert_int_equal(out.background, -1);
+    assert_int_equal(out.position, CSS_POS_UNSET);
+    css_free(sh);
+}
+
+/* The same guarantee through a MULTI-COMPOUND selector. The pseudo-element marker is
+ * produced by the SUBJECT compound (the rightmost), and the walk up the ancestor
+ * chain must not overwrite it -- a compound that carries no pseudo-element reports
+ * "none", and letting an ancestor report win erased the marker for every selector
+ * longer than one compound. That is the shape real sheets use: Wikipedia's rule is
+ * `figure[typeof~='mw:File/Thumb'] > figcaption::before`, two compounds. */
+static void test_pseudo_kind_survives_combinators(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "figure[typeof~='mw:File/Thumb'] > figcaption::before{content:'';width:15px;float:right}"
+        "section p::after{content:'';width:22px}"
+        "main section p span::before{content:'';height:33px}", 0, &sh), CSS_OK);
+
+    static const css_attr fig_attr[] = { { "typeof", "mw:File/Thumb" } };
+    css_element fig = el_attr_node("figure", NULL, NULL, 0, fig_attr, 1, NULL);
+    css_element cap = el_node("figcaption", NULL, NULL, 0, &fig);
+    assert_int_equal(css_resolve_el(sh, &cap, NULL, 0).width, CSS_LEN_UNSET);
+    assert_int_equal(css_resolve_el(sh, &cap, NULL, 0).float_side, CSS_FLOAT_UNSET);
+
+    /* Descendant combinator, and a three-deep chain. */
+    css_element sect = el_node("section", NULL, NULL, 0, NULL);
+    css_element par  = el_node("p", NULL, NULL, 0, &sect);
+    assert_int_equal(css_resolve_el(sh, &par, NULL, 0).width, CSS_LEN_UNSET);
+
+    css_element main_el = el_node("main", NULL, NULL, 0, NULL);
+    css_element sect2   = el_node("section", NULL, NULL, 0, &main_el);
+    css_element par2    = el_node("p", NULL, NULL, 0, &sect2);
+    css_element span    = el_node("span", NULL, NULL, 0, &par2);
+    assert_int_equal(css_resolve_el(sh, &span, NULL, 0).height, CSS_LEN_UNSET);
+    css_free(sh);
+}
+
+/* The pseudo rule must not even CLAIM the cascade slot: a later, real rule for the
+ * same property still has to win it. Skipping after the slot was taken would have
+ * turned a leak into a silent drop. */
+static void test_pseudo_does_not_claim_cascade_slot(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("#cap::before{width:15px;color:#ff0000}"
+                                "figcaption{width:250px;color:#0000ff}", 0, &sh), CSS_OK);
+    css_element el = el_node("figcaption", "cap", NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    /* The id selector outranks the type selector, so a leak would have won here. */
+    assert_int_equal(out.width, 250);
+    assert_int_equal(out.color, 0x0000ff);
     css_free(sh);
 }
 
@@ -3931,6 +4010,9 @@ int main(void) {
         cmocka_unit_test(test_pseudo_unknown_drops_selector),
         cmocka_unit_test(test_pseudo_content_before_after_separate),
         cmocka_unit_test(test_pseudo_content_empty_without_pseudo),
+        cmocka_unit_test(test_pseudo_geometry_does_not_leak_to_element),
+        cmocka_unit_test(test_pseudo_kind_survives_combinators),
+        cmocka_unit_test(test_pseudo_does_not_claim_cascade_slot),
         cmocka_unit_test(test_pseudo_specificity),
         cmocka_unit_test(test_pseudo_with_sibling_combinator),
         cmocka_unit_test(test_pseudo_nth_malformed_drops),

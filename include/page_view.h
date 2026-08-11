@@ -275,6 +275,17 @@ typedef struct pv_run {
      * resolves the effective cap with bx_width_cap against the real available
      * width (the tighter of the two wins). Gated by caps.css like box_w. */
     int     box_w_pct;
+    /* User-agent box identity of this run's nearest BLOCK-LEVEL ancestor: a bx_ua_tag
+     * code (BX_UA_NONE = the element gets no UA margin, which is the answer for
+     * div/section/td/... and for anything unclassified).
+     *
+     * It exists because rd_kind cannot answer the question: every body-text block
+     * arrives as RD_PARAGRAPH, so without this the painter guessed "p" and gave a
+     * plain <div> a paragraph's 1em margins -- a blank line before EVERY block of
+     * every page. It is STRUCTURE, carried regardless of caps.css: a user-agent
+     * margin is the UA sheet, not author styling (CLAUDE.md 7.2 "Layout != estilo de
+     * autor"). spec/box_style.md 4d. */
+    int     ua_tag;
     /* Keystone (Stage 0): stable document-order element identity. node_id is the
      * dom_node_id of the source element for this run, assigned by the same pre-order
      * walk that dom_build uses, so it agrees with the JS sandbox's index. It is
@@ -770,6 +781,11 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
  * NULL view. The append helpers default everything to 0. */
 void pv_set_row_span(pv_view *v, int row_span);
 void pv_set_grid_rows(pv_view *v, int grid_rows);
+
+/* Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its
+ * nearest block-level ancestor). Out-of-range values fail closed to BX_UA_NONE, i.e.
+ * no user-agent margin. No-op on an empty view. spec/box_style.md 4d. */
+void pv_set_ua_tag(pv_view *v, int ua_tag);
 
 /* Sets the last run's cont_box_id (the box enclosing its container's items; -1 =
  * none). No-op on an empty view. */

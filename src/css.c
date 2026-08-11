@@ -4723,6 +4723,25 @@ void css_free(css_sheet *s) {
 static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
                         int spec, int ord, const char (*urltab)[CSS_URL_MAX],
                         const char (*contenttab)[CSS_URL_MAX], int pseudo_kind) {
+    /* CSS 2.1 §12.1: a ::before/::after rule styles the GENERATED box, never the
+     * element it originates from. Only `content` crosses over, because that is how
+     * the generated text reaches page_view (which materialises it as a synthetic
+     * run); the pseudo's own geometry has no box of its own here yet.
+     *
+     * Letting the rest through handed the originating element the pseudo's layout.
+     * Wikipedia's
+     *   figure[typeof~='mw:File/Thumb'] > figcaption::before{content:'';width:15px;float:right}
+     * gave the whole <figcaption> a 15px width cap -- the article's image captions
+     * came out as 131 one-character lines in a column at the page edge.
+     *
+     * Rejected BEFORE the cascade slots are claimed: a pseudo rule that took the slot
+     * and then declined to write would block a later real rule for the same property,
+     * turning a visible leak into a silent drop. Fails closed either way -- an
+     * unrepresentable pseudo box paints nothing rather than corrupting a real one. */
+    if ((pseudo_kind == PSEUDO_BEFORE || pseudo_kind == PSEUDO_AFTER)
+        && d->prop != P_CONTENT) {
+        return;
+    }
     int slot = d->prop;
     int imp = d->important;
     int win = imp > wi[slot] ||

@@ -137,6 +137,92 @@ static void test_div_is_block(void **state) {
     assert_edges(d.margin, 0.0, 0.0, 0.0, 0.0);
 }
 
+/* --- bx_ua_of_tag / bx_default_for_ua (spec/box_style.md 4d) --- */
+
+/* The whole point of the code: the structural wrappers a real page is built from
+ * carry NO user-agent margin, so none of them may map to the <p> row. */
+static void test_ua_structural_wrappers_have_no_margin(void **state) {
+    (void)state;
+    static const char *const wrappers[] = {
+        "div", "section", "header", "article", "footer", "nav", "main", "aside",
+        "table", "tbody", "thead", "tfoot", "tr", "td", "th", "form", "fieldset",
+        "figcaption", "dt", "address", "details", "summary", "span",
+    };
+    for (size_t i = 0; i < sizeof wrappers / sizeof wrappers[0]; ++i) {
+        assert_int_equal(bx_ua_of_tag(wrappers[i]), BX_UA_NONE);
+        bx_box b = bx_default_for_ua(bx_ua_of_tag(wrappers[i]));
+        assert_true(dbl_eq(b.margin.top, 0.0));
+        assert_true(dbl_eq(b.margin.bottom, 0.0));
+    }
+}
+
+/* ...while the handful of elements the user-agent sheet DOES space keep their margin
+ * through the round trip, at the same value bx_default_for_tag reports. */
+static void test_ua_spaced_tags_round_trip(void **state) {
+    (void)state;
+    static const char *const spaced[] = {
+        "p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "menu",
+        "dl", "pre", "blockquote", "figure", "hr",
+    };
+    for (size_t i = 0; i < sizeof spaced / sizeof spaced[0]; ++i) {
+        bx_ua_tag id = bx_ua_of_tag(spaced[i]);
+        assert_int_not_equal(id, BX_UA_NONE);
+        bx_box viaid  = bx_default_for_ua(id);
+        bx_box viatag = bx_default_for_tag(spaced[i]);
+        assert_true(dbl_eq(viaid.margin.top, viatag.margin.top));
+        assert_true(dbl_eq(viaid.margin.bottom, viatag.margin.bottom));
+        assert_true(viaid.margin.top > 0.0);
+        assert_int_equal(viaid.display, viatag.display);
+    }
+}
+
+/* A list item is spacing-free but is NOT the unknown-tag fallback: it has its own
+ * code, so a block inside a list can be told apart from a block nobody classified. */
+static void test_ua_list_item_is_distinct_but_unspaced(void **state) {
+    (void)state;
+    assert_int_equal(bx_ua_of_tag("li"), BX_UA_LI);
+    bx_box li = bx_default_for_ua(BX_UA_LI);
+    assert_int_equal(li.display, BX_DISPLAY_LIST_ITEM);
+    assert_edges(li.margin, 0.0, 0.0, 0.0, 0.0);
+}
+
+static void test_ua_case_insensitive_and_trimmed(void **state) {
+    (void)state;
+    assert_int_equal(bx_ua_of_tag("P"), BX_UA_P);
+    assert_int_equal(bx_ua_of_tag("  BlockQuote \n"), BX_UA_BLOCKQUOTE);
+    assert_int_equal(bx_ua_of_tag("H3"), BX_UA_H3);
+}
+
+/* Fails closed in both directions: nothing recognisable, no invented spacing. */
+static void test_ua_fails_closed(void **state) {
+    (void)state;
+    assert_int_equal(bx_ua_of_tag(NULL), BX_UA_NONE);
+    assert_int_equal(bx_ua_of_tag(""), BX_UA_NONE);
+    assert_int_equal(bx_ua_of_tag("zorp"), BX_UA_NONE);
+    assert_int_equal(bx_ua_of_tag("this-tag-name-is-far-too-long-to-fit-in-the-buffer"),
+                     BX_UA_NONE);
+
+    bx_box none = bx_default_for_ua(BX_UA_NONE);
+    assert_edges(none.margin, 0.0, 0.0, 0.0, 0.0);
+    bx_box over = bx_default_for_ua((bx_ua_tag)BX_UA_COUNT);
+    assert_edges(over.margin, 0.0, 0.0, 0.0, 0.0);
+    bx_box way = bx_default_for_ua((bx_ua_tag)9999);
+    assert_edges(way.margin, 0.0, 0.0, 0.0, 0.0);
+}
+
+/* The table the codes index must stay in step with the enum: every code in range
+ * resolves, and no two codes collide on one tag. */
+static void test_ua_code_space_is_total(void **state) {
+    (void)state;
+    for (int i = BX_UA_NONE + 1; i < BX_UA_COUNT; ++i) {
+        bx_box b = bx_default_for_ua((bx_ua_tag)i);
+        assert_int_not_equal(b.display, BX_DISPLAY_INLINE);
+        for (int j = i + 1; j < BX_UA_COUNT; ++j) {
+            assert_int_not_equal(i, j);
+        }
+    }
+}
+
 static void test_parse_display_keywords(void **state) {
     (void)state;
     bx_display d;
@@ -313,6 +399,12 @@ int main(void) {
         cmocka_unit_test(test_case_insensitive),
         cmocka_unit_test(test_unknown_and_null_are_neutral_inline),
         cmocka_unit_test(test_div_is_block),
+        cmocka_unit_test(test_ua_structural_wrappers_have_no_margin),
+        cmocka_unit_test(test_ua_spaced_tags_round_trip),
+        cmocka_unit_test(test_ua_list_item_is_distinct_but_unspaced),
+        cmocka_unit_test(test_ua_case_insensitive_and_trimmed),
+        cmocka_unit_test(test_ua_fails_closed),
+        cmocka_unit_test(test_ua_code_space_is_total),
         cmocka_unit_test(test_parse_display_keywords),
         cmocka_unit_test(test_parse_display_inline_aliases),
         cmocka_unit_test(test_parse_display_case_and_trim),

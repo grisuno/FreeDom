@@ -1057,12 +1057,17 @@ static void test_download_png_inflow_opacity_blends_box_and_row_together(void **
     assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
     free(bytes);
 
-    /* Sample two rows: y=30 is inside the padding (box decoration only, no text
-     * row behind it), y=45 is inside the text row itself. Both must show the SAME
+    /* Sample two rows: y=5 is inside the top padding (box decoration only, no text
+     * row behind it), y=20 is inside the text row itself. Both must show the SAME
      * blend -- 0.5*(0,0,255 blue) + 0.5*(0,255,0 green) = (0,127.5,127.5) -- proving
-     * the row's background fill is no longer a separate, un-faded solid patch. */
-    assert_true(px.width > 500 && px.height > 45);
-    for (int y = 30; y <= 45; y += 15) {
+     * the row's background fill is no longer a separate, un-faded solid patch.
+     *
+     * The offsets deliberately sit well inside a 10px padding + one line box. They
+     * used to be y=30/y=45, which silently depended on a line box being 27.6px tall;
+     * once `line-height: normal` became the font's natural 23px (spec/box_style.md
+     * 4c) the box ended at y=43 and the second sample fell off it entirely. */
+    assert_true(px.width > 500 && px.height >= 40);
+    for (int y = 5; y <= 20; y += 15) {
         uint32_t pixel = ((const uint32_t *)(const void *)px.data)[y * (px.stride / 4) + 500];
         uint8_t r = (uint8_t)(pixel >> 16), g = (uint8_t)(pixel >> 8), b = (uint8_t)pixel;
         assert_true(r <= 2);                    /* no red channel in blue+green */

@@ -218,6 +218,7 @@ static void run_init_common(pv_run *r) {
     r->box_mt = PV_LEN_UNSET;
     r->box_mb = PV_LEN_UNSET;
     r->box_w_pct = 0;
+    r->ua_tag = BX_UA_NONE;
     r->node_id = DOM_NODE_NONE;
     r->block_id = -1;
     r->input_type = 0;
@@ -636,6 +637,12 @@ void pv_set_box_pct(pv_view *v, int box_w_pct) {
     v->runs[v->count - 1].box_w_pct = box_w_pct;
 }
 
+void pv_set_ua_tag(pv_view *v, int ua_tag) {
+    if (v == NULL || v->count == 0) return;
+    if (ua_tag < BX_UA_NONE || ua_tag >= BX_UA_COUNT) ua_tag = BX_UA_NONE;
+    v->runs[v->count - 1].ua_tag = ua_tag;
+}
+
 void pv_set_node_id(pv_view *v, dom_node_id node_id) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].node_id = node_id;
@@ -848,6 +855,35 @@ static int text_node_is_blank(const lxb_dom_node_t *c) {
 
 /* element_is_content_leaf lives further down, next to the style cache it needs. */
 
+/* User-agent box identity of a block-level element, from its lexbor tag id. Only the
+ * tags the UA sheet gives a vertical margin need naming; everything else -- div,
+ * section, header, article, footer, nav, main, the table family, the form family --
+ * is BX_UA_NONE, which is the correct answer (no UA margin) and the fail-closed one.
+ *
+ * The lexbor id is page_view's own vocabulary, so the mapping lives here; the METRICS
+ * behind each code stay in box_style's one table. spec/box_style.md 4d. */
+static bx_ua_tag ua_tag_of(lxb_tag_id_t t) {
+    switch (t) {
+        case LXB_TAG_P:          return BX_UA_P;
+        case LXB_TAG_H1:         return BX_UA_H1;
+        case LXB_TAG_H2:         return BX_UA_H2;
+        case LXB_TAG_H3:         return BX_UA_H3;
+        case LXB_TAG_H4:         return BX_UA_H4;
+        case LXB_TAG_H5:         return BX_UA_H5;
+        case LXB_TAG_H6:         return BX_UA_H6;
+        case LXB_TAG_UL:         return BX_UA_UL;
+        case LXB_TAG_OL:         return BX_UA_OL;
+        case LXB_TAG_MENU:       return BX_UA_MENU;
+        case LXB_TAG_DL:         return BX_UA_DL;
+        case LXB_TAG_PRE:        return BX_UA_PRE;
+        case LXB_TAG_BLOCKQUOTE: return BX_UA_BLOCKQUOTE;
+        case LXB_TAG_FIGURE:     return BX_UA_FIGURE;
+        case LXB_TAG_HR:         return BX_UA_HR;
+        case LXB_TAG_LI:         return BX_UA_LI;
+        default:                 return BX_UA_NONE;
+    }
+}
+
 static int heading_level(lxb_tag_id_t t) {
     switch (t) {
         case LXB_TAG_H1: return 1;
@@ -1026,6 +1062,9 @@ typedef struct pv_box_info {
     int l, r, w, center, mt, mb;
     int w_pct;   /* per-mille width cap (Hito 32), 0 = none; LAST so the existing
                   * positional initializers keep meaning what they say */
+    int ua;      /* bx_ua_tag of the block this box came from; rides beside mt/mb
+                  * because it is what makes them meaningful when the author sets
+                  * neither. Appended, same reason as w_pct. */
 } pv_box_info;
 
 /* The author text-presentation extensions struct (pv_text_ext) is public now
@@ -1308,7 +1347,7 @@ typedef struct pv_box_reg {
  * (PV_LEN_UNSET width/radius/outline width, -1 colors, 0 the rest). */
 static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->parent_id = -1;
-    pv_box_info hb = { 0, 0, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0 };
+    pv_box_info hb = { 0, 0, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, BX_UA_NONE };
     css_hbox_resolve(cs, &hb);
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
     d->box_w_pct = hb.w_pct;
@@ -1749,6 +1788,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     }
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
+    box->ua = BX_UA_NONE;
     pv_text_ext_reset(ext);
     *block_id_out = -1;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
@@ -1856,6 +1896,10 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 int row_zero = (t == LXB_TAG_TR) ? 0 : PV_LEN_UNSET;
                 box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : row_zero;
                 box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : row_zero;
+                /* ...and WHICH element it is, so the painter can apply that element's
+                 * user-agent margin instead of assuming <p>. Same nearest-block-
+                 * ancestor rule as the margins it rides with. spec/box_style.md 4d. */
+                box->ua = ua_tag_of(t);
                 /* The leaf block's own `clear` ends any preceding float band (float.md). */
                 cont->float_clear = (cs.clear != CSS_CLEAR_UNSET) ? cs.clear : 0;
             }
@@ -4003,6 +4047,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     link_cont_chain(&reg, &items, &econt);
                     pv_set_float(v, econt.float_side, econt.float_id, econt.float_clear);
                     pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
+                    pv_set_ua_tag(v, ebox.ua);
                     pv_set_box_pct(v, ebox.w_pct);
                     pv_set_text_ext(v, &eext);
                     pv_set_block_id(v, ebdeco);
@@ -4160,6 +4205,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
+                pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
@@ -4274,6 +4320,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
+                pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);

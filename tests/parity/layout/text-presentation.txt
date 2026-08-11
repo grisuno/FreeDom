@@ -1,25 +1,25 @@
 Text presentation (Hito 23b-6)
 === Freedom layout ===
-content_w=952 total_h=844.5 nbox=1 nrow=21 npositioned=0
-  row[0] top=0.0 h=54.0 x_off=0.0
-  row[1] top=75.4 h=27.6 x_off=0.0
-  row[2] top=119.0 h=22.8 x_off=0.0
-  row[3] top=157.8 h=20.4 x_off=0.0
-  row[4] top=194.2 h=27.6 x_off=0.0
-  row[5] top=237.8 h=27.6 x_off=0.0
-  row[6] top=281.4 h=27.6 x_off=0.0
-  row[7] top=325.0 h=27.6 x_off=0.0
-  row[8] top=384.6 h=27.6 x_off=0.0 w=952.0
-  row[9] top=428.2 h=27.6 x_off=0.0 w=952.0
-  row[10] top=471.8 h=27.6 x_off=0.0 w=952.0
-  row[11] top=499.4 h=27.6 x_off=0.0 w=952.0
-  row[12] top=543.0 h=27.6 x_off=0.0 w=952.0
-  row[13] top=590.6 h=40.8 x_off=0.0 w=952.0
-  row[14] top=651.3 h=27.6 x_off=24.0 w=952.0
-  row[15] top=678.9 h=27.6 x_off=24.0 w=952.0
-  row[16] top=706.5 h=27.6 x_off=24.0 w=952.0
-  row[17] top=734.1 h=27.6 x_off=24.0 w=952.0
-  row[18] top=761.7 h=27.6 x_off=24.0 w=952.0
-  row[19] top=789.3 h=27.6 x_off=24.0 w=952.0
-  row[20] top=816.9 h=27.6 x_off=24.0 w=952.0
-  box[0] bid=0 x=0.0 top=368.6 w=952.0 h=43.6
+content_w=952 total_h=743.3 nbox=1 nrow=21 npositioned=0
+  row[0] top=0.0 h=45.0 x_off=0.0
+  row[1] top=66.4 h=23.0 x_off=0.0
+  row[2] top=105.4 h=19.0 x_off=0.0
+  row[3] top=140.4 h=17.0 x_off=0.0
+  row[4] top=173.4 h=23.0 x_off=0.0
+  row[5] top=212.4 h=23.0 x_off=0.0
+  row[6] top=251.4 h=23.0 x_off=0.0
+  row[7] top=290.4 h=23.0 x_off=0.0
+  row[8] top=345.4 h=23.0 x_off=0.0 w=952.0
+  row[9] top=384.4 h=23.0 x_off=0.0 w=952.0
+  row[10] top=423.4 h=23.0 x_off=0.0 w=952.0
+  row[11] top=446.4 h=23.0 x_off=0.0 w=952.0
+  row[12] top=485.4 h=23.0 x_off=0.0 w=952.0
+  row[13] top=528.4 h=34.0 x_off=0.0 w=952.0
+  row[14] top=582.3 h=23.0 x_off=24.0 w=952.0
+  row[15] top=605.3 h=23.0 x_off=24.0 w=952.0
+  row[16] top=628.3 h=23.0 x_off=24.0 w=952.0
+  row[17] top=651.3 h=23.0 x_off=24.0 w=952.0
+  row[18] top=674.3 h=23.0 x_off=24.0 w=952.0
+  row[19] top=697.3 h=23.0 x_off=24.0 w=952.0
+  row[20] top=720.3 h=23.0 x_off=24.0 w=952.0
+  box[0] bid=0 x=0.0 top=329.4 w=952.0 h=39.0

@@ -64,9 +64,17 @@ typedef struct tag_row {
 #define ZERO    EDG(0.0, 0.0, 0.0, 0.0)
 
 /* Sorted by name (ASCII, lowercase) for binary search. body has zero margin: the
- * window chrome supplies the page gutter, so there is no double margin. */
+ * window chrome supplies the page gutter, so there is no double margin.
+ *
+ * The vertical margins mirror the HTML user-agent sheet, which is far stingier than
+ * it looks: only p, h1-h6, ul/ol/menu, dl, pre, blockquote, figure and hr get one.
+ * Every structural wrapper -- div, section, header, article, footer, nav, main, and
+ * the whole table and form families -- gets ZERO. Listing them explicitly is not
+ * redundant with the unknown-tag fallback: it documents that the zero is the
+ * user-agent sheet's answer and not an accident of the lookup missing. */
 static const tag_row TAG_TABLE[] = {
     { "a",          { INLINE, ZERO, ZERO } },
+    { "address",    { BLOCK,  ZERO, ZERO } },
     { "article",    { BLOCK,  ZERO, ZERO } },
     { "aside",      { BLOCK,  ZERO, ZERO } },
     { "b",          { INLINE, ZERO, ZERO } },
@@ -74,11 +82,19 @@ static const tag_row TAG_TABLE[] = {
     { "blockquote", { BLOCK,  EDG(1.0, 2.5, 1.0, 2.5), ZERO } },
     { "body",       { BLOCK,  ZERO, ZERO } },
     { "button",     { IBLOCK, ZERO, ZERO } },
+    { "caption",    { BLOCK,  ZERO, ZERO } },
     { "code",       { INLINE, ZERO, ZERO } },
+    { "dd",         { BLOCK,  EDG(0.0, 0.0, 0.0, 2.5), ZERO } },
+    { "details",    { BLOCK,  ZERO, ZERO } },
     { "div",        { BLOCK,  ZERO, ZERO } },
+    { "dl",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), ZERO } },
+    { "dt",         { BLOCK,  ZERO, ZERO } },
     { "em",         { INLINE, ZERO, ZERO } },
-    { "figure",     { BLOCK,  ZERO, ZERO } },
+    { "fieldset",   { BLOCK,  ZERO, ZERO } },
+    { "figcaption", { BLOCK,  ZERO, ZERO } },
+    { "figure",     { BLOCK,  EDG(1.0, 2.5, 1.0, 2.5), ZERO } },
     { "footer",     { BLOCK,  ZERO, ZERO } },
+    { "form",       { BLOCK,  ZERO, ZERO } },
     { "h1",         { BLOCK,  EDG(0.67, 0.0, 0.67, 0.0), ZERO } },
     { "h2",         { BLOCK,  EDG(0.83, 0.0, 0.83, 0.0), ZERO } },
     { "h3",         { BLOCK,  EDG(1.0,  0.0, 1.0,  0.0), ZERO } },
@@ -92,10 +108,11 @@ static const tag_row TAG_TABLE[] = {
     { "img",        { IBLOCK, ZERO, ZERO } },
     { "input",      { IBLOCK, ZERO, ZERO } },
     { "label",      { INLINE, ZERO, ZERO } },
+    { "legend",     { BLOCK,  ZERO, ZERO } },
     { "li",         { LITEM,  ZERO, ZERO } },
     { "link",       { NONE,   ZERO, ZERO } },
     { "main",       { BLOCK,  ZERO, ZERO } },
-    { "menu",       { BLOCK,  ZERO, ZERO } },
+    { "menu",       { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) } },
     { "meta",       { NONE,   ZERO, ZERO } },
     { "nav",        { BLOCK,  ZERO, ZERO } },
     { "ol",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) } },
@@ -109,9 +126,17 @@ static const tag_row TAG_TABLE[] = {
     { "strong",     { INLINE, ZERO, ZERO } },
     { "style",      { NONE,   ZERO, ZERO } },
     { "sub",        { INLINE, ZERO, ZERO } },
+    { "summary",    { BLOCK,  ZERO, ZERO } },
     { "sup",        { INLINE, ZERO, ZERO } },
+    { "table",      { BLOCK,  ZERO, ZERO } },
+    { "tbody",      { BLOCK,  ZERO, ZERO } },
+    { "td",         { BLOCK,  ZERO, ZERO } },
     { "textarea",   { IBLOCK, ZERO, ZERO } },
+    { "tfoot",      { BLOCK,  ZERO, ZERO } },
+    { "th",         { BLOCK,  ZERO, ZERO } },
+    { "thead",      { BLOCK,  ZERO, ZERO } },
     { "title",      { NONE,   ZERO, ZERO } },
+    { "tr",         { BLOCK,  ZERO, ZERO } },
     { "ul",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) } },
 };
 #define TAG_N (sizeof TAG_TABLE / sizeof TAG_TABLE[0])
@@ -122,6 +147,40 @@ bx_box bx_default_for_tag(const char *tag) {
     if (copy_lower_trim(tag, buf, sizeof buf) != 0) return neutral;
     const tag_row *r = bsearch(buf, TAG_TABLE, TAG_N, sizeof TAG_TABLE[0], name_cmp);
     return (r != NULL) ? r->box : neutral;
+}
+
+/* --- source-element identity across the render IPC (spec/box_style.md 4d) --- */
+
+/* The canonical tag name behind each bx_ua_tag code, indexed BY the code. It holds no
+ * metrics of its own: bx_default_for_ua feeds the name straight back into TAG_TABLE,
+ * so the user-agent sheet keeps exactly ONE definition and the two lookup directions
+ * cannot drift apart. BX_UA_NONE has no name -- it is the absence of a UA margin. */
+static const char *const UA_NAME[BX_UA_COUNT] = {
+    NULL,
+    "p",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "ul", "ol", "menu",
+    "dl",
+    "pre",
+    "blockquote",
+    "figure",
+    "hr",
+    "li",
+};
+
+bx_ua_tag bx_ua_of_tag(const char *tag) {
+    char buf[BX_TAG_MAX];
+    if (copy_lower_trim(tag, buf, sizeof buf) != 0) return BX_UA_NONE;
+    for (int i = BX_UA_NONE + 1; i < BX_UA_COUNT; ++i) {
+        if (strcmp(buf, UA_NAME[i]) == 0) return (bx_ua_tag)i;
+    }
+    return BX_UA_NONE;
+}
+
+bx_box bx_default_for_ua(bx_ua_tag id) {
+    const bx_box neutral = { INLINE, ZERO, ZERO };
+    if (id == BX_UA_NONE || id >= BX_UA_COUNT) return neutral;
+    return bx_default_for_tag(UA_NAME[id]);
 }
 
 /* --- display keyword -> value table --- */

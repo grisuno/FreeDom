@@ -177,6 +177,11 @@ typedef struct rd_block {
     /* Symbolic per-mille width cap (Hito 32), 0 = none; resolved against the real
      * available width by the painter (bx_width_cap). Gated by caps.css like box_w. */
     int              box_w_pct;
+    /* User-agent box identity of the block this came from (a bx_ua_tag code).
+     * STRUCTURE, carried regardless of caps.css: the UA sheet is not author styling.
+     * Without it rd_block_tag has to guess, and its guess is "p" for every body-text
+     * block -- a phantom 1em gap before every <div>. spec/box_style.md 4d. */
+    int              ua_tag;
     /* Keystone (Stage 0): stable document-order element identity. node_id is the
      * dom_node_id of the source element for this block, copied from pv_run. It is
      * STRUCTURE, carried regardless of caps.css (like block_id). DOM_NODE_NONE when

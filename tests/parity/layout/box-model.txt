@@ -1,19 +1,19 @@
 Author box model demo
 === Freedom layout ===
-content_w=952 total_h=626.9 nbox=1 nrow=15 npositioned=0
-  row[0] top=0.0 h=54.0 x_off=0.0
-  row[1] top=75.4 h=27.6 x_off=0.0
-  row[2] top=103.0 h=27.6 x_off=0.0
-  row[3] top=166.6 h=40.8 x_off=296.0 w=360.0
-  row[4] top=227.3 h=27.6 x_off=296.0 w=360.0
-  row[5] top=254.9 h=27.6 x_off=296.0 w=360.0
-  row[6] top=282.5 h=27.6 x_off=296.0 w=360.0
-  row[7] top=310.1 h=27.6 x_off=296.0 w=360.0
-  row[8] top=337.7 h=27.6 x_off=296.0 w=360.0
-  row[9] top=381.3 h=27.6 x_off=296.0 w=360.0
-  row[10] top=408.9 h=27.6 x_off=296.0 w=360.0
-  row[11] top=436.5 h=27.6 x_off=296.0 w=360.0
-  row[12] top=464.1 h=27.6 x_off=296.0 w=360.0
-  row[13] top=555.7 h=27.6 x_off=0.0 w=360.0
-  row[14] top=599.3 h=27.6 x_off=0.0 w=360.0
-  box[0] bid=0 x=272.0 top=146.6 w=408.0 h=345.0
+content_w=952 total_h=551.3 nbox=1 nrow=15 npositioned=0
+  row[0] top=0.0 h=45.0 x_off=0.0
+  row[1] top=66.4 h=23.0 x_off=0.0
+  row[2] top=89.4 h=23.0 x_off=0.0
+  row[3] top=148.4 h=34.0 x_off=296.0 w=360.0
+  row[4] top=202.3 h=23.0 x_off=296.0 w=360.0
+  row[5] top=225.3 h=23.0 x_off=296.0 w=360.0
+  row[6] top=248.3 h=23.0 x_off=296.0 w=360.0
+  row[7] top=271.3 h=23.0 x_off=296.0 w=360.0
+  row[8] top=294.3 h=23.0 x_off=296.0 w=360.0
+  row[9] top=333.3 h=23.0 x_off=296.0 w=360.0
+  row[10] top=356.3 h=23.0 x_off=296.0 w=360.0
+  row[11] top=379.3 h=23.0 x_off=296.0 w=360.0
+  row[12] top=402.3 h=23.0 x_off=296.0 w=360.0
+  row[13] top=489.3 h=23.0 x_off=0.0 w=360.0
+  row[14] top=528.3 h=23.0 x_off=0.0 w=360.0
+  box[0] bid=0 x=272.0 top=128.4 w=408.0 h=296.8

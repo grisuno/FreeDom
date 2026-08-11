@@ -26,7 +26,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
          * cascade over it; the full input is still the parsed HTML. */
         const char *ext = (const char *)data + size / 2;
         size_t ext_len = size - size / 2;
-        if (pv_build_styled(doc, 0, 0, 0, ext, ext_len, &v) == PV_OK) {
+        /* Render width the `@media (min-width/max-width)` gate is evaluated against
+         * (2026-08-10 doctrine): the headless page width, fixed so a run is
+         * reproducible. The harness had not been updated when the parameter was
+         * added, which silently broke this fuzz target at build time. */
+        if (pv_build_styled(doc, 0, 0, 0, ext, ext_len, 1000, &v) == PV_OK) {
             size_t n = pv_count(v);
             for (size_t i = 0; i < n; ++i) {
                 const pv_run *r = pv_at(v, i);
@@ -35,7 +39,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
                 if (r->text != NULL) sink ^= (int)r->text[0];
                 sink ^= r->kind ^ r->heading ^ r->bold ^ r->italic ^ r->indent
                       ^ r->block_break ^ r->cont_id ^ r->cont_display ^ r->cont_cols
-                      ^ r->input_type ^ r->form_id;
+                      ^ r->input_type ^ r->form_id ^ r->ua_tag;
                 (void)sink;
             }
             pv_free(v);

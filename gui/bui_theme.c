@@ -24,7 +24,12 @@ ui_theme ui_theme_default(void) {
     t.heading_scale[4] = 1.0;
     t.heading_scale[5] = 0.83;
     t.heading_scale[6] = 0.67;
-    t.line_spacing = 1.2;   /* approximates `line-height: normal` for these faces */
+    /* `line-height: normal` IS the font's natural line box -- the scaled
+     * ascent+descent the painter already sums -- so the multiplier on top of it is
+     * 1.0, not a taste. At 1.2 every line of every page without an author
+     * line-height came out 20% tall; measured against Firefox on this host, a 16px
+     * line is 23px in both engines only at 1.0. spec/box_style.md 4c. */
+    t.line_spacing = 1.0;
     t.paragraph_gap = 8.0;
     t.content_margin = UI_TEXT_MARGIN;
     t.image_box_pad = 6.0;
