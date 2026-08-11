@@ -2687,14 +2687,14 @@ static void test_build_styled_external_css(void **state) {
     static const char EXT[] =
         "p{text-align:center} p.own{text-align:center} .gone{display:none}";
     pv_view *v = NULL;
-    assert_int_equal(pv_build_styled(doc, 0, 0, 0, EXT, sizeof EXT - 1, &v), PV_OK);
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, EXT, sizeof EXT - 1, 0, &v), PV_OK);
     assert_int_equal(find_text(v, "centered")->text_align, CSS_ALIGN_CENTER);
     assert_int_equal(find_text(v, "docwins")->text_align, CSS_ALIGN_RIGHT);
     assert_null(find_text(v, "hidden"));
     pv_free(v);
 
     pv_view *w = NULL;
-    assert_int_equal(pv_build_styled(doc, 0, 0, 0, NULL, 0, &w), PV_OK);
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, NULL, 0, 0, &w), PV_OK);
     assert_int_equal(find_text(w, "centered")->text_align, CSS_ALIGN_UNSET);
     assert_non_null(find_text(w, "hidden"));
     pv_free(w);
@@ -2706,7 +2706,7 @@ static void test_pseudo_before_on_empty(void **state) {
     hp_document *doc = parse("<body><div></div></body>");
     static const char CSS[] = "div::before{content:\"BEFORE\"}";
     pv_view *v = NULL;
-    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, &v), PV_OK);
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
     const pv_run *r = find_text(v, "BEFORE");
     assert_non_null(r);
     assert_int_equal(r->kind, PV_TEXT);
@@ -2719,7 +2719,7 @@ static void test_pseudo_before_on_element_with_children(void **state) {
     hp_document *doc = parse("<body><p>World</p></body>");
     static const char CSS[] = "p::before{content:\"Hello \"}";
     pv_view *v = NULL;
-    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, &v), PV_OK);
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
     assert_non_null(find_text(v, "Hello "));
     assert_non_null(find_text(v, "World"));
     const pv_run *before_run = find_text(v, "Hello ");
@@ -2734,7 +2734,7 @@ static void test_pseudo_after_on_element_with_children(void **state) {
     hp_document *doc = parse("<body><p>Start</p></body>");
     static const char CSS[] = "p::after{content:\" End\"}";
     pv_view *v = NULL;
-    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, &v), PV_OK);
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
     assert_non_null(find_text(v, "Start"));
     assert_non_null(find_text(v, " End"));
     const pv_run *start_run = find_text(v, "Start");
@@ -2749,7 +2749,7 @@ static void test_pseudo_both_before_and_after(void **state) {
     hp_document *doc = parse("<body><p>IN</p></body>");
     static const char CSS[] = "p::before{content:\"<<\"}p::after{content:\">>\"}";
     pv_view *v = NULL;
-    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, &v), PV_OK);
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
     const pv_run *b = find_text(v, "<<");
     const pv_run *in = find_text(v, "IN");
     const pv_run *a = find_text(v, ">>");
@@ -2767,7 +2767,7 @@ static void test_pseudo_no_content_no_run(void **state) {
     hp_document *doc = parse("<body><div>real</div></body>");
     static const char CSS[] = "div::before{color:red}";
     pv_view *v = NULL;
-    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, &v), PV_OK);
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
     assert_non_null(find_text(v, "real"));
     assert_int_equal(pv_count(v), 1);
     pv_free(v);

@@ -101,6 +101,7 @@ typedef struct child_state {
     int             last_run_js;       /* render params from the last OP_LOAD */
     int             last_reader;
     int             last_prefers_dark;
+    int             last_viewport_w;   /* @media render width (0 => normalized default) */
     char           *extern_css;        /* fetched <link rel=stylesheet> bodies (Hito 27); */
     size_t          extern_css_len;    /* kept so click/re-derive restyles without refetch */
     pv_view        *preserved_view;    /* pre-script DOM snapshot (fallback when jQuery */
@@ -718,10 +719,12 @@ static int32_t child_next_timer_ms(child_state *cs);
 
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
-                              int css, const char *page_url, const char *cookies) {
+                              int css, int viewport_w, const char *page_url,
+                              const char *cookies) {
     cs->last_run_js = run_js;
     cs->last_reader = reader;
     cs->last_prefers_dark = prefers_dark;
+    cs->last_viewport_w = viewport_w;
 
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
@@ -787,7 +790,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
          * count and the fuller-view heuristic picks it even with JS on. */
         (void)pv_build_styled(cs->doc, run_js, reader, prefers_dark,
                               cs->extern_css, cs->extern_css_len,
-                              &preserve_view);
+                              cs->last_viewport_w, &preserve_view);
     }
     if (ok && run_js) {
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
@@ -928,7 +931,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         text  = hp_extract_text(cs->doc, &xl);
         if (title == NULL || text == NULL
             || pv_build_styled(cs->doc, run_js, reader, prefers_dark,
-                               cs->extern_css, cs->extern_css_len, &view) != PV_OK) {
+                               cs->extern_css, cs->extern_css_len,
+                               cs->last_viewport_w, &view) != PV_OK) {
             ok = 0;
             child_reset_page(cs);
         } else {
@@ -1038,7 +1042,7 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
         if (title != NULL && text != NULL
             && pv_build_styled(cs->doc, cs->last_run_js, cs->last_reader,
                                cs->last_prefers_dark, cs->extern_css,
-                               cs->extern_css_len, &view) == PV_OK) {
+                               cs->extern_css_len, cs->last_viewport_w, &view) == PV_OK) {
             ok = 1;
         }
     }
@@ -1382,13 +1386,15 @@ static void tab_worker_run(int rfd, int wfd) {
          * (prefers-color-scheme) and css (external stylesheet fetch, Hito 27), then
          * the page URL (for the real location), before length+payload. */
         uint8_t run_js = 0, net = 0, reader = 0, dark = 0, css = 0;
+        int32_t vpw = 0;
         char *url = NULL, *cookies = NULL;
         if (op == OP_LOAD) {
             if (read_full(rfd, &run_js, 1) != 0
              || read_full(rfd, &net, 1) != 0
              || read_full(rfd, &reader, 1) != 0
              || read_full(rfd, &dark, 1) != 0
-             || read_full(rfd, &css, 1) != 0) break;
+             || read_full(rfd, &css, 1) != 0
+             || read_full(rfd, &vpw, sizeof vpw) != 0) break;
             size_t ulen = 0;
             if (read_full(rfd, &ulen, sizeof ulen) != 0) break;
             if (ulen > TAB_MAX_URL) break; /* defensive: URLs are small */
@@ -1417,7 +1423,7 @@ static void tab_worker_run(int rfd, int wfd) {
         if (len != 0 && read_full(rfd, buf, len) != 0) { free(buf); free(url); break; }
         buf[len] = '\0';
 
-        if (op == OP_LOAD)                   child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, url, cookies);
+        if (op == OP_LOAD)                   child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, (int)vpw, url, cookies);
         else if (op == OP_EVAL)              child_handle_eval(wfd, &cs, buf, len);
         else if (op == OP_DECODE_IMAGE)      child_handle_decode_image(wfd, buf, len);
         else /* OP_DECODE_IMAGE_B64 */       child_handle_decode_image_b64(wfd, buf, len);
@@ -1478,6 +1484,7 @@ struct tab {
      * opt-in); fetcher does the policy-checked fetch in the trusted parent. */
     int            net_allowed;
     int            css_allowed;
+    int            viewport_w;    /* @media render width for the next load (0 => default) */
     char          *cookies_in;   /* seeds document.cookie for the next load (owned) */
     tab_fetch_fn   fetcher;
     void          *fetcher_ctx;
@@ -2048,6 +2055,11 @@ void tab_set_css_allowed(tab *t, int allowed) {
     t->css_allowed = allowed ? 1 : 0;
 }
 
+void tab_set_viewport_w(tab *t, int px) {
+    if (t == NULL) return;
+    t->viewport_w = (px > 0) ? px : 0;   /* 0 => the worker uses the normalized default */
+}
+
 void tab_set_cookies(tab *t, const char *cookies) {
     if (t == NULL) return;
     free(t->cookies_in);
@@ -2121,15 +2133,16 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][url_len][url]
-     * [ck_len][cookies][len][html] (the flags, URL and cookie seed precede the payload
-     * so the html stays zero-copy). net grants XHR/fetch and is only meaningful with JS
-     * on; css grants GET-only external stylesheet fetches (Hito 27); cookies seed
-     * document.cookie for a trusted host (empty otherwise). */
+    /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][vpw:4][url_len][url]
+     * [ck_len][cookies][len][html] (the flags, viewport width, URL and cookie seed
+     * precede the payload so the html stays zero-copy). net grants XHR/fetch and is only
+     * meaningful with JS on; css grants GET-only external stylesheet fetches (Hito 27);
+     * vpw is the @media render width; cookies seed document.cookie for a trusted host. */
     uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0,
             nflag = (run_js && t->net_allowed) ? 1 : 0,
             rflag = reader ? 1 : 0, dflag = prefers_dark ? 1 : 0,
             cflag = t->css_allowed ? 1 : 0;
+    int32_t vpw = (int32_t)t->viewport_w;
     const char *ck = (nflag && t->cookies_in != NULL) ? t->cookies_in : "";
     size_t cklen = strlen(ck);
     if (write_full(t->req_fd, &op, 1) != 0
@@ -2138,6 +2151,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
      || write_full(t->req_fd, &rflag, 1) != 0
      || write_full(t->req_fd, &dflag, 1) != 0
      || write_full(t->req_fd, &cflag, 1) != 0
+     || write_full(t->req_fd, &vpw, sizeof vpw) != 0
      || write_full(t->req_fd, &ulen, sizeof ulen) != 0
      || (ulen != 0 && write_full(t->req_fd, page_url, ulen) != 0)
      || write_full(t->req_fd, &cklen, sizeof cklen) != 0

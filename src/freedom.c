@@ -488,6 +488,10 @@ static int render_page(const char *html, size_t len, const char *top_url,
 
     tab_page page;
     memset(&page, 0, sizeof page);
+    /* @media width queries evaluate against the fixed headless canvas width, the same
+     * width ui_render_png/ui_dump_layout paint at (so responsive pages pick the paint
+     * breakpoint, not a normalized-desktop one that then paints narrower). */
+    tab_set_viewport_w(t, ui_render_viewport_w());
     ts = tab_load_full(t, html, len, top_url, wc.js, 0, 0, &page);
 
     /* The prefetch window ends with the load: rebind the direct fetcher and drop

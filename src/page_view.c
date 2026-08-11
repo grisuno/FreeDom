@@ -3104,12 +3104,12 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out) {
 
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                         int prefers_dark, pv_view **out) {
-    return pv_build_styled(doc, js_enabled, reader, prefers_dark, NULL, 0, out);
+    return pv_build_styled(doc, js_enabled, reader, prefers_dark, NULL, 0, 0, out);
 }
 
 pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
-                          pv_view **out) {
+                          int viewport_w, pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
 
@@ -3156,12 +3156,15 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         }
     }
     css_sheet *sheet = NULL;
-    /* @media gated against the user's color scheme (auto dark mode) and a fixed,
-     * normalized desktop width (no real viewport size leaks). Screen context.
-     * The live <html>/<body> class list scopes custom-property collection, so a
-     * theme palette keyed by a class the page actually carries applies and an
-     * inactive one never clobbers it. */
-    css_media media = { prefers_dark ? 1 : 0, 0, CSS_MEDIA_DEFAULT_WIDTH };
+    /* @media gated against the user's color scheme (auto dark mode) and the render
+     * viewport width, so a responsive page selects the same breakpoint Firefox does
+     * at the paint width (0 => the normalized CSS_MEDIA_DEFAULT_WIDTH desktop). Only
+     * the width query sees this; viewport UNITS still resolve against the normalized
+     * desktop (no real geometry leaks into lengths). The live <html>/<body> class
+     * list scopes custom-property collection, so a theme palette keyed by a class the
+     * page actually carries applies and an inactive one never clobbers it. */
+    int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
+    css_media media = { prefers_dark ? 1 : 0, 0, media_w };
     char *root_scope = collect_root_scope(root);
     (void)css_parse_scoped(style_text, style_len, &media, root_scope, &sheet);
     free(root_scope);

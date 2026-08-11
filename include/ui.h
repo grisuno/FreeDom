@@ -125,4 +125,9 @@ ui_status ui_render_pdf_images(const struct rd_doc *doc, struct tab *t, const ch
  * UI_ERR_NULL_ARG if doc is null or empty. */
 ui_status ui_dump_layout(const struct rd_doc *doc);
 
+/* The fixed canvas width (px) every headless render (ui_render_png/pdf, ui_dump_layout)
+ * lays out at. The headless driver feeds it to tab_set_viewport_w so @media width
+ * queries match the width the page is actually painted at. */
+int ui_render_viewport_w(void);
+
 #endif /* FREEDOM_UI_H */

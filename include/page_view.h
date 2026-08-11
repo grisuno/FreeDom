@@ -611,9 +611,15 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
  * the page's <style> wins), and the combined text is capped (anti-DoS). Hostile
  * input: it flows through the same bounded, fail-closed css parser (url()/@import
  * dropped -- it can never phone home). */
+/* viewport_w is the render viewport width in px used to evaluate @media width
+ * queries (min-width/max-width): it MUST equal the width the page is painted at, or
+ * a responsive page selects rules for the wrong breakpoint (e.g. Wikipedia's Vector
+ * body activates its >=1680px pinned-sidebar grid at a 1000px paint and squeezes the
+ * article). 0 (or negative) falls back to CSS_MEDIA_DEFAULT_WIDTH, keeping every
+ * caller that predates this parameter byte-identical. */
 pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
-                          pv_view **out);
+                          int viewport_w, pv_view **out);
 
 /* Allocates an empty view (used by the IPC deserialiser to rebuild a view on the
  * receiving side). Returns NULL on allocation failure. */

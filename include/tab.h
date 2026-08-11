@@ -157,6 +157,13 @@ void tab_set_cookies(tab *t, const char *cookies);
  * exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */
 void tab_set_css_allowed(tab *t, int allowed);
 
+/* Sets the render viewport width (px) used to evaluate @media width queries on the
+ * NEXT load, so a responsive page selects the same breakpoint the paint width would
+ * (the page is painted at this width). <= 0 restores the normalized default. Only the
+ * @media width query sees it; viewport UNITS (vw/vh) still resolve against the fixed
+ * normalized desktop, so no real geometry leaks into computed lengths. */
+void tab_set_viewport_w(tab *t, int px);
+
 /* Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for
  * this load, never the worker's claims): net_allowed permits any well-formed method;
  * css_allowed alone permits exactly "GET"; a NULL/empty method or no grant is refused. */

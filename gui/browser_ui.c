@@ -2079,6 +2079,9 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * theme makes the author's @media(prefers-color-scheme:dark) rules apply (auto
      * dark mode). Reader forces a clean view, so it never reports a dark preference. */
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
+    /* @media width queries evaluate against the paint width, so a responsive page picks
+     * the same breakpoint it would in another browser at this window size. */
+    tab_set_viewport_w(t, (int)w->width);
     tab_status load_ts = tab_load_full(t, w->cur_html, w->cur_html_len, w->cur_top,
                                        w->caps.js, w->reader, prefers_dark, &page);
 
@@ -4195,9 +4198,14 @@ static double replaced_item_width(const browser_window *w, const ui_theme *th,
  * real flow_text_block (same fonts, shaping, letter-spacing, transforms), so a
  * measured width cannot drift from the width the item actually lays out at; the
  * scratch layout is discarded. Returns 0.0 for an item with no text. */
-static double measure_item_content_w(cairo_t *cr, const browser_window *w,
-                                     const ui_theme *th, const rd_doc *doc,
-                                     size_t b0, size_t b1) {
+/* Widest resulting line when the item's runs are flowed at `measure_w`. At the wide
+ * FLEX_MEASURE_W this is the item's MAX-CONTENT width (nothing wraps); at a 1px
+ * measure the runs wrap at every break and the widest line is the longest
+ * unbreakable word -- the item's MIN-CONTENT width. A replaced element keeps its
+ * intrinsic box either way (it does not wrap below its own size). */
+static double measure_item_w_at(cairo_t *cr, const browser_window *w,
+                                const ui_theme *th, const rd_doc *doc,
+                                size_t b0, size_t b1, double measure_w) {
     rc_layout M;
     rc_state  si;
     memset(&M, 0, sizeof M);
@@ -4214,7 +4222,7 @@ static double measure_item_content_w(cairo_t *cr, const browser_window *w,
         if (rw >= 0.0) {
             if (rw > repl_max) repl_max = rw;
         } else {
-            flow_text_block(cr, w, &M, &si, th, bk, FLEX_MEASURE_W);
+            flow_text_block(cr, w, &M, &si, th, bk, measure_w);
         }
     }
     flush_line(&M, &si, th);
@@ -4228,6 +4236,12 @@ static double measure_item_content_w(cairo_t *cr, const browser_window *w,
     }
     rc_free(&M);
     return maxw;
+}
+
+static double measure_item_content_w(cairo_t *cr, const browser_window *w,
+                                     const ui_theme *th, const rd_doc *doc,
+                                     size_t b0, size_t b1) {
+    return measure_item_w_at(cr, w, th, doc, b0, b1, FLEX_MEASURE_W);
 }
 
 /* Main-axis base size of one flex item, in BORDER-BOX px (what bt_layout lays out).
@@ -4703,6 +4717,71 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                      * makes that cell wrap into a second line -- which is the very
                      * thing content-sized columns exist to prevent. */
                     table_track[t] = (int)ceil(px - 0.001);
+                }
+                root.grid_track = table_track;
+                root.grid_ntrack = PV_GRID_TRACKS;
+            }
+        }
+        /* Intrinsic tracks mixed with fr (CSS Grid §11.5): a track sized `min-content`
+         * / `max-content` / `auto` (encoded 0) must take its CONTENT width, and the fr
+         * tracks share the REMAINDER -- not an equal 1fr slice each. The equal split
+         * was the single dominant parity offender: Wikipedia's Vector body is
+         * `grid-template-columns:minmax(0,1fr) min-content` (article + rail), and giving
+         * the rail half the page squeezed the article's whole text into a ~248px column,
+         * wrapping it one word per line and making the page ~5x Firefox's height. Only
+         * fires when an fr track exists to absorb the remainder, so an all-auto author
+         * grid keeps its historical equal split byte-for-byte (spec/css.md, doctrine
+         * "author grid with auto tracks"). Tables took their own path above. */
+        if (is_grid && !cdv.is_table && ncols <= PV_GRID_TRACKS) {
+            int has_fr = 0, has_intrinsic = 0;
+            for (size_t t = 0; t < ncols; ++t) {
+                if (cdv.col_w[t] < 0) has_fr = 1;
+                else if (cdv.col_w[t] == 0) has_intrinsic = 1;
+            }
+            if (has_fr && has_intrinsic) {
+                /* Min-content width per intrinsic column: the longest unbreakable word,
+                 * so the fr track keeps every pixel the rail does not strictly need. */
+                double colw[PV_GRID_TRACKS];
+                for (size_t t = 0; t < PV_GRID_TRACKS; ++t) colw[t] = 0.0;
+                for (size_t j = 0; j < g; ++j) {
+                    size_t c = j % ncols;
+                    if (c >= ncols || cdv.col_w[c] != 0) continue;
+                    item_sides cs = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                                                        cid, item_cbox);
+                    double mw = measure_item_w_at(cr, w, th, doc,
+                                                  gstart[j], gstart[j + 1], 1.0)
+                              + cs.pl + cs.pr + cs.bl + cs.br + cs.ml + cs.mr;
+                    if (mw > colw[c]) colw[c] = mw;
+                }
+                /* Reserve for the fr tracks: an intrinsic rail may never eat the space a
+                 * 1fr column needs, so cap the intrinsic total at the room left after
+                 * every fr track keeps a minimum usable line. */
+                double avail = content_w - (double)cdv.gap * (double)(ncols - 1);
+                if (avail < 1.0) avail = 1.0;
+                int fr_count = 0;
+                double intrinsic_sum = 0.0;
+                for (size_t t = 0; t < ncols; ++t) {
+                    if (cdv.col_w[t] < 0) ++fr_count;
+                    else if (cdv.col_w[t] == 0) intrinsic_sum += colw[t];
+                }
+                double fr_reserve = (double)fr_count * FX_FLOAT_MIN_LINE;
+                double cap = avail - fr_reserve;
+                if (cap < 0.0) cap = 0.0;
+                if (intrinsic_sum > cap && intrinsic_sum > 0.0) {
+                    double k = cap / intrinsic_sum;
+                    for (size_t t = 0; t < ncols; ++t)
+                        if (cdv.col_w[t] == 0) colw[t] *= k;
+                }
+                for (size_t t = 0; t < PV_GRID_TRACKS; ++t) {
+                    if (t < ncols && cdv.col_w[t] == 0) {
+                        double px = colw[t];
+                        if (px < 1.0) px = 1.0;
+                        /* CEIL, never round: a track half a pixel under its widest word
+                         * wraps that word, the very thing content-sizing prevents. */
+                        table_track[t] = (int)ceil(px - 0.001);
+                    } else {
+                        table_track[t] = cdv.col_w[t];   /* fr / fixed pass through */
+                    }
                 }
                 root.grid_track = table_track;
                 root.grid_ntrack = PV_GRID_TRACKS;
@@ -9353,6 +9432,8 @@ static void export_pdf(browser_window *w) {
  * follows the content but is capped so a hostile page cannot force an unbounded
  * allocation (a taller page is clipped at PNG_MAX_H). */
 #define PNG_PAGE_W   1000.0
+
+int ui_render_viewport_w(void) { return (int)PNG_PAGE_W; }
 #define PNG_MARGIN   24.0
 #define PNG_MAX_H    30000   /* px; 1000 * 30000 * 4B ~= 120 MiB worst case */
 
@@ -11530,6 +11611,7 @@ static tab *freebug_repl_worker(browser_window *w) {
     tab_set_net_allowed(t, wc.net);
     tab_set_css_allowed(t, wc.css);
     seed_session_cookies(t, wc.cookies, w->cur_top); /* REPL worker sees the same cookies */
+    tab_set_viewport_w(t, (int)w->width);
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);
