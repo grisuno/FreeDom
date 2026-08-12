@@ -15,10 +15,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Longest recognised tag is "blockquote" (10); longest display keyword is
- * "inline-block" (12). The buffers are generous so a normal token always fits and
+/* Longest display keyword is "inline-block" (12); the tag bound is the public
+ * BX_TAG_NAME_MAX (box_style.h) so a caller building a tag buffer and this module
+ * agree on one number. Both are generous, so a normal token always fits and
  * anything longer fails closed instead of truncating. */
-#define BX_TAG_MAX     32u
+#define BX_TAG_MAX     BX_TAG_NAME_MAX
 #define BX_DISPLAY_MAX 24u
 
 static char lc(char c) {
@@ -50,9 +51,15 @@ static int name_cmp(const void *key, const void *elem) {
 
 /* --- tag -> box table (CSS 2.1 user-agent defaults; margins/padding in em) --- */
 
+/* One row of the user-agent sheet. `role` is the table role the UA sheet assigns the
+ * tag (CSS 2.1 17.2: `table{display:table}`, `td{display:table-cell}`, ...); it stays
+ * on the SAME row as the metrics so the sheet keeps one source of truth per tag.
+ * Rows that omit it get BX_TROLE_NONE from aggregate zero-init, which is the correct
+ * answer for every non-table element. */
 typedef struct tag_row {
-    const char *name;
-    bx_box      box;
+    const char   *name;
+    bx_box        box;
+    bx_table_role role;
 } tag_row;
 
 #define BLOCK   BX_DISPLAY_BLOCK
@@ -62,6 +69,14 @@ typedef struct tag_row {
 #define NONE    BX_DISPLAY_NONE
 #define EDG(t, r, b, l) { (t), (r), (b), (l) }
 #define ZERO    EDG(0.0, 0.0, 0.0, 0.0)
+/* Table roles, aliased like the display values above so a row stays one line. */
+#define T_NO    BX_TROLE_NONE
+#define T_TBL   BX_TROLE_TABLE
+#define T_GRP   BX_TROLE_ROW_GROUP
+#define T_ROW   BX_TROLE_ROW
+#define T_CELL  BX_TROLE_CELL
+#define T_CAP   BX_TROLE_CAPTION
+#define T_COL   BX_TROLE_COLUMN
 
 /* Sorted by name (ASCII, lowercase) for binary search. body has zero margin: the
  * window chrome supplies the page gutter, so there is no double margin.
@@ -73,71 +88,73 @@ typedef struct tag_row {
  * redundant with the unknown-tag fallback: it documents that the zero is the
  * user-agent sheet's answer and not an accident of the lookup missing. */
 static const tag_row TAG_TABLE[] = {
-    { "a",          { INLINE, ZERO, ZERO } },
-    { "address",    { BLOCK,  ZERO, ZERO } },
-    { "article",    { BLOCK,  ZERO, ZERO } },
-    { "aside",      { BLOCK,  ZERO, ZERO } },
-    { "b",          { INLINE, ZERO, ZERO } },
-    { "base",       { NONE,   ZERO, ZERO } },
-    { "blockquote", { BLOCK,  EDG(1.0, 2.5, 1.0, 2.5), ZERO } },
-    { "body",       { BLOCK,  ZERO, ZERO } },
-    { "button",     { IBLOCK, ZERO, ZERO } },
-    { "caption",    { BLOCK,  ZERO, ZERO } },
-    { "code",       { INLINE, ZERO, ZERO } },
-    { "dd",         { BLOCK,  EDG(0.0, 0.0, 0.0, 2.5), ZERO } },
-    { "details",    { BLOCK,  ZERO, ZERO } },
-    { "div",        { BLOCK,  ZERO, ZERO } },
-    { "dl",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), ZERO } },
-    { "dt",         { BLOCK,  ZERO, ZERO } },
-    { "em",         { INLINE, ZERO, ZERO } },
-    { "fieldset",   { BLOCK,  ZERO, ZERO } },
-    { "figcaption", { BLOCK,  ZERO, ZERO } },
-    { "figure",     { BLOCK,  EDG(1.0, 2.5, 1.0, 2.5), ZERO } },
-    { "footer",     { BLOCK,  ZERO, ZERO } },
-    { "form",       { BLOCK,  ZERO, ZERO } },
-    { "h1",         { BLOCK,  EDG(0.67, 0.0, 0.67, 0.0), ZERO } },
-    { "h2",         { BLOCK,  EDG(0.83, 0.0, 0.83, 0.0), ZERO } },
-    { "h3",         { BLOCK,  EDG(1.0,  0.0, 1.0,  0.0), ZERO } },
-    { "h4",         { BLOCK,  EDG(1.33, 0.0, 1.33, 0.0), ZERO } },
-    { "h5",         { BLOCK,  EDG(1.67, 0.0, 1.67, 0.0), ZERO } },
-    { "h6",         { BLOCK,  EDG(2.33, 0.0, 2.33, 0.0), ZERO } },
-    { "head",       { NONE,   ZERO, ZERO } },
-    { "header",     { BLOCK,  ZERO, ZERO } },
-    { "hr",         { BLOCK,  EDG(0.5, 0.0, 0.5, 0.0), ZERO } },
-    { "i",          { INLINE, ZERO, ZERO } },
-    { "img",        { IBLOCK, ZERO, ZERO } },
-    { "input",      { IBLOCK, ZERO, ZERO } },
-    { "label",      { INLINE, ZERO, ZERO } },
-    { "legend",     { BLOCK,  ZERO, ZERO } },
-    { "li",         { LITEM,  ZERO, ZERO } },
-    { "link",       { NONE,   ZERO, ZERO } },
-    { "main",       { BLOCK,  ZERO, ZERO } },
-    { "menu",       { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) } },
-    { "meta",       { NONE,   ZERO, ZERO } },
-    { "nav",        { BLOCK,  ZERO, ZERO } },
-    { "ol",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) } },
-    { "p",          { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), ZERO } },
-    { "pre",        { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), ZERO } },
-    { "script",     { NONE,   ZERO, ZERO } },
-    { "section",    { BLOCK,  ZERO, ZERO } },
-    { "select",     { IBLOCK, ZERO, ZERO } },
-    { "small",      { INLINE, ZERO, ZERO } },
-    { "span",       { INLINE, ZERO, ZERO } },
-    { "strong",     { INLINE, ZERO, ZERO } },
-    { "style",      { NONE,   ZERO, ZERO } },
-    { "sub",        { INLINE, ZERO, ZERO } },
-    { "summary",    { BLOCK,  ZERO, ZERO } },
-    { "sup",        { INLINE, ZERO, ZERO } },
-    { "table",      { BLOCK,  ZERO, ZERO } },
-    { "tbody",      { BLOCK,  ZERO, ZERO } },
-    { "td",         { BLOCK,  ZERO, ZERO } },
-    { "textarea",   { IBLOCK, ZERO, ZERO } },
-    { "tfoot",      { BLOCK,  ZERO, ZERO } },
-    { "th",         { BLOCK,  ZERO, ZERO } },
-    { "thead",      { BLOCK,  ZERO, ZERO } },
-    { "title",      { NONE,   ZERO, ZERO } },
-    { "tr",         { BLOCK,  ZERO, ZERO } },
-    { "ul",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) } },
+    { "a",          { INLINE, ZERO, ZERO }, T_NO },
+    { "address",    { BLOCK,  ZERO, ZERO }, T_NO },
+    { "article",    { BLOCK,  ZERO, ZERO }, T_NO },
+    { "aside",      { BLOCK,  ZERO, ZERO }, T_NO },
+    { "b",          { INLINE, ZERO, ZERO }, T_NO },
+    { "base",       { NONE,   ZERO, ZERO }, T_NO },
+    { "blockquote", { BLOCK,  EDG(1.0, 2.5, 1.0, 2.5), ZERO }, T_NO },
+    { "body",       { BLOCK,  ZERO, ZERO }, T_NO },
+    { "button",     { IBLOCK, ZERO, ZERO }, T_NO },
+    { "caption",    { BLOCK,  ZERO, ZERO }, T_CAP },
+    { "code",       { INLINE, ZERO, ZERO }, T_NO },
+    { "col",        { NONE,   ZERO, ZERO }, T_COL },
+    { "colgroup",   { NONE,   ZERO, ZERO }, T_COL },
+    { "dd",         { BLOCK,  EDG(0.0, 0.0, 0.0, 2.5), ZERO }, T_NO },
+    { "details",    { BLOCK,  ZERO, ZERO }, T_NO },
+    { "div",        { BLOCK,  ZERO, ZERO }, T_NO },
+    { "dl",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), ZERO }, T_NO },
+    { "dt",         { BLOCK,  ZERO, ZERO }, T_NO },
+    { "em",         { INLINE, ZERO, ZERO }, T_NO },
+    { "fieldset",   { BLOCK,  ZERO, ZERO }, T_NO },
+    { "figcaption", { BLOCK,  ZERO, ZERO }, T_NO },
+    { "figure",     { BLOCK,  EDG(1.0, 2.5, 1.0, 2.5), ZERO }, T_NO },
+    { "footer",     { BLOCK,  ZERO, ZERO }, T_NO },
+    { "form",       { BLOCK,  ZERO, ZERO }, T_NO },
+    { "h1",         { BLOCK,  EDG(0.67, 0.0, 0.67, 0.0), ZERO }, T_NO },
+    { "h2",         { BLOCK,  EDG(0.83, 0.0, 0.83, 0.0), ZERO }, T_NO },
+    { "h3",         { BLOCK,  EDG(1.0,  0.0, 1.0,  0.0), ZERO }, T_NO },
+    { "h4",         { BLOCK,  EDG(1.33, 0.0, 1.33, 0.0), ZERO }, T_NO },
+    { "h5",         { BLOCK,  EDG(1.67, 0.0, 1.67, 0.0), ZERO }, T_NO },
+    { "h6",         { BLOCK,  EDG(2.33, 0.0, 2.33, 0.0), ZERO }, T_NO },
+    { "head",       { NONE,   ZERO, ZERO }, T_NO },
+    { "header",     { BLOCK,  ZERO, ZERO }, T_NO },
+    { "hr",         { BLOCK,  EDG(0.5, 0.0, 0.5, 0.0), ZERO }, T_NO },
+    { "i",          { INLINE, ZERO, ZERO }, T_NO },
+    { "img",        { IBLOCK, ZERO, ZERO }, T_NO },
+    { "input",      { IBLOCK, ZERO, ZERO }, T_NO },
+    { "label",      { INLINE, ZERO, ZERO }, T_NO },
+    { "legend",     { BLOCK,  ZERO, ZERO }, T_NO },
+    { "li",         { LITEM,  ZERO, ZERO }, T_NO },
+    { "link",       { NONE,   ZERO, ZERO }, T_NO },
+    { "main",       { BLOCK,  ZERO, ZERO }, T_NO },
+    { "menu",       { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) }, T_NO },
+    { "meta",       { NONE,   ZERO, ZERO }, T_NO },
+    { "nav",        { BLOCK,  ZERO, ZERO }, T_NO },
+    { "ol",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) }, T_NO },
+    { "p",          { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), ZERO }, T_NO },
+    { "pre",        { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), ZERO }, T_NO },
+    { "script",     { NONE,   ZERO, ZERO }, T_NO },
+    { "section",    { BLOCK,  ZERO, ZERO }, T_NO },
+    { "select",     { IBLOCK, ZERO, ZERO }, T_NO },
+    { "small",      { INLINE, ZERO, ZERO }, T_NO },
+    { "span",       { INLINE, ZERO, ZERO }, T_NO },
+    { "strong",     { INLINE, ZERO, ZERO }, T_NO },
+    { "style",      { NONE,   ZERO, ZERO }, T_NO },
+    { "sub",        { INLINE, ZERO, ZERO }, T_NO },
+    { "summary",    { BLOCK,  ZERO, ZERO }, T_NO },
+    { "sup",        { INLINE, ZERO, ZERO }, T_NO },
+    { "table",      { BLOCK,  ZERO, ZERO }, T_TBL },
+    { "tbody",      { BLOCK,  ZERO, ZERO }, T_GRP },
+    { "td",         { BLOCK,  ZERO, ZERO }, T_CELL },
+    { "textarea",   { IBLOCK, ZERO, ZERO }, T_NO },
+    { "tfoot",      { BLOCK,  ZERO, ZERO }, T_GRP },
+    { "th",         { BLOCK,  ZERO, ZERO }, T_CELL },
+    { "thead",      { BLOCK,  ZERO, ZERO }, T_GRP },
+    { "title",      { NONE,   ZERO, ZERO }, T_NO },
+    { "tr",         { BLOCK,  ZERO, ZERO }, T_ROW },
+    { "ul",         { BLOCK,  EDG(1.0, 0.0, 1.0, 0.0), EDG(0.0, 0.0, 0.0, 2.5) }, T_NO },
 };
 #define TAG_N (sizeof TAG_TABLE / sizeof TAG_TABLE[0])
 
@@ -147,6 +164,26 @@ bx_box bx_default_for_tag(const char *tag) {
     if (copy_lower_trim(tag, buf, sizeof buf) != 0) return neutral;
     const tag_row *r = bsearch(buf, TAG_TABLE, TAG_N, sizeof TAG_TABLE[0], name_cmp);
     return (r != NULL) ? r->box : neutral;
+}
+
+bx_table_role bx_table_role_of(const char *tag, css_display display) {
+    /* The computed display decides when it names a role: that is what a table box
+     * IS in CSS 2.1 17.2. The UA sheet is only the default supplier of these values,
+     * so an author display both CREATES a role on a <div> and REMOVES it from a <td>. */
+    switch (display) {
+        case CSS_DISP_TABLE:            return BX_TROLE_TABLE;
+        case CSS_DISP_TABLE_ROW_GROUP:  return BX_TROLE_ROW_GROUP;
+        case CSS_DISP_TABLE_ROW:        return BX_TROLE_ROW;
+        case CSS_DISP_TABLE_CELL:       return BX_TROLE_CELL;
+        case CSS_DISP_TABLE_CAPTION:    return BX_TROLE_CAPTION;
+        case CSS_DISP_TABLE_COLUMN:     return BX_TROLE_COLUMN;
+        case CSS_DISP_UNSET:            break;   /* no author display: ask the UA sheet */
+        default:                        return BX_TROLE_NONE;  /* block/flex/none/... */
+    }
+    char buf[BX_TAG_MAX];
+    if (copy_lower_trim(tag, buf, sizeof buf) != 0) return BX_TROLE_NONE;
+    const tag_row *r = bsearch(buf, TAG_TABLE, TAG_N, sizeof TAG_TABLE[0], name_cmp);
+    return (r != NULL) ? r->role : BX_TROLE_NONE;
 }
 
 /* --- source-element identity across the render IPC (spec/box_style.md 4d) --- */
@@ -181,6 +218,20 @@ bx_box bx_default_for_ua(bx_ua_tag id) {
     const bx_box neutral = { INLINE, ZERO, ZERO };
     if (id == BX_UA_NONE || id >= BX_UA_COUNT) return neutral;
     return bx_default_for_tag(UA_NAME[id]);
+}
+
+bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua) {
+    /* A heading is picked by its own level: RD_HEADING carries exactly that, and it
+     * outranks both the list-item approximation and the ancestor identity. */
+    if (heading_level > 0) {
+        if (heading_level > 6) heading_level = 6;
+        return bx_default_for_ua((bx_ua_tag)(BX_UA_H1 + (heading_level - 1)));
+    }
+    /* Inside a list, the item's box wins so entries stay tight (spec 4d). */
+    if (in_list) return bx_default_for_ua(BX_UA_LI);
+    /* Otherwise the nearest block-level ancestor is the answer -- and the only
+     * source that HAS one, since an inline-level element has no vertical margin. */
+    return bx_default_for_ua(ua);
 }
 
 /* --- display keyword -> value table --- */

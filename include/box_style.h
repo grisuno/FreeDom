@@ -5,6 +5,8 @@
 #error "Freedom is pure C (C11). C++ is not supported."
 #endif
 
+#include "css.h"   /* css_display: the author side of the display property */
+
 /*
  * box_style — the user-agent box model, per HTML tag.
  *
@@ -24,6 +26,11 @@
  *
  * See spec/box_style.md for the full contract.
  */
+
+/* Buffer size a caller needs to hand a tag name to this module. Generous: the
+ * longest recognised tag is "blockquote" (10), so a real tag always fits and
+ * anything longer fails closed instead of truncating into a wrong match. */
+#define BX_TAG_NAME_MAX 32u
 
 typedef enum bx_display {
     BX_DISPLAY_BLOCK = 0,     /* stacks vertically, takes the available width */
@@ -97,6 +104,45 @@ bx_ua_tag bx_ua_of_tag(const char *tag);
  * bx_default_for_tag reads, so the user-agent sheet has ONE definition. A code
  * outside 0..BX_UA_COUNT-1 fails closed to the neutral zero-margin box. Pure. */
 bx_box bx_default_for_ua(bx_ua_tag id);
+
+/* The user-agent box of a laid-out BLOCK, resolving the three questions the painter
+ * would otherwise answer with a guess (spec/box_style.md 4f). Pure and total.
+ *
+ *   heading_level  1..6 when the block IS a heading (its own level, not its
+ *                  ancestry, picks h1..h6), 0 otherwise; out-of-range clamps into
+ *                  1..6 rather than inventing a box.
+ *   in_list        nonzero when the block sits inside a list item: it then takes
+ *                  the <li> box (zero margin), keeping items tight. A heading
+ *                  escapes this, per 4d.
+ *   ua             identity of the nearest BLOCK-LEVEL ancestor (bx_ua_tag).
+ *
+ * `ua` is the authority for every non-heading block whatever kind of run carried
+ * it: an <a>/<img>/<svg>/<input> is inline-level and contributes no vertical margin
+ * of its own (CSS 2.1 8.3), so asking ITS tag returns zero and silently deletes the
+ * containing block's margin. */
+bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua);
+
+/* The role an element plays in a table (CSS 2.1 17.2). BX_TROLE_COLUMN generates no
+ * box of its own; the rest are the boxes the table layout is built from. */
+typedef enum bx_table_role {
+    BX_TROLE_NONE = 0,   /* not part of a table */
+    BX_TROLE_TABLE,      /* display:table / inline-table   -- UA: <table>          */
+    BX_TROLE_ROW_GROUP,  /* display:table-*-group          -- UA: tbody/thead/tfoot*/
+    BX_TROLE_ROW,        /* display:table-row              -- UA: <tr>             */
+    BX_TROLE_CELL,       /* display:table-cell             -- UA: <td>, <th>       */
+    BX_TROLE_CAPTION,    /* display:table-caption          -- UA: <caption>        */
+    BX_TROLE_COLUMN      /* display:table-column(-group)   -- UA: <col>, <colgroup>*/
+} bx_table_role;
+
+/* Which table role (tag, display) plays. The computed `display` decides whenever it
+ * names a role -- that is what CSS 2.1 17.2 says a table box IS -- and otherwise the
+ * HTML user-agent sheet's role for the tag applies, which is where every <table> the
+ * engine already laid out comes from. So `<div style="display:table-cell">` is a cell
+ * and `<td style="display:block">` is not, both without a second table engine.
+ *
+ * Pure and total: tag NULL/empty/unknown with no role-naming display yields
+ * BX_TROLE_NONE (an unrecognised element joins no table -- fail closed). */
+bx_table_role bx_table_role_of(const char *tag, css_display display);
 
 /* Decodes a CSS display keyword token (case-insensitive, ASCII-trimmed) into *out.
  * Recognises none / block / inline / inline-block / list-item / flex / inline-flex

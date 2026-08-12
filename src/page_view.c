@@ -2103,6 +2103,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             cd->gap = 0;
                             cd->anon_row = 1;
                             cd->cols = 0;
+                            /* This row models an INLINE FORMATTING CONTEXT, and an
+                             * inline box that does not fit the current line box opens
+                             * a new one (CSS 2.1 9.4.2). A nowrap flex row instead
+                             * puts every item on ONE line by definition, so a nav bar
+                             * or tag cloud ran off the page sideways. An AUTHOR
+                             * display:flex is untouched -- there the absence of
+                             * flex-wrap really does mean nowrap. */
+                            cd->wrap = CSS_FW_WRAP;
                             cd->justify = (cs.text_align == CSS_ALIGN_CENTER) ? FX_JUSTIFY_CENTER
                                         : (cs.text_align == CSS_ALIGN_RIGHT)  ? FX_JUSTIFY_END
                                                                               : FX_JUSTIFY_START;
@@ -2891,65 +2899,103 @@ static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
     else                       snprintf(out, cap, "\xE2\x80\xA2 ");
 }
 
-/* Nearest <table> ancestor of n (up to base), or NULL. */
-static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+/* Cache of the per-table flow decision (a table subtree is scanned at most once,
+ * anti-DoS) PLUS the style context the table machinery needs to answer "what role
+ * does this element play". Registry full => grid (the previous behaviour), bounded
+ * fail-closed.
+ *
+ * sheet/cache ride here rather than as two more parameters on nine helpers: the
+ * table role of an element is its computed `display` (CSS 2.1 17.2), so resolving it
+ * needs the cascade, and the memo cache is what keeps that from being quadratic. */
+typedef struct pv_flow_reg {
+    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    unsigned char         flow[PV_MAX_CONTAINERS];
+    size_t                count;
+    const css_sheet      *sheet;
+    pv_style_cache       *cache;
+} pv_flow_reg;
+
+/* The table role of an element: its computed `display` when that names one, else the
+ * role the HTML user-agent sheet gives its tag. Both halves live in box_style, so
+ * the user-agent sheet is not restated here -- this only supplies the two inputs.
+ *
+ * With fr == NULL (or no sheet) the author display is unknown and the tag alone
+ * answers, which is exactly the pre-CSS behaviour: <table>/<tr>/<td> still work. */
+static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr) {
+    if (n == NULL || n->type != LXB_DOM_NODE_TYPE_ELEMENT) return BX_TROLE_NONE;
+    lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)n);
+    size_t nl = 0;
+    const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl);
+    char tag[BX_TAG_NAME_MAX];
+    const char *tagp = NULL;
+    if (nm != NULL && nl > 0 && nl < sizeof tag) {
+        memcpy(tag, nm, nl);
+        tag[nl] = '\0';
+        tagp = tag;
+    }
+    css_display d = CSS_DISP_UNSET;
+    if (fr != NULL && fr->sheet != NULL) d = cached_element_style(el, fr->sheet, fr->cache).display;
+    return bx_table_role_of(tagp, d);
+}
+
+/* Nearest ancestor of n (up to base) that is a table box, or NULL. */
+static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                                           const pv_flow_reg *fr) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
-        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(p) == LXB_TAG_TABLE) return p;
+        if (node_table_role(p, fr) == BX_TROLE_TABLE) return p;
         if (p == base) break;
     }
     return NULL;
 }
 
-/* Nearest <tr> ancestor of n up to base, or NULL. Used so each table ROW is its own
- * block: the first cell of a row breaks to a new line, the rest share it, so a table
- * that overflows the grid engine still degrades to one row per line (not one blob). */
-static const lxb_dom_node_t *nearest_row(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+/* Nearest table-row ancestor of n up to base, or NULL. Used so each table ROW is its
+ * own block: the first cell of a row breaks to a new line, the rest share it, so a
+ * table that overflows the grid engine still degrades to one row per line (not one
+ * blob). */
+static const lxb_dom_node_t *nearest_row(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                                         const pv_flow_reg *fr) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
-        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(p) == LXB_TAG_TR) return p;
+        if (node_table_role(p, fr) == BX_TROLE_ROW) return p;
         if (p == base) break;
     }
     return NULL;
 }
 
-/* Nonzero when n's DIRECT parent is table structure that is not a cell -- <table>,
- * <tbody>/<thead>/<tfoot>, <tr> or <colgroup>. Text there is "between cells/rows"
- * rather than inside a cell (<td>/<th>). Per CSS 2.1 §17.2.1 (anonymous table
- * objects) a whitespace-only such node generates no box; the caller drops it so it
- * does not split a data table's grid-container item run (which the layout engine
- * gathers contiguously -- a stray run drops every cell onto its own line). */
-static int parent_is_table_internal(const lxb_dom_node_t *n) {
-    const lxb_dom_node_t *p = n->parent;
-    if (p == NULL || p->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
-    switch (node_tag(p)) {
-        case LXB_TAG_TABLE: case LXB_TAG_TBODY: case LXB_TAG_THEAD:
-        case LXB_TAG_TFOOT: case LXB_TAG_TR:    case LXB_TAG_COLGROUP:
+/* Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a
+ * row group, a row or a column group. Text there is "between cells/rows" rather than
+ * inside a cell. Per CSS 2.1 §17.2.1 (anonymous table objects) a whitespace-only such
+ * node generates no box; the caller drops it so it does not split a data table's
+ * grid-container item run (which the layout engine gathers contiguously -- a stray
+ * run drops every cell onto its own line). */
+static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr) {
+    switch (node_table_role(n->parent, fr)) {
+        case BX_TROLE_TABLE: case BX_TROLE_ROW_GROUP:
+        case BX_TROLE_ROW:   case BX_TROLE_COLUMN:
             return 1;
         default:
             return 0;
     }
 }
 
-/* Nearest <td>/<th> ancestor of n up to base, or NULL. */
-static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base) {
+/* Nearest table-cell ancestor of n up to base, or NULL. */
+static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                                          const pv_flow_reg *fr) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
-        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
-            lxb_tag_id_t t = node_tag(p);
-            if (t == LXB_TAG_TD || t == LXB_TAG_TH) return p;
-        }
+        if (node_table_role(p, fr) == BX_TROLE_CELL) return p;
         if (p == base) break;
     }
     return NULL;
 }
 
-/* Nonzero if cell has a descendant <table>: it is then a structural CONTAINER, not a
- * leaf cell. Only leaf cells (no nested table) are collected as one text run; a
+/* Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not
+ * a leaf cell. Only leaf cells (no nested table) are collected as one text run; a
  * container cell is walked so the inner table's cells are collected separately. This
  * is what stops a legacy table-in-table layout (e.g. Hacker News: the story list is a
  * <table> nested inside a <td> of the outer table) from flattening its whole subtree
  * into one giant run. Early-exit on the first nested table (bounded by the subtree). */
-static int cell_has_nested_table(const lxb_dom_node_t *cell) {
+static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr) {
     for (lxb_dom_node_t *k = cell->first_child; k != NULL; k = node_next(k, cell)) {
-        if (k->type == LXB_DOM_NODE_TYPE_ELEMENT && node_tag(k) == LXB_TAG_TABLE) return 1;
+        if (node_table_role(k, fr) == BX_TROLE_TABLE) return 1;
     }
     return 0;
 }
@@ -2987,21 +3033,18 @@ static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count
  * two or more anchors. Flattening such a cell into one collected run would destroy
  * its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows the table's cells through the normal walk instead of gridding them. */
-static int table_prefers_flow(const lxb_dom_node_t *table) {
+static int table_prefers_flow(const lxb_dom_node_t *table, const pv_flow_reg *fr) {
     lxb_dom_node_t *n = table->first_child;
     while (n != NULL) {
         int skip_children = 0;
-        if (n->type == LXB_DOM_NODE_TYPE_ELEMENT) {
-            lxb_tag_id_t t = node_tag(n);
-            if (t == LXB_TAG_TABLE) {
-                skip_children = 1;
-            } else if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
-                       && !cell_has_nested_table(n)) {
-                int nanch = 0;
-                (void)cell_anchors(n, &nanch);
-                if (nanch >= 2) return 1;
-                skip_children = 1; /* the whole leaf cell was just scanned */
-            }
+        bx_table_role role = node_table_role(n, fr);
+        if (role == BX_TROLE_TABLE) {
+            skip_children = 1;
+        } else if (role == BX_TROLE_CELL && !cell_has_nested_table(n, fr)) {
+            int nanch = 0;
+            (void)cell_anchors(n, &nanch);
+            if (nanch >= 2) return 1;
+            skip_children = 1; /* the whole leaf cell was just scanned */
         }
         n = skip_children ? next_skip(n, (const lxb_dom_node_t *)table)
                           : node_next(n, table);
@@ -3009,20 +3052,12 @@ static int table_prefers_flow(const lxb_dom_node_t *table) {
     return 0;
 }
 
-/* Cache of the per-table flow decision (a table subtree is scanned at most once,
- * anti-DoS). Registry full => grid (the previous behaviour), bounded fail-closed. */
-typedef struct pv_flow_reg {
-    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
-    unsigned char         flow[PV_MAX_CONTAINERS];
-    size_t                count;
-} pv_flow_reg;
-
 static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table) {
     if (table == NULL) return 0;
     for (size_t i = 0; i < fr->count; ++i)
         if (fr->node[i] == table) return fr->flow[i];
     if (fr->count >= PV_MAX_CONTAINERS) return 0;
-    int f = table_prefers_flow(table) ? 1 : 0;
+    int f = table_prefers_flow(table, fr) ? 1 : 0;
     fr->node[fr->count] = table;
     fr->flow[fr->count] = (unsigned char)f;
     fr->count++;
@@ -3031,8 +3066,8 @@ static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table) {
 
 static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
                               struct pv_flow_reg *fr) {
-    return fr != NULL && cell != NULL && !cell_has_nested_table(cell)
-        && flow_table(fr, nearest_table(cell, base));
+    return fr != NULL && cell != NULL && !cell_has_nested_table(cell, fr)
+        && flow_table(fr, nearest_table(cell, base, fr));
 }
 
 /* Nonzero if n's NEAREST <td>/<th> ancestor (up to base) is a COLLECTED leaf cell:
@@ -3043,43 +3078,36 @@ static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *
 static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                              pv_flow_reg *fr) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
-        if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
-            lxb_tag_id_t t = node_tag(p);
-            if (t == LXB_TAG_TD || t == LXB_TAG_TH) {
-                if (cell_has_nested_table(p)) return 0;
-                if (flow_table(fr, nearest_table(p, base))) return 0;
-                return 1;
-            }
+        if (node_table_role(p, fr) == BX_TROLE_CELL) {
+            if (cell_has_nested_table(p, fr)) return 0;
+            if (flow_table(fr, nearest_table(p, base, fr))) return 0;
+            return 1;
         }
         if (p == base) break;
     }
     return 0;
 }
 
-/* Grid column count of a table: the maximum number of logical columns across all
- * <tr> elements, computed by summing each <td>/<th>'s colspan attribute (default 1),
- * clamped to [1, PV_MAX_GRID_COLS]. */
-static int table_columns(const lxb_dom_node_t *table) {
+/* Grid column count of a table: the maximum number of logical columns across all its
+ * rows, computed by summing each cell's colspan attribute (default 1), clamped to
+ * [1, PV_MAX_GRID_COLS]. */
+static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr) {
     int maxc = 1;
     for (lxb_dom_node_t *n = table->first_child; n != NULL; n = node_next(n, table)) {
-        if (n->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(n) != LXB_TAG_TR) continue;
+        if (node_table_role(n, fr) != BX_TROLE_ROW) continue;
         int c = 0;
         for (const lxb_dom_node_t *k = n->first_child; k != NULL; k = k->next) {
-            if (k->type == LXB_DOM_NODE_TYPE_ELEMENT) {
-                lxb_tag_id_t t = node_tag(k);
-                if (t == LXB_TAG_TD || t == LXB_TAG_TH) {
-                    int span = 1;
-                    size_t cl = 0;
-                    const lxb_char_t *cv = lxb_dom_element_get_attribute(
-                        lxb_dom_interface_element((lxb_dom_node_t *)k),
-                        (const lxb_char_t *)"colspan", 7, &cl);
-                    if (cv != NULL && cl > 0) {
-                        long sv = strtol((const char *)cv, NULL, 10);
-                        if (sv > 1) span = (sv > PV_MAX_GRID_COLS) ? PV_MAX_GRID_COLS : (int)sv;
-                    }
-                    c += span;
-                }
+            if (node_table_role(k, fr) != BX_TROLE_CELL) continue;
+            int span = 1;
+            size_t cl = 0;
+            const lxb_char_t *cv = lxb_dom_element_get_attribute(
+                lxb_dom_interface_element((lxb_dom_node_t *)k),
+                (const lxb_char_t *)"colspan", 7, &cl);
+            if (cv != NULL && cl > 0) {
+                long sv = strtol((const char *)cv, NULL, 10);
+                if (sv > 1) span = (sv > PV_MAX_GRID_COLS) ? PV_MAX_GRID_COLS : (int)sv;
             }
+            c += span;
         }
         if (c > maxc) maxc = c;
     }
@@ -3274,13 +3302,16 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     pv_container_reg reg = { { NULL }, { { 0 } }, 0 };  /* flex/grid containers + defs */
     pv_container_reg float_reg = { { NULL }, { { 0 } }, 0 };  /* floated elements */
     pv_box_reg box_reg = { { NULL }, { { 0 } }, 0 };  /* box-carrying blocks + their defs */
-    pv_flow_reg flowreg = { { NULL }, { 0 }, 0 };  /* per-table flow-vs-grid decisions */
     pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
     int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
     const lxb_dom_node_t *after_pending_el = NULL;
     char *after_pending_text = NULL;
     pv_style_cache cache;  /* memoized cch_element_style() per element (see above) */
     (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
+    /* Per-table flow-vs-grid decisions, plus the style context the table role
+     * resolution needs (a role is a computed `display`, spec/css.md). Declared
+     * after `cache` because it borrows it. */
+    pv_flow_reg flowreg = { { NULL }, { 0 }, 0, sheet, &cache };
 
     /* CSS 2.1 §14.2: the root <html> element's background-color propagates to the
      * canvas (the full viewport). If <html> itself has no background set, <body>'s
@@ -3366,16 +3397,16 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
              * cell: flattening would destroy the links -- the Hacker News case) are
              * WALKED instead: their text/links flow through the normal path, each
              * <tr> a block, with a separator run between adjacent walked cells. */
-            if ((t == LXB_TAG_TD || t == LXB_TAG_TH)
+            if (node_table_role(n, &flowreg) == BX_TROLE_CELL
                 && !in_skipped_subtree(n, base, js_enabled)
                 && !in_collected_cell(n, base, &flowreg)
                 && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
-                const lxb_dom_node_t *table = nearest_table(n, base);
-                if (cell_has_nested_table(n) || flow_table(&flowreg, table)) {
+                const lxb_dom_node_t *table = nearest_table(n, base, &flowreg);
+                if (cell_has_nested_table(n, &flowreg) || flow_table(&flowreg, table)) {
                     /* Walked cell. If it continues the row block already open, emit
                      * one inter-cell gap so cell texts do not fuse ("1."+"Title"). */
-                    const lxb_dom_node_t *row = nearest_row(n, base);
+                    const lxb_dom_node_t *row = nearest_row(n, base, &flowreg);
                     const lxb_dom_node_t *tblk = (row != NULL) ? row : table;
                     if (!pending_break && tblk != NULL && tblk == prev_block
                         && !last_was_gap) {
@@ -3385,7 +3416,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     }
                     continue;
                 }
-                int cols = (table != NULL) ? table_columns(table) : 1;
+                int cols = (table != NULL) ? table_columns(table, &flowreg) : 1;
                 int cid = (table != NULL) ? container_id(&reg, table) : -1;
 
                 char *raw = collect_text(n);
@@ -3398,7 +3429,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * prior row, the rest of the row share it. The grid (cont_id on the
                  * table) still aligns columns when it fits the engine; when a table
                  * overflows the engine it degrades to one row per line, not one blob. */
-                const lxb_dom_node_t *row = nearest_row(n, base);
+                const lxb_dom_node_t *row = nearest_row(n, base, &flowreg);
                 const lxb_dom_node_t *tblk = (row != NULL) ? row : (table != NULL ? table : n);
                 int brk = pending_break || (tblk != prev_block);
                 pending_break = 0;
@@ -4062,9 +4093,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                      * boxed placeholder would still split the row. v1 limit: the
                      * icon's own decoration (a sprite background) does not paint
                      * inside a flowed row; the row's integrity wins. */
-                    const lxb_dom_node_t *fcell = nearest_cell(n, base);
+                    const lxb_dom_node_t *fcell = nearest_cell(n, base, &flowreg);
                     if (in_flow_table_cell(fcell, base, &flowreg)) {
-                        const lxb_dom_node_t *frow = nearest_row(n, base);
+                        const lxb_dom_node_t *frow = nearest_row(n, base, &flowreg);
                         if (frow != NULL) eblock = frow;
                         ebdeco = -1;
                     }
@@ -4295,7 +4326,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-column data table collapses to a 1-column vertical list. Non-whitespace
          * text there is rare (foster-parented by real browsers) and left untouched. */
-        if (!has_content && parent_is_table_internal(n)) {
+        if (!has_content && parent_is_table_internal(n, &flowreg)) {
             free(collapsed);
             continue;
         }

@@ -138,11 +138,54 @@ matches** (fail closed): callers that cannot afford the sibling walk simply lose
 structural matching, never mis-match. page_view computes both with a bounded walk
 (`PV_CSS_NTH_MAX`, 1024): an element beyond 1024 element-siblings reads as unknown.
 
-**Unknown pseudo-classes and all pseudo-elements** (`::before`, `::after`,
-`::selection`, …, including the legacy single-colon spellings `:before`/`:after`/
-`:first-line`/`:first-letter`, and functional ones we do not support such as
-`:not()`/`:is()`/`:where()`/`:has()`/`:first-of-type`) drop the **whole selector**
-(fail closed); the rest of the comma group still parses.
+**Unknown pseudo-classes and unsupported pseudo-elements** (`::selection`,
+`::first-line`, `::first-letter`, … and the legacy single-colon spellings of those)
+drop the **whole selector** (fail closed); the rest of the comma group still parses.
+
+*Corrected 2026-08-11 — this paragraph used to list `:not()`, `:is()`, `:where()`,
+`:has()` and `:first-of-type` as unsupported. They are all implemented in
+`src/css_select.c` (`PSEUDO_NOT`/`IS`/`WHERE`/`HAS`, the of-type family, `:empty`,
+`:target`, `:lang()`), and `::before`/`::after` parse and match. The spec was simply
+stale; a spec that under-reports is as misleading as one that over-reports, because
+the next reader adds a feature that already exists.*
+
+### `display` de la familia tabla (2026-08-11)
+
+`interp_display` devolvía **-1** para `table`, `inline-table`, `table-row`,
+`table-cell`, `table-row-group`, `table-header-group`, `table-footer-group`,
+`table-column`, `table-column-group` y `table-caption`, o sea: se descartaban en
+silencio. El efecto medido no es cosmético — una tabla construida con `display` en vez
+de con `<table>` (el patrón de todo framework CSS moderno, y lo que usa el
+`<figcaption>` de Wikipedia) colapsaba a **una celda por fila**: sonda de 30 filas × 3
+celdas, **3592 px contra 960 px de Firefox (3.74×)**.
+
+CSS 2.1 §17.2 define esos valores como los **roles** de la tabla, y la hoja UA de HTML
+no hace más que asignarlos: `table{display:table}`, `tr{display:table-row}`,
+`td,th{display:table-cell}`, `tbody,thead,tfoot{display:table-row-group}`,
+`caption{display:table-caption}`, `col,colgroup{display:table-column(-group)}`. Es
+decir: **el motor ya implementaba estos roles, pero solo sabía leerlos de la etiqueta**.
+No se agrega un motor de tablas nuevo; se unifica la pregunta.
+
+Los valores entran en `css_display` (`CSS_DISP_TABLE`, `_TABLE_ROW`, `_TABLE_CELL`,
+`_TABLE_ROW_GROUP`, `_TABLE_CAPTION`, `_TABLE_COLUMN`; `inline-table` → `CSS_DISP_TABLE`
+y los tres `*-group` de fila → `_TABLE_ROW_GROUP`, porque el motor no los distingue),
+**apéndice** al enum: los códigos cruzan el códec IPC y no se renumeran.
+
+La resolución del rol vive en **una** función pura y total de `box_style`
+—`bx_table_role_of(tag, display)`— porque es exactamente la hoja UA:
+el `display` computado manda cuando nombra un rol, y si no, manda el que la hoja UA le
+da a la etiqueta. Ese es el único lugar donde se decide.
+
+**Dado** `<div style="display:table"><div style="display:table-row">` con tres
+`display:table-cell` **cuando** se maqueta **entonces** la fila es **una** línea de tres
+columnas dimensionadas por contenido, igual que un `<tr>` de tres `<td>`; **y dado**
+un `<table>` sin `display` de autor **entonces** el resultado es byte-idéntico al
+anterior (la etiqueta sigue dando el mismo rol).
+
+**Fail-closed:** un `display` de tabla sobre un elemento cuyo ancestro no forma una
+tabla no inventa una: sin ancestro con rol `TABLE` la celda fluye como el bloque que
+era. No se sintetizan las cajas anónimas de CSS 2.1 §17.2.1 (queda fuera de alcance,
+documentado abajo).
 
 ### `::before` / `::after` estilan la caja generada, nunca el elemento (2026-08-10)
 
@@ -446,7 +489,11 @@ computed size.
    **`hyphens`**, **`user-select`**, **`caret-color`** (**painted** 2026-07-10:
    tints the text caret of a focused form control; `auto`/unset keeps the theme
    caret; gated by `caps.css`).
-- *Layout / box*: `display`, `gap`(`grid-gap`/`column-gap`), `justify-content`,
+- *Layout / box*: `display` — `none`/`block`/`inline`/`inline-block`/`list-item`/
+   `flex`/`inline-flex`/`grid`/`inline-grid` **and, since 2026-08-11, the whole table
+   family** (`table`/`inline-table`, `table-row`, `table-cell`, `table-caption`,
+   `table-row-group`/`-header-group`/`-footer-group`, `table-column`/`-column-group`;
+   see the dated section above) —, `gap`(`grid-gap`/`column-gap`), `justify-content`,
    `grid-template-columns` (`repeat()`/`minmax()`-aware track **count**), `margin`
    (+longhands), `padding`(+longhands), `width`, `min-width`, `max-width`,
    `height`, `min-height`, `max-height` (**all four painted** 2026-07-10:
@@ -522,6 +569,49 @@ computed size.
 (Properties in **bold** are the Hito 23b-7 batch. The `css` module resolves their
 values; honouring the rest at paint time — full flex/grid sizing, out-of-flow
 positioning beyond Stage 2 — is staged across later milestones.)
+
+### Propiedades ausentes del parser — inventario MEDIDO (2026-08-11)
+
+Esta lista no se escribió de memoria: sale de comparar la tabla de despacho real
+(`grep -o 'strcmp(prop, "[a-z-]*"' src/css.c`, 199 entradas) contra las propiedades
+que el corpus de paridad usa. Una propiedad ausente de esa tabla se **descarta
+entera**, en silencio. Ordenadas por valor visual medido en `make parity`:
+
+1. **Multicolumna** — `column-count`, `column-width`, `columns`, `column-rule`
+   (+`-width`/`-style`/`-color`), `column-span`, `column-fill`. Sonda
+   `tests/parity/pages/multicol.html`: **35.88**, la brecha abierta más cara.
+   `column-gap` sí se parsea, pero como alias de `gap` (flex/grid), no como canal
+   de multicolumna. Usos en el corpus: 11 en wikipedia, 6 en jkanime.
+2. **Porcentajes en padding/margin** — no es una propiedad ausente sino un *valor*
+   ausente: `interp_len` descarta `%`, y `expand_box4` descarta el shorthand
+   **entero** ante `padding: 2% 5%`. Sonda `pct-box.html`: **16.10**. 149
+   declaraciones entre jkanime, slashdot y wikipedia. Diseño ya decidido: espejar
+   el canal por-mille de `width_pct`, resolviendo contra el **ancho** del bloque
+   contenedor en las cuatro caras (CSS 2.1 §8.4). El `%` de `height` queda fuera a
+   propósito: con altura contenedora `auto`, CSS lo computa a `auto`, que es
+   exactamente lo que hoy hace descartarlo.
+3. **Colocación de grid por nombre/línea** — `grid-template-areas`, `grid-area`,
+   `grid-column-start`/`-end`, `grid-row-start`/`-end`, `grid-auto-rows`,
+   `grid-auto-columns`, `justify-self`. Hoy los ítems van round-robin `índice %
+   cols`.
+4. **Bordes e imagen** — `border-image` (+`-source`/`-slice`/`-width`/`-outset`/
+   `-repeat`), radios lógicos (`border-start-start-radius` y familia),
+   `object-position`, `clip-path`, `mask` (+familia), `box-decoration-break`.
+5. **Transform individuales** — `translate`, `rotate`, `scale` como propiedades
+   propias (el shorthand `transform` sí está).
+6. **Contadores y comillas** — `counter-reset`, `counter-increment`, `counter()`
+   dentro de `content`, `quotes`, `list-style-image`.
+7. **Tipografía fina** — `font-feature-settings`, `font-variation-settings`,
+   `font-optical-sizing`, `text-wrap`(`-style`), `line-clamp`/
+   `-webkit-line-clamp`, `text-underline-offset`, `text-decoration-skip-ink`,
+   `text-emphasis`.
+8. **Escritura y dirección** — `writing-mode`, `text-orientation`, `unicode-bidi`
+   (las propiedades lógicas ya mapean a físicas asumiendo `horizontal-tb` + LTR).
+9. **Scroll e interacción** — `scroll-margin*`, `scroll-padding*`,
+   `scroll-snap-*`, `overflow-anchor`, `will-change`.
+10. **Palabras clave de tamaño intrínseco** — `min-content` / `max-content` /
+    `fit-content()` como valores de `width`/`height`/tracks.
+11. **`all`** (el reset universal).
 
 **Not yet supported** (dropped / fail closed unless noted), highest cosmetic value
 first:
@@ -618,11 +708,19 @@ of them, the field already has the value ready. Grouped by family:
   the main axis; `column-reverse` reverses the visual stack of items (first item
   at bottom, last at top); `wrap-reverse` reverses the cross-axis line order
   (first line at bottom, last at top). All three are now painted (Hito 2026-07-09).
-- *Selectors*: `:not()`/`:is()`/`:where()`/`:has()`, `:first-of-type`/of-type
-  family, `:empty`, `:target`, `:lang()`, all pseudo-elements `::` (dropped, fail
-  closed). Sibling combinators `+`/`~` and the pseudo-class subset above **are**
-  supported since Hito 23b-9; dynamic pseudos (`:hover`/`:focus`/`:active`) parse
-  but never match (no interactive re-cascade yet), `:visited` never matches by
+- *Selectors* (**inventory corrected 2026-08-11**): what is actually **missing** is
+  `::selection` / `::first-line` / `::first-letter` and any other pseudo-element
+  beyond `::before`/`::after`; nesting (`&`); `:nth-child(An+B of S)`; and
+  combinator-bearing or multi-compound arguments inside `:not()`/`:is()`/`:where()`
+  (the sub-selector grammar is one simple compound, `CSS_MAX_SUB_SELS` of them).
+  **Supported** — and previously mis-listed here as missing —
+  `:not()`/`:is()`/`:where()`/`:has()`, the whole of-type family
+  (`:first-of-type`/`:last-of-type`/`:only-of-type`/`:nth-of-type`/
+  `:nth-last-of-type`), `:empty`, `:target`, `:lang()`, `::before`/`::after`, the
+  sibling combinators `+`/`~`, and the `:nth-child`/`:nth-last-child` An+B family.
+  Dynamic pseudos (`:hover`/`:active`/`:focus`/`:focus-within`/`:focus-visible`)
+  parse and match **from `css_element.state`**, which is 0 on a freshly loaded page,
+  so none of them matches until the engine sets the bit; `:visited` never matches by
   Zero-Knowledge design.
 - *Values*: `%`/viewport units anywhere (`calc()`/plain lengths alike), `url()`
   anything, `@import`/`@font-face`. `calc()` and `var()`/custom properties **are**

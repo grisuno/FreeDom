@@ -3307,25 +3307,14 @@ static void block_margins(const ui_theme *th, const rd_block *b,
     /* Which user-agent box applies is a question about the SOURCE ELEMENT, and
      * rd_kind cannot answer it: every body-text block arrives as RD_PARAGRAPH, so
      * asking rd_block_tag returns "p" for a <div>, a <section>, a <td> and a <nav>
-     * alike -- a phantom blank line before every block on every page. ua_tag carries
-     * the real answer from page_view (spec/box_style.md 4d); it is BX_UA_NONE, i.e.
-     * no vertical margin, for every structural wrapper, which is what the HTML
-     * user-agent sheet actually says.
-     *
-     * A block inside a list still takes the <li> box (zero margins) whatever its own
-     * tag: the deliberate approximation from before, which keeps list items tight
-     * instead of a blank line apart.
-     *
-     * A heading keeps the kind-driven path: its level, not its ancestry, is what
-     * picks h1..h6, and RD_HEADING is exactly that level. */
-    bx_box box;
-    if (b->indent > 0 && b->kind != RD_HEADING) {
-        box = bx_default_for_ua(BX_UA_LI);
-    } else if (b->kind == RD_PARAGRAPH) {
-        box = bx_default_for_ua((bx_ua_tag)b->ua_tag);
-    } else {
-        box = bx_default_for_tag(tag);
-    }
+     * alike -- a phantom blank line before every block on every page -- and it
+     * returns "a"/"img"/"svg"/"input" for a block whose content happens to be one
+     * inline-level element, which has NO vertical margin to give and so silently
+     * deleted the containing block's (spec/box_style.md 4f). ua_tag carries the real
+     * answer from page_view for every kind alike; the three-way decision is the pure
+     * bx_block_ua_box, so the user-agent sheet keeps deciding it, not the painter. */
+    bx_box box = bx_block_ua_box(b->kind == RD_HEADING ? b->heading_level : 0,
+                                 b->indent > 0, (bx_ua_tag)b->ua_tag);
     double size; int bold, italic, underline; ui_rgb color;
     block_style(th, b, &size, &bold, &italic, &underline, &color);
     /* An author margin-top/bottom (px, only with caps.css) overrides the UA margin;

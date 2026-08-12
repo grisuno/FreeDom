@@ -186,6 +186,99 @@ static void test_ua_list_item_is_distinct_but_unspaced(void **state) {
     assert_edges(li.margin, 0.0, 0.0, 0.0, 0.0);
 }
 
+/* --- bx_block_ua_box: the three-way block decision (spec/box_style.md 4f) --- */
+
+/* The margin of a block is the margin of its SOURCE element, whatever kind of run
+ * happened to carry it. A <p> holding nothing but an <a> is still a <p>: the anchor
+ * is inline-level and CSS 2.1 8.3 gives it no vertical margin to contribute. */
+static void test_block_ua_box_is_content_independent(void **state) {
+    (void)state;
+    bx_box p = bx_block_ua_box(0, 0, BX_UA_P);
+    assert_edges(p.margin, 1.0, 0.0, 1.0, 0.0);
+
+    /* Same element, whatever the painter's rd_kind was: the answer comes from ua. */
+    bx_box wrapper = bx_block_ua_box(0, 0, BX_UA_NONE);
+    assert_edges(wrapper.margin, 0.0, 0.0, 0.0, 0.0);
+}
+
+/* A heading's own level picks h1..h6 -- not the block ancestry it was found under. */
+static void test_block_ua_box_heading_level_wins(void **state) {
+    (void)state;
+    bx_box h2 = bx_block_ua_box(2, 0, BX_UA_NONE);
+    assert_edges(h2.margin, 0.83, 0.0, 0.83, 0.0);
+    /* Even when the ancestor says <p>, the heading level is the authority. */
+    bx_box h1_in_p = bx_block_ua_box(1, 0, BX_UA_P);
+    assert_edges(h1_in_p.margin, 0.67, 0.0, 0.67, 0.0);
+    /* Out-of-range levels clamp into 1..6 rather than inventing a box. */
+    assert_edges(bx_block_ua_box(99, 0, BX_UA_NONE).margin, 2.33, 0.0, 2.33, 0.0);
+}
+
+/* A block inside a list takes the list item's (zero) box, keeping items tight --
+ * the deliberate approximation of 4d. A heading still escapes it. */
+static void test_block_ua_box_list_item_wins_over_ancestor(void **state) {
+    (void)state;
+    bx_box in_list = bx_block_ua_box(0, 1, BX_UA_P);
+    assert_edges(in_list.margin, 0.0, 0.0, 0.0, 0.0);
+    bx_box heading_in_list = bx_block_ua_box(3, 1, BX_UA_P);
+    assert_edges(heading_in_list.margin, 1.0, 0.0, 1.0, 0.0);
+}
+
+/* Total: every representable input yields a box, none of them invented. */
+static void test_block_ua_box_is_total(void **state) {
+    (void)state;
+    for (int ua = 0; ua < BX_UA_COUNT + 2; ++ua) {
+        for (int lvl = -1; lvl <= 7; ++lvl) {
+            bx_box b = bx_block_ua_box(lvl, lvl & 1, (bx_ua_tag)ua);
+            assert_true(b.margin.top >= 0.0);
+            assert_true(b.margin.bottom >= 0.0);
+        }
+    }
+}
+
+/* --- bx_table_role_of: the UA sheet's table roles (spec/css.md, CSS 2.1 17.2) --- */
+
+/* With no author display, the role is the one the HTML user-agent sheet assigns to
+ * the tag -- which is where every <table> the engine already laid out came from. */
+static void test_table_role_from_tag(void **state) {
+    (void)state;
+    assert_int_equal(bx_table_role_of("table", CSS_DISP_UNSET), BX_TROLE_TABLE);
+    assert_int_equal(bx_table_role_of("tr", CSS_DISP_UNSET), BX_TROLE_ROW);
+    assert_int_equal(bx_table_role_of("td", CSS_DISP_UNSET), BX_TROLE_CELL);
+    assert_int_equal(bx_table_role_of("th", CSS_DISP_UNSET), BX_TROLE_CELL);
+    assert_int_equal(bx_table_role_of("tbody", CSS_DISP_UNSET), BX_TROLE_ROW_GROUP);
+    assert_int_equal(bx_table_role_of("thead", CSS_DISP_UNSET), BX_TROLE_ROW_GROUP);
+    assert_int_equal(bx_table_role_of("tfoot", CSS_DISP_UNSET), BX_TROLE_ROW_GROUP);
+    assert_int_equal(bx_table_role_of("caption", CSS_DISP_UNSET), BX_TROLE_CAPTION);
+    assert_int_equal(bx_table_role_of("colgroup", CSS_DISP_UNSET), BX_TROLE_COLUMN);
+    assert_int_equal(bx_table_role_of("col", CSS_DISP_UNSET), BX_TROLE_COLUMN);
+    assert_int_equal(bx_table_role_of("div", CSS_DISP_UNSET), BX_TROLE_NONE);
+}
+
+/* A computed display that names a role wins over the tag: that is the whole point --
+ * a <div style="display:table-cell"> is a cell, and a <td style="display:block"> is
+ * not (CSS 2.1 17.2: the role is the display, the UA sheet merely supplies it). */
+static void test_table_role_display_overrides_tag(void **state) {
+    (void)state;
+    assert_int_equal(bx_table_role_of("div", CSS_DISP_TABLE), BX_TROLE_TABLE);
+    assert_int_equal(bx_table_role_of("span", CSS_DISP_TABLE_CELL), BX_TROLE_CELL);
+    assert_int_equal(bx_table_role_of("li", CSS_DISP_TABLE_ROW), BX_TROLE_ROW);
+    assert_int_equal(bx_table_role_of("td", CSS_DISP_BLOCK), BX_TROLE_NONE);
+    assert_int_equal(bx_table_role_of("table", CSS_DISP_FLEX), BX_TROLE_NONE);
+    /* display:none is not a table role; the caller drops the element anyway. */
+    assert_int_equal(bx_table_role_of("td", CSS_DISP_NONE), BX_TROLE_NONE);
+}
+
+/* Total and fail-closed: no tag, no display, nothing invented. */
+static void test_table_role_is_total(void **state) {
+    (void)state;
+    assert_int_equal(bx_table_role_of(NULL, CSS_DISP_UNSET), BX_TROLE_NONE);
+    assert_int_equal(bx_table_role_of("", CSS_DISP_UNSET), BX_TROLE_NONE);
+    assert_int_equal(bx_table_role_of("zorp", CSS_DISP_UNSET), BX_TROLE_NONE);
+    assert_int_equal(bx_table_role_of(NULL, CSS_DISP_TABLE_CELL), BX_TROLE_CELL);
+    for (int d = 0; d < CSS_DISP_TABLE_COLUMN + 3; ++d)
+        (void)bx_table_role_of("div", (css_display)d);
+}
+
 static void test_ua_case_insensitive_and_trimmed(void **state) {
     (void)state;
     assert_int_equal(bx_ua_of_tag("P"), BX_UA_P);
@@ -402,6 +495,13 @@ int main(void) {
         cmocka_unit_test(test_ua_structural_wrappers_have_no_margin),
         cmocka_unit_test(test_ua_spaced_tags_round_trip),
         cmocka_unit_test(test_ua_list_item_is_distinct_but_unspaced),
+        cmocka_unit_test(test_block_ua_box_is_content_independent),
+        cmocka_unit_test(test_block_ua_box_heading_level_wins),
+        cmocka_unit_test(test_block_ua_box_list_item_wins_over_ancestor),
+        cmocka_unit_test(test_block_ua_box_is_total),
+        cmocka_unit_test(test_table_role_from_tag),
+        cmocka_unit_test(test_table_role_display_overrides_tag),
+        cmocka_unit_test(test_table_role_is_total),
         cmocka_unit_test(test_ua_case_insensitive_and_trimmed),
         cmocka_unit_test(test_ua_fails_closed),
         cmocka_unit_test(test_ua_code_space_is_total),

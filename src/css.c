@@ -982,6 +982,16 @@ static int interp_display(const char *v) {
     if (csel_ci_eq(v, "list-item")) return CSS_DISP_LIST_ITEM;
     if (csel_ci_eq(v, "flex") || csel_ci_eq(v, "inline-flex")) return CSS_DISP_FLEX;
     if (csel_ci_eq(v, "grid") || csel_ci_eq(v, "inline-grid")) return CSS_DISP_GRID;
+    /* The table roles (CSS 2.1 17.2). Dropping these collapsed every CSS-built table
+     * to one cell per row; see spec/css.md "display de la familia tabla". */
+    if (csel_ci_eq(v, "table") || csel_ci_eq(v, "inline-table")) return CSS_DISP_TABLE;
+    if (csel_ci_eq(v, "table-row")) return CSS_DISP_TABLE_ROW;
+    if (csel_ci_eq(v, "table-cell")) return CSS_DISP_TABLE_CELL;
+    if (csel_ci_eq(v, "table-caption")) return CSS_DISP_TABLE_CAPTION;
+    if (csel_ci_eq(v, "table-row-group") || csel_ci_eq(v, "table-header-group")
+        || csel_ci_eq(v, "table-footer-group")) return CSS_DISP_TABLE_ROW_GROUP;
+    if (csel_ci_eq(v, "table-column") || csel_ci_eq(v, "table-column-group"))
+        return CSS_DISP_TABLE_COLUMN;
     return -1;  /* unknown display: leave unset */
 }
 

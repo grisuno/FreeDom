@@ -286,6 +286,33 @@ static void test_inline_display(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).display, CSS_DISP_UNSET);
 }
 
+/* The table roles of CSS 2.1 17.2. They used to fail closed to CSS_DISP_UNSET, which
+ * collapsed every CSS-built table to one cell per row (spec/css.md "display de la
+ * familia tabla"). inline-table shares the table code and the three row-group
+ * spellings share one: the engine draws no distinction between them. */
+static void test_inline_display_table_family(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("display:table", 0).display, CSS_DISP_TABLE);
+    assert_int_equal(css_parse_inline("display:inline-table", 0).display, CSS_DISP_TABLE);
+    assert_int_equal(css_parse_inline("display:table-row", 0).display, CSS_DISP_TABLE_ROW);
+    assert_int_equal(css_parse_inline("display:table-cell", 0).display, CSS_DISP_TABLE_CELL);
+    assert_int_equal(css_parse_inline("display:table-caption", 0).display,
+                     CSS_DISP_TABLE_CAPTION);
+    assert_int_equal(css_parse_inline("display:table-row-group", 0).display,
+                     CSS_DISP_TABLE_ROW_GROUP);
+    assert_int_equal(css_parse_inline("display:table-header-group", 0).display,
+                     CSS_DISP_TABLE_ROW_GROUP);
+    assert_int_equal(css_parse_inline("display:table-footer-group", 0).display,
+                     CSS_DISP_TABLE_ROW_GROUP);
+    assert_int_equal(css_parse_inline("display:table-column", 0).display,
+                     CSS_DISP_TABLE_COLUMN);
+    assert_int_equal(css_parse_inline("display:table-column-group", 0).display,
+                     CSS_DISP_TABLE_COLUMN);
+    /* Case-insensitive like every other keyword, and still fails closed on junk. */
+    assert_int_equal(css_parse_inline("display:TABLE-CELL", 0).display, CSS_DISP_TABLE_CELL);
+    assert_int_equal(css_parse_inline("display:table-zorp", 0).display, CSS_DISP_UNSET);
+}
+
 /* --- flex/grid container props (Hito 23b-2) --- */
 
 static void test_inline_container_props(void **state) {
@@ -904,7 +931,10 @@ static void test_sheet_compound_selector(void **state) {
 static css_element el_node(const char *tag, const char *id,
                            const char *const *classes, size_t nc,
                            const css_element *parent) {
-    css_element e;
+    /* Zero-init first: a field this helper forgets would otherwise be read as stack
+     * garbage by the matcher, making the test's verdict depend on the build. That
+     * really happened to `state` and `dom_node` (:has() dereferences the latter). */
+    css_element e = { 0 };
     e.tag = tag; e.id = id; e.classes = classes; e.nclasses = nc;
     e.attrs = NULL; e.nattrs = 0; e.parent = parent;
     e.nth = 0; e.nsib = 0; e.prev = NULL;   /* sibling context unknown by default */
@@ -3981,6 +4011,7 @@ int main(void) {
         cmocka_unit_test(test_list_style_type),
         cmocka_unit_test(test_text_ext_cascade_and_important),
         cmocka_unit_test(test_inline_display),
+        cmocka_unit_test(test_inline_display_table_family),
         cmocka_unit_test(test_inline_container_props),
         cmocka_unit_test(test_sheet_container_props),
         cmocka_unit_test(test_container_cascade_inline_wins),

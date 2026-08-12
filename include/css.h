@@ -48,7 +48,17 @@ typedef enum css_display {
     CSS_DISP_LIST_ITEM,
     CSS_DISP_FLEX,
     CSS_DISP_GRID,
-    CSS_DISP_OTHER
+    CSS_DISP_OTHER,
+    /* The table roles of CSS 2.1 17.2. APPEND only: these codes ride the render IPC.
+     * `inline-table` shares CSS_DISP_TABLE and the header/footer group spellings
+     * share CSS_DISP_TABLE_ROW_GROUP -- the engine draws no distinction between
+     * them, so giving each its own code would be a difference it cannot honour. */
+    CSS_DISP_TABLE,
+    CSS_DISP_TABLE_ROW_GROUP,
+    CSS_DISP_TABLE_ROW,
+    CSS_DISP_TABLE_CELL,
+    CSS_DISP_TABLE_CAPTION,
+    CSS_DISP_TABLE_COLUMN
 } css_display;
 
 typedef enum css_justify {  /* justify-content (flex/grid main axis) */

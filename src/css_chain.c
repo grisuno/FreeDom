@@ -33,6 +33,19 @@ typedef struct cch_node {
 /* Fills *node with element e's tag/id/class tokens (no style=, no parent link yet).
  * Over-long tokens are simply absent, which fails closed (does not match). */
 static void fill_css_node(lxb_dom_element_t *e, cch_node *node) {
+    /* Zero the whole selector view FIRST, then fill it. The explicit per-field
+     * assignments below are the documentation of what each input means, but they
+     * cannot be the only initialisation: `chain[]`/`sibs[]` are stack arrays, so a
+     * field this function forgets is read as stack GARBAGE by the matcher.
+     *
+     * That is not hypothetical -- it is how `state` (added with the dynamic pseudos)
+     * shipped: `:hover`/`:active`/`:focus*` read an uninitialised bitmask, so whether
+     * an author's :hover rules applied to a freshly loaded page depended on what
+     * happened to be on the stack. It silently reinstated the ":hover always matches"
+     * behaviour that was deliberately removed, and only on SOME builds -- -O2 matched,
+     * the ASan build did not. Zero-init by construction so the next field added to
+     * css_element cannot repeat it. */
+    node->el = (css_element){ 0 };
     size_t nl = 0;
     const lxb_char_t *ln = lxb_dom_element_local_name(e, &nl);
     size_t tn = (ln != NULL && nl > 0 && nl < sizeof node->tag) ? nl : 0;

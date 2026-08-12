@@ -615,6 +615,17 @@ páginas modernas. Verificadas comparando el mismo HTML en **Firefox 140 ESR hea
   (texto junto a un inline-block) se deja intacto, porque necesita maquetación inline real dentro
   de una línea, no una fila flex — convertirlo reflowaría la frase que lo rodea. Acotado por
   `PV_MAX_INLINE_ROW_ITEMS` (128).
+  **Corrección 2026-08-11: esa fila anónima ENVUELVE.** Se sintetizaba con `wrap` sin
+  poner, o sea `nowrap`, y una fila flex sin wrap mete **todos** sus ítems en una sola
+  línea por definición. Pero lo que la fila anónima modela es un **contexto de formato
+  inline**, y CSS 2.1 §9.4.2 dice que cuando una caja inline no entra en la línea actual
+  se abre una **línea nueva**. Medido: 60 `inline-block` de 124 px en un lienzo de
+  1000 px salían en **una** fila de 40 px de alto (7440 px de ancho, desbordando la
+  página) donde Firefox arma ocho líneas. Es el patrón de toda barra de navegación,
+  nube de etiquetas, grilla de tarjetas o tira de botones — y es la propiedad más usada
+  del corpus (138 usos en slashdot, 115 en jkanime). La fila anónima se registra ahora
+  con `CSS_FW_WRAP`. Un `display:flex` **de autor** no cambia: ahí el autor declaró
+  `flex-wrap` y su ausencia sí significa `nowrap`.
 - **Hoja de contenido ignora hijos fuera de flujo** (`element_is_content_leaf`). Un hijo
   `display:none` o **fuera de flujo** (`position:absolute`/`fixed`) **no es contenido**: lo pinta
   la pasada de posicionamiento, no el flujo del padre. Contarlo como contenido hacía que un

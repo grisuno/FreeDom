@@ -1268,6 +1268,40 @@ static void test_build_flex_container(void **state) {
     hp_document_free(doc);
 }
 
+/* The anonymous row synthesised for an all-inline-block parent models an INLINE
+ * FORMATTING CONTEXT, and CSS 2.1 9.4.2 starts a new line box when a box does not fit
+ * the current one. Registered without wrap it was a nowrap flex row, which puts every
+ * item on ONE line by definition -- a nav bar or tag cloud overflowed the page
+ * sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
+static void test_build_anon_inline_block_row_wraps(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div><span style='display:inline-block'>a</span>"
+        "<span style='display:inline-block'>b</span></div>"
+        "<div style='display:flex'><div>nowrap</div></div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *a = find_text(v, "a");
+    assert_non_null(a);
+    assert_int_equal(a->cont_wrap, CSS_FW_WRAP);
+    const pv_run *b = find_text(v, "b");
+    assert_non_null(b);
+    assert_int_equal(b->cont_id, a->cont_id);      /* one anonymous row */
+    assert_int_equal(b->cont_wrap, CSS_FW_WRAP);
+
+    /* An AUTHOR flex container is untouched: there the author declared flex-wrap,
+     * and its absence really does mean nowrap. */
+    const pv_run *n = find_text(v, "nowrap");
+    assert_non_null(n);
+    assert_int_equal(n->cont_wrap, CSS_FW_UNSET);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) resolve through
  * the same cascade and thread through the same run fields as the rest of Stage 3. */
 static void test_build_flex_wrap_align_row_gap(void **state) {
@@ -2579,12 +2613,19 @@ static void test_build_pseudo_classes_and_siblings(void **state) {
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
 
-    /* a:link matches the anchor (ZK: every link unvisited); :hover always matches
-     * (PSEUDO_ALWAYS) so a:visited,a:hover's #bad000 wins (same specificity as
-     * a:link, later in source). */
+    /* a:link matches the anchor (Zero Knowledge: every link is unvisited). The later,
+     * equal-specificity `a:visited, a:hover` matches NEITHER half on a freshly loaded
+     * page -- :visited never (no history to match) and :hover only when the pointer
+     * is over the element, i.e. when css_element.state carries CSEL_STATE_HOVER
+     * (spec/css_select.md). So a:link's colour survives.
+     *
+     * This assertion used to expect #bad000, from the old PSEUDO_ALWAYS doctrine where
+     * :hover matched unconditionally -- reverted 2026-08-11 because it painted every
+     * page as though the mouse were on every element at once. The test was left
+     * asserting the doctrine that had just been removed. */
     const pv_run *link = find_text(v, "homelink");
     assert_non_null(link);
-    assert_int_equal(link->fg_rgb, 0xbad000);
+    assert_int_equal(link->fg_rgb, 0x123123);
     assert_int_equal(link->text_decoration, 0);   /* explicit none drops underline */
 
     /* Zebra: li #1 first-child, #2 and #4 even, #3 unstyled. */
@@ -3351,6 +3392,7 @@ int main(void) {
         cmocka_unit_test(test_bgclip_text_solid_color_runs),
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_flex_item_values),
+        cmocka_unit_test(test_build_anon_inline_block_row_wraps),
         cmocka_unit_test(test_build_flex_wrap_align_row_gap),
         cmocka_unit_test(test_build_float_threading),
         cmocka_unit_test(test_build_absolute_inside_float_escapes),

@@ -246,6 +246,37 @@ depende de `caps.css`, exactamente igual que el resto del box model UA
 `bx_ua_of_tag` / `bx_default_for_ua` son puras y comparten la **misma** `TAG_TABLE` que
 `bx_default_for_tag`: una sola fuente de verdad para la hoja UA.
 
+## 4f. `ua_tag` responde por TODO bloque, no solo por `RD_PARAGRAPH` (2026-08-11)
+
+§4d dejó el código a medio camino: el `ua_tag` viajaba en todos los bloques pero el
+pintor lo consultaba **solo** cuando `kind == RD_PARAGRAPH`. Un `RD_LINK` / `RD_IMAGE` /
+`RD_SVG` / `RD_INPUT` caía a `bx_default_for_tag(rd_block_tag(b))`, que devuelve la caja
+de `a` / `img` / `svg` / `input` — todas **inline y de margen cero** en la hoja UA. El
+resultado: un bloque cuyo contenido es *solo* un elemento de nivel inline perdía el
+margen de su bloque contenedor.
+
+Es el patrón más común de la web: `<p><a>…</a></p>`, un `<li>` que es un enlace, un
+`<figcaption>` de puros links, una celda con un ícono. Medido: dos `<p>` con un `<a>`
+como único hijo dan 48 px contra 80 px de Firefox; con texto suelto al lado, 64 px —
+o sea el margen aparecía y desaparecía según el contenido, que es justo lo que la hoja
+UA **no** dice.
+
+La regla de CSS es la contraria y no depende del contenido: el margen vertical lo pone
+la **caja de bloque**, y un elemento de nivel inline no tiene margen vertical que
+aportar (CSS 2.1 §8.3 — los márgenes verticales no se aplican a cajas inline no
+reemplazadas). `ua_tag` ya es la identidad del ancestro de bloque, así que es la
+respuesta correcta para **cualquier** `rd_kind`.
+
+**Dado** un `<p>` cuyo único hijo es un `<a>` **cuando** se resuelve su caja UA
+**entonces** es la de `p` (`1em` arriba y abajo), igual que si el hijo fuera texto suelto;
+**y dado** un `<h2>` **entonces** gana su propio nivel, no el ancestro; **y dado** un
+bloque dentro de un `<li>` **entonces** gana la caja del ítem (margen cero), que es la
+aproximación deliberada de §4d.
+
+Esa decisión de tres ramas vive en **una** función pura y total,
+`bx_block_ua_box(heading_level, in_list, ua)`, no en el pintor: es la hoja UA
+decidiendo, y la hoja UA es de este módulo. El pintor solo la llama.
+
 ## 4e. El `line-height` del autor es múltiplo del `font-size`, no de la caja natural (2026-08-10)
 
 CSS 2.1 §10.8.1: `line-height: 1.4` significa **1.4 × el `font-size` del fragmento**. La
