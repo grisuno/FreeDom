@@ -828,6 +828,12 @@ typedef struct css_element {
      * that need descendant traversal (:has()). NULL means no DOM access available
      * (the pseudo fails closed). */
     const void *dom_node;
+    /* Dynamic element state: a bitmask of CSEL_STATE_* (css_select.h) driving
+     * :hover/:active/:focus/:focus-within/:focus-visible. Zero -- a freshly
+     * loaded page, pointer nowhere, nothing focused -- is the default and makes
+     * all of them fail to match, exactly as any browser does. The engine, not
+     * the matcher, owns this. */
+    unsigned state;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators

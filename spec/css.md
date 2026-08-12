@@ -12,6 +12,27 @@ building the display list; render_doc still gates the author presentation behind
 `caps.css` (Privacy by Default). Layout structure (flex/grid) is handled elsewhere
 and is not gated (doctrine: "Layout != estilo de autor").
 
+## Lengths: one resolver, no private unit tables
+
+Every `<length>` in this module resolves through **`css_length` (`cl_`)** — see
+`spec/css_length.md`. That is a hard rule, not a preference: `interp_len`,
+`interp_lineheight`, `interp_fontsize_ex`, `media_len_px` and `calc_factor` each used
+to carry a private unit table with its own hardcoded `16.0`, and none of them agreed.
+`interp_len` — the box-model resolver — dropped `pt` entirely, `rem` and `em` were the
+same number, and `vmax`/`vmin` were aliases of `vw`/`vh`. A new unit is added in
+`css_length` **once** and every consumer here picks it up.
+
+The same applies to numbers: `parse_num` delegates to `cl_number`, the CSS Syntax
+§4.3.12 grammar, so a number means the same thing in a length, a colour channel, an
+`opacity` and a `transform` argument. The parser it replaced required a digit before
+the decimal point, which rejected the very common `.5` spelling everywhere.
+
+The cascade is element-free, so lengths resolve against `cl_ctx_initial()` (CSS initial
+font-size, normalized viewport). The author's ROOT font-size is applied by rewriting
+`rem` in the source text (`rem_rebase`), not by threading a context — that is why
+at-rule preludes are deliberately left alone: inside a media query `em`/`rem` refer to
+the initial font size, never the author's root.
+
 ## Security posture (non-negotiable)
 
 - **Never phones home.** Any declaration whose value contains `url(` is dropped, and

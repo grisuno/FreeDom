@@ -29,10 +29,28 @@
 - **Dado** `a:link{...}` y un elemento `a` con atributo `href` — **cuando** se
   matchea — **entonces** aplica (Zero Knowledge: sin historial, todo enlace está
   no-visitado). **Dado** `:visited` — **entonces** jamás matchea (sin historial
-  por diseño). **Dado** `:hover`/`:focus`/`:active` — **entonces** siempre
-  matchean (PSEUDO_ALWAYS, 2026-07-11: la cascada se resuelve una vez por carga;
-  el contenido oculto tras `:hover` se vuelve visible. Sin re-cascada interactiva
-  aún). El selector parsea y cuenta especificidad en todos los casos.
+  por diseño).
+- **Dado** un pseudo dinámico (`:hover`/`:active`/`:focus`/`:focus-within`/
+  `:focus-visible`) — **entonces** matchea **si y solo si** el bit
+  correspondiente está encendido en `el->state`. En una carga sin puntero ni
+  foco, `state == 0` y **ninguno** matchea, que es exactamente lo que hace
+  cualquier navegador con el mouse fuera de la ventana.
+
+  > **Cambio de doctrina (2026-08-11, autorizado por el dueño).** Hasta esta
+  > fecha eran `PSEUDO_ALWAYS`: matcheaban siempre, con la idea de "revelar el
+  > contenido escondido tras un menú". El efecto real era peor que el problema:
+  > la página se pintaba como si el mouse estuviera **sobre todos los elementos
+  > a la vez**. Medido en DuckDuckGo: cada snippet de resultado salía subrayado
+  > y azul, aparecían bordes que el autor solo pone en `:hover`, y bloques que
+  > el autor oculta hasta el hover se superponían al texto. Ninguna de esas
+  > cosas está en el CSS de la página *en el estado en que la página se carga*.
+  > Una regla `:hover` **sí** viene del CSS; aplicarla siempre **no**. El estado
+  > es un input del motor, no una constante.
+  >
+  > El campo `state` es el punto de extensión: cuando la GUI sepa qué elemento
+  > está bajo el puntero, prende `CSEL_STATE_HOVER` y re-resuelve ese subárbol;
+  > el matcher ya no necesita cambiar. El selector parsea y cuenta especificidad
+  > en todos los casos, matchee o no.
 - **Dado** `li:nth-child(2n)` y un elemento con `nth=4` — **entonces** matchea;
   con `nth=0` (desconocido) — **entonces** NO matchea (fail closed).
 - **Dado** `A + B` (`A ~ B`) y un sujeto con `prev` poblado — **entonces** `+`

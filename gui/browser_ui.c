@@ -6563,27 +6563,36 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
         return;
     }
 
-    /* Unknown size: the informative full-width labelled bar. */
-    cairo_rectangle(cr, left, ry, content_w, row_h);
-    cairo_stroke(cr);
+    /*
+     * Unknown size. HTML 4.8.4.4: an image that is not available renders its
+     * `alt` text in its place -- and nothing else. An `alt=""` is the author
+     * declaring the image decorative, so it renders as nothing at all.
+     *
+     * What must NOT appear here is a diagnostic. Until 2026-08-11 this drew a
+     * full-width bordered bar reading "image blocked: non-https : <alt>",
+     * i.e. a string that exists in no stylesheet, no markup and no script,
+     * injected into the page as if it were content. It also spread a missing
+     * icon across the entire column. The reason an image was withheld is real
+     * information, but it belongs to the reader in devtools -- rd_image_label
+     * still serves --dump-dom -- not to the layout. (void)fail keeps that
+     * distinction explicit rather than silently dropping the value.
+     */
+    (void)fail;
+    const char *alt = (blk->text != NULL) ? blk->text : "";
+    if (alt[0] == '\0') return;
 
+    /* Alt text IS the element's content, so it takes the element's own colour
+     * (author colour when caps.css allowed one, otherwise the theme's text
+     * colour) -- not the "blocked" accent the border above uses. */
+    set_rgb(cr, blk->fg_rgb >= 0 ? rgb_from_packed(blk->fg_rgb) : th->text);
     content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
     cairo_save(cr);
     cairo_rectangle(cr, left + pad, ry, content_w - 2.0 * pad, row_h);
     cairo_clip(cr);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
-    cairo_move_to(cr, left + pad, ry + fe.ascent + pad);
-    char label[1024];
-    const char *alt = (blk->text != NULL) ? blk->text : "";
-    if (fail != NULL) {
-        snprintf(label, sizeof label, "%s%s%s",
-                 fail, alt[0] ? " : " : "", alt);
-    } else {
-        snprintf(label, sizeof label, "%s%s%s",
-                 rd_image_label(blk->img_decision), alt[0] ? " : " : "", alt);
-    }
-    cairo_show_text(cr, label);
+    cairo_move_to(cr, left + pad, ry + fe.ascent);
+    cairo_show_text(cr, alt);
     cairo_restore(cr);
 }
 

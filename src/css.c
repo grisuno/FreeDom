@@ -7,6 +7,7 @@
 
 #include "css.h"
 #include "css_color.h"
+#include "css_length.h"
 #include "css_select.h"
 
 #include <limits.h>
@@ -252,19 +253,11 @@ struct css_sheet {
 /* Parses a leading non-negative number (digits + optional fraction). Returns 1 on
  * success, setting *out and *endp to the first unconsumed char. */
 static int parse_num(const char *s, double *out, const char **endp) {
-    const char *p = s;
-    double v = 0.0;
-    int any = 0;
-    while (*p >= '0' && *p <= '9') { v = v * 10.0 + (*p - '0'); any = 1; ++p; }
-    if (*p == '.') {
-        ++p;
-        double f = 0.1;
-        while (*p >= '0' && *p <= '9') { v += (*p - '0') * f; f *= 0.1; ++p; }
-    }
-    if (!any) return 0;
-    *out = v;
-    *endp = p;
-    return 1;
+    /* Delegates to the canonical CSS <number> grammar so a number means the same
+     * thing here as in a length, a colour channel and a transform argument. The
+     * private version this replaced required a digit before the decimal point,
+     * which silently dropped every `.5`-style value in the stylesheet. */
+    return cl_number(s, out, endp);
 }
 
 /* Rounds v to the nearest int, clamped to [lo, hi]. Clamping the double BEFORE the
@@ -834,20 +827,29 @@ static int expand_background(const char *val, css_decl *dst, int cap,
     return w;
 }
 
-/* Viewport units resolve against the NORMALIZED 1920x1080 viewport (the same
- * fixed desktop the @media width queries assume), never the real window --
- * the cascade runs on hostile content and must not see real geometry. Returns
- * 1 with *px set when unit (case-insensitive, NUL-terminated) is one of
- * vw/vh/vmin/vmax; 0 otherwise. */
-static int viewport_unit_px(const char *unit, double num, double *px) {
-    double per;
-    if      (csel_ci_eq(unit, "vw") || csel_ci_eq(unit, "vmax"))
-        per = CSS_MEDIA_DEFAULT_WIDTH  / 100.0;
-    else if (csel_ci_eq(unit, "vh") || csel_ci_eq(unit, "vmin"))
-        per = CSS_MEDIA_DEFAULT_HEIGHT / 100.0;
-    else return 0;
-    *px = num * per;
-    return 1;
+/*
+ * The context every <length> in the cascade resolves against.
+ *
+ * The cascade is pure and element-free: it runs before any element is known, so
+ * it cannot see a computed font-size and must use the CSS initial context. That
+ * is precisely why the ROOT font-size is handled by rewriting `rem` in the
+ * source text (rem_rebase, see below) rather than by threading a context here.
+ *
+ * Viewport units resolve against the NORMALIZED 1920x1080 desktop, never the
+ * real window: the cascade runs on hostile content and a computed length must
+ * not leak real geometry (only @media width queries see the render width).
+ * cl_ctx_initial already encodes that.
+ */
+static cl_ctx css_len_ctx(void) {
+    return cl_ctx_initial();
+}
+
+/* Resolves a NUL-terminated <length> token to px through the canonical
+ * resolver. Returns 1 on success. This is the ONLY place in the cascade that
+ * turns a unit into pixels -- see spec/css_length.md for why that matters. */
+static int length_px(const char *v, double *px) {
+    cl_ctx ctx = css_len_ctx();
+    return cl_resolve(v, &ctx, px) == CL_OK;
 }
 
 static int interp_align(const char *v) {
@@ -883,17 +885,28 @@ static int interp_fontsize_ex(const char *v, int *abs_out) {
     const char *end;
     if (!parse_num(v, &num, &end)) { *abs_out = 0; return -1; }
     while (*end == ' ' || *end == '\t') ++end;
-    double scale, vpx;
-    /* rem is the ROOT em and this engine's root is always 16px, so it resolves
-     * exactly like px -- absolute. Plain em is relative to the inherited size. */
-    if (csel_ci_eq(end, "px")) scale = num / 16.0 * 100.0;
-    else if (csel_ci_eq(end, "rem")) scale = num * 100.0;
-    else if (csel_ci_eq(end, "em")) { *abs_out = 0; scale = num * 100.0; }
-    else if (end[0] == '%' && end[1] == '\0') { *abs_out = 0; scale = num; }
-    else if (csel_ci_eq(end, "pt")) scale = num * 1.333 / 16.0 * 100.0;
-    else if (viewport_unit_px(end, num, &vpx)) scale = vpx / 16.0 * 100.0;
-    else { *abs_out = 0; return -1; }
-    return round_clamp(scale, 10, 1000);
+
+    /* A percentage is not a <length>: it is relative to the INHERITED size by
+     * definition, so it is handled here and never reaches the resolver. */
+    if (end[0] == '%' && end[1] == '\0') {
+        *abs_out = 0;
+        return round_clamp(num, 10, 1000);
+    }
+
+    /* Everything else is a real length. Whether it is absolute or relative is
+     * derived from the unit family instead of a hand-written whitelist: a
+     * font-relative unit (em/ex/ch/cap/ic/lh) steps off the inherited size,
+     * while px/pt/cm/rem/vw and friends do not. Adding a unit to css_length
+     * classifies it correctly here for free. */
+    double px;
+    if (!length_px(v, &px)) { *abs_out = 0; return -1; }
+    *abs_out = !cl_unit_is_font_relative(end, 0);
+
+    /* One formula for both families. The resolver ran with font_size at the CSS
+     * initial value, so px/initial is the absolute size in "initial units" for
+     * an absolute unit AND the multiple of the inherited size for a relative
+     * one -- `2ex` correctly yields 100% (2 x 0.5em), not 200%. */
+    return round_clamp(px / CL_INITIAL_FONT_SIZE * 100.0, 10, 1000);
 }
 
 
@@ -910,9 +923,15 @@ static int interp_lineheight(const char *v) {
     double pct;
     if (end[0] == '\0')                       pct = num * 100.0; /* unitless */
     else if (end[0] == '%' && end[1] == '\0') pct = num;
-    else if (csel_ci_eq(end, "px"))           pct = num / 16.0 * 100.0; /* rel to base */
-    else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) pct = num * 100.0;
-    else return -1;  /* other: out of scope, dropped */
+    else {
+        /* Any real <length> -- including pt/pc/cm/ex/ch, all of which used to be
+         * dropped here while px and em were accepted. Stored as a percentage of
+         * the CSS initial font-size; layout re-multiplies it by the fragment's
+         * own font-size (CSS 2.1 section 10.8.1). */
+        double px;
+        if (!length_px(v, &px)) return -1;
+        pct = px / CL_INITIAL_FONT_SIZE * 100.0;
+    }
     return round_clamp(pct, CSS_LINE_MIN, CSS_LINE_MAX);
 }
 
@@ -1276,32 +1295,24 @@ static int calc_factor(calc_parser *p, calc_val *out, int depth) {
     if (!parse_num(p->s + p->i, &num, &end)) return 0;
     p->i += (size_t)(end - (p->s + p->i));
     if (neg) num = -num;
-    if (p->i + 2 <= p->n && csel_lower_ch(p->s[p->i]) == 'p' && csel_lower_ch(p->s[p->i + 1]) == 'x') {
-        out->px = num; out->is_length = 1; p->i += 2; return 1;
+    /* Collect the unit identifier that follows the number and resolve it
+     * through the canonical table, so calc() understands exactly the same set
+     * of units as a plain declaration -- it used to know only px/em/rem and the
+     * viewport units, which made `calc(100% - 12pt)` fail as a whole while
+     * `calc(100% - 12px)` worked. A run that is not a length unit falls through
+     * to the bare-number path, whose leftover characters then fail the whole
+     * expression (fail closed). */
+    size_t un = 0;
+    while (p->i + un < p->n && un < CL_MAX_TOKEN) {
+        char c = csel_lower_ch(p->s[p->i + un]);
+        if (c < 'a' || c > 'z') break;
+        ++un;
     }
-    if (p->i + 3 <= p->n && csel_lower_ch(p->s[p->i]) == 'r' &&
-        csel_lower_ch(p->s[p->i + 1]) == 'e' && csel_lower_ch(p->s[p->i + 2]) == 'm') {
-        out->px = num * 16.0; out->is_length = 1; p->i += 3; return 1;
-    }
-    if (p->i + 2 <= p->n && csel_lower_ch(p->s[p->i]) == 'e' && csel_lower_ch(p->s[p->i + 1]) == 'm') {
-        out->px = num * 16.0; out->is_length = 1; p->i += 2; return 1;
-    }
-    if (p->i < p->n && csel_lower_ch(p->s[p->i]) == 'v') {
-        /* Viewport units: collect the alpha run (<= 4 chars) and try vw/vh/
-         * vmin/vmax against the normalized 1920x1080 viewport. A non-matching
-         * run falls through to the bare-number path, whose leftover characters
-         * then fail the whole expression (fail closed). */
-        char ub[5];
-        size_t un = 0;
-        while (p->i + un < p->n && un < 4) {
-            char c = csel_lower_ch(p->s[p->i + un]);
-            if (c < 'a' || c > 'z') break;
-            ub[un++] = c;
-        }
-        ub[un] = '\0';
-        double vpx;
-        if (viewport_unit_px(ub, num, &vpx)) {
-            out->px = vpx; out->is_length = 1; p->i += un; return 1;
+    if (un > 0) {
+        cl_ctx ctx = css_len_ctx();
+        double per;
+        if (cl_unit_scale(p->s + p->i, un, &ctx, &per) == CL_OK) {
+            out->px = num * per; out->is_length = 1; p->i += un; return 1;
         }
     }
     out->px = num;                      /* a bare number: length only if exactly 0 */
@@ -1408,30 +1419,13 @@ static int interp_len(const char *v, int allow_auto, int *out) {
         }
     }
 
-    const char *p = v;
-    int neg = 0;
-    if (*p == '+') ++p;
-    else if (*p == '-') { neg = 1; ++p; }
-    double num;
-    const char *end;
-    if (!parse_num(p, &num, &end)) return 0;
-    while (*end == ' ' || *end == '\t') ++end;
+    /* Every unit CSS defines as a <length>, through the one canonical resolver.
+     * This used to be a private four-unit table that silently dropped pt (and
+     * pc/cm/mm/in/Q/ex/ch/lh), so a page written in points -- Hacker News, for
+     * one -- lost every padding, margin and width it declared. */
     double px;
-    if (end[0] == '\0') {
-        if (num != 0.0) return 0;       /* unitless non-zero length: invalid */
-        px = 0.0;
-    } else if (csel_ci_eq(end, "px")) {
-        px = num;
-    } else if (csel_ci_eq(end, "em") || csel_ci_eq(end, "rem")) {
-        px = num * 16.0;
-    } else if (viewport_unit_px(end, num, &px)) {
-        ;                               /* vw/vh/vmin/vmax vs the 1920x1080 normal */
-    } else {
-        return 0;                       /* %, pt, ... */
-    }
-    int val = round_clamp(px, 0, CSS_LEN_MAX);   /* px >= 0 here; sign applied next */
-    if (neg) val = -val;
-    *out = val;
+    if (!length_px(v, &px)) return 0;
+    *out = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
     return 1;
 }
 
@@ -4086,12 +4080,15 @@ static size_t block_end(const char *s, size_t open, size_t n) {
  * author's root font-size -- which is exactly why rem_rebase leaves at-rule
  * preludes alone. An unknown unit keeps the historical bare-number reading. */
 static int media_len_px(const char *v) {
+    double px;
+    if (length_px(v, &px)) return round_clamp(px, 0, CSS_LEN_MAX);
+
+    /* Not a length. Keep the historical bare-number reading so a query with a
+     * unit this engine does not model still compares something rather than
+     * collapsing to 0 (which would make every min-width query true). */
     double d;
     const char *e;
     if (!parse_num(v, &d, &e)) return 0;
-    while (*e == ' ' || *e == '\t') ++e;
-    if (csel_ci_eq(e, "em") || csel_ci_eq(e, "rem")) d *= 16.0;
-    else if (csel_ci_eq(e, "pt")) d *= 4.0 / 3.0;
     return round_clamp(d, 0, CSS_LEN_MAX);
 }
 
@@ -5168,7 +5165,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
      * therefore cannot match through its combinator (complex_matches needs parents).
      * No attributes are supplied, so [attr] selectors do not match via this entry
      * point (callers that need them build a css_element with attrs). */
-    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL };
+    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0 };
     return css_resolve_el(sheet, &el, inline_style, inline_len);
 }
 

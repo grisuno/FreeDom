@@ -19,6 +19,7 @@
 #include <cmocka.h>
 
 #include "css.h"
+#include "css_select.h"
 
 /* --- inline declarations --- */
 
@@ -1091,17 +1092,36 @@ static void test_pseudo_link(void **state) {
 static void test_pseudo_never_match_keeps_group(void **state) {
     (void)state;
     css_sheet *sh = NULL;
-    /* :visited never matches (no history by design); :hover/:focus/:active
-     * now always match (PSEUDO_ALWAYS) so that content hidden behind hover
-     * becomes visible. The selectors still PARSE, so the comma group and
-     * the rest of the sheet survive. The last matching rule wins (same
-     * specificity, all 0,0,1,0): a:active. */
+    /* :visited never matches (no history by design). The dynamic pseudos match
+     * only when the corresponding CSEL_STATE_* bit is set on the element, so a
+     * freshly loaded page -- pointer nowhere, nothing focused -- matches none
+     * of them and paints the way the author wrote the resting state. The
+     * selectors still PARSE either way, so the comma group and the rest of the
+     * sheet survive. */
     assert_int_equal(css_parse("a:visited, b{color:#040404} a:hover{color:#050505} "
                                 "a:focus{color:#060606} a:active{color:#070707}",
                                 0, &sh), CSS_OK);
     css_attr href[] = { { "href", "/x" } };
     css_element a = el_attr_node("a", NULL, NULL, 0, href, 1, NULL);
+
+    /* state == 0: none of the three dynamic rules applies. */
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, -1);
+
+    /* Each bit selects exactly its own pseudo -- they are not interchangeable. */
+    a.state = CSEL_STATE_HOVER;
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x050505);
+    a.state = CSEL_STATE_FOCUS;
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x060606);
+    a.state = CSEL_STATE_ACTIVE;
     assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x070707);
+
+    /* With several states at once the last matching rule wins (all are
+     * specificity 0,0,1,0), which is ordinary cascade order, not a tiebreak
+     * invented for dynamic pseudos. */
+    a.state = CSEL_STATE_HOVER | CSEL_STATE_FOCUS | CSEL_STATE_ACTIVE;
+    assert_int_equal(css_resolve_el(sh, &a, NULL, 0).color, 0x070707);
+
+    /* The :visited half of the comma group is dead, but `b` still applies. */
     css_element b = el_node("b", NULL, NULL, 0, NULL);
     assert_int_equal(css_resolve_el(sh, &b, NULL, 0).color, 0x040404);
     css_free(sh);
@@ -2803,7 +2823,7 @@ static void test_table_sheet_cascade(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
-    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL };
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0 };
     css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
     assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
     assert_int_equal(s.empty_cells, CSS_EC_HIDE);

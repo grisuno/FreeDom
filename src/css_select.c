@@ -166,10 +166,11 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     if (csel_ci_eq(name, "link") || csel_ci_eq(name, "any-link")) pm->kind = PSEUDO_LINK;
     else if (csel_ci_eq(name, "visited"))
         pm->kind = PSEUDO_NEVER;
-    else if (csel_ci_eq(name, "hover") || csel_ci_eq(name, "active") ||
-             csel_ci_eq(name, "focus") || csel_ci_eq(name, "focus-within") ||
-             csel_ci_eq(name, "focus-visible"))
-        pm->kind = PSEUDO_ALWAYS;
+    else if (csel_ci_eq(name, "hover"))          pm->kind = PSEUDO_HOVER;
+    else if (csel_ci_eq(name, "active"))         pm->kind = PSEUDO_ACTIVE;
+    else if (csel_ci_eq(name, "focus"))          pm->kind = PSEUDO_FOCUS;
+    else if (csel_ci_eq(name, "focus-within"))   pm->kind = PSEUDO_FOCUS_WITHIN;
+    else if (csel_ci_eq(name, "focus-visible"))  pm->kind = PSEUDO_FOCUS_VISIBLE;
     else if (csel_ci_eq(name, "root"))        pm->kind = PSEUDO_ROOT;
     else if (csel_ci_eq(name, "first-child")) pm->kind = PSEUDO_FIRST_CHILD;
     else if (csel_ci_eq(name, "last-child"))  pm->kind = PSEUDO_LAST_CHILD;
@@ -562,9 +563,9 @@ static int sub_sel_matches(const css_sub_sel *sub, const css_element *el) {
 
 /* True if pseudo-class `pm` matches element `el`. Zero Knowledge semantics:
  * :link covers every a/area[href] (no history, everything is unvisited) and
- * PSEUDO_NEVER (:visited) never matches. PSEUDO_ALWAYS (:hover/:active/:focus)
- * always matches — the cascade is resolved once per load, so dynamic pseudos
- * are treated as always-on (content hidden behind hover becomes visible).
+ * PSEUDO_NEVER (:visited) never matches. The dynamic pseudos read el->state, so
+ * a freshly loaded page (state == 0, pointer nowhere) matches none of them --
+ * the page paints the way its author wrote it for the resting state.
  * Structural pseudos read nth/nsib, where 0 = unknown = no match (fail closed).
  * For :not/:is/:where, the sel pointer provides the sub-selector array. */
 static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
@@ -576,7 +577,12 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
                    (csel_ci_eq(el->tag, "a") || csel_ci_eq(el->tag, "area")) &&
                    el_attr_value(el, "href") != NULL;
         case PSEUDO_NEVER:        return 0;
-        case PSEUDO_ALWAYS:       return 1;
+        /* Driven by the engine, never by a constant. See CSEL_STATE_*. */
+        case PSEUDO_HOVER:          return (el->state & CSEL_STATE_HOVER) != 0;
+        case PSEUDO_ACTIVE:         return (el->state & CSEL_STATE_ACTIVE) != 0;
+        case PSEUDO_FOCUS:          return (el->state & CSEL_STATE_FOCUS) != 0;
+        case PSEUDO_FOCUS_WITHIN:   return (el->state & CSEL_STATE_FOCUS_WITHIN) != 0;
+        case PSEUDO_FOCUS_VISIBLE:  return (el->state & CSEL_STATE_FOCUS_VISIBLE) != 0;
         case PSEUDO_ROOT:         return el->tag != NULL && csel_ci_eq(el->tag, "html");
         case PSEUDO_FIRST_CHILD:  return el->nth == 1;
         case PSEUDO_LAST_CHILD:   return el->nth > 0 && el->nth == el->nsib;

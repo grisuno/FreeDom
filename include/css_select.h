@@ -34,13 +34,30 @@ enum { COMB_DESCENDANT = 0, COMB_CHILD = 1, COMB_ADJACENT = 2, COMB_GENERAL = 3 
 enum { ATTR_PRESENT = 0, ATTR_EQ, ATTR_TILDE, ATTR_PIPE, ATTR_CARET, ATTR_DOLLAR,
        ATTR_STAR };
 
+/*
+ * Dynamic element state, as a bitmask on css_element.state. Zero -- the state
+ * of a page that has just loaded, with the pointer nowhere and nothing focused
+ * -- means no dynamic pseudo matches, which is what every browser does.
+ *
+ * These exist so the state can come from the ENGINE rather than from a constant
+ * in the matcher: when the GUI knows which element is under the pointer it sets
+ * CSEL_STATE_HOVER on that element's chain and re-resolves. See the doctrine
+ * note in spec/css_select.md.
+ */
+enum {
+    CSEL_STATE_HOVER          = 1u << 0,
+    CSEL_STATE_ACTIVE         = 1u << 1,
+    CSEL_STATE_FOCUS          = 1u << 2,
+    CSEL_STATE_FOCUS_WITHIN   = 1u << 3,
+    CSEL_STATE_FOCUS_VISIBLE  = 1u << 4
+};
+
 /* Pseudo-class kind (Hito 23b-9). NEVER covers :visited (Zero Knowledge: no
- * history to match, and no CSS history sniffing). ALWAYS covers the dynamic
- * pseudos (:hover/:active/:focus/:focus-within/:focus-visible) — the cascade
- * is resolved once per load, so they always match: content hidden behind
- * :hover (common on Slashdot, menus etc.) becomes visible instead of
- * invisible. :visited stays NEVER (we never leak history). */
-enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ALWAYS, PSEUDO_ROOT,
+ * history to match, and no CSS history sniffing). The dynamic pseudos each get
+ * their own kind so they can be driven independently from css_element.state --
+ * they used to share a single PSEUDO_ALWAYS that matched unconditionally, which
+ * painted every page as though the mouse were on every element at once. */
+enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_HOVER, PSEUDO_ROOT,
        PSEUDO_FIRST_CHILD, PSEUDO_LAST_CHILD, PSEUDO_ONLY_CHILD,
        PSEUDO_NTH_CHILD, PSEUDO_NTH_LAST_CHILD,
        PSEUDO_CHECKED, PSEUDO_DISABLED, PSEUDO_ENABLED,
@@ -53,7 +70,9 @@ enum { PSEUDO_LINK = 0, PSEUDO_NEVER, PSEUDO_ALWAYS, PSEUDO_ROOT,
         /* R8: pseudo-elements (::before/::after) */
         PSEUDO_BEFORE, PSEUDO_AFTER,
         /* :has() relational pseudo-class (descendant walk) */
-        PSEUDO_HAS };
+        PSEUDO_HAS,
+        /* Remaining dynamic pseudos, each driven by its own CSEL_STATE_* bit. */
+        PSEUDO_ACTIVE, PSEUDO_FOCUS, PSEUDO_FOCUS_WITHIN, PSEUDO_FOCUS_VISIBLE };
 
 /* Sub-selector for :not()/:is()/:where(): a simple compound with only
  * tag/.class/#id/[attr] (no combinators, no pseudo-classes inside
