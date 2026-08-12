@@ -487,6 +487,28 @@ elemento tiene `flex_grow > 0` **y** su padre directo es contenedor `flex`/`grid
 padre evita emitir una línea en blanco por un `flex-grow` suelto en flujo de bloque).
 Test `test_build_empty_flex_grow_spacer`.
 
+### `<select>` cerrado muestra SOLO su opción seleccionada (2026-08-11)
+
+Un `<select>` colapsado (el estado por defecto) presenta el **label de su opción
+seleccionada**, no la concatenación de todas las opciones — la lista completa solo se ve al
+abrir el control (HTML *Rendering* §"The select element", que remite al comportamiento del
+*option list*). El `value` visible se deriva **del propio HTML**, sin ninguna constante:
+
+  **Dado** un `<select>` de selección simple
+  **cuando** `describe_control` recorre sus `<option>` hijos
+  **entonces** el label mostrado es el de la **última** opción que lleva el atributo
+  `selected` (HTML §"the selectedness": la última en orden de árbol gana), y **si ninguna**
+  lo lleva, el de la **primera** opción (el *placeholder label option* / default de un
+  `size` 1 no-`multiple`). Sin opciones ⇒ cadena vacía.
+
+El label se colapsa por espacios como todo texto recolectado. El listado completo
+`value||label||…` (`select_opts`) sigue construyéndose para cuando el control se abra; solo
+cambia **cuál** de esos labels es el `value` del run. Regresión que cierra: `collect_text(node)`
+aplanaba el subárbol entero del `<select>`, así que el control pintaba
+`"All Regions Argentina Australia …"` —cada opción del filtro de DuckDuckGo— en vez de
+`"All Regions"`, reventando su ancho y apilando la barra de filtros. Candados:
+`test_build_select_shows_selected_option`, `test_build_select_defaults_to_first_option`.
+
 ### Control de formulario dentro de una caja: se sienta en el rect de contenido (2026-08-01)
 
 En el painter, una fila reemplazada de `RD_INPUT` se emitía con `x_off = 0` y `bg_w = content_w`

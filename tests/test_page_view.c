@@ -2431,6 +2431,65 @@ static void test_build_textarea_value(void **state) {
     hp_document_free(doc);
 }
 
+/* A closed <select> displays ONLY its selected option's label, not every
+ * option's text concatenated. The selected option is the last <option> carrying
+ * a `selected` attribute (HTML "the selectedness": last in tree order wins). */
+static void test_build_select_shows_selected_option(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<form><select name=\"kl\">"
+        "<option value=\"\">All Regions</option>"
+        "<option value=\"ar-es\" selected>Argentina</option>"
+        "<option value=\"au-en\">Australia</option>"
+        "</select></form>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *sel = find_input(v, "kl");
+    assert_non_null(sel);
+    assert_int_equal(sel->input_type, PV_IN_SELECT);
+    assert_string_equal(sel->value, "Argentina");
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* When several options are marked `selected`, a single select shows the LAST one
+ * in tree order (HTML "the selectedness"), not the first. */
+static void test_build_select_last_selected_wins(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<form><select name=\"k\">"
+        "<option selected>one</option>"
+        "<option selected>two</option>"
+        "<option>three</option>"
+        "</select></form>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *sel = find_input(v, "k");
+    assert_non_null(sel);
+    assert_string_equal(sel->value, "two");
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* With no option marked `selected`, a single (non-multiple) select defaults to
+ * displaying its FIRST option -- never the whole option list joined together. */
+static void test_build_select_defaults_to_first_option(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<form><select name=\"when\">"
+        "<option>Any Time</option>"
+        "<option>Past Day</option>"
+        "<option>Past Week</option>"
+        "</select></form>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *sel = find_input(v, "when");
+    assert_non_null(sel);
+    assert_string_equal(sel->value, "Any Time");
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_control_without_form(void **state) {
     (void)state;
     hp_document *doc = parse("<input type=\"text\" name=\"loose\">");
@@ -3332,6 +3391,9 @@ int main(void) {
         cmocka_unit_test(test_build_search_form_get),
         cmocka_unit_test(test_build_form_post_and_hidden),
         cmocka_unit_test(test_build_textarea_value),
+        cmocka_unit_test(test_build_select_shows_selected_option),
+        cmocka_unit_test(test_build_select_last_selected_wins),
+        cmocka_unit_test(test_build_select_defaults_to_first_option),
         cmocka_unit_test(test_build_control_without_form),
         cmocka_unit_test(test_build_two_forms_distinct_groups),
         cmocka_unit_test(test_build_style_sheet_color),

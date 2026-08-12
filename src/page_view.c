@@ -2675,6 +2675,10 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
         char *opts = (char *)malloc(opts_cap);
         if (opts == NULL) return -1;
         opts[0] = '\0';
+        /* The displayed value of a closed select is the label of its selected
+         * option: the LAST <option selected> in tree order, or -- with none --
+         * the FIRST option. Captured while the option list is walked below. */
+        char *first_label = NULL, *selected_label = NULL;
         for (lxb_dom_node_t *ch = node->first_child; ch != NULL; ch = ch->next) {
             if (ch->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(ch) != LXB_TAG_OPTION)
                 continue;
@@ -2692,6 +2696,15 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
             if (opt_val == NULL) continue;
             char *opt_label = collect_text(ch);
             if (opt_label == NULL) { free(opt_val); continue; }
+            if (first_label == NULL)
+                first_label = dup_n(opt_label, strlen(opt_label));
+            /* `selected` is a boolean attribute (present, no value), so presence
+             * -- not a non-NULL value -- is what marks the option selected. */
+            if (lxb_dom_element_has_attribute(
+                    opt_el, (const lxb_char_t *)"selected", 8)) {
+                free(selected_label);
+                selected_label = dup_n(opt_label, strlen(opt_label));
+            }
             size_t need = strlen(opt_val) + 2 + strlen(opt_label) + 2;
             if (opts_len + need >= opts_cap) {
                 size_t ncap = opts_cap * 2;
@@ -2716,13 +2729,18 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
         *out_label = dup_n("", 0);
         char *ph = attr_dup(el, "placeholder", 11);
         if (ph != NULL) { free(*out_label); *out_label = ph; }
-        /* Default value: first selected option or the first option */
-        char *sel = collect_text(node);
-        if (sel != NULL && sel[0] != '\0') {
-            char *trimmed = collapse_ws(sel, strlen(sel));
-            free(sel); sel = trimmed;
+        /* Display value = selected option's label (last selected, else first),
+         * collapsed like all recolected text. Never the whole list concatenated. */
+        char *chosen = (selected_label != NULL) ? selected_label : first_label;
+        if (chosen != NULL) {
+            char *collapsed = collapse_ws(chosen, strlen(chosen));
+            *out_value = (collapsed != NULL) ? collapsed
+                                             : dup_n(chosen, strlen(chosen));
+        } else {
+            *out_value = dup_n("", 0);
         }
-        *out_value = (sel != NULL) ? sel : dup_n("", 0);
+        free(first_label);
+        free(selected_label);
         if (*out_label == NULL || *out_value == NULL) return -1;
         return 0;
     }
