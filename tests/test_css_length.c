@@ -297,8 +297,160 @@ static void test_cl_number(void **state) {
     assert_false(cl_number(NULL, &v, &e));
 }
 
+/* --- <length-percentage> (spec/css_length.md section 7.5) ------------------ */
+
+/* Rows 1-9: cl_resolve_lp accepts everything cl_resolve does, plus the
+ * percentage component, and keeps the two components separate. */
+static void test_lp_parse(void **state) {
+    (void)state;
+    cl_ctx c = cl_ctx_initial();
+    cl_lp lp;
+
+    /* 1: a pure length has no percentage component. */
+    assert_int_equal(cl_resolve_lp("10px", &c, &lp), CL_OK);
+    assert_true(fabs(lp.px - 10.0) < EPS);
+    assert_true(fabs(lp.pct) < EPS);
+    assert_int_equal(lp.has_pct, 0);
+
+    /* 2: a pure percentage carries no px. */
+    assert_int_equal(cl_resolve_lp("50%", &c, &lp), CL_OK);
+    assert_true(fabs(lp.px) < EPS);
+    assert_true(fabs(lp.pct - 50.0) < EPS);
+    assert_int_equal(lp.has_pct, 1);
+
+    /* 3: unitless zero stays a length. */
+    assert_int_equal(cl_resolve_lp("0", &c, &lp), CL_OK);
+    assert_true(fabs(lp.px) < EPS);
+    assert_int_equal(lp.has_pct, 0);
+
+    /* 4: a negative percentage parses; rejecting it is the emitter's job. */
+    assert_int_equal(cl_resolve_lp("-25%", &c, &lp), CL_OK);
+    assert_true(fabs(lp.pct + 25.0) < EPS);
+    assert_int_equal(lp.has_pct, 1);
+
+    /* 5: the shared <number> grammar means ".5%" is valid. */
+    assert_int_equal(cl_resolve_lp(".5%", &c, &lp), CL_OK);
+    assert_true(fabs(lp.pct - 0.5) < EPS);
+
+    /* 6: a <percentage> is ONE token -- no space before the sign. */
+    assert_int_equal(cl_resolve_lp("2 %", &c, &lp), CL_ERR_SYNTAX);
+
+    /* 7: trailing junk after the percent sign. */
+    assert_int_equal(cl_resolve_lp("50%x", &c, &lp), CL_ERR_SYNTAX);
+
+    /* 8: a non-finite percentage. */
+    assert_int_equal(cl_resolve_lp("1e400%", &c, &lp), CL_ERR_RANGE);
+
+    /* 9: NULL arguments. */
+    assert_int_equal(cl_resolve_lp(NULL, &c, &lp), CL_ERR_NULL_ARG);
+    assert_int_equal(cl_resolve_lp("1%", NULL, &lp), CL_ERR_NULL_ARG);
+    assert_int_equal(cl_resolve_lp("1%", &c, NULL), CL_ERR_NULL_ARG);
+
+    /* Every unit cl_resolve knows still resolves here (it is a superset). */
+    assert_int_equal(cl_resolve_lp("12pt", &c, &lp), CL_OK);
+    assert_true(fabs(lp.px - 16.0) < EPS);
+    assert_int_equal(cl_resolve_lp("1cqw", &c, &lp), CL_ERR_UNIT);
+}
+
+/* Rows 10-13: the used value is px + pct/100 * basis, and nothing else. */
+static void test_lp_used(void **state) {
+    (void)state;
+    /* Designated: a field added to cl_lp must not silently shift these. */
+    cl_lp abs_only = { .px = 10.0,  .em = 0.0, .pct = 0.0,   .has_pct = 0 };
+    cl_lp pct_only = { .px = 0.0,   .em = 0.0, .pct = 50.0,  .has_pct = 1 };
+    cl_lp mixed    = { .px = -10.0, .em = 0.0, .pct = 100.0, .has_pct = 1 };  /* calc(100% - 10px) */
+
+    assert_true(fabs(cl_lp_used(abs_only, 200.0) - 10.0) < EPS);
+    assert_true(fabs(cl_lp_used(pct_only, 200.0) - 100.0) < EPS);
+    assert_true(fabs(cl_lp_used(mixed, 200.0) - 190.0) < EPS);
+
+    /* 13: a basis that is not a usable length contributes nothing, but the
+     * absolute component survives -- dropping it would lose author intent. */
+    assert_true(fabs(cl_lp_used(mixed, -1.0) + 10.0) < EPS);
+    assert_true(fabs(cl_lp_used(mixed, 0.0) + 10.0) < EPS);
+    assert_true(fabs(cl_lp_used(abs_only, -1.0) - 10.0) < EPS);
+}
+
+/* --- The font-relative component (spec/css_length.md section 8) ------------
+ *
+ * A font-relative length is not a number, it is the affine function
+ * a + b*font-size. These rows pin the derivative b, which is what lets the
+ * cascade re-fit a value once the element's computed font-size is known. */
+static void test_em_derivative(void **state) {
+    (void)state;
+    cl_ctx c = cl_ctx_initial();
+    cl_lp lp;
+
+    /* em: one per unit, by definition. */
+    assert_int_equal(cl_resolve_lp("10em", &c, &lp), CL_OK);
+    assert_true(fabs(lp.px - 160.0) < EPS);   /* still resolved at the ctx */
+    assert_true(fabs(lp.em - 10.0) < EPS);
+
+    /* The spec-named metric fallbacks are ratios of the font-size, so each
+     * carries its ratio as the derivative -- taken from the SAME table as the
+     * value, never rewritten here. */
+    assert_int_equal(cl_resolve_lp("10ex", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em - 10.0 * CL_FALLBACK_EX_RATIO) < EPS);
+    assert_int_equal(cl_resolve_lp("10ch", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em - 10.0 * CL_FALLBACK_CH_RATIO) < EPS);
+    assert_int_equal(cl_resolve_lp("10cap", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em - 10.0 * CL_FALLBACK_CAP_RATIO) < EPS);
+    assert_int_equal(cl_resolve_lp("10ic", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em - 10.0 * CL_FALLBACK_IC_RATIO) < EPS);
+
+    /* rem/rlh measure against the ROOT: from a non-root element they are
+     * absolute, so the derivative is zero. That distinction is the whole point
+     * of cl_unit_is_font_relative. */
+    assert_int_equal(cl_resolve_lp("10rem", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em) < EPS);
+
+    /* Absolute and viewport units: no font-size dependence at all. */
+    assert_int_equal(cl_resolve_lp("10px", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em) < EPS);
+    assert_int_equal(cl_resolve_lp("10pt", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em) < EPS);
+    assert_int_equal(cl_resolve_lp("10vw", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em) < EPS);
+
+    /* A percentage carries no font-relative component either. */
+    assert_int_equal(cl_resolve_lp("50%", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em) < EPS);
+
+    /* Negative and fractional coefficients survive intact. */
+    assert_int_equal(cl_resolve_lp("-1.5em", &c, &lp), CL_OK);
+    assert_true(fabs(lp.em + 1.5) < EPS);
+}
+
+/* cl_em_refit is the ONLY arithmetic that turns the derivative into pixels. */
+static void test_em_refit(void **state) {
+    (void)state;
+    cl_ctx c = cl_ctx_initial();
+    cl_lp lp;
+
+    assert_int_equal(cl_resolve_lp("10em", &c, &lp), CL_OK);
+
+    /* Zero by construction at the parse context: a page whose elements are all
+     * at the initial font-size renders byte-identically. */
+    assert_true(fabs(cl_em_refit(lp.px, lp.em, c.font_size, 16.0) - 160.0) < EPS);
+    /* The measured Firefox values from the probe in spec section 8.1. */
+    assert_true(fabs(cl_em_refit(lp.px, lp.em, c.font_size, 32.0) - 320.0) < EPS);
+    assert_true(fabs(cl_em_refit(lp.px, lp.em, c.font_size,  8.0) -  80.0) < EPS);
+
+    /* A zero derivative is inert whatever the font-size does. */
+    assert_int_equal(cl_resolve_lp("10px", &c, &lp), CL_OK);
+    assert_true(fabs(cl_em_refit(lp.px, lp.em, c.font_size, 99.0) - 10.0) < EPS);
+
+    /* A non-finite or non-positive target font-size must not manufacture a
+     * value: the already-resolved px survives (fail closed, never NaN). */
+    assert_true(fabs(cl_em_refit(160.0, 10.0, 16.0,  0.0) - 160.0) < EPS);
+    assert_true(fabs(cl_em_refit(160.0, 10.0, 16.0, -5.0) - 160.0) < EPS);
+    assert_true(fabs(cl_em_refit(160.0, 10.0, 0.0,  32.0) - 160.0) < EPS);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_lp_parse),
+        cmocka_unit_test(test_lp_used),
         cmocka_unit_test(test_unitless),
         cmocka_unit_test(test_absolute_units),
         cmocka_unit_test(test_font_relative_em_rem),
@@ -316,6 +468,8 @@ int main(void) {
         cmocka_unit_test(test_is_length_unit),
         cmocka_unit_test(test_initial_ctx),
         cmocka_unit_test(test_cl_number),
+        cmocka_unit_test(test_em_derivative),
+        cmocka_unit_test(test_em_refit),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

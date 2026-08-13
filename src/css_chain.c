@@ -238,11 +238,19 @@ static const css_element *build_chain(lxb_dom_element_t *el,
  * element and its ancestor chain (bounded) become the selector match inputs, so
  * descendant/child combinators (`div p`, `nav > a`) resolve. Pure (no fetch, no
  * execution): the css module drops url() and @-rules. */
-css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
+css_style cch_element_style_fs(lxb_dom_element_t *el, const css_sheet *sheet,
+                               double parent_font_size) {
     cch_node chain[CCH_CHAIN_MAX];
     cch_node sibs[CCH_SIB_MAX];
     lxb_dom_node_t *nodes[CCH_CHAIN_MAX];
     const css_element *subject = build_chain(el, chain, sibs, nodes);
+
+    /* The inherited font-size is an ENGINE INPUT, like `state`: the cascade
+     * cannot discover it (font-size is computed before every other property),
+     * and without it every `em` in the sheet would mean 16px regardless of the
+     * element's own size. chain[0] is the subject; build_chain zeroes the view,
+     * so leaving it 0 keeps the CSS initial context. */
+    if (subject != NULL) chain[0].el.font_size = parent_font_size;
 
     /* Inline style= applies to the subject element only. */
     size_t sl = 0;
@@ -250,6 +258,10 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
         lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
 
     return css_resolve_el(sheet, subject, (const char *)st, sl);
+}
+
+css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet) {
+    return cch_element_style_fs(el, sheet, 0.0);
 }
 
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel) {

@@ -1393,3 +1393,181 @@ common case.)
   `text-indent`, `vertical-align` lengths/`top`/`middle`/`bottom`, and `white-space`
   whitespace *preservation* (only the wrap distinction is consumed). The full "Not yet
   supported" list (borders, `position`, transforms, gradients, …) is in *Property inventory*.
+
+---
+
+## Multicolumna (CSS Multi-column Layout Level 1) — 2026-08-12
+
+Brecha abierta más cara del corpus (`tests/parity/pages/multicol.html`: **35.88**).
+Wikipedia declara `column-count`/`column-width` en 11 reglas y jkanime en 6; hasta
+esta tanda el parser **descartaba las propiedades enteras** y el contenido caía a
+una sola columna, multiplicando el alto de la página.
+
+### Propiedades
+
+| Propiedad | Valores aceptados | Campo |
+| :-- | :-- | :-- |
+| `column-count` | `<integer>` \| `auto` | `column_count` (0 = auto) |
+| `column-width` | `<length>` \| `auto` | `column_width` (0 = auto) |
+| `columns` | `<'column-width'> \|\| <'column-count'>` (shorthand) | ambos |
+| `column-gap` | `<length-percentage>` \| `normal` | `column_gap` (−1 = normal ⇒ 1em) |
+| `column-rule-width/-style/-color`, `column-rule` | como `border-*` | `column_rule_*` |
+| `column-fill` | `balance` \| `auto` | `column_fill` |
+| `column-span` | `none` \| `all` | `column_span` |
+
+`column-gap` ya se parseaba, pero **como alias de `gap`** (el de flex/grid). Son la
+misma propiedad en CSS Box Alignment, así que sigue escribiendo el mismo slot; lo
+que cambia es que multicolumna ahora **lee** ese slot en vez de ignorarlo.
+
+### Conteo y ancho usados (§3.4) — `fx_multicol_used`, puro
+
+Dado el ancho disponible `W` y el gap `G`:
+
+1. `column-width: auto` **y** `column-count: auto` ⇒ **no es** un contenedor
+   multicolumna (N = 1, ancho = W). Fail-closed: sin declaración no hay cambio.
+2. `column-width: auto` ⇒ `N = column-count`.
+3. `column-count: auto` ⇒ `N = max(1, floor((W + G) / (column-width + G)))`.
+4. Ambos declarados ⇒ `N = min(column-count, max(1, floor((W + G) / (column-width + G))))`.
+
+En todos los casos con N ≥ 1: `col_w = (W − (N−1)·G) / N`, acotado a ≥ 1 px.
+
+El paso 3 es lo que hace que `column-width: 30em` produzca **una** columna en un
+viewport angosto y tres en uno ancho — sin esa fórmula, `column-width` sería o un
+no-op o una división fija, y ambas cosas son inventadas.
+
+### Fragmentación (`column-fill: balance`, el valor inicial)
+
+El contenido se maqueta **una sola vez** al ancho de columna `col_w`, produciendo
+las filas y cajas normales del display list. Después se reparte:
+
+- Altura objetivo `H_col = total / N` (balance).
+- Se recorren las filas en orden acumulando alto; al superar `H_col` empieza la
+  columna siguiente (nunca se parte una fila: la unidad de fragmentación mínima de
+  este motor es la línea, que es exactamente lo que CSS llama *class A break point*
+  entre líneas).
+- Cada fila y cada caja de la columna `k` se traslada `x += k·(col_w + G)` y
+  `top -= inicio_de_columna_k`.
+
+La altura final del contenedor es la de la columna más alta, no la suma — que es
+justamente la reducción de alto que la sonda mide.
+
+**Fuera de alcance declarado:** `column-span: all` (el elemento que atraviesa
+todas las columnas rompe el flujo en dos fragmentos multicolumna), `break-inside:
+avoid` como restricción dura del balanceo, y las reglas de solapamiento de
+`column-rule` con `column-gap` menor que su ancho.
+
+---
+
+## Inventario de propiedades — actualización 2026-08-12
+
+Reescrito tras la tanda 17. Lo que sigue **ausente** del despacho ya no incluye
+ninguna de las brechas que `make parity` medía como abiertas.
+
+**Incorporadas en esta tanda** (antes se descartaban enteras o parcialmente):
+
+| Propiedad | Nota |
+| :-- | :-- |
+| `column-count`, `column-width`, `columns`, `column-fill`, `column-span`, `column-rule(-width/-style/-color)` | Multicolumna completa; `column-gap` ya existía y ahora se **lee**. |
+| `border-top-left-radius` y las otras tres esquinas, más las ocho lógicas (`border-start-start-radius`…) | El shorthand se quedaba con **un** valor y los longhands se tiraban. 158 declaraciones en el corpus. |
+| `line-clamp`, `-webkit-line-clamp` | Limita el bloque a N líneas y **recorta el alto**, no solo la pintura. |
+| `flex-flow` | Se perdían dirección **y** wrap. |
+| `%` en `margin-*`, `padding-*`, `min-width`, `height`/`min-height`/`max-height`, `top/right/bottom/left`, `text-indent`, `border-radius`, `translate()` | Canal `<length-percentage>` canónico, §7 de `spec/css_length.md`. |
+
+**Siguen fuera** (ordenadas por lo que el corpus realmente usa): `mask-*`,
+`grid-template-areas` y la colocación por línea/nombre (`grid-area`,
+`grid-*-start/-end`, `grid-auto-rows/-columns`, `justify-self`), `counter-reset`/
+`counter-increment` + `counter()` en `content`, `quotes`, `list-style-image`,
+`border-image-*`, `clip-path`, `background-position-x`/`-y`, `will-change`,
+`perspective`, `unicode-bidi`, `writing-mode`, `text-wrap`, `line-break`,
+`font-variant-numeric`, `font-feature-settings`, `break-*`/`page-break-*`,
+`orphans`/`widows`, `scrollbar-width`/`-color`, `overflow-anchor`,
+`scroll-margin*`/`scroll-padding*`, `text-size-adjust`,
+`text-decoration-skip-ink`, y las palabras clave de tamaño intrínseco
+(`min-content`/`max-content`/`fit-content()`).
+
+### Flotantes: lo que cambió (CSS 2.1 §9.5)
+
+Tres reglas, las tres citables, que juntas hacen que un `<figure float:right>`
+se comporte como en Firefox:
+
+1. **`clear` es del ELEMENTO, no de cada run de su subárbol.** `page_view`
+   estampa el `clear` del bloque en todos sus runs; la banda de flotantes lo
+   leía por run y **partía la banda en cada uno**. Un `figure{float:right;
+   clear:right}` (el idioma de toda miniatura de MediaWiki) se rompía en una
+   banda de ancho completo por enlace del pie de foto. Ahora el `clear` solo
+   corta la banda cuando viene de un flotante **distinto**: §9.5.2 define
+   `clear` contra flotantes **anteriores**, nunca contra el propio.
+2. **Un flotante solitario con `width:auto` encoge a su contenido** (§10.3.5),
+   y un hijo `display:table-caption` **no** entra en esa medición (§17.4/§17.5.2:
+   el caption se maqueta *al* ancho de la tabla, no lo decide). Sin la segunda
+   mitad, la frase del pie de foto —mucho más ancha que la imagen de 250 px que
+   describe— elegía el ancho de la miniatura.
+3. **Una exclusión de flotante sobrevive al entrar en una caja anidada.** El
+   chequeo era `box_depth != float_depth` (igualdad exacta), así que el párrafo
+   siguiente —que abre la caja envolvente del artículo— descartaba la exclusión
+   y se apilaba debajo. Un flotante acorta las líneas de todo descendiente del
+   mismo contexto de formato de bloque; ahora solo se descarta al **salir**
+   (`box_depth < float_depth`), y al entrar más adentro la exclusión se
+   **traduce** a las coordenadas de la caja anidada.
+
+3. **Una línea que no entra al lado del flotante se baja, no se pinta encima**
+   (CSS 2.1 §9.5: *"if there is not enough horizontal room for the line box
+   beside the float, it is shifted downward until either it fits or there are no
+   more floats present"*). `line_limit` acotaba el ancho a `FX_FLOAT_MIN_LINE` y
+   dibujaba igual, así que un flotante que ocupa todo el contexto —una `<figure>`
+   de ancho completo— quedaba con el párrafo siguiente **escrito encima de su pie
+   de foto**. `rc_float_fit_line` baja `cur_top` al fondo del flotante más cercano
+   que estorba y vuelve a medir; acotado por el número de flotantes vivos, así
+   que no puede ciclar. Regresión introducida por la regla (3) anterior y
+   detectada en revisión visual, no por el score: `make parity` la premiaba
+   (la página era más corta) mientras el render era peor.
+
+---
+
+## Prefijos de vendor: una propiedad prefijada ES la propiedad estándar (2026-08-13)
+
+`-webkit-transform` y `transform` son la misma declaración. El motor las
+descartaba **enteras**, y no es un caso raro: en el corpus de paridad hay
+**~900 declaraciones** con prefijo.
+
+| Propiedad | Usos en el corpus | Efecto |
+| :-- | --: | :-- |
+| `-webkit-transform` / `-moz-` / `-o-` / `-ms-` | 176 | pintura |
+| `-moz-border-radius` / `-webkit-` / `-o-` | 173 | pintura |
+| `-webkit-transition` / `-moz-` / `-o-` / `-ms-` | 126 | — |
+| `-webkit-box-shadow` / `-moz-` | 74 | pintura |
+| `-webkit-box-sizing` / `-moz-` | 26 | **geometría** |
+
+**La regla, completa:** si el nombre empieza por `-webkit-`/`-moz-`/`-ms-`/`-o-`,
+se le saca el prefijo y se vuelve a preguntar **una sola vez**. No hay tabla de
+alias: el despacho de propiedades que ya existe *es* la tabla, así que una
+propiedad nueva queda prefijada-compatible sola y no hay una segunda lista que se
+desincronice.
+
+**Lo que deliberadamente NO hace, y por qué eso es lo correcto:** no mapea la
+sintaxis *tweener* de flexbox de IE10 (`-ms-flex-pack`, `-ms-flex-align`,
+`-ms-flex-order`, …, 400+ usos en el corpus). Al sacarle el prefijo queda
+`flex-pack`, que **no es ninguna propiedad**, así que la declaración se descarta.
+Eso es la respuesta correcta y sale gratis: la gramática de valores de
+`-ms-flex-pack` (`justify`/`distribute`) **no** es la de `justify-content`
+(`space-between`/`space-around`), y mapearlas por parecido del nombre sería
+inventar una regla.
+
+**Casos límite cerrados:**
+
+- `--x` es una custom property, **no** un prefijo de vendor: se exige una letra
+  después del `-` inicial, así que `--webkit-color` no se convierte en `x`.
+- Un nombre doblemente prefijado (`-webkit--moz-color`) falla cerrado en vez de
+  recursionar: la profundidad la elegiría el atacante.
+- Un prefijo desconocido (`-quux-color`) se descarta, no se desprefija.
+
+**Contrato — Dado / Cuando / Entonces**
+
+- **Dado** `-webkit-box-sizing: border-box`, **entonces** `box_sizing` es
+  `CSS_BOXS_BORDER`, idéntico a la forma sin prefijo.
+- **Dado** `-moz-border-radius: 8px`, **entonces** el radio es 8 px.
+- **Dado** `-ms-flex-pack: justify`, **entonces** `justify` queda
+  `CSS_JUSTIFY_UNSET` (descartada, fail-closed).
+- **Dado** `--webkit-color: red`, **entonces** no se pinta rojo: es una custom
+  property.
+- **Dado** `-webkit--moz-color: red`, **entonces** se descarta.

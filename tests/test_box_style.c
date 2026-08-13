@@ -444,6 +444,47 @@ static void test_place_failclosed_bounds(void **state) {
 
 /* Hito 32: effective width cap combining the px cap with a per-mille cap
  * resolved against the real available width (the tighter one wins). */
+/* bx_lp_px: the used value of a <length-percentage> is px + pct/1000 * basis,
+ * and nothing else. Unlike bx_width_cap (which picks the TIGHTER of a width and
+ * a max-width sharing one slot), this is ADDITIVE: `padding: 10px` and
+ * `padding: 5%` are halves of one value, not two competing caps. */
+static void test_lp_used_value(void **state) {
+    (void)state;
+    assert_true(dbl_eq(bx_lp_px(10, 0, 800.0), 10.0));        /* px only */
+    assert_true(dbl_eq(bx_lp_px(0, 500, 800.0), 400.0));      /* 50% of 800 */
+    assert_true(dbl_eq(bx_lp_px(10, 500, 800.0), 410.0));     /* both halves add */
+    assert_true(dbl_eq(bx_lp_px(0, 25, 1000.0), 25.0));       /* 2.5% of 1000 */
+    assert_true(dbl_eq(bx_lp_px(-20, 1000, 200.0), 180.0));   /* calc(100% - 20px) */
+
+    /* A percentage-only value leaves the px half at the "not declared"
+     * sentinel; treating that as a real length would resolve to INT_MIN. */
+    assert_true(dbl_eq(bx_lp_px(CSS_LEN_UNSET, 500, 800.0), 400.0));
+    assert_true(dbl_eq(bx_lp_px(CSS_LEN_AUTO, 500, 800.0), 400.0));
+    assert_true(dbl_eq(bx_lp_px(CSS_LEN_UNSET, 0, 800.0), 0.0));
+
+    /* An unusable basis contributes nothing, but never discards the px half. */
+    assert_true(dbl_eq(bx_lp_px(10, 500, 0.0), 10.0));
+    assert_true(dbl_eq(bx_lp_px(10, 500, -5.0), 10.0));
+}
+
+/* bx_border_box_h: with the CSS default (content-box) a declared height sizes
+ * the CONTENT, so padding and border make the painted box taller. Treating the
+ * declared value as the border box made every `height:Npx; padding:...` box
+ * exactly padding+border too short. */
+static void test_border_box_height(void **state) {
+    (void)state;
+    /* content-box: the edges add. */
+    assert_true(dbl_eq(bx_border_box_h(60.0, 0, 20.0, 20.0, 0.0, 0.0), 100.0));
+    assert_true(dbl_eq(bx_border_box_h(60.0, 0, 10.0, 10.0, 1.0, 1.0), 82.0));
+    /* border-box: the declared height already includes them. */
+    assert_true(dbl_eq(bx_border_box_h(60.0, 1, 20.0, 20.0, 5.0, 5.0), 60.0));
+    /* no edges: identity either way. */
+    assert_true(dbl_eq(bx_border_box_h(60.0, 0, 0.0, 0.0, 0.0, 0.0), 60.0));
+    /* degenerate inputs never produce a negative box. */
+    assert_true(dbl_eq(bx_border_box_h(-5.0, 0, 10.0, 10.0, 0.0, 0.0), 20.0));
+    assert_true(dbl_eq(bx_border_box_h(10.0, 0, -3.0, -3.0, 0.0, 0.0), 10.0));
+}
+
 static void test_width_cap_pct(void **state) {
     (void)state;
     assert_true(dbl_eq(bx_width_cap(0, 0, 800.0), 0.0));       /* none */
@@ -510,6 +551,8 @@ int main(void) {
         cmocka_unit_test(test_parse_display_case_and_trim),
         cmocka_unit_test(test_parse_display_errors),
         cmocka_unit_test(test_display_name),
+        cmocka_unit_test(test_lp_used_value),
+        cmocka_unit_test(test_border_box_height),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

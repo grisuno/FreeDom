@@ -184,6 +184,48 @@ int cl_unit_is_font_relative(const char *unit, size_t unit_len) {
 }
 
 /*
+ * How many px one of `unit` is worth per 1px of font-size -- the derivative the
+ * cascade needs to re-fit a length once the element's computed font-size is
+ * known (spec/css_length.md section 8.3).
+ *
+ * It is READ OUT OF cl_unit_scale, not written by hand: the probe context has
+ * font_size 1.0 and no measured metrics, so the factor the table returns IS the
+ * ratio. A unit added to section 6.1 therefore gets its coefficient for free,
+ * and the two can never drift apart -- which is the same argument that made
+ * this module the single length resolver in the first place.
+ *
+ * Non-font-relative units answer 0: for them the length simply does not move
+ * with the font-size.
+ */
+double cl_unit_font_ratio(const char *unit, size_t unit_len) {
+    if (!cl_unit_is_font_relative(unit, unit_len)) return 0.0;
+
+    cl_ctx probe = cl_ctx_initial();
+    probe.font_size = 1.0;
+    /* Zeroed so the spec-named fallbacks (which ARE ratios of the font-size)
+     * apply. A measured metric is absolute px taken at one size and would not
+     * be a ratio at all -- see the honest-limit note in spec section 8.3. */
+    probe.line_height         = 0.0;
+    probe.x_height            = 0.0;
+    probe.zero_advance        = 0.0;
+    probe.cap_height          = 0.0;
+    probe.ideographic_advance = 0.0;
+
+    double per;
+    if (cl_unit_scale(unit, unit_len, &probe, &per) != CL_OK) return 0.0;
+    return isfinite(per) ? per : 0.0;
+}
+
+double cl_em_refit(double px, double em, double from_font_size, double font_size) {
+    if (em == 0.0) return px;
+    if (!isfinite(px) || !isfinite(em)) return px;
+    if (!isfinite(from_font_size) || from_font_size <= 0.0) return px;
+    if (!isfinite(font_size) || font_size <= 0.0) return px;
+    double v = px + em * (font_size - from_font_size);
+    return isfinite(v) ? v : px;
+}
+
+/*
  * Parses a CSS <number> (CSS Syntax 4.3.12) without strtod -- strtod is
  * locale-dependent, and a locale whose decimal separator is ',' would silently
  * truncate "1.5px" to 1px. Returns 1 and advances *pp past the number.
@@ -258,8 +300,14 @@ int cl_number(const char *s, double *out, const char **endp) {
     return 1;
 }
 
-cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px) {
-    if (value == NULL || ctx == NULL || out_px == NULL) return CL_ERR_NULL_ARG;
+/*
+ * The shared core of cl_resolve and cl_resolve_lp: tokenize <number><unit> and
+ * resolve it into the two components of a <length-percentage>. Keeping ONE
+ * tokenizer is what stops the two entry points from disagreeing about, say,
+ * whether "10 px" is legal.
+ */
+static cl_status cl_resolve_core(const char *value, const cl_ctx *ctx, cl_lp *out) {
+    if (value == NULL || ctx == NULL || out == NULL) return CL_ERR_NULL_ARG;
 
     /* Bounded scan: a <length> token is short, and refusing to walk past
      * CL_MAX_TOKEN is what makes this safe on a value that lost its NUL. */
@@ -279,21 +327,34 @@ cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px) {
     /* A <dimension> is a single token: no whitespace between number and unit.
      * Accepting "10 px" would be inventing grammar the CSS parser does not
      * have, and would make `margin: 10 px` mean something in Freedom that it
-     * means in no other browser. */
+     * means in no other browser. The same holds for a <percentage>: "2 %". */
     if (p < end && (*p == ' ' || *p == '\t')) return CL_ERR_SYNTAX;
+
+    out->px = 0.0;
+    out->em = 0.0;
+    out->pct = 0.0;
+    out->has_pct = 0;
 
     if (p == end) {
         /* Unitless. Section 5: only zero is a valid <length> without a unit. */
         if (num != 0.0) return CL_ERR_UNIT;
-        *out_px = 0.0;
         return CL_OK;
     }
 
-    /* Whatever follows the number must be a bare identifier: a trailing ';' or
-     * any other non-identifier byte is a syntax error, not an unknown unit. */
+    /* A <percentage> is the number plus exactly one '%' and nothing else. */
+    if (*p == '%') {
+        if (p + 1 != end) return CL_ERR_SYNTAX;
+        out->pct = num;
+        out->has_pct = 1;
+        return CL_OK;
+    }
+
+    /* Whatever else follows the number must be a bare identifier: a trailing
+     * ';' or any other non-identifier byte is a syntax error, not an unknown
+     * unit. '%' is handled above, so it can no longer appear mid-token. */
     for (const char *q = p; q < end; ++q) {
         int c = cl_ascii_lower((unsigned char)*q);
-        if (!((c >= 'a' && c <= 'z') || *q == '%')) return CL_ERR_SYNTAX;
+        if (!(c >= 'a' && c <= 'z')) return CL_ERR_SYNTAX;
     }
 
     double per;
@@ -308,6 +369,32 @@ cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px) {
      * `width:99999999px` from "very wide" to "no width at all". */
     if (!isfinite(px)) return CL_ERR_RANGE;
 
-    *out_px = px;
+    out->px = px;
+    out->em = num * cl_unit_font_ratio(p, (size_t)(end - p));
     return CL_OK;
+}
+
+cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px) {
+    if (out_px == NULL) return CL_ERR_NULL_ARG;
+    cl_lp lp;
+    cl_status st = cl_resolve_core(value, ctx, &lp);
+    if (st != CL_OK) return st;
+    /* A percentage is not a <length>. Properties that accept the wider type ask
+     * for it explicitly through cl_resolve_lp; everything else keeps failing
+     * closed here, which is what makes `letter-spacing: 5%` a dropped
+     * declaration rather than an invented one. */
+    if (lp.has_pct) return CL_ERR_UNIT;
+    *out_px = lp.px;
+    return CL_OK;
+}
+
+cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out) {
+    return cl_resolve_core(value, ctx, out);
+}
+
+double cl_lp_used(cl_lp lp, double basis) {
+    if (!lp.has_pct) return lp.px;
+    if (!isfinite(basis) || basis <= 0.0) return lp.px;
+    double v = lp.px + lp.pct / 100.0 * basis;
+    return isfinite(v) ? v : lp.px;
 }

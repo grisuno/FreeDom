@@ -565,6 +565,112 @@ static void test_auto_min_size_is_min_content(void **state) {
     assert_float_equal(fx_auto_min_size(-5.0, -5.0, -1.0, 0), 0.0, 1e-9);
 }
 
+/* --- CSS Multi-column Layout 3.4: used column-count / column-width --------- */
+
+/* The whole point of the algorithm is that `column-width` is a MINIMUM, not a
+ * fixed width: the number of columns falls out of how many fit, so the same
+ * stylesheet gives one column on a narrow viewport and three on a wide one. */
+static void test_multicol_used_counts(void **state) {
+    (void)state;
+    int n; double cw;
+
+    /* Neither declared: not a multi-column container at all. */
+    assert_int_equal(fx_multicol_used(1000.0, 0, 0.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 1);
+    assert_true(dbl_eq(cw, 1000.0));
+
+    /* column-count only: N columns sharing the width minus the gaps. */
+    assert_int_equal(fx_multicol_used(1000.0, 3, 0.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 3);
+    assert_true(dbl_eq(cw, (1000.0 - 2.0 * 20.0) / 3.0));
+
+    /* column-width only: as many as fit, floor((W+G)/(cw+G)). */
+    assert_int_equal(fx_multicol_used(1000.0, 0, 300.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 3);                       /* (1000+20)/(300+20) = 3.18 */
+    assert_true(dbl_eq(cw, (1000.0 - 2.0 * 20.0) / 3.0));
+
+    /* A column-width wider than the container still yields one column. */
+    assert_int_equal(fx_multicol_used(300.0, 0, 1000.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 1);
+    assert_true(dbl_eq(cw, 300.0));
+
+    /* Both: the count is a CAP on how many fit. */
+    assert_int_equal(fx_multicol_used(1000.0, 2, 300.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 2);
+    assert_int_equal(fx_multicol_used(1000.0, 8, 300.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 3);                       /* only three fit */
+
+    /* Zero gap is legal and must not divide by anything odd. */
+    assert_int_equal(fx_multicol_used(900.0, 3, 0.0, 0.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 3);
+    assert_true(dbl_eq(cw, 300.0));
+}
+
+/* Degenerate inputs never produce a zero/negative column or a division blow-up. */
+static void test_multicol_used_edges(void **state) {
+    (void)state;
+    int n; double cw;
+
+    assert_int_equal(fx_multicol_used(1000.0, 3, 0.0, 20.0, NULL, &cw), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_multicol_used(1000.0, 3, 0.0, 20.0, &n, NULL), FX_ERR_NULL_ARG);
+
+    /* Gaps that eat the whole container: the column never goes below 1px. */
+    assert_int_equal(fx_multicol_used(50.0, 10, 0.0, 40.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 10);
+    assert_true(cw >= 1.0);
+
+    /* A zero or negative available width degrades to one full-width column. */
+    assert_int_equal(fx_multicol_used(0.0, 3, 0.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 1);
+
+    /* Negative/absurd author values fail closed to a single column. */
+    assert_int_equal(fx_multicol_used(1000.0, -4, 0.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 1);
+    assert_int_equal(fx_multicol_used(1000.0, 0, -300.0, 20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 1);
+    /* A negative gap is not a gap. */
+    assert_int_equal(fx_multicol_used(1000.0, 2, 0.0, -20.0, &n, &cw), FX_OK);
+    assert_int_equal(n, 2);
+    assert_true(dbl_eq(cw, 500.0));
+}
+
+/* Balancing: rows are distributed so every column is about the same height, and
+ * a row is never split (the line is this engine's smallest fragmentation unit). */
+static void test_multicol_balance(void **state) {
+    (void)state;
+    /* Twelve rows of 10px into 3 columns -> 4 rows each, column height 40. */
+    double h[12];
+    for (int i = 0; i < 12; ++i) h[i] = 10.0;
+    int col[12];
+    double colh[8];
+    int ncol = 3;
+    assert_int_equal(fx_multicol_balance(h, 12, ncol, col, colh), FX_OK);
+    for (int i = 0; i < 12; ++i) assert_int_equal(col[i], i / 4);
+    assert_true(dbl_eq(colh[0], 40.0));
+    assert_true(dbl_eq(colh[1], 40.0));
+    assert_true(dbl_eq(colh[2], 40.0));
+
+    /* One row far taller than the target still occupies exactly one column
+     * slot: an unsplittable row cannot be balanced away. */
+    double h2[4] = { 100.0, 10.0, 10.0, 10.0 };
+    int col2[4];
+    double colh2[8];
+    assert_int_equal(fx_multicol_balance(h2, 4, 2, col2, colh2), FX_OK);
+    assert_int_equal(col2[0], 0);
+    assert_true(colh2[0] >= 100.0);
+
+    /* Fewer rows than columns: no column gets two, none is negative. */
+    double h3[2] = { 10.0, 10.0 };
+    int col3[2];
+    double colh3[8];
+    assert_int_equal(fx_multicol_balance(h3, 2, 4, col3, colh3), FX_OK);
+    assert_int_equal(col3[0], 0);
+    assert_true(col3[1] >= 0 && col3[1] < 4);
+
+    assert_int_equal(fx_multicol_balance(NULL, 2, 2, col3, colh3), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_multicol_balance(h3, 2, 0, col3, colh3), FX_ERR_RANGE);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_grow_equal),
@@ -610,6 +716,9 @@ int main(void) {
         cmocka_unit_test(test_float_insets_never_starve_the_line),
         cmocka_unit_test(test_float_insets_edges),
         cmocka_unit_test(test_auto_min_size_is_min_content),
+        cmocka_unit_test(test_multicol_used_counts),
+        cmocka_unit_test(test_multicol_used_edges),
+        cmocka_unit_test(test_multicol_balance),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

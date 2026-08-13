@@ -35,6 +35,19 @@
  * against the real DOM. sheet may be NULL (inline only). */
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet);
 
+/*
+ * As cch_element_style, but supplying the element's INHERITED font-size in px
+ * (its parent's computed value; <= 0 = unknown -> the CSS initial 16px).
+ *
+ * That value is what makes a font-relative length mean what the author wrote:
+ * `width: 10em` is 320px on a 32px element and 80px on an 8px one. The caller
+ * supplies it because only the caller walks the DOM top-down and can memoize
+ * it -- resolving each ancestor from scratch here would be a full cascade per
+ * level, per element. See spec/css_length.md section 8.5.
+ */
+css_style cch_element_style_fs(lxb_dom_element_t *el, const css_sheet *sheet,
+                               double parent_font_size);
+
 /* Nonzero iff the parsed selector *sel matches element `el`, built against the
  * same bounded ancestor/sibling/attribute context as cch_element_style. This is
  * the single source of truth for selector matching: the DOM's querySelector and

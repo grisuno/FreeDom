@@ -181,9 +181,13 @@ typedef struct rd_block {
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or
      * PV_LEN_UNSET (use the user-agent margin). */
     int              box_l, box_r, box_w, box_center, box_mt, box_mb;
-    /* Symbolic per-mille width cap (Hito 32), 0 = none; resolved against the real
-     * available width by the painter (bx_width_cap). Gated by caps.css like box_w. */
+    /* The percentage halves of the same placement, per-mille of the containing
+     * block WIDTH, 0 = none; combined with their px twins by the painter
+     * (bx_lp_px) once it knows the real available width. box_mt_pct/box_mb_pct
+     * are the vertical margins, which CSS 2.1 8.3 also resolves against the
+     * containing WIDTH. Gated by caps.css like their px halves. */
     int              box_w_pct;
+    int              box_l_pct, box_r_pct, box_mt_pct, box_mb_pct;
     /* User-agent box identity of the block this came from (a bx_ua_tag code).
      * STRUCTURE, carried regardless of caps.css: the UA sheet is not author styling.
      * Without it rd_block_tag has to guess, and its guess is "p" for every body-text

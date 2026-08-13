@@ -1,0 +1,86 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>font-relative length units</title>
+<!--
+  Probe for spec/css_length.md section 8: a font-relative length is an affine
+  function of the element's COMPUTED font-size, not a constant.
+
+  Every box below declares the SAME em length under a different font-size, so a
+  resolver that freezes `em` at the initial 16px paints them all identically and
+  a correct one paints them proportionally. Taller than 768px on purpose:
+  Firefox reports the viewport height for short pages, and h_ratio then measures
+  nothing (see CLAUDE.md, batch 11).
+-->
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  section { margin-bottom: 24px; }
+  .fs8   { font-size: 8px; }
+  .fs16  { font-size: 16px; }
+  .fs32  { font-size: 32px; }
+  .fs48  { font-size: 48px; }
+
+  /* A: width in em -- horizontal, so it shows up in col_mae. */
+  .wbar  { width: 10em; height: 18px; background: #3a7; margin-bottom: 3px; }
+
+  /* B: height in em -- vertical, the term the score weighs most. */
+  .hbar  { height: 2em; background: #357; margin-bottom: 3px; }
+
+  /* C: padding in em -- all four sides, the most common em property by far. */
+  .pad   { padding: 1em; background: #fca; margin-bottom: 3px; }
+
+  /* D: margin in em, between siblings. */
+  .mg    { margin: 0.5em 0; background: #cde; height: 12px; }
+
+  /* E: em nests -- an inner element's em measures against ITS OWN computed
+     size, which font-size:2em has already doubled off the parent. */
+  .outer { font-size: 20px; }
+  .inner { font-size: 2em; }          /* 40px */
+  .inner > div { height: 1em; background: #944; }   /* 40px, not 20 and not 16 */
+
+  /* F: the other font-relative units of CSS Values 4 section 6.1, whose
+     fallbacks are defined as ratios of the font-size. */
+  .ex    { width: 20ex;  height: 14px; background: #66c; margin-bottom: 3px; }
+  .ch    { width: 20ch;  height: 14px; background: #6a6; margin-bottom: 3px; }
+
+  /* G: rem must NOT move with the element's font-size -- it measures the root. */
+  .rem   { width: 10rem; height: 14px; background: #c6c; margin-bottom: 3px; }
+
+  /* H: calc() mixing an em term with an absolute one stays exact. */
+  .calc  { width: calc(10em + 20px); height: 14px; background: #a80; }
+</style>
+
+<section><div class="fs8"><div class="wbar"></div></div>
+         <div class="fs16"><div class="wbar"></div></div>
+         <div class="fs32"><div class="wbar"></div></div>
+         <div class="fs48"><div class="wbar"></div></div></section>
+
+<section><div class="fs8"><div class="hbar"></div></div>
+         <div class="fs16"><div class="hbar"></div></div>
+         <div class="fs32"><div class="hbar"></div></div>
+         <div class="fs48"><div class="hbar"></div></div></section>
+
+<section><div class="fs8"  ><div class="pad">padding of one em</div></div>
+         <div class="fs16" ><div class="pad">padding of one em</div></div>
+         <div class="fs32" ><div class="pad">padding of one em</div></div></section>
+
+<section><div class="fs8" ><div class="mg"></div><div class="mg"></div></div>
+         <div class="fs32"><div class="mg"></div><div class="mg"></div></div></section>
+
+<section class="outer"><div class="inner"><div></div></div></section>
+
+<section><div class="fs16"><div class="ex"></div><div class="ch"></div></div>
+         <div class="fs32"><div class="ex"></div><div class="ch"></div></div></section>
+
+<section><div class="fs16"><div class="rem"></div></div>
+         <div class="fs32"><div class="rem"></div></div>
+         <div class="fs48"><div class="rem"></div></div></section>
+
+<section><div class="fs16"><div class="calc"></div></div>
+         <div class="fs32"><div class="calc"></div></div></section>
+
+<section><div class="fs32">Text at 32px with a 2em block below it.</div>
+         <div class="fs32"><div class="hbar"></div></div>
+         <div class="fs16">Text at 16px with a 2em block below it.</div>
+         <div class="fs16"><div class="hbar"></div></div>
+         <div class="fs48">Text at 48px.</div>
+         <div class="fs48"><div class="hbar"></div></div></section>

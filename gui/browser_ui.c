@@ -1382,6 +1382,11 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     if (hb_check(w->hosts, host) == HB_BLOCK) return -1;   /* tracker/host blocklist */
 
     sf_config cfg = sf_config_default();
+    /* A subresource is optional by construction: the page renders without it.
+     * Letting one stalled stylesheet or script hold the document's full 30 s
+     * budget is a guaranteed delay bought for a possible improvement, and a
+     * page names many of them. */
+    cfg.timeout_ms = SF_SUBRESOURCE_TIMEOUT_MS;
     apply_auth(w, abs, &cfg);
     if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;  /* realm fail-closed */
     int allowlisted = hb_is_allowlisted(w->hosts, host), dg = 0;
@@ -1427,6 +1432,10 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
     sf_config cfg = sf_config_default();
     cfg.user_agent = tf_text(&w->ua_field);
     cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
+    /* Same reasoning as gui_subresource_fetch, and it matters most here: a page
+     * names dozens of images, and every unreachable one used to cost the full
+     * document timeout. That is what turned a slow page into a minutes-long one. */
+    cfg.timeout_ms = SF_SUBRESOURCE_TIMEOUT_MS;
     apply_auth(w, abs, &cfg);
 
     /* Route the image like the page: a .onion/.i2p image with its proxy off is
@@ -2852,6 +2861,17 @@ typedef struct rc_frag {
      * page_view so inline text with no box of its own hides too, and a descendant
      * that declares `visible` reappears. Space is reserved, glyphs do not paint. */
     int         hidden;
+    /* An INLINE-LEVEL replaced element (an <img> or inline <svg> that appeared
+     * between text runs of the same block) participates in the line box as an
+     * atomic inline, not as a block of its own -- CSS 2.1 9.2.2/10.8. When repl
+     * is non-NULL this fragment paints that element at repl_w x repl_h sitting
+     * on the baseline instead of glyphs, and text/len are unused.
+     *
+     * Without this every icon, badge and emoji-image on the web ended the line
+     * and took a full row, so a sentence with one 16px icon in it occupied
+     * three lines instead of one. */
+    const rd_block *repl;
+    double      repl_w, repl_h;
 } rc_frag;
 
 typedef enum rc_rowkind { RC_TEXT = 0, RC_IMAGE, RC_INPUT, RC_VIDEO, RC_SVG } rc_rowkind;
@@ -2881,7 +2901,14 @@ typedef struct rc_box {
     int    bord_tw, bord_rw, bord_bw, bord_lw;
     int    bord_ts, bord_rs, bord_bs, bord_ls;
     int    bord_tc, bord_rc, bord_bc, bord_lc;
-    int    radius;
+    /* The four border-radius corners in CSS corner order, already resolved to
+     * px (the percentage halves were combined against the box's own size at
+     * open_box time, where that size is known). */
+    double radius_c[4];
+    /* The percentage halves of the same four corners (per-mille). They can only
+     * be resolved where the box's own size is known, which is paint time -- the
+     * box height is not final until every row inside it has been placed. */
+    int    radius_pct[4];
     int    bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
     int    outline_w, outline_style, outline_color;
     int    outline_offset;  /* px outset from the border edge; CSS_LEN_UNSET = 0 */
@@ -2955,7 +2982,23 @@ typedef struct rc_open_box {
     int    block_id;
     size_t box_idx;
     double bl, br, pb, bb;
+    /* Top padding/border kept alongside the bottom pair, and whether the box is
+     * border-box: close_top_box needs all four to turn a DECLARED height (which
+     * under the CSS default sizes the CONTENT) into the border-box height. */
+    double pt, bt;
+    int    border_box;
     double inner_left, inner_w;
+    /* Multi-column state (CSS Multi-column Layout 1). col_n > 1 means the box's
+     * content was flowed at ONE column's width and must be fragmented into
+     * col_n columns when the box closes. row0/box0 mark where that content
+     * starts in the display list; content_top is its layout-space origin. */
+    int    col_n;
+    double col_w, col_gap;
+    size_t col_row0, col_box0;
+    double col_content_top;
+    /* line-clamp: at most this many line boxes survive inside the box (0 = no
+     * clamp). Cut when the box closes, from the same row range multicol uses. */
+    int    clamp_lines;
 } rc_open_box;
 
 /* Max box-nesting depth the painter composes (anti-DoS; deeper boxes are clamped to
@@ -2965,6 +3008,13 @@ typedef struct rc_open_box {
 /* Live float exclusions one layout state tracks (anti-DoS). A ninth float is
  * dropped, so a pathological page overlaps a float instead of losing content. */
 #define RC_FLOAT_MAX 8
+
+/* Narrowest strip beside a float that still counts as room for a line box.
+ * Below it the line is shifted under the float instead (CSS 2.1 9.5). It is a
+ * width in px, not a heuristic about content: a strip narrower than one average
+ * word cannot hold a line box, and pretending it can is what makes text paint
+ * on top of the float. */
+#define RC_FLOAT_FIT_MIN 32.0
 
 typedef struct rc_state {
     double cur_top, pending_gap, pen_x, line_asc, line_desc;
@@ -3053,6 +3103,10 @@ typedef struct rc_state {
     int         float_depth;
     double      float_avail;
     double      float_l, float_r;
+    /* Width left for the line after both insets, in the CURRENT box context.
+     * rc_float_fit_line uses it to decide whether the line fits beside the
+     * float at all or has to be pushed below it. */
+    double      float_line_avail;
 } rc_state;
 
 /* Bottom of the lowest live float exclusion, or 0.0 when there is none. */
@@ -3072,14 +3126,21 @@ static void rc_float_clear(rc_state *s) {
     s->nfloats = 0;
     s->float_l = 0.0;
     s->float_r = 0.0;
+    s->float_line_avail = 0.0;
 }
 
 /* Recomputes the open line's float insets for its own cur_top, discarding exclusions
  * the flow has already passed. Called once per line by open_line, so a paragraph
  * narrows beside a float and widens again below it. */
 static void rc_float_refresh(rc_state *s, double line_h) {
-    if (s->nfloats == 0) { s->float_l = 0.0; s->float_r = 0.0; return; }
-    if (s->box_depth != s->float_depth) { rc_float_clear(s); return; }
+    if (s->nfloats == 0) { s->float_l = 0.0; s->float_r = 0.0; s->float_line_avail = 0.0; return; }
+    /* Leaving the context that registered the float ends the exclusion; ENTERING
+     * a box nested inside it does not. A float shortens the line boxes of every
+     * descendant in the same block formatting context (CSS 2.1 9.5), and
+     * requiring the exact same depth meant the very next paragraph -- which
+     * opens the article's own wrapper box -- dropped the exclusion and stacked
+     * under the float instead of wrapping beside it. */
+    if (s->box_depth < s->float_depth) { rc_float_clear(s); return; }
     int keep = 0;
     for (int i = 0; i < s->nfloats; ++i)
         if (s->floats[i].bottom > s->cur_top) s->floats[keep++] = s->floats[i];
@@ -3087,8 +3148,50 @@ static void rc_float_refresh(rc_state *s, double line_h) {
     double l = 0.0, r = 0.0;
     if (fx_float_insets(s->floats, (size_t)s->nfloats, s->cur_top, line_h,
                         s->float_avail, &l, &r) != FX_OK) { l = 0.0; r = 0.0; }
+    double avail = s->float_avail;
+    if (s->box_depth > s->float_depth) {
+        /* The exclusion is stated in the REGISTERING context's coordinates; a
+         * nested box has its own origin and width, so translate rather than
+         * reuse the numbers. Clamped at 0: a nested box entirely clear of the
+         * float loses the inset instead of gaining a negative one. */
+        const rc_open_box *ob = &s->box_stack[s->box_depth - 1];
+        double inner_l = ob->inner_left, inner_w = ob->inner_w;
+        double l2 = l - inner_l;
+        double r2 = r - (s->float_avail - inner_l - inner_w);
+        l = (l2 > 0.0) ? l2 : 0.0;
+        r = (r2 > 0.0) ? r2 : 0.0;
+        if (l > inner_w) l = inner_w;
+        if (r > inner_w) r = inner_w;
+        avail = inner_w;
+    }
     s->float_l = l;
     s->float_r = r;
+    s->float_line_avail = avail - l - r;
+}
+
+/* CSS 2.1 9.5: "if there is not enough horizontal room for the line box beside
+ * the float, it is shifted downward until either it fits or there are no more
+ * floats present". Without this a line beside a float that spans the whole
+ * context still painted -- clamped to a sliver by line_limit -- ON TOP of the
+ * float, which is how a full-width figure ended up with the next paragraph
+ * written across its caption.
+ *
+ * Bounded by the number of live floats: each step drops past at least one of
+ * them, so the loop cannot spin. */
+static void rc_float_fit_line(rc_state *s, double line_h) {
+    for (int guard = 0; guard <= RC_FLOAT_MAX; ++guard) {
+        rc_float_refresh(s, line_h);
+        if (s->nfloats == 0) return;
+        if (s->float_line_avail >= RC_FLOAT_FIT_MIN) return;
+        /* Drop to the bottom of the nearest float still in the way. */
+        double next = 0.0;
+        for (int i = 0; i < s->nfloats; ++i) {
+            double b = s->floats[i].bottom;
+            if (b > s->cur_top && (next == 0.0 || b < next)) next = b;
+        }
+        if (next <= s->cur_top) return;   /* nothing left to clear past */
+        s->cur_top = next;
+    }
 }
 
 /* The right edge available to the open line: the block's content width minus what a
@@ -3127,7 +3230,12 @@ static rc_frag *rc_add_frag(rc_layout *L) {
         if (g == NULL) return NULL;
         L->frags = g; L->capfrag = nc;
     }
-    return &L->frags[L->nfrag++];
+    rc_frag *f = &L->frags[L->nfrag++];
+    /* Zero by construction (V-002): realloc hands back uninitialised bytes, so
+     * any field a caller forgets is garbage the painter would act on. The named
+     * assignments below stay as documentation of what each input means. */
+    memset(f, 0, sizeof *f);
+    return f;
 }
 
 static rc_row *rc_add_row(rc_layout *L) {
@@ -3300,8 +3408,10 @@ static void block_style(const ui_theme *th, const rd_block *b,
  * resolved against the block's own font size (em -> px). The user-agent notice has
  * no HTML tag, so it keeps the theme's paragraph gap as a separator and does not
  * regress. The single place that turns "what tag is this" into block spacing. */
+/* cb_w is the containing block's content width: a PERCENTAGE vertical margin
+ * resolves against it, not against any height (CSS 2.1 8.3). */
 static void block_margins(const ui_theme *th, const rd_block *b,
-                          double *top_px, double *bottom_px) {
+                          double cb_w, double *top_px, double *bottom_px) {
     const char *tag = rd_block_tag(b);
     if (tag == NULL) { *top_px = th->paragraph_gap; *bottom_px = th->paragraph_gap; return; }
     /* Which user-agent box applies is a question about the SOURCE ELEMENT, and
@@ -3319,8 +3429,10 @@ static void block_margins(const ui_theme *th, const rd_block *b,
     block_style(th, b, &size, &bold, &italic, &underline, &color);
     /* An author margin-top/bottom (px, only with caps.css) overrides the UA margin;
      * PV_LEN_UNSET keeps the UA value. */
-    *top_px = (b->box_mt != PV_LEN_UNSET) ? (double)b->box_mt : box.margin.top * size;
-    *bottom_px = (b->box_mb != PV_LEN_UNSET) ? (double)b->box_mb : box.margin.bottom * size;
+    *top_px = (b->box_mt != PV_LEN_UNSET || b->box_mt_pct != 0)
+            ? bx_lp_px(b->box_mt, b->box_mt_pct, cb_w) : box.margin.top * size;
+    *bottom_px = (b->box_mb != PV_LEN_UNSET || b->box_mb_pct != 0)
+               ? bx_lp_px(b->box_mb, b->box_mb_pct, cb_w) : box.margin.bottom * size;
 }
 
 static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def);
@@ -3437,7 +3549,7 @@ static void open_line(rc_layout *L, rc_state *s) {
      * starts past it, a line below it starts at 0 again (spec/float.md §6b). The
      * height is not known until flush_line, so the line is probed as zero-height --
      * fx_float_insets consults a float that starts exactly at this y for that reason. */
-    rc_float_refresh(s, 0.0);
+    rc_float_fit_line(s, 0.0);
     /* Author text-indent (px) offsets the first line a block opens; cleared so wrapped
      * lines start at 0. Default pending_indent 0 -> identical to before. */
     s->pen_x = s->pending_indent + s->float_l;
@@ -3792,6 +3904,92 @@ static void svg_intrinsic_size(const rd_block *b, double *out_w, double *out_h) 
     *out_h = sh;
 }
 
+/* Intrinsic size of an inline-level replaced block, in px, or 0 when the block is
+ * not one this engine can size without laying it out. Shared by the inline placer
+ * and the row emitter so the two cannot disagree about how big an <img>/<svg> is. */
+static int replaced_inline_size(const browser_window *w, const rd_block *b,
+                                double avail_w, double *out_w, double *out_h) {
+    if (b->kind == RD_SVG) {
+        double sw, sh;
+        svg_intrinsic_size(b, &sw, &sh);
+        if (sw <= 0.0 || sh <= 0.0) return 0;
+        if (sw > avail_w && avail_w > 0.0) { sh *= avail_w / sw; sw = avail_w; }
+        *out_w = sw; *out_h = sh;
+        return 1;
+    }
+    if (b->kind == RD_IMAGE) {
+        double dw, dh;
+        if (!image_display_size(w, b, avail_w, &dw, &dh) &&
+            !placeholder_display_size(b, avail_w, &dw, &dh)) return 0;
+        if (dw <= 0.0 || dh <= 0.0) return 0;
+        *out_w = dw; *out_h = dh;
+        return 1;
+    }
+    return 0;
+}
+
+/* True when a replaced block is INLINE-LEVEL content of the line already being
+ * built, rather than a block of its own.
+ *
+ * The signal is structural, not a size threshold: `block_break` is exactly the
+ * marker page_view sets when a block-level box starts. A replaced element that
+ * arrives WITHOUT it appeared between two text runs of the same block -- which
+ * is the definition of an atomic inline in an inline formatting context (CSS
+ * 2.1 9.2.2). `<p>text <img> text</p>` flows; `<div><img></div>` still gets its
+ * own row, because there the image opens the block. */
+static int replaced_is_inline_level(const rc_state *s, const rd_block *b) {
+    if (b->kind != RD_SVG && b->kind != RD_IMAGE) return 0;
+    if (b->block_break) return 0;
+    return s->line_open;
+}
+
+/* Places an inline-level replaced element inside the open line as an atomic
+ * inline: it advances the pen like a word, and raises the line's ascent so the
+ * line box grows to hold it (CSS 2.1 10.8 -- the line box is as tall as its
+ * tallest inline box). An element that does not fit wraps to the next line, the
+ * same way a word does; it never silently overflows.
+ *
+ * Returns 1 when it took the block. */
+static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
+                                 const browser_window *w, const rd_block *b,
+                                 double content_w) {
+    double avail = content_w - s->indent_px;
+    if (avail < 1.0) avail = 1.0;
+    double rw, rh;
+    if (!replaced_inline_size(w, b, avail, &rw, &rh)) return 0;
+
+    /* Wrap like a word when the rest of the line cannot hold it. */
+    if (s->pen_x > 0.0 && s->pen_x + rw > avail) {
+        flush_line(L, s, th);
+        open_line(L, s);
+    }
+    rc_frag *f = rc_add_frag(L);
+    if (f == NULL) return 0;
+    f->x = s->pen_x;
+    f->width = rw;
+    f->font_size = th->body_font;
+    f->color = th->text;
+    f->bg_rgb = -1;
+    f->node_id = b->node_id;
+    f->block_id = b->block_id;
+    f->opacity = -1;
+    f->shadow_color = -1;
+    f->deco_color = -1;
+    f->deco_thick = -1;
+    f->repl = b;
+    f->repl_w = rw;
+    f->repl_h = rh;
+    f->hidden = pv_content_hidden(s->hidden_from != 0, b->visibility);
+    if (s->line_first == L->nfrag - 1) { s->line_bg = -1; s->line_bg_mixed = 0; }
+    else if (s->line_bg != -1) s->line_bg_mixed = 1;
+
+    s->pen_x += rw;
+    /* An atomic inline sits on the baseline, so its whole height is ascent. */
+    if (rh > s->line_asc) s->line_asc = rh;
+    s->line_any_theme = 1;
+    return 1;
+}
+
 /* Flows one text/link/notice block into L at content_w using state s. The caller
  * sets s->bg_rgb (the block's author background, or -1) beforehand; the foreground
  * color and link/heading styling are derived here. */
@@ -4054,6 +4252,16 @@ static double box_edge_px(int wpx) {
     return (wpx != PV_LEN_UNSET && wpx > 0) ? (double)wpx : 0.0;
 }
 
+/* One padding edge in px: the <length-percentage> resolved against the
+ * containing block WIDTH (cb_w) and floored at 0 -- padding is never negative
+ * (CSS 2.1 8.4), whichever half of the value tried to make it so. Every site
+ * that reads a pad_* field goes through here so the px and % halves can never
+ * be honoured in one place and dropped in another. */
+static double box_pad_px(int px_val, int pct_pm, double cb_w) {
+    double v = bx_lp_px(px_val, pct_pm, cb_w);
+    return (v > 0.0) ? v : 0.0;
+}
+
 /* Copies a box def's paint-time decoration (borders, radius, shadow, outline,
  * background, gradient, background-image params, generated content, and author
  * vertical dimensions) into an rc_box. Geometry (x/top/w/h), block_id, hidden
@@ -4067,7 +4275,17 @@ static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def) {
     bx->bord_bs = def->bord_bs; bx->bord_ls = def->bord_ls;
     bx->bord_tc = def->bord_tc; bx->bord_rc = def->bord_rc;
     bx->bord_bc = def->bord_bc; bx->bord_lc = def->bord_lc;
-    bx->radius = def->border_radius;
+    /* Corners are resolved by the caller (they need the box's own size for the
+     * percentage half); default to the px halves so a caller that has no size
+     * yet still gets the author's absolute radii. */
+    bx->radius_c[0] = box_edge_px(def->border_radius);
+    bx->radius_c[1] = box_edge_px(def->border_radius_tr);
+    bx->radius_c[2] = box_edge_px(def->border_radius_br);
+    bx->radius_c[3] = box_edge_px(def->border_radius_bl);
+    bx->radius_pct[0] = def->radius_tl_pct;
+    bx->radius_pct[1] = def->radius_tr_pct;
+    bx->radius_pct[2] = def->radius_br_pct;
+    bx->radius_pct[3] = def->radius_bl_pct;
     bx->bsh_dx = def->bsh_dx; bx->bsh_dy = def->bsh_dy; bx->bsh_blur = def->bsh_blur;
     bx->bsh_spread = def->bsh_spread; bx->bsh_color = def->bsh_color;
     bx->bsh_inset = def->bsh_inset;
@@ -4104,21 +4322,23 @@ typedef struct item_sides {
     int    box;              /* item_root_box index, -1 when none */
 } item_sides;
 
-/* Fills an item_sides from an already-chosen root box. */
-static item_sides item_sides_from_box(const rd_doc *doc, int box) {
+/* Fills an item_sides from an already-chosen root box, resolving each edge's
+ * <length-percentage> against `cb_w` -- the containing block WIDTH, which is
+ * the basis for all four padding and margin percentages (CSS 2.1 8.3/8.4). */
+static item_sides item_sides_from_box(const rd_doc *doc, int box, double cb_w) {
     item_sides sd;
     memset(&sd, 0, sizeof sd);
     sd.box = box;
     const pv_box_def *d = (sd.box >= 0) ? rd_box_at(doc, (size_t)sd.box) : NULL;
     if (d == NULL) return sd;
-    sd.pl = (d->pad_l > 0) ? (double)d->pad_l : 0.0;
-    sd.pr = (d->pad_r > 0) ? (double)d->pad_r : 0.0;
-    sd.pt = (d->pad_t > 0) ? (double)d->pad_t : 0.0;
-    sd.pb = (d->pad_b > 0) ? (double)d->pad_b : 0.0;
+    sd.pl = box_pad_px(d->pad_l, d->pad_l_pct, cb_w);
+    sd.pr = box_pad_px(d->pad_r, d->pad_r_pct, cb_w);
+    sd.pt = box_pad_px(d->pad_t, d->pad_t_pct, cb_w);
+    sd.pb = box_pad_px(d->pad_b, d->pad_b_pct, cb_w);
     sd.bl = box_edge_px(d->bord_lw); sd.br = box_edge_px(d->bord_rw);
     sd.bt = box_edge_px(d->bord_tw); sd.bb = box_edge_px(d->bord_bw);
-    sd.ml = (double)d->box_l - sd.pl; if (sd.ml < 0.0) sd.ml = 0.0;
-    sd.mr = (double)d->box_r - sd.pr; if (sd.mr < 0.0) sd.mr = 0.0;
+    sd.ml = bx_lp_px(d->box_l, d->box_l_pct, cb_w) - sd.pl; if (sd.ml < 0.0) sd.ml = 0.0;
+    sd.mr = bx_lp_px(d->box_r, d->box_r_pct, cb_w) - sd.pr; if (sd.mr < 0.0) sd.mr = 0.0;
     return sd;
 }
 
@@ -4147,19 +4367,19 @@ static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid);
  * the inner item's size. The child's box must still be a strict descendant of this
  * container's box, the same rule item_root_box applies, or it is not an item box. */
 static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
-                                      int cid, int cont_box) {
+                                      int cid, int cont_box, double cb_w) {
     int child = child_cont_at_level(doc, rd_at(doc, b0), cid);
     if (child >= 0) {
         const pv_cont_def *ccd = rd_cont_at(doc, (size_t)child);
         int cbox = (ccd != NULL) ? ccd->box_id : -1;
         if (!box_is_strict_descendant(doc, cbox, cont_box)) cbox = -1;
-        return item_sides_from_box(doc, cbox);
+        return item_sides_from_box(doc, cbox, cb_w);
     }
     /* An explicit container box wins over the run's stamp: a synthesised table has
      * no stamp, and the caller computed the box every cell shares. */
     return item_sides_from_box(doc,
         (cont_box >= 0) ? item_root_box_in(doc, b0, b1, cont_box)
-                        : item_root_box(doc, b0, b1));
+                        : item_root_box(doc, b0, b1), cb_w);
 }
 
 
@@ -4230,7 +4450,16 @@ static double replaced_item_width(const browser_window *w, const ui_theme *th,
         double dw, dh;
         if (image_display_size(w, b, FLEX_MEASURE_W, &dw, &dh))
             return dw + 2.0 * th->image_box_pad;
-        return -1.0;   /* image unavailable: measure the alt text instead */
+        /* An unavailable image with declared dimensions still reserves that box
+         * (HTML broken-image parity) -- and the painter already draws it at that
+         * size. Measuring the alt text instead made the measure and the paint
+         * disagree about the same element: a wikipedia thumbnail measured 0 (its
+         * alt is empty) while painting 250px, so the float that contained it was
+         * never shrink-wrapped. Same helper as emit_replaced_row, so they cannot
+         * drift again. */
+        if (placeholder_display_size(b, FLEX_MEASURE_W, &dw, &dh))
+            return dw + 2.0 * th->image_box_pad;
+        return -1.0;   /* nothing declared either: measure the alt text instead */
     }
     if (b->kind == RD_VIDEO)
         return (b->video_w > 0) ? (double)b->video_w : 320.0;
@@ -4324,7 +4553,7 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
         int it = item_at_level(doc, rd_at(doc, k), cid);
         size_t e = k + 1;
         while (e < b1 && it >= 0 && item_at_level(doc, rd_at(doc, e), cid) == it) ++e;
-        item_sides isd = item_sides_at_level(doc, k, e, cid, cd->box_id);
+        item_sides isd = item_sides_at_level(doc, k, e, cid, cd->box_id, content_w);
         int child = child_cont_at_level(doc, rd_at(doc, k), cid);
         double base;
         if (child >= 0) {
@@ -4677,7 +4906,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             const rd_block *bk = rd_at(doc, gstart[j]);
             bt_node *kid = &kids[pos_of[j]];
             item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
-                                                cid, item_cbox);
+                                                cid, item_cbox, content_w);
             kid->display = BX_DISPLAY_BLOCK;
             /* An item that is a nested container reads its flex props from that
              * container's descriptor (item_*): bk is a run INSIDE the nested
@@ -4765,7 +4994,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                      * padding/border/margin counts -- measuring text alone leaves
                      * every cell overflowing its column by its padding. */
                     item_sides cs = item_sides_at_level(doc, gstart[j], gstart[j + 1],
-                                                        cid, item_cbox);
+                                                        cid, item_cbox, content_w);
                     double mw = measure_item_content_w(cr, w, th, doc,
                                                        gstart[j], gstart[j + 1])
                               + cs.pl + cs.pr + cs.bl + cs.br + cs.ml + cs.mr;
@@ -4820,7 +5049,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                     size_t c = j % ncols;
                     if (c >= ncols || cdv.col_w[c] != 0) continue;
                     item_sides cs = item_sides_at_level(doc, gstart[j], gstart[j + 1],
-                                                        cid, item_cbox);
+                                                        cid, item_cbox, content_w);
                     double mw = measure_item_w_at(cr, w, th, doc,
                                                   gstart[j], gstart[j + 1], 1.0)
                               + cs.pl + cs.pr + cs.bl + cs.br + cs.ml + cs.mr;
@@ -4904,7 +5133,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * (spec/page_view.md §4 "Ítems flex/grid"). block_id < 0 (table cells,
          * author CSS off) => no box => byte-identical to the pre-existing path. */
         item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
-                                            cid, item_cbox);
+                                            cid, item_cbox, content_w);
         int rb = sd.box;
         item_box[j] = rb;
         const pv_box_def *rbd = (rb >= 0) ? rd_box_at(doc, (size_t)rb) : NULL;
@@ -5058,6 +5287,9 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
 
 /* True iff a border/outline style paints a line (solid..outset); none/hidden/unset
  * paint nothing. The fancier 3D styles collapse to solid at paint time. */
+static double multicol_fragment(rc_layout *L, const rc_open_box *ob,
+                                double content_bottom);
+
 static int box_line_visible(int style) {
     return style >= CSS_BST_SOLID && style <= CSS_BST_OUTSET;
 }
@@ -5068,6 +5300,37 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (s->box_depth <= 0) return;
     flush_line(L, s, th);
     rc_open_box *ob = &s->box_stack[s->box_depth - 1];
+    /* line-clamp (CSS Overflow 4): the block shows at most N line boxes and the
+     * rest are clipped. Cutting the extra rows here -- rather than clipping at
+     * paint time -- is what makes the box, and everything after it, take the
+     * height the author asked for; a purely visual clip would leave the page
+     * just as tall. */
+    if (ob->clamp_lines > 0 && L->nrow > ob->col_row0) {
+        size_t kept = 0, cut = L->nrow;
+        for (size_t ri = ob->col_row0; ri < L->nrow; ++ri) {
+            if (++kept > (size_t)ob->clamp_lines) { cut = ri; break; }
+        }
+        if (cut < L->nrow) {
+            double bottom = L->rows[cut - 1].top + L->rows[cut - 1].height;
+            /* Boxes opened by the discarded rows go with them, or they would
+             * paint decoration around content that is no longer there. */
+            for (size_t bi = L->nbox; bi > ob->col_box0; --bi) {
+                if (L->boxes[bi - 1].top < bottom) break;
+                L->nbox = bi - 1;
+            }
+            L->nfrag = L->rows[cut].first;
+            L->nrow = cut;
+            if (s->cur_top > bottom) s->cur_top = bottom;
+        }
+    }
+    /* Multi-column: the content flowed as one tall column, so cut it into the
+     * used number of columns BEFORE the box height is finalized -- the box is
+     * as tall as its tallest column, not as the whole flow. That height drop is
+     * the whole visible effect of the feature. */
+    if (ob->col_n > 1) {
+        double tallest = multicol_fragment(L, ob, s->cur_top);
+        if (tallest > 0.0) s->cur_top = ob->col_content_top + tallest;
+    }
     s->cur_top += ob->pb + ob->bb;   /* bottom padding + border close the border box */
     if (ob->box_idx < L->nbox) {
         rc_box *bx = &L->boxes[ob->box_idx];
@@ -5077,9 +5340,25 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
          * a floor, max_h a cap. The v1 model is intentionally simple: the box
          * is the larger of content vs min_h, smaller of result vs max_h, and
          * the fixed box_h when set overrides both. */
-        if (bx->box_h > 0 || bx->box_h_set) h = (double)bx->box_h;
-        if (bx->box_min_h > 0 && h < (double)bx->box_min_h) h = (double)bx->box_min_h;
-        if (bx->box_max_h > 0 && h > (double)bx->box_max_h) h = (double)bx->box_max_h;
+        /* A declared height/min-height/max-height is a CONTENT height unless the
+         * box is border-box (CSS 2.1 10.6.3): the vertical padding and border
+         * sit outside it. Reading the declared value straight into the border
+         * box made every sized-and-padded box exactly its own padding too
+         * short -- and since `height` + `padding` is how every card, banner and
+         * hero section is written, that shortfall accumulated down the page. */
+        if (bx->box_h > 0 || bx->box_h_set)
+            h = bx_border_box_h((double)bx->box_h, ob->border_box,
+                                ob->pt, ob->pb, ob->bt, ob->bb);
+        if (bx->box_min_h > 0) {
+            double mn = bx_border_box_h((double)bx->box_min_h, ob->border_box,
+                                        ob->pt, ob->pb, ob->bt, ob->bb);
+            if (h < mn) h = mn;
+        }
+        if (bx->box_max_h > 0) {
+            double mx = bx_border_box_h((double)bx->box_max_h, ob->border_box,
+                                        ob->pt, ob->pb, ob->bt, ob->bb);
+            if (h > mx) h = mx;
+        }
         bx->h = h;
         if (h > 0.0 && s->cur_top - bx->top < h) s->cur_top = bx->top + h;
     }
@@ -5126,13 +5405,16 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
 
     double bl = box_edge_px(def->bord_lw), br = box_edge_px(def->bord_rw);
     double bt = box_edge_px(def->bord_tw), bb = box_edge_px(def->bord_bw);
-    double pl = (def->pad_l > 0) ? (double)def->pad_l : 0.0;
-    double pr = (def->pad_r > 0) ? (double)def->pad_r : 0.0;
-    double pt = (def->pad_t > 0) ? (double)def->pad_t : 0.0;
-    double pb = (def->pad_b > 0) ? (double)def->pad_b : 0.0;
 
     double avail_w = ctx_w;
     if (avail_w < 1.0) avail_w = 1.0;
+    /* ctx_w IS this box's containing block content width, so it is the basis
+     * every percentage edge resolves against -- vertical padding included
+     * (CSS 2.1 8.4). */
+    double pl = box_pad_px(def->pad_l, def->pad_l_pct, avail_w);
+    double pr = box_pad_px(def->pad_r, def->pad_r_pct, avail_w);
+    double pt = box_pad_px(def->pad_t, def->pad_t_pct, avail_w);
+    double pb = box_pad_px(def->pad_b, def->pad_b_pct, avail_w);
     /* box-sizing: border-box (2026-07-11): the declared width includes the
      * horizontal padding + border, so the CONTENT cap shrinks by those edges. */
     double wcap = bx_content_cap(bx_width_cap(def->box_w, def->box_w_pct, avail_w),
@@ -5147,13 +5429,15 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         if (wcap > room) wcap = room;
         if (wcap < 1.0) wcap = 1.0;
     }
-    bx_hplace hp = bx_place((double)def->box_l, (double)def->box_r,
+    bx_hplace hp = bx_place(bx_lp_px(def->box_l, def->box_l_pct, avail_w),
+                            bx_lp_px(def->box_r, def->box_r_pct, avail_w),
                             wcap, def->box_center, avail_w);
     /* A shrink-wrapped box with no author margin is placed by the parent's
      * text-align, exactly like the inline box it is. page_view packs the box's
      * horizontal inset as padding + margin, so the author margin is what is left
      * once the padding is taken back out (same unpacking as item_sides_of). */
-    double auth_ml = (double)def->box_l - pl, auth_mr = (double)def->box_r - pr;
+    double auth_ml = bx_lp_px(def->box_l, def->box_l_pct, avail_w) - pl;
+    double auth_mr = bx_lp_px(def->box_r, def->box_r_pct, avail_w) - pr;
     if (shrink_w > 0.0 && !def->box_center && auth_ml <= 0.0 && auth_mr <= 0.0
         && (align == CSS_ALIGN_CENTER || align == CSS_ALIGN_RIGHT)) {
         double slack = avail_w - (hp.content_w + pl + pr + bl + br);
@@ -5215,11 +5499,114 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         ob->block_id = block_id;
         ob->box_idx = idx;
         ob->bl = bl; ob->br = br; ob->pb = pb; ob->bb = bb;
+        ob->pt = pt; ob->bt = bt;
+        ob->border_box = (def->box_sizing == CSS_BOXS_BORDER);
         ob->inner_left = ctx_left + hp.x_off + bl;
         ob->inner_w = hp.content_w - bl - br;
         if (ob->inner_w < 1.0) ob->inner_w = 1.0;
+        /* Multi-column: the content flows at ONE column's width; close_top_box
+         * then slices the rows it produced into the columns. Doing it this way
+         * round -- lay out once narrow, fragment after -- is what lets the
+         * existing flow code stay untouched, and it is also how column-fill:
+         * balance is defined (the content is a single flow, cut into equal
+         * pieces). The used gap is `column-gap`, whose initial value is 1em
+         * (CSS Box Alignment 8.1), which is the theme's font size here. */
+        ob->col_n = 1;
+        ob->col_w = ob->inner_w;
+        ob->col_gap = 0.0;
+        ob->col_row0 = L->nrow;
+        ob->col_box0 = L->nbox;
+        ob->col_content_top = s->cur_top;
+        ob->clamp_lines = (def->line_clamp > 0) ? def->line_clamp : 0;
+        if (def->col_count > 0 || def->col_width > 0) {
+            double cgap = (def->col_gap >= 0) ? (double)def->col_gap : th->body_font;
+            int cn = 1;
+            double cw = ob->inner_w;
+            if (fx_multicol_used(ob->inner_w, def->col_count, (double)def->col_width,
+                                 cgap, &cn, &cw) == FX_OK && cn > 1) {
+                ob->col_n = cn;
+                ob->col_w = cw;
+                ob->col_gap = cgap;
+                ob->inner_w = cw;
+            }
+        }
         if (!inherited_hidden && this_hidden) s->hidden_from = s->box_depth;
     }
+}
+
+/* Fragments a multi-column box's content: the rows in [row0, nrow) were flowed
+ * one under the other at a single column's width, so they are redistributed over
+ * ob->col_n columns of that width and the box shrinks to the tallest column.
+ *
+ * A row is never split. The smallest fragmentation unit this engine has is the
+ * line box, which is exactly what CSS Fragmentation calls a class A break point,
+ * so this is a restriction of the model, not an approximation of the rule.
+ *
+ * Returns the height of the tallest column (0 when there is nothing to fragment). */
+static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double content_bottom) {
+    if (ob->col_n <= 1 || L->nrow <= ob->col_row0) return 0.0;
+    size_t n = L->nrow - ob->col_row0;
+    if (n > FX_MAX_ITEMS) return 0.0;
+
+    /* A row's extent is the distance to the next row's top, not its own height:
+     * that is what carries the margins between blocks into the balance. */
+    double heights[FX_MAX_ITEMS];
+    for (size_t i = 0; i < n; ++i) {
+        const rc_row *r = &L->rows[ob->col_row0 + i];
+        double next = (i + 1 < n) ? L->rows[ob->col_row0 + i + 1].top : content_bottom;
+        double h = next - r->top;
+        heights[i] = (h > 0.0) ? h : ((r->height > 0.0) ? r->height : 0.0);
+    }
+
+    int col[FX_MAX_ITEMS];
+    double colh[FX_MAX_COLUMNS];
+    if (fx_multicol_balance(heights, n, ob->col_n, col, colh) != FX_OK) return 0.0;
+
+    /* Where each column's content starts in the ORIGINAL single flow, so a row
+     * can be lifted by exactly that much. */
+    double col_origin[FX_MAX_COLUMNS];
+    int seen[FX_MAX_COLUMNS];
+    for (int c = 0; c < ob->col_n; ++c) { col_origin[c] = ob->col_content_top; seen[c] = 0; }
+    for (size_t i = 0; i < n; ++i) {
+        int c = col[i];
+        if (c >= 0 && c < ob->col_n && !seen[c]) {
+            col_origin[c] = L->rows[ob->col_row0 + i].top;
+            seen[c] = 1;
+        }
+    }
+
+    double step = ob->col_w + ob->col_gap;
+    for (size_t i = 0; i < n; ++i) {
+        int c = col[i];
+        if (c < 0 || c >= ob->col_n) continue;
+        rc_row *r = &L->rows[ob->col_row0 + i];
+        r->top -= (col_origin[c] - ob->col_content_top);
+        r->x_off += step * (double)c;
+        /* The row's line box is now the COLUMN, not the container: without this
+         * a centred or right-aligned row would align against the full container
+         * width and drift out of its own column. */
+        if (!(r->bg_w > 0.0)) r->bg_w = ob->col_w;
+    }
+
+    /* Boxes nested inside the multi-column content ride with the column their
+     * top falls in, so a child with a border or a background does not stay
+     * behind at the original single-flow position. */
+    for (size_t bi = ob->col_box0; bi < L->nbox; ++bi) {
+        rc_box *bx = &L->boxes[bi];
+        int c = 0;
+        for (size_t i = 0; i < n; ++i) {
+            if (L->rows[ob->col_row0 + i].top > bx->top) break;
+            c = col[i];
+        }
+        if (c < 0 || c >= ob->col_n) continue;
+        bx->top -= (col_origin[c] - ob->col_content_top);
+        bx->x += step * (double)c;
+        if (bx->w > ob->col_w) bx->w = ob->col_w;
+    }
+
+    double tallest = 0.0;
+    for (int c = 0; c < ob->col_n; ++c) if (colh[c] > tallest) tallest = colh[c];
+    return tallest;
 }
 
 /* Reconciles the open-box stack so it equals block b's box path (root..b->block_id),
@@ -5415,6 +5802,21 @@ static int band_shared_box(const rd_doc *doc, const rc_state *s,
  * item's blocks flow into its column (a fresh sub-state, like the flex per-item
  * pass); the band height is the sum over rows of each row's tallest column.
  * Structure, applied by default. */
+/* True when a block sits inside a `display: table-caption` box. The walk goes up
+ * the box tree because the caption's text runs carry the caption's box only when
+ * they have no nearer box of their own. Bounded like every other box walk here. */
+static int block_in_table_caption(const rd_doc *doc, const rd_block *b) {
+    if (b == NULL) return 0;
+    int id = b->block_id;
+    for (int guard = 0; id >= 0 && guard < RC_BOX_STACK_MAX; ++guard) {
+        const pv_box_def *d = rd_box_at(doc, (size_t)id);
+        if (d == NULL) return 0;
+        if (d->display == CSS_DISP_TABLE_CAPTION) return 1;
+        id = d->parent_id;
+    }
+    return 0;
+}
+
 static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                               rc_state *s, const ui_theme *th, double content_w,
                               const rd_doc *doc, size_t start, size_t end,
@@ -5485,6 +5887,40 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         }
         width[j] = (capw > 0.0) ? capw : -1.0;
         if (width[j] > 0.0) explicit_sum += width[j]; else ++nfree;
+    }
+    /* A float with `width: auto` SHRINKS TO FIT its content (CSS 2.1 10.3.5:
+     * shrink-to-fit = min(max(preferred minimum, available), preferred)). Only
+     * when a LONE auto float would otherwise be handed the whole band -- which
+     * is what made a wikipedia thumbnail (a 250px image and its caption, no
+     * declared width) span the full column and push the whole article below it
+     * instead of letting the text wrap beside.
+     *
+     * With several items the even split stays: that is the two-column era
+     * layout (Slashdot, 960.gs), where the columns DO carry declared widths and
+     * the split only catches the leftovers. */
+    if (g == 1 && nfree == 1) {
+        /* A `display: table-caption` child is NOT part of the table's width
+         * calculation (CSS 2.1 17.4/17.5.2): the caption is laid out AT the
+         * table's used width, so measuring it would let a long caption decide
+         * how wide the picture is. That is exactly the wikipedia thumbnail --
+         * `figure{display:table;float:right}` with
+         * `figcaption{display:table-caption}` -- whose caption sentence is far
+         * wider than the 250px image it describes. */
+        double pref = 0.0;
+        size_t k = gstart[0];
+        while (k < gstart[1]) {
+            if (block_in_table_caption(doc, rd_at(doc, k))) { ++k; continue; }
+            size_t e = k + 1;
+            while (e < gstart[1] && !block_in_table_caption(doc, rd_at(doc, e))) ++e;
+            double seg = measure_item_content_w(cr, w, th, doc, k, e);
+            if (seg > pref) pref = seg;
+            k = e;
+        }
+        if (pref > 0.0 && pref < ctx_w) {
+            width[0] = pref;
+            explicit_sum += pref;
+            nfree = 0;
+        }
     }
     double leftover = ctx_w - explicit_sum;
     double share = (nfree > 0) ? (leftover / (double)nfree) : 0.0;
@@ -5676,7 +6112,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ++j;
             }
             double mt, mb;
-            block_margins(th, b, &mt, &mb);
+            block_margins(th, b, content_w, &mt, &mb);
             /* Reconcile to the innermost box ENCLOSING the container's items, exactly
              * as the float band below does, instead of closing every open box. That
              * box is the container's own (background/border/padding/margin/radius --
@@ -5733,7 +6169,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             size_t j = i + 1;
             while (j < rd_count(doc)) {
                 const rd_block *bj = rd_at(doc, j);
-                if (bj->float_id < 0 || bj->float_clear != 0) break;
+                if (bj->float_id < 0) break;
+                /* `clear` is a property of the ELEMENT, and page_view stamps it on
+                 * every run of that element's subtree. A run that continues the
+                 * SAME floated element therefore carries its float's own clear --
+                 * and CSS 2.1 9.5.2 defines clear against EARLIER floats, never
+                 * against the box's own. Breaking the band on it split a
+                 * `figure{float:right;clear:right}` (the wikipedia thumbnail idiom)
+                 * into one full-width band per inline run: the caption's five links
+                 * each took a row of their own instead of flowing as one sentence. */
+                if (bj->float_clear != 0 && bj->float_id != b->float_id) break;
                 ++j;
             }
             /* A new band ends the previous float context: consecutive bands stack,
@@ -5742,7 +6187,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             int shared = band_shared_box(doc, &s, i, j);
             reconcile_boxes(cr, w, L, &s, th, doc, content_w, shared, i);
             double mt, mb;
-            block_margins(th, b, &mt, &mb);
+            block_margins(th, b, content_w, &mt, &mb);
             s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
             layout_float_band(cr, w, L, &s, th, content_w, doc, i, j, shared);
             s.prev_bottom = mb;
@@ -5750,7 +6195,12 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             continue;
         }
 
-        int standalone = (b->kind == RD_IMAGE || b->kind == RD_NOTICE
+        /* An inline-level replaced element belongs to the line already open, so it
+         * must not be treated as standalone (which would flush that line and give
+         * the element a row of its own -- R7). */
+        int inline_replaced = replaced_is_inline_level(&s, b);
+        int standalone = !inline_replaced
+                      && (b->kind == RD_IMAGE || b->kind == RD_NOTICE
                        || b->kind == RD_HEADING || b->kind == RD_INPUT
                        || b->kind == RD_VIDEO);
         /* Box engine (Hito 23b-8 Step D): reconcile the open-box stack with this
@@ -5768,7 +6218,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             /* Space before this block = its top margin collapsed with the previous
              * block's bottom margin (CSS adjacent-margin collapsing, basic). */
             double mt, mb;
-            block_margins(th, b, &mt, &mb);
+            block_margins(th, b, content_w, &mt, &mb);
             s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
             s.prev_bottom = mb;
         }
@@ -5776,6 +6226,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         /* Replaced/atomic blocks (input/svg/image/video) emit their element-sized row
          * through the shared helper -- identical to the flex/grid item flow, so a
          * replaced element paints the same in flow and inside a column. */
+        if (inline_replaced && place_inline_replaced(L, &s, th, w, b, content_w))
+            continue;
         if (emit_replaced_row(cr, w, L, &s, th, b, content_w)) {
             /* A form control inside an open box must sit within that box's content
              * rect, exactly as the text rows do via s.indent_px. The row was emitted
@@ -5835,7 +6287,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * when there is no author box (all zero). */
             double avail_w = content_w - base_l;
             if (avail_w < 1.0) avail_w = 1.0;
-            bx_hplace hp = bx_place((double)b->box_l, (double)b->box_r,
+            bx_hplace hp = bx_place(bx_lp_px(b->box_l, b->box_l_pct, avail_w),
+                                    bx_lp_px(b->box_r, b->box_r_pct, avail_w),
                                     bx_width_cap(b->box_w, b->box_w_pct, avail_w),
                                     b->box_center, avail_w);
             s.indent_px = base_l + hp.x_off;
@@ -5937,8 +6390,8 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
          * which is the only place that knows the containing block. */
         double bw = bx_width_cap(bd->box_w, bd->box_w_pct, content_w);
         if (bw <= 0.0) {
-            double pl = (bd->pad_l > 0) ? (double)bd->pad_l : 0.0;
-            double pr = (bd->pad_r > 0) ? (double)bd->pad_r : 0.0;
+            double pl = box_pad_px(bd->pad_l, bd->pad_l_pct, content_w);
+            double pr = box_pad_px(bd->pad_r, bd->pad_r_pct, content_w);
             double edges = pl + pr + box_edge_px(bd->bord_lw) + box_edge_px(bd->bord_rw);
             if (b->kind == RD_IMAGE) {
                 double dw, dh, ibox = content_w - 2.0 * th->image_box_pad;
@@ -5975,8 +6428,8 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 if (bk->kind == RD_IMAGE || bk->kind == RD_INPUT || bk->block_break)
                     sub_h += default_h;
             }
-            double pt = (bd->pad_t > 0) ? (double)bd->pad_t : 0.0;
-            double pb = (bd->pad_b > 0) ? (double)bd->pad_b : 0.0;
+            double pt = box_pad_px(bd->pad_t, bd->pad_t_pct, content_w);
+            double pb = box_pad_px(bd->pad_b, bd->pad_b_pct, content_w);
             gh[bid] = sub_h + pt + pb
                     + box_edge_px(bd->bord_tw) + box_edge_px(bd->bord_bw);
         }
@@ -7252,19 +7705,36 @@ static double row_justify_gap(const rc_layout *L, const rc_row *r, double conten
  * rectangle; r is clamped so opposite corners never overlap (min(w,h)/2). One radius
  * for all four corners: per-corner / elliptical radii collapse to the first value
  * upstream (see spec/css.md). */
-static void box_path(cairo_t *cr, double x, double y, double w, double h, double r) {
-    if (r <= 0.0 || w <= 0.0 || h <= 0.0) {
+static void box_path4(cairo_t *cr, double x, double y, double w, double h,
+                      const double *rc) {
+    if (w <= 0.0 || h <= 0.0) { cairo_rectangle(cr, x, y, w, h); return; }
+    double half = (w < h ? w : h) / 2.0;
+    double tl = rc[0], tr = rc[1], br = rc[2], bl = rc[3];
+    if (tl < 0.0) tl = 0.0;
+    if (tr < 0.0) tr = 0.0;
+    if (br < 0.0) br = 0.0;
+    if (bl < 0.0) bl = 0.0;
+    if (tl > half) tl = half;
+    if (tr > half) tr = half;
+    if (br > half) br = half;
+    if (bl > half) bl = half;
+    if (tl <= 0.0 && tr <= 0.0 && br <= 0.0 && bl <= 0.0) {
         cairo_rectangle(cr, x, y, w, h);
         return;
     }
-    double half = (w < h ? w : h) / 2.0;
-    if (r > half) r = half;
     cairo_new_sub_path(cr);
-    cairo_arc(cr, x + w - r, y + r,     r, -M_PI / 2.0, 0.0);
-    cairo_arc(cr, x + w - r, y + h - r, r, 0.0,          M_PI / 2.0);
-    cairo_arc(cr, x + r,     y + h - r, r, M_PI / 2.0,   M_PI);
-    cairo_arc(cr, x + r,     y + r,     r, M_PI,         3.0 * M_PI / 2.0);
+    cairo_arc(cr, x + w - tr, y + tr,     tr, -M_PI / 2.0, 0.0);
+    cairo_arc(cr, x + w - br, y + h - br, br, 0.0,          M_PI / 2.0);
+    cairo_arc(cr, x + bl,     y + h - bl, bl, M_PI / 2.0,   M_PI);
+    cairo_arc(cr, x + tl,     y + tl,     tl, M_PI,         3.0 * M_PI / 2.0);
     cairo_close_path(cr);
+}
+
+/* One radius for all four corners: the shape every non-border-radius caller
+ * (shadow blur, backdrop clip) still wants. */
+static void box_path(cairo_t *cr, double x, double y, double w, double h, double r) {
+    double rc[4] = { r, r, r, r };
+    box_path4(cr, x, y, w, h, rc);
 }
 
 /* Paints one block box's decoration (Hito 23b-8 Step C): box-shadow, background fill,
@@ -7370,7 +7840,20 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
     if (w <= 0.0 || h <= 0.0) return;
     double bt = box_edge_px(bx->bord_tw), br = box_edge_px(bx->bord_rw);
     double bb = box_edge_px(bx->bord_bw), bl = box_edge_px(bx->bord_lw);
-    double rad = (bx->radius > 0 && bx->radius != CSS_LEN_UNSET) ? (double)bx->radius : 0.0;
+    /* Resolve each corner's percentage half now: a percentage radius measures
+     * the box itself (CSS Backgrounds 3 5.1), and the box's height is only
+     * final here. `border-radius: 50%` on a square is how every avatar on the
+     * web is made round. */
+    double radius_c[4];
+    double rad_basis = (w < h) ? w : h;
+    for (int rk = 0; rk < 4; ++rk)
+        radius_c[rk] = bx->radius_c[rk]
+                     + ((bx->radius_pct[rk] != 0) ? rad_basis * (double)bx->radius_pct[rk] / 1000.0 : 0.0);
+    /* The largest corner drives the effects that only take one radius (the
+     * shadow silhouette, the uniform-border fast path); the background and the
+     * outline use the four independently through box_path4. */
+    double rad = 0.0;
+    for (int rk = 0; rk < 4; ++rk) if (radius_c[rk] > rad) rad = radius_c[rk];
 
     /* Box shadow: skip for sentinel values (CC_COLOR_TRANSPARENT, -1 unset).
      * CC_COLOR_CURRENT uses a default dark gray since we lack the element's color here. */
@@ -7439,7 +7922,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                 cairo_pattern_add_color_stop_rgb(pat, pos, sc.r, sc.g, sc.b);
             }
             cairo_set_source(cr, pat);
-            box_path(cr, x, y, w, h, rad);
+            box_path4(cr, x, y, w, h, radius_c);
             cairo_fill(cr);
             cairo_pattern_destroy(pat);
         } else {
@@ -7447,7 +7930,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                                                    bx->grad_c, bx->grad_pos,
                                                    bx->grad_n, 1.0);
             cairo_set_source(cr, pat);
-            box_path(cr, x, y, w, h, rad);
+            box_path4(cr, x, y, w, h, radius_c);
             cairo_fill(cr);
             cairo_pattern_destroy(pat);
         }
@@ -7459,7 +7942,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         if (bga > 0.0) {
             ui_rgb bgc = rgb_from_packed(bx->bg_rgb);
             cairo_set_source_rgba(cr, bgc.r, bgc.g, bgc.b, bga);
-            box_path(cr, x, y, w, h, rad);
+            box_path4(cr, x, y, w, h, radius_c);
             cairo_fill(cr);
         }
     }
@@ -7483,7 +7966,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         }
         double iw = (double)bgimg2->nat_w * sx, ih = (double)bgimg2->nat_h * sy;
         cairo_save(cr);
-        box_path(cr, x, y, w, h, rad);
+        box_path4(cr, x, y, w, h, radius_c);
         cairo_clip(cr);
         if (bx->bg_repeat == CSS_BGR_REPEAT_X && ih > 0.0) {
             cairo_rectangle(cr, x, y, w, ih);
@@ -7538,7 +8021,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
         }
         double iw = (double)bgimg->nat_w * sx, ih = (double)bgimg->nat_h * sy;
         cairo_save(cr);
-        box_path(cr, x, y, w, h, rad);
+        box_path4(cr, x, y, w, h, radius_c);
         cairo_clip(cr);
         if (bx->bg_repeat == CSS_BGR_REPEAT_X && ih > 0.0) {
             cairo_rectangle(cr, x, y, w, ih);
@@ -7810,6 +8293,58 @@ static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
  * hover highlight (on screen only; suppressed when exporting). */
 static int row_owner_block_id(const rc_layout *L, const rc_row *r);
 
+/* Draws one SVG block into an arbitrary rect. Shared by the row painter and the
+ * inline-fragment painter so an <svg> looks the same whether it owns a row or
+ * flows inside a line. cur is the resolved currentColor. */
+static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
+                         double dx, double dy, double dw, double dh) {
+    if (blk == NULL || blk->text == NULL) return;
+    /* Parse per paint: the markup is small, the parser is pure and bounded, and
+     * keeping no cache means a re-render can never paint stale geometry. */
+    sv_image *img = (sv_image *)calloc(1, sizeof *img);
+    if (img == NULL) return;
+    /* The root fill only overrides shapes with NO fill of their own; an explicit
+     * fill or currentColor up the <g> chain still wins. Seed it only when the
+     * author actually set a colour on the element -- a bare icon with no author
+     * colour keeps the SVG default black. */
+    int root_fill = (blk->fg_rgb >= 0) ? cur : 0x000000;
+    if (sv_parse_ex(blk->text, strlen(blk->text), img, root_fill) == SV_OK)
+        svp_draw(cr, img, dx, dy, dw, dh, cur);
+    free(img);
+}
+
+/* Resolves currentColor for a replaced element: the run's own author colour when
+ * it has one, else the theme's text colour, so a monochrome icon matches the
+ * prose around it in every theme. */
+static int replaced_current_color(const browser_window *w, const rd_block *blk) {
+    if (blk != NULL && blk->fg_rgb >= 0) return blk->fg_rgb;
+    ui_rgb tc = w->theme.text;
+    return ((int)(tc.r * 255.0 + 0.5) << 16)
+         | ((int)(tc.g * 255.0 + 0.5) << 8)
+         |  (int)(tc.b * 255.0 + 0.5);
+}
+
+/* Paints an inline-level replaced fragment at (x, y) in its resolved size. */
+static void paint_inline_replaced(cairo_t *cr, browser_window *w,
+                                  const rc_frag *f, double x, double y) {
+    const rd_block *blk = f->repl;
+    if (blk == NULL || f->repl_w <= 0.0 || f->repl_h <= 0.0) return;
+    if (blk->kind == RD_SVG) {
+        paint_svg_at(cr, blk, replaced_current_color(w, blk),
+                     x, y, f->repl_w, f->repl_h);
+        return;
+    }
+    if (blk->kind == RD_IMAGE) {
+        /* paint_image_row places the image inside a padded box; an atomic inline
+         * has no such box, so the rect is handed over exactly, with the padding
+         * cancelled out. */
+        const ui_theme *th = &w->theme;
+        paint_image_row(cr, w, blk, x - th->image_box_pad, y - th->image_box_pad,
+                        f->repl_w + 2.0 * th->image_box_pad,
+                        f->repl_h + 2.0 * th->image_box_pad);
+    }
+}
+
 static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                               const rc_row *r, double left, double ry,
                               double content_w, double band_w, int show_hover) {
@@ -7818,42 +8353,17 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
     if (r->hidden) return;  /* visibility:hidden: space stood, nothing paints */
 
     if (r->kind == RC_SVG && r->blk != NULL && r->blk->text != NULL) {
-        /* Parse per paint: the markup is small, the parser is pure and bounded, and
-         * keeping no cache means a re-render can never paint stale geometry. */
-        sv_image *img = (sv_image *)calloc(1, sizeof *img);
-        if (img != NULL) {
-            /* currentColor resolves to the run's own author colour when it has
-             * one, else the theme's text colour, so a monochrome icon matches
-             * the prose around it in every theme. That same colour also seeds the
-             * SVG root fill (page_view put the CSS `fill` there when the author set
-             * one), so an icon whose shapes declare no fill paints the intended
-             * colour instead of the SVG default black. */
-            int cur = r->blk->fg_rgb;
-            if (cur < 0) {
-                ui_rgb tc = w->theme.text;
-                cur = ((int)(tc.r * 255.0 + 0.5) << 16)
-                    | ((int)(tc.g * 255.0 + 0.5) << 8)
-                    |  (int)(tc.b * 255.0 + 0.5);
-            }
-            /* The root fill only overrides shapes with NO fill of their own; an
-             * explicit fill or currentColor up the <g> chain still wins. Seed it
-             * only when the author actually set a colour on the element (fg_rgb >= 0)
-             * -- a bare icon with no author colour keeps the SVG default black. */
-            int root_fill = (r->blk->fg_rgb >= 0) ? cur : 0x000000;
-            if (sv_parse_ex(r->blk->text, strlen(r->blk->text), img, root_fill) == SV_OK) {
-                double dw = (r->bg_w > 0.0) ? r->bg_w : content_w;
-                double dx = left + r->x_off;
-                /* An SVG is an inline-level replaced element: the parent's
-                 * text-align places it, like any other inline box. */
-                double slack = content_w - dw;
-                if (slack > 0.0) {
-                    if (r->align == CSS_ALIGN_CENTER)     dx += slack / 2.0;
-                    else if (r->align == CSS_ALIGN_RIGHT) dx += slack;
-                }
-                svp_draw(cr, img, dx, ry, dw, r->height, cur);
-            }
-            free(img);
+        double dw = (r->bg_w > 0.0) ? r->bg_w : content_w;
+        double dx = left + r->x_off;
+        /* An SVG is a replaced element: the parent's text-align places it, like
+         * any other inline box. */
+        double slack = content_w - dw;
+        if (slack > 0.0) {
+            if (r->align == CSS_ALIGN_CENTER)     dx += slack / 2.0;
+            else if (r->align == CSS_ALIGN_RIGHT) dx += slack;
         }
+        paint_svg_at(cr, r->blk, replaced_current_color(w, r->blk),
+                     dx, ry, dw, r->height);
         return;
     }
     /* A replaced row placed in a flex/grid column carries its column offset in
@@ -7927,6 +8437,12 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
          * not its inline background, not its decoration. */
         if (f->hidden) continue;
         double fx = rx + f->x + jdx;
+        /* An atomic inline replaced element (R7): paints inside the line box,
+         * sitting on the baseline, instead of owning a row. */
+        if (f->repl != NULL) {
+            paint_inline_replaced(cr, w, f, fx, baseline - f->repl_h);
+            continue;
+        }
         /* Inline background (<code>, <mark>, a highlighted <span>): fills behind
          * THIS fragment's glyphs only, not the whole line. The row band above only
          * covers a line whose fragments agree on a background; an inline highlight
@@ -8156,6 +8672,8 @@ static int box_forms_stacking_context(const pv_box_def *def) {
         .is_float = 0, .is_inline = 0,
         .has_transform = def->transform_tx != PV_LEN_UNSET ||
                          def->transform_ty != PV_LEN_UNSET ||
+                         def->transform_tx_pct != 0 ||
+                         def->transform_ty_pct != 0 ||
                          def->transform_sx != PV_LEN_UNSET ||
                          def->transform_sy != PV_LEN_UNSET ||
                          def->transform_rotate != PV_LEN_UNSET ||
@@ -8197,8 +8715,12 @@ static void box_transform_matrix(const pv_box_def *def, double box_x, double box
                                  int64_t elapsed_ms) {
     cairo_matrix_init_identity(m);
     if (def == NULL) return;
-    double tx = (def->transform_tx != PV_LEN_UNSET) ? (double)def->transform_tx : 0.0;
-    double ty = (def->transform_ty != PV_LEN_UNSET) ? (double)def->transform_ty : 0.0;
+    /* A translate() percentage measures the box's OWN border box (CSS
+     * Transforms 1 section 8), not any containing block -- which is exactly why
+     * `translate(-50%,-50%)` recentres a box of any size on the point that
+     * `left:50%; top:50%` put its corner at. */
+    double tx = bx_lp_px(def->transform_tx, def->transform_tx_pct, box_w);
+    double ty = bx_lp_px(def->transform_ty, def->transform_ty_pct, box_h);
     double sx = (def->transform_sx != PV_LEN_UNSET) ? (double)def->transform_sx / 100.0 : 1.0;
     double sy = (def->transform_sy != PV_LEN_UNSET) ? (double)def->transform_sy / 100.0 : 1.0;
     double rot = (def->transform_rotate != PV_LEN_UNSET)
@@ -8991,7 +9513,10 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .bord_bs = def->bord_bs, .bord_ls = def->bord_ls,
         .bord_tc = def->bord_tc, .bord_rc = def->bord_rc,
         .bord_bc = def->bord_bc, .bord_lc = def->bord_lc,
-        .radius = def->border_radius,
+        .radius_c = { box_edge_px(def->border_radius),
+                      box_edge_px(def->border_radius_tr),
+                      box_edge_px(def->border_radius_br),
+                      box_edge_px(def->border_radius_bl) },
         .bsh_dx = def->bsh_dx, .bsh_dy = def->bsh_dy,
         .bsh_blur = def->bsh_blur, .bsh_spread = def->bsh_spread,
         .bsh_color = def->bsh_color, .bsh_inset = def->bsh_inset,

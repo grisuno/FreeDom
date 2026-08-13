@@ -802,6 +802,15 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, protos);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, local.timeout_ms);
+    /* Bound the handshake separately from the transfer. Without this a host that
+     * accepts nothing (a blackholed CDN, a dead tracker domain) consumed the
+     * entire request timeout before the connection was even established, and a
+     * page pays that once per subresource. Never longer than the request budget
+     * itself, or it would be unreachable. */
+    long connect_ms = SF_CONNECT_TIMEOUT_MS;
+    if (local.timeout_ms > 0 && connect_ms > local.timeout_ms)
+        connect_ms = local.timeout_ms;
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_ms);
     /* Byte-range HTTP request (Range: bytes=N-M). When range_start >= 0, set the
      * range header. libcurl handles the splitting of multipart responses (206 Partial).
      * An open-ended range uses range_end < 0 (i.e., "bytes=N-"). */

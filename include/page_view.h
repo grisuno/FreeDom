@@ -276,11 +276,17 @@ typedef struct pv_run {
     int     box_center;
     int     box_mt;
     int     box_mb;
-    /* Symbolic percentage width cap (Hito 32): per-mille of the containing width
-     * (99.8% -> 998), 0 = none. Rides beside the px cap box_w; the painter
-     * resolves the effective cap with bx_width_cap against the real available
-     * width (the tighter of the two wins). Gated by caps.css like box_w. */
+    /* The percentage half of the box placement above: per-mille of the
+     * CONTAINING BLOCK WIDTH (99.8% -> 998), 0 = none. Rides beside each px
+     * field; the painter combines the two exactly once, with bx_lp_px, against
+     * the real available width.
+     *
+     * box_mt_pct/box_mb_pct are the VERTICAL margins, and they too resolve
+     * against the containing WIDTH -- CSS 2.1 8.3, not a simplification.
+     * Gated by caps.css like the px halves. */
     int     box_w_pct;
+    int     box_l_pct, box_r_pct;
+    int     box_mt_pct, box_mb_pct;
     /* User-agent box identity of this run's nearest BLOCK-LEVEL ancestor: a bx_ua_tag
      * code (BX_UA_NONE = the element gets no UA margin, which is the answer for
      * div/section/td/... and for anything unclassified).
@@ -347,7 +353,13 @@ typedef struct pv_box_def {
     int box_min_h;      /* min-height (px >= 0), or 0 unset */
     int box_max_h;      /* max-height (px > 0), or 0 unset */
     int box_min_w;      /* min-width  (px >= 0), or 0 unset */
-    int box_w_pct;      /* per-mille width cap (Hito 32), 0 = none; see pv_run */
+    /* Percentage halves (per-mille of the containing block WIDTH, 0 = none),
+     * one per px field. See the pv_run block for why even the vertical padding
+     * resolves against the width (CSS 2.1 8.4). */
+    int box_w_pct;      /* width/max-width cap */
+    int box_l_pct, box_r_pct;              /* the l/r insets (padding + margin) */
+    int box_min_w_pct;                     /* min-width */
+    int pad_t_pct, pad_r_pct, pad_b_pct, pad_l_pct;
     int bg_rgb;   /* author background-color of the box (0xRRGGBB), or -1 */
     /* Background alpha percent 0..100 from rgba()/hsla() (2026-07-19);
      * PV_LEN_UNSET = opaque. The box background fill multiplies by it. */
@@ -357,7 +369,16 @@ typedef struct pv_box_def {
     int bord_tw, bord_rw, bord_bw, bord_lw;
     int bord_ts, bord_rs, bord_bs, bord_ls;
     int bord_tc, bord_rc, bord_bc, bord_lc;
-    int border_radius;
+    /* The four border-radius corners in CSS corner order (top-left, top-right,
+     * bottom-right, bottom-left) plus their percentage halves (per-mille,
+     * resolved against the box's own smaller dimension -- see css_pct_slot).
+     * border_radius IS the top-left corner. */
+    int border_radius, border_radius_tr, border_radius_br, border_radius_bl;
+    int radius_tl_pct, radius_tr_pct, radius_br_pct, radius_bl_pct;
+    /* translate() percentage halves (per-mille). Unlike every other percentage
+     * on this struct these measure the box's OWN border box, x against its
+     * width and y against its height (CSS Transforms 1 section 8). */
+    int transform_tx_pct, transform_ty_pct;
     int bsh_dx, bsh_dy, bsh_blur, bsh_spread, bsh_color, bsh_inset;
     int outline_w, outline_style, outline_color;
     /* outline-offset: distance in px between the border edge and the outline (CSS:
@@ -374,6 +395,13 @@ typedef struct pv_box_def {
      * debug_dom dump can see them. */
     int position;
     int inset_top, inset_right, inset_bottom, inset_left;
+    /* Percentage halves of the four insets, per-mille (0 = none). left/right
+     * resolve against the containing block WIDTH, top/bottom against its
+     * HEIGHT (CSS 2.1 9.3.2) -- the one place in the box model where the two
+     * axes really do use different bases. `left:50%` + `translate(-50%,-50%)`
+     * is the universal centring idiom, so dropping these dropped the whole
+     * pattern. */
+    int inset_top_pct, inset_right_pct, inset_bottom_pct, inset_left_pct;
     int z_index;
     /* visibility / overflow / cursor (not inherited, like border/position -- read
      * from the box's own resolved style). visibility gates painting of this box and
@@ -394,6 +422,18 @@ typedef struct pv_box_def {
      * resolve there. Rides the box-def tree, so it is caps.css-gated by
      * construction (no boxes without author CSS). */
     int pointer_events;
+    /* Multi-column container params (CSS Multi-column Layout 1). col_count 0 =
+     * `auto`, col_width 0 = `auto`; with both 0 the box is NOT a multi-column
+     * container and lays out exactly as before this existed. col_gap is the
+     * used `column-gap` in px, -1 = `normal` (the painter then uses 1em, the
+     * spec's initial value). The rule fields paint the line between columns.
+     * STRUCTURE, like the flex/grid cont_* fields. */
+    /* line-clamp: at most this many line boxes paint inside the box, the rest
+     * are clipped (CSS Overflow 4). 0 = no clamp. STRUCTURE, like col_*. */
+    int line_clamp;
+    int col_count, col_width, col_gap;
+    int col_fill, col_span;
+    int col_rule_w, col_rule_style, col_rule_color;
     /* aspect-ratio (numerator/denominator x1000, both 0 = unset/auto) */
     int aspect_num, aspect_den;
     /* linear-gradient background (2026-07-11): stop count (0 = none, else
@@ -840,7 +880,8 @@ void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
 /* Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the
  * most recently appended run. No-op on an empty or NULL view; the append helpers
  * default box_w_pct to 0. */
-void pv_set_box_pct(pv_view *v, int box_w_pct);
+void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
+                    int box_mt_pct, int box_mb_pct);
 
 /* Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of
  * the source element. No-op on an empty or NULL view; the append helpers default

@@ -317,7 +317,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[36] = {
+        int32_t b[40] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -343,6 +343,10 @@ static int write_view(int wfd, const pv_view *v) {
              * read_view mirrors this). Without it the painter cannot tell a <div>
              * from a <p> and gives both a paragraph's 1em margins. */
             (int32_t)r->ua_tag,
+            /* <length-percentage> halves of the run's box placement,
+             * 2026-08-12 (appended; read_view mirrors this). */
+            (int32_t)r->box_l_pct, (int32_t)r->box_r_pct,
+            (int32_t)r->box_mt_pct, (int32_t)r->box_mb_pct,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -369,7 +373,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[178] = {
+        int32_t f[207] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -495,6 +499,31 @@ static int write_view(int wfd, const pv_view *v) {
             /* css display, 2026-07-30 (appended; read_view mirrors). An
              * inline-level box shrink-wraps instead of filling its line. */
             (int32_t)bd->display,
+            /* <length-percentage> halves, 2026-08-12 (appended; read_view
+             * mirrors). A percentage cannot be resolved before layout, so it
+             * crosses the pipe symbolically beside its px twin. */
+            (int32_t)bd->box_l_pct, (int32_t)bd->box_r_pct,
+            (int32_t)bd->box_min_w_pct,
+            (int32_t)bd->pad_t_pct, (int32_t)bd->pad_r_pct,
+            (int32_t)bd->pad_b_pct, (int32_t)bd->pad_l_pct,
+            (int32_t)bd->inset_top_pct, (int32_t)bd->inset_right_pct,
+            (int32_t)bd->inset_bottom_pct, (int32_t)bd->inset_left_pct,
+            /* Multi-column container params, 2026-08-12 (appended; read_view
+             * mirrors this). */
+            (int32_t)bd->col_count, (int32_t)bd->col_width, (int32_t)bd->col_gap,
+            (int32_t)bd->col_fill, (int32_t)bd->col_span,
+            (int32_t)bd->col_rule_w, (int32_t)bd->col_rule_style,
+            (int32_t)bd->col_rule_color,
+            /* border-radius corners + their percentage halves, 2026-08-12
+             * (appended; read_view mirrors this). */
+            (int32_t)bd->border_radius_tr, (int32_t)bd->border_radius_br,
+            (int32_t)bd->border_radius_bl,
+            (int32_t)bd->radius_tl_pct, (int32_t)bd->radius_tr_pct,
+            (int32_t)bd->radius_br_pct, (int32_t)bd->radius_bl_pct,
+            /* translate() percentage halves, 2026-08-12. */
+            (int32_t)bd->transform_tx_pct, (int32_t)bd->transform_ty_pct,
+            /* line-clamp, 2026-08-12. */
+            (int32_t)bd->line_clamp,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1565,7 +1594,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[36];
+        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[40];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1679,7 +1708,11 @@ static int read_view(int fd, pv_view **out) {
             pv_set_cont_item(v, (int)citem);
             pv_set_float(v, (int)flside, (int)flid, (int)flclear);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
-            pv_set_box_pct(v, (int)bwpct);
+            /* Both halves of the box placement travel together, and are combined
+             * only at layout (bx_lp_px): setting one without the other would make
+             * the pair disagree about the same property. */
+            pv_set_box_pct(v, (int)bwpct, (int)b[36], (int)b[37],
+                           (int)b[38], (int)b[39]);
         } else {
             /* An input skips the text-presentation restore above (its value/label
              * handling owns those slots), but its flex/grid container membership must
@@ -1721,7 +1754,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[178];
+        int32_t f[207];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1809,6 +1842,27 @@ static int read_view(int fd, pv_view **out) {
             .box_h_set = f[176],
             /* css display, 2026-07-30 */
             .display = f[177],
+            /* <length-percentage> halves, 2026-08-12 */
+            .box_l_pct = f[178], .box_r_pct = f[179],
+            .box_min_w_pct = f[180],
+            .pad_t_pct = f[181], .pad_r_pct = f[182],
+            .pad_b_pct = f[183], .pad_l_pct = f[184],
+            .inset_top_pct = f[185], .inset_right_pct = f[186],
+            .inset_bottom_pct = f[187], .inset_left_pct = f[188],
+            /* Multi-column container params, 2026-08-12. */
+            .col_count = f[189], .col_width = f[190], .col_gap = f[191],
+            .col_fill = f[192], .col_span = f[193],
+            .col_rule_w = f[194], .col_rule_style = f[195],
+            .col_rule_color = f[196],
+            /* border-radius corners + percentage halves, 2026-08-12. */
+            .border_radius_tr = f[197], .border_radius_br = f[198],
+            .border_radius_bl = f[199],
+            .radius_tl_pct = f[200], .radius_tr_pct = f[201],
+            .radius_br_pct = f[202], .radius_bl_pct = f[203],
+            /* translate() percentage halves, 2026-08-12. */
+            .transform_tx_pct = f[204], .transform_ty_pct = f[205],
+            /* line-clamp, 2026-08-12. */
+            .line_clamp = f[206],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

@@ -21,6 +21,7 @@
 #include "box_tree.h"
 #include "compositor.h" /* cx_item/cx_sort: paint-order for Stage 2 (M1.1 increment 2) */
 #include "css.h"        /* CSS_VIS_HIDDEN/COLLAPSE for bt_box_hidden (Stage 2b) */
+#include "box_style.h"  /* bx_lp_px: the one place a percentage becomes pixels */
 
 #include <stddef.h>
 
@@ -402,17 +403,25 @@ static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
     return -1;
 }
 
-/* Resolves an inset value: PV_LEN_UNSET or BT_LEN_AUTO → 0 (anchor at the
- * containing block's edge); otherwise the px value. */
-static double resolve_inset(int v) {
-    if (v == PV_LEN_UNSET || v == BT_LEN_AUTO) return 0.0;
-    return (double)v;
+/* Resolves an inset <length-percentage>: PV_LEN_UNSET or BT_LEN_AUTO with no
+ * percentage half → 0 (anchor at the containing block's edge); otherwise the px
+ * half plus pct per-mille of `basis`.
+ *
+ * `basis` is the containing block's WIDTH for left/right and its HEIGHT for
+ * top/bottom (CSS 2.1 9.3.2). Passing the wrong one is the only way to get this
+ * wrong, which is why the two axes are resolved at separate call sites below
+ * rather than through a shared four-value helper. */
+static double resolve_inset(int v, int pct_pm, double basis) {
+    return bx_lp_px(v, pct_pm, basis);
 }
 
 /* Stage 2b: an inset axis the author left undeclared (UNSET) or `auto`. Both
- * mean "no inset" for the unset checks; resolve_inset maps them to a 0 offset. */
-static int inset_unset(int v) {
-    return v == PV_LEN_UNSET || v == BT_LEN_AUTO;
+ * mean "no inset" for the unset checks; resolve_inset maps them to a 0 offset.
+ * A percentage half makes the axis DECLARED even when the px half is the unset
+ * sentinel -- `left: 50%` sets left, and reading only the px half would file it
+ * under "author said nothing" and fall back to the static position. */
+static int inset_unset(int v, int pct_pm) {
+    return pct_pm == 0 && (v == PV_LEN_UNSET || v == BT_LEN_AUTO);
 }
 
 bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
@@ -489,14 +498,12 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
             /* else: viewport (already the default). */
         }
         /* FIXED → viewport (default). RELATIVE/STICKY → in-flow. */
-        (void)cb_w;
-        (void)cb_h;
 
         double x, y;
-        double inset_l = resolve_inset(boxes[i].inset_left);
-        double inset_r = resolve_inset(boxes[i].inset_right);
-        double inset_t = resolve_inset(boxes[i].inset_top);
-        double inset_b = resolve_inset(boxes[i].inset_bottom);
+        double inset_l = resolve_inset(boxes[i].inset_left,   boxes[i].inset_left_pct,   cb_w);
+        double inset_r = resolve_inset(boxes[i].inset_right,  boxes[i].inset_right_pct,  cb_w);
+        double inset_t = resolve_inset(boxes[i].inset_top,    boxes[i].inset_top_pct,    cb_h);
+        double inset_b = resolve_inset(boxes[i].inset_bottom, boxes[i].inset_bottom_pct, cb_h);
 
         int z = (boxes[i].z_index == PV_LEN_UNSET) ? 0 : boxes[i].z_index;
         double bw = (box_w != NULL) ? box_w[i] : 0.0;
@@ -510,11 +517,11 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
              * left beats right when both are set, matching absolute/fixed
              * convention (spec says left wins for relative too). An AUTO inset
              * counts as unset (Stage 2b inset_unset). */
-            if (!inset_unset(boxes[i].inset_right) && inset_unset(boxes[i].inset_left))
+            if (!inset_unset(boxes[i].inset_right, boxes[i].inset_right_pct) && inset_unset(boxes[i].inset_left, boxes[i].inset_left_pct))
                 x -= inset_r;
             else
                 x += inset_l;
-            if (!inset_unset(boxes[i].inset_bottom) && inset_unset(boxes[i].inset_top))
+            if (!inset_unset(boxes[i].inset_bottom, boxes[i].inset_bottom_pct) && inset_unset(boxes[i].inset_top, boxes[i].inset_top_pct))
                 y -= inset_b;
             else
                 y += inset_t;
@@ -524,15 +531,15 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
              * hypothetical in-flow spot, CSS 2.2 §10.3.7/§10.6.4) when the
              * caller provides it; the containing-block edge is the fallback.
              * An explicit inset always wins; right/bottom keep their anchor. */
-            if (!inset_unset(boxes[i].inset_right) && inset_unset(boxes[i].inset_left))
+            if (!inset_unset(boxes[i].inset_right, boxes[i].inset_right_pct) && inset_unset(boxes[i].inset_left, boxes[i].inset_left_pct))
                 x = cb_x + cb_w - bw - inset_r;
-            else if (inset_unset(boxes[i].inset_left) && static_x != NULL)
+            else if (inset_unset(boxes[i].inset_left, boxes[i].inset_left_pct) && static_x != NULL)
                 x = static_x[i];
             else
                 x = cb_x + inset_l;
-            if (!inset_unset(boxes[i].inset_bottom) && inset_unset(boxes[i].inset_top))
+            if (!inset_unset(boxes[i].inset_bottom, boxes[i].inset_bottom_pct) && inset_unset(boxes[i].inset_top, boxes[i].inset_top_pct))
                 y = cb_y + cb_h - bh - inset_b;
-            else if (inset_unset(boxes[i].inset_top) && static_y != NULL)
+            else if (inset_unset(boxes[i].inset_top, boxes[i].inset_top_pct) && static_y != NULL)
                 y = static_y[i];
             else
                 y = cb_y + inset_t;

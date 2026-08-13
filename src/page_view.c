@@ -13,6 +13,7 @@
 #include "box_style.h"
 #include "css.h"
 #include "css_chain.h"
+#include "css_length.h"   /* CL_INITIAL_FONT_SIZE: the inherited-size base case */
 #include "css_color.h"
 #include "flex_layout.h"
 #include "html_parse.h"
@@ -46,6 +47,12 @@ _Static_assert(PV_BG_URL_MAX == CSS_URL_MAX,
  * 10..1000), so a chain can never resolve outside what one declaration could. */
 #define PV_FONT_REL_MIN 0.1
 #define PV_FONT_REL_MAX 10.0
+
+/* Deepest ancestor chain walked to compute an inherited font-size. Bounds a
+ * stack buffer against an attacker-chosen nesting depth; past it the walk falls
+ * back to the CSS initial size (a wrong `em` very deep inside a pathological
+ * document, never a stack overflow). */
+#define PV_FONT_CHAIN_MAX 256
 #define PV_FONT_PCT_MIN 10
 #define PV_FONT_PCT_MAX 1000
 
@@ -219,6 +226,10 @@ static void run_init_common(pv_run *r) {
     r->box_mt = PV_LEN_UNSET;
     r->box_mb = PV_LEN_UNSET;
     r->box_w_pct = 0;
+    r->box_l_pct = 0;
+    r->box_r_pct = 0;
+    r->box_mt_pct = 0;
+    r->box_mb_pct = 0;
     r->ua_tag = BX_UA_NONE;
     r->node_id = DOM_NODE_NONE;
     r->block_id = -1;
@@ -634,9 +645,15 @@ void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
     r->box_mb = box_mb;
 }
 
-void pv_set_box_pct(pv_view *v, int box_w_pct) {
+void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
+                    int box_mt_pct, int box_mb_pct) {
     if (v == NULL || v->count == 0) return;
-    v->runs[v->count - 1].box_w_pct = box_w_pct;
+    pv_run *r = &v->runs[v->count - 1];
+    r->box_w_pct  = box_w_pct;
+    r->box_l_pct  = box_l_pct;
+    r->box_r_pct  = box_r_pct;
+    r->box_mt_pct = box_mt_pct;
+    r->box_mb_pct = box_mb_pct;
 }
 
 void pv_set_ua_tag(pv_view *v, int ua_tag) {
@@ -780,6 +797,18 @@ static int is_block_like(lxb_tag_id_t t, css_display display) {
     if (display == CSS_DISP_INLINE) return 0;
     if (display == CSS_DISP_BLOCK || display == CSS_DISP_INLINE_BLOCK
         || display == CSS_DISP_LIST_ITEM) return 1;
+    /* Every box of the table family is a BLOCK CONTAINER (CSS 2.1 17.2): a
+     * table, a row group, a row, a cell and a caption all establish a block
+     * formatting context for their content. Only table-column generates no box
+     * at all, so it is deliberately absent.
+     *
+     * Reaching is_block_tag for them meant a `figcaption{display:table-caption}`
+     * -- how every MediaWiki thumbnail caption is written -- registered no box,
+     * so nothing downstream could tell the caption apart from the picture it
+     * describes. */
+    if (display == CSS_DISP_TABLE || display == CSS_DISP_TABLE_ROW_GROUP ||
+        display == CSS_DISP_TABLE_ROW || display == CSS_DISP_TABLE_CELL ||
+        display == CSS_DISP_TABLE_CAPTION) return 1;
     return is_block_tag(t);
 }
 
@@ -1067,6 +1096,10 @@ typedef struct pv_box_info {
     int ua;      /* bx_ua_tag of the block this box came from; rides beside mt/mb
                   * because it is what makes them meaningful when the author sets
                   * neither. Appended, same reason as w_pct. */
+    /* Percentage halves of the same placement, per-mille of the containing
+     * block WIDTH (all four of them: CSS 2.1 8.3/8.4 resolve even the vertical
+     * margins against the width). 0 = none. Appended for the same reason. */
+    int l_pct, r_pct, mt_pct, mb_pct;
 } pv_box_info;
 
 /* The author text-presentation extensions struct (pv_text_ext) is public now
@@ -1162,12 +1195,16 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
     }
 }
 
-/* True if the resolved style declares any HORIZONTAL box property. */
+/* True if the resolved style declares any HORIZONTAL box property, in either
+ * half of the <length-percentage>: `width: 50%` states a width just as much as
+ * `width: 400px` does. */
 static int css_has_hbox(const css_style *cs) {
     return cs->margin_left != CSS_LEN_UNSET || cs->margin_right != CSS_LEN_UNSET ||
            cs->pad_left   != CSS_LEN_UNSET || cs->pad_right   != CSS_LEN_UNSET ||
            cs->width != CSS_LEN_UNSET || cs->max_width != CSS_LEN_UNSET ||
-           cs->width_pct > 0 || cs->max_width_pct > 0 ||
+           cs->pct[CSS_PCT_WIDTH] != 0 || cs->pct[CSS_PCT_MAX_WIDTH] != 0 ||
+           cs->pct[CSS_PCT_MARGIN_LEFT] != 0 || cs->pct[CSS_PCT_MARGIN_RIGHT] != 0 ||
+           cs->pct[CSS_PCT_PAD_LEFT] != 0 || cs->pct[CSS_PCT_PAD_RIGHT] != 0 ||
            cs->min_width > 0;
 }
 
@@ -1186,14 +1223,22 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
         w = cs->max_width;
     /* Percentage caps stay symbolic (per-mille, both against the same containing
      * width, so the tighter per-mille IS the tighter cap); the painter resolves
-     * px-vs-pct with bx_width_cap at layout time. */
-    int wp = (cs->width_pct > 0) ? cs->width_pct : 0;
-    if (cs->max_width_pct > 0 && (wp == 0 || cs->max_width_pct < wp))
-        wp = cs->max_width_pct;
+     * px-vs-pct with bx_lp_px at layout time. */
+    int wp = (cs->pct[CSS_PCT_WIDTH] > 0) ? cs->pct[CSS_PCT_WIDTH] : 0;
+    int mwp = cs->pct[CSS_PCT_MAX_WIDTH];
+    if (mwp > 0 && (wp == 0 || mwp < wp)) wp = mwp;
+    /* The inset percentages add exactly like the px ones: padding and margin on
+     * one side share the containing block width as their basis, so their
+     * per-mille shares are additive (CSS 2.1 8.3/8.4). An `auto` margin has no
+     * percentage half by definition. */
+    int lp = cs->pct[CSS_PCT_PAD_LEFT]  + ((ml != CSS_LEN_AUTO) ? cs->pct[CSS_PCT_MARGIN_LEFT]  : 0);
+    int rp = cs->pct[CSS_PCT_PAD_RIGHT] + ((mr != CSS_LEN_AUTO) ? cs->pct[CSS_PCT_MARGIN_RIGHT] : 0);
     out->l = (l > 0) ? l : 0;
     out->r = (r > 0) ? r : 0;
     out->w = (w != CSS_LEN_UNSET && w > 0) ? w : 0;
     out->w_pct = wp;
+    out->l_pct = (lp > 0) ? lp : 0;
+    out->r_pct = (rp > 0) ? rp : 0;
     out->center = (ml == CSS_LEN_AUTO && mr == CSS_LEN_AUTO &&
                    (out->w > 0 || wp > 0)) ? 1 : 0;
 }
@@ -1218,6 +1263,11 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->border_top_width > 0 || cs->border_right_width > 0 ||
            cs->border_bottom_width > 0 || cs->border_left_width > 0 ||
            (cs->border_radius != CSS_LEN_UNSET && cs->border_radius > 0) ||
+           (cs->border_radius_tr != CSS_LEN_UNSET && cs->border_radius_tr > 0) ||
+           (cs->border_radius_br != CSS_LEN_UNSET && cs->border_radius_br > 0) ||
+           (cs->border_radius_bl != CSS_LEN_UNSET && cs->border_radius_bl > 0) ||
+           cs->pct[CSS_PCT_RADIUS_TL] > 0 || cs->pct[CSS_PCT_RADIUS_TR] > 0 ||
+           cs->pct[CSS_PCT_RADIUS_BR] > 0 || cs->pct[CSS_PCT_RADIUS_BL] > 0 ||
            cs->box_shadow_color != -1 ||
            (cs->outline_width != CSS_LEN_UNSET && cs->outline_width > 0) ||
            css_has_position(cs) ||
@@ -1235,6 +1285,23 @@ static int css_has_boxdeco(const css_style *cs) {
            /* min-width alone too: a div with only `min-width:Npx` is a paintable
             * floor; the painter needs the box entry to honour it. */
            cs->min_width > 0 ||
+           /* ...and a declared WIDTH, for the same reason the declared HEIGHT
+            * above needs one. It matters most for a flex/grid container: its
+            * items are laid out inside the box the painter finds for it, so a
+            * `.row{display:flex;width:300px}` with no other decoration had no
+            * box at all and its items wrapped against the PAGE width instead of
+            * the 300px the author declared. */
+           (cs->display == CSS_DISP_FLEX || cs->display == CSS_DISP_GRID
+            ? (cs->width > 0 || cs->pct[CSS_PCT_WIDTH] > 0 ||
+               cs->max_width > 0 || cs->pct[CSS_PCT_MAX_WIDTH] > 0)
+            : 0) ||
+           /* A multi-column container is a box even with no decoration at all:
+            * the painter fragments its content into columns, which it can only
+            * do from a box def. `.refs { column-count: 3 }` on a bare <div> is
+            * the entire wikipedia reference-list idiom. */
+           cs->column_count > 0 || cs->column_width > 0 ||
+           /* A clamped block needs a box for the painter to cut its lines in. */
+           cs->line_clamp > 0 ||
            /* a linear-gradient background needs the box machinery to paint (a solid
             * background alone still rides the runs, unchanged). */
            cs->bg_grad_n >= 2 ||
@@ -1248,6 +1315,7 @@ static int css_has_boxdeco(const css_style *cs) {
            cs->opacity != -1 || cs->mix_blend_mode != CSS_MB_UNSET ||
            cs->isolation != CSS_ISO_UNSET ||
            cs->transform_tx != CSS_LEN_UNSET || cs->transform_ty != CSS_LEN_UNSET ||
+           cs->pct[CSS_PCT_TRANSLATE_X] != 0 || cs->pct[CSS_PCT_TRANSLATE_Y] != 0 ||
            cs->transform_sx != CSS_LEN_UNSET || cs->transform_sy != CSS_LEN_UNSET ||
            cs->transform_rotate != CSS_LEN_UNSET ||
            /* M1.2c: skew triggers like any other transform function; origin
@@ -1360,10 +1428,12 @@ typedef struct pv_box_reg {
  * (PV_LEN_UNSET width/radius/outline width, -1 colors, 0 the rest). */
 static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->parent_id = -1;
-    pv_box_info hb = { 0, 0, 0, 0, PV_LEN_UNSET, PV_LEN_UNSET, 0, BX_UA_NONE };
+    pv_box_info hb = { .mt = PV_LEN_UNSET, .mb = PV_LEN_UNSET, .ua = BX_UA_NONE };
     css_hbox_resolve(cs, &hb);
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
     d->box_w_pct = hb.w_pct;
+    d->box_l_pct = hb.l_pct; d->box_r_pct = hb.r_pct;
+    d->box_min_w_pct = (cs->pct[CSS_PCT_MIN_WIDTH] > 0) ? cs->pct[CSS_PCT_MIN_WIDTH] : 0;
     int bg = cs->background;
     d->bg_rgb = (bg >= 0) ? bg
               : (bg == CC_COLOR_TRANSPARENT) ? CC_COLOR_TRANSPARENT
@@ -1375,6 +1445,13 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->pad_r = (cs->pad_right  != CSS_LEN_UNSET) ? cs->pad_right  : 0;
     d->pad_b = (cs->pad_bottom != CSS_LEN_UNSET) ? cs->pad_bottom : 0;
     d->pad_l = (cs->pad_left   != CSS_LEN_UNSET) ? cs->pad_left   : 0;
+    /* All four padding percentages measure the containing block WIDTH (CSS 2.1
+     * 8.4, including padding-top/-bottom): that is what makes a percentage
+     * padding produce a constant-ratio box. */
+    d->pad_t_pct = cs->pct[CSS_PCT_PAD_TOP];
+    d->pad_r_pct = cs->pct[CSS_PCT_PAD_RIGHT];
+    d->pad_b_pct = cs->pct[CSS_PCT_PAD_BOTTOM];
+    d->pad_l_pct = cs->pct[CSS_PCT_PAD_LEFT];
     d->bord_tw = cs->border_top_width;    d->bord_rw = cs->border_right_width;
     d->bord_bw = cs->border_bottom_width; d->bord_lw = cs->border_left_width;
     d->bord_ts = cs->border_top_style;    d->bord_rs = cs->border_right_style;
@@ -1382,6 +1459,15 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bord_tc = cs->border_top_color;    d->bord_rc = cs->border_right_color;
     d->bord_bc = cs->border_bottom_color; d->bord_lc = cs->border_left_color;
     d->border_radius = cs->border_radius;
+    d->border_radius_tr = cs->border_radius_tr;
+    d->border_radius_br = cs->border_radius_br;
+    d->border_radius_bl = cs->border_radius_bl;
+    d->radius_tl_pct = cs->pct[CSS_PCT_RADIUS_TL];
+    d->radius_tr_pct = cs->pct[CSS_PCT_RADIUS_TR];
+    d->radius_br_pct = cs->pct[CSS_PCT_RADIUS_BR];
+    d->radius_bl_pct = cs->pct[CSS_PCT_RADIUS_BL];
+    d->transform_tx_pct = cs->pct[CSS_PCT_TRANSLATE_X];
+    d->transform_ty_pct = cs->pct[CSS_PCT_TRANSLATE_Y];
     d->bsh_dx = cs->shadow2_dx; d->bsh_dy = cs->shadow2_dy;
     d->bsh_blur = cs->shadow2_blur; d->bsh_spread = cs->shadow2_spread;
     d->bsh_color = cs->box_shadow_color; d->bsh_inset = cs->box_shadow_inset;
@@ -1390,8 +1476,21 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->outline_offset = cs->outline_offset;
     d->position = cs->position;
     d->display = cs->display;
+    d->line_clamp = cs->line_clamp;
+    d->col_count = cs->column_count;
+    d->col_width = cs->column_width;
+    d->col_gap = cs->gap;                 /* column-gap and the box-alignment gap are one property */
+    d->col_fill = cs->column_fill;
+    d->col_span = cs->column_span;
+    d->col_rule_w = cs->column_rule_width;
+    d->col_rule_style = cs->column_rule_style;
+    d->col_rule_color = cs->column_rule_color;
     d->inset_top = cs->inset_top; d->inset_right = cs->inset_right;
     d->inset_bottom = cs->inset_bottom; d->inset_left = cs->inset_left;
+    d->inset_top_pct = cs->pct[CSS_PCT_INSET_TOP];
+    d->inset_right_pct = cs->pct[CSS_PCT_INSET_RIGHT];
+    d->inset_bottom_pct = cs->pct[CSS_PCT_INSET_BOTTOM];
+    d->inset_left_pct = cs->pct[CSS_PCT_INSET_LEFT];
     d->z_index = cs->z_index;
     d->visibility = cs->visibility;
     /* content-visibility: hidden folds into visibility (skip paint, keep space --
@@ -1547,6 +1646,11 @@ static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style
 typedef struct pv_style_cache {
     const lxb_dom_node_t **node;
     css_style             *style;
+    /* The element's COMPUTED font-size in px, cached beside its style because
+     * every descendant needs it as its inherited value. Without memoising it,
+     * resolving one element would mean re-resolving its whole ancestor chain --
+     * a full cascade per level, per element. */
+    double                *font_size;
     size_t                 count, cap;
 } pv_style_cache;
 
@@ -1554,9 +1658,10 @@ static int pv_style_cache_init(pv_style_cache *c) {
     c->cap = 64;
     c->node = (const lxb_dom_node_t **)calloc(c->cap, sizeof *c->node);
     c->style = (css_style *)calloc(c->cap, sizeof *c->style);
-    if (c->node == NULL || c->style == NULL) {
-        free(c->node); free(c->style);
-        c->node = NULL; c->style = NULL; c->cap = 0;
+    c->font_size = (double *)calloc(c->cap, sizeof *c->font_size);
+    if (c->node == NULL || c->style == NULL || c->font_size == NULL) {
+        free(c->node); free(c->style); free(c->font_size);
+        c->node = NULL; c->style = NULL; c->font_size = NULL; c->cap = 0;
         return -1;
     }
     c->count = 0;
@@ -1564,36 +1669,94 @@ static int pv_style_cache_init(pv_style_cache *c) {
 }
 
 static void pv_style_cache_free(pv_style_cache *c) {
-    free(c->node); free(c->style);
-    c->node = NULL; c->style = NULL; c->count = c->cap = 0;
+    free(c->node); free(c->style); free(c->font_size);
+    c->node = NULL; c->style = NULL; c->font_size = NULL;
+    c->count = c->cap = 0;
 }
 
 /* cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init,
  * or a caller that opts out) simply calls through uncached -- never a hard
  * failure, matching every other degrade-on-OOM path in this module. */
+/* Index of `node` in the cache, or -1. */
+static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node) {
+    if (cache == NULL) return -1;
+    for (size_t i = 0; i < cache->count; ++i)
+        if (cache->node[i] == node) return (long)i;
+    return -1;
+}
+
+static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
+                         const css_style *cs, double font_size) {
+    if (cache == NULL) return;
+    if (cache->count == cache->cap) {
+        size_t ncap = cache->cap * 2;
+        const lxb_dom_node_t **nn =
+            (const lxb_dom_node_t **)realloc(cache->node, ncap * sizeof *nn);
+        if (nn != NULL) cache->node = nn;
+        css_style *ns = (css_style *)realloc(cache->style, ncap * sizeof *ns);
+        if (ns != NULL) cache->style = ns;
+        double *nf = (double *)realloc(cache->font_size, ncap * sizeof *nf);
+        if (nf != NULL) cache->font_size = nf;
+        if (nn != NULL && ns != NULL && nf != NULL) cache->cap = ncap;
+    }
+    if (cache->count < cache->cap) {
+        cache->node[cache->count] = node;
+        cache->style[cache->count] = *cs;
+        cache->font_size[cache->count] = font_size;
+        ++cache->count;
+    }
+}
+
+/* The nearest ancestor that is an element, or NULL at the root. */
+static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el) {
+    lxb_dom_node_t *p = ((lxb_dom_node_t *)el)->parent;
+    if (p == NULL || p->type != LXB_DOM_NODE_TYPE_ELEMENT) return NULL;
+    return lxb_dom_interface_element(p);
+}
+
+/*
+ * cch_element_style(el, sheet), memoized in *cache, resolving font-relative
+ * lengths against the element's real computed font-size.
+ *
+ * An element's `em` depends on its font-size, which depends on its parent's, so
+ * the chain has to be resolved from the ROOT DOWN. It is walked iteratively into
+ * a bounded stack buffer rather than by recursion: the depth is attacker-chosen
+ * (a page of ten thousand nested <div>s is a few hundred KB of HTML), and
+ * recursion there is a stack overflow, not a slow render. Past the bound the
+ * walk simply starts from the CSS initial size -- a wrong `em` deep inside a
+ * pathological document, never a crash.
+ *
+ * A NULL cache (OOM at init) still resolves correctly, just without memoising.
+ */
 static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
                                       pv_style_cache *cache) {
     const lxb_dom_node_t *node = (const lxb_dom_node_t *)el;
-    if (cache != NULL) {
-        for (size_t i = 0; i < cache->count; ++i)
-            if (cache->node[i] == node) return cache->style[i];
+    long hit = pv_cache_find(cache, node);
+    if (hit >= 0) return cache->style[hit];
+
+    /* Collect the uncached ancestors, nearest first, stopping at the first one
+     * already resolved (its font-size is the inherited value from there down). */
+    lxb_dom_element_t *stack[PV_FONT_CHAIN_MAX];
+    size_t n = 0;
+    double inherited = CL_INITIAL_FONT_SIZE;
+    lxb_dom_element_t *cur = el;
+    while (cur != NULL && n < PV_FONT_CHAIN_MAX) {
+        long h = pv_cache_find(cache, (const lxb_dom_node_t *)cur);
+        if (h >= 0) { inherited = cache->font_size[h]; break; }
+        stack[n++] = cur;
+        cur = pv_parent_element(cur);
     }
-    css_style cs = cch_element_style(el, sheet);
-    if (cache != NULL) {
-        if (cache->count == cache->cap) {
-            size_t ncap = cache->cap * 2;
-            const lxb_dom_node_t **nn =
-                (const lxb_dom_node_t **)realloc(cache->node, ncap * sizeof *nn);
-            if (nn != NULL) cache->node = nn;
-            css_style *ns = (css_style *)realloc(cache->style, ncap * sizeof *ns);
-            if (ns != NULL) cache->style = ns;
-            if (nn != NULL && ns != NULL) cache->cap = ncap;
-        }
-        if (cache->count < cache->cap) {
-            cache->node[cache->count] = node;
-            cache->style[cache->count] = cs;
-            ++cache->count;
-        }
+
+    /* n is at least 1 (el itself was not cached, so it was pushed) unless the
+     * bound was already exhausted; resolve directly in that degenerate case. */
+    if (n == 0) return cch_element_style_fs(el, sheet, inherited);
+
+    /* Resolve top-down so each level sees its parent's computed size. */
+    css_style cs = cch_element_style_fs(stack[n - 1], sheet, inherited);
+    for (size_t k = n; k-- > 0; ) {
+        if (k != n - 1) cs = cch_element_style_fs(stack[k], sheet, inherited);
+        inherited = css_computed_font_size(&cs, inherited);
+        pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited);
     }
     return cs;
 }
@@ -1909,6 +2072,11 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 int row_zero = (t == LXB_TAG_TR) ? 0 : PV_LEN_UNSET;
                 box->mt = (cs.margin_top != CSS_LEN_UNSET) ? cs.margin_top : row_zero;
                 box->mb = (cs.margin_bottom != CSS_LEN_UNSET) ? cs.margin_bottom : row_zero;
+                /* The percentage half of the same two margins. It resolves against
+                 * the containing block WIDTH, not its height (CSS 2.1 8.3) -- the
+                 * one rule about percentage margins that surprises everyone. */
+                box->mt_pct = cs.pct[CSS_PCT_MARGIN_TOP];
+                box->mb_pct = cs.pct[CSS_PCT_MARGIN_BOTTOM];
                 /* ...and WHICH element it is, so the painter can apply that element's
                  * user-agent margin instead of assuming <p>. Same nearest-block-
                  * ancestor rule as the margins it rides with. spec/box_style.md 4d. */
@@ -1947,7 +2115,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                  * nothing and keeps its even-split. */
                 if (box != NULL && !crossed_container && box->w == 0 && box->w_pct == 0) {
                     if (cs.width != CSS_LEN_UNSET && cs.width > 0) box->w = cs.width;
-                    if (cs.width_pct > 0) box->w_pct = cs.width_pct;
+                    if (cs.pct[CSS_PCT_WIDTH] > 0) box->w_pct = cs.pct[CSS_PCT_WIDTH];
                 }
             }
             /* Horizontal box from the nearest block ancestor that declares one, so a
@@ -4130,7 +4298,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     pv_set_float(v, econt.float_side, econt.float_id, econt.float_clear);
                     pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
                     pv_set_ua_tag(v, ebox.ua);
-                    pv_set_box_pct(v, ebox.w_pct);
+                    pv_set_box_pct(v, ebox.w_pct, ebox.l_pct, ebox.r_pct,
+                                   ebox.mt_pct, ebox.mb_pct);
                     pv_set_text_ext(v, &eext);
                     pv_set_block_id(v, ebdeco);
                     pv_set_node_id(v, pv_node_map_id(&node_map, n));
@@ -4288,7 +4457,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_ua_tag(v, box.ua);
-                pv_set_box_pct(v, box.w_pct);
+                pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,
+                               box.mt_pct, box.mb_pct);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
@@ -4403,7 +4573,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_ua_tag(v, box.ua);
-                pv_set_box_pct(v, box.w_pct);
+                pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,
+                               box.mt_pct, box.mb_pct);
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));

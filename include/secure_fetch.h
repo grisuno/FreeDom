@@ -168,6 +168,30 @@ typedef struct sf_response {
 #define SF_DEFAULT_USER_AGENT  FP_USER_AGENT
 #define SF_DEFAULT_MAX_BODY    ((size_t)(16u * 1024u * 1024u))
 #define SF_DEFAULT_TIMEOUT_MS  30000L
+
+/*
+ * Connect deadline, and the shorter total budget a SUBRESOURCE gets.
+ *
+ * These exist because a page is not one fetch. A document that names twenty
+ * stylesheets, scripts and images pays the timeout of every one of them, and
+ * with only a 30 s total timeout and NO connect deadline at all, a single
+ * blackholed host burned the whole 30 s inside the TCP/TLS handshake -- twenty
+ * of those is a page that takes minutes to appear. Measured on a real site:
+ * 1.5 s with no subresources, 32 s with author CSS, past 400 s with images.
+ *
+ * SF_CONNECT_TIMEOUT_MS bounds only the handshake: a peer that has not
+ * completed one in this long is not about to. It is deliberately generous
+ * enough for a slow mobile link plus a Tor/I2P hop, which is why it is not
+ * one or two seconds.
+ *
+ * SF_SUBRESOURCE_TIMEOUT_MS is the total budget for a stylesheet, script or
+ * image. A subresource is optional by construction -- the page renders without
+ * it -- so waiting the document's full budget for one trades a guaranteed
+ * delay for a possible improvement. The document itself keeps
+ * SF_DEFAULT_TIMEOUT_MS: there is nothing to show without it.
+ */
+#define SF_CONNECT_TIMEOUT_MS      8000L
+#define SF_SUBRESOURCE_TIMEOUT_MS  8000L
 #define SF_DEFAULT_MAX_REDIRECTS 10
 #define SF_MAX_URL             8192u  /* hard cap for any single URL we will act on (matches URL_MAX_LEN; modern bundler URLs exceed 2 KiB) */
 

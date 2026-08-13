@@ -171,6 +171,36 @@ bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
  * => 0 (no cap). Never negative. Pure. */
 double bx_width_cap(int w_px, int w_pct, double avail_w);
 
+/* Border-box height for a DECLARED height under box-sizing (CSS 2.1 10.6.3,
+ * CSS Box Sizing 3 section 4). With content-box -- the CSS default, so the
+ * common case -- `height` sizes the CONTENT, and the vertical padding and
+ * border sit OUTSIDE it: a `height:60px; padding:2%` box is taller than 60px.
+ * With border-box the declared height already includes them and this is the
+ * identity. Negative edges are treated as 0; the result is never negative.
+ *
+ * The horizontal twin is bx_content_cap, which converts the other way (a
+ * declared border-box WIDTH into the content width cap) because widths are
+ * capped and heights are set. Pure. */
+double bx_border_box_h(double declared_h, int border_box,
+                       double pad_t, double pad_b, double bord_t, double bord_b);
+
+/* Used px value of a <length-percentage> (CSS Values 4 section 5.3): the px
+ * half plus pct_pm per-mille of `basis`. This is the ONLY place the engine
+ * turns a percentage into pixels, and the rule is the whole of it -- there is
+ * no clamping, no minimum and no special case here, because none of those are
+ * properties of the value type.
+ *
+ * `basis` is the containing-block dimension the property resolves against.
+ * Which dimension that is belongs to the caller and is NOT symmetric: CSS 2.1
+ * sections 8.3/8.4 resolve ALL FOUR margin and padding percentages against the
+ * containing block WIDTH, padding-top and padding-bottom included. The full
+ * property -> basis table is spec/css_length.md section 7.3.
+ *
+ * px_val may carry a CSS_LEN_UNSET/CSS_LEN_AUTO sentinel, which contributes 0
+ * (a percentage-only value states no absolute length). A basis that is not a
+ * usable length contributes nothing while the absolute half survives. Pure. */
+double bx_lp_px(int px_val, int pct_pm, double basis);
+
 /* Content-width cap adjusted for box-sizing (2026-07-11). With border_box set,
  * the declared width includes the horizontal padding and border, so the cap on
  * the CONTENT is width_cap minus those edges, clamped >= 1 (a border-box

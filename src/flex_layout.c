@@ -346,6 +346,74 @@ double fx_auto_min_size(double min_content, double basis, double author_min,
     return (mc < b) ? mc : b;
 }
 
+fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+                           double gap, int *out_n, double *out_w) {
+    if (out_n == NULL || out_w == NULL) return FX_ERR_NULL_ARG;
+
+    if (!(avail_w > 0.0)) { *out_n = 1; *out_w = (avail_w > 0.0) ? avail_w : 1.0; return FX_OK; }
+    if (!(gap > 0.0)) gap = 0.0;
+
+    int have_count = (column_count > 0);
+    int have_width = (column_width > 0.0);
+
+    int n;
+    if (!have_count && !have_width) {
+        /* Not a multi-column container. Fail closed: with neither property the
+         * element must lay out exactly as it did before this feature existed. */
+        *out_n = 1;
+        *out_w = avail_w;
+        return FX_OK;
+    }
+    if (!have_width) {
+        n = column_count;
+    } else {
+        /* How many columns of at least column_width fit, gaps included. */
+        double fit = (avail_w + gap) / (column_width + gap);
+        n = (fit >= 1.0) ? (int)fit : 1;
+        if (have_count && column_count < n) n = column_count;
+    }
+    if (n < 1) n = 1;
+    if (n > (int)FX_MAX_COLUMNS) n = (int)FX_MAX_COLUMNS;
+
+    double w = (avail_w - gap * (double)(n - 1)) / (double)n;
+    if (!(w >= 1.0)) w = 1.0;
+
+    *out_n = n;
+    *out_w = w;
+    return FX_OK;
+}
+
+fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+                              int *out_col, double *out_colh) {
+    if (ncol < 1 || ncol > (int)FX_MAX_COLUMNS) return FX_ERR_RANGE;
+    if (n > FX_MAX_ITEMS) return FX_ERR_RANGE;
+    if (out_colh == NULL) return FX_ERR_NULL_ARG;
+    for (int c = 0; c < ncol; ++c) out_colh[c] = 0.0;
+    if (n == 0) return FX_OK;
+    if (heights == NULL || out_col == NULL) return FX_ERR_NULL_ARG;
+
+    double total = 0.0;
+    for (size_t i = 0; i < n; ++i) if (heights[i] > 0.0) total += heights[i];
+    double target = total / (double)ncol;
+
+    int c = 0;
+    double acc = 0.0;
+    for (size_t i = 0; i < n; ++i) {
+        double h = (heights[i] > 0.0) ? heights[i] : 0.0;
+        /* Move on once this column has reached the balanced target, but never
+         * leave a column empty just to honour it, and never run past the last
+         * column -- the remainder always lands somewhere. */
+        if (c < ncol - 1 && acc > 0.0 && acc >= target) {
+            ++c;
+            acc = 0.0;
+        }
+        out_col[i] = c;
+        acc += h;
+        out_colh[c] += h;
+    }
+    return FX_OK;
+}
+
 const char *fx_justify_name(fx_justify j) {
     switch (j) {
         case FX_JUSTIFY_START:         return "start";

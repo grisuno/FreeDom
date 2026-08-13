@@ -80,7 +80,12 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
        P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
        P_PAD_TOP, P_PAD_RIGHT, P_PAD_BOTTOM, P_PAD_LEFT,
        P_WIDTH, P_MAXWIDTH, P_MINWIDTH, P_HEIGHT, P_MINHEIGHT, P_MAXHEIGHT,
-       P_WIDTH_PCT, P_MAXWIDTH_PCT,
+       /* The percentage half of every <length-percentage> property, one slot per
+        * css_pct_slot and in that exact order, so pct_slot_of() is a table lookup
+        * rather than a second hand-maintained switch. apply() writes them into
+        * css_style.pct[]. */
+       P_PCT_FIRST,
+       P_PCT_LAST = P_PCT_FIRST + CSS_PCT_N - 1,
        /* Text-presentation extensions (Hito 23b-6). The three text-shadow slots are
         * contiguous (dx,dy,color) so expand_shadow writes them as a group. */
        P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING,
@@ -95,7 +100,10 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
        P_BW_TOP, P_BW_RIGHT, P_BW_BOTTOM, P_BW_LEFT,
        P_BS_TOP, P_BS_RIGHT, P_BS_BOTTOM, P_BS_LEFT,
        P_BC_TOP, P_BC_RIGHT, P_BC_BOTTOM, P_BC_LEFT,
-       P_BORDER_RADIUS,
+       /* The four border-radius corners, contiguous in CSS corner order
+        * (top-left, top-right, bottom-right, bottom-left) so the shorthand
+        * expander can write them as a group. */
+       P_BORDER_RADIUS, P_RADIUS_TR, P_RADIUS_BR, P_RADIUS_BL,
        P_BSHADOW_DX, P_BSHADOW_DY, P_BSHADOW_BLUR, P_BSHADOW_SPREAD,
        P_BSHADOW_COLOR, P_BSHADOW_INSET,
        P_OUTLINE_W, P_OUTLINE_S, P_OUTLINE_C, P_OUTLINE_OFFSET,
@@ -179,12 +187,28 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         /* clip: rect(top,right,bottom,left) for positioned boxes (2016-07-30).
          * Each slot carries px, CSS_LEN_UNSET = auto (the border-box edge). */
         P_CLIP_TOP, P_CLIP_RIGHT, P_CLIP_BOTTOM, P_CLIP_LEFT,
+        /* Multi-column (2026-08-12). column-gap is not here: it is the same
+         * property as the flex/grid gap in CSS Box Alignment and keeps writing
+         * P_GAP, which multicol now reads instead of ignoring. */
+        P_LINE_CLAMP,
+        P_COLUMN_COUNT, P_COLUMN_WIDTH, P_COLUMN_FILL, P_COLUMN_SPAN,
+        P_COLRULE_W, P_COLRULE_S, P_COLRULE_C,
         P_NSLOTS };
 
 typedef struct css_decl {
     int prop;       /* P_* */
     int ival;       /* interpreted value (color packed / enum / scale / bool) */
     int important;  /* 1 if the declaration carried !important (higher cascade tier) */
+    /* Font-relative component of a <length>, in THOUSANDTHS of an em: the
+     * derivative cl_lp.em, scaled like the per-mille percentage channel and for
+     * the same reason (the cascade is integer). 0 = the value does not move with
+     * the font-size, which is true of every non-length declaration by
+     * construction -- only the length emitters ever write it.
+     *
+     * `ival` stays the value resolved at the INITIAL 16px context, so an element
+     * that computes to 16px is unaffected and the fold is a pure correction.
+     * See spec/css_length.md section 8. */
+    int emil;
 } css_decl;
 
 /* One custom property (--name: value), for var() lookups. Both fields are bounded
@@ -1212,7 +1236,11 @@ static int expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
  * the declaration (anti-DoS; the whole value already fits one CSS_TOK_MAX token). */
 #define CSS_MATHFN_MAX_ARGS 8
 
-typedef struct calc_val { double px; int is_length; } calc_val;
+/* A calc() term: its value at the parse context PLUS its derivative with
+ * respect to the element's font-size (spec/css_length.md section 8.4). Carrying
+ * `em` through the arithmetic is what makes `calc(2em + 10px)` exact at any
+ * font-size instead of frozen at the initial 16px. */
+typedef struct calc_val { double px; double em; int is_length; } calc_val;
 typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
 
 static void calc_skip_ws(calc_parser *p) {
@@ -1230,6 +1258,26 @@ static int calc_match_fn(calc_parser *p, const char *name) {
     if (p->s[p->i + len] != '(') return 0;
     p->i += len + 1;
     return 1;
+}
+
+/*
+ * The font-size derivative of a min()/max()/clamp() result.
+ *
+ * These are piecewise linear, not affine: WHICH operand wins depends on the
+ * font-size, so once two operands disagree about their derivative the result
+ * has no single slope and cannot be folded later. That fails closed to 0 --
+ * i.e. the value stays frozen at the initial context, which is exactly what the
+ * engine did before font-relative folding existed. Inventing a slope would be
+ * worse than keeping the old answer.
+ *
+ * When every operand shares one derivative the result provably has it too,
+ * whichever operand wins, so that case IS exact and is kept.
+ */
+static double calc_piecewise_em(const calc_val *args, int nargs) {
+    if (nargs <= 0) return 0.0;
+    for (int k = 1; k < nargs; ++k)
+        if (args[k].em != args[0].em) return 0.0;
+    return args[0].em;
 }
 
 /* min()/max()/clamp() (2026-07-10): comma-separated full expressions, every
@@ -1257,6 +1305,7 @@ static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind) {
         if (nargs != 3) return 0;
         double m = (args[1].px < args[2].px) ? args[1].px : args[2].px;
         out->px = (args[0].px > m) ? args[0].px : m;
+        out->em = calc_piecewise_em(args, nargs);
         out->is_length = args[0].is_length;
         return 1;
     }
@@ -1266,6 +1315,7 @@ static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind) {
         else           { if (args[k].px > best) best = args[k].px; }
     }
     out->px = best;
+    out->em = calc_piecewise_em(args, nargs);
     out->is_length = args[0].is_length;
     return 1;
 }
@@ -1322,10 +1372,13 @@ static int calc_factor(calc_parser *p, calc_val *out, int depth) {
         cl_ctx ctx = css_len_ctx();
         double per;
         if (cl_unit_scale(p->s + p->i, un, &ctx, &per) == CL_OK) {
-            out->px = num * per; out->is_length = 1; p->i += un; return 1;
+            out->px = num * per;
+            out->em = num * cl_unit_font_ratio(p->s + p->i, un);
+            out->is_length = 1; p->i += un; return 1;
         }
     }
     out->px = num;                      /* a bare number: length only if exactly 0 */
+    out->em = 0.0;
     out->is_length = (num == 0.0);
     return 1;
 }
@@ -1341,11 +1394,13 @@ static int calc_term(calc_parser *p, calc_val *out, int depth) {
         if (!calc_factor(p, &rhs, depth)) return 0;
         if (op == '*') {
             if (out->is_length && rhs.is_length) return 0;   /* length*length: invalid */
+            out->em = out->em * rhs.px + rhs.em * out->px;
             out->px = out->px * rhs.px;
             out->is_length = out->is_length || rhs.is_length;
         } else {
             if (rhs.is_length || rhs.px == 0.0) return 0;    /* divisor must be a nonzero number */
             out->px = out->px / rhs.px;
+            out->em = out->em / rhs.px;
         }
     }
     return 1;
@@ -1361,6 +1416,7 @@ static int calc_expr(calc_parser *p, calc_val *out, int depth) {
         if (!calc_term(p, &rhs, depth)) return 0;
         if (out->is_length != rhs.is_length) return 0;       /* length +/- number: invalid */
         out->px = (op == '+') ? out->px + rhs.px : out->px - rhs.px;
+        out->em = (op == '+') ? out->em + rhs.em : out->em - rhs.em;
     }
     return 1;
 }
@@ -1368,14 +1424,25 @@ static int calc_expr(calc_parser *p, calc_val *out, int depth) {
 /* Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching
  * ")" already stripped by the caller). Fails closed on any leftover/unparsed input,
  * mismatched parens, a dimensionless result, or a dimensional error. */
-static int calc_eval(const char *v, size_t vlen, double *out_px) {
+static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em) {
     calc_parser p = { v, vlen, 0 };
     calc_val r;
     if (!calc_expr(&p, &r, 0)) return 0;
     calc_skip_ws(&p);
     if (p.i != vlen || !r.is_length) return 0;
     *out_px = r.px;
+    if (out_em != NULL) *out_em = r.em;
     return 1;
+}
+
+static int calc_eval(const char *v, size_t vlen, double *out_px) {
+    return calc_eval_full(v, vlen, out_px, NULL);
+}
+
+/* The font-size derivative of a calc() body, for value_em_milli. */
+static int calc_eval_em(const char *v, size_t vlen, double *out_em) {
+    double px;
+    return calc_eval_full(v, vlen, &px, out_em);
 }
 
 /* True if s (already trimmed) is a "calc(...)" call spanning the whole string
@@ -1439,40 +1506,133 @@ static int interp_len(const char *v, int allow_auto, int *out) {
     return 1;
 }
 
-/* Emits one box length declaration for slot into dst (cap permitting). A negative
- * value is rejected unless allow_neg (margins allow it; padding/width do not).
- * Returns 1 on success, 0 if the value is unsupported or does not fit. */
-static int emit_len(css_decl *dst, int cap, int slot, const char *val,
-                    int allow_auto, int allow_neg) {
-    int o;
-    if (cap < 1 || !interp_len(val, allow_auto, &o)) return 0;
-    if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
-    dst[0].prop = slot;
-    dst[0].ival = o;
+/* The css_pct_slot mirroring a px length slot, or -1 when the property does not
+ * accept the <length-percentage> type. ONE table, so adding a percentage-capable
+ * property is one row here and nothing else -- and so a property that must keep
+ * rejecting `%` (letter-spacing, border-width, ...) does so by simply not
+ * appearing. */
+static int pct_slot_of(int slot) {
+    switch (slot) {
+        case P_MARGIN_TOP:    return CSS_PCT_MARGIN_TOP;
+        case P_MARGIN_RIGHT:  return CSS_PCT_MARGIN_RIGHT;
+        case P_MARGIN_BOTTOM: return CSS_PCT_MARGIN_BOTTOM;
+        case P_MARGIN_LEFT:   return CSS_PCT_MARGIN_LEFT;
+        case P_PAD_TOP:       return CSS_PCT_PAD_TOP;
+        case P_PAD_RIGHT:     return CSS_PCT_PAD_RIGHT;
+        case P_PAD_BOTTOM:    return CSS_PCT_PAD_BOTTOM;
+        case P_PAD_LEFT:      return CSS_PCT_PAD_LEFT;
+        case P_WIDTH:         return CSS_PCT_WIDTH;
+        case P_MAXWIDTH:      return CSS_PCT_MAX_WIDTH;
+        case P_MINWIDTH:      return CSS_PCT_MIN_WIDTH;
+        case P_HEIGHT:        return CSS_PCT_HEIGHT;
+        case P_MINHEIGHT:     return CSS_PCT_MIN_HEIGHT;
+        case P_MAXHEIGHT:     return CSS_PCT_MAX_HEIGHT;
+        case P_INSET_TOP:     return CSS_PCT_INSET_TOP;
+        case P_INSET_RIGHT:   return CSS_PCT_INSET_RIGHT;
+        case P_INSET_BOTTOM:  return CSS_PCT_INSET_BOTTOM;
+        case P_INSET_LEFT:    return CSS_PCT_INSET_LEFT;
+        case P_TEXTINDENT:    return CSS_PCT_TEXT_INDENT;
+        case P_BORDER_RADIUS: return CSS_PCT_RADIUS_TL;
+        case P_RADIUS_TR:     return CSS_PCT_RADIUS_TR;
+        case P_RADIUS_BR:     return CSS_PCT_RADIUS_BR;
+        case P_RADIUS_BL:     return CSS_PCT_RADIUS_BL;
+        case P_TRANSFORM_TX:  return CSS_PCT_TRANSLATE_X;
+        case P_TRANSFORM_TY:  return CSS_PCT_TRANSLATE_Y;
+        case P_FLEX_BASIS:    return CSS_PCT_FLEX_BASIS;
+        default:              return -1;
+    }
+}
+
+/* Parses one <length-percentage> into its two components: *out_px (a px value,
+ * CSS_LEN_AUTO, or 0 when the value is a pure percentage) and *out_pm (the
+ * percentage in per-mille, 0 when there is none). Percentages are accepted only
+ * when the caller asks (allow_pct), which is how properties whose grammar is a
+ * bare <length> keep failing closed.
+ *
+ * calc() is resolved by the existing evaluator, which works in px and has no
+ * containing block, so a calc() MIXING a percentage with a length still fails
+ * closed rather than silently dropping the percentage half. */
+/* The font-relative derivative of `v`, in thousandths of an em, saturating at
+ * CSS_EM_MILLI_MAX. Zero for anything that does not move with the font-size --
+ * which includes a plain px value, a percentage, `auto`, and any value this
+ * module could not parse as a length at all.
+ *
+ * Deliberately re-resolves rather than being plumbed through interp_len's 17
+ * call sites: the derivative is a property of the VALUE TEXT, so asking the one
+ * canonical resolver for it keeps a single source of truth. calc() answers for
+ * its own sum via calc_eval; a bare token answers through cl_resolve_lp. */
+static int value_em_milli(const char *v) {
+    double em = 0.0;
+
+    size_t cs, cl;
+    if (calc_unwrap(v, &cs, &cl)) {
+        if (!calc_eval_em(v + cs, cl, &em)) return 0;
+    } else {
+        cl_ctx ctx = cl_ctx_initial();
+        cl_lp lp;
+        if (cl_resolve_lp(v, &ctx, &lp) != CL_OK) return 0;
+        em = lp.em;
+    }
+    if (!isfinite(em) || em == 0.0) return 0;
+
+    double milli = em * 1000.0;
+    if (milli >  (double)CSS_EM_MILLI_MAX) milli =  (double)CSS_EM_MILLI_MAX;
+    if (milli < -(double)CSS_EM_MILLI_MAX) milli = -(double)CSS_EM_MILLI_MAX;
+    return (int)(milli < 0.0 ? milli - 0.5 : milli + 0.5);
+}
+
+static int interp_lp(const char *v, int allow_auto, int allow_pct,
+                     int *out_px, int *out_pm) {
+    *out_pm = 0;
+    if (interp_len(v, allow_auto, out_px)) return 1;
+    if (!allow_pct) return 0;
+
+    cl_ctx ctx = cl_ctx_initial();
+    cl_lp lp;
+    if (cl_resolve_lp(v, &ctx, &lp) != CL_OK || !lp.has_pct) return 0;
+
+    double pm = lp.pct * 10.0;
+    if (pm >  (double)CSS_PCT_MAX) pm =  (double)CSS_PCT_MAX;
+    if (pm < -(double)CSS_PCT_MAX) pm = -(double)CSS_PCT_MAX;
+    *out_pm = (int)(pm < 0.0 ? pm - 0.5 : pm + 0.5);
+    *out_px = round_clamp(lp.px, -CSS_LEN_MAX, CSS_LEN_MAX);
     return 1;
 }
 
-/* Emits a symbolic percentage width for slot (Hito 32): "<num>%" with num > 0,
- * carried as per-mille (99.8% -> 998) and saturating at 1000% (10000). The parser
- * has no containing block, so the value stays symbolic until layout resolves it
- * (bx_width_cap). Junk or a non-positive number fails closed (returns 0). */
-static int emit_pct(css_decl *dst, int cap, int slot, const char *val) {
-    if (cap < 1) return 0;
-    const char *p = val;
-    if (*p == '+') ++p;
-    double num;
-    const char *end;
-    if (!parse_num(p, &num, &end)) return 0;
-    while (*end == ' ' || *end == '\t') ++end;
-    if (end[0] != '%' || end[1] != '\0') return 0;
-    if (num <= 0.0) return 0;
-    double pm = num * 10.0;
-    if (pm > 10000.0) pm = 10000.0;
-    int v = (int)(pm + 0.5);
-    if (v < 1) return 0;
+/* Emits one box length declaration for slot into dst (cap permitting). A negative
+ * value is rejected unless allow_neg (margins allow it; padding/width do not).
+ *
+ * When the property accepts <length-percentage> (pct_slot_of(slot) >= 0) this
+ * writes BOTH halves, always -- including a 0 percentage for a plain length.
+ * Emitting only the half that changed would leave a lower-specificity `width:50%`
+ * combining with a winning `width:200px`, which is exactly the cascade bug the
+ * old separate P_WIDTH_PCT slot had.
+ *
+ * Returns the number of decls written (0 = unsupported value or no room). */
+static int emit_len(css_decl *dst, int cap, int slot, const char *val,
+                    int allow_auto, int allow_neg) {
+    int ps = pct_slot_of(slot);
+    int need = (ps >= 0) ? 2 : 1;
+    if (cap < need) return 0;
+
+    int o, pm;
+    if (!interp_lp(val, allow_auto, ps >= 0, &o, &pm)) return 0;
+    if (!allow_neg && o != CSS_LEN_AUTO && (o < 0 || pm < 0)) return 0;
+
     dst[0].prop = slot;
-    dst[0].ival = v;
-    return 1;
+    dst[0].ival = o;
+    /* The font-relative half of the value, alongside the px and % halves. A
+     * length emitter is the ONLY thing that writes it, which is what guarantees
+     * a non-length slot can never carry one. */
+    dst[0].emil = (o == CSS_LEN_AUTO) ? 0 : value_em_milli(val);
+    if (ps < 0) return 1;
+    /* A pure percentage leaves the px half UNSET, not 0: `width: 50%` states
+     * nothing about an absolute width, and zeroing it would read as `width: 0`
+     * everywhere the percentage cannot be resolved. */
+    if (pm != 0 && o == 0) dst[0].ival = CSS_LEN_UNSET;
+    dst[1].prop = P_PCT_FIRST + ps;
+    dst[1].ival = pm;
+    return 2;
 }
 
 /* Extracts the next whitespace-separated token starting at *p into tok (bounded to
@@ -1507,29 +1667,40 @@ static int next_ws_token(const char **p, char *tok, size_t cap) {
  * (fail closed, never a partial box). Returns the number of decls written (<= cap). */
 static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
                        css_decl *dst, int cap) {
-    int vals[4], nv = 0;
+    int px[4], pm[4], em[4], nv = 0;
     const char *p = val;
     char tok[CSS_TOK_MAX];
+    int accepts_pct = pct_slot_of(slot_top) >= 0;
     while (nv < 4 && next_ws_token(&p, tok, sizeof tok)) {
-        int o;
-        if (!interp_len(tok, allow_auto, &o)) return 0;
-        if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
-        vals[nv++] = o;
+        int o, q;
+        if (!interp_lp(tok, allow_auto, accepts_pct, &o, &q)) return 0;
+        if (!allow_neg && o != CSS_LEN_AUTO && (o < 0 || q < 0)) return 0;
+        px[nv] = o; pm[nv] = q;
+        em[nv] = (o == CSS_LEN_AUTO) ? 0 : value_em_milli(tok);
+        ++nv;
     }
     if (nv == 0) return 0;
-    int top, right, bottom, left;
-    switch (nv) {
-        case 1: top = right = bottom = left = vals[0]; break;
-        case 2: top = bottom = vals[0]; right = left = vals[1]; break;
-        case 3: top = vals[0]; right = left = vals[1]; bottom = vals[2]; break;
-        default: top = vals[0]; right = vals[1]; bottom = vals[2]; left = vals[3]; break;
-    }
-    int sides[4] = { top, right, bottom, left };
+    /* CSS shorthand order: all / "v h" / "t h b" / "t r b l". */
+    static const int PICK[4][4] = {
+        { 0, 0, 0, 0 }, { 0, 1, 0, 1 }, { 0, 1, 2, 1 }, { 0, 1, 2, 3 }
+    };
+    const int *pick = PICK[nv - 1];
     int n = 0;
-    for (int s = 0; s < 4 && n < cap; ++s) {
-        dst[n].prop = slot_top + s;
-        dst[n].ival = sides[s];
+    for (int s = 0; s < 4; ++s) {
+        int src = pick[s];
+        int slot = slot_top + s;
+        int ps = pct_slot_of(slot);
+        if (n + ((ps >= 0) ? 2 : 1) > cap) break;
+        dst[n].prop = slot;
+        /* Same rule as emit_len: a pure percentage leaves the px half unset. */
+        dst[n].ival = (pm[src] != 0 && px[src] == 0) ? CSS_LEN_UNSET : px[src];
+        dst[n].emil = em[src];
         ++n;
+        if (ps >= 0) {
+            dst[n].prop = P_PCT_FIRST + ps;
+            dst[n].ival = pm[src];
+            ++n;
+        }
     }
     return n;
 }
@@ -1539,20 +1710,27 @@ static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_
  * Fail closed on zero, more than two, or any uninterpretable token. */
 static int expand_box2(const char *val, int slot_start, int slot_end,
                        int allow_auto, int allow_neg, css_decl *dst, int cap) {
-    int vals[2], nv = 0;
+    char toks[2][CSS_TOK_MAX];
+    int nv = 0;
     const char *p = val;
     char tok[CSS_TOK_MAX];
     while (nv < 2 && next_ws_token(&p, tok, sizeof tok)) {
-        int o;
-        if (!interp_len(tok, allow_auto, &o)) return 0;
-        if (!allow_neg && o != CSS_LEN_AUTO && o < 0) return 0;
-        vals[nv++] = o;
+        memcpy(toks[nv], tok, sizeof tok);
+        ++nv;
     }
     if (nv == 0 || next_ws_token(&p, tok, sizeof tok)) return 0;
-    if (cap < 2) return 0;
-    dst[0].prop = slot_start; dst[0].ival = vals[0];
-    dst[1].prop = slot_end;   dst[1].ival = (nv == 2) ? vals[1] : vals[0];
-    return 2;
+
+    /* Both sides go through emit_len, so the <length-percentage> handling (and
+     * the both-halves cascade rule) lives in exactly one place. */
+    int slots[2] = { slot_start, slot_end };
+    const char *src[2] = { toks[0], (nv == 2) ? toks[1] : toks[0] };
+    int n = 0;
+    for (int s = 0; s < 2; ++s) {
+        int w = emit_len(dst + n, cap - n, slots[s], src[s], allow_auto, allow_neg);
+        if (w == 0) return 0;   /* fail closed: never a partial logical pair */
+        n += w;
+    }
+    return n;
 }
 
 /* --- text-presentation extensions (Hito 23b-6) --- */
@@ -2300,17 +2478,32 @@ static int interp_time_ms(const char *v) {
     return -1;
 }
 
-static int interp_border_radius(const char *v) {
+/* The `border-radius` shorthand: one to four <length-percentage> corner values
+ * in CSS corner order (all / "tl-br tr-bl" / "tl tr-bl br" / "tl tr br bl"),
+ * optionally followed by `/` and the vertical radii.
+ *
+ * The vertical half is PARSED AND DROPPED on purpose: this engine draws a
+ * circular corner, so it keeps the horizontal radius rather than failing the
+ * whole declaration closed -- losing `border-radius: 50% / 20%` entirely would
+ * turn a rounded card into a square one, which is further from the author's
+ * intent than a circular approximation of it. */
+static int expand_border_radius(const char *val, css_decl *dst, int cap) {
+    /* Everything after '/' is the vertical radius set: cut it off. */
+    char horiz[CSS_TOK_MAX];
+    size_t hn = 0;
+    for (const char *q = val; *q != '\0' && *q != '/' && hn + 1 < sizeof horiz; ++q)
+        horiz[hn++] = *q;
+    horiz[hn] = '\0';
+    return expand_box4(horiz, P_BORDER_RADIUS, 0, 0, dst, cap);
+}
+
+/* One corner longhand (border-top-left-radius and friends). Same elliptical
+ * simplification as the shorthand: `8px 4px` keeps the horizontal 8px. */
+static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val) {
     char tok[CSS_TOK_MAX];
-    size_t k = 0;
-    const char *p = v;
-    while (*p == ' ' || *p == '\t') ++p;
-    while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '/' && k + 1 < sizeof tok)
-        tok[k++] = *p++;
-    tok[k] = '\0';
-    int px;
-    if (!interp_len(tok, 0, &px) || px < 0) return -1;
-    return px;
+    const char *p = val;
+    if (!next_ws_token(&p, tok, sizeof tok)) return 0;
+    return emit_len(dst, cap, slot, tok, 0, 0);
 }
 
 /* token classifiers for the per-category border-{width,style,color} quad expanders. */
@@ -2388,6 +2581,101 @@ static int expand_outline(const char *val, css_decl *dst, int cap) {
     if (hw && n < cap) { dst[n].prop = P_OUTLINE_W; dst[n].ival = w; ++n; }
     if (hs && n < cap) { dst[n].prop = P_OUTLINE_S; dst[n].ival = s; ++n; }
     if (hc && n < cap) { dst[n].prop = P_OUTLINE_C; dst[n].ival = c; ++n; }
+    return n;
+}
+
+/* --- Multi-column (CSS Multi-column Layout 1) ------------------------------ */
+
+/* `column-count`: a positive <integer>, or `auto`. Anything else fails closed.
+ * The count is clamped to FX_MAX_COLUMNS' worth of sanity here rather than in
+ * layout, for the same reason CSS_LEN_MAX lives on the emitter: it is an
+ * anti-DoS policy of the box model, not a property of the value. */
+static int interp_column_count(const char *v) {
+    if (csel_ci_eq(v, "auto")) return 0;
+    double num; const char *end;
+    if (!cl_number(v, &num, &end)) return -1;
+    while (*end == ' ' || *end == '\t') ++end;
+    if (*end != '\0') return -1;
+    if (num < 1.0) return -1;
+    if (num > (double)CSS_COLUMN_COUNT_MAX) num = (double)CSS_COLUMN_COUNT_MAX;
+    return (int)(num + 0.5);
+}
+
+/* `column-width`: a non-negative <length>, or `auto` (0). */
+static int interp_column_width(const char *v) {
+    if (csel_ci_eq(v, "auto")) return 0;
+    int px;
+    if (!interp_len(v, 0, &px) || px < 0) return -1;
+    return px;
+}
+
+/* `columns` shorthand: <'column-width'> || <'column-count'> in either order,
+ * one or two tokens. A bare number is the count, a length is the width, `auto`
+ * fills whichever slot is still free -- which is exactly the grammar, and the
+ * reason a positional reading would mis-parse the very common `columns: 2`. */
+static int expand_columns(const char *val, css_decl *dst, int cap) {
+    if (cap < 2) return 0;
+    int count = 0, width = 0, have_count = 0, have_width = 0, nauto = 0;
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    int ntok = 0;
+    while (ntok < 3 && next_ws_token(&p, tok, sizeof tok)) {
+        ++ntok;
+        if (csel_ci_eq(tok, "auto")) { ++nauto; continue; }
+        double num; const char *end;
+        if (cl_number(tok, &num, &end) && *end == '\0') {
+            if (have_count) return 0;
+            int c = interp_column_count(tok);
+            if (c <= 0) return 0;
+            count = c; have_count = 1;
+            continue;
+        }
+        int wpx = interp_column_width(tok);
+        if (wpx <= 0 || have_width) return 0;
+        width = wpx; have_width = 1;
+    }
+    if (ntok == 0 || ntok > 2) return 0;
+    if (!have_count && !have_width && nauto == 0) return 0;
+    dst[0].prop = P_COLUMN_COUNT; dst[0].ival = count;
+    dst[1].prop = P_COLUMN_WIDTH; dst[1].ival = width;
+    return 2;
+}
+
+static int interp_flex_direction(const char *v);
+static int interp_flex_wrap(const char *v);
+
+/* `flex-flow` shorthand: the direction and the wrap keyword in either order,
+ * one or two tokens. Fails closed on an unknown token rather than applying half
+ * the declaration. */
+static int expand_flex_flow(const char *val, css_decl *dst, int cap) {
+    int dir = -1, wrap = -1;
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    int ntok = 0;
+    while (ntok < 3 && next_ws_token(&p, tok, sizeof tok)) {
+        ++ntok;
+        int d = interp_flex_direction(tok);
+        if (d > 0) { if (dir >= 0) return 0; dir = d; continue; }
+        int wv = interp_flex_wrap(tok);
+        if (wv > 0) { if (wrap >= 0) return 0; wrap = wv; continue; }
+        return 0;
+    }
+    if (ntok == 0 || ntok > 2) return 0;
+    int n = 0;
+    if (dir  >= 0 && n < cap) { dst[n].prop = P_FLEX_DIR;  dst[n].ival = dir;  ++n; }
+    if (wrap >= 0 && n < cap) { dst[n].prop = P_FLEX_WRAP; dst[n].ival = wrap; ++n; }
+    return n;
+}
+
+/* `column-rule` shorthand: same <line-width> || <line-style> || <color> grammar
+ * as `border`/`outline`, so it reuses classify_box_edge rather than repeating it. */
+static int expand_column_rule(const char *val, css_decl *dst, int cap) {
+    int w = 0, st = 0, c = 0, hw, hs, hc;
+    if (!classify_box_edge(val, &w, &hw, &st, &hs, &c, &hc)) return 0;
+    int n = 0;
+    if (hw && n < cap) { dst[n].prop = P_COLRULE_W; dst[n].ival = w; ++n; }
+    if (hs && n < cap) { dst[n].prop = P_COLRULE_S; dst[n].ival = st; ++n; }
+    if (hc && n < cap) { dst[n].prop = P_COLRULE_C; dst[n].ival = c; ++n; }
     return n;
 }
 
@@ -3316,23 +3604,30 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
      * translateY(0) declaration that shadows a separately-cascaded translateY).
      * translate(x) alone DOES mean translate(x, 0) per spec, so TR_BOTH always
      * emits both slots. */
-    int tx, ty;
+    int tx, ty, txp, typ;
     if (kind == TR_X) {
-        if (has_second || !interp_len(a, 0, &tx)) return 0;
-        dst[0].prop = P_TRANSFORM_TX; dst[0].ival = tx;
-        return 1;
+        if (has_second || !interp_lp(a, 0, 1, &tx, &txp)) return 0;
+        if (cap < 2) return 0;
+        dst[0].prop = P_TRANSFORM_TX; dst[0].ival = (txp != 0 && tx == 0) ? CSS_LEN_UNSET : tx;
+        dst[1].prop = P_PCT_FIRST + CSS_PCT_TRANSLATE_X; dst[1].ival = txp;
+        return 2;
     }
     if (kind == TR_Y) {
-        if (has_second || !interp_len(a, 0, &ty)) return 0;
-        dst[0].prop = P_TRANSFORM_TY; dst[0].ival = ty;
-        return 1;
+        if (has_second || !interp_lp(a, 0, 1, &ty, &typ)) return 0;
+        if (cap < 2) return 0;
+        dst[0].prop = P_TRANSFORM_TY; dst[0].ival = (typ != 0 && ty == 0) ? CSS_LEN_UNSET : ty;
+        dst[1].prop = P_PCT_FIRST + CSS_PCT_TRANSLATE_Y; dst[1].ival = typ;
+        return 2;
     }
-    ty = 0;
-    if (!interp_len(a, 0, &tx)) return 0;
-    if (has_second && !interp_len(b, 0, &ty)) return 0;
-    dst[0].prop = P_TRANSFORM_TX; dst[0].ival = tx;
-    dst[1].prop = P_TRANSFORM_TY; dst[1].ival = ty;
-    return 2;
+    ty = 0; typ = 0;
+    if (!interp_lp(a, 0, 1, &tx, &txp)) return 0;
+    if (has_second && !interp_lp(b, 0, 1, &ty, &typ)) return 0;
+    if (cap < 4) return 0;
+    dst[0].prop = P_TRANSFORM_TX; dst[0].ival = (txp != 0 && tx == 0) ? CSS_LEN_UNSET : tx;
+    dst[1].prop = P_TRANSFORM_TY; dst[1].ival = (typ != 0 && ty == 0) ? CSS_LEN_UNSET : ty;
+    dst[2].prop = P_PCT_FIRST + CSS_PCT_TRANSLATE_X; dst[2].ival = txp;
+    dst[3].prop = P_PCT_FIRST + CSS_PCT_TRANSLATE_Y; dst[3].ival = typ;
+    return 4;
 }
 
 /* One transform-origin component: keyword (axis-checked) or a percent.
@@ -3550,6 +3845,40 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
 static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
                            char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
+    /*
+     * A vendor-prefixed property IS the standard property: `-webkit-transform`
+     * and `transform` are the same declaration, and every engine treats the
+     * prefixed spelling as an alias. Dropping them cost ~900 declarations in the
+     * parity corpus alone -- -webkit-transform (88), -moz-border-radius (70),
+     * -webkit-border-radius (69), -webkit-box-shadow (44), -webkit/-moz-
+     * box-sizing (26, and that one is geometry, not paint).
+     *
+     * The rule is exactly "strip the prefix and ask again", ONCE, and the alias
+     * table falls out of the dispatch below instead of being a second list that
+     * goes stale. What it deliberately does NOT do is map the IE10 tweener
+     * flexbox names: there is no property called `flex-pack`, so `-ms-flex-pack`
+     * finds nothing and stays dropped -- which is right, because its value
+     * grammar (`justify`/`distribute`) is not `justify-content`'s. Guessing
+     * there would be inventing a rule.
+     *
+     * `--x` is a custom property, not a vendor prefix, and is excluded by
+     * requiring a letter after the leading '-'.
+     */
+    if (prop[0] == '-' && prop[1] != '\0' && prop[1] != '-') {
+        static const char *const VENDOR[] = { "-webkit-", "-moz-", "-ms-", "-o-" };
+        for (size_t v = 0; v < sizeof VENDOR / sizeof *VENDOR; ++v) {
+            size_t plen = strlen(VENDOR[v]);
+            if (strncmp(prop, VENDOR[v], plen) != 0) continue;
+            const char *bare = prop + plen;
+            /* Once only: a doubly-prefixed name is not a property, and
+             * recursing on it would be a loop with attacker-chosen depth. */
+            if (bare[0] == '\0' || bare[0] == '-') return 0;
+            return interpret_prop(bare, val, dst, cap, urltab, nurl, urlcap,
+                                  contenttab, ncontent, contentcap);
+        }
+        return 0;   /* an unknown vendor prefix: fail closed */
+    }
+
     /* Box model: margins allow 'auto' and negatives; padding/width neither. The
      * shorthands expand; the longhands and width/max-width emit one. */
     if (strcmp(prop, "margin") == 0)  return expand_box4(val, P_MARGIN_TOP, 1, 1, dst, cap);
@@ -3562,13 +3891,11 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "padding-right") == 0)  return emit_len(dst, cap, P_PAD_RIGHT, val, 0, 0);
     if (strcmp(prop, "padding-bottom") == 0) return emit_len(dst, cap, P_PAD_BOTTOM, val, 0, 0);
     if (strcmp(prop, "padding-left") == 0)   return emit_len(dst, cap, P_PAD_LEFT, val, 0, 0);
-    /* width/max-width: px path first; a % value is carried symbolically (Hito 32). */
-    if (strcmp(prop, "width") == 0)
-        return emit_len(dst, cap, P_WIDTH, val, 0, 0)
-            || emit_pct(dst, cap, P_WIDTH_PCT, val);
-    if (strcmp(prop, "max-width") == 0)
-        return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0)
-            || emit_pct(dst, cap, P_MAXWIDTH_PCT, val);
+    /* width/max-width and every other box length go through the one
+     * <length-percentage> emitter: the % half is carried symbolically and
+     * resolved against the containing block at layout time. */
+    if (strcmp(prop, "width") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
+    if (strcmp(prop, "max-width") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
     if (strcmp(prop, "min-width") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
     if (strcmp(prop, "height") == 0)    return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
     if (strcmp(prop, "min-height") == 0)return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
@@ -3595,14 +3922,10 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "inset-block-end") == 0)      return emit_len(dst, cap, P_INSET_BOTTOM, val, 1, 1);
     if (strcmp(prop, "inset-inline") == 0)   return expand_box2(val, P_INSET_LEFT, P_INSET_RIGHT, 1, 1, dst, cap);
     if (strcmp(prop, "inset-block") == 0)    return expand_box2(val, P_INSET_TOP, P_INSET_BOTTOM, 1, 1, dst, cap);
-    if (strcmp(prop, "inline-size") == 0)
-        return emit_len(dst, cap, P_WIDTH, val, 0, 0)
-            || emit_pct(dst, cap, P_WIDTH_PCT, val);
+    if (strcmp(prop, "inline-size") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
     if (strcmp(prop, "block-size") == 0)      return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
     if (strcmp(prop, "min-inline-size") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
-    if (strcmp(prop, "max-inline-size") == 0)
-        return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0)
-            || emit_pct(dst, cap, P_MAXWIDTH_PCT, val);
+    if (strcmp(prop, "max-inline-size") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
     if (strcmp(prop, "min-block-size") == 0)  return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
     if (strcmp(prop, "max-block-size") == 0)  return emit_len(dst, cap, P_MAXHEIGHT, val, 0, 0);
 
@@ -3658,6 +3981,34 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "border-color") == 0)  return expand_quad(val, P_BC_TOP, interp_bc_tok, dst, cap);
     if (strcmp(prop, "box-shadow") == 0)    return expand_box_shadow(val, dst, cap);
     if (strcmp(prop, "outline") == 0)       return expand_outline(val, dst, cap);
+    if (strcmp(prop, "columns") == 0)       return expand_columns(val, dst, cap);
+    /* flex-flow: <'flex-direction'> || <'flex-wrap'>, in either order. Dropping
+     * it silently lost BOTH the axis and the wrapping of every container written
+     * with the shorthand. */
+    if (strcmp(prop, "flex-flow") == 0)     return expand_flex_flow(val, dst, cap);
+    if (strcmp(prop, "column-rule") == 0)   return expand_column_rule(val, dst, cap);
+    /* border-radius: the shorthand plus the four physical corners and the eight
+     * logical spellings, all mapped onto the same four slots (horizontal-tb LTR,
+     * like the rest of the logical properties here). Before this the shorthand
+     * kept only ONE value and every corner longhand was dropped whole -- 158
+     * declarations in the parity corpus alone. */
+    if (strcmp(prop, "border-radius") == 0) return expand_border_radius(val, dst, cap);
+    if (strcmp(prop, "border-top-left-radius") == 0)
+        return emit_radius_corner(dst, cap, P_BORDER_RADIUS, val);
+    if (strcmp(prop, "border-top-right-radius") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_TR, val);
+    if (strcmp(prop, "border-bottom-right-radius") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_BR, val);
+    if (strcmp(prop, "border-bottom-left-radius") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_BL, val);
+    if (strcmp(prop, "border-start-start-radius") == 0)
+        return emit_radius_corner(dst, cap, P_BORDER_RADIUS, val);
+    if (strcmp(prop, "border-start-end-radius") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_TR, val);
+    if (strcmp(prop, "border-end-end-radius") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_BR, val);
+    if (strcmp(prop, "border-end-start-radius") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_BL, val);
     if (strcmp(prop, "outline-offset") == 0) return emit_len(dst, cap, P_OUTLINE_OFFSET, val, 0, 1);
     if (strcmp(prop, "outline-width") == 0) {
         int o = interp_bwidth1(val);
@@ -3740,7 +4091,23 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
              strcmp(prop, "list-style") == 0)          { prop_id = P_LISTSTYLE;     ival = interp_liststyle(val); }
     else if (strcmp(prop, "position") == 0)            { prop_id = P_POSITION;      ival = interp_position(val); }
     else if (strcmp(prop, "box-sizing") == 0)          { prop_id = P_BOXSIZING;     ival = interp_boxsizing(val); }
-    else if (strcmp(prop, "border-radius") == 0)       { prop_id = P_BORDER_RADIUS; ival = interp_border_radius(val); }
+    else if (strcmp(prop, "line-clamp") == 0 ||
+             strcmp(prop, "-webkit-line-clamp") == 0) { prop_id = P_LINE_CLAMP;
+        /* Same positive-<integer>-or-none grammar as column-count, and the same
+         * anti-DoS cap: a clamp of 10000 lines is not a clamp. */
+        ival = csel_ci_eq(val, "none") ? 0 : interp_column_count(val);
+        if (ival < 0) return 0; }
+    else if (strcmp(prop, "column-count") == 0)        { prop_id = P_COLUMN_COUNT; ival = interp_column_count(val); if (ival < 0) return 0; }
+    else if (strcmp(prop, "column-width") == 0)        { prop_id = P_COLUMN_WIDTH; ival = interp_column_width(val); if (ival < 0) return 0; }
+    else if (strcmp(prop, "column-fill") == 0)         { prop_id = P_COLUMN_FILL;
+        ival = csel_ci_eq(val, "balance") ? CSS_CF_BALANCE
+             : csel_ci_eq(val, "auto")    ? CSS_CF_AUTO : -1; }
+    else if (strcmp(prop, "column-span") == 0)         { prop_id = P_COLUMN_SPAN;
+        ival = csel_ci_eq(val, "none") ? CSS_CSP_NONE
+             : csel_ci_eq(val, "all")  ? CSS_CSP_ALL : -1; }
+    else if (strcmp(prop, "column-rule-width") == 0)   { prop_id = P_COLRULE_W; ival = interp_bwidth1(val); }
+    else if (strcmp(prop, "column-rule-style") == 0)   { prop_id = P_COLRULE_S; ival = interp_border_style(val); }
+    else if (strcmp(prop, "column-rule-color") == 0)   { prop_id = P_COLRULE_C; ival = interp_color(val); }
     else if (strcmp(prop, "border-top-width") == 0)    { prop_id = P_BW_TOP;        ival = interp_bwidth1(val); }
     else if (strcmp(prop, "border-right-width") == 0)  { prop_id = P_BW_RIGHT;      ival = interp_bwidth1(val); }
     else if (strcmp(prop, "border-bottom-width") == 0) { prop_id = P_BW_BOTTOM;     ival = interp_bwidth1(val); }
@@ -4006,6 +4373,12 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
         size_t nc = sh->decls_cap ? sh->decls_cap * 2 : CSS_INIT_DECLS;
         css_decl *g = (css_decl *)realloc(sh->decls, nc * sizeof *g);
         if (g == NULL) return;
+        /* V-002: zero the fresh region. The property emitters below write only
+         * the fields their property has -- `emil` is written by the LENGTH
+         * emitters alone -- so an unzeroed tail would hand a non-length slot a
+         * font-relative coefficient made of whatever realloc returned, and the
+         * cascade would then scale it by the element's font-size. */
+        memset(g + sh->decls_cap, 0, (nc - sh->decls_cap) * sizeof *g);
         sh->decls = g;
         sh->decls_cap = nc;
     }
@@ -4405,7 +4778,7 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                 size_t de2 = db;
                                 while (de2 < ke && s[de2] != '}') ++de2;
                                 /* Parse inner declarations to extract opacity */
-                                css_decl kdecls[CSS_MAX_KEYFRAME_DECLS];
+                                css_decl kdecls[CSS_MAX_KEYFRAME_DECLS] = { { 0, 0, 0, 0 } };  /* V-002 */
                                 int nd = interpret_decls(s + db, de2 - db,
                                     kdecls, CSS_MAX_KEYFRAME_DECLS, sh->custom, sh->ncustom,
                                     sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
@@ -4597,6 +4970,13 @@ static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) 
 /* Rewinds a sheet to empty while keeping every allocation, so the text can be
  * re-parsed in place. Caps are preserved; only the counters move. */
 static void sheet_rewind(css_sheet *sh) {
+    /* V-002: the declaration slots are RECYCLED by the re-parse, and a property
+     * emitter only writes the fields its property has. Without this, a slot that
+     * held `margin:2em` on the first pass would hand its coefficient to whatever
+     * non-length declaration lands there on the second -- and rem_rebase makes
+     * that second pass the normal case, not an edge one. */
+    if (sh->decls != NULL && sh->decls_cap > 0)
+        memset(sh->decls, 0, sh->decls_cap * sizeof *sh->decls);
     sh->ndecls = 0;
     sh->nrules = 0;
     sh->nsels = 0;
@@ -4675,7 +5055,14 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
 
     /* Allocate initial dynamic arrays. Start small; add_rule doubles on demand.
      * Leak-safe: if any alloc fails, css_free releases whatever was allocated. */
-    sh->decls = (css_decl *)malloc(CSS_INIT_DECLS * sizeof(css_decl));
+    /* V-002: calloc, not malloc. A property emitter writes only the fields its
+     * property has -- `emil`, the font-relative coefficient, is written by the
+     * LENGTH emitters alone -- so an unzeroed slot hands a non-length
+     * declaration a coefficient made of whatever the allocator returned, and
+     * the cascade then scales it by the element's font-size. Measured: a page
+     * whose only rule was `font-size:32px` came out 158px tall instead of 45,
+     * because P_FONT_SIZE picked up a coefficient off a recycled text buffer. */
+    sh->decls = (css_decl *)calloc(CSS_INIT_DECLS, sizeof(css_decl));
     sh->decls_cap = sh->decls ? CSS_INIT_DECLS : 0;
     sh->rules = (css_rule *)malloc(CSS_INIT_RULES * sizeof(css_rule));
     sh->rules_cap = sh->rules ? CSS_INIT_RULES : 0;
@@ -4732,7 +5119,8 @@ void css_free(css_sheet *s) {
  * cascade is two-tiered: an !important declaration beats any non-important one
  * (regardless of specificity); within a tier the higher specificity wins, ties
  * broken by document order. wi/ws/wo track the winning tier/specificity/order so far. */
-static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *d,
+static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+                        const css_decl *d,
                         int spec, int ord, const char (*urltab)[CSS_URL_MAX],
                         const char (*contenttab)[CSS_URL_MAX], int pseudo_kind) {
     /* CSS 2.1 §12.1: a ::before/::after rule styles the GENERATED box, never the
@@ -4762,6 +5150,12 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
         wi[slot] = imp;
         ws[slot] = spec;
         wo[slot] = ord;
+        /* Remember the winner's font-relative coefficient so the fold below can
+         * find it without a second slot->field mapping. wem may be NULL for
+         * callers that do not fold (css_parse_inline, which has no element and
+         * therefore no computed font-size). */
+        if (wem != NULL) wem[slot] = d->emil;
+        if (wv  != NULL) wv[slot]  = d->ival;
         switch (d->prop) {
             case P_COLOR:    o->color = d->ival; break;
             case P_SVG_FILL: o->svg_fill = d->ival; break;
@@ -4819,8 +5213,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_PAD_LEFT:   o->pad_left = d->ival; break;
             case P_WIDTH:      o->width = d->ival; break;
             case P_MAXWIDTH:   o->max_width = d->ival; break;
-            case P_WIDTH_PCT:    o->width_pct = d->ival; break;
-            case P_MAXWIDTH_PCT: o->max_width_pct = d->ival; break;
+
             case P_MINWIDTH:   o->min_width = d->ival; break;
             case P_HEIGHT:     o->height = d->ival; break;
             case P_MINHEIGHT:  o->min_height = d->ival; break;
@@ -4859,6 +5252,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
             case P_BC_BOTTOM:     o->border_bottom_color = d->ival; break;
             case P_BC_LEFT:       o->border_left_color = d->ival; break;
             case P_BORDER_RADIUS: o->border_radius = d->ival; break;
+            case P_RADIUS_TR:     o->border_radius_tr = d->ival; break;
+            case P_RADIUS_BR:     o->border_radius_br = d->ival; break;
+            case P_RADIUS_BL:     o->border_radius_bl = d->ival; break;
             case P_BSHADOW_DX:     o->shadow2_dx = d->ival; break;
             case P_BSHADOW_DY:     o->shadow2_dy = d->ival; break;
             case P_BSHADOW_BLUR:   o->shadow2_blur = d->ival; break;
@@ -5001,8 +5397,91 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, const css_decl *
                     }
                 }
                 break;
-            default: break;
+            case P_LINE_CLAMP:   o->line_clamp = d->ival; break;
+            case P_COLUMN_COUNT: o->column_count = d->ival; break;
+            case P_COLUMN_WIDTH: o->column_width = d->ival; break;
+            case P_COLUMN_FILL:  o->column_fill = d->ival; break;
+            case P_COLUMN_SPAN:  o->column_span = d->ival; break;
+            case P_COLRULE_W:    o->column_rule_width = d->ival; break;
+            case P_COLRULE_S:    o->column_rule_style = d->ival; break;
+            case P_COLRULE_C:    o->column_rule_color = d->ival; break;
+            default:
+                /* The percentage half of every <length-percentage> property:
+                 * one contiguous slot block mirroring css_pct_slot, so a new
+                 * percentage-capable property needs no case of its own here. */
+                if (d->prop >= P_PCT_FIRST && d->prop <= P_PCT_LAST)
+                    o->pct[d->prop - P_PCT_FIRST] = d->ival;
+                break;
         }
+    }
+}
+
+/*
+ * This element's computed font-size in px: the cascade result applied to the
+ * inherited value (CSS Fonts 4.4, CSS 2.1 15.7).
+ *
+ * font_scale is a percentage and font_abs says what of -- an ABSOLUTE size
+ * (px/pt/rem/keyword) is a percentage of the CSS initial size, a RELATIVE one
+ * (em/%/smaller/larger) a percentage of the INHERITED size. font_scale == 0
+ * means the element declared no font-size at all, so it inherits unchanged.
+ */
+double css_computed_font_size(const css_style *o, double inherited_px) {
+    if (o == NULL) return (inherited_px > 0.0) ? inherited_px : CL_INITIAL_FONT_SIZE;
+    if (!(inherited_px > 0.0)) inherited_px = CL_INITIAL_FONT_SIZE;
+    if (o->font_scale == 0) return inherited_px;
+    double base = o->font_abs ? CL_INITIAL_FONT_SIZE : inherited_px;
+    double fs = base * (double)o->font_scale / 100.0;
+    if (!isfinite(fs) || fs <= 0.0) return inherited_px;
+    if (fs > (double)CSS_FONT_SIZE_MAX) fs = (double)CSS_FONT_SIZE_MAX;
+    return fs;
+}
+
+static double computed_font_size(const css_style *o, const css_element *el) {
+    return css_computed_font_size(o, (el != NULL) ? el->font_size : 0.0);
+}
+
+/*
+ * Folds every font-relative length in the resolved style against this element's
+ * computed font-size. This is the ONE place a font-relative length becomes
+ * pixels, the way bx_lp_px is the one place a percentage does
+ * (spec/css_length.md section 8.5).
+ *
+ * The correction is applied by re-running apply_decl with the winning
+ * declaration's OWN specificity and order -- the cascade's test is
+ * `ord >= wo[slot]`, so re-applying wins -- instead of a parallel slot->field
+ * switch. A second mapping would be duplicated knowledge that goes stale the
+ * next time a length property is added; this way a new property is folded as
+ * soon as its emitter records a coefficient, with no edit here at all.
+ *
+ * Inert when the element computes to the initial font-size, which is what makes
+ * the whole mechanism provably a no-op on a page that never restyles text.
+ */
+static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
+                               const int *wem, const int *wv,
+                               const css_element *el,
+                               const char (*urltab)[CSS_URL_MAX],
+                               const char (*contenttab)[CSS_URL_MAX]) {
+    double fs = computed_font_size(o, el);
+    if (!isfinite(fs) || fs <= 0.0 || fs == CL_INITIAL_FONT_SIZE) return;
+
+    for (int slot = 0; slot < P_NSLOTS; ++slot) {
+        if (wem[slot] == 0) continue;
+        /* CSS_LEN_AUTO/UNSET are sentinels, not lengths: scaling them would turn
+         * `width:auto` into a number. The emitter already refuses to record a
+         * coefficient for auto; this is the belt to that braces. */
+        if (wv[slot] == CSS_LEN_AUTO || wv[slot] == CSS_LEN_UNSET) continue;
+
+        double px = cl_em_refit((double)wv[slot], (double)wem[slot] / 1000.0,
+                                CL_INITIAL_FONT_SIZE, fs);
+        css_decl folded = {
+            .prop = slot,
+            .ival = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX),
+            .important = wi[slot],
+            .emil = 0,   /* already folded: never fold twice */
+        };
+        if (folded.ival == wv[slot]) continue;   /* nothing moved */
+        apply_decl(o, wi, ws, wo, NULL, NULL, &folded,
+                   ws[slot], wo[slot], urltab, contenttab, -1);
     }
 }
 
@@ -5042,7 +5521,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .border_bottom_style = CSS_BST_UNSET, .border_left_style = CSS_BST_UNSET,
         .border_top_color = -1, .border_right_color = -1,
         .border_bottom_color = -1, .border_left_color = -1,
-        .border_radius = CSS_LEN_UNSET,
+        .border_radius = CSS_LEN_UNSET, .border_radius_tr = CSS_LEN_UNSET,
+        .border_radius_br = CSS_LEN_UNSET, .border_radius_bl = CSS_LEN_UNSET,
         .shadow2_dx = 0, .shadow2_dy = 0, .shadow2_blur = 0, .shadow2_spread = 0,
         .box_shadow_color = -1, .box_shadow_inset = -1,
         .outline_width = CSS_LEN_UNSET, .outline_style = CSS_BST_UNSET,
@@ -5105,9 +5585,19 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .bg_pos_x = CSS_LEN_UNSET, .bg_pos_y = CSS_LEN_UNSET,
         .clip_top = CSS_LEN_UNSET, .clip_right = CSS_LEN_UNSET,
         .clip_bottom = CSS_LEN_UNSET, .clip_left = CSS_LEN_UNSET,
+        /* Multi-column: 0 is `auto` for both count and width, which is the CSS
+         * initial value and means "not a multi-column container". */
+        .line_clamp = 0,
+        .column_count = 0, .column_width = 0,
+        .column_fill = CSS_CF_UNSET, .column_span = CSS_CSP_UNSET,
+        .column_rule_width = CSS_LEN_UNSET, .column_rule_style = CSS_BST_UNSET,
+        .column_rule_color = -1,
+        .pct = { 0 },
     };
-    int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS];
-    for (int k = 0; k < P_NSLOTS; ++k) { wi[k] = -1; ws[k] = -1; wo[k] = -1; }
+    int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS], wem[P_NSLOTS], wv[P_NSLOTS];
+    for (int k = 0; k < P_NSLOTS; ++k) {
+        wi[k] = -1; ws[k] = -1; wo[k] = -1; wem[k] = 0; wv[k] = 0;
+    }
 
     if (sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
@@ -5117,7 +5607,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
             size_t start = sheet->rules[sel->rule].start;
             size_t cnt = sheet->rules[sel->rule].count;
             for (size_t d = 0; d < cnt; ++d)
-                apply_decl(&out, wi, ws, wo, &sheet->decls[start + d], sel->spec, sel->order,
+                apply_decl(&out, wi, ws, wo, wem, wv, &sheet->decls[start + d], sel->spec, sel->order,
                            sheet->bg_urls, sheet->content_urls, pseudo_kind);
         }
     }
@@ -5143,7 +5633,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                     combined[ncombined++] = sheet->custom[i];
             }
         }
-        css_decl tmp[CSS_INLINE_DECLS];
+        css_decl tmp[CSS_INLINE_DECLS] = { { 0, 0, 0, 0 } };  /* V-002, as above */
         char inline_bg_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
         size_t n_inline_bg_urls = 0;
         char inline_content_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
@@ -5159,10 +5649,14 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                                     inline_bg_urls, &n_inline_bg_urls, CSS_INLINE_BG_URLS,
                                     inline_content_urls, &n_inline_content_urls, CSS_INLINE_BG_URLS);
         for (size_t d = 0; d < dn; ++d)
-            apply_decl(&out, wi, ws, wo, &tmp[d], CSS_INLINE_SPEC, INT_MAX,
+            apply_decl(&out, wi, ws, wo, wem, wv, &tmp[d], CSS_INLINE_SPEC, INT_MAX,
                        inline_bg_urls, inline_content_urls, -1);
         free(combined);
     }
+
+    fold_font_relative(&out, wi, ws, wo, wem, wv, el,
+                       sheet != NULL ? sheet->bg_urls : NULL,
+                       sheet != NULL ? sheet->content_urls : NULL);
 
     css_resolve_anim_keyframes(&out, sheet);
     return out;
@@ -5175,7 +5669,17 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
      * therefore cannot match through its combinator (complex_matches needs parents).
      * No attributes are supplied, so [attr] selectors do not match via this entry
      * point (callers that need them build a css_element with attrs). */
-    css_element el = { tag, id, classes, nclasses, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0 };
+    /* Designated and zero-based: a field added to css_element must not silently
+     * shift the meaning of the ones after it (V-002 applied to view structs).
+     * child_count -1 = unknown, so :empty keeps failing closed; font_size 0 =
+     * unknown, so font-relative lengths keep the CSS initial context. */
+    css_element el = {
+        .tag = tag, .id = id, .classes = classes, .nclasses = nclasses,
+        .attrs = NULL, .nattrs = 0, .parent = NULL,
+        .nth = 0, .nsib = 0, .prev = NULL,
+        .nth_of_type = 0, .nsib_of_type = 0,
+        .child_count = -1, .dom_node = NULL, .state = 0, .font_size = 0.0,
+    };
     return css_resolve_el(sheet, &el, inline_style, inline_len);
 }
 

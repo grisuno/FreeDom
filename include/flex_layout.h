@@ -166,6 +166,57 @@ fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
 double fx_auto_min_size(double min_content, double basis, double author_min,
                         int scroll_container);
 
+/* Maximum columns a multi-column container is laid out with (anti-DoS). A larger
+ * `column-count` is clamped to it; real stylesheets ask for two to four. */
+#define FX_MAX_COLUMNS 16u
+
+/*
+ * Used column count and column width of a multi-column container (CSS
+ * Multi-column Layout Level 1, section 3.4).
+ *
+ *   avail_w        the container's content width (px).
+ *   column_count   the author's `column-count`, or 0/negative for `auto`.
+ *   column_width   the author's `column-width` in px, or 0/negative for `auto`.
+ *   gap            the used `column-gap` in px (negative is treated as 0).
+ *
+ * The rule, and the reason it cannot be simplified: `column-width` is a MINIMUM,
+ * not a fixed width. The count falls out of how many columns of at least that
+ * width fit, which is what makes one stylesheet render one column on a narrow
+ * viewport and three on a wide one. Hardcoding either half would turn
+ * `column-width` into a no-op or a fixed division -- both invented rules.
+ *
+ *   both auto      -> not a multi-column container: *out_n = 1, *out_w = avail_w
+ *   width auto     -> N = column-count
+ *   count auto     -> N = max(1, floor((avail_w + gap) / (column_width + gap)))
+ *   both           -> N = min(column-count, that same fitting count)
+ *
+ * and in every case *out_w = (avail_w - (N-1)*gap) / N, floored at 1px.
+ *
+ * N is clamped to [1, FX_MAX_COLUMNS]. Pure, total, no allocation. Returns
+ * FX_ERR_NULL_ARG if either out pointer is NULL; otherwise FX_OK.
+ */
+fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+                           double gap, int *out_n, double *out_w);
+
+/*
+ * Distributes `n` already-measured row heights over `ncol` columns so the
+ * columns come out as even as possible -- the initial `column-fill: balance`.
+ *
+ * A row is never split: the smallest fragmentation unit this engine has is the
+ * line box, which is also what CSS Fragmentation calls a class A break point
+ * (between line boxes). So a single row taller than the balanced target simply
+ * makes its column taller, exactly as in a real UA.
+ *
+ *   heights   per-row heights in document order (negative is treated as 0).
+ *   out_col   receives each row's 0-based column index (caller-owned, n entries).
+ *   out_colh  receives each column's total height (caller-owned, ncol entries).
+ *
+ * ncol outside [1, FX_MAX_COLUMNS] or n > FX_MAX_ITEMS fails closed with
+ * FX_ERR_RANGE. Pure, total, no allocation.
+ */
+fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+                              int *out_col, double *out_colh);
+
 /* Stable, short English name of a justify mode for structured/agent output. Never
  * NULL; an unknown enum value yields "start". */
 const char *fx_justify_name(fx_justify j);

@@ -395,6 +395,16 @@ typedef enum css_touch_action {
 typedef enum css_overscroll {
     CSS_OS_UNSET = 0, CSS_OS_AUTO, CSS_OS_CONTAIN, CSS_OS_NONE
 } css_overscroll;
+/* column-fill. 0 unset; BALANCE is the CSS initial value (columns come out as
+ * even as possible); AUTO fills each column to the container height in turn. */
+typedef enum css_column_fill {
+    CSS_CF_UNSET = 0, CSS_CF_BALANCE, CSS_CF_AUTO
+} css_column_fill;
+/* column-span. 0 unset; NONE is the initial value; ALL makes the element span
+ * every column, splitting the multi-column flow around it. */
+typedef enum css_column_span {
+    CSS_CSP_UNSET = 0, CSS_CSP_NONE, CSS_CSP_ALL
+} css_column_span;
 /* backface-visibility. 0 unset. */
 typedef enum css_backface {
     CSS_BF_UNSET = 0, CSS_BF_VISIBLE, CSS_BF_HIDDEN
@@ -420,6 +430,74 @@ typedef enum css_backface {
 #define CSS_LEN_UNSET     (-2147483647 - 1) /* INT_MIN: property not set */
 #define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
 #define CSS_LEN_END       (-2147483646)     /* INT_MIN+2: 100% offset (right/bottom edge) */
+
+/* --- <length-percentage>: the percentage channel (spec/css_length.md 7) -----
+ *
+ * A percentage cannot be resolved by the parser: it needs the containing block,
+ * which only layout knows. So it travels SYMBOLICALLY, in per-mille of that
+ * block's relevant dimension (50% -> 500, 33.333% -> 333), beside the px value
+ * of the same property, and the two are combined exactly once, at layout, by
+ * cl_lp_used / bx_lp_px.
+ *
+ * Per-mille integers rather than a double because the whole render IPC is
+ * integer; a tenth of a percent is finer than any real stylesheet asks for.
+ *
+ * 0 means "no percentage component", which is not a lie: contributing 0% of a
+ * containing block contributes nothing. What makes that safe is that EVERY
+ * emitter of a <length-percentage> writes both slots, so a more specific
+ * `width: 200px` clears a less specific `width: 50%` in the cascade instead of
+ * silently combining with it.
+ *
+ * This replaces the ad-hoc width_pct/max_width_pct pair: a percentage is a
+ * property of the VALUE TYPE, not of `width`. */
+#define CSS_PCT_MAX       10000    /* +-1000%, saturating (anti-DoS, like CSS_LEN_MAX) */
+
+/* Anti-DoS cap on the font-relative component of a length, in thousandths of an
+ * em (+-1000em). Saturating like CSS_PCT_MAX and for the same reason: the value
+ * is an author-supplied multiplier of the font-size, and a page asking for
+ * 1e9em must be clamped rather than allowed to overflow the fold. */
+#define CSS_EM_MILLI_MAX  1000000
+
+/* Anti-DoS ceiling on a computed font-size, in px. Bounds the value every
+ * font-relative length is multiplied by, so a page nesting `font-size:2em`
+ * hundreds deep saturates instead of running the geometry away. Generous: no
+ * real stylesheet asks for text taller than this. */
+#define CSS_FONT_SIZE_MAX 1600
+
+/* Anti-DoS cap on `column-count`. Real stylesheets ask for two to four; a page
+ * demanding thousands of columns is layout poison, not a legitimate value. */
+#define CSS_COLUMN_COUNT_MAX 16
+
+typedef enum css_pct_slot {
+    /* Resolved against the containing block WIDTH -- all four sides, including
+     * top/bottom, per CSS 2.1 8.3 (margin) and 8.4 (padding). */
+    CSS_PCT_MARGIN_TOP = 0, CSS_PCT_MARGIN_RIGHT,
+    CSS_PCT_MARGIN_BOTTOM, CSS_PCT_MARGIN_LEFT,
+    CSS_PCT_PAD_TOP, CSS_PCT_PAD_RIGHT, CSS_PCT_PAD_BOTTOM, CSS_PCT_PAD_LEFT,
+    CSS_PCT_WIDTH, CSS_PCT_MAX_WIDTH, CSS_PCT_MIN_WIDTH,
+    /* Resolved against the containing block HEIGHT, and only when that height is
+     * definite; against an auto height these compute to auto (CSS 2.1 10.5). */
+    CSS_PCT_HEIGHT, CSS_PCT_MIN_HEIGHT, CSS_PCT_MAX_HEIGHT,
+    /* Insets: left/right against width, top/bottom against height (9.3.2). */
+    CSS_PCT_INSET_TOP, CSS_PCT_INSET_RIGHT,
+    CSS_PCT_INSET_BOTTOM, CSS_PCT_INSET_LEFT,
+    CSS_PCT_TEXT_INDENT,   /* containing block width (16.1) */
+    CSS_PCT_FLEX_BASIS,    /* container main size (Flexbox 7.2.3) */
+    /* border-radius corners. CSS Backgrounds 3 5.1 resolves the horizontal
+     * radius against the box's own WIDTH and the vertical one against its
+     * HEIGHT; this engine draws a circular corner, so it resolves against the
+     * smaller of the two -- which is also exactly what the existing
+     * min(w,h)/2 corner clamp enforces, and what makes `border-radius: 50%`
+     * on a square produce a circle. */
+    CSS_PCT_RADIUS_TL, CSS_PCT_RADIUS_TR, CSS_PCT_RADIUS_BR, CSS_PCT_RADIUS_BL,
+    /* translate() arguments. The odd one out: CSS Transforms 1 section 8
+     * resolves these against the element's OWN border box (x against its width,
+     * y against its height), not against any containing block. That is what
+     * makes `left:50%; top:50%; transform:translate(-50%,-50%)` centre a box --
+     * the universal centring idiom, and dead without both halves. */
+    CSS_PCT_TRANSLATE_X, CSS_PCT_TRANSLATE_Y,
+    CSS_PCT_N
+} css_pct_slot;
 
 /* Max compounds in one complex selector (subject + ancestor/parent constraints),
  * i.e. the number of space/`>`/`+`/`~`-separated parts. A deeper chain is dropped
@@ -509,12 +587,11 @@ typedef struct css_style {
     int         pad_top, pad_right, pad_bottom, pad_left;
     int         width, max_width, min_width;
     int         height, min_height, max_height;
-    /* Symbolic percentage width caps (Hito 32): per-mille of the containing
-     * width (99.8% -> 998), 0 = unset. Carried separately from the px channel
-     * (the parser has no containing block) and resolved at layout time by
-     * bx_width_cap; the tighter of px/pct wins. Only width/max-width accept %;
-     * every other % length still fails closed. */
-    int         width_pct, max_width_pct;
+    /* The percentage component of every <length-percentage> property, in
+     * per-mille of the containing block, indexed by css_pct_slot. 0 = none.
+     * Resolved against the px field of the SAME property at layout time
+     * (bx_lp_px). See the css_pct_slot documentation above. */
+    int         pct[CSS_PCT_N];
     /* Author text-presentation extensions (Hito 23b-6). All inherit in CSS; in this
      * flat model the caller takes the nearest ancestor that sets each. Like the other
      * author presentation, they are gated behind caps.css downstream. */
@@ -544,7 +621,20 @@ typedef struct css_style {
     int         border_top_width, border_right_width, border_bottom_width, border_left_width;
     int         border_top_style, border_right_style, border_bottom_style, border_left_style;
     int         border_top_color, border_right_color, border_bottom_color, border_left_color;
-    int         border_radius;   /* px >= 0, or CSS_LEN_UNSET */
+    /* border-radius, one value per corner (px >= 0, or CSS_LEN_UNSET). The
+     * `border-radius` shorthand writes all four in the CSS corner order
+     * top-left, top-right, bottom-right, bottom-left; the four longhands and
+     * the logical spellings write one each. border_radius IS the top-left
+     * corner -- kept under that name because it is the one the shorthand-only
+     * pages set, and every consumer already reads it.
+     *
+     * Only a CIRCULAR radius is modelled: CSS's elliptical `r1 / r2` form keeps
+     * its first (horizontal) component, a stated simplification, not a parse
+     * failure -- dropping the declaration would lose the rounding entirely. */
+    int         border_radius;         /* top-left */
+    int         border_radius_tr;
+    int         border_radius_br;
+    int         border_radius_bl;
     /* box-shadow (single layer). offsets/blur/spread px; color 0xRRGGBB or -1 (none/
      * unset); inset 1/0, or -1 (unset). */
     int         shadow2_dx, shadow2_dy, shadow2_blur, shadow2_spread;
@@ -733,6 +823,29 @@ typedef struct css_style {
      * ("0% 0%" which is also the CSS initial value). */
     int         bg_pos_x;
     int         bg_pos_y;
+    /* --- Multi-column (CSS Multi-column Layout 1) ---------------------------
+     * NOT inherited (they describe the container element itself), like the
+     * flex/grid container params, and like them they are LAYOUT STRUCTURE.
+     * column_count 0 = `auto`; column_width 0 = `auto`; with both auto the
+     * element is not a multi-column container at all and lays out unchanged.
+     * The used gap is css_style.gap -- `column-gap` is the same property in CSS
+     * Box Alignment, so it keeps writing that one slot. */
+    /* line-clamp / -webkit-line-clamp (CSS Overflow 4; the -webkit- form is
+     * specified in Overflow 3 "Legacy"). A block with a clamp of N and
+     * `overflow` other than visible shows at most N line boxes and clips the
+     * rest. NOT inherited. 0 = none.
+     *
+     * It is layout, not decoration: dropping it made every clamped card title
+     * on jkanime render its full four lines where the author asked for two, and
+     * that difference multiplies over a grid of cards. */
+    int         line_clamp;
+    int         column_count;    /* <integer>, 0 = auto */
+    int         column_width;    /* px, 0 = auto */
+    int         column_fill;     /* css_column_fill */
+    int         column_span;     /* css_column_span */
+    int         column_rule_width; /* px >= 0, or CSS_LEN_UNSET */
+    int         column_rule_style; /* css_border_style */
+    int         column_rule_color; /* 0xRRGGBB, or -1 */
     /* clip: rect(top,right,bottom,left) for positioned boxes (CSS 2.1 §11.1.2).
      * px values, CSS_LEN_UNSET on a side = auto (the border-box edge). Only
      * applies to position:absolute/fixed per spec. */
@@ -844,6 +957,23 @@ typedef struct css_element {
      * all of them fail to match, exactly as any browser does. The engine, not
      * the matcher, owns this. */
     unsigned state;
+    /*
+     * The computed font-size of the PARENT element, in px -- the value this
+     * element inherits. <= 0 means "unknown", and every font-relative length
+     * then falls back to CL_INITIAL_FONT_SIZE, which is what the whole engine
+     * did before this field existed.
+     *
+     * It is the parent's and not this element's because that is CSS's own
+     * order of operations: `font-size` is computed FIRST, against the inherited
+     * value, and only then can `em` mean anything for the other properties.
+     * css_resolve_el derives this element's own size from it and folds every
+     * font-relative length against THAT (spec/css_length.md section 8.5).
+     *
+     * An engine input like `state`, not a style: the cascade cannot discover it
+     * on its own, and inventing 16px for it -- which is exactly what the engine
+     * used to do -- makes `width:10em` mean 160px on a 32px element.
+     */
+    double font_size;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators
@@ -851,6 +981,17 @@ typedef struct css_element {
  * allocates nothing, reentrant. css_resolve is this with a parentless element. */
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          const char *inline_style, size_t inline_len);
+
+/*
+ * The computed font-size in px of an element whose resolved style is *o and
+ * whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial).
+ *
+ * Exported because the caller that walks the DOM is the one that can supply the
+ * inherited value, and it needs the same formula css_resolve_el used internally
+ * to fold font-relative lengths -- two copies of it would be two answers to
+ * "how big is 1em here". Pure.
+ */
+double css_computed_font_size(const css_style *o, double inherited_px);
 
 /* Convenience: resolve only an inline declaration list (no sheet, no selectors). */
 css_style css_parse_inline(const char *style, size_t len);

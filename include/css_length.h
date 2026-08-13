@@ -117,6 +117,99 @@ cl_ctx cl_ctx_initial(void);
 cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px);
 
 /*
+ * A resolved <length-percentage> (CSS Values 4 section 5.3): the absolute px
+ * component and the percentage component, kept SEPARATE because only the
+ * caller knows the containing block the percentage measures against.
+ *
+ * The two coexist rather than being alternatives: `calc(100% - 10px)` is one
+ * computed value with px == -10 and pct == 100 (CSS Values 4 section 10.3), so
+ * a union or an "either/or" enum could not represent it.
+ *
+ * pct is in PERCENT units (50% -> 50.0), not a fraction: it is what the author
+ * wrote. The engine's wire format stores per-mille integers, but that is the
+ * IPC codec's convention, not this type's.
+ */
+typedef struct cl_lp {
+    double px;       /* value resolved IN THE GIVEN ctx (font-relative part included) */
+    double em;       /* d(px)/d(font_size): px gained per 1px of font-size, 0 if none */
+    double pct;      /* percentage component (50% -> 50.0) */
+    int    has_pct;  /* 1 when the value carries a percentage component */
+} cl_lp;
+
+/*
+ * The font-relative component (spec/css_length.md section 8).
+ *
+ * A font-relative length is not a number, it is the affine function
+ * a + b*font-size: `10em` is 320px on a 32px element and 80px on an 8px one.
+ * The cascade cannot know the element's computed font-size (font-size is
+ * computed FIRST, then everything else), so a length is resolved at the parse
+ * context and carries `em` -- the derivative b -- so it can be re-fitted once
+ * the element is known.
+ *
+ * `px` deliberately holds the value ALREADY EVALUATED at ctx->font_size rather
+ * than the purely absolute part. That makes the correction below vanish when
+ * the element sits at the parse context's font-size, so a page whose elements
+ * are all at the initial 16px is byte-identical to one resolved without this
+ * machinery at all -- which is what bounds the blast radius of the change.
+ *
+ * rem/rlh have a ZERO derivative: they measure against the root, so from any
+ * non-root element they are absolute. That is the distinction
+ * cl_unit_is_font_relative() draws.
+ */
+
+/*
+ * Re-fits a resolved length to a different font-size:
+ *
+ *     used = px + em * (font_size - from_font_size)
+ *
+ * This is the whole rule and the only place the derivative becomes pixels --
+ * the same way cl_lp_used is the only place a percentage does. A non-finite or
+ * non-positive font-size on either side leaves `px` untouched: a font-size that
+ * cannot be believed must not manufacture a length (fail closed, never NaN).
+ */
+double cl_em_refit(double px, double em, double from_font_size, double font_size);
+
+/*
+ * How many px one of `unit` is worth per 1px of font-size -- the per-unit
+ * derivative behind cl_lp.em. `em` answers 1, `ex` its 0.5 fallback ratio, and
+ * every non-font-relative unit (px, pt, vw, and rem/rlh) answers 0.
+ *
+ * Read out of the cl_unit_scale table rather than written by hand, so a unit
+ * added to section 6.1 gets its coefficient automatically and the two can never
+ * disagree. Exported for calc(), which tokenizes its own dimensions and needs
+ * the derivative of each term to sum them.
+ */
+double cl_unit_font_ratio(const char *unit, size_t unit_len);
+
+/*
+ * As cl_resolve, but for a property whose grammar is <length-percentage>.
+ * Every input cl_resolve accepts resolves identically here (with has_pct 0);
+ * a <percentage> additionally resolves into the pct component.
+ *
+ * cl_resolve itself is deliberately NOT widened: there are properties where a
+ * percentage is genuinely invalid, and they must keep failing closed. Asking
+ * for this function is how a call site declares that its property accepts the
+ * type. See spec/css_length.md section 7.
+ */
+cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out);
+
+/*
+ * The used value of a <length-percentage>: lp.px + lp.pct/100 * basis. This is
+ * the whole rule; there is no other percentage arithmetic in the engine.
+ *
+ * `basis` is the containing-block dimension the property resolves against --
+ * which dimension is the CALLER's knowledge, and it is not symmetric: CSS 2.1
+ * sections 8.3/8.4 resolve ALL FOUR margin and padding percentages against the
+ * containing block's WIDTH, including padding-top and padding-bottom. The table
+ * of property -> basis is spec/css_length.md section 7.3.
+ *
+ * A basis that is not a usable length (negative, zero, non-finite) contributes
+ * nothing, but the absolute component still survives: dropping it would throw
+ * away a length the author did state.
+ */
+double cl_lp_used(cl_lp lp, double basis);
+
+/*
  * Parses a CSS <number> at the start of `s` (CSS Syntax Level 3, 4.3.12):
  *
  *     [+-]?  ( digit+ ('.' digit*)?  |  '.' digit+ )  ( [eE] [+-]? digit+ )?

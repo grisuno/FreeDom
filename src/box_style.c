@@ -291,6 +291,28 @@ double bx_width_cap(int w_px, int w_pct, double avail_w) {
     return (px > 0.0) ? px : pc;
 }
 
+double bx_border_box_h(double declared_h, int border_box,
+                       double pad_t, double pad_b, double bord_t, double bord_b) {
+    if (declared_h < 0.0) declared_h = 0.0;
+    if (border_box) return declared_h;
+    if (pad_t < 0.0) pad_t = 0.0;
+    if (pad_b < 0.0) pad_b = 0.0;
+    if (bord_t < 0.0) bord_t = 0.0;
+    if (bord_b < 0.0) bord_b = 0.0;
+    return declared_h + pad_t + pad_b + bord_t + bord_b;
+}
+
+double bx_lp_px(int px_val, int pct_pm, double basis) {
+    /* A sentinel is the absence of an absolute length, not a huge negative one.
+     * Without this a `padding-left: 5%` (px half CSS_LEN_UNSET) would resolve to
+     * INT_MIN plus the percentage. */
+    double px = (px_val == CSS_LEN_UNSET || px_val == CSS_LEN_AUTO ||
+                 px_val == CSS_LEN_END) ? 0.0 : (double)px_val;
+    if (pct_pm == 0) return px;
+    if (!(basis > 0.0) || basis != basis) return px;   /* NaN-safe */
+    return px + basis * (double)pct_pm / 1000.0;
+}
+
 double bx_content_cap(double width_cap, int border_box,
                       double pad_l, double pad_r, double bord_l, double bord_r) {
     if (!border_box || width_cap <= 0.0) return width_cap;

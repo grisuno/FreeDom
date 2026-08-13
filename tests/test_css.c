@@ -2000,36 +2000,76 @@ static void test_box_units_and_failclosed(void **state) {
     assert_int_equal(def.max_width, CSS_LEN_UNSET);
 }
 
-/* Hito 32: width/max-width percentages are carried SYMBOLICALLY (per-mille in
- * width_pct/max_width_pct; the px channel stays UNSET) and resolved at layout
- * time against the real containing width. Junk still fails closed; every other
- * % length keeps failing closed. */
-static void test_width_percent_carried_symbolically(void **state) {
+/* <length-percentage>: the percentage half of EVERY box-model length is carried
+ * symbolically (per-mille in css_style.pct[], the px half left UNSET) and
+ * resolved at layout against the containing block. This used to be a private
+ * channel for width/max-width only, so `padding: 2% 5%` dropped the whole
+ * shorthand and `margin-left: 10%` dropped the declaration.
+ * spec/css_length.md section 7. */
+static void test_length_percentage_carried_symbolically(void **state) {
     (void)state;
     css_style s = css_parse_inline("width:99.8%", 0);
-    assert_int_equal(s.width, CSS_LEN_UNSET);          /* px channel untouched */
-    assert_int_equal(s.width_pct, 998);
-    assert_int_equal(css_parse_inline("max-width:50%", 0).max_width_pct, 500);
-    assert_int_equal(css_parse_inline("width:100%", 0).width_pct, 1000);
-    /* logical alias rides the same slots. */
-    assert_int_equal(css_parse_inline("inline-size:25%", 0).width_pct, 250);
-    assert_int_equal(css_parse_inline("max-inline-size:75%", 0).max_width_pct, 750);
+    assert_int_equal(s.width, CSS_LEN_UNSET);          /* px half untouched */
+    assert_int_equal(s.pct[CSS_PCT_WIDTH], 998);
+    assert_int_equal(css_parse_inline("max-width:50%", 0).pct[CSS_PCT_MAX_WIDTH], 500);
+    assert_int_equal(css_parse_inline("width:100%", 0).pct[CSS_PCT_WIDTH], 1000);
+    /* logical aliases ride the same slots. */
+    assert_int_equal(css_parse_inline("inline-size:25%", 0).pct[CSS_PCT_WIDTH], 250);
+    assert_int_equal(css_parse_inline("max-inline-size:75%", 0).pct[CSS_PCT_MAX_WIDTH], 750);
     /* junk fails closed (unset = 0). */
-    assert_int_equal(css_parse_inline("width:-5%", 0).width_pct, 0);
-    assert_int_equal(css_parse_inline("width:%", 0).width_pct, 0);
-    assert_int_equal(css_parse_inline("width:abc%", 0).width_pct, 0);
-    assert_int_equal(css_parse_inline("width:0%", 0).width_pct, 0);
+    assert_int_equal(css_parse_inline("width:-5%", 0).pct[CSS_PCT_WIDTH], 0);
+    assert_int_equal(css_parse_inline("width:%", 0).pct[CSS_PCT_WIDTH], 0);
+    assert_int_equal(css_parse_inline("width:abc%", 0).pct[CSS_PCT_WIDTH], 0);
+    /* `width: 0%` is a VALID zero width, not junk: it resolves on the px half. */
+    assert_int_equal(css_parse_inline("width:0%", 0).width, 0);
+    assert_int_equal(css_parse_inline("width:0%", 0).pct[CSS_PCT_WIDTH], 0);
     /* clamp: anything past 1000% saturates instead of overflowing. */
-    assert_int_equal(css_parse_inline("width:5000%", 0).width_pct, 10000);
-    /* px and pct coexist across properties (each keeps its own channel). */
+    assert_int_equal(css_parse_inline("width:5000%", 0).pct[CSS_PCT_WIDTH], CSS_PCT_MAX);
+    /* px and pct coexist across properties (each keeps its own slot). */
     css_style t = css_parse_inline("width:600px; max-width:50%", 0);
     assert_int_equal(t.width, 600);
-    assert_int_equal(t.width_pct, 0);
-    assert_int_equal(t.max_width_pct, 500);
+    assert_int_equal(t.pct[CSS_PCT_WIDTH], 0);
+    assert_int_equal(t.pct[CSS_PCT_MAX_WIDTH], 500);
     assert_int_equal(t.max_width, CSS_LEN_UNSET);
-    /* other % lengths still fail closed. */
-    assert_int_equal(css_parse_inline("margin-left:10%", 0).margin_left, CSS_LEN_UNSET);
-    assert_int_equal(css_parse_inline("min-width:10%", 0).min_width, CSS_LEN_UNSET);
+
+    /* Margins and padding now carry percentages too -- on ALL FOUR sides, since
+     * CSS 2.1 8.3/8.4 resolve even the vertical ones against the containing
+     * WIDTH. A negative percentage is legal for margin and not for padding,
+     * exactly like a negative px length. */
+    css_style m = css_parse_inline("margin-left:10%", 0);
+    assert_int_equal(m.margin_left, CSS_LEN_UNSET);
+    assert_int_equal(m.pct[CSS_PCT_MARGIN_LEFT], 100);
+    assert_int_equal(css_parse_inline("margin-left:-25%", 0).pct[CSS_PCT_MARGIN_LEFT], -250);
+    assert_int_equal(css_parse_inline("padding-left:-5%", 0).pct[CSS_PCT_PAD_LEFT], 0);
+    assert_int_equal(css_parse_inline("min-width:10%", 0).pct[CSS_PCT_MIN_WIDTH], 100);
+    assert_int_equal(css_parse_inline("height:100%", 0).pct[CSS_PCT_HEIGHT], 1000);
+    assert_int_equal(css_parse_inline("left:50%", 0).pct[CSS_PCT_INSET_LEFT], 500);
+    assert_int_equal(css_parse_inline("top:-50%", 0).pct[CSS_PCT_INSET_TOP], -500);
+
+    /* The shorthand no longer dies on a percentage token: `padding: 2% 5%` is
+     * the CSS "v h" form and must reach all four sides. */
+    css_style p4 = css_parse_inline("padding:2% 5%", 0);
+    assert_int_equal(p4.pct[CSS_PCT_PAD_TOP], 20);
+    assert_int_equal(p4.pct[CSS_PCT_PAD_RIGHT], 50);
+    assert_int_equal(p4.pct[CSS_PCT_PAD_BOTTOM], 20);
+    assert_int_equal(p4.pct[CSS_PCT_PAD_LEFT], 50);
+    /* Mixed px and % in one shorthand: each side keeps its own two halves. */
+    css_style mix = css_parse_inline("margin:1% 0", 0);
+    assert_int_equal(mix.pct[CSS_PCT_MARGIN_TOP], 10);
+    assert_int_equal(mix.pct[CSS_PCT_MARGIN_RIGHT], 0);
+    assert_int_equal(mix.margin_right, 0);
+
+    /* Cascade: a later plain-length declaration must CLEAR the earlier
+     * percentage half, or the two would combine into one bogus value. That is
+     * why every emitter writes both halves unconditionally. */
+    css_style clr = css_parse_inline("width:50%; width:200px", 0);
+    assert_int_equal(clr.width, 200);
+    assert_int_equal(clr.pct[CSS_PCT_WIDTH], 0);
+
+    /* A property whose grammar is a bare <length> still rejects a percentage. */
+    assert_int_equal(css_parse_inline("letter-spacing:5%", 0).letter_spacing, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("border-left-width:5%", 0).border_left_width,
+                     CSS_LEN_UNSET);
 }
 
 static void test_calc_basic_arithmetic(void **state) {
@@ -2853,7 +2893,7 @@ static void test_table_sheet_cascade(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
-    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0 };
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0, 0.0 };
     css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
     assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
     assert_int_equal(s.empty_cells, CSS_EC_HIDE);
@@ -3949,6 +3989,50 @@ static void test_clip_auto(void **state) {
     assert_int_equal(s.clip_left, CSS_LEN_UNSET);
 }
 
+
+/* --- Vendor-prefixed properties are aliases (spec/css.md) -----------------
+ *
+ * ~900 declarations in the parity corpus carry a -webkit-/-moz-/-o-/-ms-
+ * prefix, and all of them were dropped whole. A prefixed property IS the
+ * standard property; stripping the prefix and re-dispatching is the entire
+ * rule, and it declines the IE10 tweener flexbox names for free (there is no
+ * property called `flex-pack`), which is the correct fail-closed answer. */
+static void test_vendor_prefixes(void **state) {
+    (void)state;
+    /* Layout-affecting: these change geometry, not just paint. */
+    assert_int_equal(css_parse_inline("-webkit-box-sizing:border-box", 0).box_sizing,
+                     CSS_BOXS_BORDER);
+    assert_int_equal(css_parse_inline("-moz-box-sizing:border-box", 0).box_sizing,
+                     CSS_BOXS_BORDER);
+
+    /* Paint: the corpus' single most common prefixed property families. */
+    assert_int_equal(css_parse_inline("-moz-border-radius:8px", 0).border_radius, 8);
+    assert_int_equal(css_parse_inline("-webkit-border-radius:8px", 0).border_radius, 8);
+    assert_int_equal(css_parse_inline("-o-border-radius:8px", 0).border_radius, 8);
+    assert_int_equal(css_parse_inline("-ms-transform:scale(2)", 0).transform_sx,
+                     css_parse_inline("transform:scale(2)", 0).transform_sx);
+    assert_int_equal(css_parse_inline("-webkit-column-width:300px", 0).column_width, 300);
+
+    /* The prefixed spelling must agree with the standard one exactly. */
+    assert_int_equal(css_parse_inline("-webkit-opacity:0.5", 0).opacity,
+                     css_parse_inline("opacity:0.5", 0).opacity);
+
+    /* A prefixed name whose UNPREFIXED form is not a property stays dropped --
+     * the IE10 tweener flexbox syntax has different value grammars, so mapping
+     * it by name would be inventing a rule. */
+    assert_int_equal(css_parse_inline("-ms-flex-pack:justify", 0).justify,
+                     CSS_JUSTIFY_UNSET);
+    assert_int_equal(css_parse_inline("-ms-flex-align:center", 0).align_items,
+                     CSS_AK_UNSET);
+
+    /* A custom property is not a vendor prefix: `--x` must not be mistaken for
+     * one and stripped down to `x`. */
+    assert_int_equal(css_parse_inline("--webkit-color:red", 0).color, -1);
+
+    /* Prefix stripping happens once: a doubly-prefixed name is not a property. */
+    assert_int_equal(css_parse_inline("-webkit--moz-color:red", 0).color, -1);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -3958,6 +4042,7 @@ int main(void) {
         cmocka_unit_test(test_cursor),
         cmocka_unit_test(test_text_overflow_and_word_break),
         cmocka_unit_test(test_box_sizing),
+        cmocka_unit_test(test_vendor_prefixes),
         cmocka_unit_test(test_border_shorthand),
         cmocka_unit_test(test_border_longhands),
         cmocka_unit_test(test_box_shadow_and_outline),
@@ -3973,7 +4058,7 @@ int main(void) {
         cmocka_unit_test(test_calc_precedence_and_parens),
         cmocka_unit_test(test_calc_units_and_signs),
         cmocka_unit_test(test_calc_dimension_errors_fail_closed),
-        cmocka_unit_test(test_width_percent_carried_symbolically),
+        cmocka_unit_test(test_length_percentage_carried_symbolically),
         cmocka_unit_test(test_calc_clamped_anti_dos),
         cmocka_unit_test(test_viewport_units_resolve_normalized),
         cmocka_unit_test(test_viewport_units_in_calc_and_mathfn),
