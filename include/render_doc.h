@@ -152,6 +152,9 @@ typedef struct rd_block {
     int              cont_col_w[PV_GRID_TRACKS];
     int              grid_span;
     int              row_span;
+    /* Resolved named-grid cell (2026-08-14), 0-based, -1 = auto-placed. See
+     * spec/grid_areas.md: page_view matches the name, the painter gets numbers. */
+    int              grid_row_start, grid_col_start;
     /* Stage 3a: flex per-item values (structure, carried regardless of caps.css,
      * like cont_*). Copied from pv_run; the GUI's layout_container feeds them to
      * bt_node.grow/shrink/basis. Defaults: grow -1, shrink -1, basis CSS_LEN_UNSET,

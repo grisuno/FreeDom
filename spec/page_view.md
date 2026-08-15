@@ -462,6 +462,81 @@ espacio); un candidato `data:` termina en el primer espacio o el final de la cad
 cortar en la coma interna de `;base64,`. Sin `src` **ni** `srcset` utilizable: sin run, como
 antes. Ver `[[freedom-data-url-images]]`.
 
+### El registro de cajas vive en el heap y una caja la genera también un margen (2026-08-14)
+
+Dos cambios que se destaparon el uno al otro.
+
+**1. Un margen vertical genera caja.** `css_has_boxdeco` decide si un elemento
+merece una entrada en el árbol de cajas. Antes solo miraba decoración *pintable*
+(borde, padding, radio, sombra, posición, dimensiones). Pero **un margen es espacio
+FUERA del border box**, así que el único sitio donde el pintor puede aplicarlo es
+donde empieza la caja de ese elemento — y sin entrada de caja no tenía dónde vivir.
+El motor solo llevaba los márgenes del **bloque ancestro más cercano** montados en el
+run de texto, de modo que:
+
+- un wrapper sin decoración (`section { margin-bottom: 24px }` alrededor de un par de
+  `<div>`, o cualquier clase `.row`/`.stack` cuyo único trabajo es el ritmo vertical)
+  perdía sus márgenes **enteros**; y
+- una página cuyos bloques son todos cajas decoradas no tenía ningún run que llevara
+  nada: tres `<div>` de 20 px con `margin-bottom:30px` salían en 0/20/40 contra
+  **0/50/100** de Firefox.
+
+Cero y `auto` **no** cuentan (`margin: 0` es el reset universal y registrar una caja
+por él haría que el pintor volcara una línea en cada elemento que lo trae). Un margen
+**negativo** sí: solapar bordes con `margin-top:-1px` es un caso que debe sobrevivir.
+
+**2. El registro pasó al heap.** `pv_box_reg` eran dos arreglos fijos dentro de la
+struct: **1.5 MiB de `pv_box_def` en el marco de pila de `pv_build`**, y un tope de
+**256 cajas por página** que una portada de noticias real satura sin proponérselo
+(slashdot registra ~460). Pasado el tope `box_reg_id` devuelve -1 y el elemento pierde
+su caja **en silencio**: sin decoración, sin márgenes, y sus descendientes maquetados
+contra la página en vez de contra él. *Un límite que una página normal alcanza no es
+una cota anti-DoS, es un bug de render.*
+
+Ahora crece por duplicación (`box_reg_grow`, degrada a "sin caja" ante OOM, nunca
+falla duro) hasta `PV_MAX_BOXES`, que sí es una cota dura. El tail que devuelve
+`realloc` se **zero-inicializa** (V-002): un `pv_box_def` leído antes de que
+`boxdef_from_style` lo llene haría que el render dependiera de basura del heap.
+
+`PV_MAX_BOXES` está acoplado por `_Static_assert` a `BT_MAX_POSITIONED`
+(`include/box_tree.h`), porque el resolvedor out-of-flow indexa sus arreglos **por id
+de caja**: si el registro acepta una caja que el resolvedor no puede direccionar,
+`position_doc` se rinde **entera** y nada posicionado se coloca en toda la página.
+
+### La caja lleva sus propios márgenes verticales y su identidad UA (2026-08-14)
+
+`pv_box_def` gana `box_mt`/`box_mb` (+ mitades de porcentaje), `ua_tag` y `font_px`.
+Los márgenes **horizontales** se pliegan en `box_l`/`box_r` porque solo desplazan la
+caja dentro de su línea; los verticales no se pueden plegar en ningún lado, porque
+**colapsan** con los del hermano adyacente (CSS 2.1 §8.3.1) y por eso tienen que
+sobrevivir como valor propio hasta que los dos estén uno al lado del otro.
+`ua_tag` nombra el elemento para poder pedirle a `bx_block_ua_box` el margen que la
+hoja UA le da cuando el autor no declara ninguno, y `font_px` es su `font-size`
+computado — los márgenes UA se expresan en `em` (`p { margin: 1em 0 }` **es** la hoja
+UA), así que sin él habría que multiplicarlos por una constante, que es justamente lo
+que este batch existe para eliminar.
+
+**Quién es el dueño del margen.** Un margen pertenece a un ELEMENTO y se aplica
+exactamente una vez. Si el elemento genera caja, lo aplica la caja; si no, lo aplica
+el run. Cuando el mismo ancestro es a la vez el bloque más cercano del run y el dueño
+de su caja, `resolve_context` **pone a cero la copia del run**: dejarla aplicaría el
+mismo margen una segunda vez *dentro* de la caja, que es donde el motor viejo metía
+todo el `margin-top` de un bloque — haciéndolo más alto en vez de moverlo hacia abajo.
+
+### El contenido de `::before` es contenido INLINE, no un bloque (2026-08-14)
+
+CSS 2.1 §12.1: el contenido generado por `::before` es el primer contenido inline de
+su elemento. Se emitía como run con `block_break` propio, así que cada marcador
+generado se llevaba una fila entera. En la lista de referencias de Wikipedia —donde
+cada entrada lleva un marcador `^` de retroenlace— eso **duplicaba el alto de toda la
+sección**.
+
+Ahora el run generado toma el salto de bloque (es él quien abre la primera línea del
+elemento) y el texto propio del elemento ya no toma otro (`prev_block = block`). Y
+tiene que viajar con el **mismo `block_id`, indent, contenedor y estilo de texto** que
+el texto del elemento: si no, el pintor reconcilia cajas entre los dos runs y vuelca
+la línea igual, separándolos de nuevo.
+
 ### Tamaño CSS de elementos reemplazados: `width`/`height` gana al atributo (2026-08-01)
 
 `img_w`/`img_h` de un `<img>` o `<svg>` en línea se toman primero de los atributos

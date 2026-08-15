@@ -165,6 +165,7 @@ fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
 
 fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                              const int *row_span,
+                             const int *fixed_row, const int *fixed_col,
                              size_t *out_row, size_t *out_col) {
     if (nitems == 0) return FX_OK;
     if (ncols == 0 || nitems > FX_MAX_ITEMS) return FX_ERR_RANGE;
@@ -176,8 +177,46 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
     size_t nocc = 0;
     for (size_t i = 0; i < FX_MAX_ITEMS; ++i) occ[i] = 0;
 
+    /* Pass 1 -- EXPLICIT placement (CSS Grid 1 section 8.3). An item whose cell the
+     * author named takes that rectangle and marks it occupied, BEFORE any automatic
+     * item is placed, so the automatic ones can flow around it (section 8.5). Doing
+     * it in one interleaved pass instead would let an earlier automatic item sit in
+     * a cell a later named item owns. With fixed_row/fixed_col NULL this pass places
+     * nothing and the loop below is bit-for-bit the pre-2026-08-14 algorithm. */
+    for (size_t i = 0; i < nitems; ++i) {
+        int fr = (fixed_row != NULL) ? fixed_row[i] : -1;
+        int fc = (fixed_col != NULL) ? fixed_col[i] : -1;
+        if (fr < 0 && fc < 0) continue;
+        size_t sp = 1;
+        if (span != NULL && span[i] > 1)
+            sp = ((size_t)span[i] > ncols) ? ncols : (size_t)span[i];
+        size_t rsp = 1;
+        if (row_span != NULL && row_span[i] > 1)
+            rsp = (size_t)row_span[i];
+        /* A cell outside the grid is CLAMPED, not dropped: an item at the edge is
+         * a smaller error than an item that disappears. */
+        size_t pr = (fr > 0) ? (size_t)fr : 0;
+        size_t pc = (fc > 0) ? (size_t)fc : 0;
+        if (pc >= ncols) pc = ncols - 1;
+        if (pc + sp > ncols) sp = ncols - pc;
+        /* The row is NOT bounded by the item count: a named area may legitimately
+         * sit in the fourth row of a template with one item in it. The only real
+         * bound is the occupancy array. */
+        if (pr >= FX_MAX_ITEMS) pr = FX_MAX_ITEMS - 1;
+        out_row[i] = pr;
+        out_col[i] = pc;
+        size_t mask = ((1ull << sp) - 1ull) << pc;
+        for (size_t kr = pr; kr < pr + rsp && kr < FX_MAX_ITEMS; ++kr) {
+            while (nocc <= kr) { occ[nocc] = 0; ++nocc; }
+            occ[kr] |= mask;
+        }
+    }
+
+    /* Pass 2 -- AUTOMATIC placement over whatever cells are left. */
     size_t r = 0, c = 0;
     for (size_t i = 0; i < nitems; ++i) {
+        if ((fixed_row != NULL && fixed_row[i] >= 0) ||
+            (fixed_col != NULL && fixed_col[i] >= 0)) continue;   /* placed above */
         size_t sp = 1;
         if (span != NULL && span[i] > 1)
             sp = ((size_t)span[i] > ncols) ? ncols : (size_t)span[i];
@@ -222,6 +261,152 @@ fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
             }
         }
     }
+    return FX_OK;
+}
+
+
+/* --- grid-template-areas: named placement (spec/grid_areas.md) --------------- */
+
+unsigned fx_grid_area_hash(const char *name) {
+    if (name == NULL) return 0u;
+    /* Trim both ends first, so the hash of a template token and the hash of the
+     * item's `grid-area` value agree no matter how either was spaced. */
+    const char *b = name;
+    while (*b == ' ' || *b == '\t' || *b == '\n' || *b == '\r' || *b == '\f') ++b;
+    const char *e = b;
+    while (*e != '\0') ++e;
+    while (e > b && (e[-1] == ' ' || e[-1] == '\t' || e[-1] == '\n' ||
+                     e[-1] == '\r' || e[-1] == '\f')) --e;
+    if (e == b) return 0u;
+
+    /* FNV-1a, 32-bit. */
+    unsigned h = 2166136261u;
+    for (const char *p = b; p < e; ++p) {
+        h ^= (unsigned char)*p;
+        h *= 16777619u;
+    }
+    /* 0 is reserved for "no name" (the null cell token), so a name that hashes to
+     * it is nudged; the alternative is a name that silently reads as a hole. */
+    return (h == 0u) ? 1u : h;
+}
+
+/* True for the null cell token: a single `.` or a run of them (CSS Grid 1 7.3). */
+static int area_token_is_null_cell(const char *tok, size_t len) {
+    if (len == 0) return 0;
+    for (size_t i = 0; i < len; ++i) if (tok[i] != '.') return 0;
+    return 1;
+}
+
+fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out) {
+    if (tmpl == NULL || out == NULL) return FX_ERR_NULL_ARG;
+    out->rows = 0;
+    out->cols = 0;
+    for (size_t i = 0; i < FX_AREA_MAX_CELLS; ++i) out->cell[i] = 0u;
+
+    int rows = 0, cols = -1;
+    const char *p = tmpl;
+    while (*p != '\0') {
+        /* Each ROW of the template is one quoted string; anything between them is
+         * ignored (that is where the `grid-template` shorthand's track sizes live). */
+        while (*p != '\0' && *p != '\'' && *p != '"') ++p;
+        if (*p == '\0') break;
+        char quote = *p++;
+        const char *row_start = p;
+        while (*p != '\0' && *p != quote) ++p;
+        if (*p == '\0') { out->rows = 0; return FX_ERR_RANGE; }  /* unterminated */
+        const char *row_end = p++;
+
+        if (rows >= FX_AREA_MAX_ROWS) { out->rows = 0; return FX_ERR_RANGE; }
+
+        /* Split this row into whitespace-separated cell tokens. */
+        int c = 0;
+        const char *q = row_start;
+        while (q < row_end) {
+            while (q < row_end && (*q == ' ' || *q == '\t')) ++q;
+            if (q >= row_end) break;
+            const char *tok = q;
+            while (q < row_end && *q != ' ' && *q != '\t') ++q;
+            size_t len = (size_t)(q - tok);
+
+            if (c >= FX_AREA_MAX_COLS) { out->rows = 0; return FX_ERR_RANGE; }
+            size_t idx = (size_t)rows * (size_t)FX_AREA_MAX_COLS + (size_t)c;
+            if (idx >= FX_AREA_MAX_CELLS) { out->rows = 0; return FX_ERR_RANGE; }
+
+            if (area_token_is_null_cell(tok, len) || len >= FX_AREA_NAME_MAX) {
+                /* A null cell, or a name too long to hold: both are HOLES. An
+                 * over-long name is deliberately not truncated -- truncating would
+                 * invent a different name and could collide with a real one. */
+                out->cell[idx] = 0u;
+            } else {
+                char name[FX_AREA_NAME_MAX];
+                for (size_t k = 0; k < len; ++k) name[k] = tok[k];
+                name[len] = '\0';
+                out->cell[idx] = fx_grid_area_hash(name);
+            }
+            ++c;
+        }
+
+        if (c == 0) { out->rows = 0; return FX_ERR_RANGE; }      /* empty row */
+        /* Every row must declare the same number of columns; CSS 7.3 calls a ragged
+         * template invalid, and a ragged grid has no defined geometry to place into. */
+        if (cols < 0) cols = c;
+        else if (c != cols) { out->rows = 0; return FX_ERR_RANGE; }
+        ++rows;
+    }
+
+    if (rows == 0 || cols <= 0) { out->rows = 0; return FX_ERR_RANGE; }
+    if ((size_t)rows * (size_t)cols > FX_AREA_MAX_CELLS) { out->rows = 0; return FX_ERR_RANGE; }
+
+    /* Cells were written on an FX_AREA_MAX_COLS stride so a ragged template could be
+     * detected before committing; compact to the real stride now that cols is known. */
+    if (cols != FX_AREA_MAX_COLS) {
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                out->cell[(size_t)r * (size_t)cols + (size_t)c] =
+                    out->cell[(size_t)r * (size_t)FX_AREA_MAX_COLS + (size_t)c];
+            }
+        }
+    }
+    out->rows = rows;
+    out->cols = cols;
+    return FX_OK;
+}
+
+fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
+                            int *row, int *col, int *row_span, int *col_span) {
+    if (m == NULL || row == NULL || col == NULL ||
+        row_span == NULL || col_span == NULL) return FX_ERR_NULL_ARG;
+    if (name == 0u || m->rows <= 0 || m->cols <= 0) return FX_ERR_RANGE;
+
+    int r0 = m->rows, r1 = -1, c0 = m->cols, c1 = -1;
+    int found = 0;
+    for (int r = 0; r < m->rows; ++r) {
+        for (int c = 0; c < m->cols; ++c) {
+            if (m->cell[(size_t)r * (size_t)m->cols + (size_t)c] != name) continue;
+            found = 1;
+            if (r < r0) r0 = r;
+            if (r > r1) r1 = r;
+            if (c < c0) c0 = c;
+            if (c > c1) c1 = c;
+        }
+    }
+    if (!found) return FX_ERR_RANGE;
+
+    /* A named area is rectangular BY DEFINITION (CSS Grid 1 7.3): if the bounding
+     * box holds a cell that is not this name, the template is invalid. Reporting
+     * that as "no placement" degrades the one item to auto-placement instead of
+     * silently giving it a rectangle that covers someone else's cells. */
+    for (int r = r0; r <= r1; ++r) {
+        for (int c = c0; c <= c1; ++c) {
+            if (m->cell[(size_t)r * (size_t)m->cols + (size_t)c] != name)
+                return FX_ERR_RANGE;
+        }
+    }
+
+    *row = r0;
+    *col = c0;
+    *row_span = r1 - r0 + 1;
+    *col_span = c1 - c0 + 1;
     return FX_OK;
 }
 

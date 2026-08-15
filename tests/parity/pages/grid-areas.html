@@ -1,0 +1,113 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>grid-template-areas placement</title>
+<!--
+  Probe for spec/grid_areas.md: an item's cell comes from `grid-area: <name>`
+  matched against the container's `grid-template-areas` (CSS Grid 1 7.3 + 8.4),
+  NOT from its position in the source. Before this existed the engine placed grid
+  items round-robin at index % columns, so every named layout -- which is how
+  every modern portal is built -- came out with its regions in source order.
+
+  Every section below lists its items in a DELIBERATELY WRONG source order, so a
+  round-robin placer cannot accidentally agree with the answer.
+
+  Taller than 768px on purpose: Firefox reports the viewport height for short
+  pages and h_ratio then measures nothing (CLAUDE.md, batch 11).
+-->
+<style>
+  body { margin: 0; font: 14px/1.4 monospace; }
+  h2 { font: 16px/1.2 sans-serif; margin: 20px 0 8px; }
+  .cell { padding: 8px; color: #fff; }
+
+  /* A: the three-row portal shell -- a full-width notice, a narrow rail beside a
+     wide body, a full-width footer. Wikipedia's Vector shell is exactly this. */
+  .shell { display: grid; grid-template-columns: 200px 1fr; gap: 10px;
+           grid-template-areas: 'notice notice'
+                                'side   main'
+                                'foot   foot'; }
+  .notice { grid-area: notice; background: #b33; height: 40px; }
+  .side   { grid-area: side;   background: #383; height: 160px; }
+  .main   { grid-area: main;   background: #35a; height: 240px; }
+  .foot   { grid-area: foot;   background: #963; height: 50px; }
+
+  /* B: an area spanning BOTH axes, so the rectangle is 2x2 rather than one cell. */
+  .app { display: grid; grid-template-columns: 120px 1fr 1fr; gap: 8px;
+         grid-template-areas: 'hd hd hd'
+                              'nv bd bd'
+                              'nv bd bd'
+                              'ft ft ft'; }
+  .hd { grid-area: hd; background: #444; height: 36px; }
+  .nv { grid-area: nv; background: #276; height: 200px; }
+  .bd { grid-area: bd; background: #625; height: 200px; }
+  .ft { grid-area: ft; background: #666; height: 36px; }
+
+  /* C: a null cell (the dot) is a HOLE, not a name: nothing is placed there and
+     the column keeps its width. */
+  .holes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+           grid-template-areas: 'a . b'
+                                '. c .'; }
+  .ha { grid-area: a; background: #a52; height: 60px; }
+  .hb { grid-area: b; background: #5a2; height: 60px; }
+  .hc { grid-area: c; background: #25a; height: 60px; }
+
+  /* D: named items MIXED with auto-placed ones. The named item claims its cell
+     first and the rest flow around it (CSS Grid 1 8.5). */
+  .mixed { display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+           grid-template-areas: 'x x'
+                                '. .'; }
+  .mx { grid-area: x; background: #808; height: 50px; }
+  .auto { background: #555; height: 50px; }
+
+  /* E: a name the template does not hold falls back to auto-placement, exactly
+     as a browser does -- it must not disappear and must not land at (0,0). */
+  .missing { display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+             grid-template-areas: 'p q'; }
+  .mp { grid-area: p; background: #068; height: 60px; }
+  .mq { grid-area: q; background: #860; height: 60px; }
+  .mz { grid-area: nosuchname; background: #333; height: 60px; }
+</style>
+
+<h2>A. portal shell (source order: main, foot, notice, side)</h2>
+<div class="shell">
+  <div class="cell main">main</div>
+  <div class="cell foot">foot</div>
+  <div class="cell notice">notice</div>
+  <div class="cell side">side</div>
+</div>
+
+<h2>B. an area spanning two rows and two columns (source order: bd, ft, hd, nv)</h2>
+<div class="app">
+  <div class="cell bd">body</div>
+  <div class="cell ft">footer</div>
+  <div class="cell hd">header</div>
+  <div class="cell nv">nav</div>
+</div>
+
+<h2>C. null cells are holes (source order: c, b, a)</h2>
+<div class="holes">
+  <div class="cell hc">c</div>
+  <div class="cell hb">b</div>
+  <div class="cell ha">a</div>
+</div>
+
+<h2>D. a named item mixed with auto-placed ones</h2>
+<div class="mixed">
+  <div class="cell auto">auto 1</div>
+  <div class="cell mx">named, spans the first row</div>
+  <div class="cell auto">auto 2</div>
+</div>
+
+<h2>E. a name the template does not hold auto-places</h2>
+<div class="missing">
+  <div class="cell mz">unnamed area</div>
+  <div class="cell mq">q</div>
+  <div class="cell mp">p</div>
+</div>
+
+<h2>F. the shell again, to push the page past the viewport</h2>
+<div class="shell">
+  <div class="cell side">side</div>
+  <div class="cell notice">notice</div>
+  <div class="cell main">main</div>
+  <div class="cell foot">foot</div>
+</div>

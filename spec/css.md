@@ -341,6 +341,9 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | `row-gap` | `row_gap` (px, clamped `[0, CSS_GAP_MAX]`, or -1 unset). `column-gap`/`gap` keep feeding `gap` (first token); two-value `gap` row component is set only via `row-gap`. |
 | `grid-auto-flow` | `grid_auto_flow` (`css_grid_flow`): `row`/`column`; `dense` ignored |
 | `grid-column`, `grid-row` | `grid_col_span`/`grid_row_span` from a `span N` value, clamped `[1, CSS_GRID_SPAN_MAX]`; line-number / named-line forms out of scope (dropped) |
+| `grid-template-areas` (2026-08-14) | `grid_areas`: the raw quoted-row text, kept verbatim (max `CSS_GRID_AREAS_MAX`, longer → **dropped**, never truncated: half a template would place items against a grid the author never wrote). It rides the same string pool `content` uses. `none` resets it to `""`. Parsed into a cell grid by `fx_grid_areas_parse` — see `spec/grid_areas.md`. |
+| `grid-area` (2026-08-14) | `grid_area_name`: the single `<custom-ident>` form, reduced on the spot to `fx_grid_area_hash` (0 = unset), so an item's placement crosses the IPC codec as **one int** and the painter never sees a name. `auto`/`none` → 0. A value containing `/` or starting with a digit is the line-placement form and is **dropped** rather than mistaken for a name. |
+| `grid-template`, `grid` (2026-08-14) | Shorthand: split on the last **top-level** `/` (top-level because `minmax(0,1fr)` and `repeat(2,1fr)` hold parens and commas but never a bare slash). The right half feeds `grid-template-columns`, the left half `grid-template-rows`, and quoted strings in the left half are **also** the areas template (CSS Grid 1 §7.4). Without a slash the whole value is the rows half. `grid` routes here too: taking its tracks and areas beats dropping the declaration for the implicit-track parts this engine does not model. |
 | `border-collapse` | `border_collapse` (`css_border_collapse`): `collapse`/`separate`; unknown dropped |
 | `border-spacing` | `border_spacing` (signed px, `CSS_LEN_UNSET` unset): the first length only (two-value h/v → only h honoured in v1); px/em/rem/0, accepts a bare non-zero number as px; clamped `[0, CSS_BORDER_SPACING_MAX]` |
 | `empty-cells` | `empty_cells` (`css_empty_cells`): `show`/`hide`; unknown dropped |
@@ -411,6 +414,31 @@ continues, so `.card{font-size:14px} .card h3{font-size:1.2em}` resolves to
 `14 × 1.2 = 16.8px` (absolute). The walk stops at the first **absolute** declaration, or
 at the root — where a leftover pure-relative chain keeps `font_abs = 0` (the pre-existing
 behaviour, which is right for an inline inside a heading).
+
+**WHERE the absolute declaration sits decides whether it replaces the heading scale
+(2026-08-14).** "The author set the property" means *on this element*. A declaration on
+an **ancestor** is the heading's **inherited value**, and the user-agent rule
+`h1 { font-size: 2em }` still doubles it. So `resolve_context` records whether the
+absolute size was found at-or-inside the heading (`heading_here`) or outside it, and only
+the first case sets `font_abs = 1`:
+
+| declaration | h1 renders at | why |
+| :-- | :-- | :-- |
+| `h1 { font-size: 40px }` | 40px | same element, the author's rule wins |
+| `h1 > span { font-size: 20px }` | span at 20px | inside the heading, same reasoning |
+| `body { font-size: 16px }` | **32px** | inherited value; the UA `2em` still applies |
+| `body { font-size: 20px }` | **40px** | idem, 2 × 20 |
+| `body { font: 16px/1.2 sans-serif }` | **32px** | the shorthand is the same declaration |
+
+Treating *every* absolute size as a replacement made `body { font-size: 16px }` — which
+is on essentially every real page, and is what the `font` shorthand expands to — render
+`h1`, `h2` and `p` **at exactly the same size**: the document lost its heading hierarchy
+entirely. Measured against Firefox: `h1` 38.4px line vs our 23px.
+
+The above-heading case is exact rather than approximate, and needs no new arithmetic:
+`font_scale` is already a percent **of the same 16px root** the UA base is built from, so
+`base(= scale × 16) × font_scale/100(= px/16) == scale × px`. Passing `font_abs = 0`
+therefore makes the painter compute the right number with the multiply it already does.
 
 `rem` is absolute by definition (root em). Viewport units resolve through the same
 normalized 1920×1080 desktop the `@media` queries use, then become an absolute percent

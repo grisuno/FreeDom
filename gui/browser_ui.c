@@ -12,6 +12,7 @@
 #define _GNU_SOURCE
 
 #include "browser.h"
+#include "block_flow.h"
 #include "box_style.h"
 #include "box_tree.h"
 #include "compositor.h"
@@ -2999,6 +3000,21 @@ typedef struct rc_open_box {
     /* line-clamp: at most this many line boxes survive inside the box (0 = no
      * clamp). Cut when the box closes, from the same row range multicol uses. */
     int    clamp_lines;
+    /* The box's own USED margin-bottom, resolved at open time (that is when the
+     * containing block width the percentage half needs is in hand). close_top_box
+     * publishes it as prev_bottom so the NEXT sibling can collapse against it --
+     * which is the whole of CSS 2.1 8.3.1 for adjacent siblings. */
+    double margin_bottom;
+    /* PARENT-CHILD collapsing state (CSS 2.1 8.3.1, second half). A block's top
+     * margin collapses with its FIRST in-flow child's when nothing separates them
+     * (no top border, no top padding): the child's margin does not push the child
+     * down inside the parent, it moves the PARENT down. chain_margin is the single
+     * collapsed margin currently sitting above this box AND above every ancestor
+     * it collapsed through; chain_first_box is the display-list index of the
+     * outermost box of that chain, so admitting one more margin means shifting the
+     * whole chain [chain_first_box, nbox) down by the difference. */
+    double chain_margin;
+    size_t chain_first_box;
 } rc_open_box;
 
 /* Max box-nesting depth the painter composes (anti-DoS; deeper boxes are clamped to
@@ -3487,6 +3503,19 @@ static void leave_inline_box(rc_layout *L, rc_state *s, int block_id) {
     s->pen_x += s->inline_box_pad_r;
 }
 
+/* Has any in-flow content been placed on the page yet?
+ *
+ * The gap before the very first block has nothing to collapse against and is
+ * dropped (this engine's stand-in for a margin collapsing through the root). The
+ * test used to be "a text ROW exists", which silently answers "the page is empty"
+ * for a page built out of decorated boxes -- a separator, a spacer, an icon tile,
+ * an empty card, a rule. On such a page NO block ever received a margin: three
+ * 20px divs with margin-bottom:30px stacked at 0/20/40 where Firefox puts
+ * 0/50/100. A box is content exactly as much as a line of text is. */
+static int rc_has_content(const rc_layout *L) {
+    return L->nrow > 0 || L->nbox > 0;
+}
+
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     if (!s->line_open) return;
     /* The line takes the MAX leading of its fragments (CSS 2.1 §10.8): the last
@@ -3542,7 +3571,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
 
 static void open_line(rc_layout *L, rc_state *s) {
     if (s->line_open) return;
-    if (L->nrow > 0) s->cur_top += s->pending_gap;  /* no leading gap at the very top */
+    if (rc_has_content(L)) s->cur_top += s->pending_gap;  /* no leading gap at the very top */
     s->pending_gap = 0;
     s->line_open = 1;
     /* This line's float insets, measured at its own top: a line overlapping a float
@@ -4008,7 +4037,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         double h = fe.height + 2.0 * UI_INPUT_PAD;
-        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4025,7 +4054,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         svg_intrinsic_size(b, &sw, &sh);
         double avail = content_w;
         if (sw > avail && sw > 0.0) { sh *= avail / sw; sw = avail; }
-        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4051,7 +4080,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                     placeholder_display_size(b, box_w, &dw, &dh))
                    ? dh + 2.0 * th->image_box_pad
                    : fe.height + 2.0 * th->image_box_pad;
-        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4068,7 +4097,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
         double vh = (b->video_h > 0) ? (double)b->video_h : fe.height * 6.0;
-        double top = s->cur_top + (L->nrow > 0 ? s->pending_gap : 0.0);
+        double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
         if (r != NULL) {
@@ -4784,7 +4813,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                      cdv.direction == CSS_FD_COLUMN_REVERSE)) {
         size_t row_start[BT_MAX_CHILDREN], row_count[BT_MAX_CHILDREN];
         double item_h[BT_MAX_CHILDREN], cum_off[BT_MAX_CHILDREN];
-        double base = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
+        double base = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
         s->pending_gap = 0;
         double cur = base;
         for (size_t j = 0; j < g; ++j) {
@@ -4822,7 +4851,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     }
 
     flush_line(L, s, th);
-    double base_top = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
+    double base_top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
     s->pending_gap = 0;
 
     /* Stage 3: per-item flex. pos_of[j] is the layout slot of document item j —
@@ -4967,6 +4996,13 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 const rd_block *bk = rd_at(doc, gstart[j]);
                 kids[pos_of[j]].grid_span = bk->grid_span;
                 kids[pos_of[j]].grid_row_span = bk->row_span;
+                /* The cell `grid-area: <name>` resolved to, ONE-BASED on the box
+                 * struct (0 = auto); page_view did the name matching, so nothing
+                 * here needs to know the template. spec/grid_areas.md. */
+                kids[pos_of[j]].grid_row_start =
+                    (bk->grid_row_start >= 0) ? bk->grid_row_start + 1 : 0;
+                kids[pos_of[j]].grid_col_start =
+                    (bk->grid_col_start >= 0) ? bk->grid_col_start + 1 : 0;
             }
         }
         /* Automatic table layout (CSS 2.1 §17.5.2): a table's columns are as wide as
@@ -5233,9 +5269,25 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * close_top_box so the flat and container paths agree). */
         double ih = si.cur_top + pt + pb + bt + bb;
         if (rbd != NULL) {
-            if (rbd->box_h > 0 || rbd->box_h_set) ih = (double)rbd->box_h;
-            if (rbd->box_min_h > 0 && ih < (double)rbd->box_min_h) ih = (double)rbd->box_min_h;
-            if (rbd->box_max_h > 0 && ih > (double)rbd->box_max_h) ih = (double)rbd->box_max_h;
+            /* A declared height is a CONTENT height unless the box is border-box
+             * (CSS 2.1 10.6.3), so the vertical padding and border sit OUTSIDE it --
+             * the same conversion close_top_box does through bx_border_box_h. Taking
+             * the declared value as the border box (which this path used to do,
+             * despite the comment above claiming the two agreed) made every sized,
+             * padded grid or flex item exactly its own vertical padding too short.
+             * `height` + `padding` on a card is how every tile grid on the web is
+             * written, so the shortfall repeated once per item, per row. */
+            int bbox = (rbd->box_sizing == CSS_BOXS_BORDER);
+            if (rbd->box_h > 0 || rbd->box_h_set)
+                ih = bx_border_box_h((double)rbd->box_h, bbox, pt, pb, bt, bb);
+            if (rbd->box_min_h > 0) {
+                double mn = bx_border_box_h((double)rbd->box_min_h, bbox, pt, pb, bt, bb);
+                if (ih < mn) ih = mn;
+            }
+            if (rbd->box_max_h > 0) {
+                double mx = bx_border_box_h((double)rbd->box_max_h, bbox, pt, pb, bt, bb);
+                if (ih > mx) ih = mx;
+            }
         }
         kid->content_h = ih;
     }
@@ -5331,6 +5383,14 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
         double tallest = multicol_fragment(L, ob, s->cur_top);
         if (tallest > 0.0) s->cur_top = ob->col_content_top + tallest;
     }
+    /* The last child's bottom margin escapes this box only if nothing separates the
+     * two (CSS 2.1 8.3.1). With a bottom border or padding it CANNOT escape, so it
+     * is real space inside the content box and the box is that much taller. It was
+     * never added to cur_top -- a margin-bottom is only spent when the next block
+     * arrives -- so a padded card ended exactly its last paragraph's margin short,
+     * which is every card, panel and hero section on the web. */
+    if (!bf_margins_adjoin(ob->bb, ob->pb) && s->prev_bottom > 0.0)
+        s->cur_top += s->prev_bottom;
     s->cur_top += ob->pb + ob->bb;   /* bottom padding + border close the border box */
     if (ob->box_idx < L->nbox) {
         rc_box *bx = &L->boxes[ob->box_idx];
@@ -5362,6 +5422,21 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
         bx->h = h;
         if (h > 0.0 && s->cur_top - bx->top < h) s->cur_top = bx->top + h;
     }
+    /* Hand this box's own margin-bottom to the next block so the two can collapse
+     * (CSS 2.1 8.3.1). Without it a box's bottom margin was simply lost: the box
+     * closed, prev_bottom stayed at whatever the last text run left, and the next
+     * sibling sat flush against the border box.
+     *
+     * The LAST child's bottom margin collapses out of this box the same way the
+     * first child's top margin did, when nothing separates them (no bottom border,
+     * no bottom padding). s->prev_bottom holds exactly that margin at this point --
+     * the box's content ends at its last child's border edge, and that child's
+     * margin was never added to cur_top -- so the two simply collapse into the one
+     * value the next sibling sees. With a bottom border or padding they do not
+     * adjoin and only this box's own margin escapes. */
+    s->prev_bottom = bf_margins_adjoin(ob->bb, ob->pb)
+                   ? bf_collapse(ob->margin_bottom, s->prev_bottom)
+                   : ob->margin_bottom;
     s->box_depth--;
     if (s->hidden_from > s->box_depth) s->hidden_from = 0;
 }
@@ -5386,6 +5461,35 @@ static void rc_box_context(const rc_state *s, double content_w,
     }
 }
 
+/* The USED vertical margins of a box, in px, resolved the same way a text block's
+ * are (block_margins): the author value when declared -- either half of the
+ * <length-percentage>, the percentage measured against the containing block WIDTH
+ * even on the vertical axis (CSS 2.1 8.3) -- otherwise the user-agent sheet's
+ * margin for that element, which is stated in em and so is scaled by the element's
+ * OWN computed font-size, not by a constant.
+ *
+ * cb_w is the containing block's content width. font_px == 0 (an element whose
+ * size the style cache could not answer for) falls back to the theme's body size,
+ * which is the same number the UA sheet's `1em` means at the document root. */
+static double box_ua_margin_em(const pv_box_def *def, int bottom) {
+    bx_box uab = bx_block_ua_box(0, 0, (bx_ua_tag)def->ua_tag);
+    return bottom ? uab.margin.bottom : uab.margin.top;
+}
+
+static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w) {
+    if (def->box_mt != PV_LEN_UNSET || def->box_mt_pct != 0)
+        return bx_lp_px(def->box_mt, def->box_mt_pct, cb_w);
+    double fs = (def->font_px > 0) ? (double)def->font_px : th->body_font;
+    return box_ua_margin_em(def, 0) * fs;
+}
+
+static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w) {
+    if (def->box_mb != PV_LEN_UNSET || def->box_mb_pct != 0)
+        return bx_lp_px(def->box_mb, def->box_mb_pct, cb_w);
+    double fs = (def->font_px > 0) ? (double)def->font_px : th->body_font;
+    return box_ua_margin_em(def, 1) * fs;
+}
+
 /* Opens a block box (block_id, decoration from def) INSIDE the content rect
  * [ctx_left, ctx_left+ctx_w): flushes the line, applies the gap before the box,
  * records the border-box rect, reserves the top border+padding, and pushes the box's
@@ -5397,10 +5501,59 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
                      double ctx_left, double ctx_w,
                      double shrink_w, int align) {
     flush_line(L, s, th);
-    if (L->nrow > 0) {
-        double gap = (s->prev_bottom > th->paragraph_gap) ? s->prev_bottom : th->paragraph_gap;
-        s->cur_top += gap;
+    /* The space before this box is its OWN margin-top collapsed with whatever the
+     * previous block left behind (CSS 2.1 8.3.1) -- read from the element's cascade,
+     * never a theme constant. The old code used th->paragraph_gap as a floor here,
+     * which gave a <div> the vertical rhythm of a <p> and, worse, gated the whole
+     * thing on "a text row has been emitted": a page whose content is decorated
+     * boxes (a spacer, a separator, an icon tile, an empty card) never emits one, so
+     * no box on it ever got a margin at all. */
+    double my_mt = box_margin_top(th, def, ctx_w);
+    /* PARENT-CHILD collapsing (CSS 2.1 8.3.1, second half): when this box is the
+     * FIRST in-flow thing inside its parent and nothing separates the two margins
+     * (the parent has no top border and no top padding), the two margins are one.
+     * The space then belongs ABOVE the parent, not inside it -- so the parent (and
+     * every ancestor it in turn collapsed through) slides down and this box sits
+     * flush against it. Adding the margin inside instead is what made every
+     * undecorated wrapper exactly its first child's margin too tall, on every level
+     * of every page. */
+    double chain_margin = 0.0;
+    size_t chain_first = L->nbox;   /* the index rc_add_box will give this box */
+    int collapsed_out = 0;
+    if (s->box_depth > 0) {
+        rc_open_box *par = &s->box_stack[s->box_depth - 1];
+        /* "Still the first child": nothing at all has been placed inside the parent
+         * since it opened. Deeper ancestors need no separate test -- the parent's
+         * own chain_first_box already points at the outermost box it collapsed
+         * through, so shifting [chain_first_box, nbox) moves the whole chain. */
+        int par_empty = (L->nrow == par->col_row0) && (L->nbox == par->col_box0);
+        if (bf_margins_adjoin(par->bt, par->pt) && par_empty) {
+            double combined = bf_collapse(par->chain_margin, my_mt);
+            double extra = combined - par->chain_margin;
+            for (size_t ci = par->chain_first_box; ci < L->nbox; ++ci)
+                L->boxes[ci].top += extra;
+            s->cur_top += extra;
+            chain_margin = combined;
+            chain_first = par->chain_first_box;
+            collapsed_out = 1;
+        }
     }
+    if (!collapsed_out) {
+        /* An adjacent-sibling margin: collapsed with whatever the previous block
+         * left behind, and read from the element's cascade rather than a theme
+         * constant. The old code used th->paragraph_gap as a floor here, which gave
+         * a <div> the vertical rhythm of a <p> and, worse, gated the whole thing on
+         * "a text row has been emitted" -- so on a page whose content is decorated
+         * boxes (a spacer, a separator, an icon tile, an empty card) no box ever got
+         * a margin at all. */
+        double gap = rc_has_content(L) ? bf_collapse(s->prev_bottom, my_mt) : 0.0;
+        s->cur_top += gap;
+        chain_margin = gap;
+    }
+    /* The gap is spent. A run inside this box must not re-apply the same element's
+     * margin: page_view already zeroes the run's copy when the box owns it, and any
+     * gap accumulated for an enclosing block was consumed by the outermost box. */
+    s->pending_gap = 0;
     s->prev_bottom = 0;
 
     double bl = box_edge_px(def->bord_lw), br = box_edge_px(def->bord_rw);
@@ -5518,6 +5671,11 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         ob->col_box0 = L->nbox;
         ob->col_content_top = s->cur_top;
         ob->clamp_lines = (def->line_clamp > 0) ? def->line_clamp : 0;
+        /* Resolved here because ctx_w -- the containing block width the percentage
+         * half measures against -- is only in hand at open time. */
+        ob->margin_bottom = box_margin_bottom(th, def, ctx_w);
+        ob->chain_margin = chain_margin;
+        ob->chain_first_box = chain_first;
         if (def->col_count > 0 || def->col_width > 0) {
             double cgap = (def->col_gap >= 0) ? (double)def->col_gap : th->body_font;
             int cn = 1;
@@ -5575,7 +5733,45 @@ static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double cont
         }
     }
 
+    /* Which column a nested BOX belongs to is decided by where its top falls in the
+     * ORIGINAL single flow, so the row tops have to be read before they are moved.
+     * Snapshot them: the box pass used to run after the row pass and compare a
+     * pre-shift box top against post-shift row tops, which put boxes in the wrong
+     * column (and, for the last column, far below the content -- the PNG canvas is
+     * sized by the lowest box, so the page grew by the whole length of the flow). */
+    double orig_top[FX_MAX_ITEMS];
+    for (size_t i = 0; i < n; ++i) orig_top[i] = L->rows[ob->col_row0 + i].top;
+
     double step = ob->col_w + ob->col_gap;
+
+    /* Boxes nested inside the multi-column content ride with the column their top
+     * falls in, so a child with a border or a background does not stay behind at
+     * the original single-flow position. */
+    for (size_t bi = ob->col_box0; bi < L->nbox; ++bi) {
+        rc_box *bx = &L->boxes[bi];
+        int c = 0;
+        for (size_t i = 0; i < n; ++i) {
+            if (orig_top[i] > bx->top) break;
+            c = col[i];
+        }
+        if (c < 0 || c >= ob->col_n) continue;
+        bx->top -= (col_origin[c] - ob->col_content_top);
+        bx->x += step * (double)c;
+        if (bx->w > ob->col_w) bx->w = ob->col_w;
+        /* A box that enclosed the WHOLE flow (the <ol> inside a columnised
+         * reference list is the everyday case) was measured before the flow was
+         * cut into columns, so it kept the full single-column height -- and then
+         * painted its border and background that far down the page, past the end
+         * of the content, with the export canvas sized to it. v1 cannot fragment a
+         * box across columns, so the honest degrade is to end it where its column
+         * ends. */
+        double col_bottom = ob->col_content_top + colh[c];
+        if (bx->top + bx->h > col_bottom) {
+            bx->h = col_bottom - bx->top;
+            if (bx->h < 0.0) bx->h = 0.0;
+        }
+    }
+
     for (size_t i = 0; i < n; ++i) {
         int c = col[i];
         if (c < 0 || c >= ob->col_n) continue;
@@ -5586,22 +5782,6 @@ static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double cont
          * a centred or right-aligned row would align against the full container
          * width and drift out of its own column. */
         if (!(r->bg_w > 0.0)) r->bg_w = ob->col_w;
-    }
-
-    /* Boxes nested inside the multi-column content ride with the column their
-     * top falls in, so a child with a border or a background does not stay
-     * behind at the original single-flow position. */
-    for (size_t bi = ob->col_box0; bi < L->nbox; ++bi) {
-        rc_box *bx = &L->boxes[bi];
-        int c = 0;
-        for (size_t i = 0; i < n; ++i) {
-            if (L->rows[ob->col_row0 + i].top > bx->top) break;
-            c = col[i];
-        }
-        if (c < 0 || c >= ob->col_n) continue;
-        bx->top -= (col_origin[c] - ob->col_content_top);
-        bx->x += step * (double)c;
-        if (bx->w > ob->col_w) bx->w = ob->col_w;
     }
 
     double tallest = 0.0;
@@ -5857,7 +6037,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         return;
     }
 
-    double base_top = s->cur_top + ((L->nrow > 0) ? s->pending_gap : 0.0);
+    double base_top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
     s->pending_gap = 0;
 
     /* Item widths + sides: explicit author width (px or % of the band context,
@@ -6088,7 +6268,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                     rc_box_context(&s, content_w, &in_l, &in_w);
                     (void)in_w;
                     L->oof_sx[sbid] = in_l;
-                    L->oof_sy[sbid] = s.cur_top + ((L->nrow > 0) ? s.pending_gap : 0.0);
+                    L->oof_sy[sbid] = s.cur_top + (rc_has_content(L) ? s.pending_gap : 0.0);
                     L->oof_static_set[sbid] = 1;
                 }
                 continue;
@@ -6139,7 +6319,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             reconcile_boxes(cr, w, L, &s, th, doc, content_w, cbox, i);
             double in_l, in_w;
             rc_box_context(&s, content_w, &in_l, &in_w);
-            if (cbox < 0) s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
+            if (cbox < 0) s.pending_gap = bf_collapse(s.prev_bottom, mt);
             s.indent_px = in_l;   /* degrade paths flow through the same rect */
             layout_container(cr, w, L, &s, th, in_l, in_w, doc, i, j, rootc);
             s.indent_px = 0.0;
@@ -6188,7 +6368,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             reconcile_boxes(cr, w, L, &s, th, doc, content_w, shared, i);
             double mt, mb;
             block_margins(th, b, content_w, &mt, &mb);
-            s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
+            s.pending_gap = bf_collapse(s.prev_bottom, mt);
             layout_float_band(cr, w, L, &s, th, content_w, doc, i, j, shared);
             s.prev_bottom = mb;
             i = j - 1;  /* the loop's ++i moves past the band */
@@ -6219,7 +6399,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * block's bottom margin (CSS adjacent-margin collapsing, basic). */
             double mt, mb;
             block_margins(th, b, content_w, &mt, &mb);
-            s.pending_gap = (s.prev_bottom > mt) ? s.prev_bottom : mt;
+            s.pending_gap = bf_collapse(s.prev_bottom, mt);
             s.prev_bottom = mb;
         }
 

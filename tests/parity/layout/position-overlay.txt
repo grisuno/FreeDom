@@ -1,20 +1,26 @@
 Stage 2 demo: position overlay
 === Freedom layout ===
-content_w=952 total_h=452.0 nbox=2 nrow=12 npositioned=3
-  row[0] top=66.0 h=31.0 x_off=158.0 w=636.0
-  row[1] top=109.0 h=23.0 x_off=158.0 w=636.0
-  row[2] top=132.0 h=23.0 x_off=158.0 w=636.0
-  row[3] top=155.0 h=23.0 x_off=158.0 w=636.0
-  row[4] top=186.0 h=23.0 x_off=158.0 w=636.0
-  row[5] top=209.0 h=23.0 x_off=158.0 w=636.0
-  row[6] top=240.0 h=23.0 x_off=158.0 w=636.0
-  row[7] top=263.0 h=23.0 x_off=158.0 w=636.0
-  row[8] top=294.0 h=23.0 x_off=158.0 w=636.0
-  row[9] top=317.0 h=23.0 x_off=158.0 w=636.0
-  row[10] top=348.0 h=23.0 x_off=158.0 w=636.0
-  row[11] top=371.0 h=23.0 x_off=158.0 w=636.0
-  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=452.0
-  box[1] bid=2 x=140.0 top=48.0 w=672.0 h=364.0
-  pos[0] box=3 z=0 x=753.7 y=56.0 w=50.3 h=30.0
-  pos[1] box=4 z=50 x=0.0 y=29972.0 w=384.8 h=28.0
+content_w=952 total_h=508.0 nbox=8 nrow=12 npositioned=3
+  row[0] top=90.0 h=31.0 x_off=158.0 w=636.0
+  row[1] top=133.0 h=23.0 x_off=158.0 w=636.0
+  row[2] top=156.0 h=23.0 x_off=158.0 w=636.0
+  row[3] top=179.0 h=23.0 x_off=158.0 w=636.0
+  row[4] top=210.0 h=23.0 x_off=158.0 w=636.0
+  row[5] top=233.0 h=23.0 x_off=158.0 w=636.0
+  row[6] top=264.0 h=23.0 x_off=158.0 w=636.0
+  row[7] top=287.0 h=23.0 x_off=158.0 w=636.0
+  row[8] top=318.0 h=23.0 x_off=158.0 w=636.0
+  row[9] top=341.0 h=23.0 x_off=158.0 w=636.0
+  row[10] top=372.0 h=23.0 x_off=158.0 w=636.0
+  row[11] top=395.0 h=23.0 x_off=158.0 w=636.0
+  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=508.0
+  box[1] bid=2 x=140.0 top=72.0 w=672.0 h=372.0
+  box[2] bid=4 x=158.0 top=90.0 w=636.0 h=31.0
+  box[3] bid=5 x=158.0 top=133.0 w=636.0 h=69.0
+  box[4] bid=6 x=158.0 top=210.0 w=636.0 h=46.0
+  box[5] bid=7 x=158.0 top=264.0 w=636.0 h=46.0
+  box[6] bid=8 x=158.0 top=318.0 w=636.0 h=46.0
+  box[7] bid=9 x=158.0 top=372.0 w=636.0 h=46.0
+  pos[0] box=3 z=0 x=753.7 y=80.0 w=50.3 h=30.0
+  pos[1] box=10 z=50 x=0.0 y=29972.0 w=384.8 h=28.0
   pos[2] box=1 z=100 x=0.0 y=0.0 w=199.4 h=32.0

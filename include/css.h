@@ -75,6 +75,12 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_GAP_MAX       4096   /* px cap on gap */
 #define CSS_GRID_COLS_MAX 64     /* cap on grid-template-columns track count */
 #define CSS_GRID_TRACKS_MAX 8    /* cap on SIZED tracks (tracks past it lay out as auto) */
+/* Cap on the raw `grid-template-areas` text kept on a resolved style. It holds
+ * the quoted row strings verbatim (flex_layout parses them); a template longer
+ * than this is DROPPED, never truncated -- half a template would place items
+ * against a grid the author never wrote. Sized for the real thing: the largest in
+ * the measured corpus (Wikipedia's Vector page container) is 66 bytes. */
+#define CSS_GRID_AREAS_MAX 256
 #define CSS_GRAD_STOPS_MAX 4     /* cap on linear-gradient color stops (extra kept out) */
 #define CSS_LINE_MIN      50     /* line-height clamp floor (percent) */
 #define CSS_LINE_MAX      400    /* line-height clamp ceiling (percent, anti-DoS) */
@@ -580,6 +586,16 @@ typedef struct css_style {
      * minmax(a,b) resolves to its max component; %/unknown fall to auto. Tracks
      * past the cap lay out as auto. Only meaningful when grid_cols > 0. */
     int         grid_col_w[CSS_GRID_TRACKS_MAX];
+    /* Named grid placement (2026-08-14, CSS Grid 1 7.3 + 8.4). On a CONTAINER,
+     * grid_areas is the raw `grid-template-areas` value (the quoted row strings);
+     * "" = not declared. On an ITEM, grid_area_name is its `grid-area: <name>`
+     * already reduced to fx_grid_area_hash (0 = not declared) -- a hash rather than
+     * text because the item's placement has to cross the IPC codec, and one int
+     * does that with no string channel. page_view is what pairs the two: it parses
+     * the container's template once and resolves each item's hash to a rectangle,
+     * so only resolved row/column numbers reach the painter. */
+    char        grid_areas[CSS_GRID_AREAS_MAX];
+    unsigned    grid_area_name;
     /* Author box model (px; NOT inherited — read from the element's own style).
      * margins: CSS_LEN_UNSET / CSS_LEN_AUTO / signed px. padding: CSS_LEN_UNSET /
      * px >= 0. width/max_width: CSS_LEN_UNSET / px > 0 (auto/none -> unset). */

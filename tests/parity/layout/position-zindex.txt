@@ -1,13 +1,15 @@
 Stage 2 demo: z-index stacking
 === Freedom layout ===
-content_w=952 total_h=168.0 nbox=2 nrow=4 npositioned=4
-  row[0] top=60.0 h=22.0 x_off=0.0 w=952.0
-  row[1] top=94.0 h=22.0 x_off=0.0 w=952.0
-  row[2] top=116.0 h=22.0 x_off=0.0 w=952.0
-  row[3] top=138.0 h=22.0 x_off=0.0 w=952.0
-  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=168.0
-  box[1] bid=1 x=176.0 top=168.0 w=600.0 h=0.0
-  pos[0] box=5 z=0 x=216.0 y=368.0 w=443.8 h=34.0
-  pos[1] box=2 z=1 x=216.0 y=208.0 w=160.0 h=100.0
-  pos[2] box=4 z=5 x=296.0 y=288.0 w=160.0 h=100.0
-  pos[3] box=3 z=10 x=256.0 y=248.0 w=160.0 h=100.0
+content_w=952 total_h=188.0 nbox=4 nrow=4 npositioned=4
+  row[0] top=60.0 h=42.0 x_off=16.0 w=936.0
+  row[1] top=114.0 h=22.0 x_off=16.0 w=920.0
+  row[2] top=136.0 h=22.0 x_off=16.0 w=920.0
+  row[3] top=158.0 h=22.0 x_off=16.0 w=920.0
+  box[0] bid=0 x=0.0 top=0.0 w=952.0 h=188.0
+  box[1] bid=1 x=16.0 top=60.0 w=936.0 h=42.0
+  box[2] bid=2 x=16.0 top=114.0 w=920.0 h=66.0
+  box[3] bid=3 x=176.0 top=188.0 w=600.0 h=0.0
+  pos[0] box=7 z=0 x=216.0 y=388.0 w=443.8 h=34.0
+  pos[1] box=4 z=1 x=216.0 y=228.0 w=160.0 h=100.0
+  pos[2] box=6 z=5 x=296.0 y=308.0 w=160.0 h=100.0
+  pos[3] box=5 z=10 x=256.0 y=268.0 w=160.0 h=100.0

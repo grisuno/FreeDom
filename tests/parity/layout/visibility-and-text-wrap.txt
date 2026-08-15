@@ -1,24 +1,24 @@
 === Freedom layout ===
-content_w=952 total_h=716.9 nbox=7 nrow=15 npositioned=0
-  row[0] top=0.0 h=26.0 x_off=0.0
-  row[1] top=47.4 h=26.0 x_off=0.0
-  row[2] top=113.4 h=26.0 x_off=4.0 w=944.0
-  row[3] top=175.4 h=26.0 x_off=0.0 w=952.0
-  row[4] top=237.4 h=26.0 x_off=4.0 w=944.0
-  row[5] top=287.3 h=26.0 x_off=0.0 w=944.0
-  row[6] top=342.2 h=26.0 x_off=9.0 w=218.0
-  row[7] top=368.2 h=26.0 x_off=9.0 w=218.0
-  row[8] top=394.2 h=26.0 x_off=9.0 w=218.0
-  row[9] top=420.2 h=26.0 x_off=9.0 w=218.0
-  row[10] top=472.2 h=26.0 x_off=9.0 w=218.0
-  row[11] top=527.1 h=26.0 x_off=0.0 w=218.0
-  row[12] top=582.0 h=26.0 x_off=9.0 w=218.0
-  row[13] top=637.0 h=26.0 x_off=0.0 w=218.0
-  row[14] top=686.9 h=26.0 x_off=4.0 w=944.0
-  box[0] bid=0 x=0.0 top=93.4 w=952.0 h=50.0
-  box[1] bid=1 x=0.0 top=159.4 w=952.0 h=42.0
-  box[2] bid=2 x=0.0 top=217.4 w=952.0 h=50.0
-  box[3] bid=3 x=0.0 top=333.2 w=236.0 h=122.0
-  box[4] bid=4 x=0.0 top=463.2 w=236.0 h=44.0
-  box[5] bid=5 x=0.0 top=573.0 w=236.0 h=44.0
-  box[6] bid=6 x=0.0 top=682.9 w=952.0 h=34.0
+content_w=952 total_h=732.9 nbox=7 nrow=15 npositioned=0
+  row[0] top=0.0 h=50.0 x_off=0.0
+  row[1] top=71.4 h=37.0 x_off=0.0
+  row[2] top=132.4 h=26.0 x_off=4.0 w=944.0
+  row[3] top=180.4 h=26.0 x_off=0.0 w=952.0
+  row[4] top=228.4 h=26.0 x_off=4.0 w=944.0
+  row[5] top=278.3 h=37.0 x_off=0.0 w=944.0
+  row[6] top=344.2 h=26.0 x_off=9.0 w=218.0
+  row[7] top=370.2 h=26.0 x_off=9.0 w=218.0
+  row[8] top=396.2 h=26.0 x_off=9.0 w=218.0
+  row[9] top=422.2 h=26.0 x_off=9.0 w=218.0
+  row[10] top=466.2 h=26.0 x_off=9.0 w=218.0
+  row[11] top=521.1 h=37.0 x_off=0.0 w=218.0
+  row[12] top=587.0 h=26.0 x_off=9.0 w=218.0
+  row[13] top=642.0 h=37.0 x_off=0.0 w=218.0
+  row[14] top=702.9 h=26.0 x_off=4.0 w=944.0
+  box[0] bid=0 x=0.0 top=128.4 w=952.0 h=34.0
+  box[1] bid=1 x=0.0 top=180.4 w=952.0 h=26.0
+  box[2] bid=2 x=0.0 top=224.4 w=952.0 h=34.0
+  box[3] bid=3 x=0.0 top=335.2 w=236.0 h=122.0
+  box[4] bid=4 x=0.0 top=457.2 w=236.0 h=44.0
+  box[5] bid=5 x=0.0 top=578.0 w=236.0 h=44.0
+  box[6] bid=6 x=0.0 top=698.9 w=952.0 h=34.0

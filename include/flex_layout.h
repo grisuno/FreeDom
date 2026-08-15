@@ -87,10 +87,54 @@ fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
  * NULL span array = 1) is clamped to [1, ncols]; an item whose span does not fit in
  * the columns remaining on its row jumps to the next row (CSS auto-placement).
  * Writes each item's row and starting column. nitems == 0 is a no-op; ncols == 0 or
- * nitems > FX_MAX_ITEMS fails closed. */
+ * nitems > FX_MAX_ITEMS fails closed.
+ *
+ * fixed_row/fixed_col (2026-08-14, either or both may be NULL; -1 in an entry means
+ * "auto") give an item an EXPLICIT cell -- what `grid-area: <name>` resolves to via
+ * fx_grid_area_rect. Such an item claims its rectangle and does not move the
+ * auto-placement cursor; the automatic items then flow around the cells already
+ * taken, which is CSS Grid 1 section 8.5. With both arrays NULL the result is
+ * byte-identical to the pre-2026-08-14 behaviour. */
 fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                               const int *row_span,
+                              const int *fixed_row, const int *fixed_col,
                               size_t *out_row, size_t *out_col);
+
+/* --- grid-template-areas: named placement (CSS Grid 1 sections 7.3 + 8.4) ------
+ * Full contract, error table and out-of-scope list: spec/grid_areas.md. */
+
+/* Bounds on a parsed area template. The template is author CSS -- i.e. attacker
+ * chosen -- so every one of these is checked BEFORE anything is written. */
+#define FX_AREA_MAX_ROWS  16
+#define FX_AREA_MAX_COLS  16
+#define FX_AREA_MAX_CELLS 128
+#define FX_AREA_NAME_MAX  64
+
+/* A parsed grid-template-areas: a rows x cols grid of NAME HASHES in row-major
+ * order. 0 is the null cell token (`.`), never a name. rows == 0 means "no valid
+ * template" -- the only state fx_grid_areas_parse leaves behind on failure. */
+typedef struct fx_area_map {
+    int      rows, cols;
+    unsigned cell[FX_AREA_MAX_CELLS];
+} fx_area_map;
+
+/* FNV-1a of a trimmed, case-sensitive CSS identifier; never returns 0 for a
+ * non-empty name (0 is reserved for "unnamed"). NULL/empty/blank -> 0. Comparing
+ * hashes rather than strings is what lets an item's area name cross the IPC codec
+ * as one int; see spec/grid_areas.md section 2 on collisions. */
+unsigned fx_grid_area_hash(const char *name);
+
+/* Parses the raw `grid-template-areas` value (quoted strings, one per row) into
+ * *out. Ragged rows, an over-large template and an empty template all fail closed
+ * with FX_ERR_RANGE and out->rows == 0. Allocation-free. */
+fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out);
+
+/* The rectangle of the named area: the smallest rect covering every cell with that
+ * name. FX_ERR_RANGE (outputs untouched) when the name is absent, is 0, or its
+ * cells do not form a filled rectangle -- the caller then auto-places the item,
+ * which is what a browser does with a grid-area that names nothing. */
+fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
+                            int *row, int *col, int *row_span, int *col_span);
 
 /* Float packing (one band; spec/float.md). Packs n float items along one axis:
  * side[i] == 0 (left) items advance a cursor from the content start (0) rightward in

@@ -8,6 +8,7 @@
 #include "css.h"
 #include "css_color.h"
 #include "css_length.h"
+#include "flex_layout.h"  /* fx_grid_area_hash: an area name reduces to one int */
 #include "css_select.h"
 
 #include <limits.h>
@@ -193,6 +194,13 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         P_LINE_CLAMP,
         P_COLUMN_COUNT, P_COLUMN_WIDTH, P_COLUMN_FILL, P_COLUMN_SPAN,
         P_COLRULE_W, P_COLRULE_S, P_COLRULE_C,
+        /* Named grid placement (2026-08-14, CSS Grid 1 7.3 + 8.4).
+         * P_GRID_AREAS carries an INDEX into the same string pool P_CONTENT uses
+         * (the template is one short quoted-string list, exactly the shape that
+         * pool holds) -- reusing it keeps one pool to audit instead of two.
+         * P_GRID_AREA_NAME carries the item's area name already HASHED to an int,
+         * so an item's placement needs no string channel at all. */
+        P_GRID_AREAS, P_GRID_AREA_NAME,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -2950,6 +2958,131 @@ static int expand_content(const char *val, css_decl *dst, int cap,
     return emit_content(dst, cap, buf, contenttab, ncontent, contentcap);
 }
 
+
+/* grid-template-areas (CSS Grid 1 7.3): the value is a list of quoted strings, one
+ * per grid row. It is stored VERBATIM in the shared string pool and parsed into a
+ * cell grid later, by flex_layout, where the geometry lives -- the cascade's job is
+ * only to decide which declaration wins.
+ *
+ * `none` resets it to the empty string (an explicit "no template" that overrides a
+ * lower-tier declaration, which is why it emits rather than returning 0). Anything
+ * with no quoted string in it, or longer than the cap, is DROPPED: half a template
+ * would place items against a grid the author never wrote. url() is refused like
+ * everywhere else -- a template can never be one, and the guard costs nothing. */
+static int expand_grid_areas(const char *val, css_decl *dst, int cap,
+                             char (*contenttab)[CSS_URL_MAX], size_t *ncontent,
+                             size_t contentcap) {
+    if (cap < 1) return 0;
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none") || csel_ci_eq(val, "normal")) {
+        dst[0].prop = P_GRID_AREAS;
+        dst[0].ival = -1;
+        return 1;
+    }
+    if (strchr(val, '\'') == NULL && strchr(val, '"') == NULL) return 0;
+    size_t len = strlen(val);
+    if (len == 0 || len >= CSS_GRID_AREAS_MAX) return 0;
+    if (*ncontent >= contentcap) return 0;
+    memcpy(contenttab[*ncontent], val, len + 1);
+    dst[0].prop = P_GRID_AREAS;
+    dst[0].ival = (int)*ncontent;
+    ++*ncontent;
+    return 1;
+}
+
+/* grid-area on an ITEM. CSS Grid 1 8.3 gives the property two shapes: a single
+ * <custom-ident> naming an area, and a slash-separated list of grid lines. Only the
+ * first is interpreted here (spec/grid_areas.md 4 lists line placement as the
+ * explicit out-of-scope point, and the measured corpus uses only names), and the
+ * value is reduced to its hash on the spot so an item's placement is one int all
+ * the way to the painter. A value containing `/` or a digit is a line-placement
+ * form: dropped rather than mistaken for a name. */
+static int expand_grid_area(const char *val, css_decl *dst, int cap) {
+    if (cap < 1) return 0;
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "auto") || csel_ci_eq(val, "none")) {
+        dst[0].prop = P_GRID_AREA_NAME;
+        dst[0].ival = 0;
+        return 1;
+    }
+    if (strchr(val, '/') != NULL) return 0;   /* line placement: out of scope */
+    const char *p = val;
+    while (*p == ' ' || *p == '\t') ++p;
+    /* A CSS custom-ident starts with a letter, underscore or a non-ASCII byte; a
+     * leading digit means this is a line number, not a name. */
+    if (!((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+          *p == '_' || *p == '-' || (unsigned char)*p >= 0x80)) return 0;
+    size_t len = strlen(val);
+    if (len >= FX_AREA_NAME_MAX) return 0;
+    unsigned h = fx_grid_area_hash(val);
+    if (h == 0u) return 0;
+    dst[0].prop = P_GRID_AREA_NAME;
+    dst[0].ival = (int)h;
+    return 1;
+}
+
+/* The `grid-template` shorthand (CSS Grid 1 7.4). Two forms reach a real page:
+ *
+ *   grid-template: <rows> / <columns>            e.g. `auto / 15.5rem minmax(0,1fr)`
+ *   grid-template: "a b" 1fr "c d" 1fr / 20% 1fr  (rows interleaved with areas)
+ *
+ * Both are handled by splitting on the LAST top-level `/` -- top-level because
+ * minmax(0,1fr) and repeat(2, 1fr) contain commas and parens but never a bare
+ * slash -- and feeding each half to the longhand expander it already has. When the
+ * row half contains quoted strings it is ALSO the areas template, which is exactly
+ * how the shorthand is defined; expand_grid_areas ignores the track sizes between
+ * the strings. Without a slash the whole value is the rows half.
+ *
+ * `grid` is the same shorthand plus the implicit-track properties this engine does
+ * not model, so it routes here too: taking the tracks and areas from it is strictly
+ * better than dropping the declaration. */
+static int expand_grid_template(const char *val, css_decl *dst, int cap,
+                                char (*contenttab)[CSS_URL_MAX], size_t *ncontent,
+                                size_t contentcap) {
+    if (csel_substr(val, "url(", 1)) return 0;
+    if (csel_ci_eq(val, "none")) return 0;
+
+    size_t len = strlen(val);
+    if (len == 0 || len >= CSS_GRID_AREAS_MAX) return 0;
+
+    /* Find the last slash that is neither inside parentheses nor inside a string. */
+    long slash = -1;
+    int depth = 0, quote = 0;
+    for (size_t i = 0; i < len; ++i) {
+        char ch = val[i];
+        if (quote) { if (ch == quote) quote = 0; continue; }
+        if (ch == '\'' || ch == '"') { quote = ch; continue; }
+        if (ch == '(') ++depth;
+        else if (ch == ')') { if (depth > 0) --depth; }
+        else if (ch == '/' && depth == 0) slash = (long)i;
+    }
+
+    char rows[CSS_GRID_AREAS_MAX], cols[CSS_GRID_AREAS_MAX];
+    size_t rlen = (slash >= 0) ? (size_t)slash : len;
+    if (rlen >= sizeof rows) return 0;
+    memcpy(rows, val, rlen);
+    rows[rlen] = '\0';
+    cols[0] = '\0';
+    if (slash >= 0) {
+        size_t clen = len - (size_t)slash - 1;
+        if (clen >= sizeof cols) return 0;
+        memcpy(cols, val + slash + 1, clen);
+        cols[clen] = '\0';
+    }
+
+    int n = 0;
+    if (cols[0] != '\0' && cap - n >= 1 + CSS_GRID_TRACKS_MAX)
+        n += expand_grid_template_cols(cols, dst + n, cap - n);
+    if (rows[0] != '\0' && cap - n >= 1) {
+        int nrows = interp_gridcols(rows);
+        if (nrows > 0) { dst[n].prop = P_GRID_ROWS; dst[n].ival = nrows; ++n; }
+    }
+    /* Quoted strings in the row half ARE the areas template (7.4). */
+    if ((strchr(rows, '\'') != NULL || strchr(rows, '"') != NULL) && cap - n >= 1)
+        n += expand_grid_areas(rows, dst + n, cap - n, contenttab, ncontent, contentcap);
+    return n;
+}
+
 /* box-shadow (single layer): up to four lengths in order dx, dy, blur, spread, an
  * optional color, and an optional `inset` keyword, in any order. Needs >= 2 lengths
  * (dx, dy) or the whole declaration is dropped (fail closed). `none` is an explicit
@@ -4289,6 +4422,11 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         return expand_backdrop_filter(val, dst, cap);
     else if (strcmp(prop, "background-position") == 0)   return expand_bg_position(val, dst, cap);
     else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap, contenttab, ncontent, contentcap);
+    else if (strcmp(prop, "grid-template-areas") == 0)
+        return expand_grid_areas(val, dst, cap, contenttab, ncontent, contentcap);
+    else if (strcmp(prop, "grid-area") == 0)              return expand_grid_area(val, dst, cap);
+    else if (strcmp(prop, "grid-template") == 0 || strcmp(prop, "grid") == 0)
+        return expand_grid_template(val, dst, cap, contenttab, ncontent, contentcap);
     else return 0;
 
     if (ival < 0) return 0;  /* unsupported value */
@@ -5398,6 +5536,19 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                 }
                 break;
             case P_LINE_CLAMP:   o->line_clamp = d->ival; break;
+            /* Named grid placement (2026-08-14). The template rides the same string
+             * pool as P_CONTENT; ival < 0 is the explicit `none` reset. */
+            case P_GRID_AREAS:
+                if (d->ival < 0 || contenttab == NULL) {
+                    o->grid_areas[0] = '\0';
+                } else {
+                    size_t gl = strlen(contenttab[d->ival]);
+                    if (gl >= CSS_GRID_AREAS_MAX) gl = CSS_GRID_AREAS_MAX - 1;
+                    memcpy(o->grid_areas, contenttab[d->ival], gl);
+                    o->grid_areas[gl] = '\0';
+                }
+                break;
+            case P_GRID_AREA_NAME: o->grid_area_name = (unsigned)d->ival; break;
             case P_COLUMN_COUNT: o->column_count = d->ival; break;
             case P_COLUMN_WIDTH: o->column_width = d->ival; break;
             case P_COLUMN_FILL:  o->column_fill = d->ival; break;
@@ -5496,6 +5647,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .bold = -1, .italic = -1, .display = CSS_DISP_UNSET,
         .gap = -1, .justify = CSS_JUSTIFY_UNSET, .grid_cols = 0,
         .grid_col_w = { 0 },
+        .grid_areas = { 0 }, .grid_area_name = 0u,
         .margin_top = CSS_LEN_UNSET, .margin_right = CSS_LEN_UNSET,
         .margin_bottom = CSS_LEN_UNSET, .margin_left = CSS_LEN_UNSET,
         .pad_top = CSS_LEN_UNSET, .pad_right = CSS_LEN_UNSET,

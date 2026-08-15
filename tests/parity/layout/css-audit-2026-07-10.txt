@@ -1,39 +1,39 @@
 CSS properties end-to-end test
 === Freedom layout ===
-content_w=952 total_h=1342.4 nbox=9 nrow=27 npositioned=0
+content_w=952 total_h=1238.4 nbox=9 nrow=27 npositioned=0
   row[0] top=0.0 h=45.0 x_off=0.0
   row[1] top=66.4 h=34.0 x_off=0.0
   row[2] top=128.4 h=23.0 x_off=8.0 w=936.0
   row[3] top=179.3 h=34.0 x_off=0.0 w=936.0
   row[4] top=233.2 h=23.0 x_off=0.0 w=952.0
-  row[5] top=321.2 h=23.0 x_off=0.0 w=952.0
-  row[6] top=429.2 h=23.0 x_off=0.0 w=952.0
-  row[7] top=472.1 h=34.0 x_off=0.0 w=952.0
-  row[8] top=538.0 h=23.0 x_off=12.0 w=928.0
-  row[9] top=593.0 h=23.0 x_off=12.0 w=928.0
-  row[10] top=648.0 h=34.0 x_off=0.0 w=928.0
-  row[11] top=701.9 h=23.0 x_off=0.0 w=928.0
-  row[12] top=724.9 h=23.0 x_off=0.0 w=928.0
-  row[13] top=767.8 h=34.0 x_off=0.0 w=928.0
-  row[14] top=845.7 h=19.0 x_off=8.0 w=936.0
-  row[15] top=880.7 h=19.0 x_off=8.0 w=936.0
-  row[16] top=947.7 h=19.0 x_off=8.0 w=936.0
-  row[17] top=982.7 h=19.0 x_off=8.0 w=936.0
-  row[18] top=1029.6 h=34.0 x_off=0.0 w=936.0
-  row[19] top=1103.6 h=23.0 x_off=4.0 w=944.0
-  row[20] top=1150.5 h=34.0 x_off=0.0 w=944.0
-  row[21] top=1204.4 h=23.0 x_off=24.0 w=944.0
-  row[22] top=1227.4 h=23.0 x_off=24.0 w=944.0
-  row[23] top=1250.4 h=23.0 x_off=24.0 w=944.0
-  row[24] top=1273.4 h=23.0 x_off=24.0 w=944.0
-  row[25] top=1296.4 h=23.0 x_off=24.0 w=944.0
-  row[26] top=1319.4 h=23.0 x_off=24.0 w=944.0
+  row[5] top=313.2 h=23.0 x_off=0.0 w=952.0
+  row[6] top=413.2 h=23.0 x_off=0.0 w=952.0
+  row[7] top=456.1 h=34.0 x_off=0.0 w=952.0
+  row[8] top=522.0 h=23.0 x_off=12.0 w=928.0
+  row[9] top=569.0 h=23.0 x_off=12.0 w=928.0
+  row[10] top=624.0 h=34.0 x_off=0.0 w=928.0
+  row[11] top=677.9 h=23.0 x_off=0.0 w=928.0
+  row[12] top=700.9 h=23.0 x_off=0.0 w=928.0
+  row[13] top=743.8 h=34.0 x_off=0.0 w=928.0
+  row[14] top=805.7 h=19.0 x_off=8.0 w=936.0
+  row[15] top=824.7 h=19.0 x_off=8.0 w=936.0
+  row[16] top=875.7 h=19.0 x_off=8.0 w=936.0
+  row[17] top=894.7 h=19.0 x_off=8.0 w=936.0
+  row[18] top=941.6 h=34.0 x_off=0.0 w=936.0
+  row[19] top=999.6 h=23.0 x_off=4.0 w=944.0
+  row[20] top=1046.5 h=34.0 x_off=0.0 w=944.0
+  row[21] top=1100.4 h=23.0 x_off=24.0 w=944.0
+  row[22] top=1123.4 h=23.0 x_off=24.0 w=944.0
+  row[23] top=1146.4 h=23.0 x_off=24.0 w=944.0
+  row[24] top=1169.4 h=23.0 x_off=24.0 w=944.0
+  row[25] top=1192.4 h=23.0 x_off=24.0 w=944.0
+  row[26] top=1215.4 h=23.0 x_off=24.0 w=944.0
   box[0] bid=0 x=0.0 top=120.4 w=952.0 h=39.0
   box[1] bid=1 x=0.0 top=233.2 w=952.0 h=80.0
-  box[2] bid=2 x=0.0 top=321.2 w=952.0 h=100.0
-  box[3] bid=3 x=0.0 top=429.2 w=952.0 h=23.0
-  box[4] bid=4 x=0.0 top=526.0 w=952.0 h=47.0
-  box[5] bid=5 x=0.0 top=581.0 w=952.0 h=47.0
-  box[6] bid=6 x=0.0 top=821.7 w=952.0 h=86.0
-  box[7] bid=7 x=0.0 top=923.7 w=952.0 h=86.0
-  box[8] bid=8 x=0.0 top=1083.6 w=952.0 h=47.0
+  box[2] bid=2 x=0.0 top=313.2 w=952.0 h=100.0
+  box[3] bid=3 x=0.0 top=413.2 w=952.0 h=23.0
+  box[4] bid=4 x=0.0 top=510.0 w=952.0 h=47.0
+  box[5] bid=5 x=0.0 top=557.0 w=952.0 h=47.0
+  box[6] bid=6 x=0.0 top=797.7 w=952.0 h=54.0
+  box[7] bid=7 x=0.0 top=867.7 w=952.0 h=54.0
+  box[8] bid=8 x=0.0 top=995.6 w=952.0 h=31.0

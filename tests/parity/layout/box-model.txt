@@ -1,6 +1,6 @@
 Author box model demo
 === Freedom layout ===
-content_w=952 total_h=551.3 nbox=1 nrow=15 npositioned=0
+content_w=952 total_h=551.3 nbox=2 nrow=15 npositioned=0
   row[0] top=0.0 h=45.0 x_off=0.0
   row[1] top=66.4 h=23.0 x_off=0.0
   row[2] top=89.4 h=23.0 x_off=0.0
@@ -14,6 +14,7 @@ content_w=952 total_h=551.3 nbox=1 nrow=15 npositioned=0
   row[10] top=356.3 h=23.0 x_off=296.0 w=360.0
   row[11] top=379.3 h=23.0 x_off=296.0 w=360.0
   row[12] top=402.3 h=23.0 x_off=296.0 w=360.0
-  row[13] top=489.3 h=23.0 x_off=0.0 w=360.0
-  row[14] top=528.3 h=23.0 x_off=0.0 w=360.0
+  row[13] top=489.3 h=23.0 x_off=0.0 w=952.0
+  row[14] top=528.3 h=23.0 x_off=0.0 w=952.0
   box[0] bid=0 x=272.0 top=128.4 w=408.0 h=296.8
+  box[1] bid=1 x=0.0 top=489.3 w=952.0 h=23.0

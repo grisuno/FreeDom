@@ -34,7 +34,12 @@
  * fails closed (BT_ERR_RANGE) instead of overflowing the stack. */
 #define BT_MAX_DEPTH      64u
 #define BT_MAX_CHILDREN   128u
-#define BT_MAX_POSITIONED 256u  /* Stage 2: out-of-flow boxes resolved per page */
+/* Stage 2: the out-of-flow solver's arrays are indexed BY BOX ID, so this bounds
+ * the box count of a whole page, not the number of positioned elements on it. It
+ * must therefore stay >= page_view's PV_MAX_BOXES, or a page with more boxes than
+ * this makes position_doc bail wholesale and NOTHING out of flow is placed. At 256
+ * that cliff was reached by ordinary news front pages. */
+#define BT_MAX_POSITIONED 1024u
 
 /* Stage 2: position values for bt_node.position and pv_box_def.position. 0 covers
  * both unset and CSS_POS_STATIC (in-flow); the 1 gap is intentional, mirroring
@@ -91,6 +96,13 @@ typedef struct bt_node {
     int             grid_span;
     /* grid-row: span N; 0 (default) = 1 row. */
     int             grid_row_span;
+    /* EXPLICIT cell of this grid item (2026-08-14): what `grid-area: <name>`
+     * resolved to against the parent's `grid-template-areas`. ONE-BASED, and 0
+     * means auto-placement -- the same convention CSS itself uses for grid lines,
+     * chosen so that ZERO-INIT means "auto". A -1 sentinel would have made every
+     * caller that predates named placement pin its items to cell (0,0), which is
+     * exactly the class of bug V-002 exists to prevent. See spec/grid_areas.md. */
+    int             grid_row_start, grid_col_start;
 
     /* leaf content height in px (ignored for containers; computed): */
     double          content_h;

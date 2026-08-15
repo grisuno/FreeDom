@@ -1882,8 +1882,20 @@ static void test_build_box_leaf_inline(void **state) {
 
     const pv_run *solo = find_text(v, "solo");
     assert_non_null(solo);
-    assert_int_equal(solo->box_mt, 50);
-    assert_int_equal(solo->box_mb, 5);
+    /* A margin belongs to an ELEMENT and is applied exactly once, OUTSIDE its
+     * border box. This <p> declares padding and a width, so it generates a box --
+     * and the box is therefore the owner of its vertical margins. The run inside
+     * carries 0, or the painter would apply the same 50px a second time INSIDE the
+     * box, making the block taller instead of moving it down. */
+    assert_int_equal(solo->box_mt, 0);
+    assert_int_equal(solo->box_mb, 0);
+    assert_true(solo->block_id >= 0);
+    const pv_box_def *bd = pv_box_at(v, (size_t)solo->block_id);
+    assert_non_null(bd);
+    assert_int_equal(bd->box_mt, 50);
+    assert_int_equal(bd->box_mb, 5);
+    /* The horizontal half stays on the run: a horizontal margin never collapses,
+     * so page_view folds it into the box inset the way it always has. */
     assert_int_equal(solo->box_l, 30);
     assert_int_equal(solo->box_r, 0);
     assert_int_equal(solo->box_w, 400);

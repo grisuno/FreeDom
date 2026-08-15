@@ -229,6 +229,12 @@ typedef struct pv_run {
     int     cont_col_w[PV_GRID_TRACKS];
     int     grid_span;
     int     row_span;
+    /* Named grid placement (2026-08-14, CSS Grid 1 8.4): the cell this item's
+     * `grid-area: <name>` resolved to inside its container's
+     * `grid-template-areas`, or -1 when the item is auto-placed. Numbers, not a
+     * name: page_view does the name matching, so the painter (and the codec) only
+     * ever carry a row and a column. */
+    int     grid_row_start, grid_col_start;
     /* Stage 3a: flex per-item values from the BLOCK element's own css_style (the
      * flex item = the nearest block ancestor of this run). Like cont_*, these are
      * layout STRUCTURE (not author styling), carried regardless of caps.css. The
@@ -356,6 +362,26 @@ typedef struct pv_box_def {
     /* Percentage halves (per-mille of the containing block WIDTH, 0 = none),
      * one per px field. See the pv_run block for why even the vertical padding
      * resolves against the width (CSS 2.1 8.4). */
+    /* The box's OWN vertical margins (2026-08-14), px + per-mille percentage half,
+     * PV_LEN_UNSET/0 = not declared by the author. Horizontal margins are folded
+     * into box_l/box_r above because they only shift the box within its line; the
+     * vertical ones cannot be folded anywhere, because they COLLAPSE with the
+     * adjacent sibling's (CSS 2.1 8.3.1) and so must survive as their own value
+     * until the two are next to each other. Without them the painter had no
+     * margin to read for a box-generating block and substituted a theme constant,
+     * which is why three 20px divs with margin-bottom:30px stacked at 0/20/40
+     * instead of Firefox's 0/50/100. ua_tag names the element so the USER-AGENT
+     * margin can be looked up (bx_block_ua_box) when the author declares none --
+     * the same identity, from the same table, that a text run carries. */
+    int box_mt, box_mb;
+    int box_mt_pct, box_mb_pct;
+    int ua_tag;
+    /* The element's COMPUTED font-size in px. The user-agent margins the ua_tag
+     * above selects are expressed in em (`p { margin: 1em 0 }` IS the UA sheet), so
+     * without the element's own font-size the painter would have to multiply them by
+     * a constant -- which is the bug this whole batch exists to remove. 0 = unknown,
+     * and the painter then falls back to the theme's body size. */
+    int font_px;
     int box_w_pct;      /* width/max-width cap */
     int box_l_pct, box_r_pct;              /* the l/r insets (padding + margin) */
     int box_min_w_pct;                     /* min-width */
@@ -840,6 +866,10 @@ void pv_set_container(pv_view *v, int cont_id, int cont_display,
  * col_span is the item's `grid-column: span N` (<= 0 = 1). No-op on an empty or
  * NULL view. The append helpers default everything to 0. */
 void pv_set_row_span(pv_view *v, int row_span);
+
+/* Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed). See
+ * spec/grid_areas.md; the name matching happens in pv_build, never downstream. */
+void pv_set_grid_area(pv_view *v, int row_start, int col_start);
 void pv_set_grid_rows(pv_view *v, int grid_rows);
 
 /* Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its

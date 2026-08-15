@@ -216,14 +216,30 @@ static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
      * holds at least one item, so nrows <= nk <= BT_MAX_CHILDREN. */
     int    span[BT_MAX_CHILDREN];
     int    row_span[BT_MAX_CHILDREN];
+    /* Explicit cells from `grid-area: <name>` (spec/grid_areas.md), -1 = auto.
+     * An all-auto grid passes the same values it always did, so its placement is
+     * byte-identical. */
+    int    frow[BT_MAX_CHILDREN], fcol[BT_MAX_CHILDREN];
     size_t prow[BT_MAX_CHILDREN], pcol[BT_MAX_CHILDREN];
     for (size_t i = 0; i < nk; ++i) {
         span[i] = kids[i]->grid_span;
         row_span[i] = kids[i]->grid_row_span;
+        /* 1-based on the struct (0 = auto), 0-based in the solver. */
+        frow[i] = kids[i]->grid_row_start - 1;
+        fcol[i] = kids[i]->grid_col_start - 1;
     }
-    if (fx_grid_place_span(nk, cols, span, row_span, prow, pcol) != FX_OK) return BT_ERR_RANGE;
+    if (fx_grid_place_span(nk, cols, span, row_span, frow, fcol, prow, pcol) != FX_OK)
+        return BT_ERR_RANGE;
 
-    size_t nrows = (nk > 0) ? prow[nk - 1] + 1 : 0;
+    /* The tallest row index over ALL items, not the last item's: with explicit
+     * placement document order no longer implies row order, so reading the last
+     * item's row would cut every row a named area put below it. */
+    size_t nrows = 0;
+    for (size_t i = 0; i < nk; ++i) {
+        size_t rsp = (row_span[i] > 1) ? (size_t)row_span[i] : 1;
+        size_t end = prow[i] + rsp;
+        if (end > nrows) nrows = end;
+    }
     /* Explicit grid rows (grid-template-rows) set a floor row count. When
      * the placement algorithm produces fewer rows than declared, the explicit
      * rows still occupy space (with zero-height measurements, their row-gap

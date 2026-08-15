@@ -191,3 +191,32 @@ El llamante mide `min_content` fluyendo el ítem al extremo angosto de la misma 
   `px`/`fr`/`auto` y `minmax` (componente max) ya se resuelven vía `fx_grid_columns_weighted`
   (2026-07-11).
 - Aplicar los rectángulos a Cairo / construir el árbol de cajas: eso es el orquestador (la GUI).
+
+## Colocación explícita de ítems de grilla (2026-08-14)
+
+`fx_grid_place_span` acepta `fixed_row`/`fixed_col` (arreglos opcionales, `-1` = auto).
+El algoritmo pasa a ser de **dos pases**, que es el orden que manda CSS Grid 1:
+
+1. **§8.3, colocación explícita.** Todo ítem con celda declarada toma su rectángulo y
+   lo marca ocupado, ANTES de colocar ningún ítem automático.
+2. **§8.5, auto-colocación.** El cursor recorre la grilla y salta las celdas ya
+   ocupadas.
+
+Hacerlo en un solo pase intercalado dejaría que un ítem automático anterior en orden de
+documento se sentara en una celda que un ítem nombrado posterior posee.
+
+Con ambos arreglos en `NULL` el pase 1 no coloca nada y el pase 2 es **bit a bit** el
+algoritmo anterior, así que ninguna grilla sin nombres cambia.
+
+Una celda fija fuera de la grilla se **recorta** al rango válido en vez de descartarse:
+un ítem en el borde es un error más chico que un ítem que desaparece. La fila NO está
+acotada por la cantidad de ítems (un área nombrada puede legítimamente vivir en la cuarta
+fila de una plantilla con un solo ítem); la única cota es el arreglo de ocupación.
+
+De paso, el número de filas pasó a ser el **máximo sobre todos los ítems** en vez de la
+fila del último: con colocación explícita el orden de documento ya no implica orden de
+fila, así que leer el último ítem cortaba toda fila que un área nombrada hubiera puesto
+por debajo de él.
+
+Las funciones de áreas nombradas (`fx_grid_area_hash`, `fx_grid_areas_parse`,
+`fx_grid_area_rect`) tienen su contrato completo en **`spec/grid_areas.md`**.

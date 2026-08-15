@@ -265,7 +265,7 @@ static int write_field(int fd, const char *s) {
  *            box_l,box_r,box_w,box_center,box_mt,box_mb,box_w_pct,
  *            block_id,ua_tag,
  *            input_type,form_id,form_method, name, value )*
- * then the box-definition tree (Step D): [nbox]( the 172 box int32 fields, then the
+ * then the box-definition tree (Step D): [nbox]( the 213 box int32 fields, then the
  * background-image url() string, length-prefixed like the run strings above )*.
  * block_id on a run says which box it belongs to; boxes[block_id] carries the
  * decoration + parent.
@@ -317,7 +317,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[40] = {
+        int32_t b[42] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -347,6 +347,9 @@ static int write_view(int wfd, const pv_view *v) {
              * 2026-08-12 (appended; read_view mirrors this). */
             (int32_t)r->box_l_pct, (int32_t)r->box_r_pct,
             (int32_t)r->box_mt_pct, (int32_t)r->box_mb_pct,
+            /* Resolved named-grid cell, 2026-08-14 (appended; read_view mirrors
+             * this). -1/-1 = auto-placed. */
+            (int32_t)r->grid_row_start, (int32_t)r->grid_col_start,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -373,7 +376,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[207] = {
+        int32_t f[213] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -524,6 +527,13 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->transform_tx_pct, (int32_t)bd->transform_ty_pct,
             /* line-clamp, 2026-08-12. */
             (int32_t)bd->line_clamp,
+            /* The box's OWN vertical margins + the UA identity to fall back on,
+             * 2026-08-14 (appended; read_view mirrors this). Without them the
+             * painter has no margin to collapse against its neighbour and a
+             * text-less decorated block loses its vertical spacing entirely. */
+            (int32_t)bd->box_mt, (int32_t)bd->box_mb,
+            (int32_t)bd->box_mt_pct, (int32_t)bd->box_mb_pct,
+            (int32_t)bd->ua_tag, (int32_t)bd->font_px,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1594,7 +1604,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[40];
+        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[42];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1702,6 +1712,8 @@ static int read_view(int fd, pv_view **out) {
                 for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) gw[gk] = (int)gtw[gk];
                 pv_set_grid(v, gw, PV_GRID_TRACKS, (int)gtw[PV_GRID_TRACKS]);
                 pv_set_row_span(v, (int)b[26]);
+                /* Resolved named-grid cell, 2026-08-14. */
+                pv_set_grid_area(v, (int)b[40], (int)b[41]);
             }
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
                        (int)fself);
@@ -1730,6 +1742,8 @@ static int read_view(int fd, pv_view **out) {
                 for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) gw[gk] = (int)gtw[gk];
                 pv_set_grid(v, gw, PV_GRID_TRACKS, (int)gtw[PV_GRID_TRACKS]);
                 pv_set_row_span(v, (int)b[26]);
+                /* Resolved named-grid cell, 2026-08-14. */
+                pv_set_grid_area(v, (int)b[40], (int)b[41]);
             }
             pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir,
                        (int)fself);
@@ -1754,7 +1768,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[207];
+        int32_t f[213];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1863,6 +1877,10 @@ static int read_view(int fd, pv_view **out) {
             .transform_tx_pct = f[204], .transform_ty_pct = f[205],
             /* line-clamp, 2026-08-12. */
             .line_clamp = f[206],
+            /* The box's own vertical margins + UA identity, 2026-08-14. */
+            .box_mt = f[207], .box_mb = f[208],
+            .box_mt_pct = f[209], .box_mb_pct = f[210],
+            .ua_tag = f[211], .font_px = f[212],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

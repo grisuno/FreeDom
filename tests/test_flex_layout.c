@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <cmocka.h>
@@ -256,7 +257,7 @@ static void test_grid_place_span_basic(void **state) {
     /* 3 columns; item0 spans 2 -> (0,0); item1 span 1 -> (0,2); item2 span 1 -> (1,0) */
     int span[3] = { 2, 1, 1 };
     size_t row[3], col[3];
-    assert_int_equal(fx_grid_place_span(3, 3, span, NULL, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(3, 3, span, NULL, NULL, NULL, row, col), FX_OK);
     assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
     assert_int_equal(row[1], 0); assert_int_equal(col[1], 2);
     assert_int_equal(row[2], 1); assert_int_equal(col[2], 0);
@@ -268,7 +269,7 @@ static void test_grid_place_span_wraps_when_it_does_not_fit(void **state) {
      * jumps to (1,0); item2 -> (2,0) */
     int span[3] = { 1, 3, 1 };
     size_t row[3], col[3];
-    assert_int_equal(fx_grid_place_span(3, 3, span, NULL, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(3, 3, span, NULL, NULL, NULL, row, col), FX_OK);
     assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
     assert_int_equal(row[1], 1); assert_int_equal(col[1], 0);
     assert_int_equal(row[2], 2); assert_int_equal(col[2], 0);
@@ -279,15 +280,15 @@ static void test_grid_place_span_clamps_and_defaults(void **state) {
     /* span > ncols clamps to ncols; span <= 0 and NULL spans mean 1 */
     int span[2] = { 9, 0 };
     size_t row[2], col[2];
-    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, NULL, NULL, row, col), FX_OK);
     assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
     assert_int_equal(row[1], 1); assert_int_equal(col[1], 0);
-    assert_int_equal(fx_grid_place_span(2, 3, NULL, NULL, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(2, 3, NULL, NULL, NULL, NULL, row, col), FX_OK);
     assert_int_equal(row[1], 0); assert_int_equal(col[1], 1);
     /* fail-closed edges */
-    assert_int_equal(fx_grid_place_span(0, 3, NULL, NULL, NULL, NULL), FX_OK);   /* no-op */
-    assert_int_equal(fx_grid_place_span(2, 0, span, NULL, row, col), FX_ERR_RANGE);
-    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, NULL, col), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_grid_place_span(0, 3, NULL, NULL, NULL, NULL, NULL, NULL), FX_OK);   /* no-op */
+    assert_int_equal(fx_grid_place_span(2, 0, span, NULL, NULL, NULL, row, col), FX_ERR_RANGE);
+    assert_int_equal(fx_grid_place_span(2, 3, span, NULL, NULL, NULL, NULL, col), FX_ERR_NULL_ARG);
 }
 
 static void test_grid_place_rowspan(void **state) {
@@ -300,7 +301,7 @@ static void test_grid_place_rowspan(void **state) {
     int span[4]      = { 1, 1, 1, 1 };
     int row_span[4]  = { 2, 1, 2, 1 };
     size_t row[4], col[4];
-    assert_int_equal(fx_grid_place_span(4, 3, span, row_span, row, col), FX_OK);
+    assert_int_equal(fx_grid_place_span(4, 3, span, row_span, NULL, NULL, row, col), FX_OK);
     assert_int_equal(row[0], 0); assert_int_equal(col[0], 0);
     assert_int_equal(row[1], 0); assert_int_equal(col[1], 1);
     assert_int_equal(row[2], 0); assert_int_equal(col[2], 2);
@@ -671,6 +672,173 @@ static void test_multicol_balance(void **state) {
     assert_int_equal(fx_multicol_balance(h3, 2, 0, col3, colh3), FX_ERR_RANGE);
 }
 
+
+/* ---- grid-template-areas: named placement (spec/grid_areas.md) ------------- */
+
+/* The hash is over the TRIMMED name, is case-sensitive (CSS identifiers are), and
+ * never collides with the reserved 0 that means "unnamed". */
+static void test_area_hash_basics(void **state) {
+    (void)state;
+    assert_int_equal(fx_grid_area_hash(NULL), 0u);
+    assert_int_equal(fx_grid_area_hash(""), 0u);
+    assert_int_equal(fx_grid_area_hash("   "), 0u);
+    assert_true(fx_grid_area_hash("content") != 0u);
+    assert_int_equal(fx_grid_area_hash("  content  "), fx_grid_area_hash("content"));
+    assert_true(fx_grid_area_hash("content") != fx_grid_area_hash("Content"));
+    assert_true(fx_grid_area_hash("a") != fx_grid_area_hash("b"));
+}
+
+/* The template Wikipedia's Vector 2022 page container actually ships. */
+static void test_areas_parse_and_resolve(void **state) {
+    (void)state;
+    fx_area_map m;
+    assert_int_equal(fx_grid_areas_parse(
+        "'siteNotice siteNotice' 'columnStart pageContent' 'footer footer'", &m), FX_OK);
+    assert_int_equal(m.rows, 3);
+    assert_int_equal(m.cols, 2);
+
+    int r, c, rs, cs;
+    /* A name spanning both columns of one row. */
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("siteNotice"),
+                                       &r, &c, &rs, &cs), FX_OK);
+    assert_int_equal(r, 0); assert_int_equal(c, 0);
+    assert_int_equal(rs, 1); assert_int_equal(cs, 2);
+
+    /* One cell in the narrow column. */
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("columnStart"),
+                                       &r, &c, &rs, &cs), FX_OK);
+    assert_int_equal(r, 1); assert_int_equal(c, 0);
+    assert_int_equal(rs, 1); assert_int_equal(cs, 1);
+
+    /* ...and one in the wide column beside it. */
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("pageContent"),
+                                       &r, &c, &rs, &cs), FX_OK);
+    assert_int_equal(r, 1); assert_int_equal(c, 1);
+
+    /* A name that is not in the template auto-places instead. */
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("nope"),
+                                       &r, &c, &rs, &cs), FX_ERR_RANGE);
+    /* 0 is "unnamed", not a name. */
+    assert_int_equal(fx_grid_area_rect(&m, 0u, &r, &c, &rs, &cs), FX_ERR_RANGE);
+}
+
+/* The null cell token (a dot, or a run of dots) is a hole, not a name. */
+static void test_areas_null_cell(void **state) {
+    (void)state;
+    fx_area_map m;
+    assert_int_equal(fx_grid_areas_parse("\"titlebar .\" \"content columnEnd\"", &m), FX_OK);
+    assert_int_equal(m.rows, 2);
+    assert_int_equal(m.cols, 2);
+    assert_int_equal(m.cell[1], 0u);          /* the dot */
+    assert_true(m.cell[0] != 0u);
+
+    fx_area_map m2;
+    assert_int_equal(fx_grid_areas_parse("'a ...' 'b c'", &m2), FX_OK);
+    assert_int_equal(m2.cell[1], 0u);         /* a RUN of dots is also one null cell */
+}
+
+/* A multi-row, multi-column area resolves to the full rectangle it covers. */
+static void test_areas_rect_spans_rows_and_cols(void **state) {
+    (void)state;
+    fx_area_map m;
+    assert_int_equal(fx_grid_areas_parse(
+        "'h h h' 'nav main main' 'nav main main'", &m), FX_OK);
+    int r, c, rs, cs;
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("main"),
+                                       &r, &c, &rs, &cs), FX_OK);
+    assert_int_equal(r, 1); assert_int_equal(c, 1);
+    assert_int_equal(rs, 2); assert_int_equal(cs, 2);
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("nav"),
+                                       &r, &c, &rs, &cs), FX_OK);
+    assert_int_equal(rs, 2); assert_int_equal(cs, 1);
+}
+
+/* An L-shaped name is not a rectangle: CSS calls that invalid, and the item
+ * degrades to auto-placement rather than being given a wrong rect. */
+static void test_areas_non_rectangular_is_rejected(void **state) {
+    (void)state;
+    fx_area_map m;
+    assert_int_equal(fx_grid_areas_parse("'a a' 'a b'", &m), FX_OK);
+    int r, c, rs, cs;
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("a"),
+                                       &r, &c, &rs, &cs), FX_ERR_RANGE);
+    /* 'b' is a plain single cell and still resolves. */
+    assert_int_equal(fx_grid_area_rect(&m, fx_grid_area_hash("b"),
+                                       &r, &c, &rs, &cs), FX_OK);
+}
+
+/* Every fail-closed edge leaves rows == 0, so a caller that ignores the status
+ * still cannot read a half-built map. */
+static void test_areas_parse_fails_closed(void **state) {
+    (void)state;
+    fx_area_map m;
+    assert_int_equal(fx_grid_areas_parse(NULL, &m), FX_ERR_NULL_ARG);
+    assert_int_equal(fx_grid_areas_parse("'a b'", NULL), FX_ERR_NULL_ARG);
+    /* ragged: 2 columns then 3 */
+    assert_int_equal(fx_grid_areas_parse("'a b' 'c d e'", &m), FX_ERR_RANGE);
+    assert_int_equal(m.rows, 0);
+    /* nothing quoted at all */
+    assert_int_equal(fx_grid_areas_parse("none", &m), FX_ERR_RANGE);
+    assert_int_equal(m.rows, 0);
+    /* an empty row */
+    assert_int_equal(fx_grid_areas_parse("'' 'a'", &m), FX_ERR_RANGE);
+    assert_int_equal(m.rows, 0);
+}
+
+/* An over-large template is refused rather than truncated: truncation would place
+ * items against a grid the author never wrote. */
+static void test_areas_parse_bounds(void **state) {
+    (void)state;
+    char big[2048];
+    size_t n = 0;
+    for (int row = 0; row < FX_AREA_MAX_ROWS + 2; ++row) {
+        n += (size_t)snprintf(big + n, sizeof big - n, "'a' ");
+    }
+    fx_area_map m;
+    assert_int_equal(fx_grid_areas_parse(big, &m), FX_ERR_RANGE);
+    assert_int_equal(m.rows, 0);
+}
+
+/* An explicit cell claims its rectangle; the automatic items flow AROUND it
+ * instead of overwriting it (CSS Grid 1 section 8.5). */
+static void test_grid_place_explicit_cells(void **state) {
+    (void)state;
+    size_t row[4], col[4];
+    /* item 0 is pinned to row 1 col 0; 1..3 auto-place. */
+    const int frow[4] = { 1, -1, -1, -1 };
+    const int fcol[4] = { 0, -1, -1, -1 };
+    assert_int_equal(fx_grid_place_span(4, 2, NULL, NULL, frow, fcol, row, col), FX_OK);
+    assert_int_equal(row[0], 1); assert_int_equal(col[0], 0);
+    /* the three automatic items take (0,0), (0,1) and then skip the taken (1,0). */
+    assert_int_equal(row[1], 0); assert_int_equal(col[1], 0);
+    assert_int_equal(row[2], 0); assert_int_equal(col[2], 1);
+    assert_int_equal(row[3], 1); assert_int_equal(col[3], 1);
+}
+
+/* Both arrays NULL must reproduce the old contract exactly, so no grid without
+ * named areas changes. */
+static void test_grid_place_null_fixed_is_unchanged(void **state) {
+    (void)state;
+    size_t row[5], col[5];
+    assert_int_equal(fx_grid_place_span(5, 3, NULL, NULL, NULL, NULL, row, col), FX_OK);
+    for (size_t i = 0; i < 5; ++i) {
+        assert_int_equal(row[i], i / 3);
+        assert_int_equal(col[i], i % 3);
+    }
+}
+
+/* An explicit cell outside the grid is clamped into range rather than dropped: a
+ * visible item at the edge beats a vanished one. */
+static void test_grid_place_explicit_out_of_range_clamps(void **state) {
+    (void)state;
+    size_t row[1], col[1];
+    const int frow[1] = { 3 };
+    const int fcol[1] = { 99 };
+    assert_int_equal(fx_grid_place_span(1, 2, NULL, NULL, frow, fcol, row, col), FX_OK);
+    assert_int_equal(row[0], 3);
+    assert_int_equal(col[0], 1);   /* clamped to the last column */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_grow_equal),
@@ -718,6 +886,16 @@ int main(void) {
         cmocka_unit_test(test_auto_min_size_is_min_content),
         cmocka_unit_test(test_multicol_used_counts),
         cmocka_unit_test(test_multicol_used_edges),
+        cmocka_unit_test(test_area_hash_basics),
+        cmocka_unit_test(test_areas_parse_and_resolve),
+        cmocka_unit_test(test_areas_null_cell),
+        cmocka_unit_test(test_areas_rect_spans_rows_and_cols),
+        cmocka_unit_test(test_areas_non_rectangular_is_rejected),
+        cmocka_unit_test(test_areas_parse_fails_closed),
+        cmocka_unit_test(test_areas_parse_bounds),
+        cmocka_unit_test(test_grid_place_explicit_cells),
+        cmocka_unit_test(test_grid_place_null_fixed_is_unchanged),
+        cmocka_unit_test(test_grid_place_explicit_out_of_range_clamps),
         cmocka_unit_test(test_multicol_balance),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

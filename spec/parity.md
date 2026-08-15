@@ -122,3 +122,26 @@ Re-freezes `tests/parity/layout/*.txt` from current `examples/*.html`.
 - `col_mae` and `row_mae` are sensitive to background colour differences (white
   in Freedom vs off-white in Firefox). The modal-luminance background detection
   in pngdiff compensates for this.
+
+## `make geom` — la geometría de los dos motores, lado a lado (2026-08-14)
+
+`make parity` dice **cuánto** difiere una página; no dice **qué** caja se movió.
+`make geom PAGE=archivo.html [SEL=selector]` responde eso:
+
+```
+make geom PAGE=tests/parity/pages/margin-collapse.html
+make geom PAGE=probe.html SEL="section,div,p"
+```
+
+Imprime el `--dump-layout` de Freedom y deja en `build/geom/firefox.png` la geometría
+que Firefox resuelve para la MISMA página — como texto, no como render: la página se
+**copia** (nunca se modifica en el sitio) con un script que reemplaza el `<body>` por el
+`getBoundingClientRect()` de cada elemento que matchea `SEL` (por defecto, todo elemento
+con clase). Así una diferencia de layout se lee como dos columnas de números en vez de
+adivinarse comparando dos capturas.
+
+Es el bucle que cada tanda de paridad corre de verdad: **aislar el caso en una página
+chica, medir LOS DOS motores, y recién entonces tocar código.** Las trampas de Firefox
+headless documentadas en `parity` valen igual acá (ruta absoluta para `--screenshot`,
+`-profile` fresco y `--no-remote` en cada invocación). Todo contra `file://`: sin red,
+sin estado que quede atrás.

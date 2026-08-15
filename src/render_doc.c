@@ -136,6 +136,8 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     for (int gk = 0; gk < PV_GRID_TRACKS; ++gk) b->cont_col_w[gk] = 0;
     b->grid_span = 0;
     b->row_span = 0;
+    b->grid_row_start = -1;
+    b->grid_col_start = -1;
     b->flex_grow = -1;
     b->flex_shrink = -1;
     b->flex_basis = CSS_LEN_UNSET;
@@ -444,6 +446,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->cont_col_w[gk] = r->cont_col_w[gk];
             lb->grid_span = r->grid_span;
             lb->row_span = r->row_span;
+            lb->grid_row_start = r->grid_row_start;
+            lb->grid_col_start = r->grid_col_start;
             /* Stage 3: flex per-item values are layout structure like cont_*, so they
              * are carried regardless of caps.css. */
             lb->flex_grow = r->flex_grow;
@@ -514,6 +518,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->cont_col_w[gk] = r->cont_col_w[gk];
             lb->grid_span = r->grid_span;
             lb->row_span = r->row_span;
+            lb->grid_row_start = r->grid_row_start;
+            lb->grid_col_start = r->grid_col_start;
             lb->flex_grow = r->flex_grow;
             lb->flex_shrink = r->flex_shrink;
             lb->flex_basis = r->flex_basis;

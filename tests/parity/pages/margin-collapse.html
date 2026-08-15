@@ -1,0 +1,81 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>vertical margin collapsing</title>
+<!--
+  Probe for spec/block_flow.md: the vertical space between two block boxes is
+  their two margins COLLAPSED (CSS 2.1 8.3.1), not the sum, not the larger of a
+  margin and a theme constant, and not zero.
+
+  Section A is the case the engine used to get completely wrong: blocks whose
+  content is a decorated box with NO text. The old "has any content been placed"
+  test counted text ROWS only, so on a page made of boxes it always answered "the
+  page is empty" and no block ever received a margin at all -- three 20px divs
+  with margin-bottom:30px stacked at 0/20/40 where Firefox puts 0/50/100.
+
+  Taller than 768px on purpose: Firefox reports the viewport height for short
+  pages and h_ratio then measures nothing (CLAUDE.md, batch 11).
+-->
+<style>
+  body { margin: 0; font: 16px/1.2 sans-serif; }
+
+  /* A: box-only siblings -- no text anywhere, so nothing but the boxes exists. */
+  .a { width: 120px; height: 20px; background: #c33; margin-bottom: 30px; }
+
+  /* B: the two margins are different, so the LARGER one wins (not their sum). */
+  .b1 { width: 120px; height: 20px; background: #3a3; margin-bottom: 10px; }
+  .b2 { width: 120px; height: 20px; background: #393; margin-top: 40px; }
+
+  /* C: a NEGATIVE margin is deducted from the positive one -- max(a,b) gets this
+     wrong, and margin-top:-1px to overlap borders is everyday markup. */
+  .c1 { width: 120px; height: 20px; background: #36c; margin-bottom: 30px; }
+  .c2 { width: 120px; height: 20px; background: #25b; margin-top: -10px; }
+
+  /* D: parent/child collapsing. The wrapper has no border and no padding, so its
+     first child's top margin belongs OUTSIDE the wrapper: the wrapper moves down
+     and the child sits flush against it. Putting the margin inside instead made
+     every undecorated wrapper exactly its first child's margin too tall. */
+  .wrap { background: #eee; }
+  .wrap p { margin: 24px 0; }
+
+  /* E: ...and with padding the margins do NOT adjoin, so the same margin is real
+     space INSIDE the card and the card is that much taller. */
+  .card { background: #fed; padding: 12px; }
+  .card p { margin: 24px 0; }
+
+  /* F: the user-agent sheet's own margins still apply where the author declares
+     none, and they are the ELEMENT's (a <div> has none, a <p> has 1em). */
+  .plain { background: #ddd; }
+</style>
+
+<h1>Vertical margin collapsing</h1>
+
+<h2>A. box-only siblings</h2>
+<div class="a"></div><div class="a"></div><div class="a"></div><div class="a"></div>
+
+<h2>B. unequal margins collapse to the larger</h2>
+<div class="b1"></div><div class="b2"></div><div class="b1"></div><div class="b2"></div>
+
+<h2>C. a negative margin is deducted</h2>
+<div class="c1"></div><div class="c2"></div><div class="c1"></div><div class="c2"></div>
+
+<h2>D. parent/child, nothing between them</h2>
+<div class="wrap"><p>first paragraph of the wrapper</p><p>second paragraph</p></div>
+<div class="wrap"><p>another wrapper, same shape</p><p>second paragraph</p></div>
+
+<h2>E. parent/child with padding between them</h2>
+<div class="card"><p>first paragraph of the card</p><p>second paragraph</p></div>
+<div class="card"><p>another card</p><p>second paragraph</p></div>
+
+<h2>F. user-agent margins, per element</h2>
+<div class="plain">a div has no user-agent margin</div>
+<p>a paragraph has 1em above and below</p>
+<div class="plain">another div</div>
+<p>another paragraph</p>
+<div class="plain">and a third div</div>
+
+<h2>G. repeat, to push the page past the viewport</h2>
+<div class="a"></div><div class="a"></div><div class="a"></div><div class="a"></div>
+<div class="card"><p>a card again</p><p>with two paragraphs</p></div>
+<div class="wrap"><p>a wrapper again</p><p>with two paragraphs</p></div>
+<div class="b1"></div><div class="b2"></div><div class="b1"></div><div class="b2"></div>
+<p>a closing paragraph so the flow ends on text</p>

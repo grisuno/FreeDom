@@ -116,11 +116,12 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
               $(BUILD_DIR)/test_hls $(BUILD_DIR)/test_data_url \
               $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock \
               $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render \
-              $(BUILD_DIR)/test_perf_trace $(BUILD_DIR)/test_css_length
+              $(BUILD_DIR)/test_perf_trace $(BUILD_DIR)/test_css_length \
+              $(BUILD_DIR)/test_block_flow
 
 .PHONY: all install test itest asan fuzz fuzz-svg fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
         deps run deb docker view clean \
-        parity parity-update layout-diff layout-update
+        parity parity-update layout-diff layout-update geom
 
 all: $(BUILD_DIR)/freedom
 
@@ -192,13 +193,13 @@ $(BUILD_DIR)/test_html_parse: $(TEST_DIR)/test_html_parse.c $(BUILD_DIR)/html_pa
 $(BUILD_DIR)/test_js_sandbox: $(TEST_DIR)/test_js_sandbox.c $(BUILD_DIR)/js_sandbox.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_dom: $(TEST_DIR)/test_dom.c $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_page_view: $(TEST_DIR)/test_page_view.c $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/dom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_js_dom: $(TEST_DIR)/test_js_dom.c $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) -isystem $(QJS_DIR) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_os_sandbox: $(TEST_DIR)/test_os_sandbox.c $(BUILD_DIR)/os_sandbox.o | $(BUILD_DIR)
@@ -222,9 +223,9 @@ $(BUILD_DIR)/test_render_policy: $(TEST_DIR)/test_render_policy.c $(BUILD_DIR)/r
 # so it links page_view/html_parse (lexbor) plus the render/request policy chain.
 $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_doc.o \
                               $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(BUILD_DIR)/data_url.o \
-                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o \
+                              $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o \
                               $(BUILD_DIR)/css_color.o \
-                              $(BUILD_DIR)/box_style.o \
+                              $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
                               $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
@@ -233,9 +234,9 @@ $(BUILD_DIR)/test_render_doc: $(TEST_DIR)/test_render_doc.c $(BUILD_DIR)/render_
 $(BUILD_DIR)/test_dom_debug: $(TEST_DIR)/test_dom_debug.c $(BUILD_DIR)/dom_debug.o \
                              $(BUILD_DIR)/render_doc.o \
                              $(BUILD_DIR)/render_policy.o $(BUILD_DIR)/request_policy.o $(BUILD_DIR)/data_url.o \
-                             $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o \
+                             $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o \
                              $(BUILD_DIR)/css_color.o \
-                             $(BUILD_DIR)/box_style.o \
+                             $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
                              $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(PSL_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
@@ -324,13 +325,17 @@ $(BUILD_DIR)/test_css_color: $(TEST_DIR)/test_css_color.c $(BUILD_DIR)/css_color
 $(BUILD_DIR)/test_css_length: $(TEST_DIR)/test_css_length.c $(BUILD_DIR)/css_length.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
+# Vertical margin collapsing (CSS 2.1 8.3.1). Pure arithmetic, no deps but libm.
+$(BUILD_DIR)/test_block_flow: $(TEST_DIR)/test_block_flow.c $(BUILD_DIR)/block_flow.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
+
 # Pure author-CSS parser + simple cascade. Reuses css_color for color tokens.
 # No I/O deps; hostile content (never phones home: url()/@-rules dropped).
-$(BUILD_DIR)/test_css: $(TEST_DIR)/test_css.c $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_css: $(TEST_DIR)/test_css.c $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # Pure user-agent box model (per-tag margins/padding + display). No I/O deps.
-$(BUILD_DIR)/test_box_style: $(TEST_DIR)/test_box_style.c $(BUILD_DIR)/box_style.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_box_style: $(TEST_DIR)/test_box_style.c $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure flexbox/grid geometry solver. No I/O deps.
@@ -338,7 +343,7 @@ $(BUILD_DIR)/test_flex_layout: $(TEST_DIR)/test_flex_layout.c $(BUILD_DIR)/flex_
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure recursive block/flex/grid box-tree layout. Composes flex_layout. No I/O deps.
-$(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_style.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure /etc/hosts-format host filter (blocklist + allowlist). No I/O deps.
@@ -390,7 +395,7 @@ $(BUILD_DIR)/test_download: $(TEST_DIR)/test_download.c $(BUILD_DIR)/download.o 
 $(BUILD_DIR)/test_renderer: $(TEST_DIR)/test_renderer.c $(BUILD_DIR)/renderer.o $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(HP_LIBS) $(CMOCKA_LIBS)
 
-$(BUILD_DIR)/test_js_env: $(TEST_DIR)/test_js_env.c $(BUILD_DIR)/js_env.o $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
+$(BUILD_DIR)/test_js_env: $(TEST_DIR)/test_js_env.c $(BUILD_DIR)/js_env.o $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_sandbox.o $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/dom.o $(BUILD_DIR)/html_parse.o $(BUILD_DIR)/url.o $(BUILD_DIR)/freebug.o $(BUILD_DIR)/css_chain.o $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o $(QJS_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) -isystem $(QJS_DIR) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(CMOCKA_LIBS)
 
 $(BUILD_DIR)/test_local_store: $(TEST_DIR)/test_local_store.c $(BUILD_DIR)/local_store.o | $(BUILD_DIR)
@@ -406,8 +411,8 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_env.o \
                        $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o \
-                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o \
-                       $(BUILD_DIR)/box_style.o \
+                       $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o \
+                       $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o \
                        $(BUILD_DIR)/request_policy.o $(PSL_OBJ) \
                        $(BUILD_DIR)/url.o $(BUILD_DIR)/link_nav.o \
@@ -431,10 +436,10 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o $(QJS_OBJ) \
                       $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/url.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
-                      $(BUILD_DIR)/css.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o \
+                      $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o \
                       $(BUILD_DIR)/request_policy.o \
                       $(BUILD_DIR)/render_doc.o $(BUILD_DIR)/render_policy.o \
-                      $(BUILD_DIR)/box_style.o $(BUILD_DIR)/box_tree.o \
+                      $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o $(BUILD_DIR)/box_tree.o \
                       $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/hostblock.o \
                       $(BUILD_DIR)/hostedit.o \
                       $(BUILD_DIR)/net_realm.o \
@@ -522,7 +527,7 @@ fuzz-img: | $(BUILD_DIR)
 fuzz-pv: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c \
+	  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c \
 	  $(SRC_DIR)/css_color.c \
 	  $(SRC_DIR)/box_style.c $(SRC_DIR)/html_parse.c \
 	  -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
@@ -531,7 +536,7 @@ fuzz-pv: | $(BUILD_DIR)
 fuzz-dom: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_dom.c $(SRC_DIR)/dom.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_length.c \
+	  $(FUZZ_DIR)/fuzz_dom.c $(SRC_DIR)/dom.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c \
 	  $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/html_parse.c \
 	  -o $(BUILD_DIR)/fuzz_dom $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_dom -max_total_time=30 -rss_limit_mb=2048
@@ -563,7 +568,7 @@ fuzz-dl: | $(BUILD_DIR)
 fuzz-css: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c \
+	  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c \
 	  -o $(BUILD_DIR)/fuzz_css $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_css -max_total_time=30 -rss_limit_mb=2048
 
@@ -575,7 +580,7 @@ fuzz-dd: $(PSL_OBJ) | $(BUILD_DIR)
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_dom_debug.c $(SRC_DIR)/dom_debug.c $(SRC_DIR)/render_doc.c \
 	  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c \
-	  $(SRC_DIR)/css.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
+	  $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
 	  $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(PSL_OBJ) \
 	  -o $(BUILD_DIR)/fuzz_dom_debug $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_dom_debug -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
@@ -854,6 +859,43 @@ parity: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
 	    END {printf "  %-18s %+8.2f\n", "TOTAL", t}' \
 	    $(PARITY_DIR)/baseline.tsv $(PARITY_OUT)/current.tsv; \
 	else echo ""; echo "(no baseline yet -- run 'make parity-update' to freeze one)"; fi
+
+# `make geom PAGE=path/to.html [SEL=selector]` -- print the geometry Firefox resolves
+# for a page beside the geometry Freedom resolves for it, so a layout difference is
+# read as two columns of numbers instead of guessed from two screenshots. This is the
+# loop every parity batch actually runs: isolate the case in a small page, measure BOTH
+# engines, then change code.
+#
+# Firefox has no geometry dump, so the page is COPIED (never modified in place) with a
+# probe script appended that replaces the body with the getBoundingClientRect() of every
+# element matching SEL (default: every element carrying a class). The shot is then plain
+# text -- the numbers ARE the page. Freedom's side is --dump-layout, which already prints
+# rects. Everything runs against file:// on a throwaway profile: no network, no state
+# left behind. The two Firefox traps documented on the parity target apply here too
+# (absolute --screenshot path, fresh -profile + --no-remote).
+GEOM_OUT := $(BUILD_DIR)/geom
+GEOM_SEL ?= [class]
+
+geom: $(BUILD_DIR)/freedom
+	@test -n "$(PAGE)" || { echo "usage: make geom PAGE=file.html [SEL=selector]"; exit 1; }
+	@command -v firefox >/dev/null 2>&1 || { \
+	  echo "geom: firefox not found -- the reference renderer is required"; exit 1; }
+	@mkdir -p $(GEOM_OUT)
+	@sel='$(if $(SEL),$(SEL),$(GEOM_SEL))'; \
+	 awk -v sel="$$sel" '\
+	   /<\/body>/ && !done { \
+	     printf "<script>window.addEventListener(\"load\",function(){var o=[];document.querySelectorAll(\"%s\").forEach(function(e,i){var r=e.getBoundingClientRect();o.push(i+\" \"+e.tagName.toLowerCase()+\".\"+e.className+\" top=\"+Math.round(r.top)+\" left=\"+Math.round(r.left)+\" w=\"+Math.round(r.width)+\" h=\"+Math.round(r.height));});document.documentElement.style.background=\"#fff\";document.body.innerHTML=\"<pre style=\\\"font:11px monospace;color:#000\\\">\"+o.join(\"\\n\")+\"</pre>\";});</script>\n", sel; \
+	     done = 1 } \
+	   { print }' "$(PAGE)" > $(GEOM_OUT)/probe.html
+	@rm -rf $(GEOM_OUT)/prof; mkdir -p $(GEOM_OUT)/prof
+	@firefox --headless --no-remote -profile "$(CURDIR)/$(GEOM_OUT)/prof" \
+	         --screenshot "$(CURDIR)/$(GEOM_OUT)/firefox.png" \
+	         --window-size=$(PARITY_WIDTH) \
+	         "file://$$(readlink -f $(GEOM_OUT)/probe.html)" >/dev/null 2>&1
+	@echo "FIREFOX geometry rendered to $(GEOM_OUT)/firefox.png (read it as an image)"
+	@echo ""
+	@echo "=== FREEDOM ==="
+	@./$(BUILD_DIR)/freedom --dump-layout --author-css --images "$(PAGE)" 2>/dev/null
 
 parity-update: parity
 	@cp $(PARITY_OUT)/current.tsv $(PARITY_DIR)/baseline.tsv

@@ -83,6 +83,41 @@ telemetry, mandatory API keys, or hidden solver workers. We refuse to do so.
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
+### Vertical rhythm, heading scale and named grid areas (14 August 2026)
+
+Three engine-wide corrections, each isolated in a probe **measured against Firefox
+headless before any code changed**. Structural divergence over the parity corpus fell
+from **154.06 to 126.04**.
+
+- **Vertical margins now collapse (CSS 2.1 §8.3.1).** The gap between two block boxes
+  used to be `max(previous bottom margin, a theme constant)`, and only once a line of
+  *text* had been painted. A page whose content is boxes — a separator, a spacer, an
+  icon tile, an empty card — never paints one, so **no block on it received any margin
+  at all**: three 20px divs with `margin-bottom:30px` stacked at 0/20/40 where Firefox
+  puts 0/50/100. The rule lives in a new pure module, `block_flow` (`bf_`), and is the
+  normative one — `max(0, positives) + min(0, negatives)`, which stops agreeing with
+  `max(a, b)` the moment a margin is negative, and `margin-top:-1px` to overlap borders
+  is everyday markup. Parent/child collapsing works in both directions: a first child's
+  top margin moves the *parent*, while a last child's bottom margin stays *inside* a
+  box that has bottom padding.
+- **Headings keep their size under an author base font-size.** `body{font-size:16px}`
+  — or its `font:` shorthand, which is on essentially every real page — used to render
+  `h1`, `h2` and `p` at exactly the same size, flattening the document's hierarchy. An
+  absolute font-size replaces the user-agent heading scale only when the author
+  declared it *on the heading*; on an ancestor it is the heading's inherited value and
+  `h1{font-size:2em}` still doubles it.
+- **`grid-template-areas` places items by name.** Grid items were placed round-robin at
+  `index % columns`, so every named layout — how essentially every modern portal is
+  built — came out with its regions in source order. Named areas resolve to rectangles
+  (`spec/grid_areas.md`) and explicit placement runs before auto-placement, per CSS Grid
+  §8.3/§8.5. The `grid-template` / `grid` shorthands parse too.
+
+Also fixed on the way: `::before` content is inline content and no longer takes a row of
+its own (it was doubling the height of Wikipedia's reference list); multi-column
+fragmentation no longer reads row positions its own earlier pass had already rewritten;
+and a flex/grid item with both `height` and `padding` is no longer exactly its vertical
+padding too short.
+
 ### Nested flex/grid + inline-block flow (31 July 2026)
 
 The two structural render breaks are closed, both **measured** against Firefox headless:
