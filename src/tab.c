@@ -382,7 +382,7 @@ static int write_view(int wfd, const pv_view *v) {
     if (write_full(wfd, &nb, sizeof nb) != 0) return -1;
     for (size_t bi = 0; bi < nb; ++bi) {
         const pv_box_def *bd = pv_box_at(v, bi);
-        int32_t f[213] = {
+        int32_t f[219] = {
             (int32_t)bd->parent_id, (int32_t)bd->box_sizing,
             (int32_t)bd->pad_t, (int32_t)bd->pad_r, (int32_t)bd->pad_b, (int32_t)bd->pad_l,
             (int32_t)bd->bord_tw, (int32_t)bd->bord_rw, (int32_t)bd->bord_bw, (int32_t)bd->bord_lw,
@@ -540,6 +540,11 @@ static int write_view(int wfd, const pv_view *v) {
             (int32_t)bd->box_mt, (int32_t)bd->box_mb,
             (int32_t)bd->box_mt_pct, (int32_t)bd->box_mb_pct,
             (int32_t)bd->ua_tag, (int32_t)bd->font_px,
+            /* background-position percentage halves + background-size's explicit
+             * component pair, 2026-08-16 (appended; read_view mirrors this). */
+            (int32_t)bd->bg_pos_x_pct, (int32_t)bd->bg_pos_y_pct,
+            (int32_t)bd->bg_size_w, (int32_t)bd->bg_size_h,
+            (int32_t)bd->bg_size_w_pct, (int32_t)bd->bg_size_h_pct,
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1777,7 +1782,7 @@ static int read_view(int fd, pv_view **out) {
     if (read_full(fd, &nb, sizeof nb) != 0) { pv_free(v); return -1; }
     if (nb > TAB_MAX_RUNS) { pv_free(v); return -1; }
     for (size_t bi = 0; bi < nb; ++bi) {
-        int32_t f[213];
+        int32_t f[219];
         if (read_full(fd, f, sizeof f) != 0) { pv_free(v); return -1; }
         pv_box_def bd = {
             .parent_id = f[0], .box_sizing = f[1],
@@ -1890,6 +1895,10 @@ static int read_view(int fd, pv_view **out) {
             .box_mt = f[207], .box_mb = f[208],
             .box_mt_pct = f[209], .box_mb_pct = f[210],
             .ua_tag = f[211], .font_px = f[212],
+            /* background-position percentage halves + background-size pair. */
+            .bg_pos_x_pct = f[213], .bg_pos_y_pct = f[214],
+            .bg_size_w = f[215], .bg_size_h = f[216],
+            .bg_size_w_pct = f[217], .bg_size_h_pct = f[218],
         };
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
             bd.bg_grad_pos[k] = (k < 4) ? f[74 + k] : -1;

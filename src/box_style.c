@@ -289,8 +289,13 @@ double bx_width_cap(int w_px, int w_pct, double avail_w) {
      * px half of -6 and a percentage half of 100%, and its used width is 794 of an
      * 800px containing block -- taking the tighter of the two answered 800 and
      * dropped the -6px on the floor. */
+    /* The intrinsic sizing keywords are not lengths: they name a measurement the
+     * caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a
+     * px and a percentage half they read exactly like `auto` -- no declared width.
+     * Letting the sentinel through would have it summed as a length, and it is a
+     * large negative number. */
     int has_px  = (w_px != 0 && w_px != CSS_LEN_UNSET && w_px != CSS_LEN_AUTO &&
-                   w_px != CSS_LEN_END);
+                   w_px != CSS_LEN_END && !CSS_LEN_IS_INTRINSIC(w_px));
     int has_pct = (w_pct != 0);
     if (!has_px && !has_pct) return 0.0;              /* no declared width */
     if (has_pct && !(avail_w > 0.0) && !has_px) return 0.0;  /* % with no basis */
@@ -348,6 +353,55 @@ double bx_content_cap(double width_cap, int border_box,
     if (bord_r < 0.0) bord_r = 0.0;
     double w = width_cap - pad_l - pad_r - bord_l - bord_r;
     return (w < 1.0) ? 1.0 : w;
+}
+
+/* One background-size component in px, or -1 when it is `auto` (Backgrounds 3
+ * section 3.9). `auto` is both the explicit keyword and the absence of a
+ * declaration, which are the same thing for sizing. */
+static double bg_size_component(int px_val, int pct_pm, double area) {
+    if (pct_pm != 0) return bx_lp_px(px_val, pct_pm, area);
+    if (px_val == CSS_LEN_AUTO || px_val == CSS_LEN_UNSET ||
+        CSS_LEN_IS_INTRINSIC(px_val)) return -1.0;
+    return (double)px_val;
+}
+
+int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,
+                        double *out_x, double *out_y) {
+    if (in == NULL || out_w == NULL || out_h == NULL ||
+        out_x == NULL || out_y == NULL) return 0;
+    if (!(in->nat_w > 0.0) || !(in->nat_h > 0.0)) return 0;
+    if (!(in->area_w > 0.0) || !(in->area_h > 0.0)) return 0;
+
+    double iw, ih;
+    if (in->size_kw == CSS_BGS_COVER || in->size_kw == CSS_BGS_CONTAIN) {
+        double rx = in->area_w / in->nat_w, ry = in->area_h / in->nat_h;
+        double s = (in->size_kw == CSS_BGS_COVER) ? ((rx > ry) ? rx : ry)
+                                                  : ((rx < ry) ? rx : ry);
+        iw = in->nat_w * s;
+        ih = in->nat_h * s;
+    } else {
+        double cw = bg_size_component(in->size_w, in->size_w_pct, in->area_w);
+        double ch = bg_size_component(in->size_h, in->size_h_pct, in->area_h);
+        if (cw < 0.0 && ch < 0.0)      { iw = in->nat_w; ih = in->nat_h; }
+        /* One auto keeps the intrinsic ratio -- that is what makes a one-value
+         * `background-size: 44px` a scaled icon and not a squashed one. */
+        else if (ch < 0.0)             { iw = cw; ih = cw * in->nat_h / in->nat_w; }
+        else if (cw < 0.0)             { iw = ch * in->nat_w / in->nat_h; ih = ch; }
+        else                           { iw = cw; ih = ch; }
+    }
+    if (!(iw > 0.0) || !(ih > 0.0) || iw != iw || ih != ih) return 0;
+
+    /* A percentage aligns that fraction of the image with the same fraction of
+     * the area, so the free space is what it scales (Backgrounds 3 section 3.6). */
+    double ox = bx_lp_px((in->pos_x == CSS_LEN_UNSET) ? 0 : in->pos_x,
+                         in->pos_x_pct, in->area_w - iw);
+    double oy = bx_lp_px((in->pos_y == CSS_LEN_UNSET) ? 0 : in->pos_y,
+                         in->pos_y_pct, in->area_h - ih);
+    *out_w = iw;
+    *out_h = ih;
+    *out_x = ox;
+    *out_y = oy;
+    return 1;
 }
 
 const char *bx_display_name(bx_display d) {

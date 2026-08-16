@@ -87,6 +87,12 @@
 #define CSS_MAX_KEYFRAME_DECLS 8
 #define CSS_INLINE_BG_URLS 8u
 
+/* Scratch size for the CSS-wide-keyword probe (wide_claim). Bounds the widest
+ * shorthand expansion in the dispatch: the four-side length shorthands emit a px
+ * and a percentage slot per side (8), grid-template-columns emits one slot per
+ * track plus the count (9), and matrix() emits seven. */
+#define CSS_WIDE_PROBE_DECLS 24
+
 /* Property slots. The enum value IS the css_style slot index used by apply().
  * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
  * left); the four padding slots likewise — expand_box4 relies on that. */
@@ -216,6 +222,13 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
          * P_GRID_AREA_NAME carries the item's area name already HASHED to an int,
          * so an item's placement needs no string channel at all. */
         P_GRID_AREAS, P_GRID_AREA_NAME,
+        /* background-size's explicit <length-percentage>|auto pair (Backgrounds 3
+         * 3.9) and vertical-align's <length-percentage> production (CSS 2.1
+         * 10.8.1). Each is the OTHER half of a property whose keyword production
+         * already had a slot; they are separate slots because a keyword enum
+         * cannot also hold a signed length, and the cascade has to be able to let
+         * a later keyword clear an earlier length. */
+        P_BG_SIZE_W, P_BG_SIZE_H, P_VALIGN_SHIFT,
         P_NSLOTS };
 
 typedef struct css_decl {
@@ -243,7 +256,14 @@ typedef struct css_decl {
      * The point is that the slot is CLAIMED. Dropping the declaration instead --
      * which is what happened before -- handed the slot to a LOWER-specificity
      * rule, so `a{color:#333} a.x{color:inherit}` painted #333 where every other
-     * engine paints the parent's colour. */
+     * engine paints the parent's colour.
+     *
+     * 0 = an ordinary declaration. 1 = claim the slot and leave the field alone
+     * (the generic dispatch tail, which has no way to know the property's unset
+     * default). 2 = claim the slot AND write `ival`, for an emitter that DOES know
+     * that default. The distinction is not cosmetic: winning a slot without
+     * writing it leaves whatever an EARLIER, lower-specificity declaration already
+     * put there, so `.a{width:50%} .a.b{width:auto}` kept the 50%. */
     int wide;
 } css_decl;
 
@@ -1093,23 +1113,59 @@ static int interp_display(const char *v) {
         || csel_ci_eq(v, "table-footer-group")) return CSS_DISP_TABLE_ROW_GROUP;
     if (csel_ci_eq(v, "table-column") || csel_ci_eq(v, "table-column-group"))
         return CSS_DISP_TABLE_COLUMN;
+    /* `flow-root` is a block box that establishes a block formatting context
+     * (CSS Display 3 2.1) -- the modern clearfix. This engine gives every block
+     * box its own formatting context already, so `block` IS its used behaviour
+     * here; the distinction it draws is one this layout cannot currently observe.
+     * The two-keyword `display: <outer> <inner>` forms of Display 3 2 reduce the
+     * same way: the OUTER keyword is what the box model reads. */
+    if (csel_ci_eq(v, "flow-root") || csel_ci_eq(v, "block flow") ||
+        csel_ci_eq(v, "block flow-root")) return CSS_DISP_BLOCK;
+    if (csel_ci_eq(v, "inline flow-root")) return CSS_DISP_INLINE_BLOCK;
+    if (csel_ci_eq(v, "block flex") || csel_ci_eq(v, "inline flex"))
+        return CSS_DISP_FLEX;
+    if (csel_ci_eq(v, "block grid") || csel_ci_eq(v, "inline grid"))
+        return CSS_DISP_GRID;
     /* The vendor spellings of `flex` ARE `flex`: -webkit-flex and -ms-flexbox name
      * the same formatting context with the same box model, so an autoprefixed sheet
-     * that writes both gets one answer either way. `-webkit-box` is deliberately
-     * absent: that is the 2009 draft, a different spec with different item
-     * semantics, and guessing it is `flex` would be inventing a rule. */
+     * that writes both gets one answer either way. */
     if (csel_ci_eq(v, "-webkit-flex") || csel_ci_eq(v, "-moz-flex") ||
         csel_ci_eq(v, "-ms-flexbox") ||
         csel_ci_eq(v, "-webkit-inline-flex") || csel_ci_eq(v, "-moz-inline-flex") ||
         csel_ci_eq(v, "-ms-inline-flexbox")) return CSS_DISP_FLEX;
     if (csel_ci_eq(v, "-ms-grid") || csel_ci_eq(v, "-ms-inline-grid"))
         return CSS_DISP_GRID;
+    /* `-webkit-box` / `-webkit-flexbox` is the 2009 flexbox draft. It is a
+     * DIFFERENT spec, but the difference is in the item properties (box-flex,
+     * box-pack, box-orient), not in the container's box: it is a block-level box
+     * whose children lay out along one axis, which is what CSS_DISP_FLEX models
+     * here. Leaving it unset was not neutral -- it is the container half of the
+     * `-webkit-line-clamp` idiom (Overflow 3 "Legacy"), so dropping it dropped
+     * every clamped card title with it. The single-axis default of the 2009 draft
+     * is horizontal, same as flex-direction's, so the mapping needs no extra rule;
+     * `-webkit-box-orient: vertical` supplies the column case and is handled as an
+     * alias of flex-direction. */
+    if (csel_ci_eq(v, "-webkit-box") || csel_ci_eq(v, "-moz-box") ||
+        csel_ci_eq(v, "-webkit-inline-box") || csel_ci_eq(v, "-moz-inline-box"))
+        return CSS_DISP_FLEX;
+    /* `contents` makes the element generate no box of its own while its children
+     * still generate theirs (Display 3 3). This engine has no box-less pass-through,
+     * and treating it as `none` would DELETE the subtree -- the opposite of what it
+     * means -- so it reduces to the element's normal block box, which keeps every
+     * child rendered. */
+    if (csel_ci_eq(v, "contents")) return CSS_DISP_BLOCK;
+    if (csel_ci_eq(v, "inline-list-item")) return CSS_DISP_LIST_ITEM;
+    /* Ruby has no formatting context here; its boxes are inline (Ruby 1 2). */
+    if (csel_ci_eq(v, "ruby") || csel_ci_eq(v, "ruby-base") ||
+        csel_ci_eq(v, "ruby-text") || csel_ci_eq(v, "ruby-base-container") ||
+        csel_ci_eq(v, "ruby-text-container")) return CSS_DISP_INLINE;
     return -1;  /* unknown display: leave unset */
 }
 
 /* gap / grid-gap / column-gap: leading length as px (a two-value gap keeps the
  * first), "normal" -> 0; clamped to [0, CSS_GAP_MAX]. -1 when not a length. */
 static int interp_len(const char *v, int allow_auto, int *out);
+static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap);
 
 /* One gap length. Reuses interp_len (px / em / rem / bare 0 / calc() / math
  * functions), so a `gap: 1em` is 16px instead of the old misparse-as-1px, and a
@@ -1815,13 +1871,56 @@ static int emit_len(css_decl *dst, int cap, int slot, const char *val,
         dst[0].prop = slot;
         dst[0].ival = CSS_LEN_UNSET;
         dst[0].emil = 0;
-        dst[0].wide = 1;
+        dst[0].wide = 2;
         if (ps < 0) return 1;
         dst[1].prop = P_PCT_FIRST + ps;
         dst[1].ival = 0;
         dst[1].emil = 0;
-        dst[1].wide = 1;
+        dst[1].wide = 2;
         return 2;
+    }
+
+    /* The intrinsic sizing keywords (CSS Sizing 3 section 5.1). They are values of
+     * the <width> type, not lengths, so like `auto` they ride the out-of-band
+     * sentinel channel; the two AUTO_RESET modes are exactly the sizing properties
+     * (width, height, min-width, min-height, max-width, max-height) and so
+     * exactly where the grammar allows them. `stretch` and its prefixed spellings fill the containing block, which
+     * IS a block box's `auto` behaviour, so they claim without a sentinel. */
+    if (allow_auto == AUTO_RESET || allow_auto == AUTO_RESET_NONE) {
+        int kw = 0;
+        if (csel_ci_eq(val, "min-content"))      kw = CSS_LEN_MIN_CONTENT;
+        else if (csel_ci_eq(val, "max-content")) kw = CSS_LEN_MAX_CONTENT;
+        else if (csel_ci_eq(val, "fit-content")) kw = CSS_LEN_FIT_CONTENT;
+        else if (csel_ci_eq(val, "stretch") || csel_ci_eq(val, "available") ||
+                 csel_ci_eq(val, "fill") || csel_ci_eq(val, "fill-available"))
+            kw = CSS_LEN_UNSET;
+        else if (csel_span_eq(val, "fit-content(", 12, 1)) {
+            /* fit-content(L) is min(max-content, max(min-content, L)) (Sizing 3
+             * section 5.1). Its upper bound is L, and a box that cannot measure its
+             * own content uses that bound -- so the length inside is the used value
+             * this engine can honour, and it is read with the same resolver as any
+             * other length rather than a second parser. */
+            size_t vn = strlen(val);
+            if (vn > 13u && val[vn - 1] == ')') {
+                char inner[CSS_TOK_MAX];
+                if (copy_trim(val, 12, vn - 1, inner, sizeof inner) != (size_t)-1 &&
+                    inner[0] != '\0')
+                    return emit_len(dst, cap, slot, inner, AUTO_REJECT, allow_neg);
+            }
+            return 0;
+        }
+        if (kw != 0) {
+            dst[0].prop = slot;
+            dst[0].ival = kw;
+            dst[0].emil = 0;
+            dst[0].wide = 2;
+            if (ps < 0) return 1;
+            dst[1].prop = P_PCT_FIRST + ps;
+            dst[1].ival = 0;
+            dst[1].emil = 0;
+            dst[1].wide = 2;
+            return 2;
+        }
     }
 
     int o, pm;
@@ -2035,8 +2134,35 @@ static int interp_valign(const char *v) {
      * entirely; 17 declarations on one corpus page. */
     if (csel_ci_eq(v, "text-top"))    return CSS_VA_TOP;
     if (csel_ci_eq(v, "text-bottom")) return CSS_VA_BOTTOM;
-    /* <length>/<percentage> offsets: still fail closed (no sub-line placement). */
+    /* The <length-percentage> production is a different KIND of value and gets its
+     * own slot: see expand_valign. */
     return -1;
+}
+
+/* vertical-align (CSS 2.1 section 10.8.1) has two productions: a keyword, and a
+ * <length-percentage> baseline SHIFT (positive raises). They are different kinds of
+ * value, so they take different slots -- a keyword enum cannot also hold a signed
+ * length -- and both are emitted on every declaration so that whichever the author
+ * wrote CLEARS the other. Without that, `vertical-align: middle` under a
+ * lower-specificity `vertical-align: -2px` would apply both.
+ *
+ * The percentage resolves against the element's own line-height, which is the one
+ * basis in CSS Values that is neither a containing block nor the element's border
+ * box, so it has its own pct slot. Measured: jkanime's icon font sets `.255em` on
+ * every glyph, and the whole declaration was dropped. */
+static int expand_valign(const char *val, css_decl *dst, int cap) {
+    if (cap < 3) return 0;
+    int kw = interp_valign(val);
+    int shift = CSS_LEN_UNSET, pm = 0, emil = 0;
+    if (kw < 0) {
+        if (!interp_lp(val, 0, 1, &shift, &pm)) return 0;
+        emil = value_em_milli(val);
+        kw = CSS_VA_UNSET;
+    }
+    dst[0].prop = P_VALIGN;        dst[0].ival = kw;
+    dst[1].prop = P_VALIGN_SHIFT;  dst[1].ival = shift; dst[1].emil = emil;
+    dst[2].prop = P_PCT_FIRST + CSS_PCT_VALIGN; dst[2].ival = pm;
+    return 3;
 }
 
 /* transition-property value encoding: -1 = unset, 0 = none, 1 = all,
@@ -2294,13 +2420,26 @@ static int interp_overflow(const char *v) {
     return -1;
 }
 
-/* `overflow: X` sets both overflow-x and overflow-y to the same value. The two-token
- * per-axis form (`overflow: hidden visible`) is out of scope -- use the longhands. */
+/* `overflow` is a shorthand for overflow-x and overflow-y (CSS Overflow 3 3): one
+ * token sets both, two tokens set x then y. The two-token form is how a page asks
+ * for one scrollable axis (`hidden auto` on wikipedia's wide tables), and rejecting
+ * it lost the clipping on BOTH axes, not just the one it could not express. */
 static int expand_overflow(const char *val, css_decl *dst, int cap) {
-    int o = interp_overflow(val);
-    if (o < 0 || cap < 2) return 0;
-    dst[0].prop = P_OVERFLOW_X; dst[0].ival = o;
-    dst[1].prop = P_OVERFLOW_Y; dst[1].ival = o;
+    if (cap < 2) return 0;
+    const char *p = val;
+    char tx[CSS_TOK_MAX], ty[CSS_TOK_MAX];
+    if (!next_ws_token(&p, tx, sizeof tx)) return 0;
+    int ox = interp_overflow(tx);
+    if (ox < 0) return 0;
+    int oy = ox;
+    if (next_ws_token(&p, ty, sizeof ty)) {
+        oy = interp_overflow(ty);
+        if (oy < 0) return 0;
+        char extra[CSS_TOK_MAX];
+        if (next_ws_token(&p, extra, sizeof extra)) return 0;  /* at most two */
+    }
+    dst[0].prop = P_OVERFLOW_X; dst[0].ival = ox;
+    dst[1].prop = P_OVERFLOW_Y; dst[1].ival = oy;
     return 2;
 }
 
@@ -2427,17 +2566,39 @@ static int interp_caret_color(const char *v) {
     return parse_color(v);
 }
 
-/* appearance: auto/none. -1 unknown. */
+/* appearance (CSS Basic UI 4 section 6.1). Beyond auto/none the property takes the
+ * "compat" keywords (button, textfield, checkbox, ...), every one of which names a
+ * NATIVE control look. This engine draws one chrome per control type from the
+ * element's own tag, so every compat keyword means the same thing it does: keep the
+ * native appearance. They resolve to AUTO rather than being dropped, because the
+ * declaration's real job on a page is to compete for the slot against a `none` that
+ * would strip the chrome. */
 static int interp_appearance(const char *v) {
     if (csel_ci_eq(v, "auto")) return CSS_AP_AUTO;
     if (csel_ci_eq(v, "none")) return CSS_AP_NONE;
+    static const char *const COMPAT[] = {
+        "button", "textfield", "searchfield", "textarea", "checkbox", "radio",
+        "menulist", "menulist-button", "listbox", "meter", "progress-bar",
+        "push-button", "square-button", "slider-horizontal",
+    };
+    for (size_t i = 0; i < sizeof COMPAT / sizeof *COMPAT; ++i)
+        if (csel_ci_eq(v, COMPAT[i])) return CSS_AP_AUTO;
     return -1;
 }
 
-/* pointer-events: auto/none. -1 unknown. */
+/* pointer-events. Beyond auto/none the property takes the SVG hit-testing keywords
+ * (visiblePainted, fill, stroke, all, ...), which differ only in WHICH part of an
+ * SVG shape is a hit target. This engine hit-tests a box, not a shape, so every one
+ * of them means "this element is a target" -- the same answer as `auto`. Only `none`
+ * is a different answer, and it is the one pages actually rely on. */
 static int interp_pointer_events(const char *v) {
-    if (csel_ci_eq(v, "auto")) return CSS_PE_AUTO;
     if (csel_ci_eq(v, "none")) return CSS_PE_NONE;
+    static const char *const TARGET[] = {
+        "auto", "all", "visible", "visiblepainted", "visiblefill", "visiblestroke",
+        "painted", "fill", "stroke", "inherit-hit",
+    };
+    for (size_t i = 0; i < sizeof TARGET / sizeof *TARGET; ++i)
+        if (csel_ci_eq(v, TARGET[i])) return CSS_PE_AUTO;
     return -1;
 }
 
@@ -3133,33 +3294,114 @@ static int expand_backdrop_filter(const char *val, css_decl *dst, int cap) {
 
 /* background-position (R5a): 1 or 2 values. Keywords map to edges/center; px
  * lengths are used directly. % is not supported in v1 (falls to 0). */
+/* background-position (CSS Backgrounds 3 section 3.6).
+ *
+ * The keywords ARE percentages: left/top = 0%, center = 50%, right/bottom = 100%.
+ * And a percentage does not mean "this fraction of the area" -- it aligns that
+ * fraction of the IMAGE with the same fraction of the area, so the used offset is
+ * (area - image) * pct. Writing the keywords as three private sentinels and
+ * rejecting real percentages was two mechanisms for one value type, and it dropped
+ * `background-position: 50% 50%` -- the centring idiom -- entirely.
+ *
+ * Both axes are always emitted, px half and percentage half, like every other
+ * <length-percentage> emitter: a partially written pair lets a lower-specificity
+ * declaration survive underneath the winner on the half it did not write. */
 static int expand_bg_position(const char *val, css_decl *dst, int cap) {
-    if (cap < 2) return 0;
-    int x = CSS_LEN_UNSET, y = CSS_LEN_UNSET;
+    if (cap < 4) return 0;
+    int px[2] = { CSS_LEN_UNSET, CSS_LEN_UNSET };
+    int pm[2] = { 0, 0 };
+    int seen[2] = { 0, 0 };
     const char *p = val;
-    for (int pass = 0; pass < 2; ++pass) {
-        char tok[CSS_TOK_MAX];
-        if (!next_ws_token(&p, tok, sizeof tok)) break;
-        if (csel_ci_eq(tok, "left"))   { x = 0; continue; }
-        if (csel_ci_eq(tok, "right"))  { x = CSS_LEN_END; continue; }
-        if (csel_ci_eq(tok, "center")) { if (x == CSS_LEN_UNSET) x = CSS_LEN_AUTO; else y = CSS_LEN_AUTO; continue; }
-        if (csel_ci_eq(tok, "top"))    { y = 0; continue; }
-        if (csel_ci_eq(tok, "bottom")) { y = CSS_LEN_END; continue; }
-        int px;
-        /* NEGATIVE offsets are the whole point of a sprite sheet: `background-
-         * position: -304px -82px` picks a tile out of a strip, and it is the single
-         * most common shape this property takes on a real page (38 declarations in
-         * one corpus page alone). A position is an OFFSET, not a size, so the
-         * non-negative rule that applies to widths never applied here. */
-        if (interp_len(tok, AUTO_REJECT, &px)) {
-            if (x == CSS_LEN_UNSET) x = px;
-            else if (y == CSS_LEN_UNSET) y = px;
+    char tok[CSS_TOK_MAX];
+    int order = 0;              /* next axis for an axis-agnostic component */
+    int any = 0;
+    while (next_ws_token(&p, tok, sizeof tok)) {
+        int axis = -1, kwpm = -1;
+        if (csel_ci_eq(tok, "left"))        { axis = 0; kwpm = 0; }
+        else if (csel_ci_eq(tok, "right"))  { axis = 0; kwpm = 1000; }
+        else if (csel_ci_eq(tok, "top"))    { axis = 1; kwpm = 0; }
+        else if (csel_ci_eq(tok, "bottom")) { axis = 1; kwpm = 1000; }
+        else if (csel_ci_eq(tok, "center")) { kwpm = 500; }
+        if (kwpm >= 0) {
+            if (axis < 0) { axis = (order < 2) ? order : 1; }
+            if (axis > 1 || seen[axis]) return 0;
+            seen[axis] = 1;
+            pm[axis] = kwpm;
+            px[axis] = CSS_LEN_UNSET;
+            if (axis == order) ++order;
+            any = 1;
+            continue;
         }
+        /* A <length-percentage>. NEGATIVE offsets are the whole point of a sprite
+         * sheet: `background-position: -304px -82px` picks a tile out of a strip
+         * (38 declarations on one corpus page). A position is an OFFSET, not a
+         * size, so the non-negative rule that applies to widths never applied. */
+        int lpx, lpm;
+        if (!interp_lp(tok, AUTO_REJECT, 1, &lpx, &lpm)) return 0;
+        axis = (order < 2) ? order : -1;
+        if (axis < 0 || seen[axis]) return 0;
+        seen[axis] = 1;
+        px[axis] = lpx;
+        pm[axis] = lpm;
+        ++order;
+        any = 1;
     }
-    int n = 0;
-    if (x != CSS_LEN_UNSET) { dst[n].prop = P_BG_POS_X; dst[n].ival = x; ++n; }
-    if (y != CSS_LEN_UNSET) { dst[n].prop = P_BG_POS_Y; dst[n].ival = y; ++n; }
-    return n;
+    if (!any) return 0;
+    /* One component sets the horizontal position; the vertical one is `center`
+     * (Backgrounds 3 section 3.6), not "unset". */
+    if (!seen[1]) pm[1] = 500;
+    dst[0].prop = P_BG_POS_X; dst[0].ival = px[0];
+    dst[1].prop = P_BG_POS_Y; dst[1].ival = px[1];
+    dst[2].prop = P_PCT_FIRST + CSS_PCT_BG_POS_X; dst[2].ival = pm[0];
+    dst[3].prop = P_PCT_FIRST + CSS_PCT_BG_POS_Y; dst[3].ival = pm[1];
+    return 4;
+}
+
+/* background-size (CSS Backgrounds 3 section 3.9): either a keyword
+ * (cover/contain) or one-to-two <length-percentage>|auto components, where one
+ * component means "that width, auto height". The keyword and the explicit pair are
+ * different kinds of value and take different slots; both are emitted on every
+ * declaration so whichever the author wrote CLEARS the other.
+ *
+ * Only the keyword form existed, so `background-size: 44px 12px` (11 declarations
+ * on ddg alone) and every calc() pair were dropped, taking the icon sprites with
+ * them. */
+static int expand_bg_size(const char *val, css_decl *dst, int cap) {
+    if (cap < 5) return 0;
+    int kw = interp_bg_size(val);
+    int w = CSS_LEN_UNSET, h = CSS_LEN_UNSET, wp = 0, hp = 0;
+    if (kw == CSS_BGS_COVER || kw == CSS_BGS_CONTAIN) {
+        /* A keyword sizes both axes; the explicit pair must not survive under it. */
+    } else {
+        const char *p = val;
+        char tok[CSS_TOK_MAX];
+        int n = 0;
+        int comp_px[2] = { CSS_LEN_AUTO, CSS_LEN_AUTO };
+        int comp_pm[2] = { 0, 0 };
+        while (n < 2 && next_ws_token(&p, tok, sizeof tok)) {
+            if (csel_ci_eq(tok, "auto")) { comp_px[n] = CSS_LEN_AUTO; ++n; continue; }
+            int lpx, lpm;
+            if (!interp_lp(tok, AUTO_REJECT, 1, &lpx, &lpm) ||
+                !lp_can_be_nonneg(lpx, lpm))
+                return 0;                       /* a size cannot be negative */
+            comp_px[n] = lpx;
+            comp_pm[n] = lpm;
+            ++n;
+        }
+        if (n == 0) return 0;
+        char extra[CSS_TOK_MAX];
+        if (next_ws_token(&p, extra, sizeof extra)) return 0;   /* at most two */
+        w = comp_px[0]; wp = comp_pm[0];
+        h = (n == 2) ? comp_px[1] : CSS_LEN_AUTO;
+        hp = (n == 2) ? comp_pm[1] : 0;
+        kw = CSS_BGS_UNSET;
+    }
+    dst[0].prop = P_BG_SIZE;   dst[0].ival = kw;
+    dst[1].prop = P_BG_SIZE_W; dst[1].ival = w;
+    dst[2].prop = P_BG_SIZE_H; dst[2].ival = h;
+    dst[3].prop = P_PCT_FIRST + CSS_PCT_BG_SIZE_W; dst[3].ival = wp;
+    dst[4].prop = P_PCT_FIRST + CSS_PCT_BG_SIZE_H; dst[4].ival = hp;
+    return 5;
 }
 
 /* R8: emit a content string into the pool, storing its index in ival (-1 = none). */
@@ -3376,7 +3618,11 @@ static int interp_flex_basis(const char *v, int *out) {
         if (parse_num(p, &num, &end)) {
             while (*end == ' ' || *end == '\t') ++end;
             if (end[0] == '%' && end[1] == '\0') {
-                if (num <= 0.0 || num > 1000.0) return 0;
+                /* 0% is a valid <percentage> and is Bootstrap's basis on every
+                 * column (`flex: 1 1 0%`); rejecting it dropped the whole
+                 * shorthand, so the column lost its grow factor too. Only a
+                 * NEGATIVE basis is invalid (Flexbox 1 section 7.2.3). */
+                if (num < 0.0 || num > 1000.0) return 0;
                 double pm = num * 10.0;
                 if (pm > 10000.0) pm = 10000.0;
                 *out = -(int)(1000000.0 + pm + 0.5);
@@ -4240,6 +4486,11 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
 static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
                            char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
+                           int *known);
+
+static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
+                           char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
+                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
                            int *known) {
     if (known != NULL) *known = 1;
     /*
@@ -4495,7 +4746,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "font-family") == 0)        { prop_id = P_FONTFAMILY;    ival = interp_fontfamily(val); }
     else if (strcmp(prop, "text-transform") == 0)     { prop_id = P_TEXTTRANSFORM; ival = interp_texttransform(val); }
     else if (strcmp(prop, "opacity") == 0)            { prop_id = P_OPACITY;       ival = interp_opacity(val); }
-    else if (strcmp(prop, "vertical-align") == 0)     { prop_id = P_VALIGN;        ival = interp_valign(val); }
+    else if (strcmp(prop, "vertical-align") == 0)     return expand_valign(val, dst, cap);
     else if (strcmp(prop, "white-space") == 0)        { prop_id = P_WHITESPACE;    ival = interp_whitespace(val); }
     else if (strcmp(prop, "tab-size") == 0)            { prop_id = P_TABSIZE;       ival = interp_tabsize(val); }
     else if (strcmp(prop, "direction") == 0)           { prop_id = P_DIRECTION;     ival = interp_direction(val); }
@@ -4571,7 +4822,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "appearance") == 0)            { prop_id = P_APPEARANCE;      ival = interp_appearance(val); }
     else if (strcmp(prop, "pointer-events") == 0)        { prop_id = P_POINTER_EVENTS;  ival = interp_pointer_events(val); }
     else if (strcmp(prop, "background-repeat") == 0)    { prop_id = P_BG_REPEAT;     ival = interp_bg_repeat(val); }
-    else if (strcmp(prop, "background-size") == 0)      { prop_id = P_BG_SIZE;       ival = interp_bg_size(val); }
+    else if (strcmp(prop, "background-size") == 0)      return expand_bg_size(val, dst, cap);
     else if (strcmp(prop, "background-clip") == 0 ||
              strcmp(prop, "-webkit-background-clip") == 0)
                                                         { prop_id = P_BG_CLIP;       ival = interp_bg_clip(val); }
@@ -4731,6 +4982,119 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     dst[0].prop = prop_id;
     dst[0].ival = ival;
     return 1;
+}
+
+/* True when `v` is a single identifier carrying a vendor prefix, and writes the
+ * unprefixed spelling to `out`. A vendor prefix on a VALUE is the same aliasing
+ * rule as one on a property name (`position: -webkit-sticky` IS `position: sticky`,
+ * `user-select: -moz-none` IS `user-select: none`), so it is applied at the same
+ * one place and with the same "strip once, ask again" bound. Multi-token values are
+ * excluded on purpose: a prefixed token inside a shorthand names something the
+ * standard grammar may not have (`-webkit-focus-ring-color` is not a colour), and
+ * rewriting one token of several would be guessing. */
+static int devendor_value(const char *v, char *out, size_t outcap) {
+    if (v[0] != '-' || v[1] == '\0' || v[1] == '-') return 0;
+    for (const char *q = v; *q != '\0'; ++q)
+        if (*q == ' ' || *q == '\t' || *q == ',' || *q == '(') return 0;
+    static const char *const VENDOR[] = { "-webkit-", "-moz-", "-ms-", "-o-" };
+    for (size_t i = 0; i < sizeof VENDOR / sizeof *VENDOR; ++i) {
+        size_t plen = strlen(VENDOR[i]);
+        if (strncmp(v, VENDOR[i], plen) != 0) continue;
+        const char *bare = v + plen;
+        if (bare[0] == '\0' || bare[0] == '-') return 0;
+        size_t n = strlen(bare);
+        if (n + 1 > outcap) return 0;
+        memcpy(out, bare, n + 1);
+        return 1;
+    }
+    return 0;
+}
+
+/* The generic values a shorthand's grammar is most likely to accept. Used only to
+ * DISCOVER which longhand slots a shorthand writes -- see wide_claim below. They are
+ * ordinary CSS values, not sentinels: whichever one parses, parses through the same
+ * dispatch that will parse the page's real declarations. */
+static const char *const WIDE_PROBES[] = {
+    "0", "none", "auto", "normal", "0 0", "medium serif", "1 1 auto",
+    "medium none currentcolor", "0 0 0 0",
+};
+
+/* CSS Cascade 5 section 7.3: a CSS-wide keyword is valid on EVERY property, and on a
+ * SHORTHAND it applies to every longhand the shorthand expands to. So honouring one
+ * needs the longhand SLOT SET, not the property name -- and the set is already
+ * encoded, exactly once, in the shorthand's own expander.
+ *
+ * Rather than keep a second shorthand->longhands table that would go stale on the
+ * next shorthand added, the set is read back OUT of the dispatch: a shorthand writes
+ * its slots for any value its grammar accepts, so parsing a generic probe value
+ * yields the slots, and those slots are then claimed with no value written. A
+ * property that accepts no probe (it has no shorthand grammar) falls through to the
+ * single-slot claim the generic tail already did.
+ *
+ * Claiming matters because a dropped declaration hands its slot to a LOWER
+ * specificity rule: `p{padding:8px} p.bare{padding:inherit}` painted 8px where every
+ * other engine paints the parent's padding. */
+static int wide_claim(const char *prop, css_decl *dst, int cap,
+                      char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
+                      char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
+    (void)urltab; (void)nurl; (void)urlcap;
+    (void)contenttab; (void)ncontent; (void)contentcap;
+    /* Scratch pools: a probe must never consume an entry of the real url/content
+     * pools, which belong to the declarations the page actually wrote. */
+    char probe_urls[2][CSS_URL_MAX];
+    char probe_content[2][CSS_URL_MAX];
+    size_t nprobe_url = 0, nprobe_content = 0;
+    for (size_t i = 0; i < sizeof WIDE_PROBES / sizeof *WIDE_PROBES; ++i) {
+        /* Wide enough for the widest shorthand in the dispatch (the four-side
+         * length shorthands emit a px and a percentage slot per side, and
+         * grid-template-columns emits one slot per track). V-002: zero every
+         * field, so a field added to css_decl cannot leak through the probe. */
+        css_decl tmp[CSS_WIDE_PROBE_DECLS];
+        memset(tmp, 0, sizeof tmp);
+        int inner_known = 1;
+        int n = interpret_prop_dispatch(prop, WIDE_PROBES[i], tmp,
+                                        (int)(sizeof tmp / sizeof *tmp),
+                                        probe_urls, &nprobe_url, 2,
+                                        probe_content, &nprobe_content, 2,
+                                        &inner_known);
+        if (n <= 0) continue;
+        if (n > cap) n = cap;
+        for (int k = 0; k < n; ++k) {
+            dst[k].prop = tmp[k].prop;
+            dst[k].ival = 0;
+            dst[k].emil = 0;
+            dst[k].wide = 1;
+        }
+        return n;
+    }
+    return 0;
+}
+
+/* The two value-level rules that hold for EVERY property, applied once around the
+ * dispatch so no per-property branch has to remember them. Order matters: the
+ * dispatch runs first, so a property whose own grammar happens to define one of
+ * these spellings keeps its meaning. */
+static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+                           char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
+                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
+                           int *known) {
+    int nw = interpret_prop_dispatch(prop, val, dst, cap, urltab, nurl, urlcap,
+                                     contenttab, ncontent, contentcap, known);
+    if (nw > 0) return nw;
+    /* An unknown property NAME has no grammar to retry against. */
+    if (known != NULL && *known == 0) return 0;
+
+    char bare[CSS_TOK_MAX];
+    if (devendor_value(val, bare, sizeof bare)) {
+        int inner_known = 1;
+        nw = interpret_prop_dispatch(prop, bare, dst, cap, urltab, nurl, urlcap,
+                                     contenttab, ncontent, contentcap, &inner_known);
+        if (nw > 0) return nw;
+    }
+    if (css_wide_keyword(val))
+        return wide_claim(prop, dst, cap, urltab, nurl, urlcap,
+                          contenttab, ncontent, contentcap);
+    return 0;
 }
 
 /* Copies hostile CSS text into a fixed report buffer: bounded, NUL-terminated,
@@ -5532,6 +5896,21 @@ static double sheet_root_font_px(const css_sheet *sh) {
  * becomes one space). Caller frees. */
 static char *strip_comments(const char *text, size_t len, size_t *outlen) {
     if (len == (size_t)-1) return NULL;
+    /* CSS Syntax 3 section 3.2 "Decode bytes": a stylesheet that begins with a
+     * U+FEFF BYTE ORDER MARK has it REMOVED before tokenizing. Everywhere else
+     * U+FEFF is ZERO WIDTH NO-BREAK SPACE, an ordinary identifier-invalid
+     * character, so only the leading one is stripped.
+     *
+     * Measured on ddg-results, whose <style> opens with a BOM: the first rule's
+     * selector parsed as "<BOM>:root", which is not a selector this engine can
+     * recognise as root-scoped, so the entire custom-property palette was never
+     * collected and forty var() declarations -- font sizes, widths, radii, the
+     * whole theme -- died as invalid values further down. One byte. */
+    if (len >= 3 && (unsigned char)text[0] == 0xEF &&
+        (unsigned char)text[1] == 0xBB && (unsigned char)text[2] == 0xBF) {
+        text += 3;
+        len  -= 3;
+    }
     char *buf = (char *)malloc(len + 1);
     if (buf == NULL) return NULL;
     size_t o = 0, i = 0;
@@ -5692,7 +6071,12 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
         if (d->wide) {
             if (wem != NULL) wem[slot] = 0;
             if (wv  != NULL) wv[slot]  = CSS_LEN_UNSET;
-            return;
+            /* wide == 1 cannot write: the generic tail claims slots for properties
+             * whose unset default it does not know. wide == 2 comes from an emitter
+             * that does know it and carries it in ival, so it falls through to the
+             * switch and actually clears the field -- without that, the claim wins
+             * the slot but leaves an earlier lower-specificity value in place. */
+            if (d->wide == 1) return;
         }
         /* Remember the winner's font-relative coefficient so the fold below can
          * find it without a second slot->field mapping. wem may be NULL for
@@ -5962,6 +6346,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_COLRULE_W:    o->column_rule_width = d->ival; break;
             case P_COLRULE_S:    o->column_rule_style = d->ival; break;
             case P_COLRULE_C:    o->column_rule_color = d->ival; break;
+            case P_BG_SIZE_W:    o->bg_size_w = d->ival; break;
+            case P_BG_SIZE_H:    o->bg_size_h = d->ival; break;
+            case P_VALIGN_SHIFT: o->valign_shift = d->ival; break;
             default:
                 /* The percentage half of every <length-percentage> property:
                  * one contiguous slot block mirroring css_pct_slot, so a new
@@ -6064,7 +6451,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .font_family = CSS_FF_UNSET, .text_transform = CSS_TT_UNSET,
         .letter_spacing = CSS_LEN_UNSET, .word_spacing = CSS_LEN_UNSET,
         .shadow_dx = 0, .shadow_dy = 0, .shadow_color = -1,
-        .opacity = -1, .valign = CSS_VA_UNSET,
+        .opacity = -1, .valign = CSS_VA_UNSET, .valign_shift = CSS_LEN_UNSET,
         .text_indent = CSS_LEN_UNSET, .white_space = CSS_WS_UNSET,
         .tab_size = 0,
         .list_style = CSS_LS_UNSET,
@@ -6105,6 +6492,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         .caret_color = -1,
         .appearance = CSS_AP_UNSET, .pointer_events = CSS_PE_UNSET,
         .bg_repeat = CSS_BGR_UNSET, .bg_size = CSS_BGS_UNSET,
+        .bg_size_w = CSS_LEN_UNSET, .bg_size_h = CSS_LEN_UNSET,
         .bg_clip = CSS_BGC_UNSET, .bg_origin = CSS_BGO_UNSET,
         .bg_attachment = CSS_BGA_UNSET,
         .isolation = CSS_ISO_UNSET, .contain = 0,

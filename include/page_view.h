@@ -567,6 +567,20 @@ typedef struct pv_box_def {
     /* background-position (R5a): px offsets, PV_LEN_UNSET = unset. */
     int bg_pos_x;
     int bg_pos_y;
+    /* background-position's percentage halves, per-mille (Backgrounds 3 3.6). A
+     * percentage here does NOT mean "this fraction of the area": it aligns the
+     * same fraction of the IMAGE with that fraction of the area, so the used
+     * offset is (area - image) * pct. That rule is also what the left/center/right
+     * keywords mean (0% / 50% / 100%), so the keyword and percentage forms are one
+     * channel and not two. */
+    int bg_pos_x_pct;
+    int bg_pos_y_pct;
+    /* background-size's explicit component pair (Backgrounds 3 3.9): px, or
+     * CSS_LEN_AUTO for an `auto` component, or PV_LEN_UNSET when the value was a
+     * keyword (cover/contain, in bg_size). Percentage halves resolve against the
+     * background positioning area. */
+    int bg_size_w, bg_size_h;
+    int bg_size_w_pct, bg_size_h_pct;
     /* R8: ::before/::after generated content text. Empty string = none. */
     char content_str[PV_BG_URL_MAX];
     char content_before_str[PV_BG_URL_MAX];

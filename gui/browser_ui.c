@@ -2939,6 +2939,10 @@ typedef struct rc_box {
     /* background-position (R5a): px offset, PV_LEN_UNSET/AUTO → compute from
      * keyword (center = (box_w - img_w)/2). */
     int    bg_pos_x, bg_pos_y;
+    /* background-position's percentage halves and background-size's explicit
+     * component pair; resolved against the box by bx_background_layer. */
+    int    bg_pos_x_pct, bg_pos_y_pct;
+    int    bg_size_w, bg_size_h, bg_size_w_pct, bg_size_h_pct;
     char   bg_url2[PV_BG_URL_MAX];  /* R5b: second bg layer */
     char   content_str[64];         /* R8: ::before/::after generated content */
 } rc_box;
@@ -4364,6 +4368,9 @@ static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def) {
     bx->grad_radial = def->bg_grad_radial;
     bx->bg_size = def->bg_size; bx->bg_repeat = def->bg_repeat;
     bx->bg_pos_x = def->bg_pos_x; bx->bg_pos_y = def->bg_pos_y;
+    bx->bg_pos_x_pct = def->bg_pos_x_pct; bx->bg_pos_y_pct = def->bg_pos_y_pct;
+    bx->bg_size_w = def->bg_size_w; bx->bg_size_h = def->bg_size_h;
+    bx->bg_size_w_pct = def->bg_size_w_pct; bx->bg_size_h_pct = def->bg_size_h_pct;
     memcpy(bx->bg_url2, def->bg_image_url2, sizeof bx->bg_url2);
     bx->bg_url2[sizeof bx->bg_url2 - 1] = '\0';
     memcpy(bx->content_str, def->content_str, sizeof bx->content_str);
@@ -8089,6 +8096,55 @@ static void bui_paint_conic(cairo_t *cr, double x, double y, double w, double h,
     cairo_restore(cr);
 }
 
+/* Paints one background-image layer into the box rect (x,y,w,h) with `radius_c`
+ * corners. The geometry -- used image size and offset, from background-size and
+ * background-position -- is bx_background_layer, so this function only clips,
+ * translates and tiles. Both layers go through it: they differ in nothing but the
+ * surface, and the two hand-written copies had already drifted apart. */
+static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
+                           double x, double y, double w, double h,
+                           const double radius_c[4]) {
+    if (img == NULL || img->surface == NULL || img->nat_w <= 0 || img->nat_h <= 0)
+        return;
+    if (!(w > 0.0) || !(h > 0.0)) return;
+
+    bx_bg_layer L = {
+        .nat_w = (double)img->nat_w, .nat_h = (double)img->nat_h,
+        .area_w = w, .area_h = h,
+        .size_kw = bx->bg_size,
+        .size_w = bx->bg_size_w, .size_h = bx->bg_size_h,
+        .size_w_pct = bx->bg_size_w_pct, .size_h_pct = bx->bg_size_h_pct,
+        .pos_x = bx->bg_pos_x, .pos_y = bx->bg_pos_y,
+        .pos_x_pct = bx->bg_pos_x_pct, .pos_y_pct = bx->bg_pos_y_pct,
+    };
+    double iw = 0.0, ih = 0.0, ox = 0.0, oy = 0.0;
+    if (!bx_background_layer(&L, &iw, &ih, &ox, &oy)) return;
+
+    cairo_save(cr);
+    box_path4(cr, x, y, w, h, radius_c);
+    cairo_clip(cr);
+    /* Cairo's EXTEND_REPEAT tiles BOTH axes, so repeat-x/repeat-y are expressed by
+     * clipping to a one-tile-tall/-wide strip. space/round fall back to plain
+     * repeat (their tile-count math is a separate refinement, see spec/css.md). */
+    if (bx->bg_repeat == CSS_BGR_REPEAT_X) {
+        cairo_rectangle(cr, x, y + oy, w, ih);
+        cairo_clip(cr);
+    } else if (bx->bg_repeat == CSS_BGR_REPEAT_Y) {
+        cairo_rectangle(cr, x + ox, y, iw, h);
+        cairo_clip(cr);
+    }
+    cairo_translate(cr, x + ox, y + oy);
+    cairo_scale(cr, iw / (double)img->nat_w, ih / (double)img->nat_h);
+    cairo_pattern_t *ipat = cairo_pattern_create_for_surface(img->surface);
+    cairo_pattern_set_extend(ipat, bx->bg_repeat == CSS_BGR_NO_REPEAT
+                                   ? CAIRO_EXTEND_NONE : CAIRO_EXTEND_REPEAT);
+    cairo_pattern_set_filter(ipat, CAIRO_FILTER_GOOD);
+    cairo_set_source(cr, ipat);
+    cairo_paint(cr);
+    cairo_pattern_destroy(ipat);
+    cairo_restore(cr);
+}
+
 static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
                                  const ui_bg_image *bgimg, const ui_bg_image *bgimg2,
                                  const ui_theme *th) {
@@ -8209,47 +8265,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * and OVER bg_rgb/gradient, UNDER the border. Same sizing/repeat/position
      * as the first layer, using the SAME rc_box fields (bg_size, bg_repeat,
      * and bg_pos are shared across layers in v1 -- see spec/css.md). */
-    if (bgimg2 != NULL && bgimg2->surface != NULL && bgimg2->nat_w > 0 && bgimg2->nat_h > 0
-        && w > 0.0 && h > 0.0) {
-        double sx = 1.0, sy = 1.0;
-        if (bx->bg_size == CSS_BGS_COVER) {
-            double s = (w / (double)bgimg2->nat_w > h / (double)bgimg2->nat_h)
-                     ? w / (double)bgimg2->nat_w : h / (double)bgimg2->nat_h;
-            sx = sy = s;
-        } else if (bx->bg_size == CSS_BGS_CONTAIN) {
-            double s = (w / (double)bgimg2->nat_w < h / (double)bgimg2->nat_h)
-                     ? w / (double)bgimg2->nat_w : h / (double)bgimg2->nat_h;
-            sx = sy = s;
-        }
-        double iw = (double)bgimg2->nat_w * sx, ih = (double)bgimg2->nat_h * sy;
-        cairo_save(cr);
-        box_path4(cr, x, y, w, h, radius_c);
-        cairo_clip(cr);
-        if (bx->bg_repeat == CSS_BGR_REPEAT_X && ih > 0.0) {
-            cairo_rectangle(cr, x, y, w, ih);
-            cairo_clip(cr);
-        } else if (bx->bg_repeat == CSS_BGR_REPEAT_Y && iw > 0.0) {
-            cairo_rectangle(cr, x, y, iw, h);
-            cairo_clip(cr);
-        }
-        double pox = 0.0, poy = 0.0;
-        if (bx->bg_pos_x == CSS_LEN_AUTO && iw > 0.0) pox = (w - iw) / 2.0;
-        else if (bx->bg_pos_x == CSS_LEN_END  && iw > 0.0) pox = w - iw;
-        else if (bx->bg_pos_x != PV_LEN_UNSET) pox = (double)bx->bg_pos_x;
-        if (bx->bg_pos_y == CSS_LEN_AUTO && ih > 0.0) poy = (h - ih) / 2.0;
-        else if (bx->bg_pos_y == CSS_LEN_END  && ih > 0.0) poy = h - ih;
-        else if (bx->bg_pos_y != PV_LEN_UNSET) poy = (double)bx->bg_pos_y;
-        cairo_translate(cr, x + pox, y + poy);
-        cairo_scale(cr, sx, sy);
-        cairo_pattern_t *ipat = cairo_pattern_create_for_surface(bgimg2->surface);
-        cairo_pattern_set_extend(ipat, bx->bg_repeat == CSS_BGR_NO_REPEAT
-                                       ? CAIRO_EXTEND_NONE : CAIRO_EXTEND_REPEAT);
-        cairo_pattern_set_filter(ipat, CAIRO_FILTER_GOOD);
-        cairo_set_source(cr, ipat);
-        cairo_paint(cr);
-        cairo_pattern_destroy(ipat);
-        cairo_restore(cr);
-    }
+    paint_bg_layer(cr, bx, bgimg2, x, y, w, h, radius_c);
 
     /* CSS background-image (first layer): paints OVER bg_rgb/gradient (and over the
      * second layer, if any), UNDER the border (CSS background layering: color, then
@@ -8264,50 +8280,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
      * (which tiles both axes) only shows through on the axis that should repeat;
      * space/round fall back to plain repeat (their exact tile-count/spacing math is a
      * v2 refinement, see spec/css.md). */
-    if (bgimg != NULL && bgimg->surface != NULL && bgimg->nat_w > 0 && bgimg->nat_h > 0
-        && w > 0.0 && h > 0.0) {
-        double sx = 1.0, sy = 1.0;
-        if (bx->bg_size == CSS_BGS_COVER) {
-            double s = (w / (double)bgimg->nat_w > h / (double)bgimg->nat_h)
-                     ? w / (double)bgimg->nat_w : h / (double)bgimg->nat_h;
-            sx = sy = s;
-        } else if (bx->bg_size == CSS_BGS_CONTAIN) {
-            double s = (w / (double)bgimg->nat_w < h / (double)bgimg->nat_h)
-                     ? w / (double)bgimg->nat_w : h / (double)bgimg->nat_h;
-            sx = sy = s;
-        }
-        double iw = (double)bgimg->nat_w * sx, ih = (double)bgimg->nat_h * sy;
-        cairo_save(cr);
-        box_path4(cr, x, y, w, h, radius_c);
-        cairo_clip(cr);
-        if (bx->bg_repeat == CSS_BGR_REPEAT_X && ih > 0.0) {
-            cairo_rectangle(cr, x, y, w, ih);
-            cairo_clip(cr);
-        } else if (bx->bg_repeat == CSS_BGR_REPEAT_Y && iw > 0.0) {
-            cairo_rectangle(cr, x, y, iw, h);
-            cairo_clip(cr);
-        }
-        /* R5a: background-position offset. AUTO = center ((box-img)/2),
-         * END = right/bottom edge (box - img), UNSET = 0 (top-left). */
-        double pox = 0.0, poy = 0.0;
-        if (bx->bg_pos_x == CSS_LEN_AUTO && iw > 0.0) pox = (w - iw) / 2.0;
-        else if (bx->bg_pos_x == CSS_LEN_END  && iw > 0.0) pox = w - iw;
-        else if (bx->bg_pos_x != PV_LEN_UNSET) pox = (double)bx->bg_pos_x;
-        if (bx->bg_pos_y == CSS_LEN_AUTO && ih > 0.0) poy = (h - ih) / 2.0;
-        else if (bx->bg_pos_y == CSS_LEN_END  && ih > 0.0) poy = h - ih;
-        else if (bx->bg_pos_y != PV_LEN_UNSET) poy = (double)bx->bg_pos_y;
-
-        cairo_translate(cr, x + pox, y + poy);
-        cairo_scale(cr, sx, sy);
-        cairo_pattern_t *ipat = cairo_pattern_create_for_surface(bgimg->surface);
-        cairo_pattern_set_extend(ipat, bx->bg_repeat == CSS_BGR_NO_REPEAT
-                                       ? CAIRO_EXTEND_NONE : CAIRO_EXTEND_REPEAT);
-        cairo_pattern_set_filter(ipat, CAIRO_FILTER_GOOD);
-        cairo_set_source(cr, ipat);
-        cairo_paint(cr);
-        cairo_pattern_destroy(ipat);
-        cairo_restore(cr);
-    }
+    paint_bg_layer(cr, bx, bgimg, x, y, w, h, radius_c);
 
     /* The four borders. With a radius and UNIFORM sides (same width, colour and a
      * visible style on all four) the ring is one rounded stroke centred on the
@@ -9786,6 +9759,9 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
         .grad_radial = def->bg_grad_radial,
         .bg_size = def->bg_size, .bg_repeat = def->bg_repeat,
         .bg_pos_x = def->bg_pos_x, .bg_pos_y = def->bg_pos_y,
+        .bg_pos_x_pct = def->bg_pos_x_pct, .bg_pos_y_pct = def->bg_pos_y_pct,
+        .bg_size_w = def->bg_size_w, .bg_size_h = def->bg_size_h,
+        .bg_size_w_pct = def->bg_size_w_pct, .bg_size_h_pct = def->bg_size_h_pct,
     };
     const ui_bg_image *bgimg = find_bg_image(w, def->bg_image_url);
     const ui_bg_image *bgimg2 = find_bg_image(w, def->bg_image_url2);

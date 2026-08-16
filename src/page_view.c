@@ -1250,10 +1250,18 @@ static void css_hbox_resolve(const css_style *cs, pv_box_info *out) {
     int pr = (cs->pad_right != CSS_LEN_UNSET) ? cs->pad_right : 0;
     int l = pl + ((ml != CSS_LEN_UNSET && ml != CSS_LEN_AUTO) ? ml : 0);
     int r = pr + ((mr != CSS_LEN_UNSET && mr != CSS_LEN_AUTO) ? mr : 0);
+    /* An intrinsic sizing keyword is not a px cap: it names a measurement, and the
+     * measurement this engine takes for an undeclared dimension IS content sizing
+     * (CSS Sizing 3 section 5.1). Feeding the sentinel forward as a length would
+     * hand layout a large negative width, so it reads as "no cap" here -- the same
+     * answer `auto` gets -- and the keyword survives in cs->width for the
+     * shrink-to-fit path that can act on it. */
+    int cw = CSS_LEN_IS_INTRINSIC(cs->width) ? CSS_LEN_UNSET : cs->width;
+    int cmw = CSS_LEN_IS_INTRINSIC(cs->max_width) ? CSS_LEN_UNSET : cs->max_width;
     int w = CSS_LEN_UNSET;
-    if (cs->width != CSS_LEN_UNSET) w = cs->width;
-    if (cs->max_width != CSS_LEN_UNSET && (w == CSS_LEN_UNSET || cs->max_width < w))
-        w = cs->max_width;
+    if (cw != CSS_LEN_UNSET) w = cw;
+    if (cmw != CSS_LEN_UNSET && (w == CSS_LEN_UNSET || cmw < w))
+        w = cmw;
     /* Percentage caps stay symbolic (per-mille, both against the same containing
      * width, so the tighter per-mille IS the tighter cap); the painter resolves
      * px-vs-pct with bx_lp_px at layout time. */
@@ -1661,6 +1669,12 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->filter_drop_color = cs->filter_drop_color;
     d->backdrop_blur = cs->backdrop_blur;
     d->bg_pos_x = cs->bg_pos_x;
+    d->bg_pos_x_pct = cs->pct[CSS_PCT_BG_POS_X];
+    d->bg_pos_y_pct = cs->pct[CSS_PCT_BG_POS_Y];
+    d->bg_size_w = cs->bg_size_w;
+    d->bg_size_h = cs->bg_size_h;
+    d->bg_size_w_pct = cs->pct[CSS_PCT_BG_SIZE_W];
+    d->bg_size_h_pct = cs->pct[CSS_PCT_BG_SIZE_H];
     d->clip_top = cs->clip_top;
     d->clip_right = cs->clip_right;
     d->clip_bottom = cs->clip_bottom;

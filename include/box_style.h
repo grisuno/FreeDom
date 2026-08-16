@@ -231,4 +231,37 @@ double bx_lp_px(int px_val, int pct_pm, double basis);
 double bx_content_cap(double width_cap, int border_box,
                       double pad_l, double pad_r, double bord_l, double bord_r);
 
+/* One background-image layer's geometry (CSS Backgrounds 3 sections 3.6 + 3.9),
+ * as a pure function of the layer's declared values and the two sizes involved.
+ * The painter does the drawing; deciding WHERE and HOW BIG is arithmetic and
+ * belongs where it can be tested.
+ *
+ * Sizing (3.9). `size_kw` is CSS_BGS_COVER / CSS_BGS_CONTAIN / anything else. For
+ * the explicit form, each component is a px value (CSS_LEN_AUTO = auto,
+ * CSS_LEN_UNSET = not declared, which is auto) plus a per-mille percentage of the
+ * positioning area. Both auto is the natural size; ONE auto preserves the
+ * intrinsic ratio, which is what makes `background-size: 44px` a scaled icon
+ * rather than a squashed one.
+ *
+ * Positioning (3.6). A percentage aligns that fraction of the IMAGE with the same
+ * fraction of the AREA, so the offset is (area - image) * pct + px. That single
+ * rule also expresses left/center/right, which the caller passes as 0/500/1000.
+ *
+ * Writes the used image size to out_w and out_h, and its offset from the area's
+ * top-left corner to out_x and out_y. Returns 0 (writing nothing) when a size is not
+ * usable -- a zero or negative natural size, area, or computed size -- so the
+ * caller skips the layer instead of dividing by it. Pure. */
+typedef struct bx_bg_layer {
+    double nat_w, nat_h;      /* the image's intrinsic size, px */
+    double area_w, area_h;    /* the background positioning area, px */
+    int    size_kw;           /* css_bg_size */
+    int    size_w, size_h;    /* px / CSS_LEN_AUTO / CSS_LEN_UNSET */
+    int    size_w_pct, size_h_pct;   /* per-mille of the area */
+    int    pos_x, pos_y;      /* px / CSS_LEN_UNSET */
+    int    pos_x_pct, pos_y_pct;     /* per-mille (0 = left/top, 1000 = right/bottom) */
+} bx_bg_layer;
+
+int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,
+                        double *out_x, double *out_y);
+
 #endif /* FREEDOM_BOX_STYLE_H */

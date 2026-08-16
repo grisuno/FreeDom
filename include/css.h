@@ -437,6 +437,20 @@ typedef enum css_backface {
 #define CSS_LEN_AUTO      (-2147483647)     /* INT_MIN+1: the 'auto' keyword */
 #define CSS_LEN_END       (-2147483646)     /* INT_MIN+2: 100% offset (right/bottom edge) */
 
+/* Intrinsic sizing keywords (CSS Sizing 3 5.1). Like `auto` these are not lengths
+ * -- they name a measurement only layout can take -- so they ride the same
+ * out-of-band sentinel channel rather than a parallel per-property flag. A
+ * consumer that does not know them must treat them as `auto`, which is what the
+ * spec's fallback behaviour already is for a box that cannot measure itself. */
+#define CSS_LEN_MIN_CONTENT (-2147483645)   /* INT_MIN+3 */
+#define CSS_LEN_MAX_CONTENT (-2147483644)   /* INT_MIN+4 */
+#define CSS_LEN_FIT_CONTENT (-2147483643)   /* INT_MIN+5 */
+
+/* True when `v` is one of the intrinsic keywords above. */
+#define CSS_LEN_IS_INTRINSIC(v) \
+    ((v) == CSS_LEN_MIN_CONTENT || (v) == CSS_LEN_MAX_CONTENT || \
+     (v) == CSS_LEN_FIT_CONTENT)
+
 /* --- <length-percentage>: the percentage channel (spec/css_length.md 7) -----
  *
  * A percentage cannot be resolved by the parser: it needs the containing block,
@@ -502,6 +516,17 @@ typedef enum css_pct_slot {
      * makes `left:50%; top:50%; transform:translate(-50%,-50%)` centre a box --
      * the universal centring idiom, and dead without both halves. */
     CSS_PCT_TRANSLATE_X, CSS_PCT_TRANSLATE_Y,
+    /* background-size components, against the background POSITIONING AREA
+     * (Backgrounds 3 3.9), and the vertical-align baseline shift, against the
+     * element's own line-height (CSS 2.1 10.8.1). Both are the element's own box
+     * rather than a containing block, like the translate() pair above. */
+    CSS_PCT_BG_SIZE_W, CSS_PCT_BG_SIZE_H,
+    /* background-position. Not a fraction of the area: a percentage aligns that
+     * fraction of the IMAGE with the same fraction of the area (Backgrounds 3
+     * 3.6), so the used offset is (area - image) * pct -- which is also exactly
+     * what left/center/right mean, making keyword and percentage one channel. */
+    CSS_PCT_BG_POS_X, CSS_PCT_BG_POS_Y,
+    CSS_PCT_VALIGN,
     CSS_PCT_N
 } css_pct_slot;
 
@@ -620,6 +645,14 @@ typedef struct css_style {
     int         shadow_color;    /* text-shadow color 0xRRGGBB, or -1 (none/unset) */
     int         opacity;         /* percent 0..100, or -1 (unset) */
     int         valign;          /* css_valign, 0 (unset) */
+    /* vertical-align's OTHER production: a <length-percentage> baseline shift
+     * (CSS 2.1 10.8.1), positive = raise. Signed px, CSS_LEN_UNSET when the value
+     * was a keyword or absent. The two are exclusive by grammar, but they are
+     * separate slots because they answer different questions and a single field
+     * would have to overload the keyword enum with a signed length. The
+     * percentage production resolves against the element's own line-height and
+     * therefore rides the shared pct[] channel, at CSS_PCT_VALIGN. */
+    int         valign_shift;
     int         text_indent;     /* px (signed), CSS_LEN_UNSET (unset) */
     int         white_space;     /* css_white_space, 0 (unset) */
     int         tab_size;        /* number of spaces for tab, 0 (unset) */
@@ -705,6 +738,13 @@ typedef struct css_style {
     int         pointer_events;   /* css_pointer_events, 0 (unset) */
     int         bg_repeat;        /* css_bg_repeat, 0 (unset) */
     int         bg_size;          /* css_bg_size, 0 (unset) */
+    /* background-size's explicit production: one or two <length-percentage>|auto
+     * components (Backgrounds 3 3.9). px, CSS_LEN_AUTO for the `auto` component,
+     * CSS_LEN_UNSET when the value was a keyword (cover/contain, in bg_size) or
+     * absent. The percentage halves resolve against the background POSITIONING
+     * AREA, which only the painter knows, so they travel per-mille like every
+     * other <length-percentage>. */
+    int         bg_size_w, bg_size_h;
     /* background-image: url(...) (2026-07-16). The RAW, UNRESOLVED url() text
      * (possibly relative, e.g. "hero.jpg") -- css.c never fetches or resolves it,
      * same doctrine as bg_grad_*; resolving against the page origin and deciding
