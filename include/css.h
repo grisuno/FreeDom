@@ -916,6 +916,50 @@ css_status css_parse_media(const char *text, size_t len, const css_media *media,
 css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                             const char *root_scope, css_sheet **out);
 
+/* Why a declaration was discarded. The distinction is the point of the log: the two
+ * causes need different fixes, and BAD_VALUE is the dangerous one because the
+ * property IS implemented -- it shows up in every name-based inventory while the
+ * declaration is lost anyway (a leading-dot number, a percentage inside a shorthand,
+ * a `pt` length have each cost a whole parity batch). See spec/css_drops.md. */
+typedef enum css_drop_cause {
+    CSS_DROP_UNKNOWN_PROP = 0,  /* the name is not in interpret_prop's dispatch */
+    CSS_DROP_BAD_VALUE    = 1   /* the name is known; the value grammar rejected it */
+} css_drop_cause;
+
+#define CSS_DROP_PROP_MAX 64
+#define CSS_DROP_VAL_MAX  96
+
+/* One coalesced drop: every occurrence of the same (property, cause) pair folds into
+ * a single entry, because a real sheet repeats one unsupported property hundreds of
+ * times and an un-grouped listing is unreadable. `val` samples the FIRST occurrence,
+ * bounded and sanitised (control bytes -> '.'), because it is hostile remote text
+ * headed for a terminal. */
+typedef struct css_drop {
+    char prop[CSS_DROP_PROP_MAX];
+    char val[CSS_DROP_VAL_MAX];
+    int  cause;   /* css_drop_cause */
+    int  count;   /* occurrences folded into this entry */
+} css_drop;
+
+/* Optional write-only sink the parser fills while parsing. `items` is CALLER-OWNED
+ * (the parser allocates nothing, so the log adds no OOM path); items == NULL or
+ * cap == 0 disables the listing but NOT the counting, so a report can always state
+ * the true magnitude ("N dropped, first M listed") instead of silently understating
+ * it. Nothing recorded here feeds back into the cascade. */
+typedef struct css_drop_log {
+    css_drop *items;
+    size_t    cap;
+    size_t    n;
+    size_t    total;
+} css_drop_log;
+
+/* As css_parse_scoped, plus the drop sink. log == NULL is exactly css_parse_scoped:
+ * same path, same sheet, same cost. The resulting sheet is identical with and
+ * without a log -- the instrument can never change the render. */
+css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+                            const char *root_scope, css_sheet **out,
+                            css_drop_log *log);
+
 /* Idempotent; NULL-safe. */
 void css_free(css_sheet *s);
 

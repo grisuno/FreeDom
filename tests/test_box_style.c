@@ -491,10 +491,29 @@ static void test_width_cap_pct(void **state) {
     assert_true(dbl_eq(bx_width_cap(600, 0, 800.0), 600.0));   /* px only */
     assert_true(dbl_eq(bx_width_cap(0, 998, 1000.0), 998.0));  /* 99.8% of 1000 */
     assert_true(dbl_eq(bx_width_cap(0, 500, 800.0), 400.0));   /* 50% of 800 */
-    assert_true(dbl_eq(bx_width_cap(300, 500, 800.0), 300.0)); /* px tighter */
-    assert_true(dbl_eq(bx_width_cap(700, 500, 800.0), 400.0)); /* pct tighter */
     assert_true(dbl_eq(bx_width_cap(0, 500, 0.0), 0.0));       /* no avail: none */
     assert_true(dbl_eq(bx_width_cap(-5, -3, 800.0), 0.0));     /* junk: none */
+}
+
+/* The two halves of a <length-percentage> are SUMMED, not raced.
+ *
+ * `width: calc(100% - 6px)` is one value with a px half of -6 and a percentage
+ * half of 100%, and its used width is 794 of an 800px containing block. Treating
+ * the halves as two independent caps and taking the tighter answered 800 -- the
+ * -6px simply vanished. That rule was unreachable before calc() carried a
+ * percentage (a plain `width:50%` leaves the px half UNSET, a plain `width:300px`
+ * leaves the percentage half 0, so the two were never both set), which is why it
+ * survived: it was defensive code for a case CSS could not produce. It can now. */
+static void test_width_cap_sums_both_halves(void **state) {
+    (void)state;
+    /* calc(100% - 6px) against an 800px containing block. */
+    assert_true(dbl_eq(bx_width_cap(-6, 1000, 800.0), 794.0));
+    /* calc(50% + 20px). */
+    assert_true(dbl_eq(bx_width_cap(20, 500, 800.0), 420.0));
+    /* A used value that comes out negative is clamped to "no cap", not applied as
+     * a negative width (CSS Values 4 section 10.1: out-of-range calc() results are
+     * clamped at used-value time). */
+    assert_true(dbl_eq(bx_width_cap(-900, 1000, 800.0), 0.0));
 }
 
 /* 2026-07-11: box-sizing: border-box subtracts the horizontal padding + border
@@ -513,6 +532,41 @@ static void test_content_cap_border_box(void **state) {
     assert_true(dbl_eq(bx_content_cap(300.0, 1, -5.0, 20.0, -1.0, 2.0), 278.0));
 }
 
+
+/* An unavailable replaced element with a definite width and an aspect-ratio has a
+ * definite BOX (CSS Sizing 4 section 4: the ratio supplies the missing axis). This
+ * is the shape a catalogue thumbnail takes in Freedom by default -- images are off,
+ * and a third-party CDN thumbnail is blocked even when they are on -- so getting it
+ * wrong is not an edge case: with no box the alt text flows as ordinary paragraph
+ * text and every card in the grid grows to fit a title it already shows underneath.
+ * Firefox sizes it: `width:100%` in a 232px cell with `aspect-ratio:1/1.5` is a
+ * 232x348 box with the alt text clipped inside. */
+static void test_replaced_box_from_aspect_ratio(void **state) {
+    (void)state;
+    double w = 0.0, h = 0.0;
+
+    /* width:100% of a 232px containing block, aspect-ratio 1/1.5 -> 232 x 348. */
+    assert_true(bx_replaced_box(CSS_LEN_UNSET, 1000, 1000, 1500, 232.0, &w, &h));
+    assert_true(dbl_eq(w, 232.0));
+    assert_true(dbl_eq(h, 348.0));
+
+    /* A definite px width wins over the containing block. */
+    assert_true(bx_replaced_box(200, 0, 16000, 9000, 900.0, &w, &h));
+    assert_true(dbl_eq(w, 200.0));
+    assert_true(dbl_eq(h, 112.5));
+
+    /* No aspect ratio: no derivable box, so the caller keeps its own fallback
+     * rather than inventing a height. */
+    assert_false(bx_replaced_box(200, 0, 0, 0, 900.0, &w, &h));
+    /* No definite width: same. */
+    assert_false(bx_replaced_box(CSS_LEN_UNSET, 0, 1000, 1500, 900.0, &w, &h));
+    /* A degenerate ratio fails closed instead of dividing by zero. */
+    assert_false(bx_replaced_box(200, 0, 0, 1500, 900.0, &w, &h));
+    assert_false(bx_replaced_box(200, 0, 1000, 0, 900.0, &w, &h));
+    /* A width that resolves to nothing yields no box. */
+    assert_false(bx_replaced_box(CSS_LEN_UNSET, 1000, 1000, 1500, 0.0, &w, &h));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_place_no_box_is_identity),
@@ -521,6 +575,8 @@ int main(void) {
         cmocka_unit_test(test_place_insets),
         cmocka_unit_test(test_place_failclosed_bounds),
         cmocka_unit_test(test_width_cap_pct),
+        cmocka_unit_test(test_width_cap_sums_both_halves),
+        cmocka_unit_test(test_replaced_box_from_aspect_ratio),
         cmocka_unit_test(test_content_cap_border_box),
         cmocka_unit_test(test_body_has_no_margin),
         cmocka_unit_test(test_paragraph),

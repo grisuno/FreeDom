@@ -236,6 +236,7 @@ static void run_init_common(pv_run *r) {
     r->ua_tag = BX_UA_NONE;
     r->node_id = DOM_NODE_NONE;
     r->block_id = -1;
+    r->own_box_id = -1;
     r->input_type = 0;
     r->name = NULL;
     r->value = NULL;
@@ -680,6 +681,11 @@ void pv_set_node_id(pv_view *v, dom_node_id node_id) {
 void pv_set_block_id(pv_view *v, int block_id) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].block_id = block_id;
+}
+
+void pv_set_own_box(pv_view *v, int box_id) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].own_box_id = box_id;
 }
 
 void pv_set_input_checked(pv_view *v, int checked) {
@@ -3587,6 +3593,81 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
     return pv_build_styled(doc, js_enabled, reader, prefers_dark, NULL, 0, 0, out);
 }
 
+/* The page's complete author CSS text, owned by the caller: the document's own
+ * <style> blocks with any pre-fetched external sheets (Hito 27) PREPENDED, which is
+ * a document-order approximation -- at equal specificity the page's inline sheet,
+ * being later in the text, wins the cascade. The combined text stays capped at
+ * PV_MAX_STYLE_BYTES; an allocation failure degrades to the document's own styles
+ * rather than failing the build. Shared so the drop report (pv_css_drops) measures
+ * exactly the bytes the renderer parses, not a second opinion about them. */
+/* Attaches the layout membership a replaced run needs to take part in its
+ * surroundings: flex/grid container identity and item slot, float side/clear, the
+ * inherited text style, and the resolved text extensions.
+ *
+ * It exists as ONE function because the alternative has failed repeatedly: every
+ * replaced kind emitted this block by hand, and a kind that forgot part of it lost
+ * exactly that much layout, silently. A <video> inside Wikipedia's `float:right`
+ * <figure> was annotated with nothing at all, so it took a full-width band of its
+ * own and pushed underneath it every line Firefox flows beside the figure. Adding a
+ * kind now means calling this, not copying twelve setters. */
+static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+                                  pv_item_track *items, pv_cont_info *cont,
+                                  const pv_text_ext *ext,
+                                  int align, int fscale, int fs_abs, int lscale,
+                                  int deco, int bdeco) {
+    /* The element's OWN box, for sizing. It is what lets the painter read the
+     * declared width and aspect-ratio, which is how an unavailable image keeps the
+     * box its author reserved instead of collapsing to a text-height bar. It is
+     * deliberately NOT block_id: that drives box reconciliation, and pointing it at
+     * a replaced element's own box reshuffles the box structure around every inline
+     * icon on the page. */
+    pv_set_own_box(v, bdeco);
+    /* The inherited text-align rides a replaced run: it is placed by it exactly
+     * like a line of text. */
+    pv_set_text_style(v, align, fscale, fs_abs, lscale, deco);
+    /* Container membership: without it a replaced run mid-column breaks the
+     * container's maximal run in the top-level layout loop and splits the row. */
+    pv_set_container(v, cont->id, cont->display, cont->gap,
+                     cont->justify, cont->cols, cont->wrap,
+                     cont->row_gap, cont->align_items);
+    pv_set_grid(v, cont->col_w, PV_GRID_TRACKS, cont->col_span);
+    pv_set_grid_rows(v, cont->grid_rows);
+    pv_set_cont_box(v, cont->box_id);
+    pv_set_row_span(v, cont->row_span);
+    pv_set_grid_area(v, cont->grid_row_start, cont->grid_col_start);
+    pv_set_flex(v, cont->grow, cont->shrink, cont->basis,
+                cont->order, cont->direction, cont->align_self);
+    pv_set_cont_item(v, item_ordinal(items, cont->id, cont->item));
+    link_cont_chain(reg, items, cont);
+    pv_set_float(v, cont->float_side, cont->float_id, cont->float_clear);
+    if (ext != NULL) pv_set_text_ext(v, ext);
+}
+
+static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+                              size_t extern_len, size_t *outlen) {
+    size_t style_len = 0;
+    char *style_text = collect_style_text(root, &style_len);
+    if (extern_css != NULL && extern_len != 0) {
+        if (extern_len > PV_MAX_STYLE_BYTES) extern_len = PV_MAX_STYLE_BYTES;
+        size_t dlen = style_len;
+        if (dlen > PV_MAX_STYLE_BYTES - extern_len) dlen = PV_MAX_STYLE_BYTES - extern_len;
+        if (extern_len != (size_t)-1 && dlen != (size_t)-1) {
+            char *comb = (char *)malloc(extern_len + 1 + dlen + 1);
+            if (comb != NULL) {
+                memcpy(comb, extern_css, extern_len);
+                comb[extern_len] = '\n';
+                if (dlen != 0) memcpy(comb + extern_len + 1, style_text, dlen);
+                comb[extern_len + 1 + dlen] = '\0';
+                free(style_text);
+                style_text = comb;
+                style_len = extern_len + 1 + dlen;
+            }
+        }
+    }
+    *outlen = style_len;
+    return style_text;
+}
+
 pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, pv_view **out) {
@@ -3613,28 +3694,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
      * fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css
      * module, so OOM here degrades to "no author CSS", not a failure. */
     size_t style_len = 0;
-    char *style_text = collect_style_text(root, &style_len);
-    /* Pre-fetched external sheets (Hito 27) precede the document's own <style>
-     * text: document-order approximation, so at equal specificity the page's
-     * inline sheet (later in the text) wins the cascade. The combined text stays
-     * capped at PV_MAX_STYLE_BYTES; OOM degrades to document styles only. */
-    if (extern_css != NULL && extern_len != 0) {
-        if (extern_len > PV_MAX_STYLE_BYTES) extern_len = PV_MAX_STYLE_BYTES;
-        size_t dlen = style_len;
-        if (dlen > PV_MAX_STYLE_BYTES - extern_len) dlen = PV_MAX_STYLE_BYTES - extern_len;
-        if (extern_len != (size_t)-1 && dlen != (size_t)-1) {
-            char *comb = (char *)malloc(extern_len + 1 + dlen + 1);
-            if (comb != NULL) {
-                memcpy(comb, extern_css, extern_len);
-                comb[extern_len] = '\n';
-                if (dlen != 0) memcpy(comb + extern_len + 1, style_text, dlen);
-                comb[extern_len + 1 + dlen] = '\0';
-                free(style_text);
-                style_text = comb;
-                style_len = extern_len + 1 + dlen;
-            }
-        }
-    }
+    char *style_text = collect_page_css(root, extern_css, extern_len, &style_len);
     css_sheet *sheet = NULL;
     /* @media gated against the user's color scheme (auto dark mode) and the render
      * viewport width, so a responsive page selects the same breakpoint Firefox does
@@ -4274,28 +4334,21 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(src_dup);
                 free(alt_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
-                /* The inherited text-align rides the image run: a replaced element
-                 * is placed by it exactly like a line of text. */
-                pv_set_text_style(v, unused_align, unused_fs, unused_fs_abs, unused_lh, unused_deco);
-                /* An <img> inside a flex/grid container is one of its items: carry the
-                 * container annotation so it does not break the container's maximal run
-                 * in the top-level layout loop (a poster mid-column split the flex row). */
-                pv_set_container(v, img_cont.id, img_cont.display, img_cont.gap,
-                                 img_cont.justify, img_cont.cols, img_cont.wrap,
-                                 img_cont.row_gap, img_cont.align_items);
-                pv_set_grid(v, img_cont.col_w, PV_GRID_TRACKS, img_cont.col_span);
-                pv_set_grid_rows(v, img_cont.grid_rows);
-                pv_set_cont_box(v, img_cont.box_id);
-                pv_set_row_span(v, img_cont.row_span);
-                pv_set_grid_area(v, img_cont.grid_row_start, img_cont.grid_col_start);
-                pv_set_flex(v, img_cont.grow, img_cont.shrink, img_cont.basis,
-                            img_cont.order, img_cont.direction, img_cont.align_self);
-                pv_set_cont_item(v, item_ordinal(&items, img_cont.id, img_cont.item));
-                link_cont_chain(&reg, &items, &img_cont);
-                pv_set_float(v, img_cont.float_side, img_cont.float_id, img_cont.float_clear);
-                /* The resolved inherited text extensions ride the image run too:
-                 * image_rendering picks the paint scaling filter (2026-07-10). */
-                pv_set_text_ext(v, &img_ext);
+                /* resolve_context tracks the innermost box-generating ANCESTOR, not
+                 * the replaced element itself, so an <img> that carries its own box
+                 * (a declared width, an aspect-ratio, a border/radius) had no way to
+                 * reach the painter with it -- and an unavailable image then lost the
+                 * box its author reserved and collapsed to a text-height bar. Same
+                 * registration the form-control path above already does, for the same
+                 * reason. */
+                if (bdeco < 0) {
+                    css_style rcs = cached_element_style(el, sheet, &cache);
+                    if (css_has_boxdeco(&rcs))
+                        bdeco = box_reg_id(&box_reg, n, &rcs, pv_cached_font_px(&cache, n));
+                }
+                annotate_replaced_run(v, &reg, &items, &img_cont, &img_ext,
+                                      unused_align, unused_fs, unused_fs_abs,
+                                      unused_lh, unused_deco, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
             } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
                        && !in_skipped_subtree(n, base, js_enabled)
@@ -4363,7 +4416,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 int unused_fs_abs = 0, unused_lh = 0, unused_deco = 0;
                 const lxb_dom_node_t *unused_li = NULL;
                 int unused_depth = 0, unused_ordered = 0;
-                pv_cont_info unused_cont;
+                pv_cont_info vid_cont;
                 pv_box_info unused_box;
                 pv_text_ext vid_ext;
                 int bdeco;
@@ -4372,7 +4425,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_align, &unused_fs, &unused_fs_abs, &unused_lh,
                                 &unused_deco,
                                 &unused_li, &unused_depth, &unused_ordered,
-                                &reg, &unused_cont, &unused_box, &vid_ext,
+                                &reg, &vid_cont, &unused_box, &vid_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
                 int brk = pending_break || (block != prev_block);
                 pending_break = 0;
@@ -4394,6 +4447,25 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 free(alt_dup);
                 free(poster_dup);
                 if (st != PV_OK) { rc = st; goto cleanup; }
+                /* A <video> is a replaced element like an <img>, so it takes part
+                 * in its surroundings the same way: it can be a flex/grid item and
+                 * it inherits its ancestor <figure>'s float. Emitting it bare gave
+                 * it a full-width band of its own. */
+                /* resolve_context tracks the innermost box-generating ANCESTOR, not
+                 * the replaced element itself, so an <img> that carries its own box
+                 * (a declared width, an aspect-ratio, a border/radius) had no way to
+                 * reach the painter with it -- and an unavailable image then lost the
+                 * box its author reserved and collapsed to a text-height bar. Same
+                 * registration the form-control path above already does, for the same
+                 * reason. */
+                if (bdeco < 0) {
+                    css_style rcs = cached_element_style(el, sheet, &cache);
+                    if (css_has_boxdeco(&rcs))
+                        bdeco = box_reg_id(&box_reg, n, &rcs, pv_cached_font_px(&cache, n));
+                }
+                annotate_replaced_run(v, &reg, &items, &vid_cont, &vid_ext,
+                                      unused_align, unused_fs, unused_fs_abs,
+                                      unused_lh, unused_deco, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
             } else if (element_is_content_leaf(n, sheet, &cache)
                        && !in_skipped_subtree(n, base, js_enabled)
@@ -4837,4 +4909,35 @@ cleanup:
     box_reg_free(&box_reg);
     pv_free(v);
     return rc;
+}
+
+/* Diagnostic counterpart to pv_build_styled: same document, same collected CSS
+ * text, same @media/root-scope context -- but the sheet is thrown away and only the
+ * parser's drop log is kept. Nothing here can influence a render; see
+ * spec/css_drops.md for why the cause split (unknown property vs rejected value)
+ * is the whole point of the instrument. */
+pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+                       const char *extern_css, size_t extern_len,
+                       int viewport_w, css_drop_log *log) {
+    if (doc == NULL || log == NULL) return PV_ERR_NULL_ARG;
+    log->n = 0;
+    log->total = 0;
+
+    lxb_dom_node_t *root = (lxb_dom_node_t *)hp_document_root(doc);
+    if (root == NULL) return PV_OK;  /* empty document: nothing was dropped */
+
+    size_t style_len = 0;
+    char *style_text = collect_page_css(root, extern_css, extern_len, &style_len);
+
+    int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
+    css_media media = { prefers_dark ? 1 : 0, 0, media_w };
+    char *root_scope = collect_root_scope(root);
+
+    css_sheet *sheet = NULL;
+    (void)css_parse_logged(style_text, style_len, &media, root_scope, &sheet, log);
+
+    css_free(sheet);
+    free(root_scope);
+    free(style_text);
+    return PV_OK;
 }

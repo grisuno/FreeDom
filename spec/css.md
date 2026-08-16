@@ -1012,6 +1012,92 @@ query (segment) **not match** — Freedom never applies a rule it cannot correct
 Nested `@media` and any other `@`-rule inside a matched block are skipped. `@import` /
 `@font-face` / other top-level `@`-rules are still skipped entirely (no network/font surface).
 
+
+### El VALOR también se descarta — inventario medido por el motor (2026-08-15)
+
+La sección anterior mide qué **nombres** de propiedad faltan. La mitad cara de las
+brechas históricas es la otra: un **valor** que la gramática rechaza en una propiedad
+que sí está implementada. Eso tira la declaración entera y no aparece en ningún
+inventario por nombre.
+
+Por eso el inventario dejó de ser un `grep` y pasó a ser una **medición del motor**:
+`spec/css_drops.md` (`--dump-css-drops`), que reporta cada declaración descartada
+agrupada por `(propiedad, causa)`, distinguiendo `unknown-prop` de `bad-value`.
+
+Medido sobre el corpus, antes → después de esta tanda:
+
+| Página | descartes antes | después |
+| :-- | --: | --: |
+| wikipedia | 383 | 265 |
+| slashdot | 236 | 52 |
+| ddg-results | 155 | 92 |
+| jkanime | 527 | 328 |
+
+Lo que se cerró, cada uno con su regla citable:
+
+- **Palabras clave CSS-wide** (`initial`/`inherit`/`unset`/`revert`/`revert-layer`,
+  CSS Cascade 5 §7.3). Válidas en TODA propiedad, y ninguna nombra un valor de la
+  gramática propia, así que todo intérprete las rechazaba. Se reconocen en los **dos
+  puntos de paso compartidos** — la cola del despacho genérico y `emit_len` para la
+  familia `<length-percentage>` — nunca en una tabla por propiedad que se
+  desactualizaría. La declaración **reclama su slot de cascada y no escribe**: dejar
+  el campo en su valor sin-poner es lo que le da su significado (la fusión con el
+  ancestro rellena una propiedad heredada; una no heredada se queda en su inicial).
+  Descartarla le regalaba el slot a una regla de MENOR especificidad, así que
+  `a{color:#333} a.x{color:inherit}` pintaba `#333`.
+- **`transparent` y `currentColor` son VALORES, no fallos.** Los centinelas son
+  negativos (`CC_COLOR_TRANSPARENT` −3, `CC_COLOR_CURRENT` −2) y solo −1 significa "no
+  es un color", pero cada test de aceptación estaba escrito `>= 0`. Un predicado
+  compartido, `color_ok`. 65 declaraciones del corpus, en todas sus páginas.
+- **`width:auto` / `height:auto` / `max-*:none`.** El auto-dimensionado por contenido
+  ES el comportamiento sin declarar de este motor, así que `auto` reclama el slot y no
+  escribe (modo `AUTO_RESET` de `emit_len`). Reclamarlo importa: `.a{width:200px}
+  .a.b{width:auto}` debe salir dimensionado por contenido, y descartar la segunda
+  dejaba los 200px. 90 declaraciones del corpus.
+- **`calc()` con porcentaje.** Un resultado de `calc()` es la combinación afín
+  `a·1px + b·1em + c·1%`, y CSS Values 4 §10 deja mezclar las tres. `calc_val` gana la
+  componente `pct`, propagada por la aritmética igual que la derivada `em` y por el
+  mismo motivo (su base es el bloque contenedor, que la cascada element-free no
+  conoce). `min()`/`max()`/`clamp()` **fallan cerrado** ante un porcentaje: son
+  lineales a trozos y la comparación no significa nada sin la base — `min(50%,600px)`
+  habría comparado una mitad px de 0 contra 600 y colapsado el elemento a ancho cero.
+- **El rechazo de negativos es sobre el valor USADO, no sobre cada mitad**
+  (`lp_can_be_nonneg`). `calc(100% - 6px)` tiene mitad px negativa y porcentaje
+  positivo; CSS Values 4 §10.1 dice que un resultado fuera de rango se **acota** al
+  usarlo, no que sea inválido al parsearlo.
+- **Números fraccionarios en `rgb()`/`hsl()`** (CSS Color 4). Un canal es
+  `<number>`/`<percentage>`, nunca "solo dígitos": `hsl(0,0%,15.83%)` —la forma que
+  emite cualquier preprocesador— perdía la paleta entera. Un solo escáner decimal
+  (`cc_scan_number`, gramática de CSS Syntax §4.3.12, `.5` incluido) para todos los
+  componentes, y la saturación/luminosidad pasan a **centésimas de por ciento** porque
+  redondear a entero corría el canal un paso.
+- **`background-position` negativo.** Es la forma normal de un sprite sheet
+  (`-304px -82px`), y una posición es un DESPLAZAMIENTO, no un tamaño: la regla de
+  no-negatividad nunca le aplicó.
+- **`content: ""`.** La cadena vacía es válida y es como un autor hace existir un
+  pseudo-elemento para que sus propias propiedades de caja tengan a qué aplicarse.
+- **`transform: none`** es el valor inicial y, en una página, un RESET: emite la
+  identidad para reclamar sus slots en vez de cederlos.
+- **Alias de vendor que son la propiedad estándar:** las grafías viejas de esquina de
+  Gecko/Presto (`-moz-border-radius-topright`) ponen la esquina AL FINAL, así que
+  quitar el prefijo y volver a preguntar no las encuentra; son un renombre, no una
+  regla inventada. Las grafías de `display` (`-webkit-flex`, `-ms-flexbox`) nombran el
+  mismo contexto de formato. `-webkit-box` queda fuera a propósito: es el borrador de
+  2009, otra spec.
+- **`vertical-align: text-top`/`text-bottom`** caen en el mismo borde que `top`/`bottom`
+  (una caja de línea por línea, sin borde de contenido del padre aparte). Descartarlas
+  dejaba el elemento en la LÍNEA BASE, un sitio distinto.
+- **`list-style-type` desconocido → `decimal`** (CSS Counter Styles 3 §7.1): un estilo
+  de contador que no se puede usar **cae a decimal**, no invalida la declaración.
+
+**Y un bug del motor que solo el instrumento podía encontrar:** `width: 70%` y
+`margin-left: 20px` aparecían como `bad-value` en slashdot. No lo eran — la regla se
+había quedado **sin espacio** en el arreglo de declaraciones de la hoja. `add_rule`
+duplicaba el arreglo una sola vez por regla, así que el espacio libre bajaba hasta 1 y
+las reglas que caían ahí perdían casi todas sus declaraciones, en silencio. Ahora se
+garantiza `CSS_DECL_SLOTS_MIN` de holgura y la regla se re-parsea creciendo hasta que
+el resultado es **demostrablemente completo** (termina con holgura de sobra).
+
 ## Types
 
 ```c

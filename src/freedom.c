@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "dom_debug.h"
+#include "html_parse.h"
 #include "freebug.h"
 #include "hostblock.h"
 #include "js_policy.h"
@@ -59,6 +60,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n");
     fprintf(fp, "  --dump-css: headless, print the resolved CSS property dump (boxes + block properties) to stdout\n");
     fprintf(fp, "  --dump-layout: headless, print the resolved layout (box rects + positioned boxes) to stdout\n");
+    fprintf(fp, "  --dump-css-drops: headless, list the author-CSS declarations the parser discarded (property + cause)\n");
     fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n");
     fprintf(fp, "  --dump-video=PATH: headless download and save video stream from a URL to PATH\n");
     fprintf(fp, "                     ('-' for stdout, pipable to ffplay -i pipe:0)\n");
@@ -112,6 +114,18 @@ static int g_dump_dom = 0;
  * the render, showing per-element resolved CSS. Like --dump-dom, it makes the agent
  * diagnose styling gaps without a Wayland window. Honours --author-css. */
 static int g_dump_css = 0;
+
+/* Set by --dump-css-drops: report every author-CSS declaration the parser
+ * DISCARDED, grouped by property and by cause. A grep over the parser's dispatch
+ * sees property names only; this sees a rejected VALUE on a property that IS
+ * implemented, which is the failure mode that has cost the most render fidelity
+ * (a leading-dot number, a percentage in a shorthand, a `pt` length). */
+static int g_dump_css_drops = 0;
+
+/* Distinct (property, cause) pairs the drop report lists. The corpus's worst page
+ * has ~25; the cap keeps the report readable and the buffer on the stack, and the
+ * log's `total` still counts past it so the header never understates the number. */
+#define CSS_DROPS_REPORT_MAX 128
 
 /* Set by --dump-layout: print the resolved layout (in-flow boxes + positioned
  * boxes) to stdout. The layout-side counterpart to --dump-dom: --dump-dom shows
@@ -438,6 +452,45 @@ static void foldback_cookies(const char *url, const char *jar) {
     }
 }
 
+
+/* Prints the author-CSS drop report for `html`, sorted by occurrence count. The
+ * document is re-parsed here on the TRUSTED side rather than plumbed out of the
+ * worker: the report is a developer diagnostic about the page's stylesheet text,
+ * not a render product, and keeping it out of the IPC codec means it cannot change
+ * what the confined renderer does. External <link> sheets are not included -- the
+ * worker fetches those -- so the report covers the document's own <style> blocks,
+ * which is what a local probe page is made of. */
+static void print_css_drops(const char *html, size_t len) {
+    hp_document *hdoc = NULL;
+    hp_config cfg = hp_config_default();
+    if (hp_parse(html, len, &cfg, &hdoc) != HP_OK || hdoc == NULL) {
+        printf("CSS drops: (document could not be parsed)\n");
+        return;
+    }
+    css_drop items[CSS_DROPS_REPORT_MAX];
+    memset(items, 0, sizeof items);
+    css_drop_log log = { items, CSS_DROPS_REPORT_MAX, 0, 0 };
+    (void)pv_css_drops(hdoc, 0, NULL, 0, ui_render_viewport_w(), &log);
+    hp_document_free(hdoc);
+
+    printf("CSS drops: %zu declaration(s) dropped, %zu distinct\n", log.total, log.n);
+    if (log.n == 0) return;
+    /* Selection sort by count: the listing is capped at CSS_DROPS_REPORT_MAX, so
+     * this is a fixed, tiny bound -- not a data-dependent cost. */
+    for (size_t i = 0; i < log.n; ++i) {
+        size_t best = i;
+        for (size_t j = i + 1; j < log.n; ++j)
+            if (items[j].count > items[best].count) best = j;
+        if (best != i) { css_drop t = items[i]; items[i] = items[best]; items[best] = t; }
+    }
+    printf("  %5s  %-13s %-28s %s\n", "count", "cause", "property", "first value");
+    for (size_t i = 0; i < log.n; ++i) {
+        printf("  %5d  %-13s %-28s %s\n", items[i].count,
+               items[i].cause == CSS_DROP_UNKNOWN_PROP ? "unknown-prop" : "bad-value",
+               items[i].prop, items[i].val);
+    }
+}
+
 static int render_page(const char *html, size_t len, const char *top_url,
                        char **out_nav) {
     tab *t = NULL;
@@ -585,9 +638,9 @@ static int render_page(const char *html, size_t len, const char *top_url,
             fprintf(stderr, "freedom: nothing to render to PNG for this page\n");
             out_rc = EXIT_ERROR;
         }
-    } else if (rs == RD_OK && rd_count(doc) > 0 && !g_dump_dom && !g_dump_layout && !g_dump_css) {
+    } else if (rs == RD_OK && rd_count(doc) > 0 && !g_dump_dom && !g_dump_layout && !g_dump_css && !g_dump_css_drops) {
         print_doc(doc);
-    } else if (!g_dump_dom && !g_dump_layout && !g_dump_css && page.text != NULL && page.text_len > 0) {
+    } else if (!g_dump_dom && !g_dump_layout && !g_dump_css && !g_dump_css_drops && page.text != NULL && page.text_len > 0) {
         printf("\n%s\n", page.text); /* fallback if the display list is empty */
     }
 
@@ -602,6 +655,11 @@ static int render_page(const char *html, size_t len, const char *top_url,
     /* --dump-css: the resolved CSS property inspector, showing per-element CSS
      * properties as seen by the box engine and painter. */
     if (g_dump_css && rs == RD_OK) print_dom_css(doc);
+    /* --dump-css-drops: what the parser threw away, which is the other half of
+     * --dump-css. --dump-css shows the properties that survived; this shows the
+     * declarations that never made it, split by whether the property is missing or
+     * its value grammar is too narrow. */
+    if (g_dump_css_drops) print_css_drops(html, len);
     /* --dump-video-url: print the first PV_VIDEO source URL to stdout without
      * truncation, so the user can pipe it to --dump-video or ffmpeg. Looks at
      * the raw pv_view (display list) before rd_free. */
@@ -1013,6 +1071,9 @@ int main(int argc, char **argv) {
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (strcmp(arg, "--dump-css") == 0) {
             g_dump_css = 1;
+            headless = 1;      /* it is a headless diagnostic (no window) */
+        } else if (strcmp(arg, "--dump-css-drops") == 0) {
+            g_dump_css_drops = 1;
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (strcmp(arg, "--dump-layout") == 0) {
             g_dump_layout = 1;

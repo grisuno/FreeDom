@@ -108,7 +108,8 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_pdf_export $(BUILD_DIR)/test_js_policy \
              $(BUILD_DIR)/test_zoom $(BUILD_DIR)/test_download \
              $(BUILD_DIR)/test_webcaps $(BUILD_DIR)/test_compositor \
-             $(BUILD_DIR)/test_css $(BUILD_DIR)/test_freebug \
+             $(BUILD_DIR)/test_css $(BUILD_DIR)/test_css_drops \
+             $(BUILD_DIR)/test_freebug \
              $(BUILD_DIR)/test_text_shape $(BUILD_DIR)/test_hostedit \
              $(BUILD_DIR)/test_dom_debug $(BUILD_DIR)/test_prefetch \
              $(BUILD_DIR)/test_prefs $(BUILD_DIR)/test_profile \
@@ -332,6 +333,10 @@ $(BUILD_DIR)/test_block_flow: $(TEST_DIR)/test_block_flow.c $(BUILD_DIR)/block_f
 # Pure author-CSS parser + simple cascade. Reuses css_color for color tokens.
 # No I/O deps; hostile content (never phones home: url()/@-rules dropped).
 $(BUILD_DIR)/test_css: $(TEST_DIR)/test_css.c $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
+
+# Parser drop log: what the CSS parser discards, by property AND by cause.
+$(BUILD_DIR)/test_css_drops: $(TEST_DIR)/test_css_drops.c $(BUILD_DIR)/css.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # Pure user-agent box model (per-tag margins/padding + display). No I/O deps.
@@ -822,6 +827,29 @@ PARITY_WIDTH := 1000
 $(BUILD_DIR)/pngdiff: tools/pngdiff.c | $(BUILD_DIR)
 	$(CC) $(STD) -Wall -Wextra -Werror $(OPT) -o $@ $< $(PNG_CFLAGS) $(PNG_LIBS) -lm
 
+# `make parity` -- score every corpus page against Firefox. The score is the render
+# engine's objective function, so what it MEASURES has to be the same document on both
+# sides.
+#
+# Firefox runs with JAVASCRIPT DISABLED, because Freedom renders with JS off by default
+# (Privacy by Default) and a scripted page is otherwise not one document but two. The
+# measured case that forced this: Wikipedia's navboxes carry `class="mw-collapsed"` and
+# `<html class="client-nojs">`, and MediaWiki's script swaps that to `client-js`, at
+# which point the stylesheet's `.client-js .mw-collapsed tr:not(:first-child)
+# {display:none}` folds ~3200px of browser-timeline lists away. Firefox ran that script
+# and Freedom did not, so the h_ratio was reading a policy difference as a layout bug --
+# and "fixing" it would have meant making the engine wrong.
+#
+# It also runs with NO NETWORK (a dead proxy, which leaves file:// and data: intact),
+# for the same reason: Freedom blocks third-party subresources by default, so a
+# reference that fetches a CDN is again grading policy rather than layout. Measured
+# on jkanime, this also CORRECTED the roadmap: its gap had been written off as "the
+# images Firefox loads and we block", but Firefox renders it 2398px offline against
+# 2680px online -- the images were worth 282px of a ~7000px difference, and the rest
+# is a real engine gap in the tile grid.
+#
+# `make geom` deliberately does NOT do either: its probe IS a script, and it measures
+# one selector's rects rather than a whole-page bitmap.
 parity: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
 	@command -v firefox >/dev/null 2>&1 || { \
 	  echo "parity: firefox not found -- the reference renderer is required"; exit 1; }
@@ -837,6 +865,14 @@ parity: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
 	  if [ -z "$$h" ]; then echo "$$name: freedom produced no PNG"; continue; fi; \
 	  rm -f $(PARITY_OUT)/$$name.ff.png; \
 	  rm -rf $(PARITY_OUT)/ffprof; mkdir -p $(PARITY_OUT)/ffprof; \
+	  printf '%s\n' 'user_pref("javascript.enabled", false);' \
+	                'user_pref("network.proxy.type", 1);' \
+	                'user_pref("network.proxy.http", "127.0.0.1");' \
+	                'user_pref("network.proxy.http_port", 1);' \
+	                'user_pref("network.proxy.ssl", "127.0.0.1");' \
+	                'user_pref("network.proxy.ssl_port", 1);' \
+	                'user_pref("network.proxy.allow_hijacking_localhost", true);' \
+	    > $(PARITY_OUT)/ffprof/user.js; \
 	  firefox --headless --no-remote -profile "$(CURDIR)/$(PARITY_OUT)/ffprof" \
 	          --screenshot "$(CURDIR)/$(PARITY_OUT)/$$name.ff.png" \
 	          --window-size=$(PARITY_WIDTH) \

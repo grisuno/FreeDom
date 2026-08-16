@@ -317,7 +317,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[42] = {
+        int32_t b[43] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -350,6 +350,12 @@ static int write_view(int wfd, const pv_view *v) {
             /* Resolved named-grid cell, 2026-08-14 (appended; read_view mirrors
              * this). -1/-1 = auto-placed. */
             (int32_t)r->grid_row_start, (int32_t)r->grid_col_start,
+            /* The replaced element's OWN box, 2026-08-15 (appended; read_view
+             * mirrors this). Distinct from block_id -- see pv_run.own_box_id. An
+             * unavailable <img> reads its declared width and aspect-ratio from it,
+             * which is what keeps a blocked thumbnail the size its author reserved
+             * instead of collapsing to a text-height bar. */
+            (int32_t)r->own_box_id,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -1604,7 +1610,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[42];
+        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[43];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1759,6 +1765,9 @@ static int read_view(int fd, pv_view **out) {
         /* ua_tag rides here, in the shared tail, for the same reason block_id does:
          * it is structure and belongs to EVERY run kind, replaced ones included. */
         pv_set_ua_tag(v, (int)b[35]);
+        /* The replaced element's own box, in the shared tail for the same reason:
+         * it is structure. Only the replaced kinds ever have one (-1 otherwise). */
+        pv_set_own_box(v, (int)b[42]);
     }
 
     /* Box engine (Step D): the box tree, same order/shape as write_view. Bounded by

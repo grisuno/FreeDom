@@ -186,6 +186,58 @@ static void test_pack_unpack(void **state) {
     assert_int_equal(c.r, 0xab); assert_int_equal(c.g, 0xcd); assert_int_equal(c.b, 0xef);
 }
 
+
+/* CSS Color 4: an rgb() channel is a <number> or <percentage> and an hsl()
+ * saturation/lightness is a <percentage> -- none of them is restricted to whole
+ * digits. Requiring integers dropped the colour, and with it the DECLARATION, which
+ * is how a page written by a preprocessor (`hsl(0,0%,15.8333333333%)`, the shape a
+ * SASS/LESS colour function emits) lost its entire palette. */
+static void test_hsl_fractional_percentages(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("hsl(0,0%,15.8333333333%)", &C), CC_OK);
+    /* 15.83% of 255 = 40.4 -> 40. An integer-only parser could not see the .83 at
+     * all, so the whole declaration vanished. */
+    assert_int_equal(C.r, 40); assert_int_equal(C.g, 40); assert_int_equal(C.b, 40);
+
+    assert_int_equal(cc_parse("hsl(0,0%,91.862745098%)", &C), CC_OK);
+    assert_int_equal(C.r, 234); assert_int_equal(C.g, 234); assert_int_equal(C.b, 234);
+}
+
+/* A fractional hue is a <number> too (and hsl() takes an <angle>, whose bare-number
+ * form is degrees). */
+static void test_hsl_fractional_hue(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("hsl(120.5,100%,50%)", &C), CC_OK);
+    assert_int_equal(C.r, 0); assert_int_equal(C.g, 255);
+}
+
+/* rgb() channels take fractional numbers and fractional percentages. */
+static void test_rgb_fractional(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("rgb(127.5, 0, 0)", &C), CC_OK);
+    assert_int_equal(C.r, 128); assert_int_equal(C.g, 0); assert_int_equal(C.b, 0);
+    assert_int_equal(cc_parse("rgb(50.5%, 0%, 0%)", &C), CC_OK);
+    assert_int_equal(C.r, 129);
+}
+
+/* A leading-dot number is a valid <number> (CSS Syntax 4.3.12): `.5` must parse. */
+static void test_leading_dot_number(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("rgba(0, 0, 0, .5)", &C), CC_OK);
+    assert_int_equal(cc_parse("hsl(0,.5%,50%)", &C), CC_OK);
+}
+
+/* Out-of-range and malformed values still fail closed -- widening the grammar to
+ * fractions must not widen it to junk. */
+static void test_fractional_still_fails_closed(void **state) {
+    (void)state;
+    assert_int_not_equal(cc_parse("hsl(0,0%,150.5%)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(300.5, 0, 0)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(1.2.3, 0, 0)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("hsl(0,0%,5x%)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(., 0, 0)", &C), CC_OK);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_args),
@@ -206,6 +258,11 @@ int main(void) {
         cmocka_unit_test(test_hsl_240),
         cmocka_unit_test(test_hsla),
         cmocka_unit_test(test_hsl_out_of_range),
+        cmocka_unit_test(test_hsl_fractional_percentages),
+        cmocka_unit_test(test_hsl_fractional_hue),
+        cmocka_unit_test(test_rgb_fractional),
+        cmocka_unit_test(test_leading_dot_number),
+        cmocka_unit_test(test_fractional_still_fails_closed),
         cmocka_unit_test(test_unsupported_syntax),
         cmocka_unit_test(test_pack_unpack),
     };

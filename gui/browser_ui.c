@@ -4029,9 +4029,23 @@ static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
  * top level, so an <img>/<select> that became flex content (its cont_id now keeps it
  * inside the container's run) produced a zero-width text placeholder and vanished.
  * Returns 1 when it emitted the row (caller advances), 0 for a normal text block. */
+/* The box an unavailable replaced element gets from its own CSS: a definite width
+ * plus an aspect-ratio (CSS Sizing 4 section 4). The two inputs live on the
+ * element's own pv_box_def -- css_has_boxdeco already makes an aspect-ratio generate
+ * a box, so nothing new has to cross the IPC codec. The RULE is bx_replaced_box,
+ * pure and unit-tested; this only fetches its inputs. */
+static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
+                            double *dw, double *dh) {
+    if (b->own_box_id < 0) return 0;
+    const pv_box_def *d = rd_box_at(doc, (size_t)b->own_box_id);
+    if (d == NULL) return 0;
+    return bx_replaced_box(d->box_w, d->box_w_pct, d->aspect_num, d->aspect_den,
+                           avail_w, dw, dh);
+}
+
 static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th, const rd_block *b,
-                             double content_w) {
+                             double content_w, const rd_doc *doc) {
     if (b->kind == RD_INPUT) {
         content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
         cairo_font_extents_t fe;
@@ -4074,12 +4088,23 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         double dw, dh;
         double box_w = content_w - 2.0 * th->image_box_pad;
         /* A decoded image sizes the row to its blit; an unavailable image with a
-         * declared intrinsic size reserves that box (broken-image parity); anything
-         * else falls back to a one-line labelled bar. */
-        double h = (image_display_size(w, b, box_w, &dw, &dh) ||
-                    placeholder_display_size(b, box_w, &dw, &dh))
-                   ? dh + 2.0 * th->image_box_pad
-                   : fe.height + 2.0 * th->image_box_pad;
+         * declared intrinsic size reserves that box (broken-image parity); one sized
+         * only by CSS -- a definite width plus an aspect-ratio, which is how every
+         * responsive thumbnail is written -- reserves the box that ratio gives it;
+         * anything else falls back to a one-line labelled bar.
+         *
+         * The CSS case matters because it is Freedom's DEFAULT: images are off, and a
+         * third-party thumbnail stays blocked even when they are on. Without it a
+         * blocked tile collapsed to text height and its `alt` reflowed the card,
+         * so a four-across catalogue grid grew to several times its real height. */
+        double h;
+        if (image_display_size(w, b, box_w, &dw, &dh) ||
+            placeholder_display_size(b, box_w, &dw, &dh) ||
+            css_replaced_box(doc, b, box_w, &dw, &dh)) {
+            h = dh + 2.0 * th->image_box_pad;
+        } else {
+            h = fe.height + 2.0 * th->image_box_pad;
+        }
         double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
@@ -4096,7 +4121,16 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
         content_font(cr, th->body_font, 0, 0, CSS_FF_UNSET);
         cairo_font_extents_t fe;
         cairo_font_extents(cr, &fe);
+        /* A <video> is a replaced element and its declared width/height ARE its
+         * box (CSS 2.1 section 10.3.2 / 10.6.2), exactly like an <img>. Taking the
+         * full column instead made every thumbnail-sized clip a full-bleed band:
+         * Wikipedia's 250x159 demo video became a 952px bar, and because a band
+         * that wide leaves no room beside it, the text that Firefox flows next to
+         * the figure was pushed underneath. Oversize shrinks to fit, keeping the
+         * aspect ratio, which is what the SVG branch above already does. */
+        double vw = (b->video_w > 0) ? (double)b->video_w : content_w;
         double vh = (b->video_h > 0) ? (double)b->video_h : fe.height * 6.0;
+        if (vw > content_w && vw > 0.0) { vh *= content_w / vw; vw = content_w; }
         double top = s->cur_top + (rc_has_content(L) ? s->pending_gap : 0.0);
         s->pending_gap = 0;
         rc_row *r = rc_add_row(L);
@@ -4104,7 +4138,7 @@ static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
             r->kind = RC_VIDEO; r->top = top; r->height = vh; r->ascent = fe.ascent;
             r->first = 0; r->count = 0; r->banner = 0; r->bg_rgb = -1; r->x_off = 0.0;
             r->align = 0; r->blk = b; r->hidden = pv_content_hidden(s->hidden_from != 0, b->visibility);
-            r->bg_w = content_w;   /* the column width; the translation pass adds x_off */
+            r->bg_w = vw;
         }
         s->cur_top = top + vh;
         return 1;
@@ -4424,11 +4458,25 @@ static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
  * The container used to close every open box, which lost BOTH: its own backdrop
  * never painted, and a flex row inside a `max-width; margin:0 auto` wrapper escaped
  * to full page width. */
-static int container_box_of(const rd_doc *doc, size_t start, size_t end) {
-    /* page_view now stamps the enclosing box directly (cont_box_id): the container
-     * element's OWN box when it has one, else the nearest ancestor wrapper. The
-     * derivation below is the fallback for runs that carry no stamp (collected
-     * table grids, older views). */
+static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid) {
+    /* The box to resolve is the one enclosing the container LEVEL being laid out, so
+     * ask that level's descriptor first. The per-run `cont_box_id` stamp answers for
+     * the run's INNERMOST container, which is a different question as soon as
+     * containers nest -- and it answers with the first ITEM's own box, so the parent
+     * was laid out inside its own child. Measured: a `.row{display:flex}` of
+     * `.cell{width:25%;display:flex}` cards was given a 200px containing block (the
+     * first cell's width) instead of the row's 936, so nothing could fit beside
+     * anything and a four-across grid became one card per line.
+     *
+     * page_view stamps pv_cont_def.box_id with the container element's OWN box when
+     * it has one, else its nearest ancestor wrapper -- exactly the containing block
+     * this needs. */
+    if (cid >= 0) {
+        const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
+        if (cd != NULL && cd->box_id >= 0) return cd->box_id;
+    }
+    /* Fallback for runs whose container carries no descriptor box (a collected table
+     * grid is synthesised and stamps none) or no descriptor at all (older views). */
     if (start < rd_count(doc)) {
         int stamped = rd_at(doc, start)->cont_box_id;
         if (stamped >= 0) return stamped;
@@ -4563,6 +4611,26 @@ static int ov_box_clips(const pv_box_def *d);
 static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid);
 static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid);
 
+/* The flex base size a DEFINITE width gives an item, or 0 when it has none.
+ *
+ * CSS Flexbox 1 section 7.2.3: with `flex-basis: auto` (the default), the flex base
+ * size IS the item's `width`. flex_item_basis has always applied that -- but only on
+ * the path where the item is a plain block. An item that is ITSELF a flex/grid
+ * container skipped it and measured the container's content instead, and that
+ * measurement resolves the content's own percentages against the OUTER width: a
+ * `.cell{width:25%;display:flex}` holding a `.card{width:100%}` measured 100% of the
+ * whole row, so every cell asked for the full line and the four-across grid became
+ * one card per line. Measured on jkanime: 9800px against Firefox's 2398.
+ *
+ * Same helper for both paths, so the two cannot answer differently again. */
+static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
+                                  double content_w) {
+    if (sd->box < 0) return 0.0;
+    const pv_box_def *d = rd_box_at(doc, (size_t)sd->box);
+    if (d == NULL) return 0.0;
+    return bx_width_cap(d->box_w, d->box_w_pct, content_w);
+}
+
 /* Max-content width of a NESTED container acting as one item: the sum of its own
  * items' bases plus its gaps. Measuring its runs as if they flowed one after another
  * (what measure_item_content_w does) undercounts badly -- it ignores the gaps and the
@@ -4586,8 +4654,11 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
         int child = child_cont_at_level(doc, rd_at(doc, k), cid);
         double base;
         if (child >= 0) {
-            base = nested_cont_basis(cr, w, th, doc, k, e, child, content_w, depth + 1)
-                 + isd.pl + isd.pr + isd.bl + isd.br + isd.ml + isd.mr;
+            double decl = item_declared_basis(doc, &isd, content_w);
+            base = (decl > 0.0)
+                 ? decl + isd.ml + isd.mr
+                 : nested_cont_basis(cr, w, th, doc, k, e, child, content_w, depth + 1)
+                   + isd.pl + isd.pr + isd.bl + isd.br + isd.ml + isd.mr;
         } else {
             base = flex_item_basis(cr, w, th, doc, k, e, &isd, content_w);
         }
@@ -4960,8 +5031,14 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 else if (ib <= -1000000 && ib > -2000000)
                     ib_px = content_w * (double)(-ib - 1000000) / 1000.0;
                 double b;
+                double decl_w = item_declared_basis(doc, &sd, content_w);
+
                 if (ib_px >= 0.0) {
                     b = ib_px + sd.ml + sd.mr;
+                } else if (decl_w > 0.0) {
+                    /* A definite width on the wrapper IS its flex base size, and it
+                     * outranks measuring what the nested container holds. */
+                    b = decl_w + sd.ml + sd.mr;
                 } else {
                     b = nested_cont_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
                                           nb_child, content_w, 0)
@@ -5250,7 +5327,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * emits its atomic row here, sized to the element, rather than flowing
                  * as zero-width text -- the same row the top-level path produces, so the
                  * translation pass places it in the column and the painter blits it. */
-                if (!emit_replaced_row(cr, w, L, &si, th, bk, inner_w))
+                if (!emit_replaced_row(cr, w, L, &si, th, bk, inner_w, doc))
                     flow_text_block(cr, w, L, &si, th, bk, inner_w);
             }
             k = seg_end;
@@ -6159,7 +6236,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                 if (k > gstart[j]) flush_line(L, &si, th);
                 leave_inline_box(L, &si, bk->block_id);
                 reconcile_boxes_below(cr, w, L, &si, th, doc, cw,
-                                      container_box_of(doc, k, ce), k, band_box);
+                                      container_box_of(doc, k, ce, rootc), k, band_box);
                 double cin_l, cin_w;
                 rc_box_context(&si, cw, &cin_l, &cin_w);
                 si.indent_px = cin_l;
@@ -6178,7 +6255,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             leave_inline_box(L, &si, bk->block_id);
             reconcile_boxes_below(cr, w, L, &si, th, doc, cw, bk->block_id, k, band_box);
             si.bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
-            if (!emit_replaced_row(cr, w, L, &si, th, bk, cw))
+            if (!emit_replaced_row(cr, w, L, &si, th, bk, cw, doc))
                 flow_text_block(cr, w, L, &si, th, bk, cw);
         }
         close_all_boxes(L, &si, th);
@@ -6306,7 +6383,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             /* A flex/grid container establishes its own formatting context, so it
              * goes BELOW any live float rather than flowing beside it. */
             rc_float_clear(&s);
-            int cbox = container_box_of(doc, i, j);
+            int cbox = container_box_of(doc, i, j, rootc);
             /* A synthesised table grid stamps no container box, so container_box_of
              * finds none and every open box would be closed -- the table then starts
              * at x = 0 and loses the <body> padding Firefox keeps. The box every cell
@@ -6408,7 +6485,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * replaced element paints the same in flow and inside a column. */
         if (inline_replaced && place_inline_replaced(L, &s, th, w, b, content_w))
             continue;
-        if (emit_replaced_row(cr, w, L, &s, th, b, content_w)) {
+        if (emit_replaced_row(cr, w, L, &s, th, b, content_w, doc)) {
             /* A form control inside an open box must sit within that box's content
              * rect, exactly as the text rows do via s.indent_px. The row was emitted
              * with x_off 0 / bg_w content_w (page width), so a width:100% <input>

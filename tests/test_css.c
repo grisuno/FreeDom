@@ -224,7 +224,16 @@ static void test_vertical_align(void **state) {
     assert_int_equal(css_parse_inline("vertical-align:middle", 0).valign, CSS_VA_MIDDLE);
     assert_int_equal(css_parse_inline("vertical-align:top", 0).valign, CSS_VA_TOP);
     assert_int_equal(css_parse_inline("vertical-align:bottom", 0).valign, CSS_VA_BOTTOM);
-    assert_int_equal(css_parse_inline("vertical-align:text-top", 0).valign, CSS_VA_UNSET); /* not yet supported */
+    /* text-top/text-bottom align with the parent's CONTENT box rather than the line
+     * box (CSS 2.1 section 10.8.1). With one line box per line and no separate
+     * parent content edge, they land on the same edge as top/bottom -- which is a
+     * closer answer than dropping them, since a dropped declaration leaves the
+     * element on the BASELINE, a different place entirely. */
+    assert_int_equal(css_parse_inline("vertical-align:text-top", 0).valign, CSS_VA_TOP);
+    assert_int_equal(css_parse_inline("vertical-align:text-bottom", 0).valign, CSS_VA_BOTTOM);
+    /* A <length>/<percentage> offset still fails closed: there is no sub-line
+     * placement to apply it to, and inventing one would move text nowhere real. */
+    assert_int_equal(css_parse_inline("vertical-align:4px", 0).valign, CSS_VA_UNSET);
     assert_int_equal(css_parse_inline("color:red", 0).valign, CSS_VA_UNSET);
 }
 
@@ -2103,12 +2112,19 @@ static void test_calc_dimension_errors_fail_closed(void **state) {
     assert_int_equal(css_parse_inline("width: calc(2 * 3)", 0).width, CSS_LEN_UNSET);
     /* length +/- dimensionless number is invalid. */
     assert_int_equal(css_parse_inline("width: calc(10px + 5)", 0).width, CSS_LEN_UNSET);
-    /* division by zero, by a length, unbalanced parens, percent inside calc(). */
+    /* division by zero, by a length, unbalanced parens. */
     assert_int_equal(css_parse_inline("width: calc(10px / 0)", 0).width, CSS_LEN_UNSET);
     assert_int_equal(css_parse_inline("width: calc(10px / 2px)", 0).width, CSS_LEN_UNSET);
     assert_int_equal(css_parse_inline("width: calc(10px + (5px)", 0).width, CSS_LEN_UNSET);
-    assert_int_equal(css_parse_inline("width: calc(100% - 20px)", 0).width, CSS_LEN_UNSET);
     assert_int_equal(css_parse_inline("width: calc()", 0).width, CSS_LEN_UNSET);
+    /* A percentage inside calc() is no longer a dimension error: `calc(100% - 20px)`
+     * is a <length-percentage>, and the two halves travel separately to layout (the
+     * px half here is the -20px, and the % half rides css_style.pct). It stays
+     * rejected on a property that does NOT accept a percentage, which is what keeps
+     * the dimensional check meaningful. */
+    assert_int_equal(css_parse_inline("width: calc(100% - 20px)", 0).width, -20);
+    assert_int_equal(css_parse_inline("letter-spacing: calc(100% - 20px)", 0).letter_spacing,
+                     CSS_LEN_UNSET);
 }
 
 static void test_calc_clamped_anti_dos(void **state) {
@@ -3064,10 +3080,14 @@ static void test_inline_transform_translate(void **state) {
     assert_int_equal(s.transform_tx, 0);
     assert_int_equal(s.transform_ty, 0);
 
-    /* Unsupported/malformed: fails closed to unset, never a half-applied transform. */
+    /* `none` is the INITIAL value, not a malformed one: it is how a rule cancels a
+     * transform an earlier rule applied, so it must claim its cascade slots and
+     * write the identity. Dropping it left the earlier transform in place. */
     s = css_parse_inline("transform:none", 0);
-    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
-    assert_int_equal(s.transform_ty, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_tx, 0);
+    assert_int_equal(s.transform_ty, 0);
+
+    /* Unsupported/malformed still fails closed, never a half-applied transform. */
     s = css_parse_inline("transform:translate(10%,10%)", 0); /* % unsupported */
     assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
     s = css_parse_inline("transform:translateX(1px) translateY(2px)", 0); /* v1: one fn only */

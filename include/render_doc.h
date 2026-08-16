@@ -77,6 +77,13 @@ typedef struct rd_block {
      * replaced element: RD_VIDEO (the <video> attributes), RD_IMAGE (the <img>
      * attributes, which the painter lays out at) and RD_SVG (the parsed <svg>
      * width/height). */
+    /* The replaced element's OWN box def index (-1 = none). Distinct from
+     * block_id, which says which box the run BELONGS to and drives box
+     * reconciliation: this one is read for SIZING only -- a replaced element's
+     * declared width and aspect-ratio live on its own box, and that is what lets an
+     * unavailable image keep the box its author reserved instead of collapsing to a
+     * text-height bar. Only the replaced kinds carry it. */
+    int              own_box_id;
     int              video_w;
     int              video_h;
     int              fg_rgb;         /* author color packed 0xRRGGBB, or -1; set only with caps.css */

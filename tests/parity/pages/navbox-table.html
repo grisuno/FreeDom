@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!--
+  Probe: a two-column data table whose LABEL cell is sized `width:1%` and whose
+  CONTENT cell is `width:100%`.
+
+  This is the shape of every Wikipedia navbox, of every MediaWiki infobox, and of
+  the "term / definition" tables that fill reference sites: the percentages do not
+  add to 100 on purpose, because in table layout a percentage is a HINT the column
+  algorithm resolves against the table's own width -- `width:1%` means "as narrow as
+  this column's content allows", which is how the label column shrink-wraps and the
+  content column takes everything left over.
+
+  If the two cells stack instead of sitting side by side, every row of the table
+  costs two lines instead of one. Wikipedia's browser-timeline navbox alone has ~54
+  such rows.
+
+  Deliberately taller than a 768px viewport: Firefox reports the viewport height for
+  short pages, and the parity harness's h_ratio measures nothing there.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>navbox table probe</title>
+<style>
+  body { font: 16px/1.5 sans-serif; margin: 0; padding: 16px; }
+  h2 { font-size: 18px; margin: 24px 0 8px; }
+  table.nav { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  table.nav th.group {
+    width: 1%;
+    padding: 4px 8px;
+    text-align: right;
+    vertical-align: top;
+    background: #ddf;
+    white-space: nowrap;
+    font-weight: bold;
+  }
+  table.nav td.list {
+    width: 100%;
+    padding: 4px 8px;
+    text-align: left;
+    background: #f6f6ff;
+  }
+  ul.hlist, ul.hlist li { margin: 0; padding: 0; }
+  ul.hlist li { display: inline; }
+  ul.hlist li::after { content: " \00b7 "; }
+  th.navbox-title { background: #ccf; padding: 4px; }
+  table.subgroup { border-spacing: 0; }
+  table.plain { width: 100%; border-collapse: collapse; }
+  table.plain th { width: 1%; white-space: nowrap; text-align: left; padding: 2px 8px; }
+  table.plain td { width: 100%; padding: 2px 8px; }
+</style>
+</head>
+<body>
+
+<h2>A. Label column at width:1%, content column at width:100%</h2>
+<table class="nav">
+  <tr><th class="group" scope="row">1994</th><td class="list">Netscape Navigator 0.9 &#183; IBM WebExplorer</td></tr>
+  <tr><th class="group" scope="row">1995</th><td class="list">Internet Explorer 1&#8211;2 &#183; Netscape Navigator 1&#8211;2 &#183; Opera 1&#8211;2</td></tr>
+  <tr><th class="group" scope="row">1996</th><td class="list">Arachne 1.0 &#183; Internet Explorer 3 &#183; Netscape Navigator 3 &#183; Opera 2.1</td></tr>
+  <tr><th class="group" scope="row">1997</th><td class="list">Internet Explorer 4 &#183; Netscape Communicator 4 &#183; Opera 3</td></tr>
+  <tr><th class="group" scope="row">1998</th><td class="list">iCab &#183; Mozilla Application Suite &#183; Opera 3.5</td></tr>
+  <tr><th class="group" scope="row">1999</th><td class="list">Mozilla M3 &#183; Internet Explorer 5 &#183; OmniWeb 3 &#183; Opera 3.6</td></tr>
+  <tr><th class="group" scope="row">2000</th><td class="list">Konqueror &#183; K-Meleon &#183; Netscape 6 &#183; Opera 4&#8211;4.02</td></tr>
+  <tr><th class="group" scope="row">2001</th><td class="list">iCab 2.5 &#183; Internet Explorer 6 &#183; MSN Explorer &#183; OmniWeb 4 &#183; Opera 5</td></tr>
+  <tr><th class="group" scope="row">2002</th><td class="list">Camino &#183; Epiphany &#183; Netscape 7 &#183; Opera 6</td></tr>
+  <tr><th class="group" scope="row">2003</th><td class="list">Safari &#183; Maxthon &#183; Opera 7 &#183; SlimBrowser</td></tr>
+  <tr><th class="group" scope="row">2004</th><td class="list">Firefox &#183; Opera 7.5&#8211;7.55</td></tr>
+  <tr><th class="group" scope="row">2005</th><td class="list">AOL Explorer &#183; Deepnet Explorer &#183; Netscape Browser &#183; Opera 8 &#183; Safari 2</td></tr>
+</table>
+
+<h2>B. The same shape written with bare th/td</h2>
+<table class="plain">
+  <tr><th>Features</th><td>Tabbed browsing, bookmarks, private browsing, extensions</td></tr>
+  <tr><th>Protocols</th><td>HTTP, HTTPS, WebSocket, FTP</td></tr>
+  <tr><th>Engines</th><td>Blink, Gecko, WebKit, Goanna, Servo</td></tr>
+  <tr><th>Standards</th><td>HTML, CSS, JavaScript, DOM, WebAssembly</td></tr>
+  <tr><th>Security</th><td>Sandboxing, site isolation, certificate pinning</td></tr>
+  <tr><th>Privacy</th><td>Tracking protection, cookie policy, fingerprint resistance</td></tr>
+  <tr><th>Formats</th><td>PNG, JPEG, WebP, AVIF, SVG, WOFF2</td></tr>
+  <tr><th>Media</th><td>H.264, VP9, AV1, Opus, Vorbis, AAC</td></tr>
+</table>
+
+<h2>C. A long label that must still shrink-wrap</h2>
+<table class="plain">
+  <tr><th>Hypertext Transfer Protocol</th><td>The application protocol the web is built on</td></tr>
+  <tr><th>URL</th><td>Uniform Resource Locator, the address of a resource</td></tr>
+  <tr><th>DNS</th><td>Domain Name System, which resolves a host name to an address</td></tr>
+  <tr><th>TLS</th><td>Transport Layer Security, which encrypts the connection</td></tr>
+</table>
+
+
+<h2>E. The real Wikipedia navbox shape: a SUBGROUP table nested inside a
+    colspan=2 cell, whose content cell holds a div &gt; ul with inline items</h2>
+<table class="nav">
+  <tr><th colspan="2" class="navbox-title">Web browsers</th></tr>
+  <tr><td colspan="2" class="navbox-list" style="width:100%;padding:0">
+    <table class="nav subgroup" style="width:100%;border-spacing:0">
+      <tr><th class="group" scope="row">Features</th>
+          <td class="list"><div style="padding:0 .25em"><ul class="hlist"><li>Bookmarks</li><li>Extensions</li><li>Privacy mode</li></ul></div></td></tr>
+      <tr><th class="group" scope="row">Web standards</th>
+          <td class="list"><div style="padding:0 .25em"><ul class="hlist"><li>HTML</li><li>CSS</li><li>DOM</li><li>WebAssembly</li></ul></div></td></tr>
+      <tr><th class="group" scope="row">Protocols</th>
+          <td class="list"><div style="padding:0 .25em"><ul class="hlist"><li>HTTP</li><li>HTTPS</li><li>WebSocket</li><li>FTP</li></ul></div></td></tr>
+      <tr><th class="group" scope="row">Engines</th>
+          <td class="list"><div style="padding:0 .25em"><ul class="hlist"><li>Blink</li><li>Gecko</li><li>WebKit</li><li>Goanna</li><li>Servo</li></ul></div></td></tr>
+      <tr><th class="group" scope="row">Gecko-based</th>
+          <td class="list"><div style="padding:0 .25em"><ul class="hlist"><li>Firefox</li><li>SeaMonkey</li><li>Waterfox</li><li>Pale Moon</li><li>Basilisk</li><li>K-Meleon</li></ul></div></td></tr>
+      <tr><th class="group" scope="row">WebKit-based</th>
+          <td class="list"><div style="padding:0 .25em"><ul class="hlist"><li>Safari</li><li>Konqueror</li><li>Epiphany</li><li>Midori</li><li>OmniWeb</li></ul></div></td></tr>
+    </table>
+  </td></tr>
+</table>
+
+<h2>D. Filler, so the page is taller than a viewport</h2>
+<p>A web browser is an application for accessing websites. When a user requests a web page from a particular website, the browser retrieves its files from a web server and then displays the page on the user's screen.</p>
+<p>Browsers are used on a range of devices, including desktops, laptops, tablets, smartphones, smartwatches, smart televisions and consoles.</p>
+<p>The purpose of a web browser is to fetch content and display it on the user's device. This process begins when the user inputs a Uniform Resource Locator into the browser's address bar.</p>
+<p>Virtually all URLs on the Web start with either http: or https: which means they are retrieved with the Hypertext Transfer Protocol.</p>
+<p>Requisite materials, including text, style sheets, images, and other types of multimedia, are downloaded from the server.</p>
+<p>Once the materials have been downloaded, the web browser's engine converts those resources into an interactive visual representation of the page on the user's device.</p>
+<p>Modern web browsers also contain separate JavaScript engines which enable more complex interactive applications inside the browser.</p>
+<p>A web browser that does not render a graphical user interface is known as a headless browser.</p>
+
+</body>
+</html>

@@ -165,6 +165,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->ua_tag = BX_UA_NONE;
     b->node_id = DOM_NODE_NONE;
     b->block_id = -1;
+    b->own_box_id = -1;
     b->input_type = 0;
     b->name = NULL;
     b->value = NULL;
@@ -380,6 +381,16 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             if (r->kind == PV_IMAGE || r->kind == PV_SVG) nb->text_align = r->text_align;
             if (r->kind == PV_INPUT) nb->caret_color = r->caret_color;
             if (r->kind == PV_INPUT) nb->block_id = r->block_id;
+            /* The replaced element's OWN box, which is a different question from
+             * block_id ("which box does this run belong to", the input to box
+             * reconciliation). Overloading block_id for both answers reshuffled the
+             * box structure of every page with inline icons -- measured on slashdot,
+             * where the story headings began overlapping the body text. The own box
+             * is read for SIZING only: it is where a replaced element's declared
+             * width and aspect-ratio live, and without it an unavailable <img>
+             * collapsed to a text-height bar and let its `alt` reflow the page. */
+            if (r->kind == PV_IMAGE || r->kind == PV_VIDEO || r->kind == PV_SVG)
+                nb->own_box_id = r->own_box_id;
         }
 
         /* Author flex/grid container layout is structure, not author styling: it

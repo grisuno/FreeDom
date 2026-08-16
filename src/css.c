@@ -41,6 +41,21 @@
  * a bug, not a feature. */
 #define CSS_INIT_SELS            512u
 #define CSS_INIT_DECLS           1024u
+/* Free declaration slots guaranteed to be available before a rule's block is
+ * interpreted, and the slack that must REMAIN afterwards for the result to be
+ * trusted as complete.
+ *
+ * Without it, a rule parsed while the sheet's array happened to be nearly full lost
+ * every declaration after the first few, silently: the array doubled only once it
+ * was completely full, so the free space cycled down to 1 and whichever rules landed
+ * there were truncated. Measured with the drop log, which reported them as
+ * "bad-value" -- a plain `width: 70%` and `margin-left: 20px` appearing as invalid
+ * is what exposed it.
+ *
+ * It must exceed the most slots ANY single declaration can emit (the widest today
+ * is the `background` shorthand at 12), so that finishing with this much slack
+ * proves no declaration in the rule was refused for lack of room. */
+#define CSS_DECL_SLOTS_MIN         32u
 #define CSS_INIT_RULES           256u
 #define CSS_SELS_PER_GROUP      32
 #define CSS_INLINE_DECLS        64u
@@ -217,6 +232,19 @@ typedef struct css_decl {
      * that computes to 16px is unaffected and the fold is a pure correction.
      * See spec/css_length.md section 8. */
     int emil;
+    /* CSS Cascade 5 section 7.3: the declaration's value was a CSS-WIDE KEYWORD
+     * (initial / inherit / unset / revert / revert-layer), which is valid on
+     * EVERY property. The declaration still competes for -- and can win -- its
+     * cascade slot; what it does not do is write a value. Leaving the slot at the
+     * style's unset default is what makes it mean the right thing: the caller's
+     * ancestor merge then supplies the parent's value (`inherit`), or the initial
+     * value stands where nothing is inherited (`initial`/`revert`).
+     *
+     * The point is that the slot is CLAIMED. Dropping the declaration instead --
+     * which is what happened before -- handed the slot to a LOWER-specificity
+     * rule, so `a{color:#333} a.x{color:inherit}` painted #333 where every other
+     * engine paints the parent's colour. */
+    int wide;
 } css_decl;
 
 /* One custom property (--name: value), for var() lookups. Both fields are bounded
@@ -316,6 +344,32 @@ static int parse_color(const char *v) {
 
 static int interp_color(const char *v) {
     return parse_color(v);
+}
+
+/* Whether a parse_color/interp_color result is a VALUE. The two sentinels are
+ * negative (CC_COLOR_CURRENT -2, CC_COLOR_TRANSPARENT -3) and only -1 means "not a
+ * colour", so every acceptance test written as `>= 0` silently rejected
+ * `transparent` and `currentColor` -- which is how a page clears an inherited or UA
+ * background, and how it says "match the text colour". 65 declarations in the
+ * measured corpus, on every page in it. One predicate so the next colour-valued
+ * property cannot get it wrong again. */
+static int color_ok(int c) { return c != -1; }
+
+/* A CSS-wide keyword (CSS Cascade 5 section 7.3). These are valid on EVERY
+ * property and none of them names a value in the property's own grammar, so every
+ * value interpreter in this file rejects them -- which is why they are recognised
+ * at the two SHARED chokepoints every property funnels through (the generic
+ * dispatch tail, and emit_len for the <length-percentage> family) rather than in a
+ * per-property table that would go stale on the next property added.
+ *
+ * `revert`/`revert-layer` roll back to the previous cascade origin. With one author
+ * origin and a UA sheet expressed as per-tag defaults rather than as declarations,
+ * "the previous origin" IS the unset default here, so they collapse onto the same
+ * handling -- correct by construction rather than by approximation. */
+static int css_wide_keyword(const char *v) {
+    return csel_ci_eq(v, "initial") || csel_ci_eq(v, "inherit") ||
+           csel_ci_eq(v, "unset")   || csel_ci_eq(v, "revert")  ||
+           csel_ci_eq(v, "revert-layer");
 }
 
 /* Alpha (4th) component of the first rgba()/hsla() call inside v, as a percent
@@ -841,7 +895,22 @@ static int expand_background(const char *val, css_decl *dst, int cap,
     }
     rest[r] = '\0';
     int color = interp_bg(rest);
-    if (f != 1 && uf != 1 && color < 0) return 0;
+    /* `background: transparent` and `background: none` both mean "no colour and no
+     * image layer", which is a RESET the shorthand must apply, not a value it fails
+     * to understand: CSS Backgrounds 3 section 3.10 resets every longhand it omits.
+     * Dropping them left whatever a lower-specificity rule (or the UA) painted. */
+    if (f != 1 && uf != 1 && !color_ok(color)) {
+        char kw[CSS_TOK_MAX];
+        const char *b = rest;
+        while (*b == ' ' || *b == '\t') ++b;
+        size_t tl = strlen(b);
+        while (tl > 0 && (b[tl - 1] == ' ' || b[tl - 1] == '\t')) --tl;
+        if (tl >= sizeof kw) return 0;
+        memcpy(kw, b, tl);
+        kw[tl] = '\0';
+        if (!csel_ci_eq(kw, "none") && !css_wide_keyword(kw)) return 0;
+        color = CC_COLOR_TRANSPARENT;
+    }
     if (cap < 2) return 0;
     dst[0].prop = P_BG;
     dst[0].ival = color;
@@ -1024,6 +1093,17 @@ static int interp_display(const char *v) {
         || csel_ci_eq(v, "table-footer-group")) return CSS_DISP_TABLE_ROW_GROUP;
     if (csel_ci_eq(v, "table-column") || csel_ci_eq(v, "table-column-group"))
         return CSS_DISP_TABLE_COLUMN;
+    /* The vendor spellings of `flex` ARE `flex`: -webkit-flex and -ms-flexbox name
+     * the same formatting context with the same box model, so an autoprefixed sheet
+     * that writes both gets one answer either way. `-webkit-box` is deliberately
+     * absent: that is the 2009 draft, a different spec with different item
+     * semantics, and guessing it is `flex` would be inventing a rule. */
+    if (csel_ci_eq(v, "-webkit-flex") || csel_ci_eq(v, "-moz-flex") ||
+        csel_ci_eq(v, "-ms-flexbox") ||
+        csel_ci_eq(v, "-webkit-inline-flex") || csel_ci_eq(v, "-moz-inline-flex") ||
+        csel_ci_eq(v, "-ms-inline-flexbox")) return CSS_DISP_FLEX;
+    if (csel_ci_eq(v, "-ms-grid") || csel_ci_eq(v, "-ms-inline-grid"))
+        return CSS_DISP_GRID;
     return -1;  /* unknown display: leave unset */
 }
 
@@ -1248,7 +1328,16 @@ static int expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
  * respect to the element's font-size (spec/css_length.md section 8.4). Carrying
  * `em` through the arithmetic is what makes `calc(2em + 10px)` exact at any
  * font-size instead of frozen at the initial 16px. */
-typedef struct calc_val { double px; double em; int is_length; } calc_val;
+/* `pct` is the percentage component, carried through the arithmetic exactly like
+ * `em` and for exactly the same reason: a calc() result is the affine combination
+ * a*1px + b*1em + c*1%, and CSS Values 4 section 10 lets an author mix all three.
+ * Collapsing the percentage at parse time is impossible -- its basis is the
+ * containing block, which the element-free cascade does not know -- so it travels
+ * symbolically to bx_lp_px, the one place a percentage becomes pixels.
+ *
+ * Before this, calc() understood no percentage at all, so `width: calc(100% - 2rem)`
+ * -- the single most common responsive idiom on the web -- was dropped whole. */
+typedef struct calc_val { double px; double em; double pct; int is_length; } calc_val;
 typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
 
 static void calc_skip_ws(calc_parser *p) {
@@ -1281,11 +1370,18 @@ static int calc_match_fn(calc_parser *p, const char *name) {
  * When every operand shares one derivative the result provably has it too,
  * whichever operand wins, so that case IS exact and is kept.
  */
-static double calc_piecewise_em(const calc_val *args, int nargs) {
+/* Shared by BOTH symbolic components: the percentage is piecewise for exactly the
+ * same reason the em derivative is -- which operand min()/max()/clamp() selects
+ * depends on the containing block, which is unknown here -- so it obeys the same
+ * rule instead of a second copy of it. want_pct selects the component. */
+static double calc_piecewise(const calc_val *args, int nargs, int want_pct) {
     if (nargs <= 0) return 0.0;
-    for (int k = 1; k < nargs; ++k)
-        if (args[k].em != args[0].em) return 0.0;
-    return args[0].em;
+    double first = want_pct ? args[0].pct : args[0].em;
+    for (int k = 1; k < nargs; ++k) {
+        double v = want_pct ? args[k].pct : args[k].em;
+        if (v != first) return 0.0;
+    }
+    return first;
 }
 
 /* min()/max()/clamp() (2026-07-10): comma-separated full expressions, every
@@ -1309,11 +1405,22 @@ static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind) {
     ++p->i;
     for (int k = 1; k < nargs; ++k)
         if (args[k].is_length != args[0].is_length) return 0;
+    /* A PERCENTAGE inside min()/max()/clamp() is not resolvable here and must fail
+     * closed, not degrade. Unlike the em derivative -- where falling back to slope
+     * 0 still leaves a valid pixel value -- the comparison itself is meaningless
+     * without the basis: min(50%, 600px) would compare a px half of 0 against 600
+     * and pick 0, i.e. collapse the element to zero width. Dropping the declaration
+     * leaves the element at its content size, which is the honest answer.
+     * Percentages in a plain calc() ARE resolvable (they stay symbolic and are
+     * summed later); only the piecewise functions have to refuse. */
+    for (int k = 0; k < nargs; ++k)
+        if (args[k].pct != 0.0) return 0;
     if (kind == 2) {
         if (nargs != 3) return 0;
         double m = (args[1].px < args[2].px) ? args[1].px : args[2].px;
         out->px = (args[0].px > m) ? args[0].px : m;
-        out->em = calc_piecewise_em(args, nargs);
+        out->em  = calc_piecewise(args, nargs, 0);
+        out->pct = calc_piecewise(args, nargs, 1);
         out->is_length = args[0].is_length;
         return 1;
     }
@@ -1323,7 +1430,8 @@ static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind) {
         else           { if (args[k].px > best) best = args[k].px; }
     }
     out->px = best;
-    out->em = calc_piecewise_em(args, nargs);
+    out->em  = calc_piecewise(args, nargs, 0);
+    out->pct = calc_piecewise(args, nargs, 1);
     out->is_length = args[0].is_length;
     return 1;
 }
@@ -1382,11 +1490,21 @@ static int calc_factor(calc_parser *p, calc_val *out, int depth) {
         if (cl_unit_scale(p->s + p->i, un, &ctx, &per) == CL_OK) {
             out->px = num * per;
             out->em = num * cl_unit_font_ratio(p->s + p->i, un);
+            out->pct = 0.0;
             out->is_length = 1; p->i += un; return 1;
         }
     }
+    if (p->i < p->n && p->s[p->i] == '%') {
+        out->px = 0.0;
+        out->em = 0.0;
+        out->pct = num;
+        out->is_length = 1;   /* a <percentage> is dimensional, like a length */
+        ++p->i;
+        return 1;
+    }
     out->px = num;                      /* a bare number: length only if exactly 0 */
     out->em = 0.0;
+    out->pct = 0.0;
     out->is_length = (num == 0.0);
     return 1;
 }
@@ -1403,12 +1521,14 @@ static int calc_term(calc_parser *p, calc_val *out, int depth) {
         if (op == '*') {
             if (out->is_length && rhs.is_length) return 0;   /* length*length: invalid */
             out->em = out->em * rhs.px + rhs.em * out->px;
+            out->pct = out->pct * rhs.px + rhs.pct * out->px;
             out->px = out->px * rhs.px;
             out->is_length = out->is_length || rhs.is_length;
         } else {
             if (rhs.is_length || rhs.px == 0.0) return 0;    /* divisor must be a nonzero number */
             out->px = out->px / rhs.px;
             out->em = out->em / rhs.px;
+            out->pct = out->pct / rhs.px;
         }
     }
     return 1;
@@ -1425,6 +1545,7 @@ static int calc_expr(calc_parser *p, calc_val *out, int depth) {
         if (out->is_length != rhs.is_length) return 0;       /* length +/- number: invalid */
         out->px = (op == '+') ? out->px + rhs.px : out->px - rhs.px;
         out->em = (op == '+') ? out->em + rhs.em : out->em - rhs.em;
+        out->pct = (op == '+') ? out->pct + rhs.pct : out->pct - rhs.pct;
     }
     return 1;
 }
@@ -1432,7 +1553,8 @@ static int calc_expr(calc_parser *p, calc_val *out, int depth) {
 /* Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching
  * ")" already stripped by the caller). Fails closed on any leftover/unparsed input,
  * mismatched parens, a dimensionless result, or a dimensional error. */
-static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em) {
+static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
+                          double *out_pct) {
     calc_parser p = { v, vlen, 0 };
     calc_val r;
     if (!calc_expr(&p, &r, 0)) return 0;
@@ -1440,17 +1562,23 @@ static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *ou
     if (p.i != vlen || !r.is_length) return 0;
     *out_px = r.px;
     if (out_em != NULL) *out_em = r.em;
+    if (out_pct != NULL) *out_pct = r.pct;
     return 1;
 }
 
+/* The pure-length entry point: a percentage in the expression makes the result a
+ * <length-percentage>, which this caller's property does not accept, so it fails
+ * closed here rather than silently dropping the percentage term. */
 static int calc_eval(const char *v, size_t vlen, double *out_px) {
-    return calc_eval_full(v, vlen, out_px, NULL);
+    double pct = 0.0;
+    if (!calc_eval_full(v, vlen, out_px, NULL, &pct)) return 0;
+    return pct == 0.0;
 }
 
 /* The font-size derivative of a calc() body, for value_em_milli. */
 static int calc_eval_em(const char *v, size_t vlen, double *out_em) {
     double px;
-    return calc_eval_full(v, vlen, &px, out_em);
+    return calc_eval_full(v, vlen, &px, out_em, NULL);
 }
 
 /* True if s (already trimmed) is a "calc(...)" call spanning the whole string
@@ -1595,6 +1723,23 @@ static int interp_lp(const char *v, int allow_auto, int allow_pct,
     if (interp_len(v, allow_auto, out_px)) return 1;
     if (!allow_pct) return 0;
 
+    /* calc() that MIXES a percentage with a length. interp_len above already ran
+     * the same expression and failed closed on the percentage term (its property
+     * may not accept one); here the property does, so both halves are kept and
+     * travel symbolically to bx_lp_px. `width: calc(100% - 2rem)` is the most
+     * common responsive idiom on the web and used to be dropped whole. */
+    size_t cs, cl;
+    if (calc_unwrap(v, &cs, &cl)) {
+        double px = 0.0, pct = 0.0;
+        if (!calc_eval_full(v + cs, cl, &px, NULL, &pct)) return 0;
+        double pm = pct * 10.0;
+        if (pm >  (double)CSS_PCT_MAX) pm =  (double)CSS_PCT_MAX;
+        if (pm < -(double)CSS_PCT_MAX) pm = -(double)CSS_PCT_MAX;
+        *out_pm = (int)(pm < 0.0 ? pm - 0.5 : pm + 0.5);
+        *out_px = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
+        return 1;
+    }
+
     cl_ctx ctx = cl_ctx_initial();
     cl_lp lp;
     if (cl_resolve_lp(v, &ctx, &lp) != CL_OK || !lp.has_pct) return 0;
@@ -1607,6 +1752,24 @@ static int interp_lp(const char *v, int allow_auto, int allow_pct,
     return 1;
 }
 
+/* Whether a <length-percentage> whose two halves are (px_val, pct_pm) can be
+ * non-negative once its basis is known.
+ *
+ * A property that forbids negative values (width, padding, ...) cannot decide that
+ * by looking at one half: `calc(100% - 6px)` has a NEGATIVE px half and a positive
+ * percentage half, and its used value is positive for any containing block wider
+ * than 6px. Rejecting on the px half alone dropped the single most common
+ * responsive idiom on the web. CSS Values 4 section 10.1 is explicit that a
+ * calc() result out of range is CLAMPED at used-value time, not invalid at parse
+ * time -- so the only thing rejected here is a value that can never be positive.
+ * The clamp itself belongs to the consumer of the used value, not to the cascade. */
+static int lp_can_be_nonneg(int px_val, int pct_pm) {
+    if (px_val == CSS_LEN_AUTO || px_val == CSS_LEN_UNSET) return 1;
+    if (px_val >= 0 && pct_pm >= 0) return 1;
+    /* Mixed signs: the basis decides, so it is representable. */
+    return (px_val < 0 && pct_pm > 0) || (pct_pm < 0 && px_val > 0);
+}
+
 /* Emits one box length declaration for slot into dst (cap permitting). A negative
  * value is rejected unless allow_neg (margins allow it; padding/width do not).
  *
@@ -1617,15 +1780,53 @@ static int interp_lp(const char *v, int allow_auto, int allow_pct,
  * old separate P_WIDTH_PCT slot had.
  *
  * Returns the number of decls written (0 = unsupported value or no room). */
+/* How `auto` is treated for a given <length-percentage> slot.
+ *
+ * The distinction is not cosmetic. On a margin, `auto` is a real value with real
+ * behaviour (it absorbs free space, which is how `margin:0 auto` centres). On
+ * width/height/min/max it means "size to content" -- and content sizing IS this
+ * engine's behaviour for an undeclared box dimension, so the correct
+ * representation of `width:auto` is an unset dimension whose CASCADE SLOT is
+ * claimed. Claiming matters: `.a{width:200px} .a.b{width:auto}` must come out
+ * content-sized, and dropping the second declaration (which is what happened
+ * before) left the 200px in place. 90 declarations in the measured corpus. */
+#define AUTO_REJECT 0   /* `auto` is not in this property's value grammar */
+#define AUTO_VALUE  1   /* `auto` is a distinct value -> CSS_LEN_AUTO */
+#define AUTO_RESET  2   /* `auto` is this engine's unset behaviour -> claim, write nothing */
+/* max-width/max-height take `none`, not `auto`, as their "no constraint" initial
+ * value (CSS 2.1 section 10.4). Same reset semantics, different spelling -- kept a
+ * distinct mode so `width:none`, which is not valid CSS, still fails closed. */
+#define AUTO_RESET_NONE 3
+
 static int emit_len(css_decl *dst, int cap, int slot, const char *val,
                     int allow_auto, int allow_neg) {
     int ps = pct_slot_of(slot);
     int need = (ps >= 0) ? 2 : 1;
     if (cap < need) return 0;
 
+    /* A CSS-wide keyword -- and `auto` where auto IS the unset behaviour -- claims
+     * the slot(s) and writes nothing. BOTH halves are claimed, for the same reason
+     * every other emitter writes both: leaving the % half unclaimed would let a
+     * lower-specificity `width:50%` survive underneath a `width:auto` that won. */
+    if (css_wide_keyword(val) ||
+        (allow_auto == AUTO_RESET && csel_ci_eq(val, "auto")) ||
+        (allow_auto == AUTO_RESET_NONE &&
+         (csel_ci_eq(val, "none") || csel_ci_eq(val, "auto")))) {
+        dst[0].prop = slot;
+        dst[0].ival = CSS_LEN_UNSET;
+        dst[0].emil = 0;
+        dst[0].wide = 1;
+        if (ps < 0) return 1;
+        dst[1].prop = P_PCT_FIRST + ps;
+        dst[1].ival = 0;
+        dst[1].emil = 0;
+        dst[1].wide = 1;
+        return 2;
+    }
+
     int o, pm;
     if (!interp_lp(val, allow_auto, ps >= 0, &o, &pm)) return 0;
-    if (!allow_neg && o != CSS_LEN_AUTO && (o < 0 || pm < 0)) return 0;
+    if (!allow_neg && !lp_can_be_nonneg(o, pm)) return 0;
 
     dst[0].prop = slot;
     dst[0].ival = o;
@@ -1682,7 +1883,7 @@ static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_
     while (nv < 4 && next_ws_token(&p, tok, sizeof tok)) {
         int o, q;
         if (!interp_lp(tok, allow_auto, accepts_pct, &o, &q)) return 0;
-        if (!allow_neg && o != CSS_LEN_AUTO && (o < 0 || q < 0)) return 0;
+        if (!allow_neg && !lp_can_be_nonneg(o, q)) return 0;
         px[nv] = o; pm[nv] = q;
         em[nv] = (o == CSS_LEN_AUTO) ? 0 : value_em_milli(tok);
         ++nv;
@@ -1826,7 +2027,15 @@ static int interp_valign(const char *v) {
     if (csel_ci_eq(v, "middle"))   return CSS_VA_MIDDLE;
     if (csel_ci_eq(v, "top"))      return CSS_VA_TOP;
     if (csel_ci_eq(v, "bottom"))   return CSS_VA_BOTTOM;
-    /* text-top/text-bottom/<length>/<percentage>: fail closed for now. */
+    /* `text-top`/`text-bottom` align with the parent's CONTENT box rather than the
+     * line box (CSS 2.1 section 10.8.1). This engine has one line box per line and
+     * no separate parent content edge to align against, so the two collapse onto
+     * top/bottom -- the same edge, measured on the box it does have. Dropping them
+     * instead left the element on the baseline, which is a different place
+     * entirely; 17 declarations on one corpus page. */
+    if (csel_ci_eq(v, "text-top"))    return CSS_VA_TOP;
+    if (csel_ci_eq(v, "text-bottom")) return CSS_VA_BOTTOM;
+    /* <length>/<percentage> offsets: still fail closed (no sub-line placement). */
     return -1;
 }
 
@@ -1939,6 +2148,23 @@ static int liststyle_kw(const char *t) {
     return -1;
 }
 
+/* A <counter-style> name this engine has no glyph set for.
+ *
+ * CSS Counter Styles 3 section 7.1 is explicit: a counter style that cannot be used
+ * falls back to `decimal`, it does not make the declaration invalid. So
+ * `list-style-type: persian` numbers the list in decimal -- which is what every
+ * engine does when it lacks the style -- instead of dropping the declaration and
+ * leaving the list with whatever marker a lower-specificity rule set. The name must
+ * still LOOK like an identifier, so junk keeps failing closed. */
+static int liststyle_unknown_name(const char *t) {
+    if (t[0] == '\0') return 0;
+    for (const char *p = t; *p != '\0'; ++p) {
+        char c = csel_lower_ch(*p);
+        if (!((c >= 'a' && c <= 'z') || c == '-' || (*p >= '0' && *p <= '9'))) return 0;
+    }
+    return 1;
+}
+
 /* list-style-type, or the type token of the list-style shorthand: the first
  * recognised keyword wins. url() (a list-style-image) is dropped: never fetch. */
 static int interp_liststyle(const char *v) {
@@ -1954,6 +2180,11 @@ static int interp_liststyle(const char *v) {
         while (*p != '\0' && *p != ' ' && *p != '\t') ++p;
         int ls = liststyle_kw(tok);
         if (ls >= 0) return ls;
+        /* An identifier this engine has no glyph set for is `decimal`, not a
+         * parse error (CSS Counter Styles 3 section 7.1). `inside`/`outside` and
+         * `none` are handled by liststyle_kw / the position longhand, so what
+         * reaches here is a counter-style name. */
+        if (liststyle_unknown_name(tok)) return CSS_LS_DECIMAL;
     }
     return -1;
 }
@@ -2517,7 +2748,7 @@ static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)
 /* token classifiers for the per-category border-{width,style,color} quad expanders. */
 static int interp_bw_tok(const char *t, int *o) { return interp_border_width(t, o); }
 static int interp_bs_tok(const char *t, int *o) { int r = interp_border_style(t); if (r < 0) return 0; *o = r; return 1; }
-static int interp_bc_tok(const char *t, int *o) { int r = interp_color(t); if (r < 0) return 0; *o = r; return 1; }
+static int interp_bc_tok(const char *t, int *o) { int r = interp_color(t); if (!color_ok(r)) return 0; *o = r; return 1; }
 
 typedef int (*tok_interp)(const char *tok, int *out);
 
@@ -2560,7 +2791,7 @@ static int classify_box_edge(const char *val, int *w, int *hw, int *s, int *hs,
         int tmp;
         if (!*hw && interp_border_width(tok, &tmp)) { *w = tmp; *hw = 1; }
         else if (!*hs && (tmp = interp_border_style(tok)) >= 0) { *s = tmp; *hs = 1; }
-        else if (!*hc && (tmp = interp_color(tok)) >= 0) { *c = tmp; *hc = 1; }
+        else if (!*hc && color_ok(tmp = interp_color(tok))) { *c = tmp; *hc = 1; }
         else return 0;   /* unrecognised token: drop the whole shorthand */
     }
     return (*hw || *hs || *hc);
@@ -2915,7 +3146,12 @@ static int expand_bg_position(const char *val, css_decl *dst, int cap) {
         if (csel_ci_eq(tok, "top"))    { y = 0; continue; }
         if (csel_ci_eq(tok, "bottom")) { y = CSS_LEN_END; continue; }
         int px;
-        if (interp_len(tok, 0, &px) && px >= 0) {
+        /* NEGATIVE offsets are the whole point of a sprite sheet: `background-
+         * position: -304px -82px` picks a tile out of a strip, and it is the single
+         * most common shape this property takes on a real page (38 declarations in
+         * one corpus page alone). A position is an OFFSET, not a size, so the
+         * non-negative rule that applies to widths never applied here. */
+        if (interp_len(tok, AUTO_REJECT, &px)) {
             if (x == CSS_LEN_UNSET) x = px;
             else if (y == CSS_LEN_UNSET) y = px;
         }
@@ -2948,8 +3184,11 @@ static int expand_content(const char *val, css_decl *dst, int cap,
     int q = (val[0] == '"' || val[0] == '\'') ? val[0] : 0;
     if (!q) return 0;
     size_t len = strlen(val);
-    if (len < 3 || val[len-1] != q) return 0;
-    /* Extract inner string, store in pool */
+    /* len == 2 is the EMPTY string, `content: ""`, which is valid and meaningful:
+     * it is how an author makes a pseudo-element exist so that its own box
+     * properties (a decorative bar, an icon, a clearfix) have something to apply
+     * to. Requiring three characters dropped it. */
+    if (len < 2 || val[len-1] != q) return 0;
     size_t inner_len = len - 2;
     char buf[CSS_URL_MAX];
     if (inner_len >= sizeof buf) inner_len = sizeof buf - 1;
@@ -3589,6 +3828,23 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     const char *p = val;
     while (*p == ' ' || *p == '\t') ++p;
 
+    /* `transform: none` is the initial value and, on a page, a RESET -- it is how a
+     * rule cancels a transform a lower-specificity rule applied. Dropping it left
+     * the transform in place, which is the opposite of what the author wrote. It
+     * emits the identity explicitly rather than returning 0, so it claims the
+     * cascade slots instead of yielding them. */
+    if (csel_ci_eq(p, "none")) {
+        dst[0].prop = P_TRANSFORM_TX; dst[0].ival = 0;
+        dst[1].prop = P_TRANSFORM_TY; dst[1].ival = 0;
+        int k = 2;
+        if (k < cap) { dst[k].prop = P_TRANSFORM_SX;  dst[k].ival = 1000; ++k; }
+        if (k < cap) { dst[k].prop = P_TRANSFORM_SY;  dst[k].ival = 1000; ++k; }
+        if (k < cap) { dst[k].prop = P_TRANSFORM_ROTATE; dst[k].ival = 0; ++k; }
+        if (k < cap) { dst[k].prop = P_TRANSFORM_SKX;    dst[k].ival = 0; ++k; }
+        if (k < cap) { dst[k].prop = P_TRANSFORM_SKY;    dst[k].ival = 0; ++k; }
+        return k;
+    }
+
     enum { TR_X, TR_Y, TR_BOTH, SC_X, SC_Y, SC_BOTH, ROTATE,
            SK_X, SK_Y, SK_BOTH, MATRIX } kind;
     if (csel_span_eq(p, "translatex(", 11, 1))      { kind = TR_X;    p += 11; }
@@ -3975,9 +4231,17 @@ static int expand_font(const char *val, css_decl *dst, int cap) {
  * cap). Returns the number written (0 if unsupported). Most properties emit one; the
  * margin/padding shorthands expand to up to four (one per side). The important flag is
  * left to the caller (parse_one_decl stamps it). */
+/* `known` (optional) reports whether the property NAME reached a branch of the
+ * dispatch below, which is what separates "not implemented" from "implemented but
+ * this value was rejected" for the drop log (spec/css_drops.md). It is written at
+ * the two exits that mean "no name matched" and nowhere else, so the dispatch stays
+ * the single source of truth -- a parallel list of known names would go stale on the
+ * next property added. */
 static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
-                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
+                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
+                           int *known) {
+    if (known != NULL) *known = 1;
     /*
      * A vendor-prefixed property IS the standard property: `-webkit-transform`
      * and `transform` are the same declaration, and every engine treats the
@@ -4007,8 +4271,9 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
              * recursing on it would be a loop with attacker-chosen depth. */
             if (bare[0] == '\0' || bare[0] == '-') return 0;
             return interpret_prop(bare, val, dst, cap, urltab, nurl, urlcap,
-                                  contenttab, ncontent, contentcap);
+                                  contenttab, ncontent, contentcap, known);
         }
+        if (known != NULL) *known = 0;
         return 0;   /* an unknown vendor prefix: fail closed */
     }
 
@@ -4027,12 +4292,12 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     /* width/max-width and every other box length go through the one
      * <length-percentage> emitter: the % half is carried symbolically and
      * resolved against the containing block at layout time. */
-    if (strcmp(prop, "width") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
-    if (strcmp(prop, "max-width") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
-    if (strcmp(prop, "min-width") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
-    if (strcmp(prop, "height") == 0)    return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
-    if (strcmp(prop, "min-height") == 0)return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
-    if (strcmp(prop, "max-height") == 0)return emit_len(dst, cap, P_MAXHEIGHT, val, 0, 0);
+    if (strcmp(prop, "width") == 0)     return emit_len(dst, cap, P_WIDTH, val, AUTO_RESET, 0);
+    if (strcmp(prop, "max-width") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, AUTO_RESET_NONE, 0);
+    if (strcmp(prop, "min-width") == 0) return emit_len(dst, cap, P_MINWIDTH, val, AUTO_RESET, 0);
+    if (strcmp(prop, "height") == 0)    return emit_len(dst, cap, P_HEIGHT, val, AUTO_RESET, 0);
+    if (strcmp(prop, "min-height") == 0)return emit_len(dst, cap, P_MINHEIGHT, val, AUTO_RESET, 0);
+    if (strcmp(prop, "max-height") == 0)return emit_len(dst, cap, P_MAXHEIGHT, val, AUTO_RESET_NONE, 0);
 
     /* Logical properties (2026-07-10): physical horizontal-tb LTR mapping (the
      * engine has no writing-mode, and the cascade interprets values before it
@@ -4055,12 +4320,12 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     if (strcmp(prop, "inset-block-end") == 0)      return emit_len(dst, cap, P_INSET_BOTTOM, val, 1, 1);
     if (strcmp(prop, "inset-inline") == 0)   return expand_box2(val, P_INSET_LEFT, P_INSET_RIGHT, 1, 1, dst, cap);
     if (strcmp(prop, "inset-block") == 0)    return expand_box2(val, P_INSET_TOP, P_INSET_BOTTOM, 1, 1, dst, cap);
-    if (strcmp(prop, "inline-size") == 0)     return emit_len(dst, cap, P_WIDTH, val, 0, 0);
-    if (strcmp(prop, "block-size") == 0)      return emit_len(dst, cap, P_HEIGHT, val, 0, 0);
-    if (strcmp(prop, "min-inline-size") == 0) return emit_len(dst, cap, P_MINWIDTH, val, 0, 0);
-    if (strcmp(prop, "max-inline-size") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, 0, 0);
-    if (strcmp(prop, "min-block-size") == 0)  return emit_len(dst, cap, P_MINHEIGHT, val, 0, 0);
-    if (strcmp(prop, "max-block-size") == 0)  return emit_len(dst, cap, P_MAXHEIGHT, val, 0, 0);
+    if (strcmp(prop, "inline-size") == 0)     return emit_len(dst, cap, P_WIDTH, val, AUTO_RESET, 0);
+    if (strcmp(prop, "block-size") == 0)      return emit_len(dst, cap, P_HEIGHT, val, AUTO_RESET, 0);
+    if (strcmp(prop, "min-inline-size") == 0) return emit_len(dst, cap, P_MINWIDTH, val, AUTO_RESET, 0);
+    if (strcmp(prop, "max-inline-size") == 0) return emit_len(dst, cap, P_MAXWIDTH, val, AUTO_RESET_NONE, 0);
+    if (strcmp(prop, "min-block-size") == 0)  return emit_len(dst, cap, P_MINHEIGHT, val, AUTO_RESET, 0);
+    if (strcmp(prop, "max-block-size") == 0)  return emit_len(dst, cap, P_MAXHEIGHT, val, AUTO_RESET_NONE, 0);
 
     /* Multi-slot shorthands (2026-07-10): two-value gap, place-*, font. */
     if (strcmp(prop, "gap") == 0 || strcmp(prop, "grid-gap") == 0)
@@ -4134,6 +4399,20 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
         return emit_radius_corner(dst, cap, P_RADIUS_BR, val);
     if (strcmp(prop, "border-bottom-left-radius") == 0)
         return emit_radius_corner(dst, cap, P_RADIUS_BL, val);
+    /* The pre-standard Gecko/Presto corner spellings put the corner LAST
+     * (`border-radius-topright`), which is why stripping the vendor prefix and
+     * asking again does not find them -- the bare name is a different name, not the
+     * standard one. They are the same property with the same value grammar, so the
+     * mapping is a rename, not an invented rule (unlike the IE10 tweener flexbox
+     * names, whose VALUES differ and which therefore stay dropped). */
+    if (strcmp(prop, "border-radius-topleft") == 0)
+        return emit_radius_corner(dst, cap, P_BORDER_RADIUS, val);
+    if (strcmp(prop, "border-radius-topright") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_TR, val);
+    if (strcmp(prop, "border-radius-bottomright") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_BR, val);
+    if (strcmp(prop, "border-radius-bottomleft") == 0)
+        return emit_radius_corner(dst, cap, P_RADIUS_BL, val);
     if (strcmp(prop, "border-start-start-radius") == 0)
         return emit_radius_corner(dst, cap, P_BORDER_RADIUS, val);
     if (strcmp(prop, "border-start-end-radius") == 0)
@@ -4165,7 +4444,7 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
          * matching how the color slot itself overwrites. */
         if (cap < 2) return 0;
         int o = interp_bg(val);
-        if (o < 0) return 0;
+        if (!color_ok(o)) return 0;
         dst[0].prop = P_BG;       dst[0].ival = o;
         dst[1].prop = P_BG_ALPHA; dst[1].ival = bg_alpha_of(val);
         return 2;
@@ -4427,12 +4706,73 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
     else if (strcmp(prop, "grid-area") == 0)              return expand_grid_area(val, dst, cap);
     else if (strcmp(prop, "grid-template") == 0 || strcmp(prop, "grid") == 0)
         return expand_grid_template(val, dst, cap, contenttab, ncontent, contentcap);
-    else return 0;
+    else { if (known != NULL) *known = 0; return 0; }
 
-    if (ival < 0) return 0;  /* unsupported value */
+    /* `transparent` (-3) and `currentColor` (-2) are VALUES, not failures: the
+     * colour interpreters return them as sentinels and the blanket `ival < 0`
+     * below used to eat every one. `background-color:transparent` is how a page
+     * clears an inherited or UA background, so dropping it left the old paint in
+     * place -- 65 declarations in the measured corpus, on every page in it. */
+    if (ival == CC_COLOR_CURRENT || ival == CC_COLOR_TRANSPARENT) {
+        dst[0].prop = prop_id;
+        dst[0].ival = ival;
+        return 1;
+    }
+    if (ival < 0) {
+        /* One chokepoint for every property that reaches the tail: a CSS-wide
+         * keyword claims the slot without writing a value. */
+        if (css_wide_keyword(val)) {
+            dst[0].prop = prop_id;
+            dst[0].wide = 1;
+            return 1;
+        }
+        return 0;  /* unsupported value */
+    }
     dst[0].prop = prop_id;
     dst[0].ival = ival;
     return 1;
+}
+
+/* Copies hostile CSS text into a fixed report buffer: bounded, NUL-terminated,
+ * truncated with a visible "..." marker rather than silently cut, and with control
+ * bytes folded to '.' -- the drop report is printed to a terminal, and an ANSI escape
+ * smuggled through a remote stylesheet must not be able to paint it. */
+static void drop_copy_text(char *dst, size_t cap, const char *src) {
+    if (cap == 0) return;
+    size_t len = strlen(src);
+    size_t room = cap - 1;
+    size_t take = len;
+    int trunc = 0;
+    if (take > room) { trunc = 1; take = (room > 3) ? room - 3 : 0; }
+    size_t o = 0;
+    for (size_t i = 0; i < take; ++i) {
+        unsigned char c = (unsigned char)src[i];
+        dst[o++] = (c < 0x20 || c == 0x7f) ? '.' : (char)c;
+    }
+    if (trunc) { for (int k = 0; k < 3 && o + 1 < cap; ++k) dst[o++] = '.'; }
+    dst[o] = '\0';
+}
+
+/* Records one dropped declaration, coalescing by (property, cause). `total` counts
+ * every drop seen even once the listing is full, so a report can state the real
+ * magnitude instead of understating it. */
+static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause) {
+    if (log == NULL) return;
+    ++log->total;
+    if (log->items == NULL || log->cap == 0) return;
+    for (size_t i = 0; i < log->n; ++i) {
+        if (log->items[i].cause == cause &&
+            strcmp(log->items[i].prop, prop) == 0) {
+            if (log->items[i].count < INT_MAX) ++log->items[i].count;
+            return;
+        }
+    }
+    if (log->n >= log->cap) return;
+    css_drop *d = &log->items[log->n++];
+    drop_copy_text(d->prop, sizeof d->prop, prop);
+    drop_copy_text(d->val, sizeof d->val, val);
+    d->cause = cause;
+    d->count = 1;
 }
 
 /* Interprets one declaration span s[0,n) into dst (up to cap). Returns the number of
@@ -4440,11 +4780,12 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
  * `!important` (stamping every emitted decl), resolves any var() reference against
  * tab/ntab (a custom-property declaration itself, `--name: ...`, is not a real
  * property and falls through interpret_prop's unknown-property path unchanged),
- * then dispatches on the property. */
+ * then dispatches on the property. `log` (optional) records what was discarded. */
 static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
                            const css_custom_prop *tab, size_t ntab,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
-                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
+                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
+                           css_drop_log *log) {
     if (cap < 1) return 0;
     size_t c = 0;
     while (c < n && s[c] != ':') ++c;
@@ -4463,12 +4804,28 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
     const char *use_val = val;
     char resolved[CSS_URL_MAX];
     if (csel_substr(val, "var(", 1)) {
-        if (!resolve_var(val, resolved, sizeof resolved, tab, ntab)) return 0;
+        if (!resolve_var(val, resolved, sizeof resolved, tab, ntab)) {
+            /* An unresolvable var() is a value problem, not a missing property:
+             * the referenced custom property was never declared (or the fallback
+             * chain bottomed out), so the declaration is invalid at computed-value
+             * time exactly as CSS Variables 1 says. */
+            drop_record(log, prop, val, CSS_DROP_BAD_VALUE);
+            return 0;
+        }
         use_val = resolved;
     }
 
+    /* A custom property declaration is not a property, so it is not a drop -- it
+     * was already harvested into the var() table by collect_custom_props_scoped. */
+    int is_custom = (prop[0] == '-' && prop[1] == '-');
+
+    int known = 1;
     int nw = interpret_prop(prop, use_val, dst, cap, urltab, nurl, urlcap,
-                             contenttab, ncontent, contentcap);
+                             contenttab, ncontent, contentcap, &known);
+    if (nw == 0 && !is_custom) {
+        drop_record(log, prop, use_val,
+                    known ? CSS_DROP_BAD_VALUE : CSS_DROP_UNKNOWN_PROP);
+    }
     for (int i = 0; i < nw; ++i) dst[i].important = important;
     return nw;
 }
@@ -4480,13 +4837,15 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
 static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
                                const css_custom_prop *tab, size_t ntab,
                                char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
-                               char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
+                               char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
+                               css_drop_log *log) {
     size_t count = 0, i = 0;
     while (i < n && count < cap) {
         size_t j = i;
         while (j < n && s[j] != ';') ++j;
         count += (size_t)parse_one_decl(s + i, j - i, &dst[count], (int)(cap - count), tab, ntab,
-                                        urltab, nurl, urlcap, contenttab, ncontent, contentcap);
+                                        urltab, nurl, urlcap, contenttab, ncontent, contentcap,
+                                        log);
         i = (j < n) ? j + 1 : j;
     }
     return count;
@@ -4494,7 +4853,7 @@ static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap
 
 /* Adds a rule: selector list s[ss,se), declaration block s[ds,de). */
 static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
-                     size_t ds, size_t de) {
+                     size_t ds, size_t de, css_drop_log *log) {
     css_sel tmp[CSS_SELS_PER_GROUP];
     int got = 0;
     size_t i = ss;
@@ -4506,26 +4865,42 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     }
     if (got == 0) return;  /* no supported selector: skip the whole rule */
 
-    /* Grow decls array if needed. */
-    if (sh->ndecls >= sh->decls_cap) {
+    /* Interpret the block with GUARANTEED headroom, growing and retrying until the
+     * result is provably complete: the rule is trusted only when it finishes with
+     * CSS_DECL_SLOTS_MIN slots still free, which proves no declaration in it was
+     * refused for want of room. Growing once per rule (the old behaviour) left the
+     * free space cycling down to 1, and whichever rules landed there lost most of
+     * their declarations without a trace. */
+    size_t dstart = sh->ndecls;
+    size_t dn = 0;
+    for (;;) {
+        size_t room = sh->decls_cap - dstart;
+        if (room >= CSS_DECL_SLOTS_MIN) {
+            /* The retry re-reads the same text, so the log has to be rewound with
+             * it or the same drop would be counted once per attempt. */
+            size_t log_n = (log != NULL) ? log->n : 0;
+            size_t log_total = (log != NULL) ? log->total : 0;
+            dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], room,
+                                 sh->custom, sh->ncustom,
+                                 sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
+                                 sh->content_urls, &sh->ncontent_urls, 64, log);
+            if (room - dn >= CSS_DECL_SLOTS_MIN) break;   /* finished with slack */
+            if (log != NULL) { log->n = log_n; log->total = log_total; }
+        }
         size_t nc = sh->decls_cap ? sh->decls_cap * 2 : CSS_INIT_DECLS;
+        if (nc <= sh->decls_cap) return;                  /* overflow: fail closed */
         css_decl *g = (css_decl *)realloc(sh->decls, nc * sizeof *g);
         if (g == NULL) return;
-        /* V-002: zero the fresh region. The property emitters below write only
-         * the fields their property has -- `emil` is written by the LENGTH
-         * emitters alone -- so an unzeroed tail would hand a non-length slot a
-         * font-relative coefficient made of whatever realloc returned, and the
-         * cascade would then scale it by the element's font-size. */
+        /* V-002: zero the fresh region. The property emitters write only the fields
+         * their property has -- `emil`, the font-relative coefficient, is written by
+         * the LENGTH emitters alone -- so an unzeroed tail would hand a non-length
+         * slot a coefficient made of whatever realloc returned, and the cascade
+         * would then scale it by the element's font-size. */
         memset(g + sh->decls_cap, 0, (nc - sh->decls_cap) * sizeof *g);
         sh->decls = g;
         sh->decls_cap = nc;
+        dn = 0;
     }
-    size_t dstart = sh->ndecls;
-    size_t dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart],
-                                 sh->decls_cap - dstart,
-                                 sh->custom, sh->ncustom,
-                                 sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
-                                 sh->content_urls, &sh->ncontent_urls, 64);
     if (dn == 0) return;
 
     sh->ndecls += dn;
@@ -4787,7 +5162,7 @@ static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
 /* Parses rules in s[start,end). A matched @media block is descended into (bounded
  * depth); @import/@font-face/other @-rules and a non-matching @media are skipped. */
 static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
-                        const css_media *media, int depth) {
+                        const css_media *media, int depth, css_drop_log *log) {
     size_t i = start;
     while (i < end) {
         while (i < end && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r')) ++i;
@@ -4801,7 +5176,7 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                     size_t body_start = q + 1;
                     size_t body_end = (be > body_start) ? be - 1 : body_start;
                     if (depth < CSS_MEDIA_MAX_DEPTH && media_matches(s, i + 6, q, media))
-                        parse_block(sh, s, body_start, body_end, media, depth + 1);
+                        parse_block(sh, s, body_start, body_end, media, depth + 1, log);
                     i = be;
                     continue;
                 }
@@ -4916,11 +5291,11 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                                 size_t de2 = db;
                                 while (de2 < ke && s[de2] != '}') ++de2;
                                 /* Parse inner declarations to extract opacity */
-                                css_decl kdecls[CSS_MAX_KEYFRAME_DECLS] = { { 0, 0, 0, 0 } };  /* V-002 */
+                                css_decl kdecls[CSS_MAX_KEYFRAME_DECLS] = { { 0 } };  /* V-002: zero EVERY field, so a field added to css_decl cannot reintroduce the hole */
                                 int nd = interpret_decls(s + db, de2 - db,
                                     kdecls, CSS_MAX_KEYFRAME_DECLS, sh->custom, sh->ncustom,
                                     sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
-                                    NULL, NULL, 0);
+                                    NULL, NULL, 0, log);
                                 int kop = -1, kbg = -1, kfg = -1, ktx = CSS_LEN_UNSET, kty = CSS_LEN_UNSET, ksx = 0, ksy = 0, krot = 0;
                                 for (int dd = 0; dd < nd; ++dd) {
                                     int p = kdecls[dd].prop;
@@ -4974,7 +5349,7 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
         while (i < end && s[i] != '}') ++i;
         size_t de = i;     /* at '}' or end */
         if (i < end) ++i;
-        add_rule(sh, s, ss, se, ds, de);
+        add_rule(sh, s, ss, se, ds, de, log);
     }
 }
 
@@ -5130,17 +5505,18 @@ static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                                         css_custom_prop *tab, size_t cap,
                                         size_t *ntab, int depth);
 static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
-                        const css_media *media, int depth);
+                        const css_media *media, int depth, css_drop_log *log);
 
 /* Replaces a sheet's contents with the result of parsing s[0,n). Custom properties
  * are collected first so every var() reference resolves against the complete table
  * regardless of document order, exactly as on the first parse. */
 static void sheet_reparse(css_sheet *sh, const char *s, size_t n,
-                          const css_media *m, const char *root_scope) {
+                          const css_media *m, const char *root_scope,
+                          css_drop_log *log) {
     sheet_rewind(sh);
     collect_custom_props_scoped(s, 0, n, m, root_scope,
                                 sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
-    parse_block(sh, s, 0, n, m, 0);
+    parse_block(sh, s, 0, n, m, 0, log);
 }
 
 /* The root element's font-size in px, as the cascade resolves it (16px when the
@@ -5185,7 +5561,14 @@ css_status css_parse_media(const char *text, size_t len, const css_media *media,
 
 css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                             const char *root_scope, css_sheet **out) {
+    return css_parse_logged(text, len, media, root_scope, out, NULL);
+}
+
+css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+                            const char *root_scope, css_sheet **out,
+                            css_drop_log *log) {
     if (out == NULL) return CSS_ERR_NULL_ARG;
+    if (log != NULL) { log->n = 0; log->total = 0; }
     css_sheet *sh = (css_sheet *)calloc(1, sizeof *sh);
     if (sh == NULL) return CSS_ERR_OOM;
     css_media def = { 0, 0, CSS_MEDIA_DEFAULT_WIDTH };  /* screen / light / desktop */
@@ -5214,7 +5597,7 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
         if (clean == NULL) { css_free(sh); return CSS_ERR_OOM; }
         collect_custom_props_scoped(clean, 0, clen, m, root_scope,
                                     sh->custom, CSS_MAX_CUSTOM_PROPS, &sh->ncustom, 0);
-        parse_block(sh, clean, 0, clen, m, 0);
+        parse_block(sh, clean, 0, clen, m, 0, log);
 
         /* Second pass, only when the sheet redefines the root font-size: `rem` is
          * the ROOT em, so `html{font-size:62.5%}` makes 1rem 10px and not 16px.
@@ -5227,14 +5610,21 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
             size_t rlen = 0;
             char *rebased = rem_rebase(clean, clen, rem_px, &rlen);
             if (rebased != NULL) {
-                sheet_reparse(sh, rebased, rlen, m, root_scope);
+                /* The rebase re-parses the whole sheet, so the first pass's drops
+                 * are about text that no longer exists: restart the log rather than
+                 * double-count. `total` is reset with it -- a report that counted
+                 * both passes would claim twice the real number. */
+                if (log != NULL) { log->n = 0; log->total = 0; }
+                sheet_reparse(sh, rebased, rlen, m, root_scope, log);
                 /* The rebase must be a FIXED POINT. If rewriting the sheet also
                  * moved the root size, the root declared its own font-size in rem
                  * -- where the spec says rem means the INITIAL 16px, not the value
                  * being defined -- so the rewrite fed on itself. Abstain and
                  * restore the unrebased parse rather than compound the error. */
-                if (sheet_root_font_px(sh) != rem_px)
-                    sheet_reparse(sh, clean, clen, m, root_scope);
+                if (sheet_root_font_px(sh) != rem_px) {
+                    if (log != NULL) { log->n = 0; log->total = 0; }
+                    sheet_reparse(sh, clean, clen, m, root_scope, log);
+                }
                 free(rebased);
             }
         }
@@ -5288,6 +5678,22 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
         wi[slot] = imp;
         ws[slot] = spec;
         wo[slot] = ord;
+        /* A CSS-wide keyword WINS the slot and writes nothing (CSS Cascade 5
+         * section 7.3). Leaving the field at the style's unset default is what
+         * gives the keyword its meaning without a second slot->field switch that
+         * would go stale: the caller's ancestor merge fills an unset inherited
+         * property from the parent (`inherit`), and an unset non-inherited one
+         * stands at its initial value (`initial`/`unset`/`revert`).
+         *
+         * The winner bookkeeping above is the whole point -- it is what stops a
+         * lower-specificity rule from writing the slot afterwards. The font-relative
+         * and value caches are cleared so the font-size fold cannot re-apply a
+         * coefficient belonging to the declaration this one just beat. */
+        if (d->wide) {
+            if (wem != NULL) wem[slot] = 0;
+            if (wv  != NULL) wv[slot]  = CSS_LEN_UNSET;
+            return;
+        }
         /* Remember the winner's font-relative coefficient so the fold below can
          * find it without a second slot->field mapping. wem may be NULL for
          * callers that do not fold (css_parse_inline, which has no element and
@@ -5785,7 +6191,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                     combined[ncombined++] = sheet->custom[i];
             }
         }
-        css_decl tmp[CSS_INLINE_DECLS] = { { 0, 0, 0, 0 } };  /* V-002, as above */
+        css_decl tmp[CSS_INLINE_DECLS] = { { 0 } };  /* V-002, as above */
         char inline_bg_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
         size_t n_inline_bg_urls = 0;
         char inline_content_urls[CSS_INLINE_BG_URLS][CSS_URL_MAX];
@@ -5799,7 +6205,8 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
         size_t dn = interpret_decls(inline_style, inline_len, tmp, CSS_INLINE_DECLS,
                                     vtab, nvtab,
                                     inline_bg_urls, &n_inline_bg_urls, CSS_INLINE_BG_URLS,
-                                    inline_content_urls, &n_inline_content_urls, CSS_INLINE_BG_URLS);
+                                    inline_content_urls, &n_inline_content_urls, CSS_INLINE_BG_URLS,
+                                    NULL);
         for (size_t d = 0; d < dn; ++d)
             apply_decl(&out, wi, ws, wo, wem, wv, &tmp[d], CSS_INLINE_SPEC, INT_MAX,
                        inline_bg_urls, inline_content_urls, -1);

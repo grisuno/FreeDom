@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!--
+  Probe: a grid of cards whose thumbnail image is UNAVAILABLE.
+
+  This is the single most common shape on a media/catalogue front page (jkanime,
+  any streaming index, any shop listing), and it is the shape Freedom renders most
+  often by construction: images are off by default, and a third-party CDN thumbnail
+  is blocked by network policy even when they are on. So "how does a card look when
+  its image did not load" is not an edge case here -- it is the default.
+
+  HTML section 4.8.4.4 says an unavailable image renders its `alt` text. What it does
+  NOT say, and what costs the height, is that the text may resize the image's box: a
+  replaced element's box comes from its width/height (CSS 2.1 section 10.3.2), and
+  the alt text is laid out INSIDE that box. Firefox clips it. If the alt instead
+  flows as ordinary text, every card grows to fit three to six lines of a title it
+  is already showing underneath, and a four-column grid of 88px tiles becomes a
+  column of 200px ones.
+
+  Section A gives the image an explicit CSS width (the Bootstrap `.card-img-top`
+  idiom); section B leaves it auto; section C is the control, with the image
+  removed entirely, so the cost of the alt text is the difference between B and C.
+
+  Taller than a 768px viewport on purpose: Firefox reports the viewport height for
+  short pages and the harness's h_ratio measures nothing there.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>broken image card probe</title>
+<style>
+  body { font: 16px/1.5 sans-serif; margin: 0; padding: 16px; background: #fff; }
+  h2 { font-size: 18px; margin: 20px 0 8px; }
+  .row { display: flex; flex-wrap: wrap; }
+  .cell { width: 25%; display: flex; align-items: stretch; padding: 4px; box-sizing: border-box; }
+  .card { background: #eef; border: 1px solid #ccd; width: 100%; }
+  .thumb { position: relative; }
+  .card-img-top { width: 100%; aspect-ratio: 1/1.5; display: block; }
+  .card-body { padding: 6px; }
+  h5.title { font-size: 15px; line-height: 19px; margin: 0; }
+</style>
+</head>
+<body>
+
+<h2>A. Card whose thumbnail has an explicit CSS width and aspect-ratio</h2>
+<div class="row">
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/a.jpg" alt="Azur Lane: Bisoku Zenshin! Ni!! - 2"></div><div class="card-body"><h5 class="title">Azur Lane: Bisoku Zenshin! Ni!!</h5></div></a></div></div>
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/b.jpg" alt="Mushoku Tensei III: Isekai Ittara Honki Dasu - 1"></div><div class="card-body"><h5 class="title">Mushoku Tensei III: Isekai Ittara Honki Dasu</h5></div></a></div></div>
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/c.jpg" alt="Nijusseiki Denki Mokuroku: Eureka Evrika - 2"></div><div class="card-body"><h5 class="title">Nijusseiki Denki Mokuroku: Eureka Evrika</h5></div></a></div></div>
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/d.jpg" alt="Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo 3rd Season - 2"></div><div class="card-body"><h5 class="title">Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo 3rd Season</h5></div></a></div></div>
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/e.jpg" alt="Seihantai na Kimi to Boku 2nd Season - 2"></div><div class="card-body"><h5 class="title">Seihantai na Kimi to Boku 2nd Season</h5></div></a></div></div>
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/f.jpg" alt="Sekai Saikyou no Kouei: Meikyuukoku no Shinjin Tansakusha - 2"></div><div class="card-body"><h5 class="title">Sekai Saikyou no Kouei: Meikyuukoku no Shinjin Tansakusha</h5></div></a></div></div>
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/g.jpg" alt="Tetsunabe no Jan! - 2"></div><div class="card-body"><h5 class="title">Tetsunabe no Jan!</h5></div></a></div></div>
+  <div class="cell"><div class="card"><a href="#"><div class="thumb"><img class="card-img-top" src="https://example.invalid/h.jpg" alt="Let's Go Kaiki-gumi - 2"></div><div class="card-body"><h5 class="title">Let's Go Kaiki-gumi</h5></div></a></div></div>
+</div>
+
+<h2>B. The same cards with an auto-sized thumbnail</h2>
+<div class="row">
+  <div class="cell"><div class="card"><div class="thumb"><img src="https://example.invalid/i.jpg" alt="Saijo no Osewa: Takane no Hanadarake na Meimonkou de, Gakuin Ichi no Ojousama"></div><div class="card-body"><h5 class="title">Saijo no Osewa</h5></div></div></div>
+  <div class="cell"><div class="card"><div class="thumb"><img src="https://example.invalid/j.jpg" alt="Hanaori-san wa Tensei shitemo Kenka ga Shitai - 1"></div><div class="card-body"><h5 class="title">Hanaori-san wa Tensei shitemo Kenka ga Shitai</h5></div></div></div>
+  <div class="cell"><div class="card"><div class="thumb"><img src="https://example.invalid/k.jpg" alt="Kabushikigaisha Magi-Lumiere 2nd Season"></div><div class="card-body"><h5 class="title">Kabushikigaisha Magi-Lumiere 2nd Season</h5></div></div></div>
+  <div class="cell"><div class="card"><div class="thumb"><img src="https://example.invalid/l.jpg" alt="Oni no Hanayome - 2"></div><div class="card-body"><h5 class="title">Oni no Hanayome</h5></div></div></div>
+</div>
+
+<h2>C. Control: the same cards with no image at all</h2>
+<div class="row">
+  <div class="cell"><div class="card"><div class="thumb"></div><div class="card-body"><h5 class="title">Saijo no Osewa</h5></div></div></div>
+  <div class="cell"><div class="card"><div class="thumb"></div><div class="card-body"><h5 class="title">Hanaori-san wa Tensei shitemo Kenka ga Shitai</h5></div></div></div>
+  <div class="cell"><div class="card"><div class="thumb"></div><div class="card-body"><h5 class="title">Kabushikigaisha Magi-Lumiere 2nd Season</h5></div></div></div>
+  <div class="cell"><div class="card"><div class="thumb"></div><div class="card-body"><h5 class="title">Oni no Hanayome</h5></div></div></div>
+</div>
+
+<h2>D. Filler, so the page is taller than a viewport</h2>
+<p>A catalogue front page is mostly thumbnails, and a browser that blocks third-party images by default renders it as a page of alt text. How that alt text is boxed decides whether the grid keeps its shape.</p>
+<p>An unavailable image still occupies the box its width and height give it. The alternative text is painted inside that box, not flowed through the page as if the element were a paragraph.</p>
+<p>When the alt text is allowed to resize the box, a card grows to fit a title it already displays beneath the thumbnail, and the grid stretches to several times its real height.</p>
+<p>The control section is what the same cards cost with no image element at all, so the difference between the two is exactly the price of the alternative text.</p>
+<p>Every measurement in this file is taken at the same paint width the parity harness uses, with the reference renderer offline, so neither engine is loading anything the other cannot.</p>
+<p>Freedom blocks third-party subresources by design. The reference renderer is configured to match, so a difference in this page is a difference in layout.</p>
+<p>The image is unavailable in both engines here: the host does not resolve, and no cache can answer for it.</p>
+<p>What remains after that is the box model, which is what this probe is for.</p>
+
+</body>
+</html>

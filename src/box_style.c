@@ -284,11 +284,37 @@ bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
 }
 
 double bx_width_cap(int w_px, int w_pct, double avail_w) {
-    double px = (w_px > 0) ? (double)w_px : 0.0;
-    double pc = (w_pct > 0 && avail_w > 0.0)
-                ? avail_w * (double)w_pct / 1000.0 : 0.0;
-    if (px > 0.0 && pc > 0.0) return (px < pc) ? px : pc;
-    return (px > 0.0) ? px : pc;
+    /* One <length-percentage>, one resolver: the halves are SUMMED through
+     * bx_lp_px, not raced against each other. `width: calc(100% - 6px)` carries a
+     * px half of -6 and a percentage half of 100%, and its used width is 794 of an
+     * 800px containing block -- taking the tighter of the two answered 800 and
+     * dropped the -6px on the floor. */
+    int has_px  = (w_px != 0 && w_px != CSS_LEN_UNSET && w_px != CSS_LEN_AUTO &&
+                   w_px != CSS_LEN_END);
+    int has_pct = (w_pct != 0);
+    if (!has_px && !has_pct) return 0.0;              /* no declared width */
+    if (has_pct && !(avail_w > 0.0) && !has_px) return 0.0;  /* % with no basis */
+
+    double v = bx_lp_px(w_px, w_pct, avail_w);
+    /* An out-of-range result is clamped at used-value time (CSS Values 4 section
+     * 10.1), and 0 is this function's "no cap" answer -- a negative cap would read
+     * as a width the caller must honour. */
+    return (v > 0.0) ? v : 0.0;
+}
+
+
+int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,
+                    double avail_w, double *out_w, double *out_h) {
+    if (out_w == NULL || out_h == NULL) return 0;
+    if (aspect_num <= 0 || aspect_den <= 0) return 0;
+    double w = bx_width_cap(w_px, w_pct, avail_w);
+    if (!(w > 0.0)) return 0;
+    /* aspect-ratio is width/height, so the height is width * den/num. */
+    double h = w * (double)aspect_den / (double)aspect_num;
+    if (!(h > 0.0) || h != h) return 0;   /* NaN-safe, fail closed */
+    *out_w = w;
+    *out_h = h;
+    return 1;
 }
 
 double bx_border_box_h(double declared_h, int border_box,

@@ -171,6 +171,27 @@ bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
  * => 0 (no cap). Never negative. Pure. */
 double bx_width_cap(int w_px, int w_pct, double avail_w);
 
+/* The used BOX of a replaced element (image/video) that has no intrinsic pixel size
+ * of its own -- because it did not load, or was never allowed to.
+ *
+ * CSS Sizing 4 section 4: when one axis is definite and an aspect-ratio is present,
+ * the ratio supplies the other. That is what makes a blocked thumbnail keep the
+ * shape the author reserved for it instead of collapsing to a text-height bar and
+ * letting its `alt` reflow the page. Freedom renders this case by default (images
+ * off; third-party images blocked even when on), so it is the common path, not an
+ * edge case.
+ *
+ * w_px / w_pct are the declared width's two halves (CSS_LEN_UNSET / 0 for absent),
+ * resolved against avail_w exactly like every other <length-percentage>.
+ * aspect_num / aspect_den are the ratio x1000 (0 = none).
+ *
+ * Returns 1 and writes *out_w / *out_h only when BOTH a positive used width and a
+ * usable ratio are available; otherwise returns 0 and touches nothing, leaving the
+ * caller's own fallback in place rather than inventing a height. Pure. */
+int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,
+                    double avail_w, double *out_w, double *out_h);
+
+
 /* Border-box height for a DECLARED height under box-sizing (CSS 2.1 10.6.3,
  * CSS Box Sizing 3 section 4). With content-box -- the CSS default, so the
  * common case -- `height` sizes the CONTENT, and the vertical padding and

@@ -20,6 +20,14 @@
 /* Channel maxima for the rgb() functional form. */
 #define CC_CHANNEL_MAX 255
 #define CC_PERCENT_MAX 100
+/* Digits accepted on either side of the decimal point in one component. A real
+ * value has a handful; the cap is what stops a hostile stylesheet from handing the
+ * scanner an unbounded digit run (anti-DoS, fail closed). A preprocessor emitting
+ * `91.862745098%` uses 9 fractional digits, so the bound is set well clear of it. */
+#define CC_NUMBER_MAX_DIGITS 24
+/* Fixed-point scale for hsl() saturation/lightness: hundredths of a percent, so
+ * 100% is CC_HSL_SCALE. See parse_hsl_comp. */
+#define CC_HSL_SCALE 10000
 
 typedef struct cc_named {
     const char   *name;
@@ -156,6 +164,51 @@ static int parse_hex(const char *s, cc_rgb *out) {
     return -1;
 }
 
+/* Scans a CSS <number> in [b, e) into *out (CSS Syntax 3 section 4.3.12): an
+ * optional sign, then digits with an optional fractional part, where EITHER side of
+ * the dot may be empty but not both ("1", "1.5", ".5" and "1." are all numbers,
+ * "." is not). Returns 0 on success, -1 if the span is not exactly one number.
+ *
+ * One scanner for every component of every functional colour form. The integer-only
+ * loops it replaces rejected any fraction, so `hsl(0,0%,15.83%)` -- the shape a
+ * preprocessor emits -- failed, and with it the whole declaration: a page could lose
+ * its entire palette to a decimal point. Bounded by construction (it never reads
+ * past e) and it does no allocation, so it stays usable on hostile input. */
+static int cc_scan_number(const char *b, const char *e, double *out) {
+    if (b >= e) return -1;
+    int neg = 0;
+    if (*b == '+' || *b == '-') { neg = (*b == '-'); ++b; }
+
+    double ip = 0.0;
+    int int_digits = 0;
+    while (b < e && *b >= '0' && *b <= '9') {
+        ip = ip * 10.0 + (double)(*b - '0');
+        ++b; ++int_digits;
+        if (int_digits > CC_NUMBER_MAX_DIGITS) return -1;  /* anti-DoS, fail closed */
+    }
+
+    double fp = 0.0, scale = 1.0;
+    int frac_digits = 0;
+    if (b < e && *b == '.') {
+        ++b;
+        while (b < e && *b >= '0' && *b <= '9') {
+            scale *= 10.0;
+            fp += (double)(*b - '0') / scale;
+            ++b; ++frac_digits;
+            if (frac_digits > CC_NUMBER_MAX_DIGITS) return -1;
+        }
+    }
+    if (int_digits == 0 && frac_digits == 0) return -1;  /* "." / "+" / "" */
+    if (b != e) return -1;                               /* trailing junk */
+
+    double v = ip + fp;
+    *out = neg ? -v : v;
+    return 0;
+}
+
+/* Rounds a non-negative scanned number to the nearest integer. */
+static long cc_round(double v) { return (long)(v + 0.5); }
+
 /* Parses one rgb() component in [b, e). For a color channel, the value is an
  * integer 0..255 or a percentage 0%..100% (rounded). For the alpha channel
  * (is_alpha), the value is validated as numeric and discarded. Returns 0 / -1. */
@@ -165,29 +218,27 @@ static int parse_component(const char *b, const char *e, int is_alpha, int *out)
     if (b == e) return -1;
 
     if (is_alpha) {
-        for (const char *p = b; p < e; ++p) {
-            if (!((*p >= '0' && *p <= '9') || *p == '.' || *p == '%')) return -1;
-        }
+        /* Validated and discarded: the alpha is carried separately (css.c reads it
+         * with bg_alpha_of). Scanning it properly means "1.2.3" is rejected here
+         * instead of being waved through by a character-class check. */
+        const char *ae = (e > b && e[-1] == '%') ? e - 1 : e;
+        double a;
+        if (cc_scan_number(b, ae, &a) != 0) return -1;
         *out = 0;
         return 0;
     }
 
     int percent = (e[-1] == '%');
     const char *de = percent ? e - 1 : e;
-    if (de == b) return -1;
-
-    long v = 0;
-    for (const char *p = b; p < de; ++p) {
-        if (*p < '0' || *p > '9') return -1;
-        v = v * 10 + (*p - '0');
-        if (v > 100000) return -1;
-    }
+    double num;
+    if (cc_scan_number(b, de, &num) != 0) return -1;
+    if (num < 0.0) return -1;
     if (percent) {
-        if (v > CC_PERCENT_MAX) return -1;
-        *out = (int)((v * CC_CHANNEL_MAX + CC_PERCENT_MAX / 2) / CC_PERCENT_MAX);
+        if (num > (double)CC_PERCENT_MAX) return -1;
+        *out = (int)cc_round(num * (double)CC_CHANNEL_MAX / (double)CC_PERCENT_MAX);
     } else {
-        if (v > CC_CHANNEL_MAX) return -1;
-        *out = (int)v;
+        if (num > (double)CC_CHANNEL_MAX) return -1;
+        *out = (int)cc_round(num);
     }
     return 0;
 }
@@ -199,71 +250,67 @@ static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out) {
     while (e > b && e[-1] == ' ') --e;
     if (b == e) return -1;
     if (is_hue) {
-        if (e[-1] == '%') return -1; /* hue cannot be a percentage */
-        long v = 0;
-        int neg = 0;
-        if (*b == '-') { neg = 1; ++b; }
-        if (b == e) return -1;
-        for (const char *p = b; p < e; ++p) {
-            if (*p < '0' || *p > '9') return -1;
-            v = v * 10 + (*p - '0');
-            if (v > 1000) return -1;
-        }
-        if (neg) v = -v;
-        /* Normalise hue to 0..359 */
+        if (e[-1] == '%') return -1; /* hue is an <angle>/<number>, never a percentage */
+        double num;
+        if (cc_scan_number(b, e, &num) != 0) return -1;
+        long v = (num < 0.0) ? (long)(num - 0.5) : (long)(num + 0.5);
         v = v % 360;
         if (v < 0) v += 360;
         *out = (int)v;
         return 0;
     }
-    /* S or L: must be percentage */
+    /* S or L: a <percentage>, kept in HUNDREDTHS of a percent (0..10000).
+     *
+     * Rounding to whole percent first is a real loss of colour: 15.8333% of 255 is
+     * 40.4, but 16% of 255 is 40.8, so the channel came out one step off every
+     * other engine. The extra two digits cost nothing -- the conversion below is
+     * fixed-point either way -- and they are exactly what a preprocessor emits. */
     if (e[-1] != '%') return -1;
-    long v = 0;
-    for (const char *p = b; p < e - 1; ++p) {
-        if (*p < '0' || *p > '9') return -1;
-        v = v * 10 + (*p - '0');
-        if (v > 1000) return -1;
-    }
-    if (v > 100) return -1;
-    *out = (int)v;
+    double num;
+    if (cc_scan_number(b, e - 1, &num) != 0) return -1;
+    if (num < 0.0 || num > (double)CC_PERCENT_MAX) return -1;
+    *out = (int)cc_round(num * (double)CC_HSL_SCALE / (double)CC_PERCENT_MAX);
     return 0;
 }
 
 /* Convert HSL to RGB using integer math. H in 0..359, S and L in 0..100.
  * Precise enough for display (error < 1 in 255). No floating point needed. */
 static void hsl_to_rgb(int h, int s, int l, unsigned char *r, unsigned char *g, unsigned char *b) {
-    /* Scale S and L to 0..10000 for fixed-point */
-    int s2 = s, l2 = l;
-    /* Chroma = (1 - |2L - 1|) * S, scaled to 0..255 */
-    int l_times_2 = l2 * 2; /* 0..200 */
-    int abs_2l_minus_1 = (l_times_2 > 100) ? (l_times_2 - 100) : (100 - l_times_2); /* 0..100 */
-    int chroma_times_100 = (100 - abs_2l_minus_1) * s2; /* 0..10000 */
-    /* chroma on 0..255 scale: chroma_times_100 * 255 / 10000 */
-    int chroma = (chroma_times_100 * 255 + 5000) / 10000;
-    /* X = chroma * (1 - |(H/60) mod 2 - 1|) */
+    /* H is 0..359 degrees; S and L are hundredths of a percent (0..CC_HSL_SCALE).
+     * All fixed-point: the intermediate chroma term reaches CC_HSL_SCALE^2, which
+     * overflows int, so the products are done in long. */
+    long s2 = s, l2 = l;
+
+    /* Chroma = (1 - |2L - 1|) * S, then scaled onto 0..255. */
+    long l_times_2 = l2 * 2;
+    long abs_2l_minus_1 = (l_times_2 > CC_HSL_SCALE)
+                        ? (l_times_2 - CC_HSL_SCALE) : (CC_HSL_SCALE - l_times_2);
+    long chroma_scaled = (CC_HSL_SCALE - abs_2l_minus_1) * s2;   /* 0..CC_HSL_SCALE^2 */
+    long denom = (long)CC_HSL_SCALE * (long)CC_HSL_SCALE;
+    long chroma = (chroma_scaled * CC_CHANNEL_MAX + denom / 2) / denom;
+
+    /* X = chroma * (1 - |(H/60) mod 2 - 1|). */
     int h_sector = h / 60;       /* 0..5 */
     int h_remainder = h % 60;    /* 0..59 */
-    /* x = chroma * min(h_remainder, 60 - h_remainder) / 60 */
-    int x = chroma * ((h_remainder < 30) ? h_remainder : (60 - h_remainder)) / 30;
-    /* m = L - chroma/2 = (L*255 - chroma*100/2) / 100... simplify:
-     * m = (l2 * 255 - chroma * 50) / 100... but l2 is 0..100.
-     * Actually: m = L - C/2, where L: 0..100, C: 0..255.
-     * To get L on 0..255 scale: l2 * 255 / 100 = l2 * 51 / 20
-     * But simpler: work in chroma "units". */
-    int r1 = 0, g1 = 0, b1 = 0;
+    long x = chroma * ((h_remainder < 30) ? h_remainder : (60 - h_remainder)) / 30;
+
+    long r1 = 0, g1 = 0, b1 = 0;
     switch (h_sector) {
-        case 0: r1 = chroma; g1 = x;    b1 = 0;     break;
-        case 1: r1 = x;     g1 = chroma; b1 = 0;     break;
-        case 2: r1 = 0;     g1 = chroma; b1 = x;     break;
-        case 3: r1 = 0;     g1 = x;      b1 = chroma; break;
-        case 4: r1 = x;     g1 = 0;      b1 = chroma; break;
-        case 5: r1 = chroma; g1 = 0;     b1 = x;     break;
+        case 0: r1 = chroma; g1 = x;      b1 = 0;      break;
+        case 1: r1 = x;      g1 = chroma; b1 = 0;      break;
+        case 2: r1 = 0;      g1 = chroma; b1 = x;      break;
+        case 3: r1 = 0;      g1 = x;      b1 = chroma; break;
+        case 4: r1 = x;      g1 = 0;      b1 = chroma; break;
+        case 5: r1 = chroma; g1 = 0;      b1 = x;      break;
+        default: break;
     }
-    /* m = L * 255/100 - C/2 = (L*255 - C*50) / 100 */
-    int m = (l2 * 255 - chroma * 50 + 50) / 100;
-    *r = (unsigned char)((r1 + m > 255) ? 255 : (r1 + m < 0 ? 0 : r1 + m));
-    *g = (unsigned char)((g1 + m > 255) ? 255 : (g1 + m < 0 ? 0 : g1 + m));
-    *b = (unsigned char)((b1 + m > 255) ? 255 : (b1 + m < 0 ? 0 : b1 + m));
+    /* m = L*255 - C/2, on the 0..255 scale. */
+    long m = (l2 * CC_CHANNEL_MAX - chroma * (CC_HSL_SCALE / 2) + CC_HSL_SCALE / 2)
+             / CC_HSL_SCALE;
+    long rr = r1 + m, gg = g1 + m, bb = b1 + m;
+    *r = (unsigned char)((rr > 255) ? 255 : (rr < 0 ? 0 : rr));
+    *g = (unsigned char)((gg > 255) ? 255 : (gg < 0 ? 0 : gg));
+    *b = (unsigned char)((bb > 255) ? 255 : (bb < 0 ? 0 : bb));
 }
 
 /* Parses the functional rgb()/rgba()/hsl()/hsla() form (lowercased token).

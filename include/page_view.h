@@ -6,6 +6,7 @@
 
 #include "dom.h"
 #include "html_parse.h"
+#include "css.h"   /* css_drop_log, for the pv_css_drops diagnostic */
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -318,6 +319,17 @@ typedef struct pv_run {
      * NOT duplicated per run — so a text-less wrapper box is representable and the
      * decoration is described once. See pv_box_def. */
     int     block_id;
+    /* The REPLACED element's own box def index (-1 = none), for <img>/<video>/<svg>.
+     *
+     * Deliberately NOT block_id: those answer two different questions. block_id says
+     * which box a run belongs to and is what box reconciliation walks; this says
+     * where the element's own declared width and aspect-ratio live, and is read for
+     * SIZING only. Overloading block_id for both reshuffled the box structure of
+     * every page carrying inline icons (measured on slashdot: story headings started
+     * overlapping the body text), while leaving it unset meant an unavailable image
+     * had no box at all -- so its `alt` reflowed as ordinary text and every card in
+     * a thumbnail grid grew to fit a title it already displayed underneath. */
+    int     own_box_id;
     /* form controls (PV_INPUT only; defaults: type 0, name/value NULL, form_id -1,
      * method GET). name/value carry the submitted bytes verbatim (not whitespace
      * collapsed); form_id groups controls of the same <form> (-1 = no form). */
@@ -704,6 +716,18 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, pv_view **out);
 
+/* Diagnostic: runs exactly the CSS collection and parse pv_build_styled runs, and
+ * reports into *log every declaration the parser DISCARDED, by property and by
+ * cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so
+ * "what is this page's CSS losing?" is a measurement instead of a grep over the
+ * dispatch, which sees property names only and is blind to a rejected VALUE on a
+ * property that is already implemented. Shares collect_style_text/collect_root_scope
+ * with the real path, so the answer is about the same bytes the renderer parsed.
+ * Returns PV_ERR_NULL_ARG if doc or log is NULL. */
+pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+                       const char *extern_css, size_t extern_len,
+                       int viewport_w, css_drop_log *log);
+
 /* Allocates an empty view (used by the IPC deserialiser to rebuild a view on the
  * receiving side). Returns NULL on allocation failure. */
 pv_view *pv_new(void);
@@ -922,6 +946,10 @@ void pv_set_node_id(pv_view *v, dom_node_id node_id);
  * the box-carrying block it belongs to (-1 = none). No-op on an empty or NULL view;
  * the append helpers default block_id to -1. The box's decoration is on pv_box_def. */
 void pv_set_block_id(pv_view *v, int block_id);
+
+/* Records the replaced element's own box def index on the last appended run. See
+ * pv_run.own_box_id for why this is separate from pv_set_block_id. */
+void pv_set_own_box(pv_view *v, int box_id);
 
 /* Box engine (Hito 23b-8 Step D): appends one box definition to the box tree,
  * taking an owned copy of *d. The append order IS the block_id order (callers append
