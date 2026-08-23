@@ -34,6 +34,20 @@ import subprocess
 import sys
 
 
+HEIGHT_SCRIPT = """
+<script>
+window.addEventListener("load", function () {
+  var sh = document.documentElement.scrollHeight;
+  if (sh <= 0) sh = document.body.scrollHeight;
+  var d = document.createElement("div");
+  d.id = "__ffh";
+  d.style.cssText = "position:absolute;left:0;top:0;width:1px;height:" + sh + "px";
+  document.body.appendChild(d);
+});
+</script>
+"""
+
+
 PROBE_TMPL = """<!doctype html>
 <html><head><meta charset="utf-8"><style>
 body { margin: 0; }
@@ -139,7 +153,10 @@ def lum(p):
     return 0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]
 
 
-def decode(path):
+def _word_reader(path):
+    """Loads a probe screenshot and returns a function reading 16-bit words from
+    the bit-grid at (x0, y0). Shared by `decode` (rects) and `height` (the page's
+    real scrollHeight)."""
     width, height, channels, rows = load_rows(path)
     if width < 64:
         raise ValueError("%s: narrower than the 64px grid" % path)
@@ -167,22 +184,43 @@ def decode(path):
     if y0 < 0:
         raise ValueError("%s: no alignment row found (is this a ffgeom probe shot?)"
                          % path)
-    y0 &= ~3
-    x0 &= ~3
+    base = y0 & ~3
 
-    def bit(grid_row, cell):
-        return 1 if lum_at(x0 + cell * 4 + 2, y0 + grid_row * 4 + 2) < 128 else 0
+    def bit(grid_row, cell, origin):
+        return 1 if lum_at(origin + cell * 4 + 2, base + grid_row * 4 + 2) < 128 else 0
 
-    def word(grid_row):
+    def word(grid_row, origin):
         v = 0
         for b in range(16):
-            v = (v << 1) | bit(grid_row, b)
+            v = (v << 1) | bit(grid_row, b, origin)
         return v
 
-    magic = word(1)
-    if magic != 0xC0DE:
+    # The grid's rows are 4px tall and sampled at 4px multiples, but the canvas may
+    # sit at a 1px offset (a page whose UA reset the margin to something odd), so
+    # try each of the four sub-cell origins and keep the one whose magic word reads.
+    x0 = -1
+    origin = -1
+    for y0c in range(base, base + 4):
+        # locate the run's left edge within this candidate row
+        for x in range(0, min(width, 80)):
+            if lum_at(x, y0c + 1) < 128:
+                x0 = x
+                break
+        if x0 < 0:
+            continue
+        x0 &= ~3
+        if word(1, x0) == 0xC0DE:
+            origin = x0
+            y0 = y0c
+            break
+    if origin < 0:
         raise ValueError("%s: grid magic 0x%04X not found (probe version skew?)"
-                         % (path, magic))
+                         % (path, word(1, (x0 & ~3) if x0 >= 0 else 0)))
+    return lambda row: word(row, origin)
+
+
+def decode(path):
+    word = _word_reader(path)
     total_rows = word(2)
     nrect = (total_rows - 3) // 8
     out = []
@@ -215,6 +253,34 @@ def probe(page, selector, out_html):
         f.write(src[idx:])
 
 
+def height_probe(page, out_html):
+    import re
+    with open(page) as f:
+        src = f.read()
+    src = re.sub(r"(?is)<script\b.*?</script>", "", src)
+    idx = src.lower().find("</body>")
+    if idx < 0:
+        raise ValueError("%s: no </body> to append the probe to" % page)
+    # The height is carried on a synthetic #__ffh div appended at load, then read by
+    # the SAME rect probe the geometry harness uses (a div's getBoundingClientRect
+    # height is its CSS height here, so the canvas bit-grid machinery is reused and
+    # trusted). The probe runs on load and replaces the body AFTER measuring.
+    with open(out_html, "w") as f:
+        f.write(src[:idx])
+        f.write(HEIGHT_SCRIPT)
+        f.write(PROBE_TMPL % "#__ffh")
+        f.write(src[idx:])
+
+
+def height(path):
+    """Decodes the scrollHeight carried by the #__ffh sentinel: the probe encodes
+    one rect (its height), which decode() returns as the first element's h value."""
+    vals = decode(path)
+    if not vals:
+        raise ValueError("%s: height probe produced no rect" % path)
+    return vals[0][3]
+
+
 def main(argv):
     if len(argv) < 2:
         print(__doc__)
@@ -224,6 +290,22 @@ def main(argv):
             print("usage: ffgeom probe <page.html> <selector> <out.html>")
             return 1
         probe(argv[2], argv[3], argv[4])
+        return 0
+    if argv[1] == "height-probe":
+        if len(argv) != 4:
+            print("usage: ffgeom height-probe <page.html> <out.html>")
+            return 1
+        height_probe(argv[2], argv[3])
+        return 0
+    if argv[1] == "height":
+        if len(argv) != 3:
+            print("usage: ffgeom height <screenshot.png>")
+            return 1
+        try:
+            print(height(argv[2]))
+        except ValueError as e:
+            print("ffgeom: %s" % e, file=sys.stderr)
+            return 1
         return 0
     if argv[1] == "decode":
         if len(argv) != 3:

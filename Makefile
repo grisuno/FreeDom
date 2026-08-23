@@ -822,6 +822,14 @@ LAYOUT_OUT   := $(BUILD_DIR)/layout
 # ONLY is what makes Firefox emit a full-page shot; adding a height instead clamps
 # it to that viewport and makes the ratio 1.0 by construction, measuring nothing.
 # 1000px matches Freedom's --download-png canvas.
+#
+# Firefox's width-only full-page screenshot is still unreliable for very tall pages
+# (it truncated the jkanime corpus page at ~2400px of a real 2680px). So H_FF -- the
+# reference height that drives h_ratio -- comes from Firefox's real
+# document.scrollHeight, probed per page by tools/ffgeom.py height-probe/height (a
+# JS-enabled profile: the probe itself is JS, the page's own scripts are stripped).
+# pngdiff receives it as its 4th argument; on probe failure it falls back to the
+# screenshot height, which is the small-corpus behaviour and unchanged.
 PARITY_WIDTH := 1000
 
 $(BUILD_DIR)/pngdiff: tools/pngdiff.c | $(BUILD_DIR)
@@ -879,8 +887,20 @@ parity: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
 	          "file://$$(readlink -f $$f)" >/dev/null 2>&1; \
 	  if [ ! -f $(PARITY_OUT)/$$name.ff.png ]; then \
 	    echo "$$name: firefox produced no screenshot"; continue; fi; \
-	  row=$$(./$(BUILD_DIR)/pngdiff $(PARITY_OUT)/$$name.fd.png \
-	                                $(PARITY_OUT)/$$name.ff.png) || continue; \
+	  ff_real=$$( { python3 tools/ffgeom.py height-probe "$$f" $(PARITY_OUT)/$$name.h.html \
+	        && rm -rf $(PARITY_OUT)/hprof && mkdir -p $(PARITY_OUT)/hprof \
+	        && firefox --headless --no-remote -profile "$(CURDIR)/$(PARITY_OUT)/hprof" \
+	             --screenshot "$(CURDIR)/$(PARITY_OUT)/$$name.h.png" \
+	             --window-size=$(PARITY_WIDTH) \
+	             "file://$$(readlink -f $(PARITY_OUT)/$$name.h.html)" >/dev/null 2>&1 \
+	        && python3 tools/ffgeom.py height $(PARITY_OUT)/$$name.h.png; } 2>/dev/null ); \
+	  if [ -n "$$ff_real" ] && [ "$$ff_real" -gt 0 ] 2>/dev/null; then \
+	    row=$$(./$(BUILD_DIR)/pngdiff $(PARITY_OUT)/$$name.fd.png \
+	                                  $(PARITY_OUT)/$$name.ff.png "$$ff_real") || continue; \
+	  else \
+	    row=$$(./$(BUILD_DIR)/pngdiff $(PARITY_OUT)/$$name.fd.png \
+	                                  $(PARITY_OUT)/$$name.ff.png) || continue; \
+	  fi; \
 	  printf '%-18s %7s %7s %8s %8s %8s %8s\n' $$name $$row; \
 	  printf '%s\t%s\n' "$$name" "$$(echo "$$row" | cut -f6)" >> $(PARITY_OUT)/current.tsv; \
 	done

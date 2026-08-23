@@ -531,6 +531,25 @@ generado se llevaba una fila entera. En la lista de referencias de Wikipedia —
 cada entrada lleva un marcador `^` de retroenlace— eso **duplicaba el alto de toda la
 sección**.
 
+### Un margen HORIZONTAL genera caja (2026-08-23)
+
+`css_has_boxdeco` ya registraba caja para los márgenes **verticales** (`margin-top`/
+`margin-bottom`, Hito 2026-08-14) pero no para los **horizontales**. La regla CSS 2.1
+§10.3.3 —el ancho usado de un bloque `width:auto` se encoge por sus márgenes— se
+aplica en el pintor solo si hay una caja donde vivan esos márgenes:
+
+- **Dado** un bloque con solo `margin-right: 320px` (sin padding/borde/width/height),
+  **cuando** `css_has_boxdeco` decide si registra caja,
+  **entonces** debe registrarla y el pintor aplica `box_r` (ancho de contenido = contenedor
+  − margin). Sin ella, la columna principal del layout float+margin de slashdot se pintaba
+  a ancho completo de página con el rail debajo en vez de al lado.
+- `margin-left/right: auto` se excluyen (es el idiom de centrado, ya manejado por
+  `box_center`) y `0` es el reset universal, igual que los márgenes verticales.
+- Sonda: `make parity` slashdot 16.52 → 15.61, slashdot-cols 13.75 → 13.41,
+  `layout-diff` byte-idéntico, 2 tests unitarios red→green verificados.
+
+
+
 Ahora el run generado toma el salto de bloque (es él quien abre la primera línea del
 elemento) y el texto propio del elemento ya no toma otro (`prev_block = block`). Y
 tiene que viajar con el **mismo `block_id`, indent, contenedor y estilo de texto** que

@@ -231,15 +231,26 @@ static double pd_mae(const double *a, const double *b, size_t n) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 3) {
-        fprintf(stderr, "usage: pngdiff <freedom.png> <reference.png>\n");
+    if (argc != 3 && argc != 4) {
+        fprintf(stderr, "usage: pngdiff <freedom.png> <reference.png> [ref_real_height]\n");
         return 1;
     }
     pd_profile fd, ff;
     if (pd_profile_of(argv[1], &fd) != 0) return 1;
     if (pd_profile_of(argv[2], &ff) != 0) return 1;
 
-    double h_ratio = (ff.height > 0) ? (double)fd.height / (double)ff.height : 0.0;
+    /* Firefox's headless full-page screenshot is unreliable for tall pages: its
+     * width-only --window-size capture truncated the jkanime corpus page at ~2400px
+     * while Firefox's real document.scrollHeight is 2680px. The parity target probes
+     * Firefox's true scrollHeight and passes it here, so h_ratio compares real
+     * heights instead of reading a truncated screenshot as if it were the whole page.
+     * When not given, the PNG height is used (the small-corpus behaviour, unchanged). */
+    uint32_t ff_real = ff.height;
+    if (argc == 4) {
+        long v = strtol(argv[3], NULL, 10);
+        if (v > 0) ff_real = (uint32_t)v;
+    }
+    double h_ratio = (ff_real > 0) ? (double)fd.height / (double)ff_real : 0.0;
     double col_mae = pd_mae(fd.col, ff.col, PD_COLS);
     double row_mae = pd_mae(fd.rowc, ff.rowc, PD_ROWS);
 
@@ -252,6 +263,6 @@ int main(int argc, char **argv) {
     double score = 100.0 * (0.40 * h_term + 0.40 * col_mae + 0.20 * row_mae);
 
     printf("%u\t%u\t%.4f\t%.4f\t%.4f\t%.2f\n",
-           fd.height, ff.height, h_ratio, col_mae, row_mae, score);
+           fd.height, ff_real, h_ratio, col_mae, row_mae, score);
     return 0;
 }

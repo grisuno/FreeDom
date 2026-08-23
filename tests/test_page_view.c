@@ -1938,6 +1938,43 @@ static void test_box_defaults_and_setter(void **state) {
 
 /* --- box engine (Hito 23b-8 Step A): identity + box decoration on a run --- */
 
+static void test_build_boxdeco_h_margin_alone_creates_box(void **state) {
+    (void)state;
+    /* A block with ONLY a horizontal margin (no padding/border/width/height) must
+     * still generate a box, or the painter has nowhere to apply `margin-right: 320px`
+     * and the two-column float+margin layout falls back to full page width. `auto`
+     * and `0` are excluded (centring idiom / universal reset). */
+    hp_document *doc = parse(
+        "<body><div style='margin-right:320px'>col</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *col = find_text(v, "col");
+    assert_non_null(col);
+    assert_true(col->block_id >= 0);
+    const pv_box_def *bx = pv_box_at(v, (size_t)col->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->box_r, 320);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='margin-right:0;margin-left:0'>m</div>"
+        "<div style='margin:0 auto'>c</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *m = find_text(v, "m");
+    const pv_run *c = find_text(v, "c");
+    assert_non_null(m);
+    assert_non_null(c);
+    assert_int_equal(m->block_id, -1);
+    assert_int_equal(c->block_id, -1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_boxdeco_border_padding(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -3426,6 +3463,8 @@ int main(void) {
         cmocka_unit_test(test_build_box_leaf_inline),
         cmocka_unit_test(test_box_defaults_and_setter),
         cmocka_unit_test(test_build_boxdeco_border_padding),
+        cmocka_unit_test(test_build_boxdeco_h_margin_alone_creates_box),
+        cmocka_unit_test(test_build_boxdeco_h_margin_zero_auto_no_box),
         cmocka_unit_test(test_build_empty_box_gets_run_and_box),
         cmocka_unit_test(test_build_zero_padding_is_not_a_box),
         cmocka_unit_test(test_build_flow_table_row_is_one_block),

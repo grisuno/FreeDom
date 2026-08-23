@@ -1337,6 +1337,19 @@ static int css_has_boxdeco(const css_style *cs) {
            (cs->margin_bottom != CSS_LEN_UNSET && cs->margin_bottom != CSS_LEN_AUTO &&
             cs->margin_bottom != 0) ||
            cs->pct[CSS_PCT_MARGIN_TOP] != 0 || cs->pct[CSS_PCT_MARGIN_BOTTOM] != 0 ||
+           /* HORIZONTAL margins generate a box too: `margin-right: 320px` on a bare
+            * block (no padding/border/width) is how a two-column layout reserves the
+            * gap for a floated sidebar (CSS 2.1 section 10.3.3 -- an auto-width
+            * block's used width shrinks by its margins). Without a box the painter
+            * had nowhere to apply the right margin, so the main column of slashdot's
+            * float+margin layout painted at full page width with the rail pushed
+            * below instead of beside it. `auto` is excluded (that is the centring
+            * idiom, handled by box_center) and zero is the reset, as above. */
+           (cs->margin_left != CSS_LEN_UNSET && cs->margin_left != CSS_LEN_AUTO &&
+            cs->margin_left != 0) ||
+           (cs->margin_right != CSS_LEN_UNSET && cs->margin_right != CSS_LEN_AUTO &&
+            cs->margin_right != 0) ||
+           cs->pct[CSS_PCT_MARGIN_LEFT] != 0 || cs->pct[CSS_PCT_MARGIN_RIGHT] != 0 ||
            /* Author vertical dimensions or aspect-ratio alone make the box worth
             * tracking (the painter needs them at open_box). */
            cs->height > 0 || cs->min_height > 0 || cs->max_height > 0 ||
