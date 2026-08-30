@@ -60,7 +60,7 @@ CFLAGS    ?= $(STD) $(WARN) $(HARDEN) $(OPT) -Iinclude $(LEXBOR_CFLAGS)
 LDFLAGS   ?= $(LDHARDEN)
 
 # Per-module link dependencies.
-SF_LIBS    = -lcurl -lssl -lcrypto -lpthread
+SF_LIBS    = -l:libcurl.so.4 -lssl -lcrypto -lpthread
 # css.o needs libm since M1.2c (matrix() QR decomposition: hypot/atan2/atan);
 # css.o links alongside lexbor in every HP_LIBS consumer.
 HP_LIBS    = $(LEXBOR_LIBS) -lm
