@@ -144,4 +144,31 @@ Es el bucle que cada tanda de paridad corre de verdad: **aislar el caso en una p
 chica, medir LOS DOS motores, y recién entonces tocar código.** Las trampas de Firefox
 headless documentadas en `parity` valen igual acá (ruta absoluta para `--screenshot`,
 `-profile` fresco y `--no-remote` en cada invocación). Todo contra `file://`: sin red,
+
+## `make wpt` — benchmark axis #2: esquinas de la spec (2026-09-06)
+
+`make parity` mide páginas REALES (la función objetivo del trabajo de render);
+`make wpt` mide esquinas de la SPEC (el backlog de conformidad): un subconjunto
+vendorizado de reftests CSS del WPT (`tests/wpt/`, con su `-ref.html` como fixture
+de procedencia), filtrado por doctrina — estáticos o inertes-con-JS-apagado (el
+arnés corre Firefox con `javascript.enabled=false`, igual que `parity`) y
+autocontenidos (sin URLs remotas, sin Ahem/fuentes custom: `@font-face` se
+descarta fail-closed, así que un test con fuentes mediría política, la lección de
+wikipedia). Detalle del filtro y procedimiento de actualización en
+`tests/wpt/README.md`.
+
+Dos reglas de viewport hacen comparables a las páginas cortas (casi todo WPT,
+donde un ratio de alturas mediría la ventana, no el documento):
+
+- Firefox captura a `--window-size=1000,H_FD`: los dos bitmaps comparten canvas.
+- `pngdiff` corre SIN su 4.º argumento (scrollHeight): `h_ratio` es 1.0 por
+  construcción y el score es divergencia pura de perfiles; `H_FD` vs `FF_REAL`
+  viajan como columnas informativas para que un faltante bajo el pliegue siga
+  visible.
+
+**Dado** un test WPT estático, **cuando** `make wpt` lo renderiza en los dos
+motores, **entonces** PASS es score <= 5.0 y el target falla solo ante divergencia
+NUEVA (score > 1.0 sobre `expected.tsv`, o test sin expectativa): un score alto
+es un TODO medido, no un gate de release. `make wpt-update` congela
+`build/wpt/current.tsv` → `tests/wpt/expected.tsv`.
 sin estado que quede atrás.

@@ -1632,9 +1632,14 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     /* Author vertical dimensions (this batch, 2026-07-10): height/min-height/
      * max-height in px, 0 unset; min-width too. A negative css_style value is the
      * CSS_LEN_AUTO sentinel for height/width -- the user-agent's auto-sizing is
-     * always 0 here (the engine sizes boxes by their content). */
-    d->box_h = (cs->height > 0) ? cs->height : 0;
-    d->box_h_set = (cs->height != CSS_LEN_UNSET) ? 1 : 0;
+     * always 0 here (the engine sizes boxes by their content). An intrinsic
+     * keyword on the block axis (CSS Sizing 3 section 5.1) is content height
+     * with indefinite available space, i.e. `auto`: letting CSS_LEN_FIT_CONTENT
+     * arm box_h_set collapsed the box to zero and buried max-height with it
+     * (jkanime's trending_div sidebar). */
+    int h_intrinsic = CSS_LEN_IS_INTRINSIC(cs->height);
+    d->box_h = (!h_intrinsic && cs->height > 0) ? cs->height : 0;
+    d->box_h_set = (!h_intrinsic && cs->height != CSS_LEN_UNSET) ? 1 : 0;
     d->box_min_h = (cs->min_height > 0) ? cs->min_height : 0;
     d->box_max_h = (cs->max_height > 0) ? cs->max_height : 0;
     d->box_min_w = (cs->min_width > 0) ? cs->min_width : 0;

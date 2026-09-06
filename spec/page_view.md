@@ -551,6 +551,40 @@ aplica en el pintor solo si hay una caja donde vivan esos márgenes:
 - Sonda: `make parity` slashdot 16.52 → 15.61, slashdot-cols 13.75 → 13.41,
   `layout-diff` byte-idéntico, 2 tests unitarios red→green verificados.
 
+### Una caja con tope de alto y overflow no visible recorta su contenido (2026-09-06)
+
+Medido en jkanime: `.trending_div { height: fit-content; max-height: 1200px;
+overflow-y: scroll }` (sidebar "Animes recientes", ~30 entradas). Firefox: caja de
+1200 px con scroll interno, documento de 2680 px. Freedom: página de ~7000 px
+(jkanime 49.15, un tercio del TOTAL). Dos brechas sumadas, ambas citables:
+
+1. `height: fit-content` (CSS Sizing 3 §5.1) sobre el eje de bloque colapsaba la caja
+   a 0: el sentinela `CSS_LEN_FIT_CONTENT` activaba `box_h_set` y el pintor tomaba
+   `box_h = 0` como altura declarada. En un bloque en flujo normal con tamaño
+   disponible indefinido, `fit-content` se comporta como `auto`: altura por contenido.
+   **Dado** `height: fit-content` (o `min/max-content` en este eje),
+   **cuando** se construye el `pv_box_def`,
+   **entonces** `box_h = 0` y `box_h_set = 0` (como `auto`); `max-height` y `overflow`
+   se aplican con normalidad.
+2. Tope con recorte (CSS 2.1 §10.7 + §11.1.1): la altura usada es `min(contenido,
+   max-height)` (y el `height` declarado cuando existe); con `overflow` distinto de
+   `visible` el contenido que excede NO extiende la página — en una captura estática
+   (scrollpos 0) las filas bajo el tope se descartan igual que `line-clamp`, y el
+   cursor vuelve al borde inferior de la caja. **Dado** una caja con altura usada con
+   tope y algún `overflow-x`/`overflow-y` no `visible` (un eje no-`visible` computa el
+   otro a `auto` por CSS Overflow 3 §2.2, así que basta que UNO no sea `visible`),
+   **cuando** `close_top_box` comprueba que el contenido excede la caja,
+   **entonces** corta las filas con `top >= borde_inferior`, retira las cajas abiertas
+   por las filas descartadas, trunca las cajas descendientes que cruzan el tope
+   (`h = borde - top`: el canvas se dimensiona a la caja más alta y una caja
+   interior de 5773 px re-extendería la página que las filas acaban de dejar) y
+   `cur_top = borde_inferior`. Con `overflow: visible`
+   (o sin tope) no cambia nada: el desborde visible sigue extendiendo la página.
+- Fuera de alcance: contenedores flex/grid con tope+scroll (solo vía plana),
+  descendientes posicionados dentro del área recortada (sus rects listados no se
+  reescriben; la decoración de pintura existente los recorta), barras de scroll
+  pintadas (no se dibujan; el contenido visible es el mismo).
+
 
 
 Ahora el run generado toma el salto de bloque (es él quien abre la primera línea del

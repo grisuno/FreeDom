@@ -485,6 +485,26 @@ static void test_border_box_height(void **state) {
     assert_true(dbl_eq(bx_border_box_h(10.0, 0, -3.0, -3.0, 0.0, 0.0), 10.0));
 }
 
+/* bx_content_clipped: a capped box (height/max-height) clips overflowing content
+ * vertically unless BOTH overflow axes are visible. One non-visible axis computes
+ * the other to auto (CSS Overflow 3 section 2.2), so either one clipping is
+ * enough; unknown values fail closed to no-clip (never hide content). */
+static void test_content_clipped(void **state) {
+    (void)state;
+    assert_int_equal(bx_content_clipped(CSS_OF_UNSET, CSS_OF_UNSET), 0);
+    assert_int_equal(bx_content_clipped(CSS_OF_VISIBLE, CSS_OF_VISIBLE), 0);
+    assert_int_equal(bx_content_clipped(CSS_OF_VISIBLE, CSS_OF_UNSET), 0);
+    assert_int_equal(bx_content_clipped(CSS_OF_UNSET, CSS_OF_VISIBLE), 0);
+    assert_int_equal(bx_content_clipped(CSS_OF_HIDDEN, CSS_OF_VISIBLE), 1);
+    assert_int_equal(bx_content_clipped(CSS_OF_VISIBLE, CSS_OF_HIDDEN), 1);
+    assert_int_equal(bx_content_clipped(CSS_OF_SCROLL, CSS_OF_VISIBLE), 1);
+    assert_int_equal(bx_content_clipped(CSS_OF_VISIBLE, CSS_OF_SCROLL), 1);
+    assert_int_equal(bx_content_clipped(CSS_OF_AUTO, CSS_OF_AUTO), 1);
+    assert_int_equal(bx_content_clipped(CSS_OF_UNSET, CSS_OF_AUTO), 1);
+    assert_int_equal(bx_content_clipped(CSS_OF_HIDDEN, CSS_OF_HIDDEN), 1);
+    assert_int_equal(bx_content_clipped(99, 99), 0);
+}
+
 static void test_width_cap_pct(void **state) {
     (void)state;
     assert_true(dbl_eq(bx_width_cap(0, 0, 800.0), 0.0));       /* none */
@@ -609,6 +629,7 @@ int main(void) {
         cmocka_unit_test(test_display_name),
         cmocka_unit_test(test_lp_used_value),
         cmocka_unit_test(test_border_box_height),
+        cmocka_unit_test(test_content_clipped),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -1,0 +1,56 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>scroll-box probe</title>
+<style>
+  body { margin: 0; font-family: sans-serif; }
+  .rail { width: 220px; }
+  .scroll300 { height: fit-content; max-height: 300px; overflow-y: scroll;
+               width: 220px; padding: 8px; background: #f4f4f4; }
+  .entry { display: flex; padding: 6px; }
+  .thumb { width: 40px; }
+  .fixed200 { height: 200px; overflow: hidden; background: #eef; }
+</style></head>
+<body>
+  <div class="rail">
+    <div class="scroll300">
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb1.jpg" alt="Thumb one"><div>Entry one with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb2.jpg" alt="Thumb two"><div>Entry two with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb3.jpg" alt="Thumb three"><div>Entry three with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb4.jpg" alt="Thumb four"><div>Entry four with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb5.jpg" alt="Thumb five"><div>Entry five with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb6.jpg" alt="Thumb six"><div>Entry six with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb7.jpg" alt="Thumb thing"><div>Entry number 7 with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb8.jpg" alt="Thumb thing"><div>Entry number 8 with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb9.jpg" alt="Thumb thing"><div>Entry number 9 with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+      <div class="entry"><img class="thumb" src="https://cdn.example/thumb10.jpg" alt="Thumb thing"><div>Entry number 10 with enough text to wrap over a couple of lines in this narrow rail column.</div></div>
+    </div>
+    <div class="fixed200">
+      <div>Fixed-height hidden-overflow box, line one.</div>
+      <div>Fixed-height hidden-overflow box, line two.</div>
+      <div>Fixed-height hidden-overflow box, line three.</div>
+      <div>Fixed-height hidden-overflow box, line four.</div>
+      <div>Fixed-height hidden-overflow box, line five.</div>
+      <div>Fixed-height hidden-overflow box, line six.</div>
+      <div>Fixed-height hidden-overflow box, line seven.</div>
+      <div>Fixed-height hidden-overflow box, line eight.</div>
+      <div>Fixed-height hidden-overflow box, line nine.</div>
+    </div>
+  </div>
+  <p>Footer flows right after the clipped boxes, not after their full content.</p>
+<h2>D. Filler, so the page is taller than a viewport</h2>
+<p>The parity harness scores h_ratio with the reference renderer, and a page shorter than the
+viewport measures nothing: the browser reports the viewport height, so a short probe cannot
+distinguish a real height difference from the fixed window. This tail pushes the document past
+that floor in both engines.</p>
+<p>A capped scroll container is the default shape under test above; the filler below is plain
+content, so it renders identically in both engines and contributes no geometry of its own to
+the score.</p>
+<p>Each line is ordinary text at the same width and font, so any difference between the two
+engines here is a difference in the probe's clipped boxes, not in this padding.</p>
+<p>Line four of the filler keeps the same boring shape: prose, no images, no absolute positioning,
+no flex, nothing that would make one engine engage a feature the other does not.</p>
+<p>Line five continues the theme so the total comfortably clears the viewport with margin to spare.</p>
+<p>Line six, line seven and line eight are all written the same way on purpose: the only variable in
+this file is the clipped box the probe is about, and everything else is inert scaffolding.</p>
+<div style="height:900px"></div>
+</body></html>

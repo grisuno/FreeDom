@@ -2053,6 +2053,51 @@ static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state) {
     hp_document_free(doc);
 }
 
+/* `height: fit-content` on the block axis behaves as `auto` (CSS Sizing 3 5.1):
+ * with indefinite available space a block sizes by its content. It must NOT set
+ * box_h/box_h_set (that collapsed the box to 0 and buried max-height with it --
+ * jkanime's `.trending_div{height:fit-content;max-height:1200px;overflow:scroll}`
+ * sidebar grew to ~7000px instead of clipping at 1200). */
+static void test_build_boxdeco_fit_content_height_is_auto(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='height:fit-content;max-height:100px;overflow-y:scroll'>"
+        "<div>one</div><div>two</div><div>three</div><div>four</div><div>five</div>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "one");
+    assert_non_null(r);
+    assert_true(r->block_id >= 0);
+    const pv_box_def *bx = pv_box_at(v, (size_t)r->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->box_h, 0);
+    assert_int_equal(bx->box_h_set, 0);
+    assert_int_equal(bx->box_max_h, 100);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Same for `min-content`: an intrinsic keyword on the block axis is content
+ * height, never a declared 0 that arms box_h_set. */
+static void test_build_boxdeco_min_content_height_is_auto(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='height:min-content;max-height:100px'>txt</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *r = find_text(v, "txt");
+    assert_non_null(r);
+    assert_true(r->block_id >= 0);
+    const pv_box_def *bx = pv_box_at(v, (size_t)r->block_id);
+    assert_non_null(bx);
+    assert_int_equal(bx->box_h, 0);
+    assert_int_equal(bx->box_h_set, 0);
+    assert_int_equal(bx->box_max_h, 100);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_boxdeco_border_padding(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -3574,6 +3619,8 @@ int main(void) {
         cmocka_unit_test(test_build_boxdeco_border_padding),
         cmocka_unit_test(test_build_boxdeco_h_margin_alone_creates_box),
         cmocka_unit_test(test_build_boxdeco_h_margin_zero_auto_no_box),
+        cmocka_unit_test(test_build_boxdeco_fit_content_height_is_auto),
+        cmocka_unit_test(test_build_boxdeco_min_content_height_is_auto),
         cmocka_unit_test(test_build_empty_box_gets_run_and_box),
         cmocka_unit_test(test_build_zero_padding_is_not_a_box),
         cmocka_unit_test(test_build_flow_table_row_is_one_block),

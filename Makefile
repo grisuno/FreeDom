@@ -122,7 +122,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
 
 .PHONY: all install test itest asan fuzz fuzz-svg fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
         deps run deb docker view clean \
-        parity parity-update layout-diff layout-update geom bench
+        parity parity-update layout-diff layout-update geom bench wpt wpt-update
 
 all: $(BUILD_DIR)/freedom
 
@@ -958,6 +958,106 @@ parity-update: parity
 	@cp $(PARITY_OUT)/current.tsv $(PARITY_DIR)/baseline.tsv
 	@echo "Froze parity baseline in $(PARITY_DIR)/baseline.tsv"
 
+# ---------------------------------------------------------------------------
+# WPT static-reftest harness (tests/wpt/README.md)
+#
+# `make wpt`        scores every vendored WPT test Freedom-vs-Firefox with the
+#                   same no-JS, no-network discipline as `make parity`, reusing
+#                   build/pngdiff. PASS = score <= 5.0. Fails on NEW divergence
+#                   (a score more than 1.0 above expected.tsv, or no expectation).
+# `make wpt-update` freezes the current scores as expected.tsv.
+#
+# Two viewport rules make short pages comparable (most WPT tests are shorter
+# than any viewport, where a height ratio only measures the window, not the
+# document -- the same floor `make parity` probes dodge with filler, which a
+# pristine vendored test cannot carry):
+#   - Firefox screenshots at --window-size=1000,H_FD, so both bitmaps share one
+#     canvas and pngdiff's column/row profiles compare ink, not window dressing.
+#   - pngdiff runs WITHOUT its 4th (scrollHeight) argument, so h_ratio is 1.0
+#     by construction and the score is pure profile divergence; H_FD vs FF_REAL
+#     ride along as info columns so a below-the-fold shortfall stays visible.
+#
+# This is benchmark axis #2 beside parity: parity measures REAL pages (the
+# objective function), wpt measures SPEC corners (the conformance backlog).
+# A high score here is a measured TODO, not a release gate.
+# ---------------------------------------------------------------------------
+WPT_DIR    := tests/wpt
+# (one % per pattern: make rejects two, so every ref suffix is listed.)
+WPT_TESTS  := $(sort $(filter-out %-ref.html %-ref.xht %-ref.tentative.html ref-%.html ref-%.xht,$(wildcard $(WPT_DIR)/*/*.html $(WPT_DIR)/*/*.xht)))
+WPT_OUT    := $(BUILD_DIR)/wpt
+WPT_PASS   := 5.0
+WPT_TOL    := 1.0
+
+wpt: $(BUILD_DIR)/freedom $(BUILD_DIR)/pngdiff
+	@command -v firefox >/dev/null 2>&1 || { \
+	  echo "wpt: firefox not found -- the reference renderer is required"; exit 1; }
+	@mkdir -p $(WPT_OUT)/ffprof
+	@printf '%-42s %7s %7s %8s %8s %6s\n' TEST H_FD FF_REAL COL_MAE ROW_MAE SCORE
+	@printf -- '--------------------------------------------------------------------------------\n'
+	@: > $(WPT_OUT)/current.tsv
+	@pass=0; total=0; \
+	for f in $(WPT_TESTS); do \
+	  rel=$${f#$(WPT_DIR)/}; \
+	  name=$$(echo "$$rel" | tr '/' '_' | sed 's/\.[^.]*$$//'); \
+	  h=$$(./$(BUILD_DIR)/freedom --author-css --images \
+	        --download-png=$(WPT_OUT)/$$name.fd.png "$$f" 2>/dev/null \
+	      | sed -n 's/^Saved PNG (\([0-9]*\) px).*/\1/p'); \
+	  if [ -z "$$h" ] || [ ! -f $(WPT_OUT)/$$name.fd.png ]; then \
+	    echo "$$rel: freedom produced no PNG"; continue; fi; \
+	  if [ "$$h" -lt 1 ] 2>/dev/null; then wh=768; \
+	  elif [ "$$h" -gt 30000 ] 2>/dev/null; then wh=30000; else wh=$$h; fi; \
+	  rm -f $(WPT_OUT)/$$name.ff.png; \
+	  rm -rf $(WPT_OUT)/ffprof; mkdir -p $(WPT_OUT)/ffprof; \
+	  printf '%s\n' 'user_pref("javascript.enabled", false);' \
+	                'user_pref("network.proxy.type", 1);' \
+	                'user_pref("network.proxy.http", "127.0.0.1");' \
+	                'user_pref("network.proxy.http_port", 1);' \
+	                'user_pref("network.proxy.ssl", "127.0.0.1");' \
+	                'user_pref("network.proxy.ssl_port", 1);' \
+	                'user_pref("network.proxy.allow_hijacking_localhost", true);' \
+	    > $(WPT_OUT)/ffprof/user.js; \
+	  firefox --headless --no-remote -profile "$(CURDIR)/$(WPT_OUT)/ffprof" \
+	          --screenshot "$(CURDIR)/$(WPT_OUT)/$$name.ff.png" \
+	          --window-size=1000,$$wh \
+	          "file://$$(readlink -f $$f)" >/dev/null 2>&1; \
+	  if [ ! -f $(WPT_OUT)/$$name.ff.png ]; then \
+	    echo "$$rel: firefox produced no screenshot"; continue; fi; \
+	  ff_real=$$( { python3 tools/ffgeom.py height-probe "$$f" $(WPT_OUT)/$$name.h.html \
+	        && rm -rf $(WPT_OUT)/hprof && mkdir -p $(WPT_OUT)/hprof \
+	        && firefox --headless --no-remote -profile "$(CURDIR)/$(WPT_OUT)/hprof" \
+	             --screenshot "$(CURDIR)/$(WPT_OUT)/$$name.h.png" \
+	             --window-size=$(PARITY_WIDTH) \
+	             "file://$$(readlink -f $(WPT_OUT)/$$name.h.html)" >/dev/null 2>&1 \
+	        && python3 tools/ffgeom.py height $(WPT_OUT)/$$name.h.png; } 2>/dev/null ); \
+	  [ -z "$$ff_real" ] && ff_real=0; \
+	  row=$$(./$(BUILD_DIR)/pngdiff $(WPT_OUT)/$$name.fd.png \
+	                                $(WPT_OUT)/$$name.ff.png) || continue; \
+	  score=$$(echo "$$row" | cut -f6); \
+	  col=$$(echo "$$row" | cut -f4); \
+	  rowm=$$(echo "$$row" | cut -f5); \
+	  printf '%s\t%s\n' "$$rel" "$$score" >> $(WPT_OUT)/current.tsv; \
+	  total=$$((total+1)); \
+	  if awk "BEGIN {exit !(($$score) <= $(WPT_PASS))}"; then \
+	    pass=$$((pass+1)); fi; \
+	  printf '%-42s %7s %7s %8s %8s %6s\n' "$$rel" "$$h" "$$ff_real" "$$col" "$$rowm" "$$score"; \
+	done; \
+	echo "--------------------------------------------------------------------------------"; \
+	echo "wpt: $$pass/$$total PASS (score <= $(WPT_PASS))"
+	@if [ -f $(WPT_DIR)/expected.tsv ]; then \
+	  echo ""; echo "vs expected (tolerance +$(WPT_TOL); only regressions fail):"; \
+	  awk -F'\t' -v tol="$(WPT_TOL)" \
+	    'NR==FNR {b[$$1]=$$2; next} \
+	     { if (!($$1 in b)) { printf "  NEW(no expectation): %s %s\n", $$1, $$2; f++ } \
+	       else if ($$2+0 > b[$$1]+0+tol) { printf "  REGRESSED: %s %s (expected %s)\n", $$1, $$2, b[$$1]; f++ } } \
+	     END { if (f+0 > 0) { printf "wpt: FAIL -- %d new divergence(s)\n", f; exit 1 } \
+	           else print "wpt: OK -- no new divergence" }' \
+	    $(WPT_DIR)/expected.tsv $(WPT_OUT)/current.tsv; \
+	else echo ""; echo "(no expected.tsv yet -- run 'make wpt-update' to freeze one)"; fi
+
+wpt-update: wpt
+	@cp $(WPT_OUT)/current.tsv $(WPT_DIR)/expected.tsv
+	@echo "Froze WPT expectations in $(WPT_DIR)/expected.tsv"
+
 layout-diff: $(BUILD_DIR)/freedom
 	@mkdir -p $(LAYOUT_OUT)
 	@fail=0; miss=0; \
@@ -983,7 +1083,7 @@ layout-update: $(BUILD_DIR)/freedom
 	  name=$$(basename $$f .html); \
 	  ./$(BUILD_DIR)/freedom --dump-layout --author-css "$$f" \
 	      > $(PARITY_DIR)/layout/$$name.txt 2>/dev/null; \
-	done; \
+	done
 	@echo "Froze layout baseline for $(words $(LAYOUT_PAGES)) pages in $(PARITY_DIR)/layout/"
 
 # `make bench` -- per-stage render timings over the local bench corpus

@@ -205,6 +205,14 @@ int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,
 double bx_border_box_h(double declared_h, int border_box,
                        double pad_t, double pad_b, double bord_t, double bord_b);
 
+/* True (nonzero) when a height-capped box clips overflowing content vertically
+ * instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That
+ * is the case unless BOTH overflow axes are visible-or-unset: one non-visible
+ * axis computes the other to auto (CSS Overflow 3 section 2.2), so either one
+ * clipping is enough. Out-of-range values fail closed to 0 (never hide content
+ * on an input the parser cannot produce). Pure. */
+int bx_content_clipped(int overflow_x, int overflow_y);
+
 /* Used px value of a <length-percentage> (CSS Values 4 section 5.3): the px
  * half plus pct_pm per-mille of `basis`. This is the ONLY place the engine
  * turns a percentage into pixels, and the rule is the whole of it -- there is

@@ -234,6 +234,17 @@ def decode(path):
     return out
 
 
+def _append_probe(src, script):
+    """Inserts the probe script before </body> (else </html>, else at EOF: many
+    WPT files omit the explicit body close and the parser closes it for us)."""
+    idx = src.lower().find("</body>")
+    if idx < 0:
+        idx = src.lower().find("</html>")
+    if idx < 0:
+        return src + script
+    return src[:idx] + script + src[idx:]
+
+
 def probe(page, selector, out_html):
     import re
     with open(page) as f:
@@ -243,14 +254,9 @@ def probe(page, selector, out_html):
     # PROBE itself needs a script to run. Strip every existing <script> block, so
     # the only executable left is the probe's.
     src = re.sub(r"(?is)<script\b.*?</script>", "", src)
-    idx = src.lower().find("</body>")
-    if idx < 0:
-        raise ValueError("%s: no </body> to append the probe to" % page)
     script = PROBE_TMPL % selector
     with open(out_html, "w") as f:
-        f.write(src[:idx])
-        f.write(script)
-        f.write(src[idx:])
+        f.write(_append_probe(src, script))
 
 
 def height_probe(page, out_html):
@@ -258,18 +264,12 @@ def height_probe(page, out_html):
     with open(page) as f:
         src = f.read()
     src = re.sub(r"(?is)<script\b.*?</script>", "", src)
-    idx = src.lower().find("</body>")
-    if idx < 0:
-        raise ValueError("%s: no </body> to append the probe to" % page)
     # The height is carried on a synthetic #__ffh div appended at load, then read by
     # the SAME rect probe the geometry harness uses (a div's getBoundingClientRect
     # height is its CSS height here, so the canvas bit-grid machinery is reused and
     # trusted). The probe runs on load and replaces the body AFTER measuring.
     with open(out_html, "w") as f:
-        f.write(src[:idx])
-        f.write(HEIGHT_SCRIPT)
-        f.write(PROBE_TMPL % "#__ffh")
-        f.write(src[idx:])
+        f.write(_append_probe(src, HEIGHT_SCRIPT + PROBE_TMPL % "#__ffh"))
 
 
 def height(path):

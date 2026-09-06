@@ -3004,6 +3004,11 @@ typedef struct rc_open_box {
     /* line-clamp: at most this many line boxes survive inside the box (0 = no
      * clamp). Cut when the box closes, from the same row range multicol uses. */
     int    clamp_lines;
+    /* Scroll-container clip (2026-09-06): nonzero when the box clips overflowing
+     * content (some overflow axis non-visible, via bx_content_clipped). A capped
+     * used height then ends the page flow there: close_top_box drops the rows
+     * past the cap like line-clamp does and rewinds the cursor. */
+    int    clip_content;
     /* The box's own USED margin-bottom, resolved at open time (that is when the
      * containing block width the percentage half needs is in hand). close_top_box
      * publishes it as prev_bottom so the NEXT sibling can collapse against it --
@@ -5582,6 +5587,42 @@ static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th) {
         }
         bx->h = h;
         if (h > 0.0 && s->cur_top - bx->top < h) s->cur_top = bx->top + h;
+        /* A height-capped scroll container clips (CSS 2.1 section 10.7 + 11.1.1):
+         * the painted height above is already the used (capped) one, but cur_top
+         * still stands at the full content height, so the page grew by the
+         * scrolled-out part (jkanime's 1200px sidebar flowed ~7000px). The rows
+         * past the cap belong to the scrolled-out region at scrollpos 0: drop
+         * them like line-clamp does and rewind the cursor to the border-box
+         * bottom. With visible overflow (or no cap) nothing changes. Only the
+         * flat path: a multicol box already rewrote its rows above. */
+        if (h > 0.0 && ob->clip_content && ob->col_n <= 1 &&
+            s->cur_top > bx->top + h) {
+            double clip_bottom = bx->top + h;
+            size_t cut = L->nrow;
+            for (size_t ri = ob->col_row0; ri < L->nrow; ++ri) {
+                if (L->rows[ri].top >= clip_bottom) { cut = ri; break; }
+            }
+            if (cut < L->nrow) {
+                for (size_t bi = L->nbox; bi > ob->col_box0; --bi) {
+                    if (L->boxes[bi - 1].top < clip_bottom) break;
+                    L->nbox = bi - 1;
+                }
+                L->nfrag = L->rows[cut].first;
+                L->nrow = cut;
+            }
+            /* Descendant boxes that straddle the cap keep their full height
+             * otherwise (they closed before this box did, LIFO): the canvas
+             * sizes to the tallest box, so one 5773px inner box re-extends the
+             * page the rows just left. Truncate straddlers to the cap; boxes
+             * past it are gone with the rows above. Only shrinks, never grows,
+             * so an already-clipped inner scroll container is untouched. */
+            for (size_t bi = ob->col_box0; bi < L->nbox; ++bi) {
+                double bbot = L->boxes[bi].top + L->boxes[bi].h;
+                if (bbot > clip_bottom && L->boxes[bi].top < clip_bottom)
+                    L->boxes[bi].h = clip_bottom - L->boxes[bi].top;
+            }
+            s->cur_top = clip_bottom;
+        }
     }
     /* Hand this box's own margin-bottom to the next block so the two can collapse
      * (CSS 2.1 8.3.1). Without it a box's bottom margin was simply lost: the box
@@ -5832,6 +5873,7 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
         ob->col_box0 = L->nbox;
         ob->col_content_top = s->cur_top;
         ob->clamp_lines = (def->line_clamp > 0) ? def->line_clamp : 0;
+        ob->clip_content = bx_content_clipped(def->overflow_x, def->overflow_y);
         /* Resolved here because ctx_w -- the containing block width the percentage
          * half measures against -- is only in hand at open time. */
         ob->margin_bottom = box_margin_bottom(th, def, ctx_w);
@@ -8851,11 +8893,11 @@ static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L
 /* Max overflow:hidden nesting depth (anti-DoS). */
 #define OV_MAX_DEPTH 16
 
-/* Returns nonzero if a box clips content on either axis. */
+/* Returns nonzero if a box clips content on either axis (single predicate with
+ * the layout path's close_top_box, which decides the scroll-container cut). */
 static int ov_box_clips(const pv_box_def *d) {
     if (d == NULL) return 0;
-    return (d->overflow_x != CSS_OF_VISIBLE && d->overflow_x != CSS_OF_UNSET)
-        || (d->overflow_y != CSS_OF_VISIBLE && d->overflow_y != CSS_OF_UNSET);
+    return bx_content_clipped(d->overflow_x, d->overflow_y);
 }
 
 /* Walks the ancestor chain of block_id and collects overflow:hidden box IDs

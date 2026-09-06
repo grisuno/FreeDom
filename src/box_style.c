@@ -333,6 +333,12 @@ double bx_border_box_h(double declared_h, int border_box,
     return declared_h + pad_t + pad_b + bord_t + bord_b;
 }
 
+int bx_content_clipped(int overflow_x, int overflow_y) {
+    return (overflow_x == CSS_OF_HIDDEN || overflow_x == CSS_OF_SCROLL ||
+            overflow_x == CSS_OF_AUTO || overflow_y == CSS_OF_HIDDEN ||
+            overflow_y == CSS_OF_SCROLL || overflow_y == CSS_OF_AUTO) ? 1 : 0;
+}
+
 double bx_lp_px(int px_val, int pct_pm, double basis) {
     /* A sentinel is the absence of an absolute length, not a huge negative one.
      * Without this a `padding-left: 5%` (px half CSS_LEN_UNSET) would resolve to
