@@ -619,7 +619,7 @@ static void test_static_position_absolute_auto_insets(void **state) {
     double sx[1] = {30}, sy[1] = {40};
     bt_positioned out[4];
     size_t cnt = 0;
-    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy,
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy, NULL,
                                                800, 600, out, 4, &cnt), BT_OK);
     assert_int_equal(cnt, 1);
     assert_true(dbl_eq(out[0].x, 30));
@@ -635,7 +635,7 @@ static void test_static_position_fixed_auto_insets(void **state) {
     double sx[1] = {15}, sy[1] = {120};
     bt_positioned out[4];
     size_t cnt = 0;
-    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy,
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy, NULL,
                                                800, 600, out, 4, &cnt), BT_OK);
     assert_int_equal(cnt, 1);
     assert_true(dbl_eq(out[0].x, 15));
@@ -656,7 +656,7 @@ static void test_static_position_explicit_insets_win(void **state) {
     double sx[2] = {0, 300}, sy[2] = {0, 300};
     bt_positioned out[4];
     size_t cnt = 0;
-    assert_int_equal(bt_resolve_positioning_ex(boxes, 2, gx, gy, gw, gh, sx, sy,
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 2, gx, gy, gw, gh, sx, sy, NULL,
                                                800, 600, out, 4, &cnt), BT_OK);
     assert_int_equal(cnt, 2);
     assert_true(dbl_eq(out[1].x, 60));
@@ -676,7 +676,7 @@ static void test_static_position_mixed_axis(void **state) {
     double sx[2] = {0, 0}, sy[2] = {0, 75};
     bt_positioned out[4];
     size_t cnt = 0;
-    assert_int_equal(bt_resolve_positioning_ex(boxes, 2, gx, gy, gw, gh, sx, sy,
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 2, gx, gy, gw, gh, sx, sy, NULL,
                                                800, 600, out, 4, &cnt), BT_OK);
     assert_int_equal(cnt, 2);
     assert_true(dbl_eq(out[1].x, 60));
@@ -695,7 +695,7 @@ static void test_static_position_right_inset_keeps_anchor(void **state) {
     double sx[1] = {30}, sy[1] = {40};
     bt_positioned out[4];
     size_t cnt = 0;
-    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy,
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, sx, sy, NULL,
                                                800, 600, out, 4, &cnt), BT_OK);
     assert_int_equal(cnt, 1);
     /* x = viewport_w - w - inset_r = 800 - 80 - 10 = 710 */
@@ -711,10 +711,64 @@ static void test_static_position_null_arrays_legacy(void **state) {
     bt_positioned out[4];
     size_t cnt = 0;
     assert_int_equal(bt_resolve_positioning_ex(boxes, 1, gx, gy, gw, gh, NULL, NULL,
-                                               800, 600, out, 4, &cnt), BT_OK);
+                                               NULL, 800, 600, out, 4, &cnt), BT_OK);
     assert_int_equal(cnt, 1);
     assert_true(dbl_eq(out[0].x, 0));
     assert_true(dbl_eq(out[0].y, 0));
+}
+
+/* The `placed` bitmap climbs past an unplaced containing block to the nearest
+ * placed ancestor: an undecorated absolute badge inside a card whose only
+ * in-flow content is a blocked image has its containing block never opened, so
+ * its offsets would resolve against a zero rect and land off-page. */
+static void test_abspos_resolves_against_placed_ancestor(void **state) {
+    (void)state;
+    /* A placed ancestor (0) wraps an unplaced relative card (1) which wraps the
+     * absolute badge (2): find_positioned_ancestor stops at the relative card, and
+     * because the card is unplaced the lookup climbs to the placed ancestor, so the
+     * badge resolves against a real rect instead of a zero one. */
+    pv_box_def boxes[3] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE, UNSET4 },         /* 0 placed ancestor */
+        { .parent_id = 0,  .position = BT_POS_RELATIVE, UNSET4 },         /* 1 card, unplaced */
+        { .parent_id = 1,  .position = BT_POS_ABSOLUTE,
+          .inset_top = 10, .inset_right = PV_LEN_UNSET,
+          .inset_bottom = PV_LEN_UNSET, .inset_left = PV_LEN_UNSET,
+          .inset_top_pct = 0, .inset_right_pct = 0,
+          .inset_bottom_pct = 0, .inset_left_pct = 0 },                  /* 2 badge */
+    };
+    double gx[3] = {100, 0, 0}, gy[3] = {200, 0, 0}, gw[3] = {476, 0, 0}, gh[3] = {300, 0, 0};
+    char placed[3] = {1, 0, 0};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 3, gx, gy, gw, gh, NULL, NULL,
+                                               placed, 800, 600, out, 4, &cnt), BT_OK);
+    /* two relatives + one absolute; out is sorted by (z, doc_order): badge last. */
+    assert_int_equal(cnt, 3);
+    assert_int_equal(out[2].box_index, 2);
+    /* left auto → static NULL → containing-block edge + inset_l(0).
+     * containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */
+    assert_true(dbl_eq(out[2].x, 100));
+    assert_true(dbl_eq(out[2].y, 210));   /* cb_y(200) + inset_top(10) */
+}
+
+static void test_abspos_unplaced_without_anchor_falls_to_viewport(void **state) {
+    (void)state;
+    pv_box_def boxes[2] = {
+        { .parent_id = -1, .position = BT_POS_RELATIVE, UNSET4 },
+        { .parent_id = 0,  .position = BT_POS_ABSOLUTE,
+          .inset_left = 10, .inset_right = PV_LEN_UNSET,
+          .inset_top = 5,   .inset_bottom = PV_LEN_UNSET,
+          .inset_left_pct = 0, .inset_right_pct = 0, .inset_top_pct = 0, .inset_bottom_pct = 0 },
+    };
+    double gx[2] = {0, 0}, gy[2] = {0, 0}, gw[2] = {0, 0}, gh[2] = {0, 0};
+    char placed[2] = {0, 0};
+    bt_positioned out[4];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(boxes, 2, gx, gy, gw, gh, NULL, NULL,
+                                               placed, 800, 600, out, 4, &cnt), BT_OK);
+    assert_int_equal(cnt, 2);   /* relative root + absolute child */
+    assert_true(dbl_eq(out[1].x, 10));   /* viewport edge + left */
+    assert_true(dbl_eq(out[1].y, 5));
 }
 
 static void test_box_hidden_self(void **state) {
@@ -874,6 +928,8 @@ int main(void) {
         cmocka_unit_test(test_static_position_mixed_axis),
         cmocka_unit_test(test_static_position_right_inset_keeps_anchor),
         cmocka_unit_test(test_static_position_null_arrays_legacy),
+        cmocka_unit_test(test_abspos_resolves_against_placed_ancestor),
+        cmocka_unit_test(test_abspos_unplaced_without_anchor_falls_to_viewport),
         cmocka_unit_test(test_box_hidden_self),
         cmocka_unit_test(test_box_hidden_ancestor),
         cmocka_unit_test(test_box_hidden_fail_closed),

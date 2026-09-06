@@ -209,6 +209,10 @@ typedef struct rd_block {
      * the block has no single source element. This is the link that lets the GUI
      * dispatch a click on a painted block to the worker's live DOM handler. */
     dom_node_id      node_id;
+    /* Out-of-flow subtree membership, copied from pv_run (STRUCTURE, never
+     * gated): the presentation layer skips such blocks in grouping/flow and
+     * Stage 2 positions them separately. See pv_run.oof_subtree. */
+    int              oof;
     /* Box engine (Hito 23b-8 Step D). block_id says which block-level box this block
      * belongs to (-1 = none); the box's decoration and parent_id live on the box-def
      * tree (rd_doc.boxes[block_id]), not here. block_id is gated by caps.css (like the

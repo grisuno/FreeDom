@@ -1763,6 +1763,84 @@ static void test_build_abs_child_is_not_a_flex_item(void **state) {
     hp_document_free(doc);
 }
 
+/* An out-of-flow run carries no block_break (spec/page_view.md): it is removed
+ * from flow (CSS 2.1 9.7), so its boundary must not flush the line. Regression:
+ * a flex item holding an absolutely-positioned badge split the row band at every
+ * item and a 4-column grid rendered 1 per row (measured on jkanime). */
+static void test_build_abs_run_carries_no_block_break(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><div style='display:flex;flex-wrap:wrap;position:relative'>"
+        "<div style='flex:0 0 25%'>A<div style='position:absolute'>1</div></div>"
+        "<div style='flex:0 0 25%'>B<span><span style='position:absolute'>"
+        "<span>2</span></span></span></div>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *badge = find_text(v, "1");
+    assert_non_null(badge);
+    assert_int_equal(badge->block_break, 0);
+    assert_int_equal(badge->oof_subtree, 1);
+    /* Nested inside an undecorated abspos wrapper: the flag is subtree-wide,
+     * not just the element's own position (no box marks the region). */
+    const pv_run *nested = find_text(v, "2");
+    assert_non_null(nested);
+    assert_int_equal(nested->block_break, 0);
+    assert_int_equal(nested->oof_subtree, 1);
+    /* In-flow neighbours are untouched on both axes. */
+    const pv_run *a = find_text(v, "A");
+    assert_non_null(a);
+    assert_int_equal(a->oof_subtree, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Same rule through the stylesheet cascade (class selectors, not inline
+ * style): the subtree walk must see the abspos ancestor's resolved style. */
+static void test_build_oof_flag_via_cascade(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>"
+        ".badges{position:absolute;top:7px;left:6px;}"
+        ".badge{display:inline-block;}"
+        "</style></head><body>"
+        "<div class=\"badges\"><span class=\"badge\">Ep 2</span></div>"
+        "<p>after</p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *ep = find_text(v, "Ep 2");
+    assert_non_null(ep);
+    assert_int_equal(ep->block_break, 0);
+    assert_int_equal(ep->oof_subtree, 1);
+    const pv_run *after = find_text(v, "after");
+    assert_non_null(after);
+    assert_int_equal(after->oof_subtree, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* jkanime badges idiom: inline-block pills inside an undecorated absolute
+ * wrapper. The pill text is OOF by ancestry even though no box marks it. */
+static void test_build_oof_flag_badges_idiom(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>"
+        ".badges{position:absolute;top:7px;left:6px;}"
+        ".badges-top{position:absolute;right:5px;top:10px;}"
+        ".badge{display:inline-block;padding:.25em .4em;}"
+        "</style></head><body>"
+        "<div class=\"badges badges-top\"><span class=\"badge\">Ep 2</span></div>"
+        "<p>after</p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *ep = find_text(v, "Ep 2");
+    assert_non_null(ep);
+    assert_int_equal(ep->block_break, 0);
+    assert_int_equal(ep->oof_subtree, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_flex_container_from_sheet(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -3455,6 +3533,9 @@ int main(void) {
         cmocka_unit_test(test_build_root_element_style_inherits),
         cmocka_unit_test(test_build_root_font_size_is_overridable),
         cmocka_unit_test(test_build_abs_child_is_not_a_flex_item),
+        cmocka_unit_test(test_build_abs_run_carries_no_block_break),
+        cmocka_unit_test(test_build_oof_flag_via_cascade),
+        cmocka_unit_test(test_build_oof_flag_badges_idiom),
         cmocka_unit_test(test_build_flex_container_from_sheet),
         cmocka_unit_test(test_build_grid_columns_from_sheet),
         cmocka_unit_test(test_build_container_sheet_inline_cascade),

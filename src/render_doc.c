@@ -164,6 +164,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->box_mb_pct = 0;
     b->ua_tag = BX_UA_NONE;
     b->node_id = DOM_NODE_NONE;
+    b->oof = 0;
     b->block_id = -1;
     b->own_box_id = -1;
     b->input_type = 0;
@@ -494,6 +495,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
              * author presentation, so it is carried regardless of caps.css. This is the
              * stable handle the GUI uses to dispatch clicks to the worker's live DOM. */
             lb->node_id = r->node_id;
+            /* Out-of-flow subtree membership is structure (like node_id), never
+             * gated: without it the presentation layer cannot tell an overlay
+             * run from flow content. */
+            lb->oof = r->oof_subtree;
             /* ua_tag rides OUTSIDE the caps.css gate above on purpose: box_mt/box_mb are
              * the AUTHOR's margins (presentation, gated), ua_tag is which user-agent
              * margin applies when the author sets none -- the UA sheet, i.e. structure.

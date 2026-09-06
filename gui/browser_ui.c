@@ -4259,6 +4259,8 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
  * as its own item box -- inheriting the body's padding, which made each table row
  * reserve roughly twice the height Firefox gives it. */
 static int band_common_box(const rd_doc *doc, size_t start, size_t end);
+static void rc_box_context(const rc_state *s, double content_w,
+                           double *out_l, double *out_w);
 
 static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox) {
     int best = -1;
@@ -4481,6 +4483,31 @@ static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid
     if (cid >= 0) {
         const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
         if (cd != NULL && cd->box_id >= 0) return cd->box_id;
+        /* A descriptor with no box (undecorated container) must NOT fall through
+         * to one run's stamp below: that stamp answers for the run's INNERMOST
+         * container, and when the run sits in a nested item it IS an item box --
+         * so the parent laid out inside its own child (a .row of 25% cards got
+         * the first card's 200px as containing block: one card per line).
+         * The items' common parent is computed by the agreement loop; only a
+         * synthesised table (no descriptors to disagree) keeps the stamp. */
+        if (cd != NULL && !cd->is_table) {
+            int parent = -1;
+            int seen = 0;
+            for (size_t k = start; k < end; ) {
+                size_t j = k + 1;
+                int item = rd_at(doc, k)->cont_item;
+                while (j < end && rd_at(doc, j)->cont_item == item && item >= 0) ++j;
+                int rb = item_root_box(doc, k, j);
+                if (rb >= 0) {
+                    const pv_box_def *d = rd_box_at(doc, (size_t)rb);
+                    int p = (d != NULL) ? d->parent_id : -1;
+                    if (!seen) { parent = p; seen = 1; }
+                    else if (p != parent) return -1;
+                }
+                k = j;
+            }
+            return seen ? parent : -1;
+        }
     }
     /* Fallback for runs whose container carries no descriptor box (a collected table
      * grid is synthesised and stamps none) or no descriptor at all (older views). */
@@ -4799,6 +4826,31 @@ static int item_order_at(const rd_doc *doc, size_t b0, int cid) {
  * whose children are all containers has no run of its own to read them from -- that
  * is the whole reason the table exists. An absent entry falls back to the head run's
  * legacy per-run fields, so a view from an older code path still lays out. */
+/* True iff the block lives inside an out-of-flow (absolute/fixed) subtree:
+ * Stage 2 positions it separately, so the in-flow passes (grouping, flow,
+ * measurement continuity) must treat it as invisible. Centralizes the
+ * bt_oof_root test shared by layout_container and the container scan.
+ * The explicit pv_run.oof_subtree flag is primary (boxes cannot carry this:
+ * an undecorated abspos element registers no box, so a box-chain walk
+ * misses the whole subtree); the box chain is the backstop for run kinds
+ * whose emission predates the flag. */
+static int block_is_oof(const rd_doc *doc, const rd_block *bk) {
+    if (bk->oof) return 1;
+    return bk->block_id >= 0
+        && bt_oof_root(doc->boxes, rd_box_count(doc), bk->block_id) >= 0;
+}
+
+/* True iff the block really LEAVES the flow: out-of-flow AND Stage 2 can
+ * anchor it (an absolute/fixed box on its chain). Without an anchor --
+ * only when the box budget is exhausted, since page_view boxes every
+ * abspos element -- the block stays in flow: positioned nowhere is worse
+ * than positioned in flow (fail-open, content never vanishes). */
+static int block_leaves_flow(const rd_doc *doc, const rd_block *bk) {
+    if (!block_is_oof(doc, bk)) return 0;
+    return bk->block_id >= 0
+        && bt_oof_root(doc->boxes, rd_box_count(doc), bk->block_id) >= 0;
+}
+
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th,
                              double origin_x, double content_w,
@@ -4842,6 +4894,29 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         int have_prev = 0;
         for (size_t k = start; k < end; ++k) {
             const rd_block *bk = rd_at(doc, k);
+            /* An out-of-flow run (absolute/fixed subtree) is invisible to the
+             * row (CSS 2.1 9.7): it forms no item, takes no space and flows no
+             * text -- Stage 2 positions it separately. Skipping (not grouping)
+             * is what keeps a badge inside one item from splitting the row
+             * into one line per item. Its static position is recorded here at
+             * the row top, exactly as the flat flow would before anything
+             * flows (first fragment wins, same guard). Anchorless (box budget
+             * exhausted) stays grouped: fail-open, see block_leaves_flow. */
+            if (block_leaves_flow(doc, bk)) {
+                int oroot = bt_oof_root(doc->boxes, rd_box_count(doc),
+                                        bk->block_id);
+                size_t sbid = (size_t)oroot;
+                if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
+                    double in_l, in_w;
+                    rc_box_context(s, content_w, &in_l, &in_w);
+                    (void)in_w;
+                    L->oof_sx[sbid] = in_l;
+                    L->oof_sy[sbid] = s->cur_top
+                        + (rc_has_content(L) ? s->pending_gap : 0.0);
+                    L->oof_static_set[sbid] = 1;
+                }
+                continue;
+            }
             /* The ordinal is taken AT THIS LEVEL: a run inside a nested container
              * reports the nested container's own item slot in cid, so every run of
              * that container collapses into ONE item of this one. */
@@ -4903,6 +4978,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             size_t sr = L->nrow;
             for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
                 const rd_block *bk = rd_at(doc, k);
+                if (block_leaves_flow(doc, bk)) continue;  /* positioned separately */
                 if (k > gstart[j] && bk->block_break) flush_line(L, s, th);
                 s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
                 flow_text_block(cr, w, L, s, th, bk, content_w);
@@ -5311,6 +5387,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             } else
             for (size_t m = k; m < seg_end; ++m) {
                 const rd_block *bk = rd_at(doc, m);
+                if (block_leaves_flow(doc, bk)) continue;  /* positioned separately */
                 if (m > gstart[j] && bk->block_break) flush_line(L, &si, th);
                 /* Boxes nested INSIDE the item open here, in item-local coordinates
                  * (the second pass translates them into the column). rb bounds the
@@ -6236,6 +6313,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                 size_t ce = k + 1;
                 while (ce < gstart[j + 1]) {
                     const rd_block *bce = rd_at(doc, ce);
+                    if (block_leaves_flow(doc, bce)) { ++ce; continue; }
                     if (bce->cont_id < 0 || root_cont_of(doc, bce->cont_id) != rootc)
                         break;
                     ++ce;
@@ -6372,7 +6450,18 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             size_t j = i + 1;
             while (j < rd_count(doc)) {
                 const rd_block *bj = rd_at(doc, j);
-                if (bj->cont_id < 0 || root_cont_of(doc, bj->cont_id) != rootc) break;
+                /* An out-of-flow block carries its own (anonymous) container
+                 * with a different root, but must not cut the maximal run:
+                 * Stage 2 positions it separately and layout_container skips
+                 * it for continuity (same rule). Only when Stage 2 can anchor
+                 * it; anchorless stays in the run and lays out in flow
+                 * (fail-open, see block_leaves_flow). */
+                if (block_leaves_flow(doc, bj)) {
+                    ++j;
+                    continue;
+                }
+                if (bj->cont_id < 0) break;
+                if (root_cont_of(doc, bj->cont_id) != rootc) break;
                 ++j;
             }
             double mt, mb;
@@ -6712,7 +6801,8 @@ static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
      * zero static position, but they also keep zero geometry (gw/gh == 0), so
      * the painter skips them regardless — the zero never reaches the screen. */
     bt_status st = bt_resolve_positioning_ex(
-        doc->boxes, nbox, gx, gy, gw, gh, L->oof_sx, L->oof_sy, content_w, vp_h,
+        doc->boxes, nbox, gx, gy, gw, gh, L->oof_sx, L->oof_sy, in_flow,
+        content_w, vp_h,
         L->positioned, BT_MAX_POSITIONED, &L->npositioned);
     (void)st;  /* BT_OK / BT_ERR_NULL_ARG / BT_ERR_RANGE all logged via dom_debug */
 

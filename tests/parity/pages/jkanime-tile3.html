@@ -33,4 +33,20 @@
       </div>
     </div>
   </div>
+<h2>D. Filler, so the page is taller than a viewport</h2>
+<p>The parity harness scores h_ratio with the reference renderer, and a page shorter than the
+viewport measures nothing: the browser reports the viewport height, so a short probe cannot
+distinguish a real height difference from the fixed window. This tail pushes the document past
+that floor in both engines.</p>
+<p>A blocked thumbnail is the default shape under this engine; the probes above isolate how one
+card boxes its alt text, its badges and its clamped title. The filler below is plain content,
+so it renders identically in both engines and contributes no geometry of its own to the score.</p>
+<p>Each line is ordinary text at the same width and font, so any difference between the two
+engines here is a difference in the probe's card, not in this padding.</p>
+<p>Line four of the filler keeps the same boring shape: prose, no images, no absolute positioning,
+no flex, nothing that would make one engine engage a feature the other does not.</p>
+<p>Line five continues the theme so the total comfortably clears the viewport with margin to spare.</p>
+<p>Line six, line seven and line eight are all written the same way on purpose: the only variable in
+this file is the card the probe is about, and everything else is inert scaffolding.</p>
+<div style="height:900px"></div>
 </body></html>

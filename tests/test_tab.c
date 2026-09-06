@@ -432,6 +432,41 @@ static void test_load_carries_node_id(void **state) {
     tab_close(t);
 }
 
+/* The oof_subtree flag crosses the worker IPC (write_view/read_view mirror):
+ * an out-of-flow run arrives flagged, an in-flow one does not. */
+static void test_load_carries_oof_flag(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><title>O</title></head><body>"
+        "<div style='position:relative'>"
+        "<span>plain</span>"
+        "<span style='position:absolute'>over</span>"
+        "</div></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_non_null(p.view);
+
+    int seen_plain = 0, seen_over = 0;
+    for (size_t i = 0; i < pv_count(p.view); ++i) {
+        const pv_run *r = pv_at(p.view, i);
+        if (r->text != NULL && strcmp(r->text, "plain") == 0) {
+            assert_int_equal(r->oof_subtree, 0);
+            seen_plain = 1;
+        }
+        if (r->text != NULL && strcmp(r->text, "over") == 0) {
+            assert_int_equal(r->oof_subtree, 1);
+            seen_over = 1;
+        }
+    }
+    assert_int_equal(seen_plain, 1);
+    assert_int_equal(seen_over, 1);
+
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Stage 4 dispatcher: a click on a node with a JS handler mutates the DOM, and the
  * new view is returned over IPC with the mutation reflected. */
 static void test_click_runs_handler_and_returns_view(void **state) {
@@ -2270,6 +2305,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_visibility_overflow_cursor_and_text_wrap),
         cmocka_unit_test(test_load_carries_cont_item),
         cmocka_unit_test(test_load_carries_node_id),
+        cmocka_unit_test(test_load_carries_oof_flag),
         cmocka_unit_test(test_click_runs_handler_and_returns_view),
         cmocka_unit_test(test_event_ipc_via_tab_eval),
         cmocka_unit_test(test_mouse_ipc_round_trip),

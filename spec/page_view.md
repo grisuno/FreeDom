@@ -433,7 +433,10 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
 - **Salto de bloque**: `block_break != 0` cuando el bloque contenedor más cercano del run difiere
   del bloque del run anterior, o cuando un `<br>`/`<hr>` precede al run. Bloques: `body, div, p,
   h1..h6, ul, ol, li, section, article, header, footer, nav, main, aside, blockquote, pre, table,
-  tr, figure, form, fieldset, dl, dt, dd`.
+  tr, figure, form, fieldset, dl, dt, dd`. **Excepción: un run cuyo propio elemento es
+  out-of-flow (`position:absolute|fixed`) nunca lleva `block_break`** (está fuera del flujo:
+  CSS 2.1 §9.7; su ruptura partía la banda del flujo y cada ítem flex con un badge
+  absoluto caía en su propia línea — medido en jkanime: grilla de 4 en 1 por fila).
 - **UTF-8**: `text` se normaliza a UTF-8 bien formado, porque el renderer (cairo) rechaza UTF-8
   inválido y muchas páginas llegan en codificaciones legadas. Las secuencias UTF-8 válidas pasan
   intactas. Un byte que **no** forma una secuencia UTF-8 válida se reinterpreta como **Windows-1252**

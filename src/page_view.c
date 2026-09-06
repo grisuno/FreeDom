@@ -235,6 +235,7 @@ static void run_init_common(pv_run *r) {
     r->box_mb_pct = 0;
     r->ua_tag = BX_UA_NONE;
     r->node_id = DOM_NODE_NONE;
+    r->oof_subtree = 0;
     r->block_id = -1;
     r->own_box_id = -1;
     r->input_type = 0;
@@ -686,6 +687,11 @@ void pv_set_block_id(pv_view *v, int block_id) {
 void pv_set_own_box(pv_view *v, int box_id) {
     if (v == NULL || v->count == 0) return;
     v->runs[v->count - 1].own_box_id = box_id;
+}
+
+void pv_set_oof(pv_view *v, int oof) {
+    if (v == NULL || v->count == 0) return;
+    v->runs[v->count - 1].oof_subtree = (oof != 0);
 }
 
 void pv_set_input_checked(pv_view *v, int checked) {
@@ -1911,6 +1917,27 @@ static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sh
         pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited);
     }
     return cs;
+}
+
+/* True iff the element itself is out of flow (position:absolute/fixed) or
+ * descends from one. Such a subtree is removed from normal flow (CSS 2.1
+ * 9.7): its runs carry no block_break and no container membership effects,
+ * or every flex item holding one (a corner badge, an overlay title) splits
+ * its row band into one line per item. Boxes cannot answer this: an
+ * undecorated abspos element registers no box, so a box-chain walk misses
+ * the whole subtree -- hence an explicit element-derived flag (pv_run.
+ * oof_subtree). Walks to the document root; each level is style-cached, so
+ * repeated queries over one page stay linear. */
+static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
+                          pv_style_cache *cache) {
+    for (const lxb_dom_node_t *p = el; p != NULL; p = p->parent) {
+        if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        css_style cs = cached_element_style(lxb_dom_interface_element(
+            (lxb_dom_node_t *)p), sheet, cache);
+        if (cs.position == CSS_POS_ABSOLUTE || cs.position == CSS_POS_FIXED)
+            return 1;
+    }
+    return 0;
 }
 
 /* Overrides the intrinsic dimensions of a replaced element (iw, ih) with the
@@ -4348,7 +4375,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                 &unused_li, &unused_depth, &unused_ordered,
                                 &reg, &img_cont, &unused_box, &img_ext,
                                 &box_reg, &float_reg, &bdeco, &cache, &flowreg);
-                int brk = pending_break || (block != prev_block);
+                int img_oof = subtree_is_oof(n, sheet, &cache);
+                int brk = (pending_break || (block != prev_block)) && !img_oof;
                 pending_break = 0;
                 prev_block = block;
 
@@ -4377,6 +4405,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                       unused_align, unused_fs, unused_fs_abs,
                                       unused_lh, unused_deco, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
+                pv_set_oof(v, img_oof);
             } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
                        && !in_skipped_subtree(n, base, js_enabled)
                        && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
@@ -4557,13 +4586,16 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                         if (frow != NULL) eblock = frow;
                         ebdeco = -1;
                     }
-                    int ebrk = pending_break || (eblock != prev_block);
+                    int eleaf_oof = subtree_is_oof(n, sheet, &cache);
+                    int ebrk = (pending_break || (eblock != prev_block))
+                        && !eleaf_oof;
                     pending_break = 0;
                     prev_block = eblock;
                     const char *leaf_text = "";
                     if (ecs.content_str[0] != '\0') leaf_text = ecs.content_str;
                     pv_status st = pv_append(v, PV_TEXT, 0, ebrk, leaf_text, NULL);
                     if (st != PV_OK) { rc = st; goto cleanup; }
+                    pv_set_oof(v, eleaf_oof);
                     last_was_gap = 0;
                     pv_set_emphasis(v, ebold, eitalic);
                     pv_set_indent(v, edepth);
@@ -4693,11 +4725,14 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                      * boxes between the two runs and flushes the line anyway --
                      * splitting them right back apart. */
                     int before_brk = (pending_break || block != prev_block) ? 1 : 0;
+                    int before_oof = subtree_is_oof(n->parent, sheet, &cache);
+                    before_brk = before_brk && !before_oof;
                     pv_status st = pv_append(v, PV_TEXT, 0, before_brk,
                                              content_dup, NULL);
                     free(content_dup);
                     if (st != PV_OK) { free(collapsed); rc = st; goto cleanup; }
                     pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
+                    pv_set_oof(v, before_oof);
                     pv_set_color(v, pcs.color);
                     pv_set_bgcolor(v, pcs.background);
                     pv_set_emphasis(v, pcs.bold > 0, pcs.italic > 0);
@@ -4718,7 +4753,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 }
             }
 
-        int brk = pending_break || (block != prev_block);
+        /* An out-of-flow text run never breaks the line (spec/page_view.md):
+         * it is removed from flow (CSS 2.1 9.7), so neither a block change nor
+         * a pending break may flush the band through it. Subtree-wide: the run
+         * may sit deep inside an undecorated abspos wrapper, where no box
+         * marks the out-of-flow region. */
+        int own_oof = subtree_is_oof(n->parent, sheet, &cache);
+        int brk = (pending_break || (block != prev_block)) && !own_oof;
         pending_break = 0;
         prev_block = block;
 
@@ -4743,7 +4784,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 char *line = dup_n(start, len);
                 if (line == NULL) { free(href_dup2); free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
 
-                int line_brk = first ? brk : 1;
+                int line_brk = first ? brk : (brk || !own_oof);
                 first = 0;
                 pv_status st = pv_append(v, href_dup2 != NULL ? PV_LINK : PV_TEXT,
                                          heading, line_brk, line, href_dup2);
@@ -4774,6 +4815,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
+                pv_set_oof(v, own_oof);
 
                 if (nl == NULL) break;
                 start = nl + 1;
@@ -4891,6 +4933,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_text_ext(v, &ext);
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
+                pv_set_oof(v, own_oof);
             }
 
     /* Box engine (Step D): publish the box tree. box_reg holds one def per

@@ -647,7 +647,16 @@ Two rules close the gap:
      `bottom` with auto `top` still anchors bottom.
    The legacy entry point `bt_resolve_positioning` delegates with NULL arrays
    (byte-identical behaviour for callers that cannot know a static position).
-2. **Visibility gate.** `bt_box_hidden(boxes, nbox, bid)` (pure) walks the
+3. **Placed-ancestor fallback.** `bt_resolve_positioning_ex` takes a `placed[]`
+   bitmap (indexed by box_index; NULL keeps legacy behaviour). An ABSOLUTE box whose
+   containing block was never placed in flow — an undecorated `position:relative`
+   wrapper whose only child is a blocked image, so nothing opened its box — would
+   resolve its offsets against a zero rect and land off-page. The lookup now climbs
+   from the containing block to the nearest **placed** ancestor on the chain; with
+   none placed it falls back to the viewport. The ancestor is the flow's best
+   approximation of the true containing block (same position neighbourhood),
+   strictly better than zeros.
+4. **Visibility gate.** `bt_box_hidden(boxes, nbox, bid)` (pure) walks the
    `parent_id` chain from `bid` and returns 1 when the nearest explicit
    `visibility` on the chain is HIDDEN or COLLAPSE (the same simplification the
    in-flow path makes — no `visible`-override re-entry), bounded to `nbox` steps
@@ -744,6 +753,48 @@ another absolute box gets a zero static position (its hypothetical spot inside t
 outer box's content is not tracked); boxless continuation runs (`block_id < 0`)
 inside an out-of-flow subtree still flow (no chain to classify); the stacked
 one-line-per-block paint approximation stays.
+
+### Stage 2e — "leaves flow" needs an anchor, and undecorated absolute wrappers (2026-09-06)
+
+Two gaps found on the jkanime card grid (a four-column `row-cols-*` grid rendering
+one card per line). Both are the CSS 2.1 §9.7 rule — an absolutely positioned subtree
+is out of flow — applied to the two carriers that can express it, not just the box
+chain:
+
+1. **The maximal-run scan trusted a single run's `cont_box_id` stamp.** The stamp
+   answers for the run's **innermost** container, so when a container's items sit
+   inside nested elements the stamp is an **item** box, and `container_box_of`
+   returned that item box as the whole container's containing block: a `.row` of
+   `25%` cards was given the first card's 200px as its block, so nothing could fit
+   beside it. `container_box_of` now only keeps the per-run stamp for synthesised
+   tables (which stamp none); an author flex/grid container resolves its containing
+   block from the loop over item root boxes' common parent (the container's own box
+   or nearest ancestor wrapper), falling back to `-1` when items disagree.
+
+2. **An out-of-flow block was skipped from a flex/grid run only when it had no
+   `cont_id`.** The GUI now classifies a block as *leaving the flow* only when it is
+   out-of-flow **and** Stage 2 can anchor it (`block_leaves_flow`: the IPC
+   `oof_subtree` flag or the box chain, **plus** a `bt_oof_root >= 0`). That one
+   predicate is used at every skip site — the maximal-run scan, the per-item
+   segment scan, and the band grouping — so an absolute badge inside one card stops
+   the whole grid from splitting into one line per card, and a float-column segment
+   no longer ends at the first skipped badge. Anchorless out-of-flow blocks (only
+   reachable when the box budget is exhausted) stay in flow: positioned nowhere is
+   worse than positioned in flow, so the predicate is **fail-open**, never vanishing
+   content.
+
+**Given** a `display:flex;flex-wrap:wrap` row whose items each hold an
+`position:absolute` badge (and no decorated box carries the badge), **when** laid
+out, **then** the items share one line (four across) and the badges are still
+positioned out of flow — not woven into the row as full-width text.
+
+**Given** the same row holding a nested `display:flex` container per item, **when**
+`container_box_of` resolves the row's containing block, **then** it is the row's own
+(or nearest ancestor) box, never one item's box, so 25%-wide items fit four across.
+
+Security posture: unchanged — the predicate is a pure function of already-clamped
+box ids; `block_leaves_flow` fails open (content stays visible) exactly like the
+box-chain classifiers it centralises.
 
 ### Out of scope (Stage 2)
 

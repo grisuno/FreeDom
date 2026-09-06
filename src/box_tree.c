@@ -447,7 +447,7 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                                  bt_positioned *out, size_t out_cap,
                                  size_t *out_count) {
     return bt_resolve_positioning_ex(boxes, nbox, box_x, box_y, box_w, box_h,
-                                     NULL, NULL, viewport_w, viewport_h,
+                                     NULL, NULL, NULL, viewport_w, viewport_h,
                                      out, out_cap, out_count);
 }
 
@@ -455,6 +455,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                                     const double *box_x, const double *box_y,
                                     const double *box_w, const double *box_h,
                                     const double *static_x, const double *static_y,
+                                    const char *placed,
                                     double viewport_w, double viewport_h,
                                     bt_positioned *out, size_t out_cap,
                                     size_t *out_count) {
@@ -505,6 +506,19 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
         double cb_x = 0.0, cb_y = 0.0, cb_w = viewport_w, cb_h = viewport_h;
         if (pos == BT_POS_ABSOLUTE) {
             int ancestor = find_positioned_ancestor(boxes, nbox, i);
+            /* The containing block may never have been placed (no in-flow rect):
+             * its offsets would resolve against a zero rect. Climb to the nearest
+             * placed ancestor, whose rect is real; a static ancestor is an
+             * approximation of the true block (same flow neighbourhood), strictly
+             * better than zeros. NULL placed keeps legacy behaviour. */
+            if (placed != NULL) {
+                unsigned hops = 0;
+                while (ancestor >= 0 && (size_t)ancestor < nbox &&
+                       !placed[ancestor] && hops < BT_MAX_DEPTH) {
+                    ancestor = (int)boxes[ancestor].parent_id;
+                    hops++;
+                }
+            }
             if (ancestor >= 0) {
                 cb_x = (box_x != NULL) ? box_x[ancestor] : 0.0;
                 cb_y = (box_y != NULL) ? box_y[ancestor] : 0.0;

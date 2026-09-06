@@ -1540,6 +1540,62 @@ static void test_dump_layout_float_two_columns(void **state) {
     unlink(path);
 }
 
+/* --- flex row with absolute badges (M2) --- */
+
+/* An absolutely-positioned child is not a flex item (CSS 2.1 9.7): it must
+ * not cut the container's maximal run, or every item holding a badge takes
+ * its own line (jkanime 4-column card grid rendered 1 per row). */
+static void test_dump_layout_flex_badges_share_row(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        ".row{display:flex;flex-wrap:wrap;}"
+        ".col{flex:0 0 25%;max-width:25%;position:relative;background:#eef;}"
+        ".badge{position:absolute;right:4px;top:4px;background:#f80;}"
+        "</style></head><body>"
+        "<div class=\"row\">"
+        "<div class=\"col\">A<div class=\"badge\">1</div></div>"
+        "<div class=\"col\">B<div class=\"badge\">2</div></div>"
+        "<div class=\"col\">C<div class=\"badge\">3</div></div>"
+        "<div class=\"col\">D<div class=\"badge\">4</div></div>"
+        "</div></body></html>";
+    const char *path = "__freedom_flexbadge.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_flexbadge.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    /* The four items share one flex line: some top value owns >= 4 rows. */
+    double tops[64];
+    size_t ntops = 0;
+    char *p = out;
+    while ((p = strstr(p, "row[")) != NULL && ntops < 64) {
+        double t = -1.0;
+        char *tp = strstr(p, "top=");
+        if (tp != NULL && sscanf(tp, "top=%lf", &t) == 1) tops[ntops++] = t;
+        p += 4;
+    }
+    size_t best = 0;
+    for (size_t a = 0; a < ntops; ++a) {
+        size_t n = 0;
+        for (size_t b = 0; b < ntops; ++b)
+            if (tops[b] > tops[a] - 0.5 && tops[b] < tops[a] + 0.5) ++n;
+        if (n > best) best = n;
+    }
+    assert_true(best >= 4);  /* one shared row, not one line per item */
+
+    /* The badges are still positioned (out of flow), not dropped. */
+    assert_non_null(strstr(out, "npositioned=4"));
+
+    unlink(path);
+}
+
 /* --- network policy --- */
 
 static void test_rejects_http_url(void **state) {
@@ -1874,6 +1930,7 @@ int main(void) {
         cmocka_unit_test(test_dump_timings_prints_stages),
         cmocka_unit_test(test_dump_layout_no_wrapper_fragmentation),
         cmocka_unit_test(test_dump_layout_float_two_columns),
+        cmocka_unit_test(test_dump_layout_flex_badges_share_row),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

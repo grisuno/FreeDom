@@ -182,11 +182,19 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
  *     anchors right (R4).
  *   - top  unset/auto  -> y = static_y[i] same rule. An explicit top wins;
  *     bottom with auto top still anchors bottom (R8).
+ * `placed` (may be NULL) marks which boxes have an in-flow rect in box_x/y/w/h:
+ * an absolutely positioned box whose containing block was never placed (a card
+ * whose only in-flow content is a blocked image, so nothing opened its box)
+ * would otherwise resolve its offsets against a zero rect and land off-page.
+ * The lookup then climbs to the nearest placed ancestor (whose rect is real);
+ * with none placed it falls back to the viewport, and with placed == NULL every
+ * box counts as placed (legacy behaviour).
  * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */
 bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                                     const double *box_x, const double *box_y,
                                     const double *box_w, const double *box_h,
                                     const double *static_x, const double *static_y,
+                                    const char *placed,
                                     double viewport_w, double viewport_h,
                                     bt_positioned *out, size_t out_cap,
                                     size_t *out_count);

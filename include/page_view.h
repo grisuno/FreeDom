@@ -312,6 +312,15 @@ typedef struct pv_run {
      * when the run has no single source element (e.g. an anonymous text run outside a
      * block, or a synthesized notice). */
     dom_node_id node_id;
+    /* Out-of-flow subtree membership (CSS 2.1 9.7): nonzero when the run's own
+     * element is absolutely/fixed positioned OR descends from one. Boxes are an
+     * unreliable carrier for this (an undecorated abspos element registers no
+     * box, so a box-chain walk misses the whole subtree), hence an explicit
+     * element-derived flag. It is STRUCTURE, carried regardless of caps.css:
+     * the presentation layer skips such runs in grouping/flow (Stage 2
+     * positions them separately) and page_view emits them without
+     * block_break. spec/page_view.md. */
+    int     oof_subtree;
     /* Box engine (Hito 23b-8): block_id groups the runs of one block-level box in
      * document order (-1 = no box-carrying block). It is STRUCTURE, carried by
      * render_doc regardless of caps.css (like cont_id). The box's decoration and
@@ -964,6 +973,10 @@ void pv_set_block_id(pv_view *v, int block_id);
 /* Records the replaced element's own box def index on the last appended run. See
  * pv_run.own_box_id for why this is separate from pv_set_block_id. */
 void pv_set_own_box(pv_view *v, int box_id);
+
+/* Records out-of-flow subtree membership on the last appended run (see
+ * pv_run.oof_subtree). No-op on an empty or NULL view. */
+void pv_set_oof(pv_view *v, int oof);
 
 /* Box engine (Hito 23b-8 Step D): appends one box definition to the box tree,
  * taking an owned copy of *d. The append order IS the block_id order (callers append
