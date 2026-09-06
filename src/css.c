@@ -5696,7 +5696,7 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                         }
                     }
                 }
-                i = (be > 0) ? be : end;
+                i = (be > 0) ? be : skip_at_rule(s, i, end);
                 continue;
             }
             i = skip_at_rule(s, i, end);

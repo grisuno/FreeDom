@@ -718,7 +718,12 @@ of them, the field already has the value ready. Grouped by family:
   space`/`round` spacing (falls back to plain tiling).
 - *Transitions*: `transition` (hover interpolation). `transform`, `filter`
   (incl. `drop-shadow`), `animation`/`@keyframes` **are** supported — see
-  the compositor/interp specs and the dated sections above.
+  the compositor/interp specs and the dated sections above. The `@keyframes`
+  table is bounded (`CSS_MAX_KEYFRAMES` 4): a 5th block is **skipped in place**
+  (balanced skip, like `@font-face` past its cap), never aborts the rest of
+  the sheet — aborting would silently drop every later rule of the page
+  (measured on jkanime: 25 `@keyframes` blocks discarded all
+  `position:absolute` overlays, 4x page height).
 - *Text, finer grain*: `text-transform: full-width`, `letter-spacing`/`text-indent`
   in `%`/viewport units, `text-decoration-thickness`,
   `vertical-align` length/`top`/`middle`/`bottom`, `white-space` whitespace

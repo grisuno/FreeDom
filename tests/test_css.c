@@ -3848,6 +3848,30 @@ static void test_anim_transform_keyframes_from_sheet(void **state) {
     css_free(sh);
 }
 
+/* --- @keyframes overflow skips the block, never aborts the sheet -------------
+ *
+ * The @keyframes table is bounded (CSS_MAX_KEYFRAMES 4). A 5th block must be
+ * skipped in place: aborting the parse there silently drops every later rule
+ * of the page. Measured on jkanime (25 @keyframes blocks): all
+ * position:absolute overlay rules died and the page rendered 4x too tall. */
+static void test_keyframes_overflow_skips_block_not_sheet(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(
+        "@keyframes a1 { from { opacity: 0; } to { opacity: 1; } }\n"
+        "@keyframes a2 { from { opacity: 0; } to { opacity: 1; } }\n"
+        "@keyframes a3 { from { opacity: 0; } to { opacity: 1; } }\n"
+        "@keyframes a4 { from { opacity: 0; } to { opacity: 1; } }\n"
+        "@keyframes a5 { from { opacity: 0; } to { opacity: 1; } }\n"
+        "@keyframes a6 { from { opacity: 0; } to { opacity: 1; } }\n"
+        ".badge { position: absolute; right: 14px; top: 14px; }\n",
+        0, &sh), CSS_OK);
+    const char *cls[] = { "badge" };
+    css_style s = css_resolve(sh, "div", NULL, cls, 1, NULL, 0);
+    assert_int_equal(s.position, CSS_POS_ABSOLUTE);  /* rule after overflow survives */
+    css_free(sh);
+}
+
 /* --- rem rebased on the root font-size (2026-08-10) ---------------------------
  *
  * The root element's font-size defines what `rem` means. `html{font-size:62.5%}`
@@ -4282,6 +4306,7 @@ int main(void) {
         cmocka_unit_test(test_filter_drop_shadow_defaults_and_failclosed),
         cmocka_unit_test(test_background_rgba_alpha),
         cmocka_unit_test(test_anim_keyframes_resolved_from_sheet),
+        cmocka_unit_test(test_keyframes_overflow_skips_block_not_sheet),
         cmocka_unit_test(test_anim_transform_keyframes_from_sheet),
         cmocka_unit_test(test_clip_rect),
         cmocka_unit_test(test_clip_auto),
