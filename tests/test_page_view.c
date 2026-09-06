@@ -3000,6 +3000,34 @@ static void test_build_display_none_hidden(void **state) {
     hp_document_free(doc);
 }
 
+/* display:none is STRUCTURAL and applies to the image path too (spec/page_view.md):
+ * a hidden tab-pane's thumbnails must not be emitted. Without this they reserved
+ * their broken-image box as alt text and inflated a card grid to several times its
+ * real height (jkanime's donghuas/ovas panes are display:none, yet all their
+ * thumbnails flowed and each took a tile's worth of height). */
+static void test_build_display_none_hides_images(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>"
+        ".tab-content>.tab-pane{display:none}"
+        ".tab-content>.active{display:block}"
+        "</style>"
+        "<div class='tab-content'>"
+        "<div class='tab-pane active'>"
+        "<img src='https://e.example/visible.jpg' alt='shown'>"
+        "</div>"
+        "<div class='tab-pane'>"
+        "<img src='https://e.example/hidden.jpg' alt='secret'>"
+        "</div>"
+        "</div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    assert_non_null(find_image(v, "https://e.example/visible.jpg"));
+    assert_null(find_image(v, "https://e.example/hidden.jpg"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* External pre-fetched CSS (Hito 27) feeds the same cascade as the document's
  * <style>: an extern rule applies (presentation and display:none alike); at equal
  * specificity the document's own sheet, concatenated after, wins; and a NULL
@@ -3581,6 +3609,7 @@ int main(void) {
         cmocka_unit_test(test_build_text_decoration),
         cmocka_unit_test(test_build_css_bold_and_inline_wins),
         cmocka_unit_test(test_build_display_none_hidden),
+        cmocka_unit_test(test_build_display_none_hides_images),
         cmocka_unit_test(test_build_styled_external_css),
         cmocka_unit_test(test_pseudo_before_on_empty),
         cmocka_unit_test(test_pseudo_before_on_element_with_children),

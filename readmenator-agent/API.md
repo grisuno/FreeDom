@@ -544,803 +544,815 @@ static sf_status fetch_post_na...`
 - Defined: `gui/browser_ui.c:4152`
 
 ### item_root_box_in `static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox)`
-- Defined: `gui/browser_ui.c:4262`
+- Defined: `gui/browser_ui.c:4264`
 
 ### item_root_box `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)`
-- Defined: `gui/browser_ui.c:4299`
+- Defined: `gui/browser_ui.c:4301`
 - Doc: Root box of a flex/grid item, bounded by the container box page_view stamped on the item's runs (pv_run.cont_box_id). Th
 
 ### css_align_to_bt `static int css_align_to_bt(int align_kw)`
-- Defined: `gui/browser_ui.c:4308`
+- Defined: `gui/browser_ui.c:4310`
 - Doc: Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-*
 
 ### box_edge_px `static double box_edge_px(int wpx)`
-- Defined: `gui/browser_ui.c:4318`
+- Defined: `gui/browser_ui.c:4320`
 - Doc: Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-*
 
 ### rc_box_copy_decoration `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)`
-- Defined: `gui/browser_ui.c:4338`
+- Defined: `gui/browser_ui.c:4340`
 - Doc: Copies a box def's paint-time decoration (borders, radius, shadow, outline, background, gradient, background-image param
 
 ### box_is_strict_descendant `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)`
-- Defined: `gui/browser_ui.c:4417`
+- Defined: `gui/browser_ui.c:4419`
 - Doc: True iff box `id` is a STRICT descendant of `anc` in the box tree (or anc < 0, * which means "no container box", where a
 
 ### item_sides_at_level `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
                   ...`
-- Defined: `gui/browser_ui.c:4439`
+- Defined: `gui/browser_ui.c:4441`
 - Doc: item_sides for one item of container `cid`. A NESTED container item takes the child container's OWN box, not item_root_b
 
 ### container_box_of `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)`
-- Defined: `gui/browser_ui.c:4468`
+- Defined: `gui/browser_ui.c:4470`
 - Doc: The innermost box ENCLOSING a flex/grid container's items: the parent shared by the items' root boxes. page_view stamps 
+
+### table `* synthesised table (no descriptors to disagree) keeps the stamp. */
+        if (cd != NULL && !c...`
+- Defined: `gui/browser_ui.c:4492`
 
 ### row `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
 static d...`
-- Defined: `gui/browser_ui.c:4525`
+- Defined: `gui/browser_ui.c:4552`
 
 ### way `* intrinsic box either way (it does not wrap below its own size). */
 static double measure_item_w...`
-- Defined: `gui/browser_ui.c:4566`
+- Defined: `gui/browser_ui.c:4593`
 
 ### measure_item_content_w `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                       ...`
-- Defined: `gui/browser_ui.c:4601`
+- Defined: `gui/browser_ui.c:4628`
 
 ### item_declared_basis `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                       ...`
-- Defined: `gui/browser_ui.c:4633`
+- Defined: `gui/browser_ui.c:4660`
 - Doc: The flex base size a DEFINITE width gives an item, or 0 when it has none.  CSS Flexbox 1 section 7.2.3: with `flex-basis
 
 ### nested_cont_basis `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                            ...`
-- Defined: `gui/browser_ui.c:4647`
+- Defined: `gui/browser_ui.c:4674`
 - Doc: Max-content width of a NESTED container acting as one item: the sum of its own items' bases plus its gaps. Measuring its
 
 ### flex_item_basis `static double flex_item_basis(cairo_t *cr, const browser_window *w,
                              ...`
-- Defined: `gui/browser_ui.c:4679`
+- Defined: `gui/browser_ui.c:4706`
 
 ### flex_item_min_main `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                           ...`
-- Defined: `gui/browser_ui.c:4710`
+- Defined: `gui/browser_ui.c:4737`
 - Doc: Automatic minimum size of one flex item (CSS Flexbox 4.5), in the same border-box+margin units flex_item_basis returns -
 
 ### item_at_level `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-- Defined: `gui/browser_ui.c:4743`
+- Defined: `gui/browser_ui.c:4770`
 - Doc: Item index of run `bk` at container level `cid`: the run's own cont_item when it sits directly in cid, otherwise the par
 
 ### child_cont_at_level `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-- Defined: `gui/browser_ui.c:4758`
+- Defined: `gui/browser_ui.c:4785`
 - Doc: The container on `bk`'s ancestor chain that is a DIRECT child of cid, or -1 when the run sits directly in cid. That chil
 
 ### root_cont_of `static int root_cont_of(const rd_doc *doc, int cid)`
-- Defined: `gui/browser_ui.c:4773`
+- Defined: `gui/browser_ui.c:4800`
 - Doc: Root of a run's container chain: the outermost container that encloses it. That is the container the main layout loop gr
+
+### block_is_oof `static int block_is_oof(const rd_doc *doc, const rd_block *bk)`
+- Defined: `gui/browser_ui.c:4837`
+- Doc: True iff the block lives inside an out-of-flow (absolute/fixed) subtree: Stage 2 positions it separately, so the in-flow
+
+### layout_container `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+                ...`
+- Defined: `gui/browser_ui.c:4853`
 
 ### ITEMS `* between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visua...`
-- Defined: `gui/browser_ui.c:4888`
+- Defined: `gui/browser_ui.c:4963`
 
 ### slot `* layout slot (item 0 → rightmost, last item → leftmost). */
     if (use_flex && cdv.direction ==...`
-- Defined: `gui/browser_ui.c:4979`
+- Defined: `gui/browser_ui.c:5055`
 
 ### path `*
          * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
         ...`
-- Defined: `gui/browser_ui.c:5097`
+- Defined: `gui/browser_ui.c:5173`
 
 ### box_line_visible `static int box_line_visible(int style)`
-- Defined: `gui/browser_ui.c:5428`
+- Defined: `gui/browser_ui.c:5505`
 
 ### close_top_box `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)`
-- Defined: `gui/browser_ui.c:5435`
+- Defined: `gui/browser_ui.c:5512`
 - Doc: Closes the open block box: flushes the current line, reserves the box's bottom * padding+border, and finalizes the recor
 
 ### rc_box_context `static void rc_box_context(const rc_state *s, double content_w,
                            double...`
-- Defined: `gui/browser_ui.c:5536`
+- Defined: `gui/browser_ui.c:5613`
 - Doc: Content rect (left, width) the current run/box is laid out in: the innermost open * box's, or the page content box when 
 
 ### box_margin_top `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)`
-- Defined: `gui/browser_ui.c:5562`
+- Defined: `gui/browser_ui.c:5639`
 
 ### box_margin_bottom `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)`
-- Defined: `gui/browser_ui.c:5569`
+- Defined: `gui/browser_ui.c:5646`
 
 ### children `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...`
-- Defined: `gui/browser_ui.c:5580`
+- Defined: `gui/browser_ui.c:5657`
 
 ### column `*
  * Returns the height of the tallest column (0 when there is nothing to fragment). */
 static do...`
-- Defined: `gui/browser_ui.c:5786`
+- Defined: `gui/browser_ui.c:5863`
 
 ### box_path_has `static int box_path_has(const rd_doc *doc, int block_id, int want)`
-- Defined: `gui/browser_ui.c:5881`
+- Defined: `gui/browser_ui.c:5958`
 - Doc: Reconciles the open-box stack so it equals block b's box path (root..b->block_id), derived from the box-def parent_id ch
 
 ### box_shrink_width `static double box_shrink_width(cairo_t *cr, const browser_window *w,
                             ...`
-- Defined: `gui/browser_ui.c:5896`
+- Defined: `gui/browser_ui.c:5973`
 - Doc: Max-content width (px) of the box `box_id` opening at run `start`: the widest line produced by the maximal run of blocks
 
 ### reconcile_boxes_below `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                          ...`
-- Defined: `gui/browser_ui.c:5904`
+- Defined: `gui/browser_ui.c:5981`
 
 ### treatment `* block treatment (shrink-wrapped and placed by text-align), which is what a
          * standalon...`
-- Defined: `gui/browser_ui.c:5950`
+- Defined: `gui/browser_ui.c:6027`
 
 ### reconcile_boxes `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
                             rc_...`
-- Defined: `gui/browser_ui.c:5977`
+- Defined: `gui/browser_ui.c:6054`
 
 ### box_path_of `static int box_path_of(const rd_doc *doc, int block_id, int *out)`
-- Defined: `gui/browser_ui.c:5992`
+- Defined: `gui/browser_ui.c:6069`
 - Doc: Box path root..block_id via the box-def parent_id chain (root first), written into * out (bounded by RC_BOX_STACK_MAX). 
 
 ### band_common_box `static int band_common_box(const rd_doc *doc, size_t start, size_t end)`
-- Defined: `gui/browser_ui.c:6008`
+- Defined: `gui/browser_ui.c:6085`
 - Doc: The innermost box that is an ancestor (or self) of EVERY block in [start, end), via the longest common prefix of their b
 
 ### block_in_table_caption `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)`
-- Defined: `gui/browser_ui.c:6072`
+- Defined: `gui/browser_ui.c:6149`
 - Doc: True when a block sits inside a `display: table-caption` box. The walk goes up the box tree because the caption's text r
 
 ### layout_float_band `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...`
-- Defined: `gui/browser_ui.c:6083`
+- Defined: `gui/browser_ui.c:6160`
 
 ### thumbnail `* is what made a wikipedia thumbnail (a 250px image and its caption, no
      * declared width) sp...`
-- Defined: `gui/browser_ui.c:6158`
+- Defined: `gui/browser_ui.c:6235`
 
 ### layout_doc `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...`
-- Defined: `gui/browser_ui.c:6311`
+- Defined: `gui/browser_ui.c:6389`
 
 ### position_doc `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...`
-- Defined: `gui/browser_ui.c:6579`
+- Defined: `gui/browser_ui.c:6668`
 
 ### input_box_width `static double input_box_width(double content_w)`
-- Defined: `gui/browser_ui.c:6736`
+- Defined: `gui/browser_ui.c:6826`
 - Doc: make the painter repaint the box on TOP of its rows — covering everything past the first block with the box background. 
 
 ### select_box_width `static double select_box_width(double content_w)`
-- Defined: `gui/browser_ui.c:6739`
+- Defined: `gui/browser_ui.c:6829`
 
 ### button_box_width `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...`
-- Defined: `gui/browser_ui.c:6745`
+- Defined: `gui/browser_ui.c:6835`
 - Doc: } L->npositioned = keep; } /* Width of a painted text-input box: the preferred width clamped to the content. static doub
 
 ### v_read `static int v_read(int fd, void *buf, size_t n)`
-- Defined: `gui/browser_ui.c:7325`
+- Defined: `gui/browser_ui.c:7415`
 - Doc: EINTR/EAGAIN-safe pipe read — loops until all bytes arrive or hard error. With O_NONBLOCK, a partial read triggers EAGAI
 
 ### dies `* child dies (exec failed, device busy, daemon absent) is detected on the
  * next PCM write (EPIP...`
-- Defined: `gui/browser_ui.c:7353`
+- Defined: `gui/browser_ui.c:7443`
 
 ### audio_spawn `static void audio_spawn(browser_window *w, int rate, int channels)`
-- Defined: `gui/browser_ui.c:7361`
+- Defined: `gui/browser_ui.c:7451`
 
 ### audio_mark_dead `static void audio_mark_dead(browser_window *w)`
-- Defined: `gui/browser_ui.c:7416`
+- Defined: `gui/browser_ui.c:7506`
 - Doc: Reaps a dead sink child and advances the rotation so the next spawn tries * the next player. Called when a PCM write hit
 
 ### audio_write `static void audio_write(browser_window *w, const uint8_t *data, size_t len)`
-- Defined: `gui/browser_ui.c:7433`
+- Defined: `gui/browser_ui.c:7523`
 - Doc: Best-effort PCM write: whatever does not fit in the pipe is dropped (with PTS pacing the producer runs at ~real time, so
 
 ### audio_stop `static void audio_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:7447`
+- Defined: `gui/browser_ui.c:7537`
 
 ### video_stop `static void video_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:7467`
+- Defined: `gui/browser_ui.c:7557`
 
 ### video_fetch `static sf_status video_fetch(const char *url, browser_window *w,
                               sf...`
-- Defined: `gui/browser_ui.c:7646`
+- Defined: `gui/browser_ui.c:7736`
 - Doc: Fetches a single resource (m3u8 or TS segment) under the full policy gates: impersonation, routing, auth, navigability f
 
 ### video_play `static int video_play(browser_window *w, const char *m3u8_url)`
-- Defined: `gui/browser_ui.c:7663`
+- Defined: `gui/browser_ui.c:7753`
 - Doc: Starts video playback from an m3u8 playlist URL. Fetches the playlist, parses it, handles multi-variant master playlists
 
 ### video_stop `* each segment loop so a video_stop() in the main thread (which sets it to 0
  * then calls pthrea...`
-- Defined: `gui/browser_ui.c:7765`
+- Defined: `gui/browser_ui.c:7855`
 
 ### paint_video_row `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                 ...`
-- Defined: `gui/browser_ui.c:7818`
+- Defined: `gui/browser_ui.c:7908`
 
 ### row_line_slack `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)`
-- Defined: `gui/browser_ui.c:7931`
+- Defined: `gui/browser_ui.c:8021`
 - Doc: Free space left on a row's LINE BOX after its last fragment, or a negative/zero value when the line is full. The line bo
 
 ### row_align_offset `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)`
-- Defined: `gui/browser_ui.c:7943`
+- Defined: `gui/browser_ui.c:8033`
 - Doc: Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and the 
 
 ### upstream `* upstream (see spec/css.md). */
 static void box_path4(cairo_t *cr, double x, double y, double w,...`
-- Defined: `gui/browser_ui.c:7971`
+- Defined: `gui/browser_ui.c:8061`
 
 ### box_path `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)`
-- Defined: `gui/browser_ui.c:7999`
+- Defined: `gui/browser_ui.c:8089`
 - Doc: One radius for all four corners: the shape every non-border-radius caller * (shadow blur, backdrop clip) still wants.
 
 ### text `* fill and gradient text (2026-07-19). */
 static cairo_pattern_t *bui_linear_grad(double x, doubl...`
-- Defined: `gui/browser_ui.c:8016`
+- Defined: `gui/browser_ui.c:8106`
 
 ### bui_grad_color_at `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                    ...`
-- Defined: `gui/browser_ui.c:8041`
+- Defined: `gui/browser_ui.c:8131`
 - Doc: Interpolated gradient color at fraction t (0..1) of the stop run. Stops sit at explicit 0-1000 positions or evenly space
 
 ### spaced `* or evenly spaced (bui_grad_color_at). */
 static void bui_paint_conic(cairo_t *cr, double x, dou...`
-- Defined: `gui/browser_ui.c:8072`
+- Defined: `gui/browser_ui.c:8162`
 
 ### paint_bg_layer `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
                ...`
-- Defined: `gui/browser_ui.c:8104`
+- Defined: `gui/browser_ui.c:8194`
 - Doc: Paints one background-image layer into the box rect (x,y,w,h) with `radius_c` corners. The geometry -- used image size a
 
 ### paint_box_decoration `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
            ...`
-- Defined: `gui/browser_ui.c:8147`
+- Defined: `gui/browser_ui.c:8237`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8310`
+- Defined: `gui/browser_ui.c:8400`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8313`
+- Defined: `gui/browser_ui.c:8403`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8352`
+- Defined: `gui/browser_ui.c:8442`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8355`
+- Defined: `gui/browser_ui.c:8445`
 
 ### set_rgb `set_rgb(cr, (ui_rgb)`
-- Defined: `gui/browser_ui.c:8389`
+- Defined: `gui/browser_ui.c:8479`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8412`
+- Defined: `gui/browser_ui.c:8502`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8415`
+- Defined: `gui/browser_ui.c:8505`
 
 ### paint_deco_line `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
                        ...`
-- Defined: `gui/browser_ui.c:8473`
+- Defined: `gui/browser_ui.c:8563`
 - Doc: Paints one text-decoration line at a given y. Shared by underline, strikethrough and overline so the wavy/double/dashed/
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8507`
+- Defined: `gui/browser_ui.c:8597`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8509`
+- Defined: `gui/browser_ui.c:8599`
 
 ### paint_svg_at `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
                          doub...`
-- Defined: `gui/browser_ui.c:8529`
+- Defined: `gui/browser_ui.c:8619`
 - Doc: Draws one SVG block into an arbitrary rect. Shared by the row painter and the inline-fragment painter so an <svg> looks 
 
 ### replaced_current_color `static int replaced_current_color(const browser_window *w, const rd_block *blk)`
-- Defined: `gui/browser_ui.c:8549`
+- Defined: `gui/browser_ui.c:8639`
 - Doc: Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text colour,
 
 ### paint_inline_replaced `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
                                ...`
-- Defined: `gui/browser_ui.c:8558`
+- Defined: `gui/browser_ui.c:8648`
 - Doc: Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text colour,
 
 ### paint_content_row `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...`
-- Defined: `gui/browser_ui.c:8577`
+- Defined: `gui/browser_ui.c:8667`
 
 ### ov_box_clips `static int ov_box_clips(const pv_box_def *d)`
-- Defined: `gui/browser_ui.c:8765`
+- Defined: `gui/browser_ui.c:8855`
 - Doc: paint_deco_line(cr, x0, x1, sy, deco_thick, f->deco_style); } if (f->overline) { double oy = fbaseline - f->font_size * 
 
 ### ov_collect_chain `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)`
-- Defined: `gui/browser_ui.c:8773`
+- Defined: `gui/browser_ui.c:8863`
 - Doc: Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first). Returns count,
 
 ### ov_box_bounds `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)`
-- Defined: `gui/browser_ui.c:8794`
+- Defined: `gui/browser_ui.c:8884`
 - Doc: Fills *out (x/top/w/h only) with the UNION of every rc_box fragment carrying block_id bid, returning 1 if any exists. A 
 
 ### ov_content_rect `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...`
-- Defined: `gui/browser_ui.c:8818`
+- Defined: `gui/browser_ui.c:8908`
 - Doc: Computes the padding-box content rect (in page coords: y, x, w, h) for a box. * Used as the clip region for overflow:hid
 
 ### fragment `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
  * blk->block_id alo...`
-- Defined: `gui/browser_ui.c:8838`
+- Defined: `gui/browser_ui.c:8928`
 
 ### box_forms_stacking_context `static int box_forms_stacking_context(const pv_box_def *def)`
-- Defined: `gui/browser_ui.c:8893`
+- Defined: `gui/browser_ui.c:8983`
 - Doc: Does this box need its own offscreen compositing group? Single source of truth: the compositor's cx_forms_stacking_conte
 
 ### bui_skew_tan `static double bui_skew_tan(int deg)`
-- Defined: `gui/browser_ui.c:8936`
+- Defined: `gui/browser_ui.c:9026`
 - Doc: transform (M1.2 translate; M1.2b scale/rotate; M1.2c skew + origin): builds the box's full 2D affine transform -- transl
 
 ### box_transform_matrix `static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
              ...`
-- Defined: `gui/browser_ui.c:8942`
+- Defined: `gui/browser_ui.c:9032`
 
 ### bui_blend_operator `static cairo_operator_t bui_blend_operator(int mix_blend)`
-- Defined: `gui/browser_ui.c:9061`
+- Defined: `gui/browser_ui.c:9151`
 - Doc: Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's offscreen group is blended back over its bac
 
 ### bui_paint_backdrop_blur `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
                          ...`
-- Defined: `gui/browser_ui.c:9199`
+- Defined: `gui/browser_ui.c:9289`
 - Doc: backdrop-filter: blur (2026-07-19, glassmorphism v1). Samples the CURRENT paint target under the box rect (device-space 
 
 ### bui_pop_group_composite `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms)`
-- Defined: `gui/browser_ui.c:9257`
+- Defined: `gui/browser_ui.c:9347`
 - Doc: Composites the currently-pushed group back onto cr using def's opacity/mix-blend (the group must already be open via cai
 
 ### limits `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
  * grouped this w...`
-- Defined: `gui/browser_ui.c:9487`
+- Defined: `gui/browser_ui.c:9577`
 
 ### paint_box_decoration_grouped `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                         ...`
-- Defined: `gui/browser_ui.c:9555`
+- Defined: `gui/browser_ui.c:9645`
 
 ### paint_box_and_direct_rows `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
        ...`
-- Defined: `gui/browser_ui.c:9596`
+- Defined: `gui/browser_ui.c:9686`
 - Doc: (blk->block_id match), together, when the box forms a stacking context -- so a translucent/blended box's background and 
 
 ### paint_positioned_one `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
             ...`
-- Defined: `gui/browser_ui.c:9691`
+- Defined: `gui/browser_ui.c:9781`
 - Doc: Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context (box_forms_stacking_context: opacity<1,
 
 ### paint_nested_children `static void paint_nested_children(cairo_t *cr, browser_window *w,
                                ...`
-- Defined: `gui/browser_ui.c:9880`
+- Defined: `gui/browser_ui.c:9970`
 - Doc: R6: recursively paints child boxes of `parent_id` that form stacking contexts, inside the parent's already-open cairo gr
 
 ### paint_structured `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-- Defined: `gui/browser_ui.c:9912`
+- Defined: `gui/browser_ui.c:10002`
 
 ### write_doc_pdf `static long write_doc_pdf(browser_window *w, const char *path)`
-- Defined: `gui/browser_ui.c:10130`
+- Defined: `gui/browser_ui.c:10220`
 - Doc: Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter. Returns the page count 
 
 ### export_pdf `static void export_pdf(browser_window *w)`
-- Defined: `gui/browser_ui.c:10235`
+- Defined: `gui/browser_ui.c:10325`
 
 ### write_doc_png `static long write_doc_png(browser_window *w, const char *path)`
-- Defined: `gui/browser_ui.c:10289`
+- Defined: `gui/browser_ui.c:10379`
 - Doc: Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as the s
 
 ### export_png `static void export_png(browser_window *w)`
-- Defined: `gui/browser_ui.c:10410`
+- Defined: `gui/browser_ui.c:10500`
 
 ### caller `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-- Defined: `gui/browser_ui.c:10445`
+- Defined: `gui/browser_ui.c:10535`
 
 ### ui_render_png `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)`
-- Defined: `gui/browser_ui.c:10468`
+- Defined: `gui/browser_ui.c:10558`
 - Doc: Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the whole page, the cheapest artifact for 
 
 ### render_doc_images `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
               ...`
-- Defined: `gui/browser_ui.c:10494`
+- Defined: `gui/browser_ui.c:10584`
 - Doc: Headless PNG/PDF export WITH image decoding (see include/ui.h). Unlike the plain ui_render_png/pdf (which always draw pl
 
 ### ui_render_png_images `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- Defined: `gui/browser_ui.c:10524`
+- Defined: `gui/browser_ui.c:10614`
 
 ### ui_render_pdf_images `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- Defined: `gui/browser_ui.c:10530`
+- Defined: `gui/browser_ui.c:10620`
 
 ### ui_dump_layout `ui_status ui_dump_layout(const rd_doc *doc)`
-- Defined: `gui/browser_ui.c:10546`
+- Defined: `gui/browser_ui.c:10636`
 - Doc: Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the resolved
 
 ### link_at_point `static const char *link_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:10607`
+- Defined: `gui/browser_ui.c:10697`
 
 ### resolve_box_cursor `static int resolve_box_cursor(const rd_doc *doc, int block_id)`
-- Defined: `gui/browser_ui.c:10701`
+- Defined: `gui/browser_ui.c:10791`
 - Doc: First non-unset author `cursor` on block_id's box or an ancestor (nearest wins, like the rest of the box-decoration fiel
 
 ### box_pointer_events_none `static int box_pointer_events_none(const rd_doc *doc, int block_id)`
-- Defined: `gui/browser_ui.c:10715`
+- Defined: `gui/browser_ui.c:10805`
 - Doc: True when author `pointer-events: none` removes block_id's content from hit-testing (2026-07-10): the nearest box in the
 
 ### cursor_at_point `static int cursor_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:10731`
+- Defined: `gui/browser_ui.c:10821`
 - Doc: Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET when outside content / no box sets one. 
 
 ### node_at_point `static dom_node_id node_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:10783`
+- Defined: `gui/browser_ui.c:10873`
 - Doc: Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the point is over blank space / outside conte
 
 ### reference `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
  * hostile content...`
-- Defined: `gui/browser_ui.c:10831`
+- Defined: `gui/browser_ui.c:10921`
 
 ### apply_click_result `static void apply_click_result(browser_window *w, tab_page *page)`
-- Defined: `gui/browser_ui.c:10852`
+- Defined: `gui/browser_ui.c:10942`
 - Doc: Applies a click result returned by the worker: rebuild the rendered document and refresh inputs/console, but keep the cu
 
 ### memory `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...`
-- Defined: `gui/browser_ui.c:10875`
+- Defined: `gui/browser_ui.c:10965`
 
 ### GET `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...`
-- Defined: `gui/browser_ui.c:10958`
+- Defined: `gui/browser_ui.c:11048`
 
 ### ensure_download_dir `static int ensure_download_dir(char *out, size_t outsz)`
-- Defined: `gui/browser_ui.c:10992`
+- Defined: `gui/browser_ui.c:11082`
 - Doc: Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine). Returns 1 on s
 
 ### write_file_atomic `static int write_file_atomic(const char *path, const void *bytes, size_t len)`
-- Defined: `gui/browser_ui.c:11007`
+- Defined: `gui/browser_ui.c:11097`
 - Doc: Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash mid-write 
 
 ### save_download `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...`
-- Defined: `gui/browser_ui.c:11029`
+- Defined: `gui/browser_ui.c:11119`
 - Doc: Saves a fetched resource to ~/Downloads/freedom instead of rendering it. The filename is derived fail-closed from the ho
 
 ### save_current_page `static void save_current_page(browser_window *w)`
-- Defined: `gui/browser_ui.c:11062`
+- Defined: `gui/browser_ui.c:11152`
 - Doc: Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network * round-trip -- the bytes already in th
 
 ### deliver_fetch_result `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-- Defined: `gui/browser_ui.c:11071`
+- Defined: `gui/browser_ui.c:11161`
 
 ### drain_fetch_results `static void drain_fetch_results(browser_window *w)`
-- Defined: `gui/browser_ui.c:11126`
+- Defined: `gui/browser_ui.c:11216`
 - Doc: Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are atom
 
 ### toggle_reader `static void toggle_reader(browser_window *w)`
-- Defined: `gui/browser_ui.c:11202`
+- Defined: `gui/browser_ui.c:11292`
 - Doc: Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styl
 
 ### menu_item_checked `static int menu_item_checked(const browser_window *w, size_t i)`
-- Defined: `gui/browser_ui.c:11213`
+- Defined: `gui/browser_ui.c:11303`
 - Doc: Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styl
 
 ### menu_item_toggle `static void menu_item_toggle(browser_window *w, size_t i)`
-- Defined: `gui/browser_ui.c:11235`
+- Defined: `gui/browser_ui.c:11325`
 - Doc: Toggles options-menu item i and applies its effect. Theme and force-colors only affect presentation (a repaint, which re
 
 ### draw_clock `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...`
-- Defined: `gui/browser_ui.c:11345`
+- Defined: `gui/browser_ui.c:11435`
 - Doc: A small spinner meaning "busy". Now that the fetch runs off the event-loop thread, the loop ticks ~12 fps while loading 
 
 ### draw_hamburger `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- Defined: `gui/browser_ui.c:11356`
+- Defined: `gui/browser_ui.c:11446`
 
 ### draw_reload `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- Defined: `gui/browser_ui.c:11373`
+- Defined: `gui/browser_ui.c:11463`
 - Doc: The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx. Drawn with Cairo (not
 
 ### draw_menu `static void draw_menu(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11395`
+- Defined: `gui/browser_ui.c:11485`
 - Doc: double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx, cy, r
 
 ### draw_hover_url `static double draw_hover_url(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11506`
+- Defined: `gui/browser_ui.c:11596`
 - Doc: Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click will go
 
 ### draw_toast `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)`
-- Defined: `gui/browser_ui.c:11538`
+- Defined: `gui/browser_ui.c:11628`
 - Doc: Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks above 
 
 ### draw_tabstrip `static void draw_tabstrip(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11568`
+- Defined: `gui/browser_ui.c:11658`
 - Doc: Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each with 
 
 ### draw_omnibox `static void draw_omnibox(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11623`
+- Defined: `gui/browser_ui.c:11713`
 - Doc: Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top of co
 
 ### paint `static void paint(browser_window *w)`
-- Defined: `gui/browser_ui.c:11656`
+- Defined: `gui/browser_ui.c:11746`
 
 ### redraw `static void redraw(browser_window *w)`
-- Defined: `gui/browser_ui.c:11900`
+- Defined: `gui/browser_ui.c:11990`
 
 ### wm_base_ping `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
-- Defined: `gui/browser_ui.c:11912`
+- Defined: `gui/browser_ui.c:12002`
 - Doc: cairo_destroy(cr); } static void redraw(browser_window *w) { if (!w->configured) return; if (ensure_buffer(w) != 0) retu
 
 ### xdg_surface_configure `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- Defined: `gui/browser_ui.c:11918`
+- Defined: `gui/browser_ui.c:12008`
 
 ### toplevel_configure `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-- Defined: `gui/browser_ui.c:11926`
+- Defined: `gui/browser_ui.c:12016`
 
 ### wl_array_for_each `wl_array_for_each(st, states)`
-- Defined: `gui/browser_ui.c:11943`
+- Defined: `gui/browser_ui.c:12033`
 
 ### toplevel_close `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-- Defined: `gui/browser_ui.c:11949`
+- Defined: `gui/browser_ui.c:12039`
 
 ### deco_configure `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-- Defined: `gui/browser_ui.c:11957`
+- Defined: `gui/browser_ui.c:12047`
 
 ### set_cursor `static void set_cursor(browser_window *w, int cur_kind)`
-- Defined: `gui/browser_ui.c:11970`
+- Defined: `gui/browser_ui.c:12060`
 - Doc: Applies the appropriate Wayland cursor for the given CSS cursor value. * A no-op when no themed cursor is available (the
 
 ### element `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without...`
-- Defined: `gui/browser_ui.c:12000`
+- Defined: `gui/browser_ui.c:12090`
 
 ### fbw_split_y `static double fbw_split_y(const freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12070`
+- Defined: `gui/browser_ui.c:12160`
 - Doc: struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface; double split;          /* lo
 
 ### freebug_ensure_buffer `static int freebug_ensure_buffer(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12078`
+- Defined: `gui/browser_ui.c:12168`
 
 ### fbw_level_rgb `static void fbw_level_rgb(int level, double *r, double *g, double *b)`
-- Defined: `gui/browser_ui.c:12106`
+- Defined: `gui/browser_ui.c:12196`
 - Doc: struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer = wl_shm_pool_create_buffer
 
 ### fbw_console_lines `static size_t fbw_console_lines(const fb_buffer *log)`
-- Defined: `gui/browser_ui.c:12117`
+- Defined: `gui/browser_ui.c:12207`
 - Doc: } /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g, doubl
 
 ### freebug_paint `static void freebug_paint(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12129`
+- Defined: `gui/browser_ui.c:12219`
 
 ### freebug_redraw_fb `static void freebug_redraw_fb(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12328`
+- Defined: `gui/browser_ui.c:12418`
 
 ### freebug_redraw `static void freebug_redraw(browser_window *w)`
-- Defined: `gui/browser_ui.c:12337`
+- Defined: `gui/browser_ui.c:12427`
 
 ### freebug_hide `static void freebug_hide(browser_window *w)`
-- Defined: `gui/browser_ui.c:12341`
+- Defined: `gui/browser_ui.c:12431`
 
 ### fbw_xdg_surface_configure `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- Defined: `gui/browser_ui.c:12357`
+- Defined: `gui/browser_ui.c:12447`
 
 ### fbw_toplevel_configure `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-- Defined: `gui/browser_ui.c:12365`
+- Defined: `gui/browser_ui.c:12455`
 
 ### fbw_toplevel_close `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-- Defined: `gui/browser_ui.c:12375`
+- Defined: `gui/browser_ui.c:12465`
 
 ### freebug_show `static void freebug_show(browser_window *w)`
-- Defined: `gui/browser_ui.c:12384`
+- Defined: `gui/browser_ui.c:12474`
 
 ### freebug_toggle `static void freebug_toggle(browser_window *w)`
-- Defined: `gui/browser_ui.c:12414`
+- Defined: `gui/browser_ui.c:12504`
 
 ### freebug_destroy `static void freebug_destroy(browser_window *w)`
-- Defined: `gui/browser_ui.c:12419`
+- Defined: `gui/browser_ui.c:12509`
 
 ### freebug_owns_surface `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:12426`
+- Defined: `gui/browser_ui.c:12516`
 
 ### freebug_is_open `static int freebug_is_open(const browser_window *w)`
-- Defined: `gui/browser_ui.c:12430`
+- Defined: `gui/browser_ui.c:12520`
 
 ### freebug_repl_worker `static tab *freebug_repl_worker(browser_window *w)`
-- Defined: `gui/browser_ui.c:12438`
+- Defined: `gui/browser_ui.c:12528`
 - Doc: Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept alive
 
 ### freebug_eval `static void freebug_eval(browser_window *w)`
-- Defined: `gui/browser_ui.c:12474`
+- Defined: `gui/browser_ui.c:12564`
 
 ### freebug_handle_key `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-- Defined: `gui/browser_ui.c:12514`
+- Defined: `gui/browser_ui.c:12604`
 
 ### freebug_pointer_button `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-- Defined: `gui/browser_ui.c:12549`
+- Defined: `gui/browser_ui.c:12639`
 
 ### freebug_pointer_motion `static void freebug_pointer_motion(browser_window *w)`
-- Defined: `gui/browser_ui.c:12568`
+- Defined: `gui/browser_ui.c:12658`
 
 ### freebug_pointer_axis `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-- Defined: `gui/browser_ui.c:12590`
+- Defined: `gui/browser_ui.c:12680`
 
 ### ptr_enter `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
-- Defined: `gui/browser_ui.c:12608`
+- Defined: `gui/browser_ui.c:12698`
 
 ### ptr_leave `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:12627`
+- Defined: `gui/browser_ui.c:12717`
 
 ### ptr_motion `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-- Defined: `gui/browser_ui.c:12644`
+- Defined: `gui/browser_ui.c:12734`
 
 ### load_current `static void load_current(browser_window *w)`
-- Defined: `gui/browser_ui.c:12668`
+- Defined: `gui/browser_ui.c:12758`
 
 ### go_omnibox `static void go_omnibox(browser_window *w)`
-- Defined: `gui/browser_ui.c:12682`
+- Defined: `gui/browser_ui.c:12772`
 - Doc: Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure) decide
 
 ### ptr_button `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-- Defined: `gui/browser_ui.c:12726`
+- Defined: `gui/browser_ui.c:12816`
 
 ### scroll_line_px `static double scroll_line_px(const browser_window *w)`
-- Defined: `gui/browser_ui.c:12956`
+- Defined: `gui/browser_ui.c:13046`
 - Doc: } } /* PV_IN_BUTTON (reset/generic) is inert in v1. } else { /* Clicking non-input: dispatch blur on old if any. if (old
 
 ### ptr_axis `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-- Defined: `gui/browser_ui.c:12959`
+- Defined: `gui/browser_ui.c:13049`
 
 ### ptr_frame `static void ptr_frame(void *d, struct wl_pointer *p)`
-- Defined: `gui/browser_ui.c:12983`
+- Defined: `gui/browser_ui.c:13073`
 
 ### mime_is_text `static int mime_is_text(const char *mime)`
-- Defined: `gui/browser_ui.c:13000`
+- Defined: `gui/browser_ui.c:13090`
 - Doc: } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion = ptr_mot
 
 ### data_offer_source_actions `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-- Defined: `gui/browser_ui.c:13018`
+- Defined: `gui/browser_ui.c:13108`
 
 ### data_offer_action `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-- Defined: `gui/browser_ui.c:13021`
+- Defined: `gui/browser_ui.c:13111`
 
 ### data_device_data_offer `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...`
-- Defined: `gui/browser_ui.c:13031`
+- Defined: `gui/browser_ui.c:13121`
 - Doc: } static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) { (void)d; (void)o; (void)a; } sta
 
 ### data_device_selection `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...`
-- Defined: `gui/browser_ui.c:13043`
+- Defined: `gui/browser_ui.c:13133`
 - Doc: The clipboard selection changed. Commit the new offer (or NULL when the clipboard * was cleared), destroying any previou
 
 ### data_device_enter `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...`
-- Defined: `gui/browser_ui.c:13062`
+- Defined: `gui/browser_ui.c:13152`
 - Doc: wl_data_offer_destroy(w->selection_offer); if (offer == NULL) { w->selection_offer = NULL; w->selection_offer_has_text =
 
 ### data_device_leave `static void data_device_leave(void *d, struct wl_data_device *dev)`
-- Defined: `gui/browser_ui.c:13067`
+- Defined: `gui/browser_ui.c:13157`
 
 ### data_device_motion `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-- Defined: `gui/browser_ui.c:13068`
+- Defined: `gui/browser_ui.c:13158`
 
 ### data_device_drop `static void data_device_drop(void *d, struct wl_data_device *dev)`
-- Defined: `gui/browser_ui.c:13072`
+- Defined: `gui/browser_ui.c:13162`
 
 ### data_source_cancelled `static void data_source_cancelled(void *data, struct wl_data_source *src)`
-- Defined: `gui/browser_ui.c:13083`
+- Defined: `gui/browser_ui.c:13173`
 - Doc: wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d, str
 
 ### data_source_send `static void data_source_send(void *data, struct wl_data_source *src,
                             ...`
-- Defined: `gui/browser_ui.c:13089`
+- Defined: `gui/browser_ui.c:13179`
 - Doc: .enter = data_device_enter, .leave = data_device_leave, .motion = data_device_motion, .drop = data_device_drop, .selecti
 
 ### data_source_target `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-- Defined: `gui/browser_ui.c:13102`
+- Defined: `gui/browser_ui.c:13192`
 
 ### freebug_copy_console `static void freebug_copy_console(browser_window *w)`
-- Defined: `gui/browser_ui.c:13114`
+- Defined: `gui/browser_ui.c:13204`
 - Doc: Formats the entire Freebug console buffer and places it on the Wayland clipboard, so the user can paste the developer co
 
 ### insert_pasted_text `static void insert_pasted_text(browser_window *w, const char *text, size_t len)`
-- Defined: `gui/browser_ui.c:13172`
+- Defined: `gui/browser_ui.c:13262`
 - Doc: Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar). Contro
 
 ### clipboard_copy `static void clipboard_copy(browser_window *w)`
-- Defined: `gui/browser_ui.c:13236`
+- Defined: `gui/browser_ui.c:13326`
 - Doc: Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a wl_dat
 
 ### keyboard_keymap `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...`
-- Defined: `gui/browser_ui.c:13283`
+- Defined: `gui/browser_ui.c:13373`
 - Doc: Cut the omnibar selection: copy it to the clipboard, then remove it. v1 cut is the * URL bar only (page inputs / the UA 
 
 ### keyboard_enter `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-- Defined: `gui/browser_ui.c:13304`
+- Defined: `gui/browser_ui.c:13394`
 
 ### keyboard_leave `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:13312`
+- Defined: `gui/browser_ui.c:13402`
 
 ### key_sym_to_js_key `static const char *key_sym_to_js_key(xkb_keysym_t sym)`
-- Defined: `gui/browser_ui.c:13320`
+- Defined: `gui/browser_ui.c:13410`
 - Doc: Maps an xkb keysym to a JS event.key string. Returns NULL for printable chars * (the utf8 bytes should be used as the ke
 
 ### key_sym_to_keycode `static int key_sym_to_keycode(xkb_keysym_t sym)`
-- Defined: `gui/browser_ui.c:13346`
+- Defined: `gui/browser_ui.c:13436`
 - Doc: Maps an xkb keysym to a JS keyCode number. For printable ASCII, returns the * ASCII value; for special keys, returns the
 
 ### dispatch_js_event `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...`
-- Defined: `gui/browser_ui.c:13371`
+- Defined: `gui/browser_ui.c:13461`
 - Doc: Dispatches a JS DOM event to the worker for the given node_id. The worker returns a re-derived view which is applied via
 
 ### handle_key_press `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...`
-- Defined: `gui/browser_ui.c:13428`
+- Defined: `gui/browser_ui.c:13518`
 - Doc: Performs the effect of a single key press. Factored out of keyboard_key so a held key can be re-fired from the repeat ti
 
 ### key_is_repeatable `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
-- Defined: `gui/browser_ui.c:13758`
+- Defined: `gui/browser_ui.c:13848`
 - Doc: Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling. A Ctrl chord (tab spawn,
 
 ### key_repeat_arm `static void key_repeat_arm(browser_window *w, uint32_t key)`
-- Defined: `gui/browser_ui.c:13774`
+- Defined: `gui/browser_ui.c:13864`
 - Doc: Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s. A held key thus repeats u
 
 ### key_repeat_stop `static void key_repeat_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:13787`
+- Defined: `gui/browser_ui.c:13877`
 - Doc: 1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). static void key_repeat_arm(browser_window *w,
 
 ### key_repeat_fire `static void key_repeat_fire(browser_window *w)`
-- Defined: `gui/browser_ui.c:13798`
+- Defined: `gui/browser_ui.c:13888`
 - Doc: Re-fires the currently held key. Called from the event loop when the timer expires. Modifiers/keysym are recomputed from
 
 ### keyboard_key `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-- Defined: `gui/browser_ui.c:13811`
+- Defined: `gui/browser_ui.c:13901`
 
 ### keyboard_modifiers `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-- Defined: `gui/browser_ui.c:13851`
+- Defined: `gui/browser_ui.c:13941`
 
 ### keyboard_repeat_info `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-- Defined: `gui/browser_ui.c:13861`
+- Defined: `gui/browser_ui.c:13951`
 
 ### seat_caps `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-- Defined: `gui/browser_ui.c:13879`
+- Defined: `gui/browser_ui.c:13969`
 - Doc: w->repeat_rate = rate; w->repeat_delay = delay; } static const struct wl_keyboard_listener keyboard_listener = { .keymap
 
 ### seat_name `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-- Defined: `gui/browser_ui.c:13891`
+- Defined: `gui/browser_ui.c:13981`
 
 ### registry_global `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-- Defined: `gui/browser_ui.c:13897`
+- Defined: `gui/browser_ui.c:13987`
 - Doc: w->pointer = wl_seat_get_pointer(seat); wl_pointer_add_listener(w->pointer, &pointer_listener, w); } if ((caps & WL_SEAT
 
 ### registry_remove `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-- Defined: `gui/browser_ui.c:13918`
+- Defined: `gui/browser_ui.c:14008`
 
 ### ui_run_browser `ui_status ui_run_browser(const char *start_url)`
-- Defined: `gui/browser_ui.c:13927`
+- Defined: `gui/browser_ui.c:14017`
 - Doc: w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1); } else if (strcmp(iface, zxd
 
 ### cost `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
-- Defined: `gui/browser_ui.c:14304`
+- Defined: `gui/browser_ui.c:14394`
 
 ## gui/bui_theme.c
 
@@ -1737,18 +1749,22 @@ static void do_submit_post(browser_w...`
                        ...`
 - Defined: `src/box_tree.c:453`
 
+### block `* approximation of the true block (same flow neighbourhood), strictly
+             * better than ...`
+- Defined: `src/box_tree.c:512`
+
 ### oof_walk `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
-- Defined: `src/box_tree.c:620`
+- Defined: `src/box_tree.c:634`
 - Doc: Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers the l
 
 ### bt_oof_anchor `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-- Defined: `src/box_tree.c:636`
+- Defined: `src/box_tree.c:650`
 
 ### bt_oof_root `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-- Defined: `src/box_tree.c:640`
+- Defined: `src/box_tree.c:654`
 
 ### bt_box_hidden `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-- Defined: `src/box_tree.c:644`
+- Defined: `src/box_tree.c:658`
 
 ## src/browser.c
 
@@ -4504,513 +4520,521 @@ int os_namespac...`
 - Doc: Common field initialization shared by all append helpers. Keeps the three constructors DRY and guarantees every run star
 
 ### pv_node_map_init `static int pv_node_map_init(pv_node_map *m)`
-- Defined: `src/page_view.c:263`
+- Defined: `src/page_view.c:264`
 
 ### pv_node_map_free `static void pv_node_map_free(pv_node_map *m)`
-- Defined: `src/page_view.c:271`
+- Defined: `src/page_view.c:272`
 
 ### pv_node_map_build `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:308`
+- Defined: `src/page_view.c:309`
 - Doc: Builds a document-order map of all element nodes under root. Returns 0, or -1 on * allocation failure.
 
 ### pv_new `pv_view *pv_new(void)`
-- Defined: `src/page_view.c:316`
+- Defined: `src/page_view.c:317`
 
 ### pv_append `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     c...`
-- Defined: `src/page_view.c:320`
+- Defined: `src/page_view.c:321`
 
 ### pv_append_image `pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           con...`
-- Defined: `src/page_view.c:354`
+- Defined: `src/page_view.c:355`
 
 ### pv_append_input `pv_status pv_append_input(pv_view *v, int heading, int block_break,
                           pv_...`
-- Defined: `src/page_view.c:384`
+- Defined: `src/page_view.c:385`
 
 ### pv_append_video `pv_status pv_append_video(pv_view *v, int heading, int block_break,
                           con...`
-- Defined: `src/page_view.c:424`
+- Defined: `src/page_view.c:425`
 
 ### pv_append_svg `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
                         const c...`
-- Defined: `src/page_view.c:460`
+- Defined: `src/page_view.c:461`
 
 ### pv_set_emphasis `void pv_set_emphasis(pv_view *v, int bold, int italic)`
-- Defined: `src/page_view.c:489`
+- Defined: `src/page_view.c:490`
 
 ### pv_set_indent `void pv_set_indent(pv_view *v, int indent)`
-- Defined: `src/page_view.c:496`
+- Defined: `src/page_view.c:497`
 
 ### pv_set_color `void pv_set_color(pv_view *v, int fg_rgb)`
-- Defined: `src/page_view.c:501`
+- Defined: `src/page_view.c:502`
 
 ### pv_set_bgcolor `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
-- Defined: `src/page_view.c:506`
+- Defined: `src/page_view.c:507`
 
 ### pv_set_text_style `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
                 ...`
-- Defined: `src/page_view.c:511`
+- Defined: `src/page_view.c:512`
 
 ### pv_set_grad_text `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)`
-- Defined: `src/page_view.c:522`
+- Defined: `src/page_view.c:523`
 
 ### pv_set_text_ext `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
-- Defined: `src/page_view.c:530`
+- Defined: `src/page_view.c:531`
 
 ### ignored `* source is ignored (fail-visible: never invisible text from half a
      * pattern). A real text-...`
-- Defined: `src/page_view.c:563`
+- Defined: `src/page_view.c:564`
 
 ### pv_set_container `void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_g...`
-- Defined: `src/page_view.c:577`
+- Defined: `src/page_view.c:578`
 
 ### pv_set_row_span `void pv_set_row_span(pv_view *v, int row_span)`
-- Defined: `src/page_view.c:592`
+- Defined: `src/page_view.c:593`
 
 ### pv_set_grid_area `void pv_set_grid_area(pv_view *v, int row_start, int col_start)`
-- Defined: `src/page_view.c:596`
+- Defined: `src/page_view.c:597`
 
 ### pv_set_grid `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
-- Defined: `src/page_view.c:603`
+- Defined: `src/page_view.c:604`
 
 ### pv_set_grid_rows `void pv_set_grid_rows(pv_view *v, int grid_rows)`
-- Defined: `src/page_view.c:613`
+- Defined: `src/page_view.c:614`
 
 ### pv_set_cont_box `void pv_set_cont_box(pv_view *v, int cont_box_id)`
-- Defined: `src/page_view.c:617`
+- Defined: `src/page_view.c:618`
 
 ### pv_set_flex `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int...`
-- Defined: `src/page_view.c:621`
+- Defined: `src/page_view.c:622`
 
 ### pv_set_cont_item `void pv_set_cont_item(pv_view *v, int cont_item)`
-- Defined: `src/page_view.c:633`
+- Defined: `src/page_view.c:634`
 
 ### pv_set_float `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear)`
-- Defined: `src/page_view.c:638`
+- Defined: `src/page_view.c:639`
 
 ### pv_set_box `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int ...`
-- Defined: `src/page_view.c:646`
+- Defined: `src/page_view.c:647`
 
 ### pv_set_box_pct `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
                     ...`
-- Defined: `src/page_view.c:658`
+- Defined: `src/page_view.c:659`
 
 ### pv_set_ua_tag `void pv_set_ua_tag(pv_view *v, int ua_tag)`
-- Defined: `src/page_view.c:669`
+- Defined: `src/page_view.c:670`
 
 ### pv_set_node_id `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
-- Defined: `src/page_view.c:675`
+- Defined: `src/page_view.c:676`
 
 ### pv_set_block_id `void pv_set_block_id(pv_view *v, int block_id)`
-- Defined: `src/page_view.c:680`
+- Defined: `src/page_view.c:681`
 
 ### pv_set_own_box `void pv_set_own_box(pv_view *v, int box_id)`
-- Defined: `src/page_view.c:685`
+- Defined: `src/page_view.c:686`
+
+### pv_set_oof `void pv_set_oof(pv_view *v, int oof)`
+- Defined: `src/page_view.c:691`
 
 ### pv_set_input_checked `void pv_set_input_checked(pv_view *v, int checked)`
-- Defined: `src/page_view.c:690`
+- Defined: `src/page_view.c:696`
 
 ### pv_set_input_select_opts `void pv_set_input_select_opts(pv_view *v, const char *select_opts)`
-- Defined: `src/page_view.c:695`
+- Defined: `src/page_view.c:701`
 
 ### pv_add_cont_def `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)`
-- Defined: `src/page_view.c:703`
+- Defined: `src/page_view.c:709`
 
 ### pv_cont_count `size_t pv_cont_count(const pv_view *v)`
-- Defined: `src/page_view.c:716`
+- Defined: `src/page_view.c:722`
 
 ### pv_cont_at `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:720`
+- Defined: `src/page_view.c:726`
 
 ### pv_add_box_def `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
-- Defined: `src/page_view.c:725`
+- Defined: `src/page_view.c:731`
 
 ### pv_free `void pv_free(pv_view *v)`
-- Defined: `src/page_view.c:738`
+- Defined: `src/page_view.c:744`
 
 ### pv_count `size_t pv_count(const pv_view *v)`
-- Defined: `src/page_view.c:755`
+- Defined: `src/page_view.c:761`
 
 ### pv_at `const pv_run *pv_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:759`
+- Defined: `src/page_view.c:765`
 
 ### pv_box_count `size_t pv_box_count(const pv_view *v)`
-- Defined: `src/page_view.c:764`
+- Defined: `src/page_view.c:770`
 
 ### pv_box_at `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:768`
+- Defined: `src/page_view.c:774`
 
 ### node_next `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:777`
+- Defined: `src/page_view.c:783`
 - Doc: } size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const pv_view 
 
 ### is_block_tag `static int is_block_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:786`
+- Defined: `src/page_view.c:792`
 
 ### is_block_like `static int is_block_like(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:812`
+- Defined: `src/page_view.c:818`
 - Doc: An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display property in
 
 ### resolves `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
  * button/tooltip w...`
-- Defined: `src/page_view.c:837`
+- Defined: `src/page_view.c:843`
 
 ### is_block_like_style `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)`
-- Defined: `src/page_view.c:847`
+- Defined: `src/page_view.c:853`
 - Doc: is_block_like with the out-of-flow coercion applied. Takes the resolved style * because the answer depends on position/f
 
 ### generates_box `static int generates_box(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:858`
+- Defined: `src/page_view.c:864`
 
 ### generates_box_style `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)`
-- Defined: `src/page_view.c:871`
+- Defined: `src/page_view.c:877`
 - Doc: Form controls (input/select/textarea/button) are inline-block by default but can carry author CSS like position:absolute
 
 ### causes_block_break `static int causes_block_break(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:878`
+- Defined: `src/page_view.c:884`
 - Doc: Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do NOT
 
 ### paints `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
  * vacías"). Comment a...`
-- Defined: `src/page_view.c:887`
+- Defined: `src/page_view.c:893`
 
 ### ua_tag_of `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:912`
+- Defined: `src/page_view.c:918`
 - Doc: User-agent box identity of a block-level element, from its lexbor tag id. Only the tags the UA sheet gives a vertical ma
 
 ### heading_level `static int heading_level(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:933`
+- Defined: `src/page_view.c:939`
 
 ### is_skipped_tag `static int is_skipped_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:945`
+- Defined: `src/page_view.c:951`
 
 ### node_tag `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
-- Defined: `src/page_view.c:965`
+- Defined: `src/page_view.c:971`
 
 ### in_skipped_subtree `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
               ...`
-- Defined: `src/page_view.c:974`
+- Defined: `src/page_view.c:980`
 - Doc: Nonzero if any ancestor up to base is a non-rendered container. When js_enabled, a <noscript> ancestor also suppresses c
 
 ### font_color_attr `static int font_color_attr(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1010`
+- Defined: `src/page_view.c:1016`
 
 ### bgcolor_attr `static int bgcolor_attr(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1017`
+- Defined: `src/page_view.c:1023`
 - Doc: Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News' orange b
 
 ### item_ordinal `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)`
-- Defined: `src/page_view.c:1113`
+- Defined: `src/page_view.c:1119`
 - Doc: Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its own it
 
 ### pv_content_hidden `int pv_content_hidden(int box_hidden, int run_visibility)`
-- Defined: `src/page_view.c:1144`
+- Defined: `src/page_view.c:1150`
 - Doc: The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field resolves fr
 
 ### pv_text_ext_reset `void pv_text_ext_reset(pv_text_ext *e)`
-- Defined: `src/page_view.c:1149`
+- Defined: `src/page_view.c:1155`
 
 ### pv_text_ext_merge `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)`
-- Defined: `src/page_view.c:1176`
+- Defined: `src/page_view.c:1182`
 - Doc: Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten — ke
 
 ### css_has_hbox `static int css_has_hbox(const css_style *cs)`
-- Defined: `src/page_view.c:1234`
+- Defined: `src/page_view.c:1240`
 - Doc: True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width: 50%`
 
 ### css_hbox_resolve `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
-- Defined: `src/page_view.c:1247`
+- Defined: `src/page_view.c:1253`
 - Doc: Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side (clam
 
 ### css_has_position `static int css_has_position(const css_style *cs)`
-- Defined: `src/page_view.c:1291`
+- Defined: `src/page_view.c:1297`
 - Doc: A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree (pa
 
 ### css_has_boxdeco `static int css_has_boxdeco(const css_style *cs)`
-- Defined: `src/page_view.c:1295`
+- Defined: `src/page_view.c:1301`
 
 ### cont_def_reset `static void cont_def_reset(pv_cont_def *d)`
-- Defined: `src/page_view.c:1435`
+- Defined: `src/page_view.c:1441`
 - Doc: Per-container parameters + parent linkage (2026-07-31). Mirrors pv_box_reg's def[] array: the registry is the one place 
 
 ### container_id `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1449`
+- Defined: `src/page_view.c:1455`
 - Doc: static void cont_def_reset(pv_cont_def *d) { memset(d, 0, sizeof *d); d->parent_id = -1; d->parent_item = -1; d->row_gap
 
 ### trying `* a real page passes without trying (slashdot's front page saturates it), and past
  * it box_reg_...`
-- Defined: `src/page_view.c:1502`
+- Defined: `src/page_view.c:1508`
 
 ### box_reg_free `static void box_reg_free(pv_box_reg *r)`
-- Defined: `src/page_view.c:1530`
+- Defined: `src/page_view.c:1536`
 
 ### boxdef_from_style `static void boxdef_from_style(pv_box_def *d, const css_style *cs)`
-- Defined: `src/page_view.c:1540`
+- Defined: `src/page_view.c:1546`
 - Doc: Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style. Padding unset -> 0 (geometry default)
 
 ### box_reg_id `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
            ...`
-- Defined: `src/page_view.c:1756`
+- Defined: `src/page_view.c:1762`
 - Doc: Registers (or finds) the box for `node`. font_px is the element's COMPUTED font-size, needed because the user-agent marg
 
 ### pv_style_cache_init `static int pv_style_cache_init(pv_style_cache *c)`
-- Defined: `src/page_view.c:1799`
+- Defined: `src/page_view.c:1805`
 
 ### pv_style_cache_free `static void pv_style_cache_free(pv_style_cache *c)`
-- Defined: `src/page_view.c:1813`
+- Defined: `src/page_view.c:1819`
 
 ### pv_cache_find `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1824`
+- Defined: `src/page_view.c:1830`
 - Doc: cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init, or a caller that opts out) simply calls thr
 
 ### pv_cached_font_px `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1835`
+- Defined: `src/page_view.c:1841`
 - Doc: The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was never
 
 ### pv_cache_put `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
                      ...`
-- Defined: `src/page_view.c:1839`
+- Defined: `src/page_view.c:1845`
 
 ### pv_parent_element `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1863`
+- Defined: `src/page_view.c:1869`
 - Doc: if (ns != NULL) cache->style = ns; double *nf = (double *)realloc(cache->font_size, ncap * sizeof *nf); if (nf != NULL) 
+
+### subtree_is_oof `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
+                     ...`
+- Defined: `src/page_view.c:1931`
+- Doc: True iff the element itself is out of flow (position:absolute/fixed) or descends from one. Such a subtree is removed fro
 
 ### size `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
 static void app...`
-- Defined: `src/page_view.c:1924`
+- Defined: `src/page_view.c:1951`
 
 ### builder `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
  * (the ...`
-- Defined: `src/page_view.c:1944`
+- Defined: `src/page_view.c:1971`
 
 ### css_to_fx_justify `static int css_to_fx_justify(css_justify j)`
-- Defined: `src/page_view.c:1973`
+- Defined: `src/page_view.c:2000`
 - Doc: Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to FX_J
 
 ### is_bold_tag `static int is_bold_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:1992`
+- Defined: `src/page_view.c:2019`
 - Doc: Tags the user-agent sheet renders bold. Headings belong here: making the UA bold part of the RESOLVED weight is what let
 
 ### is_italic_tag `static int is_italic_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:1997`
+- Defined: `src/page_view.c:2024`
 
 ### is_inline_block_row `static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
                  ...`
-- Defined: `src/page_view.c:2031`
+- Defined: `src/page_view.c:2058`
 - Doc: at least one element child, EVERY element child is display:inline-block, and it carries no text of its own beyond whites
 
 ### paints `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
  *
  * A chil...`
-- Defined: `src/page_view.c:2051`
+- Defined: `src/page_view.c:2078`
 
 ### resolve_context `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...`
-- Defined: `src/page_view.c:2082`
+- Defined: `src/page_view.c:2109`
 
 ### margins `* margins (boxdef_from_style) and the painter applies them when
                          * it ope...`
-- Defined: `src/page_view.c:2311`
+- Defined: `src/page_view.c:2338`
 
 ### container `* membership in this container (and none in any container further out,
                  * since i...`
-- Defined: `src/page_view.c:2427`
+- Defined: `src/page_view.c:2454`
 
 ### walk `* far on this walk (they are all inside this element). */
 
                         /* The innermo...`
-- Defined: `src/page_view.c:2510`
+- Defined: `src/page_view.c:2537`
 
 ### sz_count `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)`
-- Defined: `src/page_view.c:2629`
+- Defined: `src/page_view.c:2656`
 - Doc: Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer. Two passes -- one to mea
 
 ### sz_write `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
-- Defined: `src/page_view.c:2642`
+- Defined: `src/page_view.c:2669`
 
 ### serialize_subtree `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
-- Defined: `src/page_view.c:2650`
+- Defined: `src/page_view.c:2677`
 
 ### collapse_ws `static char *collapse_ws(const char *s, size_t n)`
-- Defined: `src/page_view.c:2670`
+- Defined: `src/page_view.c:2697`
 - Doc: if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL) return 
 
 ### parse_dim `static int parse_dim(const lxb_char_t *s, size_t len)`
-- Defined: `src/page_view.c:2694`
+- Defined: `src/page_view.c:2721`
 - Doc: Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%"). Returns the valu
 
 ### present `* when no width descriptors are present (density-only or bare URLs). */
 static void srcset_best_u...`
-- Defined: `src/page_view.c:2711`
+- Defined: `src/page_view.c:2738`
 
 ### srcset_slot_width `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
                               ...`
-- Defined: `src/page_view.c:2806`
+- Defined: `src/page_view.c:2833`
 - Doc: Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns the effective slot width in px for the given vie
 
 ### dimensions `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
 static void srcse...`
-- Defined: `src/page_view.c:2852`
+- Defined: `src/page_view.c:2879`
 
 ### find_body `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:2883`
+- Defined: `src/page_view.c:2910`
 
 ### string `* Returns a heap string (caller frees) or NULL when neither carries a class —
  * NULL simply mean...`
-- Defined: `src/page_view.c:2894`
+- Defined: `src/page_view.c:2921`
 
 ### forms_free `static void forms_free(form_table *ft)`
-- Defined: `src/page_view.c:2941`
+- Defined: `src/page_view.c:2968`
 
 ### ascii_ieq `static int ascii_ieq(const char *s, const char *lit)`
-- Defined: `src/page_view.c:2949`
+- Defined: `src/page_view.c:2976`
 - Doc: } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void forms_free(form_
 
 ### attr_dup `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)`
-- Defined: `src/page_view.c:2961`
+- Defined: `src/page_view.c:2988`
 - Doc: Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute y
 
 ### forms_add `static int forms_add(form_table *ft, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:2970`
+- Defined: `src/page_view.c:2997`
 - Doc: Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute y
 
 ### form_for `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...`
-- Defined: `src/page_view.c:2990`
+- Defined: `src/page_view.c:3017`
 - Doc: } lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method", 6); i
 
 ### under_unrendered `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)`
-- Defined: `src/page_view.c:3006`
+- Defined: `src/page_view.c:3033`
 - Doc: Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected subtr
 
 ### collect_text `static char *collect_text(const lxb_dom_node_t *el)`
-- Defined: `src/page_view.c:3019`
+- Defined: `src/page_view.c:3046`
 - Doc: Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of a <
 
 ### classify_input `static pv_input_type classify_input(const char *type)`
-- Defined: `src/page_view.c:3042`
+- Defined: `src/page_view.c:3069`
 
 ### li_ordinal `static int li_ordinal(const lxb_dom_node_t *li)`
-- Defined: `src/page_view.c:3222`
+- Defined: `src/page_view.c:3249`
 - Doc: 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out of s
 
 ### roman_marker `static void roman_marker(int n, int upper, char *out, size_t cap)`
-- Defined: `src/page_view.c:3248`
+- Defined: `src/page_view.c:3275`
 - Doc: int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ? 'A'
 
 ### list_marker `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...`
-- Defined: `src/page_view.c:3273`
+- Defined: `src/page_view.c:3300`
 - Doc: Builds the list marker for the first run of an <li>. With no author list-style (CSS_LS_UNSET) it is the UA default: "N. 
 
 ### node_table_role `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3314`
+- Defined: `src/page_view.c:3341`
 - Doc: The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet gives 
 
 ### nearest_table `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
  ...`
-- Defined: `src/page_view.c:3332`
+- Defined: `src/page_view.c:3359`
 - Doc: const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl); char tag[BX_TAG_NAME_MAX]; const char *tagp = NULL; if (nm !
 
 ### parent_is_table_internal `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3360`
+- Defined: `src/page_view.c:3387`
 - Doc: Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group. T
 
 ### nearest_cell `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
   ...`
-- Defined: `src/page_view.c:3371`
+- Defined: `src/page_view.c:3398`
 - Doc: node generates no box; the caller drops it so it does not split a data table's grid-container item run (which the layout
 
 ### cell_has_nested_table `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3386`
+- Defined: `src/page_view.c:3413`
 - Doc: Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell. Only leaf cells (no nest
 
 ### next_skip `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:3395`
+- Defined: `src/page_view.c:3422`
 - Doc: Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the table 
 
 ### cell_anchors `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)`
-- Defined: `src/page_view.c:3406`
+- Defined: `src/page_view.c:3433`
 - Doc: First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only non
 
 ### links `* its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows ...`
-- Defined: `src/page_view.c:3424`
+- Defined: `src/page_view.c:3451`
 
 ### flow_table `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
-- Defined: `src/page_view.c:3444`
+- Defined: `src/page_view.c:3471`
 
 ### in_flow_table_cell `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
            ...`
-- Defined: `src/page_view.c:3456`
+- Defined: `src/page_view.c:3483`
 
 ### table `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
  * content -- their ...`
-- Defined: `src/page_view.c:3466`
+- Defined: `src/page_view.c:3493`
 
 ### table_columns `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3484`
+- Defined: `src/page_view.c:3511`
 - Doc: Grid column count of a table: the maximum number of logical columns across all its rows, computed by summing each cell's
 
 ### collect_style_text `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)`
-- Defined: `src/page_view.c:3517`
+- Defined: `src/page_view.c:3544`
 - Doc: Concatenates the text of every <style> element in the document (head included) into one owned, NUL-terminated buffer, ca
 
 ### in_hidden_subtree `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...`
-- Defined: `src/page_view.c:3558`
+- Defined: `src/page_view.c:3585`
 - Doc: Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none is 
 
 ### in_boilerplate_subtree `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-- Defined: `src/page_view.c:3575`
+- Defined: `src/page_view.c:3602`
 - Doc: Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>). Used only in distraction
 
 ### in_closed_details_subtree `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-- Defined: `src/page_view.c:3590`
+- Defined: `src/page_view.c:3617`
 - Doc: Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its <summa
 
 ### pv_build `pv_status pv_build(const hp_document *doc, pv_view **out)`
-- Defined: `src/page_view.c:3609`
+- Defined: `src/page_view.c:3636`
 
 ### pv_build_ex `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-- Defined: `src/page_view.c:3613`
+- Defined: `src/page_view.c:3640`
 
 ### pv_build_full `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-- Defined: `src/page_view.c:3617`
+- Defined: `src/page_view.c:3644`
 
 ### annotate_replaced_run `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...`
-- Defined: `src/page_view.c:3640`
+- Defined: `src/page_view.c:3667`
 - Doc: Attaches the layout membership a replaced run needs to take part in its surroundings: flex/grid container identity and i
 
 ### collect_page_css `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...`
-- Defined: `src/page_view.c:3672`
+- Defined: `src/page_view.c:3699`
 
 ### pv_build_styled `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-- Defined: `src/page_view.c:3697`
+- Defined: `src/page_view.c:3724`
 
 ### px `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-- Defined: `src/page_view.c:4228`
+- Defined: `src/page_view.c:4255`
 
 ### engine `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-- Defined: `src/page_view.c:4808`
+- Defined: `src/page_view.c:4854`
 
 ### appended `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
         if (cont.fl...`
-- Defined: `src/page_view.c:4862`
+- Defined: `src/page_view.c:4908`
 
 ### pv_css_drops `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
-- Defined: `src/page_view.c:4946`
+- Defined: `src/page_view.c:4993`
 - Doc: Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context -- but
 
 ## src/pdf_export.c
@@ -5241,57 +5265,57 @@ static void srcse...`
 - Doc: Appends one block, taking owned copies of text (required) and href (optional). * Returns 0 on success, -1 on allocation 
 
 ### rd_push_input `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)`
-- Defined: `src/render_doc.c:181`
+- Defined: `src/render_doc.c:182`
 - Doc: Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value. Retur
 
 ### resolve_image_decision `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
         ...`
-- Defined: `src/render_doc.c:216`
+- Defined: `src/render_doc.c:217`
 - Doc: Resolves raw_src (possibly relative, or a data: URI) against top_level_url and judges it under the exact same policy an 
 
 ### rd_build `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-- Defined: `src/render_doc.c:237`
+- Defined: `src/render_doc.c:238`
 
 ### unset `* background paints as if unset (no border/box-shadow-style
                  * "broken image" pla...`
-- Defined: `src/render_doc.c:570`
+- Defined: `src/render_doc.c:575`
 
 ### rd_free `void rd_free(rd_doc *d)`
-- Defined: `src/render_doc.c:634`
+- Defined: `src/render_doc.c:639`
 
 ### rd_count `size_t rd_count(const rd_doc *d)`
-- Defined: `src/render_doc.c:650`
+- Defined: `src/render_doc.c:655`
 
 ### rd_at `const rd_block *rd_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:654`
-
-### rd_box_count `size_t rd_box_count(const rd_doc *d)`
 - Defined: `src/render_doc.c:659`
 
-### rd_box_at `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:663`
+### rd_box_count `size_t rd_box_count(const rd_doc *d)`
+- Defined: `src/render_doc.c:664`
 
-### rd_cont_count `size_t rd_cont_count(const rd_doc *d)`
+### rd_box_at `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
 - Defined: `src/render_doc.c:668`
 
-### rd_cont_at `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:672`
+### rd_cont_count `size_t rd_cont_count(const rd_doc *d)`
+- Defined: `src/render_doc.c:673`
 
-### rd_kind_name `const char *rd_kind_name(rd_kind k)`
+### rd_cont_at `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
 - Defined: `src/render_doc.c:677`
 
+### rd_kind_name `const char *rd_kind_name(rd_kind k)`
+- Defined: `src/render_doc.c:682`
+
 ### rd_block_tag `const char *rd_block_tag(const rd_block *b)`
-- Defined: `src/render_doc.c:691`
+- Defined: `src/render_doc.c:696`
 
 ### rd_input_label `const char *rd_input_label(int input_type)`
-- Defined: `src/render_doc.c:722`
+- Defined: `src/render_doc.c:727`
 
 ### rd_image_label `const char *rd_image_label(rdp_img_decision d)`
-- Defined: `src/render_doc.c:741`
+- Defined: `src/render_doc.c:746`
 
 ### rd_image_fail_label `const char *rd_image_fail_label(img_fail_reason reason)`
-- Defined: `src/render_doc.c:752`
+- Defined: `src/render_doc.c:757`
 
 ## src/render_policy.c
 
@@ -5640,204 +5664,204 @@ static int child_load(ch...`
 
 ### FB_MAX_FILE_BYTES `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-- Defined: `src/tab.c:619`
+- Defined: `src/tab.c:622`
 
 ### budget_remaining_ms `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
-- Defined: `src/tab.c:649`
+- Defined: `src/tab.c:652`
 - Doc: Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS bud
 
 ### ctype_is_javascript `static int ctype_is_javascript(const char *ctype)`
-- Defined: `src/tab.c:663`
+- Defined: `src/tab.c:666`
 - Doc: Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types): accept a 
 
 ### ctype_is_css `static int ctype_is_css(const char *ctype)`
-- Defined: `src/tab.c:672`
+- Defined: `src/tab.c:675`
 - Doc: Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is accepted,
 
 ### log_external_skip `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...`
-- Defined: `src/tab.c:680`
+- Defined: `src/tab.c:683`
 - Doc: Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused). The raw hostile s
 
 ### run `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
  * Call after every ...`
-- Defined: `src/tab.c:698`
+- Defined: `src/tab.c:701`
 
 ### window `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-- Defined: `src/tab.c:731`
+- Defined: `src/tab.c:734`
 
 ### child_handle_load `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-- Defined: `src/tab.c:775`
+- Defined: `src/tab.c:778`
 
 ### swap `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...`
-- Defined: `src/tab.c:1019`
+- Defined: `src/tab.c:1022`
 
 ### child_next_timer_ms `static int32_t child_next_timer_ms(child_state *cs)`
-- Defined: `src/tab.c:1057`
+- Defined: `src/tab.c:1060`
 - Doc: Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending. Does 
 
 ### child_handle_mutation `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...`
-- Defined: `src/tab.c:1072`
+- Defined: `src/tab.c:1075`
 - Doc: Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so the 
 
 ### child_handle_click `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- Defined: `src/tab.c:1138`
+- Defined: `src/tab.c:1141`
 
 ### child_handle_tick `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- Defined: `src/tab.c:1142`
+- Defined: `src/tab.c:1145`
 
 ### child_handle_event `static void child_handle_event(int wfd, child_state *cs)`
-- Defined: `src/tab.c:1152`
+- Defined: `src/tab.c:1155`
 
 ### child_handle_mouse `static void child_handle_mouse(int wfd, child_state *cs)`
-- Defined: `src/tab.c:1201`
+- Defined: `src/tab.c:1204`
 - Doc: Handles a mouse DOM event (OP_MOUSE). Reads: node_id:int32, event_type_len:size_t, event_type, client_x:int32, client_y:
 
 ### child_handle_submit `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
-- Defined: `src/tab.c:1235`
+- Defined: `src/tab.c:1238`
 - Doc: Fires a submit event on the form enclosing node_id. Walks up the DOM to find the <form> element, dispatches the event, a
 
 ### child_handle_eval `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
-- Defined: `src/tab.c:1269`
+- Defined: `src/tab.c:1272`
 - Doc: Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a JS-le
 
 ### child_handle_decode_image `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
-- Defined: `src/tab.c:1302`
+- Defined: `src/tab.c:1305`
 - Doc: Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data]. Decoding hostile image bytes happens h
 
 ### child_handle_decode_image_b64 `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
-- Defined: `src/tab.c:1324`
+- Defined: `src/tab.c:1327`
 - Doc: data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64 DEC
 
 ### gen_session_key `static uint64_t gen_session_key(void)`
-- Defined: `src/tab.c:1335`
+- Defined: `src/tab.c:1338`
 
 ### tab_worker_run `static void tab_worker_run(int rfd, int wfd)`
-- Defined: `src/tab.c:1356`
+- Defined: `src/tab.c:1359`
 - Doc: The confined request loop. Runs in the re-exec'd worker image (see * tab_worker_dispatch). Never returns to the caller (
 
 ### parse_worker_fd `static int parse_worker_fd(const char *s, int *out)`
-- Defined: `src/tab.c:1499`
+- Defined: `src/tab.c:1502`
 - Doc: else /* OP_DECODE_IMAGE_B64 */       child_handle_decode_image_b64(wfd, buf, len); free(buf); free(url); free(cookies); 
 
 ### tab_parse_worker_args `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- Defined: `src/tab.c:1510`
+- Defined: `src/tab.c:1513`
 
 ### tab_worker_dispatch `void tab_worker_dispatch(int argc, char **argv)`
-- Defined: `src/tab.c:1520`
+- Defined: `src/tab.c:1523`
 
 ### ignore_sigpipe `static void ignore_sigpipe(void)`
-- Defined: `src/tab.c:1551`
+- Defined: `src/tab.c:1554`
 - Doc: A write to a dead child must not kill the parent with SIGPIPE. Idempotent; * no module-level mutable state of our own (t
 
 ### tab_refresh_alive `static void tab_refresh_alive(tab *t)`
-- Defined: `src/tab.c:1557`
+- Defined: `src/tab.c:1560`
 
 ### read_field `static int read_field(int fd, char **out, size_t *out_len)`
-- Defined: `src/tab.c:1577`
+- Defined: `src/tab.c:1580`
 - Doc: Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
 
 ### read_view `static int read_view(int fd, pv_view **out)`
-- Defined: `src/tab.c:1593`
+- Defined: `src/tab.c:1596`
 - Doc: Reads a display list serialised by write_view into a fresh pv_view. The run * count and each field are capped against am
 
 ### read_console `static int read_console(int fd, fb_buffer *out)`
-- Defined: `src/tab.c:2017`
+- Defined: `src/tab.c:2023`
 - Doc: Reads the console section written by write_console into out (a zero-initialised fb_buffer). Bounds the entry count and e
 
 ### send_request `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
-- Defined: `src/tab.c:2054`
+- Defined: `src/tab.c:2060`
 - Doc: if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt, elen) !=
 
 ### io_failure `static tab_status io_failure(tab *t)`
-- Defined: `src/tab.c:2063`
+- Defined: `src/tab.c:2069`
 
 ### exec_worker_child `static void exec_worker_child(int rfd, int wfd)`
-- Defined: `src/tab.c:2072`
+- Defined: `src/tab.c:2078`
 - Doc: Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other tabs' c
 
 ### tab_set_fetcher `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- Defined: `src/tab.c:2142`
-
-### tab_set_net_allowed `void tab_set_net_allowed(tab *t, int allowed)`
 - Defined: `src/tab.c:2148`
 
+### tab_set_net_allowed `void tab_set_net_allowed(tab *t, int allowed)`
+- Defined: `src/tab.c:2154`
+
 ### tab_set_css_allowed `void tab_set_css_allowed(tab *t, int allowed)`
-- Defined: `src/tab.c:2153`
+- Defined: `src/tab.c:2159`
 
 ### tab_set_viewport_w `void tab_set_viewport_w(tab *t, int px)`
-- Defined: `src/tab.c:2158`
+- Defined: `src/tab.c:2164`
 
 ### tab_set_cookies `void tab_set_cookies(tab *t, const char *cookies)`
-- Defined: `src/tab.c:2163`
+- Defined: `src/tab.c:2169`
 
 ### tab_subreq_permitted `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- Defined: `src/tab.c:2169`
+- Defined: `src/tab.c:2175`
 
 ### answered `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-- Defined: `src/tab.c:2182`
+- Defined: `src/tab.c:2188`
 
 ### tab_load `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- Defined: `src/tab.c:2217`
+- Defined: `src/tab.c:2223`
 
 ### tab_load_ex `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- Defined: `src/tab.c:2221`
+- Defined: `src/tab.c:2227`
 
 ### tab_load_full `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- Defined: `src/tab.c:2225`
+- Defined: `src/tab.c:2231`
 
 ### tab_click `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- Defined: `src/tab.c:2371`
+- Defined: `src/tab.c:2377`
 
 ### tab_tick `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- Defined: `src/tab.c:2378`
+- Defined: `src/tab.c:2384`
 
 ### tab_submit `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
-- Defined: `src/tab.c:2388`
+- Defined: `src/tab.c:2394`
 - Doc: Dispatches a submit event on the form enclosing node_id. Simple response: * [TAG_RESULT][ok:int32][prevented:int32]. No 
 
 ### tab_read_view `tab_status tab_read_view(tab *t, tab_page *out)`
-- Defined: `src/tab.c:2493`
+- Defined: `src/tab.c:2499`
 - Doc: Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request, tab_subreq
 
 ### tab_eval `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- Defined: `src/tab.c:2548`
+- Defined: `src/tab.c:2554`
 
 ### tab_decode_image_op `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...`
-- Defined: `src/tab.c:2589`
+- Defined: `src/tab.c:2595`
 - Doc: Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the [ok][w][h][stri
 
 ### tab_decode_image `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- Defined: `src/tab.c:2630`
-
-### tab_decode_image_data_url `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
 - Defined: `src/tab.c:2636`
 
-### tab_alive `int tab_alive(const tab *t)`
-- Defined: `src/tab.c:2654`
+### tab_decode_image_data_url `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+- Defined: `src/tab.c:2642`
 
-### tab_child_pid `pid_t tab_child_pid(const tab *t)`
+### tab_alive `int tab_alive(const tab *t)`
 - Defined: `src/tab.c:2660`
 
+### tab_child_pid `pid_t tab_child_pid(const tab *t)`
+- Defined: `src/tab.c:2666`
+
 ### tab_close `void tab_close(tab *t)`
-- Defined: `src/tab.c:2664`
+- Defined: `src/tab.c:2670`
 
 ### tab_page_free `void tab_page_free(tab_page *p)`
-- Defined: `src/tab.c:2677`
+- Defined: `src/tab.c:2683`
 
 ### tab_eval_result_free `void tab_eval_result_free(tab_eval_result *r)`
-- Defined: `src/tab.c:2695`
+- Defined: `src/tab.c:2701`
 
 ### tab_image_free `void tab_image_free(tab_image *img)`
-- Defined: `src/tab.c:2704`
+- Defined: `src/tab.c:2710`
 
 ## src/text_shape.c
 
@@ -6477,35 +6501,42 @@ static int looks_like_host(const c...`
 ### test_static_position_null_arrays_legacy `static void test_static_position_null_arrays_legacy(void **state)`
 - Defined: `tests/test_box_tree.c:705`
 
+### test_abspos_resolves_against_placed_ancestor `static void test_abspos_resolves_against_placed_ancestor(void **state)`
+- Defined: `tests/test_box_tree.c:724`
+- Doc: The `placed` bitmap climbs past an unplaced containing block to the nearest placed ancestor: an undecorated absolute bad
+
+### test_abspos_unplaced_without_anchor_falls_to_viewport `static void test_abspos_unplaced_without_anchor_falls_to_viewport(void **state)`
+- Defined: `tests/test_box_tree.c:753`
+
 ### test_box_hidden_self `static void test_box_hidden_self(void **state)`
-- Defined: `tests/test_box_tree.c:719`
+- Defined: `tests/test_box_tree.c:773`
 
 ### test_box_hidden_ancestor `static void test_box_hidden_ancestor(void **state)`
-- Defined: `tests/test_box_tree.c:731`
+- Defined: `tests/test_box_tree.c:785`
 
 ### test_box_hidden_fail_closed `static void test_box_hidden_fail_closed(void **state)`
-- Defined: `tests/test_box_tree.c:744`
+- Defined: `tests/test_box_tree.c:798`
 
 ### test_oof_anchor_none_on_static_chain `static void test_oof_anchor_none_on_static_chain(void **state)`
-- Defined: `tests/test_box_tree.c:757`
+- Defined: `tests/test_box_tree.c:811`
 
 ### test_oof_anchor_self `static void test_oof_anchor_self(void **state)`
-- Defined: `tests/test_box_tree.c:767`
+- Defined: `tests/test_box_tree.c:821`
 
 ### test_oof_anchor_via_ancestor `static void test_oof_anchor_via_ancestor(void **state)`
-- Defined: `tests/test_box_tree.c:774`
+- Defined: `tests/test_box_tree.c:828`
 
 ### test_oof_nested_absolute_anchor_vs_root `static void test_oof_nested_absolute_anchor_vs_root(void **state)`
-- Defined: `tests/test_box_tree.c:787`
+- Defined: `tests/test_box_tree.c:841`
 
 ### test_oof_relative_does_not_anchor `static void test_oof_relative_does_not_anchor(void **state)`
-- Defined: `tests/test_box_tree.c:802`
+- Defined: `tests/test_box_tree.c:856`
 
 ### test_oof_fail_open `static void test_oof_fail_open(void **state)`
-- Defined: `tests/test_box_tree.c:816`
+- Defined: `tests/test_box_tree.c:870`
 
 ### main `int main(void)`
-- Defined: `tests/test_box_tree.c:834`
+- Defined: `tests/test_box_tree.c:888`
 
 ## tests/test_browser.c
 
@@ -7408,54 +7439,58 @@ static int looks_like_host(const c...`
 ### test_anim_transform_keyframes_from_sheet `static void test_anim_transform_keyframes_from_sheet(void **state)`
 - Defined: `tests/test_css.c:3785`
 
+### test_keyframes_overflow_skips_block_not_sheet `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
+- Defined: `tests/test_css.c:3857`
+- Doc: -- @keyframes overflow skips the block, never aborts the sheet -------------  The @keyframes table is bounded (CSS_MAX_K
+
 ### test_rem_rebased_on_root_font_size `static void test_rem_rebased_on_root_font_size(void **state)`
-- Defined: `tests/test_css.c:3859`
+- Defined: `tests/test_css.c:3883`
 - Doc: -- rem rebased on the root font-size (2026-08-10) ---------------------------  The root element's font-size defines what
 
 ### test_rem_rebase_applies_to_box_lengths `static void test_rem_rebase_applies_to_box_lengths(void **state)`
-- Defined: `tests/test_css.c:3871`
+- Defined: `tests/test_css.c:3895`
 
 ### test_rem_rebase_absent_root_declaration_is_byte_identical `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
-- Defined: `tests/test_css.c:3885`
+- Defined: `tests/test_css.c:3909`
 
 ### test_rem_rebase_honours_root_pseudo_class `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
-- Defined: `tests/test_css.c:3897`
+- Defined: `tests/test_css.c:3921`
 
 ### test_rem_rebase_skips_at_rule_prelude `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
-- Defined: `tests/test_css.c:3907`
+- Defined: `tests/test_css.c:3931`
 
 ### test_rem_rebase_leaves_quoted_text_alone `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
-- Defined: `tests/test_css.c:3930`
+- Defined: `tests/test_css.c:3954`
 
 ### test_rem_rebase_ignores_identifier_lookalikes `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
-- Defined: `tests/test_css.c:3941`
+- Defined: `tests/test_css.c:3965`
 
 ### test_rem_rebase_62_5_percent_idiom `static void test_rem_rebase_62_5_percent_idiom(void **state)`
-- Defined: `tests/test_css.c:3956`
+- Defined: `tests/test_css.c:3980`
 
 ### test_media_query_length_honours_its_unit `static void test_media_query_length_honours_its_unit(void **state)`
-- Defined: `tests/test_css.c:3971`
+- Defined: `tests/test_css.c:3995`
 
 ### assert_int_equal `assert_int_equal(css_parse("@media (min-width: 200em)`
-- Defined: `tests/test_css.c:3979`
+- Defined: `tests/test_css.c:4003`
 - Doc: A media-query length used to be read as a bare number with the unit discarded, so `min-width: 200em` compared 200 agains
 
 ### assert_int_equal `assert_int_equal(css_parse("@media (min-width: 40em)`
-- Defined: `tests/test_css.c:3985`
+- Defined: `tests/test_css.c:4009`
 
 ### test_clip_rect `static void test_clip_rect(void **state)`
-- Defined: `tests/test_css.c:3992`
+- Defined: `tests/test_css.c:4016`
 - Doc: the viewport does not reach, so the block must not apply. assert_int_equal(css_parse("@media (min-width: 200em) { p { co
 
 ### test_clip_auto `static void test_clip_auto(void **state)`
-- Defined: `tests/test_css.c:4002`
+- Defined: `tests/test_css.c:4026`
 
 ### test_vendor_prefixes `static void test_vendor_prefixes(void **state)`
-- Defined: `tests/test_css.c:4020`
+- Defined: `tests/test_css.c:4044`
 - Doc: -- Vendor-prefixed properties are aliases (spec/css.md) -----------------  ~900 declarations in the parity corpus carry 
 
 ### main `int main(void)`
-- Defined: `tests/test_css.c:4055`
+- Defined: `tests/test_css.c:4079`
 
 ## tests/test_css_color.c
 
@@ -8546,35 +8581,35 @@ static void test_download_png_group...`
 - Defined: `tests/test_freedom.c:1428`
 
 ### test_rejects_http_url `static void test_rejects_http_url(void **state)`
-- Defined: `tests/test_freedom.c:1544`
-- Doc: The relative panel is in flow: at least one box, and no positioned box left it * at the page bottom (the grey-stripe bug
+- Defined: `tests/test_freedom.c:1600`
+- Doc: size_t n = 0; for (size_t b = 0; b < ntops; ++b) if (tops[b] > tops[a] - 0.5 && tops[b] < tops[a] + 0.5) ++n; if (n > be
 
 ### white `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-- Defined: `tests/test_freedom.c:1607`
+- Defined: `tests/test_freedom.c:1663`
 
 ### test_download_png_gradient_box_text_keeps_gradient `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-- Defined: `tests/test_freedom.c:1703`
+- Defined: `tests/test_freedom.c:1759`
 - Doc: Firefox parity: a text row inside a box whose background is a GRADIENT (or an image) must not repaint an OUTER ancestor'
 
 ### test_download_png_flex_container_paints_one_band `static void test_download_png_flex_container_paints_one_band(void **state)`
-- Defined: `tests/test_freedom.c:1728`
+- Defined: `tests/test_freedom.c:1784`
 - Doc: Firefox parity: a flex container's own background is ONE band across the container, not one rectangle per item.  A `disp
 
 ### test_download_png_inline_block_shrinks_and_centers `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-- Defined: `tests/test_freedom.c:1748`
+- Defined: `tests/test_freedom.c:1804`
 - Doc: Firefox parity: `display:inline-block` shrink-wraps to its content and is placed by the parent's text-align, instead of 
 
 ### test_download_png_inline_svg_path_and_drops_image `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-- Defined: `tests/test_freedom.c:1792`
+- Defined: `tests/test_freedom.c:1848`
 - Doc: A <path> with a fill reaches the painter, and an element that could name a resource is dropped instead: the same page ca
 
 ### test_dump_timings_prints_stages `static void test_dump_timings_prints_stages(void **state)`
-- Defined: `tests/test_freedom.c:1808`
+- Defined: `tests/test_freedom.c:1864`
 - Doc: -dump-timings prints the pure pt_ accumulator (Fase 0): one line per * measured stage, enum order. Fail-closed: without 
 
 ### main `int main(void)`
-- Defined: `tests/test_freedom.c:1832`
+- Defined: `tests/test_freedom.c:1888`
 - Doc: char out[8192]; int rc; char args[256]; assert_true((size_t)snprintf(args, sizeof args, "--author-css --dump-timings %s"
 
 ## tests/test_hls.c
@@ -10182,217 +10217,229 @@ static void test_bu...`
 - Defined: `tests/test_page_view.c:1743`
 - Doc: CSS Flexbox 4.1: "An absolutely-positioned child of a flex container does not participate in flex layout" -- it is not a
 
+### test_build_oof_flag_via_cascade `static void test_build_oof_flag_via_cascade(void **state)`
+- Defined: `tests/test_page_view.c:1800`
+- Doc: Same rule through the stylesheet cascade (class selectors, not inline * style): the subtree walk must see the abspos anc
+
+### test_build_oof_flag_badges_idiom `static void test_build_oof_flag_badges_idiom(void **state)`
+- Defined: `tests/test_page_view.c:1824`
+- Doc: jkanime badges idiom: inline-block pills inside an undecorated absolute * wrapper. The pill text is OOF by ancestry even
+
 ### test_build_flex_container_from_sheet `static void test_build_flex_container_from_sheet(void **state)`
-- Defined: `tests/test_page_view.c:1765`
+- Defined: `tests/test_page_view.c:1843`
 
 ### test_build_grid_columns_from_sheet `static void test_build_grid_columns_from_sheet(void **state)`
-- Defined: `tests/test_page_view.c:1787`
+- Defined: `tests/test_page_view.c:1865`
 
 ### test_container_defaults `static void test_container_defaults(void **state)`
-- Defined: `tests/test_page_view.c:1827`
+- Defined: `tests/test_page_view.c:1905`
 - Doc: pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); const pv_run *x = find_text(v, "x"); assert_non_null(x); 
 
 ### test_build_box_leaf_inline `static void test_build_box_leaf_inline(void **state)`
-- Defined: `tests/test_page_view.c:1875`
+- Defined: `tests/test_page_view.c:1953`
 - Doc: A leaf block's own box: vertical margins override the UA, horizontal padding + * a fixed width inset and cap the content
 
 ### test_box_defaults_and_setter `static void test_box_defaults_and_setter(void **state)`
-- Defined: `tests/test_page_view.c:1910`
+- Defined: `tests/test_page_view.c:1988`
 - Doc: A run with no author box carries the neutral defaults; pv_set_box fixes the * last run and is NULL-safe.
 
 ### test_build_boxdeco_h_margin_alone_creates_box `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)`
-- Defined: `tests/test_page_view.c:1940`
+- Defined: `tests/test_page_view.c:2018`
 - Doc: pv_view *w = pv_new(); assert_int_equal(pv_append(w, PV_TEXT, 0, 0, "x", NULL), PV_OK); pv_set_box(w, 12, 8, 500, 1, 40,
 
 ### test_build_boxdeco_h_margin_zero_auto_no_box `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)`
-- Defined: `tests/test_page_view.c:1960`
+- Defined: `tests/test_page_view.c:2038`
 
 ### test_build_boxdeco_border_padding `static void test_build_boxdeco_border_padding(void **state)`
-- Defined: `tests/test_page_view.c:1977`
+- Defined: `tests/test_page_view.c:2055`
 
 ### test_build_empty_box_gets_run_and_box `static void test_build_empty_box_gets_run_and_box(void **state)`
-- Defined: `tests/test_page_view.c:2009`
+- Defined: `tests/test_page_view.c:2087`
 - Doc: An empty <div> with a background + explicit height paints an 8px bar in a real browser. It has no text, so the text-node
 
 ### test_build_zero_padding_is_not_a_box `static void test_build_zero_padding_is_not_a_box(void **state)`
-- Defined: `tests/test_page_view.c:2033`
+- Defined: `tests/test_page_view.c:2111`
 
 ### test_build_flow_table_row_is_one_block `static void test_build_flow_table_row_is_one_block(void **state)`
-- Defined: `tests/test_page_view.c:2050`
+- Defined: `tests/test_page_view.c:2128`
 
 ### test_build_boxdeco_shadow_outline `static void test_build_boxdeco_shadow_outline(void **state)`
-- Defined: `tests/test_page_view.c:2085`
+- Defined: `tests/test_page_view.c:2163`
 
 ### test_build_boxdeco_visibility_overflow_cursor `static void test_build_boxdeco_visibility_overflow_cursor(void **state)`
-- Defined: `tests/test_page_view.c:2108`
+- Defined: `tests/test_page_view.c:2186`
 
 ### test_build_cursor_alone_triggers_box `static void test_build_cursor_alone_triggers_box(void **state)`
-- Defined: `tests/test_page_view.c:2133`
+- Defined: `tests/test_page_view.c:2211`
 - Doc: A block that sets ONLY cursor (no other box property) still registers a box: the trigger for a box-def entry must includ
 
 ### test_build_boxdeco_dims_alone_trigger_box `static void test_build_boxdeco_dims_alone_trigger_box(void **state)`
-- Defined: `tests/test_page_view.c:2188`
+- Defined: `tests/test_page_view.c:2266`
 - Doc: 2026-07-10: a block that sets ONLY min-width / min-height / max-height / height / aspect-ratio (no other box property) s
 
 ### test_build_text_overflow_and_word_break `static void test_build_text_overflow_and_word_break(void **state)`
-- Defined: `tests/test_page_view.c:2233`
+- Defined: `tests/test_page_view.c:2311`
 - Doc: assert_int_equal(bd->box_h, 80); const pv_run *e = find_text(v, "E"); assert_non_null(e); const pv_box_def *be = pv_box_
 
 ### test_build_boxdeco_defaults_no_box `static void test_build_boxdeco_defaults_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2292`
+- Defined: `tests/test_page_view.c:2370`
 
 ### test_build_boxdeco_sibling_blocks_distinct_ids `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)`
-- Defined: `tests/test_page_view.c:2306`
+- Defined: `tests/test_page_view.c:2384`
 
 ### test_build_boxdeco_shared_id_within_block `static void test_build_boxdeco_shared_id_within_block(void **state)`
-- Defined: `tests/test_page_view.c:2324`
+- Defined: `tests/test_page_view.c:2402`
 
 ### test_build_box_tree_textless_wrapper `static void test_build_box_tree_textless_wrapper(void **state)`
-- Defined: `tests/test_page_view.c:2387`
+- Defined: `tests/test_page_view.c:2465`
 - Doc: A text-less wrapper (a card whose only child is a body div with the text) owns no run, yet its box def must still exist 
 
 ### test_build_box_tree_empty_no_box `static void test_build_box_tree_empty_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2412`
+- Defined: `tests/test_page_view.c:2490`
 - Doc: const pv_box_def *bd = pv_box_at(v, (size_t)body->block_id); assert_non_null(bd); assert_int_equal(bd->pad_t, 9); int ca
 
 ### find_input `static const pv_run *find_input(const pv_view *v, const char *name)`
-- Defined: `tests/test_page_view.c:2424`
+- Defined: `tests/test_page_view.c:2502`
 - Doc: /* A page with no author box has an empty box tree (default render byte-identical). static void test_build_box_tree_empt
 
 ### test_build_search_form_get `static void test_build_search_form_get(void **state)`
-- Defined: `tests/test_page_view.c:2433`
+- Defined: `tests/test_page_view.c:2511`
 - Doc: pv_free(v); hp_document_free(doc); } /* Finds the first PV_INPUT run whose name equals `name`; NULL if none. static cons
 
 ### test_build_form_post_and_hidden `static void test_build_form_post_and_hidden(void **state)`
-- Defined: `tests/test_page_view.c:2466`
+- Defined: `tests/test_page_view.c:2544`
 
 ### test_build_textarea_value `static void test_build_textarea_value(void **state)`
-- Defined: `tests/test_page_view.c:2500`
+- Defined: `tests/test_page_view.c:2578`
 
 ### test_build_select_shows_selected_option `static void test_build_select_shows_selected_option(void **state)`
-- Defined: `tests/test_page_view.c:2520`
+- Defined: `tests/test_page_view.c:2598`
 - Doc: A closed <select> displays ONLY its selected option's label, not every option's text concatenated. The selected option i
 
 ### test_build_select_defaults_to_first_option `static void test_build_select_defaults_to_first_option(void **state)`
-- Defined: `tests/test_page_view.c:2559`
+- Defined: `tests/test_page_view.c:2637`
 - Doc: With no option marked `selected`, a single (non-multiple) select defaults to * displaying its FIRST option -- never the 
 
 ### test_build_control_without_form `static void test_build_control_without_form(void **state)`
-- Defined: `tests/test_page_view.c:2575`
+- Defined: `tests/test_page_view.c:2653`
 
 ### test_build_two_forms_distinct_groups `static void test_build_two_forms_distinct_groups(void **state)`
-- Defined: `tests/test_page_view.c:2588`
+- Defined: `tests/test_page_view.c:2666`
 
 ### test_build_pseudo_classes_and_siblings `static void test_build_pseudo_classes_and_siblings(void **state)`
-- Defined: `tests/test_page_view.c:2648`
+- Defined: `tests/test_page_view.c:2726`
 - Doc: Pseudo-classes + sibling combinators (Hito 23b-9) resolve through the real pipeline: page_view must feed the css engine 
 
 ### test_build_table_cell_author_styles `static void test_build_table_cell_author_styles(void **state)`
-- Defined: `tests/test_page_view.c:2711`
+- Defined: `tests/test_page_view.c:2789`
 - Doc: Collected DATA-table cells resolve author styles too (found via --dump-dom: the cell path never called resolve_context, 
 
 ### test_build_style_cache_distinct_siblings `static void test_build_style_cache_distinct_siblings(void **state)`
-- Defined: `tests/test_page_view.c:2771`
+- Defined: `tests/test_page_view.c:2849`
 - Doc: Regression for pv_style_cache (page_view.c): resolve_context()/in_hidden_subtree() now memoize cch_element_style() per e
 
 ### test_build_text_align_and_font_size `static void test_build_text_align_and_font_size(void **state)`
-- Defined: `tests/test_page_view.c:2813`
+- Defined: `tests/test_page_view.c:2891`
 - Doc: text-align and font-size resolve into the new run fields, from both a <style> * sheet and inline style=.
 
 ### test_build_text_decoration `static void test_build_text_decoration(void **state)`
-- Defined: `tests/test_page_view.c:2860`
+- Defined: `tests/test_page_view.c:2938`
 - Doc: text-decoration resolves into text_decoration from a <style> sheet and inline * style=, inherits to descendant text, and
 
 ### test_build_css_bold_and_inline_wins `static void test_build_css_bold_and_inline_wins(void **state)`
-- Defined: `tests/test_page_view.c:2883`
+- Defined: `tests/test_page_view.c:2961`
 - Doc: pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); assert_int_equal(find_text(v, "struck ")->text_decoration
 
 ### test_build_display_none_hidden `static void test_build_display_none_hidden(void **state)`
-- Defined: `tests/test_page_view.c:2902`
+- Defined: `tests/test_page_view.c:2980`
 - Doc: "<p class='b'>strongish</p></body>"); pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); const pv_run *t = f
 
+### height `* real height (jkanime's donghuas/ovas panes are display:none, yet all their
+ * thumbnails flowed...`
+- Defined: `tests/test_page_view.c:3006`
+
 ### test_build_styled_external_css `static void test_build_styled_external_css(void **state)`
-- Defined: `tests/test_page_view.c:2930`
+- Defined: `tests/test_page_view.c:3036`
 - Doc: External pre-fetched CSS (Hito 27) feeds the same cascade as the document's <style>: an extern rule applies (presentatio
 
 ### test_pseudo_before_on_empty `static void test_pseudo_before_on_empty(void **state)`
-- Defined: `tests/test_page_view.c:2953`
+- Defined: `tests/test_page_view.c:3059`
 
 ### test_pseudo_before_on_element_with_children `static void test_pseudo_before_on_element_with_children(void **state)`
-- Defined: `tests/test_page_view.c:2966`
+- Defined: `tests/test_page_view.c:3072`
 
 ### test_pseudo_after_on_element_with_children `static void test_pseudo_after_on_element_with_children(void **state)`
-- Defined: `tests/test_page_view.c:2981`
+- Defined: `tests/test_page_view.c:3087`
 
 ### test_pseudo_both_before_and_after `static void test_pseudo_both_before_and_after(void **state)`
-- Defined: `tests/test_page_view.c:2996`
+- Defined: `tests/test_page_view.c:3102`
 
 ### test_pseudo_no_content_no_run `static void test_pseudo_no_content_no_run(void **state)`
-- Defined: `tests/test_page_view.c:3014`
+- Defined: `tests/test_page_view.c:3120`
 
 ### test_build_reader_skips_boilerplate `static void test_build_reader_skips_boilerplate(void **state)`
-- Defined: `tests/test_page_view.c:3029`
+- Defined: `tests/test_page_view.c:3135`
 - Doc: Reader (distraction-free) mode skips nav/header/footer/aside boilerplate but * keeps the main article content; with read
 
 ### test_set_node_id_model `static void test_set_node_id_model(void **state)`
-- Defined: `tests/test_page_view.c:3057`
+- Defined: `tests/test_page_view.c:3163`
 - Doc: The setter is a no-op when the view is empty or NULL, and it writes to the * most recently appended run otherwise.
 
 ### test_build_node_id_matches_dom_index `static void test_build_node_id_matches_dom_index(void **state)`
-- Defined: `tests/test_page_view.c:3073`
+- Defined: `tests/test_page_view.c:3179`
 - Doc: Stage 0 keystone: every emitted run carries the document-order element id of its source element, matching the id that do
 
 ### test_set_text_style_model `static void test_set_text_style_model(void **state)`
-- Defined: `tests/test_page_view.c:3111`
+- Defined: `tests/test_page_view.c:3217`
 
 ### test_build_pointer_events_on_box `static void test_build_pointer_events_on_box(void **state)`
-- Defined: `tests/test_page_view.c:3143`
+- Defined: `tests/test_page_view.c:3249`
 - Doc: pointer-events rides the box-def tree like cursor: a block whose style sets it becomes box-carrying and the def records 
 
 ### test_build_content_visibility_hidden_folds `static void test_build_content_visibility_hidden_folds(void **state)`
-- Defined: `tests/test_page_view.c:3162`
+- Defined: `tests/test_page_view.c:3268`
 - Doc: content-visibility: hidden folds into the box's visibility (skip paint, keep space) -- the documented visibility:collaps
 
 ### test_build_image_rendering_inherited `static void test_build_image_rendering_inherited(void **state)`
-- Defined: `tests/test_page_view.c:3188`
+- Defined: `tests/test_page_view.c:3294`
 - Doc: image-rendering inherits (nearest ancestor) and is stamped on IMAGE runs so the * painter can pick the nearest-neighbour
 
 ### test_build_caret_color_inherited `static void test_build_caret_color_inherited(void **state)`
-- Defined: `tests/test_page_view.c:3207`
+- Defined: `tests/test_page_view.c:3313`
 - Doc: caret-color inherits and is stamped on INPUT runs so the painter can tint the * caret of a focused control. auto/unset s
 
 ### test_append_video_copies_fields `static void test_append_video_copies_fields(void **state)`
-- Defined: `tests/test_page_view.c:3230`
+- Defined: `tests/test_page_view.c:3336`
 - Doc: for (size_t i = 0; i < pv_count(v); ++i) { if (pv_at(v, i)->kind != PV_INPUT) continue; if (in1 == NULL) in1 = pv_at(v, 
 
 ### test_append_video_no_poster `static void test_append_video_no_poster(void **state)`
-- Defined: `tests/test_page_view.c:3249`
+- Defined: `tests/test_page_view.c:3355`
 
 ### test_append_video_null_args `static void test_append_video_null_args(void **state)`
-- Defined: `tests/test_page_view.c:3265`
+- Defined: `tests/test_page_view.c:3371`
 
 ### test_build_video_with_source `static void test_build_video_with_source(void **state)`
-- Defined: `tests/test_page_view.c:3275`
+- Defined: `tests/test_page_view.c:3381`
 
 ### test_build_video_uses_source_child `static void test_build_video_uses_source_child(void **state)`
-- Defined: `tests/test_page_view.c:3295`
+- Defined: `tests/test_page_view.c:3401`
 
 ### test_build_video_source_type_preference `static void test_build_video_source_type_preference(void **state)`
-- Defined: `tests/test_page_view.c:3316`
+- Defined: `tests/test_page_view.c:3422`
 - Doc: Given several <source> children, When one carries a natively-playable type (HLS playlist / MPEG-TS / MP4), Then it wins 
 
 ### test_build_video_fallback_suppressed `static void test_build_video_fallback_suppressed(void **state)`
-- Defined: `tests/test_page_view.c:3334`
+- Defined: `tests/test_page_view.c:3440`
 - Doc: Given a <video> with fallback markup, When the view is built, Then the fallback text is suppressed regardless of the JS 
 
 ### test_build_video_without_src_ignored `static void test_build_video_without_src_ignored(void **state)`
-- Defined: `tests/test_page_view.c:3348`
+- Defined: `tests/test_page_view.c:3454`
 
 ### test_build_audio_as_video_kind `static void test_build_audio_as_video_kind(void **state)`
-- Defined: `tests/test_page_view.c:3359`
+- Defined: `tests/test_page_view.c:3465`
 
 ### main `int main(void)`
-- Defined: `tests/test_page_view.c:3373`
+- Defined: `tests/test_page_view.c:3479`
 
 ## tests/test_pdf_export.c
 
@@ -11209,257 +11256,261 @@ static void test_bu...`
 - Defined: `tests/test_tab.c:403`
 - Doc: Stage 0 keystone: the document-order element id assigned by the child must survive the IPC round-trip, so the parent can
 
-### test_click_runs_handler_and_returns_view `static void test_click_runs_handler_and_returns_view(void **state)`
+### test_load_carries_oof_flag `static void test_load_carries_oof_flag(void **state)`
 - Defined: `tests/test_tab.c:437`
+- Doc: The oof_subtree flag crosses the worker IPC (write_view/read_view mirror): * an out-of-flow run arrives flagged, an in-f
+
+### test_click_runs_handler_and_returns_view `static void test_click_runs_handler_and_returns_view(void **state)`
+- Defined: `tests/test_tab.c:472`
 - Doc: Stage 4 dispatcher: a click on a node with a JS handler mutates the DOM, and the * new view is returned over IPC with th
 
 ### test_event_ipc_via_tab_eval `static void test_event_ipc_via_tab_eval(void **state)`
-- Defined: `tests/test_tab.c:475`
+- Defined: `tests/test_tab.c:510`
 
 ### test_mouse_ipc_round_trip `static void test_mouse_ipc_round_trip(void **state)`
-- Defined: `tests/test_tab.c:531`
+- Defined: `tests/test_tab.c:566`
 - Doc: Dispatches a mouse event (mouseover) via tab_dispatch_mouse and verifies the * handler fires and mutates the DOM. Covers
 
 ### test_focus_ipc_round_trip `static void test_focus_ipc_round_trip(void **state)`
-- Defined: `tests/test_tab.c:576`
+- Defined: `tests/test_tab.c:611`
 - Doc: Dispatches a focus event via tab_dispatch_event (OP_EVENT path) and verifies * the handler fires and mutates the DOM. Co
 
 ### test_tick_fires_delayed_timer `static void test_tick_fires_delayed_timer(void **state)`
-- Defined: `tests/test_tab.c:623`
+- Defined: `tests/test_tab.c:658`
 - Doc: Real async timers (2026-07-11): a setTimeout with a delay does NOT fire on the load pump; the load response reports the 
 
 ### test_tick_interval_rearms `static void test_tick_interval_rearms(void **state)`
-- Defined: `tests/test_tab.c:659`
+- Defined: `tests/test_tab.c:694`
 
 ### test_load_carries_box_decoration `static void test_load_carries_box_decoration(void **state)`
-- Defined: `tests/test_tab.c:690`
+- Defined: `tests/test_tab.c:725`
 - Doc: Box-engine identity + decoration resolved in the confined child must survive the * IPC round-trip (write_view/read_view 
 
 ### test_load_carries_box_tree `static void test_load_carries_box_tree(void **state)`
-- Defined: `tests/test_tab.c:726`
+- Defined: `tests/test_tab.c:761`
 - Doc: The box TREE (Step D) — the box-definition list with its parent links — must survive the IPC round-trip: a nested box pa
 
 ### test_load_carries_input_box_and_clip `static void test_load_carries_input_box_and_clip(void **state)`
-- Defined: `tests/test_tab.c:813`
+- Defined: `tests/test_tab.c:848`
 - Doc: Stage 2d + P5 regression: (a) a form control's own box (the checkbox-hack pattern: position:absolute; opacity:0) must re
 
 ### test_load_strips_script `static void test_load_strips_script(void **state)`
-- Defined: `tests/test_tab.c:858`
+- Defined: `tests/test_tab.c:893`
 
 ### test_load_ex_noscript_hidden_with_js `static void test_load_ex_noscript_hidden_with_js(void **state)`
-- Defined: `tests/test_tab.c:905`
+- Defined: `tests/test_tab.c:940`
 - Doc: Given a page with a <noscript> fallback and a script, When loaded with run_js, Then the fallback text is absent from the
 
 ### test_load_no_session_cookies_when_untrusted `static void test_load_no_session_cookies_when_untrusted(void **state)`
-- Defined: `tests/test_tab.c:982`
+- Defined: `tests/test_tab.c:1017`
 - Doc: Untrusted host (net off): the cookie jar stays disabled -- document.cookie is '' even * if the parent were to seed it, a
 
 ### test_load_ex_builds_dom_and_fires_onload `static void test_load_ex_builds_dom_and_fires_onload(void **state)`
-- Defined: `tests/test_tab.c:1004`
+- Defined: `tests/test_tab.c:1039`
 - Doc: Live JS construction (Hito 20c): a script builds a node and an onload handler * mutates it; both must be reflected in th
 
 ### test_load_ex_inner_html_renders `static void test_load_ex_inner_html_renders(void **state)`
-- Defined: `tests/test_tab.c:1032`
+- Defined: `tests/test_tab.c:1067`
 - Doc: innerHTML (Hito 20d): a script replaces a container's markup; the parsed content * renders, and ephemeral storage / empt
 
 ### console_find `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)`
-- Defined: `tests/test_tab.c:1083`
+- Defined: `tests/test_tab.c:1118`
 - Doc: assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK); assert_non_null(p.title); assert_string_equal(p.title, "Old"
 
 ### test_load_captures_console_and_error `static void test_load_captures_console_and_error(void **state)`
-- Defined: `tests/test_tab.c:1093`
+- Defined: `tests/test_tab.c:1128`
 - Doc: Freebug (FB-1): with run_js, the page's console.* output and any uncaught script * error are captured and delivered to t
 
 ### test_load_isolates_script_errors `static void test_load_isolates_script_errors(void **state)`
-- Defined: `tests/test_tab.c:1120`
+- Defined: `tests/test_tab.c:1155`
 - Doc: Per-script isolation (browser semantics): an uncaught error in the FIRST inline <script> must NOT abort later scripts. B
 
 ### test_load_error_carries_location `static void test_load_error_carries_location(void **state)`
-- Defined: `tests/test_tab.c:1148`
+- Defined: `tests/test_tab.c:1183`
 - Doc: FB error locations (Hito 24): an uncaught error reports the inline script name ("inline #N") plus the line and column of
 
 ### test_load_element_wrapper_idioms `static void test_load_element_wrapper_idioms(void **state)`
-- Defined: `tests/test_tab.c:1174`
+- Defined: `tests/test_tab.c:1209`
 - Doc: Element-wrapper completeness (Hito 24): the exact google.com startup idioms that previously threw -- dataset.X, hasAttri
 
 ### test_load_document_fonts_stub `static void test_load_document_fonts_stub(void **state)`
-- Defined: `tests/test_tab.c:1204`
+- Defined: `tests/test_tab.c:1239`
 - Doc: document.fonts stub: a feature-detecting script that calls document.fonts.load()/ .check() must not throw (this exact ca
 
 ### test_load_without_js_has_empty_console `static void test_load_without_js_has_empty_console(void **state)`
-- Defined: `tests/test_tab.c:1224`
+- Defined: `tests/test_tab.c:1259`
 - Doc: "</script></body></html>"; tab *t = NULL; assert_int_equal(tab_open(&t), TAB_OK); tab_page p; assert_int_equal(tab_load_
 
 ### test_eval_captures_console_output `static void test_eval_captures_console_output(void **state)`
-- Defined: `tests/test_tab.c:1240`
+- Defined: `tests/test_tab.c:1275`
 - Doc: Freebug (FB-1): the REPL (tab_eval) returns the value AND the console output the * evaluation produced, each eval report
 
 ### test_load_full_location_is_real `static void test_load_full_location_is_real(void **state)`
-- Defined: `tests/test_tab.c:1269`
+- Defined: `tests/test_tab.c:1304`
 - Doc: Real location (Hito 20e): the page URL passed to tab_load_full backs a real * location object the page's JS can read (no
 
 ### test_js_navigation_relative_resolved `static void test_js_navigation_relative_resolved(void **state)`
-- Defined: `tests/test_tab.c:1305`
+- Defined: `tests/test_tab.c:1340`
 
 ### test_js_navigation_unsafe_is_blocked `static void test_js_navigation_unsafe_is_blocked(void **state)`
-- Defined: `tests/test_tab.c:1325`
+- Defined: `tests/test_tab.c:1360`
 - Doc: Fail-closed gate: the parent rejects a downgrade / foreign-scheme / fragment nav, * so a hostile or compromised worker c
 
 ### test_no_js_no_navigation `static void test_no_js_no_navigation(void **state)`
-- Defined: `tests/test_tab.c:1347`
+- Defined: `tests/test_tab.c:1382`
 - Doc: const char *cases[] = { DOWNGRADE, FOREIGN, FRAGMENT }; for (size_t i = 0; i < 3; ++i) { tab *t = NULL; assert_int_equal
 
 ### test_load_null_and_too_large `static void test_load_null_and_too_large(void **state)`
-- Defined: `tests/test_tab.c:1360`
+- Defined: `tests/test_tab.c:1395`
 
 ### test_eval_sees_dom `static void test_eval_sees_dom(void **state)`
-- Defined: `tests/test_tab.c:1376`
+- Defined: `tests/test_tab.c:1411`
 - Doc: (void)state; tab *t = NULL; assert_int_equal(tab_open(&t), TAB_OK); tab_page p; assert_int_equal(tab_load(NULL, HTML, 4,
 
 ### test_eval_sees_env `static void test_eval_sees_env(void **state)`
-- Defined: `tests/test_tab.c:1386`
+- Defined: `tests/test_tab.c:1421`
 - Doc: tab_close(t); } /* --- eval: sees the DOM bound in the child --- static void test_eval_sees_dom(void **state) { fixture 
 
 ### test_eval_no_network_or_cross_origin_api `static void test_eval_no_network_or_cross_origin_api(void **state)`
-- Defined: `tests/test_tab.c:1404`
+- Defined: `tests/test_tab.c:1439`
 - Doc: SOP/CORS confidentiality (gap audit #2): the JS sandbox exposes NO way to make a network request or open a cross-origin 
 
 ### stub_fetch `static int stub_fetch(void *ctx, const char *method, const char *url,
                       const...`
-- Defined: `tests/test_tab.c:1423`
+- Defined: `tests/test_tab.c:1458`
 - Doc: Stub parent fetcher: returns a fixed 200/"PONG" body, but REFUSES any "blocked.example" * host -- standing in for the re
 
 ### test_xhr_works_when_net_allowed `static void test_xhr_works_when_net_allowed(void **state)`
-- Defined: `tests/test_tab.c:1442`
+- Defined: `tests/test_tab.c:1477`
 - Doc: With net allowed (host in allow.conf AND js.conf) the page's XHR reaches the parent * fetcher and the response is visibl
 
 ### test_xhr_undefined_when_net_not_allowed `static void test_xhr_undefined_when_net_not_allowed(void **state)`
-- Defined: `tests/test_tab.c:1462`
+- Defined: `tests/test_tab.c:1497`
 - Doc: Default (net not allowed): XHR/fetch stay undefined -- Same-Origin-by-construction holds for every site not in BOTH list
 
 ### stub_script_fetch `static int stub_script_fetch(void *ctx, const char *method, const char *url,
                     ...`
-- Defined: `tests/test_tab.c:1501`
+- Defined: `tests/test_tab.c:1536`
 - Doc: Stub parent fetcher for external scripts: serves JS bodies by URL with a proper JavaScript Content-Type; refuses "blocke
 
 ### test_external_script_executes_when_net_allowed `static void test_external_script_executes_when_net_allowed(void **state)`
-- Defined: `tests/test_tab.c:1531`
+- Defined: `tests/test_tab.c:1566`
 - Doc: With net granted (allow.conf AND js.conf) an external script's bytes come from the * trusted parent and execute: its DOM
 
 ### test_external_script_document_order `static void test_external_script_document_order(void **state)`
-- Defined: `tests/test_tab.c:1548`
+- Defined: `tests/test_tab.c:1583`
 - Doc: External scripts execute IN DOCUMENT ORDER interleaved with inline ones: a later * inline script sees the external scrip
 
 ### test_external_script_skipped_without_net `static void test_external_script_skipped_without_net(void **state)`
-- Defined: `tests/test_tab.c:1571`
+- Defined: `tests/test_tab.c:1606`
 - Doc: Without the network grant an external script is SKIPPED (never fetched, never run): the page still loads and a Freebug w
 
 ### test_external_script_bad_ctype_not_executed `static void test_external_script_bad_ctype_not_executed(void **state)`
-- Defined: `tests/test_tab.c:1595`
+- Defined: `tests/test_tab.c:1630`
 - Doc: A response that is not JavaScript (e.g. an HTML error page) is NOT executed * (type-confusion guard, fail closed); the p
 
 ### test_external_script_blocked_host_refused `static void test_external_script_blocked_host_refused(void **state)`
-- Defined: `tests/test_tab.c:1612`
+- Defined: `tests/test_tab.c:1647`
 - Doc: Even with net granted, the trusted parent's refusal (blocked host) means the script * never runs -- the gate is the PARE
 
 ### stub_css_fetch `static int stub_css_fetch(void *ctx, const char *method, const char *url,
                        ...`
-- Defined: `tests/test_tab.c:1635`
+- Defined: `tests/test_tab.c:1670`
 - Doc: Stub parent fetcher for stylesheets: serves CSS bodies by URL with a text/css Content-Type; refuses "blocked.example" (s
 
 ### view_find_text `static const pv_run *view_find_text(const pv_view *v, const char *needle)`
-- Defined: `tests/test_tab.c:1656`
+- Defined: `tests/test_tab.c:1691`
 
 ### test_external_css_applied_when_allowed `static void test_external_css_applied_when_allowed(void **state)`
-- Defined: `tests/test_tab.c:1668`
+- Defined: `tests/test_tab.c:1703`
 - Doc: With the css grant, the <link rel=stylesheet> bytes come from the trusted parent * and feed the author-CSS cascade -- no
 
 ### test_external_css_skipped_without_grant `static void test_external_css_skipped_without_grant(void **state)`
-- Defined: `tests/test_tab.c:1688`
+- Defined: `tests/test_tab.c:1723`
 - Doc: Default (no grant): zero subresource requests and no external styling -- * Privacy by Default holds, byte-identical to t
 
 ### test_external_css_bad_ctype_not_parsed `static void test_external_css_bad_ctype_not_parsed(void **state)`
-- Defined: `tests/test_tab.c:1707`
+- Defined: `tests/test_tab.c:1742`
 - Doc: A non-CSS Content-Type (an HTML 404 page, a script) is never parsed as a sheet * (anti type-confusion, fail closed); the
 
 ### test_external_css_blocked_host_refused `static void test_external_css_blocked_host_refused(void **state)`
-- Defined: `tests/test_tab.c:1725`
+- Defined: `tests/test_tab.c:1760`
 - Doc: The parent's policy refusal (blocked host) degrades to "no sheet", never a * failed load: presentation is fail-open like
 
 ### test_external_css_survives_click_rederive `static void test_external_css_survives_click_rederive(void **state)`
-- Defined: `tests/test_tab.c:1743`
+- Defined: `tests/test_tab.c:1778`
 - Doc: The fetched sheet PERSISTS in the worker: a click re-derives the view (OP_CLICK) * and the styling survives without a re
 
 ### test_subreq_permitted_pure `static void test_subreq_permitted_pure(void **state)`
-- Defined: `tests/test_tab.c:1771`
+- Defined: `tests/test_tab.c:1806`
 - Doc: Pure parent-side subresource gate (Zero Trust: the parent decides from ITS flags, never the worker's): net grants any we
 
 ### read `* vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */
 static void tes...`
-- Defined: `tests/test_tab.c:1792`
+- Defined: `tests/test_tab.c:1827`
 
 ### test_eval_exception `static void test_eval_exception(void **state)`
-- Defined: `tests/test_tab.c:1812`
+- Defined: `tests/test_tab.c:1847`
 - Doc: "<!DOCTYPE html><html><head><title>x</title></head><body>" "<script>document.title = 'tz:' + new Date(0).getTimezoneOffs
 
 ### test_eval_persistent_state `static void test_eval_persistent_state(void **state)`
-- Defined: `tests/test_tab.c:1824`
+- Defined: `tests/test_tab.c:1859`
 - Doc: /* --- eval: a JS exception is TAB_OK with is_exception set, not a worker error --- static void test_eval_exception(void
 
 ### test_reload_replaces_page `static void test_reload_replaces_page(void **state)`
-- Defined: `tests/test_tab.c:1833`
+- Defined: `tests/test_tab.c:1868`
 - Doc: assert_non_null(strstr(r.value, "boom")); tab_eval_result_free(&r); } /* --- eval: state persists across calls within th
 
 ### test_eval_without_load `static void test_eval_without_load(void **state)`
-- Defined: `tests/test_tab.c:1857`
+- Defined: `tests/test_tab.c:1892`
 - Doc: static const char HTML2[] = "<!DOCTYPE html><html><head><title>Second</title></head>" "<body><span id=\"other\">x</span>
 
 ### test_binary_does_not_crash_parent `static void test_binary_does_not_crash_parent(void **state)`
-- Defined: `tests/test_tab.c:1869`
+- Defined: `tests/test_tab.c:1904`
 - Doc: /* --- eval before any load is a worker error, not a crash --- static void test_eval_without_load(void **state) { (void)
 
 ### test_child_death_survived `static void test_child_death_survived(void **state)`
-- Defined: `tests/test_tab.c:1884`
+- Defined: `tests/test_tab.c:1919`
 - Doc: static void test_binary_does_not_crash_parent(void **state) { (void)state; tab *t = NULL; assert_int_equal(tab_open(&t),
 
 ### test_free_null_and_double `static void test_free_null_and_double(void **state)`
-- Defined: `tests/test_tab.c:1910`
+- Defined: `tests/test_tab.c:1945`
 - Doc: /* Give the kernel a moment to deliver the signal and reap-on-read. struct timespec ts = { 0, 50 * 1000 * 1000 }; nanosl
 
 ### test_decode_image_in_sandbox `static void test_decode_image_in_sandbox(void **state)`
-- Defined: `tests/test_tab.c:1944`
+- Defined: `tests/test_tab.c:1979`
 
 ### test_decode_image_rejects_junk `static void test_decode_image_rejects_junk(void **state)`
-- Defined: `tests/test_tab.c:1966`
+- Defined: `tests/test_tab.c:2001`
 
 ### test_decode_image_null_args `static void test_decode_image_null_args(void **state)`
-- Defined: `tests/test_tab.c:1981`
+- Defined: `tests/test_tab.c:2016`
 
 ### test_decode_image_data_url_in_sandbox `static void test_decode_image_data_url_in_sandbox(void **state)`
-- Defined: `tests/test_tab.c:2000`
+- Defined: `tests/test_tab.c:2035`
 
 ### test_decode_image_data_url_null_args `static void test_decode_image_data_url_null_args(void **state)`
-- Defined: `tests/test_tab.c:2042`
+- Defined: `tests/test_tab.c:2077`
 
 ### test_worker_args_valid `static void test_worker_args_valid(void **state)`
-- Defined: `tests/test_tab.c:2055`
+- Defined: `tests/test_tab.c:2090`
 - Doc: } static void test_decode_image_data_url_null_args(void **state) { (void)state; tab *t = NULL; assert_int_equal(tab_open
 
 ### test_worker_args_not_worker `static void test_worker_args_not_worker(void **state)`
-- Defined: `tests/test_tab.c:2064`
+- Defined: `tests/test_tab.c:2099`
 
 ### test_worker_args_malformed `static void test_worker_args_malformed(void **state)`
-- Defined: `tests/test_tab.c:2071`
+- Defined: `tests/test_tab.c:2106`
 
 ### test_worker_args_null_safe `static void test_worker_args_null_safe(void **state)`
-- Defined: `tests/test_tab.c:2086`
+- Defined: `tests/test_tab.c:2121`
 
 ### test_load_view_codec_full_roundtrip `static void test_load_view_codec_full_roundtrip(void **state)`
-- Defined: `tests/test_tab.c:2103`
+- Defined: `tests/test_tab.c:2138`
 - Doc: M0.2 codec golden: one load packs a broad spread of run + box fields across BOTH fixed-width run blocks (block A: image/
 
 ### main `int main(int argc, char **argv)`
-- Defined: `tests/test_tab.c:2250`
+- Defined: `tests/test_tab.c:2285`
 
 ## tests/test_text_shape.c
 

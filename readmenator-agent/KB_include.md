@@ -451,10 +451,10 @@
 - Language: h
 - Symbols:
   - `pv_run` (struct, line 108)
-  - `pv_box_def` (struct, line 356)
-  - `pv_cont_def` (struct, line 641)
-  - `pv_view` (struct, line 677)
-  - `pv_text_ext` (struct, line 838)
+  - `pv_box_def` (struct, line 365)
+  - `pv_cont_def` (struct, line 650)
+  - `pv_view` (struct, line 686)
+  - `pv_text_ext` (struct, line 847)
   - `FREEDOM_PAGE_VIEW_H` (macro, line 2)
   - `PV_LEN_UNSET` (macro, line 43)
   - `PV_LEN_AUTO` (macro, line 44)
@@ -537,7 +537,7 @@
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 227)
+  - `rd_doc` (struct, line 231)
   - `FREEDOM_RENDER_DOC_H` (macro, line 2)
 
 ## include/render_policy.h

@@ -19,8 +19,8 @@
   - `rc_open_box` (struct, line 2986)
   - `rc_state` (struct, line 3039)
   - `rc_ext` (struct, line 3595)
-  - `item_sides` (struct, line 4388)
-  - `freebug_window` (struct, line 12047)
+  - `item_sides` (struct, line 4390)
+  - `freebug_window` (struct, line 12137)
   - `now_ms` (function, line 145) `static uint64_t now_ms(void)`
   - `gutter` (function, line 551) `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
  * zoom. The PDF ...`
@@ -159,290 +159,295 @@ static sf_status fetch_post_na...`
                 ...`
   - `flow_text_block` (function, line 4152) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                  ...`
-  - `item_root_box_in` (function, line 4262) `static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox)`
-  - `item_root_box` (function, line 4299) `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)`
-  - `css_align_to_bt` (function, line 4308) `static int css_align_to_bt(int align_kw)`
-  - `box_edge_px` (function, line 4318) `static double box_edge_px(int wpx)`
-  - `rc_box_copy_decoration` (function, line 4338) `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)`
-  - `box_is_strict_descendant` (function, line 4417) `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)`
-  - `item_sides_at_level` (function, line 4439) `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
+  - `item_root_box_in` (function, line 4264) `static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox)`
+  - `item_root_box` (function, line 4301) `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)`
+  - `css_align_to_bt` (function, line 4310) `static int css_align_to_bt(int align_kw)`
+  - `box_edge_px` (function, line 4320) `static double box_edge_px(int wpx)`
+  - `rc_box_copy_decoration` (function, line 4340) `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)`
+  - `box_is_strict_descendant` (function, line 4419) `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)`
+  - `item_sides_at_level` (function, line 4441) `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
                   ...`
-  - `container_box_of` (function, line 4468) `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)`
-  - `row` (function, line 4525) `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
+  - `container_box_of` (function, line 4470) `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)`
+  - `table` (function, line 4492) `* synthesised table (no descriptors to disagree) keeps the stamp. */
+        if (cd != NULL && !c...`
+  - `row` (function, line 4552) `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
 static d...`
-  - `way` (function, line 4566) `* intrinsic box either way (it does not wrap below its own size). */
+  - `way` (function, line 4593) `* intrinsic box either way (it does not wrap below its own size). */
 static double measure_item_w...`
-  - `measure_item_content_w` (function, line 4601) `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
+  - `measure_item_content_w` (function, line 4628) `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                       ...`
-  - `item_declared_basis` (function, line 4633) `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
+  - `item_declared_basis` (function, line 4660) `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                       ...`
-  - `nested_cont_basis` (function, line 4647) `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
+  - `nested_cont_basis` (function, line 4674) `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                            ...`
-  - `flex_item_basis` (function, line 4679) `static double flex_item_basis(cairo_t *cr, const browser_window *w,
+  - `flex_item_basis` (function, line 4706) `static double flex_item_basis(cairo_t *cr, const browser_window *w,
                              ...`
-  - `flex_item_min_main` (function, line 4710) `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
+  - `flex_item_min_main` (function, line 4737) `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                           ...`
-  - `item_at_level` (function, line 4743) `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-  - `child_cont_at_level` (function, line 4758) `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-  - `root_cont_of` (function, line 4773) `static int root_cont_of(const rd_doc *doc, int cid)`
-  - `ITEMS` (function, line 4888) `* between ITEMS (not between the lines inside one item). column-reverse
+  - `item_at_level` (function, line 4770) `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
+  - `child_cont_at_level` (function, line 4785) `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
+  - `root_cont_of` (function, line 4800) `static int root_cont_of(const rd_doc *doc, int cid)`
+  - `block_is_oof` (function, line 4837) `static int block_is_oof(const rd_doc *doc, const rd_block *bk)`
+  - `layout_container` (function, line 4853) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+                ...`
+  - `ITEMS` (function, line 4963) `* between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visua...`
-  - `slot` (function, line 4979) `* layout slot (item 0 → rightmost, last item → leftmost). */
+  - `slot` (function, line 5055) `* layout slot (item 0 → rightmost, last item → leftmost). */
     if (use_flex && cdv.direction ==...`
-  - `path` (function, line 5097) `*
+  - `path` (function, line 5173) `*
          * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
         ...`
-  - `box_line_visible` (function, line 5428) `static int box_line_visible(int style)`
-  - `close_top_box` (function, line 5435) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)`
-  - `rc_box_context` (function, line 5536) `static void rc_box_context(const rc_state *s, double content_w,
+  - `box_line_visible` (function, line 5505) `static int box_line_visible(int style)`
+  - `close_top_box` (function, line 5512) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)`
+  - `rc_box_context` (function, line 5613) `static void rc_box_context(const rc_state *s, double content_w,
                            double...`
-  - `box_margin_top` (function, line 5562) `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)`
-  - `box_margin_bottom` (function, line 5569) `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)`
-  - `children` (function, line 5580) `* own content rect onto the stack so its children (text or nested boxes) place inside
+  - `box_margin_top` (function, line 5639) `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)`
+  - `box_margin_bottom` (function, line 5646) `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)`
+  - `children` (function, line 5657) `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...`
-  - `column` (function, line 5786) `*
+  - `column` (function, line 5863) `*
  * Returns the height of the tallest column (0 when there is nothing to fragment). */
 static do...`
-  - `box_path_has` (function, line 5881) `static int box_path_has(const rd_doc *doc, int block_id, int want)`
-  - `box_shrink_width` (function, line 5896) `static double box_shrink_width(cairo_t *cr, const browser_window *w,
+  - `box_path_has` (function, line 5958) `static int box_path_has(const rd_doc *doc, int block_id, int want)`
+  - `box_shrink_width` (function, line 5973) `static double box_shrink_width(cairo_t *cr, const browser_window *w,
                             ...`
-  - `reconcile_boxes_below` (function, line 5904) `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
+  - `reconcile_boxes_below` (function, line 5981) `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                          ...`
-  - `treatment` (function, line 5950) `* block treatment (shrink-wrapped and placed by text-align), which is what a
+  - `treatment` (function, line 6027) `* block treatment (shrink-wrapped and placed by text-align), which is what a
          * standalon...`
-  - `reconcile_boxes` (function, line 5977) `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
+  - `reconcile_boxes` (function, line 6054) `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
                             rc_...`
-  - `box_path_of` (function, line 5992) `static int box_path_of(const rd_doc *doc, int block_id, int *out)`
-  - `band_common_box` (function, line 6008) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)`
-  - `block_in_table_caption` (function, line 6072) `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)`
-  - `layout_float_band` (function, line 6083) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
+  - `box_path_of` (function, line 6069) `static int box_path_of(const rd_doc *doc, int block_id, int *out)`
+  - `band_common_box` (function, line 6085) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)`
+  - `block_in_table_caption` (function, line 6149) `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)`
+  - `layout_float_band` (function, line 6160) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...`
-  - `thumbnail` (function, line 6158) `* is what made a wikipedia thumbnail (a 250px image and its caption, no
+  - `thumbnail` (function, line 6235) `* is what made a wikipedia thumbnail (a 250px image and its caption, no
      * declared width) sp...`
-  - `layout_doc` (function, line 6311) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
+  - `layout_doc` (function, line 6389) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...`
-  - `position_doc` (function, line 6579) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
+  - `position_doc` (function, line 6668) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...`
-  - `input_box_width` (function, line 6736) `static double input_box_width(double content_w)`
-  - `select_box_width` (function, line 6739) `static double select_box_width(double content_w)`
-  - `button_box_width` (function, line 6745) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
+  - `input_box_width` (function, line 6826) `static double input_box_width(double content_w)`
+  - `select_box_width` (function, line 6829) `static double select_box_width(double content_w)`
+  - `button_box_width` (function, line 6835) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...`
-  - `v_read` (function, line 7325) `static int v_read(int fd, void *buf, size_t n)`
-  - `dies` (function, line 7353) `* child dies (exec failed, device busy, daemon absent) is detected on the
+  - `v_read` (function, line 7415) `static int v_read(int fd, void *buf, size_t n)`
+  - `dies` (function, line 7443) `* child dies (exec failed, device busy, daemon absent) is detected on the
  * next PCM write (EPIP...`
-  - `audio_spawn` (function, line 7361) `static void audio_spawn(browser_window *w, int rate, int channels)`
-  - `audio_mark_dead` (function, line 7416) `static void audio_mark_dead(browser_window *w)`
-  - `audio_write` (function, line 7433) `static void audio_write(browser_window *w, const uint8_t *data, size_t len)`
-  - `audio_stop` (function, line 7447) `static void audio_stop(browser_window *w)`
-  - `video_stop` (function, line 7467) `static void video_stop(browser_window *w)`
-  - `video_fetch` (function, line 7646) `static sf_status video_fetch(const char *url, browser_window *w,
+  - `audio_spawn` (function, line 7451) `static void audio_spawn(browser_window *w, int rate, int channels)`
+  - `audio_mark_dead` (function, line 7506) `static void audio_mark_dead(browser_window *w)`
+  - `audio_write` (function, line 7523) `static void audio_write(browser_window *w, const uint8_t *data, size_t len)`
+  - `audio_stop` (function, line 7537) `static void audio_stop(browser_window *w)`
+  - `video_stop` (function, line 7557) `static void video_stop(browser_window *w)`
+  - `video_fetch` (function, line 7736) `static sf_status video_fetch(const char *url, browser_window *w,
                               sf...`
-  - `video_play` (function, line 7663) `static int video_play(browser_window *w, const char *m3u8_url)`
-  - `video_stop` (function, line 7765) `* each segment loop so a video_stop() in the main thread (which sets it to 0
+  - `video_play` (function, line 7753) `static int video_play(browser_window *w, const char *m3u8_url)`
+  - `video_stop` (function, line 7855) `* each segment loop so a video_stop() in the main thread (which sets it to 0
  * then calls pthrea...`
-  - `paint_video_row` (function, line 7818) `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+  - `paint_video_row` (function, line 7908) `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                 ...`
-  - `row_line_slack` (function, line 7931) `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)`
-  - `row_align_offset` (function, line 7943) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)`
-  - `upstream` (function, line 7971) `* upstream (see spec/css.md). */
+  - `row_line_slack` (function, line 8021) `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)`
+  - `row_align_offset` (function, line 8033) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)`
+  - `upstream` (function, line 8061) `* upstream (see spec/css.md). */
 static void box_path4(cairo_t *cr, double x, double y, double w,...`
-  - `box_path` (function, line 7999) `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)`
-  - `text` (function, line 8016) `* fill and gradient text (2026-07-19). */
+  - `box_path` (function, line 8089) `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)`
+  - `text` (function, line 8106) `* fill and gradient text (2026-07-19). */
 static cairo_pattern_t *bui_linear_grad(double x, doubl...`
-  - `bui_grad_color_at` (function, line 8041) `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
+  - `bui_grad_color_at` (function, line 8131) `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                    ...`
-  - `spaced` (function, line 8072) `* or evenly spaced (bui_grad_color_at). */
+  - `spaced` (function, line 8162) `* or evenly spaced (bui_grad_color_at). */
 static void bui_paint_conic(cairo_t *cr, double x, dou...`
-  - `paint_bg_layer` (function, line 8104) `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
+  - `paint_bg_layer` (function, line 8194) `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
                ...`
-  - `paint_box_decoration` (function, line 8147) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
+  - `paint_box_decoration` (function, line 8237) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
            ...`
-  - `cairo_set_dash` (function, line 8310) `cairo_set_dash(cr, (double[])`
-  - `cairo_set_dash` (function, line 8313) `cairo_set_dash(cr, (double[])`
-  - `cairo_set_dash` (function, line 8352) `cairo_set_dash(cr, (double[])`
-  - `cairo_set_dash` (function, line 8355) `cairo_set_dash(cr, (double[])`
-  - `set_rgb` (function, line 8389) `set_rgb(cr, (ui_rgb)`
-  - `cairo_set_dash` (function, line 8412) `cairo_set_dash(cr, (double[])`
-  - `cairo_set_dash` (function, line 8415) `cairo_set_dash(cr, (double[])`
-  - `paint_deco_line` (function, line 8473) `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
+  - `cairo_set_dash` (function, line 8400) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 8403) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 8442) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 8445) `cairo_set_dash(cr, (double[])`
+  - `set_rgb` (function, line 8479) `set_rgb(cr, (ui_rgb)`
+  - `cairo_set_dash` (function, line 8502) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 8505) `cairo_set_dash(cr, (double[])`
+  - `paint_deco_line` (function, line 8563) `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
                        ...`
-  - `cairo_set_dash` (function, line 8507) `cairo_set_dash(cr, (double[])`
-  - `cairo_set_dash` (function, line 8509) `cairo_set_dash(cr, (double[])`
-  - `paint_svg_at` (function, line 8529) `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
+  - `cairo_set_dash` (function, line 8597) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 8599) `cairo_set_dash(cr, (double[])`
+  - `paint_svg_at` (function, line 8619) `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
                          doub...`
-  - `replaced_current_color` (function, line 8549) `static int replaced_current_color(const browser_window *w, const rd_block *blk)`
-  - `paint_inline_replaced` (function, line 8558) `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
+  - `replaced_current_color` (function, line 8639) `static int replaced_current_color(const browser_window *w, const rd_block *blk)`
+  - `paint_inline_replaced` (function, line 8648) `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
                                ...`
-  - `paint_content_row` (function, line 8577) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
+  - `paint_content_row` (function, line 8667) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...`
-  - `ov_box_clips` (function, line 8765) `static int ov_box_clips(const pv_box_def *d)`
-  - `ov_collect_chain` (function, line 8773) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)`
-  - `ov_box_bounds` (function, line 8794) `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)`
-  - `ov_content_rect` (function, line 8818) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
+  - `ov_box_clips` (function, line 8855) `static int ov_box_clips(const pv_box_def *d)`
+  - `ov_collect_chain` (function, line 8863) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)`
+  - `ov_box_bounds` (function, line 8884) `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)`
+  - `ov_content_rect` (function, line 8908) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...`
-  - `fragment` (function, line 8838) `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
+  - `fragment` (function, line 8928) `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
  * blk->block_id alo...`
-  - `box_forms_stacking_context` (function, line 8893) `static int box_forms_stacking_context(const pv_box_def *def)`
-  - `bui_skew_tan` (function, line 8936) `static double bui_skew_tan(int deg)`
-  - `box_transform_matrix` (function, line 8942) `static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
+  - `box_forms_stacking_context` (function, line 8983) `static int box_forms_stacking_context(const pv_box_def *def)`
+  - `bui_skew_tan` (function, line 9026) `static double bui_skew_tan(int deg)`
+  - `box_transform_matrix` (function, line 9032) `static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
              ...`
-  - `bui_blend_operator` (function, line 9061) `static cairo_operator_t bui_blend_operator(int mix_blend)`
-  - `bui_paint_backdrop_blur` (function, line 9199) `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
+  - `bui_blend_operator` (function, line 9151) `static cairo_operator_t bui_blend_operator(int mix_blend)`
+  - `bui_paint_backdrop_blur` (function, line 9289) `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
                          ...`
-  - `bui_pop_group_composite` (function, line 9257) `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms)`
-  - `limits` (function, line 9487) `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
+  - `bui_pop_group_composite` (function, line 9347) `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms)`
+  - `limits` (function, line 9577) `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
  * grouped this w...`
-  - `paint_box_decoration_grouped` (function, line 9555) `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
+  - `paint_box_decoration_grouped` (function, line 9645) `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                         ...`
-  - `paint_box_and_direct_rows` (function, line 9596) `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
+  - `paint_box_and_direct_rows` (function, line 9686) `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
        ...`
-  - `paint_positioned_one` (function, line 9691) `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
+  - `paint_positioned_one` (function, line 9781) `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
             ...`
-  - `paint_nested_children` (function, line 9880) `static void paint_nested_children(cairo_t *cr, browser_window *w,
+  - `paint_nested_children` (function, line 9970) `static void paint_nested_children(cairo_t *cr, browser_window *w,
                                ...`
-  - `paint_structured` (function, line 9912) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
+  - `paint_structured` (function, line 10002) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-  - `write_doc_pdf` (function, line 10130) `static long write_doc_pdf(browser_window *w, const char *path)`
-  - `export_pdf` (function, line 10235) `static void export_pdf(browser_window *w)`
-  - `write_doc_png` (function, line 10289) `static long write_doc_png(browser_window *w, const char *path)`
-  - `export_png` (function, line 10410) `static void export_png(browser_window *w)`
-  - `caller` (function, line 10445) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
+  - `write_doc_pdf` (function, line 10220) `static long write_doc_pdf(browser_window *w, const char *path)`
+  - `export_pdf` (function, line 10325) `static void export_pdf(browser_window *w)`
+  - `write_doc_png` (function, line 10379) `static long write_doc_png(browser_window *w, const char *path)`
+  - `export_png` (function, line 10500) `static void export_png(browser_window *w)`
+  - `caller` (function, line 10535) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-  - `ui_render_png` (function, line 10468) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)`
-  - `render_doc_images` (function, line 10494) `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
+  - `ui_render_png` (function, line 10558) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)`
+  - `render_doc_images` (function, line 10584) `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
               ...`
-  - `ui_render_png_images` (function, line 10524) `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
+  - `ui_render_png_images` (function, line 10614) `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-  - `ui_render_pdf_images` (function, line 10530) `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
+  - `ui_render_pdf_images` (function, line 10620) `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-  - `ui_dump_layout` (function, line 10546) `ui_status ui_dump_layout(const rd_doc *doc)`
-  - `link_at_point` (function, line 10607) `static const char *link_at_point(browser_window *w, double px, double py)`
-  - `resolve_box_cursor` (function, line 10701) `static int resolve_box_cursor(const rd_doc *doc, int block_id)`
-  - `box_pointer_events_none` (function, line 10715) `static int box_pointer_events_none(const rd_doc *doc, int block_id)`
-  - `cursor_at_point` (function, line 10731) `static int cursor_at_point(browser_window *w, double px, double py)`
-  - `node_at_point` (function, line 10783) `static dom_node_id node_at_point(browser_window *w, double px, double py)`
-  - `reference` (function, line 10831) `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
+  - `ui_dump_layout` (function, line 10636) `ui_status ui_dump_layout(const rd_doc *doc)`
+  - `link_at_point` (function, line 10697) `static const char *link_at_point(browser_window *w, double px, double py)`
+  - `resolve_box_cursor` (function, line 10791) `static int resolve_box_cursor(const rd_doc *doc, int block_id)`
+  - `box_pointer_events_none` (function, line 10805) `static int box_pointer_events_none(const rd_doc *doc, int block_id)`
+  - `cursor_at_point` (function, line 10821) `static int cursor_at_point(browser_window *w, double px, double py)`
+  - `node_at_point` (function, line 10873) `static dom_node_id node_at_point(browser_window *w, double px, double py)`
+  - `reference` (function, line 10921) `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
  * hostile content...`
-  - `apply_click_result` (function, line 10852) `static void apply_click_result(browser_window *w, tab_page *page)`
-  - `memory` (function, line 10875) `* memory (the href pointer, not its contents, was all the old code preserved). */
+  - `apply_click_result` (function, line 10942) `static void apply_click_result(browser_window *w, tab_page *page)`
+  - `memory` (function, line 10965) `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...`
-  - `GET` (function, line 10958) `* the network under weaker rules than a GET (Zero Trust). */
+  - `GET` (function, line 11048) `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...`
-  - `ensure_download_dir` (function, line 10992) `static int ensure_download_dir(char *out, size_t outsz)`
-  - `write_file_atomic` (function, line 11007) `static int write_file_atomic(const char *path, const void *bytes, size_t len)`
-  - `save_download` (function, line 11029) `static void save_download(browser_window *w, const char *url, const char *bytes,
+  - `ensure_download_dir` (function, line 11082) `static int ensure_download_dir(char *out, size_t outsz)`
+  - `write_file_atomic` (function, line 11097) `static int write_file_atomic(const char *path, const void *bytes, size_t len)`
+  - `save_download` (function, line 11119) `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...`
-  - `save_current_page` (function, line 11062) `static void save_current_page(browser_window *w)`
-  - `deliver_fetch_result` (function, line 11071) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-  - `drain_fetch_results` (function, line 11126) `static void drain_fetch_results(browser_window *w)`
-  - `toggle_reader` (function, line 11202) `static void toggle_reader(browser_window *w)`
-  - `menu_item_checked` (function, line 11213) `static int menu_item_checked(const browser_window *w, size_t i)`
-  - `menu_item_toggle` (function, line 11235) `static void menu_item_toggle(browser_window *w, size_t i)`
-  - `draw_clock` (function, line 11345) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
+  - `save_current_page` (function, line 11152) `static void save_current_page(browser_window *w)`
+  - `deliver_fetch_result` (function, line 11161) `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
+  - `drain_fetch_results` (function, line 11216) `static void drain_fetch_results(browser_window *w)`
+  - `toggle_reader` (function, line 11292) `static void toggle_reader(browser_window *w)`
+  - `menu_item_checked` (function, line 11303) `static int menu_item_checked(const browser_window *w, size_t i)`
+  - `menu_item_toggle` (function, line 11325) `static void menu_item_toggle(browser_window *w, size_t i)`
+  - `draw_clock` (function, line 11435) `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...`
-  - `draw_hamburger` (function, line 11356) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-  - `draw_reload` (function, line 11373) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-  - `draw_menu` (function, line 11395) `static void draw_menu(cairo_t *cr, browser_window *w)`
-  - `draw_hover_url` (function, line 11506) `static double draw_hover_url(cairo_t *cr, browser_window *w)`
-  - `draw_toast` (function, line 11538) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)`
-  - `draw_tabstrip` (function, line 11568) `static void draw_tabstrip(cairo_t *cr, browser_window *w)`
-  - `draw_omnibox` (function, line 11623) `static void draw_omnibox(cairo_t *cr, browser_window *w)`
-  - `paint` (function, line 11656) `static void paint(browser_window *w)`
-  - `redraw` (function, line 11900) `static void redraw(browser_window *w)`
-  - `wm_base_ping` (function, line 11912) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
-  - `xdg_surface_configure` (function, line 11918) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-  - `toplevel_configure` (function, line 11926) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
+  - `draw_hamburger` (function, line 11446) `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
+  - `draw_reload` (function, line 11463) `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)`
+  - `draw_menu` (function, line 11485) `static void draw_menu(cairo_t *cr, browser_window *w)`
+  - `draw_hover_url` (function, line 11596) `static double draw_hover_url(cairo_t *cr, browser_window *w)`
+  - `draw_toast` (function, line 11628) `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)`
+  - `draw_tabstrip` (function, line 11658) `static void draw_tabstrip(cairo_t *cr, browser_window *w)`
+  - `draw_omnibox` (function, line 11713) `static void draw_omnibox(cairo_t *cr, browser_window *w)`
+  - `paint` (function, line 11746) `static void paint(browser_window *w)`
+  - `redraw` (function, line 11990) `static void redraw(browser_window *w)`
+  - `wm_base_ping` (function, line 12002) `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
+  - `xdg_surface_configure` (function, line 12008) `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+  - `toplevel_configure` (function, line 12016) `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-  - `wl_array_for_each` (function, line 11943) `wl_array_for_each(st, states)`
-  - `toplevel_close` (function, line 11949) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-  - `deco_configure` (function, line 11957) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-  - `set_cursor` (function, line 11970) `static void set_cursor(browser_window *w, int cur_kind)`
-  - `element` (function, line 12000) `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
+  - `wl_array_for_each` (function, line 12033) `wl_array_for_each(st, states)`
+  - `toplevel_close` (function, line 12039) `static void toplevel_close(void *data, struct xdg_toplevel *t)`
+  - `deco_configure` (function, line 12047) `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
+  - `set_cursor` (function, line 12060) `static void set_cursor(browser_window *w, int cur_kind)`
+  - `element` (function, line 12090) `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without...`
-  - `fbw_split_y` (function, line 12070) `static double fbw_split_y(const freebug_window *fb)`
-  - `freebug_ensure_buffer` (function, line 12078) `static int freebug_ensure_buffer(freebug_window *fb)`
-  - `fbw_level_rgb` (function, line 12106) `static void fbw_level_rgb(int level, double *r, double *g, double *b)`
-  - `fbw_console_lines` (function, line 12117) `static size_t fbw_console_lines(const fb_buffer *log)`
-  - `freebug_paint` (function, line 12129) `static void freebug_paint(freebug_window *fb)`
-  - `freebug_redraw_fb` (function, line 12328) `static void freebug_redraw_fb(freebug_window *fb)`
-  - `freebug_redraw` (function, line 12337) `static void freebug_redraw(browser_window *w)`
-  - `freebug_hide` (function, line 12341) `static void freebug_hide(browser_window *w)`
-  - `fbw_xdg_surface_configure` (function, line 12357) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-  - `fbw_toplevel_configure` (function, line 12365) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
+  - `fbw_split_y` (function, line 12160) `static double fbw_split_y(const freebug_window *fb)`
+  - `freebug_ensure_buffer` (function, line 12168) `static int freebug_ensure_buffer(freebug_window *fb)`
+  - `fbw_level_rgb` (function, line 12196) `static void fbw_level_rgb(int level, double *r, double *g, double *b)`
+  - `fbw_console_lines` (function, line 12207) `static size_t fbw_console_lines(const fb_buffer *log)`
+  - `freebug_paint` (function, line 12219) `static void freebug_paint(freebug_window *fb)`
+  - `freebug_redraw_fb` (function, line 12418) `static void freebug_redraw_fb(freebug_window *fb)`
+  - `freebug_redraw` (function, line 12427) `static void freebug_redraw(browser_window *w)`
+  - `freebug_hide` (function, line 12431) `static void freebug_hide(browser_window *w)`
+  - `fbw_xdg_surface_configure` (function, line 12447) `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
+  - `fbw_toplevel_configure` (function, line 12455) `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-  - `fbw_toplevel_close` (function, line 12375) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-  - `freebug_show` (function, line 12384) `static void freebug_show(browser_window *w)`
-  - `freebug_toggle` (function, line 12414) `static void freebug_toggle(browser_window *w)`
-  - `freebug_destroy` (function, line 12419) `static void freebug_destroy(browser_window *w)`
-  - `freebug_owns_surface` (function, line 12426) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-  - `freebug_is_open` (function, line 12430) `static int freebug_is_open(const browser_window *w)`
-  - `freebug_repl_worker` (function, line 12438) `static tab *freebug_repl_worker(browser_window *w)`
-  - `freebug_eval` (function, line 12474) `static void freebug_eval(browser_window *w)`
-  - `freebug_handle_key` (function, line 12514) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
+  - `fbw_toplevel_close` (function, line 12465) `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
+  - `freebug_show` (function, line 12474) `static void freebug_show(browser_window *w)`
+  - `freebug_toggle` (function, line 12504) `static void freebug_toggle(browser_window *w)`
+  - `freebug_destroy` (function, line 12509) `static void freebug_destroy(browser_window *w)`
+  - `freebug_owns_surface` (function, line 12516) `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
+  - `freebug_is_open` (function, line 12520) `static int freebug_is_open(const browser_window *w)`
+  - `freebug_repl_worker` (function, line 12528) `static tab *freebug_repl_worker(browser_window *w)`
+  - `freebug_eval` (function, line 12564) `static void freebug_eval(browser_window *w)`
+  - `freebug_handle_key` (function, line 12604) `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-  - `freebug_pointer_button` (function, line 12549) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
+  - `freebug_pointer_button` (function, line 12639) `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-  - `freebug_pointer_motion` (function, line 12568) `static void freebug_pointer_motion(browser_window *w)`
-  - `freebug_pointer_axis` (function, line 12590) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-  - `ptr_enter` (function, line 12608) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
+  - `freebug_pointer_motion` (function, line 12658) `static void freebug_pointer_motion(browser_window *w)`
+  - `freebug_pointer_axis` (function, line 12680) `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
+  - `ptr_enter` (function, line 12698) `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
-  - `ptr_leave` (function, line 12627) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-  - `ptr_motion` (function, line 12644) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-  - `load_current` (function, line 12668) `static void load_current(browser_window *w)`
-  - `go_omnibox` (function, line 12682) `static void go_omnibox(browser_window *w)`
-  - `ptr_button` (function, line 12726) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
+  - `ptr_leave` (function, line 12717) `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
+  - `ptr_motion` (function, line 12734) `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
+  - `load_current` (function, line 12758) `static void load_current(browser_window *w)`
+  - `go_omnibox` (function, line 12772) `static void go_omnibox(browser_window *w)`
+  - `ptr_button` (function, line 12816) `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-  - `scroll_line_px` (function, line 12956) `static double scroll_line_px(const browser_window *w)`
-  - `ptr_axis` (function, line 12959) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
+  - `scroll_line_px` (function, line 13046) `static double scroll_line_px(const browser_window *w)`
+  - `ptr_axis` (function, line 13049) `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-  - `ptr_frame` (function, line 12983) `static void ptr_frame(void *d, struct wl_pointer *p)`
-  - `mime_is_text` (function, line 13000) `static int mime_is_text(const char *mime)`
-  - `data_offer_source_actions` (function, line 13018) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-  - `data_offer_action` (function, line 13021) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-  - `data_device_data_offer` (function, line 13031) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
+  - `ptr_frame` (function, line 13073) `static void ptr_frame(void *d, struct wl_pointer *p)`
+  - `mime_is_text` (function, line 13090) `static int mime_is_text(const char *mime)`
+  - `data_offer_source_actions` (function, line 13108) `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
+  - `data_offer_action` (function, line 13111) `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
+  - `data_device_data_offer` (function, line 13121) `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...`
-  - `data_device_selection` (function, line 13043) `static void data_device_selection(void *data, struct wl_data_device *dev,
+  - `data_device_selection` (function, line 13133) `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...`
-  - `data_device_enter` (function, line 13062) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
+  - `data_device_enter` (function, line 13152) `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...`
-  - `data_device_leave` (function, line 13067) `static void data_device_leave(void *d, struct wl_data_device *dev)`
-  - `data_device_motion` (function, line 13068) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
+  - `data_device_leave` (function, line 13157) `static void data_device_leave(void *d, struct wl_data_device *dev)`
+  - `data_device_motion` (function, line 13158) `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-  - `data_device_drop` (function, line 13072) `static void data_device_drop(void *d, struct wl_data_device *dev)`
-  - `data_source_cancelled` (function, line 13083) `static void data_source_cancelled(void *data, struct wl_data_source *src)`
-  - `data_source_send` (function, line 13089) `static void data_source_send(void *data, struct wl_data_source *src,
+  - `data_device_drop` (function, line 13162) `static void data_device_drop(void *d, struct wl_data_device *dev)`
+  - `data_source_cancelled` (function, line 13173) `static void data_source_cancelled(void *data, struct wl_data_source *src)`
+  - `data_source_send` (function, line 13179) `static void data_source_send(void *data, struct wl_data_source *src,
                             ...`
-  - `data_source_target` (function, line 13102) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-  - `freebug_copy_console` (function, line 13114) `static void freebug_copy_console(browser_window *w)`
-  - `insert_pasted_text` (function, line 13172) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)`
-  - `clipboard_copy` (function, line 13236) `static void clipboard_copy(browser_window *w)`
-  - `keyboard_keymap` (function, line 13283) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
+  - `data_source_target` (function, line 13192) `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
+  - `freebug_copy_console` (function, line 13204) `static void freebug_copy_console(browser_window *w)`
+  - `insert_pasted_text` (function, line 13262) `static void insert_pasted_text(browser_window *w, const char *text, size_t len)`
+  - `clipboard_copy` (function, line 13326) `static void clipboard_copy(browser_window *w)`
+  - `keyboard_keymap` (function, line 13373) `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...`
-  - `keyboard_enter` (function, line 13304) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
+  - `keyboard_enter` (function, line 13394) `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-  - `keyboard_leave` (function, line 13312) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-  - `key_sym_to_js_key` (function, line 13320) `static const char *key_sym_to_js_key(xkb_keysym_t sym)`
-  - `key_sym_to_keycode` (function, line 13346) `static int key_sym_to_keycode(xkb_keysym_t sym)`
-  - `dispatch_js_event` (function, line 13371) `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
+  - `keyboard_leave` (function, line 13402) `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
+  - `key_sym_to_js_key` (function, line 13410) `static const char *key_sym_to_js_key(xkb_keysym_t sym)`
+  - `key_sym_to_keycode` (function, line 13436) `static int key_sym_to_keycode(xkb_keysym_t sym)`
+  - `dispatch_js_event` (function, line 13461) `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...`
-  - `handle_key_press` (function, line 13428) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
+  - `handle_key_press` (function, line 13518) `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...`
-  - `key_is_repeatable` (function, line 13758) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
-  - `key_repeat_arm` (function, line 13774) `static void key_repeat_arm(browser_window *w, uint32_t key)`
-  - `key_repeat_stop` (function, line 13787) `static void key_repeat_stop(browser_window *w)`
-  - `key_repeat_fire` (function, line 13798) `static void key_repeat_fire(browser_window *w)`
-  - `keyboard_key` (function, line 13811) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
+  - `key_is_repeatable` (function, line 13848) `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
+  - `key_repeat_arm` (function, line 13864) `static void key_repeat_arm(browser_window *w, uint32_t key)`
+  - `key_repeat_stop` (function, line 13877) `static void key_repeat_stop(browser_window *w)`
+  - `key_repeat_fire` (function, line 13888) `static void key_repeat_fire(browser_window *w)`
+  - `keyboard_key` (function, line 13901) `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-  - `keyboard_modifiers` (function, line 13851) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
+  - `keyboard_modifiers` (function, line 13941) `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-  - `keyboard_repeat_info` (function, line 13861) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-  - `seat_caps` (function, line 13879) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-  - `seat_name` (function, line 13891) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-  - `registry_global` (function, line 13897) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
+  - `keyboard_repeat_info` (function, line 13951) `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
+  - `seat_caps` (function, line 13969) `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
+  - `seat_name` (function, line 13981) `static void seat_name(void *d, struct wl_seat *s, const char *name)`
+  - `registry_global` (function, line 13987) `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-  - `registry_remove` (function, line 13918) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-  - `ui_run_browser` (function, line 13927) `ui_status ui_run_browser(const char *start_url)`
-  - `cost` (function, line 14304) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+  - `registry_remove` (function, line 14008) `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
+  - `ui_run_browser` (function, line 14017) `ui_status ui_run_browser(const char *start_url)`
+  - `cost` (function, line 14394) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
   - `_GNU_SOURCE` (macro, line 11)
   - `UI_TOOLBAR_H` (macro, line 80)
@@ -494,28 +499,28 @@ static void do_submit_post(browser_w...`
   - `RC_BOX_STACK_MAX` (macro, line 3026)
   - `RC_FLOAT_MAX` (macro, line 3030)
   - `RC_FLOAT_FIT_MIN` (macro, line 3037)
-  - `FLEX_MEASURE_W` (macro, line 4512)
-  - `FLEX_MIN_MEASURE_W` (macro, line 4517)
-  - `RC_MAX_OUT_OF_FLOW` (macro, line 5988)
-  - `BUI_CONIC_SLICES` (macro, line 8065)
-  - `OV_MAX_DEPTH` (macro, line 8762)
-  - `H2R` (macro, line 9365)
-  - `PDF_PAGE_W` (macro, line 10114)
-  - `PDF_PAGE_H` (macro, line 10115)
-  - `PDF_MARGIN` (macro, line 10116)
-  - `PNG_PAGE_W` (macro, line 10278)
-  - `PNG_MARGIN` (macro, line 10281)
-  - `PNG_MAX_H` (macro, line 10282)
-  - `FBW_W` (macro, line 12035)
-  - `FBW_H` (macro, line 12037)
-  - `FBW_HEADER` (macro, line 12038)
-  - `FBW_PAD` (macro, line 12039)
-  - `FBW_LINE` (macro, line 12040)
-  - `FBW_GUTTER` (macro, line 12041)
-  - `FBW_MIN_SPLIT` (macro, line 12042)
-  - `FBW_MAX_SPLIT` (macro, line 12043)
-  - `FBW_COPY_BTN_W` (macro, line 12044)
-  - `FBW_COPY_BTN_H` (macro, line 12045)
+  - `FLEX_MEASURE_W` (macro, line 4539)
+  - `FLEX_MIN_MEASURE_W` (macro, line 4544)
+  - `RC_MAX_OUT_OF_FLOW` (macro, line 6065)
+  - `BUI_CONIC_SLICES` (macro, line 8155)
+  - `OV_MAX_DEPTH` (macro, line 8852)
+  - `H2R` (macro, line 9455)
+  - `PDF_PAGE_W` (macro, line 10204)
+  - `PDF_PAGE_H` (macro, line 10205)
+  - `PDF_MARGIN` (macro, line 10206)
+  - `PNG_PAGE_W` (macro, line 10368)
+  - `PNG_MARGIN` (macro, line 10371)
+  - `PNG_MAX_H` (macro, line 10372)
+  - `FBW_W` (macro, line 12125)
+  - `FBW_H` (macro, line 12127)
+  - `FBW_HEADER` (macro, line 12128)
+  - `FBW_PAD` (macro, line 12129)
+  - `FBW_LINE` (macro, line 12130)
+  - `FBW_GUTTER` (macro, line 12131)
+  - `FBW_MIN_SPLIT` (macro, line 12132)
+  - `FBW_MAX_SPLIT` (macro, line 12133)
+  - `FBW_COPY_BTN_W` (macro, line 12134)
+  - `FBW_COPY_BTN_H` (macro, line 12135)
 
 ## gui/browser_ui_internal.h
 - Layer: presentation

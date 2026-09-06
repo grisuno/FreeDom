@@ -4309,13 +4309,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
             }
 
             if (t == LXB_TAG_IMG && !in_skipped_subtree(n, base, js_enabled)
+                && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                 && !(reader && in_boilerplate_subtree(n, base))) {
-                /* `in_hidden_subtree` is intentionally NOT checked here because
-                 * many sites use JS-driven tab systems (display:none on all tabs,
-                 * JS shows one) that we cannot fully execute. Since images already
-                 * require explicit user opt-in (caps.images), showing them even
-                 * in hidden-subtree containers is a reasonable trade-off between
-                 * privacy and usability. */
+                /* `in_hidden_subtree` IS checked here (display:none is structural,
+                 * spec/page_view.md): a thumbnail inside a display:none tab pane must
+                 * not be emitted. It used to be skipped on the theory that JS-driven
+                 * tabs set display:none on every pane and reveal one client-side; but
+                 * with JS off (the default) the author's own `.active{display:block}`
+                 * rule is what marks the visible pane, exactly what Firefox-with-
+                 * no-JS does. Emitting the hidden panes' images reserved their
+                 * broken-image boxes as alt text and inflated a card grid to several
+                 * times its height (jkanime's donghuas/ovas panes). */
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
                 size_t sl = 0;
                 const lxb_char_t *src =

@@ -23,7 +23,7 @@
 | `fuzz/fuzz_text_shape.c` | - | fuzz | 2 |
 | `fuzz/fuzz_tls_impersonate.c` | - | fuzz | 0 |
 | `fuzz/fuzz_url.c` | - | fuzz | 2 |
-| `gui/browser_ui.c` | - | gui | 408 |
+| `gui/browser_ui.c` | - | gui | 411 |
 | `gui/browser_ui_internal.h` | ifndef FREEDOM_BROWSER_UI_INTERNAL_H define FREEDOM_BROWSER_UI_INTERNAL_H  ifdef | gui | 6 |
 | `gui/bui_theme.c` | - | gui | 6 |
 | `gui/freedom_view.c` | - | gui | 2 |
@@ -93,7 +93,7 @@
 | `src/anti_fp.c` | - | src | 23 |
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. See spec/block_flow.md. | src | 4 |
 | `src/box_style.c` | - | src | 38 |
-| `src/box_tree.c` | - | src | 18 |
+| `src/box_tree.c` | - | src | 19 |
 | `src/browser.c` | - | src | 37 |
 | `src/compositor.c` | - | src | 5 |
 | `src/css.c` | - | src | 226 |
@@ -126,7 +126,7 @@
 | `src/media_decoder.c` | - | src | 12 |
 | `src/net_realm.c` | - | src | 10 |
 | `src/os_sandbox.c` | - | src | 28 |
-| `src/page_view.c` | - | src | 168 |
+| `src/page_view.c` | - | src | 170 |
 | `src/pdf_export.c` | - | src | 4 |
 | `src/perf_trace.c` | - | src | 12 |
 | `src/prefetch.c` | - | src | 17 |
@@ -150,10 +150,10 @@
 | `tests/test_anti_fp.c` | - | tests | 15 |
 | `tests/test_block_flow.c` | - | tests | 8 |
 | `tests/test_box_style.c` | - | tests | 39 |
-| `tests/test_box_tree.c` | - | tests | 52 |
+| `tests/test_box_tree.c` | - | tests | 54 |
 | `tests/test_browser.c` | - | tests | 15 |
 | `tests/test_compositor.c` | - | tests | 21 |
-| `tests/test_css.c` | - | tests | 250 |
+| `tests/test_css.c` | - | tests | 251 |
 | `tests/test_css_color.c` | - | tests | 26 |
 | `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 25 |
 | `tests/test_css_length.c` | - | tests | 25 |
@@ -182,7 +182,7 @@
 | `tests/test_media_decoder.c` | - | tests | 6 |
 | `tests/test_net_realm.c` | - | tests | 13 |
 | `tests/test_os_sandbox.c` | - | tests | 19 |
-| `tests/test_page_view.c` | - | tests | 131 |
+| `tests/test_page_view.c` | - | tests | 134 |
 | `tests/test_pdf_export.c` | - | tests | 30 |
 | `tests/test_perf_trace.c` | - | tests | 12 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 11 |
@@ -194,7 +194,7 @@
 | `tests/test_request_policy.c` | - | tests | 12 |
 | `tests/test_secure_fetch.c` | - | tests | 48 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 16 |
-| `tests/test_tab.c` | - | tests | 85 |
+| `tests/test_tab.c` | - | tests | 86 |
 | `tests/test_text_shape.c` | - | tests | 9 |
 | `tests/test_textfield.c` | - | tests | 8 |
 | `tests/test_tls_impersonate.c` | - | tests | 11 |
