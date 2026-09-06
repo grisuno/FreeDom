@@ -122,7 +122,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
 
 .PHONY: all install test itest asan fuzz fuzz-svg fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
         deps run deb docker view clean \
-        parity parity-update layout-diff layout-update geom
+        parity parity-update layout-diff layout-update geom bench
 
 all: $(BUILD_DIR)/freedom
 
@@ -455,8 +455,9 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o \
                       $(BUILD_DIR)/freebug.o $(BUILD_DIR)/text_shape.o \
-                      $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
-                      $(BUILD_DIR)/prefs.o $(BUILD_DIR)/profile.o \
+                       $(BUILD_DIR)/dom_debug.o $(BUILD_DIR)/prefetch.o \
+                       $(BUILD_DIR)/perf_trace.o \
+                       $(BUILD_DIR)/prefs.o $(BUILD_DIR)/profile.o \
                       $(BUILD_DIR)/disk_store.o $(BUILD_DIR)/local_store.o \
                        $(BUILD_DIR)/tls_impersonate.o \
                        $(BUILD_DIR)/hls.o \
@@ -982,8 +983,23 @@ layout-update: $(BUILD_DIR)/freedom
 	  name=$$(basename $$f .html); \
 	  ./$(BUILD_DIR)/freedom --dump-layout --author-css "$$f" \
 	      > $(PARITY_DIR)/layout/$$name.txt 2>/dev/null; \
-	done
+	done; \
 	@echo "Froze layout baseline for $(words $(LAYOUT_PAGES)) pages in $(PARITY_DIR)/layout/"
+
+# `make bench` -- per-stage render timings over the local bench corpus
+# (tests/bench/*.html, never the network). Uses --dump-timings (the pt_
+# accumulator wired in freedom.c) with --author-css, writing PNGs to
+# build/bench. Deterministic and offline; compare before/after a change.
+BENCH_PAGES := $(sort $(wildcard tests/bench/*.html))
+BENCH_OUT   := $(BUILD_DIR)/bench
+bench: $(BUILD_DIR)/freedom
+	@mkdir -p $(BENCH_OUT)
+	@for f in $(BENCH_PAGES); do \
+	  name=$$(basename $$f .html); \
+	  echo "== $$name =="; \
+	  ./$(BUILD_DIR)/freedom --author-css --dump-timings \
+	    --download-png=$(BENCH_OUT)/$$name.png "$$f" 2>/dev/null; \
+	done
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

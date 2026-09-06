@@ -3,7 +3,7 @@
     "god_nodes": [
       [
         "gui/browser_ui.c",
-        37.0
+        40.800000000000004
       ],
       [
         "src/local_store.c",
@@ -11,23 +11,23 @@
       ],
       [
         "tests/test_css.c",
-        23.3
+        25.0
       ],
       [
         "src/css.c",
-        18.900000000000002
+        22.6
       ],
       [
         "src/page_view.c",
-        13.3
+        16.8
+      ],
+      [
+        "tests/test_page_view.c",
+        13.100000000000001
       ],
       [
         "tests/test_js_dom.c",
         10.8
-      ],
-      [
-        "tests/test_page_view.c",
-        10.600000000000001
       ],
       [
         "tests/test_tab.c",
@@ -35,7 +35,7 @@
       ],
       [
         "src/tab.c",
-        7.1000000000000005
+        7.300000000000001
       ],
       [
         "src/dom.c",
@@ -80,6 +80,7 @@
     "gui/svg_paint.c": "presentation",
     "gui/ui_render.c": "presentation",
     "include/anti_fp.h": "utility",
+    "include/block_flow.h": "utility",
     "include/box_style.h": "utility",
     "include/box_tree.h": "utility",
     "include/browser.h": "utility",
@@ -87,6 +88,7 @@
     "include/css.h": "utility",
     "include/css_chain.h": "utility",
     "include/css_color.h": "utility",
+    "include/css_length.h": "utility",
     "include/css_select.h": "utility",
     "include/data_url.h": "data_access",
     "include/disk_store.h": "data_access",
@@ -97,6 +99,7 @@
     "include/form.h": "data_access",
     "include/frame_clock.h": "utility",
     "include/freebug.h": "utility",
+    "include/freedom_config.h": "infrastructure",
     "include/hls.h": "utility",
     "include/hostblock.h": "utility",
     "include/hostedit.h": "infrastructure",
@@ -138,6 +141,7 @@
     "install.sh": "utility",
     "run_freedom.sh": "utility",
     "src/anti_fp.c": "utility",
+    "src/block_flow.c": "utility",
     "src/box_style.c": "utility",
     "src/box_tree.c": "utility",
     "src/browser.c": "utility",
@@ -145,6 +149,7 @@
     "src/css.c": "utility",
     "src/css_chain.c": "utility",
     "src/css_color.c": "utility",
+    "src/css_length.c": "utility",
     "src/css_select.c": "utility",
     "src/data_url.c": "data_access",
     "src/disk_store.c": "data_access",
@@ -193,12 +198,15 @@
     "src/zoom.c": "utility",
     "tests/itest_secure_fetch.c": "testing",
     "tests/test_anti_fp.c": "testing",
+    "tests/test_block_flow.c": "testing",
     "tests/test_box_style.c": "testing",
     "tests/test_box_tree.c": "testing",
     "tests/test_browser.c": "testing",
     "tests/test_compositor.c": "testing",
     "tests/test_css.c": "testing",
     "tests/test_css_color.c": "testing",
+    "tests/test_css_drops.c": "testing",
+    "tests/test_css_length.c": "testing",
     "tests/test_data_url.c": "testing",
     "tests/test_disk_store.c": "testing",
     "tests/test_dom.c": "testing",
@@ -244,7 +252,11 @@
     "tests/test_url.c": "testing",
     "tests/test_webcaps.c": "testing",
     "tests/test_zoom.c": "testing",
-    "tools/gen_psl.c": "utility"
+    "tools/ffgeom.py": "utility",
+    "tools/gen_psl.c": "utility",
+    "tools/mutate.py": "utility",
+    "tools/pngdiff.c": "infrastructure",
+    "tools/pngprof.py": "utility"
   },
   "security": {
     "findings": []

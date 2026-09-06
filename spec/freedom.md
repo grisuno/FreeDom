@@ -61,6 +61,14 @@ OPTIONS:
                         el motor de cajas produjo (salida). Honora --author-css. Es la
                         forma de verificar position/z-index/box-engine sin Wayland ni
                         imagen: los bugs de anclaje/fragmentación se ven como números.
+  --dump-timings        modo headless: mide el pipeline con el reloj monotónico del
+                        lado confiable y vuelca el acumulador puro `pt_` a stdout
+                        al final. Etapas: `fetch` (lectura local o GET),
+                        `ipc` (tab_load_full: worker + parse/style, ver
+                        spec/perf_trace.md §6), `rd_build`, `paint` (export
+                        PNG/PDF). Opt-in explícito, nunca por defecto; Zero
+                        Knowledge (solo stdout local). `FREEDOM_PERF=1` activa
+                        el mismo volcado a stderr.
 
 [url-or-file]:
   - "https://host/..."  → se obtiene con secure_fetch (TLS 1.3, KE híbrido PQ).

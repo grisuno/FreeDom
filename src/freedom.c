@@ -19,6 +19,7 @@
 #include "js_policy.h"
 #include "link_nav.h"
 #include "net_realm.h"
+#include "perf_trace.h"
 #include "prefetch.h"
 #include "render_doc.h"
 #include "render_policy.h"
@@ -37,6 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
 
 #define EXIT_OK     0
 #define EXIT_ERROR  1
@@ -61,6 +63,7 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --dump-css: headless, print the resolved CSS property dump (boxes + block properties) to stdout\n");
     fprintf(fp, "  --dump-layout: headless, print the resolved layout (box rects + positioned boxes) to stdout\n");
     fprintf(fp, "  --dump-css-drops: headless, list the author-CSS declarations the parser discarded (property + cause)\n");
+  fprintf(fp, "  --dump-timings: headless, print per-stage render timings (fetch/ipc/rd_build/paint) to stdout\n");
     fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n");
     fprintf(fp, "  --dump-video=PATH: headless download and save video stream from a URL to PATH\n");
     fprintf(fp, "                     ('-' for stdout, pipable to ffplay -i pipe:0)\n");
@@ -121,6 +124,35 @@ static int g_dump_css = 0;
  * implemented, which is the failure mode that has cost the most render fidelity
  * (a leading-dot number, a percentage in a shorthand, a `pt` length). */
 static int g_dump_css_drops = 0;
+
+/* Set by --dump-timings (or FREEDOM_PERF=1): measure the headless pipeline with
+ * the trusted-side monotonic clock and dump the pure pt_ accumulator to stdout
+ * at the end. Opt-in only, never by default (Zero Knowledge: local stdout). */
+static int g_dump_timings = 0;
+static pt_trace g_timings;
+static int g_timings_init = 0;
+
+static uint64_t now_us(void) {
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) return 0;
+    return (uint64_t)ts.tv_sec * 1000000u + (uint64_t)ts.tv_nsec / 1000u;
+}
+
+static void timings_ensure_init(void) {
+    if (!g_timings_init) { pt_init(&g_timings); g_timings_init = 1; }
+}
+
+static int timings_enabled(void) {
+    return g_dump_timings || getenv("FREEDOM_PERF") != NULL;
+}
+
+static void timings_dump(void) {
+    if (!timings_enabled()) return;
+    timings_ensure_init();
+    char buf[1024];
+    size_t n = pt_format(&g_timings, buf, sizeof buf);
+    if (n > 0) fputs(buf, stdout);
+}
 
 /* Distinct (property, cause) pairs the drop report lists. The corpus's worst page
  * has ~25; the cap keeps the report readable and the buffer on the stack, and the
@@ -545,7 +577,10 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * width ui_render_png/ui_dump_layout paint at (so responsive pages pick the paint
      * breakpoint, not a normalized-desktop one that then paints narrower). */
     tab_set_viewport_w(t, ui_render_viewport_w());
+    timings_ensure_init();
+    uint64_t ipc_t0 = now_us();
     ts = tab_load_full(t, html, len, top_url, wc.js, 0, 0, &page);
+    pt_record(&g_timings, PT_IPC, pt_elapsed_us(ipc_t0, now_us()));
 
     /* The prefetch window ends with the load: rebind the direct fetcher and drop
      * the pool (unconsumed results freed, in-flight fetches joined). */
@@ -589,7 +624,9 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * shows images in the bitmap). */
     rdp_caps caps = wc_render_caps(wc);
     rd_doc *doc = NULL;
+    uint64_t rd_t0 = now_us();
     rd_status rs = rd_build(page.view, caps, top_url, &doc);
+    pt_record(&g_timings, PT_RD_BUILD, pt_elapsed_us(rd_t0, now_us()));
     int out_rc = (rs == RD_OK) ? EXIT_OK : EXIT_ERROR;
 
     /* With --images the export DECODES the page's allowed images through the still-open
@@ -606,9 +643,11 @@ static int render_page(const char *html, size_t len, const char *top_url,
          * the GUI would paint, to a PDF, without a Wayland window. */
         if (rs == RD_OK && rd_count(doc) > 0) {
             long pages = 0;
+            uint64_t paint_t0 = now_us();
             ui_status ur = caps.images
                 ? ui_render_pdf_images(doc, t, top_url, img_fetch, img_ctx, g_pdf_out, &pages)
                 : ui_render_pdf(doc, g_pdf_out, &pages);
+            pt_record(&g_timings, PT_PAINT, pt_elapsed_us(paint_t0, now_us()));
             if (ur != UI_OK) {
                 fprintf(stderr, "freedom: could not write PDF to '%s'\n", g_pdf_out);
                 out_rc = EXIT_ERROR;
@@ -625,9 +664,11 @@ static int render_page(const char *html, size_t len, const char *top_url,
          * of the SAME display list the GUI would paint, no Wayland window. */
         if (rs == RD_OK && rd_count(doc) > 0) {
             long img_h = 0;
+            uint64_t paint_t0 = now_us();
             ui_status ur = caps.images
                 ? ui_render_png_images(doc, t, top_url, img_fetch, img_ctx, g_png_out, &img_h)
                 : ui_render_png(doc, g_png_out, &img_h);
+            pt_record(&g_timings, PT_PAINT, pt_elapsed_us(paint_t0, now_us()));
             if (ur != UI_OK) {
                 fprintf(stderr, "freedom: could not write PNG to '%s'\n", g_png_out);
                 out_rc = EXIT_ERROR;
@@ -677,6 +718,8 @@ static int render_page(const char *html, size_t len, const char *top_url,
 
     /* Developer console (Freebug): show what the page's JS logged and any error. */
     if (g_dump_console) print_console(&page.console);
+
+    timings_dump();
 
     if (out_nav != NULL) {
         *out_nav = (page.nav_url != NULL && page.nav_url[0] != '\0')
@@ -749,7 +792,10 @@ static int fetch_and_render_one(const char *url, char **out_nav) {
 
     /* Follow redirects (e.g. google.com -> www.google.com), re-validating the
      * full policy on every hop. */
+    timings_ensure_init();
+    uint64_t fetch_t0 = now_us();
     sf_status ss = sf_get_follow(url, &cfg, &resp, SF_DEFAULT_MAX_REDIRECTS);
+    pt_record(&g_timings, PT_FETCH, pt_elapsed_us(fetch_t0, now_us()));
     if (ss != SF_OK) {
         fprintf(stderr, "freedom: fetch failed for '%s' (status %d: %s)\n",
                 url, (int)ss, sf_reason(ss));
@@ -791,7 +837,10 @@ static int run_headless(const char *target) {
     }
 
     size_t len = 0;
+    timings_ensure_init();
+    uint64_t fetch_t0 = now_us();
     char *html = read_file(target, &len);
+    pt_record(&g_timings, PT_FETCH, pt_elapsed_us(fetch_t0, now_us()));
     if (html == NULL) {
         fprintf(stderr, "freedom: cannot read '%s'\n", target);
         return EXIT_ERROR;
@@ -1074,6 +1123,9 @@ int main(int argc, char **argv) {
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (strcmp(arg, "--dump-css-drops") == 0) {
             g_dump_css_drops = 1;
+            headless = 1;      /* it is a headless diagnostic (no window) */
+        } else if (strcmp(arg, "--dump-timings") == 0) {
+            g_dump_timings = 1;
             headless = 1;      /* it is a headless diagnostic (no window) */
         } else if (strcmp(arg, "--dump-layout") == 0) {
             g_dump_layout = 1;

@@ -1803,6 +1803,31 @@ static void test_download_png_inline_svg_path_and_drops_image(void **state) {
     assert_true(r < 60 && b < 60);
 }
 
+/* --dump-timings prints the pure pt_ accumulator (Fase 0): one line per
+ * measured stage, enum order. Fail-closed: without the flag no stage= line. */
+static void test_dump_timings_prints_stages(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><title>T</title></head><body><p>hi</p></body></html>";
+    const char *path = "__freedom_dumptimings.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-timings %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    assert_non_null(strstr(out, "stage=ipc"));
+    assert_non_null(strstr(out, "stage=rd_build"));
+
+    unlink(path);
+}
+
 /* --- suite --- */
 
 int main(void) {
@@ -1846,6 +1871,7 @@ int main(void) {
         cmocka_unit_test(test_dump_console_shows_output_and_error),
         cmocka_unit_test(test_no_dump_console_without_flag),
         cmocka_unit_test(test_dump_dom_prints_render_tree),
+        cmocka_unit_test(test_dump_timings_prints_stages),
         cmocka_unit_test(test_dump_layout_no_wrapper_fragmentation),
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_rejects_http_url),
