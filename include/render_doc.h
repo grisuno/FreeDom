@@ -191,6 +191,12 @@ typedef struct rd_block {
      * (never gated); the band packer resolves them with bx_lp_px against the
      * band width. Defaults: 0 / 0 / 0 / 0. */
     int              float_ml, float_ml_pct, float_mr, float_mr_pct;
+    /* The OUTERMOST float founder (spec/float.md §7d.1): group id (-1 = the
+     * nearest IS the outermost), side (css_float), and its own horizontal
+     * margins (same halves). Structure like float_id (never gated).
+     * Defaults: -1 / 0 / 0 / 0 / 0 / 0. */
+    int              float_oid, float_oside;
+    int              float_oml, float_oml_pct, float_omr, float_omr_pct;
     /* Author box model (Hito 23b-3); set only with caps.css, else 0 / PV_LEN_UNSET.
      * box_l/box_r: left/right insets px; box_w: content-width cap px (0 = none);
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or

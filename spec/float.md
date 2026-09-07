@@ -380,14 +380,17 @@ exactly as before.
 - **Given** a page with no OOF block inside a float band, **when** rendered,
   **then** `layout-diff` byte-identical.
 
-## 7d. PROPOSED (red): nested pull-up floats — the rail below (2026-09-07)
+## 7d. nested pull-up floats — the rail beside the stories (2026-09-07)
 
-> **Status: SPEC ONLY (red state: `slashdot` 20.70).** Everything in §7c is
-> correct and validated, yet the real rail still renders BELOW the articles
-> (col_mae 0.30 = 12 of 20.7 points; ~1200px of the height gap). This section
-> records the measured root cause and the committed design. Implementing it is
-> the next architectural milestone, not a bugfix: it restructures the float
-> subsystem (recursive columns), so it runs the full SDD cycle on its own.
+> **Status: IMPLEMENTED (`slashdot` 20.70 → 15.51, h_ratio 1.165 → 0.969).**
+> The rail now paints beside the stories instead of below them. Two additional
+> root causes surfaced and were fixed on top of §7d.1's: each story is a
+> single-id band but every keyless inline float (the footer quote, the header
+> login bar) of the same band was breaking deferral, and the OOF comment
+> badges / "Posted by" bars inside floated stories had no static position so
+> they painted at (0,0). The residual col_mae 0.332 is a nav gap and the main
+> column ~520px vs Firefox ~654px (the `.main-content{margin-right:320px}`
+> reservation half-applies), documented in §7d.5.
 
 ### 7d.1 Measured root cause (not a hypothesis)
 
@@ -470,14 +473,38 @@ container tops do not move) for nested containers; miss ⇒ old path.
   top-right beside story 1 (rail rows at x≈632 from y≈440, as Firefox:
   `aside.rail-right top=8 left=672 of 984`), stories keep their exact widths,
   and the score drops from 20.70 toward ~8 (col_mae 0.30 → <0.10 with no page
-  worse).
+  worse). **Result: 15.51, h_ratio 0.969** (rail beside stories; col_mae 0.332
+  remains — §7d.5).
 - **Given** `slashdot-cols` (no inner floats, anchor unset), **when**
   rendered, **then** byte-identical to §7c (11.03): the new path never fires.
-- **Given** a page with no `oid != id` block, **when** rendered, **then**
-  `layout-diff` byte-identical (the deferred map stays empty).
+  **Result: 8.65** (better than §7c).
+- **Given** a page with no nested float, **when** rendered, **then**
+  `layout-diff` byte-identical (no outer founder anywhere ⇒ `defer_split`
+  answers inline). **Result: byte-identical across 20 pages.**
 - **Given** 9 simultaneous pulled columns, **when** rendered, **then** the
   ninth degrades to sequential flow (bounded map, fail-open, content never
-  lost).
+  lost). **Result: `RC_DEFER_COLS` 8 / `RC_DEFER_RANGES` 32 bounds, atomic
+  per-band split (all-or-inline).**
+
+### 7d.5 Residuals (honest, measured)
+
+- **Main column width ~520px vs Firefox ~654px.** The `.main-content
+  {margin-right:320px}` reservation reaches the story runs only incompletely:
+  the width on the story title reads the column's full width, not the
+  inset, so the teal header overhangs right. The margin box (#51) does open in
+  the deferred column (fixed), but the runs' own `box_r` does not carry it
+  (deliberate single-application: the box owns its margin), so the flat text
+  path wraps at ~544px instead of ~654px across the several inset chains. A
+  follow-up is to reconcile the column context once and flow all inner bands
+  inside it rather than re-deriving the width per range.
+- **Rail col_mae 0.332.** The rail lands at y≈338 (below the header that the
+  deferred flush's first-row packing cannot pull above) and its boxes are a
+  few px off Firefox; the nav "Search Slashdot" (key 1) and the login bar
+  (keys 4/5) are single-level floats that now defer alongside the nested ones,
+  changing their previous inline placement.
+- **`story-chain` short (0.728).** The probe's story images are OOF (absolute
+  thumb), so `--images` leaves them out of flow here while Firefox's reference
+  keeps them — a harness/doctrine difference, not an engine regression.
 
 ## 8. Errors
 

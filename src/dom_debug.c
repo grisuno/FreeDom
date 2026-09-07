@@ -338,6 +338,11 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
     if (b->float_ml || b->float_ml_pct || b->float_mr || b->float_mr_pct)
         dd_printf(c, " fml=%d/%d fmr=%d/%d", b->float_ml, b->float_ml_pct,
                   b->float_mr, b->float_mr_pct);
+    /* Outermost founder (spec/float.md §7d.1): printed only when set, so the
+     * default dump stays byte-identical. */
+    if (b->float_oid >= 0)
+        dd_printf(c, " foid=#%d%s", b->float_oid,
+                  (b->float_oside == CSS_FLOAT_RIGHT) ? "R" : "L");
 
     if (b->text_align)    dd_printf(c, " align=%s", dd_align_name(b->text_align));
     if (b->font_scale)    dd_printf(c, " fscale=%d", b->font_scale);

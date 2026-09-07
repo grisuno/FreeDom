@@ -226,6 +226,12 @@ static void run_init_common(pv_run *r) {
     r->float_ml_pct = 0;
     r->float_mr = 0;
     r->float_mr_pct = 0;
+    r->float_oid = -1;
+    r->float_oside = 0;
+    r->float_oml = 0;
+    r->float_oml_pct = 0;
+    r->float_omr = 0;
+    r->float_omr_pct = 0;
     r->box_l = 0;
     r->box_r = 0;
     r->box_w = 0;
@@ -642,7 +648,10 @@ void pv_set_cont_item(pv_view *v, int cont_item) {
 }
 
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
-                int float_ml, int float_ml_pct, int float_mr, int float_mr_pct) {
+                int float_ml, int float_ml_pct, int float_mr, int float_mr_pct,
+                int float_oid, int float_oside,
+                int float_oml, int float_oml_pct,
+                int float_omr, int float_omr_pct) {
     if (v == NULL || v->count == 0) return;
     pv_run *r = &v->runs[v->count - 1];
     r->float_side = float_side;
@@ -652,6 +661,12 @@ void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
     r->float_ml_pct = float_ml_pct;
     r->float_mr = float_mr;
     r->float_mr_pct = float_mr_pct;
+    r->float_oid = float_oid;
+    r->float_oside = float_oside;
+    r->float_oml = float_oml;
+    r->float_oml_pct = float_oml_pct;
+    r->float_omr = float_omr;
+    r->float_omr_pct = float_omr_pct;
 }
 
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
@@ -1077,6 +1092,15 @@ typedef struct pv_cont_info {
      * signed, pct halves per-mille signed, 0 = none. Stamped when the founder is
      * found, so the band packer sizes outer (margin) boxes, not borders. */
     int float_ml, float_ml_pct, float_mr, float_mr_pct;
+    /* The OUTERMOST float founder (spec/float.md §7d.1): the last (highest)
+     * floated self-or-ancestor block on this run's chain. float_oid is its
+     * group id (-1 = the nearest IS the outermost: single-level float, the
+     * painter's old path); float_oside its css_float side; float_oml/oml_pct/
+     * omr/omr_pct its own horizontal margins (same halves as above, for the
+     * outer column's pack). The walk already visits every ancestor, so keeping
+     * the last match costs nothing. Structure like float_id. */
+    int float_oid, float_oside;
+    int float_oml, float_oml_pct, float_omr, float_omr_pct;
 /* flex-wrap / row-gap / align-items (CONTAINER); align-self (ITEM, tracked
  * like grow/shrink/basis/order via the previous element on the walk).
  * align_content / justify_items (CONTAINER), grid_rows / grid_flow (grid
@@ -2152,6 +2176,9 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     cont->float_side = 0; cont->float_id = -1; cont->float_clear = 0;
     cont->float_ml = 0; cont->float_ml_pct = 0;
     cont->float_mr = 0; cont->float_mr_pct = 0;
+    cont->float_oid = -1; cont->float_oside = 0;
+    cont->float_oml = 0; cont->float_oml_pct = 0;
+    cont->float_omr = 0; cont->float_omr_pct = 0;
     cont->wrap = 0; cont->row_gap = -1; cont->align_items = 0; cont->align_self = 0;
     cont->align_content = 0; cont->justify_items = 0;
     cont->grid_rows = 0; cont->grid_flow = 0; cont->row_span = 0;
@@ -2165,6 +2192,11 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
     box->l = 0; box->r = 0; box->w = 0; box->center = 0;
     box->mt = PV_LEN_UNSET; box->mb = PV_LEN_UNSET;
     box->ua = BX_UA_NONE;
+    /* Symbolic halves start at none: without this they are stack garbage on
+     * every caller that declares pv_box_info without zeroing it (all of
+     * them), and the merge below reads them — nondeterministic render. */
+    box->w_pct = 0; box->l_pct = 0; box->r_pct = 0;
+    box->mt_pct = 0; box->mb_pct = 0;
     pv_text_ext_reset(ext);
     *block_id_out = -1;
     int got_link = 0, got_block = 0, got_heading = 0, got_color = 0, got_bg = 0, got_cont = 0;
@@ -2309,42 +2341,64 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * the painter groups the runs of one floated element into one column. A run
              * inside an out-of-flow (absolute/fixed) subtree is excluded: it is placed
              * by the positioner, not the float column. */
-            if (!got_float && !oof_seen && float_reg != NULL && is_block_like_style(t, &cs) &&
+            if (!oof_seen && float_reg != NULL && is_block_like_style(t, &cs) &&
                 (cs.float_side == CSS_FLOAT_LEFT || cs.float_side == CSS_FLOAT_RIGHT)) {
-                cont->float_side = cs.float_side;
-                cont->float_id = container_id(float_reg, p);
-                got_float = 1;
-                /* The founder's OWN margins travel with the float context
-                 * (spec/float.md §7c.1): the band packer positions outer
-                 * (margin) boxes, and only the founder's style answers that —
-                 * the run's nearest-hbox insets below belong to descendants.
-                 * Both <length-percentage> halves, so a % margin resolves
-                 * against the band width at layout time. Gated by caps.css
-                 * upstream like every other author length: without it the
-                 * cascade fields below read UNSET/0. */
+                /* The OUTERMOST founder (spec/float.md §7d.1): EVERY floated
+                 * ancestor refreshes it, so when the walk ends it names the
+                 * highest one. Same halves as the nearest founder's margins;
+                 * the post-walk fixup below folds it back to -1 when the
+                 * nearest IS the outermost (single-level float, old path). */
+                cont->float_oid = container_id(float_reg, p);
+                cont->float_oside = cs.float_side;
+                cont->float_oml = 0; cont->float_oml_pct = 0;
+                cont->float_omr = 0; cont->float_omr_pct = 0;
                 if (cs.margin_left != CSS_LEN_UNSET && cs.margin_left != CSS_LEN_AUTO)
-                    cont->float_ml = cs.margin_left;
-                cont->float_ml_pct = cs.pct[CSS_PCT_MARGIN_LEFT];
+                    cont->float_oml = cs.margin_left;
+                cont->float_oml_pct = cs.pct[CSS_PCT_MARGIN_LEFT];
                 if (cs.margin_right != CSS_LEN_UNSET && cs.margin_right != CSS_LEN_AUTO)
-                    cont->float_mr = cs.margin_right;
-                cont->float_mr_pct = cs.pct[CSS_PCT_MARGIN_RIGHT];
-                /* The float COLUMN is sized by the floated element's own width, which
-                 * the nearest-hbox search misses whenever a width-less inner wrapper
-                 * (a padding-only <header>/<div>) claimed the hbox first. Seed the box
-                 * width from the float element when still unset, so the whole column
-                 * (headers included) takes the float's width instead of being mistaken
-                 * for width-less and split evenly across the row (slashdot grid_24
-                 * stories collapsing into thin columns). A width-less float seeds
-                 * nothing and keeps its even-split. */
-                if (box != NULL && !crossed_container && box->w == 0 && box->w_pct == 0) {
-                    if (cs.width != CSS_LEN_UNSET && cs.width > 0) box->w = cs.width;
-                    if (cs.pct[CSS_PCT_WIDTH] > 0) box->w_pct = cs.pct[CSS_PCT_WIDTH];
+                    cont->float_omr = cs.margin_right;
+                cont->float_omr_pct = cs.pct[CSS_PCT_MARGIN_RIGHT];
+                if (!got_float) {
+                    cont->float_side = cs.float_side;
+                    cont->float_id = container_id(float_reg, p);
+                    got_float = 1;
+                    /* The founder's OWN margins travel with the float context
+                     * (spec/float.md §7c.1): the band packer positions outer
+                     * (margin) boxes, and only the founder's style answers that —
+                     * the run's nearest-hbox insets below belong to descendants.
+                     * Both <length-percentage> halves, so a % margin resolves
+                     * against the band width at layout time. Gated by caps.css
+                     * upstream like every other author length: without it the
+                     * cascade fields below read UNSET/0. */
+                    if (cs.margin_left != CSS_LEN_UNSET && cs.margin_left != CSS_LEN_AUTO)
+                        cont->float_ml = cs.margin_left;
+                    cont->float_ml_pct = cs.pct[CSS_PCT_MARGIN_LEFT];
+                    if (cs.margin_right != CSS_LEN_UNSET && cs.margin_right != CSS_LEN_AUTO)
+                        cont->float_mr = cs.margin_right;
+                    cont->float_mr_pct = cs.pct[CSS_PCT_MARGIN_RIGHT];
+                    /* The float COLUMN is sized by the floated element's own width, which
+                     * the nearest-hbox search misses whenever a width-less inner wrapper
+                     * (a padding-only <header>/<div>) claimed the hbox first. Seed the box
+                     * width from the float element when still unset, so the whole column
+                     * (headers included) takes the float's width instead of being mistaken
+                     * for width-less and split evenly across the row (slashdot grid_24
+                     * stories collapsing into thin columns). A width-less float seeds
+                     * nothing and keeps its even-split. */
+                    if (box != NULL && !crossed_container && box->w == 0 && box->w_pct == 0) {
+                        if (cs.width != CSS_LEN_UNSET && cs.width > 0) box->w = cs.width;
+                        if (cs.pct[CSS_PCT_WIDTH] > 0) box->w_pct = cs.pct[CSS_PCT_WIDTH];
+                    }
                 }
             }
             /* Horizontal box from the nearest block ancestor that declares one, so a
              * wrapper's max-width/centering/padding reaches all its descendants. Skipped
              * once the walk crossed the run's flex/grid container: that container's width
-             * sizes the container, not this item (crossed_container). */
+             * sizes the container, not this item (crossed_container). A margin-only
+             * wrapper above the container (like `.main-content{margin-right:320px}`)
+             * does NOT seed runs: its margin lives on its own box def, and the
+             * painter applies it when the box opens (band/shared context) — seeding
+             * it onto runs too counts it twice (slashdot's column came out ~540px
+             * instead of ~654). */
             if (!got_hbox && !crossed_container && is_block_like_style(t, &cs) && css_has_hbox(&cs)) {
                 css_hbox_resolve(&cs, box);
                 got_hbox = 1;
@@ -2650,6 +2704,17 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
          * rendered at the wrong text size. Only the document node sits above <html>
          * and it is not an element, so the loop ends immediately after it either way;
          * the walk stays bounded by the DOM depth exactly as before. */
+    }
+
+    /* The OUTERMOST founder folds back to -1 when the nearest IS the outermost
+     * (spec/float.md §7d.1): a single-level float matched once, so oid == id,
+     * and the painter must take the old inline path byte-identically. Only a
+     * genuinely nested float (oid != id) takes the deferred-column path. */
+    if (cont->float_oid == cont->float_id) {
+        cont->float_oid = -1;
+        cont->float_oside = 0;
+        cont->float_oml = 0; cont->float_oml_pct = 0;
+        cont->float_omr = 0; cont->float_omr_pct = 0;
     }
 
     /* The walk ended with relative font-sizes and no absolute anchor: the product
@@ -3729,7 +3794,10 @@ static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
     link_cont_chain(reg, items, cont);
     pv_set_float(v, cont->float_side, cont->float_id, cont->float_clear,
                          cont->float_ml, cont->float_ml_pct,
-                         cont->float_mr, cont->float_mr_pct);
+                         cont->float_mr, cont->float_mr_pct,
+                         cont->float_oid, cont->float_oside,
+                         cont->float_oml, cont->float_oml_pct,
+                         cont->float_omr, cont->float_omr_pct);
     if (ext != NULL) pv_set_text_ext(v, ext);
 }
 
@@ -4046,7 +4114,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 pv_set_cont_item(v, item_ordinal(&items, cid, n));
                 pv_set_float(v, cu_cont.float_side, cu_cont.float_id, cu_cont.float_clear,
                          cu_cont.float_ml, cu_cont.float_ml_pct,
-                         cu_cont.float_mr, cu_cont.float_mr_pct);
+                         cu_cont.float_mr, cu_cont.float_mr_pct,
+                         cu_cont.float_oid, cu_cont.float_oside,
+                         cu_cont.float_oml, cu_cont.float_oml_pct,
+                         cu_cont.float_omr, cu_cont.float_omr_pct);
                 /* The cell's own box (`td { border: 1px solid; padding: 5px }`).
                  * resolve_context registered it, but the id was resolved and then
                  * dropped, so the cell's border/padding/background never reached the
@@ -4139,7 +4210,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 link_cont_chain(&reg, &items, &ictl_cont);
                 pv_set_float(v, ictl_cont.float_side, ictl_cont.float_id, ictl_cont.float_clear,
                          ictl_cont.float_ml, ictl_cont.float_ml_pct,
-                         ictl_cont.float_mr, ictl_cont.float_mr_pct);
+                         ictl_cont.float_mr, ictl_cont.float_mr_pct,
+                         ictl_cont.float_oid, ictl_cont.float_oside,
+                         ictl_cont.float_oml, ictl_cont.float_oml_pct,
+                         ictl_cont.float_omr, ictl_cont.float_omr_pct);
                 /* The resolved inherited text extensions ride the input run too:
                  * caret_color tints the caret of the focused control (2026-07-10). */
                 pv_set_text_ext(v, &ctl_ext);
@@ -4448,6 +4522,12 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 annotate_replaced_run(v, &reg, &items, &img_cont, &img_ext,
                                       unused_align, unused_fs, unused_fs_abs,
                                       unused_lh, unused_deco, bdeco);
+                /* An image inside an out-of-flow subtree carries its nearest
+                 * box block_id (spec/float.md §7d, slashdot rail): without an
+                 * anchor the layout layer cannot position it and it falls
+                 * into flow as a full-width row. Gated on img_oof, so every
+                 * in-flow image keeps block_id == -1 byte-identically. */
+                if (img_oof) pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 pv_set_oof(v, img_oof);
             } else if ((t == LXB_TAG_VIDEO || t == LXB_TAG_AUDIO)
@@ -4664,7 +4744,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     link_cont_chain(&reg, &items, &econt);
                     pv_set_float(v, econt.float_side, econt.float_id, econt.float_clear,
                          econt.float_ml, econt.float_ml_pct,
-                         econt.float_mr, econt.float_mr_pct);
+                         econt.float_mr, econt.float_mr_pct,
+                         econt.float_oid, econt.float_oside,
+                         econt.float_oml, econt.float_oml_pct,
+                         econt.float_omr, econt.float_omr_pct);
                     pv_set_box(v, ebox.l, ebox.r, ebox.w, ebox.center, ebox.mt, ebox.mb);
                     pv_set_ua_tag(v, ebox.ua);
                     pv_set_box_pct(v, ebox.w_pct, ebox.l_pct, ebox.r_pct,
@@ -4855,7 +4938,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear,
                          cont.float_ml, cont.float_ml_pct,
-                         cont.float_mr, cont.float_mr_pct);
+                         cont.float_mr, cont.float_mr_pct,
+                         cont.float_oid, cont.float_oside,
+                         cont.float_oml, cont.float_oml_pct,
+                         cont.float_omr, cont.float_omr_pct);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,
@@ -4975,7 +5061,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 link_cont_chain(&reg, &items, &cont);
                 pv_set_float(v, cont.float_side, cont.float_id, cont.float_clear,
                          cont.float_ml, cont.float_ml_pct,
-                         cont.float_mr, cont.float_mr_pct);
+                         cont.float_mr, cont.float_mr_pct,
+                         cont.float_oid, cont.float_oside,
+                         cont.float_oml, cont.float_oml_pct,
+                         cont.float_omr, cont.float_omr_pct);
                 pv_set_box(v, box.l, box.r, box.w, box.center, box.mt, box.mb);
                 pv_set_ua_tag(v, box.ua);
                 pv_set_box_pct(v, box.w_pct, box.l_pct, box.r_pct,

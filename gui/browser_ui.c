@@ -3578,6 +3578,24 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     s->line_first = L->nfrag;
 }
 
+/* Height the currently open line WILL have when it flushes (same formula
+ * flush_line uses): an out-of-flow static position recorded mid-line must sit
+ * below the whole line, not at its top — otherwise a badge/Posted bar whose
+ * block is skipped while its title line is still open lands ON the title
+ * instead of below it. 0 when no line is open. Pure reader, no state change. */
+static double open_line_height(const rc_state *s, const ui_theme *th) {
+    if (!s->line_open) return 0.0;
+    double natural = (s->line_asc + s->line_desc) * th->line_spacing;
+    double h = s->line_any_theme ? natural : 0.0;
+    if (s->line_lead_px > h) h = s->line_lead_px;
+    if (h <= 0.0) {
+        h = (s->line_scale > 0)
+            ? (s->line_asc + s->line_desc) * (double)s->line_scale / 100.0
+            : natural;
+    }
+    return (h > 0.0) ? h : 0.0;
+}
+
 static void open_line(rc_layout *L, rc_state *s) {
     if (s->line_open) return;
     if (rc_has_content(L)) s->cur_top += s->pending_gap;  /* no leading gap at the very top */
@@ -4917,7 +4935,8 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                     (void)in_w;
                     L->oof_sx[sbid] = in_l;
                     L->oof_sy[sbid] = s->cur_top
-                        + (rc_has_content(L) ? s->pending_gap : 0.0);
+                        + (rc_has_content(L) ? s->pending_gap : 0.0)
+                        + open_line_height(s, th);
                     L->oof_static_set[sbid] = 1;
                 }
                 continue;
@@ -6200,6 +6219,430 @@ static int block_in_table_caption(const rd_doc *doc, const rd_block *b) {
     return 0;
 }
 
+/* Deferred pull-up float columns (spec/float.md §7d.2-7d.3).
+ *
+ * A float band whose groups live inside an OUTER float founder (the rail's
+ * inner poll section, the stories inside .main-wrap) cannot be placed by the
+ * sequential band loop: its outer column never shares a band with the earlier
+ * content it must sit beside. Such bands defer: their block ranges collect
+ * into a column keyed by the outermost founder id, and the column is placed
+ * (beside earlier content, at the tracked anchor) at the next in-flow,
+ * non-deferred block or EOF. Everything is bounded static storage; every
+ * overflow degrades to the old inline path (fail-open: content overlaps or
+ * stacks instead of vanishing). With no nested float in the document the map
+ * stays empty and every band lays out exactly as before. */
+#define RC_DEFER_COLS 8
+#define RC_DEFER_RANGES 32
+/* Forward: the deferred flush below reuses the band layer, defined after it. */
+static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
+                              rc_state *s, const ui_theme *th, double content_w,
+                              const rd_doc *doc, size_t start, size_t end,
+                              int band_box);
+typedef struct rc_defer_col {
+    int key;                                /* outermost founder group id */
+    int side;                               /* its css_float side */
+    int ml, mlpct, mr, mrpct;               /* its own margins (halves) */
+    size_t rs[RC_DEFER_RANGES], re[RC_DEFER_RANGES];
+    int nr;
+} rc_defer_col;
+typedef struct rc_defer {
+    rc_defer_col col[RC_DEFER_COLS];
+    int n;
+    double anchor_top;                      /* §7d.3: bottom of the last
+                                             * in-flow, non-whitespace block */
+    int anchor_set;
+    int pkey[RC_DEFER_COLS];                /* placed columns: later fragments
+                                             * of a key stack beneath earlier
+                                             * ones instead of overlapping */
+    double pbot[RC_DEFER_COLS];
+    int np;
+} rc_defer;
+
+/* Forward: defer_split (below) appends through defer_append (after it). */
+static int defer_append(rc_defer *d, int key, int side,
+                        int ml, int mlpct, int mr, int mrpct,
+                        size_t start, size_t end);
+
+/* The defer key of one block: its outermost founder id, else its own id (a
+ * single-level float is its own column). Callers only pass non-OOF blocks of
+ * a float band, so float_id >= 0 always holds here. */
+static int defer_key_block(const rd_block *bk) {
+    if (bk->float_oid >= 0) return bk->float_oid;
+    return bk->float_id;
+}
+
+/* The outer founder's side+margins for one key: prefer a block naming it via
+ * float_oid (same element's style either way — an oid carrier and an
+ * id==key carrier describe the same founder), else the founder's own direct
+ * content. */
+static void defer_founder_style(const rd_doc *doc, size_t start, size_t end,
+                                int key, int *side,
+                                int *ml, int *mlpct, int *mr, int *mrpct) {
+    *side = 0; *ml = 0; *mlpct = 0; *mr = 0; *mrpct = 0;
+    for (int pass = 0; pass < 2 && *side == 0; ++pass) {
+        for (size_t k = start; k < end; ++k) {
+            const rd_block *bk = rd_at(doc, k);
+            if (block_leaves_flow(doc, bk)) continue;
+            if (pass == 0 && bk->float_oid == key) {
+                *side = bk->float_oside;
+                *ml = bk->float_oml; *mlpct = bk->float_oml_pct;
+                *mr = bk->float_omr; *mrpct = bk->float_omr_pct;
+                return;
+            }
+            if (pass == 1 && bk->float_oid < 0 && bk->float_id == key) {
+                *side = bk->float_side;
+                *ml = bk->float_ml; *mlpct = bk->float_ml_pct;
+                *mr = bk->float_mr; *mrpct = bk->float_mr_pct;
+                return;
+            }
+        }
+    }
+}
+
+/* Partition band [start, end) by defer key (spec/float.md §7d.2): a real band
+ * carries several outer founders (stories under 6, the aside under 67,
+ * footer nav under 75/89, plus single-level floats like the fortune quote
+ * under their own id). Appends each key's maximal runs to its deferred
+ * column and returns the number of distinct keys. Returns -1 (lay the whole
+ * band inline, today's path, fail-open) when the band has no nesting at all
+ * (no oid and no id naming an outer founder: the byte-identical fast path
+ * for ordinary float pages) or any bound would overflow. OOF blocks ride the
+ * run they sit in (grouping and flow skip them with the same predicate, so
+ * they break nothing). */
+#define RC_DEFER_BAND_RUNS 64
+static int defer_split(rc_defer *d, const rd_doc *doc, size_t start, size_t end,
+                       const int *outer, int nouter) {
+    struct { int key; size_t rs, re; } runs[RC_DEFER_BAND_RUNS];
+    int nruns = 0;
+    int cur = -2;
+    size_t rstart = 0;
+    int nested = 0;
+    for (size_t k = start; k < end; ++k) {
+        const rd_block *bk = rd_at(doc, k);
+        if (block_leaves_flow(doc, bk)) continue;
+        if (bk->float_oid >= 0) nested = 1;
+        else {
+            for (int o = 0; o < nouter; ++o) {
+                if (outer[o] == bk->float_id) { nested = 1; break; }
+            }
+        }
+        int key = defer_key_block(bk);
+        if (cur == -2) { cur = key; rstart = k; }
+        else if (key != cur) {
+            if (nruns >= RC_DEFER_BAND_RUNS) {
+                if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                    fprintf(stderr, "[defer] band [%zu,%zu) runs overflow\n",
+                            start, end);
+                return -1;
+            }
+            runs[nruns].key = cur; runs[nruns].rs = rstart; runs[nruns].re = k;
+            ++nruns;
+            cur = key; rstart = k;
+        }
+    }
+    if (cur == -2) return 0;
+    if (nruns >= RC_DEFER_BAND_RUNS) return -1;
+    runs[nruns].key = cur; runs[nruns].rs = rstart; runs[nruns].re = end;
+    ++nruns;
+    /* No nesting anywhere in the band: ordinary floats take the old inline
+     * path byte-identically (a single-level float is its own column only
+     * once pull-up is already engaged). */
+    if (!nested) return -1;
+    /* Bounds before touching the map (atomic: all or inline). */
+    int keys[RC_DEFER_COLS];
+    int nkeys = 0;
+    for (int r = 0; r < nruns; ++r) {
+        int seen = 0;
+        for (int q = 0; q < nkeys; ++q) {
+            if (keys[q] == runs[r].key) { seen = 1; break; }
+        }
+        if (!seen) {
+            if (nkeys >= RC_DEFER_COLS) return -1;
+            keys[nkeys++] = runs[r].key;
+        }
+    }
+    if (d->n + nkeys > RC_DEFER_COLS) return -1;
+    for (int q = 0; q < nkeys; ++q) {
+        int have = 0;
+        for (int r = 0; r < nruns; ++r) {
+            if (runs[r].key == keys[q]) ++have;
+        }
+        int live = 0;
+        for (int c = 0; c < d->n; ++c) {
+            if (d->col[c].key == keys[q]) live = d->col[c].nr;
+        }
+        if (live + have > RC_DEFER_RANGES) return -1;
+    }
+    for (int r = 0; r < nruns; ++r) {
+        int side = 0, ml = 0, mlpct = 0, mr = 0, mrpct = 0;
+        defer_founder_style(doc, start, end, runs[r].key,
+                            &side, &ml, &mlpct, &mr, &mrpct);
+        if (defer_append(d, runs[r].key, side, ml, mlpct, mr, mrpct,
+                         runs[r].rs, runs[r].re) != 0)
+            return -1;
+    }
+    if (getenv("FREEDOM_DEFER_DEBUG") != NULL) {
+        fprintf(stderr, "[defer] band [%zu,%zu) keys=", start, end);
+        for (int q = 0; q < nkeys; ++q)
+            fprintf(stderr, "%d%s", keys[q], (q + 1 < nkeys) ? "," : "\n");
+    }
+    return nkeys;
+}
+
+static int defer_append(rc_defer *d, int key, int side,
+                        int ml, int mlpct, int mr, int mrpct,
+                        size_t start, size_t end) {
+    if (d == NULL) return -1;
+    rc_defer_col *dc = NULL;
+    for (int c = 0; c < d->n; ++c) {
+        if (d->col[c].key == key) { dc = &d->col[c]; break; }
+    }
+    if (dc == NULL) {
+        if (d->n >= RC_DEFER_COLS) return -1;
+        dc = &d->col[d->n++];
+        dc->key = key; dc->side = side;
+        dc->ml = ml; dc->mlpct = mlpct; dc->mr = mr; dc->mrpct = mrpct;
+        dc->nr = 0;
+    }
+    if (dc->nr >= RC_DEFER_RANGES) return -1;
+    dc->rs[dc->nr] = start;
+    dc->re[dc->nr] = end;
+    dc->nr++;
+    return 0;
+}
+
+/* Places every deferred column: each lays its inner bands (reused, not forked)
+ * at the column's border width, stacked in document order, then shifts into
+ * place beside the earlier content at the anchor. Sibling columns share ONE
+ * synthetic pack row with a full-width proxy standing in for the earlier
+ * content: a zero-outer rail fits on the proxy row beside a full-width
+ * article, while a column that wraps to a later pack row stacks below the
+ * earlier pack row instead of overlapping it. cur_top becomes the max so page
+ * flow never rewinds; each column rect registers as a float exclusion so
+ * following content wraps below it. Pack failure falls back to sequential
+ * placement (fail-open). Clears the pending map, keeps the placed table; the
+ * anchor advances to the new bottom so source-later columns stack, never
+ * overlap. */
+static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
+                        rc_state *s, const ui_theme *th, double content_w,
+                        const rd_doc *doc, rc_defer *d) {
+    if (d == NULL || d->n == 0) return;
+    double ctx_left, ctx_w;
+    rc_box_context(s, content_w, &ctx_left, &ctx_w);
+    if (ctx_w < 1.0) ctx_w = 1.0;
+    int n = d->n;
+    /* Pass 1: every column's border width and resolved outer margins. The
+     * width is the FOUNDER's own, read off its direct-content blocks
+     * (float_id == key, no oid — their nearest hbox IS the founder), % //
+     * resolved against this context. A founder with no direct content keeps
+     * the old rules: a single-group column shrinks to its widest px cap
+     * (the §7c lone-float doctrine), a multi-group one goes full width
+     * (== the inline even-split it replaces). Content px caps never size a
+     * multi-group column, or a %-child would resolve against its own width
+     * and a footer would squeeze to one nav link. */
+    double border[RC_DEFER_COLS], oml[RC_DEFER_COLS], omr[RC_DEFER_COLS];
+    for (int c = 0; c < n; ++c) {
+        rc_defer_col *dc = &d->col[c];
+        double fw = 0.0, pxw = 0.0;
+        int ngroups = 0;
+        int gids[RC_DEFER_RANGES * 2];
+        for (int r = 0; r < dc->nr; ++r) {
+            for (size_t k = dc->rs[r]; k < dc->re[r]; ++k) {
+                const rd_block *bb = rd_at(doc, k);
+                if (block_leaves_flow(doc, bb)) continue;
+                if (bb->float_oid < 0 && bb->float_id == dc->key) {
+                    double t = bx_width_cap(bb->box_w, bb->box_w_pct, ctx_w);
+                    if (t > fw) fw = t;
+                }
+                if (bb->box_w > 0) {
+                    double t = bx_width_cap(bb->box_w, 0, ctx_w);
+                    if (t > pxw) pxw = t;
+                }
+                int seen = 0;
+                for (int q = 0; q < ngroups; ++q) {
+                    if (gids[q] == bb->float_id) { seen = 1; break; }
+                }
+                if (!seen && ngroups < (int)(sizeof gids / sizeof gids[0]))
+                    gids[ngroups++] = bb->float_id;
+            }
+        }
+        if (fw > 0.0) border[c] = fw;
+        else if (ngroups <= 1 && pxw > 0.0) border[c] = pxw;
+        else border[c] = ctx_w;
+        if (border[c] > ctx_w) border[c] = ctx_w;
+        if (border[c] < 1.0) border[c] = 1.0;
+        oml[c] = bx_lp_px(dc->ml, dc->mlpct, ctx_w);
+        omr[c] = bx_lp_px(dc->mr, dc->mrpct, ctx_w);
+    }
+    /* One synthetic row: the proxy (earlier content) plus every column's
+     * border with its outer margins, through the margin-aware packer. The
+     * reported x is already the BORDER x (the §7c.2 rule); the pack row tells
+     * which columns sit side by side and which stack. */
+    double wrow[RC_DEFER_COLS + 1], mrow[RC_DEFER_COLS + 1];
+    double rrow[RC_DEFER_COLS + 1], xrow[RC_DEFER_COLS + 1];
+    int srow[RC_DEFER_COLS + 1];
+    size_t prow[RC_DEFER_COLS + 1];
+    wrow[0] = ctx_w; mrow[0] = 0.0; rrow[0] = 0.0; srow[0] = 0;
+    for (int c = 0; c < n; ++c) {
+        wrow[c + 1] = border[c];
+        mrow[c + 1] = oml[c];
+        rrow[c + 1] = omr[c];
+        srow[c + 1] = (d->col[c].side == CSS_FLOAT_RIGHT) ? 1 : 0;
+    }
+    size_t maxrow = 0;
+    int pack_ok = (fx_float_pack_m(wrow, srow, mrow, rrow, (size_t)n + 1, ctx_w,
+                                   0.0, xrow, prow) == FX_OK);
+    if (pack_ok) {
+        for (int c = 0; c < n; ++c) {
+            if (prow[c + 1] > maxrow) maxrow = prow[c + 1];
+        }
+    }
+    double base = (d->anchor_set ? d->anchor_top : s->cur_top);
+    if (getenv("FREEDOM_DEFER_DEBUG") != NULL) {
+        fprintf(stderr, "[defer] flush n=%d anchor=%s%.1f cur=%.1f ctxl=%.1f ctxw=%.1f keys=",
+                n, d->anchor_set ? "" : "(unset)", base, s->cur_top,
+                ctx_left, ctx_w);
+        for (int c = 0; c < n; ++c) fprintf(stderr, "%d%s", d->col[c].key,
+                                            (c + 1 < n) ? "," : "\n");
+    }
+    /* Pass 2: lay columns pack-row by pack-row, first-seen order within a
+     * row. A later pack row starts below the earlier pack row's bottom. */
+    double rowtop = base;
+    for (size_t prr = 0; prr <= maxrow; ++prr) {
+        double rowbot = rowtop;
+        /* Within one pack row, narrow columns lay first: a pulled rail must
+         * exist (as a float exclusion) before the stories flow beside it —
+         * that is what shortens the story lines to the rail's edge exactly
+         * like a sequential lone float would. Stable by first-seen order. */
+        int order[RC_DEFER_COLS];
+        int norder = 0;
+        for (int pass = 0; pass < 2; ++pass) {
+            for (int c = 0; c < n; ++c) {
+                if (pack_ok && prow[c + 1] != prr) continue;
+                int narrow = (border[c] < ctx_w) ? 1 : 0;
+                if ((pass == 0) != (narrow != 0)) continue;
+                order[norder++] = c;
+            }
+        }
+        for (int oi = 0; oi < norder; ++oi) {
+            int c = order[oi];
+            rc_defer_col *dc = &d->col[c];
+            double colx = pack_ok ? xrow[c + 1] : 0.0;
+            double colw = border[c];
+            if (colw < 1.0) colw = 1.0;
+            /* Later fragments of an already-placed key stack beneath it. */
+            double top = rowtop;
+            for (int p = 0; p < d->np; ++p) {
+                if (d->pkey[p] == dc->key && d->pbot[p] > top) top = d->pbot[p];
+            }
+            rc_state si;
+            memset(&si, 0, sizeof si);
+            si.bg_rgb = -1;
+            /* The column's text wraps around floats the page already placed
+             * (the rail beside the stories and vice versa): inherit the live
+             * exclusions. Column-local lone floats stay inside (discarded
+             * with si below — same as nested floats anywhere). */
+            si.nfloats = s->nfloats;
+            for (int fi = 0; fi < s->nfloats; ++fi) si.floats[fi] = s->floats[fi];
+            si.float_depth = s->float_depth;
+            si.float_avail = s->float_avail;
+            size_t sr = L->nrow, sbx = L->nbox;
+            /* OOF static positions born inside this column are column-local
+             * (the per-item shift above translated them that far); shift the
+             * newly set ones into place with the column's rows and boxes. */
+            char coof_had[BT_MAX_POSITIONED];
+            memcpy(coof_had, L->oof_static_set, sizeof coof_had);
+            for (int r = 0; r < dc->nr; ++r) {
+                /* The range's common box (not _shared: si starts empty, so
+                 * there is no open stack to keep — _shared would answer -1
+                 * for single-group ranges and drop the wrapper context). */
+                int bbox = band_common_box(doc, dc->rs[r], dc->re[r]);
+                if (r == 0) {
+                    /* The band's top margin collapses with whatever flowed
+                     * before (mirrors the main loop): without it the column
+                     * starts gap-less where the inline band would not. */
+                    double mt, mb;
+                    block_margins(th, rd_at(doc, dc->rs[r]), colw, &mt, &mb);
+                    si.pending_gap = bf_collapse(s->prev_bottom, mt);
+                    (void)mb;
+                }
+                /* Open the band's shared context in the column (mirrors the
+                 * main loop's reconcile before layout_float_band): that is
+                 * what brings in wrapper boxes like the `.main-content`
+                 * margin box, without which the column flows at full page
+                 * width. Items open their own boxes below bbox inside. */
+                reconcile_boxes(cr, w, L, &si, th, doc, colw, bbox,
+                                dc->rs[r]);
+                /* Inner % resolves against the COLUMN width: it is the
+                 * containing block, exactly as a nested flex container's
+                 * would. */
+                layout_float_band(cr, w, L, &si, th, colw, doc,
+                                  dc->rs[r], dc->re[r], bbox);
+            }
+            double col_h = si.cur_top;
+            if (col_h < 0.0) col_h = 0.0;
+            /* The lone-float path rewinds si.cur_top to the band top BY DESIGN
+             * (following content flows BESIDE the float, not below it) — but
+             * the column's content rows ARE in L. Measure the real bottom
+             * from what was emitted, or every pulled column reads height 0
+             * and the following content overlaps it. */
+            for (size_t rr = sr; rr < L->nrow; ++rr) {
+                double rb = L->rows[rr].top + L->rows[rr].height;
+                if (rb > col_h) col_h = rb;
+            }
+            for (size_t bb = sbx; bb < L->nbox; ++bb) {
+                double bx2 = L->boxes[bb].top + L->boxes[bb].h;
+                if (bx2 > col_h) col_h = bx2;
+            }
+            for (size_t rr = sr; rr < L->nrow; ++rr) {
+                L->rows[rr].top += top;
+                L->rows[rr].x_off += ctx_left + colx;
+            }
+            for (size_t bb = sbx; bb < L->nbox; ++bb) {
+                L->boxes[bb].x += ctx_left + colx;
+                L->boxes[bb].top += top;
+            }
+            for (size_t q = 0; q < BT_MAX_POSITIONED; ++q) {
+                if (!coof_had[q] && L->oof_static_set[q]) {
+                    L->oof_sx[q] += ctx_left + colx;
+                    L->oof_sy[q] += top;
+                }
+            }
+            double bottom = top + col_h;
+            if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                fprintf(stderr, "[defer] col key=%d row=%zu x=%.1f w=%.1f top=%.1f h=%.1f nr=%d\n",
+                        dc->key, prr, colx, colw, top, col_h, dc->nr);
+            if (d->np < RC_DEFER_COLS) {
+                d->pkey[d->np] = dc->key;
+                d->pbot[d->np] = bottom;
+                d->np++;
+            }
+            if (bottom > s->cur_top) s->cur_top = bottom;
+            if (bottom > rowbot) rowbot = bottom;
+            /* Following content wraps below/around the pulled column (the
+             * lone-float exclusion discipline, §7c: edges are OUTER/margin
+             * edges, in the band context's coordinates). */
+            if (s->nfloats < RC_FLOAT_MAX) {
+                fx_float_rect *fr = &s->floats[s->nfloats++];
+                fr->top = top;
+                fr->bottom = bottom;
+                fr->side = (dc->side == CSS_FLOAT_RIGHT) ? 1 : 0;
+                fr->edge = (fr->side == 1) ? (colx - oml[c])
+                                           : (colx + colw + omr[c]);
+                s->float_depth = s->box_depth;
+                s->float_avail = ctx_w;
+            }
+        }
+        rowtop = rowbot;
+    }
+    /* Advance the anchor past what this flush placed: source-later columns
+     * flushed separately (a footer float in its own band) belong below
+     * full-width content, not at the container top. Columns OF this flush
+     * already used the pre-advance anchor, so a rail sharing the flush with
+     * its stories still lands beside story one. */
+    if (d->anchor_set && s->cur_top > d->anchor_top) d->anchor_top = s->cur_top;
+    d->n = 0;
+}
 static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                               rc_state *s, const ui_theme *th, double content_w,
                               const rd_doc *doc, size_t start, size_t end,
@@ -6363,13 +6806,43 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         si.bg_w = cw;
         size_t sr = L->nrow;
         size_t sbx = L->nbox;
+        /* OOF static positions recorded while flowing this item (below and
+         * inside layout_container) are column-local; the item shift below
+         * translates them exactly like rows and boxes. Snapshot which were
+         * already set so only this item's are shifted. */
+        char oof_had[BT_MAX_POSITIONED];
+        memcpy(oof_had, L->oof_static_set, sizeof oof_had);
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bk = rd_at(doc, k);
             /* Out-of-flow blocks are placed by the positioner, never in flow
              * (spec/float.md §7c.5): skip them here as the main loop does, or a
              * positioned badge inside a float column paints twice (here and in
              * Stage 2). Mirrors the grouping skip above, same predicate. */
-            if (block_leaves_flow(doc, bk)) continue;
+            if (block_leaves_flow(doc, bk)) {
+                /* Static position for Stage 2, recorded here at the
+                 * column-local pen (mirrors layout_container's grouping):
+                 * without it an abspos box inside a float column keeps the
+                 * (0,0) default and paints at the page origin (the story
+                 * "Posted by" bars lived at 0,0 under the title). */
+                int oroot = bt_oof_root(doc->boxes, rd_box_count(doc),
+                                        bk->block_id);
+                size_t sbid = (size_t)oroot;
+                if (sbid < BT_MAX_POSITIONED && !L->oof_static_set[sbid]) {
+                    double in_l, in_w;
+                    rc_box_context(&si, cw, &in_l, &in_w);
+                    (void)in_w;
+                    L->oof_sx[sbid] = in_l;
+                    L->oof_sy[sbid] = si.cur_top
+                        + (rc_has_content(L) ? si.pending_gap : 0.0)
+                        + open_line_height(&si, th);
+                    L->oof_static_set[sbid] = 1;
+                    if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                        fprintf(stderr, "[oof] band item: box=%d si_top=%.1f k=%zu fid=%d txt='%.30s'\n",
+                                (int)sbid, si.cur_top, k, bk->float_id,
+                                (bk->text != NULL) ? bk->text : "(null)");
+                }
+                continue;
+            }
             /* A flex/grid container nested INSIDE this float column (e.g. a data
              * table in slashdot's floated story body) is laid out by the grid/flex
              * engine at the COLUMN width, exactly as the top-level loop does. Without
@@ -6472,6 +6945,15 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             L->boxes[b].x   += ctx_left + outx[j];
             L->boxes[b].top += base_top + row_top;
         }
+        /* OOF static positions born while flowing this item (above and inside
+         * layout_container) are column-local: shift the newly set ones by this
+         * item's delta, exactly like its rows and boxes. */
+        for (size_t q = 0; q < BT_MAX_POSITIONED; ++q) {
+            if (!oof_had[q] && L->oof_static_set[q]) {
+                L->oof_sx[q] += ctx_left + outx[j];
+                L->oof_sy[q] += base_top + row_top;
+            }
+        }
     }
     /* A single float on a single row must NOT push the following content down: it
      * shortens the line boxes beside it (CSS 2.1 §9.5). Register the exclusion and
@@ -6508,6 +6990,24 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
     memset(&s, 0, sizeof s);
     s.bg_rgb = -1;  /* 0 is opaque black; no background until a block sets one */
     /* s.box_depth starts 0 (memset): no open box -> default flat flow. */
+    /* Pull-up pre-pass (spec/float.md §7d.2): the set of outermost float
+     * founder ids in the whole document. A band whose groups name one of
+     * these — directly (its own id) or via float_oid — belongs to that outer
+     * column and defers instead of laying out inline. Empty on pages without
+     * nested floats: every band takes the old path byte-identically. */
+    int douter[RC_DEFER_COLS];
+    int dnouter = 0;
+    for (size_t oi = 0; oi < rd_count(doc); ++oi) {
+        int oid = rd_at(doc, oi)->float_oid;
+        if (oid < 0) continue;
+        int seen = 0;
+        for (int o = 0; o < dnouter; ++o) {
+            if (douter[o] == oid) { seen = 1; break; }
+        }
+        if (!seen && dnouter < RC_DEFER_COLS) douter[dnouter++] = oid;
+    }
+    rc_defer df;
+    memset(&df, 0, sizeof df);
 
     for (size_t i = 0; i < rd_count(doc); ++i) {
         const rd_block *b = rd_at(doc, i);
@@ -6542,7 +7042,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                     rc_box_context(&s, content_w, &in_l, &in_w);
                     (void)in_w;
                     L->oof_sx[sbid] = in_l;
-                    L->oof_sy[sbid] = s.cur_top + (rc_has_content(L) ? s.pending_gap : 0.0);
+                    L->oof_sy[sbid] = s.cur_top + (rc_has_content(L) ? s.pending_gap : 0.0)
+                        + open_line_height(&s, th);
                     L->oof_static_set[sbid] = 1;
                 }
                 continue;
@@ -6589,7 +7090,10 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * close_all_boxes at the end) finalizes its height, so it wraps the whole
              * container. */
             /* A flex/grid container establishes its own formatting context, so it
-             * goes BELOW any live float rather than flowing beside it. */
+             * goes BELOW any live float rather than flowing beside it. A
+             * source-later container likewise goes below pulled columns:
+             * flush first (no-op when nothing is deferred). */
+            defer_flush(cr, w, L, &s, th, content_w, doc, &df);
             rc_float_clear(&s);
             int cbox = container_box_of(doc, i, j, rootc);
             /* A synthesised table grid stamps no container box, so container_box_of
@@ -6609,6 +7113,15 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             layout_container(cr, w, L, &s, th, in_l, in_w, doc, i, j, rootc);
             s.indent_px = 0.0;
             s.prev_bottom = mb;
+            /* A laid container is in-flow content: it moves the pull-up
+             * anchor (spec/float.md §7d.3) exactly like a text block. An
+             * empty/hidden one leaves cur_top untouched, so this is a no-op
+             * for it. Without this a flex header never anchored and pulled
+             * columns teleported above it. */
+            if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                fprintf(stderr, "[anchor] container -> %.1f\n", s.cur_top);
+            df.anchor_top = s.cur_top;
+            df.anchor_set = 1;
             i = j - 1;  /* the loop's ++i moves past the container */
             continue;
         }
@@ -6618,9 +7131,14 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
 
         /* The block's own `clear` ends the float context: it drops below the tallest
          * live float (spec/float.md §6b.3). This is what puts a clear:both footer
-         * under the columns instead of beside them. */
+         * under the columns instead of beside them. Deferred columns place first
+         * (the footer clears them too). The anchor is NOT reset: it names the
+         * containing block's top (§7d.3), and source-later sibling columns (the
+         * rail, flushed here) still need it; same-key fragments stack via the
+         * placed table regardless. */
         if (b->float_clear != 0 && b->float_id < 0) {
             flush_line(L, &s, th);
+            defer_flush(cr, w, L, &s, th, content_w, doc, &df);
             rc_float_clear(&s);
         }
 
@@ -6652,6 +7170,22 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 if (bj->float_clear != 0 && bj->float_id != b->float_id) break;
                 ++j;
             }
+            /* Pull-up deferral (spec/float.md §7d.2): bands living inside
+             * outer founders collect into per-founder columns instead of
+             * laying out inline below earlier content. A band with several
+             * founders splits by key (stories, rail, footer nav each take
+             * their column); a band with inline content, or any overflow,
+             * lays out whole inline (fail-open: today's path). */
+            {
+                int nkeys = defer_split(&df, doc, i, j, douter, dnouter);
+                if (nkeys > 0) {
+                    i = j - 1;  /* the loop's ++i moves past the band */
+                    continue;
+                }
+            }
+            /* An inline band lays out below pulled columns: flush first
+             * (no-op when nothing is deferred). */
+            defer_flush(cr, w, L, &s, th, content_w, doc, &df);
             /* A new band ends the previous float context: consecutive bands stack,
              * as they always have (spec/float.md §6b.3). */
             rc_float_clear(&s);
@@ -6665,6 +7199,10 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             i = j - 1;  /* the loop's ++i moves past the band */
             continue;
         }
+
+        /* In-flow content after deferred bands flows below the pulled columns:
+         * flush first (no-op when nothing is deferred). */
+        defer_flush(cr, w, L, &s, th, content_w, doc, &df);
 
         /* An inline-level replaced element belongs to the line already open, so it
          * must not be treated as standalone (which would flush that line and give
@@ -6714,6 +7252,15 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                 rr->x_off = ctx_left;
                 if (rr->bg_w > ctx_w) rr->bg_w = ctx_w;
             }
+            /* A replaced row is in-flow content after any pending pulled
+             * column: flush first so the column lands above it (source order),
+             * then move the anchor — the image bottom is the container top
+             * for whatever follows. */
+            defer_flush(cr, w, L, &s, th, content_w, doc, &df);
+            if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                fprintf(stderr, "[anchor] replaced -> %.1f\n", s.cur_top);
+            df.anchor_top = s.cur_top;
+            df.anchor_set = 1;
             continue;
         }
 
@@ -6767,7 +7314,27 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         }
         if (inner_w < 1.0) inner_w = 1.0;
         flow_text_block(cr, w, L, &s, th, b, inner_w);
+        /* Pull-up anchor (spec/float.md §7d.3): the bottom of the last
+         * in-flow, non-whitespace block. Float bands never reach here (they
+         * continue above) and OOF blocks never reach here either (Stage 2d),
+         * so this is exactly the container top a pulled column aligns to.
+         * Whitespace-only runs leave it alone; assigning an unchanged cur_top
+         * would be harmless but the guard keeps the invariant legible. */
+        if (b->text != NULL && b->text[0] != '\0') {
+            const char *at = b->text;
+            while (*at == ' ' || *at == '\t' || *at == '\n' || *at == '\r') ++at;
+            if (*at != '\0') {
+                if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                    fprintf(stderr, "[anchor] text '%.40s' -> %.1f\n",
+                            at, s.cur_top);
+                df.anchor_top = s.cur_top;
+                df.anchor_set = 1;
+            }
+        }
     }
+    /* Trailing deferred columns (the rail with nothing after it but EOF, or a
+     * footer without clear): place before the tree closes. */
+    defer_flush(cr, w, L, &s, th, content_w, doc, &df);
     close_all_boxes(L, &s, th);
     flush_line(L, &s, th);
     /* A float taller than the text beside it still occupies the page: end the float

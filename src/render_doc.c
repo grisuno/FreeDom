@@ -155,6 +155,12 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->float_ml_pct = 0;
     b->float_mr = 0;
     b->float_mr_pct = 0;
+    b->float_oid = -1;
+    b->float_oside = 0;
+    b->float_oml = 0;
+    b->float_oml_pct = 0;
+    b->float_omr = 0;
+    b->float_omr_pct = 0;
     b->box_l = 0;
     b->box_r = 0;
     b->box_w = 0;
@@ -485,6 +491,13 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->float_ml_pct = r->float_ml_pct;
             lb->float_mr = r->float_mr;
             lb->float_mr_pct = r->float_mr_pct;
+            /* Outermost founder likewise: structure, never gated. */
+            lb->float_oid = r->float_oid;
+            lb->float_oside = r->float_oside;
+            lb->float_oml = r->float_oml;
+            lb->float_oml_pct = r->float_oml_pct;
+            lb->float_omr = r->float_omr;
+            lb->float_omr_pct = r->float_omr_pct;
             /* Author box model is presentation (it can shrink content to
              * unreadability), so it is gated by caps.css like the colors above. */
             if (caps.css) {
@@ -562,6 +575,17 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->float_ml_pct = r->float_ml_pct;
             lb->float_mr = r->float_mr;
             lb->float_mr_pct = r->float_mr_pct;
+            lb->float_oid = r->float_oid;
+            lb->float_oside = r->float_oside;
+            lb->float_oml = r->float_oml;
+            lb->float_oml_pct = r->float_oml_pct;
+            lb->float_omr = r->float_omr;
+            lb->float_omr_pct = r->float_omr_pct;
+            /* The OOF-subtree image/video anchor (spec/float.md §7d): gated
+             * by caps.css like every other block_id — without author boxes
+             * there is nothing to anchor to, so the default render is
+             * byte-identical and only the author-CSS render pulls up. */
+            if (caps.css) lb->block_id = r->block_id;
             lb->ua_tag = r->ua_tag;
         }
     }

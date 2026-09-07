@@ -1449,6 +1449,120 @@ static void test_build_float_threading(void **state) {
     hp_document_free(doc);
 }
 
+/* float.md §7d: runs carry the OUTERMOST float founder alongside the nearest.
+ * A run inside a float nested in another float reports the inner element as
+ * float_id (unchanged) plus the outer element as float_oid (group id, side and
+ * founder margins); a single-level float has float_oid == -1, i.e. the nearest
+ * IS the outermost and the painter behaves exactly as before. */
+static void test_build_float_outermost_founder(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='float:left;width:100%'><div style='float:left'><p>deep</p></div></div>"
+        "<div style='float:left'><p>shallow</p></div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *d = find_text(v, "deep");
+    assert_non_null(d);
+    assert_true(d->float_id >= 0);
+    assert_true(d->float_oid >= 0);              /* nested: outer founder visible */
+    assert_int_not_equal(d->float_oid, d->float_id);
+    assert_int_equal(d->float_oside, CSS_FLOAT_LEFT);
+
+    const pv_run *s = find_text(v, "shallow");
+    assert_non_null(s);
+    assert_true(s->float_id >= 0);
+    assert_int_equal(s->float_oid, -1);          /* nearest IS outermost: old path */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* float.md §7d (slashdot rail): an image inside an out-of-flow (absolute)
+ * subtree must carry its nearest box block_id, or the layout layer has no
+ * anchor for it and it falls into flow as a full-width row — pushing floated
+ * stories apart and pinning the pull-up anchor below the rail's container
+ * top. A non-OOF image keeps block_id == -1 (byte-identical by construction:
+ * the fix is gated on the OOF flag). */
+static void test_build_oof_image_carries_block_id(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div style='float:left;width:100%'>"
+        "<div style='float:left'>"
+        "<span style='position:absolute;top:12px;overflow:hidden'>"
+        "<img src='http://example.com/x.png' alt='EU'>"
+        "</span><p>deep</p></div></div>"
+        "<div><img src='http://example.com/y.png' alt='plain'></div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *oof_img = NULL, *plain_img = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r != NULL && r->kind == PV_IMAGE) {
+            if (r->text != NULL && strcmp(r->text, "EU") == 0) oof_img = r;
+            if (r->text != NULL && strcmp(r->text, "plain") == 0) plain_img = r;
+        }
+    }
+    assert_non_null(oof_img);
+    assert_non_null(plain_img);
+    assert_true(oof_img->block_id >= 0);   /* anchored: leaves the flow */
+    assert_int_equal(plain_img->block_id, -1);  /* untouched path */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* float.md §7d (slashdot main column): a margin-only wrapper's reservation
+ * lives on its OWN box def (painter applies it when the box opens — band /
+ * shared context), never on descendant runs: seeding it onto runs too counts
+ * it twice (~540px column instead of ~654). `.outer{margin-right:320px}`
+ * over a flex row must leave the paragraph's box_r at 0. */
+static void test_build_hbox_margin_above_container_merges(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>.outer{margin-right:320px}.row{display:flex}</style></head>"
+        "<body><div class='outer'><div class='row'><p>Wide story text.</p></div></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *p = find_text(v, "Wide story text.");
+    assert_non_null(p);
+    assert_int_equal(p->box_r, 0);   /* single application: the box owns it */
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The `.ua{width:50%}` guard (tanda 8): the container's OWN width never seeds
+ * its items — a flex bar of inline-block links keeps shrink-wrapped items
+ * instead of one 50%-of-the-page block per link. Locks the merge above to
+ * outer levels only. */
+static void test_build_hbox_container_width_never_seeds_items(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<head><style>.ua{width:50%}.ua li{display:inline-block}</style></head>"
+        "<body><ul class='ua'><li><span>Login</span></li></ul></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *p = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strstr(r->text, "Login") != NULL) { p = r; break; }
+    }
+    assert_non_null(p);
+    assert_int_equal(p->box_w, 0);      /* not the bar's 50% */
+    assert_int_equal(p->box_w_pct, 0);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* CSS 2.2 section 9.7: an absolutely (or fixed) positioned element computes `float`
  * to none and is taken out of flow -- it does NOT participate in an ancestor float's
  * column. Regression: slashdot's `.comment-bubble{position:absolute;right:12px}` sits
@@ -3595,6 +3709,10 @@ int main(void) {
         cmocka_unit_test(test_build_anon_inline_block_row_wraps),
         cmocka_unit_test(test_build_flex_wrap_align_row_gap),
         cmocka_unit_test(test_build_float_threading),
+        cmocka_unit_test(test_build_float_outermost_founder),
+        cmocka_unit_test(test_build_oof_image_carries_block_id),
+        cmocka_unit_test(test_build_hbox_margin_above_container_merges),
+        cmocka_unit_test(test_build_hbox_container_width_never_seeds_items),
         cmocka_unit_test(test_build_absolute_inside_float_escapes),
         cmocka_unit_test(test_build_flex_whitespace_not_item),
         cmocka_unit_test(test_build_interblock_whitespace_not_emitted),

@@ -283,6 +283,18 @@ typedef struct pv_run {
     int     float_ml_pct;
     int     float_mr;
     int     float_mr_pct;
+    /* The OUTERMOST float founder (spec/float.md §7d.1): the highest floated
+     * self-or-ancestor block on this run's chain. float_oid is its group id
+     * (-1 = the nearest IS the outermost: single-level float, old path);
+     * float_oside its css_float side; float_oml/oml_pct/omr/omr_pct its own
+     * horizontal margins (same halves, for the outer column's pack).
+     * Structure like float_id. Defaults: -1 / 0 / 0 / 0 / 0 / 0. */
+    int     float_oid;
+    int     float_oside;
+    int     float_oml;
+    int     float_oml_pct;
+    int     float_omr;
+    int     float_omr_pct;
     /* Author box model pre-resolved to px (Hito 23b-3), gated by caps.css. box_l/
      * box_r are the left/right insets (padding + non-auto margin of that side);
      * box_w is the content-width cap (min width/max-width, 0 = none); box_center is
@@ -956,10 +968,15 @@ void pv_set_cont_item(pv_view *v, int cont_item);
 /* Float layout setter for the most recently appended run (spec/float.md): float_side
  * (css_float), float_id (floated-element group id, -1 = none), float_clear (css_clear),
  * plus the float FOUNDER's own horizontal margins (float_ml/ml_pct/mr/mr_pct, signed;
- * spec/float.md §7c.1). No-op on an empty or NULL view; the append helpers default
- * to 0 / -1 / 0 / 0 / 0 / 0 / 0. */
+ * spec/float.md §7c.1), plus the OUTERMOST founder (float_oid/oside/oml/oml_pct/
+ * omr/omr_pct; float_oid -1 = nearest IS outermost; spec/float.md §7d.1). No-op on
+ * an empty or NULL view; the append helpers default to 0 / -1 / 0 / 0 / 0 / 0 / 0
+ * and -1 / 0 / 0 / 0 / 0 / 0. */
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
-                  int float_ml, int float_ml_pct, int float_mr, int float_mr_pct);
+                  int float_ml, int float_ml_pct, int float_mr, int float_mr_pct,
+                  int float_oid, int float_oside,
+                  int float_oml, int float_oml_pct,
+                  int float_omr, int float_omr_pct);
 
 /* Sets the author box model on the most recently appended run (left/right insets,
  * width cap, centered flag, and top/bottom margin overrides in px; box_mt/box_mb

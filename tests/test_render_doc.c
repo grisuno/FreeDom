@@ -650,7 +650,8 @@ static void test_float_carried_by_default(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "col", NULL), PV_OK);
-    pv_set_float(v, CSS_FLOAT_LEFT, 3, CSS_CLEAR_BOTH, 0, 0, 0, 0);
+    pv_set_float(v, CSS_FLOAT_LEFT, 3, CSS_CLEAR_BOTH, 0, 0, 0, 0,
+                 -1, 0, 0, 0, 0, 0);
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "bare", NULL), PV_OK);
 
     for (int pass = 0; pass < 2; ++pass) {
@@ -663,6 +664,8 @@ static void test_float_carried_by_default(void **state) {
         assert_int_equal(p->float_side, CSS_FLOAT_LEFT);
         assert_int_equal(p->float_id, 3);
         assert_int_equal(p->float_clear, CSS_CLEAR_BOTH);
+        assert_int_equal(p->float_oid, -1);   /* nearest IS outermost: old path */
+        assert_int_equal(p->float_oside, 0);
         int saw_bare = 0;
         for (size_t i = 0; i < rd_count(d); ++i) {
             const rd_block *b = rd_at(d, i);

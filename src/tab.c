@@ -261,8 +261,9 @@ static int write_field(int fd, const char *s) {
  *            cont_col_w[PV_GRID_TRACKS],grid_span,
  *            flex_grow,flex_shrink,flex_basis,flex_order,flex_direction,cont_item,
  *            cont_wrap,cont_row_gap,cont_align_items,flex_align_self,
-  *            float_side,float_id,float_clear,
-  *            float_ml,float_ml_pct,float_mr,float_mr_pct,
+ *            float_side,float_id,float_clear,
+ *            float_ml,float_ml_pct,float_mr,float_mr_pct,
+ *            float_oid,float_oside,float_oml,float_oml_pct,float_omr,float_omr_pct,
   *            box_l,box_r,box_w,box_center,box_mt,box_mb,box_w_pct,
  *            block_id,ua_tag,
  *            input_type,form_id,form_method, name, value )*
@@ -318,7 +319,7 @@ static int write_view(int wfd, const pv_view *v) {
         gtw[PV_GRID_TRACKS] = (int32_t)r->grid_span;
         /* Block B: fixed-width scalars after the grid array (flex item, float, author
          * box model, block/node id, form control). */
-        int32_t b[48] = {
+        int32_t b[54] = {
             (int32_t)r->flex_grow, (int32_t)r->flex_shrink, (int32_t)r->flex_basis,
             (int32_t)r->flex_order, (int32_t)r->flex_direction, (int32_t)r->cont_item,
             (int32_t)r->cont_wrap, (int32_t)r->cont_row_gap, (int32_t)r->cont_align_items,
@@ -366,6 +367,14 @@ static int write_view(int wfd, const pv_view *v) {
              * (the holy-grail rail) wraps below instead of beside. */
             (int32_t)r->float_ml, (int32_t)r->float_ml_pct,
             (int32_t)r->float_mr, (int32_t)r->float_mr_pct,
+            /* The OUTERMOST float founder, 2026-09-07 (appended; read_view
+             * mirrors this). See pv_run.float_oid. Without it the painter
+             * cannot see that an inner float lives inside a pulled outer
+             * column, so the rail lays out below the articles instead of
+             * beside them. */
+            (int32_t)r->float_oid, (int32_t)r->float_oside,
+            (int32_t)r->float_oml, (int32_t)r->float_oml_pct,
+            (int32_t)r->float_omr, (int32_t)r->float_omr_pct,
         };
         /* Wire order (unchanged): head, text|href|src|poster, A, grid, B,
          * select_opts|name|value. */
@@ -1625,7 +1634,7 @@ static int read_view(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[48];
+        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[54];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -1646,7 +1655,9 @@ static int read_view(int fd, pv_view **out) {
                 bw = b[15], bcenter = b[16], bmt = b[17], bmb = b[18], bwpct = b[19],
                 blkid = b[20], nodeid = b[21], itype = b[22], fid = b[23], method = b[24],
                 ckd = b[25], fabs_flag = b[34],
-                flml = b[44], flmlpct = b[45], flmr = b[46], flmrpct = b[47];
+                flml = b[44], flmlpct = b[45], flmr = b[46], flmrpct = b[47],
+                floid = b[48], floside = b[49], floml = b[50], flomlpct = b[51],
+                flomr = b[52], flomrpct = b[53];
         char *opts = NULL;
         size_t ol = 0;
         if (read_field(fd, &opts, &ol) != 0) {
@@ -1741,7 +1752,9 @@ static int read_view(int fd, pv_view **out) {
                        (int)fself);
             pv_set_cont_item(v, (int)citem);
             pv_set_float(v, (int)flside, (int)flid, (int)flclear,
-                         (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct);
+                         (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct,
+                         (int)floid, (int)floside,
+                         (int)floml, (int)flomlpct, (int)flomr, (int)flomrpct);
             pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);
             /* Both halves of the box placement travel together, and are combined
              * only at layout (bx_lp_px): setting one without the other would make
@@ -1772,7 +1785,9 @@ static int read_view(int fd, pv_view **out) {
                        (int)fself);
             pv_set_cont_item(v, (int)citem);
             pv_set_float(v, (int)flside, (int)flid, (int)flclear,
-                         (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct);
+                         (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct,
+                         (int)floid, (int)floside,
+                         (int)floml, (int)flomlpct, (int)flomr, (int)flomrpct);
         }
         /* block_id/node_id ride EVERY run kind: an input's own box (position:
          * absolute, opacity:0 -- the checkbox-hack pattern) travelled on the
