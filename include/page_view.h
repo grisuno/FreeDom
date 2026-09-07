@@ -272,6 +272,17 @@ typedef struct pv_run {
     int     float_side;
     int     float_id;
     int     float_clear;
+    /* The FLOAT FOUNDER's own horizontal margins (spec/float.md §7c.1): the
+     * <length-percentage> of the element whose float_side founded this run's
+     * float_id group — px halves signed, pct halves per-mille signed, 0 = none.
+     * Structure like float_id (never the run's own/nearest-hbox insets: those
+     * belong to descendants and must not size the founder's outer slot). The
+     * band packer resolves them with bx_lp_px against the band width. Defaults:
+     * 0/0/0/0. */
+    int     float_ml;
+    int     float_ml_pct;
+    int     float_mr;
+    int     float_mr_pct;
     /* Author box model pre-resolved to px (Hito 23b-3), gated by caps.css. box_l/
      * box_r are the left/right insets (padding + non-auto margin of that side);
      * box_w is the content-width cap (min width/max-width, 0 = none); box_center is
@@ -943,9 +954,12 @@ void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
 void pv_set_cont_item(pv_view *v, int cont_item);
 
 /* Float layout setter for the most recently appended run (spec/float.md): float_side
- * (css_float), float_id (floated-element group id, -1 = none), float_clear (css_clear).
- * No-op on an empty or NULL view; the append helpers default to 0 / -1 / 0. */
-void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear);
+ * (css_float), float_id (floated-element group id, -1 = none), float_clear (css_clear),
+ * plus the float FOUNDER's own horizontal margins (float_ml/ml_pct/mr/mr_pct, signed;
+ * spec/float.md §7c.1). No-op on an empty or NULL view; the append helpers default
+ * to 0 / -1 / 0 / 0 / 0 / 0 / 0. */
+void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
+                  int float_ml, int float_ml_pct, int float_mr, int float_mr_pct);
 
 /* Sets the author box model on the most recently appended run (left/right insets,
  * width cap, centered flag, and top/bottom margin overrides in px; box_mt/box_mb

@@ -1,10 +1,10 @@
 Freedom — demo
 === Freedom layout ===
-content_w=952 total_h=1238.4 nbox=0 nrow=32 npositioned=0
+content_w=1000 total_h=1238.4 nbox=0 nrow=32 npositioned=0
   row[0] top=0.0 h=45.0 x_off=0.0
   row[1] top=66.4 h=23.0 x_off=0.0
   row[2] top=89.4 h=23.0 x_off=0.0
-  row[3] top=128.4 h=34.0 x_off=0.0 w=952.0
+  row[3] top=128.4 h=34.0 x_off=0.0 w=1000.0
   row[4] top=178.4 h=23.0 x_off=0.0
   row[5] top=201.4 h=23.0 x_off=0.0
   row[6] top=240.4 h=23.0 x_off=0.0

@@ -650,7 +650,7 @@ static void test_float_carried_by_default(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "col", NULL), PV_OK);
-    pv_set_float(v, CSS_FLOAT_LEFT, 3, CSS_CLEAR_BOTH);
+    pv_set_float(v, CSS_FLOAT_LEFT, 3, CSS_CLEAR_BOTH, 0, 0, 0, 0);
     assert_int_equal(pv_append(v, PV_TEXT, 0, 1, "bare", NULL), PV_OK);
 
     for (int pass = 0; pass < 2; ++pass) {

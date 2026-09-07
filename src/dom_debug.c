@@ -333,6 +333,11 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
         dd_printf(c, " float=%s(#%d)", (b->float_side == CSS_FLOAT_RIGHT) ? "right" : "left",
                   b->float_id);
     if (b->float_clear) dd_printf(c, " clear=%d", b->float_clear);
+    /* Founder margins (spec/float.md §7c.1): printed only when nonzero, so the
+     * default dump stays byte-identical. Signed: a negative pull-up prints. */
+    if (b->float_ml || b->float_ml_pct || b->float_mr || b->float_mr_pct)
+        dd_printf(c, " fml=%d/%d fmr=%d/%d", b->float_ml, b->float_ml_pct,
+                  b->float_mr, b->float_mr_pct);
 
     if (b->text_align)    dd_printf(c, " align=%s", dd_align_name(b->text_align));
     if (b->font_scale)    dd_printf(c, " fscale=%d", b->font_scale);

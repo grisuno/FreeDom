@@ -159,6 +159,22 @@ fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
                              double avail, double gap, double *out_x,
                              size_t *out_row);
 
+/* Float packing with founder margins (spec/float.md §7c.2): CSS 2.1 §9.5
+ * positions floats by their OUTER (margin) edges. width[i] is the BORDER width;
+ * ml[i]/mr[i] are the floated element's own left/right margins in px (signed, on
+ * the same basis — the caller already resolved any % halves). The packer places
+ * the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows
+ * the slot and a positive one widens it) with the wrap cursor discipline, then
+ * reports the BORDER x (packed outer position + ml). A border may legally end up
+ * left of 0 or past avail when a negative margin pulls it there — that is where
+ * CSS puts it. Zero margins answer exactly fx_float_pack_wrap (locked by test).
+ * Pure, no allocation. n == 0 is a no-op (pointers may be NULL). Errors as
+ * fx_float_pack, plus FX_ERR_NULL_ARG when ml/mr is NULL with n > 0. */
+fx_status fx_float_pack_m(const double *width, const int *side,
+                          const double *ml, const double *mr, size_t n,
+                          double avail, double gap,
+                          double *out_x, size_t *out_row);
+
 /* Minimum room a line box keeps beside a float, in px. A float wider than its
  * container must still leave a usable line rather than a zero/negative one. */
 #define FX_FLOAT_MIN_LINE 1.0

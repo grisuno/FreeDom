@@ -1,5 +1,5 @@
 === Freedom layout ===
-content_w=952 total_h=349.4 nbox=0 nrow=8 npositioned=0
+content_w=1000 total_h=349.4 nbox=0 nrow=8 npositioned=0
   row[0] top=0.0 h=50.0 x_off=0.0
   row[1] top=71.4 h=26.0 x_off=0.0
   row[2] top=113.4 h=26.0 x_off=0.0

@@ -9,7 +9,7 @@ These files have the most connections. Changes here have high blast radius.
 - `tests/test_css.c` (score: 25.10)
 - `src/css.c` (score: 22.60)
 - `src/page_view.c` (score: 17.00)
-- `tests/test_page_view.c` (score: 13.40)
+- `tests/test_page_view.c` (score: 13.60)
 - `tests/test_js_dom.c` (score: 10.80)
 - `tests/test_tab.c` (score: 8.60)
 - `src/tab.c` (score: 7.30)

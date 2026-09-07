@@ -342,6 +342,101 @@ static void test_float_pack_two_right(void **state) {
     assert_true(dbl_eq(x[1], 290.0));   /* 400 - 10 gap - 100 */
 }
 
+/* --- fx_float_pack_m: margin-aware float packing (spec/float.md §7c.2) --------
+ *
+ * CSS 2.1 §9.5 positions floats by their OUTER (margin) edges. A 320px rail with
+ * margin-left:-320px has a ZERO-width outer box, so it still fits on the row
+ * after a 100%-wide float, and its border renders one (signed) margin left of
+ * its packed slot. Packing border widths instead wrapped the rail below the
+ * article (slashdot-cols probe: score 13.41). */
+
+static void test_float_pack_m_holy_grail_pull_up(void **state) {
+    (void)state;
+    /* .main-wrap{width:100%;float:left} + .rail-right{width:320px;float:left;
+     * margin-left:-320px} in a 952 band: ONE row, rail border at 952-320. */
+    double w[2] = { 952.0, 320.0 };
+    int side[2] = { 0, 0 };
+    double ml[2] = { 0.0, -320.0 };
+    double mr[2] = { 0.0, 0.0 };
+    double x[2] = { -1.0, -1.0 };
+    size_t row[2] = { 9, 9 };
+    assert_int_equal(fx_float_pack_m(w, side, ml, mr, 2, 952.0, 0.0, x, row), FX_OK);
+    assert_int_equal(row[0], 0);
+    assert_int_equal(row[1], 0);        /* beside, not below */
+    assert_true(dbl_eq(x[0], 0.0));
+    assert_true(dbl_eq(x[1], 632.0));   /* packed 952, pulled left 320 */
+}
+
+static void test_float_pack_m_zero_margins_match_wrap(void **state) {
+    (void)state;
+    /* Zero founder margins answer exactly what fx_float_pack_wrap answers. */
+    double w[3] = { 300.0, 300.0, 300.0 };
+    int side[3] = { 0, 0, 0 };
+    double ml[3] = { 0.0, 0.0, 0.0 };
+    double mr[3] = { 0.0, 0.0, 0.0 };
+    double x[3], xe[3];
+    size_t row[3], rowe[3];
+    assert_int_equal(fx_float_pack_m(w, side, ml, mr, 3, 700.0, 0.0, x, row), FX_OK);
+    assert_int_equal(fx_float_pack_wrap(w, side, 3, 700.0, 0.0, xe, rowe), FX_OK);
+    for (int i = 0; i < 3; ++i) {
+        assert_true(dbl_eq(x[i], xe[i]));
+        assert_int_equal(row[i], rowe[i]);
+    }
+    assert_true(dbl_eq(x[0], 0.0));
+    assert_true(dbl_eq(x[1], 300.0));
+    assert_int_equal(row[2], 1);        /* third wraps, both spellings agree */
+}
+
+static void test_float_pack_m_positive_margin_widens(void **state) {
+    (void)state;
+    /* A positive right margin widens the outer slot: two 500px floats with
+     * margin-right:100px on the first no longer share a 1000px row. */
+    double w[2] = { 500.0, 500.0 };
+    int side[2] = { 0, 0 };
+    double ml[2] = { 0.0, 0.0 };
+    double mr[2] = { 100.0, 0.0 };
+    double x[2];
+    size_t row[2];
+    assert_int_equal(fx_float_pack_m(w, side, ml, mr, 2, 1000.0, 0.0, x, row), FX_OK);
+    assert_int_equal(row[0], 0);
+    assert_int_equal(row[1], 1);
+    assert_true(dbl_eq(x[1], 0.0));
+}
+
+static void test_float_pack_m_right_float_negative_margin(void **state) {
+    (void)state;
+    /* Right float, margin-right:-50: outer 150 packs at 1000-150, border x is the
+     * packed outer edge plus the (zero) left margin; the border legally overhangs
+     * the band, exactly as CSS 2.1 §9.5 places it. */
+    double w[1] = { 200.0 };
+    int side[1] = { 1 };
+    double ml[1] = { 0.0 };
+    double mr[1] = { -50.0 };
+    double x[1];
+    size_t row[1];
+    assert_int_equal(fx_float_pack_m(w, side, ml, mr, 1, 1000.0, 0.0, x, row), FX_OK);
+    assert_int_equal(row[0], 0);
+    assert_true(dbl_eq(x[0], 850.0));
+}
+
+static void test_float_pack_m_errors(void **state) {
+    (void)state;
+    double w[1] = { 100.0 };
+    int side[1] = { 0 };
+    double ml[1] = { 0.0 };
+    double mr[1] = { 0.0 };
+    double x[1];
+    size_t row[1];
+    assert_int_equal(fx_float_pack_m(NULL, side, ml, mr, 1, 500.0, 0.0, x, row),
+                     FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_pack_m(w, side, NULL, mr, 1, 500.0, 0.0, x, row),
+                     FX_ERR_NULL_ARG);
+    assert_int_equal(fx_float_pack_m(w, side, ml, mr, 1, -1.0, 0.0, x, row),
+                     FX_ERR_RANGE);
+    assert_int_equal(fx_float_pack_m(w, side, ml, mr, 0, 500.0, 0.0, NULL, NULL),
+                     FX_OK);   /* n == 0 is a no-op */
+}
+
 /* --- fx_float_insets: text flows BESIDE a float (v3, spec/float.md §6b.2) ------
  *
  * CSS 2.1 §9.5: a float does not move the following block, it SHORTENS the line
@@ -875,6 +970,11 @@ int main(void) {
         cmocka_unit_test(test_float_pack_wrap_errors),
         cmocka_unit_test(test_float_pack_left_and_right),
         cmocka_unit_test(test_float_pack_two_right),
+        cmocka_unit_test(test_float_pack_m_holy_grail_pull_up),
+        cmocka_unit_test(test_float_pack_m_zero_margins_match_wrap),
+        cmocka_unit_test(test_float_pack_m_positive_margin_widens),
+        cmocka_unit_test(test_float_pack_m_right_float_negative_margin),
+        cmocka_unit_test(test_float_pack_m_errors),
         cmocka_unit_test(test_float_pack_edges),
         cmocka_unit_test(test_justify_name),
         cmocka_unit_test(test_float_insets_left_overlapping_line),

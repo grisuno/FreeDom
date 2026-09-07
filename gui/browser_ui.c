@@ -6222,6 +6222,10 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         int prev_fid = -1, have = 0;
         for (size_t k = start; k < end; ++k) {
             const rd_block *bk = rd_at(doc, k);
+            /* Out-of-flow blocks ride no column (spec/float.md §7c.5): skip
+             * them without touching the grouping state, so flanking same-id
+             * groups merge across an absolute bubble instead of splitting. */
+            if (block_leaves_flow(doc, bk)) continue;
             if (!have || bk->float_id != prev_fid) {
                 if (g >= BT_MAX_CHILDREN) { grp_overflow = 1; break; }
                 gstart[g++] = k;
@@ -6233,6 +6237,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     if (g == 0 || grp_overflow) {  /* too many items: degrade to plain vertical flow */
         for (size_t k = start; k < end; ++k) {
             const rd_block *bk = rd_at(doc, k);
+            if (block_leaves_flow(doc, bk)) continue;
             if (bk->block_break) flush_line(L, s, th);
             s->bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
             flow_text_block(cr, w, L, s, th, bk, ctx_w);
@@ -6265,6 +6270,9 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         double capw = 0.0;
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bb = rd_at(doc, k);
+            /* Out-of-flow blocks size nothing in flow (spec/float.md §7c.5):
+             * a wide abspos badge must not become the column's width. */
+            if (block_leaves_flow(doc, bb)) continue;
             double c = bx_width_cap(bb->box_w, bb->box_w_pct, ctx_w);
             if (c > capw) capw = c;
         }
@@ -6310,11 +6318,29 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
     if (share < 1.0) share = 1.0;
     for (size_t j = 0; j < g; ++j) if (width[j] < 0.0) width[j] = share;
 
+    /* The float FOUNDER's own margins (spec/float.md §7c.1), read from each
+     * item's first block: the packer positions outer (margin) boxes, so a
+     * negative margin narrows the slot (the holy-grail pull-up) and a positive
+     * one widens it (CSS 2.1 §9.5). % halves resolve against the band width —
+     * the same basis every other horizontal % uses. All zero on pages without
+     * float margins, which reduces exactly to the old packing. */
+    double fml[BT_MAX_CHILDREN];
+    double fmr[BT_MAX_CHILDREN];
+    for (size_t j = 0; j < g; ++j) {
+        const rd_block *bf = rd_at(doc, gstart[j]);
+        fml[j] = bx_lp_px(bf->float_ml, bf->float_ml_pct, ctx_w);
+        fmr[j] = bx_lp_px(bf->float_mr, bf->float_mr_pct, ctx_w);
+    }
+
     /* Greedy row wrap (Hito 32): an item that no longer fits opens a new band
-     * row -- consecutive full-width floats (.grid_24) stack instead of cramming. */
-    if (fx_float_pack_wrap(width, side, g, ctx_w, 0.0, outx, outrow) != FX_OK) {
-        for (size_t k = start; k < end; ++k)
+     * row -- consecutive full-width floats (.grid_24) stack instead of cramming.
+     * Margin-aware (spec/float.md §7c.2): outx is the BORDER x, already shifted
+     * by the signed left margin, so the column translation below needs no change. */
+    if (fx_float_pack_m(width, side, fml, fmr, g, ctx_w, 0.0, outx, outrow) != FX_OK) {
+        for (size_t k = start; k < end; ++k) {
+            if (block_leaves_flow(doc, rd_at(doc, k))) continue;
             flow_text_block(cr, w, L, s, th, rd_at(doc, k), ctx_w);
+        }
         return;
     }
 
@@ -6339,6 +6365,11 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         size_t sbx = L->nbox;
         for (size_t k = gstart[j]; k < gstart[j + 1]; ++k) {
             const rd_block *bk = rd_at(doc, k);
+            /* Out-of-flow blocks are placed by the positioner, never in flow
+             * (spec/float.md §7c.5): skip them here as the main loop does, or a
+             * positioned badge inside a float column paints twice (here and in
+             * Stage 2). Mirrors the grouping skip above, same predicate. */
+            if (block_leaves_flow(doc, bk)) continue;
             /* A flex/grid container nested INSIDE this float column (e.g. a data
              * table in slashdot's floated story body) is laid out by the grid/flex
              * engine at the COLUMN width, exactly as the top-level loop does. Without
@@ -6382,8 +6413,43 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
             leave_inline_box(L, &si, bk->block_id);
             reconcile_boxes_below(cr, w, L, &si, th, doc, cw, bk->block_id, k, band_box);
             si.bg_rgb = (!w->force_theme) ? bk->bg_rgb : -1;
-            if (!emit_replaced_row(cr, w, L, &si, th, bk, cw, doc))
-                flow_text_block(cr, w, L, &si, th, bk, cw);
+            /* Column content width (spec/float.md §7c.3): the flat-path rule —
+             * inside an open box the box's inner width (the block's own width
+             * cap and margin:0 auto centring still apply, insets would
+             * double-count the box's), at column top level the block's own
+             * bx_place. With no inner boxes and no author caps this answers
+             * the raw column width, byte-identical to before. */
+            double flow_w = cw;
+            {
+                double base_l = (double)bk->indent * UI_LIST_INDENT;
+                if (si.box_depth > 0) {
+                    double in_l, in_w;
+                    rc_box_context(&si, cw, &in_l, &in_w);
+                    double avail_in = in_w - base_l;
+                    if (avail_in < 1.0) avail_in = 1.0;
+                    bx_hplace hp_in = bx_place(0.0, 0.0,
+                                               bx_width_cap(bk->box_w, bk->box_w_pct,
+                                                            avail_in),
+                                               bk->box_center, avail_in);
+                    si.indent_px = in_l + base_l + hp_in.x_off;
+                    si.bg_w = hp_in.content_w;
+                    flow_w = hp_in.content_w;
+                } else {
+                    double avail_w = cw - base_l;
+                    if (avail_w < 1.0) avail_w = 1.0;
+                    bx_hplace hp = bx_place(bx_lp_px(bk->box_l, bk->box_l_pct, avail_w),
+                                            bx_lp_px(bk->box_r, bk->box_r_pct, avail_w),
+                                            bx_width_cap(bk->box_w, bk->box_w_pct,
+                                                         avail_w),
+                                            bk->box_center, avail_w);
+                    si.indent_px = base_l + hp.x_off;
+                    si.bg_w = hp.content_w;
+                    flow_w = hp.content_w;
+                }
+                if (flow_w < 1.0) flow_w = 1.0;
+            }
+            if (!emit_replaced_row(cr, w, L, &si, th, bk, flow_w, doc))
+                flow_text_block(cr, w, L, &si, th, bk, flow_w);
         }
         close_all_boxes(L, &si, th);
         flush_line(L, &si, th);
@@ -6418,8 +6484,12 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
         fr->top    = base_top;
         fr->bottom = base_top + row_h;
         /* The INNER edge the float steals, in the band context's coordinates: past
-         * its right side for a left float, its left side for a right float. */
-        fr->edge   = (side[0] == 1) ? outx[0] : outx[0] + width[0];
+         * its right side for a left float, its left side for a right float. Those
+         * are OUTER (margin) edges (fx_float_rect contract): outx is the border x,
+         * so the right outer edge adds the right margin and the left outer edge
+         * takes back the left one. Zero margins answer exactly the old formula. */
+        fr->edge   = (side[0] == 1) ? outx[0] - fml[0]
+                                    : outx[0] + width[0] + fmr[0];
         fr->side   = side[0];
         s->float_depth = s->box_depth;
         s->float_avail = ctx_w;
@@ -6564,6 +6634,12 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             size_t j = i + 1;
             while (j < rd_count(doc)) {
                 const rd_block *bj = rd_at(doc, j);
+                /* An out-of-flow block never flows (Stage 2d places it), so it
+                 * must not end the band either: an absolute bubble riding its
+                 * box inside a rail list item cut the band on every item
+                 * (spec/float.md §7c.5). Same predicate the main loop, the
+                 * container branch and the per-item loop below all use. */
+                if (block_leaves_flow(doc, bj)) { ++j; continue; }
                 if (bj->float_id < 0) break;
                 /* `clear` is a property of the ELEMENT, and page_view stamps it on
                  * every run of that element's subtree. A run that continues the
@@ -10410,7 +10486,17 @@ static void export_pdf(browser_window *w) {
 #define PNG_PAGE_W   1000.0
 
 int ui_render_viewport_w(void) { return (int)PNG_PAGE_W; }
-#define PNG_MARGIN   24.0
+/* Headless image padding. 0 by default: the PNG canvas IS the 1000px viewport,
+ * laid out edge to edge exactly like the reference renderer's headless
+ * screenshot (no scrollbar gutter, no window margins in either), so the two
+ * bitmaps share canvas AND content width 1:1 (spec/parity.md §4). A page can
+ * still opt into top whitespace via html_margin_top. Before, 24px here laid
+ * every headless page out 48px narrower than the reference at the same nominal
+ * width, and the absolute gap propagated down every inset chain (slashdot text
+ * 50px too narrow at every level once float columns started honouring boxes).
+ * Only the headless PNG/dump paths read this; the interactive window keeps its
+ * own margins + scrollbar gutter (content_width). */
+#define PNG_MARGIN   0.0
 #define PNG_MAX_H    30000   /* px; 1000 * 30000 * 4B ~= 120 MiB worst case */
 
 /* Writes the window's current laid-out document to a single full-height PNG at

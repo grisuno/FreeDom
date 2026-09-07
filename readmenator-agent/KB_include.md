@@ -32,7 +32,7 @@
   - `bx_edges` (struct, line 46)
   - `bx_box` (struct, line 50)
   - `bx_hplace` (struct, line 63)
-  - `bx_bg_layer` (struct, line 254)
+  - `bx_bg_layer` (struct, line 262)
   - `FREEDOM_BOX_STYLE_H` (macro, line 2)
   - `BX_TAG_NAME_MAX` (macro, line 33)
 
@@ -238,15 +238,15 @@
   - `fx_item` (struct, line 40)
   - `fx_result` (struct, line 48)
   - `fx_area_map` (struct, line 116)
-  - `fx_float_rect` (struct, line 170)
+  - `fx_float_rect` (struct, line 186)
   - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2)
   - `FX_MAX_ITEMS` (macro, line 28)
   - `FX_AREA_MAX_ROWS` (macro, line 108)
   - `FX_AREA_MAX_COLS` (macro, line 109)
   - `FX_AREA_MAX_CELLS` (macro, line 110)
   - `FX_AREA_NAME_MAX` (macro, line 111)
-  - `FX_FLOAT_MIN_LINE` (macro, line 164)
-  - `FX_MAX_COLUMNS` (macro, line 215)
+  - `FX_FLOAT_MIN_LINE` (macro, line 180)
+  - `FX_MAX_COLUMNS` (macro, line 231)
 
 ## include/form.h
 - Layer: data_access
@@ -451,10 +451,10 @@
 - Language: h
 - Symbols:
   - `pv_run` (struct, line 108)
-  - `pv_box_def` (struct, line 365)
-  - `pv_cont_def` (struct, line 650)
-  - `pv_view` (struct, line 686)
-  - `pv_text_ext` (struct, line 847)
+  - `pv_box_def` (struct, line 376)
+  - `pv_cont_def` (struct, line 661)
+  - `pv_view` (struct, line 697)
+  - `pv_text_ext` (struct, line 858)
   - `FREEDOM_PAGE_VIEW_H` (macro, line 2)
   - `PV_LEN_UNSET` (macro, line 43)
   - `PV_LEN_AUTO` (macro, line 44)
@@ -537,7 +537,7 @@
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 231)
+  - `rd_doc` (struct, line 236)
   - `FREEDOM_RENDER_DOC_H` (macro, line 2)
 
 ## include/render_policy.h

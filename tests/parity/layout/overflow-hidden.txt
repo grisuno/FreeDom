@@ -1,6 +1,6 @@
 Overflow hidden test
 === Freedom layout ===
-content_w=952 total_h=826.4 nbox=7 nrow=19 npositioned=0
+content_w=1000 total_h=826.4 nbox=7 nrow=19 npositioned=0
   row[0] top=0.0 h=34.0 x_off=0.0
   row[1] top=79.9 h=23.0 x_off=26.0 w=296.0
   row[2] top=102.9 h=23.0 x_off=26.0 w=296.0

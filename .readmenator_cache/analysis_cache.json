@@ -23,7 +23,7 @@
       ],
       [
         "tests/test_page_view.c",
-        13.4
+        13.600000000000001
       ],
       [
         "tests/test_js_dom.c",

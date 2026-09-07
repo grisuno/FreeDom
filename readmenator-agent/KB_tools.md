@@ -8,8 +8,9 @@
   - `lum` (function, line 152) `def lum(p)`
   - `_word_reader` (function, line 156) `def _word_reader(path)`
   - `decode` (function, line 222) `def decode(path)`
-  - `probe` (function, line 237) `def probe(page, selector, out_html)`
-  - `height_probe` (function, line 256) `def height_probe(page, out_html)`
+  - `_append_probe` (function, line 237) `def _append_probe(src, script)`
+  - `probe` (function, line 248) `def probe(page, selector, out_html)`
+  - `height_probe` (function, line 262) `def height_probe(page, out_html)`
   - `height` (function, line 275) `def height(path)`
   - `main` (function, line 284) `def main(argv)`
   - `lum_at` (function, line 164) `def lum_at(x, y)`

@@ -257,6 +257,228 @@ became unreadable one-word columns. v2 fixes both, keeping the packer pure:
   `css_style.width_pct`/`max_width_pct` (`[[css]]`, per-mille, fail-closed on junk);
   every other `%` length still fails closed.
 
+## 7c. Holy-grail floats: founder margins + column content width (2026-09-07)
+
+> **Why.** The other classic two-column idiom — a `width:100%` float wrapping the
+> article plus a `width:320px` rail pulled beside it with `margin-left:-320px`
+> (Slashdot's `.main-wrap`/`.rail-right`) — rendered as a full-width article with
+> the rail **below** it (`tests/parity/pages/slashdot-cols.html`: Freedom 1465px
+> vs Firefox 2049px, score 13.41; real `slashdot.html` col_mae 0.38). Two summed
+> breaches, both measurable against Firefox geometry (rail at top=8, left=664 in
+> a 984 container; article 664 wide, not 984):
+>
+> 1. **The packer placed border boxes, not margin boxes.** CSS 2.1 §9.5 positions
+>    floats by their OUTER (margin) edges: a 320px rail with `margin-left:-320px`
+>    has a ZERO-width outer box, so it still fits on the row after a 100%-wide
+>    float — and its border renders one margin to the LEFT of its packed slot
+>    (`border_x = packed_outer_x + margin_left`, signed). The band packed
+>    `952 + 320 > 952` and wrapped the rail onto its own row below.
+> 2. **Column text wrapped at the column width, not the content width.** The flat
+>    path flows text at the open box's inner width (`rc_box_context` + the block's
+>    own cap/centring); the float-band column flowed at the raw column width, so
+>    `.main-content{margin-right:320px}` narrowed its box to 632px while its text
+>    still wrapped at 952px.
+
+### 7c.1 Founder margins (`[[page_view]]` → `[[render_doc]]` → `[[tab]]`)
+
+The margins the packer needs are the FLOAT FOUNDER's own (the element whose
+`float_side` founded the `float_id` group) — not the nearest-hbox insets on the
+run (those belong to descendants: `.main-content`'s `margin-right:320px` is
+INTERIOR to `.main-wrap` and must never inflate its outer width), and not the
+group's common box (same reason). `page_view` holds the founder's resolved style
+in hand when it detects the float, so it stamps all four `<length-percentage>`
+halves — `float_ml/float_ml_pct/float_mr/float_mr_pct`, signed ints, per-mille
+pct — onto `pv_cont_info`, `pv_run` (via `pv_set_float`), and `rd_block`
+(structure, carried regardless of `caps.css`, like `float_id`; resolved against
+the band width by the painter with `bx_lp_px`). A run with no floated ancestor
+carries zeros. `write_view`/`read_view` serialize them appended to block B (same
+order both sides, `[[freedom-render-pipeline-ipc]]`); `dom_debug` prints them as
+`fml=`/`fmr=` when nonzero.
+
+### 7c.2 Margin-aware packing (pure, `[[flex_layout]]`)
+
+```c
+fx_status fx_float_pack_m(const double *width, const int *side,
+                          const double *ml, const double *mr, size_t n,
+                          double avail, double gap,
+                          double *out_x, size_t *out_row);
+```
+
+`width[i]` is the BORDER width; `ml[i]`/`mr[i]` the founder margins in px
+(signed, same basis — the caller resolved `%` already). Packs the OUTER widths
+(`width + ml + mr`, clamped `>= 0`, so a negative margin NARROWS the slot and a
+positive one widens it — both per CSS 2.1 §9.5 outer edges) with the v2 cursor
+discipline + greedy row wrap, then reports the BORDER x (`packed_outer_x + ml`).
+Zero margins are exactly `fx_float_pack_wrap` (locked by test). The lone-float
+exclusion edge becomes the outer right (`x + ml + width + mr` for a left float;
+symmetric from the right) — with zero margins identical to before.
+
+### 7c.3 Column content width (`[[browser_ui]]` `layout_float_band`)
+
+Each item's blocks flow at the flat-path width: inside an open box, the box's
+inner width via `rc_box_context` (the block's own width cap and `margin:0 auto`
+centring still apply through `bx_place(0,0,…)` — re-applying insets would
+double-count the box's); at column top level, the block's own `bx_place`
+(insets + cap + centring, exactly as `layout_doc`). `si.indent_px`/`si.bg_w`
+follow the same rule, so rows report the content width and `text-align` centres
+inside the box, not the column. With no inner boxes and no author caps the
+computation answers the raw column width — byte-identical.
+
+### 7c.4 Given-When-Then
+
+- **Given** `.main-wrap{width:100%;float:left}` + `.rail-right{width:320px;
+  float:left;margin-left:-320px}` in a 952 band, **when** packed, **then** one
+  row (`out_row` 0, 0), x = 0 and 632 — the rail's border fills the gap the
+  article's `margin-right:320px` reserves (Firefox: left=664 of 984).
+- **Given** two 500px floats with `margin-right:100px` on the first in a 1000
+  band, **when** packed, **then** two rows — a positive margin WIDENS the slot.
+- **Given** zero founder margins, **when** packed with `_m`, **then** byte-equal
+  to `fx_float_pack_wrap` (same x, same rows).
+- **Given** text inside `.main-content{margin-right:320px}` in a 952 float
+  column, **when** flowed, **then** lines wrap at 632, not 952.
+- **Given** a page with no float margins, **when** rendered, **then**
+  `layout-diff` byte-identical (founder margins are all zero; the inner-width
+  computation answers the column width).
+
+### 7c.5 Out-of-flow blocks do not split bands (2026-09-07)
+
+Stage 2d already skips out-of-flow-subtree blocks from FLOW (they are placed by
+the positioner), but the float-band detector still ended the band on them: an
+empty run riding an absolute box (`float_id = -1`, e.g. a comment bubble's
+rotated square inside a rail list item) cut the rail's band on every list item,
+so each link laid out as its own full-width band below the previous instead of
+one compact rail column. A block that leaves the flow (`block_leaves_flow`,
+same predicate) is now skipped by the band EXTENSION scan, by item GROUPING
+(flanking same-id groups merge across it), and by the per-item flow loop (which
+also closes the double-paint of non-empty OOF content inside float columns —
+the tanda-21 absolute-dropdown class). Bands that share no OOF block behave
+exactly as before.
+
+- **Given** rail list items each carrying an absolute bubble run, **when** the
+  band is detected, **then** the items form ONE band (one rail column), not one
+  band per item.
+- **Given** a page with no OOF block inside a float band, **when** rendered,
+  **then** `layout-diff` byte-identical.
+
+### 7c.5 Out-of-flow blocks do not split bands (2026-09-07)
+
+Stage 2d already skips out-of-flow-subtree blocks from FLOW (they are placed by
+the positioner), but the float-band detector still ended the band on them: an
+empty run riding an absolute box (`float_id = -1`, e.g. a comment bubble's
+rotated square inside a rail list item) cut the rail's band on every list item,
+so each link laid out as its own full-width band below the previous instead of
+one compact rail column. A block that leaves the flow (`block_leaves_flow`,
+same predicate) is now skipped by the band EXTENSION scan, by item GROUPING
+(flanking same-id groups merge across it), and by the per-item flow loop (which
+also closes the double-paint of non-empty OOF content inside float columns —
+the tanda-21 absolute-dropdown class). Bands that share no OOF block behave
+exactly as before.
+
+- **Given** rail list items each carrying an absolute bubble run, **when** the
+  band is detected, **then** the items form ONE band (one rail column), not one
+  band per item.
+- **Given** a page with no OOF block inside a float band, **when** rendered,
+  **then** `layout-diff` byte-identical.
+
+## 7d. PROPOSED (red): nested pull-up floats — the rail below (2026-09-07)
+
+> **Status: SPEC ONLY (red state: `slashdot` 20.70).** Everything in §7c is
+> correct and validated, yet the real rail still renders BELOW the articles
+> (col_mae 0.30 = 12 of 20.7 points; ~1200px of the height gap). This section
+> records the measured root cause and the committed design. Implementing it is
+> the next architectural milestone, not a bugfix: it restructures the float
+> subsystem (recursive columns), so it runs the full SDD cycle on its own.
+
+### 7d.1 Measured root cause (not a hypothesis)
+
+`slashdot.html`'s rail (`aside#slashboxes.rail-right`, `width:320px`,
+`margin-left:-320px`, founder margins cross the pipeline since §7c.1) never
+shares a band with the articles, for TWO summed structural reasons measured in
+`--dump-dom`/`--dump-layout`:
+
+1. **Cross-band:** the articles are inner floats (`article.grid_24`, one group
+   per story) in their own bands; the rail's blocks (`float #67`, `#68`, …)
+   arrive dozens of bands later. Sequential bands can never place the rail at
+   container top: §7c's packer only pulls WITHIN a band, and the probe
+   (`slashdot-cols` 13.41 → 11.03) works precisely because it has NO inner
+   floats (one shared band). A pagination band (`« Newer/Older »`, group #6,
+   full-width outer) rides WITH the rail's band — so whole-band pull-up would
+   teleport the pagination to page top: bands must SPLIT pull-up items
+   (outer≤0) from sequential ones.
+2. **Nested founders:** the rail's content carries TWO founder levels —
+   `#67` blocks stamped with the aside's own `-320` margin (direct content)
+   beside `#68` (poll section, an INNER float, no margins). `page_view`
+   stamps only the NEAREST founder (`got_float` stops at the first), so the
+   GUI cannot see that both live inside the aside's pulled column. Inner
+   bands pack at page width instead of the 320px column.
+
+Consequence for the score: stories now wrap at Firefox-exact widths (§7c.3
+proven to 1–3px on `story-chain`), bodies break line-for-line with the
+reference, yet the page stays +1480px: rail-below (~1200) + pre-existing
+broken nav (~250, "nav tosco" debt) + boundary whitespace (pre-existing).
+
+### 7d.2 Design: outermost-founder columns with pull-up placement
+
+Runs/blocks carry the OUTERMOST float founder alongside the nearest:
+`float_oid` (group id, -1 = nearest IS outermost), `float_oside`,
+`float_oml/oml_pct/omr/omr_pct` (signed halves, for the outer column's pack) —
+appended to IPC block B, same order both sides
+(`[[freedom-render-pipeline-ipc]]`). `page_view`'s ancestor walk already visits
+every ancestor: instead of stopping at the nearest float it keeps the last one
+(identical cost). Blocks with `oid == -1` (or `oid == float_id`) behave
+EXACTLY as today (gate-safe by construction: stories, probes, all 20 examples
+byte-identical).
+
+Layout (`layout_doc` + `layout_float_band`, reused, not forked):
+
+1. **Defer:** bands whose groups carry `oid != id` do not lay out inline;
+   their block ranges collect into a deferred column keyed by `oid` (bounded
+   map, ≤8 live columns; a ninth flushes the oldest — fail-open, content
+   overlaps instead of vanishing, same doctrine as `RC_FLOAT_MAX`).
+2. **Flush:** at the next non-float, non-deferred block (or EOF — footer with
+   `clear:both` is the canonical trigger), each deferred column lays its
+   inner bands with `layout_float_band` at the COLUMN width (320, not page
+   width), stacked vertically inside the column (inner bands keep their own
+   row discipline; inner margins still apply within).
+3. **Pull-up placement:** the column's outer packing uses the OUTER founder's
+   margins (`oml/omr`): outer≤0 takes no room (fits any row, §7c.2 rule). Its
+   vertical anchor is the in-flow top tracked since §7d.3: the column lands at
+   container top beside earlier content instead of below it. `cur_top` becomes
+   `max(cur_top, column_bottom)` — page flow never rewinds.
+4. **Exclusion:** after placing a pulled column, register its rect as a float
+   exclusion (existing `fx_float_rect` machinery), so FOLLOWING content wraps
+   below/around it, and LATER fragments of the same column (same x-range)
+   stack beneath earlier ones via the overlap rule — no new state.
+   Earlier content is untouched (per CSS, later floats never move earlier
+   content — this is what makes the design safe to interleave with the
+   sequential loop).
+
+### 7d.3 The anchor (measured, not invented)
+
+The pull-up needs the containing block's content top. It is tracked, not
+configured: `layout_doc` remembers the bottom of the last non-whitespace,
+in-flow, non-OOF block (nav "Search Slashdot" text is the live instance on
+slashdot; whitespace-only and float bands never move it; `clear` resets it).
+Unset anchor (probe: everything floats) degrades EXACTLY to current behavior
+(same-band pack proceeds). No box registry change is required: the anchor is
+one scalar plus a per-shared-box direct-mapped table (16 slots, first-wins —
+container tops do not move) for nested containers; miss ⇒ old path.
+
+### 7d.4 Given-When-Then (red; implement to green)
+
+- **Given** `slashdot.html`, **when** rendered, **then** the rail paints
+  top-right beside story 1 (rail rows at x≈632 from y≈440, as Firefox:
+  `aside.rail-right top=8 left=672 of 984`), stories keep their exact widths,
+  and the score drops from 20.70 toward ~8 (col_mae 0.30 → <0.10 with no page
+  worse).
+- **Given** `slashdot-cols` (no inner floats, anchor unset), **when**
+  rendered, **then** byte-identical to §7c (11.03): the new path never fires.
+- **Given** a page with no `oid != id` block, **when** rendered, **then**
+  `layout-diff` byte-identical (the deferred map stays empty).
+- **Given** 9 simultaneous pulled columns, **when** rendered, **then** the
+  ninth degrades to sequential flow (bounded map, fail-open, content never
+  lost).
+
 ## 8. Errors
 
 No new status codes. `css`/`page_view`/`render_doc`/`tab` keep their existing tables;

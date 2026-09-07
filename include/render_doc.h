@@ -186,6 +186,11 @@ typedef struct rd_block {
      * group id, -1 = none), float_clear (css_clear). Structure like cont_* (never
      * gated). Defaults: 0 / -1 / 0. */
     int              float_side, float_id, float_clear;
+    /* The float FOUNDER's own horizontal margins (spec/float.md §7c.1): px halves
+     * signed, pct halves per-mille signed, 0 = none. Structure like float_id
+     * (never gated); the band packer resolves them with bx_lp_px against the
+     * band width. Defaults: 0 / 0 / 0 / 0. */
+    int              float_ml, float_ml_pct, float_mr, float_mr_pct;
     /* Author box model (Hito 23b-3); set only with caps.css, else 0 / PV_LEN_UNSET.
      * box_l/box_r: left/right insets px; box_w: content-width cap px (0 = none);
      * box_center: margin: 0 auto; box_mt/box_mb: top/bottom margin override px or

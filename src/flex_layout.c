@@ -505,6 +505,42 @@ fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
     return float_pack_impl(width, side, n, avail, gap, 1, out_x, out_row);
 }
 
+/* Margin-aware float packing (spec/float.md §7c.2). The outer width is what the
+ * cursor discipline sees; the reported x is where the BORDER lands. A fixed
+ * scratch array (no allocation) holds the outer widths: FX_MAX_ITEMS bounds n
+ * (checked below like the shared impl does), so the buffer cannot overflow. */
+fx_status fx_float_pack_m(const double *width, const int *side,
+                          const double *ml, const double *mr, size_t n,
+                          double avail, double gap,
+                          double *out_x, size_t *out_row) {
+    if (n == 0) return FX_OK;
+    if (width == NULL || side == NULL || ml == NULL || mr == NULL ||
+        out_x == NULL || out_row == NULL)
+        return FX_ERR_NULL_ARG;
+    if (avail < 0.0 || gap < 0.0 || n > FX_MAX_ITEMS) return FX_ERR_RANGE;
+    double outer[FX_MAX_ITEMS];
+    for (size_t i = 0; i < n; ++i) {
+        /* Signed arithmetic, THEN clamped: a negative margin narrows the slot
+         * (the holy-grail pull-up), a positive one widens it. An outer width
+         * below zero (margins more negative than the border is wide) reads as
+         * zero room taken — fail-open geometry, never an error. */
+        double o = width[i] + ml[i] + mr[i];
+        outer[i] = (o > 0.0) ? o : 0.0;
+    }
+    double packed[FX_MAX_ITEMS];
+    size_t row[FX_MAX_ITEMS];
+    fx_status st = float_pack_impl(outer, side, n, avail, gap, 1, packed, row);
+    if (st != FX_OK) return st;
+    for (size_t i = 0; i < n; ++i) {
+        /* The margin box sits at the packed position; the border sits one (signed)
+         * left margin inside it. Deliberately NOT clamped to >= 0: a negative
+         * margin legally pulls the border off-band, which is where CSS puts it. */
+        out_x[i] = packed[i] + ml[i];
+        out_row[i] = row[i];
+    }
+    return FX_OK;
+}
+
 void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) {
     if (row == NULL || col == NULL) return;
     if (ncols == 0) {

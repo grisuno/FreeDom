@@ -151,6 +151,10 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->float_side = 0;
     b->float_id = -1;
     b->float_clear = 0;
+    b->float_ml = 0;
+    b->float_ml_pct = 0;
+    b->float_mr = 0;
+    b->float_mr_pct = 0;
     b->box_l = 0;
     b->box_r = 0;
     b->box_w = 0;
@@ -476,6 +480,11 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->float_side = r->float_side;
             lb->float_id = r->float_id;
             lb->float_clear = r->float_clear;
+            /* Founder margins likewise: structure, never gated. */
+            lb->float_ml = r->float_ml;
+            lb->float_ml_pct = r->float_ml_pct;
+            lb->float_mr = r->float_mr;
+            lb->float_mr_pct = r->float_mr_pct;
             /* Author box model is presentation (it can shrink content to
              * unreadability), so it is gated by caps.css like the colors above. */
             if (caps.css) {
@@ -549,6 +558,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
             lb->float_side = r->float_side;
             lb->float_id = r->float_id;
             lb->float_clear = r->float_clear;
+            lb->float_ml = r->float_ml;
+            lb->float_ml_pct = r->float_ml_pct;
+            lb->float_mr = r->float_mr;
+            lb->float_mr_pct = r->float_mr_pct;
             lb->ua_tag = r->ua_tag;
         }
     }

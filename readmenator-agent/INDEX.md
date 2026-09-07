@@ -92,7 +92,7 @@
 | `run_freedom.sh` | Thin wrapper. Launches a nested weston (for boxes without a Wayland session), th | root | 0 |
 | `src/anti_fp.c` | - | src | 23 |
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. See spec/block_flow.md. | src | 4 |
-| `src/box_style.c` | - | src | 38 |
+| `src/box_style.c` | - | src | 39 |
 | `src/box_tree.c` | - | src | 19 |
 | `src/browser.c` | - | src | 37 |
 | `src/compositor.c` | - | src | 5 |
@@ -149,7 +149,7 @@
 | `tests/itest_secure_fetch.c` | - | tests | 2 |
 | `tests/test_anti_fp.c` | - | tests | 15 |
 | `tests/test_block_flow.c` | - | tests | 8 |
-| `tests/test_box_style.c` | - | tests | 39 |
+| `tests/test_box_style.c` | - | tests | 40 |
 | `tests/test_box_tree.c` | - | tests | 54 |
 | `tests/test_browser.c` | - | tests | 15 |
 | `tests/test_compositor.c` | - | tests | 21 |
@@ -162,7 +162,7 @@
 | `tests/test_dom.c` | - | tests | 37 |
 | `tests/test_dom_debug.c` | - | tests | 11 |
 | `tests/test_download.c` | - | tests | 21 |
-| `tests/test_flex_layout.c` | - | tests | 56 |
+| `tests/test_flex_layout.c` | - | tests | 61 |
 | `tests/test_form.c` | - | tests | 20 |
 | `tests/test_frame_clock.c` | - | tests | 4 |
 | `tests/test_freebug.c` | - | tests | 13 |
@@ -182,7 +182,7 @@
 | `tests/test_media_decoder.c` | - | tests | 6 |
 | `tests/test_net_realm.c` | - | tests | 13 |
 | `tests/test_os_sandbox.c` | - | tests | 19 |
-| `tests/test_page_view.c` | - | tests | 134 |
+| `tests/test_page_view.c` | - | tests | 136 |
 | `tests/test_pdf_export.c` | - | tests | 30 |
 | `tests/test_perf_trace.c` | - | tests | 12 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 11 |
@@ -202,7 +202,7 @@
 | `tests/test_url.c` | - | tests | 45 |
 | `tests/test_webcaps.c` | - | tests | 11 |
 | `tests/test_zoom.c` | - | tests | 11 |
-| `tools/ffgeom.py` | - | tools | 11 |
+| `tools/ffgeom.py` | - | tools | 12 |
 | `tools/gen_psl.c` | - | tools | 8 |
 | `tools/mutate.py` | - | tools | 6 |
 | `tools/pngdiff.c` | - | tools | 13 |

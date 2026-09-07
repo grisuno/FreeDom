@@ -75,6 +75,23 @@ For each page in the corpus:
 5. Print table sorted by divergence, total composite score
 6. Diff against `tests/parity/baseline.tsv` if present
 
+### Viewport truth (2026-09-07): the headless canvas IS the viewport
+
+Both engines render "a 1000px window", but Freedom's headless PNG laid out at
+`1000 - 2×24` (image padding) while Firefox headless lays out at the full 1000
+(no scrollbar gutter, no window margins in screenshot mode — measured: a 974
+container for 26px of body padding). The 48px systematic gap propagated
+ABSOLUTELY down every inset chain (slashdot story text 50px too narrow at every
+level), exactly the class of harness-lies-about-the-document taught by the
+wikipedia-JS lesson (§7.4): never debug the engine against a reference that
+renders a different document — or a different WIDTH. `PNG_MARGIN` is now 0:
+headless lays out edge to edge at viewport 1000, 1:1 with the reference canvas
+(the interactive window keeps its own margins + scrollbar gutter). This already
+matches `@media`'s viewport (`ui_render_viewport_w` = 1000), so the change also
+removes an internal inconsistency. Re-freezing `layout/` (20 pages, structure
+verified identical modulo reflow), `baseline.tsv`, and `wpt/expected.tsv` (28
+WPT deltas verified float-free) is part of the change, not an afterthought.
+
 ### `make parity-update`
 
 Depends on `parity`. Copies `build/parity/current.tsv` → `tests/parity/baseline.tsv`.

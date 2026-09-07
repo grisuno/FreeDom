@@ -1,14 +1,14 @@
 Freedom float demo
 === Freedom layout ===
-content_w=952 total_h=206.0 nbox=1 nrow=10 npositioned=0
-  row[0] top=0.0 h=23.0 x_off=40.0 w=200.0
-  row[1] top=23.0 h=23.0 x_off=40.0 w=200.0
-  row[2] top=0.0 h=23.0 x_off=752.0 w=160.0
-  row[3] top=23.0 h=23.0 x_off=752.0 w=160.0
-  row[4] top=46.0 h=34.0 x_off=40.0 w=520.0
-  row[5] top=80.0 h=23.0 x_off=40.0 w=520.0
-  row[6] top=103.0 h=23.0 x_off=40.0 w=520.0
-  row[7] top=126.0 h=34.0 x_off=40.0 w=520.0
-  row[8] top=160.0 h=23.0 x_off=40.0 w=520.0
-  row[9] top=183.0 h=23.0 x_off=40.0 w=872.0
-  box[0] bid=0 x=40.0 top=0.0 w=872.0 h=206.0
+content_w=1000 total_h=160.0 nbox=1 nrow=10 npositioned=0
+  row[0] top=0.0 h=23.0 x_off=64.0 w=176.0
+  row[1] top=23.0 h=23.0 x_off=64.0 w=176.0
+  row[2] top=0.0 h=23.0 x_off=800.0 w=160.0
+  row[3] top=23.0 h=23.0 x_off=800.0 w=160.0
+  row[4] top=0.0 h=34.0 x_off=240.0 w=520.0
+  row[5] top=34.0 h=23.0 x_off=240.0 w=520.0
+  row[6] top=57.0 h=23.0 x_off=240.0 w=520.0
+  row[7] top=80.0 h=34.0 x_off=240.0 w=520.0
+  row[8] top=114.0 h=23.0 x_off=240.0 w=520.0
+  row[9] top=137.0 h=23.0 x_off=40.0 w=920.0
+  box[0] bid=0 x=40.0 top=0.0 w=920.0 h=160.0
