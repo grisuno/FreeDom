@@ -23,7 +23,7 @@
 | `fuzz/fuzz_text_shape.c` | - | fuzz | 2 |
 | `fuzz/fuzz_tls_impersonate.c` | - | fuzz | 0 |
 | `fuzz/fuzz_url.c` | - | fuzz | 2 |
-| `gui/browser_ui.c` | - | gui | 411 |
+| `gui/browser_ui.c` | - | gui | 420 |
 | `gui/browser_ui_internal.h` | ifndef FREEDOM_BROWSER_UI_INTERNAL_H define FREEDOM_BROWSER_UI_INTERNAL_H  ifdef | gui | 6 |
 | `gui/bui_theme.c` | - | gui | 6 |
 | `gui/freedom_view.c` | - | gui | 2 |
@@ -126,7 +126,7 @@
 | `src/media_decoder.c` | - | src | 12 |
 | `src/net_realm.c` | - | src | 10 |
 | `src/os_sandbox.c` | - | src | 28 |
-| `src/page_view.c` | - | src | 170 |
+| `src/page_view.c` | - | src | 172 |
 | `src/pdf_export.c` | - | src | 4 |
 | `src/perf_trace.c` | - | src | 12 |
 | `src/prefetch.c` | - | src | 17 |
@@ -182,7 +182,7 @@
 | `tests/test_media_decoder.c` | - | tests | 6 |
 | `tests/test_net_realm.c` | - | tests | 13 |
 | `tests/test_os_sandbox.c` | - | tests | 19 |
-| `tests/test_page_view.c` | - | tests | 136 |
+| `tests/test_page_view.c` | - | tests | 140 |
 | `tests/test_pdf_export.c` | - | tests | 30 |
 | `tests/test_perf_trace.c` | - | tests | 12 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 11 |

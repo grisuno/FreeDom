@@ -3,7 +3,7 @@
     "god_nodes": [
       [
         "gui/browser_ui.c",
-        41.1
+        46.0
       ],
       [
         "src/local_store.c",
@@ -18,37 +18,226 @@
         22.6
       ],
       [
+        "include/util.h",
+        20.6
+      ],
+      [
         "src/page_view.c",
-        17.0
+        19.2
+      ],
+      [
+        "include/css.h",
+        14.9
       ],
       [
         "tests/test_page_view.c",
-        13.600000000000001
+        14.0
       ],
       [
-        "tests/test_js_dom.c",
-        10.8
+        "include/page_view.h",
+        13.2
       ],
       [
-        "tests/test_tab.c",
-        8.6
-      ],
-      [
-        "src/tab.c",
-        7.300000000000001
-      ],
-      [
-        "src/dom.c",
-        6.300000000000001
+        "include/ui.h",
+        12.5
       ]
     ],
-    "communities": [],
-    "surprising_connections": [],
+    "communities": [
+      {
+        "id": 0,
+        "label": "gui",
+        "file_ids": [
+          "gui/browser_ui_internal.h",
+          "gui/browser_ui.c",
+          "gui/bui_theme.c"
+        ],
+        "cohesion": 0.6666666666666666,
+        "size": 3
+      },
+      {
+        "id": 1,
+        "label": "gui",
+        "file_ids": [
+          "gui/freedom_view.c",
+          "src/ui_layout.c",
+          "src/freedom.c",
+          "gui/ui_render.c",
+          "tests/test_ui.c",
+          "include/ui.h"
+        ],
+        "cohesion": 0.8333333333333334,
+        "size": 6
+      },
+      {
+        "id": 2,
+        "label": "include",
+        "file_ids": [
+          "include/anti_fp.h",
+          "include/secure_fetch.h"
+        ],
+        "cohesion": 1.0,
+        "size": 2
+      },
+      {
+        "id": 3,
+        "label": "include",
+        "file_ids": [
+          "include/box_style.h",
+          "include/box_tree.h",
+          "include/flex_layout.h"
+        ],
+        "cohesion": 0.5,
+        "size": 3
+      },
+      {
+        "id": 4,
+        "label": "include",
+        "file_ids": [
+          "include/css.h",
+          "include/css_color.h",
+          "include/css_select.h",
+          "include/css_chain.h"
+        ],
+        "cohesion": 0.6666666666666666,
+        "size": 4
+      },
+      {
+        "id": 5,
+        "label": "include",
+        "file_ids": [
+          "include/local_store.h",
+          "include/prefs.h",
+          "include/profile.h",
+          "include/disk_store.h"
+        ],
+        "cohesion": 1.0,
+        "size": 4
+      },
+      {
+        "id": 6,
+        "label": "include",
+        "file_ids": [
+          "include/url.h",
+          "include/html_parse.h",
+          "include/form.h",
+          "include/dom.h",
+          "include/tab.h",
+          "include/js_dom.h",
+          "include/page_view.h",
+          "include/freebug.h"
+        ],
+        "cohesion": 0.6923076923076923,
+        "size": 8
+      },
+      {
+        "id": 7,
+        "label": "include",
+        "file_ids": [
+          "include/dom_debug.h",
+          "include/render_doc.h"
+        ],
+        "cohesion": 0.3333333333333333,
+        "size": 2
+      },
+      {
+        "id": 8,
+        "label": "include",
+        "file_ids": [
+          "include/js_env.h",
+          "include/js_sandbox.h"
+        ],
+        "cohesion": 0.5,
+        "size": 2
+      },
+      {
+        "id": 9,
+        "label": "include",
+        "file_ids": [
+          "include/webcaps.h",
+          "include/render_policy.h",
+          "include/js_policy.h"
+        ],
+        "cohesion": 0.6666666666666666,
+        "size": 3
+      },
+      {
+        "id": 10,
+        "label": "include",
+        "file_ids": [
+          "src/request_policy.c",
+          "include/psl_data.h"
+        ],
+        "cohesion": 1.0,
+        "size": 2
+      },
+      {
+        "id": 11,
+        "label": "include",
+        "file_ids": [
+          "include/svg_paint.h",
+          "include/svg_render.h"
+        ],
+        "cohesion": 1.0,
+        "size": 2
+      },
+      {
+        "id": 12,
+        "label": "src",
+        "file_ids": [
+          "src/hostblock.c",
+          "src/html_parse.c",
+          "src/dom.c",
+          "src/tab.c",
+          "src/renderer.c",
+          "src/page_view.c",
+          "src/render_doc.c",
+          "include/util.h",
+          "src/media_decoder.c",
+          "src/browser.c",
+          "src/disk_store.c"
+        ],
+        "cohesion": 1.0,
+        "size": 11
+      }
+    ],
+    "surprising_connections": [
+      [
+        "include/form.h",
+        "include/js_policy.h",
+        8,
+        "{9, 6, 7}"
+      ],
+      [
+        "include/js_env.h",
+        "include/js_policy.h",
+        8,
+        "{6, 7, 8, 9}"
+      ],
+      [
+        "include/form.h",
+        "include/webcaps.h",
+        7,
+        "{9, 6, 7}"
+      ],
+      [
+        "include/js_env.h",
+        "include/webcaps.h",
+        7,
+        "{6, 7, 8, 9}"
+      ],
+      [
+        "include/js_policy.h",
+        "include/js_sandbox.h",
+        7,
+        "{8, 9, 6, 7}"
+      ]
+    ],
     "suggested_questions": [
-      "What does browser_ui.c depend on, and what depends on it? (0 connections)",
+      "What does browser_ui.c depend on, and what depends on it? (2 connections)",
       "What does local_store.c depend on, and what depends on it? (0 connections)",
       "What does test_css.c depend on, and what depends on it? (0 connections)",
-      "What is the overall architecture of this codebase?"
+      "How are the 3 files in 'gui' related to each other?",
+      "Why are form.h and js_policy.h connected through 8 hops across 3 communities?"
     ]
   },
   "layers": {

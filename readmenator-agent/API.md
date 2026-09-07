@@ -100,1289 +100,1639 @@
 ### now_ms `static uint64_t now_ms(void)`
 - Defined: `gui/browser_ui.c:145`
 - Doc: Largest text slice measured/drawn at once (one word, or one clipped label). * Words longer than this are still placed, j
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### gutter `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
  * zoom. The PDF ...`
 - Defined: `gui/browser_ui.c:551`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### apply_zoom `static void apply_zoom(browser_window *w)`
 - Defined: `gui/browser_ui.c:572`
 - Doc: Applies a new zoom level: rebuild the theme and repaint. The page is laid out fresh from w->theme on every paint, so no 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### buffer_release `static void buffer_release(void *data, struct wl_buffer *wl_buffer)`
 - Defined: `gui/browser_ui.c:582`
 - Doc: Applies a new zoom level: rebuild the theme and repaint. The page is laid out fresh from w->theme on every paint, so no 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### destroy_buffer `static void destroy_buffer(browser_window *w)`
 - Defined: `gui/browser_ui.c:588`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ensure_buffer `static int ensure_buffer(browser_window *w)`
 - Defined: `gui/browser_ui.c:594`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### read_file `static char *read_file(const char *path, size_t *out_len)`
 - Defined: `gui/browser_ui.c:624`
 - Doc: w->buffer = wl_shm_pool_create_buffer(pool, 0, w->width, w->height, stride, WL_SHM_FORMAT_ARGB8888); wl_shm_pool_destroy
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### build_file_origin `static int build_file_origin(const char *path_or_url, char *out, size_t outsz)`
 - Defined: `gui/browser_ui.c:664`
 - Doc: Builds a "file:///<canonical absolute path>" origin from a local path (or passes through a file:// URL's path). realpath
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### load_host_file `static void load_host_file(hb_set *s, const char *dir, const char *name, hb_list list)`
 - Defined: `gui/browser_ui.c:674`
 - Doc: Loads one /etc/hosts-format .conf file (if present and readable) into the given * list. A missing file is not an error: 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### build_host_filter `static hb_set *build_host_filter(void)`
 - Defined: `gui/browser_ui.c:691`
 - Doc: Builds the host filter from the user's .conf lists. Privacy by Default: block.conf (a /etc/hosts-format blocklist) block
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### build_js_filter `static hb_set *build_js_filter(void)`
 - Defined: `gui/browser_ui.c:737`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### build_impersonate_filter `static hb_set *build_impersonate_filter(void)`
 - Defined: `gui/browser_ui.c:741`
 - Doc: impersonate.conf: the THIRD opt-in signal. A host here (and in allow.conf and js.conf) * gets the Chrome/Firefox-consist
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freedom_write_dir `static int freedom_write_dir(char *out, size_t cap)`
 - Defined: `gui/browser_ui.c:746`
 - Doc: The writable Freedom config dir: $FREEDOM_HOSTS_DIR if set, else ~/.config/freedom (created if absent). Returns 0 on suc
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### add_current_host_to_list `static void add_current_host_to_list(browser_window *w, int sel)`
 - Defined: `gui/browser_ui.c:771`
 - Doc: Appends the current page's host to one of the user's .conf lists (block/allow/js), then reloads the in-memory filter so 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### load_favorites `static void load_favorites(browser_window *w)`
 - Defined: `gui/browser_ui.c:839`
 - Doc: Concatenates the allow.conf bodies along the same search path build_host_filter uses into one string: the omnibox "favor
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### omni_refresh `static void omni_refresh(browser_window *w)`
 - Defined: `gui/browser_ui.c:885`
 - Doc: Recomputes the omnibox autocomplete suggestions for the current URL-bar text. Shown only while the URL bar is focused an
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### profile_sync `static void profile_sync(browser_window *w)`
 - Defined: `gui/browser_ui.c:916`
 - Doc: Mirrors the session's persistable choices into w->prefs and seals them to disk. Called after any preference change; with
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### remember_visit `static void remember_visit(browser_window *w, const char *url)`
 - Defined: `gui/browser_ui.c:933`
 - Doc: Records a committed navigation in the persistent history (dedup + cap live in prefs). Opt-out via the "Remember history"
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### bookmark_toggle_current `static void bookmark_toggle_current(browser_window *w)`
 - Defined: `gui/browser_ui.c:941`
 - Doc: Records a committed navigation in the persistent history (dedup + cap live in prefs). Opt-out via the "Remember history"
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### proxy_addr_from_env `static int proxy_addr_from_env(const char *envname, const char *deflt,
                           ...`
 - Defined: `gui/browser_ui.c:965`
 - Doc: Copies a proxy "host:port" into dst: if the env value is unset/empty the default is used; the literal "1" also means "us
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### init_net_config `static void init_net_config(browser_window *w)`
 - Defined: `gui/browser_ui.c:979`
 - Doc: Builds the Tor/I2P routing config from the environment (Privacy by Default: opt-in, everything off unless explicitly ena
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### is_https_url `static int is_https_url(const char *s)`
 - Defined: `gui/browser_ui.c:988`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### is_http_url `static int is_http_url(const char *s)`
 - Defined: `gui/browser_ui.c:992`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### host_from_url `static int host_from_url(const char *url, char *out, size_t outsz)`
 - Defined: `gui/browser_ui.c:1004`
 - Doc: A plain-http URL whose realm self-authenticates (an i2p eepsite today): it is * fetched over the network (through the ov
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### toggle_fullscreen `static void toggle_fullscreen(browser_window *w)`
 - Defined: `gui/browser_ui.c:1034`
 - Doc: Fullscreen toggle: ALT+ENTER switches the window between windowed and * compositor-managed fullscreen. ESC exits fullscr
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### input_is_interactive `static int input_is_interactive(int input_type)`
 - Defined: `gui/browser_ui.c:1049`
 - Doc: An editable control gets a live text field; submit/button/hidden do not. Checkboxes, radios, and selects are interactive
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### input_is_editable `static int input_is_editable(int input_type)`
 - Defined: `gui/browser_ui.c:1054`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### free_inputs `static void free_inputs(browser_window *w)`
 - Defined: `gui/browser_ui.c:1061`
 - Doc: are not text-editable -- they are tracked via rebuild_inputs so clicks * dispatch to them, but they have no tf_field. st
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### free_images `static void free_images(browser_window *w)`
 - Defined: `gui/browser_ui.c:1069`
 - Doc: static int input_is_editable(int input_type) { return input_type == PV_IN_TEXT || input_type == PV_IN_PASSWORD || input_
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### find_bg_image `static const ui_bg_image *find_bg_image(const browser_window *w, const char *url)`
 - Defined: `gui/browser_ui.c:1108`
 - Doc: The decoded background-image for url (a box's bg_image_url), or NULL when it has none (unset / blocked / failed -- the c
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### layout `* shared by layout (row height) and paint (blit), so they cannot drift apart. */
 static int image...`
 - Defined: `gui/browser_ui.c:1120`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rebuild_inputs `static void rebuild_inputs(browser_window *w)`
 - Defined: `gui/browser_ui.c:1169`
 - Doc: Builds the live editable state for the current doc: one entry per editable * control, seeded with its declared value. Al
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### find_input_state `static ui_input_state *find_input_state(browser_window *w, const rd_block *blk)`
 - Defined: `gui/browser_ui.c:1194`
 - Doc: if (w->inputs == NULL) return; /* fail closed: no editable fields, page still shows size_t k = 0; for (size_t i = 0; i <
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### clear_doc `static void clear_doc(browser_window *w)`
 - Defined: `gui/browser_ui.c:1202`
 - Doc: Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls a
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### set_cache `static void set_cache(browser_window *w, char *html, size_t len, const char *top)`
 - Defined: `gui/browser_ui.c:1212`
 - Doc: Releases the structured render of the previous page (text mode resumes). The * hovered link and the live form controls a
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### surface_from_pixels `static cairo_surface_t *surface_from_pixels(const tab_image *img)`
 - Defined: `gui/browser_ui.c:1223`
 - Doc: Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row by row because Cairo may use a wider str
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fetch_follow_navigable `static sf_status fetch_follow_navigable(const char *url, sf_config *cfg,
                         ...`
 - Defined: `gui/browser_ui.c:1290`
 - Doc: Fetches url (following redirects) under cfg's policy, applying two navigability fallbacks in order of decreasing securit
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### GET `* a GET (Zero Trust). cfg->policy is restored before returning. */
 static sf_status fetch_post_na...`
 - Defined: `gui/browser_ui.c:1326`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### gui_subresource_fetch `static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
                ...`
 - Defined: `gui/browser_ui.c:1368`
 - Doc: tab_fetch_fn: the trusted parent's policy-checked subresource fetch for page XHR/fetch. The worker has no network; it pr
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### prepare_fetch `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
                     ...`
 - Defined: `gui/browser_ui.c:1495`
 - Doc: Builds cfg for url and applies the pre-fetch gates. Returns nonzero when the fetch may proceed (cfg and pr->allowlisted 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fetch_job_free `static void fetch_job_free(fetch_job *j)`
 - Defined: `gui/browser_ui.c:1595`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### stream_progress_cb `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)`
 - Defined: `gui/browser_ui.c:1616`
 - Doc: Called by the fetch thread (~1/sec) with the downloaded body so far. Copies the data to the window's thread-safe streami
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fetch_thread `static void *fetch_thread(void *arg)`
 - Defined: `gui/browser_ui.c:1640`
 - Doc: Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer back to the event loop. Pure with re
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fetch_launch `static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg,
                ...`
 - Defined: `gui/browser_ui.c:1688`
 - Doc: Spawns a detached worker to fetch url under cfg (already gated by prepare_fetch). The caller has bumped w->net_gen for t
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### load_images `static void load_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)`
 - Defined: `gui/browser_ui.c:1808`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### load_bg_images `static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, void *fetch_ctx)`
 - Defined: `gui/browser_ui.c:1893`
 - Doc: Fetches and decodes every box's resolved CSS background-image into w->bg_images (2026-07-16, mirrors load_images -- see 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### page_js_host_allowlisted `static int page_js_host_allowlisted(const browser_window *w)`
 - Defined: `gui/browser_ui.c:1948`
 - Doc: Resolves the JS policy for the current page's host (Secure by Default: off unless the global mode is ON or the host is o
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### compute_page_js `static int compute_page_js(const browser_window *w)`
 - Defined: `gui/browser_ui.c:1954`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### seed_session_cookies `static void seed_session_cookies(tab *t, int trusted, const char *url)`
 - Defined: `gui/browser_ui.c:1968`
 - Doc: Seeds document.cookie for the next load from the ephemeral network jar (trusted host * only); reset to none otherwise so
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### foldback_session_cookies `static void foldback_session_cookies(const char *url, const char *jar)`
 - Defined: `gui/browser_ui.c:1981`
 - Doc: Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network jar * one pair at a time, so JS-set sess
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### drop_repl_worker `static void drop_repl_worker(browser_window *w)`
 - Defined: `gui/browser_ui.c:2000`
 - Doc: Drops the kept-alive REPL worker and clears the (active-tab) console transcript. Used when the active page changes WITHO
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### schedule_js_tick `static void schedule_js_tick(browser_window *w, int next_ms)`
 - Defined: `gui/browser_ui.c:2014`
 - Doc: Schedules the next JS timer tick from the worker's reported smallest pending delay (tab_page.next_timer_ms; < 0 = nothin
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### render_current_ex `static void render_current_ex(browser_window *w, int allow_js_nav)`
 - Defined: `gui/browser_ui.c:2023`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### render_current `static void render_current(browser_window *w)`
 - Defined: `gui/browser_ui.c:2196`
 - Doc: Real async timers: a fresh load resets the per-page tick budget and schedules * the first OP_TICK from the worker's repo
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### show_busy `static void show_busy(browser_window *w)`
 - Defined: `gui/browser_ui.c:2203`
 - Doc: Marks a request in flight and paints a frame so the spinner appears at once. The fetch now runs on a worker thread, so t
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### show_fetch_error `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
                   ...`
 - Defined: `gui/browser_ui.c:2212`
 - Doc: Replaces the page with the standard "Failed to load" diagnostic for status ss on url. allowlisted tailors the hint (alre
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### arrives `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
  * and local ...`
 - Defined: `gui/browser_ui.c:2263`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### strcmp `&& strcmp(auth_host_buf, w->auth_host) != 0)`
 - Defined: `gui/browser_ui.c:2331`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### tab_save `static void tab_save(browser_window *w)`
 - Defined: `gui/browser_ui.c:2392`
 - Doc: Parks the active tab's live state into its slot (a shallow move: the slot and the live fields briefly alias the same all
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### tab_restore `static void tab_restore(browser_window *w)`
 - Defined: `gui/browser_ui.c:2409`
 - Doc: c->doc = w->doc; c->caps = w->caps; c->scroll = w->scroll; c->content_total_h = w->content_total_h; c->inputs = w->input
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### free_live_page `static void free_live_page(browser_window *w)`
 - Defined: `gui/browser_ui.c:2426`
 - Doc: w->doc = c->doc; w->caps = c->caps; w->scroll = c->scroll; w->content_total_h = c->content_total_h; w->inputs = c->input
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### tab_ctx_release `static void tab_ctx_release(tab_ctx *c)`
 - Defined: `gui/browser_ui.c:2435`
 - Doc: w->hover_href = c->hover_href; w->hover_cursor = c->hover_cursor; } /* Frees the LIVE page's owned state (used when clos
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### tab_switch `static void tab_switch(browser_window *w, int idx)`
 - Defined: `gui/browser_ui.c:2459`
 - Doc: if (c->bg_images[i].surface != NULL) cairo_surface_destroy(c->bg_images[i].surface); free(c->bg_images[i].url); } free(c
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### tab_new `static void tab_new(browser_window *w, const char *url)`
 - Defined: `gui/browser_ui.c:2478`
 - Doc: w->net_gen++; w->loading = 0; drop_repl_worker(w); /* active page changes without a render; rebind on next eval tab_save
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### uitab_close `static void uitab_close(browser_window *w, int idx)`
 - Defined: `gui/browser_ui.c:2511`
 - Doc: w->images = NULL; w->image_count = 0; w->bg_images = NULL; w->bg_image_count = 0; w->cur_html = NULL; w->cur_html_len = 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### newtab_x `static double newtab_x(const browser_window *w)`
 - Defined: `gui/browser_ui.c:2553`
 - Doc: X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge.
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### tab_title `static const char *tab_title(const browser_window *w, int i)`
 - Defined: `gui/browser_ui.c:2560`
 - Doc: X of the "new tab" (+) button: right after the last tab, clamped to the reserved * slot at the right edge. static double
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### tabbar_top `static double tabbar_top(const browser_window *w)`
 - Defined: `gui/browser_ui.c:2576`
 - Doc: Top of the tab strip: directly under the client-side titlebar (or at the surface * top under server-side decorations).
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### toolbar_top `static double toolbar_top(const browser_window *w)`
 - Defined: `gui/browser_ui.c:2582`
 - Doc: Top of the toolbar: under the tab strip, which is always reserved. The whole * content area derives from this, so adding
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### content_geometry `static void content_geometry(const browser_window *w, double *top, double *height)`
 - Defined: `gui/browser_ui.c:2589`
 - Doc: The content area rectangle below the toolbar, in surface coordinates. The single source of truth for both painting and c
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### content_width `static double content_width(const browser_window *w)`
 - Defined: `gui/browser_ui.c:2615`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### html_center_offset `static double html_center_offset(const browser_window *w)`
 - Defined: `gui/browser_ui.c:2625`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### scrollbar_metrics `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
          ...`
 - Defined: `gui/browser_ui.c:2640`
 - Doc: Geometry of the vertical scrollbar in surface coordinates, plus the current thumb position. Returns 0 (and leaves output
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### scrollbar_drag_to `static void scrollbar_drag_to(browser_window *w)`
 - Defined: `gui/browser_ui.c:2668`
 - Doc: Maps the current pointer Y (less the grab offset) to a scroll offset while the * thumb is being dragged, then repaints. 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_scrollbar `static void draw_scrollbar(cairo_t *cr, const browser_window *w)`
 - Defined: `gui/browser_ui.c:2685`
 - Doc: Paints the scrollbar track and thumb. The thumb highlights while hovered or * dragged, the same affordance the toolbar b
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### window_button_rects `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
 - Defined: `gui/browser_ui.c:2721`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### toolbar_rects `static void toolbar_rects(const browser_window *w,
                           double *back_x, doub...`
 - Defined: `gui/browser_ui.c:2731`
 - Doc: The reload button sits as the third left chrome button (after back/forward), at a * fixed x; callers that need it derive
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### toolbar_button_at `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)`
 - Defined: `gui/browser_ui.c:2747`
 - Doc: Which toolbar button (if any) is at (px, py). Shared by the hover highlight and * the cursor shape so they cannot drift 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### hot_actionable `static int hot_actionable(const browser_window *w, ui_hot hot)`
 - Defined: `gui/browser_ui.c:2763`
 - Doc: A hovered button is "actionable" (gets the hand cursor) when clicking it would * do something: Go/menu always, Back/Forw
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### menu_panel_rect `static void menu_panel_rect(const browser_window *w, double *x, double *y,
                       ...`
 - Defined: `gui/browser_ui.c:2774`
 - Doc: The options-menu panel rectangle (below the gear button), and its per-item row * height. The single source of truth for 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ua_box_rect `static void ua_box_rect(const browser_window *w, double *x, double *y,
                         do...`
 - Defined: `gui/browser_ui.c:2790`
 - Doc: The editable User-Agent box rectangle inside the options panel. The single * source of truth for drawing and hit-testing
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_text `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
 - Defined: `gui/browser_ui.c:2799`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_float_bottom `static double rc_float_bottom(const rc_state *s)`
 - Defined: `gui/browser_ui.c:3138`
 - Doc: Width left for the line after both insets, in the CURRENT box context. rc_float_fit_line uses it to decide whether the l
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_float_clear `static void rc_float_clear(rc_state *s)`
 - Defined: `gui/browser_ui.c:3147`
 - Doc: Ends the float context: drops every exclusion and moves cur_top below the tallest one. This is what puts a `clear:both` 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_float_refresh `static void rc_float_refresh(rc_state *s, double line_h)`
 - Defined: `gui/browser_ui.c:3160`
 - Doc: Recomputes the open line's float insets for its own cur_top, discarding exclusions the flow has already passed. Called o
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_float_fit_line `static void rc_float_fit_line(rc_state *s, double line_h)`
 - Defined: `gui/browser_ui.c:3206`
 - Doc: CSS 2.1 9.5: "if there is not enough horizontal room for the line box beside the float, it is shifted downward until eit
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### line_limit `static double line_limit(const rc_state *s, double content_w)`
 - Defined: `gui/browser_ui.c:3225`
 - Doc: The right edge available to the open line: the block's content width minus what a float steals from the right at this li
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_free `static void rc_free(rc_layout *L)`
 - Defined: `gui/browser_ui.c:3229`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_add_box `static rc_box *rc_add_box(rc_layout *L)`
 - Defined: `gui/browser_ui.c:3238`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_add_frag `static rc_frag *rc_add_frag(rc_layout *L)`
 - Defined: `gui/browser_ui.c:3250`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_add_row `static rc_row *rc_add_row(rc_layout *L)`
 - Defined: `gui/browser_ui.c:3265`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### family_face `static const char *family_face(int family)`
 - Defined: `gui/browser_ui.c:3278`
 - Doc: Maps an author font-family bucket (css_font_family) to a Cairo toy-font family. * The engine matches no exact families, 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### content_font `static void content_font(cairo_t *cr, double size, int bold, int italic, int family)`
 - Defined: `gui/browser_ui.c:3295`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### set_rgb_alpha `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)`
 - Defined: `gui/browser_ui.c:3309`
 - Doc: Sets the source color, applying an author opacity (0..100) as an alpha when set * (-1 = fully opaque). Used for author t
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### utf8_clen `static size_t utf8_clen(const char *s, size_t n)`
 - Defined: `gui/browser_ui.c:3318`
 - Doc: Bytes in the UTF-8 cluster starting at s[0] (1 for a stray/continuation byte), * clamped to n.
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_slice `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)`
 - Defined: `gui/browser_ui.c:3358`
 - Doc: Draws a text slice at (x, baseline) in the current content font/source. Shapes with HarfBuzz when available; otherwise t
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### frag_styled `static int frag_styled(const rc_frag *f)`
 - Defined: `gui/browser_ui.c:3371`
 - Doc: True if a fragment needs the per-cluster path (text-transform other than none/unset, or a non-zero letter-spacing). Othe
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### styled_advance `static double styled_advance(cairo_t *cr, const rc_frag *f)`
 - Defined: `gui/browser_ui.c:3378`
 - Doc: Advance (px) of a fragment's text under its text-transform + letter-spacing. The current Cairo font must already be sele
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### styled_draw `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)`
 - Defined: `gui/browser_ui.c:3394`
 - Doc: Draws a fragment's text starting at (x, baseline) under its text-transform + * letter-spacing. The current Cairo font/so
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### block_style `static void block_style(const ui_theme *th, const rd_block *b,
                         double *si...`
 - Defined: `gui/browser_ui.c:3410`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### block_margins `static void block_margins(const ui_theme *th, const rd_block *b,
                           double...`
 - Defined: `gui/browser_ui.c:3438`
 - Doc: cb_w is the containing block's content width: a PERCENTAGE vertical margin * resolves against it, not against any height
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### add `* about to add (top/h passed in). A box that survived a line wrap simply ends at the
  * wrap -- m...`
 - Defined: `gui/browser_ui.c:3468`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### run `* continuation run (block_id < 0 with no block break) deliberately skips reconcile
  * to stay on ...`
 - Defined: `gui/browser_ui.c:3503`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### flush_line `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
 - Defined: `gui/browser_ui.c:3527`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
+
+### open_line_height `static double open_line_height(const rc_state *s, const ui_theme *th)`
+- Defined: `gui/browser_ui.c:3586`
+- Doc: Height the currently open line WILL have when it flushes (same formula flush_line uses): an out-of-flow static position 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### open_line `static void open_line(rc_layout *L, rc_state *s)`
-- Defined: `gui/browser_ui.c:3580`
+- Defined: `gui/browser_ui.c:3598`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### flow_emit_frag `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
                  ...`
-- Defined: `gui/browser_ui.c:3629`
+- Defined: `gui/browser_ui.c:3647`
 - Doc: Emits one fragment at the current pen position, advancing it. Shared by the * whole-word path and the word-break split p
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### flow_text `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                ...`
-- Defined: `gui/browser_ui.c:3696`
+- Defined: `gui/browser_ui.c:3714`
 - Doc: owning box (for the hover-cursor lookup), -1 if none.  word-break/overflow-wrap (s->break_words): a single word wider th
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### replaced_inline_size `static int replaced_inline_size(const browser_window *w, const rd_block *b,
                      ...`
-- Defined: `gui/browser_ui.c:3948`
+- Defined: `gui/browser_ui.c:3966`
 - Doc: Intrinsic size of an inline-level replaced block, in px, or 0 when the block is not one this engine can size without lay
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### replaced_is_inline_level `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)`
-- Defined: `gui/browser_ui.c:3978`
+- Defined: `gui/browser_ui.c:3996`
 - Doc: True when a replaced block is INLINE-LEVEL content of the line already being built, rather than a block of its own.  The
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### place_inline_replaced `static int place_inline_replaced(rc_layout *L, rc_state *s, const ui_theme *th,
                  ...`
-- Defined: `gui/browser_ui.c:3991`
+- Defined: `gui/browser_ui.c:4009`
 - Doc: Places an inline-level replaced element inside the open line as an atomic inline: it advances the pen like a word, and r
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### css_replaced_box `static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
                ...`
-- Defined: `gui/browser_ui.c:4046`
+- Defined: `gui/browser_ui.c:4064`
 - Doc: The box an unavailable replaced element gets from its own CSS: a definite width plus an aspect-ratio (CSS Sizing 4 secti
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### emit_replaced_row `static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-- Defined: `gui/browser_ui.c:4054`
+- Defined: `gui/browser_ui.c:4072`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### flow_text_block `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                  ...`
-- Defined: `gui/browser_ui.c:4157`
+- Defined: `gui/browser_ui.c:4175`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### item_root_box_in `static int item_root_box_in(const rd_doc *doc, size_t b0, size_t b1, int cbox)`
-- Defined: `gui/browser_ui.c:4269`
+- Defined: `gui/browser_ui.c:4287`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### item_root_box `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)`
-- Defined: `gui/browser_ui.c:4306`
+- Defined: `gui/browser_ui.c:4324`
 - Doc: Root box of a flex/grid item, bounded by the container box page_view stamped on the item's runs (pv_run.cont_box_id). Th
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### css_align_to_bt `static int css_align_to_bt(int align_kw)`
-- Defined: `gui/browser_ui.c:4315`
+- Defined: `gui/browser_ui.c:4333`
 - Doc: Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-*
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_edge_px `static double box_edge_px(int wpx)`
-- Defined: `gui/browser_ui.c:4325`
+- Defined: `gui/browser_ui.c:4343`
 - Doc: Maps a css_align_kw (align-items/align-self) to the box_tree cross-axis alignment it drives. BASELINE/AUTO/UNSET/space-*
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_box_copy_decoration `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)`
-- Defined: `gui/browser_ui.c:4345`
+- Defined: `gui/browser_ui.c:4363`
 - Doc: Copies a box def's paint-time decoration (borders, radius, shadow, outline, background, gradient, background-image param
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_is_strict_descendant `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)`
-- Defined: `gui/browser_ui.c:4424`
+- Defined: `gui/browser_ui.c:4442`
 - Doc: True iff box `id` is a STRICT descendant of `anc` in the box tree (or anc < 0, * which means "no container box", where a
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### item_sides_at_level `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
                   ...`
-- Defined: `gui/browser_ui.c:4446`
+- Defined: `gui/browser_ui.c:4464`
 - Doc: item_sides for one item of container `cid`. A NESTED container item takes the child container's OWN box, not item_root_b
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### container_box_of `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)`
-- Defined: `gui/browser_ui.c:4475`
+- Defined: `gui/browser_ui.c:4493`
 - Doc: The innermost box ENCLOSING a flex/grid container's items: the parent shared by the items' root boxes. page_view stamps 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### table `* synthesised table (no descriptors to disagree) keeps the stamp. */
         if (cd != NULL && !c...`
-- Defined: `gui/browser_ui.c:4497`
+- Defined: `gui/browser_ui.c:4515`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### row `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
 static d...`
-- Defined: `gui/browser_ui.c:4557`
+- Defined: `gui/browser_ui.c:4575`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### way `* intrinsic box either way (it does not wrap below its own size). */
 static double measure_item_w...`
-- Defined: `gui/browser_ui.c:4598`
+- Defined: `gui/browser_ui.c:4616`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### measure_item_content_w `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                       ...`
-- Defined: `gui/browser_ui.c:4633`
+- Defined: `gui/browser_ui.c:4651`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### item_declared_basis `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                       ...`
-- Defined: `gui/browser_ui.c:4665`
+- Defined: `gui/browser_ui.c:4683`
 - Doc: The flex base size a DEFINITE width gives an item, or 0 when it has none.  CSS Flexbox 1 section 7.2.3: with `flex-basis
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### nested_cont_basis `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                            ...`
-- Defined: `gui/browser_ui.c:4679`
+- Defined: `gui/browser_ui.c:4697`
 - Doc: Max-content width of a NESTED container acting as one item: the sum of its own items' bases plus its gaps. Measuring its
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### flex_item_basis `static double flex_item_basis(cairo_t *cr, const browser_window *w,
                              ...`
-- Defined: `gui/browser_ui.c:4711`
+- Defined: `gui/browser_ui.c:4729`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### flex_item_min_main `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                           ...`
-- Defined: `gui/browser_ui.c:4742`
+- Defined: `gui/browser_ui.c:4760`
 - Doc: Automatic minimum size of one flex item (CSS Flexbox 4.5), in the same border-box+margin units flex_item_basis returns -
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### item_at_level `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-- Defined: `gui/browser_ui.c:4775`
+- Defined: `gui/browser_ui.c:4793`
 - Doc: Item index of run `bk` at container level `cid`: the run's own cont_item when it sits directly in cid, otherwise the par
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### child_cont_at_level `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-- Defined: `gui/browser_ui.c:4790`
+- Defined: `gui/browser_ui.c:4808`
 - Doc: The container on `bk`'s ancestor chain that is a DIRECT child of cid, or -1 when the run sits directly in cid. That chil
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### root_cont_of `static int root_cont_of(const rd_doc *doc, int cid)`
-- Defined: `gui/browser_ui.c:4805`
+- Defined: `gui/browser_ui.c:4823`
 - Doc: Root of a run's container chain: the outermost container that encloses it. That is the container the main layout loop gr
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### block_is_oof `static int block_is_oof(const rd_doc *doc, const rd_block *bk)`
-- Defined: `gui/browser_ui.c:4842`
+- Defined: `gui/browser_ui.c:4860`
 - Doc: True iff the block lives inside an out-of-flow (absolute/fixed) subtree: Stage 2 positions it separately, so the in-flow
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### layout_container `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-- Defined: `gui/browser_ui.c:4858`
+- Defined: `gui/browser_ui.c:4876`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ITEMS `* between ITEMS (not between the lines inside one item). column-reverse
      * reverses the visua...`
-- Defined: `gui/browser_ui.c:4968`
+- Defined: `gui/browser_ui.c:4987`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### slot `* layout slot (item 0 → rightmost, last item → leftmost). */
     if (use_flex && cdv.direction ==...`
-- Defined: `gui/browser_ui.c:5060`
+- Defined: `gui/browser_ui.c:5079`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### path `*
          * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
         ...`
-- Defined: `gui/browser_ui.c:5178`
+- Defined: `gui/browser_ui.c:5197`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_line_visible `static int box_line_visible(int style)`
-- Defined: `gui/browser_ui.c:5510`
+- Defined: `gui/browser_ui.c:5529`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### close_top_box `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)`
-- Defined: `gui/browser_ui.c:5517`
+- Defined: `gui/browser_ui.c:5536`
 - Doc: Closes the open block box: flushes the current line, reserves the box's bottom * padding+border, and finalizes the recor
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### rc_box_context `static void rc_box_context(const rc_state *s, double content_w,
                            double...`
-- Defined: `gui/browser_ui.c:5654`
+- Defined: `gui/browser_ui.c:5673`
 - Doc: Content rect (left, width) the current run/box is laid out in: the innermost open * box's, or the page content box when 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_margin_top `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)`
-- Defined: `gui/browser_ui.c:5680`
+- Defined: `gui/browser_ui.c:5699`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_margin_bottom `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)`
-- Defined: `gui/browser_ui.c:5687`
+- Defined: `gui/browser_ui.c:5706`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### children `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...`
-- Defined: `gui/browser_ui.c:5698`
+- Defined: `gui/browser_ui.c:5717`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### column `*
  * Returns the height of the tallest column (0 when there is nothing to fragment). */
 static do...`
-- Defined: `gui/browser_ui.c:5905`
+- Defined: `gui/browser_ui.c:5924`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_path_has `static int box_path_has(const rd_doc *doc, int block_id, int want)`
-- Defined: `gui/browser_ui.c:6000`
+- Defined: `gui/browser_ui.c:6019`
 - Doc: Reconciles the open-box stack so it equals block b's box path (root..b->block_id), derived from the box-def parent_id ch
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_shrink_width `static double box_shrink_width(cairo_t *cr, const browser_window *w,
                             ...`
-- Defined: `gui/browser_ui.c:6015`
+- Defined: `gui/browser_ui.c:6034`
 - Doc: Max-content width (px) of the box `box_id` opening at run `start`: the widest line produced by the maximal run of blocks
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### reconcile_boxes_below `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                          ...`
-- Defined: `gui/browser_ui.c:6023`
+- Defined: `gui/browser_ui.c:6042`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### treatment `* block treatment (shrink-wrapped and placed by text-align), which is what a
          * standalon...`
-- Defined: `gui/browser_ui.c:6069`
+- Defined: `gui/browser_ui.c:6088`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### reconcile_boxes `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
                             rc_...`
-- Defined: `gui/browser_ui.c:6096`
+- Defined: `gui/browser_ui.c:6115`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_path_of `static int box_path_of(const rd_doc *doc, int block_id, int *out)`
-- Defined: `gui/browser_ui.c:6111`
+- Defined: `gui/browser_ui.c:6130`
 - Doc: Box path root..block_id via the box-def parent_id chain (root first), written into * out (bounded by RC_BOX_STACK_MAX). 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### band_common_box `static int band_common_box(const rd_doc *doc, size_t start, size_t end)`
-- Defined: `gui/browser_ui.c:6127`
+- Defined: `gui/browser_ui.c:6146`
 - Doc: The innermost box that is an ancestor (or self) of EVERY block in [start, end), via the longest common prefix of their b
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### block_in_table_caption `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)`
-- Defined: `gui/browser_ui.c:6191`
+- Defined: `gui/browser_ui.c:6210`
 - Doc: True when a block sits inside a `display: table-caption` box. The walk goes up the box tree because the caption's text r
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
+
+### defer_key_block `static int defer_key_block(const rd_block *bk)`
+- Defined: `gui/browser_ui.c:6269`
+- Doc: The defer key of one block: its outermost founder id, else its own id (a single-level float is its own column). Callers 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
+
+### defer_append `static int defer_append(rc_defer *d, int key, int side,
+                        int ml, int mlpct...`
+- Defined: `gui/browser_ui.c:6391`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
+
+### defer_flush `static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
+                     ...`
+- Defined: `gui/browser_ui.c:6426`
+- Doc: Places every deferred column: each lays its inner bands (reused, not forked) at the column's border width, stacked in do
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### layout_float_band `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...`
-- Defined: `gui/browser_ui.c:6202`
+- Defined: `gui/browser_ui.c:6646`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### thumbnail `* is what made a wikipedia thumbnail (a 250px image and its caption, no
      * declared width) sp...`
-- Defined: `gui/browser_ui.c:6285`
+- Defined: `gui/browser_ui.c:6728`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### layout_doc `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...`
-- Defined: `gui/browser_ui.c:6501`
+- Defined: `gui/browser_ui.c:6983`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### position_doc `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...`
-- Defined: `gui/browser_ui.c:6786`
+- Defined: `gui/browser_ui.c:7353`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### input_box_width `static double input_box_width(double content_w)`
-- Defined: `gui/browser_ui.c:6944`
+- Defined: `gui/browser_ui.c:7511`
 - Doc: make the painter repaint the box on TOP of its rows — covering everything past the first block with the box background. 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### select_box_width `static double select_box_width(double content_w)`
-- Defined: `gui/browser_ui.c:6947`
+- Defined: `gui/browser_ui.c:7514`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### button_box_width `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...`
-- Defined: `gui/browser_ui.c:6953`
+- Defined: `gui/browser_ui.c:7520`
 - Doc: } L->npositioned = keep; } /* Width of a painted text-input box: the preferred width clamped to the content. static doub
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### v_read `static int v_read(int fd, void *buf, size_t n)`
-- Defined: `gui/browser_ui.c:7533`
+- Defined: `gui/browser_ui.c:8100`
 - Doc: EINTR/EAGAIN-safe pipe read — loops until all bytes arrive or hard error. With O_NONBLOCK, a partial read triggers EAGAI
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### dies `* child dies (exec failed, device busy, daemon absent) is detected on the
  * next PCM write (EPIP...`
-- Defined: `gui/browser_ui.c:7561`
+- Defined: `gui/browser_ui.c:8128`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### audio_spawn `static void audio_spawn(browser_window *w, int rate, int channels)`
-- Defined: `gui/browser_ui.c:7569`
+- Defined: `gui/browser_ui.c:8136`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### audio_mark_dead `static void audio_mark_dead(browser_window *w)`
-- Defined: `gui/browser_ui.c:7624`
+- Defined: `gui/browser_ui.c:8191`
 - Doc: Reaps a dead sink child and advances the rotation so the next spawn tries * the next player. Called when a PCM write hit
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### audio_write `static void audio_write(browser_window *w, const uint8_t *data, size_t len)`
-- Defined: `gui/browser_ui.c:7641`
+- Defined: `gui/browser_ui.c:8208`
 - Doc: Best-effort PCM write: whatever does not fit in the pipe is dropped (with PTS pacing the producer runs at ~real time, so
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### audio_stop `static void audio_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:7655`
+- Defined: `gui/browser_ui.c:8222`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### video_stop `static void video_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:7675`
+- Defined: `gui/browser_ui.c:8242`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### video_fetch `static sf_status video_fetch(const char *url, browser_window *w,
                               sf...`
-- Defined: `gui/browser_ui.c:7854`
+- Defined: `gui/browser_ui.c:8421`
 - Doc: Fetches a single resource (m3u8 or TS segment) under the full policy gates: impersonation, routing, auth, navigability f
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### video_play `static int video_play(browser_window *w, const char *m3u8_url)`
-- Defined: `gui/browser_ui.c:7871`
+- Defined: `gui/browser_ui.c:8438`
 - Doc: Starts video playback from an m3u8 playlist URL. Fetches the playlist, parses it, handles multi-variant master playlists
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### video_stop `* each segment loop so a video_stop() in the main thread (which sets it to 0
  * then calls pthrea...`
-- Defined: `gui/browser_ui.c:7973`
+- Defined: `gui/browser_ui.c:8540`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_video_row `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                 ...`
-- Defined: `gui/browser_ui.c:8026`
+- Defined: `gui/browser_ui.c:8593`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### row_line_slack `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)`
-- Defined: `gui/browser_ui.c:8139`
+- Defined: `gui/browser_ui.c:8706`
 - Doc: Free space left on a row's LINE BOX after its last fragment, or a negative/zero value when the line is full. The line bo
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### row_align_offset `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)`
-- Defined: `gui/browser_ui.c:8151`
+- Defined: `gui/browser_ui.c:8718`
 - Doc: Horizontal shift a row's text gets from author text-align (center/right): the slack between the available width and the 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### upstream `* upstream (see spec/css.md). */
 static void box_path4(cairo_t *cr, double x, double y, double w,...`
-- Defined: `gui/browser_ui.c:8179`
+- Defined: `gui/browser_ui.c:8746`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_path `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)`
-- Defined: `gui/browser_ui.c:8207`
+- Defined: `gui/browser_ui.c:8774`
 - Doc: One radius for all four corners: the shape every non-border-radius caller * (shadow blur, backdrop clip) still wants.
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### text `* fill and gradient text (2026-07-19). */
 static cairo_pattern_t *bui_linear_grad(double x, doubl...`
-- Defined: `gui/browser_ui.c:8224`
+- Defined: `gui/browser_ui.c:8791`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### bui_grad_color_at `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                    ...`
-- Defined: `gui/browser_ui.c:8249`
+- Defined: `gui/browser_ui.c:8816`
 - Doc: Interpolated gradient color at fraction t (0..1) of the stop run. Stops sit at explicit 0-1000 positions or evenly space
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### spaced `* or evenly spaced (bui_grad_color_at). */
 static void bui_paint_conic(cairo_t *cr, double x, dou...`
-- Defined: `gui/browser_ui.c:8280`
+- Defined: `gui/browser_ui.c:8847`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_bg_layer `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
                ...`
-- Defined: `gui/browser_ui.c:8312`
+- Defined: `gui/browser_ui.c:8879`
 - Doc: Paints one background-image layer into the box rect (x,y,w,h) with `radius_c` corners. The geometry -- used image size a
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_box_decoration `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
            ...`
-- Defined: `gui/browser_ui.c:8355`
+- Defined: `gui/browser_ui.c:8922`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8518`
+- Defined: `gui/browser_ui.c:9085`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8521`
+- Defined: `gui/browser_ui.c:9088`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8560`
+- Defined: `gui/browser_ui.c:9127`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8563`
+- Defined: `gui/browser_ui.c:9130`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### set_rgb `set_rgb(cr, (ui_rgb)`
-- Defined: `gui/browser_ui.c:8597`
+- Defined: `gui/browser_ui.c:9164`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8620`
+- Defined: `gui/browser_ui.c:9187`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8623`
+- Defined: `gui/browser_ui.c:9190`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_deco_line `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
                        ...`
-- Defined: `gui/browser_ui.c:8681`
+- Defined: `gui/browser_ui.c:9248`
 - Doc: Paints one text-decoration line at a given y. Shared by underline, strikethrough and overline so the wavy/double/dashed/
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8715`
+- Defined: `gui/browser_ui.c:9282`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cairo_set_dash `cairo_set_dash(cr, (double[])`
-- Defined: `gui/browser_ui.c:8717`
+- Defined: `gui/browser_ui.c:9284`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_svg_at `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
                          doub...`
-- Defined: `gui/browser_ui.c:8737`
+- Defined: `gui/browser_ui.c:9304`
 - Doc: Draws one SVG block into an arbitrary rect. Shared by the row painter and the inline-fragment painter so an <svg> looks 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### replaced_current_color `static int replaced_current_color(const browser_window *w, const rd_block *blk)`
-- Defined: `gui/browser_ui.c:8757`
+- Defined: `gui/browser_ui.c:9324`
 - Doc: Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text colour,
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_inline_replaced `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
                                ...`
-- Defined: `gui/browser_ui.c:8766`
+- Defined: `gui/browser_ui.c:9333`
 - Doc: Resolves currentColor for a replaced element: the run's own author colour when it has one, else the theme's text colour,
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_content_row `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...`
-- Defined: `gui/browser_ui.c:8785`
+- Defined: `gui/browser_ui.c:9352`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ov_box_clips `static int ov_box_clips(const pv_box_def *d)`
-- Defined: `gui/browser_ui.c:8974`
+- Defined: `gui/browser_ui.c:9541`
 - Doc: Returns nonzero if a box clips content on either axis (single predicate with * the layout path's close_top_box, which de
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ov_collect_chain `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)`
-- Defined: `gui/browser_ui.c:8981`
+- Defined: `gui/browser_ui.c:9548`
 - Doc: Walks the ancestor chain of block_id and collects overflow:hidden box IDs * into out[] (outermost first). Returns count,
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ov_box_bounds `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)`
-- Defined: `gui/browser_ui.c:9002`
+- Defined: `gui/browser_ui.c:9569`
 - Doc: Fills *out (x/top/w/h only) with the UNION of every rc_box fragment carrying block_id bid, returning 1 if any exists. A 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ov_content_rect `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...`
-- Defined: `gui/browser_ui.c:9026`
+- Defined: `gui/browser_ui.c:9593`
 - Doc: Computes the padding-box content rect (in page coords: y, x, w, h) for a box. * Used as the clip region for overflow:hid
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fragment `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
  * blk->block_id alo...`
-- Defined: `gui/browser_ui.c:9046`
+- Defined: `gui/browser_ui.c:9613`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_forms_stacking_context `static int box_forms_stacking_context(const pv_box_def *def)`
-- Defined: `gui/browser_ui.c:9101`
+- Defined: `gui/browser_ui.c:9668`
 - Doc: Does this box need its own offscreen compositing group? Single source of truth: the compositor's cx_forms_stacking_conte
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### bui_skew_tan `static double bui_skew_tan(int deg)`
-- Defined: `gui/browser_ui.c:9144`
+- Defined: `gui/browser_ui.c:9711`
 - Doc: transform (M1.2 translate; M1.2b scale/rotate; M1.2c skew + origin): builds the box's full 2D affine transform -- transl
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_transform_matrix `static void box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
              ...`
-- Defined: `gui/browser_ui.c:9150`
+- Defined: `gui/browser_ui.c:9717`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### bui_blend_operator `static cairo_operator_t bui_blend_operator(int mix_blend)`
-- Defined: `gui/browser_ui.c:9269`
+- Defined: `gui/browser_ui.c:9836`
 - Doc: Maps CSS mix-blend-mode to the Cairo compositing operator used when a box's offscreen group is blended back over its bac
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### bui_paint_backdrop_blur `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
                          ...`
-- Defined: `gui/browser_ui.c:9407`
+- Defined: `gui/browser_ui.c:9974`
 - Doc: backdrop-filter: blur (2026-07-19, glassmorphism v1). Samples the CURRENT paint target under the box rect (device-space 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### bui_pop_group_composite `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms)`
-- Defined: `gui/browser_ui.c:9465`
+- Defined: `gui/browser_ui.c:10032`
 - Doc: Composites the currently-pushed group back onto cr using def's opacity/mix-blend (the group must already be open via cai
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### limits `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
  * grouped this w...`
-- Defined: `gui/browser_ui.c:9695`
+- Defined: `gui/browser_ui.c:10262`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_box_decoration_grouped `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                         ...`
-- Defined: `gui/browser_ui.c:9763`
+- Defined: `gui/browser_ui.c:10330`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_box_and_direct_rows `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
        ...`
-- Defined: `gui/browser_ui.c:9804`
+- Defined: `gui/browser_ui.c:10371`
 - Doc: (blk->block_id match), together, when the box forms a stacking context -- so a translucent/blended box's background and 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_positioned_one `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
             ...`
-- Defined: `gui/browser_ui.c:9899`
+- Defined: `gui/browser_ui.c:10466`
 - Doc: Group compositing (M1.1 increments 3-4): a box that forms a CSS stacking context (box_forms_stacking_context: opacity<1,
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_nested_children `static void paint_nested_children(cairo_t *cr, browser_window *w,
                                ...`
-- Defined: `gui/browser_ui.c:10088`
+- Defined: `gui/browser_ui.c:10655`
 - Doc: R6: recursively paints child boxes of `parent_id` that form stacking contexts, inside the parent's already-open cairo gr
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint_structured `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-- Defined: `gui/browser_ui.c:10120`
+- Defined: `gui/browser_ui.c:10687`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### write_doc_pdf `static long write_doc_pdf(browser_window *w, const char *path)`
-- Defined: `gui/browser_ui.c:10338`
+- Defined: `gui/browser_ui.c:10905`
 - Doc: Writes the window's current laid-out document to a vector PDF at `path`, paginated to US Letter. Returns the page count 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### export_pdf `static void export_pdf(browser_window *w)`
-- Defined: `gui/browser_ui.c:10443`
+- Defined: `gui/browser_ui.c:11010`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### write_doc_png `static long write_doc_png(browser_window *w, const char *path)`
-- Defined: `gui/browser_ui.c:10507`
+- Defined: `gui/browser_ui.c:11074`
 - Doc: Writes the window's current laid-out document to a single full-height PNG at `path` (the same layout/paint path as the s
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### export_png `static void export_png(browser_window *w)`
-- Defined: `gui/browser_ui.c:10628`
+- Defined: `gui/browser_ui.c:11195`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### caller `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-- Defined: `gui/browser_ui.c:10663`
+- Defined: `gui/browser_ui.c:11230`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ui_render_png `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)`
-- Defined: `gui/browser_ui.c:10686`
+- Defined: `gui/browser_ui.c:11253`
 - Doc: Headless PNG export (no Wayland; see include/ui.h). One full-height bitmap of the whole page, the cheapest artifact for 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### render_doc_images `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
               ...`
-- Defined: `gui/browser_ui.c:10712`
+- Defined: `gui/browser_ui.c:11279`
 - Doc: Headless PNG/PDF export WITH image decoding (see include/ui.h). Unlike the plain ui_render_png/pdf (which always draw pl
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ui_render_png_images `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- Defined: `gui/browser_ui.c:10742`
+- Defined: `gui/browser_ui.c:11309`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ui_render_pdf_images `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-- Defined: `gui/browser_ui.c:10748`
+- Defined: `gui/browser_ui.c:11315`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ui_dump_layout `ui_status ui_dump_layout(const rd_doc *doc)`
-- Defined: `gui/browser_ui.c:10764`
+- Defined: `gui/browser_ui.c:11331`
 - Doc: Headless layout dump: runs the same layout_doc + position_doc pass as the on-screen/PNG renderer and prints the resolved
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### link_at_point `static const char *link_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:10825`
+- Defined: `gui/browser_ui.c:11392`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### resolve_box_cursor `static int resolve_box_cursor(const rd_doc *doc, int block_id)`
-- Defined: `gui/browser_ui.c:10919`
+- Defined: `gui/browser_ui.c:11486`
 - Doc: First non-unset author `cursor` on block_id's box or an ancestor (nearest wins, like the rest of the box-decoration fiel
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### box_pointer_events_none `static int box_pointer_events_none(const rd_doc *doc, int block_id)`
-- Defined: `gui/browser_ui.c:10933`
+- Defined: `gui/browser_ui.c:11500`
 - Doc: True when author `pointer-events: none` removes block_id's content from hit-testing (2026-07-10): the nearest box in the
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cursor_at_point `static int cursor_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:10949`
+- Defined: `gui/browser_ui.c:11516`
 - Doc: Returns the resolved author `cursor` (css_cursor) at (px, py), or CSS_CUR_UNSET when outside content / no box sets one. 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### node_at_point `static dom_node_id node_at_point(browser_window *w, double px, double py)`
-- Defined: `gui/browser_ui.c:11001`
+- Defined: `gui/browser_ui.c:11568`
 - Doc: Returns the DOM node id of the element under (px, py), or DOM_NODE_NONE if the point is over blank space / outside conte
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### reference `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:
  * hostile content...`
-- Defined: `gui/browser_ui.c:11049`
+- Defined: `gui/browser_ui.c:11616`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### apply_click_result `static void apply_click_result(browser_window *w, tab_page *page)`
-- Defined: `gui/browser_ui.c:11070`
+- Defined: `gui/browser_ui.c:11637`
 - Doc: Applies a click result returned by the worker: rebuild the rendered document and refresh inputs/console, but keep the cu
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### memory `* memory (the href pointer, not its contents, was all the old code preserved). */
 static void dis...`
-- Defined: `gui/browser_ui.c:11093`
+- Defined: `gui/browser_ui.c:11660`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### GET `* the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_w...`
-- Defined: `gui/browser_ui.c:11176`
+- Defined: `gui/browser_ui.c:11743`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ensure_download_dir `static int ensure_download_dir(char *out, size_t outsz)`
-- Defined: `gui/browser_ui.c:11210`
+- Defined: `gui/browser_ui.c:11777`
 - Doc: Builds ~/Downloads/freedom into out and creates both levels (best effort; an existing directory is fine). Returns 1 on s
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### write_file_atomic `static int write_file_atomic(const char *path, const void *bytes, size_t len)`
-- Defined: `gui/browser_ui.c:11225`
+- Defined: `gui/browser_ui.c:11792`
 - Doc: Writes len bytes to path with 0600 perms via a temp file + atomic rename (the disk_store convention): a crash mid-write 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### save_download `static void save_download(browser_window *w, const char *url, const char *bytes,
                 ...`
-- Defined: `gui/browser_ui.c:11247`
+- Defined: `gui/browser_ui.c:11814`
 - Doc: Saves a fetched resource to ~/Downloads/freedom instead of rendering it. The filename is derived fail-closed from the ho
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### save_current_page `static void save_current_page(browser_window *w)`
-- Defined: `gui/browser_ui.c:11280`
+- Defined: `gui/browser_ui.c:11847`
 - Doc: Ctrl+S: save the current page's cached source to ~/Downloads/freedom. No network * round-trip -- the bytes already in th
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### deliver_fetch_result `static void deliver_fetch_result(browser_window *w, fetch_job *j)`
-- Defined: `gui/browser_ui.c:11289`
+- Defined: `gui/browser_ui.c:11856`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### drain_fetch_results `static void drain_fetch_results(browser_window *w)`
-- Defined: `gui/browser_ui.c:11344`
+- Defined: `gui/browser_ui.c:11911`
 - Doc: Drains every completed fetch the worker threads have posted (the read end is non-blocking; pointer-sized writes are atom
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### toggle_reader `static void toggle_reader(browser_window *w)`
-- Defined: `gui/browser_ui.c:11420`
+- Defined: `gui/browser_ui.c:11987`
 - Doc: Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styl
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### menu_item_checked `static int menu_item_checked(const browser_window *w, size_t i)`
-- Defined: `gui/browser_ui.c:11431`
+- Defined: `gui/browser_ui.c:11998`
 - Doc: Toggles distraction-free (reader) mode and re-renders from cache (no network): the worker drops boilerplate, author styl
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### menu_item_toggle `static void menu_item_toggle(browser_window *w, size_t i)`
-- Defined: `gui/browser_ui.c:11453`
+- Defined: `gui/browser_ui.c:12020`
 - Doc: Toggles options-menu item i and applies its effect. Theme and force-colors only affect presentation (a repaint, which re
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_clock `static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
                ...`
-- Defined: `gui/browser_ui.c:11563`
+- Defined: `gui/browser_ui.c:12130`
 - Doc: A small spinner meaning "busy". Now that the fetch runs off the event-loop thread, the loop ticks ~12 fps while loading 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_hamburger `static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- Defined: `gui/browser_ui.c:11574`
+- Defined: `gui/browser_ui.c:12141`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_reload `static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop)`
-- Defined: `gui/browser_ui.c:11591`
+- Defined: `gui/browser_ui.c:12158`
 - Doc: The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button starting at bx. Drawn with Cairo (not
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_menu `static void draw_menu(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11613`
+- Defined: `gui/browser_ui.c:12180`
 - Doc: double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead cairo_new_sub_path(cr); cairo_arc(cr, cx, cy, r
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_hover_url `static double draw_hover_url(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11724`
+- Defined: `gui/browser_ui.c:12291`
 - Doc: Persistent bottom strip showing the target of the link under the pointer, so the user always knows where a click will go
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_toast `static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset)`
-- Defined: `gui/browser_ui.c:11756`
+- Defined: `gui/browser_ui.c:12323`
 - Doc: Draws the transient status toast (a banner near the bottom of the window), * raised by bottom_offset so it stacks above 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_tabstrip `static void draw_tabstrip(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11786`
+- Defined: `gui/browser_ui.c:12353`
 - Doc: Paints the tab strip: one cell per tab (the active one connected to the content background, the rest dimmed), each with 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### draw_omnibox `static void draw_omnibox(cairo_t *cr, browser_window *w)`
-- Defined: `gui/browser_ui.c:11841`
+- Defined: `gui/browser_ui.c:12408`
 - Doc: Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL bar, drawn as an overlay (on top of co
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### paint `static void paint(browser_window *w)`
-- Defined: `gui/browser_ui.c:11874`
+- Defined: `gui/browser_ui.c:12441`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### redraw `static void redraw(browser_window *w)`
-- Defined: `gui/browser_ui.c:12118`
+- Defined: `gui/browser_ui.c:12685`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### wm_base_ping `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
-- Defined: `gui/browser_ui.c:12130`
+- Defined: `gui/browser_ui.c:12697`
 - Doc: cairo_destroy(cr); } static void redraw(browser_window *w) { if (!w->configured) return; if (ensure_buffer(w) != 0) retu
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### xdg_surface_configure `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- Defined: `gui/browser_ui.c:12136`
+- Defined: `gui/browser_ui.c:12703`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### toplevel_configure `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
-- Defined: `gui/browser_ui.c:12144`
+- Defined: `gui/browser_ui.c:12711`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### wl_array_for_each `wl_array_for_each(st, states)`
-- Defined: `gui/browser_ui.c:12161`
+- Defined: `gui/browser_ui.c:12728`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### toplevel_close `static void toplevel_close(void *data, struct xdg_toplevel *t)`
-- Defined: `gui/browser_ui.c:12167`
+- Defined: `gui/browser_ui.c:12734`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### deco_configure `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
-- Defined: `gui/browser_ui.c:12175`
+- Defined: `gui/browser_ui.c:12742`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### set_cursor `static void set_cursor(browser_window *w, int cur_kind)`
-- Defined: `gui/browser_ui.c:12188`
+- Defined: `gui/browser_ui.c:12755`
 - Doc: Applies the appropriate Wayland cursor for the given CSS cursor value. * A no-op when no themed cursor is available (the
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### element `* cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without...`
-- Defined: `gui/browser_ui.c:12218`
+- Defined: `gui/browser_ui.c:12785`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fbw_split_y `static double fbw_split_y(const freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12288`
+- Defined: `gui/browser_ui.c:12855`
 - Doc: struct wl_buffer *buffer; void  *shm_data; size_t shm_size; cairo_surface_t *cairo_surface; double split;          /* lo
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_ensure_buffer `static int freebug_ensure_buffer(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12296`
+- Defined: `gui/browser_ui.c:12863`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fbw_level_rgb `static void fbw_level_rgb(int level, double *r, double *g, double *b)`
-- Defined: `gui/browser_ui.c:12324`
+- Defined: `gui/browser_ui.c:12891`
 - Doc: struct wl_shm_pool *pool = wl_shm_create_pool(fb->owner->shm, fd, (int32_t)size); fb->buffer = wl_shm_pool_create_buffer
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fbw_console_lines `static size_t fbw_console_lines(const fb_buffer *log)`
-- Defined: `gui/browser_ui.c:12335`
+- Defined: `gui/browser_ui.c:12902`
 - Doc: } /* Color for a console level (dark devtools palette). static void fbw_level_rgb(int level, double *r, double *g, doubl
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_paint `static void freebug_paint(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12347`
+- Defined: `gui/browser_ui.c:12914`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_redraw_fb `static void freebug_redraw_fb(freebug_window *fb)`
-- Defined: `gui/browser_ui.c:12546`
+- Defined: `gui/browser_ui.c:13113`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_redraw `static void freebug_redraw(browser_window *w)`
-- Defined: `gui/browser_ui.c:12555`
+- Defined: `gui/browser_ui.c:13122`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_hide `static void freebug_hide(browser_window *w)`
-- Defined: `gui/browser_ui.c:12559`
+- Defined: `gui/browser_ui.c:13126`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fbw_xdg_surface_configure `static void fbw_xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
-- Defined: `gui/browser_ui.c:12575`
+- Defined: `gui/browser_ui.c:13142`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fbw_toplevel_configure `static void fbw_toplevel_configure(void *data, struct xdg_toplevel *t,
                           ...`
-- Defined: `gui/browser_ui.c:12583`
+- Defined: `gui/browser_ui.c:13150`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### fbw_toplevel_close `static void fbw_toplevel_close(void *data, struct xdg_toplevel *t)`
-- Defined: `gui/browser_ui.c:12593`
+- Defined: `gui/browser_ui.c:13160`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_show `static void freebug_show(browser_window *w)`
-- Defined: `gui/browser_ui.c:12602`
+- Defined: `gui/browser_ui.c:13169`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_toggle `static void freebug_toggle(browser_window *w)`
-- Defined: `gui/browser_ui.c:12632`
+- Defined: `gui/browser_ui.c:13199`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_destroy `static void freebug_destroy(browser_window *w)`
-- Defined: `gui/browser_ui.c:12637`
+- Defined: `gui/browser_ui.c:13204`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_owns_surface `static int freebug_owns_surface(const browser_window *w, const struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:12644`
+- Defined: `gui/browser_ui.c:13211`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_is_open `static int freebug_is_open(const browser_window *w)`
-- Defined: `gui/browser_ui.c:12648`
+- Defined: `gui/browser_ui.c:13215`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_repl_worker `static tab *freebug_repl_worker(browser_window *w)`
-- Defined: `gui/browser_ui.c:12656`
+- Defined: `gui/browser_ui.c:13223`
 - Doc: Returns the live page worker for the REPL, lazily (re)opening one bound to the active page's cache if none is kept alive
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_eval `static void freebug_eval(browser_window *w)`
-- Defined: `gui/browser_ui.c:12692`
+- Defined: `gui/browser_ui.c:13259`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_handle_key `static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                              ...`
-- Defined: `gui/browser_ui.c:12732`
+- Defined: `gui/browser_ui.c:13299`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_pointer_button `static void freebug_pointer_button(browser_window *w, uint32_t serial,
                           ...`
-- Defined: `gui/browser_ui.c:12767`
+- Defined: `gui/browser_ui.c:13334`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_pointer_motion `static void freebug_pointer_motion(browser_window *w)`
-- Defined: `gui/browser_ui.c:12786`
+- Defined: `gui/browser_ui.c:13353`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_pointer_axis `static void freebug_pointer_axis(browser_window *w, wl_fixed_t value)`
-- Defined: `gui/browser_ui.c:12808`
+- Defined: `gui/browser_ui.c:13375`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ptr_enter `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
-- Defined: `gui/browser_ui.c:12826`
+- Defined: `gui/browser_ui.c:13393`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ptr_leave `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:12845`
+- Defined: `gui/browser_ui.c:13412`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ptr_motion `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
-- Defined: `gui/browser_ui.c:12862`
+- Defined: `gui/browser_ui.c:13429`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### load_current `static void load_current(browser_window *w)`
-- Defined: `gui/browser_ui.c:12886`
+- Defined: `gui/browser_ui.c:13453`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### go_omnibox `static void go_omnibox(browser_window *w)`
-- Defined: `gui/browser_ui.c:12900`
+- Defined: `gui/browser_ui.c:13467`
 - Doc: Commits the URL bar like a real omnibox: an existing local file is opened as before; otherwise url_omnibox (pure) decide
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ptr_button `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
-- Defined: `gui/browser_ui.c:12944`
+- Defined: `gui/browser_ui.c:13511`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### scroll_line_px `static double scroll_line_px(const browser_window *w)`
-- Defined: `gui/browser_ui.c:13174`
+- Defined: `gui/browser_ui.c:13741`
 - Doc: } } /* PV_IN_BUTTON (reset/generic) is inert in v1. } else { /* Clicking non-input: dispatch blur on old if any. if (old
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ptr_axis `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
-- Defined: `gui/browser_ui.c:13177`
+- Defined: `gui/browser_ui.c:13744`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ptr_frame `static void ptr_frame(void *d, struct wl_pointer *p)`
-- Defined: `gui/browser_ui.c:13201`
+- Defined: `gui/browser_ui.c:13768`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### mime_is_text `static int mime_is_text(const char *mime)`
-- Defined: `gui/browser_ui.c:13218`
+- Defined: `gui/browser_ui.c:13785`
 - Doc: } static const struct wl_pointer_listener pointer_listener = { .enter = ptr_enter, .leave = ptr_leave, .motion = ptr_mot
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_offer_source_actions `static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a)`
-- Defined: `gui/browser_ui.c:13236`
+- Defined: `gui/browser_ui.c:13803`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_offer_action `static void data_offer_action(void *d, struct wl_data_offer *o, uint32_t a)`
-- Defined: `gui/browser_ui.c:13239`
+- Defined: `gui/browser_ui.c:13806`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_device_data_offer `static void data_device_data_offer(void *data, struct wl_data_device *dev,
                       ...`
-- Defined: `gui/browser_ui.c:13249`
+- Defined: `gui/browser_ui.c:13816`
 - Doc: } static void data_offer_source_actions(void *d, struct wl_data_offer *o, uint32_t a) { (void)d; (void)o; (void)a; } sta
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_device_selection `static void data_device_selection(void *data, struct wl_data_device *dev,
                        ...`
-- Defined: `gui/browser_ui.c:13261`
+- Defined: `gui/browser_ui.c:13828`
 - Doc: The clipboard selection changed. Commit the new offer (or NULL when the clipboard * was cleared), destroying any previou
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_device_enter `static void data_device_enter(void *d, struct wl_data_device *dev, uint32_t serial,
              ...`
-- Defined: `gui/browser_ui.c:13280`
+- Defined: `gui/browser_ui.c:13847`
 - Doc: wl_data_offer_destroy(w->selection_offer); if (offer == NULL) { w->selection_offer = NULL; w->selection_offer_has_text =
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_device_leave `static void data_device_leave(void *d, struct wl_data_device *dev)`
-- Defined: `gui/browser_ui.c:13285`
+- Defined: `gui/browser_ui.c:13852`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_device_motion `static void data_device_motion(void *d, struct wl_data_device *dev, uint32_t t,
                  ...`
-- Defined: `gui/browser_ui.c:13286`
+- Defined: `gui/browser_ui.c:13853`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_device_drop `static void data_device_drop(void *d, struct wl_data_device *dev)`
-- Defined: `gui/browser_ui.c:13290`
+- Defined: `gui/browser_ui.c:13857`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_source_cancelled `static void data_source_cancelled(void *data, struct wl_data_source *src)`
-- Defined: `gui/browser_ui.c:13301`
+- Defined: `gui/browser_ui.c:13868`
 - Doc: wl_fixed_t x, wl_fixed_t y) { (void)d; (void)dev; (void)t; (void)x; (void)y; } static void data_device_drop(void *d, str
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_source_send `static void data_source_send(void *data, struct wl_data_source *src,
                             ...`
-- Defined: `gui/browser_ui.c:13307`
+- Defined: `gui/browser_ui.c:13874`
 - Doc: .enter = data_device_enter, .leave = data_device_leave, .motion = data_device_motion, .drop = data_device_drop, .selecti
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### data_source_target `static void data_source_target(void *d, struct wl_data_source *s, const char *m)`
-- Defined: `gui/browser_ui.c:13320`
+- Defined: `gui/browser_ui.c:13887`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### freebug_copy_console `static void freebug_copy_console(browser_window *w)`
-- Defined: `gui/browser_ui.c:13332`
+- Defined: `gui/browser_ui.c:13899`
 - Doc: Formats the entire Freebug console buffer and places it on the Wayland clipboard, so the user can paste the developer co
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### insert_pasted_text `static void insert_pasted_text(browser_window *w, const char *text, size_t len)`
-- Defined: `gui/browser_ui.c:13390`
+- Defined: `gui/browser_ui.c:13957`
 - Doc: Inserts pasted bytes into whichever text target currently has focus (page input, User-Agent box, or the URL bar). Contro
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### clipboard_copy `static void clipboard_copy(browser_window *w)`
-- Defined: `gui/browser_ui.c:13454`
+- Defined: `gui/browser_ui.c:14021`
 - Doc: Ctrl+C: copy the focused field's text (or, with nothing focused, the page address) * to the clipboard by owning a wl_dat
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### keyboard_keymap `static void keyboard_keymap(void *data, struct wl_keyboard *kbd,
                             uint...`
-- Defined: `gui/browser_ui.c:13501`
+- Defined: `gui/browser_ui.c:14068`
 - Doc: Cut the omnibar selection: copy it to the clipboard, then remove it. v1 cut is the * URL bar only (page inputs / the UA 
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### keyboard_enter `static void keyboard_enter(void *d, struct wl_keyboard *kbd, uint32_t s,
                         ...`
-- Defined: `gui/browser_ui.c:13522`
+- Defined: `gui/browser_ui.c:14089`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### keyboard_leave `static void keyboard_leave(void *d, struct wl_keyboard *kbd, uint32_t s, struct wl_surface *sf)`
-- Defined: `gui/browser_ui.c:13530`
+- Defined: `gui/browser_ui.c:14097`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### key_sym_to_js_key `static const char *key_sym_to_js_key(xkb_keysym_t sym)`
-- Defined: `gui/browser_ui.c:13538`
+- Defined: `gui/browser_ui.c:14105`
 - Doc: Maps an xkb keysym to a JS event.key string. Returns NULL for printable chars * (the utf8 bytes should be used as the ke
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### key_sym_to_keycode `static int key_sym_to_keycode(xkb_keysym_t sym)`
-- Defined: `gui/browser_ui.c:13564`
+- Defined: `gui/browser_ui.c:14131`
 - Doc: Maps an xkb keysym to a JS keyCode number. For printable ASCII, returns the * ASCII value; for special keys, returns the
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### dispatch_js_event `static void dispatch_js_event(browser_window *w, dom_node_id node_id,
                            ...`
-- Defined: `gui/browser_ui.c:13589`
+- Defined: `gui/browser_ui.c:14156`
 - Doc: Dispatches a JS DOM event to the worker for the given node_id. The worker returns a re-derived view which is applied via
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### handle_key_press `static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *utf8,
              ...`
-- Defined: `gui/browser_ui.c:13646`
+- Defined: `gui/browser_ui.c:14213`
 - Doc: Performs the effect of a single key press. Factored out of keyboard_key so a held key can be re-fired from the repeat ti
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### key_is_repeatable `static int key_is_repeatable(xkb_keysym_t sym, int n, int ctrl)`
-- Defined: `gui/browser_ui.c:13976`
+- Defined: `gui/browser_ui.c:14543`
 - Doc: Keys whose held-down auto-repeat is safe and useful: text editing, cursor motion and scrolling. A Ctrl chord (tab spawn,
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### key_repeat_arm `static void key_repeat_arm(browser_window *w, uint32_t key)`
-- Defined: `gui/browser_ui.c:13992`
+- Defined: `gui/browser_ui.c:14559`
 - Doc: Arms the repeat timer for key: first fire after repeat_delay ms, then every * 1/repeat_rate s. A held key thus repeats u
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### key_repeat_stop `static void key_repeat_stop(browser_window *w)`
-- Defined: `gui/browser_ui.c:14005`
+- Defined: `gui/browser_ui.c:14572`
 - Doc: 1/repeat_rate s. A held key thus repeats until released (key_repeat_stop). static void key_repeat_arm(browser_window *w,
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### key_repeat_fire `static void key_repeat_fire(browser_window *w)`
-- Defined: `gui/browser_ui.c:14016`
+- Defined: `gui/browser_ui.c:14583`
 - Doc: Re-fires the currently held key. Called from the event loop when the timer expires. Modifiers/keysym are recomputed from
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### keyboard_key `static void keyboard_key(void *data, struct wl_keyboard *kbd, uint32_t serial,
                   ...`
-- Defined: `gui/browser_ui.c:14029`
+- Defined: `gui/browser_ui.c:14596`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### keyboard_modifiers `static void keyboard_modifiers(void *data, struct wl_keyboard *kbd, uint32_t s,
                  ...`
-- Defined: `gui/browser_ui.c:14069`
+- Defined: `gui/browser_ui.c:14636`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### keyboard_repeat_info `static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate, int32_t delay)`
-- Defined: `gui/browser_ui.c:14079`
+- Defined: `gui/browser_ui.c:14646`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### seat_caps `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
-- Defined: `gui/browser_ui.c:14097`
+- Defined: `gui/browser_ui.c:14664`
 - Doc: w->repeat_rate = rate; w->repeat_delay = delay; } static const struct wl_keyboard_listener keyboard_listener = { .keymap
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### seat_name `static void seat_name(void *d, struct wl_seat *s, const char *name)`
-- Defined: `gui/browser_ui.c:14109`
+- Defined: `gui/browser_ui.c:14676`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### registry_global `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
-- Defined: `gui/browser_ui.c:14115`
+- Defined: `gui/browser_ui.c:14682`
 - Doc: w->pointer = wl_seat_get_pointer(seat); wl_pointer_add_listener(w->pointer, &pointer_listener, w); } if ((caps & WL_SEAT
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### registry_remove `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
-- Defined: `gui/browser_ui.c:14136`
+- Defined: `gui/browser_ui.c:14703`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### ui_run_browser `ui_status ui_run_browser(const char *start_url)`
-- Defined: `gui/browser_ui.c:14145`
+- Defined: `gui/browser_ui.c:14712`
 - Doc: w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1); } else if (strcmp(iface, zxd
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ### cost `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
-- Defined: `gui/browser_ui.c:14522`
+- Defined: `gui/browser_ui.c:15089`
+- Depends on: `gui/browser_ui_internal.h`, `include/ui.h`
 
 ## gui/bui_theme.c
 
 ### ui_theme_default `ui_theme ui_theme_default(void)`
 - Defined: `gui/bui_theme.c:14`
 - Doc: bui_theme — presentation palettes for the Wayland/Cairo GUI.  Carved out of browser_ui.c: the light/dark/sepia themes an
+- Depends on: `gui/browser_ui_internal.h`
 
 ### ui_theme_dark `ui_theme ui_theme_dark(void)`
 - Defined: `gui/bui_theme.c:84`
 - Doc: Dark reading palette. Shares all the metrics (font sizes, spacing) with the * default theme; only the colours change, so
+- Depends on: `gui/browser_ui_internal.h`
 
 ### ui_theme_sepia `ui_theme ui_theme_sepia(void)`
 - Defined: `gui/bui_theme.c:129`
 - Doc: Sepia reading palette: warm paper background and dark-brown ink, easier on the eyes for long-form text. Shares all the m
+- Depends on: `gui/browser_ui_internal.h`
 
 ### ui_theme_for `ui_theme ui_theme_for(int mode)`
 - Defined: `gui/bui_theme.c:171`
 - Doc: t.menu_bg        = (ui_rgb){ 0.95, 0.90, 0.80 }; t.menu_border    = (ui_rgb){ 0.55, 0.46, 0.32 }; t.menu_text      = (ui
+- Depends on: `gui/browser_ui_internal.h`
 
 ### rgb_from_packed `ui_rgb rgb_from_packed(int packed)`
 - Defined: `gui/bui_theme.c:180`
 - Doc: t.scrollbar_thumb_hot = (ui_rgb){ 0.44, 0.35, 0.22 }; return t; } /* The single place that maps the theme mode to a pale
+- Depends on: `gui/browser_ui_internal.h`
 
 ### set_rgb `void set_rgb(cairo_t *cr, ui_rgb c)`
 - Defined: `gui/bui_theme.c:184`
+- Depends on: `gui/browser_ui_internal.h`
 
 ## gui/freedom_view.c
 
 ### main `int main(int argc, char **argv)`
 - Defined: `gui/freedom_view.c:36`
+- Depends on: `include/ui.h`
 
 ## gui/svg_paint.c
 
@@ -1409,83 +1759,105 @@ static void do_submit_post(browser_w...`
 ### sanitize_utf8_inplace `static void sanitize_utf8_inplace(char *s)`
 - Defined: `gui/ui_render.c:37`
 - Doc: Rewrites s in place to well-formed UTF-8, replacing any byte that is not part of a valid sequence with '?'. cairo_show_t
+- Depends on: `include/ui.h`
 
 ### button_rects `static void button_rects(const ui_window *w, double *min_x, double *max_x, double *close_x)`
 - Defined: `gui/ui_render.c:105`
 - Doc: int    use_csd;    /* draw our own titlebar/controls (compositor has no SSD) int    maximized; double ptr_x, ptr_y; cons
+- Depends on: `include/ui.h`
 
 ### buffer_release `static void buffer_release(void *data, struct wl_buffer *wl_buffer)`
 - Defined: `gui/ui_render.c:112`
 - Doc: size_t      text_len; size_t      scroll; /* first visible line } ui_window; static void redraw(ui_window *w); /* Right-
+- Depends on: `include/ui.h`
 
 ### destroy_buffer `static void destroy_buffer(ui_window *w)`
 - Defined: `gui/ui_render.c:119`
+- Depends on: `include/ui.h`
 
 ### ensure_buffer `static int ensure_buffer(ui_window *w)`
 - Defined: `gui/ui_render.c:125`
+- Depends on: `include/ui.h`
 
 ### paint `static void paint(ui_window *w)`
 - Defined: `gui/ui_render.c:156`
 - Doc: WL_SHM_FORMAT_ARGB8888); wl_shm_pool_destroy(pool); close(fd); if (w->buffer == NULL) { munmap(data, size); return -1; }
+- Depends on: `include/ui.h`
 
 ### redraw `static void redraw(ui_window *w)`
 - Defined: `gui/ui_render.c:242`
+- Depends on: `include/ui.h`
 
 ### wm_base_ping `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)`
 - Defined: `gui/ui_render.c:257`
 - Doc: Always repaint and re-commit. We do not gate on buffer release: a single shm buffer can be re-attached, and gating on re
+- Depends on: `include/ui.h`
 
 ### xdg_surface_configure `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)`
 - Defined: `gui/ui_render.c:263`
+- Depends on: `include/ui.h`
 
 ### toplevel_configure `static void toplevel_configure(void *data, struct xdg_toplevel *t,
                               ...`
 - Defined: `gui/ui_render.c:271`
+- Depends on: `include/ui.h`
 
 ### toplevel_close `static void toplevel_close(void *data, struct xdg_toplevel *t)`
 - Defined: `gui/ui_render.c:281`
+- Depends on: `include/ui.h`
 
 ### deco_configure `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)`
 - Defined: `gui/ui_render.c:292`
 - Doc: The compositor tells us the actual decoration mode it granted. If it insists * on client-side, we draw our own titlebar;
+- Depends on: `include/ui.h`
 
 ### ptr_enter `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,
                       struct wl_...`
 - Defined: `gui/ui_render.c:302`
 - Doc: The compositor tells us the actual decoration mode it granted. If it insists * on client-side, we draw our own titlebar;
+- Depends on: `include/ui.h`
 
 ### ptr_leave `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)`
 - Defined: `gui/ui_render.c:310`
+- Depends on: `include/ui.h`
 
 ### ptr_motion `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)`
 - Defined: `gui/ui_render.c:313`
+- Depends on: `include/ui.h`
 
 ### ptr_button `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,
               ...`
 - Defined: `gui/ui_render.c:320`
 - Doc: ui_window *w = (ui_window *)d; w->ptr_x = wl_fixed_to_double(x); w->ptr_y = wl_fixed_to_double(y); } static void ptr_lea
+- Depends on: `include/ui.h`
 
 ### ptr_axis `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32...`
 - Defined: `gui/ui_render.c:342`
+- Depends on: `include/ui.h`
 
 ### seat_caps `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)`
 - Defined: `gui/ui_render.c:364`
+- Depends on: `include/ui.h`
 
 ### seat_name `static void seat_name(void *d, struct wl_seat *s, const char *name)`
 - Defined: `gui/ui_render.c:374`
+- Depends on: `include/ui.h`
 
 ### registry_global `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                  ...`
 - Defined: `gui/ui_render.c:380`
 - Doc: ui_window *w = (ui_window *)data; fprintf(stderr, "[ui] seat caps: pointer=%s\n", (caps & WL_SEAT_CAPABILITY_POINTER) ? 
+- Depends on: `include/ui.h`
 
 ### registry_remove `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)`
 - Defined: `gui/ui_render.c:399`
+- Depends on: `include/ui.h`
 
 ### ui_run_text_view `ui_status ui_run_text_view(const char *title, const char *text, size_t text_len)`
 - Defined: `gui/ui_render.c:407`
 - Doc: w->seat = wl_registry_bind(reg, name, &wl_seat_interface, 1); wl_seat_add_listener(w->seat, &seat_listener, w); } else i
+- Depends on: `include/ui.h`
 
 ## include/block_flow.h
 
@@ -1497,20 +1869,30 @@ static void do_submit_post(browser_w...`
 ### csel_lower_ch `static inline char csel_lower_ch(char c)`
 - Defined: `include/css_select.h:158`
 - Doc: True if *sel matches element *el against its ancestor chain. target_id (optional) is the URL fragment for :target matchi
+- Depends on: `include/css.h`
+- Imported by: `include/css_chain.h`
 
 ### csel_ci_eq `static inline int csel_ci_eq(const char *a, const char *b)`
 - Defined: `include/css_select.h:162`
+- Depends on: `include/css.h`
+- Imported by: `include/css_chain.h`
 
 ### csel_span_eq `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
 - Defined: `include/css_select.h:172`
 - Doc: static inline char csel_lower_ch(char c) { return (c >= 'A' && c <= 'Z') ? (char)(c + 32) : c; } static inline int csel_
+- Depends on: `include/css.h`
+- Imported by: `include/css_chain.h`
 
 ### csel_substr `static inline int csel_substr(const char *hay, const char *needle, int ci)`
 - Defined: `include/css_select.h:183`
 - Doc: Substring test (used both to drop any value carrying url() — always ci — and by * the attribute `*=` operator). A non-em
+- Depends on: `include/css.h`
+- Imported by: `include/css_chain.h`
 
 ### csel_ident_ch `static inline int csel_ident_ch(char c)`
 - Defined: `include/css_select.h:190`
+- Depends on: `include/css.h`
+- Imported by: `include/css_chain.h`
 
 ## include/media_decoder.h
 
@@ -1524,21 +1906,26 @@ static void do_submit_post(browser_w...`
 ### write_full `static inline int write_full(int fd, const void *buf, size_t n)`
 - Defined: `include/util.h:14`
 - Doc: util.h — shared pure helpers (no I/O except where noted). Static inline so each * compilation unit gets its own copy wit
+- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
 
 ### read_full `static inline int read_full(int fd, void *buf, size_t n)`
 - Defined: `include/util.h:25`
+- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
 
 ### mem_contains_ci `static inline int mem_contains_ci(const void *hay, size_t hlen, const char *needle)`
 - Defined: `include/util.h:43`
 - Doc: Returns 1 when the trusted lowercase-ASCII needle (letters/digits) occurs in the hostile, length-delimited haystack, mat
+- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
 
 ### utf8_seq_len `static inline size_t utf8_seq_len(unsigned char c)`
 - Defined: `include/util.h:56`
 - Doc: `| 0x20` fold maps A-Z to a-z and leaves digits unchanged. static inline int mem_contains_ci(const void *hay, size_t hle
+- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
 
 ### fnv1a `static inline uint64_t fnv1a(const char *s, size_t n)`
 - Defined: `include/util.h:66`
 - Doc: return 0; } /* --- UTF-8 lead-byte length table --- static inline size_t utf8_seq_len(unsigned char c) { if (c < 0x80) r
+- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
 
 ## src/anti_fp.c
 
@@ -1774,116 +2161,152 @@ static void do_submit_post(browser_w...`
 ### free_page `static void free_page(browser_state *bs)`
 - Defined: `src/browser.c:14`
 - Doc: include <stdlib.h> include <string.h>
+- Depends on: `include/util.h`
 
 ### clear_status `static void clear_status(browser_state *bs)`
 - Defined: `src/browser.c:25`
 - Doc: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) { if (bs == NULL) return; free(bs->page
+- Depends on: `include/util.h`
 
 ### free_history `static void free_history(browser_state *bs)`
 - Defined: `src/browser.c:29`
+- Depends on: `include/util.h`
 
 ### free_exceptions `static void free_exceptions(browser_state *bs)`
 - Defined: `src/browser.c:39`
+- Depends on: `include/util.h`
 
 ### is_https_url `static int is_https_url(const char *s)`
 - Defined: `src/browser.c:48`
+- Depends on: `include/util.h`
 
 ### is_local_path `static int is_local_path(const char *s)`
 - Defined: `src/browser.c:52`
+- Depends on: `include/util.h`
 
 ### url_is_allowed `static int url_is_allowed(const char *url)`
 - Defined: `src/browser.c:57`
+- Depends on: `include/util.h`
 
 ### xstrdup `static char *xstrdup(const char *s)`
 - Defined: `src/browser.c:71`
+- Depends on: `include/util.h`
 
 ### cp1252_to_ucs `static unsigned int cp1252_to_ucs(unsigned char c)`
 - Defined: `src/browser.c:86`
 - Doc: Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80). 0xA0.. 0xFF map identically to Latin-1; 0x80..0x
+- Depends on: `include/util.h`
 
 ### utf8_encode `static size_t utf8_encode(unsigned int cp, char *out)`
 - Defined: `src/browser.c:100`
 - Doc: Encodes a BMP scalar (<= 0xFFFF) as UTF-8 into out (up to 3 bytes); returns the * byte count written.
+- Depends on: `include/util.h`
 
 ### browser_init `browser_status browser_init(browser_state *bs)`
 - Defined: `src/browser.c:153`
+- Depends on: `include/util.h`
 
 ### browser_free `void browser_free(browser_state *bs)`
 - Defined: `src/browser.c:164`
+- Depends on: `include/util.h`
 
 ### browser_set_url_bar `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
 - Defined: `src/browser.c:175`
+- Depends on: `include/util.h`
 
 ### browser_commit_url_bar `browser_status browser_commit_url_bar(browser_state *bs)`
 - Defined: `src/browser.c:187`
+- Depends on: `include/util.h`
 
 ### browser_navigate `browser_status browser_navigate(browser_state *bs, const char *url)`
 - Defined: `src/browser.c:192`
+- Depends on: `include/util.h`
 
 ### browser_back `browser_status browser_back(browser_state *bs)`
 - Defined: `src/browser.c:227`
+- Depends on: `include/util.h`
 
 ### browser_forward `browser_status browser_forward(browser_state *bs)`
 - Defined: `src/browser.c:239`
+- Depends on: `include/util.h`
 
 ### browser_can_back `int browser_can_back(const browser_state *bs)`
 - Defined: `src/browser.c:251`
+- Depends on: `include/util.h`
 
 ### browser_can_forward `int browser_can_forward(const browser_state *bs)`
 - Defined: `src/browser.c:255`
+- Depends on: `include/util.h`
 
 ### browser_current_url `const char *browser_current_url(const browser_state *bs)`
 - Defined: `src/browser.c:259`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_selection `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
 - Defined: `src/browser.c:264`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_delete_selection `int browser_url_bar_delete_selection(browser_state *bs)`
 - Defined: `src/browser.c:275`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_insert `browser_status browser_url_bar_insert(browser_state *bs, char c)`
 - Defined: `src/browser.c:285`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_backspace `browser_status browser_url_bar_backspace(browser_state *bs)`
 - Defined: `src/browser.c:300`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_delete `browser_status browser_url_bar_delete(browser_state *bs)`
 - Defined: `src/browser.c:314`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_move_cursor `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
 - Defined: `src/browser.c:325`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_extend_cursor `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
 - Defined: `src/browser.c:335`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_set_cursor `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
 - Defined: `src/browser.c:344`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_select_all `browser_status browser_url_bar_select_all(browser_state *bs)`
 - Defined: `src/browser.c:352`
+- Depends on: `include/util.h`
 
 ### browser_url_bar_clear `browser_status browser_url_bar_clear(browser_state *bs)`
 - Defined: `src/browser.c:359`
+- Depends on: `include/util.h`
 
 ### browser_set_page `browser_status browser_set_page(browser_state *bs, const char *title,
                            ...`
 - Defined: `src/browser.c:368`
+- Depends on: `include/util.h`
 
 ### browser_set_status `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
 - Defined: `src/browser.c:390`
+- Depends on: `include/util.h`
 
 ### browser_status_text `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
 - Defined: `src/browser.c:404`
+- Depends on: `include/util.h`
 
 ### host_equal `static int host_equal(const char *a, const char *b)`
 - Defined: `src/browser.c:412`
 - Doc: if (n >= BROWSER_STATUS_MAX) n = BROWSER_STATUS_MAX - 1; memcpy(bs->status_msg, msg, n); bs->status_msg[n] = '\0'; bs->s
+- Depends on: `include/util.h`
 
 ### browser_is_exception `int browser_is_exception(const browser_state *bs, const char *host)`
 - Defined: `src/browser.c:423`
+- Depends on: `include/util.h`
 
 ### browser_add_exception `browser_status browser_add_exception(browser_state *bs, const char *host)`
 - Defined: `src/browser.c:431`
+- Depends on: `include/util.h`
 
 ## src/compositor.c
 
@@ -2900,206 +3323,264 @@ static const css_element *build_chain(lxb_dom_ele...`
 ### fsync_dir `static void fsync_dir(const char *path)`
 - Defined: `src/disk_store.c:32`
 - Doc: Best-effort fsync of the directory holding path, for crash durability of the * rename. Failures are non-fatal (some file
+- Depends on: `include/util.h`
 
 ### map_ls `static ds_status map_ls(ls_status s)`
 - Defined: `src/disk_store.c:49`
+- Depends on: `include/util.h`
 
 ### ds_write `ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead,
                ...`
 - Defined: `src/disk_store.c:65`
 - Doc: switch (s) { case LS_OK:            return DS_OK; case LS_ERR_NULL_ARG:  return DS_ERR_NULL_ARG; case LS_ERR_TOO_LARGE: 
+- Depends on: `include/util.h`
 
 ### ds_read `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN],
                   uint8_t **ou...`
 - Defined: `src/disk_store.c:102`
+- Depends on: `include/util.h`
 
 ### ds_free `void ds_free(uint8_t *buf, size_t len)`
 - Defined: `src/disk_store.c:135`
+- Depends on: `include/util.h`
 
 ## src/dom.c
 
 ### to_lower_buf `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)`
 - Defined: `src/dom.c:33`
 - Doc: #include <stdint.h> #include <stdlib.h> #include <string.h> #include <lexbor/dom/dom.h> #include <lexbor/html/html.h> /*
+- Depends on: `include/util.h`
 
 ### ptr_hash `static size_t ptr_hash(const void *p)`
 - Defined: `src/dom.c:43`
+- Depends on: `include/util.h`
 
 ### sm_entry_append `static int sm_entry_append(sm_entry *e, dom_node_id id)`
 - Defined: `src/dom.c:69`
+- Depends on: `include/util.h`
 
 ### sm_grow `static int sm_grow(strmap *m)`
 - Defined: `src/dom.c:81`
+- Depends on: `include/util.h`
 
 ### sm_put `static int sm_put(strmap *m, const char *key, size_t klen, dom_node_id id)`
 - Defined: `src/dom.c:98`
+- Depends on: `include/util.h`
 
 ### sm_find `static const sm_entry *sm_find(const strmap *m, const char *key, size_t klen)`
 - Defined: `src/dom.c:126`
+- Depends on: `include/util.h`
 
 ### sm_free `static void sm_free(strmap *m)`
 - Defined: `src/dom.c:138`
+- Depends on: `include/util.h`
 
 ### pm_grow `static int pm_grow(ptrmap *m)`
 - Defined: `src/dom.c:165`
+- Depends on: `include/util.h`
 
 ### pm_put `static int pm_put(ptrmap *m, const void *key, dom_node_id id)`
 - Defined: `src/dom.c:182`
+- Depends on: `include/util.h`
 
 ### pm_get `static int pm_get(const ptrmap *m, const void *key, dom_node_id *out)`
 - Defined: `src/dom.c:199`
+- Depends on: `include/util.h`
 
 ### pm_free `static void pm_free(ptrmap *m)`
 - Defined: `src/dom.c:210`
+- Depends on: `include/util.h`
 
 ### node_next `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)`
 - Defined: `src/dom.c:232`
 - Doc: /* --- the index --- struct dom_index { lxb_dom_node_t      **nodes;    /* arena: id -> element node, in document order 
+- Depends on: `include/util.h`
 
 ### valid `static int valid(const dom_index *idx, dom_node_id n)`
 - Defined: `src/dom.c:241`
+- Depends on: `include/util.h`
 
 ### index_element `static int index_element(dom_index *idx, lxb_dom_element_t *el, dom_node_id id)`
 - Defined: `src/dom.c:247`
 - Doc: if (node->first_child != NULL) return node->first_child; while (node != root && node->next == NULL) { if (node->parent =
+- Depends on: `include/util.h`
 
 ### dom_build `dom_status dom_build(const hp_document *doc, dom_index **out)`
 - Defined: `src/dom.c:283`
 - Doc: } size_t tlen = 0; const lxb_char_t *tag = lxb_dom_element_qualified_name(el, &tlen); if (tag != NULL && tlen > 0) { cha
+- Depends on: `include/util.h`
 
 ### dom_free `void dom_free(dom_index *idx)`
 - Defined: `src/dom.c:324`
+- Depends on: `include/util.h`
 
 ### dom_node_count `size_t dom_node_count(const dom_index *idx)`
 - Defined: `src/dom.c:336`
 - Doc: return DOM_ERR_OOM; } void dom_free(dom_index *idx) { if (idx == NULL) return; free(idx->nodes); sm_free(&idx->by_id); s
+- Depends on: `include/util.h`
 
 ### dom_get_element_by_id `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
 - Defined: `src/dom.c:340`
+- Depends on: `include/util.h`
 
 ### copy_ids `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
 - Defined: `src/dom.c:346`
+- Depends on: `include/util.h`
 
 ### dom_get_by_tag `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
                       dom_node_id *o...`
 - Defined: `src/dom.c:353`
+- Depends on: `include/util.h`
 
 ### dom_get_by_class `size_t dom_get_by_class(const dom_index *idx, const char *cls,
                         dom_node_i...`
 - Defined: `src/dom.c:362`
+- Depends on: `include/util.h`
 
 ### id_of `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)`
 - Defined: `src/dom.c:376`
 - Doc: Max complex selectors in one comma-separated list. A longer list is truncated * (anti-DoS): the extra selectors are drop
+- Depends on: `include/util.h`
 
 ### parse_selector_list `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)`
 - Defined: `src/dom.c:386`
 - Doc: Parses a selector list "a, b, c" into up to cap css_sel. Splits only on TOP-LEVEL commas (respecting [], () and quotes s
+- Depends on: `include/util.h`
 
 ### node_matches_any `static int node_matches_any(const lxb_dom_node_t *cn,
                             const css_sel *...`
 - Defined: `src/dom.c:419`
 - Doc: s.order = (int)n; s.rule = 0; out[n++] = s; } } start = i + 1; } break; default: break; } } return n; } /* Nonzero iff e
+- Depends on: `include/util.h`
 
 ### count `* count (may exceed cap), and returns DOM_NODE_NONE. */
 static dom_node_id qs_walk(const dom_inde...`
 - Defined: `src/dom.c:430`
+- Depends on: `include/util.h`
 
 ### dom_query_selector `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
                           ...`
 - Defined: `src/dom.c:459`
+- Depends on: `include/util.h`
 
 ### dom_query_selector_all `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
                            ...`
 - Defined: `src/dom.c:468`
+- Depends on: `include/util.h`
 
 ### dom_matches `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
 - Defined: `src/dom.c:479`
+- Depends on: `include/util.h`
 
 ### dom_closest `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
                         const cha...`
 - Defined: `src/dom.c:488`
+- Depends on: `include/util.h`
 
 ### dom_document_position `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
 - Defined: `src/dom.c:504`
+- Depends on: `include/util.h`
 
 ### dom_precedes `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
 - Defined: `src/dom.c:509`
+- Depends on: `include/util.h`
 
 ### dom_node_at `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
 - Defined: `src/dom.c:514`
+- Depends on: `include/util.h`
 
 ### dom_parent `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
 - Defined: `src/dom.c:519`
+- Depends on: `include/util.h`
 
 ### dom_first_child `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
 - Defined: `src/dom.c:529`
+- Depends on: `include/util.h`
 
 ### dom_next_sibling `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
 - Defined: `src/dom.c:537`
+- Depends on: `include/util.h`
 
 ### dom_tag_name `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
 - Defined: `src/dom.c:545`
+- Depends on: `include/util.h`
 
 ### dom_get_attribute `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                            ...`
 - Defined: `src/dom.c:556`
+- Depends on: `include/util.h`
 
 ### dom_attribute_names `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
                            con...`
 - Defined: `src/dom.c:578`
+- Depends on: `include/util.h`
 
 ### dom_text_content `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
 - Defined: `src/dom.c:596`
+- Depends on: `include/util.h`
 
 ### dom_document_title `const char *dom_document_title(const dom_index *idx, size_t *len)`
 - Defined: `src/dom.c:606`
+- Depends on: `include/util.h`
 
 ### dom_set_text_content `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
                                ...`
 - Defined: `src/dom.c:619`
 - Doc: } const char *dom_document_title(const dom_index *idx, size_t *len) { if (len != NULL) *len = 0; if (idx == NULL || idx-
+- Depends on: `include/util.h`
 
 ### dom_set_document_title `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
 - Defined: `src/dom.c:644`
+- Depends on: `include/util.h`
 
 ### idx_push `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)`
 - Defined: `src/dom.c:656`
 - Doc: return DOM_OK; } dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) { if (idx == NULL || id
+- Depends on: `include/util.h`
 
 ### dom_create_element `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
 - Defined: `src/dom.c:672`
+- Depends on: `include/util.h`
 
 ### dom_append_child `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
 - Defined: `src/dom.c:692`
+- Depends on: `include/util.h`
 
 ### dom_remove_child `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
 - Defined: `src/dom.c:706`
+- Depends on: `include/util.h`
 
 ### dom_set_attribute `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const...`
 - Defined: `src/dom.c:714`
+- Depends on: `include/util.h`
 
 ### dom_remove_attribute `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
 - Defined: `src/dom.c:743`
+- Depends on: `include/util.h`
 
 ### index_subtree `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)`
 - Defined: `src/dom.c:753`
 - Doc: } } return DOM_OK; } dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) { if (!valid(id
+- Depends on: `include/util.h`
 
 ### dom_set_inner_html `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
                               con...`
 - Defined: `src/dom.c:762`
+- Depends on: `include/util.h`
 
 ### ih_append `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
 - Defined: `src/dom.c:815`
+- Depends on: `include/util.h`
 
 ### ih_free `static void ih_free(ih_acc *a)`
 - Defined: `src/dom.c:842`
+- Depends on: `include/util.h`
 
 ### dom_get_inner_html `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
                            ...`
 - Defined: `src/dom.c:869`
+- Depends on: `include/util.h`
 
 ## src/dom_debug.c
 
@@ -3171,10 +3652,10 @@ static dom_node_id qs_walk(const dom_inde...`
 - Defined: `src/dom_debug.c:301`
 
 ### dd_format `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
-- Defined: `src/dom_debug.c:369`
+- Defined: `src/dom_debug.c:374`
 
 ### dd_format_css `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
-- Defined: `src/dom_debug.c:402`
+- Defined: `src/dom_debug.c:407`
 - Doc: } dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b != NULL) dd
 
 ## src/download.c
@@ -3375,98 +3856,124 @@ static dom_node_id qs_walk(const dom_inde...`
 ### print_usage `static void print_usage(FILE *fp, const char *prog)`
 - Defined: `src/freedom.c:46`
 - Doc: define EXIT_OK     0 define EXIT_ERROR  1 define EXIT_USAGE  2
+- Depends on: `include/ui.h`
 
 ### is_https_url `static int is_https_url(const char *s)`
 - Defined: `src/freedom.c:71`
+- Depends on: `include/ui.h`
 
 ### is_http_url `static int is_http_url(const char *s)`
 - Defined: `src/freedom.c:75`
+- Depends on: `include/ui.h`
 
 ### is_overlay_http `static int is_overlay_http(const char *s)`
 - Defined: `src/freedom.c:81`
 - Doc: fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n"); fpri
+- Depends on: `include/ui.h`
 
 ### now_us `static uint64_t now_us(void)`
 - Defined: `src/freedom.c:134`
+- Depends on: `include/ui.h`
 
 ### timings_ensure_init `static void timings_ensure_init(void)`
 - Defined: `src/freedom.c:140`
+- Depends on: `include/ui.h`
 
 ### timings_enabled `static int timings_enabled(void)`
 - Defined: `src/freedom.c:144`
+- Depends on: `include/ui.h`
 
 ### timings_dump `static void timings_dump(void)`
 - Defined: `src/freedom.c:148`
+- Depends on: `include/ui.h`
 
 ### read_file `static char *read_file(const char *path, size_t *out_len)`
 - Defined: `src/freedom.c:195`
 - Doc: When non-NULL (set by --dump-video=PATH), headless mode downloads the video stream from a URL and writes it to the speci
+- Depends on: `include/ui.h`
 
 ### headless_load_hosts `static void headless_load_hosts(void)`
 - Defined: `src/freedom.c:212`
+- Depends on: `include/ui.h`
 
 ### is_blank_text `static int is_blank_text(const char *s)`
 - Defined: `src/freedom.c:251`
 - Doc: impersonate.conf lives in the same search dirs; load it as an allowlist so * hb_is_allowlisted answers the third gate si
+- Depends on: `include/ui.h`
 
 ### print_doc `static void print_doc(const rd_doc *doc)`
 - Defined: `src/freedom.c:264`
 - Doc: Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data, nev
+- Depends on: `include/ui.h`
 
 ### print_console `static void print_console(const fb_buffer *log)`
 - Defined: `src/freedom.c:357`
 - Doc: Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed with i
+- Depends on: `include/ui.h`
 
 ### print_dom `static void print_dom(const rd_doc *doc)`
 - Defined: `src/freedom.c:374`
 - Doc: Prints the paint-ready render tree (dom_debug) to stdout. Two-pass: measure, then allocate exactly and format. The dump 
+- Depends on: `include/ui.h`
 
 ### print_dom_css `static void print_dom_css(const rd_doc *doc)`
 - Defined: `src/freedom.c:389`
 - Doc: Prints the CSS property inspector (dd_format_css) to stdout. Same contract as * print_dom: two-pass measure-then-allocat
+- Depends on: `include/ui.h`
 
 ### headless_fetch `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
 - Defined: `src/freedom.c:413`
 - Doc: tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script src>.
+- Depends on: `include/ui.h`
 
 ### foldback_cookies `static void foldback_cookies(const char *url, const char *jar)`
 - Defined: `src/freedom.c:471`
 - Doc: Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set ses
+- Depends on: `include/ui.h`
 
 ### print_css_drops `static void print_css_drops(const char *html, size_t len)`
 - Defined: `src/freedom.c:495`
 - Doc: Prints the author-CSS drop report for `html`, sorted by occurrence count. The document is re-parsed here on the TRUSTED 
+- Depends on: `include/ui.h`
 
 ### render_page `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
 - Defined: `src/freedom.c:525`
+- Depends on: `include/ui.h`
 
 ### sf_reason `static const char *sf_reason(sf_status ss)`
 - Defined: `src/freedom.c:733`
+- Depends on: `include/ui.h`
 
 ### fetch_and_render_one `static int fetch_and_render_one(const char *url, char **out_nav)`
 - Defined: `src/freedom.c:753`
 - Doc: Fetches one url with secure_fetch and renders the result. The response body is * consumed directly; no extra copy is mad
+- Depends on: `include/ui.h`
 
 ### elsewhere `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
 - Defined: `src/freedom.c:814`
+- Depends on: `include/ui.h`
 
 ### run_headless `static int run_headless(const char *target)`
 - Defined: `src/freedom.c:832`
+- Depends on: `include/ui.h`
 
 ### video_fetch_with_fallback `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
 - Defined: `src/freedom.c:896`
 - Doc: Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as fetch_follow_navigab
+- Depends on: `include/ui.h`
 
 ### run_dump_video `static int run_dump_video(const char *url)`
 - Defined: `src/freedom.c:1007`
 - Doc: -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
+- Depends on: `include/ui.h`
 
 ### main `int main(int argc, char **argv)`
 - Defined: `src/freedom.c:1025`
+- Depends on: `include/ui.h`
 
 ## src/hls.c
 
@@ -3502,51 +4009,65 @@ static dom_node_id qs_walk(const dom_inde...`
 ### table_probe `static size_t table_probe(const hb_table *t, const char *key, size_t klen)`
 - Defined: `src/hostblock.c:38`
 - Doc: Finds the slot for key (length klen) in t, which must have a free slot. Returns * the index of either the matching entry
+- Depends on: `include/util.h`
 
 ### table_grow `static int table_grow(hb_table *t, size_t newcap)`
 - Defined: `src/hostblock.c:49`
 - Doc: Finds the slot for key (length klen) in t, which must have a free slot. Returns * the index of either the matching entry
+- Depends on: `include/util.h`
 
 ### table_insert `static int table_insert(hb_table *t, const char *key, size_t klen)`
 - Defined: `src/hostblock.c:71`
 - Doc: Inserts key (length klen) into t, deduping. Returns 0 (inserted or already * present), -1 on OOM.
+- Depends on: `include/util.h`
 
 ### table_contains `static int table_contains(const hb_table *t, const char *key)`
 - Defined: `src/hostblock.c:91`
+- Depends on: `include/util.h`
 
 ### table_free `static void table_free(hb_table *t)`
 - Defined: `src/hostblock.c:97`
+- Depends on: `include/util.h`
 
 ### lower `static char lower(char c)`
 - Defined: `src/hostblock.c:106`
 - Doc: static int table_contains(const hb_table *t, const char *key) { if (t->cap == 0) return 0; size_t i = table_probe(t, key
+- Depends on: `include/util.h`
 
 ### is_ip_token `static int is_ip_token(const char *s, size_t n)`
 - Defined: `src/hostblock.c:113`
 - Doc: A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain. An empty token never reaches here.
+- Depends on: `include/util.h`
 
 ### is_domain_char `static int is_domain_char(char c)`
 - Defined: `src/hostblock.c:122`
 - Doc: A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain. An empty token never reaches here.
+- Depends on: `include/util.h`
 
 ### hb_new `hb_set *hb_new(void)`
 - Defined: `src/hostblock.c:143`
 - Doc: token is not a domain we accept (caller skips it). static size_t normalise_domain(const char *tok, size_t n, char *out, 
+- Depends on: `include/util.h`
 
 ### hb_free `void hb_free(hb_set *s)`
 - Defined: `src/hostblock.c:148`
+- Depends on: `include/util.h`
 
 ### hb_load `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
 - Defined: `src/hostblock.c:155`
+- Depends on: `include/util.h`
 
 ### hb_check `hb_decision hb_check(const hb_set *s, const char *host)`
 - Defined: `src/hostblock.c:192`
+- Depends on: `include/util.h`
 
 ### hb_is_allowlisted `int hb_is_allowlisted(const hb_set *s, const char *host)`
 - Defined: `src/hostblock.c:217`
+- Depends on: `include/util.h`
 
 ### hb_count `size_t hb_count(const hb_set *s, hb_list list)`
 - Defined: `src/hostblock.c:237`
+- Depends on: `include/util.h`
 
 ## src/hostedit.c
 
@@ -3597,86 +4118,110 @@ static dom_node_id qs_walk(const dom_inde...`
 ### dup_bytes `static char *dup_bytes(const lxb_char_t *src, size_t len)`
 - Defined: `src/html_parse.c:26`
 - Doc: #include "util.h" #include <stdlib.h> #include <string.h> #include <lexbor/html/html.h> #include <lexbor/dom/dom.h> #inc
+- Depends on: `include/util.h`
 
 ### node_next `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)`
 - Defined: `src/html_parse.c:37`
 - Doc: }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t len) { if (len == (size_t)-1) return NULL; /*
+- Depends on: `include/util.h`
 
 ### attr_is_event_handler `static int attr_is_event_handler(const lxb_dom_attr_t *attr)`
 - Defined: `src/html_parse.c:46`
+- Depends on: `include/util.h`
 
 ### node_is_script `static int node_is_script(const lxb_dom_node_t *node)`
 - Defined: `src/html_parse.c:53`
+- Depends on: `include/util.h`
 
 ### strip_scripts `static void strip_scripts(lxb_html_document_t *document)`
 - Defined: `src/html_parse.c:59`
+- Depends on: `include/util.h`
 
 ### script_classify `static int script_classify(const lxb_dom_node_t *n,
                            const lxb_char_t *...`
 - Defined: `src/html_parse.c:97`
 - Doc: Classifies a <script>: a classic program runs only when its type is absent/empty or a JavaScript MIME type (contains "ja
+- Depends on: `include/util.h`
 
 ### hp_extract_script_list `hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count)`
 - Defined: `src/html_parse.c:126`
 - Doc: Collects each executable <script> as its own entry, in document order: inline source for classic inline scripts, the raw
+- Depends on: `include/util.h`
 
 ### hp_free_scripts `void hp_free_scripts(hp_script *scripts, size_t count)`
 - Defined: `src/html_parse.c:196`
+- Depends on: `include/util.h`
 
 ### attr_has_token_ci `static int attr_has_token_ci(const lxb_char_t *val, size_t vlen, const char *needle)`
 - Defined: `src/html_parse.c:210`
 - Doc: Whitespace-separated token test over a length-delimited attribute value, ASCII case-insensitive: rel="preload stylesheet
+- Depends on: `include/util.h`
 
 ### link_is_active_stylesheet `static int link_is_active_stylesheet(lxb_dom_element_t *el,
                                      ...`
 - Defined: `src/html_parse.c:231`
 - Doc: An applicable stylesheet <link>: rel token "stylesheet" and not "alternate"; a non-empty href; media absent/empty or men
+- Depends on: `include/util.h`
 
 ### hp_extract_stylesheet_hrefs `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count)`
 - Defined: `src/html_parse.c:252`
+- Depends on: `include/util.h`
 
 ### hp_free_stylesheet_hrefs `void hp_free_stylesheet_hrefs(char **hrefs, size_t count)`
 - Defined: `src/html_parse.c:286`
+- Depends on: `include/util.h`
 
 ### strip_event_handlers `static void strip_event_handlers(lxb_html_document_t *document)`
 - Defined: `src/html_parse.c:292`
+- Depends on: `include/util.h`
 
 ### hp_config_default `hp_config hp_config_default(void)`
 - Defined: `src/html_parse.c:315`
 - Doc: for (lxb_dom_attr_t *attr = lxb_dom_element_first_attribute(el); attr != NULL; attr = lxb_dom_element_next_attribute(att
+- Depends on: `include/util.h`
 
 ### hp_validate_input `hp_status hp_validate_input(const char *html, size_t len, const hp_config *cfg)`
 - Defined: `src/html_parse.c:323`
+- Depends on: `include/util.h`
 
 ### hp_parse `hp_status hp_parse(const char *html, size_t len, const hp_config *cfg, hp_document **out)`
 - Defined: `src/html_parse.c:333`
 - Doc: c.strip_scripts = 1; c.strip_event_handlers = 1; return c; } hp_status hp_validate_input(const char *html, size_t len, c
+- Depends on: `include/util.h`
 
 ### hp_element_count `size_t hp_element_count(const hp_document *doc)`
 - Defined: `src/html_parse.c:367`
 - Doc: if (local.strip_scripts) strip_scripts(document); if (local.strip_event_handlers) strip_event_handlers(document); hp_doc
+- Depends on: `include/util.h`
 
 ### hp_script_count `size_t hp_script_count(const hp_document *doc)`
 - Defined: `src/html_parse.c:377`
+- Depends on: `include/util.h`
 
 ### hp_event_handler_count `size_t hp_event_handler_count(const hp_document *doc)`
 - Defined: `src/html_parse.c:387`
+- Depends on: `include/util.h`
 
 ### hp_extract_text `char *hp_extract_text(const hp_document *doc, size_t *out_len)`
 - Defined: `src/html_parse.c:403`
+- Depends on: `include/util.h`
 
 ### hp_get_title `char *hp_get_title(const hp_document *doc, size_t *out_len)`
 - Defined: `src/html_parse.c:422`
+- Depends on: `include/util.h`
 
 ### hp_free `void hp_free(char *buf)`
 - Defined: `src/html_parse.c:437`
 - Doc: char *hp_get_title(const hp_document *doc, size_t *out_len) { if (out_len != NULL) *out_len = 0; if (doc == NULL || doc-
+- Depends on: `include/util.h`
 
 ### hp_document_free `void hp_document_free(hp_document *doc)`
 - Defined: `src/html_parse.c:441`
+- Depends on: `include/util.h`
 
 ### hp_document_root `const void *hp_document_root(const hp_document *doc)`
 - Defined: `src/html_parse.c:447`
+- Depends on: `include/util.h`
 
 ## src/image_decode.c
 
@@ -4353,40 +4898,50 @@ static int cb_append(char **bu...`
  * Sandbox: the decoder needs open() for shared libraries (.so loading) and
  * brk/mmap for FFm...`
 - Defined: `src/media_decoder.c:17`
+- Depends on: `include/util.h`
 
 ### decoder_close `static void decoder_close(decoder_ctx *dc)`
 - Defined: `src/media_decoder.c:78`
 - Doc: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /* converted frame (ARGB) AVFrame         *audi
+- Depends on: `include/util.h`
 
 ### decoder_init `static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len)`
 - Defined: `src/media_decoder.c:96`
 - Doc: Initialises the decoder from the first TS segment bytes. The caller passes the complete segment data so avformat can pro
+- Depends on: `include/util.h`
 
 ### frame_pts_us `static int64_t frame_pts_us(const AVFrame *f, AVRational tb, int64_t fallback)`
 - Defined: `src/media_decoder.c:215`
 - Doc: Rescales a decoded frame's PTS to microseconds using the time base of the * stream it came from; frames without a PTS ge
+- Depends on: `include/util.h`
 
 ### av_rescale_q `return av_rescale_q(f->pts, tb, (AVRational)`
 - Defined: `src/media_decoder.c:217`
+- Depends on: `include/util.h`
 
 ### send_video_frame `static void send_video_frame(decoder_ctx *dc, int64_t pts_us)`
 - Defined: `src/media_decoder.c:222`
 - Doc: Converts the current dc->frame (YUV) to BGRA and sends it as MD_FRAME with * the given PTS in microseconds.
+- Depends on: `include/util.h`
 
 ### send_audio_frame `static void send_audio_frame(decoder_ctx *dc, int64_t pts_us)`
 - Defined: `src/media_decoder.c:242`
 - Doc: Converts the current dc->audio_frame to interleaved S16LE PCM and sends it as MD_AUDIO_FRAME with the given PTS in micro
+- Depends on: `include/util.h`
 
 ### decode_segment `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)`
 - Defined: `src/media_decoder.c:276`
 - Doc: Decodes one segment of TS data and sends frames. Returns the number of * frames sent, or -1 on fatal error.
+- Depends on: `include/util.h`
 
 ### media_decoder_run `void media_decoder_run(int out_fd, int cmd_fd)`
 - Defined: `src/media_decoder.c:378`
 - Doc: v2: NO per-segment codec drain. v1 sent a NULL packet here, which put the codec in permanent EOF state: every segment af
+- Depends on: `include/util.h`
 
 ### media_decoder_spawn `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
 - Defined: `src/media_decoder.c:448`
+- Depends on: `include/util.h`
 
 ## src/net_realm.c
 
@@ -4507,539 +5062,693 @@ int os_namespac...`
 ### cp1252_to_ucs `static unsigned int cp1252_to_ucs(unsigned char c)`
 - Defined: `src/page_view.c:82`
 - Doc: Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80). 0xA0.. 0xFF map identically to Latin-1 (code poi
+- Depends on: `include/util.h`
 
 ### utf8_encode `static size_t utf8_encode(unsigned int cp, char *out)`
 - Defined: `src/page_view.c:96`
 - Doc: Encodes a BMP scalar (<= 0xFFFF, which covers all Windows-1252 targets) as * UTF-8 into out (up to 3 bytes); returns the
+- Depends on: `include/util.h`
 
 ### utf8_sanitized_dup `static char *utf8_sanitized_dup(const char *s)`
 - Defined: `src/page_view.c:108`
+- Depends on: `include/util.h`
 
 ### dup_n `static char *dup_n(const char *s, size_t n)`
 - Defined: `src/page_view.c:142`
+- Depends on: `include/util.h`
 
 ### run_init_common `static void run_init_common(pv_run *r)`
 - Defined: `src/page_view.c:157`
 - Doc: Common field initialization shared by all append helpers. Keeps the three constructors DRY and guarantees every run star
+- Depends on: `include/util.h`
 
 ### pv_node_map_init `static int pv_node_map_init(pv_node_map *m)`
-- Defined: `src/page_view.c:268`
+- Defined: `src/page_view.c:274`
+- Depends on: `include/util.h`
 
 ### pv_node_map_free `static void pv_node_map_free(pv_node_map *m)`
-- Defined: `src/page_view.c:276`
+- Defined: `src/page_view.c:282`
+- Depends on: `include/util.h`
 
 ### pv_node_map_build `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:313`
+- Defined: `src/page_view.c:319`
 - Doc: Builds a document-order map of all element nodes under root. Returns 0, or -1 on * allocation failure.
+- Depends on: `include/util.h`
 
 ### pv_new `pv_view *pv_new(void)`
-- Defined: `src/page_view.c:321`
+- Defined: `src/page_view.c:327`
+- Depends on: `include/util.h`
 
 ### pv_append `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
                     c...`
-- Defined: `src/page_view.c:325`
+- Defined: `src/page_view.c:331`
+- Depends on: `include/util.h`
 
 ### pv_append_image `pv_status pv_append_image(pv_view *v, int heading, int block_break,
                           con...`
-- Defined: `src/page_view.c:359`
+- Defined: `src/page_view.c:365`
+- Depends on: `include/util.h`
 
 ### pv_append_input `pv_status pv_append_input(pv_view *v, int heading, int block_break,
                           pv_...`
-- Defined: `src/page_view.c:389`
+- Defined: `src/page_view.c:395`
+- Depends on: `include/util.h`
 
 ### pv_append_video `pv_status pv_append_video(pv_view *v, int heading, int block_break,
                           con...`
-- Defined: `src/page_view.c:429`
+- Defined: `src/page_view.c:435`
+- Depends on: `include/util.h`
 
 ### pv_append_svg `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
                         const c...`
-- Defined: `src/page_view.c:465`
+- Defined: `src/page_view.c:471`
+- Depends on: `include/util.h`
 
 ### pv_set_emphasis `void pv_set_emphasis(pv_view *v, int bold, int italic)`
-- Defined: `src/page_view.c:494`
+- Defined: `src/page_view.c:500`
+- Depends on: `include/util.h`
 
 ### pv_set_indent `void pv_set_indent(pv_view *v, int indent)`
-- Defined: `src/page_view.c:501`
+- Defined: `src/page_view.c:507`
+- Depends on: `include/util.h`
 
 ### pv_set_color `void pv_set_color(pv_view *v, int fg_rgb)`
-- Defined: `src/page_view.c:506`
+- Defined: `src/page_view.c:512`
+- Depends on: `include/util.h`
 
 ### pv_set_bgcolor `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
-- Defined: `src/page_view.c:511`
+- Defined: `src/page_view.c:517`
+- Depends on: `include/util.h`
 
 ### pv_set_text_style `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
                 ...`
-- Defined: `src/page_view.c:516`
+- Defined: `src/page_view.c:522`
+- Depends on: `include/util.h`
 
 ### pv_set_grad_text `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)`
-- Defined: `src/page_view.c:527`
+- Defined: `src/page_view.c:533`
+- Depends on: `include/util.h`
 
 ### pv_set_text_ext `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
-- Defined: `src/page_view.c:535`
+- Defined: `src/page_view.c:541`
+- Depends on: `include/util.h`
 
 ### ignored `* source is ignored (fail-visible: never invisible text from half a
      * pattern). A real text-...`
-- Defined: `src/page_view.c:568`
+- Defined: `src/page_view.c:574`
+- Depends on: `include/util.h`
 
 ### pv_set_container `void pv_set_container(pv_view *v, int cont_id, int cont_display,
                       int cont_g...`
-- Defined: `src/page_view.c:582`
+- Defined: `src/page_view.c:588`
+- Depends on: `include/util.h`
 
 ### pv_set_row_span `void pv_set_row_span(pv_view *v, int row_span)`
-- Defined: `src/page_view.c:597`
+- Defined: `src/page_view.c:603`
+- Depends on: `include/util.h`
 
 ### pv_set_grid_area `void pv_set_grid_area(pv_view *v, int row_start, int col_start)`
-- Defined: `src/page_view.c:601`
+- Defined: `src/page_view.c:607`
+- Depends on: `include/util.h`
 
 ### pv_set_grid `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
-- Defined: `src/page_view.c:608`
+- Defined: `src/page_view.c:614`
+- Depends on: `include/util.h`
 
 ### pv_set_grid_rows `void pv_set_grid_rows(pv_view *v, int grid_rows)`
-- Defined: `src/page_view.c:618`
+- Defined: `src/page_view.c:624`
+- Depends on: `include/util.h`
 
 ### pv_set_cont_box `void pv_set_cont_box(pv_view *v, int cont_box_id)`
-- Defined: `src/page_view.c:622`
+- Defined: `src/page_view.c:628`
+- Depends on: `include/util.h`
 
 ### pv_set_flex `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
                  int...`
-- Defined: `src/page_view.c:626`
+- Defined: `src/page_view.c:632`
+- Depends on: `include/util.h`
 
 ### pv_set_cont_item `void pv_set_cont_item(pv_view *v, int cont_item)`
-- Defined: `src/page_view.c:638`
+- Defined: `src/page_view.c:644`
+- Depends on: `include/util.h`
 
 ### pv_set_float `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
                 int ...`
-- Defined: `src/page_view.c:643`
+- Defined: `src/page_view.c:649`
+- Depends on: `include/util.h`
 
 ### pv_set_box `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
                 int box_center, int ...`
-- Defined: `src/page_view.c:656`
+- Defined: `src/page_view.c:671`
+- Depends on: `include/util.h`
 
 ### pv_set_box_pct `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
                     ...`
-- Defined: `src/page_view.c:668`
+- Defined: `src/page_view.c:683`
+- Depends on: `include/util.h`
 
 ### pv_set_ua_tag `void pv_set_ua_tag(pv_view *v, int ua_tag)`
-- Defined: `src/page_view.c:679`
+- Defined: `src/page_view.c:694`
+- Depends on: `include/util.h`
 
 ### pv_set_node_id `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
-- Defined: `src/page_view.c:685`
+- Defined: `src/page_view.c:700`
+- Depends on: `include/util.h`
 
 ### pv_set_block_id `void pv_set_block_id(pv_view *v, int block_id)`
-- Defined: `src/page_view.c:690`
+- Defined: `src/page_view.c:705`
+- Depends on: `include/util.h`
 
 ### pv_set_own_box `void pv_set_own_box(pv_view *v, int box_id)`
-- Defined: `src/page_view.c:695`
+- Defined: `src/page_view.c:710`
+- Depends on: `include/util.h`
 
 ### pv_set_oof `void pv_set_oof(pv_view *v, int oof)`
-- Defined: `src/page_view.c:700`
+- Defined: `src/page_view.c:715`
+- Depends on: `include/util.h`
 
 ### pv_set_input_checked `void pv_set_input_checked(pv_view *v, int checked)`
-- Defined: `src/page_view.c:705`
+- Defined: `src/page_view.c:720`
+- Depends on: `include/util.h`
 
 ### pv_set_input_select_opts `void pv_set_input_select_opts(pv_view *v, const char *select_opts)`
-- Defined: `src/page_view.c:710`
+- Defined: `src/page_view.c:725`
+- Depends on: `include/util.h`
 
 ### pv_add_cont_def `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)`
-- Defined: `src/page_view.c:718`
+- Defined: `src/page_view.c:733`
+- Depends on: `include/util.h`
 
 ### pv_cont_count `size_t pv_cont_count(const pv_view *v)`
-- Defined: `src/page_view.c:731`
+- Defined: `src/page_view.c:746`
+- Depends on: `include/util.h`
 
 ### pv_cont_at `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:735`
+- Defined: `src/page_view.c:750`
+- Depends on: `include/util.h`
 
 ### pv_add_box_def `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
-- Defined: `src/page_view.c:740`
+- Defined: `src/page_view.c:755`
+- Depends on: `include/util.h`
 
 ### pv_free `void pv_free(pv_view *v)`
-- Defined: `src/page_view.c:753`
+- Defined: `src/page_view.c:768`
+- Depends on: `include/util.h`
 
 ### pv_count `size_t pv_count(const pv_view *v)`
-- Defined: `src/page_view.c:770`
+- Defined: `src/page_view.c:785`
+- Depends on: `include/util.h`
 
 ### pv_at `const pv_run *pv_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:774`
+- Defined: `src/page_view.c:789`
+- Depends on: `include/util.h`
 
 ### pv_box_count `size_t pv_box_count(const pv_view *v)`
-- Defined: `src/page_view.c:779`
+- Defined: `src/page_view.c:794`
+- Depends on: `include/util.h`
 
 ### pv_box_at `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
-- Defined: `src/page_view.c:783`
+- Defined: `src/page_view.c:798`
+- Depends on: `include/util.h`
 
 ### node_next `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:792`
+- Defined: `src/page_view.c:807`
 - Doc: } size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const pv_view 
+- Depends on: `include/util.h`
 
 ### is_block_tag `static int is_block_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:801`
+- Defined: `src/page_view.c:816`
+- Depends on: `include/util.h`
 
 ### is_block_like `static int is_block_like(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:827`
+- Defined: `src/page_view.c:842`
 - Doc: An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display property in
+- Depends on: `include/util.h`
 
 ### resolves `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
  * button/tooltip w...`
-- Defined: `src/page_view.c:852`
+- Defined: `src/page_view.c:867`
+- Depends on: `include/util.h`
 
 ### is_block_like_style `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)`
-- Defined: `src/page_view.c:862`
+- Defined: `src/page_view.c:877`
 - Doc: is_block_like with the out-of-flow coercion applied. Takes the resolved style * because the answer depends on position/f
+- Depends on: `include/util.h`
 
 ### generates_box `static int generates_box(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:873`
+- Defined: `src/page_view.c:888`
+- Depends on: `include/util.h`
 
 ### generates_box_style `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)`
-- Defined: `src/page_view.c:886`
+- Defined: `src/page_view.c:901`
 - Doc: Form controls (input/select/textarea/button) are inline-block by default but can carry author CSS like position:absolute
+- Depends on: `include/util.h`
 
 ### causes_block_break `static int causes_block_break(lxb_tag_id_t t, css_display display)`
-- Defined: `src/page_view.c:893`
+- Defined: `src/page_view.c:908`
 - Doc: Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do NOT
+- Depends on: `include/util.h`
 
 ### paints `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
  * vacías"). Comment a...`
-- Defined: `src/page_view.c:902`
+- Defined: `src/page_view.c:917`
+- Depends on: `include/util.h`
 
 ### ua_tag_of `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:927`
+- Defined: `src/page_view.c:942`
 - Doc: User-agent box identity of a block-level element, from its lexbor tag id. Only the tags the UA sheet gives a vertical ma
+- Depends on: `include/util.h`
 
 ### heading_level `static int heading_level(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:948`
+- Defined: `src/page_view.c:963`
+- Depends on: `include/util.h`
 
 ### is_skipped_tag `static int is_skipped_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:960`
+- Defined: `src/page_view.c:975`
+- Depends on: `include/util.h`
 
 ### node_tag `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
-- Defined: `src/page_view.c:980`
+- Defined: `src/page_view.c:995`
+- Depends on: `include/util.h`
 
 ### in_skipped_subtree `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
               ...`
-- Defined: `src/page_view.c:989`
+- Defined: `src/page_view.c:1004`
 - Doc: Nonzero if any ancestor up to base is a non-rendered container. When js_enabled, a <noscript> ancestor also suppresses c
+- Depends on: `include/util.h`
 
 ### font_color_attr `static int font_color_attr(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1025`
+- Defined: `src/page_view.c:1040`
+- Depends on: `include/util.h`
 
 ### bgcolor_attr `static int bgcolor_attr(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1032`
+- Defined: `src/page_view.c:1047`
 - Doc: Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News' orange b
+- Depends on: `include/util.h`
 
 ### item_ordinal `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)`
-- Defined: `src/page_view.c:1132`
+- Defined: `src/page_view.c:1156`
 - Doc: Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its own it
+- Depends on: `include/util.h`
 
 ### pv_content_hidden `int pv_content_hidden(int box_hidden, int run_visibility)`
-- Defined: `src/page_view.c:1163`
+- Defined: `src/page_view.c:1187`
 - Doc: The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field resolves fr
+- Depends on: `include/util.h`
 
 ### pv_text_ext_reset `void pv_text_ext_reset(pv_text_ext *e)`
-- Defined: `src/page_view.c:1168`
+- Defined: `src/page_view.c:1192`
+- Depends on: `include/util.h`
 
 ### pv_text_ext_merge `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)`
-- Defined: `src/page_view.c:1195`
+- Defined: `src/page_view.c:1219`
 - Doc: Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten — ke
+- Depends on: `include/util.h`
 
 ### css_has_hbox `static int css_has_hbox(const css_style *cs)`
-- Defined: `src/page_view.c:1253`
+- Defined: `src/page_view.c:1277`
 - Doc: True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width: 50%`
+- Depends on: `include/util.h`
 
 ### css_hbox_resolve `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
-- Defined: `src/page_view.c:1266`
+- Defined: `src/page_view.c:1290`
 - Doc: Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side (clam
+- Depends on: `include/util.h`
 
 ### css_has_position `static int css_has_position(const css_style *cs)`
-- Defined: `src/page_view.c:1310`
+- Defined: `src/page_view.c:1334`
 - Doc: A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree (pa
+- Depends on: `include/util.h`
 
 ### css_has_boxdeco `static int css_has_boxdeco(const css_style *cs)`
-- Defined: `src/page_view.c:1314`
+- Defined: `src/page_view.c:1338`
+- Depends on: `include/util.h`
 
 ### cont_def_reset `static void cont_def_reset(pv_cont_def *d)`
-- Defined: `src/page_view.c:1454`
+- Defined: `src/page_view.c:1478`
 - Doc: Per-container parameters + parent linkage (2026-07-31). Mirrors pv_box_reg's def[] array: the registry is the one place 
+- Depends on: `include/util.h`
 
 ### container_id `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1468`
+- Defined: `src/page_view.c:1492`
 - Doc: static void cont_def_reset(pv_cont_def *d) { memset(d, 0, sizeof *d); d->parent_id = -1; d->parent_item = -1; d->row_gap
+- Depends on: `include/util.h`
 
 ### trying `* a real page passes without trying (slashdot's front page saturates it), and past
  * it box_reg_...`
-- Defined: `src/page_view.c:1521`
+- Defined: `src/page_view.c:1545`
+- Depends on: `include/util.h`
 
 ### box_reg_free `static void box_reg_free(pv_box_reg *r)`
-- Defined: `src/page_view.c:1549`
+- Defined: `src/page_view.c:1573`
+- Depends on: `include/util.h`
 
 ### boxdef_from_style `static void boxdef_from_style(pv_box_def *d, const css_style *cs)`
-- Defined: `src/page_view.c:1559`
+- Defined: `src/page_view.c:1583`
 - Doc: Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style. Padding unset -> 0 (geometry default)
+- Depends on: `include/util.h`
 
 ### box_reg_id `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
            ...`
-- Defined: `src/page_view.c:1780`
+- Defined: `src/page_view.c:1804`
 - Doc: Registers (or finds) the box for `node`. font_px is the element's COMPUTED font-size, needed because the user-agent marg
+- Depends on: `include/util.h`
 
 ### pv_style_cache_init `static int pv_style_cache_init(pv_style_cache *c)`
-- Defined: `src/page_view.c:1823`
+- Defined: `src/page_view.c:1847`
+- Depends on: `include/util.h`
 
 ### pv_style_cache_free `static void pv_style_cache_free(pv_style_cache *c)`
-- Defined: `src/page_view.c:1837`
+- Defined: `src/page_view.c:1861`
+- Depends on: `include/util.h`
 
 ### pv_cache_find `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1848`
+- Defined: `src/page_view.c:1872`
 - Doc: cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init, or a caller that opts out) simply calls thr
+- Depends on: `include/util.h`
 
 ### pv_cached_font_px `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:1859`
+- Defined: `src/page_view.c:1883`
 - Doc: The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was never
+- Depends on: `include/util.h`
 
 ### pv_cache_put `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
                      ...`
-- Defined: `src/page_view.c:1863`
+- Defined: `src/page_view.c:1887`
+- Depends on: `include/util.h`
 
 ### pv_parent_element `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)`
-- Defined: `src/page_view.c:1887`
+- Defined: `src/page_view.c:1911`
 - Doc: if (ns != NULL) cache->style = ns; double *nf = (double *)realloc(cache->font_size, ncap * sizeof *nf); if (nf != NULL) 
+- Depends on: `include/util.h`
 
 ### subtree_is_oof `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
                      ...`
-- Defined: `src/page_view.c:1949`
+- Defined: `src/page_view.c:1973`
 - Doc: True iff the element itself is out of flow (position:absolute/fixed) or descends from one. Such a subtree is removed fro
+- Depends on: `include/util.h`
 
 ### size `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
 static void app...`
-- Defined: `src/page_view.c:1969`
+- Defined: `src/page_view.c:1993`
+- Depends on: `include/util.h`
 
 ### builder `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
  * (the ...`
-- Defined: `src/page_view.c:1989`
+- Defined: `src/page_view.c:2013`
+- Depends on: `include/util.h`
 
 ### css_to_fx_justify `static int css_to_fx_justify(css_justify j)`
-- Defined: `src/page_view.c:2018`
+- Defined: `src/page_view.c:2042`
 - Doc: Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to FX_J
+- Depends on: `include/util.h`
 
 ### is_bold_tag `static int is_bold_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:2037`
+- Defined: `src/page_view.c:2061`
 - Doc: Tags the user-agent sheet renders bold. Headings belong here: making the UA bold part of the RESOLVED weight is what let
+- Depends on: `include/util.h`
 
 ### is_italic_tag `static int is_italic_tag(lxb_tag_id_t t)`
-- Defined: `src/page_view.c:2042`
+- Defined: `src/page_view.c:2066`
+- Depends on: `include/util.h`
 
 ### is_inline_block_row `static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
                  ...`
-- Defined: `src/page_view.c:2076`
+- Defined: `src/page_view.c:2100`
 - Doc: at least one element child, EVERY element child is display:inline-block, and it carries no text of its own beyond whites
+- Depends on: `include/util.h`
 
 ### paints `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas vacías").
  *
  * A chil...`
-- Defined: `src/page_view.c:2096`
+- Defined: `src/page_view.c:2120`
+- Depends on: `include/util.h`
 
 ### resolve_context `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...`
-- Defined: `src/page_view.c:2127`
+- Defined: `src/page_view.c:2151`
+- Depends on: `include/util.h`
+
+### opens `* painter applies it when the box opens (band/shared context) — seeding
+             * it onto ru...`
+- Defined: `src/page_view.c:2399`
+- Depends on: `include/util.h`
 
 ### margins `* margins (boxdef_from_style) and the painter applies them when
                          * it ope...`
-- Defined: `src/page_view.c:2372`
+- Defined: `src/page_view.c:2426`
+- Depends on: `include/util.h`
 
 ### container `* membership in this container (and none in any container further out,
                  * since i...`
-- Defined: `src/page_view.c:2488`
+- Defined: `src/page_view.c:2542`
+- Depends on: `include/util.h`
 
 ### walk `* far on this walk (they are all inside this element). */
 
                         /* The innermo...`
-- Defined: `src/page_view.c:2571`
+- Defined: `src/page_view.c:2625`
+- Depends on: `include/util.h`
+
+### float `* genuinely nested float (oid != id) takes the deferred-column path. */
+    if (cont->float_oid =...`
+- Defined: `src/page_view.c:2712`
+- Depends on: `include/util.h`
 
 ### sz_count `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)`
-- Defined: `src/page_view.c:2690`
+- Defined: `src/page_view.c:2755`
 - Doc: Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer. Two passes -- one to mea
+- Depends on: `include/util.h`
 
 ### sz_write `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
-- Defined: `src/page_view.c:2703`
+- Defined: `src/page_view.c:2768`
+- Depends on: `include/util.h`
 
 ### serialize_subtree `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
-- Defined: `src/page_view.c:2711`
+- Defined: `src/page_view.c:2776`
+- Depends on: `include/util.h`
 
 ### collapse_ws `static char *collapse_ws(const char *s, size_t n)`
-- Defined: `src/page_view.c:2731`
+- Defined: `src/page_view.c:2796`
 - Doc: if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL) return 
+- Depends on: `include/util.h`
 
 ### parse_dim `static int parse_dim(const lxb_char_t *s, size_t len)`
-- Defined: `src/page_view.c:2755`
+- Defined: `src/page_view.c:2820`
 - Doc: Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%"). Returns the valu
+- Depends on: `include/util.h`
 
 ### present `* when no width descriptors are present (density-only or bare URLs). */
 static void srcset_best_u...`
-- Defined: `src/page_view.c:2772`
+- Defined: `src/page_view.c:2837`
+- Depends on: `include/util.h`
 
 ### srcset_slot_width `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
                               ...`
-- Defined: `src/page_view.c:2867`
+- Defined: `src/page_view.c:2932`
 - Doc: Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns the effective slot width in px for the given vie
+- Depends on: `include/util.h`
 
 ### dimensions `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
 static void srcse...`
-- Defined: `src/page_view.c:2913`
+- Defined: `src/page_view.c:2978`
+- Depends on: `include/util.h`
 
 ### find_body `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:2944`
+- Defined: `src/page_view.c:3009`
+- Depends on: `include/util.h`
 
 ### string `* Returns a heap string (caller frees) or NULL when neither carries a class —
  * NULL simply mean...`
-- Defined: `src/page_view.c:2955`
+- Defined: `src/page_view.c:3020`
+- Depends on: `include/util.h`
 
 ### forms_free `static void forms_free(form_table *ft)`
-- Defined: `src/page_view.c:3002`
+- Defined: `src/page_view.c:3067`
+- Depends on: `include/util.h`
 
 ### ascii_ieq `static int ascii_ieq(const char *s, const char *lit)`
-- Defined: `src/page_view.c:3010`
+- Defined: `src/page_view.c:3075`
 - Doc: } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void forms_free(form_
+- Depends on: `include/util.h`
 
 ### attr_dup `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)`
-- Defined: `src/page_view.c:3022`
+- Defined: `src/page_view.c:3087`
 - Doc: Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute y
+- Depends on: `include/util.h`
 
 ### forms_add `static int forms_add(form_table *ft, const lxb_dom_node_t *node)`
-- Defined: `src/page_view.c:3031`
+- Defined: `src/page_view.c:3096`
 - Doc: Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent. A present-but-empty attribute y
+- Depends on: `include/util.h`
 
 ### form_for `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...`
-- Defined: `src/page_view.c:3051`
+- Defined: `src/page_view.c:3116`
 - Doc: } lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method", 6); i
+- Depends on: `include/util.h`
 
 ### under_unrendered `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)`
-- Defined: `src/page_view.c:3067`
+- Defined: `src/page_view.c:3132`
 - Doc: Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected subtr
+- Depends on: `include/util.h`
 
 ### collect_text `static char *collect_text(const lxb_dom_node_t *el)`
-- Defined: `src/page_view.c:3080`
+- Defined: `src/page_view.c:3145`
 - Doc: Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of a <
+- Depends on: `include/util.h`
 
 ### classify_input `static pv_input_type classify_input(const char *type)`
-- Defined: `src/page_view.c:3103`
+- Defined: `src/page_view.c:3168`
+- Depends on: `include/util.h`
 
 ### li_ordinal `static int li_ordinal(const lxb_dom_node_t *li)`
-- Defined: `src/page_view.c:3283`
+- Defined: `src/page_view.c:3348`
 - Doc: 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out of s
+- Depends on: `include/util.h`
 
 ### roman_marker `static void roman_marker(int n, int upper, char *out, size_t cap)`
-- Defined: `src/page_view.c:3309`
+- Defined: `src/page_view.c:3374`
 - Doc: int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ? 'A'
+- Depends on: `include/util.h`
 
 ### list_marker `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...`
-- Defined: `src/page_view.c:3334`
+- Defined: `src/page_view.c:3399`
 - Doc: Builds the list marker for the first run of an <li>. With no author list-style (CSS_LS_UNSET) it is the UA default: "N. 
+- Depends on: `include/util.h`
 
 ### node_table_role `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3375`
+- Defined: `src/page_view.c:3440`
 - Doc: The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet gives 
+- Depends on: `include/util.h`
 
 ### nearest_table `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
  ...`
-- Defined: `src/page_view.c:3393`
+- Defined: `src/page_view.c:3458`
 - Doc: const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl); char tag[BX_TAG_NAME_MAX]; const char *tagp = NULL; if (nm !
+- Depends on: `include/util.h`
 
 ### parent_is_table_internal `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3421`
+- Defined: `src/page_view.c:3486`
 - Doc: Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group. T
+- Depends on: `include/util.h`
 
 ### nearest_cell `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
   ...`
-- Defined: `src/page_view.c:3432`
+- Defined: `src/page_view.c:3497`
 - Doc: node generates no box; the caller drops it so it does not split a data table's grid-container item run (which the layout
+- Depends on: `include/util.h`
 
 ### cell_has_nested_table `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3447`
+- Defined: `src/page_view.c:3512`
 - Doc: Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell. Only leaf cells (no nest
+- Depends on: `include/util.h`
 
 ### next_skip `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)`
-- Defined: `src/page_view.c:3456`
+- Defined: `src/page_view.c:3521`
 - Doc: Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the table 
+- Depends on: `include/util.h`
 
 ### cell_anchors `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)`
-- Defined: `src/page_view.c:3467`
+- Defined: `src/page_view.c:3532`
 - Doc: First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only non
+- Depends on: `include/util.h`
 
 ### links `* its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows ...`
-- Defined: `src/page_view.c:3485`
+- Defined: `src/page_view.c:3550`
+- Depends on: `include/util.h`
 
 ### flow_table `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
-- Defined: `src/page_view.c:3505`
+- Defined: `src/page_view.c:3570`
+- Depends on: `include/util.h`
 
 ### in_flow_table_cell `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
            ...`
-- Defined: `src/page_view.c:3517`
+- Defined: `src/page_view.c:3582`
+- Depends on: `include/util.h`
 
 ### table `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
  * content -- their ...`
-- Defined: `src/page_view.c:3527`
+- Defined: `src/page_view.c:3592`
+- Depends on: `include/util.h`
 
 ### table_columns `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
-- Defined: `src/page_view.c:3545`
+- Defined: `src/page_view.c:3610`
 - Doc: Grid column count of a table: the maximum number of logical columns across all its rows, computed by summing each cell's
+- Depends on: `include/util.h`
 
 ### collect_style_text `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)`
-- Defined: `src/page_view.c:3578`
+- Defined: `src/page_view.c:3643`
 - Doc: Concatenates the text of every <style> element in the document (head included) into one owned, NUL-terminated buffer, ca
+- Depends on: `include/util.h`
 
 ### in_hidden_subtree `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...`
-- Defined: `src/page_view.c:3619`
+- Defined: `src/page_view.c:3684`
 - Doc: Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none is 
+- Depends on: `include/util.h`
 
 ### in_boilerplate_subtree `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-- Defined: `src/page_view.c:3636`
+- Defined: `src/page_view.c:3701`
 - Doc: Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>). Used only in distraction
+- Depends on: `include/util.h`
 
 ### in_closed_details_subtree `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-- Defined: `src/page_view.c:3651`
+- Defined: `src/page_view.c:3716`
 - Doc: Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its <summa
+- Depends on: `include/util.h`
 
 ### pv_build `pv_status pv_build(const hp_document *doc, pv_view **out)`
-- Defined: `src/page_view.c:3670`
+- Defined: `src/page_view.c:3735`
+- Depends on: `include/util.h`
 
 ### pv_build_ex `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-- Defined: `src/page_view.c:3674`
+- Defined: `src/page_view.c:3739`
+- Depends on: `include/util.h`
 
 ### pv_build_full `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-- Defined: `src/page_view.c:3678`
+- Defined: `src/page_view.c:3743`
+- Depends on: `include/util.h`
 
 ### annotate_replaced_run `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...`
-- Defined: `src/page_view.c:3701`
+- Defined: `src/page_view.c:3766`
 - Doc: Attaches the layout membership a replaced run needs to take part in its surroundings: flex/grid container identity and i
+- Depends on: `include/util.h`
 
 ### collect_page_css `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...`
-- Defined: `src/page_view.c:3735`
+- Defined: `src/page_view.c:3803`
+- Depends on: `include/util.h`
 
 ### pv_build_styled `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-- Defined: `src/page_view.c:3760`
+- Defined: `src/page_view.c:3828`
+- Depends on: `include/util.h`
 
 ### px `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-- Defined: `src/page_view.c:4295`
+- Defined: `src/page_view.c:4369`
+- Depends on: `include/util.h`
 
 ### engine `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-- Defined: `src/page_view.c:4898`
+- Defined: `src/page_view.c:4984`
+- Depends on: `include/util.h`
 
 ### appended `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
         if (cont.fl...`
-- Defined: `src/page_view.c:4952`
+- Defined: `src/page_view.c:5038`
+- Depends on: `include/util.h`
 
 ### pv_css_drops `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
-- Defined: `src/page_view.c:5039`
+- Defined: `src/page_view.c:5128`
 - Doc: Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context -- but
+- Depends on: `include/util.h`
 
 ## src/pdf_export.c
 
@@ -5262,64 +5971,82 @@ static void srcse...`
 ### utf8_sanitized_dup `static char *utf8_sanitized_dup(const char *s)`
 - Defined: `src/render_doc.c:26`
 - Doc: UTF-8 sanitisation, kept local so render_doc stays self-contained (matching the convention in browser.c and page_view.c)
+- Depends on: `include/util.h`
 
 ### rd_push `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
                  ...`
 - Defined: `src/render_doc.c:60`
 - Doc: Appends one block, taking owned copies of text (required) and href (optional). * Returns 0 on success, -1 on allocation 
+- Depends on: `include/util.h`
 
 ### rd_push_input `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)`
-- Defined: `src/render_doc.c:186`
+- Defined: `src/render_doc.c:192`
 - Doc: Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value. Retur
+- Depends on: `include/util.h`
 
 ### resolve_image_decision `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
         ...`
-- Defined: `src/render_doc.c:221`
+- Defined: `src/render_doc.c:227`
 - Doc: Resolves raw_src (possibly relative, or a data: URI) against top_level_url and judges it under the exact same policy an 
+- Depends on: `include/util.h`
 
 ### rd_build `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-- Defined: `src/render_doc.c:242`
+- Defined: `src/render_doc.c:248`
+- Depends on: `include/util.h`
 
 ### unset `* background paints as if unset (no border/box-shadow-style
                  * "broken image" pla...`
-- Defined: `src/render_doc.c:588`
+- Defined: `src/render_doc.c:612`
+- Depends on: `include/util.h`
 
 ### rd_free `void rd_free(rd_doc *d)`
-- Defined: `src/render_doc.c:652`
+- Defined: `src/render_doc.c:676`
+- Depends on: `include/util.h`
 
 ### rd_count `size_t rd_count(const rd_doc *d)`
-- Defined: `src/render_doc.c:668`
+- Defined: `src/render_doc.c:692`
+- Depends on: `include/util.h`
 
 ### rd_at `const rd_block *rd_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:672`
+- Defined: `src/render_doc.c:696`
+- Depends on: `include/util.h`
 
 ### rd_box_count `size_t rd_box_count(const rd_doc *d)`
-- Defined: `src/render_doc.c:677`
+- Defined: `src/render_doc.c:701`
+- Depends on: `include/util.h`
 
 ### rd_box_at `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:681`
+- Defined: `src/render_doc.c:705`
+- Depends on: `include/util.h`
 
 ### rd_cont_count `size_t rd_cont_count(const rd_doc *d)`
-- Defined: `src/render_doc.c:686`
+- Defined: `src/render_doc.c:710`
+- Depends on: `include/util.h`
 
 ### rd_cont_at `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-- Defined: `src/render_doc.c:690`
+- Defined: `src/render_doc.c:714`
+- Depends on: `include/util.h`
 
 ### rd_kind_name `const char *rd_kind_name(rd_kind k)`
-- Defined: `src/render_doc.c:695`
+- Defined: `src/render_doc.c:719`
+- Depends on: `include/util.h`
 
 ### rd_block_tag `const char *rd_block_tag(const rd_block *b)`
-- Defined: `src/render_doc.c:709`
+- Defined: `src/render_doc.c:733`
+- Depends on: `include/util.h`
 
 ### rd_input_label `const char *rd_input_label(int input_type)`
-- Defined: `src/render_doc.c:740`
+- Defined: `src/render_doc.c:764`
+- Depends on: `include/util.h`
 
 ### rd_image_label `const char *rd_image_label(rdp_img_decision d)`
-- Defined: `src/render_doc.c:759`
+- Defined: `src/render_doc.c:783`
+- Depends on: `include/util.h`
 
 ### rd_image_fail_label `const char *rd_image_fail_label(img_fail_reason reason)`
-- Defined: `src/render_doc.c:770`
+- Defined: `src/render_doc.c:794`
+- Depends on: `include/util.h`
 
 ## src/render_policy.c
 
@@ -5345,50 +6072,63 @@ static void srcse...`
 ### child_render `static void child_render(int wfd, const char *html, size_t len)`
 - Defined: `src/renderer.c:24`
 - Doc: #include "html_parse.h" #include "os_sandbox.h" #include "util.h" #include <errno.h> #include <stdint.h> #include <stdli
+- Depends on: `include/util.h`
 
 ### read_field `static int read_field(int fd, char **out, size_t *out_len)`
 - Defined: `src/renderer.c:52`
 - Doc: int ok = (title != NULL && text != NULL) && write_full(wfd, &tl, sizeof tl) == 0 && (tl == 0 || write_full(wfd, title, t
+- Depends on: `include/util.h`
 
 ### rd_render_html `rd_status rd_render_html(const char *html, size_t len, rd_result *out)`
 - Defined: `src/renderer.c:69`
 - Doc: if (read_full(fd, &n, sizeof n) != 0) return -1; if (n > RD_MAX_FIELD) return -1; /* anti-amplification: reject huge len
+- Depends on: `include/util.h`
 
 ### rd_result_free `void rd_result_free(rd_result *out)`
 - Defined: `src/renderer.c:119`
+- Depends on: `include/util.h`
 
 ## src/request_policy.c
 
 ### lower `static char lower(char c)`
 - Defined: `src/request_policy.c:21`
 - Doc: all output goes to caller-provided bounded buffers.  #include "request_policy.h" #include "psl_data.h" #include <stdlib.
+- Depends on: `include/psl_data.h`
 
 ### ci_starts_with `static int ci_starts_with(const char *s, const char *prefix)`
 - Defined: `src/request_policy.c:25`
+- Depends on: `include/psl_data.h`
 
 ### psl_cmp `static int psl_cmp(const void *key, const void *elem)`
 - Defined: `src/request_policy.c:35`
 - Doc: static char lower(char c) { return (c >= 'A' && c <= 'Z') ? (char)(c + ('a' - 'A')) : c; } static int ci_starts_with(con
+- Depends on: `include/psl_data.h`
 
 ### psl_in `static int psl_in(const char *const *arr, size_t n, const char *key)`
 - Defined: `src/request_policy.c:39`
+- Depends on: `include/psl_data.h`
 
 ### public_suffix_labels `static size_t public_suffix_labels(const char *host, const size_t *off, size_t n)`
 - Defined: `src/request_policy.c:48`
 - Doc: Number of labels of the public suffix (eTLD) of a lowercased host, applying the full PSL algorithm: exception rules win;
+- Depends on: `include/psl_data.h`
 
 ### rp_host_of `int rp_host_of(const char *url, char *out, size_t out_size)`
 - Defined: `src/request_policy.c:75`
 - Doc: } if (s + 1 < n) { const char *parent = host + off[s + 1]; /* labels[s+1..n-1] if (psl_in(psl_wildcards, psl_wildcards_n
+- Depends on: `include/psl_data.h`
 
 ### rp_site_of `int rp_site_of(const char *host, char *out, size_t out_size)`
 - Defined: `src/request_policy.c:101`
+- Depends on: `include/psl_data.h`
 
 ### rp_same_site `int rp_same_site(const char *top_level_url, const char *request_url)`
 - Defined: `src/request_policy.c:133`
+- Depends on: `include/psl_data.h`
 
 ### rp_evaluate `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)`
 - Defined: `src/request_policy.c:142`
+- Depends on: `include/psl_data.h`
 
 ## src/secure_fetch.c
 
@@ -5648,224 +6388,285 @@ static void srcse...`
 
 ### child_reset_page `static void child_reset_page(child_state *cs)`
 - Defined: `src/tab.c:110`
+- Depends on: `include/util.h`
 
 ### policy `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
  * compromi...`
 - Defined: `src/tab.c:126`
+- Depends on: `include/util.h`
 
 ### run_js `* regardless of run_js (a no-JS load simply never records a request). */
 static int child_load(ch...`
 - Defined: `src/tab.c:180`
+- Depends on: `include/util.h`
 
 ### write_field `static int write_field(int fd, const char *s)`
 - Defined: `src/tab.c:247`
 - Doc: Writes one length-prefixed string field (the write mirror of read_field): a size_t * length then the bytes, with NULL/em
+- Depends on: `include/util.h`
 
 ### blocks `*
  * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
  * grid arr...`
-- Defined: `src/tab.c:278`
+- Defined: `src/tab.c:279`
+- Depends on: `include/util.h`
 
 ### FB_MAX_FILE_BYTES `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-- Defined: `src/tab.c:629`
+- Defined: `src/tab.c:638`
+- Depends on: `include/util.h`
 
 ### budget_remaining_ms `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
-- Defined: `src/tab.c:659`
+- Defined: `src/tab.c:668`
 - Doc: Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS bud
+- Depends on: `include/util.h`
 
 ### ctype_is_javascript `static int ctype_is_javascript(const char *ctype)`
-- Defined: `src/tab.c:673`
+- Defined: `src/tab.c:682`
 - Doc: Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types): accept a 
+- Depends on: `include/util.h`
 
 ### ctype_is_css `static int ctype_is_css(const char *ctype)`
-- Defined: `src/tab.c:682`
+- Defined: `src/tab.c:691`
 - Doc: Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is accepted,
+- Depends on: `include/util.h`
 
 ### log_external_skip `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...`
-- Defined: `src/tab.c:690`
+- Defined: `src/tab.c:699`
 - Doc: Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused). The raw hostile s
+- Depends on: `include/util.h`
 
 ### run `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
  * Call after every ...`
-- Defined: `src/tab.c:708`
+- Defined: `src/tab.c:717`
+- Depends on: `include/util.h`
 
 ### window `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-- Defined: `src/tab.c:741`
+- Defined: `src/tab.c:750`
+- Depends on: `include/util.h`
 
 ### child_handle_load `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-- Defined: `src/tab.c:785`
+- Defined: `src/tab.c:794`
+- Depends on: `include/util.h`
 
 ### swap `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...`
-- Defined: `src/tab.c:1029`
+- Defined: `src/tab.c:1038`
+- Depends on: `include/util.h`
 
 ### child_next_timer_ms `static int32_t child_next_timer_ms(child_state *cs)`
-- Defined: `src/tab.c:1067`
+- Defined: `src/tab.c:1076`
 - Doc: Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending. Does 
+- Depends on: `include/util.h`
 
 ### child_handle_mutation `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...`
-- Defined: `src/tab.c:1082`
+- Defined: `src/tab.c:1091`
 - Doc: Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so the 
+- Depends on: `include/util.h`
 
 ### child_handle_click `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- Defined: `src/tab.c:1148`
+- Defined: `src/tab.c:1157`
+- Depends on: `include/util.h`
 
 ### child_handle_tick `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- Defined: `src/tab.c:1152`
+- Defined: `src/tab.c:1161`
+- Depends on: `include/util.h`
 
 ### child_handle_event `static void child_handle_event(int wfd, child_state *cs)`
-- Defined: `src/tab.c:1162`
+- Defined: `src/tab.c:1171`
+- Depends on: `include/util.h`
 
 ### child_handle_mouse `static void child_handle_mouse(int wfd, child_state *cs)`
-- Defined: `src/tab.c:1211`
+- Defined: `src/tab.c:1220`
 - Doc: Handles a mouse DOM event (OP_MOUSE). Reads: node_id:int32, event_type_len:size_t, event_type, client_x:int32, client_y:
+- Depends on: `include/util.h`
 
 ### child_handle_submit `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
-- Defined: `src/tab.c:1245`
+- Defined: `src/tab.c:1254`
 - Doc: Fires a submit event on the form enclosing node_id. Walks up the DOM to find the <form> element, dispatches the event, a
+- Depends on: `include/util.h`
 
 ### child_handle_eval `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
-- Defined: `src/tab.c:1279`
+- Defined: `src/tab.c:1288`
 - Doc: Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a JS-le
+- Depends on: `include/util.h`
 
 ### child_handle_decode_image `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
-- Defined: `src/tab.c:1312`
+- Defined: `src/tab.c:1321`
 - Doc: Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data]. Decoding hostile image bytes happens h
+- Depends on: `include/util.h`
 
 ### child_handle_decode_image_b64 `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
-- Defined: `src/tab.c:1334`
+- Defined: `src/tab.c:1343`
 - Doc: data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64 DEC
+- Depends on: `include/util.h`
 
 ### gen_session_key `static uint64_t gen_session_key(void)`
-- Defined: `src/tab.c:1345`
+- Defined: `src/tab.c:1354`
+- Depends on: `include/util.h`
 
 ### tab_worker_run `static void tab_worker_run(int rfd, int wfd)`
-- Defined: `src/tab.c:1366`
+- Defined: `src/tab.c:1375`
 - Doc: The confined request loop. Runs in the re-exec'd worker image (see * tab_worker_dispatch). Never returns to the caller (
+- Depends on: `include/util.h`
 
 ### parse_worker_fd `static int parse_worker_fd(const char *s, int *out)`
-- Defined: `src/tab.c:1509`
+- Defined: `src/tab.c:1518`
 - Doc: else /* OP_DECODE_IMAGE_B64 */       child_handle_decode_image_b64(wfd, buf, len); free(buf); free(url); free(cookies); 
+- Depends on: `include/util.h`
 
 ### tab_parse_worker_args `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- Defined: `src/tab.c:1520`
+- Defined: `src/tab.c:1529`
+- Depends on: `include/util.h`
 
 ### tab_worker_dispatch `void tab_worker_dispatch(int argc, char **argv)`
-- Defined: `src/tab.c:1530`
+- Defined: `src/tab.c:1539`
+- Depends on: `include/util.h`
 
 ### ignore_sigpipe `static void ignore_sigpipe(void)`
-- Defined: `src/tab.c:1561`
+- Defined: `src/tab.c:1570`
 - Doc: A write to a dead child must not kill the parent with SIGPIPE. Idempotent; * no module-level mutable state of our own (t
+- Depends on: `include/util.h`
 
 ### tab_refresh_alive `static void tab_refresh_alive(tab *t)`
-- Defined: `src/tab.c:1567`
+- Defined: `src/tab.c:1576`
+- Depends on: `include/util.h`
 
 ### read_field `static int read_field(int fd, char **out, size_t *out_len)`
-- Defined: `src/tab.c:1587`
+- Defined: `src/tab.c:1596`
 - Doc: Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
+- Depends on: `include/util.h`
 
 ### read_view `static int read_view(int fd, pv_view **out)`
-- Defined: `src/tab.c:1603`
+- Defined: `src/tab.c:1612`
 - Doc: Reads a display list serialised by write_view into a fresh pv_view. The run * count and each field are capped against am
+- Depends on: `include/util.h`
 
 ### read_console `static int read_console(int fd, fb_buffer *out)`
-- Defined: `src/tab.c:2033`
+- Defined: `src/tab.c:2048`
 - Doc: Reads the console section written by write_console into out (a zero-initialised fb_buffer). Bounds the entry count and e
+- Depends on: `include/util.h`
 
 ### send_request `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
-- Defined: `src/tab.c:2070`
+- Defined: `src/tab.c:2085`
 - Doc: if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt, elen) !=
+- Depends on: `include/util.h`
 
 ### io_failure `static tab_status io_failure(tab *t)`
-- Defined: `src/tab.c:2079`
+- Defined: `src/tab.c:2094`
+- Depends on: `include/util.h`
 
 ### exec_worker_child `static void exec_worker_child(int rfd, int wfd)`
-- Defined: `src/tab.c:2088`
+- Defined: `src/tab.c:2103`
 - Doc: Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other tabs' c
+- Depends on: `include/util.h`
 
 ### tab_set_fetcher `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- Defined: `src/tab.c:2158`
+- Defined: `src/tab.c:2173`
+- Depends on: `include/util.h`
 
 ### tab_set_net_allowed `void tab_set_net_allowed(tab *t, int allowed)`
-- Defined: `src/tab.c:2164`
+- Defined: `src/tab.c:2179`
+- Depends on: `include/util.h`
 
 ### tab_set_css_allowed `void tab_set_css_allowed(tab *t, int allowed)`
-- Defined: `src/tab.c:2169`
+- Defined: `src/tab.c:2184`
+- Depends on: `include/util.h`
 
 ### tab_set_viewport_w `void tab_set_viewport_w(tab *t, int px)`
-- Defined: `src/tab.c:2174`
+- Defined: `src/tab.c:2189`
+- Depends on: `include/util.h`
 
 ### tab_set_cookies `void tab_set_cookies(tab *t, const char *cookies)`
-- Defined: `src/tab.c:2179`
+- Defined: `src/tab.c:2194`
+- Depends on: `include/util.h`
 
 ### tab_subreq_permitted `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- Defined: `src/tab.c:2185`
+- Defined: `src/tab.c:2200`
+- Depends on: `include/util.h`
 
 ### answered `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-- Defined: `src/tab.c:2198`
+- Defined: `src/tab.c:2213`
+- Depends on: `include/util.h`
 
 ### tab_load `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- Defined: `src/tab.c:2233`
+- Defined: `src/tab.c:2248`
+- Depends on: `include/util.h`
 
 ### tab_load_ex `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- Defined: `src/tab.c:2237`
+- Defined: `src/tab.c:2252`
+- Depends on: `include/util.h`
 
 ### tab_load_full `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- Defined: `src/tab.c:2241`
+- Defined: `src/tab.c:2256`
+- Depends on: `include/util.h`
 
 ### tab_click `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- Defined: `src/tab.c:2387`
+- Defined: `src/tab.c:2402`
+- Depends on: `include/util.h`
 
 ### tab_tick `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- Defined: `src/tab.c:2394`
+- Defined: `src/tab.c:2409`
+- Depends on: `include/util.h`
 
 ### tab_submit `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
-- Defined: `src/tab.c:2404`
+- Defined: `src/tab.c:2419`
 - Doc: Dispatches a submit event on the form enclosing node_id. Simple response: * [TAG_RESULT][ok:int32][prevented:int32]. No 
+- Depends on: `include/util.h`
 
 ### tab_read_view `tab_status tab_read_view(tab *t, tab_page *out)`
-- Defined: `src/tab.c:2509`
+- Defined: `src/tab.c:2524`
 - Doc: Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request, tab_subreq
+- Depends on: `include/util.h`
 
 ### tab_eval `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- Defined: `src/tab.c:2564`
+- Defined: `src/tab.c:2579`
+- Depends on: `include/util.h`
 
 ### tab_decode_image_op `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...`
-- Defined: `src/tab.c:2605`
+- Defined: `src/tab.c:2620`
 - Doc: Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the [ok][w][h][stri
+- Depends on: `include/util.h`
 
 ### tab_decode_image `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- Defined: `src/tab.c:2646`
+- Defined: `src/tab.c:2661`
+- Depends on: `include/util.h`
 
 ### tab_decode_image_data_url `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-- Defined: `src/tab.c:2652`
+- Defined: `src/tab.c:2667`
+- Depends on: `include/util.h`
 
 ### tab_alive `int tab_alive(const tab *t)`
-- Defined: `src/tab.c:2670`
+- Defined: `src/tab.c:2685`
+- Depends on: `include/util.h`
 
 ### tab_child_pid `pid_t tab_child_pid(const tab *t)`
-- Defined: `src/tab.c:2676`
+- Defined: `src/tab.c:2691`
+- Depends on: `include/util.h`
 
 ### tab_close `void tab_close(tab *t)`
-- Defined: `src/tab.c:2680`
+- Defined: `src/tab.c:2695`
+- Depends on: `include/util.h`
 
 ### tab_page_free `void tab_page_free(tab_page *p)`
-- Defined: `src/tab.c:2693`
+- Defined: `src/tab.c:2708`
+- Depends on: `include/util.h`
 
 ### tab_eval_result_free `void tab_eval_result_free(tab_eval_result *r)`
-- Defined: `src/tab.c:2711`
+- Defined: `src/tab.c:2726`
+- Depends on: `include/util.h`
 
 ### tab_image_free `void tab_image_free(tab_image *img)`
-- Defined: `src/tab.c:2720`
+- Defined: `src/tab.c:2735`
+- Depends on: `include/util.h`
 
 ## src/text_shape.c
 
@@ -6010,15 +6811,19 @@ static void child_fetch_stylesheets(child_state *cs)`
 ### layout_push `static int layout_push(ui_layout *lay, size_t offset, size_t len)`
 - Defined: `src/ui_layout.c:12`
 - Doc: include <stdlib.h>
+- Depends on: `include/ui.h`
 
 ### ui_wrap_text `ui_status ui_wrap_text(const char *text, size_t len, size_t max_cols, ui_layout *out)`
 - Defined: `src/ui_layout.c:26`
+- Depends on: `include/ui.h`
 
 ### ui_layout_free `void ui_layout_free(ui_layout *lay)`
 - Defined: `src/ui_layout.c:90`
+- Depends on: `include/ui.h`
 
 ### ui_clamp_scroll `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines)`
 - Defined: `src/ui_layout.c:98`
+- Depends on: `include/ui.h`
 
 ## src/url.c
 
@@ -10208,271 +11013,287 @@ static void test_bu...`
 - Defined: `tests/test_page_view.c:1411`
 - Doc: float.md: a run inside a floated block carries that block's side + a stable float_id grouping all its runs; two floated 
 
+### test_build_float_outermost_founder `static void test_build_float_outermost_founder(void **state)`
+- Defined: `tests/test_page_view.c:1457`
+- Doc: float.md §7d: runs carry the OUTERMOST float founder alongside the nearest. A run inside a float nested in another float
+
+### test_build_oof_image_carries_block_id `static void test_build_oof_image_carries_block_id(void **state)`
+- Defined: `tests/test_page_view.c:1489`
+- Doc: float.md §7d (slashdot rail): an image inside an out-of-flow (absolute) subtree must carry its nearest box block_id, or 
+
+### test_build_hbox_margin_above_container_merges `static void test_build_hbox_margin_above_container_merges(void **state)`
+- Defined: `tests/test_page_view.c:1525`
+- Doc: float.md §7d (slashdot main column): a margin-only wrapper's reservation lives on its OWN box def (painter applies it wh
+
+### test_build_hbox_container_width_never_seeds_items `static void test_build_hbox_container_width_never_seeds_items(void **state)`
+- Defined: `tests/test_page_view.c:1545`
+- Doc: The `.ua{width:50%}` guard (tanda 8): the container's OWN width never seeds its items — a flex bar of inline-block links
+
 ### test_build_absolute_inside_float_escapes `static void test_build_absolute_inside_float_escapes(void **state)`
-- Defined: `tests/test_page_view.c:1460`
+- Defined: `tests/test_page_view.c:1574`
 - Doc: CSS 2.2 section 9.7: an absolutely (or fixed) positioned element computes `float` to none and is taken out of flow -- it
 
 ### test_build_flex_whitespace_not_item `static void test_build_flex_whitespace_not_item(void **state)`
-- Defined: `tests/test_page_view.c:1490`
+- Defined: `tests/test_page_view.c:1604`
 - Doc: CSS: whitespace directly inside a flex/grid container creates NO anonymous item (the source newlines between <p> items m
 
 ### test_build_inline_whitespace_kept `static void test_build_inline_whitespace_kept(void **state)`
-- Defined: `tests/test_page_view.c:1546`
+- Defined: `tests/test_page_view.c:1660`
 - Doc: The separator space BETWEEN two inline elements is content, not an anonymous box: * it flows mid-block (no break) and mu
 
 ### test_build_cont_item_identity `static void test_build_cont_item_identity(void **state)`
-- Defined: `tests/test_page_view.c:1568`
+- Defined: `tests/test_page_view.c:1682`
 - Doc: Container-item identity: inline fragments of the SAME direct child share one cont_item ordinal (they are one flex/grid i
 
 ### test_build_table_colspan_rowspan `static void test_build_table_colspan_rowspan(void **state)`
-- Defined: `tests/test_page_view.c:1633`
+- Defined: `tests/test_page_view.c:1747`
 
 ### test_build_grid_container `static void test_build_grid_container(void **state)`
-- Defined: `tests/test_page_view.c:1679`
+- Defined: `tests/test_page_view.c:1793`
 
 ### test_build_root_element_style_inherits `static void test_build_root_element_style_inherits(void **state)`
-- Defined: `tests/test_page_view.c:1705`
+- Defined: `tests/test_page_view.c:1819`
 - Doc: CSS inheritance starts at the ROOT element. The context walk used to stop at the rendering root (<body>), so every `html
 
 ### test_build_root_font_size_is_overridable `static void test_build_root_font_size_is_overridable(void **state)`
-- Defined: `tests/test_page_view.c:1723`
+- Defined: `tests/test_page_view.c:1837`
 - Doc: A percentage on the root is relative to the UA default, and a nearer ancestor still wins over it -- the root is the STAR
 
 ### test_build_abs_child_is_not_a_flex_item `static void test_build_abs_child_is_not_a_flex_item(void **state)`
-- Defined: `tests/test_page_view.c:1743`
+- Defined: `tests/test_page_view.c:1857`
 - Doc: CSS Flexbox 4.1: "An absolutely-positioned child of a flex container does not participate in flex layout" -- it is not a
 
 ### test_build_oof_flag_via_cascade `static void test_build_oof_flag_via_cascade(void **state)`
-- Defined: `tests/test_page_view.c:1800`
+- Defined: `tests/test_page_view.c:1914`
 - Doc: Same rule through the stylesheet cascade (class selectors, not inline * style): the subtree walk must see the abspos anc
 
 ### test_build_oof_flag_badges_idiom `static void test_build_oof_flag_badges_idiom(void **state)`
-- Defined: `tests/test_page_view.c:1824`
+- Defined: `tests/test_page_view.c:1938`
 - Doc: jkanime badges idiom: inline-block pills inside an undecorated absolute * wrapper. The pill text is OOF by ancestry even
 
 ### test_build_flex_container_from_sheet `static void test_build_flex_container_from_sheet(void **state)`
-- Defined: `tests/test_page_view.c:1843`
+- Defined: `tests/test_page_view.c:1957`
 
 ### test_build_grid_columns_from_sheet `static void test_build_grid_columns_from_sheet(void **state)`
-- Defined: `tests/test_page_view.c:1865`
+- Defined: `tests/test_page_view.c:1979`
 
 ### test_container_defaults `static void test_container_defaults(void **state)`
-- Defined: `tests/test_page_view.c:1905`
+- Defined: `tests/test_page_view.c:2019`
 - Doc: pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); const pv_run *x = find_text(v, "x"); assert_non_null(x); 
 
 ### test_build_box_leaf_inline `static void test_build_box_leaf_inline(void **state)`
-- Defined: `tests/test_page_view.c:1953`
+- Defined: `tests/test_page_view.c:2067`
 - Doc: A leaf block's own box: vertical margins override the UA, horizontal padding + * a fixed width inset and cap the content
 
 ### test_box_defaults_and_setter `static void test_box_defaults_and_setter(void **state)`
-- Defined: `tests/test_page_view.c:1988`
+- Defined: `tests/test_page_view.c:2102`
 - Doc: A run with no author box carries the neutral defaults; pv_set_box fixes the * last run and is NULL-safe.
 
 ### test_build_boxdeco_h_margin_alone_creates_box `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)`
-- Defined: `tests/test_page_view.c:2018`
+- Defined: `tests/test_page_view.c:2132`
 - Doc: pv_view *w = pv_new(); assert_int_equal(pv_append(w, PV_TEXT, 0, 0, "x", NULL), PV_OK); pv_set_box(w, 12, 8, 500, 1, 40,
 
 ### test_build_boxdeco_h_margin_zero_auto_no_box `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2038`
+- Defined: `tests/test_page_view.c:2152`
 
 ### test_build_boxdeco_fit_content_height_is_auto `static void test_build_boxdeco_fit_content_height_is_auto(void **state)`
-- Defined: `tests/test_page_view.c:2061`
+- Defined: `tests/test_page_view.c:2175`
 - Doc: `height: fit-content` on the block axis behaves as `auto` (CSS Sizing 3 5.1): with indefinite available space a block si
 
 ### test_build_boxdeco_min_content_height_is_auto `static void test_build_boxdeco_min_content_height_is_auto(void **state)`
-- Defined: `tests/test_page_view.c:2083`
+- Defined: `tests/test_page_view.c:2197`
 - Doc: Same for `min-content`: an intrinsic keyword on the block axis is content * height, never a declared 0 that arms box_h_s
 
 ### test_build_boxdeco_border_padding `static void test_build_boxdeco_border_padding(void **state)`
-- Defined: `tests/test_page_view.c:2100`
+- Defined: `tests/test_page_view.c:2214`
 
 ### test_build_empty_box_gets_run_and_box `static void test_build_empty_box_gets_run_and_box(void **state)`
-- Defined: `tests/test_page_view.c:2132`
+- Defined: `tests/test_page_view.c:2246`
 - Doc: An empty <div> with a background + explicit height paints an 8px bar in a real browser. It has no text, so the text-node
 
 ### test_build_zero_padding_is_not_a_box `static void test_build_zero_padding_is_not_a_box(void **state)`
-- Defined: `tests/test_page_view.c:2156`
+- Defined: `tests/test_page_view.c:2270`
 
 ### test_build_flow_table_row_is_one_block `static void test_build_flow_table_row_is_one_block(void **state)`
-- Defined: `tests/test_page_view.c:2173`
+- Defined: `tests/test_page_view.c:2287`
 
 ### test_build_boxdeco_shadow_outline `static void test_build_boxdeco_shadow_outline(void **state)`
-- Defined: `tests/test_page_view.c:2208`
+- Defined: `tests/test_page_view.c:2322`
 
 ### test_build_boxdeco_visibility_overflow_cursor `static void test_build_boxdeco_visibility_overflow_cursor(void **state)`
-- Defined: `tests/test_page_view.c:2231`
+- Defined: `tests/test_page_view.c:2345`
 
 ### test_build_cursor_alone_triggers_box `static void test_build_cursor_alone_triggers_box(void **state)`
-- Defined: `tests/test_page_view.c:2256`
+- Defined: `tests/test_page_view.c:2370`
 - Doc: A block that sets ONLY cursor (no other box property) still registers a box: the trigger for a box-def entry must includ
 
 ### test_build_boxdeco_dims_alone_trigger_box `static void test_build_boxdeco_dims_alone_trigger_box(void **state)`
-- Defined: `tests/test_page_view.c:2311`
+- Defined: `tests/test_page_view.c:2425`
 - Doc: 2026-07-10: a block that sets ONLY min-width / min-height / max-height / height / aspect-ratio (no other box property) s
 
 ### test_build_text_overflow_and_word_break `static void test_build_text_overflow_and_word_break(void **state)`
-- Defined: `tests/test_page_view.c:2356`
+- Defined: `tests/test_page_view.c:2470`
 - Doc: assert_int_equal(bd->box_h, 80); const pv_run *e = find_text(v, "E"); assert_non_null(e); const pv_box_def *be = pv_box_
 
 ### test_build_boxdeco_defaults_no_box `static void test_build_boxdeco_defaults_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2415`
+- Defined: `tests/test_page_view.c:2529`
 
 ### test_build_boxdeco_sibling_blocks_distinct_ids `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)`
-- Defined: `tests/test_page_view.c:2429`
+- Defined: `tests/test_page_view.c:2543`
 
 ### test_build_boxdeco_shared_id_within_block `static void test_build_boxdeco_shared_id_within_block(void **state)`
-- Defined: `tests/test_page_view.c:2447`
+- Defined: `tests/test_page_view.c:2561`
 
 ### test_build_box_tree_textless_wrapper `static void test_build_box_tree_textless_wrapper(void **state)`
-- Defined: `tests/test_page_view.c:2510`
+- Defined: `tests/test_page_view.c:2624`
 - Doc: A text-less wrapper (a card whose only child is a body div with the text) owns no run, yet its box def must still exist 
 
 ### test_build_box_tree_empty_no_box `static void test_build_box_tree_empty_no_box(void **state)`
-- Defined: `tests/test_page_view.c:2535`
+- Defined: `tests/test_page_view.c:2649`
 - Doc: const pv_box_def *bd = pv_box_at(v, (size_t)body->block_id); assert_non_null(bd); assert_int_equal(bd->pad_t, 9); int ca
 
 ### find_input `static const pv_run *find_input(const pv_view *v, const char *name)`
-- Defined: `tests/test_page_view.c:2547`
+- Defined: `tests/test_page_view.c:2661`
 - Doc: /* A page with no author box has an empty box tree (default render byte-identical). static void test_build_box_tree_empt
 
 ### test_build_search_form_get `static void test_build_search_form_get(void **state)`
-- Defined: `tests/test_page_view.c:2556`
+- Defined: `tests/test_page_view.c:2670`
 - Doc: pv_free(v); hp_document_free(doc); } /* Finds the first PV_INPUT run whose name equals `name`; NULL if none. static cons
 
 ### test_build_form_post_and_hidden `static void test_build_form_post_and_hidden(void **state)`
-- Defined: `tests/test_page_view.c:2589`
+- Defined: `tests/test_page_view.c:2703`
 
 ### test_build_textarea_value `static void test_build_textarea_value(void **state)`
-- Defined: `tests/test_page_view.c:2623`
+- Defined: `tests/test_page_view.c:2737`
 
 ### test_build_select_shows_selected_option `static void test_build_select_shows_selected_option(void **state)`
-- Defined: `tests/test_page_view.c:2643`
+- Defined: `tests/test_page_view.c:2757`
 - Doc: A closed <select> displays ONLY its selected option's label, not every option's text concatenated. The selected option i
 
 ### test_build_select_defaults_to_first_option `static void test_build_select_defaults_to_first_option(void **state)`
-- Defined: `tests/test_page_view.c:2682`
+- Defined: `tests/test_page_view.c:2796`
 - Doc: With no option marked `selected`, a single (non-multiple) select defaults to * displaying its FIRST option -- never the 
 
 ### test_build_control_without_form `static void test_build_control_without_form(void **state)`
-- Defined: `tests/test_page_view.c:2698`
+- Defined: `tests/test_page_view.c:2812`
 
 ### test_build_two_forms_distinct_groups `static void test_build_two_forms_distinct_groups(void **state)`
-- Defined: `tests/test_page_view.c:2711`
+- Defined: `tests/test_page_view.c:2825`
 
 ### test_build_pseudo_classes_and_siblings `static void test_build_pseudo_classes_and_siblings(void **state)`
-- Defined: `tests/test_page_view.c:2771`
+- Defined: `tests/test_page_view.c:2885`
 - Doc: Pseudo-classes + sibling combinators (Hito 23b-9) resolve through the real pipeline: page_view must feed the css engine 
 
 ### test_build_table_cell_author_styles `static void test_build_table_cell_author_styles(void **state)`
-- Defined: `tests/test_page_view.c:2834`
+- Defined: `tests/test_page_view.c:2948`
 - Doc: Collected DATA-table cells resolve author styles too (found via --dump-dom: the cell path never called resolve_context, 
 
 ### test_build_style_cache_distinct_siblings `static void test_build_style_cache_distinct_siblings(void **state)`
-- Defined: `tests/test_page_view.c:2894`
+- Defined: `tests/test_page_view.c:3008`
 - Doc: Regression for pv_style_cache (page_view.c): resolve_context()/in_hidden_subtree() now memoize cch_element_style() per e
 
 ### test_build_text_align_and_font_size `static void test_build_text_align_and_font_size(void **state)`
-- Defined: `tests/test_page_view.c:2936`
+- Defined: `tests/test_page_view.c:3050`
 - Doc: text-align and font-size resolve into the new run fields, from both a <style> * sheet and inline style=.
 
 ### test_build_text_decoration `static void test_build_text_decoration(void **state)`
-- Defined: `tests/test_page_view.c:2983`
+- Defined: `tests/test_page_view.c:3097`
 - Doc: text-decoration resolves into text_decoration from a <style> sheet and inline * style=, inherits to descendant text, and
 
 ### test_build_css_bold_and_inline_wins `static void test_build_css_bold_and_inline_wins(void **state)`
-- Defined: `tests/test_page_view.c:3006`
+- Defined: `tests/test_page_view.c:3120`
 - Doc: pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); assert_int_equal(find_text(v, "struck ")->text_decoration
 
 ### test_build_display_none_hidden `static void test_build_display_none_hidden(void **state)`
-- Defined: `tests/test_page_view.c:3025`
+- Defined: `tests/test_page_view.c:3139`
 - Doc: "<p class='b'>strongish</p></body>"); pv_view *v = NULL; assert_int_equal(pv_build(doc, &v), PV_OK); const pv_run *t = f
 
 ### height `* real height (jkanime's donghuas/ovas panes are display:none, yet all their
  * thumbnails flowed...`
-- Defined: `tests/test_page_view.c:3051`
+- Defined: `tests/test_page_view.c:3165`
 
 ### test_build_styled_external_css `static void test_build_styled_external_css(void **state)`
-- Defined: `tests/test_page_view.c:3081`
+- Defined: `tests/test_page_view.c:3195`
 - Doc: External pre-fetched CSS (Hito 27) feeds the same cascade as the document's <style>: an extern rule applies (presentatio
 
 ### test_pseudo_before_on_empty `static void test_pseudo_before_on_empty(void **state)`
-- Defined: `tests/test_page_view.c:3104`
+- Defined: `tests/test_page_view.c:3218`
 
 ### test_pseudo_before_on_element_with_children `static void test_pseudo_before_on_element_with_children(void **state)`
-- Defined: `tests/test_page_view.c:3117`
+- Defined: `tests/test_page_view.c:3231`
 
 ### test_pseudo_after_on_element_with_children `static void test_pseudo_after_on_element_with_children(void **state)`
-- Defined: `tests/test_page_view.c:3132`
+- Defined: `tests/test_page_view.c:3246`
 
 ### test_pseudo_both_before_and_after `static void test_pseudo_both_before_and_after(void **state)`
-- Defined: `tests/test_page_view.c:3147`
+- Defined: `tests/test_page_view.c:3261`
 
 ### test_pseudo_no_content_no_run `static void test_pseudo_no_content_no_run(void **state)`
-- Defined: `tests/test_page_view.c:3165`
+- Defined: `tests/test_page_view.c:3279`
 
 ### test_build_reader_skips_boilerplate `static void test_build_reader_skips_boilerplate(void **state)`
-- Defined: `tests/test_page_view.c:3180`
+- Defined: `tests/test_page_view.c:3294`
 - Doc: Reader (distraction-free) mode skips nav/header/footer/aside boilerplate but * keeps the main article content; with read
 
 ### test_set_node_id_model `static void test_set_node_id_model(void **state)`
-- Defined: `tests/test_page_view.c:3208`
+- Defined: `tests/test_page_view.c:3322`
 - Doc: The setter is a no-op when the view is empty or NULL, and it writes to the * most recently appended run otherwise.
 
 ### test_build_node_id_matches_dom_index `static void test_build_node_id_matches_dom_index(void **state)`
-- Defined: `tests/test_page_view.c:3224`
+- Defined: `tests/test_page_view.c:3338`
 - Doc: Stage 0 keystone: every emitted run carries the document-order element id of its source element, matching the id that do
 
 ### test_set_text_style_model `static void test_set_text_style_model(void **state)`
-- Defined: `tests/test_page_view.c:3262`
+- Defined: `tests/test_page_view.c:3376`
 
 ### test_build_pointer_events_on_box `static void test_build_pointer_events_on_box(void **state)`
-- Defined: `tests/test_page_view.c:3294`
+- Defined: `tests/test_page_view.c:3408`
 - Doc: pointer-events rides the box-def tree like cursor: a block whose style sets it becomes box-carrying and the def records 
 
 ### test_build_content_visibility_hidden_folds `static void test_build_content_visibility_hidden_folds(void **state)`
-- Defined: `tests/test_page_view.c:3313`
+- Defined: `tests/test_page_view.c:3427`
 - Doc: content-visibility: hidden folds into the box's visibility (skip paint, keep space) -- the documented visibility:collaps
 
 ### test_build_image_rendering_inherited `static void test_build_image_rendering_inherited(void **state)`
-- Defined: `tests/test_page_view.c:3339`
+- Defined: `tests/test_page_view.c:3453`
 - Doc: image-rendering inherits (nearest ancestor) and is stamped on IMAGE runs so the * painter can pick the nearest-neighbour
 
 ### test_build_caret_color_inherited `static void test_build_caret_color_inherited(void **state)`
-- Defined: `tests/test_page_view.c:3358`
+- Defined: `tests/test_page_view.c:3472`
 - Doc: caret-color inherits and is stamped on INPUT runs so the painter can tint the * caret of a focused control. auto/unset s
 
 ### test_append_video_copies_fields `static void test_append_video_copies_fields(void **state)`
-- Defined: `tests/test_page_view.c:3381`
+- Defined: `tests/test_page_view.c:3495`
 - Doc: for (size_t i = 0; i < pv_count(v); ++i) { if (pv_at(v, i)->kind != PV_INPUT) continue; if (in1 == NULL) in1 = pv_at(v, 
 
 ### test_append_video_no_poster `static void test_append_video_no_poster(void **state)`
-- Defined: `tests/test_page_view.c:3400`
+- Defined: `tests/test_page_view.c:3514`
 
 ### test_append_video_null_args `static void test_append_video_null_args(void **state)`
-- Defined: `tests/test_page_view.c:3416`
+- Defined: `tests/test_page_view.c:3530`
 
 ### test_build_video_with_source `static void test_build_video_with_source(void **state)`
-- Defined: `tests/test_page_view.c:3426`
+- Defined: `tests/test_page_view.c:3540`
 
 ### test_build_video_uses_source_child `static void test_build_video_uses_source_child(void **state)`
-- Defined: `tests/test_page_view.c:3446`
+- Defined: `tests/test_page_view.c:3560`
 
 ### test_build_video_source_type_preference `static void test_build_video_source_type_preference(void **state)`
-- Defined: `tests/test_page_view.c:3467`
+- Defined: `tests/test_page_view.c:3581`
 - Doc: Given several <source> children, When one carries a natively-playable type (HLS playlist / MPEG-TS / MP4), Then it wins 
 
 ### test_build_video_fallback_suppressed `static void test_build_video_fallback_suppressed(void **state)`
-- Defined: `tests/test_page_view.c:3485`
+- Defined: `tests/test_page_view.c:3599`
 - Doc: Given a <video> with fallback markup, When the view is built, Then the fallback text is suppressed regardless of the JS 
 
 ### test_build_video_without_src_ignored `static void test_build_video_without_src_ignored(void **state)`
-- Defined: `tests/test_page_view.c:3499`
+- Defined: `tests/test_page_view.c:3613`
 
 ### test_build_audio_as_video_kind `static void test_build_audio_as_video_kind(void **state)`
-- Defined: `tests/test_page_view.c:3510`
+- Defined: `tests/test_page_view.c:3624`
 
 ### main `int main(void)`
-- Defined: `tests/test_page_view.c:3524`
+- Defined: `tests/test_page_view.c:3638`
 
 ## tests/test_pdf_export.c
 
@@ -10862,21 +11683,21 @@ static void test_bu...`
 - Doc: float.md: float_side/float_id/float_clear are layout structure, carried regardless of * caps.css; a run that never got p
 
 ### test_flex_item_carried_by_default `static void test_flex_item_carried_by_default(void **state)`
-- Defined: `tests/test_render_doc.c:681`
+- Defined: `tests/test_render_doc.c:684`
 
 ### test_flex_wrap_align_row_gap_carried_by_default `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)`
-- Defined: `tests/test_render_doc.c:730`
+- Defined: `tests/test_render_doc.c:733`
 - Doc: flex-wrap / row-gap / align-items (CONTAINER) + align-self (ITEM) are structure * like the rest of the cont_ and flex_ f
 
 ### test_block_tag_total `static void test_block_tag_total(void **state)`
-- Defined: `tests/test_render_doc.c:761`
+- Defined: `tests/test_render_doc.c:764`
 
 ### test_node_id_carried_by_default `static void test_node_id_carried_by_default(void **state)`
-- Defined: `tests/test_render_doc.c:798`
+- Defined: `tests/test_render_doc.c:801`
 - Doc: Stage 0 keystone: node_id is structure, so it is copied regardless of the * caps.css gate (unlike block_id, which exists
 
 ### main `int main(void)`
-- Defined: `tests/test_render_doc.c:810`
+- Defined: `tests/test_render_doc.c:813`
 
 ## tests/test_render_policy.c
 
@@ -11648,39 +12469,51 @@ static void tes...`
                        ...`
 - Defined: `tests/test_ui.c:20`
 - Doc: Build: make test   ;   ASan: make asan  #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include <setjmp.h> 
+- Depends on: `include/ui.h`
 
 ### test_wrap_null_args `static void test_wrap_null_args(void **state)`
 - Defined: `tests/test_ui.c:27`
+- Depends on: `include/ui.h`
 
 ### test_wrap_empty `static void test_wrap_empty(void **state)`
 - Defined: `tests/test_ui.c:34`
+- Depends on: `include/ui.h`
 
 ### test_wrap_short_single_line `static void test_wrap_short_single_line(void **state)`
 - Defined: `tests/test_ui.c:42`
+- Depends on: `include/ui.h`
 
 ### test_wrap_breaks_at_space `static void test_wrap_breaks_at_space(void **state)`
 - Defined: `tests/test_ui.c:52`
+- Depends on: `include/ui.h`
 
 ### test_wrap_hard_breaks_long_word `static void test_wrap_hard_breaks_long_word(void **state)`
 - Defined: `tests/test_ui.c:63`
+- Depends on: `include/ui.h`
 
 ### test_wrap_does_not_split_utf8 `static void test_wrap_does_not_split_utf8(void **state)`
 - Defined: `tests/test_ui.c:75`
+- Depends on: `include/ui.h`
 
 ### test_wrap_respects_newline `static void test_wrap_respects_newline(void **state)`
 - Defined: `tests/test_ui.c:89`
+- Depends on: `include/ui.h`
 
 ### test_wrap_zero_cols_is_sanitised `static void test_wrap_zero_cols_is_sanitised(void **state)`
 - Defined: `tests/test_ui.c:100`
+- Depends on: `include/ui.h`
 
 ### test_clamp_scroll `static void test_clamp_scroll(void **state)`
 - Defined: `tests/test_ui.c:112`
+- Depends on: `include/ui.h`
 
 ### test_layout_free_null_and_double `static void test_layout_free_null_and_double(void **state)`
 - Defined: `tests/test_ui.c:120`
+- Depends on: `include/ui.h`
 
 ### main `int main(void)`
 - Defined: `tests/test_ui.c:129`
+- Depends on: `include/ui.h`
 
 ## tests/test_url.c
 

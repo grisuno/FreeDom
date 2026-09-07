@@ -2,7 +2,55 @@
 
 ## Internal Dependencies
 
-- (no internal resolved imports)
+- `gui/browser_ui.c` -> `gui/browser_ui_internal.h`
+- `gui/browser_ui.c` -> `include/ui.h`
+- `gui/bui_theme.c` -> `gui/browser_ui_internal.h`
+- `gui/freedom_view.c` -> `include/ui.h`
+- `gui/ui_render.c` -> `include/ui.h`
+- `include/box_style.h` -> `include/css.h`
+- `include/box_tree.h` -> `include/box_style.h`
+- `include/box_tree.h` -> `include/flex_layout.h`
+- `include/box_tree.h` -> `include/page_view.h`
+- `include/css.h` -> `include/css_color.h`
+- `include/css_chain.h` -> `include/css.h`
+- `include/css_chain.h` -> `include/css_select.h`
+- `include/css_select.h` -> `include/css.h`
+- `include/disk_store.h` -> `include/local_store.h`
+- `include/dom.h` -> `include/html_parse.h`
+- `include/dom_debug.h` -> `include/render_doc.h`
+- `include/form.h` -> `include/url.h`
+- `include/js_dom.h` -> `include/dom.h`
+- `include/js_dom.h` -> `include/freebug.h`
+- `include/js_dom.h` -> `include/js_sandbox.h`
+- `include/js_dom.h` -> `include/url.h`
+- `include/js_env.h` -> `include/js_sandbox.h`
+- `include/page_view.h` -> `include/css.h`
+- `include/page_view.h` -> `include/dom.h`
+- `include/page_view.h` -> `include/html_parse.h`
+- `include/profile.h` -> `include/local_store.h`
+- `include/profile.h` -> `include/prefs.h`
+- `include/render_doc.h` -> `include/page_view.h`
+- `include/render_doc.h` -> `include/render_policy.h`
+- `include/secure_fetch.h` -> `include/anti_fp.h`
+- `include/svg_paint.h` -> `include/svg_render.h`
+- `include/tab.h` -> `include/freebug.h`
+- `include/tab.h` -> `include/page_view.h`
+- `include/webcaps.h` -> `include/js_policy.h`
+- `include/webcaps.h` -> `include/render_policy.h`
+- `src/browser.c` -> `include/util.h`
+- `src/disk_store.c` -> `include/util.h`
+- `src/dom.c` -> `include/util.h`
+- `src/freedom.c` -> `include/ui.h`
+- `src/hostblock.c` -> `include/util.h`
+- `src/html_parse.c` -> `include/util.h`
+- `src/media_decoder.c` -> `include/util.h`
+- `src/page_view.c` -> `include/util.h`
+- `src/render_doc.c` -> `include/util.h`
+- `src/renderer.c` -> `include/util.h`
+- `src/request_policy.c` -> `include/psl_data.h`
+- `src/tab.c` -> `include/util.h`
+- `src/ui_layout.c` -> `include/ui.h`
+- `tests/test_ui.c` -> `include/ui.h`
 
 ## External Imports
 

@@ -15,6 +15,7 @@
   - `FP_SEC_FETCH_MODE_NAV` (macro, line 46)
   - `FP_SEC_FETCH_SITE_NONE` (macro, line 47)
   - `FP_SEC_FETCH_USER_ON` (macro, line 48)
+- Imported by: `include/secure_fetch.h`
 
 ## include/block_flow.h
 - Layer: utility
@@ -35,6 +36,8 @@
   - `bx_bg_layer` (struct, line 262)
   - `FREEDOM_BOX_STYLE_H` (macro, line 2)
   - `BX_TAG_NAME_MAX` (macro, line 33)
+- Depends on: `include/css.h`
+- Imported by: `include/box_tree.h`
 
 ## include/box_tree.h
 - Layer: utility
@@ -56,6 +59,7 @@
   - `BT_ALIGN_CENTER` (macro, line 59)
   - `BT_ALIGN_END` (macro, line 60)
   - `BT_ALIGN_STRETCH` (macro, line 61)
+- Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
 
 ## include/browser.h
 - Layer: utility
@@ -131,6 +135,8 @@
   - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 930)
   - `CSS_DROP_PROP_MAX` (macro, line 968)
   - `CSS_DROP_VAL_MAX` (macro, line 970)
+- Depends on: `include/css_color.h`
+- Imported by: `include/box_style.h`, `include/css_chain.h`, `include/css_select.h`, `include/page_view.h`
 
 ## include/css_chain.h
 - Layer: utility
@@ -141,6 +147,7 @@
   - `CCH_CHAIN_MAX` (macro, line 26)
   - `CCH_SIB_MAX` (macro, line 27)
   - `CCH_NTH_MAX` (macro, line 28)
+- Depends on: `include/css.h`, `include/css_select.h`
 
 ## include/css_color.h
 - Layer: utility
@@ -151,6 +158,7 @@
   - `FREEDOM_CSS_COLOR_H` (macro, line 2)
   - `CC_COLOR_CURRENT` (macro, line 59)
   - `CC_COLOR_TRANSPARENT` (macro, line 60)
+- Imported by: `include/css.h`
 
 ## include/css_length.h
 - Layer: utility
@@ -188,6 +196,8 @@
   - `CSS_MAX_CLASSES_PER_SEL` (macro, line 28)
   - `CSS_MAX_SUB_SELS` (macro, line 80)
   - `CSS_SUB_MAX_ATTRS` (macro, line 81)
+- Depends on: `include/css.h`
+- Imported by: `include/css_chain.h`
 
 ## include/data_url.h
 - Layer: data_access
@@ -203,6 +213,7 @@
 - Language: h
 - Symbols:
   - `FREEDOM_DISK_STORE_H` (macro, line 2)
+- Depends on: `include/local_store.h`
 
 ## include/dom.h
 - Layer: utility
@@ -211,6 +222,8 @@
 - Symbols:
   - `FREEDOM_DOM_H` (macro, line 2)
   - `DOM_NODE_NONE` (macro, line 37)
+- Depends on: `include/html_parse.h`
+- Imported by: `include/js_dom.h`, `include/page_view.h`
 
 ## include/dom_debug.h
 - Layer: utility
@@ -219,6 +232,7 @@
 - Symbols:
   - `FREEDOM_DOM_DEBUG_H` (macro, line 2)
   - `DD_FIELD_MAX` (macro, line 28)
+- Depends on: `include/render_doc.h`
 
 ## include/download.h
 - Layer: utility
@@ -247,6 +261,7 @@
   - `FX_AREA_NAME_MAX` (macro, line 111)
   - `FX_FLOAT_MIN_LINE` (macro, line 180)
   - `FX_MAX_COLUMNS` (macro, line 231)
+- Imported by: `include/box_tree.h`
 
 ## include/form.h
 - Layer: data_access
@@ -259,6 +274,7 @@
   - `FM_URL_MAX` (macro, line 28)
   - `FM_BODY_MAX` (macro, line 30)
   - `FM_MAX_FIELDS` (macro, line 31)
+- Depends on: `include/url.h`
 
 ## include/frame_clock.h
 - Layer: utility
@@ -280,6 +296,7 @@
   - `FB_MAX_ENTRY_BYTES` (macro, line 57)
   - `FB_MAX_TOTAL_BYTES` (macro, line 58)
   - `FB_MAX_FILE_BYTES` (macro, line 62)
+- Imported by: `include/js_dom.h`, `include/tab.h`
 
 ## include/freedom_config.h
 - Layer: infrastructure
@@ -330,6 +347,7 @@
   - `HP_DEFAULT_MAX_BYTES` (macro, line 40)
   - `HP_MAX_SCRIPTS` (macro, line 48)
   - `HP_MAX_STYLESHEETS` (macro, line 112)
+- Imported by: `include/dom.h`, `include/page_view.h`
 
 ## include/image_decode.h
 - Layer: utility
@@ -362,6 +380,7 @@
   - `jd_opaque` (struct, line 45)
   - `FREEDOM_JS_DOM_H` (macro, line 2)
   - `JD_IFRAME_TRACK_MAX` (macro, line 39)
+- Depends on: `include/dom.h`, `include/freebug.h`, `include/js_sandbox.h`, `include/url.h`
 
 ## include/js_env.h
 - Layer: infrastructure
@@ -369,6 +388,7 @@
 - Language: h
 - Symbols:
   - `FREEDOM_JS_ENV_H` (macro, line 2)
+- Depends on: `include/js_sandbox.h`
 
 ## include/js_policy.h
 - Layer: business_logic
@@ -376,6 +396,7 @@
 - Language: h
 - Symbols:
   - `FREEDOM_JS_POLICY_H` (macro, line 2)
+- Imported by: `include/webcaps.h`
 
 ## include/js_sandbox.h
 - Layer: utility
@@ -390,6 +411,7 @@
   - `JS_DEFAULT_MEM_LIMIT` (macro, line 67)
   - `JS_DEFAULT_STACK_LIMIT` (macro, line 68)
   - `JS_DEFAULT_TIME_BUDGET` (macro, line 69)
+- Imported by: `include/js_dom.h`, `include/js_env.h`
 
 ## include/link_nav.h
 - Layer: utility
@@ -414,6 +436,7 @@
   - `LS_HEADER_LEN` (macro, line 30)
   - `LS_OVERHEAD` (macro, line 31)
   - `LS_MAX_PLAINTEXT` (macro, line 32)
+- Imported by: `include/disk_store.h`, `include/profile.h`
 
 ## include/media_decoder.h
 - Layer: infrastructure
@@ -451,10 +474,10 @@
 - Language: h
 - Symbols:
   - `pv_run` (struct, line 108)
-  - `pv_box_def` (struct, line 376)
-  - `pv_cont_def` (struct, line 661)
-  - `pv_view` (struct, line 697)
-  - `pv_text_ext` (struct, line 858)
+  - `pv_box_def` (struct, line 388)
+  - `pv_cont_def` (struct, line 673)
+  - `pv_view` (struct, line 709)
+  - `pv_text_ext` (struct, line 870)
   - `FREEDOM_PAGE_VIEW_H` (macro, line 2)
   - `PV_LEN_UNSET` (macro, line 43)
   - `PV_LEN_AUTO` (macro, line 44)
@@ -462,6 +485,8 @@
   - `PV_GRID_TRACKS` (macro, line 48)
   - `PV_CONT_DEPTH` (macro, line 53)
   - `PV_BG_URL_MAX` (macro, line 59)
+- Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
+- Imported by: `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`
 
 ## include/pdf_export.h
 - Layer: utility
@@ -513,6 +538,7 @@
   - `PREFS_MAX_HISTORY` (macro, line 30)
   - `PREFS_MAX_TEXT` (macro, line 31)
   - `PREFS_PAGE_HISTORY` (macro, line 34)
+- Imported by: `include/profile.h`
 
 ## include/profile.h
 - Layer: utility
@@ -523,6 +549,7 @@
   - `FREEDOM_PROFILE_H` (macro, line 2)
   - `PROFILE_KEY_FILE` (macro, line 31)
   - `PROFILE_PREFS_FILE` (macro, line 33)
+- Depends on: `include/local_store.h`, `include/prefs.h`
 
 ## include/psl_data.h
 - Layer: data_access
@@ -530,6 +557,7 @@
 - Language: h
 - Symbols:
   - `FREEDOM_PSL_DATA_H` (macro, line 2)
+- Imported by: `src/request_policy.c`
 
 ## include/render_doc.h
 - Layer: presentation
@@ -537,8 +565,10 @@
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 236)
+  - `rd_doc` (struct, line 242)
   - `FREEDOM_RENDER_DOC_H` (macro, line 2)
+- Depends on: `include/page_view.h`, `include/render_policy.h`
+- Imported by: `include/dom_debug.h`
 
 ## include/render_policy.h
 - Layer: presentation
@@ -548,6 +578,7 @@
   - `rdp_caps` (struct, line 32)
   - `FREEDOM_RENDER_POLICY_H` (macro, line 2)
   - `RDP_TRACKER_MAX_DIM` (macro, line 27)
+- Imported by: `include/render_doc.h`, `include/webcaps.h`
 
 ## include/renderer.h
 - Layer: presentation
@@ -586,6 +617,7 @@
   - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 194)
   - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 195)
   - `SF_MAX_URL` (macro, line 196)
+- Depends on: `include/anti_fp.h`
 
 ## include/svg_paint.h
 - Layer: utility
@@ -593,6 +625,7 @@
 - Language: h
 - Symbols:
   - `FREEDOM_SVG_PAINT_H` (macro, line 2)
+- Depends on: `include/svg_render.h`
 
 ## include/svg_render.h
 - Layer: presentation
@@ -611,6 +644,7 @@
   - `SV_MAX_INPUT` (macro, line 37)
   - `SV_DEFAULT_W` (macro, line 41)
   - `SV_DEFAULT_H` (macro, line 42)
+- Imported by: `include/svg_paint.h`
 
 ## include/tab.h
 - Layer: utility
@@ -622,6 +656,7 @@
   - `tab_image` (struct, line 93)
   - `FREEDOM_TAB_H` (macro, line 2)
   - `TAB_MAX_INPUT` (macro, line 100)
+- Depends on: `include/freebug.h`, `include/page_view.h`
 
 ## include/text_shape.h
 - Layer: utility
@@ -669,6 +704,7 @@
   - `rd_doc` (struct, line 68)
   - `tab` (struct, line 94)
   - `FREEDOM_UI_H` (macro, line 2)
+- Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
 
 ## include/url.h
 - Layer: utility
@@ -679,6 +715,7 @@
   - `FREEDOM_URL_H` (macro, line 2)
   - `URL_MAX_LEN` (macro, line 30)
   - `URL_SEARCH_ENDPOINT` (macro, line 76)
+- Imported by: `include/form.h`, `include/js_dom.h`
 
 ## include/util.h
 - Layer: utility
@@ -691,6 +728,7 @@
   - `utf8_seq_len` (function, line 56) `static inline size_t utf8_seq_len(unsigned char c)`
   - `fnv1a` (function, line 66) `static inline uint64_t fnv1a(const char *s, size_t n)`
   - `UTIL_H` (macro, line 5)
+- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
 
 ## include/webcaps.h
 - Layer: utility
@@ -700,6 +738,7 @@
   - `wc_caps` (struct, line 38)
   - `wc_input` (struct, line 57)
   - `FREEDOM_WEBCAPS_H` (macro, line 2)
+- Depends on: `include/js_policy.h`, `include/render_policy.h`
 
 ## include/zoom.h
 - Layer: utility
