@@ -1,0 +1,24 @@
+{
+  "tool": "readmenator",
+  "generated_at": "2026-09-08T16:19:36Z",
+  "project_root": "/tmp/push_FreeDom_20260908_131917",
+  "files": 205,
+  "symbols": 6427,
+  "imports": 1377,
+  "resolved_imports": 346,
+  "security_findings": 0,
+  "languages": {
+    "py": 4,
+    "sh": 5,
+    "c": 136,
+    "h": 60
+  },
+  "entrypoints": [],
+  "start_here": "INDEX.md",
+  "workflow": [
+    "grep -n '<keyword>' INDEX.md",
+    "cat KB_<subsystem>.md",
+    "grep -n '<file>' ARCHITECTURE.md SYMBOLS.md"
+  ],
+  "regenerate": "readmenator . --rebuild"
+}
