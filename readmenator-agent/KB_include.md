@@ -5,17 +5,42 @@
 - Doc: ifndef FREEDOM_ANTI_FP_H define FREEDOM_ANTI_FP_H  include <stddef.h> include <stdint.h>  ifdef __cplusplus error "Freed
 - Language: h
 - Symbols:
-  - `FREEDOM_ANTI_FP_H` (macro, line 2)
-  - `FP_TIMER_RESOLUTION_MS` (macro, line 21)
-  - `FP_USER_AGENT` (macro, line 31)
-  - `FP_ACCEPT_LANGUAGE` (macro, line 33)
-  - `FP_ACCEPT_LANGUAGE_HEADER` (macro, line 34)
-  - `FP_ACCEPT_HEADER_NAV` (macro, line 40)
-  - `FP_SEC_FETCH_DEST_NAV` (macro, line 45)
-  - `FP_SEC_FETCH_MODE_NAV` (macro, line 46)
-  - `FP_SEC_FETCH_SITE_NONE` (macro, line 47)
-  - `FP_SEC_FETCH_USER_ON` (macro, line 48)
-- Imported by: `include/secure_fetch.h`
+  - `fp_timer_resolution_ms` (function, line 51) `uint64_t fp_timer_resolution_ms(void);`
+  - `fp_coarsen_time_ms` (function, line 53) `uint64_t fp_coarsen_time_ms(uint64_t raw_ms);`
+  - `fp_user_agent` (function, line 56) `const char *fp_user_agent(void);`
+  - `fp_accept_language` (function, line 58) `const char *fp_accept_language(void);`
+  - `fp_accept_language_header` (function, line 59) `const char *fp_accept_language_header(void);`
+  - `fp_timezone` (function, line 60) `const char *fp_timezone(void);`
+  - `fp_platform` (function, line 61) `const char *fp_platform(void);`
+  - `fp_vendor` (function, line 62) `const char *fp_vendor(void);`
+  - `fp_hardware_concurrency` (function, line 63) `int fp_hardware_concurrency(void);`
+  - `fp_device_memory_gb` (function, line 64) `int fp_device_memory_gb(void);`
+  - `properties` (function, line 67) `* Legacy navigator properties (Hito 30b): normalized Firefox values shared by * js_env and the network layer so JS and HTTP present the same identity. */ const char *fp_app_version(void);`
+  - `fp_app_code_name` (function, line 71) `const char *fp_app_code_name(void);`
+  - `fp_product` (function, line 72) `const char *fp_product(void);`
+  - `fp_app_name` (function, line 73) `const char *fp_app_name(void);`
+  - `fp_product_sub` (function, line 74) `const char *fp_product_sub(void);`
+  - `fp_oscpu` (function, line 75) `const char *fp_oscpu(void);`
+  - `fp_build_id` (function, line 76) `const char *fp_build_id(void);`
+  - `fp_max_touch_points` (function, line 77) `int fp_max_touch_points(void);`
+  - `fp_on_line` (function, line 78) `int fp_on_line(void);`
+  - `fp_cookie_enabled` (function, line 79) `int fp_cookie_enabled(void);`
+  - `fp_bucket_screen` (function, line 83) `void fp_bucket_screen(int w, int h, int *out_w, int *out_h);`
+  - `fp_perturb` (function, line 88) `void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key);`
+  - `domain` (function, line 91) `* registrable domain (eTLD+1). Same (session_key, domain) => same key (poisoning * is stable within a site);`
+  - `probability` (function, line 93) `* keys with overwhelming probability (canvas/audio noise is not linkable across * sites, defeating cross-origin fingerprint linking). registrable_domain NULL or * "" collapses to a single namespace (i`
+  - `fp_origin_key` (function, line 98) `uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain);`
+  - `FREEDOM_ANTI_FP_H` (macro, line 2) `#define FREEDOM_ANTI_FP_H`
+  - `FP_TIMER_RESOLUTION_MS` (macro, line 21) `#define FP_TIMER_RESOLUTION_MS`
+  - `FP_USER_AGENT` (macro, line 31) `#define FP_USER_AGENT`
+  - `FP_ACCEPT_LANGUAGE` (macro, line 33) `#define FP_ACCEPT_LANGUAGE`
+  - `FP_ACCEPT_LANGUAGE_HEADER` (macro, line 34) `#define FP_ACCEPT_LANGUAGE_HEADER`
+  - `FP_ACCEPT_HEADER_NAV` (macro, line 40) `#define FP_ACCEPT_HEADER_NAV`
+  - `FP_SEC_FETCH_DEST_NAV` (macro, line 45) `#define FP_SEC_FETCH_DEST_NAV`
+  - `FP_SEC_FETCH_MODE_NAV` (macro, line 46) `#define FP_SEC_FETCH_MODE_NAV`
+  - `FP_SEC_FETCH_SITE_NONE` (macro, line 47) `#define FP_SEC_FETCH_SITE_NONE`
+  - `FP_SEC_FETCH_USER_ON` (macro, line 48) `#define FP_SEC_FETCH_USER_ON`
+- Imported by: `include/secure_fetch.h`, `src/anti_fp.c`, `src/js_env.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_anti_fp.c`
 
 ## include/block_flow.h
 - Layer: utility
@@ -23,7 +48,10 @@
 - Language: h
 - Symbols:
   - `bf_collapse_n` (function, line 33) `* bf_collapse_n((double[])`
-  - `FREEDOM_BLOCK_FLOW_H` (macro, line 11)
+  - `ABSENT` (function, line 26) `* as ABSENT (0) rather than propagated: a poisoned length must not spread into * the geometry of the rest of the page. */ double bf_collapse(double a, double b);`
+  - `bf_margins_adjoin` (function, line 43) `int bf_margins_adjoin(double border_px, double padding_px);`
+  - `FREEDOM_BLOCK_FLOW_H` (macro, line 11) `#define FREEDOM_BLOCK_FLOW_H`
+- Imported by: `gui/browser_ui.c`, `src/block_flow.c`, `tests/test_block_flow.c`
 
 ## include/box_style.h
 - Layer: utility
@@ -34,10 +62,33 @@
   - `bx_box` (struct, line 50)
   - `bx_hplace` (struct, line 63)
   - `bx_bg_layer` (struct, line 262)
-  - `FREEDOM_BOX_STYLE_H` (macro, line 2)
-  - `BX_TAG_NAME_MAX` (macro, line 33)
+  - `bx_display` (enum, line 35)
+  - `bx_status` (enum, line 56)
+  - `bx_ua_tag` (enum, line 84)
+  - `bx_table_role` (enum, line 127)
+  - `left` (type_alias, line 46) `typedef struct bx_edges { double top, right, bottom, left;`
+  - `display` (type_alias, line 49) `typedef struct bx_box { bx_display display;`
+  - `x_off` (type_alias, line 63) `typedef struct bx_hplace { double x_off;`
+  - `nat_h` (type_alias, line 262) `typedef struct bx_bg_layer { double nat_w, nat_h;`
+  - `bx_default_for_tag` (function, line 72) `bx_box bx_default_for_tag(const char *tag);`
+  - `bx_ua_of_tag` (function, line 101) `bx_ua_tag bx_ua_of_tag(const char *tag);`
+  - `bx_default_for_ua` (function, line 106) `bx_box bx_default_for_ua(bx_ua_tag id);`
+  - `box` (function, line 114) `* in_list nonzero when the block sits inside a list item: it then takes * the <li> box (zero margin), keeping items tight. A heading * escapes this, per 4d. * ua identity of the nearest BLOCK-LEVEL an`
+  - `BX_TROLE_NONE` (function, line 144) `* BX_TROLE_NONE (an unrecognised element joins no table -- fail closed). */ bx_table_role bx_table_role_of(const char *tag, css_display display);`
+  - `bx_parse_display` (function, line 152) `bx_status bx_parse_display(const char *token, bx_display *out);`
+  - `bx_display_name` (function, line 156) `const char *bx_display_name(bx_display d);`
+  - `bx_place` (function, line 165) `bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center, double avail_w);`
+  - `bx_width_cap` (function, line 172) `double bx_width_cap(int w_px, int w_pct, double avail_w);`
+  - `bx_replaced_box` (function, line 191) `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double avail_w, double *out_w, double *out_h);`
+  - `bx_border_box_h` (function, line 205) `double bx_border_box_h(double declared_h, int border_box, double pad_t, double pad_b, double bord_t, double bord_b);`
+  - `page` (function, line 209) `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow axes are visible-or-unset: one non-visible * axis computes the other to auto (CSS Overf`
+  - `bx_lp_px` (function, line 231) `double bx_lp_px(int px_val, int pct_pm, double basis);`
+  - `bx_content_cap` (function, line 239) `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);`
+  - `bx_background_layer` (function, line 271) `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);`
+  - `FREEDOM_BOX_STYLE_H` (macro, line 2) `#define FREEDOM_BOX_STYLE_H`
+  - `BX_TAG_NAME_MAX` (macro, line 33) `#define BX_TAG_NAME_MAX`
 - Depends on: `include/css.h`
-- Imported by: `include/box_tree.h`
+- Imported by: `gui/browser_ui.c`, `include/box_tree.h`, `src/box_style.c`, `src/box_tree.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `tests/test_box_style.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/box_tree.h
 - Layer: utility
@@ -46,20 +97,35 @@
 - Symbols:
   - `bt_node` (struct, line 63)
   - `bt_positioned` (struct, line 122)
-  - `FREEDOM_BOX_TREE_H` (macro, line 2)
-  - `BT_MAX_DEPTH` (macro, line 35)
-  - `BT_MAX_CHILDREN` (macro, line 36)
-  - `BT_MAX_POSITIONED` (macro, line 42)
-  - `BT_POS_STATIC` (macro, line 47)
-  - `BT_POS_RELATIVE` (macro, line 48)
-  - `BT_POS_ABSOLUTE` (macro, line 49)
-  - `BT_POS_FIXED` (macro, line 50)
-  - `BT_POS_STICKY` (macro, line 51)
-  - `BT_ALIGN_START` (macro, line 58)
-  - `BT_ALIGN_CENTER` (macro, line 59)
-  - `BT_ALIGN_END` (macro, line 60)
-  - `BT_ALIGN_STRETCH` (macro, line 61)
+  - `bt_status` (enum, line 129)
+  - `display` (type_alias, line 62) `typedef struct bt_node { bx_display display;`
+  - `box_index` (type_alias, line 122) `typedef struct bt_positioned { size_t box_index;`
+  - `closed` (function, line 34) `* fails closed (BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN 128u /* Stage 2: the out-of-flow solver's arrays are indexed BY BOX ID, so this boun`
+  - `one` (function, line 77) `* of forcing them all onto one (flex-wrap);`
+  - `line` (function, line 91) `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a grid item of its GRID parent (2026-07-11): columns it spans * (grid-column: span N);`
+  - `node` (function, line 138) `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller composes absolute coordinates by accumulating parent * origins. */ bt_status bt_layout(`
+  - `bt_resolve_positioning` (function, line 168) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, double viewport_w, double viewport_h, bt_posi`
+  - `flow` (function, line 177) `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);`
+  - `bottom` (function, line 184) `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in box_x/y/w/h: * an absolutely positioned box whose containing block was never placed`
+  - `placed` (function, line 191) `* box counts as placed (legacy behaviour). * bt_resolve_positioning delegates with NULL arrays (legacy behaviour). */ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const do`
+  - `bt_box_hidden` (function, line 209) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);`
+  - `bt_oof_anchor` (function, line 223) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `bt_oof_root` (function, line 224) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);`
+  - `FREEDOM_BOX_TREE_H` (macro, line 2) `#define FREEDOM_BOX_TREE_H`
+  - `BT_MAX_DEPTH` (macro, line 35) `#define BT_MAX_DEPTH`
+  - `BT_MAX_CHILDREN` (macro, line 36) `#define BT_MAX_CHILDREN`
+  - `BT_MAX_POSITIONED` (macro, line 42) `#define BT_MAX_POSITIONED`
+  - `BT_POS_STATIC` (macro, line 47) `#define BT_POS_STATIC`
+  - `BT_POS_RELATIVE` (macro, line 48) `#define BT_POS_RELATIVE`
+  - `BT_POS_ABSOLUTE` (macro, line 49) `#define BT_POS_ABSOLUTE`
+  - `BT_POS_FIXED` (macro, line 50) `#define BT_POS_FIXED`
+  - `BT_POS_STICKY` (macro, line 51) `#define BT_POS_STICKY`
+  - `BT_ALIGN_START` (macro, line 58) `#define BT_ALIGN_START`
+  - `BT_ALIGN_CENTER` (macro, line 59) `#define BT_ALIGN_CENTER`
+  - `BT_ALIGN_END` (macro, line 60) `#define BT_ALIGN_END`
+  - `BT_ALIGN_STRETCH` (macro, line 61) `#define BT_ALIGN_STRETCH`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
+- Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `tests/test_box_tree.c`
 
 ## include/browser.h
 - Layer: utility
@@ -67,10 +133,36 @@
 - Language: h
 - Symbols:
   - `browser_state` (struct, line 27)
-  - `FREEDOM_BROWSER_H` (macro, line 2)
-  - `BROWSER_URL_MAX` (macro, line 20)
-  - `BROWSER_STATUS_MAX` (macro, line 24)
-  - `BROWSER_STATUS_DURATION_MS` (macro, line 25)
+  - `browser_status` (enum, line 50)
+  - `state` (function, line 60) `* state (frees old history and page buffers). */ browser_status browser_init(browser_state *bs);`
+  - `browser_free` (function, line 64) `void browser_free(browser_state *bs);`
+  - `browser_set_page` (function, line 69) `* browser_set_page() with the result. */ browser_status browser_navigate(browser_state *bs, const char *url);`
+  - `browser_back` (function, line 73) `browser_status browser_back(browser_state *bs);`
+  - `browser_forward` (function, line 74) `browser_status browser_forward(browser_state *bs);`
+  - `browser_can_back` (function, line 77) `int browser_can_back(const browser_state *bs);`
+  - `browser_can_forward` (function, line 78) `int browser_can_forward(const browser_state *bs);`
+  - `browser_current_url` (function, line 79) `const char *browser_current_url(const browser_state *bs);`
+  - `browser_is_exception` (function, line 82) `int browser_is_exception(const browser_state *bs, const char *host);`
+  - `browser_add_exception` (function, line 83) `browser_status browser_add_exception(browser_state *bs, const char *host);`
+  - `browser_set_url_bar` (function, line 86) `browser_status browser_set_url_bar(browser_state *bs, const char *url);`
+  - `browser_commit_url_bar` (function, line 87) `browser_status browser_commit_url_bar(browser_state *bs);`
+  - `browser_url_bar_insert` (function, line 90) `browser_status browser_url_bar_insert(browser_state *bs, char c);`
+  - `browser_url_bar_backspace` (function, line 91) `browser_status browser_url_bar_backspace(browser_state *bs);`
+  - `browser_url_bar_delete` (function, line 92) `browser_status browser_url_bar_delete(browser_state *bs);`
+  - `browser_url_bar_move_cursor` (function, line 93) `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta);`
+  - `browser_url_bar_clear` (function, line 94) `browser_status browser_url_bar_clear(browser_state *bs);`
+  - `browser_url_bar_extend_cursor` (function, line 103) `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta);`
+  - `browser_url_bar_set_cursor` (function, line 107) `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend);`
+  - `browser_url_bar_select_all` (function, line 110) `browser_status browser_url_bar_select_all(browser_state *bs);`
+  - `browser_url_bar_selection` (function, line 114) `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);`
+  - `browser_url_bar_delete_selection` (function, line 118) `int browser_url_bar_delete_selection(browser_state *bs);`
+  - `copied` (function, line 126) `* copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms + BROWSER_STATUS_DURATION_MS). A NULL or empty msg clears it. now_ms is a * caller-supplied monotonic millisecond clock,`
+  - `browser_status_text` (function, line 133) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms);`
+  - `FREEDOM_BROWSER_H` (macro, line 2) `#define FREEDOM_BROWSER_H`
+  - `BROWSER_URL_MAX` (macro, line 20) `#define BROWSER_URL_MAX`
+  - `BROWSER_STATUS_MAX` (macro, line 24) `#define BROWSER_STATUS_MAX`
+  - `BROWSER_STATUS_DURATION_MS` (macro, line 25) `#define BROWSER_STATUS_DURATION_MS`
+- Imported by: `gui/browser_ui.c`, `src/browser.c`, `tests/test_browser.c`
 
 ## include/compositor.h
 - Layer: utility
@@ -79,7 +171,15 @@
 - Symbols:
   - `cx_style` (struct, line 46)
   - `cx_item` (struct, line 69)
-  - `FREEDOM_COMPOSITOR_H` (macro, line 2)
+  - `cx_layer` (enum, line 27)
+  - `position` (type_alias, line 46) `typedef struct cx_style { int position;`
+  - `layer` (type_alias, line 69) `typedef struct cx_item { cx_layer layer;`
+  - `cx_forms_stacking_context` (function, line 60) `int cx_forms_stacking_context(const cx_style *s);`
+  - `cx_box_layer` (function, line 64) `cx_layer cx_box_layer(const cx_style *s);`
+  - `cx_item_compare` (function, line 80) `int cx_item_compare(const cx_item *a, const cx_item *b);`
+  - `cx_sort` (function, line 84) `void cx_sort(cx_item *items, size_t n);`
+  - `FREEDOM_COMPOSITOR_H` (macro, line 2) `#define FREEDOM_COMPOSITOR_H`
+- Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/compositor.c`, `tests/test_compositor.c`
 
 ## include/css.h
 - Layer: utility
@@ -92,62 +192,149 @@
   - `css_drop_log` (struct, line 989)
   - `css_attr` (struct, line 1018)
   - `css_element` (struct, line 1028)
-  - `FREEDOM_CSS_H` (macro, line 2)
-  - `CSS_GAP_MAX` (macro, line 75)
-  - `CSS_GRID_COLS_MAX` (macro, line 76)
-  - `CSS_GRID_TRACKS_MAX` (macro, line 77)
-  - `CSS_GRID_AREAS_MAX` (macro, line 83)
-  - `CSS_GRAD_STOPS_MAX` (macro, line 84)
-  - `CSS_LINE_MIN` (macro, line 85)
-  - `CSS_LINE_MAX` (macro, line 86)
-  - `CSS_URL_MAX` (macro, line 87)
-  - `CSS_DECO_UNDERLINE` (macro, line 92)
-  - `CSS_DECO_LINE_THROUGH` (macro, line 93)
-  - `CSS_DECO_OVERLINE` (macro, line 94)
-  - `CSS_CONTAIN_SIZE` (macro, line 332)
-  - `CSS_CONTAIN_LAYOUT` (macro, line 333)
-  - `CSS_CONTAIN_STYLE` (macro, line 334)
-  - `CSS_CONTAIN_PAINT` (macro, line 335)
-  - `CSS_BORDER_W_MAX` (macro, line 422)
-  - `CSS_BORDER_SPACING_MAX` (macro, line 423)
-  - `CSS_FLEX_FACTOR_MAX` (macro, line 424)
-  - `CSS_GRID_SPAN_MAX` (macro, line 425)
-  - `CSS_SPACING_MAX` (macro, line 429)
-  - `CSS_SHADOW_MAX` (macro, line 430)
-  - `CSS_LEN_MAX` (macro, line 435)
-  - `CSS_LEN_UNSET` (macro, line 436)
-  - `CSS_LEN_AUTO` (macro, line 437)
-  - `CSS_LEN_END` (macro, line 438)
-  - `CSS_LEN_MIN_CONTENT` (macro, line 445)
-  - `CSS_LEN_MAX_CONTENT` (macro, line 446)
-  - `CSS_LEN_FIT_CONTENT` (macro, line 447)
-  - `CSS_LEN_IS_INTRINSIC` (macro, line 450)
-  - `CSS_PCT_MAX` (macro, line 473)
-  - `CSS_EM_MILLI_MAX` (macro, line 479)
-  - `CSS_FONT_SIZE_MAX` (macro, line 485)
-  - `CSS_COLUMN_COUNT_MAX` (macro, line 489)
-  - `CSS_MAX_COMPOUNDS` (macro, line 544)
-  - `CSS_MAX_ATTR_SEL` (macro, line 548)
-  - `CSS_MAX_PSEUDO_SEL` (macro, line 552)
-  - `CSS_NTH_MAX` (macro, line 556)
-  - `CSS_MAX_KF_STOPS` (macro, line 830)
-  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 924)
-  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 930)
-  - `CSS_DROP_PROP_MAX` (macro, line 968)
-  - `CSS_DROP_VAL_MAX` (macro, line 970)
+  - `css_status` (enum, line 28)
+  - `css_align` (enum, line 34)
+  - `css_display` (enum, line 42)
+  - `css_justify` (enum, line 64)
+  - `css_font_family` (enum, line 98)
+  - `css_text_transform` (enum, line 104)
+  - `css_valign` (enum, line 109)
+  - `css_white_space` (enum, line 115)
+  - `css_list_style` (enum, line 121)
+  - `css_position` (enum, line 133)
+  - `css_box_sizing` (enum, line 140)
+  - `css_border_style` (enum, line 147)
+  - `css_flex_direction` (enum, line 154)
+  - `css_flex_wrap` (enum, line 160)
+  - `css_align_kw` (enum, line 166)
+  - `css_grid_flow` (enum, line 173)
+  - `css_float` (enum, line 179)
+  - `css_clear` (enum, line 185)
+  - `css_visibility` (enum, line 193)
+  - `css_overflow` (enum, line 202)
+  - `css_cursor` (enum, line 210)
+  - `css_text_overflow` (enum, line 219)
+  - `css_word_break` (enum, line 233)
+  - `css_text_decoration_style` (enum, line 240)
+  - `css_direction` (enum, line 247)
+  - `css_border_collapse` (enum, line 253)
+  - `css_empty_cells` (enum, line 259)
+  - `css_caption_side` (enum, line 265)
+  - `css_table_layout` (enum, line 271)
+  - `css_font_variant` (enum, line 277)
+  - `css_hyphens` (enum, line 283)
+  - `css_user_select` (enum, line 289)
+  - `css_appearance` (enum, line 295)
+  - `css_pointer_events` (enum, line 301)
+  - `css_bg_repeat` (enum, line 306)
+  - `css_bg_size` (enum, line 311)
+  - `css_bg_clip` (enum, line 315)
+  - `css_bg_origin` (enum, line 320)
+  - `css_bg_attachment` (enum, line 324)
+  - `css_isolation` (enum, line 328)
+  - `css_content_visibility` (enum, line 337)
+  - `css_image_rendering` (enum, line 341)
+  - `css_color_scheme` (enum, line 345)
+  - `css_print_color_adjust` (enum, line 349)
+  - `css_forced_color_adjust` (enum, line 353)
+  - `css_mix_blend` (enum, line 358)
+  - `css_object_fit` (enum, line 365)
+  - `css_list_pos` (enum, line 370)
+  - `css_font_kerning` (enum, line 374)
+  - `css_text_rendering` (enum, line 378)
+  - `css_font_stretch` (enum, line 383)
+  - `css_resize` (enum, line 389)
+  - `css_scroll_behavior` (enum, line 393)
+  - `css_touch_action` (enum, line 397)
+  - `css_overscroll` (enum, line 401)
+  - `css_column_fill` (enum, line 406)
+  - `css_column_span` (enum, line 411)
+  - `css_backface` (enum, line 415)
+  - `css_pct_slot` (enum, line 491)
+  - `css_drop_cause` (enum, line 964)
+  - `color` (type_alias, line 563) `typedef struct css_style { int color;`
+  - `css_sheet` (type_alias, line 913) `typedef struct css_sheet css_sheet;`
+  - `prefers_dark` (type_alias, line 919) `typedef struct css_media { int prefers_dark;`
+  - `prop` (type_alias, line 977) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
+  - `verbatim` (function, line 79) `* the quoted row strings verbatim (flex_layout parses them);`
+  - `POINTER` (function, line 207) `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
+  - `translate` (function, line 790) `* translate()/translateX()/translateY();`
+  - `scaleY` (function, line 791) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+  - `declared` (function, line 795) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c`
+  - `element` (function, line 800) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e`
+  - `slots` (function, line 807) `* parse time into ALL seven slots (singular matrices fail closed);`
+  - `css_parse` (function, line 937) `css_status css_parse(const char *text, size_t len, css_sheet **out);`
+  - `css_parse_media` (function, line 943) `css_status css_parse_media(const char *text, size_t len, const css_media *media, css_sheet **out);`
+  - `palette` (function, line 953) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(`
+  - `css_parse_logged` (function, line 999) `css_status css_parse_logged(const char *text, size_t len, const css_media *media, const char *root_scope, css_sheet **out, css_drop_log *log);`
+  - `css_free` (function, line 1004) `void css_free(css_sheet *s);`
+  - `order` (function, line 1007) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is`
+  - `css_resolve_el` (function, line 1082) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len);`
+  - `inherited_px` (function, line 1087) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that walks the DOM is the one that can supply the * inherited value, and it needs the same `
+  - `css_parse_inline` (function, line 1097) `css_style css_parse_inline(const char *style, size_t len);`
+  - `css_font_face_count` (function, line 1103) `size_t css_font_face_count(const css_sheet *sheet);`
+  - `css_font_face_at` (function, line 1104) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+  - `css_resolve_anim_keyframes` (function, line 1112) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
+  - `FREEDOM_CSS_H` (macro, line 2) `#define FREEDOM_CSS_H`
+  - `CSS_GAP_MAX` (macro, line 75) `#define CSS_GAP_MAX`
+  - `CSS_GRID_COLS_MAX` (macro, line 76) `#define CSS_GRID_COLS_MAX`
+  - `CSS_GRID_TRACKS_MAX` (macro, line 77) `#define CSS_GRID_TRACKS_MAX`
+  - `CSS_GRID_AREAS_MAX` (macro, line 83) `#define CSS_GRID_AREAS_MAX`
+  - `CSS_GRAD_STOPS_MAX` (macro, line 84) `#define CSS_GRAD_STOPS_MAX`
+  - `CSS_LINE_MIN` (macro, line 85) `#define CSS_LINE_MIN`
+  - `CSS_LINE_MAX` (macro, line 86) `#define CSS_LINE_MAX`
+  - `CSS_URL_MAX` (macro, line 87) `#define CSS_URL_MAX`
+  - `CSS_DECO_UNDERLINE` (macro, line 92) `#define CSS_DECO_UNDERLINE`
+  - `CSS_DECO_LINE_THROUGH` (macro, line 93) `#define CSS_DECO_LINE_THROUGH`
+  - `CSS_DECO_OVERLINE` (macro, line 94) `#define CSS_DECO_OVERLINE`
+  - `CSS_CONTAIN_SIZE` (macro, line 332) `#define CSS_CONTAIN_SIZE`
+  - `CSS_CONTAIN_LAYOUT` (macro, line 333) `#define CSS_CONTAIN_LAYOUT`
+  - `CSS_CONTAIN_STYLE` (macro, line 334) `#define CSS_CONTAIN_STYLE`
+  - `CSS_CONTAIN_PAINT` (macro, line 335) `#define CSS_CONTAIN_PAINT`
+  - `CSS_BORDER_W_MAX` (macro, line 422) `#define CSS_BORDER_W_MAX`
+  - `CSS_BORDER_SPACING_MAX` (macro, line 423) `#define CSS_BORDER_SPACING_MAX`
+  - `CSS_FLEX_FACTOR_MAX` (macro, line 424) `#define CSS_FLEX_FACTOR_MAX`
+  - `CSS_GRID_SPAN_MAX` (macro, line 425) `#define CSS_GRID_SPAN_MAX`
+  - `CSS_SPACING_MAX` (macro, line 429) `#define CSS_SPACING_MAX`
+  - `CSS_SHADOW_MAX` (macro, line 430) `#define CSS_SHADOW_MAX`
+  - `CSS_LEN_MAX` (macro, line 435) `#define CSS_LEN_MAX`
+  - `CSS_LEN_UNSET` (macro, line 436) `#define CSS_LEN_UNSET`
+  - `CSS_LEN_AUTO` (macro, line 437) `#define CSS_LEN_AUTO`
+  - `CSS_LEN_END` (macro, line 438) `#define CSS_LEN_END`
+  - `CSS_LEN_MIN_CONTENT` (macro, line 445) `#define CSS_LEN_MIN_CONTENT`
+  - `CSS_LEN_MAX_CONTENT` (macro, line 446) `#define CSS_LEN_MAX_CONTENT`
+  - `CSS_LEN_FIT_CONTENT` (macro, line 447) `#define CSS_LEN_FIT_CONTENT`
+  - `CSS_LEN_IS_INTRINSIC` (macro, line 450) `#define CSS_LEN_IS_INTRINSIC(v)`
+  - `CSS_PCT_MAX` (macro, line 473) `#define CSS_PCT_MAX`
+  - `CSS_EM_MILLI_MAX` (macro, line 479) `#define CSS_EM_MILLI_MAX`
+  - `CSS_FONT_SIZE_MAX` (macro, line 485) `#define CSS_FONT_SIZE_MAX`
+  - `CSS_COLUMN_COUNT_MAX` (macro, line 489) `#define CSS_COLUMN_COUNT_MAX`
+  - `CSS_MAX_COMPOUNDS` (macro, line 544) `#define CSS_MAX_COMPOUNDS`
+  - `CSS_MAX_ATTR_SEL` (macro, line 548) `#define CSS_MAX_ATTR_SEL`
+  - `CSS_MAX_PSEUDO_SEL` (macro, line 552) `#define CSS_MAX_PSEUDO_SEL`
+  - `CSS_NTH_MAX` (macro, line 556) `#define CSS_NTH_MAX`
+  - `CSS_MAX_KF_STOPS` (macro, line 830) `#define CSS_MAX_KF_STOPS`
+  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 924) `#define CSS_MEDIA_DEFAULT_WIDTH`
+  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 930) `#define CSS_MEDIA_DEFAULT_HEIGHT`
+  - `CSS_DROP_PROP_MAX` (macro, line 968) `#define CSS_DROP_PROP_MAX`
+  - `CSS_DROP_VAL_MAX` (macro, line 970) `#define CSS_DROP_VAL_MAX`
 - Depends on: `include/css_color.h`
-- Imported by: `include/box_style.h`, `include/css_chain.h`, `include/css_select.h`, `include/page_view.h`
+- Imported by: `fuzz/fuzz_css.c`, `gui/browser_ui.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_length.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_length.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_shape.c`
 
 ## include/css_chain.h
 - Layer: utility
 - Doc: ifndef FREEDOM_CSS_CHAIN_H define FREEDOM_CSS_CHAIN_H  include <lexbor/html/html.h>  include "css.h" include "css_select
 - Language: h
 - Symbols:
-  - `FREEDOM_CSS_CHAIN_H` (macro, line 2)
-  - `CCH_CHAIN_MAX` (macro, line 26)
-  - `CCH_SIB_MAX` (macro, line 27)
-  - `CCH_NTH_MAX` (macro, line 28)
+  - `cch_element_style` (function, line 36) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet);`
+  - `cch_element_style_fs` (function, line 48) `css_style cch_element_style_fs(lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size);`
+  - `cch_element_matches` (function, line 56) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);`
+  - `FREEDOM_CSS_CHAIN_H` (macro, line 2) `#define FREEDOM_CSS_CHAIN_H`
+  - `CCH_CHAIN_MAX` (macro, line 26) `#define CCH_CHAIN_MAX`
+  - `CCH_SIB_MAX` (macro, line 27) `#define CCH_SIB_MAX`
+  - `CCH_NTH_MAX` (macro, line 28) `#define CCH_NTH_MAX`
 - Depends on: `include/css.h`, `include/css_select.h`
+- Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`
 
 ## include/css_color.h
 - Layer: utility
@@ -155,10 +342,15 @@
 - Language: h
 - Symbols:
   - `cc_rgb` (struct, line 27)
-  - `FREEDOM_CSS_COLOR_H` (macro, line 2)
-  - `CC_COLOR_CURRENT` (macro, line 59)
-  - `CC_COLOR_TRANSPARENT` (macro, line 60)
-- Imported by: `include/css.h`
+  - `cc_status` (enum, line 31)
+  - `b` (type_alias, line 26) `typedef struct cc_rgb { unsigned char r, g, b;`
+  - `cc_parse` (function, line 45) `cc_status cc_parse(const char *token, cc_rgb *out);`
+  - `cc_pack` (function, line 49) `int cc_pack(cc_rgb c);`
+  - `cc_unpack` (function, line 52) `cc_rgb cc_unpack(int packed);`
+  - `FREEDOM_CSS_COLOR_H` (macro, line 2) `#define FREEDOM_CSS_COLOR_H`
+  - `CC_COLOR_CURRENT` (macro, line 59) `#define CC_COLOR_CURRENT`
+  - `CC_COLOR_TRANSPARENT` (macro, line 60) `#define CC_COLOR_TRANSPARENT`
+- Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `gui/svg_paint.c`, `include/css.h`, `src/css.c`, `src/css_color.c`, `src/page_view.c`, `src/svg_render.c`, `tests/test_css_color.c`
 
 ## include/css_length.h
 - Layer: utility
@@ -167,14 +359,28 @@
 - Symbols:
   - `cl_ctx` (struct, line 84)
   - `cl_lp` (struct, line 132)
-  - `FREEDOM_CSS_LENGTH_H` (macro, line 2)
-  - `CL_MAX_TOKEN` (macro, line 33)
-  - `CL_INITIAL_FONT_SIZE` (macro, line 39)
-  - `CL_NORMAL_LINE_RATIO` (macro, line 45)
-  - `CL_FALLBACK_EX_RATIO` (macro, line 56)
-  - `CL_FALLBACK_CH_RATIO` (macro, line 57)
-  - `CL_FALLBACK_CAP_RATIO` (macro, line 58)
-  - `CL_FALLBACK_IC_RATIO` (macro, line 59)
+  - `cl_status` (enum, line 61)
+  - `font_size` (type_alias, line 84) `typedef struct cl_ctx { double font_size;`
+  - `px` (type_alias, line 132) `typedef struct cl_lp { double px;`
+  - `prelude` (function, line 99) `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the author's root) and the conservative default * everywhere else. */ cl_ctx cl_ctx_initial(voi`
+  - `cl_resolve` (function, line 117) `cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px);`
+  - `cl_unit_is_font_relative` (function, line 157) `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em * (font_size - from_font_size) * * This is the whole rule and the only place the deri`
+  - `cl_unit_font_ratio` (function, line 182) `double cl_unit_font_ratio(const char *unit, size_t unit_len);`
+  - `here` (function, line 186) `* Every input cl_resolve accepts resolves identically here (with has_pct 0);`
+  - `cl_resolve_lp` (function, line 194) `cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out);`
+  - `length` (function, line 205) `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute component still survives: dropping it would throw * away a length the author did state. */ `
+  - `cl_number` (function, line 230) `int cl_number(const char *s, double *out, const char **endp);`
+  - `cl_unit_scale` (function, line 241) `cl_status cl_unit_scale(const char *unit, size_t unit_len, const cl_ctx *ctx, double *out_px_per_unit);`
+  - `cl_is_length_unit` (function, line 246) `int cl_is_length_unit(const char *unit, size_t unit_len);`
+  - `FREEDOM_CSS_LENGTH_H` (macro, line 2) `#define FREEDOM_CSS_LENGTH_H`
+  - `CL_MAX_TOKEN` (macro, line 33) `#define CL_MAX_TOKEN`
+  - `CL_INITIAL_FONT_SIZE` (macro, line 39) `#define CL_INITIAL_FONT_SIZE`
+  - `CL_NORMAL_LINE_RATIO` (macro, line 45) `#define CL_NORMAL_LINE_RATIO`
+  - `CL_FALLBACK_EX_RATIO` (macro, line 56) `#define CL_FALLBACK_EX_RATIO`
+  - `CL_FALLBACK_CH_RATIO` (macro, line 57) `#define CL_FALLBACK_CH_RATIO`
+  - `CL_FALLBACK_CAP_RATIO` (macro, line 58) `#define CL_FALLBACK_CAP_RATIO`
+  - `CL_FALLBACK_IC_RATIO` (macro, line 59) `#define CL_FALLBACK_IC_RATIO`
+- Imported by: `src/css.c`, `src/css_length.c`, `src/page_view.c`, `tests/test_css_length.c`
 
 ## include/css_select.h
 - Layer: utility
@@ -186,63 +392,123 @@
   - `css_pseudo_match` (struct, line 105)
   - `css_compound` (struct, line 115)
   - `css_sel` (struct, line 132)
+  - `name` (type_alias, line 84) `typedef struct css_attr_match { char name[CSS_TOK_MAX];`
+  - `tag` (type_alias, line 90) `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];`
+  - `kind` (type_alias, line 105) `typedef struct css_pseudo_match { int kind;`
+  - `tag` (type_alias, line 115) `typedef struct css_compound { char tag[CSS_TOK_MAX];`
+  - `parts` (type_alias, line 132) `typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];`
   - `csel_lower_ch` (function, line 158) `static inline char csel_lower_ch(char c)`
   - `csel_ci_eq` (function, line 162) `static inline int csel_ci_eq(const char *a, const char *b)`
   - `csel_span_eq` (function, line 172) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
   - `csel_substr` (function, line 183) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
   - `csel_ident_ch` (function, line 190) `static inline int csel_ident_ch(char c)`
-  - `FREEDOM_CSS_SELECT_H` (macro, line 2)
-  - `CSS_TOK_MAX` (macro, line 27)
-  - `CSS_MAX_CLASSES_PER_SEL` (macro, line 28)
-  - `CSS_MAX_SUB_SELS` (macro, line 80)
-  - `CSS_SUB_MAX_ATTRS` (macro, line 81)
+  - `csel_parse` (function, line 145) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
+  - `csel_matches` (function, line 154) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int *pseudo_kind);`
+  - `FREEDOM_CSS_SELECT_H` (macro, line 2) `#define FREEDOM_CSS_SELECT_H`
+  - `CSS_TOK_MAX` (macro, line 27) `#define CSS_TOK_MAX`
+  - `CSS_MAX_CLASSES_PER_SEL` (macro, line 28) `#define CSS_MAX_CLASSES_PER_SEL`
+  - `CSS_MAX_SUB_SELS` (macro, line 80) `#define CSS_MAX_SUB_SELS`
+  - `CSS_SUB_MAX_ATTRS` (macro, line 81) `#define CSS_SUB_MAX_ATTRS`
 - Depends on: `include/css.h`
-- Imported by: `include/css_chain.h`
+- Imported by: `include/css_chain.h`, `src/css.c`, `src/css_chain.c`, `src/css_select.c`, `src/dom.c`, `tests/test_css.c`
 
 ## include/data_url.h
 - Layer: data_access
 - Doc: ifndef FREEDOM_DATA_URL_H define FREEDOM_DATA_URL_H  include <stddef.h> include <stdint.h>  ifdef __cplusplus error "Fre
 - Language: h
 - Symbols:
-  - `FREEDOM_DATA_URL_H` (macro, line 2)
-  - `DU_MAX_ENCODED_LEN` (macro, line 43)
+  - `du_status` (enum, line 27)
+  - `allocation` (function, line 20) `* * du_base64_payload does no allocation (it only slices the caller's url string);`
+  - `du_is_data_url` (function, line 46) `int du_is_data_url(const char *url);`
+  - `du_base64_payload` (function, line 54) `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len);`
+  - `closed` (function, line 59) `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len != 0) => DU_ERR_NULL_ARG. */ du_status du_base64_decode(const char *b64, size_t b64_len,`
+  - `FREEDOM_DATA_URL_H` (macro, line 2) `#define FREEDOM_DATA_URL_H`
+  - `DU_MAX_ENCODED_LEN` (macro, line 43) `#define DU_MAX_ENCODED_LEN`
+- Imported by: `fuzz/fuzz_data_url.c`, `gui/browser_ui.c`, `src/data_url.c`, `src/render_doc.c`, `src/render_policy.c`, `src/tab.c`, `tests/test_data_url.c`
 
 ## include/disk_store.h
 - Layer: data_access
 - Doc: ifndef FREEDOM_DISK_STORE_H define FREEDOM_DISK_STORE_H  include <stddef.h> include <stdint.h>  include "local_store.h" 
 - Language: h
 - Symbols:
-  - `FREEDOM_DISK_STORE_H` (macro, line 2)
+  - `ds_status` (enum, line 25)
+  - `ds_write` (function, line 38) `ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead, const uint8_t *plaintext, size_t pt_len);`
+  - `ds_read` (function, line 43) `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN], uint8_t **out, size_t *out_len);`
+  - `ds_free` (function, line 47) `void ds_free(uint8_t *buf, size_t len);`
+  - `FREEDOM_DISK_STORE_H` (macro, line 2) `#define FREEDOM_DISK_STORE_H`
 - Depends on: `include/local_store.h`
+- Imported by: `src/disk_store.c`, `src/profile.c`, `tests/test_disk_store.c`
 
 ## include/dom.h
 - Layer: utility
 - Doc: ifndef FREEDOM_DOM_H define FREEDOM_DOM_H  include <stddef.h> include <stdint.h>  include "html_parse.h"  ifdef __cplusp
 - Language: h
 - Symbols:
-  - `FREEDOM_DOM_H` (macro, line 2)
-  - `DOM_NODE_NONE` (macro, line 37)
+  - `dom_status` (enum, line 26)
+  - `dom_node_id` (type_alias, line 34) `typedef uint32_t dom_node_id;`
+  - `dom_index` (type_alias, line 40) `typedef struct dom_index dom_index;`
+  - `dom_build` (function, line 45) `dom_status dom_build(const hp_document *doc, dom_index **out);`
+  - `dom_free` (function, line 48) `void dom_free(dom_index *idx);`
+  - `dom_node_count` (function, line 51) `size_t dom_node_count(const dom_index *idx);`
+  - `dom_get_element_by_id` (function, line 56) `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id);`
+  - `count` (function, line 59) `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index *idx, const char *tag, dom_node_id *out, size_t cap);`
+  - `dom_get_by_class` (function, line 62) `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);`
+  - `dom_query_selector` (function, line 82) `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root, const char *selector);`
+  - `dom_matches` (function, line 91) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);`
+  - `dom_closest` (function, line 95) `dom_node_id dom_closest(const dom_index *idx, dom_node_id node, const char *selector);`
+  - `dom_document_position` (function, line 101) `size_t dom_document_position(const dom_index *idx, dom_node_id node);`
+  - `dom_precedes` (function, line 104) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);`
+  - `dom_node_at` (function, line 107) `dom_node_id dom_node_at(const dom_index *idx, size_t position);`
+  - `dom_parent` (function, line 110) `dom_node_id dom_parent(const dom_index *idx, dom_node_id node);`
+  - `dom_first_child` (function, line 112) `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node);`
+  - `dom_next_sibling` (function, line 113) `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node);`
+  - `dom_tag_name` (function, line 118) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);`
+  - `dom_get_attribute` (function, line 121) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);`
+  - `dom_attribute_names` (function, line 128) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);`
+  - `dom_text_content` (function, line 133) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);`
+  - `dom_document_title` (function, line 136) `const char *dom_document_title(const dom_index *idx, size_t *len);`
+  - `dom_set_text_content` (function, line 146) `dom_status dom_set_text_content(dom_index *idx, dom_node_id node, const char *text, size_t len);`
+  - `dom_set_document_title` (function, line 151) `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len);`
+  - `dom_create_element` (function, line 161) `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id);`
+  - `cycle` (function, line 164) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child);`
+  - `index` (function, line 169) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);`
+  - `dom_set_attribute` (function, line 175) `dom_status dom_set_attribute(dom_index *idx, dom_node_id node, const char *name, const char *value);`
+  - `dom_remove_attribute` (function, line 182) `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name);`
+  - `dom_set_inner_html` (function, line 189) `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node, const char *html, size_t len);`
+  - `length` (function, line 194) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard cap — OOM from malloc is the only limit. * Invalid handle / NULL out => DOM_ERR_NULL`
+  - `FREEDOM_DOM_H` (macro, line 2) `#define FREEDOM_DOM_H`
+  - `DOM_NODE_NONE` (macro, line 37) `#define DOM_NODE_NONE`
 - Depends on: `include/html_parse.h`
-- Imported by: `include/js_dom.h`, `include/page_view.h`
+- Imported by: `fuzz/fuzz_dom.c`, `include/js_dom.h`, `include/page_view.h`, `src/dom.c`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 
 ## include/dom_debug.h
 - Layer: utility
 - Doc: ifndef FREEDOM_DOM_DEBUG_H define FREEDOM_DOM_DEBUG_H  include <stddef.h>  include "render_doc.h"  ifdef __cplusplus err
 - Language: h
 - Symbols:
-  - `FREEDOM_DOM_DEBUG_H` (macro, line 2)
-  - `DD_FIELD_MAX` (macro, line 28)
+  - `dd_format` (function, line 36) `size_t dd_format(const rd_doc *doc, char *out, size_t cap);`
+  - `dd_format_css` (function, line 41) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap);`
+  - `FREEDOM_DOM_DEBUG_H` (macro, line 2) `#define FREEDOM_DOM_DEBUG_H`
+  - `DD_FIELD_MAX` (macro, line 28) `#define DD_FIELD_MAX`
 - Depends on: `include/render_doc.h`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `src/dom_debug.c`, `src/freedom.c`, `tests/test_dom_debug.c`
 
 ## include/download.h
 - Layer: utility
 - Doc: ifndef FREEDOM_DOWNLOAD_H define FREEDOM_DOWNLOAD_H  include <stddef.h>  ifdef __cplusplus error "Freedom is pure C (C11
 - Language: h
 - Symbols:
-  - `FREEDOM_DOWNLOAD_H` (macro, line 2)
-  - `DL_NAME_MAX` (macro, line 28)
-  - `DL_FALLBACK_NAME` (macro, line 30)
-  - `DL_MAX_BYTES` (macro, line 31)
+  - `dl_status` (enum, line 33)
+  - `dl_should_download` (function, line 43) `int dl_should_download(const char *content_type, const char *content_disposition);`
+  - `literal` (function, line 47) `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);`
+  - `DL_ERR_OVERFLOW` (function, line 56) `* DL_ERR_OVERFLOW (out left empty). url/content_disposition NULL => absent. */ dl_status dl_pick_name(const char *url, const char *content_disposition, const char *content_type, char *out, size_t outs`
+  - `basename` (function, line 61) `* sanitized basename (a name still containing '/' is rejected => DL_ERR_OVERFLOW, * so the path can never escape dir). Trailing '/' on dir respected. Fails closed * on overflow. dir/name/out NULL or o`
+  - `dl_check_size` (function, line 67) `dl_status dl_check_size(size_t len);`
+  - `FREEDOM_DOWNLOAD_H` (macro, line 2) `#define FREEDOM_DOWNLOAD_H`
+  - `DL_NAME_MAX` (macro, line 28) `#define DL_NAME_MAX`
+  - `DL_FALLBACK_NAME` (macro, line 30) `#define DL_FALLBACK_NAME`
+  - `DL_MAX_BYTES` (macro, line 31) `#define DL_MAX_BYTES`
+- Imported by: `fuzz/fuzz_download.c`, `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 
 ## include/flex_layout.h
 - Layer: presentation
@@ -253,15 +519,40 @@
   - `fx_result` (struct, line 48)
   - `fx_area_map` (struct, line 116)
   - `fx_float_rect` (struct, line 186)
-  - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2)
-  - `FX_MAX_ITEMS` (macro, line 28)
-  - `FX_AREA_MAX_ROWS` (macro, line 108)
-  - `FX_AREA_MAX_COLS` (macro, line 109)
-  - `FX_AREA_MAX_CELLS` (macro, line 110)
-  - `FX_AREA_NAME_MAX` (macro, line 111)
-  - `FX_FLOAT_MIN_LINE` (macro, line 180)
-  - `FX_MAX_COLUMNS` (macro, line 231)
-- Imported by: `include/box_tree.h`
+  - `fx_justify` (enum, line 30)
+  - `fx_status` (enum, line 53)
+  - `basis` (type_alias, line 40) `typedef struct fx_item { double basis;`
+  - `pos` (type_alias, line 48) `typedef struct fx_result { double pos;`
+  - `cols` (type_alias, line 116) `typedef struct fx_area_map { int rows, cols;`
+  - `bottom` (type_alias, line 186) `typedef struct fx_float_rect { double top, bottom;`
+  - `size` (function, line 60) `* content size (px);`
+  - `out` (function, line 62) `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap, fx_justify justify, fx_result *out);`
+  - `fx_grid_columns` (function, line 69) `fx_status fx_grid_columns(double avail, size_t ncols, double gap, double *col_x, double *col_w);`
+  - `fx_grid_cell` (function, line 74) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);`
+  - `fx_grid_columns_weighted` (function, line 82) `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap, const int *track, size_t ntrack, double *col_x, double *col_w);`
+  - `fx_grid_place_span` (function, line 98) `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span, const int *row_span, const int *fixed_row, const int *fixed_col, size_t *out_row, size_t *out_col);`
+  - `fx_grid_area_hash` (function, line 125) `unsigned fx_grid_area_hash(const char *name);`
+  - `fx_grid_areas_parse` (function, line 130) `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out);`
+  - `fx_grid_area_rect` (function, line 136) `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name, int *row, int *col, int *row_span, int *col_span);`
+  - `offset` (function, line 143) `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would overflow still gets a clamped position. Pure, no allocation. * n == 0 is a no-op (poin`
+  - `required` (function, line 156) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
+  - `fx_float_pack_wrap` (function, line 158) `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n, double avail, double gap, double *out_x, size_t *out_row);`
+  - `widths` (function, line 166) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens it) with the wrap cursor discipline, then * reports the BORDER x (packed outer posi`
+  - `FX_ERR_NULL_ARG` (function, line 200) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
+  - `fx_float_insets` (function, line 202) `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h, double avail, double *out_l, double *out_r);`
+  - `fx_auto_min_size` (function, line 226) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
+  - `fx_multicol_used` (function, line 258) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width, double gap, int *out_n, double *out_w);`
+  - `fx_multicol_balance` (function, line 277) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol, int *out_col, double *out_colh);`
+  - `fx_justify_name` (function, line 282) `const char *fx_justify_name(fx_justify j);`
+  - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
+  - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
+  - `FX_AREA_MAX_ROWS` (macro, line 108) `#define FX_AREA_MAX_ROWS`
+  - `FX_AREA_MAX_COLS` (macro, line 109) `#define FX_AREA_MAX_COLS`
+  - `FX_AREA_MAX_CELLS` (macro, line 110) `#define FX_AREA_MAX_CELLS`
+  - `FX_AREA_NAME_MAX` (macro, line 111) `#define FX_AREA_NAME_MAX`
+  - `FX_FLOAT_MIN_LINE` (macro, line 180) `#define FX_FLOAT_MIN_LINE`
+  - `FX_MAX_COLUMNS` (macro, line 231) `#define FX_MAX_COLUMNS`
+- Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/form.h
 - Layer: data_access
@@ -270,11 +561,20 @@
 - Symbols:
   - `fm_field` (struct, line 37)
   - `fm_plan` (struct, line 52)
-  - `FREEDOM_FORM_H` (macro, line 2)
-  - `FM_URL_MAX` (macro, line 28)
-  - `FM_BODY_MAX` (macro, line 30)
-  - `FM_MAX_FIELDS` (macro, line 31)
+  - `fm_method` (enum, line 33)
+  - `fm_kind` (enum, line 39)
+  - `fm_block_reason` (enum, line 45)
+  - `fm_status` (enum, line 61)
+  - `kind` (type_alias, line 51) `typedef struct fm_plan { fm_kind kind;`
+  - `fm_encode` (function, line 74) `fm_status fm_encode(const fm_field *fields, size_t n, char *out, size_t outsz, size_t *out_len);`
+  - `fm_build` (function, line 81) `fm_status fm_build(const char *base, const char *action, fm_method method, const fm_field *fields, size_t n, fm_plan *out);`
+  - `FM_CONTENT_TYPE_URLENCODED` (variable, line 68) `extern const char FM_CONTENT_TYPE_URLENCODED[];`
+  - `FREEDOM_FORM_H` (macro, line 2) `#define FREEDOM_FORM_H`
+  - `FM_URL_MAX` (macro, line 28) `#define FM_URL_MAX`
+  - `FM_BODY_MAX` (macro, line 30) `#define FM_BODY_MAX`
+  - `FM_MAX_FIELDS` (macro, line 31) `#define FM_MAX_FIELDS`
 - Depends on: `include/url.h`
+- Imported by: `gui/browser_ui.c`, `src/form.c`, `tests/test_form.c`
 
 ## include/frame_clock.h
 - Layer: utility
@@ -282,7 +582,13 @@
 - Language: h
 - Symbols:
   - `fc_clock` (struct, line 15)
-  - `FREEDOM_FRAME_CLOCK_H` (macro, line 2)
+  - `active` (type_alias, line 14) `typedef struct fc_clock { int active;`
+  - `fc_init` (function, line 19) `void fc_init(fc_clock *c);`
+  - `fc_set_active` (function, line 21) `void fc_set_active(fc_clock *c, int active);`
+  - `fc_needs_tick` (function, line 22) `int fc_needs_tick(const fc_clock *c);`
+  - `fc_interval_ms` (function, line 23) `int fc_interval_ms(const fc_clock *c);`
+  - `FREEDOM_FRAME_CLOCK_H` (macro, line 2) `#define FREEDOM_FRAME_CLOCK_H`
+- Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
 
 ## include/freebug.h
 - Layer: utility
@@ -291,25 +597,36 @@
 - Symbols:
   - `fb_entry` (struct, line 36)
   - `fb_buffer` (struct, line 46)
-  - `FREEDOM_FREEBUG_H` (macro, line 2)
-  - `FB_MAX_ENTRIES` (macro, line 56)
-  - `FB_MAX_ENTRY_BYTES` (macro, line 57)
-  - `FB_MAX_TOTAL_BYTES` (macro, line 58)
-  - `FB_MAX_FILE_BYTES` (macro, line 62)
-- Imported by: `include/js_dom.h`, `include/tab.h`
+  - `fb_level` (enum, line 24)
+  - `level` (type_alias, line 36) `typedef struct fb_entry { int level;`
+  - `fb_buffer_init` (function, line 65) `void fb_buffer_init(fb_buffer *b);`
+  - `truncated` (function, line 69) `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow and leaves prior entries intact. The stored * entry has no source location (file == NU`
+  - `copied` (function, line 75) `* copied (truncated to FB_MAX_FILE_BYTES);`
+  - `fb_buffer_push_loc` (function, line 78) `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len, const char *file, int line, int col);`
+  - `fb_buffer_reset` (function, line 83) `void fb_buffer_reset(fb_buffer *b);`
+  - `fb_buffer_free` (function, line 86) `void fb_buffer_free(fb_buffer *b);`
+  - `fb_buffer_count` (function, line 89) `size_t fb_buffer_count(const fb_buffer *b);`
+  - `fb_buffer_at` (function, line 92) `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i);`
+  - `fb_level_name` (function, line 96) `const char *fb_level_name(int level);`
+  - `FREEDOM_FREEBUG_H` (macro, line 2) `#define FREEDOM_FREEBUG_H`
+  - `FB_MAX_ENTRIES` (macro, line 56) `#define FB_MAX_ENTRIES`
+  - `FB_MAX_ENTRY_BYTES` (macro, line 57) `#define FB_MAX_ENTRY_BYTES`
+  - `FB_MAX_TOTAL_BYTES` (macro, line 58) `#define FB_MAX_TOTAL_BYTES`
+  - `FB_MAX_FILE_BYTES` (macro, line 62) `#define FB_MAX_FILE_BYTES`
+- Imported by: `fuzz/fuzz_freebug.c`, `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/tab.c`, `tests/test_freebug.c`
 
 ## include/freedom_config.h
 - Layer: infrastructure
 - Language: h
 - Symbols:
-  - `FREEDOM_CONFIG_H` (macro, line 14)
-  - `FC_PNG_PAGE_W` (macro, line 20)
-  - `FC_PNG_MARGIN` (macro, line 24)
-  - `FC_PNG_MAX_H` (macro, line 29)
-  - `FC_FLEX_MEASURE_W` (macro, line 35)
-  - `FC_FLEX_MIN_MEASURE_W` (macro, line 41)
-  - `FC_FONT_CHAIN_MAX` (macro, line 46)
-  - `FC_MAX_BOXES` (macro, line 51)
+  - `FREEDOM_CONFIG_H` (macro, line 14) `#define FREEDOM_CONFIG_H`
+  - `FC_PNG_PAGE_W` (macro, line 20) `#define FC_PNG_PAGE_W`
+  - `FC_PNG_MARGIN` (macro, line 24) `#define FC_PNG_MARGIN`
+  - `FC_PNG_MAX_H` (macro, line 29) `#define FC_PNG_MAX_H`
+  - `FC_FLEX_MEASURE_W` (macro, line 35) `#define FC_FLEX_MEASURE_W`
+  - `FC_FLEX_MIN_MEASURE_W` (macro, line 41) `#define FC_FLEX_MIN_MEASURE_W`
+  - `FC_FONT_CHAIN_MAX` (macro, line 46) `#define FC_FONT_CHAIN_MAX`
+  - `FC_MAX_BOXES` (macro, line 51) `#define FC_MAX_BOXES`
 
 ## include/hls.h
 - Layer: utility
@@ -319,22 +636,45 @@
   - `hls_segment` (struct, line 29)
   - `hls_variant` (struct, line 36)
   - `hls_playlist` (struct, line 45)
-  - `FREEDOM_HLS_H` (macro, line 2)
+  - `hls_status` (enum, line 21)
+  - `hls_parse` (function, line 59) `hls_status hls_parse(const char *playlist_text, size_t len, hls_playlist **out);`
+  - `hls_select_variant` (function, line 65) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);`
+  - `resolved` (function, line 68) `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */ size_t hls_resolve_url(const char *base_url, const char *segment_url, char *resolved`
+  - `hls_playlist_free` (function, line 74) `void hls_playlist_free(hls_playlist *pl);`
+  - `FREEDOM_HLS_H` (macro, line 2) `#define FREEDOM_HLS_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
 
 ## include/hostblock.h
 - Layer: utility
 - Doc: ifndef FREEDOM_HOSTBLOCK_H define FREEDOM_HOSTBLOCK_H  include <stddef.h>  ifdef __cplusplus error "Freedom is pure C (C
 - Language: h
 - Symbols:
-  - `FREEDOM_HOSTBLOCK_H` (macro, line 2)
+  - `hb_list` (enum, line 32)
+  - `hb_decision` (enum, line 37)
+  - `hb_status` (enum, line 42)
+  - `hb_set` (type_alias, line 29) `typedef struct hb_set hb_set;`
+  - `hb_new` (function, line 49) `hb_set *hb_new(void);`
+  - `hb_free` (function, line 52) `void hb_free(hb_set *s);`
+  - `hb_load` (function, line 60) `hb_status hb_load(hb_set *s, const char *text, hb_list list);`
+  - `walked` (function, line 65) `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins, covers subdomains);`
+  - `hb_check` (function, line 68) `hb_decision hb_check(const hb_set *s, const char *host);`
+  - `hb_is_allowlisted` (function, line 75) `int hb_is_allowlisted(const hb_set *s, const char *host);`
+  - `hb_count` (function, line 79) `size_t hb_count(const hb_set *s, hb_list list);`
+  - `FREEDOM_HOSTBLOCK_H` (macro, line 2) `#define FREEDOM_HOSTBLOCK_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
 
 ## include/hostedit.h
 - Layer: infrastructure
 - Doc: ifndef FREEDOM_HOSTEDIT_H define FREEDOM_HOSTEDIT_H  include <stddef.h>  ifdef __cplusplus error "Freedom is pure C (C11
 - Language: h
 - Symbols:
-  - `FREEDOM_HOSTEDIT_H` (macro, line 2)
-  - `HE_MAX_HOST` (macro, line 32)
+  - `he_status` (enum, line 24)
+  - `he_make_line` (function, line 40) `he_status he_make_line(const char *host, char *out, size_t cap);`
+  - `he_text_has_host` (function, line 46) `int he_text_has_host(const char *text, const char *host);`
+  - `he_suggest` (function, line 55) `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);`
+  - `FREEDOM_HOSTEDIT_H` (macro, line 2) `#define FREEDOM_HOSTEDIT_H`
+  - `HE_MAX_HOST` (macro, line 32) `#define HE_MAX_HOST`
+- Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
 
 ## include/html_parse.h
 - Layer: utility
@@ -343,11 +683,30 @@
 - Symbols:
   - `hp_config` (struct, line 32)
   - `hp_script` (struct, line 76)
-  - `FREEDOM_HTML_PARSE_H` (macro, line 2)
-  - `HP_DEFAULT_MAX_BYTES` (macro, line 40)
-  - `HP_MAX_SCRIPTS` (macro, line 48)
-  - `HP_MAX_STYLESHEETS` (macro, line 112)
-- Imported by: `include/dom.h`, `include/page_view.h`
+  - `hp_status` (enum, line 22)
+  - `max_bytes` (type_alias, line 31) `typedef struct hp_config { size_t max_bytes;`
+  - `hp_document` (type_alias, line 39) `typedef struct hp_document hp_document;`
+  - `dropped` (function, line 47) `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure defaults applied. */ hp_config hp_config_default(void);`
+  - `hp_validate_input` (function, line 54) `hp_status hp_validate_input(const char *html, size_t len, const hp_config *cfg);`
+  - `cfg` (function, line 57) `* policy in cfg (cfg == NULL => secure defaults). No script is ever executed. * html == NULL or out == NULL => HP_ERR_NULL_ARG. * On HP_OK, *out is set and must be released with hp_document_free. */ h`
+  - `hp_element_count` (function, line 63) `size_t hp_element_count(const hp_document *doc);`
+  - `hp_script_count` (function, line 64) `size_t hp_script_count(const hp_document *doc);`
+  - `hp_event_handler_count` (function, line 65) `size_t hp_event_handler_count(const hp_document *doc);`
+  - `hp_extract_text` (function, line 69) `char *hp_extract_text(const hp_document *doc, size_t *out_len);`
+  - `hp_get_title` (function, line 70) `char *hp_get_title(const hp_document *doc, size_t *out_len);`
+  - `src` (function, line 87) `* carry their raw src (a <script src> with an inline body lists ONLY the src -- * browser rule: when src is present the content is ignored). A script executes * only when its type is absent/empty or a`
+  - `modules` (function, line 91) `* ES modules (import/export cannot run as a classic script), and template blocks * (text/x-jquery-tmpl, text/html, text/template), whose markup would throw a * SyntaxError if evaluated as JS. Each ent`
+  - `hp_free_scripts` (function, line 108) `void hp_free_scripts(hp_script *scripts, size_t count);`
+  - `hp_extract_stylesheet_hrefs` (function, line 124) `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count);`
+  - `hp_free_stylesheet_hrefs` (function, line 127) `void hp_free_stylesheet_hrefs(char **hrefs, size_t count);`
+  - `hp_free` (function, line 130) `void hp_free(char *buf);`
+  - `hp_document_free` (function, line 133) `void hp_document_free(hp_document *doc);`
+  - `hp_document_root` (function, line 139) `const void *hp_document_root(const hp_document *doc);`
+  - `FREEDOM_HTML_PARSE_H` (macro, line 2) `#define FREEDOM_HTML_PARSE_H`
+  - `HP_DEFAULT_MAX_BYTES` (macro, line 40) `#define HP_DEFAULT_MAX_BYTES`
+  - `HP_MAX_SCRIPTS` (macro, line 48) `#define HP_MAX_SCRIPTS`
+  - `HP_MAX_STYLESHEETS` (macro, line 112) `#define HP_MAX_STYLESHEETS`
+- Imported by: `fuzz/fuzz_dom.c`, `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_html_parse.c`, `fuzz/fuzz_page_view.c`, `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
 
 ## include/image_decode.h
 - Layer: utility
@@ -355,9 +714,24 @@
 - Language: h
 - Symbols:
   - `img_pixels` (struct, line 56)
-  - `FREEDOM_IMAGE_DECODE_H` (macro, line 2)
-  - `IMG_MAX_DIM` (macro, line 65)
-  - `IMG_MAX_PIXELS` (macro, line 66)
+  - `img_format` (enum, line 33)
+  - `img_status` (enum, line 41)
+  - `width` (type_alias, line 56) `typedef struct img_pixels { uint32_t width;`
+  - `guards` (function, line 25) `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before decode);`
+  - `img_sniff` (function, line 69) `img_format img_sniff(const uint8_t *bytes, size_t len);`
+  - `img_png_dimensions` (function, line 73) `img_status img_png_dimensions(const uint8_t *bytes, size_t len, uint32_t *out_w, uint32_t *out_h);`
+  - `img_dimensions_ok` (function, line 78) `int img_dimensions_ok(uint32_t w, uint32_t h);`
+  - `inputs` (function, line 81) `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h, double *out_w, double *out_h);`
+  - `img_decode_png` (function, line 89) `img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out);`
+  - `decode` (function, line 92) `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG (IMG_ERR_FORMAT), out-of-bounds dimensions, CMYK/ * YCCK and corrupt streams (IMG_E`
+  - `img_decode_gif` (function, line 104) `img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out);`
+  - `img_decode` (function, line 117) `img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out);`
+  - `img_pixels_free` (function, line 121) `void img_pixels_free(img_pixels *p);`
+  - `img_format_name` (function, line 124) `const char *img_format_name(img_format f);`
+  - `FREEDOM_IMAGE_DECODE_H` (macro, line 2) `#define FREEDOM_IMAGE_DECODE_H`
+  - `IMG_MAX_DIM` (macro, line 65) `#define IMG_MAX_DIM`
+  - `IMG_MAX_PIXELS` (macro, line 66) `#define IMG_MAX_PIXELS`
+- Imported by: `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
 
 ## include/interp.h
 - Layer: utility
@@ -367,9 +741,26 @@
   - `ip_ease_fn` (struct, line 38)
   - `ip_keyframe` (struct, line 70)
   - `ip_anim` (struct, line 101)
-  - `FREEDOM_INTERP_H` (macro, line 2)
-  - `IP_MAX_KEYFRAMES` (macro, line 67)
-  - `IP_ITERATION_INFINITE` (macro, line 84)
+  - `ip_easing` (enum, line 25)
+  - `ip_val_kind` (enum, line 54)
+  - `ip_direction` (enum, line 87)
+  - `ip_fill_mode` (enum, line 94)
+  - `kind` (type_alias, line 37) `typedef struct ip_ease_fn { ip_easing kind;`
+  - `pct` (type_alias, line 69) `typedef struct ip_keyframe { double pct;`
+  - `val_kind` (type_alias, line 100) `typedef struct ip_anim { ip_val_kind val_kind;`
+  - `ip_ease` (function, line 48) `double ip_ease(double t, const ip_ease_fn *fn);`
+  - `ip_lerp` (function, line 59) `double ip_lerp(double a, double b, double t);`
+  - `ip_lerp_color` (function, line 61) `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t);`
+  - `ip_interp` (function, line 62) `double ip_interp(ip_val_kind kind, double a, double b, double t);`
+  - `ip_kf_interp` (function, line 78) `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf, int n_kf, double pct);`
+  - `ip_anim_init` (function, line 121) `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease, const ip_keyframe *kf, int n_kf, double duration_ms, double delay_ms, int iteration_count, int direction, int fill_mode);`
+  - `ip_anim_tick` (function, line 128) `int ip_anim_tick(ip_anim *a, double dt_ms);`
+  - `ip_anim_current` (function, line 131) `double ip_anim_current(const ip_anim *a);`
+  - `ip_anim_done` (function, line 134) `int ip_anim_done(const ip_anim *a);`
+  - `FREEDOM_INTERP_H` (macro, line 2) `#define FREEDOM_INTERP_H`
+  - `IP_MAX_KEYFRAMES` (macro, line 67) `#define IP_MAX_KEYFRAMES`
+  - `IP_ITERATION_INFINITE` (macro, line 84) `#define IP_ITERATION_INFINITE`
+- Imported by: `gui/browser_ui.c`, `src/interp.c`, `tests/test_interp.c`
 
 ## include/js_dom.h
 - Layer: utility
@@ -378,25 +769,57 @@
 - Symbols:
   - `jd_iframe_track` (struct, line 40)
   - `jd_opaque` (struct, line 45)
-  - `FREEDOM_JS_DOM_H` (macro, line 2)
-  - `JD_IFRAME_TRACK_MAX` (macro, line 39)
+  - `jd_status` (enum, line 24)
+  - `jd_click_state` (type_alias, line 34) `typedef struct jd_click_state jd_click_state;`
+  - `processed` (type_alias, line 40) `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];`
+  - `jd_install` (function, line 57) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque);`
+  - `opaque` (function, line 62) `* the engine runtime opaque (unreachable from script);`
+  - `jd_install_console` (function, line 65) `jd_status jd_install_console(js_context *ctx, fb_buffer *log);`
+  - `jd_click_state_free` (function, line 68) `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
+  - `jd_install_events` (function, line 74) `jd_status jd_install_events(js_context *ctx, jd_click_state *state);`
+  - `run` (function, line 77) `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called preventDefault(). ctx == NULL => 1 (fail-open for the * default action, since no script can`
+  - `preventDefault` (function, line 84) `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found => 1 (fail-open: submission proceeds). */ int jd_fire_submit(js_context *ctx, dom_node_`
+  - `reads` (function, line 115) `* reads (NULL => only href is known, the rest fall back to stub defaults). Call after * jd_install, on the page's context. ctx == NULL => JD_ERR_NULL_ARG. */ jd_status jd_set_location(js_context *ctx,`
+  - `host` (function, line 120) `* for a trusted host (allow.conf AND js.conf);`
+  - `jd_set_cookies` (function, line 125) `jd_status jd_set_cookies(js_context *ctx, const char *cookies);`
+  - `jd_get_cookies` (function, line 131) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
+  - `acting` (function, line 136) `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);`
+  - `out_status` (function, line 144) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response bytes, malloc'd -- the bridge frees with free()), and * *out_ctype (Content-Type, malloc'`
+  - `jd_install_xhr` (function, line 160) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx);`
+  - `jd_process_iframes` (function, line 165) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */ jd_status jd_inject_video_shim(js_context *ctx);`
+  - `URLs` (function, line 172) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT re-process iframes already processed (tracks them by node_id in * jd_opaque.iframe_track`
+  - `jd_video_from_scripts` (function, line 186) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t nscripts, const char *page_url);`
+  - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
+  - `JD_IFRAME_TRACK_MAX` (macro, line 39) `#define JD_IFRAME_TRACK_MAX`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/js_sandbox.h`, `include/url.h`
+- Imported by: `src/js_dom.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
 
 ## include/js_env.h
 - Layer: infrastructure
 - Doc: ifndef FREEDOM_JS_ENV_H define FREEDOM_JS_ENV_H  include "js_sandbox.h"  ifdef __cplusplus error "Freedom is pure C (C11
 - Language: h
 - Symbols:
-  - `FREEDOM_JS_ENV_H` (macro, line 2)
+  - `je_status` (enum, line 27)
+  - `je_install` (function, line 38) `je_status je_install(js_context *ctx, int screen_w, int screen_h);`
+  - `poisoned` (function, line 43) `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat readback fingerprinting. readback_key * is the per-origin key the orchestrator derive`
+  - `FREEDOM_JS_ENV_H` (macro, line 2) `#define FREEDOM_JS_ENV_H`
 - Depends on: `include/js_sandbox.h`
+- Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
 
 ## include/js_policy.h
 - Layer: business_logic
 - Doc: ifndef FREEDOM_JS_POLICY_H define FREEDOM_JS_POLICY_H  include <stdbool.h>  ifdef __cplusplus error "Freedom is pure C (
 - Language: h
 - Symbols:
-  - `FREEDOM_JS_POLICY_H` (macro, line 2)
-- Imported by: `include/webcaps.h`
+  - `jsp_mode` (enum, line 27)
+  - `membership` (function, line 16) `* membership (the allowlist itself is matched by the hostblock module, which * already covers subdomains). No I/O, no global state. * * The decision is surfaced as rdp_caps.js and consumed by the rend`
+  - `allowlist` (function, line 34) `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool jsp_enabled(jsp_mode mode, int host_allowlisted);`
+  - `jsp_trusted` (function, line 45) `bool jsp_trusted(bool js_enabled, int host_allowlisted);`
+  - `jsp_present_trusted` (function, line 54) `bool jsp_present_trusted(int host_allowlisted);`
+  - `jsp_mode_from_str` (function, line 60) `jsp_mode jsp_mode_from_str(const char *s);`
+  - `jsp_mode_str` (function, line 64) `const char *jsp_mode_str(jsp_mode mode);`
+  - `FREEDOM_JS_POLICY_H` (macro, line 2) `#define FREEDOM_JS_POLICY_H`
+- Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_policy.c`, `tests/test_js_policy.c`
 
 ## include/js_sandbox.h
 - Layer: utility
@@ -405,13 +828,30 @@
 - Symbols:
   - `js_limits` (struct, line 39)
   - `js_result` (struct, line 49)
-  - `FREEDOM_JS_SANDBOX_H` (macro, line 2)
-  - `JS_LOC_FILE_MAX` (macro, line 64)
-  - `JS_DEFAULT_MAX_SOURCE` (macro, line 65)
-  - `JS_DEFAULT_MEM_LIMIT` (macro, line 67)
-  - `JS_DEFAULT_STACK_LIMIT` (macro, line 68)
-  - `JS_DEFAULT_TIME_BUDGET` (macro, line 69)
-- Imported by: `include/js_dom.h`, `include/js_env.h`
+  - `js_status` (enum, line 24)
+  - `max_source_bytes` (type_alias, line 39) `typedef struct js_limits { size_t max_source_bytes;`
+  - `js_context` (type_alias, line 47) `typedef struct js_context js_context;`
+  - `status` (type_alias, line 48) `typedef struct js_result { js_status status;`
+  - `js_limits_default` (function, line 72) `js_limits js_limits_default(void);`
+  - `js_validate_source` (function, line 75) `js_status js_validate_source(const char *src, size_t len, const js_limits *lim);`
+  - `js_context_new` (function, line 83) `js_status js_context_new(const js_limits *lim, js_context **out);`
+  - `js_context_free` (function, line 86) `void js_context_free(js_context *ctx);`
+  - `js_eval` (function, line 94) `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res);`
+  - `js_eval_named` (function, line 100) `js_status js_eval_named(js_context *ctx, const char *src, size_t len, const char *filename, js_result *res);`
+  - `js_eval_once` (function, line 105) `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res);`
+  - `js_loc_from_stack` (function, line 115) `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);`
+  - `js_set_time_budget` (function, line 123) `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);`
+  - `js_result_free` (function, line 126) `void js_result_free(js_result *res);`
+  - `js_pump_jobs` (function, line 134) `int js_pump_jobs(js_context *ctx, int max_jobs);`
+  - `handle` (function, line 137) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive. Binding modules are the intended consumers. */ void *js_context_raw(js_context *ctx);`
+  - `js_set_current_script` (function, line 146) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
+  - `FREEDOM_JS_SANDBOX_H` (macro, line 2) `#define FREEDOM_JS_SANDBOX_H`
+  - `JS_LOC_FILE_MAX` (macro, line 64) `#define JS_LOC_FILE_MAX`
+  - `JS_DEFAULT_MAX_SOURCE` (macro, line 65) `#define JS_DEFAULT_MAX_SOURCE`
+  - `JS_DEFAULT_MEM_LIMIT` (macro, line 67) `#define JS_DEFAULT_MEM_LIMIT`
+  - `JS_DEFAULT_STACK_LIMIT` (macro, line 68) `#define JS_DEFAULT_STACK_LIMIT`
+  - `JS_DEFAULT_TIME_BUDGET` (macro, line 69) `#define JS_DEFAULT_TIME_BUDGET`
+- Imported by: `fuzz/fuzz_js_sandbox.c`, `include/js_dom.h`, `include/js_env.h`, `src/js_dom.c`, `src/js_env.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_sandbox.c`
 
 ## include/link_nav.h
 - Layer: utility
@@ -419,24 +859,41 @@
 - Language: h
 - Symbols:
   - `ln_result` (struct, line 62)
-  - `FREEDOM_LINK_NAV_H` (macro, line 2)
-  - `LN_MAX_TARGET` (macro, line 33)
-  - `LN_MAX_FRAGMENT` (macro, line 38)
+  - `ln_action` (enum, line 40)
+  - `ln_target_kind` (enum, line 46)
+  - `ln_block_reason` (enum, line 54)
+  - `ln_status` (enum, line 70)
+  - `action` (type_alias, line 61) `typedef struct ln_result { ln_action action;`
+  - `dropped` (function, line 36) `* A longer fragment is dropped (stored as "");`
+  - `ln_resolve` (function, line 81) `ln_status ln_resolve(const char *base, const char *href, ln_result *out);`
+  - `ln_block_reason_text` (function, line 85) `const char *ln_block_reason_text(ln_block_reason reason);`
+  - `FREEDOM_LINK_NAV_H` (macro, line 2) `#define FREEDOM_LINK_NAV_H`
+  - `LN_MAX_TARGET` (macro, line 33) `#define LN_MAX_TARGET`
+  - `LN_MAX_FRAGMENT` (macro, line 38) `#define LN_MAX_FRAGMENT`
+- Imported by: `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
 
 ## include/local_store.h
 - Layer: data_access
 - Doc: ifndef FREEDOM_LOCAL_STORE_H define FREEDOM_LOCAL_STORE_H  include <stddef.h> include <stdint.h>  ifdef __cplusplus erro
 - Language: h
 - Symbols:
-  - `FREEDOM_LOCAL_STORE_H` (macro, line 2)
-  - `LS_KEY_LEN` (macro, line 25)
-  - `LS_SALT_LEN` (macro, line 27)
-  - `LS_NONCE_LEN` (macro, line 28)
-  - `LS_TAG_LEN` (macro, line 29)
-  - `LS_HEADER_LEN` (macro, line 30)
-  - `LS_OVERHEAD` (macro, line 31)
-  - `LS_MAX_PLAINTEXT` (macro, line 32)
-- Imported by: `include/disk_store.h`, `include/profile.h`
+  - `ls_aead` (enum, line 34)
+  - `ls_status` (enum, line 39)
+  - `ls_derive_key` (function, line 52) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len, const uint8_t *salt, size_t salt_len, uint8_t out_key[LS_KEY_LEN]);`
+  - `ls_seal` (function, line 58) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead, const uint8_t *plaintext, size_t pt_len, uint8_t **out, size_t *out_len);`
+  - `ls_open` (function, line 64) `ls_status ls_open(const uint8_t key[LS_KEY_LEN], const uint8_t *blob, size_t blob_len, uint8_t **out, size_t *out_len);`
+  - `ls_seal_passphrase` (function, line 70) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead, const uint8_t *plaintext, size_t pt_len, uint8_t **out, size_t *out_len);`
+  - `ls_open_passphrase` (function, line 75) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len, const uint8_t *blob, size_t blob_len, uint8_t **out, size_t *out_len);`
+  - `ls_free` (function, line 80) `void ls_free(uint8_t *buf, size_t len);`
+  - `FREEDOM_LOCAL_STORE_H` (macro, line 2) `#define FREEDOM_LOCAL_STORE_H`
+  - `LS_KEY_LEN` (macro, line 25) `#define LS_KEY_LEN`
+  - `LS_SALT_LEN` (macro, line 27) `#define LS_SALT_LEN`
+  - `LS_NONCE_LEN` (macro, line 28) `#define LS_NONCE_LEN`
+  - `LS_TAG_LEN` (macro, line 29) `#define LS_TAG_LEN`
+  - `LS_HEADER_LEN` (macro, line 30) `#define LS_HEADER_LEN`
+  - `LS_OVERHEAD` (macro, line 31) `#define LS_OVERHEAD`
+  - `LS_MAX_PLAINTEXT` (macro, line 32) `#define LS_MAX_PLAINTEXT`
+- Imported by: `include/disk_store.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
 
 ## include/media_decoder.h
 - Layer: infrastructure
@@ -444,13 +901,19 @@
 - Language: h
 - Symbols:
   - `md_pacer` (struct, line 67)
+  - `md_cmd` (enum, line 29)
+  - `md_resp` (enum, line 38)
+  - `epoch_ms` (type_alias, line 66) `typedef struct md_pacer { uint64_t epoch_ms;`
   - `md_pace_due_ms` (function, line 79) `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,
                              ...`
-  - `FREEDOM_MEDIA_DECODER_H` (macro, line 2)
-  - `MD_MAX_SEGMENT_BYTES` (macro, line 45)
-  - `MD_PACE_MAX_LAG_MS` (macro, line 58)
-  - `MD_PACE_MAX_STEP_MS` (macro, line 62)
-  - `MD_MAX_CATCHUP_READS` (macro, line 65)
+  - `media_decoder_run` (function, line 99) `void media_decoder_run(int out_fd, int cmd_fd);`
+  - `media_decoder_spawn` (function, line 104) `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd);`
+  - `FREEDOM_MEDIA_DECODER_H` (macro, line 2) `#define FREEDOM_MEDIA_DECODER_H`
+  - `MD_MAX_SEGMENT_BYTES` (macro, line 45) `#define MD_MAX_SEGMENT_BYTES`
+  - `MD_PACE_MAX_LAG_MS` (macro, line 58) `#define MD_PACE_MAX_LAG_MS`
+  - `MD_PACE_MAX_STEP_MS` (macro, line 62) `#define MD_PACE_MAX_STEP_MS`
+  - `MD_MAX_CATCHUP_READS` (macro, line 65) `#define MD_MAX_CATCHUP_READS`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/media_decoder.c`, `tests/test_media_decoder.c`
 
 ## include/net_realm.h
 - Layer: utility
@@ -458,7 +921,18 @@
 - Language: h
 - Symbols:
   - `nr_config` (struct, line 42)
-  - `FREEDOM_NET_REALM_H` (macro, line 2)
+  - `nr_realm` (enum, line 29)
+  - `nr_route` (enum, line 35)
+  - `tor_enabled` (type_alias, line 41) `typedef struct nr_config { int tor_enabled;`
+  - `nr_classify_host` (function, line 51) `nr_realm nr_classify_host(const char *host);`
+  - `nr_classify_url` (function, line 54) `nr_realm nr_classify_url(const char *url);`
+  - `NR_ROUTE_BLOCKED` (function, line 57) `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled => NR_ROUTE_BLOCKED. */ nr_route nr_route_for(const char *url, nr_config cfg);`
+  - `address` (function, line 62) `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently: NR_I2P => 1 (eepsites are http);`
+  - `nr_realm_allows_http` (function, line 66) `int nr_realm_allows_http(nr_realm r);`
+  - `nr_realm_name` (function, line 69) `const char *nr_realm_name(nr_realm r);`
+  - `nr_route_name` (function, line 70) `const char *nr_route_name(nr_route r);`
+  - `FREEDOM_NET_REALM_H` (macro, line 2) `#define FREEDOM_NET_REALM_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/net_realm.c`, `tests/test_net_realm.c`
 
 ## include/os_sandbox.h
 - Layer: utility
@@ -466,7 +940,21 @@
 - Language: h
 - Symbols:
   - `os_fs_rule` (struct, line 108)
-  - `FREEDOM_OS_SANDBOX_H` (macro, line 2)
+  - `os_status` (enum, line 21)
+  - `os_violation` (enum, line 30)
+  - `os_fs_access` (enum, line 102)
+  - `flags` (function, line 39) `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);`
+  - `os_policy_size` (function, line 43) `size_t os_policy_size(void);`
+  - `os_prot_allowed` (function, line 52) `int os_prot_allowed(long syscall_nr, unsigned long prot);`
+  - `denied` (function, line 59) `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf x86_64. */ os_status os_harden(os_violation action);`
+  - `os_no_dump` (function, line 70) `os_status os_no_dump(void);`
+  - `namespace` (function, line 75) `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and passes bytes -- so it gets an empty stack), * IPC and UTS namespaces. Pure: returns the `
+  - `os_namespace_flags` (function, line 81) `int os_namespace_flags(void);`
+  - `os_isolate_namespaces` (function, line 97) `os_status os_isolate_namespaces(void);`
+  - `os_landlock_abi` (function, line 114) `int os_landlock_abi(void);`
+  - `os_landlock_restrict` (function, line 122) `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n);`
+  - `FREEDOM_OS_SANDBOX_H` (macro, line 2) `#define FREEDOM_OS_SANDBOX_H`
+- Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_sandbox.c`
 
 ## include/page_view.h
 - Layer: presentation
@@ -478,26 +966,95 @@
   - `pv_cont_def` (struct, line 673)
   - `pv_view` (struct, line 709)
   - `pv_text_ext` (struct, line 870)
-  - `FREEDOM_PAGE_VIEW_H` (macro, line 2)
-  - `PV_LEN_UNSET` (macro, line 43)
-  - `PV_LEN_AUTO` (macro, line 44)
-  - `PV_LEN_END` (macro, line 45)
-  - `PV_GRID_TRACKS` (macro, line 48)
-  - `PV_CONT_DEPTH` (macro, line 53)
-  - `PV_BG_URL_MAX` (macro, line 59)
+  - `pv_status` (enum, line 34)
+  - `pv_kind` (enum, line 61)
+  - `pv_input_type` (enum, line 77)
+  - `pv_form_method` (enum, line 94)
+  - `kind` (type_alias, line 108) `typedef struct pv_run { pv_kind kind;`
+  - `parent_id` (type_alias, line 388) `typedef struct pv_box_def { int parent_id;`
+  - `parent_id` (type_alias, line 673) `typedef struct pv_cont_def { int parent_id;`
+  - `word_spacing` (type_alias, line 870) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
+  - `container` (function, line 207) `* cont_id groups runs of one container (-1 = none);`
+  - `bx_display` (function, line 208) `* bx_display (flex/grid);`
+  - `order` (function, line 269) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
+  - `CSS_LEN_UNSET` (function, line 460) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an in-flow offset, reader-safe);`
+  - `scale` (function, line 535) `* scale(1)) and rotate in whole degrees (transform_rotate);`
+  - `pv_build` (function, line 730) `pv_status pv_build(const hp_document *doc, pv_view **out);`
+  - `nonzero` (function, line 734) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);`
+  - `resolved` (function, line 741) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full with reader == 0 and prefers_dark == 0. */ pv_status pv_build_full(const hp_document`
+  - `policy` (function, line 749) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The external text precedes the document's own <style> * blocks in the parsed sheet (document-or`
+  - `cause` (function, line 767) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?" is a measurement instead of a grep over the * dispatch, which sees property names on`
+  - `pv_new` (function, line 779) `pv_view *pv_new(void);`
+  - `pv_append` (function, line 784) `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break, const char *text, const char *href);`
+  - `pv_append_image` (function, line 792) `pv_status pv_append_image(pv_view *v, int heading, int block_break, const char *alt, const char *src, int w, int h);`
+  - `form` (function, line 798) `* form (-1 if none);`
+  - `pv_append_input` (function, line 801) `pv_status pv_append_input(pv_view *v, int heading, int block_break, pv_input_type input_type, const char *text, const char *name, const char *value, const char *action, int form_id, int method);`
+  - `pv_append_video` (function, line 811) `pv_status pv_append_video(pv_view *v, int heading, int block_break, const char *alt, const char *src, const char *poster, int w, int h);`
+  - `pv_append_svg` (function, line 818) `pv_status pv_append_svg(pv_view *v, int heading, int block_break, const char *markup, int w, int h);`
+  - `pv_set_emphasis` (function, line 830) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
+  - `default` (function, line 835) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+  - `pv_set_color` (function, line 837) `void pv_set_color(pv_view *v, int fg_rgb);`
+  - `pv_set_bgcolor` (function, line 845) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
+  - `pv_set_text_style` (function, line 854) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
+  - `pv_text_ext_reset` (function, line 901) `void pv_text_ext_reset(pv_text_ext *e);`
+  - `ancestors` (function, line 906) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box stack in both directions: that is * what makes `visibility` inherited-but-overridable,`
+  - `pv_set_text_ext` (function, line 915) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+  - `pv_set_grad_text` (function, line 922) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
+  - `run` (function, line 925) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an empty or NULL view. Both append helpers * default cont_id to -1 (no container), cont_wr`
+  - `pv_set_row_span` (function, line 938) `void pv_set_row_span(pv_view *v, int row_span);`
+  - `pv_set_grid_area` (function, line 942) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
+  - `pv_set_grid_rows` (function, line 943) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+  - `pv_set_ua_tag` (function, line 948) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
+  - `pv_set_cont_box` (function, line 952) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
+  - `pv_set_grid` (function, line 953) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+  - `pv_set_flex` (function, line 961) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int flex_align_self);`
+  - `pv_set_cont_item` (function, line 966) `void pv_set_cont_item(pv_view *v, int cont_item);`
+  - `pv_set_float` (function, line 975) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_mr, int float_mr_pct, int float_oid, int float_oside, int float_oml, int float_om`
+  - `pv_set_box` (function, line 985) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
+  - `pv_set_box_pct` (function, line 991) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
+  - `pv_set_node_id` (function, line 997) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
+  - `pv_set_block_id` (function, line 1002) `void pv_set_block_id(pv_view *v, int block_id);`
+  - `pv_set_own_box` (function, line 1006) `void pv_set_own_box(pv_view *v, int box_id);`
+  - `pv_set_oof` (function, line 1010) `void pv_set_oof(pv_view *v, int oof);`
+  - `pv_add_box_def` (function, line 1017) `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d);`
+  - `pv_add_cont_def` (function, line 1021) `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d);`
+  - `pv_cont_count` (function, line 1025) `size_t pv_cont_count(const pv_view *v);`
+  - `pv_cont_at` (function, line 1026) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+  - `pv_set_input_checked` (function, line 1030) `void pv_set_input_checked(pv_view *v, int checked);`
+  - `pv_set_input_select_opts` (function, line 1034) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
+  - `pv_free` (function, line 1037) `void pv_free(pv_view *v);`
+  - `pv_count` (function, line 1040) `size_t pv_count(const pv_view *v);`
+  - `pv_at` (function, line 1041) `const pv_run *pv_at(const pv_view *v, size_t i);`
+  - `pv_box_count` (function, line 1045) `size_t pv_box_count(const pv_view *v);`
+  - `pv_box_at` (function, line 1046) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+  - `FREEDOM_PAGE_VIEW_H` (macro, line 2) `#define FREEDOM_PAGE_VIEW_H`
+  - `PV_LEN_UNSET` (macro, line 43) `#define PV_LEN_UNSET`
+  - `PV_LEN_AUTO` (macro, line 44) `#define PV_LEN_AUTO`
+  - `PV_LEN_END` (macro, line 45) `#define PV_LEN_END`
+  - `PV_GRID_TRACKS` (macro, line 48) `#define PV_GRID_TRACKS`
+  - `PV_CONT_DEPTH` (macro, line 53) `#define PV_CONT_DEPTH`
+  - `PV_BG_URL_MAX` (macro, line 59) `#define PV_BG_URL_MAX`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
-- Imported by: `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_page_view.c`, `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/pdf_export.h
 - Layer: utility
 - Doc: ifndef FREEDOM_PDF_EXPORT_H define FREEDOM_PDF_EXPORT_H  include <stddef.h>  ifdef __cplusplus error "Freedom is pure C 
 - Language: h
 - Symbols:
-  - `FREEDOM_PDF_EXPORT_H` (macro, line 2)
-  - `PE_NAME_MAX` (macro, line 27)
-  - `PE_EXT` (macro, line 29)
-  - `PE_EXT_PNG` (macro, line 30)
-  - `PE_FALLBACK_NAME` (macro, line 31)
+  - `pe_status` (enum, line 33)
+  - `fallback` (function, line 46) `* fallback (PE_ERR_OVERFLOW, out left empty). title == NULL is treated as empty. * Does NOT append the extension (that is pe_build_path's job). */ pe_status pe_safe_basename(const char *title, char *o`
+  - `trusted` (function, line 51) `* dir is trusted (chosen by the app from XDG/$HOME);`
+  - `literal` (function, line 52) `* trusted literal (e.g. PE_EXT / PE_EXT_PNG);`
+  - `pe_build_path_ext` (function, line 57) `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext, char *out, size_t outsz);`
+  - `pe_build_path` (function, line 61) `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz);`
+  - `pe_paginate` (function, line 70) `size_t pe_paginate(const double *tops, const double *heights, size_t n, double page_h, int *out_page, double *out_page_y);`
+  - `FREEDOM_PDF_EXPORT_H` (macro, line 2) `#define FREEDOM_PDF_EXPORT_H`
+  - `PE_NAME_MAX` (macro, line 27) `#define PE_NAME_MAX`
+  - `PE_EXT` (macro, line 29) `#define PE_EXT`
+  - `PE_EXT_PNG` (macro, line 30) `#define PE_EXT_PNG`
+  - `PE_FALLBACK_NAME` (macro, line 31) `#define PE_FALLBACK_NAME`
+- Imported by: `fuzz/fuzz_pdf_export.c`, `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/test_pdf_export.c`
 
 ## include/perf_trace.h
 - Layer: utility
@@ -506,8 +1063,22 @@
 - Symbols:
   - `pt_stage_stats` (struct, line 34)
   - `pt_trace` (struct, line 41)
-  - `FREEDOM_PERF_TRACE_H` (macro, line 2)
-  - `PT_MAX_SAMPLES` (macro, line 31)
+  - `order` (enum, line 71)
+  - `samples` (type_alias, line 33) `typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES];`
+  - `stage` (type_alias, line 40) `typedef struct pt_trace { pt_stage_stats stage[PT_STAGE_COUNT];`
+  - `pt_init` (function, line 46) `void pt_init(pt_trace *t);`
+  - `pt_elapsed_us` (function, line 50) `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us);`
+  - `pt_record` (function, line 54) `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us);`
+  - `pt_count` (function, line 57) `size_t pt_count(const pt_trace *t, pt_stage stage);`
+  - `pt_last_us` (function, line 60) `uint64_t pt_last_us(const pt_trace *t, pt_stage stage);`
+  - `pt_min_us` (function, line 63) `uint64_t pt_min_us(const pt_trace *t, pt_stage stage);`
+  - `pt_max_us` (function, line 64) `uint64_t pt_max_us(const pt_trace *t, pt_stage stage);`
+  - `pt_median_us` (function, line 65) `uint64_t pt_median_us(const pt_trace *t, pt_stage stage);`
+  - `pt_stage_name` (function, line 69) `const char *pt_stage_name(pt_stage stage);`
+  - `pt_format` (function, line 76) `size_t pt_format(const pt_trace *t, char *buf, size_t cap);`
+  - `FREEDOM_PERF_TRACE_H` (macro, line 2) `#define FREEDOM_PERF_TRACE_H`
+  - `PT_MAX_SAMPLES` (macro, line 31) `#define PT_MAX_SAMPLES`
+- Imported by: `src/freedom.c`, `src/perf_trace.c`, `tests/test_perf_trace.c`
 
 ## include/prefetch.h
 - Layer: utility
@@ -519,9 +1090,24 @@
   - `pf_job` (struct, line 77)
   - `pf_pool` (struct, line 87)
   - `pf_gated_fetch` (struct, line 129)
-  - `FREEDOM_PREFETCH_H` (macro, line 2)
-  - `PF_MAX_REFS` (macro, line 46)
-  - `PF_MAX_THREADS` (macro, line 48)
+  - `pf_kind` (enum, line 35)
+  - `pf_job_state` (enum, line 70)
+  - `kind` (type_alias, line 42) `typedef struct pf_ref { pf_kind kind;`
+  - `refs` (type_alias, line 49) `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];`
+  - `jobs` (type_alias, line 86) `typedef struct pf_pool { pf_job jobs[PF_MAX_REFS];`
+  - `inner` (type_alias, line 129) `typedef struct pf_gated_fetch { pf_fetch_fn inner;`
+  - `pf_scan` (function, line 59) `int pf_scan(const char *html, size_t len, pf_list *out);`
+  - `pf_list_free` (function, line 60) `void pf_list_free(pf_list *l);`
+  - `int` (function, line 65) `typedef int (*pf_fetch_fn)(void *ctx, const char *method, const char *url, const char *body, size_t body_len, int *out_status, char **out_body, size_t *out_len, char **out_ctype);`
+  - `fetch` (function, line 102) `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start (the caller just falls back to serial fetching: * performance fails open, policy is una`
+  - `pf_pool_take` (function, line 115) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);`
+  - `pf_pool_finish` (function, line 121) `void pf_pool_finish(pf_pool *p);`
+  - `pool` (function, line 125) `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);`
+  - `pf_pooled_fetch` (function, line 134) `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int *out_status, char **out_body, size_t *out_len, char **out_ctype);`
+  - `FREEDOM_PREFETCH_H` (macro, line 2) `#define FREEDOM_PREFETCH_H`
+  - `PF_MAX_REFS` (macro, line 46) `#define PF_MAX_REFS`
+  - `PF_MAX_THREADS` (macro, line 48) `#define PF_MAX_THREADS`
+- Imported by: `fuzz/fuzz_prefetch.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_prefetch.c`
 
 ## include/prefs.h
 - Layer: utility
@@ -530,15 +1116,27 @@
 - Symbols:
   - `prefs_entry` (struct, line 45)
   - `prefs_state` (struct, line 50)
-  - `FREEDOM_PREFS_H` (macro, line 2)
-  - `PREFS_VERSION` (macro, line 25)
-  - `PREFS_MAX_URL` (macro, line 27)
-  - `PREFS_MAX_TITLE` (macro, line 28)
-  - `PREFS_MAX_BOOKMARKS` (macro, line 29)
-  - `PREFS_MAX_HISTORY` (macro, line 30)
-  - `PREFS_MAX_TEXT` (macro, line 31)
-  - `PREFS_PAGE_HISTORY` (macro, line 34)
-- Imported by: `include/profile.h`
+  - `prefs_status` (enum, line 36)
+  - `theme_mode` (type_alias, line 49) `typedef struct prefs_state { int theme_mode;`
+  - `prefs_init` (function, line 65) `void prefs_init(prefs_state *p);`
+  - `prefs_free` (function, line 68) `void prefs_free(prefs_state *p);`
+  - `free` (function, line 71) `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
+  - `prefs_parse` (function, line 78) `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out);`
+  - `prefs_bookmark_index` (function, line 81) `int prefs_bookmark_index(const prefs_state *p, const char *url);`
+  - `prefs_bookmark_toggle` (function, line 86) `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url, const char *title, int *added);`
+  - `prefs_history_add` (function, line 92) `prefs_status prefs_history_add(prefs_state *p, const char *url);`
+  - `prefs_suggest` (function, line 100) `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);`
+  - `anyway` (function, line 105) `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
+  - `prefs_bookmarks_page` (function, line 107) `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len);`
+  - `FREEDOM_PREFS_H` (macro, line 2) `#define FREEDOM_PREFS_H`
+  - `PREFS_VERSION` (macro, line 25) `#define PREFS_VERSION`
+  - `PREFS_MAX_URL` (macro, line 27) `#define PREFS_MAX_URL`
+  - `PREFS_MAX_TITLE` (macro, line 28) `#define PREFS_MAX_TITLE`
+  - `PREFS_MAX_BOOKMARKS` (macro, line 29) `#define PREFS_MAX_BOOKMARKS`
+  - `PREFS_MAX_HISTORY` (macro, line 30) `#define PREFS_MAX_HISTORY`
+  - `PREFS_MAX_TEXT` (macro, line 31) `#define PREFS_MAX_TEXT`
+  - `PREFS_PAGE_HISTORY` (macro, line 34) `#define PREFS_PAGE_HISTORY`
+- Imported by: `fuzz/fuzz_prefs.c`, `gui/browser_ui.c`, `include/profile.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
 
 ## include/profile.h
 - Layer: utility
@@ -546,17 +1144,31 @@
 - Language: h
 - Symbols:
   - `profile_ctx` (struct, line 46)
-  - `FREEDOM_PROFILE_H` (macro, line 2)
-  - `PROFILE_KEY_FILE` (macro, line 31)
-  - `PROFILE_PREFS_FILE` (macro, line 33)
+  - `profile_status` (enum, line 35)
+  - `dir` (type_alias, line 45) `typedef struct profile_ctx { char dir[1024];`
+  - `absent` (function, line 53) `* the keyfile when absent (0600, atomic write);`
+  - `closed` (function, line 54) `* wrong size fails closed (PROFILE_ERR_KEY, never overwritten). Derives the * AEAD key (Argon2id, per-device salt) and marks ctx ready. */ profile_status profile_open(profile_ctx *ctx, const char *dir`
+  - `profile_load` (function, line 61) `profile_status profile_load(const profile_ctx *ctx, prefs_state *out);`
+  - `profile_save` (function, line 64) `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p);`
+  - `profile_close` (function, line 67) `void profile_close(profile_ctx *ctx);`
+  - `FREEDOM_PROFILE_H` (macro, line 2) `#define FREEDOM_PROFILE_H`
+  - `PROFILE_KEY_FILE` (macro, line 31) `#define PROFILE_KEY_FILE`
+  - `PROFILE_PREFS_FILE` (macro, line 33) `#define PROFILE_PREFS_FILE`
 - Depends on: `include/local_store.h`, `include/prefs.h`
+- Imported by: `gui/browser_ui.c`, `src/profile.c`, `tests/test_profile.c`
 
 ## include/psl_data.h
 - Layer: data_access
 - Doc: ifndef FREEDOM_PSL_DATA_H define FREEDOM_PSL_DATA_H  include <stddef.h>  ifdef __cplusplus error "Freedom is pure C (C11
 - Language: h
 - Symbols:
-  - `FREEDOM_PSL_DATA_H` (macro, line 2)
+  - `psl_rules` (variable, line 20) `extern const char *const psl_rules[];`
+  - `psl_rules_n` (variable, line 22) `extern const size_t psl_rules_n;`
+  - `psl_wildcards` (variable, line 23) `extern const char *const psl_wildcards[];`
+  - `psl_wildcards_n` (variable, line 24) `extern const size_t psl_wildcards_n;`
+  - `psl_exceptions` (variable, line 25) `extern const char *const psl_exceptions[];`
+  - `psl_exceptions_n` (variable, line 26) `extern const size_t psl_exceptions_n;`
+  - `FREEDOM_PSL_DATA_H` (macro, line 2) `#define FREEDOM_PSL_DATA_H`
 - Imported by: `src/request_policy.c`
 
 ## include/render_doc.h
@@ -566,9 +1178,31 @@
 - Symbols:
   - `rd_block` (struct, line 64)
   - `rd_doc` (struct, line 242)
-  - `FREEDOM_RENDER_DOC_H` (macro, line 2)
+  - `img_fail_reason` (enum, line 34)
+  - `rd_kind` (enum, line 42)
+  - `rd_status` (enum, line 268)
+  - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
+  - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides WHAT to show and HOW to label it (a semantic * style plus, for images, the render_p`
+  - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
+  - `form` (function, line 63) `* form (-1 = none);`
+  - `default` (function, line 142) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer can lay it out with box_tree/flex_layout. * cont_id groups blocks of one container (-1`
+  - `to` (function, line 228) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 277) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose img_decision is computed with * rdp_image_decision(caps, top_level_url, src, img_w, img_h) `
+  - `rd_free` (function, line 287) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 290) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 291) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 295) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 296) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 300) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 301) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 305) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 313) `const char *rd_block_tag(const rd_block *b);`
+  - `decision` (function, line 316) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char *rd_image_label(rdp_img_decision d);`
+  - `IMG_FAIL_OK` (function, line 322) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 327) `const char *rd_input_label(int input_type);`
+  - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
-- Imported by: `include/dom_debug.h`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ## include/render_policy.h
 - Layer: presentation
@@ -576,9 +1210,17 @@
 - Language: h
 - Symbols:
   - `rdp_caps` (struct, line 32)
-  - `FREEDOM_RENDER_POLICY_H` (macro, line 2)
-  - `RDP_TRACKER_MAX_DIM` (macro, line 27)
-- Imported by: `include/render_doc.h`, `include/webcaps.h`
+  - `rdp_img_decision` (enum, line 39)
+  - `images` (type_alias, line 32) `typedef struct rdp_caps { bool images;`
+  - `rdp_caps_safe` (function, line 48) `rdp_caps rdp_caps_safe(void);`
+  - `rdp_is_tracking_pixel` (function, line 53) `int rdp_is_tracking_pixel(int w, int h);`
+  - `size` (function, line 56) `* announced size (e.g. <img width height>);`
+  - `rdp_image_decision` (function, line 59) `rdp_img_decision rdp_image_decision(rdp_caps caps, const char *top_level_url, const char *image_url, int declared_w, int declared_h);`
+  - `rdp_img_reason` (function, line 66) `const char *rdp_img_reason(rdp_img_decision d);`
+  - `rdp_images_warning` (function, line 69) `const char *rdp_images_warning(void);`
+  - `FREEDOM_RENDER_POLICY_H` (macro, line 2) `#define FREEDOM_RENDER_POLICY_H`
+  - `RDP_TRACKER_MAX_DIM` (macro, line 27) `#define RDP_TRACKER_MAX_DIM`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
 
 ## include/renderer.h
 - Layer: presentation
@@ -586,16 +1228,27 @@
 - Language: h
 - Symbols:
   - `rd_result` (struct, line 29)
-  - `FREEDOM_RENDERER_H` (macro, line 2)
-  - `RD_MAX_INPUT` (macro, line 36)
-  - `RD_MAX_FIELD` (macro, line 38)
+  - `rd_status` (enum, line 20)
+  - `status` (type_alias, line 28) `typedef struct rd_result { rd_status status;`
+  - `rd_render_html` (function, line 43) `rd_status rd_render_html(const char *html, size_t len, rd_result *out);`
+  - `rd_result_free` (function, line 46) `void rd_result_free(rd_result *out);`
+  - `FREEDOM_RENDERER_H` (macro, line 2) `#define FREEDOM_RENDERER_H`
+  - `RD_MAX_INPUT` (macro, line 36) `#define RD_MAX_INPUT`
+  - `RD_MAX_FIELD` (macro, line 38) `#define RD_MAX_FIELD`
+- Imported by: `src/renderer.c`, `tests/test_renderer.c`
 
 ## include/request_policy.h
 - Layer: business_logic
 - Doc: ifndef FREEDOM_REQUEST_POLICY_H define FREEDOM_REQUEST_POLICY_H  include <stddef.h>  ifdef __cplusplus error "Freedom is
 - Language: h
 - Symbols:
-  - `FREEDOM_REQUEST_POLICY_H` (macro, line 2)
+  - `rp_decision` (enum, line 21)
+  - `rp_host_of` (function, line 30) `int rp_host_of(const char *url, char *out, size_t out_size);`
+  - `rp_site_of` (function, line 34) `int rp_site_of(const char *host, char *out, size_t out_size);`
+  - `rp_same_site` (function, line 37) `int rp_same_site(const char *top_level_url, const char *request_url);`
+  - `rp_evaluate` (function, line 40) `rp_decision rp_evaluate(const char *top_level_url, const char *request_url);`
+  - `FREEDOM_REQUEST_POLICY_H` (macro, line 2) `#define FREEDOM_REQUEST_POLICY_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/tab.c`, `tests/test_request_policy.c`
 
 ## include/secure_fetch.h
 - Layer: utility
@@ -605,27 +1258,57 @@
   - `sf_chain_info` (struct, line 60)
   - `sf_config` (struct, line 75)
   - `sf_response` (struct, line 117)
-  - `FREEDOM_SECURE_FETCH_H` (macro, line 2)
-  - `SF_DEFAULT_KEX_GROUPS` (macro, line 143)
-  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 152)
-  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 153)
-  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 157)
-  - `SF_DEFAULT_USER_AGENT` (macro, line 168)
-  - `SF_DEFAULT_MAX_BODY` (macro, line 169)
-  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 170)
-  - `SF_CONNECT_TIMEOUT_MS` (macro, line 193)
-  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 194)
-  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 195)
-  - `SF_MAX_URL` (macro, line 196)
+  - `sf_status` (enum, line 23)
+  - `sf_policy` (enum, line 40)
+  - `sf_proxy_type` (enum, line 69)
+  - `policy` (type_alias, line 74) `typedef struct sf_config { sf_policy policy;`
+  - `status` (type_alias, line 116) `typedef struct sf_response { sf_status status;`
+  - `validators` (function, line 17) `* The security logic lives in pure validators (no I/O);`
+  - `void` (function, line 110) `void (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);`
+  - `sf_global_init` (function, line 204) `void sf_global_init(void);`
+  - `EXCLUDED` (function, line 210) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host (the caller gates on allow.conf AND js.conf). 0 on empty/error. */ size_t sf_cookie_he`
+  - `sf_cookie_put` (function, line 217) `void sf_cookie_put(const char *url, const char *namevalue);`
+  - `sf_cookie_line_matches` (function, line 222) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
+  - `sf_config_default` (function, line 226) `sf_config sf_config_default(void);`
+  - `sf_user_agent_or_default` (function, line 231) `const char *sf_user_agent_or_default(const char *ua);`
+  - `sf_impersonate_kex_groups` (function, line 235) `const char *sf_impersonate_kex_groups(void);`
+  - `sf_impersonate_tls13_ciphers` (function, line 236) `const char *sf_impersonate_tls13_ciphers(void);`
+  - `sf_validate_url` (function, line 241) `sf_status sf_validate_url(const char *url);`
+  - `sf_check_tls_version` (function, line 244) `sf_status sf_check_tls_version(const char *negotiated_version);`
+  - `sf_check_group_is_pq` (function, line 248) `sf_status sf_check_group_is_pq(const char *negotiated_group);`
+  - `sf_check_chain_policy` (function, line 252) `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy);`
+  - `skipped` (function, line 256) `* skipped (a classical key exchange is accepted);`
+  - `sf_enforce_policy` (function, line 261) `sf_status sf_enforce_policy(const char *tls_version, const char *group, const sf_chain_info *chain, sf_policy policy);`
+  - `sf_is_redirect_code` (function, line 267) `int sf_is_redirect_code(long http_code);`
+  - `sf_parse_location_header` (function, line 273) `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz);`
+  - `sf_resolve_redirect` (function, line 278) `sf_status sf_resolve_redirect(const char *base_url, const char *location, char *out, size_t outsz);`
+  - `sf_get` (function, line 288) `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out);`
+  - `connection` (function, line 292) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding max_redirects => SF_ERR_TOO_MANY_REDIRECTS. * On SF_OK, *out is the final response and`
+  - `sf_response_free` (function, line 312) `void sf_response_free(sf_response *resp);`
+  - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
+  - `SF_DEFAULT_KEX_GROUPS` (macro, line 143) `#define SF_DEFAULT_KEX_GROUPS`
+  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 152) `#define SF_IMPERSONATE_KEX_GROUPS`
+  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 153) `#define SF_IMPERSONATE_TLS13_CIPHERS`
+  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 157) `#define SF_IMPERSONATE_TLS12_CIPHERS`
+  - `SF_DEFAULT_USER_AGENT` (macro, line 168) `#define SF_DEFAULT_USER_AGENT`
+  - `SF_DEFAULT_MAX_BODY` (macro, line 169) `#define SF_DEFAULT_MAX_BODY`
+  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 170) `#define SF_DEFAULT_TIMEOUT_MS`
+  - `SF_CONNECT_TIMEOUT_MS` (macro, line 193) `#define SF_CONNECT_TIMEOUT_MS`
+  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 194) `#define SF_SUBRESOURCE_TIMEOUT_MS`
+  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 195) `#define SF_DEFAULT_MAX_REDIRECTS`
+  - `SF_MAX_URL` (macro, line 196) `#define SF_MAX_URL`
 - Depends on: `include/anti_fp.h`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/secure_fetch.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
 ## include/svg_paint.h
 - Layer: utility
 - Doc: ifndef FREEDOM_SVG_PAINT_H define FREEDOM_SVG_PAINT_H  include <cairo.h>  include "svg_render.h"  ifdef __cplusplus erro
 - Language: h
 - Symbols:
-  - `FREEDOM_SVG_PAINT_H` (macro, line 2)
+  - `svp_draw` (function, line 31) `void svp_draw(cairo_t *cr, const sv_image *img, double x, double y, double w, double h, int current_rgb);`
+  - `FREEDOM_SVG_PAINT_H` (macro, line 2) `#define FREEDOM_SVG_PAINT_H`
 - Depends on: `include/svg_render.h`
+- Imported by: `gui/browser_ui.c`, `gui/svg_paint.c`
 
 ## include/svg_render.h
 - Layer: presentation
@@ -635,16 +1318,25 @@
   - `sv_seg` (struct, line 65)
   - `sv_shape` (struct, line 75)
   - `sv_image` (struct, line 104)
-  - `FREEDOM_SVG_RENDER_H` (macro, line 2)
-  - `SV_MAX_SHAPES` (macro, line 31)
-  - `SV_MAX_POINTS` (macro, line 33)
-  - `SV_MAX_SEGS` (macro, line 34)
-  - `SV_MAX_DEPTH` (macro, line 35)
-  - `SV_TEXT_MAX` (macro, line 36)
-  - `SV_MAX_INPUT` (macro, line 37)
-  - `SV_DEFAULT_W` (macro, line 41)
-  - `SV_DEFAULT_H` (macro, line 42)
-- Imported by: `include/svg_paint.h`
+  - `sv_status` (enum, line 25)
+  - `sv_shape_kind` (enum, line 44)
+  - `sv_verb` (enum, line 58)
+  - `verb` (type_alias, line 64) `typedef struct sv_seg { int verb;`
+  - `kind` (type_alias, line 75) `typedef struct sv_shape { int kind;`
+  - `height` (type_alias, line 104) `typedef struct sv_image { double width, height;`
+  - `sv_parse` (function, line 120) `sv_status sv_parse(const char *markup, size_t len, sv_image *out);`
+  - `sv_parse_ex` (function, line 125) `sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill);`
+  - `sv_fit` (function, line 131) `void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y);`
+  - `FREEDOM_SVG_RENDER_H` (macro, line 2) `#define FREEDOM_SVG_RENDER_H`
+  - `SV_MAX_SHAPES` (macro, line 31) `#define SV_MAX_SHAPES`
+  - `SV_MAX_POINTS` (macro, line 33) `#define SV_MAX_POINTS`
+  - `SV_MAX_SEGS` (macro, line 34) `#define SV_MAX_SEGS`
+  - `SV_MAX_DEPTH` (macro, line 35) `#define SV_MAX_DEPTH`
+  - `SV_TEXT_MAX` (macro, line 36) `#define SV_TEXT_MAX`
+  - `SV_MAX_INPUT` (macro, line 37) `#define SV_MAX_INPUT`
+  - `SV_DEFAULT_W` (macro, line 41) `#define SV_DEFAULT_W`
+  - `SV_DEFAULT_H` (macro, line 42) `#define SV_DEFAULT_H`
+- Imported by: `fuzz/fuzz_svg_render.c`, `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_render.c`, `tests/test_svg_render.c`
 
 ## include/tab.h
 - Layer: utility
@@ -654,18 +1346,59 @@
   - `tab_page` (struct, line 49)
   - `tab_eval_result` (struct, line 80)
   - `tab_image` (struct, line 93)
-  - `FREEDOM_TAB_H` (macro, line 2)
-  - `TAB_MAX_INPUT` (macro, line 100)
+  - `tab_status` (enum, line 30)
+  - `tab` (type_alias, line 44) `typedef struct tab tab;`
+  - `width` (type_alias, line 93) `typedef struct tab_image { uint32_t width;`
+  - `tab_worker_dispatch` (function, line 105) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd> <wfd>" invocation it runs the confined worker loop on * those pipe fds and never retu`
+  - `tab_open` (function, line 109) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc, char **argv);`
+  - `tab_parse_worker_args` (function, line 116) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
+  - `out_status` (function, line 128) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab frees with free()), *out_ctype (malloc'd Content-Type, * may be NULL). Return non-zer`
+  - `tab_set_fetcher` (function, line 139) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
+  - `tab_set_net_allowed` (function, line 144) `void tab_set_net_allowed(tab *t, int allowed);`
+  - `jar` (function, line 147) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted host (allow.conf AND js.conf);`
+  - `tab_set_cookies` (function, line 151) `void tab_set_cookies(tab *t, const char *cookies);`
+  - `exclusively` (function, line 157) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab *t, int allowed);`
+  - `tab_set_viewport_w` (function, line 165) `void tab_set_viewport_w(tab *t, int px);`
+  - `tab_subreq_permitted` (function, line 170) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `tab_load` (function, line 175) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out);`
+  - `view` (function, line 178) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted page-script execution will hook in (live-DOM milestone). * tab_load is tab_load_ex with run`
+  - `tab_load_full` (function, line 191) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url, int run_js, int reader, int prefers_dark, tab_page *out);`
+  - `string` (function, line 198) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be NULL). * key_code is the numeric keyCode/key value. * value is the element's current`
+  - `tab_read_view` (function, line 222) `tab_status tab_read_view(tab *t, tab_page *out);`
+  - `tab_click` (function, line 228) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out);`
+  - `tab_submit` (function, line 235) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented);`
+  - `tab_tick` (function, line 242) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out);`
+  - `tab_eval` (function, line 248) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out);`
+  - `decode` (function, line 254) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for transport/worker failures. */ tab_status tab_decode_image(tab *t, const uint8_t *bytes, s`
+  - `tab_decode_image_data_url` (function, line 264) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out);`
+  - `tab_alive` (function, line 267) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 270) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 273) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 276) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 277) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 278) `void tab_image_free(tab_image *img);`
+  - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
+  - `TAB_MAX_INPUT` (macro, line 100) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/page_view.h`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tab.c`, `tests/test_tab.c`
 
 ## include/text_shape.h
 - Layer: utility
 - Language: h
 - Symbols:
   - `tsh_font` (struct, line 30)
-  - `FREEDOM_TEXT_SHAPE_H` (macro, line 19)
-  - `TSH_MAX_GLYPHS` (macro, line 35)
-  - `TSH_MAX_TEXT` (macro, line 37)
+  - `tsh_status` (enum, line 39)
+  - `family` (type_alias, line 30) `typedef struct tsh_font { int family;`
+  - `content` (function, line 11) `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
+  - `tsh_ready` (function, line 48) `int tsh_ready(void);`
+  - `origin` (function, line 51) `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen advance in pixels. Fail-closed on every other * status (see spec): the caller must not `
+  - `tsh_measure` (function, line 60) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);`
+  - `tsh_draw` (function, line 65) `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px, double x, double baseline, const char *text, size_t len);`
+  - `tsh_shutdown` (function, line 69) `void tsh_shutdown(void);`
+  - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
+  - `TSH_MAX_GLYPHS` (macro, line 35) `#define TSH_MAX_GLYPHS`
+  - `TSH_MAX_TEXT` (macro, line 37) `#define TSH_MAX_TEXT`
+- Imported by: `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `src/text_shape.c`, `tests/test_text_shape.c`
 
 ## include/textfield.h
 - Layer: utility
@@ -673,8 +1406,23 @@
 - Language: h
 - Symbols:
   - `tf_field` (struct, line 25)
-  - `FREEDOM_TEXTFIELD_H` (macro, line 2)
-  - `TF_CAP` (macro, line 22)
+  - `tf_status` (enum, line 31)
+  - `buf` (type_alias, line 24) `typedef struct tf_field { char buf[TF_CAP];`
+  - `tf_init` (function, line 38) `void tf_init(tf_field *f);`
+  - `tf_set` (function, line 42) `tf_status tf_set(tf_field *f, const char *s);`
+  - `tf_clear` (function, line 45) `void tf_clear(tf_field *f);`
+  - `tf_insert` (function, line 50) `tf_status tf_insert(tf_field *f, char c);`
+  - `tf_backspace` (function, line 53) `void tf_backspace(tf_field *f);`
+  - `tf_delete` (function, line 56) `void tf_delete(tf_field *f);`
+  - `tf_move` (function, line 59) `void tf_move(tf_field *f, long delta);`
+  - `tf_home` (function, line 62) `void tf_home(tf_field *f);`
+  - `tf_end` (function, line 63) `void tf_end(tf_field *f);`
+  - `tf_text` (function, line 66) `const char *tf_text(const tf_field *f);`
+  - `tf_len` (function, line 67) `size_t tf_len(const tf_field *f);`
+  - `tf_cursor` (function, line 68) `size_t tf_cursor(const tf_field *f);`
+  - `FREEDOM_TEXTFIELD_H` (macro, line 2) `#define FREEDOM_TEXTFIELD_H`
+  - `TF_CAP` (macro, line 22) `#define TF_CAP`
+- Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
 
 ## include/tls_impersonate.h
 - Layer: utility
@@ -683,16 +1431,27 @@
 - Symbols:
   - `ti_req` (struct, line 68)
   - `ti_resp` (struct, line 78)
-  - `FREEDOM_TLS_IMPERSONATE_H` (macro, line 2)
-  - `TI_MAGIC` (macro, line 56)
-  - `TI_MAX_URL` (macro, line 57)
-  - `TI_MAX_METHOD` (macro, line 58)
-  - `TI_MAX_HEADERS` (macro, line 59)
-  - `TI_MAX_BODY` (macro, line 60)
-  - `TI_MAX_RESP_HDR` (macro, line 61)
-  - `TI_MAX_RESP_BODY` (macro, line 62)
-  - `TI_MAX_CHAIN` (macro, line 63)
-  - `TI_MAX_GROUP` (macro, line 64)
+  - `ti_profile` (enum, line 38)
+  - `status` (type_alias, line 78) `typedef struct ti_resp { long status;`
+  - `chain` (function, line 28) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT re-applies the strength policy (RSA<3072 leaf, SHA-1 fatal, * hybrid-KE) with OpenSSL over wh`
+  - `ti_should_impersonate` (function, line 52) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int host_in_impersonate);`
+  - `success` (function, line 93) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out left zeroed / owned buffers freed). */ size_t ti_encode_req(const ti_req *r, uint8_t *`
+  - `ti_decode_req` (function, line 97) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
+  - `ti_req_free` (function, line 98) `void ti_req_free(ti_req *r);`
+  - `ti_encode_resp` (function, line 99) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
+  - `ti_decode_resp` (function, line 101) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
+  - `ti_resp_free` (function, line 102) `void ti_resp_free(ti_resp *r);`
+  - `FREEDOM_TLS_IMPERSONATE_H` (macro, line 2) `#define FREEDOM_TLS_IMPERSONATE_H`
+  - `TI_MAGIC` (macro, line 56) `#define TI_MAGIC`
+  - `TI_MAX_URL` (macro, line 57) `#define TI_MAX_URL`
+  - `TI_MAX_METHOD` (macro, line 58) `#define TI_MAX_METHOD`
+  - `TI_MAX_HEADERS` (macro, line 59) `#define TI_MAX_HEADERS`
+  - `TI_MAX_BODY` (macro, line 60) `#define TI_MAX_BODY`
+  - `TI_MAX_RESP_HDR` (macro, line 61) `#define TI_MAX_RESP_HDR`
+  - `TI_MAX_RESP_BODY` (macro, line 62) `#define TI_MAX_RESP_BODY`
+  - `TI_MAX_CHAIN` (macro, line 63) `#define TI_MAX_CHAIN`
+  - `TI_MAX_GROUP` (macro, line 64) `#define TI_MAX_GROUP`
+- Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
 ## include/ui.h
 - Layer: presentation
@@ -703,7 +1462,23 @@
   - `ui_layout` (struct, line 34)
   - `rd_doc` (struct, line 68)
   - `tab` (struct, line 94)
-  - `FREEDOM_UI_H` (macro, line 2)
+  - `ui_status` (enum, line 19)
+  - `offset` (type_alias, line 29) `typedef struct ui_line { size_t offset;`
+  - `space` (function, line 43) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and treats '\n' as a forced break. max_cols == 0 * is treated as 1. len == 0 yields zero lin`
+  - `ui_layout_free` (function, line 51) `void ui_layout_free(ui_layout *lay);`
+  - `ui_clamp_scroll` (function, line 54) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);`
+  - `ui_run_text_view` (function, line 61) `ui_status ui_run_text_view(const char *title, const char *text, size_t text_len);`
+  - `ui_run_browser` (function, line 66) `ui_status ui_run_browser(const char *start_url);`
+  - `ui_render_pdf` (function, line 79) `ui_status ui_render_pdf(const struct rd_doc *doc, const char *out_path, long *out_pages);`
+  - `available` (function, line 85) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG directly (no PDF rasterise step). The image * height is bounded (a hostile page can`
+  - `ui_render_png` (function, line 92) `ui_status ui_render_png(const struct rd_doc *doc, const char *out_path, long *out_h);`
+  - `placeholders` (function, line 97) `* above always draw image placeholders (no worker to decode hostile bytes);`
+  - `disk` (function, line 102) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https or file://);`
+  - `images` (function, line 104) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder, byte-identical to the on-screen window path. The fetcher type * matches tab_fetch_fn (include`
+  - `ui_render_pdf_images` (function, line 112) `ui_status ui_render_pdf_images(const struct rd_doc *doc, struct tab *t, const char *top_url, int (*img_fetch)(void *, const char *, const char *, const char *, size_t, int *, char **, size_t *, char *`
+  - `ui_dump_layout` (function, line 126) `ui_status ui_dump_layout(const struct rd_doc *doc);`
+  - `ui_render_viewport_w` (function, line 131) `int ui_render_viewport_w(void);`
+  - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
 - Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
 
 ## include/url.h
@@ -712,10 +1487,27 @@
 - Language: h
 - Symbols:
   - `url_parts` (struct, line 129)
-  - `FREEDOM_URL_H` (macro, line 2)
-  - `URL_MAX_LEN` (macro, line 30)
-  - `URL_SEARCH_ENDPOINT` (macro, line 76)
-- Imported by: `include/form.h`, `include/js_dom.h`
+  - `url_status` (enum, line 32)
+  - `url_omni_kind` (enum, line 78)
+  - `url_is_https` (function, line 42) `int url_is_https(const char *s);`
+  - `url_has_scheme` (function, line 46) `int url_has_scheme(const char *s);`
+  - `url_authority_len` (function, line 51) `size_t url_authority_len(const char *url);`
+  - `url_validate_https` (function, line 55) `url_status url_validate_https(const char *url);`
+  - `url_remove_dot_segments` (function, line 60) `url_status url_remove_dot_segments(const char *path, char *out, size_t outsz);`
+  - `url_resolve_https` (function, line 70) `url_status url_resolve_https(const char *base, const char *ref, char *out, size_t outsz);`
+  - `url_omnibox` (function, line 97) `url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz);`
+  - `URL_ERR_NOT_HTTPS` (function, line 109) `* URL_ERR_NOT_HTTPS (out untouched);`
+  - `url_search_rewrite` (function, line 110) `url_status url_search_rewrite(const char *url, char *out, size_t outsz);`
+  - `path` (function, line 115) `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);`
+  - `url_file_path` (function, line 121) `const char *url_file_path(const char *s);`
+  - `url` (function, line 126) `* Every field ALIASES the input url (not owned, valid while url is alive);`
+  - `url_split` (function, line 147) `url_status url_split(const char *url, url_parts *out);`
+  - `password` (function, line 152) `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When there is no userinfo ("@") in the * URL, writes the original URL into out and sets *user`
+  - `url_resolve_file` (function, line 172) `url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz);`
+  - `FREEDOM_URL_H` (macro, line 2) `#define FREEDOM_URL_H`
+  - `URL_MAX_LEN` (macro, line 30) `#define URL_MAX_LEN`
+  - `URL_SEARCH_ENDPOINT` (macro, line 76) `#define URL_SEARCH_ENDPOINT`
+- Imported by: `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `src/freedom.c`, `src/link_nav.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `tests/test_js_dom.c`, `tests/test_url.c`
 
 ## include/util.h
 - Layer: utility
@@ -727,7 +1519,7 @@
   - `mem_contains_ci` (function, line 43) `static inline int mem_contains_ci(const void *hay, size_t hlen, const char *needle)`
   - `utf8_seq_len` (function, line 56) `static inline size_t utf8_seq_len(unsigned char c)`
   - `fnv1a` (function, line 66) `static inline uint64_t fnv1a(const char *s, size_t n)`
-  - `UTIL_H` (macro, line 5)
+  - `UTIL_H` (macro, line 5) `#define UTIL_H`
 - Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
 
 ## include/webcaps.h
@@ -737,15 +1529,29 @@
 - Symbols:
   - `wc_caps` (struct, line 38)
   - `wc_input` (struct, line 57)
-  - `FREEDOM_WEBCAPS_H` (macro, line 2)
+  - `js` (type_alias, line 38) `typedef struct wc_caps { /* leak-free (global): granted by user toggle or allow.conf presentation-trust. */ bool js;`
+  - `js_mode` (type_alias, line 57) `typedef struct wc_input { jsp_mode js_mode;`
+  - `wc_safe` (function, line 67) `wc_caps wc_safe(void);`
+  - `wc_derive` (function, line 72) `wc_caps wc_derive(wc_input in);`
+  - `wc_from_flags` (function, line 77) `wc_caps wc_from_flags(bool js, bool css, bool images);`
+  - `wc_render_caps` (function, line 82) `rdp_caps wc_render_caps(wc_caps c);`
+  - `FREEDOM_WEBCAPS_H` (macro, line 2) `#define FREEDOM_WEBCAPS_H`
 - Depends on: `include/js_policy.h`, `include/render_policy.h`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webcaps.c`, `tests/test_webcaps.c`
 
 ## include/zoom.h
 - Layer: utility
 - Doc: ifndef FREEDOM_ZOOM_H define FREEDOM_ZOOM_H  ifdef __cplusplus error "Freedom is pure C (C11). C++ is not supported." en
 - Language: h
 - Symbols:
-  - `FREEDOM_ZOOM_H` (macro, line 2)
-  - `ZM_MIN_PCT` (macro, line 20)
-  - `ZM_MAX_PCT` (macro, line 22)
-  - `ZM_DEFAULT_PCT` (macro, line 23)
+  - `zm_clamp` (function, line 26) `int zm_clamp(int pct);`
+  - `zm_zoom_in` (function, line 29) `int zm_zoom_in(int pct);`
+  - `zm_zoom_out` (function, line 32) `int zm_zoom_out(int pct);`
+  - `zm_reset` (function, line 35) `int zm_reset(void);`
+  - `zm_scale` (function, line 38) `double zm_scale(int pct);`
+  - `zm_apply` (function, line 42) `double zm_apply(double base_px, int pct);`
+  - `FREEDOM_ZOOM_H` (macro, line 2) `#define FREEDOM_ZOOM_H`
+  - `ZM_MIN_PCT` (macro, line 20) `#define ZM_MIN_PCT`
+  - `ZM_MAX_PCT` (macro, line 22) `#define ZM_MAX_PCT`
+  - `ZM_DEFAULT_PCT` (macro, line 23) `#define ZM_DEFAULT_PCT`
+- Imported by: `gui/browser_ui.c`, `src/prefs.c`, `src/zoom.c`, `tests/test_prefs.c`, `tests/test_zoom.c`
