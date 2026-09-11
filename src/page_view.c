@@ -3480,17 +3480,39 @@ static const lxb_dom_node_t *nearest_row(const lxb_dom_node_t *n, const lxb_dom_
 /* Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a
  * row group, a row or a column group. Text there is "between cells/rows" rather than
  * inside a cell. Per CSS 2.1 §17.2.1 (anonymous table objects) a whitespace-only such
- * node generates no box; the caller drops it so it does not split a data table's
- * grid-container item run (which the layout engine gathers contiguously -- a stray
- * run drops every cell onto its own line). */
+ * node generates no box -- UNLESS it flanks anonymous-cell material: an element with
+ * no table role (span/a/..., which will share one anonymous cell with the space) or
+ * text carrying non-whitespace (css-tables-3 fixup; WPT anonymous-table-ws-001
+ * renders "a b", not "ab"). The flank walk looks through whitespace-only text
+ * (bounded: hostile sibling runs cannot spin it) and stops at anything else;
+ * an absent flank is structural. So `</td> <td>` still drops (cells both sides)
+ * while `<span>a</span> <span>b</span>` keeps its space. The caller drops the run
+ * so it does not split a data table's grid-container item run (which the layout
+ * engine gathers contiguously -- a stray run drops every cell onto its own line). */
 static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr) {
     switch (node_table_role(n->parent, fr)) {
         case BX_TROLE_TABLE: case BX_TROLE_ROW_GROUP:
         case BX_TROLE_ROW:   case BX_TROLE_COLUMN:
-            return 1;
+            break;
         default:
             return 0;
     }
+    const lxb_dom_node_t *flanks[2] = { n->prev, n->next };
+    for (int f = 0; f < 2; ++f) {
+        int steps = 0;
+        for (const lxb_dom_node_t *s = flanks[f]; s != NULL && steps < 16;
+             s = (f == 0) ? s->prev : s->next, ++steps) {
+            if (s->type == LXB_DOM_NODE_TYPE_TEXT && text_node_is_blank(s))
+                continue;
+            if (s->type == LXB_DOM_NODE_TYPE_ELEMENT &&
+                node_table_role(s, fr) == BX_TROLE_NONE)
+                return 0;
+            if (s->type == LXB_DOM_NODE_TYPE_TEXT && !text_node_is_blank(s))
+                return 0;
+            break;
+        }
+    }
+    return 1;
 }
 
 /* Nearest table-cell ancestor of n up to base, or NULL. */

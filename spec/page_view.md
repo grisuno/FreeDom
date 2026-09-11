@@ -224,8 +224,13 @@ espacios **hijo directo** del elemento contenedor flex/grid tampoco se emite aun
 fluidas no se ve afectado (se emite por otro camino y lleva `cont_id == -1`, sin break).
 **Whitespace en estructura de tabla (CSS 2.1 §17.2.1).** Un run de solo espacios cuyo **padre
 directo** es estructura de tabla que no es celda (`<table>`/`<tbody>`/`<thead>`/`<tfoot>`/`<tr>`/
-`<colgroup>`) **no se emite** — es el whitespace fuente entre `</td>` y `<td>` (o entre filas), que
-por CSS no genera caja. Sin esta regla ese run partía la corrida contigua de ítems del grid
+`<colgroup>`) se emite o no según sus VECINOS: solo se descarta cuando ningún vecino es material
+de celda anónima. Vecino material = elemento sin rol de tabla (`<span>`/`<a>`/…, que compartirá
+una celda anónima con el espacio) o texto con contenido; se mira a través de texto en blanco
+(acotado). Así `<tr> <td>a</td> <td>b</td> </tr>` sigue descartando (vecinos celda/fila ⇒
+estructural, el grid no se parte) pero `<div style="display:table"><span>a</span>
+<span>b</span></div>` conserva su espacio (`a b`, WPT css-tables/anonymous-table-ws-001).
+Sin esta regla ese run partía la corrida contigua de ítems del grid
 sintetizado de la tabla (el motor de layout agrupa ítems **contiguos**), tirando cada celda a su
 propia fila: una tabla de datos de 2 columnas colapsaba a una lista vertical de 1 columna. Texto
 no-whitespace ahí (raro; los navegadores lo foster-parentean) se deja intacto.

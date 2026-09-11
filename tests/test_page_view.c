@@ -402,6 +402,33 @@ static void test_build_table_intercell_whitespace_dropped(void **state) {
     hp_document_free(doc);
 }
 
+/* WPT css-tables/anonymous-table-ws-001: whitespace between two INLINE
+ * siblings inside display:table is anonymous-cell content ("a b"), not
+ * inter-cell structure. Only whitespace with no anonymous-cell material on
+ * either flank is dropped (the inter-cell rule above stays). */
+static void test_build_table_inline_whitespace_kept(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div style=\"display:table\">"
+                             "<span>a</span> <span>b</span></div></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    /* The "a", " " and "b" runs exist in order: the separator space survived. */
+    long ia = -1, ib = -1, is = -1;
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text == NULL) continue;
+        if (strcmp(r->text, "a") == 0) ia = (long)i;
+        else if (strcmp(r->text, "b") == 0) ib = (long)i;
+        else if (strcmp(r->text, " ") == 0) is = (long)i;
+    }
+    assert_true(ia >= 0 && ib >= 0);
+    assert_true(is == ia + 1 && ib == ia + 2);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* Cell inner markup is flattened into the cell's text and not re-emitted as a
  * separate run; the column count comes from the widest row. */
 static void test_build_table_flattens_cell(void **state) {
@@ -3666,6 +3693,7 @@ int main(void) {
         cmocka_unit_test(test_build_ordered_and_nested_list),
         cmocka_unit_test(test_build_table_grid),
         cmocka_unit_test(test_build_table_intercell_whitespace_dropped),
+        cmocka_unit_test(test_build_table_inline_whitespace_kept),
         cmocka_unit_test(test_build_table_flattens_cell),
         cmocka_unit_test(test_build_collected_text_skips_style_and_script),
         cmocka_unit_test(test_build_multilink_table_flows_links),
