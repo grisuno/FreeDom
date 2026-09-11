@@ -1,0 +1,59 @@
+Ver Anime Online - todos los animes gratis
+CSS drops: 344 declaration(s) dropped, 56 distinct
+  count  cause         property                     first value
+     60  unknown-prop  -ms-flex-order               -1
+     41  unknown-prop  -ms-flex-align               center
+     39  unknown-prop  -ms-flex-pack                center
+     24  unknown-prop  -ms-flex-line-pack           start
+     24  unknown-prop  -ms-flex-item-align          auto
+     17  unknown-prop  animation                    progress-bar-stripes 1s linear infinite
+     14  unknown-prop  -ms-flex-positive            1
+     13  bad-value     background                   no-repeat 50%/50% 50%
+     11  unknown-prop  -ms-flex-negative            0
+     10  unknown-prop  -ms-flex-preferred-size      0
+      8  unknown-prop  -webkit-animation            progress-bar-stripes 1s linear infinite
+      5  unknown-prop  -webkit-font-smoothing       antialiased
+      5  bad-value     transform                    rotateX(90deg)
+      4  bad-value     background-position          right calc(.375em + .1875rem) center
+      4  unknown-prop  -webkit-tap-highlight-color  transparent
+      4  bad-value     -webkit-transform            rotateX(90deg)
+      3  bad-value     content                      attr(data-browse)
+      3  bad-value     -ms-touch-action             pan-y
+      3  bad-value     font-family                  "tabler-icons"
+      3  unknown-prop  -moz-osx-font-smoothing      grayscale
+      2  bad-value     touch-action                 pan-y
+      2  unknown-prop  speak                        none
+      2  unknown-prop  line-break                   auto
+      2  bad-value     margin-right                 calc((calc(10px * .7) - 2) * -1)
+      2  unknown-prop  will-change                  transform
+      2  unknown-prop  -webkit-perspective          500px
+      2  unknown-prop  perspective                  500px
+      2  unknown-prop  -webkit-overflow-scrolling   touch
+      2  unknown-prop  -webkit-box-align            center
+      2  unknown-prop  -webkit-box-pack             center
+      2  unknown-prop  ms-box-sizing                border-box
+      2  unknown-prop  webkit-box-sizing            border-box
+      2  unknown-prop  moz-box-sizing               border-box
+      1  unknown-prop  -webkit-touch-callout        none
+      1  unknown-prop  -khtml-user-select           none
+      1  unknown-prop  transform-style              preserve-3d
+      1  unknown-prop  widows                       1
+      1  unknown-prop  *zoom                        1
+      1  unknown-prop  -webkit-text-size-adjust     100%
+      1  unknown-prop  -webkit-text-decoration-skip-ink none
+      1  unknown-prop  -webkit-perspective-origin   center
+      1  unknown-prop  perspective-origin           center
+      1  bad-value     transition                   transform, -webkit-transform
+      1  unknown-prop  orphans                      1
+      1  unknown-prop  text-decoration-skip-ink     none
+      1  unknown-prop  font-variant-numeric         tabular-nums
+      1  unknown-prop  -webkit-box-decoration-break clone
+      1  unknown-prop  scrollbar-color              #f49600 #eee
+      1  bad-value     border-bottom                1px solid rgb(229 233 240 / 50%)
+      1  unknown-prop  box-decoration-break         clone
+      1  bad-value     outline                      5px auto -webkit-focus-ring-color
+      1  bad-value     margin                       -5px/2 0 0
+      1  unknown-prop  scrollbar-width              none
+      1  bad-value     padding-bottom               -50px
+      1  bad-value     animation-timing-function    cubic-bezier(0, 1, 1, 0)
+      1  bad-value     grid-template-columns        repeat(auto-fill, minmax(14rem, 1fr))

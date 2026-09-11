@@ -3706,6 +3706,22 @@ static int interp_flex_direction(const char *v) {
     return -1;
 }
 
+/**
+ * 2009 flexbox `box-orient` axis names onto `css_flex_direction`.
+ *
+ * Contract: the 2009 draft names the main axis, not the direction, so
+ * `horizontal`/`inline-axis` mean row and `vertical`/`block-axis` mean
+ * column. Modern `row`/`column` spellings are NOT accepted here: they belong
+ * to `flex-direction`, and accepting them would merge two grammars. Reached
+ * via the strip-prefix-and-ask-again rule (`-webkit-box-orient` strips to
+ * `box-orient`), never dispatched under a prefixed name directly.
+ */
+static int interp_box_orient(const char *v) {
+    if (csel_ci_eq(v, "horizontal") || csel_ci_eq(v, "inline-axis")) return CSS_FD_ROW;
+    if (csel_ci_eq(v, "vertical") || csel_ci_eq(v, "block-axis")) return CSS_FD_COLUMN;
+    return -1;
+}
+
 static int interp_flex_wrap(const char *v) {
     if (csel_ci_eq(v, "nowrap")) return CSS_FW_NOWRAP;
     if (csel_ci_eq(v, "wrap")) return CSS_FW_WRAP;
@@ -4037,30 +4053,408 @@ static int parse_scale_pct(const char *s, int *out) {
     return 1;
 }
 
-/* rotate() argument: a signed WHOLE-DEGREE angle, "deg" suffix mandatory --
- * same convention as the linear-gradient direction grammar (grad_direction
- * above): rad/turn/grad and fractional degrees are unsupported, fail closed.
- * Not normalized mod 360 (a static rotation of e.g. 720deg is visually
- * identical to 0deg once fed through cos/sin at paint time). */
-static int parse_rotate_deg(const char *s, int *out) {
-    char *end = NULL;
-    long a = strtol(s, &end, 10);
-    if (end == s || !csel_ci_eq(end, "deg")) return 0;
-    if (a > CSS_LEN_MAX) a = CSS_LEN_MAX;
-    if (a < -CSS_LEN_MAX) a = -CSS_LEN_MAX;
-    *out = (int)a;
+/**
+ * <angle> in whole degrees (CSS Values 4 6.1).
+ *
+ * Contract: a number plus any of the four angle units, fractional allowed;
+ * the slot stores whole degrees so the result rounds (rotate(.5turn) is 180,
+ * rotate(1rad) is 57). A missing unit fails closed, as does junk. Not
+ * normalized mod 360 (a static rotation of e.g. 720deg is visually identical
+ * to 0deg once fed through cos/sin at paint time).
+ */
+static int parse_angle_deg(const char *s, int *out) {
+    const char *p = s;
+    int neg = 0;
+    if (*p == '+') ++p;
+    else if (*p == '-') { neg = 1; ++p; }
+    double num;
+    const char *end;
+    if (!parse_num(p, &num, &end)) return 0;
+    while (*end == ' ' || *end == '\t') ++end;
+    double deg;
+    if (csel_ci_eq(end, "deg")) deg = num;
+    else if (csel_ci_eq(end, "grad")) deg = num * 0.9;
+    else if (csel_ci_eq(end, "rad")) deg = num * (180.0 / 3.14159265358979323846);
+    else if (csel_ci_eq(end, "turn")) deg = num * 360.0;
+    else return 0;
+    if (neg) deg = -deg;
+    *out = round_clamp(deg, -CSS_LEN_MAX, CSS_LEN_MAX);
     return 1;
+}
+
+enum { TR_LIST_MAX = 8 };
+
+enum {
+    SPEC_TX = 1u, SPEC_TY = 2u, SPEC_SX = 4u, SPEC_SY = 8u,
+    SPEC_ROT = 16u, SPEC_SKX = 32u, SPEC_SKY = 64u,
+    SPEC_ALL7 = SPEC_TX | SPEC_TY | SPEC_SX | SPEC_SY | SPEC_ROT | SPEC_SKX | SPEC_SKY
+};
+
+/**
+ * Right-multiply 2D affine matrices: out = l * r (r applies first).
+ *
+ * Contract: matrices are {a,b,c,d,e,f} with x' = a*x + c*y + e and
+ * y' = b*x + d*y + f, the layout expand_transform's matrix() branch
+ * decomposes. Pure arithmetic, no allocation, no I/O.
+ */
+static void tr_mul(double out[6], const double l[6], const double r[6]) {
+    double a = l[0] * r[0] + l[2] * r[1];
+    double b = l[1] * r[0] + l[3] * r[1];
+    double c = l[0] * r[2] + l[2] * r[3];
+    double d = l[1] * r[2] + l[3] * r[3];
+    double e = l[0] * r[4] + l[2] * r[5] + l[4];
+    double f = l[1] * r[4] + l[3] * r[5] + l[5];
+    out[0] = a; out[1] = b; out[2] = c; out[3] = d; out[4] = e; out[5] = f;
+}
+
+/**
+ * QR-decompose an affine matrix into whole px/percent/degree slots.
+ *
+ * Contract: the matrix() branch's math, shared so the single-function and
+ * list paths cannot disagree. Skew lands on skx only (the decomposition
+ * convention: a shear pair has a family of factorizations and this one pins
+ * sky to zero); skewY inside a multi-function list is therefore approximated
+ * and documented as such in expand_transform_list. Returns 0 when singular
+ * (zero first column or zero determinant): the caller falls back or fails.
+ */
+static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
+                        int *sx, int *sy, int *skx) {
+    double r11 = hypot(m[0], m[1]);
+    double det = m[0] * m[3] - m[1] * m[2];
+    if (r11 < 1e-9 || det == 0.0) return 0;
+    const double rad2deg = 180.0 / 3.14159265358979323846;
+    double r12 = (m[0] * m[2] + m[1] * m[3]) / r11;
+    *tx = round_clamp(m[4], -CSS_LEN_MAX, CSS_LEN_MAX);
+    *ty = round_clamp(m[5], -CSS_LEN_MAX, CSS_LEN_MAX);
+    *rot = round_clamp(atan2(m[1], m[0]) * rad2deg, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *sx = round_clamp(r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *sy = round_clamp(det / r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *skx = round_clamp(atan(r12 / r11) * rad2deg, -CSS_LEN_MAX, CSS_LEN_MAX);
+    return 1;
+}
+
+/**
+ * Parse matrix(a,b,c,d,e,f): six comma-separated unitless numbers.
+ *
+ * Contract: the matrix() branch's argument grammar, shared with the list
+ * path. Comma count must be exactly five; each argument is a bare signed
+ * decimal. Anything else fails closed.
+ */
+static int parse_matrix6(const char *p, size_t argn, double m6[6]) {
+    size_t k = 0;
+    for (int arg = 0; arg < 6; ++arg) {
+        char tok[CSS_TOK_MAX];
+        size_t stop = argn;
+        for (size_t q = k; q < argn; ++q) {
+            if (p[q] == ',') { stop = q; break; }
+        }
+        if ((arg < 5) != (stop < argn)) return 0;
+        if (copy_trim(p, k, stop, tok, sizeof tok) == (size_t)-1 || tok[0] == '\0')
+            return 0;
+        const char *tp = tok;
+        int neg = 0;
+        if (*tp == '+') ++tp;
+        else if (*tp == '-') { neg = 1; ++tp; }
+        const char *tend;
+        if (!parse_num(tp, &m6[arg], &tend) || *tend != '\0') return 0;
+        if (neg) m6[arg] = -m6[arg];
+        k = stop + 1;
+    }
+    return 1;
+}
+
+/**
+ * Split a top-level comma list honouring paren depth.
+ *
+ * Contract: calc()/min()/max() nest commas that must not split arguments, so
+ * the scan tracks depth and only cuts at depth zero. Writes at most max spans
+ * as [starts[i], stops[i]) offsets into s; returns the span count, or -1 when
+ * more than max spans appear. Empty spans are kept (the caller's per-kind
+ * validation rejects them), so a trailing comma fails closed downstream.
+ */
+static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
+                          int max) {
+    int cnt = 0;
+    size_t i = 0;
+    while (i < n) {
+        while (i < n && (s[i] == ' ' || s[i] == '\t')) ++i;
+        if (i >= n) break;
+        if (cnt >= max) return -1;
+        starts[cnt] = i;
+        int depth = 0;
+        while (i < n && (depth > 0 || s[i] != ',')) {
+            if (s[i] == '(') ++depth;
+            else if (s[i] == ')') --depth;
+            ++i;
+        }
+        stops[cnt] = i;
+        ++cnt;
+        if (i < n && s[i] == ',') ++i;
+    }
+    return cnt;
+}
+
+/**
+ * transform FUNCTION LIST (CSS Transforms 1 3).
+ *
+ * Contract: space-separated functions apply in order and compose into one
+ * affine matrix, QR-decomposed into the seven slots (shared with matrix()).
+ * Only slots a function of the list specifies are emitted, so a list never
+ * invents a phantom axis (translateX stays single-axis, like the legacy
+ * single path); translate percent halves ride as ever, both halves always.
+ * translate3d()/translateZ() flatten to their 2D projection (a 2D engine
+ * renders z as nothing, which is what the projection says), with the z
+ * argument still validated as a length. Skew angles accumulate outside the
+ * matrix: the painter applies shear innermost in a fixed order, so list-order
+ * shear has no exact slot form, and the accumulator is exactly as correct as
+ * any choice under that painter. A bare translateZ() list has no 2D effect
+ * and fails closed. Unknown functions, bad arguments, more than TR_LIST_MAX
+ * functions, or a singular coupled matrix reject the WHOLE declaration --
+ * fail closed, never a half-applied transform.
+ */
+static int expand_transform_list(const char *val, css_decl *dst, int cap) {
+    double m[6] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+    int txp = 0, typ = 0;
+    int acc_skx = 0, acc_sky = 0;
+    unsigned spec = 0u;
+    int any2d = 0, seentr = 0;
+    const char *p = val;
+    int nfns = 0;
+    const double pi = 3.14159265358979323846;
+    for (;;) {
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '\0') break;
+        if (++nfns > TR_LIST_MAX) return 0;
+        char name[16];
+        size_t nl = 0;
+        while ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+               (*p >= '0' && *p <= '9')) {
+            if (nl + 1 >= sizeof name) return 0;
+            name[nl++] = csel_lower_ch(*p++);
+        }
+        name[nl] = '\0';
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p != '(') return 0;
+        ++p;
+        const char *ab = p;
+        int depth = 1;
+        while (*p != '\0' && depth > 0) {
+            if (*p == '(') ++depth;
+            else if (*p == ')') --depth;
+            ++p;
+        }
+        if (depth != 0) return 0;
+        size_t argn = (size_t)(p - 1 - ab);
+        double f[6] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+        size_t starts[3], stops[3];
+        char a[CSS_TOK_MAX], b[CSS_TOK_MAX], c[CSS_TOK_MAX];
+        if (strcmp(name, "translatex") == 0 || strcmp(name, "translatey") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int px, pm;
+            if (!interp_lp(a, 0, 1, &px, &pm)) return 0;
+            if (name[9] == 'x') { f[4] = (double)px; txp += pm; spec |= SPEC_TX; }
+            else { f[5] = (double)px; typ += pm; spec |= SPEC_TY; }
+            seentr = 1;
+            any2d = 1;
+        } else if (strcmp(name, "translate") == 0) {
+            int nargs = split_top_args(ab, argn, starts, stops, 3);
+            if (nargs < 1 || nargs > 2) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int px, pm, qx = 0, qm = 0;
+            if (!interp_lp(a, 0, 1, &px, &pm)) return 0;
+            if (nargs == 2) {
+                if (copy_trim(ab, starts[1], stops[1], b, sizeof b) == (size_t)-1 ||
+                    b[0] == '\0')
+                    return 0;
+                if (!interp_lp(b, 0, 1, &qx, &qm)) return 0;
+            }
+            f[4] = (double)px;
+            f[5] = (double)qx;
+            txp += pm;
+            typ += qm;
+            spec |= SPEC_TX | SPEC_TY;
+            seentr = 1;
+            any2d = 1;
+        } else if (strcmp(name, "translate3d") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 3) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            if (copy_trim(ab, starts[1], stops[1], b, sizeof b) == (size_t)-1 ||
+                b[0] == '\0')
+                return 0;
+            if (copy_trim(ab, starts[2], stops[2], c, sizeof c) == (size_t)-1 ||
+                c[0] == '\0')
+                return 0;
+            int px, pm, qx, qm, zd, zm;
+            if (!interp_lp(a, 0, 1, &px, &pm)) return 0;
+            if (!interp_lp(b, 0, 1, &qx, &qm)) return 0;
+            if (!interp_lp(c, 0, 0, &zd, &zm)) return 0;
+            f[4] = (double)px;
+            f[5] = (double)qx;
+            txp += pm;
+            typ += qm;
+            spec |= SPEC_TX | SPEC_TY;
+            seentr = 1;
+            any2d = 1;
+        } else if (strcmp(name, "translatez") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int zd, zm;
+            if (!interp_lp(a, 0, 0, &zd, &zm)) return 0;
+        } else if (strcmp(name, "scalex") == 0 || strcmp(name, "scaley") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int v;
+            if (!parse_scale_pct(a, &v)) return 0;
+            if (name[5] == 'x') { f[0] = (double)v / 100.0; spec |= SPEC_SX; }
+            else { f[3] = (double)v / 100.0; spec |= SPEC_SY; }
+            any2d = 1;
+        } else if (strcmp(name, "scale") == 0) {
+            int nargs = split_top_args(ab, argn, starts, stops, 3);
+            if (nargs < 1 || nargs > 2) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int vx, vy;
+            if (!parse_scale_pct(a, &vx)) return 0;
+            vy = vx;
+            if (nargs == 2) {
+                if (copy_trim(ab, starts[1], stops[1], b, sizeof b) == (size_t)-1 ||
+                    b[0] == '\0')
+                    return 0;
+                if (!parse_scale_pct(b, &vy)) return 0;
+            }
+            f[0] = (double)vx / 100.0;
+            f[3] = (double)vy / 100.0;
+            spec |= SPEC_SX | SPEC_SY;
+            any2d = 1;
+        } else if (strcmp(name, "rotate") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int deg;
+            if (!parse_angle_deg(a, &deg)) return 0;
+            double r = (double)deg * pi / 180.0;
+            f[0] = cos(r);
+            f[1] = sin(r);
+            f[2] = -sin(r);
+            f[3] = cos(r);
+            spec |= SPEC_ROT;
+            any2d = 1;
+        } else if (strcmp(name, "skewx") == 0 || strcmp(name, "skewy") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int deg;
+            if (!parse_angle_deg(a, &deg)) return 0;
+            if (name[4] == 'x') { acc_skx += deg; spec |= SPEC_SKX; }
+            else { acc_sky += deg; spec |= SPEC_SKY; }
+            any2d = 1;
+        } else if (strcmp(name, "skew") == 0) {
+            int nargs = split_top_args(ab, argn, starts, stops, 3);
+            if (nargs < 1 || nargs > 2) return 0;
+            if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
+                a[0] == '\0')
+                return 0;
+            int ax, ay = 0;
+            if (!parse_angle_deg(a, &ax)) return 0;
+            if (nargs == 2) {
+                if (copy_trim(ab, starts[1], stops[1], b, sizeof b) == (size_t)-1 ||
+                    b[0] == '\0')
+                    return 0;
+                if (!parse_angle_deg(b, &ay)) return 0;
+            }
+            acc_skx += ax;
+            acc_sky += ay;
+            spec |= SPEC_SKX | SPEC_SKY;
+            any2d = 1;
+        } else if (strcmp(name, "matrix") == 0) {
+            if (!parse_matrix6(ab, argn, f)) return 0;
+            spec |= SPEC_ALL7;
+            any2d = 1;
+        } else {
+            return 0;
+        }
+        double acc[6];
+        tr_mul(acc, m, f);
+        m[0] = acc[0]; m[1] = acc[1]; m[2] = acc[2];
+        m[3] = acc[3]; m[4] = acc[4]; m[5] = acc[5];
+    }
+    if (!any2d && txp == 0 && typ == 0) return 0;
+    int tx, ty, rot, sx, sy, dskx;
+    if (tr_decompose(m, &tx, &ty, &rot, &sx, &sy, &dskx)) {
+    } else if (m[1] == 0.0 && m[2] == 0.0) {
+        tx = round_clamp(m[4], -CSS_LEN_MAX, CSS_LEN_MAX);
+        ty = round_clamp(m[5], -CSS_LEN_MAX, CSS_LEN_MAX);
+        rot = 0;
+        dskx = 0;
+        sx = round_clamp(m[0] * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+        sy = round_clamp(m[3] * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+    } else {
+        return 0;
+    }
+    if (txp > CSS_PCT_MAX) txp = CSS_PCT_MAX;
+    if (txp < -CSS_PCT_MAX) txp = -CSS_PCT_MAX;
+    if (typ > CSS_PCT_MAX) typ = CSS_PCT_MAX;
+    if (typ < -CSS_PCT_MAX) typ = -CSS_PCT_MAX;
+    int skx = round_clamp((double)dskx + (double)acc_skx, -CSS_LEN_MAX, CSS_LEN_MAX);
+    int sky = round_clamp((double)acc_sky, -CSS_LEN_MAX, CSS_LEN_MAX);
+    int need = (seentr ? 2 : 0);
+    if (spec & SPEC_TX) ++need;
+    if (spec & SPEC_TY) ++need;
+    if (spec & SPEC_SX) ++need;
+    if (spec & SPEC_SY) ++need;
+    if (spec & SPEC_ROT) ++need;
+    if (spec & SPEC_SKX) ++need;
+    if (spec & SPEC_SKY) ++need;
+    if (cap < need) return 0;
+    int n = 0;
+    if (spec & SPEC_TX) {
+        dst[n].prop = P_TRANSFORM_TX;
+        dst[n].ival = (txp != 0 && tx == 0) ? CSS_LEN_UNSET : tx;
+        ++n;
+    }
+    if (spec & SPEC_TY) {
+        dst[n].prop = P_TRANSFORM_TY;
+        dst[n].ival = (typ != 0 && ty == 0) ? CSS_LEN_UNSET : ty;
+        ++n;
+    }
+    if (spec & SPEC_ROT) { dst[n].prop = P_TRANSFORM_ROTATE; dst[n].ival = rot; ++n; }
+    if (spec & SPEC_SX) { dst[n].prop = P_TRANSFORM_SX; dst[n].ival = sx; ++n; }
+    if (spec & SPEC_SY) { dst[n].prop = P_TRANSFORM_SY; dst[n].ival = sy; ++n; }
+    if (spec & SPEC_SKX) { dst[n].prop = P_TRANSFORM_SKX; dst[n].ival = skx; ++n; }
+    if (spec & SPEC_SKY) { dst[n].prop = P_TRANSFORM_SKY; dst[n].ival = sky; ++n; }
+    if (seentr) {
+        dst[n].prop = P_PCT_FIRST + CSS_PCT_TRANSLATE_X; dst[n].ival = txp; ++n;
+        dst[n].prop = P_PCT_FIRST + CSS_PCT_TRANSLATE_Y; dst[n].ival = typ; ++n;
+    }
+    return n;
 }
 
 /* transform (M1.2 translate; M1.2b adds scale/rotate): translate()/
  * translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %,
  * viewport units and bare non-calc numbers all fail closed, same as any other
  * box-model length here); scale()/scaleX()/scaleY() unitless ratios via
- * parse_scale_pct; rotate()/skew()/skewX()/skewY() whole-degree angles via
- * parse_rotate_deg; matrix(a,b,c,d,e,f) QR-decomposed at parse time into ALL
- * seven slots (M1.2c; singular matrices fail closed). Any other transform
- * function (perspective/3D), multiple space-separated functions, or
- * unparseable syntax reject the WHOLE declaration (no decl emitted -> cascades
+ * parse_scale_pct; rotate()/skew()/skewX()/skewY() <angle> values via
+ * parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to
+ * whole degrees); matrix(a,b,c,d,e,f) QR-decomposed at parse time into ALL
+ * seven slots (M1.2c; singular matrices fail closed). Space-separated function
+ * LISTS compose in order through expand_transform_list (CSS Transforms 1 3);
+ * translate3d()/translateZ() flatten to their 2D projection. Any other
+ * transform function (perspective/rotate3d/...), or unparseable syntax,
+ * rejects the WHOLE declaration (no decl emitted -> cascades
  * as unset, byte-identical to a page that never declared transform at all --
  * fail closed, never a half-applied transform). Transformed hit-testing
  * (click, cursor, overflow-clip ancestor resolution) stays out of scope -- the
@@ -4083,19 +4477,21 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
         dst[0].prop = P_TRANSFORM_TX; dst[0].ival = 0;
         dst[1].prop = P_TRANSFORM_TY; dst[1].ival = 0;
         int k = 2;
-        if (k < cap) { dst[k].prop = P_TRANSFORM_SX;  dst[k].ival = 1000; ++k; }
-        if (k < cap) { dst[k].prop = P_TRANSFORM_SY;  dst[k].ival = 1000; ++k; }
+        if (k < cap) { dst[k].prop = P_TRANSFORM_SX;  dst[k].ival = 100; ++k; }
+        if (k < cap) { dst[k].prop = P_TRANSFORM_SY;  dst[k].ival = 100; ++k; }
         if (k < cap) { dst[k].prop = P_TRANSFORM_ROTATE; dst[k].ival = 0; ++k; }
         if (k < cap) { dst[k].prop = P_TRANSFORM_SKX;    dst[k].ival = 0; ++k; }
         if (k < cap) { dst[k].prop = P_TRANSFORM_SKY;    dst[k].ival = 0; ++k; }
         return k;
     }
 
-    enum { TR_X, TR_Y, TR_BOTH, SC_X, SC_Y, SC_BOTH, ROTATE,
+    enum { TR_X, TR_Y, TR_BOTH, TR_3D, TR_Z, SC_X, SC_Y, SC_BOTH, ROTATE,
            SK_X, SK_Y, SK_BOTH, MATRIX } kind;
     if (csel_span_eq(p, "translatex(", 11, 1))      { kind = TR_X;    p += 11; }
     else if (csel_span_eq(p, "translatey(", 11, 1)) { kind = TR_Y;    p += 11; }
     else if (csel_span_eq(p, "translate(", 10, 1))  { kind = TR_BOTH; p += 10; }
+    else if (csel_span_eq(p, "translate3d(", 12, 1)) { kind = TR_3D;   p += 12; }
+    else if (csel_span_eq(p, "translatez(", 11, 1)) { kind = TR_Z;    p += 11; }
     else if (csel_span_eq(p, "scalex(", 7, 1))      { kind = SC_X;    p += 7; }
     else if (csel_span_eq(p, "scaley(", 7, 1))      { kind = SC_Y;    p += 7; }
     else if (csel_span_eq(p, "scale(", 6, 1))       { kind = SC_BOTH; p += 6; }
@@ -4118,7 +4514,10 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     size_t argn = j - 1;                       /* [0, argn) is the arg list */
     const char *rest = p + j;
     while (*rest == ' ' || *rest == '\t') ++rest;
-    if (*rest != '\0') return 0;               /* trailing junk: v1 allows one function only */
+    /* A second function, or a 3D spelling, takes the list path: single
+     * legacy functions continue below exactly as before. */
+    if (kind == TR_3D || kind == TR_Z || *rest != '\0')
+        return expand_transform_list(val, dst, cap);
 
     if (kind == MATRIX) {
         /* matrix(a,b,c,d,e,f) (M1.2c): six comma-separated unitless numbers,
@@ -4131,39 +4530,15 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
          * column) fails closed. */
         if (cap < 7) return 0;
         double m6[6];
-        size_t k = 0;
-        for (int arg = 0; arg < 6; ++arg) {
-            char tok[CSS_TOK_MAX];
-            size_t stop = argn;
-            for (size_t q = k; q < argn; ++q) {
-                if (p[q] == ',') { stop = q; break; }
-            }
-            if ((arg < 5) != (stop < argn)) return 0;  /* comma count must be 5 */
-            if (copy_trim(p, k, stop, tok, sizeof tok) == (size_t)-1 || tok[0] == '\0')
-                return 0;
-            const char *tp = tok;
-            int neg = 0;
-            if (*tp == '+') ++tp;
-            else if (*tp == '-') { neg = 1; ++tp; }
-            const char *tend;
-            if (!parse_num(tp, &m6[arg], &tend) || *tend != '\0') return 0;
-            if (neg) m6[arg] = -m6[arg];
-            k = stop + 1;
-        }
-        double r11 = hypot(m6[0], m6[1]);
-        double det = m6[0] * m6[3] - m6[1] * m6[2];
-        if (r11 < 1e-9 || det == 0.0) return 0;
-        const double rad2deg = 180.0 / 3.14159265358979323846;
-        double theta = atan2(m6[1], m6[0]) * rad2deg;
-        double r12 = (m6[0] * m6[2] + m6[1] * m6[3]) / r11;
-        double sy = det / r11;
-        double skx = atan(r12 / r11) * rad2deg;
-        dst[0].prop = P_TRANSFORM_TX;     dst[0].ival = round_clamp(m6[4], -CSS_LEN_MAX, CSS_LEN_MAX);
-        dst[1].prop = P_TRANSFORM_TY;     dst[1].ival = round_clamp(m6[5], -CSS_LEN_MAX, CSS_LEN_MAX);
-        dst[2].prop = P_TRANSFORM_ROTATE; dst[2].ival = round_clamp(theta, -CSS_LEN_MAX, CSS_LEN_MAX);
-        dst[3].prop = P_TRANSFORM_SX;     dst[3].ival = round_clamp(r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
-        dst[4].prop = P_TRANSFORM_SY;     dst[4].ival = round_clamp(sy * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
-        dst[5].prop = P_TRANSFORM_SKX;    dst[5].ival = round_clamp(skx, -CSS_LEN_MAX, CSS_LEN_MAX);
+        if (!parse_matrix6(p, argn, m6)) return 0;
+        int mtx, mty, mrot, msx, msy, mskx;
+        if (!tr_decompose(m6, &mtx, &mty, &mrot, &msx, &msy, &mskx)) return 0;
+        dst[0].prop = P_TRANSFORM_TX;     dst[0].ival = mtx;
+        dst[1].prop = P_TRANSFORM_TY;     dst[1].ival = mty;
+        dst[2].prop = P_TRANSFORM_ROTATE; dst[2].ival = mrot;
+        dst[3].prop = P_TRANSFORM_SX;     dst[3].ival = msx;
+        dst[4].prop = P_TRANSFORM_SY;     dst[4].ival = msy;
+        dst[5].prop = P_TRANSFORM_SKX;    dst[5].ival = mskx;
         dst[6].prop = P_TRANSFORM_SKY;    dst[6].ival = 0;
         return 7;
     }
@@ -4182,28 +4557,28 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
 
     if (kind == ROTATE) {
         int deg;
-        if (has_second || !parse_rotate_deg(a, &deg)) return 0;
+        if (has_second || !parse_angle_deg(a, &deg)) return 0;
         dst[0].prop = P_TRANSFORM_ROTATE; dst[0].ival = deg;
         return 1;
     }
 
     if (kind == SK_X) {
         int deg;
-        if (has_second || !parse_rotate_deg(a, &deg)) return 0;
+        if (has_second || !parse_angle_deg(a, &deg)) return 0;
         dst[0].prop = P_TRANSFORM_SKX; dst[0].ival = deg;
         return 1;
     }
     if (kind == SK_Y) {
         int deg;
-        if (has_second || !parse_rotate_deg(a, &deg)) return 0;
+        if (has_second || !parse_angle_deg(a, &deg)) return 0;
         dst[0].prop = P_TRANSFORM_SKY; dst[0].ival = deg;
         return 1;
     }
     if (kind == SK_BOTH) {
         /* skew(ax) means skew(ax, 0) -- like translate(x), both slots emitted. */
         int ax, ay = 0;
-        if (!parse_rotate_deg(a, &ax)) return 0;
-        if (has_second && !parse_rotate_deg(b, &ay)) return 0;
+        if (!parse_angle_deg(a, &ax)) return 0;
+        if (has_second && !parse_angle_deg(b, &ay)) return 0;
         dst[0].prop = P_TRANSFORM_SKX; dst[0].ival = ax;
         dst[1].prop = P_TRANSFORM_SKY; dst[1].ival = ay;
         return 2;
@@ -4265,9 +4640,11 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     return 4;
 }
 
-/* One transform-origin component: keyword (axis-checked) or a percent.
- * axis: 0 = x (left/right valid), 1 = y (top/bottom valid). Percents clamp to
- * [-1000, 1000] (values outside [0,100] are legal CSS, e.g. "150%"). */
+/* One transform-origin component: keyword (axis-checked), a percent, or a
+ * bare zero. axis: 0 = x (left/right valid), 1 = y (top/bottom valid).
+ * Percents clamp to [-1000, 1000] (values outside [0,100] are legal CSS, e.g.
+ * "150%"). A unitless zero is 0px, and 0px of any box edge is 0% of it, so it
+ * maps to 0; any other unitless number is not a length and fails closed. */
 static int origin_component(const char *tok, int axis, int *out) {
     if (csel_ci_eq(tok, "center"))                { *out = 50;  return 1; }
     if (axis == 0 && csel_ci_eq(tok, "left"))     { *out = 0;   return 1; }
@@ -4278,6 +4655,12 @@ static int origin_component(const char *tok, int axis, int *out) {
     const char *end;
     if (parse_num(tok, &num, &end) && end[0] == '%' && end[1] == '\0') {
         *out = round_clamp(num, -1000, 1000);
+        return 1;
+    }
+    const char *q = tok;
+    if (*q == '+' || *q == '-') ++q;
+    if (parse_num(q, &num, &end) && *end == '\0' && num == 0.0) {
+        *out = 0;
         return 1;
     }
     return 0;
@@ -4790,6 +5173,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "align-content") == 0)       { prop_id = P_ALIGN_CONTENT; ival = interp_align_kw(val, 0, 1); }
     else if (strcmp(prop, "justify-items") == 0)       { prop_id = P_JUSTIFY_ITEMS; ival = interp_align_kw(val, 0, 0); }
     else if (strcmp(prop, "flex-direction") == 0)      { prop_id = P_FLEX_DIR;      ival = interp_flex_direction(val); }
+    else if (strcmp(prop, "box-orient") == 0)          { prop_id = P_FLEX_DIR;      ival = interp_box_orient(val); }
     else if (strcmp(prop, "flex-wrap") == 0)           { prop_id = P_FLEX_WRAP;     ival = interp_flex_wrap(val); }
     else if (strcmp(prop, "grid-template-rows") == 0)  { prop_id = P_GRID_ROWS;     ival = interp_gridcols(val); }
     else if (strcmp(prop, "row-gap") == 0)             { prop_id = P_ROW_GAP;       ival = interp_gap(val); }

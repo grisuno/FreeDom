@@ -1540,6 +1540,66 @@ static void test_dump_layout_float_two_columns(void **state) {
     unlink(path);
 }
 
+/* --- nested holy-grail pull-up rail (spec/float.md §7d.6) --- */
+
+/* A pulled column spends its founder margin twice unless rows shift by the
+ * packed OUTER x: the inner band pack applies every item's margin
+ * (border = packed_outer + ml) and the flush used to add the border x on top.
+ * The rail (width:320px; margin-left:-320px) landed at x=360 instead of
+ * Firefox's x=680. */
+static void test_dump_layout_pulled_rail_single_margin(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        ".main-wrap { float:left; width:100%; }"
+        ".main-wrap > .main-content { margin-right:320px; }"
+        "article.story { float:left; width:100%; }"
+        ".rail-right { float:left; width:320px; margin-left:-320px; }"
+        "</style></head><body>"
+        "<div class=\"main-wrap\"><div class=\"main-content\">"
+        "<article class=\"story\"><h2>Title one</h2>"
+        "<div>Body one text with enough words to wrap over three lines.</div>"
+        "</article>"
+        "<article class=\"story\"><h2>Title two</h2>"
+        "<div>Body two text with enough words to wrap over three lines.</div>"
+        "</article>"
+        "</div></div>"
+        "<aside class=\"rail-right\"><h3>Rail</h3>"
+        "<div>Rail paragraph one.</div><div>Rail paragraph two.</div></aside>"
+        "</body></html>";
+    const char *path = "__freedom_pullrail.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[16384];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_pullrail.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    /* Rail rows: 320 wide at x=680 (Firefox: left=680 w=320). The double-count
+     * bug put them at x=360. Story rows: 680 wide at x=0. */
+    int rail_ok = 0, story_ok = 0;
+    char *p = out;
+    while ((p = strstr(p, "row[")) != NULL) {
+        double x = -1.0, w = -1.0;
+        char *xp = strstr(p, "x_off=");
+        char *wp = (xp != NULL) ? strstr(xp, " w=") : NULL;
+        if (xp != NULL && sscanf(xp, "x_off=%lf", &x) == 1 &&
+            wp != NULL && sscanf(wp, " w=%lf", &w) == 1) {
+            if (w > 319.0 && w < 321.0 && x > 679.0 && x < 681.0) rail_ok = 1;
+            if (w > 679.0 && w < 681.0 && x > -0.5 && x < 0.5) story_ok = 1;
+        }
+        p += 4;
+    }
+    assert_true(rail_ok);   /* rail text at the border x, margin spent once */
+    assert_true(story_ok);  /* stories keep the reserved width */
+
+    unlink(path);
+}
+
 /* --- flex row with absolute badges (M2) --- */
 
 /* An absolutely-positioned child is not a flex item (CSS 2.1 9.7): it must
@@ -1930,6 +1990,7 @@ int main(void) {
         cmocka_unit_test(test_dump_timings_prints_stages),
         cmocka_unit_test(test_dump_layout_no_wrapper_fragmentation),
         cmocka_unit_test(test_dump_layout_float_two_columns),
+        cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),
         cmocka_unit_test(test_dump_layout_flex_badges_share_row),
         cmocka_unit_test(test_rejects_http_url),
     };

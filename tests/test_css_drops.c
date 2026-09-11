@@ -272,6 +272,9 @@ static void test_transform_3d_flattens(void **state) {
 static void test_transform_origin_number_component(void **state) {
     (void)state;
     css_sheet *sh = parse_nodrop("a{transform-origin:0 100%}");
+    css_style s = css_resolve(sh, "a", NULL, NULL, 0, NULL, 0);
+    assert_int_equal(s.transform_ox, 0);
+    assert_int_equal(s.transform_oy, 100);
     css_free(sh);
 }
 
@@ -380,7 +383,8 @@ static void test_font_shorthand_with_line_height(void **state) {
     (void)state;
     css_sheet *sh = parse_nodrop("a{font:normal 24px/1.5 serif}");
     css_style s = css_resolve(sh, "a", NULL, NULL, 0, NULL, 0);
-    assert_int_equal(s.font_abs, 24);
+    assert_int_equal(s.font_scale, 150);
+    assert_int_equal(s.font_abs, 1);
     assert_int_equal(s.line_scale, 150);
     css_free(sh);
 }

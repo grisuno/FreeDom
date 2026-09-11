@@ -189,3 +189,26 @@ NUEVA (score > 1.0 sobre `expected.tsv`, o test sin expectativa): un score alto
 es un TODO medido, no un gate de release. `make wpt-update` congela
 `build/wpt/current.tsv` → `tests/wpt/expected.tsv`.
 sin estado que quede atrás.
+
+## `make drops` — gate de descartes del parser (2026-09-11)
+
+`--dump-css-drops` (`spec/css_drops.md`) es la otra mitad del diagnóstico: `parity`
+dice cuánto difiere una página, `drops` dice qué declaraciones el parser tiró para
+llegar ahí. Un `bad-value` nuevo en una página del corpus es la clase cara de bug
+(la propiedad existe en todo inventario por nombre y la declaración se pierde
+igual), así que es un gate, no un reporte:
+
+- `make drops` vuelca `--dump-css-drops` de cada página de `PARITY_PAGES` y hace
+  `diff -u` contra `tests/parity/drops/<page>.txt`. Cualquier diff ⇒ FAIL.
+- `make drops-update` re-congela (solo con descarte justificado, igual que
+  `layout-update`).
+
+## Perfil trusted (contraste contra allowed hosts)
+
+El corpus ya renderiza con `--author-css --images`, que es exactamente lo que la
+doctrina trusted-host (`allow ∩ js ⇒ CSS de autor e imágenes efectivos`) enciende
+para un host de `config/allow.conf`. Corpus cubierto por la allowlist:
+`slashdot.org`, `news.ycombinator.com` (hackernews), `duckduckgo.com`,
+`wikipedia.org`, `jkanime.net`. JS sigue apagado en ambos lados aunque el host
+sea trusted: con JS los dos motores miden documentos distintos (lección
+wikipedia-navbox, §7.4 de CLAUDE.md) y el número dejaría de calificar el layout.

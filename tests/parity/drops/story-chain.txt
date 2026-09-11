@@ -1,0 +1,37 @@
+CSS drops: 42 declaration(s) dropped, 35 distinct
+  count  cause         property                     first value
+      4  bad-value     font                         normal 24px/1.5
+      2  unknown-prop  -border-radius               2px
+      2  bad-value     cursor                       ew-resize
+      2  bad-value     filter                       progid:DXImageTransform.Microsoft.gradient( startColorstr='#004d4e', endColorstr='#007c7c',G...
+      2  bad-value     overflow                     no-display
+      2  unknown-prop  -webkit-font-smoothing       antialiased
+      1  unknown-prop  -khtml-user-select           none
+      1  unknown-prop  zoom                         1
+      1  unknown-prop  webkit-border-radius         2px
+      1  unknown-prop  moz-border-radius            2px
+      1  bad-value     background                   -webkit-gradient(linear, left top, left bottom, color-stop(0%,#004d4e), color-stop(100%,#007...
+      1  bad-value     margin                       0..padding:0
+      1  unknown-prop  -o-bottom-right-radius       4px
+      1  unknown-prop  background-position-x        0%
+      1  unknown-prop  background-position-y        0%
+      1  unknown-prop  border-image-outset          0px
+      1  unknown-prop  border-image-repeat          stretch
+      1  unknown-prop  border-image-slice           100%
+      1  unknown-prop  border-image-source          none
+      1  unknown-prop  border-image-width           1
+      1  unknown-prop  text-size-adjust             100%
+      1  bad-value     transition-delay             0s, 0s
+      1  bad-value     transition-duration          0.125s, 0.125s
+      1  bad-value     transition-property          background-color, color
+      1  bad-value     transition-timing-function   ease-out, ease-out
+      1  unknown-prop  margin-bo..ttom              1.4em
+      1  unknown-prop  text-wrap                    nowrap
+      1  bad-value     -webkit-transform            translateZ(0)
+      1  unknown-prop  -moz-animation               spin 2s infinite linear
+      1  unknown-prop  -o-animation                 spin 2s infinite linear
+      1  unknown-prop  -webkit-animation            spin 2s infinite linear
+      1  unknown-prop  animation                    spin 2s infinite linear
+      1  bad-value     border-style                 0
+      1  unknown-prop  font-weignt                  normal
+      1  bad-value     padding-top                  1

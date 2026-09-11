@@ -1,0 +1,25 @@
+Web browser - Wikipedia
+CSS drops: 250 declaration(s) dropped, 22 distinct
+  count  cause         property                     first value
+    101  unknown-prop  mask-image                   url(https://en.wikipedia.org/w/load.php?modules=skins.vector.icons&image=eye&format=original...
+    100  unknown-prop  -webkit-mask-image           url(https://en.wikipedia.org/w/load.php?modules=skins.vector.icons&image=eye&format=original...
+      8  unknown-prop  unicode-bidi                 -moz-isolate
+      7  unknown-prop  counter-reset                mw-ref-details-parent mw-references list-item
+      6  unknown-prop  counter-increment            mw-ref-details-parent mw-references
+      6  bad-value     content                      counter(mw-references,decimal) '.' counter(mw-ref-linkback,decimal)
+      5  bad-value     transition-property          background-color,color,border-color,box-shadow
+      2  bad-value     background-position          center right
+      2  unknown-prop  quotes                       '"' '"' "'" "'"
+      1  unknown-prop  animation                    mw-tmh-player-progress-bar-slide 2s infinite linear
+      1  unknown-prop  page-break-inside            avoid
+      1  unknown-prop  break-inside                 avoid-column
+      1  unknown-prop  list-style-image             none
+      1  bad-value     list-style-type              myanmar_with_period
+      1  bad-value     filter                       none
+      1  unknown-prop  scroll-padding-top           3.125rem
+      1  unknown-prop  scroll-margin-top            75px
+      1  unknown-prop  mask-size                    0.875rem
+      1  unknown-prop  clip-path                    inset(50%)
+      1  bad-value     height                       1.6
+      1  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
+      1  unknown-prop  font-variant-numeric         lining-nums tabular-nums

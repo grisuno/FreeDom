@@ -895,6 +895,13 @@ make fuzz-css     # Fuzz the author-CSS parser + cascade
 make fuzz-pv      # Fuzz the display-list builder
 make fuzz-img     # Fuzz the PNG+JPEG+WebP+GIF decoder
 make fuzz-svg     # Fuzz the inline-SVG parser (geometry + pool bounds)
+make parity       # Score structural divergence vs Firefox over the page corpus
+make parity-update # Freeze current parity scores as the baseline
+make layout-diff  # Fail on any default-layout change over examples/
+make layout-update # Re-freeze the layout baseline (justified diffs only)
+make drops        # Fail on any new author-CSS parser discard over the corpus
+make drops-update # Re-freeze the drops baseline (justified diffs only)
+make wpt          # Score the vendored WPT static-reftest subset vs Firefox
 make view         # Compile the standalone Wayland + Cairo GUI demo
 make clean        # Wipe the build directory
 make all          # Build the whole proyect

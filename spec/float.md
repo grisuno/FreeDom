@@ -506,6 +506,48 @@ container tops do not move) for nested containers; miss ⇒ old path.
   thumb), so `--images` leaves them out of flow here while Firefox's reference
   keeps them — a harness/doctrine difference, not an engine regression.
 
+### 7d.6 Pulled-column origin: the founder margin applied twice (2026-09-11)
+
+> **Status: IMPLEMENTED.** A pulled column whose founder carries a left margin
+> (the holy-grail rail: `width:320px; margin-left:-320px`) painted its text one
+> margin too far left: the inner band pack applies every item's margin
+> (`border = packed_outer + ml`, §7c.2) AND the flush shifted rows by the
+> already-margin-inclusive border x. Measured on a minimal nested probe
+> (outer float + inner floats + pulled rail): stories at x=0 w=680 correct,
+> rail text at x=360 instead of Firefox's 680.
+
+Two shifts compose in the deferred column, and they must agree on the origin:
+
+- the inner band (`layout_float_band`) lays each item at its BORDER x,
+  margins included (`outx = packed_outer + ml`: −320 for the rail's own
+  item);
+- the flush (`defer_flush`) shifts rows by `colx`, which §7c.2 also defines as
+  the BORDER x (680 for the rail: `packed_outer + ml` again).
+
+So the founder margin is spent twice (−320 + 680 = 360). Boxes do not suffer
+it: they open on the outer state at the border origin already. The exclusion
+edge never suffered it either: it is outer-based by construction
+(`colx − oml` / `colx + colw + omr`).
+
+The fix zeroes the founder margin inside the inner pack, for the founder's
+own item only and only when it is the band's sole item: `layout_float_band`
+takes the column key plus the founder's raw margin halves, and a lone item
+whose group id IS the key packs margin-free (the flush already spent those
+margins placing the column at its border x). Siblings keep their margins:
+with company the margins place items relatively, and zeroing them repacked
+slashdot's poll section wrong (measured: +1.06, reverted to the scoped form).
+Nested items (their own id under the key) keep their own margins for
+relative placement — zeroing theirs too packed the poll section at +320 the
+wrong way, measured and reverted. With zero founder margins, or outside a
+deferred column, the subtraction is zero and the pack is byte-identical.
+
+**Given** a nested holy-grail (outer `float:left;width:100%` founder, inner
+`float:left;width:100%` stories, `float:left;width:320px;margin-left:-320px`
+rail), **when** rendered, **then** rail text rows sit at x=680 w=320 (Firefox:
+left=680 w=320) and story rows at x=0 w=680 (Firefox: left=0 w=680).
+**Given** zero founder margins, **when** rendered, **then** `layout-diff`
+byte-identical (the correction is zero).
+
 ## 8. Errors
 
 No new status codes. `css`/`page_view`/`render_doc`/`tab` keep their existing tables;

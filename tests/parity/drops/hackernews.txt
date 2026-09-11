@@ -1,0 +1,5 @@
+Hacker News
+CSS drops: 2 declaration(s) dropped, 2 distinct
+  count  cause         property                     first value
+      1  unknown-prop  page-break-before            always
+      1  bad-value     -ms-filter                   "progid:DXImageTransform.Microsoft.Matrix(M11=-1, M12=0, M21=0, M22=-1, DX=0, DY=0, SizingMe...

@@ -122,7 +122,7 @@ TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
 
 .PHONY: all install test itest asan fuzz fuzz-svg fuzz-js fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-afl \
         deps run deb docker view clean \
-        parity parity-update layout-diff layout-update geom bench wpt wpt-update
+        parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
 all: $(BUILD_DIR)/freedom
 
@@ -1085,6 +1085,41 @@ layout-update: $(BUILD_DIR)/freedom
 	      > $(PARITY_DIR)/layout/$$name.txt 2>/dev/null; \
 	done
 	@echo "Froze layout baseline for $(words $(LAYOUT_PAGES)) pages in $(PARITY_DIR)/layout/"
+
+# `make drops` -- fail the build on NEW parser discards. `--dump-css-drops`
+# (spec/css_drops.md) reports every author-CSS declaration the parser threw
+# away; a new `bad-value` on a corpus page is the expensive class of render
+# bug (the property exists, the declaration is lost anyway), so it is a gate,
+# not a report. Frozen baselines live in tests/parity/drops/.
+DROPS_OUT   := $(BUILD_DIR)/drops
+
+drops: $(BUILD_DIR)/freedom
+	@mkdir -p $(DROPS_OUT)
+	@fail=0; miss=0; \
+	for f in $(PARITY_PAGES); do \
+	  name=$$(basename $$f .html); \
+	  ./$(BUILD_DIR)/freedom --dump-css-drops "$$f" \
+	      > $(DROPS_OUT)/$$name.txt 2>/dev/null; \
+	  if [ -f $(PARITY_DIR)/drops/$$name.txt ]; then \
+	    diff -u $(PARITY_DIR)/drops/$$name.txt $(DROPS_OUT)/$$name.txt \
+	      || fail=1; \
+	  else miss=$$((miss+1)); fi; \
+	done; \
+	if [ $$miss -gt 0 ]; then \
+	  echo "drops: $$miss page(s) have no baseline -- run 'make drops-update'"; fi; \
+	if [ $$fail -ne 0 ]; then \
+	  echo "drops: FAIL -- parser discards changed (justify it, or fix it)"; exit 1; \
+	fi; \
+	echo "drops: OK -- parser discards unchanged across $(words $(PARITY_PAGES)) pages"
+
+drops-update: $(BUILD_DIR)/freedom
+	@mkdir -p $(PARITY_DIR)/drops
+	@for f in $(PARITY_PAGES); do \
+	  name=$$(basename $$f .html); \
+	  ./$(BUILD_DIR)/freedom --dump-css-drops "$$f" \
+	      > $(PARITY_DIR)/drops/$$name.txt 2>/dev/null; \
+	done
+	@echo "Froze drops baseline for $(words $(PARITY_PAGES)) pages in $(PARITY_DIR)/drops/"
 
 # `make bench` -- per-stage render timings over the local bench corpus
 # (tests/bench/*.html, never the network). Uses --dump-timings (the pt_

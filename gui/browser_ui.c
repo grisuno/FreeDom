@@ -6233,11 +6233,16 @@ static int block_in_table_caption(const rd_doc *doc, const rd_block *b) {
  * stays empty and every band lays out exactly as before. */
 #define RC_DEFER_COLS 8
 #define RC_DEFER_RANGES 32
-/* Forward: the deferred flush below reuses the band layer, defined after it. */
+/* Forward: the deferred flush below reuses the band layer, defined after it.
+ * founder_key/fml/fmlpct/fmr/fmrpct name a column founder whose outer margins
+ * the caller already spent placing the column (spec/float.md §7d.6): the
+ * founder's own item packs margin-free inside, every other item keeps its
+ * own. All zeros (founder_key < 0) is the plain band path, byte-identical. */
 static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                               rc_state *s, const ui_theme *th, double content_w,
                               const rd_doc *doc, size_t start, size_t end,
-                              int band_box);
+                              int band_box, int founder_key,
+                              int fml, int fmlpct, int fmr, int fmrpct);
 typedef struct rc_defer_col {
     int key;                                /* outermost founder group id */
     int side;                               /* its css_float side */
@@ -6577,7 +6582,8 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * containing block, exactly as a nested flex container's
                  * would. */
                 layout_float_band(cr, w, L, &si, th, colw, doc,
-                                  dc->rs[r], dc->re[r], bbox);
+                                  dc->rs[r], dc->re[r], bbox, dc->key,
+                                  dc->ml, dc->mlpct, dc->mr, dc->mrpct);
             }
             double col_h = si.cur_top;
             if (col_h < 0.0) col_h = 0.0;
@@ -6646,7 +6652,8 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
 static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                               rc_state *s, const ui_theme *th, double content_w,
                               const rd_doc *doc, size_t start, size_t end,
-                              int band_box) {
+                              int band_box, int founder_key,
+                              int fml, int fmlpct, int fmr, int fmrpct) {
     flush_line(L, s, th);
     double ctx_left, ctx_w;
     rc_box_context(s, content_w, &ctx_left, &ctx_w);
@@ -6766,20 +6773,40 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
      * negative margin narrows the slot (the holy-grail pull-up) and a positive
      * one widens it (CSS 2.1 §9.5). % halves resolve against the band width —
      * the same basis every other horizontal % uses. All zero on pages without
-     * float margins, which reduces exactly to the old packing. */
-    double fml[BT_MAX_CHILDREN];
-    double fmr[BT_MAX_CHILDREN];
+     * float margins, which reduces exactly to the old packing.
+     *
+     * Inside a deferred column the founder's own item packs margin-free, but
+     * only when it is the band's SOLE item: the flush already spent those
+     * margins placing the column at its border x, so spending them again
+     * would double-count (spec/float.md §7d.6: the rail at 360 instead of
+     * 680). With siblings the margins place items relatively and stay.
+     * Founder-direct means the item's group id IS the column key; nested
+     * items (their own id under the key) keep their own margins for relative
+     * placement. */
+    double fmls[BT_MAX_CHILDREN];
+    double fmrs[BT_MAX_CHILDREN];
     for (size_t j = 0; j < g; ++j) {
         const rd_block *bf = rd_at(doc, gstart[j]);
-        fml[j] = bx_lp_px(bf->float_ml, bf->float_ml_pct, ctx_w);
-        fmr[j] = bx_lp_px(bf->float_mr, bf->float_mr_pct, ctx_w);
+        /* Founder-direct: the band's sole item IS the founder's own level
+         * (its group id is the key), so its margins are the founder's,
+         * already spent placing the column. Nested items (their own id
+         * under the key's oid) keep their own margins for relative
+         * placement. */
+        int is_founder = (founder_key >= 0 && g == 1 &&
+                          bf->float_id == founder_key);
+        int eml = bf->float_ml - (is_founder ? fml : 0);
+        int emlp = bf->float_ml_pct - (is_founder ? fmlpct : 0);
+        int emr = bf->float_mr - (is_founder ? fmr : 0);
+        int emrp = bf->float_mr_pct - (is_founder ? fmrpct : 0);
+        fmls[j] = bx_lp_px(eml, emlp, ctx_w);
+        fmrs[j] = bx_lp_px(emr, emrp, ctx_w);
     }
 
     /* Greedy row wrap (Hito 32): an item that no longer fits opens a new band
      * row -- consecutive full-width floats (.grid_24) stack instead of cramming.
      * Margin-aware (spec/float.md §7c.2): outx is the BORDER x, already shifted
      * by the signed left margin, so the column translation below needs no change. */
-    if (fx_float_pack_m(width, side, fml, fmr, g, ctx_w, 0.0, outx, outrow) != FX_OK) {
+    if (fx_float_pack_m(width, side, fmls, fmrs, g, ctx_w, 0.0, outx, outrow) != FX_OK) {
         for (size_t k = start; k < end; ++k) {
             if (block_leaves_flow(doc, rd_at(doc, k))) continue;
             flow_text_block(cr, w, L, s, th, rd_at(doc, k), ctx_w);
@@ -6970,8 +6997,8 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
          * are OUTER (margin) edges (fx_float_rect contract): outx is the border x,
          * so the right outer edge adds the right margin and the left outer edge
          * takes back the left one. Zero margins answer exactly the old formula. */
-        fr->edge   = (side[0] == 1) ? outx[0] - fml[0]
-                                    : outx[0] + width[0] + fmr[0];
+        fr->edge   = (side[0] == 1) ? outx[0] - fmls[0]
+                                    : outx[0] + width[0] + fmrs[0];
         fr->side   = side[0];
         s->float_depth = s->box_depth;
         s->float_avail = ctx_w;
@@ -7194,7 +7221,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
             double mt, mb;
             block_margins(th, b, content_w, &mt, &mb);
             s.pending_gap = bf_collapse(s.prev_bottom, mt);
-            layout_float_band(cr, w, L, &s, th, content_w, doc, i, j, shared);
+            layout_float_band(cr, w, L, &s, th, content_w, doc, i, j, shared,
+                              -1, 0, 0, 0, 0);
             s.prev_bottom = mb;
             i = j - 1;  /* the loop's ++i moves past the band */
             continue;

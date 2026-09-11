@@ -2715,6 +2715,38 @@ static void test_flex_align(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).flex_direction, CSS_FD_UNSET);
 }
 
+/**
+ * 2009 flexbox `box-orient` drafts as `flex-direction`.
+ *
+ * Contract: `box-orient` is the 2009 name of the main axis
+ * (`horizontal`/`inline-axis` map to row, `vertical`/`block-axis` to column).
+ * Vendor spellings reach it through the strip-prefix-and-ask-again rule, so
+ * `-webkit-box-orient:vertical` (the `-webkit-line-clamp` idiom axis) stacks
+ * vertically. Anything else fails closed.
+ */
+static void test_box_orient_maps_to_flex_direction(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("box-orient:horizontal", 0).flex_direction,
+                     CSS_FD_ROW);
+    assert_int_equal(css_parse_inline("box-orient:vertical", 0).flex_direction,
+                     CSS_FD_COLUMN);
+    assert_int_equal(css_parse_inline("box-orient:inline-axis", 0).flex_direction,
+                     CSS_FD_ROW);
+    assert_int_equal(css_parse_inline("box-orient:block-axis", 0).flex_direction,
+                     CSS_FD_COLUMN);
+    assert_int_equal(css_parse_inline("-webkit-box-orient:vertical", 0).flex_direction,
+                     CSS_FD_COLUMN);
+    assert_int_equal(css_parse_inline("-moz-box-orient:horizontal", 0).flex_direction,
+                     CSS_FD_ROW);
+    assert_int_equal(css_parse_inline("box-orient:diagonal", 0).flex_direction,
+                     CSS_FD_UNSET);
+    assert_int_equal(css_parse_inline("box-orient:row", 0).flex_direction,
+                     CSS_FD_UNSET);
+    assert_int_equal(css_parse_inline("flex-direction:horizontal", 0).flex_direction,
+                     CSS_FD_UNSET);
+    assert_int_equal(css_parse_inline("color:red", 0).flex_direction, CSS_FD_UNSET);
+}
+
 static void test_grid_extras(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("grid-template-rows:1fr 1fr 1fr", 0).grid_rows, 3);
@@ -3086,12 +3118,19 @@ static void test_inline_transform_translate(void **state) {
     s = css_parse_inline("transform:none", 0);
     assert_int_equal(s.transform_tx, 0);
     assert_int_equal(s.transform_ty, 0);
+    assert_int_equal(s.transform_sx, 100);
+    assert_int_equal(s.transform_sy, 100);
+    assert_int_equal(s.transform_rotate, 0);
+    assert_int_equal(s.transform_skx, 0);
+    assert_int_equal(s.transform_sky, 0);
 
     /* Unsupported/malformed still fails closed, never a half-applied transform. */
-    s = css_parse_inline("transform:translate(10%,10%)", 0); /* % unsupported */
+    s = css_parse_inline("transform:translate(10%,10%)", 0); /* % rides the pct half */
     assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
-    s = css_parse_inline("transform:translateX(1px) translateY(2px)", 0); /* v1: one fn only */
-    assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
+    /* Function lists compose in order (CSS Transforms 1 3). */
+    s = css_parse_inline("transform:translateX(1px) translateY(2px)", 0);
+    assert_int_equal(s.transform_tx, 1);
+    assert_int_equal(s.transform_ty, 2);
     s = css_parse_inline("transform:translate(10px,20px,30px)", 0); /* too many args */
     assert_int_equal(s.transform_tx, CSS_LEN_UNSET);
     s = css_parse_inline("color:red", 0);
@@ -3133,12 +3172,13 @@ static void test_inline_transform_scale(void **state) {
     assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
     s = css_parse_inline("transform:scale()", 0);
     assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
-    s = css_parse_inline("transform:scaleX(1) scaleY(2)", 0); /* v1: one fn only */
-    assert_int_equal(s.transform_sx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:scaleX(1) scaleY(2)", 0); /* list composes */
+    assert_int_equal(s.transform_sx, 100);
+    assert_int_equal(s.transform_sy, 200);
 }
 
-/* transform: rotate() (M1.2b), whole degrees only (deg suffix mandatory, same
- * convention as the linear-gradient angle grammar). */
+/* transform: rotate() (M1.2b), <angle> in any unit (CSS Values 4 6.1),
+ * fractional allowed, rounded to whole degrees for the int slot. */
 static void test_inline_transform_rotate(void **state) {
     (void)state;
     css_style s;
@@ -3155,21 +3195,20 @@ static void test_inline_transform_rotate(void **state) {
     s = css_parse_inline("transform:rotate(720deg)", 0); /* not normalized mod 360 */
     assert_int_equal(s.transform_rotate, 720);
 
-    /* Unsupported/malformed: fails closed (rad/turn/grad/fractional degrees,
-     * matching the pre-existing linear-gradient angle grammar). */
+    /* Unsupported/malformed: fails closed (unitless is not an angle). */
     s = css_parse_inline("transform:rotate(1.5deg)", 0);
-    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_rotate, 2);
     s = css_parse_inline("transform:rotate(0.5turn)", 0);
-    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_rotate, 180);
     s = css_parse_inline("transform:rotate(1rad)", 0);
-    assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_rotate, 57);
     s = css_parse_inline("transform:rotate(45)", 0); /* unitless: invalid */
     assert_int_equal(s.transform_rotate, CSS_LEN_UNSET);
 }
 
-/* transform: skew()/skewX()/skewY() (M1.2c), whole degrees only (deg suffix
- * mandatory, same grammar as rotate()). skew(a) means skew(a, 0) -- like
- * translate(x), both slots emitted; skewX/skewY emit only their axis. */
+/* transform: skew()/skewX()/skewY() (M1.2c), <angle> like rotate().
+ * skew(a) means skew(a, 0) -- like translate(x), both slots emitted;
+ * skewX/skewY emit only their axis. */
 static void test_inline_transform_skew(void **state) {
     (void)state;
     css_style s;
@@ -3192,11 +3231,12 @@ static void test_inline_transform_skew(void **state) {
 
     /* Unsupported/malformed: fails closed, never half-applied. */
     s = css_parse_inline("transform:skew(0.5turn)", 0);
-    assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
+    assert_int_equal(s.transform_skx, 180);
     s = css_parse_inline("transform:skew(10)", 0);
     assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
-    s = css_parse_inline("transform:skewX(10deg) skewY(2deg)", 0); /* v1: one fn */
-    assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
+    s = css_parse_inline("transform:skewX(10deg) skewY(2deg)", 0); /* list composes */
+    assert_int_equal(s.transform_skx, 10);
+    assert_int_equal(s.transform_sky, 2);
     s = css_parse_inline("color:red", 0);
     assert_int_equal(s.transform_skx, CSS_LEN_UNSET);
     assert_int_equal(s.transform_sky, CSS_LEN_UNSET);
@@ -4092,6 +4132,7 @@ int main(void) {
         cmocka_unit_test(test_box_shadow_and_outline),
         cmocka_unit_test(test_flex_item),
         cmocka_unit_test(test_flex_align),
+        cmocka_unit_test(test_box_orient_maps_to_flex_direction),
         cmocka_unit_test(test_grid_extras),
         cmocka_unit_test(test_layout_sheet_cascade_and_unset),
         cmocka_unit_test(test_inline_box_longhands),

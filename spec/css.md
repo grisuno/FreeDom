@@ -336,6 +336,7 @@ later milestones. Insets/`z-index`/`order` reuse the `CSS_LEN_*` sentinels.
 | `order` | `order` (signed, clamped `[−CSS_LEN_MAX, CSS_LEN_MAX]`, or `CSS_LEN_UNSET`) |
 | `align-items`, `align-self`, `align-content`, `justify-items` | `css_align_kw`: `stretch`/`flex-start`\|`start`/`flex-end`\|`end`/`center`/`baseline` (+`space-*` for `align-content`; +`auto` for `align-self`); unknown dropped |
 | `flex-direction` | `flex_direction` (`css_flex_direction`): `row`/`row-reverse`/`column`/`column-reverse` |
+| `box-orient` (2009 flexbox draft) | Alias of `flex_direction`: `horizontal`/`inline-axis` → `row`, `vertical`/`block-axis` → `column`. Reached via the vendor-prefix rule (`-webkit-box-orient`/`-moz-box-orient` strip to `box-orient`), so the `-webkit-line-clamp` idiom (`display:-webkit-box` + `-webkit-box-orient:vertical`) stacks vertically instead of dropping its axis. Any other value dropped. |
 | `flex-wrap` | `flex_wrap` (`css_flex_wrap`): `nowrap`/`wrap`/`wrap-reverse` |
 | `grid-template-rows` | `grid_rows` (track count, like `grid-template-columns`) |
 | `row-gap` | `row_gap` (px, clamped `[0, CSS_GAP_MAX]`, or -1 unset). `column-gap`/`gap` keep feeding `gap` (first token); two-value `gap` row component is set only via `row-gap`. |
@@ -1087,8 +1088,10 @@ Lo que se cerró, cada uno con su regla citable:
   Gecko/Presto (`-moz-border-radius-topright`) ponen la esquina AL FINAL, así que
   quitar el prefijo y volver a preguntar no las encuentra; son un renombre, no una
   regla inventada. Las grafías de `display` (`-webkit-flex`, `-ms-flexbox`) nombran el
-  mismo contexto de formato. `-webkit-box` queda fuera a propósito: es el borrador de
-  2009, otra spec.
+   mismo contexto de formato. `-webkit-box`/`-moz-box` es el contenedor del borrador de
+   2009: otra spec en los ítems, pero el mismo bloque-contenedor en una sola dirección,
+   así que mapea a `flex` (es la mitad contenedora del idioma `-webkit-line-clamp`;
+   `-webkit-box-orient: vertical` aporta la columna como alias de `flex-direction`).
 - **`vertical-align: text-top`/`text-bottom`** caen en el mismo borde que `top`/`bottom`
   (una caja de línea por línea, sin borde de contenido del padre aparte). Descartarlas
   dejaba el elemento en la LÍNEA BASE, un sitio distinto.
@@ -1690,3 +1693,59 @@ inventar una regla.
 - **Dado** `--webkit-color: red`, **entonces** no se pinta rojo: es una custom
   property.
 - **Dado** `-webkit--moz-color: red`, **entonces** se descarta.
+
+---
+
+## Listas de funciones de `transform`, ángulos, 3D y `box-orient` (2026-09-11)
+
+El shorthand `transform` aceptaba UNA sola función: `translateY(-50%) scale(0)`
+(jkanime 18 usos), `scale(1) translateY(0)` (11), `skewx(1deg) skewy(1deg)
+translatex(0px)` (slashdot, en minúsculas por el minificador) y
+`translate(-50%,-50%) scale(1.1)` (wikipedia) se descartaban enteros, y con
+ellos cualquier posicionamiento de badges/dropdowns/centrados.
+
+**Composición (Transforms 1 §3).** Las funciones componen en orden en una
+matriz afín (`tr_mul`: `M = M·f`, la de la izquierda aplica última) y el
+resultado se QR-descompone a los siete slots con la MISMA matemática que
+`matrix()` (`tr_decompose`, compartida para que los dos caminos no puedan
+divergir). Solo se emiten los slots que la lista especifica (una lista nunca
+inventa un eje fantasma: `translateX` sigue single-axis); las mitades `%` de
+translate viajan como siempre, las dos mitades. Más de `TR_LIST_MAX` (8)
+funciones, una función desconocida, un argumento inválido o una matriz
+singular acoplada rechazan la declaración ENTERA (fail-closed).
+
+**3D se aplana.** `translate3d(x,y,z)` aporta su proyección 2D (el motor 2D
+pinta z como nada, que es lo que la proyección dice) con z validado como
+longitud; `translateZ` solo valida. Una lista sin efecto 2D (solo
+`translateZ`) falla cerrada. `rotateX`, `perspective`, `transform-style` y
+`will-change: transform` siguen fuera de alcance (se descartan).
+
+**`<angle>` completo (Values 4 §6.1).** `deg`/`grad`/`rad`/`turn`, fraccionario
+permitido, redondeado al grado entero del slot (`rotate(.5turn)` = 180,
+`rotate(1rad)` = 57). Sin unidad sigue inválido.
+
+**`transform-origin` acepta el cero sin unidad.** `0` es `0px`, y `0px` de
+cualquier borde es `0%`: `transform-origin: 0 100%` mapea a `(0, 100)`.
+Cualquier otro número sin unidad sigue fallando (no es una longitud).
+
+**`box-orient` es `flex-direction`.** El borrador 2009 nombra el eje
+(`horizontal`/`inline-axis` → `row`, `vertical`/`block-axis` → `column`) y se
+alcanza por la regla de prefijos (`-webkit-box-orient` desnuda a
+`box-orient`); es la mitad que le faltaba al idioma `-webkit-line-clamp`
+(`display:-webkit-box` ya mapeaba a flex). `box-orient: row` no existe y falla.
+
+**`transform: none` emite la identidad real.** Reclama sus slots con
+`scale = 100` (1x), no 1000 (10x): antes todo `none` escalaba el elemento diez
+veces, sin ningún test que lo atara.
+
+**Contrato — Dado / Cuando / Entonces**
+
+- **Dado** `transform:translateX(10px) scale(2)`, **entonces** `tx=10`,
+  `sx=sy=200`, y `ty` queda sin declarar (no hay fantasma).
+- **Dado** `transform:SKEWX(4deg) translatex(3px)`, **entonces** `skx=4`,
+  `tx=3` (los nombres de función son insensibles a mayúsculas, Syntax 3 §4.2).
+- **Dado** `transform:translateY(-50%) scale(0)` (singular), **entonces** pinta
+  colapsado (fallback de matriz diagonal), no se descarta.
+- **Dado** `transform:perspective(5px)` o `transform:scale(2) bogus(1)`,
+  **entonces** la declaración entera se descarta (fail-closed).
+- **Dado** más de 8 funciones, **entonces** se descarta (cota anti-DoS).
