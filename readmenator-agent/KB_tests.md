@@ -5,7 +5,11 @@
 - Language: c
 - Symbols:
   - `main` (function, line 25) `int main(void)`
-  - `CHECK` (macro, line 15)
+  - `printf` (function, line 19) `printf(" ok : %s\n", (msg));`
+  - `CHECK` (function, line 32) `CHECK(s0 == SF_ERR_INVALID_URL, "rejects http:// scheme before any I/O");`
+  - `sf_response_free` (function, line 33) `sf_response_free(&r0);`
+  - `CHECK` (macro, line 15) `#define CHECK(cond, msg)`
+- Depends on: `include/secure_fetch.h`
 
 ## tests/test_anti_fp.c
 - Layer: testing
@@ -26,6 +30,19 @@
   - `test_origin_key_empty_namespace` (function, line 170) `static void test_origin_key_empty_namespace(void **state)`
   - `test_origin_key_unlinks_readback` (function, line 183) `static void test_origin_key_unlinks_readback(void **state)`
   - `main` (function, line 196) `int main(void)`
+  - `assert_true` (function, line 21) `assert_true(res > 0);`
+  - `assert_int_equal` (function, line 22) `assert_int_equal((int)fp_coarsen_time_ms(0), 0);`
+  - `assert_non_null` (function, line 36) `assert_non_null(fp_user_agent());`
+  - `assert_null` (function, line 40) `assert_null(strstr(fp_user_agent(), "Freedom"));`
+  - `assert_string_equal` (function, line 42) `assert_string_equal(fp_user_agent(), FP_USER_AGENT);`
+  - `fp_bucket_screen` (function, line 86) `fp_bucket_screen(1920, 1080, &w, &h);`
+  - `memset` (function, line 104) `memset(a, 0x80, sizeof a);`
+  - `memcpy` (function, line 105) `memcpy(b, a, sizeof b);`
+  - `fp_perturb` (function, line 106) `fp_perturb(a, sizeof a, 0xABCDEF1234567890ULL);`
+  - `assert_memory_equal` (function, line 108) `assert_memory_equal(a, b, sizeof a);`
+  - `assert_memory_not_equal` (function, line 133) `assert_memory_not_equal(a, b, sizeof a);`
+  - `cmocka_run_group_tests` (function, line 214) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/anti_fp.h`
 
 ## tests/test_block_flow.c
 - Layer: testing
@@ -39,6 +56,10 @@
   - `test_collapse_n_edges` (function, line 84) `static void test_collapse_n_edges(void **state)`
   - `test_margins_adjoin` (function, line 95) `static void test_margins_adjoin(void **state)`
   - `main` (function, line 104) `int main(void)`
+  - `assert_true` (function, line 31) `assert_true(dbl_eq(bf_collapse(30.0, 0.0), 30.0));`
+  - `assert_int_equal` (function, line 97) `assert_int_equal(bf_margins_adjoin(0.0, 0.0), 1);`
+  - `cmocka_run_group_tests` (function, line 115) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/block_flow.h`
 
 ## tests/test_box_style.c
 - Layer: testing
@@ -85,6 +106,15 @@
   - `percentage` (function, line 524) `* percentage (a plain `width:50%` leaves the px half UNSET, a plain `width:300px`
  * leaves the p...`
   - `main` (function, line 589) `int main(void)`
+  - `assert_true` (function, line 28) `assert_true(dbl_eq(e.top, t));`
+  - `assert_int_equal` (function, line 37) `assert_int_equal(b.display, BX_DISPLAY_BLOCK);`
+  - `assert_int_not_equal` (function, line 169) `assert_int_not_equal(id, BX_UA_NONE);`
+  - `memset` (function, line 367) `memset(big, 'a', sizeof big - 1);`
+  - `assert_string_equal` (function, line 376) `assert_string_equal(bx_display_name(BX_DISPLAY_BLOCK), "block");`
+  - `width` (function, line 534) `* a negative width (CSS Values 4 section 10.1: out-of-range calc() results are * clamped at used-value time). */ assert_true(dbl_eq(bx_width_cap(-900, 1000, 800.0), 0.0));`
+  - `assert_false` (function, line 580) `assert_false(bx_replaced_box(200, 0, 0, 0, 900.0, &w, &h));`
+  - `cmocka_run_group_tests` (function, line 634) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/box_style.h`
 
 ## tests/test_box_tree.c
 - Layer: testing
@@ -143,7 +173,12 @@
   - `test_oof_relative_does_not_anchor` (function, line 856) `static void test_oof_relative_does_not_anchor(void **state)`
   - `test_oof_fail_open` (function, line 870) `static void test_oof_fail_open(void **state)`
   - `main` (function, line 888) `int main(void)`
-  - `UNSET4` (macro, line 609)
+  - `assert_true` (function, line 29) `assert_true(dbl_eq(n->x, x));`
+  - `assert_int_equal` (function, line 37) `assert_int_equal(bt_layout(NULL, 200), BT_ERR_NULL_ARG);`
+  - `card` (function, line 749) `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));`
+  - `cmocka_run_group_tests` (function, line 943) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `UNSET4` (macro, line 609) `#define UNSET4`
+- Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ## tests/test_browser.c
 - Layer: testing
@@ -163,7 +198,28 @@
   - `test_status_toast` (function, line 277) `static void test_status_toast(void **state)`
   - `test_status_truncates` (function, line 308) `static void test_status_truncates(void **state)`
   - `main` (function, line 325) `int main(void)`
-  - `_POSIX_C_SOURCE` (macro, line 7)
+  - `memset` (function, line 23) `memset(&bs, 0, sizeof bs);`
+  - `assert_int_equal` (function, line 24) `assert_int_equal(browser_init(&bs), BROWSER_OK);`
+  - `assert_string_equal` (function, line 25) `assert_string_equal(bs.url_bar, "about:blank");`
+  - `assert_false` (function, line 26) `assert_false(browser_can_back(&bs));`
+  - `browser_free` (function, line 28) `browser_free(&bs);`
+  - `assert_true` (function, line 43) `assert_true(browser_can_back(&bs));`
+  - `browser_navigate` (function, line 66) `browser_navigate(&bs, "/a.html");`
+  - `browser_back` (function, line 70) `browser_back(&bs);`
+  - `browser_url_bar_clear` (function, line 127) `browser_url_bar_clear(&bs);`
+  - `browser_url_bar_insert` (function, line 130) `browser_url_bar_insert(&bs, 'h');`
+  - `browser_url_bar_move_cursor` (function, line 135) `browser_url_bar_move_cursor(&bs, -1);`
+  - `browser_url_bar_backspace` (function, line 139) `browser_url_bar_backspace(&bs);`
+  - `browser_url_bar_delete` (function, line 144) `browser_url_bar_delete(&bs);`
+  - `browser_set_url_bar` (function, line 157) `browser_set_url_bar(&bs, "example.com");`
+  - `browser_url_bar_select_all` (function, line 163) `browser_url_bar_select_all(&bs);`
+  - `browser_url_bar_set_cursor` (function, line 175) `browser_url_bar_set_cursor(&bs, 2, 0);`
+  - `browser_url_bar_extend_cursor` (function, line 176) `browser_url_bar_extend_cursor(&bs, 3);`
+  - `assert_null` (function, line 282) `assert_null(browser_status_text(&bs, 0));`
+  - `assert_non_null` (function, line 293) `assert_non_null(browser_status_text(&bs, 0));`
+  - `cmocka_run_group_tests` (function, line 342) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
+- Depends on: `include/browser.h`
 
 ## tests/test_compositor.c
 - Layer: testing
@@ -190,6 +246,11 @@
   - `test_sort_noop_guards` (function, line 206) `static void test_sort_noop_guards(void **state)`
   - `test_sort_matches_zindex_only_ordering` (function, line 218) `static void test_sort_matches_zindex_only_ordering(void **state)`
   - `main` (function, line 230) `int main(void)`
+  - `assert_int_equal` (function, line 63) `assert_int_equal(cx_forms_stacking_context(&s), 1);`
+  - `assert_true` (function, line 143) `assert_true(cx_item_compare(&a, &b) < 0);`
+  - `cx_sort` (function, line 172) `cx_sort(items, sizeof items / sizeof items[0]);`
+  - `cmocka_run_group_tests` (function, line 253) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/compositor.h`, `include/css.h`
 
 ## tests/test_css.c
 - Layer: testing
@@ -373,88 +434,103 @@
   - `test_box_shadow_and_outline` (function, line 2626) `static void test_box_shadow_and_outline(void **state)`
   - `test_flex_item` (function, line 2651) `static void test_flex_item(void **state)`
   - `test_flex_align` (function, line 2695) `static void test_flex_align(void **state)`
-  - `test_grid_extras` (function, line 2717) `static void test_grid_extras(void **state)`
-  - `test_layout_sheet_cascade_and_unset` (function, line 2735) `static void test_layout_sheet_cascade_and_unset(void **state)`
-  - `test_inline_outline_longhands` (function, line 2772) `static void test_inline_outline_longhands(void **state)`
-  - `test_inline_border_collapse` (function, line 2803) `static void test_inline_border_collapse(void **state)`
-  - `test_inline_border_spacing` (function, line 2812) `static void test_inline_border_spacing(void **state)`
-  - `test_inline_empty_cells` (function, line 2823) `static void test_inline_empty_cells(void **state)`
-  - `test_inline_caption_side` (function, line 2832) `static void test_inline_caption_side(void **state)`
-  - `test_inline_table_layout` (function, line 2841) `static void test_inline_table_layout(void **state)`
-  - `test_inline_font_variant` (function, line 2850) `static void test_inline_font_variant(void **state)`
-  - `test_inline_hyphens` (function, line 2859) `static void test_inline_hyphens(void **state)`
-  - `test_inline_user_select` (function, line 2869) `static void test_inline_user_select(void **state)`
-  - `test_inline_caret_color` (function, line 2880) `static void test_inline_caret_color(void **state)`
-  - `test_inline_appearance` (function, line 2890) `static void test_inline_appearance(void **state)`
-  - `test_inline_pointer_events` (function, line 2899) `static void test_inline_pointer_events(void **state)`
-  - `test_table_sheet_cascade` (function, line 2908) `static void test_table_sheet_cascade(void **state)`
-  - `test_inline_bg_repeat` (function, line 2923) `static void test_inline_bg_repeat(void **state)`
-  - `test_inline_bg_size` (function, line 2934) `static void test_inline_bg_size(void **state)`
-  - `test_inline_bg_clip_origin_attachment` (function, line 2943) `static void test_inline_bg_clip_origin_attachment(void **state)`
-  - `test_inline_isolation` (function, line 2963) `static void test_inline_isolation(void **state)`
-  - `test_inline_contain` (function, line 2971) `static void test_inline_contain(void **state)`
-  - `test_inline_content_visibility` (function, line 2986) `static void test_inline_content_visibility(void **state)`
-  - `test_inline_image_rendering` (function, line 2995) `static void test_inline_image_rendering(void **state)`
-  - `test_inline_color_scheme` (function, line 3004) `static void test_inline_color_scheme(void **state)`
-  - `test_inline_accent_color` (function, line 3014) `static void test_inline_accent_color(void **state)`
-  - `test_inline_print_forced_adjust` (function, line 3023) `static void test_inline_print_forced_adjust(void **state)`
-  - `test_inline_mix_blend_mode` (function, line 3037) `static void test_inline_mix_blend_mode(void **state)`
-  - `test_inline_transform_translate` (function, line 3059) `static void test_inline_transform_translate(void **state)`
-  - `test_inline_transform_scale` (function, line 3103) `static void test_inline_transform_scale(void **state)`
-  - `test_inline_transform_rotate` (function, line 3142) `static void test_inline_transform_rotate(void **state)`
-  - `test_inline_transform_skew` (function, line 3173) `static void test_inline_transform_skew(void **state)`
-  - `test_transform_origin` (function, line 3251) `static void test_transform_origin(void **state)`
-  - `test_inline_transform_independent_cascade_combines` (function, line 3293) `static void test_inline_transform_independent_cascade_combines(void **state)`
-  - `test_inline_object_fit` (function, line 3306) `static void test_inline_object_fit(void **state)`
-  - `test_inline_list_style_pos` (function, line 3317) `static void test_inline_list_style_pos(void **state)`
-  - `test_inline_font_kerning` (function, line 3325) `static void test_inline_font_kerning(void **state)`
-  - `test_inline_text_rendering` (function, line 3334) `static void test_inline_text_rendering(void **state)`
-  - `test_inline_font_stretch` (function, line 3344) `static void test_inline_font_stretch(void **state)`
-  - `test_inline_resize` (function, line 3359) `static void test_inline_resize(void **state)`
-  - `test_inline_scroll_behavior` (function, line 3369) `static void test_inline_scroll_behavior(void **state)`
-  - `test_inline_touch_action` (function, line 3377) `static void test_inline_touch_action(void **state)`
-  - `test_inline_overscroll_behavior` (function, line 3386) `static void test_inline_overscroll_behavior(void **state)`
-  - `test_inline_backface_visibility` (function, line 3395) `static void test_inline_backface_visibility(void **state)`
-  - `test_math_min_max_top_level` (function, line 3405) `static void test_math_min_max_top_level(void **state)`
-  - `test_math_clamp` (function, line 3416) `static void test_math_clamp(void **state)`
-  - `test_math_nested_in_calc` (function, line 3426) `static void test_math_nested_in_calc(void **state)`
-  - `test_logical_margin_padding` (function, line 3441) `static void test_logical_margin_padding(void **state)`
-  - `test_logical_inset_and_sizes` (function, line 3466) `static void test_logical_inset_and_sizes(void **state)`
-  - `test_place_shorthands` (function, line 3489) `static void test_place_shorthands(void **state)`
-  - `test_gap_two_value` (function, line 3511) `static void test_gap_two_value(void **state)`
-  - `test_font_shorthand` (function, line 3529) `static void test_font_shorthand(void **state)`
-  - `test_white_space_break_spaces` (function, line 3551) `static void test_white_space_break_spaces(void **state)`
-  - `test_background_rgba_alpha` (function, line 3559) `static void test_background_rgba_alpha(void **state)`
-  - `test_background_clip_text` (function, line 3587) `static void test_background_clip_text(void **state)`
-  - `test_text_fill_color` (function, line 3596) `static void test_text_fill_color(void **state)`
-  - `test_conic_gradient_basic` (function, line 3607) `static void test_conic_gradient_basic(void **state)`
-  - `test_conic_gradient_from_angle` (function, line 3619) `static void test_conic_gradient_from_angle(void **state)`
-  - `test_conic_gradient_pie_hard_stop` (function, line 3633) `static void test_conic_gradient_pie_hard_stop(void **state)`
-  - `test_conic_gradient_deg_positions` (function, line 3648) `static void test_conic_gradient_deg_positions(void **state)`
-  - `test_conic_gradient_fails_closed` (function, line 3658) `static void test_conic_gradient_fails_closed(void **state)`
-  - `test_linear_gradient_positions_emitted` (function, line 3668) `static void test_linear_gradient_positions_emitted(void **state)`
-  - `test_filter_drop_shadow` (function, line 3685) `static void test_filter_drop_shadow(void **state)`
-  - `test_filter_drop_shadow_defaults_and_failclosed` (function, line 3698) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
-  - `test_backdrop_filter_blur` (function, line 3712) `static void test_backdrop_filter_blur(void **state)`
-  - `test_filter_blur_and_grayscale` (function, line 3724) `static void test_filter_blur_and_grayscale(void **state)`
-  - `test_anim_keyframes_resolved_from_sheet` (function, line 3752) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
-  - `test_anim_transform_keyframes_from_sheet` (function, line 3785) `static void test_anim_transform_keyframes_from_sheet(void **state)`
-  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 3857) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
-  - `test_rem_rebased_on_root_font_size` (function, line 3883) `static void test_rem_rebased_on_root_font_size(void **state)`
-  - `test_rem_rebase_applies_to_box_lengths` (function, line 3895) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
-  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 3909) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
-  - `test_rem_rebase_honours_root_pseudo_class` (function, line 3921) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
-  - `test_rem_rebase_skips_at_rule_prelude` (function, line 3931) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
-  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 3954) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
-  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 3965) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
-  - `test_rem_rebase_62_5_percent_idiom` (function, line 3980) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
-  - `test_media_query_length_honours_its_unit` (function, line 3995) `static void test_media_query_length_honours_its_unit(void **state)`
-  - `assert_int_equal` (function, line 4003) `assert_int_equal(css_parse("@media (min-width: 200em)`
-  - `assert_int_equal` (function, line 4009) `assert_int_equal(css_parse("@media (min-width: 40em)`
-  - `test_clip_rect` (function, line 4016) `static void test_clip_rect(void **state)`
-  - `test_clip_auto` (function, line 4026) `static void test_clip_auto(void **state)`
-  - `test_vendor_prefixes` (function, line 4044) `static void test_vendor_prefixes(void **state)`
-  - `main` (function, line 4079) `int main(void)`
+  - `test_box_orient_maps_to_flex_direction` (function, line 2727) `static void test_box_orient_maps_to_flex_direction(void **state)`
+  - `test_grid_extras` (function, line 2749) `static void test_grid_extras(void **state)`
+  - `test_layout_sheet_cascade_and_unset` (function, line 2767) `static void test_layout_sheet_cascade_and_unset(void **state)`
+  - `test_inline_outline_longhands` (function, line 2804) `static void test_inline_outline_longhands(void **state)`
+  - `test_inline_border_collapse` (function, line 2835) `static void test_inline_border_collapse(void **state)`
+  - `test_inline_border_spacing` (function, line 2844) `static void test_inline_border_spacing(void **state)`
+  - `test_inline_empty_cells` (function, line 2855) `static void test_inline_empty_cells(void **state)`
+  - `test_inline_caption_side` (function, line 2864) `static void test_inline_caption_side(void **state)`
+  - `test_inline_table_layout` (function, line 2873) `static void test_inline_table_layout(void **state)`
+  - `test_inline_font_variant` (function, line 2882) `static void test_inline_font_variant(void **state)`
+  - `test_inline_hyphens` (function, line 2891) `static void test_inline_hyphens(void **state)`
+  - `test_inline_user_select` (function, line 2901) `static void test_inline_user_select(void **state)`
+  - `test_inline_caret_color` (function, line 2912) `static void test_inline_caret_color(void **state)`
+  - `test_inline_appearance` (function, line 2922) `static void test_inline_appearance(void **state)`
+  - `test_inline_pointer_events` (function, line 2931) `static void test_inline_pointer_events(void **state)`
+  - `test_table_sheet_cascade` (function, line 2940) `static void test_table_sheet_cascade(void **state)`
+  - `test_inline_bg_repeat` (function, line 2955) `static void test_inline_bg_repeat(void **state)`
+  - `test_inline_bg_size` (function, line 2966) `static void test_inline_bg_size(void **state)`
+  - `test_inline_bg_clip_origin_attachment` (function, line 2975) `static void test_inline_bg_clip_origin_attachment(void **state)`
+  - `test_inline_isolation` (function, line 2995) `static void test_inline_isolation(void **state)`
+  - `test_inline_contain` (function, line 3003) `static void test_inline_contain(void **state)`
+  - `test_inline_content_visibility` (function, line 3018) `static void test_inline_content_visibility(void **state)`
+  - `test_inline_image_rendering` (function, line 3027) `static void test_inline_image_rendering(void **state)`
+  - `test_inline_color_scheme` (function, line 3036) `static void test_inline_color_scheme(void **state)`
+  - `test_inline_accent_color` (function, line 3046) `static void test_inline_accent_color(void **state)`
+  - `test_inline_print_forced_adjust` (function, line 3055) `static void test_inline_print_forced_adjust(void **state)`
+  - `test_inline_mix_blend_mode` (function, line 3069) `static void test_inline_mix_blend_mode(void **state)`
+  - `test_inline_transform_translate` (function, line 3091) `static void test_inline_transform_translate(void **state)`
+  - `test_inline_transform_scale` (function, line 3142) `static void test_inline_transform_scale(void **state)`
+  - `test_inline_transform_rotate` (function, line 3182) `static void test_inline_transform_rotate(void **state)`
+  - `test_inline_transform_skew` (function, line 3212) `static void test_inline_transform_skew(void **state)`
+  - `test_transform_origin` (function, line 3291) `static void test_transform_origin(void **state)`
+  - `test_inline_transform_independent_cascade_combines` (function, line 3333) `static void test_inline_transform_independent_cascade_combines(void **state)`
+  - `test_inline_object_fit` (function, line 3346) `static void test_inline_object_fit(void **state)`
+  - `test_inline_list_style_pos` (function, line 3357) `static void test_inline_list_style_pos(void **state)`
+  - `test_inline_font_kerning` (function, line 3365) `static void test_inline_font_kerning(void **state)`
+  - `test_inline_text_rendering` (function, line 3374) `static void test_inline_text_rendering(void **state)`
+  - `test_inline_font_stretch` (function, line 3384) `static void test_inline_font_stretch(void **state)`
+  - `test_inline_resize` (function, line 3399) `static void test_inline_resize(void **state)`
+  - `test_inline_scroll_behavior` (function, line 3409) `static void test_inline_scroll_behavior(void **state)`
+  - `test_inline_touch_action` (function, line 3417) `static void test_inline_touch_action(void **state)`
+  - `test_inline_overscroll_behavior` (function, line 3426) `static void test_inline_overscroll_behavior(void **state)`
+  - `test_inline_backface_visibility` (function, line 3435) `static void test_inline_backface_visibility(void **state)`
+  - `test_math_min_max_top_level` (function, line 3445) `static void test_math_min_max_top_level(void **state)`
+  - `test_math_clamp` (function, line 3456) `static void test_math_clamp(void **state)`
+  - `test_math_nested_in_calc` (function, line 3466) `static void test_math_nested_in_calc(void **state)`
+  - `test_logical_margin_padding` (function, line 3481) `static void test_logical_margin_padding(void **state)`
+  - `test_logical_inset_and_sizes` (function, line 3506) `static void test_logical_inset_and_sizes(void **state)`
+  - `test_place_shorthands` (function, line 3529) `static void test_place_shorthands(void **state)`
+  - `test_gap_two_value` (function, line 3551) `static void test_gap_two_value(void **state)`
+  - `test_font_shorthand` (function, line 3569) `static void test_font_shorthand(void **state)`
+  - `test_white_space_break_spaces` (function, line 3591) `static void test_white_space_break_spaces(void **state)`
+  - `test_background_rgba_alpha` (function, line 3599) `static void test_background_rgba_alpha(void **state)`
+  - `test_background_clip_text` (function, line 3627) `static void test_background_clip_text(void **state)`
+  - `test_text_fill_color` (function, line 3636) `static void test_text_fill_color(void **state)`
+  - `test_conic_gradient_basic` (function, line 3647) `static void test_conic_gradient_basic(void **state)`
+  - `test_conic_gradient_from_angle` (function, line 3659) `static void test_conic_gradient_from_angle(void **state)`
+  - `test_conic_gradient_pie_hard_stop` (function, line 3673) `static void test_conic_gradient_pie_hard_stop(void **state)`
+  - `test_conic_gradient_deg_positions` (function, line 3688) `static void test_conic_gradient_deg_positions(void **state)`
+  - `test_conic_gradient_fails_closed` (function, line 3698) `static void test_conic_gradient_fails_closed(void **state)`
+  - `test_linear_gradient_positions_emitted` (function, line 3708) `static void test_linear_gradient_positions_emitted(void **state)`
+  - `test_filter_drop_shadow` (function, line 3725) `static void test_filter_drop_shadow(void **state)`
+  - `test_filter_drop_shadow_defaults_and_failclosed` (function, line 3738) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
+  - `test_backdrop_filter_blur` (function, line 3752) `static void test_backdrop_filter_blur(void **state)`
+  - `test_filter_blur_and_grayscale` (function, line 3764) `static void test_filter_blur_and_grayscale(void **state)`
+  - `test_anim_keyframes_resolved_from_sheet` (function, line 3792) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
+  - `test_anim_transform_keyframes_from_sheet` (function, line 3825) `static void test_anim_transform_keyframes_from_sheet(void **state)`
+  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 3897) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
+  - `test_rem_rebased_on_root_font_size` (function, line 3923) `static void test_rem_rebased_on_root_font_size(void **state)`
+  - `test_rem_rebase_applies_to_box_lengths` (function, line 3935) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
+  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 3949) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
+  - `test_rem_rebase_honours_root_pseudo_class` (function, line 3961) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
+  - `test_rem_rebase_skips_at_rule_prelude` (function, line 3971) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
+  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 3994) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
+  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 4005) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
+  - `test_rem_rebase_62_5_percent_idiom` (function, line 4020) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
+  - `test_media_query_length_honours_its_unit` (function, line 4035) `static void test_media_query_length_honours_its_unit(void **state)`
+  - `assert_int_equal` (function, line 4043) `assert_int_equal(css_parse("@media (min-width: 200em)`
+  - `assert_int_equal` (function, line 4049) `assert_int_equal(css_parse("@media (min-width: 40em)`
+  - `test_clip_rect` (function, line 4056) `static void test_clip_rect(void **state)`
+  - `test_clip_auto` (function, line 4066) `static void test_clip_auto(void **state)`
+  - `test_vendor_prefixes` (function, line 4084) `static void test_vendor_prefixes(void **state)`
+  - `main` (function, line 4119) `int main(void)`
+  - `box` (function, line 228) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the same edge as top/bottom -- which is a * closer answer than dropping them, since a dro`
+  - `css_free` (function, line 286) `css_free(sh);`
+  - `assert_true` (function, line 404) `assert_true(r0 > 0 && (size_t)r0 < sizeof buf);`
+  - `closed` (function, line 472) `* fail closed (unset), never a wrong guess. */ assert_int_equal( css_parse_inline("grid-template-columns: repeat(auto-fill, 100px)", 0).grid_cols, 0);`
+  - `assert_string_equal` (function, line 625) `assert_string_equal(s.bg_image_url, "hero.jpg");`
+  - `downstream` (function, line 643) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline( "background-image: url(https://cdn.example.com/hero.jpg?w=1200)", 0).bg_image_url, "https://c`
+  - `memset` (function, line 666) `memset(big, 'a', sizeof big - 1);`
+  - `snprintf` (function, line 669) `snprintf(val, sizeof val, "background-image: url(%s.png)", big);`
+  - `invalid` (function, line 745) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color: var(--missing);`
+  - `assert_int_not_equal` (function, line 1267) `assert_int_not_equal(css_resolve_el(sh, &q, NULL, 0).color, -1);`
+  - `assert_non_null` (function, line 1760) `assert_non_null(buf);`
+  - `free` (function, line 1781) `free(buf);`
+  - `cmocka_run_group_tests` (function, line 4364) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/css.h`, `include/css_select.h`
 
 ## tests/test_css_color.c
 - Layer: testing
@@ -487,6 +563,11 @@
   - `test_leading_dot_number` (function, line 224) `static void test_leading_dot_number(void **state)`
   - `test_fractional_still_fails_closed` (function, line 232) `static void test_fractional_still_fails_closed(void **state)`
   - `main` (function, line 240) `int main(void)`
+  - `assert_int_equal` (function, line 24) `assert_int_equal(cc_parse(NULL, &C), CC_ERR_NULL_ARG);`
+  - `assert_true` (function, line 180) `assert_true(p >= 0);`
+  - `assert_int_not_equal` (function, line 234) `assert_int_not_equal(cc_parse("hsl(0,0%,150.5%)", &C), CC_OK);`
+  - `cmocka_run_group_tests` (function, line 269) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/css_color.h`
 
 ## tests/test_css_drops.c
 - Layer: testing
@@ -510,15 +591,23 @@ static void test_leading_b...`
   - `test_transform_angle_units` (function, line 249) `static void test_transform_angle_units(void **state)`
   - `test_transform_3d_flattens` (function, line 260) `static void test_transform_3d_flattens(void **state)`
   - `test_transform_origin_number_component` (function, line 272) `static void test_transform_origin_number_component(void **state)`
-  - `test_background_size_two_lengths` (function, line 280) `static void test_background_size_two_lengths(void **state)`
-  - `test_background_position_percentages` (function, line 291) `static void test_background_position_percentages(void **state)`
-  - `test_vertical_align_length` (function, line 310) `static void test_vertical_align_length(void **state)`
-  - `test_css_wide_keyword_on_shorthand` (function, line 321) `static void test_css_wide_keyword_on_shorthand(void **state)`
-  - `test_overflow_two_values` (function, line 331) `static void test_overflow_two_values(void **state)`
-  - `test_intrinsic_sizing_keywords` (function, line 357) `static void test_intrinsic_sizing_keywords(void **state)`
-  - `test_vendor_prefixed_value_keyword` (function, line 369) `static void test_vendor_prefixed_value_keyword(void **state)`
-  - `test_font_shorthand_with_line_height` (function, line 379) `static void test_font_shorthand_with_line_height(void **state)`
-  - `main` (function, line 387) `int main(void)`
+  - `test_background_size_two_lengths` (function, line 283) `static void test_background_size_two_lengths(void **state)`
+  - `test_background_position_percentages` (function, line 294) `static void test_background_position_percentages(void **state)`
+  - `test_vertical_align_length` (function, line 313) `static void test_vertical_align_length(void **state)`
+  - `test_css_wide_keyword_on_shorthand` (function, line 324) `static void test_css_wide_keyword_on_shorthand(void **state)`
+  - `test_overflow_two_values` (function, line 334) `static void test_overflow_two_values(void **state)`
+  - `test_intrinsic_sizing_keywords` (function, line 360) `static void test_intrinsic_sizing_keywords(void **state)`
+  - `test_vendor_prefixed_value_keyword` (function, line 372) `static void test_vendor_prefixed_value_keyword(void **state)`
+  - `test_font_shorthand_with_line_height` (function, line 382) `static void test_font_shorthand_with_line_height(void **state)`
+  - `main` (function, line 391) `int main(void)`
+  - `assert_int_equal` (function, line 25) `assert_int_equal(st, CSS_OK);`
+  - `assert_string_equal` (function, line 46) `assert_string_equal(items[0].prop, "unknown-prop");`
+  - `css_free` (function, line 50) `css_free(sh);`
+  - `assert_non_null` (function, line 103) `assert_non_null(find_drop(&log, "color"));`
+  - `assert_true` (function, line 158) `assert_true(strlen(items[0].val) < CSS_DROP_VAL_MAX);`
+  - `assert_null` (function, line 167) `assert_null(strchr(it2[0].val, '\033'));`
+  - `cmocka_run_group_tests` (function, line 421) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/css.h`
 
 ## tests/test_css_length.c
 - Layer: testing
@@ -548,7 +637,14 @@ static void test_leading_b...`
   - `test_em_derivative` (function, line 379) `static void test_em_derivative(void **state)`
   - `test_em_refit` (function, line 425) `static void test_em_refit(void **state)`
   - `main` (function, line 449) `int main(void)`
-  - `EPS` (macro, line 19)
+  - `assert_int_equal` (function, line 23) `assert_int_equal(cl_resolve(value, ctx, &px), CL_OK);`
+  - `assert_true` (function, line 30) `assert_true(px == -12345.0);`
+  - `assert_int_not_equal` (function, line 203) `assert_int_not_equal(cl_resolve(big, &c, &px), CL_OK);`
+  - `assert_false` (function, line 234) `assert_false(cl_unit_is_font_relative("rem", 0));`
+  - `assert_string_equal` (function, line 287) `assert_string_equal(e, "em");`
+  - `cmocka_run_group_tests` (function, line 474) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `EPS` (macro, line 19) `#define EPS`
+- Depends on: `include/css.h`, `include/css_length.h`
 
 ## tests/test_data_url.c
 - Layer: testing
@@ -577,12 +673,23 @@ static void test_leading_b...`
   - `test_decode_nulls` (function, line 235) `static void test_decode_nulls(void **state)`
   - `test_end_to_end_png_data_uri` (function, line 246) `static void test_end_to_end_png_data_uri(void **state)`
   - `main` (function, line 267) `int main(void)`
+  - `assert_int_not_equal` (function, line 27) `assert_int_not_equal(du_is_data_url("Data:,plain"), 0);`
+  - `assert_int_equal` (function, line 33) `assert_int_equal(du_is_data_url("https://example.com/logo.png"), 0);`
+  - `assert_non_null` (function, line 49) `assert_non_null(payload);`
+  - `assert_memory_equal` (function, line 51) `assert_memory_equal(payload, "QQ==", 4);`
+  - `memset` (function, line 112) `memset(url + strlen(url), 'A', huge_len);`
+  - `free` (function, line 119) `free(url);`
+  - `assert_null` (function, line 198) `assert_null(out);`
+  - `assert_true` (function, line 261) `assert_true(out_len >= 8);`
+  - `cmocka_run_group_tests` (function, line 293) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/data_url.h`
 
 ## tests/test_disk_store.c
 - Layer: testing
 - Language: c
 - Symbols:
   - `fixture` (struct, line 33)
+  - `dir` (type_alias, line 32) `typedef struct fixture { char dir[64];`
   - `setup` (function, line 34) `static int setup(void **state)`
   - `teardown` (function, line 44) `static int teardown(void **state)`
   - `count_dir_entries` (function, line 64) `static size_t count_dir_entries(const char *dir)`
@@ -596,7 +703,22 @@ static void test_leading_b...`
   - `test_tamper_on_disk` (function, line 149) `static void test_tamper_on_disk(void **state)`
   - `test_missing_and_null` (function, line 167) `static void test_missing_and_null(void **state)`
   - `main` (function, line 180) `int main(void)`
-  - `_POSIX_C_SOURCE` (macro, line 7)
+  - `strcpy` (function, line 38) `strcpy(f->dir, "/tmp/freedom_ds_XXXXXX");`
+  - `snprintf` (function, line 40) `snprintf(f->path, sizeof f->path, "%s/state", f->dir);`
+  - `unlink` (function, line 55) `unlink(p);`
+  - `closedir` (function, line 57) `closedir(d);`
+  - `rmdir` (function, line 59) `rmdir(f->dir);`
+  - `free` (function, line 60) `free(f);`
+  - `assert_int_equal` (function, line 80) `assert_int_equal(ds_write(f->path, KEY, LS_AEAD_AES256_GCM, (const uint8_t *)PT, sizeof PT - 1), DS_OK);`
+  - `assert_memory_equal` (function, line 85) `assert_memory_equal(out, PT, sizeof PT - 1);`
+  - `ds_free` (function, line 86) `ds_free(out, out_len);`
+  - `memcpy` (function, line 143) `memcpy(bad, KEY, LS_KEY_LEN);`
+  - `assert_null` (function, line 147) `assert_null(out);`
+  - `assert_true` (function, line 155) `assert_true(fd >= 0);`
+  - `close` (function, line 160) `close(fd);`
+  - `cmocka_run_group_tests` (function, line 193) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
+- Depends on: `include/disk_store.h`, `include/local_store.h`
 
 ## tests/test_dom.c
 - Layer: testing
@@ -638,8 +760,21 @@ static void test_leading_b...`
   - `test_matches_and_closest` (function, line 459) `static void test_matches_and_closest(void **state)`
   - `test_query_selector_fail_closed` (function, line 472) `static void test_query_selector_fail_closed(void **state)`
   - `main` (function, line 490) `int main(void)`
-  - `DOC` (macro, line 54)
-  - `IDX` (macro, line 56)
+  - `dom_free` (function, line 48) `dom_free((dom_index *)pair[1]);`
+  - `hp_document_free` (function, line 49) `hp_document_free((hp_document *)pair[0]);`
+  - `free` (function, line 50) `free(pair);`
+  - `assert_int_equal` (function, line 63) `assert_int_equal(dom_build(NULL, &idx), DOM_ERR_NULL_ARG);`
+  - `assert_true` (function, line 82) `assert_true(dom_node_count(IDX(state)) > 0);`
+  - `assert_int_not_equal` (function, line 91) `assert_int_not_equal(main_id, DOM_NODE_NONE);`
+  - `assert_non_null` (function, line 94) `assert_non_null(tag);`
+  - `assert_string_equal` (function, line 95) `assert_string_equal(tag, "div");`
+  - `assert_false` (function, line 142) `assert_false(dom_precedes(idx, go, main_id));`
+  - `assert_null` (function, line 179) `assert_null(dom_get_attribute(idx, main_id, "data-missing", NULL));`
+  - `dom_get_by_tag` (function, line 367) `dom_get_by_tag(idx, "p", buf, 8);`
+  - `cmocka_run_group_tests` (function, line 526) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `DOC` (macro, line 54) `#define DOC(state)`
+  - `IDX` (macro, line 56) `#define IDX(state)`
+- Depends on: `include/dom.h`, `include/html_parse.h`
 
 ## tests/test_dom_debug.c
 - Layer: testing
@@ -656,6 +791,20 @@ static void test_leading_b...`
   - `test_truncation_no_overflow` (function, line 216) `static void test_truncation_no_overflow(void **state)`
   - `test_control_bytes_kept_on_one_line` (function, line 244) `static void test_control_bytes_kept_on_one_line(void **state)`
   - `main` (function, line 268) `int main(void)`
+  - `assert_int_equal` (function, line 38) `assert_int_equal(rd_build(v, caps, TOP, &d), RD_OK);`
+  - `assert_non_null` (function, line 39) `assert_non_null(d);`
+  - `assert_true` (function, line 49) `assert_true(n > 0);`
+  - `rd_free` (function, line 84) `rd_free(d);`
+  - `pv_free` (function, line 86) `pv_free(v);`
+  - `pv_set_container` (function, line 98) `pv_set_container(v, 7, BX_DISPLAY_GRID, 0, FX_JUSTIFY_START, 3, 0, -1, 0);`
+  - `pv_set_block_id` (function, line 120) `pv_set_block_id(v, 0);`
+  - `memset` (function, line 123) `memset(&b, 0, sizeof b);`
+  - `pv_text_ext_reset` (function, line 160) `pv_text_ext_reset(&te);`
+  - `pv_set_text_ext` (function, line 164) `pv_set_text_ext(v, &te);`
+  - `dd_format` (function, line 207) `dd_format(d, buf, sizeof buf);`
+  - `assert_null` (function, line 209) `assert_null(strstr(buf, "[boxes]"));`
+  - `cmocka_run_group_tests` (function, line 280) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`, `include/render_doc.h`, `include/render_policy.h`
 
 ## tests/test_download.c
 - Layer: testing
@@ -685,6 +834,12 @@ static void test_leading_b...`
   - `test_build_path_null_args` (function, line 185) `static void test_build_path_null_args(void **state)`
   - `test_check_size` (function, line 196) `static void test_check_size(void **state)`
   - `main` (function, line 203) `int main(void)`
+  - `assert_int_equal` (function, line 26) `assert_int_equal(dl_should_download(NULL, "ATTACHMENT"), 1);`
+  - `assert_string_equal` (function, line 54) `assert_string_equal(dl_ext_for_type("application/pdf"), ".pdf");`
+  - `assert_null` (function, line 124) `assert_null(strchr(out, '/'));`
+  - `assert_true` (function, line 125) `assert_true(out[0] != '.');`
+  - `cmocka_run_group_tests` (function, line 227) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/download.h`
 
 ## tests/test_flex_layout.c
 - Layer: testing
@@ -753,6 +908,14 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `test_grid_place_null_fixed_is_unchanged` (function, line 915) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
   - `test_grid_place_explicit_out_of_range_clamps` (function, line 927) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
   - `main` (function, line 936) `int main(void)`
+  - `assert_true` (function, line 27) `assert_true(dbl_eq(r.pos, pos));`
+  - `assert_int_equal` (function, line 35) `assert_int_equal(fx_flex_line(it, 2, 300, 0, FX_JUSTIFY_START, out), FX_OK);`
+  - `fx_grid_cell` (function, line 190) `fx_grid_cell(0, 3, &r, &c);`
+  - `to` (function, line 269) `* jumps to (1,0);`
+  - `assert_string_equal` (function, line 628) `assert_string_equal(fx_justify_name(FX_JUSTIFY_START), "start");`
+  - `assert_float_equal` (function, line 645) `assert_float_equal(fx_auto_min_size(40.0, 300.0, -1.0, 0), 40.0, 1e-9);`
+  - `cmocka_run_group_tests` (function, line 1001) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/flex_layout.h`
 
 ## tests/test_form.c
 - Layer: testing
@@ -778,6 +941,11 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `test_build_null_args` (function, line 191) `static void test_build_null_args(void **state)`
   - `test_get_no_fields_still_navigates` (function, line 198) `static void test_get_no_fields_still_navigates(void **state)`
   - `main` (function, line 206) `int main(void)`
+  - `assert_int_equal` (function, line 29) `assert_int_equal(fm_encode(f, 2, out, sizeof out, &len), FM_OK);`
+  - `assert_string_equal` (function, line 30) `assert_string_equal(out, "q=hello&lang=en");`
+  - `assert_null` (function, line 86) `assert_null(p.content_type);`
+  - `cmocka_run_group_tests` (function, line 229) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/form.h`
 
 ## tests/test_frame_clock.c
 - Layer: testing
@@ -787,6 +955,11 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `test_set_active_twice` (function, line 35) `static void test_set_active_twice(void **state)`
   - `test_null_safe` (function, line 44) `static void test_null_safe(void **state)`
   - `main` (function, line 52) `int main(void)`
+  - `fc_init` (function, line 17) `fc_init(&c);`
+  - `assert_int_equal` (function, line 18) `assert_int_equal(c.active, 0);`
+  - `fc_set_active` (function, line 28) `fc_set_active(&c, 1);`
+  - `cmocka_run_group_tests_name` (function, line 60) `return cmocka_run_group_tests_name("frame_clock", tests, NULL, NULL);`
+- Depends on: `include/frame_clock.h`
 
 ## tests/test_freebug.c
 - Layer: testing
@@ -805,6 +978,19 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `test_push_loc_null_file_and_negative_nums` (function, line 196) `static void test_push_loc_null_file_and_negative_nums(void **state)`
   - `test_push_loc_file_truncated` (function, line 213) `static void test_push_loc_file_truncated(void **state)`
   - `main` (function, line 227) `int main(void)`
+  - `fb_buffer_init` (function, line 24) `fb_buffer_init(&b);`
+  - `assert_int_equal` (function, line 25) `assert_int_equal((int)fb_buffer_count(&b), 0);`
+  - `assert_non_null` (function, line 33) `assert_non_null(e0);`
+  - `assert_string_equal` (function, line 37) `assert_string_equal(e0->text, "hello");`
+  - `assert_null` (function, line 40) `assert_null(fb_buffer_at(&b, 2));`
+  - `fb_buffer_free` (function, line 43) `fb_buffer_free(&b);`
+  - `memset` (function, line 82) `memset(huge, 'A', big);`
+  - `free` (function, line 89) `free(huge);`
+  - `assert_true` (function, line 110) `assert_true(b.total_bytes <= FB_MAX_TOTAL_BYTES);`
+  - `fb_buffer_reset` (function, line 149) `fb_buffer_reset(&b);`
+  - `fb_buffer_push` (function, line 165) `fb_buffer_push(&b, FB_LOG, "x", 1);`
+  - `cmocka_run_group_tests` (function, line 243) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/freebug.h`
 
 ## tests/test_freedom.c
 - Layer: testing
@@ -853,19 +1039,32 @@ static void test_download_png_group...`
   - `test_dump_dom_prints_render_tree` (function, line 1395) `static void test_dump_dom_prints_render_tree(void **state)`
   - `ballooned` (function, line 1428) `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece
  * became the contain...`
-  - `test_rejects_http_url` (function, line 1600) `static void test_rejects_http_url(void **state)`
-  - `white` (function, line 1663) `* and not white (the old behaviour where only text rows got background fills). */
+  - `test_dump_layout_pulled_rail_single_margin` (function, line 1550) `static void test_dump_layout_pulled_rail_single_margin(void **state)`
+  - `test_rejects_http_url` (function, line 1660) `static void test_rejects_http_url(void **state)`
+  - `white` (function, line 1723) `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 1759) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-  - `test_download_png_flex_container_paints_one_band` (function, line 1784) `static void test_download_png_flex_container_paints_one_band(void **state)`
-  - `test_download_png_inline_block_shrinks_and_centers` (function, line 1804) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-  - `test_download_png_inline_svg_path_and_drops_image` (function, line 1848) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-  - `test_dump_timings_prints_stages` (function, line 1864) `static void test_dump_timings_prints_stages(void **state)`
-  - `main` (function, line 1888) `int main(void)`
-  - `_POSIX_C_SOURCE` (macro, line 10)
-  - `FREEDOM_BIN` (macro, line 25)
-  - `OUT_FILE` (macro, line 27)
-  - `ERR_FILE` (macro, line 28)
+  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 1819) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
+  - `test_download_png_flex_container_paints_one_band` (function, line 1844) `static void test_download_png_flex_container_paints_one_band(void **state)`
+  - `test_download_png_inline_block_shrinks_and_centers` (function, line 1864) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
+  - `test_download_png_inline_svg_path_and_drops_image` (function, line 1908) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
+  - `test_dump_timings_prints_stages` (function, line 1924) `static void test_dump_timings_prints_stages(void **state)`
+  - `main` (function, line 1948) `int main(void)`
+  - `fclose` (function, line 46) `fclose(f);`
+  - `assert_int_equal` (function, line 111) `assert_int_equal(run_freedom("--help", out, sizeof out, &rc), 0);`
+  - `assert_non_null` (function, line 113) `assert_non_null(strstr(out, "usage"));`
+  - `assert_true` (function, line 149) `assert_true((size_t)snprintf(arg, sizeof arg, "%s", path) < sizeof arg);`
+  - `unlink` (function, line 154) `unlink(path);`
+  - `assert_null` (function, line 178) `assert_null(strstr(out, "HIDDENMARKER"));`
+  - `free` (function, line 369) `free(bytes);`
+  - `img_pixels_free` (function, line 380) `img_pixels_free(&px);`
+  - `rows` (function, line 894) `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);`
+  - `bottom` (function, line 1536) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ assert_non_null(strstr(out, "nbox=1"));`
+  - `sample_png_pixel` (function, line 1832) `sample_png_pixel(html, "--author-css", "gradrow", 900, 85, &r, &g, &b);`
+  - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
+  - `FREEDOM_BIN` (macro, line 25) `#define FREEDOM_BIN`
+  - `OUT_FILE` (macro, line 27) `#define OUT_FILE`
+  - `ERR_FILE` (macro, line 28) `#define ERR_FILE`
+- Depends on: `include/image_decode.h`
 
 ## tests/test_hls.c
 - Layer: testing
@@ -887,6 +1086,17 @@ static void tes...`
   - `test_resolve_url_deep_relative` (function, line 199) `static void test_resolve_url_deep_relative(void **state)`
   - `test_handles_windows_line_endings` (function, line 208) `static void test_handles_windows_line_endings(void **state)`
   - `main` (function, line 218) `int main(void)`
+  - `assert_int_equal` (function, line 18) `assert_int_equal(hls_parse("this is not a playlist", 22, &pl), HLS_ERR_PARSE);`
+  - `assert_null` (function, line 19) `assert_null(pl);`
+  - `assert_non_null` (function, line 26) `assert_non_null(pl);`
+  - `hls_playlist_free` (function, line 28) `hls_playlist_free(pl);`
+  - `assert_string_equal` (function, line 41) `assert_string_equal(pl->segments[0].url, "seg1.ts");`
+  - `assert_float_equal` (function, line 42) `assert_float_equal(pl->segments[0].duration, 10.5, 0.01);`
+  - `assert_false` (function, line 79) `assert_false(pl->is_variant);`
+  - `assert_true` (function, line 92) `assert_true(pl->is_variant);`
+  - `assert_int_not_equal` (function, line 186) `assert_int_not_equal((int)n, 0);`
+  - `cmocka_run_group_tests` (function, line 237) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/hls.h`
 
 ## tests/test_hostblock.c
 - Layer: testing
@@ -914,6 +1124,12 @@ static void tes...`
   - `test_is_allowlisted` (function, line 230) `static void test_is_allowlisted(void **state)`
   - `test_check_fail_open_edges` (function, line 251) `static void test_check_fail_open_edges(void **state)`
   - `main` (function, line 265) `int main(void)`
+  - `assert_non_null` (function, line 26) `assert_non_null(s);`
+  - `assert_int_equal` (function, line 27) `assert_int_equal(hb_count(s, HB_LIST_BLOCK), 0);`
+  - `hb_free` (function, line 29) `hb_free(s);`
+  - `memset` (function, line 159) `memset(big, 'a', sizeof big);`
+  - `cmocka_run_group_tests` (function, line 291) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/hostblock.h`
 
 ## tests/test_hostedit.c
 - Layer: testing
@@ -931,6 +1147,10 @@ static void tes...`
   - `test_suggest_case_insensitive_and_dedup` (function, line 91) `static void test_suggest_case_insensitive_and_dedup(void **state)`
   - `test_suggest_empty_query_and_cap` (function, line 100) `static void test_suggest_empty_query_and_cap(void **state)`
   - `main` (function, line 113) `int main(void)`
+  - `assert_int_equal` (function, line 14) `assert_int_equal(he_make_line("News.YCombinator.com", out, sizeof out), HE_OK);`
+  - `assert_string_equal` (function, line 15) `assert_string_equal(out, "news.ycombinator.com\n");`
+  - `cmocka_run_group_tests` (function, line 127) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/hostedit.h`
 
 ## tests/test_html_parse.c
 - Layer: testing
@@ -957,7 +1177,21 @@ static void tes...`
   - `test_parse_malformed_does_not_crash` (function, line 423) `static void test_parse_malformed_does_not_crash(void **state)`
   - `test_free_null_and_double` (function, line 435) `static void test_free_null_and_double(void **state)`
   - `main` (function, line 445) `int main(void)`
-  - `LIT` (macro, line 20)
+  - `assert_int_equal` (function, line 40) `assert_int_equal((unsigned long)c.max_bytes, (unsigned long)HP_DEFAULT_MAX_BYTES);`
+  - `assert_int_not_equal` (function, line 41) `assert_int_not_equal(c.strip_scripts, 0);`
+  - `assert_null` (function, line 86) `assert_null(doc);`
+  - `assert_non_null` (function, line 96) `assert_non_null(doc);`
+  - `assert_true` (function, line 97) `assert_true(hp_element_count(doc) > 0);`
+  - `assert_string_equal` (function, line 102) `assert_string_equal(title, "Hello Title");`
+  - `hp_free` (function, line 103) `hp_free(title);`
+  - `hp_document_free` (function, line 110) `hp_document_free(doc);`
+  - `hp_free_scripts` (function, line 192) `hp_free_scripts(s, n);`
+  - `src` (function, line 197) `* ONLY the src (browser rule: when src is present the content is ignored);`
+  - `free` (function, line 296) `free(html);`
+  - `hp_free_stylesheet_hrefs` (function, line 322) `hp_free_stylesheet_hrefs(s, n);`
+  - `cmocka_run_group_tests` (function, line 473) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `LIT` (macro, line 20) `#define LIT(s)`
+- Depends on: `include/html_parse.h`
 
 ## tests/test_image_decode.c
 - Layer: testing
@@ -1000,6 +1234,17 @@ static void tes...`
   - `test_decode_webp_fail_closed` (function, line 470) `static void test_decode_webp_fail_closed(void **state)`
   - `test_decode_dispatch_routes_webp` (function, line 482) `static void test_decode_dispatch_routes_webp(void **state)`
   - `main` (function, line 491) `int main(void)`
+  - `assert_int_equal` (function, line 77) `assert_int_equal(img_sniff(PNG_2x2, sizeof PNG_2x2), IMG_FMT_PNG);`
+  - `img_fit` (function, line 140) `img_fit(200, 100, 100.0, 100.0, &w, &h);`
+  - `assert_true` (function, line 141) `assert_true(w > 99.9 && w < 100.1);`
+  - `memset` (function, line 169) `memset(&p, 0, sizeof p);`
+  - `assert_non_null` (function, line 174) `assert_non_null(p.data);`
+  - `img_pixels_free` (function, line 175) `img_pixels_free(&p);`
+  - `assert_null` (function, line 196) `assert_null(p.data);`
+  - `assert_string_equal` (function, line 229) `assert_string_equal(img_format_name(IMG_FMT_PNG), "png");`
+  - `assert_int_not_equal` (function, line 291) `assert_int_not_equal(img_decode_jpeg(JPEG_RED_4x4, 40u, &p), IMG_OK);`
+  - `cmocka_run_group_tests` (function, line 530) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/image_decode.h`
 
 ## tests/test_interp.c
 - Layer: testing
@@ -1042,6 +1287,12 @@ static void tes...`
   - `test_anim_negative_dt` (function, line 447) `static void test_anim_negative_dt(void **state)`
   - `test_anim_null_init` (function, line 462) `static void test_anim_null_init(void **state)`
   - `main` (function, line 473) `int main(void)`
+  - `assert_true` (function, line 96) `assert_true(v > 0.0 && v < 0.5);`
+  - `assert_int_equal` (function, line 175) `assert_int_equal(got, 0x800080);`
+  - `ip_anim_init` (function, line 268) `ip_anim_init(&a, IP_VAL_SCALAR, &e, kf, 2, 1000.0, 500.0, 1, IP_DIR_NORMAL, IP_FILL_NONE);`
+  - `ip_anim_tick` (function, line 306) `ip_anim_tick(&a, 750.0);`
+  - `cmocka_run_group_tests_name` (function, line 511) `return cmocka_run_group_tests_name("interp", tests, NULL, NULL);`
+- Depends on: `include/interp.h`
 
 ## tests/test_js_dom.c
 - Layer: testing
@@ -1162,7 +1413,24 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_video_from_scripts_no_video` (function, line 1497) `static void test_video_from_scripts_no_video(void **state)`
   - `test_video_from_scripts_null_args` (function, line 1508) `static void test_video_from_scripts_null_args(void **state)`
   - `main` (function, line 1518) `int main(void)`
-  - `EXPECT` (macro, line 72)
+  - `js_context_free` (function, line 59) `js_context_free(f->ctx);`
+  - `dom_free` (function, line 60) `dom_free(f->idx);`
+  - `hp_document_free` (function, line 61) `hp_document_free(f->doc);`
+  - `free` (function, line 62) `free(f);`
+  - `js_eval` (function, line 70) `return js_eval(f->ctx, src, strlen(src), r);`
+  - `assert_non_null` (function, line 77) `assert_non_null(_r.value);`
+  - `assert_string_equal` (function, line 78) `assert_string_equal(_r.value, (expected));`
+  - `js_result_free` (function, line 79) `js_result_free(&_r);`
+  - `identity` (function, line 298) `* identity (the same one innerWidth and the CSS viewport units use);`
+  - `assert_true` (function, line 496) `assert_true(dom_get_by_tag(f->idx, "span", span, 4) >= 1);`
+  - `assert_int_not_equal` (function, line 505) `assert_int_not_equal(dom_get_element_by_id(f->idx, "made"), DOM_NODE_NONE);`
+  - `assert_null` (function, line 641) `assert_null(strstr(buf, "theme="));`
+  - `fb_buffer_init` (function, line 762) `fb_buffer_init(log);`
+  - `fb_buffer_free` (function, line 768) `fb_buffer_free(log);`
+  - `jd_click_state_free` (function, line 1196) `jd_click_state_free(cs);`
+  - `cmocka_run_group_tests` (function, line 1621) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `EXPECT` (macro, line 72) `#define EXPECT(f, src, expected)`
+- Depends on: `include/dom.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/url.h`
 
 ## tests/test_js_env.c
 - Layer: testing
@@ -1193,7 +1461,21 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_canvas_unforgeable` (function, line 302) `static void test_canvas_unforgeable(void **state)`
   - `test_coexists_with_dom` (function, line 325) `static void test_coexists_with_dom(void **state)`
   - `main` (function, line 354) `int main(void)`
-  - `EXPECT` (macro, line 50)
+  - `js_context_free` (function, line 41) `js_context_free(f->ctx);`
+  - `free` (function, line 42) `free(f);`
+  - `js_eval` (function, line 48) `return js_eval(f->ctx, src, strlen(src), r);`
+  - `assert_int_equal` (function, line 54) `assert_int_equal(run((f), (src), &_r), JS_OK);`
+  - `assert_non_null` (function, line 55) `assert_non_null(_r.value);`
+  - `assert_string_equal` (function, line 56) `assert_string_equal(_r.value, (expected));`
+  - `js_result_free` (function, line 57) `js_result_free(&_r);`
+  - `EXPECT` (function, line 76) `EXPECT(f, "navigator.userAgent.indexOf('Firefox') >= 0", "true");`
+  - `snprintf` (function, line 290) `snprintf(out, out_size, "%s", r.value);`
+  - `assert_string_not_equal` (function, line 300) `assert_string_not_equal(a, b);`
+  - `dom_free` (function, line 351) `dom_free(idx);`
+  - `hp_document_free` (function, line 352) `hp_document_free(doc);`
+  - `cmocka_run_group_tests` (function, line 377) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `EXPECT` (macro, line 50) `#define EXPECT(f, src, expected)`
+- Depends on: `include/dom.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`
 
 ## tests/test_js_policy.c
 - Layer: testing
@@ -1204,6 +1486,12 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_mode_str_roundtrip` (function, line 52) `static void test_mode_str_roundtrip(void **state)`
   - `test_trusted_requires_both_signals` (function, line 68) `static void test_trusted_requires_both_signals(void **state)`
   - `main` (function, line 88) `int main(void)`
+  - `assert_false` (function, line 21) `assert_false(jsp_enabled(JSP_OFF, 0));`
+  - `assert_true` (function, line 25) `assert_true(jsp_enabled(JSP_ALLOWLIST, 1));`
+  - `assert_int_equal` (function, line 38) `assert_int_equal(jsp_mode_from_str("off"), JSP_OFF);`
+  - `assert_string_equal` (function, line 55) `assert_string_equal(jsp_mode_str(JSP_OFF), "off");`
+  - `cmocka_run_group_tests` (function, line 98) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/js_policy.h`
 
 ## tests/test_js_sandbox.c
 - Layer: testing
@@ -1239,6 +1527,16 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_eval_named_null_filename_defaults` (function, line 308) `static void test_eval_named_null_filename_defaults(void **state)`
   - `test_eval_thrown_primitive_has_no_location` (function, line 323) `static void test_eval_thrown_primitive_has_no_location(void **state)`
   - `main` (function, line 339) `int main(void)`
+  - `assert_true` (function, line 26) `assert_true(l.max_source_bytes > 0);`
+  - `assert_non_null` (function, line 62) `assert_non_null(ctx);`
+  - `js_context_free` (function, line 63) `js_context_free(ctx);`
+  - `memset` (function, line 78) `memset(&r, 0, sizeof r);`
+  - `assert_string_equal` (function, line 82) `assert_string_equal(r.value, "3");`
+  - `js_result_free` (function, line 83) `js_result_free(&r);`
+  - `js_set_time_budget` (function, line 163) `js_set_time_budget(NULL, 1000);`
+  - `assert_null` (function, line 304) `assert_null(r.file);`
+  - `cmocka_run_group_tests` (function, line 371) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/js_sandbox.h`
 
 ## tests/test_link_nav.c
 - Layer: testing
@@ -1266,6 +1564,14 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_block_reason_text` (function, line 233) `static void test_block_reason_text(void **state)`
   - `test_fragment_capture` (function, line 243) `static void test_fragment_capture(void **state)`
   - `main` (function, line 272) `int main(void)`
+  - `assert_int_equal` (function, line 26) `assert_int_equal(ln_resolve("https://h/", "/x", NULL), LN_ERR_NULL_ARG);`
+  - `assert_string_equal` (function, line 41) `assert_string_equal(R.target, "");`
+  - `memset` (function, line 105) `memset(href + 1, 'x', 4499);`
+  - `assert_true` (function, line 109) `assert_true(strlen(R.target) > 4096);`
+  - `memcpy` (function, line 198) `memcpy(big, "https://h.example/", 18);`
+  - `assert_non_null` (function, line 237) `assert_non_null(ln_block_reason_text(LN_BLOCK_FOREIGN_SCHEME));`
+  - `cmocka_run_group_tests` (function, line 297) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/link_nav.h`
 
 ## tests/test_local_store.c
 - Layer: testing
@@ -1288,6 +1594,18 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_format_errors` (function, line 165) `static void test_format_errors(void **s)`
   - `test_null_and_limits` (function, line 180) `static void test_null_and_limits(void **s)`
   - `main` (function, line 192) `int main(void)`
+  - `local_store` (function, line 2) `* TDD suite for local_store (Hito 5 - Zero Knowledge: encrypted local state). * * RED state until src/local_store.c exists: this links and fails on purpose. * * Build: make test (cmocka + libcrypto) ;`
+  - `assert_int_equal` (function, line 33) `assert_int_equal( ls_seal(KEY, aead, (const uint8_t *)PT, sizeof PT - 1, &blob, &blob_len), LS_OK);`
+  - `assert_non_null` (function, line 37) `assert_non_null(blob);`
+  - `assert_memory_equal` (function, line 42) `assert_memory_equal(out, PT, sizeof PT - 1);`
+  - `ls_free` (function, line 43) `ls_free(blob, blob_len);`
+  - `memcpy` (function, line 76) `memcpy(bad, KEY, LS_KEY_LEN);`
+  - `assert_null` (function, line 79) `assert_null(out);`
+  - `assert_true` (function, line 91) `assert_true(off < blob_len);`
+  - `assert_memory_not_equal` (function, line 114) `assert_memory_not_equal(a, b, al);`
+  - `memset` (function, line 153) `memset(salt1, 0xAA, sizeof salt1);`
+  - `cmocka_run_group_tests` (function, line 210) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/local_store.h`
 
 ## tests/test_media_decoder.c
 - Layer: testing
@@ -1299,6 +1617,10 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_pacer_hostile_pts_bounded` (function, line 69) `static void test_pacer_hostile_pts_bounded(void **state)`
   - `test_pacer_null_safe` (function, line 84) `static void test_pacer_null_safe(void **state)`
   - `main` (function, line 88) `int main(void)`
+  - `assert_int_equal` (function, line 21) `assert_int_equal(md_pace_due_ms(&p, 1000, 7000000), 1000);`
+  - `assert_true` (function, line 22) `assert_true(p.primed);`
+  - `cmocka_run_group_tests_name` (function, line 98) `return cmocka_run_group_tests_name("media_decoder", tests, NULL, NULL);`
+- Depends on: `include/media_decoder.h`
 
 ## tests/test_net_realm.c
 - Layer: testing
@@ -1317,6 +1639,12 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `test_realm_allows_http` (function, line 117) `static void test_realm_allows_http(void **state)`
   - `test_names` (function, line 125) `static void test_names(void **state)`
   - `main` (function, line 139) `int main(void)`
+  - `assert_int_equal` (function, line 24) `assert_int_equal(nr_classify_host("expyuzz4wqqyqhjn.onion"), NR_ONION);`
+  - `memset` (function, line 60) `memset(big, 'a', sizeof big);`
+  - `assert_string_equal` (function, line 128) `assert_string_equal(nr_realm_name(NR_CLEARNET), "clearnet");`
+  - `assert_non_null` (function, line 136) `assert_non_null(nr_realm_name((nr_realm)999));`
+  - `cmocka_run_group_tests` (function, line 155) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/net_realm.h`
 
 ## tests/test_os_sandbox.c
 - Layer: testing
@@ -1341,7 +1669,19 @@ static void test_cookie_jar_enabled_for_trusted_hos...`
   - `suite` (function, line 313) `* suite (it is best-effort defense in depth), and on a host that allows them the
  * isolation mus...`
   - `main` (function, line 334) `int main(void)`
-  - `_GNU_SOURCE` (macro, line 13)
+  - `assert_true` (function, line 45) `assert_true(os_policy_allows(__NR_read));`
+  - `assert_false` (function, line 53) `assert_false(os_policy_allows(__NR_socket));`
+  - `_exit` (function, line 87) `_exit(0);`
+  - `assert_int_equal` (function, line 90) `assert_int_equal(waitpid(pid, &st, 0), pid);`
+  - `assert_non_null` (function, line 260) `assert_non_null(mkdtemp(dir));`
+  - `snprintf` (function, line 262) `snprintf(file, sizeof file, "%s/f", dir);`
+  - `close` (function, line 266) `close(wfd);`
+  - `unlink` (function, line 282) `unlink(file);`
+  - `rmdir` (function, line 284) `rmdir(dir);`
+  - `assert_int_not_equal` (function, line 319) `assert_int_not_equal(pid, -1);`
+  - `cmocka_run_group_tests` (function, line 356) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `_GNU_SOURCE` (macro, line 13) `#define _GNU_SOURCE`
+- Depends on: `include/os_sandbox.h`
 
 ## tests/test_page_view.c
 - Layer: testing
@@ -1491,6 +1831,30 @@ static void test_bu...`
   - `test_build_video_without_src_ignored` (function, line 3613) `static void test_build_video_without_src_ignored(void **state)`
   - `test_build_audio_as_video_kind` (function, line 3624) `static void test_build_audio_as_video_kind(void **state)`
   - `main` (function, line 3638) `int main(void)`
+  - `assert_int_equal` (function, line 29) `assert_int_equal(hp_parse(html, strlen(html), NULL, &doc), HP_OK);`
+  - `assert_non_null` (function, line 30) `assert_non_null(doc);`
+  - `assert_null` (function, line 77) `assert_null(pv_at(v, 0));`
+  - `pv_free` (function, line 78) `pv_free(v);`
+  - `assert_string_equal` (function, line 92) `assert_string_equal(a->text, "hello");`
+  - `hp_document_free` (function, line 211) `hp_document_free(doc);`
+  - `assert_true` (function, line 346) `assert_true(name->cont_id >= 0);`
+  - `assert_int_not_equal` (function, line 492) `assert_int_not_equal(rank->block_break, 0);`
+  - `it` (function, line 590) `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */ assert_int_equal(rank1->block_break, 1);`
+  - `break` (function, line 659) `* block break (from entering <p>);`
+  - `pv_set_color` (function, line 1052) `pv_set_color(v, 0x102030);`
+  - `pv_set_bgcolor` (function, line 1060) `pv_set_bgcolor(v, 0x654321);`
+  - `float_id` (function, line 1453) `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer element as float_oid (group id, side and * founder margins);`
+  - `assert_false` (function, line 1619) `assert_false(blank);`
+  - `ordinal` (function, line 1680) `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);`
+  - `pv_set_container` (function, line 2025) `pv_set_container(v, 2, BX_DISPLAY_GRID, 8, FX_JUSTIFY_END, 4, 0, -1, 0);`
+  - `pv_set_box` (function, line 2120) `pv_set_box(w, 12, 8, 500, 1, 40, 4);`
+  - `reverted` (function, line 3150) `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression) because it broke many sites: * elements with stylesheet display:none AND any inline styl`
+  - `applies` (function, line 3191) `* <style>: an extern rule applies (presentation and display:none alike);`
+  - `pv_set_node_id` (function, line 3326) `pv_set_node_id(v, 42);`
+  - `dom_free` (function, line 3373) `dom_free(idx);`
+  - `pv_set_text_style` (function, line 3380) `pv_set_text_style(v, CSS_ALIGN_CENTER, 150, 1, 140, CSS_DECO_UNDERLINE);`
+  - `cmocka_run_group_tests` (function, line 3793) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`
 
 ## tests/test_pdf_export.c
 - Layer: testing
@@ -1527,6 +1891,13 @@ static void test_bu...`
   - `test_paginate_preserves_gaps` (function, line 263) `static void test_paginate_preserves_gaps(void **state)`
   - `test_paginate_invalid_args` (function, line 275) `static void test_paginate_invalid_args(void **state)`
   - `main` (function, line 289) `int main(void)`
+  - `assert_int_equal` (function, line 27) `assert_int_equal(pe_safe_basename("Report_v2.final-1", out, sizeof out), PE_OK);`
+  - `assert_string_equal` (function, line 28) `assert_string_equal(out, "Report_v2.final-1");`
+  - `assert_null` (function, line 45) `assert_null(strchr(out, '/'));`
+  - `memset` (function, line 115) `memset(in, 'a', sizeof in - 1);`
+  - `assert_true` (function, line 119) `assert_true(strlen(out) <= PE_NAME_MAX);`
+  - `cmocka_run_group_tests` (function, line 322) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/pdf_export.h`
 
 ## tests/test_perf_trace.c
 - Layer: testing
@@ -1544,6 +1915,16 @@ static void test_bu...`
   - `test_format_null_or_zero_cap` (function, line 151) `static void test_format_null_or_zero_cap(void **state)`
   - `test_null_safe` (function, line 162) `static void test_null_safe(void **state)`
   - `main` (function, line 173) `int main(void)`
+  - `pt_init` (function, line 18) `pt_init(&t);`
+  - `assert_int_equal` (function, line 20) `assert_int_equal((int)pt_count(&t, (pt_stage)s), 0);`
+  - `pt_record` (function, line 32) `pt_record(&t, PT_LAYOUT, 1500);`
+  - `assert_string_equal` (function, line 103) `assert_string_equal(pt_stage_name(PT_FETCH), "fetch");`
+  - `assert_memory_equal` (function, line 127) `assert_memory_equal(buf1, buf2, n1);`
+  - `assert_true` (function, line 128) `assert_true(n1 > 0);`
+  - `assert_non_null` (function, line 129) `assert_non_null(strstr(buf1, "stage=fetch"));`
+  - `assert_null` (function, line 132) `assert_null(strstr(buf1, "stage=layout"));`
+  - `cmocka_run_group_tests_name` (function, line 189) `return cmocka_run_group_tests_name("perf_trace", tests, NULL, NULL);`
+- Depends on: `include/perf_trace.h`
 
 ## tests/test_prefetch.c
 - Layer: testing
@@ -1551,6 +1932,7 @@ static void test_bu...`
 - Language: c
 - Symbols:
   - `fake_ctx` (struct, line 126)
+  - `barrier` (type_alias, line 126) `typedef struct fake_ctx { pthread_barrier_t barrier;`
   - `test_scan_null_args` (function, line 21) `static void test_scan_null_args(void **state)`
   - `test_scan_basic_stylesheet_and_script` (function, line 31) `static void test_scan_basic_stylesheet_and_script(void **state)`
   - `test_scan_ref_cap` (function, line 104) `static void test_scan_ref_cap(void **state)`
@@ -1561,7 +1943,25 @@ static void test_bu...`
   - `test_pool_finish_unconsumed_and_empty` (function, line 228) `static void test_pool_finish_unconsumed_and_empty(void **state)`
   - `test_pooled_fetch_adapter` (function, line 249) `static void test_pooled_fetch_adapter(void **state)`
   - `main` (function, line 288) `int main(void)`
-  - `_POSIX_C_SOURCE` (macro, line 4)
+  - `assert_int_equal` (function, line 25) `assert_int_equal(pf_scan(NULL, 3, &l), -1);`
+  - `pf_list_free` (function, line 29) `pf_list_free(&l);`
+  - `assert_string_equal` (function, line 43) `assert_string_equal(l.refs[0].url, "news.css");`
+  - `assert_non_null` (function, line 107) `assert_non_null(html);`
+  - `assert_true` (function, line 111) `assert_true(r > 0 && (size_t)r < 64);`
+  - `free` (function, line 118) `free(html);`
+  - `pthread_mutex_lock` (function, line 141) `pthread_mutex_lock(&c->lock);`
+  - `pthread_mutex_unlock` (function, line 143) `pthread_mutex_unlock(&c->lock);`
+  - `memset` (function, line 157) `memset(&c, 0, sizeof c);`
+  - `pthread_mutex_init` (function, line 158) `pthread_mutex_init(&c.lock, NULL);`
+  - `pthread_barrier_init` (function, line 159) `pthread_barrier_init(&c.barrier, NULL, PF_MAX_THREADS);`
+  - `pf_pool_finish` (function, line 179) `pf_pool_finish(&p);`
+  - `pthread_barrier_destroy` (function, line 181) `pthread_barrier_destroy(&c.barrier);`
+  - `pthread_mutex_destroy` (function, line 182) `pthread_mutex_destroy(&c.lock);`
+  - `assert_int_not_equal` (function, line 213) `assert_int_not_equal(rc, 0);`
+  - `assert_null` (function, line 214) `assert_null(b);`
+  - `cmocka_run_group_tests` (function, line 302) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 4) `#define _POSIX_C_SOURCE`
+- Depends on: `include/prefetch.h`
 
 ## tests/test_prefs.c
 - Layer: testing
@@ -1581,13 +1981,26 @@ static void test_bu...`
   - `test_bookmarks_page_escapes` (function, line 344) `static void test_bookmarks_page_escapes(void **state)`
   - `test_format_null_args` (function, line 381) `static void test_format_null_args(void **state)`
   - `main` (function, line 393) `int main(void)`
-  - `_POSIX_C_SOURCE` (macro, line 8)
+  - `prefs_init` (function, line 28) `prefs_init(&p);`
+  - `assert_int_equal` (function, line 29) `assert_int_equal(p.theme_mode, 0);`
+  - `prefs_free` (function, line 42) `prefs_free(&p);`
+  - `assert_non_null` (function, line 77) `assert_non_null(text);`
+  - `assert_string_equal` (function, line 95) `assert_string_equal(q.bookmarks[0].url, "https://example.com/a");`
+  - `free` (function, line 102) `free(text);`
+  - `memset` (function, line 194) `memset(big, 'a', sizeof big - 1);`
+  - `assert_true` (function, line 229) `assert_true(klen <= PREFS_MAX_TITLE);`
+  - `snprintf` (function, line 254) `snprintf(url, sizeof url, "https://cap.test/%zu", i);`
+  - `assert_null` (function, line 360) `assert_null(strstr(html, "<script>"));`
+  - `cmocka_run_group_tests` (function, line 410) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
+- Depends on: `include/prefs.h`, `include/zoom.h`
 
 ## tests/test_profile.c
 - Layer: testing
 - Language: c
 - Symbols:
   - `fixture` (struct, line 28)
+  - `dir` (type_alias, line 27) `typedef struct fixture { char dir[64];`
   - `setup` (function, line 29) `static int setup(void **state)`
   - `teardown` (function, line 38) `static int teardown(void **state)`
   - `path_of` (function, line 59) `static void path_of(const fixture *f, const char *name, char *out, size_t cap)`
@@ -1602,7 +2015,27 @@ static void test_bu...`
   - `test_foreign_key_auth_fails` (function, line 235) `static void test_foreign_key_auth_fails(void **state)`
   - `test_null_and_not_ready` (function, line 260) `static void test_null_and_not_ready(void **state)`
   - `main` (function, line 277) `int main(void)`
-  - `_GNU_SOURCE` (macro, line 8)
+  - `strcpy` (function, line 33) `strcpy(f->dir, "/tmp/freedom_prof_XXXXXX");`
+  - `snprintf` (function, line 49) `snprintf(p, sizeof p, "%s/%s", f->dir, e->d_name);`
+  - `unlink` (function, line 50) `unlink(p);`
+  - `closedir` (function, line 52) `closedir(d);`
+  - `rmdir` (function, line 54) `rmdir(f->dir);`
+  - `free` (function, line 55) `free(f);`
+  - `assert_int_equal` (function, line 75) `assert_int_equal(profile_open(&ctx, f->dir), PROFILE_OK);`
+  - `assert_true` (function, line 76) `assert_true(ctx.ready);`
+  - `profile_close` (function, line 83) `profile_close(&ctx);`
+  - `assert_false` (function, line 84) `assert_false(ctx.ready);`
+  - `close` (function, line 96) `close(fd);`
+  - `prefs_init` (function, line 120) `prefs_init(&p);`
+  - `prefs_free` (function, line 124) `prefs_free(&p);`
+  - `assert_string_equal` (function, line 155) `assert_string_equal(q.bookmarks[0].url, "https://example.com/");`
+  - `assert_non_null` (function, line 189) `assert_non_null(fp);`
+  - `fclose` (function, line 192) `fclose(fp);`
+  - `assert_null` (function, line 194) `assert_null(memmem(blob, blen, secret_url, strlen(secret_url)));`
+  - `memset` (function, line 266) `memset(&ctx, 0, sizeof ctx);`
+  - `cmocka_run_group_tests` (function, line 290) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `_GNU_SOURCE` (macro, line 8) `#define _GNU_SOURCE`
+- Depends on: `include/prefs.h`, `include/profile.h`
 
 ## tests/test_render_doc.c
 - Layer: testing
@@ -1644,6 +2077,26 @@ static void test_bu...`
   - `test_block_tag_total` (function, line 764) `static void test_block_tag_total(void **state)`
   - `test_node_id_carried_by_default` (function, line 801) `static void test_node_id_carried_by_default(void **state)`
   - `main` (function, line 813) `int main(void)`
+  - `assert_int_equal` (function, line 47) `assert_int_equal(rd_build(v, rdp_caps_safe(), TOP, NULL), RD_ERR_NULL_ARG);`
+  - `pv_free` (function, line 48) `pv_free(v);`
+  - `assert_non_null` (function, line 55) `assert_non_null(d);`
+  - `assert_null` (function, line 58) `assert_null(rd_at(d, 0));`
+  - `rd_free` (function, line 59) `rd_free(d);`
+  - `assert_string_equal` (function, line 78) `assert_string_equal(h->text, "Title");`
+  - `pv_set_emphasis` (function, line 99) `pv_set_emphasis(v, 1, 0);`
+  - `assert_true` (function, line 344) `assert_true(strlen(rd_kind_name(all[i])) > 0);`
+  - `pv_set_color` (function, line 376) `pv_set_color(v, 0x3366cc);`
+  - `pv_set_bgcolor` (function, line 377) `pv_set_bgcolor(v, 0xeeddcc);`
+  - `pv_text_ext_reset` (function, line 407) `pv_text_ext_reset(&te);`
+  - `pv_set_text_ext` (function, line 411) `pv_set_text_ext(v, &te);`
+  - `pv_set_container` (function, line 588) `pv_set_container(v, 0, BX_DISPLAY_FLEX, 12, FX_JUSTIFY_CENTER, 0, 0, -1, 0);`
+  - `pv_set_cont_item` (function, line 621) `pv_set_cont_item(v, 7);`
+  - `pv_set_float` (function, line 653) `pv_set_float(v, CSS_FLOAT_LEFT, 3, CSS_CLEAR_BOTH, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0);`
+  - `pv_set_flex` (function, line 690) `pv_set_flex(v, 300, 0, 120, -2, CSS_FD_COLUMN, 0);`
+  - `memset` (function, line 768) `memset(&b, 0, sizeof b);`
+  - `pv_set_node_id` (function, line 805) `pv_set_node_id(v, 42);`
+  - `cmocka_run_group_tests` (function, line 851) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/flex_layout.h`, `include/page_view.h`, `include/render_doc.h`, `include/render_policy.h`
 
 ## tests/test_render_policy.c
 - Layer: testing
@@ -1669,6 +2122,15 @@ static void test_bu...`
   - `test_img_reason_total_and_stable` (function, line 216) `static void test_img_reason_total_and_stable(void **state)`
   - `test_images_warning_present` (function, line 231) `static void test_images_warning_present(void **state)`
   - `main` (function, line 240) `int main(void)`
+  - `assert_false` (function, line 21) `assert_false(c.images);`
+  - `assert_memory_equal` (function, line 32) `assert_memory_equal(&z, &s, sizeof(rdp_caps));`
+  - `assert_int_equal` (function, line 39) `assert_int_equal(rdp_is_tracking_pixel(1, 1), 1);`
+  - `consulted` (function, line 76) `* is not even consulted (a bogus URL still yields BLOCK_DISABLED). */ assert_int_equal( rdp_image_decision(off, "https://example.com/", "https://example.com/a.png", 64, 64), RDP_IMG_BLOCK_DISABLED);`
+  - `assert_non_null` (function, line 225) `assert_non_null(r);`
+  - `assert_true` (function, line 226) `assert_true(strlen(r) > 0);`
+  - `assert_string_equal` (function, line 229) `assert_string_equal(rdp_img_reason((rdp_img_decision)999), "unknown");`
+  - `cmocka_run_group_tests` (function, line 262) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/render_policy.h`
 
 ## tests/test_renderer.c
 - Layer: testing
@@ -1682,6 +2144,14 @@ static void test_bu...`
   - `test_render_multiple_independent` (function, line 74) `static void test_render_multiple_independent(void **state)`
   - `test_result_free_null_and_double` (function, line 83) `static void test_result_free_null_and_double(void **state)`
   - `main` (function, line 92) `int main(void)`
+  - `assert_int_equal` (function, line 30) `assert_int_equal(rd_render_html(HTML, sizeof HTML - 1, &r), RD_OK);`
+  - `assert_non_null` (function, line 31) `assert_non_null(r.title);`
+  - `assert_string_equal` (function, line 32) `assert_string_equal(r.title, "Isolated");`
+  - `rd_result_free` (function, line 36) `rd_result_free(&r);`
+  - `assert_null` (function, line 44) `assert_null(strstr(r.text, "steal_cookies"));`
+  - `assert_true` (function, line 69) `assert_true(s == RD_OK || s == RD_ERR_RENDER);`
+  - `cmocka_run_group_tests` (function, line 103) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/renderer.h`
 
 ## tests/test_request_policy.c
 - Layer: testing
@@ -1699,6 +2169,10 @@ static void test_bu...`
   - `test_evaluate_block_scheme` (function, line 119) `static void test_evaluate_block_scheme(void **state)`
   - `test_evaluate_block_invalid` (function, line 127) `static void test_evaluate_block_invalid(void **state)`
   - `main` (function, line 138) `int main(void)`
+  - `assert_int_equal` (function, line 21) `assert_int_equal(rp_host_of("https://example.com/path", h, sizeof h), 0);`
+  - `assert_string_equal` (function, line 22) `assert_string_equal(h, "example.com");`
+  - `cmocka_run_group_tests` (function, line 153) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/request_policy.h`
 
 ## tests/test_secure_fetch.c
 - Layer: testing
@@ -1752,6 +2226,20 @@ static void test_bu...`
   - `test_cookie_line_matches_pure` (function, line 479) `static void test_cookie_line_matches_pure(void **state)`
   - `test_cookie_jar_put_and_header` (function, line 515) `static void test_cookie_jar_put_and_header(void **state)`
   - `main` (function, line 531) `int main(void)`
+  - `assert_int_equal` (function, line 26) `assert_int_equal(c.policy, SF_POLICY_PQ_HYBRID_KE);`
+  - `assert_non_null` (function, line 29) `assert_non_null(c.kex_groups);`
+  - `assert_string_equal` (function, line 30) `assert_string_equal(c.kex_groups, SF_DEFAULT_KEX_GROUPS);`
+  - `assert_null` (function, line 31) `assert_null(c.user_agent);`
+  - `assert_true` (function, line 287) `assert_true(sf_is_redirect_code(301));`
+  - `assert_false` (function, line 296) `assert_false(sf_is_redirect_code(200));`
+  - `memset` (function, line 416) `memset(&r, 0, sizeof r);`
+  - `sf_response_free` (function, line 417) `sf_response_free(&r);`
+  - `memcpy` (function, line 431) `memcpy(r.location, u, n);`
+  - `sf_global_init` (function, line 518) `sf_global_init();`
+  - `sf_cookie_put` (function, line 519) `sf_cookie_put("https://www.google.com/", "SOCS=xyz123");`
+  - `sf_cookie_header_for` (function, line 528) `sf_cookie_header_for("https://example.com/", buf2, sizeof buf2);`
+  - `cmocka_run_group_tests` (function, line 584) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/secure_fetch.h`
 
 ## tests/test_svg_render.c
 - Layer: testing
@@ -1774,6 +2262,17 @@ static void test_bu...`
   - `test_text_element` (function, line 287) `static void test_text_element(void **state)`
   - `test_fit_uniform_and_centered` (function, line 304) `static void test_fit_uniform_and_centered(void **state)`
   - `main` (function, line 327) `int main(void)`
+  - `assert_non_null` (function, line 22) `assert_non_null(im);`
+  - `sv_parse` (function, line 27) `return sv_parse(s, strlen(s), im);`
+  - `assert_int_equal` (function, line 33) `assert_int_equal(sv_parse(NULL, 5, im), SV_ERR_NULL_ARG);`
+  - `free` (function, line 35) `free(im);`
+  - `assert_true` (function, line 56) `assert_true(fabs(im->width - 64.0) < 0.01);`
+  - `snprintf` (function, line 243) `snprintf(buf + o, cap - o, "</svg>");`
+  - `memset` (function, line 261) `memset(big, 'a', SV_MAX_INPUT + 8);`
+  - `assert_string_equal` (function, line 299) `assert_string_equal(im->shapes[0].text, "Hi there");`
+  - `sv_fit` (function, line 311) `sv_fit(im, 48.0, 48.0, &sc, &ox, &oy);`
+  - `cmocka_run_group_tests` (function, line 345) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/svg_render.h`
 
 ## tests/test_tab.c
 - Layer: testing
@@ -1865,10 +2364,30 @@ static void tes...`
   - `test_worker_args_null_safe` (function, line 2121) `static void test_worker_args_null_safe(void **state)`
   - `test_load_view_codec_full_roundtrip` (function, line 2138) `static void test_load_view_codec_full_roundtrip(void **state)`
   - `main` (function, line 2285) `int main(int argc, char **argv)`
-  - `_POSIX_C_SOURCE` (macro, line 13)
-  - `XHR_PAGE` (macro, line 1469)
-  - `EXT_PAGE` (macro, line 1559)
-  - `CSS_PAGE` (macro, line 1686)
+  - `tab_page_free` (function, line 47) `tab_page_free(&p);`
+  - `tab_close` (function, line 55) `tab_close(f->t);`
+  - `free` (function, line 56) `free(f);`
+  - `assert_int_equal` (function, line 64) `assert_int_equal(tab_eval(t, js, strlen(js), &r), TAB_OK);`
+  - `assert_non_null` (function, line 66) `assert_non_null(r.value);`
+  - `assert_string_equal` (function, line 67) `assert_string_equal(r.value, expected);`
+  - `tab_eval_result_free` (function, line 68) `tab_eval_result_free(&r);`
+  - `assert_true` (function, line 78) `assert_true(tab_alive(t));`
+  - `assert_false` (function, line 388) `assert_false(blank);`
+  - `assert_int_not_equal` (function, line 394) `assert_int_not_equal(item_second, item_lead);`
+  - `assert_null` (function, line 900) `assert_null(strstr(p.text, "steal_cookies"));`
+  - `tab_set_net_allowed` (function, line 999) `tab_set_net_allowed(t, 1);`
+  - `tab_set_cookies` (function, line 1026) `tab_set_cookies(t, "sid=abc");`
+  - `tab_set_fetcher` (function, line 1481) `tab_set_fetcher(t, stub_fetch, NULL);`
+  - `tab_set_css_allowed` (function, line 1708) `tab_set_css_allowed(t, 1);`
+  - `nanosleep` (function, line 1934) `nanosleep(&ts, NULL);`
+  - `tab_image_free` (function, line 1997) `tab_image_free(&img);`
+  - `tab_worker_dispatch` (function, line 2289) `tab_worker_dispatch(argc, argv);`
+  - `cmocka_run_group_tests` (function, line 2374) `return cmocka_run_group_tests(tests, NULL, NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 13) `#define _POSIX_C_SOURCE`
+  - `XHR_PAGE` (macro, line 1469) `#define XHR_PAGE(URL)`
+  - `EXT_PAGE` (macro, line 1559) `#define EXT_PAGE(SRC)`
+  - `CSS_PAGE` (macro, line 1686) `#define CSS_PAGE(HREF)`
+- Depends on: `include/css.h`, `include/tab.h`
 
 ## tests/test_text_shape.c
 - Layer: testing
@@ -1883,6 +2402,14 @@ static void tes...`
   - `test_draw_paints` (function, line 129) `static void test_draw_paints(void **state)`
   - `teardown` (function, line 142) `static int teardown(void **state)`
   - `main` (function, line 148) `int main(void)`
+  - `assert_int_equal` (function, line 33) `assert_int_equal(tsh_shape(NULL, 16.0, "x", 1, g, 64, &n, &adv), TSH_ERR_INPUT);`
+  - `assert_true` (function, line 53) `assert_true(tsh_measure(NULL, 16.0, "x", 1) < 0.0);`
+  - `cairo_set_source_rgb` (function, line 135) `cairo_set_source_rgb(cr, 0, 0, 0);`
+  - `cairo_destroy` (function, line 139) `cairo_destroy(cr);`
+  - `cairo_surface_destroy` (function, line 140) `cairo_surface_destroy(s);`
+  - `tsh_shutdown` (function, line 145) `tsh_shutdown();`
+  - `cmocka_run_group_tests` (function, line 159) `return cmocka_run_group_tests(tests, NULL, teardown);`
+- Depends on: `include/css.h`, `include/text_shape.h`
 
 ## tests/test_textfield.c
 - Layer: testing
@@ -1896,6 +2423,18 @@ static void tes...`
   - `test_move_saturates` (function, line 99) `static void test_move_saturates(void **state)`
   - `test_full_fails_closed` (function, line 112) `static void test_full_fails_closed(void **state)`
   - `main` (function, line 139) `int main(void)`
+  - `tf_init` (function, line 23) `tf_init(&f);`
+  - `assert_int_equal` (function, line 24) `assert_int_equal(tf_len(&f), 0);`
+  - `assert_string_equal` (function, line 26) `assert_string_equal(tf_text(&f), "");`
+  - `tf_clear` (function, line 33) `tf_clear(NULL);`
+  - `tf_backspace` (function, line 34) `tf_backspace(NULL);`
+  - `tf_delete` (function, line 35) `tf_delete(NULL);`
+  - `tf_move` (function, line 36) `tf_move(NULL, 3);`
+  - `tf_home` (function, line 37) `tf_home(NULL);`
+  - `tf_end` (function, line 38) `tf_end(NULL);`
+  - `memset` (function, line 134) `memset(big, 'z', sizeof big);`
+  - `cmocka_run_group_tests` (function, line 150) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/textfield.h`
 
 ## tests/test_tls_impersonate.c
 - Layer: testing
@@ -1912,6 +2451,19 @@ static void tes...`
   - `test_encode_fails_when_no_room` (function, line 191) `static void test_encode_fails_when_no_room(void **state)`
   - `test_encode_rejects_oversize_url` (function, line 202) `static void test_encode_rejects_oversize_url(void **state)`
   - `main` (function, line 217) `int main(void)`
+  - `assert_int_equal` (function, line 24) `assert_int_equal(ti_should_impersonate(1, 1, 1), 1);`
+  - `assert_true` (function, line 52) `assert_true(n > 0);`
+  - `assert_string_equal` (function, line 56) `assert_string_equal(out.url, in.url);`
+  - `assert_memory_equal` (function, line 60) `assert_memory_equal(out.body, in.body, in.body_len);`
+  - `ti_req_free` (function, line 62) `ti_req_free(&out);`
+  - `strncpy` (function, line 102) `strncpy(in.negotiated_group, "x25519", sizeof in.negotiated_group - 1);`
+  - `ti_resp_free` (function, line 118) `ti_resp_free(&out);`
+  - `assert_null` (function, line 137) `assert_null(out.peer_chain_der);`
+  - `assert_non_null` (function, line 206) `assert_non_null(huge);`
+  - `memset` (function, line 207) `memset(huge, 'a', TI_MAX_URL + 8);`
+  - `free` (function, line 215) `free(huge);`
+  - `cmocka_run_group_tests` (function, line 231) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/tls_impersonate.h`
 
 ## tests/test_ui.c
 - Layer: testing
@@ -1930,6 +2482,11 @@ static void tes...`
   - `test_clamp_scroll` (function, line 112) `static void test_clamp_scroll(void **state)`
   - `test_layout_free_null_and_double` (function, line 120) `static void test_layout_free_null_and_double(void **state)`
   - `main` (function, line 129) `int main(void)`
+  - `assert_true` (function, line 22) `assert_true(n < lay->count);`
+  - `assert_int_equal` (function, line 24) `assert_int_equal((int)lay->lines[n].len, (int)elen);`
+  - `assert_memory_equal` (function, line 25) `assert_memory_equal(text + lay->lines[n].offset, expected, elen);`
+  - `ui_layout_free` (function, line 40) `ui_layout_free(&lay);`
+  - `cmocka_run_group_tests` (function, line 143) `return cmocka_run_group_tests(tests, NULL, NULL);`
 - Depends on: `include/ui.h`
 
 ## tests/test_url.c
@@ -1981,6 +2538,16 @@ static void tes...`
   - `test_extract_userinfo_empty_password` (function, line 611) `static void test_extract_userinfo_empty_password(void **state)`
   - `test_split_fail_closed_non_https` (function, line 624) `static void test_split_fail_closed_non_https(void **state)`
   - `main` (function, line 635) `int main(void)`
+  - `assert_int_equal` (function, line 25) `assert_int_equal(url_is_https("https://example.com"), 1);`
+  - `memcpy` (function, line 53) `memcpy(url, "https://e.example/", base);`
+  - `memset` (function, line 54) `memset(url + base, 'a', 4000 - base);`
+  - `assert_true` (function, line 64) `assert_true(url_validate_https(url) != URL_OK);`
+  - `assert_string_equal` (function, line 100) `assert_string_equal(out, "/a/b/c");`
+  - `assert_null` (function, line 385) `assert_null(url_file_path("https://example.com"));`
+  - `assert_memory_equal` (function, line 448) `assert_memory_equal(p, expect, len);`
+  - `free` (function, line 523) `free(user);`
+  - `assert_ptr_equal` (function, line 547) `assert_ptr_equal(user, NULL);`
+- Depends on: `include/url.h`
 
 ## tests/test_webcaps.c
 - Layer: testing
@@ -1997,6 +2564,11 @@ static void tes...`
   - `test_from_flags_headless` (function, line 153) `static void test_from_flags_headless(void **state)`
   - `assert_memory_equal` (function, line 176) `assert_memory_equal(&(rdp_caps)`
   - `main` (function, line 180) `int main(void)`
+  - `memset` (function, line 22) `memset(&in, 0, sizeof in);`
+  - `assert_true` (function, line 41) `assert_true(c.js);`
+  - `assert_false` (function, line 59) `assert_false(c.js);`
+  - `cmocka_run_group_tests` (function, line 194) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/webcaps.h`
 
 ## tests/test_zoom.c
 - Layer: testing
@@ -2013,3 +2585,7 @@ static void tes...`
   - `test_scale_factor` (function, line 90) `static void test_scale_factor(void **state)`
   - `test_apply_scales_and_floors` (function, line 99) `static void test_apply_scales_and_floors(void **state)`
   - `main` (function, line 111) `int main(void)`
+  - `assert_int_equal` (function, line 19) `assert_int_equal(zm_clamp(100), 100);`
+  - `assert_true` (function, line 71) `assert_true(pct >= prev);`
+  - `cmocka_run_group_tests` (function, line 125) `return cmocka_run_group_tests(tests, NULL, NULL);`
+- Depends on: `include/zoom.h`

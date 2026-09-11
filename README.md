@@ -962,3 +962,9 @@ AI agents: Read `readmenator-agent/INDEX.md` for fast project context.
 Developers: Read `KNOWLEDGE_BASE.md` for full architecture reference.
 <!-- /readmenator-kb-link -->
 
+
+
+---
+### Intelligence and Analysis Ecosystem
+- [QC](https://github.com/grisuno/QC): OSINT analysis.
+- [ReadMenator](https://github.com/grisuno/ReadMenator): Offline codebase analysis.
