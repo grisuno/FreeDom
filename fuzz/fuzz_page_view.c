@@ -11,6 +11,7 @@
 
 #include "html_parse.h"
 #include "page_view.h"
+#include "freedom_config.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -30,7 +31,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
          * (2026-08-10 doctrine): the headless page width, fixed so a run is
          * reproducible. The harness had not been updated when the parameter was
          * added, which silently broke this fuzz target at build time. */
-        if (pv_build_styled(doc, 0, 0, 0, ext, ext_len, 1000, &v) == PV_OK) {
+        if (pv_build_styled(doc, 0, 0, 0, ext, ext_len, (int)FC_PNG_PAGE_W, &v) == PV_OK) {
             size_t n = pv_count(v);
             for (size_t i = 0; i < n; ++i) {
                 const pv_run *r = pv_at(v, i);

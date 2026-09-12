@@ -11584,6 +11584,17 @@ static int cursor_at_point(browser_window *w, double px, double py) {
                 if (f->text[j] == ' ') jdx += jgap;
         }
     }
+    if (cur == CSS_CUR_UNSET) {
+        for (size_t bi = L.nbox; bi > 0 && cur == CSS_CUR_UNSET; --bi) {
+            const rc_box *bx = &L.boxes[bi - 1];
+            double bx0 = left + bx->x;
+            double by0 = origin + bx->top;
+            if (px >= bx0 && px <= bx0 + bx->w && py >= by0 && py <= by0 + bx->h
+                && !box_pointer_events_none(w->doc, bx->block_id)) {
+                cur = resolve_box_cursor(w->doc, bx->block_id);
+            }
+        }
+    }
 
     rc_free(&L);
     cairo_destroy(cr);

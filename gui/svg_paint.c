@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "css_color.h"
+#include "freedom_config.h"
 
 /* Resolves a shape's packed paint into an RGB triple. Returns 0 when the shape
  * asked for no paint at all (fill="none"), so the caller skips the operation. */
@@ -128,7 +129,7 @@ static void svp_draw_text(cairo_t *cr, const sv_shape *sh, int current_rgb) {
     cairo_save(cr);
     cairo_set_source_rgba(cr, r, g, b, svp_alpha(sh->opacity, sh->fill_opacity));
     cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, (sh->c > 0.0) ? sh->c : 16.0);
+    cairo_set_font_size(cr, (sh->c > 0.0) ? sh->c : FC_FONT_FALLBACK_PX);
     cairo_move_to(cr, sh->a, sh->b);
     cairo_show_text(cr, sh->text);
     cairo_new_path(cr);

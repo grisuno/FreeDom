@@ -23,7 +23,9 @@
 #include "xdg-shell-client-protocol.h"
 #include "xdg-decoration-client-protocol.h"
 
-#define UI_FONT_SIZE  16.0
+#include "freedom_config.h"
+
+#define UI_FONT_SIZE  FC_UI_FONT_SIZE
 #define UI_MARGIN     8.0
 #define UI_TITLEBAR_H 30.0   /* client-side titlebar height */
 #define UI_BTN_W      30.0   /* min/max/close button width */

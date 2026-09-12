@@ -16,10 +16,12 @@
 #include "tab.h"
 
 #include "anti_fp.h"
+#include "box_tree.h"
 #include "css.h"
 #include "data_url.h"
 #include "dom.h"
 #include "freebug.h"
+#include "freedom_config.h"
 #include "html_parse.h"
 #include "image_decode.h"
 #include "js_dom.h"
@@ -52,6 +54,14 @@ static void ignore_sigpipe(void);
 #define TAB_SCREEN_W 1920
 #define TAB_SCREEN_H 1080
 
+/* IPC wire block widths. Single source of truth for write_view/read_view.
+ * Change requires same-diff in both functions; _Static_assert below enforces. */
+#define TAB_WIRE_HEAD_N 6
+#define TAB_WIRE_A_N 38
+#define TAB_WIRE_B_N 54
+#define TAB_WIRE_BOX_F_N 219
+#define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
+
 /* Anti-amplification cap on the number of display-list runs the parent will
  * accept from the (possibly exploited) child. Plenty for any real page. */
 #define TAB_MAX_RUNS ((size_t)(2u * 1024u * 1024u))
@@ -82,6 +92,9 @@ enum { TAG_SUBREQ = 1, TAG_RESULT = 2 };
 
 /* Handshake bytes (child -> parent) after the confinement attempt. */
 enum { TAB_READY = 0x55, TAB_NO_CONFINE = 0xAA };
+
+_Static_assert(TAB_WIRE_GRID_N == 9, "PV_GRID_TRACKS drift");
+_Static_assert(FC_MAX_BOXES == BT_MAX_POSITIONED, "box cap coupling");
 
 
 /* =========================== child side ============================== */

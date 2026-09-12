@@ -50,4 +50,13 @@
  * lower value, which is a render bug, not a DoS bound. */
 #define FC_MAX_BOXES 1024u
 
+/* Fallback font size in px when a text shape carries no resolved size.
+ * Single source for the former scattered 16.0 literals in painters and
+ * harnesses; matches the UA root size so fallback text measures like body. */
+#define FC_FONT_FALLBACK_PX 16.0
+
+/* Chrome font size in px for the minimal Wayland UI shell. Formerly duplicated
+ * as UI_FONT_SIZE in gui/ui_render.c and gui/browser_ui_internal.h. */
+#define FC_UI_FONT_SIZE 16.0
+
 #endif /* FREEDOM_CONFIG_H */

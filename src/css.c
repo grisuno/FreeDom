@@ -8,6 +8,7 @@
 #include "css.h"
 #include "css_color.h"
 #include "css_length.h"
+#include "css_values.h"
 #include "flex_layout.h"  /* fx_grid_area_hash: an area name reduces to one int */
 #include "css_select.h"
 
@@ -354,16 +355,11 @@ static int round_clamp(double v, int lo, int hi) {
 
 /* Like cc_parse but returns packed int with sentinels for currentColor/transparent. */
 static int parse_color(const char *v) {
-    cc_rgb c;
-    cc_status st = cc_parse(v, &c);
-    if (st == CC_OK) return cc_pack(c);
-    if (st == CC_CURRENT_COLOR) return CC_COLOR_CURRENT;
-    if (st == CC_TRANSPARENT) return CC_COLOR_TRANSPARENT;
-    return -1;
+    return cv_parse_color(v);
 }
 
 static int interp_color(const char *v) {
-    return parse_color(v);
+    return cv_interp_color(v);
 }
 
 /* Whether a parse_color/interp_color result is a VALUE. The two sentinels are
@@ -373,7 +369,7 @@ static int interp_color(const char *v) {
  * background, and how it says "match the text colour". 65 declarations in the
  * measured corpus, on every page in it. One predicate so the next colour-valued
  * property cannot get it wrong again. */
-static int color_ok(int c) { return c != -1; }
+static int color_ok(int c) { return cv_color_ok(c); }
 
 /* A CSS-wide keyword (CSS Cascade 5 section 7.3). These are valid on EVERY
  * property and none of them names a value in the property's own grammar, so every
@@ -399,60 +395,11 @@ static int css_wide_keyword(const char *v) {
  * yields UNSET here AND an invalid color there, so the declaration still fails
  * closed as a whole. */
 static int bg_alpha_of(const char *v) {
-    for (const char *p = v; *p != '\0'; ++p) {
-        int is_fn =
-            ((csel_lower_ch(p[0]) == 'r' && csel_lower_ch(p[1]) == 'g' &&
-              csel_lower_ch(p[2]) == 'b' && csel_lower_ch(p[3]) == 'a' && p[4] == '(') ||
-             (csel_lower_ch(p[0]) == 'h' && csel_lower_ch(p[1]) == 's' &&
-              csel_lower_ch(p[2]) == 'l' && csel_lower_ch(p[3]) == 'a' && p[4] == '('));
-        if (!is_fn) continue;
-        const char *close = strchr(p + 5, ')');
-        if (close == NULL) return CSS_LEN_UNSET;
-        int commas = 0;
-        const char *a = NULL;
-        for (const char *q = p + 5; q < close; ++q) {
-            if (*q == ',') {
-                ++commas;
-                if (commas == 3) { a = q + 1; break; }
-            }
-        }
-        if (a == NULL) return CSS_LEN_UNSET;
-        while (a < close && (*a == ' ' || *a == '\t')) ++a;
-        double num;
-        const char *end;
-        if (!parse_num(a, &num, &end)) return CSS_LEN_UNSET;
-        double pct = (*end == '%') ? num : num * 100.0;
-        return round_clamp(pct, 0, 100);
-    }
-    return CSS_LEN_UNSET;
+    return cv_bg_alpha_of(v);
 }
 
 static int interp_bg(const char *v) {
-    int result = parse_color(v);
-    if (result != -1) return result;
-    /* token-iterate: skip url() tokens (never phone home), parse each other
-     * token as a color */
-    char tok[CSS_TOK_MAX];
-    const char *p = v;
-    while (*p != '\0') {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        if (*p == 'u' || *p == 'U') {
-            /* skip url(...) token */
-            if ((p[0] == 'u' || p[0] == 'U') && (p[1] == 'r' || p[1] == 'R') &&
-                (p[2] == 'l' || p[2] == 'L') && p[3] == '(') {
-                while (*p != '\0' && *p != ')') ++p;
-                if (*p == ')') ++p;
-                continue;
-            }
-        }
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-        tok[k] = '\0';
-        int tok_col = parse_color(tok);
-        if (tok_col != -1) return tok_col;
-    }
-    return -1;
+    return cv_interp_bg(v);
 }
 
 /* --- linear-gradient backgrounds (2026-07-11, spec/css.md) ---
