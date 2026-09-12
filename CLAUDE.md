@@ -431,6 +431,11 @@ import/export de marcadores.
   hitos se comprime a **una línea por hito** (título + resultado + `[[link]]`) apenas se cierra; el
   detalle vive en la memoria, en `spec/<modulo>.md` y en `git log`, nunca en prosa acumulada aquí.
   Si al documentar un hito nuevo el archivo creciera de más, comprimí lo viejo **antes**, no después.
+- Roles: `AGENTS.md` modifica internos, `CORE.md` consume como dependencia. Leer solo uno por rol.
+- IPC: todo campo nuevo `pv_run`/`pv_box_def` cruza `write_view`/`read_view`; correr `make drift`.
+- Tunables en `include/freedom_config.h` (`FC_*`); bounds de contrato en header de modulo.
+- `css_values` dueno de color/bg; `css.c` delega. Mutantes equivalentes `round_clamp` documentados (redondeo hace borde inobservable).
+- Cascade split: `css_decl` (P_* slots + `css_round_clamp` unico), `css_values` (cv_), `css_gradient` (cg_), `css_box` (cb_ + grid/calc), `css_text` (ct_). `css.c` solo dispatch/cascade + wrappers. Drift gate verifica duenos.
 
 <!-- readmenator-agent-kb-link -->
 ## Project Knowledge Base

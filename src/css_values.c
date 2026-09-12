@@ -1,5 +1,6 @@
 #include "css_values.h"
 #include "css.h"
+#include "css_decl.h"
 #include "css_color.h"
 #include "css_length.h"
 #include "css_select.h"
@@ -9,17 +10,6 @@
 static int cv_parse_num(const char *s, double *out, const char **endp)
 {
     return cl_number(s, out, endp);
-}
-
-static int cv_round_clamp(double v, int lo, int hi)
-{
-    if (v >= (double)hi) {
-        return hi;
-    }
-    if (v <= (double)lo) {
-        return lo;
-    }
-    return (int)(v + (v < 0.0 ? -0.5 : 0.5));
 }
 
 int cv_parse_color(const char *v)
@@ -96,7 +86,7 @@ int cv_bg_alpha_of(const char *v)
                 return CSS_LEN_UNSET;
             }
             pct = (*end == '%') ? num : num * 100.0;
-            return cv_round_clamp(pct, 0, 100);
+            return css_round_clamp(pct, 0, 100);
         }
     }
     return CSS_LEN_UNSET;

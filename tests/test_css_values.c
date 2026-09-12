@@ -34,6 +34,10 @@ static void test_alpha(void **state)
 {
     (void)state;
     assert_int_equal(cv_bg_alpha_of("rgba(0,0,0,0.5)"), 50);
+    assert_int_equal(cv_bg_alpha_of("rgba(0,0,0,0)"), 0);
+    assert_int_equal(cv_bg_alpha_of("rgba(0,0,0,1)"), 100);
+    assert_int_equal(cv_bg_alpha_of("rgba(0,0,0,2)"), 100);
+    assert_int_equal(cv_bg_alpha_of("rgba(0,0,0,100%)"), 100);
     assert_int_equal(cv_bg_alpha_of("red"), CSS_LEN_UNSET);
 }
 

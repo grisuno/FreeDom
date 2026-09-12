@@ -119,9 +119,18 @@ def run_make(root, target):
     return proc.returncode == 0
 
 
+MUTATE_TIMEOUT = int(os.environ.get("MUTATE_TIMEOUT", "60"))
+
+
 def run_bin(path):
-    proc = subprocess.run([path], stdout=subprocess.DEVNULL,
-                          stderr=subprocess.DEVNULL)
+    # A hung suite is a killed mutant: the fault was detected (nothing passed).
+    # Without a timeout one size_t-underflow mutant hangs the whole run, and a
+    # SIGKILLed harness leaves that mutant on disk (no finally on SIGKILL).
+    try:
+        proc = subprocess.run([path], stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL, timeout=MUTATE_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return False
     return proc.returncode == 0
 
 

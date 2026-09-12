@@ -9,6 +9,9 @@
 #include "css_color.h"
 #include "css_length.h"
 #include "css_values.h"
+#include "css_gradient.h"
+#include "css_box.h"
+#include "css_text.h"
 #include "flex_layout.h"  /* fx_grid_area_hash: an area name reduces to one int */
 #include "css_select.h"
 
@@ -81,192 +84,7 @@
  * declares far fewer distinct background-image rules than colors/gradients) so
  * it does not multiply CSS_MAX_DECLS' footprint the way embedding the string in
  * every css_decl would. */
-#define CSS_MAX_BG_URLS 256u
-
-#define CSS_MAX_KEYFRAMES 4
-#define CSS_MAX_KEYFRAME_STOPS 8
-#define CSS_MAX_KEYFRAME_DECLS 8
-#define CSS_INLINE_BG_URLS 8u
-
-/* Scratch size for the CSS-wide-keyword probe (wide_claim). Bounds the widest
- * shorthand expansion in the dispatch: the four-side length shorthands emit a px
- * and a percentage slot per side (8), grid-template-columns emits one slot per
- * track plus the count (9), and matrix() emits seven. */
-#define CSS_WIDE_PROBE_DECLS 24
-
-/* Property slots. The enum value IS the css_style slot index used by apply().
- * The four margin slots are contiguous in CSS shorthand order (top,right,bottom,
- * left); the four padding slots likewise — expand_box4 relies on that. */
-enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT, P_STYLE,
-       P_TEXTDECO, P_TEXTDECO_COLOR, P_TEXTDECO_STYLE,
-       P_DISPLAY, P_GAP, P_JUSTIFY, P_GRIDCOLS,
-       P_MARGIN_TOP, P_MARGIN_RIGHT, P_MARGIN_BOTTOM, P_MARGIN_LEFT,
-       P_PAD_TOP, P_PAD_RIGHT, P_PAD_BOTTOM, P_PAD_LEFT,
-       P_WIDTH, P_MAXWIDTH, P_MINWIDTH, P_HEIGHT, P_MINHEIGHT, P_MAXHEIGHT,
-       /* The percentage half of every <length-percentage> property, one slot per
-        * css_pct_slot and in that exact order, so pct_slot_of() is a table lookup
-        * rather than a second hand-maintained switch. apply() writes them into
-        * css_style.pct[]. */
-       P_PCT_FIRST,
-       P_PCT_LAST = P_PCT_FIRST + CSS_PCT_N - 1,
-       /* Text-presentation extensions (Hito 23b-6). The three text-shadow slots are
-        * contiguous (dx,dy,color) so expand_shadow writes them as a group. */
-       P_FONTFAMILY, P_TEXTTRANSFORM, P_LETTERSPACING, P_WORDSPACING,
-       P_SHADOW_DX, P_SHADOW_DY, P_SHADOW_COLOR,
-       P_OPACITY, P_VALIGN, P_TEXTINDENT, P_WHITESPACE, P_TABSIZE, P_LISTSTYLE, P_DIRECTION,
-       /* Layout / box decoration (Hito 23b-7). Contiguous groups feed the box4-style
-        * expanders: insets (T R B L); border widths/styles/colors (each T R B L);
-        * box-shadow (dx dy blur spread color inset); flex (grow shrink basis). */
-       P_POSITION,
-       P_INSET_TOP, P_INSET_RIGHT, P_INSET_BOTTOM, P_INSET_LEFT,
-       P_ZINDEX, P_BOXSIZING,
-       P_BW_TOP, P_BW_RIGHT, P_BW_BOTTOM, P_BW_LEFT,
-       P_BS_TOP, P_BS_RIGHT, P_BS_BOTTOM, P_BS_LEFT,
-       P_BC_TOP, P_BC_RIGHT, P_BC_BOTTOM, P_BC_LEFT,
-       /* The four border-radius corners, contiguous in CSS corner order
-        * (top-left, top-right, bottom-right, bottom-left) so the shorthand
-        * expander can write them as a group. */
-       P_BORDER_RADIUS, P_RADIUS_TR, P_RADIUS_BR, P_RADIUS_BL,
-       P_BSHADOW_DX, P_BSHADOW_DY, P_BSHADOW_BLUR, P_BSHADOW_SPREAD,
-       P_BSHADOW_COLOR, P_BSHADOW_INSET,
-       P_OUTLINE_W, P_OUTLINE_S, P_OUTLINE_C, P_OUTLINE_OFFSET,
-       P_FLEX_GROW, P_FLEX_SHRINK, P_FLEX_BASIS,
-       P_ORDER, P_ALIGN_ITEMS, P_ALIGN_SELF, P_ALIGN_CONTENT, P_JUSTIFY_ITEMS,
-       P_FLEX_DIR, P_FLEX_WRAP,
-       P_GRID_ROWS, P_ROW_GAP, P_GRID_FLOW, P_GRID_COL_SPAN, P_GRID_ROW_SPAN,
-       P_FLOAT, P_CLEAR,
-        P_VISIBILITY, P_OVERFLOW_X, P_OVERFLOW_Y, P_CURSOR,
-        P_TEXT_OVERFLOW, P_WORD_BREAK,
-        P_BORDER_COLLAPSE, P_BORDER_SPACING, P_EMPTY_CELLS,
-        P_CAPTION_SIDE, P_TABLE_LAYOUT,
-        P_FONT_VARIANT, P_HYPHENS, P_USER_SELECT, P_CARET_COLOR,
-        P_APPEARANCE, P_POINTER_EVENTS,
-        P_BG_REPEAT, P_BG_SIZE, P_BG_CLIP, P_BG_ORIGIN, P_BG_ATTACHMENT,
-        P_ISOLATION, P_CONTAIN, P_CONTENT_VISIBILITY, P_IMAGE_RENDERING,
-        P_COLOR_SCHEME, P_ACCENT_COLOR, P_PRINT_COLOR_ADJUST, P_FORCED_COLOR_ADJUST,
-        P_MIX_BLEND_MODE, P_OBJECT_FIT, P_LIST_STYLE_POS,
-        P_FONT_KERNING, P_TEXT_RENDERING, P_FONT_STRETCH,
-        P_RESIZE, P_SCROLL_BEHAVIOR, P_TOUCH_ACTION, P_OVERSCROLL_BEHAVIOR,
-        P_BACKFACE_VISIBILITY,
-        P_TEXTDECO_THICKNESS, P_ASPECT_NUM, P_ASPECT_DEN,
-        /* linear-gradient background (2026-07-11). Contiguous group: one declaration
-         * emits angle + stop count + the stop colors in lock-step. */
-        P_BG_GRAD_ANGLE, P_BG_GRAD_N,
-        P_BG_GRAD_C0, P_BG_GRAD_C1, P_BG_GRAD_C2, P_BG_GRAD_C3,
-        /* gradient stop positions (R5d): 0-100% stored as 0-1000. P_BG_GRAD_N
-         * controls how many are valid. */
-        P_BG_GRAD_POS0, P_BG_GRAD_POS1, P_BG_GRAD_POS2, P_BG_GRAD_POS3,
-        /* grid-template-columns track sizes (2026-07-11). Contiguous group of
-         * CSS_GRID_TRACKS_MAX slots emitted in lock-step with P_GRIDCOLS. */
-        P_GRID_TRACK0, P_GRID_TRACK1, P_GRID_TRACK2, P_GRID_TRACK3,
-        P_GRID_TRACK4, P_GRID_TRACK5, P_GRID_TRACK6, P_GRID_TRACK7,
-        /* transform (M1.2): translate()/translateX()/translateY() px offsets.
-         * M1.2b adds scale()/scaleX()/scaleY() (percent) and rotate() (degrees),
-         * each its own independent-cascade slot (see css.h). */
-        P_TRANSFORM_TX, P_TRANSFORM_TY,
-        P_TRANSFORM_SX, P_TRANSFORM_SY, P_TRANSFORM_ROTATE,
-        /* M1.2c: skew()/skewX()/skewY() whole degrees + transform-origin percent
-         * slots (CSS_LEN_UNSET = 50% center default). */
-        P_TRANSFORM_SKX, P_TRANSFORM_SKY, P_TRANSFORM_OX, P_TRANSFORM_OY,
-        /* background-image: url(...) (2026-07-16). ival is an INDEX into a small
-         * per-parse url table (css_sheet.bg_urls for stylesheet rules, a stack-local
-         * table for inline style="") -- css_decl stays int-only, no per-declaration
-         * string payload, so the 32768-entry decls[] array does not balloon. -1
-         * means the explicit "no image" reset (see expand_bg_image). */
-        P_BG_IMAGE_URL,
-        /* animation-duration (Phase R1): parsed time in ms. 0 = unset (no animation).
-         * Other animation-* properties and @keyframes parsing are follow-up work
-         * (the E2E test uses hardcoded keyframes for v1). */
-        P_ANIM_DURATION,
-        /* @keyframes / animation-* (R1b) */
-        P_ANIM_NAME, P_ANIM_ITERS, P_ANIM_DIR, P_ANIM_FILL, P_ANIM_TIMING,
-        P_ANIM_DELAY,
-        /* filter (Phase R3) */
-        P_FILTER_BLUR, P_FILTER_GRAYSCALE, P_FILTER_BRIGHTNESS, P_FILTER_CONTRAST,
-        P_FILTER_SEPIA, P_FILTER_INVERT, P_FILTER_SATURATE, P_FILTER_HUE_ROTATE,
-        /* filter: drop-shadow (2026-07-19). Contiguous group emitted in
-         * lock-step by expand_filter's drop-shadow branch. */
-        P_FILTER_DROP_DX, P_FILTER_DROP_DY, P_FILTER_DROP_BLUR, P_FILTER_DROP_COLOR,
-        /* -webkit-text-fill-color (2026-07-19, gradient text) */
-        P_TEXT_FILL,
-        /* SVG `fill` presentation property: colours inline-<svg> shapes without
-         * their own fill (the .social svg{fill:#fff} icon-tint pattern). */
-        P_SVG_FILL,
-        /* backdrop-filter: blur(Npx) (2026-07-19, glassmorphism v1). */
-        P_BACKDROP_BLUR,
-        /* Background alpha percent from rgba()/hsla() (2026-07-19). */
-        P_BG_ALPHA,
-        /* background-position (R5a) */
-        P_BG_POS_X, P_BG_POS_Y,
-        /* multi-layer background-image layer 2 (R5b): second url() behind the first. */
-        P_BG_IMAGE_URL2,
-        /* radial-gradient flag (R5c): 0=linear(default), 1=radial */
-        P_BG_GRAD_RADIAL,
-        /* content property (R8) for ::before/::after */
-        P_CONTENT,
-        /* transition (v1 parse-only, runtime deferred to hito phase-4) */
-        P_TRANSITION_DURATION, P_TRANSITION_PROPERTY,
-        P_TRANSITION_TIMING, P_TRANSITION_DELAY,
-        /* clip: rect(top,right,bottom,left) for positioned boxes (2016-07-30).
-         * Each slot carries px, CSS_LEN_UNSET = auto (the border-box edge). */
-        P_CLIP_TOP, P_CLIP_RIGHT, P_CLIP_BOTTOM, P_CLIP_LEFT,
-        /* Multi-column (2026-08-12). column-gap is not here: it is the same
-         * property as the flex/grid gap in CSS Box Alignment and keeps writing
-         * P_GAP, which multicol now reads instead of ignoring. */
-        P_LINE_CLAMP,
-        P_COLUMN_COUNT, P_COLUMN_WIDTH, P_COLUMN_FILL, P_COLUMN_SPAN,
-        P_COLRULE_W, P_COLRULE_S, P_COLRULE_C,
-        /* Named grid placement (2026-08-14, CSS Grid 1 7.3 + 8.4).
-         * P_GRID_AREAS carries an INDEX into the same string pool P_CONTENT uses
-         * (the template is one short quoted-string list, exactly the shape that
-         * pool holds) -- reusing it keeps one pool to audit instead of two.
-         * P_GRID_AREA_NAME carries the item's area name already HASHED to an int,
-         * so an item's placement needs no string channel at all. */
-        P_GRID_AREAS, P_GRID_AREA_NAME,
-        /* background-size's explicit <length-percentage>|auto pair (Backgrounds 3
-         * 3.9) and vertical-align's <length-percentage> production (CSS 2.1
-         * 10.8.1). Each is the OTHER half of a property whose keyword production
-         * already had a slot; they are separate slots because a keyword enum
-         * cannot also hold a signed length, and the cascade has to be able to let
-         * a later keyword clear an earlier length. */
-        P_BG_SIZE_W, P_BG_SIZE_H, P_VALIGN_SHIFT,
-        P_NSLOTS };
-
-typedef struct css_decl {
-    int prop;       /* P_* */
-    int ival;       /* interpreted value (color packed / enum / scale / bool) */
-    int important;  /* 1 if the declaration carried !important (higher cascade tier) */
-    /* Font-relative component of a <length>, in THOUSANDTHS of an em: the
-     * derivative cl_lp.em, scaled like the per-mille percentage channel and for
-     * the same reason (the cascade is integer). 0 = the value does not move with
-     * the font-size, which is true of every non-length declaration by
-     * construction -- only the length emitters ever write it.
-     *
-     * `ival` stays the value resolved at the INITIAL 16px context, so an element
-     * that computes to 16px is unaffected and the fold is a pure correction.
-     * See spec/css_length.md section 8. */
-    int emil;
-    /* CSS Cascade 5 section 7.3: the declaration's value was a CSS-WIDE KEYWORD
-     * (initial / inherit / unset / revert / revert-layer), which is valid on
-     * EVERY property. The declaration still competes for -- and can win -- its
-     * cascade slot; what it does not do is write a value. Leaving the slot at the
-     * style's unset default is what makes it mean the right thing: the caller's
-     * ancestor merge then supplies the parent's value (`inherit`), or the initial
-     * value stands where nothing is inherited (`initial`/`revert`).
-     *
-     * The point is that the slot is CLAIMED. Dropping the declaration instead --
-     * which is what happened before -- handed the slot to a LOWER-specificity
-     * rule, so `a{color:#333} a.x{color:inherit}` painted #333 where every other
-     * engine paints the parent's colour.
-     *
-     * 0 = an ordinary declaration. 1 = claim the slot and leave the field alone
-     * (the generic dispatch tail, which has no way to know the property's unset
-     * default). 2 = claim the slot AND write `ival`, for an emitter that DOES know
-     * that default. The distinction is not cosmetic: winning a slot without
-     * writing it leaves whatever an EARLIER, lower-specificity declaration already
-     * put there, so `.a{width:50%} .a.b{width:auto}` kept the 50%. */
-    int wide;
-} css_decl;
+#include "css_decl.h"
 
 /* One custom property (--name: value), for var() lookups. Both fields are bounded
  * like every other token buffer here. */
@@ -341,16 +159,6 @@ static int parse_num(const char *s, double *out, const char **endp) {
     return cl_number(s, out, endp);
 }
 
-/* Rounds v to the nearest int, clamped to [lo, hi]. Clamping the double BEFORE the
- * cast avoids undefined behaviour: casting an out-of-range double (e.g. a hostile
- * "99999999999px") to int is UB. Every value interpreter that casts a parsed double
- * routes through here. */
-static int round_clamp(double v, int lo, int hi) {
-    if (v >= (double)hi) return hi;
-    if (v <= (double)lo) return lo;
-    return (int)(v + (v < 0.0 ? -0.5 : 0.5));
-}
-
 /* --- value interpreters (return -1 / sentinel when the value is unsupported) --- */
 
 /* Like cc_parse but returns packed int with sentinels for currentColor/transparent. */
@@ -402,498 +210,20 @@ static int interp_bg(const char *v) {
     return cv_interp_bg(v);
 }
 
-/* --- linear-gradient backgrounds (2026-07-11, spec/css.md) ---
- * The accepted grammar has no URL form, so a gradient can never fetch. Everything
- * else about it fails closed: an unparseable direction or color, unbalanced parens
- * or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
- * the whole declaration). */
+/* Gradient/background-image family lives in css_gradient.c (single owner).
+ * Thin wrappers keep existing call sites stable while the cascade
+ * decomposes. See spec/css_gradient.md. */
 
-/* `to <side-or-corner>` (two keywords in either order) or `<int>deg` -> CSS degrees
- * normalized [0,359]. Returns -1 when seg is not direction syntax at all (it may be
- * the first color stop), -2 when it IS direction syntax but invalid (poisons the
- * gradient). */
-static int grad_direction(const char *seg) {
-    const char *p = seg;
-    if (*p == '-' || *p == '+' || (*p >= '0' && *p <= '9')) {
-        char *end = NULL;
-        long a = strtol(seg, &end, 10);
-        if (end != seg && csel_ci_eq(end, "deg"))
-            return (int)(((a % 360) + 360) % 360);
-        return -2;   /* rad/grad/turn/junk angles: unsupported */
-    }
-    if (!(csel_lower_ch(p[0]) == 't' && csel_lower_ch(p[1]) == 'o' &&
-          (p[2] == ' ' || p[2] == '\t')))
-        return -1;
-    p += 3;
-    int vert = -1, horiz = -1;
-    for (int w = 0; w < 2; ++w) {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        char word[16];
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof word)
-            word[k++] = csel_lower_ch(*p++);
-        word[k] = '\0';
-        if      (strcmp(word, "top") == 0    && vert  < 0) vert = 0;
-        else if (strcmp(word, "bottom") == 0 && vert  < 0) vert = 1;
-        else if (strcmp(word, "right") == 0  && horiz < 0) horiz = 0;
-        else if (strcmp(word, "left") == 0   && horiz < 0) horiz = 1;
-        else return -2;
-    }
-    while (*p == ' ' || *p == '\t') ++p;
-    if (*p != '\0') return -2;
-    if (vert < 0 && horiz < 0) return -2;
-    if (horiz < 0) return vert == 0 ? 0 : 180;
-    if (vert < 0)  return horiz == 0 ? 90 : 270;
-    if (vert == 0) return horiz == 0 ? 45 : 315;
-    return horiz == 0 ? 135 : 225;
-}
-
-/* Locates a gradient function call `fn` (e.g. "linear-gradient(") in v
- * (case-insensitive; an occurrence that is the tail of a longer ident, e.g.
- * repeating-linear-gradient, does not count). Writes the call span [start,end)
- * (end past the closing paren) and the argument span. 1 = found, 0 = absent,
- * -1 = found but unbalanced (malformed). */
-static int find_gradient_call(const char *v, const char *fn, size_t *start,
-                              size_t *end, size_t *args, size_t *argn) {
-    const size_t fnlen = strlen(fn);
-    size_t n = strlen(v);
-    for (size_t i = 0; i + fnlen <= n; ++i) {
-        size_t k = 0;
-        while (k < fnlen && csel_lower_ch(v[i + k]) == fn[k]) ++k;
-        if (k != fnlen) continue;
-        if (i > 0) {
-            char pc = v[i - 1];
-            if (pc == '-' || (pc >= 'a' && pc <= 'z') || (pc >= 'A' && pc <= 'Z') ||
-                (pc >= '0' && pc <= '9'))
-                continue;
-        }
-        size_t j = i + fnlen;
-        int depth = 1;
-        while (j < n && depth > 0) {
-            if (v[j] == '(') ++depth;
-            else if (v[j] == ')') --depth;
-            ++j;
-        }
-        if (depth != 0) return -1;
-        *start = i; *end = j;
-        *args = i + fnlen; *argn = (j - 1) - (i + fnlen);
-        return 1;
-    }
-    return 0;
-}
-
-/* conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>`
- * (position accepted and ignored -- always center, v1), or `at <pos>` alone.
- * Returns 1 = consumed (angle possibly set), 0 = not a prelude (it is the
- * first color stop), -1 = prelude syntax but malformed (poisons the gradient,
- * mirrors grad_direction's -2). */
-static int conic_prelude(const char *seg, int *angle) {
-    const char *p = seg;
-    int saw = 0;
-    if (csel_lower_ch(p[0]) == 'f' && csel_lower_ch(p[1]) == 'r' &&
-        csel_lower_ch(p[2]) == 'o' && csel_lower_ch(p[3]) == 'm' &&
-        (p[4] == ' ' || p[4] == '\t')) {
-        p += 5;
-        while (*p == ' ' || *p == '\t') ++p;
-        char *end = NULL;
-        long a = strtol(p, &end, 10);
-        if (end == p ||
-            !(csel_lower_ch(end[0]) == 'd' && csel_lower_ch(end[1]) == 'e' &&
-              csel_lower_ch(end[2]) == 'g'))
-            return -1;
-        *angle = (int)(((a % 360) + 360) % 360);
-        p = end + 3;
-        saw = 1;
-        while (*p == ' ' || *p == '\t') ++p;
-    }
-    if (csel_lower_ch(p[0]) == 'a' && csel_lower_ch(p[1]) == 't' &&
-        (p[2] == ' ' || p[2] == '\t'))
-        return 1;
-    if (saw) return (*p == '\0') ? 1 : -1;
-    return 0;
-}
-
-/* radial-gradient prelude (`circle ...`, `ellipse ...`, `at <pos>`): consumed
- * and ignored (always a centered circle, v1). 1 = consumed, 0 = not a prelude. */
-static int radial_prelude(const char *seg) {
-    static const char *const kw[] = { "circle", "ellipse", "at " };
-    for (size_t k = 0; k < sizeof kw / sizeof kw[0]; ++k) {
-        size_t kl = strlen(kw[k]);
-        size_t m = 0;
-        while (m < kl && csel_lower_ch(seg[m]) == kw[k][m]) ++m;
-        if (m == kl) return 1;
-    }
-    return 0;
-}
-
-/* One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts
- * `Ndeg` -> the same 0-1000 turn fraction; legacy bare 0..100 -> x10. Returns
- * the position or -1 (not a position / out of range; *endp untouched then). */
-static int grad_stop_pos(const char *pp, int conic, const char **endp) {
-    double dd;
-    const char *ee;
-    if (!parse_num(pp, &dd, &ee)) return -1;
-    if (*ee == '%') {
-        if (dd < 0.0 || dd > 100.0) return -1;
-        *endp = ee + 1;
-        return (int)(dd * 10.0 + 0.5);
-    }
-    if (conic && csel_lower_ch(ee[0]) == 'd' && csel_lower_ch(ee[1]) == 'e' &&
-        csel_lower_ch(ee[2]) == 'g') {
-        if (dd < 0.0 || dd > 360.0) return -1;
-        *endp = ee + 3;
-        return (int)(dd / 360.0 * 1000.0 + 0.5);
-    }
-    if (*ee == '\0' || *ee == ' ' || *ee == '\t') {
-        if (dd < 0.0 || dd > 100.0) return -1;
-        *endp = ee;
-        return (int)(dd * 10.0 + 0.5);
-    }
-    return -1;
-}
-
-/* Parses the argument list shared by linear-/radial-/conic-gradient (s[0,n) is
- * the text inside the parens): optional kind-specific prelude, then color stops
- * split on top-level commas. kind: 0 = linear (`to <side>`/`<int>deg` prelude),
- * 1 = radial (`circle`/`ellipse`/`at` prelude, ignored), 2 = conic (`from
- * <int>deg [at <pos>]` prelude; stop positions may be `deg`). Stop positions
- * (R5d, completed 2026-07-19) land in positions[] as 0-1000 (-1 = evenly
- * spaced); a stop with TWO positions emits its color twice (hard edge). Fills
- * *angle and colors[CSS_GRAD_STOPS_MAX]; returns the stop count clamped to
- * CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
- * the gradient fails closed. */
-static int parse_gradient_args(const char *s, size_t n, int kind, int *angle,
-                               int *colors, int *positions) {
-    *angle = (kind == 2) ? 0 : 180;
-    int nstops = 0, first = 1;
-    size_t i = 0;
-    while (i < n) {
-        size_t j = i;
-        int depth = 0;
-        while (j < n && (depth > 0 || s[j] != ',')) {
-            if (s[j] == '(') ++depth;
-            else if (s[j] == ')' && depth > 0) --depth;
-            ++j;
-        }
-        size_t a = i, b = j;
-        while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\n' || s[a] == '\r')) ++a;
-        while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
-        if (a == b) return 0;   /* empty segment */
-        char seg[CSS_TOK_MAX];
-        size_t len = b - a;
-        if (len >= sizeof seg) return 0;
-        memcpy(seg, s + a, len);
-        seg[len] = '\0';
-
-        if (first) {
-            first = 0;
-            if (kind == 2) {
-                int c = conic_prelude(seg, angle);
-                if (c == 1) { i = j + 1; continue; }
-                if (c == -1) return 0;
-            } else if (kind == 1) {
-                if (radial_prelude(seg)) { i = j + 1; continue; }
-            } else {
-                int d = grad_direction(seg);
-                if (d >= 0) { *angle = d; i = j + 1; continue; }
-                if (d == -2) return 0;
-            }
-        }
-        {
-            size_t ce = 0;
-            const char *lp = strchr(seg, '(');
-            if (lp != NULL) {
-                const char *rp = strchr(lp, ')');
-                if (rp == NULL) return 0;
-                ce = (size_t)(rp - seg) + 1;
-            } else {
-                while (seg[ce] != '\0' && seg[ce] != ' ' && seg[ce] != '\t') ++ce;
-            }
-            char color[CSS_TOK_MAX];
-            memcpy(color, seg, ce);
-            color[ce] = '\0';
-            int cv = parse_color(color);
-            if (cv == -1) return 0;
-            int p1 = -1, p2 = -1;
-            const char *pp = seg + ce;
-            while (*pp == ' ' || *pp == '\t') ++pp;
-            if (*pp != '\0') {
-                const char *e1 = pp;
-                p1 = grad_stop_pos(pp, kind == 2, &e1);
-                if (p1 >= 0) {
-                    pp = e1;
-                    while (*pp == ' ' || *pp == '\t') ++pp;
-                    if (*pp != '\0') {
-                        const char *e2 = pp;
-                        p2 = grad_stop_pos(pp, kind == 2, &e2);
-                    }
-                }
-            }
-            if (nstops < CSS_GRAD_STOPS_MAX) {
-                colors[nstops] = cv;
-                if (positions != NULL) positions[nstops] = p1;
-            }
-            ++nstops;
-            if (p2 >= 0) {
-                /* two-position stop (`red 0 25%`): duplicate the color at the
-                 * second position -> a hard edge (pie slices, stripes). */
-                if (nstops < CSS_GRAD_STOPS_MAX) {
-                    colors[nstops] = cv;
-                    if (positions != NULL) positions[nstops] = p2;
-                }
-                ++nstops;
-            }
-        }
-        i = j + 1;
-    }
-    if (nstops < 2) return 0;
-    return nstops > CSS_GRAD_STOPS_MAX ? CSS_GRAD_STOPS_MAX : nstops;
-}
-
-/* Emits the gradient decl group. nstops == 0 emits only the explicit reset
- * (P_BG_GRAD_N = 0), which is how a shorthand clears a lower-tier gradient. */
-static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
-                          const int *colors, const int *positions) {
-    if (nstops <= 0) {
-        if (cap < 1) return 0;
-        dst[0].prop = P_BG_GRAD_N;
-        dst[0].ival = 0;
-        return 1;
-    }
-    int pos_extra = (positions != NULL) ? nstops : 0;
-    if (cap < 2 + nstops + pos_extra) return 0;
-    dst[0].prop = P_BG_GRAD_ANGLE; dst[0].ival = angle;
-    dst[1].prop = P_BG_GRAD_N;     dst[1].ival = nstops;
-    for (int k = 0; k < nstops; ++k) {
-        dst[2 + k].prop = P_BG_GRAD_C0 + k;
-        dst[2 + k].ival = colors[k];
-    }
-    if (positions != NULL)
-        for (int k = 0; k < nstops; ++k) {
-            dst[2 + nstops + k].prop = P_BG_GRAD_POS0 + k;
-            dst[2 + nstops + k].ival = positions[k];
-        }
-    return 2 + nstops + pos_extra;
-}
-
-/* Finds a single url(...) token in val (bare or quoted). On success (1) sets
- * [*us,*ue) to the full "url(...)" span in val and copies the trimmed, unquoted
- * inner text into out (bounded outcap, NUL-terminated). Returns 0 when val has no
- * url( at all, -1 when it does but the token is malformed (unbalanced parens) or
- * the inner text does not fit outcap -- fail closed: the caller must drop the
- * whole image (never fetch a truncated URL). */
-static int find_url_token(const char *val, size_t *us, size_t *ue,
-                          char *out, size_t outcap) {
-    for (const char *p = val; *p != '\0'; ++p) {
-        if (!((p[0] == 'u' || p[0] == 'U') && (p[1] == 'r' || p[1] == 'R') &&
-              (p[2] == 'l' || p[2] == 'L') && p[3] == '('))
-            continue;
-        const char *inner = p + 4;
-        const char *close = strchr(inner, ')');
-        if (close == NULL) return -1;
-        size_t ilen = (size_t)(close - inner);
-        while (ilen > 0 && (*inner == ' ' || *inner == '\t')) { ++inner; --ilen; }
-        while (ilen > 0 && (inner[ilen - 1] == ' ' || inner[ilen - 1] == '\t')) --ilen;
-        if (ilen >= 2 && (inner[0] == '\'' || inner[0] == '"') && inner[ilen - 1] == inner[0]) {
-            ++inner; ilen -= 2;
-        }
-        if (ilen == 0 || ilen >= outcap) return -1;
-        memcpy(out, inner, ilen);
-        out[ilen] = '\0';
-        *us = (size_t)(p - val);
-        *ue = (size_t)(close - val) + 1;
-        return 1;
-    }
-    return 0;
-}
-
-/* R5c: detects radial-gradient(circle at center, color1, color2). Returns 1
- * with the argument span set. */
-static int find_radial_gradient(const char *v, size_t *start, size_t *end,
-                                 size_t *arg_start, size_t *arg_len) {
-    size_t n = strlen(v);
-    const char pre[] = "radial-gradient(";
-    size_t pl = sizeof pre - 1;
-    if (n < pl || memcmp(v, pre, pl) != 0) return 0;
-    *start = 0;
-    size_t p = pl, depth = 0;
-    while (p < n) {
-        if (v[p] == '(') ++depth;
-        else if (v[p] == ')') { if (depth == 0) break; --depth; }
-        ++p;
-    }
-    if (p >= n) return 0;
-    *end = p + 1;
-    *arg_start = pl;
-    *arg_len = p - pl;
-    return 1;
-}
-
-/* Emits the P_BG_IMAGE_URL decl: url==NULL emits the explicit "no image" reset
- * (ival=-1, mirrors emit_gradient's nstops<=0 reset); otherwise appends url to the
- * shared pool (bounded urlcap -- a pool overrun fails closed to reset rather than
- * silently keeping a stale image reference) and emits its index. */
-static int emit_bg_image_url(css_decl *dst, int cap, const char *url,
-                             char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
-    if (cap < 1) return 0;
-    dst[0].prop = P_BG_IMAGE_URL;
-    if (url == NULL || *nurl >= urlcap) {
-        dst[0].ival = -1;
-        return 1;
-    }
-    memcpy(urltab[*nurl], url, strlen(url) + 1);
-    dst[0].ival = (int)*nurl;
-    ++*nurl;
-    return 1;
-}
-
-/* background-image: linear-gradient resolves to the gradient group (image-url
- * explicitly reset); a single url(...) (bare or quoted, with only whitespace
- * surrounding it -- multi-layer/trailing junk fails closed) resolves to the image
- * pool (gradient explicitly reset); none/radial/conic/repeating-gradients/
- * malformed/multi-layer emit both explicit resets. Never fetches: url() is only
- * ever a bounded string extraction, the same trust level as reading an href/src
- * attribute elsewhere in this pipeline -- deciding whether to actually fetch it
- * happens downstream (render_doc.c), gated by caps.images like an <img>. */
 static int expand_bg_image(const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
-    size_t gs, ge, as, an;
-    int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
-    int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
-    int angle = 180, nst = 0, kind = 0;
-    if (find_gradient_call(val, "linear-gradient(", &gs, &ge, &as, &an) == 1)
-        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos);
-    if (nst == 0 && find_gradient_call(val, "conic-gradient(", &gs, &ge, &as, &an) == 1) {
-        nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos);
-        if (nst > 0) kind = 2;
-    }
-    if (nst == 0 && find_radial_gradient(val, &gs, &ge, &as, &an) == 1) {
-        nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos);
-        if (nst > 0) kind = 1;
-    }
-    int n = emit_gradient(dst, cap, angle, nst, colors, nst > 0 ? grad_pos : NULL);
-    if (nst > 0) {
-        /* the kind rides every gradient emission so a higher-tier linear fully
-         * overrides a lower-tier radial/conic (independent cascade slots). */
-        if (cap - n >= 1) { dst[n].prop = P_BG_GRAD_RADIAL; dst[n].ival = kind; ++n; }
-        if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, NULL, urltab, nurl, urlcap);
-        return n;
-    }
-    size_t us, ue;
-    char urlbuf[CSS_URL_MAX];
-    int uf = find_url_token(val, &us, &ue, urlbuf, sizeof urlbuf);
-    const char *use_url = NULL;
-    if (uf == 1) {
-        int clean = 1;
-        for (size_t i = 0; clean && i < us; ++i)
-            if (val[i] != ' ' && val[i] != '\t') clean = 0;
-        for (size_t i = ue; clean && val[i] != '\0'; ++i)
-            if (val[i] != ' ' && val[i] != '\t') clean = 0;
-        if (clean) use_url = urlbuf;
-    }
-    if (cap - n >= 1) n += emit_bg_image_url(dst + n, cap - n, use_url, urltab, nurl, urlcap);
-
-    /* R5b: second comma-separated url (layer behind the first). */
-    if (use_url != NULL && cap - n >= 1) {
-        const char *comma = val + ue;
-        while (*comma != '\0' && *comma != ',') ++comma;
-        if (*comma == ',') {
-            char urlbuf2[CSS_URL_MAX];
-            size_t us2, ue2;
-            int uf2 = find_url_token(comma + 1, &us2, &ue2, urlbuf2, sizeof urlbuf2);
-            if (uf2 == 1 && *nurl < urlcap) {
-                memcpy(urltab[*nurl], urlbuf2, strlen(urlbuf2) + 1);
-                dst[n].prop = P_BG_IMAGE_URL2; dst[n].ival = (int)*nurl; ++*nurl; ++n;
-            }
-        }
-    }
-    return n;
+    return cg_expand_bg_image(val, dst, cap, urltab, nurl, urlcap);
 }
 
-/* background shorthand: CSS resets BOTH the color and the image layer (gradient or
- * url), so a color emits gradient-unset+image-unset and a gradient/url emits
- * color-unset. A present-but-broken gradient or malformed url(...) drops the whole
- * declaration (fail closed); a value with no color, gradient nor url keeps the
- * historical drop path. */
 static int expand_background(const char *val, css_decl *dst, int cap,
                              char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
-    size_t gs = 0, ge = 0, as = 0, an = 0;
-    int colors[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
-    int grad_pos[CSS_GRAD_STOPS_MAX] = { -1, -1, -1, -1 };
-    int angle = 180, nst = 0, kind = 0;
-    int f = find_gradient_call(val, "linear-gradient(", &gs, &ge, &as, &an);
-    if (f < 0) return 0;
-    if (f == 1) {
-        nst = parse_gradient_args(val + as, an, 0, &angle, colors, grad_pos);
-        if (nst == 0) return 0;
-    }
-    if (f == 0) {
-        f = find_gradient_call(val, "conic-gradient(", &gs, &ge, &as, &an);
-        if (f < 0) return 0;
-        if (f == 1) {
-            nst = parse_gradient_args(val + as, an, 2, &angle, colors, grad_pos);
-            if (nst == 0) return 0;
-            kind = 2;
-        }
-    }
-    if (f == 0) {
-        f = find_gradient_call(val, "radial-gradient(", &gs, &ge, &as, &an);
-        if (f < 0) return 0;
-        if (f == 1) {
-            nst = parse_gradient_args(val + as, an, 1, &angle, colors, grad_pos);
-            if (nst == 0) return 0;
-            kind = 1;
-        }
-    }
-    size_t us = 0, ue = 0;
-    char urlbuf[CSS_URL_MAX];
-    int uf = 0;
-    if (f != 1) {
-        uf = find_url_token(val, &us, &ue, urlbuf, sizeof urlbuf);
-        if (uf < 0) return 0;
-    }
-    char rest[CSS_URL_MAX];
-    size_t n = strlen(val), r = 0;
-    for (size_t i = 0; i < n && r + 1 < sizeof rest; ++i) {
-        if (f == 1 && i >= gs && i < ge) continue;
-        if (uf == 1 && i >= us && i < ue) continue;
-        rest[r++] = val[i];
-    }
-    rest[r] = '\0';
-    int color = interp_bg(rest);
-    /* `background: transparent` and `background: none` both mean "no colour and no
-     * image layer", which is a RESET the shorthand must apply, not a value it fails
-     * to understand: CSS Backgrounds 3 section 3.10 resets every longhand it omits.
-     * Dropping them left whatever a lower-specificity rule (or the UA) painted. */
-    if (f != 1 && uf != 1 && !color_ok(color)) {
-        char kw[CSS_TOK_MAX];
-        const char *b = rest;
-        while (*b == ' ' || *b == '\t') ++b;
-        size_t tl = strlen(b);
-        while (tl > 0 && (b[tl - 1] == ' ' || b[tl - 1] == '\t')) --tl;
-        if (tl >= sizeof kw) return 0;
-        memcpy(kw, b, tl);
-        kw[tl] = '\0';
-        if (!csel_ci_eq(kw, "none") && !css_wide_keyword(kw)) return 0;
-        color = CC_COLOR_TRANSPARENT;
-    }
-    if (cap < 2) return 0;
-    dst[0].prop = P_BG;
-    dst[0].ival = color;
-    /* Alpha rides the shorthand too (2026-07-19); always emitted so
-     * `background: red` resets a lower-tier rgba() alpha to opaque. */
-    dst[1].prop = P_BG_ALPHA;
-    dst[1].ival = bg_alpha_of(rest);
-    int w = 2;
-    w += emit_gradient(dst + w, cap - w, angle, nst, colors, nst > 0 ? grad_pos : NULL);
-    if (nst > 0 && cap - w >= 1) {
-        dst[w].prop = P_BG_GRAD_RADIAL; dst[w].ival = kind; ++w;
-    }
-    if (cap - w >= 1) w += emit_bg_image_url(dst + w, cap - w, uf == 1 ? urlbuf : NULL,
-                                             urltab, nurl, urlcap);
-    return w;
+    return cg_expand_background(val, dst, cap, urltab, nurl, urlcap);
 }
+
 
 /*
  * The context every <length> in the cascade resolves against.
@@ -908,1414 +238,110 @@ static int expand_background(const char *val, css_decl *dst, int cap,
  * not leak real geometry (only @media width queries see the render width).
  * cl_ctx_initial already encodes that.
  */
-static cl_ctx css_len_ctx(void) {
-    return cl_ctx_initial();
+/* Length/box/grid/calc value family lives in css_box.c (single owner).
+ * Thin wrappers keep existing call sites stable while the cascade
+ * decomposes. See spec/css_box.md. */
+#define AUTO_REJECT CB_AUTO_REJECT
+#define AUTO_VALUE CB_AUTO_VALUE
+#define AUTO_RESET CB_AUTO_RESET
+#define AUTO_RESET_NONE CB_AUTO_RESET_NONE
+
+static int emit_len(css_decl *dst, int cap, int slot, const char *val,
+                    int allow_auto, int allow_neg) {
+    return cb_emit_len(dst, cap, slot, val, allow_auto, allow_neg);
 }
 
-/* Resolves a NUL-terminated <length> token to px through the canonical
- * resolver. Returns 1 on success. This is the ONLY place in the cascade that
- * turns a unit into pixels -- see spec/css_length.md for why that matters. */
-static int length_px(const char *v, double *px) {
-    cl_ctx ctx = css_len_ctx();
-    return cl_resolve(v, &ctx, px) == CL_OK;
+static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
+                       css_decl *dst, int cap) {
+    return cb_expand_box4(val, slot_top, allow_auto, allow_neg, dst, cap);
 }
 
-static int interp_align(const char *v) {
-    if (csel_ci_eq(v, "left") || csel_ci_eq(v, "start")) return CSS_ALIGN_LEFT;
-    if (csel_ci_eq(v, "center")) return CSS_ALIGN_CENTER;
-    if (csel_ci_eq(v, "right") || csel_ci_eq(v, "end")) return CSS_ALIGN_RIGHT;
-    if (csel_ci_eq(v, "justify")) return CSS_ALIGN_JUSTIFY;
-    return -1;
+static int expand_box2(const char *val, int slot_start, int slot_end,
+                       int allow_auto, int allow_neg, css_decl *dst, int cap) {
+    return cb_expand_box2(val, slot_start, slot_end, allow_auto, allow_neg, dst, cap);
 }
 
-/* font-size as a percent, plus whether that percent is ABSOLUTE (of the 16px root)
- * or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the
- * absolute keywords. Relative: em, %, and smaller/larger. *abs is written on every
- * path, including the -1 failure, so the caller never reads it uninitialised.
- *
- * The distinction is load-bearing, not cosmetic: without it the painter multiplied
- * an absolute `font-size: 40px` onto the user-agent heading scale and every author-
- * styled <h1> came out at 80px. See spec/css.md "font-size: absolute vs relative". */
-static int interp_fontsize_ex(const char *v, int *abs_out) {
-    *abs_out = 1;
-    if (csel_ci_eq(v, "medium")) return 100;
-    if (csel_ci_eq(v, "small")) return 85;
-    if (csel_ci_eq(v, "large")) return 120;
-    if (csel_ci_eq(v, "x-large")) return 150;
-    if (csel_ci_eq(v, "xx-large")) return 200;
-    if (csel_ci_eq(v, "x-small")) return 75;
-    if (csel_ci_eq(v, "xx-small")) return 60;
-    /* smaller/larger step off the INHERITED size, so they stay relative. */
-    if (csel_ci_eq(v, "smaller")) { *abs_out = 0; return 85; }
-    if (csel_ci_eq(v, "larger"))  { *abs_out = 0; return 120; }
-
-    double num;
-    const char *end;
-    if (!parse_num(v, &num, &end)) { *abs_out = 0; return -1; }
-    while (*end == ' ' || *end == '\t') ++end;
-
-    /* A percentage is not a <length>: it is relative to the INHERITED size by
-     * definition, so it is handled here and never reaches the resolver. */
-    if (end[0] == '%' && end[1] == '\0') {
-        *abs_out = 0;
-        return round_clamp(num, 10, 1000);
-    }
-
-    /* Everything else is a real length. Whether it is absolute or relative is
-     * derived from the unit family instead of a hand-written whitelist: a
-     * font-relative unit (em/ex/ch/cap/ic/lh) steps off the inherited size,
-     * while px/pt/cm/rem/vw and friends do not. Adding a unit to css_length
-     * classifies it correctly here for free. */
-    double px;
-    if (!length_px(v, &px)) { *abs_out = 0; return -1; }
-    *abs_out = !cl_unit_is_font_relative(end, 0);
-
-    /* One formula for both families. The resolver ran with font_size at the CSS
-     * initial value, so px/initial is the absolute size in "initial units" for
-     * an absolute unit AND the multiple of the inherited size for a relative
-     * one -- `2ex` correctly yields 100% (2 x 0.5em), not 200%. */
-    return round_clamp(px / CL_INITIAL_FONT_SIZE * 100.0, 10, 1000);
-}
-
-
-/* line-height as a percent of the natural line box. A unitless multiplier ("1.5" ->
- * 150) or a percent ("160%" -> 160); "normal" is unset (the UA default). Absolute px/em
- * line-heights need a font size we don't have here, so they are dropped (return -1).
- * Clamped to [CSS_LINE_MIN, CSS_LINE_MAX] (anti-DoS). */
-static int interp_lineheight(const char *v) {
-    if (csel_ci_eq(v, "normal")) return 0;
-    double num;
-    const char *end;
-    if (!parse_num(v, &num, &end)) return -1;
-    while (*end == ' ' || *end == '\t') ++end;
-    double pct;
-    if (end[0] == '\0')                       pct = num * 100.0; /* unitless */
-    else if (end[0] == '%' && end[1] == '\0') pct = num;
-    else {
-        /* Any real <length> -- including pt/pc/cm/ex/ch, all of which used to be
-         * dropped here while px and em were accepted. Stored as a percentage of
-         * the CSS initial font-size; layout re-multiplies it by the fragment's
-         * own font-size (CSS 2.1 section 10.8.1). */
-        double px;
-        if (!length_px(v, &px)) return -1;
-        pct = px / CL_INITIAL_FONT_SIZE * 100.0;
-    }
-    return round_clamp(pct, CSS_LINE_MIN, CSS_LINE_MAX);
-}
-
-static int interp_weight(const char *v) {
-    if (csel_ci_eq(v, "bold") || csel_ci_eq(v, "bolder")) return 1;
-    if (csel_ci_eq(v, "normal") || csel_ci_eq(v, "lighter")) return 0;
-    double num;
-    const char *end;
-    if (parse_num(v, &num, &end) && *end == '\0') return num >= 600.0 ? 1 : 0;
-    return -1;
-}
-
-static int interp_style(const char *v) {
-    if (csel_ci_eq(v, "italic") || csel_ci_eq(v, "oblique")) return 1;
-    if (csel_ci_eq(v, "normal")) return 0;
-    return -1;
-}
-
-/* text-decoration / text-decoration-line: OR of the line keywords underline /
- * overline / line-through found in the (space-separated) value. "none" -> 0
- * (explicit removal). Style/color/thickness tokens (wavy, red, 2px, solid, ...) are
- * ignored. A value carrying no line keyword at all is unsupported -> -1 (dropped). */
-static int interp_textdeco(const char *v) {
-    int bits = 0, saw_keyword = 0;
-    const char *p = v;
-    while (*p != '\0') {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        char tok[CSS_TOK_MAX];
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-        tok[k] = '\0';
-        while (*p != '\0' && *p != ' ' && *p != '\t') ++p;  /* drop an over-long token tail */
-        if (csel_ci_eq(tok, "none")) return 0;
-        else if (csel_ci_eq(tok, "underline"))    { bits |= CSS_DECO_UNDERLINE;    saw_keyword = 1; }
-        else if (csel_ci_eq(tok, "overline"))     { bits |= CSS_DECO_OVERLINE;     saw_keyword = 1; }
-        else if (csel_ci_eq(tok, "line-through")) { bits |= CSS_DECO_LINE_THROUGH; saw_keyword = 1; }
-        /* anything else (style/color/thickness): ignored */
-    }
-    return saw_keyword ? bits : -1;
-}
-
-static int interp_display(const char *v) {
-    if (csel_ci_eq(v, "none")) return CSS_DISP_NONE;
-    if (csel_ci_eq(v, "block")) return CSS_DISP_BLOCK;
-    if (csel_ci_eq(v, "inline")) return CSS_DISP_INLINE;
-    if (csel_ci_eq(v, "inline-block")) return CSS_DISP_INLINE_BLOCK;
-    if (csel_ci_eq(v, "list-item")) return CSS_DISP_LIST_ITEM;
-    if (csel_ci_eq(v, "flex") || csel_ci_eq(v, "inline-flex")) return CSS_DISP_FLEX;
-    if (csel_ci_eq(v, "grid") || csel_ci_eq(v, "inline-grid")) return CSS_DISP_GRID;
-    /* The table roles (CSS 2.1 17.2). Dropping these collapsed every CSS-built table
-     * to one cell per row; see spec/css.md "display de la familia tabla". */
-    if (csel_ci_eq(v, "table") || csel_ci_eq(v, "inline-table")) return CSS_DISP_TABLE;
-    if (csel_ci_eq(v, "table-row")) return CSS_DISP_TABLE_ROW;
-    if (csel_ci_eq(v, "table-cell")) return CSS_DISP_TABLE_CELL;
-    if (csel_ci_eq(v, "table-caption")) return CSS_DISP_TABLE_CAPTION;
-    if (csel_ci_eq(v, "table-row-group") || csel_ci_eq(v, "table-header-group")
-        || csel_ci_eq(v, "table-footer-group")) return CSS_DISP_TABLE_ROW_GROUP;
-    if (csel_ci_eq(v, "table-column") || csel_ci_eq(v, "table-column-group"))
-        return CSS_DISP_TABLE_COLUMN;
-    /* `flow-root` is a block box that establishes a block formatting context
-     * (CSS Display 3 2.1) -- the modern clearfix. This engine gives every block
-     * box its own formatting context already, so `block` IS its used behaviour
-     * here; the distinction it draws is one this layout cannot currently observe.
-     * The two-keyword `display: <outer> <inner>` forms of Display 3 2 reduce the
-     * same way: the OUTER keyword is what the box model reads. */
-    if (csel_ci_eq(v, "flow-root") || csel_ci_eq(v, "block flow") ||
-        csel_ci_eq(v, "block flow-root")) return CSS_DISP_BLOCK;
-    if (csel_ci_eq(v, "inline flow-root")) return CSS_DISP_INLINE_BLOCK;
-    if (csel_ci_eq(v, "block flex") || csel_ci_eq(v, "inline flex"))
-        return CSS_DISP_FLEX;
-    if (csel_ci_eq(v, "block grid") || csel_ci_eq(v, "inline grid"))
-        return CSS_DISP_GRID;
-    /* The vendor spellings of `flex` ARE `flex`: -webkit-flex and -ms-flexbox name
-     * the same formatting context with the same box model, so an autoprefixed sheet
-     * that writes both gets one answer either way. */
-    if (csel_ci_eq(v, "-webkit-flex") || csel_ci_eq(v, "-moz-flex") ||
-        csel_ci_eq(v, "-ms-flexbox") ||
-        csel_ci_eq(v, "-webkit-inline-flex") || csel_ci_eq(v, "-moz-inline-flex") ||
-        csel_ci_eq(v, "-ms-inline-flexbox")) return CSS_DISP_FLEX;
-    if (csel_ci_eq(v, "-ms-grid") || csel_ci_eq(v, "-ms-inline-grid"))
-        return CSS_DISP_GRID;
-    /* `-webkit-box` / `-webkit-flexbox` is the 2009 flexbox draft. It is a
-     * DIFFERENT spec, but the difference is in the item properties (box-flex,
-     * box-pack, box-orient), not in the container's box: it is a block-level box
-     * whose children lay out along one axis, which is what CSS_DISP_FLEX models
-     * here. Leaving it unset was not neutral -- it is the container half of the
-     * `-webkit-line-clamp` idiom (Overflow 3 "Legacy"), so dropping it dropped
-     * every clamped card title with it. The single-axis default of the 2009 draft
-     * is horizontal, same as flex-direction's, so the mapping needs no extra rule;
-     * `-webkit-box-orient: vertical` supplies the column case and is handled as an
-     * alias of flex-direction. */
-    if (csel_ci_eq(v, "-webkit-box") || csel_ci_eq(v, "-moz-box") ||
-        csel_ci_eq(v, "-webkit-inline-box") || csel_ci_eq(v, "-moz-inline-box"))
-        return CSS_DISP_FLEX;
-    /* `contents` makes the element generate no box of its own while its children
-     * still generate theirs (Display 3 3). This engine has no box-less pass-through,
-     * and treating it as `none` would DELETE the subtree -- the opposite of what it
-     * means -- so it reduces to the element's normal block box, which keeps every
-     * child rendered. */
-    if (csel_ci_eq(v, "contents")) return CSS_DISP_BLOCK;
-    if (csel_ci_eq(v, "inline-list-item")) return CSS_DISP_LIST_ITEM;
-    /* Ruby has no formatting context here; its boxes are inline (Ruby 1 2). */
-    if (csel_ci_eq(v, "ruby") || csel_ci_eq(v, "ruby-base") ||
-        csel_ci_eq(v, "ruby-text") || csel_ci_eq(v, "ruby-base-container") ||
-        csel_ci_eq(v, "ruby-text-container")) return CSS_DISP_INLINE;
-    return -1;  /* unknown display: leave unset */
-}
-
-/* gap / grid-gap / column-gap: leading length as px (a two-value gap keeps the
- * first), "normal" -> 0; clamped to [0, CSS_GAP_MAX]. -1 when not a length. */
-static int interp_len(const char *v, int allow_auto, int *out);
-static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap);
-
-/* One gap length. Reuses interp_len (px / em / rem / bare 0 / calc() / math
- * functions), so a `gap: 1em` is 16px instead of the old misparse-as-1px, and a
- * trailing junk token fails closed. Negative fails; clamped to CSS_GAP_MAX. */
-static int interp_gap(const char *v) {
-    if (csel_ci_eq(v, "normal")) return 0;
-    int px;
-    if (!interp_len(v, 0, &px) || px < 0) return -1;
-    return (px > CSS_GAP_MAX) ? CSS_GAP_MAX : px;
-}
-
-static int interp_justify(const char *v) {
-    if (csel_ci_eq(v, "flex-start") || csel_ci_eq(v, "start") || csel_ci_eq(v, "normal"))
-        return CSS_JUSTIFY_START;
-    if (csel_ci_eq(v, "flex-end") || csel_ci_eq(v, "end")) return CSS_JUSTIFY_END;
-    if (csel_ci_eq(v, "center")) return CSS_JUSTIFY_CENTER;
-    if (csel_ci_eq(v, "space-between")) return CSS_JUSTIFY_SPACE_BETWEEN;
-    if (csel_ci_eq(v, "space-around")) return CSS_JUSTIFY_SPACE_AROUND;
-    if (csel_ci_eq(v, "space-evenly")) return CSS_JUSTIFY_SPACE_EVENLY;
-    return -1;  /* unknown: fail closed */
-}
-
-/* grid-template-columns / grid-template-rows: counts the tracks in a track-list,
- * paren-aware (a token may contain balanced parens, e.g. "minmax(100px, 1fr)", and
- * is then ONE track, not split by its internal comma/space) and expanding
- * repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern).
- * repeat(auto-fill|...) / repeat(auto-fit|...) need an available width this pure
- * parser does not have, so they fail the WHOLE value (return -1), like %/vw
- * elsewhere in this module -- never a wrong guess. A malformed repeat() (no comma,
- * non-integer count) likewise fails the whole value.
- * TRACK SIZES (2026-07-11): the walker optionally resolves the size of each of the
- * first `szcap` tracks into `sizes` (0 auto / >0 px / <0 fr x100 -- see
- * css_style.grid_col_w); *pos is the running track index across the recursion.
- * count_tracks (sizes == NULL) keeps the count-only behaviour. */
-static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos);
-static int starts_with_ci(const char *s, const char *pre);
-
-static int count_tracks(const char *s, size_t n) {
-    int pos = 0;
-    return walk_tracks(s, n, NULL, 0, &pos);
-}
-
-/* Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0);
- * minmax(a,b) -> the size of its max component b; auto/%/unknown -> 0 (an equal
- * `auto` share downstream, never a wrong guess). */
-static int track_size_of(const char *tok) {
-    size_t len = strlen(tok);
-    if (len > 7 && starts_with_ci(tok, "minmax(") && tok[len - 1] == ')') {
-        /* take the max component: the part after the top-level comma */
-        size_t comma = 0;
-        int depth = 0;
-        for (size_t k = 7; k + 1 < len; ++k) {
-            if (tok[k] == '(') ++depth;
-            else if (tok[k] == ')') --depth;
-            else if (tok[k] == ',' && depth == 0) { comma = k; break; }
-        }
-        if (comma == 0) return 0;
-        char mx[CSS_TOK_MAX];
-        size_t a = comma + 1, b = len - 1;
-        while (a < b && (tok[a] == ' ' || tok[a] == '\t')) ++a;
-        while (b > a && (tok[b - 1] == ' ' || tok[b - 1] == '\t')) --b;
-        if (a >= b || b - a >= sizeof mx) return 0;
-        memcpy(mx, tok + a, b - a);
-        mx[b - a] = '\0';
-        return track_size_of(mx);
-    }
-    double num;
-    const char *end;
-    if (parse_num(tok, &num, &end) && csel_ci_eq(end, "fr") && num > 0.0)
-        return -round_clamp(num * 100.0, 1, CSS_FLEX_FACTOR_MAX);
-    int px;
-    if (interp_len(tok, 0, &px) && px > 0) return px;
-    return 0;
-}
-
-static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
-                            int *sizes, int szcap, int *pos) {
-    size_t inner_a = tokstart + 7;                  /* past "repeat(" */
-    size_t inner_b = tokstart + toklen - 1;          /* before the matching ')' */
-    size_t comma = inner_b;
-    int depth = 0;
-    for (size_t k = inner_a; k < inner_b; ++k) {
-        if (s[k] == '(') ++depth;
-        else if (s[k] == ')') --depth;
-        else if (s[k] == ',' && depth == 0) { comma = k; break; }
-    }
-    if (comma >= inner_b) return -1;                 /* no comma: malformed */
-    size_t ca = inner_a, cb = comma;
-    while (ca < cb && (s[ca] == ' ' || s[ca] == '\t')) ++ca;
-    while (cb > ca && (s[cb - 1] == ' ' || s[cb - 1] == '\t')) --cb;
-    char cbuf[CSS_TOK_MAX];
-    size_t clen = cb - ca;
-    if (clen == 0 || clen >= sizeof cbuf) return -1;
-    memcpy(cbuf, s + ca, clen);
-    cbuf[clen] = '\0';
-    if (csel_ci_eq(cbuf, "auto-fill") || csel_ci_eq(cbuf, "auto-fit")) return -1;
-    double num;
-    const char *end;
-    if (!parse_num(cbuf, &num, &end) || *end != '\0' || num < 1.0) return -1;
-    int reps = round_clamp(num, 1, (int)CSS_GRID_COLS_MAX);
-    /* Walk the pattern once (its own sizes into a local buffer), then replicate. */
-    int inner_sz[CSS_GRID_TRACKS_MAX];
-    int inner_pos = 0;
-    int inner_tracks = walk_tracks(s + comma + 1, inner_b - (comma + 1),
-                                   (sizes != NULL) ? inner_sz : NULL,
-                                   (sizes != NULL) ? CSS_GRID_TRACKS_MAX : 0,
-                                   &inner_pos);
-    if (inner_tracks < 1) return -1;
-    for (int r = 0; r < reps; ++r)
-        for (int t = 0; t < inner_tracks; ++t) {
-            if (sizes != NULL && *pos < szcap)
-                sizes[*pos] = (t < CSS_GRID_TRACKS_MAX) ? inner_sz[t] : 0;
-            if (*pos < (int)CSS_GRID_COLS_MAX) ++(*pos);
-        }
-    long total = (long)reps * (long)inner_tracks;
-    return (total > (long)CSS_GRID_COLS_MAX) ? (int)CSS_GRID_COLS_MAX : (int)total;
-}
-
-static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos) {
-    int total = 0;
-    size_t i = 0;
-    while (i < n) {
-        while (i < n && (s[i] == ' ' || s[i] == '\t')) ++i;
-        if (i >= n) break;
-        size_t start = i;
-        int depth = 0;
-        while (i < n) {
-            if (s[i] == '(') ++depth;
-            else if (s[i] == ')') { if (depth > 0) --depth; }
-            else if (depth == 0 && (s[i] == ' ' || s[i] == '\t')) break;
-            ++i;
-        }
-        size_t toklen = i - start;
-        int is_repeat = toklen > 7 && s[start + toklen - 1] == ')' &&
-            csel_lower_ch(s[start]) == 'r' && csel_lower_ch(s[start + 1]) == 'e' &&
-            csel_lower_ch(s[start + 2]) == 'p' && csel_lower_ch(s[start + 3]) == 'e' &&
-            csel_lower_ch(s[start + 4]) == 'a' && csel_lower_ch(s[start + 5]) == 't' &&
-            s[start + 6] == '(';
-        if (is_repeat) {
-            int rc = count_one_repeat(s, start, toklen, sizes, szcap, pos);
-            if (rc < 0) return -1;
-            total += rc;
-        } else {
-            if (sizes != NULL && *pos < szcap) {
-                char tok[CSS_TOK_MAX];
-                if (toklen < sizeof tok) {
-                    memcpy(tok, s + start, toklen);
-                    tok[toklen] = '\0';
-                    sizes[*pos] = track_size_of(tok);
-                } else {
-                    sizes[*pos] = 0;   /* overlong token: auto */
-                }
-            }
-            if (*pos < (int)CSS_GRID_COLS_MAX) ++(*pos);
-            total += 1;
-        }
-        if (total > (int)CSS_GRID_COLS_MAX) total = (int)CSS_GRID_COLS_MAX;
-    }
-    return total;
-}
-
-/* grid-template-columns / -rows: track count via count_tracks (repeat()/minmax()
- * aware), clamped to [1, CSS_GRID_COLS_MAX]. "none"/empty -> -1 (unset). url()
- * defensively dropped (never reachable in practice: a track size cannot be a URL,
- * but this mirrors the same guard the other properties carry). */
-static int interp_gridcols(const char *v) {
-    if (csel_substr(v, "url(", 1)) return -1;
-    if (csel_ci_eq(v, "none")) return -1;
-    int n = count_tracks(v, strlen(v));
-    if (n < 1) return -1;
-    if (n > CSS_GRID_COLS_MAX) n = CSS_GRID_COLS_MAX;
-    return n;
-}
-
-/* grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track
- * sizes, emitted in lock-step (P_GRIDCOLS + P_GRID_TRACK0..7; unsized slots emit
- * 0 = auto so a higher-tier declaration fully resets a lower-tier one).
- * none/url()/malformed drop the declaration, exactly like interp_gridcols. */
-static int expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
-    if (csel_substr(val, "url(", 1)) return 0;
-    if (csel_ci_eq(val, "none")) return 0;
-    int sizes[CSS_GRID_TRACKS_MAX] = { 0 };
-    int pos = 0;
-    int n = walk_tracks(val, strlen(val), sizes, CSS_GRID_TRACKS_MAX, &pos);
-    if (n < 1) return 0;
-    if (n > CSS_GRID_COLS_MAX) n = CSS_GRID_COLS_MAX;
-    if (cap < 1 + CSS_GRID_TRACKS_MAX) return 0;
-    dst[0].prop = P_GRIDCOLS;
-    dst[0].ival = n;
-    for (int k = 0; k < CSS_GRID_TRACKS_MAX; ++k) {
-        dst[1 + k].prop = P_GRID_TRACK0 + k;
-        dst[1 + k].ival = sizes[k];
-    }
-    return 1 + CSS_GRID_TRACKS_MAX;
-}
-
-/* --- calc() for length values -------------------------------------------------
- *
- * A small recursive-descent evaluator over +, -, *, / and parens. Operands are
- * plain numbers or px/em/rem/vw/vh/vmin/vmax lengths -- the same units interp_len
- * itself accepts (no %: this engine has no containing block to resolve it
- * against, so calc() cannot reach further than interp_len already can). Bounded:
- * the whole expression already lives inside one CSS_TOK_MAX (64-byte) token,
- * and CSS_CALC_MAX_DEPTH additionally caps parenthesis nesting -- never unbounded
- * recursion. Dimensionally checked like real calc(): +/- require both sides to be
- * the same "shape" (both lengths, or both bare numbers); * requires at least one
- * bare-number side; / requires a bare-number, non-zero divisor. A bare-number
- * *result* (e.g. calc(2 * 3), no length anywhere) is not a valid length -> fails. */
-#define CSS_CALC_MAX_DEPTH 8
-
-/* Max arguments of one min()/max() call (clamp() takes exactly three). More fail
- * the declaration (anti-DoS; the whole value already fits one CSS_TOK_MAX token). */
-#define CSS_MATHFN_MAX_ARGS 8
-
-/* A calc() term: its value at the parse context PLUS its derivative with
- * respect to the element's font-size (spec/css_length.md section 8.4). Carrying
- * `em` through the arithmetic is what makes `calc(2em + 10px)` exact at any
- * font-size instead of frozen at the initial 16px. */
-/* `pct` is the percentage component, carried through the arithmetic exactly like
- * `em` and for exactly the same reason: a calc() result is the affine combination
- * a*1px + b*1em + c*1%, and CSS Values 4 section 10 lets an author mix all three.
- * Collapsing the percentage at parse time is impossible -- its basis is the
- * containing block, which the element-free cascade does not know -- so it travels
- * symbolically to bx_lp_px, the one place a percentage becomes pixels.
- *
- * Before this, calc() understood no percentage at all, so `width: calc(100% - 2rem)`
- * -- the single most common responsive idiom on the web -- was dropped whole. */
-typedef struct calc_val { double px; double em; double pct; int is_length; } calc_val;
-typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
-
-static void calc_skip_ws(calc_parser *p) {
-    while (p->i < p->n && (p->s[p->i] == ' ' || p->s[p->i] == '\t')) ++p->i;
-}
-
-static int calc_expr(calc_parser *p, calc_val *out, int depth);
-
-/* Consumes "name(" (case-insensitive) at the cursor; 0 leaves the cursor put. */
-static int calc_match_fn(calc_parser *p, const char *name) {
-    size_t len = strlen(name);
-    if (p->i + len + 1 > p->n) return 0;
-    for (size_t k = 0; k < len; ++k)
-        if (csel_lower_ch(p->s[p->i + k]) != name[k]) return 0;
-    if (p->s[p->i + len] != '(') return 0;
-    p->i += len + 1;
-    return 1;
-}
-
-/*
- * The font-size derivative of a min()/max()/clamp() result.
- *
- * These are piecewise linear, not affine: WHICH operand wins depends on the
- * font-size, so once two operands disagree about their derivative the result
- * has no single slope and cannot be folded later. That fails closed to 0 --
- * i.e. the value stays frozen at the initial context, which is exactly what the
- * engine did before font-relative folding existed. Inventing a slope would be
- * worse than keeping the old answer.
- *
- * When every operand shares one derivative the result provably has it too,
- * whichever operand wins, so that case IS exact and is kept.
- */
-/* Shared by BOTH symbolic components: the percentage is piecewise for exactly the
- * same reason the em derivative is -- which operand min()/max()/clamp() selects
- * depends on the containing block, which is unknown here -- so it obeys the same
- * rule instead of a second copy of it. want_pct selects the component. */
-static double calc_piecewise(const calc_val *args, int nargs, int want_pct) {
-    if (nargs <= 0) return 0.0;
-    double first = want_pct ? args[0].pct : args[0].em;
-    for (int k = 1; k < nargs; ++k) {
-        double v = want_pct ? args[k].pct : args[k].em;
-        if (v != first) return 0.0;
-    }
-    return first;
-}
-
-/* min()/max()/clamp() (2026-07-10): comma-separated full expressions, every
- * argument the same shape (all lengths or all bare numbers, like +/-). clamp(lo,
- * mid, hi) is max(lo, min(mid, hi)) per CSS and takes exactly three arguments;
- * min/max take 1..CSS_MATHFN_MAX_ARGS. Depth-bounded with the parens. kind: 0
- * min, 1 max, 2 clamp. */
-static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind) {
-    if (depth >= CSS_CALC_MAX_DEPTH) return 0;
-    calc_val args[CSS_MATHFN_MAX_ARGS];
-    int nargs = 0;
-    for (;;) {
-        if (nargs >= CSS_MATHFN_MAX_ARGS) return 0;
-        if (!calc_expr(p, &args[nargs], depth + 1)) return 0;
-        ++nargs;
-        calc_skip_ws(p);
-        if (p->i < p->n && p->s[p->i] == ',') { ++p->i; continue; }
-        break;
-    }
-    if (p->i >= p->n || p->s[p->i] != ')') return 0;
-    ++p->i;
-    for (int k = 1; k < nargs; ++k)
-        if (args[k].is_length != args[0].is_length) return 0;
-    /* A PERCENTAGE inside min()/max()/clamp() is not resolvable here and must fail
-     * closed, not degrade. Unlike the em derivative -- where falling back to slope
-     * 0 still leaves a valid pixel value -- the comparison itself is meaningless
-     * without the basis: min(50%, 600px) would compare a px half of 0 against 600
-     * and pick 0, i.e. collapse the element to zero width. Dropping the declaration
-     * leaves the element at its content size, which is the honest answer.
-     * Percentages in a plain calc() ARE resolvable (they stay symbolic and are
-     * summed later); only the piecewise functions have to refuse. */
-    for (int k = 0; k < nargs; ++k)
-        if (args[k].pct != 0.0) return 0;
-    if (kind == 2) {
-        if (nargs != 3) return 0;
-        double m = (args[1].px < args[2].px) ? args[1].px : args[2].px;
-        out->px = (args[0].px > m) ? args[0].px : m;
-        out->em  = calc_piecewise(args, nargs, 0);
-        out->pct = calc_piecewise(args, nargs, 1);
-        out->is_length = args[0].is_length;
-        return 1;
-    }
-    double best = args[0].px;
-    for (int k = 1; k < nargs; ++k) {
-        if (kind == 0) { if (args[k].px < best) best = args[k].px; }
-        else           { if (args[k].px > best) best = args[k].px; }
-    }
-    out->px = best;
-    out->em  = calc_piecewise(args, nargs, 0);
-    out->pct = calc_piecewise(args, nargs, 1);
-    out->is_length = args[0].is_length;
-    return 1;
-}
-
-/* One number or length token, a parenthesized sub-expression, a nested calc(),
- * or a math function call (min/max/clamp). */
-static int calc_factor(calc_parser *p, calc_val *out, int depth) {
-    calc_skip_ws(p);
-    if (calc_match_fn(p, "min"))   return calc_mathfn(p, out, depth, 0);
-    if (calc_match_fn(p, "max"))   return calc_mathfn(p, out, depth, 1);
-    if (calc_match_fn(p, "clamp")) return calc_mathfn(p, out, depth, 2);
-    if (calc_match_fn(p, "calc")) {          /* nested calc(): plain grouping */
-        if (depth >= CSS_CALC_MAX_DEPTH) return 0;
-        if (!calc_expr(p, out, depth + 1)) return 0;
-        calc_skip_ws(p);
-        if (p->i >= p->n || p->s[p->i] != ')') return 0;
-        ++p->i;
-        return 1;
-    }
-    if (p->i < p->n && p->s[p->i] == '(') {
-        if (depth >= CSS_CALC_MAX_DEPTH) return 0;
-        ++p->i;
-        if (!calc_expr(p, out, depth + 1)) return 0;
-        calc_skip_ws(p);
-        if (p->i >= p->n || p->s[p->i] != ')') return 0;
-        ++p->i;
-        return 1;
-    }
-    int neg = 0;
-    if (p->i < p->n && (p->s[p->i] == '+' || p->s[p->i] == '-')) {
-        neg = (p->s[p->i] == '-');
-        ++p->i;
-        calc_skip_ws(p);
-    }
-    double num;
-    const char *end;
-    if (!parse_num(p->s + p->i, &num, &end)) return 0;
-    p->i += (size_t)(end - (p->s + p->i));
-    if (neg) num = -num;
-    /* Collect the unit identifier that follows the number and resolve it
-     * through the canonical table, so calc() understands exactly the same set
-     * of units as a plain declaration -- it used to know only px/em/rem and the
-     * viewport units, which made `calc(100% - 12pt)` fail as a whole while
-     * `calc(100% - 12px)` worked. A run that is not a length unit falls through
-     * to the bare-number path, whose leftover characters then fail the whole
-     * expression (fail closed). */
-    size_t un = 0;
-    while (p->i + un < p->n && un < CL_MAX_TOKEN) {
-        char c = csel_lower_ch(p->s[p->i + un]);
-        if (c < 'a' || c > 'z') break;
-        ++un;
-    }
-    if (un > 0) {
-        cl_ctx ctx = css_len_ctx();
-        double per;
-        if (cl_unit_scale(p->s + p->i, un, &ctx, &per) == CL_OK) {
-            out->px = num * per;
-            out->em = num * cl_unit_font_ratio(p->s + p->i, un);
-            out->pct = 0.0;
-            out->is_length = 1; p->i += un; return 1;
-        }
-    }
-    if (p->i < p->n && p->s[p->i] == '%') {
-        out->px = 0.0;
-        out->em = 0.0;
-        out->pct = num;
-        out->is_length = 1;   /* a <percentage> is dimensional, like a length */
-        ++p->i;
-        return 1;
-    }
-    out->px = num;                      /* a bare number: length only if exactly 0 */
-    out->em = 0.0;
-    out->pct = 0.0;
-    out->is_length = (num == 0.0);
-    return 1;
-}
-
-/* '*' and '/' bind tighter than '+'/'-'. */
-static int calc_term(calc_parser *p, calc_val *out, int depth) {
-    if (!calc_factor(p, out, depth)) return 0;
-    for (;;) {
-        calc_skip_ws(p);
-        if (p->i >= p->n || (p->s[p->i] != '*' && p->s[p->i] != '/')) break;
-        char op = p->s[p->i++];
-        calc_val rhs;
-        if (!calc_factor(p, &rhs, depth)) return 0;
-        if (op == '*') {
-            if (out->is_length && rhs.is_length) return 0;   /* length*length: invalid */
-            out->em = out->em * rhs.px + rhs.em * out->px;
-            out->pct = out->pct * rhs.px + rhs.pct * out->px;
-            out->px = out->px * rhs.px;
-            out->is_length = out->is_length || rhs.is_length;
-        } else {
-            if (rhs.is_length || rhs.px == 0.0) return 0;    /* divisor must be a nonzero number */
-            out->px = out->px / rhs.px;
-            out->em = out->em / rhs.px;
-            out->pct = out->pct / rhs.px;
-        }
-    }
-    return 1;
-}
-
-static int calc_expr(calc_parser *p, calc_val *out, int depth) {
-    if (!calc_term(p, out, depth)) return 0;
-    for (;;) {
-        calc_skip_ws(p);
-        if (p->i >= p->n || (p->s[p->i] != '+' && p->s[p->i] != '-')) break;
-        char op = p->s[p->i++];
-        calc_val rhs;
-        if (!calc_term(p, &rhs, depth)) return 0;
-        if (out->is_length != rhs.is_length) return 0;       /* length +/- number: invalid */
-        out->px = (op == '+') ? out->px + rhs.px : out->px - rhs.px;
-        out->em = (op == '+') ? out->em + rhs.em : out->em - rhs.em;
-        out->pct = (op == '+') ? out->pct + rhs.pct : out->pct - rhs.pct;
-    }
-    return 1;
-}
-
-/* Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching
- * ")" already stripped by the caller). Fails closed on any leftover/unparsed input,
- * mismatched parens, a dimensionless result, or a dimensional error. */
-static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
-                          double *out_pct) {
-    calc_parser p = { v, vlen, 0 };
-    calc_val r;
-    if (!calc_expr(&p, &r, 0)) return 0;
-    calc_skip_ws(&p);
-    if (p.i != vlen || !r.is_length) return 0;
-    *out_px = r.px;
-    if (out_em != NULL) *out_em = r.em;
-    if (out_pct != NULL) *out_pct = r.pct;
-    return 1;
-}
-
-/* The pure-length entry point: a percentage in the expression makes the result a
- * <length-percentage>, which this caller's property does not accept, so it fails
- * closed here rather than silently dropping the percentage term. */
-static int calc_eval(const char *v, size_t vlen, double *out_px) {
-    double pct = 0.0;
-    if (!calc_eval_full(v, vlen, out_px, NULL, &pct)) return 0;
-    return pct == 0.0;
-}
-
-/* The font-size derivative of a calc() body, for value_em_milli. */
-static int calc_eval_em(const char *v, size_t vlen, double *out_em) {
-    double px;
-    return calc_eval_full(v, vlen, &px, out_em, NULL);
-}
-
-/* True if s (already trimmed) is a "calc(...)" call spanning the whole string
- * (case-insensitive keyword, balanced trailing paren); on success the argument
- * span is written to *inner_start / *inner_len. */
-static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len) {
-    size_t n = strlen(s);
-    if (n < 6) return 0;   /* "calc()" minimum */
-    if (csel_lower_ch(s[0]) != 'c' || csel_lower_ch(s[1]) != 'a' || csel_lower_ch(s[2]) != 'l' ||
-        csel_lower_ch(s[3]) != 'c' || s[4] != '(' || s[n - 1] != ')')
-        return 0;
-    *inner_start = 5;
-    *inner_len = n - 6;
-    return 1;
-}
-
-/* Parses one box-model length. Accepts "Npx", a bare "0", "Nem"/"Nrem" (x16 px,
- * the engine's base font), viewport units (vw/vh/vmin/vmax vs the normalized
- * 1920x1080 viewport; see viewport_unit_px), "calc(...)" over the same units
- * (+, -, *, /, parens; see calc_eval), and (when allow_auto) "auto". Rejects %
- * and bare non-zero numbers outside calc() (fail closed: they need a containing
- * block the parser does not have). Returns 1 with *out = CSS_LEN_AUTO or a
- * signed px clamped to [-CSS_LEN_MAX, CSS_LEN_MAX]; 0 if unsupported. */
 static int interp_len(const char *v, int allow_auto, int *out) {
-    if (allow_auto && csel_ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
-
-    size_t cs, cl;
-    if (calc_unwrap(v, &cs, &cl)) {
-        double px;
-        if (!calc_eval(v + cs, cl, &px)) return 0;
-        *out = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
-        return 1;
-    }
-    /* A bare math-function value (min()/max()/clamp() without a calc() wrapper).
-     * The m/c prefix check keeps plain lengths off the calc machinery; the whole
-     * value must be exactly one function call whose result is a length. */
-    if (csel_lower_ch(v[0]) == 'm' || csel_lower_ch(v[0]) == 'c') {
-        size_t n = strlen(v);
-        calc_parser p = { v, n, 0 };
-        int kind = -1;
-        if (calc_match_fn(&p, "min")) kind = 0;
-        else if (calc_match_fn(&p, "max")) kind = 1;
-        else if (calc_match_fn(&p, "clamp")) kind = 2;
-        if (kind >= 0) {
-            calc_val r;
-            if (!calc_mathfn(&p, &r, 0, kind)) return 0;
-            calc_skip_ws(&p);
-            if (p.i != n || !r.is_length) return 0;
-            *out = round_clamp(r.px, -CSS_LEN_MAX, CSS_LEN_MAX);
-            return 1;
-        }
-    }
-
-    /* Every unit CSS defines as a <length>, through the one canonical resolver.
-     * This used to be a private four-unit table that silently dropped pt (and
-     * pc/cm/mm/in/Q/ex/ch/lh), so a page written in points -- Hacker News, for
-     * one -- lost every padding, margin and width it declared. */
-    double px;
-    if (!length_px(v, &px)) return 0;
-    *out = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
-    return 1;
+    return cb_interp_len(v, allow_auto, out);
 }
 
-/* The css_pct_slot mirroring a px length slot, or -1 when the property does not
- * accept the <length-percentage> type. ONE table, so adding a percentage-capable
- * property is one row here and nothing else -- and so a property that must keep
- * rejecting `%` (letter-spacing, border-width, ...) does so by simply not
- * appearing. */
-static int pct_slot_of(int slot) {
-    switch (slot) {
-        case P_MARGIN_TOP:    return CSS_PCT_MARGIN_TOP;
-        case P_MARGIN_RIGHT:  return CSS_PCT_MARGIN_RIGHT;
-        case P_MARGIN_BOTTOM: return CSS_PCT_MARGIN_BOTTOM;
-        case P_MARGIN_LEFT:   return CSS_PCT_MARGIN_LEFT;
-        case P_PAD_TOP:       return CSS_PCT_PAD_TOP;
-        case P_PAD_RIGHT:     return CSS_PCT_PAD_RIGHT;
-        case P_PAD_BOTTOM:    return CSS_PCT_PAD_BOTTOM;
-        case P_PAD_LEFT:      return CSS_PCT_PAD_LEFT;
-        case P_WIDTH:         return CSS_PCT_WIDTH;
-        case P_MAXWIDTH:      return CSS_PCT_MAX_WIDTH;
-        case P_MINWIDTH:      return CSS_PCT_MIN_WIDTH;
-        case P_HEIGHT:        return CSS_PCT_HEIGHT;
-        case P_MINHEIGHT:     return CSS_PCT_MIN_HEIGHT;
-        case P_MAXHEIGHT:     return CSS_PCT_MAX_HEIGHT;
-        case P_INSET_TOP:     return CSS_PCT_INSET_TOP;
-        case P_INSET_RIGHT:   return CSS_PCT_INSET_RIGHT;
-        case P_INSET_BOTTOM:  return CSS_PCT_INSET_BOTTOM;
-        case P_INSET_LEFT:    return CSS_PCT_INSET_LEFT;
-        case P_TEXTINDENT:    return CSS_PCT_TEXT_INDENT;
-        case P_BORDER_RADIUS: return CSS_PCT_RADIUS_TL;
-        case P_RADIUS_TR:     return CSS_PCT_RADIUS_TR;
-        case P_RADIUS_BR:     return CSS_PCT_RADIUS_BR;
-        case P_RADIUS_BL:     return CSS_PCT_RADIUS_BL;
-        case P_TRANSFORM_TX:  return CSS_PCT_TRANSLATE_X;
-        case P_TRANSFORM_TY:  return CSS_PCT_TRANSLATE_Y;
-        case P_FLEX_BASIS:    return CSS_PCT_FLEX_BASIS;
-        default:              return -1;
-    }
-}
-
-/* Parses one <length-percentage> into its two components: *out_px (a px value,
- * CSS_LEN_AUTO, or 0 when the value is a pure percentage) and *out_pm (the
- * percentage in per-mille, 0 when there is none). Percentages are accepted only
- * when the caller asks (allow_pct), which is how properties whose grammar is a
- * bare <length> keep failing closed.
- *
- * calc() is resolved by the existing evaluator, which works in px and has no
- * containing block, so a calc() MIXING a percentage with a length still fails
- * closed rather than silently dropping the percentage half. */
-/* The font-relative derivative of `v`, in thousandths of an em, saturating at
- * CSS_EM_MILLI_MAX. Zero for anything that does not move with the font-size --
- * which includes a plain px value, a percentage, `auto`, and any value this
- * module could not parse as a length at all.
- *
- * Deliberately re-resolves rather than being plumbed through interp_len's 17
- * call sites: the derivative is a property of the VALUE TEXT, so asking the one
- * canonical resolver for it keeps a single source of truth. calc() answers for
- * its own sum via calc_eval; a bare token answers through cl_resolve_lp. */
-static int value_em_milli(const char *v) {
-    double em = 0.0;
-
-    size_t cs, cl;
-    if (calc_unwrap(v, &cs, &cl)) {
-        if (!calc_eval_em(v + cs, cl, &em)) return 0;
-    } else {
-        cl_ctx ctx = cl_ctx_initial();
-        cl_lp lp;
-        if (cl_resolve_lp(v, &ctx, &lp) != CL_OK) return 0;
-        em = lp.em;
-    }
-    if (!isfinite(em) || em == 0.0) return 0;
-
-    double milli = em * 1000.0;
-    if (milli >  (double)CSS_EM_MILLI_MAX) milli =  (double)CSS_EM_MILLI_MAX;
-    if (milli < -(double)CSS_EM_MILLI_MAX) milli = -(double)CSS_EM_MILLI_MAX;
-    return (int)(milli < 0.0 ? milli - 0.5 : milli + 0.5);
+static int length_px(const char *v, double *px) {
+    return cb_length_px(v, px);
 }
 
 static int interp_lp(const char *v, int allow_auto, int allow_pct,
                      int *out_px, int *out_pm) {
-    *out_pm = 0;
-    if (interp_len(v, allow_auto, out_px)) return 1;
-    if (!allow_pct) return 0;
-
-    /* calc() that MIXES a percentage with a length. interp_len above already ran
-     * the same expression and failed closed on the percentage term (its property
-     * may not accept one); here the property does, so both halves are kept and
-     * travel symbolically to bx_lp_px. `width: calc(100% - 2rem)` is the most
-     * common responsive idiom on the web and used to be dropped whole. */
-    size_t cs, cl;
-    if (calc_unwrap(v, &cs, &cl)) {
-        double px = 0.0, pct = 0.0;
-        if (!calc_eval_full(v + cs, cl, &px, NULL, &pct)) return 0;
-        double pm = pct * 10.0;
-        if (pm >  (double)CSS_PCT_MAX) pm =  (double)CSS_PCT_MAX;
-        if (pm < -(double)CSS_PCT_MAX) pm = -(double)CSS_PCT_MAX;
-        *out_pm = (int)(pm < 0.0 ? pm - 0.5 : pm + 0.5);
-        *out_px = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX);
-        return 1;
-    }
-
-    cl_ctx ctx = cl_ctx_initial();
-    cl_lp lp;
-    if (cl_resolve_lp(v, &ctx, &lp) != CL_OK || !lp.has_pct) return 0;
-
-    double pm = lp.pct * 10.0;
-    if (pm >  (double)CSS_PCT_MAX) pm =  (double)CSS_PCT_MAX;
-    if (pm < -(double)CSS_PCT_MAX) pm = -(double)CSS_PCT_MAX;
-    *out_pm = (int)(pm < 0.0 ? pm - 0.5 : pm + 0.5);
-    *out_px = round_clamp(lp.px, -CSS_LEN_MAX, CSS_LEN_MAX);
-    return 1;
+    return cb_interp_lp(v, allow_auto, allow_pct, out_px, out_pm);
 }
 
-/* Whether a <length-percentage> whose two halves are (px_val, pct_pm) can be
- * non-negative once its basis is known.
- *
- * A property that forbids negative values (width, padding, ...) cannot decide that
- * by looking at one half: `calc(100% - 6px)` has a NEGATIVE px half and a positive
- * percentage half, and its used value is positive for any containing block wider
- * than 6px. Rejecting on the px half alone dropped the single most common
- * responsive idiom on the web. CSS Values 4 section 10.1 is explicit that a
- * calc() result out of range is CLAMPED at used-value time, not invalid at parse
- * time -- so the only thing rejected here is a value that can never be positive.
- * The clamp itself belongs to the consumer of the used value, not to the cascade. */
 static int lp_can_be_nonneg(int px_val, int pct_pm) {
-    if (px_val == CSS_LEN_AUTO || px_val == CSS_LEN_UNSET) return 1;
-    if (px_val >= 0 && pct_pm >= 0) return 1;
-    /* Mixed signs: the basis decides, so it is representable. */
-    return (px_val < 0 && pct_pm > 0) || (pct_pm < 0 && px_val > 0);
+    return cb_lp_can_be_nonneg(px_val, pct_pm);
 }
 
-/* Emits one box length declaration for slot into dst (cap permitting). A negative
- * value is rejected unless allow_neg (margins allow it; padding/width do not).
- *
- * When the property accepts <length-percentage> (pct_slot_of(slot) >= 0) this
- * writes BOTH halves, always -- including a 0 percentage for a plain length.
- * Emitting only the half that changed would leave a lower-specificity `width:50%`
- * combining with a winning `width:200px`, which is exactly the cascade bug the
- * old separate P_WIDTH_PCT slot had.
- *
- * Returns the number of decls written (0 = unsupported value or no room). */
-/* How `auto` is treated for a given <length-percentage> slot.
- *
- * The distinction is not cosmetic. On a margin, `auto` is a real value with real
- * behaviour (it absorbs free space, which is how `margin:0 auto` centres). On
- * width/height/min/max it means "size to content" -- and content sizing IS this
- * engine's behaviour for an undeclared box dimension, so the correct
- * representation of `width:auto` is an unset dimension whose CASCADE SLOT is
- * claimed. Claiming matters: `.a{width:200px} .a.b{width:auto}` must come out
- * content-sized, and dropping the second declaration (which is what happened
- * before) left the 200px in place. 90 declarations in the measured corpus. */
-#define AUTO_REJECT 0   /* `auto` is not in this property's value grammar */
-#define AUTO_VALUE  1   /* `auto` is a distinct value -> CSS_LEN_AUTO */
-#define AUTO_RESET  2   /* `auto` is this engine's unset behaviour -> claim, write nothing */
-/* max-width/max-height take `none`, not `auto`, as their "no constraint" initial
- * value (CSS 2.1 section 10.4). Same reset semantics, different spelling -- kept a
- * distinct mode so `width:none`, which is not valid CSS, still fails closed. */
-#define AUTO_RESET_NONE 3
-
-static int emit_len(css_decl *dst, int cap, int slot, const char *val,
-                    int allow_auto, int allow_neg) {
-    int ps = pct_slot_of(slot);
-    int need = (ps >= 0) ? 2 : 1;
-    if (cap < need) return 0;
-
-    /* A CSS-wide keyword -- and `auto` where auto IS the unset behaviour -- claims
-     * the slot(s) and writes nothing. BOTH halves are claimed, for the same reason
-     * every other emitter writes both: leaving the % half unclaimed would let a
-     * lower-specificity `width:50%` survive underneath a `width:auto` that won. */
-    if (css_wide_keyword(val) ||
-        (allow_auto == AUTO_RESET && csel_ci_eq(val, "auto")) ||
-        (allow_auto == AUTO_RESET_NONE &&
-         (csel_ci_eq(val, "none") || csel_ci_eq(val, "auto")))) {
-        dst[0].prop = slot;
-        dst[0].ival = CSS_LEN_UNSET;
-        dst[0].emil = 0;
-        dst[0].wide = 2;
-        if (ps < 0) return 1;
-        dst[1].prop = P_PCT_FIRST + ps;
-        dst[1].ival = 0;
-        dst[1].emil = 0;
-        dst[1].wide = 2;
-        return 2;
-    }
-
-    /* The intrinsic sizing keywords (CSS Sizing 3 section 5.1). They are values of
-     * the <width> type, not lengths, so like `auto` they ride the out-of-band
-     * sentinel channel; the two AUTO_RESET modes are exactly the sizing properties
-     * (width, height, min-width, min-height, max-width, max-height) and so
-     * exactly where the grammar allows them. `stretch` and its prefixed spellings fill the containing block, which
-     * IS a block box's `auto` behaviour, so they claim without a sentinel. */
-    if (allow_auto == AUTO_RESET || allow_auto == AUTO_RESET_NONE) {
-        int kw = 0;
-        if (csel_ci_eq(val, "min-content"))      kw = CSS_LEN_MIN_CONTENT;
-        else if (csel_ci_eq(val, "max-content")) kw = CSS_LEN_MAX_CONTENT;
-        else if (csel_ci_eq(val, "fit-content")) kw = CSS_LEN_FIT_CONTENT;
-        else if (csel_ci_eq(val, "stretch") || csel_ci_eq(val, "available") ||
-                 csel_ci_eq(val, "fill") || csel_ci_eq(val, "fill-available"))
-            kw = CSS_LEN_UNSET;
-        else if (csel_span_eq(val, "fit-content(", 12, 1)) {
-            /* fit-content(L) is min(max-content, max(min-content, L)) (Sizing 3
-             * section 5.1). Its upper bound is L, and a box that cannot measure its
-             * own content uses that bound -- so the length inside is the used value
-             * this engine can honour, and it is read with the same resolver as any
-             * other length rather than a second parser. */
-            size_t vn = strlen(val);
-            if (vn > 13u && val[vn - 1] == ')') {
-                char inner[CSS_TOK_MAX];
-                if (copy_trim(val, 12, vn - 1, inner, sizeof inner) != (size_t)-1 &&
-                    inner[0] != '\0')
-                    return emit_len(dst, cap, slot, inner, AUTO_REJECT, allow_neg);
-            }
-            return 0;
-        }
-        if (kw != 0) {
-            dst[0].prop = slot;
-            dst[0].ival = kw;
-            dst[0].emil = 0;
-            dst[0].wide = 2;
-            if (ps < 0) return 1;
-            dst[1].prop = P_PCT_FIRST + ps;
-            dst[1].ival = 0;
-            dst[1].emil = 0;
-            dst[1].wide = 2;
-            return 2;
-        }
-    }
-
-    int o, pm;
-    if (!interp_lp(val, allow_auto, ps >= 0, &o, &pm)) return 0;
-    if (!allow_neg && !lp_can_be_nonneg(o, pm)) return 0;
-
-    dst[0].prop = slot;
-    dst[0].ival = o;
-    /* The font-relative half of the value, alongside the px and % halves. A
-     * length emitter is the ONLY thing that writes it, which is what guarantees
-     * a non-length slot can never carry one. */
-    dst[0].emil = (o == CSS_LEN_AUTO) ? 0 : value_em_milli(val);
-    if (ps < 0) return 1;
-    /* A pure percentage leaves the px half UNSET, not 0: `width: 50%` states
-     * nothing about an absolute width, and zeroing it would read as `width: 0`
-     * everywhere the percentage cannot be resolved. */
-    if (pm != 0 && o == 0) dst[0].ival = CSS_LEN_UNSET;
-    dst[1].prop = P_PCT_FIRST + ps;
-    dst[1].ival = pm;
-    return 2;
-}
-
-/* Extracts the next whitespace-separated token starting at *p into tok (bounded to
- * cap, NUL-terminated), advancing *p past it and any leading whitespace. A token
- * may itself contain balanced parens -- so "calc(1px + 2px)" (which has spaces
- * INSIDE it) is ONE token, not split apart at the space after "1px" -- tracked via
- * a paren-depth counter, so every multi-value shorthand below can carry a calc()
- * value exactly like a single-value property can. Every shorthand tokenizer in
- * this file that might hand a token to interp_len (transitively: margin/padding/
- * inset, flex-basis, border/outline width, text-shadow/box-shadow offsets) uses
- * this helper, so calc() works uniformly instead of only in single-value
- * properties. Returns 0 (tok untouched) when there is nothing left to read. */
 static int next_ws_token(const char **p, char *tok, size_t cap) {
-    while (**p == ' ' || **p == '\t') ++*p;
-    if (**p == '\0') return 0;
-    size_t k = 0;
-    int depth = 0;
-    while (**p != '\0') {
-        if (**p == '(') ++depth;
-        else if (**p == ')') { if (depth > 0) --depth; }
-        else if (depth == 0 && (**p == ' ' || **p == '\t')) break;
-        if (k + 1 < cap) tok[k++] = **p;
-        ++*p;
-    }
-    tok[k] = '\0';
-    return 1;
+    return cb_next_ws_token(p, tok, cap);
 }
 
-/* Expands a margin/padding shorthand (1..4 whitespace-separated lengths, CSS order
- * all / "v h" / "t h b" / "t r b l") into the four contiguous slots starting at
- * slot_top (top,right,bottom,left). Any unsupported token drops the WHOLE shorthand
- * (fail closed, never a partial box). Returns the number of decls written (<= cap). */
-static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
-                       css_decl *dst, int cap) {
-    int px[4], pm[4], em[4], nv = 0;
-    const char *p = val;
-    char tok[CSS_TOK_MAX];
-    int accepts_pct = pct_slot_of(slot_top) >= 0;
-    while (nv < 4 && next_ws_token(&p, tok, sizeof tok)) {
-        int o, q;
-        if (!interp_lp(tok, allow_auto, accepts_pct, &o, &q)) return 0;
-        if (!allow_neg && !lp_can_be_nonneg(o, q)) return 0;
-        px[nv] = o; pm[nv] = q;
-        em[nv] = (o == CSS_LEN_AUTO) ? 0 : value_em_milli(tok);
-        ++nv;
-    }
-    if (nv == 0) return 0;
-    /* CSS shorthand order: all / "v h" / "t h b" / "t r b l". */
-    static const int PICK[4][4] = {
-        { 0, 0, 0, 0 }, { 0, 1, 0, 1 }, { 0, 1, 2, 1 }, { 0, 1, 2, 3 }
-    };
-    const int *pick = PICK[nv - 1];
-    int n = 0;
-    for (int s = 0; s < 4; ++s) {
-        int src = pick[s];
-        int slot = slot_top + s;
-        int ps = pct_slot_of(slot);
-        if (n + ((ps >= 0) ? 2 : 1) > cap) break;
-        dst[n].prop = slot;
-        /* Same rule as emit_len: a pure percentage leaves the px half unset. */
-        dst[n].ival = (pm[src] != 0 && px[src] == 0) ? CSS_LEN_UNSET : px[src];
-        dst[n].emil = em[src];
-        ++n;
-        if (ps >= 0) {
-            dst[n].prop = P_PCT_FIRST + ps;
-            dst[n].ival = pm[src];
-            ++n;
-        }
-    }
-    return n;
+static int interp_align(const char *v) {
+    return cb_interp_align(v);
 }
 
-/* Expands a two-slot logical shorthand (margin-inline / padding-block /
- * inset-inline: one value sets both sides, two set start then end; 2026-07-10).
- * Fail closed on zero, more than two, or any uninterpretable token. */
-static int expand_box2(const char *val, int slot_start, int slot_end,
-                       int allow_auto, int allow_neg, css_decl *dst, int cap) {
-    char toks[2][CSS_TOK_MAX];
-    int nv = 0;
-    const char *p = val;
-    char tok[CSS_TOK_MAX];
-    while (nv < 2 && next_ws_token(&p, tok, sizeof tok)) {
-        memcpy(toks[nv], tok, sizeof tok);
-        ++nv;
-    }
-    if (nv == 0 || next_ws_token(&p, tok, sizeof tok)) return 0;
-
-    /* Both sides go through emit_len, so the <length-percentage> handling (and
-     * the both-halves cascade rule) lives in exactly one place. */
-    int slots[2] = { slot_start, slot_end };
-    const char *src[2] = { toks[0], (nv == 2) ? toks[1] : toks[0] };
-    int n = 0;
-    for (int s = 0; s < 2; ++s) {
-        int w = emit_len(dst + n, cap - n, slots[s], src[s], allow_auto, allow_neg);
-        if (w == 0) return 0;   /* fail closed: never a partial logical pair */
-        n += w;
-    }
-    return n;
+static int interp_fontsize_ex(const char *v, int *abs_out) {
+    return cb_interp_fontsize_ex(v, abs_out);
 }
 
-/* --- text-presentation extensions (Hito 23b-6) --- */
-
-/* Maps one font-family name (a generic keyword or a common family) to a generic
- * css_font_family bucket; -1 if unrecognised. Case-insensitive; multi-word names
- * (e.g. "times new roman") are compared whole. */
-static int family_of(const char *name) {
-    static const struct { const char *n; int f; } tbl[] = {
-        { "serif", CSS_FF_SERIF }, { "ui-serif", CSS_FF_SERIF },
-        { "times", CSS_FF_SERIF }, { "times new roman", CSS_FF_SERIF },
-        { "georgia", CSS_FF_SERIF }, { "garamond", CSS_FF_SERIF },
-        { "cambria", CSS_FF_SERIF }, { "palatino", CSS_FF_SERIF },
-        { "sans-serif", CSS_FF_SANS }, { "ui-sans-serif", CSS_FF_SANS },
-        { "system-ui", CSS_FF_SANS }, { "arial", CSS_FF_SANS },
-        { "helvetica", CSS_FF_SANS }, { "verdana", CSS_FF_SANS },
-        { "tahoma", CSS_FF_SANS }, { "segoe ui", CSS_FF_SANS },
-        { "roboto", CSS_FF_SANS }, { "open sans", CSS_FF_SANS },
-        { "monospace", CSS_FF_MONO }, { "ui-monospace", CSS_FF_MONO },
-        { "courier", CSS_FF_MONO }, { "courier new", CSS_FF_MONO },
-        { "consolas", CSS_FF_MONO }, { "monaco", CSS_FF_MONO },
-        { "menlo", CSS_FF_MONO }, { "dejavu sans mono", CSS_FF_MONO },
-        { "glass tty vt220", CSS_FF_MONO }, { "glass tty vt220 medium", CSS_FF_MONO },
-        { "vt220", CSS_FF_MONO }, { "xterm", CSS_FF_MONO },
-        { "terminus", CSS_FF_MONO }, { "liberation mono", CSS_FF_MONO },
-        { "inconsolata", CSS_FF_MONO }, { "source code pro", CSS_FF_MONO },
-        { "cursive", CSS_FF_CURSIVE }, { "comic sans ms", CSS_FF_CURSIVE },
-        { "fantasy", CSS_FF_FANTASY }, { "impact", CSS_FF_FANTASY },
-    };
-    for (size_t i = 0; i < sizeof tbl / sizeof tbl[0]; ++i)
-        if (csel_ci_eq(name, tbl[i].n)) return tbl[i].f;
-    return -1;
+static int interp_lineheight(const char *v) {
+    return cb_interp_lineheight(v);
 }
 
-/* font-family: the first recognised name in the comma-separated stack wins (its
- * generic bucket). Quotes are stripped. url() defensively dropped. -1 if none known. */
-static int interp_fontfamily(const char *v) {
-    if (csel_substr(v, "url(", 1)) return -1;
-    const char *p = v;
-    while (*p != '\0') {
-        while (*p == ' ' || *p == '\t' || *p == ',') ++p;
-        if (*p == '\0') break;
-        const char *st = p;
-        while (*p != '\0' && *p != ',') ++p;       /* one comma entry */
-        size_t e = (size_t)(p - st);
-        while (e > 0 && (st[e-1] == ' ' || st[e-1] == '\t')) --e;
-        size_t a = 0;
-        if (e >= 2 && (st[0] == '"' || st[0] == '\'') && st[e-1] == st[0]) { a = 1; --e; }
-        char buf[CSS_TOK_MAX];
-        size_t k = 0;
-        for (size_t i = a; i < e && k + 1 < sizeof buf; ++i) buf[k++] = st[i];
-        buf[k] = '\0';
-        int f = family_of(buf);
-        if (f >= 0) return f;
-    }
-    return -1;
+static int interp_weight(const char *v) {
+    return cb_interp_weight(v);
 }
 
-static int interp_texttransform(const char *v) {
-    if (csel_ci_eq(v, "none"))       return CSS_TT_NONE;
-    if (csel_ci_eq(v, "uppercase"))  return CSS_TT_UPPERCASE;
-    if (csel_ci_eq(v, "lowercase"))  return CSS_TT_LOWERCASE;
-    if (csel_ci_eq(v, "capitalize")) return CSS_TT_CAPITALIZE;
-    return -1;  /* full-width/full-size-kana/...: out of scope, fail closed */
+static int interp_style(const char *v) {
+    return cb_interp_style(v);
 }
 
-/* opacity: a unitless 0..1 alpha (or a percentage), mapped to 0..100 and clamped.
- * A negative or unparseable value is dropped (-1). */
-static int interp_opacity(const char *v) {
-    double num;
-    const char *end;
-    if (!parse_num(v, &num, &end)) return -1;
-    while (*end == ' ' || *end == '\t') ++end;
-    double pct;
-    if (end[0] == '%' && end[1] == '\0') pct = num;
-    else if (end[0] == '\0')             pct = num * 100.0;
-    else return -1;
-    return round_clamp(pct, 0, 100);
+static int interp_textdeco(const char *v) {
+    return cb_interp_textdeco(v);
 }
 
-static int interp_valign(const char *v) {
-    if (csel_ci_eq(v, "baseline")) return CSS_VA_BASELINE;
-    if (csel_ci_eq(v, "sub"))      return CSS_VA_SUB;
-    if (csel_ci_eq(v, "super"))    return CSS_VA_SUPER;
-    if (csel_ci_eq(v, "middle"))   return CSS_VA_MIDDLE;
-    if (csel_ci_eq(v, "top"))      return CSS_VA_TOP;
-    if (csel_ci_eq(v, "bottom"))   return CSS_VA_BOTTOM;
-    /* `text-top`/`text-bottom` align with the parent's CONTENT box rather than the
-     * line box (CSS 2.1 section 10.8.1). This engine has one line box per line and
-     * no separate parent content edge to align against, so the two collapse onto
-     * top/bottom -- the same edge, measured on the box it does have. Dropping them
-     * instead left the element on the baseline, which is a different place
-     * entirely; 17 declarations on one corpus page. */
-    if (csel_ci_eq(v, "text-top"))    return CSS_VA_TOP;
-    if (csel_ci_eq(v, "text-bottom")) return CSS_VA_BOTTOM;
-    /* The <length-percentage> production is a different KIND of value and gets its
-     * own slot: see expand_valign. */
-    return -1;
+static int interp_display(const char *v) {
+    return cb_interp_display(v);
 }
 
-/* vertical-align (CSS 2.1 section 10.8.1) has two productions: a keyword, and a
- * <length-percentage> baseline SHIFT (positive raises). They are different kinds of
- * value, so they take different slots -- a keyword enum cannot also hold a signed
- * length -- and both are emitted on every declaration so that whichever the author
- * wrote CLEARS the other. Without that, `vertical-align: middle` under a
- * lower-specificity `vertical-align: -2px` would apply both.
- *
- * The percentage resolves against the element's own line-height, which is the one
- * basis in CSS Values that is neither a containing block nor the element's border
- * box, so it has its own pct slot. Measured: jkanime's icon font sets `.255em` on
- * every glyph, and the whole declaration was dropped. */
-static int expand_valign(const char *val, css_decl *dst, int cap) {
-    if (cap < 3) return 0;
-    int kw = interp_valign(val);
-    int shift = CSS_LEN_UNSET, pm = 0, emil = 0;
-    if (kw < 0) {
-        if (!interp_lp(val, 0, 1, &shift, &pm)) return 0;
-        emil = value_em_milli(val);
-        kw = CSS_VA_UNSET;
-    }
-    dst[0].prop = P_VALIGN;        dst[0].ival = kw;
-    dst[1].prop = P_VALIGN_SHIFT;  dst[1].ival = shift; dst[1].emil = emil;
-    dst[2].prop = P_PCT_FIRST + CSS_PCT_VALIGN; dst[2].ival = pm;
-    return 3;
+static int interp_gap(const char *v) {
+    return cb_interp_gap(v);
 }
 
-/* transition-property value encoding: -1 = unset, 0 = none, 1 = all,
- * 2 = opacity, 3 = transform. Other values not yet supported. */
-static int interp_transition_property(const char *v) {
-    if (csel_ci_eq(v, "none"))  return 0;
-    if (csel_ci_eq(v, "all"))   return 1;
-    if (csel_ci_eq(v, "opacity"))    return 2;
-    if (csel_ci_eq(v, "transform"))  return 3;
-    return -1;
+static int interp_justify(const char *v) {
+    return cb_interp_justify(v);
 }
 
-static int interp_whitespace(const char *v) {
-    if (csel_ci_eq(v, "normal"))   return CSS_WS_NORMAL;
-    if (csel_ci_eq(v, "nowrap"))   return CSS_WS_NOWRAP;
-    if (csel_ci_eq(v, "pre"))      return CSS_WS_PRE;
-    if (csel_ci_eq(v, "pre-wrap")) return CSS_WS_PRE_WRAP;
-    if (csel_ci_eq(v, "pre-line")) return CSS_WS_PRE_LINE;
-    /* break-spaces preserves whitespace and wraps; this engine only models the
-     * wrap/keep distinction, so it collapses to pre-wrap (2026-07-10). */
-    if (csel_ci_eq(v, "break-spaces")) return CSS_WS_PRE_WRAP;
-    return -1;
+static int interp_gridcols(const char *v) {
+    return cb_interp_gridcols(v);
 }
 
-/* tab-size: a non-negative integer (number of spaces). -1 if unsupported. */
-static int interp_tabsize(const char *v) {
-    double num;
-    const char *end;
-    if (!parse_num(v, &num, &end)) return -1;
-    while (*end == ' ' || *end == '\t') ++end;
-    if (*end != '\0') return -1;  /* units/lengths dropped; only bare number */
-    int n = round_clamp(num, 0, 64);
-    return (n > 0) ? n : -1;  /* 0 or unparseable -> unset */
+static int expand_grid_template_cols(const char *val, css_decl *dst, int cap) {
+    return cb_expand_grid_template_cols(val, dst, cap);
 }
 
-/* text-decoration-style: solid/wavy/dotted/dashed/double. -1 if unknown. */
-static int interp_textdeco_style(const char *v) {
-    if (csel_ci_eq(v, "solid"))  return CSS_TDS_SOLID;
-    if (csel_ci_eq(v, "double")) return CSS_TDS_DOUBLE;
-    if (csel_ci_eq(v, "dotted")) return CSS_TDS_DOTTED;
-    if (csel_ci_eq(v, "dashed")) return CSS_TDS_DASHED;
-    if (csel_ci_eq(v, "wavy"))   return CSS_TDS_WAVY;
-    return -1;
-}
-
-/* text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length
- * (px -> px, em/rem x16). -1 if unsupported (negative, %, etc -> dropped). */
-static int interp_textdeco_thickness(const char *v) {
-    if (csel_ci_eq(v, "from-font")) return 0;
-    int px;
-    if (!interp_len(v, 0, &px) || px < 0) return -1;
-    return px;
-}
-
-/* aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>`
- * (auto fallback). Stores both numerator and denominator x1000 (for sub-integer
- * ratios like 1.5 -> 1500/1000). Returns 1 with *num and *den set, 0 if unsupported.
- * A bare number 1.5 is stored as 1500/1000; 16/9 as 16000/9000;
- * auto / unparseable -> 0 (unset). */
-static int interp_aspect_ratio(const char *v, int *num, int *den) {
-    *num = *den = 0;
-    const char *p = v;
-    while (*p == ' ' || *p == '\t') ++p;
-    if (csel_ci_eq(p, "auto")) return 1;  /* auto alone -> unset (natural sizing) */
-    char buf[CSS_TOK_MAX];
-    size_t k = 0;
-    while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof buf) buf[k++] = *p++;
-    buf[k] = '\0';
-    if (k == 0) return 1;
-    /* Look for a '/' separator */
-    char *slash = strchr(buf, '/');
-    if (slash != NULL) {
-        *slash = '\0';
-        char *nend = slash + 1;
-        double nv, dv;
-        const char *ne, *de;
-        if (!parse_num(buf, &nv, &ne) || *ne != '\0') return 1;   /* fail -> unset */
-        if (!parse_num(nend, &dv, &de) || *de != '\0' || dv <= 0.0) return 1;
-        *num = round_clamp(nv * 1000.0, 1, CSS_LEN_MAX);
-        *den = round_clamp(dv * 1000.0, 1, CSS_LEN_MAX);
-        return 1;
-    }
-    /* Bare number: treat as w/h = N/1 */
-    double nv;
-    const char *ne;
-    if (!parse_num(buf, &nv, &ne) || *ne != '\0' || nv <= 0.0) return 1;
-    *num = round_clamp(nv * 1000.0, 1, CSS_LEN_MAX);
-    *den = 1000;
-    return 1;
-}
-
-/* direction: ltr/rtl. -1 if unknown. */
-static int interp_direction(const char *v) {
-    if (csel_ci_eq(v, "ltr")) return CSS_DIR_LTR;
-    if (csel_ci_eq(v, "rtl")) return CSS_DIR_RTL;
-    return -1;
-}
-
-static int liststyle_kw(const char *t) {
-    if (csel_ci_eq(t, "none"))        return CSS_LS_NONE;
-    if (csel_ci_eq(t, "disc"))        return CSS_LS_DISC;
-    if (csel_ci_eq(t, "circle"))      return CSS_LS_CIRCLE;
-    if (csel_ci_eq(t, "square"))      return CSS_LS_SQUARE;
-    if (csel_ci_eq(t, "decimal"))     return CSS_LS_DECIMAL;
-    if (csel_ci_eq(t, "lower-alpha") || csel_ci_eq(t, "lower-latin")) return CSS_LS_LOWER_ALPHA;
-    if (csel_ci_eq(t, "upper-alpha") || csel_ci_eq(t, "upper-latin")) return CSS_LS_UPPER_ALPHA;
-    if (csel_ci_eq(t, "lower-roman")) return CSS_LS_LOWER_ROMAN;
-    if (csel_ci_eq(t, "upper-roman")) return CSS_LS_UPPER_ROMAN;
-    return -1;
-}
-
-/* A <counter-style> name this engine has no glyph set for.
- *
- * CSS Counter Styles 3 section 7.1 is explicit: a counter style that cannot be used
- * falls back to `decimal`, it does not make the declaration invalid. So
- * `list-style-type: persian` numbers the list in decimal -- which is what every
- * engine does when it lacks the style -- instead of dropping the declaration and
- * leaving the list with whatever marker a lower-specificity rule set. The name must
- * still LOOK like an identifier, so junk keeps failing closed. */
-static int liststyle_unknown_name(const char *t) {
-    if (t[0] == '\0') return 0;
-    for (const char *p = t; *p != '\0'; ++p) {
-        char c = csel_lower_ch(*p);
-        if (!((c >= 'a' && c <= 'z') || c == '-' || (*p >= '0' && *p <= '9'))) return 0;
-    }
-    return 1;
-}
-
-/* list-style-type, or the type token of the list-style shorthand: the first
- * recognised keyword wins. url() (a list-style-image) is dropped: never fetch. */
-static int interp_liststyle(const char *v) {
-    if (csel_substr(v, "url(", 1)) return -1;
-    const char *p = v;
-    while (*p != '\0') {
-        while (*p == ' ' || *p == '\t') ++p;
-        if (*p == '\0') break;
-        char tok[CSS_TOK_MAX];
-        size_t k = 0;
-        while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++;
-        tok[k] = '\0';
-        while (*p != '\0' && *p != ' ' && *p != '\t') ++p;
-        int ls = liststyle_kw(tok);
-        if (ls >= 0) return ls;
-        /* An identifier this engine has no glyph set for is `decimal`, not a
-         * parse error (CSS Counter Styles 3 section 7.1). `inside`/`outside` and
-         * `none` are handled by liststyle_kw / the position longhand, so what
-         * reaches here is a counter-style name. */
-        if (liststyle_unknown_name(tok)) return CSS_LS_DECIMAL;
-    }
-    return -1;
-}
-
-/* letter-spacing / word-spacing: "normal" -> 0, else a signed length (px/em/0),
- * clamped to [-CSS_SPACING_MAX, CSS_SPACING_MAX]. Returns 1 with *out set, 0 if
- * the value is unsupported (%/vw/calc/bare number -> dropped, fail closed). */
-static int interp_spacing(const char *v, int *out) {
-    if (csel_ci_eq(v, "normal")) { *out = 0; return 1; }
-    int px;
-    if (!interp_len(v, 0, &px)) return 0;
-    if (px > CSS_SPACING_MAX) px = CSS_SPACING_MAX;
-    if (px < -CSS_SPACING_MAX) px = -CSS_SPACING_MAX;
-    *out = px;
-    return 1;
-}
-
-static int emit_spacing(css_decl *dst, int cap, int slot, const char *val) {
-    int o;
-    if (cap < 1 || !interp_spacing(val, &o)) return 0;
-    dst[0].prop = slot;
-    dst[0].ival = o;
-    return 1;
-}
-
-/* text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is
- * ignored) and an optional color, in any order. "none" emits an explicit no-shadow.
- * Needs at least dx and dy or the whole declaration is dropped (fail closed). When no
- * color is given it defaults to black. url() dropped: never fetch. Writes the three
- * contiguous P_SHADOW_* slots; offsets clamped to [-CSS_SHADOW_MAX, CSS_SHADOW_MAX]. */
-static int expand_shadow(const char *val, css_decl *dst, int cap) {
-    if (cap < 3) return 0;
-    if (csel_substr(val, "url(", 1)) return 0;
-    if (csel_ci_eq(val, "none")) {
-        dst[0].prop = P_SHADOW_DX;    dst[0].ival = 0;
-        dst[1].prop = P_SHADOW_DY;    dst[1].ival = 0;
-        dst[2].prop = P_SHADOW_COLOR; dst[2].ival = -1;
-        return 3;
-    }
-    int lens[3], nlen = 0, color = 0, have_color = 0;
-    const char *p = val;
-    char tok[CSS_TOK_MAX];
-    while (next_ws_token(&p, tok, sizeof tok)) {
-        int px;
-        if (interp_len(tok, 0, &px)) { if (nlen < 3) lens[nlen++] = px; }
-        else if (!have_color) { int cv = parse_color(tok); if (cv != -1) { color = cv; have_color = 1; } }
-    }
-    if (nlen < 2) return 0;  /* need both offsets */
-    int dx = lens[0], dy = lens[1];
-    if (dx > CSS_SHADOW_MAX) dx = CSS_SHADOW_MAX;
-    if (dx < -CSS_SHADOW_MAX) dx = -CSS_SHADOW_MAX;
-    if (dy > CSS_SHADOW_MAX) dy = CSS_SHADOW_MAX;
-    if (dy < -CSS_SHADOW_MAX) dy = -CSS_SHADOW_MAX;
-    dst[0].prop = P_SHADOW_DX;    dst[0].ival = dx;
-    dst[1].prop = P_SHADOW_DY;    dst[1].ival = dy;
-    dst[2].prop = P_SHADOW_COLOR; dst[2].ival = have_color ? color : CC_COLOR_CURRENT;
-    return 3;
-}
+/* Text-presentation family lives in css_text.c (single owner). Wrappers keep
+ * call sites stable. See spec/css_text.md. */
+static int interp_fontfamily(const char *v) { return ct_interp_fontfamily(v); }
+static int interp_texttransform(const char *v) { return ct_interp_texttransform(v); }
+static int interp_opacity(const char *v) { return ct_interp_opacity(v); }
+static int expand_valign(const char *val, css_decl *dst, int cap) { return ct_expand_valign(val, dst, cap); }
+static int interp_transition_property(const char *v) { return ct_interp_transition_property(v); }
+static int interp_whitespace(const char *v) { return ct_interp_whitespace(v); }
+static int interp_tabsize(const char *v) { return ct_interp_tabsize(v); }
+static int interp_textdeco_style(const char *v) { return ct_interp_textdeco_style(v); }
+static int interp_textdeco_thickness(const char *v) { return ct_interp_textdeco_thickness(v); }
+static int interp_aspect_ratio(const char *v, int *num, int *den) { return ct_interp_aspect_ratio(v, num, den); }
+static int interp_direction(const char *v) { return ct_interp_direction(v); }
+static int interp_liststyle(const char *v) { return ct_interp_liststyle(v); }
+static int emit_spacing(css_decl *dst, int cap, int slot, const char *val) { return ct_emit_spacing(dst, cap, slot, val); }
+static int expand_shadow(const char *val, css_decl *dst, int cap) { return ct_expand_shadow(val, dst, cap); }
 
 /* --- Layout / box decoration (Hito 23b-7) --------------------------------- */
 
@@ -2455,7 +481,7 @@ static int interp_border_spacing(const char *v) {
     double num;
     const char *end;
     if (parse_num(tok, &num, &end) && *end == '\0' && num >= 0.0) {
-        px = round_clamp(num, 0, CSS_BORDER_SPACING_MAX);
+        px = css_round_clamp(num, 0, CSS_BORDER_SPACING_MAX);
         return px;
     }
     return -1;
@@ -3547,7 +1573,7 @@ static int interp_flex_factor(const char *v) {
     double num;
     const char *end;
     if (!parse_num(v, &num, &end) || *end != '\0' || num < 0.0) return -1;
-    return round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
+    return css_round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
 }
 
 /* flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; a
@@ -3610,7 +1636,7 @@ static int expand_flex(const char *val, css_decl *dst, int cap) {
              * still fails closed rather than inventing a unit. */
             if (parse_num(tok, &num, &end) && *end == '\0' && !(have_g && have_sh)) {
                 if (num < 0.0) return 0;
-                int x100 = round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
+                int x100 = css_round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);
                 if (!have_g)       { g = x100;  have_g = 1; }
                 else               { sh = x100; have_sh = 1; }
             } else {                                            /* a length / auto */
@@ -3715,7 +1741,7 @@ static int interp_grid_span(const char *v) {
     if (!parse_num(p, &num, &end)) return -1;
     while (*end == ' ' || *end == '\t') ++end;
     if (*end != '\0') return -1;
-    int n = round_clamp(num, 0, CSS_GRID_SPAN_MAX);
+    int n = css_round_clamp(num, 0, CSS_GRID_SPAN_MAX);
     if (n < 1) return -1;
     return n;
 }
@@ -3996,7 +2022,7 @@ static int parse_scale_pct(const char *s, int *out) {
     while (*end == ' ' || *end == '\t') ++end;
     if (*end != '\0') return 0;                /* unitless only */
     if (neg) num = -num;
-    *out = round_clamp(num * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *out = css_round_clamp(num * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
     return 1;
 }
 
@@ -4025,7 +2051,7 @@ static int parse_angle_deg(const char *s, int *out) {
     else if (csel_ci_eq(end, "turn")) deg = num * 360.0;
     else return 0;
     if (neg) deg = -deg;
-    *out = round_clamp(deg, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *out = css_round_clamp(deg, -CSS_LEN_MAX, CSS_LEN_MAX);
     return 1;
 }
 
@@ -4071,12 +2097,12 @@ static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
     if (r11 < 1e-9 || det == 0.0) return 0;
     const double rad2deg = 180.0 / 3.14159265358979323846;
     double r12 = (m[0] * m[2] + m[1] * m[3]) / r11;
-    *tx = round_clamp(m[4], -CSS_LEN_MAX, CSS_LEN_MAX);
-    *ty = round_clamp(m[5], -CSS_LEN_MAX, CSS_LEN_MAX);
-    *rot = round_clamp(atan2(m[1], m[0]) * rad2deg, -CSS_LEN_MAX, CSS_LEN_MAX);
-    *sx = round_clamp(r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
-    *sy = round_clamp(det / r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
-    *skx = round_clamp(atan(r12 / r11) * rad2deg, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *tx = css_round_clamp(m[4], -CSS_LEN_MAX, CSS_LEN_MAX);
+    *ty = css_round_clamp(m[5], -CSS_LEN_MAX, CSS_LEN_MAX);
+    *rot = css_round_clamp(atan2(m[1], m[0]) * rad2deg, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *sx = css_round_clamp(r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *sy = css_round_clamp(det / r11 * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+    *skx = css_round_clamp(atan(r12 / r11) * rad2deg, -CSS_LEN_MAX, CSS_LEN_MAX);
     return 1;
 }
 
@@ -4343,12 +2369,12 @@ static int expand_transform_list(const char *val, css_decl *dst, int cap) {
     int tx, ty, rot, sx, sy, dskx;
     if (tr_decompose(m, &tx, &ty, &rot, &sx, &sy, &dskx)) {
     } else if (m[1] == 0.0 && m[2] == 0.0) {
-        tx = round_clamp(m[4], -CSS_LEN_MAX, CSS_LEN_MAX);
-        ty = round_clamp(m[5], -CSS_LEN_MAX, CSS_LEN_MAX);
+        tx = css_round_clamp(m[4], -CSS_LEN_MAX, CSS_LEN_MAX);
+        ty = css_round_clamp(m[5], -CSS_LEN_MAX, CSS_LEN_MAX);
         rot = 0;
         dskx = 0;
-        sx = round_clamp(m[0] * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
-        sy = round_clamp(m[3] * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+        sx = css_round_clamp(m[0] * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
+        sy = css_round_clamp(m[3] * 100.0, -CSS_LEN_MAX, CSS_LEN_MAX);
     } else {
         return 0;
     }
@@ -4356,8 +2382,8 @@ static int expand_transform_list(const char *val, css_decl *dst, int cap) {
     if (txp < -CSS_PCT_MAX) txp = -CSS_PCT_MAX;
     if (typ > CSS_PCT_MAX) typ = CSS_PCT_MAX;
     if (typ < -CSS_PCT_MAX) typ = -CSS_PCT_MAX;
-    int skx = round_clamp((double)dskx + (double)acc_skx, -CSS_LEN_MAX, CSS_LEN_MAX);
-    int sky = round_clamp((double)acc_sky, -CSS_LEN_MAX, CSS_LEN_MAX);
+    int skx = css_round_clamp((double)dskx + (double)acc_skx, -CSS_LEN_MAX, CSS_LEN_MAX);
+    int sky = css_round_clamp((double)acc_sky, -CSS_LEN_MAX, CSS_LEN_MAX);
     int need = (seentr ? 2 : 0);
     if (spec & SPEC_TX) ++need;
     if (spec & SPEC_TY) ++need;
@@ -4601,7 +2627,7 @@ static int origin_component(const char *tok, int axis, int *out) {
     double num;
     const char *end;
     if (parse_num(tok, &num, &end) && end[0] == '%' && end[1] == '\0') {
-        *out = round_clamp(num, -1000, 1000);
+        *out = css_round_clamp(num, -1000, 1000);
         return 1;
     }
     const char *q = tok;
@@ -5672,7 +3698,7 @@ static size_t block_end(const char *s, size_t open, size_t n) {
  * preludes alone. An unknown unit keeps the historical bare-number reading. */
 static int media_len_px(const char *v) {
     double px;
-    if (length_px(v, &px)) return round_clamp(px, 0, CSS_LEN_MAX);
+    if (length_px(v, &px)) return css_round_clamp(px, 0, CSS_LEN_MAX);
 
     /* Not a length. Keep the historical bare-number reading so a query with a
      * unit this engine does not model still compares something rather than
@@ -5680,7 +3706,7 @@ static int media_len_px(const char *v) {
     double d;
     const char *e;
     if (!parse_num(v, &d, &e)) return 0;
-    return round_clamp(d, 0, CSS_LEN_MAX);
+    return css_round_clamp(d, 0, CSS_LEN_MAX);
 }
 
 /* Trims ASCII spaces/tabs from both ends of a NUL-terminated string, in place. */
@@ -6750,7 +4776,7 @@ static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                                 CL_INITIAL_FONT_SIZE, fs);
         css_decl folded = {
             .prop = slot,
-            .ival = round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX),
+            .ival = css_round_clamp(px, -CSS_LEN_MAX, CSS_LEN_MAX),
             .important = wi[slot],
             .emil = 0,   /* already folded: never fold twice */
         };
