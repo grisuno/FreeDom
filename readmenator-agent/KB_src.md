@@ -27,6 +27,7 @@
   - `splitmix64` (function, line 120) `static uint64_t splitmix64(uint64_t *state)`
   - `fp_perturb` (function, line 127) `void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key)`
   - `fp_origin_key` (function, line 138) `uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain)`
+- Depends on: `include/anti_fp.h`
 
 ## src/block_flow.c
 - Layer: utility
@@ -37,6 +38,7 @@
   - `bf_collapse_n` (function, line 14) `double bf_collapse_n(const double *m, size_t n)`
   - `bf_collapse` (function, line 29) `double bf_collapse(double a, double b)`
   - `bf_margins_adjoin` (function, line 34) `int bf_margins_adjoin(double border_px, double padding_px)`
+- Depends on: `include/block_flow.h`
 
 ## src/box_style.c
 - Layer: utility
@@ -68,24 +70,27 @@
   - `bx_background_layer` (function, line 373) `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,
                     ...`
   - `bx_display_name` (function, line 412) `const char *bx_display_name(bx_display d)`
-  - `BX_TAG_MAX` (macro, line 22)
-  - `BX_DISPLAY_MAX` (macro, line 23)
-  - `BLOCK` (macro, line 64)
-  - `INLINE` (macro, line 66)
-  - `IBLOCK` (macro, line 67)
-  - `LITEM` (macro, line 68)
-  - `NONE` (macro, line 69)
-  - `EDG` (macro, line 70)
-  - `ZERO` (macro, line 71)
-  - `T_NO` (macro, line 73)
-  - `T_TBL` (macro, line 74)
-  - `T_GRP` (macro, line 75)
-  - `T_ROW` (macro, line 76)
-  - `T_CELL` (macro, line 77)
-  - `T_CAP` (macro, line 78)
-  - `T_COL` (macro, line 79)
-  - `TAG_N` (macro, line 159)
-  - `DISP_N` (macro, line 257)
+  - `strcmp` (function, line 49) `return strcmp((const char *)key, *(const char *const *)elem);`
+  - `take` (function, line 293) `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read exactly like `auto` -- no declared width. * Letting the sentinel through would have `
+  - `BX_TAG_MAX` (macro, line 22) `#define BX_TAG_MAX`
+  - `BX_DISPLAY_MAX` (macro, line 23) `#define BX_DISPLAY_MAX`
+  - `BLOCK` (macro, line 64) `#define BLOCK`
+  - `INLINE` (macro, line 66) `#define INLINE`
+  - `IBLOCK` (macro, line 67) `#define IBLOCK`
+  - `LITEM` (macro, line 68) `#define LITEM`
+  - `NONE` (macro, line 69) `#define NONE`
+  - `EDG` (macro, line 70) `#define EDG(t, r, b, l)`
+  - `ZERO` (macro, line 71) `#define ZERO`
+  - `T_NO` (macro, line 73) `#define T_NO`
+  - `T_TBL` (macro, line 74) `#define T_TBL`
+  - `T_GRP` (macro, line 75) `#define T_GRP`
+  - `T_ROW` (macro, line 76) `#define T_ROW`
+  - `T_CELL` (macro, line 77) `#define T_CELL`
+  - `T_CAP` (macro, line 78) `#define T_CAP`
+  - `T_COL` (macro, line 79) `#define T_COL`
+  - `TAG_N` (macro, line 159) `#define TAG_N`
+  - `DISP_N` (macro, line 257) `#define DISP_N`
+- Depends on: `include/box_style.h`
 
 ## src/box_tree.c
 - Layer: utility
@@ -117,8 +122,12 @@
   - `bt_oof_anchor` (function, line 650) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
   - `bt_oof_root` (function, line 654) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
   - `bt_box_hidden` (function, line 658) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-  - `BT_LEN_AUTO` (macro, line 31)
-  - `BT_WRAP_EPS` (macro, line 61)
+  - `layout_flex` (function, line 344) `case BX_DISPLAY_FLEX: return layout_flex(node, kids, nk, pl, pt, pb, cw, depth);`
+  - `bx_lp_px` (function, line 431) `return bx_lp_px(v, pct_pm, basis);`
+  - `cx_sort` (function, line 619) `cx_sort(order, tmp_count);`
+  - `BT_LEN_AUTO` (macro, line 31) `#define BT_LEN_AUTO`
+  - `BT_WRAP_EPS` (macro, line 61) `#define BT_WRAP_EPS`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ## src/browser.c
 - Layer: utility
@@ -161,8 +170,12 @@
   - `host_equal` (function, line 412) `static int host_equal(const char *a, const char *b)`
   - `browser_is_exception` (function, line 423) `int browser_is_exception(const browser_state *bs, const char *host)`
   - `browser_add_exception` (function, line 431) `browser_status browser_add_exception(browser_state *bs, const char *host)`
-  - `_POSIX_C_SOURCE` (macro, line 6)
-- Depends on: `include/util.h`
+  - `free` (function, line 17) `free(bs->page_title);`
+  - `memcpy` (function, line 78) `memcpy(d, s, n + 1);`
+  - `memset` (function, line 157) `memset(bs, 0, sizeof *bs);`
+  - `memmove` (function, line 279) `memmove(bs->url_bar + s, bs->url_bar + s + l, bs->url_bar_len - (s + l) + 1);`
+  - `_POSIX_C_SOURCE` (macro, line 6) `#define _POSIX_C_SOURCE`
+- Depends on: `include/browser.h`, `include/util.h`
 
 ## src/compositor.c
 - Layer: utility
@@ -173,288 +186,379 @@
   - `eff_z` (function, line 50) `static int eff_z(const cx_item *it)`
   - `cx_item_compare` (function, line 53) `int cx_item_compare(const cx_item *a, const cx_item *b)`
   - `cx_sort` (function, line 70) `void cx_sort(cx_item *items, size_t n)`
+- Depends on: `include/compositor.h`, `include/css.h`
 
 ## src/css.c
 - Layer: utility
 - Language: c
 - Symbols:
-  - `css_decl` (struct, line 234)
-  - `css_custom_prop` (struct, line 272)
-  - `css_sheet` (struct, line 282)
-  - `css_keyframe_stop` (struct, line 304)
-  - `calc_val` (struct, line 1396)
-  - `calc_parser` (struct, line 1397)
-  - `parse_num` (function, line 335) `static int parse_num(const char *s, double *out, const char **endp)`
-  - `round_clamp` (function, line 347) `static int round_clamp(double v, int lo, int hi)`
-  - `parse_color` (function, line 356) `static int parse_color(const char *v)`
-  - `interp_color` (function, line 364) `static int interp_color(const char *v)`
-  - `through` (function, line 381) `* at the two SHARED chokepoints every property funnels through (the generic
+  - `css_custom_prop` (struct, line 91)
+  - `css_sheet` (struct, line 101)
+  - `css_keyframe_stop` (struct, line 123)
+  - `css_rule` (struct, line 99)
+  - `name` (type_alias, line 91) `typedef struct css_custom_prop { char name[CSS_TOK_MAX];`
+  - `parse_num` (function, line 154) `static int parse_num(const char *s, double *out, const char **endp)`
+  - `parse_color` (function, line 165) `static int parse_color(const char *v)`
+  - `interp_color` (function, line 168) `static int interp_color(const char *v)`
+  - `through` (function, line 185) `* at the two SHARED chokepoints every property funnels through (the generic
  * dispatch tail, and...`
-  - `bg_alpha_of` (function, line 401) `static int bg_alpha_of(const char *v)`
-  - `interp_bg` (function, line 429) `static int interp_bg(const char *v)`
-  - `gradient` (function, line 461) `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
- * the whole decl...`
-  - `find_gradient_call` (function, line 510) `static int find_gradient_call(const char *v, const char *fn, size_t *start,
-                     ...`
-  - `conic_prelude` (function, line 544) `static int conic_prelude(const char *seg, int *angle)`
-  - `grad_stop_pos` (function, line 586) `static int grad_stop_pos(const char *pp, int conic, const char **endp)`
-  - `CSS_GRAD_STOPS_MAX` (function, line 617) `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
- * the gradient fai...`
-  - `emit_gradient` (function, line 709) `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
-                         ...`
-  - `find_radial_gradient` (function, line 766) `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
-                      ...`
-  - `downstream` (function, line 811) `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
-static int expand_bg_...`
-  - `expand_background` (function, line 872) `static int expand_background(const char *val, css_decl *dst, int cap,
+  - `bg_alpha_of` (function, line 205) `static int bg_alpha_of(const char *v)`
+  - `interp_bg` (function, line 208) `static int interp_bg(const char *v)`
+  - `expand_bg_image` (function, line 216) `static int expand_bg_image(const char *val, css_decl *dst, int cap,
+                           ch...`
+  - `expand_background` (function, line 221) `static int expand_background(const char *val, css_decl *dst, int cap,
                            ...`
-  - `text` (function, line 957) `* source text (rem_rebase, see below) rather than by threading a context here.
+  - `text` (function, line 234) `* source text (rem_rebase, see below) rather than by threading a context here.
  *
  * Viewport uni...`
-  - `length_px` (function, line 971) `static int length_px(const char *v, double *px)`
-  - `interp_align` (function, line 975) `static int interp_align(const char *v)`
-  - `interp_lineheight` (function, line 1038) `static int interp_lineheight(const char *v)`
-  - `interp_weight` (function, line 1058) `static int interp_weight(const char *v)`
-  - `interp_style` (function, line 1067) `static int interp_style(const char *v)`
-  - `interp_textdeco` (function, line 1078) `static int interp_textdeco(const char *v)`
-  - `interp_display` (function, line 1097) `static int interp_display(const char *v)`
-  - `interp_gap` (function, line 1173) `static int interp_gap(const char *v)`
-  - `interp_justify` (function, line 1179) `static int interp_justify(const char *v)`
-  - `count_tracks` (function, line 1205) `static int count_tracks(const char *s, size_t n)`
-  - `track_size_of` (function, line 1214) `static int track_size_of(const char *tok)`
-  - `count_one_repeat` (function, line 1243) `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
-                      ...`
-  - `walk_tracks` (function, line 1286) `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
-  - `expand_grid_template_cols` (function, line 1347) `static int expand_grid_template_cols(const char *val, css_decl *dst, int cap)`
-  - `calc_skip_ws` (function, line 1398) `static void calc_skip_ws(calc_parser *p)`
-  - `calc_match_fn` (function, line 1406) `static int calc_match_fn(calc_parser *p, const char *name)`
-  - `calc_piecewise` (function, line 1433) `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)`
-  - `calc_mathfn` (function, line 1448) `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)`
-  - `calc_term` (function, line 1569) `static int calc_term(calc_parser *p, calc_val *out, int depth)`
-  - `calc_expr` (function, line 1592) `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
-  - `calc_eval_full` (function, line 1612) `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
-           ...`
-  - `calc_eval` (function, line 1628) `static int calc_eval(const char *v, size_t vlen, double *out_px)`
-  - `calc_eval_em` (function, line 1635) `static int calc_eval_em(const char *v, size_t vlen, double *out_em)`
-  - `calc_unwrap` (function, line 1643) `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)`
-  - `interp_len` (function, line 1661) `static int interp_len(const char *v, int allow_auto, int *out)`
-  - `pct_slot_of` (function, line 1706) `static int pct_slot_of(int slot)`
-  - `value_em_milli` (function, line 1756) `static int value_em_milli(const char *v)`
-  - `interp_lp` (function, line 1775) `static int interp_lp(const char *v, int allow_auto, int allow_pct,
-                     int *out_...`
-  - `interp_len` (function, line 1952) `* this file that might hand a token to interp_len (transitively: margin/padding/
- * inset, flex-b...`
-  - `expand_box2` (function, line 2019) `static int expand_box2(const char *val, int slot_start, int slot_end,
-                       int ...`
-  - `family_of` (function, line 2049) `static int family_of(const char *name)`
-  - `interp_fontfamily` (function, line 2078) `static int interp_fontfamily(const char *v)`
-  - `interp_texttransform` (function, line 2099) `static int interp_texttransform(const char *v)`
-  - `interp_valign` (function, line 2121) `static int interp_valign(const char *v)`
-  - `expand_valign` (function, line 2153) `static int expand_valign(const char *val, css_decl *dst, int cap)`
-  - `interp_transition_property` (function, line 2170) `static int interp_transition_property(const char *v)`
-  - `interp_whitespace` (function, line 2177) `static int interp_whitespace(const char *v)`
-  - `interp_tabsize` (function, line 2191) `static int interp_tabsize(const char *v)`
-  - `interp_textdeco_style` (function, line 2202) `static int interp_textdeco_style(const char *v)`
-  - `interp_textdeco_thickness` (function, line 2213) `static int interp_textdeco_thickness(const char *v)`
-  - `interp_aspect_ratio` (function, line 2225) `static int interp_aspect_ratio(const char *v, int *num, int *den)`
-  - `interp_direction` (function, line 2258) `static int interp_direction(const char *v)`
-  - `liststyle_kw` (function, line 2263) `static int liststyle_kw(const char *t)`
-  - `liststyle_unknown_name` (function, line 2285) `static int liststyle_unknown_name(const char *t)`
-  - `interp_liststyle` (function, line 2296) `static int interp_liststyle(const char *v)`
-  - `emit_spacing` (function, line 2330) `static int emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
-  - `expand_shadow` (function, line 2344) `static int expand_shadow(const char *val, css_decl *dst, int cap)`
-  - `interp_position` (function, line 2374) `static int interp_position(const char *v)`
-  - `interp_boxsizing` (function, line 2383) `static int interp_boxsizing(const char *v)`
-  - `interp_float` (function, line 2389) `static int interp_float(const char *v)`
-  - `interp_clear` (function, line 2396) `static int interp_clear(const char *v)`
-  - `interp_visibility` (function, line 2406) `static int interp_visibility(const char *v)`
-  - `interp_overflow` (function, line 2413) `static int interp_overflow(const char *v)`
-  - `interp_cursor` (function, line 2445) `static int interp_cursor(const char *v)`
-  - `interp_text_overflow` (function, line 2461) `static int interp_text_overflow(const char *v)`
-  - `interp_word_break` (function, line 2467) `static int interp_word_break(const char *v)`
-  - `interp_overflow_wrap` (function, line 2475) `static int interp_overflow_wrap(const char *v)`
-  - `interp_border_collapse` (function, line 2484) `static int interp_border_collapse(const char *v)`
-  - `number` (function, line 2493) `* number (no unit) as px (common in shorthand context like "10 5"). */
-static int interp_border_s...`
-  - `interp_empty_cells` (function, line 2518) `static int interp_empty_cells(const char *v)`
-  - `interp_caption_side` (function, line 2525) `static int interp_caption_side(const char *v)`
-  - `interp_table_layout` (function, line 2532) `static int interp_table_layout(const char *v)`
-  - `interp_font_variant` (function, line 2539) `static int interp_font_variant(const char *v)`
-  - `interp_hyphens` (function, line 2547) `static int interp_hyphens(const char *v)`
-  - `interp_user_select` (function, line 2555) `static int interp_user_select(const char *v)`
-  - `interp_caret_color` (function, line 2564) `static int interp_caret_color(const char *v)`
-  - `interp_appearance` (function, line 2576) `static int interp_appearance(const char *v)`
-  - `interp_pointer_events` (function, line 2594) `static int interp_pointer_events(const char *v)`
-  - `interp_bg_repeat` (function, line 2606) `static int interp_bg_repeat(const char *v)`
-  - `interp_bg_size` (function, line 2616) `static int interp_bg_size(const char *v)`
-  - `interp_bg_clip` (function, line 2623) `static int interp_bg_clip(const char *v)`
-  - `interp_bg_origin` (function, line 2631) `static int interp_bg_origin(const char *v)`
-  - `interp_bg_attachment` (function, line 2638) `static int interp_bg_attachment(const char *v)`
-  - `interp_isolation` (function, line 2645) `static int interp_isolation(const char *v)`
-  - `interp_contain` (function, line 2651) `static int interp_contain(const char *v)`
-  - `interp_content_visibility` (function, line 2672) `static int interp_content_visibility(const char *v)`
-  - `interp_image_rendering` (function, line 2679) `static int interp_image_rendering(const char *v)`
-  - `interp_color_scheme` (function, line 2686) `static int interp_color_scheme(const char *v)`
-  - `interp_accent_color` (function, line 2704) `static int interp_accent_color(const char *v)`
-  - `interp_print_color_adjust` (function, line 2709) `static int interp_print_color_adjust(const char *v)`
-  - `interp_forced_color_adjust` (function, line 2715) `static int interp_forced_color_adjust(const char *v)`
-  - `interp_mix_blend_mode` (function, line 2722) `static int interp_mix_blend_mode(const char *v)`
-  - `interp_object_fit` (function, line 2740) `static int interp_object_fit(const char *v)`
-  - `interp_list_style_pos` (function, line 2749) `static int interp_list_style_pos(const char *v)`
-  - `interp_font_kerning` (function, line 2755) `static int interp_font_kerning(const char *v)`
-  - `interp_text_rendering` (function, line 2762) `static int interp_text_rendering(const char *v)`
-  - `interp_font_stretch` (function, line 2770) `static int interp_font_stretch(const char *v)`
-  - `interp_resize` (function, line 2783) `static int interp_resize(const char *v)`
-  - `interp_scroll_behavior` (function, line 2791) `static int interp_scroll_behavior(const char *v)`
-  - `interp_touch_action` (function, line 2797) `static int interp_touch_action(const char *v)`
-  - `interp_overscroll_behavior` (function, line 2804) `static int interp_overscroll_behavior(const char *v)`
-  - `interp_backface_visibility` (function, line 2811) `static int interp_backface_visibility(const char *v)`
-  - `interp_border_style` (function, line 2833) `static int interp_border_style(const char *v)`
-  - `interp_bwidth1` (function, line 2859) `static int interp_bwidth1(const char *v)`
-  - `interp_time_ms` (function, line 2869) `static int interp_time_ms(const char *v)`
-  - `emit_radius_corner` (function, line 2902) `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)`
-  - `interp_bw_tok` (function, line 2910) `static int interp_bw_tok(const char *t, int *o)`
-  - `interp_bs_tok` (function, line 2911) `static int interp_bs_tok(const char *t, int *o)`
-  - `interp_bc_tok` (function, line 2912) `static int interp_bc_tok(const char *t, int *o)`
-  - `expand_outline` (function, line 2976) `static int expand_outline(const char *val, css_decl *dst, int cap)`
-  - `interp_column_count` (function, line 2993) `static int interp_column_count(const char *v)`
-  - `interp_column_width` (function, line 3005) `static int interp_column_width(const char *v)`
-  - `expand_columns` (function, line 3016) `static int expand_columns(const char *val, css_decl *dst, int cap)`
-  - `expand_flex_flow` (function, line 3050) `static int expand_flex_flow(const char *val, css_decl *dst, int cap)`
-  - `expand_column_rule` (function, line 3072) `static int expand_column_rule(const char *val, css_decl *dst, int cap)`
-  - `interp_filter_pct` (function, line 3084) `static int interp_filter_pct(const char *s)`
-  - `interp_filter_deg` (function, line 3098) `static int interp_filter_deg(const char *s)`
-  - `filter_paren_body` (function, line 3113) `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)`
-  - `expand_backdrop_filter` (function, line 3276) `static int expand_backdrop_filter(const char *val, css_decl *dst, int cap)`
-  - `expand_bg_position` (function, line 3309) `static int expand_bg_position(const char *val, css_decl *dst, int cap)`
-  - `expand_bg_size` (function, line 3369) `static int expand_bg_size(const char *val, css_decl *dst, int cap)`
-  - `emit_content` (function, line 3408) `static int emit_content(css_decl *dst, int cap, const char *str,
-                        char (*c...`
-  - `expand_content` (function, line 3421) `static int expand_content(const char *val, css_decl *dst, int cap,
-                          char...`
-  - `expand_grid_areas` (function, line 3453) `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
-                           ...`
-  - `expand_grid_template` (function, line 3520) `static int expand_grid_template(const char *val, css_decl *dst, int cap,
-                        ...`
-  - `expand_box_shadow` (function, line 3571) `static int expand_box_shadow(const char *val, css_decl *dst, int cap)`
-  - `interp_flex_factor` (function, line 3599) `static int interp_flex_factor(const char *v)`
-  - `interp_flex_basis` (function, line 3609) `static int interp_flex_basis(const char *v, int *out)`
-  - `expand_flex` (function, line 3643) `static int expand_flex(const char *val, css_decl *dst, int cap)`
-  - `interp_align_kw` (function, line 3688) `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)`
-  - `interp_flex_direction` (function, line 3700) `static int interp_flex_direction(const char *v)`
-  - `interp_flex_wrap` (function, line 3708) `static int interp_flex_wrap(const char *v)`
-  - `interp_grid_flow` (function, line 3717) `static int interp_grid_flow(const char *v)`
-  - `interp_grid_span` (function, line 3743) `static int interp_grid_span(const char *v)`
-  - `copy_trim` (function, line 3762) `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
-  - `strip_important` (function, line 3775) `static int strip_important(char *val)`
-  - `scope_has_class` (function, line 3855) `static int scope_has_class(const char *list, const char *name, size_t len)`
-  - `var_append` (function, line 3924) `static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n)`
-  - `value` (function, line 3951) `* any other unsupported value (fail closed, never a partially-substituted value). */
-static int r...`
-  - `overflowed` (function, line 4011) `* overflowed (caller drops the declaration). */
-static int resolve_var(const char *val, char *out...`
-  - `parse_rotate_deg` (function, line 4045) `static int parse_rotate_deg(const char *s, int *out)`
-  - `function` (function, line 4062) `* function (perspective/3D), multiple space-separated functions, or
- * unparseable syntax reject ...`
-  - `origin_component` (function, line 4271) `static int origin_component(const char *tok, int axis, int *out)`
-  - `expand_transform_origin` (function, line 4291) `static int expand_transform_origin(const char *val, css_decl *dst, int cap)`
-  - `expand_gap` (function, line 4323) `static int expand_gap(const char *val, css_decl *dst, int cap)`
-  - `ignored` (function, line 4342) `* engine slot and is ignored (documented simplification, like list-style's
- * ignored tokens). An...`
-  - `property` (function, line 4377) `* error drops the whole property (fail closed). */
-static int expand_clip(const char *val, css_de...`
-  - `shorthand` (function, line 4420) `* generic bucket keeps the rest of the shorthand (same net effect as the
- * font-family longhand ...`
-  - `interpret_prop_dispatch` (function, line 4490) `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
-   ...`
-  - `grammar` (function, line 4509) `* grammar (`justify`/`distribute`) is not `justify-content`'s. Guessing
-     * there would be inv...`
-  - `wide_claim` (function, line 5037) `static int wide_claim(const char *prop, css_decl *dst, int cap,
-                      char (*urlt...`
-  - `interpret_prop` (function, line 5077) `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+  - `expand_box4` (function, line 253) `static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
             ...`
-  - `drop_copy_text` (function, line 5104) `static void drop_copy_text(char *dst, size_t cap, const char *src)`
-  - `drop_record` (function, line 5123) `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)`
-  - `interpret_decls` (function, line 5201) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+  - `expand_box2` (function, line 258) `static int expand_box2(const char *val, int slot_start, int slot_end,
+                       int ...`
+  - `interp_len` (function, line 263) `static int interp_len(const char *v, int allow_auto, int *out)`
+  - `length_px` (function, line 267) `static int length_px(const char *v, double *px)`
+  - `interp_lp` (function, line 271) `static int interp_lp(const char *v, int allow_auto, int allow_pct,
+                     int *out_...`
+  - `lp_can_be_nonneg` (function, line 276) `static int lp_can_be_nonneg(int px_val, int pct_pm)`
+  - `next_ws_token` (function, line 280) `static int next_ws_token(const char **p, char *tok, size_t cap)`
+  - `interp_align` (function, line 284) `static int interp_align(const char *v)`
+  - `interp_fontsize_ex` (function, line 288) `static int interp_fontsize_ex(const char *v, int *abs_out)`
+  - `interp_lineheight` (function, line 292) `static int interp_lineheight(const char *v)`
+  - `interp_weight` (function, line 296) `static int interp_weight(const char *v)`
+  - `interp_style` (function, line 300) `static int interp_style(const char *v)`
+  - `interp_textdeco` (function, line 304) `static int interp_textdeco(const char *v)`
+  - `interp_display` (function, line 308) `static int interp_display(const char *v)`
+  - `interp_gap` (function, line 312) `static int interp_gap(const char *v)`
+  - `interp_justify` (function, line 316) `static int interp_justify(const char *v)`
+  - `interp_gridcols` (function, line 320) `static int interp_gridcols(const char *v)`
+  - `expand_grid_template_cols` (function, line 324) `static int expand_grid_template_cols(const char *val, css_decl *dst, int cap)`
+  - `interp_fontfamily` (function, line 331) `static int interp_fontfamily(const char *v)`
+  - `interp_texttransform` (function, line 332) `static int interp_texttransform(const char *v)`
+  - `interp_opacity` (function, line 333) `static int interp_opacity(const char *v)`
+  - `expand_valign` (function, line 334) `static int expand_valign(const char *val, css_decl *dst, int cap)`
+  - `interp_transition_property` (function, line 335) `static int interp_transition_property(const char *v)`
+  - `interp_whitespace` (function, line 336) `static int interp_whitespace(const char *v)`
+  - `interp_tabsize` (function, line 337) `static int interp_tabsize(const char *v)`
+  - `interp_textdeco_style` (function, line 338) `static int interp_textdeco_style(const char *v)`
+  - `interp_textdeco_thickness` (function, line 339) `static int interp_textdeco_thickness(const char *v)`
+  - `interp_aspect_ratio` (function, line 340) `static int interp_aspect_ratio(const char *v, int *num, int *den)`
+  - `interp_direction` (function, line 341) `static int interp_direction(const char *v)`
+  - `interp_liststyle` (function, line 342) `static int interp_liststyle(const char *v)`
+  - `emit_spacing` (function, line 343) `static int emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+  - `expand_shadow` (function, line 344) `static int expand_shadow(const char *val, css_decl *dst, int cap)`
+  - `interp_position` (function, line 347) `static int interp_position(const char *v)`
+  - `interp_boxsizing` (function, line 356) `static int interp_boxsizing(const char *v)`
+  - `interp_float` (function, line 362) `static int interp_float(const char *v)`
+  - `interp_clear` (function, line 369) `static int interp_clear(const char *v)`
+  - `interp_visibility` (function, line 379) `static int interp_visibility(const char *v)`
+  - `interp_overflow` (function, line 386) `static int interp_overflow(const char *v)`
+  - `interp_cursor` (function, line 418) `static int interp_cursor(const char *v)`
+  - `interp_text_overflow` (function, line 434) `static int interp_text_overflow(const char *v)`
+  - `interp_word_break` (function, line 440) `static int interp_word_break(const char *v)`
+  - `interp_overflow_wrap` (function, line 448) `static int interp_overflow_wrap(const char *v)`
+  - `interp_border_collapse` (function, line 457) `static int interp_border_collapse(const char *v)`
+  - `number` (function, line 466) `* number (no unit) as px (common in shorthand context like "10 5"). */
+static int interp_border_s...`
+  - `interp_empty_cells` (function, line 491) `static int interp_empty_cells(const char *v)`
+  - `interp_caption_side` (function, line 498) `static int interp_caption_side(const char *v)`
+  - `interp_table_layout` (function, line 505) `static int interp_table_layout(const char *v)`
+  - `interp_font_variant` (function, line 512) `static int interp_font_variant(const char *v)`
+  - `interp_hyphens` (function, line 520) `static int interp_hyphens(const char *v)`
+  - `interp_user_select` (function, line 528) `static int interp_user_select(const char *v)`
+  - `interp_caret_color` (function, line 537) `static int interp_caret_color(const char *v)`
+  - `interp_appearance` (function, line 549) `static int interp_appearance(const char *v)`
+  - `interp_pointer_events` (function, line 567) `static int interp_pointer_events(const char *v)`
+  - `interp_bg_repeat` (function, line 579) `static int interp_bg_repeat(const char *v)`
+  - `interp_bg_size` (function, line 589) `static int interp_bg_size(const char *v)`
+  - `interp_bg_clip` (function, line 596) `static int interp_bg_clip(const char *v)`
+  - `interp_bg_origin` (function, line 604) `static int interp_bg_origin(const char *v)`
+  - `interp_bg_attachment` (function, line 611) `static int interp_bg_attachment(const char *v)`
+  - `interp_isolation` (function, line 618) `static int interp_isolation(const char *v)`
+  - `interp_contain` (function, line 624) `static int interp_contain(const char *v)`
+  - `interp_content_visibility` (function, line 645) `static int interp_content_visibility(const char *v)`
+  - `interp_image_rendering` (function, line 652) `static int interp_image_rendering(const char *v)`
+  - `interp_color_scheme` (function, line 659) `static int interp_color_scheme(const char *v)`
+  - `interp_accent_color` (function, line 677) `static int interp_accent_color(const char *v)`
+  - `interp_print_color_adjust` (function, line 682) `static int interp_print_color_adjust(const char *v)`
+  - `interp_forced_color_adjust` (function, line 688) `static int interp_forced_color_adjust(const char *v)`
+  - `interp_mix_blend_mode` (function, line 695) `static int interp_mix_blend_mode(const char *v)`
+  - `interp_object_fit` (function, line 713) `static int interp_object_fit(const char *v)`
+  - `interp_list_style_pos` (function, line 722) `static int interp_list_style_pos(const char *v)`
+  - `interp_font_kerning` (function, line 728) `static int interp_font_kerning(const char *v)`
+  - `interp_text_rendering` (function, line 735) `static int interp_text_rendering(const char *v)`
+  - `interp_font_stretch` (function, line 743) `static int interp_font_stretch(const char *v)`
+  - `interp_resize` (function, line 756) `static int interp_resize(const char *v)`
+  - `interp_scroll_behavior` (function, line 764) `static int interp_scroll_behavior(const char *v)`
+  - `interp_touch_action` (function, line 770) `static int interp_touch_action(const char *v)`
+  - `interp_overscroll_behavior` (function, line 777) `static int interp_overscroll_behavior(const char *v)`
+  - `interp_backface_visibility` (function, line 784) `static int interp_backface_visibility(const char *v)`
+  - `interp_border_style` (function, line 806) `static int interp_border_style(const char *v)`
+  - `interp_bwidth1` (function, line 832) `static int interp_bwidth1(const char *v)`
+  - `interp_time_ms` (function, line 842) `static int interp_time_ms(const char *v)`
+  - `emit_radius_corner` (function, line 875) `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)`
+  - `interp_bw_tok` (function, line 883) `static int interp_bw_tok(const char *t, int *o)`
+  - `interp_bs_tok` (function, line 884) `static int interp_bs_tok(const char *t, int *o)`
+  - `interp_bc_tok` (function, line 885) `static int interp_bc_tok(const char *t, int *o)`
+  - `expand_outline` (function, line 949) `static int expand_outline(const char *val, css_decl *dst, int cap)`
+  - `interp_column_count` (function, line 966) `static int interp_column_count(const char *v)`
+  - `interp_column_width` (function, line 978) `static int interp_column_width(const char *v)`
+  - `expand_columns` (function, line 989) `static int expand_columns(const char *val, css_decl *dst, int cap)`
+  - `expand_flex_flow` (function, line 1023) `static int expand_flex_flow(const char *val, css_decl *dst, int cap)`
+  - `expand_column_rule` (function, line 1045) `static int expand_column_rule(const char *val, css_decl *dst, int cap)`
+  - `interp_filter_pct` (function, line 1057) `static int interp_filter_pct(const char *s)`
+  - `interp_filter_deg` (function, line 1071) `static int interp_filter_deg(const char *s)`
+  - `filter_paren_body` (function, line 1086) `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)`
+  - `expand_backdrop_filter` (function, line 1249) `static int expand_backdrop_filter(const char *val, css_decl *dst, int cap)`
+  - `expand_bg_position` (function, line 1282) `static int expand_bg_position(const char *val, css_decl *dst, int cap)`
+  - `expand_bg_size` (function, line 1342) `static int expand_bg_size(const char *val, css_decl *dst, int cap)`
+  - `emit_content` (function, line 1381) `static int emit_content(css_decl *dst, int cap, const char *str,
+                        char (*c...`
+  - `expand_content` (function, line 1394) `static int expand_content(const char *val, css_decl *dst, int cap,
+                          char...`
+  - `expand_grid_areas` (function, line 1426) `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
+                           ...`
+  - `expand_grid_template` (function, line 1493) `static int expand_grid_template(const char *val, css_decl *dst, int cap,
+                        ...`
+  - `expand_box_shadow` (function, line 1544) `static int expand_box_shadow(const char *val, css_decl *dst, int cap)`
+  - `interp_flex_factor` (function, line 1572) `static int interp_flex_factor(const char *v)`
+  - `interp_flex_basis` (function, line 1582) `static int interp_flex_basis(const char *v, int *out)`
+  - `expand_flex` (function, line 1616) `static int expand_flex(const char *val, css_decl *dst, int cap)`
+  - `interp_align_kw` (function, line 1661) `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)`
+  - `interp_flex_direction` (function, line 1673) `static int interp_flex_direction(const char *v)`
+  - `interp_box_orient` (function, line 1692) `static int interp_box_orient(const char *v)`
+  - `interp_flex_wrap` (function, line 1697) `static int interp_flex_wrap(const char *v)`
+  - `interp_grid_flow` (function, line 1706) `static int interp_grid_flow(const char *v)`
+  - `interp_grid_span` (function, line 1732) `static int interp_grid_span(const char *v)`
+  - `copy_trim` (function, line 1751) `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+  - `strip_important` (function, line 1764) `static int strip_important(char *val)`
+  - `scope_has_class` (function, line 1844) `static int scope_has_class(const char *list, const char *name, size_t len)`
+  - `var_append` (function, line 1913) `static int var_append(char *out, size_t outcap, size_t *o, const char *s, size_t n)`
+  - `value` (function, line 1940) `* any other unsupported value (fail closed, never a partially-substituted value). */
+static int r...`
+  - `overflowed` (function, line 2000) `* overflowed (caller drops the declaration). */
+static int resolve_var(const char *val, char *out...`
+  - `tr_mul` (function, line 2073) `static void tr_mul(double out[6], const double l[6], const double r[6])`
+  - `tr_decompose` (function, line 2093) `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
+                        in...`
+  - `parse_matrix6` (function, line 2116) `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
+  - `split_top_args` (function, line 2148) `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
                ...`
-  - `add_rule` (function, line 5219) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
+  - `translate3d` (function, line 2178) `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
+ * renders z as nothing,...`
+  - `translate3d` (function, line 2428) `* translate3d()/translateZ() flatten to their 2D projection. Any other
+ * transform function (per...`
+  - `origin_component` (function, line 2621) `static int origin_component(const char *tok, int axis, int *out)`
+  - `expand_transform_origin` (function, line 2647) `static int expand_transform_origin(const char *val, css_decl *dst, int cap)`
+  - `expand_gap` (function, line 2679) `static int expand_gap(const char *val, css_decl *dst, int cap)`
+  - `ignored` (function, line 2698) `* engine slot and is ignored (documented simplification, like list-style's
+ * ignored tokens). An...`
+  - `property` (function, line 2733) `* error drops the whole property (fail closed). */
+static int expand_clip(const char *val, css_de...`
+  - `shorthand` (function, line 2776) `* generic bucket keeps the rest of the shorthand (same net effect as the
+ * font-family longhand ...`
+  - `interpret_prop_dispatch` (function, line 2846) `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
+   ...`
+  - `grammar` (function, line 2865) `* grammar (`justify`/`distribute`) is not `justify-content`'s. Guessing
+     * there would be inv...`
+  - `wide_claim` (function, line 3394) `static int wide_claim(const char *prop, css_decl *dst, int cap,
+                      char (*urlt...`
+  - `interpret_prop` (function, line 3434) `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+            ...`
+  - `drop_copy_text` (function, line 3461) `static void drop_copy_text(char *dst, size_t cap, const char *src)`
+  - `drop_record` (function, line 3480) `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)`
+  - `interpret_decls` (function, line 3558) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+               ...`
+  - `add_rule` (function, line 3576) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      siz...`
-  - `skip_at_rule` (function, line 5304) `static size_t skip_at_rule(const char *s, size_t i, size_t n)`
-  - `block_end` (function, line 5320) `static size_t block_end(const char *s, size_t open, size_t n)`
-  - `trim_inplace` (function, line 5356) `static void trim_inplace(char *s)`
-  - `copy_lower_trim` (function, line 5365) `static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
-  - `media_part_matches` (function, line 5374) `static int media_part_matches(const char *p, const css_media *m)`
-  - `media_segment_matches` (function, line 5403) `static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m)`
-  - `media_matches` (function, line 5440) `static int media_matches(const char *s, size_t a, size_t b, const css_media *m)`
-  - `at_is_media` (function, line 5454) `static int at_is_media(const char *s, size_t i, size_t n)`
-  - `collect_custom_props_scoped` (function, line 5472) `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+  - `skip_at_rule` (function, line 3661) `static size_t skip_at_rule(const char *s, size_t i, size_t n)`
+  - `block_end` (function, line 3677) `static size_t block_end(const char *s, size_t open, size_t n)`
+  - `trim_inplace` (function, line 3713) `static void trim_inplace(char *s)`
+  - `copy_lower_trim` (function, line 3722) `static size_t copy_lower_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+  - `media_part_matches` (function, line 3731) `static int media_part_matches(const char *p, const css_media *m)`
+  - `media_segment_matches` (function, line 3760) `static int media_segment_matches(const char *s, size_t a, size_t b, const css_media *m)`
+  - `media_matches` (function, line 3797) `static int media_matches(const char *s, size_t a, size_t b, const css_media *m)`
+  - `at_is_media` (function, line 3811) `static int at_is_media(const char *s, size_t i, size_t n)`
+  - `collect_custom_props_scoped` (function, line 3829) `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                 ...`
-  - `parse_block` (function, line 5528) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+  - `parse_block` (function, line 3885) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                  ...`
-  - `rem_ident_ch` (function, line 5734) `static int rem_ident_ch(char c)`
-  - `rem_num_starts_after` (function, line 5742) `static int rem_num_starts_after(char prev)`
-  - `rem_emit_px` (function, line 5752) `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)`
-  - `rem_rebase` (function, line 5782) `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
-  - `sheet_rewind` (function, line 5849) `static void sheet_rewind(css_sheet *sh)`
-  - `sheet_root_font_px` (function, line 5889) `static double sheet_root_font_px(const css_sheet *sh)`
-  - `strip_comments` (function, line 5897) `static char *strip_comments(const char *text, size_t len, size_t *outlen)`
-  - `var` (function, line 5907) `* collected and forty var() declarations -- font sizes, widths, radii, the
+  - `rem_ident_ch` (function, line 4091) `static int rem_ident_ch(char c)`
+  - `rem_num_starts_after` (function, line 4099) `static int rem_num_starts_after(char prev)`
+  - `rem_emit_px` (function, line 4109) `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)`
+  - `rem_rebase` (function, line 4139) `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
+  - `sheet_rewind` (function, line 4206) `static void sheet_rewind(css_sheet *sh)`
+  - `sheet_root_font_px` (function, line 4246) `static double sheet_root_font_px(const css_sheet *sh)`
+  - `strip_comments` (function, line 4254) `static char *strip_comments(const char *text, size_t len, size_t *outlen)`
+  - `var` (function, line 4264) `* collected and forty var() declarations -- font sizes, widths, radii, the
      * whole theme -- ...`
-  - `css_parse` (function, line 5931) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
-  - `css_parse_media` (function, line 5935) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
+  - `css_parse` (function, line 4288) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
+  - `css_parse_media` (function, line 4292) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
                 ...`
-  - `css_parse_scoped` (function, line 5940) `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+  - `css_parse_scoped` (function, line 4297) `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                ...`
-  - `css_parse_logged` (function, line 5945) `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+  - `css_parse_logged` (function, line 4302) `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
                ...`
-  - `css_free` (function, line 6015) `void css_free(css_sheet *s)`
-  - `apply_decl` (function, line 6029) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+  - `css_free` (function, line 4372) `void css_free(css_sheet *s)`
+  - `apply_decl` (function, line 4386) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...`
-  - `parent` (function, line 6064) `* property from the parent (`inherit`), and an unset non-inherited one
+  - `parent` (function, line 4421) `* property from the parent (`inherit`), and an unset non-inherited one
          * stands at its i...`
-  - `computed_font_size` (function, line 6382) `static double computed_font_size(const css_style *o, const css_element *el)`
-  - `fold_font_relative` (function, line 6403) `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
+  - `computed_font_size` (function, line 4739) `static double computed_font_size(const css_style *o, const css_element *el)`
+  - `fold_font_relative` (function, line 4760) `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                          ...`
-  - `css_resolve_el` (function, line 6431) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+  - `css_resolve_el` (function, line 4788) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          ...`
-  - `css_resolve` (function, line 6611) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+  - `css_resolve` (function, line 4968) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-  - `NULL` (function, line 6636) `* Sheet can be NULL (inline style, no @keyframes). */
+  - `NULL` (function, line 4993) `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...`
-  - `css_font_face_count` (function, line 6667) `size_t css_font_face_count(const css_sheet *sheet)`
-  - `css_font_face_at` (function, line 6671) `int css_font_face_at(const css_sheet *sheet, size_t i,
+  - `css_font_face_count` (function, line 5024) `size_t css_font_face_count(const css_sheet *sheet)`
+  - `css_font_face_at` (function, line 5028) `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...`
-  - `css_parse_inline` (function, line 6681) `css_style css_parse_inline(const char *style, size_t len)`
-  - `CSS_INIT_SELS` (macro, line 42)
-  - `CSS_INIT_DECLS` (macro, line 43)
-  - `CSS_DECL_SLOTS_MIN` (macro, line 58)
-  - `CSS_INIT_RULES` (macro, line 59)
-  - `CSS_SELS_PER_GROUP` (macro, line 60)
-  - `CSS_INLINE_DECLS` (macro, line 61)
-  - `CSS_INLINE_SPEC` (macro, line 62)
-  - `CSS_MAX_CUSTOM_PROPS` (macro, line 73)
-  - `CSS_VAR_MAX_DEPTH` (macro, line 74)
-  - `CSS_MAX_BG_URLS` (macro, line 83)
-  - `CSS_MAX_KEYFRAMES` (macro, line 84)
-  - `CSS_MAX_KEYFRAME_STOPS` (macro, line 86)
-  - `CSS_MAX_KEYFRAME_DECLS` (macro, line 87)
-  - `CSS_INLINE_BG_URLS` (macro, line 88)
-  - `CSS_WIDE_PROBE_DECLS` (macro, line 94)
-  - `CSS_MAX_FONT_FACES` (macro, line 322)
-  - `CSS_CALC_MAX_DEPTH` (macro, line 1377)
-  - `CSS_MATHFN_MAX_ARGS` (macro, line 1381)
-  - `AUTO_REJECT` (macro, line 1849)
-  - `AUTO_VALUE` (macro, line 1850)
-  - `AUTO_RESET` (macro, line 1851)
-  - `AUTO_RESET_NONE` (macro, line 1855)
-  - `CSS_MEDIA_TOK` (macro, line 5331)
-  - `CSS_MEDIA_MAX_DEPTH` (macro, line 5462)
+  - `css_parse_inline` (function, line 5038) `css_style css_parse_inline(const char *style, size_t len)`
+  - `here` (function, line 73) `* A value is capped at CSS_TOK_MAX like every other token here (an overlong one * could never fit a re-substituted declaration value anyway), and lookups recurse * at most CSS_VAR_MAX_DEPTH deep (a ch`
+  - `cl_number` (function, line 159) `return cl_number(s, out, endp);`
+  - `cv_parse_color` (function, line 166) `return cv_parse_color(v);`
+  - `cv_interp_color` (function, line 170) `return cv_interp_color(v);`
+  - `csel_ci_eq` (function, line 194) `return csel_ci_eq(v, "initial") || csel_ci_eq(v, "inherit") || csel_ci_eq(v, "unset") || csel_ci_eq(v, "revert") || csel_ci_eq(v, "revert-layer");`
+  - `cv_bg_alpha_of` (function, line 206) `return cv_bg_alpha_of(v);`
+  - `cv_interp_bg` (function, line 210) `return cv_interp_bg(v);`
+  - `cg_expand_bg_image` (function, line 219) `return cg_expand_bg_image(val, dst, cap, urltab, nurl, urlcap);`
+  - `cg_expand_background` (function, line 224) `return cg_expand_background(val, dst, cap, urltab, nurl, urlcap);`
+  - `cb_emit_len` (function, line 251) `return cb_emit_len(dst, cap, slot, val, allow_auto, allow_neg);`
+  - `cb_expand_box4` (function, line 256) `return cb_expand_box4(val, slot_top, allow_auto, allow_neg, dst, cap);`
+  - `cb_expand_box2` (function, line 261) `return cb_expand_box2(val, slot_start, slot_end, allow_auto, allow_neg, dst, cap);`
+  - `cb_interp_len` (function, line 265) `return cb_interp_len(v, allow_auto, out);`
+  - `cb_length_px` (function, line 269) `return cb_length_px(v, px);`
+  - `cb_interp_lp` (function, line 274) `return cb_interp_lp(v, allow_auto, allow_pct, out_px, out_pm);`
+  - `cb_lp_can_be_nonneg` (function, line 278) `return cb_lp_can_be_nonneg(px_val, pct_pm);`
+  - `cb_next_ws_token` (function, line 282) `return cb_next_ws_token(p, tok, cap);`
+  - `cb_interp_align` (function, line 286) `return cb_interp_align(v);`
+  - `cb_interp_fontsize_ex` (function, line 290) `return cb_interp_fontsize_ex(v, abs_out);`
+  - `cb_interp_lineheight` (function, line 294) `return cb_interp_lineheight(v);`
+  - `cb_interp_weight` (function, line 298) `return cb_interp_weight(v);`
+  - `cb_interp_style` (function, line 302) `return cb_interp_style(v);`
+  - `cb_interp_textdeco` (function, line 306) `return cb_interp_textdeco(v);`
+  - `cb_interp_display` (function, line 310) `return cb_interp_display(v);`
+  - `cb_interp_gap` (function, line 314) `return cb_interp_gap(v);`
+  - `cb_interp_justify` (function, line 318) `return cb_interp_justify(v);`
+  - `cb_interp_gridcols` (function, line 322) `return cb_interp_gridcols(v);`
+  - `cb_expand_grid_template_cols` (function, line 326) `return cb_expand_grid_template_cols(val, dst, cap);`
+  - `emit_len` (function, line 879) `return emit_len(dst, cap, slot, tok, 0, 0);`
+  - `int` (function, line 886) `typedef int (*tok_interp)(const char *tok, int *out);`
+  - `memcpy` (function, line 1110) `memcpy(toks[nt], tok, tl + 1);`
+  - `order` (function, line 1211) `* Lengths in declaration order (dx, dy, optional blur >= 0);`
+  - `function` (function, line 1213) `* function (the rest of the list still applies). Emits the whole * 4-decl group in lock-step or nothing. */ const char *body = filter_paren_body(tok, "drop-shadow(", 12);`
+  - `blur` (function, line 1246) `* consumes ONLY blur(Npx);`
+  - `css_round_clamp` (function, line 1576) `return css_round_clamp(num * 100.0, 0, CSS_FLEX_FACTOR_MAX);`
+  - `column` (function, line 1595) `* column (`flex: 1 1 0%`);`
+  - `strcpy` (function, line 1831) `strcpy(tab[slot].value, valbuf);`
+  - `resolve_var_rec` (function, line 1908) `static int resolve_var_rec(const char *val, size_t vlen, char *out, size_t outcap, size_t *o, const css_custom_prop *tab, size_t ntab, int depth);`
+  - `matrix` (function, line 2085) `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands on skx only (the decomposition * convention: a shear pair has a family of factoriza`
+  - `LIST` (function, line 2171) `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose into one * affine matrix, QR-decomposed into the seven slots (shared with matrix()). `
+  - `translateX` (function, line 2420) `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc numbers all fail closed, same as any other * box-model length here);`
+  - `parse_angle_deg` (function, line 2424) `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
+  - `expand_transform_list` (function, line 2427) `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
+  - `caller` (function, line 2835) `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached a branch of the * dispatch below, which is what separates "not implemented" from "im`
+  - `slots` (function, line 2957) `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return emit_len(dst, cap, P_INSET_TOP, val, 1, 1);`
+  - `memset` (function, line 3410) `memset(tmp, 0, sizeof tmp);`
+  - `declared` (function, line 3530) `* the referenced custom property was never declared (or the fallback * chain bottomed out), so the declaration is invalid at computed-value * time exactly as CSS Variables 1 says. */ drop_record(log, `
+  - `memmove` (function, line 3717) `memmove(s, s + a, n + 1);`
+  - `collect_custom_decls` (function, line 3875) `collect_custom_decls(s, ds, de, tab, cap, ntab);`
+  - `sheet_reparse` (function, line 4354) `sheet_reparse(sh, rebased, rlen, m, root_scope, log);`
+  - `free` (function, line 4364) `free(rebased);`
+  - `page_view` (function, line 4392) `* the generated text reaches page_view (which materialises it as a synthetic * run);`
+  - `css_computed_font_size` (function, line 4741) `return css_computed_font_size(o, (el != NULL) ? el->font_size : 0.0);`
+  - `stylesheet` (function, line 4922) `* the stylesheet (e.g. a `:root` rule). Inline-declared names win on a * collision (closer to the use site), so they go first in the combined * table -- expand_lookup takes the first match, which also`
+  - `css_resolve_anim_keyframes` (function, line 4964) `css_resolve_anim_keyframes(&out, sheet);`
+  - `snprintf` (function, line 5034) `snprintf(family, fam_cap, "%s", sheet->font_faces[i].family);`
+  - `CSS_INIT_SELS` (macro, line 46) `#define CSS_INIT_SELS`
+  - `CSS_INIT_DECLS` (macro, line 47) `#define CSS_INIT_DECLS`
+  - `CSS_DECL_SLOTS_MIN` (macro, line 62) `#define CSS_DECL_SLOTS_MIN`
+  - `CSS_INIT_RULES` (macro, line 63) `#define CSS_INIT_RULES`
+  - `CSS_SELS_PER_GROUP` (macro, line 64) `#define CSS_SELS_PER_GROUP`
+  - `CSS_INLINE_DECLS` (macro, line 65) `#define CSS_INLINE_DECLS`
+  - `CSS_INLINE_SPEC` (macro, line 66) `#define CSS_INLINE_SPEC`
+  - `CSS_MAX_CUSTOM_PROPS` (macro, line 77) `#define CSS_MAX_CUSTOM_PROPS`
+  - `CSS_VAR_MAX_DEPTH` (macro, line 78) `#define CSS_VAR_MAX_DEPTH`
+  - `CSS_MAX_FONT_FACES` (macro, line 141) `#define CSS_MAX_FONT_FACES`
+  - `AUTO_REJECT` (macro, line 244) `#define AUTO_REJECT`
+  - `AUTO_VALUE` (macro, line 245) `#define AUTO_VALUE`
+  - `AUTO_RESET` (macro, line 246) `#define AUTO_RESET`
+  - `AUTO_RESET_NONE` (macro, line 247) `#define AUTO_RESET_NONE`
+  - `CSS_MEDIA_TOK` (macro, line 3688) `#define CSS_MEDIA_TOK`
+  - `CSS_MEDIA_MAX_DEPTH` (macro, line 3819) `#define CSS_MEDIA_MAX_DEPTH`
+- Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/flex_layout.h`
+
+## src/css_box.c
+- Layer: utility
+- Doc: include "css_box.h" include "css_decl.h" include "css.h" include "css_color.h" include "css_length.h" include "css_selec
+- Language: c
+- Symbols:
+  - `calc_val` (struct, line 479)
+  - `calc_parser` (struct, line 480)
+  - `px` (type_alias, line 479) `typedef struct calc_val { double px;`
+  - `cb_parse_num` (function, line 12) `static int cb_parse_num(const char *s, double *out, const char **endp)`
+  - `cb_wide_keyword` (function, line 17) `static int cb_wide_keyword(const char *v)`
+  - `cb_copy_trim` (function, line 24) `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+  - `cb_length_px` (function, line 49) `int cb_length_px(const char *v, double *px)`
+  - `cb_interp_align` (function, line 53) `int cb_interp_align(const char *v)`
+  - `cb_interp_lineheight` (function, line 116) `int cb_interp_lineheight(const char *v)`
+  - `cb_interp_weight` (function, line 136) `int cb_interp_weight(const char *v)`
+  - `cb_interp_style` (function, line 145) `int cb_interp_style(const char *v)`
+  - `cb_interp_textdeco` (function, line 156) `int cb_interp_textdeco(const char *v)`
+  - `cb_interp_display` (function, line 175) `int cb_interp_display(const char *v)`
+  - `cb_interp_gap` (function, line 251) `int cb_interp_gap(const char *v)`
+  - `cb_interp_justify` (function, line 257) `int cb_interp_justify(const char *v)`
+  - `cb_starts_with_ci` (function, line 282) `static int cb_starts_with_ci(const char *s, const char *pre)`
+  - `count_tracks` (function, line 288) `static int count_tracks(const char *s, size_t n)`
+  - `track_size_of` (function, line 297) `static int track_size_of(const char *tok)`
+  - `count_one_repeat` (function, line 326) `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
+                      ...`
+  - `walk_tracks` (function, line 369) `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
+  - `cb_expand_grid_template_cols` (function, line 430) `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)`
+  - `calc_skip_ws` (function, line 481) `static void calc_skip_ws(calc_parser *p)`
+  - `calc_match_fn` (function, line 489) `static int calc_match_fn(calc_parser *p, const char *name)`
+  - `calc_piecewise` (function, line 516) `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)`
+  - `calc_mathfn` (function, line 531) `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)`
+  - `calc_term` (function, line 652) `static int calc_term(calc_parser *p, calc_val *out, int depth)`
+  - `calc_expr` (function, line 675) `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
+  - `calc_eval_full` (function, line 695) `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
+           ...`
+  - `calc_eval` (function, line 711) `static int calc_eval(const char *v, size_t vlen, double *out_px)`
+  - `calc_eval_em` (function, line 718) `static int calc_eval_em(const char *v, size_t vlen, double *out_em)`
+  - `calc_unwrap` (function, line 726) `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)`
+  - `cb_interp_len` (function, line 744) `int cb_interp_len(const char *v, int allow_auto, int *out)`
+  - `pct_slot_of` (function, line 789) `static int pct_slot_of(int slot)`
+  - `cb_value_em_milli` (function, line 839) `int cb_value_em_milli(const char *v)`
+  - `cb_interp_lp` (function, line 858) `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
+                     int *out_px, ...`
+  - `interp_len` (function, line 1035) `* this file that might hand a token to interp_len (transitively: margin/padding/
+ * inset, flex-b...`
+  - `cb_expand_box2` (function, line 1106) `int cb_expand_box2(const char *val, int slot_start, int slot_end,
+                       int allo...`
+  - `cl_number` (function, line 15) `return cl_number(s, out, endp);`
+  - `csel_ci_eq` (function, line 20) `return csel_ci_eq(v, "initial") || csel_ci_eq(v, "inherit") || csel_ci_eq(v, "unset") || csel_ci_eq(v, "revert") || csel_ci_eq(v, "revert-layer");`
+  - `memcpy` (function, line 41) `memcpy(dst, s + a, n);`
+  - `css_round_clamp` (function, line 92) `return css_round_clamp(num, 10, 1000);`
+  - `repeat` (function, line 272) `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) / repeat(auto-fit|...) need an available width this pure * parser does not have, so they fail the W`
+  - `accepts` (function, line 452) `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further than interp_len already can). Bounded: * the whole expression already lives inside o`
+  - `min` (function, line 550) `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the element to zero width. Dropping the declaration * leaves the element at its content size, `
+  - `term` (function, line 866) `* the same expression and failed closed on the percentage term (its property * may not accept one);`
+  - `CSS_CALC_MAX_DEPTH` (macro, line 460) `#define CSS_CALC_MAX_DEPTH`
+  - `CSS_MATHFN_MAX_ARGS` (macro, line 464) `#define CSS_MATHFN_MAX_ARGS`
+  - `AUTO_REJECT` (macro, line 932) `#define AUTO_REJECT`
+  - `AUTO_VALUE` (macro, line 933) `#define AUTO_VALUE`
+  - `AUTO_RESET` (macro, line 934) `#define AUTO_RESET`
+  - `AUTO_RESET_NONE` (macro, line 938) `#define AUTO_RESET_NONE`
+- Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_chain.c
 - Layer: utility
 - Language: c
 - Symbols:
   - `cch_node` (struct, line 23)
+  - `tag` (type_alias, line 23) `typedef struct cch_node { char tag[CCH_TAG_MAX];`
   - `fill_css_node` (function, line 35) `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)`
   - `sibling_position` (function, line 133) `static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib)`
   - `sibling_type_position` (function, line 151) `static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib)`
@@ -463,12 +567,17 @@ void css_resolve_anim_keyframes(css_style *...`
 static const css_element *build_chain(lxb_dom_ele...`
   - `cch_element_style` (function, line 262) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
   - `cch_element_matches` (function, line 266) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
-  - `CCH_TAG_MAX` (macro, line 14)
-  - `CCH_ID_MAX` (macro, line 15)
-  - `CCH_CLASS_BUF` (macro, line 16)
-  - `CCH_MAX_CLASSES` (macro, line 17)
-  - `CCH_MAX_ATTRS` (macro, line 18)
-  - `CCH_ATTR_BUF` (macro, line 19)
+  - `lxb_dom_element_get_attribute` (function, line 58) `lxb_dom_element_get_attribute(e, (const lxb_char_t *)"id", 2, &il);`
+  - `memcpy` (function, line 60) `memcpy(node->idbuf, idv, il);`
+  - `css_resolve_el` (function, line 259) `return css_resolve_el(sheet, subject, (const char *)st, sl);`
+  - `cch_element_style_fs` (function, line 264) `return cch_element_style_fs(el, sheet, 0.0);`
+  - `CCH_TAG_MAX` (macro, line 14) `#define CCH_TAG_MAX`
+  - `CCH_ID_MAX` (macro, line 15) `#define CCH_ID_MAX`
+  - `CCH_CLASS_BUF` (macro, line 16) `#define CCH_CLASS_BUF`
+  - `CCH_MAX_CLASSES` (macro, line 17) `#define CCH_MAX_CLASSES`
+  - `CCH_MAX_ATTRS` (macro, line 18) `#define CCH_MAX_ATTRS`
+  - `CCH_ATTR_BUF` (macro, line 19) `#define CCH_ATTR_BUF`
+- Depends on: `include/css_chain.h`, `include/css_select.h`
 
 ## src/css_color.c
 - Layer: utility
@@ -488,11 +597,44 @@ static const css_element *build_chain(lxb_dom_ele...`
   - `cc_parse` (function, line 403) `cc_status cc_parse(const char *token, cc_rgb *out)`
   - `cc_pack` (function, line 434) `int cc_pack(cc_rgb c)`
   - `cc_unpack` (function, line 438) `cc_rgb cc_unpack(int packed)`
-  - `CC_TOKEN_MAX` (macro, line 18)
-  - `CC_CHANNEL_MAX` (macro, line 21)
-  - `CC_PERCENT_MAX` (macro, line 22)
-  - `CC_NUMBER_MAX_DIGITS` (macro, line 27)
-  - `CC_HSL_SCALE` (macro, line 30)
+  - `hsl_to_rgb` (function, line 361) `hsl_to_rgb(comps[0], comps[1], comps[2], &out->r, &out->g, &out->b);`
+  - `strcmp` (function, line 391) `return strcmp(k, n->name);`
+  - `CC_TOKEN_MAX` (macro, line 18) `#define CC_TOKEN_MAX`
+  - `CC_CHANNEL_MAX` (macro, line 21) `#define CC_CHANNEL_MAX`
+  - `CC_PERCENT_MAX` (macro, line 22) `#define CC_PERCENT_MAX`
+  - `CC_NUMBER_MAX_DIGITS` (macro, line 27) `#define CC_NUMBER_MAX_DIGITS`
+  - `CC_HSL_SCALE` (macro, line 30) `#define CC_HSL_SCALE`
+- Depends on: `include/css_color.h`
+
+## src/css_gradient.c
+- Layer: infrastructure
+- Doc: include "css_gradient.h" include "css_decl.h" include "css_color.h" include "css_length.h" include "css_select.h" includ
+- Language: c
+- Symbols:
+  - `cg_parse_num` (function, line 10) `static int cg_parse_num(const char *s, double *out, const char **endp)`
+  - `cg_wide_keyword` (function, line 15) `static int cg_wide_keyword(const char *v)`
+  - `gradient` (function, line 26) `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
+ * the whole decl...`
+  - `find_gradient_call` (function, line 75) `static int find_gradient_call(const char *v, const char *fn, size_t *start,
+                     ...`
+  - `conic_prelude` (function, line 109) `static int conic_prelude(const char *seg, int *angle)`
+  - `grad_stop_pos` (function, line 151) `static int grad_stop_pos(const char *pp, int conic, const char **endp)`
+  - `CSS_GRAD_STOPS_MAX` (function, line 182) `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+ * the gradient fai...`
+  - `emit_gradient` (function, line 274) `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+                         ...`
+  - `find_radial_gradient` (function, line 331) `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+                      ...`
+  - `downstream` (function, line 376) `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+int cg_expand_bg_imag...`
+  - `cg_expand_background` (function, line 437) `int cg_expand_background(const char *val, css_decl *dst, int cap,
+                             ch...`
+  - `cl_number` (function, line 13) `return cl_number(s, out, endp);`
+  - `csel_ci_eq` (function, line 18) `return csel_ci_eq(v, "initial") || csel_ci_eq(v, "inherit") || csel_ci_eq(v, "unset") || csel_ci_eq(v, "revert") || csel_ci_eq(v, "revert-layer");`
+  - `memcpy` (function, line 204) `memcpy(seg, s + a, len);`
+  - `pool` (function, line 372) `* pool (gradient explicitly reset);`
+  - `declaration` (function, line 435) `* declaration (fail closed);`
+- Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_length.c
 - Layer: utility
@@ -517,7 +659,8 @@ static const css_element *build_chain(lxb_dom_ele...`
   - `cl_resolve` (function, line 376) `cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px)`
   - `cl_resolve_lp` (function, line 390) `cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out)`
   - `cl_lp_used` (function, line 394) `double cl_lp_used(cl_lp lp, double basis)`
-  - `CL_PX_PER_IN` (macro, line 21)
+  - `CL_PX_PER_IN` (macro, line 21) `#define CL_PX_PER_IN`
+- Depends on: `include/css.h`, `include/css_length.h`
 
 ## src/css_select.c
 - Layer: utility
@@ -543,7 +686,56 @@ static const css_element *build_chain(lxb_dom_ele...`
  * through that com...`
   - `csel_matches` (function, line 860) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
-  - `HAS_MAX_DEPTH` (macro, line 646)
+  - `memset` (function, line 21) `memset(am, 0, sizeof *am);`
+  - `between` (function, line 206) `* between ( and ) is split on commas (not inside [] or ());`
+  - `csel_span_eq` (function, line 487) `return csel_span_eq(v + vl - fl, suf, fl, ci);`
+  - `csel_substr` (function, line 520) `case ATTR_STAR: return csel_substr(v, am->value, am->ci);`
+  - `csel_ci_eq` (function, line 538) `return csel_ci_eq(tag, "input") || csel_ci_eq(tag, "button") || csel_ci_eq(tag, "select") || csel_ci_eq(tag, "textarea") || csel_ci_eq(tag, "option") || csel_ci_eq(tag, "optgroup") || csel_ci_eq(tag, `
+  - `strlen` (function, line 714) `strlen(sub->attrs[ai].name), &avl);`
+  - `HAS_MAX_DEPTH` (macro, line 646) `#define HAS_MAX_DEPTH`
+- Depends on: `include/css_select.h`
+
+## src/css_text.c
+- Layer: utility
+- Doc: include "css_text.h" include "css_decl.h" include "css.h" include "css_box.h" include "css_color.h" include "css_length.
+- Language: c
+- Symbols:
+  - `ct_family_of` (function, line 18) `static int ct_family_of(const char *name)`
+  - `ct_interp_fontfamily` (function, line 47) `int ct_interp_fontfamily(const char *v)`
+  - `ct_interp_texttransform` (function, line 68) `int ct_interp_texttransform(const char *v)`
+  - `ct_interp_valign` (function, line 90) `int ct_interp_valign(const char *v)`
+  - `ct_expand_valign` (function, line 122) `int ct_expand_valign(const char *val, css_decl *dst, int cap)`
+  - `ct_interp_transition_property` (function, line 139) `int ct_interp_transition_property(const char *v)`
+  - `ct_interp_whitespace` (function, line 146) `int ct_interp_whitespace(const char *v)`
+  - `ct_interp_tabsize` (function, line 160) `int ct_interp_tabsize(const char *v)`
+  - `ct_interp_textdeco_style` (function, line 171) `int ct_interp_textdeco_style(const char *v)`
+  - `ct_interp_textdeco_thickness` (function, line 182) `int ct_interp_textdeco_thickness(const char *v)`
+  - `ct_interp_aspect_ratio` (function, line 194) `int ct_interp_aspect_ratio(const char *v, int *num, int *den)`
+  - `ct_interp_direction` (function, line 227) `int ct_interp_direction(const char *v)`
+  - `ct_liststyle_kw` (function, line 232) `static int ct_liststyle_kw(const char *t)`
+  - `ct_liststyle_unknown_name` (function, line 254) `static int ct_liststyle_unknown_name(const char *t)`
+  - `ct_interp_liststyle` (function, line 265) `int ct_interp_liststyle(const char *v)`
+  - `ct_emit_spacing` (function, line 299) `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+  - `ct_expand_shadow` (function, line 313) `int ct_expand_shadow(const char *val, css_decl *dst, int cap)`
+  - `css_round_clamp` (function, line 88) `return css_round_clamp(pct, 0, 100);`
+- Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`
+
+## src/css_values.c
+- Layer: utility
+- Doc: include "css_values.h" include "css.h" include "css_decl.h" include "css_color.h" include "css_length.h" include "css_se
+- Language: c
+- Symbols:
+  - `cv_parse_num` (function, line 9) `static int cv_parse_num(const char *s, double *out, const char **endp)`
+  - `cv_parse_color` (function, line 14) `int cv_parse_color(const char *v)`
+  - `cv_interp_color` (function, line 34) `int cv_interp_color(const char *v)`
+  - `cv_color_ok` (function, line 39) `int cv_color_ok(int c)`
+  - `cv_bg_alpha_of` (function, line 44) `int cv_bg_alpha_of(const char *v)`
+  - `cv_interp_bg` (function, line 94) `int cv_interp_bg(const char *v)`
+  - `cl_number` (function, line 12) `return cl_number(s, out, endp);`
+  - `cc_pack` (function, line 24) `return cc_pack(c);`
+  - `csel_lower_ch` (function, line 53) `csel_lower_ch(p[2]) == 'b' && csel_lower_ch(p[3]) == 'a' && p[4] == '(') || (csel_lower_ch(p[0]) == 'h' && csel_lower_ch(p[1]) == 's' && csel_lower_ch(p[2]) == 'l' && csel_lower_ch(p[3]) == 'a' && p[4`
+  - `css_round_clamp` (function, line 89) `return css_round_clamp(pct, 0, 100);`
+- Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/data_url.c
 - Layer: data_access
@@ -555,6 +747,7 @@ static const css_element *build_chain(lxb_dom_ele...`
   - `du_base64_payload` (function, line 31) `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len)`
   - `b64_val` (function, line 61) `static int b64_val(unsigned char c)`
   - `du_base64_decode` (function, line 69) `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)`
+- Depends on: `include/data_url.h`
 
 ## src/disk_store.c
 - Layer: data_access
@@ -567,8 +760,12 @@ static const css_element *build_chain(lxb_dom_ele...`
   - `ds_read` (function, line 102) `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN],
                   uint8_t **ou...`
   - `ds_free` (function, line 135) `void ds_free(uint8_t *buf, size_t len)`
-  - `_POSIX_C_SOURCE` (macro, line 10)
-- Depends on: `include/util.h`
+  - `free` (function, line 47) `free(dup);`
+  - `memcpy` (function, line 81) `memcpy(tmp, path, plen);`
+  - `ls_free` (function, line 99) `ls_free(blob, blob_len);`
+  - `close` (function, line 117) `close(fd);`
+  - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
+- Depends on: `include/disk_store.h`, `include/local_store.h`, `include/util.h`
 
 ## src/dom.c
 - Layer: utility
@@ -647,10 +844,24 @@ static dom_node_id qs_walk(const dom_inde...`
   - `ih_free` (function, line 842) `static void ih_free(ih_acc *a)`
   - `dom_get_inner_html` (function, line 869) `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
                            ...`
-  - `_POSIX_C_SOURCE` (macro, line 10)
-  - `DOM_QS_MAX_SELECTORS` (macro, line 373)
-  - `IH_BLOCK_SIZE` (macro, line 801)
-- Depends on: `include/util.h`
+  - `free` (function, line 93) `free(m->buckets);`
+  - `memcpy` (function, line 116) `memcpy(e->key, key, klen);`
+  - `lxb_dom_element_get_attribute` (function, line 251) `lxb_dom_element_get_attribute(el, (const lxb_char_t *)"id", 2, &len);`
+  - `qs_walk` (function, line 466) `return qs_walk(idx, root, sels, nsel, NULL, 0, NULL, 1);`
+  - `lxb_dom_element_qualified_name` (function, line 551) `lxb_dom_element_qualified_name(lxb_dom_interface_element(idx->nodes[node]), &tlen);`
+  - `lxb_html_document_title` (function, line 612) `lxb_html_document_title((lxb_html_document_t *)idx->document, &tl);`
+  - `lxb_dom_node_remove` (function, line 630) `lxb_dom_node_remove(c);`
+  - `lxb_dom_document_create_text_node` (function, line 637) `lxb_dom_document_create_text_node(el->owner_document, (const lxb_char_t *)text, len);`
+  - `lxb_dom_node_insert_child` (function, line 640) `lxb_dom_node_insert_child(el, lxb_dom_interface_node(t));`
+  - `lxb_html_document_title_set` (function, line 648) `lxb_html_document_title_set((lxb_html_document_t *)idx->document, (const lxb_char_t *)(text != NULL ? text : ""), len);`
+  - `lxb_dom_document_create_element` (function, line 682) `lxb_dom_document_create_element(idx->document, (const lxb_char_t *)lower, tlen, NULL);`
+  - `lxb_dom_element_set_attribute` (function, line 722) `lxb_dom_element_set_attribute(lxb_dom_interface_element(idx->nodes[node]), (const lxb_char_t *)name, nl, (const lxb_char_t *)v, vl);`
+  - `lxb_dom_element_remove_attribute` (function, line 747) `lxb_dom_element_remove_attribute(lxb_dom_interface_element(idx->nodes[node]), (const lxb_char_t *)name, strlen(name));`
+  - `lxb_html_document_parse_fragment` (function, line 770) `lxb_html_document_parse_fragment((lxb_html_document_t *)idx->document, lxb_dom_interface_element(el), (const lxb_char_t *)(html != NULL ? html : ""), len);`
+  - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
+  - `DOM_QS_MAX_SELECTORS` (macro, line 373) `#define DOM_QS_MAX_SELECTORS`
+  - `IH_BLOCK_SIZE` (macro, line 801) `#define IH_BLOCK_SIZE`
+- Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
 
 ## src/dom_debug.c
 - Layer: utility
@@ -680,6 +891,10 @@ static dom_node_id qs_walk(const dom_inde...`
   - `dd_block_line` (function, line 301) `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
   - `dd_format` (function, line 374) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
   - `dd_format_css` (function, line 407) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
+  - `va_start` (function, line 51) `va_start(ap, fmt);`
+  - `va_end` (function, line 53) `va_end(ap);`
+  - `dd_field` (function, line 371) `dd_field(c, b->text);`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
 
 ## src/download.c
 - Layer: utility
@@ -698,6 +913,8 @@ static dom_node_id qs_walk(const dom_inde...`
                        c...`
   - `dl_build_path` (function, line 194) `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
   - `dl_check_size` (function, line 212) `dl_status dl_check_size(size_t len)`
+  - `memcpy` (function, line 172) `memcpy(cand, DL_FALLBACK_NAME, fl + 1);`
+- Depends on: `include/download.h`, `include/pdf_export.h`
 
 ## src/flex_layout.c
 - Layer: presentation
@@ -733,7 +950,8 @@ static dom_node_id qs_walk(const dom_inde...`
   - `fx_multicol_balance` (function, line 606) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
                         ...`
   - `fx_justify_name` (function, line 637) `const char *fx_justify_name(fx_justify j)`
-  - `FX_EPS` (macro, line 14)
+  - `FX_EPS` (macro, line 14) `#define FX_EPS`
+- Depends on: `include/flex_layout.h`
 
 ## src/form.c
 - Layer: data_access
@@ -750,6 +968,9 @@ static dom_node_id qs_walk(const dom_inde...`
                         ...`
   - `fm_build` (function, line 119) `fm_status fm_build(const char *base, const char *action, fm_method method,
                    con...`
+  - `memcpy` (function, line 69) `memcpy(dst, src, n + 1);`
+  - `memset` (function, line 123) `memset(out, 0, sizeof *out);`
+- Depends on: `include/form.h`
 
 ## src/frame_clock.c
 - Layer: utility
@@ -758,7 +979,8 @@ static dom_node_id qs_walk(const dom_inde...`
   - `fc_set_active` (function, line 15) `void fc_set_active(fc_clock *c, int active)`
   - `fc_needs_tick` (function, line 20) `int fc_needs_tick(const fc_clock *c)`
   - `fc_interval_ms` (function, line 25) `int fc_interval_ms(const fc_clock *c)`
-  - `FC_DEFAULT_INTERVAL_MS` (macro, line 7)
+  - `FC_DEFAULT_INTERVAL_MS` (macro, line 7) `#define FC_DEFAULT_INTERVAL_MS`
+- Depends on: `include/frame_clock.h`
 
 ## src/freebug.c
 - Layer: utility
@@ -773,6 +995,10 @@ static dom_node_id qs_walk(const dom_inde...`
   - `fb_buffer_count` (function, line 100) `size_t fb_buffer_count(const fb_buffer *b)`
   - `fb_buffer_at` (function, line 104) `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)`
   - `fb_level_name` (function, line 109) `const char *fb_level_name(int level)`
+  - `whole` (function, line 5) `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);`
+  - `free` (function, line 81) `free(b->entries[i].text);`
+  - `memset` (function, line 98) `memset(b, 0, sizeof *b);`
+- Depends on: `include/freebug.h`
 
 ## src/freedom.c
 - Layer: utility
@@ -808,14 +1034,52 @@ static dom_node_id qs_walk(const dom_inde...`
                      ...`
   - `run_dump_video` (function, line 1007) `static int run_dump_video(const char *url)`
   - `main` (function, line 1025) `int main(int argc, char **argv)`
-  - `_POSIX_C_SOURCE` (macro, line 8)
-  - `_DEFAULT_SOURCE` (macro, line 10)
-  - `EXIT_OK` (macro, line 42)
-  - `EXIT_ERROR` (macro, line 44)
-  - `EXIT_USAGE` (macro, line 45)
-  - `CSS_DROPS_REPORT_MAX` (macro, line 160)
-  - `HL_JS_NAV_MAX` (macro, line 749)
-- Depends on: `include/ui.h`
+  - `fprintf` (function, line 48) `fprintf(fp, "usage: %s [--help] [--version] [--headless] [--insecure] <url-or-file>\n", prog);`
+  - `rewind` (function, line 201) `rewind(f);`
+  - `fclose` (function, line 207) `fclose(f);`
+  - `snprintf` (function, line 225) `snprintf(home_dir, sizeof home_dir, "%s/.config/freedom", home);`
+  - `putchar` (function, line 272) `putchar('\n');`
+  - `printf` (function, line 274) `printf(" %s\n", b->text);`
+  - `memset` (function, line 318) `memset(bar, '=', (size_t)filled);`
+  - `dd_format` (function, line 382) `dd_format(doc, buf, need + 1);`
+  - `fputs` (function, line 383) `fputs(buf, stdout);`
+  - `free` (function, line 384) `free(buf);`
+  - `dd_format_css` (function, line 397) `dd_format_css(doc, buf, need + 1);`
+  - `gets` (function, line 409) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed (fail-closed);`
+  - `sf_get_follow` (function, line 451) `: sf_get_follow(url, &cfg, &resp, SF_DEFAULT_MAX_REDIRECTS);`
+  - `sf_response_free` (function, line 461) `sf_response_free(&resp);`
+  - `memcpy` (function, line 480) `memcpy(pair, p, plen);`
+  - `sf_cookie_put` (function, line 481) `sf_cookie_put(url, pair);`
+  - `hp_document_free` (function, line 506) `hp_document_free(hdoc);`
+  - `tab_set_net_allowed` (function, line 542) `tab_set_net_allowed(t, wc.net);`
+  - `tab_set_css_allowed` (function, line 543) `tab_set_css_allowed(t, wc.css);`
+  - `tab_set_fetcher` (function, line 564) `tab_set_fetcher(t, pf_pooled_fetch, &gated);`
+  - `tab_set_viewport_w` (function, line 579) `tab_set_viewport_w(t, ui_render_viewport_w());`
+  - `pt_record` (function, line 583) `pt_record(&g_timings, PT_IPC, pt_elapsed_us(ipc_t0, now_us()));`
+  - `pool` (function, line 586) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);`
+  - `pf_list_free` (function, line 589) `pf_list_free(&scanned);`
+  - `tab_close` (function, line 593) `tab_close(t);`
+  - `tab_page_free` (function, line 605) `tab_page_free(&page);`
+  - `only` (function, line 622) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetches (so --download-png --images actually * shows images in the bitmap). */ rdp_ca`
+  - `ui_render_pdf` (function, line 649) `: ui_render_pdf(doc, g_pdf_out, &pages);`
+  - `ui_render_png` (function, line 670) `: ui_render_png(doc, g_png_out, &img_h);`
+  - `rd_free` (function, line 717) `rd_free(doc);`
+  - `BLOCKED` (function, line 779) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `fetch_and_render` (function, line 836) `return fetch_and_render(target);`
+  - `hls_playlist_free` (function, line 942) `hls_playlist_free(pl);`
+  - `dump_video_stream` (function, line 950) `return dump_video_stream(var_url, out_fp);`
+  - `fflush` (function, line 1021) `fflush(out);`
+  - `_exit` (function, line 1036) `_exit(1);`
+  - `tab_worker_dispatch` (function, line 1038) `tab_worker_dispatch(argc, argv);`
+  - `setenv` (function, line 1110) `setenv("FREEDOM_JS", "on", 1);`
+  - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
+  - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
+  - `EXIT_OK` (macro, line 42) `#define EXIT_OK`
+  - `EXIT_ERROR` (macro, line 44) `#define EXIT_ERROR`
+  - `EXIT_USAGE` (macro, line 45) `#define EXIT_USAGE`
+  - `CSS_DROPS_REPORT_MAX` (macro, line 160) `#define CSS_DROPS_REPORT_MAX`
+  - `HL_JS_NAV_MAX` (macro, line 749) `#define HL_JS_NAV_MAX`
+- Depends on: `include/dom_debug.h`, `include/freebug.h`, `include/hls.h`, `include/hostblock.h`, `include/html_parse.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`
 
 ## src/hls.c
 - Layer: utility
@@ -831,8 +1095,13 @@ static dom_node_id qs_walk(const dom_inde...`
   - `hls_resolve_url` (function, line 222) `size_t hls_resolve_url(const char *base_url, const char *segment_url,
                        char...`
   - `hls_playlist_free` (function, line 252) `void hls_playlist_free(hls_playlist *pl)`
-  - `_GNU_SOURCE` (macro, line 20)
-  - `_POSIX_C_SOURCE` (macro, line 22)
+  - `name` (function, line 46) `* attr is the attribute name (e.g. "BANDWIDTH=");`
+  - `memset` (function, line 94) `memset(&current_variant, 0, sizeof current_variant);`
+  - `memcpy` (function, line 121) `memcpy(dbuf, val, vallen);`
+  - `free` (function, line 256) `free(pl->segments[i].url);`
+  - `_GNU_SOURCE` (macro, line 20) `#define _GNU_SOURCE`
+  - `_POSIX_C_SOURCE` (macro, line 22) `#define _POSIX_C_SOURCE`
+- Depends on: `include/hls.h`
 
 ## src/hostblock.c
 - Layer: utility
@@ -854,9 +1123,11 @@ static dom_node_id qs_walk(const dom_inde...`
   - `hb_check` (function, line 192) `hb_decision hb_check(const hb_set *s, const char *host)`
   - `hb_is_allowlisted` (function, line 217) `int hb_is_allowlisted(const hb_set *s, const char *host)`
   - `hb_count` (function, line 237) `size_t hb_count(const hb_set *s, hb_list list)`
-  - `HB_MAX_HOST` (macro, line 18)
-  - `HB_INIT_CAP` (macro, line 20)
-- Depends on: `include/util.h`
+  - `free` (function, line 65) `free(old);`
+  - `memcpy` (function, line 85) `memcpy(copy, key, klen);`
+  - `HB_MAX_HOST` (macro, line 18) `#define HB_MAX_HOST`
+  - `HB_INIT_CAP` (macro, line 20) `#define HB_INIT_CAP`
+- Depends on: `include/hostblock.h`, `include/util.h`
 
 ## src/hostedit.c
 - Layer: infrastructure
@@ -876,6 +1147,8 @@ static dom_node_id qs_walk(const dom_inde...`
   - `suggest_cb` (function, line 143) `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
   - `he_suggest` (function, line 163) `int he_suggest(const char *text, const char *query,
                char results[][HE_MAX_HOST + 1...`
+  - `token_eq_host` (function, line 106) `return token_eq_host(ts, ts + tl, (const char *)ctx);`
+- Depends on: `include/hostedit.h`
 
 ## src/html_parse.c
 - Layer: utility
@@ -908,8 +1181,16 @@ static dom_node_id qs_walk(const dom_inde...`
   - `hp_free` (function, line 437) `void hp_free(char *buf)`
   - `hp_document_free` (function, line 441) `void hp_document_free(hp_document *doc)`
   - `hp_document_root` (function, line 447) `const void *hp_document_root(const hp_document *doc)`
-  - `_POSIX_C_SOURCE` (macro, line 8)
-- Depends on: `include/util.h`
+  - `lxb_dom_node_remove` (function, line 78) `lxb_dom_node_remove(list[i]);`
+  - `lxb_dom_node_destroy_deep` (function, line 79) `lxb_dom_node_destroy_deep(list[i]);`
+  - `free` (function, line 81) `free(list);`
+  - `lxb_dom_element_get_attribute` (function, line 102) `lxb_dom_element_get_attribute(el, (const lxb_char_t *)"type", 4, &len);`
+  - `lxb_dom_interface_element` (function, line 178) `lxb_dom_interface_element((lxb_dom_node_t *)n), (const lxb_char_t *)"defer", 5, &dl);`
+  - `lxb_html_document_destroy` (function, line 349) `lxb_html_document_destroy(document);`
+  - `lxb_dom_interface_node` (function, line 411) `: lxb_dom_interface_node(doc->doc);`
+  - `lxb_dom_document_destroy_text` (function, line 418) `lxb_dom_document_destroy_text(lxb_dom_interface_document(doc->doc), text);`
+  - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
+- Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
 
 ## src/image_decode.c
 - Layer: utility
@@ -942,8 +1223,19 @@ static dom_node_id qs_walk(const dom_inde...`
   - `img_decode` (function, line 552) `img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out)`
   - `img_pixels_free` (function, line 565) `void img_pixels_free(img_pixels *p)`
   - `img_format_name` (function, line 574) `const char *img_format_name(img_format f)`
-  - `PNG_IHDR_MIN` (macro, line 34)
-  - `GIF_LZW_MAX_CODES` (macro, line 252)
+  - `exit` (function, line 6) `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib). WebP uses libwebp's WebPDecodeBGRA in-memory * API. Output is tightly packed BGRA (`
+  - `memset` (function, line 104) `memset(out, 0, sizeof *out);`
+  - `png_image_free` (function, line 113) `png_image_free(&image);`
+  - `free` (function, line 137) `free(buf);`
+  - `longjmp` (function, line 160) `longjmp(e->jb, 1);`
+  - `jpeg_destroy_decompress` (function, line 185) `jpeg_destroy_decompress(&cinfo);`
+  - `jpeg_create_decompress` (function, line 190) `jpeg_create_decompress(&cinfo);`
+  - `jpeg_mem_src` (function, line 192) `jpeg_mem_src(&cinfo, bytes, (unsigned long)len);`
+  - `jpeg_start_decompress` (function, line 205) `jpeg_start_decompress(&cinfo);`
+  - `jpeg_finish_decompress` (function, line 235) `jpeg_finish_decompress(&cinfo);`
+  - `PNG_IHDR_MIN` (macro, line 34) `#define PNG_IHDR_MIN`
+  - `GIF_LZW_MAX_CODES` (macro, line 252) `#define GIF_LZW_MAX_CODES`
+- Depends on: `include/image_decode.h`
 
 ## src/interp.c
 - Layer: utility
@@ -974,6 +1266,7 @@ static dom_node_id qs_walk(const dom_inde...`
   - `ip_anim_tick` (function, line 235) `int ip_anim_tick(ip_anim *a, double dt_ms)`
   - `ip_anim_current` (function, line 281) `double ip_anim_current(const ip_anim *a)`
   - `ip_anim_done` (function, line 319) `int ip_anim_done(const ip_anim *a)`
+- Depends on: `include/interp.h`
 
 ## src/js_dom.c
 - Layer: utility
@@ -1080,7 +1373,35 @@ static int cb_append(char **bu...`
                            char *out, si...`
   - `jd_process_iframes` (function, line 2399) `void jd_process_iframes(js_context *ctx, dom_index *idx,
                         jd_fetch_fn fn, ...`
-  - `_GNU_SOURCE` (macro, line 9)
+  - `JS_NewInt64` (function, line 54) `return JS_NewInt64(ctx, (int64_t)dom_node_count(jd_idx(ctx)));`
+  - `JS_FreeCString` (function, line 63) `JS_FreeCString(ctx, s);`
+  - `dom_get_by_tag` (function, line 74) `: dom_get_by_tag(idx, s, NULL, 0);`
+  - `JS_FreeValue` (function, line 83) `JS_FreeValue(ctx, arr);`
+  - `JS_ThrowOutOfMemory` (function, line 84) `return JS_ThrowOutOfMemory(ctx);`
+  - `JS_SetPropertyUint32` (function, line 90) `JS_SetPropertyUint32(ctx, arr, (uint32_t)i, JS_NewInt64(ctx, (int64_t)buf[i]));`
+  - `free` (function, line 92) `free(buf);`
+  - `JS_NewBool` (function, line 163) `return JS_NewBool(ctx, dom_precedes(jd_idx(ctx), a, b));`
+  - `JS_SetPropertyStr` (function, line 323) `JS_SetPropertyStr(ctx, global, "__clickRegistry", JS_DupValue(ctx, reg));`
+  - `snprintf` (function, line 378) `snprintf(nstr, sizeof nstr, "%u", (unsigned)h);`
+  - `scripts` (function, line 694) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without throwing. No network, no real * playback in the worker -- actual decoding happens in `
+  - `enough` (function, line 825) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery clones a fragment twice and reads .lastChild * (b.checkClone);`
+  - `ms` (function, line 918) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+  - `empty` (function, line 1006) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+  - `fire` (function, line 1007) `* observers never fire (no observation -> no info leak);`
+  - `memset` (function, line 1526) `memset(opaque, 0, sizeof *opaque);`
+  - `JS_SetContextOpaque` (function, line 1528) `JS_SetContextOpaque(jsctx, (void *)opaque);`
+  - `JS_DefinePropertyValueStr` (function, line 1538) `JS_DefinePropertyValueStr(jsctx, dom, JD_METHODS[i].name, fn, JS_PROP_ENUMERABLE);`
+  - `JS_PreventExtensions` (function, line 1543) `JS_PreventExtensions(jsctx, dom);`
+  - `fb_buffer_push` (function, line 1636) `fb_buffer_push(log, magic, (msg != NULL) ? msg : "", len);`
+  - `JS_SetRuntimeOpaque` (function, line 1655) `JS_SetRuntimeOpaque(JS_GetRuntime(jsctx), (void *)log);`
+  - `memcpy` (function, line 1752) `memcpy(buf, s, slen);`
+  - `JS_ToInt32` (function, line 1810) `JS_ToInt32(ctx, &l, lo);`
+  - `send` (function, line 1867) `* callbacks fire right after send();`
+  - `resolve_video_url` (function, line 2217) `resolve_video_url(tmp, page_url, best_url, sizeof best_url);`
+  - `dom_set_attribute` (function, line 2304) `dom_set_attribute(idx, ifr_id, "src", best_url);`
+  - `dom_append_child` (function, line 2305) `dom_append_child(idx, bid, ifr_id);`
+  - `_GNU_SOURCE` (macro, line 9) `#define _GNU_SOURCE`
+- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`
 
 ## src/js_env.c
 - Layer: infrastructure
@@ -1118,9 +1439,25 @@ static int cb_append(char **bu...`
                               ...`
   - `je_install` (function, line 489) `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
   - `je_install_canvas` (function, line 508) `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
-  - `_POSIX_C_SOURCE` (macro, line 16)
-  - `FP_MIME_COUNT` (macro, line 253)
-  - `PERF_ORIGIN_EPOCH` (macro, line 337)
+  - `primitives` (function, line 6) `* the pure anti_fp primitives (one audited source of normalized constants);`
+  - `JS_NewFloat64` (function, line 52) `return JS_NewFloat64(ctx, (double)fp_coarsen_time_ms(wall_clock_ms()));`
+  - `JS_ToFloat64` (function, line 62) `JS_ToFloat64(ctx, &origin, func_data[0]);`
+  - `JS_NewArray` (function, line 80) `return JS_NewArray(ctx);`
+  - `JS_FreeValue` (function, line 102) `JS_FreeValue(ctx, ab);`
+  - `JS_ToInt32` (function, line 110) `JS_ToInt32(ctx, &off32, off_val);`
+  - `JS_DupValue` (function, line 122) `return JS_DupValue(ctx, argv[0]);`
+  - `JS_NewString` (function, line 139) `return JS_NewString(ctx, buf);`
+  - `JS_PreventExtensions` (function, line 194) `JS_PreventExtensions(ctx, arr);`
+  - `JS_DefinePropertyValueStr` (function, line 209) `JS_DefinePropertyValueStr(ctx, p0, "name", JS_NewString(ctx, "Chrome PDF Plugin"), JS_PROP_ENUMERABLE);`
+  - `JS_DefinePropertyValueUint32` (function, line 218) `JS_DefinePropertyValueUint32(ctx, plugins, 0, p0, JS_PROP_ENUMERABLE);`
+  - `fp_bucket_screen` (function, line 297) `fp_bucket_screen(w, h, &bw, &bh);`
+  - `fp_perturb` (function, line 462) `fp_perturb(copy, size, key);`
+  - `free` (function, line 465) `free(copy);`
+  - `JS_NewCFunctionData` (function, line 474) `return JS_NewCFunctionData(ctx, m_readback, 1, 0, 2, data);`
+  - `_POSIX_C_SOURCE` (macro, line 16) `#define _POSIX_C_SOURCE`
+  - `FP_MIME_COUNT` (macro, line 253) `#define FP_MIME_COUNT`
+  - `PERF_ORIGIN_EPOCH` (macro, line 337) `#define PERF_ORIGIN_EPOCH`
+- Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`
 
 ## src/js_policy.c
 - Layer: business_logic
@@ -1132,6 +1469,7 @@ static int cb_append(char **bu...`
   - `jsp_present_trusted` (function, line 34) `bool jsp_present_trusted(int host_allowlisted)`
   - `jsp_mode_from_str` (function, line 38) `jsp_mode jsp_mode_from_str(const char *s)`
   - `jsp_mode_str` (function, line 50) `const char *jsp_mode_str(jsp_mode mode)`
+- Depends on: `include/js_policy.h`
 
 ## src/js_sandbox.c
 - Layer: utility
@@ -1139,6 +1477,7 @@ static int cb_append(char **bu...`
 - Symbols:
   - `js_mem_state` (struct, line 27)
   - `js_context` (struct, line 33)
+  - `limit` (type_alias, line 27) `typedef struct js_mem_state { size_t limit;`
   - `jm_malloc` (function, line 44) `static void *jm_malloc(void *opaque, size_t size)`
   - `jm_calloc` (function, line 52) `static void *jm_calloc(void *opaque, size_t count, size_t size)`
   - `jm_free` (function, line 62) `static void jm_free(void *opaque, void *ptr)`
@@ -1165,7 +1504,19 @@ static int cb_append(char **bu...`
   - `js_result_free` (function, line 451) `void js_result_free(js_result *res)`
   - `js_set_current_script` (function, line 464) `void js_set_current_script(js_context *ctx, const char *src, const char *type)`
   - `js_context_raw` (function, line 513) `void *js_context_raw(js_context *ctx)`
-  - `_POSIX_C_SOURCE` (macro, line 11)
+  - `free` (function, line 66) `free(ptr);`
+  - `malloc_usable_size` (function, line 80) `return malloc_usable_size((void *)ptr);`
+  - `clock_gettime` (function, line 109) `clock_gettime(CLOCK_MONOTONIC, &now);`
+  - `JS_FreeCString` (function, line 206) `JS_FreeCString(ctx, cmsg);`
+  - `undefined` (function, line 210) `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx, exc, "stack");`
+  - `JS_FreeValue` (function, line 213) `JS_FreeValue(ctx, JS_GetException(ctx));`
+  - `JS_SetMaxStackSize` (function, line 287) `JS_SetMaxStackSize(c->rt, l.max_stack_bytes);`
+  - `JS_SetInterruptHandler` (function, line 288) `JS_SetInterruptHandler(c->rt, js_interrupt_cb, c);`
+  - `JS_FreeRuntime` (function, line 293) `JS_FreeRuntime(c->rt);`
+  - `memset` (function, line 342) `memset(res, 0, sizeof *res);`
+  - `JS_SetPropertyStr` (function, line 473) `JS_SetPropertyStr(jc, doc, "currentScript", JS_NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
+- Depends on: `include/js_sandbox.h`
 
 ## src/link_nav.c
 - Layer: utility
@@ -1182,6 +1533,10 @@ static int cb_append(char **bu...`
   - `resolve_file` (function, line 149) `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)`
   - `ln_resolve` (function, line 171) `ln_status ln_resolve(const char *base, const char *href, ln_result *out)`
   - `ln_block_reason_text` (function, line 240) `const char *ln_block_reason_text(ln_block_reason reason)`
+  - `memcpy` (function, line 91) `memcpy(body + *blen, seg, seglen);`
+  - `normalize_file_path` (function, line 169) `return normalize_file_path(merged, out, outsz);`
+  - `split_fragment` (function, line 187) `split_fragment(clean, out->fragment, sizeof out->fragment);`
+- Depends on: `include/link_nav.h`, `include/url.h`
 
 ## src/local_store.c
 - Layer: data_access
@@ -1210,271 +1565,282 @@ static int cb_append(char **bu...`
   - `ls_open_passphrase` (function, line 942) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
   - `ls_free` (function, line 962) `void ls_free(uint8_t *buf, size_t len)`
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 3)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 6)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 9)
-  - `_GNU_SOURCE` (macro, line 11)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 14)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 17)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 20)
-  - `_GNU_SOURCE` (macro, line 22)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 25)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 28)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 31)
-  - `_GNU_SOURCE` (macro, line 33)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 36)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 39)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 42)
-  - `_GNU_SOURCE` (macro, line 44)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 47)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 50)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 53)
-  - `_GNU_SOURCE` (macro, line 55)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 58)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 61)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 64)
-  - `_GNU_SOURCE` (macro, line 66)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 69)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 72)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 75)
-  - `_GNU_SOURCE` (macro, line 77)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 80)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 83)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 86)
-  - `_GNU_SOURCE` (macro, line 88)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 91)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 94)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 97)
-  - `_GNU_SOURCE` (macro, line 99)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 102)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 105)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 108)
-  - `_GNU_SOURCE` (macro, line 110)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 113)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 116)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 119)
-  - `_GNU_SOURCE` (macro, line 121)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 124)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 127)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 130)
-  - `_GNU_SOURCE` (macro, line 132)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 135)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 138)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 141)
-  - `_GNU_SOURCE` (macro, line 143)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 146)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 149)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 152)
-  - `_GNU_SOURCE` (macro, line 154)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 157)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 160)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 163)
-  - `_GNU_SOURCE` (macro, line 165)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 168)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 171)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 174)
-  - `_GNU_SOURCE` (macro, line 176)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 179)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 182)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 185)
-  - `_GNU_SOURCE` (macro, line 187)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 190)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 193)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 196)
-  - `_GNU_SOURCE` (macro, line 198)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 201)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 204)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 207)
-  - `_GNU_SOURCE` (macro, line 209)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 212)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 215)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 218)
-  - `_GNU_SOURCE` (macro, line 220)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 223)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 226)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 229)
-  - `_GNU_SOURCE` (macro, line 231)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 234)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 237)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 240)
-  - `_GNU_SOURCE` (macro, line 242)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 245)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 248)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 251)
-  - `_GNU_SOURCE` (macro, line 253)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 256)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 259)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 262)
-  - `_GNU_SOURCE` (macro, line 264)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 267)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 270)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 273)
-  - `_GNU_SOURCE` (macro, line 275)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 278)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 281)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 284)
-  - `_GNU_SOURCE` (macro, line 286)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 289)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 292)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 295)
-  - `_GNU_SOURCE` (macro, line 297)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 300)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 303)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 306)
-  - `_GNU_SOURCE` (macro, line 308)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 311)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 314)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 317)
-  - `_GNU_SOURCE` (macro, line 319)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 322)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 325)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 328)
-  - `_GNU_SOURCE` (macro, line 330)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 333)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 336)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 339)
-  - `_GNU_SOURCE` (macro, line 341)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 344)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 347)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 350)
-  - `_GNU_SOURCE` (macro, line 352)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 355)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 358)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 361)
-  - `_GNU_SOURCE` (macro, line 363)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 366)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 369)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 372)
-  - `_GNU_SOURCE` (macro, line 374)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 377)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 380)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 383)
-  - `_GNU_SOURCE` (macro, line 385)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 388)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 391)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 394)
-  - `_GNU_SOURCE` (macro, line 396)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 399)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 402)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 405)
-  - `_GNU_SOURCE` (macro, line 407)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 410)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 413)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 416)
-  - `_GNU_SOURCE` (macro, line 418)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 421)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 424)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 427)
-  - `_GNU_SOURCE` (macro, line 429)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 432)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 435)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 438)
-  - `_GNU_SOURCE` (macro, line 440)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 443)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 446)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 449)
-  - `_GNU_SOURCE` (macro, line 451)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 454)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 457)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 460)
-  - `_GNU_SOURCE` (macro, line 462)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 465)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 468)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 471)
-  - `_GNU_SOURCE` (macro, line 473)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 476)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 479)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 482)
-  - `_GNU_SOURCE` (macro, line 484)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 487)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 490)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 493)
-  - `_GNU_SOURCE` (macro, line 495)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 498)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 501)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 504)
-  - `_GNU_SOURCE` (macro, line 506)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 509)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 512)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 515)
-  - `_GNU_SOURCE` (macro, line 517)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 520)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 523)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 526)
-  - `_GNU_SOURCE` (macro, line 528)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 531)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 534)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 537)
-  - `_GNU_SOURCE` (macro, line 539)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 542)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 545)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 548)
-  - `_GNU_SOURCE` (macro, line 550)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 553)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 556)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 559)
-  - `_GNU_SOURCE` (macro, line 561)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 564)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 567)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 570)
-  - `_GNU_SOURCE` (macro, line 572)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 575)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 578)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 581)
-  - `_GNU_SOURCE` (macro, line 583)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 586)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 589)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 592)
-  - `_GNU_SOURCE` (macro, line 594)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 597)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 600)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 603)
-  - `_GNU_SOURCE` (macro, line 605)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 608)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 611)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 614)
-  - `_GNU_SOURCE` (macro, line 616)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 619)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 622)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 625)
-  - `_GNU_SOURCE` (macro, line 627)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 630)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 633)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 636)
-  - `_GNU_SOURCE` (macro, line 638)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 641)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 644)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 647)
-  - `_GNU_SOURCE` (macro, line 649)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 652)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 655)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 658)
-  - `_GNU_SOURCE` (macro, line 660)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 663)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 666)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 669)
-  - `_GNU_SOURCE` (macro, line 671)
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 698)
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 701)
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 704)
-  - `LS_VERSION` (macro, line 706)
-  - `LS_KDF_NONE` (macro, line 708)
-  - `LS_KDF_ARGON2ID` (macro, line 709)
-  - `LS_ARGON2_T` (macro, line 712)
-  - `LS_ARGON2_M_KIB` (macro, line 713)
-  - `LS_ARGON2_P` (macro, line 714)
-  - `OFF_MAGIC` (macro, line 717)
-  - `OFF_VERSION` (macro, line 718)
-  - `OFF_AEAD` (macro, line 719)
-  - `OFF_KDF` (macro, line 720)
-  - `OFF_SALT` (macro, line 721)
-  - `OFF_NONCE` (macro, line 722)
+  - `EVP_aes_256_gcm` (function, line 730) `case LS_AEAD_AES256_GCM: return EVP_aes_256_gcm();`
+  - `EVP_chacha20_poly1305` (function, line 731) `case LS_AEAD_CHACHA20_POLY1305: return EVP_chacha20_poly1305();`
+  - `EVP_KDF_free` (function, line 744) `EVP_KDF_free(kdf);`
+  - `EVP_KDF_CTX_free` (function, line 763) `EVP_KDF_CTX_free(kctx);`
+  - `EVP_CIPHER_CTX_free` (function, line 797) `done: EVP_CIPHER_CTX_free(ctx);`
+  - `memcpy` (function, line 840) `memcpy(blob + OFF_MAGIC, LS_MAGIC, sizeof LS_MAGIC);`
+  - `OPENSSL_cleanse` (function, line 848) `OPENSSL_cleanse(blob, blob_len);`
+  - `free` (function, line 849) `free(blob);`
+  - `memset` (function, line 907) `memset(salt, 0, sizeof salt);`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 3) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 6) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 9) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 11) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 14) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 17) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 20) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 22) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 25) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 28) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 31) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 33) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 36) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 39) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 42) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 44) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 47) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 50) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 53) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 55) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 58) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 61) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 64) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 66) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 69) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 72) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 75) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 77) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 80) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 83) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 86) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 88) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 91) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 94) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 97) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 99) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 102) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 105) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 108) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 110) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 113) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 116) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 119) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 121) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 124) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 127) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 130) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 132) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 135) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 138) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 141) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 143) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 146) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 149) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 152) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 154) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 157) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 160) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 163) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 165) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 168) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 171) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 174) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 176) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 179) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 182) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 185) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 187) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 190) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 193) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 196) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 198) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 201) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 204) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 207) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 209) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 212) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 215) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 218) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 220) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 223) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 226) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 229) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 231) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 234) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 237) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 240) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 242) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 245) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 248) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 251) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 253) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 256) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 259) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 262) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 264) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 267) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 270) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 273) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 275) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 278) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 281) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 284) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 286) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 289) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 292) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 295) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 297) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 300) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 303) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 306) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 308) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 311) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 314) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 317) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 319) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 322) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 325) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 328) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 330) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 333) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 336) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 339) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 341) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 344) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 347) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 350) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 352) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 355) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 358) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 361) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 363) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 366) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 369) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 372) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 374) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 377) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 380) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 383) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 385) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 388) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 391) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 394) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 396) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 399) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 402) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 405) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 407) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 410) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 413) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 416) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 418) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 421) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 424) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 427) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 429) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 432) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 435) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 438) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 440) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 443) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 446) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 449) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 451) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 454) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 457) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 460) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 462) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 465) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 468) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 471) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 473) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 476) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 479) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 482) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 484) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 487) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 490) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 493) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 495) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 498) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 501) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 504) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 506) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 509) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 512) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 515) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 517) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 520) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 523) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 526) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 528) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 531) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 534) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 537) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 539) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 542) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 545) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 548) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 550) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 553) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 556) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 559) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 561) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 564) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 567) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 570) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 572) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 575) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 578) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 581) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 583) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 586) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 589) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 592) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 594) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 597) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 600) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 603) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 605) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 608) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 611) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 614) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 616) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 619) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 622) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 625) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 627) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 630) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 633) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 636) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 638) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 641) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 644) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 647) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 649) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 652) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 655) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 658) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 660) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 663) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 666) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 669) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 671) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 698) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 701) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 704) `#define OSSL_KDF_PARAM_THREADS`
+  - `LS_VERSION` (macro, line 706) `#define LS_VERSION`
+  - `LS_KDF_NONE` (macro, line 708) `#define LS_KDF_NONE`
+  - `LS_KDF_ARGON2ID` (macro, line 709) `#define LS_KDF_ARGON2ID`
+  - `LS_ARGON2_T` (macro, line 712) `#define LS_ARGON2_T`
+  - `LS_ARGON2_M_KIB` (macro, line 713) `#define LS_ARGON2_M_KIB`
+  - `LS_ARGON2_P` (macro, line 714) `#define LS_ARGON2_P`
+  - `OFF_MAGIC` (macro, line 717) `#define OFF_MAGIC`
+  - `OFF_VERSION` (macro, line 718) `#define OFF_VERSION`
+  - `OFF_AEAD` (macro, line 719) `#define OFF_AEAD`
+  - `OFF_KDF` (macro, line 720) `#define OFF_KDF`
+  - `OFF_SALT` (macro, line 721) `#define OFF_SALT`
+  - `OFF_NONCE` (macro, line 722) `#define OFF_NONCE`
+- Depends on: `include/local_store.h`
 
 ## src/media_decoder.c
 - Layer: infrastructure
 - Language: c
 - Symbols:
   - `decoder_ctx` (struct, line 54)
+  - `out_fd` (type_alias, line 53) `typedef struct decoder_ctx { int out_fd;`
   - `open` (function, line 17) `*
  * Sandbox: the decoder needs open() for shared libraries (.so loading) and
  * brk/mmap for FFm...`
@@ -1487,8 +1853,30 @@ static int cb_append(char **bu...`
   - `decode_segment` (function, line 276) `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)`
   - `media_decoder_run` (function, line 378) `void media_decoder_run(int out_fd, int cmd_fd)`
   - `media_decoder_spawn` (function, line 448) `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
-  - `_POSIX_C_SOURCE` (macro, line 22)
-- Depends on: `include/util.h`
+  - `write_full` (function, line 47) `write_full(fd, &tag, 1);`
+  - `av_frame_free` (function, line 80) `av_frame_free(&dc->rgb);`
+  - `avcodec_free_context` (function, line 83) `avcodec_free_context(&dc->video_codec_ctx);`
+  - `avformat_close_input` (function, line 85) `avformat_close_input(&dc->fmt_ctx);`
+  - `av_packet_free` (function, line 86) `av_packet_free(&dc->pkt);`
+  - `memset` (function, line 87) `memset(dc, 0, sizeof *dc);`
+  - `memcpy` (function, line 105) `memcpy(avio_buf, data, len);`
+  - `av_free` (function, line 114) `av_free(avio_buf);`
+  - `avformat_free_context` (function, line 115) `avformat_free_context(dc->fmt_ctx);`
+  - `send_error` (function, line 117) `send_error(dc->out_fd, "OOM avio_alloc");`
+  - `sws_scale` (function, line 223) `sws_scale(dc->sws, (const uint8_t *const *)dc->frame->data, dc->frame->linesize, 0, dc->h, dc->rgb->data, dc->rgb->linesize);`
+  - `free` (function, line 271) `free(pcm);`
+  - `av_packet_unref` (function, line 338) `av_packet_unref(dc->pkt);`
+  - `av_frame_unref` (function, line 348) `av_frame_unref(dc->frame);`
+  - `dropped` (function, line 368) `* the codec in permanent EOF state: every segment after the first decoded * one was silently dropped ("plays a couple of seconds then stops"). * Reorder-buffered frames flush with the next segment's p`
+  - `signal` (function, line 380) `signal(SIGPIPE, SIG_IGN);`
+  - `avformat_network_init` (function, line 388) `avformat_network_init();`
+  - `avcodec_send_packet` (function, line 423) `avcodec_send_packet(dc.video_codec_ctx, NULL);`
+  - `_exit` (function, line 446) `_exit(0);`
+  - `close` (function, line 457) `close(out_pipe[0]);`
+  - `fd` (function, line 469) `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd would be leaked to the * decoder child and, if accidentally written to (e.g. by an FFmpe`
+  - `execl` (function, line 491) `execl("/proc/self/exe", "freedom", "--media-decoder", out_str, cmd_str, (char *)NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 22) `#define _POSIX_C_SOURCE`
+- Depends on: `include/media_decoder.h`, `include/util.h`
 
 ## src/net_realm.c
 - Layer: utility
@@ -1503,7 +1891,9 @@ static int cb_append(char **bu...`
   - `nr_realm_allows_http` (function, line 87) `int nr_realm_allows_http(nr_realm r)`
   - `nr_realm_name` (function, line 93) `const char *nr_realm_name(nr_realm r)`
   - `nr_route_name` (function, line 102) `const char *nr_route_name(nr_route r)`
-  - `NR_MAX_HOST` (macro, line 14)
+  - `memcpy` (function, line 63) `memcpy(out, p, n);`
+  - `NR_MAX_HOST` (macro, line 14) `#define NR_MAX_HOST`
+- Depends on: `include/net_realm.h`
 
 ## src/os_sandbox.c
 - Layer: utility
@@ -1535,11 +1925,19 @@ int os_namespac...`
   - `os_landlock_restrict` (function, line 290) `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
   - `os_landlock_abi` (function, line 330) `int os_landlock_abi(void)`
   - `os_landlock_restrict` (function, line 332) `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
-  - `_GNU_SOURCE` (macro, line 12)
-  - `OS_ALLOWED_N` (macro, line 49)
-  - `OS_SECCOMP_ARCH` (macro, line 140)
-  - `OS_SECCOMP_ARCH` (macro, line 142)
-  - `LL_FS_BASE` (macro, line 254)
+  - `number` (function, line 157) `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, arch));`
+  - `offsetof` (function, line 165) `offsetof(struct seccomp_data, nr));`
+  - `headroom` (function, line 203) `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));`
+  - `syscall` (function, line 241) `return syscall(__NR_landlock_create_ruleset, attr, size, flags);`
+  - `memset` (function, line 300) `memset(&attr, 0, sizeof attr);`
+  - `fields` (function, line 303) `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd = (int)ll_create_ruleset(&attr, sizeof attr, 0);`
+  - `close` (function, line 318) `close(pfd);`
+  - `_GNU_SOURCE` (macro, line 12) `#define _GNU_SOURCE`
+  - `OS_ALLOWED_N` (macro, line 49) `#define OS_ALLOWED_N`
+  - `OS_SECCOMP_ARCH` (macro, line 140) `#  define OS_SECCOMP_ARCH`
+  - `OS_SECCOMP_ARCH` (macro, line 142) `#  define OS_SECCOMP_ARCH`
+  - `LL_FS_BASE` (macro, line 254) `#define LL_FS_BASE`
+- Depends on: `include/os_sandbox.h`
 
 ## src/page_view.c
 - Layer: presentation
@@ -1557,6 +1955,8 @@ int os_namespac...`
   - `form_rec` (struct, line 3057)
   - `form_table` (struct, line 3063)
   - `pv_flow_reg` (struct, line 3426)
+  - `cols` (type_alias, line 1079) `typedef struct pv_cont_info { int id, display, gap, justify, cols;`
+  - `mb` (type_alias, line 1168) `typedef struct pv_box_info { int l, r, w, center, mt, mb;`
   - `cp1252_to_ucs` (function, line 82) `static unsigned int cp1252_to_ucs(unsigned char c)`
   - `utf8_encode` (function, line 96) `static size_t utf8_encode(unsigned int cp, char *out)`
   - `utf8_sanitized_dup` (function, line 108) `static char *utf8_sanitized_dup(const char *s)`
@@ -1717,58 +2117,89 @@ static void srcse...`
   - `node_table_role` (function, line 3440) `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
   - `nearest_table` (function, line 3458) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
  ...`
-  - `parent_is_table_internal` (function, line 3486) `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-  - `nearest_cell` (function, line 3497) `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  - `parent_is_table_internal` (function, line 3492) `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
+  - `nearest_cell` (function, line 3519) `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
   ...`
-  - `cell_has_nested_table` (function, line 3512) `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)`
-  - `next_skip` (function, line 3521) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)`
-  - `cell_anchors` (function, line 3532) `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)`
-  - `links` (function, line 3550) `* its links (the Hacker News case: every story link lives inside a <td>), so the
+  - `cell_has_nested_table` (function, line 3534) `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)`
+  - `next_skip` (function, line 3543) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)`
+  - `cell_anchors` (function, line 3554) `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)`
+  - `links` (function, line 3572) `* its links (the Hacker News case: every story link lives inside a <td>), so the
  * caller flows ...`
-  - `flow_table` (function, line 3570) `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
-  - `in_flow_table_cell` (function, line 3582) `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+  - `flow_table` (function, line 3592) `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
+  - `in_flow_table_cell` (function, line 3604) `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
            ...`
-  - `table` (function, line 3592) `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
+  - `table` (function, line 3614) `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
  * content -- their ...`
-  - `table_columns` (function, line 3610) `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
-  - `collect_style_text` (function, line 3643) `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)`
-  - `in_hidden_subtree` (function, line 3684) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  - `table_columns` (function, line 3632) `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
+  - `collect_style_text` (function, line 3665) `static char *collect_style_text(lxb_dom_node_t *root, size_t *outlen)`
+  - `in_hidden_subtree` (function, line 3706) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...`
-  - `in_boilerplate_subtree` (function, line 3701) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-  - `in_closed_details_subtree` (function, line 3716) `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-  - `pv_build` (function, line 3735) `pv_status pv_build(const hp_document *doc, pv_view **out)`
-  - `pv_build_ex` (function, line 3739) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-  - `pv_build_full` (function, line 3743) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+  - `in_boilerplate_subtree` (function, line 3723) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
+  - `in_closed_details_subtree` (function, line 3738) `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
+  - `pv_build` (function, line 3757) `pv_status pv_build(const hp_document *doc, pv_view **out)`
+  - `pv_build_ex` (function, line 3761) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+  - `pv_build_full` (function, line 3765) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-  - `annotate_replaced_run` (function, line 3766) `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+  - `annotate_replaced_run` (function, line 3788) `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...`
-  - `collect_page_css` (function, line 3803) `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+  - `collect_page_css` (function, line 3825) `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...`
-  - `pv_build_styled` (function, line 3828) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+  - `pv_build_styled` (function, line 3850) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-  - `px` (function, line 4369) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+  - `px` (function, line 4391) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-  - `engine` (function, line 4984) `* layout engine (contiguous item gather) drops every cell onto its own row and
+  - `engine` (function, line 5006) `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-  - `appended` (function, line 5038) `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
+  - `appended` (function, line 5060) `* AFTER the run is appended (so THIS run's brk stays) but BEFORE the next. */
         if (cont.fl...`
-  - `pv_css_drops` (function, line 5128) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+  - `pv_css_drops` (function, line 5150) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
-  - `_POSIX_C_SOURCE` (macro, line 9)
-  - `PV_MAX_DIM` (macro, line 44)
-  - `PV_FONT_REL_MIN` (macro, line 49)
-  - `PV_FONT_REL_MAX` (macro, line 50)
-  - `PV_FONT_CHAIN_MAX` (macro, line 56)
-  - `PV_FONT_PCT_MIN` (macro, line 57)
-  - `PV_FONT_PCT_MAX` (macro, line 58)
-  - `PV_NODE_MAP_INIT_CAP` (macro, line 267)
-  - `PV_COLOR_TOKEN_MAX` (macro, line 1019)
-  - `PV_MAX_CONTAINERS` (macro, line 1056)
-  - `PV_MAX_GRID_COLS` (macro, line 1058)
-  - `PV_MAX_BOXES` (macro, line 1066)
-  - `PV_MAX_INLINE_ROW_ITEMS` (macro, line 2099)
-  - `PV_MAX_STYLE_BYTES` (macro, line 3637)
-- Depends on: `include/util.h`
+  - `positions` (function, line 132) `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
+  - `free` (function, line 285) `free(m->nodes);`
+  - `is_out_of_flow` (function, line 878) `return is_out_of_flow(cs) || is_block_like(t, cs->display);`
+  - `lxb_dom_element_tag_id` (function, line 997) `return lxb_dom_element_tag_id(lxb_dom_interface_element((lxb_dom_node_t *)n));`
+  - `content` (function, line 1001) `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
+  - `lxb_dom_element_get_attribute` (function, line 1027) `lxb_dom_element_get_attribute(el, (const lxb_char_t *)name, name_len, &cl);`
+  - `memcpy` (function, line 1030) `memcpy(buf, col, cl);`
+  - `color_attr` (function, line 1042) `return color_attr(el, "color", 5);`
+  - `address` (function, line 1069) `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <= BT_MAX_POSITIONED, "PV_MAX_BOXES must fit the out-of-flow solver's per-box arrays");`
+  - `child` (function, line 1077) `* child (NULL = anonymous item: text directly inside the container);`
+  - `id` (function, line 1097) `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);`
+  - `it` (function, line 1183) `* it (they inherit in CSS). list_style drives the <li> marker (structural);`
+  - `memset` (function, line 1479) `memset(d, 0, sizeof *d);`
+  - `here` (function, line 1672) `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3 section 5.1) is content height * with indefinite available space, i.e. `auto`: letting`
+  - `glyphs` (function, line 1710) `* glyphs (the runs carry it as their fill source);`
+  - `lxb_dom_interface_element` (function, line 1914) `return lxb_dom_interface_element(p);`
+  - `outermost` (function, line 2350) `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
+  - `snprintf` (function, line 3404) `case CSS_LS_DISC: snprintf(out, cap, "\xE2\x80\xA2 ");`
+  - `alpha_marker` (function, line 3408) `case CSS_LS_LOWER_ALPHA: alpha_marker(ord, 0, out, cap);`
+  - `bx_table_role_of` (function, line 3454) `return bx_table_role_of(tagp, d);`
+  - `link_cont_chain` (function, line 3816) `link_cont_chain(reg, items, cont);`
+  - `control` (function, line 4240) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
+  - `apply_css_replaced_size` (function, line 4386) `apply_css_replaced_size(el, sheet, &cache, &iw, &ih);`
+  - `height` (function, line 4458) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+  - `srcset_best_url` (function, line 4478) `srcset_best_url(srcset, ssl, sw, &img_src, &img_src_len);`
+  - `srcset_first_url` (function, line 4482) `srcset_first_url(srcset, ssl, &img_src, &img_src_len);`
+  - `block_id` (function, line 4548) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it falls * into flow as a full-width row. Gated on img_oof, so every * in-flow image keep`
+  - `strlen` (function, line 4902) `strlen(pcs.content_after_str));`
+  - `flow` (function, line 4908) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through it. Subtree-wide: the run * may sit deep inside an undecorated abspos wrapper, where`
+  - `line` (function, line 5015) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
+  - `css_free` (function, line 5128) `css_free(sheet);`
+  - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
+  - `PV_MAX_DIM` (macro, line 44) `#define PV_MAX_DIM`
+  - `PV_FONT_REL_MIN` (macro, line 49) `#define PV_FONT_REL_MIN`
+  - `PV_FONT_REL_MAX` (macro, line 50) `#define PV_FONT_REL_MAX`
+  - `PV_FONT_CHAIN_MAX` (macro, line 56) `#define PV_FONT_CHAIN_MAX`
+  - `PV_FONT_PCT_MIN` (macro, line 57) `#define PV_FONT_PCT_MIN`
+  - `PV_FONT_PCT_MAX` (macro, line 58) `#define PV_FONT_PCT_MAX`
+  - `PV_NODE_MAP_INIT_CAP` (macro, line 267) `#define PV_NODE_MAP_INIT_CAP`
+  - `PV_COLOR_TOKEN_MAX` (macro, line 1019) `#define PV_COLOR_TOKEN_MAX`
+  - `PV_MAX_CONTAINERS` (macro, line 1056) `#define PV_MAX_CONTAINERS`
+  - `PV_MAX_GRID_COLS` (macro, line 1058) `#define PV_MAX_GRID_COLS`
+  - `PV_MAX_BOXES` (macro, line 1066) `#define PV_MAX_BOXES`
+  - `PV_MAX_INLINE_ROW_ITEMS` (macro, line 2099) `#define PV_MAX_INLINE_ROW_ITEMS`
+  - `PV_MAX_STYLE_BYTES` (macro, line 3659) `#define PV_MAX_STYLE_BYTES`
+- Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_length.h`, `include/dom.h`, `include/flex_layout.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
 
 ## src/pdf_export.c
 - Layer: utility
@@ -1780,6 +2211,8 @@ static void srcse...`
   - `pe_build_path` (function, line 90) `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)`
   - `pe_paginate` (function, line 94) `size_t pe_paginate(const double *tops, const double *heights, size_t n,
                    double...`
+  - `memcpy` (function, line 61) `memcpy(out, name, name_len);`
+- Depends on: `include/pdf_export.h`
 
 ## src/perf_trace.c
 - Layer: utility
@@ -1796,7 +2229,11 @@ static void srcse...`
   - `pt_median_us` (function, line 78) `uint64_t pt_median_us(const pt_trace *t, pt_stage stage)`
   - `pt_stage_name` (function, line 88) `const char *pt_stage_name(pt_stage stage)`
   - `pt_format` (function, line 108) `size_t pt_format(const pt_trace *t, char *buf, size_t cap)`
-  - `PT_LINE_CAP` (macro, line 107)
+  - `memset` (function, line 18) `memset(t, 0, sizeof(*t));`
+  - `memcpy` (function, line 84) `memcpy(sorted, s->samples, s->fill * sizeof(uint64_t));`
+  - `qsort` (function, line 85) `qsort(sorted, s->fill, sizeof(uint64_t), cmp_u64);`
+  - `PT_LINE_CAP` (macro, line 107) `#define PT_LINE_CAP`
+- Depends on: `include/perf_trace.h`
 
 ## src/prefetch.c
 - Layer: utility
@@ -1820,8 +2257,20 @@ static void srcse...`
   - `pf_pool_finish` (function, line 309) `void pf_pool_finish(pf_pool *p)`
   - `pf_pooled_fetch` (function, line 323) `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
                     const ch...`
-  - `_POSIX_C_SOURCE` (macro, line 11)
-  - `PF_MAX_URL` (macro, line 21)
+  - `memcpy` (function, line 123) `memcpy(u, val, vlen);`
+  - `pthread_mutex_lock` (function, line 204) `pthread_mutex_lock(&p->lock);`
+  - `pthread_mutex_unlock` (function, line 207) `pthread_mutex_unlock(&p->lock);`
+  - `pthread_cond_broadcast` (function, line 221) `pthread_cond_broadcast(&p->done_cv);`
+  - `memset` (function, line 230) `memset(p, 0, sizeof *p);`
+  - `pthread_mutex_init` (function, line 246) `pthread_mutex_init(&p->lock, NULL);`
+  - `pthread_cond_init` (function, line 248) `pthread_cond_init(&p->done_cv, NULL);`
+  - `pthread_mutex_destroy` (function, line 262) `pthread_mutex_destroy(&p->lock);`
+  - `pthread_cond_destroy` (function, line 263) `pthread_cond_destroy(&p->done_cv);`
+  - `free` (function, line 302) `free(j->body);`
+  - `pthread_join` (function, line 313) `pthread_join(p->threads[i], NULL);`
+  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
+  - `PF_MAX_URL` (macro, line 21) `#define PF_MAX_URL`
+- Depends on: `include/prefetch.h`
 
 ## src/prefs.c
 - Layer: utility
@@ -1854,8 +2303,13 @@ static void srcse...`
   - `sb_esc` (function, line 387) `static void sb_esc(sbuf *b, const char *s)`
   - `sb_link_item` (function, line 399) `static void sb_link_item(sbuf *b, const char *url, const char *label)`
   - `prefs_bookmarks_page` (function, line 407) `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
-  - `_POSIX_C_SOURCE` (macro, line 10)
-  - `PREFS_MAGIC` (macro, line 19)
+  - `memset` (function, line 68) `memset(p, 0, sizeof *p);`
+  - `free` (function, line 77) `free(p->bookmarks[i].url);`
+  - `memmove` (function, line 140) `memmove(&p->bookmarks[idx], &p->bookmarks[idx + 1], (p->bookmarks_len - (size_t)idx - 1) * sizeof p->bookmarks[0]);`
+  - `memcpy` (function, line 255) `memcpy(head, line, ll);`
+  - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
+  - `PREFS_MAGIC` (macro, line 19) `#define PREFS_MAGIC`
+- Depends on: `include/prefs.h`, `include/zoom.h`
 
 ## src/profile.c
 - Layer: utility
@@ -1870,8 +2324,16 @@ static void srcse...`
   - `profile_load` (function, line 111) `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)`
   - `profile_save` (function, line 132) `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)`
   - `profile_close` (function, line 148) `void profile_close(profile_ctx *ctx)`
-  - `_POSIX_C_SOURCE` (macro, line 10)
-  - `PROFILE_KEYFILE_LEN` (macro, line 26)
+  - `close` (function, line 47) `close(fd);`
+  - `unlink` (function, line 48) `unlink(tmp);`
+  - `memset` (function, line 61) `memset(ctx, 0, sizeof *ctx);`
+  - `memcpy` (function, line 66) `memcpy(ctx->dir, dir, dlen + 1);`
+  - `OPENSSL_cleanse` (function, line 92) `OPENSSL_cleanse(kf, sizeof kf);`
+  - `ds_free` (function, line 127) `ds_free(pt, pt_len);`
+  - `ls_free` (function, line 145) `ls_free((uint8_t *)text, len);`
+  - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
+  - `PROFILE_KEYFILE_LEN` (macro, line 26) `#define PROFILE_KEYFILE_LEN`
+- Depends on: `include/disk_store.h`, `include/profile.h`
 
 ## src/render_doc.c
 - Layer: presentation
@@ -1899,7 +2361,11 @@ static void srcse...`
   - `rd_input_label` (function, line 764) `const char *rd_input_label(int input_type)`
   - `rd_image_label` (function, line 783) `const char *rd_image_label(rdp_img_decision d)`
   - `rd_image_fail_label` (function, line 794) `const char *rd_image_fail_label(img_fail_reason reason)`
-- Depends on: `include/util.h`
+  - `place` (function, line 216) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never resolved, never touches the network either way);`
+  - `rdp_image_decision` (function, line 246) `return rdp_image_decision(caps, top_level_url, *out_url, w, h);`
+  - `memcpy` (function, line 626) `memcpy(d->boxes[i].bg_image_url, img_url, ulen + 1);`
+  - `free` (function, line 680) `free(d->blocks[i].text);`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ## src/render_policy.c
 - Layer: presentation
@@ -1911,6 +2377,7 @@ static void srcse...`
                                     const char...`
   - `rdp_img_reason` (function, line 62) `const char *rdp_img_reason(rdp_img_decision d)`
   - `rdp_images_warning` (function, line 73) `const char *rdp_images_warning(void)`
+- Depends on: `include/data_url.h`, `include/render_policy.h`, `include/request_policy.h`
 
 ## src/renderer.c
 - Layer: presentation
@@ -1920,8 +2387,16 @@ static void srcse...`
   - `read_field` (function, line 52) `static int read_field(int fd, char **out, size_t *out_len)`
   - `rd_render_html` (function, line 69) `rd_status rd_render_html(const char *html, size_t len, rd_result *out)`
   - `rd_result_free` (function, line 119) `void rd_result_free(rd_result *out)`
-  - `_POSIX_C_SOURCE` (macro, line 6)
-- Depends on: `include/util.h`
+  - `os_no_dump` (function, line 29) `os_no_dump();`
+  - `write_full` (function, line 40) `&& write_full(wfd, &tl, sizeof tl) == 0 && (tl == 0 || write_full(wfd, title, tl) == 0) && write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0);`
+  - `hp_free` (function, line 44) `hp_free(title);`
+  - `hp_document_free` (function, line 47) `hp_document_free(doc);`
+  - `_exit` (function, line 48) `_exit(ok ? 0 : 92);`
+  - `memset` (function, line 72) `memset(out, 0, sizeof *out);`
+  - `close` (function, line 80) `close(fds[0]);`
+  - `free` (function, line 106) `free(title);`
+  - `_POSIX_C_SOURCE` (macro, line 6) `#define _POSIX_C_SOURCE`
+- Depends on: `include/html_parse.h`, `include/os_sandbox.h`, `include/renderer.h`, `include/util.h`
 
 ## src/request_policy.c
 - Layer: business_logic
@@ -1936,9 +2411,11 @@ static void srcse...`
   - `rp_site_of` (function, line 101) `int rp_site_of(const char *host, char *out, size_t out_size)`
   - `rp_same_site` (function, line 133) `int rp_same_site(const char *top_level_url, const char *request_url)`
   - `rp_evaluate` (function, line 142) `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)`
-  - `RP_MAX_HOST` (macro, line 16)
-  - `RP_MAX_LABELS` (macro, line 18)
-- Depends on: `include/psl_data.h`
+  - `strcmp` (function, line 37) `return strcmp((const char *)key, *(const char *const *)elem);`
+  - `memcpy` (function, line 130) `memcpy(out, site, n + 1);`
+  - `RP_MAX_HOST` (macro, line 16) `#define RP_MAX_HOST`
+  - `RP_MAX_LABELS` (macro, line 18) `#define RP_MAX_LABELS`
+- Depends on: `include/psl_data.h`, `include/request_policy.h`
 
 ## src/secure_fetch.c
 - Layer: utility
@@ -1947,6 +2424,7 @@ static void srcse...`
   - `body_sink` (struct, line 433)
   - `tls_capture` (struct, line 446)
   - `fetch_ctx` (struct, line 456)
+  - `sink` (type_alias, line 455) `typedef struct fetch_ctx { body_sink sink;`
   - `ci_starts_with` (function, line 43) `static int ci_starts_with(const char *haystack, const char *prefix)`
   - `ci_index` (function, line 55) `static long ci_index(const char *haystack, const char *needle)`
   - `sf_share_lock` (function, line 66) `static void sf_share_lock(CURL *handle, curl_lock_data data,
@@ -1994,7 +2472,30 @@ static void srcse...`
                   const void *body, size...`
   - `sf_get_follow` (function, line 1006) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                 ...`
-  - `_POSIX_C_SOURCE` (macro, line 11)
+  - `pthread_mutex_lock` (function, line 70) `pthread_mutex_lock(&sf_cookie_lock);`
+  - `pthread_mutex_unlock` (function, line 75) `pthread_mutex_unlock(&sf_cookie_lock);`
+  - `curl_global_init` (function, line 83) `curl_global_init(CURL_GLOBAL_DEFAULT);`
+  - `curl_share_setopt` (function, line 89) `curl_share_setopt(sf_share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);`
+  - `memcpy` (function, line 133) `memcpy(eb, f[4], el);`
+  - `curl_easy_setopt` (function, line 173) `curl_easy_setopt(h, CURLOPT_SHARE, sf_share);`
+  - `curl_easy_getinfo` (function, line 176) `curl_easy_getinfo(h, CURLINFO_COOKIELIST, &list);`
+  - `curl_slist_free_all` (function, line 189) `curl_slist_free_all(list);`
+  - `curl_easy_cleanup` (function, line 190) `curl_easy_cleanup(h);`
+  - `memset` (function, line 217) `memset(&c, 0, sizeof c);`
+  - `module` (function, line 363) `* pure url module (DRY);`
+  - `free` (function, line 412) `free(resp->tls_version);`
+  - `progress` (function, line 442) `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
+  - `void` (function, line 464) `void (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);`
+  - `database` (function, line 484) `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid handshake as unnamed and the * policy check rejects it -- exactly the sites doing TLS r`
+  - `group` (function, line 498) `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
+  - `OBJ_nid2sn` (function, line 507) `return OBJ_nid2sn(nid);`
+  - `this` (function, line 524) `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and causes false rejections. * If it is NULL (no group / not TLS 1.3 / no PFS), we copy ""`
+  - `STACK_OF` (function, line 622) `STACK_OF(X509) *chain = SSL_get0_verified_chain(ssl);`
+  - `X509_get0_signature` (function, line 661) `X509_get0_signature(NULL, &alg, cert);`
+  - `X509_ALGOR_get0` (function, line 664) `X509_ALGOR_get0(&aobj, NULL, NULL, alg);`
+  - `OBJ_obj2txt` (function, line 666) `OBJ_obj2txt(sigbuf, (int)sigbuf_len, aobj, 0);`
+  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
+- Depends on: `include/anti_fp.h`, `include/secure_fetch.h`, `include/url.h`
 
 ## src/svg_render.c
 - Layer: presentation
@@ -2003,6 +2504,7 @@ static void srcse...`
 - Symbols:
   - `sv_attr` (struct, line 91)
   - `sv_ctx` (struct, line 151)
+  - `stroke` (type_alias, line 151) `typedef struct sv_ctx { int fill, stroke;`
   - `sv_is_space` (function, line 20) `static int sv_is_space(char c)`
   - `sv_is_digit` (function, line 24) `static int sv_is_digit(char c)`
   - `sv_lower` (function, line 26) `static char sv_lower(char c)`
@@ -2037,107 +2539,184 @@ static void srcse...`
             double *scale, double *off_x, ...`
   - `sv_parse` (function, line 762) `sv_status sv_parse(const char *markup, size_t len, sv_image *out)`
   - `sv_parse_ex` (function, line 766) `sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill)`
-  - `SV_MAX_ATTRS` (macro, line 95)
+  - `memcpy` (function, line 124) `memcpy(dst, s, n);`
+  - `memset` (function, line 327) `memset(sh, 0, sizeof *sh);`
+  - `point` (function, line 556) `* current point (SVG 8.3.6). */ int had = (prev == 'C' || prev == 'c' || prev == 'S' || prev == 's');`
+  - `SV_MAX_ATTRS` (macro, line 95) `#define SV_MAX_ATTRS`
+- Depends on: `include/css_color.h`, `include/svg_render.h`
 
 ## src/tab.c
 - Layer: utility
 - Language: c
 - Symbols:
-  - `child_state` (struct, line 89)
-  - `tab` (struct, line 1550)
-  - `child_reset_page` (function, line 110) `static void child_reset_page(child_state *cs)`
-  - `policy` (function, line 126) `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
+  - `child_state` (struct, line 102)
+  - `tab` (struct, line 1563)
+  - `child_reset_page` (function, line 123) `static void child_reset_page(child_state *cs)`
+  - `policy` (function, line 139) `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
  * compromi...`
-  - `run_js` (function, line 180) `* regardless of run_js (a no-JS load simply never records a request). */
+  - `run_js` (function, line 193) `* regardless of run_js (a no-JS load simply never records a request). */
 static int child_load(ch...`
-  - `write_field` (function, line 247) `static int write_field(int fd, const char *s)`
-  - `blocks` (function, line 279) `*
+  - `write_field` (function, line 260) `static int write_field(int fd, const char *s)`
+  - `blocks` (function, line 292) `*
  * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
  * grid arr...`
-  - `FB_MAX_FILE_BYTES` (function, line 638) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+  - `FB_MAX_FILE_BYTES` (function, line 651) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-  - `budget_remaining_ms` (function, line 668) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
-  - `ctype_is_javascript` (function, line 682) `static int ctype_is_javascript(const char *ctype)`
-  - `ctype_is_css` (function, line 691) `static int ctype_is_css(const char *ctype)`
-  - `log_external_skip` (function, line 699) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+  - `budget_remaining_ms` (function, line 681) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
+  - `ctype_is_javascript` (function, line 695) `static int ctype_is_javascript(const char *ctype)`
+  - `ctype_is_css` (function, line 704) `static int ctype_is_css(const char *ctype)`
+  - `log_external_skip` (function, line 712) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...`
-  - `run` (function, line 717) `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
+  - `run` (function, line 730) `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
  * Call after every ...`
-  - `window` (function, line 750) `* net window (cs->net_active). */
+  - `window` (function, line 763) `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-  - `child_handle_load` (function, line 794) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+  - `child_handle_load` (function, line 807) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-  - `swap` (function, line 1038) `* display:none hiding an element via class swap (CSS, not
+  - `swap` (function, line 1051) `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...`
-  - `child_next_timer_ms` (function, line 1076) `static int32_t child_next_timer_ms(child_state *cs)`
-  - `child_handle_mutation` (function, line 1091) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+  - `child_next_timer_ms` (function, line 1089) `static int32_t child_next_timer_ms(child_state *cs)`
+  - `child_handle_mutation` (function, line 1104) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...`
-  - `child_handle_click` (function, line 1157) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-  - `child_handle_tick` (function, line 1161) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-  - `child_handle_event` (function, line 1171) `static void child_handle_event(int wfd, child_state *cs)`
-  - `child_handle_mouse` (function, line 1220) `static void child_handle_mouse(int wfd, child_state *cs)`
-  - `child_handle_submit` (function, line 1254) `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
-  - `child_handle_eval` (function, line 1288) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
-  - `child_handle_decode_image` (function, line 1321) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
-  - `child_handle_decode_image_b64` (function, line 1343) `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
-  - `gen_session_key` (function, line 1354) `static uint64_t gen_session_key(void)`
-  - `tab_worker_run` (function, line 1375) `static void tab_worker_run(int rfd, int wfd)`
-  - `parse_worker_fd` (function, line 1518) `static int parse_worker_fd(const char *s, int *out)`
-  - `tab_parse_worker_args` (function, line 1529) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-  - `tab_worker_dispatch` (function, line 1539) `void tab_worker_dispatch(int argc, char **argv)`
-  - `ignore_sigpipe` (function, line 1570) `static void ignore_sigpipe(void)`
-  - `tab_refresh_alive` (function, line 1576) `static void tab_refresh_alive(tab *t)`
-  - `read_field` (function, line 1596) `static int read_field(int fd, char **out, size_t *out_len)`
-  - `read_view` (function, line 1612) `static int read_view(int fd, pv_view **out)`
-  - `read_console` (function, line 2048) `static int read_console(int fd, fb_buffer *out)`
-  - `send_request` (function, line 2085) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
-  - `io_failure` (function, line 2094) `static tab_status io_failure(tab *t)`
-  - `exec_worker_child` (function, line 2103) `static void exec_worker_child(int rfd, int wfd)`
-  - `tab_set_fetcher` (function, line 2173) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-  - `tab_set_net_allowed` (function, line 2179) `void tab_set_net_allowed(tab *t, int allowed)`
-  - `tab_set_css_allowed` (function, line 2184) `void tab_set_css_allowed(tab *t, int allowed)`
-  - `tab_set_viewport_w` (function, line 2189) `void tab_set_viewport_w(tab *t, int px)`
-  - `tab_set_cookies` (function, line 2194) `void tab_set_cookies(tab *t, const char *cookies)`
-  - `tab_subreq_permitted` (function, line 2200) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-  - `answered` (function, line 2213) `* A refused frame is still consumed and answered (status 0), so the protocol never
+  - `child_handle_click` (function, line 1170) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
+  - `child_handle_tick` (function, line 1174) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
+  - `child_handle_event` (function, line 1184) `static void child_handle_event(int wfd, child_state *cs)`
+  - `child_handle_mouse` (function, line 1233) `static void child_handle_mouse(int wfd, child_state *cs)`
+  - `child_handle_submit` (function, line 1267) `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
+  - `child_handle_eval` (function, line 1301) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
+  - `child_handle_decode_image` (function, line 1334) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
+  - `child_handle_decode_image_b64` (function, line 1356) `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
+  - `gen_session_key` (function, line 1367) `static uint64_t gen_session_key(void)`
+  - `tab_worker_run` (function, line 1388) `static void tab_worker_run(int rfd, int wfd)`
+  - `parse_worker_fd` (function, line 1531) `static int parse_worker_fd(const char *s, int *out)`
+  - `tab_parse_worker_args` (function, line 1542) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
+  - `tab_worker_dispatch` (function, line 1552) `void tab_worker_dispatch(int argc, char **argv)`
+  - `ignore_sigpipe` (function, line 1583) `static void ignore_sigpipe(void)`
+  - `tab_refresh_alive` (function, line 1589) `static void tab_refresh_alive(tab *t)`
+  - `read_field` (function, line 1609) `static int read_field(int fd, char **out, size_t *out_len)`
+  - `read_view` (function, line 1625) `static int read_view(int fd, pv_view **out)`
+  - `read_console` (function, line 2061) `static int read_console(int fd, fb_buffer *out)`
+  - `send_request` (function, line 2098) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
+  - `io_failure` (function, line 2107) `static tab_status io_failure(tab *t)`
+  - `exec_worker_child` (function, line 2116) `static void exec_worker_child(int rfd, int wfd)`
+  - `tab_set_fetcher` (function, line 2186) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+  - `tab_set_net_allowed` (function, line 2192) `void tab_set_net_allowed(tab *t, int allowed)`
+  - `tab_set_css_allowed` (function, line 2197) `void tab_set_css_allowed(tab *t, int allowed)`
+  - `tab_set_viewport_w` (function, line 2202) `void tab_set_viewport_w(tab *t, int px)`
+  - `tab_set_cookies` (function, line 2207) `void tab_set_cookies(tab *t, const char *cookies)`
+  - `tab_subreq_permitted` (function, line 2213) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+  - `answered` (function, line 2226) `* A refused frame is still consumed and answered (status 0), so the protocol never
  * desyncs. Re...`
-  - `tab_load` (function, line 2248) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-  - `tab_load_ex` (function, line 2252) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-  - `tab_load_full` (function, line 2256) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+  - `tab_load` (function, line 2261) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+  - `tab_load_ex` (function, line 2265) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+  - `tab_load_full` (function, line 2269) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-  - `tab_click` (function, line 2402) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-  - `tab_tick` (function, line 2409) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-  - `tab_submit` (function, line 2419) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
-  - `tab_read_view` (function, line 2524) `tab_status tab_read_view(tab *t, tab_page *out)`
-  - `tab_eval` (function, line 2579) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-  - `tab_decode_image_op` (function, line 2620) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+  - `tab_click` (function, line 2415) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+  - `tab_tick` (function, line 2422) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+  - `tab_submit` (function, line 2432) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
+  - `tab_read_view` (function, line 2537) `tab_status tab_read_view(tab *t, tab_page *out)`
+  - `tab_eval` (function, line 2592) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+  - `tab_decode_image_op` (function, line 2633) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...`
-  - `tab_decode_image` (function, line 2661) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-  - `tab_decode_image_data_url` (function, line 2667) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-  - `tab_alive` (function, line 2685) `int tab_alive(const tab *t)`
-  - `tab_child_pid` (function, line 2691) `pid_t tab_child_pid(const tab *t)`
-  - `tab_close` (function, line 2695) `void tab_close(tab *t)`
-  - `tab_page_free` (function, line 2708) `void tab_page_free(tab_page *p)`
-  - `tab_eval_result_free` (function, line 2726) `void tab_eval_result_free(tab_eval_result *r)`
-  - `tab_image_free` (function, line 2735) `void tab_image_free(tab_image *img)`
-  - `_GNU_SOURCE` (macro, line 13)
-  - `TAB_SCREEN_W` (macro, line 52)
-  - `TAB_SCREEN_H` (macro, line 53)
-  - `TAB_MAX_RUNS` (macro, line 57)
-  - `PV_MAX_CONTAINERS_WIRE` (macro, line 61)
-  - `TAB_MAX_URL` (macro, line 64)
-  - `TAB_MAX_SUBREQ` (macro, line 79)
-  - `TAB_MAX_SUBRESOURCE` (macro, line 80)
-  - `TAB_MAX_JS_JOBS` (macro, line 81)
-  - `TAB_MAX_EXTERN_CSS` (macro, line 711)
-- Depends on: `include/util.h`
+  - `tab_decode_image` (function, line 2674) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+  - `tab_decode_image_data_url` (function, line 2680) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+  - `tab_alive` (function, line 2698) `int tab_alive(const tab *t)`
+  - `tab_child_pid` (function, line 2704) `pid_t tab_child_pid(const tab *t)`
+  - `tab_close` (function, line 2708) `void tab_close(tab *t)`
+  - `tab_page_free` (function, line 2721) `void tab_page_free(tab_page *p)`
+  - `tab_eval_result_free` (function, line 2739) `void tab_eval_result_free(tab_eval_result *r)`
+  - `tab_image_free` (function, line 2748) `void tab_image_free(tab_image *img)`
+  - `_Static_assert` (function, line 95) `_Static_assert(TAB_WIRE_GRID_N == 9, "PV_GRID_TRACKS drift");`
+  - `free` (function, line 129) `free(cs->extern_css);`
+  - `pv_free` (function, line 132) `pv_free(cs->preserved_view);`
+  - `dom_free` (function, line 210) `dom_free(idx);`
+  - `js_context_free` (function, line 225) `js_context_free(js);`
+  - `buffer` (function, line 236) `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of run_js so the REPL works on any page. */ fb_buffer_reset(&cs->log);`
+  - `host` (function, line 248) `* granted net access for this host (allow.conf AND js.conf). Otherwise they stay * undefined (Same-Origin-by-construction holds). child_fetch still refuses unless * net_active is set during the script`
+  - `clock_gettime` (function, line 683) `clock_gettime(CLOCK_MONOTONIC, &now);`
+  - `pv_append_video` (function, line 750) `pv_append_video(*vp, 0, 1, NULL, src, NULL, -1, -1);`
+  - `memcpy` (function, line 797) `memcpy(cs->extern_css + cs->extern_css_len, body, blen);`
+  - `hp_free_stylesheet_hrefs` (function, line 803) `hp_free_stylesheet_hrefs(hrefs, nhrefs);`
+  - `child_fetch_stylesheets` (function, line 835) `child_fetch_stylesheets(cs);`
+  - `fallback` (function, line 877) `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it even with JS on. */ (void)pv_build_styled(cs->doc, run_js, reader, prefers_dark, cs->`
+  - `js_set_time_budget` (function, line 913) `js_set_time_budget(cs->js, rem);`
+  - `js_set_current_script` (function, line 960) `js_set_current_script(cs->js, scripts[i].src, scripts[i].type);`
+  - `memset` (function, line 963) `memset(&r, 0, sizeof r);`
+  - `js_result_free` (function, line 968) `js_result_free(&r);`
+  - `hp_free_scripts` (function, line 976) `hp_free_scripts(scripts, nscripts);`
+  - `content` (function, line 997) `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video> elements in the DOM for any * found. */ if (cs->idx != NULL) jd_process_iframes(cs->js, cs`
+  - `once` (function, line 1042) `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
+  - `inject_video_into_view` (function, line 1044) `inject_video_into_view(cs, &cs->preserved_view);`
+  - `write_full` (function, line 1071) `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd, write_which) == 0 && write_full(wfd, &nlen, sizeof nlen) == 0 && (nlen == 0 || write_full(wfd,`
+  - `hp_free` (function, line 1082) `hp_free(title);`
+  - `fb_buffer_reset` (function, line 1309) `fb_buffer_reset(&cs->log);`
+  - `img_pixels_free` (function, line 1348) `img_pixels_free(&px);`
+  - `EPIPE` (function, line 1390) `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
+  - `tzset` (function, line 1406) `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
+  - `depth` (function, line 1411) `* defense in depth (seccomp already excludes open/socket/exec);`
+  - `os_isolate_namespaces` (function, line 1416) `os_isolate_namespaces();`
+  - `os_no_dump` (function, line 1417) `os_no_dump();`
+  - `os_landlock_restrict` (function, line 1418) `os_landlock_restrict(NULL, 0);`
+  - `_exit` (function, line 1421) `_exit(hs == TAB_READY ? 0 : 70);`
+  - `fb_buffer_free` (function, line 1524) `fb_buffer_free(&cs.log);`
+  - `load` (function, line 1570) `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
+  - `sigaction` (function, line 1587) `sigaction(SIGPIPE, &sa, NULL);`
+  - `pv_set_input_checked` (function, line 1713) `pv_set_input_checked(v, (int)ckd);`
+  - `pv_text_ext_reset` (function, line 1722) `pv_text_ext_reset(&e);`
+  - `pv_set_text_ext` (function, line 1737) `pv_set_text_ext(v, &e);`
+  - `pv_set_grad_text` (function, line 1742) `pv_set_grad_text(v, (int)b[27], (int)b[28], gtc);`
+  - `pv_set_emphasis` (function, line 1746) `pv_set_emphasis(v, (int)bold, (int)italic);`
+  - `pv_set_indent` (function, line 1747) `pv_set_indent(v, (int)indent);`
+  - `pv_set_color` (function, line 1748) `pv_set_color(v, (int)fg);`
+  - `pv_set_bgcolor` (function, line 1749) `pv_set_bgcolor(v, (int)bg);`
+  - `pv_set_text_style` (function, line 1750) `pv_set_text_style(v, (int)talign, (int)fscale, (int)fabs_flag, (int)lscale, (int)deco);`
+  - `pv_set_container` (function, line 1752) `pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (int)ccols, (int)cwrap, (int)crgap, (int)calign);`
+  - `pv_set_grid_rows` (function, line 1754) `pv_set_grid_rows(v, (int)crows);`
+  - `pv_set_cont_box` (function, line 1755) `pv_set_cont_box(v, (int)b[33]);`
+  - `pv_set_grid` (function, line 1759) `pv_set_grid(v, gw, PV_GRID_TRACKS, (int)gtw[PV_GRID_TRACKS]);`
+  - `pv_set_row_span` (function, line 1760) `pv_set_row_span(v, (int)b[26]);`
+  - `pv_set_grid_area` (function, line 1762) `pv_set_grid_area(v, (int)b[40], (int)b[41]);`
+  - `pv_set_flex` (function, line 1764) `pv_set_flex(v, (int)fgrow, (int)fshrink, (int)fbasis, (int)forder, (int)fdir, (int)fself);`
+  - `pv_set_cont_item` (function, line 1766) `pv_set_cont_item(v, (int)citem);`
+  - `pv_set_float` (function, line 1767) `pv_set_float(v, (int)flside, (int)flid, (int)flclear, (int)flml, (int)flmlpct, (int)flmr, (int)flmrpct, (int)floid, (int)floside, (int)floml, (int)flomlpct, (int)flomr, (int)flomrpct);`
+  - `pv_set_box` (function, line 1771) `pv_set_box(v, (int)bl, (int)br, (int)bw, (int)bcenter, (int)bmt, (int)bmb);`
+  - `layout` (function, line 1773) `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property. */ pv_set_box_pct(v, (int)bwpct, (int)b[36], (int)b[37], (int)b[38], (int)b[39]);`
+  - `column` (function, line 1783) `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation as text runs. */ pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (in`
+  - `pv_set_block_id` (function, line 1809) `pv_set_block_id(v, (int)blkid);`
+  - `pv_set_node_id` (function, line 1810) `pv_set_node_id(v, (dom_node_id)nodeid);`
+  - `pv_set_ua_tag` (function, line 1813) `pv_set_ua_tag(v, (int)b[35]);`
+  - `pv_set_own_box` (function, line 1816) `pv_set_own_box(v, (int)b[42]);`
+  - `pv_set_oof` (function, line 1819) `pv_set_oof(v, (int)b[43]);`
+  - `close_range` (function, line 2120) `close_range(3, ~0U, CLOSE_RANGE_CLOEXEC);`
+  - `execv` (function, line 2130) `execv("/proc/self/exe", av);`
+  - `close` (function, line 2142) `close(req[0]);`
+  - `kill` (function, line 2174) `kill(pid, SIGKILL);`
+  - `fb_buffer_init` (function, line 2348) `fb_buffer_init(&console);`
+  - `tab_mutation_request` (function, line 2419) `return tab_mutation_request(t, OP_CLICK, (int32_t)node_id, out);`
+  - `_GNU_SOURCE` (macro, line 13) `#define _GNU_SOURCE`
+  - `TAB_SCREEN_W` (macro, line 54) `#define TAB_SCREEN_W`
+  - `TAB_SCREEN_H` (macro, line 55) `#define TAB_SCREEN_H`
+  - `TAB_WIRE_HEAD_N` (macro, line 59) `#define TAB_WIRE_HEAD_N`
+  - `TAB_WIRE_A_N` (macro, line 60) `#define TAB_WIRE_A_N`
+  - `TAB_WIRE_B_N` (macro, line 61) `#define TAB_WIRE_B_N`
+  - `TAB_WIRE_BOX_F_N` (macro, line 62) `#define TAB_WIRE_BOX_F_N`
+  - `TAB_WIRE_GRID_N` (macro, line 63) `#define TAB_WIRE_GRID_N`
+  - `TAB_MAX_RUNS` (macro, line 67) `#define TAB_MAX_RUNS`
+  - `PV_MAX_CONTAINERS_WIRE` (macro, line 71) `#define PV_MAX_CONTAINERS_WIRE`
+  - `TAB_MAX_URL` (macro, line 74) `#define TAB_MAX_URL`
+  - `TAB_MAX_SUBREQ` (macro, line 89) `#define TAB_MAX_SUBREQ`
+  - `TAB_MAX_SUBRESOURCE` (macro, line 90) `#define TAB_MAX_SUBRESOURCE`
+  - `TAB_MAX_JS_JOBS` (macro, line 91) `#define TAB_MAX_JS_JOBS`
+  - `TAB_MAX_EXTERN_CSS` (macro, line 724) `#define TAB_MAX_EXTERN_CSS`
+- Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/data_url.h`, `include/dom.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/image_decode.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/tab.h`, `include/url.h`, `include/util.h`
 
 ## src/text_shape.c
 - Layer: utility
 - Language: c
 - Symbols:
   - `tsh_entry` (struct, line 34)
+  - `loaded` (type_alias, line 33) `typedef struct tsh_entry { int loaded;`
   - `generic_name` (function, line 53) `static const char *generic_name(int family)`
   - `backend_init` (function, line 63) `static int backend_init(void)`
   - `read_font_file` (function, line 80) `static unsigned char *read_font_file(const char *path, long *out_n)`
@@ -2150,9 +2729,31 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `tsh_draw` (function, line 220) `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, doub...`
   - `tsh_shutdown` (function, line 242) `void tsh_shutdown(void)`
-  - `_POSIX_C_SOURCE` (macro, line 11)
-  - `TSH_MAX_FONT_BYTES` (macro, line 28)
-  - `TSH_CACHE_SLOTS` (macro, line 32)
+  - `FcInit` (function, line 69) `FcInit();`
+  - `FT_Done_FreeType` (function, line 73) `FT_Done_FreeType(g_ft);`
+  - `fclose` (function, line 91) `fclose(fp);`
+  - `FcPatternAddInteger` (function, line 100) `FcPatternAddInteger(pat, FC_WEIGHT, bold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL);`
+  - `FcConfigSubstitute` (function, line 102) `FcConfigSubstitute(NULL, pat, FcMatchPattern);`
+  - `FcDefaultSubstitute` (function, line 103) `FcDefaultSubstitute(pat);`
+  - `FcPatternDestroy` (function, line 106) `FcPatternDestroy(pat);`
+  - `FcPatternGetInteger` (function, line 115) `FcPatternGetInteger(match, FC_INDEX, 0, &index);`
+  - `free` (function, line 123) `free(bytes);`
+  - `FT_Done_Face` (function, line 129) `FT_Done_Face(ft);`
+  - `hb_blob_destroy` (function, line 140) `hb_blob_destroy(blob);`
+  - `cairo_font_face_destroy` (function, line 141) `cairo_font_face_destroy(cf);`
+  - `hb_font_set_scale` (function, line 187) `hb_font_set_scale(e->hbfont, scale, scale);`
+  - `hb_buffer_reset` (function, line 188) `hb_buffer_reset(g_buf);`
+  - `hb_buffer_add_utf8` (function, line 190) `hb_buffer_add_utf8(g_buf, text, (int)len, 0, (int)len);`
+  - `hb_buffer_guess_segment_properties` (function, line 191) `hb_buffer_guess_segment_properties(g_buf);`
+  - `hb_shape` (function, line 192) `hb_shape(e->hbfont, g_buf, NULL, 0);`
+  - `cairo_set_font_face` (function, line 232) `cairo_set_font_face(cr, e->cface);`
+  - `cairo_set_font_size` (function, line 234) `cairo_set_font_size(cr, px);`
+  - `cairo_show_glyphs` (function, line 239) `cairo_show_glyphs(cr, g_scratch, (int)n);`
+  - `memset` (function, line 253) `memset(e, 0, sizeof *e);`
+  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
+  - `TSH_MAX_FONT_BYTES` (macro, line 28) `#define TSH_MAX_FONT_BYTES`
+  - `TSH_CACHE_SLOTS` (macro, line 32) `#define TSH_CACHE_SLOTS`
+- Depends on: `include/css.h`, `include/text_shape.h`
 
 ## src/textfield.c
 - Layer: utility
@@ -2173,11 +2774,17 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `tf_text` (function, line 82) `const char *tf_text(const tf_field *f)`
   - `tf_len` (function, line 86) `size_t tf_len(const tf_field *f)`
   - `tf_cursor` (function, line 90) `size_t tf_cursor(const tf_field *f)`
+  - `tf_init` (function, line 21) `tf_init(f);`
+  - `memcpy` (function, line 28) `memcpy(f->buf, s, n);`
+  - `memmove` (function, line 39) `memmove(f->buf + f->cursor + 1, f->buf + f->cursor, f->len - f->cursor);`
+- Depends on: `include/textfield.h`
 
 ## src/tls_impersonate.c
 - Layer: utility
 - Language: c
 - Symbols:
+  - `ti_wr` (struct, line 33)
+  - `ti_rd` (struct, line 63)
   - `ti_should_impersonate` (function, line 17) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,
                           i...`
   - `bounded_len` (function, line 24) `static size_t bounded_len(const char *s, size_t max)`
@@ -2197,6 +2804,10 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `ti_encode_resp` (function, line 176) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap)`
   - `ti_decode_resp` (function, line 195) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out)`
   - `ti_resp_free` (function, line 229) `void ti_resp_free(ti_resp *r)`
+  - `memcpy` (function, line 97) `memcpy(b, r->p + r->off, n);`
+  - `memset` (function, line 142) `memset(out, 0, sizeof *out);`
+  - `free` (function, line 157) `free(url);`
+- Depends on: `include/tls_impersonate.h`
 
 ## src/ui_layout.c
 - Layer: presentation
@@ -2206,6 +2817,7 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `ui_wrap_text` (function, line 26) `ui_status ui_wrap_text(const char *text, size_t len, size_t max_cols, ui_layout *out)`
   - `ui_layout_free` (function, line 90) `void ui_layout_free(ui_layout *lay)`
   - `ui_clamp_scroll` (function, line 98) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines)`
+  - `free` (function, line 93) `free(lay->lines);`
 - Depends on: `include/ui.h`
 
 ## src/url.c
@@ -2241,7 +2853,10 @@ static int looks_like_host(const c...`
   - `url_file_path` (function, line 527) `const char *url_file_path(const char *s)`
   - `url_resolve_file` (function, line 531) `url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz)`
   - `url_split` (function, line 580) `url_status url_split(const char *url, url_parts *out)`
-  - `_POSIX_C_SOURCE` (macro, line 8)
+  - `memcpy` (function, line 34) `memcpy(out, src, n + 1);`
+  - `memset` (function, line 584) `memset(out, 0, sizeof *out);`
+  - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
+- Depends on: `include/url.h`
 
 ## src/webcaps.c
 - Layer: utility
@@ -2251,6 +2866,7 @@ static int looks_like_host(const c...`
   - `wc_derive` (function, line 14) `wc_caps wc_derive(wc_input in)`
   - `wc_from_flags` (function, line 34) `wc_caps wc_from_flags(bool js, bool css, bool images)`
   - `wc_render_caps` (function, line 45) `rdp_caps wc_render_caps(wc_caps c)`
+- Depends on: `include/webcaps.h`
 
 ## src/zoom.c
 - Layer: utility
@@ -2262,4 +2878,5 @@ static int looks_like_host(const c...`
   - `zm_reset` (function, line 35) `int zm_reset(void)`
   - `zm_scale` (function, line 39) `double zm_scale(int pct)`
   - `zm_apply` (function, line 43) `double zm_apply(double base_px, int pct)`
-  - `ZM_LADDER_N` (macro, line 12)
+  - `ZM_LADDER_N` (macro, line 12) `#define ZM_LADDER_N`
+- Depends on: `include/zoom.h`
