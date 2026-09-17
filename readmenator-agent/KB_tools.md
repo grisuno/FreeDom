@@ -2,6 +2,7 @@
 
 ## tools/ffgeom.py
 - Layer: utility
+- Doc: ffgeom -- Firefox geometry as TEXT, no image reading.  The `make geom` loop needs Firefox's getBoundingClientRect() numb
 - Language: py
 - Symbols:
   - `load_rows` (function, line 99) `def load_rows(path)`
@@ -22,24 +23,25 @@
 - Language: c
 - Symbols:
   - `vec` (struct, line 21)
-  - `vec_push` (function, line 26) `static void vec_push(vec *v, const char *s)`
-  - `cmp_str` (function, line 37) `static int cmp_str(const void *a, const void *b)`
+  - `vec_push` (function, line 27) `static void vec_push(vec *v, const char *s)`
+  - `cmp_str` (function, line 38) `static int cmp_str(const void *a, const void *b)`
   - `sort_unique` (function, line 43) `static void sort_unique(vec *v)`
   - `ascii_lower` (function, line 55) `static void ascii_lower(char *s)`
-  - `emit` (function, line 60) `static void emit(const char *name, vec *v)`
-  - `main` (function, line 66) `int main(int argc, char **argv)`
-  - `_POSIX_C_SOURCE` (macro, line 14)
+  - `emit` (function, line 61) `static void emit(const char *name, vec *v)`
+  - `main` (function, line 67) `int main(int argc, char **argv)`
+  - `_POSIX_C_SOURCE` (macro, line 15) `#define _POSIX_C_SOURCE`
 
 ## tools/mutate.py
 - Layer: utility
+- Doc: mutate -- compile-time mutation testing for the CMocka suites.  One mutant = one operator substitution in one src/ file 
 - Language: py
 - Symbols:
   - `line_sites` (function, line 41) `def line_sites(text)`
   - `mutate_line` (function, line 75) `def mutate_line(line, op)`
   - `find_modules` (function, line 107) `def find_modules(root)`
   - `run_make` (function, line 116) `def run_make(root, target)`
-  - `run_bin` (function, line 122) `def run_bin(path)`
-  - `main` (function, line 128) `def main(argv)`
+  - `run_bin` (function, line 125) `def run_bin(path)`
+  - `main` (function, line 137) `def main(argv)`
 
 ## tools/pngdiff.c
 - Layer: infrastructure
@@ -47,20 +49,22 @@
 - Symbols:
   - `pd_profile` (struct, line 65)
   - `pd_reader` (struct, line 71)
-  - `pd_reader_close` (function, line 78) `static void pd_reader_close(pd_reader *r)`
+  - `height` (type_alias, line 64) `typedef struct pd_profile { uint32_t width, height;`
+  - `pd_reader_close` (function, line 79) `static void pd_reader_close(pd_reader *r)`
   - `pd_reader_open` (function, line 88) `static int pd_reader_open(pd_reader *r, const char *path)`
   - `png_set_background` (function, line 116) `png_set_background(r->png, &(png_color_16)`
-  - `pd_lum` (function, line 140) `static double pd_lum(const png_byte *p)`
+  - `pd_lum` (function, line 141) `static double pd_lum(const png_byte *p)`
   - `pd_background` (function, line 147) `static int pd_background(const char *path, double *out_bg)`
   - `pd_profile_of` (function, line 175) `static int pd_profile_of(const char *path, pd_profile *out)`
-  - `pd_mae` (function, line 226) `static double pd_mae(const double *a, const double *b, size_t n)`
-  - `main` (function, line 232) `int main(int argc, char **argv)`
-  - `PD_COLS` (macro, line 57)
-  - `PD_ROWS` (macro, line 58)
-  - `PD_INK_DELTA` (macro, line 63)
+  - `pd_mae` (function, line 227) `static double pd_mae(const double *a, const double *b, size_t n)`
+  - `main` (function, line 233) `int main(int argc, char **argv)`
+  - `PD_COLS` (macro, line 57) `#define PD_COLS`
+  - `PD_ROWS` (macro, line 58) `#define PD_ROWS`
+  - `PD_INK_DELTA` (macro, line 63) `#define PD_INK_DELTA`
 
 ## tools/pngprof.py
 - Layer: utility
+- Doc: pngprof -- structural ink-profile dump for page screenshots.  Build-time tool for Freedom layout work (companion to tool
 - Language: py
 - Symbols:
   - `load_rows` (function, line 41) `def load_rows(path)`
