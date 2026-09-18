@@ -2126,6 +2126,60 @@ static int is_inline_block_row(const lxb_dom_node_t *p, const css_sheet *sheet,
  * no box at all -- so it painted nothing, reserved no height, and, worst of all, its
  * children lost their containing block and resolved their insets against a degenerate
  * 0x0 rect, landing off-screen. Comment and other node types carry no content. */
+/* True when the element's resolved style carries ::before generated content
+ * (spec/css.md ::before/::after: only `content` crosses over). BEFORE-only by
+ * design: ::before has no pending mechanism, so entry emission (which needs a
+ * textless subtree, where the text-node path can never fire) is single-fire by
+ * construction. ::after stays on the pre-existing pending path: its content is
+ * routinely zero-geometry by its own rule (`content:"."` + `height:0` +
+ * `visibility:hidden`, the clearfix idiom), and this engine has no generated-box
+ * model to honor that with -- emitting it as a normal run would paint a visible
+ * line where every browser paints nothing. */
+static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,
+                                 pv_style_cache *cache) {
+    css_style ecs = cached_element_style(lxb_dom_interface_element(n), sheet, cache);
+    return ecs.content_before_str[0] != '\0';
+}
+
+/* Depth cap for subtree_has_own_text: attacker-controlled nesting fails open to
+ * "has text", i.e. the pre-existing behavior (no entry emission). */
+#define PV_TEXTLESS_DEPTH_MAX 64
+
+/* Skip predicates defined further down (used before their definitions). */
+static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                             const css_sheet *sheet, pv_style_cache *style_cache,
+                             int js_enabled);
+static int in_closed_details_subtree(const lxb_dom_node_t *n,
+                                     const lxb_dom_node_t *base);
+static int in_boilerplate_subtree(const lxb_dom_node_t *n,
+                                  const lxb_dom_node_t *base);
+
+/* True when the subtree holds no non-blank text of its own outside skipped /
+ * hidden / closed-details subtrees -- exactly the text the walk could ever visit
+ * (blank text is skipped at emit, hidden/skipped/closed text never is). Lets an
+ * element whose only content would be generated (::before on an icon wrapper
+ * holding one empty span) emit it at entry; with own text the text-node path
+ * stays the single emitter, so double emission is impossible by construction. */
+static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                                const css_sheet *sheet, pv_style_cache *cache,
+                                int js_enabled, int reader, int depth) {
+    if (depth > PV_TEXTLESS_DEPTH_MAX) return 1;
+    for (const lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
+        if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
+            if (!text_node_is_blank(c)) return 1;
+            continue;
+        }
+        if (c->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        if (in_skipped_subtree(c, base, js_enabled)) continue;
+        if (in_hidden_subtree(c, base, sheet, cache, js_enabled)) continue;
+        if (in_closed_details_subtree(c, base)) continue;
+        if (reader && in_boilerplate_subtree(c, base)) continue;
+        if (subtree_has_own_text(c, base, sheet, cache, js_enabled, reader, depth + 1))
+            return 1;
+    }
+    return 0;
+}
+
 static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
                                    pv_style_cache *cache) {
     for (const lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
@@ -4457,6 +4511,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                  * broken-image boxes as alt text and inflated a card grid to several
                  * times its height (jkanime's donghuas/ovas panes). */
                 lxb_dom_element_t *el = lxb_dom_interface_element(n);
+                size_t al = 0;
+                const lxb_char_t *alt =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"alt", 3, &al);
+                size_t wl = 0, hl = 0;
+                const lxb_char_t *ws =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"width", 5, &wl);
+                const lxb_char_t *hs =
+                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
+                int iw = parse_dim(ws, wl);
+                int ih = parse_dim(hs, hl);
+                apply_css_replaced_size(el, sheet, &cache, &iw, &ih);
                 size_t sl = 0;
                 const lxb_char_t *src =
                     lxb_dom_element_get_attribute(el, (const lxb_char_t *)"src", 3, &sl);
@@ -4481,20 +4546,17 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                         /* Last resort: first candidate. */
                         srcset_first_url(srcset, ssl, &img_src, &img_src_len);
                     }
-                    if (img_src == NULL) continue; /* no usable source: nothing to show */
+                    if (img_src == NULL) {
+                        /* No usable source: still a broken image (HTML §4.8.3)
+                         * when there is something to show -- alt text or a
+                         * declared box. The empty src resolves to no fetch
+                         * downstream (rp_evaluate rejects it). A bare <img>
+                         * with nothing to show keeps the old skip. */
+                        if (al == 0 && (iw <= 0 || ih <= 0)) continue;
+                        img_src = "";
+                        img_src_len = 0;
+                    }
                 }
-
-                size_t al = 0;
-                const lxb_char_t *alt =
-                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"alt", 3, &al);
-                size_t wl = 0, hl = 0;
-                const lxb_char_t *ws =
-                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"width", 5, &wl);
-                const lxb_char_t *hs =
-                    lxb_dom_element_get_attribute(el, (const lxb_char_t *)"height", 6, &hl);
-                int iw = parse_dim(ws, wl);
-                int ih = parse_dim(hs, hl);
-                apply_css_replaced_size(el, sheet, &cache, &iw, &ih);
 
                 const char *unused_href = NULL;
                 size_t unused_hl = 0;
@@ -4669,7 +4731,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                       unused_align, unused_fs, unused_fs_abs,
                                       unused_lh, unused_deco, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
-            } else if (element_is_content_leaf(n, sheet, &cache)
+            } else if ((element_is_content_leaf(n, sheet, &cache)
+                        || (pv_element_has_before(n, sheet, &cache)
+                            && !subtree_has_own_text(n, base, sheet, &cache,
+                                                     js_enabled, reader, 0)))
                        && !in_skipped_subtree(n, base, js_enabled)
                        && !in_hidden_subtree(n, base, sheet, &cache, js_enabled)
                        && !in_closed_details_subtree(n, base)
@@ -4703,7 +4768,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                         flex_spacer = 1;
                 }
                 if ((is_block_like_style(node_tag(n), &ecs) && css_has_boxdeco(&ecs))
-                    || flex_spacer) {
+                    || flex_spacer
+                    || ecs.content_before_str[0] != '\0') {
                     const char *ehref = NULL; size_t ehl = 0;
                     const lxb_dom_node_t *eblock = NULL;
                     int eheading = 0, efg = -1, ebg = -1, ebold = 0, eitalic = 0;
@@ -4846,10 +4912,21 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         /* R8: ::before generated content. Emit once per element: check if the
          * text node's parent element has non-empty content_str in its resolved
          * style (the ::before content). We compare directly against the block
-         * (most common) and also check the parent inline element. */
+         * (most common) and also check the parent inline element. The subtree
+         * gate matters: whitespace between block children would otherwise arm
+         * markers (and pending ::after) for elements whose only text is gaps --
+         * a clearfix `content:"."` firing once per gap shattered float bands.
+         * With real text anywhere under the parent the first text node (even a
+         * leading gap) still triggers, so position is preserved; fully textless
+         * subtrees belong to the entry emission, never here. */
         if (n->parent != NULL && n->parent->type == LXB_DOM_NODE_TYPE_ELEMENT) {
             lxb_dom_element_t *pel = lxb_dom_interface_element(n->parent);
             css_style pcs = cached_element_style(pel, sheet, &cache);
+            /* Cheap content check first: the subtree walk below is linear, so it
+             * only runs for elements that actually carry generated content. */
+            if ((pcs.content_str[0] != '\0' || pcs.content_after_str[0] != '\0')
+                && subtree_has_own_text(n->parent, base, sheet, &cache,
+                                        js_enabled, reader, 0)) {
             if (pcs.content_str[0] != '\0') {
                 int fresh = 1;
                 for (size_t bi = 0; bi < box_reg.count; ++bi) {
@@ -4902,6 +4979,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                                strlen(pcs.content_after_str));
                     if (after_pending_text == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
                 }
+            }
             }
 
         /* An out-of-flow text run never breaks the line (spec/page_view.md):

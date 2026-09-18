@@ -10,6 +10,13 @@
 
 #define CSS_MAX_BG_URLS 256u
 
+/* Bound for the ::before/::after content string pool (and the grid-template
+ * rows that share it). Same budget as background URLs: an icon font ships
+ * hundreds of one-glyph `content` rules (a real page carried 400+), and past
+ * the cap every later rule loses its string in silence. Heap sheet, freed
+ * with it: 256 KiB transient per page parse, same as the bg pool. */
+#define CSS_MAX_CONTENT_URLS 256u
+
 #define CSS_MAX_KEYFRAMES 4
 #define CSS_MAX_KEYFRAME_STOPS 8
 #define CSS_MAX_KEYFRAME_DECLS 8

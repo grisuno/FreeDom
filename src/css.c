@@ -115,7 +115,7 @@ struct css_sheet {
     size_t          ncustom;
     char            bg_urls[CSS_MAX_BG_URLS][CSS_URL_MAX]; /* background-image url() pool */
     size_t          nbg_urls;
-    char            content_urls[64][CSS_URL_MAX];  /* R8: ::before/::after content strings */
+    char            content_urls[CSS_MAX_CONTENT_URLS][CSS_URL_MAX];  /* R8: ::before/::after content strings */
     size_t          ncontent_urls;
     /* @keyframes animation blocks (R1b). Bounded anti-DoS. */
     struct {
@@ -1389,12 +1389,91 @@ static int emit_content(css_decl *dst, int cap, const char *str,
     return 1;
 }
 
+/* R8: CSS Syntax 4.3.7 escape consumption inside a quoted value. Backslash +
+ * 1-6 hex digits (then one optional whitespace, eaten as the terminator) is the
+ * codepoint, emitted UTF-8; backslash + newline eats both (continuation);
+ * backslash + anything else is that char; a trailing backslash is dropped. Null,
+ * surrogates and > U+10FFFF become U+FFFD. Decoded output only ever shrinks,
+ * except \0-like escapes (2 chars -> 3 bytes), so the write is capped and a
+ * hostile value truncates instead of overflowing. */
+static int css_hex_val(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+static size_t css_emit_utf8(unsigned int cp, char *out) {
+    if (cp == 0 || (cp >= 0xD800 && cp <= 0xDFFF) || cp > 0x10FFFF)
+        cp = 0xFFFD;
+    if (cp < 0x80) { out[0] = (char)cp; return 1; }
+    if (cp < 0x800) {
+        out[0] = (char)(0xC0 | (cp >> 6));
+        out[1] = (char)(0x80 | (cp & 0x3F));
+        return 2;
+    }
+    if (cp < 0x10000) {
+        out[0] = (char)(0xE0 | (cp >> 12));
+        out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+        out[2] = (char)(0x80 | (cp & 0x3F));
+        return 3;
+    }
+    out[0] = (char)(0xF0 | (cp >> 18));
+    out[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
+    out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
+    out[3] = (char)(0x80 | (cp & 0x3F));
+    return 4;
+}
+
+static void css_unescape_into(char *dst, size_t cap, const char *src, size_t n) {
+    size_t o = 0, i = 0;
+    while (i < n && o + 1 < cap) {
+        if (src[i] != '\\' || i + 1 >= n) {
+            if (src[i] == '\\') break; /* trailing backslash: dropped */
+            dst[o++] = src[i++];
+            continue;
+        }
+        char nx = src[i + 1];
+        if (nx == '\n') { i += 2; continue; }
+        if (nx == '\r') { i += 2; if (i < n && src[i] == '\n') ++i; continue; }
+        int hv = css_hex_val(nx);
+        if (hv < 0) {
+            if (o + 1 >= cap) break;
+            dst[o++] = nx;
+            i += 2;
+            continue;
+        }
+        unsigned int cp = 0;
+        size_t k = 0;
+        while (k < 6 && i + 1 + k < n && css_hex_val(src[i + 1 + k]) >= 0) {
+            cp = cp * 16u + (unsigned int)css_hex_val(src[i + 1 + k]);
+            ++k;
+        }
+        i += 1 + k;
+        if (i < n && (src[i] == ' ' || src[i] == '\t')) ++i;
+        else if (i < n && src[i] == '\n') ++i;
+        else if (i + 1 < n && src[i] == '\r' && src[i + 1] == '\n') i += 2;
+        else if (i < n && src[i] == '\r') ++i;
+        char enc[4];
+        size_t elen = css_emit_utf8(cp, enc);
+        if (o + elen >= cap) break;
+        memcpy(dst + o, enc, elen);
+        o += elen;
+    }
+    dst[o] = '\0';
+}
+
 /* R8: content property. Extracts quoted string, stores in content pool, emits
  * P_CONTENT with pool index. Returns 1 if parsed. */
 static int expand_content(const char *val, css_decl *dst, int cap,
                           char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap) {
     if (cap < 1) return 0;
-    if (csel_ci_eq(val, "none") || csel_ci_eq(val, "normal")) return 0;
+    /* `none`/`normal` are valid values meaning "no generated content": claim
+     * the slot with an explicit empty (ival -1) instead of dropping, or a
+     * lower-priority string would leak through and the drops gate would count
+     * a conforming declaration as a discard. */
+    if (csel_ci_eq(val, "none") || csel_ci_eq(val, "normal"))
+        return emit_content(dst, cap, NULL, contenttab, ncontent, contentcap);
     if (csel_substr(val, "url(", 1)) return 0;
     int q = (val[0] == '"' || val[0] == '\'') ? val[0] : 0;
     if (!q) return 0;
@@ -1407,8 +1486,7 @@ static int expand_content(const char *val, css_decl *dst, int cap,
     size_t inner_len = len - 2;
     char buf[CSS_URL_MAX];
     if (inner_len >= sizeof buf) inner_len = sizeof buf - 1;
-    memcpy(buf, val + 1, inner_len);
-    buf[inner_len] = '\0';
+    css_unescape_into(buf, sizeof buf, val + 1, inner_len);
     return emit_content(dst, cap, buf, contenttab, ncontent, contentcap);
 }
 
@@ -3604,7 +3682,7 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
             dn = interpret_decls(s + ds, de - ds, &sh->decls[dstart], room,
                                  sh->custom, sh->ncustom,
                                  sh->bg_urls, &sh->nbg_urls, CSS_MAX_BG_URLS,
-                                 sh->content_urls, &sh->ncontent_urls, 64, log);
+                                 sh->content_urls, &sh->ncontent_urls, CSS_MAX_CONTENT_URLS, log);
             if (room - dn >= CSS_DECL_SLOTS_MIN) break;   /* finished with slack */
             if (log != NULL) { log->n = log_n; log->total = log_total; }
         }
@@ -4666,7 +4744,17 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_CLIP_LEFT:           o->clip_left = d->ival; break;
             case P_CONTENT:
                 if (d->ival < 0) {
-                    o->content_str[0] = '\0';
+                    /* Explicit `content: none|normal`: clears the channel the
+                     * winning pseudo-kind (or the bare element) owns, so a
+                     * higher-priority none beats a lower-priority string. */
+                    if (pseudo_kind == PSEUDO_BEFORE) {
+                        o->content_before_str[0] = '\0';
+                        o->content_str[0] = '\0';
+                    } else if (pseudo_kind == PSEUDO_AFTER) {
+                        o->content_after_str[0] = '\0';
+                    } else {
+                        o->content_str[0] = '\0';
+                    }
                 } else if (contenttab != NULL) {
                     if (pseudo_kind == PSEUDO_BEFORE) {
                         memcpy(o->content_before_str, contenttab[d->ival], CSS_URL_MAX);

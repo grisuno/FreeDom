@@ -1,7 +1,7 @@
 Slashdot: News for nerds, stuff that matters, & software
-CSS drops: 42 declaration(s) dropped, 35 distinct
+CSS drops: 44 declaration(s) dropped, 37 distinct
   count  cause         property                     first value
-      4  bad-value     font                         normal 24px/1.5
+      3  bad-value     font                         normal 24px/1.5
       2  unknown-prop  -border-radius               2px
       2  bad-value     cursor                       ew-resize
       2  bad-value     filter                       progid:DXImageTransform.Microsoft.gradient( startColorstr='#004d4e', endColorstr='#007c7c',G...
@@ -29,6 +29,8 @@ CSS drops: 42 declaration(s) dropped, 35 distinct
       1  unknown-prop  margin-bo..ttom              1.4em
       1  unknown-prop  text-wrap                    nowrap
       1  bad-value     -webkit-transform            translateZ(0)
+      1  bad-value     font-family                  "sdicon"
+      1  unknown-prop  speak                        none
       1  unknown-prop  -moz-animation               spin 2s infinite linear
       1  unknown-prop  -o-animation                 spin 2s infinite linear
       1  unknown-prop  -webkit-animation            spin 2s infinite linear

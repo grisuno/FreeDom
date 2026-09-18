@@ -970,14 +970,44 @@ static void test_build_noscript_hidden_when_js_on(void **state) {
 
 static void test_build_image_without_src_ignored(void **state) {
     (void)state;
-    /* An <img> with no src has nothing to load and nothing to show: skipped. */
-    hp_document *doc = parse("<body><img alt=\"orphan\"><p>kept</p></body>");
+    /* A bare <img> with no src, no alt and no dimensions paints nothing. */
+    hp_document *doc = parse("<body><img><p>kept</p></body>");
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
     for (size_t i = 0; i < pv_count(v); ++i) {
         assert_int_not_equal(pv_at(v, i)->kind, PV_IMAGE);
     }
     assert_non_null(find_text(v, "kept"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* HTML §4.8.3: an <img> with no resolvable source is broken, not absent --
+ * its alt text still renders (Firefox shows "orphan" inline). */
+static void test_build_image_without_src_alt_emits_broken(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><img alt=\"orphan\"><p>kept</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = find_image(v, "");
+    assert_non_null(img);
+    assert_string_equal(img->text, "orphan");
+    assert_non_null(find_text(v, "kept"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Declared width+height reserve the box even with no source (the blocked-
+ * thumbnail probe: <img width="200" height="280"> with no src). */
+static void test_build_image_without_src_dims_emit_broken(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><img width=\"200\" height=\"280\"><p>kept</p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *img = find_image(v, "");
+    assert_non_null(img);
+    assert_int_equal(img->img_w, 200);
+    assert_int_equal(img->img_h, 280);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -1047,13 +1077,14 @@ static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state
  * same as the existing no-src case. */
 static void test_build_image_no_src_and_no_srcset_ignored(void **state) {
     (void)state;
+    /* Whitespace-only srcset is unusable, but the alt still shows: broken. */
     hp_document *doc = parse("<body><img alt=\"orphan\" srcset=\"   \">"
                             "<p>kept</p></body>");
     pv_view *v = NULL;
     assert_int_equal(pv_build(doc, &v), PV_OK);
-    for (size_t i = 0; i < pv_count(v); ++i) {
-        assert_int_not_equal(pv_at(v, i)->kind, PV_IMAGE);
-    }
+    const pv_run *img = find_image(v, "");
+    assert_non_null(img);
+    assert_string_equal(img->text, "orphan");
     assert_non_null(find_text(v, "kept"));
     pv_free(v);
     hp_document_free(doc);
@@ -3304,6 +3335,78 @@ static void test_pseudo_both_before_and_after(void **state) {
     hp_document_free(doc);
 }
 
+/* ::before on an undecorated inline with no own text still generates its box
+ * content (CSS 2.1 12.1): the icon-font idiom. */
+static void test_pseudo_before_on_textless_inline(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><span class=\"i\"></span><p>after</p></body>");
+    static const char CSS[] = ".i::before{content:\"I\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_non_null(find_text(v, "I"));
+    assert_non_null(find_text(v, "after"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Nested shape from the wild (.icon-beaker:before on a span holding an empty
+ * span): the outer element owns generated content but no text of its own. */
+static void test_pseudo_before_on_textless_subtree(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><span class=\"icon\"><span></span></span><p>after</p></body>");
+    static const char CSS[] = ".icon::before{content:\"B\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *b = find_text(v, "B");
+    assert_non_null(b);
+    assert_true(b < find_text(v, "after"));
+    assert_int_equal((int)pv_count(v), 2);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* End to end with a hex escape: the emitted run carries the decoded codepoint
+ * (U+E8F0), not the backslash literal. */
+static void test_pseudo_before_escape_end_to_end(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><span class=\"icon\"><span></span></span></body>");
+    static const char CSS[] = ".icon::before{content:\"\\e8f0\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_non_null(find_text(v, "\xee\xa3\xb0"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Whitespace gaps between block children must not arm generated content: a
+ * clearfix `content:"."` firing once per gap shattered float bands. */
+static void test_pseudo_after_on_whitespace_only_no_run(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class=\"cf\">\n<div>\n<span></span>\n</div>\n</div><p>after</p></body>");
+    static const char CSS[] = ".cf:after{content:\".\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_null(find_text(v, "."));
+    assert_non_null(find_text(v, "after"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* With real text anywhere under the parent the first text node (even a leading
+ * gap) still triggers, so marker position is preserved. */
+static void test_pseudo_before_fires_with_nested_text(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class=\"x\"> <span>hi</span></div></body>");
+    static const char CSS[] = ".x::before{content:\"*\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *m = find_text(v, "*");
+    assert_non_null(m);
+    assert_true(m < find_text(v, "hi"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_pseudo_no_content_no_run(void **state) {
     (void)state;
     hp_document *doc = parse("<body><div>real</div></body>");
@@ -3720,6 +3823,8 @@ int main(void) {
         cmocka_unit_test(test_build_noscript_shown_when_js_off),
         cmocka_unit_test(test_build_noscript_hidden_when_js_on),
         cmocka_unit_test(test_build_image_without_src_ignored),
+        cmocka_unit_test(test_build_image_without_src_alt_emits_broken),
+        cmocka_unit_test(test_build_image_without_src_dims_emit_broken),
         cmocka_unit_test(test_build_image_srcset_fallback_when_no_src),
         cmocka_unit_test(test_build_image_plain_src_wins_over_srcset),
         cmocka_unit_test(test_build_image_srcset_single_no_descriptor),
@@ -3808,6 +3913,11 @@ int main(void) {
         cmocka_unit_test(test_pseudo_before_on_element_with_children),
         cmocka_unit_test(test_pseudo_after_on_element_with_children),
         cmocka_unit_test(test_pseudo_both_before_and_after),
+        cmocka_unit_test(test_pseudo_before_on_textless_inline),
+        cmocka_unit_test(test_pseudo_before_on_textless_subtree),
+        cmocka_unit_test(test_pseudo_before_escape_end_to_end),
+        cmocka_unit_test(test_pseudo_after_on_whitespace_only_no_run),
+        cmocka_unit_test(test_pseudo_before_fires_with_nested_text),
         cmocka_unit_test(test_pseudo_no_content_no_run),
         cmocka_unit_test(test_build_reader_skips_boilerplate),
         cmocka_unit_test(test_set_node_id_model),

@@ -1265,7 +1265,8 @@ static void test_pseudo_unknown_drops_selector(void **state) {
     assert_int_equal(css_resolve_el(sh, &p, NULL, 0).background, 0x101010);
     css_element q = el_node("q", NULL, NULL, 0, NULL);
     assert_int_not_equal(css_resolve_el(sh, &q, NULL, 0).color, -1); /* :not() supported */
-    /* single-colon :before is still unknown (pseudo-class, not pseudo-element) */
+    /* :first-of-type needs type-info (the single-colon remark that used to live
+     * here is gone: :before/:after are the CSS 2.1 legacy pseudo-elements). */
     css_element s = el_sib_node("s", 1, 1, NULL, NULL);
     assert_int_equal(css_resolve_el(sh, &s, NULL, 0).color, -1); /* :first-of-type needs type-info */
     css_free(sh);
@@ -1280,6 +1281,132 @@ static void test_pseudo_content_before_after_separate(void **state) {
     css_style out = css_resolve_el(sh, &el, NULL, 0);
     assert_string_equal(out.content_before_str, "BEFORE");
     assert_string_equal(out.content_after_str, "AFTER");
+    css_free(sh);
+}
+
+/* CSS Syntax 4.3.7: a hex escape is 1-6 digits plus one optional terminator
+ * space. U+E8F0 in UTF-8 is EE A3 B0. */
+static void test_pseudo_content_decodes_hex_escape(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div::before{content:\"\\e8f0\"}", 0, &sh), CSS_OK);
+    css_element el = el_node("div", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_memory_equal(out.content_before_str, "\xee\xa3\xb0", 3);
+    assert_int_equal(out.content_before_str[3], 0);
+    css_free(sh);
+}
+
+/* Six digits eat exactly one following space as the terminator. */
+static void test_pseudo_content_escape_eats_terminator_space(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div::before{content:\"A\\000026B\"}", 0, &sh), CSS_OK);
+    css_element el = el_node("div", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "A&B");
+    css_free(sh);
+}
+
+/* A backslash before an ordinary char yields that char. */
+static void test_pseudo_content_decodes_escaped_char(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div::before{content:\"a\\\"b\"}", 0, &sh), CSS_OK);
+    css_element el = el_node("div", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "a\"b");
+    css_free(sh);
+}
+
+/* CSS 2.1 section 5.12.3: single-colon :before/:after are the legacy spelling
+ * of the pseudo-elements and cascade exactly like the double-colon form. */
+static void test_pseudo_single_colon_before_matches(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div:before{content:\"LEGACY\"}", 0, &sh), CSS_OK);
+    css_element el = el_node("div", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "LEGACY");
+    css_free(sh);
+}
+
+/* The content string pool must survive an icon font: hundreds of one-glyph
+ * rules precede the one that matches, and past the cap every later rule lost
+ * its string in silence (a real page carried 400+). */
+static void test_pseudo_content_pool_survives_icon_font(void **state) {
+    (void)state;
+    char css[8192];
+    size_t o = 0;
+    for (int i = 0; i < 70; ++i) {
+        o += (size_t)snprintf(css + o, sizeof css - o,
+                              ".i%d::before{content:\"g%d\"}", i, i);
+        assert_true(o + 64 < sizeof css);
+    }
+    o += (size_t)snprintf(css + o, sizeof css - o,
+                          ".tgt::before{content:\"T\"}");
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(css, 0, &sh), CSS_OK);
+    static const char *cls[] = { "tgt" };
+    css_element el = el_node("span", NULL, cls, 1, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "T");
+    css_free(sh);
+}
+
+/* Invalid codepoints fail closed to U+FFFD (never NUL, never a bare
+ * surrogate, never past U+10FFFF); the 2-byte UTF-8 path is pinned too. */
+static void test_pseudo_content_escapes_fail_closed(void **state) {
+    (void)state;
+    struct { const char *css; const unsigned char *want; size_t n; } cases[] = {
+        /* \e9 = U+00E9, 2-byte path (C3 A9). The first space is the hex
+         * terminator (consumed, not painted); the second one paints. */
+        { "div::before{content:'\\e9  x'}", (const unsigned char *)"\xC3\xA9 x", 4 },
+        /* Lone surrogate -> FFFD (EF BF BD). */
+        { "div::before{content:'\\d800'}", (const unsigned char *)"\xEF\xBF\xBD", 3 },
+        /* Past U+10FFFF -> FFFD. */
+        { "div::before{content:'\\110000'}", (const unsigned char *)"\xEF\xBF\xBD", 3 },
+        /* NUL -> FFFD, not a truncated string. */
+        { "div::before{content:'\\0 '}", (const unsigned char *)"\xEF\xBF\xBD", 3 },
+        /* Escapes denote the codepoint itself (CSS Syntax 4.3.7): \85 is
+         * U+0085 (C2 85). No byte-encoding remap applies here -- the
+         * windows-1252 reinterpretation belongs to byte-stream decoding
+         * (browser.c/page_view.c), not to escape consumption. */
+        { "div::before{content:'\\85 '}", (const unsigned char *)"\xC2\x85", 2 },
+    };
+    for (size_t i = 0; i < sizeof cases / sizeof cases[0]; i++) {
+        css_sheet *sh = NULL;
+        assert_int_equal(css_parse(cases[i].css, 0, &sh), CSS_OK);
+        css_element el = el_node("div", NULL, NULL, 0, NULL);
+        css_style out = css_resolve_el(sh, &el, NULL, 0);
+        assert_int_equal(strlen(out.content_before_str), cases[i].n);
+        assert_memory_equal(out.content_before_str, cases[i].want, cases[i].n);
+        css_free(sh);
+    }
+}
+
+/* `content: none` is a conforming "no box" value, not a discard: it parses to
+ * an explicit empty and beats a lower-priority string. */
+static void test_pseudo_content_none_parses_empty(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div::before{content:\"X\"}"
+                               "div::before{content:none}", 0, &sh), CSS_OK);
+    css_element el = el_node("div", NULL, NULL, 0, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_int_equal(out.content_before_str[0], 0);
+    assert_int_equal(out.content_str[0], 0);
+    css_free(sh);
+}
+
+static void test_pseudo_single_colon_before_class_tmp(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".icon:before{content:\"B\"}", 0, &sh), CSS_OK);
+    static const char *cls[] = { "icon" };
+    css_element el = el_node("span", NULL, cls, 1, NULL);
+    css_style out = css_resolve_el(sh, &el, NULL, 0);
+    assert_string_equal(out.content_before_str, "B");
     css_free(sh);
 }
 
@@ -4243,6 +4370,14 @@ int main(void) {
         cmocka_unit_test(test_pseudo_root_and_form_state),
         cmocka_unit_test(test_pseudo_unknown_drops_selector),
         cmocka_unit_test(test_pseudo_content_before_after_separate),
+        cmocka_unit_test(test_pseudo_content_decodes_hex_escape),
+        cmocka_unit_test(test_pseudo_content_escape_eats_terminator_space),
+        cmocka_unit_test(test_pseudo_content_decodes_escaped_char),
+        cmocka_unit_test(test_pseudo_single_colon_before_matches),
+        cmocka_unit_test(test_pseudo_single_colon_before_class_tmp),
+        cmocka_unit_test(test_pseudo_content_escapes_fail_closed),
+        cmocka_unit_test(test_pseudo_content_none_parses_empty),
+        cmocka_unit_test(test_pseudo_content_pool_survives_icon_font),
         cmocka_unit_test(test_pseudo_content_empty_without_pseudo),
         cmocka_unit_test(test_pseudo_geometry_does_not_leak_to_element),
         cmocka_unit_test(test_pseudo_kind_survives_combinators),

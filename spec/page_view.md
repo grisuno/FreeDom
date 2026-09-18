@@ -467,8 +467,19 @@ responsivas y de `<img srcset=...>` sin `src` de las librerías de lazy-loading 
 fallback dentro de `<picture>` lo es, y ya funcionaba antes de este cambio). Un candidato
 normal termina en el primer espacio o coma (su descriptor `2x`/`800w` opcional va separado por
 espacio); un candidato `data:` termina en el primer espacio o el final de la cadena, para no
-cortar en la coma interna de `;base64,`. Sin `src` **ni** `srcset` utilizable: sin run, como
-antes. Ver `[[freedom-data-url-images]]`.
+cortar en la coma interna de `;base64,`. Sin `src` **ni** `srcset` utilizable el
+elemento sigue representando una imagen rota (HTML Standard §4.8.3, *the img element*:
+un `img` sin origen que resuelva es *broken* y se renderiza su `alt` o su caja
+declarada, nunca nada): se emite un run `PV_IMAGE` con `src` vacío (`""`, que
+toda decisión posterior bloquea sin red — `rp_evaluate` lo rechaza como inválido)
+**solo** cuando hay algo que mostrar — `alt` no vacío **o** `width` y `height`
+declarados; un `<img>` sin `src`, sin `alt` y sin dimensiones no pinta nada y se
+omite como antes. Dado un `<img alt="logo">` sin `src`, cuando se construye la
+vista, entonces hay un run `PV_IMAGE` con `src == ""` y `text == "logo"`. Dado un
+`<img width="200" height="280">` sin `src` ni `alt`, cuando se construye la vista,
+entonces hay un run `PV_IMAGE` con `img_w == 200` e `img_h == 280`. Dado un
+`<img>` sin `src`, sin `alt` y sin dimensiones, cuando se construye la vista,
+entonces no hay run de imagen. Ver `[[freedom-data-url-images]]`.
 
 ### El registro de cajas vive en el heap y una caja la genera también un margen (2026-08-14)
 
@@ -530,6 +541,25 @@ el run. Cuando el mismo ancestro es a la vez el bloque más cercano del run y el
 de su caja, `resolve_context` **pone a cero la copia del run**: dejarla aplicaría el
 mismo margen una segunda vez *dentro* de la caja, que es donde el motor viejo metía
 todo el `margin-top` de un bloque — haciéndolo más alto en vez de moverlo hacia abajo.
+
+### `::before` emite aunque el elemento no tenga texto propio (2026-09-18)
+
+El contenido generado se emitía solo al visitar un nodo de texto cuyo padre directo
+lleva el estilo con `content`: un elemento cuyo subárbol no tiene texto no-blanco
+(`<span class=icon><span></span></span>` con `.icon:before{content:'\e8f0'}` — el
+idioma de las icon fonts) no generaba ningún run y el icono colapsaba a 0×0. En
+slashdot es la línea del details: sin el glifo, la barra queda en el padding
+(10 px) contra 33 px de Firefox.
+
+- **Dado** un elemento con `content_before/after` no vacío cuyo subárbol no tiene
+  texto no-blanco (fuera de subárboles ocultos/salteados),
+  **cuando** se construye la vista, **entonces** se emite el run sintético con el
+  contenido decodificado, una sola vez, con el contexto del elemento.
+- **Dado** un elemento CON texto propio, **cuando** se construye la vista,
+  **entonces** no cambia nada: el camino por nodo de texto sigue siendo el único
+  emisor (cero doble emisión por construcción).
+- El caso intermedio (texto solo bajo un nieto cuyo padre directo no lleva el
+  estilo) sigue sin emitir: residual documentado, fuera de alcance aquí.
 
 ### El contenido de `::before` es contenido INLINE, no un bloque (2026-08-14)
 

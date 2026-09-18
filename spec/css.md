@@ -213,6 +213,33 @@ documentado abajo).
   elemento. Ese es el bug que metía los pies de foto de Wikipedia en una columna de
   15 px, 131 líneas de un carácter.
 
+### `content` decodifica escapes CSS (2026-09-18)
+
+CSS Syntax §4.3.7: dentro de un string, `\` + 1–6 dígitos hex + un blanco opcional
+vale el codepoint (las icon fonts viven de esto: `.icon:before{content:'\e8f0'}`),
+`\` + salto de línea se traga ambos (continuación), `\` + otro carácter vale ese
+carácter, `\` final se descarta. Codepoint 0, sustituto o > U+10FFFF ⇒ U+FFFD.
+El valor se guarda **decodificado a UTF-8**: sin esto el run generado pinta la
+barra invertida literal (5 glifos de ancho por un icono) o el tokenizador lo pierde.
+
+- **Dado** `content:'\e8f0'`, **cuando** se resuelve el estilo, **entonces**
+  `content_before_str` es U+E8F0 en UTF-8 (`EE A3 B0`), no la barra literal.
+- **Dado** `content:'A\000026B'`, **entonces** es `A&B` (el blanco tras 6 hex se
+  consume como terminador, no pinta).
+- `:before`/`:after` con un colon son los pseudo-elementos legacy (CSS 2.1
+  §5.12.3) y cascad igual que `::before`/`::after`; `:first-line`/
+  `:first-letter` siguen descartados (sin modelo de primera línea).
+- `content: none|normal` es válido ("sin caja generada") y reclama el slot con
+  un vacío explícito: un `none` de mayor prioridad limpia el canal que el
+  pseudo-kind ganador posee (`before` limpia `content_before_str` y
+  `content_str`, `after` limpia `content_after_str`), o un string de menor
+  prioridad se filtraría. Antes se descartaba como `bad-value`.
+- El pool de strings de `content` (compartido con las filas de grid) tiene techo
+  `CSS_MAX_CONTENT_URLS` (256, igual que `CSS_MAX_BG_URLS`): una icon font trae
+  cientos de reglas `content` de un glifo y pasado el techo cada regla posterior
+  perdía su string en silencio. Heap de la sheet, se libera con ella.
+- Fuera de alcance: `attr()` sigue descartado (contrato aparte).
+
 **Specificity** = sum over all compounds of `100*has_id + 10*(nclasses + nattrs +
 npseudo) + has_type` (an attribute selector and a pseudo-class each count as a
 class, so `input[type=text]` = 11, `a:link` = 11 and `#main .card p` = 100+10+1 =

@@ -129,9 +129,11 @@ static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *su
 /* Parses one pseudo-class starting at s[*ip] == ':' (within s[.,b)) into *pm.
  * Advances *ip past it (including a (arg) for the nth-child family). Returns 1
  * if supported, 0 (fail closed) otherwise — unknown names, functional pseudos
- * other than nth-child/nth-last-child, and every pseudo-ELEMENT (`::name` and
- * the legacy single-colon spellings :before/:after/:first-line/:first-letter)
- * drop the whole selector. */
+ * other than nth-child/nth-last-child, and pseudo-ELEMENTS other than
+ * ::before/::after (including the legacy single-colon :first-line/:first-letter,
+ * which have no first-line model here) drop the whole selector. Single-colon
+ * :before/:after are the CSS 2.1 §5.12.3 legacy spelling of the pseudo-elements
+ * and match exactly like the double-colon form. */
 static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *pm,
                         css_sel *sel) {
     size_t i = *ip + 1;  /* past ':' */
@@ -190,6 +192,8 @@ static int parse_pseudo(const char *s, size_t *ip, size_t b, css_pseudo_match *p
     else if (csel_ci_eq(name, "last-of-type"))     pm->kind = PSEUDO_LAST_OF_TYPE;
     else if (csel_ci_eq(name, "only-of-type"))     pm->kind = PSEUDO_ONLY_OF_TYPE;
     else if (csel_ci_eq(name, "empty"))            pm->kind = PSEUDO_EMPTY;
+    else if (csel_ci_eq(name, "before"))           pm->kind = PSEUDO_BEFORE;
+    else if (csel_ci_eq(name, "after"))            pm->kind = PSEUDO_AFTER;
     else if (csel_ci_eq(name, "target"))           pm->kind = PSEUDO_TARGET;
     else if (csel_ci_eq(name, "lang"))             { pm->kind = PSEUDO_LANG; wants_arg = 3; }
     else return 0;   /* unknown pseudo-class: drop the selector */
