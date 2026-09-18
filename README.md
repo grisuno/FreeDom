@@ -942,6 +942,10 @@ For more information, visit the [GitHub repository](https://github.com/grisuno/F
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Shell Script](https://img.shields.io/badge/shell_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white) [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y2Z73AV)
+---
+### Intelligence and Analysis Ecosystem
+- [QC](https://github.com/grisuno/QC): OSINT analysis.
+- [ReadMenator](https://github.com/grisuno/ReadMenator): Offline codebase analysis.
 
 <!-- readmenator-kb-link -->
 ## Knowledge Base
@@ -957,8 +961,12 @@ a zero-token polyglot static analysis tool. Analysis outputs are available:
   - `API.md` -- Public function contracts
   - `GOTCHAS.md` -- Change warnings
   - `SECURITY.md` -- Findings by severity
+- **[readmenator-wiki/](./readmenator-wiki/)** -- Navigable wiki (start here for the big picture).
+  - `index.md` -- Entry point: overview, reading order, god nodes, connections
+  - `community_*.md` -- One synthesis page per code community
+  - `REPORT.md` -- Honest audit: coverage, confidence, limits
 
-AI agents: Read `readmenator-agent/INDEX.md` for fast project context.
+AI agents: Read `readmenator-wiki/index.md` first for the big picture, then `readmenator-agent/INDEX.md` for grep-friendly lookup.
 Developers: Read `KNOWLEDGE_BASE.md` for full architecture reference.
 <!-- /readmenator-kb-link -->
 

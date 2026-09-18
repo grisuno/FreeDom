@@ -2,7 +2,7 @@
 
 ## app.py
 - Layer: utility
-- Doc: _*_ coding: utf8 _*_
+- Doc: app.py  Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: 
 - Language: py
 - Symbols:
   - `read_fuzz_stats` (function, line 30) `def read_fuzz_stats()`
@@ -25,7 +25,7 @@
 
 ## install.sh
 - Layer: utility
-- Doc: Exit immediately if a command exits with a non-zero status, if an undefined variable is used, or if any pipe fails.
+- Doc: Exit immediately if a command exits with a non-zero status,
 - Language: sh
 
 ## run_freedom.sh
