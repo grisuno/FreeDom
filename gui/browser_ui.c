@@ -4700,6 +4700,14 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                                 int depth) {
     const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
     if (cd == NULL || depth > PV_CONT_DEPTH) return 0.0;
+    /* CSS Sizing 3 5.1-5.2: a COLUMN container stacks its items, so its
+     * max-content width is the LARGEST item contribution, not their sum (the
+     * sum is the row-direction rule, where items sit side by side). Summing a
+     * column made every card with alt+title+badge as wide as all three added
+     * up, capped to the full row (spec/box_engine.md). A gap between stacked
+     * rows adds no width either. Row containers and grids keep the sum. */
+    int is_column = (cd->direction == CSS_FD_COLUMN
+                     || cd->direction == CSS_FD_COLUMN_REVERSE);
     double total = 0.0;
     size_t n_items = 0;
     size_t k = b0;
@@ -4719,11 +4727,12 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
         } else {
             base = flex_item_basis(cr, w, th, doc, k, e, &isd, content_w);
         }
-        total += base;
+        total = is_column ? ((base > total) ? base : total) : total + base;
         ++n_items;
         k = e;
     }
-    if (n_items > 1 && cd->gap > 0) total += (double)cd->gap * (double)(n_items - 1);
+    if (!is_column && n_items > 1 && cd->gap > 0)
+        total += (double)cd->gap * (double)(n_items - 1);
     return total;
 }
 
@@ -5346,6 +5355,9 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         memset(&si, 0, sizeof si);
         bt_node *kid = &kids[pos_of[j]];
         double cw = (kid->w < 1.0) ? 1.0 : kid->w;
+        if (getenv("FREEDOM_MEASURE_DEBUG") != NULL)
+            fprintf(stderr, "[item] cid=%d j=%zu basis=%.1f w=%.1f grow=%.2f\n",
+                    cid, j, kid->basis, kid->w, kid->grow);
         /* The item's ROOT box (its own element's card/tile decoration) reserves
          * its box_h/min-height and insets the content by its padding+border; an
          * rc_box painted below draws it. Without this an empty grid tile collapsed

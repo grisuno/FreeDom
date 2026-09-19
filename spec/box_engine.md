@@ -796,6 +796,44 @@ Security posture: unchanged — the predicate is a pure function of already-clam
 box ids; `block_leaves_flow` fails open (content stays visible) exactly like the
 box-chain classifiers it centralises.
 
+### Nested column max-content: max, not sum (2026-09-19)
+
+Found by the Firefox-parity diff on `tests/parity/pages/jkanime-tile.html`
+(score 9.02): a one-item flex row holding a card (`display:flex` column) with a
+blocked thumbnail, a title and a badge rendered full-width (998 px) where
+Firefox renders 660 px. Measured with `FREEDOM_MEASURE_DEBUG` (scratch
+instrumentation, never shipped): the card-body's three items measure 316.2 +
+636.6 + 61.9 px and `nested_cont_basis` returned their SUM, 1014.8, capped to
+the row — while Firefox takes the MAX (636.6 + padding + border ≈ 660, the
+remaining delta is font metrics).
+
+- **CSS Sizing 3 §5.1–§5.2: the max-content size of a column container is the
+  LARGEST max-content contribution among its items**, not their sum. The sum is
+  the row-direction rule (items sit side by side); in a column they stack, so
+  the widest one sets the width. `nested_cont_basis` summed unconditionally,
+  which is correct only for `flex-direction:row` (and grids, whose tracks add).
+- The container's own `direction` (`pv_cont_def.direction`, `css_flex_direction`)
+  already crosses the IPC, so the measure site reads it: `COLUMN`/
+  `COLUMN_REVERSE` take the max and skip the column-gap term (a gap between
+  stacked rows adds no width); every other direction keeps the historical sum.
+  Row containers, grids and the single-item fast path are byte-identical.
+- The recursion is fixed at the same single site: a doubly-nested column
+  (card > card-body) maxes at each level through the same function.
+
+**Given** a flex row whose item is a `flex-direction:column` container with
+items of max-content widths 316/636/62 px, **when** the row measures the item's
+flex base size, **then** the basis is ≈ 636 + the item's own padding/border
+(the max), never the ≈ 1015 sum. **Given** the same shape with
+`flex-direction:row`, **when** measured, **then** the basis is still the sum
+plus gaps (unchanged behaviour).
+
+Security posture: unchanged — pure width arithmetic over already-measured,
+already-clamped inputs; fail-open cap (`> content_w → content_w`) untouched.
+
+Regression lock: `test_dump_layout_nested_column_takes_max` (card ≈ title
+width, not row width) plus the `jkanime-tile` parity probe as the real-page
+guard.
+
 ### Out of scope (Stage 2)
 
 - `position:sticky` with scroll (own follow-up: needs the scroll path).

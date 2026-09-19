@@ -1,0 +1,25 @@
+{
+  "tool": "readmenator",
+  "generated_at": "2026-09-19T05:14:58Z",
+  "project_root": "/home/grisun0/src_note/c/freedom-0.0.3",
+  "files": 218,
+  "symbols": 5231,
+  "imports": 1454,
+  "resolved_imports": 398,
+  "security_findings": 0,
+  "languages": {
+    "py": 4,
+    "sh": 5,
+    "c": 144,
+    "h": 65
+  },
+  "entrypoints": [],
+  "start_here": "INDEX.md",
+  "workflow": [
+    "ls *.md readmenator-*/  # orient: docs first, ignore build noise",
+    "grep -n '<keyword>' INDEX.md",
+    "cat KB_<subsystem>.md",
+    "grep -n '<file>' ARCHITECTURE.md SYMBOLS.md"
+  ],
+  "regenerate": "readmenator . --rebuild"
+}

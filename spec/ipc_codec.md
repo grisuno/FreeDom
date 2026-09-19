@@ -11,7 +11,8 @@ locks the codec against that class.
 
 - Wire block widths defined once in `src/tab.c`:
   `TAB_WIRE_HEAD_N=6`, `TAB_WIRE_A_N=38`, `TAB_WIRE_B_N=54`,
-  `TAB_WIRE_BOX_F_N=219`, `TAB_WIRE_GRID_N=PV_GRID_TRACKS+1`.
+  `TAB_WIRE_BOX_F_N=219`, `TAB_WIRE_GRID_N=PV_GRID_TRACKS+1`,
+  `TAB_WIRE_CONT_N=23+PV_GRID_TRACKS` (container table: 23 scalars + track sizes).
 - `_Static_assert(TAB_WIRE_GRID_N == 9)` guards `PV_GRID_TRACKS` drift.
 - `_Static_assert(FC_MAX_BOXES == BT_MAX_POSITIONED)` guards box cap coupling.
 - `make drift` fails build when array literal width differs from constant.

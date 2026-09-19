@@ -1656,6 +1656,60 @@ static void test_dump_layout_flex_badges_share_row(void **state) {
     unlink(path);
 }
 
+/* --- nested column max-content is the max, not the sum (box_engine.md) --- */
+
+/* A one-item flex row holding a `flex-direction:column` card (blocked thumbnail
+ * alt + title + badge) must size the card to its widest item (CSS Sizing 3
+ * 5.1-5.2), not to the sum of all three: the sum capped to the row made every
+ * jkanime card full-width (jkanime-tile probe 9.02, card 998px vs Firefox 660).
+ * Row-direction nesting keeps the sum (locked by flex_badges_share_row). */
+static void test_dump_layout_nested_column_takes_max(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        ".row{display:flex;flex-wrap:wrap;}"
+        ".card{position:relative;display:flex;flex-direction:column;"
+        "background:#fff;border:1px solid #ddd;}"
+        ".card-body{flex:1 1 auto;min-height:1px;padding:1.25rem;"
+        "display:flex;flex-direction:column;}"
+        ".card-title{margin-bottom:.75rem;font-size:16px;}"
+        "</style></head><body>"
+        "<div class=\"row\">"
+        "<div class=\"card\"><div class=\"card-body\">"
+        "<img alt=\"Shingeki no Kyojin The Final Season Part 2\" width=\"200\" height=\"280\">"
+        "<div class=\"card-title\">Shingeki no Kyojin The Final Season Part 2 "
+        "Shingeki no Kyojin The Final Season Part 2</div>"
+        "<span>TV - 24 min</span>"
+        "</div></div></div></body></html>";
+    const char *path = "__freedom_nestedcol.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+
+    char out[8192];
+    int rc;
+    assert_int_equal(run_freedom("--author-css --dump-layout __freedom_nestedcol.html",
+                                 out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+
+    /* Every measured row width (the card's content rows carry an explicit w=)
+     * stays under 800: the max item is the ~637px title, never the ~1015 sum. */
+    int measured = 0;
+    char *p = out;
+    while ((p = strstr(p, " w=")) != NULL) {
+        double w = 0.0;
+        if (sscanf(p, " w=%lf", &w) == 1 && w > 1.0) {
+            ++measured;
+            assert_true(w < 800.0);
+        }
+        p += 3;
+    }
+    assert_true(measured > 0);
+
+    unlink(path);
+}
+
 /* --- network policy --- */
 
 static void test_rejects_http_url(void **state) {
@@ -1992,6 +2046,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_float_two_columns),
         cmocka_unit_test(test_dump_layout_pulled_rail_single_margin),
         cmocka_unit_test(test_dump_layout_flex_badges_share_row),
+        cmocka_unit_test(test_dump_layout_nested_column_takes_max),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

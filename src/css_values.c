@@ -49,41 +49,83 @@ int cv_bg_alpha_of(const char *v)
         return CSS_LEN_UNSET;
     }
     for (p = v; *p != '\0'; ++p) {
-        int is_fn = ((csel_lower_ch(p[0]) == 'r' && csel_lower_ch(p[1]) == 'g' &&
-                      csel_lower_ch(p[2]) == 'b' && csel_lower_ch(p[3]) == 'a' && p[4] == '(') ||
-                     (csel_lower_ch(p[0]) == 'h' && csel_lower_ch(p[1]) == 's' &&
-                      csel_lower_ch(p[2]) == 'l' && csel_lower_ch(p[3]) == 'a' && p[4] == '('));
+        int is_rgba = (csel_lower_ch(p[0]) == 'r' && csel_lower_ch(p[1]) == 'g' &&
+                       csel_lower_ch(p[2]) == 'b' && csel_lower_ch(p[3]) == 'a' && p[4] == '(');
+        int is_rgb = !is_rgba && csel_lower_ch(p[0]) == 'r' && csel_lower_ch(p[1]) == 'g' &&
+                     csel_lower_ch(p[2]) == 'b' && p[3] == '(';
+        int is_hsla = (csel_lower_ch(p[0]) == 'h' && csel_lower_ch(p[1]) == 's' &&
+                       csel_lower_ch(p[2]) == 'l' && csel_lower_ch(p[3]) == 'a' && p[4] == '(');
+        int is_hsl = !is_hsla && csel_lower_ch(p[0]) == 'h' && csel_lower_ch(p[1]) == 's' &&
+                     csel_lower_ch(p[2]) == 'l' && p[3] == '(';
+        /* CSS Color 4 made rgb()/rgba() (hsl()/hsla()) aliases: the slash form
+         * rides on any of the four names, so all four are probed, not just the
+         * legacy alias pair. */
+        int is_fn = is_rgba || is_rgb || is_hsla || is_hsl;
         if (!is_fn) {
             continue;
         }
         {
-            const char *close = strchr(p + 5, ')');
+            const char *open = strchr(p, '(');
+            const char *close = (open != NULL) ? strchr(open + 1, ')') : NULL;
             const char *q;
             const char *a = NULL;
             int commas = 0;
+            int depth = 0;
             double num;
             const char *end;
             double pct;
-            if (close == NULL) {
+            if (open == NULL || close == NULL) {
                 return CSS_LEN_UNSET;
             }
-            for (q = p + 5; q < close; ++q) {
-                if (*q == ',') {
-                    ++commas;
-                    if (commas == 3) {
-                        a = q + 1;
-                        break;
-                    }
+            /* Modern slash alpha first: a single top-level '/' names what
+             * follows it, on any of the four function names. */
+            for (q = open + 1; q < close; ++q) {
+                if (*q == '(') ++depth;
+                else if (*q == ')') --depth;
+                else if (*q == '/' && depth == 0) {
+                    if (a != NULL) return CSS_LEN_UNSET;  /* second slash */
+                    a = q + 1;
                 }
             }
-            if (a == NULL) {
+            if (depth != 0) {
                 return CSS_LEN_UNSET;
+            }
+            if (a == NULL) {
+                /* Legacy comma alpha: only the alias names ever carried it,
+                 * and only as the 4th component. */
+                if (!is_rgba && !is_hsla) {
+                    continue;
+                }
+                for (q = open + 1; q < close; ++q) {
+                    if (*q == ',') {
+                        ++commas;
+                        if (commas == 3) {
+                            a = q + 1;
+                            break;
+                        }
+                    }
+                }
+                if (a == NULL) {
+                    continue;
+                }
             }
             while (a < close && (*a == ' ' || *a == '\t')) {
                 ++a;
             }
-            if (!cv_parse_num(a, &num, &end)) {
-                return CSS_LEN_UNSET;
+            {
+                const char *ae = close;
+                while (ae > a && (ae[-1] == ' ' || ae[-1] == '\t')) --ae;
+                char abuf[CSS_TOK_MAX];
+                size_t alen = (size_t)(ae - a);
+                if (alen == 0 || alen >= sizeof abuf) return CSS_LEN_UNSET;
+                memcpy(abuf, a, alen);
+                abuf[alen] = '\0';
+                if (!cv_parse_num(abuf, &num, &end)) {
+                    return CSS_LEN_UNSET;
+                }
+                if (*end != '\0' && !(*end == '%' && end[1] == '\0')) {
+                    return CSS_LEN_UNSET;
+                }
             }
             pct = (*end == '%') ? num : num * 100.0;
             return css_round_clamp(pct, 0, 100);

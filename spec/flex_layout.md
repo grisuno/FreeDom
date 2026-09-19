@@ -67,6 +67,7 @@ double      fx_auto_min_size(double min_content, double basis, double author_min
 void        fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);
 fx_status   fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                                size_t *out_row, size_t *out_col);
+size_t      fx_autofill_cols(double avail, double gap, double min_w);
 const char *fx_justify_name(fx_justify j);
 ```
 
@@ -126,6 +127,18 @@ que ocupa en el eje principal (`kid->w` es la caja de margen; la caja de borde s
   (`avail − gaps − Σfijas`, acotado a ≥ 0) se reparte proporcional al peso fr. Todo-`auto`
   reproduce **byte-idéntico** el reparto igualitario de `fx_grid_columns`. Si las fijas exceden
   `avail`, las fr quedan en 0 (overflow a la derecha, como CSS).
+
+### `fx_autofill_cols` (repeat auto-fill/auto-fit, CSS Grid 1 §7.2.3.2)
+- Dado el ancho disponible `avail`, el `gap` de columna y el mínimo de pista `min_w` (el mínimo
+  del `minmax()` que viaja en `P_GRID_AUTOFILL`), devuelve cuántas repeticiones caben:
+  `floor((avail + gap) / (min_w + gap))`, acotado a `[1, FX_MAX_ITEMS]`. Con `N` columnas iguales
+  de `(avail − gap·(N−1)) / N ≥ min_w` por construcción, así que el reparto igualitario existente
+  (`fx_grid_columns_weighted` todo-`auto`) es el layout — esta función solo resuelve el conteo.
+- `min_w <= 0`, `avail < 0` o `gap < 0` → `1` (falla a una columna, el comportamiento previo al
+  fix, nunca a cero columnas ni a un número hostil). Puro, sin asignación.
+- Dado `avail = 600, gap = 16, min_w = 224` (jkanime: `minmax(14rem, 1fr)` a 16px), entonces `2`.
+- Dado `avail = 1000, gap = 16, min_w = 224`, entonces `4`.
+- Dado `avail = 100, gap = 16, min_w = 224`, entonces `1`.
 
 ### `fx_grid_cell`
 - `row = index / ncols`, `col = index % ncols` (colocación fila-por-fila). `ncols == 0` →

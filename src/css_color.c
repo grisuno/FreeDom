@@ -313,7 +313,81 @@ static void hsl_to_rgb(int h, int s, int l, unsigned char *r, unsigned char *g, 
     *b = (unsigned char)((bb > 255) ? 255 : (bb < 0 ? 0 : bb));
 }
 
+/* Splits the inside [b, e) of rgb()/hsl() into at most 4 component spans
+ * (CSS Color 4: legacy comma-separated `f(a, b, c[, d])`, or space-separated
+ * `f(a b c [/ d])`). A top-level '/' names the alpha that follows it; mixing
+ * commas with '/' is rejected. Writes the span bounds into bs/es, the alpha
+ * span (when a slash is present) into ab/ae, and returns the component count,
+ * or -1. Bounded: never reads past e, never writes past 4 spans. */
+static int cc_split_args(const char *b, const char *e, const char **bs,
+                         const char **es, const char **ab, const char **ae,
+                         int *comma) {
+    const char *slash = NULL;
+    int depth = 0;
+    for (const char *q = b; q < e; ++q) {
+        if (*q == '(') ++depth;
+        else if (*q == ')') { if (--depth < 0) return -1; }
+        else if (*q == '/' && depth == 0) {
+            if (slash != NULL) return -1;  /* second slash */
+            slash = q;
+        }
+    }
+    if (depth != 0) return -1;
+    const char *left_e = (slash != NULL) ? slash : e;
+    if (slash != NULL) {
+        const char *x = slash + 1;
+        const char *y = e;
+        while (x < y && (*x == ' ' || *x == '\t')) ++x;
+        while (y > x && (y[-1] == ' ' || y[-1] == '\t')) --y;
+        if (x >= y) return -1;  /* dangling slash */
+        for (const char *q = x; q < y; ++q)
+            if (*q == ' ' || *q == '\t' || *q == ',' || *q == '/') return -1;
+        *ab = x;
+        *ae = y;
+    }
+    int has_comma = 0;
+    depth = 0;
+    for (const char *q = b; q < left_e; ++q) {
+        if (*q == '(') ++depth;
+        else if (*q == ')') { if (--depth < 0) return -1; }
+        else if (*q == ',' && depth == 0) { has_comma = 1; break; }
+    }
+    if (depth != 0) return -1;
+    if (slash != NULL && has_comma) return -1;  /* mixed grammars */
+    *comma = has_comma;
+    int nc = 0;
+    if (has_comma) {
+        const char *seg = b;
+        for (const char *cur = b; cur <= left_e; ++cur) {
+            if (cur == left_e || *cur == ',') {
+                if (nc >= 4) return -1;
+                bs[nc] = seg;
+                es[nc] = cur;
+                ++nc;
+                seg = cur + 1;
+                if (cur == left_e) break;
+            }
+        }
+    } else {
+        const char *cur = b;
+        while (cur < left_e) {
+            while (cur < left_e && (*cur == ' ' || *cur == '\t')) ++cur;
+            if (cur >= left_e) break;
+            if (nc >= 4) return -1;
+            const char *tok = cur;
+            while (cur < left_e && *cur != ' ' && *cur != '\t') ++cur;
+            bs[nc] = tok;
+            es[nc] = cur;
+            ++nc;
+        }
+    }
+    return nc;
+}
+
 /* Parses the functional rgb()/rgba()/hsl()/hsla() form (lowercased token).
+ * CSS Color 4: rgb() and rgba() (hsl() and hsla()) are aliases -- arity comes
+ * from the alpha, not the name. The alpha is validated and discarded (Freedom
+ * paints opaque; backgrounds read it separately via cv_bg_alpha_of).
  * Returns 0 / -1. */
 static int parse_func(const char *s, cc_rgb *out) {
     int is_hsl = 0;
@@ -330,55 +404,48 @@ static int parse_func(const char *s, cc_rgb *out) {
         if (*q != ' ') return -1; /* only trailing spaces after ')' */
     }
 
+    const char *bs[4];
+    const char *es[4];
+    const char *ab = NULL, *ae = NULL;
+    int comma = 0;
+    int nc = cc_split_args(p, close, bs, es, &ab, &ae, &comma);
+    if (nc < 0) return -1;
+
+    int comps[3] = { 0, 0, 0 };
     if (is_hsl) {
-        int comps[3] = { 0, 0, 0 };
-        int nc = 0;
-        const char *seg = p;
-        for (const char *cur = p; cur <= close; ++cur) {
-            if (cur == close || *cur == ',') {
-                if (nc >= 4) return -1;
-                int is_alpha = (nc == 3);
-                int dummy = 0;
-                int *slot;
-                if (is_alpha) {
-                    slot = &dummy;
-                } else {
-                    slot = &comps[nc];
-                }
-                if (is_alpha) {
-                    for (const char *x = seg; x < cur; ++x) {
-                        if (!((*x >= '0' && *x <= '9') || *x == '.' || *x == '%')) return -1;
-                    }
-                } else {
-                    if (parse_hsl_comp(seg, cur, nc == 0, slot) != 0) return -1;
-                }
-                ++nc;
-                seg = cur + 1;
-                if (cur == close) break;
+        /* Legacy comma form keeps its 4th-component alpha (`hsla(h,s,l,a)`);
+         * the space form carries it after the slash instead -- a 4th bare
+         * space token is not an alpha (CSS Color 4 requires the slash). */
+        if (nc < 3 || nc > 4) return -1;
+        if (ab != NULL && nc != 3) return -1;
+        if (ab == NULL && nc == 4 && !comma) return -1;
+        for (int i = 0; i < 3; ++i)
+            if (parse_hsl_comp(bs[i], es[i], i == 0, &comps[i]) != 0) return -1;
+        {
+            int dummy = 0;
+            if (ab != NULL) {
+                if (parse_component(ab, ae, 1, &dummy) != 0) return -1;
+            } else if (nc == 4) {
+                if (parse_component(bs[3], es[3], 1, &dummy) != 0) return -1;
             }
         }
-        if (nc < 3) return -1;
         hsl_to_rgb(comps[0], comps[1], comps[2], &out->r, &out->g, &out->b);
         return 0;
     }
 
-    int comps[3] = { 0, 0, 0 };
-    int nc = 0;
-    const char *seg = p;
-    for (const char *cur = p; cur <= close; ++cur) {
-        if (cur == close || *cur == ',') {
-            if (nc >= 4) return -1; /* too many components */
-            int is_alpha = (nc == 3);
-            int dummy = 0;
-            int *slot = is_alpha ? &dummy : &comps[nc];
-            if (parse_component(seg, cur, is_alpha, slot) != 0) return -1;
-            ++nc;
-            seg = cur + 1;
-            if (cur == close) break;
+    if (nc < 3 || nc > 4) return -1;
+    if (ab != NULL && nc != 3) return -1;
+    if (ab == NULL && nc == 4 && !comma) return -1;
+    for (int i = 0; i < 3; ++i)
+        if (parse_component(bs[i], es[i], 0, &comps[i]) != 0) return -1;
+    {
+        int dummy = 0;
+        if (ab != NULL) {
+            if (parse_component(ab, ae, 1, &dummy) != 0) return -1;
+        } else if (nc == 4) {
+            if (parse_component(bs[3], es[3], 1, &dummy) != 0) return -1;
         }
     }
-    if (nc < 3) return -1; /* too few components */
-
     out->r = (unsigned char)comps[0];
     out->g = (unsigned char)comps[1];
     out->b = (unsigned char)comps[2];

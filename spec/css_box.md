@@ -42,7 +42,14 @@ int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);
   and on trailing junk (`1px 2px 3px 4px 5px` drops whole, per CSS -- the old
   code silently kept the first four).
 - `CB_AUTO_*` modes mirror the old `AUTO_*`: reject/value/reset/reset-none.
-- Grid `repeat()` with auto-fill/fit or malformed count fails the whole value.
+- Grid `repeat()` with a malformed count fails the whole value. `repeat(auto-fill|auto-fit,
+  <single-track>)` with a px-resolvable minimum resolves to an **auto-fill container**: the
+  declaration emits `P_GRIDCOLS = 0` (unset, honest) plus `P_GRID_AUTOFILL = min-px`, always in
+  lock-step (a later rule clearing one clears the other — the two-halves doctrine). The repeat
+  count itself is NOT resolved here: this pure parser has no containing-block width. The count
+  is resolved where the width is known (`fx_autofill_cols` at layout time). Anything else with
+  auto-fill/fit (multi-track pattern, `%`/`auto`/`fr` minimum, unresolvable min) fails the whole
+  value, exactly like before.
 - Proven-equivalent mutants (documented, allowlisted): `cb_copy_trim`'s
   `a >= b` vs `a > b` -- its only caller drops an empty trim either way
   (`fit-content()` never yields a value), so no test can distinguish them;
@@ -54,7 +61,14 @@ int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);
 - Given `12px`, when interpreted, then 12.
 - Given `auto` with `CB_AUTO_REJECT`, when interpreted, then reject (0).
 - Given `margin:0 auto`, when expanded, then centering decls.
-- Given `repeat(auto-fill, 1fr)`, when counted, then whole value dropped.
+- Given `repeat(auto-fill, 1fr)`, when counted, then whole value dropped (no px minimum).
+- Given `grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr))`, when expanded (after
+  `rem` rebasing), then `P_GRIDCOLS = 0` + `P_GRID_AUTOFILL = 224` (lock-step; 10 decls total).
+- Given `grid-template-columns: repeat(auto-fit, minmax(100px, 1fr))`, when expanded, then
+  `P_GRIDCOLS = 0` + `P_GRID_AUTOFILL = 100` (auto-fit collapses trailing empties, which this
+  left-aligned engine never paints — same columns).
+- Given `repeat(auto-fill, minmax(10%, 1fr))` or `repeat(auto-fill, 1fr 2fr)`, when expanded,
+  then whole value dropped (fail closed, today's behaviour).
 
 ## 4. Security guarantees
 

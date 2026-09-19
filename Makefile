@@ -549,18 +549,18 @@ fuzz-img: | $(BUILD_DIR)
 fuzz-pv: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c \
-	  $(SRC_DIR)/css_color.c \
-	  $(SRC_DIR)/box_style.c $(SRC_DIR)/html_parse.c \
-	  -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
+  $(FUZZ_DIR)/fuzz_page_view.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c \
+  $(SRC_DIR)/css_color.c \
+  $(SRC_DIR)/box_style.c $(SRC_DIR)/html_parse.c \
+  -o $(BUILD_DIR)/fuzz_page_view $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_page_view -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
 
 fuzz-dom: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_dom.c $(SRC_DIR)/dom.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c \
-	  $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/html_parse.c \
-	  -o $(BUILD_DIR)/fuzz_dom $(HP_LIBS)
+  $(FUZZ_DIR)/fuzz_dom.c $(SRC_DIR)/dom.c $(SRC_DIR)/css_chain.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c \
+  $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/html_parse.c \
+  -o $(BUILD_DIR)/fuzz_dom $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_dom -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the PDF-export filename sanitizer (clang + libFuzzer).
@@ -590,8 +590,8 @@ fuzz-dl: | $(BUILD_DIR)
 fuzz-css: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
-	  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c \
-	  -o $(BUILD_DIR)/fuzz_css $(HP_LIBS)
+  $(FUZZ_DIR)/fuzz_css.c $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c \
+  -o $(BUILD_DIR)/fuzz_css $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_css -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of dom_debug (render-tree dump). Arbitrary bytes -> DOM ->
@@ -601,9 +601,9 @@ fuzz-dd: $(PSL_OBJ) | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude $(LEXBOR_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_dom_debug.c $(SRC_DIR)/dom_debug.c $(SRC_DIR)/render_doc.c \
-	  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c \
-	  $(SRC_DIR)/css.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
-	  $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(PSL_OBJ) \
+  $(SRC_DIR)/render_policy.c $(SRC_DIR)/request_policy.c $(SRC_DIR)/page_view.c $(SRC_DIR)/css_chain.c \
+  $(SRC_DIR)/css.c $(SRC_DIR)/css_text.c $(SRC_DIR)/css_box.c $(SRC_DIR)/css_gradient.c $(SRC_DIR)/css_values.c $(SRC_DIR)/flex_layout.c $(SRC_DIR)/css_length.c $(SRC_DIR)/css_select.c $(SRC_DIR)/css_color.c $(SRC_DIR)/box_style.c \
+  $(SRC_DIR)/html_parse.c $(SRC_DIR)/url.c $(PSL_OBJ) \
 	  -o $(BUILD_DIR)/fuzz_dom_debug $(HP_LIBS)
 	./$(BUILD_DIR)/fuzz_dom_debug -max_total_time=30 -rss_limit_mb=2048 $(FUZZ_DIR)/in
 

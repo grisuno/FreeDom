@@ -43,10 +43,26 @@ cc_rgb    cc_unpack(int packed);        /* inverso de cc_pack; bits altos ignora
     porcentaje `0%..100%` (se redondea al entero más cercano). El alfa de `rgba` se parsea pero se
     descarta. Espacios alrededor de comas y paréntesis permitidos; separación por comas (sintaxis
     CSS clásica). Los componentes se acotan a `[0,255]` / `[0%,100%]`; fuera de rango → `CC_ERR_SYNTAX`.
+  - **Funcional moderno (CSS Color 4, espacio + barra):** `rgb(R G B [/ A])`, `rgba(R G B [/ A])`,
+    `hsl(H S L [/ A])`, `hsla(H S L [/ A])`, donde los componentes se separan por espacios ASCII
+    (uno o más) y el alfa —número o porcentaje— va tras una única `/` top-level. `rgb()` y `rgba()`
+    (y `hsl()`/`hsla()`) son alias: la aridad la decide la presencia de alfa, no el nombre. Mezclar
+    comas con `/` es inválido (falla cerrado). Motivación medida: `rgb(0 0 0 / 75%)` y
+    `rgb(229 233 240 / 50%)` son el idioma de overlays y bordes de las páginas reales (jkanime,
+    slashdot); rechazarlos pierde la declaración entera.
+    - Dado `rgb(0 0 0 / 75%)`, cuando se parsea, entonces `CC_OK` con `(0,0,0)`.
+    - Dado `rgb(229 233 240 / 50%)`, cuando se parsea, entonces `CC_OK` con `(229,233,240)`.
+    - Dado `hsl(0 0% 0% / 50%)`, cuando se parsea, entonces `CC_OK` con `(0,0,0)`.
+    - Dado `rgb(255 0 0)` (sin alfa), cuando se parsea, entonces `CC_OK` con `(255,0,0)`.
+    - Dado `rgb(0, 0, 0 / 50%)` (comas + barra), cuando se parsea, entonces `CC_ERR_SYNTAX`.
+    - Dado `rgb(0 0)` o `rgb(0 0 0 /)` o `rgb(0 0 0 / /)`, cuando se parsea, entonces
+      `CC_ERR_SYNTAX`.
+    - Dado `rgba(10, 20, 30, 0.5)` (legado con comas), cuando se parsea, entonces `CC_OK` con
+      `(10,20,30)` — sin cambios.
   - **Nombres:** las palabras clave de color CSS (conjunto extendido) más `transparent`. `transparent`
     no tiene color visible (alfa 0): se rechaza con `CC_ERR_SYNTAX` para que el render use el tema en
     vez de pintar texto invisible (falla cerrado, corrección visual).
-- Cualquier otra cosa (`hsl(...)`, `currentColor`, `var(...)`, nombre desconocido, basura) →
+- Cualquier otra cosa (`hwb(...)`, `var(...)`, nombre desconocido, basura) →
   `CC_ERR_SYNTAX`. La lista de nombres se consulta por **búsqueda binaria** sobre una tabla ordenada
   (dato de referencia, no números mágicos).
 - En `CC_OK`, `*out` queda poblado; en error, `*out` no se toca.
@@ -73,6 +89,7 @@ cc_rgb    cc_unpack(int packed);        /* inverso de cc_pack; bits altos ignora
 
 ## 5. Fuera de alcance
 
-- `hsl()`/`hsla()`, `hwb()`, `lab()`, `color()`, `currentColor`, `var()`, palabras `inherit`/`initial`.
+- `hwb()`, `lab()`, `color()`, `color-mix()`, `currentColor`, `var()`, palabras `inherit`/`initial`.
+- La palabra `none` como componente (CSS Color 4 la permite; aquí falla cerrado a tema).
 - Composición de alfa: Freedom pinta opaco; el alfa se valida pero no se aplica.
 - La extracción del token desde el documento (qué declaración `color:` aplica): la hace `page_view`.

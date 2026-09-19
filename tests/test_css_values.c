@@ -41,6 +41,19 @@ static void test_alpha(void **state)
     assert_int_equal(cv_bg_alpha_of("red"), CSS_LEN_UNSET);
 }
 
+/* CSS Color 4 slash alpha rides on the rgb()/hsl() names too, not just the
+ * legacy rgba()/hsla() aliases. */
+static void test_alpha_slash(void **state)
+{
+    (void)state;
+    assert_int_equal(cv_bg_alpha_of("rgb(0 0 0 / 75%)"), 75);
+    assert_int_equal(cv_bg_alpha_of("rgb(229 233 240 / 50%)"), 50);
+    assert_int_equal(cv_bg_alpha_of("rgb(0 0 0 / 0.5)"), 50);
+    assert_int_equal(cv_bg_alpha_of("hsl(0 0% 0% / 50%)"), 50);
+    assert_int_equal(cv_bg_alpha_of("rgb(255 0 0)"), CSS_LEN_UNSET);
+    assert_int_equal(cv_bg_alpha_of("rgb(0,0,0)"), CSS_LEN_UNSET);
+}
+
 static void test_bg_skips_url(void **state)
 {
     (void)state;
@@ -54,6 +67,7 @@ int main(void)
         cmocka_unit_test(test_sentinels_ok),
         cmocka_unit_test(test_junk_fails_closed),
         cmocka_unit_test(test_alpha),
+        cmocka_unit_test(test_alpha_slash),
         cmocka_unit_test(test_bg_skips_url),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

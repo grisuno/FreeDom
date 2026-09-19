@@ -238,6 +238,55 @@ static void test_fractional_still_fails_closed(void **state) {
     assert_int_not_equal(cc_parse("rgb(., 0, 0)", &C), CC_OK);
 }
 
+/* CSS Color 4 space-separated components with optional slash alpha (spec/css_color.md):
+ * the measured overlay/border idiom of real pages (`rgb(0 0 0 / 75%)`). rgb()/rgba()
+ * (and hsl()/hsla()) are aliases; arity comes from the alpha, not the name. */
+static void test_rgb_space_separated(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("rgb(0 0 0 / 75%)", &C), CC_OK);
+    assert_int_equal(C.r, 0); assert_int_equal(C.g, 0); assert_int_equal(C.b, 0);
+
+    assert_int_equal(cc_parse("rgb(229 233 240 / 50%)", &C), CC_OK);
+    assert_int_equal(C.r, 229); assert_int_equal(C.g, 233); assert_int_equal(C.b, 240);
+
+    assert_int_equal(cc_parse("rgb(255 0 0)", &C), CC_OK);
+    assert_int_equal(C.r, 255); assert_int_equal(C.g, 0); assert_int_equal(C.b, 0);
+
+    assert_int_equal(cc_parse("rgba(10 20 30 / 0.5)", &C), CC_OK);
+    assert_int_equal(C.r, 10); assert_int_equal(C.g, 20); assert_int_equal(C.b, 30);
+
+    assert_int_equal(cc_parse("RGB(100% 0% 50% / 100%)", &C), CC_OK);
+    assert_int_equal(C.r, 255); assert_int_equal(C.g, 0); assert_int_equal(C.b, 128);
+}
+
+static void test_hsl_space_separated(void **state) {
+    (void)state;
+    assert_int_equal(cc_parse("hsl(0 0% 0% / 50%)", &C), CC_OK);
+    assert_int_equal(C.r, 0); assert_int_equal(C.g, 0); assert_int_equal(C.b, 0);
+
+    assert_int_equal(cc_parse("hsl(120 100% 50%)", &C), CC_OK);
+    assert_int_equal(C.r, 0); assert_int_equal(C.g, 255); assert_int_equal(C.b, 0);
+
+    assert_int_equal(cc_parse("hsla(240 100% 50% / .5)", &C), CC_OK);
+    assert_int_equal(C.r, 0); assert_int_equal(C.g, 0); assert_int_equal(C.b, 255);
+}
+
+/* Mixing the two grammars, or a dangling slash, still fails closed. */
+static void test_space_separated_still_fails_closed(void **state) {
+    (void)state;
+    assert_int_not_equal(cc_parse("rgb(0, 0, 0 / 50%)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(0 0)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(0 0 0 /)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(0 0 0 // 50%)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(0  0  0  0)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("rgb(256 0 0)", &C), CC_OK);
+    /* Out-of-range alpha clamps at computed-value time (CSS Color 4), like the
+     * legacy `rgba(0,0,0,2)` the parser already accepts: valid, discarded. */
+    assert_int_equal(cc_parse("rgb(0 0 0 / 150%)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("hsl(0 50% 50% / 0.5 / 0.5)", &C), CC_OK);
+    assert_int_not_equal(cc_parse("hsl(0 150% 50%)", &C), CC_OK);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_args),
@@ -263,6 +312,9 @@ int main(void) {
         cmocka_unit_test(test_rgb_fractional),
         cmocka_unit_test(test_leading_dot_number),
         cmocka_unit_test(test_fractional_still_fails_closed),
+        cmocka_unit_test(test_rgb_space_separated),
+        cmocka_unit_test(test_hsl_space_separated),
+        cmocka_unit_test(test_space_separated_still_fails_closed),
         cmocka_unit_test(test_unsupported_syntax),
         cmocka_unit_test(test_pack_unpack),
     };
